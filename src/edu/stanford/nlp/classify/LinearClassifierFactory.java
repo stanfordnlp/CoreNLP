@@ -43,7 +43,7 @@ import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.MultiClassAccuracyStats;
 import edu.stanford.nlp.stats.Scorer;
 import edu.stanford.nlp.util.*;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 
 /**
  * Builds various types of linear classifiers, with functionality for
@@ -266,11 +266,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       private static final long serialVersionUID = 9028306475652690036L;
       @Override
       public Minimizer<DiffFunction> create() {
-          QNMinimizer qnMinimizer = new QNMinimizer(LinearClassifierFactory.this.mem);
-          if (!verbose) {
-              qnMinimizer.shutUp();
-          }
-          return qnMinimizer;
+        return new QNMinimizer(LinearClassifierFactory.this.mem);
       }
     };
   }
@@ -280,11 +276,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       private static final long serialVersionUID = -9108222058357693242L;
       @Override
       public Minimizer<DiffFunction> create() {
-          QNMinimizer qnMinimizer = new QNMinimizer(LinearClassifierFactory.this.mem, useRobust);
-          if (!verbose) {
-              qnMinimizer.shutUp();
-          }
-          return qnMinimizer;
+        return new QNMinimizer(LinearClassifierFactory.this.mem, useRobust);
       }
     };
   }
@@ -294,11 +286,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       private static final long serialVersionUID = -7760753348350678588L;
       @Override
       public Minimizer<DiffFunction> create() {
-          SQNMinimizer<DiffFunction> sqnMinimizer = new SQNMinimizer<DiffFunction>(LinearClassifierFactory.this.mem, initialSMDGain, stochasticBatchSize, false);
-          if (!verbose) {
-              sqnMinimizer.shutUp();
-          }
-          return sqnMinimizer;
+        return new SQNMinimizer<DiffFunction>(LinearClassifierFactory.this.mem, initialSMDGain, stochasticBatchSize, false);
       }
     };
   }
@@ -313,11 +301,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       private static final long serialVersionUID = 6860437108371914482L;
       @Override
       public Minimizer<DiffFunction> create() {
-          SMDMinimizer<DiffFunction> smdMinimizer = new SMDMinimizer<DiffFunction>(initialSMDGain, stochasticBatchSize, stochasticMethod, passes);
-          if (!verbose) {
-              smdMinimizer.shutUp();
-          }
-          return smdMinimizer;
+        return new SMDMinimizer<DiffFunction>(initialSMDGain,stochasticBatchSize,stochasticMethod,passes);
       }
     };
   }
@@ -331,11 +315,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       private static final long serialVersionUID = 2564615420955196299L;
       @Override
       public Minimizer<DiffFunction> create() {
-          InefficientSGDMinimizer<DiffFunction> sgdMinimizer = new InefficientSGDMinimizer<DiffFunction>(gainSGD, stochasticBatchSize);
-          if (!verbose) {
-              sgdMinimizer.shutUp();
-          }
-          return sgdMinimizer;
+        return new InefficientSGDMinimizer<DiffFunction>(gainSGD,stochasticBatchSize);
       }
     };
   }
@@ -349,11 +329,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       private static final long serialVersionUID = -5319225231759162616L;
       @Override
       public Minimizer<DiffFunction> create() {
-          SGDMinimizer<DiffFunction> sgdMinimizer = new SGDMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
-          if (!verbose) {
-              sgdMinimizer.shutUp();
-          }
-          return sgdMinimizer;
+        return new SGDMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
       }
     };
   }
@@ -363,13 +339,9 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       private static final long serialVersionUID = -3042400543337763144L;
       @Override
       public Minimizer<DiffFunction> create() {
-          SGDMinimizer<DiffFunction> firstMinimizer = new SGDMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
-          QNMinimizer secondMinimizer = new QNMinimizer(mem);
-          if (!verbose) {
-              firstMinimizer.shutUp();
-              secondMinimizer.shutUp();
-          }
-          return new HybridMinimizer(firstMinimizer, secondMinimizer, SGDPasses);
+        Minimizer<DiffFunction> firstMinimizer = new SGDMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
+        Minimizer<DiffFunction> secondMinimizer = new QNMinimizer(mem);
+        return new HybridMinimizer(firstMinimizer, secondMinimizer, SGDPasses);
       }
     };
   }
@@ -381,12 +353,8 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       private static final long serialVersionUID = 5823852936137599566L;
       @Override
       public Minimizer<DiffFunction> create() {
-          SGDToQNMinimizer sgdToQNMinimizer = new SGDToQNMinimizer(SGDGain, batchSize, sgdPasses,
-                  qnPasses, hessSamples, QNMem, outputToFile);
-          if (!verbose) {
-              sgdToQNMinimizer.shutUp();
-          }
-          return sgdToQNMinimizer;
+        return new SGDToQNMinimizer(SGDGain, batchSize, sgdPasses,
+                                    qnPasses, hessSamples, QNMem, outputToFile);
       }
     };
   }
@@ -397,14 +365,12 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
 
   public void useHybridMinimizer(final double initialSMDGain, final int stochasticBatchSize,
                                  final StochasticCalculateMethods stochasticMethod, final int cutoffIteration){
-    this.minimizerCreator = () -> {
-        SMDMinimizer<DiffFunction> firstMinimizer = new SMDMinimizer<DiffFunction>(initialSMDGain, stochasticBatchSize, stochasticMethod, cutoffIteration);
-        QNMinimizer secondMinimizer = new QNMinimizer(mem);
-        if (!verbose) {
-            firstMinimizer.shutUp();
-            secondMinimizer.shutUp();
-        }
-        return new HybridMinimizer(firstMinimizer, secondMinimizer, cutoffIteration);
+    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
+      public Minimizer<DiffFunction> create() {
+        Minimizer<DiffFunction> firstMinimizer = new SMDMinimizer<DiffFunction>(initialSMDGain, stochasticBatchSize,stochasticMethod,cutoffIteration);
+        Minimizer<DiffFunction> secondMinimizer = new QNMinimizer(mem);
+        return new HybridMinimizer(firstMinimizer,secondMinimizer,cutoffIteration);
+      }
     };
   }
 
@@ -740,8 +706,10 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     labelIndex = dataset.labelIndex;
 
     final CrossValidator<L, F> crossValidator = new CrossValidator<L, F>(dataset,kfold);
-    final Function<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState>,Double> scoreFn =
-        fold -> {
+    final Function<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState>,Double> score =
+      new Function<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState>,Double> ()
+      {
+        public Double apply (Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState> fold) {
           GeneralDataset<L, F> trainSet = fold.first();
           GeneralDataset<L, F> devSet   = fold.second();
 
@@ -758,17 +726,21 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
           //System.out.println("score: "+score);
           System.out.print(".");
           return score;
-        };
+        }
+      };
 
     Function<Double,Double> negativeScorer =
-        sigmaToTry -> {
+      new Function<Double,Double> ()
+      {
+        public Double apply(Double sigmaToTry) {
           //sigma = sigmaToTry;
           setSigma(sigmaToTry);
-          Double averageScore = crossValidator.computeAverage(scoreFn);
+          Double averageScore = crossValidator.computeAverage(score);
           System.err.print("##sigma = "+getSigma()+" ");
           System.err.println("-> average Score: "+averageScore);
           return -averageScore;
-        };
+        }
+      };
 
     double bestSigma = minimizer.minimize(negativeScorer);
     System.err.println("##best sigma: " + bestSigma);

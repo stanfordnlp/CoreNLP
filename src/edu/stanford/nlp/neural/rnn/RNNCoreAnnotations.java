@@ -12,7 +12,7 @@ public class RNNCoreAnnotations {
   private RNNCoreAnnotations() {} // only static members
 
   /**
-   * Used to denote the vector (distributed representation) at a particular node.
+   * Used to denote the vector at a particular node
    */
   public static class NodeVector implements CoreAnnotation<SimpleMatrix> {
     public Class<SimpleMatrix> getType() {
@@ -20,12 +20,6 @@ public class RNNCoreAnnotations {
     }
   }
 
-  /**
-   * Get the vector (distributed representation) at a particular node.
-   *
-   * @param tree The tree node
-   * @return The vector (distributed representation) of the given tree
-   */
   public static SimpleMatrix getNodeVector(Tree tree) {
     Label label = tree.label();
     if (!(label instanceof CoreLabel)) {
@@ -64,18 +58,12 @@ public class RNNCoreAnnotations {
     }
   }
 
-  /** Return as an int the predicted class. If it is not defined for a node,
-   *  it will return -1
-   *
-   *  @return Either the sentiment level or -1 if none
-   */
   public static int getPredictedClass(Tree tree) {
     Label label = tree.label();
     if (!(label instanceof CoreLabel)) {
       throw new IllegalArgumentException("CoreLabels required to get the attached predicted class");
     }
-    Integer val = ((CoreLabel) label).get(PredictedClass.class);
-    return val == null ? -1: val;
+    return ((CoreLabel) label).get(PredictedClass.class);
   }
 
   /**

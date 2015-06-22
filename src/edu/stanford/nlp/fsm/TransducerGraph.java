@@ -18,7 +18,9 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
- * TransducerGraph represents a deterministic finite state automaton
+ * TransducerGraph
+ * <p/>
+ * Class for representing a deterministic finite state automaton
  * without epsilon transitions.
  *
  * @author Teg Grenager

@@ -1,6 +1,7 @@
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseEnglishWordMap;
 import edu.stanford.nlp.util.*;
@@ -8,8 +9,6 @@ import edu.stanford.nlp.util.XMLUtils;
 
 import java.io.*;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 
 /**
@@ -67,8 +66,8 @@ public class TreePrint {
   private final HeadFinder hf;
   private final TreebankLanguagePack tlp;
   private final WordStemmer stemmer;
-  private final Predicate<Dependency<Label, Label, Object>> dependencyFilter;
-  private final Predicate<Dependency<Label, Label, Object>> dependencyWordFilter;
+  private final Filter<Dependency<Label, Label, Object>> dependencyFilter;
+  private final Filter<Dependency<Label, Label, Object>> dependencyWordFilter;
   private final GrammaticalStructureFactory gsf;
 
   /** Pool use of one WordNetConnection.  I don't really know if
@@ -155,19 +154,15 @@ public class TreePrint {
     boolean includePunctuationDependencies;
     includePunctuationDependencies = propertyToBoolean(this.options,
                                                        "includePunctuationDependencies");
-
-    boolean generateOriginalDependencies = tlp.generateOriginalDependencies();
-
-    Predicate<String> puncFilter;
+    Filter<String> puncWordFilter;
     if (includePunctuationDependencies) {
       dependencyFilter = Filters.acceptFilter();
       dependencyWordFilter = Filters.acceptFilter();
-      puncFilter = Filters.acceptFilter();
+      puncWordFilter = Filters.acceptFilter();
     } else {
       dependencyFilter = new Dependencies.DependentPuncTagRejectFilter<Label, Label, Object>(tlp.punctuationTagRejectFilter());
       dependencyWordFilter = new Dependencies.DependentPuncWordRejectFilter<Label, Label, Object>(tlp.punctuationWordRejectFilter());
-      //Universal dependencies filter punction by tags
-      puncFilter = generateOriginalDependencies ? tlp.punctuationWordRejectFilter() : tlp.punctuationTagRejectFilter();
+      puncWordFilter = tlp.punctuationWordRejectFilter();
     }
     if (propertyToBoolean(this.options, "stem")) {
       stemmer = new WordStemmer();
@@ -177,7 +172,7 @@ public class TreePrint {
     if (formats.containsKey("typedDependenciesCollapsed") ||
         formats.containsKey("typedDependencies") ||
         (formats.containsKey("conll2007") && tlp.supportsGrammaticalStructures())) {
-      gsf = tlp.grammaticalStructureFactory(puncFilter, typedDependencyHF);
+      gsf = tlp.grammaticalStructureFactory(puncWordFilter, typedDependencyHF);
     } else {
       gsf = null;
     }
@@ -417,18 +412,20 @@ public class TreePrint {
     }
 
     if (transChinese) {
-      TreeTransformer tt = t1 -> {
-        t1 = t1.treeSkeletonCopy();
-        for (Tree subtree : t1) {
-          if (subtree.isLeaf()) {
-            Label oldLabel = subtree.label();
-            String translation = ChineseEnglishWordMap.getInstance().getFirstTranslation(oldLabel.value());
-            if (translation == null) translation = "[UNK]";
-            Label newLabel = new StringLabel(oldLabel.value() + ':' + translation);
-            subtree.setLabel(newLabel);
+      TreeTransformer tt = new TreeTransformer() {
+        public Tree transformTree(Tree t) {
+          t = t.treeSkeletonCopy();
+          for (Tree subtree : t) {
+            if (subtree.isLeaf()) {
+              Label oldLabel = subtree.label();
+              String translation = ChineseEnglishWordMap.getInstance().getFirstTranslation(oldLabel.value());
+              if (translation == null) translation = "[UNK]";
+              Label newLabel = new StringLabel(oldLabel.value() + ':' + translation);
+              subtree.setLabel(newLabel);
+            }
           }
+          return t;
         }
-        return t1;
       };
       outputPSTree = tt.transformTree(outputPSTree);
     }
@@ -492,7 +489,7 @@ public class TreePrint {
           print(gs.allTypedDependencies(), "xml", includeTags, pw);
         }
         if (collapsedDependencies) {
-          print(gs.typedDependenciesCollapsed(GrammaticalStructure.Extras.MAXIMAL), "xml", includeTags, pw);
+          print(gs.typedDependenciesCollapsed(true), "xml", includeTags, pw);
         }
         if (CCPropagatedDependencies) {
           print(gs.typedDependenciesCCprocessed(), "xml", includeTags, pw);
@@ -559,17 +556,14 @@ public class TreePrint {
 
         for (int i = 0; i < sortedDeps.size(); i++) {
           Dependency<Label, Label, Object> d = sortedDeps.get(i);
-          if (!dependencyFilter.test(d)) {
+          if (!dependencyFilter.accept(d)) {
             continue;
           }
-          if (!(d.dependent() instanceof HasIndex) || !(d.governor() instanceof HasIndex)) {
-            throw new IllegalArgumentException("Expected labels to have indices");
-          }
-          HasIndex dep = (HasIndex) d.dependent();
-          HasIndex gov = (HasIndex) d.governor();
+          CoreMap dep = (CoreMap) d.dependent();
+          CoreMap gov = (CoreMap) d.governor();
 
-          int depi = dep.index();
-          int govi = gov.index();
+          Integer depi = dep.get(CoreAnnotations.IndexAnnotation.class);
+          Integer govi = gov.get(CoreAnnotations.IndexAnnotation.class);
 
           CoreLabel w = tagged.get(depi-1);
 
@@ -660,7 +654,7 @@ public class TreePrint {
           print(gs.allTypedDependencies(), "separator", includeTags, pw);
         }
         if (collapsedDependencies) {
-          print(gs.typedDependenciesCollapsed(GrammaticalStructure.Extras.MAXIMAL), includeTags, pw);
+          print(gs.typedDependenciesCollapsed(true), includeTags, pw);
         }
         if (CCPropagatedDependencies) {
           print(gs.typedDependenciesCCprocessed(), includeTags, pw);
@@ -684,13 +678,13 @@ public class TreePrint {
     pw.flush();
   }
 
-  private List<Dependency<Label, Label, Object>> getSortedDeps(Tree tree, Predicate<Dependency<Label, Label, Object>> filter) {
+  private List<Dependency<Label, Label, Object>> getSortedDeps(Tree tree, Filter<Dependency<Label, Label, Object>> filter) {
     if (gsf != null) {
       GrammaticalStructure gs = gsf.newGrammaticalStructure(tree);
-      Collection<TypedDependency> deps = gs.typedDependencies(GrammaticalStructure.Extras.NONE);
+      Collection<TypedDependency> deps = gs.typedDependencies(false);
       List<Dependency<Label, Label, Object>> sortedDeps = new ArrayList<Dependency<Label, Label, Object>>();
       for (TypedDependency dep : deps) {
-        sortedDeps.add(new NamedDependency(dep.gov(), dep.dep(), dep.reln().toString()));
+        sortedDeps.add(new NamedDependency(dep.gov().label(), dep.dep().label(), dep.reln().toString()));
       }
       Collections.sort(sortedDeps, Dependencies.dependencyIndexComparator());
       return sortedDeps;
@@ -850,7 +844,11 @@ public class TreePrint {
       if (argsMap.keySet().contains("-useTLPTreeReader")) {
         trf = tlp.treeReaderFactory();
       } else {
-        trf = in -> new PennTreeReader(in, new LabeledScoredTreeFactory(new StringLabelFactory()), new TreeNormalizer());
+        trf = new TreeReaderFactory() {
+          public TreeReader newTreeReader(Reader in) {
+            return new PennTreeReader(in, new LabeledScoredTreeFactory(new StringLabelFactory()), new TreeNormalizer());
+          }
+        };
       }
       trees = new DiskTreebank(trf);
       trees.loadPath(args[0]);
@@ -935,7 +933,7 @@ public class TreePrint {
    *         typed dependencies
    */
   private static String toString(Collection<TypedDependency> dependencies, boolean extraSep, boolean includeTags) {
-    CoreLabel.OutputFormat labelFormat = (includeTags) ? CoreLabel.OutputFormat.VALUE_TAG_INDEX : CoreLabel.OutputFormat.VALUE_INDEX;
+    String labelFormat = (includeTags) ? "value-tag-index" : "value-index";
     StringBuilder buf = new StringBuilder();
     if (extraSep) {
       List<TypedDependency> extraDeps =  new ArrayList<TypedDependency>();
@@ -978,22 +976,22 @@ public class TreePrint {
     for (TypedDependency td : dependencies) {
       String reln = td.reln().toString();
       String gov = td.gov().value();
-      String govTag = td.gov().tag();
+      String govTag = td.gov().label().tag();
       int govIdx = td.gov().index();
       String dep = td.dep().value();
-      String depTag = td.dep().tag();
+      String depTag = td.dep().label().tag();
       int depIdx = td.dep().index();
       boolean extra = td.extra();
       // add an attribute if the node is a copy
       // (this happens in collapsing when different prepositions are conjuncts)
       String govCopy = "";
-      int copyGov = td.gov().copyCount();
-      if (copyGov > 0) {
+      Integer copyGov = td.gov().label.get(CoreAnnotations.CopyAnnotation.class);
+      if (copyGov != null) {
         govCopy = " copy=\"" + copyGov + '\"';
       }
       String depCopy = "";
-      int copyDep = td.dep().copyCount();
-      if (copyDep > 0) {
+      Integer copyDep = td.dep().label.get(CoreAnnotations.CopyAnnotation.class);
+      if (copyDep != null) {
         depCopy = " copy=\"" + copyDep + '\"';
       }
       String govTagAttribute = (includeTags && govTag != null) ? " tag=\"" + govTag + "\"" : "";

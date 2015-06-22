@@ -3,7 +3,7 @@ package edu.stanford.nlp.sequences;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.optimization.StochasticCalculateMethods;
 import edu.stanford.nlp.process.WordShapeClassifier;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.ReflectionLoading;
 
 import java.io.Serializable;
@@ -16,13 +16,14 @@ import java.util.*;
  * {@link edu.stanford.nlp.ie.NERFeatureFactory}. Documentation for the flags
  * for Chinese word segmentation can be found in the Javadoc of
  * {@link edu.stanford.nlp.wordseg.ChineseSegmenterFeatureFactory}.
+ * <br>
  *
  * <i>IMPORTANT NOTE IF CHANGING THIS FILE:</i> <b>MAKE SURE</b> TO
  * ONLY ADD NEW VARIABLES AT THE END OF THE LIST OF VARIABLES (and not
  * to change existing variables)! Otherwise you usually break all
  * currently serialized classifiers!!! Search for "ADD VARIABLES ABOVE
  * HERE" below.
- *
+ * <br>
  * Some general flags are described here
  * <table border="1">
  * <tr>
@@ -58,7 +59,7 @@ import java.util.*;
  * <td>boolean</td>
  * <td>false</td>
  * <td>Use SGD (tweaking weights in place) to find minimum (more efficient than
- * the old SGD, faster to converge than Quasi-Newton if there are very large of
+ * the old SGD, faster to converge than Quasi-Newtown if there are very large of
  * samples). Implemented for CRFClassifier. NOTE: Remember to set useQN to false
  * </td>
  * </tr>
@@ -91,7 +92,7 @@ import java.util.*;
  * <td>Use SGD (SGD version selected by useInPlaceSGD or useSGD) for a certain
  * number of passes (SGDPasses) and then switches to QN. Gives the quick initial
  * convergence of SGD, with the desired convergence criterion of QN (there is
- * some ramp up time for QN). NOTE: Remember to set useQN to false</td>
+ * some rampup time for QN). NOTE: Remember to set useQN to false</td>
  * </tr>
  * <tr>
  * <td>evaluateIters</td>
@@ -287,8 +288,10 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useVB = false;
   public boolean subCWGaz = false;
 
-  // TODO OBSOLETE: delete when breaking serialization sometime.
-  public String documentReader = "ColumnDocumentReader";
+  public String documentReader = "ColumnDocumentReader"; // TODO OBSOLETE:
+  // delete when breaking
+  // serialization
+  // sometime.
 
   // public String trainMap = "word=0,tag=1,answer=2";
   // public String testMap = "word=0,tag=1,answer=2";
@@ -474,10 +477,13 @@ public class SeqClassifierFlags implements Serializable {
   public boolean removeBackgroundSingletonFeatures = false;
   public boolean doGibbs = false;
   public int numSamples = 100;
-  public boolean useNERPrior = false; // todo [cdm 2014]: Disused, to be deleted, use priorModelFactory
-  public boolean useAcqPrior = false; // todo [cdm 2014]: Disused, to be deleted, use priorModelFactory
-
-  public boolean useUniformPrior = false; // todo [cdm 2014]: Disused, to be deleted, use priorModelFactory
+  public boolean useNERPrior = false;
+  public boolean useAcqPrior = false;
+  /**
+   * If true and doGibbs also true, will do generic Gibbs inference without any
+   * priors
+   */
+  public boolean useUniformPrior = false;
   public boolean useMUCFeatures = false;
   public double annealingRate = 0.0;
   public String annealingType = null;
@@ -489,7 +495,7 @@ public class SeqClassifierFlags implements Serializable {
 
   public boolean checkNameList = false;
 
-  public boolean useSemPrior = false; // todo [cdm 2014]: Disused, to be deleted, use priorModelFactory
+  public boolean useSemPrior = false;
   public boolean useFirstWord = false;
 
   public boolean useNumberFeature = false;
@@ -550,9 +556,10 @@ public class SeqClassifierFlags implements Serializable {
   public boolean iobWrapper = false;
 
   public boolean iobTags = false;
-
-  /** Binary segmentation feature for character-based Chinese NER. */
-  public boolean useSegmentation = false;
+  public boolean useSegmentation = false; /*
+                                           * binary segmentation feature for
+                                           * character-based Chinese NER
+                                           */
 
   public boolean memoryThrift = false;
   public boolean timitDatum = false;
@@ -649,7 +656,7 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useDictionaryConjunctions;
   public boolean expandMidDot;
 
-  public int printFeaturesUpto = Integer.MAX_VALUE;
+  public int printFeaturesUpto; // = 0;
 
   public boolean useDictionaryConjunctions3;
   public boolean useWordUTypeConjunctions2;
@@ -873,7 +880,7 @@ public class SeqClassifierFlags implements Serializable {
   public String embeddingWords = null;
   public String embeddingVectors = null;
   public boolean transitionEdgeOnly = false;
-  // L1-prior used in QNMinimizer's OWLQN
+  // L1-prior used in OWLQN
   public double priorLambda = 0;
   public boolean addCapitalFeatures = false;
   public int arbitraryInputLayerSize = -1;
@@ -893,7 +900,7 @@ public class SeqClassifierFlags implements Serializable {
   public boolean addBiasToEmbedding = false;
   public boolean hardcodeSoftmaxOutputWeights = false;
 
-  public boolean useNERPriorBIO = false; // todo [cdm 2014]: Disused, to be deleted, use priorModelFactory
+  public boolean useNERPriorBIO = false;
   public String entityMatrix = null;
   public int multiThreadClassifier = 0;
   public boolean useDualDecomp = false;
@@ -1014,56 +1021,13 @@ public class SeqClassifierFlags implements Serializable {
 
   public boolean useRandomSeed = false;
   public boolean terminateOnAvgImprovement = false;
-
-  public boolean strictGoodCoNLL = false;
-  public boolean removeStrictGoodCoNLLDuplicates = false;
-
-  /** A class name for a factory that vends a prior NER model that
-   *  implements both SequenceModel and SequenceListener, and which
-   *  is used in the Gibbs sampling sequence model inference.
-   */
-  public String priorModelFactory;
-
-  /** Put in undirected (left/right) bag of words features for local
-   *  neighborhood. Seems much worse than regular useDisjunctive.
-   */
-  public boolean useUndirectedDisjunctive;
-
-  public boolean splitSlashHyphenWords;  // unused with new enum below. Remove when breaking serialization.
-
-  /** If this number is strictly positive (greater than 0; 0 means unlimited),
-   *  then add at most this many words to the knownLCwords.  (Words will only
-   *  be added if useKnownLCWords is true.) By default, this is set to 10,000,
-   *  so it will work on a few documents, but not cause unlimited memory growth
-   *  if a SequenceClassifier is run for a long time!
-   */
-  public int maxAdditionalKnownLCWords = 10_000;
-
-  public enum SlashHyphenEnum { NONE, WFRAG, WORD, BOTH };
-
-  public SlashHyphenEnum slashHyphenTreatment = SlashHyphenEnum.NONE;
-
-  public boolean useTitle2 = false;
-
-  public boolean showNCCInfo;
-  public boolean showCCInfo;
-  public String crfToExamine;
-  public boolean useSUTime;
-  public boolean applyNumericClassifiers;
-  public String combinationMode;
-  public String nerModel;
-
   // "ADD VARIABLES ABOVE HERE"
 
   public transient List<String> phraseGazettes = null;
   public transient Properties props = null;
 
-
-
-  /**
-   * Create a new SeqClassifierFlags object initialized with default values.
-   */
-  public SeqClassifierFlags() { }
+  public SeqClassifierFlags() {
+  }
 
   /**
    * Create a new SeqClassifierFlags object and initialize it using values in
@@ -1079,7 +1043,8 @@ public class SeqClassifierFlags implements Serializable {
    * Initialize this object using values in Properties object. The properties
    * are printed to stderr as it works.
    *
-   * @param props The properties object used for initialization
+   * @param props
+   *          The properties object used for initialization
    */
   public final void setProperties(Properties props) {
     setProperties(props, true);
@@ -1088,15 +1053,18 @@ public class SeqClassifierFlags implements Serializable {
   /**
    * Initialize using values in Properties file.
    *
-   * @param props The properties object used for initialization
-   * @param printProps Whether to print the properties to stderr as it works.
+   * @param props
+   *          The properties object used for initialization
+   * @param printProps
+   *          Whether to print the properties to stderr as it works.
    */
   public void setProperties(Properties props, boolean printProps) {
     this.props = props;
     StringBuilder sb = new StringBuilder(stringRep);
-    for (String key : props.stringPropertyNames()) {
+    for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
+      String key = (String) e.nextElement();
       String val = props.getProperty(key);
-      if (!(key.isEmpty() && val.isEmpty())) {
+      if (!(key.length() == 0 && val.length() == 0)) {
         if (printProps) {
           System.err.println(key + '=' + val);
         }
@@ -1139,8 +1107,6 @@ public class SeqClassifierFlags implements Serializable {
           normalizeTimex = true;
         }
       } else if (key.equalsIgnoreCase("goodCoNLL")) {
-        // This was developed for CMMClassifier after the original 2003 CoNLL work.
-        // It is for an MEMM.  You shouldn't use it with CRFClassifier.
         if (Boolean.parseBoolean(val)) {
           // featureFactory = "edu.stanford.nlp.ie.NERFeatureFactory";
           readerAndWriter = "edu.stanford.nlp.sequences.CoNLLDocumentReaderAndWriter";
@@ -1172,10 +1138,7 @@ public class SeqClassifierFlags implements Serializable {
           useLastRealWord = true;
           useNextRealWord = true;
           // smooth
-          // This was originally 20, but in Aug 2006 increased to 50, because that helped
-          // for English, but actually even smaller than 20 helps for languages like
-          // Spanish, so dropped in 2014 to 5.0.
-          sigma = 5.0;
+          sigma = 50.0; // increased Aug 2006 from 20; helpful with less feats
           // normalize
           normalize = true;
           normalizeTimex = true;
@@ -1185,10 +1148,8 @@ public class SeqClassifierFlags implements Serializable {
           useBoundarySequences = true;
           useLemmas = true; // no-op except for German
           usePrevNextLemmas = true; // no-op except for German
-          strictGoodCoNLL = true; // don't add some CpC features added later
-          removeStrictGoodCoNLLDuplicates = true; // added in 2014; the duplicated features don't help
-          inputEncoding = "iso-8859-1"; // needed for CoNLL German and Spanish files
-          // optimization
+          inputEncoding = "iso-8859-1"; // needed for CoNLL German files
+          // opt
           useQN = true;
           QNsize = 15;
         }
@@ -1435,14 +1396,6 @@ public class SeqClassifierFlags implements Serializable {
         useTypeSeqs3 = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useDisjunctive")) {
         useDisjunctive = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useUndirectedDisjunctive")) {
-        useUndirectedDisjunctive = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("splitSlashHyphenWords")) {
-        try {
-          slashHyphenTreatment = SlashHyphenEnum.valueOf(val.trim().toUpperCase());
-        } catch (IllegalArgumentException | NullPointerException iae) {
-          slashHyphenTreatment = SlashHyphenEnum.NONE;
-        }
       } else if (key.equalsIgnoreCase("disjunctionWidth")) {
         disjunctionWidth = Integer.parseInt(val);
       } else if (key.equalsIgnoreCase("useDisjunctiveShapeInteraction")) {
@@ -1455,8 +1408,6 @@ public class SeqClassifierFlags implements Serializable {
         useDisjShape = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useTitle")) {
         useTitle = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useTitle2")) {
-        useTitle2 = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("booleanFeatures")) {
         booleanFeatures = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useClassFeature")) {
@@ -1582,9 +1533,6 @@ public class SeqClassifierFlags implements Serializable {
       } else if (key.equalsIgnoreCase("inputEncoding")) {
         inputEncoding = val;
       } else if (key.equalsIgnoreCase("outputEncoding")) {
-        outputEncoding = val;
-      } else if (key.equalsIgnoreCase("encoding")) {
-        inputEncoding = val;
         outputEncoding = val;
       } else if (key.equalsIgnoreCase("gazette")) {
         useGazettes = true;
@@ -1916,6 +1864,12 @@ public class SeqClassifierFlags implements Serializable {
         removeBackgroundSingletonFeatures = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("doGibbs")) {
         doGibbs = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useNERPrior")) {
+        useNERPrior = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useAcqPrior")) {
+        useAcqPrior = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useSemPrior")) {
+        useSemPrior = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useMUCFeatures")) {
         useMUCFeatures = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("initViterbi")) {
@@ -2346,6 +2300,8 @@ public class SeqClassifierFlags implements Serializable {
         addBiasToEmbedding = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("hardcodeSoftmaxOutputWeights")) {
         hardcodeSoftmaxOutputWeights = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useNERPriorBIO")) {
+        useNERPriorBIO = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("entityMatrix")) {
         entityMatrix = val;
       } else if (key.equalsIgnoreCase("multiThreadClassifier")) {
@@ -2568,30 +2524,9 @@ public class SeqClassifierFlags implements Serializable {
         useRandomSeed = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("terminateOnAvgImprovement")){
         terminateOnAvgImprovement = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("strictGoodCoNLL")) {
-        strictGoodCoNLL = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("removeStrictGoodCoNLLDuplicates")) {
-        removeStrictGoodCoNLLDuplicates = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("priorModelFactory")) {
-        priorModelFactory = val;
-      } else if (key.equalsIgnoreCase("maxAdditionalKnownLCWords")) {
-        maxAdditionalKnownLCWords = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("showNCCInfo")) {
-        showNCCInfo = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("showCCInfo")) {
-        showCCInfo = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("crfToExamine")) {
-        crfToExamine = val;
-      } else if (key.equalsIgnoreCase("ner.useSUTime")) {
-        useSUTime = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("ner.applyNumericClassifiers")) {
-        applyNumericClassifiers = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("ner.combinationMode")) {
-        combinationMode = val;
-      } else if (key.equalsIgnoreCase("ner.model")) {
-        nerModel = val;
+
         // ADD VALUE ABOVE HERE
-      } else if ( ! key.isEmpty() && ! key.equals("prop")) {
+      } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
       }
     }
@@ -2611,9 +2546,8 @@ public class SeqClassifierFlags implements Serializable {
     stringRep = sb.toString();
   } // end setProperties()
 
-
   // Thang Sep13: refactor to be used for multiple factories.
-  private static String getFeatureFactory(String val){
+  private String getFeatureFactory(String val){
     if (val.equalsIgnoreCase("SuperSimpleFeatureFactory")) {
       val = "edu.stanford.nlp.sequences.SuperSimpleFeatureFactory";
     } else if (val.equalsIgnoreCase("NERFeatureFactory")) {
@@ -2649,7 +2583,7 @@ public class SeqClassifierFlags implements Serializable {
    */
   public String getNotNullTrueStringRep() {
     try {
-      StringBuilder rep = new StringBuilder();
+      String rep = "";
       String joiner = "\n";
       Field[] f = this.getClass().getFields();
       for (Field ff : f) {
@@ -2660,52 +2594,52 @@ public class SeqClassifierFlags implements Serializable {
         if (type.equals(Boolean.class) || type.equals(boolean.class)) {
           boolean val = ff.getBoolean(this);
           if (val) {
-            rep.append(joiner).append(name).append('=').append(val);
+            rep += joiner + name + "=" + val;
           }
         } else if (type.equals(String.class)) {
           String val = (String) ff.get(this);
           if (val != null)
-            rep.append(joiner).append(name).append('=').append(val);
+            rep += joiner + name + "=" + val;
         } else if (type.equals(Double.class)) {
           Double val = (Double) ff.get(this);
-          rep.append(joiner).append(name).append('=').append(val);
+          rep += joiner + name + "=" + val;
         } else if (type.equals(double.class)) {
           double val = ff.getDouble(this);
-          rep.append(joiner).append(name).append('=').append(val);
+          rep += joiner + name + "=" + val;
         } else if (type.equals(Integer.class)) {
           Integer val = (Integer) ff.get(this);
-          rep.append(joiner).append(name).append('=').append(val);
+          rep += joiner + name + "=" + val;
         } else if (type.equals(int.class)) {
           int val = ff.getInt(this);
-          rep.append(joiner).append(name).append('=').append(val);
+          rep += joiner + name + "=" + val;
         } else if (type.equals(Float.class)) {
           Float val = (Float) ff.get(this);
-          rep.append(joiner).append(name).append('=').append(val);
+          rep += joiner + name + "=" + val;
         } else if (type.equals(float.class)) {
           float val = ff.getFloat(this);
-          rep.append(joiner).append(name).append('=').append(val);
+          rep += joiner + name + "=" + val;
         } else if (type.equals(Byte.class)) {
           Byte val = (Byte) ff.get(this);
-          rep.append(joiner).append(name).append('=').append(val);
+          rep += joiner + name + "=" + val;
         } else if (type.equals(byte.class)) {
           byte val = ff.getByte(this);
-          rep.append(joiner).append(name).append('=').append(val);
+          rep += joiner + name + "=" + val;
         } else if (type.equals(char.class)) {
           char val = ff.getChar(this);
-          rep.append(joiner).append(name).append('=').append(val);
+          rep += joiner + name + "=" + val;
         } else if (type.equals(Long.class)) {
           Long val = (Long) ff.get(this);
-          rep.append(joiner).append(name).append('=').append(val);
+          rep += joiner + name + "=" + val;
         } else if (type.equals(long.class)) {
           long val = ff.getLong(this);
-          rep.append(joiner).append(name).append('=').append(val);
+          rep += joiner + name + "=" + val;
         }
       }
-      return rep.toString();
+      return rep;
     } catch (Exception e) {
       e.printStackTrace();
-      return "";
     }
+    return null;
   }
 
 } // end class SeqClassifierFlags

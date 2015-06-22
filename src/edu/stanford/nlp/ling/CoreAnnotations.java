@@ -1,12 +1,15 @@
 package edu.stanford.nlp.ling;
 
-import edu.stanford.nlp.util.*;
-
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.ErasureUtils;
+import edu.stanford.nlp.util.IntPair;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.Triple;
 
 /**
  * <p>
@@ -166,45 +169,6 @@ public class CoreAnnotations {
       return ErasureUtils.uncheckedCast(List.class);
     }
   }
-
-  /**
-   * The CoreMap key for getting the quotations contained by an annotation.
-   *
-   * This key is typically set only on document annotations.
-   */
-  public static class QuotationsAnnotation implements CoreAnnotation<List<CoreMap>> {
-    public Class<List<CoreMap>> getType() {
-      return ErasureUtils.uncheckedCast(List.class);
-    }
-  }
-
-  /**
-   * Unique identifier within a document for a given quotation.
-   */
-  public static class QuotationIndexAnnotation implements CoreAnnotation<Integer> {
-    public Class<Integer> getType() {
-      return Integer.class;
-    }
-  }
-
-  /**
-   * The index of the sentence that this annotation begins in.
-   */
-  public static class SentenceBeginAnnotation implements CoreAnnotation<Integer> {
-    public Class<Integer> getType() {
-      return Integer.class;
-    }
-  }
-
-  /**
-   * The index of the sentence that this annotation begins in.
-   */
-  public static class SentenceEndAnnotation implements CoreAnnotation<Integer> {
-    public Class<Integer> getType() {
-      return Integer.class;
-    }
-  }
-
 
   /**
    * The CoreMap key for getting the paragraphs contained by an annotation.
@@ -447,33 +411,6 @@ public class CoreAnnotations {
       return String.class;
     }
   }
-  
-  /**
-   * CoNLL-U dep parsing - List of secondary dependencies
-   */
-  public static class CoNLLUSecondaryDepsAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-  
-  /**
-   * CoNLL-U dep parsing - List of morphological features
-   */
-  public static class CoNLLUFeats implements CoreAnnotation<HashMap<String,String>> {
-    public Class<HashMap<String,String>> getType() {
-      return ErasureUtils.uncheckedCast(HashMap.class);
-    }
-  }
-  
-  /**
-   * CoNLL-U dep parsing - Any other annotation
-   */
-  public static class CoNLLUMisc implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
 
   /**
    * CoNLL dep parsing - the index of the word which is the parent of this word
@@ -491,6 +428,20 @@ public class CoreAnnotations {
   public static class IDFAnnotation implements CoreAnnotation<Double> {
     public Class<Double> getType() {
       return Double.class;
+    }
+  }
+
+  /**
+   * Keys from AbstractMapLabel (descriptions taken from that class)
+   */
+  /**
+   * The standard key for storing a projected category in the map, as a String.
+   * For any word (leaf node), the projected category is the syntactic category
+   * of the maximal constituent headed by the word. Used in SemanticGraph.
+   */
+  public static class ProjectedCategoryAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
     }
   }
 
@@ -991,6 +942,13 @@ public class CoreAnnotations {
   }
 
   /** Seems like this could be consolidated with something else... */
+  public static class OriginalAnswerAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  /** Seems like this could be consolidated with something else... */
   public static class OriginalCharAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
@@ -1395,6 +1353,17 @@ public class CoreAnnotations {
   }
 
   /**
+   * Used in nlp.trees. When nodes are duplicated in Stanford Dependencies
+   * conversion (to represent conjunction of PPs with preposition collapsing,
+   * this gets set to a positive number on duplicated nodes.
+   */
+  public static class CopyAnnotation implements CoreAnnotation<Integer> {
+    public Class<Integer> getType() {
+      return Integer.class;
+    }
+  }
+
+  /**
    * Used in SimpleXMLAnnotator. The value is an XML element name String for the
    * innermost element in which this token was contained.
    */
@@ -1433,7 +1402,7 @@ public class CoreAnnotations {
       return String.class;
     }
   }
-
+  
   //to get words of the phrase
   public static class PhraseWordsTagAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
@@ -1447,14 +1416,14 @@ public class CoreAnnotations {
       return ErasureUtils.uncheckedCast(List.class);
     }
   }
-
+  
   //to get prototype feature, see Haghighi Exemplar driven learning
   public static class ProtoAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
     }
   }
-
+  
   //which common words list does this word belong to
   public static class CommonWordsAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
@@ -1652,18 +1621,10 @@ public class CoreAnnotations {
       return String.class;
     }
   }
-
+  
   public static class LabelWeightAnnotation implements CoreAnnotation<Double>{
    public Class<Double> getType(){
      return Double.class;
    }
-  }
-
-  public static class ColumnDataClassifierAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() { return String.class; }
-  }
-
-  public static class LabelIDAnnotation implements CoreAnnotation<Integer>{
-    public Class<Integer> getType() { return Integer.class; }
   }
 }

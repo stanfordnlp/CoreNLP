@@ -37,10 +37,10 @@ public abstract class FeatureFactory implements Serializable {
     String value = null;
     switch(feature) {
     case HEADWORD:
-      value = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadWordLabelAnnotation.class).value();
+      value = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
       break;
     case HEADTAG:
-      value = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadTagLabelAnnotation.class).value();
+      value = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
       break;
     case VALUE:
       value = (label == null) ? NULL : label.value();
@@ -67,7 +67,7 @@ public abstract class FeatureFactory implements Serializable {
     if (!(node.label() instanceof CoreLabel)) {
       throw new IllegalArgumentException("Can only featurize CoreLabel trees");
     }
-    CoreLabel head = ((CoreLabel) node.label()).get(TreeCoreAnnotations.HeadWordLabelAnnotation.class);
+    Tree head = ((CoreLabel) node.label()).get(TreeCoreAnnotations.HeadWordAnnotation.class);
 
     switch (transition) {
     case LEFT: {
@@ -79,7 +79,7 @@ public abstract class FeatureFactory implements Serializable {
         if (!(child.label() instanceof CoreLabel)) {
           throw new IllegalArgumentException("Can only featurize CoreLabel trees");
         }
-        if (((CoreLabel) child.label()).get(TreeCoreAnnotations.HeadWordLabelAnnotation.class) != head) {
+        if (((CoreLabel) child.label()).get(TreeCoreAnnotations.HeadWordAnnotation.class) != head) {
           return (CoreLabel) child.label();
         }
         node = child;
@@ -98,7 +98,7 @@ public abstract class FeatureFactory implements Serializable {
         if (!(child.label() instanceof CoreLabel)) {
           throw new IllegalArgumentException("Can only featurize CoreLabel trees");
         }
-        if (((CoreLabel) child.label()).get(TreeCoreAnnotations.HeadWordLabelAnnotation.class) != head) {
+        if (((CoreLabel) child.label()).get(TreeCoreAnnotations.HeadWordAnnotation.class) != head) {
           return (CoreLabel) child.label();
         }
         node = child;

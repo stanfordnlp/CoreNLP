@@ -2,27 +2,26 @@ package edu.stanford.nlp.ie;
 
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.ling.CoreLabel;
 
 import java.util.List;
 
 
-/** This was the empirical NER prior used for long distance consistency
- *  in the Finkel et al. ACL 2005 paper.
- *
- *  @author Jenny Finkel
+/**
+ * @author Jenny Finkel
  */
 
 public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstractSequencePrior<IN> {
 
-  protected static final String ORG = "ORGANIZATION";
-  protected static final String PER = "PERSON";
-  protected static final String LOC = "LOCATION";
-  protected static final String MISC = "MISC";
+  protected String ORG = "ORGANIZATION";
+  protected String PER = "PERSON";
+  protected String LOC = "LOCATION";
+  protected String MISC = "MISC";
 
   public EmpiricalNERPrior(String backgroundSymbol, Index<String> classIndex, List<IN> doc) {
     super(backgroundSymbol, classIndex, doc);
   }
-
+  
   protected double p1 = -Math.log(0.01);
 
   protected double dem1 = 6631.0;
@@ -30,7 +29,7 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
   protected double p3 = -Math.log(188 / dem1)/2.0;
   protected double p4 = -Math.log(4 / dem1)/2.0;
   protected double p5 = -Math.log(3 / dem1)/2.0;
-
+  
   protected double dem2 = 3169.0;
   protected double p6 = -Math.log(188.0 / dem2)/2.0;
   protected double p7 = -Math.log(2975 / dem2)/2.0;
@@ -42,39 +41,37 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
   protected double p11 = -Math.log(5 / dem3)/2.0;
   protected double p12 = -Math.log(3141 / dem3)/2.0;
   protected double p13 = -Math.log(1 / dem3)/2.0;
-
+  
   protected double dem4 = 2035.0;
   protected double p14 = -Math.log(3.0 / dem4)/2.0;
   protected double p15 = -Math.log(1 / dem4)/2.0;
   protected double p16 = -Math.log(1 / dem4)/2.0;
   protected double p17 = -Math.log(2030 / dem4)/2.0;
-
+  
   protected double dem5 = 724.0;
   protected double p18 = -Math.log(167.0 / dem5);
   protected double p19 = -Math.log(328.0 / dem5);
   protected double p20 = -Math.log(5.0 / dem5);
   protected double p21 = -Math.log(224.0 / dem5);
-
+  
   protected double dem6 = 834.0;
   protected double p22 = -Math.log(6.0 / dem6);
   protected double p23 = -Math.log(819.0 / dem6);
   protected double p24 = -Math.log(2.0 / dem6);
   protected double p25 = -Math.log(7.0 / dem6);
-
+  
   protected double dem7 = 1978.0;
   protected double p26 = -Math.log(1.0 / dem7);
   protected double p27 = -Math.log(22.0 / dem7);
   protected double p28 = -Math.log(1941.0 / dem7);
   protected double p29 = -Math.log(14.0 / dem7);
-
+  
   protected double dem8 = 622.0;
   protected double p30 = -Math.log(63.0 / dem8);
   protected double p31 = -Math.log(191.0 / dem8);
   protected double p32 = -Math.log(3.0 / dem8);
   protected double p33 = -Math.log(365.0 / dem8);
 
-  @SuppressWarnings("StringEquality")
-  @Override
   public double scoreOf(int[] sequence) {
     double p = 0.0;
     for (int i = 0; i < entities.length; i++) {
@@ -85,19 +82,18 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
         int length = entity.words.size();
         String tag1 = classIndex.get(entity.type);
 
-        // Use canonical String values, so we can henceforth just use ==
         if (tag1.equals(LOC)) { tag1 = LOC; }
         else if (tag1.equals(ORG)) { tag1 = ORG; }
         else if (tag1.equals(PER)) { tag1 = PER; }
         else if (tag1.equals(MISC)) { tag1 = MISC; }
 
         int[] other = entities[i].otherOccurrences;
-        for (int otherOccurrence : other) {
+        for (int j = 0; j < other.length; j++) {
 
           Entity otherEntity = null;
-          for (int k = otherOccurrence; k < otherOccurrence + length && k < entities.length; k++) {
-            otherEntity = entities[k];
-            if (otherEntity != null) {
+          for (int k = other[j]; k < other[j]+length && k < entities.length; k++) {
+            otherEntity = entities[k]; 
+            if (otherEntity != null) { 
 //               if (k > other[j]) {
 //                 System.err.println(entity.words+" "+otherEntity.words);
 //               }
@@ -108,7 +104,7 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
           if (otherEntity == null) {
             //p -= length * Math.log(0.1);
             //if (entity.words.size() == 1) {
-            //p -= length * p1;
+              //p -= length * p1;
             //}
             continue;
           }
@@ -116,22 +112,16 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
           int oLength = otherEntity.words.size();
           String tag2 = classIndex.get(otherEntity.type);
 
-          // Use canonical String values, so we can henceforth just use ==
-          if (tag2.equals(LOC)) {
-            tag2 = LOC;
-          } else if (tag2.equals(ORG)) {
-            tag2 = ORG;
-          } else if (tag2.equals(PER)) {
-            tag2 = PER;
-          } else if (tag2.equals(MISC)) {
-            tag2 = MISC;
-          }
+          if (tag2.equals(LOC)) { tag2 = LOC; }
+          else if (tag2.equals(ORG)) { tag2 = ORG; }
+          else if (tag2.equals(PER)) { tag2 = PER; }
+          else if (tag2.equals(MISC)) { tag2 = MISC; }
 
           // exact match??
           boolean exact = false;
           int[] oOther = otherEntity.otherOccurrences;
-          for (int index : oOther) {
-            if (index >= i && index <= i + length - 1) {
+          for (int k = 0; k < oOther.length; k++) {
+            if (oOther[k] >= i && oOther[k] <= i+length-1) {
               exact = true;
               break;
             }
@@ -144,11 +134,11 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
                 //p -= Math.abs(oLength - length) * Math.log(0.1);
                 p -= Math.abs(oLength - length) * p1;
               } else if (!(tag1.equals(ORG) && tag2.equals(LOC)) &&
-                      !(tag2.equals(LOC) && tag1.equals(ORG))) {
+                         !(tag2.equals(LOC) && tag1.equals(ORG))) {
                 // shorter
                 p -= (oLength + length) * p1;
               }
-            }
+            } 
             if (tag1 == (LOC)) {
               if (tag2 == (LOC)) {
                 //p -= length * Math.log(6436.0 / dem);
@@ -162,7 +152,7 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
               } else if (tag2 == (MISC)) {
                 //p -= length * Math.log(3 / dem);
                 p -= length * p5;
-              }
+              } 
             } else if (tag1 == (ORG)) {
               //double dem = 3169.0;
               if (tag2 == (LOC)) {
@@ -177,7 +167,7 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
               } else if (tag2 == (MISC)) {
                 //p -= length * Math.log(1 / dem);
                 p -= length * p9;
-              }
+              } 
             } else if (tag1 == (PER)) {
               //double dem = 3151.0;
               if (tag2 == (LOC)) {
@@ -224,7 +214,7 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
               } else if (tag2 == (MISC)) {
                 //p -= length * Math.log(224.0 / dem);
                 p -= length * p21;
-              }
+              } 
             } else if (tag1 == (ORG)) {
               //double dem = 834.0;
               if (tag2 == (LOC)) {
@@ -239,7 +229,7 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
               } else if (tag2 == (MISC)) {
                 //p -= length * Math.log(7.0 / dem);
                 p -= length * p25;
-              }
+              } 
             } else if (tag1 == (PER)) {
               //double dem = 1978.0;
               if (tag2 == (LOC)) {
@@ -272,7 +262,7 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
               }
             }
           }
-
+          
 //           if (tag1 == PER) {
 //             int personIndex = classIndex.indexOf(PER);
 //             String lastName = entity.words.get(entity.words.size()-1);

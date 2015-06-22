@@ -1,12 +1,11 @@
 package edu.stanford.nlp.trees.international.hebrew;
 
-import java.io.Serializable;
 import java.util.Collections;
 
 import edu.stanford.nlp.trees.BobChrisTreeNormalizer;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 
 /**
  * 
@@ -17,7 +16,7 @@ public class HebrewTreeNormalizer extends BobChrisTreeNormalizer {
 
   private static final long serialVersionUID = -3129547164200725933L;
 
-  private final Predicate<Tree> hebrewEmptyFilter;
+  private final Filter<Tree> hebrewEmptyFilter;
 
   public HebrewTreeNormalizer() {
     super(new HebrewTreebankLanguagePack());
@@ -27,11 +26,11 @@ public class HebrewTreeNormalizer extends BobChrisTreeNormalizer {
   /**
    * Remove traces and pronoun deletion markers.
    */
-  public static class HebrewEmptyFilter implements Predicate<Tree>, Serializable {
+  public static class HebrewEmptyFilter implements Filter<Tree> {
 
     private static final long serialVersionUID = -7256461296718287280L;
 
-    public boolean test(Tree t) {
+    public boolean accept(Tree t) {
       return ! (t.isPreTerminal() && t.value().equals("-NONE-"));
     }
   }

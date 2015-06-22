@@ -16,29 +16,28 @@ import java.io.StringReader;
 import java.util.ArrayList;
 
 public class XMLBeginEndIteratorTest extends TestCase {
+  static public final String TEST_STRING = "<xml><tagger>\n  <text>\n    This tests the xml input.\n  </text>  \n  This should not be found.  \n  <text>\n    This should be found.\n  </text>\n  <text>\n    The dog's barking kept the\n neighbors up all night.\n  </text>\n</tagging></xml>";
 
-  public static final String TEST_STRING = "<xml><tagger>\n  <text>\n    This tests the xml input.\n  </text>  \n  This should not be found.  \n  <text>\n    This should be found.\n  </text>\n  <text>\n    The dog's barking kept the\n neighbors up all night.\n  </text>\n</tagging></xml>";
+  static public final String EMPTY_TEST_STRING = "<text></text>";
 
-  public static final String EMPTY_TEST_STRING = "<text></text>";
+  static public final String SINGLE_TAG_TEST_STRING = "<xml><text>This tests the xml input with single tags<text/>, which should not close the input</text><text/>and should not open it either.</xml>";
 
-  public static final String SINGLE_TAG_TEST_STRING = "<xml><text>This tests the xml input with single tags<text/>, which should not close the input</text><text/>and should not open it either.</xml>";
+  static public final String NESTING_TEST_STRING = "<xml><text>A<text>B</text>C</text>D <text>A<text>B</text>C<text>D</text>E</text>F <text>A<text>B</text>C<text>D<text/></text>E</text>F</xml>";
 
-  public static final String NESTING_TEST_STRING = "<xml><text>A<text>B</text>C</text>D <text>A<text>B</text>C<text>D</text>E</text>F <text>A<text>B</text>C<text>D<text/></text>E</text>F</xml>";
+  static public final String TAG_IN_TEXT_STRING = "<xml><bar>The dog's barking kept the neighbors up all night</bar></xml>";
 
-  public static final String TAG_IN_TEXT_STRING = "<xml><bar>The dog's barking kept the neighbors up all night</bar></xml>";
+  static public final String TWO_TAGS_STRING = "<xml><foo>This is the first sentence</foo><bar>The dog's barking kept the neighbors up all night</bar><foo>The owner could not stop the dog from barking</foo></xml>";
 
-  public static final String TWO_TAGS_STRING = "<xml><foo>This is the first sentence</foo><bar>The dog's barking kept the neighbors up all night</bar><foo>The owner could not stop the dog from barking</foo></xml>";
-
-  public static ArrayList<String> getResults(XMLBeginEndIterator<String> iterator) {
+  public ArrayList<String> getResults(XMLBeginEndIterator<String> iterator) {
     ArrayList<String> results = new ArrayList<String>();
     while (iterator.hasNext()) {
       results.add(iterator.next());
-    }
+    }    
     return results;
   }
 
-  public static void compareResults(XMLBeginEndIterator<String> iterator,
-                                    String... expectedResults) {
+  public void compareResults(XMLBeginEndIterator<String> iterator,
+                             String ... expectedResults) {
     ArrayList<String> results = getResults(iterator);
     assertEquals(expectedResults.length, results.size());
     for (int i = 0; i < expectedResults.length; ++i) {
@@ -59,14 +58,14 @@ public class XMLBeginEndIteratorTest extends TestCase {
                    "\n    The dog's barking kept the\n neighbors up all night.\n  ");
   }
 
-  public void testEmpty() {
+  public void testEmpty() {    
     XMLBeginEndIterator<String> iterator = new XMLBeginEndIterator<String>(new BufferedReader(new StringReader(EMPTY_TEST_STRING)), "text");
     compareResults(iterator, "");
   }
 
   public void testSingleTags() {
     XMLBeginEndIterator<String> iterator = new XMLBeginEndIterator<String>(new BufferedReader(new StringReader(SINGLE_TAG_TEST_STRING)), "text");
-    compareResults(iterator,
+    compareResults(iterator, 
                    "This tests the xml input with single tags, which should not close the input");
   }
 

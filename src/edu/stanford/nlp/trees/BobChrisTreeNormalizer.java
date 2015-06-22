@@ -1,9 +1,7 @@
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.Label;
-
-import java.io.Serializable;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 
 
 /**
@@ -29,7 +27,7 @@ import java.util.function.Predicate;
  * 5. Delete empty/trace nodes (ones marked '-NONE-')
  * 6. Recursively delete any nodes that do not dominate any words
  * 7. Delete A over A nodes where the top A dominates nothing else
- * 8. Remove backslashes from lexical items
+ * 8. Remove backslahes from lexical items
  * (the Treebank inserts them to escape slashes (/) and stars (*)).
  * 4 is deliberately omitted, and a few things are purely aesthetic.
  * <p/>
@@ -85,7 +83,7 @@ public class BobChrisTreeNormalizer extends TreeNormalizer implements TreeTransf
    * @return The cleaned up label (phrase structure category)
    */
   protected String cleanUpLabel(final String label) {
-    if (label == null || label.isEmpty()) {
+    if (label == null || label.length() == 0) {
       return "ROOT";
       // String constants are always interned
     } else {
@@ -98,17 +96,11 @@ public class BobChrisTreeNormalizer extends TreeNormalizer implements TreeTransf
    * Normalize a whole tree -- one can assume that this is the
    * root.  This implementation deletes empty elements (ones with
    * nonterminal tag label '-NONE-') from the tree, and splices out
-   * unary A over A nodes.  It assumes that it is not given a
-   * null tree, but it may return one if there are no real words.
+   * unary A over A nodes.  It does work for a null tree.
    */
   @Override
   public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
-    Tree middle = tree.prune(emptyFilter, tf);
-    if (middle == null) {
-      return null;
-    } else {
-      return middle.spliceOut(aOverAFilter, tf);
-    }
+    return tree.prune(emptyFilter, tf).spliceOut(aOverAFilter, tf);
   }
 
   @Override
@@ -117,20 +109,19 @@ public class BobChrisTreeNormalizer extends TreeNormalizer implements TreeTransf
   }
 
 
-  protected Predicate<Tree> emptyFilter = new EmptyFilter();
+  protected Filter<Tree> emptyFilter = new EmptyFilter();
 
-  protected Predicate<Tree> aOverAFilter = new AOverAFilter();
+  protected Filter<Tree> aOverAFilter = new AOverAFilter();
 
   private static final long serialVersionUID = -1005188028979810143L;
 
 
-  public static class EmptyFilter implements Predicate<Tree>, Serializable {
+  public static class EmptyFilter implements Filter<Tree> {
 
     private static final long serialVersionUID = 8914098359495987617L;
 
     /** Doesn't accept nodes that only cover an empty. */
-    @Override
-    public boolean test(Tree t) {
+    public boolean accept(Tree t) {
       Tree[] kids = t.children();
       Label l = t.label();
       // Delete (return false for) empty/trace nodes (ones marked '-NONE-')
@@ -142,13 +133,12 @@ public class BobChrisTreeNormalizer extends TreeNormalizer implements TreeTransf
   } // end class EmptyFilter
 
 
-  public static class AOverAFilter implements Predicate<Tree>, Serializable {
+  public static class AOverAFilter implements Filter<Tree> {
 
     /** Doesn't accept nodes that are A over A nodes (perhaps due to
      *  empty removal or are EDITED nodes).
      */
-    @Override
-    public boolean test(Tree t) {
+    public boolean accept(Tree t) {
       if (t.isLeaf() || t.isPreTerminal()) {
         return true;
       }
@@ -164,6 +154,6 @@ public class BobChrisTreeNormalizer extends TreeNormalizer implements TreeTransf
 
     private static final long serialVersionUID = 1L;
 
-  } // end static class AOverAFilter
+  } // end class AOverAFilter
 
 }

@@ -1,7 +1,7 @@
 package edu.stanford.nlp.ling.tokensregex.matcher;
 
 import edu.stanford.nlp.util.BinaryHeapPriorityQueue;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.PriorityQueue;
 
 import java.util.*;

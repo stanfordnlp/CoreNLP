@@ -43,6 +43,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -163,8 +164,8 @@ public class LexicalizedParserITest extends TestCase {
     compareOutput(results, false,
                   "My/PRP$ dog/NN likes/VBZ to/TO eat/VB yoghurt/NN ./.",
                   "(ROOT (S (NP (PRP$ My) (NN dog)) (VP (VBZ likes) (S (VP (TO to) (VP (VB eat) (NP (NN yoghurt)))))) (. .)))",
-                  "nmod:poss(dog-2, My-1) nsubj(likes-3, dog-2) root(ROOT-0, likes-3) mark(eat-5, to-4) xcomp(likes-3, eat-5) dobj(eat-5, yoghurt-6)",
-                  "nmod:poss(dog-2, My-1) nsubj(likes-3, dog-2) nsubj(eat-5, dog-2) root(ROOT-0, likes-3) mark(eat-5, to-4) xcomp(likes-3, eat-5) dobj(eat-5, yoghurt-6)");
+                  "poss(dog-2, My-1) nsubj(likes-3, dog-2) root(ROOT-0, likes-3) aux(eat-5, to-4) xcomp(likes-3, eat-5) dobj(eat-5, yoghurt-6)",
+                  "poss(dog-2, My-1) nsubj(likes-3, dog-2) xsubj(eat-5, dog-2) root(ROOT-0, likes-3) aux(eat-5, to-4) xcomp(likes-3, eat-5) dobj(eat-5, yoghurt-6)");
   }
 
   /**
@@ -186,10 +187,10 @@ public class LexicalizedParserITest extends TestCase {
     sentences.add(Sentence.toCoreLabelList("Hopefully", "they", "can", "turn", "it", "around", "."));
     sentences.add(Sentence.toCoreLabelList("Winning", "on", "Wednesday", "would", "be", "a", "good", "first", "step", "."));
     sentences.add(Sentence.toCoreLabelList("Their", "next", "opponent", "is", "quite", "bad", "."));
-
+    
     List<Tree> results1 = englishParser.parseMultiple(sentences);
     List<Tree> results2 = englishParser.parseMultiple(sentences, 3);
-
+    
     assertEquals(results1, results2);
   }
 
@@ -238,7 +239,7 @@ public class LexicalizedParserITest extends TestCase {
 
   private static final String chineseTest2 = "这里 是 新闻 之 夜 ．";
   private static final String expectedChineseTree2 = "(ROOT (IP (NP (PN 这里)) (VP (VC 是) (NP (DNP (NP (NN 新闻)) (DEG 之)) (NP (NN 夜)))) (PU ．)))";
-  private static final String expectedChineseDeps2 = "nsubj(夜-5, 这里-1) cop(夜-5, 是-2) assmod(夜-5, 新闻-3) case(新闻-3, 之-4) root(ROOT-0, 夜-5)";
+  private static final String expectedChineseDeps2 = "top(是-2, 这里-1) root(ROOT-0, 是-2) assmod(夜-5, 新闻-3) assm(新闻-3, 之-4) attr(是-2, 夜-5)";
 
   public static void testChineseDependenciesSemanticHead() {
     Tree tree = chineseParser.parse(chineseTest2);

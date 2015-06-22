@@ -2,12 +2,7 @@ package edu.stanford.nlp.ling.tokensregex;
 
 import edu.stanford.nlp.util.*;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * Generic Sequence Pattern for regular expressions.
@@ -81,15 +76,12 @@ import java.util.function.Function;
  *                         see {@link MultiCoreMapNodePattern} for example) </li>
  * <li> Conjunctions - conjunctions of sequence patterns (works for some cases)</li>
  * </ol>
- *
- * </p>
- * <p>Note that this and the inherited classes do not implement any custom equals and hashCode functions.
  * </p>
  *
  * @author Angel Chang
  * @see SequenceMatcher
  */
-public class SequencePattern<T> implements Serializable {
+public class SequencePattern<T> {
   // TODO:
   //  1. Validate backref capture groupid
   //  2. Actions
@@ -99,7 +91,6 @@ public class SequencePattern<T> implements Serializable {
   private String patternStr;
   private PatternExpr patternExpr;
   private SequenceMatchAction<T> action;
-
   State root;
   int totalGroups = 0;
 
@@ -138,15 +129,6 @@ public class SequencePattern<T> implements Serializable {
   @Override
   public String toString() {
     return this.pattern();
-  }
-
-  public <T2> SequencePattern<T2> transform(NodePatternTransformer<T,T2> transformer) {
-    if (action != null) {
-      throw new UnsupportedOperationException("transform on actions not yet implemented");
-    }
-    SequencePattern.PatternExpr transformedPattern = this.patternExpr.transform(transformer);
-    // TODO: Make string unique by indicating this pattern was transformed
-    return new SequencePattern<T2>(this.patternStr, transformedPattern, null);
   }
 
   public String pattern() {
@@ -268,7 +250,7 @@ public class SequencePattern<T> implements Serializable {
   /**
    * Represents a sequence pattern expressions (before translating into NFA).
    */
-  public abstract static class PatternExpr implements Serializable {
+  public abstract static class PatternExpr {
 
     protected abstract Frag build();
 
@@ -296,8 +278,6 @@ public class SequencePattern<T> implements Serializable {
 
     /** Returns an optimized version of this pattern - default is a noop */
     protected PatternExpr optimize() { return this; }
-
-    protected abstract PatternExpr transform(NodePatternTransformer transformer);
   }
 
   /** Represents one element to be matched. */
@@ -326,11 +306,6 @@ public class SequencePattern<T> implements Serializable {
     protected int assignGroupIds(int start) { return start; }
     @Override
     protected void updateBindings(VarGroupBindings bindings) {}
-
-    @Override
-    protected PatternExpr transform(NodePatternTransformer transformer) {
-      return new NodePatternExpr(transformer.transform(nodePattern));
-    }
 
     public String toString() {
       return nodePattern.toString();
@@ -362,10 +337,6 @@ public class SequencePattern<T> implements Serializable {
     protected int assignGroupIds(int start) { return start; }
     @Override
     protected void updateBindings(VarGroupBindings bindings) {}
-    @Override
-    protected PatternExpr transform(NodePatternTransformer transformer) {
-      return new MultiNodePatternExpr(transformer.transform(multiNodePattern));
-    }
 
     public String toString() {
       return multiNodePattern.toString();
@@ -404,10 +375,6 @@ public class SequencePattern<T> implements Serializable {
     protected int assignGroupIds(int start) { return start; }
     @Override
     protected void updateBindings(VarGroupBindings bindings) {}
-    @Override
-    protected PatternExpr transform(NodePatternTransformer transformer) {
-      return new SpecialNodePatternExpr(name, stateFactory);
-    }
 
     public String toString() {
       return name;
@@ -502,15 +469,6 @@ public class SequencePattern<T> implements Serializable {
       return new SequencePatternExpr(newPatterns);
     }
 
-    @Override
-    protected PatternExpr transform(NodePatternTransformer transformer) {
-      List<PatternExpr> newPatterns = new ArrayList<PatternExpr>(patterns.size());
-      for (PatternExpr p:patterns) {
-        newPatterns.add(p.transform(transformer));
-      }
-      return new SequencePatternExpr(newPatterns);
-    }
-
     public String toString() {
       return StringUtils.join(patterns, " ");
     }
@@ -547,12 +505,6 @@ public class SequencePattern<T> implements Serializable {
     protected PatternExpr copy()
     {
       return new BackRefPatternExpr(matcher, captureGroupId);
-    }
-
-    @Override
-    protected PatternExpr transform(NodePatternTransformer transformer) {
-      // TODO: Implement me!!!
-      throw new UnsupportedOperationException("BackRefPatternExpr.transform not implemented yet!!! Please implement me!!!");
     }
 
     public String toString() {
@@ -597,11 +549,6 @@ public class SequencePattern<T> implements Serializable {
     @Override
     protected PatternExpr optimize() {
       return new ValuePatternExpr(expr.optimize(), value);
-    }
-
-    @Override
-    protected PatternExpr transform(NodePatternTransformer transformer) {
-      return new ValuePatternExpr(expr.transform(transformer), value);
     }
 
     @Override
@@ -674,12 +621,6 @@ public class SequencePattern<T> implements Serializable {
     protected PatternExpr optimize()
     {
       return new GroupPatternExpr(pattern.optimize(), capture, captureGroupId, varname);
-    }
-
-    @Override
-    protected PatternExpr transform(NodePatternTransformer transformer)
-    {
-      return new GroupPatternExpr(pattern.transform(transformer), capture, captureGroupId, varname);
     }
 
     public String toString() {
@@ -796,11 +737,6 @@ public class SequencePattern<T> implements Serializable {
     {
       return new RepeatPatternExpr(pattern.optimize(), minMatch, maxMatch, greedyMatch);
     }
-    @Override
-    protected PatternExpr transform(NodePatternTransformer transformer)
-    {
-      return new RepeatPatternExpr(pattern.transform(transformer), minMatch, maxMatch, greedyMatch);
-    }
 
     public String toString() {
       StringBuilder sb = new StringBuilder();
@@ -875,16 +811,6 @@ public class SequencePattern<T> implements Serializable {
       List<PatternExpr> newPatterns = new ArrayList<PatternExpr>(patterns.size());
       for (PatternExpr p:patterns) {
         newPatterns.add(p.copy());
-      }
-      return new OrPatternExpr(newPatterns);
-    }
-
-    @Override
-    protected PatternExpr transform(NodePatternTransformer transformer)
-    {
-      List<PatternExpr> newPatterns = new ArrayList<PatternExpr>(patterns.size());
-      for (PatternExpr p:patterns) {
-        newPatterns.add(p.transform(transformer));
       }
       return new OrPatternExpr(newPatterns);
     }
@@ -1119,16 +1045,6 @@ public class SequencePattern<T> implements Serializable {
       List<PatternExpr> newPatterns = new ArrayList<PatternExpr>(patterns.size());
       for (PatternExpr p:patterns) {
         newPatterns.add(p.optimize());
-      }
-      return new AndPatternExpr(newPatterns);
-    }
-
-    @Override
-    protected PatternExpr transform(NodePatternTransformer transformer)
-    {
-      List<PatternExpr> newPatterns = new ArrayList<PatternExpr>(patterns.size());
-      for (PatternExpr p:patterns) {
-        newPatterns.add(p.transform(transformer));
       }
       return new AndPatternExpr(newPatterns);
     }
@@ -1748,36 +1664,6 @@ public class SequencePattern<T> implements Serializable {
       }
     }
   }
-
-
-
-  private void readObject(ObjectInputStream ois)
-    throws IOException, ClassNotFoundException {
-    patternStr = (String)ois.readObject();
-
-    patternExpr = (PatternExpr) ois.readObject();
-    //this.patternStr = patternStr;
-    //this.patternExpr = nodeSequencePattern;
-    action = (SequenceMatchAction) ois.readObject();
-
-    patternExpr = new GroupPatternExpr(patternExpr, true);
-    patternExpr = patternExpr.optimize();
-    this.totalGroups = patternExpr.assignGroupIds(0);
-    Frag f = patternExpr.build();
-    f.connect(MATCH_STATE);
-    this.root = f.start;
-    varGroupBindings = new VarGroupBindings(totalGroups+1);
-    patternExpr.updateBindings(varGroupBindings);
-  }
-
-
-  private void writeObject(ObjectOutputStream oos)
-    throws IOException {
-    oos.writeObject(toString());
-    oos.writeObject(this.getPatternExpr());
-    oos.writeObject(this.getAction());
-
-  }  //  public void writeObject()
 
   // States for matching conjunctions
   // - Basic, not well tested implementation that may not work for all cases ...

@@ -6,6 +6,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.Timing;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -28,9 +29,10 @@ public class NumberAnnotator implements Annotator {
 
   private final AbstractSequenceClassifier<CoreLabel> nsc;
 
+  private Timing timer = new Timing();
   private boolean VERBOSE = true;
   private static final String DEFAULT_BACKGROUND_SYMBOL = "O";
-  private final String BACKGROUND_SYMBOL;
+  private String BACKGROUND_SYMBOL;
 
   public static final String BACKGROUND_SYMBOL_PROPERTY = "background";
 
@@ -62,10 +64,10 @@ public class NumberAnnotator implements Annotator {
     nsc = new NumberSequenceClassifier(useSUTime);
   }
 
-  @Override
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
-      System.err.print("Adding number annotation ... ");
+      timer.start();
+      System.err.print("Adding number annotation...");
     }
 
     if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {

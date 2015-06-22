@@ -8,9 +8,7 @@ import edu.stanford.nlp.util.MapFactory;
 import edu.stanford.nlp.util.MutableDouble;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Utility functions for using trie maps
@@ -56,18 +54,6 @@ public class TrieMapUtils {
     @Override
     public Map<Iterable<K>,V> newMap(int initCapacity) {
       return new TrieMap<K,V>(initCapacity);
-    }
-
-    @Override
-    public Set<Iterable<K>> newSet() {
-      return Collections.newSetFromMap(new TrieMap<K,Boolean>());
-    }
-
-    @Override
-    public Set<Iterable<K>> newSet(Collection<Iterable<K>> init) {
-      Set<Iterable<K>> set = Collections.newSetFromMap(new TrieMap<K,Boolean>());
-      init.addAll(init);
-      return set;
     }
 
     @Override

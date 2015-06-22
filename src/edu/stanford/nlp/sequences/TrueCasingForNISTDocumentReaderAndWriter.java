@@ -1,38 +1,37 @@
 package edu.stanford.nlp.sequences;
 
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.objectbank.LineIterator;
+import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
+
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.objectbank.LineIterator;
-import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
-
-// Note: This DocumentReaderAndWriter needs to be in core because it is
-// used in the truecasing Annotator (loaded by reflection).
-
-/** A DocumentReaderAndWriter for truecasing documents.
- *  Adapted from Jenny's TrueCasingDocumentReaderAndWriter.java.
- *
- *  @author Pi-Chuan Chang
+/**
+ * adapt from Jenny's TrueCasingDocumentReaderAndWriter.java
+ * @author Pi-Chuan Chang
  */
 public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel> {
 
   public static final String THREE_CLASSES_PROPERTY = "3class";
   public static final boolean THREE_CLASSES = Boolean.parseBoolean(System.getProperty(THREE_CLASSES_PROPERTY, "false"));
 
+  /**
+   * 
+   */
   private static final long serialVersionUID = -3000389291781534479L;
   private IteratorFromReaderFactory<List<CoreLabel>> factory;
   private Boolean verboseForTrueCasing = false;
-  private static final Pattern alphabet = Pattern.compile("[A-Za-z]+");
+  private static Pattern alphabet = Pattern.compile("[A-Za-z]+");
 
   /**
    * for test only
@@ -41,7 +40,8 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
     Reader reader = new BufferedReader(new FileReader(args[0]));
     TrueCasingForNISTDocumentReaderAndWriter raw = new TrueCasingForNISTDocumentReaderAndWriter();
     raw.init(null);
-    for (Iterator<List<CoreLabel>> it = raw.getIterator(reader); it.hasNext(); ) {
+    Iterator<List<CoreLabel>> it = raw.getIterator(reader);
+    while(it.hasNext()) {
       List<CoreLabel> l = it.next();
       for (CoreLabel cl : l) {
         System.out.println(cl);
@@ -50,7 +50,6 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
     }
   }
 
-  @Override
   public void init(SeqClassifierFlags flags) {
     verboseForTrueCasing = flags.verboseForTrueCasing;
     factory = LineIterator.getFactory(new LineToTrueCasesParser()); // todo
@@ -62,16 +61,14 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
     return knownWords.contains(s.toLowerCase());
   }
 
-  @Override
   public Iterator<List<CoreLabel>> getIterator(Reader r) {
     return factory.getIterator(r);
   }
 
-  @Override
   public void printAnswers(List<CoreLabel> doc, PrintWriter out) {
-    List<String> sentence = new ArrayList<>();
+    List<String> sentence = new ArrayList<String>();
     int wrong = 0;
-
+    
     for (CoreLabel wi : doc) {
       StringBuilder sb = new StringBuilder();
       if (! wi.get(CoreAnnotations.AnswerAnnotation.class).equals(wi.get(CoreAnnotations.GoldAnswerAnnotation.class))) {
@@ -85,7 +82,7 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
         sb.append(wi.word().substring(0,1).toUpperCase())
           .append(wi.word().substring(1));
       } else if (wi.get(CoreAnnotations.AnswerAnnotation.class).equals("O")) {
-        // in this case, if it contains a-z at all, then append "MIX" at the end
+        // in this case, if it cotains a-z at all, then append "MIX" at the end
         sb.append(wi.word());
         Matcher alphaMatcher = alphabet.matcher(wi.word());
         if (alphaMatcher.matches()) {
@@ -102,28 +99,27 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
       sentence.add(sb.toString());
     }
     out.print(StringUtils.join(sentence, " "));
-    System.err.printf("> wrong = %d ; total = %d%n", wrong, doc.size());
+    System.err.printf("> wrong = %d ; total = %d\n", wrong, doc.size());
     out.println();
   }
 
   public static class LineToTrueCasesParser implements Function<String,List<CoreLabel>> {
-    private static final Pattern allLower = Pattern.compile("[^A-Z]*?[a-z]+[^A-Z]*?");
-    private static final Pattern allUpper = Pattern.compile("[^a-z]*?[A-Z]+[^a-z]*?");
-    private static final Pattern startUpper = Pattern.compile("[A-Z].*");
-
-    @Override
+    private static Pattern allLower = Pattern.compile("[^A-Z]*?[a-z]+[^A-Z]*?");
+    private static Pattern allUpper = Pattern.compile("[^a-z]*?[A-Z]+[^a-z]*?");
+    private static Pattern startUpper = Pattern.compile("[A-Z].*");
+    
     public List<CoreLabel> apply(String line) {
-      List<CoreLabel> doc = new ArrayList<>();
+      List<CoreLabel> doc = new ArrayList<CoreLabel>();
       int pos = 0;
-
+      
       //line = line.replaceAll(" +"," ");
       //System.err.println("pichuan: processing line = "+line);
-
+      
       String[] toks = line.split(" ");
       for (String word : toks) {
         CoreLabel wi = new CoreLabel();
         Matcher lowerMatcher = allLower.matcher(word);
-
+        
         if (lowerMatcher.matches()) {
           wi.set(CoreAnnotations.AnswerAnnotation.class, "LOWER");
           wi.set(CoreAnnotations.GoldAnswerAnnotation.class, "LOWER");
@@ -153,14 +149,13 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
             }
           }
         }
-
+        
         wi.setWord(word.toLowerCase());
-        wi.set(CoreAnnotations.PositionAnnotation.class, String.valueOf(pos));
+        wi.set(CoreAnnotations.PositionAnnotation.class, pos + "");
         doc.add(wi);
         pos++;
       }
       return doc;
     }
   }
-
 }

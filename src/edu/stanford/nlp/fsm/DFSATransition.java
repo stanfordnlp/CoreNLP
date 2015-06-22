@@ -3,7 +3,9 @@ package edu.stanford.nlp.fsm;
 import edu.stanford.nlp.util.Scored;
 
 /**
- * DFSATransition represents a transition in a weighted finite state
+ * (D)FSA Transition
+ * <p/>
+ * Class for representing a transition in a weighted finite state
  * transducer.  For now, just null out fields that may not apply.
  * This should really be FSATransition as there's nothing
  * deterministic-specific.  If FSA is ever made, this should be

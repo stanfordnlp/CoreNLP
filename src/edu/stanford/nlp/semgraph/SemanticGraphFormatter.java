@@ -1,6 +1,6 @@
 package edu.stanford.nlp.semgraph;
 
-import edu.stanford.nlp.ling.CoreLabel;
+//import edu.stanford.nlp.ling.IndexedFeatureLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
@@ -20,7 +20,7 @@ public class SemanticGraphFormatter {
   private static final String LPAREN = "[";
   private static final String RPAREN = "]";
   private static final String SPACE = " ";
-  private static final String COLON = ">";
+  private static final String COLON = ":";
 
   private static final int DEFAULT_WIDTH = 80;
   private static final int DEFAULT_INDENT = 4;
@@ -92,7 +92,7 @@ public class SemanticGraphFormatter {
       int index = 0;
       for (IndexedWord root: sg.getRoots()) {
         index+=1;
-        out.append("root_").append(index).append("> ");
+        out.append("root_").append(index).append(": ");
         formatSGNode(sg, root, 9);
         out.append("\n");
       }
@@ -212,7 +212,7 @@ public class SemanticGraphFormatter {
       }
     }
     if (showAnnos) {
-      s += node.toString(CoreLabel.OutputFormat.MAP);
+      s += node.toString(IndexedWord.COMPLETE_FORMAT);
     }
     return s;
   }
@@ -235,11 +235,11 @@ public class SemanticGraphFormatter {
     System.out.println("12345678901234567890123456789012345678901234567890123456789012345678901234567890");
     System.out.println();
 
-    fmt.test("[like subj>Bill dobj>[muffins compound>blueberrry]]");
+    fmt.test("[like subj:Bill dobj:[muffins nn:blueberrry]]");
 
-    fmt.test("[eligible nsubj>Zambia cop>became xcomp>[receive mark>to dobj>[assistance amod>UNCDF] nmod:in>1991]]");
+    fmt.test("[eligible nsubj:Zambia cop:became xcomp:[receive aux:to dobj:[assistance amod:UNCDF] prep_in:1991]]");
 
-    fmt.test("[say advcl>[are mark>If nsubj>[polls det>the] xcomp>[believed aux>to auxpass>be]] nsubj>[voters amod>American] aux>will advmod>[much dep>[same det>the]] nmod:to>[Republicans nmod:poss>[Bush case>'s compound>George] case>to] dep>[vote advmod>when nsubj>they nmod:in>[elections amod>congressional det>the case>in] nmod:on>[[November num>7th case>on]]]]");
+    fmt.test("[say advcl:[are mark:If nsubj:[polls det:the] xcomp:[believed aux:to auxpass:be]] nsubj:[voters amod:American] aux:will advmod:[much dep:[same det:the]] dep:[to pobj:[Republicans poss:[Bush possessive:'s nn:George]]] dep:[vote advmod:when nsubj:they prep:[in pobj:[elections amod:congressional det:the]] prep:[on pobj:[November num:7th]]]]");
   }
 
 }

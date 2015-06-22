@@ -1,29 +1,3 @@
-// SemanticHeadFinder -- An implementation of content-word heads.
-// Copyright (c) 2005 - 2014 The Board of Trustees of
-// The Leland Stanford Junior University. All Rights Reserved.
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software Foundation,
-// Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-//
-// For more information, bug reports, fixes, contact:
-//    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
-//    USA
-//    parser-support@lists.stanford.edu
-//    http://nlp.stanford.edu/software/stanford-dependencies.shtml
-
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.HasCategory;
@@ -33,7 +7,7 @@ import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.ArrayUtils;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Generics;
 
 import java.util.Arrays;
@@ -42,10 +16,8 @@ import java.util.Set;
 
 
 /**
- * Implements a 'semantic head' variant of the the English HeadFinder
- * found in Michael Collins' 1999 thesis.
- * This use of mainly content words as heads is used for determining
- * the dependency structure in English Stanford Dependencies (SD).
+ * Implements a 'semantic head' variant of the the HeadFinder found
+ * in Michael Collins' 1999 thesis.
  * This version chooses the semantic head verb rather than the verb form
  * for cases with verbs.  And it makes similar themed changes to other
  * categories: e.g., in question phrases, like "Which Brazilian game", the
@@ -86,15 +58,12 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
   private static final boolean DEBUG = System.getProperty("SemanticHeadFinder", null) != null;
 
   /* A few times the apostrophe is missing on "'s", so we have "s" */
-  /* Tricky auxiliaries: "a", "na" is from "(gon|wan)na", "ve" from "Weve", etc.  "of" as non-standard for "have" */
-  /* "as" is "has" with missing first letter. "to" is rendered "the" once in EWT. */
-  private static final String[] auxiliaries = {
-          "will", "wo", "shall", "sha", "may", "might", "should", "would", "can", "could", "ca", "must", "'ll", "ll", "-ll", "cold",
-          "has", "have", "had", "having", "'ve", "ve", "v", "of", "hav", "hvae", "as",
-          "get", "gets", "getting", "got", "gotten", "do", "does", "did", "'d", "d", "du",
-          "to", "2", "na", "a", "ot", "ta", "the", "too" };
+  /* Tricky auxiliaries: "na" is from "gonna", "ve" from "Weve", etc.  "of" as non-standard for "have" */
+  private static final String[] auxiliaries = {"will", "wo", "shall", "sha", "may", "might", "should", "would", "can", "could", "ca", "must", "has", "have", "had", "having", "get", "gets", "getting", "got", "gotten", "do", "does", "did", "to", "'ve", "ve", "v", "'d", "d", "'ll", "ll", "na", "of", "hav", "hvae", "as" };
+  private static final String[] beGetVerbs = {"be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "m", "'re", "'s", "s", "art", "ar", "get", "getting", "gets", "got"};
+  private static final String[] copulaVerbs = {"be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "m", "'re", "'s", "s", "wase", "seem", "seems", "seemed", "appear", "appears", "appeared", "stay", "stays", "stayed", "remain", "remains", "remained", "resemble", "resembles", "resembled", "become", "becomes", "became"};
 
-  // include Charniak tags (AUX, AUXG) so can do BLLIP right
+  // include Charniak tags so can do BLLIP right
   private static final String[] verbTags = {"TO", "MD", "VB", "VBD", "VBP", "VBZ", "VBG", "VBN", "AUX", "AUXG"};
   // These ones are always auxiliaries, even if the word is "too", "my", or whatever else appears in web text.
   private static final String[] unambiguousAuxTags = {"TO", "MD", "AUX", "AUXG"};
@@ -122,30 +91,30 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
    *
    * @param tlp The TreebankLanguagePack, used by the superclass to get basic
    *     category of constituents.
-   * @param noCopulaHead If true, a copular verb (a form of be)
+   * @param noCopulaHead If true, a copular verb 
+   *     (be, seem, appear, stay, remain, resemble, become)
    *     is not treated as head when it has an AdjP or NP complement.  If false,
    *     a copula verb is still always treated as a head.  But it will still
    *     be treated as an auxiliary in periphrastic tenses with a VP complement.
    */
   public SemanticHeadFinder(TreebankLanguagePack tlp, boolean noCopulaHead) {
     super(tlp);
-
-    // TODO: reverse the polarity of noCopulaHead
-    this.makeCopulaHead = !noCopulaHead;
-
     ruleChanges();
 
     // make a distinction between auxiliaries and copula verbs to
     // get the NP has semantic head in sentences like "Bill is an honest man".  (Added "sha" for "shan't" May 2009
     verbalAuxiliaries = Generics.newHashSet(Arrays.asList(auxiliaries));
 
-    passiveAuxiliaries = Generics.newHashSet(Arrays.asList(EnglishPatterns.beGetVerbs));
+    passiveAuxiliaries = Generics.newHashSet(Arrays.asList(beGetVerbs));
 
     //copula verbs having an NP complement
     copulars = Generics.newHashSet();
     if (noCopulaHead) {
-      copulars.addAll(Arrays.asList(EnglishPatterns.copularVerbs));
+      copulars.addAll(Arrays.asList(copulaVerbs));
     }
+
+    // TODO: reverse the polarity of noCopulaHead
+    this.makeCopulaHead = !noCopulaHead;
 
     verbalTags = Generics.newHashSet(Arrays.asList(verbTags));
     unambiguousAuxiliaryTags = Generics.newHashSet(Arrays.asList(unambiguousAuxTags));
@@ -159,8 +128,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
   //makes modifications of Collins' rules to better fit with semantic notions of heads
   private void ruleChanges() {
     //  NP: don't want a POS to be the head
-    // verbs are here so that POS isn't favored in the case of bad parses
-    nonTerminalInfo.put("NP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "NML", "JJR", "WP" }, {"left", "NP", "PRP"}, {"rightdis", "$", "ADJP", "FW"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "QP", "DT", "WDT", "NML", "PRN", "RB", "RBR", "ADVP"}, {"rightdis", "VP", "VB", "VBZ", "VBD", "VBP"}, {"left", "POS"}});
+    nonTerminalInfo.put("NP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "NML", "JJR", "WP" }, {"left", "NP", "PRP"}, {"rightdis", "$", "ADJP", "FW"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "QP", "DT", "WDT", "NML", "PRN", "RB", "RBR", "ADVP"}, {"left", "POS"}});
     nonTerminalInfo.put("NX", nonTerminalInfo.get("NP"));
     nonTerminalInfo.put("NML", nonTerminalInfo.get("NP"));
     // WHNP clauses should have the same sort of head as an NP
@@ -180,11 +148,8 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     nonTerminalInfo.put("SBAR", new String[][]{{"left", "S", "SQ", "SINV", "SBAR", "FRAG", "VP", "WHNP", "WHPP", "WHADVP", "WHADJP", "IN", "DT"}});
     // VP shouldn't be needed in SBAR, but occurs in one buggy tree in PTB3 wsj_1457 and otherwise does no harm
 
-    if (makeCopulaHead) {
-      nonTerminalInfo.put("SQ", new String[][]{{"left", "VP", "SQ", "VB", "VBZ", "VBD", "VBP", "MD", "AUX", "AUXG", "ADJP"}});
-    } else {
-      nonTerminalInfo.put("SQ", new String[][]{{"left", "VP", "SQ", "ADJP", "VB", "VBZ", "VBD", "VBP", "MD", "AUX", "AUXG"}});
-    }
+    nonTerminalInfo.put("SQ", new String[][]{{"left", "VP", "SQ", "ADJP", "VB", "VBZ", "VBD", "VBP", "MD", "AUX", "AUXG"}});
+
 
     // UCP take the first element as head
     nonTerminalInfo.put("UCP", new String[][]{{"left"}});
@@ -274,16 +239,16 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
   // structure has already been removed in CoordinationTransformer.
   static final TregexPattern[] headOfCopulaTregex = {
     // Matches phrases such as "what is wrong"
-    TregexPattern.compile("SBARQ < (WHNP $++ (/^VB/ < " + EnglishPatterns.copularWordRegex + " $++ ADJP=head))"),
+    TregexPattern.compile("SBARQ < (WHNP $++ (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " $++ ADJP=head))"),
 
     // matches WHNP $+ VB<copula $+ NP
     // for example, "Who am I to judge?"
     // !$++ ADJP matches against "Why is the dog pink?"
-    TregexPattern.compile("SBARQ < (WHNP=head $++ (/^VB/ < " + EnglishPatterns.copularWordRegex + " $+ NP !$++ ADJP))"),
+    TregexPattern.compile("SBARQ < (WHNP=head $++ (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " $+ NP !$++ ADJP))"),
 
-    // Actually somewhat limited in scope, this detects "Tuesday it is",
+    // Actually somewhat limited in scope, this detects "Tuesday it is", 
     // "Such a great idea this was", etc
-    TregexPattern.compile("SINV < (NP=head $++ (NP $++ (VP < (/^(?:VB|AUX)/ < " + EnglishPatterns.copularWordRegex + "))))"),
+    TregexPattern.compile("SINV < (NP=head $++ (NP $++ (VP < (/^(?:VB|AUX)/ < " + EnglishGrammaticalRelations.copularWordRegex + "))))"),
   };
 
   static final TregexPattern[] headOfConjpTregex = {
@@ -294,25 +259,27 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
   static final TregexPattern noVerbOverTempTregex = TregexPattern.compile("/^VP/ < NP-TMP !< /^V/ !< NNP|NN|NNPS|NNS|NP|JJ|ADJP|S");
 
-  /**
+  /** 
    * We use this to avoid making a -TMP or -ADV the head of a copular phrase.
-   * For example, in the sentence "It is hands down the best dessert ...",
+   * For example, in the sentence "It is hands down the best dessert ...", 
    * we want to avoid using "hands down" as the head.
    */
-  static final Predicate<Tree> REMOVE_TMP_AND_ADV = tree -> {
-    if (tree == null)
-      return false;
-    Label label = tree.label();
-    if (label == null)
-      return false;
-    if (label.value().contains("-TMP") || label.value().contains("-ADV"))
-      return false;
-    if (label.value().startsWith("VP") && noVerbOverTempTregex.matcher(tree).matches()) {
-      return false;
+  static final Filter<Tree> REMOVE_TMP_AND_ADV = new Filter<Tree>() {
+    public boolean accept(Tree tree) {
+      if (tree == null) 
+        return false;
+      Label label = tree.label();
+      if (label == null) 
+        return false;
+      if (label.value().contains("-TMP") || label.value().contains("-ADV"))
+        return false;
+      if (label.value().startsWith("VP") && noVerbOverTempTregex.matcher(tree).matches()) {
+        return false;
+      }
+      return true;
     }
-    return true;
   };
-
+    
   /**
    * Determine which daughter of the current parse tree is the
    * head.  It assumes that the daughters already have had their
@@ -344,7 +311,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
       // if none of the above patterns match, use the standard method
     }
 
-    if (motherCat.equals("SBARQ") || motherCat.equals("SINV")) {
+    if (motherCat.equals("SBARQ") || motherCat.equals("SINV")) { 
       if (!makeCopulaHead) {
         for (TregexPattern pattern : headOfCopulaTregex) {
           TregexMatcher matcher = pattern.matcher(t);
@@ -355,6 +322,8 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
       }
       // if none of the above patterns match, use the standard method
     }
+
+    Tree[] tmpFilteredChildren = null;
 
     // do VPs with auxiliary as special case
     if ((motherCat.equals("VP") || motherCat.equals("SQ") || motherCat.equals("SINV"))) {
@@ -369,20 +338,12 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
       }
 
       // looks for auxiliaries
-      Tree[] tmpFilteredChildren = null;
       if (hasVerbalAuxiliary(kids, verbalAuxiliaries, true) || hasPassiveProgressiveAuxiliary(kids)) {
         // String[] how = new String[] {"left", "VP", "ADJP", "NP"};
         // Including NP etc seems okay for copular sentences but is
         // problematic for other auxiliaries, like 'he has an answer'
-        String[] how ;
-        if (hasVerbalAuxiliary(kids, copulars, true)) {
-          // Only allow ADJP in copular constructions
-          // In constructions like "It gets cold", "get" should be the head
-          how = new String[]{ "left", "VP", "ADJP" };
-        } else {
-          how = new String[]{ "left", "VP" };
-        }
-
+        // But maybe doing ADJP is fine!
+        String[] how = { "left", "VP", "ADJP" };
         if (tmpFilteredChildren == null) {
           tmpFilteredChildren = ArrayUtils.filter(kids, REMOVE_TMP_AND_ADV);
         }
@@ -606,7 +567,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
   }
 
 
-  // now overly complex so it deals with coordinations.  Maybe change this class to use tregrex?f
+  // now overly complex so it deals with coordinations.  Maybe change this class to use tregrex?
   private boolean hasPassiveProgressiveAuxiliary(Tree[] kids) {
     if (DEBUG) {
       System.err.println("Checking for passive/progressive auxiliary");

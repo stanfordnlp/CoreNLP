@@ -1,6 +1,6 @@
 package edu.stanford.nlp.ling.tokensregex;
 
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Interval;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -25,9 +25,7 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
   double priority = 0.0;
   int order;
 
-  @Override
   public List<? extends T> elements() { return elements; }
-  @Override
   public SequencePattern<T> pattern() { return pattern; }
 
 //  public static <T> BasicSequenceMatchResult<T> toBasicSequenceMatchResult(List<? extends T> elements) {
@@ -37,13 +35,12 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
 //    return matchResult;
 //  }
 
-  @Override
   public BasicSequenceMatchResult<T> toBasicSequenceMatchResult() {
     return copy();
   }
 
   public BasicSequenceMatchResult<T> copy() {
-    BasicSequenceMatchResult<T> res = new BasicSequenceMatchResult<T>();
+    BasicSequenceMatchResult res = new BasicSequenceMatchResult<T>();
     res.pattern = pattern;
     res.elements = elements;
     res.matchedGroups = new MatchedGroup[matchedGroups.length];
@@ -64,12 +61,10 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     return res;
   }
 
-  @Override
   public Interval<Integer> getInterval() {
     return TO_INTERVAL.apply(this);
   }
 
-  @Override
   public int getOrder() {
     return order;
   }
@@ -78,22 +73,18 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     this.order = order;
   }
 
-  @Override
   public double priority() {
     return priority;
   }
 
-  @Override
   public double score() {
     return score;
   }
 
-  @Override
   public int start() {
     return start(0);
   }
 
-  @Override
   public int start(int group) {
     if (group == GROUP_BEFORE_MATCH) {
       return 0;
@@ -107,7 +98,6 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     }
   }
 
-  @Override
   public int start(String var) {
     int g = getFirstVarGroup(var);
     if (g >= 0) {
@@ -117,12 +107,10 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     }
   }
 
-  @Override
   public int end() {
     return end(0);
   }
 
-  @Override
   public int end(int group) {
     if (group == GROUP_BEFORE_MATCH) {
       return matchedGroups[0].matchBegin;
@@ -136,7 +124,6 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     }
   }
 
-  @Override
   public int end(String var) {
     int g = getFirstVarGroup(var);
     if (g >= 0) {
@@ -146,12 +133,10 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     }
   }
 
-  @Override
   public String group() {
     return group(0);
   }
 
-  @Override
   public String group(int group) {
     List<? extends T> groupTokens = groupNodes(group);
     if (nodesToStringConverter == null) {
@@ -161,7 +146,6 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     }
   }
 
-  @Override
   public String group(String var) {
     int g = getFirstVarGroup(var);
     if (g >= 0) {
@@ -171,12 +155,10 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     }
   }
 
-  @Override
   public List<T> groupNodes() {
     return groupNodes(0);
   }
 
-  @Override
   public List<T> groupNodes(int group) {
     if (group == GROUP_BEFORE_MATCH || group == GROUP_AFTER_MATCH) {
       // return a new list so the resulting object is serializable
@@ -190,7 +172,6 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     }
   }
 
-  @Override
   public List<? extends T> groupNodes(String var) {
     int g = getFirstVarGroup(var);
     if (g >= 0) {
@@ -200,12 +181,10 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     }
   }
 
-  @Override
   public Object groupValue() {
     return groupValue(0);
   }
 
-  @Override
   public Object groupValue(int group) {
     if (group == GROUP_BEFORE_MATCH || group == GROUP_AFTER_MATCH) {
       // return a new list so the resulting object is serializable
@@ -218,7 +197,6 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     }
   }
 
-  @Override
   public Object groupValue(String var) {
     int g = getFirstVarGroup(var);
     if (g >= 0) {
@@ -228,12 +206,10 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     }
   }
 
-  @Override
   public MatchedGroupInfo<T> groupInfo() {
     return groupInfo(0);
   }
 
-  @Override
   public MatchedGroupInfo<T> groupInfo(int group) {
     List<? extends T> nodes = groupNodes(group);
     if (nodes != null) {
@@ -246,7 +222,6 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     }
   }
 
-  @Override
   public MatchedGroupInfo<T> groupInfo(String var) {
     int g = getFirstVarGroup(var);
     if (g >= 0) {
@@ -256,17 +231,14 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     }
   }
 
-  @Override
   public int groupCount() {
     return matchedGroups.length-1;
   }
 
-  @Override
   public List<Object> groupMatchResults() {
     return groupMatchResults(0);
   }
 
-  @Override
   public List<Object> groupMatchResults(int group) {
     if (matchedResults == null) return null;
     if (group == GROUP_BEFORE_MATCH || group == GROUP_AFTER_MATCH) {
@@ -279,7 +251,6 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     }
   }
 
-  @Override
   public List<Object> groupMatchResults(String var) {
     int g = getFirstVarGroup(var);
     if (g >= 0) {
@@ -289,7 +260,6 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     }
   }
 
-  @Override
   public Object nodeMatchResult(int index) {
     if (matchedResults != null) {
       return matchedResults[index];
@@ -298,7 +268,6 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     }
   }
 
-  @Override
   public Object groupMatchResult(int group, int index) {
     if (matchedResults != null) {
       int s = start(group);
@@ -313,7 +282,6 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     return null;
   }
 
-  @Override
   public Object groupMatchResult(String var, int index) {
     int g = getFirstVarGroup(var);
     if (g >= 0) {
@@ -358,7 +326,7 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
 
     public String toString()
     {
-      return "(" + matchBegin + ',' + matchEnd + ')';
+      return "(" + matchBegin + "," + matchEnd + ")";
     }
   }
 

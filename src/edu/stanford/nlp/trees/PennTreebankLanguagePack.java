@@ -3,7 +3,7 @@ package edu.stanford.nlp.trees;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.PTBTokenizer;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 
 
 /**
@@ -160,11 +160,7 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
    */
   @Override
   public GrammaticalStructureFactory grammaticalStructureFactory() {
-    if (generateOriginalDependencies) {
-      return new EnglishGrammaticalStructureFactory();
-    } else {
-      return new UniversalEnglishGrammaticalStructureFactory();
-    }
+    return new EnglishGrammaticalStructureFactory();
   }
 
   /**
@@ -175,21 +171,13 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
    * @return A GrammaticalStructure suitable for this language/treebank.
    */
   @Override
-  public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilter) {
-    if (generateOriginalDependencies) {
-      return new EnglishGrammaticalStructureFactory(puncFilter);
-    } else {
-      return new UniversalEnglishGrammaticalStructureFactory(puncFilter);
-    }
+  public GrammaticalStructureFactory grammaticalStructureFactory(Filter<String> puncFilter) {
+    return new EnglishGrammaticalStructureFactory(puncFilter);
   }
 
   @Override
-  public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilter, HeadFinder hf) {
-    if (generateOriginalDependencies) {
-      return new EnglishGrammaticalStructureFactory(puncFilter, hf);
-    } else {
-      return new UniversalEnglishGrammaticalStructureFactory(puncFilter, hf);
-    }
+  public GrammaticalStructureFactory grammaticalStructureFactory(Filter<String> puncFilter, HeadFinder hf) {
+    return new EnglishGrammaticalStructureFactory(puncFilter, hf);
   }
 
   @Override
@@ -206,11 +194,7 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
   /** {@inheritDoc} */
   @Override
   public HeadFinder typedDependencyHeadFinder() {
-    if (generateOriginalDependencies) {
-      return new SemanticHeadFinder(this, true);
-    } else {
-      return new UniversalSemanticHeadFinder(this, true);
-    }
+    return new SemanticHeadFinder(this, true);
   }
 
 

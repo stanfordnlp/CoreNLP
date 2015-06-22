@@ -4,7 +4,7 @@ import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.parser.metrics.AbstractEval;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.ling.*;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Index;
 
 import java.io.OutputStream;
@@ -234,14 +234,10 @@ public interface TreebankLangParserParams extends TreebankFactory, Serializable 
    * UnsupportedOperationException if the language doesn't support
    * dependencies or GrammaticalStructures.
    */
-  GrammaticalStructure getGrammaticalStructure(Tree t, Predicate<String> filter,
+  GrammaticalStructure getGrammaticalStructure(Tree t, Filter<String> filter,
                                                HeadFinder hf);
 
   boolean supportsBasicDependencies();
-  
-  void setGenerateOriginalDependencies(boolean originalDependencies);
-  boolean generateOriginalDependencies();
-
 
   /** When run inside StanfordCoreNLP, which flags should be used by default */
   String[] defaultCoreNLPFlags();

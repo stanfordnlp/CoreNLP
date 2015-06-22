@@ -1,6 +1,5 @@
 package edu.stanford.nlp.trees.international.french;
 
-import java.io.Serializable;
 import java.util.Collections;
 
 import edu.stanford.nlp.international.french.FrenchMorphoFeatureSpecification;
@@ -11,7 +10,7 @@ import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.trees.BobChrisTreeNormalizer;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 
 /**
  * Prepares French Treebank trees for parsing.
@@ -38,9 +37,9 @@ public class FrenchTreeNormalizer extends BobChrisTreeNormalizer {
 
     aOverAFilter = new FrenchAOverAFilter();
 
-    emptyFilter = new Predicate<Tree>() {
+    emptyFilter = new Filter<Tree>() {
       private static final long serialVersionUID = -22673346831392110L;
-      public boolean test(Tree tree) {
+      public boolean accept(Tree tree) {
         if(tree.isPreTerminal() && (tree.firstChild().value().equals("") || tree.firstChild().value().equals("-NONE-"))) {
           return false;
         }
@@ -162,7 +161,7 @@ public class FrenchTreeNormalizer extends BobChrisTreeNormalizer {
     return tree;
   }
 
-  public static class FrenchAOverAFilter implements Predicate<Tree>, Serializable {
+  public static class FrenchAOverAFilter implements Filter<Tree> {
 
     private static final long serialVersionUID = 793800623099852951L;
 
@@ -171,7 +170,7 @@ public class FrenchTreeNormalizer extends BobChrisTreeNormalizer {
      *
      *  Also removes all w nodes.
      */
-    public boolean test(Tree t) {
+    public boolean accept(Tree t) {
       if(t.value() != null && t.value().equals("w"))
         return false;
 

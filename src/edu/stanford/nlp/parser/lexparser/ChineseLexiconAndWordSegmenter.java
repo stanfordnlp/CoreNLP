@@ -7,7 +7,7 @@ import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.TokenizerFactory;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.process.WordSegmenter;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseEscaper;
@@ -39,34 +39,22 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
     wordSegmenter = seg;
   }
 
-  @Override
   public List<HasWord> segment(String s) {
     return wordSegmenter.segment(s);
   }
 
-  @Override
   public boolean isKnown(int word) {
     return chineseLexicon.isKnown(word);
   }
 
-  @Override
   public boolean isKnown(String word) {
     return chineseLexicon.isKnown(word);
   }
 
-  /** {@inheritDoc} */
-  @Override
-  public Set<String> tagSet(Function<String,String> basicCategoryFunction) {
-    return chineseLexicon.tagSet(basicCategoryFunction);
-  }
-
-
-  @Override
   public Iterator<IntTaggedWord> ruleIteratorByWord(int word, int loc, String featureSpec) {
     return chineseLexicon.ruleIteratorByWord(word, loc, null);
   }
 
-  @Override
   public Iterator<IntTaggedWord> ruleIteratorByWord(String word, int loc, String featureSpec) {
     return chineseLexicon.ruleIteratorByWord(word, loc, null);
   }
@@ -74,7 +62,6 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
   /** Returns the number of rules (tag rewrites as word) in the Lexicon.
    *  This method assumes that the lexicon has been initialized.
    */
-  @Override
   public int numRules() {
     return chineseLexicon.numRules();
   }
@@ -140,23 +127,19 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
     wordSegmenter.finishTraining();
   }
 
-  @Override
   public float score(IntTaggedWord iTW, int loc, String word, String featureSpec) {
     return chineseLexicon.score(iTW, loc, word, null);
   } // end score()
 
 
-  @Override
   public void loadSegmenter(String filename) {
     throw new UnsupportedOperationException();
   }
 
-  @Override
   public void readData(BufferedReader in) throws IOException {
     chineseLexicon.readData(in);
   }
 
-  @Override
   public void writeData(Writer w) throws IOException {
     chineseLexicon.writeData(w);
   }
@@ -709,12 +692,10 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
   private static final long serialVersionUID = -6554995189795187918L;
 
 
-  @Override
   public UnknownWordModel getUnknownWordModel() {
     return chineseLexicon.getUnknownWordModel();
   }
 
-  @Override
   public void setUnknownWordModel(UnknownWordModel uwm) {
     chineseLexicon.setUnknownWordModel(uwm);
   }

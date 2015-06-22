@@ -1,13 +1,7 @@
 package edu.stanford.nlp.semgraph.semgrex;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.patterns.PatternsAnnotations;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
@@ -97,7 +91,7 @@ public class SemgrexPatternTest extends TestCase {
     }
 
     SemgrexPattern pat3 = SemgrexPattern
-        .compile("({word:LIKE}=parent >>/aux.*/ {word:/do/}=node)");
+        .compile("({word:/LIKE/}=parent >>/aux.*/ {word:/do/}=node)");
     System.out.println("pattern is ");
     pat3.prettyPrint();
     System.out.println("tree is ");
@@ -115,59 +109,6 @@ public class SemgrexPatternTest extends TestCase {
     } else {
       Assert.fail();
     }
-  }
-
-  public void testMacro() throws IOException {
-    SemanticGraph h = SemanticGraph.valueOf("[married/VBN nsubjpass>Hughes/NNP auxpass>was/VBD nmod:to>Gracia/NNP]");
-    String macro = "macro WORD = married";
-    SemgrexBatchParser parser = new SemgrexBatchParser();
-    String pattern = "({word:${WORD}}=parent >>nsubjpass {}=node)";
-    List<SemgrexPattern> pats = parser.compileStream(new ByteArrayInputStream((macro + "\n" + pattern).getBytes(StandardCharsets.UTF_8)));
-    SemgrexPattern pat3 = pats.get(0);
-    boolean ignoreCase = true;
-    SemgrexMatcher mat3 = pat3.matcher(h, ignoreCase);
-    if (mat3.find()) {
-      String parent = mat3.getNode("parent").word();
-      String node = mat3.getNode("node").word();
-      System.out.println("Result: parent is " + parent + " and node is " + node);
-      Assert.assertEquals(parent, "married");
-      Assert.assertEquals(node, "Hughes");
-    } else
-      throw new RuntimeException("failed!");
-  }
-
-  public void testEnv() throws IOException {
-    SemanticGraph h = SemanticGraph.valueOf("[married/VBN nsubjpass>Hughes/NNP auxpass>was/VBD nmod:to>Gracia/NNP]");
-    h.getFirstRoot().set(PatternsAnnotations.PatternLabel1.class,"YES");
-    //SemanticGraph t = SemanticGraph
-    //  .valueOf("[loved/VBD\nnsubj:Hughes/NNP\ndobj:[wife/NN poss:his/PRP$ appos:Gracia/NNP]\nconj_and:[obsessed/JJ\ncop:was/VBD\nadvmod:absolutely/RB\nprep_with:[Elicia/NN poss:his/PRP$ amod:little/JJ nn:daughter/NN]]]");
-    String macro = "macro WORD = married";
-    SemgrexBatchParser parser = new SemgrexBatchParser();
-    Env env = new Env();
-    env.bind("pattern1",PatternsAnnotations.PatternLabel1.class);
-    String pattern = "({pattern1:YES}=parent >>nsubjpass {}=node)";
-    List<SemgrexPattern> pats = parser.compileStream(new ByteArrayInputStream((macro + "\n" + pattern).getBytes(StandardCharsets.UTF_8)), env);
-    SemgrexPattern pat3 = pats.get(0);
-    boolean ignoreCase = true;
-    SemgrexMatcher mat3 = pat3.matcher(h, ignoreCase);
-    if (mat3.find()) {
-      String parent = mat3.getNode("parent").word();
-      String node = mat3.getNode("node").word();
-      System.out.println("Result: parent is " + parent + " and node is " + node);
-      Assert.assertEquals(parent, "married");
-      Assert.assertEquals(node, "Hughes");
-    } else
-      throw new RuntimeException("failed!");
-  }
-
-  public void testSerialization() throws IOException, ClassNotFoundException {
-    SemgrexPattern pat3 = SemgrexPattern
-      .compile("({word:LIKE}=parent >>nn {word:/do/}=node)");
-    File tempfile = File.createTempFile("temp","file");
-    tempfile.deleteOnExit();
-    IOUtils.writeObjectToFile(pat3, tempfile);
-    SemgrexPattern pat4 = IOUtils.readObjectFromFile(tempfile);
-    Assert.assertEquals(pat3, pat4);
   }
 
 }

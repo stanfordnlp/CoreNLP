@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -358,9 +357,10 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
                     DocumentReaderAndWriter<CoreLabel> readerAndWriter) {}
 
   @Override
-  public void serializeClassifier(String serializePath) {}
+  public void printProbsDocument(List<CoreLabel> document) {}
 
-  public void serializeClassifier(ObjectOutputStream oos) {}
+  @Override
+  public void serializeClassifier(String serializePath) {}
 
   @Override
   public void loadClassifier(ObjectInputStream in, Properties props)

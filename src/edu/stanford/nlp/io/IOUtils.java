@@ -10,7 +10,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -18,15 +17,12 @@ import java.util.zip.GZIPOutputStream;
 /**
  * Helper Class for various I/O related things.
  *
- * @author Kayur Patel
- * @author Teg Grenager
- * @author Christopher Manning
+ * @author Kayur Patel, Teg Grenager
  */
 
 public class IOUtils {
 
-  private static final int SLURP_BUFFER_SIZE = 16000;
-  private static final int GZIP_FILE_BUFFER_SIZE = 65536;
+  private static final int SLURPBUFFSIZE = 16000;
 
   public static final String eolChar = System.getProperty("line.separator");
   public static final String defaultEncoding = "utf-8";
@@ -316,19 +312,6 @@ public class IOUtils {
     return ErasureUtils.uncheckedCast(o);
   }
 
-  public static <T> T readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(String msg, String path) {
-    T obj;
-    try {
-      Timing timing = new Timing();
-      System.err.print(msg + ' ' + path + " ... ");
-      obj = IOUtils.readObjectFromURLOrClasspathOrFileSystem(path);
-      timing.done();
-    } catch (IOException | ClassNotFoundException e) {
-      throw new RuntimeIOException(e);
-    }
-    return obj;
-  }
-
   public static <T> T readObjectFromObjectStream(ObjectInputStream ois) throws IOException,
           ClassNotFoundException {
     Object o = ois.readObject();
@@ -400,7 +383,6 @@ public class IOUtils {
 
   /**
    * Locates this file either in the CLASSPATH or in the file system. The CLASSPATH takes priority.
-   *
    * @param name The file or resource name
    * @throws FileNotFoundException If the file does not exist
    * @return The InputStream of name, or null if not found
@@ -413,21 +395,9 @@ public class IOUtils {
     // windows File.separator is \, but getting resources only works with /
     if (is == null) {
       is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/"));
-      // Classpath doesn't like double slashes (e.g., /home/user//foo.txt)
-      if (is == null) {
-        is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/").replaceAll("/+", "/"));
-      }
     }
     // if not found in the CLASSPATH, load from the file system
     if (is == null) is = new FileInputStream(name);
-    // make sure it's not a GZIP stream
-    if (name.endsWith(".gz")) {
-      try {
-        return new GZIPInputStream(is);
-      } catch (IOException e) {
-        System.err.println("Resource or file looks like a gzip file, but is not: " + name);
-      }
-    }
     return is;
   }
 
@@ -462,11 +432,6 @@ public class IOUtils {
       URL u = new URL(textFileOrUrl);
       URLConnection uc = u.openConnection();
       in = uc.getInputStream();
-      if (textFileOrUrl.endsWith(".gz")) {
-        try {
-          in = new GZIPInputStream(in);
-        } catch (IOException e) { }
-      }
     } else {
       try {
         in = findStreamInClasspathOrFileSystem(textFileOrUrl);
@@ -485,13 +450,16 @@ public class IOUtils {
       }
     }
 
-    // buffer this stream.  even gzip streams benefit from buffering,
-    // such as for the shift reduce parser
+    if (textFileOrUrl.endsWith(".gz")) {
+      // gunzip it if necessary
+      in = new GZIPInputStream(in, 65536);
+    }
+
+    // buffer this stream
     in = new BufferedInputStream(in);
 
     return in;
   }
-
 
   /**
    * Quietly opens a File. If the file ends with a ".gz" extension,
@@ -510,7 +478,6 @@ public class IOUtils {
     }
   }
 
-
   /**
    * Open a BufferedReader to a File. If the file's getName() ends in .gz,
    * it is interpreted as a gzipped file (and uncompressed). The file is then
@@ -526,46 +493,21 @@ public class IOUtils {
       is = inputStreamFromFile(file);
       return new BufferedReader(new InputStreamReader(is, "UTF-8"));
     } catch (IOException ioe) {
-      IOUtils.closeIgnoringExceptions(is);
       throw new RuntimeIOException(ioe);
+    } finally {
+      IOUtils.closeIgnoringExceptions(is);
     }
   }
 
-
-  // todo [cdm 2014]: get rid of this method, using other methods. This will change the semantics to null meaning UTF-8, but that seems better in 2015.
-  /**
-   * Open a BufferedReader to a File. If the file's getName() ends in .gz,
-   * it is interpreted as a gzipped file (and uncompressed). The file is then
-   * turned into a BufferedReader with the given encoding.
-   * If the encoding passed in is null, then the system default encoding is used.
-   *
-   * @param file What to read from
-   * @param encoding What charset to use. A null String is interpreted as platform default encoding
-   * @return The BufferedReader
-   * @throws RuntimeIOException If there is an I/O problem
-   */
-  public static BufferedReader readerFromFile(File file, String encoding) {
-    InputStream is = null;
-    try {
-      is = inputStreamFromFile(file);
-      if (encoding == null) {
-        return new BufferedReader(new InputStreamReader(is));
-      } else {
-        return new BufferedReader(new InputStreamReader(is, encoding));
-      }
-    } catch (IOException ioe) {
-      IOUtils.closeIgnoringExceptions(is);
-      throw new RuntimeIOException(ioe);
-    }
-  }
 
 
   /**
    * Open a BufferedReader on stdin. Use the user's default encoding.
    *
    * @return The BufferedReader
+   * @throws IOException If there is an I/O problem
    */
-  public static BufferedReader readerFromStdin() {
+  public static BufferedReader readerFromStdin() throws IOException {
     return new BufferedReader(new InputStreamReader(System.in));
   }
 
@@ -586,11 +528,10 @@ public class IOUtils {
 
 
   /**
-   * Open a BufferedReader to a file, class path entry or URL specified by a String name.
-   * If the String starts with https?://, then it is first tried as a URL. It
-   * is next tried as a resource on the CLASSPATH, and then it is tried
-   * as a local file. Finally, it is then tried again in case it is some network-available
-   * file accessible by URL. If the String ends in .gz, it
+   * Open a BufferedReader to a file or URL specified by a String name. If the
+   * String starts with https?://, then it is first tried as a URL, otherwise it
+   * is next tried as a resource on the CLASSPATH, and then finally it is tried
+   * as a local file or other network-available file. If the String ends in .gz, it
    * is interpreted as a gzipped file (and uncompressed). The file is then
    * interpreted as a utf-8 text file.
    *
@@ -611,7 +552,6 @@ public class IOUtils {
    * as a local file or other network-available file . If the String ends in .gz, it
    * is interpreted as a gzipped file (and uncompressed), else it is interpreted as
    * a regular text file in the given encoding.
-   * If the encoding passed in is null, then the system default encoding is used.
    *
    * @param textFileOrUrl What to read from
    * @param encoding CharSet encoding. Maybe be null, in which case the
@@ -880,7 +820,7 @@ public class IOUtils {
     private final int bufferSize;
     private EolPreservingLineReaderIterable( Reader reader )
     {
-      this(reader, SLURP_BUFFER_SIZE);
+      this(reader, SLURPBUFFSIZE);
     }
     private EolPreservingLineReaderIterable( Reader reader, int bufferSize )
     {
@@ -953,7 +893,11 @@ public class IOUtils {
                 return true; // end of line reached
               }
             }
-            lastWasLF = (charBuffer[i] == '\r');
+            if (charBuffer[i] == '\r') {
+              lastWasLF = true;
+            } else {
+              lastWasLF = false;
+            }
           }
           sb.append(charBuffer, charBufferPos, charsInBuffer - charBufferPos);
           // reset character buffer pos
@@ -1012,7 +956,8 @@ public class IOUtils {
   /**
    * Iterate over all the files in the directory, recursively.
    *
-   * @param dir The root directory.
+   * @param dir
+   *          The root directory.
    * @return All files within the directory.
    */
   public static Iterable<File> iterFilesRecursive(final File dir) {
@@ -1022,8 +967,10 @@ public class IOUtils {
   /**
    * Iterate over all the files in the directory, recursively.
    *
-   * @param dir The root directory.
-   * @param ext A string that must be at the end of all files (e.g. ".txt")
+   * @param dir
+   *          The root directory.
+   * @param ext
+   *          A string that must be at the end of all files (e.g. ".txt")
    * @return All files within the directory ending in the given extension.
    */
   public static Iterable<File> iterFilesRecursive(final File dir,
@@ -1034,8 +981,10 @@ public class IOUtils {
   /**
    * Iterate over all the files in the directory, recursively.
    *
-   * @param dir The root directory.
-   * @param pattern A regular expression that the file path must match. This uses
+   * @param dir
+   *          The root directory.
+   * @param pattern
+   *          A regular expression that the file path must match. This uses
    *          Matcher.find(), so use ^ and $ to specify endpoints.
    * @return All files within the directory.
    */
@@ -1125,7 +1074,7 @@ public class IOUtils {
    */
   public static String slurpFile(String filename, String encoding)
           throws IOException {
-    Reader r = readerFromString(filename, encoding);
+    Reader r = new InputStreamReader(getInputStreamFromURLOrClasspathOrFileSystem(filename), encoding);
     return IOUtils.slurpReader(r);
   }
 
@@ -1156,6 +1105,13 @@ public class IOUtils {
   /**
    * Returns all the text at the given URL.
    */
+  public static String slurpGBURL(URL u) throws IOException {
+    return IOUtils.slurpURL(u, "GB18030");
+  }
+
+  /**
+   * Returns all the text at the given URL.
+   */
   public static String slurpURLNoExceptions(URL u, String encoding) {
     try {
       return IOUtils.slurpURL(u, encoding);
@@ -1181,12 +1137,9 @@ public class IOUtils {
       return "";
     }
     BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
-    StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
-    for (String temp; (temp = br.readLine()) != null;
-
-
-
-            ) {
+    String temp;
+    StringBuilder buff = new StringBuilder(16000); // make biggish
+    while ((temp = br.readLine()) != null) {
       buff.append(temp);
       buff.append(lineSeparator);
     }
@@ -1218,8 +1171,9 @@ public class IOUtils {
     String encoding = getUrlEncoding(uc);
     InputStream is = uc.getInputStream();
     BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
-    StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
-    for (String temp; (temp = br.readLine()) != null; ) {
+    String temp;
+    StringBuilder buff = new StringBuilder(16000); // make biggish
+    while ((temp = br.readLine()) != null) {
       buff.append(temp);
       buff.append(lineSeparator);
     }
@@ -1300,9 +1254,9 @@ public class IOUtils {
     BufferedReader r = new BufferedReader(reader);
     StringBuilder buff = new StringBuilder();
     try {
-      char[] chars = new char[SLURP_BUFFER_SIZE];
+      char[] chars = new char[SLURPBUFFSIZE];
       while (true) {
-        int amountRead = r.read(chars, 0, SLURP_BUFFER_SIZE);
+        int amountRead = r.read(chars, 0, SLURPBUFFSIZE);
         if (amountRead < 0) {
           break;
         }
@@ -1336,8 +1290,7 @@ public class IOUtils {
   }
 
   /**
-   * Read in a CSV formatted file with a header row.
-   *
+   * Read in a CSV formatted file with a header row
    * @param path - path to CSV file
    * @param quoteChar - character for enclosing strings, defaults to "
    * @param escapeChar - character for escaping quotes appearing in quoted strings; defaults to " (i.e. "" is used for " inside quotes, consistent with Excel)
@@ -1538,8 +1491,8 @@ public class IOUtils {
     //System.err.println("getBZip2PipedInputStream: Running command: "+cmd);
     Process p = rt.exec(cmd);
     Writer errWriter = new BufferedWriter(new OutputStreamWriter(System.err));
-    StreamGobbler errGobbler = new StreamGobbler(p.getErrorStream(), errWriter);
-    errGobbler.start();
+    StreamGobbler errGobler = new StreamGobbler(p.getErrorStream(), errWriter);
+    errGobler.start();
     return p.getInputStream();
   }
 
@@ -1669,7 +1622,7 @@ public class IOUtils {
   public static List<String> linesFromFile(String filename,String encoding, boolean ignoreHeader) {
     try {
       List<String> lines = new ArrayList<String>();
-      BufferedReader in = getBufferedReaderFromClasspathOrFileSystem(filename, encoding);
+      BufferedReader in = new BufferedReader(new EncodingFileReader(filename,encoding));
       String line;
       int i = 0;
       while ((line = in.readLine()) != null) {
@@ -1747,7 +1700,7 @@ public class IOUtils {
   /**
    * Given a filepath, delete all files in the directory recursively
    * @param dir
-   * @return {@code true} if the deletion is successful, {@code false} otherwise
+   * @return
    */
   public static boolean deleteDirRecursively(File dir) {
     if (dir.isDirectory()) {
@@ -1826,7 +1779,6 @@ public class IOUtils {
     }
   }
 
-
   /**
    * A raw file copy function -- this is not public since no error checks are made as to the
    * consistency of the filed being copied. Use instead:
@@ -1838,20 +1790,10 @@ public class IOUtils {
   private static void copyFile(File source, File target) throws IOException {
     FileChannel sourceChannel = new FileInputStream( source ).getChannel();
     FileChannel targetChannel = new FileOutputStream( target ).getChannel();
-
-    // allow for the case that it doesn't all transfer in one go (though it probably does for a file cp)
-    long pos = 0;
-    long toCopy = sourceChannel.size();
-    while (toCopy > 0) {
-      long bytes = sourceChannel.transferTo(pos, toCopy, targetChannel);
-      pos += bytes;
-      toCopy -= bytes;
-    }
-
+    sourceChannel.transferTo(0, sourceChannel.size(), targetChannel);
     sourceChannel.close();
     targetChannel.close();
   }
-
 
   /**
    * <p>An implementation of cp, as close to the Unix command as possible.
@@ -1986,7 +1928,6 @@ public class IOUtils {
     for (int i = 0; i < rtn.length; ++i) {
       rtn[i] = linesReversed.get(rtn.length - i - 1);
     }
-    raf.close();
     return rtn;
   }
 
@@ -2046,26 +1987,5 @@ public class IOUtils {
     file.delete();
   }
 
-  /**
-   * Start a simple console. Read lines from stdin, and pass each line to the callback.
-   * Returns on typing "exit" or "quit".
-   * @param callback The function to run for every line of input.
-   * @throws IOException Thrown from the underlying input stream.
-   */
-  public static void console(Consumer<String> callback) throws IOException {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-    String line;
-    System.out.print("> ");
-    while ( (line = reader.readLine()) != null) {
-      switch (line.toLowerCase()) {
-        case "exit":
-        case "quit":
-          return;
-        default:
-          callback.accept(line);
-      }
-      System.out.print("> ");
-    }
-  }
 
 }

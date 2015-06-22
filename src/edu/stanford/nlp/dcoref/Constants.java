@@ -1,6 +1,5 @@
 package edu.stanford.nlp.dcoref;
 
-import java.util.Locale;
 import java.util.logging.Logger;
 
 public class Constants {
@@ -64,10 +63,6 @@ public class Constants {
   /** Whether or not the RuleBasedCorefMentionFinder can reparse a phrase to find its head */
   public static final boolean ALLOW_REPARSING = true;
 
-  /** Default language */
-  public static final Locale LANGUAGE_DEFAULT = Locale.ENGLISH;
-  
-  public static final String LANGUAGE_PROP = "coref.language";
   public static final String STATES_PROP = "dcoref.states";
   public static final String DEMONYM_PROP = "dcoref.demonym";
   public static final String ANIMATE_PROP = "dcoref.animate";
@@ -111,8 +106,6 @@ public class Constants {
   public static final String ALLOW_REPARSING_PROP = "dcoref.allowReparsing";
 
   public static final int MONITOR_DIST_CMD_FINISHED_WAIT_MILLIS = 60000;
-
-
 
   //
   // note that default paths for all dictionaries used are in

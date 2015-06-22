@@ -92,8 +92,8 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E> {
   //--- JM added for Distributions
 
   /**
-   * Assuming that c has a total count &lt; 1, returns a new Distribution using the counts in c as probabilities.
-   * If c has a total count &gt; 1, returns a normalized distribution with no remaining mass.
+   * Assuming that c has a total count < 1, returns a new Distribution using the counts in c as probabilities.
+   * If c has a total count > 1, returns a normalized distribution with no remaining mass.
    */
   public static <E> Distribution<E> getDistributionFromPartiallySpecifiedCounter(Counter<E> c, int numKeys){
     Distribution<E> d;
@@ -756,11 +756,13 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E> {
   public String toString() {
     NumberFormat nf = new DecimalFormat("0.0##E0");
     List<E> keyList = new ArrayList<E>(keySet());
-    Collections.sort(keyList, (o1, o2) -> {
-      if (probabilityOf(o1) < probabilityOf(o2)) {
-        return 1;
-      } else {
-        return -1;
+    Collections.sort(keyList, new Comparator<E>() {
+      public int compare(E o1, E o2) {
+        if (probabilityOf(o1) < probabilityOf(o2)) {
+          return 1;
+        } else {
+          return -1;
+        }
       }
     });
     StringBuilder sb = new StringBuilder();

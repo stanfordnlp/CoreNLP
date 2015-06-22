@@ -93,31 +93,24 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
           int flags = (env != null)? env.defaultStringPatternFlags: 0;
           p.add(c, newStringRegexPattern(regex, flags));
         } else if (value.startsWith("::")) {
-          switch (value) {
-            case "::IS_NIL":
-            case "::NOT_EXISTS":
-              p.add(c, new NilAnnotationPattern());
-              break;
-            case "::EXISTS":
-            case "::NOT_NIL":
-              p.add(c, new NotNilAnnotationPattern());
-              break;
-            case "::IS_NUM":
-              p.add(c, new NumericAnnotationPattern(0, NumericAnnotationPattern.CmpType.IS_NUM));
-              break;
-            default:
-              boolean ok = false;
-              if (env != null) {
-                Object custom = env.get(value);
-                if (custom != null) {
-                  p.add(c, (NodePattern) custom);
-                  ok = true;
-                }
+          if (value.equals("::IS_NIL") || value.equals("::NOT_EXISTS")) {
+            p.add(c, new NilAnnotationPattern());
+          } else if (value.equals("::EXISTS") || value.equals("::NOT_NIL")) {
+            p.add(c, new NotNilAnnotationPattern());
+          } else if (value.equals("::IS_NUM")) {
+            p.add(c, new NumericAnnotationPattern(0, NumericAnnotationPattern.CmpType.IS_NUM));
+          } else {
+            boolean ok = false;
+            if (env != null) {
+              Object custom = env.get(value);
+              if (custom != null) {
+                p.add(c, (NodePattern) custom);
+                ok = true;
               }
-              if (!ok) {
-                throw new IllegalArgumentException("Invalid value " + value + " for key: " + attr);
-              }
-              break;
+            }
+            if (!ok) {
+              throw new IllegalArgumentException("Invalid value " + value + " for key: " + attr);
+            }
           }
         } else if (value.startsWith("<=")) {
           Double v = Double.parseDouble(value.substring(2));
@@ -170,7 +163,7 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
 
   @Override
   public Object matchWithResult(CoreMap token) {
-    Map<Class,Object> matchResults = new HashMap<Class, Object>();//Generics.newHashMap();
+    Map<Class,Object> matchResults = Generics.newHashMap();
     if (match(token, matchResults)) {
       return matchResults;
     } else {
@@ -462,24 +455,5 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
 
   public static final AttributesEqualMatchChecker TEXT_ATTR_EQUAL_CHECKER =
           new AttributesEqualMatchChecker(CoreAnnotations.TextAnnotation.class);
-
-  //For exact matching integers. Presumably faster than NumericAnnotationPattern
-  //TODO : add this in the valueOf function of CoreMapNodePattern
-  public static class IntegerAnnotationPattern extends NodePattern<Integer>{
-
-    int value;
-    public IntegerAnnotationPattern(int v){
-      this.value = v;
-    }
-
-    @Override
-    public boolean match(Integer node) {
-      return value == node;
-    }
-
-    public int getValue() {
-      return value;
-    }
-  }
 
 }

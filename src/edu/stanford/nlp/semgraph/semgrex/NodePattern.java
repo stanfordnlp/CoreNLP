@@ -92,11 +92,7 @@ public class NodePattern extends SemgrexPattern {
       // if (key.equals("idx"))
       // nodeValue = Integer.toString(node.index());
       // else {
-
-      Class c = Env.lookupAnnotationKey(env, key);
-      //find class for the key
-
-      Object value = node.get(c);
+      Object value = node.get(AnnotationLookup.getCoreKey(key).coreKey);
       if (value == null)
         nodeValue = null;
       else

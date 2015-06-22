@@ -278,14 +278,6 @@ public class ArrayMath {
 
   // OPERATIONS WITH TWO ARRAYS - DESTRUCTIVE
 
-  public static void pairwiseAddInPlace(float[] to, float[] from) {
-    if (to.length != from.length) {
-      throw new RuntimeException("to length:" + to.length + " from length:" + from.length);
-    }
-    for (int i = 0; i < to.length; i++) {
-      to[i] = to[i] + from[i];
-    }
-  }
   public static void pairwiseAddInPlace(double[] to, double[] from) {
     if (to.length != from.length) {
       throw new RuntimeException("to length:" + to.length + " from length:" + from.length);
@@ -642,17 +634,6 @@ public class ArrayMath {
     return total / a.length;
   }
 
-  /** This version avoids any possibility of overflow. */
-  public static double iterativeAverage(double[] a) {
-    double avg = 0.0;
-    int t = 1;
-    for (double x : a) {
-      avg += (x - avg) / t;
-      t++;
-    }
-    return avg;
-  }
-
   /**
    * Computes inf-norm of vector.
    * This is just the largest absolute value of an element.
@@ -805,7 +786,7 @@ public class ArrayMath {
   }
 
   /**
-   * @return the index of the min value; if min is a tie, returns the first one.
+   * @return the index of the max value; if max is a tie, returns the first one.
    */
   public static int argmin(double[] a) {
     double min = Double.POSITIVE_INFINITY;
@@ -819,15 +800,12 @@ public class ArrayMath {
     return argmin;
   }
 
-  /**
-   * @return The minimum value in an array.
-   */
   public static double min(double[] a) {
     return a[argmin(a)];
   }
 
   /**
-   * Returns the smallest value in a vector of doubles.  Any values which
+   * Returns the largest value in a vector of doubles.  Any values which
    * are NaN or infinite are ignored.  If the vector is empty, 0.0 is
    * returned.
    */
@@ -838,7 +816,7 @@ public class ArrayMath {
   }
 
   /**
-   * @return the index of the min value; if min is a tie, returns the first one.
+   * @return the index of the max value; if max is a tie, returns the first one.
    */
   public static int argmin(float[] a) {
     float min = Float.POSITIVE_INFINITY;
@@ -857,7 +835,7 @@ public class ArrayMath {
   }
 
   /**
-   * @return the index of the min value; if min is a tie, returns the first one.
+   * @return the index of the max value; if max is a tie, returns the first one.
    */
   public static int argmin(int[] a) {
     int min = Integer.MAX_VALUE;
@@ -1134,6 +1112,12 @@ public class ArrayMath {
 
   // UTILITIES
 
+  public static int[] subArray(int[] a, int from, int to) {
+    int[] result = new int[to-from];
+    System.arraycopy(a, from, result, 0, to-from);
+    return result;
+  }
+
   public static double[][] load2DMatrixFromFile(String filename) throws IOException {
     String s = IOUtils.slurpFile(filename);
     String[] rows = s.split("[\r\n]+");
@@ -1228,20 +1212,6 @@ public class ArrayMath {
     }
     multiplyInPlace(a, 1.0/total); // divide each value by total
   }
-  public static void L2normalize(double[] a) {
-    double total = L2Norm(a);
-    if (total == 0.0 || Double.isNaN(total)) {
-      if (a.length < 100) {
-        throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(a));
-      } else {
-        double[] aTrunc = new double[100];
-        System.arraycopy(a, 0, aTrunc, 0, 100);
-        throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(aTrunc) + " ... ");
-      }
-
-    }
-    multiplyInPlace(a, 1.0/total); // divide each value by total
-  }
 
   /**
    * Makes the values in this array sum to 1.0. Does it in place.
@@ -1253,20 +1223,6 @@ public class ArrayMath {
       throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN");
     }
     multiplyInPlace(a, 1.0f/total); // divide each value by total
-  }
-  public static void L2normalize(float[] a) {
-    float total = L2Norm(a);
-    if (total == 0.0 || Float.isNaN(total)) {
-      if (a.length < 100) {
-        throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(a));
-      } else {
-        float[] aTrunc = new float[100];
-        System.arraycopy(a, 0, aTrunc, 0, 100);
-        throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(aTrunc) + " ... ");
-      }
-
-    }
-    multiplyInPlace(a, 1.0/total); // divide each value by total
   }
 
   /**
@@ -1292,13 +1248,6 @@ public class ArrayMath {
       result += Math.pow(d,2);
     }
     return Math.sqrt(result);
-  }
-  public static float L2Norm(float[] a) {
-    double result = 0;
-    for(float d: a) {
-      result += Math.pow(d,2);
-    }
-    return (float) Math.sqrt(result);
   }
 
   public static double L1Norm(double[] a) {
@@ -1446,7 +1395,7 @@ public class ArrayMath {
   public static int mean(int[] a) {
     return sum(a) / a.length;
   }
-
+  
   public static double median(double[] a) {
     double[] b = new double[a.length];
     System.arraycopy(a, 0, b, 0, b.length);
@@ -1579,29 +1528,29 @@ public class ArrayMath {
    * x and y, then compute innerProduct(x,y)/(x.length-1).
    */
   public static double pearsonCorrelation(double[] x, double[] y) {
-    double result;
-    double sum_sq_x = 0, sum_sq_y = 0;
+		double result;
+		double sum_sq_x = 0, sum_sq_y = 0;
     double mean_x = x[0], mean_y = y[0];
-    double sum_coproduct = 0;
-    for(int i=2; i<x.length+1;++i) {
-      double w = (i - 1)*1.0/i;
-      double delta_x = x[i-1] - mean_x;
-      double delta_y = y[i-1] - mean_y;
-      sum_sq_x += delta_x * delta_x*w;
-      sum_sq_y += delta_y * delta_y*w;
-      sum_coproduct += delta_x * delta_y*w;
-      mean_x += delta_x / i;
-      mean_y += delta_y / i;
-    }
-    double pop_sd_x = Math.sqrt(sum_sq_x/x.length);
-    double pop_sd_y = Math.sqrt(sum_sq_y/y.length);
-    double cov_x_y = sum_coproduct / x.length;
+		double sum_coproduct = 0;
+		for(int i=2; i<x.length+1;++i) {
+			double w = (i - 1)*1.0/i;
+			double delta_x = x[i-1] - mean_x;
+			double delta_y = y[i-1] - mean_y;
+			sum_sq_x += delta_x * delta_x*w;
+			sum_sq_y += delta_y * delta_y*w;
+			sum_coproduct += delta_x * delta_y*w;
+			mean_x += delta_x / i;
+			mean_y += delta_y / i;
+		}
+		double pop_sd_x = Math.sqrt(sum_sq_x/x.length);
+		double pop_sd_y = Math.sqrt(sum_sq_y/y.length);
+		double cov_x_y = sum_coproduct / x.length;
     double denom = pop_sd_x*pop_sd_y;
     if(denom == 0.0)
       return 0.0;
     result = cov_x_y/denom;
-    return result;
-  }
+		return result;
+	}
 
   /**
    * Computes the significance level by approximate randomization, using a
@@ -2096,9 +2045,24 @@ public class ArrayMath {
     }
   }
 
+  /**
+   * Simulate Arrays.copyOf method provided by Java 6
+   * When/if the JavaNLP-core code base moves past Java 5, this method can be removed
+   *
+   * @param original
+   * @param newSize
+   */
+  public static double[] copyOf(double[] original, int newSize) {
+    double[] a = new double[newSize];
+    System.arraycopy(original, 0, a, 0, original.length);
+    return a;
+  }
+
   public static double entropy(double[] probs) {
-    double e = 0.0;
-    for (double p : probs) {
+    double e = 0;
+    double p = 0;
+    for (int i = 0; i < probs.length; i++) {
+      p = probs[i];
       if (p != 0.0)
         e -= p * Math.log(p);
     }

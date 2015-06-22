@@ -1,7 +1,7 @@
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.Label;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 
 /**
  * Applies a Function to the labels in a tree.  

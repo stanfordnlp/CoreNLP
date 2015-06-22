@@ -15,10 +15,19 @@ import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
-import edu.stanford.nlp.trees.*;
-import edu.stanford.nlp.util.*;
-
-import java.util.function.Function;
+import edu.stanford.nlp.trees.GrammaticalStructureFactory;
+import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.Trees;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.trees.TreebankLanguagePack;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.ReflectionLoading;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
+import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
+import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
 /**
  * This class will add parse information to an Annotation.
@@ -33,7 +42,7 @@ import java.util.function.Function;
  *
  * @author Jenny Finkel
  */
-public class ParserAnnotator extends SentenceAnnotator {
+public class ParserAnnotator implements Annotator {
 
   private final boolean VERBOSE;
   private final boolean BUILD_GRAPHS;
@@ -55,10 +64,6 @@ public class ParserAnnotator extends SentenceAnnotator {
   private final int nThreads;
 
   private final boolean saveBinaryTrees;
-
-  /** If true, don't re-annotate sentences that already have a tree annotation */
-  private final boolean noSquash;
-  private final GrammaticalStructure.Extras extraDependencies;
 
   public ParserAnnotator(boolean verbose, int maxSent) {
     this(System.getProperty("parse.model", LexicalizedParser.DEFAULT_PARSER_LOC), verbose, maxSent, StringUtils.EMPTY_STRING_ARRAY);
@@ -88,18 +93,17 @@ public class ParserAnnotator extends SentenceAnnotator {
     } else {
       this.gsf = null;
     }
-    
     this.nThreads = 1;
     this.saveBinaryTrees = false;
-    this.noSquash = false;
-    this.extraDependencies = GrammaticalStructure.Extras.NONE;
   }
 
 
   public ParserAnnotator(String annotatorName, Properties props) {
     String model = props.getProperty(annotatorName + ".model", LexicalizedParser.DEFAULT_PARSER_LOC);
     if (model == null) {
-      throw new IllegalArgumentException("No model specified for Parser annotator " + annotatorName);
+      throw new IllegalArgumentException("No model specified for " +
+                                         "Parser annotator " +
+                                         annotatorName);
     }
     this.VERBOSE = PropertiesUtils.getBool(props, annotatorName + ".debug", false);
 
@@ -114,7 +118,7 @@ public class ParserAnnotator extends SentenceAnnotator {
       this.treeMap = ReflectionLoading.loadByReflection(treeMapClass, props);
     }
 
-    this.maxParseTime = PropertiesUtils.getLong(props, annotatorName + ".maxtime", -1);
+    this.maxParseTime = PropertiesUtils.getLong(props, annotatorName + ".maxtime", 0);
 
     String buildGraphsProperty = annotatorName + ".buildgraphs";
     if (!this.parser.getTLPParams().supportsBasicDependencies()) {
@@ -127,8 +131,6 @@ public class ParserAnnotator extends SentenceAnnotator {
     }
 
     if (this.BUILD_GRAPHS) {
-      boolean generateOriginalDependencies = PropertiesUtils.getBool(props, annotatorName + ".originalDependencies", false);
-      parser.getTLPParams().setGenerateOriginalDependencies(generateOriginalDependencies);
       TreebankLanguagePack tlp = parser.getTLPParams().treebankLanguagePack();
       // TODO: expose keeping punctuation as an option to the user?
       this.gsf = tlp.grammaticalStructureFactory(tlp.punctuationWordRejectFilter(), parser.getTLPParams().typedDependencyHeadFinder());
@@ -139,8 +141,6 @@ public class ParserAnnotator extends SentenceAnnotator {
     this.nThreads = PropertiesUtils.getInt(props, annotatorName + ".nthreads", PropertiesUtils.getInt(props, "nthreads", 1));
     boolean usesBinary = StanfordCoreNLP.usesBinaryTrees(props);
     this.saveBinaryTrees = PropertiesUtils.getBool(props, annotatorName + ".binaryTrees", usesBinary);
-    this.noSquash = PropertiesUtils.getBool(props, annotatorName + ".nosquash", false);
-    this.extraDependencies = MetaClass.cast(props.getProperty(annotatorName + ".extradependencies", "NONE"), GrammaticalStructure.Extras.class);
   }
 
   public static String signature(String annotatorName, Properties props) {
@@ -157,17 +157,11 @@ public class ParserAnnotator extends SentenceAnnotator {
     os.append(annotatorName + ".treemap:" +
             props.getProperty(annotatorName + ".treemap", ""));
     os.append(annotatorName + ".maxtime:" +
-            props.getProperty(annotatorName + ".maxtime", "-1"));
-    os.append(annotatorName + ".originalDependencies:" +
-            props.getProperty(annotatorName + ".originalDependencies", "false"));
+            props.getProperty(annotatorName + ".maxtime", "0"));
     os.append(annotatorName + ".buildgraphs:" +
-      props.getProperty(annotatorName + ".buildgraphs", "true"));
+            props.getProperty(annotatorName + ".buildgraphs", "true"));
     os.append(annotatorName + ".nthreads:" +
               props.getProperty(annotatorName + ".nthreads", props.getProperty("nthreads", "")));
-    os.append(annotatorName + ".nosquash:" +
-      props.getProperty(annotatorName + ".nosquash", "false"));
-    os.append(annotatorName + ".extradependencies:" +
-        props.getProperty(annotatorName + ".extradependences", "NONE").toLowerCase());
     boolean usesBinary = StanfordCoreNLP.usesBinaryTrees(props);
     boolean saveBinaryTrees = PropertiesUtils.getBool(props, annotatorName + ".binaryTrees", usesBinary);
     os.append(annotatorName + ".binaryTrees:" + saveBinaryTrees);
@@ -201,32 +195,56 @@ public class ParserAnnotator extends SentenceAnnotator {
     return result;
   }
 
-  @Override
-  protected int nThreads() {
-    return nThreads;
+  private class ParserAnnotatorProcessor implements ThreadsafeProcessor<CoreMap, CoreMap> {
+    @Override
+    public CoreMap process(CoreMap sentence) {
+      doOneSentence(sentence);
+      return sentence;
+    }
+
+    @Override
+    public ThreadsafeProcessor<CoreMap, CoreMap> newInstance() {
+      return this;
+    }
   }
 
   @Override
-  protected long maxTime() {
-    return maxParseTime;
-  };  
-
-  @Override
-  protected void doOneSentence(Annotation annotation, CoreMap sentence) {
-    // If "noSquash" is set, don't re-annotate sentences which already have a tree annotation
-    if (noSquash &&
-        sentence.get(TreeCoreAnnotations.TreeAnnotation.class) != null &&
-        !"X".equalsIgnoreCase(sentence.get(TreeCoreAnnotations.TreeAnnotation.class).label().value())) {
-      return;
+  public void annotate(Annotation annotation) {
+    if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
+      if (nThreads != 1 || maxParseTime > 0) {
+        MulticoreWrapper<CoreMap, CoreMap> wrapper = new MulticoreWrapper<CoreMap, CoreMap>(nThreads, new ParserAnnotatorProcessor());
+        if (maxParseTime > 0) {
+          wrapper.setMaxBlockTime(maxParseTime);
+        }
+        for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+          wrapper.put(sentence);
+          while (wrapper.peek()) {
+            wrapper.poll();
+          }
+        }
+        wrapper.join();
+        while (wrapper.peek()) {
+          wrapper.poll();
+        }
+      } else {
+        // parse a tree for each sentence
+        for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+          doOneSentence(sentence);
+        }
+      }
+    } else {
+      throw new RuntimeException("unable to find sentences in: " + annotation);
     }
+  }
 
+  private void doOneSentence(CoreMap sentence) {
     final List<CoreLabel> words = sentence.get(CoreAnnotations.TokensAnnotation.class);
     if (VERBOSE) {
       System.err.println("Parsing: " + words);
     }
     Tree tree = null;
     // generate the constituent tree
-    if (maxSentenceLength <= 0 || words.size() <= maxSentenceLength) {
+    if (maxSentenceLength <= 0 || words.size() < maxSentenceLength) {
       try {
         final List<ParserConstraint> constraints = sentence.get(ParserAnnotations.ConstraintAnnotation.class);
         tree = doOneSentence(constraints, words);
@@ -240,33 +258,18 @@ public class ParserAnnotator extends SentenceAnnotator {
     // tree == null may happen if the parser takes too long or if
     // the sentence is longer than the max length
     if (tree == null) {
-      doOneFailedSentence(annotation, sentence);
-    } else {
-      finishSentence(sentence, tree);
+      tree = ParserUtils.xTree(words);
     }
-  }
 
-  @Override
-  public void doOneFailedSentence(Annotation annotation, CoreMap sentence) {
-    final List<CoreLabel> words = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    Tree tree = ParserUtils.xTree(words);
-    for (CoreLabel word : words) {
-      if (word.tag() == null) {
-        word.setTag("XX");
-      }
-    }
-    finishSentence(sentence, tree);
-  }
-
-  private void finishSentence(CoreMap sentence, Tree tree) {
     if (treeMap != null) {
       tree = treeMap.apply(tree);
     }
-    
-    ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, tree, extraDependencies);
+
+    ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, tree);
 
     if (saveBinaryTrees) {
-      TreeBinarizer binarizer = TreeBinarizer.simpleTreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack());
+      TreeBinarizer binarizer = new TreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack(),
+                                                  false, false, 0, false, false, 0.0, false, true, true);
       Tree binarized = binarizer.transformTree(tree);
       Trees.convertToCoreLabels(binarized);
       sentence.set(TreeCoreAnnotations.BinarizedTreeAnnotation.class, binarized);
@@ -281,14 +284,8 @@ public class ParserAnnotator extends SentenceAnnotator {
     Tree tree = null;
     try {
       tree = pq.getBestParse();
-      if (tree == null) {
-        System.err.println("WARNING: Parsing of sentence failed.  " +
-                         "Will ignore and continue: " +
-                         Sentence.listToString(words));
-      } else {
-        // -10000 denotes unknown words
-        tree.setScore(pq.getPCFGScore() % -10000.0);
-      }
+      // -10000 denotes unknown words
+      tree.setScore(pq.getPCFGScore() % -10000.0);
     } catch (OutOfMemoryError e) {
       System.err.println("WARNING: Parsing of sentence ran out of memory.  " +
                          "Will ignore and continue: " +

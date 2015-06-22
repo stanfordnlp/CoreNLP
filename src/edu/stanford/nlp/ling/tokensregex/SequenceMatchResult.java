@@ -1,7 +1,7 @@
 package edu.stanford.nlp.ling.tokensregex;
 
 import edu.stanford.nlp.util.Comparators;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.HasInterval;
 import edu.stanford.nlp.util.Interval;
 
@@ -134,11 +134,12 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
   /**
    * Returns an Object representing the result for the match for a particular node.
    * (actual Object returned depends on the type T of the nodes.  For instance,
-   *  for a CoreMap, the match result is returned as a {@code Map<Class, Object>}, while
+   *  for a CoreMap, the match result is returned as a Map<Class, Object>, while
    *  for String, the match result is typically a MatchResult.
    *
-   * @param  index The index of the element in the original sequence.
-   * @return The match result associated with the node at the given index.
+   * @param  index
+   *         The index of the element in the original sequence.
+   * @return the match result associated with the node at the given index.
    * @throws  IllegalStateException
    *          If no match has yet been attempted,
    *          or if the previous match operation failed
@@ -150,11 +151,13 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
   /**
    * Returns an Object representing the result for the match for a particular node in a group.
    * (actual Object returned depends on the type T of the nodes.  For instance,
-   *  for a CoreMap, the match result is returned as a {@code Map<Class, Object>}, while
+   *  for a CoreMap, the match result is returned as a Map<Class, Object>, while
    *  for String, the match result is typically a MatchResult.
    *
-   * @param  groupid The index of a capturing group in this matcher's pattern
-   * @param  index The index of the element in the captured subsequence.
+   * @param  groupid
+   *         The index of a capturing group in this matcher's pattern
+   * @param  index
+   *         The index of the element in the captured subsequence.
    * @return the match result associated with the node
    *         at the given index for the captured group.
    * @throws  IllegalStateException
@@ -169,11 +172,13 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
   /**
    * Returns an Object representing the result for the match for a particular node in a group.
    * (actual Object returned depends on the type T of the nodes.  For instance,
-   *  for a CoreMap, the match result is returned as a {@code Map<Class, Object>}, while
+   *  for a CoreMap, the match result is returned as a Map<Class, Object>, while
    *  for String, the match result is typically a MatchResult.
    *
-   * @param  groupVar The name of the capturing group in this matcher's pattern
-   * @param  index The index of the element in the captured subsequence.
+   * @param  groupVar
+   *         The name of the capturing group in this matcher's pattern
+   * @param  index
+   *         The index of the element in the captured subsequence.
    * @return the match result associated with the node
    *         at the given index for the captured group.
    * @throws  IllegalStateException
@@ -270,48 +275,55 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
     }
   }
 
-  public final static Comparator<MatchResult> PRIORITY_COMPARATOR = (e1, e2) -> {
-    double s1 = 0;
-    if (e1 instanceof SequenceMatchResult) { s1 =  ((SequenceMatchResult) e1).priority(); }
-    double s2 = 0;
-    if (e2 instanceof SequenceMatchResult) { s2 =  ((SequenceMatchResult) e2).priority(); }
-    if (s1 == s2) {
-      return 0;
-    } else {
-      return (s1 > s2)? -1:1;
+  public final static Comparator<MatchResult> PRIORITY_COMPARATOR = new Comparator<MatchResult>() {
+    public int compare(MatchResult e1, MatchResult e2) {
+      double s1 = 0;
+      if (e1 instanceof SequenceMatchResult) { s1 =  ((SequenceMatchResult) e1).priority(); }
+      double s2 = 0;
+      if (e2 instanceof SequenceMatchResult) { s2 =  ((SequenceMatchResult) e2).priority(); }
+      if (s1 == s2) {
+        return 0;
+      } else {
+        return (s1 > s2)? -1:1;
+      }
     }
   };
 
-  public final static Comparator<MatchResult> SCORE_COMPARATOR = (e1, e2) -> {
-    double s1 = 0;
-    if (e1 instanceof SequenceMatchResult) { s1 =  ((SequenceMatchResult) e1).score(); }
-    double s2 = 0;
-    if (e2 instanceof SequenceMatchResult) { s2 =  ((SequenceMatchResult) e2).score(); }
-    if (s1 == s2) {
-      return 0;
-    } else {
-      return (s1 > s2)? -1:1;
+  public final static Comparator<MatchResult> SCORE_COMPARATOR = new Comparator<MatchResult>() {
+    public int compare(MatchResult e1, MatchResult e2) {
+      double s1 = 0;
+      if (e1 instanceof SequenceMatchResult) { s1 =  ((SequenceMatchResult) e1).score(); }
+      double s2 = 0;
+      if (e2 instanceof SequenceMatchResult) { s2 =  ((SequenceMatchResult) e2).score(); }
+      if (s1 == s2) {
+        return 0;
+      } else {
+        return (s1 > s2)? -1:1;
+      }
     }
   };
 
   public final static Comparator<MatchResult> ORDER_COMPARATOR =
-      (e1, e2) -> {
-        int o1 = 0;
-        if (e1 instanceof SequenceMatchResult) {o1 =  ((SequenceMatchResult) e1).getOrder(); }
-        int o2 = 0;
-        if (e2 instanceof SequenceMatchResult) {o2 =  ((SequenceMatchResult) e2).getOrder(); }
-        if (o1 == o2) {
-          return 0;
-        } else {
-          return (o1 < o2)? -1:1;
-        }
-      };
+    new Comparator<MatchResult>() {
+    public int compare(MatchResult e1, MatchResult e2) {
+      int o1 = 0;
+      if (e1 instanceof SequenceMatchResult) {o1 =  ((SequenceMatchResult) e1).getOrder(); }
+      int o2 = 0;
+      if (e2 instanceof SequenceMatchResult) {o2 =  ((SequenceMatchResult) e2).getOrder(); }
+      if (o1 == o2) {
+        return 0;
+      } else {
+        return (o1 < o2)? -1:1;
+      }
+    }
+  };
 
   // Compares two match results.
   // Use to order match results by:
   //    length (longest first),
   public final static Comparator<MatchResult> LENGTH_COMPARATOR =
-      (e1, e2) -> {
+    new Comparator<MatchResult>() {
+      public int compare(MatchResult e1, MatchResult e2) {
         int len1 = e1.end() - e1.start();
         int len2 = e2.end() - e2.start();
         if (len1 == len2) {
@@ -319,10 +331,12 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
         } else {
           return (len1 > len2)? -1:1;
         }
-      };
+      }
+    };
 
   public final static Comparator<MatchResult> OFFSET_COMPARATOR =
-      (e1, e2) -> {
+    new Comparator<MatchResult>() {
+      public int compare(MatchResult e1, MatchResult e2) {
         if (e1.start() == e2.start()) {
           if (e1.end() == e2.end()) {
             return 0;
@@ -332,7 +346,8 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
         } else {
           return (e1.start() < e2.start())? -1:1;
         }
-      };
+      }
+    };
 
   // Compares two match results.
   // Use to order match results by:
@@ -344,9 +359,12 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
   public final static Comparator<MatchResult> PRIORITY_SCORE_LENGTH_ORDER_OFFSET_COMPARATOR =
           Comparators.chain(PRIORITY_COMPARATOR, SCORE_COMPARATOR, LENGTH_COMPARATOR, ORDER_COMPARATOR, OFFSET_COMPARATOR);
   public final static Comparator<? super MatchResult> DEFAULT_COMPARATOR = PRIORITY_SCORE_LENGTH_ORDER_OFFSET_COMPARATOR;
-  public final static Function<MatchResult, Double> SCORER = in -> {
-    if (in instanceof SequenceMatchResult) { return  ((SequenceMatchResult) in).score(); }
-    else return 0.0;
+  public final static Function<MatchResult, Double> SCORER = new Function<MatchResult, Double>() {
+    @Override
+    public Double apply(MatchResult in) {
+      if (in instanceof SequenceMatchResult) { return  ((SequenceMatchResult) in).score(); }
+      else return 0.0;
+    }
   };
 
   /**

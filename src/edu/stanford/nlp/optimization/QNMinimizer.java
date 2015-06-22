@@ -12,7 +12,6 @@ import java.util.Set;
 
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.math.ArrayMath;
-import edu.stanford.nlp.util.CallbackFunction;
 import edu.stanford.nlp.util.Generics;
 
 
@@ -132,8 +131,6 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   private int startEvaluateIters = 0; // starting evaluation after x iterations
   private Evaluator[] evaluators;  // separate set of evaluators to check how optimization is going
 
-  private transient CallbackFunction iterCallbackFunction = null;
-
   public enum eState {
     TERMINATE_MAXEVALS, TERMINATE_RELATIVENORM, TERMINATE_GRADNORM, TERMINATE_AVERAGEIMPROVE, CONTINUE, TERMINATE_EVALIMPROVE, TERMINATE_MAXITR
   }
@@ -146,9 +143,9 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     DIAGONAL, SCALAR
   }
 
-  private eLineSearch lsOpt = eLineSearch.MINPACK;
-  private eScaling scaleOpt = eScaling.DIAGONAL;
-  private eState state = eState.CONTINUE;
+  eLineSearch lsOpt = eLineSearch.MINPACK;// eLineSearch.MINPACK;
+  eScaling scaleOpt = eScaling.DIAGONAL;// eScaling.DIAGONAL;
+  eState state = eState.CONTINUE;
 
 
   public QNMinimizer() {
@@ -209,10 +206,6 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     this.evaluateIters = iters;
     this.startEvaluateIters = startEvaluateIters;
     this.evaluators = evaluators;
-  }
-
-  public void setIterationCallbackFunction(CallbackFunction func){
-    iterCallbackFunction = func;
   }
 
   public void terminateOnRelativeNorm(boolean toTerminate) {
@@ -293,6 +286,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   }
 
   /**
+   *
    * The Record class is used to collect information about the function value
    * over a series of iterations. This information is used to determine
    * convergence, and to (attempt to) ensure numerical errors are not an issue.
@@ -662,7 +656,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
      * hessian through scaling or diagonal update, and then storing of the
      * secant pairs s = x - previousX and y = grad - previousGrad.
      *
-     * Things can go wrong, if any non convex behavior is detected (s^T y &lt; 0)
+     * Things can go wrong, if any non convex behavior is detected (s^T y < 0)
      * or numerical errors are likely the update is skipped.
      *
      */
@@ -1036,13 +1030,15 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
             say("M");
             break;
           default:
-            throw new IllegalArgumentException("Invalid line search option for QNMinimizer.");
+            sayln("Invalid line search option for QNMinimizer. ");
+            System.exit(1);
+            break;
+
           }
         }
 
         newValue = newPoint[f];
-        say(" ");
-        say(nf.format(newPoint[a]));
+        System.err.print(" " + nf.format(newPoint[a]));
         say("] ");
 
         // This shouldn't actually evaluate anything since that should have been
@@ -1065,11 +1061,6 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
         // Add the current value and gradient to the records, this also monitors
         // X and writes to output
         rec.add(newValue, newGrad, newX, fevals, evalScore);
-
-        //If you wanna call a function and do whatever with the information
-        if(iterCallbackFunction != null){
-          iterCallbackFunction.callback(newX, its, newValue, newGrad);
-        }
 
         // shift
         value = newValue;
@@ -1118,8 +1109,6 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
       double evalScore = (useEvalImprovement ? doEvaluation(rec.getBest()) : doEvaluation(x));
       sayln("final evalScore is: " + evalScore);
     }
-
-
 
     //
     // Announce the reason minimization has terminated.
@@ -1200,12 +1189,6 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     return dfunc.valueAt(x);
   }
 
-  /** To set QNMinimizer to use L1 regularization, call this method before use,
-   *  with the boolean set true, and the appropriate lambda parameter.
-   *
-   *  @param use Whether to use Orthant-wise optimization
-   * @param lambda The L1 regularization parameter.
-   */
   public void useOWLQN(boolean use, double lambda) {
     this.useOWLQN = use;
     this.lambdaOWL = lambda;

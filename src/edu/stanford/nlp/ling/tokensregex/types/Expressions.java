@@ -4,6 +4,7 @@ import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.EnvLookup;
 import edu.stanford.nlp.ling.tokensregex.SequenceMatchResult;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MetaClass;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
@@ -18,8 +19,9 @@ import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 
 /**
- * Various implementations of the Expression interface, which is
- *   used for specifying an "action" or "result" in TokensRegex extraction rules.
+ * Various implementations of the Expression interface.
+ * <p>
+ *   Expressions (used for specifying "action", "result" in TokensRegex extraction rules).
  *   Expressions are made up of identifiers, literals (numbers, strings "I'm a string", TRUE, FALSE),
  *     function calls ( FUNC(args) ).
  * </p>
@@ -101,7 +103,6 @@ import java.util.regex.Pattern;
  * @author Angel Chang
  */
 public class Expressions {
-
   /** VAR - Variable */
   public static final String TYPE_VAR = "VAR";
   /** FUNCTION - (input) => (output) where input is a list of Values, and output is a single Value */
@@ -132,8 +133,6 @@ public class Expressions {
   public static final Value<Boolean> TRUE = new PrimitiveValue<Boolean>(Expressions.TYPE_BOOLEAN, true);
   public static final Value<Boolean> FALSE = new PrimitiveValue<Boolean>(Expressions.TYPE_BOOLEAN, false);
   public static final Value NIL = new PrimitiveValue("NIL", null);
-
-  private Expressions() { } // static methods and classes
 
   public static Boolean convertValueToBoolean(Value v, boolean keepNull) {
     Boolean res = null;
@@ -203,38 +202,31 @@ public class Expressions {
   }
 
   /**
-   * An expression that is a wrapper around another expression.
+   * An expression that is a wrapper around another expression
    */
   public abstract static class WrappedExpression implements Expression {
-
     protected Expression expr;
 
-    @Override
     public Tags getTags() {
       return expr.getTags();
     }
 
-    @Override
     public void setTags(Tags tags) {
       expr.setTags(tags);
     }
 
-    @Override
     public String getType() {
       return expr.getType();
     }
 
-    @Override
     public Expression simplify(Env env) {
       return expr.simplify(env);
     }
 
-    @Override
     public boolean hasValue() {
       return expr.hasValue();
     }
 
-    @Override
     public Value evaluate(Env env, Object... args) {
       return expr.evaluate(env, args);
     }
@@ -255,11 +247,10 @@ public class Expressions {
     public int hashCode() {
       return expr != null ? expr.hashCode() : 0;
     }
-
   }
 
   /**
-  * An expression with a typename and tags.
+  * An expression with a typename and tags
   */
   public abstract static class TypedExpression implements Expression, Serializable {
     String typename;
@@ -466,15 +457,13 @@ public class Expressions {
     }
   }
 
-
   /**
    * A variable assignment with the name of the variable, and the expression to assign to that variable
    */
   public static class VarAssignmentExpression extends Expressions.TypedExpression {
-
-    final String varName;
-    final Expression valueExpr;
-    final boolean bindAsValue;
+    String varName;
+    Expression valueExpr;
+    boolean bindAsValue = false;
 
     public VarAssignmentExpression(String varName, Expression valueExpr, boolean bindAsValue) {
       super("VAR_ASSIGNMENT");
@@ -535,8 +524,7 @@ public class Expressions {
       result = 31 * result + (bindAsValue ? 1 : 0);
       return result;
     }
-  } // end class VarAssignmentExpression
-
+  }
 
   /**
    * A variable, which can be assigned any expression.
@@ -544,12 +532,9 @@ public class Expressions {
    *   environment, evaluated, and returned.
    */
   public static class VarExpression extends SimpleExpression<String> implements AssignableExpression  {
-
     public VarExpression(String varname, String... tags) {
       super(TYPE_VAR, varname, tags);
     }
-
-    @Override
     public Value evaluate(Env env, Object... args) {
       Expression exp = null;
       String varName = value;
@@ -758,53 +743,39 @@ public class Expressions {
     }
   }
 
-
   public static class ConditionalExpression extends Expressions.WrappedExpression {
-
     public ConditionalExpression(Expression expr) {
       this.expr = expr;
     }
 
     public ConditionalExpression(String op, Expression expr1, Expression expr2) {
-      switch (op) {
-        case ">=":
-          expr = new FunctionCallExpression("GE", Arrays.asList(expr1, expr2));
-          break;
-        case "<=":
-          expr = new FunctionCallExpression("LE", Arrays.asList(expr1, expr2));
-          break;
-        case ">":
-          expr = new FunctionCallExpression("GT", Arrays.asList(expr1, expr2));
-          break;
-        case "<":
-          expr = new FunctionCallExpression("LT", Arrays.asList(expr1, expr2));
-          break;
-        case "==":
-          expr = new FunctionCallExpression("EQ", Arrays.asList(expr1, expr2));
-          break;
-        case "!=":
-          expr = new FunctionCallExpression("NE", Arrays.asList(expr1, expr2));
-          break;
-        case "=~":
-          expr = new FunctionCallExpression("Match", Arrays.asList(expr1, expr2));
-          break;
-        case "!~":
-          expr = new NotExpression(new FunctionCallExpression("Match", Arrays.asList(expr1, expr2)));
-          break;
+      if (">=".equals(op)) {
+        expr = new FunctionCallExpression("GE", Arrays.asList(expr1, expr2));
+      } else if ("<=".equals(op))  {
+        expr = new FunctionCallExpression("LE", Arrays.asList(expr1, expr2));
+      } else if (">".equals(op)) {
+        expr = new FunctionCallExpression("GT", Arrays.asList(expr1, expr2));
+      } else if ("<".equals(op)) {
+        expr = new FunctionCallExpression("LT", Arrays.asList(expr1, expr2));
+      } else if ("==".equals(op)) {
+        expr = new FunctionCallExpression("EQ", Arrays.asList(expr1, expr2));
+      } else if ("!=".equals(op)) {
+        expr = new FunctionCallExpression("NE", Arrays.asList(expr1, expr2));
+      } else if ("=~".equals(op)) {
+        expr = new FunctionCallExpression("Match", Arrays.asList(expr1, expr2));
+      } else if ("!~".equals(op)) {
+        expr = new NotExpression(new FunctionCallExpression("Match", Arrays.asList(expr1, expr2)));
       }
     }
 
-    @Override
     public String getType() {
       return Expressions.TYPE_BOOLEAN;
     }
 
-    @Override
     public Expression simplify(Env env) {
       return this;
     }
 
-    @Override
     public Value evaluate(Env env, Object... args) {
       Value v = expr.evaluate(env, args);
       return convertValueToBooleanValue(v, false);
@@ -874,13 +845,10 @@ public class Expressions {
     return compatible;
   }
 
-
   protected static final String NEWLINE = System.getProperty("line.separator");
-
   public static class FunctionCallExpression extends Expressions.TypedExpression {
-
-    final String function;
-    final List<? extends Expression> params;
+    String function;
+    List<? extends Expression> params;
 
     public FunctionCallExpression(String function, List<? extends Expression> params, String... tags) {
       super(TYPE_FUNCTION, tags);
@@ -889,7 +857,12 @@ public class Expressions {
     }
 
     public String toString() {
-      return function + '(' + StringUtils.join(params, ", ") + ')';
+      StringBuilder sb = new StringBuilder("");
+      sb.append(function);
+      sb.append("(");
+      sb.append(StringUtils.join(params, ", "));
+      sb.append(")");
+      return sb.toString();
     }
 
     public Expression simplify(Env env)
@@ -1032,7 +1005,6 @@ public class Expressions {
   }
 
   public static class MethodCallExpression extends Expressions.TypedExpression {
-
     String function;
     Expression object;
     List<Expression> params;
@@ -1045,7 +1017,14 @@ public class Expressions {
     }
 
     public String toString() {
-      return object + "." + function + '(' + StringUtils.join(params, ", ") + ')';
+      StringBuilder sb = new StringBuilder("");
+      sb.append(object);
+      sb.append(".");
+      sb.append(function);
+      sb.append("(");
+      sb.append(StringUtils.join(params, ", "));
+      sb.append(")");
+      return sb.toString();
     }
 
     public Expression simplify(Env env)
@@ -1164,7 +1143,7 @@ public class Expressions {
   */
   public static class CompositeValue extends SimpleCachedExpression<Map<String,Expression>> implements Value<Map<String,Expression>>{
     public CompositeValue(String... tags) {
-      super(TYPE_COMPOSITE, new HashMap<String, Expression>(), tags);//Generics.<String,Expression>newHashMap()
+      super(TYPE_COMPOSITE, Generics.<String,Expression>newHashMap(), tags);
     }
 
     public CompositeValue(Map<String, Expression> m, boolean isEvaluated, String... tags) {
@@ -1302,46 +1281,43 @@ public class Expressions {
           // Predefined types:
           Expression valueField = cv.value.get("value");
           Value value = valueField.evaluate(env, args);
-          switch (typeName) {
-            case TYPE_ANNOTATION_KEY: {
-              String className = (String) value.get();
-              try {
-                return new PrimitiveValue<Class>(TYPE_ANNOTATION_KEY, Class.forName(className));
-              } catch (ClassNotFoundException ex) {
-                throw new RuntimeException("Unknown class " + className, ex);
-              }
+          if (TYPE_ANNOTATION_KEY.equals(typeName)) {
+            String className = (String) value.get();
+            try {
+              return new PrimitiveValue<Class>(TYPE_ANNOTATION_KEY, Class.forName(className));
+            } catch (ClassNotFoundException ex) {
+              throw new RuntimeException("Unknown class " + className, ex);
             }
-            case TYPE_CLASS: {
-              String className = (String) value.get();
-              try {
-                return new PrimitiveValue<Class>(TYPE_CLASS, Class.forName(className));
-              } catch (ClassNotFoundException ex) {
-                throw new RuntimeException("Unknown class " + className, ex);
-              }
+          } else if (TYPE_CLASS.equals(typeName)) {
+            String className = (String) value.get();
+            try {
+              return new PrimitiveValue<Class>(TYPE_CLASS, Class.forName(className));
+            } catch (ClassNotFoundException ex) {
+              throw new RuntimeException("Unknown class " + className, ex);
             }
-            case TYPE_STRING:
-              return new PrimitiveValue<String>(TYPE_STRING, (String) value.get());
-            case TYPE_REGEX:
-              return new RegexValue((String) value.get());
+          } else if (TYPE_STRING.equals(typeName)) {
+            return new PrimitiveValue<String>(TYPE_STRING, (String) value.get());
+          } else if (TYPE_REGEX.equals(typeName)) {
+            return new RegexValue((String) value.get());
             /* } else if (TYPE_TOKEN_REGEX.equals(type)) {
        return new PrimitiveValue<TokenSequencePattern>(TYPE_TOKEN_REGEX, (TokenSequencePattern) value.get()); */
-            case TYPE_NUMBER:
-              if (value.get() instanceof Number) {
-                return new PrimitiveValue<Number>(TYPE_NUMBER, (Number) value.get());
-              } else if (value.get() instanceof String) {
-                String str = (String) value.get();
-                if (str.contains(".")) {
-                  return new PrimitiveValue<Number>(TYPE_NUMBER, Double.valueOf(str));
-                } else {
-                  return new PrimitiveValue<Number>(TYPE_NUMBER, Long.valueOf(str));
-                }
+          } else if (TYPE_NUMBER.equals(typeName)) {
+            if (value.get() instanceof Number) {
+              return new PrimitiveValue<Number>(TYPE_NUMBER, (Number) value.get());
+            } else if (value.get() instanceof String){
+              String str = (String) value.get();
+              if (str.contains(".")) {
+                return new PrimitiveValue<Number>(TYPE_NUMBER, Double.valueOf(str));
               } else {
-                throw new IllegalArgumentException("Invalid value " + value + " for type " + typeName);
+                return new PrimitiveValue<Number>(TYPE_NUMBER, Long.valueOf(str));
               }
-            default:
-              // TODO: support other types
-              return new PrimitiveValue(typeName, value.get());
-              //throw new UnsupportedOperationException("Cannot convert type " + typeName);
+            } else {
+              throw new IllegalArgumentException("Invalid value " + value + " for type " + typeName);
+            }
+          } else {
+            // TODO: support other types
+            return new PrimitiveValue(typeName, value.get());
+            //throw new UnsupportedOperationException("Cannot convert type " + typeName);
           }
         }
       }
@@ -1350,7 +1326,7 @@ public class Expressions {
 
     public CompositeValue simplifyNoTypeConversion(Env env, Object... args) {
       Map<String, Expression> m = value;
-      Map<String, Expression> res = new HashMap<String, Expression>(m.size());//Generics.newHashMap (m.size());
+      Map<String, Expression> res = Generics.newHashMap (m.size());
       for (Map.Entry<String, Expression> stringExpressionEntry : m.entrySet()) {
         res.put(stringExpressionEntry.getKey(), stringExpressionEntry.getValue().simplify(env));
       }
@@ -1359,7 +1335,7 @@ public class Expressions {
 
     private CompositeValue evaluateNoTypeConversion(Env env, Object... args) {
       Map<String, Expression> m = value;
-      Map<String, Expression> res = new HashMap<String, Expression>(m.size());//Generics.newHashMap (m.size());
+      Map<String, Expression> res = Generics.newHashMap (m.size());
       for (Map.Entry<String, Expression> stringExpressionEntry : m.entrySet()) {
         res.put(stringExpressionEntry.getKey(), stringExpressionEntry.getValue().evaluate(env, args));
       }
@@ -1370,14 +1346,12 @@ public class Expressions {
       Value v = attemptTypeConversion(this, env, args);
       if (v != null) return v;
       Map<String, Expression> m = value;
-      Map<String, Expression> res = new HashMap<String, Expression>(m.size());//Generics.newHashMap (m.size());
+      Map<String, Expression> res = Generics.newHashMap (m.size());
       for (Map.Entry<String, Expression> stringExpressionEntry : m.entrySet()) {
         res.put(stringExpressionEntry.getKey(), stringExpressionEntry.getValue().evaluate(env, args));
       }
       disableCaching = !checkValue();
       return new CompositeValue(res, true);
     }
-
-  } // end static class CompositeValue
-
+  }
 }

@@ -21,7 +21,7 @@ import edu.stanford.nlp.util.IterableIterator;
 
 /**
  * A hierarchical channel based logger. Log messages are arranged hierarchically by depth
- * (e.g. main-&gt;tagging-&gt;sentence 2) using the startTrack() and endTrack() methods.
+ * (e.g. main->tagging->sentence 2) using the startTrack() and endTrack() methods.
  * Furthermore, messages can be flagged with a number of channels, which allow filtering by channel.
  * Log levels are implemented as channels (ERROR, WARNING, etc).
  *
@@ -291,11 +291,14 @@ public class Redwood {
     //--Handle Record
     if(isThreaded){
       //(case: multithreaded)
-      final Runnable log = () -> {
-        assert !isThreaded || control.isHeldByCurrentThread();
-        Record toPass = new Record(content,tags,depth,timestamp);
-        handlers.process(toPass, MessageType.SIMPLE,depth, toPass.timesstamp);
-        assert !isThreaded || control.isHeldByCurrentThread();
+      final Runnable log = new Runnable(){
+        @Override
+        public void run(){
+          assert !isThreaded || control.isHeldByCurrentThread();
+          Record toPass = new Record(content,tags,depth,timestamp);
+          handlers.process(toPass, MessageType.SIMPLE,depth, toPass.timesstamp);
+          assert !isThreaded || control.isHeldByCurrentThread();
+        }
       };
       long threadId = Thread.currentThread().getId();
       attemptThreadControl( threadId, log );
@@ -372,18 +375,21 @@ public class Redwood {
     if(isClosed){ return; }
     //--Make Task
     final long timestamp = System.currentTimeMillis();
-    Runnable endTrack = () -> {
-      assert !isThreaded || control.isHeldByCurrentThread();
-      String expected = titleStack.pop();
-      //(check name match)
-      if (!isThreaded && !expected.equalsIgnoreCase(title)){
-        throw new IllegalArgumentException("Track names do not match: expected: " + expected + " found: " + title);
+    Runnable endTrack = new Runnable(){
+      @Override
+      public void run(){
+        assert !isThreaded || control.isHeldByCurrentThread();
+        String expected = titleStack.pop();
+        //(check name match)
+        if (!isThreaded && !expected.equalsIgnoreCase(title)){
+          throw new IllegalArgumentException("Track names do not match: expected: " + expected + " found: " + title);
+        }
+        //(decrement depth)
+        depth -= 1;
+        //(send signal)
+        handlers.process(null, MessageType.END_TRACK, depth, timestamp);
+        assert !isThreaded || control.isHeldByCurrentThread();
       }
-      //(decrement depth)
-      depth -= 1;
-      //(send signal)
-      handlers.process(null, MessageType.END_TRACK, depth, timestamp);
-      assert !isThreaded || control.isHeldByCurrentThread();
     };
     //--Run Task
     if(isThreaded){
@@ -425,7 +431,12 @@ public class Redwood {
   public static void finishThread(){
     //--Create Task
     final long threadId = Thread.currentThread().getId();
-    Runnable finish = () -> releaseThreadControl(threadId);
+    Runnable finish = new Runnable(){
+      @Override
+      public void run(){
+        releaseThreadControl(threadId);
+      }
+    };
     //--Run Task
     if(isThreaded){
       //(case: multithreaded)
@@ -823,17 +834,20 @@ public class Redwood {
     private void sort(){
       //(sort flags)
       if(!channelsSorted && channels.length > 1){
-        Arrays.sort(channels, (a, b) -> {
-          if (a == FORCE) {
-            return -1;
-          } else if (b == FORCE) {
-            return 1;
-          } else if (a instanceof Flag && !(b instanceof Flag)) {
-            return -1;
-          } else if (b instanceof Flag && !(a instanceof Flag)) {
-            return 1;
-          } else {
-            return a.toString().compareTo(b.toString());
+        Arrays.sort(channels, new Comparator<Object>() {
+          @Override
+          public int compare(Object a, Object b) {
+            if (a == FORCE) {
+              return -1;
+            } else if (b == FORCE) {
+              return 1;
+            } else if (a instanceof Flag && !(b instanceof Flag)) {
+              return -1;
+            } else if (b instanceof Flag && !(a instanceof Flag)) {
+              return 1;
+            } else {
+              return a.toString().compareTo(b.toString());
+            }
           }
         });
       }
@@ -1030,7 +1044,10 @@ public class Redwood {
                 //(run runnable)
                 try{
                   runnable.run();
-                } catch (Exception | AssertionError e){
+                } catch (Exception e){
+                  e.printStackTrace();
+                  System.exit(1);
+                } catch (AssertionError e) {
                   e.printStackTrace();
                   System.exit(1);
                 }
@@ -1098,7 +1115,7 @@ public class Redwood {
       threadAndRun(title,runnables,Runtime.getRuntime().availableProcessors());
     }
     public static void threadAndRun(Iterable<Runnable> runnables, int numThreads){
-      threadAndRun(String.valueOf(numThreads), runnables, numThreads);
+      threadAndRun(""+numThreads, runnables, numThreads);
     }
     public static void threadAndRun(Iterable<Runnable> runnables){
       threadAndRun(runnables, Execution.threads);
@@ -1107,7 +1124,7 @@ public class Redwood {
     /**
      * Print (to console) a margin with the channels of a given log message.
      * Note that this does not affect File printing.
-     * @param width The width of the margin to print (must be &gt;2)
+     * @param width The width of the margin to print (must be >2)
      */
     public static void printChannels(int width){
       for(LogRecordHandler handler : handlers){
@@ -1243,24 +1260,27 @@ public class Redwood {
     LinkedList<Runnable> tasks = new LinkedList<Runnable>();
     for(int i=0; i<1000; i++){
       final int fI = i;
-      tasks.add(() -> {
-        startTrack("Runnable " + fI);
-        log(Thread.currentThread().getId());
-        log("message " + fI + ".1");
-        log("message " + fI + ".2");
-        log("message " + fI + ".3");
-        log(FORCE,"message " + fI + ".4");
-        log("message " + fI + ".5");
-        forceTrack("Runnable " + fI + ".1");
-        endTrack("Runnable " + fI + ".1");
-        forceTrack("Runnable " + fI + ".2");
-        log("a message");
-        endTrack("Runnable " + fI + ".2");
-        forceTrack("Runnable " + fI + ".3");
-        log("a message");
-        log(FORCE,"A forced message");
-        endTrack("Runnable " + fI + ".3");
-        endTrack("Runnable " + fI);
+      tasks.add(new Runnable(){
+        @Override
+        public void run(){
+          startTrack("Runnable " + fI);
+          log(Thread.currentThread().getId());
+          log("message " + fI + ".1");
+          log("message " + fI + ".2");
+          log("message " + fI + ".3");
+          log(FORCE,"message " + fI + ".4");
+          log("message " + fI + ".5");
+          forceTrack("Runnable " + fI + ".1");
+          endTrack("Runnable " + fI + ".1");
+          forceTrack("Runnable " + fI + ".2");
+          log("a message");
+          endTrack("Runnable " + fI + ".2");
+          forceTrack("Runnable " + fI + ".3");
+          log("a message");
+          log(FORCE,"A forced message");
+          endTrack("Runnable " + fI + ".3");
+          endTrack("Runnable " + fI);
+        }
       });
     }
     startTrack("Wrapper");
@@ -1374,16 +1394,19 @@ public class Redwood {
     startThreads("name");
     for(int i=0; i<50; i++){
       final int theI = i;
-      exec.execute(() -> {
-        startTrack("Thread " + theI + " (" + Thread.currentThread().getId() + ")");
-        for(int time=0; time<5; time++){
-          log("tick " + time + " from " + theI + " (" + Thread.currentThread().getId() + ")");
-          try {
-            Thread.sleep(50);
-          } catch (Exception e) {}
+      exec.execute(new Runnable(){
+        @Override
+        public void run() {
+          startTrack("Thread " + theI + " (" + Thread.currentThread().getId() + ")");
+          for(int time=0; time<5; time++){
+            log("tick " + time + " from " + theI + " (" + Thread.currentThread().getId() + ")");
+            try {
+              Thread.sleep(50);
+            } catch (Exception e) {}
+          }
+          endTrack("Thread " + theI + " (" + Thread.currentThread().getId() + ")");
+          finishThread();
         }
-        endTrack("Thread " + theI + " (" + Thread.currentThread().getId() + ")");
-        finishThread();
       });
 
     }

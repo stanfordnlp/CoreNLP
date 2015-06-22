@@ -37,14 +37,10 @@ import java.util.Set;
  * @author Angel Chang
  */
 public class TokensRegexAnnotator implements Annotator {
+  private Env env;
+  private CoreMapExpressionExtractor extractor;
+  private Options options = new Options();
 
-  private final Env env;
-  private final CoreMapExpressionExtractor extractor;
-  private final Options options = new Options();
-  private final boolean verbose;
-
-
-  // Make public so can be accessed and set via reflection
   public static class Options {
     public Class matchedExpressionsAnnotationKey;
     public boolean setTokenOffsets;
@@ -52,11 +48,12 @@ public class TokensRegexAnnotator implements Annotator {
     public boolean flatten;
   }
 
+  private Timing timer = new Timing();
+  private boolean verbose;
 
   public TokensRegexAnnotator(String... files) {
     env = TokenSequencePattern.getNewEnv();
     extractor = CoreMapExpressionExtractor.createExtractorFromFiles(env, files);
-    verbose = false;
   }
 
   public TokensRegexAnnotator(String name, Properties props) {
@@ -68,13 +65,13 @@ public class TokensRegexAnnotator implements Annotator {
     env = TokenSequencePattern.getNewEnv();
     env.bind("options", options);
     extractor = CoreMapExpressionExtractor.createExtractorFromFiles(env, files);
-    verbose = PropertiesUtils.getBool(props, prefix + "verbose", false);
+    verbose = PropertiesUtils.getBool(props, prefix + "verbose", verbose);
     options.setTokenOffsets = PropertiesUtils.getBool(props, prefix + "setTokenOffsets", options.setTokenOffsets);
     options.extractWithTokens = PropertiesUtils.getBool(props, prefix + "extractWithTokens", options.extractWithTokens);
     options.flatten = PropertiesUtils.getBool(props, prefix + "flatten", options.flatten);
     String matchedExpressionsAnnotationKeyName = props.getProperty(prefix + "matchedExpressionsAnnotationKey");
     if (matchedExpressionsAnnotationKeyName != null) {
-      options.matchedExpressionsAnnotationKey = EnvLookup.lookupAnnotationKeyWithClassname(env, matchedExpressionsAnnotationKeyName);
+      options.matchedExpressionsAnnotationKey = EnvLookup.lookupAnnotationKey(env, matchedExpressionsAnnotationKeyName);
       if (options.matchedExpressionsAnnotationKey == null) {
         String propName = prefix + "matchedExpressionsAnnotationKey";
         throw new RuntimeException("Cannot determine annotation key for " + propName + "=" + matchedExpressionsAnnotationKeyName);
@@ -87,7 +84,8 @@ public class TokensRegexAnnotator implements Annotator {
   }
 
 
-  private static void addTokenOffsets(CoreMap annotation) {
+  public void addTokenOffsets(CoreMap annotation)
+  {
     // We are going to mark the token begin and token end for each token
     Integer startTokenOffset = annotation.get(CoreAnnotations.TokenBeginAnnotation.class);
     if (startTokenOffset == null) {
@@ -118,9 +116,9 @@ public class TokensRegexAnnotator implements Annotator {
     }
   }
 
-  @Override
   public void annotate(Annotation annotation) {
     if (verbose) {
+      timer.start();
       Redwood.log(Redwood.DBG, "Adding TokensRegexAnnotator annotation...");
     }
 
@@ -148,9 +146,8 @@ public class TokensRegexAnnotator implements Annotator {
       annotation.set(options.matchedExpressionsAnnotationKey, allMatched);
     }
 
-    if (verbose) {
-      Redwood.log(Redwood.DBG, "done.");
-    }
+    if (verbose)
+      timer.stop("done.");
   }
 
   @Override
@@ -163,5 +160,4 @@ public class TokensRegexAnnotator implements Annotator {
     // TODO: not sure what goes here
     return Collections.emptySet();
   }
-
 }

@@ -10,7 +10,6 @@ import edu.stanford.nlp.util.StringUtils;
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -1044,9 +1043,6 @@ public class ISODateInstance {
       if (Character.isDigit(inputDate.charAt(0))) {
         // just parse number part, assuming last two letters are st/nd/rd
         year = QuantifiableEntityNormalizer.normalizedNumberStringQuiet(inputDate.substring(0, inputDate.length() - 2), 1, "", null);
-        if (year == null) {
-          year = "";
-        }
         if (year.contains(".")) {//number format issue
           year = year.substring(0, year.indexOf('.'));
         }
@@ -1108,8 +1104,8 @@ public class ISODateInstance {
       extract = extract.replaceAll("[^0-9]", "");
       if (!extract.equals("")) {
         try {
-          Long i = Long.parseLong(extract);
-          if (i.intValue() < 32l && i.intValue() > 0l) {
+          Integer i = Integer.valueOf(extract);
+          if (i.intValue() < 32 && i.intValue() > 0) {
             if (isoDate.length() < 6) {//should already have year and month
               if (isoDate.length() != 4)//throw new RuntimeException("Error extracting dates; should have had month and year but didn't");
               {

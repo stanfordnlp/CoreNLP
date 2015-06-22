@@ -137,7 +137,11 @@ public class MaxentTaggerGUI extends JFrame {
     tagButton.setBackground(Color.WHITE);
     buttonPanel.add(tagButton);
 
-    tagButton.addActionListener(e -> performTagAction(e));
+    tagButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        performTagAction(e);
+      }
+    });
 
 
     //Lay it all out
@@ -163,7 +167,11 @@ public class MaxentTaggerGUI extends JFrame {
       @Override
       public void run() {
         final String taggedStr = tagger.tagString(s);
-        SwingUtilities.invokeLater(() -> outputBox.setText(taggedStr));
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            outputBox.setText(taggedStr);
+          }
+        });
       }
     };
     t.start();

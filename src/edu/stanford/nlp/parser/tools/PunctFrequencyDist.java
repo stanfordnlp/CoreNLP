@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import edu.stanford.nlp.international.Language;
+import edu.stanford.nlp.international.Languages;
+import edu.stanford.nlp.international.Languages.Language;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
@@ -28,7 +29,7 @@ public final class PunctFrequencyDist {
   static {
     usage.append(String.format("Usage: java %s [OPTS] punct_tag tree_file \n\n",PunctFrequencyDist.class.getName()));
     usage.append("Options:\n");
-    usage.append("  -l lang    : Select language settings from " + Language.langList + "\n");
+    usage.append("  -l lang    : Select language settings from " + Languages.listOfLanguages() + "\n");
     usage.append("  -e enc     : Encoding.\n");
   }
 
@@ -45,19 +46,16 @@ public final class PunctFrequencyDist {
 
     for(int i = 0; i < args.length; i++) {
       if(args[i].startsWith("-")) {
-        switch (args[i]) {
-          case "-l":
-            Language lang = Language.valueOf(args[++i].trim());
-            tlpp = lang.params;
+        if(args[i].equals("-l")) {
+          Language lang = Language.valueOf(args[++i].trim());
+          tlpp = Languages.getLanguageParams(lang);
 
-            break;
-          case "-e":
-            encoding = args[++i];
+        } else if(args[i].equals("-e")) {
+          encoding = args[++i];
 
-            break;
-          default:
-            System.out.println(usage.toString());
-            System.exit(-1);
+        } else {
+          System.out.println(usage.toString());
+          System.exit(-1);
         }
 
       } else {

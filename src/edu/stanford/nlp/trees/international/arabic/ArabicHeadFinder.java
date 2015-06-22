@@ -67,14 +67,11 @@ public class ArabicHeadFinder extends AbstractCollinsHeadFinder {
     abstract TreebankLanguagePack langPack();
 
     static TagSet tagSet(String str) {
-      switch (str) {
-        case "BIES_COLLAPSED":
-          return BIES_COLLAPSED;
-        case "ORIGINAL":
-          return ORIGINAL;
-        default:
-          throw new IllegalArgumentException("Don't know anything about tagset " + str);
-      }
+      if(str.equals("BIES_COLLAPSED"))
+        return BIES_COLLAPSED;
+      else if(str.equals("ORIGINAL"))
+        return ORIGINAL;
+      else throw new IllegalArgumentException("Don't know anything about tagset " + str);
     }
   }
 

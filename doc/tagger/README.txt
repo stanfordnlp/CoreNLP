@@ -1,4 +1,4 @@
-Stanford POS Tagger, v3.5.2 - 2015-04-20
+Stanford POS Tagger, v3.4 - 2014-06-16
 Copyright (c) 2002-2012 The Board of Trustees of
 The Leland Stanford Junior University. All Rights Reserved.
 
@@ -27,7 +27,7 @@ Kristina Toutanova, Dan Klein, Christopher Manning, and Yoram
 Singer. 2003. Feature-Rich Part-of-Speech Tagging with a Cyclic
 Dependency Network. In Proceedings of HLT-NAACL 2003 pages 252-259.
 
-The system requires Java 1.8+ to be installed. About 60 MB of memory is
+The system requires Java 1.6+ to be installed. About 60 MB of memory is
 required to run a trained tagger, depending on the OS, tagging model
 chosen, etc.  (i.e., you may need to give to java an option like java
 -mx120m). Plenty of memory is needed to train a tagger. It depends on
@@ -134,7 +134,7 @@ stanford-postagger-YYYY-MM-DD.jar
 
 src
 
-  A directory containing the Java 1.8 source code for the Stanford POS
+  A directory containing the Java 1.5 source code for the Stanford POS
   Tagger distribution.
 
 build.xml, Makefile
@@ -201,14 +201,6 @@ processing.
 
 CHANGES
 -----------------------------------------------
-
-2015-04-20    3.5.2     Update for compatibility 
-
-2015-01-29    3.5.1     General bugfixes 
-
-2014-10-26    3.5.0     Upgrade to Java 1.8 
-
-2014-08-27    3.4.1     Add Spanish models 
 
 2014-06-16      3.4     Using CC tagset for French 
 

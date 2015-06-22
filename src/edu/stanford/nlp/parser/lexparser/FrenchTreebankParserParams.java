@@ -1,5 +1,16 @@
 package edu.stanford.nlp.parser.lexparser;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import edu.stanford.nlp.international.french.FrenchMorphoFeatureSpecification;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification.MorphoFeatureType;
@@ -18,20 +29,16 @@ import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.international.french.DybroFrenchHeadFinder;
 import edu.stanford.nlp.trees.international.french.FrenchTreeReaderFactory;
-import edu.stanford.nlp.trees.international.french.FrenchTreebankLanguagePack;
 import edu.stanford.nlp.trees.international.french.FrenchXMLTreeReaderFactory;
+import edu.stanford.nlp.trees.international.french.FrenchTreebankLanguagePack;
+import edu.stanford.nlp.trees.tregex.TregexParseException;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
+import edu.stanford.nlp.trees.tregex.TregexPattern;
+import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
+import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.util.List;
 
 /**
  * TreebankLangParserParams for the French Treebank corpus. This package assumes that the FTB
@@ -42,13 +49,15 @@ import java.util.List;
  * @author Spence Green
  *
  */
-public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParams {
+public class FrenchTreebankParserParams extends AbstractTreebankParserParams {
 
   private static final long serialVersionUID = -6976724734594763986L;
 
   private final StringBuilder optionsString;
 
   private HeadFinder headFinder;
+  private final Map<String,Pair<TregexPattern,Function<TregexMatcher,String>>> annotationPatterns;
+  private final List<Pair<TregexPattern,Function<TregexMatcher,String>>> activeAnnotations;
 
   //The treebank is distributed in XML format.
   //Use -xmlFormat below to enable reading the raw files.
@@ -72,294 +81,251 @@ public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParam
     optionsString = new StringBuilder();
     optionsString.append("FrenchTreebankParserParams\n");
 
+    annotationPatterns = Generics.newHashMap();
+    activeAnnotations = new ArrayList<Pair<TregexPattern,Function<TregexMatcher,String>>>();
+
     initializeAnnotationPatterns();
   }
 
-  /**
-   * Features which should be enabled by default.
-   */
-  @Override
-  protected String[] baselineAnnotationFeatures() {
-    return new String[0];
-  }
+  private final List<String> baselineFeatures = new ArrayList<String>();
+  {
+    baselineFeatures.add("-tagPAFr");
 
-  /**
-   * Features to enable for the factored parser
-   */
-  private static final String[] factoredFeatures = new String[] {
-    "-tagPAFr",
-
-    "-markInf", "-markPart", "-markVN", "-coord1", "-de2", "-markP1",
+    baselineFeatures.add("-markInf");
+    baselineFeatures.add("-markPart");
+    baselineFeatures.add("-markVN");
+    baselineFeatures.add("-coord1");
+    baselineFeatures.add("-de2");
+    baselineFeatures.add("-markP1");
 
     //MWE features...don't help overall parsing, but help MWE categories
-    "-MWAdvS", "-MWADVSel1", "-MWADVSel2", "-MWNSel1", "-MWNSel2",
+    baselineFeatures.add("-MWAdvS");
+    baselineFeatures.add("-MWADVSel1");
+    baselineFeatures.add("-MWADVSel2");
+    baselineFeatures.add("-MWNSel1");
+    baselineFeatures.add("-MWNSel2");
 
     // New features for CL submission
-    "-splitPUNC",
-  };
+    baselineFeatures.add("-splitPUNC");
+  }
+  private final List<String> additionalFeatures = new ArrayList<String>();
 
-  @SuppressWarnings("unchecked")
+
   private void initializeAnnotationPatterns() {
-    /***************************************************************************
-     *                           BASELINE FEATURES
-     ***************************************************************************/
-    // Incremental delta improvements are over the previous feature (dev set, <= 40)
-    //
+    try {
 
-    // POS Splitting for verbs
-    annotations.put("-markInf", new Pair("@V > (@VN > @VPinf)",
-                                         new SimpleStringFunction("-infinitive")));
-    annotations.put("-markPart", new Pair("@V > (@VN > @VPpart)",
-                                          new SimpleStringFunction("-participle")));
-    annotations.put("-markVN", new Pair("__ << @VN", new SimpleStringFunction("-withVN")));
+      TregexPatternCompiler tregexPatternCompiler = new TregexPatternCompiler(headFinder());
 
-    // +1.45 F1  (Helps MWEs significantly)
-    annotations.put("-tagPAFr", new Pair("!@PUNC < (__ !< __) > __=parent",
-                                         new AddRelativeNodeFunction("-", "parent", true)));
+      /***************************************************************************
+       *                           BASELINE FEATURES
+       ***************************************************************************/
+      // Incremental delta improvements are over the previous feature (dev set, <= 40)
+      //
 
-    // +.14 F1
-    annotations.put("-coord1", new Pair("@COORD <2 __=word",
-                                        new AddRelativeNodeFunction("-","word", true)));
+      // POS Splitting for verbs
+      annotationPatterns.put("-markInf",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@V > (@VN > @VPinf)"),new SimpleStringFunction("-infinitive")));
+      annotationPatterns.put("-markPart",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@V > (@VN > @VPpart)"),new SimpleStringFunction("-participle")));
+      annotationPatterns.put("-markVN",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("__ << @VN"),new SimpleStringFunction("-withVN")));
 
-    // +.70 F1 -- de c-commands other stuff dominated by NP, PP, and COORD
-    annotations.put("-de2", new Pair("@P < /^([Dd]es?|du|d')$/", new SimpleStringFunction("-de2")));
-    annotations.put("-de3", new Pair("@NP|PP|COORD >+(@NP|PP) (@PP <, (@P < /^([Dd]es?|du|d')$/))",
-                                     new SimpleStringFunction("-de3")));
+      // +1.45 F1  (Helps MWEs significantly)
+      annotationPatterns.put("-tagPAFr", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("!@PUNC < (__ !< __) > __=parent"),new AddRelativeNodeFunction("-","parent", true)));
 
-    // +.31 F1
-    annotations.put("-markP1",new Pair("@P > (@PP > @NP)", new SimpleStringFunction("-n")));
+      // +.14 F1
+      annotationPatterns.put("-coord1",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@COORD <2 __=word"), new AddRelativeNodeFunction("-","word", true)));
 
-    //MWEs
-    //(for MWADV 75.92 -> 77.16)
-    annotations.put("-MWAdvS", new Pair("@MWADV > /S/", new SimpleStringFunction("-mwadv-s")));
+      // +.70 F1 -- de c-commands other stuff dominated by NP, PP, and COORD
+      annotationPatterns.put("-de2", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@P < /^([Dd]es?|du|d')$/"),new SimpleStringFunction("-de2")));
+      annotationPatterns.put("-de3", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@NP|PP|COORD >+(@NP|PP) (@PP <, (@P < /^([Dd]es?|du|d')$/))"),new SimpleStringFunction("-de3")));
 
-    annotations.put("-MWADVSel1", new Pair("@MWADV <1 @P <2 @N !<3 __",
-                                           new SimpleStringFunction("-mwadv1")));
-    annotations.put("-MWADVSel2", new Pair("@MWADV <1 @P <2 @D <3 @N !<4 __",
-                                           new SimpleStringFunction("-mwadv2")));
+      // +.31 F1
+      annotationPatterns.put("-markP1",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@P > (@PP > @NP)"),new SimpleStringFunction("-n")));
 
-    annotations.put("-MWNSel1", new Pair("@MWN <1 @N <2 @A !<3 __",
-                                         new SimpleStringFunction("-mwn1")));
-    annotations.put("-MWNSel2", new Pair("@MWN <1 @N <2 @P <3 @N !<4 __",
-                                         new SimpleStringFunction("-mwn2")));
-    annotations.put("-MWNSel3", new Pair("@MWN <1 @N <2 @- <3 @N !<4 __",
-                                         new SimpleStringFunction("-mwn3")));
+      //MWEs
+      //(for MWADV 75.92 -> 77.16)
+      annotationPatterns.put("-MWAdvS", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWADV > /S/"),new SimpleStringFunction("-mwadv-s")));
 
-    annotations.put("-splitPUNC",new Pair("@PUNC < __=" + AnnotatePunctuationFunction.key,
-                                          new AnnotatePunctuationFunction()));
+      annotationPatterns.put("-MWADVSel1", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWADV <1 @P <2 @N !<3 __"),new SimpleStringFunction("-mwadv1")));
+      annotationPatterns.put("-MWADVSel2", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWADV <1 @P <2 @D <3 @N !<4 __"),new SimpleStringFunction("-mwadv2")));
 
-    /***************************************************************************
-     *                          TEST FEATURES
-     ***************************************************************************/
+      annotationPatterns.put("-MWNSel1", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWN <1 @N <2 @A !<3 __"),new SimpleStringFunction("-mwn1")));
+      annotationPatterns.put("-MWNSel2", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWN <1 @N <2 @P <3 @N !<4 __"),new SimpleStringFunction("-mwn2")));
+      annotationPatterns.put("-MWNSel3", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWN <1 @N <2 @- <3 @N !<4 __"),new SimpleStringFunction("-mwn3")));
 
-    // Mark MWE tags only
-    annotations.put("-mweTag", new Pair("!@PUNC < (__ !< __) > /MW/=parent",
-                                        new AddRelativeNodeFunction("-","parent", true)));
+      annotationPatterns.put("-splitPUNC",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@PUNC < __=" + AnnotatePunctuationFunction.key),new AnnotatePunctuationFunction()));
+
+      /***************************************************************************
+       *                          TEST FEATURES
+       ***************************************************************************/
+
+      // Mark MWE tags only
+      annotationPatterns.put("-mweTag", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("!@PUNC < (__ !< __) > /MW/=parent"),new AddRelativeNodeFunction("-","parent", true)));
 
 
-    annotations.put("-sq",new Pair("@SENT << /\\?/", new SimpleStringFunction("-Q")));
+      annotationPatterns.put("-sq",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@SENT << /\\?/"),new SimpleStringFunction("-Q")));
 
-    //New phrasal splits
-    annotations.put("-hasVP", new Pair("!@ROOT|SENT << /^VP/", new SimpleStringFunction("-hasVP")));
-    annotations.put("-hasVP2", new Pair("__ << /^VP/", new SimpleStringFunction("-hasVP")));
-    annotations.put("-npCOORD", new Pair("@NP < @COORD", new SimpleStringFunction("-coord")));
-    annotations.put("-npVP", new Pair("@NP < /VP/", new SimpleStringFunction("-vp")));
+      //New phrasal splits
+      annotationPatterns.put("-hasVP", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("!@ROOT|SENT << /^VP/"),new SimpleStringFunction("-hasVP")));
+      annotationPatterns.put("-hasVP2", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("__ << /^VP/"),new SimpleStringFunction("-hasVP")));
+      annotationPatterns.put("-npCOORD", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@NP < @COORD"),new SimpleStringFunction("-coord")));
+      annotationPatterns.put("-npVP", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@NP < /VP/"),new SimpleStringFunction("-vp")));
 
-    //NPs
-    annotations.put("-baseNP1", new Pair("@NP <1 @D <2 @N !<3 __",
-                                         new SimpleStringFunction("-np1")));
-    annotations.put("-baseNP2", new Pair("@NP <1 @D <2 @MWN !<3 __",
-                                         new SimpleStringFunction("-np2")));
-    annotations.put("-baseNP3", new Pair("@NP <1 @MWD <2 @N !<3 __ ",
-                                         new SimpleStringFunction("-np3")));
+      //NPs
+      annotationPatterns.put("-baseNP1", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@NP <1 @D <2 @N !<3 __"),new SimpleStringFunction("-np1")));
+      annotationPatterns.put("-baseNP2", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@NP <1 @D <2 @MWN !<3 __"),new SimpleStringFunction("-np2")));
+      annotationPatterns.put("-baseNP3", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@NP <1 @MWD <2 @N !<3 __ "),new SimpleStringFunction("-np3")));
 
 
-    //MWEs
-    annotations.put("-npMWN1", new Pair("@NP < (@MWN < @A)", new SimpleStringFunction("-mwna")));
-    annotations.put("-npMWN2", new Pair("@NP <1 @D <2 @MWN <3 @PP !<4 __",
-                                        new SimpleStringFunction("-mwn2")));
-    annotations.put("-npMWN3", new Pair("@NP <1 @D <2 (@MWN <1 @N <2 @A !<3 __) !<3 __",
-                                        new SimpleStringFunction("-mwn3")));
-    annotations.put("-npMWN4", new Pair(
-      "@PP <, @P <2 (@NP <1 @D <2 (@MWN <1 @N <2 @A !<3 __) !<3 __) !<3 __",
-      new SimpleStringFunction("-mwn3")));
+      //MWEs
+      annotationPatterns.put("-npMWN1", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@NP < (@MWN < @A)"),new SimpleStringFunction("-mwna")));
+      annotationPatterns.put("-npMWN2", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@NP <1 @D <2 @MWN <3 @PP !<4 __"),new SimpleStringFunction("-mwn2")));
+      annotationPatterns.put("-npMWN3", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@NP <1 @D <2 (@MWN <1 @N <2 @A !<3 __) !<3 __"),new SimpleStringFunction("-mwn3")));
+      annotationPatterns.put("-npMWN4", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@PP <, @P <2 (@NP <1 @D <2 (@MWN <1 @N <2 @A !<3 __) !<3 __) !<3 __"),new SimpleStringFunction("-mwn3")));
 
 
-    //The whopper....
-    annotations.put("-MWNSel", new Pair("@MWN", new AddPOSSequenceFunction("-",600,true)));
-    annotations.put("-MWADVSel", new Pair("@MWADV", new AddPOSSequenceFunction("-",500,true)));
-    annotations.put("-MWASel", new Pair("@MWA", new AddPOSSequenceFunction("-",100,true)));
-    annotations.put("-MWCSel", new Pair("@MWC", new AddPOSSequenceFunction("-",400,true)));
-    annotations.put("-MWDSel", new Pair("@MWD", new AddPOSSequenceFunction("-",100,true)));
-    annotations.put("-MWPSel", new Pair("@MWP", new AddPOSSequenceFunction("-",600,true)));
-    annotations.put("-MWPROSel", new Pair("@MWPRO", new AddPOSSequenceFunction("-",60,true)));
-    annotations.put("-MWVSel", new Pair("@MWV", new AddPOSSequenceFunction("-",200,true)));
+      //The whopper....
+      annotationPatterns.put("-MWNSel", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWN"),new AddPOSSequenceFunction("-",600,true)));
+      annotationPatterns.put("-MWADVSel", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWADV"),new AddPOSSequenceFunction("-",500,true)));
+      annotationPatterns.put("-MWASel", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWA"),new AddPOSSequenceFunction("-",100,true)));
+      annotationPatterns.put("-MWCSel", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWC"),new AddPOSSequenceFunction("-",400,true)));
+      annotationPatterns.put("-MWDSel", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWD"),new AddPOSSequenceFunction("-",100,true)));
+      annotationPatterns.put("-MWPSel", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWP"),new AddPOSSequenceFunction("-",600,true)));
+      annotationPatterns.put("-MWPROSel", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWPRO"),new AddPOSSequenceFunction("-",60,true)));
+      annotationPatterns.put("-MWVSel", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWV"),new AddPOSSequenceFunction("-",200,true)));
 
-    //MWN
-    annotations.put("-mwn1", new Pair("@MWN <1 @N <2 @A !<3 __", new SimpleStringFunction("-na")));
-    annotations.put("-mwn2", new Pair("@MWN <1 @N <2 @P <3 @N !<4 __",
-                                      new SimpleStringFunction("-npn")));
-    annotations.put("-mwn3", new Pair("@MWN <1 @N <2 @- <3 @N !<4 __",
-                                      new SimpleStringFunction("-n-n")));
-    annotations.put("-mwn4", new Pair("@MWN <1 @N <2 @N !<3 __", new SimpleStringFunction("-nn")));
-    annotations.put("-mwn5", new Pair("@MWN <1 @D <2 @N !<3 __", new SimpleStringFunction("-dn")));
+      //MWN
+      annotationPatterns.put("-mwn1", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWN <1 @N <2 @A !<3 __"),new SimpleStringFunction("-na")));
+      annotationPatterns.put("-mwn2", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWN <1 @N <2 @P <3 @N !<4 __"),new SimpleStringFunction("-npn")));
+      annotationPatterns.put("-mwn3", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWN <1 @N <2 @- <3 @N !<4 __"),new SimpleStringFunction("-n-n")));
+      annotationPatterns.put("-mwn4", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWN <1 @N <2 @N !<3 __"),new SimpleStringFunction("-nn")));
+      annotationPatterns.put("-mwn5", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWN <1 @D <2 @N !<3 __"),new SimpleStringFunction("-dn")));
 
-    //wh words
-    annotations.put("-hasWH", new Pair(
-      "__ < /^(qui|quoi|comment|quel|quelle|quels|quelles|où|combien|que|pourquoi|quand)$/",
-      new SimpleStringFunction("-wh")));
+      //wh words
+      annotationPatterns.put("-hasWH", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("__ < /^(qui|quoi|comment|quel|quelle|quels|quelles|où|combien|que|pourquoi|quand)$/"),new SimpleStringFunction("-wh")));
 
 
-    //POS splitting
-    annotations.put("-markNNP2", new Pair("@N < /^[A-Z]/", new SimpleStringFunction("-nnp")));
+      //POS splitting
+      annotationPatterns.put("-markNNP2", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@N < /^[A-Z]/"),new SimpleStringFunction("-nnp")));
 
-    annotations.put("-markD1",new Pair("@D > (__ > @PP)", new SimpleStringFunction("-p")));
-    annotations.put("-markD2",new Pair("@D > (__ > @NP)", new SimpleStringFunction("-n")));
-    annotations.put("-markD3",new Pair("@D > (__ > /^VP/)", new SimpleStringFunction("-v")));
-    annotations.put("-markD4",new Pair("@D > (__ > /^S/)", new SimpleStringFunction("-s")));
-    annotations.put("-markD5",new Pair("@D > (__ > @COORD)", new SimpleStringFunction("-c")));
+      annotationPatterns.put("-markD1",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@D > (__ > @PP)"),new SimpleStringFunction("-p")));
+      annotationPatterns.put("-markD2",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@D > (__ > @NP)"),new SimpleStringFunction("-n")));
+      annotationPatterns.put("-markD3",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@D > (__ > /^VP/)"),new SimpleStringFunction("-v")));
+      annotationPatterns.put("-markD4",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@D > (__ > /^S/)"),new SimpleStringFunction("-s")));
+      annotationPatterns.put("-markD5",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@D > (__ > @COORD)"),new SimpleStringFunction("-c")));
 
-    //Appositives?
-    annotations.put("-app1", new Pair("@NP < /[,]/", new SimpleStringFunction("-app1")));
-    annotations.put("-app2", new Pair("/[^,\\-:;\"]/ > (@NP < /^[,]$/) $,, /^[,]$/",
-                                      new SimpleStringFunction("-app2")));
+      //Appositives?
+      annotationPatterns.put("-app1", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@NP < /[,]/"),new SimpleStringFunction("-app1")));
+      annotationPatterns.put("-app2", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("/[^,\\-:;\"]/ > (@NP < /^[,]$/) $,, /^[,]$/"),new SimpleStringFunction("-app2")));
 
-    //COORD
-    annotations.put("-coord2",new Pair("@COORD !< @C", new SimpleStringFunction("-nonC")));
-    annotations.put("-hasCOORD",new Pair("__ < @COORD", new SimpleStringFunction("-hasCOORD")));
-    annotations.put("-hasCOORDLS",new Pair("@SENT <, @COORD",
-                                           new SimpleStringFunction("-hasCOORDLS")));
-    annotations.put("-hasCOORDNonS",new Pair("__ < @COORD !<, @COORD",
-                                             new SimpleStringFunction("-hasCOORDNonS")));
+      //COORD
+      annotationPatterns.put("-coord2",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@COORD !< @C"), new SimpleStringFunction("-nonC")));
+      annotationPatterns.put("-hasCOORD",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("__ < @COORD"), new SimpleStringFunction("-hasCOORD")));
+      annotationPatterns.put("-hasCOORDLS",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@SENT <, @COORD"), new SimpleStringFunction("-hasCOORDLS")));
+      annotationPatterns.put("-hasCOORDNonS",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("__ < @COORD !<, @COORD"), new SimpleStringFunction("-hasCOORDNonS")));
 
 
-    // PP / VPInf
-    annotations.put("-pp1",new Pair("@P < /^(du|des|au|aux)$/=word",
-                                    new AddRelativeNodeFunction("-","word", false)));
-    annotations.put("-vpinf1",new Pair("@VPinf <, __=word",
-                                       new AddRelativeNodeFunction("-","word", false)));
+      // PP / VPInf
+      annotationPatterns.put("-pp1",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@P < /^(du|des|au|aux)$/=word"), new AddRelativeNodeFunction("-","word", false)));
+      annotationPatterns.put("-vpinf1",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@VPinf <, __=word"), new AddRelativeNodeFunction("-","word", false)));
 
-    annotations.put("-vpinf2",new Pair("@VPinf <, __=word",
-                                       new AddRelativeNodeFunction("-","word", true)));
+      annotationPatterns.put("-vpinf2",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@VPinf <, __=word"), new AddRelativeNodeFunction("-","word", true)));
 
-    // PP splitting (subsumed by the de2-3 features)
-    annotations.put("-splitIN",new Pair(
-      "@PP <, (P < /^([Dd]e|[Dd]'|[Dd]es|[Dd]u|à|[Aa]u|[Aa]ux|[Ee]n|[Dd]ans|[Pp]ar|[Ss]ur|[Pp]our|[Aa]vec|[Ee]ntre)$/=word)",
-      new AddRelativeNodeFunction("-","word", false,true)));
+      // PP splitting (subsumed by the de2-3 features)
+      annotationPatterns.put("-splitIN",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@PP <, (P < /^([Dd]e|[Dd]'|[Dd]es|[Dd]u|à|[Aa]u|[Aa]ux|[Ee]n|[Dd]ans|[Pp]ar|[Ss]ur|[Pp]our|[Aa]vec|[Ee]ntre)$/=word)"), new AddRelativeNodeFunction("-","word", false,true)));
 
-    annotations.put("-splitP",new Pair(
-      "@P < /^([Dd]e|[Dd]'|[Dd]es|[Dd]u|à|[Aa]u|[Aa]ux|[Ee]n|[Dd]ans|[Pp]ar|[Ss]ur|[Pp]our|[Aa]vec|[Ee]ntre)$/=word",
-      new AddRelativeNodeFunction("-","word", false,true)));
+      annotationPatterns.put("-splitP",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@P < /^([Dd]e|[Dd]'|[Dd]es|[Dd]u|à|[Aa]u|[Aa]ux|[Ee]n|[Dd]ans|[Pp]ar|[Ss]ur|[Pp]our|[Aa]vec|[Ee]ntre)$/=word"), new AddRelativeNodeFunction("-","word", false,true)));
 
-    //de features
-    annotations.put("-hasde", new Pair("@NP|PP <+(@NP|PP) (P < de)",
-                                       new SimpleStringFunction("-hasDE")));
-    annotations.put("-hasde2", new Pair("@PP < de", new SimpleStringFunction("-hasDE2")));
+      //de features
+      annotationPatterns.put("-hasde", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@NP|PP <+(@NP|PP) (P < de)"),new SimpleStringFunction("-hasDE")));
+      annotationPatterns.put("-hasde2", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@PP < de"),new SimpleStringFunction("-hasDE2")));
 
-    //NPs
-    annotations.put("-np1", new Pair("@NP < /^,$/", new SimpleStringFunction("-np1")));
-    annotations.put("-np2", new Pair("@NP <, (@D < le|la|les)", new SimpleStringFunction("-np2")));
-    annotations.put("-np3", new Pair("@D < le|la|les", new SimpleStringFunction("-def")));
+      //NPs
+      annotationPatterns.put("-np1", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@NP < /^,$/"),new SimpleStringFunction("-np1")));
+      annotationPatterns.put("-np2", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@NP <, (@D < le|la|les)"),new SimpleStringFunction("-np2")));
+      annotationPatterns.put("-np3", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@D < le|la|les"),new SimpleStringFunction("-def")));
 
 
-    annotations.put("-baseNP", new Pair("@NP <, @D <- (@N , @D)", new SimpleStringFunction("-baseNP")));
+      annotationPatterns.put("-baseNP", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@NP <, @D <- (@N , @D)"),new SimpleStringFunction("-baseNP")));
 
-    // PP environment
-    annotations.put("-markP2",new Pair("@P > (@PP > @AP)", new SimpleStringFunction("-a")));
-    annotations.put("-markP3",new Pair("@P > (@PP > @SENT|Ssub|VPinf|VPpart)",
-                                       new SimpleStringFunction("-v")));
-    annotations.put("-markP4",new Pair("@P > (@PP > @Srel)", new SimpleStringFunction("-r")));
-    annotations.put("-markP5",new Pair("@P > (@PP > @COORD)", new SimpleStringFunction("-c")));
-    annotations.put("-markP6",new Pair("@P > @VPinf", new SimpleStringFunction("-b")));
-    annotations.put("-markP7",new Pair("@P > @VPpart", new SimpleStringFunction("-b")));
-    annotations.put("-markP8",new Pair("@P > /^MW|NP/", new SimpleStringFunction("-internal")));
-    annotations.put("-markP9",new Pair("@P > @COORD", new SimpleStringFunction("-c")));
-
-
-    /***************************************************************************
-     *                           DIDN'T WORK
-     ***************************************************************************/
-    //MWEs
-    annotations.put("-hasMWP", new Pair("!/S/ < @MWP", new SimpleStringFunction("-mwp")));
-    annotations.put("-hasMWP2", new Pair("@PP < @MWP", new SimpleStringFunction("-mwp2")));
-    annotations.put("-hasMWN2", new Pair("@PP <+(@NP) @MWN", new SimpleStringFunction("-hasMWN2")));
-    annotations.put("-hasMWN3", new Pair("@NP < @MWN", new SimpleStringFunction("-hasMWN3")));
-
-    annotations.put("-hasMWADV", new Pair("/^A/ < @MWADV", new SimpleStringFunction("-hasmwadv")));
-    annotations.put("-hasC1", new Pair("__ < @MWC", new SimpleStringFunction("-hasc1")));
-    annotations.put("-hasC2", new Pair("@MWC > /S/", new SimpleStringFunction("-hasc2")));
-    annotations.put("-hasC3", new Pair("@COORD < @MWC", new SimpleStringFunction("-hasc3")));
-    annotations.put("-uMWN", new Pair("@NP <: @MWN", new SimpleStringFunction("-umwn")));
-
-    //POS splitting
-    annotations.put("-splitC", new Pair("@C < __=word",
-                                        new AddRelativeNodeFunction("-","word", false)));
-    annotations.put("-splitD",new Pair("@D < /^[^\\d+]{1,4}$/=word",
-                                       new AddRelativeNodeFunction("-","word", false)));
-    annotations.put("-de1", new Pair("@D < /^([Dd]es?|du|d')$/",
-                                     new SimpleStringFunction("-de1")));
-
-    annotations.put("-markNNP1", new Pair("@NP < (N < /^[A-Z]/) !< /^[^NA]/",
-                                          new SimpleStringFunction("-nnp")));
-
-    //PP environment
-    annotations.put("-markPP1",new Pair("@PP > @NP", new SimpleStringFunction("-n")));
-    annotations.put("-markPP2",new Pair("@PP > @AP", new SimpleStringFunction("-a")));
-    annotations.put("-markPP3",new Pair("@PP > @SENT|Ssub|VPinf|VPpart",
-                                        new SimpleStringFunction("-v")));
-    annotations.put("-markPP4",new Pair("@PP > @Srel", new SimpleStringFunction("-r")));
-    annotations.put("-markPP5",new Pair("@PP > @COORD", new SimpleStringFunction("-c")));
-
-    annotations.put("-dominateCC",new Pair("__ << @COORD", new SimpleStringFunction("-withCC")));
-    annotations.put("-dominateIN",new Pair("__ << @PP", new SimpleStringFunction("-withPP")));
-
-    //Klein and Manning style features
-    annotations.put("-markContainsVP", new Pair("__ << /^VP/",
-                                                new SimpleStringFunction("-hasV")));
-    annotations.put("-markContainsVP2",new Pair("__ << /^VP/=word",
-                                                new AddRelativeNodeFunction("-hasV-","word", false)));
-
-    annotations.put("-markVNArgs",new Pair("@VN $+ __=word1",
-                                           new AddRelativeNodeFunction("-","word1", false)));
-    annotations.put("-markVNArgs2",new Pair("@VN > __=word1 $+ __=word2",
-                                            new AddRelativeNodeFunction("-","word1","word2", false)));
-
-    annotations.put("-markContainsMW", new Pair("__ << /^MW/", new SimpleStringFunction("-hasMW")));
-    annotations.put("-markContainsMW2",new Pair("__ << /^MW/=word",
-                                                new AddRelativeNodeFunction("-has-","word", false)));
-
-    //MWE Sequence features
-    annotations.put("-mwStart", new Pair("__ >, /^MW/", new SimpleStringFunction("-mwStart")));
-    annotations.put("-mwMiddle", new Pair("__ !>- /^MW/ !>, /^MW/ > /^MW/",
-                                          new SimpleStringFunction("-mwMid")));
-    annotations.put("-mwMiddle2", new Pair("__ !>- /^MW/ !>, /^MW/ > /^MW/ , __=pos",
-                                           new AddRelativeNodeFunction("-","pos", true)));
-    annotations.put("-mwEnd", new Pair("__ >- /^MW/", new SimpleStringFunction("-mwEnd")));
-
-    //AP Features
-    annotations.put("-nonNAP",new Pair("@AP !$, @N|AP", new SimpleStringFunction("-nap")));
-
-    //Phrasal splitting
-    annotations.put("-markNPTMP", new Pair(
-      "@NP < (@N < /^(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche|Lundi|Mardi|Mercredi|Jeudi|Vendredi|Samedi|Dimanche|janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre|Janvier|Février|Mars|Avril|Mai|Juin|Juillet|Août|Septembre|Octobre|Novembre|Décembre)$/)",
-      new SimpleStringFunction("-tmp")));
-
-    //Singular
-    annotations.put("-markSing1", new Pair("@NP < (D < /^(ce|cette|une|la|le|un|sa|son|ma|mon|ta|ton)$/)",
-                                           new SimpleStringFunction("-sing")));
-    annotations.put("-markSing2", new Pair("@AP < (A < (/[^sx]$/ !< __))",
-                                           new SimpleStringFunction("-sing")));
-    annotations.put("-markSing3", new Pair("@VPpart < (V < /(e|é)$/)",
-                                           new SimpleStringFunction("-sing")));
-
-    //Plural
-    annotations.put("-markPl1", new Pair("@NP < (D < /s$/)", new SimpleStringFunction("-pl")));
-    annotations.put("-markPl2", new Pair("@AP < (A < /[sx]$/)", new SimpleStringFunction("-pl")));
-    annotations.put("-markPl3", new Pair("@VPpart < (V < /(es|és)$/)",
-                                         new SimpleStringFunction("-pl")));
+      // PP environment
+      annotationPatterns.put("-markP2",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@P > (@PP > @AP)"),new SimpleStringFunction("-a")));
+      annotationPatterns.put("-markP3",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@P > (@PP > @SENT|Ssub|VPinf|VPpart)"),new SimpleStringFunction("-v")));
+      annotationPatterns.put("-markP4",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@P > (@PP > @Srel)"),new SimpleStringFunction("-r")));
+      annotationPatterns.put("-markP5",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@P > (@PP > @COORD)"),new SimpleStringFunction("-c")));
+      annotationPatterns.put("-markP6",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@P > @VPinf"),new SimpleStringFunction("-b")));
+      annotationPatterns.put("-markP7",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@P > @VPpart"),new SimpleStringFunction("-b")));
+      annotationPatterns.put("-markP8",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@P > /^MW|NP/"),new SimpleStringFunction("-internal")));
+      annotationPatterns.put("-markP9",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@P > @COORD"),new SimpleStringFunction("-c")));
 
 
-    compileAnnotations(headFinder());
+      /***************************************************************************
+       *                           DIDN'T WORK
+       ***************************************************************************/
+      //MWEs
+      annotationPatterns.put("-hasMWP", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("!/S/ < @MWP"),new SimpleStringFunction("-mwp")));
+      annotationPatterns.put("-hasMWP2", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@PP < @MWP"),new SimpleStringFunction("-mwp2")));
+      annotationPatterns.put("-hasMWN2", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@PP <+(@NP) @MWN"),new SimpleStringFunction("-hasMWN2")));
+      annotationPatterns.put("-hasMWN3", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@NP < @MWN"),new SimpleStringFunction("-hasMWN3")));
+
+      annotationPatterns.put("-hasMWADV", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("/^A/ < @MWADV"),new SimpleStringFunction("-hasmwadv")));
+      annotationPatterns.put("-hasC1", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("__ < @MWC"),new SimpleStringFunction("-hasc1")));
+      annotationPatterns.put("-hasC2", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWC > /S/"),new SimpleStringFunction("-hasc2")));
+      annotationPatterns.put("-hasC3", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@COORD < @MWC"),new SimpleStringFunction("-hasc3")));
+      annotationPatterns.put("-uMWN", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@NP <: @MWN"),new SimpleStringFunction("-umwn")));
+
+      //POS splitting
+      annotationPatterns.put("-splitC", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@C < __=word"),new AddRelativeNodeFunction("-","word", false)));
+      annotationPatterns.put("-splitD",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@D < /^[^\\d+]{1,4}$/=word"), new AddRelativeNodeFunction("-","word", false)));
+      annotationPatterns.put("-de1", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@D < /^([Dd]es?|du|d')$/"),new SimpleStringFunction("-de1")));
+
+      annotationPatterns.put("-markNNP1", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@NP < (N < /^[A-Z]/) !< /^[^NA]/"),new SimpleStringFunction("-nnp")));
+
+      //PP environment
+      annotationPatterns.put("-markPP1",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@PP > @NP"),new SimpleStringFunction("-n")));
+      annotationPatterns.put("-markPP2",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@PP > @AP"),new SimpleStringFunction("-a")));
+      annotationPatterns.put("-markPP3",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@PP > @SENT|Ssub|VPinf|VPpart"),new SimpleStringFunction("-v")));
+      annotationPatterns.put("-markPP4",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@PP > @Srel"),new SimpleStringFunction("-r")));
+      annotationPatterns.put("-markPP5",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@PP > @COORD"),new SimpleStringFunction("-c")));
+
+      annotationPatterns.put("-dominateCC",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("__ << @COORD"),new SimpleStringFunction("-withCC")));
+      annotationPatterns.put("-dominateIN",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("__ << @PP"),new SimpleStringFunction("-withPP")));
+
+      //Klein and Manning style features
+      annotationPatterns.put("-markContainsVP", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("__ << /^VP/"),new SimpleStringFunction("-hasV")));
+      annotationPatterns.put("-markContainsVP2",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("__ << /^VP/=word"), new AddRelativeNodeFunction("-hasV-","word", false)));
+
+      annotationPatterns.put("-markVNArgs",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@VN $+ __=word1"), new AddRelativeNodeFunction("-","word1", false)));
+      annotationPatterns.put("-markVNArgs2",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@VN > __=word1 $+ __=word2"), new AddRelativeNodeFunction("-","word1","word2", false)));
+
+      annotationPatterns.put("-markContainsMW", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("__ << /^MW/"),new SimpleStringFunction("-hasMW")));
+      annotationPatterns.put("-markContainsMW2",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("__ << /^MW/=word"), new AddRelativeNodeFunction("-has-","word", false)));
+
+      //MWE Sequence features
+      annotationPatterns.put("-mwStart", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("__ >, /^MW/"),new SimpleStringFunction("-mwStart")));
+      annotationPatterns.put("-mwMiddle", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("__ !>- /^MW/ !>, /^MW/ > /^MW/"),new SimpleStringFunction("-mwMid")));
+      annotationPatterns.put("-mwMiddle2", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("__ !>- /^MW/ !>, /^MW/ > /^MW/ , __=pos"),new AddRelativeNodeFunction("-","pos", true)));
+      annotationPatterns.put("-mwEnd", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("__ >- /^MW/"),new SimpleStringFunction("-mwEnd")));
+
+      //AP Features
+      annotationPatterns.put("-nonNAP",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@AP !$, @N|AP"), new SimpleStringFunction("-nap")));
+
+      //Phrasal splitting
+      annotationPatterns.put("-markNPTMP", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@NP < (@N < /^(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche|Lundi|Mardi|Mercredi|Jeudi|Vendredi|Samedi|Dimanche|janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre|Janvier|Février|Mars|Avril|Mai|Juin|Juillet|Août|Septembre|Octobre|Novembre|Décembre)$/)"),new SimpleStringFunction("-tmp")));
+
+      //Singular
+      annotationPatterns.put("-markSing1", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@NP < (D < /^(ce|cette|une|la|le|un|sa|son|ma|mon|ta|ton)$/)"),new SimpleStringFunction("-sing")));
+      annotationPatterns.put("-markSing2", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@AP < (A < (/[^sx]$/ !< __))"),new SimpleStringFunction("-sing")));
+      annotationPatterns.put("-markSing3", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@VPpart < (V < /(e|é)$/)"),new SimpleStringFunction("-sing")));
+
+      //Plural
+      annotationPatterns.put("-markPl1", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@NP < (D < /s$/)"),new SimpleStringFunction("-pl")));
+      annotationPatterns.put("-markPl2", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@AP < (A < /[sx]$/)"),new SimpleStringFunction("-pl")));
+      annotationPatterns.put("-markPl3", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@VPpart < (V < /(es|és)$/)"),new SimpleStringFunction("-pl")));
+
+    } catch (TregexParseException e) {
+      int nth = annotationPatterns.size() + 1;
+      String nthStr = (nth == 1) ? "1st": ((nth == 2) ? "2nd": nth + "th");
+      System.err.println("Parse exception on " + nthStr + " annotation pattern initialization:" + e);
+    }
   }
 
   private static class AnnotatePunctuationFunction implements SerializableFunction<TregexMatcher,String> {
@@ -369,17 +335,14 @@ public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParam
 
       final String punc = m.getNode(key).value();
 
-      switch (punc) {
-        case ".":
-          return "-fs";
-        case "?":
-          return "-quest";
-        case ",":
-          return "-comma";
-        case ":":
-        case ";":
-          return "-colon";
-      }
+      if (punc.equals("."))
+        return "-fs";
+      else if (punc.equals("?"))
+        return "-quest";
+      else if (punc.equals(","))
+        return "-comma";
+      else if (punc.equals(":") || punc.equals(";"))
+        return "-colon";
 //      else if (punc.equals("-LRB-"))
 //        return "-lrb";
 //      else if (punc.equals("-RRB-"))
@@ -399,6 +362,29 @@ public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParam
 
     @Override
     public String toString() { return "AnnotatePunctuationFunction"; }
+
+    private static final long serialVersionUID = 1L;
+  }
+
+  /**
+   * Annotates all nodes that match the tregex query with annotationMark.
+   *
+   */
+  private static class SimpleStringFunction implements SerializableFunction<TregexMatcher,String> {
+
+    private String annotationMark;
+
+    public SimpleStringFunction(String annotationMark) {
+      this.annotationMark = annotationMark;
+    }
+
+
+    public String apply(TregexMatcher tregexMatcher) {
+      return annotationMark;
+    }
+
+    @Override
+    public String toString() { return "SimpleStringFunction[" + annotationMark + ']'; }
 
     private static final long serialVersionUID = 1L;
   }
@@ -519,7 +505,19 @@ public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParam
 
     headFinder = hf;
 
-    compileAnnotations(hf);
+    // Need to re-initialize all patterns due to the new headFinder
+    initializeAnnotationPatterns();
+
+    activeAnnotations.clear();
+
+    for(String key : baselineFeatures) {
+      Pair<TregexPattern,Function<TregexMatcher,String>> p = annotationPatterns.get(key);
+      activeAnnotations.add(p);
+    }
+    for(String key : additionalFeatures) {
+      Pair<TregexPattern,Function<TregexMatcher,String>> p = annotationPatterns.get(key);
+      activeAnnotations.add(p);
+    }
   }
 
 
@@ -575,10 +573,16 @@ public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParam
 
   @Override
   public Tree transformTree(Tree t, Tree root) {
-    // Perform tregex-powered annotations
-    t = super.transformTree(t, root);
 
-    String cat = t.value();
+    String baseCat = t.value();
+    StringBuilder newCategory = new StringBuilder();
+
+    //Add manual state splits
+    for (Pair<TregexPattern,Function<TregexMatcher,String>> e : activeAnnotations) {
+      TregexMatcher m = e.first().matcher(root);
+      if (m.matchesAt(t))
+        newCategory.append(e.second().apply(m));
+    }
 
     //Add morphosyntactic features if this is a POS tag
     if(t.isPreTerminal() && tagSpec != null) {
@@ -588,13 +592,14 @@ public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParam
       String morphoStr = ((CoreLabel) t.firstChild().label()).originalText();
       Pair<String,String> lemmaMorph = MorphoFeatureSpecification.splitMorphString("", morphoStr);
       MorphoFeatures feats = tagSpec.strToFeatures(lemmaMorph.second());
-      cat = feats.getTag(cat);
+      baseCat = feats.getTag(baseCat);
     }
 
     //Update the label(s)
-    t.setValue(cat);
+    String newCat = baseCat + newCategory.toString();
+    t.setValue(newCat);
     if (t.isPreTerminal() && t.label() instanceof HasTag)
-      ((HasTag) t.label()).setTag(cat);
+      ((HasTag) t.label()).setTag(newCat);
 
     return t;
   }
@@ -642,6 +647,15 @@ public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParam
     return morphoSpec.toString();
   }
 
+
+  private void removeBaselineFeature(String featName) {
+    if(baselineFeatures.contains(featName)) {
+      baselineFeatures.remove(featName);
+      Pair<TregexPattern,Function<TregexMatcher,String>> p = annotationPatterns.get(featName);
+      activeAnnotations.remove(p);
+    }
+  }
+
   @Override
   public void display() {
     System.err.println(optionsString.toString());
@@ -649,9 +663,13 @@ public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParam
 
   @Override
   public int setOptionFlag(String[] args, int i) {
-    if (annotations.containsKey(args[i])) {
-      addFeature(args[i]);
+    if (annotationPatterns.keySet().contains(args[i])) {
+      if(!baselineFeatures.contains(args[i])) additionalFeatures.add(args[i]);
+      Pair<TregexPattern,Function<TregexMatcher,String>> p = annotationPatterns.get(args[i]);
+      activeAnnotations.add(p);
+      optionsString.append("Option " + args[i] + " added annotation pattern " + p.first() + " with annotation " + p.second() + '\n');
       i++;
+
     } else if (args[i].equals("-collinizerRetainsPunctuation")) {
       optionsString.append("Collinizer retains punctuation.\n");
       collinizerRetainsPunctuation = true;
@@ -676,8 +694,10 @@ public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParam
       i++;
 
     } else if (args[i].equals("-frenchFactored")) {
-      for(String feature : factoredFeatures)
-        addFeature(feature);
+      for(String annotation : baselineFeatures) {
+        String[] a = {annotation};
+        setOptionFlag(a,0);
+      }
       i++;
 
     } else if(args[i].equals("-frenchMWMap")) {
@@ -687,12 +707,12 @@ public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParam
     } else if(args[i].equals("-tsg")) {
       //wsg2011: These features should be removed for TSG extraction.
       //If they are retained, the resulting grammar seems to be too brittle....
-      optionsString.append("Removing baseline features: -markVN, -coord1");
+      optionsString.append("Removing baseline features: ");
 
-      removeFeature("-markVN");
+      removeBaselineFeature("-markVN");
       optionsString.append(" (removed -markVN)");
 
-      removeFeature("-coord1");
+      removeBaselineFeature("-coord1");
       optionsString.append(" (removed -coord1)\n");
 
       i++;
@@ -702,7 +722,7 @@ public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParam
       optionsString.append("Factored Lexicon: active features: ").append(activeFeats);
 
       // WSGDEBUG Maybe add -mweTag in place of -tagPAFr?
-      removeFeature("-tagPAFr");
+      removeBaselineFeature("-tagPAFr");
       optionsString.append(" (removed -tagPAFr)\n");
 
       // Add -mweTag
@@ -711,8 +731,7 @@ public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParam
 
       i+=2;
     } else if(args[i].equals("-noFeatures")) {
-      for (String feature : annotations.keySet())
-        removeFeature(feature);
+      activeAnnotations.clear();
       optionsString.append("Removed all manual features.\n");
 
       i++;

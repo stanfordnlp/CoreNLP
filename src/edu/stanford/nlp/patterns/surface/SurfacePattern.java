@@ -1,14 +1,13 @@
 package edu.stanford.nlp.patterns.surface;
 
 import java.io.Serializable;
-import java.util.*;
-
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.patterns.Pattern;
-import edu.stanford.nlp.patterns.PatternFactory;
-import edu.stanford.nlp.patterns.PatternsAnnotations;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.StringUtils;
 
 /**
  * To represent a surface pattern in more detail than TokenSequencePattern (this
@@ -19,54 +18,40 @@ import edu.stanford.nlp.util.*;
  * Author: Sonal Gupta (sonalg@stanford.edu)
  */
 
-public class SurfacePattern extends Pattern implements Serializable, Comparable<SurfacePattern>{
+public class SurfacePattern implements Serializable, Comparable<SurfacePattern> {
 
-
-  @Override
-  public CollectionValuedMap<String, String> getRelevantWords() {
-    CollectionValuedMap<String, String> relwordsThisPat = new CollectionValuedMap<>();
-    Token[] next = getNextContext();
-    getRelevantWordsBase(next, relwordsThisPat);
-    Token[] prev = getPrevContext();
-    getRelevantWordsBase(prev, relwordsThisPat);
-    return relwordsThisPat;
-  }
-
-  @Override
-  public int equalContext(Pattern p) {
-    return equalContext((SurfacePattern)p);
-  }
-
-
-
+  public static enum Genre {
+    PREV, NEXT, PREVNEXT
+  };
 
   private static final long serialVersionUID = 1L;
 
-  public Token[] prevContext;
-  public Token[] nextContext;
+  protected String[] prevContext;
+  protected String[] nextContext;
   // String prevContextStr = "", nextContextStr = "";
-  public PatternToken token;
+  protected PatternToken token;
   // protected String[] originalPrev;
   // protected String[] originalNext;
   // protected String originalPrevStr = "";
   // protected String originalNextStr = "";
   // protected String toString;
   protected int hashcode;
-  protected SurfacePatternFactory.Genre genre;
+  protected Genre genre;
 
-  public SurfacePatternFactory.Genre getGenre() {
+  public Genre getGenre() {
     return genre;
   }
 
-  public void setGenre(SurfacePatternFactory.Genre genre) {
+  public void setGenre(Genre genre) {
     this.genre = genre;
   }
 
   public static boolean insertModifierWildcard = false;
 
-
-  public SurfacePattern(Token[] prevContext, PatternToken token, Token[] nextContext, SurfacePatternFactory.Genre genre) {
-    super(PatternFactory.PatternType.SURFACE);
+  public SurfacePattern(String[] prevContext, PatternToken token, String[] nextContext, Genre genre) {
+    // String[] originalPrev, String[] originalNext, Genre genre) {
+    prevContext = trim(prevContext);
+    nextContext = trim(nextContext);
     this.setPrevContext(prevContext);
     this.setNextContext(nextContext);
     //
@@ -82,40 +67,42 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
     this.genre = genre;
 
     hashcode = toString().hashCode();
+
   }
 
-  public SurfacePattern copyNewToken(){
-    return new SurfacePattern(this.prevContext, token.copy(), this.nextContext, genre);
+  String[] trim(String[] p) {
+
+    if (p == null)
+      return null;
+
+    for (int i = 0; i < p.length; i++) {
+      p[i] = p[i].trim();
+    }
+    return p;
   }
 
-  public static Token getContextToken(CoreLabel tokenj) {
-    Token token = new Token(PatternFactory.PatternType.SURFACE);
-    token.addORRestriction(PatternsAnnotations.ProcessedTextAnnotation.class, tokenj.get(PatternsAnnotations.ProcessedTextAnnotation.class));
-    return token;
-  }
+  public static String getContextStr(CoreLabel tokenj, boolean useLemmaContextTokens, boolean lowerCaseContext) {
+    String str = "";
 
-//  public static String getContextStr(CoreLabel tokenj, boolean useLemmaContextTokens, boolean lowerCaseContext) {
-//    String str = "";
-//
-//    if (useLemmaContextTokens) {
-//      String tok = tokenj.lemma();
-//      if (lowerCaseContext)
-//        tok = tok.toLowerCase();
-//      str = "[{lemma:/" + Pattern.quote(tok.replaceAll("/", "\\\\/"))+ "/}] ";
-//      //str = "[{lemma:/\\Q" + tok.replaceAll("/", "\\\\/") + "\\E/}] ";
-//    } else {
-//      String tok = tokenj.word();
-//      if (lowerCaseContext)
-//        tok = tok.toLowerCase();
-//      str = "[{word:/" + Pattern.quote(tok.replaceAll("/", "\\\\/")) + "/}] ";
-//      //str = "[{word:/\\Q" + tok.replaceAll("/", "\\\\/") + "\\E/}] ";
-//
-//    }
-//    return str;
-//  }
+    if (useLemmaContextTokens) {
+      String tok = tokenj.lemma();
+      if (lowerCaseContext)
+        tok = tok.toLowerCase();
+      str = "[{lemma:/" + Pattern.quote(tok)+ "/}] ";
+      //str = "[{lemma:/\\Q" + tok.replaceAll("/", "\\\\/") + "\\E/}] ";
+    } else {
+      String tok = tokenj.word();
+      if (lowerCaseContext)
+        tok = tok.toLowerCase();
+      str = "[{word:/" + Pattern.quote(tok) + "/}] ";
+      //str = "[{word:/\\Q" + tok.replaceAll("/", "\\\\/") + "\\E/}] ";
+
+    }
+    return str;
+  }
 
   public static String getContextStr(String w) {
-    String str = "[/" + java.util.regex.Pattern.quote(w.replaceAll("/", "\\\\/")) + "/] ";
+    String str = "[/" + Pattern.quote(w) + "/] ";
     //String str = "[/\\Q" + w.replaceAll("/", "\\\\/") + "\\E/] ";
     return str;
   }
@@ -239,26 +226,11 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
     return getSimplerTokens(nextContext);
   }
 
-//  static Pattern p1 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(lemma|word)\\s*:\\s*/" + Pattern.quote("\\Q") + "(.*)"
-//      + Pattern.quote("\\E") + "/\\s*" + Pattern.quote("}") + "\\s*" + Pattern.quote("]"));
-//
-//  static Pattern p2 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(.*)\\s*:\\s*(.*)\\s*" + Pattern.quote("}") + "\\s*"
-//      + Pattern.quote("]"));
+  static Pattern p1 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(lemma|word)\\s*:\\s*/" + Pattern.quote("\\Q") + "(.*)"
+      + Pattern.quote("\\E") + "/\\s*" + Pattern.quote("}") + "\\s*" + Pattern.quote("]"));
+  static Pattern p2 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(.*)\\s*:\\s*(.*)\\s*" + Pattern.quote("}") + "\\s*"
+      + Pattern.quote("]"));
 
-  public String[] getSimplerTokens(Token[] p){
-    if (p == null)
-      return null;
-
-    String[] sim = new String[p.length];
-    for (int i = 0; i < p.length; i++) {
-
-      assert p[i] != null : "How is the any one " + Arrays.toString(p) + " null!";
-      sim[i] = p[i].getSimple();
-
-    }
-    return sim;
-  }
-/*
   public String[] getSimplerTokens(String[] p) {
     if (p == null)
       return null;
@@ -290,7 +262,7 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
     return sim;
 
   }
-*/
+
   public String toStringSimple() {
 
     String[] simprev = getSimplerTokensPrev();
@@ -302,19 +274,19 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
     return sim;
   }
 
-  public Token[] getPrevContext() {
+  public String[] getPrevContext() {
     return prevContext;
   }
 
-  public void setPrevContext(Token[] prevContext) {
+  public void setPrevContext(String[] prevContext) {
     this.prevContext = prevContext;
   }
 
-  public Token[] getNextContext() {
+  public String[] getNextContext() {
     return nextContext;
   }
 
-  public void setNextContext(Token[] nextContext) {
+  public void setNextContext(String[] nextContext) {
     this.nextContext = nextContext;
   }
 
@@ -377,7 +349,7 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
    * @param array2
    * @return
    */
-  static public boolean subsumesArray(Object[] array1, Object[] array2) {
+  static public boolean subsumesArray(String[] array1, String[] array2) {
 
     if ((array1 == null && array2 == null)) {
       return true;
@@ -476,10 +448,6 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
       return false;
   }
 
-  public void setNumWordsCompound(Integer numWordsCompound) {
-    token.numWordsCompound = numWordsCompound;
-  }
-
   // public static SurfacePattern parse(String s) {
   // String[] t = s.split("##", -1);
   // String prev = t[0];
@@ -487,7 +455,5 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
   // String next = t[2];
   // return new SurfacePattern(prev, tok, next);
   // }
-
-
 
 }

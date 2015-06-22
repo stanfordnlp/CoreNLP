@@ -17,14 +17,7 @@ import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
-/**
- * @author John Bauer
- * @author Richard Socher
- */
 public class BuildBinarizedDataset {
-
-  private BuildBinarizedDataset() {} // static methods only
-
   /**
    * Sets all of the labels on a tree to the given default value.
    */
@@ -38,7 +31,7 @@ public class BuildBinarizedDataset {
     }
 
     tree.label().setValue(defaultLabel.toString());
-  }
+  }  
 
   public static void setPredictedLabels(Tree tree) {
     if (tree.isLeaf()) {
@@ -51,7 +44,7 @@ public class BuildBinarizedDataset {
 
     tree.label().setValue(Integer.toString(RNNCoreAnnotations.getPredictedClass(tree)));
   }
-
+  
   public static void extractLabels(Map<Pair<Integer, Integer>, String> spanToLabels, List<HasWord> tokens, String line) {
     String[] pieces = line.trim().split("\\s+");
     if (pieces.length == 0) {
@@ -59,10 +52,11 @@ public class BuildBinarizedDataset {
     }
     if (pieces.length == 1) {
       String error = "Found line with label " + line + " but no tokens to associate with that line";
+      System.err.println(error);
       throw new RuntimeException(error);
     }
 
-    //TODO: BUG: The pieces are tokenized differently than the splitting, e.g., on possessive markers as in "actors' expenses"
+    //TODO: BUG: The pieces are tokenized differently than the splitting, e.g. on possessive markers as in "actors' expenses" 
     for (int i = 0; i < tokens.size() - pieces.length + 2; ++i) {
       boolean found = true;
       for (int j = 1; j < pieces.length; ++j) {
@@ -82,8 +76,8 @@ public class BuildBinarizedDataset {
       throw new AssertionError("Expected CoreLabels");
     }
     CoreLabel label = (CoreLabel) tree.label();
-    if (label.get(CoreAnnotations.BeginIndexAnnotation.class).equals(span.first) &&
-        label.get(CoreAnnotations.EndIndexAnnotation.class).equals(span.second)) {
+    if (label.get(CoreAnnotations.BeginIndexAnnotation.class) == span.first &&
+        label.get(CoreAnnotations.EndIndexAnnotation.class) == span.second) {
       label.setValue(value);
       return true;
     }
@@ -104,9 +98,9 @@ public class BuildBinarizedDataset {
    * the treebank used in the Sentiment project.
    * <br>
    * The expected input file is one sentence per line, with sentences
-   * separated by blank lines. The first line has the main label of the sentence together with the full sentence.
+   * separated by blank lines. The first line has the main label of the sentence together with the full sentence. 
    * Lines after the first sentence line but before
-   * the blank line will be treated as labeled sub-phrases.  The
+   * the blank line will be treated as labeled subphrases.  The
    * labels should start with the label and then contain a list of
    * tokens the label applies to. All phrases that do not have their own label will take on the main sentence label!
    *  For example:
@@ -158,7 +152,8 @@ public class BuildBinarizedDataset {
     }
 
     LexicalizedParser parser = LexicalizedParser.loadModel(parserModel);
-    TreeBinarizer binarizer = TreeBinarizer.simpleTreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack());
+    TreeBinarizer binarizer = new TreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack(), 
+                                                false, false, 0, false, false, 0.0, false, true, true);
 
     if (sentimentModelPath != null) {
       sentimentModel = SentimentModel.loadSerialized(sentimentModelPath);
@@ -168,7 +163,7 @@ public class BuildBinarizedDataset {
     String[] chunks = text.split("\\n\\s*\\n+"); // need blank line to make a new chunk
 
     for (String chunk : chunks) {
-      if (chunk.trim().isEmpty()) {
+      if (chunk.trim() == "") {
         continue;
       }
       // The expected format is that line 0 will be the text of the
@@ -212,13 +207,12 @@ public class BuildBinarizedDataset {
       Trees.convertToCoreLabels(collapsedUnary);
       collapsedUnary.indexSpans();
 
-      for (Map.Entry<Pair<Integer, Integer>, String> pairStringEntry : spanToLabels.entrySet()) {
-        setSpanLabel(collapsedUnary, pairStringEntry.getKey(), pairStringEntry.getValue());
+      for (Pair<Integer, Integer> span : spanToLabels.keySet()) {
+        setSpanLabel(collapsedUnary, span, spanToLabels.get(span));
       }
 
       System.out.println(collapsedUnary);
       //System.out.println();
     }
-  } // end main
-
+  }
 }

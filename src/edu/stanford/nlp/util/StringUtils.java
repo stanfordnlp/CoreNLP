@@ -2,7 +2,6 @@ package edu.stanford.nlp.util;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasOffset;
 import edu.stanford.nlp.ling.HasWord;
@@ -15,31 +14,12 @@ import java.lang.reflect.Method;
 import java.text.Normalizer;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 /**
- * StringUtils is a class for random String things, including output formatting and command line argument parsing.
- * <p>
- * Many of these methods will be familiar to perl users: {@link #join(Iterable)}, {@link #split(String, String)}, {@link
- * #trim(String, int)}, {@link #find(String, String)}, {@link #lookingAt(String, String)}, and {@link #matches(String,
- * String)}.
- * <p>
- * There are also useful methods for padding Strings/Objects with spaces on the right or left for printing even-width
- * table columns: {@link #padLeft(int, int)}, {@link #pad(String, int)}.
- *
- * <p>Example: print a comma-separated list of numbers:</p>
- * <p><code>System.out.println(StringUtils.pad(nums, &quot;, &quot;));</code></p>
- * <p>Example: print a 2D array of numbers with 8-char cells:</p>
- * <p><code>for(int i = 0; i &lt; nums.length; i++) {<br>
- * &nbsp;&nbsp;&nbsp; for(int j = 0; j &lt; nums[i].length; j++) {<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
- * System.out.print(StringUtils.leftPad(nums[i][j], 8));<br>
- * &nbsp;&nbsp;&nbsp; <br>
- * &nbsp;&nbsp;&nbsp; System.out.println();<br>
- * </code></p>
+ * StringUtils is a class for random String things, including output
+ * formatting and command line argument parsing.
  *
  * @author Dan Klein
  * @author Christopher Manning
@@ -52,7 +32,8 @@ public class StringUtils {
   /**
    * Don't let anyone instantiate this class.
    */
-  private StringUtils() {}
+  private StringUtils() {
+  }
 
   public static final String[] EMPTY_STRING_ARRAY = new String[0];
   private static final String PROP = "prop";
@@ -107,8 +88,7 @@ public class StringUtils {
   /**
    * Takes a string of the form "x1=y1,x2=y2,..." such
    * that each y is an integer and each x is a key.  A
-   * String[] s is returned such that s[yn]=xn.
-   *
+   * String[] s is returned such that s[yn]=xn
    * @param map A string of the form "x1=y1,x2=y2,..." such
    *     that each y is an integer and each x is a key.
    * @return  A String[] s is returned such that s[yn]=xn
@@ -136,8 +116,7 @@ public class StringUtils {
 
 
   /**
-   * Takes a string of the form "x1=y1,x2=y2,..." and returns Map.
-   *
+   * Takes a string of the form "x1=y1,x2=y2,..." and returns Map
    * @param map A string of the form "x1=y1,x2=y2,..."
    * @return  A Map m is returned such that m.get(xn) = yn
    */
@@ -217,7 +196,7 @@ public class StringUtils {
 
 
   public static String joinWords(Iterable<? extends HasWord> l, String glue) {
-    StringBuilder sb = new StringBuilder(l instanceof Collection ? ((Collection) l).size() : 64);
+    StringBuilder sb = new StringBuilder();
     boolean first = true;
     for (HasWord o : l) {
       if ( ! first) {
@@ -248,7 +227,11 @@ public class StringUtils {
   }
 
   public static String joinWords(List<? extends HasWord> l, String glue, int start, int end) {
-    return join(l, glue, in -> in.word(), start, end);
+    return join(l, glue, new Function<HasWord, String>() {
+      public String apply(HasWord in) {
+        return in.word();
+      }
+    }, start, end);
   }
 
   public static final Function<Object,String> DEFAULT_TOSTRING = new Function<Object, String>() {
@@ -341,11 +324,9 @@ public class StringUtils {
   }
 
   /**
-   * Joins each elem in the {@link Iterable} with the given glue.
+   * Joins each elem in the {@code Collection} with the given glue.
    * For example, given a list of {@code Integers}, you can create
    * a comma-separated list by calling {@code join(numbers, ", ")}.
-   *
-   * @see StringUtils#join(Stream, String)
    */
   public static <X> String join(Iterable<X> l, String glue) {
     StringBuilder sb = new StringBuilder();
@@ -357,28 +338,6 @@ public class StringUtils {
         first = false;
       }
       sb.append(o);
-    }
-    return sb.toString();
-  }
-
-  /**
-   * Joins each elem in the {@link Stream} with the given glue.
-   * For example, given a list of {@code Integers}, you can create
-   * a comma-separated list by calling {@code join(numbers, ", ")}.
-   *
-   * @see StringUtils#join(Iterable, String)
-   */
-  public static <X> String join(Stream<X> l, String glue) {
-    StringBuilder sb = new StringBuilder();
-    boolean first = true;
-    Iterator<X> iter = l.iterator();
-    while (iter.hasNext()) {
-      if ( ! first) {
-        sb.append(glue);
-      } else {
-        first = false;
-      }
-      sb.append(iter.next());
     }
     return sb.toString();
   }
@@ -408,28 +367,6 @@ public class StringUtils {
    */
   public static String join(Object[] elements, String glue) {
     return (join(Arrays.asList(elements), glue));
-  }
-
-  /**
-   * Joins an array of elements in a given span.
-   * @param elements The elements to join.
-   * @param start The start index to join from.
-   * @param end The end (non-inclusive) to join until.
-   * @param glue The glue to hold together the elements.
-   * @return The string form of the sub-array, joined on the given glue.
-   */
-  public static String join(Object[] elements, int start, int end, String glue) {
-    StringBuilder b = new StringBuilder(127);
-    boolean isFirst = true;
-    for (int i = start; i < end; ++i) {
-      if (isFirst) {
-        b.append(elements[i].toString());
-        isFirst = false;
-      } else {
-        b.append(glue).append(elements[i].toString());
-      }
-    }
-    return b.toString();
   }
 
   /**
@@ -919,28 +856,30 @@ public class StringUtils {
         int min = maxFlagArgs == null ? 0 : maxFlagArgs;
         List<String> flagArgs = new ArrayList<String>();
         // cdm oct 2007: add length check to allow for empty string argument!
-        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].isEmpty() || args[i + 1].charAt(0) != '-'); i++, j++) {
+        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
           flagArgs.add(args[i + 1]);
         }
         if (flagArgs.isEmpty()) {
           result.setProperty(key, "true");
         } else {
           result.setProperty(key, join(flagArgs, " "));
-          if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
+          if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS))
+          {
             try {
-              BufferedReader reader = IOUtils.readerFromString(result.getProperty(key));
+              InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(result.getProperty(key));
+              InputStreamReader reader = new InputStreamReader(is, "utf-8");
               result.remove(key); // location of this line is critical
               result.load(reader);
               // trim all values
-              for (String propKey : result.stringPropertyNames()){
-                String newVal = result.getProperty(propKey);
-                result.setProperty(propKey, newVal.trim());
+              for(Object propKey : result.keySet()){
+                String newVal = result.getProperty((String)propKey);
+                result.setProperty((String)propKey,newVal.trim());
               }
-              reader.close();
+              is.close();
             } catch (IOException e) {
-              String msg = "argsToProperties could not read properties file: " + result.getProperty(key);
               result.remove(key);
-              throw new RuntimeIOException(msg, e);
+              System.err.println("argsToProperties could not read properties file: " + result.getProperty(key));
+              throw new RuntimeIOException(e);
             }
           }
         }
@@ -955,10 +894,11 @@ public class StringUtils {
     if (result.containsKey(PROP)) {
       String file = result.getProperty(PROP);
       result.remove(PROP);
-      Properties toAdd = argsToProperties("-prop", file);
-      for (String key : toAdd.stringPropertyNames()) {
+      Properties toAdd = argsToProperties(new String[]{"-prop", file});
+      for (Enumeration<?> e = toAdd.propertyNames(); e.hasMoreElements(); ) {
+        String key = (String) e.nextElement();
         String val = toAdd.getProperty(key);
-        if ( ! result.containsKey(key)) {
+        if (!result.containsKey(key)) {
           result.setProperty(key, val);
         }
       }
@@ -972,7 +912,6 @@ public class StringUtils {
    * This method reads in properties listed in a file in the format prop=value, one property per line.
    * Although <code>Properties.load(InputStream)</code> exists, I implemented this method to trim the lines,
    * something not implemented in the <code>load()</code> method.
-   *
    * @param filename A properties file to read
    * @return The corresponding Properties object
    */
@@ -982,9 +921,9 @@ public class StringUtils {
       InputStream is = new BufferedInputStream(new FileInputStream(filename));
       result.load(is);
       // trim all values
-      for (String propKey : result.stringPropertyNames()){
-        String newVal = result.getProperty(propKey);
-        result.setProperty(propKey,newVal.trim());
+      for (Object propKey : result.keySet()){
+        String newVal = result.getProperty((String)propKey);
+        result.setProperty((String)propKey,newVal.trim());
       }
       is.close();
       return result;
@@ -1264,10 +1203,9 @@ public class StringUtils {
    * splitChar.  However, it provides a quoting facility: it is possible to
    * quote strings with the quoteChar.
    * If the quoteChar occurs within the quotedExpression, it must be prefaced
-   * by the escapeChar.
-   * This routine can be useful for processing a line of a CSV file.
+   * by the escapeChar
    *
-   * @param s         The String to split into fields. Cannot be null.
+   * @param s         The String to split
    * @param splitChar The character to split on
    * @param quoteChar The character to quote items with
    * @param escapeChar The character to escape the quoteChar with
@@ -1282,11 +1220,10 @@ public class StringUtils {
       char curr = s.charAt(i);
       if (curr == splitChar) {
         // add last buffer
-        // cdm 2014: Do this even if the field is empty!
-        // if (b.length() > 0) {
-        result.add(b.toString());
-        b = new StringBuilder();
-        // }
+        if (b.length() > 0) {
+          result.add(b.toString());
+          b = new StringBuilder();
+        }
         i++;
       } else if (curr == quoteChar) {
         // find next instance of quoteChar
@@ -1311,7 +1248,6 @@ public class StringUtils {
         i++;
       }
     }
-    // RFC 4180 disallows final comma. At any rate, don't produce a field after it unless non-empty
     if (b.length() > 0) {
       result.add(b.toString());
     }
@@ -1662,20 +1598,16 @@ public class StringUtils {
    */
   public static String makeTextTable(Object[][] table, Object[] rowLabels, Object[] colLabels, int padLeft, int padRight, boolean tsv) {
     StringBuilder buff = new StringBuilder();
-    if (colLabels != null) {
-      // top row
-      buff.append(makeAsciiTableCell("", padLeft, padRight, tsv)); // the top left cell
-      for (int j = 0; j < table[0].length; j++) { // assume table is a rectangular matrix
-        buff.append(makeAsciiTableCell(colLabels[j], padLeft, padRight, (j != table[0].length - 1) && tsv));
-      }
-      buff.append('\n');
+    // top row
+    buff.append(makeAsciiTableCell("", padLeft, padRight, tsv)); // the top left cell
+    for (int j = 0; j < table[0].length; j++) { // assume table is a rectangular matrix
+      buff.append(makeAsciiTableCell(colLabels[j], padLeft, padRight, (j != table[0].length - 1) && tsv));
     }
+    buff.append('\n');
     // all other rows
     for (int i = 0; i < table.length; i++) {
       // one row
-      if (rowLabels != null) {
-        buff.append(makeAsciiTableCell(rowLabels[i], padLeft, padRight, tsv));
-      }
+      buff.append(makeAsciiTableCell(rowLabels[i], padLeft, padRight, tsv));
       for (int j = 0; j < table[i].length; j++) {
         buff.append(makeAsciiTableCell(table[i][j], padLeft, padRight, (j != table[0].length - 1) && tsv));
       }
@@ -2100,24 +2032,6 @@ public class StringUtils {
     return getNgrams(Arrays.asList(s.split("\\s+")), minSize, maxSize);
   }
 
-  /**
-   * Build a list of character-based ngrams from the given string.
-   */
-  public static Collection<String> getCharacterNgrams(String s, int minSize, int maxSize) {
-    Collection<String> ngrams = new ArrayList<String>();
-    int len = s.length();
-
-    for (int i = 0; i < len; i++) {
-      for (int ngramSize = minSize;
-           ngramSize > 0 && ngramSize <= maxSize && i + ngramSize <= len;
-           ngramSize++) {
-        ngrams.add(s.substring(i, i + ngramSize));
-      }
-    }
-
-    return ngrams;
-  }
-
   private static Pattern diacriticalMarksPattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}");
   public static String normalize(String s) {
     // Normalizes string and strips diacritics (map to ascii) by
@@ -2135,75 +2049,5 @@ public class StringUtils {
     String d = Normalizer.normalize(s, Normalizer.Form.NFKD);
     d = diacriticalMarksPattern.matcher(d).replaceAll("");
     return Normalizer.normalize(d, Normalizer.Form.NFKC);
-  }
-
-  /**
-   * Convert a list of labels into a string, by simply joining them with spaces.
-   * @param words The words to join.
-   * @return A string representation of the sentence, tokenized by a single space.
-   */
-  public static String toString(List<CoreLabel> words) {
-    return join(words.stream().map(CoreLabel::word), " ");
-  }
-
-  /**
-   * Convert a CoreMap representing a sentence into a string, by simply joining them with spaces.
-   * @param sentence The sentence to stringify.
-   * @return A string representation of the sentence, tokenized by a single space.
-   */
-  public static String toString(CoreMap sentence) {
-    return toString(sentence.get(CoreAnnotations.TokensAnnotation.class));
-  }
-
-  /** I shamefully stole this from: http://rosettacode.org/wiki/Levenshtein_distance#Java --Gabor */
-  public static int levenshteinDistance(String s1, String s2) {
-    s1 = s1.toLowerCase();
-    s2 = s2.toLowerCase();
-
-    int[] costs = new int[s2.length() + 1];
-    for (int i = 0; i <= s1.length(); i++) {
-      int lastValue = i;
-      for (int j = 0; j <= s2.length(); j++) {
-        if (i == 0)
-          costs[j] = j;
-        else {
-          if (j > 0) {
-            int newValue = costs[j - 1];
-            if (s1.charAt(i - 1) != s2.charAt(j - 1))
-              newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-            costs[j - 1] = lastValue;
-            lastValue = newValue;
-          }
-        }
-      }
-      if (i > 0)
-        costs[s2.length()] = lastValue;
-    }
-    return costs[s2.length()];
-  }
-
-  /** I shamefully stole this from: http://rosettacode.org/wiki/Levenshtein_distance#Java --Gabor */
-  public static <E> int levenshteinDistance(E[] s1, E[] s2) {
-
-    int[] costs = new int[s2.length + 1];
-    for (int i = 0; i <= s1.length; i++) {
-      int lastValue = i;
-      for (int j = 0; j <= s2.length; j++) {
-        if (i == 0)
-          costs[j] = j;
-        else {
-          if (j > 0) {
-            int newValue = costs[j - 1];
-            if (!s1[i - 1].equals(s2[j - 1]))
-              newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-            costs[j - 1] = lastValue;
-            lastValue = newValue;
-          }
-        }
-      }
-      if (i > 0)
-        costs[s2.length] = lastValue;
-    }
-    return costs[s2.length];
   }
 }

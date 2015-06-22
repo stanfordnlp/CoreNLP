@@ -16,25 +16,23 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
 
   @Override
   public int hashCode() {
-    return (int)(i ^ (i >>> 32));
+    return (int) i;
   }
 
   /**
    * Compares this object to the specified object.  The result is
-   * {@code true} if and only if the argument is not
-   * {@code null} and is an {@code MutableLong} object that
-   * contains the same {@code long} value as this object.
-   * Note that a MutableLong isn't and can't be equal to an Long.
+   * <code>true</code> if and only if the argument is not
+   * <code>null</code> and is an <code>MutableInteger</code> object that
+   * contains the same <code>int</code> value as this object.
+   * Note that a MutableInteger isn't and can't be equal to an Integer.
    *
    * @param obj the object to compare with.
-   * @return {@code true} if the objects are the same;
-   *         {@code false} otherwise.
+   * @return <code>true</code> if the objects are the same;
+   *         <code>false</code> otherwise.
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    } else if (obj instanceof MutableLong) {
+    if (obj instanceof MutableLong) {
       return i == ((MutableLong) obj).i;
     }
     return false;
@@ -60,7 +58,6 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
    *         greater than the argument <code>MutableLong</code> (signed
    *         comparison).
    */
-  @Override
   public int compareTo(MutableLong anotherMutableLong) {
     long thisVal = this.i;
     long anotherVal = anotherMutableLong.i;
@@ -99,11 +96,11 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     return i;
   }
 
-  /** Add the argument to the value of this long.  A convenience method.
+  /** Add the argument to the value of this integer.  A convenience method.
    *
-   * @param val Value to be added to this long
+   * @param val Value to be added to this integer
    */
-  public void incValue(long val) {
+  public void incValue(int val) {
     i += val;
   }
 
@@ -111,10 +108,9 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     this(0);
   }
 
-  public MutableLong(long i) {
+  public MutableLong(int i) {
     this.i = i;
   }
 
   private static final long serialVersionUID = 624465615824626762L;
-
 }

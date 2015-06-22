@@ -34,6 +34,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
@@ -41,6 +42,7 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -58,7 +60,17 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import edu.stanford.nlp.swing.FontDetector;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.trees.international.arabic.ArabicHeadFinder;
+import edu.stanford.nlp.trees.international.arabic.ArabicTreeReaderFactory;
+import edu.stanford.nlp.trees.international.french.DybroFrenchHeadFinder;
+import edu.stanford.nlp.trees.international.french.FrenchTreeReaderFactory;
+import edu.stanford.nlp.trees.international.negra.NegraHeadFinder;
+import edu.stanford.nlp.trees.international.pennchinese.*;
+import edu.stanford.nlp.trees.international.tuebadz.TueBaDZHeadFinder;
+import edu.stanford.nlp.trees.tregex.TregexPattern;
+
 
 /**
  * Class for creating the preferences panel which holds user definable preferences (e.g., tree display size,
@@ -74,15 +86,12 @@ public class PreferencesPanel extends JDialog {
   private static final String HISTORY_ERROR = "history";//error code if history size is not an int >0
   private static final String MAX_MATCH_ERROR = "maxMatch";//error code if history size is not an int >0
 
-  private TregexGUI gui;
-
   final JButton highlightButton;
   private JTextField setEncoding;//declared here because may change in different places
 
   public PreferencesPanel(TregexGUI gui) {
-    super(gui, "Preferences");
+    super(gui,"Preferences");
 
-    this.gui = gui;
 
     this.setResizable(false);
     final JPanel prefPanel = new JPanel();
@@ -96,20 +105,17 @@ public class PreferencesPanel extends JDialog {
     displayOptions.setLayout(new GridLayout(3,2,0,2));
 
     JLabel historyLabel = new JLabel("Recent matches length: ");
-    final JTextField historySizeField =
-      new JTextField(Integer.toString(Preferences.getHistorySize()));
+    final JTextField historySizeField = new JTextField();
     displayOptions.add(historyLabel);
     displayOptions.add(historySizeField);
 
     JLabel maxMatchesLabel = new JLabel("Max displayed trees: ");
-    final JTextField maxMatchesSizeField
-      = new JTextField(Integer.toString(Preferences.getMaxMatches()));
+    final JTextField maxMatchesSizeField = new JTextField(Integer.toString(MatchesPanel.getInstance().getMaxMatches()));
     displayOptions.add(maxMatchesLabel);
     displayOptions.add(maxMatchesSizeField);
 
     JLabel highlightLabel = new JLabel("Highlight color:");
-    highlightButton = makeColorButton("Pick a new highlight color: ",
-                                      Preferences.getHighlightColor(), prefPanel);
+    highlightButton = makeColorButton("Pick a new highlight color: ", MatchesPanel.getInstance().getHighlightColor(), prefPanel);
     highlightButton.putClientProperty("JButton.buttonType","icon");
     displayOptions.add(highlightLabel);
     displayOptions.add(highlightButton);
@@ -122,27 +128,21 @@ public class PreferencesPanel extends JDialog {
     treeDisplayOptions.setLayout(new GridLayout(4,2));
     JLabel fontName = new JLabel("Font: ");
     final JComboBox fontPicker = new JComboBox(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames());
-    fontPicker.setSelectedItem(Preferences.getFont());
-
+    fontPicker.setSelectedItem("Dialog");
     JLabel sizeLabel = new JLabel("Font size: ");
-    final JTextField size =
-      new JTextField(Integer.toString(Preferences.getFontSize()));
-
+    final JTextField size = new JTextField();
     treeDisplayOptions.add(fontName);
     treeDisplayOptions.add(fontPicker);
     treeDisplayOptions.add(sizeLabel);
     treeDisplayOptions.add(size);
 
     JLabel defaultColorLabel = new JLabel("Tree color: ");
-    final JButton defaultColorButton = makeColorButton("Pick a new tree color: ",
-                                                       Preferences.getTreeColor(), prefPanel);
+    final JButton defaultColorButton = makeColorButton("Pick a new tree color: ", DisplayMatchesPanel.getInstance().getDefaultColor(), prefPanel);
     treeDisplayOptions.add(defaultColorLabel);
     treeDisplayOptions.add(defaultColorButton);
 
     JLabel matchedLabel = new JLabel("Matched node color: ");
-    final JButton matchedButton = makeColorButton("Pick a new color for matched nodes: ",
-                                                  Preferences.getMatchedColor(),
-                                                  prefPanel);
+    final JButton matchedButton = makeColorButton("Pick a new color for matched nodes: ", DisplayMatchesPanel.getInstance().getMatchedColor(), prefPanel);
     treeDisplayOptions.add(matchedLabel);
     treeDisplayOptions.add(matchedButton);
 
@@ -154,17 +154,15 @@ public class PreferencesPanel extends JDialog {
     advOptions.setBorder(BorderFactory.createTitledBorder("Advanced "));
     advOptions.setLayout(new GridLayout(3,2,0,4));
     JLabel headfinderName = new JLabel("Head finder:");
-    final JComboBox headfinderPicker = new JComboBox(new String[] {"ArabicHeadFinder", "BikelChineseHeadFinder", "ChineseHeadFinder", "ChineseSemanticHeadFinder", "CollinsHeadFinder", "DybroFrenchHeadFinder", "LeftHeadFinder", "ModCollinsHeadFinder", "NegraHeadFinder", "SemanticHeadFinder", "SunJurafskyChineseHeadFinder", "TueBaDZHeadFinder"}); //
+    final JComboBox headfinderPicker = new JComboBox(new String[] {"ArabicHeadFinder", "BikelChineseHeadFinder", "ChineseHeadFinder", "ChineseSemanticHeadFinder", "CollinsHeadFinder", "FrenchHeadFinder", "LeftHeadFinder", "ModCollinsHeadFinder", "NegraHeadFinder", "SemanticHeadFinder", "SunJurafskyChineseHeadFinder", "TueBaDZHeadFinder"}); //
     headfinderPicker.setEditable(true);
-    headfinderPicker.setSelectedItem(Preferences.getHeadFinder()
-                                     .getClass().getSimpleName());
+    headfinderPicker.setSelectedItem("CollinsHeadFinder");
     JLabel treeReaderFactoryName = new JLabel("Tree reader factory:");
-    final JComboBox trfPicker = new JComboBox(new String[] {"ArabicTreeReaderFactory", "ArabicTreeReaderFactory.ArabicRawTreeReaderFactory", "CTBTreeReaderFactory", "Basic categories only (LabeledScoredTreeReaderFactory)", "FrenchTreeReaderFactory","NoEmptiesCTBTreeReaderFactory", "PennTreeReaderFactory", "TregexTreeReaderFactory" });
+    final JComboBox trfPicker = new JComboBox(new String[] {"ArabicTreeReaderFactory", "ArabicTreeReaderFactory.ArabicRawTreeReaderFactory", "CTBTreeReaderFactory", "Basic categories only (LabeledScoredTreeReaderFactory)", "FrenchTreeReaderFactory","NoEmptiesCTBTreeReaderFactory", "PennTreeReaderFactory", "TregexPattern.TregexTreeReaderFactory" });
     trfPicker.setEditable(true);
-    trfPicker.setSelectedItem(Preferences.getTreeReaderFactory()
-                              .getClass().getSimpleName());
+    trfPicker.setSelectedItem("TregexPattern.TregexTreeReaderFactory");
     JLabel encodingLabel = new JLabel("Character encoding: ");
-    setEncoding = new JTextField(Preferences.getEncoding());
+    setEncoding = new JTextField(FileTreeModel.getCurEncoding());
     setEncoding.setPreferredSize(headfinderName.getPreferredSize());
     advOptions.add(headfinderName);
     advOptions.add(headfinderPicker);
@@ -174,11 +172,11 @@ public class PreferencesPanel extends JDialog {
     advOptions.add(setEncoding);
     //tsurgeon enabled box
     final JCheckBox tsurgeonCheck = new JCheckBox("Enable Tsurgeon");
-    tsurgeonCheck.setSelected(Preferences.getEnableTsurgeon());
+    tsurgeonCheck.setSelected(InputPanel.getInstance().getTsurgeonEnabled());
 
     //matched portions only box
     final JCheckBox matchPortion = new JCheckBox("Show only matched portions of tree");
-    matchPortion.setSelected(Preferences.getMatchPortionOnly());
+    matchPortion.setSelected(MatchesPanel.getInstance().isShowOnlyMatchedPortion());
 
     //add everything
     GridBagConstraints c = new GridBagConstraints();
@@ -216,18 +214,14 @@ public class PreferencesPanel extends JDialog {
       public void actionPerformed(ActionEvent arg0) {
         try {
           //check appropriate headfinder/tree reader
-          HeadFinder hf = Preferences.lookupHeadFinder(headfinderPicker.getSelectedItem().toString());
-          if (hf == null) {
-            JOptionPane.showMessageDialog(PreferencesPanel.this, "Sorry, there was an error finding or instantiating the head finder. Please choose another head finder.", "Head Finder Error", JOptionPane.ERROR_MESSAGE);
+          HeadFinder hf = getHeadfinder(headfinderPicker.getSelectedItem().toString());
+          if(hf == null) {
             throw new Exception("Headfinder error");
           }
 
-          TreeReaderFactory trf = Preferences.lookupTreeReaderFactory(trfPicker.getSelectedItem().toString());
-          if (trf == null) {
-            JOptionPane.showMessageDialog(PreferencesPanel.this, "Sorry, there was an error finding or instantiating the tree reader factory. Please choose another tree reader factory.", "Tree Reader Factory Error", JOptionPane.ERROR_MESSAGE);
+          TreeReaderFactory trf = getTreeReaderFactory(trfPicker.getSelectedItem().toString());
+          if(trf == null)
             throw new Exception("Tree reader factory error");
-          }
-
           //check appropriate number formats
           Integer historySize = checkNumberFormat(historySizeField, PreferencesPanel.HISTORY_ERROR);
           Integer maxMatchSize = checkNumberFormat(maxMatchesSizeField, PreferencesPanel.MAX_MATCH_ERROR);
@@ -260,7 +254,12 @@ public class PreferencesPanel extends JDialog {
 
     });
 
-    cancel.addActionListener(arg0 -> PreferencesPanel.this.setVisible(false));
+    cancel.addActionListener(new ActionListener() {
+
+      public void actionPerformed(ActionEvent arg0) {
+        PreferencesPanel.this.setVisible(false);
+      }
+    });
 
   }
 
@@ -279,6 +278,74 @@ public class PreferencesPanel extends JDialog {
     return number;
   }
 
+  private TreeReaderFactory getTreeReaderFactory(String trfName) {
+    if(trfName.equalsIgnoreCase("ArabicTreeReaderFactory")) {
+      return new ArabicTreeReaderFactory();
+    } else if(trfName.equalsIgnoreCase("ArabicTreeReaderFactory.ArabicRawTreeReaderFactory")) {
+      return new ArabicTreeReaderFactory.ArabicRawTreeReaderFactory();
+    } else if(trfName.equalsIgnoreCase("CTBTreeReaderFactory")) {
+      return new CTBTreeReaderFactory();
+    } else if(trfName.equalsIgnoreCase("NoEmptiesCTBTreeReaderFactory")) {
+      return new NoEmptiesCTBTreeReaderFactory();
+    } else if(trfName.equalsIgnoreCase("Basic categories only (LabeledScoredTreeReaderFactory)")) {
+      return new LabeledScoredTreeReaderFactory();
+    } else if(trfName.equalsIgnoreCase("FrenchTreeReaderFactory")) {
+      return new FrenchTreeReaderFactory();//PTB format
+    } else if(trfName.equalsIgnoreCase("PennTreeReaderFactory")) {
+      return new PennTreeReaderFactory();
+    } else if(trfName.equalsIgnoreCase("StringLabeledScoredTreeReaderFactory")) {
+      return new StringLabeledScoredTreeReaderFactory();
+    } else if(trfName.equalsIgnoreCase("TregexPattern.TregexTreeReaderFactory")) {
+      return new TregexPattern.TRegexTreeReaderFactory();
+    } else {//try to find the class
+      try {
+        Class<?> trfClass = Class.forName(trfName);
+        TreeReaderFactory trf = (TreeReaderFactory) trfClass.newInstance();
+        return trf;
+      } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Sorry, there was an error finding or instantiating the tree reader factory. Please choose another tree reader factory.", "Tree Reader Factory Error", JOptionPane.ERROR_MESSAGE);
+      }
+    }
+    return null;
+  }
+
+  private HeadFinder getHeadfinder(String headfinderName) {
+    if(headfinderName.equalsIgnoreCase("ArabicHeadFinder")) {
+      return new ArabicHeadFinder();
+    } else if(headfinderName.equalsIgnoreCase("BikelChineseHeadFinder")) {
+      return new BikelChineseHeadFinder();
+    } else if(headfinderName.equalsIgnoreCase("ChineseHeadFinder")) {
+      return new ChineseHeadFinder();
+    } else if(headfinderName.equalsIgnoreCase("ChineseSemanticHeadFinder")) {
+      return new ChineseSemanticHeadFinder();
+    } else if(headfinderName.equalsIgnoreCase("CollinsHeadFinder")) {
+      return new CollinsHeadFinder();
+    } else if(headfinderName.equalsIgnoreCase("FrenchHeadFinder")) {
+      return new DybroFrenchHeadFinder();
+    } else if(headfinderName.equalsIgnoreCase("LeftHeadFinder")) {
+      return new LeftHeadFinder();
+    }  else if(headfinderName.equalsIgnoreCase("ModCollinsHeadFinder")) {
+      return new ModCollinsHeadFinder();
+    }  else if(headfinderName.equalsIgnoreCase("NegraHeadFinder")) {
+      return new NegraHeadFinder();
+    }  else if(headfinderName.equalsIgnoreCase("SemanticHeadFinder")) {
+      return new SemanticHeadFinder();
+    } else if(headfinderName.equalsIgnoreCase("SunJurafskyChineseHeadFinder")) {
+      return new SunJurafskyChineseHeadFinder();
+    } else if(headfinderName.equalsIgnoreCase("TueBaDZHeadFinder")) {
+      return new TueBaDZHeadFinder();
+    } else {//try to find the class
+      try {
+        Class<?> headfinder = Class.forName(headfinderName);
+        HeadFinder hf = (HeadFinder) headfinder.newInstance();
+        return hf;
+      } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Sorry, there was an error finding or instantiating the head finder. Please choose another head finder.", "Head Finder Error", JOptionPane.ERROR_MESSAGE);
+      }
+    }
+    return null;
+  }
+
   public static void alignLeft(JComponent box) {
     for(Component comp: box.getComponents()) {
       ((JComponent) comp).setAlignmentX(Box.LEFT_ALIGNMENT);
@@ -287,23 +354,40 @@ public class PreferencesPanel extends JDialog {
 
   private void syncFromPrefPanel(String font, Integer fontSize, Color treeColor, Color matchedColor, Color highlightColor,
       Integer historySize, Integer maxMatches, boolean enableTsurgeon, boolean matchPortionOnly, HeadFinder hf, TreeReaderFactory trf, String encoding) {
-    Preferences.setFont(font);
-    Preferences.setFontSize(fontSize == null ? 0 : fontSize);
-    Preferences.setTreeColor(treeColor);
-    Preferences.setMatchedColor(matchedColor);
-    Preferences.setHighlightColor(highlightColor);
-    Preferences.setHistorySize(historySize == null ? 0 : historySize);
-    Preferences.setMaxMatches(maxMatches == null ? 0 : maxMatches);
-    Preferences.setEnableTsurgeon(enableTsurgeon);
-    Preferences.setMatchPortionOnly(matchPortionOnly);
-    Preferences.setHeadFinder(hf);
-    Preferences.setTreeReaderFactory(trf);
-    Preferences.setEncoding(encoding);
+    //general parameters
+    InputPanel.getInstance().enableTsurgeon(enableTsurgeon);
+    MatchesPanel.getInstance().setShowOnlyMatchedPortion(matchPortionOnly);
+    //display stuff
+    MatchesPanel.getInstance().setHighlightColor(highlightColor);
+    if(historySize != null)
+      InputPanel.getInstance().setNumRecentPatterns(historySize);
+    if(maxMatches != null)
+      MatchesPanel.getInstance().setMaxMatches(maxMatches);
 
-    gui.loadPreferences();
+    //tree display stuff
+    DisplayMatchesPanel.getInstance().setMatchedColor(matchedColor);
+    DisplayMatchesPanel.getInstance().setDefaultColor(treeColor);
+    DisplayMatchesPanel.getInstance().setFontName(font);
+    MatchesPanel.getInstance().setFontName(font);
+    if(fontSize != null)
+      DisplayMatchesPanel.getInstance().setFontSize(fontSize);
+
+    //advanced stuff
+    InputPanel.getInstance().setHeadFinder(hf);
+    FilePanel.getInstance().setTreeReaderFactory(trf);
+    String hfName = hf.getClass().getSimpleName();
+    String trfName = trf.getClass().getSimpleName();
+    if(encoding != null && !encoding.equals(""))
+      FileTreeModel.setCurEncoding(encoding);
+    if(isChinese(hfName, trfName))
+        setChineseFont();
+    else if(isArabic(hfName, trfName))
+      setArabicFont();
+    checkEncodingAndDisplay(hfName,trfName);
+
   }
 
-  void checkEncodingAndDisplay(String headFinder, String trf) {
+  private void checkEncodingAndDisplay(String headFinder, String trf) {
     boolean prompt = false;
     String defaultEncoding = "";
     String curEncoding = FileTreeModel.getCurEncoding();
@@ -358,23 +442,52 @@ public class PreferencesPanel extends JDialog {
     fileFilterDialog.setOptions(options);
 
     final JDialog dialog = fileFilterDialog.createDialog(null, "Default encoding changed...");
-    useNewEncoding.addActionListener(arg0 -> {
-      FileTreeModel.setCurEncoding(encoding);
-      if(setEncoding == null)
-        System.out.println("encoding null!!");
-      setEncoding.setText(encoding);
-      dialog.setVisible(false);
+    useNewEncoding.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent arg0) {
+        FileTreeModel.setCurEncoding(encoding);
+        if(setEncoding == null)
+          System.out.println("encoding null!!");
+        setEncoding.setText(encoding);
+        dialog.setVisible(false);
+      }
     });
-    useOldEncoding.addActionListener(e -> dialog.setVisible(false));
-    useAnotherEncoding.addActionListener(e -> {
-      //need to prompt for an encoding
-      dialog.setVisible(false);
-      alternateEncodingPrompt(encoding);
+    useOldEncoding.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        dialog.setVisible(false);
+      }
+    });
+    useAnotherEncoding.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        //need to prompt for an encoding
+        dialog.setVisible(false);
+        alternateEncodingPrompt(encoding);
+      }
     });
     dialog.getRootPane().setDefaultButton(useNewEncoding);
     dialog.pack();
     dialog.setLocationRelativeTo(this);
     dialog.setVisible(true);
+  }
+
+  private static void setChineseFont() {
+    Thread t = new Thread() {
+      @Override
+      public void run() {
+        List<Font> fonts = FontDetector.supportedFonts(FontDetector.CHINESE);
+        String fontName = "";
+        if ( ! fonts.isEmpty()) {
+          fontName = fonts.get(0).getName();
+        } else if (FontDetector.hasFont("Watanabe Mincho")) {
+          fontName = "Watanabe Mincho";
+        }
+
+        if(!fontName.equals("")) {
+          DisplayMatchesPanel.getInstance().setFontName(fontName);
+          MatchesPanel.getInstance().setFontName(fontName);
+        }
+      }
+    };
+    t.start();
   }
 
   /**
@@ -387,10 +500,28 @@ public class PreferencesPanel extends JDialog {
     setEncoding.setText(response.trim());
   }
 
+  private static void setArabicFont() {
+    Thread t = new Thread() {
+      @Override
+      public void run() {
+        List<Font> fonts = FontDetector.supportedFonts(FontDetector.ARABIC);
+        String fontName = "";
+        if (fonts.size() > 0) {
+          fontName = fonts.get(0).getName();
+        }
+        if(!fontName.equals("")) {
+          DisplayMatchesPanel.getInstance().setFontName(fontName);
+          MatchesPanel.getInstance().setFontName(fontName);
+        }
+      }
+    };
+    t.start();
+  }
+
   /**
    * Checks if the given head finder or tree reader factory are for Negra (German).
    */
-  static boolean isNegra(String headFinder, String trf) {
+  private static boolean isNegra(String headFinder, String trf) {
     return headFinder.startsWith("Negra");
   }
 
@@ -398,7 +529,7 @@ public class PreferencesPanel extends JDialog {
    * Checks if the given head finder or tree reader factory are for Chinese; if so, the font chosen in prefs
    * will be overridden for a Chinese compatible font
    */
-  static boolean isChinese(String headFinder, String trf) {
+  private static boolean isChinese(String headFinder, String trf) {
     return headFinder.startsWith("Chinese") || headFinder.startsWith("OldChinese") || trf.equalsIgnoreCase("CTBTreeReaderFactory") || trf.equalsIgnoreCase("NoEmptiesCTBTreeReaderFactory");
   }
 
@@ -406,9 +537,11 @@ public class PreferencesPanel extends JDialog {
    * Checks if the given head finder or tree reader factory are for Arabic; if so, the font chosen in prefs
    * will be overridden for a Arabic compatible font
    */
-  static boolean isArabic(String headFinder, String trf) {
+  private static boolean isArabic(String headFinder, String trf) {
     return headFinder.startsWith("Arabic") || trf.startsWith("Arabic");
   }
+
+
 
   /**
    * Makes a color choosing button that displays only an icon with a square of the given color
@@ -416,11 +549,14 @@ public class PreferencesPanel extends JDialog {
   public static JButton makeColorButton(final String promptText, Color iconColor, final JPanel parent) {
     final ColorIcon icon = new ColorIcon(iconColor);
     final JButton button = new JButton(icon);
-    button.addActionListener(arg0 -> {
-      Color newColor = JColorChooser.showDialog(parent,promptText, icon.getColor());
-      if (newColor != null) {
-        icon.setColor(newColor);
-        parent.repaint();
+    button.addActionListener(new ActionListener() {
+
+      public void actionPerformed(ActionEvent arg0) {
+        Color newColor = JColorChooser.showDialog(parent,promptText, icon.getColor());
+        if (newColor != null) {
+          icon.setColor(newColor);
+          parent.repaint();
+        }
       }
     });
     return button;

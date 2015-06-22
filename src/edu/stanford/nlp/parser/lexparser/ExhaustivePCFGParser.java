@@ -404,7 +404,7 @@ public class ExhaustivePCFGParser implements Scorer, KBestViterbiParser {
       //if (words[i] == unkIndex) {
       //  ++unkIndex;
       //}
-      words[i] = wordIndex.addToIndex(s);
+      words[i] = wordIndex.indexOf(s, true);
       //if (wordIndex.contains(s)) {
       //  words[i] = wordIndex.indexOf(s);
       //} else {

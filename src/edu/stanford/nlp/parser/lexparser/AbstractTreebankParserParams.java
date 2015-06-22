@@ -10,7 +10,7 @@ import edu.stanford.nlp.process.SerializableFunction;
 import edu.stanford.nlp.stats.EquivalenceClasser;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Index;
 
 import java.io.OutputStream;
@@ -139,8 +139,6 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
   protected String inputEncoding;
   protected String outputEncoding;
   protected TreebankLanguagePack tlp;
-  protected boolean generateOriginalDependencies;
-
 
   /**
    * Stores the passed-in TreebankLanguagePack and sets up charset encodings.
@@ -151,7 +149,6 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
     this.tlp = tlp;
     inputEncoding = tlp.getEncoding();
     outputEncoding = tlp.getEncoding();
-    generateOriginalDependencies = false;
   }
 
   @Override
@@ -516,10 +513,13 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
    *  @return An Equivalence class for typed dependencies
    */
   public static EquivalenceClasser<List<String>, String> typedDependencyClasser() {
-    return s -> {
-      if(s.get(5).equals(leftHeaded))
-        return s.get(2) + '(' + s.get(3) + "->" + s.get(4) + ')';
-      return s.get(2) + '(' + s.get(4) + "<-" + s.get(3) + ')';
+    return new EquivalenceClasser<List<String>, String>() {
+      @Override
+      public String equivalenceClass(List<String> s) {
+        if(s.get(5).equals(leftHeaded))
+          return s.get(2) + '(' + s.get(3) + "->" + s.get(4) + ')';
+        return s.get(2) + '(' + s.get(4) + "<-" + s.get(3) + ')';
+      }
     };
   }
 
@@ -670,7 +670,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
 
   @Override
   public GrammaticalStructure getGrammaticalStructure(Tree t,
-                                                      Predicate<String> filter,
+                                                      Filter<String> filter,
                                                       HeadFinder hf) {
     throw new UnsupportedOperationException("This language does not support GrammaticalStructures or dependencies");
   }
@@ -684,25 +684,6 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
     return false;
   }
 
-  /**
-   * For languages that have implementations of the 
-   * original Stanford dependencies and Universal 
-   * dependencies, this parameter is used to decide which
-   * implementation should be used.
-   */
-  @Override
-  public void setGenerateOriginalDependencies(boolean originalDependencies) {
-    this.generateOriginalDependencies = originalDependencies;
-    if (this.tlp != null) {
-      this.tlp.setGenerateOriginalDependencies(originalDependencies);
-    }
-  }
-  
-  @Override
-  public boolean generateOriginalDependencies() {
-    return this.generateOriginalDependencies;
-  }
-  
   private static final String[] EMPTY_ARGS = new String[0];
 
   @Override

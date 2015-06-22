@@ -26,7 +26,7 @@
 
 package edu.stanford.nlp.trees;
 
-import edu.stanford.nlp.international.Language;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
@@ -37,12 +37,13 @@ import edu.stanford.nlp.util.StringUtils;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.lang.ref.SoftReference;
 import java.util.*;
 import java.util.regex.Pattern;
 
 
 /**
- * {@code GrammaticalRelation} is used to define a
+ * <code>GrammaticalRelation</code> is used to define a
  * standardized, hierarchical set of grammatical relations,
  * together with patterns for identifying them in
  * parse trees.<p>
@@ -50,17 +51,17 @@ import java.util.regex.Pattern;
  * Each <code>GrammaticalRelation</code> has:
  * <ul>
  *   <li>A <code>String</code> short name, which should be a lowercase
- *       abbreviation of some kind (in the fure mainly Universal Dependency names).</li>
+ *       abbreviation of some kind.</li>
  *   <li>A <code>String</code> long name, which should be descriptive.</li>
  *   <li>A parent in the <code>GrammaticalRelation</code> hierarchy.</li>
  *   <li>A {@link Pattern <code>Pattern</code>} called
  *   <code>sourcePattern</code> which matches (parent) nodes from which
  *   this <code>GrammaticalRelation</code> could hold.  (Note: this is done
- *   with the Java regex Pattern <code>matches()</code> predicate. The pattern
+ *   with the Java regex Pattern <code>matches()</code> predicate: the pattern
  *   must match the
  *   whole node name, and <code>^</code> or <code>$</code> aren't needed.
  *   Tregex constructions like __ do not work. Use ".*" to be applicable
- *   at all nodes. This prefiltering is used for efficiency.)</li>
+ *   at all nodes.)</li>
  *   <li>A list of zero or more {@link TregexPattern
  *   <code>TregexPattern</code>s} called <code>targetPatterns</code>,
  *   which describe the local tree structure which must hold between
@@ -110,7 +111,7 @@ import java.util.regex.Pattern;
  *
  * @author Bill MacCartney
  * @author Galen Andrew (refactoring English-specific stuff)
- * @author Ilya Sherman (refactoring annotation-relation pairing, which is now gone)
+ * @author Ilya Sherman (refactoring annotation-relation pairing)
  */
 public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Serializable {
 
@@ -118,6 +119,16 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
 
   private static final boolean DEBUG = System.getProperty("GrammaticalRelation", null) != null;
 
+  public abstract static class GrammaticalRelationAnnotation implements CoreAnnotation<Set<TreeGraphNode>> {
+    @Override
+    @SuppressWarnings({"unchecked", "RedundantCast"})
+    public Class<Set<TreeGraphNode>> getType() {  return (Class) Set.class; }
+  }
+
+  private static final Map<Class<? extends GrammaticalRelationAnnotation>, GrammaticalRelation>
+    annotationsToRelations = Generics.newHashMap();
+  private static final Map<GrammaticalRelation, Class<? extends GrammaticalRelationAnnotation>>
+    relationsToAnnotations = Generics.newHashMap();
   private static final EnumMap<Language, Map<String, GrammaticalRelation>>
     stringsToRelations = new EnumMap<Language, Map<String, GrammaticalRelation>>(Language.class);
 
@@ -127,8 +138,9 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
    * Example: "the red car" &rarr; <code>gov</code>(red, car)
    */
   public static final GrammaticalRelation GOVERNOR =
-    new GrammaticalRelation(Language.Any, "gov", "governor", null);
+    new GrammaticalRelation(Language.Any, "gov", "governor", GovernorGRAnnotation.class, null);
 
+  public static class GovernorGRAnnotation extends GrammaticalRelationAnnotation { }
 
   /**
    * The "dependent" grammatical relation, which is the inverse of "governor".<p>
@@ -136,22 +148,35 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
    * Example: "the red car" &rarr; <code>dep</code>(car, red)
    */
   public static final GrammaticalRelation DEPENDENT =
-    new GrammaticalRelation(Language.Any, "dep", "dependent", null);
+    new GrammaticalRelation(Language.Any, "dep", "dependent", DependentGRAnnotation.class, null);
 
+  public static class DependentGRAnnotation extends GrammaticalRelationAnnotation{ }
 
   /**
    *  The "root" grammatical relation between a faked "ROOT" node, and the root of the sentence.
    */
   public static final GrammaticalRelation ROOT =
-    new GrammaticalRelation(Language.Any, "root", "root", null);
+    new GrammaticalRelation(Language.Any, "root", "root", RootGRAnnotation.class, null);
 
+  public static class RootGRAnnotation extends GrammaticalRelationAnnotation{ }
 
   /**
-   * Dummy relation, used while collapsing relations, e.g., in English &amp; Chinese GrammaticalStructure
+   * Dummy relation, used while collapsing relations, in English &amp; Chinese GrammaticalStructure
    */
   public static final GrammaticalRelation KILL =
-    new GrammaticalRelation(Language.Any, "KILL", "dummy relation kill", null);
+    new GrammaticalRelation(Language.Any, "KILL", "dummy relation kill", KillGRAnnotation.class, null);
 
+  public static class KillGRAnnotation extends GrammaticalRelationAnnotation { }
+
+  public static Class<? extends GrammaticalRelationAnnotation>
+  getAnnotationClass(GrammaticalRelation relation) {
+    return relationsToAnnotations.get(relation);
+  }
+
+  public static GrammaticalRelation
+  getRelation(Class<? extends GrammaticalRelationAnnotation> annotation) {
+    return annotationsToRelations.get(annotation);
+  }
 
   /**
    * Returns the GrammaticalRelation having the given string
@@ -169,21 +194,6 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     return null;
   }
 
-  /**
-   * Returns the GrammaticalRelation having the given string
-   * representation (e.g. "nsubj"), or null if no such is found.
-   *
-   * @param s The short name of the GrammaticalRelation
-   * @param map The map from string to GrammaticalRelation
-   * @return The GrammaticalRelation with that name
-   */
-  public static GrammaticalRelation valueOf(String s, Map<String, GrammaticalRelation> map) {
-    if (map.containsKey(s)) {
-      return map.get(s);
-    }
-    return null;
-  }
-
   /** Convert from a String representation of a GrammaticalRelation to a
    *  GrammaticalRelation.  Where possible, you should avoid using this
    *  method and simply work with true GrammaticalRelations rather than
@@ -198,10 +208,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
    *  @return The grammatical relation represented by this String
    */
   public static GrammaticalRelation valueOf(Language language, String s) {
-    GrammaticalRelation reln;
-    synchronized (stringsToRelations) {
-      reln = (stringsToRelations.get(language) != null ? valueOf(s, stringsToRelations.get(language)) : null);
-    }
+    GrammaticalRelation reln = (stringsToRelations.get(language) != null ? valueOf(s, stringsToRelations.get(language).values()) : null);
     if (reln == null) {
       // TODO this breaks the hierarchical structure of the classes,
       //      but it makes English relations that much likelier to work.
@@ -225,14 +232,22 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
         name = s;
         specific = null;
       }
-      reln = new GrammaticalRelation(language, name, null, null, specific);
+      reln = new GrammaticalRelation(language, name, null, null, null, specific);
 
     }
     return reln;
   }
 
+  private static Map<String, SoftReference<GrammaticalRelation>> valueOfCache = new HashMap<String, SoftReference<GrammaticalRelation>>();
   public static GrammaticalRelation valueOf(String s) {
-    return valueOf(Language.Any, s);
+    GrammaticalRelation value = null;
+    SoftReference<GrammaticalRelation> possiblyCachedValue = valueOfCache.get(s);
+    if (possiblyCachedValue != null) { value = possiblyCachedValue.get(); }
+    if (value == null) {
+      value = valueOf(Language.English, s);
+      valueOfCache.put(s, new SoftReference<GrammaticalRelation>(value));
+    }
+    return value;
   }
 
   /**
@@ -246,6 +261,10 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
   public boolean isFromString() {
     return longName == null;
   }
+
+
+  public enum Language { Any, English, Chinese }
+
 
   /* Non-static stuff */
   private final Language language;
@@ -263,6 +282,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
   private GrammaticalRelation(Language language,
                              String shortName,
                              String longName,
+                             Class<? extends GrammaticalRelationAnnotation> annotation,
                              GrammaticalRelation parent,
                              String sourcePattern,
                              TregexPatternCompiler tregexCompiler,
@@ -276,6 +296,15 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
 
     if (parent != null) {
       parent.addChild(this);
+    }
+
+    if (annotation != null) {
+      if (GrammaticalRelation.annotationsToRelations.put(annotation, this) != null) {
+        throw new IllegalArgumentException("Annotation cannot be associated with more than one relation!");
+      }
+      if (GrammaticalRelation.relationsToAnnotations.put(this, annotation) != null) {
+        throw new IllegalArgumentException("There should only ever be one instance of each relation!");
+      }
     }
 
     if (sourcePattern != null) {
@@ -297,15 +326,12 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
       }
     }
 
-    GrammaticalRelation previous;
-    synchronized (stringsToRelations) {
-      Map<String, GrammaticalRelation> sToR = stringsToRelations.get(language);
-      if (sToR == null) {
-        sToR = Generics.newHashMap();
-        stringsToRelations.put(language, sToR);
-      }
-      previous = sToR.put(toString(), this);
+    Map<String, GrammaticalRelation> sToR = stringsToRelations.get(language);
+    if (sToR == null) {
+      sToR = Generics.newHashMap();
+      stringsToRelations.put(language, sToR);
     }
+    GrammaticalRelation previous = sToR.put(toString(), this);
     if (previous != null) {
       if (!previous.isFromString() && !isFromString()) {
         throw new IllegalArgumentException("There is already a relation named " + toString() + '!');
@@ -319,32 +345,32 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     }
   }
 
-  // This is the main constructor used
   public GrammaticalRelation(Language language,
                              String shortName,
                              String longName,
+                             Class<? extends GrammaticalRelationAnnotation> annotation,
                              GrammaticalRelation parent,
                              String sourcePattern,
                              TregexPatternCompiler tregexCompiler,
                              String... targetPatterns) {
-    this(language, shortName, longName, parent, sourcePattern, tregexCompiler, targetPatterns, null);
+    this(language, shortName, longName, annotation, parent, sourcePattern, tregexCompiler, targetPatterns, null);
   }
 
-  // Used for non-leaf relations with no patterns
   public GrammaticalRelation(Language language,
                              String shortName,
                              String longName,
+                             Class<? extends GrammaticalRelationAnnotation> annotation,
                              GrammaticalRelation parent) {
-    this(language, shortName, longName, parent, null, null, StringUtils.EMPTY_STRING_ARRAY, null);
+    this(language, shortName, longName, annotation, parent, null, null, StringUtils.EMPTY_STRING_ARRAY, null);
   }
 
-  // used to create collapsed relations with specificString
   public GrammaticalRelation(Language language,
                              String shortName,
                              String longName,
+                             Class<? extends GrammaticalRelationAnnotation> annotation,
                              GrammaticalRelation parent,
                              String specificString) {
-    this(language, shortName, longName, parent, null, null, StringUtils.EMPTY_STRING_ARRAY, specificString);
+    this(language, shortName, longName, annotation, parent, null, null, StringUtils.EMPTY_STRING_ARRAY, specificString);
   }
 
   private void addChild(GrammaticalRelation child) {
@@ -420,8 +446,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     if (specific == null) {
       return shortName;
     } else {
-      char sep = language == Language.UniversalEnglish ? ':' : '_';
-      return shortName + sep + specific;
+      return shortName + '_' + specific;
     }
   }
 
@@ -446,12 +471,13 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
    * <code>indentLevel</code>.
    *
    * @param indentLevel how many levels to indent (0 for root node)
+   *
    */
   private void toPrettyString(int indentLevel, StringBuilder buf) {
     for (int i = 0; i < indentLevel; i++) {
       buf.append("  ");
     }
-    buf.append(shortName).append(" (").append(longName).append("): ").append(targetPatterns);
+    buf.append(shortName).append(": ").append(targetPatterns);
     for (GrammaticalRelation child : children) {
       buf.append('\n');
       child.toPrettyString(indentLevel + 1, buf);
@@ -479,8 +505,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
 
     final GrammaticalRelation gr = (GrammaticalRelation) o;
     // == okay for language as enum!
-    // TODO(gabor) perhaps Language.Any shouldn't be equal to any language? This is a bit of a hack around some dependencies caring about language and others not.
-    return (this.language.compatibleWith(gr.language)) &&
+    return this.language == gr.language &&
              this.shortName.equals(gr.shortName) &&
              (this.specific == gr.specific ||
               (this.specific != null && this.specific.equals(gr.specific)));
@@ -508,13 +533,6 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
 
   public String getShortName() {
     return shortName;
-  }
-
-  /**
-   * Get the language of the grammatical relation.
-   */
-  public Language getLanguage() {
-    return this.language;
   }
 
   public String getSpecific() {
@@ -548,18 +566,17 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     case English: {
       GrammaticalRelation rel = EnglishGrammaticalRelations.valueOf(toString());
       if (rel == null) {
-        switch (shortName) {
-          case "conj":
-            return EnglishGrammaticalRelations.getConj(specific);
-          case "prep":
-            return EnglishGrammaticalRelations.getPrep(specific);
-          case "prepc":
-            return EnglishGrammaticalRelations.getPrepC(specific);
-          default:
-            // TODO: we need to figure out what to do with relations
-            // which were serialized and then deprecated.  Perhaps there
-            // is a good way to make them singletons
-            return this;
+        if (shortName.equals("conj")) {
+          return EnglishGrammaticalRelations.getConj(specific);
+        } else if (shortName.equals("prep")) {
+          return EnglishGrammaticalRelations.getPrep(specific);
+        } else if (shortName.equals("prepc")) {
+          return EnglishGrammaticalRelations.getPrepC(specific);
+        } else {
+          // TODO: we need to figure out what to do with relations
+          // which were serialized and then deprecated.  Perhaps there
+          // is a good way to make them singletons
+          return this;
           //throw new RuntimeException("Unknown English relation " + this);
         }
       } else {
@@ -577,29 +594,6 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
       }
       return rel;
     }
-    case UniversalEnglish:
-      GrammaticalRelation rel = UniversalEnglishGrammaticalRelations.valueOf(toString());
-      if (rel == null) {
-        switch (shortName) {
-          case "conj":
-            return UniversalEnglishGrammaticalRelations.getConj(specific);
-          case "nmod":
-            return UniversalEnglishGrammaticalRelations.getNmod(specific);
-          case "acl":
-            return UniversalEnglishGrammaticalRelations.getAcl(specific);
-          case "advcl":
-            return UniversalEnglishGrammaticalRelations.getAdvcl(specific);
-          default:
-            // TODO: we need to figure out what to do with relations
-            // which were serialized and then deprecated.  Perhaps there
-            // is a good way to make them singletons
-            return this;
-          //throw new RuntimeException("Unknown English relation " + this);
-        }
-      } else {
-        return rel;
-      }
-      
     default: {
       throw new RuntimeException("Unknown language " + language);
     }

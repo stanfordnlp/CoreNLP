@@ -11,7 +11,7 @@ import edu.stanford.nlp.util.IntTuple;
 import edu.stanford.nlp.util.Pair;
 
 /**
- * Similar to {@link edu.stanford.nlp.ling.CoreAnnotations},
+ * Similar to {@link edu.stanford.nlp.ling.CoreAnnotations}, 
  * but this class contains
  * annotations made specifically for storing Coref data.  This is kept
  * separate from CoreAnnotations so that systems which only need
@@ -20,22 +20,21 @@ import edu.stanford.nlp.util.Pair;
 public class CorefCoreAnnotations {
 
   /**
-   * The standard key for the coref label.
-   * Not used by the new dcoref system.
+   * the standard key for the coref label.
+   * not used by the new dcoref system.
    */
   public static class CorefAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   /**
-   * Destination of the coreference link for this word (if any).
-   * It contains the index of the sentence and the index of the word that
-   * are the end of this coref link. Both indices start at 1. The
+   * Destination of the coreference link for this word (if any): it
+   * contains the index of the sentence and the index of the word that
+   * are the end of this coref link Both indices start at 1 The
    * sentence index is IntTuple.get(0); the token index in the
-   * sentence is IntTuple.get(1).
+   * sentence is IntTuple.get(1)
    */
   public static class CorefDestAnnotation implements CoreAnnotation<IntTuple> {
     public Class<IntTuple> getType() {
@@ -72,18 +71,15 @@ public class CorefCoreAnnotations {
    * Set of all the CoreLabel objects which are coreferent with a
    * CoreLabel.  Note that the list includes the CoreLabel that was
    * annotated which creates a cycle.
-   *
-   * @deprecated This was an original dcoref annotation. You should know use CorefChainAnnotation
    */
-  @Deprecated
   public static class CorefClusterAnnotation implements CoreAnnotation<Set<CoreLabel>> {
     public Class<Set<CoreLabel>> getType() {
       return ErasureUtils.uncheckedCast(Set.class);
     }
   }
-
+  
   /**
-   * CorefChainID - CorefChain map.
+   * CorefChainID - CorefChain map
    */
   public static class CorefChainAnnotation implements CoreAnnotation<Map<Integer, CorefChain>> {
     public Class<Map<Integer, CorefChain>> getType() {

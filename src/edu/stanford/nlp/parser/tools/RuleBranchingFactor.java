@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import edu.stanford.nlp.international.Language;
+import edu.stanford.nlp.international.Languages;
+import edu.stanford.nlp.international.Languages.Language;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -19,7 +20,7 @@ import edu.stanford.nlp.util.StringUtils;
 
 /**
  * Counts the rule branching factor (and other rule statistics) in a treebank.
- *
+ * 
  * @author Spence Green
  *
  */
@@ -34,8 +35,8 @@ public class RuleBranchingFactor {
     }
     return sb.toString();
   }
-
-
+  
+  
   private static final int minArgs = 1;
   private static final String usage;
   static {
@@ -43,11 +44,11 @@ public class RuleBranchingFactor {
     String nl = System.getProperty("line.separator");
     sb.append(String.format("Usage: java %s [OPTS] tree_file%s%s",CountTrees.class.getName(),nl,nl));
     sb.append("Options:\n");
-    sb.append("  -l lang    : Select language settings from " + Language.langList).append(nl);
+    sb.append("  -l lang    : Select language settings from " + Languages.listOfLanguages()).append(nl);
     sb.append("  -e enc     : Encoding.").append(nl);
     usage = sb.toString();
   }
-
+  
   public static final Map<String,Integer> optionArgDefinitions = Generics.newHashMap();
   static {
     optionArgDefinitions.put("l", 1);
@@ -59,7 +60,7 @@ public class RuleBranchingFactor {
       System.out.println(usage);
       System.exit(-1);
     }
-
+    
     // Process command-line options
     Properties options = StringUtils.argsToProperties(args, optionArgDefinitions);
     String fileName = options.getProperty("");
@@ -68,14 +69,14 @@ public class RuleBranchingFactor {
       System.exit(-1);
     }
     Language language = PropertiesUtils.get(options, "l", Language.English, Language.class);
-    TreebankLangParserParams tlpp = language.params;
+    TreebankLangParserParams tlpp = Languages.getLanguageParams(language);
     String encoding = options.getProperty("e", "UTF-8");
     tlpp.setInputEncoding(encoding);
     tlpp.setOutputEncoding(encoding);
-
+    
     DiskTreebank tb = tlpp.diskTreebank();
     tb.loadPath(fileName);
-
+    
     // Statistics
     Counter<String> binaryRuleTypes = new ClassicCounter<String>(20000);
     List<Integer> branchingFactors = new ArrayList<Integer>(20000);
@@ -83,7 +84,7 @@ public class RuleBranchingFactor {
     int nUnaryRules = 0;
     int nBinaryRules = 0;
     int binaryBranchingFactors = 0;
-
+    
     // Read the treebank
     PrintWriter pw = tlpp.pw();
     for (Tree tree : tb) {
@@ -114,12 +115,11 @@ public class RuleBranchingFactor {
     System.out.printf("#unaries:\t%d%n", nUnaryRules);
   }
 
-  private static double standardDeviation(List<Integer> branchingFactors, double mean) {
+  private static Object standardDeviation(List<Integer> branchingFactors, double mean) {
     double variance = 0.0;
     for (int i : branchingFactors) {
       variance += (i-mean)*(i-mean);
     }
     return Math.sqrt(variance / (branchingFactors.size()-1));
   }
-
 }

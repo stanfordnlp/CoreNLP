@@ -1,11 +1,11 @@
 package edu.stanford.nlp.trees.tregex;
 
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.ArrayStringFilter;
 import edu.stanford.nlp.util.Pair;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -23,7 +23,7 @@ class DescriptionPattern extends TregexPattern {
   private final DescriptionMode descriptionMode;
   private final String exactMatch;
   private final Pattern descPattern;
-  private final Predicate<String> stringFilter;
+  private final Filter<String> stringFilter;
 
   // what size string matchers to use before switching to regex for
   // disjunction matches
@@ -400,7 +400,7 @@ class DescriptionPattern extends TregexPattern {
               found = true;
               break;
             case STRINGS:
-              found = myNode.stringFilter.test(value);
+              found = myNode.stringFilter.accept(value);
               break;
             default:
               throw new IllegalArgumentException("Unexpected match mode");

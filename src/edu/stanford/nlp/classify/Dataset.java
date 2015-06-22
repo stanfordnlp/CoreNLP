@@ -377,25 +377,8 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
    */
   @Override
   public RVFDatum<L, F> getRVFDatum(int index) {
-    ClassicCounter<F> c = new ClassicCounter<>();
-    // Make sure all features are valid
-    // (count how many features are valid)
-    int validFeatureCount = 0;
-    for (int feature : data[index]) { if (feature < featureIndex.size()) validFeatureCount += 1; }
-    int validFeatures[] = data[index];
-    // (if there are invalid features, copy only the valid ones over)
-    if (validFeatureCount != validFeatures.length) {
-      validFeatures = new int[validFeatureCount];
-      int i = 0;
-      for (int feature : data[index]) {
-        if (feature < featureIndex.size()) {
-          validFeatures[i] = feature;
-          i += 1;
-        }
-      }
-    }
-    // Add features
-    for (F key : featureIndex.objects(validFeatures)) {
+    ClassicCounter<F> c = new ClassicCounter<F>();
+    for (F key : featureIndex.objects(data[index])) {
       c.incrementCount(key);
     }
     return new RVFDatum<L, F>(c, labelIndex.get(labels[index]));
@@ -417,7 +400,6 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
   public String toSummaryStatistics() {
     StringBuilder sb = new StringBuilder();
     sb.append("numDatums: ").append(size).append('\n');
-    sb.append("numDatumsPerLabel: ").append(this.numDatumsPerLabel()).append('\n');
     sb.append("numLabels: ").append(labelIndex.size()).append(" [");
     Iterator<L> iter = labelIndex.iterator();
     while (iter.hasNext()) {

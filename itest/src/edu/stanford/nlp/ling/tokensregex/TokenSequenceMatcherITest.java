@@ -1,21 +1,16 @@
 package edu.stanford.nlp.ling.tokensregex;
 
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 import junit.framework.TestCase;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 public class TokenSequenceMatcherITest extends TestCase {
@@ -27,7 +22,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     synchronized(TokenSequenceMatcherITest.class) {
       if (pipeline == null) {
         pipeline = new AnnotationPipeline();
-        pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
+        pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
         pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
         pipeline.addAnnotator(new POSTaggerAnnotator(false));
         pipeline.addAnnotator(new NumberAnnotator(false, false));
@@ -1488,42 +1483,4 @@ public class TokenSequenceMatcherITest extends TestCase {
     //assertEquals(m.group(), "matching this");
   }
 
-  //This DOES NOT work right now!!
-//  public void testCompile2(){
-//    Env env = TokenSequencePattern.getNewEnv();
-//    env.bind("wordname",CoreAnnotations.TextAnnotation.class);
-//    String s = "[" + CoreAnnotations.TextAnnotation.class.getName()+":\"name\"]{1,2}";
-//    TokenSequencePattern p = TokenSequencePattern.compile(env, s);
-//    for(Map.Entry<String, Object> vars: env.getVariables().entrySet()){
-//      if(vars.getValue().equals(CoreAnnotations.TextAnnotation.class)){
-//        System.out.println("Found " + vars.getKey() + " binding for " + vars.getValue());
-//      }
-//    }
-//  }
-
-  public void testCaseInsensitive1(){
-    Env env = TokenSequencePattern.getNewEnv();
-    env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
-    env.setDefaultStringMatchFlags(NodePattern.CASE_INSENSITIVE);
-    String s = "for /President/";
-    CoreMap doc = createDocument("for president");
-    TokenSequencePattern p = TokenSequencePattern.compile(env, s);
-    TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    boolean match = m.find();
-    assertTrue(match);
-  }
-
-  public void testCaseInsensitive2(){
-    Env env = TokenSequencePattern.getNewEnv();
-    env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
-    env.setDefaultStringMatchFlags(NodePattern.CASE_INSENSITIVE);
-
-    String s = "for president";
-    CoreMap doc = createDocument("for President");
-
-    TokenSequencePattern p = TokenSequencePattern.compile(env, s);
-    TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    boolean match = m.find();
-    assertTrue(match);
-  }
 }

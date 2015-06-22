@@ -15,7 +15,7 @@ public class AnnotatedTextReaderTest extends TestCase {
       Set<String> labels = new HashSet<String>();
       labels.add("LOC");
       System.out.println(AnnotatedTextReader.parseFile(new BufferedReader(new StringReader(text)),
-          labels, null, true, ""));
+          labels, null, true, true, false, ""));
     } catch (Exception e) {
       e.printStackTrace();
     }

@@ -241,11 +241,9 @@ public class MentionExtractor {
   }
 
   /**
-   * Sets the label of the leaf nodes of a Tree to be the CoreLabels in the given sentence.
-   * The original value() of the Tree nodes is preserved, and otherwise the label of tree
-   * leaves becomes the label from the List.
+   * Sets the label of the leaf nodes to be the CoreLabels in the given sentence
+   * The original value() of the Tree nodes is preserved
    */
-  // todo [cdm 2015]: This clearly shouldn't be here! Maybe it's not needed at all now since parsing code does this?
   public static void mergeLabels(Tree tree, List<CoreLabel> sentence) {
     int idx = 0;
     for (Tree t : tree.getLeaves()) {
@@ -367,19 +365,10 @@ public class MentionExtractor {
         }
         for(Pair<Integer, Integer> foundPair: foundPairs){
           if((foundPair.first == m1.headIndex && foundPair.second == m2.headIndex)){
-            switch (flag) {
-              case "APPOSITION":
-                m2.addApposition(m1);
-                break;
-              case "PREDICATE_NOMINATIVE":
-                m2.addPredicateNominatives(m1);
-                break;
-              case "RELATIVE_PRONOUN":
-                m2.addRelativePronoun(m1);
-                break;
-              default:
-                throw new RuntimeException("check flag in markMentionRelation (dcoref/MentionExtractor.java)");
-            }
+            if(flag.equals("APPOSITION")) m2.addApposition(m1);
+            else if(flag.equals("PREDICATE_NOMINATIVE")) m2.addPredicateNominatives(m1);
+            else if(flag.equals("RELATIVE_PRONOUN")) m2.addRelativePronoun(m1);
+            else throw new RuntimeException("check flag in markMentionRelation (dcoref/MentionExtractor.java)");
           }
         }
       }
@@ -430,7 +419,7 @@ public class MentionExtractor {
     }
     String annoStr = annoSb.toString();
     SieveCoreferenceSystem.logger.info("MentionExtractor ignores specified annotators, using annotators=" + annoStr);
-    pipelineProps.setProperty("annotators", annoStr);
+    pipelineProps.put("annotators", annoStr);
     return new StanfordCoreNLP(pipelineProps, false);
   }
 

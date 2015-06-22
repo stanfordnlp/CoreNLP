@@ -6,7 +6,7 @@ import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
 import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
 import edu.stanford.nlp.util.Comparators;
 import edu.stanford.nlp.util.CoreMap;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Interval;
 import edu.stanford.nlp.util.IntervalTree;
@@ -314,8 +314,8 @@ public class MatchedExpression {
                                                       List<? extends MatchedExpression> matchedExprs)
   {
     if (matchedExprs == null) return list;
-    Map<Integer, Integer> tokenBeginToListIndexMap = new HashMap<Integer, Integer>();//Generics.newHashMap();
-    Map<Integer, Integer> tokenEndToListIndexMap = new HashMap<Integer, Integer>();//Generics.newHashMap();
+    Map<Integer, Integer> tokenBeginToListIndexMap = Generics.newHashMap();
+    Map<Integer, Integer> tokenEndToListIndexMap = Generics.newHashMap();
     for (int i = 0; i < list.size(); i++) {
       CoreMap cm = list.get(i);
       if (cm.has(CoreAnnotations.TokenBeginAnnotation.class) && cm.has(CoreAnnotations.TokenEndAnnotation.class)) {
@@ -390,14 +390,24 @@ public class MatchedExpression {
 
   @SuppressWarnings("unused")
   public static final Function<CoreMap, Interval<Integer>> COREMAP_TO_TOKEN_OFFSETS_INTERVAL_FUNC =
-      in -> Interval.toInterval(
-            in.get(CoreAnnotations.TokenBeginAnnotation.class),
-            in.get(CoreAnnotations.TokenEndAnnotation.class));
+    new Function<CoreMap, Interval<Integer>>() {
+      @Override
+      public Interval<Integer> apply(CoreMap in) {
+        return Interval.toInterval(
+              in.get(CoreAnnotations.TokenBeginAnnotation.class),
+              in.get(CoreAnnotations.TokenEndAnnotation.class));
+      }
+    };
 
   public static final Function<CoreMap, Interval<Integer>> COREMAP_TO_CHAR_OFFSETS_INTERVAL_FUNC =
-      in -> Interval.toInterval(
-              in.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
-              in.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+          new Function<CoreMap, Interval<Integer>>() {
+            @Override
+            public Interval<Integer> apply(CoreMap in) {
+              return Interval.toInterval(
+                      in.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
+                      in.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+            }
+          };
 
   public static final Function<MatchedExpression, Interval<Integer>> EXPR_TO_TOKEN_OFFSETS_INTERVAL_FUNC =
     new Function<MatchedExpression, Interval<Integer>>() {
@@ -408,26 +418,32 @@ public class MatchedExpression {
     };
 
   public static final Comparator<MatchedExpression> EXPR_PRIORITY_COMPARATOR =
-      (e1, e2) -> {
-        double s1 = e1.getPriority();
-        double s2 = e2.getPriority();
-        if (s1 == s2) {
-          return 0;
-        } else {
-          return (s1 > s2)? -1:1;
-        }
-      };
+    new Comparator<MatchedExpression>() {
+    @Override
+    public int compare(MatchedExpression e1, MatchedExpression e2) {
+      double s1 = e1.getPriority();
+      double s2 = e2.getPriority();
+      if (s1 == s2) {
+        return 0;
+      } else {
+        return (s1 > s2)? -1:1;
+      }
+    }
+  };
 
   public static final Comparator<MatchedExpression> EXPR_ORDER_COMPARATOR =
-      (e1, e2) -> {
-        int s1 = e1.getOrder();
-        int s2 = e2.getOrder();
-        if (s1 == s2) {
-          return 0;
-        } else {
-          return (s1 < s2)? -1:1;
-        }
-      };
+    new Comparator<MatchedExpression>() {
+    @Override
+    public int compare(MatchedExpression e1, MatchedExpression e2) {
+      int s1 = e1.getOrder();
+      int s2 = e2.getOrder();
+      if (s1 == s2) {
+        return 0;
+      } else {
+        return (s1 < s2)? -1:1;
+      }
+    }
+  };
 
   // Compares two matched expressions.
   // Use to order matched expressions by:

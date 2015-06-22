@@ -26,10 +26,10 @@ public class RNNTestOptions implements Serializable {
 
   public int setOption(String[] args, int argIndex) {
     if (args[argIndex].equalsIgnoreCase("-ngramRecordSize")) {
-      ngramRecordSize = Integer.parseInt(args[argIndex + 1]);
+      ngramRecordSize = Integer.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-ngramRecordMaximumLength")) {
-      ngramRecordMaximumLength = Integer.parseInt(args[argIndex + 1]);
+      ngramRecordMaximumLength = Integer.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-printLengthAccuracies")) {
       printLengthAccuracies = true;

@@ -2,8 +2,8 @@ package edu.stanford.nlp.trees;
 
 import java.io.*;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
 
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.HasIndex;
 
 /**
@@ -213,9 +213,14 @@ public final class DiskTreebank extends Treebank {
           currentFilename = currentFile.getAbsolutePath();
           if(PRINT_FILENAMES) System.err.println(currentFile);
 
-          if (tr != null) { tr.close(); }
-          tr = treeReaderFactory().newTreeReader(IOUtils.readerFromFile(currentFile, encoding()));
+          if(tr != null) tr.close();
+          if(currentFile.getPath().endsWith(".gz")){
+            tr = treeReaderFactory().newTreeReader(new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(currentFile)), encoding())));
+          } else {
+            tr = treeReaderFactory().newTreeReader(new BufferedReader(new InputStreamReader(new FileInputStream(currentFile), encoding())));
+          }
           curLineId = 1;
+
           return true;
         }
 
