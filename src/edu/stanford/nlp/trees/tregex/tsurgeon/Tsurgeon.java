@@ -227,11 +227,14 @@ public class Tsurgeon {
    *     Multiple subtrees at the root is an illegal operation and
    *     will throw an exception.
    *
-   * <li>{@code createSubtree <new-label> <name1> [<name2>]}
+   * <li>{@code createSubtree <auxiliary-tree-or-label> <name1> [<name2>]}
    *     Create a subtree out of all the nodes from {@code <name1>} through
-   *     {@code <name2>} and puts the new subtree where
-   *     that span used to be.  To limit the operation to just one
-   *     node, elide {@code <name2>}.
+   *     {@code <name2>}. The subtree is moved to the foot of the given
+   *     auxiliary tree, and the tree is inserted where the nodes of
+   *     the subtree used to reside. If a simple label is provided as
+   *     the first argument, the subtree is given a single parent with
+   *     a name corresponding to the label.  To limit the operation to
+   *     just one node, elide {@code <name2>}.
    *
    * <li><code>adjoin &#60;auxiliary_tree&#62; &lt;name&gt;</code> Adjoins the specified auxiliary tree into the named node.
    *     The daughters of the target node will become the daughters of the foot of the auxiliary tree.
@@ -252,11 +255,12 @@ public class Tsurgeon {
    * </ul>
    *
    * <p>
-   * In the context of <code>adjoin</code>, <code>adjoinH</code>, and
-   * <code>adjoinF</code>, an auxiliary tree is a tree in Penn
-   * Treebank format with <code>@</code> on exactly one of the leaves
-   * denoting the foot of the tree.  The operations which use the foot
-   * use the labeled node.  For example: <br>
+   * In the context of <code>adjoin</code>, <code>adjoinH</code>,
+   * <code>adjoinF</code>, and <code>createSubtree</code>, an auxiliary
+   * tree is a tree in Penn Treebank format with <code>@</code> on
+   * exactly one of the leaves denoting the foot of the tree.
+   * The operations which use the foot use the labeled node.
+   * For example: <br>
    * Tsurgeon: <code>adjoin (FOO (BAR@)) foo</code> <br>
    * Tregex: <code>B=foo</code> <br>
    * Input: <code>(A (B 1 2))</code>
@@ -468,6 +472,10 @@ public class Tsurgeon {
       // System.err.println("Read tsurgeon op: " + thisLine);
       operations.add(parseOperation(thisLine));
     }
+
+    if (operations.size() == 0)
+      throw new TsurgeonParseException("No Tsurgeon operation provided.");
+
     return collectOperations(operations);
   }
 

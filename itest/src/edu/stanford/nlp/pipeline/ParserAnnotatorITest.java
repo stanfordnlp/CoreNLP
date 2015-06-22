@@ -30,6 +30,14 @@ public class ParserAnnotatorITest extends TestCase {
 
   private static ParserAnnotator parser = null;
 
+  // TODO: kind of silly to make so many copies of the ParserAnnotator
+  private static AnnotationPipeline timeoutPipeline = null;
+  private static AnnotationPipeline threaded3TimeoutPipeline = null;
+  private static AnnotationPipeline threaded4TimeoutPipeline = null;
+
+  private static AnnotationPipeline threaded3Pipeline = null;
+  private static AnnotationPipeline threaded4Pipeline = null;
+
   public void setUp() throws Exception {
     synchronized(ParserAnnotatorITest.class) {
       if (pipeline != null)
@@ -53,6 +61,26 @@ public class ParserAnnotatorITest extends TestCase {
 
       parserOnlyPipeline = new AnnotationPipeline();
       parserOnlyPipeline.addAnnotator(parser);
+
+      Properties props = new Properties();
+      props.setProperty("parse.maxtime", "1");
+      props.setProperty("annotators", "tokenize, ssplit, parse");
+      timeoutPipeline = new StanfordCoreNLP(props);
+
+      props = new Properties();
+      props.setProperty("parse.maxtime", "1");
+      props.setProperty("parse.nthreads", "3");
+      props.setProperty("annotators", "tokenize, ssplit, parse");
+      threaded3TimeoutPipeline = new StanfordCoreNLP(props);
+
+      props.setProperty("parse.nthreads", "4");
+      threaded4TimeoutPipeline = new StanfordCoreNLP(props);
+
+      props.setProperty("parse.maxtime", "-1");
+      threaded4Pipeline = new StanfordCoreNLP(props);
+
+      props.setProperty("parse.nthreads", "3");
+      threaded3Pipeline = new StanfordCoreNLP(props);
     }
   }
 
@@ -75,15 +103,49 @@ public class ParserAnnotatorITest extends TestCase {
     }
   }
 
-  public void testParserAnnotator() throws Exception {    
-    Annotation document = new Annotation(text);    
+  public void testParserAnnotator() {
+    Annotation document = new Annotation(TEXT);    
     pipeline.annotate(document);
     
     int i = 0;
     for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
       Tree parse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
-      assertEquals(parse.toString(), answer[i++]);
+      assertEquals(parse.toString(), ANSWER[i++]);
     }
+  }
+
+  public void testThreadedAnnotator() {
+    Annotation document = new Annotation(TEXT + TEXT + TEXT + TEXT + TEXT);
+    threaded4Pipeline.annotate(document);
+    verifyAnswers(document, ANSWER);
+    
+    document = new Annotation(TEXT + TEXT + TEXT + TEXT + TEXT);
+    threaded3Pipeline.annotate(document);
+    verifyAnswers(document, ANSWER);
+
+    document = new Annotation(TEXT);
+    threaded4Pipeline.annotate(document);
+    verifyAnswers(document, ANSWER);
+  }
+
+  public void testMaxLen() {
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize, ssplit, parse");
+    props.setProperty("parse.maxlen", "7");
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    Annotation document = new Annotation(TEXT);
+    pipeline.annotate(document);
+
+    verifyAnswers(document, XPARSES);
+
+    props.setProperty("parse.maxlen", "8");
+    pipeline = new StanfordCoreNLP(props);
+    document = new Annotation(TEXT);
+    pipeline.annotate(document);
+
+    assertEquals(ANSWER[0], document.get(CoreAnnotations.SentencesAnnotation.class).get(0).get(TreeCoreAnnotations.TreeAnnotation.class).toString());
+    assertEquals(XPARSES[1], document.get(CoreAnnotations.SentencesAnnotation.class).get(1).get(TreeCoreAnnotations.TreeAnnotation.class).toString());
+    assertEquals(XPARSES[2], document.get(CoreAnnotations.SentencesAnnotation.class).get(2).get(TreeCoreAnnotations.TreeAnnotation.class).toString());
   }
 
   /**
@@ -109,6 +171,35 @@ public class ParserAnnotatorITest extends TestCase {
                 expectedResult.equals(result));
     assertTrue("Tree should be forced to contain SBAR",
                result.indexOf("SBAR") >= 0);
+  }
+
+  /**
+   * Tests that if you run a parser annotator with an absurdly low
+   * timeout, all sentences are successfully labeled with X trees, as
+   * opposed to null trees or not timing out
+   */
+  public void testTimeout() {
+    Annotation document = new Annotation(TEXT);    
+    timeoutPipeline.annotate(document);
+    verifyAnswers(document, XPARSES);
+  }
+
+  /**
+   * Tests that if you run a threaded parser annotator on input text,
+   * all sentences get successfully converted into X trees after they
+   * time out.  Incidentally, this sort of tests that the threaded
+   * parser annotator adds output in the right order.
+   */
+  public void testThreadedTimeout() {
+    for (int i = 0; i < 20; ++i) {
+      Annotation document = new Annotation(TEXT + TEXT);
+      threaded3TimeoutPipeline.annotate(document);
+      verifyAnswers(document, XPARSES);
+
+      document = new Annotation(TEXT + TEXT + TEXT + TEXT + TEXT);
+      threaded4TimeoutPipeline.annotate(document);
+      verifyAnswers(document, XPARSES);
+    }
   }
 
 
@@ -141,9 +232,7 @@ public class ParserAnnotatorITest extends TestCase {
    */
   public void testAnnotatorConstructors() {
     assertParseOK(new ParserAnnotator(false, -1));
-    assertParseOK(new ParserAnnotator(true, -1));
     assertParseOK(new ParserAnnotator(false, 100));
-    assertParseOK(new ParserAnnotator(true, 100));
 
     Properties props = new Properties();
     props.setProperty("annotators", "parse");
@@ -151,15 +240,32 @@ public class ParserAnnotatorITest extends TestCase {
 
   }
 
-  static final String text = "I saw him ordering them to saw. Jack 's father has n't played\ngolf since 20 years ago . I 'm going to the\nbookstore to return a book Jack and his friends bought me .";
 
-  static final String[] answer = {
+  public void verifyAnswers(Annotation document, String[] expected) {
+    int i = 0;
+    for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
+      Tree parse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+      assertFalse("Sentence " + i + " was null", parse == null);
+      assertEquals(expected[i++ % expected.length], parse.toString());
+    } 
+  }
+
+
+  static final String TEXT = "I saw him ordering them to saw. Jack 's father has n't played\ngolf since 20 years ago . I 'm going to the\nbookstore to return a book Jack and his friends bought me .  ";
+
+  static final String[] ANSWER = {
       // TODO: this is actually the wrong parse!
       "(ROOT (S (NP (PRP I)) (VP (VBD saw) (S (NP (PRP him)) (VP (VBG ordering) (NP (PRP them)) (PP (TO to) (NP (NN saw)))))) (. .)))",
 
       "(ROOT (S (NP (NP (NNP Jack) (POS 's)) (NN father)) (VP (VBZ has) (RB n't) (VP (VBN played) (NP (NN golf)) (PP (IN since) (ADVP (NP (CD 20) (NNS years)) (RB ago))))) (. .)))",
 
       "(ROOT (S (NP (PRP I)) (VP (VBP 'm) (VP (VBG going) (PP (TO to) (NP (DT the) (NN bookstore))) (S (VP (TO to) (VP (VB return) (NP (NP (DT a) (NN book)) (SBAR (S (NP (NP (NNP Jack)) (CC and) (NP (PRP$ his) (NNS friends))) (VP (VBD bought) (NP (PRP me))))))))))) (. .)))"
+  };
+
+  static final String[] XPARSES = {
+    "(X (X I) (X saw) (X him) (X ordering) (X them) (X to) (X saw) (X .))",
+    "(X (X Jack) (X 's) (X father) (X has) (X n't) (X played) (X golf) (X since) (X 20) (X years) (X ago) (X .))",
+    "(X (X I) (X 'm) (X going) (X to) (X the) (X bookstore) (X to) (X return) (X a) (X book) (X Jack) (X and) (X his) (X friends) (X bought) (X me) (X .))"
   };
 }
 

@@ -35,11 +35,11 @@ import edu.stanford.nlp.util.RegexStringFilter;
  * @author Chloe Kiddon
  */
 abstract class GraphRelation implements Serializable {
-  String symbol;
-  Filter<String> type;
-  String rawType;
+  final String symbol;
+  final Filter<String> type;
+  final String rawType;
 	
-  String name;
+  final String name;
 	
   //"<" | ">" | ">>" | "<<" | "<#" | ">#" | ":" | "@">
 
@@ -250,7 +250,6 @@ abstract class GraphRelation implements Serializable {
       for (Pair<GrammaticalRelation, IndexedWord> dep : deps) {
         if (this.type.accept(dep.first().toString()) &&
             dep.second().equals(l2)) {
-          name = dep.second().toString();
           return true;  
         }
       }
@@ -651,6 +650,7 @@ abstract class GraphRelation implements Serializable {
                 if (type.accept(edge.getRelation().toString()) && !matchedNodes.contains(source)) {
                   matchedNodes.add(source);
                   next = source;
+                  relation = edge.getRelation().toString();
                   return;
                 }
               }
@@ -812,7 +812,6 @@ abstract class GraphRelation implements Serializable {
     @Override
     boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
       if (l1 == l2) {
-        name = l2.toString();
         return true;
       }
       return false;

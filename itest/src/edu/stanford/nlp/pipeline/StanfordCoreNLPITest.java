@@ -1,5 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
+import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
@@ -173,15 +175,18 @@ public class StanfordCoreNLPITest extends TestCase {
     // Check the regexner is integrated with the StanfordCoreNLP
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,relation");
-
-    String text = "Barack Obama is the 44th President of the United States.  He is the first African American president.";
+    //props.setProperty("sup.relation.model", "/home/sonalg/javanlp/tmp/roth_relation_model_pipeline.ser");
+    String text = "Barack Obama, a Yale professor, is president.";
     Annotation document = new Annotation(text);
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     pipeline.annotate(document);
-
-    StringWriter stringWriter = new StringWriter();
-    pipeline.prettyPrint(document, new PrintWriter(stringWriter));
-    String result = stringWriter.getBuffer().toString();
+    CoreMap sentence = document.get(CoreAnnotations.SentencesAnnotation.class).get(0);
+    List<RelationMention> rel = sentence.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
+    assertEquals(rel.get(0).getType(),"Work_For");
+//    StringWriter stringWriter = new StringWriter();
+//    pipeline.prettyPrint(document, new PrintWriter(stringWriter));
+//    String result = stringWriter.getBuffer().toString();
+//    System.out.println(result);
   }
   
   
@@ -230,7 +235,7 @@ public class StanfordCoreNLPITest extends TestCase {
     Matcher matcher = pattern.matcher(string);
     return matcher.find();
   }
-
+  
   public void testSerialization() 
     throws Exception
   {

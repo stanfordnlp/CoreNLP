@@ -132,9 +132,6 @@ public class TreeGraph implements Serializable {
 //    node1.addArc("1TO4", node4);
 //    node4.addArc("4to1", node1);
 //    System.out.println("----------------------------");
-//    System.out.println("arcs from 1 to 4: " + node1.arcLabelsToNode(node4));
-//    System.out.println("arcs from 4 to 1: " + node4.arcLabelsToNode(node1));
-//    System.out.println("arcs from 0 to 4: " + tg.root.arcLabelsToNode(node4));
 //    for (int i = 0; i <= 9; i++) {
 //      System.out.println("parent of " + i + ": " + tg.getNodeByIndex(i).parent());
 //      System.out.println("highest node with same head as " + i + ": " + tg.getNodeByIndex(i).highestNodeWithSameHead());

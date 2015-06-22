@@ -117,28 +117,6 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   private static final Filter<TypedDependency> extraTreeDepFilter = new ExtraTreeDepFilter();
 
 
-  /**
-   * Tries to return a node representing the <code>SUBJECT</code> (whether
-   * nominal or clausal) of the given node <code>t</code>. Probably, node
-   * <code>t</code> should represent a clause or verb phrase.
-   *
-   * @param t A node in this <code>GrammaticalStructure</code>
-   * @return A node which is the subject of node <code>t</code>, or else
-   *         <code>null</code>
-   */
-  public static TreeGraphNode getSubject(TreeGraphNode t) {
-    TreeGraphNode subj = t.getNodeInRelation(NOMINAL_SUBJECT);
-    if (subj != null) {
-      return subj;
-    }
-    subj = t.getNodeInRelation(CLAUSAL_SUBJECT);
-    if (subj != null) {
-      return subj;
-    } else {
-      return t.getNodeInRelation(NOMINAL_PASSIVE_SUBJECT);
-    }
-  }
-
   @Override
   protected void correctDependencies(Collection<TypedDependency> list) {
     if (DEBUG) {
@@ -861,6 +839,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       boolean hasSubjectDaughter = false;
       boolean hasAux = false;
       List<TreeGraphNode> subjects = new ArrayList<TreeGraphNode>();
+      List<TreeGraphNode> objects = new ArrayList<TreeGraphNode>();
       for (TypedDependency dep : list) {
         // already have a subject dependency
         if ((dep.reln() == NOMINAL_SUBJECT || dep.reln() == NOMINAL_PASSIVE_SUBJECT) && dep.gov() == modifier) {
@@ -876,6 +855,10 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         if ((dep.reln() == NOMINAL_SUBJECT || dep.reln() == NOMINAL_PASSIVE_SUBJECT) && dep.gov() == head) {
           subjects.add(dep.dep());
         }
+
+        if (dep.reln() == DIRECT_OBJECT && dep.gov() == head) {
+          objects.add(dep.dep());
+        }
       }
 
       // if we already have an nsubj dependency, no need to add an xsubj
@@ -888,9 +871,22 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         continue;
       }
 
-      for (TreeGraphNode subject : subjects) {
-        TypedDependency newDep = new TypedDependency(CONTROLLING_SUBJECT, modifier, subject);
-        newDeps.add(newDep);
+      // In general, we find that the objects of the verb are better
+      // for xsubj than the original nsubj of the verb.  For example,
+      // "Many investors wrote asking the SEC to require ..."
+      // There is no nsubj of asking, but the dobj, SEC, is the xsubj of require.
+      // Similarly, "The law tells them when to do so"
+      // Instead of xsubj(do, law) we want xsubj(do, them)
+      if (objects.size() > 0) {
+        for (TreeGraphNode object : objects) {
+          TypedDependency newDep = new TypedDependency(CONTROLLING_SUBJECT, modifier, object);
+          newDeps.add(newDep);
+        }
+      } else {
+        for (TreeGraphNode subject : subjects) {
+          TypedDependency newDep = new TypedDependency(CONTROLLING_SUBJECT, modifier, subject);
+          newDeps.add(newDep);
+        }
       }
     }
 

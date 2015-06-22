@@ -1,0 +1,35 @@
+## tagger training invoked at Fri Feb 14 01:19:49 PST 2014 with arguments:
+                   model = chinese-distsim.tagger
+                    arch = generic,suffix(4),prefix(4),unicodeshapes(-1,1),unicodeshapeconjunction(-1,1),words(-2,-2),words(2,2),distsim(/u/nlp/data/chinese/distsim/xin_cmn_2000-2010.ldc.seg.utf8.1M.random-c1000,-1,1),distsimconjunction(/u/nlp/data/chinese/distsim/xin_cmn_2000-2010.ldc.seg.utf8.1M.random-c1000,-1,1)
+            wordFunction = edu.stanford.nlp.util.UTF8EquivalenceFunction
+               trainFile = format=TREES,/u/nlp/data/chinese/ctb7/train.mrg
+         closedClassTags = 
+ closedClassTagThreshold = 40
+ curWordMinFeatureThresh = 1
+                   debug = false
+             debugPrefix = 
+            tagSeparator = #
+                encoding = utf-8
+              iterations = 100
+                    lang = chinese
+    learnClosedClassTags = false
+        minFeatureThresh = 3
+           openClassTags = 
+rareWordMinFeatureThresh = 3
+          rareWordThresh = 20
+                  search = owlqn
+                    sgml = false
+            sigmaSquared = 0.0
+                   regL1 = 0.75
+               tagInside = 
+                tokenize = false
+        tokenizerFactory = 
+        tokenizerOptions = 
+                 verbose = false
+          verboseResults = true
+    veryCommonWordThresh = 250
+                xmlInput = null
+              outputFile = 
+            outputFormat = slashTags
+     outputFormatOptions = 
+                nthreads = 1

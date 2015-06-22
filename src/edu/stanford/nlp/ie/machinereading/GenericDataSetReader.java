@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ie.machinereading.common.NoPunctuationHeadFinder;
 import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
@@ -15,6 +15,9 @@ import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.parser.common.ParserAnnotations;
 import edu.stanford.nlp.parser.common.ParserConstraint;
@@ -135,9 +138,37 @@ public class GenericDataSetReader {
 
     if (preProcessSentences) {
       preProcessSentences(retVal);
+      if(MachineReadingProperties.trainUsePipelineNER){
+        logger.severe("Changing NER tags using the CoreNLP pipeline.");
+        modifyUsingCoreNLPNER(retVal);
+        }
     }
-
     return retVal;
+  }
+  
+  private void modifyUsingCoreNLPNER(Annotation doc) {
+    Properties ann = new Properties();
+    ann.setProperty("annotators", "pos, lemma, ner");
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(ann, false);
+    pipeline.annotate(doc);
+    for (CoreMap sentence : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
+      List<EntityMention> entities = sentence.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
+      if (entities != null) {
+        List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+        for (EntityMention en : entities) {
+          //System.out.println("old ner tag for " + en.getExtentString() + " was " + en.getType());
+          Span s = en.getExtent();
+          Counter<String> allNertagforSpan = new ClassicCounter<String>();
+          for (int i = s.start(); i < s.end(); i++) {
+            allNertagforSpan.incrementCount(tokens.get(i).ner());
+          }
+          String entityNertag = Counters.argmax(allNertagforSpan);
+          en.setType(entityNertag);
+          //System.out.println("new ner tag is " + entityNertag);
+        }
+      }
+      
+    }
   }
 
   public Annotation read(String path) throws Exception {
@@ -466,6 +497,8 @@ public class GenericDataSetReader {
     label.setWord(token);
     label.setValue(token);
     label.set(CoreAnnotations.TextAnnotation.class, token);
+    label.set(CoreAnnotations.ValueAnnotation.class, token);
+    
     return label;
   }
 

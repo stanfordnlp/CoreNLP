@@ -1,0 +1,35 @@
+## tagger training invoked at Mon Jun 09 17:36:16 PDT 2014 with arguments:
+                   model = french.tagger
+                    arch = left3words,naacl2003unknowns,unicodeshapes(-1,1)
+            wordFunction = 
+               trainFile = format=TREES,/u/nlp/data/lexparser/trees/FrenchCC/FTB-Train.utf8.txt
+         closedClassTags = 
+ closedClassTagThreshold = 40
+ curWordMinFeatureThresh = 2
+                   debug = false
+             debugPrefix = 
+            tagSeparator = _
+                encoding = utf-8
+              iterations = 100
+                    lang = french
+    learnClosedClassTags = false
+        minFeatureThresh = 2
+           openClassTags = 
+rareWordMinFeatureThresh = 10
+          rareWordThresh = 5
+                  search = owlqn
+                    sgml = false
+            sigmaSquared = 0.0
+                   regL1 = 0.75
+               tagInside = 
+                tokenize = true
+        tokenizerFactory = 
+        tokenizerOptions = asciiQuotes
+                 verbose = false
+          verboseResults = true
+    veryCommonWordThresh = 250
+                xmlInput = null
+              outputFile = 
+            outputFormat = slashTags
+     outputFormatOptions = 
+                nthreads = 1

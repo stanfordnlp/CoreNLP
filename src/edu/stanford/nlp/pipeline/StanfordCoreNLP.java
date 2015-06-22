@@ -636,15 +636,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         // keep track of all relevant properties for this annotator here!
         return "ner.model:" +
                 properties.getProperty("ner.model", "") +
-                "ner.model.3class:" +
-                properties.getProperty("ner.model.3class",
-                        DefaultPaths.DEFAULT_NER_THREECLASS_MODEL) +
-                "ner.model.7class:" +
-                properties.getProperty("ner.model.7class",
-                        DefaultPaths.DEFAULT_NER_MUC_MODEL) +
-                "ner.model.MISCclass:" +
-                properties.getProperty("ner.model.MISCclass",
-                        DefaultPaths.DEFAULT_NER_CONLL_MODEL) +
                 NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY + ":" +
                 properties.getProperty(NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY,
                         Boolean.toString(NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_DEFAULT)) +
@@ -1013,9 +1004,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
     os.println();
     os.println("\tIf annotator \"ner\" is defined:");
-    os.println("\t\"ner.model.3class\" - path towards the three-class NER model");
-    os.println("\t\"ner.model.7class\" - path towards the seven-class NER model");
-    os.println("\t\"ner.model.MISCclass\" - path towards the NER model with a MISC class");
+    os.println("\t\"ner.model\" - paths for the ner models.  By default, the English 3 class, 7 class, and 4 class models are used.");
+    os.println("\t\"ner.useSUTime\" - Whether or not to use sutime (English specific)");
+    os.println("\t\"ner.applyNumericClassifiers\" - whether or not to use any numeric classifiers (English specific)");
 
     os.println();
     os.println("\tIf annotator \"truecase\" is defined:");
