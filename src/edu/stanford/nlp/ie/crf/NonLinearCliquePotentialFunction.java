@@ -6,14 +6,13 @@ import edu.stanford.nlp.sequences.SeqClassifierFlags;
 /**
  * @author Mengqiu Wang
  */
-
 public class NonLinearCliquePotentialFunction implements CliquePotentialFunction {
 
-  double[][] linearWeights;
-  double[][] inputLayerWeights; // first index is number of hidden units in layer one, second index is the input feature indices
-  double[][] outputLayerWeights; // first index is the output class, second index is the number of hidden units
-  SeqClassifierFlags flags;
-  double[] layerOneCache, hiddenLayerCache;
+  private final double[][] linearWeights;
+  private final double[][] inputLayerWeights; // first index is number of hidden units in layer one, second index is the input feature indices
+  private final double[][] outputLayerWeights; // first index is the output class, second index is the number of hidden units
+  private final SeqClassifierFlags flags;
+  private double[] layerOneCache, hiddenLayerCache;
 
   private static double sigmoid(double x) {
     return 1 / (1 + Math.exp(-x));
@@ -95,4 +94,5 @@ public class NonLinearCliquePotentialFunction implements CliquePotentialFunction
     }
     return output;
   }
+
 }

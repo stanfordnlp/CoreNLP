@@ -4,6 +4,7 @@ import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
 import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
@@ -35,9 +36,10 @@ public class StanfordCoreNLPITest extends TestCase {
   }
 
   public void test() throws Exception {
-    // create a properties that enables all the anotators
+    // create a properties that enables all the annotators
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
+    props.setProperty("ssplit.newlineIsSentenceBreak", "never");
 
     // run an annotation through the pipeline
     String text = "Dan Ramage is working for\nMicrosoft. He's in Seattle! \n";
@@ -67,7 +69,15 @@ public class StanfordCoreNLPITest extends TestCase {
 
       // check for parse tree
       Assert.assertNotNull(sentence.get(TreeCoreAnnotations.TreeAnnotation.class));
+
+      // check that dependency graph Labels have word()
+      SemanticGraph deps = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+      for (IndexedWord vertex : deps.vertexSet()) {
+        Assert.assertNotNull(vertex.word());
+        Assert.assertEquals(vertex.word(), vertex.value());
+      }
     }
+
 
     // test pretty print
     StringWriter stringWriter = new StringWriter();
@@ -121,8 +131,8 @@ public class StanfordCoreNLPITest extends TestCase {
         assertEquals(message + ": ner mismatch for " + debug + "(" + tokens.get(j).word() + ")\n" + coremapOutput, ner, tokens.get(j).ner());
       }
     }
-
   }
+
   public void testRegexNer() throws Exception {
     // Check the regexner is integrated with the StanfordCoreNLP
     Properties props = new Properties();
@@ -187,7 +197,6 @@ public class StanfordCoreNLPITest extends TestCase {
   }
 
 
-
   /* This test no longer supported. Do not mess with AnnotatorPool outside of StanfordCoreNLP */
   /*
   public void testAnnotatorPool() throws Exception {
@@ -227,6 +236,7 @@ public class StanfordCoreNLPITest extends TestCase {
   }
   */
 
+
   public void testSerialization()
     throws Exception
   {
@@ -245,12 +255,23 @@ public class StanfordCoreNLPITest extends TestCase {
     processSerialization(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class));
     processSerialization(sentence);
 
-    Object newDocument = processSerialization(document);
-    assertTrue(newDocument instanceof Annotation);
+    Object processed = processSerialization(document);
+    assertTrue(processed instanceof Annotation);
+    Annotation newDocument = (Annotation) processed;
+    assertEquals(document.get(CoreAnnotations.SentencesAnnotation.class).size(),
+                 newDocument.get(CoreAnnotations.SentencesAnnotation.class).size());
+    for (int i = 0; i < document.get(CoreAnnotations.SentencesAnnotation.class).size(); ++i) {
+      CoreMap oldSentence = document.get(CoreAnnotations.SentencesAnnotation.class).get(0);
+      CoreMap newSentence = newDocument.get(CoreAnnotations.SentencesAnnotation.class).get(0);
+      assertEquals(oldSentence.get(TreeCoreAnnotations.TreeAnnotation.class),
+                   newSentence.get(TreeCoreAnnotations.TreeAnnotation.class));
+      assertEquals(oldSentence.get(CoreAnnotations.TokensAnnotation.class),
+                   newSentence.get(CoreAnnotations.TokensAnnotation.class));
+    }
     assertTrue(document.equals(newDocument));
   }
 
-  public static Object processSerialization(Object input)
+  private static Object processSerialization(Object input)
     throws Exception
   {
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -264,5 +285,70 @@ public class StanfordCoreNLPITest extends TestCase {
     return oin.readObject();
   }
 
+  public void testSentenceNewlines() {
+    // create a properties that enables all the annotators
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize,ssplit,pos");
+    props.setProperty("ssplit.isOneSentence", "true");
+
+    // run an annotation through the pipeline
+    String text = "At least a few female committee members are from Scandinavia. \n";
+    Annotation document = new Annotation(text);
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    pipeline.annotate(document);
+
+    // check that tokens are present
+    List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);
+    Assert.assertNotNull(tokens);
+    Assert.assertEquals("Wrong number of tokens: " + tokens, 11, tokens.size());
+
+    // check that sentences are present
+    List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
+    Assert.assertNotNull(sentences);
+    Assert.assertEquals("Wrong number of sentences", 1, sentences.size());
+  }
+
+  public void testSentenceNewlinesTwo() {
+    // create a properties that enables all the annotators
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize");
+
+    // run an annotation through the pipeline
+    String text = "At least a few female committee members\nare from Scandinavia.\n";
+    Annotation document = new Annotation(text);
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    pipeline.annotate(document);
+
+    // check that tokens are present
+    List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);
+    Assert.assertNotNull(tokens);
+    Assert.assertEquals("Wrong number of tokens: " + tokens, 11, tokens.size());
+  }
+
+  public void testSentenceNewlinesThree() {
+    // create a properties that enables all the annotators
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize,ssplit,pos");
+
+    // run an annotation through the pipeline
+    String text = "At least a few female committee members\nare from Scandinavia.\n";
+    Annotation document = new Annotation(text);
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    pipeline.annotate(document);
+
+    // check that tokens are present
+    List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);
+    Assert.assertNotNull(tokens);
+    Assert.assertEquals("Wrong number of tokens: " + tokens, 11, tokens.size());
+
+    // check that sentences are present
+    List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
+    Assert.assertNotNull(sentences);
+    Assert.assertEquals("Wrong number of sentences", 1, sentences.size());
+    CoreMap firstSentence = sentences.get(0);
+    List<CoreLabel> sentTokens = firstSentence.get(CoreAnnotations.TokensAnnotation.class);
+    Assert.assertNotNull(sentTokens);
+    Assert.assertEquals("Wrong number of sentTokens: " + sentTokens, 11, sentTokens.size());
+  }
 
 }

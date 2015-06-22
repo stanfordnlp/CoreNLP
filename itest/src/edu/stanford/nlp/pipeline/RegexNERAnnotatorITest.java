@@ -91,8 +91,8 @@ public class RegexNERAnnotatorITest extends TestCase {
 
     annotator.annotate(corpus);
 
-    checkTags(tokens, "O", "O", "LOCATION", "LOCATION", "O", "O", "O", "O", "O", "ORGANIZATION",
-        "ORGANIZATION", "ORGANIZATION", "O", "O", "O");
+    checkTags(tokens, "O", "O", "LOCATION", "LOCATION", "O", "O", "O", "O", "O", "RELIGION",
+        "RELIGION", "RELIGION", "O", "O", "O");
   }
 
   /**

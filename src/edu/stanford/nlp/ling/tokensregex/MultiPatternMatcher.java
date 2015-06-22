@@ -88,6 +88,36 @@ public class MultiPatternMatcher<T> {
 
   /**
    * Given a sequence, applies our patterns over the sequence and returns
+   *   all matches, depending on the findType.  When multiple patterns overlaps,
+   *   matched patterns are selected by order specified by the comparator
+   * @param elements input sequence to match against
+   * @param findType whether FindType.FIND_ALL or FindType.FIND_NONOVERLAPPING
+   * @return list of match results
+   */
+  public List<SequenceMatchResult<T>> find(List<? extends T> elements, SequenceMatcher.FindType findType)
+  {
+    Collection<SequencePattern<T>> triggered = getTriggeredPatterns(elements);
+    List<SequenceMatchResult<T>> all = new ArrayList<SequenceMatchResult<T>>();
+    int i = 0;
+    for (SequencePattern<T> p:triggered) {
+      SequenceMatcher<T> m = p.getMatcher(elements);
+      m.setFindType(findType);
+      m.setOrder(i);
+      while (m.find()) {
+        all.add(m.toBasicSequenceMatchResult());
+      }
+      i++;
+    }
+    List<SequenceMatchResult<T>> res = IntervalTree.getNonOverlapping( all, SequenceMatchResult.TO_INTERVAL, SequenceMatchResult.DEFAULT_COMPARATOR);
+    Collections.sort(res, SequenceMatchResult.OFFSET_COMPARATOR);
+
+    return res;
+  }
+
+
+
+  /**
+   * Given a sequence, applies our patterns over the sequence and returns
    *   all non overlapping matches.  When multiple patterns overlaps,
    *   matched patterns are selected to give the overall maximum score
    * @param elements input sequence to match against

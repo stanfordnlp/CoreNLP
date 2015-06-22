@@ -2,6 +2,7 @@ package edu.stanford.nlp.sentiment;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.ejml.simple.SimpleMatrix;
 
@@ -16,14 +17,16 @@ import edu.stanford.nlp.util.TwoDimensionalMap;
 
 // TODO: get rid of the word Sentiment everywhere
 public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
-  SentimentModel model;
-  List<Tree> trainingBatch;
+
+  private final SentimentModel model;
+  private final List<Tree> trainingBatch;
 
   public SentimentCostAndGradient(SentimentModel model, List<Tree> trainingBatch) {
     this.model = model;
     this.trainingBatch = trainingBatch;
   }
 
+  @Override
   public int domainDimension() {
     // TODO: cache this for speed?
     return model.totalParamSize();
@@ -47,7 +50,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
    * Returns the index with the highest value in the <code>predictions</code> matrix.
    * Indexed from 0.
    */
-  public int getPredictedClass(SimpleMatrix predictions) {
+  private static int getPredictedClass(SimpleMatrix predictions) {
     int argmax = 0;
     for (int i = 1; i < predictions.getNumElements(); ++i) {
       if (predictions.get(i) > predictions.get(argmax)) {
@@ -57,11 +60,12 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     return argmax;
   }
 
+  @Override
   public void calculate(double[] theta) {
     model.vectorToParams(theta);
 
-    double localValue = 0.0;
-    double[] localDerivative = new double[theta.length];
+    // double localValue = 0.0;
+    // double[] localDerivative = new double[theta.length];
 
     // We use TreeMap for each of these so that they stay in a
     // canonical sorted order
@@ -110,11 +114,8 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       int numCols = entry.getValue().numCols();
       unaryCD.put(entry.getKey(), new SimpleMatrix(numRows, numCols));
     }
-    for (Map.Entry<String, SimpleMatrix> entry : model.wordVectors.entrySet()) {
-      int numRows = entry.getValue().numRows();
-      int numCols = entry.getValue().numCols();
-      wordVectorD.put(entry.getKey(), new SimpleMatrix(numRows, numCols));
-    }
+
+    // wordVectorD will be filled on an as-needed basis
 
     // TODO: This part can easily be parallelized
     List<Tree> forwardPropTrees = Generics.newArrayList();
@@ -138,44 +139,59 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     double scale = (1.0 / trainingBatch.size());
     value = error * scale;
 
-    value += scaleAndRegularize(binaryTD, model.binaryTransform, scale, model.op.trainOptions.regTransformMatrix);
-    value += scaleAndRegularize(binaryCD, model.binaryClassification, scale, model.op.trainOptions.regClassification);
+    value += scaleAndRegularize(binaryTD, model.binaryTransform, scale, model.op.trainOptions.regTransformMatrix, false);
+    value += scaleAndRegularize(binaryCD, model.binaryClassification, scale, model.op.trainOptions.regClassification, true);
     value += scaleAndRegularizeTensor(binaryTensorTD, model.binaryTensors, scale, model.op.trainOptions.regTransformTensor);
-    value += scaleAndRegularize(unaryCD, model.unaryClassification, scale, model.op.trainOptions.regClassification);
-    value += scaleAndRegularize(wordVectorD, model.wordVectors, scale, model.op.trainOptions.regWordVector);
+    value += scaleAndRegularize(unaryCD, model.unaryClassification, scale, model.op.trainOptions.regClassification, false, true);
+    value += scaleAndRegularize(wordVectorD, model.wordVectors, scale, model.op.trainOptions.regWordVector, true, false);
 
     derivative = NeuralUtils.paramsToVector(theta.length, binaryTD.valueIterator(), binaryCD.valueIterator(), SimpleTensor.iteratorSimpleMatrix(binaryTensorTD.valueIterator()), unaryCD.values().iterator(), wordVectorD.values().iterator());
   }
 
-  double scaleAndRegularize(TwoDimensionalMap<String, String, SimpleMatrix> derivatives,
-                            TwoDimensionalMap<String, String, SimpleMatrix> currentMatrices,
-                            double scale,
-                            double regCost) {
+  static double scaleAndRegularize(TwoDimensionalMap<String, String, SimpleMatrix> derivatives,
+                                   TwoDimensionalMap<String, String, SimpleMatrix> currentMatrices,
+                                   double scale, double regCost, boolean dropBiasColumn) {
     double cost = 0.0; // the regularization cost
     for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : currentMatrices) {
       SimpleMatrix D = derivatives.get(entry.getFirstKey(), entry.getSecondKey());
-      D = D.scale(scale).plus(entry.getValue().scale(regCost));
+      SimpleMatrix regMatrix = entry.getValue();
+      if (dropBiasColumn) {
+        regMatrix = new SimpleMatrix(regMatrix);
+        regMatrix.insertIntoThis(0, regMatrix.numCols() - 1, new SimpleMatrix(regMatrix.numRows(), 1));
+      }
+      D = D.scale(scale).plus(regMatrix.scale(regCost));
       derivatives.put(entry.getFirstKey(), entry.getSecondKey(), D);
-      cost += entry.getValue().elementMult(entry.getValue()).elementSum() * regCost / 2.0;
+      cost += regMatrix.elementMult(regMatrix).elementSum() * regCost / 2.0;
     }
     return cost;
   }
 
-  double scaleAndRegularize(Map<String, SimpleMatrix> derivatives,
-                            Map<String, SimpleMatrix> currentMatrices,
-                            double scale,
-                            double regCost) {
+  static double scaleAndRegularize(Map<String, SimpleMatrix> derivatives,
+                                   Map<String, SimpleMatrix> currentMatrices,
+                                   double scale, double regCost, 
+                                   boolean activeMatricesOnly, boolean dropBiasColumn) {
     double cost = 0.0; // the regularization cost
     for (Map.Entry<String, SimpleMatrix> entry : currentMatrices.entrySet()) {
       SimpleMatrix D = derivatives.get(entry.getKey());
-      D = D.scale(scale).plus(entry.getValue().scale(regCost));
+      if (activeMatricesOnly && D == null) {
+        // Fill in an emptpy matrix so the length of theta can match.
+        // TODO: might want to allow for sparse parameter vectors
+        derivatives.put(entry.getKey(), new SimpleMatrix(entry.getValue().numRows(), entry.getValue().numCols()));
+        continue;
+      }
+      SimpleMatrix regMatrix = entry.getValue();
+      if (dropBiasColumn) {
+        regMatrix = new SimpleMatrix(regMatrix);
+        regMatrix.insertIntoThis(0, regMatrix.numCols() - 1, new SimpleMatrix(regMatrix.numRows(), 1));
+      }
+      D = D.scale(scale).plus(regMatrix.scale(regCost));
       derivatives.put(entry.getKey(), D);
-      cost += entry.getValue().elementMult(entry.getValue()).elementSum() * regCost / 2.0;
+      cost += regMatrix.elementMult(regMatrix).elementSum() * regCost / 2.0;
     }
     return cost;
   }
 
-  double scaleAndRegularizeTensor(TwoDimensionalMap<String, String, SimpleTensor> derivatives,
+  static double scaleAndRegularizeTensor(TwoDimensionalMap<String, String, SimpleTensor> derivatives,
                                   TwoDimensionalMap<String, String, SimpleTensor> currentMatrices,
                                   double scale,
                                   double regCost) {
@@ -252,7 +268,12 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       SimpleMatrix deltaFromClass = model.getUnaryClassification(category).transpose().mult(deltaClass);
       deltaFromClass = deltaFromClass.extractMatrix(0, model.op.numHid, 0, 1).elementMult(currentVectorDerivative);
       SimpleMatrix deltaFull = deltaFromClass.plus(deltaUp);
-      wordVectorD.put(word, wordVectorD.get(word).plus(deltaFull));
+      SimpleMatrix oldWordVectorD = wordVectorD.get(word);
+      if (oldWordVectorD == null) {
+        wordVectorD.put(word, deltaFull);
+      } else {
+        wordVectorD.put(word, oldWordVectorD.plus(deltaFull));
+      }
     } else {
       // Otherwise, this must be a binary node
       String leftCategory = model.basicCategory(tree.children()[0].label().value());
@@ -291,7 +312,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     }
   }
 
-  private SimpleMatrix computeTensorDeltaDown(SimpleMatrix deltaFull, SimpleMatrix leftVector, SimpleMatrix rightVector,
+  private static SimpleMatrix computeTensorDeltaDown(SimpleMatrix deltaFull, SimpleMatrix leftVector, SimpleMatrix rightVector,
                                               SimpleMatrix W, SimpleTensor Wt) {
     SimpleMatrix WTDelta = W.transpose().mult(deltaFull);
     SimpleMatrix WTDeltaNoBias = WTDelta.extractMatrix(0, deltaFull.numRows() * 2, 0, 1);
@@ -305,7 +326,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     return deltaTensor.plus(WTDeltaNoBias);
   }
 
-  private SimpleTensor getTensorGradient(SimpleMatrix deltaFull, SimpleMatrix leftVector, SimpleMatrix rightVector) {
+  private static SimpleTensor getTensorGradient(SimpleMatrix deltaFull, SimpleMatrix leftVector, SimpleMatrix rightVector) {
     int size = deltaFull.getNumElements();
     SimpleTensor Wt_df = new SimpleTensor(size*2, size*2, size);
     // TODO: combine this concatenation with computeTensorDeltaDown?
@@ -376,5 +397,6 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     label.set(RNNCoreAnnotations.Predictions.class, predictions);
     label.set(RNNCoreAnnotations.PredictedClass.class, index);
     label.set(RNNCoreAnnotations.NodeVector.class, nodeVector);
-  }
+  } // end forwardPropagateTree
+
 }

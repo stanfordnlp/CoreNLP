@@ -3,7 +3,7 @@ package edu.stanford.nlp.ie.crf;
 /**
  * @author Mengqiu Wang
  */
-
+@FunctionalInterface
 public interface CliquePotentialFunction {
 
   /**

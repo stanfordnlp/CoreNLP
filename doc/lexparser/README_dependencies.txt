@@ -1,4 +1,4 @@
-STANFORD DEPENDENCIES.  Stanford Parser v3.3.1
+STANFORD DEPENDENCIES.  Stanford Parser v3.5.1
 -----------------------------------------------------------
 
 The manual for the English version of the Stanford Dependencies
@@ -17,7 +17,22 @@ presentation in this paper:
 Pi-Chuan Chang, Huihsin Tseng, Dan Jurafsky, and Christopher
 D. Manning. 2009.  Discriminative Reordering with Chinese Grammatical
 Relations Features.  Third Workshop on Syntax and Structure in Statistical
-Translation.
+Translation. http://nlp.stanford.edu/pubs/ssst09-chang.pdf
+
+
+--------------------------------------
+UNIVERSAL DEPENDENCIES
+
+We are at present involved in a group developing a cross-linguistically
+valid Universal Dependencies representation and treebanks:
+
+      http://universaldependencies.github.io/docs/
+
+It is our intention to transition Stanford NLP tools to Universal
+Dependencies, but there is not yet any model support for Universal
+Dependencies in this release.  (However, there is no reason that you
+yourself cannot train a POS tagger and a neural-net dependency parser
+for Universal Dependencies.
 
 
 --------------------------------------
@@ -42,6 +57,23 @@ For more discussion of the design principles, please see:
 These papers can be cited as references for the English Stanford
 Dependencies.
 
+
+--------------------------------------
+CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.5.1
+
+A couple of small fixes were made, leading to ccomp and advcl being
+recognized in a couple of new environments.
+
+--------------------------------------
+CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.4
+
+One major change was made to the dependency taxonomy:
+
+ - We decided to collapse together the two dependencies partmod and infmod,
+ since they have similar function and mainly differ in the form of the verbal
+ head, which is anyways recorded in the POS tag. Those two relations are
+ removed from the taxonomy, and a new relation vmod covering the union of both
+ was added.
 
 --------------------------------------
 CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.3.1

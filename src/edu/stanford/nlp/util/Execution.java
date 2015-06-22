@@ -329,6 +329,19 @@ public class Execution {
     return classes.toArray(new Class<?>[classes.size()]);
   }
 
+  /**
+   * Get all the declared fields of this class and all super classes.
+   */
+  private static Field[] scrapeFields(Class<?> clazz) throws Exception {
+    List<Field> fields = new ArrayList<>();
+    while (clazz != null && !clazz.equals(Object.class)) {
+      fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
+      clazz = clazz.getSuperclass();
+    }
+    return fields.toArray(new Field[fields.size()]);
+  }
+
+
   @SuppressWarnings("rawtypes")
   protected static Map<String, Field> fillOptionsImpl(
       Object[] instances,
@@ -342,6 +355,13 @@ public class Execution {
       for (int i = 0; i < classes.length; ++i) {
         assert instances[i].getClass() == classes[i];
         class2object.put(classes[i], instances[i]);
+        Class<?> mySuper = instances[i].getClass().getSuperclass();
+        while (mySuper != null && !mySuper.equals(Object.class)) {
+          if (!class2object.containsKey(mySuper)) {
+            class2object.put(mySuper, instances[i]);
+          }
+          mySuper = mySuper.getSuperclass();
+        }
       }
     }
 
@@ -352,7 +372,7 @@ public class Execution {
     for (Class c : classes) {
       Field[] fields;
       try {
-        fields = c.getDeclaredFields();
+        fields = scrapeFields(c);
       } catch (Throwable e) {
         debug("Could not check fields for class: " + c.getName() + "  (caused by " + e.getClass() + ": " + e.getMessage() + ")");
         continue;
@@ -505,7 +525,7 @@ public class Execution {
     //(convert to map)
     Properties options = StringUtils.argsToProperties(args);
     for (String key : props.stringPropertyNames()) {
-      options.put(key, props.getProperty(key));
+      options.setProperty(key, props.getProperty(key));
     }
     //(bootstrap)
     Map<String, Field> bootstrapMap = fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap

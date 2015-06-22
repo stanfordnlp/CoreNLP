@@ -115,7 +115,23 @@ public class ConfusionMatrix<U> {
                               ", ");
     }
 
+    public double f1(){
+      return f1;
+    }
+
+    public double precision(){
+      return prec;
+    }
+
+    public double recall(){
+      return recall;
+    }
+
+    public double spec(){
+      return spec;
+    }
   }
+
 
   private ConcurrentHashMap<Pair<U, U>, Integer> confTable = new ConcurrentHashMap<Pair<U, U>, Integer>();
 

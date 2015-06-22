@@ -7,6 +7,7 @@ import edu.stanford.nlp.optimization.LineSearcher;
 import edu.stanford.nlp.sequences.Clique;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.FeatureFactory;
+import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.CoreMap;
 import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
@@ -25,10 +26,11 @@ import java.util.*;
  * with {@link CRFClassifier} and supports most command-line parameters
  * available in {@link CRFClassifier}.  In addition to this,
  * CRFBiasedClassifier also interprets the parameter -classBias, as in:
- * <p/><code>
+ * <p><code>
  * java -server -mx500m edu.stanford.nlp.ie.crf.CRFBiasedClassifier -loadClassifier model.gz -testFile test.txt -classBias A:0.5,B:1.5
  * </code>
- * <p/>The command above sets a bias of 0.5 towards class A and a bias of
+ * <p>
+ * The command above sets a bias of 0.5 towards class A and a bias of
  * 1.5 towards class B. These biases (which internally are treated as
  * feature weights in the log-linear model underpinning the CRF
  * classifier) can take any real value. As the weight of A tends to plus
@@ -49,6 +51,8 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
     super(props);
   }
 
+  public CRFBiasedClassifier(SeqClassifierFlags flags) {super(flags); }
+
   @Override
   public CRFDatum<List<String>, CRFLabel> makeDatum(List<IN> info, int loc, List<FeatureFactory<IN>> featureFactories) {
 
@@ -63,7 +67,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
       windowCliques.removeAll(done);
       done.addAll(windowCliques);
       for (Clique c : windowCliques) {
-        for (FeatureFactory featureFactory : featureFactories) {
+        for (FeatureFactory<IN> featureFactory : featureFactories) {
           featuresC.addAll(featureFactory.getCliqueFeatures(pInfo, loc, c));
         }
         if(testTime && i==0)
@@ -121,6 +125,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
       evalFunction = e;
     }
 
+    @Override
     public Double apply(Double w) {
       crf.setBiasWeight(0,w);
       return evalFunction.apply(w);

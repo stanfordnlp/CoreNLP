@@ -1,27 +1,27 @@
-Stanford NER - v3.4.1 - 2014-08-27
+Stanford NER - v3.5.0 - 2014-10-26
 ----------------------------------------------
 
 This package provides a high-performance machine learning based named
 entity recognition system, including facilities to train models from
 supervised training data and pre-trained models for English.
 
-(c) 2002-2012.  The Board of Trustees of The Leland
-    Stanford Junior University. All Rights Reserved. 
+(c) 2002-2015.  The Board of Trustees of The Leland
+    Stanford Junior University. All Rights Reserved.
 
 Original CRF code by Jenny Finkel.
 Additional modules, features, internationalization, compaction, and
 support code by Christopher Manning, Dan Klein, Christopher Cox, Huy Nguyen
 Shipra Dingare, Anna Rafferty, and John Bauer.
-This release prepared by John Bauer.
+This release prepared by Jon Gauthier.
 
-LICENSE 
+LICENSE
 
-The software is licensed under the full GPL.  Please see the file LICENCE.txt
+The software is licensed under the full GPL v2+.  Please see the file LICENCE.txt
 
 For more information, bug reports, and fixes, contact:
     Christopher Manning
-    Dept of Computer Science, Gates 1A
-    Stanford CA 94305-9010
+    Dept of Computer Science, Gates 2A
+    Stanford CA 94305-9020
     USA
     java-nlp-support@lists.stanford.edu
     http://www-nlp.stanford.edu/software/CRF-NER.shtml
@@ -29,7 +29,7 @@ For more information, bug reports, and fixes, contact:
 CONTACT
 
 For questions about this distribution, please contact Stanford's JavaNLP group
-at java-nlp-support@lists.stanford.edu.  We provide assistance on a best-effort
+at java-nlp-user@lists.stanford.edu.  We provide assistance on a best-effort
 basis.
 
 TUTORIAL
@@ -43,36 +43,37 @@ INCLUDED SERIALIZED MODELS / TRAINING DATA
 The basic included serialized model is a 3 class NER tagger that can
 label: PERSON, ORGANIZATION, and LOCATION entities.  It is included as
 english.all.3class.distsim.crf.ser.gz.  It is trained on data from
-CoNLL, MUC6, MUC7, and ACE.  Because this model is trained on both US
+CoNLL, MUC6, MUC7, ACE, OntoNotes, and Wikipedia.
+Because this model is trained on both US
 and UK newswire, it is fairly robust across the two domains.
 
 We have also included a 4 class NER tagger trained on the CoNLL 2003
 Shared Task training data that labels for PERSON, ORGANIZATION,
 LOCATION, and MISC.  It is named
-english.conll.4class.caseless.distsim.crf.ser.gz .
+english.conll.4class.distsim.crf.ser.gz .
 
-A third model is trained only on data from MUC and distinguishes
-between 7 different classes,
-english.muc.7class.caseless.distsim.crf.ser.gz.
+A third model is trained only on data from MUC and
+distinguishes between 7 different classes:
+english.muc.7class.distsim.crf.ser.gz.
 
-All of the serialized classifiers come in two versions, the second of
-which uses a distributional similarity lexicon to improve performance
-(by about 1.5% F-measure).  These classifiers have additional features
-which make them perform substantially better, but they require rather
-more memory.  The distsim models are included in the release package,
-and nodistsim versions of the same models are available on the
+All of the serialized classifiers come in two versions, one trained to
+basically expected standard written English capitalization, and the other
+to ignore capitalization information. The case-insensitive versions
+of the three models available on the Stanford NER webpage.
+These models use a distributional similarity lexicon to improve performance
+(by between 1.5%-3% F-measure).  The distributional similarity features
+make the models perform substantially better, but they require rather
+more memory.  The distsim models are included in the release package.
+The nodistsim versions of the same models may be available on the
 Stanford NER webpage.
 
-There are also case-insensitive versions of the three models available
-on the webpage.
-
-Finally, a package with two German models is also available for download.
+Finally, we have models for other languages, include two German models,
+a Chinese model, and a Spanish model.
 
 
 QUICKSTART INSTRUCTIONS
 
-This NER system requires Java 1.6 or later.   We have only tested it on
-the SUN JVM.
+This NER system requires Java 1.8 or later.
 
 Providing java is on your PATH, you should just be able to run an NER
 GUI demonstration by just clicking.  It might work to double-click on
@@ -119,7 +120,7 @@ as from using CRFClassifier.  For more information on API calls, look in
 the enclosed javadoc directory: load index.html in a browser and look
 first at the edu.stanford.nlp.ie.crf package and CRFClassifier class.
 If you wish to train your own NER systems, look also at the
-edu.stanford.nlp.ie package NERFeatureFactory class. 
+edu.stanford.nlp.ie package NERFeatureFactory class.
 
 
 SERVER VERSION
@@ -140,11 +141,10 @@ java -mx1000m -cp stanford-ner.jar edu.stanford.nlp.ie.NERServer -loadJarClassif
 RUNNING CLASSIFIERS FROM INSIDE A JAR FILE
 
 The software can run any serialized classifier from within a jar file by
-giving the flag -loadJarClassifier resourceName .  An end user can make
-their own jar files with the desired NER models contained inside.  The
-serialized classifier must be located immediately under classifiers/ in
-the jar file, with the name given.  This allows single jar file
-deployment.
+following the -loadClassifier flag by some resource available within a
+jar file on the CLASSPATH.  An end user can make
+their own jar files with the desired NER models contained inside.
+This allows single jar file deployment.
 
 
 PERFORMANCE GUIDELINES
@@ -165,24 +165,26 @@ PERSON	ORGANIZATION	LOCATION
 CHANGES
 --------------------
 
-2014-08-27    3.4.1     Add Spanish models 
+2014-10-26    3.5.0     Upgrade to Java 1.8
 
-2014-06-16      3.4     Fix serialization bug 
+2014-08-27    3.4.1     Add Spanish models
 
-2014-01-04    3.3.1     Bugfix release 
+2014-06-16      3.4     Fix serialization bug
 
-2013-11-12    3.3.0     Update for compatibility 
+2014-01-04    3.3.1     Bugfix release
 
-2013-11-12    3.3.0     Update for compatibility 
+2013-11-12    3.3.0     Update for compatibility
 
-2013-06-19    3.2.0     Improve handling of line-by-line input 
+2013-11-12    3.3.0     Update for compatibility
 
-2013-04-04    1.2.8     nthreads option 
+2013-06-19    3.2.0     Improve handling of line-by-line input
 
-2012-11-11    1.2.7     Improved English 3 class model by including 
-                        data from Wikipedia, release Chinese model 
+2013-04-04    1.2.8     nthreads option
 
-2012-07-09    1.2.6     Minor bug fixes 
+2012-11-11    1.2.7     Improved English 3 class model by including
+                        data from Wikipedia, release Chinese model
+
+2012-07-09    1.2.6     Minor bug fixes
 
 2012-05-22    1.2.5     Fix encoding issue
 
@@ -192,11 +194,11 @@ CHANGES
 
 2011-09-14    1.2.2     Improved thread safety
 
-2011-06-19    1.2.1     Models reduced in size but on average improved 
+2011-06-19    1.2.1     Models reduced in size but on average improved
                         in accuracy (improved distsim clusters)
 
-2011-05-16      1.2     Normal download includes 3, 4, and 7 
-                        class models. Updated for compatibility 
+2011-05-16      1.2     Normal download includes 3, 4, and 7
+                        class models. Updated for compatibility
                         with other software releases.
 
 2009-01-16    1.1.1     Minor bug and usability fixes, changed API

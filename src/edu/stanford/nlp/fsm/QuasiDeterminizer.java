@@ -4,9 +4,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import java.util.*;
 
 /**
- * QuasiDeterminizer.
- * <p/>
- * Class for performing quasi-determinization on TransducerGraphs.
+ * QuasiDeterminizer performing quasi-determinization on TransducerGraphs.
  *
  * @author Teg Grenager
  * @version 11/02/03

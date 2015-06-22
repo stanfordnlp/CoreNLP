@@ -1,5 +1,7 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
+import java.util.Collection;
+
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.trees.Tree;
@@ -7,18 +9,21 @@ import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.ErasureUtils;
 
 class ShiftReduceUtils {
+
+  private ShiftReduceUtils() {} // static utility methods
+
   static BinaryTransition.Side getBinarySide(Tree tree) {
     if (tree.children().length != 2) {
       throw new AssertionError();
     }
     CoreLabel label = ErasureUtils.uncheckedCast(tree.label());
     CoreLabel childLabel = ErasureUtils.uncheckedCast(tree.children()[0].label());
-    if (label.get(TreeCoreAnnotations.HeadWordAnnotation.class) == childLabel.get(TreeCoreAnnotations.HeadWordAnnotation.class)) {
+    if (label.get(TreeCoreAnnotations.HeadWordLabelAnnotation.class) == childLabel.get(TreeCoreAnnotations.HeadWordLabelAnnotation.class)) {
       return BinaryTransition.Side.LEFT;
     } else {
       return BinaryTransition.Side.RIGHT;
     }
-  }  
+  }
 
   static boolean isTemporary(Tree tree) {
     String label = tree.value();
@@ -34,8 +39,7 @@ class ShiftReduceUtils {
   /** Returns a 0-based index of the head of the tree.  Assumes the leaves had been indexed from 1 */
   static int headIndex(Tree tree) {
     CoreLabel label = ErasureUtils.uncheckedCast(tree.label());
-    Tree head = label.get(TreeCoreAnnotations.HeadWordAnnotation.class);
-    CoreLabel headLabel = ErasureUtils.uncheckedCast(head.label());
+    CoreLabel headLabel = label.get(TreeCoreAnnotations.HeadWordLabelAnnotation.class);
     return headLabel.index() - 1;
   }
 
@@ -48,7 +52,7 @@ class ShiftReduceUtils {
 
     return leftIndex(tree.children()[0]);
   }
-    
+
   /** Returns a 0-based index of the right leaf of the tree.  Assumes the leaves had been indexed from 1 */
   static int rightIndex(Tree tree) {
     if (tree.isLeaf()) {
@@ -67,7 +71,20 @@ class ShiftReduceUtils {
         top = top.children()[0];
       } else {
         return false;
-      } 
+      }
     }
   }
+
+  /**
+   * Returns true iff the given {@code state} is present on the {@code agenda}
+   */
+  static boolean findStateOnAgenda(Collection<State> agenda, State state) {
+    for (State other : agenda) {
+      if (other.areTransitionsEqual(state)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
 }

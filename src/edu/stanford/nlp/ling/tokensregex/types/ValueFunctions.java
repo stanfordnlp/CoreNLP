@@ -41,6 +41,7 @@ public class ValueFunctions {
       this.name = name;
     }
 
+    @Override
     public String getDescription() { return ""; }
 
     public String getParamDesc() { return "..."; }
@@ -61,16 +62,13 @@ public class ValueFunctions {
 
     public String toString() {
       if (signature == null) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(name);
-        sb.append("(");
-        sb.append(getParamDesc());
-        sb.append(")");
-        signature = sb.toString();
+        signature = name + '(' + getParamDesc() + ')';
       }
       return signature;
     }
-  }
+
+  } // end static class NamedValueFunction
+
 
   public static class ParamInfo {
     public final String name;
@@ -1642,4 +1640,5 @@ public class ValueFunctions {
       }
     }
   }
+
 }

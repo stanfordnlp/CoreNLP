@@ -1,16 +1,19 @@
 package edu.stanford.nlp.neural;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import java.util.function.Predicate;
 import org.ejml.simple.SimpleMatrix;
+import org.ejml.ops.MatrixIO;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.Filter;
 
 /**
  * Includes a bunch of utility methods usable by projects which use
@@ -48,8 +51,8 @@ public class NeuralUtils {
   }
 
   public static SimpleMatrix convertTextMatrix(String text) {
-    List<String> lines = CollectionUtils.filterAsList(Arrays.asList(text.split("\n")), new Filter<String>() {
-        public boolean accept(String s) {
+    List<String> lines = CollectionUtils.filterAsList(Arrays.asList(text.split("\n")), new Predicate<String>() {
+        public boolean test(String s) {
           return s.trim().length() > 0;
         }
         private static final long serialVersionUID = 1;
@@ -70,6 +73,15 @@ public class NeuralUtils {
     return new SimpleMatrix(data);
   }
 
+  /**
+   * @param matrix The matrix to return as a String
+   * @param format The format to use for each value in the matrix, eg "%f"
+   */
+  public static String toString(SimpleMatrix matrix, String format) {
+    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    MatrixIO.print(new PrintStream(stream), matrix.getMatrix(), format);
+    return stream.toString();
+  }
 
   /**
    * Compute cosine distance between two column vectors.
@@ -96,6 +108,7 @@ public class NeuralUtils {
    * the matrices with the entries in the theta vector.  Errors are
    * thrown if the theta vector does not exactly fill the matrices.
    */
+  @SafeVarargs
   public static void vectorToParams(double[] theta, Iterator<SimpleMatrix> ... matrices) {
     int index = 0;
     for (Iterator<SimpleMatrix> matrixIterator : matrices) {
@@ -119,6 +132,7 @@ public class NeuralUtils {
    * total size as a time savings.  AssertionError thrown if the
    * vector sizes do not exactly match.
    */
+  @SafeVarargs
   public static double[] paramsToVector(int totalSize, Iterator<SimpleMatrix> ... matrices) {
     double[] theta = new double[totalSize];
     int index = 0;
@@ -146,6 +160,7 @@ public class NeuralUtils {
    * expected total size as a time savings.  AssertionError thrown if
    * the vector sizes do not exactly match.
    */
+  @SafeVarargs
   public static double[] paramsToVector(double scale, int totalSize, Iterator<SimpleMatrix> ... matrices) {
     double[] theta = new double[totalSize];
     int index = 0;

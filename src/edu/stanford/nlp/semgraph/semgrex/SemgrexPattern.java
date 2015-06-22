@@ -6,6 +6,7 @@ import java.util.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeNormalizer;
@@ -163,6 +164,8 @@ public abstract class SemgrexPattern implements Serializable {
   private boolean opt = false;
   private String patternString; // conceptually final, but can't do because of parsing
 
+  Env env;
+
   // package private constructor
   SemgrexPattern() {
   }
@@ -263,10 +266,11 @@ public abstract class SemgrexPattern implements Serializable {
    *          the pattern string
    * @return a SemgrexPattern for the string.
    */
-  public static SemgrexPattern compile(String semgrex) {
+  public static SemgrexPattern compile(String semgrex, Env env) {
     try {
       SemgrexParser parser = new SemgrexParser(new StringReader(semgrex + "\n"));
       SemgrexPattern newPattern = parser.Root();
+      newPattern.env = env;
       newPattern.patternString = semgrex;
       return newPattern;
     } catch (ParseException ex) {
@@ -274,6 +278,10 @@ public abstract class SemgrexPattern implements Serializable {
     } catch (TokenMgrError er) {
       throw new SemgrexParseException("Error parsing semgrex pattern " + semgrex, er);
     }
+  }
+
+  public static SemgrexPattern compile(String semgrex) {
+    return compile(semgrex, new Env());
   }
 
   public String pattern() {
@@ -402,7 +410,7 @@ public abstract class SemgrexPattern implements Serializable {
         treebank.loadPath(treeFile);
         for (Tree tree : treebank) {
           // TODO: allow other languages... this defaults to English
-          SemanticGraph graph = SemanticGraphFactory.makeFromTree(tree, mode, useExtras, true, null);
+          SemanticGraph graph = SemanticGraphFactory.makeFromTree(tree, mode, useExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, true, null);
           graphs.add(graph);
         }
       }

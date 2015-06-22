@@ -2,8 +2,12 @@ package edu.stanford.nlp.patterns.surface;
 
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 
-import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
+import edu.stanford.nlp.patterns.CandidatePhrase;
+import edu.stanford.nlp.patterns.ConstantsAndVariables;
+import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass.PatternScoring;
+import edu.stanford.nlp.patterns.ScorePatterns;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
@@ -17,22 +21,21 @@ import edu.stanford.nlp.util.CollectionUtils;
  *
  */
 
-public class ScorePatternsF1 extends ScorePatterns {
+public class ScorePatternsF1<E> extends ScorePatterns<E> {
 
-  Counter<String> p0Set = null;
-  SurfacePattern p0;
+  Counter<CandidatePhrase> p0Set = null;
+  E p0;
   public ScorePatternsF1(ConstantsAndVariables constVars,
       PatternScoring patternScoring,
-      String label,
-      TwoDimensionalCounter<SurfacePattern, String> patternsandWords4Label,
-      TwoDimensionalCounter<SurfacePattern, String> negPatternsandWords4Label,
-      TwoDimensionalCounter<SurfacePattern, String> unLabeledPatternsandWords4Label,
-      TwoDimensionalCounter<SurfacePattern, String> negandUnLabeledPatternsandWords4Label,
-      TwoDimensionalCounter<SurfacePattern, String> allPatternsandWords4Label, Properties props, Counter<String> p0Set, SurfacePattern p0){
+      String label, Set<CandidatePhrase> allCandidatePhrases,
+      TwoDimensionalCounter<E, CandidatePhrase> patternsandWords4Label,
+      TwoDimensionalCounter<E, CandidatePhrase> negPatternsandWords4Label,
+      TwoDimensionalCounter<E, CandidatePhrase> unLabeledPatternsandWords4Label,
+      Properties props, Counter<CandidatePhrase> p0Set, E p0){
     super(constVars,
-        patternScoring, label, patternsandWords4Label,
+        patternScoring, label, allCandidatePhrases, patternsandWords4Label,
         negPatternsandWords4Label, unLabeledPatternsandWords4Label,
-        negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label, props);
+        props);
     this.p0 = p0;
     this.p0Set =p0Set; 
   }
@@ -41,15 +44,15 @@ public class ScorePatternsF1 extends ScorePatterns {
   public void setUp(Properties props){}
   
   @Override
-  Counter<SurfacePattern> score() {
-    Counter<SurfacePattern> specificity = new ClassicCounter<SurfacePattern>();
-    Counter<SurfacePattern> sensitivity = new ClassicCounter<SurfacePattern>();
+  public Counter<E> score() {
+    Counter<E> specificity = new ClassicCounter<E>();
+    Counter<E> sensitivity = new ClassicCounter<E>();
 
     if (p0Set.keySet().size() == 0)
       throw new RuntimeException("how come p0set size is empty for " + p0
           + "?");
 
-    for (Entry<SurfacePattern, ClassicCounter<String>> en : patternsandWords4Label
+    for (Entry<E, ClassicCounter<CandidatePhrase>> en : patternsandWords4Label
         .entrySet()) {
 
       int common = CollectionUtils.intersection(en.getValue().keySet(),
@@ -66,12 +69,12 @@ public class ScorePatternsF1 extends ScorePatterns {
     }
     Counters.retainNonZeros(specificity);
     Counters.retainNonZeros(sensitivity);
-    Counter<SurfacePattern> add = Counters.add(sensitivity, specificity);
-    Counter<SurfacePattern> product = Counters.product(sensitivity,
+    Counter<E> add = Counters.add(sensitivity, specificity);
+    Counter<E> product = Counters.product(sensitivity,
         specificity);
     Counters.retainNonZeros(product);
     Counters.retainKeys(product, add.keySet());
-    Counter<SurfacePattern> finalPat = Counters.scale(
+    Counter<E> finalPat = Counters.scale(
         Counters.division(product, add), 2);
     
     return finalPat;

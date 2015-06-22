@@ -1433,21 +1433,11 @@ public class SemanticGraph implements Serializable {
   // todo [cdm 2013]: These next two methods should really be toString options on indexed word but are different from all the current ones....
 
   private static String toDepStyle(IndexedWord fl) {
-    StringBuilder buf = new StringBuilder();
-    buf.append(fl.word());
-    buf.append("-");
-    buf.append(fl.index());
-    return buf.toString();
+    return fl.toString(CoreLabel.OutputFormat.VALUE_INDEX);
   }
 
   private static String toPOSStyle(IndexedWord fl) {
-    StringBuilder buf = new StringBuilder();
-    buf.append(fl.word());
-    buf.append("/");
-    buf.append(fl.tag());
-    buf.append("-");
-    buf.append(fl.index());
-    return buf.toString();
+    return fl.toString(CoreLabel.OutputFormat.VALUE_TAG_INDEX);
   }
 
   private String toReadableString() {
@@ -1676,22 +1666,19 @@ public class SemanticGraph implements Serializable {
     roots = wordMapFactory.newSet();
 
     for (TypedDependency d : dependencies) {
-      TreeGraphNode gov = d.gov();
-      TreeGraphNode dep = d.dep();
+      IndexedWord gov = d.gov();
+      IndexedWord dep = d.dep();
       GrammaticalRelation reln = d.reln();
 
       if (reln != ROOT) { // the root relation only points to the root: the governor is a fake node that we don't want to add in the graph
-        IndexedWord govVertex = new IndexedWord(gov.label());
-        IndexedWord depVertex = new IndexedWord(dep.label());
         // It is unnecessary to call addVertex, since addEdge will
         // implicitly add vertices if needed
-        //addVertex(govVertex);
-        //addVertex(depVertex);
-        addEdge(govVertex, depVertex, reln, Double.NEGATIVE_INFINITY, d.extra());
+        //addVertex(gov);
+        //addVertex(dep);
+        addEdge(gov, dep, reln, Double.NEGATIVE_INFINITY, d.extra());
       } else { //it's the root and we add it
-        IndexedWord depVertex = new IndexedWord(dep.label());
-        addVertex(depVertex);
-        roots.add(depVertex);
+        addVertex(dep);
+        roots.add(dep);
       }
     }
 
@@ -1930,23 +1917,17 @@ public class SemanticGraph implements Serializable {
    */
   public Collection<TypedDependency> typedDependencies() {
     Collection<TypedDependency> dependencies = new ArrayList<TypedDependency>();
-    // FIXME: parts of the code (such as the dependencies) expect the
-    // TreeGraphNodes to be == equal, but that doesn't apply the way
-    // this method is written
-    TreeGraphNode root = null;
+    IndexedWord root = null;
     for (IndexedWord node : roots) {
       if (root == null) {
-        IndexedWord rootLabel = new IndexedWord(node.docID(), node.sentIndex(), 0);
-        rootLabel.setValue("ROOT");
-        root = new TreeGraphNode(rootLabel);
+        root = new IndexedWord(node.docID(), node.sentIndex(), 0);
+        root.setValue("ROOT");
       }
-      TypedDependency dependency = new TypedDependency(ROOT, root, new TreeGraphNode(node));
+      TypedDependency dependency = new TypedDependency(ROOT, root, node);
       dependencies.add(dependency);
     }
     for (SemanticGraphEdge e : this.edgeIterable()){
-      TreeGraphNode gov = new TreeGraphNode(e.getGovernor());
-      TreeGraphNode dep = new TreeGraphNode(e.getDependent());
-      TypedDependency dependency = new TypedDependency(e.getRelation(), gov, dep);
+      TypedDependency dependency = new TypedDependency(e.getRelation(), e.getGovernor(), e.getDependent());
       dependencies.add(dependency);
     }
     return dependencies;

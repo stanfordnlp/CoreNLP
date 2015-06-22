@@ -37,7 +37,7 @@ public class TextOutputter extends AnnotationOutputter {
   /**
    * The meat of the outputter
    */
-  private void print(Annotation annotation, PrintWriter os, Options options) throws IOException {
+  private static void print(Annotation annotation, PrintWriter os, Options options) throws IOException {
     double beam = options.beamPrintingOption;
 
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
@@ -96,16 +96,17 @@ public class TextOutputter extends AnnotationOutputter {
 
         // display the parse tree for this sentence
         Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
-        if (tree != null){
+        if (tree != null) {
           options.constituentTreePrinter.printTree(tree, os);
-          // It is possible turn off the semantic graphs, in which
-          // case we don't want to recreate them using the dependency
-          // printer.  This might be relevant if using corenlp for a
-          // language which doesn't have dependencies, for example.
-          if (sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class) != null) {
-            os.print(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class).toList());
-            os.printf("%n");
-          }
+        }
+
+        // It is possible turn off the semantic graphs, in which
+        // case we don't want to recreate them using the dependency
+        // printer.  This might be relevant if using corenlp for a
+        // language which doesn't have dependencies, for example.
+        if (sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class) != null) {
+          os.print(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class).toList());
+          os.printf("%n");
         }
 
         // display MachineReading entities and relations

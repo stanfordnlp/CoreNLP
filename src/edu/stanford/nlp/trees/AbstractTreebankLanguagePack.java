@@ -6,8 +6,9 @@ import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 import edu.stanford.nlp.util.Filters;
+
 import java.util.function.Function;
 
 
@@ -109,7 +110,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    */
   @Override
   public boolean isPunctuationTag(String str) {
-    return punctTagStringAcceptFilter.accept(str);
+    return punctTagStringAcceptFilter.test(str);
   }
 
 
@@ -123,7 +124,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    */
   @Override
   public boolean isPunctuationWord(String str) {
-    return punctWordStringAcceptFilter.accept(str);
+    return punctWordStringAcceptFilter.test(str);
   }
 
 
@@ -135,7 +136,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    */
   @Override
   public boolean isSentenceFinalPunctuationTag(String str) {
-    return sFPunctTagStringAcceptFilter.accept(str);
+    return sFPunctTagStringAcceptFilter.test(str);
   }
 
 
@@ -151,7 +152,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    */
   @Override
   public boolean isEvalBIgnoredPunctuationTag(String str) {
-    return eIPunctTagStringAcceptFilter.accept(str);
+    return eIPunctTagStringAcceptFilter.test(str);
   }
 
 
@@ -162,7 +163,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * @return The filter
    */
   @Override
-  public Filter<String> punctuationTagAcceptFilter() {
+  public Predicate<String> punctuationTagAcceptFilter() {
     return punctTagStringAcceptFilter;
   }
 
@@ -174,7 +175,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * @return The filter
    */
   @Override
-  public Filter<String> punctuationTagRejectFilter() {
+  public Predicate<String> punctuationTagRejectFilter() {
     return Filters.notFilter(punctTagStringAcceptFilter);
   }
 
@@ -188,7 +189,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * @return The Filter
    */
   @Override
-  public Filter<String> punctuationWordAcceptFilter() {
+  public Predicate<String> punctuationWordAcceptFilter() {
     return punctWordStringAcceptFilter;
   }
 
@@ -202,7 +203,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * @return The Filter
    */
   @Override
-  public Filter<String> punctuationWordRejectFilter() {
+  public Predicate<String> punctuationWordRejectFilter() {
     return Filters.notFilter(punctWordStringAcceptFilter);
   }
 
@@ -214,7 +215,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * @return The Filter
    */
   @Override
-  public Filter<String> sentenceFinalPunctuationTagAcceptFilter() {
+  public Predicate<String> sentenceFinalPunctuationTagAcceptFilter() {
     return sFPunctTagStringAcceptFilter;
   }
 
@@ -230,7 +231,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * @return The Filter
    */
   @Override
-  public Filter<String> evalBIgnoredPunctuationTagAcceptFilter() {
+  public Predicate<String> evalBIgnoredPunctuationTagAcceptFilter() {
     return eIPunctTagStringAcceptFilter;
   }
 
@@ -245,7 +246,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * @return The Filter
    */
   @Override
-  public Filter<String> evalBIgnoredPunctuationTagRejectFilter() {
+  public Predicate<String> evalBIgnoredPunctuationTagRejectFilter() {
     return Filters.notFilter(eIPunctTagStringAcceptFilter);
   }
 
@@ -508,7 +509,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    */
   @Override
   public boolean isStartSymbol(String str) {
-    return startSymbolAcceptFilter.accept(str);
+    return startSymbolAcceptFilter.test(str);
   }
 
 
@@ -519,7 +520,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * @return The filter
    */
   @Override
-  public Filter<String> startSymbolAcceptFilter() {
+  public Predicate<String> startSymbolAcceptFilter() {
     return startSymbolAcceptFilter;
   }
 
@@ -549,15 +550,15 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
   }
 
 
-  private final Filter<String> punctTagStringAcceptFilter = Filters.collectionAcceptFilter(punctuationTags());
+  private final Predicate<String> punctTagStringAcceptFilter = Filters.collectionAcceptFilter(punctuationTags());
 
-  private final Filter<String> punctWordStringAcceptFilter = Filters.collectionAcceptFilter(punctuationWords());
+  private final Predicate<String> punctWordStringAcceptFilter = Filters.collectionAcceptFilter(punctuationWords());
 
-  private final Filter<String> sFPunctTagStringAcceptFilter = Filters.collectionAcceptFilter(sentenceFinalPunctuationTags());
+  private final Predicate<String> sFPunctTagStringAcceptFilter = Filters.collectionAcceptFilter(sentenceFinalPunctuationTags());
 
-  private final Filter<String> eIPunctTagStringAcceptFilter = Filters.collectionAcceptFilter(evalBIgnoredPunctuationTags());
+  private final Predicate<String> eIPunctTagStringAcceptFilter = Filters.collectionAcceptFilter(evalBIgnoredPunctuationTags());
 
-  private final Filter<String> startSymbolAcceptFilter = Filters.collectionAcceptFilter(startSymbols());
+  private final Predicate<String> startSymbolAcceptFilter = Filters.collectionAcceptFilter(startSymbols());
 
   /**
    * Return a tokenizer which might be suitable for tokenizing text that
@@ -589,7 +590,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * @return A GrammaticalStructureFactory suitable for this language/treebank
    */
   @Override
-  public GrammaticalStructureFactory grammaticalStructureFactory(Filter<String> puncFilt) {
+  public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilt) {
     return grammaticalStructureFactory();
   }
 
@@ -600,7 +601,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * @return A GrammaticalStructureFactory suitable for this language/treebank
    */
   @Override
-  public GrammaticalStructureFactory grammaticalStructureFactory(Filter<String> puncFilt, HeadFinder typedDependencyHeadFinder) {
+  public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilt, HeadFinder typedDependencyHeadFinder) {
     return grammaticalStructureFactory();
   }
 

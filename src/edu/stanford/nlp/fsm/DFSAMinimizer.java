@@ -9,9 +9,7 @@ import edu.stanford.nlp.util.UnorderedPair;
 import java.util.*;
 
 /**
- * DFSAMinimizer
- * <p/>
- * Class for minimizing (unweighted) deterministic finite state
+ * DFSAMinimizer minimizes (unweighted) deterministic finite state
  * automata.
  *
  * @author Dan Klein
@@ -22,8 +20,7 @@ public final class DFSAMinimizer {
   static boolean debug = false;
 
 
-  private DFSAMinimizer() {
-  }
+  private DFSAMinimizer() {} // static methods class
 
 
   static class IntPair {

@@ -233,15 +233,15 @@
       <echo message="Building from ${source.path}/@{webapp.path}"/>
 
       <!-- First, compile the .jsp into .java -->
-      <jasper2 
+      <jasper2
          validateXml="false" 
          uriroot="${source.path}/@{webapp.path}" 
          webXmlFragment="${source.path}/@{webapp.path}/WEB-INF/generated.xml" 
          addWebXmlMappings="true"
          outputDir="${build.path}/@{webapp.path}/WEB-INF/src" /> 
-      
+
       <mkdir dir="${build.path}/@{webapp.path}/WEB-INF/classes"/>
-      
+
       <!-- Then compile the .java into .class -->
       <javac destdir="${build.path}/@{webapp.path}/WEB-INF/classes"
              optimize="${compile.optimize}"

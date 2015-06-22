@@ -11,6 +11,7 @@ import edu.stanford.nlp.util.StringUtils;
 
 public class RNNOptions implements Serializable {
 
+  // TODO [2014]: This should really be a long
   /**
    * The random seed the random number generator is initialized with.
    */
