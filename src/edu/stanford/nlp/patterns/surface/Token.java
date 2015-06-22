@@ -2,6 +2,7 @@ package edu.stanford.nlp.patterns.surface;
 
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
+import edu.stanford.nlp.patterns.ConstantsAndVariables;
 import edu.stanford.nlp.patterns.PatternFactory;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -16,7 +17,7 @@ import java.util.regex.Pattern;
 public class Token implements Serializable {
 
   //Can be semgrex.Env but does not matter
-  static public Env env = TokenSequencePattern.getNewEnv();
+  //static public Env env = TokenSequencePattern.getNewEnv();
 
   static Map<Class, String> class2KeyMapping = new ConcurrentHashMap<Class, String>();
 
@@ -192,7 +193,7 @@ public class Token implements Serializable {
 
     String key =class2KeyMapping.get(classR);
     if(key == null){
-      for(Map.Entry<String, Object> vars: env.getVariables().entrySet()){
+      for(Map.Entry<String, Object> vars: ConstantsAndVariables.globalEnv.getVariables().entrySet()){
         if(vars.getValue().equals(classR)){
           key = vars.getKey().toLowerCase();
           class2KeyMapping.put(classR, key);
@@ -203,7 +204,7 @@ public class Token implements Serializable {
     if(key == null){
       key = classR.getSimpleName().toLowerCase();
       class2KeyMapping.put(classR, key);
-      env.bind(key, classR);
+      ConstantsAndVariables.globalEnv.bind(key, classR);
     }
     return key;
   }

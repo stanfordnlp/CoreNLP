@@ -72,7 +72,7 @@ import static java.util.stream.Collectors.toList;
  * @author Jon Gauthier
  */
 public class DependencyParser {
-  public static final String DEFAULT_MODEL = "edu/stanford/nlp/models/parser/nndep/PTB_Stanford_params.txt.gz";
+  public static final String DEFAULT_MODEL = "edu/stanford/nlp/models/parser/nndep/english_SD.gz";
 
   /**
    * Words, parts of speech, and dependency relation labels which were
