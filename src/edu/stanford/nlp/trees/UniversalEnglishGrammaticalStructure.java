@@ -1,7 +1,6 @@
 package edu.stanford.nlp.trees;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -9,7 +8,6 @@ import edu.stanford.nlp.graph.DirectedMultiGraph;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraph.OutputFormat;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
@@ -143,7 +141,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     Collections.sort(list);
   }
 
-  protected void correctDependencies(SemanticGraph sg) {
+  protected static void correctDependencies(SemanticGraph sg) {
     if (DEBUG) {
       printListSorted("At correctDependencies:", sg.typedDependencies());
     }
@@ -349,7 +347,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     edge.setRelation(reln);
   }
 
-  private static SemgrexPattern PREP_CONJP_PATTERN = SemgrexPattern.compile("{} >case ({}=gov >cc {}=cc >conj {}=conj)");
+  private static final SemgrexPattern PREP_CONJP_PATTERN = SemgrexPattern.compile("{} >case ({}=gov >cc {}=cc >conj {}=conj)");
 
   /**
    * Expands prepositions with conjunctions such as in the sentence
@@ -367,7 +365,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * because if the verb has multiple cc relations then it can be impossible
    * to infer which coordination marker belongs to which conjuncts.
    *
-   * @param list mutable list of dependencies
+   * @param sg A SemanticGraph for a sentence
    */
   private static void expandPrepConjunctions(SemanticGraph sg) {
 
@@ -405,7 +403,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   /*
    * Used by expandPrepConjunctions.
    */
-
   private static void expandPrepConjunction(SemanticGraph sg, IndexedWord gov,
       List<IndexedWord> conjDeps, IndexedWord ccDep)  {
 
@@ -589,7 +586,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   }
 
 
-  private static SemgrexPattern CONJUNCTION_PATTERN = SemgrexPattern.compile("{}=gov >cc {}=cc >conj {}=conj");
+  private static final SemgrexPattern CONJUNCTION_PATTERN = SemgrexPattern.compile("{}=gov >cc {}=cc >conj {}=conj");
 
 
   /**
@@ -605,7 +602,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * Some multi-word coordination markers are collapsed to <code>conj:and</code> or <code>conj:negcc</code>.
    * See {@link #conjValue(IndexedWord, SemanticGraph)}.
    *
-   * @param list mutable list of dependency relations
+   * @param sg A SemanticGraph from a sentence
    */
   private static void addConjInformation(SemanticGraph sg) {
 
@@ -654,9 +651,9 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   }
 
   /* Used by correctWHAttachment */
-  private static SemgrexPattern XCOMP_PATTERN = SemgrexPattern.compile("{}=root >xcomp {}=embedded >/^(dep|dobj)$/ {}=wh ?>/([di]obj)/ {}=obj");
+  private static final SemgrexPattern XCOMP_PATTERN = SemgrexPattern.compile("{}=root >xcomp {}=embedded >/^(dep|dobj)$/ {}=wh ?>/([di]obj)/ {}=obj");
 
-  private static Morphology morphology = new Morphology();
+  private static final Morphology morphology = new Morphology();
 
   /**
    * Tries to correct complicated cases of WH-movement in
