@@ -16,26 +16,22 @@ import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
-import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Filters;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
 
 import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
-import static edu.stanford.nlp.trees.GrammaticalRelation.GOVERNOR;
 import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
 
 
 
 
 /**
- * A {@code GrammaticalStructure} is a {@link TreeGraph
- * <code>TreeGraph</code>} (that is, a tree with additional labeled
- * arcs between nodes) for representing the grammatical relations in a
- * parse tree.  A new <code>GrammaticalStructure</code> is constructed
+ * A {@code GrammaticalStructure} stores dependency relations between
+ * nodes in a tree.  A new <code>GrammaticalStructure</code> is constructed
  * from an existing parse tree with the help of {@link
  * GrammaticalRelation <code>GrammaticalRelation</code>}, which
  * defines a hierarchy of grammatical relations, along with
@@ -45,7 +41,10 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
  * labeled grammatical relations as it can.  Once constructed, the new
  * <code>GrammaticalStructure</code> can be printed in various
  * formats, or interrogated using the interface methods in this
- * class.
+ * class. Internally, this uses a representation via a {@code TreeGraphNode},
+ * that is, a tree with additional labeled
+ * arcs between nodes, for representing the grammatical relations in a
+ * parse tree.
  * <p/>
  * <b>Caveat emptor!</b> This is a work in progress.
  * Nothing in here should be relied upon to function perfectly.
@@ -59,7 +58,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
  * @see GrammaticalRelation
  * @see EnglishGrammaticalStructure
  */
-public abstract class GrammaticalStructure extends TreeGraph {
+public abstract class GrammaticalStructure implements Serializable {
 
   private static final boolean PRINT_DEBUGGING = System.getProperty("GrammaticalStructure", null) != null;
 
@@ -67,6 +66,16 @@ public abstract class GrammaticalStructure extends TreeGraph {
   protected final List<TypedDependency> allTypedDependencies;
 
   protected final Filter<String> puncFilter;
+
+  /**
+   * The root Tree node for this GrammaticalStructure.
+   */
+  protected final TreeGraphNode root;
+
+  /**
+   * A map from arbitrary integer indices to nodes.
+   */
+  private final Map<Integer, TreeGraphNode> indexMap = Generics.newHashMap();
 
   /**
    * Create a new GrammaticalStructure, analyzing the parse tree and
@@ -85,7 +94,8 @@ public abstract class GrammaticalStructure extends TreeGraph {
    */
   public GrammaticalStructure(Tree t, Collection<GrammaticalRelation> relations,
                               Lock relationsLock, HeadFinder hf, Filter<String> puncFilter) {
-    super(t); // makes a Tree with TreeGraphNode nodes
+    this.root = new TreeGraphNode(t, this);
+    indexNodes(this.root);
     // add head word and tag to phrase nodes
     if (hf == null) {
       throw new AssertionError("Cannot use null HeadFinder");
@@ -123,6 +133,103 @@ public abstract class GrammaticalStructure extends TreeGraph {
     getExtraDeps(allTypedDependencies, puncTypedDepFilter, completeGraph);
   }
 
+
+  /**
+   * Assign sequential integer indices (starting with 1) to all
+   * nodes of the subtree rooted at this
+   * <code>Tree</code>.  The leaves are indexed first,
+   * from left to right.  Then the internal nodes are indexed,
+   * using a pre-order tree traversal.
+   */
+  private void indexNodes(TreeGraphNode tree) {
+    indexNodes(tree, indexLeaves(tree, 1));
+  }
+
+  /**
+   * Assign sequential integer indices to the leaves of the subtree
+   * rooted at this <code>TreeGraphNode</code>, beginning with
+   * <code>startIndex</code>, and traversing the leaves from left
+   * to right. If node is already indexed, then it uses the existing index.
+   *
+   * @param startIndex index for this node
+   * @return the next index still unassigned
+   */
+  private int indexLeaves(TreeGraphNode tree, int startIndex) {
+    if (tree.isLeaf()) {
+      int oldIndex = tree.index();
+      if (oldIndex >= 0) {
+        startIndex = oldIndex;
+      } else {
+        tree.setIndex(startIndex);
+      }
+      addNodeToIndexMap(startIndex, tree);
+      startIndex++;
+    } else {
+      for (TreeGraphNode child : tree.children) {
+        startIndex = indexLeaves(child, startIndex);
+      }
+    }
+    return startIndex;
+  }
+
+  /**
+   * Assign sequential integer indices to all nodes of the subtree
+   * rooted at this <code>TreeGraphNode</code>, beginning with
+   * <code>startIndex</code>, and doing a pre-order tree traversal.
+   * Any node which already has an index will not be re-indexed
+   * &mdash; this is so that we can index the leaves first, and
+   * then index the rest.
+   *
+   * @param startIndex index for this node
+   * @return the next index still unassigned
+   */
+  private int indexNodes(TreeGraphNode tree, int startIndex) {
+    if (tree.index() < 0) {		// if this node has no index
+      addNodeToIndexMap(startIndex, tree);
+      tree.setIndex(startIndex++);
+    }
+    if (!tree.isLeaf()) {
+      for (TreeGraphNode child : tree.children) {
+        startIndex = indexNodes(child, startIndex);
+      }
+    }
+    return startIndex;
+  }
+
+  /**
+   * Store a mapping from an arbitrary integer index to a node in
+   * this treegraph.  Normally a client shouldn't need to use this,
+   * as the nodes are automatically indexed by the
+   * <code>TreeGraph</code> constructor.
+   *
+   * @param index the arbitrary integer index
+   * @param node  the <code>TreeGraphNode</code> to be indexed
+   */
+  private void addNodeToIndexMap(int index, TreeGraphNode node) {
+    indexMap.put(Integer.valueOf(index), node);
+  }
+
+
+  /**
+   * Return the node in the this treegraph corresponding to the
+   * specified integer index.
+   *
+   * @param index the integer index of the node you want
+   * @return the <code>TreeGraphNode</code> having the specified
+   *         index (or <code>null</code> if such does not exist)
+   */
+  private TreeGraphNode getNodeByIndex(int index) {
+    return indexMap.get(Integer.valueOf(index));
+  }
+
+  /**
+   * Return the root Tree of this GrammaticalStructure.
+   *
+   * @return the root Tree of this GrammaticalStructure
+   */
+  public TreeGraphNode root() {
+    return root;
+  }
 
   private static void throwDepFormatException(String dep) {
      throw new RuntimeException(String.format("Dependencies should be for the format 'type(arg-idx, arg-idx)'. Could not parse '%s'", dep));
@@ -214,7 +321,8 @@ public abstract class GrammaticalStructure extends TreeGraph {
   }
 
   public GrammaticalStructure(List<TypedDependency> projectiveDependencies, TreeGraphNode root) {
-    super(root);
+    this.root = root;
+    indexNodes(this.root);
     this.puncFilter = Filters.acceptFilter();
     allTypedDependencies = typedDependencies = new ArrayList<TypedDependency>(projectiveDependencies);
   }
@@ -224,17 +332,14 @@ public abstract class GrammaticalStructure extends TreeGraph {
     this(t, relations, null, hf, puncFilter);
   }
 
-  // @Override
-  // public String toString() {
-    // StringBuilder sb = new StringBuilder(super.toString());
-    //    sb.append("Dependencies:");
-    //    sb.append("\n" + dependencies);
-    //    sb.append("Typed Dependencies:");
-    //    sb.append("\n" + typedDependencies);
-    //    sb.append("More Typed Dependencies:");
-    //    sb.append("\n" + moreTypedDependencies());
-    // return sb.toString();
-  // }
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append(root.toPrettyString(0).substring(1));
+    sb.append("Typed Dependencies:\n");
+    sb.append(typedDependencies);
+    return sb.toString();
+  }
 
   private static void attachStrandedNodes(TreeGraphNode t, TreeGraphNode root, boolean attach, Filter<String> puncFilter, DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph) {
     if (t.isLeaf()) {
@@ -252,7 +357,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
     }
     for (TreeGraphNode kid : t.children()) {
       attachStrandedNodes(kid, root, (kid.headWordNode() != t.headWordNode()), puncFilter, basicGraph);
-    }    
+    }
   }
 
   // cdm dec 2009: I changed this to automatically fail on preterminal nodes, since they shouldn't match for GR parent patterns.  Should speed it up.
@@ -273,7 +378,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
             // If there are two patterns that add dependencies, X --> Z and Y --> Z, and X dominates Y, then the dependency Y --> Z is not added to the basic graph to prevent unwanted duplication.
             // Similarly, if there is already a path from X --> Y, and an expression would trigger Y --> X somehow, we ignore that
             Set<TreeGraphNode> parents = basicGraph.getParents(uHigh);
-            if ((parents == null || parents.size() == 0 || parents.contains(tHigh)) && 
+            if ((parents == null || parents.size() == 0 || parents.contains(tHigh)) &&
                 basicGraph.getShortestPath(uHigh, tHigh, true) == null) {
               // System.err.println("Adding " + egr.getShortName() + " from " + t + " to " + u + " tHigh=" + tHigh + "(" + tHigh.headWordNode() + ") uHigh=" + uHigh + "(" + uHigh.headWordNode() + ")");
               basicGraph.add(tHigh, uHigh, egr);
@@ -296,11 +401,8 @@ public abstract class GrammaticalStructure extends TreeGraph {
   }
 
   /**
-   * The constructor builds a list of typed dependencies using
-   * information from a <code>GrammaticalStructure</code>.
-   *
-   * @param getExtra If true, the list of typed dependencies will contain extra ones.
-   *              If false, the list of typed dependencies will respect the tree structure.
+   * Helps the constructor build a list of typed dependencies using
+   * information from a {@code GrammaticalStructure}.
    */
   private List<TypedDependency> getDeps(Filter<TypedDependency> puncTypedDepFilter, DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph) {
     List<TypedDependency> basicDep = Generics.newArrayList();
@@ -573,7 +675,25 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @return The typed dependencies of this grammatical structure
    */
   public List<TypedDependency> typedDependencies(boolean includeExtras) {
-    List<TypedDependency> deps = new ArrayList<TypedDependency>(includeExtras ? allTypedDependencies : typedDependencies);
+    List<TypedDependency> deps;
+    // This copy has to be done because of the broken way
+    // TypedDependency objects can be mutated by downstream methods
+    // such as collapseDependencies.  Without the copy here it is
+    // possible for two consecutive calls to
+    // typedDependenciesCollapsed to get different results.  For
+    // example, the English dependencies rename existing objects KILL
+    // to note that they should be removed.
+    if (includeExtras) {
+      deps = new ArrayList<TypedDependency>(allTypedDependencies.size());
+      for (TypedDependency dep : allTypedDependencies) {
+        deps.add(new TypedDependency(dep));
+      }
+    } else {
+      deps = new ArrayList<TypedDependency>(typedDependencies.size());
+      for (TypedDependency dep : typedDependencies) {
+        deps.add(new TypedDependency(dep));
+      }
+    }
     correctDependencies(deps);
     return deps;
   }

@@ -14,5 +14,5 @@ public interface LineSearcher {
    *
    * @param function          the objective function
    */
-  double minimize(edu.stanford.nlp.util.Function<Double, Double> function) ;
+  double minimize(java.util.function.Function<Double, Double> function) ;
 }

@@ -110,17 +110,15 @@ public class TopNGramRecord {
   }
 
   private Comparator<Tree> scoreComparator(final int prediction) { 
-    return new Comparator<Tree>() {
-      public int compare(Tree tree1, Tree tree2) {
-        double score1 = RNNCoreAnnotations.getPredictions(tree1).get(prediction);
-        double score2 = RNNCoreAnnotations.getPredictions(tree2).get(prediction);
-        if (score1 < score2) {
-          return -1;
-        } else if (score1 > score2) {
-          return 1;
-        } else {
-          return 0;
-        }
+    return (tree1, tree2) -> {
+      double score1 = RNNCoreAnnotations.getPredictions(tree1).get(prediction);
+      double score2 = RNNCoreAnnotations.getPredictions(tree2).get(prediction);
+      if (score1 < score2) {
+        return -1;
+      } else if (score1 > score2) {
+        return 1;
+      } else {
+        return 0;
       }
     };
   }

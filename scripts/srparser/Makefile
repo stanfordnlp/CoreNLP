@@ -28,9 +28,9 @@ CHINESE_TAGGER = /u/nlp/data/pos-tagger/distrib/chinese-nodistsim.tagger
 CHINESE_TLPP   = edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams
 
 
-GERMAN_TRAIN  = /afs/ir/data/linguistic-data/NEGRA/penn-format-train-dev-test 1
-GERMAN_DEV    = /afs/ir/data/linguistic-data/NEGRA/penn-format-train-dev-test 3
-GERMAN_TEST   = /afs/ir/data/linguistic-data/NEGRA/penn-format-train-dev-test 2
+GERMAN_TRAIN  = /u/nlp/data/GermanACL08/negra/negra_1.mrg
+GERMAN_DEV    = /u/nlp/data/GermanACL08/negra/negra_3.mrg
+GERMAN_TEST   = /u/nlp/data/GermanACL08/negra/negra_2.mrg
 GERMAN_TAGGER = /u/nlp/data/pos-tagger/distrib/german-fast.tagger
 GERMAN_TLPP   = edu.stanford.nlp.parser.lexparser.NegraPennTreebankParserParams
 
@@ -42,11 +42,18 @@ ARABIC_TAGGER = /u/nlp/data/pos-tagger/distrib/arabic-train.tagger
 ARABIC_TLPP   = edu.stanford.nlp.parser.lexparser.ArabicTreebankParserParams
 
 
+SPANISH_TRAIN = /u/nlp/data/spanish/ancora/ancora.train
+SPANISH_DEV   = /u/nlp/data/spanish/ancora/ancora.dev
+SPANISH_TEST  = /u/nlp/data/spanish/ancora/ancora.test
+SPANISH_TAGGER= /u/nlp/data/pos-tagger/distrib/spanish-distsim.tagger
+SPANISH_TLPP  = edu.stanford.nlp.parser.lexparser.SpanishTreebankParserParams
+
+
 TRAIN_BEAM = -trainingMethod BEAM -trainBeamSize 4
 TEST_BEAM  = -beamSize 4
 CUTOFF     = -featureFrequencyCutoff 5
 
-all: wsjSR.ser.gz wsjSR.beam.ser.gz englishSR.ser.gz englishSR.beam.ser.gz frenchSR.ser.gz frenchSR.beam.ser.gz chineseSR.ser.gz germanSR.ser.gz arabicSR.ser.gz
+all: wsjSR.ser.gz wsjSR.beam.ser.gz englishSR.ser.gz englishSR.beam.ser.gz frenchSR.ser.gz frenchSR.beam.ser.gz chineseSR.ser.gz germanSR.ser.gz arabicSR.ser.gz spanishSR.ser.gz spanishSR.beam.ser.gz
 .PHONY: all
 
 wsjSR.ser.gz:
@@ -103,3 +110,14 @@ arabicSR.ser.gz:
 	java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(ARABIC_TRAIN) -devTreebank $(ARABIC_DEV) -serializedPath $@ -trainingThreads 4 -batchSize 12 -preTag -taggerSerializedFile $(ARABIC_TAGGER) -trainingIterations 100 -stalledIterationLimit 25 -tlpp $(ARABIC_TLPP) > $@.out 2>&1
 	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank $(ARABIC_TEST) -serializedPath $@ -preTag -taggerSerializedFile $(ARABIC_TAGGER) -trainingIterations 100 -stalledIterationLimit 25 >> $@.out 2>&1
 
+spanishSR.ser.gz:
+	@echo Training $@
+	@echo Will test on $(SPANISH_TEST)
+	java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(SPANISH_TRAIN) -devTreebank $(SPANISH_DEV) -serializedPath $@ -trainingThreads 4 -batchSize 12 -preTag -taggerSerializedFile $(SPANISH_TAGGER) -trainingIterations 100 -stalledIterationLimit 25 -tlpp $(SPANISH_TLPP) > $@.out 2>&1
+	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank $(SPANISH_TEST) -serializedPath $@ -preTag -taggerSerializedFile $(SPANISH_TAGGER) -trainingIterations 100 -stalledIterationLimit 25 >> $@.out 2>&1
+
+spanishSR.beam.ser.gz:
+	@echo Training $@
+	@echo Will test on $(SPANISH_TEST)
+	java -mx20g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(SPANISH_TRAIN) -devTreebank $(SPANISH_DEV) -serializedPath $@ -trainingThreads 4 -batchSize 12 -preTag -taggerSerializedFile $(SPANISH_TAGGER) -trainingIterations 100 -stalledIterationLimit 25 -tlpp $(SPANISH_TLPP) $(TRAIN_BEAM) $(CUTOFF) > $@.out 2>&1
+	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank $(SPANISH_TEST) -serializedPath $@ -preTag -taggerSerializedFile $(SPANISH_TAGGER) -trainingIterations 100 -stalledIterationLimit 25 $(TEST_BEAM) >> $@.out 2>&1

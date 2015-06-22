@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Utilities for helping out with Iterables as Collections is to Collection.
@@ -467,11 +468,7 @@ public class Iterables {
       final Iterable<V> iter1, final Iterable<V> iter2,
       final Comparator<V> comparator) {
 
-    final IncrementComparator<V,V> inc = new IncrementComparator<V,V>() {
-      public int compare(V a, V b) {
-        return comparator.compare(a,b);
-      }
-    };
+    final IncrementComparator<V,V> inc = (a, b) -> comparator.compare(a,b);
 
     return merge(iter1, iter2, inc);
   }
@@ -504,11 +501,7 @@ public class Iterables {
 
     // flattens the pairs into triple
     Function<Pair<Pair<V1,V2>, V3>, Triple<V1,V2,V3>> flatten =
-      new Function<Pair<Pair<V1,V2>,V3>, Triple<V1,V2,V3>>() {
-      public Triple<V1, V2, V3> apply(Pair<Pair<V1, V2>, V3> in) {
-        return new Triple<V1,V2,V3>(in.first.first,in.first.second,in.second);
-      }
-    };
+        in -> new Triple<V1,V2,V3>(in.first.first,in.first.second,in.second);
 
     return transform(merge(partial, iter3, inc), flatten);
   }
@@ -521,11 +514,7 @@ public class Iterables {
       final Iterable<V> iter1, final Iterable<V> iter2, Iterable<V> iter3,
       final Comparator<V> comparator) {
 
-    final IncrementComparator<V,V> inc = new IncrementComparator<V,V>() {
-      public int compare(V a, V b) {
-        return comparator.compare(a,b);
-      }
-    };
+    final IncrementComparator<V,V> inc = (a, b) -> comparator.compare(a,b);
 
     return merge(iter1, iter2, iter3, inc, inc);
   }
@@ -553,41 +542,36 @@ public class Iterables {
           }
 
           public Iterable<V> next() {
-            return new Iterable<V>() {
-              public Iterator<V> iterator() {
-                /** Previous returned by this iterator */
-                return new Iterator<V>() {
-                  V last = null;
+            return () -> new Iterator<V>() {
+              V last = null;
 
-                  public boolean hasNext() {
-                    // get next if we need to and one is available
-                    if (next == null && it.hasNext()) {
-                      next = it.next();
-                    }
+              public boolean hasNext() {
+                // get next if we need to and one is available
+                if (next == null && it.hasNext()) {
+                  next = it.next();
+                }
 
-                    // if next and last both have values, compare them
-                    if (last != null && next != null) {
-                      return comparator.compare(last, next) == 0;
-                    }
+                // if next and last both have values, compare them
+                if (last != null && next != null) {
+                  return comparator.compare(last, next) == 0;
+                }
 
-                    // one of them was not null - have more if it was next
-                    return next != null;
-                  }
+                // one of them was not null - have more if it was next
+                return next != null;
+              }
 
-                  public V next() {
-                    if (!hasNext()) {
-                      throw new IllegalStateException("Didn't have next");
-                    }
-                    V rv = next;
-                    last = next;
-                    next = null;
-                    return rv;
-                  }
+              public V next() {
+                if (!hasNext()) {
+                  throw new IllegalStateException("Didn't have next");
+                }
+                V rv = next;
+                last = next;
+                next = null;
+                return rv;
+              }
 
-                  public void remove() {
-                    throw new UnsupportedOperationException();
-                  }
-                };
+              public void remove() {
+                throw new UnsupportedOperationException();
               }
             };
           }

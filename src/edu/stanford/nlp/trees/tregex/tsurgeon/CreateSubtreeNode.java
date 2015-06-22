@@ -1,10 +1,8 @@
 package edu.stanford.nlp.trees.tregex.tsurgeon;
 
 import java.util.List;
+import java.util.Map;
 
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.LabelFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.util.Generics;
@@ -47,57 +45,68 @@ public class CreateSubtreeNode extends TsurgeonPattern {
     }
   }
 
-  /**
-   * Combines all nodes between start and end into one subtree, then
-   * replaces those nodes with the new subtree in the corresponding
-   * location under parent
-   */
   @Override
-  public Tree evaluate(Tree t, TregexMatcher tm) {
-    Tree startChild = children[0].evaluate(t, tm);
-    Tree endChild = (children.length == 2) ? children[1].evaluate(t, tm) : startChild;
-    
-    Tree parent = startChild.parent(t);
+  public TsurgeonMatcher matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
+    return new Matcher(newNodeNames, coindexer);
+  }
 
-    // sanity check
-    if (parent != endChild.parent(t)) {
-      throw new TsurgeonRuntimeException("Parents did not match for trees when applied to " + this);
+  private class Matcher extends TsurgeonMatcher {
+    public Matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
+      super(CreateSubtreeNode.this, newNodeNames, coindexer);
     }
 
-    AuxiliaryTree treeCopy = auxTree.copy(this);
+    /**
+     * Combines all nodes between start and end into one subtree, then
+     * replaces those nodes with the new subtree in the corresponding
+     * location under parent
+     */
+    @Override
+    public Tree evaluate(Tree tree, TregexMatcher tregex) {
+      Tree startChild = childMatcher[0].evaluate(tree, tregex);
+      Tree endChild = (childMatcher.length == 2) ? childMatcher[1].evaluate(tree, tregex) : startChild;
 
-    // Collect all the children of the parent of the node we care
-    // about.  If the child is one of the nodes we care about, or
-    // between those two nodes, we add it to a list of inner children.
-    // When we reach the second endpoint, we turn that list of inner
-    // children into a new node using the newly created label.  All
-    // other children are kept in an outer list, with the new node
-    // added at the appropriate location.
-    List<Tree> children = Generics.newArrayList();
-    List<Tree> innerChildren = Generics.newArrayList();
-    boolean insideSpan = false;
-    for (Tree child : parent.children()) {
-      if (child == startChild || child == endChild) {
-        if (!insideSpan && startChild != endChild) {
-          insideSpan = true;
+      Tree parent = startChild.parent(tree);
+
+      // sanity check
+      if (parent != endChild.parent(tree)) {
+        throw new TsurgeonRuntimeException("Parents did not match for trees when applied to " + this);
+      }
+      
+      AuxiliaryTree treeCopy = auxTree.copy(this);
+
+      // Collect all the children of the parent of the node we care
+      // about.  If the child is one of the nodes we care about, or
+      // between those two nodes, we add it to a list of inner children.
+      // When we reach the second endpoint, we turn that list of inner
+      // children into a new node using the newly created label.  All
+      // other children are kept in an outer list, with the new node
+      // added at the appropriate location.
+      List<Tree> children = Generics.newArrayList();
+      List<Tree> innerChildren = Generics.newArrayList();
+      boolean insideSpan = false;
+      for (Tree child : parent.children()) {
+        if (child == startChild || child == endChild) {
+          if (!insideSpan && startChild != endChild) {
+            insideSpan = true;
+            innerChildren.add(child);
+          } else {
+            insideSpan = false;
+            innerChildren.add(child);
+
+            // All children have been collected; place these beneath the foot of the auxiliary tree
+            treeCopy.foot.setChildren(innerChildren);
+            children.add(treeCopy.tree);
+          }
+        } else if (insideSpan) {
           innerChildren.add(child);
         } else {
-          insideSpan = false;
-          innerChildren.add(child);
-
-          // All children have been collected; place these beneath the foot of the auxiliary tree
-          treeCopy.foot.setChildren(innerChildren);
-          children.add(treeCopy.tree);
+          children.add(child);
         }
-      } else if (insideSpan) {
-        innerChildren.add(child);
-      } else {
-        children.add(child);
       }
+
+      parent.setChildren(children);
+
+      return tree;
     }
-
-    parent.setChildren(children);
-
-    return t;
   }
 }

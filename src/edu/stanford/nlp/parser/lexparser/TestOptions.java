@@ -276,6 +276,11 @@ public class TestOptions implements Serializable {
   public int testingThreads = 1;
 
   /**
+   * When evaluating, don't print out tons of text.  Only print out the final scores
+   */
+  public boolean quietEvaluation = false;
+
+  /**
    * Determines method for print trees on output.
    *
    * @param tlpParams The treebank parser params
@@ -300,7 +305,8 @@ public class TestOptions implements Serializable {
             " outputFormat=" + outputFormat + 
             " outputFormatOptions=" + outputFormatOptions + 
             " printAllBestParses=" + printAllBestParses + 
-            " testingThreads=" + testingThreads);
+            " testingThreads=" + testingThreads +
+            " quietEvaluation=" + quietEvaluation);
   }
 
   private static final long serialVersionUID = 7256526346598L;

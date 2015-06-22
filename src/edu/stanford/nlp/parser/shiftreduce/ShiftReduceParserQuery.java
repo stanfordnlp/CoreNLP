@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.Set;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
@@ -55,7 +54,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
   }
 
   private boolean parseInternal() {
-    final int maxBeamSize = parser.op.testOptions().beamSize;
+    final int maxBeamSize = Math.max(parser.op.testOptions().beamSize, 1);
 
     success = true;
     unparsable = false;
@@ -178,7 +177,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
   @Override
   public List<ScoredObject<Tree>> getBestPCFGParses() {
     ScoredObject<Tree> parse = new ScoredObject<Tree>(debinarized, finalState.score);
-    return Collections.singletonList(parse);    
+    return Collections.singletonList(parse);
   }
 
   @Override
@@ -223,7 +222,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
   public boolean saidMemMessage() {
     return false;
   }
-  
+
   @Override
   public boolean parseSucceeded() {
     return success;

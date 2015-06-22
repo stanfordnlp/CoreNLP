@@ -16,7 +16,7 @@ import edu.stanford.nlp.process.SerializableFunction;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.arabic.*;
 import edu.stanford.nlp.trees.tregex.*;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;

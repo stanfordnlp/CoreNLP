@@ -1511,18 +1511,24 @@ public class SieveCoreferenceSystem {
     int passIndex = sieveClassNames.length - 1;
     String scoreDesc = metricType;
     double finalScore;
-    if ("combined".equals(metricType)) {
-      finalScore = (scoreMUC.get(passIndex).getScore(subScoreType)
+    switch (metricType) {
+      case "combined":
+        finalScore = (scoreMUC.get(passIndex).getScore(subScoreType)
             + scoreBcubed.get(passIndex).getScore(subScoreType)
-            + scorePairwise.get(passIndex).getScore(subScoreType))/3;
-      scoreDesc = "(muc + bcub + pairwise)/3";
-    } else if ("muc".equals(metricType)) {
-      finalScore = scoreMUC.get(passIndex).getScore(subScoreType);
-    } else if ("bcub".equals(metricType) || "bcubed".equals(metricType)) {
-      finalScore = scoreBcubed.get(passIndex).getScore(subScoreType);
-    } else if ("pairwise".equals(metricType)) {
-      finalScore = scorePairwise.get(passIndex).getScore(subScoreType);
-    } else {
+            + scorePairwise.get(passIndex).getScore(subScoreType)) / 3;
+        scoreDesc = "(muc + bcub + pairwise)/3";
+        break;
+      case "muc":
+        finalScore = scoreMUC.get(passIndex).getScore(subScoreType);
+        break;
+      case "bcub":
+      case "bcubed":
+        finalScore = scoreBcubed.get(passIndex).getScore(subScoreType);
+        break;
+      case "pairwise":
+        finalScore = scorePairwise.get(passIndex).getScore(subScoreType);
+        break;
+      default:
         throw new IllegalArgumentException("Invalid sub score type:" + subScoreType);
     }
     logger.info("Final score (" + scoreDesc + ") " + subScoreType + " = " + (new DecimalFormat("#.##")).format(finalScore));

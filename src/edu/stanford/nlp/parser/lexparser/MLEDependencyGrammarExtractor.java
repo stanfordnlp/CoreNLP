@@ -57,7 +57,7 @@ public class MLEDependencyGrammarExtractor extends AbstractTreeExtractor<Depende
 
   @Override
   public DependencyGrammar formResult() {
-    wordIndex.indexOf(Lexicon.UNKNOWN_WORD, true);
+    wordIndex.addToIndex(Lexicon.UNKNOWN_WORD);
     MLEDependencyGrammar dg = new MLEDependencyGrammar(tlpParams, directional, useDistance, useCoarseDistance, basicCategoryTagsInDependencyGrammar, op, wordIndex, tagIndex);
     for (IntDependency dependency : dependencyCounter.keySet()) {
       dg.addRule(dependency, dependencyCounter.getCount(dependency));

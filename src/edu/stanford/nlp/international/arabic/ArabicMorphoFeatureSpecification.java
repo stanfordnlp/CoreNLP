@@ -158,12 +158,17 @@ public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification
         Matcher moodMatcher = pMood.matcher(spec);
         if(moodMatcher.find()) {
           String moodStr = moodMatcher.group(1);
-          if(moodStr.equals("I"))
-            features.addFeature(MorphoFeatureType.MOOD, moodVals[0]);
-          else if(moodStr.equals("S"))
-            features.addFeature(MorphoFeatureType.MOOD, moodVals[1]);
-          else if(moodStr.equals("J"))
-            features.addFeature(MorphoFeatureType.MOOD, moodVals[2]);
+          switch (moodStr) {
+            case "I":
+              features.addFeature(MorphoFeatureType.MOOD, moodVals[0]);
+              break;
+            case "S":
+              features.addFeature(MorphoFeatureType.MOOD, moodVals[1]);
+              break;
+            case "J":
+              features.addFeature(MorphoFeatureType.MOOD, moodVals[2]);
+              break;
+          }
         }
       }
 

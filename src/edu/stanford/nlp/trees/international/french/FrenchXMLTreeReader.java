@@ -16,7 +16,6 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasCategory;
 import edu.stanford.nlp.ling.HasContext;
-import edu.stanford.nlp.ling.HasIndex;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
@@ -172,10 +171,10 @@ public class FrenchXMLTreeReader implements TreeReader {
     String ee = node.getAttribute(ATTR_EE);
     return ee == null ? "" : ee;
   }
-  
+
   /**
    * Get the POS subcategory.
-   * 
+   *
    * @param node
    * @return
    */
@@ -227,7 +226,7 @@ public class FrenchXMLTreeReader implements TreeReader {
       String morph = getMorph(eRoot);
       List<String> leafToks = getWordString(eRoot.getTextContent().trim());
       String subcat = getSubcat(eRoot);
-      
+
       if (lemmas != null && lemmas.size() != leafToks.size()) {
         // If this happens (and it does for a few poorly editted trees)
         // we assume something has gone wrong and ignore the lemmas.

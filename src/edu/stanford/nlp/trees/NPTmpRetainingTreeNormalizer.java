@@ -199,20 +199,17 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer {
    */
   @Override
   public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
-    TreeTransformer transformer1 = new TreeTransformer() {
-      @Override
-      public Tree transformTree(Tree t) {
-        if (doSGappedStuff) {
-          String lab = t.label().value();
-          if (lab.equals("S") && includesEmptyNPSubj(t)) {
-            LabelFactory lf = t.label().labelFactory();
-            // Note: this changes the tree label, rather than
-            // creating a new tree node.  Beware!
-            t.setLabel(lf.newLabel(t.label().value() + "-G"));
-          }
+    TreeTransformer transformer1 = t -> {
+      if (doSGappedStuff) {
+        String lab = t.label().value();
+        if (lab.equals("S") && includesEmptyNPSubj(t)) {
+          LabelFactory lf = t.label().labelFactory();
+          // Note: this changes the tree label, rather than
+          // creating a new tree node.  Beware!
+          t.setLabel(lf.newLabel(t.label().value() + "-G"));
         }
-        return t;
       }
+      return t;
     };
     Filter<Tree> subtreeFilter = new Filter<Tree>() {
 
@@ -256,213 +253,210 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer {
         return true;
       }
     };
-    TreeTransformer transformer2 = new TreeTransformer() {
-      @Override
-      public Tree transformTree(Tree t) {
-        if (temporalAnnotation == TEMPORAL_ANY_TMP_PERCOLATED) {
-          String lab = t.label().value();
-          if (TmpPattern.matcher(lab).matches()) {
-            Tree oldT = t;
-            Tree ht;
-            do {
-              ht = headFinder.determineHead(oldT);
-              // special fix for possessives! -- make noun before head
-              if (ht.label().value().equals("POS")) {
-                int j = oldT.objectIndexOf(ht);
-                if (j > 0) {
-                  ht = oldT.getChild(j - 1);
-                }
-              }
-              LabelFactory lf = ht.label().labelFactory();
-              // Note: this changes the tree label, rather than
-              // creating a new tree node.  Beware!
-              ht.setLabel(lf.newLabel(ht.label().value() + "-TMP"));
-              oldT = ht;
-            } while (!ht.isPreTerminal());
-            if (lab.startsWith("PP")) {
-              ht = headFinder.determineHead(t);
-              // look to right
-              int j = t.objectIndexOf(ht);
-              int sz = t.children().length;
-              if (j + 1 < sz) {
-                ht = t.getChild(j + 1);
-              }
-              if (ht.label().value().startsWith("NP")) {
-                while (!ht.isLeaf()) {
-                  LabelFactory lf = ht.label().labelFactory();
-                  // Note: this changes the tree label, rather than
-                  // creating a new tree node.  Beware!
-                  ht.setLabel(lf.newLabel(ht.label().value() + "-TMP"));
-                  ht = headFinder.determineHead(ht);
-                }
+    TreeTransformer transformer2 = t -> {
+      if (temporalAnnotation == TEMPORAL_ANY_TMP_PERCOLATED) {
+        String lab = t.label().value();
+        if (TmpPattern.matcher(lab).matches()) {
+          Tree oldT = t;
+          Tree ht;
+          do {
+            ht = headFinder.determineHead(oldT);
+            // special fix for possessives! -- make noun before head
+            if (ht.label().value().equals("POS")) {
+              int j = oldT.objectIndexOf(ht);
+              if (j > 0) {
+                ht = oldT.getChild(j - 1);
               }
             }
-          }
-        } else if (temporalAnnotation == TEMPORAL_ALL_TERMINALS) {
-          String lab = t.label().value();
-          if (NPTmpPattern.matcher(lab).matches()) {
-            Tree ht;
+            LabelFactory lf = ht.label().labelFactory();
+            // Note: this changes the tree label, rather than
+            // creating a new tree node.  Beware!
+            ht.setLabel(lf.newLabel(ht.label().value() + "-TMP"));
+            oldT = ht;
+          } while (!ht.isPreTerminal());
+          if (lab.startsWith("PP")) {
             ht = headFinder.determineHead(t);
-            if (ht.isPreTerminal()) {
-              // change all tags to -TMP
-              LabelFactory lf = ht.label().labelFactory();
-              Tree[] kids = t.children();
-              for (Tree kid : kids) {
-                if (kid.isPreTerminal()) {
-                  // Note: this changes the tree label, rather
-                  // than creating a new tree node.  Beware!
-                  kid.setLabel(lf.newLabel(kid.value() + "-TMP"));
-                }
-              }
-            } else {
-              Tree oldT = t;
-              do {
-                ht = headFinder.determineHead(oldT);
-                oldT = ht;
-              } while (!ht.isPreTerminal());
-              LabelFactory lf = ht.label().labelFactory();
-              // Note: this changes the tree label, rather than
-              // creating a new tree node.  Beware!
-              ht.setLabel(lf.newLabel(ht.label().value() + "-TMP"));
+            // look to right
+            int j = t.objectIndexOf(ht);
+            int sz = t.children().length;
+            if (j + 1 < sz) {
+              ht = t.getChild(j + 1);
             }
-          }
-        } else if (temporalAnnotation == TEMPORAL_ALL_NP) {
-          String lab = t.label().value();
-          if (NPTmpPattern.matcher(lab).matches()) {
-            Tree oldT = t;
-            Tree ht;
-            do {
-              ht = headFinder.determineHead(oldT);
-              // special fix for possessives! -- make noun before head
-              if (ht.label().value().equals("POS")) {
-                int j = oldT.objectIndexOf(ht);
-                if (j > 0) {
-                  ht = oldT.getChild(j - 1);
-                }
-              }
-              if (ht.isPreTerminal() || ht.value().startsWith("NP")) {
-                LabelFactory lf = ht.labelFactory();
+            if (ht.label().value().startsWith("NP")) {
+              while (!ht.isLeaf()) {
+                LabelFactory lf = ht.label().labelFactory();
                 // Note: this changes the tree label, rather than
                 // creating a new tree node.  Beware!
                 ht.setLabel(lf.newLabel(ht.label().value() + "-TMP"));
-                oldT = ht;
+                ht = headFinder.determineHead(ht);
               }
-            } while (ht.value().startsWith("NP"));
-          }
-        } else if (temporalAnnotation == TEMPORAL_ALL_NP_AND_PP || temporalAnnotation == TEMPORAL_NP_AND_PP_WITH_NP_HEAD || temporalAnnotation == TEMPORAL_ALL_NP_EVEN_UNDER_PP) {
-          // also allow chain to start with PP
-          String lab = t.value();
-          if (NPTmpPattern.matcher(lab).matches() || PPTmpPattern.matcher(lab).matches()) {
-            Tree oldT = t;
-            do {
-              Tree ht = headFinder.determineHead(oldT);
-              // special fix for possessives! -- make noun before head
-              if (ht.value().equals("POS")) {
-                int j = oldT.objectIndexOf(ht);
-                if (j > 0) {
-                  ht = oldT.getChild(j - 1);
-                }
-              } else if ((temporalAnnotation == TEMPORAL_NP_AND_PP_WITH_NP_HEAD || temporalAnnotation == TEMPORAL_ALL_NP_EVEN_UNDER_PP) && (ht.value().equals("IN") || ht.value().equals("TO"))) {
-                // change the head to be NP if possible
-                Tree[] kidlets = oldT.children();
-                for (int k = kidlets.length - 1; k > 0; k--) {
-                  if (kidlets[k].value().startsWith("NP")) {
-                    ht = kidlets[k];
-                  }
-                }
-              }
-              LabelFactory lf = ht.labelFactory();
-              // Note: this next bit changes the tree label, rather
-              // than creating a new tree node.  Beware!
-              if (ht.isPreTerminal() || ht.value().startsWith("NP")) {
-                ht.setLabel(lf.newLabel(ht.value() + "-TMP"));
-              }
-              if (temporalAnnotation == TEMPORAL_ALL_NP_EVEN_UNDER_PP && oldT.value().startsWith("PP")) {
-                oldT.setLabel(lf.newLabel(tlp.basicCategory(oldT.value())));
-              }
-              oldT = ht;
-            } while (oldT.value().startsWith("NP") || oldT.value().startsWith("PP"));
-          }
-        } else if (temporalAnnotation == TEMPORAL_ALL_NP_PP_ADVP) {
-          // also allow chain to start with PP or ADVP
-          String lab = t.value();
-          if (NPTmpPattern.matcher(lab).matches() || PPTmpPattern.matcher(lab).matches() || ADVPTmpPattern.matcher(lab).matches()) {
-            Tree oldT = t;
-            do {
-              Tree ht = headFinder.determineHead(oldT);
-              // special fix for possessives! -- make noun before head
-              if (ht.value().equals("POS")) {
-                int j = oldT.objectIndexOf(ht);
-                if (j > 0) {
-                  ht = oldT.getChild(j - 1);
-                }
-              }
-              // Note: this next bit changes the tree label, rather
-              // than creating a new tree node.  Beware!
-              if (ht.isPreTerminal() || ht.value().startsWith("NP")) {
-                LabelFactory lf = ht.labelFactory();
-                ht.setLabel(lf.newLabel(ht.value() + "-TMP"));
-              }
-              oldT = ht;
-            } while (oldT.value().startsWith("NP"));
-          }
-        } else if (temporalAnnotation == TEMPORAL_9) {
-          // also allow chain to start with PP or ADVP
-          String lab = t.value();
-          if (NPTmpPattern.matcher(lab).matches() || PPTmpPattern.matcher(lab).matches() || ADVPTmpPattern.matcher(lab).matches()) {
-            // System.err.println("TMP: Annotating " + t);
-            addTMP9(t);
-          }
-        } else if (temporalAnnotation == TEMPORAL_ACL03PCFG) {
-          String lab = t.label().value();
-          if (lab != null && NPTmpPattern.matcher(lab).matches()) {
-            Tree oldT = t;
-            Tree ht;
-            do {
-              ht = headFinder.determineHead(oldT);
-              // special fix for possessives! -- make noun before head
-              if (ht.label().value().equals("POS")) {
-                int j = oldT.objectIndexOf(ht);
-                if (j > 0) {
-                  ht = oldT.getChild(j - 1);
-                }
-              }
-              oldT = ht;
-            } while (!ht.isPreTerminal());
-            if ( ! onlyTagAnnotateNstar || ht.label().value().startsWith("N")) {
-              LabelFactory lf = ht.label().labelFactory();
-              // Note: this changes the tree label, rather than
-              // creating a new tree node.  Beware!
-              ht.setLabel(lf.newLabel(ht.label().value() + "-TMP"));
             }
           }
         }
-        if (doAdverbialNP) {
-          String lab = t.value();
-          if (NPAdvPattern.matcher(lab).matches()) {
+      } else if (temporalAnnotation == TEMPORAL_ALL_TERMINALS) {
+        String lab = t.label().value();
+        if (NPTmpPattern.matcher(lab).matches()) {
+          Tree ht;
+          ht = headFinder.determineHead(t);
+          if (ht.isPreTerminal()) {
+            // change all tags to -TMP
+            LabelFactory lf = ht.label().labelFactory();
+            Tree[] kids = t.children();
+            for (Tree kid : kids) {
+              if (kid.isPreTerminal()) {
+                // Note: this changes the tree label, rather
+                // than creating a new tree node.  Beware!
+                kid.setLabel(lf.newLabel(kid.value() + "-TMP"));
+              }
+            }
+          } else {
             Tree oldT = t;
-            Tree ht;
             do {
               ht = headFinder.determineHead(oldT);
-              // special fix for possessives! -- make noun before head
-              if (ht.label().value().equals("POS")) {
-                int j = oldT.objectIndexOf(ht);
-                if (j > 0) {
-                  ht = oldT.getChild(j - 1);
-                }
-              }
-              if (ht.isPreTerminal() || ht.value().startsWith("NP")) {
-                LabelFactory lf = ht.labelFactory();
-                // Note: this changes the tree label, rather than
-                // creating a new tree node.  Beware!
-                ht.setLabel(lf.newLabel(ht.label().value() + "-ADV"));
-                oldT = ht;
-              }
-            } while (ht.value().startsWith("NP"));
+              oldT = ht;
+            } while (!ht.isPreTerminal());
+            LabelFactory lf = ht.label().labelFactory();
+            // Note: this changes the tree label, rather than
+            // creating a new tree node.  Beware!
+            ht.setLabel(lf.newLabel(ht.label().value() + "-TMP"));
           }
         }
-        return t;
+      } else if (temporalAnnotation == TEMPORAL_ALL_NP) {
+        String lab = t.label().value();
+        if (NPTmpPattern.matcher(lab).matches()) {
+          Tree oldT = t;
+          Tree ht;
+          do {
+            ht = headFinder.determineHead(oldT);
+            // special fix for possessives! -- make noun before head
+            if (ht.label().value().equals("POS")) {
+              int j = oldT.objectIndexOf(ht);
+              if (j > 0) {
+                ht = oldT.getChild(j - 1);
+              }
+            }
+            if (ht.isPreTerminal() || ht.value().startsWith("NP")) {
+              LabelFactory lf = ht.labelFactory();
+              // Note: this changes the tree label, rather than
+              // creating a new tree node.  Beware!
+              ht.setLabel(lf.newLabel(ht.label().value() + "-TMP"));
+              oldT = ht;
+            }
+          } while (ht.value().startsWith("NP"));
+        }
+      } else if (temporalAnnotation == TEMPORAL_ALL_NP_AND_PP || temporalAnnotation == TEMPORAL_NP_AND_PP_WITH_NP_HEAD || temporalAnnotation == TEMPORAL_ALL_NP_EVEN_UNDER_PP) {
+        // also allow chain to start with PP
+        String lab = t.value();
+        if (NPTmpPattern.matcher(lab).matches() || PPTmpPattern.matcher(lab).matches()) {
+          Tree oldT = t;
+          do {
+            Tree ht = headFinder.determineHead(oldT);
+            // special fix for possessives! -- make noun before head
+            if (ht.value().equals("POS")) {
+              int j = oldT.objectIndexOf(ht);
+              if (j > 0) {
+                ht = oldT.getChild(j - 1);
+              }
+            } else if ((temporalAnnotation == TEMPORAL_NP_AND_PP_WITH_NP_HEAD || temporalAnnotation == TEMPORAL_ALL_NP_EVEN_UNDER_PP) && (ht.value().equals("IN") || ht.value().equals("TO"))) {
+              // change the head to be NP if possible
+              Tree[] kidlets = oldT.children();
+              for (int k = kidlets.length - 1; k > 0; k--) {
+                if (kidlets[k].value().startsWith("NP")) {
+                  ht = kidlets[k];
+                }
+              }
+            }
+            LabelFactory lf = ht.labelFactory();
+            // Note: this next bit changes the tree label, rather
+            // than creating a new tree node.  Beware!
+            if (ht.isPreTerminal() || ht.value().startsWith("NP")) {
+              ht.setLabel(lf.newLabel(ht.value() + "-TMP"));
+            }
+            if (temporalAnnotation == TEMPORAL_ALL_NP_EVEN_UNDER_PP && oldT.value().startsWith("PP")) {
+              oldT.setLabel(lf.newLabel(tlp.basicCategory(oldT.value())));
+            }
+            oldT = ht;
+          } while (oldT.value().startsWith("NP") || oldT.value().startsWith("PP"));
+        }
+      } else if (temporalAnnotation == TEMPORAL_ALL_NP_PP_ADVP) {
+        // also allow chain to start with PP or ADVP
+        String lab = t.value();
+        if (NPTmpPattern.matcher(lab).matches() || PPTmpPattern.matcher(lab).matches() || ADVPTmpPattern.matcher(lab).matches()) {
+          Tree oldT = t;
+          do {
+            Tree ht = headFinder.determineHead(oldT);
+            // special fix for possessives! -- make noun before head
+            if (ht.value().equals("POS")) {
+              int j = oldT.objectIndexOf(ht);
+              if (j > 0) {
+                ht = oldT.getChild(j - 1);
+              }
+            }
+            // Note: this next bit changes the tree label, rather
+            // than creating a new tree node.  Beware!
+            if (ht.isPreTerminal() || ht.value().startsWith("NP")) {
+              LabelFactory lf = ht.labelFactory();
+              ht.setLabel(lf.newLabel(ht.value() + "-TMP"));
+            }
+            oldT = ht;
+          } while (oldT.value().startsWith("NP"));
+        }
+      } else if (temporalAnnotation == TEMPORAL_9) {
+        // also allow chain to start with PP or ADVP
+        String lab = t.value();
+        if (NPTmpPattern.matcher(lab).matches() || PPTmpPattern.matcher(lab).matches() || ADVPTmpPattern.matcher(lab).matches()) {
+          // System.err.println("TMP: Annotating " + t);
+          addTMP9(t);
+        }
+      } else if (temporalAnnotation == TEMPORAL_ACL03PCFG) {
+        String lab = t.label().value();
+        if (lab != null && NPTmpPattern.matcher(lab).matches()) {
+          Tree oldT = t;
+          Tree ht;
+          do {
+            ht = headFinder.determineHead(oldT);
+            // special fix for possessives! -- make noun before head
+            if (ht.label().value().equals("POS")) {
+              int j = oldT.objectIndexOf(ht);
+              if (j > 0) {
+                ht = oldT.getChild(j - 1);
+              }
+            }
+            oldT = ht;
+          } while (!ht.isPreTerminal());
+          if ( ! onlyTagAnnotateNstar || ht.label().value().startsWith("N")) {
+            LabelFactory lf = ht.label().labelFactory();
+            // Note: this changes the tree label, rather than
+            // creating a new tree node.  Beware!
+            ht.setLabel(lf.newLabel(ht.label().value() + "-TMP"));
+          }
+        }
       }
+      if (doAdverbialNP) {
+        String lab = t.value();
+        if (NPAdvPattern.matcher(lab).matches()) {
+          Tree oldT = t;
+          Tree ht;
+          do {
+            ht = headFinder.determineHead(oldT);
+            // special fix for possessives! -- make noun before head
+            if (ht.label().value().equals("POS")) {
+              int j = oldT.objectIndexOf(ht);
+              if (j > 0) {
+                ht = oldT.getChild(j - 1);
+              }
+            }
+            if (ht.isPreTerminal() || ht.value().startsWith("NP")) {
+              LabelFactory lf = ht.labelFactory();
+              // Note: this changes the tree label, rather than
+              // creating a new tree node.  Beware!
+              ht.setLabel(lf.newLabel(ht.label().value() + "-ADV"));
+              oldT = ht;
+            }
+          } while (ht.value().startsWith("NP"));
+        }
+      }
+      return t;
     };
     // if there wasn't an empty nonterminal at the top, but an S, wrap it.
     if (tree.label().value().equals("S")) {

@@ -47,9 +47,9 @@ public class RedwoodConfiguration {
    */
   public RedwoodConfiguration capture(final OutputStream stream) {
     if (stream == System.out) {
-      tasks.add(new Runnable() { public void run() { Redwood.captureSystemStreams(true, Redwood.realSysErr == System.err); } });
+      tasks.add(() -> Redwood.captureSystemStreams(true, Redwood.realSysErr == System.err));
     } else if (stream == System.err) {
-      tasks.add(new Runnable() { public void run() { Redwood.captureSystemStreams(Redwood.realSysOut == System.out, true); } });
+      tasks.add(() -> Redwood.captureSystemStreams(Redwood.realSysOut == System.out, true));
     } else {
       throw new IllegalArgumentException("Must capture one of stderr or stdout");
     }
@@ -58,9 +58,9 @@ public class RedwoodConfiguration {
 
   public RedwoodConfiguration restore(final OutputStream stream) {
     if (stream == System.out) {
-      tasks.add(new Runnable() { public void run() { Redwood.captureSystemStreams(false, Redwood.realSysErr == System.err); } });
+      tasks.add(() -> Redwood.captureSystemStreams(false, Redwood.realSysErr == System.err));
     } else if (stream == System.err) {
-      tasks.add(new Runnable() { public void run() { Redwood.captureSystemStreams(Redwood.realSysOut == System.out, false); } });
+      tasks.add(() -> Redwood.captureSystemStreams(Redwood.realSysOut == System.out, false));
     } else {
       throw new IllegalArgumentException("Must capture one of stderr or stdout");
     }
@@ -95,12 +95,7 @@ public class RedwoodConfiguration {
    * @return this
    */
   public RedwoodConfiguration channelWidth(final int width) {
-    tasks.add(new Runnable() {
-      @Override
-      public void run() {
-        RedwoodConfiguration.this.channelWidth = width;
-      }
-    });
+    tasks.add(() -> RedwoodConfiguration.this.channelWidth = width);
     return this;
   }
 
@@ -110,11 +105,9 @@ public class RedwoodConfiguration {
    */
   public RedwoodConfiguration clear(){
     this.tasks = new LinkedList<Runnable>();
-    this.tasks.add(new Runnable() {
-      public void run() {
-        Redwood.clearHandlers();
-        Redwood.restoreSystemStreams();
-      }
+    this.tasks.add(() -> {
+      Redwood.clearHandlers();
+      Redwood.restoreSystemStreams();
     });
     this.outputHandler = Redwood.ConsoleHandler.out();
     return this;
@@ -165,37 +158,28 @@ public class RedwoodConfiguration {
      * Consider using "output" instead, unless you really
      * want to log only to stdout now and forever in the future.
      */
-    public static final Thunk stdout = new Thunk() {
-      @Override
-      public void apply(RedwoodConfiguration config, Redwood.RecordHandlerTree root) {
-        Redwood.ConsoleHandler handler = Redwood.ConsoleHandler.out();
-        handler.leftMargin = config.channelWidth;
-        root.addChild(handler);
-      }
+    public static final Thunk stdout = (config, root) -> {
+      Redwood.ConsoleHandler handler = Redwood.ConsoleHandler.out();
+      handler.leftMargin = config.channelWidth;
+      root.addChild(handler);
     };
     /**
      * Output to a standard error. This is a leaf node.
      * Consider using "output" instead, unless you really
      * want to log only to stderr now and forever in the future.
      */
-    public static final Thunk stderr = new Thunk() {
-      @Override
-      public void apply(RedwoodConfiguration config,Redwood.RecordHandlerTree root) {
-        Redwood.ConsoleHandler handler = Redwood.ConsoleHandler.err();
-        handler.leftMargin = config.channelWidth;
-        root.addChild(handler);
-      }
+    public static final Thunk stderr = (config, root) -> {
+      Redwood.ConsoleHandler handler = Redwood.ConsoleHandler.err();
+      handler.leftMargin = config.channelWidth;
+      root.addChild(handler);
     };
     /**
      * Output to the default location specified by the output() method.
      * Consider using this rather than stderr or stdout.
      */
-    public static final Thunk output = new Thunk() {
-      @Override
-      public void apply(RedwoodConfiguration config, Redwood.RecordHandlerTree root) {
-        config.outputHandler.leftMargin = config.channelWidth;
-        root.addChild(config.outputHandler);
-      }
+    public static final Thunk output = (config, root) -> {
+      config.outputHandler.leftMargin = config.channelWidth;
+      root.addChild(config.outputHandler);
     };
 
     //
@@ -326,10 +310,7 @@ public class RedwoodConfiguration {
     /**
      * A NOOP, as the name implies. Useful for appending to the end of lists to make commas match.
      */
-    public static Thunk noop = new Thunk() {
-      @Override
-      public void apply(RedwoodConfiguration config, Redwood.RecordHandlerTree root) {
-      }
+    public static Thunk noop = (config, root) -> {
     };
   }
 
@@ -353,12 +334,7 @@ public class RedwoodConfiguration {
    */
   public RedwoodConfiguration handlers(Thunk... paths) {
     for (final Thunk thunk : paths) {
-      tasks.add(new Runnable() {
-        @Override
-        public void run() {
-          thunk.apply(RedwoodConfiguration.this, Redwood.rootHandler());
-        }
-      });
+      tasks.add(() -> thunk.apply(RedwoodConfiguration.this, Redwood.rootHandler()));
     }
     return this;
   }
@@ -367,11 +343,9 @@ public class RedwoodConfiguration {
    * @return this
    */
   public RedwoodConfiguration neatExit(){
-    tasks.add(new Runnable() { public void run() {
-      Runtime.getRuntime().addShutdownHook(new Thread(){
-        @Override public void run(){ Redwood.stop(); }
-      });
-    }});
+    tasks.add(() -> Runtime.getRuntime().addShutdownHook(new Thread(){
+      @Override public void run(){ Redwood.stop(); }
+    }));
     return this;
   }
 

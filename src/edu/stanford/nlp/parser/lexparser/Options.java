@@ -3,7 +3,7 @@ package edu.stanford.nlp.parser.lexparser;
 import edu.stanford.nlp.trees.CompositeTreeTransformer;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TreeTransformer;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
@@ -749,6 +749,12 @@ public class Options implements Serializable {
     } else if (args[i].equalsIgnoreCase("-fastFactoredCandidateAddend")) {
       testOptions.fastFactoredCandidateAddend = Integer.parseInt(args[i + 1]);
       i += 2;
+    } else if (args[i].equalsIgnoreCase("-quietEvaluation")) {
+      testOptions.quietEvaluation = true;
+      i += 1;
+    } else if (args[i].equalsIgnoreCase("-noquietEvaluation")) {
+      testOptions.quietEvaluation = false;
+      i += 1;
     } else if (args[i].equalsIgnoreCase("-simpleBinarizedLabels")) {
       trainOptions.simpleBinarizedLabels = true;
       i += 1;
