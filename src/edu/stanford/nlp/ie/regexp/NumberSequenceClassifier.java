@@ -17,6 +17,7 @@ import edu.stanford.nlp.util.StringUtils;
 
 import java.io.ObjectInputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -57,6 +58,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
 
   public static final boolean USE_SUTIME_DEFAULT = TimeExpressionExtractorFactory.DEFAULT_EXTRACTOR_PRESENT;
   public static final String USE_SUTIME_PROPERTY = "ner.useSUTime";
+  public static final String USE_SUTIME_PROPERTY_BASE = "useSUTime";
 
   private final TimeExpressionExtractor timexExtractor;
 
@@ -200,9 +202,10 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     }
     // everything tagged as CD is also a number
     // NumberNormalizer probably catches these but let's be safe
-    for(CoreLabel token: tokenSequence) {
-      if(token.tag().equals("CD") &&
-         token.get(CoreAnnotations.AnswerAnnotation.class).equals(flags.backgroundSymbol)){
+    // use inverted "CD".equals() because tag could be null (if no POS info available)
+    for (CoreLabel token: tokenSequence) {
+      if ("CD".equals(token.tag()) &&
+         token.get(CoreAnnotations.AnswerAnnotation.class).equals(flags.backgroundSymbol)) {
         token.set(CoreAnnotations.AnswerAnnotation.class, "NUMBER");
       }
     }
@@ -343,9 +346,11 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
   }
 
   /**
-   * Recognizes money and percents
-   * This accepts currency symbols (e.g., $) both before and after numbers; but it accepts units (e.g., "dollar") only after
-   * @param tokenSequence
+   * Recognizes money and percents.
+   * This accepts currency symbols (e.g., $) both before and after numbers; but it accepts units
+   * (e.g., "dollar") only after numbers.
+   *
+   * @param tokenSequence The list of tokens to find money and percents in
    */
   private void moneyAndPercentRecognizer(List<CoreLabel> tokenSequence) {
     for(int i = 0; i < tokenSequence.size(); i ++){
@@ -354,8 +359,8 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
       CoreLabel prev = (i > 0 ? tokenSequence.get(i - 1) : null);
 
       // $5
-      if(CURRENCY_SYMBOL_PATTERN.matcher(crt.word()).matches() && next != null &&
-         (next.get(CoreAnnotations.AnswerAnnotation.class).equals("NUMBER") || next.tag().equals("CD"))){
+      if (CURRENCY_SYMBOL_PATTERN.matcher(crt.word()).matches() && next != null &&
+         (next.get(CoreAnnotations.AnswerAnnotation.class).equals("NUMBER") || "CD".equals(next.tag()))) {
         crt.set(CoreAnnotations.AnswerAnnotation.class, "MONEY");
         i = changeLeftToRight(tokenSequence, i + 1,
             next.get(CoreAnnotations.AnswerAnnotation.class),
@@ -367,8 +372,8 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
                CURRENCY_SYMBOL_PATTERN.matcher(crt.word()).matches()) &&
                prev != null &&
                (prev.get(CoreAnnotations.AnswerAnnotation.class).equals("NUMBER") ||
-                prev.tag().equals("CD")) &&
-               ! leftScanFindsWeightWord(tokenSequence, i)){
+                "CD".equals(prev.tag())) &&
+               ! leftScanFindsWeightWord(tokenSequence, i)) {
         crt.set(CoreAnnotations.AnswerAnnotation.class, "MONEY");
         changeRightToLeft(tokenSequence, i - 1,
             prev.get(CoreAnnotations.AnswerAnnotation.class),
@@ -376,11 +381,11 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
       }
 
       // 5%, 5 percent
-      else if((PERCENT_WORD_PATTERN.matcher(crt.word()).matches() ||
+      else if ((PERCENT_WORD_PATTERN.matcher(crt.word()).matches() ||
                PERCENT_SYMBOL_PATTERN.matcher(crt.word()).matches()) &&
                prev != null &&
                (prev.get(CoreAnnotations.AnswerAnnotation.class).equals("NUMBER") ||
-                prev.tag().equals("CD"))){
+                "CD".equals(prev.tag()))) {
         crt.set(CoreAnnotations.AnswerAnnotation.class, "PERCENT");
         changeRightToLeft(tokenSequence, i - 1,
             prev.get(CoreAnnotations.AnswerAnnotation.class),
@@ -581,7 +586,13 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
   private static final Pattern AM_PM = Pattern.compile("(a\\.?m\\.?)|(p\\.?m\\.?)", Pattern.CASE_INSENSITIVE);
 
   public static final Pattern CURRENCY_WORD_PATTERN = Pattern.compile("(?:dollar|cent|euro|pound)s?|penny|pence|yen|yuan|won", Pattern.CASE_INSENSITIVE);
-  public static final Pattern CURRENCY_SYMBOL_PATTERN = Pattern.compile("\\$|&#163|\u00A3|\u00A5|#|\u20AC|US\\$|HK\\$|A\\$", Pattern.CASE_INSENSITIVE);
+
+  // pattern matches: dollar, pound sign XML escapes; pound sign, yen sign, euro, won; other country dollars; now omit # for pound
+  // TODO: Delete # as currency.  But doing this involves changing PTBTokenizer currency normalization rules
+  // Code \u0023 '#' was used for pound '£' in the ISO version of ASCII (ISO 646), and this is found in very old materials
+  // e.g., the 1999 Penn Treebank, but we now don't recognize this, as it now doesn't occur and wrongly recognizes
+  // currency whenever someone refers to the #4 country etc.
+  public static final Pattern CURRENCY_SYMBOL_PATTERN = Pattern.compile("\\$|#|&#163;|&pound;|\u00A3|\u00A5|\u20AC|\u20A9|(?:US|HK|A|C|NT|S|NZ)\\$", Pattern.CASE_INSENSITIVE);  // TODO: No longer include archaic # for pound
 
   public static final Pattern ORDINAL_PATTERN = Pattern.compile("(?i)[2-9]?1st|[2-9]?2nd|[2-9]?3rd|1[0-9]th|[2-9]?[04-9]th|100+th|zeroth|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth|thirteenth|fourteenth|fifteenth|sixteenth|seventeenth|eighteenth|nineteenth|twentieth|twenty-first|twenty-second|twenty-third|twenty-fourth|twenty-fifth|twenty-sixth|twenty-seventh|twenty-eighth|twenty-ninth|thirtieth|thirty-first|fortieth|fiftieth|sixtieth|seventieth|eightieth|ninetieth|hundredth|thousandth|millionth");
 
@@ -800,14 +811,12 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
   }
 
   @Override
-  public void printProbsDocument(List<CoreLabel> document) {
-  }
-
-  @Override
   public void serializeClassifier(String serializePath) {
     System.err.print("Serializing classifier to " + serializePath + "...");
     System.err.println("done.");
   }
+
+  public void serializeClassifier(ObjectOutputStream oos) {}
 
   @Override
   public void loadClassifier(ObjectInputStream in, Properties props) throws IOException, ClassCastException, ClassNotFoundException {

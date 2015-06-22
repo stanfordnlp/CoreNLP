@@ -21,7 +21,7 @@ import edu.stanford.nlp.util.IterableIterator;
 
 /**
  * A hierarchical channel based logger. Log messages are arranged hierarchically by depth
- * (e.g. main->tagging->sentence 2) using the startTrack() and endTrack() methods.
+ * (e.g. main-&gt;tagging-&gt;sentence 2) using the startTrack() and endTrack() methods.
  * Furthermore, messages can be flagged with a number of channels, which allow filtering by channel.
  * Log levels are implemented as channels (ERROR, WARNING, etc).
  *
@@ -1030,10 +1030,7 @@ public class Redwood {
                 //(run runnable)
                 try{
                   runnable.run();
-                } catch (Exception e){
-                  e.printStackTrace();
-                  System.exit(1);
-                } catch (AssertionError e) {
+                } catch (Exception | AssertionError e){
                   e.printStackTrace();
                   System.exit(1);
                 }
@@ -1101,7 +1098,7 @@ public class Redwood {
       threadAndRun(title,runnables,Runtime.getRuntime().availableProcessors());
     }
     public static void threadAndRun(Iterable<Runnable> runnables, int numThreads){
-      threadAndRun(""+numThreads, runnables, numThreads);
+      threadAndRun(String.valueOf(numThreads), runnables, numThreads);
     }
     public static void threadAndRun(Iterable<Runnable> runnables){
       threadAndRun(runnables, Execution.threads);
@@ -1110,7 +1107,7 @@ public class Redwood {
     /**
      * Print (to console) a margin with the channels of a given log message.
      * Note that this does not affect File printing.
-     * @param width The width of the margin to print (must be >2)
+     * @param width The width of the margin to print (must be &gt;2)
      */
     public static void printChannels(int width){
       for(LogRecordHandler handler : handlers){

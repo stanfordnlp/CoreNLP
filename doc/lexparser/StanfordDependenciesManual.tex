@@ -3,6 +3,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{latexsym}
 \usepackage{amsmath}
+\usepackage{mathptmx}
 \usepackage{graphicx}
 \usepackage{tikz-dependency}
 \tikzset{/depgraph/.cd,/depgraph/.search also = {/tikz},
@@ -31,11 +32,20 @@
 % Revised for the Stanford Parser v.\ 2.0.5 in March 2013
 % Revised for the Stanford Parser v.\ 3.2 in June 2013
 % Revised for the Stanford Parser v.\ 3.3 in November 2013
-Revised for the Stanford Parser v.\ 3.3 in December 2013
+% Revised for the Stanford Parser v.\ 3.3 in December 2013
+%Revised for the Stanford Parser v.\ 3.5.1 in February 2015
+Revised for the Stanford Parser v.\ 3.5.2 in April 2015
 }
 
 \begin{document}
 \maketitle
+
+Please note that this manual describes the original Stanford 
+Dependencies representation. As of version 3.5.2 the default representation
+output by the Stanford Parser and Stanford CoreNLP is the new Universal Dependencies (UD)
+representation. Take a look at the Universal Dependencies documentation 
+at \textsf{http://universaldependencies.github.com/docs/} for a description of UD 
+relations.
 
 \section{Introduction}
 
@@ -83,10 +93,15 @@ These dependencies map straightforwardly onto a directed graph representation, i
 \caption{\label{bell} Graphical representation of the Stanford Dependencies for the sentence: \emph{Bell, based in Los Angeles, makes and distributes electronic, computer and building products.}}
 \end{figure}
 
-\subparagraph{Document overview:} This manual provides documentation about the set of dependencies defined
-for English.  (There is also a Stanford Dependency representation
-available for Chinese, but it is not further discussed here.)  Section~\ref{def}
-of the manual defines the relations and the taxonomic hierarchy over
+\subparagraph{Document overview:} This manual provides documentation for the set of dependencies defined
+for English.  There is also a Stanford Dependency representation
+available for Chinese, but it is not further discussed here.  Starting
+in 2014, there has been work to extend Stanford Dependencies to be
+generally applicable cross-linguistically. Initial work appeared in
+\citet{marneffe14universal}, and the current proposal for Universal Dependencies (UD) can be found at
+\url{http://universaldependencies.github.io/docs/}. This work is not
+(yet) reflected in this manual or in our software.
+For SD, Section~\ref{def} of the manual defines the grammatical relations and the taxonomic hierarchy over
 them appears in section~\ref{hierarchy}.  This is then followed by a description of the several variant
 dependency representations available, aimed at different use cases
 (section~\ref{types}), some details of the software available for
@@ -103,10 +118,21 @@ relations (depending slightly on the options discussed in section~\ref{types}). 
 
 \noindent\textbf{\emph{acomp}: adjectival complement}\\
 An adjectival complement of a verb is an adjectival phrase which functions as the complement (like an object of the verb).
-\begin{tabbing}
-\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
-\> ``She looks very beautiful'' \>\> \emph{acomp}(looks, beautiful)\\
-\end{tabbing}
+\begin{quote}
+\begin{dependency}[column sep=0.2em, edge unit distance=2.25ex]
+  \begin{deptext}
+    She \& looks \& very \& beautiful \\
+  \end{deptext}
+  \depedge{2}{1}{nsubj}
+  \depedge{2}{4}{acomp}
+  \depedge{4}{3}{advmod}
+\end{dependency}
+\end{quote}
+
+% \begin{tabbing}
+% \hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
+% \> ``She looks very beautiful'' \>\> \emph{acomp}(looks, beautiful)\\
+% \end{tabbing}
 
 \noindent\textbf{\emph{advcl}: adverbial clause modifier}\\
 An adverbial clause modifier of a VP or S is a clause modifying the
@@ -142,7 +168,7 @@ basic dependencies output.
 \noindent\textbf{\emph{amod}: adjectival modifier}\\
 An adjectival modifier of an NP is any adjectival phrase that serves to modify the meaning of the NP.
 \begin{tabbing}
-\hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
+\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
 \> ``Sam eats red meat'' \> \> \emph{amod}(meat, red)\\
 \> ``Sam took out  a 3 million dollar loan'' \> \> \emph{amod}(loan, dollar)\\
 \> ``Sam took out  a \$ 3 million loan'' \> \> \emph{amod}(loan, \$)\\
@@ -167,6 +193,8 @@ these structures.
    \end{deptext}
    \depedge[edge unit distance=0.5ex]{1}{5}{appos}
 \end{dependency}
+
+\medskip
 
 \begin{dependency}
    \begin{deptext}[column sep=0.2em]
@@ -678,6 +706,7 @@ xxxxx\= xxxxx\= xxxxx\= xxxxx\= xxxxx \kill
     \> \> \emph{possessive} - possessive modifier (\emph{'s}) \\
     \> \> \emph{prt} - phrasal verb particle \\
 \> \emph{parataxis} - parataxis \\
+\> \emph{goeswith} - goes with \\
 \> \emph{punct} - punctuation\\
 \> \emph{ref} - referent \\
 \> \emph{sdep} - semantic dependent \\
@@ -691,9 +720,10 @@ Five variants of the typed dependency representation are available in the depend
 
 \subsection{Basic}
 The basic typed dependencies use the dependencies defined in section
-\ref{def}, and form a tree structure.  That is, there are no crossing
-dependencies.  This is also referred to as a \emph{projective} dependency
-structure.  Each word in the sentence (except the head of the sentence) is the dependent of one other word.  For the sentence, ``Bell, a company which is based in LA, makes and distributes computer products.'', the basic typed dependencies will be:
+\ref{def}, and form a tree structure. Each word in the sentence is the
+dependent of exactly one thing, either another word in the sentence or
+the distingushed ``ROOT-0'' token.
+ For the sentence, ``Bell, a company which is based in LA, makes and distributes computer products.'', the basic typed dependencies will be:
 \begin{verbatim}
 nsubj(makes-11, Bell-1)
 det(company-4, a-3)
@@ -723,7 +753,7 @@ will become\\
 
 \bigskip
 
-\noindent Moreover, additional dependencies are considered, even ones that break the tree structure (turning the dependency structure into a \emph{directed graph}) as well as non-projective dependencies. So in the above example, the following relation will be added:\\
+\noindent Moreover, additional dependencies are considered, even ones that break the tree structure (turning the dependency structure into a \emph{directed graph}). So in the above example, the following relation will be added:\\
 \indent \texttt{ref(company-4, which-5)}\\
 That relation does not appear in the basic representation since it creates a cycle with the \texttt{rcmod} and \texttt{nsubjpass} relations. Relations that break the tree structure are the ones taking into account elements from relative clauses and their antecedents (as shown in this example), the controlling (\emph{xsubj}) relations, and the (\emph{pobj}) relation in the case of preposition stranding.
 
@@ -902,7 +932,8 @@ Dependency syntax representations are naturally thought of as ``directed graphs'
 but some of the precise formal properties of Stanford dependencies graphs can
 surprise people, so here we summarize the main graph-theoretic
 properties.
-The unusual properties are all things that occur with relative clauses.
+The unusual properties are all things that occur with relative clauses
+and/or questions.
 A summary of the properties is shown in table~\ref{graph-properties}.
 To cover the collapsed representations, you need what is commonly referred to
 as a labeled, directed multigraph.
@@ -917,10 +948,28 @@ Rooted? & Yes & Yes & Yes & Yes & Yes \\
 Acyclic & Yes & No & No & Yes & Yes \\
 Multigraph & No & No & No & No & Yes \\
 Tree & Yes & No & No & Yes & No \\
-Self-loops? & No & No & No & No & No \\ \hline
+Self-loops? & No & No & No & No & No \\ 
+Projective? & No & No & No & No & No \\ \hline
 \end{tabular}
 \caption{Graph-theoretic properties of different versions of SD graphs.}\label{graph-properties}
 \end{table}
+
+A non-standard property of graphs applicable to dependencies is
+\emph{projectivity}, which arises from the fact that depedency tree
+nodes possess a linear order, given by their order of occurrence in sentences. A
+dependency tree is projective if all arcs are projective, and an arc
+from head $w_i$ to dependent $w_j$ is projective if $w_i$ is an
+ancestor of each word $w_k$ between $w_i$ and
+$w_j$. Put more simply, if you draw the dependencies above a sentence
+written out in the usual way, a non-projective dependency structure
+will have one or more crossing lines. In current versions, no variant of Stanford Dependencies
+always produces projective dependency trees.\footnote
+ {The basic dependencies output by early versions of
+   the Stanford Dependencies converter \emph{did} only produce
+   projective trees. Starting with v.3.2, non-projective dependency
+   trees are produced in appropriate places for questions and relative clauses.}
+However, most trees are projective: Non-projective trees only occur
+occasionally in English, in structure such as questions and relative clauses.
 
 The collapsed and CCprocessed dependencies are not a DAG\@.
 The graphs can contain small cycles between two nodes (only).
@@ -960,7 +1009,7 @@ role in the relative clause.  For example you might get both the arcs
 who-6). You can even get two arcs between the same pair of words,
 though these normally result from bugs in the converter.
 
-All graphs should be connected (if it's not, it's a bug!).
+All graphs should be connected (if there are disconnected graphs, it's a bug!).
 There are no self-loops in the graphs.
 
 
@@ -993,11 +1042,14 @@ parser to specify that this has already been done.) The \texttt{penn}
 option will also give you the context-free phrase structure grammar
 representation of the sentences.
 
+\noindent Note that as of version 3.5.2 the default representation is the new Universal Dependencies representation. 
+Use the \texttt{-originalDependencies} option to obtain original Stanford Dependencies.
+
 \bigskip
 
 \noindent Command line example: \\
 {\hangindent=0.4in
-\raggedright\texttt{java -mx200m edu.stanford.nlp.parser.lexparser.LexicalizedParser -retainTmpSubcategories -outputFormat "penn,typedDependencies" -outputFormatOptions "basicDependencies" englishPCFG.ser.gz file.txt}\\}
+\raggedright\texttt{java -mx200m edu.stanford.nlp.parser.lexparser.LexicalizedParser -retainTmpSubcategories -originalDependencies -outputFormat "penn,typedDependencies" -outputFormatOptions "basicDependencies" englishPCFG.ser.gz file.txt}\\}
 
 \begin{quote}
 \hspace*{-0.375in}%
@@ -1006,6 +1058,8 @@ Java example: \\
 \hspace*{1.5in}"edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz",\\
 \hspace*{1.5in}"-maxLength", "80", "-retainTmpSubcategories"); \\
 TreebankLanguagePack tlp = new PennTreebankLanguagePack(); \\
+// Uncomment the following line to obtain original Stanford Dependencies\\
+// tlp.setGenerateOriginalDependencies(true); \\
 GrammaticalStructureFactory gsf = tlp.grammaticalStructureFactory();}
 
 \bigskip
@@ -1023,7 +1077,7 @@ If you already have Penn treebank-style trees (whether hand-annotated or as outp
 
 \paragraph{Command-line usage.} Use the \texttt{-treeFile} option as shown in the command line example below. The options to get the different types of representation are as follows:
 \begin{tabbing}
-\hspace{.3cm} \= \texttt{-collapsedTree} \= \hspace{.3cm} \= \kill
+\hspace{.3cm} \= \texttt{-originalDependencies} \= \hspace{.3cm} \= \kill
 \> \texttt{-basic} \>\> basic dependencies\\
 \> \texttt{-collapsed} \>\> collapsed dependencies (not necessarily a tree structure)\\
 \> \texttt{-CCprocessed} \>\> collapsed dependencies with propagation of conjunct \\
@@ -1031,7 +1085,9 @@ If you already have Penn treebank-style trees (whether hand-annotated or as outp
 \> \texttt{-collapsedTree} \>\> collapsed dependencies that preserve a tree structure\\
 \> \texttt{-nonCollapsed} \>\> non-collapsed dependencies: basic dependencies as well as\\
 \> 						 \>\> the extra ones which do not preserve a tree structure\\
-\> \texttt{-conllx} \>\> dependencies printed out in CoNLL X (CoNLL 2006) format
+\> \texttt{-conllx} \>\> dependencies printed out in CoNLL X (CoNLL 2006) format \\
+\> \texttt{-originalDependencies} \>\> output the original Stanford Dependencies instead of \\
+\>                                            \>\> the new Universal Dependencies.
 \end{tabbing}
 
 \noindent If you want the non-collapsed version of the dependencies where the basic ones are separated from the extra ones, add the flag \texttt{-extraSep}. This will print the basic dependencies, a separator (======) and the extra dependencies.
@@ -1096,6 +1152,8 @@ like this:
 \texttt{
 // One time setup \\
 TreebankLanguagePack tlp = new PennTreebankLanguagePack(); \\
+// Uncomment the following line to obtain original Stanford Dependencies\\
+// tlp.setGenerateOriginalDependencies(true); \\
 GrammaticalStructureFactory gsf = tlp.grammaticalStructureFactory(); \\
 // For each Tree \\
 Tree parseTree; // assumed to come from a treebank or parser \\
@@ -1130,10 +1188,10 @@ dependencies, but altering their definitions.  This is a separate download.  It 
 \subsubsection*{$\star$ \textbf{Other parsers}}
 
 A number of dependency parsers have now been trained to parse directly
-to the basic Stanford Dependencies, including MaltParser, DeSR, and
-MSTParser.  Several of these parsers distribute models trained for
-Stanford Dependencies parsing, including MaltParser and the Easy First
-Parser.  If desired, these parses can then be postprocessed to the collapsed or CCprocessed representation using the \texttt{-conllxFile} option of \texttt{EnglishGrammaticalStructure}, as discussed above.
+to the basic Stanford Dependencies, including MaltParser, DeSR,
+MSTParser, and Stanford's Neural Network Dependency Parser.  Several of these parsers distribute models trained for
+Stanford Dependencies parsing, including MaltParser, the Easy First
+Parser, and the Stanford Neural Network Dependency Parser.  If desired, these parses can then be postprocessed to the collapsed or CCprocessed representation using the \texttt{-conllxFile} option of \texttt{EnglishGrammaticalStructure}, as discussed above.
 
 Any Penn Treebank constituency parser can be used to produce Stanford
 Dependencies by using our conversion tool to convert the output of other constituency parsers to the Stanford Dependencies representation.  For more information on other parser options, see:
@@ -1145,12 +1203,13 @@ Dependencies by using our conversion tool to convert the output of other constit
 
 The Stanford Dependencies representation was first made available in
 the 2005 version of the Stanford Parser.  Subsequent releases have
-provided some refinements to and corrections of the relations defined
+provided refinements to and corrections of the relations defined
 in the original release.  The initial written presentation was
 \citep{demarneffe06generating}.  A more thorough discussion of the
 motivations behind the design of the representation appears in
 \citep{demarneffe08stanford}.
 
+\begin{sloppypar}
 The SD representation has seen considerable use within the biomedical text
 mining community.  It has been used to give a task relevant evaluation
 scheme for parsers \citep{Clegg07,Pyysalo07} and as a representation
@@ -1167,22 +1226,33 @@ Cross-Domain Parser Evaluation
 Dependencies page: \url{http://nlp.stanford.edu/software\discretionary{}{}{}/stanford-dependencies.shtml},
 but the BioInfer corpus is the main source of gold-standard SD data which is currently available.
 In the recent BioNLP 2009 Shared Task, many of the leading teams built their relation extraction systems over the Stanford Dependency representation \citep{kim09overview}.  It was used by the teams that came 1st, 3rd, 4th, and 5th in Task 1, by the team who came first in Task 2, and by the teams who came 1st and 2nd in Task 3. In the BioNLP 2011 shared task, every team used it \citep{BioNLP11}.
+\end{sloppypar}
 
 The SD representation has also been used in other domains.  It is a common representation for
 extracting opinions, sentiment, and relations
 \citep{Zhuang06cikm,Meena07sentiment,Banko07,Zouaq06tai,Zouaq07tel,chaumartin07knowledge,kessler08icwsm,Haghighi10,Hassan10,Joshi2010,Wu2010,Zouaq10}, as well as specific information (such as event, time or dialogue acts) \citep{Chambers11,McClosky12,Kluwer10}. The tool has been consistently used by several groups in the \textsc{Pascal}/NIST challenges targeting textual entailment \citep{adams-EtAl:2007:WTEP,blake:2007:WTEP,chambers-EtAl:2007:WTEP,harmeling:2007:WTEP,wang-neumann:2007:WTEP,Malakasiotis09,Mehdad09,Shivare2010,Glinos2010,Kouylekov2010,Pakray2011a}. It is also used for a variety of other tasks, such as unsupervised semantic parsing \citep{poon09unsupervised}, coreference resolution, disagreement detection and word sense induction \citep{Chen12,Abbott11,Lau12}, as well as being part of the preprocessing for machine translation systems by several groups \citep{xu09using,genzel10automatically,singh10statistical}.
+The Stanford Dependencies representation
+was also used to evaluate dependency parsers in the 2012 shared task on parsing the web \citep{Petrov12}.
 
 The Stanford dependency representation has also served as a model for
-developing dependency schemes in other languages. Recently schemes
+developing dependency schemes for other languages. The Chinese Stanford
+Dependencies are briefly described in
+\citet{chang-tseng-jurafsky-manning:2009:SSST}. Representations
 based on the Stanford dependency representation have been proposed for
 Finnish \citep{Haverinen2010a,Haverinen2010b}, Thai \citep{Potisuk10},
 Persian \citep{Seraji12}, and French \citep{Maarouf12}. 
-Indeed, there has been increasing interest in defining a
-consistent cross-linguistic set of relations suitable for Stanford
+More recently, there has been increasing interest in defining a
+consistent cross-linguistic set of relations in the style of Stanford
 Dependencies
-\citep{mcdonald-EtAl:2013:Short,tsarfaty:2013:Short}.
-The Stanford Dependencies representation
-was also used to evaluate dependency parsers in the 2012 shared task on parsing the web \citep{Petrov12}.
+\citep{mcdonald-EtAl:2013:Short,tsarfaty:2013:Short}. The authors and
+others initially proposed a reformulation as Universal Stanford
+Dependencies \citep{marneffe14universal}. Further refinement with a
+team of collaborators has led to a new synthesis spanning
+tokenization, morphological features, parts of speech, and
+dependencies, known as Universal Dependencies: 
+\url{http://universaldependencies.github.io/docs/}.  Since version 3.5.2 
+the default representation output by our parser is the Universal Dependencies
+representation.
 
 \section{Recent changes}
 

@@ -5,8 +5,12 @@ import java.util.*;
 import java.util.function.Predicate;
 
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.process.Morphology;
+import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.util.*;
-
 import static edu.stanford.nlp.trees.EnglishGrammaticalRelations.*;
 import static edu.stanford.nlp.trees.GrammaticalRelation.*;
 
@@ -82,7 +86,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    */
   public EnglishGrammaticalStructure(Tree t, Predicate<String> puncFilter, HeadFinder hf, boolean threadSafe) {
     // the tree is normalized (for index and functional tag stripping) inside CoordinationTransformer
-    super(t, EnglishGrammaticalRelations.values(threadSafe), threadSafe ? EnglishGrammaticalRelations.valuesLock() : null, new CoordinationTransformer(hf), hf, puncFilter);
+    super(t, EnglishGrammaticalRelations.values(threadSafe), threadSafe ? EnglishGrammaticalRelations.valuesLock() : null, new CoordinationTransformer(hf), hf, puncFilter, Filters.acceptFilter());
   }
 
   /** Used for postprocessing CoNLL X dependencies */
@@ -117,7 +121,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
 
   @Override
-  protected void correctDependencies(Collection<TypedDependency> list) {
+  protected void correctDependencies(List<TypedDependency> list) {
     if (DEBUG) {
       printListSorted("At correctDependencies:", list);
     }
@@ -145,6 +149,15 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     if (DEBUG) {
       printListSorted("At postProcessDependencies:", list);
     }
+
+    SemanticGraph sg = new SemanticGraph(list);
+    correctWHAttachment(sg);
+    list.clear();
+    list.addAll(sg.typedDependencies());
+    if (DEBUG) {
+      printListSorted("After correcting WH movement", list);
+    }
+
     convertRel(list);
     if (DEBUG) {
       printListSorted("After converting rel:", list);
@@ -244,6 +257,59 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     }
   }
 
+
+  /* Used by correctWHAttachment */
+  private static SemgrexPattern XCOMP_PATTERN = SemgrexPattern.compile("{}=root >xcomp {}=embedded >/^(dep|dobj)$/ {}=wh ?>/([di]obj)/ {}=obj");
+
+  private static Morphology morphology = new Morphology();
+
+  /**
+   * Tries to correct complicated cases of WH-movement in
+   * sentences such as "What does Mary seem to have?" in
+   * which "What" should attach to "have" instead of the
+   * control verb.
+   *
+   * @param sg The Semantic graph to operate on.
+   */
+  private static void correctWHAttachment(SemanticGraph sg) {
+    /* Semgrexes require a graph with a root. */
+    if (sg.getRoots().isEmpty())
+      return;
+
+    SemanticGraph sgCopy = sg.makeSoftCopy();
+    SemgrexMatcher matcher = XCOMP_PATTERN.matcher(sgCopy);
+    while (matcher.findNextMatchingNode()) {
+      IndexedWord root = matcher.getNode("root");
+      IndexedWord embeddedVerb = matcher.getNode("embedded");
+      IndexedWord wh = matcher.getNode("wh");
+      IndexedWord dobj = matcher.getNode("obj");
+
+      /* Check if the object is a WH-word. */
+      if (wh.tag().startsWith("W")) {
+        boolean reattach = false;
+        /* If the control verb already has an object, then
+           we have to reattach th WH-word to the verb in the embedded clause. */
+        if (dobj != null) {
+          reattach = true;
+        } else {
+          /* If the control verb can't have an object, we also have to reattach. */
+          String lemma = morphology.lemma(root.value(), root.tag());
+          if (lemma.matches(EnglishPatterns.NP_V_S_INF_VERBS_REGEX)) {
+            reattach = true;
+          }
+        }
+
+        if (reattach) {
+          SemanticGraphEdge edge = sg.getEdge(root, wh);
+          if (edge != null) {
+            sg.removeEdge(edge);
+            sg.addEdge(embeddedVerb, wh, DIRECT_OBJECT, Double.NEGATIVE_INFINITY, false);
+          }
+        }
+      }
+    }
+  }
+
   /**
    * What we do in this method is look for temporary dependencies of
    * the type "rel".  These occur in sentences such as "I saw the man
@@ -268,7 +334,24 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
           continue;
         }
         if (!prep.gov().equals(rel.gov())) {
-          continue;
+
+          //Try to find a clausal complement with a preposition without an
+          //object. For sentences such as "What am I good at?"
+          boolean hasCompParent = false;
+          for (TypedDependency prep2 : list) {
+            if (prep2.reln() == XCLAUSAL_COMPLEMENT
+                || prep2.reln() == ADJECTIVAL_COMPLEMENT
+                || prep2.reln() == CLAUSAL_COMPLEMENT
+                || prep2.reln() == ROOT) {
+              if (prep.gov().equals(prep2.dep()) && prep2.gov().equals(rel.gov())) {
+                hasCompParent = true;
+                break;
+              }
+            }
+          }
+
+          if ( ! hasCompParent)
+            continue;
         }
 
         // at this point, we have two dependencies as in the Mr. Bush
@@ -454,7 +537,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   /**
    * Does some hard coding to deal with relation in CONJP. For now we deal with:
    * but not, if not, instead of, rather than, but rather GO TO negcc <br>
-   * as well as, not to mention, but also, & GO TO and.
+   * as well as, not to mention, but also, &amp; GO TO and.
    *
    * @param conj The head dependency of the conjunction marker
    * @return A GrammaticalRelation made from a normalized form of that
@@ -703,8 +786,8 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
   /**
    * This method will collapse a referent relation such as follows. e.g.:
-   * "The man that I love ... " ref(man, that) dobj(love, that) -> dobj(love,
-   * man)
+   * "The man that I love &hellip; " ref(man, that) dobj(love, that) -&gt;
+   * dobj(love, man)
    */
   private static void collapseReferent(Collection<TypedDependency> list) {
     // find typed deps of form ref(gov, dep)
@@ -1451,12 +1534,12 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * prep|advmod|dep|amod(gov, mwp[0]) <br/>
    * dep(mpw[0],mwp[1]) <br/>
    * pobj|pcomp(mwp[1], compl) or pobj|pcomp(mwp[0], compl) <br/>
-   * -> prep_mwp[0]_mwp[1](gov, compl) <br/>
+   * -&gt; prep_mwp[0]_mwp[1](gov, compl) <br/>
    *
    * prep|advmod|dep|amod(gov, mwp[1]) <br/>
    * dep(mpw[1],mwp[0]) <br/>
    * pobj|pcomp(mwp[1], compl) or pobj|pcomp(mwp[0], compl) <br/>
-   * -> prep_mwp[0]_mwp[1](gov, compl)
+   * -&gt; prep_mwp[0]_mwp[1](gov, compl)
    * <p/>
    *
    * The collapsing has to be done at once in order to know exactly which node
@@ -1490,7 +1573,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   /**
    * Collapse multiword preposition of the following format:
    * prep|advmod|dep|amod(gov, mwp0) dep(mpw0,mwp1) pobj|pcomp(mwp1, compl) or
-   * pobj|pcomp(mwp0, compl) -> prep_mwp0_mwp1(gov, compl)
+   * pobj|pcomp(mwp0, compl) -&gt; prep_mwp0_mwp1(gov, compl)
    * <p/>
    *
    * @param list List of typedDependencies to work on,
@@ -1606,7 +1689,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
   /**
    * Collapse multi-words preposition of the following format: advmod|prt(gov,
-   * mwp[0]) prep(gov,mwp[1]) pobj|pcomp(mwp[1], compl) ->
+   * mwp[0]) prep(gov,mwp[1]) pobj|pcomp(mwp[1], compl) -&gt;
    * prep_mwp[0]_mwp[1](gov, compl)
    * <p/>
    *
@@ -1714,7 +1797,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * X(mwp0,mwp1) <br/>
    * X(mwp1,mwp2) <br/>
    * pobj|pcomp(mwp2, compl) <br/>
-   * -> prep_mwp[0]_mwp[1]_mwp[2](gov, compl)
+   * -&gt; prep_mwp[0]_mwp[1]_mwp[2](gov, compl)
    * <p/>
    *
    * It also takes flat annotation into account: <br/>
@@ -1722,7 +1805,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * X(mwp0,mwp1) <br/>
    * X(mwp0,mwp2) <br/>
    * pobj|pcomp(mwp0, compl) <br/>
-   * -> prep_mwp[0]_mwp[1]_mwp[2](gov, compl)
+   * -&gt; prep_mwp[0]_mwp[1]_mwp[2](gov, compl)
    * <p/>
    *
    *
@@ -1965,7 +2048,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * flat annotation. This handles e.g., "because of" (PP (IN because) (IN of)
    * ...), "such as" (PP (JJ such) (IN as) ...)
    * <p/>
-   * prep(gov, mwp[1]) dep(mpw[1], mwp[0]) pobj(mwp[1], compl) ->
+   * prep(gov, mwp[1]) dep(mpw[1], mwp[0]) pobj(mwp[1], compl) -&gt;
    * prep_mwp[0]_mwp[1](gov, compl)
    *
    * @param list List of typedDependencies to work on

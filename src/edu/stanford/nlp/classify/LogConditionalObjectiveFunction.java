@@ -856,6 +856,8 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       this.dataWeights = dataWeights;
     } else if (dataset instanceof WeightedDataset<?,?>) {
       this.dataWeights = ((WeightedDataset<L, F>)dataset).getWeights();
+    } else if (dataset instanceof WeightedRVFDataset<?,?>) {
+      this.dataWeights = ((WeightedRVFDataset<L, F>)dataset).getWeights();
     } else {
       this.dataWeights = null;
     }

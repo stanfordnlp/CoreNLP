@@ -119,11 +119,12 @@ public class CoNLLMentionExtractor extends MentionExtractor {
         // generate the dependency graph
         try {
           SemanticGraph deps = SemanticGraphFactory.makeFromTree(tree,
-              SemanticGraphFactory.Mode.COLLAPSED, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, threadSafe);
+              SemanticGraphFactory.Mode.COLLAPSED, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, threadSafe, null, true);
           SemanticGraph basicDeps = SemanticGraphFactory.makeFromTree(tree,
-              SemanticGraphFactory.Mode.BASIC, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, threadSafe);
+              SemanticGraphFactory.Mode.BASIC, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, threadSafe, null, true);
           sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, basicDeps);
           sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, deps);
+          sentence.set(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class, deps);
         } catch(Exception e) {
           logger.log(Level.WARNING, "Exception caught during extraction of Stanford dependencies. Will ignore and continue...", e);
         }
@@ -267,7 +268,7 @@ public class CoNLLMentionExtractor extends MentionExtractor {
         mention.originalSpan = m.get(CoreAnnotations.TokensAnnotation.class);
 
         // Mention dependency is collapsed dependency for sentence
-        mention.dependency = sentences.get(sentIndex).get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+        mention.dependency = sentences.get(sentIndex).get(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class);
 
         allGoldMentions.get(sentIndex).add(mention);
       }

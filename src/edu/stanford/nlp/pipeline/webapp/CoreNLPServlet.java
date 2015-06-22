@@ -139,10 +139,10 @@ public class CoreNLPServlet extends HttpServlet {
       nameByAbbrv.put("pos", "Part-of-Speech");
       nameByAbbrv.put("ner", "Named Entity Recognition");
       nameByAbbrv.put("coref", "Coreference");
-      nameByAbbrv.put("basic_dep", "Basic dependencies");
-      nameByAbbrv.put("collapsed_dep", "Collapsed dependencies");
+      nameByAbbrv.put("basic_dep", "Basic Dependencies");
+      //nameByAbbrv.put("collapsed_dep", "Collapsed dependencies");
       nameByAbbrv.put("collapsed_ccproc_dep",
-          "Collapsed CC-processed dependencies");
+          "Enhanced Dependencies");
       for (Map.Entry<String, String> entry : nameByAbbrv.entrySet()) {
         out.println("<h2>" + entry.getValue() + ":</h2>");
         out.println("<div id=\"" + entry.getKey() + "\" style=\"width:"
@@ -177,6 +177,10 @@ public class CoreNLPServlet extends HttpServlet {
       out.println("<script type=\"text/javascript\">");
       out.println("// <![CDATA[");
       out.println("    bratLocation = \"" + bratLocation + "\";");
+      out.println("    webFontURLs = [\n" +
+                  "        '"+ bratLocation + "/static/fonts/Astloch-Bold.ttf',\n" +
+                  "        '"+ bratLocation + "/static/fonts/PT_Sans-Caption-Web-Regular.ttf',\n" +
+                  "        '"+ bratLocation + "/static/fonts/Liberation_Sans-Regular.ttf'];");
       out.println("// ]]>");
       out.println("</script>");
       
@@ -222,7 +226,7 @@ public class CoreNLPServlet extends HttpServlet {
 
     String escapedXml = StringEscapeUtils.escapeHtml4(output.toString());
     String[] lines = escapedXml.split("\n");
-    out.print("<div>");
+    out.print("<div><pre>");
     for (String line : lines) {
       int numSpaces = 0;
       while (numSpaces < line.length() && line.charAt(numSpaces) == ' ') {
@@ -230,9 +234,9 @@ public class CoreNLPServlet extends HttpServlet {
         ++numSpaces;
       }
       out.print(line.substring(numSpaces));
-      out.print("<br>\n");
+      out.print("\n");
     }
-    out.print("</div>");
+    out.print("</pre></div>");
   }
    
   public void outputXml(PrintWriter out, Annotation annotation) throws IOException {

@@ -13,13 +13,14 @@ import edu.stanford.nlp.trees.Tree;
  * @author John Bauer
  */
 public class SentimentCoreAnnotations {
-  
+
   /**
    * A tree which contains the annotations used for the Sentiment
    * task.  After forwardPropagate has been called, the Tree will have
-   * prediction, etc attached to it.
+   * prediction, etc. attached to it.
    */
-  public static class AnnotatedTree implements CoreAnnotation<Tree> {
+  public static class SentimentAnnotatedTree implements CoreAnnotation<Tree> {
+    @Override
     public Class<Tree> getType() {
       return Tree.class;
     }
@@ -28,9 +29,10 @@ public class SentimentCoreAnnotations {
 
   /**
    * The final label given for a sentence.  Set by the
-   * SentimentAnnotator and used by various forms of text output
+   * SentimentAnnotator and used by various forms of text output.
    */
-  public static class ClassName implements CoreAnnotation<String> {
+  public static class SentimentClass implements CoreAnnotation<String> {
+    @Override
     public Class<String> getType() {
       return String.class;
     }

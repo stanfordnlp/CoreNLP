@@ -2,6 +2,7 @@ package edu.stanford.nlp.util;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasOffset;
 import edu.stanford.nlp.ling.HasWord;
@@ -216,7 +217,7 @@ public class StringUtils {
 
 
   public static String joinWords(Iterable<? extends HasWord> l, String glue) {
-    StringBuilder sb = new StringBuilder();
+    StringBuilder sb = new StringBuilder(l instanceof Collection ? ((Collection) l).size() : 64);
     boolean first = true;
     for (HasWord o : l) {
       if ( ! first) {
@@ -407,6 +408,28 @@ public class StringUtils {
    */
   public static String join(Object[] elements, String glue) {
     return (join(Arrays.asList(elements), glue));
+  }
+
+  /**
+   * Joins an array of elements in a given span.
+   * @param elements The elements to join.
+   * @param start The start index to join from.
+   * @param end The end (non-inclusive) to join until.
+   * @param glue The glue to hold together the elements.
+   * @return The string form of the sub-array, joined on the given glue.
+   */
+  public static String join(Object[] elements, int start, int end, String glue) {
+    StringBuilder b = new StringBuilder(127);
+    boolean isFirst = true;
+    for (int i = start; i < end; ++i) {
+      if (isFirst) {
+        b.append(elements[i].toString());
+        isFirst = false;
+      } else {
+        b.append(glue).append(elements[i].toString());
+      }
+    }
+    return b.toString();
   }
 
   /**
@@ -932,11 +955,10 @@ public class StringUtils {
     if (result.containsKey(PROP)) {
       String file = result.getProperty(PROP);
       result.remove(PROP);
-      Properties toAdd = argsToProperties(new String[]{"-prop", file});
-      for (Enumeration<?> e = toAdd.propertyNames(); e.hasMoreElements(); ) {
-        String key = (String) e.nextElement();
+      Properties toAdd = argsToProperties("-prop", file);
+      for (String key : toAdd.stringPropertyNames()) {
         String val = toAdd.getProperty(key);
-        if (!result.containsKey(key)) {
+        if ( ! result.containsKey(key)) {
           result.setProperty(key, val);
         }
       }
@@ -950,6 +972,7 @@ public class StringUtils {
    * This method reads in properties listed in a file in the format prop=value, one property per line.
    * Although <code>Properties.load(InputStream)</code> exists, I implemented this method to trim the lines,
    * something not implemented in the <code>load()</code> method.
+   *
    * @param filename A properties file to read
    * @return The corresponding Properties object
    */
@@ -959,9 +982,9 @@ public class StringUtils {
       InputStream is = new BufferedInputStream(new FileInputStream(filename));
       result.load(is);
       // trim all values
-      for (Object propKey : result.keySet()){
-        String newVal = result.getProperty((String)propKey);
-        result.setProperty((String)propKey,newVal.trim());
+      for (String propKey : result.stringPropertyNames()){
+        String newVal = result.getProperty(propKey);
+        result.setProperty(propKey,newVal.trim());
       }
       is.close();
       return result;
@@ -2112,5 +2135,75 @@ public class StringUtils {
     String d = Normalizer.normalize(s, Normalizer.Form.NFKD);
     d = diacriticalMarksPattern.matcher(d).replaceAll("");
     return Normalizer.normalize(d, Normalizer.Form.NFKC);
+  }
+
+  /**
+   * Convert a list of labels into a string, by simply joining them with spaces.
+   * @param words The words to join.
+   * @return A string representation of the sentence, tokenized by a single space.
+   */
+  public static String toString(List<CoreLabel> words) {
+    return join(words.stream().map(CoreLabel::word), " ");
+  }
+
+  /**
+   * Convert a CoreMap representing a sentence into a string, by simply joining them with spaces.
+   * @param sentence The sentence to stringify.
+   * @return A string representation of the sentence, tokenized by a single space.
+   */
+  public static String toString(CoreMap sentence) {
+    return toString(sentence.get(CoreAnnotations.TokensAnnotation.class));
+  }
+
+  /** I shamefully stole this from: http://rosettacode.org/wiki/Levenshtein_distance#Java --Gabor */
+  public static int levenshteinDistance(String s1, String s2) {
+    s1 = s1.toLowerCase();
+    s2 = s2.toLowerCase();
+
+    int[] costs = new int[s2.length() + 1];
+    for (int i = 0; i <= s1.length(); i++) {
+      int lastValue = i;
+      for (int j = 0; j <= s2.length(); j++) {
+        if (i == 0)
+          costs[j] = j;
+        else {
+          if (j > 0) {
+            int newValue = costs[j - 1];
+            if (s1.charAt(i - 1) != s2.charAt(j - 1))
+              newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+            costs[j - 1] = lastValue;
+            lastValue = newValue;
+          }
+        }
+      }
+      if (i > 0)
+        costs[s2.length()] = lastValue;
+    }
+    return costs[s2.length()];
+  }
+
+  /** I shamefully stole this from: http://rosettacode.org/wiki/Levenshtein_distance#Java --Gabor */
+  public static <E> int levenshteinDistance(E[] s1, E[] s2) {
+
+    int[] costs = new int[s2.length + 1];
+    for (int i = 0; i <= s1.length; i++) {
+      int lastValue = i;
+      for (int j = 0; j <= s2.length; j++) {
+        if (i == 0)
+          costs[j] = j;
+        else {
+          if (j > 0) {
+            int newValue = costs[j - 1];
+            if (!s1[i - 1].equals(s2[j - 1]))
+              newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+            costs[j - 1] = lastValue;
+            lastValue = newValue;
+          }
+        }
+      }
+      if (i > 0)
+        costs[s2.length] = lastValue;
+    }
+    return costs[s2.length];
   }
 }

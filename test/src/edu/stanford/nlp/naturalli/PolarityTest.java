@@ -44,7 +44,7 @@ public class PolarityTest {
 
   @Test
   public void noneProject() {
-    assertEquals(NaturalLogicRelation.EQUIVALENCE, none.projectLexicalRelation(NaturalLogicRelation.EQUIVALENCE));
+    assertEquals(NaturalLogicRelation.EQUIVALENT, none.projectLexicalRelation(NaturalLogicRelation.EQUIVALENT));
     assertEquals(NaturalLogicRelation.FORWARD_ENTAILMENT, none.projectLexicalRelation(NaturalLogicRelation.FORWARD_ENTAILMENT));
     assertEquals(NaturalLogicRelation.REVERSE_ENTAILMENT, none.projectLexicalRelation(NaturalLogicRelation.REVERSE_ENTAILMENT));
     assertEquals(NaturalLogicRelation.NEGATION, none.projectLexicalRelation(NaturalLogicRelation.NEGATION));
@@ -55,7 +55,7 @@ public class PolarityTest {
 
   @Test
   public void additive_antimultiplicativeProject() {
-    assertEquals(NaturalLogicRelation.EQUIVALENCE, additiveAntiMultiplicative.projectLexicalRelation(NaturalLogicRelation.EQUIVALENCE));
+    assertEquals(NaturalLogicRelation.EQUIVALENT, additiveAntiMultiplicative.projectLexicalRelation(NaturalLogicRelation.EQUIVALENT));
     assertEquals(NaturalLogicRelation.REVERSE_ENTAILMENT, additiveAntiMultiplicative.projectLexicalRelation(NaturalLogicRelation.FORWARD_ENTAILMENT));
     assertEquals(NaturalLogicRelation.FORWARD_ENTAILMENT, additiveAntiMultiplicative.projectLexicalRelation(NaturalLogicRelation.REVERSE_ENTAILMENT));
     assertEquals(NaturalLogicRelation.COVER, additiveAntiMultiplicative.projectLexicalRelation(NaturalLogicRelation.NEGATION));
@@ -66,7 +66,7 @@ public class PolarityTest {
 
   @Test
   public void multiplicative_antimultiplicativeProject() {
-    assertEquals(NaturalLogicRelation.EQUIVALENCE, multiplicativeAntiMultiplicative.projectLexicalRelation(NaturalLogicRelation.EQUIVALENCE));
+    assertEquals(NaturalLogicRelation.EQUIVALENT, multiplicativeAntiMultiplicative.projectLexicalRelation(NaturalLogicRelation.EQUIVALENT));
     assertEquals(NaturalLogicRelation.REVERSE_ENTAILMENT, multiplicativeAntiMultiplicative.projectLexicalRelation(NaturalLogicRelation.FORWARD_ENTAILMENT));
     assertEquals(NaturalLogicRelation.FORWARD_ENTAILMENT, multiplicativeAntiMultiplicative.projectLexicalRelation(NaturalLogicRelation.REVERSE_ENTAILMENT));
     assertEquals(NaturalLogicRelation.INDEPENDENCE, multiplicativeAntiMultiplicative.projectLexicalRelation(NaturalLogicRelation.NEGATION));
@@ -77,7 +77,7 @@ public class PolarityTest {
 
   @Test
   public void additiveProject() {
-    assertEquals(NaturalLogicRelation.EQUIVALENCE, additive.projectLexicalRelation(NaturalLogicRelation.EQUIVALENCE));
+    assertEquals(NaturalLogicRelation.EQUIVALENT, additive.projectLexicalRelation(NaturalLogicRelation.EQUIVALENT));
     assertEquals(NaturalLogicRelation.FORWARD_ENTAILMENT, additive.projectLexicalRelation(NaturalLogicRelation.FORWARD_ENTAILMENT));
     assertEquals(NaturalLogicRelation.REVERSE_ENTAILMENT, additive.projectLexicalRelation(NaturalLogicRelation.REVERSE_ENTAILMENT));
     assertEquals(NaturalLogicRelation.COVER, additive.projectLexicalRelation(NaturalLogicRelation.NEGATION));
@@ -88,7 +88,7 @@ public class PolarityTest {
 
   @Test
   public void antimultiplicativeProject() {
-    assertEquals(NaturalLogicRelation.EQUIVALENCE, antimultiplicative.projectLexicalRelation(NaturalLogicRelation.EQUIVALENCE));
+    assertEquals(NaturalLogicRelation.EQUIVALENT, antimultiplicative.projectLexicalRelation(NaturalLogicRelation.EQUIVALENT));
     assertEquals(NaturalLogicRelation.REVERSE_ENTAILMENT, antimultiplicative.projectLexicalRelation(NaturalLogicRelation.FORWARD_ENTAILMENT));
     assertEquals(NaturalLogicRelation.FORWARD_ENTAILMENT, antimultiplicative.projectLexicalRelation(NaturalLogicRelation.REVERSE_ENTAILMENT));
     assertEquals(NaturalLogicRelation.COVER, antimultiplicative.projectLexicalRelation(NaturalLogicRelation.NEGATION));
@@ -99,21 +99,21 @@ public class PolarityTest {
 
   @Test
   public void multiplicativeTruth() {
-    assertEquals(true, multiplicative.maintainsEntailment(NaturalLogicRelation.EQUIVALENCE));
-    assertEquals(true, multiplicative.maintainsEntailment(NaturalLogicRelation.FORWARD_ENTAILMENT));
-    assertEquals(false, multiplicative.maintainsEntailment(NaturalLogicRelation.REVERSE_ENTAILMENT));
-    assertEquals(false, multiplicative.maintainsEntailment(NaturalLogicRelation.NEGATION));
-    assertEquals(false, multiplicative.maintainsEntailment(NaturalLogicRelation.ALTERNATION));
-    assertEquals(false, multiplicative.maintainsEntailment(NaturalLogicRelation.COVER));
-    assertEquals(false, multiplicative.maintainsEntailment(NaturalLogicRelation.INDEPENDENCE));
+    assertEquals(true, multiplicative.maintainsTruth(NaturalLogicRelation.EQUIVALENT));
+    assertEquals(true, multiplicative.maintainsTruth(NaturalLogicRelation.FORWARD_ENTAILMENT));
+    assertEquals(false, multiplicative.maintainsTruth(NaturalLogicRelation.REVERSE_ENTAILMENT));
+    assertEquals(false, multiplicative.maintainsTruth(NaturalLogicRelation.NEGATION));
+    assertEquals(false, multiplicative.maintainsTruth(NaturalLogicRelation.ALTERNATION));
+    assertEquals(false, multiplicative.maintainsTruth(NaturalLogicRelation.COVER));
+    assertEquals(false, multiplicative.maintainsTruth(NaturalLogicRelation.INDEPENDENCE));
 
-    assertEquals(false, multiplicative.introducesNegation(NaturalLogicRelation.EQUIVALENCE));
-    assertEquals(false, multiplicative.introducesNegation(NaturalLogicRelation.FORWARD_ENTAILMENT));
-    assertEquals(false, multiplicative.introducesNegation(NaturalLogicRelation.REVERSE_ENTAILMENT));
-    assertEquals(true, multiplicative.introducesNegation(NaturalLogicRelation.NEGATION));
-    assertEquals(true, multiplicative.introducesNegation(NaturalLogicRelation.ALTERNATION));
-    assertEquals(false, multiplicative.introducesNegation(NaturalLogicRelation.COVER));
-    assertEquals(false, multiplicative.introducesNegation(NaturalLogicRelation.INDEPENDENCE));
+    assertEquals(false, multiplicative.negatesTruth(NaturalLogicRelation.EQUIVALENT));
+    assertEquals(false, multiplicative.negatesTruth(NaturalLogicRelation.FORWARD_ENTAILMENT));
+    assertEquals(false, multiplicative.negatesTruth(NaturalLogicRelation.REVERSE_ENTAILMENT));
+    assertEquals(true, multiplicative.negatesTruth(NaturalLogicRelation.NEGATION));
+    assertEquals(true, multiplicative.negatesTruth(NaturalLogicRelation.ALTERNATION));
+    assertEquals(false, multiplicative.negatesTruth(NaturalLogicRelation.COVER));
+    assertEquals(false, multiplicative.negatesTruth(NaturalLogicRelation.INDEPENDENCE));
   }
 
   @Test

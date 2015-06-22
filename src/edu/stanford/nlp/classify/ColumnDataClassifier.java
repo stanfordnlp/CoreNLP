@@ -65,13 +65,17 @@ import java.util.regex.PatternSyntaxException;
  * features will interpret these variables as numbers, but
  * the code is mainly oriented towards generating features for string
  * classification.  To designate a real-valued feature, use the realValued
- * option described below. The classifier can be either a Bernoulli Naive
- * Bayes model or a loglinear discriminative (i.e., maxent) model.
+ * option described below. The classifier by default is a maxent classifier
+ * (also known as a softmax classifier or a discriminative loglinear classifier;
+ * equivalent to multiclass logistic regression apart from a slightly different
+ * symmetric parameterization. It also implements a Bernoulli Naive
+ * Bayes model and can implement an SVM by an external call to SVMlight.
  * <p/>
  * You can also use ColumnDataClassifier programmatically, where its main
  * usefulness beyond simply building your own LinearClassifier is that it
  * provides easy conversion of data items into features, using the same
- * properties as the command-line version.
+ * properties as the command-line version. You can see example of usage in
+ * the class {@link edu.stanford.nlp.classify.demo.ClassifierDemo}.
  * <p/>
  * Input files are expected to
  * be one data item per line with two or more columns indicating the class
@@ -127,7 +131,8 @@ import java.util.regex.PatternSyntaxException;
  * The following properties are recognized:
  * </p>
  * <table border="1">
- * <tr><td><b>Property Name</b></td><td><b>Type</b></td><td><b>Default Value</b></td><td><b>Description</b></td><td><b>FeatName</b></td></tr>
+ *   <caption>Properties for ColumnDataClassifier</caption>
+ * <tr><th><b>Property Name</b></th><th><b>Type</b></th><th><b>Default Value</b></th><th><b>Description</b></th><th><b>FeatName</b></th></tr>
  * <tr><td> loadClassifier </td><td>String</td><td>n/a</td><td>Path of serialized classifier file to load</td></tr>
  * <tr><td> serializeTo</td><td>String</td><td>n/a</td><td>Path to serialize classifier to</td></tr>
  * <tr><td> printTo</td><td>String</td><td>n/a</td><td>Path to print a text representation of the linear classifier to</td></tr>
@@ -232,7 +237,7 @@ import java.util.regex.PatternSyntaxException;
  *
  * @author Christopher Manning
  * @author Anna Rafferty
- * @author Angel Chang (add options for using l1reg)
+ * @author Angel Chang (added options for using l1reg)
  */
 public class ColumnDataClassifier {
 
@@ -555,7 +560,7 @@ public class ColumnDataClassifier {
   /**
    * Write out an answer, and update statistics.
    */
-  private void writeAnswer(String[] strs, String clAnswer, Distribution<String> cntr, Counter<String> contingency, Classifier<String,String> c, double sim) {
+  private void writeAnswer(String[] strs, String clAnswer, Distribution<String> cntr) {
     String goldAnswer = globalFlags.goldAnswerColumn < strs.length ? strs[globalFlags.goldAnswerColumn]: "";
     String printedText = "";
     if (globalFlags.displayedColumn >= 0) {
@@ -767,7 +772,7 @@ public class ColumnDataClassifier {
       if (globalFlags.csvOutput != null) {
         System.out.print(formatCsv(globalFlags.csvOutput, example, answer));
       } else {
-        writeAnswer(example, answer, dist, contingency, cl, sim);
+        writeAnswer(example, answer, dist);
       }
     }
     updatePerformanceStatistics(example, answer, dist, contingency, cl, sim);
@@ -1585,8 +1590,7 @@ public class ColumnDataClassifier {
       myFlags[0] = new Flags();  // initialize zero column flags used for global flags; it can't be null
     }
 
-    for (Enumeration<?> e = props.propertyNames(); e.hasMoreElements();) {
-      String key = (String) e.nextElement();
+    for (String key : props.stringPropertyNames()) {
       String val = props.getProperty(key);
 
       int col = 0;  // the default (first after class)

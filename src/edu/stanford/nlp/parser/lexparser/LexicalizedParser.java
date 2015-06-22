@@ -323,9 +323,11 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    */
   public List<Tree> parseMultiple(final List<? extends List<? extends HasWord>> sentences, final int nthreads) {
     MulticoreWrapper<List<? extends HasWord>, Tree> wrapper = new MulticoreWrapper<List<? extends HasWord>, Tree>(nthreads, new ThreadsafeProcessor<List<? extends HasWord>, Tree>() {
+        @Override
         public Tree process(List<? extends HasWord> sentence) {
           return parse(sentence);
         }
+        @Override
         public ThreadsafeProcessor<List<? extends HasWord>, Tree> newInstance() {
           return this;
         }
@@ -363,6 +365,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
     }
   }
 
+  @Override
   public List<Eval> getExtraEvals() {
     if (reranker != null) {
       return reranker.getEvals();
@@ -372,6 +375,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
   }
 
 
+  @Override
   public List<ParserQueryEval> getParserQueryEvals() {
     return Collections.emptyList();
   }
@@ -595,7 +599,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
   public static LexicalizedParser getParserFromSerializedFile(String serializedFileOrUrl) {
     try {
       Timing tim = new Timing();
-      System.err.print("Loading parser from serialized file " + serializedFileOrUrl + " ...");
+      System.err.print("Loading parser from serialized file " + serializedFileOrUrl + " ... ");
       ObjectInputStream in = IOUtils.readStreamFromString(serializedFileOrUrl);
       LexicalizedParser pd = loadModel(in);
 
@@ -646,6 +650,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
     return buildTrainTransformer(op, binarizer);
   }
 
+  // todo [cdm2015]: This method should be used in TreeAnnotatorAndBinarizer#getAnnotatedBinaryTreebankFromTreebank and moved to that class
   public static CompositeTreeTransformer buildTrainTransformer(Options op, TreeAnnotatorAndBinarizer binarizer) {
     TreebankLangParserParams tlpParams = op.tlpParams;
     TreebankLanguagePack tlp = tlpParams.treebankLanguagePack();
@@ -670,8 +675,10 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
     return trainTransformer;
   }
 
-  /** @return a pair of binaryTrainTreebank,binaryTuneTreebank.
+  /** @return A triple of binaryTrainTreebank, binarySecondaryTrainTreebank, binaryTuneTreebank.
    */
+  @SuppressWarnings("UnusedDeclaration")
+  // todo [cdm2015]: This method should be difference-resolved with TreeAnnotatorAndBinarizer#getAnnotatedBinaryTreebankFromTreebank and then deleted
   public static Triple<Treebank, Treebank, Treebank> getAnnotatedBinaryTreebankFromTreebank(Treebank trainTreebank,
       Treebank secondaryTreebank,
       Treebank tuneTreebank,
@@ -753,7 +760,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
       binarizer.dumpStats();
     }
 
-    return new Triple<Treebank, Treebank, Treebank>(trainTreebank, secondaryTreebank, tuneTreebank);
+    return new Triple<>(trainTreebank, secondaryTreebank, tuneTreebank);
   }
 
   private static void removeDeleteSplittersFromSplitters(TreebankLanguagePack tlp, Options op) {
@@ -988,6 +995,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    *              {"-outputFormat", "typedDependencies", "-maxLength", "70"}
    * @throws IllegalArgumentException If an unknown flag is passed in
    */
+  @Override
   public void setOptionFlags(String... flags) {
     op.setOptions(flags);
   }
@@ -1014,7 +1022,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    *   </li>
    *
    *   <li> <b>Parse one or more files, given a serialized grammar and a list of files</b>
-   *    <code>java -mx512m edu.stanford.nlp.parser.lexparser.LexicalizedParser [-v] serializedGrammarPath filename [filename] ...</code>
+   *    <code>java -mx512m edu.stanford.nlp.parser.lexparser.LexicalizedParser [-v] serializedGrammarPath filename [filename]*</code>
    *   </li>
    *
    *   <li> <b>Test and report scores for a serialized grammar on trees in an output directory</b>
@@ -1032,22 +1040,26 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    * most current treebanks).  It can be specified like a range of pages to be
    * printed, for instance as <code>200-2199</code> or
    * <code>1-300,500-725,9000</code> or just as <code>1</code> (if all your
-   * trees are in a single file, just give a dummy argument such as
-   * <code>0</code> or <code>1</code>).
-   * The parser can write a grammar as either a serialized Java object file
-   * or in a text format (or as both), specified with the following options:
+   * trees are in a single file, either omit this parameter or just give a dummy
+   * argument such as {@code 0}).
+   * If the filename to parse is "-" then the parser parses from stdin.
+   * If no files are supplied to parse, then a hardwired sentence
+   * is parsed.
    *
    * <p>
-   * <code>java edu.stanford.nlp.parser.lexparser.LexicalizedParser
+   * The parser can write a grammar as either a serialized Java object file
+   * or in a text format (or as both), specified with the following options:
+   * <blockquote><code>
+   * java edu.stanford.nlp.parser.lexparser.LexicalizedParser
    * [-v] -train
    * trainFilesPath [fileRange] [-saveToSerializedFile grammarPath]
-   * [-saveToTextFile grammarPath]</code><p>
-   * If no files are supplied to parse, then a hardwired sentence
-   * is parsed. <p>
+   * [-saveToTextFile grammarPath]
+   * </code></blockquote>
    *
-   * In the same position as the verbose flag (<code>-v</code>), many other
+   * <p>
+   * In the same position as the verbose flag ({@code -v}), many other
    * options can be specified.  The most useful to an end user are:
-   * <UL>
+   * <ul>
    * <LI><code>-tLPP class</code> Specify a different
    * TreebankLangParserParams, for when using a different language or
    * treebank (the default is English Penn Treebank). <i>This option MUST occur
@@ -1166,7 +1178,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    * can use multiple threads.  This option tells the parser how many
    * threads to use.  A negative number indicates to use as many
    * threads as the machine has cores.
-   * </UL>
+   * </ul>
    * See also the package documentation for more details and examples of use.
    *
    * @param args Command line arguments, as above
@@ -1321,9 +1333,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
       } else {
         int oldIndex = argIndex;
         argIndex = op.setOptionOrWarn(args, argIndex);
-        for (int i = oldIndex; i < argIndex; i++) {
-          optionArgs.add(args[i]);
-        }
+        optionArgs.addAll(Arrays.asList(args).subList(oldIndex, argIndex));
       }
     } // end while loop through arguments
 

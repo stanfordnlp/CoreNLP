@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import edu.stanford.nlp.international.Languages;
-import edu.stanford.nlp.international.Languages.Language;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -44,7 +43,7 @@ public class RuleBranchingFactor {
     String nl = System.getProperty("line.separator");
     sb.append(String.format("Usage: java %s [OPTS] tree_file%s%s",CountTrees.class.getName(),nl,nl));
     sb.append("Options:\n");
-    sb.append("  -l lang    : Select language settings from " + Languages.listOfLanguages()).append(nl);
+    sb.append("  -l lang    : Select language settings from " + Language.langList).append(nl);
     sb.append("  -e enc     : Encoding.").append(nl);
     usage = sb.toString();
   }
@@ -69,7 +68,7 @@ public class RuleBranchingFactor {
       System.exit(-1);
     }
     Language language = PropertiesUtils.get(options, "l", Language.English, Language.class);
-    TreebankLangParserParams tlpp = Languages.getLanguageParams(language);
+    TreebankLangParserParams tlpp = language.params;
     String encoding = options.getProperty("e", "UTF-8");
     tlpp.setInputEncoding(encoding);
     tlpp.setOutputEncoding(encoding);

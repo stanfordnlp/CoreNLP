@@ -66,7 +66,11 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
 
 <xsl:template match="root/document/sentences/sentence">
   <xsl:param name="position" select="'0'"/>
-  <i><b>Sentence #<xsl:value-of select="$position"/></b></i>
+  <p><i><b>Sentence #<xsl:value-of select="$position"/></b></i>
+  <xsl:if test="@sentiment">
+        <xsl:text> Sentiment: </xsl:text><xsl:value-of select="@sentiment"/>
+  </xsl:if>
+  </p>
 
   <p>
   <i>Tokens</i><br/>
@@ -88,16 +92,7 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
   </p>
 
   <p>
-  <i>Collapsed dependencies</i>
-  <ul>
-  <xsl:for-each select="dependencies[@type='collapsed-dependencies']">
-    <xsl:apply-templates select="dep"/>
-  </xsl:for-each>
-  </ul>
-  </p>
-
-  <p>
-  <i>Collapsed dependencies with CC processed</i>
+  <i>Enhanced dependencies</i>
   <ul>
   <xsl:for-each select="dependencies[@type='collapsed-ccprocessed-dependencies']">
     <xsl:apply-templates select="dep"/>
@@ -118,6 +113,7 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
     <th>NER</th>
     <th>Normalized NER</th>
     <th>Speaker</th>
+    <th>Sentiment</th>
   </tr>
   <xsl:for-each select="token">
     <tr>
@@ -130,6 +126,7 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
       <td><xsl:value-of select="NER"/></td>
       <td><xsl:value-of select="NormalizedNER"/></td>
       <td><xsl:value-of select="Speaker"/></td>
+      <td><xsl:value-of select="sentiment"/></td>
     </tr>
   </xsl:for-each>
   </table>

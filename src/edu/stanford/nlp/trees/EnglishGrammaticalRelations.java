@@ -27,6 +27,8 @@
 package edu.stanford.nlp.trees;
 
 import static edu.stanford.nlp.trees.EnglishPatterns.*;
+
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
 import edu.stanford.nlp.util.Generics;
 
@@ -720,8 +722,12 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation RELATIVE =
     new GrammaticalRelation(Language.English, "rel", "relative",
-        COMPLEMENT, "SBAR", tregexCompiler,
-            "SBAR < (WHNP=target !< WRB) < (S < NP < (VP [ < SBAR | <+(VP) (PP <- IN|TO) | < (S < (VP < TO)) ] ))");
+        COMPLEMENT, "SBAR|SBARQ", tregexCompiler,
+            "SBAR < (WHNP=target !< WRB) < (S < NP < (VP [ < SBAR | <+(VP) (PP <- IN|TO) | < (S < (VP < TO)) ] ))",
+
+            // Rule for copular Wh-questions, e.g. "What am I good at?"
+            "SBARQ < (WHNP=target !< WRB !<# (/^NN/ < " + timeWordRegex + ")) <+(SQ|SINV) (/^(?:VB|AUX)/ < " + copularWordRegex + " !$++ VP)");
+
 
   /**
    * The "referent" grammatical relation.  A
@@ -766,8 +772,10 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation ADJECTIVAL_COMPLEMENT =
     new GrammaticalRelation(Language.English, "acomp", "adjectival complement",
-        COMPLEMENT, "VP", tregexCompiler,
-            "VP [ < ADJP=target | ( < (/^VB/ [ ( < " + clausalComplementRegex + " $++ VP=target ) | $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S)) ] ) !$-- (/^VB/ < " + copularWordRegex + " )) ]");
+        COMPLEMENT, "VP|SQ", tregexCompiler,
+            "VP [ < ADJP=target | ( < (/^VB/ [ ( < " + clausalComplementRegex + " $++ VP=target ) | $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S)) ] ) !$-- (/^VB/ < " + copularWordRegex + " )) ]",
+            //Questions like "What am I good at?" with the copula being the head
+            "SQ < (/^VB/ < " + copularWordRegex + " $++ ADJP=target !$++ VP)");
 
 
   /**
@@ -1567,7 +1575,7 @@ public class EnglishGrammaticalRelations {
   // GrammaticalRelation objects
   public static final Map<String, GrammaticalRelation> shortNameToGRel = new ConcurrentHashMap<String, GrammaticalRelation>();
   static {
-    for (GrammaticalRelation gr : values()) {
+    for (GrammaticalRelation gr : values(true)) {
       shortNameToGRel.put(gr.toString().toLowerCase(), gr);
     }
   }
@@ -1703,7 +1711,7 @@ public class EnglishGrammaticalRelations {
    * @return The EnglishGrammaticalRelation with that name
    */
   public static GrammaticalRelation valueOf(String s) {
-    return GrammaticalRelation.valueOf(s, values);
+    return GrammaticalRelation.valueOf(s, synchronizedValues);
 
 //    // TODO does this need to be changed?
 //    // modification NOTE: do not commit until go-ahead

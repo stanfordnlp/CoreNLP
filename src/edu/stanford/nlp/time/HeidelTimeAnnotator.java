@@ -59,12 +59,12 @@ public class HeidelTimeAnnotator implements Annotator {
 
   public HeidelTimeAnnotator(String name, Properties props) {
     String path = props.getProperty(HEIDELTIME_PATH_PROPERTY,
-                                    System.getProperty("heideltime",
-                                                       DEFAULT_PATH));
+            System.getProperty("heideltime",
+                    DEFAULT_PATH));
     this.heideltimePath = new File(path);
 
     this.outputResults =
-      Boolean.valueOf(props.getProperty(HEIDELTIME_OUTPUT_RESULTS, "false"));
+            Boolean.valueOf(props.getProperty(HEIDELTIME_OUTPUT_RESULTS, "false"));
   }
 
   @Override
@@ -108,6 +108,7 @@ public class HeidelTimeAnnotator implements Annotator {
     ArrayList<String> args = new ArrayList<String>();
     args.add("java");
     args.add("-jar"); args.add(this.heideltimePath.getPath() + "/heideltime.jar");
+    args.add("-c"); args.add(this.heideltimePath.getPath()+"/config.props");
     args.add("-t"); args.add("NEWS");
     if(pubDate != null){
       args.add("-dct"); args.add(pubDate);
@@ -133,7 +134,7 @@ public class HeidelTimeAnnotator implements Annotator {
       outputXML = XMLUtils.parseElement(output);
     } catch (Exception ex) {
       throw new RuntimeException(String.format("error:\n%s\ninput:\n%s\noutput:\n%s",
-      		ex, IOUtils.slurpFile(inputFile), output), ex);
+              ex, IOUtils.slurpFile(inputFile), output), ex);
     }
     inputFile.delete();
 
@@ -147,35 +148,37 @@ public class HeidelTimeAnnotator implements Annotator {
     // align Timex annotations to sentences
     int timexIndex = 0;
     for (CoreMap sentence: document.get(CoreAnnotations.SentencesAnnotation.class)) {
-    	int sentBegin = beginOffset(sentence);
-    	int sentEnd = endOffset(sentence);
+      int sentBegin = beginOffset(sentence);
+      int sentEnd = endOffset(sentence);
 
-    	// skip times before the sentence
-    	while (timexIndex < timexAnns.size() && beginOffset(timexAnns.get(timexIndex)) < sentBegin) {
-    		++timexIndex;
-    	}
+      // skip times before the sentence
+      while (timexIndex < timexAnns.size() && beginOffset(timexAnns.get(timexIndex)) < sentBegin) {
+        ++timexIndex;
+      }
 
-    	// determine times within the sentence
-    	int sublistBegin = timexIndex;
-    	int sublistEnd = timexIndex;
-    	while (timexIndex < timexAnns.size() &&
-    			   sentBegin <= beginOffset(timexAnns.get(timexIndex)) &&
-    			   endOffset(timexAnns.get(timexIndex)) <= sentEnd) {
-    		++sublistEnd;
-    		++timexIndex;
-    	}
+      // determine times within the sentence
+      int sublistBegin = timexIndex;
+      int sublistEnd = timexIndex;
+      while (timexIndex < timexAnns.size() &&
+              sentBegin <= beginOffset(timexAnns.get(timexIndex)) &&
+              endOffset(timexAnns.get(timexIndex)) <= sentEnd) {
+        ++sublistEnd;
+        ++timexIndex;
+      }
 
-    	// set the sentence timexes
-    	sentence.set(TimeAnnotations.TimexAnnotations.class, timexAnns.subList(sublistBegin, sublistEnd));
+      // set the sentence timexes
+      sentence.set(TimeAnnotations.TimexAnnotations.class, timexAnns.subList(sublistBegin, sublistEnd));
     }
+
   }
 
+
   private static int beginOffset(CoreMap ann) {
-  	return ann.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+    return ann.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
   }
 
   private static int endOffset(CoreMap ann) {
-  	return ann.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+    return ann.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
   }
 
   private static List<CoreMap> toTimexCoreMaps(Element docElem, CoreMap originalDocument) {
@@ -261,4 +264,5 @@ public class HeidelTimeAnnotator implements Annotator {
   public Set<Requirement> requirementsSatisfied() {
     return Collections.singleton(HEIDELTIME_REQUIREMENT);
   }
+
 }

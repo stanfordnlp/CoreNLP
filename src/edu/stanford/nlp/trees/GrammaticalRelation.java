@@ -26,7 +26,7 @@
 
 package edu.stanford.nlp.trees;
 
-import edu.stanford.nlp.international.Languages;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
@@ -37,7 +37,6 @@ import edu.stanford.nlp.util.StringUtils;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.lang.ref.SoftReference;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -170,6 +169,21 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     return null;
   }
 
+  /**
+   * Returns the GrammaticalRelation having the given string
+   * representation (e.g. "nsubj"), or null if no such is found.
+   *
+   * @param s The short name of the GrammaticalRelation
+   * @param map The map from string to GrammaticalRelation
+   * @return The GrammaticalRelation with that name
+   */
+  public static GrammaticalRelation valueOf(String s, Map<String, GrammaticalRelation> map) {
+    if (map.containsKey(s)) {
+      return map.get(s);
+    }
+    return null;
+  }
+
   /** Convert from a String representation of a GrammaticalRelation to a
    *  GrammaticalRelation.  Where possible, you should avoid using this
    *  method and simply work with true GrammaticalRelations rather than
@@ -184,7 +198,10 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
    *  @return The grammatical relation represented by this String
    */
   public static GrammaticalRelation valueOf(Language language, String s) {
-    GrammaticalRelation reln = (stringsToRelations.get(language) != null ? valueOf(s, stringsToRelations.get(language).values()) : null);
+    GrammaticalRelation reln;
+    synchronized (stringsToRelations) {
+      reln = (stringsToRelations.get(language) != null ? valueOf(s, stringsToRelations.get(language)) : null);
+    }
     if (reln == null) {
       // TODO this breaks the hierarchical structure of the classes,
       //      but it makes English relations that much likelier to work.
@@ -214,43 +231,8 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     return reln;
   }
 
-  private static Map<String, SoftReference<GrammaticalRelation>> valueOfCache = new HashMap<String, SoftReference<GrammaticalRelation>>();
-
-  public static GrammaticalRelation valueOf(String s, Languages.Language language) {
-    GrammaticalRelation value = null;
-    SoftReference<GrammaticalRelation> possiblyCachedValue = valueOfCache.get(s);
-    if (possiblyCachedValue != null) { value = possiblyCachedValue.get(); }
-    if (value == null) {  // TODO(gabor) we have the language conversion going on again...
-      Language depLanguage = Language.Any;
-      switch (language) {
-        case Arabic:
-          break;
-        case Chinese:
-          depLanguage = Language.Chinese;
-          break;
-        case English:
-          depLanguage = Language.English;
-          break;
-        case German:
-          break;
-        case French:
-          break;
-        case Hebrew:
-          break;
-        case Spanish:
-          break;
-        case Unknown:
-          depLanguage = Language.Any;
-          break;
-      }
-      value = valueOf(depLanguage, s);
-      valueOfCache.put(s, new SoftReference<>(value));
-    }
-    return value;
-  }
-
   public static GrammaticalRelation valueOf(String s) {
-    return valueOf(s, Languages.Language.English);
+    return valueOf(Language.Any, s);
   }
 
   /**
@@ -264,10 +246,6 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
   public boolean isFromString() {
     return longName == null;
   }
-
-
-  public static enum Language { Any, English, Chinese }
-
 
   /* Non-static stuff */
   private final Language language;
@@ -319,12 +297,15 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
       }
     }
 
-    Map<String, GrammaticalRelation> sToR = stringsToRelations.get(language);
-    if (sToR == null) {
-      sToR = Generics.newHashMap();
-      stringsToRelations.put(language, sToR);
+    GrammaticalRelation previous;
+    synchronized (stringsToRelations) {
+      Map<String, GrammaticalRelation> sToR = stringsToRelations.get(language);
+      if (sToR == null) {
+        sToR = Generics.newHashMap();
+        stringsToRelations.put(language, sToR);
+      }
+      previous = sToR.put(toString(), this);
     }
-    GrammaticalRelation previous = sToR.put(toString(), this);
     if (previous != null) {
       if (!previous.isFromString() && !isFromString()) {
         throw new IllegalArgumentException("There is already a relation named " + toString() + '!');
@@ -439,7 +420,8 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     if (specific == null) {
       return shortName;
     } else {
-      return shortName + '_' + specific;
+      char sep = language == Language.UniversalEnglish ? ':' : '_';
+      return shortName + sep + specific;
     }
   }
 
@@ -498,7 +480,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     final GrammaticalRelation gr = (GrammaticalRelation) o;
     // == okay for language as enum!
     // TODO(gabor) perhaps Language.Any shouldn't be equal to any language? This is a bit of a hack around some dependencies caring about language and others not.
-    return (this.language == Language.Any || gr.language == Language.Any || this.language == gr.language) &&
+    return (this.language.compatibleWith(gr.language)) &&
              this.shortName.equals(gr.shortName) &&
              (this.specific == gr.specific ||
               (this.specific != null && this.specific.equals(gr.specific)));
@@ -528,18 +510,11 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     return shortName;
   }
 
-  // TODO(gabor) this is nontrivially brittle. I guess in the long term we should only have one "Language" enum?
   /**
    * Get the language of the grammatical relation.
    */
-  public Languages.Language getLanguage() {
-    switch (this.language) {
-      case Any: return Languages.Language.Unknown;
-      case English: return Languages.Language.English;
-      case Chinese: return Languages.Language.Chinese;
-      default:
-        throw new IllegalStateException("Unknown language: " + this.language);
-    }
+  public Language getLanguage() {
+    return this.language;
   }
 
   public String getSpecific() {
@@ -602,6 +577,29 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
       }
       return rel;
     }
+    case UniversalEnglish:
+      GrammaticalRelation rel = UniversalEnglishGrammaticalRelations.valueOf(toString());
+      if (rel == null) {
+        switch (shortName) {
+          case "conj":
+            return UniversalEnglishGrammaticalRelations.getConj(specific);
+          case "nmod":
+            return UniversalEnglishGrammaticalRelations.getNmod(specific);
+          case "acl":
+            return UniversalEnglishGrammaticalRelations.getAcl(specific);
+          case "advcl":
+            return UniversalEnglishGrammaticalRelations.getAdvcl(specific);
+          default:
+            // TODO: we need to figure out what to do with relations
+            // which were serialized and then deprecated.  Perhaps there
+            // is a good way to make them singletons
+            return this;
+          //throw new RuntimeException("Unknown English relation " + this);
+        }
+      } else {
+        return rel;
+      }
+      
     default: {
       throw new RuntimeException("Unknown language " + language);
     }

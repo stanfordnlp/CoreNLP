@@ -9,26 +9,29 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
-import java.util.Properties;
-import java.util.Set;
 
 /**
  * Annotator that marks entity mentions in a document.
- * Entity mentions are
- * - Named entities (identified by NER)
- * - Quantifiable entities
- *   - Times (identified by TimeAnnotator)
- *   - Measurements (identified by ???)
+ * Entity mentions are:
+ * <ul>
+ * <li> Named entities (identified by NER) </li>
+ * <li> Quantifiable entities
+ *   <ul>
+ *   <li> Times (identified by TimeAnnotator) </li>
+ *   <li> Measurements (identified by ???) </li>
+ *   </ul>
+ *   </li>
+ * </ul>
  *
  * Each sentence is annotated with a list of the mentions
- *  (MentionsAnnotation as a list of CoreMap)
+ * (MentionsAnnotation as a list of CoreMap).
  *
  * @author Angel Chang
  */
 public class EntityMentionsAnnotator implements Annotator {
+
   // Currently relies on NER annotations being okay
   // - Replace with calling NER classifiers and timeAnnotator directly
   LabeledChunkIdentifier chunkIdentifier;
@@ -62,82 +65,90 @@ public class EntityMentionsAnnotator implements Annotator {
     }
   }
 
-  private static Function<Pair<CoreLabel,CoreLabel>, Boolean> IS_TOKENS_COMPATIBLE = new Function<Pair<CoreLabel, CoreLabel>, Boolean>() {
-    @Override
-    public Boolean apply(Pair<CoreLabel, CoreLabel> in) {
-      // First argument is the current token
-      CoreLabel cur = in.first;
-      // Second argument the previous token
-      CoreLabel prev = in.second;
-      if (cur == null || prev == null) {
-        return false;
-      }
+  private static final Function<Pair<CoreLabel,CoreLabel>, Boolean> IS_TOKENS_COMPATIBLE = in -> {
+    // First argument is the current token
+    CoreLabel cur = in.first;
+    // Second argument the previous token
+    CoreLabel prev = in.second;
 
-      // Get NormalizedNamedEntityTag and say two entities are incompatible if they are different
-      String v1 = cur.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
-      String v2 = prev.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
-      boolean compatible = checkStrings(v1,v2);
-      if (!compatible) return compatible;
-
-      // This duplicates logic in the QuantifiableEntityNormalizer (but maybe we will get rid of that class)
-      String nerTag = cur.get(CoreAnnotations.NamedEntityTagAnnotation.class);
-      if ("NUMBER".equals(nerTag) || "ORDINAL".equals(nerTag)) {
-        // Get NumericCompositeValueAnnotation and say two entities are incompatible if they are different
-        Number n1 = cur.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
-        Number n2 = prev.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
-        compatible = checkNumbers(n1,n2);
-        if (!compatible) return compatible;
-      }
-
-      // Check timex...
-      if ("TIME".equals(nerTag) || "SET".equals(nerTag) || "DATE".equals(nerTag) || "DURATION".equals(nerTag)) {
-        Timex timex1 = cur.get(TimeAnnotations.TimexAnnotation.class);
-        Timex timex2 = prev.get(TimeAnnotations.TimexAnnotation.class);
-        String tid1 = (timex1 != null)? timex1.tid():null;
-        String tid2 = (timex2 != null)? timex2.tid():null;
-        compatible = checkStrings(tid1,tid2);
-        if (!compatible) return compatible;
-      }
-
-      return compatible;
+    if (cur == null || prev == null) {
+      return false;
     }
+
+    // Get NormalizedNamedEntityTag and say two entities are incompatible if they are different
+    String v1 = cur.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
+    String v2 = prev.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
+    if ( ! checkStrings(v1,v2)) return false;
+
+    // This duplicates logic in the QuantifiableEntityNormalizer (but maybe we will get rid of that class)
+    String nerTag = cur.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+    if ("NUMBER".equals(nerTag) || "ORDINAL".equals(nerTag)) {
+      // Get NumericCompositeValueAnnotation and say two entities are incompatible if they are different
+      Number n1 = cur.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
+      Number n2 = prev.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
+      if ( ! checkNumbers(n1,n2)) return false;
+    }
+
+    // Check timex...
+    if ("TIME".equals(nerTag) || "SET".equals(nerTag) || "DATE".equals(nerTag) || "DURATION".equals(nerTag)) {
+      Timex timex1 = cur.get(TimeAnnotations.TimexAnnotation.class);
+      Timex timex2 = prev.get(TimeAnnotations.TimexAnnotation.class);
+      String tid1 = (timex1 != null)? timex1.tid():null;
+      String tid2 = (timex2 != null)? timex2.tid():null;
+      if ( ! checkStrings(tid1,tid2)) return false;
+    }
+
+    return true;
   };
 
   @Override
   public void annotate(Annotation annotation) {
 
-    List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
-    Integer annoTokenBegin = annotation.get(CoreAnnotations.TokenBeginAnnotation.class);
-    if (annoTokenBegin == null) { annoTokenBegin = 0; }
-    List<CoreMap> chunks = chunkIdentifier.getAnnotatedChunks(tokens, annoTokenBegin,
-            CoreAnnotations.TextAnnotation.class, CoreAnnotations.NamedEntityTagAnnotation.class, IS_TOKENS_COMPATIBLE);
-    annotation.set(CoreAnnotations.MentionsAnnotation.class, chunks);
+    List<CoreMap> allMentions = new ArrayList<>();
+    List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
 
-    // By now entity mentions have been annotated and TextAnnotation and NamedEntityAnnotation marked
-    // Some additional annotations
-    List<CoreMap> mentions = annotation.get(CoreAnnotations.MentionsAnnotation.class);
-    if (mentions != null) {
-      for (CoreMap mention: mentions) {
-        List<CoreLabel> mentionTokens = mention.get(CoreAnnotations.TokensAnnotation.class);
-        String name = (String) CoreMapAttributeAggregator.FIRST_NON_NIL.aggregate(
-                CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, mentionTokens);
-        if (name == null) {
-          name = mention.get(CoreAnnotations.TextAnnotation.class);
-        } else {
-          mention.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, name);
-        }
-        //mention.set(CoreAnnotations.EntityNameAnnotation.class, name);
-        String type = mention.get(CoreAnnotations.NamedEntityTagAnnotation.class);
-        mention.set(CoreAnnotations.EntityTypeAnnotation.class, type);
+    int sentenceIndex = 0;
+    for (CoreMap sentence : sentences) {
+      List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+      Integer annoTokenBegin = sentence.get(CoreAnnotations.TokenBeginAnnotation.class);
+      if (annoTokenBegin == null) {
+        annoTokenBegin = 0;
+      }
+      List<CoreMap> chunks = chunkIdentifier.getAnnotatedChunks(tokens, annoTokenBegin,
+              CoreAnnotations.TextAnnotation.class, CoreAnnotations.NamedEntityTagAnnotation.class, IS_TOKENS_COMPATIBLE);
+      sentence.set(CoreAnnotations.MentionsAnnotation.class, chunks);
 
-        // Take first non nil as timex for the mention
-        Timex timex = (Timex) CoreMapAttributeAggregator.FIRST_NON_NIL.aggregate(
-            TimeAnnotations.TimexAnnotation.class, mentionTokens);
-        if (timex != null) {
-          mention.set(TimeAnnotations.TimexAnnotation.class, timex);
+      // By now entity mentions have been annotated and TextAnnotation and NamedEntityAnnotation marked
+      // Some additional annotations
+      List<CoreMap> mentions = sentence.get(CoreAnnotations.MentionsAnnotation.class);
+      if (mentions != null) {
+        for (CoreMap mention : mentions) {
+          List<CoreLabel> mentionTokens = mention.get(CoreAnnotations.TokensAnnotation.class);
+          String name = (String) CoreMapAttributeAggregator.FIRST_NON_NIL.aggregate(
+                  CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, mentionTokens);
+          if (name == null) {
+            name = mention.get(CoreAnnotations.TextAnnotation.class);
+          } else {
+            mention.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, name);
+          }
+          //mention.set(CoreAnnotations.EntityNameAnnotation.class, name);
+          String type = mention.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+          mention.set(CoreAnnotations.EntityTypeAnnotation.class, type);
+
+          // set sentence index annotation for mention
+          mention.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIndex);
+          // Take first non nil as timex for the mention
+          Timex timex = (Timex) CoreMapAttributeAggregator.FIRST_NON_NIL.aggregate(
+                  TimeAnnotations.TimexAnnotation.class, mentionTokens);
+          if (timex != null) {
+            mention.set(TimeAnnotations.TimexAnnotation.class, timex);
+          }
         }
       }
+      allMentions.addAll(mentions);
+      sentenceIndex++;
     }
+    annotation.set(CoreAnnotations.MentionsAnnotation.class, allMentions);
   }
 
 
@@ -151,4 +162,5 @@ public class EntityMentionsAnnotator implements Annotator {
     // TODO: figure out what this produces
     return Collections.emptySet();
   }
+
 }

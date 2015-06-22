@@ -144,11 +144,28 @@ public class Counters {
    * @return The maximum value of the Counter
    */
   public static <E> double max(Counter<E> c) {
-    double max = Double.NEGATIVE_INFINITY;
-    for (double v : c.values()) {
-      max = Math.max(max, v);
+    return max(c, Double.NEGATIVE_INFINITY);  // note[gabor]: Should the default actually be 0 rather than negative_infinity?
+  }
+
+  /**
+   * Returns the value of the maximum entry in this counter. This is also the
+   * L_infinity norm. An empty counter is given a max value of
+   * Double.NEGATIVE_INFINITY.
+   *
+   * @param c The Counter to find the max of
+   * @param valueIfEmpty The value to return if this counter is empty (i.e., the maximum is not well defined.
+   * @return The maximum value of the Counter
+   */
+  public static <E> double max(Counter<E> c, double valueIfEmpty) {
+    if (c.size() == 0) {
+      return valueIfEmpty;
+    } else {
+      double max = Double.NEGATIVE_INFINITY;
+      for (double v : c.values()) {
+        max = Math.max(max, v);
+      }
+      return max;
     }
-    return max;
   }
 
   /**
@@ -188,17 +205,10 @@ public class Counters {
    * @return The key in the Counter with the largest count.
    */
   public static <E> E argmax(Counter<E> c) {
-    double max = Double.NEGATIVE_INFINITY;
-    E argmax = null;
-    for (E key : c.keySet()) {
-      double count = c.getCount(key);
-      if (argmax == null || count > max) { // || (count == max && tieBreaker.compare(key, argmax) < 0)
-        max = count;
-        argmax = key;
-      }
-    }
-    return argmax;
+    return argmax(c, (x, y) -> 0, null);
+
   }
+
 
   /**
    * Finds and returns the key in this Counter with the smallest count.
@@ -225,9 +235,26 @@ public class Counters {
    * null if count is empty.
    *
    * @param c The Counter
+   * @param tieBreaker the tie breaker for when elements have the same value.
    * @return The key in the Counter with the largest count.
    */
   public static <E> E argmax(Counter<E> c, Comparator<E> tieBreaker) {
+    return argmax(c, tieBreaker, (E) null);
+  }
+
+  /**
+   * Finds and returns the key in the Counter with the largest count. Returning
+   * null if count is empty.
+   *
+   * @param c The Counter
+   * @param tieBreaker the tie breaker for when elements have the same value.
+   * @param defaultIfEmpty The value to return if the counter is empty.
+   * @return The key in the Counter with the largest count.
+   */
+  public static <E> E argmax(Counter<E> c, Comparator<E> tieBreaker, E defaultIfEmpty) {
+    if (c.size() == 0) {
+      return defaultIfEmpty;
+    }
     double max = Double.NEGATIVE_INFINITY;
     E argmax = null;
     for (E key : c.keySet()) {
@@ -1927,10 +1954,10 @@ public class Counters {
    *
    * Note that this method subsumes many of the other toString methods, e.g.:
    *
-   * toString(c, k) and toBiggestValuesFirstString(c, k) => toSortedString(c, k,
+   * toString(c, k) and toBiggestValuesFirstString(c, k) =&gt; toSortedString(c, k,
    * "%s=%f", ", ", "[%s]")
    *
-   * toVerticalString(c, k) => toSortedString(c, k, "%2$g\t%1$s", "\n", "%s\n")
+   * toVerticalString(c, k) =&gt; toSortedString(c, k, "%2$g\t%1$s", "\n", "%s\n")
    *
    * @param counter A Counter.
    * @param k The number of keys to include. Use Integer.MAX_VALUE to include
@@ -3029,4 +3056,28 @@ public class Counters {
     }
     Counters.removeKeys(counter, remove);
   }
+
+  public static<E, E2> Counter<E> flatten(Map<E2, Counter<E>> hier){
+    Counter<E> flat = new ClassicCounter<E>();
+    for(Entry<E2, Counter<E>> en: hier.entrySet()){
+      flat.addAll(en.getValue());
+    }
+    return flat;
+  }
+
+  /**
+   * Returns true if the given counter contains only finite, non-NaN values.
+   * @param counts The counter to validate.
+   * @param <E> The parameterized type of the counter.
+   * @return True if the counter is finite and not NaN on every value.
+   */
+  public static <E> boolean isFinite(Counter<E> counts) {
+    for (double value : counts.values()) {
+      if (Double.isInfinite(value) || Double.isNaN(value)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
 }

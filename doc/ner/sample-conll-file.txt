@@ -1,0 +1,9 @@
+John	PERSON
+Kerry	PERSON
+will	O
+fly	O
+to	O
+Paris	LOCATION
+this	O
+weekend	O
+.	O
