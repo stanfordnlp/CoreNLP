@@ -1669,6 +1669,7 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer {
      "relabel bad NNP\n" +
             '\n') +
 
+    // spelling of "deterrant" is how it appears in wrong tree!
     ("@NP <1 (DT < a|an) <2 (JJ=bad < /^(?:official|deterrant|bible|academic|fine|buy-out|perk|installment)$/) !<3 __\n" +
      "relabel bad NN\n" +
             '\n') +
