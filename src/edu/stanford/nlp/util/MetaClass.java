@@ -10,6 +10,7 @@ import edu.stanford.nlp.trees.Tree;
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * A meta class using Java's reflection library. Can be used to create a single
@@ -791,6 +792,15 @@ public class MetaClass {
       if (value.equalsIgnoreCase("stderr") || value.equalsIgnoreCase("err")) { return (E) System.err; }
       try {
         return (E) new PrintStream(new FileOutputStream(value));
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    } else if (PrintWriter.class.isAssignableFrom(clazz)) {
+      // (case: input stream)
+      if (value.equalsIgnoreCase("stdout") || value.equalsIgnoreCase("out")) { return (E) System.out; }
+      if (value.equalsIgnoreCase("stderr") || value.equalsIgnoreCase("err")) { return (E) System.err; }
+      try {
+        return (E) IOUtils.getPrintWriter(value);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
