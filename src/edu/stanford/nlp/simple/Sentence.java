@@ -408,6 +408,73 @@ public class Sentence {
   }
 
   /**
+   * Get all mentions of the given NER tag, as a list of surface forms.
+   * @param nerTag The ner tag to search for, case sensitive.
+   * @return A list of surface forms of the entities of this tag. This is using the {@link Sentence#word(int)} function.
+   */
+  public List<String> mentions(String nerTag) {
+    List<String> mentionsOfTag = new ArrayList<>();
+    StringBuilder lastMention = new StringBuilder();
+    String lastTag = "O";
+    for (int i = 0; i < length(); ++i) {
+      String ner = ner(i);
+      if (ner.equals(nerTag) && !lastTag.equals(nerTag)) {
+        // case: beginning of span
+        lastMention.append(word(i)).append(' ');
+      } else if (ner.equals(nerTag) && lastTag.equals(nerTag)) {
+        // case: in span
+        lastMention.append(word(i)).append(' ');
+      } else if (!ner.equals(nerTag) && lastTag.equals(nerTag)) {
+        // case: end of span
+        if (lastMention.length() > 0) {
+          mentionsOfTag.add(lastMention.toString().trim());
+        }
+        lastMention.setLength(0);
+      }
+      lastTag = ner;
+    }
+    if (lastMention.length() > 0) {
+      mentionsOfTag.add(lastMention.toString().trim());
+    }
+    return mentionsOfTag;
+  }
+
+  /**
+   * Get all mentions of any NER tag, as a list of surface forms.
+   * @return A list of surface forms of the entities in this sentence. This is using the {@link Sentence#word(int)} function.
+   */
+  public List<String> mentions() {
+    List<String> mentionsOfTag = new ArrayList<>();
+    StringBuilder lastMention = new StringBuilder();
+    String lastTag = "O";
+    for (int i = 0; i < length(); ++i) {
+      String ner = ner(i);
+      if (!ner.equals("O") && !lastTag.equals(ner)) {
+        // case: beginning of span
+        if (lastMention.length() > 0) {
+          mentionsOfTag.add(lastMention.toString().trim());
+        }
+        lastMention.setLength(0);
+        lastMention.append(word(i)).append(' ');
+      } else if (!ner.equals("O") && lastTag.equals(ner)) {
+        // case: in span
+        lastMention.append(word(i)).append(' ');
+      } else if (ner.equals("O") && !lastTag.equals("O")) {
+        // case: end of span
+        if (lastMention.length() > 0) {
+          mentionsOfTag.add(lastMention.toString().trim());
+        }
+        lastMention.setLength(0);
+      }
+      lastTag = ner;
+    }
+    if (lastMention.length() > 0) {
+      mentionsOfTag.add(lastMention.toString().trim());
+    }
+    return mentionsOfTag;
+  }
+
+  /**
    * Returns the constituency parse of this sentence.
    *
    * @param props The properties to use in the parser annotator.

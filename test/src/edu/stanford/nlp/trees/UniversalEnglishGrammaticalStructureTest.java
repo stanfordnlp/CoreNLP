@@ -2548,6 +2548,41 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
               "nmod:from(flies-2', France-8)\n" +
               "nmod:to(flies-2, France-8)\n" +
               "conj:and(Serbia-6, France-8)\n"},
+             {TestType.CC_PROCESSED,
+              "((S (NP-SBJ (NP (DT The) (NN apartment)) (PP-LOC (IN across) (PP (IN from) (NP (PRP mine))))) (VP (VBD belonged) (PP-CLR (IN to) (NP (NP (DT a) (NN gang)) (PP (IN of) (NP (NNS bikers)))))) (. .)))",
+              "det(apartment-2, The-1)\n" +
+                "nsubj(belonged-6, apartment-2)\n" +
+                "case(mine-5, across-3)\n" +
+                "mwe(across-3, from-4)\n" +
+                "nmod:across_from(apartment-2, mine-5)\n" +
+                "root(ROOT-0, belonged-6)\n" +
+                "case(gang-9, to-7)\n" +
+                "det(gang-9, a-8)\n" +
+                "nmod:to(belonged-6, gang-9)\n" +
+                "case(bikers-11, of-10)\n" +
+                "nmod:of(gang-9, bikers-11)\n"},
+             {TestType.CC_PROCESSED,
+              "((S (NP-SBJ (PRP He)) (VP (VBZ is) (ADJP-PRD (JJ close) (PP (IN by) (NP (DT the ) (NN train) (NN station))))) (. .)))",
+              "nsubj(station-7, He-1)\n" +
+                  "cop(station-7, is-2)\n" +
+                  "case(station-7, close-3)\n" +
+                  "mwe(close-3, by-4)\n" +
+                  "det(station-7, the-5)\n" +
+                  "compound(station-7, train-6)\n" +
+                  "root(ROOT-0, station-7)\n"},
+              {TestType.CC_PROCESSED,
+               "(ROOT (S (PP (ADVP (RB Apart)) (IN from) (NP (DT the) (NN roof))) (, ,) (NP (DT the) (NN house)) (VP (VBZ is) (PP (IN in) (NP (JJ good) (NN shape)))) (. .)))",
+               "case(roof-4, Apart-1)\n" +
+                   "mwe(Apart-1, from-2)\n" +
+                   "det(roof-4, the-3)\n" +
+                   "nmod:apart_from(shape-11, roof-4)\n" +
+                   "det(house-7, the-6)\n" +
+                   "nsubj(shape-11, house-7)\n" +
+                   "cop(shape-11, is-8)\n" +
+                   "case(shape-11, in-9)\n" +
+                   "amod(shape-11, good-10)\n" +
+                   "root(ROOT-0, shape-11)\n"
+              }
 
     });
   }
