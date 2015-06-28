@@ -145,7 +145,9 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
       }
     }
     int[] activeFeatures = new int[i];
-    System.arraycopy(features, 0, activeFeatures, 0, i);
+    synchronized (System.class) {
+      System.arraycopy(features, 0, activeFeatures, 0, i);
+    }
     Counter<L> scores = new ClassicCounter<L>();
     for (L lab : labels()) {
       scores.setCount(lab, scoreOf(activeFeatures, lab));
