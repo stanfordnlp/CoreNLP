@@ -1,15 +1,21 @@
 package edu.stanford.nlp.simple;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.naturalli.*;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.StringUtils;
 import org.junit.Test;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 
 import static org.junit.Assert.*;
 
@@ -39,26 +45,6 @@ public class SentenceITest {
     assertEquals(
         new ArrayList <String>(){{ add("PERSON"); add("PERSON"); add("O"); add("O"); add("O"); add("LOCATION"); add("LOCATION"); add("O"); }},
         new Sentence("George Bush lives in the United States.").ners());
-  }
-
-  @Test
-  public void testMentions() {
-    assertEquals(
-        new ArrayList <String>(){{ add("George Bush"); }},
-        new Sentence("George Bush lives in the United States.").mentions("PERSON"));
-    assertEquals(
-        new ArrayList <String>(){{ add("George Bush"); add("Bill Clinton"); }},
-        new Sentence("George Bush and Bill Clinton").mentions("PERSON"));
-
-    assertEquals(
-        new ArrayList <String>(){{ add("George Bush"); add("United States"); }},
-        new Sentence("George Bush lives in the United States.").mentions());
-    assertEquals(
-        new ArrayList <String>(){{ add("George Bush"); add("Bill Clinton"); }},
-        new Sentence("George Bush and Bill Clinton").mentions());
-    assertEquals(
-        new ArrayList <String>(){{ add("George Bush"); add("27"); }},
-        new Sentence("George Bush 27").mentions());
   }
 
   @Test
