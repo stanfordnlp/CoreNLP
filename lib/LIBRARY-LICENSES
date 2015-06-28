@@ -1,63 +1,37 @@
-These are the 3rd party libraries which we currently distribute with Stanford CoreNLP.
-All of them have licenses that are compatible with GPL v3.
-All but the JSON library allow commercial use.
-A compatible JSON library is a component of Java EE (JSR 374).
+xom-1.2.10.jar
 
------------------------------------------------------------------
+Url: http://www.xom.nu/  OR  http://www.cafeconleche.org/XOM/
 
-ejml-0.23.jar
+License: http://www.xom.nu/license.xhtml
 
-URL: http://ejml.org/
+LGPL v2.1
+Gnu lesser general public license
 
-License: Gnu Lesser General Public License v.3 (through v 0.23; version 0.24 forward uses Apache 2.0)
-
------------------------------------------------------------------
-
-javax.json.jar
-
-URL: http://central.maven.org/maven2/javax/json/javax.json-api/1.0/javax.json-api-1.0.pom
-     https://json-processing-spec.java.net/
-
-License: GNU GPLv2 with Classpath Exception (or CDDL)
-
------------------------------------------------------------------
+-----------------------------------------
 
 joda-time-2.1.jar
 
-URL: http://www.joda.org/joda-time/
+Url: http://joda-time.sourceforge.net/
 
-License: Apache License 2.0
-    http://www.joda.org/joda-time/license.html
+License: http://joda-time.sourceforge.net/license.html
 
------------------------------------------
-
-jollyday-0.4.7.jar
-
-URL: http://jollyday.sourceforge.net/
-
-License: Apache License 2.0
-    http://jollyday.sourceforge.net/license.html
+Apache License 2.0
 
 -----------------------------------------
 
-protobuf.jar
+ejml.jar
 
-URL: https://github.com/google/protobuf/
-     https://developers.google.com/protocol-buffers/
+URL: http://code.google.com/p/efficient-java-matrix-library/
 
-License: BSD 3-clause license
-    https://github.com/google/protobuf/blob/master/LICENSE
-    http://opensource.org/licenses/BSD-3-Clause
+Gnu Lesser General Public License v.3 (through v 0.23; version 0.24 on is Apache 2.0)
 
------------------------------------------
+-----------------------------------------------------------------
 
-xom-1.2.10.jar
 
-Url: http://www.xom.nu/
-    OR  http://www.cafeconleche.org/XOM/
+javax.json.jar
 
-License: LGPL v2.1 Gnu lesser general public license
-    http://www.xom.nu/license.xhtml
+URL: https://json-processing-spec.java.net/
 
------------------------------------------
+GNU GPLv2 with Classpath Exception
 
+-----------------------------------------------------------------

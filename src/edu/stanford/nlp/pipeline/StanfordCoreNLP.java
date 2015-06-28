@@ -1042,11 +1042,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
    * @throws ClassNotFoundException If class loading problem
    */
   public static void main(String[] args) throws IOException, ClassNotFoundException {
-    try {
-      Thread.sleep(10000);
-    } catch (InterruptedException ie) {
-      return;
-    }
     //
     // process the arguments
     //
