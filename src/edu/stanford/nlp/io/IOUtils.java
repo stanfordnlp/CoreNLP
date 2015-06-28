@@ -732,7 +732,7 @@ public class IOUtils {
 
     private InputStream getStream() throws IOException {
       if (file != null) {
-        return inputStreamFromFile(file);
+        return new FileInputStream(file);
       } else if (path != null) {
         return getInputStreamFromURLOrClasspathOrFileSystem(path);
       } else {

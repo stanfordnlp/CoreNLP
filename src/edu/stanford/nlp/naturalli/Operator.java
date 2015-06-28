@@ -70,7 +70,6 @@ public enum Operator {
   MANY("many",                  FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
   ENOUGH("enough",              FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
   MORE_THAN("more than __num_", FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
-  A_LOT_OF("a lot of",          FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
   LOTS_OF("lots of",            FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
   PLENTY_OF("plenty of",        FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
   HEAPS_OF("heap of",           FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),

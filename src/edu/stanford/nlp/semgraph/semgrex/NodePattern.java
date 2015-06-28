@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.ling.AnnotationLookup;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.util.Generics;
@@ -37,8 +36,7 @@ public class NodePattern extends SemgrexPattern {
          new ArrayList<Pair<Integer, String>>(0));
   }
 
-  // TODO: there is no capacity for named variable groups in the
-  // parser right now
+  // TODO: there is no capacity for named variable groups in the parser right now
   public NodePattern(GraphRelation r, boolean negDesc,
                      Map<String, String> attrs,
                      boolean root, boolean empty, String name,
@@ -116,7 +114,7 @@ public class NodePattern extends SemgrexPattern {
       }
       if (!matches) {
 
-        // System.out.println("doesnt match");
+        // System.out.println("doesn't match");
         // System.out.println("");
         return negDesc;
       }
@@ -327,9 +325,7 @@ public class NodePattern extends SemgrexPattern {
           IndexedWord otherNode = namesToNodes.get(myNode.name);
           if (otherNode != null) {
             if (otherNode.equals(nextMatch)) {
-              if (myNode.negDesc) {
-                continue;
-              } else {
+              if ( ! myNode.negDesc) {
                 finished = false;
                 break;
               }
@@ -337,8 +333,6 @@ public class NodePattern extends SemgrexPattern {
               if (myNode.negDesc) {
                 finished = false;
                 break;
-              } else {
-                continue;
               }
             }
           } else {
@@ -389,8 +383,9 @@ public class NodePattern extends SemgrexPattern {
             break;
           }
         }
-      }
-      if (!finished) { // I successfully matched.
+      } // end while
+
+      if ( ! finished) { // I successfully matched.
         resetChild();
         if (myNode.name != null) {
           // note: have to fill in the map as we go for backreferencing
@@ -533,6 +528,7 @@ public class NodePattern extends SemgrexPattern {
     public String toString() {
       return "node matcher for: " + myNode.localString();
     }
-  }
+
+  } // end static class NodeMatcher
 
 }

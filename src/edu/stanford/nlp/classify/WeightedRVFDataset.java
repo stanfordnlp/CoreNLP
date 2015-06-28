@@ -24,9 +24,7 @@ public class WeightedRVFDataset<L, F> extends RVFDataset<L, F> {
 
   private float[] trimToSize(float[] i) {
     float[] newI = new float[size];
-    synchronized (System.class) {
-      System.arraycopy(i, 0, newI, 0, size);
-    }
+    System.arraycopy(i, 0, newI, 0, size);
     return newI;
   }
 
@@ -53,9 +51,7 @@ public class WeightedRVFDataset<L, F> extends RVFDataset<L, F> {
   private void addWeight(float weight) {
     if (weights.length == size) {
       float[] newWeights = new float[size * 2];
-      synchronized (System.class) {
-        System.arraycopy(weights, 0, newWeights, 0, size);
-      }
+      System.arraycopy(weights, 0, newWeights, 0, size);
       weights = newWeights;
     }
     weights[size] = weight;

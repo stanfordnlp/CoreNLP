@@ -496,7 +496,7 @@ public class ClauseSplitterSearchProblem {
           new LinearClassifier<>(new ClassicCounter<>()),
           HARD_SPLITS,
           this.featurizer.isPresent() ? this.featurizer.get() : DEFAULT_FEATURIZER,
-          1000);
+          10000);
     } else {
       if (!(isClauseClassifier.get() instanceof LinearClassifier)) {
         throw new IllegalArgumentException("For now, only linear classifiers are supported");
@@ -505,7 +505,7 @@ public class ClauseSplitterSearchProblem {
           isClauseClassifier.get(),
           HARD_SPLITS,
           this.featurizer.get(),
-          1000);
+          10000);
     }
   }
 
@@ -732,7 +732,6 @@ public class ClauseSplitterSearchProblem {
     }, true);  // First state is implicitly "done"
     fringe.add(Pair.makePair(firstState, new ArrayList<>(0)), -0.0);
     int ticks = 0;
-    int classifierEvals = 0;
 
     while (!fringe.isEmpty()) {
       if (++ticks > maxTicks) {
@@ -822,7 +821,6 @@ public class ClauseSplitterSearchProblem {
               bestLabel = ClauseClassifierLabel.CLAUSE_INTERM;
             } else {
               Counter<ClauseClassifierLabel> scores = classifier.scoresOf(new RVFDatum<>(features));
-              classifierEvals += 1;
               if (scores.size() > 0) {
                 Counters.logNormalizeInPlace(scores);
               }
@@ -844,7 +842,6 @@ public class ClauseSplitterSearchProblem {
 
       seenWords.add(rootWord);
     }
-//    System.err.println("Search finished in " + ticks + " ticks and " + classifierEvals + " classifier evaluations.");
   }
 
 
