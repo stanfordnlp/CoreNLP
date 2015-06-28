@@ -1300,6 +1300,9 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
     return Counters.argmax(scores);
   }
 
+  /** For Kryo -- can be private */
+  private LinearClassifier() { }
+
   /** Make a linear classifier from the parameters. The parameters are used, not copied.
    *
    *  @param weights The parameters of the classifier. The first index is the
