@@ -813,7 +813,7 @@ public class MetaClass {
         if (!toWriteTo.exists() && !toWriteTo.createNewFile()) {
           throw new IllegalStateException("Could not create output stream (cannot write file): " + value);
         }
-        return (E) new FileOutputStream((File) cast(value, File.class));
+        return (E) IOUtils.getFileOutputStream(value);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
