@@ -282,6 +282,7 @@ import edu.stanford.nlp.util.StringUtils;
    * single quote curly ending  92      0146    2019    8217
    * double quote curly starting        93      0147    201C    8220
    * double quote curly ending  94      0148    201D    8221
+   * bullet     95
    * en dash    96      0150    2013    8211
    * em dash    97      0151    2014    8212
    */
@@ -461,6 +462,7 @@ import edu.stanford.nlp.util.StringUtils;
     } else {
       normTok = tok;
     }
+    // System.err.printf("handleQuotes changed %s to %s.%n", tok, normTok);
     return getNext(normTok, tok);
   }
 
@@ -531,7 +533,8 @@ import edu.stanford.nlp.util.StringUtils;
 
 /* Todo: Really SGML shouldn't be here at all, it's kind of legacy.
    But we continue to tokenize some simple standard forms of concrete
-   SGML syntax, since it tends to give robustness.
+   SGML syntax, since it tends to give robustness.                    */
+/*
 ( +([A-Za-z][A-Za-z0-9:.-]*( *= *['\"][^\r\n'\"]*['\"])?|['\"][^\r\n'\"]*['\"]| *\/))*
 SGML = <([!?][A-Za-z-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:.-]*([ ]+([A-Za-z][A-Za-z0-9:.-]*([ ]*=[ ]*['\"][^\r\n'\"]*['\"])?|['\"][^\r\n'\"]*['\"]|[ ]*\/))*[ ]*)>
 ( +[A-Za-z][A-Za-z0-9:.-]*)*
@@ -582,7 +585,7 @@ FILENAME = ({LETTER}|{DIGIT})+([._-]({LETTER}|{DIGIT})+)*([.]{FILENAME_EXT})
 THING = ([dDoOlL]{APOSETCETERA}([:letter:]|[:digit:]))?([:letter:]|[:digit:])+({HYPHEN}([dDoOlL]{APOSETCETERA}([:letter:]|[:digit:]))?([:letter:]|[:digit:])+)*
 THINGA = [A-Z]+(([+&]|{SPAMP})[A-Z]+)+
 THING3 = [A-Za-z0-9]+(-[A-Za-z]+){0,2}(\\?\/[A-Za-z0-9]+(-[A-Za-z]+){0,2}){1,2}
-APOS = ['\u0092\u2019]|&apos;
+APOS = ['\u0092\u2019]|&apos;  /* ASCII straight quote, single right curly quote in CP1252 (wrong) or Unicode or HTML SGML escape */
 /* Includes extra ones that may appear inside a word, rightly or wrongly */
 APOSETCETERA = {APOS}|[`\u0091\u2018\u201B]
 HTHING = [A-Za-z0-9][A-Za-z0-9.,\u00AD]*(-([A-Za-z0-9\u00AD]+|{ACRO2}\.))+
@@ -692,6 +695,7 @@ DBLQUOT = \"|&quot;
 TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est
 TBSPEC2 = {APOS}[0-9][0-9]
 BANGWORDS = (E|Yahoo|Jeopardy)\!
+BANGMAGAZINES = OK\!
 
 /* Smileys (based on Chris Potts' sentiment tutorial, but much more restricted set - e.g., no "8)", "do:" or "):", too ambiguous) and simple Asian smileys */
 SMILEY = [<>]?[:;=][\-o\*']?[\(\)DPdpO\\{@\|\[\]]
@@ -767,7 +771,7 @@ gonna|gotta|lemme|gimme|wanna
                           }
                           return getNext(tmp, origTxt);
                         }
-{APOWORD}               { return getNext(); }
+{APOWORD}               { return handleQuotes(yytext(), false); }
 {APOWORD2}/[:letter:]   { return getNext(); }
 {FULLURL}               { String txt = yytext();
                           if (escapeForwardSlashAsterisk) {
@@ -820,6 +824,7 @@ gonna|gotta|lemme|gimme|wanna
 {FRAC2}                 { return normalizeFractions(yytext()); }
 {TBSPEC}                { return getNormalizedAmpNext(); }
 {BANGWORDS}     { return getNext(); }
+{BANGMAGAZINES}/{SPACENL}magazine   { return getNext(); }
 {THING3}                { if (escapeForwardSlashAsterisk) {
                             return getNext(delimit(yytext(), '/'), yytext());
                           } else {
@@ -847,9 +852,9 @@ gonna|gotta|lemme|gimme|wanna
                             }
                           }
                           String s;
-			  if (yylength() == 2) { // "I.", etc.
-			    yypushback(1); // return a period next time;
-			    s = yytext(); // return the word without the final period
+                          if (yylength() == 2) { // "I.", etc.
+                            yypushback(1); // return a period next time;
+                            s = yytext(); // return the word without the final period
                           } else if (strictTreebank3 && ! "U.S.".equals(yytext())) {
                             yypushback(1); // return a period for next time
                             s = yytext(); // return the word without the final period
@@ -904,8 +909,7 @@ gonna|gotta|lemme|gimme|wanna
 {ACRO}/{SPACENL}        { return getNext(); }
 {TBSPEC2}/{SPACENL}     { return getNext(); }
 {FILENAME}/({SPACENL}|[.?!,])      { return getNext(); }
-{WORD}\./{INSENTP}      { return getNext(removeSoftHyphens(yytext()),
-                                         yytext()); }
+{WORD}\./{INSENTP}      { return getNext(removeSoftHyphens(yytext()), yytext()); }
 {PHONE}                 { String txt = yytext();
                           if (normalizeSpace) {
                             // txt = SINGLE_SPACE_PATTERN.matcher(txt).replaceAll("\u00A0"); // change to non-breaking space
@@ -1005,8 +1009,8 @@ gonna|gotta|lemme|gimme|wanna
 {HTHING}\./{INSENTP}          { return getNext(removeSoftHyphens(yytext()),
                                                yytext()); }
 {HTHING}        { return getNext(removeSoftHyphens(yytext()), yytext()); }
-{THING}\./{INSENTP}          { return getNext(); }
-{THING}         { return getNext(); }
+{THING}\./{INSENTP}          { return handleQuotes(yytext(), false); }  /* A THING can contain quote like O'Malley */
+{THING}         { return handleQuotes(yytext(), false); }
 {THINGA}\./{INSENTP}    { return getNormalizedAmpNext(); }
 {THINGA}        { return getNormalizedAmpNext(); }
 '/[A-Za-z][^ \t\n\r\u00A0] { /* invert quote - often but not always right */
@@ -1018,6 +1022,7 @@ gonna|gotta|lemme|gimme|wanna
 {QUOTES}        { return handleQuotes(yytext(), false); }
 {FAKEDUCKFEET}  { return getNext(); }
 {MISCSYMBOL}    { return getNext(); }
+\u0095          { return getNext("\u2022", yytext()); } /* cp1252 bullet mapped to unicode */
 \0|{SPACES}|[\u200B\u200E-\u200F\uFEFF] { if (invertible) {
                      prevWordAfter.append(yytext());
                   }
