@@ -727,7 +727,8 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     Pattern parseInsidePattern = null;
     if (parseInsideKey != null) {
       try {
-        parseInsidePattern = Pattern.compile("<(/?)(?:" + parseInsideKey + ")(?:\\s[^>]*?)?>");
+        // We still allow space, but PTBTokenizer will change space to &nbsp; so need to also match it
+        parseInsidePattern = Pattern.compile("<(/?)(?:" + parseInsideKey + ")(?:(?:\\s|\u00A0)[^>]*?)?>");
       } catch (PatternSyntaxException e) {
         // just go with null parseInsidePattern
       }
