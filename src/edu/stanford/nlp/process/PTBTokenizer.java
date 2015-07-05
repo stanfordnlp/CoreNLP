@@ -443,6 +443,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     Matcher m = null;
     if (parseInsidePattern != null) {
       m = parseInsidePattern.matcher(""); // create once as performance hack
+      // System.err.printf("parseInsidePattern is: |%s|%n", parseInsidePattern);
     }
     for (PTBTokenizer<CoreLabel> tokenizer = new PTBTokenizer<CoreLabel>(r, new CoreLabelTokenFactory(), options); tokenizer.hasNext(); ) {
       CoreLabel obj = tokenizer.next();
@@ -457,6 +458,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
       }
       if (m != null && m.reset(origStr).matches()) {
         printing = m.group(1).isEmpty(); // turn on printing if no end element slash, turn it off it there is
+        // System.err.printf("parseInsidePattern matched against: |%s|, printing is %b.%n", origStr, printing);
       } else if (printing) {
         if (dump) {
           // after having checked for tags, change str to be exhaustive

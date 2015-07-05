@@ -42,7 +42,11 @@ public class PTBTokenizerTest {
     "NBC Live will be available free through the Yahoo! Chat Web site. E! Entertainment said ``Jeopardy!'' is a game show.",
     "I lived in O\u2019Malley and read OK! Magazine.",
     "I lived in O\u0092Malley and read OK! Magazine.", /* invalid unicode codepoint, but inherit from cp1252 */
-          "I like: \u2022wine, \u0095cheese, \u2023salami, & \u2043speck.",
+    "I like: \u2022wine, \u0095cheese, \u2023salami, & \u2043speck.",
+    "I don't give a f**k about your sh*tty life.",
+    "First sentence.... Second sentence.",
+    "First sentence . . . . Second sentence.",
+    "I wasn’t really ... well, what I mean...see . . . what I'm saying, the thing is . . . I didn’t mean it.",
   };
 
   private final String[][] ptbGold = {
@@ -80,6 +84,12 @@ public class PTBTokenizerTest {
           { "I", "lived", "in", "O'Malley", "and", "read", "OK!", "Magazine", "." },
           { "I", "like", ":", "\u2022", "wine", ",", "\u2022", "cheese", ",", "\u2023", "salami",
                   ",", "&", "\u2043", "speck", "." },
+    { "I", "do", "n't", "give", "a", "f**k", "about", "your", "sh*tty", "life", "." },
+    { "First", "sentence", "...", ".", "Second", "sentence", "." },
+    { "First", "sentence", "...", ".", "Second", "sentence", "." },
+    { "I", "was", "n't", "really", "...", "well", ",", "what", "I", "mean", "...", "see", "...", "what", "I", "'m", "saying",
+      ",", "the", "thing", "is", "...", "I", "did", "n't", "mean", "it", "." },
+
   };
 
   @Test
@@ -91,7 +101,7 @@ public class PTBTokenizerTest {
       while (ptbTokenizer.hasNext()) {
         Word w = ptbTokenizer.next();
         try {
-          assertEquals("PTBTokenizer problem", ptbGold[sent][i], w.value());
+          assertEquals("PTBTokenizer problem for index " + i + " of " + Arrays.toString(ptbGold[sent]), ptbGold[sent][i], w.value());
         } catch (ArrayIndexOutOfBoundsException aioobe) {
           // the assertion below outside the loop will fail
         }

@@ -577,7 +577,7 @@ DOLSIGN2 = [\u00A2\u00A3\u00A4\u00A5\u0080\u20A0\u20AC\u060B\u0E3F\u20A4\uFFE0\u
 /* For some reason U+0237-U+024F (dotless j) isn't in [:letter:]. Recent additions? */
 LETTER = ([:letter:]|{SPLET}|[\u00AD\u0237-\u024F\u02C2-\u02C5\u02D2-\u02DF\u02E5-\u02FF\u0300-\u036F\u0370-\u037D\u0384\u0385\u03CF\u03F6\u03FC-\u03FF\u0483-\u0487\u04CF\u04F6-\u04FF\u0510-\u0525\u055A-\u055F\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7\u0615-\u061A\u063B-\u063F\u064B-\u065E\u0670\u06D6-\u06EF\u06FA-\u06FF\u070F\u0711\u0730-\u074F\u0750-\u077F\u07A6-\u07B1\u07CA-\u07F5\u07FA\u0900-\u0903\u093C\u093E-\u094E\u0951-\u0955\u0962-\u0963\u0981-\u0983\u09BC-\u09C4\u09C7\u09C8\u09CB-\u09CD\u09D7\u09E2\u09E3\u0A01-\u0A03\u0A3C\u0A3E-\u0A4F\u0A81-\u0A83\u0ABC-\u0ACF\u0B82\u0BBE-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCD\u0C01-\u0C03\u0C3E-\u0C56\u0D3E-\u0D44\u0D46-\u0D48\u0E30-\u0E3A\u0E47-\u0E4E\u0EB1-\u0EBC\u0EC8-\u0ECD])
 WORD = {LETTER}({LETTER}|{DIGIT})*([.!?]{LETTER}({LETTER}|{DIGIT})*)*
-FILENAME_EXT = bat|bmp|bz2|c|class|cgi|cpp|dll|doc|docx|exe|gif|gz|h|htm|html|jar|java|jpeg|jpg|mov|mp3|pdf|php|pl|png|ppt|ps|py|sql|tar|txt|wav|x|xml|zip
+FILENAME_EXT = bat|bmp|bz2|c|class|cgi|cpp|dll|doc|docx|exe|gif|gz|h|htm|html|jar|java|jpeg|jpg|mov|mp3|pdf|php|pl|png|ppt|ps|py|sql|tar|txt|wav|x|xml|zip|3gp|wm[va]|avi|flv|mov|mp[34g]
 FILENAME = ({LETTER}|{DIGIT})+([._-]({LETTER}|{DIGIT})+)*([.]{FILENAME_EXT})
 /* The $ was for things like New$ */
 /* WAS: only keep hyphens with short one side like co-ed */
@@ -682,7 +682,8 @@ LESSTHAN = <|&lt;
 GREATERTHAN = >|&gt;
 HYPHEN = [-_\u058A\u2010\u2011]
 HYPHENS = \-+
-LDOTS = \.{3,5}|(\.[ \u00A0]){2,4}\.|[\u0085\u2026]
+LDOTS = \.\.\.+|[\u0085\u2026]
+SPACEDLDOTS = \.[ \u00A0](\.[ \u00A0])+\.
 ATS = @+
 UNDS = _+
 ASTS = \*+|(\\\*){1,3}
@@ -692,7 +693,7 @@ INSENTP = [,;:\u3001]
 QUOTES = {APOS}|''|[`\u2018\u2019\u201A\u201B\u201C\u201D\u0091\u0092\u0093\u0094\u201E\u201F\u2039\u203A\u00AB\u00BB]{1,2}
 DBLQUOT = \"|&quot;
 /* Cap'n for captain, c'est for french */
-TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est
+TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est|f\*[c*]k(in[g']|e[dr])?|sh\*t(ty)?
 TBSPEC2 = {APOS}[0-9][0-9]
 BANGWORDS = (E|Yahoo|Jeopardy)\!
 BANGMAGAZINES = OK\!
@@ -839,7 +840,7 @@ gonna|gotta|lemme|gimme|wanna
                           }
                         }
 /* Any acronym can be treated as sentence final iff followed by this list of words (pronouns, determiners, and prepositions, etc.). "U.S." is the single big source of errors.  Character classes make this rule case sensitive! (This is needed!!). A one letter acronym candidate like "Z." or "I." in this context usually isn't, and so we return the leter and pushback the period for next time. */
-{ACRONYM}/({SPACENLS})([A]bout|[A]ccording|[A]dditionally|[A]fter|[A]n|[A]|[A]s|[A]t|[B]ut|[D]id|[D]uring|[E]arlier|[H]e|[H]er|[H]ere|[H]ow|[H]owever|[I]f|[I]n|[I]t|[L]ast|[M]any|[M]ore|[M]r\.|[M]s\.|[N]ow|[O]nce|[O]ne|[O]ther|[O]ur|[S]he|[S]ince|[S]o|[S]ome|[S]uch|[T]hat|[T]he|[T]heir|[T]hen|[T]here|[T]hese|[T]hey|[T]his|[W]e|[W]hen|[W]hile|[W]hat|[Y]et|[Y]ou|{SGML}){SPACENL} {
+{ACRONYM}/({SPACENLS})([A]bout|[A]ccording|[A]dditionally|[A]fter|[A]n|[A]|[A]s|[A]t|[B]ut|[D]id|[D]uring|[E]arlier|[H]e|[H]er|[H]ere|[H]ow|[H]owever|[I]f|[I]n|[I]t|[L]ast|[M]any|[M]ore|[M]r\.|[M]s\.|[N]ow|[O]nce|[O]ne|[O]ther|[O]ur|[S]he|[S]ince|[S]o|[S]ome|[S]uch|[T]hat|[T]he|[T]heir|[T]hen|[T]here|[T]hese|[T]hey|[T]his|[W]e|[W]hen|[W]hile|[W]hat|[W]ho|[W]hy|[Y]et|[Y]ou|{SGML}){SPACENL} {
                           // try to work around an apparent jflex bug where it
                           // gets a space at the token end by getting
                           // wrong the length of the trailing context.
@@ -986,7 +987,13 @@ gonna|gotta|lemme|gimme|wanna
                     return getNext();
                   }
                 }
-{LDOTS}         { return handleEllipsis(yytext()); }
+{LDOTS}/\.{SPACENLS}[:letter:]    { /* attempt to treat fourth ellipsis as period if followed by space and letter. */
+                                    return handleEllipsis(yytext());
+                                  }
+{SPACEDLDOTS}/{SPACE}\.{SPACENLS}[:letter:]    { /* attempt to treat fourth ellipsis as period if followed by space and letter. */
+                                    return handleEllipsis(yytext());
+                                  }
+{LDOTS}|{SPACEDLDOTS}         { return handleEllipsis(yytext()); }
 {FNMARKS}       { return getNext(); }
 {ASTS}          { if (escapeForwardSlashAsterisk) {
                     return getNext(delimit(yytext(), '*'), yytext()); }
@@ -1023,6 +1030,7 @@ gonna|gotta|lemme|gimme|wanna
 {FAKEDUCKFEET}  { return getNext(); }
 {MISCSYMBOL}    { return getNext(); }
 \u0095          { return getNext("\u2022", yytext()); } /* cp1252 bullet mapped to unicode */
+\u0099	        { return getNext("\u2122", yytext()); } /* cp1252 TM sign mapped to unicode */
 \0|{SPACES}|[\u200B\u200E-\u200F\uFEFF] { if (invertible) {
                      prevWordAfter.append(yytext());
                   }
