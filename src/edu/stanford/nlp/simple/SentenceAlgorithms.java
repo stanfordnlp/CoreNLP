@@ -332,17 +332,18 @@ public class SentenceAlgorithms {
     LinkedList<Integer> rootToStart = new LinkedList<>();
     LinkedList<Integer> rootToEnd = new LinkedList<>();
     int startAncestor = start;
-    while (sentence.governor(startAncestor).isPresent() && sentence.governor(startAncestor).get() >= 0) {
+    List<Optional<Integer>> governors = sentence.governors();
+    while (governors.get(startAncestor).isPresent() && governors.get(startAncestor).get() >= 0) {
       rootToStart.addFirst(startAncestor);
-      startAncestor = sentence.governor(startAncestor).get();
+      startAncestor = governors.get(startAncestor).get();
     }
     if (startAncestor == -1) {
       rootToStart.addFirst(-1);
     }
     int endAncestor = end;
-    while (sentence.governor(endAncestor).isPresent() && sentence.governor(endAncestor).get() >= 0) {
+    while (governors.get(endAncestor).isPresent() && governors.get(endAncestor).get() >= 0) {
       rootToEnd.addFirst(endAncestor);
-      endAncestor = sentence.governor(endAncestor).get();
+      endAncestor = governors.get(endAncestor).get();
     }
     if (endAncestor == -1) {
       rootToEnd.addFirst(-1);
