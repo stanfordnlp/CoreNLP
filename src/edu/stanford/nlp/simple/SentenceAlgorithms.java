@@ -357,7 +357,7 @@ public class SentenceAlgorithms {
       if (seenVertices.contains(endAncestor)) {
         return Collections.EMPTY_LIST;
       }
-      seenVertices.add(startAncestor);
+      seenVertices.add(endAncestor);
       rootToEnd.addFirst(endAncestor);
       endAncestor = governors.get(endAncestor).get();
     }
