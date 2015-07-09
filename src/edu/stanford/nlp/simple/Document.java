@@ -208,7 +208,7 @@ public class Document {
   private List<Sentence> sentences = null;
 
   /** A serializer to assist in serializing and deserializing from Protocol buffers */
-  protected final ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+  protected final ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer(false );
 
   /**
    * THIS IS NONSTANDARD.
@@ -235,7 +235,7 @@ public class Document {
    */
   @SuppressWarnings("Convert2streamapi")
   public Document(Annotation ann) {
-    this.impl = new ProtobufAnnotationSerializer().toProto(ann).toBuilder();
+    this.impl = new ProtobufAnnotationSerializer(false).toProto(ann).toBuilder();
     List<CoreMap> sentences = ann.get(CoreAnnotations.SentencesAnnotation.class);
     this.sentences = new ArrayList<>(sentences.size());
     for (CoreMap sentence : sentences) {
@@ -530,7 +530,8 @@ public class Document {
   }
 
   protected Document runDepparse(Properties props) {
-    if (this.sentences != null && this.sentences.size() > 0 && this.sentence(0).rawSentence().hasBasicDependencies()) {
+    if (this.sentences != null && this.sentences.size() > 0 &&
+        this.sentence(0).rawSentence().hasBasicDependencies()) {
       return this;
     }
     // Run prerequisites
