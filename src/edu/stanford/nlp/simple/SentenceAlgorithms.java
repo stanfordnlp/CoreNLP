@@ -1,11 +1,14 @@
 package edu.stanford.nlp.simple;
 
 import edu.stanford.nlp.ie.machinereading.structure.Span;
+import edu.stanford.nlp.pipeline.CoreNLPProtos;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.StringUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -394,4 +397,14 @@ public class SentenceAlgorithms {
     return dependencyPathBetween(start, end, Sentence::words);
   }
 
+  /**
+   * A funky little helper method to interpret each token of the sentence as an HTML string, and translate it back to text.
+   * Note that this is <b>in place</b>.
+   */
+  public void unescapeHTML() {
+    for (int i = 0; i < sentence.length(); ++i) {
+      CoreNLPProtos.Token.Builder token = sentence.rawToken(i);
+      token.setWord(StringUtils.unescapeHtml3(token.getWord()));
+    }
+  }
 }
