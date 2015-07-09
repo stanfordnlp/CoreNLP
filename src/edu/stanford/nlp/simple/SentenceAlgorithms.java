@@ -354,7 +354,7 @@ public class SentenceAlgorithms {
     int endAncestor = end;
     seenVertices.clear();
     while (governors.get(endAncestor).isPresent() && governors.get(endAncestor).get() >= 0) {
-      if (seenVertices.contains(startAncestor)) {
+      if (seenVertices.contains(endAncestor)) {
         return Collections.EMPTY_LIST;
       }
       seenVertices.add(startAncestor);
