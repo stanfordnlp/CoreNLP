@@ -533,7 +533,7 @@ public class Sentence {
 
   /** @see Sentence#governor(java.util.Properties, int, SemanticGraphFactory.Mode) */
   public Optional<Integer> governor(Properties props, int index) {
-    return governor(props, index, SemanticGraphFactory.Mode.BASIC);
+    return governor(props, index, SemanticGraphFactory.Mode.COLLAPSED_TREE);
   }
 
   /** @see Sentence#governor(java.util.Properties, int, SemanticGraphFactory.Mode) */
@@ -571,7 +571,7 @@ public class Sentence {
 
   /** @see Sentence#governors(java.util.Properties, SemanticGraphFactory.Mode) */
   public List<Optional<Integer>> governors(Properties props) {
-    return governors(props, SemanticGraphFactory.Mode.BASIC);
+    return governors(props, SemanticGraphFactory.Mode.COLLAPSED_TREE);
   }
 
   /** @see Sentence#governors(java.util.Properties, SemanticGraphFactory.Mode) */
@@ -581,7 +581,7 @@ public class Sentence {
 
   /** @see Sentence#governors(java.util.Properties, SemanticGraphFactory.Mode) */
   public List<Optional<Integer>> governors() {
-    return governors(EMPTY_PROPS, SemanticGraphFactory.Mode.BASIC);
+    return governors(EMPTY_PROPS, SemanticGraphFactory.Mode.COLLAPSED_TREE);
   }
 
   /**
@@ -608,7 +608,7 @@ public class Sentence {
 
   /** @see Sentence#incomingDependencyLabel(java.util.Properties, int, SemanticGraphFactory.Mode) */
   public Optional<String> incomingDependencyLabel(Properties props, int index) {
-    return incomingDependencyLabel(props, index, SemanticGraphFactory.Mode.BASIC);
+    return incomingDependencyLabel(props, index, SemanticGraphFactory.Mode.COLLAPSED_TREE);
   }
 
   /** @see Sentence#incomingDependencyLabel(java.util.Properties, int, SemanticGraphFactory.Mode) */
@@ -642,12 +642,12 @@ public class Sentence {
 
   /** @see Sentence#incomingDependencyLabels(java.util.Properties, SemanticGraphFactory.Mode) */
   public List<Optional<String>> incomingDependencyLabels(Properties props) {
-    return incomingDependencyLabels(props, SemanticGraphFactory.Mode.BASIC);
+    return incomingDependencyLabels(props, SemanticGraphFactory.Mode.COLLAPSED_TREE);
   }
 
   /** @see Sentence#incomingDependencyLabels(java.util.Properties, SemanticGraphFactory.Mode) */
   public List<Optional<String>> incomingDependencyLabels() {
-    return incomingDependencyLabels(EMPTY_PROPS, SemanticGraphFactory.Mode.BASIC);
+    return incomingDependencyLabels(EMPTY_PROPS, SemanticGraphFactory.Mode.COLLAPSED_TREE);
   }
 
 
@@ -668,12 +668,12 @@ public class Sentence {
 
   /** @see Sentence#dependencyGraph(Properties, SemanticGraphFactory.Mode) */
   public SemanticGraph dependencyGraph(Properties props) {
-    return dependencyGraph(props, SemanticGraphFactory.Mode.BASIC);
+    return dependencyGraph(props, SemanticGraphFactory.Mode.COLLAPSED_TREE);
   }
 
   /** @see Sentence#dependencyGraph(Properties, SemanticGraphFactory.Mode) */
   public SemanticGraph dependencyGraph() {
-    return dependencyGraph(EMPTY_PROPS, SemanticGraphFactory.Mode.BASIC);
+    return dependencyGraph(EMPTY_PROPS, SemanticGraphFactory.Mode.COLLAPSED_TREE);
   }
 
   /** @see Sentence#dependencyGraph(Properties, SemanticGraphFactory.Mode) */

@@ -139,7 +139,6 @@ public class SentenceAlgorithmsITest {
   @Test
   public void testDependencyPathBetween() throws IOException {
     Sentence s = new Sentence("the blue cat sat on the green mat");
-
     assertEquals(new ArrayList<String>(){{ add("the"); add("<-det-"); add("cat"); }},
         s.algorithms().dependencyPathBetween(0, 2));
 
@@ -159,5 +158,13 @@ public class SentenceAlgorithmsITest {
         add("green");
     }},s.algorithms().dependencyPathBetween(5, 6));
 
+    s = new Sentence("I visited River Road Asset Management of Louisville , Kentucky .");
+    assertEquals(new ArrayList<String>(){{
+      add("Management");
+      add("-nmod:of->");
+      add("Louisville");  // Note[gabor]: This is the wrong parse.
+      add("-appos->");
+      add("Kentucky");
+    }},s.algorithms().dependencyPathBetween(5, 9));
   }
 }

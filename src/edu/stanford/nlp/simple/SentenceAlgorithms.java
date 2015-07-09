@@ -340,7 +340,7 @@ public class SentenceAlgorithms {
     int startAncestor = start;
     List<Optional<Integer>> governors = sentence.governors();
     Set<Integer> seenVertices = new HashSet<>();
-    while (governors.get(startAncestor).isPresent() && governors.get(startAncestor).get() >= 0) {
+    while (startAncestor >= 0 && governors.get(startAncestor).isPresent()) {
       if (seenVertices.contains(startAncestor)) {
         return Collections.EMPTY_LIST;
       }
@@ -353,7 +353,7 @@ public class SentenceAlgorithms {
     }
     int endAncestor = end;
     seenVertices.clear();
-    while (governors.get(endAncestor).isPresent() && governors.get(endAncestor).get() >= 0) {
+    while (endAncestor >= 0 && governors.get(endAncestor).isPresent()) {
       if (seenVertices.contains(endAncestor)) {
         return Collections.EMPTY_LIST;
       }
