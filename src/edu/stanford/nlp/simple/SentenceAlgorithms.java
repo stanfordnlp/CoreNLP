@@ -233,11 +233,12 @@ public class SentenceAlgorithms {
     if (tokenSpan.size() == 0) {
       throw new IllegalArgumentException("Cannot find head word of empty span!");
     }
+    List<Optional<Integer>> governors = sentence.governors();
 
     // Find where to start searching up the dependency tree
     int candidateStart = tokenSpan.end() - 1;
     Optional<Integer> parent;
-    while ( !(parent = sentence.governor(candidateStart)).isPresent() ) {
+    while ( !(parent = governors.get(candidateStart)).isPresent() ) {
       candidateStart -= 1;
       if (candidateStart < tokenSpan.start()) {
         // Case: nothing in this span has a head. Default to right-most element.
@@ -247,9 +248,14 @@ public class SentenceAlgorithms {
     int candidate = candidateStart;
 
     // Search up the dependency tree
+    Set<Integer> seen = new HashSet<>();
     while (parent.isPresent() && parent.get() >= tokenSpan.start() && parent.get() < tokenSpan.end()) {
       candidate = parent.get();
-      parent = sentence.governor(candidate);
+      if (seen.contains(candidate)) {
+        return candidate;
+      }
+      seen.add(candidate);
+      parent = governors.get(candidate);
     }
 
     // Return
@@ -333,7 +339,12 @@ public class SentenceAlgorithms {
     LinkedList<Integer> rootToEnd = new LinkedList<>();
     int startAncestor = start;
     List<Optional<Integer>> governors = sentence.governors();
+    Set<Integer> seenVertices = new HashSet<>();
     while (governors.get(startAncestor).isPresent() && governors.get(startAncestor).get() >= 0) {
+      if (seenVertices.contains(startAncestor)) {
+        return Collections.EMPTY_LIST;
+      }
+      seenVertices.add(startAncestor);
       rootToStart.addFirst(startAncestor);
       startAncestor = governors.get(startAncestor).get();
     }
@@ -341,7 +352,12 @@ public class SentenceAlgorithms {
       rootToStart.addFirst(-1);
     }
     int endAncestor = end;
+    seenVertices.clear();
     while (governors.get(endAncestor).isPresent() && governors.get(endAncestor).get() >= 0) {
+      if (seenVertices.contains(startAncestor)) {
+        return Collections.EMPTY_LIST;
+      }
+      seenVertices.add(startAncestor);
       rootToEnd.addFirst(endAncestor);
       endAncestor = governors.get(endAncestor).get();
     }

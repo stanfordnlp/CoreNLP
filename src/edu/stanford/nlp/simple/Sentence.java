@@ -162,7 +162,7 @@ public class Sentence {
 
   /** Helper for creating a sentence from a document and a CoreMap representation */
   protected Sentence(Document doc, CoreMap sentence) {
-    this(doc, doc.serializer.toProto(sentence).toBuilder());
+    this(doc, doc.serializer.toProtoBuilder(sentence));
     this.impl.setText(sentence.get(CoreAnnotations.TextAnnotation.class));
   }
 
