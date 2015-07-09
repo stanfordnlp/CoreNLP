@@ -520,8 +520,6 @@ public class ConfusionMatrix<U> {
         frame.setVisible(true);
       });
     }
-
-
   }
 
   /**

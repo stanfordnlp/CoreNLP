@@ -1,10 +1,14 @@
 package edu.stanford.nlp.simple;
 
 import edu.stanford.nlp.ie.machinereading.structure.Span;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
+import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -402,9 +406,17 @@ public class SentenceAlgorithms {
    * Note that this is <b>in place</b>.
    */
   public void unescapeHTML() {
+    // Change in the protobuf
     for (int i = 0; i < sentence.length(); ++i) {
       CoreNLPProtos.Token.Builder token = sentence.rawToken(i);
       token.setWord(StringUtils.unescapeHtml3(token.getWord()));
+      token.setLemma(StringUtils.unescapeHtml3(token.getLemma()));
+    }
+    // Change in the annotation
+    CoreMap cm = sentence.document.asAnnotation().get(CoreAnnotations.SentencesAnnotation.class).get(sentence.sentenceIndex());
+    for (CoreLabel token : cm.get(CoreAnnotations.TokensAnnotation.class)) {
+      token.setWord(StringUtils.unescapeHtml3(token.word()));
+      token.setLemma(StringUtils.unescapeHtml3(token.lemma()));
     }
   }
 }

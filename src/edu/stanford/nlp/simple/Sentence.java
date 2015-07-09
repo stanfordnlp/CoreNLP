@@ -885,7 +885,7 @@ public class Sentence {
    * @param i The index of the token to retrieve.
    * @return A Protobuf builder for that token.
    */
-  protected CoreNLPProtos.Token.Builder rawToken(int i) {
+  public CoreNLPProtos.Token.Builder rawToken(int i) {
     return tokensBuilders.get(i);
   }
 
@@ -893,7 +893,7 @@ public class Sentence {
    * Get the backing protocol buffer for this sentence.
    * @return The raw backing protocol buffer builder for this sentence.
    */
-  protected CoreNLPProtos.Sentence.Builder rawSentence() {
+  public CoreNLPProtos.Sentence.Builder rawSentence() {
     return this.impl;
   }
 
