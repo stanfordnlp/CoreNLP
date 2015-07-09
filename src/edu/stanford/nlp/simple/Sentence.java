@@ -7,6 +7,7 @@ import edu.stanford.nlp.naturalli.OperatorSpec;
 import edu.stanford.nlp.naturalli.Polarity;
 import edu.stanford.nlp.naturalli.SentenceFragment;
 import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
 import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -400,6 +401,24 @@ public class Sentence {
   /** @see Sentence#ners(java.util.Properties) */
   public List<String> ners() {
     return ners(EMPTY_PROPS);
+  }
+
+  /**
+   * Run RegexNER over this sentence. Note that this is an in place operation, and simply
+   * updates the NER tags.
+   * Therefore, every time this function is called, it re-runs the annotator!
+   *
+   * @param mappingFile The regexner mapping file.
+   *
+   * @return
+   */
+  public void regexner(String mappingFile) {
+    Properties props = new Properties();
+    for (Object prop : EMPTY_PROPS.keySet()) {
+      props.setProperty(prop.toString(), EMPTY_PROPS.getProperty(prop.toString()));
+    }
+    props.setProperty(Annotator.STANFORD_REGEXNER + ".mapping", mappingFile);
+    this.document.runRegexner(props);
   }
 
   /** @see Sentence#ners(java.util.Properties) */

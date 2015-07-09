@@ -69,6 +69,7 @@ public class Document {
    * The default {@link edu.stanford.nlp.pipeline.MorphaAnnotator} implementation
    */
   private static final Annotator defaultLemma = AnnotatorFactories.lemma(EMPTY_PROPS, backend).create();
+
   /**
    * The default {@link edu.stanford.nlp.pipeline.NERCombinerAnnotator} implementation
    */
@@ -79,6 +80,21 @@ public class Document {
     public synchronized Annotator get() {
       if (impl == null) {
         impl = AnnotatorFactories.nerTag(EMPTY_PROPS, backend).create();
+      }
+      return impl;
+    }
+  };
+
+  /**
+   * The default {@link edu.stanford.nlp.pipeline.RegexNERAnnotator} implementation
+   */
+  private static Supplier<Annotator> defaultRegexner = new Supplier<Annotator>() {
+    Annotator impl = null;
+
+    @Override
+    public synchronized Annotator get() {
+      if (impl == null) {
+        impl = AnnotatorFactories.regexNER(EMPTY_PROPS, backend).create();
       }
       return impl;
     }
@@ -492,6 +508,20 @@ public class Document {
     runPOS(props);
     // Run annotator
     Annotator ner = props == EMPTY_PROPS ? defaultNER.get() : getOrCreate(AnnotatorFactories.nerTag(props, backend));
+    Annotation ann = asAnnotation();
+    ner.annotate(ann);
+    // Update data
+    for (int i = 0; i < sentences.size(); ++i) {
+      sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (pair) -> pair.first.setNer(pair.second), CoreLabel::ner);
+    }
+    return this;
+  }
+
+  protected Document runRegexner(Properties props) {
+    // Run prerequisites
+    runNER(props);
+    // Run annotator
+    Annotator ner = props == EMPTY_PROPS ? defaultRegexner.get() : getOrCreate(AnnotatorFactories.regexNER(props, backend));
     Annotation ann = asAnnotation();
     ner.annotate(ann);
     // Update data
