@@ -326,4 +326,31 @@ public class SentenceAlgorithms {
   }
 
 
+  public List<String> dependencyPathBetween(int start, int end) {
+    // Get paths from a node to the root of the sentence
+    LinkedList<Integer> rootToStart = new LinkedList<>();
+    LinkedList<Integer> rootToEnd = new LinkedList<>();
+    int startAncestor = start;
+    while (sentence.governor(startAncestor).isPresent() && sentence.governor(startAncestor).get() >= 0) {
+      rootToStart.addFirst(startAncestor);
+      startAncestor = sentence.governor(startAncestor).get();
+    }
+    if (startAncestor == -1) {
+      rootToStart.addFirst(-1);
+    }
+    int endAncestor = start;
+    while (sentence.governor(endAncestor).isPresent() && sentence.governor(endAncestor).get() >= 0) {
+      rootToEnd.addFirst(endAncestor);
+      endAncestor = sentence.governor(endAncestor).get();
+    }
+    if (endAncestor == -1) {
+      rootToEnd.addFirst(-1);
+    }
+
+    // Get least common node
+    return null;   // TODO(gabor) write me!
+
+
+  }
+
 }
