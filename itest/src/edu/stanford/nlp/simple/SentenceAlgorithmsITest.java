@@ -15,6 +15,7 @@ import static org.junit.Assert.*;
  *
  * @author Gabor Angeli
  */
+@SuppressWarnings("AssertEqualsBetweenInconvertibleTypes")
 public class SentenceAlgorithmsITest {
 
   @Test
@@ -133,5 +134,30 @@ public class SentenceAlgorithmsITest {
     assertTrue(iter.hasNext()); assertEquals(new ArrayList<String>(){{add("c"); }}, iter.next());
     assertTrue(iter.hasNext()); assertEquals(new ArrayList<String>(){{add("d"); }}, iter.next());
     assertFalse(iter.hasNext());
+  }
+
+  @Test
+  public void testDependencyPathBetween() throws IOException {
+    Sentence s = new Sentence("the blue cat sat on the green mat");
+
+    assertEquals(new ArrayList<String>(){{ add("the"); add("<-det-"); add("cat"); }},
+        s.algorithms().dependencyPathBetween(0, 2));
+
+    assertEquals(new ArrayList<String>() {{
+      add("the");
+      add("<-det-");
+      add("cat");
+      add("-amod->");
+      add("blue");
+    }}, s.algorithms().dependencyPathBetween(0, 1));
+
+    assertEquals(new ArrayList<String>(){{
+        add("the");
+        add("<-det-");
+        add("mat");
+        add("-amod->");
+        add("green");
+    }},s.algorithms().dependencyPathBetween(5, 6));
+
   }
 }

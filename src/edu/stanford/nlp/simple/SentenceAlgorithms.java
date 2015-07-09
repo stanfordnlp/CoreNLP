@@ -326,7 +326,8 @@ public class SentenceAlgorithms {
   }
 
 
-  public List<String> dependencyPathBetween(int start, int end) {
+  @SuppressWarnings("unchecked")
+  public List<String> dependencyPathBetween(int start, int end, Function<Sentence, List<String>> selector) {
     // Get paths from a node to the root of the sentence
     LinkedList<Integer> rootToStart = new LinkedList<>();
     LinkedList<Integer> rootToEnd = new LinkedList<>();
@@ -338,7 +339,7 @@ public class SentenceAlgorithms {
     if (startAncestor == -1) {
       rootToStart.addFirst(-1);
     }
-    int endAncestor = start;
+    int endAncestor = end;
     while (sentence.governor(endAncestor).isPresent() && sentence.governor(endAncestor).get() >= 0) {
       rootToEnd.addFirst(endAncestor);
       endAncestor = sentence.governor(endAncestor).get();
@@ -348,9 +349,32 @@ public class SentenceAlgorithms {
     }
 
     // Get least common node
-    return null;   // TODO(gabor) write me!
+    int leastCommonNodeIndex = (rootToStart.size() == 0 || rootToEnd.size() == 0 || !rootToStart.get(0).equals(rootToEnd.get(0))) ? -1 : 0;
+    for (int i = 1; i < Math.min(rootToStart.size(), rootToEnd.size()); ++i) {
+      if (rootToStart.get(i).equals(rootToEnd.get(i))) {
+        leastCommonNodeIndex = i;
+      }
+    }
 
+    // Construct the path
+    if (leastCommonNodeIndex < 0) {
+      return Collections.EMPTY_LIST;
+    }
+    List<String> path = new ArrayList<>();
+    for (int i = rootToStart.size() - 1; i > leastCommonNodeIndex; --i) {
+      path.add(selector.apply(sentence).get(rootToStart.get(i)));
+      path.add("<-" + sentence.incomingDependencyLabel(rootToStart.get(i)).orElse("dep") + "-");
+    }
+    path.add(selector.apply(sentence).get(rootToStart.get(leastCommonNodeIndex)));
+    for (int i = leastCommonNodeIndex + 1; i < rootToEnd.size(); ++i) {
+      path.add("-" + sentence.incomingDependencyLabel(rootToEnd.get(i)).orElse("dep") + "->");
+      path.add(selector.apply(sentence).get(rootToEnd.get(i)));
+    }
+    return path;
+  }
 
+  public List<String> dependencyPathBetween(int start, int end) {
+    return dependencyPathBetween(start, end, Sentence::words);
   }
 
 }

@@ -861,6 +861,24 @@ public class Sentence {
   //
 
   /**
+   * A helper to get the raw Protobuf builder for a given token.
+   * Primarily useful for cache checks.
+   * @param i The index of the token to retrieve.
+   * @return A Protobuf builder for that token.
+   */
+  protected CoreNLPProtos.Token.Builder rawToken(int i) {
+    return tokensBuilders.get(i);
+  }
+
+  /**
+   * Get the backing protocol buffer for this sentence.
+   * @return The raw backing protocol buffer builder for this sentence.
+   */
+  protected CoreNLPProtos.Sentence.Builder rawSentence() {
+    return this.impl;
+  }
+
+  /**
    * Update each token in the sentence with the given information.
    * @param tokens The CoreNLP tokens returned by the {@link edu.stanford.nlp.pipeline.Annotator}.
    * @param setter The function to set a Protobuf object with the given field.
