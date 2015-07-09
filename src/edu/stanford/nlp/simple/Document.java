@@ -450,7 +450,7 @@ public class Document {
 
   protected Document runPOS(Properties props) {
     // Cached result
-    if (this.sentences != null && this.sentences.size() > 0 && this.sentence(0).rawToken(0).hasPos()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasPos()) {
       return this;
     }
     // Prerequisites
@@ -468,7 +468,7 @@ public class Document {
 
   protected Document runLemma(Properties props) {
     // Cached result
-    if (this.sentences != null && this.sentences.size() > 0 && this.sentence(0).rawToken(0).hasLemma()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasLemma()) {
       return this;
     }
     // Prerequisites
@@ -485,7 +485,7 @@ public class Document {
   }
 
   protected Document runNER(Properties props) {
-    if (this.sentences != null && this.sentences.size() > 0 && this.sentence(0).rawToken(0).hasNer()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasNer()) {
       return this;
     }
     // Run prerequisites
@@ -502,7 +502,7 @@ public class Document {
   }
 
   protected Document runParse(Properties props) {
-    if (this.sentences != null && this.sentences.size() > 0 && this.sentence(0).rawSentence().hasParseTree()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawSentence().hasParseTree()) {
       return this;
     }
     // Run annotator
@@ -531,7 +531,7 @@ public class Document {
 
   protected Document runDepparse(Properties props) {
     if (this.sentences != null && this.sentences.size() > 0 &&
-        this.sentence(0).rawSentence().hasBasicDependencies()) {
+        this.sentences.get(0).rawSentence().hasBasicDependencies()) {
       return this;
     }
     // Run prerequisites
@@ -554,7 +554,7 @@ public class Document {
   }
 
   protected Document runNatlog(Properties props) {
-    if (this.sentences != null && this.sentences.size() > 0 && this.sentence(0).rawToken(0).hasPolarity()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasPolarity()) {
       return this;
     }
     // Run prerequisites
