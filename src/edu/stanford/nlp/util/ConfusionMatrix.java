@@ -443,7 +443,7 @@ public class ConfusionMatrix<U> {
             int x = xOffset + (col * cellWidth);
             int y = yOffset + (row * cellHeight);
             float xCenter = xOffset + (col * cellWidth) + cellWidth / 3.0f;
-            float yCenter = yOffset + (row * cellHeight) + cellHeight / 3.0f;
+            float yCenter = yOffset + (row * cellHeight) + cellHeight / 2.0f;
             // Get text + Color
             String text;
             Color bg = Color.WHITE;
@@ -471,11 +471,11 @@ public class ConfusionMatrix<U> {
                 );
                 bg = Color.getHSBColor(hsb[0], hsb[1], hsb[2]);
               } else {
-                double percentGood = ((double) count) / ((double) maxDiag);
+                double percentBad = ((double) count) / ((double) maxOffdiag);
                 hsb = Color.RGBtoHSB(
-                    (int) (255 - (255.0 * percentGood / 2.0)),
-                    (int) (255 - (255.0 * percentGood)),
-                    (int) (255 - (255.0 * percentGood)),
+                    (int) (255 - (255.0 * percentBad / 2.0)),
+                    (int) (255 - (255.0 * percentBad)),
+                    (int) (255 - (255.0 * percentBad)),
                     hsb
                 );
                 bg = Color.getHSBColor(hsb[0], hsb[1], hsb[2]);
