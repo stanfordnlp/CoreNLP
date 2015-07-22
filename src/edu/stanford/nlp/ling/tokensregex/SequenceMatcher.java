@@ -1280,6 +1280,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     List<State> states;
     // Current position to match
     int curPosition = -1;
+    final int hashCode;
 
     protected MatchedStates(SequenceMatcher<T> matcher, SequencePattern.State state)
     {
@@ -1294,6 +1295,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       oldStates = new ArrayList<State>();
       this.branchStates = branchStates;
       branchStates.link(this);
+      hashCode = Objects.hashCode(this);
     }
 
     protected BranchStates getBranchStates()
