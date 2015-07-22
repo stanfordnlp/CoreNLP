@@ -187,17 +187,23 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    * @see Index#addToIndex(E)
    */
   public int addToIndexUnsafe(E o) {
-    Integer index = indexes.get(o);
-    if (index == null) {
-      if (locked) {
-        index = -1;
-      } else {
-        index = objects.size();
-        objects.add(o);
-        indexes.put(o, index);
+    if (indexes.isEmpty()) {  // a surprisingly common case in TokensRegex
+      objects.add(o);
+      indexes.put(o, 0);
+      return 0;
+    } else {
+      Integer index = indexes.get(o);
+      if (index == null) {
+        if (locked) {
+          index = -1;
+        } else {
+          index = objects.size();
+          objects.add(o);
+          indexes.put(o, index);
+        }
       }
+      return index;
     }
-    return index;
   }
 
   /**

@@ -864,9 +864,9 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     // (the branch index is with respect to parent, from 1 to number of branches the parent has)
     // TODO: This index can grow rather large, use index that allows for shrinkage
     //       (has remove function and generate new id every time)
-    HashIndex<Pair<Integer,Integer>> bidIndex = new HashIndex<Pair<Integer,Integer>>();
+    HashIndex<Pair<Integer,Integer>> bidIndex = new HashIndex<>(4);
     // Map of branch id to branch state
-    Map<Integer,BranchState> branchStates = new HashMap<Integer, BranchState>();//Generics.newHashMap();
+    Map<Integer,BranchState> branchStates = new HashMap<>();//Generics.newHashMap();
     // The activeMatchedStates is only kept to determine what branch states are still needed
     // It's okay if it overly conservative and has more states than needed,
     // And while ideally a set, it's okay to have duplicates (esp if it is a bit faster for normal cases).
@@ -894,7 +894,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
 
     protected int getBid(int parent, int child)
     {
-      return bidIndex.indexOf(new Pair<Integer,Integer>(parent,child));
+      return bidIndex.indexOf(new Pair<>(parent,child));
     }
 
     protected int newBid(int parent, int child)
