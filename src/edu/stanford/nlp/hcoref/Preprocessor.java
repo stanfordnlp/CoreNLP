@@ -736,7 +736,6 @@ public class Preprocessor {
     String nextParagraphSpeaker = "";
     int paragraphOffset = 0;
     for(CoreMap sent : doc.annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-      paragraph.add(sent);
       int currentUtter = sent.get(CoreAnnotations.TokensAnnotation.class).get(0).get(CoreAnnotations.UtteranceAnnotation.class);
       if(paragraphUtterIndex!=currentUtter) {
         nextParagraphSpeaker = findParagraphSpeaker(doc, paragraph, paragraphUtterIndex, nextParagraphSpeaker, paragraphOffset, dict);
@@ -744,6 +743,7 @@ public class Preprocessor {
         paragraphOffset += paragraph.size();
         paragraph = new ArrayList<CoreMap>();
       }
+      paragraph.add(sent);
     }
     findParagraphSpeaker(doc, paragraph, paragraphUtterIndex, nextParagraphSpeaker, paragraphOffset, dict);
   }
