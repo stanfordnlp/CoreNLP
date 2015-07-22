@@ -314,7 +314,10 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       if(dict.genderNumber.containsKey(mStr.subList(firstNameIdx, firstNameIdx+1))) return dict.genderNumber.get(mStr.subList(firstNameIdx, firstNameIdx+1));
     }
 
-    if(mStr.size() > 0 && dict.genderNumber.containsKey(mStr.subList(len-1, len))) return dict.genderNumber.get(mStr.subList(len-1, len));
+    if(mStr.size() > 0 && dict != null && dict.genderNumber != null &&
+        dict.genderNumber.containsKey(mStr.subList(len-1, len))) {
+      return dict.genderNumber.get(mStr.subList(len-1, len));
+    }
     return null;
   }
   private void setDiscourse() {
