@@ -64,16 +64,12 @@ public class CoreMapNodePatternTrigger implements MultiPatternMatcher.NodePatter
     String value;
     boolean ignoreCase;
     int keyLevel;
-    int effectiveValueLength;
 
     public StringTriggerCandidate(Class key, String value, boolean ignoreCase) {
       this.key = key;
       this.value = value;
       this.ignoreCase = ignoreCase;
-      // Favor text and lemma (more likely to be unique)
       this.keyLevel = (CoreAnnotations.TextAnnotation.class.equals(key) || CoreAnnotations.LemmaAnnotation.class.equals(key))? 1:0;
-      // Special case for -LRB- ( and -RRB- )
-      this.effectiveValueLength = ("-LRB-".equals(value) || "-RRB-".equals(value))? 1: value.length();
     }
   }
   private static final Comparator<StringTriggerCandidate> STRING_TRIGGER_CANDIDATE_COMPARATOR =
@@ -83,8 +79,8 @@ public class CoreMapNodePatternTrigger implements MultiPatternMatcher.NodePatter
         if (o1.keyLevel != o2.keyLevel) {
           return (o1.keyLevel < o2.keyLevel)? -1:1;
         } else {
-          int v1 = o1.effectiveValueLength;
-          int v2 = o2.effectiveValueLength;
+          int v1 = o1.value.length();
+          int v2 = o2.value.length();
           if (v1 != v2) return (v1 < v2)? -1:1;
           else return 0;
         }
