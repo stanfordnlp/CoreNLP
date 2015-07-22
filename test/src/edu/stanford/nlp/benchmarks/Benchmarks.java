@@ -6,8 +6,12 @@ import edu.stanford.nlp.classify.RVFDataset;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ie.machinereading.structure.AnnotationUtils;
 import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.optimization.DiffFunction;
+import edu.stanford.nlp.optimization.Minimizer;
+import edu.stanford.nlp.optimization.SGDMinimizer;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.util.Factory;
 
 import java.util.*;
 
@@ -153,6 +157,51 @@ public class Benchmarks {
         System.out.println("Training took "+delay+" ms");
     }
 
+
+    public static void benchmarkSGD() {
+        Dataset<String, String> data = new Dataset<>();
+        for (int i = 0; i < 10000; i++) {
+            Random r = new Random(42);
+            Set<String> features = new HashSet<>();
+
+            boolean cl = r.nextBoolean();
+
+            for (int j = 0; j < 1000; j++) {
+                if (cl && i % 2 == 0) {
+                    if (r.nextDouble() > 0.3) {
+                        features.add("f:"+j+":true");
+                    }
+                    else {
+                        features.add("f:"+j+":false");
+                    }
+                }
+                else {
+                    if (r.nextDouble() > 0.3) {
+                        features.add("f:" + j + ":false");
+                    }
+                    else {
+                        features.add("f:"+j+":false");
+                    }
+                }
+            }
+
+            data.add(new BasicDatum<String, String>(features, "target:" + cl));
+        }
+
+        LinearClassifierFactory<String, String> factory = new LinearClassifierFactory<>();
+        factory.setMinimizerCreator(new Factory<Minimizer<DiffFunction>>() {
+            @Override
+            public Minimizer<DiffFunction> create() {
+                return new SGDMinimizer<DiffFunction>(0.1, 100, 0, 1000);
+            }
+        });
+
+        long msStart = System.currentTimeMillis();
+        factory.trainClassifier(data);
+        long delay = System.currentTimeMillis() - msStart;
+        System.out.println("Training took "+delay+" ms");
+    }
+
     /**
      * on my machine this results in a factor of two gain, roughly
      */
@@ -190,7 +239,8 @@ public class Benchmarks {
     public static void main(String[] args) {
         for (int i = 0; i < 100; i++) {
             // benchmarkRVFLogisticRegression();
-            benchmarkLogisticRegression();
+            // benchmarkLogisticRegression();
+            benchmarkSGD();
             // benchmarkCRF();
             // testAdjacency();
         }
