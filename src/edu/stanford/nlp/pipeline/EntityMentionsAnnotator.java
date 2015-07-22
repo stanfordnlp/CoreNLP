@@ -34,33 +34,24 @@ public class EntityMentionsAnnotator implements Annotator {
 
   // Currently relies on NER annotations being okay
   // - Replace with calling NER classifiers and timeAnnotator directly
-  private final LabeledChunkIdentifier chunkIdentifier;
-
-  /**
-   * If true, heuristically search for organization acronyms, even if they are not marked
-   * explicitly by an NER tag.
-   * This is super useful (+20% recall) for KBP.
-   */
-  private final boolean doAcronyms;
+  LabeledChunkIdentifier chunkIdentifier;
 
   // TODO: Provide properties
   public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{};
 
   public EntityMentionsAnnotator() {
     chunkIdentifier = new LabeledChunkIdentifier();
-    doAcronyms = false;
   }
 
   // note: used in annotate.properties
   @SuppressWarnings("UnusedDeclaration")
   public EntityMentionsAnnotator(String name, Properties props) {
-    chunkIdentifier = new LabeledChunkIdentifier();
-    doAcronyms = Boolean.parseBoolean(props.getProperty(name + ".acronyms", props.getProperty("acronyms", "false")));
+    this();
   }
 
   private static boolean checkStrings(String s1, String s2) {
     if (s1 == null || s2 == null) {
-      return Objects.equals(s1, s2);
+      return s1 == s2;
     } else {
       return s1.equals(s2);
     }
@@ -68,7 +59,7 @@ public class EntityMentionsAnnotator implements Annotator {
 
   private static boolean checkNumbers(Number n1, Number n2) {
     if (n1 == null || n2 == null) {
-      return Objects.equals(n1, n2);
+      return n1 == n2;
     } else {
       return n1.equals(n2);
     }
@@ -154,28 +145,16 @@ public class EntityMentionsAnnotator implements Annotator {
           }
         }
       }
-      if (mentions != null) {
-        allMentions.addAll(mentions);
-      }
+      allMentions.addAll(mentions);
       sentenceIndex++;
     }
-
-    // Post-process with acronyms
-    if (doAcronyms) {
-      addAcronyms(annotation, allMentions);
-    }
-
     annotation.set(CoreAnnotations.MentionsAnnotation.class, allMentions);
-  }
-
-
-  private void addAcronyms(Annotation ann, List<CoreMap> mentions) {
   }
 
 
   @Override
   public Set<Requirement> requires() {
-    return new ArraySet<>(TOKENIZE_REQUIREMENT, NER_REQUIREMENT);
+    return new ArraySet<Requirement>(TOKENIZE_REQUIREMENT, NER_REQUIREMENT);
   }
 
   @Override
