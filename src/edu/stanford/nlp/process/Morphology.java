@@ -26,27 +26,22 @@ import java.util.function.Function;
  * available.
  * See: http://www.informatics.susx.ac.uk/research/nlp/carroll/morph.html .
  * There are several ways of invoking Morphology. One is by calling the static
- * methods:
- * <ul>
- * <li> WordTag stemStatic(String word, String tag) </li>
- * <li> WordTag stemStatic(WordTag wordTag) </li>
- * </ul>
+ * methods
+ * WordTag stemStatic(String word, String tag) or
+ * WordTag stemStatic(WordTag wordTag).
  * If we have created a Morphology object already we can use the methods
  * WordTag stem(String word, string tag) or WordTag stem(WordTag wordTag).
- * <p>
+ * <br>
  * Another way of using Morphology is to run it on an input file by running
  * <code>java Morphology filename</code>.  In this case, POS tags MUST be
  * separated from words by an underscore ("_").
- * <p>
+ * <br>
  * Note that a single instance of Morphology is not thread-safe, as
  * the underlying lexer object is not built to be re-entrant.  One thing that
  * you can do to get around this is build a new Morphology object for
- * each thread or each set of calls to the Morphology.  For example, the
+ * each set of calls to the Morphology.  For example, the
  * MorphaAnnotator builds a Morphology for each document it annotates.
  * The other approach is to use the synchronized methods in this class.
- * The crucial lexer-accessing portion of all the static methods is synchronized
- * (otherwise, their use tended to be threading bugs waiting to happen).
- * If you want less synchronization, create your own Morphology objects.
  * <br>
  * @author Kristina Toutanova (kristina@cs.stanford.edu)
  * @author Christopher Manning
@@ -89,6 +84,10 @@ public class Morphology implements Function {
     }
   }
 
+  static boolean isProper(String posTag) {
+    return posTag.equals("NNP") || posTag.equals("NNPS") || posTag.equals("NP");
+  }
+
   public Word stem(Word w) {
     return new Word(stem(w.value()));
   }
@@ -123,7 +122,7 @@ public class Morphology implements Function {
   }
 
   /**
-   * Adds stem under annotation {@code ann} to the given CoreLabel.
+   * Adds annotation <code>ann</code> to the given CoreLabel.
    * Assumes that it has a TextAnnotation and PartOfSpeechAnnotation.
    */
   public void stem(CoreLabel label,
@@ -178,18 +177,31 @@ public class Morphology implements Function {
    *  The default is to lowercase non-proper-nouns, unless options have
    *  been set.
    */
-  public static synchronized WordTag stemStatic(String word, String tag) {
+  public static WordTag stemStatic(String word, String tag) {
     initStaticLexer();
     return new WordTag(lemmatize(word, tag, staticLexer, staticLexer.option(1)), tag);
   }
 
 
-  public static synchronized String lemmaStatic(String word, String tag,
-                                                boolean lowercase) {
+  public static String lemmaStatic(String word, String tag,
+                                   boolean lowercase) {
     initStaticLexer();
     return lemmatize(word, tag, staticLexer, lowercase);
   }
 
+
+
+  public static synchronized WordTag stemStaticSynchronized(String word,
+                                                            String tag) {
+    return stemStatic(word, tag);
+  }
+
+
+  public static synchronized String lemmaStaticSynchronized(String word,
+                                                            String tag,
+                                                            boolean lowercase) {
+    return lemmaStatic(word, tag, lowercase);
+  }
 
   /** Return a new WordTag which has the lemma as the value of word().
    *  The default is to lowercase non-proper-nouns, unless options have
@@ -200,7 +212,6 @@ public class Morphology implements Function {
   }
 
 
-  @Override
   public Object apply(Object in) {
     if (in instanceof WordTag) {
       WordTag wt = (WordTag) in;

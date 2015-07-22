@@ -7,7 +7,6 @@ import edu.stanford.nlp.naturalli.OperatorSpec;
 import edu.stanford.nlp.naturalli.Polarity;
 import edu.stanford.nlp.naturalli.SentenceFragment;
 import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
 import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -163,7 +162,7 @@ public class Sentence {
 
   /** Helper for creating a sentence from a document and a CoreMap representation */
   protected Sentence(Document doc, CoreMap sentence) {
-    this(doc, doc.serializer.toProtoBuilder(sentence));
+    this(doc, doc.serializer.toProto(sentence).toBuilder());
     this.impl.setText(sentence.get(CoreAnnotations.TextAnnotation.class));
   }
 
@@ -403,94 +402,9 @@ public class Sentence {
     return ners(EMPTY_PROPS);
   }
 
-  /**
-   * Run RegexNER over this sentence. Note that this is an in place operation, and simply
-   * updates the NER tags.
-   * Therefore, every time this function is called, it re-runs the annotator!
-   *
-   * @param mappingFile The regexner mapping file.
-   *
-   * @return
-   */
-  public void regexner(String mappingFile) {
-    Properties props = new Properties();
-    for (Object prop : EMPTY_PROPS.keySet()) {
-      props.setProperty(prop.toString(), EMPTY_PROPS.getProperty(prop.toString()));
-    }
-    props.setProperty(Annotator.STANFORD_REGEXNER + ".mapping", mappingFile);
-    this.document.runRegexner(props);
-  }
-
   /** @see Sentence#ners(java.util.Properties) */
   public String ner(int index) {
     return ners().get(index);
-  }
-
-  /**
-   * Get all mentions of the given NER tag, as a list of surface forms.
-   * @param nerTag The ner tag to search for, case sensitive.
-   * @return A list of surface forms of the entities of this tag. This is using the {@link Sentence#word(int)} function.
-   */
-  public List<String> mentions(String nerTag) {
-    List<String> mentionsOfTag = new ArrayList<>();
-    StringBuilder lastMention = new StringBuilder();
-    String lastTag = "O";
-    for (int i = 0; i < length(); ++i) {
-      String ner = ner(i);
-      if (ner.equals(nerTag) && !lastTag.equals(nerTag)) {
-        // case: beginning of span
-        lastMention.append(word(i)).append(' ');
-      } else if (ner.equals(nerTag) && lastTag.equals(nerTag)) {
-        // case: in span
-        lastMention.append(word(i)).append(' ');
-      } else if (!ner.equals(nerTag) && lastTag.equals(nerTag)) {
-        // case: end of span
-        if (lastMention.length() > 0) {
-          mentionsOfTag.add(lastMention.toString().trim());
-        }
-        lastMention.setLength(0);
-      }
-      lastTag = ner;
-    }
-    if (lastMention.length() > 0) {
-      mentionsOfTag.add(lastMention.toString().trim());
-    }
-    return mentionsOfTag;
-  }
-
-  /**
-   * Get all mentions of any NER tag, as a list of surface forms.
-   * @return A list of surface forms of the entities in this sentence. This is using the {@link Sentence#word(int)} function.
-   */
-  public List<String> mentions() {
-    List<String> mentionsOfTag = new ArrayList<>();
-    StringBuilder lastMention = new StringBuilder();
-    String lastTag = "O";
-    for (int i = 0; i < length(); ++i) {
-      String ner = ner(i);
-      if (!ner.equals("O") && !lastTag.equals(ner)) {
-        // case: beginning of span
-        if (lastMention.length() > 0) {
-          mentionsOfTag.add(lastMention.toString().trim());
-        }
-        lastMention.setLength(0);
-        lastMention.append(word(i)).append(' ');
-      } else if (!ner.equals("O") && lastTag.equals(ner)) {
-        // case: in span
-        lastMention.append(word(i)).append(' ');
-      } else if (ner.equals("O") && !lastTag.equals("O")) {
-        // case: end of span
-        if (lastMention.length() > 0) {
-          mentionsOfTag.add(lastMention.toString().trim());
-        }
-        lastMention.setLength(0);
-      }
-      lastTag = ner;
-    }
-    if (lastMention.length() > 0) {
-      mentionsOfTag.add(lastMention.toString().trim());
-    }
-    return mentionsOfTag;
   }
 
   /**
@@ -552,7 +466,7 @@ public class Sentence {
 
   /** @see Sentence#governor(java.util.Properties, int, SemanticGraphFactory.Mode) */
   public Optional<Integer> governor(Properties props, int index) {
-    return governor(props, index, SemanticGraphFactory.Mode.COLLAPSED_TREE);
+    return governor(props, index, SemanticGraphFactory.Mode.BASIC);
   }
 
   /** @see Sentence#governor(java.util.Properties, int, SemanticGraphFactory.Mode) */
@@ -590,7 +504,7 @@ public class Sentence {
 
   /** @see Sentence#governors(java.util.Properties, SemanticGraphFactory.Mode) */
   public List<Optional<Integer>> governors(Properties props) {
-    return governors(props, SemanticGraphFactory.Mode.COLLAPSED_TREE);
+    return governors(props, SemanticGraphFactory.Mode.BASIC);
   }
 
   /** @see Sentence#governors(java.util.Properties, SemanticGraphFactory.Mode) */
@@ -600,7 +514,7 @@ public class Sentence {
 
   /** @see Sentence#governors(java.util.Properties, SemanticGraphFactory.Mode) */
   public List<Optional<Integer>> governors() {
-    return governors(EMPTY_PROPS, SemanticGraphFactory.Mode.COLLAPSED_TREE);
+    return governors(EMPTY_PROPS, SemanticGraphFactory.Mode.BASIC);
   }
 
   /**
@@ -627,7 +541,7 @@ public class Sentence {
 
   /** @see Sentence#incomingDependencyLabel(java.util.Properties, int, SemanticGraphFactory.Mode) */
   public Optional<String> incomingDependencyLabel(Properties props, int index) {
-    return incomingDependencyLabel(props, index, SemanticGraphFactory.Mode.COLLAPSED_TREE);
+    return incomingDependencyLabel(props, index, SemanticGraphFactory.Mode.BASIC);
   }
 
   /** @see Sentence#incomingDependencyLabel(java.util.Properties, int, SemanticGraphFactory.Mode) */
@@ -661,12 +575,12 @@ public class Sentence {
 
   /** @see Sentence#incomingDependencyLabels(java.util.Properties, SemanticGraphFactory.Mode) */
   public List<Optional<String>> incomingDependencyLabels(Properties props) {
-    return incomingDependencyLabels(props, SemanticGraphFactory.Mode.COLLAPSED_TREE);
+    return incomingDependencyLabels(props, SemanticGraphFactory.Mode.BASIC);
   }
 
   /** @see Sentence#incomingDependencyLabels(java.util.Properties, SemanticGraphFactory.Mode) */
   public List<Optional<String>> incomingDependencyLabels() {
-    return incomingDependencyLabels(EMPTY_PROPS, SemanticGraphFactory.Mode.COLLAPSED_TREE);
+    return incomingDependencyLabels(EMPTY_PROPS, SemanticGraphFactory.Mode.BASIC);
   }
 
 
@@ -687,12 +601,12 @@ public class Sentence {
 
   /** @see Sentence#dependencyGraph(Properties, SemanticGraphFactory.Mode) */
   public SemanticGraph dependencyGraph(Properties props) {
-    return dependencyGraph(props, SemanticGraphFactory.Mode.COLLAPSED_TREE);
+    return dependencyGraph(props, SemanticGraphFactory.Mode.BASIC);
   }
 
   /** @see Sentence#dependencyGraph(Properties, SemanticGraphFactory.Mode) */
   public SemanticGraph dependencyGraph() {
-    return dependencyGraph(EMPTY_PROPS, SemanticGraphFactory.Mode.COLLAPSED_TREE);
+    return dependencyGraph(EMPTY_PROPS, SemanticGraphFactory.Mode.BASIC);
   }
 
   /** @see Sentence#dependencyGraph(Properties, SemanticGraphFactory.Mode) */
@@ -878,24 +792,6 @@ public class Sentence {
   //
   // HELPERS FROM DOCUMENT
   //
-
-  /**
-   * A helper to get the raw Protobuf builder for a given token.
-   * Primarily useful for cache checks.
-   * @param i The index of the token to retrieve.
-   * @return A Protobuf builder for that token.
-   */
-  public CoreNLPProtos.Token.Builder rawToken(int i) {
-    return tokensBuilders.get(i);
-  }
-
-  /**
-   * Get the backing protocol buffer for this sentence.
-   * @return The raw backing protocol buffer builder for this sentence.
-   */
-  public CoreNLPProtos.Sentence.Builder rawSentence() {
-    return this.impl;
-  }
 
   /**
    * Update each token in the sentence with the given information.

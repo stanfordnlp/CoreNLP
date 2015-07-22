@@ -32,7 +32,6 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
    * Constructs an ArraySet with the specified elements.
    * @param elements the elements to be put in the set.
    */
-  @SafeVarargs
   public ArraySet(E ... elements) {
     this(elements.length);
     for (E element : elements) {
@@ -71,5 +70,4 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
   }
 
   private static final long serialVersionUID = 1L;
-
 }
