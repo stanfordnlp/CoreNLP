@@ -1126,7 +1126,7 @@ public class IOUtils {
    */
   public static String slurpFile(String filename, String encoding)
           throws IOException {
-    Reader r = readerFromString(filename, encoding);
+    Reader r = getBufferedReaderFromClasspathOrFileSystem(filename, encoding);
     return IOUtils.slurpReader(r);
   }
 
