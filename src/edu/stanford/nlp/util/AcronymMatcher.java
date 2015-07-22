@@ -85,15 +85,7 @@ public class AcronymMatcher {
   public static boolean isAcronym(String str, List<?> tokens)
   {
     List<String> strs = new ArrayList<String>(tokens.size());
-    for (Object tok : tokens) {
-      if (tok instanceof String) {
-        strs.add(tok.toString());
-      } else if (tok instanceof CoreMap) {
-        strs.add(((CoreMap) tok).get(CoreAnnotations.TextAnnotation.class));
-      } else {
-        strs.add(tok.toString());
-      }
-    }
+    for (Object tok : tokens) { strs.add(tok instanceof String ? tok.toString() : ((CoreLabel) tok).word()); }
     return isAcronymImpl(str, strs);
   }
 
