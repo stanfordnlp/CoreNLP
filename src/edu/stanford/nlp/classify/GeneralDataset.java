@@ -302,7 +302,9 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
   /**
    * Returns the number of examples ({@link Datum}s) in the Dataset.
    */
-  public int size() { return size; }
+  public int size() {
+    return size;
+  }
 
   protected void trimData() {
     data = trimToSize(data);
@@ -314,19 +316,25 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
 
   protected int[] trimToSize(int[] i) {
     int[] newI = new int[size];
-    System.arraycopy(i, 0, newI, 0, size);
+    synchronized (System.class) {
+      System.arraycopy(i, 0, newI, 0, size);
+    }
     return newI;
   }
 
   protected int[][] trimToSize(int[][] i) {
     int[][] newI = new int[size][];
-    System.arraycopy(i, 0, newI, 0, size);
+    synchronized (System.class) {
+      System.arraycopy(i, 0, newI, 0, size);
+    }
     return newI;
   }
 
   protected double[][] trimToSize(double[][] i) {
     double[][] newI = new double[size][];
-    System.arraycopy(i, 0, newI, 0, size);
+    synchronized (System.class) {
+      System.arraycopy(i, 0, newI, 0, size);
+    }
     return newI;
   }
 

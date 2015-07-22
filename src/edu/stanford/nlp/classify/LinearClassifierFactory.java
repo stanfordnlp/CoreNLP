@@ -481,7 +481,9 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     System.err.println("adaptWeights in LinearClassifierFactory. increase weight dim only");
     double[][] newWeights = new double[adaptDataset.featureIndex.size()][adaptDataset.labelIndex.size()];
 
-    System.arraycopy(origWeights,0,newWeights,0,origWeights.length);
+    synchronized (System.class) {
+      System.arraycopy(origWeights, 0, newWeights, 0, origWeights.length);
+    }
 
     AdaptedGaussianPriorObjectiveFunction<L, F> objective = new AdaptedGaussianPriorObjectiveFunction<L, F>(adaptDataset, logPrior,newWeights);
 

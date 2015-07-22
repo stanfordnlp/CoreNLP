@@ -518,4 +518,16 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
     return kept;
   }
 
+  /**
+   * Keeps the temporary tags on the sentence after extraction has finished.
+   * This can have potentially unexpected results if you run the same sentence through multiple extractors;
+   * but, it makes the extraction process 20+% faster.
+   *
+   * @return This object
+   */
+  public CoreMapExpressionExtractor keepTemporaryTags() {
+    this.keepTags = true;
+    return this;
+  }
+
 }
