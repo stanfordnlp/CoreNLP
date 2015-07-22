@@ -3543,18 +3543,21 @@ String VarName() : {
       for (int i = 0; i < jj_endpos; i++) {
         jj_expentry[i] = jj_lasttokens[i];
       }
-      jj_entries_loop: for (java.util.Iterator<?> it = jj_expentries.iterator(); it.hasNext();) {
+      boolean exists = false;
+      for (java.util.Iterator<?> it = jj_expentries.iterator(); it.hasNext();) {
+        exists = true;
         int[] oldentry = (int[])(it.next());
         if (oldentry.length == jj_expentry.length) {
           for (int i = 0; i < jj_expentry.length; i++) {
             if (oldentry[i] != jj_expentry[i]) {
-              continue jj_entries_loop;
+              exists = false;
+              break;
             }
           }
-          jj_expentries.add(jj_expentry);
-          break jj_entries_loop;
+          if (exists) break;
         }
       }
+      if (!exists) jj_expentries.add(jj_expentry);
       if (pos != 0) jj_lasttokens[(jj_endpos = pos) - 1] = kind;
     }
   }
