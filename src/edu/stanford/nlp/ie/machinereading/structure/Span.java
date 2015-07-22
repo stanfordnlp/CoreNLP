@@ -222,11 +222,4 @@ public class Span implements Serializable, Iterable<Integer> {
   public static Span fromPairOneIndexed(Pair<Integer, Integer> span) {
     return fromValues(span.first - 1, span.second - 1);
   }
-
-  /**
-   * The union of two spans. That is, the minimal span that contains both.
-   */
-  public static Span union(Span a, Span b) {
-    return Span.fromValues(Math.min(a.start, b.start), Math.min(a.end, b.end));
-  }
 }

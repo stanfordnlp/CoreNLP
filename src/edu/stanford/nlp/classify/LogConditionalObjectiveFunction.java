@@ -71,7 +71,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
   /** The flag to tell the gradient computations to multithread over the data.
    * keenon (june 2015): On my machine,
    * */
-  protected boolean parallelGradientCalculation = true;
+  public boolean parallelGradientCalculation = true;
 
   /** Multithreading gradient calculations is a bit cheaper if you reuse the threads. */
   protected int threads = Execution.threads;
