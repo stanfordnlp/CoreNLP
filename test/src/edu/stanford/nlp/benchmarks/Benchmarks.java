@@ -24,13 +24,16 @@ public class Benchmarks {
      * Single threaded, 4700 ms
      * Multi threaded, 700 ms
      *
+     * With same data, seed 42, 245 ms
+     * With reordered accesses for cacheing, 195 ms
+     * Down to 80% of the time, not huge but a win nonetheless
+     *
      * with 8 cpus, a 6.7x speedup -- almost, but not quite linear, pretty good
      */
     public static void benchmarkRVFLogisticRegression() {
-        Random r = new Random(42);
-
         RVFDataset<String, String> data = new RVFDataset<>();
         for (int i = 0; i < 10000; i++) {
+            Random r = new Random(42);
             Counter<String> features = new ClassicCounter<>();
 
             boolean cl = r.nextBoolean();
@@ -64,13 +67,16 @@ public class Benchmarks {
      * Single threaded, 4100 ms
      * Multi threaded, 600 ms
      *
+     * With same data, seed 42, 52 ms
+     * With reordered accesses for cacheing, 38 ms
+     * Down to 73% of the time
+     *
      * with 8 cpus, a 6.8x speedup -- basically the same as with RVFDatum
      */
     public static void benchmarkLogisticRegression() {
-        Random r = new Random(42);
-
         Dataset<String, String> data = new Dataset<>();
         for (int i = 0; i < 10000; i++) {
+            Random r = new Random(42);
             Set<String> features = new HashSet<>();
 
             boolean cl = r.nextBoolean();
@@ -147,11 +153,46 @@ public class Benchmarks {
         System.out.println("Training took "+delay+" ms");
     }
 
+    /**
+     * on my machine this results in a factor of two gain, roughly
+     */
+    public static void testAdjacency() {
+        double[][] sqar = new double[10000][1000];
+        Random r = new Random();
+
+        int k = 0;
+        long msStart = System.currentTimeMillis();
+        for (int i = 0; i < 10000; i++) {
+            int loc = r.nextInt(10000);
+            for (int j = 0; j < 1000; j++) {
+                k+= sqar[loc][j];
+            }
+        }
+        long delay = System.currentTimeMillis() - msStart;
+        System.out.println("Scanning with cache friendly lookups took "+delay+" ms");
+
+        int[] randLocs = new int[10000];
+        for (int i = 0; i < 10000; i++) {
+            randLocs[i] = r.nextInt(10000);
+        }
+
+        k = 0;
+        msStart = System.currentTimeMillis();
+        for (int j = 0; j < 1000; j++) {
+            for (int i = 0; i < 10000; i++) {
+                k+= sqar[randLocs[i]][j];
+            }
+        }
+        delay = System.currentTimeMillis() - msStart;
+        System.out.println("Scanning with cache UNfriendly lookups took "+delay+" ms");
+    }
+
     public static void main(String[] args) {
         for (int i = 0; i < 100; i++) {
             // benchmarkRVFLogisticRegression();
-            // benchmarkLogisticRegression();
-            benchmarkCRF();
+            benchmarkLogisticRegression();
+            // benchmarkCRF();
+            // testAdjacency();
         }
     }
 }

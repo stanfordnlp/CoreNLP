@@ -242,8 +242,8 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
 
         int[] featuresArr = data[d];
 
-        for (int feature : featuresArr) {
-          for (int c = 0; c < numClasses; c++) {
+        for (int c = 0; c < numClasses; c++) {
+          for (int feature : featuresArr) {
             int i = indexOf(feature, c);
             sums[c] += x[i];
           }
@@ -261,8 +261,8 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
           }
         }
 
-        for (int feature : featuresArr) {
-          for (int c = 0; c < numClasses; c++) {
+        for (int c = 0; c < numClasses; c++) {
+          for (int feature : featuresArr) {
             int i = indexOf(feature, c);
             localDerivative[i] += probs[c];
           }
@@ -874,18 +874,16 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       double[] sums = new double[numClasses];
       double[] probs = new double[numClasses];
 
-      // TODO: Doing the thread stride this way, while convenient, breaks cache locality on some architectures, so
-      // is not always the fastest thing to do.
       for (int d = threadIdx; d < data.length; d += numThreads) {
         final int[] features = data[d];
         final double[] vals = values[d];
         // activation
         Arrays.fill(sums, 0.0);
 
-        for (int f = 0; f < features.length; f++) {
-          final int feature = features[f];
-          final double val = vals[f];
-          for (int c = 0; c < numClasses; c++) {
+        for (int c = 0; c < numClasses; c++) {
+          for (int f = 0; f < features.length; f++) {
+            final int feature = features[f];
+            final double val = vals[f];
             int i = indexOf(feature, c);
             sums[c] += x[i] * val;
           }
@@ -904,10 +902,10 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
           }
         }
 
-        for (int f = 0; f < features.length; f++) {
-          final int feature = features[f];
-          final double val = vals[f];
-          for (int c = 0; c < numClasses; c++) {
+        for (int c = 0; c < numClasses; c++) {
+          for (int f = 0; f < features.length; f++) {
+            final int feature = features[f];
+            final double val = vals[f];
             int i = indexOf(feature, c);
             localDerivative[i] += probs[c] * val;
           }
