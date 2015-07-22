@@ -3,6 +3,8 @@ package edu.stanford.nlp.classify;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -14,6 +16,8 @@ import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.math.DoubleAD;
 import edu.stanford.nlp.optimization.AbstractStochasticCachingDiffUpdateFunction;
 import edu.stanford.nlp.optimization.StochasticCalculateMethods;
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.SystemUtils;
@@ -222,7 +226,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
     double localValue = 0.0;
     double[] x;
     int[] batch;
-    double[] localDerivative;
+    Counter<Integer> sparseGradient = new ClassicCounter<>();
     CountDownLatch latch;
 
     public CLBatchDerivativeCalculation(int numThreads, int threadIdx, int[] batch, double[] x, int derivativeSize, CountDownLatch latch) {
@@ -230,7 +234,6 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       this.threadIdx = threadIdx;
       this.x = x;
       this.batch = batch;
-      this.localDerivative = new double[derivativeSize];
       this.latch = latch;
     }
 
@@ -239,7 +242,6 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       double[] sums = new double[numClasses];
       double[] probs = new double[numClasses];
 
-      // TODO: could probably get slightly better speedup if threads took linear subsequences, for cacheing
       int batchSize = batch == null ? data.length : batch.length;
       for (int m = threadIdx; m < batchSize; m += numThreads) {
         int d = batch == null ? m : batch[m];
@@ -271,7 +273,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
         for (int c = 0; c < numClasses; c++) {
           for (int feature : featuresArr) {
             int i = indexOf(feature, c);
-            localDerivative[i] += probs[c];
+            sparseGradient.incrementCount(i, probs[c]);
           }
         }
 
@@ -335,8 +337,8 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
 
       for (int i = 0; i < threads; i++) {
         value += runnables[i].localValue;
-        for (int j = 0; j < derivative.length; j++) {
-          derivative[j] += runnables[i].localDerivative[j];
+        for (int j : runnables[i].sparseGradient.keySet()) {
+          derivative[j] += runnables[i].sparseGradient.getCount(j);
         }
       }
     }
@@ -655,34 +657,96 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
     return value;
   }
 
+  private class HogWildStochasticUpdate implements Runnable {
+    int numThreads;
+    int threadIdx;
+    double[] x;
+    double xscale;
+    int[] batch;
+    double gain;
+    CountDownLatch latch;
+
+    double localValue = 0.0;
+
+    public HogWildStochasticUpdate(int numThreads, int threadIdx, double[] x, double xscale, int[] batch, double gain, CountDownLatch latch) {
+      this.numThreads = numThreads;
+      this.threadIdx = threadIdx;
+      this.x = x;
+      this.xscale = xscale;
+      this.batch = batch;
+      this.gain = gain;
+      this.latch = latch;
+    }
+
+    @Override
+    public void run() {
+      double[] sums = new double[numClasses];
+      double[] probs = new double[numClasses];
+
+      for (int t = threadIdx; t < batch.length; t += numThreads) {
+        int m = batch[t];
+
+        // Sets the index based on the current batch
+        int[] features = data[m];
+        // activation
+
+        Arrays.fill(sums, 0.0);
+
+        for (int c = 0; c < numClasses; c++) {
+          for (int f = 0; f < features.length; f++) {
+            int i = indexOf(features[f], c);
+            if (values != null) {
+              sums[c] += x[i] * xscale * values[m][f];
+            } else {
+              sums[c] += x[i] * xscale;
+            }
+          }
+        }
+
+        for (int f = 0; f < features.length; f++) {
+          int i = indexOf(features[f], labels[m]);
+          double v = (values != null) ? values[m][f] : 1;
+          double delta = (dataWeights != null) ? dataWeights[m] * v : v;
+          x[i] += delta * gain;
+        }
+
+        double total = ArrayMath.logSum(sums);
+
+        for (int c = 0; c < numClasses; c++) {
+          probs[c] = Math.exp(sums[c] - total);
+
+          if (dataWeights != null) {
+            probs[c] *= dataWeights[m];
+          }
+          for (int f = 0; f < features.length; f++) {
+            int i = indexOf(features[f], c);
+            double v = (values != null) ? values[m][f] : 1;
+            double delta = probs[c] * v;
+            x[i] -= delta * gain;
+          }
+        }
+
+        double dV = sums[labels[m]] - total;
+        if (dataWeights != null) {
+          dV *= dataWeights[m];
+        }
+        value -= dV;
+      }
+
+      latch.countDown();
+    }
+  }
+
   @Override
   public double calculateStochasticUpdate(double[] x, double xscale, int[] batch, double gain) {
     value = 0.0;
-
-    // Double check that we don't have a mismatch between parallel and batch size settings
-
-    if (parallelGradientCalculation && threads > 1) {
-      int examplesPerProcessor = 50;
-      if (batch.length <= Runtime.getRuntime().availableProcessors() * examplesPerProcessor) {
-        System.err.println("\n\n***************");
-        System.err.println("CONFIGURATION ERROR: YOUR BATCH SIZE DOESN'T MEET PARALLEL MINIMUM SIZE FOR PERFORMANCE");
-        System.err.println("Batch size: " + batch.length);
-        System.err.println("CPUS: " + Runtime.getRuntime().availableProcessors());
-        System.err.println("Minimum batch size per CPU: " + examplesPerProcessor);
-        System.err.println("MINIMIM BATCH SIZE ON THIS MACHINE: " + (Runtime.getRuntime().availableProcessors() * examplesPerProcessor));
-        System.err.println("TURNING OFF PARALLEL GRADIENT COMPUTATION");
-        System.err.println("***************\n");
-        parallelGradientCalculation = false;
-      }
-    }
-
-    if (parallelGradientCalculation && threads > 1) {
+    if (parallelGradientCalculation && Execution.threads > 1) {
       // Launch several threads (reused out of our fixed pool) to handle the computation
       @SuppressWarnings("unchecked")
-      CLBatchDerivativeCalculation[] runnables = (CLBatchDerivativeCalculation[])Array.newInstance(CLBatchDerivativeCalculation.class, threads);
+      HogWildStochasticUpdate[] runnables = (HogWildStochasticUpdate[])Array.newInstance(HogWildStochasticUpdate.class, threads);
       CountDownLatch latch = new CountDownLatch(threads);
       for (int i = 0; i < threads; i++) {
-        runnables[i] = new CLBatchDerivativeCalculation(threads, i, batch, x, x.length, latch);
+        runnables[i] = new HogWildStochasticUpdate(threads, i, x, xscale, batch, gain, latch);
         executorService.execute(runnables[i]);
       }
       try {
@@ -693,9 +757,6 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
 
       for (int i = 0; i < threads; i++) {
         value += runnables[i].localValue;
-        for (int j = 0; j < x.length; j++) {
-          x[j] += runnables[i].localDerivative[j] * xscale * gain;
-        }
       }
     }
     else {
