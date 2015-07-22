@@ -529,4 +529,5 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
     this.keepTags = true;
     return this;
   }
+
 }
