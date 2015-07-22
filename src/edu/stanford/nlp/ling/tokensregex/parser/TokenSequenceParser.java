@@ -20,6 +20,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
         try{
             TokenSequenceParser p = new TokenSequenceParser(r);
             List<SequenceMatchRules.Rule> rules = p.RuleList(env);
+            System.err.println("Read " + rules.size() + " rules");
             return new CoreMapExpressionExtractor(env, rules);
         }catch(TokenMgrError error){
             throw new TokenSequenceParseException("Parsing failed. Error: " + error);
