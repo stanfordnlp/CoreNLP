@@ -27,9 +27,9 @@ import edu.stanford.nlp.util.StringUtils;
 /**
  * The idea is that you can learn features that are important using ML algorithm
  * and use those features in learning weights for patterns.
- * 
+ *
  * @author Sonal Gupta (sonalg@stanford.edu)
- * 
+ *
  */
 public class LearnImportantFeatures {
 
@@ -105,7 +105,7 @@ public class LearnImportantFeatures {
   // System.out.println(j48decisiontree.toString());
   //
   // }
-  
+
   private int sample(Map<String, DataInstance> sents, Random r, Random rneg, double perSelectNeg, double perSelectRand, int numrand, List<Pair<String, Integer>> chosen, RVFDataset<String, String> dataset){
     for (Entry<String, DataInstance> en : sents.entrySet()) {
       CoreLabel[] sent = en.getValue().getTokens().toArray(new CoreLabel[0]);
@@ -163,7 +163,7 @@ public class LearnImportantFeatures {
     LogisticClassifierFactory<String, String> logfactory = new LogisticClassifierFactory<String, String>();
     LogisticClassifier<String, String> classifier = logfactory
         .trainClassifier(dataset);
-    Counter<String> weights = classifier.weightsAsGenericCounter();
+    Counter<String> weights = classifier.weightsAsCounter();
     if (!classifier.getLabelForInternalPositiveClass().equals(answerLabel))
       weights = Counters.scale(weights, -1);
     if (thresholdWeight != null) {
@@ -191,7 +191,7 @@ public class LearnImportantFeatures {
       label = answerLabel;
     else
       label = "O";
-    
+
       CollectionValuedMap<String, CandidatePhrase> matchedPhrases = l
           .get(PatternsAnnotations.MatchedPhrases.class);
       if (matchedPhrases == null) {
@@ -206,7 +206,7 @@ public class LearnImportantFeatures {
         feat.setCount("Cluster-" + num, 1.0);
       }
 
-    
+
 
     // feat.incrementCount("WORD-" + l.word());
     // feat.incrementCount("LEMMA-" + l.lemma());
