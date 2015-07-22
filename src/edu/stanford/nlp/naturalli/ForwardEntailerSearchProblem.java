@@ -161,7 +161,7 @@ public class ForwardEntailerSearchProblem {
       if( parseTree.inDegree(vertex) > 1 ) {
         SemanticGraphEdge conjAnd = null;
         for (SemanticGraphEdge edge : parseTree.incomingEdgeIterable(vertex)) {
-          if (edge.getRelation().toString().equals("conj_and")) {
+          if (edge.getRelation().toString().equals("conj:and")) {
             conjAnd = edge;
           }
         }
@@ -248,7 +248,9 @@ public class ForwardEntailerSearchProblem {
       // Overhead with popping a node.
       if (numTicks >= maxTicks) { return results; }
       numTicks += 1;
-      if (results.size() >= maxResults) { return results; }
+      if (results.size() >= maxResults) {
+        return results;
+      }
       SearchState state = fringe.pop();
       assert state.score > 0.0;
       IndexedWord currentWord = topologicalVertices.get(state.currentIndex);

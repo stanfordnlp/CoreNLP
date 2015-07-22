@@ -28,6 +28,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap> {
         try{
             TokenSequenceParser p = new TokenSequenceParser(r);
             List<SequenceMatchRules.Rule> rules = p.RuleList(env);
+            System.err.println("Read " + rules.size() + " rules");
             return new CoreMapExpressionExtractor(env, rules);
         }catch(TokenMgrError error){
             throw new TokenSequenceParseException("Parsing failed. Error: " + error);
@@ -38,6 +39,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap> {
         try{
             TokenSequenceParser p = new TokenSequenceParser(r);
             List<SequenceMatchRules.Rule> rules = p.RuleList(extractor.getEnv());
+            System.err.println("Read " + rules.size() + " rules");
             extractor.appendRules(rules);
         }catch(TokenMgrError error){
             throw new TokenSequenceParseException("Parsing failed. Error: " + error);
@@ -121,7 +123,7 @@ TOKEN:
 |   < NONNEGINT: (["0"-"9"])+ >
 |   < INT: (["+","-"])? (["0"-"9"])+ >
 |   < LONGINT: (["+","-"])? (["0"-"9"])+ "L" >
-|   < REAL: (["+","-"])? (["0"-"9"])+ "." (["0"-"9"])+ >
+|   < REAL: (["+","-"])? (["0"-"9","E","-"])+ "." (["0"-"9","E","-"])+ >
 |	< REGEX: "/" ("\\/"|~["\n","\r","/"])* "/" >
 |	< STR: "\"" ("\\\""|~["\n","\r", "\""])* "\"" >
 |   < NUMCMP: "<=" | ">=" | ">" | "<" | "==" | "!=" >
