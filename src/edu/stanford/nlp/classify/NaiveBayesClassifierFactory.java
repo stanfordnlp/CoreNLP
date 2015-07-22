@@ -269,7 +269,9 @@ public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F
     NBWeights(double[][] wts, int[] numValues) {
       int numClasses = wts[0].length;
       priors = new double[numClasses];
-      System.arraycopy(wts[0], 0, priors, 0, numClasses);
+      synchronized (System.class) {
+        System.arraycopy(wts[0], 0, priors, 0, numClasses);
+      }
       int[] sumValues = new int[numValues.length];
       for (int j = 1; j < numValues.length; j++) {
         sumValues[j] = sumValues[j - 1] + numValues[j - 1];

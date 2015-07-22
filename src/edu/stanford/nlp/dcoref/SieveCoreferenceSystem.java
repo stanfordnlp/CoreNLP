@@ -858,8 +858,9 @@ public class SieveCoreferenceSystem {
   }
 
   /**
-   * Do coreference resolution using one sieve pass
-   * @param document - an extracted document
+   * Do coreference resolution using one sieve pass.
+   *
+   * @param document An extracted document
    * @throws Exception
    */
   private void coreference(
