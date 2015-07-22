@@ -28,7 +28,6 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap> {
         try{
             TokenSequenceParser p = new TokenSequenceParser(r);
             List<SequenceMatchRules.Rule> rules = p.RuleList(env);
-            System.err.println("Read " + rules.size() + " rules");
             return new CoreMapExpressionExtractor(env, rules);
         }catch(TokenMgrError error){
             throw new TokenSequenceParseException("Parsing failed. Error: " + error);
@@ -39,7 +38,6 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap> {
         try{
             TokenSequenceParser p = new TokenSequenceParser(r);
             List<SequenceMatchRules.Rule> rules = p.RuleList(extractor.getEnv());
-            System.err.println("Read " + rules.size() + " rules");
             extractor.appendRules(rules);
         }catch(TokenMgrError error){
             throw new TokenSequenceParseException("Parsing failed. Error: " + error);
@@ -97,6 +95,24 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap> {
       // todo [cdm 2014]: I suspect this doesn't work because of how JavaCC escapes \
       // Trim start/end quote and unescape \"
       return str.substring(1,str.length()-1).replaceAll("\\\\\"", "\"");
+    }
+
+    private void appendSpecialTokens( StringBuilder sb, Token st ) {
+      if( st != null ) {
+        appendSpecialTokens( sb, st.specialToken );
+        sb.append( st.image );
+      }
+    }
+
+    private String getStringFromTokens(Token head, Token tail, boolean includeSpecial) {
+      StringBuilder sb = new StringBuilder();
+      for( Token p = head ; p != tail ; p = p.next ) {
+        if (includeSpecial) {
+          appendSpecialTokens( sb, p.specialToken );
+        }
+        sb.append( p.image );
+      }
+      return sb.toString();
     }
 }
 
@@ -287,6 +303,8 @@ Map<String,Expression> FieldValue(Env env, Map<String,Expression> attributes) : 
 
 Value BasicValue(Env env) : {
 	Token tok = null;
+	Token head = null;
+	Token tail = null;
 	SequencePattern.PatternExpr seqRegex = null;
 }   {
         tok = <REGEX> { return new Expressions.RegexValue(/*"REGEX",*/ tok.image.substring(1,tok.image.length()-1)); }
@@ -299,8 +317,9 @@ Value BasicValue(Env env) : {
         |
         tok = <REAL> { return new Expressions.PrimitiveValue<Number>("REAL", Double.valueOf(tok.image)); }
         |
-        "(" seqRegex = SeqRegex(env) ")" {
-          TokenSequencePattern seqPattern = new TokenSequencePattern(null, seqRegex);
+        head = "(" seqRegex = SeqRegex(env) tail = ")" {
+          String str = getStringFromTokens(head, tail, true);
+          TokenSequencePattern seqPattern = new TokenSequencePattern(str, seqRegex);
           return new Expressions.PrimitiveValue<TokenSequencePattern>("TOKEN_REGEX", seqPattern);
         }
 	}

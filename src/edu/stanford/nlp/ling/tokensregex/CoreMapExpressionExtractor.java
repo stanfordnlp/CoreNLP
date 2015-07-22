@@ -156,9 +156,11 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
    */
   public void appendRules(List<SequenceMatchRules.Rule> rules)
   {
+    logger.log(Level.INFO, "Read " + rules.size() + " rules");
     // Put rules into stages
     if (collapseExtractionRules) {
       rules = collapse(rules);
+      logger.log(Level.INFO, "Collapsing into " + rules.size() + " rules");
     }
     for (SequenceMatchRules.Rule r:rules) {
       if (r instanceof SequenceMatchRules.AssignmentRule) {
