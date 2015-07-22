@@ -14,6 +14,7 @@ import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.math.DoubleAD;
 import edu.stanford.nlp.optimization.AbstractStochasticCachingDiffUpdateFunction;
 import edu.stanford.nlp.optimization.StochasticCalculateMethods;
+import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.SystemUtils;
 
@@ -69,7 +70,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
   protected boolean parallelGradientCalculation = true;
 
   /** Multithreading gradient calculations is a bit cheaper if you reuse the threads. */
-  protected int threads = Runtime.getRuntime().availableProcessors();
+  protected int threads = Execution.threads;
   protected ExecutorService executorService = Executors.newFixedThreadPool(threads);
 
   @Override
@@ -317,7 +318,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
     //    double[] counts = new double[numClasses];
     //    Arrays.fill(counts, 0.0);
 
-    if (parallelGradientCalculation) {
+    if (parallelGradientCalculation && threads > 1) {
       // Launch several threads (reused out of our fixed pool) to handle the computation
       @SuppressWarnings("unchecked")
       CLBatchDerivativeCalculation[] runnables = (CLBatchDerivativeCalculation[])Array.newInstance(CLBatchDerivativeCalculation.class, threads);
@@ -660,7 +661,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
 
     // Double check that we don't have a mismatch between parallel and batch size settings
 
-    if (parallelGradientCalculation) {
+    if (parallelGradientCalculation && threads > 1) {
       int examplesPerProcessor = 50;
       if (batch.length <= Runtime.getRuntime().availableProcessors() * examplesPerProcessor) {
         System.err.println("\n\n***************");
@@ -675,7 +676,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       }
     }
 
-    if (parallelGradientCalculation) {
+    if (parallelGradientCalculation && threads > 1) {
       // Launch several threads (reused out of our fixed pool) to handle the computation
       @SuppressWarnings("unchecked")
       CLBatchDerivativeCalculation[] runnables = (CLBatchDerivativeCalculation[])Array.newInstance(CLBatchDerivativeCalculation.class, threads);
@@ -996,7 +997,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
     //    double[] counts = new double[numClasses];
     //    Arrays.fill(counts, 0.0);
 
-    if (parallelGradientCalculation) {
+    if (parallelGradientCalculation && threads > 1) {
       // Launch several threads (reused out of our fixed pool) to handle the computation
       @SuppressWarnings("unchecked")
       RVFDerivativeCalculation[] runnables = (RVFDerivativeCalculation[])Array.newInstance(RVFDerivativeCalculation.class, threads);
