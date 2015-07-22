@@ -55,7 +55,7 @@ import edu.stanford.nlp.util.StringUtils;
  */
 public class DocumentPreprocessor implements Iterable<List<HasWord>> {
 
-  public static enum DocType {Plain, XML}
+  public enum DocType {Plain, XML}
 
   // todo: Should probably change this to be regex, but I've added some multi-character punctuation in the meantime
   public static final String[] DEFAULT_SENTENCE_DELIMS = {".", "?", "!", "!!", "!!!", "??", "?!", "!?"};
