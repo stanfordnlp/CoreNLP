@@ -1737,12 +1737,12 @@ public class SequencePattern<T> implements Serializable {
       return matchedBids;
     }
 
-    protected void updateKeepBids(Set<Integer> bids) {
+    protected void updateKeepBids(BitSet bids) {
       // TODO: Is there a point when we don't need to keep these bids anymore?
       for (Set<Pair<Integer, Integer>> v : reachableChildBids) {
         if (v != null) {
           for (Pair<Integer, Integer> p : v) {
-            bids.add(p.first());
+            bids.set(p.first());
           }
         }
       }

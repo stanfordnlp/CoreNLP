@@ -213,11 +213,7 @@ public class AcronymMatcher {
   public static List<String> getMainStrs(List<String> tokens)
   {
     List<String> mainTokenStrs = new ArrayList<String>(tokens.size());
-    for (String text:tokens) {
-      if ( !text.isEmpty() && (text.length() >= 4 || Character.isUpperCase(text.charAt(0))) ) {
-        mainTokenStrs.add(text);
-      }
-    }
+    mainTokenStrs.addAll(tokens.stream().filter(text -> !text.isEmpty() && (text.length() >= 4 || Character.isUpperCase(text.charAt(0)))).collect(Collectors.toList()));
     return mainTokenStrs;
   }
 
