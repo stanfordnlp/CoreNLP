@@ -4,10 +4,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.Timex;
-import edu.stanford.nlp.util.ArraySet;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.*;
 
 import java.util.*;
 import java.util.function.Function;
@@ -170,6 +167,38 @@ public class EntityMentionsAnnotator implements Annotator {
 
 
   private void addAcronyms(Annotation ann, List<CoreMap> mentions) {
+    // Find all the organizations in a document
+    List<List<CoreLabel>> organizations = new ArrayList<>();
+    for (CoreMap mention : mentions) {
+      if ("ORGANIZATION".equals(mention.get(CoreAnnotations.NamedEntityTagAnnotation.class))) {
+        organizations.add(mention.get(CoreAnnotations.TokensAnnotation.class));
+      }
+    }
+    // Skip very long documents
+    if (organizations.size() > 100) { return; }
+
+    // Iterate over tokens...
+    for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
+      List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+      Integer totalTokensOffset = sentence.get(CoreAnnotations.TokenBeginAnnotation.class);
+      for (int i = 0; i < tokens.size(); ++i) {
+        // ... that look like they might be an acronym and are not already a mention
+        CoreLabel token = tokens.get(i);
+        if ("O".equals(token.ner()) && token.word().toUpperCase().equals(token.word()) && token.word().length() >= 3) {
+          for (List<CoreLabel> org : organizations) {
+            // ... and actually are an acronym
+            if (AcronymMatcher.isAcronym(token.word(), org)) {
+              // ... and add them.
+              token.setNER("ORGANIZATION");
+              CoreMap chunk = ChunkAnnotationUtils.getAnnotatedChunk(Collections.singletonList(token),
+                  i, i + 1, totalTokensOffset, null, null, null);
+              mentions.add(chunk);
+
+            }
+          }
+        }
+      }
+    }
   }
 
 
