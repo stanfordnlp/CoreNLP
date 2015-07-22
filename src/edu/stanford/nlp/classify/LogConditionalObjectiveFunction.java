@@ -15,6 +15,7 @@ import edu.stanford.nlp.math.DoubleAD;
 import edu.stanford.nlp.optimization.AbstractStochasticCachingDiffUpdateFunction;
 import edu.stanford.nlp.optimization.StochasticCalculateMethods;
 import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.SystemUtils;
 
 
 /**
@@ -219,13 +220,15 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
     int threadIdx;
     double localValue = 0.0;
     double[] x;
+    int[] batch;
     double[] localDerivative;
     CountDownLatch latch;
 
-    public CLBatchDerivativeCalculation(int numThreads, int threadIdx, double[] x, int derivativeSize, CountDownLatch latch) {
+    public CLBatchDerivativeCalculation(int numThreads, int threadIdx, int[] batch, double[] x, int derivativeSize, CountDownLatch latch) {
       this.numThreads = numThreads;
       this.threadIdx = threadIdx;
       this.x = x;
+      this.batch = batch;
       this.localDerivative = new double[derivativeSize];
       this.latch = latch;
     }
@@ -236,7 +239,10 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       double[] probs = new double[numClasses];
 
       // TODO: could probably get slightly better speedup if threads took linear subsequences, for cacheing
-      for (int d = threadIdx; d < data.length; d += numThreads) {
+      int batchSize = batch == null ? data.length : batch.length;
+      for (int m = threadIdx; m < batchSize; m += numThreads) {
+        int d = batch == null ? m : batch[m];
+
         // activation
         Arrays.fill(sums, 0.0);
 
@@ -317,7 +323,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       CLBatchDerivativeCalculation[] runnables = (CLBatchDerivativeCalculation[])Array.newInstance(CLBatchDerivativeCalculation.class, threads);
       CountDownLatch latch = new CountDownLatch(threads);
       for (int i = 0; i < threads; i++) {
-        runnables[i] = new CLBatchDerivativeCalculation(threads, i, x, derivative.length, latch);
+        runnables[i] = new CLBatchDerivativeCalculation(threads, i, null, x, derivative.length, latch);
         executorService.execute(runnables[i]);
       }
       try {
@@ -652,56 +658,97 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
   public double calculateStochasticUpdate(double[] x, double xscale, int[] batch, double gain) {
     value = 0.0;
 
-    double[] sums = new double[numClasses];
-    double[] probs = new double[numClasses];
+    // Double check that we don't have a mismatch between parallel and batch size settings
 
-    for (int m : batch) {
+    if (parallelGradientCalculation) {
+      int examplesPerProcessor = 50;
+      if (batch.length <= Runtime.getRuntime().availableProcessors() * examplesPerProcessor) {
+        System.err.println("\n\n***************");
+        System.err.println("CONFIGURATION ERROR: YOUR BATCH SIZE DOESN'T MEET PARALLEL MINIMUM SIZE FOR PERFORMANCE");
+        System.err.println("Batch size: " + batch.length);
+        System.err.println("CPUS: " + Runtime.getRuntime().availableProcessors());
+        System.err.println("Minimum batch size per CPU: " + examplesPerProcessor);
+        System.err.println("MINIMIM BATCH SIZE ON THIS MACHINE: " + (Runtime.getRuntime().availableProcessors() * examplesPerProcessor));
+        System.err.println("TURNING OFF PARALLEL GRADIENT COMPUTATION");
+        System.err.println("***************\n");
+        parallelGradientCalculation = false;
+      }
+    }
 
-      // Sets the index based on the current batch
-      int[] features = data[m];
-      // activation
+    if (parallelGradientCalculation) {
+      // Launch several threads (reused out of our fixed pool) to handle the computation
+      @SuppressWarnings("unchecked")
+      CLBatchDerivativeCalculation[] runnables = (CLBatchDerivativeCalculation[])Array.newInstance(CLBatchDerivativeCalculation.class, threads);
+      CountDownLatch latch = new CountDownLatch(threads);
+      for (int i = 0; i < threads; i++) {
+        runnables[i] = new CLBatchDerivativeCalculation(threads, i, batch, x, x.length, latch);
+        executorService.execute(runnables[i]);
+      }
+      try {
+        latch.await();
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
 
-      Arrays.fill(sums, 0.0);
+      for (int i = 0; i < threads; i++) {
+        value += runnables[i].localValue;
+        for (int j = 0; j < x.length; j++) {
+          x[j] += runnables[i].localDerivative[j] * xscale * gain;
+        }
+      }
+    }
+    else {
+      double[] sums = new double[numClasses];
+      double[] probs = new double[numClasses];
 
-      for (int c = 0; c < numClasses; c++) {
-        for (int f = 0; f < features.length; f++) {
-          int i = indexOf(features[f], c);
-          if (values != null) {
-            sums[c] += x[i] * xscale * values[m][f];
-          } else {
-            sums[c] += x[i] * xscale;
+      for (int m : batch) {
+
+        // Sets the index based on the current batch
+        int[] features = data[m];
+        // activation
+
+        Arrays.fill(sums, 0.0);
+
+        for (int c = 0; c < numClasses; c++) {
+          for (int f = 0; f < features.length; f++) {
+            int i = indexOf(features[f], c);
+            if (values != null) {
+              sums[c] += x[i] * xscale * values[m][f];
+            } else {
+              sums[c] += x[i] * xscale;
+            }
           }
         }
-      }
 
-      for (int f = 0; f < features.length; f++) {
-        int i = indexOf(features[f], labels[m]);
-        double v = (values != null) ? values[m][f] : 1;
-        double delta = (dataWeights != null) ? dataWeights[m] * v : v;
-        x[i] += delta * gain;
-      }
-
-      double total = ArrayMath.logSum(sums);
-
-      for (int c = 0; c < numClasses; c++) {
-        probs[c] = Math.exp(sums[c] - total);
-
-        if (dataWeights != null) {
-          probs[c] *= dataWeights[m];
-        }
         for (int f = 0; f < features.length; f++) {
-          int i = indexOf(features[f], c);
+          int i = indexOf(features[f], labels[m]);
           double v = (values != null) ? values[m][f] : 1;
-          double delta = probs[c] * v;
-          x[i] -= delta * gain;
+          double delta = (dataWeights != null) ? dataWeights[m] * v : v;
+          x[i] += delta * gain;
         }
-      }
 
-      double dV = sums[labels[m]] - total;
-      if (dataWeights != null) {
-        dV *= dataWeights[m];
+        double total = ArrayMath.logSum(sums);
+
+        for (int c = 0; c < numClasses; c++) {
+          probs[c] = Math.exp(sums[c] - total);
+
+          if (dataWeights != null) {
+            probs[c] *= dataWeights[m];
+          }
+          for (int f = 0; f < features.length; f++) {
+            int i = indexOf(features[f], c);
+            double v = (values != null) ? values[m][f] : 1;
+            double delta = probs[c] * v;
+            x[i] -= delta * gain;
+          }
+        }
+
+        double dV = sums[labels[m]] - total;
+        if (dataWeights != null) {
+          dV *= dataWeights[m];
+        }
+        value -= dV;
       }
-      value -= dV;
     }
     return value;
   }

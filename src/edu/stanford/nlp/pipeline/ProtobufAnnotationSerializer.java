@@ -309,17 +309,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   }
 
   /**
-   * Create a protobuf builder, rather than a compiled protobuf.
-   * Useful for, e.g., the simple CoreNLP interface.
-   * @param sentence The sentence to serialize.
-   * @return A Sentence builder.
-   */
-  @SuppressWarnings("unchecked")
-  public CoreNLPProtos.Sentence.Builder toProtoBuilder(CoreMap sentence) {
-    return toProtoBuilder(sentence, Collections.EMPTY_SET);
-  }
-
-  /**
    * Create a Sentence proto from a CoreMap instance.
    * This is not static, as it optionally throws an exception if the serialization is lossy.
    * @param sentence The CoreMap to convert. Note that it should not be a CoreLabel or an Annotation,
@@ -420,17 +409,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       throw new LossySerializationException("Keys are not being serialized: " + StringUtils.join(keysToSerialize));
     }
     return builder.build();
-  }
-
-  /**
-   * Create a protobuf builder, rather than a compiled protobuf.
-   * Useful for, e.g., the simple CoreNLP interface.
-   * @param doc The document to serialize.
-   * @return A Document builder.
-   */
-  @SuppressWarnings("unchecked")
-  public CoreNLPProtos.Document.Builder toProtoBuilder(Annotation doc) {
-    return toProtoBuilder(doc, Collections.EMPTY_SET);
   }
 
   /**
