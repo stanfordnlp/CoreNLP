@@ -347,9 +347,9 @@ public class RelationTripleSegmenter {
     // add("advcl"); // Born in Hawaii, Obama is a US citizen; citizen -advcl-> Born.
   }});
 
-  /** A set of valid arcs denoting an entity we are interested in */
+  /** A set of valid arcs denoting an adverbial modifier we are interested in */
   public final Set<String> VALID_ADVERB_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
-    add("amod"); add("advmod"); add("conj"); add("cc"); add("conj:and"); add("conj:or"); add("auxpass");
+    add("amod"); add("advmod"); add("conj"); add("conj:and"); add("conj:or"); add("auxpass");
   }});
 
   private static CoreLabel mockNode(CoreLabel toCopy, int offset, String word, String POS) {
