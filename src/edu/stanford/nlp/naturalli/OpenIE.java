@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
 public class OpenIE implements Annotator {
 
-  private static enum OutputFormat { REVERB, OLLIE, DEFAULT }
+  private enum OutputFormat { REVERB, OLLIE, DEFAULT }
 
   /**
    * A pattern for rewriting "NN_1 is a JJ NN_2" --> NN_1 is JJ"
@@ -383,7 +383,7 @@ public class OpenIE implements Annotator {
           // Print the extractions
           switch (FORMAT) {
             case REVERB:
-              System.out.println(extraction.toString());
+              System.out.println(extraction.toReverbString(ann.get(CoreAnnotations.DocIDAnnotation.class), sentence));
               break;
             case OLLIE:
               System.out.println(extraction.confidenceGloss() + ": (" + extraction.subjectGloss() + "; " + extraction.relationGloss() + "; " + extraction.objectGloss() + ")");
@@ -453,8 +453,19 @@ public class OpenIE implements Annotator {
       System.err.println("Processing from stdin. Enter one sentence per line.");
       Scanner scanner = new Scanner(System.in);
       String line;
-      while ( (line = scanner.nextLine()) != null ) {
+      try {
+        line = scanner.nextLine();
+      } catch (NoSuchElementException e) {
+        System.err.println("No lines found on standard in");
+        return;
+      }
+      while (line != null) {
         processDocument(pipeline, "stdin", line);
+        try {
+          line = scanner.nextLine();
+        } catch (NoSuchElementException e) {
+          return;
+        }
       }
     } else {
       // Running from file parameters.
