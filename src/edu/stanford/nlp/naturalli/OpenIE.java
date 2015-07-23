@@ -383,7 +383,7 @@ public class OpenIE implements Annotator {
           // Print the extractions
           switch (FORMAT) {
             case REVERB:
-              System.out.println(extraction.toReverbString(ann.get(CoreAnnotations.DocIDAnnotation.class), sentence));
+              System.out.println(extraction.toReverbString(docid, sentence));
               break;
             case OLLIE:
               System.out.println(extraction.confidenceGloss() + ": (" + extraction.subjectGloss() + "; " + extraction.relationGloss() + "; " + extraction.objectGloss() + ")");
