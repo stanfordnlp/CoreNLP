@@ -632,7 +632,7 @@ public class ClauseSplitterSearchProblem {
         char tag = edge.getDependent().tag().charAt(0);
         if (tag != 'V' && tag != 'N') { return false; }
         for (SemanticGraphEdge grandchild : originalTree.outgoingEdgeIterable(edge.getDependent())) {
-          if (grandchild.getRelation().getLongName().contains("subj")) { return false; }
+          if (grandchild.getRelation().toString().contains("subj")) { return false; }
         }
         return true;
       }
@@ -674,7 +674,7 @@ public class ClauseSplitterSearchProblem {
         char tag = edge.getDependent().tag().charAt(0);
         if (tag != 'V' && tag != 'N') { return false; }
         for (SemanticGraphEdge grandchild : originalTree.outgoingEdgeIterable(edge.getDependent())) {
-          if (grandchild.getRelation().getLongName().contains("obj")) { return false; }
+          if (grandchild.getRelation().toString().contains("subj")) { return false; }
         }
         return true;
       }
@@ -769,7 +769,6 @@ public class ClauseSplitterSearchProblem {
     }, true);  // First state is implicitly "done"
     fringe.add(Pair.makePair(firstState, new ArrayList<>(0)), -0.0);
     int ticks = 0;
-    int classifierEvals = 0;
 
     while (!fringe.isEmpty()) {
       if (++ticks > maxTicks) {
@@ -859,7 +858,6 @@ public class ClauseSplitterSearchProblem {
               bestLabel = ClauseClassifierLabel.CLAUSE_INTERM;
             } else {
               Counter<ClauseClassifierLabel> scores = classifier.scoresOf(new RVFDatum<>(features));
-              classifierEvals += 1;
               if (scores.size() > 0) {
                 Counters.logNormalizeInPlace(scores);
               }
