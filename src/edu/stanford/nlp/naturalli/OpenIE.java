@@ -436,6 +436,12 @@ public class OpenIE implements Annotator {
     if ("".equals(props.getProperty("parse.extradependencies", ""))) {
       props.setProperty("parse.extradependencies", "ref_only_uncollapsed");
     }
+    if ("".equals(props.getProperty("tokenize.class", ""))) {
+      props.setProperty("tokenize.class", "WhitespaceTokenizer");
+    }
+    if ("".equals(props.getProperty("tokenize.language", ""))) {
+      props.setProperty("tokenize.language", "en");
+    }
     // Tweak properties for console mode.
     // In particular, in this mode we can assume every line of standard in is a new sentence.
     if (filesToProcess.length == 0 && "".equals(props.getProperty("ssplit.isOneSentence", ""))) {
