@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Pattern;
+
 
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
@@ -177,12 +179,15 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     return copyCoreLabel(cl, parts.first());
   }
 
+  private static final Pattern pDash = Pattern.compile("\\-");
+  private static final Pattern pSpace = Pattern.compile("\\s+");
+
   /**
    * Splits a compound marked by the lexer.
    */
   private CoreLabel processCompound(CoreLabel cl) {
     cl.remove(ParentAnnotation.class);
-    String[] parts = cl.word().replaceAll("\\-", " - ").split("\\s+");
+    String[] parts = pSpace.split(pDash.matcher(cl.word()).replaceAll(" - "));
     for (String part : parts) {
       CoreLabel newLabel = new CoreLabel(cl);
       newLabel.setWord(part);
