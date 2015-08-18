@@ -4,6 +4,10 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.patterns.TextAnnotationPatterns;
 import edu.stanford.nlp.util.StringUtils;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.stream.JsonParser;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -20,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class SPIEDServlet extends HttpServlet {
 
-
+  Logger logger = Logger.getAnonymousLogger();
   /**
    * Set the properties to the paths they appear at on the servlet.
    * See build.xml for where these paths get copied.
@@ -94,7 +98,7 @@ public class SPIEDServlet extends HttpServlet {
    * @param out The writer to write the output to.
    * @param q The query string.
    */
-  private void doGet(PrintWriter out, String q, String seedWords) {
+  private void run(PrintWriter out, String q, String seedWords) throws Exception{
 
 
 
@@ -110,20 +114,12 @@ public class SPIEDServlet extends HttpServlet {
 //    }
 
     TextAnnotationPatterns annotate = new TextAnnotationPatterns();
-    // Annotate
-    try {
-      String jsonObject = "{\"input\":"+quote(q)+",\"seedWords\":{\"name\":[\""+ StringUtils.join(seedWords.split("[,;]"), "\",")+"\"]}}";
-      annotate.processText(jsonObject, false, false);
-      String suggestions = annotate.suggestPhrases();
-      // Collect results
-      out.print(suggestions);
-    } catch (Throwable t) {
-      StringWriter sw = new StringWriter();
-      PrintWriter pw = new PrintWriter(sw);
-      t.printStackTrace(pw);
-      Logger.getAnonymousLogger().info(sw.toString());
-      out.print("{\"okay\":\"false\"}");
-    }
+    String jsonObject = "{\"input\":"+quote(q)+",\"seedWords\":{\"name\":[\""+ StringUtils.join(seedWords.split("[,;]"), "\",")+"\"]}}";
+    annotate.processText(jsonObject, false, false);
+    String suggestions = annotate.suggestPhrases();
+    // Collect results
+    out.print(suggestions);
+
   }
 
   /**
@@ -135,24 +131,57 @@ public class SPIEDServlet extends HttpServlet {
       request.setCharacterEncoding("utf-8");
     }
     response.setContentType("text/json; charset=UTF-8");
+
     PrintWriter out = response.getWriter();
-
-    String raw = request.getParameter("q");
-    String seedwords = request.getParameter("seedwords");
-    if (raw == null || "".equals(raw)) {
-      out.print("{\"okay\":\"false\"}");
-    } else {
-      doGet(out, raw, seedwords);
+    try {
+      String raw = request.getParameter("q");
+      String seedwords = request.getParameter("seedwords");
+      if (raw == null || "".equals(raw)) {
+        out.print("{\"okay\":false,\"reason\":\"No data provided\"}");
+      } else {
+        run(out, raw, seedwords);
+      }
+    } catch (Throwable t) {
+      writeError(t, out);
     }
-
     out.close();
+  }
+
+  void writeError(Throwable t, PrintWriter out){
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    t.printStackTrace(pw);
+    logger.info(sw.toString());
+    out.print("{\"okay\":false, \"reason\":\"Something bad happened. Contact the author.\"}");
   }
 
   /**
    * {@inheritDoc}
    */
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    doGet(request, response);
+    StringBuffer jb = new StringBuffer();
+    String line;
+    PrintWriter out = response.getWriter();
+
+    try {
+      BufferedReader reader = request.getReader();
+      while ((line = reader.readLine()) != null)
+        jb.append(line);
+      JsonReader jsonReader = Json.createReader(new StringReader(jb.toString()));
+      JsonObject obj = jsonReader.readObject();
+      String raw = obj.get("q").toString();
+      String seedwords = obj.get("seedwords").toString();
+      if (raw == null || "".equals(raw)) {
+        out.print("{\"okay\":false,\"reason\":\"No data provided\"}");
+      } else {
+        run(out, raw, seedwords);
+      }
+    } catch (Throwable t) {
+      writeError(t, out);
+    }
+
+    out.close();
+
   }
 
   /**
