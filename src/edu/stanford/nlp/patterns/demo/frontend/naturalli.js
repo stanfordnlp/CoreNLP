@@ -11,18 +11,15 @@ function querySuccess(elem) {
     $( "#q" ).prop('disabled', false);
     $( "#query-button").unbind( "click" );
     $( "#query-button" ).click(function(event) { $( "#form-query" ).submit(); });
-    if (response.triples.length > 0) {
-      var gloss = '<table class="triple-table">';
-      for (i = 0; i < response.triples.length; ++i) {
-        gloss += '<tr><td>(</td><td>' + response.triples[i][0] + ';</td>';
-        gloss += '<td>' + response.triples[i][1] + ';</td>';
-        gloss += '<td>' + response.triples[i][2] + '</td><td>)</td></tr>';
-      }
-      gloss += '</table>';
-      $(elem).html(gloss);
-    } else {
-      $(elem).html('<i>(no responses)</i>');
-    }
+//if (response.triples.length > 0) {
+//      var gloss = '<table class="triple-table">';
+//      for (i = 0; i < response.triples.length; ++i) {
+//        gloss += '<tr><td>(</td><td>' + response.triples[i][0] + ';</td>';
+  //      gloss += '<td>' + response.triples[i][1] + ';</td>';
+    //    gloss += '<td>' + response.triples[i][2] + '</td><td>)</td></tr>';
+     // }
+      //gloss += '</table>';
+      $(elem).html(response.data);
   }
 }
 
@@ -43,12 +40,10 @@ $(document).ready(function(){
     event.preventDefault();
     // (set the headers)
     $( "#system-header" ).css("visibility", "visible");
-    $( "#ollie-header" ).css("visibility", "visible");
     // (create a default if not input was given)
     if ( $( '#q' ).val().trim() == '') { $( '#q' ).val('faeries are dancing in the field where I lost my bike.'); }
     // (start loading icon)
     $( '#triples-container' ).html('loading...');
-    $( '#ollie-container' ).html('loading...');
     // (submission data)
     target = $(this).attr('action');
     getData = $(this).serialize();
@@ -58,16 +53,10 @@ $(document).ready(function(){
     $( "#query-button").unbind( "click" );
     // (ajax request)
     $.ajax({
-      url: 'http://plato42.stanford.edu:8080/openie/',
+      url: 'spied/',
       data: getData,
       dataType: 'json',
       success: querySuccess("#triples-container")
-    });
-    $.ajax({
-      url: 'http://plato42.stanford.edu:8080/ollie/',
-      data: getData,
-      dataType: 'json',
-      success: querySuccess("#ollie-container")
     });
   });
 

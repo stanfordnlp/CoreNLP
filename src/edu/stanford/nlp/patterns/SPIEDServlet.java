@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.util.logging.Logger;
 
 
 /**
@@ -126,7 +127,7 @@ public class SPIEDServlet extends HttpServlet {
    * {@inheritDoc}
    */
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
+    Logger.getAnonymousLogger().info("SPIED query from " + request.getRemoteAddr());
     if (request.getCharacterEncoding() == null) {
       request.setCharacterEncoding("utf-8");
     }
@@ -136,7 +137,7 @@ public class SPIEDServlet extends HttpServlet {
     String raw = request.getParameter("q");
     String seedwords = request.getParameter("seedwords");
     if (raw == null || "".equals(raw)) {
-      out.println("{ok:false}");
+      out.println("Nothing was provided in the input. Why?!");
     } else {
       doGet(out, raw, seedwords);
     }
