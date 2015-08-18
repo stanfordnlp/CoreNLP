@@ -112,7 +112,7 @@ public class SPIEDServlet extends HttpServlet {
     TextAnnotationPatterns annotate = new TextAnnotationPatterns();
     // Annotate
     try {
-      String jsonObject = "{\"input\":\""+q+"\",\"seedWords\":{\"name\":[\""+ StringUtils.join(seedWords.split("[,;]"), "\",")+"\"]}}";
+      String jsonObject = "{\"input\":"+quote(q)+",\"seedWords\":{\"name\":[\""+ StringUtils.join(seedWords.split("[,;]"), "\",")+"\"]}}";
       annotate.processText(jsonObject, false, false);
       String suggestions = annotate.suggestPhrases();
       // Collect results
