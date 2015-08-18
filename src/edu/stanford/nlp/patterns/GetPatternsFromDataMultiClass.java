@@ -3218,6 +3218,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     }
     Redwood.log(Redwood.FORCE, "Saving output in " + patternsWordsDir);
 
+    IOUtils.ensureDir(new File(patternsWordsDir));
     //writing properties file
     String outPropertiesFile = patternsWordsDir+"model.properties";
     props.store(new BufferedWriter(new FileWriter(outPropertiesFile)), "trained model properties file");
