@@ -151,9 +151,10 @@ public class SPIEDServlet extends HttpServlet {
       } else {
         run(out, raw, seedwords, testmode, "");
       }
-    } catch (Throwable t) {
+    } catch (Exception t) {
       writeError(t, out, request.toString());
     }
+
     out.close();
   }
 
