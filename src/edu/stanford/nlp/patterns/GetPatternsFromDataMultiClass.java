@@ -1466,49 +1466,52 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       for (Entry<E, ClassicCounter<CandidatePhrase>> en : unLabeledPatternsandWords4Label.entrySet()) {
         unlabWords.addAll(en.getKey(), en.getValue().keySet());
       }
-      String outputdir = constVars.outDir + "/" + constVars.identifier + "/" + label;
-      Redwood.log(ConstantsAndVariables.minimaldebug, "Saving output in " + outputdir);
 
-      IOUtils.ensureDir(new File(outputdir));
+      if (constVars.outDir != null) {
+        String outputdir = constVars.outDir + "/" + constVars.identifier + "/" + label;
+        Redwood.log(ConstantsAndVariables.minimaldebug, "Saving output in " + outputdir);
 
-      String filename = outputdir + "/patterns" + ".json";
+        IOUtils.ensureDir(new File(outputdir));
 
-      JsonArrayBuilder obj = Json.createArrayBuilder();
-      if (writtenPatInJustification.containsKey(label) && writtenPatInJustification.get(label)) {
-        JsonReader jsonReader = Json.createReader(new BufferedInputStream(new FileInputStream(filename)));
-        JsonArray objarr = jsonReader.readArray();
-        jsonReader.close();
-        for (JsonValue o : objarr)
-          obj.add(o);
-      } else
-        obj = Json.createArrayBuilder();
+        String filename = outputdir + "/patterns" + ".json";
 
-      JsonObjectBuilder objThisIter = Json.createObjectBuilder();
-      for (Pair<E, Double> pat : chosenPatSorted) {
-        JsonObjectBuilder o = Json.createObjectBuilder();
-        JsonArrayBuilder pos = Json.createArrayBuilder();
-        JsonArrayBuilder neg = Json.createArrayBuilder();
-        JsonArrayBuilder unlab = Json.createArrayBuilder();
+        JsonArrayBuilder obj = Json.createArrayBuilder();
+        if (writtenPatInJustification.containsKey(label) && writtenPatInJustification.get(label)) {
+          JsonReader jsonReader = Json.createReader(new BufferedInputStream(new FileInputStream(filename)));
+          JsonArray objarr = jsonReader.readArray();
+          jsonReader.close();
+          for (JsonValue o : objarr)
+            obj.add(o);
+        } else
+          obj = Json.createArrayBuilder();
 
-        for (CandidatePhrase w : posWords.get(pat.first()))
-          pos.add(w.getPhrase());
-        for (CandidatePhrase w : negWords.get(pat.first()))
-          neg.add(w.getPhrase());
-        for (CandidatePhrase w : unlabWords.get(pat.first()))
-          unlab.add(w.getPhrase());
+        JsonObjectBuilder objThisIter = Json.createObjectBuilder();
+        for (Pair<E, Double> pat : chosenPatSorted) {
+          JsonObjectBuilder o = Json.createObjectBuilder();
+          JsonArrayBuilder pos = Json.createArrayBuilder();
+          JsonArrayBuilder neg = Json.createArrayBuilder();
+          JsonArrayBuilder unlab = Json.createArrayBuilder();
 
-        o.add("Positive", pos);
-        o.add("Negative", neg);
-        o.add("Unlabeled", unlab);
-        o.add("Score", pat.second());
+          for (CandidatePhrase w : posWords.get(pat.first()))
+            pos.add(w.getPhrase());
+          for (CandidatePhrase w : negWords.get(pat.first()))
+            neg.add(w.getPhrase());
+          for (CandidatePhrase w : unlabWords.get(pat.first()))
+            unlab.add(w.getPhrase());
 
-        objThisIter.add(pat.first().toStringSimple(), o);
+          o.add("Positive", pos);
+          o.add("Negative", neg);
+          o.add("Unlabeled", unlab);
+          o.add("Score", pat.second());
+
+          objThisIter.add(pat.first().toStringSimple(), o);
+        }
+        obj.add(objThisIter.build());
+
+        IOUtils.ensureDir(new File(filename).getParentFile());
+        IOUtils.writeStringToFile(StringUtils.normalize(StringUtils.toAscii(obj.build().toString())), filename, "ASCII");
+        writtenPatInJustification.put(label, true);
       }
-      obj.add(objThisIter.build());
-
-      IOUtils.ensureDir(new File(filename).getParentFile());
-      IOUtils.writeStringToFile(StringUtils.normalize(StringUtils.toAscii(obj.build().toString())), filename, "ASCII");
-      writtenPatInJustification.put(label, true);
     }
 
     if (constVars.justify) {
@@ -2079,6 +2082,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     Map<String, BufferedWriter> patternsOutput = new HashMap<String, BufferedWriter>();
 
     for (String label : constVars.getLabels()) {
+      if(constVars.outDir != null){
       IOUtils.ensureDir(new File(constVars.outDir + "/" + constVars.identifier + "/" + label));
 
       String wordsOutputFileLabel;
@@ -2087,14 +2091,18 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       else
         wordsOutputFileLabel = wordsOutputFile + "_" + label;
 
-      wordsOutput.put(label, new BufferedWriter(new FileWriter(wordsOutputFileLabel)));
-      Redwood.log(ConstantsAndVariables.minimaldebug, "Saving the learned words for label " + label + " in " + wordsOutputFileLabel);
+        wordsOutput.put(label, new BufferedWriter(new FileWriter(wordsOutputFileLabel)));
+        Redwood.log(ConstantsAndVariables.minimaldebug, "Saving the learned words for label " + label + " in " + wordsOutputFileLabel);
 
-      String patternsOutputFileLabel = patternsOutFile + "_" + label;
-      if (patternsOutFile == null)
-        patternsOutputFileLabel = constVars.outDir + "/" + constVars.identifier + "/" + label + "/learnedpatterns.txt";
-      patternsOutput.put(label, new BufferedWriter(new FileWriter(patternsOutputFileLabel)));
-      Redwood.log(ConstantsAndVariables.minimaldebug, "Saving the learned patterns for label " + label + " in " + patternsOutputFileLabel);
+      }
+
+      if(constVars.outDir != null){
+        String patternsOutputFileLabel = patternsOutFile + "_" + label;
+        if (patternsOutFile == null)
+          patternsOutputFileLabel = constVars.outDir + "/" + constVars.identifier + "/" + label + "/learnedpatterns.txt";
+        patternsOutput.put(label, new BufferedWriter(new FileWriter(patternsOutputFileLabel)));
+        Redwood.log(ConstantsAndVariables.minimaldebug, "Saving the learned patterns for label " + label + " in " + patternsOutputFileLabel);
+      }
     }
 
     for (int i = 0; i < constVars.numIterationsForPatterns; i++) {
@@ -2160,7 +2168,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         }
       }
 
-      if(constVars.writeMatchedTokensIdsForEachPhrase){
+      if(constVars.writeMatchedTokensIdsForEachPhrase && constVars.outDir != null){
         String matchedtokensfilename = constVars.outDir + "/" + constVars.identifier  + "/tokenids4matchedphrases" + ".json";
         IOUtils.writeStringToFile(matchedTokensByPhraseJsonString(), matchedtokensfilename, "utf8");
 
@@ -2189,6 +2197,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
   }
 
   void writeMatchedTokensAndSents(String label, Map<String, DataInstance> sents, String suffix, CollectionValuedMap<E, Triple<String, Integer, Integer>> tokensMatchedPat) throws IOException {
+    if(constVars.outDir != null){
     Set<String> allMatchedSents = new HashSet<String>();
     String matchedtokensfilename = constVars.outDir + "/" + constVars.identifier + "/" + label + "/tokensmatchedpatterns" + suffix + ".json";
     JsonObjectBuilder pats = Json.createObjectBuilder();
@@ -2225,6 +2234,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     }
     String sentfilename = constVars.outDir + "/" + constVars.identifier + "/sentences" + suffix  + ".json";
     IOUtils.writeStringToFile(senttokens.build().toString(), sentfilename, "utf8");
+    }
   }
 
   public static String matchedTokensByPhraseJsonString(String phrase){
