@@ -142,15 +142,16 @@ public class SPIEDServlet extends HttpServlet {
         run(out, raw, seedwords);
       }
     } catch (Throwable t) {
-      writeError(t, out);
+      writeError(t, out, request.toString());
     }
     out.close();
   }
 
-  void writeError(Throwable t, PrintWriter out){
+  void writeError(Throwable t, PrintWriter out, String input){
     StringWriter sw = new StringWriter();
     PrintWriter pw = new PrintWriter(sw);
     t.printStackTrace(pw);
+    logger.info("input is " + input);
     logger.info(sw.toString());
     out.print("{\"okay\":false, \"reason\":\"Something bad happened. Contact the author.\"}");
   }
@@ -160,7 +161,7 @@ public class SPIEDServlet extends HttpServlet {
    */
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     StringBuffer jb = new StringBuffer();
-    String line;
+    String line = "";
     PrintWriter out = response.getWriter();
 
     try {
@@ -177,7 +178,7 @@ public class SPIEDServlet extends HttpServlet {
         run(out, raw, seedwords);
       }
     } catch (Throwable t) {
-      writeError(t, out);
+      writeError(t, out, line);
     }
 
     out.close();
