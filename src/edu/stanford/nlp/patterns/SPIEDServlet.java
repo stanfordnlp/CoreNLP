@@ -1,7 +1,7 @@
 package edu.stanford.nlp.patterns;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.patterns.surface.TextAnnotationPatterns;
+import edu.stanford.nlp.patterns.TextAnnotationPatterns;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;

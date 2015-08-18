@@ -1,10 +1,11 @@
-package edu.stanford.nlp.patterns.surface;
+package edu.stanford.nlp.patterns;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.patterns.*;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.TypesafeMap;
+import edu.stanford.nlp.patterns.surface.*;
 
 import javax.json.*;
 import java.io.File;
