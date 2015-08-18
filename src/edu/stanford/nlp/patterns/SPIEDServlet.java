@@ -119,7 +119,7 @@ public class SPIEDServlet extends HttpServlet {
       out.print(suggestions);
     } catch (Throwable t) {
       Logger.getAnonymousLogger().info(t.toString());
-      out.print("{okay:false}");
+      out.print("{\"okay\":\"false\"}");
     }
   }
 
@@ -137,7 +137,7 @@ public class SPIEDServlet extends HttpServlet {
     String raw = request.getParameter("q");
     String seedwords = request.getParameter("seedwords");
     if (raw == null || "".equals(raw)) {
-      out.print("{okay:false}");
+      out.print("{\"okay\":\"false\"}");
     } else {
       doGet(out, raw, seedwords);
     }
