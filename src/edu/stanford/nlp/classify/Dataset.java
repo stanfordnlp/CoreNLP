@@ -102,15 +102,13 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     int[][] trainData = new int[trainSize][];
     int[] trainLabels = new int[trainSize];
 
-    synchronized (System.class) {
-      System.arraycopy(data, start, devData, 0, devSize);
-      System.arraycopy(labels, start, devLabels, 0, devSize);
+    System.arraycopy(data, start, devData, 0, devSize);
+    System.arraycopy(labels, start, devLabels, 0, devSize);
 
-      System.arraycopy(data, 0, trainData, 0, start);
-      System.arraycopy(data, end, trainData, start, size() - end);
-      System.arraycopy(labels, 0, trainLabels, 0, start);
-      System.arraycopy(labels, end, trainLabels, start, size() - end);
-    }
+    System.arraycopy(data, 0, trainData, 0, start);
+    System.arraycopy(data, end, trainData, start, size()-end);
+    System.arraycopy(labels, 0, trainLabels, 0, start);
+    System.arraycopy(labels, end, trainLabels, start, size()-end);
 
     if (this instanceof WeightedDataset<?,?>) {
       float[] trainWeights = new float[trainSize];
@@ -118,11 +116,9 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
 
       WeightedDataset<L, F> w = (WeightedDataset<L, F>)this;
 
-      synchronized (System.class) {
-        System.arraycopy(w.weights, start, devWeights, 0, devSize);
-        System.arraycopy(w.weights, 0, trainWeights, 0, start);
-        System.arraycopy(w.weights, end, trainWeights, start, size() - end);
-      }
+      System.arraycopy(w.weights, start, devWeights, 0, devSize);
+      System.arraycopy(w.weights, 0, trainWeights, 0, start);
+      System.arraycopy(w.weights, end, trainWeights, start, size()-end);
 
       WeightedDataset<L, F> dev = new WeightedDataset<L, F>(labelIndex, devLabels, featureIndex, devData, devSize, devWeights);
       WeightedDataset<L, F> train = new WeightedDataset<L, F>(labelIndex, trainLabels, featureIndex, trainData, trainSize, trainWeights);
@@ -319,12 +315,10 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
   protected void ensureSize() {
     if (labels.length == size) {
       int[] newLabels = new int[size * 2];
-      int[][] newData = new int[size * 2][];
-      synchronized (System.class) {
-        System.arraycopy(labels, 0, newLabels, 0, size);
-        System.arraycopy(data, 0, newData, 0, size);
-      }
+      System.arraycopy(labels, 0, newLabels, 0, size);
       labels = newLabels;
+      int[][] newData = new int[size * 2][];
+      System.arraycopy(data, 0, newData, 0, size);
       data = newData;
     }
   }
@@ -354,9 +348,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
       }
     }
     data[size] = new int[j];
-    synchronized (System.class) {
-      System.arraycopy(intFeatures, 0, data[size], 0, j);
-    }
+    System.arraycopy(intFeatures, 0, data[size], 0, j);
   }
 
   protected void addFeatureIndices(int [] features) {
@@ -385,11 +377,11 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
    */
   @Override
   public RVFDatum<L, F> getRVFDatum(int index) {
-     ClassicCounter<F> c = new ClassicCounter<F>();
+    ClassicCounter<F> c = new ClassicCounter<F>();
     for (F key : featureIndex.objects(data[index])) {
       c.incrementCount(key);
     }
-    return new RVFDatum<>(c, labelIndex.get(labels[index]));
+    return new RVFDatum<L, F>(c, labelIndex.get(labels[index]));
   }
 
   /**
@@ -564,9 +556,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
         }
       }
       newData[i] = new int[k];
-      synchronized (System.class) {
-        System.arraycopy(newD, 0, newData[i], 0, k);
-      }
+      System.arraycopy(newD, 0, newData[i], 0, k);
     }
     data = newData;
     featureIndex = newFeatureIndex;
@@ -607,9 +597,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
         }
       }
       int[] newDataTrimmed = new int[curIndex];
-      synchronized (System.class) {
-        System.arraycopy(newData, 0, newDataTrimmed, 0, curIndex);
-      }
+      System.arraycopy(newData, 0, newDataTrimmed, 0, curIndex);
       data[i] = newDataTrimmed;
     }
     featureIndex = newFeatureIndex;

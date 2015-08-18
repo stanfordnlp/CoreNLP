@@ -55,7 +55,7 @@ import edu.stanford.nlp.util.StringUtils;
  */
 public class DocumentPreprocessor implements Iterable<List<HasWord>> {
 
-  public enum DocType {Plain, XML}
+  public static enum DocType {Plain, XML}
 
   // todo: Should probably change this to be regex, but I've added some multi-character punctuation in the meantime
   public static final String[] DEFAULT_SENTENCE_DELIMS = {".", "?", "!", "!!", "!!!", "??", "?!", "!?"};
@@ -210,10 +210,6 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
   /**
    * Returns sentences until the document is exhausted. Calls close() if the end of the document
    * is reached. Otherwise, the user is required to close the stream.
-   *
-   * @return An Iterator over sentences (each a List of word tokens).
-   * Although the type is given as {@code List<HasWord>}, in practice you get a List of CoreLabel,
-   * and you can cast down to that. (Someday we might manage to fix the generic typing....)
    */
   @Override
   public Iterator<List<HasWord>> iterator() {

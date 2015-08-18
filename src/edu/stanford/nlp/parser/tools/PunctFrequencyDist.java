@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import edu.stanford.nlp.international.Language;
+import edu.stanford.nlp.international.Languages;
+import edu.stanford.nlp.international.Languages.Language;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
@@ -28,7 +29,7 @@ public final class PunctFrequencyDist {
   static {
     usage.append(String.format("Usage: java %s [OPTS] punct_tag tree_file \n\n",PunctFrequencyDist.class.getName()));
     usage.append("Options:\n");
-    usage.append("  -l lang    : Select language settings from " + Language.langList + "\n");
+    usage.append("  -l lang    : Select language settings from " + Languages.listOfLanguages() + "\n");
     usage.append("  -e enc     : Encoding.\n");
   }
 
@@ -48,7 +49,7 @@ public final class PunctFrequencyDist {
         switch (args[i]) {
           case "-l":
             Language lang = Language.valueOf(args[++i].trim());
-            tlpp = lang.params;
+            tlpp = Languages.getLanguageParams(lang);
 
             break;
           case "-e":

@@ -3,9 +3,8 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotator;
-import edu.stanford.nlp.naturalli.OpenIE;
-import edu.stanford.nlp.util.MetaClass;
 import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.ReflectionLoading;
 
 import java.io.IOException;
 import java.util.*;
@@ -71,12 +70,12 @@ public class AnnotatorImplementations {
    */
   public Annotator ner(Properties properties) throws IOException {
 
-    List<String> models = new ArrayList<>();
+    List<String> models = new ArrayList<String>();
     String modelNames = properties.getProperty("ner.model");
     if (modelNames == null) {
       modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + "," + DefaultPaths.DEFAULT_NER_MUC_MODEL + "," + DefaultPaths.DEFAULT_NER_CONLL_MODEL;
     }
-    if ( ! modelNames.isEmpty()) {
+    if (modelNames.length() > 0) {
       models.addAll(Arrays.asList(modelNames.split(",")));
     }
     if (models.isEmpty()) {
@@ -98,16 +97,12 @@ public class AnnotatorImplementations {
 
     String[] loadPaths = models.toArray(new String[models.size()]);
 
-    Properties combinerProperties = PropertiesUtils.extractSelectedProperties(properties,
-            NERClassifierCombiner.DEFAULT_PASS_DOWN_PROPERTIES);
-    NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers,
-            useSUTime, combinerProperties, loadPaths);
+    NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers, useSUTime, properties, loadPaths);
 
     int nThreads = PropertiesUtils.getInt(properties, "ner.nthreads", PropertiesUtils.getInt(properties, "nthreads", 1));
     long maxTime = PropertiesUtils.getLong(properties, "ner.maxtime", 0);
-    int maxSentenceLength = PropertiesUtils.getInt(properties, "ner.maxlength", Integer.MAX_VALUE);
 
-    return new NERCombinerAnnotator(nerCombiner, verbose, nThreads, maxTime, maxSentenceLength);
+    return new NERCombinerAnnotator(nerCombiner, verbose, nThreads, maxTime);
   }
 
   /**
@@ -134,8 +129,8 @@ public class AnnotatorImplementations {
   /**
    * Annotate parse trees
    *
-   * @param properties Properties that control the behavior of the parser. It use "parse.x" properties.
-   * @return A ParserAnnotator
+   * @param properties
+   * @return
    */
   public Annotator parse(Properties properties) {
     String parserType = properties.getProperty("parse.type", "stanford");
@@ -165,23 +160,8 @@ public class AnnotatorImplementations {
             .CUSTOM_ANNOTATOR_PREFIX.length());
     String customClassName = properties.getProperty(property);
 
-    try {
-      // name + properties
-      return new MetaClass(customClassName).createInstance(customName, properties);
-    } catch (MetaClass.ConstructorNotFoundException e) {
-      try {
-        // name
-        return new MetaClass(customClassName).createInstance(customName);
-      } catch (MetaClass.ConstructorNotFoundException e2) {
-        // properties
-        try {
-          return new MetaClass(customClassName).createInstance(properties);
-        } catch (MetaClass.ConstructorNotFoundException e3) {
-          // empty arguments
-          return new MetaClass(customClassName).createInstance();
-        }
-      }
-    }
+    return ReflectionLoading.loadByReflection(customClassName, customName,
+            properties);
   }
 
   /**
@@ -231,15 +211,6 @@ public class AnnotatorImplementations {
     Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
         Annotator.STANFORD_NATLOG + '.');
     return new NaturalLogicAnnotator(relevantProperties);
-  }
-
-  /**
-   * Annotate {@link edu.stanford.nlp.ie.util.RelationTriple}s from text.
-   */
-  public Annotator openie(Properties properties) {
-    Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
-        Annotator.STANFORD_OPENIE + '.');
-    return new OpenIE(relevantProperties);
   }
 
   /**

@@ -10,7 +10,8 @@ import java.util.Random;
 import java.util.Stack;
 import java.util.TreeMap;
 
-import edu.stanford.nlp.international.Language;
+import edu.stanford.nlp.international.Languages;
+import edu.stanford.nlp.international.Languages.Language;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasIndex;
 import edu.stanford.nlp.ling.Label;
@@ -251,10 +252,10 @@ public class LeafAncestorEval {
 
 
   private static final String USAGE =
-      String.format("Usage: java %s [OPTS] goldFile guessFile%n%nOptions:%n  -l lang   : Language name %s%n" +
-              "  -y num    : Skip gold trees with yields longer than num.%n  -v        : Verbose output%n",
-              LeafAncestorEval.class.getName(),
-          Language.langList);
+    String.format("Usage: java %s [OPTS] goldFile guessFile%n%nOptions:%n  -l lang   : Language name %s%n" +
+            "  -y num    : Skip gold trees with yields longer than num.%n  -v        : Verbose output%n",
+            LeafAncestorEval.class.getName(),
+            Languages.listOfLanguages());
 
   private static final int MIN_ARGS = 2;
 
@@ -318,7 +319,7 @@ public class LeafAncestorEval {
       System.exit(-1);
     }
 
-    final TreebankLangParserParams tlpp = LANGUAGE.params;
+    final TreebankLangParserParams tlpp = Languages.getLanguageParams(LANGUAGE);
     final PrintWriter pwOut = tlpp.pw();
 
     final Treebank guessTreebank = tlpp.diskTreebank();

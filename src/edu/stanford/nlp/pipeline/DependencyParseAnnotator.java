@@ -9,12 +9,14 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.MetaClass;
 import edu.stanford.nlp.util.PropertiesUtils;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * This class adds dependency parse information to an Annotation.
  *
- * Dependency parses are added to each sentence under the annotation
+ * Parse trees are added to each sentence under the annotation
  * {@link edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.BasicDependenciesAnnotation}.
  *
  * @author Jon Gauthier
@@ -30,14 +32,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
    * Maximum parse time (in milliseconds) for a sentence
    */
   private final long maxTime;
-  /**
-   * The default maximum parse time.
-   */
-  private static final long DEFAULT_MAXTIME = -1;
-
-  /**
-   * If true, include the extra arcs in the dependency representation.
-   */
+  private static final long DEFAULT_MAXTIME = Long.MAX_VALUE;
   private final GrammaticalStructure.Extras extraDependencies;
 
   public DependencyParseAnnotator() {
@@ -74,7 +69,6 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
     sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, deps);
     sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, uncollapsedDeps);
     sentence.set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, ccDeps);
-
   }
 
   @Override
@@ -90,12 +84,14 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
 
   @Override
   public Set<Requirement> requirementsSatisfied() {
-    return Collections.singleton(DEPENDENCY_REQUIREMENT);
+    return new HashSet<>();
   }
 
   public static String signature(String annotatorName, Properties props) {
-    return annotatorName +
-            ".extradependencies:" + props.getProperty(annotatorName + ".extradependencies", "NONE").toLowerCase();
+    StringBuilder os = new StringBuilder();
+    os.append(annotatorName).append(".extradependencies:");
+    os.append(props.getProperty(annotatorName + ".extradependencies", "NONE").toLowerCase());
+    return os.toString();
   }
 
 }

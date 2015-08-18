@@ -5,9 +5,7 @@ import java.util.*;
 
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.trees.CoNLLUDocumentReader;
 import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
@@ -33,7 +31,7 @@ import edu.stanford.nlp.util.StringUtils;
  * matches "NN", "NNS", "NNP", etc. --wcmac) <p/>
  *
  * For example, <code>{lemma:slice;tag:/VB.* /}</code> represents any verb nodes
- * with "slice" as their lemma.  Attributes are extracted using
+ * with "slice" as their lemma.  Attributes are extracted using 
  * <code>edu.stanford.nlp.ling.AnnotationLookup</code>. <p/>
  *
  * The root of the graph can be marked by the $ sign, that is <code>{$}</code>
@@ -147,14 +145,14 @@ import edu.stanford.nlp.util.StringUtils;
  * <p><h3>Naming relations</h3>
  *
  * It is also possible to name relations.  For example, you can write the pattern
- * <code>{idx:1} &gt;=reln {idx:2}</code>  The name of the relation will then
- * be stored in the matcher and can be extracted with <code>getRelnName("reln")</code>
- * At present, though, there is no backreferencing capability such as with the
- * named nodes; this is only useful when using the API to extract the name of the
+ * <code>{idx:1} &gt;=reln {idx:2}</code>  The name of the relation will then 
+ * be stored in the matcher and can be extracted with <code>getRelnName("reln")</code>  
+ * At present, though, there is no backreferencing capability such as with the 
+ * named nodes; this is only useful when using the API to extract the name of the 
  * relation used when making the match.
  * <p/>
  * In the case of ancestor and descendant relations, the <b>last</b>
- * relation in the sequence of relations is the name used.
+ * relation in the sequence of relations is the name used.  
  * <p/>
  *
  * @author Chloe Kiddon
@@ -350,32 +348,18 @@ public abstract class SemgrexPattern implements Serializable {
     return this.toString().hashCode();
   }
 
-  public enum OutputFormat {
-    LIST,
-    OFFSET
-  };
-
-
   static final String PATTERN = "-pattern";
   static final String TREE_FILE = "-treeFile";
   static final String MODE = "-mode";
   static final String DEFAULT_MODE = "BASIC";
   static final String EXTRAS = "-extras";
-  static final String CONLLU_FILE = "-conlluFile";
-  static final String OUTPUT_FORMAT_OPTION = "-outputFormat";
-  static final String DEFAULT_OUTPUT_FORMAT = "LIST";
-
-
-
+    
   public static void help() {
     System.err.println("Possible arguments for SemgrexPattern:");
     System.err.println(PATTERN + ": what pattern to use for matching");
     System.err.println(TREE_FILE + ": a file of trees to process");
-    System.err.println(CONLLU_FILE + ": a CoNLL-U file of dependency trees to process");
     System.err.println(MODE + ": what mode for dependencies.  basic, collapsed, or ccprocessed.  To get 'noncollapsed', use basic with extras");
     System.err.println(EXTRAS + ": whether or not to use extras");
-    System.err.println(OUTPUT_FORMAT_OPTION + ": output format of matches. list or offset. 'list' prints the graph as a list of dependencies, "
-                         + "'offset' prints the filename and the line offset in the ConLL-U file.");
     System.err.println();
     System.err.println(PATTERN + " is required");
   }
@@ -388,16 +372,13 @@ public abstract class SemgrexPattern implements Serializable {
    * <br>
    * See the help() function for a list of possible arguments to provide.
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) {
     Map<String,Integer> flagMap = Generics.newHashMap();
 
     flagMap.put(PATTERN, 1);
     flagMap.put(TREE_FILE, 1);
     flagMap.put(MODE, 1);
     flagMap.put(EXTRAS, 1);
-    flagMap.put(CONLLU_FILE, 1);
-    flagMap.put(OUTPUT_FORMAT_OPTION, 1);
-
 
     Map<String, String[]> argsMap = StringUtils.argsToMap(args, flagMap);
     args = argsMap.get(null);
@@ -415,17 +396,11 @@ public abstract class SemgrexPattern implements Serializable {
     }
     SemanticGraphFactory.Mode mode = SemanticGraphFactory.Mode.valueOf(modeString);
 
-    String outputFormatString = DEFAULT_OUTPUT_FORMAT;
-    if (argsMap.containsKey(OUTPUT_FORMAT_OPTION) && argsMap.get(OUTPUT_FORMAT_OPTION).length > 0) {
-      outputFormatString = argsMap.get(OUTPUT_FORMAT_OPTION)[0].toUpperCase();
-    }
-    OutputFormat outputFormat = OutputFormat.valueOf(outputFormatString);
-
     boolean useExtras = true;
     if (argsMap.containsKey(EXTRAS) && argsMap.get(EXTRAS).length > 0) {
       useExtras = Boolean.valueOf(argsMap.get(EXTRAS)[0]);
     }
-
+    
     List<SemanticGraph> graphs = Generics.newArrayList();
     // TODO: allow other sources of graphs, such as dependency files
     if (argsMap.containsKey(TREE_FILE) && argsMap.get(TREE_FILE).length > 0) {
@@ -435,20 +410,7 @@ public abstract class SemgrexPattern implements Serializable {
         treebank.loadPath(treeFile);
         for (Tree tree : treebank) {
           // TODO: allow other languages... this defaults to English
-          SemanticGraph graph = SemanticGraphFactory.makeFromTree(tree, mode, useExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, true);
-          graphs.add(graph);
-        }
-      }
-    }
-
-    if (argsMap.containsKey(CONLLU_FILE) && argsMap.get(CONLLU_FILE).length > 0) {
-      CoNLLUDocumentReader reader = new CoNLLUDocumentReader();
-      for (String conlluFile : argsMap.get(CONLLU_FILE)) {
-        System.err.println("Loading file " + conlluFile);
-        Iterator<SemanticGraph> it = reader.getIterator(IOUtils.readerFromString(conlluFile));
-
-        while (it.hasNext()) {
-          SemanticGraph graph = it.next();
+          SemanticGraph graph = SemanticGraphFactory.makeFromTree(tree, mode, useExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, true, null);
           graphs.add(graph);
         }
       }
@@ -459,28 +421,19 @@ public abstract class SemgrexPattern implements Serializable {
       if (!(matcher.find())) {
         continue;
       }
-
-      if (outputFormat == OutputFormat.LIST) {
-        System.err.println("Matched graph:");
-        System.err.println(graph.toString(SemanticGraph.OutputFormat.LIST));
-        boolean found = true;
-        while (found) {
-          System.err.println("Matches at: " + matcher.getMatch().value() + "-" + matcher.getMatch().index());
-          List<String> nodeNames = Generics.newArrayList();
-          nodeNames.addAll(matcher.getNodeNames());
-          Collections.sort(nodeNames);
-          for (String name : nodeNames) {
-            System.err.println("  " + name + ": " + matcher.getNode(name).value() + "-" + matcher.getNode(name).index());
-          }
-          System.err.println();
-          found = matcher.find();
+      System.err.println("Matched graph:");
+      System.err.println(graph.toString(SemanticGraph.OutputFormat.LIST));
+      boolean found = true;
+      while (found) {
+        System.err.println("Matches at: " + matcher.getMatch().value() + "-" + matcher.getMatch().index());
+        List<String> nodeNames = Generics.newArrayList();
+        nodeNames.addAll(matcher.getNodeNames());
+        Collections.sort(nodeNames);
+        for (String name : nodeNames) {
+          System.err.println("  " + name + ": " + matcher.getNode(name).value() + "-" + matcher.getNode(name).index());
         }
-      } else if (outputFormat == OutputFormat.OFFSET) {
-        if (graph.vertexListSorted().isEmpty()) {
-          continue;
-        }
-        System.out.printf("+%d %s%n", graph.vertexListSorted().get(0).get(CoreAnnotations.LineNumberAnnotation.class),
-            argsMap.get(CONLLU_FILE)[0]);
+        System.err.println();
+        found = matcher.find();
       }
     }
   }

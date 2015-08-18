@@ -9,13 +9,13 @@ import java.util.logging.Logger;
 import static edu.stanford.nlp.ling.tokensregex.SequenceMatcher.FindType.FIND_NONOVERLAPPING;
 
 /**
- * A generic sequence matcher.
+ * <p>Generic sequence matcher</p>
  *
  * <p>
- * Similar to Java's {@code Matcher} except it matches sequences over an arbitrary type {@code T}
- *   instead of characters.
- * For a type {@code T} to be matchable, it has to have a corresponding {@code NodePattern<T>} that indicates
- *    whether a node is matched or not.
+ * Similar to Java's <code>Matcher</code> except it matches sequences over an arbitrary type <code>T</code>
+ *   instead of characters
+ * For a type <code>T</code> to be matchable, it has to have a corresponding <code>NodePattern<T></code> that indicates
+ *    whether a node is matched or not
  * </p>
  *
  * <p>
@@ -317,7 +317,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
    * Reset the matcher and then searches for pattern at the specified start index
    * @param start - Index at which to start the search
    * @return true if a match is found (false otherwise)
-   * @throws IndexOutOfBoundsException if start is {@literal <} 0 or larger then the size of the sequence
+   * @throws IndexOutOfBoundsException if start is < 0 or larger then the size of the sequence
    * @see #find()
    */
   public boolean find(int start)
@@ -769,7 +769,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     }
 
     // Add to list of related branch ids that we would like to keep...
-    private void updateKeepBids(BitSet bids) {
+    private void updateKeepBids(Set<Integer> bids) {
       if (matchStateInfo != null) {
         // TODO: Make values of matchStateInfo more organized (implement some interface) so we don't
         // need this kind of specialized code
@@ -864,9 +864,9 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     // (the branch index is with respect to parent, from 1 to number of branches the parent has)
     // TODO: This index can grow rather large, use index that allows for shrinkage
     //       (has remove function and generate new id every time)
-    HashIndex<Pair<Integer,Integer>> bidIndex = new HashIndex<>(4);
+    Index<Pair<Integer,Integer>> bidIndex = new HashIndex<Pair<Integer,Integer>>();
     // Map of branch id to branch state
-    Map<Integer,BranchState> branchStates = new HashMap<>();//Generics.newHashMap();
+    Map<Integer,BranchState> branchStates = new HashMap<Integer, BranchState>();//Generics.newHashMap();
     // The activeMatchedStates is only kept to determine what branch states are still needed
     // It's okay if it overly conservative and has more states than needed,
     // And while ideally a set, it's okay to have duplicates (esp if it is a bit faster for normal cases).
@@ -894,12 +894,12 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
 
     protected int getBid(int parent, int child)
     {
-      return bidIndex.indexOf(new Pair<>(parent,child));
+      return bidIndex.indexOf(new Pair<Integer,Integer>(parent,child));
     }
 
     protected int newBid(int parent, int child)
     {
-      return bidIndex.addToIndexUnsafe(new Pair<>(parent,child));
+      return bidIndex.addToIndex(new Pair<Integer,Integer>(parent,child));
     }
 
     protected int size()
@@ -912,9 +912,8 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
      */
     private void condense()
     {
-      BitSet keepBidStates = new BitSet();
-//      Set<Integer> curBidSet = new HashSet<Integer>();//Generics.newHashSet();
-//      Set<Integer> keepBidStates = new HashSet<Integer>();//Generics.newHashSet();
+      Set<Integer> curBidSet = new HashSet<Integer>();//Generics.newHashSet();
+      Set<Integer> keepBidStates = new HashSet<Integer>();//Generics.newHashSet();
       for (MatchedStates ms:activeMatchedStates) {
         // Trim out unneeded states info
         List<State> states = ms.states;
@@ -924,33 +923,20 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
               + ", nStates=" + states.size());
         }
         for (State state: states) {
-          keepBidStates.set(state.bid);
+          curBidSet.add(state.bid);
+          keepBidStates.add(state.bid);
         }
       }
-      for (MatchedStates ms : activeMatchedStates) {
-        for (State state : (List<State>) ms.states) {
-          int bid = state.bid;
-          BranchState bs = getBranchState(bid);
-          if (bs != null) {
-            keepBidStates.set(bs.bid);
-            bs.updateKeepBids(keepBidStates);
-            if (bs.bidsToCollapse != null) {
-              mergeBranchStates(bs);
-            }
+      for (int bid:curBidSet) {
+        BranchState bs = getBranchState(bid);
+        if (bs != null) {
+          keepBidStates.add(bs.bid);
+          bs.updateKeepBids(keepBidStates);
+          if (bs.bidsToCollapse != null) {
+            mergeBranchStates(bs);
           }
         }
       }
-      Iterator<Integer> iter = branchStates.keySet().iterator();
-      while (iter.hasNext()) {
-        int bid = iter.next();
-        if (!keepBidStates.get(bid)) {
-          if (logger.isLoggable(Level.FINEST)) {
-            logger.finest("Remove state for bid=" + bid);
-          }
-          iter.remove();
-        }
-      }
-      /* note[gabor]: replaced code below with the above
       Collection<Integer> curBidStates = new ArrayList<Integer>(branchStates.keySet());
       for (int bid:curBidStates) {
         if (!keepBidStates.contains(bid)) {
@@ -960,7 +946,11 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
           branchStates.remove(bid);
         }
       }
-      */
+      if (logger.isLoggable(Level.FINEST)) {
+        logger.finest("Condense matched state: oldBidStates=" + curBidStates.size()
+            + ", newBidStates=" + branchStates.size()
+            + ", curBidSet=" + curBidSet.size());
+      }
 
       // TODO: We should be able to trim some bids from our bidIndex as well....
       /*
@@ -1290,6 +1280,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     List<State> states;
     // Current position to match
     int curPosition = -1;
+    final int hashCode;
 
     protected MatchedStates(SequenceMatcher<T> matcher, SequencePattern.State state)
     {
@@ -1304,6 +1295,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       oldStates = new ArrayList<State>();
       this.branchStates = branchStates;
       branchStates.link(this);
+      hashCode = Objects.hashCode(this);
     }
 
     protected BranchStates getBranchStates()

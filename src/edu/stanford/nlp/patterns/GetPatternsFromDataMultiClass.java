@@ -1217,6 +1217,13 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       if(constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.DB))
         patsForEachToken.createIndexIfUsingDBAndNotExists();
 
+      if(constVars.allPatternsDir == null){
+        String systemdir = System.getProperty("java.io.tmpdir");
+        File tempFile= File.createTempFile("patterns", ".tmp", new File(systemdir));
+        tempFile.deleteOnExit();
+        tempFile.delete();
+        constVars.allPatternsDir = tempFile.getAbsolutePath();
+      }
 
       IOUtils.ensureDir(new File(constVars.allPatternsDir));
       patsForEachToken.save(constVars.allPatternsDir);

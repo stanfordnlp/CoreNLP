@@ -15,7 +15,6 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
@@ -81,22 +80,14 @@ public class TextOutputter extends AnnotationOutputter {
       for (int i = 0, sz = sentences.size(); i < sz; i ++) {
         CoreMap sentence = sentences.get(i);
         List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-        String sentiment = sentence.get(SentimentCoreAnnotations.SentimentClass.class);
-        if (sentiment == null) {
-          sentiment = "";
-        } else {
-          sentiment = ", sentiment: " + sentiment;
-        }
-        pw.printf("Sentence #%d (%d tokens%s):%n", (i + 1), tokens.size(), sentiment);
+        pw.printf("Sentence #%d (%d tokens):%n", (i + 1), tokens.size());
 
         String text = sentence.get(CoreAnnotations.TextAnnotation.class);
         pw.println(text);
 
         // display the token-level annotations
         String[] tokenAnnotations = {
-                "Text", "PartOfSpeech", "Lemma", "Answer", "NamedEntityTag",
-                "CharacterOffsetBegin", "CharacterOffsetEnd", "NormalizedNamedEntityTag",
-                "Timex", "TrueCase", "TrueCaseText", "SentimentClass" };
+            "Text", "PartOfSpeech", "Lemma", "Answer", "NamedEntityTag", "CharacterOffsetBegin", "CharacterOffsetEnd", "NormalizedNamedEntityTag", "Timex", "TrueCase", "TrueCaseText" };
         for (CoreLabel token: tokens) {
           pw.print(token.toShorterString(tokenAnnotations));
           pw.println();

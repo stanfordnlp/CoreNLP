@@ -50,7 +50,7 @@ public class TokenizerAnnotator implements Annotator {
     private final String className;
     private final String defaultOptions;
 
-    TokenizerType(String abbreviation, String className, String defaultOptions) {
+    private TokenizerType(String abbreviation, String className, String defaultOptions) {
       this.abbreviation = abbreviation;
       this.className = className;
       this.defaultOptions = defaultOptions;

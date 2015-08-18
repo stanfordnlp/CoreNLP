@@ -13,7 +13,6 @@ import java.util.function.Function;
 public class MultiPatternMatcher<T> {
   Collection<SequencePattern<T>> patterns;
   SequencePatternTrigger<T> patternTrigger;
-  boolean matchWithResult = false;
 
   public MultiPatternMatcher(SequencePatternTrigger<T> patternTrigger,
                              Collection<? extends SequencePattern<T>> patterns)
@@ -75,7 +74,6 @@ public class MultiPatternMatcher<T> {
     int i = 0;
     for (SequencePattern<T> p:triggered) {
       SequenceMatcher<T> m = p.getMatcher(elements);
-      m.setMatchWithResult(matchWithResult);
       m.setOrder(i);
       while (m.find()) {
         all.add(m.toBasicSequenceMatchResult());
@@ -103,7 +101,6 @@ public class MultiPatternMatcher<T> {
     int i = 0;
     for (SequencePattern<T> p:triggered) {
       SequenceMatcher<T> m = p.getMatcher(elements);
-      m.setMatchWithResult(matchWithResult);
       m.setFindType(findType);
       m.setOrder(i);
       while (m.find()) {
@@ -147,7 +144,6 @@ public class MultiPatternMatcher<T> {
     int i = 0;
     for (SequencePattern<T> p:triggered) {
       SequenceMatcher<T> m = p.getMatcher(elements);
-      m.setMatchWithResult(matchWithResult);
       m.setOrder(i);
       while (m.find()) {
         all.add(m.toBasicSequenceMatchResult());
@@ -172,9 +168,7 @@ public class MultiPatternMatcher<T> {
     Collection<SequencePattern<T>> triggered = getTriggeredPatterns(elements);
     List<Iterable<SequenceMatchResult<T>>> allMatches = new ArrayList<Iterable<SequenceMatchResult<T>>>(elements.size());
     for (SequencePattern<T> p:triggered) {
-      SequenceMatcher<T> m = p.getMatcher(elements);
-      m.setMatchWithResult(matchWithResult);
-      Iterable<SequenceMatchResult<T>> matches = m.findAllNonOverlapping();
+      Iterable<SequenceMatchResult<T>> matches = p.getMatcher(elements).findAllNonOverlapping();
       allMatches.add(matches);
     }
     return Iterables.chain(allMatches);
@@ -194,15 +188,7 @@ public class MultiPatternMatcher<T> {
     }
   }
 
-  public boolean isMatchWithResult() {
-    return matchWithResult;
-  }
-
-  public void setMatchWithResult(boolean matchWithResult) {
-    this.matchWithResult = matchWithResult;
-  }
-
-/** Interfaces for optimizing application of many SequencePatterns over a particular sequence */
+  /** Interfaces for optimizing application of many SequencePatterns over a particular sequence */
 
   /**
    * A function which returns a collections of patterns that may match when

@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 
-import edu.stanford.nlp.international.Language;
+import edu.stanford.nlp.international.Languages;
+import edu.stanford.nlp.international.Languages.Language;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams;
@@ -74,7 +75,7 @@ public class TsarfatyEval extends AbstractEval {
     usage.append(String.format("Usage: java %s [OPTS] gold guess\n\n",TsarfatyEval.class.getName()));
     usage.append("Options:\n");
     usage.append("  -v         : Verbose mode.\n");
-    usage.append("  -l lang    : Select language settings from " + Language.class.getName() + "\n");
+    usage.append("  -l lang    : Select language settings from " + Languages.class.getName() + "\n");
     usage.append("  -y num     : Skip gold trees with yields longer than num.\n");
     usage.append("  -g num     : Skip guess trees with yields longer than num.\n");
     usage.append("  -t         : Tagging mode (default: segmentation).\n");
@@ -109,7 +110,7 @@ public class TsarfatyEval extends AbstractEval {
         switch (args[i]) {
           case "-l":
             Language lang = Language.valueOf(args[++i].trim());
-            tlpp = lang.params;
+            tlpp = Languages.getLanguageParams(lang);
 
             break;
           case "-y":

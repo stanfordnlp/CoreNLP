@@ -41,10 +41,6 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
   private final CoreLabel label;
 
   private int copyCount; // = 0;
-  
-  private int numCopies = 0;
-  
-  private IndexedWord original = null;
 
   /**
    * Default constructor; uses {@link CoreLabel} default constructor
@@ -105,28 +101,11 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
     copy.setCopyCount(count);
     return copy;
   }
-  
-  public IndexedWord makeCopy() {
-    return makeCopy(++numCopies);
-  }
 
   public IndexedWord makeSoftCopy(int count) {
     IndexedWord copy = new IndexedWord(label);
     copy.setCopyCount(count);
-    copy.original = this;
     return copy;
-  }
-  
-  public IndexedWord makeSoftCopy() {
-    if (original != null) {
-      return original.makeSoftCopy();
-    } else {
-      return makeSoftCopy(++numCopies);
-    }
-  }
-  
-  public IndexedWord getOriginal() {
-    return original;
   }
 
   /**
@@ -295,39 +274,6 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
   public String toPrimes() {
     return StringUtils.repeat('\'', copyCount);
   }
-  
-  public boolean isCopy(IndexedWord otherWord) {
-    Integer myInd = get(CoreAnnotations.IndexAnnotation.class);
-    Integer otherInd = otherWord.get(CoreAnnotations.IndexAnnotation.class);
-    if (myInd == null) {
-      if (otherInd != null)
-      return false;
-    } else if ( ! myInd.equals(otherInd)) {
-      return false;
-    }
-    Integer mySentInd = get(CoreAnnotations.SentenceIndexAnnotation.class);
-    Integer otherSentInd = otherWord.get(CoreAnnotations.SentenceIndexAnnotation.class);
-    if (mySentInd == null) {
-      if (otherSentInd != null)
-      return false;
-    } else if ( ! mySentInd.equals(otherSentInd)) {
-      return false;
-    }
-    String myDocID = getString(CoreAnnotations.DocIDAnnotation.class);
-    String otherDocID = otherWord.getString(CoreAnnotations.DocIDAnnotation.class);
-    if (myDocID == null) {
-      if (otherDocID != null)
-      return false;
-    } else if ( ! myDocID.equals(otherDocID)) {
-      return false;
-    }
-    
-    if (copyCount() == 0 || otherWord.copyCount() != 0) {
-      return false;
-    }
-
-    return true;
-  }
 
   /**
    * This .equals is dependent only on docID, sentenceIndex, and index.
@@ -373,16 +319,12 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
   }
 
 
-  private int cachedHashCode = 0;
   /**
    * This hashCode uses only the docID, sentenceIndex, and index.
    * See compareTo for more info.
    */
   @Override
   public int hashCode() {
-    if (cachedHashCode != 0) {
-      return cachedHashCode;
-    }
     boolean sensible = false;
     int result = 0;
     if (get(CoreAnnotations.DocIDAnnotation.class) != null) {
@@ -400,7 +342,6 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
     if ( ! sensible) {
       System.err.println("WARNING!!!  You have hashed an IndexedWord with no docID, sentIndex or wordIndex. You will almost certainly lose");
     }
-    cachedHashCode = result;
     return result;
   }
 

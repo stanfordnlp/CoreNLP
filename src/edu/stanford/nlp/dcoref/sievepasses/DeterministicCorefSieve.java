@@ -30,7 +30,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -62,7 +61,6 @@ import edu.stanford.nlp.trees.Tree;
 public abstract class DeterministicCorefSieve  {
 
   public final SieveOptions flags;
-  protected Locale lang;
 
   /** Initialize flagSet */
   public DeterministicCorefSieve() {
@@ -70,7 +68,6 @@ public abstract class DeterministicCorefSieve  {
   }
 
   public void init(Properties props) {
-    lang = Locale.forLanguageTag(props.getProperty(Constants.LANGUAGE_PROP, "en"));
   }
 
   public String flagsToString() { return flags.toString(); }
@@ -118,13 +115,12 @@ public abstract class DeterministicCorefSieve  {
           CorefCluster mentionCluster,
           CorefCluster potentialAntecedent,
           Dictionaries dict,
-          Set<Mention> roleSet) {
+          Set<Mention> roleSet)
+  {
     return false;
   }
-
   /**
-   * Checks if two clusters are coreferent according to our sieve pass constraints.
-   *
+   * Checks if two clusters are coreferent according to our sieve pass constraints
    * @param document
    * @throws Exception
    */
@@ -307,7 +303,7 @@ public abstract class DeterministicCorefSieve  {
       return true;
     }
 
-    if(flags.USE_ROLEAPPOSITION && lang != Locale.CHINESE && Rules.entityIsRoleAppositive(mentionCluster, potentialAntecedent, mention, ant, dict)){
+    if(flags.USE_ROLEAPPOSITION && Rules.entityIsRoleAppositive(mentionCluster, potentialAntecedent, mention, ant, dict)){
       SieveCoreferenceSystem.logger.finest("Role Appositive: "+mention.spanToString()+"\tvs\t"+ant.spanToString());
       ret = true;
     }

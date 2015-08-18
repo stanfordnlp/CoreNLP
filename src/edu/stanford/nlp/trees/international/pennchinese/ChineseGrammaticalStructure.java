@@ -1,6 +1,5 @@
 package edu.stanford.nlp.trees.international.pennchinese;
 
-import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams;
 import edu.stanford.nlp.parser.ViterbiParserWithOptions;
@@ -59,7 +58,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
   }
 
   public ChineseGrammaticalStructure(Tree t, Predicate<String> puncFilter, HeadFinder hf) {
-    super(t, ChineseGrammaticalRelations.values(), hf, puncFilter, Filters.acceptFilter());
+    super(t, ChineseGrammaticalRelations.values(), hf, puncFilter);
   }
 
   /** Used for postprocessing CoNLL X dependencies */
@@ -104,7 +103,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
             if (td1.reln() == DEPENDENT && td2.reln() == DEPENDENT && td1DepPOS.equals("P")) {
               GrammaticalRelation td3reln = ChineseGrammaticalRelations.valueOf(td1Dep.value());
               if (td3reln == null) {
-                td3reln = GrammaticalRelation.valueOf(Language.Chinese,
+                td3reln = GrammaticalRelation.valueOf(GrammaticalRelation.Language.Chinese,
                                                       td1Dep.value());
               }
               TypedDependency td3 = new TypedDependency(td3reln, td1.gov(), td2.dep());

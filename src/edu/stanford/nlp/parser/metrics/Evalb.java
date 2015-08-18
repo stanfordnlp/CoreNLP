@@ -14,7 +14,8 @@ import java.util.PriorityQueue;
 import java.util.Properties;
 import java.util.Set;
 
-import edu.stanford.nlp.international.Language;
+import edu.stanford.nlp.international.Languages;
+import edu.stanford.nlp.international.Languages.Language;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
@@ -133,7 +134,7 @@ public class Evalb extends AbstractEval {
     sb.append(String.format("Usage: java %s [OPTS] gold guess%n%n",Evalb.class.getName()));
     sb.append("Options:").append(nl);
     sb.append("  -v         : Verbose mode.").append(nl);
-    sb.append("  -l lang    : Select language settings from ").append(Language.langList).append(nl);
+    sb.append("  -l lang    : Select language settings from ").append(Languages.listOfLanguages()).append(nl);
     sb.append("  -y num     : Skip gold trees with yields longer than num.").append(nl);
     sb.append("  -s num     : Sort the trees by F1 and output the num lowest F1 trees.").append(nl);
     sb.append("  -c         : Compute LP/LR/F1 by category.").append(nl);
@@ -165,7 +166,7 @@ public class Evalb extends AbstractEval {
     }
     Properties options = StringUtils.argsToProperties(args, optionArgDefs());
     Language language = PropertiesUtils.get(options, "l", Language.English, Language.class);
-    final TreebankLangParserParams tlpp = language.params;
+    final TreebankLangParserParams tlpp = Languages.getLanguageParams(language);
     final int maxGoldYield = PropertiesUtils.getInt(options, "y", Integer.MAX_VALUE);
     final boolean VERBOSE = PropertiesUtils.getBool(options, "v", false);
     final boolean sortByF1 = PropertiesUtils.hasProperty(options, "s");

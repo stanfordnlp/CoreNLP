@@ -2,8 +2,10 @@ package edu.stanford.nlp.naturalli;
 
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.ling.CoreAnnotation;
+import edu.stanford.nlp.ling.CoreLabel;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * A collection of {@link edu.stanford.nlp.ling.CoreAnnotation}s for various Natural Logic data.
@@ -15,7 +17,6 @@ public class NaturalLogicAnnotations {
   /**
    * An annotation which attaches to a CoreLabel to denote that this is an operator in natural logic,
    * to describe which operator it is, and to give the scope of its argument(s).
-   * This only attaches to tokens which are operators (i.e., the head words of operators).
    */
   public static final class OperatorAnnotation implements CoreAnnotation<OperatorSpec> {
     @Override
@@ -38,11 +39,11 @@ public class NaturalLogicAnnotations {
   /**
    * The set of sentences which are entailed by the original sentence, according to Natural Logic semantics.
    */
-  public static final class EntailedSentencesAnnotation implements CoreAnnotation<Collection<SentenceFragment>> {
+  public static final class ImpliedSentencesAnnotation implements CoreAnnotation<Collection<List<CoreLabel>>> {
     @SuppressWarnings("unchecked")
     @Override
-    public Class<Collection<SentenceFragment>> getType() {
-      return (Class<Collection<SentenceFragment>>) ((Object) Collection.class);
+    public Class<Collection<List<CoreLabel>>> getType() {
+      return (Class<Collection<List<CoreLabel>>>) ((Object) Collection.class);
     }
   }
 

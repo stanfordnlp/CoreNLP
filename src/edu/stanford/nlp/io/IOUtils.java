@@ -10,7 +10,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -413,21 +412,9 @@ public class IOUtils {
     // windows File.separator is \, but getting resources only works with /
     if (is == null) {
       is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/"));
-      // Classpath doesn't like double slashes (e.g., /home/user//foo.txt)
-      if (is == null) {
-        is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/").replaceAll("/+", "/"));
-      }
     }
     // if not found in the CLASSPATH, load from the file system
     if (is == null) is = new FileInputStream(name);
-    // make sure it's not a GZIP stream
-    if (name.endsWith(".gz")) {
-      try {
-        return new GZIPInputStream(is);
-      } catch (IOException e) {
-        System.err.println("Resource or file looks like a gzip file, but is not: " + name);
-      }
-    }
     return is;
   }
 
@@ -462,11 +449,6 @@ public class IOUtils {
       URL u = new URL(textFileOrUrl);
       URLConnection uc = u.openConnection();
       in = uc.getInputStream();
-      if (textFileOrUrl.endsWith(".gz")) {
-        try {
-          in = new GZIPInputStream(in);
-        } catch (IOException e) { }
-      }
     } else {
       try {
         in = findStreamInClasspathOrFileSystem(textFileOrUrl);
@@ -483,6 +465,11 @@ public class IOUtils {
                   "class path, filename or URL"); // , e2);
         }
       }
+    }
+
+    if (textFileOrUrl.endsWith(".gz")) {
+      // gunzip it if necessary
+      in = new GZIPInputStream(in, GZIP_FILE_BUFFER_SIZE);
     }
 
     // buffer this stream.  even gzip streams benefit from buffering,
@@ -732,7 +719,7 @@ public class IOUtils {
 
     private InputStream getStream() throws IOException {
       if (file != null) {
-        return inputStreamFromFile(file);
+        return new FileInputStream(file);
       } else if (path != null) {
         return getInputStreamFromURLOrClasspathOrFileSystem(path);
       } else {
@@ -874,22 +861,22 @@ public class IOUtils {
    * Line endings are: \r\n,\n,\r
    * Lines returns by this iterator will include the eol-characters
    **/
-  private static final class EolPreservingLineReaderIterable implements Iterable<String> {
-
+  private static final class EolPreservingLineReaderIterable implements Iterable<String>
+  {
     private final Reader reader;
     private final int bufferSize;
-
     private EolPreservingLineReaderIterable( Reader reader )
     {
       this(reader, SLURP_BUFFER_SIZE);
     }
-    private EolPreservingLineReaderIterable( Reader reader, int bufferSize ) {
+    private EolPreservingLineReaderIterable( Reader reader, int bufferSize )
+    {
       this.reader = reader;
       this.bufferSize = bufferSize;
     }
-
     @Override
-    public Iterator<String> iterator() {
+    public Iterator<String> iterator()
+    {
       return new Iterator<String>() {
         private String next;
         private boolean done = false;
@@ -961,6 +948,7 @@ public class IOUtils {
           return false;
         }
 
+
         @Override
         public boolean hasNext()
         {
@@ -973,7 +961,6 @@ public class IOUtils {
           }
           return !done;
         }
-
         @Override
         public String next()
         {
@@ -989,9 +976,8 @@ public class IOUtils {
           throw new UnsupportedOperationException();
         }
       };
-    } // end iterator()
-
-  } // end static class EolPreservingLineReaderIterable
+    }
+  }
 
   /**
    * Provides an implementation of closing a file for use in a finally block so
@@ -1126,7 +1112,7 @@ public class IOUtils {
    */
   public static String slurpFile(String filename, String encoding)
           throws IOException {
-    Reader r = getBufferedReaderFromClasspathOrFileSystem(filename, encoding);
+    Reader r = readerFromString(filename, encoding);
     return IOUtils.slurpReader(r);
   }
 
@@ -1183,7 +1169,11 @@ public class IOUtils {
     }
     BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
     StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
-    for (String temp; (temp = br.readLine()) != null; ) {
+    for (String temp; (temp = br.readLine()) != null;
+
+
+
+            ) {
       buff.append(temp);
       buff.append(lineSeparator);
     }
@@ -1315,8 +1305,10 @@ public class IOUtils {
   /**
    * Send all bytes from the input stream to the output stream.
    *
-   * @param input The input bytes.
-   * @param output Where the bytes should be written.
+   * @param input
+   *          The input bytes.
+   * @param output
+   *          Where the bytes should be written.
    */
   public static void writeStreamToStream(InputStream input, OutputStream output)
           throws IOException {
@@ -1533,8 +1525,8 @@ public class IOUtils {
     //System.err.println("getBZip2PipedInputStream: Running command: "+cmd);
     Process p = rt.exec(cmd);
     Writer errWriter = new BufferedWriter(new OutputStreamWriter(System.err));
-    StreamGobbler errGobbler = new StreamGobbler(p.getErrorStream(), errWriter);
-    errGobbler.start();
+    StreamGobbler errGobler = new StreamGobbler(p.getErrorStream(), errWriter);
+    errGobler.start();
     return p.getInputStream();
   }
 
@@ -1664,7 +1656,7 @@ public class IOUtils {
   public static List<String> linesFromFile(String filename,String encoding, boolean ignoreHeader) {
     try {
       List<String> lines = new ArrayList<String>();
-      BufferedReader in = getBufferedReaderFromClasspathOrFileSystem(filename, encoding);
+      BufferedReader in = new BufferedReader(new EncodingFileReader(filename,encoding));
       String line;
       int i = 0;
       while ((line = in.readLine()) != null) {
@@ -2039,29 +2031,6 @@ public class IOUtils {
     }
     //noinspection ResultOfMethodCallIgnored
     file.delete();
-  }
-
-  /**
-   * Start a simple console. Read lines from stdin, and pass each line to the callback.
-   * Returns on typing "exit" or "quit".
-   *
-   * @param callback The function to run for every line of input.
-   * @throws IOException Thrown from the underlying input stream.
-   */
-  public static void console(Consumer<String> callback) throws IOException {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-    String line;
-    System.out.print("> ");
-    while ( (line = reader.readLine()) != null) {
-      switch (line.toLowerCase()) {
-        case "exit":
-        case "quit":
-          return;
-        default:
-          callback.accept(line);
-      }
-      System.out.print("> ");
-    }
   }
 
 }

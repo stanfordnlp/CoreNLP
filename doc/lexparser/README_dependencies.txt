@@ -1,37 +1,14 @@
-UNIVERSAL/STANFORD DEPENDENCIES.  Stanford Parser v3.5.2
+STANFORD DEPENDENCIES.  Stanford Parser v3.5.1
 -----------------------------------------------------------
-
-IMPORTANT: Starting with version 3.5.2 the default dependencies
-representation output by the Stanford Parser is the new Universal
-Dependencies Representation. Universal Dependencies were developed
-with the goal of being a cross-linguistically valid representation.
-Note that some constructs such as prepositional phrases are now 
-analyzed differently and that the set of relations was updated. The
-online documentation of English Universal Dependencies at
-
-    http://universaldependencies.github.io/docs/#language-en
-
-should be consulted for the current set of dependency relations.
-
-
-The parser and converter also still support the original 
-Stanford Dependencies as described in the Stanford Dependencies 
-manual. Use the flag
-
-    -originalDependencies
-
-to obtain the original Stanford Dependencies.
-
 
 The manual for the English version of the Stanford Dependencies
 representation:
 
     StanfordDependenciesManual.pdf
 
-should be consulted for the set of dependency relations in the original
-Stanford Dependencies representation and the correct commands for 
-generating Stanford Dependencies together with any of the Stanford Parser, 
-another parser, or a treebank.
+should be consulted for the current set of dependency representations
+and the correct commands for generating Stanford Dependencies together
+with any of the Stanford Parser, another parser, or a treebank.
 
 A typed dependencies representation is also available for Chinese.  For
 the moment the documentation consists of the code, and a brief
@@ -42,24 +19,24 @@ D. Manning. 2009.  Discriminative Reordering with Chinese Grammatical
 Relations Features.  Third Workshop on Syntax and Structure in Statistical
 Translation. http://nlp.stanford.edu/pubs/ssst09-chang.pdf
 
+
 --------------------------------------
-DEPENDENCIES SCHEMES
+UNIVERSAL DEPENDENCIES
 
-For an overview of the original English Universal Dependencies schemes, please look
-at:
+We are at present involved in a group developing a cross-linguistically
+valid Universal Dependencies representation and treebanks:
 
-  Marie-Catherine de Marneffe, Timothy Dozat, Natalia Silveira, Katri Haverinen,
-  Filip Ginter, Joakim Nivre and Christopher D. Manning. 2014. Universal Stanford
-  dependencies: A cross-linguistic typology. 9th International Conference on
-  Language Resources and Evaluation (LREC 2014).
-  http://nlp.stanford.edu/pubs/USD_LREC14_paper_camera_ready.pdf
+      http://universaldependencies.github.io/docs/
 
-Please note, though, that some of the relations discussed in this paper
-were subsequently updated and please refer to the online documentation at
-    
-    http://universaldependencies.github.com/docs/
+It is our intention to transition Stanford NLP tools to Universal
+Dependencies, but there is not yet any model support for Universal
+Dependencies in this release.  (However, there is no reason that you
+yourself cannot train a POS tagger and a neural-net dependency parser
+for Universal Dependencies.
 
-for an up to date documention of the set of relations.
+
+--------------------------------------
+ORIGINAL DEPENDENCIES SCHEME
 
 For an overview of the original typed dependencies scheme, please look
 at:
@@ -77,18 +54,9 @@ For more discussion of the design principles, please see:
   workshop on Cross-Framework and Cross-Domain Parser Evaluation, pp. 1-8.
   http://nlp.stanford.edu/~manning/papers/dependencies-coling08.pdf
 
-These papers can be cited as references for the original English Stanford
-Dependencies and Enlgish Universal Dependencies.
+These papers can be cited as references for the English Stanford
+Dependencies.
 
---------------------------------------
-CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.5.2
-
-Switch to Universal Dependencies as the default representation.
-Please see the Universal Dependencies documentation at
-
-      http://universaldependencies.github.io/docs/
-
-for more information on the new relations.
 
 --------------------------------------
 CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.5.1

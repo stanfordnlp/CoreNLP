@@ -22,7 +22,7 @@ public final class ArrayMap<K,V> extends AbstractMap<K,V> implements Serializabl
     private static final long serialVersionUID = 1L;
 
     @SuppressWarnings({"NonSerializableFieldInSerializableClass"})
-    private final K key;
+    private K key;
     @SuppressWarnings({"NonSerializableFieldInSerializableClass"})
     private V value;
 

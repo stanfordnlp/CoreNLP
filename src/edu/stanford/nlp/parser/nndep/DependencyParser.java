@@ -1,6 +1,5 @@
 package edu.stanford.nlp.parser.nndep;
 
-import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -21,8 +20,6 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.TreeGraphNode;
 import edu.stanford.nlp.trees.TypedDependency;
-import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
-import edu.stanford.nlp.trees.UniversalEnglishGrammaticalStructure;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure;
 import edu.stanford.nlp.util.CoreMap;
@@ -75,7 +72,7 @@ import static java.util.stream.Collectors.toList;
  * @author Jon Gauthier
  */
 public class DependencyParser {
-  public static final String DEFAULT_MODEL = "edu/stanford/nlp/models/parser/nndep/english_UD.gz";
+  public static final String DEFAULT_MODEL = "edu/stanford/nlp/models/parser/nndep/english_SD.gz";
 
   /**
    * Words, parts of speech, and dependency relation labels which were
@@ -108,7 +105,7 @@ public class DependencyParser {
    * Language used to generate
    * {@link edu.stanford.nlp.trees.GrammaticalRelation} instances.
    */
-  private final Language language;
+  private final GrammaticalRelation.Language language;
 
   DependencyParser() {
     this(new Properties());
@@ -119,12 +116,25 @@ public class DependencyParser {
 
     // Convert Languages.Language instance to
     // GrammaticalLanguage.Language
-    this.language = config.language;
+    switch (config.language) {
+      case English:
+        language = GrammaticalRelation.Language.English;
+        break;
+      case Chinese:
+        language = GrammaticalRelation.Language.Chinese;
+        break;
+      case Unknown:
+        language = GrammaticalRelation.Language.Any;
+        break;
+      default:
+        language = GrammaticalRelation.Language.English;  // note[gabor]: This is to conform to the default in the Parser annotator
+        break;
+    }
   }
 
   /**
    * Get an integer ID for the given word. This ID can be used to index
-   * into the embeddings {@link Classifier#E}.
+   * into the embeddings {@link #embeddings}.
    *
    * @return An ID for the given word, or an ID referring to a generic
    *         "unknown" word if the word is unknown
@@ -627,8 +637,6 @@ public class DependencyParser {
         IOUtils.closeIgnoringExceptions(input);
       }
     }
-
-    embeddings = Util.scaling(embeddings, 0, 1.0);
     return embeddings;
   }
 
@@ -793,7 +801,8 @@ public class DependencyParser {
       }
       if (index >= 0) {
         ++foundEmbed;
-        System.arraycopy(embeddings[index], 0, E[i], 0, E[i].length);
+        for (int j = 0; j < E[i].length; ++j)
+          E[i][j] = embeddings[index][j];
       } else {
         for (int j = 0; j < E[i].length; ++j)
           //E[i][j] = random.nextDouble() * config.initRange * 2 - config.initRange;
@@ -976,11 +985,6 @@ public class DependencyParser {
         if (stored != null)
           return stored;
         break;
-      case UniversalEnglish:
-        stored = UniversalEnglishGrammaticalRelations.shortNameToGRel.get(label);
-        if (stored != null)
-          return stored;
-        break;
       case Chinese:
         stored = ChineseGrammaticalRelations.shortNameToGRel.get(label);
         if (stored != null)
@@ -994,11 +998,10 @@ public class DependencyParser {
   private GrammaticalStructure makeGrammaticalStructure(List<TypedDependency> dependencies, TreeGraphNode rootNode) {
     switch (language) {
       case English: return new EnglishGrammaticalStructure(dependencies, rootNode);
-      case UniversalEnglish: return new UniversalEnglishGrammaticalStructure(dependencies, rootNode);
       case Chinese: return new ChineseGrammaticalStructure(dependencies, rootNode);
 
-      // TODO suboptimal: default to UniversalEnglishGrammaticalStructure return
-      default: return new UniversalEnglishGrammaticalStructure(dependencies, rootNode);
+      // TODO suboptimal: default to EnglishGrammaticalStructure return
+      default: return new EnglishGrammaticalStructure(dependencies, rootNode);
     }
   }
 
@@ -1065,7 +1068,7 @@ public class DependencyParser {
     for (CoreMap testSent : testSents) {
       numSentences += 1;
       List<CoreLabel> tokens = testSent.get(CoreAnnotations.TokensAnnotation.class);
-      for (int k = 0; k < tokens.size(); ++ k) {
+      for (int k = 0; k < tokens.size(); ++ k) {  
         String word = tokens.get(k).word();
         numWords += 1;
         if (!wordIDs.containsKey(word))
@@ -1076,7 +1079,7 @@ public class DependencyParser {
 
     List<DependencyTree> predicted = testSents.stream().map(this::predictInner).collect(toList());
     Map<String, Double> result = system.evaluate(testSents, predicted, testTrees);
-
+    
     double uas = config.noPunc ? result.get("UASnoPunc") : result.get("UAS");
     double las = config.noPunc ? result.get("LASnoPunc") : result.get("LAS");
     System.err.printf("UAS = %.4f%n", uas);
@@ -1277,5 +1280,4 @@ public class DependencyParser {
       parser.parseTextFile(input, output);
     }
   }
-
 }

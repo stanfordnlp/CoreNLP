@@ -1,7 +1,7 @@
-Stanford Lexicalized Parser v3.5.2 - 2015-04-20
+Stanford Lexicalized Parser v3.5.1 - 2015-01-29
 -----------------------------------------------
 
-Copyright (c) 2002-2015 The Board of Trustees of The Leland Stanford Junior
+Copyright (c) 2002-2012 The Board of Trustees of The Leland Stanford Junior
 University. All Rights Reserved.
 
 Original core parser code by Dan Klein.  Support code, additional
@@ -9,10 +9,9 @@ modules, languages, features, internationalization, compaction, typed
 dependencies, etc. by Christopher Manning, Roger Levy, Teg Grenager,
 Galen Andrew, Marie-Catherine de Marneffe, Jenny Finkel, Spence Green,
 Bill MacCartney, Anna Rafferty, Huihsin Tseng, Pi-Chuan Chang,
-Wolfgang Maier, Richard Eckart, Richard Socher, John Bauer,
-Sebastian Schuster, and Jon Gauthier.
+Wolfgang Maier, Richard Eckart, Richard Socher, and John Bauer.
 
-This release was prepared by Jason Bolton.
+This release prepared by John Bauer.
 
 This package contains 4 parsers: a high-accuracy unlexicalized PCFG; a
 lexicalized dependency parser; a factored model, where the estimates
@@ -33,8 +32,8 @@ Secondly, you should also look at the Parser FAQ on the web:
 
     http://nlp.stanford.edu/software/parser-faq.shtml
 
-This software requires Java 8 (JDK 1.8.0+).  (You must have installed it
-separately. Check that the command "java -version" works and gives 1.8+.)
+This software requires Java 6 (JDK 1.6.0+).  (You must have installed it
+separately. Check that the command "java -version" works and gives 1.6+.)
 
 
 QUICKSTART
@@ -42,7 +41,7 @@ QUICKSTART
 UNIX COMMAND-LINE USAGE
 
 On a Unix system you should be able to parse the English test file with the
-following command:	
+following command:
 
     ./lexparser.sh data/testsent.txt
 
@@ -174,27 +173,10 @@ evaluation metrics:
 See the usage instructions and javadocs in the requisite classes located in
 edu.stanford.nlp.parser.metrics.
 
-UNIVERSAL DEPENDENCIES vs. STANFORD DEPENDENCIES
-
-Since v3.5.2 the default dependency representation is the new Universal Dependencies
-representation. Universal Dependencies were developed with the goal of being a
-cross-linguistically valid representation. Note that some constructs such as prepositional
-phrases are now analyzed differently and that the set of relations was updated. Please 
-look at the Universal Dependencies documentation for more information:
-
-      http://universaldependencies.github.io/docs/
-
-The parser also still supports the original Stanford Dependencies representation 
-as described in the StanfordDependenciesManual.pdf. Use the flag
-
-     -originalDependencies
-
-to obtain original Stanford Dependencies.
-
 LICENSE
 
 // StanfordLexicalizedParser -- a probabilistic lexicalized NL CFG parser
-// Copyright (c) 2002-2015 The Board of Trustees of
+// Copyright (c) 2002-2012 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -223,8 +205,6 @@ LICENSE
 ---------------------------------
 CHANGES
 ---------------------------------
-
-2015-04-20    3.5.2     Switch to universal dependencies 
 
 2015-01-29    3.5.1     Dependency parser improvements; general 
                         bugfixes 

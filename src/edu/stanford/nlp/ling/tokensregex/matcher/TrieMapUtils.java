@@ -64,13 +64,6 @@ public class TrieMapUtils {
     }
 
     @Override
-    public Set<Iterable<K>> newSet(Collection<Iterable<K>> init) {
-      Set<Iterable<K>> set = Collections.newSetFromMap(new TrieMap<K,Boolean>());
-      init.addAll(init);
-      return set;
-    }
-
-    @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1, V1> map) {
       throw new UnsupportedOperationException();
     }

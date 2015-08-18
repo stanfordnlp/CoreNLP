@@ -2,10 +2,6 @@ package edu.stanford.nlp.ling.tokensregex;
 
 import edu.stanford.nlp.util.*;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
 
@@ -81,15 +77,12 @@ import java.util.function.Function;
  *                         see {@link MultiCoreMapNodePattern} for example) </li>
  * <li> Conjunctions - conjunctions of sequence patterns (works for some cases)</li>
  * </ol>
- *
- * </p>
- * <p>Note that this and the inherited classes do not implement any custom equals and hashCode functions.
  * </p>
  *
  * @author Angel Chang
  * @see SequenceMatcher
  */
-public class SequencePattern<T> implements Serializable {
+public class SequencePattern<T> {
   // TODO:
   //  1. Validate backref capture groupid
   //  2. Actions
@@ -99,7 +92,6 @@ public class SequencePattern<T> implements Serializable {
   private String patternStr;
   private PatternExpr patternExpr;
   private SequenceMatchAction<T> action;
-
   State root;
   int totalGroups = 0;
 
@@ -227,29 +219,6 @@ public class SequencePattern<T> implements Serializable {
     return null;
   }
 
-  public <OUT> Collection<OUT> findNodePatterns(Function<NodePattern<T>, OUT> filter) {
-    List<OUT> outList = new ArrayList<OUT>();
-    Queue<State> todo = new LinkedList<State>();
-    Set<State> seen = new HashSet<State>();
-    todo.add(root);
-    seen.add(root);
-    while (!todo.isEmpty()) {
-      State state = todo.poll();
-      if (state instanceof NodePatternState) {
-        NodePattern<T> pattern = ((NodePatternState) state).pattern;
-        OUT res = filter.apply(pattern);
-        if (res != null) {
-          outList.add(res);
-        }
-      }
-      if (state.next != null) {
-        for (State s: state.next) {
-          if (!seen.contains(s)) { seen.add(s); todo.add(s); }
-        }
-      }
-    }
-    return outList;
-  }
   // Parses string to PatternExpr
   public static interface Parser<T> {
     public SequencePattern.PatternExpr parseSequence(Env env, String s) throws Exception;
@@ -291,7 +260,7 @@ public class SequencePattern<T> implements Serializable {
   /**
    * Represents a sequence pattern expressions (before translating into NFA).
    */
-  public abstract static class PatternExpr implements Serializable {
+  public abstract static class PatternExpr {
 
     protected abstract Frag build();
 
@@ -1760,47 +1729,17 @@ public class SequencePattern<T> implements Serializable {
       return matchedBids;
     }
 
-    protected void updateKeepBids(BitSet bids) {
+    protected void updateKeepBids(Set<Integer> bids) {
       // TODO: Is there a point when we don't need to keep these bids anymore?
       for (Set<Pair<Integer, Integer>> v : reachableChildBids) {
         if (v != null) {
           for (Pair<Integer, Integer> p : v) {
-            bids.set(p.first());
+            bids.add(p.first());
           }
         }
       }
     }
   }
-
-
-
-  private void readObject(ObjectInputStream ois)
-    throws IOException, ClassNotFoundException {
-    patternStr = (String)ois.readObject();
-
-    patternExpr = (PatternExpr) ois.readObject();
-    //this.patternStr = patternStr;
-    //this.patternExpr = nodeSequencePattern;
-    action = (SequenceMatchAction) ois.readObject();
-
-    patternExpr = new GroupPatternExpr(patternExpr, true);
-    patternExpr = patternExpr.optimize();
-    this.totalGroups = patternExpr.assignGroupIds(0);
-    Frag f = patternExpr.build();
-    f.connect(MATCH_STATE);
-    this.root = f.start;
-    varGroupBindings = new VarGroupBindings(totalGroups+1);
-    patternExpr.updateBindings(varGroupBindings);
-  }
-
-
-  private void writeObject(ObjectOutputStream oos)
-    throws IOException {
-    oos.writeObject(toString());
-    oos.writeObject(this.getPatternExpr());
-    oos.writeObject(this.getAction());
-
-  }  //  public void writeObject()
 
   // States for matching conjunctions
   // - Basic, not well tested implementation that may not work for all cases ...

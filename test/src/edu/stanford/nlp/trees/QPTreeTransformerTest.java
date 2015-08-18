@@ -35,16 +35,14 @@ public class QPTreeTransformerTest extends TestCase {
   public void outputResults(String input, String output) {
     Tree inputTree = Tree.valueOf(input);
     System.err.println(inputTree);
-    QPTreeTransformer qp = new QPTreeTransformer();
-    Tree outputTree = qp.QPtransform(inputTree);
+    Tree outputTree = QPTreeTransformer.QPtransform(inputTree);
     System.err.println(outputTree);
     System.err.println(output);
   }
 
   public void runTest(String input, String output) {
     Tree inputTree = Tree.valueOf(input);
-    QPTreeTransformer qp = new QPTreeTransformer();
-    Tree outputTree = qp.QPtransform(inputTree);
+    Tree outputTree = QPTreeTransformer.QPtransform(inputTree);
     assertEquals(output, outputTree.toString());
   }
 }

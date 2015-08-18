@@ -287,8 +287,10 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useVB = false;
   public boolean subCWGaz = false;
 
-  // TODO OBSOLETE: delete when breaking serialization sometime.
-  public String documentReader = "ColumnDocumentReader";
+  public String documentReader = "ColumnDocumentReader"; // TODO OBSOLETE:
+  // delete when breaking
+  // serialization
+  // sometime.
 
   // public String trainMap = "word=0,tag=1,answer=2";
   // public String testMap = "word=0,tag=1,answer=2";
@@ -957,8 +959,7 @@ public class SeqClassifierFlags implements Serializable {
   public boolean separateASCIIandRange = true;
   public double dropoutRate = 0.0;
   public double dropoutScale = 1.0;
-  // keenon: changed from = 1, nowadays it makes sense to default to parallelism
-  public int multiThreadGrad = Runtime.getRuntime().availableProcessors();
+  public int multiThreadGrad = 1;
   public int maxQNItr = 0;
   public boolean dropoutApprox = false;
   public String unsupDropoutFile = null;
@@ -1032,9 +1033,9 @@ public class SeqClassifierFlags implements Serializable {
 
   public boolean splitSlashHyphenWords;  // unused with new enum below. Remove when breaking serialization.
 
-  /** If this number is non-negative (greater than or equal to 0; negative means
-   *  unlimited), then add at most this many words to the knownLCwords.  (Words will
-   *  only be added if useKnownLCWords is true.) By default, this is set to 10,000,
+  /** If this number is strictly positive (greater than 0; 0 means unlimited),
+   *  then add at most this many words to the knownLCwords.  (Words will only
+   *  be added if useKnownLCWords is true.) By default, this is set to 10,000,
    *  so it will work on a few documents, but not cause unlimited memory growth
    *  if a SequenceClassifier is run for a long time!
    */
@@ -1043,16 +1044,6 @@ public class SeqClassifierFlags implements Serializable {
   public enum SlashHyphenEnum { NONE, WFRAG, WORD, BOTH };
 
   public SlashHyphenEnum slashHyphenTreatment = SlashHyphenEnum.NONE;
-
-  public boolean useTitle2 = false;
-
-  public boolean showNCCInfo;
-  public boolean showCCInfo;
-  public String crfToExamine;
-  public boolean useSUTime;
-  public boolean applyNumericClassifiers;
-  public String combinationMode;
-  public String nerModel;
 
   // "ADD VARIABLES ABOVE HERE"
 
@@ -1095,7 +1086,8 @@ public class SeqClassifierFlags implements Serializable {
   public void setProperties(Properties props, boolean printProps) {
     this.props = props;
     StringBuilder sb = new StringBuilder(stringRep);
-    for (String key : props.stringPropertyNames()) {
+    for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
+      String key = (String) e.nextElement();
       String val = props.getProperty(key);
       if (!(key.isEmpty() && val.isEmpty())) {
         if (printProps) {
@@ -1456,8 +1448,6 @@ public class SeqClassifierFlags implements Serializable {
         useDisjShape = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useTitle")) {
         useTitle = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useTitle2")) {
-        useTitle2 = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("booleanFeatures")) {
         booleanFeatures = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useClassFeature")) {
@@ -1583,9 +1573,6 @@ public class SeqClassifierFlags implements Serializable {
       } else if (key.equalsIgnoreCase("inputEncoding")) {
         inputEncoding = val;
       } else if (key.equalsIgnoreCase("outputEncoding")) {
-        outputEncoding = val;
-      } else if (key.equalsIgnoreCase("encoding")) {
-        inputEncoding = val;
         outputEncoding = val;
       } else if (key.equalsIgnoreCase("gazette")) {
         useGazettes = true;
@@ -2577,20 +2564,7 @@ public class SeqClassifierFlags implements Serializable {
         priorModelFactory = val;
       } else if (key.equalsIgnoreCase("maxAdditionalKnownLCWords")) {
         maxAdditionalKnownLCWords = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("showNCCInfo")) {
-        showNCCInfo = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("showCCInfo")) {
-        showCCInfo = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("crfToExamine")) {
-        crfToExamine = val;
-      } else if (key.equalsIgnoreCase("ner.useSUTime")) {
-        useSUTime = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("ner.applyNumericClassifiers")) {
-        applyNumericClassifiers = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("ner.combinationMode")) {
-        combinationMode = val;
-      } else if (key.equalsIgnoreCase("ner.model")) {
-        nerModel = val;
+
         // ADD VALUE ABOVE HERE
       } else if ( ! key.isEmpty() && ! key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
