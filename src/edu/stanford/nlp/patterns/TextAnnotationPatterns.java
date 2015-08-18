@@ -8,7 +8,10 @@ import edu.stanford.nlp.util.TypesafeMap;
 import edu.stanford.nlp.patterns.surface.*;
 
 import javax.json.*;
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.*;
@@ -32,11 +35,7 @@ public class TextAnnotationPatterns {
   Logger logger = Logger.getAnonymousLogger();
 
   public TextAnnotationPatterns() throws IOException {
-//    try{
     testProps.load(new FileReader("test.properties"));
-//    }catch(IOException e){
-//      logger.info("COULD NOT LOAD FILE test.properties");
-//    }
   }
 
   public String getAllAnnotations() {
