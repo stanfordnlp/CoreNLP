@@ -106,17 +106,19 @@ public class TextAnnotationPatterns {
     logger.info("test properties are " + testProps);
 
     Properties runProps = StringUtils.argsToPropertiesWithResolve(new String[]{"-props",modelPropertiesFile});
-    runProps.putAll(props);
-    runProps.putAll(testProps);
 
-    if(runProps.containsKey("storePatsForEachToken"))
-      runProps.remove("storePatsForEachToken");
-    if(runProps.containsKey("invertedIndexClass"))
-      runProps.remove("invertedIndexClass");
+    String[] removeProperties = new String[]{"allPatternsDir","storePatsForEachToken","invertedIndexClass","savePatternsWordsDir","batchProcessSents","outDir","saveInvertedIndex","removeOverLappingLabels","numThreads"};
+
+    for(String s: removeProperties)
+      if(runProps.containsKey(s))
+        runProps.remove(s);
 
     runProps.setProperty("stopWordsPatternFiles",stopWordsFile);
     runProps.setProperty("englishWordsFiles", stopWordsFile);
     runProps.setProperty("commonWordsPatternFiles", stopWordsFile);
+
+    runProps.putAll(props);
+    runProps.putAll(testProps);
 
     props.putAll(runProps);
 

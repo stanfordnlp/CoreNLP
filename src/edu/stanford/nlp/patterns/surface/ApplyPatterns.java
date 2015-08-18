@@ -94,8 +94,6 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Triple<TwoDim
             boolean[] addedindices = new boolean[e-s];
             Arrays.fill(addedindices, false);
 
-            System.out.println("matched pattern, indices are " + s + " and " + e);
-
             for (int i = s; i < e; i++) {
               CoreLabel l = sent.get(i);
               l.set(PatternsAnnotations.MatchedPattern.class, true);

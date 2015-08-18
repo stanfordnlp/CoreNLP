@@ -53,7 +53,7 @@ import org.joda.time.Period;
 
 /**
  * Given text and a seed list, this class gives more words like the seed words
- * by learning surface word patterns.
+ * by learning surface word or dependency patterns.
  * <p>
  *
  * The multi-threaded class (<code>nthread</code> parameter for number of
@@ -143,7 +143,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
    */
   public enum PatternScoring {
     F1SeedPattern, RlogF, RlogFPosNeg, RlogFUnlabNeg, RlogFNeg, PhEvalInPat, PhEvalInPatLogP, PosNegOdds,
-    YanGarber02, PosNegUnlabOdds, RatioAll, LOGREG, LOGREGlogP, SqrtAllRatio, LinICML03, kNN, Precision, Recall, FMeasure
+    YanGarber02, PosNegUnlabOdds, RatioAll, LOGREG, LOGREGlogP, SqrtAllRatio, LinICML03, kNN
   }
 
   enum WordScoring {
@@ -3610,31 +3610,11 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       Properties props = StringUtils.argsToPropertiesWithResolve(args);
       GetPatternsFromDataMultiClass.<SurfacePattern>run(props);
     } catch (OutOfMemoryError e) {
-      System.out.println("Out of memory! Either change the memory alloted by running as java -mx20g ... for example if you want to allot 20G. Or consider using batchProcessSents and numMaxSentencesPerBatchFile flags");
+      System.out.println("Out of memory! Either change the memory alloted by running as java -mx20g ... for example if you want to allocate 20G. Or consider using batchProcessSents and numMaxSentencesPerBatchFile flags");
       e.printStackTrace();
     } catch (Exception e) {
       e.printStackTrace();
     }
-  } // end main()
+  }
 
 }
-//  public void testProtobufSerialization() throws Exception {
-//    // Check the regexner is integrated with the StanfordCoreNLP
-//    Properties props = new Properties();
-//    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,parse");
-//    String text = "Barack Obama, a Yale professor, is president.";
-//    Annotation document = new Annotation(text);
-//    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-//    pipeline.annotate(document);
-//    File tempfile = File.createTempFile("temp","gz");
-//    tempfile.deleteOnExit();
-//    ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer(true);
-//    GZIPOutputStream gz = new GZIPOutputStream(new FileOutputStream(tempfile));
-//    gz.write(serializer.toProto(document).toByteArray());
-//    gz.finish();
-//    gz.close();
-//
-//    //IOUtils.writeObjectToFile(document.get(CoreAnnotations.SentencesAnnotation.class), tempfile);
-//    Annotation doc2 = serializer.read(new BufferedInputStream(new GZIPInputStream(new FileInputStream((tempfile))))).first();
-//
-//  }
