@@ -62,7 +62,7 @@ public class TextAnnotationPatternsInterface {
 
 
 
-    public PerformActionUpdateModel(Socket socket, int clientNumber) {
+    public PerformActionUpdateModel(Socket socket, int clientNumber) throws IOException {
       this.socket = socket;
       this.clientNumber = clientNumber;
       this.annotate =  new TextAnnotationPatterns();
@@ -114,6 +114,7 @@ public class TextAnnotationPatternsInterface {
             msg = "Did not understand " + toks[0] + ". POSSIBLE ACTIONS ARE: " + Arrays.toString(Actions.values());
           }
 
+
           String input = toks.length == 2 ? toks[1] : null;
           switch (nextlineAction) {
             case NEWPHRASES:
@@ -126,7 +127,8 @@ public class TextAnnotationPatternsInterface {
               msg = annotate.doNewAnnotations(input);
               break;
             case PROCESSFILE:
-              msg = annotate.processText(input, true, true);
+              annotate.setUpProperties(input, true, true, null);
+              msg = annotate.processText(true);
               break;
             case REMOVEANNOTATIONS:
               msg = annotate.doRemoveAnnotations(input);
