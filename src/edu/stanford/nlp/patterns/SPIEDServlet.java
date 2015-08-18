@@ -116,10 +116,10 @@ public class SPIEDServlet extends HttpServlet {
       annotate.processText(jsonObject, false, false);
       String suggestions = annotate.suggestPhrases();
       // Collect results
-      out.println(suggestions);
+      out.print(suggestions);
     } catch (Throwable t) {
-      t.printStackTrace();
-      out.println("{ok:false}");
+      Logger.getAnonymousLogger().info(t.toString());
+      out.print("{okay:false}");
     }
   }
 
@@ -137,7 +137,7 @@ public class SPIEDServlet extends HttpServlet {
     String raw = request.getParameter("q");
     String seedwords = request.getParameter("seedwords");
     if (raw == null || "".equals(raw)) {
-      out.println("Nothing was provided in the input. Why?!");
+      out.print("{okay:false}");
     } else {
       doGet(out, raw, seedwords);
     }
