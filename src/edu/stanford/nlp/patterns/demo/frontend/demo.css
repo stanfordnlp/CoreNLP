@@ -3,6 +3,42 @@ body {
   padding-bottom: 40px;
   background-color: #eee;
 }
+@font-face{
+    font-family: Dustismo;
+    src: url('fonts/Dustismo_Roman_Bold.ttf');
+    font-weight: bold;
+    font-style: normal
+}
+@font-face{
+    font-family: "PT Sans";
+    src: url('fonts/PT_Sans-Web-Regular.ttf');
+    font-weight: normal;
+    font-style: normal
+}
+@font-face{
+    font-family: "PT Sans";
+    src: url('fonts/PT_Sans-Web-Italic.ttf');
+    font-weight: normal;
+    font-style: italic
+}
+@font-face{
+    font-family: "PT Sans";
+    src: url('fonts/PT_Sans-Web-Bold.ttf');
+    font-weight: bold;
+    font-style: normal
+}
+@font-face{
+    font-family: "PT Sans";
+    src: url('fonts/PT_Sans-Web-BoldItalic.ttf');
+    font-weight: bold;
+    font-style: italic
+}
+
+body{background:#fff;min-width:1024px;color:#666;font-family: "PT Sans", sans-serif;font-weight:normal;font-style:normal;font-size:13pt}
+div#OuterCanvas{width:100%;cursor:default}
+div#InnerCanvas{margin:0 12px;text-align:center}
+div#Page{display:inline-block;text-align:left;width:1000px;min-height:400px;margin:20px auto 30px auto;border:1px solid #ccc;border-top-right-radius:80px;border-bottom-left-radius:40px;box-shadow:0 0 24px #bbb;background:#f3f3f3}
+div#Float{position:fixed;visibility:hidden;width:1000px;top:0;left:0;border-left:1px solid #ccc;border-right:1px solid #ccc;box-shadow:0 6px 24px #999}
 
 .form-query .form-control {
   position: relative;
@@ -91,12 +127,18 @@ body {
   -ms-user-select: none;
   user-select: none;
 }
-
+span {
+    vertical-align:middle;
+    display:inline-block;
+    width:90%;
+}
 .centered {
   margin: 0 auto;
   text-align: center;
 }
-
+.header{
+	font-size: 32px;
+}
 h2 {
   color:  #000080;
   padding-bottom: 1ex;
@@ -112,8 +154,6 @@ h2 {
   float: none !important;
 }
 
-td {
-  text-align: left;
-  padding-right: 2ex;
-  padding-bottom: 1ex;
+.entityEx{
+
 }
