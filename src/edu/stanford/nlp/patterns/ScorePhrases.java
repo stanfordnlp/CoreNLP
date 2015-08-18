@@ -164,7 +164,7 @@ public class ScorePhrases<E extends Pattern> {
       assert Data.rawFreq != null;
     }
 
-    Set<CandidatePhrase> alreadyIdentifiedWords = new HashSet<CandidatePhrase>(constVars.getLearnedWords().get(label).keySet());
+    Set<CandidatePhrase> alreadyIdentifiedWords = new HashSet<CandidatePhrase>(constVars.getLearnedWords(label).keySet());
     alreadyIdentifiedWords.addAll(constVars.getSeedLabelDictionary().get(label));
     Counter<CandidatePhrase> words = learnNewPhrasesPrivate(label,
         patternsForEachToken, patternsLearnedThisIter, allSelectedPatterns, alreadyIdentifiedWords,
@@ -606,7 +606,7 @@ public class ScorePhrases<E extends Pattern> {
         ignoreWordsAll = new HashSet<CandidatePhrase>(constVars.getOtherSemanticClassesWords());
 
       ignoreWordsAll.addAll(constVars.getSeedLabelDictionary().get(label));
-      ignoreWordsAll.addAll(constVars.getLearnedWords().get(label).keySet());
+      ignoreWordsAll.addAll(constVars.getLearnedWords(label).keySet());
       System.out.println("ignoreWordsAll contains word U.S. is " + ignoreWordsAll.contains(CandidatePhrase.createOrGet("U.S.")));
 
       Counter<CandidatePhrase> finalwords = chooseTopWords(phraseScores, terms,

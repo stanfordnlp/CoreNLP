@@ -79,9 +79,16 @@ public class TextAnnotationPatterns {
   public String suggestPhrases() throws IOException, ClassNotFoundException, IllegalAccessException, InterruptedException, ExecutionException, InstantiationException, NoSuchMethodException, InvocationTargetException {
     resetPatternLabelsInSents(Data.sents);
     GetPatternsFromDataMultiClass<SurfacePattern> model = new GetPatternsFromDataMultiClass<SurfacePattern>(props, Data.sents, seedWords, false, machineAnswerClasses);
-    model.constVars.numIterationsForPatterns = 2;
+    //model.constVars.numIterationsForPatterns = 2;
     model.iterateExtractApply();
     return model.constVars.getLearnedWordsAsJson();
+  }
+
+  public String suggestPhrasesTest() throws IllegalAccessException, InterruptedException, ExecutionException, IOException, InstantiationException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException {
+    GetPatternsFromDataMultiClass<SurfacePattern> model = new GetPatternsFromDataMultiClass<SurfacePattern>(props, Data.sents, seedWords, false, machineAnswerClasses);
+    model.constVars.numIterationsForPatterns = 2;
+    model.iterateExtractApply();
+    return model.constVars.getLearnedWordsAsJsonLastIteration();
   }
 
   //label the sents with the labels provided by humans

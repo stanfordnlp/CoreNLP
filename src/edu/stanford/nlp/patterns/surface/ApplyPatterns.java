@@ -132,6 +132,7 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Triple<TwoDim
                 }
               }
             }
+            System.out.println("Matched Phrase is " + phrase);
             for(int i =0; i < addedindices.length; i++){
               if(i > 0 && i < addedindices.length -1 && addedindices[i-1] == true && addedindices[i] == false && addedindices[i+1] == true){
                 doNotUse = true;
