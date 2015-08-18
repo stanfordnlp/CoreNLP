@@ -9,12 +9,14 @@ import edu.stanford.nlp.patterns.surface.*;
 
 import javax.json.*;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 /**
  * Created by sonalg on 3/10/15.
@@ -29,6 +31,16 @@ public class TextAnnotationPatterns {
   Map<String, Set<CandidatePhrase>> seedWords = new HashMap<String, Set<CandidatePhrase>>();
   private String backgroundSymbol ="O";
 
+  Properties testProps = new Properties();
+  Logger logger = Logger.getAnonymousLogger();
+
+  public TextAnnotationPatterns(){
+    try{
+    testProps.load(new FileReader("test.properties"));
+    }catch(IOException e){
+      logger.info("COULD NOT LOAD FILE test.properties");
+    }
+  }
 
   public String getAllAnnotations() {
     JsonObjectBuilder obj = Json.createObjectBuilder();
@@ -85,8 +97,9 @@ public class TextAnnotationPatterns {
   }
 
   public String suggestPhrasesTest() throws IllegalAccessException, InterruptedException, ExecutionException, IOException, InstantiationException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException {
-    GetPatternsFromDataMultiClass<SurfacePattern> model = new GetPatternsFromDataMultiClass<SurfacePattern>(props, Data.sents, seedWords, false, machineAnswerClasses);
-    model.constVars.numIterationsForPatterns = 2;
+    Properties runProps = new Properties(props);
+    runProps.putAll(testProps);
+    GetPatternsFromDataMultiClass<SurfacePattern> model = new GetPatternsFromDataMultiClass<SurfacePattern>(runProps, Data.sents, seedWords, false, machineAnswerClasses);
     model.iterateExtractApply();
     return model.constVars.getLearnedWordsAsJsonLastIteration();
   }

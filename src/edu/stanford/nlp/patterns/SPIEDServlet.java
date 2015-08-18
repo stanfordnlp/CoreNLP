@@ -98,7 +98,7 @@ public class SPIEDServlet extends HttpServlet {
    * @param out The writer to write the output to.
    * @param q The query string.
    */
-  private void run(PrintWriter out, String q, String seedWords, boolean test, String model) throws Exception{
+  private void run(PrintWriter out, String q, String seedWords, boolean testmode, String model) throws Exception{
     // Clean the string a bit
     q = q.trim();
     if (q.length() == 0) {
@@ -116,8 +116,9 @@ public class SPIEDServlet extends HttpServlet {
     annotate.processText(jsonObject, false, false);
 
     String suggestions;
+    logger.info("Testmode is " + testmode);
     // Collect results
-    if(test)
+    if(testmode)
       suggestions = annotate.suggestPhrasesTest();
     else
       suggestions = annotate.suggestPhrases();
@@ -140,12 +141,15 @@ public class SPIEDServlet extends HttpServlet {
     try {
       String raw = request.getParameter("q");
       String seedwords = request.getParameter("seedwords");
-      boolean testmode = Boolean.parseBoolean(request.getParameter("testmode"));
-      String model = request.getParameter("model");
+      String test = request.getParameter("testmode");
+      boolean testmode = false;
+      if(test != null)
+        testmode = Boolean.parseBoolean(test);
+      //String model = request.getParameter("model");
       if (raw == null || "".equals(raw)) {
         out.print("{\"okay\":false,\"reason\":\"No data provided\"}");
       } else {
-        run(out, raw, seedwords, testmode, model);
+        run(out, raw, seedwords, testmode, "");
       }
     } catch (Throwable t) {
       writeError(t, out, request.toString());
