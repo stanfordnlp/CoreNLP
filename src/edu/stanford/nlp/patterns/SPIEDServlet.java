@@ -2,6 +2,7 @@ package edu.stanford.nlp.patterns;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.patterns.TextAnnotationPatterns;
+import edu.stanford.nlp.util.StringUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -110,8 +111,7 @@ public class SPIEDServlet extends HttpServlet {
     TextAnnotationPatterns annotate = new TextAnnotationPatterns();
     // Annotate
     try {
-      //TODO:change the seed
-      String jsonObject = "{\"input\":\""+q+"\",\"seedWords\":{\"name\":[\"Obama\"]}}";
+      String jsonObject = "{\"input\":\""+q+"\",\"seedWords\":{\"name\":[\""+ StringUtils.join(seedWords.split("[,;]"), "\",")+"\"]}}";
       annotate.processText(jsonObject, false, false);
       String suggestions = annotate.suggestPhrases();
       // Collect results
