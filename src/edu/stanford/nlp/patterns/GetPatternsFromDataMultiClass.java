@@ -1971,8 +1971,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       }
       for (Entry<CandidatePhrase, String[]> phEn : identifiedWordsTokens.entrySet()) {
         String[] ph = phEn.getValue();
-        //TODO: match lowercase text given option?!
-        List<Integer> ints = ArrayUtils.getSubListIndex(ph, sent);
+        List<Integer> ints = ArrayUtils.getSubListIndex(ph, sent, o -> constVars.matchLowerCaseContext ? ((String) o.first()).equalsIgnoreCase((String)o.second()): o.first().equals(o.second()));
         if (ints == null)
           continue;
 
@@ -2312,8 +2311,10 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
     patterns.addAll(patternThisIter);
 
-      learnedPatterns.get(label).addAll(patterns);
+    learnedPatterns.get(label).addAll(patterns);
+
     assert !learnedPatternsEachIter.get(label).containsKey(numIterTotal) : "How come learned patterns already have a key for " + numIterTotal + " keys are " + learnedPatternsEachIter.get(label).keySet();
+
     learnedPatternsEachIter.get(label).put(numIterTotal, patterns);
 
       if (sentsOutFile != null)
@@ -3216,6 +3217,11 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       patternsWordsDir = patternsWordsDirValue;
     }
     Redwood.log(Redwood.FORCE, "Saving output in " + patternsWordsDir);
+
+    //writing properties file
+    String outPropertiesFile = patternsWordsDir+"model.properties";
+    props.store(new BufferedWriter(new FileWriter(outPropertiesFile)), "trained model properties file");
+
     for (String label : constVars.getLabels()) {
 
       IOUtils.ensureDir(new File(patternsWordsDir + "/" + label));
@@ -3307,8 +3313,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
     Execution.fillOptions(model, props);
 
-    // If you want to reuse patterns and words learned previously (may be on
-    // another dataset etc)
+    // If you want to reuse patterns and words learned previously (may be on another dataset etc)
     boolean loadSavedPatternsWordsDir = Boolean.parseBoolean(props.getProperty("loadSavedPatternsWordsDir"));
 
 

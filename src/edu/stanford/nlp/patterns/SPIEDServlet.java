@@ -39,7 +39,7 @@ public class SPIEDServlet extends HttpServlet {
   public void init()  throws ServletException {
     testPropertiesFile = getServletContext().getRealPath("/WEB-INF/data/test.properties");
     modelNametoDirName = new HashMap<String, String>();
-    modelNametoDirName.put("yelp","model");
+    modelNametoDirName.put("food","food");
 
   }
 
@@ -108,7 +108,7 @@ public class SPIEDServlet extends HttpServlet {
    * @param out The writer to write the output to.
    * @param q The query string.
    */
-  private void run(PrintWriter out, String q, String seedWords, boolean testmode, String model) throws Exception{
+  private void run(PrintWriter out, String q, String seedWords, String model) throws Exception{
     // Clean the string a bit
     q = q.trim();
     if (q.length() == 0) {
@@ -124,6 +124,9 @@ public class SPIEDServlet extends HttpServlet {
 
     String jsonObject = "{\"input\":"+quotedString+",\"seedWords\":{\"NAME\":[\""+ StringUtils.join(seedWords.split("[,;]"), "\",\"")+"\"]}}";
 
+    boolean testmode = true;
+    if(model.equalsIgnoreCase("new"))
+      testmode = false;
 
     logger.info("Testmode is " + testmode);
 
@@ -151,10 +154,12 @@ public class SPIEDServlet extends HttpServlet {
       testProps.setProperty("patternsWordsDir", modelDir);
       logger.info("Reading saved model from " + modelDir);
       String seedWordsFiles="NAME,"+modelDir+"/NAME/seedwords.txt,"+modelDir+"/NAME/phrases.txt";
+      String modelPropertiesFile = modelDir+"/model.properties";
+      logger.info("Loading model properties from " + modelPropertiesFile);
+      String stopWordsFile = modelDir+"/stopwords.txt";
       boolean writeOutputFile = false;
       annotate.setUpProperties(jsonObject, false, writeOutputFile, seedWordsFiles);
-      annotate.processText(writeOutputFile);
-      suggestions = annotate.suggestPhrasesTest(testProps);
+      suggestions = annotate.suggestPhrasesTest(testProps, modelPropertiesFile, stopWordsFile);
     }
     else{
       boolean writeOutputFile = false;
@@ -180,15 +185,12 @@ public class SPIEDServlet extends HttpServlet {
     try {
       String raw = request.getParameter("q");
       String seedwords = request.getParameter("seedwords");
-      String test = request.getParameter("testmode");
-      boolean testmode = false;
-      if(test != null)
-        testmode = Boolean.parseBoolean(test);
+
       String model = request.getParameter("model");
       if (raw == null || "".equals(raw)) {
         out.print("{\"okay\":false,\"reason\":\"No data provided\"}");
       } else {
-        run(out, raw, seedwords, testmode, model);
+        run(out, raw, seedwords, model);
       }
     } catch (Exception t) {
       writeError(t, out, request.toString());

@@ -6,11 +6,13 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.TypesafeMap;
 import edu.stanford.nlp.patterns.surface.*;
 
 import javax.json.*;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
@@ -99,11 +101,27 @@ public class TextAnnotationPatterns {
     return model.constVars.getLearnedWordsAsJson();
   }
 
-  public String suggestPhrasesTest(Properties testProps) throws IllegalAccessException, InterruptedException, ExecutionException, IOException, InstantiationException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException, SQLException {
+  public String suggestPhrasesTest(Properties testProps, String modelPropertiesFile, String stopWordsFile) throws IllegalAccessException, InterruptedException, ExecutionException, IOException, InstantiationException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException, SQLException {
     logger.info("Suggesting phrases in test");
     logger.info("test properties are " + testProps);
-    Properties runProps = new Properties(props);
+
+    Properties runProps = StringUtils.argsToPropertiesWithResolve(new String[]{"-props",modelPropertiesFile});
+    runProps.putAll(props);
     runProps.putAll(testProps);
+
+    if(runProps.containsKey("storePatsForEachToken"))
+      runProps.remove("storePatsForEachToken");
+    if(runProps.containsKey("invertedIndexClass"))
+      runProps.remove("invertedIndexClass");
+
+    runProps.setProperty("stopWordsPatternFiles",stopWordsFile);
+    runProps.setProperty("englishWordsFiles", stopWordsFile);
+    runProps.setProperty("commonWordsPatternFiles", stopWordsFile);
+
+    props.putAll(runProps);
+
+    processText(false);
+
 
     GetPatternsFromDataMultiClass<SurfacePattern> model = new GetPatternsFromDataMultiClass<SurfacePattern>(runProps, Data.sents, seedWords, true, humanLabelClasses);
     Execution.fillOptions(model, runProps);
@@ -125,15 +143,22 @@ public class TextAnnotationPatterns {
 
     Map<String, Counter<CandidatePhrase>> allExtractions = new HashMap<String, Counter<CandidatePhrase>>();
 
-    for(String label: model.constVars.getLabels()){
-      logger.info("Matched seed words are " + model.matchedSeedWords.get(label));
-      allExtractions.put(label, new ClassicCounter<CandidatePhrase>(model.matchedSeedWords.get(label)));
+    //Only for one label right now!
+    String label = model.constVars.getLabels().iterator().next();
+    allExtractions.put(label, new ClassicCounter<CandidatePhrase>());
 
-      //See if you learned more from the text!
-      Map.Entry<Integer, Counter<CandidatePhrase>> entry = model.constVars.getLearnedWordsEachIter().get(label).lastEntry();
-      if(entry.getKey() > alreadyLearnedIters.get(label))
-        allExtractions.get(label).addAll(entry.getValue());
+    for(Map.Entry<String, DataInstance> sent: Data.sents.entrySet()){
+      StringBuffer str = new StringBuffer();
+      for(CoreLabel l : sent.getValue().getTokens()){
+        if(l.get(PatternsAnnotations.MatchedPatterns.class) != null && !l.get(PatternsAnnotations.MatchedPatterns.class).isEmpty()){
+          str.append(" " + l.word());
+        }else{
+          allExtractions.get(label).incrementCount(CandidatePhrase.createOrGet(str.toString().trim()));
+          str.setLength(0);
+        }
+      }
     }
+    allExtractions.putAll(model.matchedSeedWords);
 
     return  model.constVars.getSetWordsAsJson(allExtractions);
   }
@@ -227,6 +252,8 @@ public class TextAnnotationPatterns {
       IOUtils.writeStringToFile(props.getProperty("input"),tempFile.getPath(), "utf8");
       props.setProperty("file", tempFile.getAbsolutePath());
     }
+
+
 
     setProperties(props);
     this.props = props;
