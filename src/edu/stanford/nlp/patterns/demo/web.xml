@@ -10,18 +10,22 @@
   </description>
 
   <servlet>
-    <servlet-name>spied</servlet-name>
+    <servlet-name>SPIEDServlet</servlet-name>
     <servlet-class>edu.stanford.nlp.patterns.SPIEDServlet</servlet-class>
     <!-- Load this servlet at server startup time -->
     <load-on-startup>6</load-on-startup>
   </servlet>
 
   <servlet-mapping>
-    <servlet-name>spied</servlet-name>
+    <servlet-name>SPIEDServlet</servlet-name>
     <url-pattern>/</url-pattern>
   </servlet-mapping>
 
   <session-config>
     <session-timeout>30</session-timeout>    <!-- 30 minutes -->
   </session-config>
+  
+  <welcome-file-list>
+	<welcome-file>index.html</welcome-file>
+  </welcome-file-list>
 </web-app>
