@@ -13,6 +13,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 
@@ -25,12 +28,19 @@ import java.util.logging.Logger;
 public class SPIEDServlet extends HttpServlet {
 
   Logger logger = Logger.getAnonymousLogger();
+
+  String testPropertiesFile;
+  Map<String, String> modelNametoDirName;
   /**
    * Set the properties to the paths they appear at on the servlet.
    * See build.xml for where these paths get copied.
    * @throws javax.servlet.ServletException Thrown by the implementation
    */
   public void init()  throws ServletException {
+    testPropertiesFile = getServletContext().getRealPath("/WEB-INF/data/test.properties");
+    modelNametoDirName = new HashMap<String, String>();
+    modelNametoDirName.put("yelp","model");
+
   }
 
   /**
@@ -112,19 +122,48 @@ public class SPIEDServlet extends HttpServlet {
     TextAnnotationPatterns annotate = new TextAnnotationPatterns();
     String quotedString = quote(q);
 
-    String jsonObject = "{\"input\":"+quotedString+",\"seedWords\":{\"name\":[\""+ StringUtils.join(seedWords.split("[,;]"), "\",\"")+"\"]}}";
-    annotate.processText(jsonObject, false, false);
+    String jsonObject = "{\"input\":"+quotedString+",\"seedWords\":{\"NAME\":[\""+ StringUtils.join(seedWords.split("[,;]"), "\",\"")+"\"]}}";
+
+
+    logger.info("Testmode is " + testmode);
+
+    logger.info("model is " + model);
+
 
     String suggestions;
-    logger.info("Testmode is " + testmode);
     // Collect results
-    if(testmode)
-      suggestions = annotate.suggestPhrasesTest();
-    else
+    if(testmode){
+      Properties testProps= new Properties();
+      if(testPropertiesFile != null && new File(testPropertiesFile).exists()){
+        try {
+          String props = IOUtils.stringFromFile(testPropertiesFile);
+          testProps.load(new StringReader(props));
+        } catch (IOException e) {
+          writeError(e, out, "Cannot read test properties file");
+          return;
+        }
+      } else{
+        writeError(new RuntimeException("test prop file not found"), out, "Test properties file not found");
+        return;
+      }
+
+      String modelDir = getServletContext().getRealPath("/WEB-INF/data/"+modelNametoDirName.get(model));
+      testProps.setProperty("patternsWordsDir", modelDir);
+      logger.info("Reading saved model from " + modelDir);
+      String seedWordsFiles="NAME,"+modelDir+"/NAME/seedwords.txt,"+modelDir+"/NAME/phrases.txt";
+      boolean writeOutputFile = false;
+      annotate.setUpProperties(jsonObject, false, writeOutputFile, seedWordsFiles);
+      annotate.processText(writeOutputFile);
+      suggestions = annotate.suggestPhrasesTest(testProps);
+    }
+    else{
+      boolean writeOutputFile = false;
+      annotate.setUpProperties(jsonObject, false, writeOutputFile, null);
+      annotate.processText(writeOutputFile);
       suggestions = annotate.suggestPhrases();
+    }
 
     out.print(suggestions);
-
   }
 
   /**
@@ -145,11 +184,11 @@ public class SPIEDServlet extends HttpServlet {
       boolean testmode = false;
       if(test != null)
         testmode = Boolean.parseBoolean(test);
-      //String model = request.getParameter("model");
+      String model = request.getParameter("model");
       if (raw == null || "".equals(raw)) {
         out.print("{\"okay\":false,\"reason\":\"No data provided\"}");
       } else {
-        run(out, raw, seedwords, testmode, "");
+        run(out, raw, seedwords, testmode, model);
       }
     } catch (Exception t) {
       writeError(t, out, request.toString());
@@ -171,6 +210,8 @@ public class SPIEDServlet extends HttpServlet {
    * {@inheritDoc}
    */
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    logger.info("Responding to the request for SPIED");
+    getServletContext().log("Responding through SPIED through servlet context!!");
   doGet(request, response);
 //    logger.info("POST SPIED query from " + request.getRemoteAddr());
 //

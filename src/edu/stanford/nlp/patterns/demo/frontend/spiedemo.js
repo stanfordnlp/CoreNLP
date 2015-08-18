@@ -37,7 +37,7 @@ function querySuccess(elem) {
 	//var ingein = window.setTimeout(tmpQuery, 5000);
 	//function tmpQuery(){
 		if (entities.length > 0) {
-			var tmp = entities.map(function(val){return '<a href="#" class="list-group-item">'+val+'</s>' })
+			var tmp = entities.map(function(val){return '<a href="#" class="list-group-item">'+val+'</a>' })
 			$( "#triples-container" ).html('<ul class="list-group">'+tmp.join("")+'</ul>');
 			}
 		else{
@@ -89,11 +89,11 @@ $(document).ready(function(){
     value = $( "#q" ).val();
     // (disable query button
      
-    freezeDemo()
+    freezeDemo();
     // (ajax request)
     $.ajax({
       type: "POST",
-      url: 'http://nlp.stanford.edu:8080/spied/spied',
+      url: '/spied/spied',
       //url: "output.json",
       data: getData,
       dataType: 'text',

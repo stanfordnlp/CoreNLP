@@ -2,14 +2,15 @@ package edu.stanford.nlp.patterns;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.patterns.*;
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.TypesafeMap;
 import edu.stanford.nlp.patterns.surface.*;
 
 import javax.json.*;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
@@ -27,15 +28,21 @@ public class TextAnnotationPatterns {
   Map<String, Class<? extends TypesafeMap.Key<String>>> humanLabelClasses = new HashMap<String, Class<? extends TypesafeMap.Key<String>>>();
   Map<String, Class<? extends TypesafeMap.Key<String>>> machineAnswerClasses = new HashMap<String, Class<? extends TypesafeMap.Key<String>>>();
   Properties props;
+  String outputFile;
+
+  Counter<String> matchedSeedWords;
 
   Map<String, Set<CandidatePhrase>> seedWords = new HashMap<String, Set<CandidatePhrase>>();
   private String backgroundSymbol ="O";
 
-  Properties testProps = new Properties();
+  //Properties testProps = new Properties();
   Logger logger = Logger.getAnonymousLogger();
 
   public TextAnnotationPatterns() throws IOException {
-    testProps.load(new FileReader("test.properties"));
+//    if(testPropertiesFile!= null && new File(testPropertiesFile).exists()){
+//      logger.info("Loading test properties from " + testPropertiesFile);
+//      testProps.load(new FileReader(testPropertiesFile));
+//    }
   }
 
   public String getAllAnnotations() {
@@ -86,18 +93,49 @@ public class TextAnnotationPatterns {
 
   public String suggestPhrases() throws IOException, ClassNotFoundException, IllegalAccessException, InterruptedException, ExecutionException, InstantiationException, NoSuchMethodException, InvocationTargetException {
     resetPatternLabelsInSents(Data.sents);
-    GetPatternsFromDataMultiClass<SurfacePattern> model = new GetPatternsFromDataMultiClass<SurfacePattern>(props, Data.sents, seedWords, false, machineAnswerClasses);
+    GetPatternsFromDataMultiClass<SurfacePattern> model = new GetPatternsFromDataMultiClass<SurfacePattern>(props, Data.sents, seedWords, false, humanLabelClasses);
     //model.constVars.numIterationsForPatterns = 2;
     model.iterateExtractApply();
     return model.constVars.getLearnedWordsAsJson();
   }
 
-  public String suggestPhrasesTest() throws IllegalAccessException, InterruptedException, ExecutionException, IOException, InstantiationException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException {
+  public String suggestPhrasesTest(Properties testProps) throws IllegalAccessException, InterruptedException, ExecutionException, IOException, InstantiationException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException, SQLException {
+    logger.info("Suggesting phrases in test");
+    logger.info("test properties are " + testProps);
     Properties runProps = new Properties(props);
     runProps.putAll(testProps);
-    GetPatternsFromDataMultiClass<SurfacePattern> model = new GetPatternsFromDataMultiClass<SurfacePattern>(runProps, Data.sents, seedWords, false, machineAnswerClasses);
-    model.iterateExtractApply();
-    return model.constVars.getLearnedWordsAsJsonLastIteration();
+
+    GetPatternsFromDataMultiClass<SurfacePattern> model = new GetPatternsFromDataMultiClass<SurfacePattern>(runProps, Data.sents, seedWords, true, humanLabelClasses);
+    Execution.fillOptions(model, runProps);
+
+    GetPatternsFromDataMultiClass.loadFromSavedPatternsWordsDir(model , runProps);
+
+    Map<String, Integer> alreadyLearnedIters = new HashMap<String, Integer>();
+    for(String label: model.constVars.getLabels())
+      alreadyLearnedIters.put(label, model.constVars.getLearnedWordsEachIter().get(label).lastEntry().getKey());
+
+
+    if (model.constVars.learn) {
+//      Map<String, E> p0 = new HashMap<String, SurfacePattern>();
+//      Map<String, Counter<CandidatePhrase>> p0Set = new HashMap<String, Counter<CandidatePhrase>>();
+//      Map<String, Set<E>> ignorePatterns = new HashMap<String, Set<E>>();
+      model.iterateExtractApply(null, null, null);
+    }
+
+
+    Map<String, Counter<CandidatePhrase>> allExtractions = new HashMap<String, Counter<CandidatePhrase>>();
+
+    for(String label: model.constVars.getLabels()){
+      logger.info("Matched seed words are " + model.matchedSeedWords.get(label));
+      allExtractions.put(label, new ClassicCounter<CandidatePhrase>(model.matchedSeedWords.get(label)));
+
+      //See if you learned more from the text!
+      Map.Entry<Integer, Counter<CandidatePhrase>> entry = model.constVars.getLearnedWordsEachIter().get(label).lastEntry();
+      if(entry.getKey() > alreadyLearnedIters.get(label))
+        allExtractions.get(label).addAll(entry.getValue());
+    }
+
+    return  model.constVars.getSetWordsAsJson(allExtractions);
   }
 
   //label the sents with the labels provided by humans
@@ -131,7 +169,7 @@ public class TextAnnotationPatterns {
 
     props.setProperty("preserveSentenceSequence", "true");
     if(!props.containsKey("debug"))
-      props.setProperty("debug","4");
+      props.setProperty("debug","3");
     if(!props.containsKey("thresholdWordExtract"))
       props.setProperty("thresholdWordExtract","0.00000000000000001");
     if(!props.containsKey("thresholdNumPatternsApplied"))
@@ -141,15 +179,12 @@ public class TextAnnotationPatterns {
 
   }
 
-
-  //the format of the line input is json string of maps. required keys are "input" and "seedWords". "input" can be a string or file (in which case readFile should be true.)
-  // For example: {"input":"presidents.txt","seedWords":{"name":["Obama"],"place":["Chicago"]}}
-  public String processText(String line, boolean readFile, boolean writeOutputToFile) throws IOException, InstantiationException, InvocationTargetException, ExecutionException, SQLException, InterruptedException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException {
-
+  void setUpProperties(String line, boolean readFile, boolean writeOutputToFile, String additionalSeedWordsFiles) throws IOException, ClassNotFoundException {
     JsonReader jsonReader = Json.createReader(new StringReader(line));
     JsonObject objarr = jsonReader.readObject();
     jsonReader.close();
     Properties props = new Properties();
+
 
     for (String o : objarr.keySet()){
       if(o.equals("seedWords")){
@@ -168,14 +203,23 @@ public class TextAnnotationPatterns {
     }
 
     System.out.println("seedwords are " + seedWords);
-    String outputfile = null;
 
+    if(additionalSeedWordsFiles != null && !additionalSeedWordsFiles.isEmpty()) {
+      Map<String, Set<CandidatePhrase>> additionalSeedWords = GetPatternsFromDataMultiClass.readSeedWords(additionalSeedWordsFiles);
+      logger.info("additional seed words are " + additionalSeedWords);
+      for (String label : seedWords.keySet()) {
+        if(additionalSeedWords.containsKey(label))
+          seedWords.get(label).addAll(additionalSeedWords.get(label));
+      }
+    }
+
+    outputFile = null;
     if(readFile) {
       System.out.println("input value is " + objarr.getString("input"));
-      outputfile = props.getProperty("input") + "_processed";
+      outputFile = props.getProperty("input") + "_processed";
       props.setProperty("file",objarr.getString("input"));
       if (writeOutputToFile && !props.containsKey("columnOutputFile"))
-        props.setProperty("columnOutputFile", outputfile);
+        props.setProperty("columnOutputFile", outputFile);
     } else{
       String systemdir = System.getProperty("java.io.tmpdir");
       File tempFile= File.createTempFile("sents", ".tmp", new File(systemdir));
@@ -186,9 +230,6 @@ public class TextAnnotationPatterns {
 
     setProperties(props);
     this.props = props;
-    Pair<Map<String, DataInstance>, Map<String, DataInstance>> sentsPair = GetPatternsFromDataMultiClass.processSents(props, seedWords.keySet());
-
-    Data.sents = sentsPair.first();
 
     int i = 1;
     for (String label : seedWords.keySet()) {
@@ -200,15 +241,30 @@ public class TextAnnotationPatterns {
       i++;
     }
 
+
+  }
+
+
+  //the format of the line input is json string of maps. required keys are "input" and "seedWords". "input" can be a string or file (in which case readFile should be true.)
+  // For example: {"input":"presidents.txt","seedWords":{"name":["Obama"],"place":["Chicago"]}}
+  public String processText(boolean writeOutputToFile) throws IOException, InstantiationException, InvocationTargetException, ExecutionException, SQLException, InterruptedException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException {
+    logger.info("Starting to process text");
+
+    logger.info("all seed words are " + seedWords);
+    Pair<Map<String, DataInstance>, Map<String, DataInstance>> sentsPair = GetPatternsFromDataMultiClass.processSents(props, seedWords.keySet());
+
+    Data.sents = sentsPair.first();
+
     ConstantsAndVariables constVars = new ConstantsAndVariables(props, seedWords.keySet(), machineAnswerClasses);
     for (String label : seedWords.keySet()) {
       GetPatternsFromDataMultiClass.runLabelSeedWords(Data.sents, humanLabelClasses.get(label), label, seedWords.get(label), constVars, true);
     }
 
     if(writeOutputToFile){
-      GetPatternsFromDataMultiClass.writeColumnOutput(outputfile, false, humanLabelClasses);
-      System.out.println("written the output to " + outputfile);
+      GetPatternsFromDataMultiClass.writeColumnOutput(outputFile, false, humanLabelClasses);
+      System.out.println("written the output to " + outputFile);
     }
+    logger.info("Finished processing text");
     return "SUCCESS";
   }
 
