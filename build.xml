@@ -421,8 +421,7 @@
                 <include name="xom-1.2.10.jar"/>
                 <include name="xml-apis.jar"/>
                 <include name="joda-time.jar"/>
-		<include name="jollyday-0.4.7.jar"/>
-		<include name="javax.json.jar"/>
+                <include name="jollyday-0.4.7.jar"/>
             </lib>
             <!-- note for John: c:/Users/John Bauer/nlp/stanford-releases -->
             <lib dir="/u/nlp/data/StanfordCoreNLPModels">

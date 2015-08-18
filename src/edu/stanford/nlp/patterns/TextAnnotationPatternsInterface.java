@@ -1,4 +1,4 @@
-package edu.stanford.nlp.patterns;
+package edu.stanford.nlp.patterns.surface;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.patterns.*;
