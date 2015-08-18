@@ -3,37 +3,6 @@ body {
   padding-bottom: 40px;
   background-color: #eee;
 }
-@font-face{
-    font-family: Dustismo;
-    src: url('fonts/Dustismo_Roman_Bold.ttf');
-    font-weight: bold;
-    font-style: normal
-}
-@font-face{
-    font-family: "PT Sans";
-    src: url('fonts/PT_Sans-Web-Regular.ttf');
-    font-weight: normal;
-    font-style: normal
-}
-@font-face{
-    font-family: "PT Sans";
-    src: url('fonts/PT_Sans-Web-Italic.ttf');
-    font-weight: normal;
-    font-style: italic
-}
-@font-face{
-    font-family: "PT Sans";
-    src: url('fonts/PT_Sans-Web-Bold.ttf');
-    font-weight: bold;
-    font-style: normal
-}
-@font-face{
-    font-family: "PT Sans";
-    src: url('fonts/PT_Sans-Web-BoldItalic.ttf');
-    font-weight: bold;
-    font-style: italic
-}
-
 body{background:#fff;min-width:1024px;color:#666;font-family: "PT Sans", sans-serif;font-weight:normal;font-style:normal;font-size:13pt}
 div#OuterCanvas{width:100%;cursor:default}
 div#InnerCanvas{margin:0 12px;text-align:center}
@@ -138,6 +107,7 @@ span {
 }
 .header{
 	font-size: 32px;
+    font-weight:700;
 }
 h2 {
   color:  #000080;

@@ -76,10 +76,12 @@ $(document).ready(function(){
     //getData = $(this).serialize();
     //value = $( "#q" ).val();
     // (disable query button
+    tmpObj = {"hi":"hello"}
 	freezeDemo()
     // (ajax request)
     $.ajax({
-      url: ifil+'.json',
+      url: 'spied/',
+      data: tmpObj,
       dataType: 'json',
       success: querySuccess("#triples-container"),
       error:  function( xhr ) {
