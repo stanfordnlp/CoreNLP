@@ -22,7 +22,9 @@ function freezeDemo(){
 
 function querySuccess(elem) {
   return function(responses) {
-	var entities = $.map(responses, function(el) { return el; });
+	console.log("Response is " + responses);
+	  var entities = $.map(responses, function(el) { return el; });
+	
 	var ingein = window.setTimeout(tmpQuery, 5000);
 	function tmpQuery(){
 		$( '#triples-row > #loading' ).hide();
@@ -72,20 +74,20 @@ $(document).ready(function(){
     // (start loading icon)
     $( '#triples-row > #loading' ).show();
     // (submission data)
-    //target = $(this).attr('action');
-    //getData = $(this).serialize();
-    //value = $( "#q" ).val();
+    target = $(this).attr('action');
+    getData = $(this).serialize();
+    value = $( "#q" ).val();
     // (disable query button
-    tmpObj = {"hi":"hello"}
-	freezeDemo()
+     
+    freezeDemo()
     // (ajax request)
     $.ajax({
-      url: 'spied/',
-      data: tmpObj,
-      dataType: 'json',
+      url: 'http://nlp.stanford.edu:8080/spied/spied',
+      data: getData,
+      //dataType: 'json',
       success: querySuccess("#triples-container"),
       error:  function( xhr ) {
-				
+			console.log(xhr);	
 				var readyState = {1: "Loading",2: "Loaded",3: "Interactive",4: "Complete"};
 				if(xhr.readyState !== 0 && xhr.status !== 0 && xhr.responseText !== undefined) {
 					$( '#triples-row > #loading' ).hide();
