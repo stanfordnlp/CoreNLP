@@ -126,7 +126,7 @@ public class SPIEDServlet extends HttpServlet {
    * {@inheritDoc}
    */
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    Logger.getAnonymousLogger().info("SPIED query from " + request.getRemoteAddr());
+    logger.info("GET SPIED query from " + request.getRemoteAddr());
     if (request.getCharacterEncoding() == null) {
       request.setCharacterEncoding("utf-8");
     }
@@ -160,6 +160,8 @@ public class SPIEDServlet extends HttpServlet {
    * {@inheritDoc}
    */
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    logger.info("POST SPIED query from " + request.getRemoteAddr());
+
     StringBuffer jb = new StringBuffer();
     String line = "";
     PrintWriter out = response.getWriter();
@@ -178,7 +180,7 @@ public class SPIEDServlet extends HttpServlet {
         run(out, raw, seedwords);
       }
     } catch (Throwable t) {
-      writeError(t, out, line);
+      writeError(t, out, jb.toString());
     }
 
     out.close();
