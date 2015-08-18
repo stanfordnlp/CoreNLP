@@ -424,11 +424,11 @@
 		<include name="jollyday-0.4.7.jar"/>
 		<include name="javax.json.jar"/>
             </lib>
-            <!-- note for John: c:/Users/John Bauer/nlp/stanford-releases -->
             <lib dir="/u/nlp/data/StanfordCoreNLPModels">
                 <include name="stanford-corenlp-models-current.jar"/>
             </lib>
             <zipfileset file="${source.path}/edu/stanford/nlp/patterns/demo/frontend/*"/>
+            <zipfileset file="${source.path}/edu/stanford/nlp/patterns/*.properties"/>
             <!--<zipfileset prefix="WEB-INF/data"-->
                         <!--file="/u/nlp/data/pos-tagger/distrib/english-left3words-distsim.tagger"/>-->
             <!--<zipfileset prefix="WEB-INF/data"-->
