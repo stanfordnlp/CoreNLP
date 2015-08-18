@@ -21,23 +21,33 @@ function freezeDemo(){
 
 
 function querySuccess(elem) {
-  return function(responses) {
-	console.log("Response is " + responses);
-	  var entities = $.map(responses, function(el) { return el; });
+  return function(responsestext) {
+	$( '#triples-row > #loading' ).hide();
+        console.log("Response is " + responsestext);
+	var responses = jQuery.parseJSON(responsestext);
+	if("okay" in responses){
+		console.log(responses.okay);
+	    if(responses.okay == "false"){
+	    	handleError("Failed to execute.");
+	    }
+	} else{
+	console.log(responses);
+        var entities = $.map(responses, function(el) { return el; });
 	
-	var ingein = window.setTimeout(tmpQuery, 5000);
-	function tmpQuery(){
-		$( '#triples-row > #loading' ).hide();
+	//var ingein = window.setTimeout(tmpQuery, 5000);
+	//function tmpQuery(){
 		if (entities.length > 0) {
 			var tmp = entities.map(function(val){return '<a href="#" class="list-group-item">'+val+'</s>' })
 			$( "#triples-container" ).html('<ul class="list-group">'+tmp.join("")+'</ul>');
-			resetDemo();
 			}
 		else{
-				handleError("No results returned!");
-			}
+			$("#triples-container").html('<ul class="list-group"> No results returned! </ul>');
 		}
+		resetDemo();
+
+	//	}
 	}
+  }
 }
 
 
@@ -82,17 +92,19 @@ $(document).ready(function(){
     freezeDemo()
     // (ajax request)
     $.ajax({
+      type: "POST",
       url: 'http://nlp.stanford.edu:8080/spied/spied',
+      //url: "output.json",
       data: getData,
-      //dataType: 'json',
-      success: querySuccess("#triples-container"),
-      error:  function( xhr ) {
+      dataType: 'text',
+      success: querySuccess("#triples-container")
+/*      error:  function( xhr ) {
 			console.log(xhr);	
 				var readyState = {1: "Loading",2: "Loaded",3: "Interactive",4: "Complete"};
 				if(xhr.readyState !== 0 && xhr.status !== 0 && xhr.responseText !== undefined) {
 					$( '#triples-row > #loading' ).hide();
 					handleError("Failed to execute query!")}
-				}
+				}*/
 	})}
   });
 

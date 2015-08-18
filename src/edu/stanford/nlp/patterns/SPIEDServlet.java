@@ -114,7 +114,15 @@ public class SPIEDServlet extends HttpServlet {
 //    }
 
     TextAnnotationPatterns annotate = new TextAnnotationPatterns();
-    String jsonObject = "{\"input\":"+quote(q)+",\"seedWords\":{\"name\":[\""+ StringUtils.join(seedWords.split("[,;]"), "\",")+"\"]}}";
+    String quotedString = quote(q);
+
+    String jsonObject = "{\"input\":"+quotedString+",\"seedWords\":{\"name\":[\""+ StringUtils.join(seedWords.split("[,;]"), "\",\"")+"\"]}}";
+
+    logger.info("Json is");
+    logger.info(jsonObject);
+    JsonReader jsonReader = Json.createReader(new StringReader(jsonObject));
+    JsonObject obj = jsonReader.readObject();
+    logger.info("Done parsing JSON");
     annotate.processText(jsonObject, false, false);
     String suggestions = annotate.suggestPhrases();
     // Collect results
@@ -162,25 +170,28 @@ public class SPIEDServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     logger.info("POST SPIED query from " + request.getRemoteAddr());
 
-    StringBuffer jb = new StringBuffer();
+    //StringBuffer jb = new StringBuffer();
     String line = "";
+    response.setContentType("text/json; charset=UTF-8");
     PrintWriter out = response.getWriter();
-
     try {
-      BufferedReader reader = request.getReader();
-      while ((line = reader.readLine()) != null)
-        jb.append(line);
-      JsonReader jsonReader = Json.createReader(new StringReader(jb.toString()));
-      JsonObject obj = jsonReader.readObject();
-      String raw = obj.get("q").toString();
-      String seedwords = obj.get("seedwords").toString();
+      String raw = StringUtils.toAscii(request.getParameter("q"));
+      String seedwords = request.getParameter("seedwords");
+//      BufferedReader reader = request.getReader();
+//      while ((line = reader.readLine()) != null)
+//        jb.append(line);
+//      JsonReader jsonReader = Json.createReader(new StringReader(jb.toString()));
+//      JsonObject obj = jsonReader.readObject();
+//      String raw = obj.get("q").toString();
+//      String seedwords = obj.get("seedwords").toString();
+      line = request.toString();
       if (raw == null || "".equals(raw)) {
         out.print("{\"okay\":false,\"reason\":\"No data provided\"}");
       } else {
         run(out, raw, seedwords);
       }
     } catch (Throwable t) {
-      writeError(t, out, jb.toString());
+      writeError(t, out, line);
     }
 
     out.close();
