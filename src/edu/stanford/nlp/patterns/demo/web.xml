@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<!DOCTYPE web-app
-    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
-    "http://java.sun.com/dtd/web-app_2_3.dtd">
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+         version="2.4">
 
-<web-app>
   <display-name>SPIED Server</display-name>
   <description>
     The backend servlet for the SPIED (Stanford Pattern-based IE) demo.
@@ -13,7 +13,7 @@
     <servlet-name>spied</servlet-name>
     <servlet-class>edu.stanford.nlp.patterns.SPIEDServlet</servlet-class>
     <!-- Load this servlet at server startup time -->
-    <load-on-startup>5</load-on-startup>
+    <load-on-startup>6</load-on-startup>
   </servlet>
 
   <servlet-mapping>
