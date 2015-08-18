@@ -349,6 +349,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     pool.register(STANFORD_COLUMN_DATA_CLASSIFIER,AnnotatorFactories.columnDataClassifier(properties,annotatorImplementation));
     pool.register(STANFORD_DEPENDENCIES, AnnotatorFactories.dependencies(properties, annotatorImplementation));
     pool.register(STANFORD_NATLOG, AnnotatorFactories.natlog(properties, annotatorImplementation));
+    pool.register(STANFORD_OPENIE, AnnotatorFactories.openie(properties, annotatorImplementation));
     pool.register(STANFORD_QUOTE, AnnotatorFactories.quote(properties, annotatorImplementation));
     // Add more annotators here
 
@@ -421,13 +422,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
    * under which this is true: the sentiment annotator is used.
    */
   public static boolean usesBinaryTrees(Properties props) {
-    String annotators = props.getProperty("annotators");
     Set<String> annoNames = Generics.newHashSet(Arrays.asList(getRequiredProperty(props, "annotators").split("[, \t]+")));
-    if (annoNames.contains(STANFORD_SENTIMENT)) {
-      return true;
-    } else {
-      return false;
-    }
+    return annoNames.contains(STANFORD_SENTIMENT);
   }
 
   /**
@@ -985,8 +981,11 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     //
     // Process one file or a directory of files
     //
-    if(properties.containsKey("file")){
+    if (properties.containsKey("file") || properties.containsKey("textFile")) {
       String fileName = properties.getProperty("file");
+      if (fileName == null) {
+        fileName = properties.getProperty("textFile");
+      }
       Collection<File> files = new FileSequentialCollection(new File(fileName), properties.getProperty("extension"), true);
       this.processFiles(null, files, numThreads);
     }
@@ -1041,6 +1040,11 @@ public class StanfordCoreNLP extends AnnotationPipeline {
    * @throws ClassNotFoundException If class loading problem
    */
   public static void main(String[] args) throws IOException, ClassNotFoundException {
+    try {
+      Thread.sleep(10000);
+    } catch (InterruptedException ie) {
+      return;
+    }
     //
     // process the arguments
     //

@@ -4,7 +4,6 @@ import edu.stanford.nlp.ling.tokensregex.types.Expressions;
 import edu.stanford.nlp.ling.tokensregex.types.Tags;
 import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
 import java.util.function.Function;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 import java.util.*;
@@ -108,11 +107,11 @@ public class Env {
   public Map<Class, CoreMapAttributeAggregator> defaultTokensAggregators;
 
   /**
-   * How annotations be extracted from the MatchedExpression
+   * How annotations are extracted from the MatchedExpression.
    * If the result type is a List and more than one annotation key is specified,
-   *   then the result is paired with the annotation key
-   *   Example: If annotation key is [ner,normalized] and result is [CITY,San Francisco]
-   *            then the final coremap will have ner=CITY, normalized=San Francisco
+   * then the result is paired with the annotation key.
+   * Example: If annotation key is [ner,normalized] and result is [CITY,San Francisco]
+   *            then the final CoreMap will have ner=CITY, normalized=San Francisco.
    * Otherwise, the result is treated as one object (all keys will be assigned that value).
    */
   Function<MatchedExpression,?> defaultResultsAnnotationExtractor;
@@ -120,9 +119,9 @@ public class Env {
   /**
    * Interface for performing custom binding of values to the environment
    */
-  public static interface Binder {
-    public void init(String prefix, Properties props);
-    public void bind(Env env);
+  public interface Binder {
+    void init(String prefix, Properties props);
+    void bind(Env env);
   }
 
   public Env(SequencePattern.Parser p) { this.parser = p; }

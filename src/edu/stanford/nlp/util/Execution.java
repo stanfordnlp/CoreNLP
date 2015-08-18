@@ -452,7 +452,8 @@ public class Execution {
         // split the key
         int lastDotIndex = rawKeyStr.lastIndexOf('.');
         if (lastDotIndex < 0) {
-          runtimeException("Unrecognized option: " + key);
+          err("Unrecognized option: " + key);
+          continue;
         }
         if (!rawKeyStr.startsWith("log.")) {  // ignore Redwood options
           String className = rawKeyStr.substring(0, lastDotIndex);

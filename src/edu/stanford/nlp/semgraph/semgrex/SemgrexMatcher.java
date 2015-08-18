@@ -113,6 +113,18 @@ public abstract class SemgrexMatcher {
 
 
   /**
+   * Topological sorting actually takes a rather large amount of time, if you call multiple
+   * patterns on the same tree.
+   * This is a weak cache that stores all the trees sorted since the garbage collector last kicked in.
+   * The key on this map is the identity hash code (i.e., memory address) of the semantic graph; the
+   * value is the sorted list of vertices.
+   *
+   * Note that this optimization will cause strange things to happen if you mutate a semantic graph between
+   * calls to Semgrex.
+   */
+  private static WeakHashMap<Integer, List<IndexedWord>> topologicalSortCache = new WeakHashMap<>();
+
+  /**
    * Find the next match of the pattern in the graph
    *
    * @return whether there is a match somewhere in the graph
@@ -121,20 +133,31 @@ public abstract class SemgrexMatcher {
     // System.err.println("hyp: " + hyp);
     if (findIterator == null) {
       try {
-        if (hyp)
-          findIterator = sg.topologicalSort().iterator();
-        else if (sg_aligned == null)
+        if (hyp) {
+          List<IndexedWord> topoSort = topologicalSortCache.get(System.identityHashCode(sg));
+          if (topoSort == null || topoSort.size() != sg.size()) {  // size check to mitigate a stale cache
+            topoSort = sg.topologicalSort();
+            topologicalSortCache.put(System.identityHashCode(sg), topoSort);
+          }
+          findIterator = topoSort.iterator();
+        } else if (sg_aligned == null) {
           return false;
-        else
-          findIterator = sg_aligned.topologicalSort().iterator();
-    			
+        } else {
+          List<IndexedWord> topoSort = topologicalSortCache.get(System.identityHashCode(sg_aligned));
+          if (topoSort == null || topoSort.size() != sg_aligned.size()) {  // size check to mitigate a stale cache
+            topoSort = sg_aligned.topologicalSort();
+            topologicalSortCache.put(System.identityHashCode(sg_aligned), topoSort);
+          }
+          findIterator = topoSort.iterator();
+        }
       } catch (Exception ex) {
-        if (hyp)
+        if (hyp) {
           findIterator = sg.vertexSet().iterator();
-        else if (sg_aligned == null)
+        } else if (sg_aligned == null) {
           return false;
-        else
+        } else {
           findIterator = sg_aligned.vertexSet().iterator();
+        }
       }
     }
   //  System.out.println("first");

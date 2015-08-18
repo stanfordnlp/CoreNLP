@@ -106,13 +106,15 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     double[][] trainValues = new double[trainSize][];
     int[] trainLabels = new int[trainSize];
 
-    System.arraycopy(data, 0, devData, 0, devSize);
-    System.arraycopy(values, 0, devValues, 0, devSize);
-    System.arraycopy(labels, 0, devLabels, 0, devSize);
+    synchronized (System.class) {
+      System.arraycopy(data, 0, devData, 0, devSize);
+      System.arraycopy(values, 0, devValues, 0, devSize);
+      System.arraycopy(labels, 0, devLabels, 0, devSize);
 
-    System.arraycopy(data, devSize, trainData, 0, trainSize);
-    System.arraycopy(values, devSize, trainValues, 0, trainSize);
-    System.arraycopy(labels, devSize, trainLabels, 0, trainSize);
+      System.arraycopy(data, devSize, trainData, 0, trainSize);
+      System.arraycopy(values, devSize, trainValues, 0, trainSize);
+      System.arraycopy(labels, devSize, trainLabels, 0, trainSize);
+    }
 
     RVFDataset<L, F> dev = new RVFDataset<L, F>(labelIndex, devLabels, featureIndex, devData, devValues);
     RVFDataset<L, F> train = new RVFDataset<L, F>(labelIndex, trainLabels, featureIndex, trainData, trainValues);
@@ -324,26 +326,48 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     double[][] trainValues = new double[trainSize][];
     int[] trainLabels = new int[trainSize];
 
-    System.arraycopy(data, start, devData, 0, devSize);
-    System.arraycopy(values, start, devValues, 0, devSize);
-    System.arraycopy(labels, start, devLabels, 0, devSize);
+    synchronized (System.class) {
+      System.arraycopy(data, start, devData, 0, devSize);
+      System.arraycopy(values, start, devValues, 0, devSize);
+      System.arraycopy(labels, start, devLabels, 0, devSize);
 
-    System.arraycopy(data, 0, trainData, 0, start);
-    System.arraycopy(data, end, trainData, start, size() - end);
-    System.arraycopy(values, 0, trainValues, 0, start);
-    System.arraycopy(values, end, trainValues, start, size() - end);
-    System.arraycopy(labels, 0, trainLabels, 0, start);
-    System.arraycopy(labels, end, trainLabels, start, size() - end);
+      System.arraycopy(data, 0, trainData, 0, start);
+      System.arraycopy(data, end, trainData, start, size() - end);
+      System.arraycopy(values, 0, trainValues, 0, start);
+      System.arraycopy(values, end, trainValues, start, size() - end);
+      System.arraycopy(labels, 0, trainLabels, 0, start);
+      System.arraycopy(labels, end, trainLabels, start, size() - end);
+    }
 
-    GeneralDataset<L, F> dev = new RVFDataset<L, F>(labelIndex, devLabels, featureIndex, devData, devValues);
-    GeneralDataset<L, F> train = new RVFDataset<L, F>(labelIndex, trainLabels, featureIndex, trainData, trainValues);
+    if (this instanceof WeightedRVFDataset<?,?>) {
+      float[] trainWeights = new float[trainSize];
+      float[] devWeights = new float[devSize];
 
-    return new Pair<GeneralDataset<L, F>, GeneralDataset<L, F>>(train, dev);
+      WeightedRVFDataset<L, F> w = (WeightedRVFDataset<L, F>)this;
+
+      synchronized (System.class) {
+        System.arraycopy(w.weights, start, devWeights, 0, devSize);
+        System.arraycopy(w.weights, 0, trainWeights, 0, start);
+        System.arraycopy(w.weights, end, trainWeights, start, size() - end);
+      }
+
+      WeightedRVFDataset<L, F> dev = new WeightedRVFDataset<L, F>(labelIndex, devLabels, featureIndex, devData, devValues, devWeights);
+      WeightedRVFDataset<L, F> train = new WeightedRVFDataset<L, F>(labelIndex, trainLabels, featureIndex, trainData, trainValues, trainWeights);
+
+      return new Pair<>(train, dev);
+    } else {
+
+      GeneralDataset<L, F> dev = new RVFDataset<L, F>(labelIndex, devLabels, featureIndex, devData, devValues);
+      GeneralDataset<L, F> train = new RVFDataset<L, F>(labelIndex, trainLabels, featureIndex, trainData, trainValues);
+
+      return new Pair<>(train, dev);
+    }
 
   }
 
   // TODO: Check that this does what we want for Datum other than RVFDatum
   @Override
+  // If you edit me, also take care of WeightedRVFDataset
   public void add(Datum<L, F> d) {
     if (d instanceof RVFDatum<?, ?>) {
       addLabel(d.label());
@@ -356,6 +380,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     }
   }
 
+  // If you edit me, also take care of WeightedRVFDataset
   public void add(Datum<L, F> d, String src, String id) {
     if (d instanceof RVFDatum<?, ?>) {
       addLabel(d.label());
@@ -391,6 +416,12 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     return new RVFDatum<L, F>(c, labelIndex.get(labels[index]));
   }
 
+  public RVFDatum<L, F> getRVFDatumWithId(int index) {
+    RVFDatum<L, F> datum = getRVFDatum(index);
+    datum.setID(getRVFDatumId(index));
+    return datum;
+  }
+
   public String getRVFDatumSource(int index) {
     return sourcesAndIds.get(index).first();
   }
@@ -399,6 +430,17 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     return sourcesAndIds.get(index).second();
   }
 
+  public void addAllWithSourcesAndIds(RVFDataset<L, F> data) {
+    for(int index=0 ; index<data.size ; index++) {
+      this.add(data.getRVFDatumWithId(index), data.getRVFDatumSource(index), data.getRVFDatumId(index));
+    }
+  }
+
+  public void addAll(Iterable<? extends Datum<L,F>> data) {
+    for (Datum<L, F> d : data) {
+      this.add(d);
+    }
+  }
   private void addSourceAndId(String src, String id) {
     sourcesAndIds.add(new Pair<String, String>(src, id));
   }
@@ -406,7 +448,9 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
   private void addLabel(L label) {
     if (labels.length == size) {
       int[] newLabels = new int[size * 2];
-      System.arraycopy(labels, 0, newLabels, 0, size);
+      synchronized (System.class) {
+        System.arraycopy(labels, 0, newLabels, 0, size);
+      }
       labels = newLabels;
     }
     labels[size] = labelIndex.addToIndex(label);
@@ -416,8 +460,10 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     if (data.length == size) {
       int[][] newData = new int[size * 2][];
       double[][] newValues = new double[size * 2][];
-      System.arraycopy(data, 0, newData, 0, size);
-      System.arraycopy(values, 0, newValues, 0, size);
+      synchronized (System.class) {
+        System.arraycopy(data, 0, newData, 0, size);
+        System.arraycopy(values, 0, newValues, 0, size);
+      }
       data = newData;
       values = newValues;
     }
@@ -518,7 +564,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
   }
 
   /**
-   * Modification of printFullFeatureMatrix to correct bugs & print values
+   * Modification of printFullFeatureMatrix to correct bugs and print values
    * (Rajat). Prints the full feature matrix in tab-delimited form. These can be
    * BIG matrices, so be careful!
    */
@@ -540,7 +586,8 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
         if (feats.containsKey(Integer.valueOf(j))) {
           pw.print(sep + feats.get(Integer.valueOf(j)));
         } else {
-          pw.print(sep + " ");
+          pw.print(sep);
+          pw.print(' ');
         }
       }
       pw.println();
@@ -886,6 +933,8 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     }
     values = trimToSize(values);
     data = trimToSize(data);
+    assert values.length == size;
+    assert values.length == size();
     return values;
   }
 

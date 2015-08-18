@@ -311,6 +311,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
           partEhat = Ehat;
       } else {
         partE = parallelE[tID];
+        // TODO: if we put this on the heap, this clearing will be unnecessary
         clear2D(partE);
         if (calculateEmpirical) {
           partEhat = parallelEhat[tID];
@@ -347,8 +348,21 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     return multiThreadGradient(docIDs, false);
   }
 
+  private class GradientCalculator implements Runnable {
+    @Override
+    public void run() {
+      double[][] arr = empty2D();
+    }
+  }
+
+  protected double newMultithreadGradient(List<Integer> docIDs, boolean calculateEmpirical) {
+    double objective = 0.0;
+    return objective;
+  }
+
   protected double multiThreadGradient(List<Integer> docIDs, boolean calculateEmpirical) {
     double objective = 0.0;
+    // TODO: This is a bunch of unnecessary heap traffic, should all be on the stack
     if (multiThreadGrad > 1) {
       if (parallelE == null) {
         parallelE = new double[multiThreadGrad][][];
@@ -364,6 +378,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
       }
     }
 
+    // TODO: this is a huge amount of machinery for no discernable reason
     MulticoreWrapper<Pair<Integer, List<Integer>>, Pair<Integer, Double>> wrapper =
       new MulticoreWrapper<Pair<Integer, List<Integer>>, Pair<Integer, Double>>(multiThreadGrad, (calculateEmpirical ? expectedAndEmpiricalThreadProcessor : expectedThreadProcessor) );
 
@@ -374,11 +389,13 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
       int endIndex = currIndex + partLen;
       if (part == multiThreadGrad-1)
         endIndex = totalLen;
+      // TODO: let's not construct a sub-list of DocIDs, unnecessary object creation, can calculate directly from ThreadID
       List<Integer> subList = docIDs.subList(currIndex, endIndex);
       wrapper.put(new Pair<Integer, List<Integer>>(part, subList));
       currIndex = endIndex;
     }
     wrapper.join();
+    // This all seems fine. May want to start running this after the joins, in case we have different end-times
     while (wrapper.peek()) {
       Pair<Integer, Double> result = wrapper.poll();
       int tID = result.first();

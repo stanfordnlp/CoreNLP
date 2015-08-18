@@ -2,7 +2,9 @@ package edu.stanford.nlp.trees.international.pennchinese;
 
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.trees.*;
+
 import java.util.function.Predicate;
+
 import edu.stanford.nlp.util.Filters;
 import edu.stanford.nlp.ling.HasWord;
 
@@ -330,6 +332,14 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
   @Override
   public HeadFinder typedDependencyHeadFinder() {
     return new ChineseSemanticHeadFinder(this);
+  }
+ 
+  /** Chinese does not support Universal Dependencies yet,
+   *  so always return true.
+   */
+  @Override
+  public boolean generateOriginalDependencies() {
+    return true;
   }
 
 }

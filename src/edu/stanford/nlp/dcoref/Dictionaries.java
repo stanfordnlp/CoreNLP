@@ -386,10 +386,14 @@ public class Dictionaries {
   private void loadGenderNumber(String file, String neutralWordsFile) {
     try {
       getWordsFromFile(neutralWordsFile, neutralWords, false);
+    } catch (IOException e) {
+      throw new RuntimeIOException("Couldn't load " + neutralWordsFile);
+    }
+    try {
       Map<List<String>, Gender> temp = IOUtils.readObjectFromURLOrClasspathOrFileSystem(file);
       genderNumber.putAll(temp);
     } catch (IOException | ClassNotFoundException e) {
-      throw new RuntimeIOException(e);
+      throw new RuntimeIOException("Couldn't load " + file);
     }
   }
 

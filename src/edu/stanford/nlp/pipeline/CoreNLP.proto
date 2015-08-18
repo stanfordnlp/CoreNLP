@@ -4,17 +4,25 @@ option java_package = "edu.stanford.nlp.pipeline";
 option java_outer_classname = "CoreNLPProtos";
 
 //
+// From JAVANLP_HOME, you can build me with the command:
+//
+//  protoc -I=projects/core/src/edu/stanford/nlp/pipeline/ --java_out=projects/core/src projects/core/src/edu/stanford/nlp/pipeline/CoreNLP.proto
+//
+
+//
 // An enumeration for the valid languages allowed in CoreNLP
 //
 enum Language {
   Unknown  = 0;
-  Arabic   = 1;
-  Chinese  = 2;
-  English  = 3;
-  German   = 4;
-  French   = 5;
-  Hebrew   = 6;
-  Spanish  = 7;
+  Any      = 1;
+  Arabic   = 2;
+  Chinese  = 3;
+  English  = 4;
+  German   = 5;
+  French   = 6;
+  Hebrew   = 7;
+  Spanish  = 8;
+  UniversalEnglish = 9;
 }
 
 //
@@ -31,6 +39,8 @@ message Document {
    * serialized without any sentences. Otherwise
    */
   repeated Token      sentencelessToken = 5;
+
+  repeated Quote      quote = 6;
 
   extensions 100 to 255;
 }
@@ -52,9 +62,12 @@ message Sentence {
   optional DependencyGraph basicDependencies                   = 8;
   optional DependencyGraph collapsedDependencies               = 9;
   optional DependencyGraph collapsedCCProcessedDependencies    = 10;
+  optional DependencyGraph alternativeDependencies             = 13;
+  repeated OpenIETriple    openieTriple                        = 14;   // The OpenIE triples in the sentence
   optional uint32          paragraph                           = 11;
 
   optional string          text                                = 12;
+
 
   // Fields set by other annotators in CoreNLP
   optional bool            hasRelationAnnotations              = 51;
@@ -95,9 +108,12 @@ message Token {
   optional uint32 corefClusterID    = 23;   // The [primary] cluster id for this token
   optional string answer            = 24;   // A temporary annotation which is occasionally left in
   //  optional string projectedCategory = 25;   // The syntactic category of the maximal constituent headed by the word. Not used anywhere, so deleted.
-  optional uint32 headWordIndex     = 26;   // The index of the head word of this word.
-  optional Operator operator        = 27;   // If this is an operator, which one is it and what is its scope (as per Natural Logic)?
-  optional Polarity polarity        = 28;   // The polarity of this word, according to Natural Logic
+  optional uint32    headWordIndex  = 26;   // The index of the head word of this word.
+  optional Operator  operator       = 27;   // If this is an operator, which one is it and what is its scope (as per Natural Logic)?
+  optional Polarity  polarity       = 28;   // The polarity of this word, according to Natural Logic
+  optional Span      span           = 29;   // The span of a leaf node of a tree
+  optional string    sentiment      = 30;   // The final sentiment of the sentence
+  optional int32     quotationIndex = 31;   // The index of the quotation this token refers to
 
   // Fields set by other annotators in CoreNLP
   optional string gender          = 51;  // gender annotation (machine reading)
@@ -123,6 +139,21 @@ enum Sentiment {
   NEUTRAL           = 2;
   WEAK_POSITIVE     = 3;
   STRONG_POSITIVE   = 4;
+}
+
+//
+// A quotation marker in text
+//
+message Quote {
+  optional string text           = 1;
+  optional uint32 begin          = 2;
+  optional uint32 end            = 3;
+  optional uint32 sentenceBegin  = 5;
+  optional uint32 sentenceEnd    = 6;
+  optional uint32 tokenBegin     = 7;
+  optional uint32 tokenEnd       = 8;
+  optional string docid          = 9;
+  optional uint32 index          = 10;
 }
 
 //
@@ -154,7 +185,7 @@ message DependencyGraph {
     optional bool   isExtra    = 4;
     optional uint32 sourceCopy = 5;
     optional uint32 targetCopy = 6;
-    optional Language language = 7;
+    optional Language language = 7 [default=Unknown];
   }
   
   repeated Node     node     = 1;
@@ -173,7 +204,7 @@ message CorefChain {
     optional string number             = 3;
     optional string gender             = 4;
     optional string animacy            = 5;
-    optional uint32 startIndex         = 6;
+    optional uint32 beginIndex         = 6;
     optional uint32 endIndex           = 7;
     optional uint32 headIndex          = 9;
     optional uint32 sentenceIndex      = 10;
@@ -183,6 +214,14 @@ message CorefChain {
   required int32        chainID        = 1;
   repeated CorefMention mention        = 2;
   required uint32       representative = 3;
+}
+
+//
+// A Span of text
+//
+message Span {
+  required uint32 begin      = 1;
+  required uint32 end        = 2;
 }
 
 //
@@ -288,4 +327,18 @@ message NERMention {
   optional string normalizedNER                 = 5;
   optional string entityType                    = 6;
   optional Timex  timex                         = 7;
+}
+
+//
+// An OpenIE relation triple
+//
+message OpenIETriple {
+  optional string          subject      = 1;  // The surface form of the subject
+  optional string          relation     = 2;  // The surface form of the relation (required)
+  optional string          object       = 3;  // The surface form of the object
+  required double          confidence   = 4;  // The [optional] confidence of the extraction
+  required Span            subjectSpan  = 5;  // The span of the subject in the sentence
+  required Span            relationSpan = 6;  // The span of the relation in the sentence
+  required Span            objectSpan   = 7;  // The span of the object in the sentence
+  optional DependencyGraph tree         = 8;  // The dependency graph fragment for this triple
 }

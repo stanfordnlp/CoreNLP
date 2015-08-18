@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Open IE ACL Demo</title>
+    <!-- Some Setup -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- JQuery from Google -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Bootstrap -->
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- Naturalli -->
+    <link rel="stylesheet" href="naturalli.css">
+    <script src="naturalli.js"></script>
+    <link rel="shortcut icon" href="favicon.ico" >
+</head>
+
+
+<body>
+    <div class="container">
+        <div class="row">
+            <center>
+                <h1>Open IE ACL Demo</h1>
+            </center>
+            <div class="col-md-12">
+                <!-- Query Box -->
+                <form id="form-query" class="form-inline" role="form" action="#">
+                    <div class="input-group">
+                        <input id="q" type="text" name="q" class="form-control input-lg"
+                               placeholder="e.g., This is a demo for an ACL paper submission which is under review."
+                               autofocus="true"autocomplete="off" />
+                        <div id="query-button" class="input-group-addon" title="Query this fact"><img src="rightarrow.png" width="30px"/></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Truth Value -->
+        <div id="triples-row" class="row" style="margin-top:2em;">
+
+            <div id="triples-left" class="col-md-6 centered">
+                <h2 id="system-header" style="visibility: hidden;">Our System</h2>
+                <div id="triples-container" class="triples"></div>
+            </div>
+            <div id="triples-right" class="col-md-6 centered">
+                <h2 id="ollie-header" style="visibility: hidden;">Ollie</h2>
+                <div id="ollie-container" class="triples"></div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

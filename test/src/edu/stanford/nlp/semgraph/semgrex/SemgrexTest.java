@@ -22,7 +22,7 @@ public class SemgrexTest extends TestCase {
 
   public void testMatchAll() {
     SemanticGraph graph =
-      SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
+      SemanticGraph.valueOf("[ate subj>Bill dobj>[muffins compound>blueberry]]");
     Set<IndexedWord> words = graph.vertexSet();
 
     SemgrexPattern pattern = SemgrexPattern.compile("{}");
@@ -35,11 +35,11 @@ public class SemgrexTest extends TestCase {
   }
 
   public void testTest() {
-    runTest("{}", "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+    runTest("{}", "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "ate", "Bill", "muffins", "blueberry");
 
     try {
-      runTest("{}", "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+      runTest("{}", "[ate subj>Bill dobj>[muffins compound>blueberry]]",
               "ate", "Bill", "muffins", "foo");
       throw new RuntimeException();
     } catch (AssertionFailedError e) {
@@ -47,7 +47,7 @@ public class SemgrexTest extends TestCase {
     }
 
     try {
-      runTest("{}", "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+      runTest("{}", "[ate subj>Bill dobj>[muffins compound>blueberry]]",
               "ate", "Bill", "muffins");
       throw new RuntimeException();
     } catch (AssertionFailedError e) {
@@ -55,7 +55,7 @@ public class SemgrexTest extends TestCase {
     }
 
     try {
-      runTest("{}", "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+      runTest("{}", "[ate subj>Bill dobj>[muffins compound>blueberry]]",
               "ate", "Bill", "muffins", "blueberry", "blueberry");
       throw new RuntimeException();
     } catch (AssertionFailedError e) {
@@ -67,138 +67,138 @@ public class SemgrexTest extends TestCase {
    * This also tests negated node matches
    */
   public void testWordMatch() {
-    runTest("{word:Bill}", "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+    runTest("{word:Bill}", "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "Bill");
     runTest("!{word:Bill}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "ate", "muffins", "blueberry");
     runTest("!{word:Fred}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "ate", "Bill", "muffins", "blueberry");
     runTest("!{word:ate}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "Bill", "muffins", "blueberry");
     runTest("{word:/^(?!Bill).*$/}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "ate", "muffins", "blueberry");
     runTest("{word:/^(?!Fred).*$/}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "ate", "Bill", "muffins", "blueberry");
     runTest("{word:/^(?!ate).*$/}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "Bill", "muffins", "blueberry");
-    runTest("{word:muffins} >nn {word:blueberry}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+    runTest("{word:muffins} >compound {word:blueberry}",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "muffins");
     runTest("{} << {word:ate}=a",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "Bill", "muffins", "blueberry");
     runTest("{} << !{word:ate}=a",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "blueberry");
     // blueberry should match twice because it has two ancestors
     runTest("{} << {}=a",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "Bill", "muffins", "blueberry", "blueberry");
   }
 
   public void testSimpleDependency() {
     // blueberry has two ancestors
-    runTest("{} << {}", "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+    runTest("{} << {}", "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "Bill", "muffins", "blueberry", "blueberry");
     // ate has three descendants
-    runTest("{} >> {}", "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+    runTest("{} >> {}", "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "ate", "ate", "ate", "muffins");
-    runTest("{} < {}", "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+    runTest("{} < {}", "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "Bill", "muffins", "blueberry");
-    runTest("{} > {}", "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+    runTest("{} > {}", "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "ate", "ate", "muffins");
   }
 
   public void testNamedDependency() {
     runTest("{} << {word:ate}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "Bill", "muffins", "blueberry");
     runTest("{} >> {word:blueberry}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "ate", "muffins");
     runTest("{} >> {word:Bill}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "ate");
     runTest("{} < {word:ate}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "Bill", "muffins");
     runTest("{} > {word:blueberry}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "muffins");
     runTest("{} > {word:muffins}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "ate");
   }
 
   public void testNamedGovernor() {
     runTest("{word:blueberry} << {}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "blueberry");
     runTest("{word:ate} << {}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]");
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]");
     runTest("{word:blueberry} >> {}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]");
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]");
     runTest("{word:muffins} >> {}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "muffins");
     runTest("{word:Bill} >> {}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]");
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]");
     runTest("{word:muffins} < {}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "muffins");
     runTest("{word:muffins} > {}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "muffins");
   }
 
   public void testTwoDependencies() {
     runTest("{} >> ({} >> {})",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "ate");
     runTest("{} >> {word:Bill} >> {word:muffins}",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "ate");
     runTest("{}=a >> {}=b >> {word:muffins}=c",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "ate", "ate", "ate");
     runTest("{}=a >> {word:Bill}=b >> {}=c",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "ate", "ate", "ate");
     runTest("{}=a >> {}=b >> {}=c",
-            "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+            "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "ate", "ate", "ate", "ate", "ate",
             "ate", "ate", "ate", "ate", "muffins");
   }
 
   public void testRegex() {
-    runTest("{word:/Bill/}", "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+    runTest("{word:/Bill/}", "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "Bill");
 
-    runTest("{word:/ill/}", "[ate subj:Bill dobj:[muffins nn:blueberry]]");
+    runTest("{word:/ill/}", "[ate subj>Bill dobj>[muffins compound>blueberry]]");
 
-    runTest("{word:/.*ill/}", "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+    runTest("{word:/.*ill/}", "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "Bill");
 
-    runTest("{word:/.*il/}", "[ate subj:Bill dobj:[muffins nn:blueberry]]");
+    runTest("{word:/.*il/}", "[ate subj>Bill dobj>[muffins compound>blueberry]]");
 
-    runTest("{word:/.*il.*/}", "[ate subj:Bill dobj:[muffins nn:blueberry]]",
+    runTest("{word:/.*il.*/}", "[ate subj>Bill dobj>[muffins compound>blueberry]]",
             "Bill");
   }
 
   public void testReferencedRegex() {
-    runTest("{word:/Bill/}", "[ate subj:Bill dobj:[bill det:the]]",
+    runTest("{word:/Bill/}", "[ate subj>Bill dobj>[bill det>the]]",
             "Bill");
 
-    runTest("{word:/.*ill/}", "[ate subj:Bill dobj:[bill det:the]]",
+    runTest("{word:/.*ill/}", "[ate subj>Bill dobj>[bill det>the]]",
             "Bill", "bill");
 
-    runTest("{word:/[Bb]ill/}", "[ate subj:Bill dobj:[bill det:the]]",
+    runTest("{word:/[Bb]ill/}", "[ate subj>Bill dobj>[bill det>the]]",
             "Bill", "bill");
 
     // TODO: implement referencing regexes
@@ -447,7 +447,7 @@ public class SemgrexTest extends TestCase {
   }
 
   public void testEqualsRelation() {
-    SemanticGraph graph = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill dobj>[muffins compound>blueberry]]");
     SemgrexPattern pattern = SemgrexPattern.compile("{} >> ({}=a == {}=b)");
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
@@ -513,7 +513,7 @@ public class SemgrexTest extends TestCase {
    * the head, for example.
    */
   public void testNotEquals() {
-    SemanticGraph graph = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill dobj>[muffins compound>blueberry]]");
 
     SemgrexPattern pattern = SemgrexPattern.compile("{} >> {}=a >> {}=b : {}=a !== {}=b");
     SemgrexMatcher matcher = pattern.matcher(graph);
@@ -619,7 +619,7 @@ public class SemgrexTest extends TestCase {
    * Test that a particular AnnotationLookup is honored
    */
   public void testIndex() {
-    SemanticGraph graph = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill dobj>[muffins compound>blueberry]]");
     runTest("{idx:0}", graph, "ate");
     runTest("{idx:1}", graph, "Bill");
     runTest("{idx:2}", graph, "muffins");
@@ -628,7 +628,7 @@ public class SemgrexTest extends TestCase {
   }
 
   public void testLemma() {
-    SemanticGraph graph = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill dobj>[muffins compound>blueberry]]");
     for (IndexedWord word : graph.vertexSet()) {
       word.setLemma(word.word());
     }
@@ -648,13 +648,13 @@ public class SemgrexTest extends TestCase {
   }
 
   public void testNamedRelation() {
-    SemanticGraph graph = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill dobj>[muffins compound>blueberry]]");
     SemgrexPattern pattern = SemgrexPattern.compile("{idx:0}=gov >>=foo {idx:3}=dep");
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals("ate", matcher.getNode("gov").toString());
     assertEquals("blueberry", matcher.getNode("dep").toString());
-    assertEquals("nn", matcher.getRelnString("foo"));
+    assertEquals("compound", matcher.getRelnString("foo"));
     assertFalse(matcher.find());
 
     pattern = SemgrexPattern.compile("{idx:3}=dep <<=foo {idx:0}=gov");
@@ -670,7 +670,7 @@ public class SemgrexTest extends TestCase {
     assertTrue(matcher.find());
     assertEquals("muffins", matcher.getNode("gov").toString());
     assertEquals("blueberry", matcher.getNode("dep").toString());
-    assertEquals("nn", matcher.getRelnString("foo"));
+    assertEquals("compound", matcher.getRelnString("foo"));
     assertFalse(matcher.find());
 
     pattern = SemgrexPattern.compile("{idx:2}=gov >=foo {idx:3}=dep");
@@ -678,7 +678,7 @@ public class SemgrexTest extends TestCase {
     assertTrue(matcher.find());
     assertEquals("muffins", matcher.getNode("gov").toString());
     assertEquals("blueberry", matcher.getNode("dep").toString());
-    assertEquals("nn", matcher.getRelnString("foo"));
+    assertEquals("compound", matcher.getRelnString("foo"));
     assertFalse(matcher.find());
   }
 

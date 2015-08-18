@@ -4,7 +4,8 @@ import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -17,7 +18,7 @@ import edu.stanford.nlp.trees.international.negra.NegraPennLanguagePack;
 
 /** @author Christopher Manning
  */
-public class PTBTokenizerTest extends TestCase {
+public class PTBTokenizerTest {
 
   private final String[] ptbInputs = {
     "This is a sentence.",
@@ -39,6 +40,13 @@ public class PTBTokenizerTest extends TestCase {
     "Kenneth liked Windows 3.1, Windows 3.x, and Mesa A.B as I remember things.",
     "I like programming in F# more than C#.",
     "NBC Live will be available free through the Yahoo! Chat Web site. E! Entertainment said ``Jeopardy!'' is a game show.",
+    "I lived in O\u2019Malley and read OK! Magazine.",
+    "I lived in O\u0092Malley and read OK! Magazine.", /* invalid unicode codepoint, but inherit from cp1252 */
+    "I like: \u2022wine, \u0095cheese, \u2023salami, & \u2043speck.",
+    "I don't give a f**k about your sh*tty life.",
+    "First sentence.... Second sentence.",
+    "First sentence . . . . Second sentence.",
+    "I wasn’t really ... well, what I mean...see . . . what I'm saying, the thing is . . . I didn’t mean it.",
   };
 
   private final String[][] ptbGold = {
@@ -72,23 +80,34 @@ public class PTBTokenizerTest extends TestCase {
     { "I", "like", "programming", "in", "F#", "more", "than", "C#", "." },
     { "NBC", "Live", "will", "be", "available", "free", "through", "the", "Yahoo!", "Chat", "Web", "site", ".",
             "E!", "Entertainment", "said", "``", "Jeopardy!", "''", "is", "a", "game", "show", "." },
+          { "I", "lived", "in", "O'Malley", "and", "read", "OK!", "Magazine", "." },
+          { "I", "lived", "in", "O'Malley", "and", "read", "OK!", "Magazine", "." },
+          { "I", "like", ":", "\u2022", "wine", ",", "\u2022", "cheese", ",", "\u2023", "salami",
+                  ",", "&", "\u2043", "speck", "." },
+    { "I", "do", "n't", "give", "a", "f**k", "about", "your", "sh*tty", "life", "." },
+    { "First", "sentence", "...", ".", "Second", "sentence", "." },
+    { "First", "sentence", "...", ".", "Second", "sentence", "." },
+    { "I", "was", "n't", "really", "...", "well", ",", "what", "I", "mean", "...", "see", "...", "what", "I", "'m", "saying",
+      ",", "the", "thing", "is", "...", "I", "did", "n't", "mean", "it", "." },
+
   };
 
+  @Test
   public void testPTBTokenizerWord() {
-    assert(ptbInputs.length == ptbGold.length);
+    assertEquals("Test data arrays don't match in length", ptbInputs.length, ptbGold.length);
     for (int sent = 0; sent < ptbInputs.length; sent++) {
       PTBTokenizer<Word> ptbTokenizer = PTBTokenizer.newPTBTokenizer(new StringReader(ptbInputs[sent]));
       int i = 0;
       while (ptbTokenizer.hasNext()) {
         Word w = ptbTokenizer.next();
         try {
-          assertEquals("PTBTokenizer problem", ptbGold[sent][i], w.value());
+          assertEquals("PTBTokenizer problem for index " + i + " of " + Arrays.toString(ptbGold[sent]), ptbGold[sent][i], w.value());
         } catch (ArrayIndexOutOfBoundsException aioobe) {
           // the assertion below outside the loop will fail
         }
         i++;
       }
-      assertEquals("PTBTokenizer num tokens problem", i, ptbGold[sent].length);
+      assertEquals("PTBTokenizer num tokens problem for " + Arrays.toString(ptbGold[sent]), ptbGold[sent].length, i);
     }
   }
 
@@ -104,6 +123,7 @@ public class PTBTokenizerTest extends TestCase {
                   "Corp.", ",", "Chevron", "Corp.", "and", "Amoco", "Corp.", "." }, // regular
   };
 
+  @Test
   public void testCorp() {
     // We test a 2x2 design: {strict, regular} x {no following context, following context}
     for (int sent = 0; sent < 4; sent++) {
@@ -132,6 +152,7 @@ public class PTBTokenizerTest extends TestCase {
     }
   }
 
+  @Test
   public void testJacobEisensteinApostropheCase() {
     StringReader reader = new StringReader("it's");
     PTBTokenizer<Word> tokenizer = PTBTokenizer.newPTBTokenizer(reader);
@@ -146,7 +167,7 @@ public class PTBTokenizerTest extends TestCase {
     assertEquals(stemmedTokens, stemmedTokens2);
   }
 
-  private final static String[] untokInputs = {
+  private static final String[] untokInputs = {
     "London - AFP reported junk .",
     "Paris - Reuters reported news .",
     "Sydney - News said - something .",
@@ -155,7 +176,7 @@ public class PTBTokenizerTest extends TestCase {
     "He said that `` Luxembourg needs surface - to - air missiles . ''",
   };
 
-  private final static String[] untokOutputs = {
+  private static final String[] untokOutputs = {
     "London - AFP reported junk.",
     "Paris - Reuters reported news.",
     "Sydney - News said - something.",
@@ -164,7 +185,7 @@ public class PTBTokenizerTest extends TestCase {
     "He said that \"Luxembourg needs surface-to-air missiles.\"",
   };
 
-
+  @Test
   public void testUntok() {
     assert(untokInputs.length == untokOutputs.length);
     for (int i = 0; i < untokInputs.length; i++) {
@@ -172,7 +193,7 @@ public class PTBTokenizerTest extends TestCase {
     }
   }
 
-
+  @Test
   public void testInvertible() {
     String text = "  This     is     a      colourful sentence.    ";
     PTBTokenizer<CoreLabel> tokenizer =
@@ -252,6 +273,7 @@ public class PTBTokenizerTest extends TestCase {
     { "<DOC>", "<DOCID>", "nyt960102", ".0516", "</DOCID>", "<STORYID\u00A0cat=w\u00A0pri=u>", "A0264", "</STORYID>", "<SLUG\u00A0fv=ttj-z>" },
   };
 
+  @Test
   public void testPTBTokenizerSGML() {
     assert(sgmlInputs.length == sgmlGold.length);
     for (int sent = 0; sent < sgmlInputs.length; sent++) {
@@ -271,6 +293,7 @@ public class PTBTokenizerTest extends TestCase {
     }
   }
 
+  @Test
   public void testPTBTokenizerGerman() {
     String sample = "Das TV-Duell von Kanzlerin Merkel und SPD-Herausforderer Steinbrück war eher lahm - können es die Spitzenleute der kleinen Parteien besser? " +
             "Die erquickende Sicherheit und Festigkeit in der Bewegung, den Vorrat von Kraft, kann ja die Versammlung nicht fühlen, hören will sie sie nicht, also muß sie sie sehen; und die sehe man einmal in einem Paar spitzen Schultern, zylindrischen Schenkeln, oder leeren Ärmeln, oder lattenförmigen Beinen.";
@@ -308,6 +331,7 @@ public class PTBTokenizerTest extends TestCase {
     { "-LCB-", "1", "-RCB-", "block", "name", "=", "-LCB-", "2", "-RCB-" },
   };
 
+  @Test
   public void testPTBTokenizerMT() {
     assert(mtInputs.length == mtGold.length);
     for (int sent = 0; sent < mtInputs.length; sent++) {

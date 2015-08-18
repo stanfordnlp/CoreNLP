@@ -12,8 +12,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Stack;
 
-import edu.stanford.nlp.international.Languages;
-import edu.stanford.nlp.international.Languages.Language;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -407,7 +406,7 @@ public class TreebankStats {
     String nl = System.getProperty("line.separator");
     usage.append(String.format("Usage: java %s [OPTS] LANG paths%n%n",TreebankStats.class.getName()));
     usage.append("Options:").append(nl);
-    usage.append(" LANG is one of " + Languages.listOfLanguages()).append(nl);
+    usage.append(" LANG is one of " + Language.langList).append(nl);
     usage.append("  -s prefix : Use a split (extensions must be dev/test/train)").append(nl);
     usage.append("  -w        : Show word distribution").append(nl);
     usage.append("  -f        : Path list is a set of files, and the first file is the training set").append(nl);
@@ -452,7 +451,7 @@ public class TreebankStats {
       corpusPaths.add(parsedArgs[i]);
     }
 
-    TreebankLangParserParams tlpp = Languages.getLanguageParams(language);
+    TreebankLangParserParams tlpp = language.params;
     TreebankStats cs = new TreebankStats(language,corpusPaths,tlpp);
     if(splitPrefix != null) {
       if(!cs.useSplit(splitPrefix)) System.err.println("Could not load split!");

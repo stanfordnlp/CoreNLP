@@ -35,7 +35,7 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
   }
 
   // TODO: make this a pattern of non special characters: [,],?,.,\,^,$,(,),*,+ ... what else?
-  private static final Pattern LITERAL_PATTERN = Pattern.compile("[A-Za-z0-9_\\-]*");
+  private static final Pattern LITERAL_PATTERN = Pattern.compile("[A-Za-z0-9_\\-']*");
   public static NodePattern<String> newStringRegexPattern(String regex, int flags) {
     boolean isLiteral = ((flags & Pattern.LITERAL) != 0) || LITERAL_PATTERN.matcher(regex).matches();
     if (isLiteral) {

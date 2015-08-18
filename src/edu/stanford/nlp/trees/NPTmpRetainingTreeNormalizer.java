@@ -222,7 +222,7 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer {
         // The special Switchboard non-terminals clause.
         // Note that it deletes IP which other Treebanks might use!
         if ("RS".equals(t.label().value()) || "RM".equals(t.label().value()) || "IP".equals(t.label().value()) || "CODE".equals(t.label().value())) {
-          return false;
+          return t.isLeaf(); //Prevents deletion of the word "IP"
         }
         if ((l != null) && l.value() != null && (l.value().equals("-NONE-")) && !t.isLeaf() && kids.length == 1 && kids[0].isLeaf()) {
           // Delete empty/trace nodes (ones marked '-NONE-')

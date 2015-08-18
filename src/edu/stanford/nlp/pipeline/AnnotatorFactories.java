@@ -444,7 +444,7 @@ public class AnnotatorFactories {
   //
   // Parser
   //
-  public static AnnotatorFactory parse(Properties properties, final AnnotatorImplementations annotatorImplementation) {
+  public static AnnotatorFactory parse(final Properties properties, final AnnotatorImplementations annotatorImplementation) {
     return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
 
@@ -577,6 +577,25 @@ public class AnnotatorFactories {
       @Override
       public Annotator create() {
         return annotatorImpl.natlog(properties);
+      }
+
+      @Override
+      protected String additionalSignature() {
+        return "";
+      }
+    };
+  }
+
+  //
+  // RelationTriples
+  //
+  public static AnnotatorFactory openie(Properties properties, final AnnotatorImplementations annotatorImpl) {
+    return new AnnotatorFactory(properties, annotatorImpl) {
+      private static final long serialVersionUID = -2525567112379296672L;
+
+      @Override
+      public Annotator create() {
+        return annotatorImpl.openie(properties);
       }
 
       @Override

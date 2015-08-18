@@ -82,16 +82,16 @@ public class CleanXmlAnnotator implements Annotator{
 
   /**
    * A map of document level annotation keys (i.e. docid) along with a pattern
-   *  indicating the tag to match, and the attribute to match
+   *  indicating the tag to match, and the attribute to match.
    */
-  private CollectionValuedMap<Class, Pair<Pattern,Pattern>> docAnnotationPatterns = new CollectionValuedMap<Class, Pair<Pattern, Pattern>>();
+  private final CollectionValuedMap<Class, Pair<Pattern,Pattern>> docAnnotationPatterns = new CollectionValuedMap<>();
   public static final String DEFAULT_DOC_ANNOTATIONS_PATTERNS = "docID=doc[id],doctype=doc[type],docsourcetype=doctype[source]";
 
   /**
    * A map of token level annotation keys (i.e. link, speaker) along with a pattern
-   *  indicating the tag/attribute to match (tokens that belows to the text enclosed in the specified tag witll be annotated)
+   *  indicating the tag/attribute to match (tokens that belong to the text enclosed in the specified tag will be annotated).
    */
-  private CollectionValuedMap<Class, Pair<Pattern,Pattern>> tokenAnnotationPatterns = new CollectionValuedMap<Class, Pair<Pattern, Pattern>>();
+  private final CollectionValuedMap<Class, Pair<Pattern,Pattern>> tokenAnnotationPatterns = new CollectionValuedMap<>();
   public static final String DEFAULT_TOKEN_ANNOTATIONS_PATTERNS = null;
 
   /**
@@ -106,10 +106,10 @@ public class CleanXmlAnnotator implements Annotator{
   private Pattern ssplitDiscardTokensMatcher = null;
 
   /**
-   * A map of section level annotation keys (i.e. docid) along with a pattern i
-   *  indicating the tag to match, and the attribute to match
+   * A map of section level annotation keys (i.e. docid) along with a pattern
+   *  indicating the tag to match, and the attribute to match.
    */
-  private CollectionValuedMap<Class, Pair<Pattern,Pattern>> sectionAnnotationPatterns = new CollectionValuedMap<Class, Pair<Pattern, Pattern>>();
+  private final CollectionValuedMap<Class, Pair<Pattern,Pattern>> sectionAnnotationPatterns = new CollectionValuedMap<>();
   public static final String DEFAULT_SECTION_ANNOTATIONS_PATTERNS = null;
 
   /**
@@ -151,8 +151,8 @@ public class CleanXmlAnnotator implements Annotator{
     dateTagMatcher = toCaseInsensitivePattern(dateTags);
   }
 
-  private Pattern toCaseInsensitivePattern(String tags) {
-    if(tags != null){
+  private static Pattern toCaseInsensitivePattern(String tags) {
+    if (tags != null) {
       return Pattern.compile(tags, Pattern.CASE_INSENSITIVE);
     } else {
       return null;
@@ -202,7 +202,7 @@ public class CleanXmlAnnotator implements Annotator{
   }
 
   private static final Pattern TAG_ATTR_PATTERN = Pattern.compile("(.*)\\[(.*)\\]");
-  private void addAnnotationPatterns(CollectionValuedMap<Class, Pair<Pattern,Pattern>> annotationPatterns, String conf, boolean attrOnly) {
+  private static void addAnnotationPatterns(CollectionValuedMap<Class, Pair<Pattern,Pattern>> annotationPatterns, String conf, boolean attrOnly) {
     String[] annoPatternStrings = conf == null ? new String[0] : conf.trim().split("\\s*,\\s*");
     for (String annoPatternString:annoPatternStrings) {
       String[] annoPattern = annoPatternString.split("\\s*=\\s*", 2);
@@ -211,7 +211,7 @@ public class CleanXmlAnnotator implements Annotator{
       }
       String annoKeyString = annoPattern[0];
       String pattern = annoPattern[1];
-      Class annoKey = EnvLookup.lookupAnnotationKey(null, annoKeyString);
+      Class annoKey = EnvLookup.lookupAnnotationKeyWithClassname(null, annoKeyString);
       if (annoKey == null) {
         throw new IllegalArgumentException("Cannot resolve annotation key " + annoKeyString);
       }
@@ -247,7 +247,7 @@ public class CleanXmlAnnotator implements Annotator{
     return process(null, tokens);
   }
 
-  private String tokensToString(Annotation annotation, List<CoreLabel> tokens) {
+  private static String tokensToString(Annotation annotation, List<CoreLabel> tokens) {
     if (tokens.isEmpty()) return "";
     // Try to get original text back?
     String annotationText = (annotation != null)? annotation.get(CoreAnnotations.TextAnnotation.class) : null;
@@ -262,19 +262,20 @@ public class CleanXmlAnnotator implements Annotator{
     }
   }
 
-  // Annotates coremap with information from xml tag
+  // Annotates CoreMap with information from xml tag
 
   /**
-   * Updates a coremap with attributes (or text context) from a tag
+   * Updates a CoreMap with attributes (or text context) from a tag.
+   *
    * @param annotation - Main document level annotation (from which the original text can be extracted)
-   * @param cm - coremap to annotate
+   * @param cm - CoreMap to annotate
    * @param tag - tag to process
    * @param annotationPatterns - list of annotation patterns to match
    * @param savedTokens - tokens for annotations that are text context of a tag
    * @param toAnnotate - what keys to annotate
-   * @return
+   * @return The set of annotations found
    */
-  private Set<Class> annotateWithTag(Annotation annotation,
+  private static Set<Class> annotateWithTag(Annotation annotation,
                                      CoreMap cm,
                                      XMLUtils.XMLTag tag,
                                      CollectionValuedMap<Class, Pair<Pattern,Pattern>> annotationPatterns,
