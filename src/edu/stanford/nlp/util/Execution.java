@@ -493,7 +493,8 @@ public class Execution {
       }
     }
     if (!good) {
-      System.exit(1);
+      throw new RuntimeException("not able to parse properties!!!!");
+      //System.exit(1);
     }
 
     return canFill;
@@ -643,7 +644,8 @@ public class Execution {
     }
     endTracksTo("main");  // end main
     if (exit) {
-      System.exit(exitCode);
+      throw new RuntimeException("not able to parse properties!!!");
+      //System.exit(exitCode);
     }
   }
 
