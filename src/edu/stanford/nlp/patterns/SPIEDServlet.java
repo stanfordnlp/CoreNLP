@@ -118,7 +118,10 @@ public class SPIEDServlet extends HttpServlet {
       // Collect results
       out.print(suggestions);
     } catch (Throwable t) {
-      Logger.getAnonymousLogger().info(t.toString());
+      StringWriter sw = new StringWriter();
+      PrintWriter pw = new PrintWriter(sw);
+      t.printStackTrace(pw);
+      Logger.getAnonymousLogger().info(sw.toString());
       out.print("{\"okay\":\"false\"}");
     }
   }

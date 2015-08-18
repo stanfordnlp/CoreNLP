@@ -2191,8 +2191,10 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
     // close all the writers
     for (String label : constVars.getLabels()) {
-      wordsOutput.get(label).close();
-      patternsOutput.get(label).close();
+      if(wordsOutput.containsKey(label) && wordsOutput.get(label) != null)
+        wordsOutput.get(label).close();
+      if(patternsOutput.containsKey(label) && patternsOutput.get(label) != null)
+        patternsOutput.get(label).close();
     }
   }
 
