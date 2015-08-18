@@ -936,6 +936,7 @@ public class Redwood {
     public static void debug(Object...objs){ Redwood.log(revConcat(objs, DBG)); }
     public static void err(Object...objs){ Redwood.log(revConcat(objs, ERR, FORCE)); }
     public static void fatal(Object...objs){ Redwood.log(revConcat(objs, ERR, FORCE)); System.exit(1); }
+    public static void runtimeException(Object...objs){ Redwood.log(revConcat(objs, ERR, FORCE)); throw new RuntimeException(objs.toString()); }
     public static void println(Object o){ System.out.println(o); }
 
     /** Exits with a given status code */

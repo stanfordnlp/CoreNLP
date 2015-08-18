@@ -184,7 +184,7 @@ public class Execution {
       //--Permissions
       boolean accessState = true;
       if (Modifier.isFinal(f.getModifiers())) {
-        fatal("Option cannot be final: " + f);
+        runtimeException("Option cannot be final: " + f);
       }
       if (!f.isAccessible()) {
         accessState = false;
@@ -198,7 +198,7 @@ public class Execution {
           Object[] array = (Object[]) objVal;
           // error check
           if (!f.getType().isArray()) {
-            fatal("Setting an array to a non-array field. field: " + f + " value: " + Arrays.toString(array) + " src: " + value);
+            runtimeException("Setting an array to a non-array field. field: " + f + " value: " + Arrays.toString(array) + " src: " + value);
           }
           // create specific array
           Object toSet = Array.newInstance(f.getType().getComponentType(), array.length);
@@ -212,7 +212,7 @@ public class Execution {
           f.set(instance, objVal);
         }
       } else {
-        fatal("Cannot assign option field: " + f + " value: " + value + "; invalid type");
+        runtimeException("Cannot assign option field: " + f + " value: " + value + "; invalid type");
       }
       //--Permissions
       if (!accessState) {
@@ -220,13 +220,13 @@ public class Execution {
       }
     } catch (IllegalArgumentException e) {
       err(e);
-      fatal("Cannot assign option field: " + f.getDeclaringClass().getCanonicalName() + "." + f.getName() + " value: " + value + " cause: " + e.getMessage());
+      runtimeException("Cannot assign option field: " + f.getDeclaringClass().getCanonicalName() + "." + f.getName() + " value: " + value + " cause: " + e.getMessage());
     } catch (IllegalAccessException e) {
       err(e);
-      fatal("Cannot access option field: " + f.getDeclaringClass().getCanonicalName() + "." + f.getName());
+      runtimeException("Cannot access option field: " + f.getDeclaringClass().getCanonicalName() + "." + f.getName());
     } catch (Exception e) {
       err(e);
-      fatal("Cannot assign option field: " + f.getDeclaringClass().getCanonicalName() + "." + f.getName() + " value: " + value + " cause: " + e.getMessage());
+      runtimeException("Cannot assign option field: " + f.getDeclaringClass().getCanonicalName() + "." + f.getName() + " value: " + value + " cause: " + e.getMessage());
     }
   }
 
@@ -403,7 +403,7 @@ public class Execution {
             String name1 = canFill.get(name).getDeclaringClass().getCanonicalName() + "." + canFill.get(name).getName();
             String name2 = f.getDeclaringClass().getCanonicalName() + "." + f.getName();
             if (!name1.equals(name2)) {
-              fatal("Multiple declarations of option " + name + ": " + name1 + " and " + name2);
+              runtimeException("Multiple declarations of option " + name + ": " + name1 + " and " + name2);
             } else {
               err("Class is in classpath multiple times: " + canFill.get(name).getDeclaringClass().getCanonicalName());
             }
@@ -452,7 +452,7 @@ public class Execution {
         // split the key
         int lastDotIndex = rawKeyStr.lastIndexOf('.');
         if (lastDotIndex < 0) {
-          fatal("Unrecognized option: " + key);
+          runtimeException("Unrecognized option: " + key);
         }
         if (!rawKeyStr.startsWith("log.")) {  // ignore Redwood options
           String className = rawKeyStr.substring(0, lastDotIndex);
