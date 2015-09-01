@@ -105,12 +105,9 @@ public final class SpanishVerbStripper implements Serializable {
     new Pair(Pattern.compile("ú"), "u")
   };
 
-  // CONSTRUCTORS
+  // CONSTRUCTOR
 
-  private SpanishVerbStripper() {
-    this(DEFAULT_DICT);
-  }
-
+  /** Access via the singleton-like getInstance() methods. */
   private SpanishVerbStripper(String dictPath) {
     dict = setupDictionary(dictPath);
   }
