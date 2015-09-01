@@ -1,9 +1,6 @@
 package edu.stanford.nlp.classify;
 
 import java.io.Serializable;
-import java.util.List;
-
-import edu.stanford.nlp.ling.RVFDatum;
 
 /**
  * A simple interface for training a Classifier from a Dataset of training
