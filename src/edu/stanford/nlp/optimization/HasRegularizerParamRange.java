@@ -3,10 +3,13 @@ package edu.stanford.nlp.optimization;
 import java.util.Set;
 
 /**
- * Indicates that an minimizer supports evaluation periodically
+ * Indicates that a Function should only be regularized on a subset
+ * of its parameters.
  *
  * @author Mengqiu Wang
  */
 public interface HasRegularizerParamRange {
-  public Set<Integer> getRegularizerParamRange(double[] x);
+
+  Set<Integer> getRegularizerParamRange(double[] x);
+
 }
