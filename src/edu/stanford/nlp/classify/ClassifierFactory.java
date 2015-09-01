@@ -16,9 +16,6 @@ import edu.stanford.nlp.ling.RVFDatum;
 
 public interface ClassifierFactory<L, F, C extends Classifier<L, F>> extends Serializable {
 
-  @Deprecated //ClassifierFactory should implement trainClassifier(GeneralDataset) instead.
-  public C trainClassifier(List<RVFDatum<L, F>> examples);
-
   public C trainClassifier(GeneralDataset<L,F> dataset);
 
 }

@@ -317,12 +317,6 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
     useSigmoid = oldUseSigmoid;
   }
 
-  @Deprecated
-  public SVMLightClassifier<L, F> trainClassifier(List<RVFDatum<L, F>> examples) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
   private boolean tuneHeldOut = false;
   private boolean tuneCV = false;
   private Scorer<L> scorer = new MultiClassAccuracyStats<L>();

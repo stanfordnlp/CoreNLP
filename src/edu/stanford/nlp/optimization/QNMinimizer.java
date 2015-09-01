@@ -13,6 +13,8 @@ import java.util.Set;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.util.CallbackFunction;
+import edu.stanford.nlp.util.Generics;
+
 
 /**
  *
@@ -1209,62 +1211,53 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     this.lambdaOWL = lambda;
   }
 
-  private static double[] projectOWL(double[] x, double[] orthant, Function func) {
+  private static Set<Integer> initializeParamRange(Function func, double[] x) {
+    Set<Integer> paramRange;
     if (func instanceof HasRegularizerParamRange) {
-      Set<Integer> paramRange = ((HasRegularizerParamRange)func).getRegularizerParamRange(x);
-      for (int i : paramRange) {
-        if (x[i] * orthant[i] <= 0)
-          x[i] = 0;
+      paramRange = ((HasRegularizerParamRange)func).getRegularizerParamRange(x);
+    } else {
+      paramRange = Generics.newHashSet(x.length);
+      for (int i = 0; i < x.length; i++) {
+        paramRange.add(i);
       }
-	} else {
-	  for (int i=0; i!=x.length; ++i){
-	    if (x[i] * orthant[i] <= 0)
-          x[i] = 0;
-	  }
-	}
+    }
+    return paramRange;
+  }
+
+  private static double[] projectOWL(double[] x, double[] orthant, Function func) {
+    Set<Integer> paramRange = initializeParamRange(func, x);
+    for (int i : paramRange) {
+      if (x[i] * orthant[i] <= 0)
+        x[i] = 0;
+    }
     return x;
   }
 
   private static double l1NormOWL(double[] x, Function func) {
+    Set<Integer> paramRange = initializeParamRange(func, x);
     double sum = 0.0;
-    if (func instanceof HasRegularizerParamRange) {
-      Set<Integer> paramRange = ((HasRegularizerParamRange)func).getRegularizerParamRange(x);
-      for (int i: paramRange) {
-        sum += Math.abs(x[i]);
-      }
-    } else {
-      for (double v : x){
-        sum += Math.abs(v);
-      }
+    for (int i: paramRange) {
+      sum += Math.abs(x[i]);
     }
     return sum;
   }
 
   private static void constrainSearchDir(double[] dir, double[] fg, double[] x, Function func) {
-    if (func instanceof HasRegularizerParamRange) {
-      Set<Integer> paramRange = ((HasRegularizerParamRange)func).getRegularizerParamRange(x);
-      for (int i: paramRange) {
-        if (dir[i] * fg[i] >= 0.0) {
-          dir[i] = 0.0;
-        }
-      }
-    } else {
-      for (int i=0; i!=x.length; ++i){
-        if (dir[i] * fg[i] >= 0.0) {
-          dir[i] = 0.0;
-        }
+    Set<Integer> paramRange = initializeParamRange(func, x);
+    for (int i: paramRange) {
+      if (dir[i] * fg[i] >= 0.0) {
+        dir[i] = 0.0;
       }
     }
   }
 
   private double[] pseudoGradientOWL(double[] x, double[] grad, Function func) {
-    Set<Integer> paramRange = func instanceof HasRegularizerParamRange ?
-        ((HasRegularizerParamRange)func).getRegularizerParamRange(x) : null ; // initialized below
+    Set<Integer> paramRange = initializeParamRange(func, x); // initialized below
     double[] newGrad = new double[grad.length];
 
     // compute pseudo gradient
     for (int i = 0; i < x.length; i++) {
-      if (paramRange == null || paramRange.contains(i)) {
+      if (paramRange.contains(i)) {
         if (x[i] < 0.0) {
           // Differentiable
           newGrad[i] = grad[i] - lambdaOWL;
