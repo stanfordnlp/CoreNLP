@@ -748,13 +748,9 @@ public class CollectionUtils {
   /**
    * Split a list into numFolds (roughly) equally sized folds. The earlier folds
    * may have one more item in them than later folds.
-   * <br>
-   * The lists returned are subList()s of the original list.
-   * Therefore, don't try to modify the sublists, and don't modify the
-   * original list while the sublists are in use.
    */
-  public static <T> List<List<T>> partitionIntoFolds(List<T> values, int numFolds) {
-    List<List<T>> folds = Generics.newArrayList();
+  public static <T> List<Collection<T>> partitionIntoFolds(List<T> values, int numFolds) {
+    List<Collection<T>> folds = new ArrayList<Collection<T>>();
     int numValues = values.size();
     int foldSize = numValues / numFolds;
     int remainder = numValues % numFolds;
@@ -783,7 +779,7 @@ public class CollectionUtils {
    */
   public static <T> Collection<Pair<Collection<T>, Collection<T>>> trainTestFoldsForCV(List<T> values, int numFolds) {
     Collection<Pair<Collection<T>, Collection<T>>> trainTestPairs = new ArrayList<Pair<Collection<T>,Collection<T>>>();
-    List<List<T>> folds = partitionIntoFolds(values, numFolds);
+    List<Collection<T>> folds = partitionIntoFolds(values, numFolds);
     for (int splitNum = 0; splitNum < numFolds; splitNum++) {
       Collection<T> test = folds.get(splitNum);
       Collection<T> train = new ArrayList<T>();

@@ -1116,9 +1116,6 @@ public class SemanticGraph implements Serializable {
     return result;
   }
 
-  /**
-   * Returns the number of nodes in the graph
-   */
   public int size() {
     return this.vertexSet().size();
   }
