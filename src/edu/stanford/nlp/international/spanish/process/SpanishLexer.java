@@ -11182,7 +11182,7 @@ class SpanishLexer {
    *      WSJ tokenization in two cases.  Setting this improves compatibility
    *      for those cases.  They are: (i) When an acronym is followed by a
    *      sentence end, such as "Corp." at the end of a sentence, the PTB3
-   *      has tokens of "Corp" and ".", while by default PTBTokenzer duplicates
+   *      has tokens of "Corp" and ".", while by default PTBTokenizer duplicates
    *      the period returning tokens of "Corp." and ".", and (ii) PTBTokenizer
    *      will return numbers with a whole number and a fractional part like
    *      "5 7/8" as a single token (with a non-breaking space in the middle),
