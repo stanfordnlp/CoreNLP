@@ -11,7 +11,7 @@ import java.util.Iterator;
 /**
  * @author Sebastian Schuster
  */
-public class CoNLLUDocumentReaderITest extends TestCase {
+public class CoNLLUDocumentReaderTest extends TestCase {
 
     private static String MULTIWORD_TEST_INPUT =
             "1     I         I      PRON    PRP   Case=Nom|Number=Sing|Person=1     2   nsubj   _   _\n" +
