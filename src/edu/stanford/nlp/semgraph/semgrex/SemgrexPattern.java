@@ -7,7 +7,7 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.trees.conllu.CoNLLUDocumentReader;
+import edu.stanford.nlp.trees.CoNLLUDocumentReader;
 import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
