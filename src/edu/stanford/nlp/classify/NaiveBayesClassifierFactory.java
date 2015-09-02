@@ -39,6 +39,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.HashIndex;
+import edu.stanford.nlp.util.logging.Logging;
 
 import java.util.*;
 
@@ -189,7 +190,7 @@ public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F
       }
     }
     int totalFeatures = sumValues[numFeatures - 1] + numValues[numFeatures - 1] + 1;
-    System.err.println("total feats " + totalFeatures);
+    Logging.logger(this.getClass()).info("total feats " + totalFeatures);
     LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(totalFeatures, numClasses, newdata, labels, prior, sigma, 0.0);
     Minimizer<DiffFunction> min = new QNMinimizer();
     double[] argmin = min.minimize(objective, 1e-4, objective.initial());
