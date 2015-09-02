@@ -88,8 +88,8 @@ public class AdaptedGaussianPriorObjectiveFunction<L, F> extends LogConditionalO
       }
       value -= dV;
     }
-    //System.err.println("x length="+x.length);
-    //System.err.println("weights length="+weights.length);
+    //Logging.logger(this.getClass()).info("x length="+x.length);
+    //Logging.logger(this.getClass()).info("weights length="+weights.length);
     double[] newX = ArrayMath.pairwiseSubtract(x, weights);
     value += prior.compute(newX, derivative);
   }

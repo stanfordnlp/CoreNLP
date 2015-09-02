@@ -284,13 +284,17 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
    */
   @Override
   public <KEY extends Key<String>> String getString(Class<KEY> key) {
+    return this.getString(key, "");
+  }
+
+  @Override
+  public <KEY extends Key<String>> String getString(Class<KEY> key, String def) {
     String value = get(key);
     if (value == null) {
-      return "";
+      return def;
     }
     return value;
   }
-
 
   /**
    * {@inheritDoc}

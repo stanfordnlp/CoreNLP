@@ -3,6 +3,7 @@ package edu.stanford.nlp.classify.demo;
 import java.io.*;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.util.logging.Logging;
 
 
 /** This class converts the MNIST data set from Yann LeCun's distributed binary
@@ -25,7 +26,7 @@ public class MnistConverter {
 
   public static void main(String[] args) throws IOException {
     if (args.length != 4) {
-      System.err.println("Usage: MnistConverter dataFile labelFile outFile propsFile");
+      Logging.logger(MnistConverter.class).info("Usage: MnistConverter dataFile labelFile outFile propsFile");
       return;
     }
 
@@ -41,7 +42,7 @@ public class MnistConverter {
     int xNumImages = xStream.readInt();
     int yNumLabels = yStream.readInt();
     if (xNumImages != yNumLabels) throw new RuntimeException("x and y sizes don't match");
-    System.err.println("Images and label file both contain " + xNumImages + " entries.");
+    Logging.logger(MnistConverter.class).info("Images and label file both contain " + xNumImages + " entries.");
     int xRows = xStream.readInt();
     int xColumns = xStream.readInt();
     for (int i = 0; i < xNumImages; i++) {
@@ -57,7 +58,7 @@ public class MnistConverter {
       }
       oStream.println();
     }
-    System.err.println("Converted.");
+    Logging.logger(MnistConverter.class).info("Converted.");
     xStream.close();
     yStream.close();
     oStream.close();

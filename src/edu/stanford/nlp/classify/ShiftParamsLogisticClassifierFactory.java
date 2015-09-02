@@ -97,10 +97,5 @@ public class ShiftParamsLogisticClassifierFactory<L, F> implements ClassifierFac
     }
     return result;
   }
-  
-  @Override
-  @Deprecated
-  public MultinomialLogisticClassifier<L, F> trainClassifier(List<RVFDatum<L, F>> examples) {
-    return null;
-  }
+
 }
