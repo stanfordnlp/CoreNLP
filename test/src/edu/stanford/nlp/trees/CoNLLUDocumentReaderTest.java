@@ -1,9 +1,7 @@
-package edu.stanford.nlp.trees.conllu;
+package edu.stanford.nlp.trees;
 
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.trees.conllu.CoNLLUDocumentReader;
 import junit.framework.TestCase;
 
 import java.io.Reader;
@@ -13,7 +11,7 @@ import java.util.Iterator;
 /**
  * @author Sebastian Schuster
  */
-public class CoNLLUDocumentReaderWriterTest extends TestCase {
+public class CoNLLUDocumentReaderTest extends TestCase {
 
     private static String MULTIWORD_TEST_INPUT =
             "1     I         I      PRON    PRP   Case=Nom|Number=Sing|Person=1     2   nsubj   _   _\n" +
@@ -64,8 +62,6 @@ public class CoNLLUDocumentReaderWriterTest extends TestCase {
                 assertEquals("haven't", iw.originalText());
             }
         }
-        assertEquals(Integer.valueOf(3), sg.getNodeByIndex(2).get(CoreAnnotations.LineNumberAnnotation.class));
-
     }
 
     public void testComment() {
@@ -77,17 +73,8 @@ public class CoNLLUDocumentReaderWriterTest extends TestCase {
         assertNotNull(sg);
         assertFalse("The input only contains one dependency tree.", it.hasNext());
         assertEquals("[have/VBP nsubj>I/PRP neg>not/RB dobj>[clue/NN det>a/DT] punct>./.]", sg.toCompactString(true));
-        assertEquals(Integer.valueOf(3), sg.getNodeByIndex(1).get(CoreAnnotations.LineNumberAnnotation.class));
-
-        assertEquals(2, sg.getComments().size());
-        assertEquals("#comment line 1", sg.getComments().get(0));
-
     }
 
-
-    /**
-     * Tests whether extra dependencies are correctly parsed.
-     */
     public void testExtraDependencies() {
         CoNLLUDocumentReader reader = new CoNLLUDocumentReader();
         Reader stringReader = new StringReader(EXTRA_DEPS_TEST_INPUT);
@@ -99,37 +86,5 @@ public class CoNLLUDocumentReaderWriterTest extends TestCase {
         assertTrue(sg.containsEdge(sg.getNodeByIndex(4), sg.getNodeByIndex(1)));
         assertTrue(sg.containsEdge(sg.getNodeByIndex(2), sg.getNodeByIndex(7)));
         assertTrue(sg.containsEdge(sg.getNodeByIndex(4), sg.getNodeByIndex(7)));
-
-
     }
-
-
-    /**
-     * Tests whether reading a Semantic Graph and printing it
-     * is equal to the original input.
-     */
-    private void testSingleReadAndWrite(String input) {
-        String clean = input.replaceAll("[\\t ]+", "\t");
-
-        CoNLLUDocumentReader reader = new CoNLLUDocumentReader();
-        CoNLLUDocumentWriter writer = new CoNLLUDocumentWriter();
-
-        Reader stringReader = new StringReader(clean);
-        Iterator<SemanticGraph> it = reader.getIterator(stringReader);
-
-        SemanticGraph sg = it.next();
-
-        String output = writer.printSemanticGraph(sg);
-
-        assertEquals(clean, output);
-
-    }
-
-
-    public void testReadingAndWriting() {
-        testSingleReadAndWrite(COMMENT_TEST_INPUT);
-        testSingleReadAndWrite(EXTRA_DEPS_TEST_INPUT);
-        testSingleReadAndWrite(MULTIWORD_TEST_INPUT);
-    }
-
 }
