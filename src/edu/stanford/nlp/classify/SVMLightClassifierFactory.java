@@ -6,7 +6,6 @@ import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.ling.Datum;
 import edu.stanford.nlp.ling.RVFDatum;
 import edu.stanford.nlp.optimization.LineSearcher;
-import edu.stanford.nlp.util.logging.Logging;
 
 import java.io.*;
 import java.text.NumberFormat;
@@ -318,6 +317,12 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
     useSigmoid = oldUseSigmoid;
   }
 
+  @Deprecated
+  public SVMLightClassifier<L, F> trainClassifier(List<RVFDatum<L, F>> examples) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
   private boolean tuneHeldOut = false;
   private boolean tuneCV = false;
   private Scorer<L> scorer = new MultiClassAccuracyStats<L>();
@@ -440,7 +445,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
       // File and Model Data
       cmd = cmd + " " + dataFile.getAbsolutePath() + " " + modelFile.getAbsolutePath();
 
-      if (verbose) Logging.logger(this.getClass()).info("<< "+cmd+" >>");
+      if (verbose) System.err.println("<< "+cmd+" >>");
 
       /*Process p = Runtime.getRuntime().exec(cmd);
 
@@ -458,7 +463,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
         }
         String evalCmd = (multiclass ? svmStructClassify : (useSVMPerf ? svmPerfClassify : svmLightClassify)) + " "
                 + dataFile.getAbsolutePath() + " " + modelFile.getAbsolutePath() + " " + predictFile.getAbsolutePath();
-        if (verbose) Logging.logger(this.getClass()).info("<< " + evalCmd + " >>");
+        if (verbose) System.err.println("<< "+evalCmd+" >>");
         SystemUtils.run(new ProcessBuilder(whitespacePattern.split(evalCmd)),
                 new PrintWriter(System.err), new PrintWriter(System.err));
       }
