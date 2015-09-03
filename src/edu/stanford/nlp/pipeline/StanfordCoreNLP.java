@@ -760,6 +760,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     processFiles(base, files, numThreads, properties, this::annotate, createOutputter(properties, () -> AnnotationOutputter.getOptions(this)));
   }
 
+
   /**
    * Create an outputter to be passed into {@link StanfordCoreNLP#processFiles(String, Collection, int, Properties, BiConsumer, BiConsumer)}.
    *

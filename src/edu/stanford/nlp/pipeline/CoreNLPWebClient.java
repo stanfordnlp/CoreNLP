@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -28,9 +29,109 @@ import java.util.function.Consumer;
  */
 @SuppressWarnings("FieldCanBeLocal")
 public class CoreNLPWebClient extends AnnotationPipeline {
+  /**
+   * Information on how to connect to a backend
+   */
+  private static class Backend {
+    /** The protocol to connect to the server with. */
+    public final String protocol = "http";
+    /** The hostname of the server running the CoreNLP annotators */
+    public final String host;
+    /** The port of the server running the CoreNLP annotators */
+    public final int port;
+    public Backend(String host, int port) {
+      this.host = host;
+      this.port = port;
+    }
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof Backend)) return false;
+      Backend backend = (Backend) o;
+      return port == backend.port && protocol.equals(backend.protocol) && host.equals(backend.host);
+    }
+    @Override
+    public int hashCode() {
+      int result = protocol.hashCode();
+      result = 31 * result + host.hashCode();
+      result = 31 * result + port;
+      return result;
+    }
+  }
 
-  /** The protocol to connect to the server with. */
-  private final String protocol = "http";
+  private static class BackendScheduler extends Thread {
+    public final List<Backend> backends;
+
+    private final Queue<Backend> freeAnnotators;
+    private final Lock freeAnnotatorsLock = new ReentrantLock();
+    private final Condition newlyFree = freeAnnotatorsLock.newCondition();
+
+    private final Queue<BiConsumer<Backend, Consumer<Backend>>> queue;
+
+    private final Lock queueLock = new ReentrantLock();
+    private final Condition enqueued = queueLock.newCondition();
+
+    public BackendScheduler(List<Backend> backends) {
+      super();
+      setDaemon(true);
+      this.backends = backends;
+      this.freeAnnotators = new LinkedList<>(backends);
+      this.queue = new LinkedList<>();
+    }
+
+    @SuppressWarnings("InfiniteLoopStatement")
+    @Override
+    public void run() {
+      try {
+        while (true) {
+          // Wait for a request
+          queueLock.lock();
+          while (queue.isEmpty()) {
+            enqueued.await();
+          }
+          BiConsumer<Backend, Consumer<Backend>> request = queue.poll();
+          queueLock.unlock();
+          // We have a request
+
+          // Find a fre annotator
+          freeAnnotatorsLock.lock();
+          while (freeAnnotators.isEmpty()) {
+            newlyFree.await();
+          }
+          Backend annotator = freeAnnotators.poll();
+          freeAnnotatorsLock.unlock();
+          // We have an annotator
+
+          // Run the annotation
+          request.accept(annotator, freedAnnotator -> {
+            // ASYNC: we've freed this annotator
+            // add it back to the queue and register it as available
+            freeAnnotatorsLock.lock();
+            try {
+              freeAnnotators.add(freedAnnotator);
+              newlyFree.signal();
+            } finally {
+              freeAnnotatorsLock.unlock();
+            }
+          });
+          // Annotator is running (in parallel, most likely)
+        }
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    public void schedule(BiConsumer<Backend, Consumer<Backend>> annotate) {
+      queueLock.lock();
+      try {
+        queue.add(annotate);
+        enqueued.signal();
+      } finally {
+        queueLock.unlock();
+      }
+    }
+  }
+
   /** The path on the server to connect to. */
   private final String path = "";
   /** The properties file to annotate with. */
@@ -39,10 +140,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
   /** The properties file, serialized as JSON. */
   private final String propsAsJSON;
 
-  /** The hostname of the server running the CoreNLP annotators */
-  public final String host;
-  /** The port of the server running the CoreNLP annotators */
-  public final int port;
+  private final BackendScheduler scheduler;
 
   /**
    * The annotation serializer responsible for translating between the wire format
@@ -50,11 +148,10 @@ public class CoreNLPWebClient extends AnnotationPipeline {
    */
   private final ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer(true);
 
-  public CoreNLPWebClient(Properties properties, String host, int port) {
+  public CoreNLPWebClient(Properties properties, List<Backend> backends) {
     // Save the constructor variables
     this.properties = new Properties(properties);
-    this.host = host;
-    this.port = port;
+    this.scheduler = new BackendScheduler(backends);
 
     // Set required properties
     this.properties.setProperty("inputFormat", "serialized");
@@ -73,6 +170,10 @@ public class CoreNLPWebClient extends AnnotationPipeline {
     }
     // Create the JSON object
     this.propsAsJSON = "{ " + StringUtils.join(jsonProperties, ", ") + " }";
+  }
+
+  public CoreNLPWebClient(Properties properties, String host, int port) {
+    this(properties, Collections.singletonList(new Backend(host, port)));
   }
 
 
@@ -128,7 +229,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
    */
   @SuppressWarnings("unchecked")
   public void annotate(final Annotation annotation, final Consumer<Annotation> callback){
-    new Thread() {
+    scheduler.schedule( (Backend backend, Consumer<Backend> isFinishedCallback) -> new Thread() {
       @Override
       public void run() {
         try {
@@ -143,8 +244,8 @@ public class CoreNLPWebClient extends AnnotationPipeline {
 
           // 2. Create a connection
           // 2.1 Open a connection
-          URL serverURL = new URL(CoreNLPWebClient.this.protocol, CoreNLPWebClient.this.host,
-              CoreNLPWebClient.this.port,
+          URL serverURL = new URL(backend.protocol, backend.host,
+              backend.port,
               CoreNLPWebClient.this.path + "?" + queryParams);
           URLConnection connection = serverURL.openConnection();
           // 2.2 Set some protocol-independent properties
@@ -154,18 +255,18 @@ public class CoreNLPWebClient extends AnnotationPipeline {
           connection.setRequestProperty("Accept-Charset", "utf-8");
           connection.setRequestProperty("User-Agent", CoreNLPWebClient.class.getName());
           // 2.3 Set some protocol-dependent properties
-          switch (CoreNLPWebClient.this.protocol) {
+          switch (backend.protocol) {
             case "http":
               ((HttpURLConnection) connection).setRequestMethod("POST");
               break;
             default:
-              throw new IllegalStateException("Haven't implemented protocol: " + CoreNLPWebClient.this.protocol);
+              throw new IllegalStateException("Haven't implemented protocol: " + backend.protocol);
           }
 
           // 3. Fire off the request
           OutputStream os = connection.getOutputStream();
           os.write(unannotatedProto.toByteArray());
-          System.err.println("Wrote " + protoSize + " bytes to " + CoreNLPWebClient.this.host + ":" + CoreNLPWebClient.this.port);
+          System.err.println("Wrote " + protoSize + " bytes to " + backend.host + ":" + backend.port);
 
           // 4. Await a response
           InputStream input = connection.getInputStream();
@@ -180,10 +281,10 @@ public class CoreNLPWebClient extends AnnotationPipeline {
           // 6. Call the callback
           callback.accept(annotation);
         } catch (IOException e) {
-          throw new RuntimeIOException("Could not connect to server: " + host + ":" + port, e);
+          throw new RuntimeIOException("Could not connect to server: " + backend.host + ":" + backend.port, e);
         }
       }
-    }.start();
+    }.start());
   }
 
   /**
@@ -318,13 +419,11 @@ public class CoreNLPWebClient extends AnnotationPipeline {
     }
 
     // Check required properties
-    /*
     if (props.getProperty("backend") == null) {
       System.err.println("Usage: " + CoreNLPWebClient.class.getSimpleName() + " -backend <hostname:port,...> ...");
       System.err.println("Missing required option: -backend <hostname:port,...>");
       System.exit(1);
     }
-    */
 
     // Run the pipeline
     new CoreNLPWebClient(props, props.getProperty("host"), Integer.parseInt(props.getProperty("port"))).run();
