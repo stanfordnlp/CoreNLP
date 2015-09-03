@@ -544,10 +544,10 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
     //
     // extract all the properties from the command line
     // if cmd line is empty, set the properties to null. The processor will search for the properties file in the classpath
-//    if (args.length < 2) {
-//      System.err.println("Usage: " + StanfordCoreNLPClient.class.getSimpleName() + " -host <hostname> -port <port> ...");
-//      System.exit(1);
-//    }
+    if (args.length < 2) {
+      System.err.println("Usage: " + StanfordCoreNLPClient.class.getSimpleName() + " -host <hostname> -port <port> ...");
+      System.exit(1);
+    }
     Properties props = StringUtils.argsToProperties(args);
     boolean hasH = props.containsKey("h");
     boolean hasHelp = props.containsKey("help");
@@ -557,9 +557,16 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
       return;
     }
 
+    // Check required properties
+    if (props.getProperty("backend") == null) {
+      System.err.println("Usage: " + StanfordCoreNLPClient.class.getSimpleName() + " -backend <hostname:port,...> ...");
+      System.err.println("Missing required option: -backend <hostname:port,...>");
+      System.exit(1);
+    }
+
     // Create the backends
     List<Backend> backends = new ArrayList<>();
-    for (String spec : props.getProperty("backend", "104.131.152.210:80").split(",")) {
+    for (String spec : props.getProperty("backend").split(",")) {
       String host = spec.substring(0, spec.indexOf(":"));
       int port = Integer.parseInt(spec.substring(spec.indexOf(":") + 1));
       backends.add(new Backend(host, port));
