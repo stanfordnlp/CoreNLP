@@ -34,7 +34,6 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.logging.StanfordRedwoodConfiguration;
 
 import java.io.*;
@@ -44,8 +43,6 @@ import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
@@ -826,7 +823,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
   /**
    * A common method for processing a set of files, used in both {@link StanfordCoreNLP} as well as
-   * {@link CoreNLPWebClient}.
+   * {@link StanfordCoreNLPClient}.
    *
    * @param base The base input directory to process from.
    * @param files The files to process.

@@ -27,7 +27,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  * @author Gabor Angeli
  */
 @SuppressWarnings("FieldCanBeLocal")
-public class CoreNLPWebClient extends AnnotationPipeline {
+public class StanfordCoreNLPClient extends AnnotationPipeline {
 
   /**
    * Information on how to connect to a backend.
@@ -223,7 +223,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
    * @param properties The properties file, as would be passed to {@link StanfordCoreNLP}.
    * @param backends The backends to run on.
    */
-  public CoreNLPWebClient(Properties properties, List<Backend> backends) {
+  public StanfordCoreNLPClient(Properties properties, List<Backend> backends) {
     // Save the constructor variables
     this.properties = properties;
     Properties serverProperties = new Properties();
@@ -259,20 +259,20 @@ public class CoreNLPWebClient extends AnnotationPipeline {
   /**
    * Run on a single backend.
    *
-   * @see CoreNLPWebClient(Properties, List)
+   * @see StanfordCoreNLPClient (Properties, List)
    */
   @SuppressWarnings("unused")
-  public CoreNLPWebClient(Properties properties, String host, int port) {
+  public StanfordCoreNLPClient(Properties properties, String host, int port) {
     this(properties, Collections.singletonList(new Backend(host, port)));
   }
 
   /**
    * Run on a single backend, but with k threads on each backend.
    *
-   * @see CoreNLPWebClient(Properties, List)
+   * @see StanfordCoreNLPClient (Properties, List)
    */
   @SuppressWarnings("unused")
-  public CoreNLPWebClient(Properties properties, String host, int port, int threads) {
+  public StanfordCoreNLPClient(Properties properties, String host, int port, int threads) {
     this(properties, new ArrayList<Backend>() {{
       for (int i = 0; i < threads; ++i) {
         add(new Backend(host, port));
@@ -347,20 +347,20 @@ public class CoreNLPWebClient extends AnnotationPipeline {
 
           String queryParams = String.format(
               "properties=%s",
-              URLEncoder.encode(CoreNLPWebClient.this.propsAsJSON, "utf-8"));
+              URLEncoder.encode(StanfordCoreNLPClient.this.propsAsJSON, "utf-8"));
 
           // 2. Create a connection
           // 2.1 Open a connection
           URL serverURL = new URL(backend.protocol, backend.host,
               backend.port,
-              CoreNLPWebClient.this.path + "?" + queryParams);
+              StanfordCoreNLPClient.this.path + "?" + queryParams);
           URLConnection connection = serverURL.openConnection();
           // 2.2 Set some protocol-independent properties
           connection.setDoOutput(true);
           connection.setRequestProperty("Content-Type", "application/x-protobuf");
           connection.setRequestProperty("Content-Length", Integer.toString(message.length));
           connection.setRequestProperty("Accept-Charset", "utf-8");
-          connection.setRequestProperty("User-Agent", CoreNLPWebClient.class.getName());
+          connection.setRequestProperty("User-Agent", StanfordCoreNLPClient.class.getName());
           // 2.3 Set some protocol-dependent properties
           switch (backend.protocol) {
             case "http":
@@ -415,7 +415,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
    * @param pipeline The pipeline to be used
    * @throws IOException If IO problem with stdin
    */
-  private static void shell(CoreNLPWebClient pipeline) throws IOException {
+  private static void shell(StanfordCoreNLPClient pipeline) throws IOException {
     System.err.println("Entering interactive shell. Type q RETURN or EOF to quit.");
     final StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(pipeline.properties.getProperty("outputFormat", "text").toUpperCase());
     IOUtils.console("NLP> ", line -> {
@@ -545,7 +545,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
     // extract all the properties from the command line
     // if cmd line is empty, set the properties to null. The processor will search for the properties file in the classpath
     if (args.length < 2) {
-      System.err.println("Usage: " + CoreNLPWebClient.class.getSimpleName() + " -host <hostname> -port <port> ...");
+      System.err.println("Usage: " + StanfordCoreNLPClient.class.getSimpleName() + " -host <hostname> -port <port> ...");
       System.exit(1);
     }
     Properties props = StringUtils.argsToProperties(args);
@@ -559,7 +559,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
 
     // Check required properties
     if (props.getProperty("backend") == null) {
-      System.err.println("Usage: " + CoreNLPWebClient.class.getSimpleName() + " -backend <hostname:port,...> ...");
+      System.err.println("Usage: " + StanfordCoreNLPClient.class.getSimpleName() + " -backend <hostname:port,...> ...");
       System.err.println("Missing required option: -backend <hostname:port,...>");
       System.exit(1);
     }
@@ -573,7 +573,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
     }
 
     // Run the pipeline
-    CoreNLPWebClient client = new CoreNLPWebClient(props, backends);
+    StanfordCoreNLPClient client = new StanfordCoreNLPClient(props, backends);
     client.run();
     try {
       client.shutdown();  // In case anything is pending on the server
