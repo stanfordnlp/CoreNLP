@@ -3,7 +3,7 @@ package edu.stanford.nlp.international.spanish.process;
 import java.io.Reader;
 import java.util.logging.Logger;
 import java.util.Properties;
-import java.util.regex.Pattern;
+
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -82,7 +82,7 @@ import edu.stanford.nlp.process.LexedTokenFactory;
    *      WSJ tokenization in two cases.  Setting this improves compatibility
    *      for those cases.  They are: (i) When an acronym is followed by a
    *      sentence end, such as "Corp." at the end of a sentence, the PTB3
-   *      has tokens of "Corp" and ".", while by default PTBTokenizer duplicates
+   *      has tokens of "Corp" and ".", while by default PTBTokenzer duplicates
    *      the period returning tokens of "Corp." and ".", and (ii) PTBTokenizer
    *      will return numbers with a whole number and a fractional part like
    *      "5 7/8" as a single token (with a non-breaking space in the middle),
@@ -118,8 +118,6 @@ import edu.stanford.nlp.process.LexedTokenFactory;
         normalizeOtherBrackets = val;
         ptb3Ellipsis = val;
         unicodeEllipsis = val;
-        asciiQuotes = val;
-        asciiDash = val;
         ptb3Dashes = val;
       } else if ("normalizeAmpersandEntity".equals(key)) {
         normalizeAmpersandEntity = val;
@@ -133,10 +131,6 @@ import edu.stanford.nlp.process.LexedTokenFactory;
         ptb3Ellipsis = val;
       } else if ("unicodeEllipsis".equals(key)) {
         unicodeEllipsis = val;
-      } else if ("asciiQuotes".equals(key)) {
-        asciiQuotes = val;
-      } else if ("asciiDash".equals(key)) {
-          asciiDash = val;
       } else if ("ptb3Dashes".equals(key)) {
         ptb3Dashes = val;
       } else if ("escapeForwardSlashAsterisk".equals(key)) {
@@ -193,8 +187,6 @@ import edu.stanford.nlp.process.LexedTokenFactory;
   private boolean normalizeOtherBrackets;
   private boolean ptb3Ellipsis = true;
   private boolean unicodeEllipsis;
-  private boolean asciiQuotes;
-  private boolean asciiDash;
   private boolean ptb3Dashes;
   private boolean escapeForwardSlashAsterisk = false;
   private boolean strictTreebank3;
@@ -228,80 +220,44 @@ import edu.stanford.nlp.process.LexedTokenFactory;
   public static final String VB_PRON_ANNOTATION = "vb_pn_attached";
   public static final String CONTR_ANNOTATION = "contraction";
 
-  private static final Pattern NO_BREAK_SPACE = Pattern.compile("\u00A0");
-
-  private static final Pattern LEFT_PAREN_PATTERN = Pattern.compile("\\(");
-  private static final Pattern RIGHT_PAREN_PATTERN = Pattern.compile("\\)");
-
-  private static final Pattern ONE_FOURTH_PATTERN = Pattern.compile("\u00BC");
-  private static final Pattern ONE_HALF_PATTERN = Pattern.compile("\u00BD");
-  private static final Pattern THREE_FOURTHS_PATTERN = Pattern.compile("\u00BE");
-  private static final Pattern ONE_THIRD_PATTERN = Pattern.compile("\u2153");
-  private static final Pattern TWO_THIRDS_PATTERN = Pattern.compile("\u2154");
-
   private Object normalizeFractions(final String in) {
-      // Strip non-breaking space
-      String out = NO_BREAK_SPACE.matcher(in).replaceAll("");
-
-      if (normalizeFractions) {
-          if (escapeForwardSlashAsterisk) {
-              out = ONE_FOURTH_PATTERN.matcher(out).replaceAll("1\\\\/4");
-            out = ONE_HALF_PATTERN.matcher(out).replaceAll("1\\\\/2");
-            out = THREE_FOURTHS_PATTERN.matcher(out).replaceAll("3\\\\/4");
-            out = ONE_THIRD_PATTERN.matcher(out).replaceAll("1\\\\/3");
-            out = TWO_THIRDS_PATTERN.matcher(out).replaceAll("2\\\\/3");
-          } else {
-              out = ONE_FOURTH_PATTERN.matcher(out).replaceAll("1/4");
-            out = ONE_HALF_PATTERN.matcher(out).replaceAll("1/2");
-            out = THREE_FOURTHS_PATTERN.matcher(out).replaceAll("3/4");
-            out = ONE_THIRD_PATTERN.matcher(out).replaceAll("1/3");
-            out = TWO_THIRDS_PATTERN.matcher(out).replaceAll("2/3");
-          }
+    // Strip non-breaking space
+    String out = in.replaceAll("\u00A0", "");
+    if (normalizeFractions) {
+      if (escapeForwardSlashAsterisk) {
+        out = out.replaceAll("\u00BC", "1\\\\/4");
+        out = out.replaceAll("\u00BD", "1\\\\/2");
+        out = out.replaceAll("\u00BE", "3\\\\/4");
+        out = out.replaceAll("\u2153", "1\\\\/3");
+        out = out.replaceAll("\u2153", "2\\\\/3");
+     } else {
+        out = out.replaceAll("\u00BC", "1/4");
+        out = out.replaceAll("\u00BD", "1/2");
+        out = out.replaceAll("\u00BE", "3/4");
+        out = out.replaceAll("\u2153", "1/3");
+        out = out.replaceAll("\u2153", "2/3");
       }
-      return getNext(out, in);
+    }
+    return getNext(out, in);
   }
-
-  private static final Pattern softHyphen = Pattern.compile("\u00AD");
-
 
   /* Soft hyphens are used to indicate line breaks in
    * typesetting.
    */
   private static String removeSoftHyphens(String in) {
-      String result = softHyphen.matcher(in).replaceAll("");
-      return result.length() == 0 ? "-" : result;
-  }
-
-  private static final Pattern asciiSingleQuote = Pattern.compile("&apos;|[\u0091\u2018\u0092\u2019\u201A\u201B\u2039\u203A']");
-  private static final Pattern asciiDoubleQuote = Pattern.compile("&quot;|[\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]");
-
-  private static String  Shlomi2AsciiQuotes(String in) {
-      return asciiQuotes(in);
-  }
-  private static String  Shlomi3AsciiQuotes(String in) {
-      return asciiQuotes(in);
+    String result = in.replaceAll("\u00AD", "");
+    return result.length() == 0 ? "-" : result;
   }
 
   private static String asciiQuotes(String in) {
     String s1 = in;
-    s1 = asciiSingleQuote.matcher(s1).replaceAll("'");
-    s1 = asciiDoubleQuote.matcher(s1).replaceAll("\"");
+    s1 = s1.replaceAll("&apos;|[\u0091\u2018\u0092\u2019\u201A\u201B\u2039\u203A']", "'");
+    s1 = s1.replaceAll("''|&quot;|[\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]", "\"");
     return s1;
   }
 
-  private String handleQuotes(String in){
-      if (asciiQuotes) return asciiQuotes(in);
-      else return in;
-  }
-
-  private static final Pattern dashes = Pattern.compile("[_\u058A\u2010\u2011]");
   private static String asciiDash(String in) {
-      return dashes.matcher(in).replaceAll("-");
-  }
-
-  private String handleDash(String in) {
-      if (asciiDash) return asciiDash(in);
-      else return in;
+    return in.replaceAll("[_\u058A\u2010\u2011]","-");
   }
 
   private Object handleEllipsis(final String tok) {
@@ -329,13 +285,12 @@ import edu.stanford.nlp.process.LexedTokenFactory;
     }
     return s;
   }
-  private static final Pattern AMP_PATTERN = Pattern.compile("(?i:&amp;)");
 
   private static String normalizeAmp(final String in) {
-      return AMP_PATTERN.matcher(in).replaceAll("&");
+    return in.replaceAll("(?i:&amp;)", "&");
   }
 
-  private static String convertToEl(String l) {
+  private static String convertToEl(String l) {	
     if(Character.isLowerCase(l.charAt(0)))
 	return "e" + l;
     else
@@ -459,7 +414,7 @@ COMPOUND = {WORD}({HYPHEN}{WORD})+
 
 /* Spanish enclitic pronouns attached at the end of infinitive, gerund,
  * and imperative verbs should be split:
- *
+ * 
  * cómpremelos => cómpre + me + los (buy + me + it)
  * házmelo => ház + me + lo (do it (for) me)
  * Escribámosela => Escribámo + se + la (write her it)
@@ -474,7 +429,7 @@ VB_REG = {WORD}([aeiáéí]r|[áé]ndo|[aeáé]n?|[aeáé]mos?)
 VB_PREF = {VB_IRREG}|({VB_REG})
 
 /* Handles second person plural imperatives:
- *
+ * 
  * Sentaos => Senta + os (seat + yourselves)
  * Vestíos => Vestí + os (dress + yourselves)
  */
@@ -575,29 +530,34 @@ cannot			{ yypushback(3) ; return getNext(); }
             }
 
 {ORDINAL}/{SPACE}       { return getNext(); }
-{SPAMP}			{ return getNormalizedAmpNext(); }
+{SPAMP}			            { return getNormalizedAmpNext(); }
 {SPPUNC} |
 {TIMEXP}                { return getNext(); }
 
 {CONTRACTION}           { final String origTxt = yytext();
-                          return getNext(origTxt, origTxt, CONTR_ANNOTATION);}
+												  return getNext(origTxt, origTxt, CONTR_ANNOTATION);
+												}
 
 {VB_ATTACHED_PRON} |
 {VB_2PP_PRON}           { final String origTxt = yytext();
-                          return getNext(origTxt, origTxt, VB_PRON_ANNOTATION);}
+                          return getNext(origTxt, origTxt, VB_PRON_ANNOTATION); 
+												}
 
-{COMPOUND_NOSPLIT}      { final String origTxt = yytext();
-                          return getNext(handleQuotes(handleDash(origTxt)), origTxt);}
+{COMPOUND_NOSPLIT}      { final String origTxt = yytext(); 
+												  return getNext(asciiQuotes(asciiDash(origTxt)), origTxt); 
+											  }
 
 {COMPOUND}              { final String origTxt = yytext();
-                          return getNext(handleQuotes(handleDash(origTxt)), origTxt, COMPOUND_ANNOTATION);}
+                          return getNext(asciiQuotes(asciiDash(origTxt)), origTxt, COMPOUND_ANNOTATION);
+												}
 
 {NUM}/{UNIT}            { return getNext(); }
 
-{WORD2}                 { final String origTxt = yytext();
-                          return getNext (handleQuotes(origTxt), origTxt);}
+{WORD2}|{WORD3}         { final String origTxt = yytext();
+										      return getNext (asciiQuotes(origTxt), origTxt);
+											  }
 
-{WORD}|{WORD3}	        { return getNext(); }
+{WORD}			{ return getNext(); }
 
 {FULLURL} |
 {LIKELYURL}		{ String txt = yytext();
@@ -650,13 +610,13 @@ cannot			{ yypushback(3) ; return getNext(); }
 {ACRO}/{SPACENL}	{ return getNext(); }
 {DBLQUOT} |
 {QUOTES}		{ final String origTxt = yytext();
-                          return getNext(handleQuotes(origTxt), origTxt);
+                          return getNext(asciiQuotes(origTxt), origTxt);
 			}
 
 {PHONE}                 { String txt = yytext();
 			  if (normalizeParentheses) {
-                              txt = LEFT_PAREN_PATTERN.matcher(txt).replaceAll(openparen);
-                              txt = RIGHT_PAREN_PATTERN.matcher(txt).replaceAll(closeparen);
+			    txt = txt.replaceAll("\\(", openparen);
+			    txt = txt.replaceAll("\\)", closeparen);
 			  }
 			  return getNext(txt, yytext());
 			}
@@ -703,7 +663,7 @@ cannot			{ yypushback(3) ; return getNext(); }
 	            return getNext(ptbmdash, yytext());
                   } else {
 		    String origTxt = yytext();
-                    return getNext(handleDash(origTxt), origTxt);
+                    return getNext(asciiDash(origTxt), origTxt);
 		  }
 		}
 {LDOTS}		{ return handleEllipsis(yytext()); }

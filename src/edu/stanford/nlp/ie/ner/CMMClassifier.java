@@ -29,6 +29,7 @@ package edu.stanford.nlp.ie.ner;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -1278,9 +1279,10 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
 
   private static List<Pair<Pattern, Integer>> getThresholds(String filename) {
     try {
-      BufferedReader in = IOUtils.readerFromString(filename);
-      List<Pair<Pattern, Integer>> thresholds = new ArrayList<>();
-      for (String line; (line = in.readLine()) != null; ) {
+      BufferedReader in = new BufferedReader(new FileReader(filename));
+      List<Pair<Pattern, Integer>> thresholds = new ArrayList<Pair<Pattern, Integer>>();
+      String line;
+      while ((line = in.readLine()) != null) {
         int i = line.lastIndexOf(' ');
         Pattern p = Pattern.compile(line.substring(0, i));
         //System.err.println(":"+line.substring(0,i)+":");

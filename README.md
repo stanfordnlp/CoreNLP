@@ -11,7 +11,7 @@ You can find more explanation and documentation on [the Stanford CoreNLP homepag
 
 The most recent models associated with the code in the HEAD of this repository can be found [here](http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar).
 
-For information about making contributions to Stanford CoreNLP, see the file [CONTRIBUTING.md](CONTRIBUTING.md).
+For information about making contributions to Stanford CoreNLP, see the file `CONTRIBUTING.md`.
 
 Questions about CoreNLP can either be posted on StackOverflow with the tag [stanford-nlp](http://stackoverflow.com/questions/tagged/stanford-nlp), 
   or on the [mailing lists](http://nlp.stanford.edu/software/corenlp.shtml#Mail).

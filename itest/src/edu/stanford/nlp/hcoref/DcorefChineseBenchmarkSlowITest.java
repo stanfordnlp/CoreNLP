@@ -13,6 +13,7 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Run the dcoref system using the exact properties we distribute as
@@ -51,7 +52,7 @@ public class DcorefChineseBenchmarkSlowITest extends TestCase {
     System.err.println(props);
 
     CorefSystem.runCoref(corefArgs);
-
+    
 
     String actualResults = IOUtils.slurpFile(baseLogFile);
     return actualResults;
@@ -59,14 +60,14 @@ public class DcorefChineseBenchmarkSlowITest extends TestCase {
 
   private static final String MENTION_TP = "Mention TP";
   private static final String MENTION_F1 = "Mention F1";
-  private static final String MUC_TP = "MUC TP";
-  private static final String MUC_F1 = "MUC F1";
-  private static final String BCUBED_TP = "Bcubed TP";
-  private static final String BCUBED_F1 = "Bcubed F1";
-  private static final String CEAFM_TP = "CEAFm TP";
-  private static final String CEAFM_F1 = "CEAFm F1";
-  private static final String CEAFE_TP = "CEAFe TP";
-  private static final String CEAFE_F1 = "CEAFe F1";
+  private static final String MUC_TP = "Mention TP";
+  private static final String MUC_F1 = "Mention F1";
+  private static final String BCUBED_TP = "Mention TP";
+  private static final String BCUBED_F1 = "Mention F1";
+  private static final String CEAFM_TP = "Mention TP";
+  private static final String CEAFM_F1 = "Mention F1";
+  private static final String CEAFE_TP = "Mention TP";
+  private static final String CEAFE_F1 = "Mention F1";
   private static final String BLANC_F1 = "BLANC F1";
   private static final String CONLL_SCORE = "CoNLL score";
 
@@ -85,28 +86,21 @@ public class DcorefChineseBenchmarkSlowITest extends TestCase {
   private static final Pattern CONLL_PATTERN =
           Pattern.compile("Final conll score .* = ((?:\\d|\\.)+).*");
 
-  private static void setAll(Counter<String> lowRes, Counter<String> highRes, Counter<String> expRes, String key, double val){
+  private void setAll(Counter<String> lowRes,Counter<String> highRes,Counter<String> expRes,String key,double val){
     lowRes.setCount(key, val);
     highRes.setCount(key, val);
     expRes.setCount(key, val);
   }
-
-  private static void setLowHighExpected(Counter<String> lowRes, Counter<String> highRes, Counter<String> expRes, String key,
-                                         double lowVal, double highVal, double expVal) {
-    lowRes.setCount(key, lowVal);
-    highRes.setCount(key, highVal);
-    expRes.setCount(key, expVal);
-  }
-
+  
   public void testChineseDcoref() throws Exception {
     Counter<String> lowResults = new ClassicCounter<String>();
     Counter<String> highResults = new ClassicCounter<String>();
     Counter<String> expectedResults = new ClassicCounter<String>();
 
-
+    
     setAll(lowResults,highResults,expectedResults,MENTION_TP,12370);
     setAll(lowResults,highResults,expectedResults,MENTION_F1,55.6);
-
+    
     setAll(lowResults,highResults,expectedResults,MUC_TP,5965);
     setAll(lowResults,highResults,expectedResults,MUC_F1,57.93);
 
@@ -114,13 +108,13 @@ public class DcorefChineseBenchmarkSlowITest extends TestCase {
     setAll(lowResults,highResults,expectedResults,BCUBED_F1,51.3);
 
     setAll(lowResults,highResults,expectedResults,CEAFM_TP,8064);
-    setAll(lowResults, highResults, expectedResults, CEAFM_F1, 54.79);
+    setAll(lowResults,highResults,expectedResults,CEAFM_F1,54.79);
 
-    setAll(lowResults, highResults, expectedResults, CEAFE_TP, 2231.44);
-    setLowHighExpected(lowResults, highResults, expectedResults, CEAFE_F1, 50.45, 50.47, 50.47);
+    setAll(lowResults,highResults,expectedResults,CEAFE_TP,2231.44);
+    setAll(lowResults,highResults,expectedResults,CEAFE_F1,50.47);
 
     setAll(lowResults,highResults,expectedResults,BLANC_F1,45.87);
-
+    
     setAll(lowResults,highResults,expectedResults,CONLL_SCORE,53.23);
 
 

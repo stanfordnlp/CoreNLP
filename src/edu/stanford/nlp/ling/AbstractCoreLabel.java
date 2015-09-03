@@ -38,6 +38,4 @@ public interface AbstractCoreLabel extends Label, HasWord, HasIndex, HasTag, Has
    */
   public <KEY extends Key<String>> String getString(Class<KEY> key);
 
-  public <KEY extends Key<String>> String getString(Class<KEY> key, String def);
-
 }

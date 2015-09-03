@@ -9,9 +9,11 @@ import edu.stanford.nlp.util.Pair;
 
 import java.io.*;
 import java.net.InetSocketAddress;
-import java.net.URI;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.WeakHashMap;
 
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
@@ -20,10 +22,8 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  *
  */
 public class StanfordCoreNLPServer implements Runnable {
-  protected static int DEFAULT_PORT = 9000;
-
   protected HttpServer server;
-  protected int serverPort;
+  protected int serverPort = 9000;
 
   public static int HTTP_OK = 200;
   public static int HTTP_BAD_INPUT = 400;
@@ -31,10 +31,9 @@ public class StanfordCoreNLPServer implements Runnable {
   public final Properties defaultProps;
 
 
-  public StanfordCoreNLPServer(int port) {
-    serverPort = port;
-
+  public StanfordCoreNLPServer() {
     defaultProps = new Properties();
+//        defaultProps.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
     defaultProps.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse");
     defaultProps.setProperty("inputFormat", "text");
     defaultProps.setProperty("outputFormat", "json");
@@ -160,7 +159,6 @@ public class StanfordCoreNLPServer implements Runnable {
       Properties props;
       Annotation ann;
       StanfordCoreNLP.OutputFormat of;
-      log("Received message from " + httpExchange.getRemoteAddress());
       try {
         props = getProperties(httpExchange);
         ann = getDocument(props, httpExchange);
@@ -203,30 +201,18 @@ public class StanfordCoreNLPServer implements Runnable {
       }
     }
 
-    Map<String, String> getURLParams(URI uri) {
-      if (uri.getQuery() != null) {
-        Map<String, String> urlParams = new HashMap<>();
-
-        String query = uri.getQuery();
-        String[] queryFields = query.split("&");
-        for (String queryField : queryFields) {
-          String[] keyValue = queryField.split("=");
-          urlParams.put(keyValue[0], keyValue[1]);
-        }
-        return urlParams;
-      } else {
-        return Collections.emptyMap();
-      }
-    }
-
     private Properties getProperties(HttpExchange httpExchange) throws UnsupportedEncodingException {
-      // Load the default properties
+      String query = URLDecoder.decode(httpExchange.getRequestURI().getRawQuery(), "UTF-8");
+      String[] queryFields = query.split("&");
+      Map<String, String> urlParams = new HashMap<>();
+      for (String queryField : queryFields) {
+        String[] keyValue = queryField.split("=");
+        urlParams.put(keyValue[0], keyValue[1]);
+      }
+
       Properties props = new Properties();
       defaultProps.entrySet().stream()
           .forEach(entry -> props.setProperty(entry.getKey().toString(), entry.getValue().toString()));
-
-      // Try to get more properties from query string.
-      Map<String, String> urlParams = getURLParams(httpExchange.getRequestURI());
       if (urlParams.containsKey("properties")) {
         // Parse properties
         parseJSONMap(urlParams.get("properties")).entrySet()
@@ -268,11 +254,10 @@ public class StanfordCoreNLPServer implements Runnable {
   }
 
   public static void main(String[] args) {
-    int port = DEFAULT_PORT;
-    if(args.length > 0) {
-      port = Integer.parseInt(args[0]);
+    StanfordCoreNLPServer server = new StanfordCoreNLPServer();
+    if (args.length > 0) {
+      server.serverPort = Integer.parseInt(args[0]);
     }
-    StanfordCoreNLPServer server = new StanfordCoreNLPServer(port);
     server.run();
   }
 }

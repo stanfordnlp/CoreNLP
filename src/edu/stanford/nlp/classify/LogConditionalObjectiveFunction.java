@@ -959,7 +959,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
     value += ((double) batch.length)/((double) data.length)*prior.compute(x, tmp);
 
     //System.err.print(System.currentTimeMillis() - curTime + " - ");
-    //Logging.logger(this.getClass()).info("");
+    //System.err.println("");
   }
 
   private class RVFDerivativeCalculation implements Runnable {
