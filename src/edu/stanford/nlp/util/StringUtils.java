@@ -2501,7 +2501,9 @@ public class StringUtils {
         continue;
       } else if(chars[i] == '\\'){
         //(case: escaped character)
-        if(i == chars.length - 1) throw new IllegalArgumentException("Last character of encoded pair is escape character: " + encoded);
+        if(i == chars.length - 1) {
+          throw new IllegalArgumentException("Last character of encoded pair is escape character: " + encoded);
+        }
         current.append(chars[i+1]);
         i += 1;
       } else if(quoteCloseChar != 0){
@@ -2521,7 +2523,9 @@ public class StringUtils {
           current.append("");  // do nothing
         } else if(chars[i] == ',' || chars[i] == ';' || chars[i] == '\t' || chars[i] == '\n'){
           // case: end a value
-          if (onKey) { throw new IllegalArgumentException("Encountered key without value"); }
+          if (onKey) {
+            throw new IllegalArgumentException("Encountered key without value");
+          }
           if (current.length() > 0) {
             value = current.toString().trim();
           }
@@ -2530,13 +2534,25 @@ public class StringUtils {
           map.put(key, value);  // <- add value
         } else if((chars[i] == '-' || chars[i] == '=') && (i < chars.length - 1 && chars[i + 1] == '>')) {
           // case: end a key
-          if (!onKey) { throw new IllegalArgumentException("Encountered a value without a key"); }
+          if (!onKey) {
+            throw new IllegalArgumentException("Encountered a value without a key");
+          }
           if (current.length() > 0) {
             key = current.toString().trim();
           }
           current = new StringBuilder();
           onKey = false;
           i += 1; // skip '>' character
+        } else if (chars[i] == ':') {
+          // case: end a key
+          if (!onKey) {
+            throw new IllegalArgumentException("Encountered a value without a key");
+          }
+          if (current.length() > 0) {
+            key = current.toString().trim();
+          }
+          current = new StringBuilder();
+          onKey = false;
         } else {
           current.append(chars[i]);
         }
