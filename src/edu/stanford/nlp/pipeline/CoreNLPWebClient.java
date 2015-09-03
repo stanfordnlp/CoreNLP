@@ -225,7 +225,12 @@ public class CoreNLPWebClient extends AnnotationPipeline {
    */
   public CoreNLPWebClient(Properties properties, List<Backend> backends) {
     // Save the constructor variables
-    this.properties = new Properties(properties);
+    this.properties = new Properties();
+    Enumeration<?> keys = properties.propertyNames();
+    while (keys.hasMoreElements()) {
+      String key = keys.nextElement().toString();
+      this.properties.setProperty(key, properties.getProperty(key));
+    }
     this.scheduler = new BackendScheduler(backends);
 
     // Set required properties
@@ -236,7 +241,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
 
     // Create a list of all the properties, as JSON map elements
     List<String> jsonProperties = new ArrayList<>();
-    Enumeration<?> keys = this.properties.propertyNames();
+    keys = this.properties.propertyNames();
     while (keys.hasMoreElements()) {
       Object key = keys.nextElement();
       jsonProperties.add(
