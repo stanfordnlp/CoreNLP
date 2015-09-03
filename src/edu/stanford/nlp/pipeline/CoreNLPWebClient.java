@@ -259,6 +259,18 @@ public class CoreNLPWebClient extends AnnotationPipeline {
     this(properties, Collections.singletonList(new Backend(host, port)));
   }
 
+  /**
+   * Run on a single backend, but with k threads on each backend.
+   *
+   * @see CoreNLPWebClient(Properties, List)
+   */
+  public CoreNLPWebClient(Properties properties, String host, int port, int threads) {
+    this(properties, new ArrayList<Backend>() {{
+      for (int i = 0; i < threads; ++i) {
+        add(new Backend(host, port));
+      }
+    }});
+  }
 
   /**
    * {@inheritDoc}
@@ -549,5 +561,3 @@ public class CoreNLPWebClient extends AnnotationPipeline {
     } catch (InterruptedException ignored) { }
   }
 }
-
-
