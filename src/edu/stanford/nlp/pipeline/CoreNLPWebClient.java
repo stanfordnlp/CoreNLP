@@ -1,12 +1,8 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.io.FileSequentialCollection;
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.logging.StanfordRedwoodConfiguration;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -34,7 +30,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
   /** The path on the server to connect to. */
   private final String path = "";
   /** The properties file to annotate with. */
-  private final Properties properties;
+  private final Properties props;
   /** The properties file, serialized as JSON. */
   private final String propsAsJSON;
 
@@ -49,26 +45,26 @@ public class CoreNLPWebClient extends AnnotationPipeline {
    */
   private final ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer(true);
 
-  public CoreNLPWebClient(Properties properties, String host, int port) {
+  public CoreNLPWebClient(Properties props, String host, int port) {
     // Save the constructor variables
-    this.properties = new Properties(properties);
+    this.props = new Properties(props);
     this.host = host;
     this.port = port;
 
     // Set required properties
-    this.properties.setProperty("inputFormat", "serialized");
-    this.properties.setProperty("outputFormat", "serialized");
-    this.properties.setProperty("inputSerializer", ProtobufAnnotationSerializer.class.getName());
-    this.properties.setProperty("outputSerializer", ProtobufAnnotationSerializer.class.getName());
+    this.props.setProperty("inputFormat", "serialized");
+    this.props.setProperty("outputFormat", "serialized");
+    this.props.setProperty("inputSerializer", ProtobufAnnotationSerializer.class.getName());
+    this.props.setProperty("outputSerializer", ProtobufAnnotationSerializer.class.getName());
 
     // Create a list of all the properties, as JSON map elements
     List<String> jsonProperties = new ArrayList<>();
-    Enumeration<?> keys = this.properties.propertyNames();
+    Enumeration<?> keys = this.props.propertyNames();
     while (keys.hasMoreElements()) {
       Object key = keys.nextElement();
       jsonProperties.add(
           "\"" + JSONOutputter.cleanJSON(key.toString()) + "\": \"" +
-              JSONOutputter.cleanJSON(this.properties.get(key).toString()) + "\"");
+              JSONOutputter.cleanJSON(this.props.get(key).toString()) + "\"");
     }
     // Create the JSON object
     this.propsAsJSON = "{ " + StringUtils.join(jsonProperties, ", ") + " }";
@@ -177,154 +173,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
     } catch (IOException e) {
       throw new RuntimeIOException("Could not connect to server: " + host + ":" + port, e);
     }
-  }
 
-  /**
-   * Runs the entire pipeline on the content of the given text passed in.
-   * @param text The text to process
-   * @return An Annotation object containing the output of all annotators
-   */
-  public Annotation process(String text) {
-    Annotation annotation = new Annotation(text);
-    annotate(annotation);
-    return annotation;
-  }
-
-
-  /**
-   * Runs an interactive shell where input text is processed with the given pipeline.
-   *
-   * @param pipeline The pipeline to be used
-   * @throws IOException If IO problem with stdin
-   */
-  private static void shell(CoreNLPWebClient pipeline) throws IOException {
-    System.err.println("Entering interactive shell. Type q RETURN or EOF to quit.");
-    final StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(pipeline.properties.getProperty("outputFormat", "text").toUpperCase());
-    IOUtils.console("NLP> ", line -> {
-      if (line.length() > 0) {
-        Annotation anno = pipeline.process(line);
-        try {
-          switch (outputFormat) {
-            case XML:
-              new XMLOutputter().print(anno, System.out);
-              break;
-            case JSON:
-              new JSONOutputter().print(anno, System.out);
-              System.out.println();
-              break;
-            case CONLL:
-              new CoNLLOutputter().print(anno, System.out);
-              System.out.println();
-              break;
-            case TEXT:
-              new TextOutputter().print(anno, System.out);
-              break;
-            default:
-              throw new IllegalArgumentException("Cannot output in format " + outputFormat + " from the interactive shell");
-          }
-        } catch (IOException e) {
-          throw new RuntimeIOException(e);
-        }
-      }
-    });
-  }
-
-  /**
-   * The implementation of what to run on a command-line call of CoreNLPWebClient
-   *
-   * @throws IOException
-   */
-  public void run() throws IOException {
-    StanfordRedwoodConfiguration.minimalSetup();
-
-    //
-    // Process one file or a directory of files
-    //
-    if (properties.containsKey("file") || properties.containsKey("textFile")) {
-      String fileName = properties.getProperty("file");
-      if (fileName == null) {
-        fileName = properties.getProperty("textFile");
-      }
-      Collection<File> files = new FileSequentialCollection(new File(fileName), properties.getProperty("extension"), true);
-      StanfordCoreNLP.processFiles(null, files, 1, properties, this::annotate,
-          StanfordCoreNLP.createOutputter(properties, AnnotationOutputter.Options::new));
-    }
-
-    //
-    // Process a list of files
-    //
-    else if (properties.containsKey("filelist")){
-      String fileName = properties.getProperty("filelist");
-      Collection<File> inputfiles = StanfordCoreNLP.readFileList(fileName);
-      Collection<File> files = new ArrayList<>(inputfiles.size());
-      for (File file:inputfiles) {
-        if (file.isDirectory()) {
-          files.addAll(new FileSequentialCollection(new File(fileName), properties.getProperty("extension"), true));
-        } else {
-          files.add(file);
-        }
-      }
-      StanfordCoreNLP.processFiles(null, files, 1, properties, this::annotate,
-          StanfordCoreNLP.createOutputter(properties, AnnotationOutputter.Options::new));
-    }
-
-    //
-    // Run the interactive shell
-    //
-    else {
-      shell(this);
-    }
-  }
-
-
-  /**
-   * This can be used just for testing or for command-line text processing.
-   * This runs the pipeline you specify on the
-   * text in the file that you specify and sends some results to stdout.
-   * The current code in this main method assumes that each line of the file
-   * is to be processed separately as a single sentence.
-   * <p>
-   * Example usage:<br>
-   * java -mx6g edu.stanford.nlp.pipeline.StanfordCoreNLP properties
-   *
-   * @param args List of required properties
-   * @throws java.io.IOException If IO problem
-   * @throws ClassNotFoundException If class loading problem
-   */
-  public static void main(String[] args) throws IOException, ClassNotFoundException {
-    //
-    // process the arguments
-    //
-    // extract all the properties from the command line
-    // if cmd line is empty, set the properties to null. The processor will search for the properties file in the classpath
-    if (args.length < 4) {
-      System.err.println("Usage: " + CoreNLPWebClient.class.getSimpleName() + " -host <hostname> -port <port> ...");
-      System.exit(1);
-    }
-    Properties props = StringUtils.argsToProperties(args);
-    boolean hasH = props.containsKey("h");
-    boolean hasHelp = props.containsKey("help");
-    if (hasH || hasHelp) {
-      String helpValue = hasH ? props.getProperty("h") : props.getProperty("help");
-      StanfordCoreNLP.printHelp(System.err, helpValue);
-      return;
-    }
-
-    // Check required properties
-    if (props.getProperty("host") == null) {
-      System.err.println("Usage: " + CoreNLPWebClient.class.getSimpleName() + " -host <hostname> -port <port> ...");
-      System.err.println("Missing required option: -host <hostname>");
-      System.exit(1);
-    }
-    if (props.getProperty("port") == null || !props.getProperty("port").matches("[0-9]+")) {
-      System.err.println("Usage: " + CoreNLPWebClient.class.getSimpleName() + " -host <hostname> -port <port> ...");
-      System.err.println("Missing required option: -port <port_number>");
-      System.exit(1);
-    }
-
-
-    // Run the pipeline
-    new CoreNLPWebClient(props, props.getProperty("host"), Integer.parseInt(props.getProperty("port"))).run();
   }
 }
 

@@ -2048,26 +2048,20 @@ public class IOUtils {
    * @param callback The function to run for every line of input.
    * @throws IOException Thrown from the underlying input stream.
    */
-    public static void console(String prompt, Consumer<String> callback) throws IOException {
+  public static void console(Consumer<String> callback) throws IOException {
     BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     String line;
-    System.out.print(prompt);
+    System.out.print("> ");
     while ( (line = reader.readLine()) != null) {
       switch (line.toLowerCase()) {
         case "exit":
         case "quit":
-        case "q":
           return;
         default:
           callback.accept(line);
       }
-      System.out.print(prompt);
+      System.out.print("> ");
     }
-  }
-
-  /** @see IOUtils#console(String, Consumer) */
-  public static void console(Consumer<String> callback) throws IOException {
-    console("> ", callback);
   }
 
 }
