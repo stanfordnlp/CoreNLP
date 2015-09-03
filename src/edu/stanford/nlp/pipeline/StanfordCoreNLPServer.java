@@ -241,6 +241,7 @@ public class StanfordCoreNLPServer implements Runnable {
   @Override
   public void run() {
     try {
+
       server = HttpServer.create(new InetSocketAddress(serverPort), 0); // 0 is the default 'backlog'
       server.createContext("/ping", new PingHandler());
       server.createContext("/", new SimpleAnnotateHandler(defaultProps));
@@ -254,6 +255,9 @@ public class StanfordCoreNLPServer implements Runnable {
 
   public static void main(String[] args) {
     StanfordCoreNLPServer server = new StanfordCoreNLPServer();
+    if (args.length > 0) {
+      server.serverPort = Integer.parseInt(args[0]);
+    }
     server.run();
   }
 }
