@@ -35,7 +35,6 @@ public class StanfordCoreNLPServer implements Runnable {
     serverPort = port;
 
     defaultProps = new Properties();
-//        defaultProps.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
     defaultProps.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse");
     defaultProps.setProperty("inputFormat", "text");
     defaultProps.setProperty("outputFormat", "json");
@@ -256,6 +255,7 @@ public class StanfordCoreNLPServer implements Runnable {
   @Override
   public void run() {
     try {
+
       server = HttpServer.create(new InetSocketAddress(serverPort), 0); // 0 is the default 'backlog'
       server.createContext("/ping", new PingHandler());
       server.createContext("/", new SimpleAnnotateHandler(defaultProps));
