@@ -433,27 +433,23 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
 
   public void annotate(final Annotation annotation, final Consumer<Annotation> callback){
-    if (PropertiesUtils.getInt(properties, "threads", 1) == 1) {
-      annotate(annotation);
-    } else {
-      try {
-        availableProcessors.acquire();
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      }
-      new Thread() {
-        @Override
-        public void run() {
-          try {
-            annotate(annotation);
-          } catch (Throwable t) {
-            annotation.set(CoreAnnotations.ExceptionAnnotation.class, t);
-          }
-          callback.accept(annotation);
-          availableProcessors.release();
-        }
-      }.start();
+    try {
+      availableProcessors.acquire();
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
     }
+    new Thread() {
+      @Override
+      public void run() {
+        try {
+          annotate(annotation);
+        } catch (Throwable t) {
+          annotation.set(CoreAnnotations.ExceptionAnnotation.class, t);
+        }
+        callback.accept(annotation);
+        availableProcessors.release();
+      }
+    }.start();
   }
 
 
@@ -761,21 +757,19 @@ public class StanfordCoreNLP extends AnnotationPipeline {
    * @throws IOException
    */
   public void processFiles(String base, final Collection<File> files, int numThreads) throws IOException {
-    AnnotationOutputter.Options options = AnnotationOutputter.getOptions(this);
-    StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(properties.getProperty("outputFormat", "text").toUpperCase());
-    processFiles(base, files, numThreads, properties, this::annotate, createOutputter(properties, options), outputFormat);
+    processFiles(base, files, numThreads, properties, this::annotate, createOutputter(properties, () -> AnnotationOutputter.getOptions(this)));
   }
 
 
   /**
-   * Create an outputter to be passed into {@link StanfordCoreNLP#processFiles(String, Collection, int, Properties, BiConsumer, BiConsumer, OutputFormat)}.
+   * Create an outputter to be passed into {@link StanfordCoreNLP#processFiles(String, Collection, int, Properties, BiConsumer, BiConsumer)}.
    *
    * @param properties The properties file to use.
-   * @param outputOptions The means of creating output options
+   * @param mkOptions The means of creating output options
    *
    * @return A consumer that can be passed into the processFiles method.
    */
-  protected static BiConsumer<Annotation, OutputStream> createOutputter(Properties properties, AnnotationOutputter.Options outputOptions) {
+  protected static BiConsumer<Annotation, OutputStream> createOutputter(Properties properties, Supplier<AnnotationOutputter.Options> mkOptions) {
     final OutputFormat outputFormat =
         OutputFormat.valueOf(properties.getProperty("outputFormat", DEFAULT_OUTPUT_FORMAT).toUpperCase());
 
@@ -790,22 +784,22 @@ public class StanfordCoreNLP extends AnnotationPipeline {
             try {
               Class clazz = Class.forName("edu.stanford.nlp.pipeline.XMLOutputter");
               Method method = clazz.getMethod("xmlPrint", Annotation.class, OutputStream.class, StanfordCoreNLP.class);
-              method.invoke(null, annotation, fos, outputOptions);
+              method.invoke(null, annotation, fos, mkOptions.get());
             } catch (NoSuchMethodException | IllegalAccessException | ClassNotFoundException | InvocationTargetException e) {
               throw new RuntimeException(e);
             }
             break;
           }
           case JSON: {
-            new JSONOutputter().print(annotation, fos, outputOptions);
+            new JSONOutputter().print(annotation, fos, mkOptions.get());
             break;
           }
           case CONLL: {
-            new CoNLLOutputter().print(annotation, fos, outputOptions);
+            new CoNLLOutputter().print(annotation, fos, mkOptions.get());
             break;
           }
           case TEXT: {
-            new TextOutputter().print(annotation, fos, outputOptions);
+            new TextOutputter().print(annotation, fos, mkOptions.get());
             break;
           }
           case SERIALIZED: {
@@ -839,8 +833,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
    */
   protected static void processFiles(String base, final Collection<File> files, int numThreads,
                                      Properties properties, BiConsumer<Annotation, Consumer<Annotation>> annotate,
-                                     BiConsumer<Annotation, OutputStream> print,
-                                     OutputFormat outputFormat) throws IOException {
+                                     BiConsumer<Annotation, OutputStream> print) throws IOException {
     List<Runnable> toRun = new LinkedList<Runnable>();
 
     // Process properties here
@@ -863,17 +856,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     final String inputSerializerClass = properties.getProperty("inputSerializer", serializerClass);
     final String inputSerializerName = (serializerClass.equals(inputSerializerClass))? "serializer":"inputSerializer";
 
-    String defaultExtension;
-    switch (outputFormat) {
-      case XML: defaultExtension = ".xml"; break;
-      case JSON: defaultExtension = ".json"; break;
-      case CONLL: defaultExtension = ".conll"; break;
-      case TEXT: defaultExtension = ".out"; break;
-      case SERIALIZED: defaultExtension = ".ser.gz"; break;
-      default: throw new IllegalArgumentException("Unknown output format " + outputFormat);
-    }
-
-    final String extension = properties.getProperty("outputExtension", defaultExtension);
     final boolean replaceExtension = Boolean.parseBoolean(properties.getProperty("replaceExtension", "false"));
     final boolean continueOnAnnotateError = Boolean.parseBoolean(properties.getProperty("continueOnAnnotateError", "false"));
 
@@ -912,10 +894,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         if (lastDot > 0) {
           outputFilename = outputFilename.substring(0, lastDot);
         }
-      }
-      // ensure we don't make filenames with doubled extensions like .xml.xml
-      if (!outputFilename.endsWith(extension)) {
-        outputFilename += extension;
       }
       // normalize filename for the upcoming comparison
       outputFilename = new File(outputFilename).getCanonicalPath();
@@ -980,7 +958,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         //(read file)
         if (annotation == null) {
           String encoding = properties.getProperty("encoding", "UTF-8");
-          String text = IOUtils.slurpFile(file.getAbsoluteFile(), encoding);
+          String text = IOUtils.slurpFile(file, encoding);
           annotation = new Annotation(text);
         }
 

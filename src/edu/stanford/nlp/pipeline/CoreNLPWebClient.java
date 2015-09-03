@@ -29,17 +29,8 @@ import java.util.function.Consumer;
  */
 @SuppressWarnings("FieldCanBeLocal")
 public class CoreNLPWebClient extends AnnotationPipeline {
-
   /**
-   * Information on how to connect to a backend.
-   * The semantics of one of these objects is as follows:
-   * <ul>
-   *   <li>It should define a hostname and port to connect to.</li>
-   *   <li>This represents ONE thread on the remote server. The client should
-   *       treat it as such.</li>
-   *   <li>Two backends that are .equals() point to the same endpoint, but there can be
-   *       multiple of them if we want to run multiple threads on that endpoint.</li>
-   * </ul>
+   * Information on how to connect to a backend
    */
   private static class Backend {
     /** The protocol to connect to the server with. */
@@ -61,71 +52,25 @@ public class CoreNLPWebClient extends AnnotationPipeline {
     }
     @Override
     public int hashCode() {
-      throw new IllegalStateException("Hashing backends is dangerous!");
+      int result = protocol.hashCode();
+      result = 31 * result + host.hashCode();
+      result = 31 * result + port;
+      return result;
     }
   }
 
-  /**
-   * A special type of {@link Thread}, which is responsible for scheduling jobs
-   * on the backend.
-   */
   private static class BackendScheduler extends Thread {
-    /**
-     * The list of backends that we can schedule on.
-     * This should not generally be called directly from anywhere
-     */
     public final List<Backend> backends;
 
-    /**
-     * The queue of annotators (backends) that are free to be run on.
-     * Remember to lock access to this object with {@link BackendScheduler#freeAnnotatorsLock}.
-     */
     private final Queue<Backend> freeAnnotators;
-    /**
-     * The lock on access to {@link BackendScheduler#freeAnnotators}.
-     */
     private final Lock freeAnnotatorsLock = new ReentrantLock();
-    /**
-     * Represents the event that an annotator has freed up and is available for
-     * work on the {@link BackendScheduler#freeAnnotators} queue.
-     * Linked to {@link BackendScheduler#freeAnnotatorsLock}.
-     */
     private final Condition newlyFree = freeAnnotatorsLock.newCondition();
 
-    /**
-     * The queue on requests for the scheduler to handle.
-     * Each element of this queue is a function: calling the function signals
-     * that this backend is available to perform a task on the passed backend.
-     * It is then obligated to call the passed Consumer to signal that it has
-     * released control of the backend, and it can be used for other things.
-     * Remember to lock access to this object with {@link BackendScheduler#queueLock}.
-     */
     private final Queue<BiConsumer<Backend, Consumer<Backend>>> queue;
-    /**
-     * The lock on access to {@link BackendScheduler#queue}.
-     */
+
     private final Lock queueLock = new ReentrantLock();
-    /**
-     * Represents the event that an item has been added to the work queue.
-     * Linked to {@link BackendScheduler#queueLock}.
-     */
     private final Condition enqueued = queueLock.newCondition();
-    /**
-     * Represents the event that the queue has become empty, and this schedule is no
-     * longer needed.
-     */
-    public final Condition queueEmpty = queueLock.newCondition();
 
-    /**
-     * While this is true, continue running the scheduler.
-     */
-    private boolean doRun = true;
-
-    /**
-     * Create a new scheduler from a list of backends.
-     * These can contain duplicates -- in that case, that many concurrent
-     * calls can be made to that backend.
-     */
     public BackendScheduler(List<Backend> backends) {
       super();
       setDaemon(true);
@@ -134,26 +79,21 @@ public class CoreNLPWebClient extends AnnotationPipeline {
       this.queue = new LinkedList<>();
     }
 
-    /** {@inheritDoc} */
+    @SuppressWarnings("InfiniteLoopStatement")
     @Override
     public void run() {
       try {
-        while (doRun) {
+        while (true) {
           // Wait for a request
           queueLock.lock();
           while (queue.isEmpty()) {
             enqueued.await();
-            if (!doRun) { return; }
           }
           BiConsumer<Backend, Consumer<Backend>> request = queue.poll();
-          // We have a request
-          // Signal if the queue is empty
-          if (queue.isEmpty()) {
-            queueEmpty.signalAll();
-          }
           queueLock.unlock();
+          // We have a request
 
-          // Find a free annotator
+          // Find a fre annotator
           freeAnnotatorsLock.lock();
           while (freeAnnotators.isEmpty()) {
             newlyFree.await();
@@ -181,13 +121,6 @@ public class CoreNLPWebClient extends AnnotationPipeline {
       }
     }
 
-    /**
-     * Schedule a new job on the backend
-     * @param annotate A callback, which will be called when a backend is free
-     *                 to do some processing. The implementation of this callback
-     *                 MUST CALL the second argument when it is done processing,
-     *                 to register the backend as free for further work.
-     */
     public void schedule(BiConsumer<Backend, Consumer<Backend>> annotate) {
       queueLock.lock();
       try {
@@ -207,7 +140,6 @@ public class CoreNLPWebClient extends AnnotationPipeline {
   /** The properties file, serialized as JSON. */
   private final String propsAsJSON;
 
-  /** The scheduler to use when running on multiple backends at a time */
   private final BackendScheduler scheduler;
 
   /**
@@ -216,13 +148,6 @@ public class CoreNLPWebClient extends AnnotationPipeline {
    */
   private final ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer(true);
 
-  /**
-   * The main constructor. Create a client from a properties file and a list of backends.
-   * Note that this creates at least one Daemon thread.
-   *
-   * @param properties The properties file, as would be passed to {@link StanfordCoreNLP}.
-   * @param backends The backends to run on.
-   */
   public CoreNLPWebClient(Properties properties, List<Backend> backends) {
     // Save the constructor variables
     this.properties = new Properties(properties);
@@ -250,27 +175,10 @@ public class CoreNLPWebClient extends AnnotationPipeline {
     this.scheduler.start();
   }
 
-  /**
-   * Run on a single backend.
-   *
-   * @see CoreNLPWebClient(Properties, List)
-   */
   public CoreNLPWebClient(Properties properties, String host, int port) {
     this(properties, Collections.singletonList(new Backend(host, port)));
   }
 
-  /**
-   * Run on a single backend, but with k threads on each backend.
-   *
-   * @see CoreNLPWebClient(Properties, List)
-   */
-  public CoreNLPWebClient(Properties properties, String host, int port, int threads) {
-    this(properties, new ArrayList<Backend>() {{
-      for (int i = 0; i < threads; ++i) {
-        add(new Backend(host, port));
-      }
-    }});
-  }
 
   /**
    * {@inheritDoc}
@@ -439,7 +347,6 @@ public class CoreNLPWebClient extends AnnotationPipeline {
    */
   public void run() throws IOException {
     StanfordRedwoodConfiguration.minimalSetup();
-    StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(properties.getProperty("outputFormat", "text").toUpperCase());
 
     //
     // Process one file or a directory of files
@@ -451,7 +358,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
       }
       Collection<File> files = new FileSequentialCollection(new File(fileName), properties.getProperty("extension"), true);
       StanfordCoreNLP.processFiles(null, files, 1, properties, this::annotate,
-          StanfordCoreNLP.createOutputter(properties, new AnnotationOutputter.Options()), outputFormat);
+          StanfordCoreNLP.createOutputter(properties, AnnotationOutputter.Options::new));
     }
 
     //
@@ -469,7 +376,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
         }
       }
       StanfordCoreNLP.processFiles(null, files, 1, properties, this::annotate,
-          StanfordCoreNLP.createOutputter(properties, new AnnotationOutputter.Options()), outputFormat);
+          StanfordCoreNLP.createOutputter(properties, AnnotationOutputter.Options::new));
     }
 
     //
@@ -477,30 +384,6 @@ public class CoreNLPWebClient extends AnnotationPipeline {
     //
     else {
       shell(this);
-    }
-  }
-
-  /**
-   * <p>
-   *   Good practice to call after you are done with this object.
-   *   Shuts down the queue of annotations to run and the associated threads.
-   * </p>
-   *
-   * <p>
-   *   If this is not called, any job which has been scheduled but not run will be
-   *   cancelled.
-   * </p>
-   */
-  public void shutdown() throws InterruptedException {
-    scheduler.queueLock.lock();
-    try {
-      while (!scheduler.queue.isEmpty()) {
-        scheduler.queueEmpty.await();
-      }
-      scheduler.doRun = false;
-      scheduler.enqueued.signalAll();  // In case the thread's waiting on this condition
-    } finally {
-      scheduler.queueLock.unlock();
     }
   }
 
@@ -554,10 +437,8 @@ public class CoreNLPWebClient extends AnnotationPipeline {
     }
 
     // Run the pipeline
-    CoreNLPWebClient client = new CoreNLPWebClient(props, backends);
-    client.run();
-    try {
-      client.shutdown();  // In case anything is pending on the server
-    } catch (InterruptedException ignored) { }
+    new CoreNLPWebClient(props, backends).run();
   }
 }
+
+
