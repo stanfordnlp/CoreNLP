@@ -144,12 +144,13 @@ public class CoreNLPWebClient extends AnnotationPipeline {
             enqueued.await();
             if (!doRun) { return; }
           }
-          BiConsumer<Backend, Consumer<Backend>> request = queue.poll();
-          // We have a request
           // Signal if the queue is empty
           if (queue.isEmpty()) {
             queueEmpty.signalAll();
           }
+          // Get the actual request
+          BiConsumer<Backend, Consumer<Backend>> request = queue.poll();
+          // We have a request
           queueLock.unlock();
 
           // Find a free annotator
@@ -200,10 +201,10 @@ public class CoreNLPWebClient extends AnnotationPipeline {
 
   /** The path on the server to connect to. */
   private final String path = "";
-  /** The properties file to annotate with. */
+  /** The Properties file to annotate with. */
   private final Properties properties;
 
-  /** The properties file, serialized as JSON. */
+  /** The Properties file to send to the server, serialized as JSON. */
   private final String propsAsJSON;
 
   /** The scheduler to use when running on multiple backends at a time */
@@ -224,28 +225,29 @@ public class CoreNLPWebClient extends AnnotationPipeline {
    */
   public CoreNLPWebClient(Properties properties, List<Backend> backends) {
     // Save the constructor variables
-    this.properties = new Properties();
+    this.properties = properties;
+    Properties serverProperties = new Properties();
     Enumeration<?> keys = properties.propertyNames();
     while (keys.hasMoreElements()) {
       String key = keys.nextElement().toString();
-      this.properties.setProperty(key, properties.getProperty(key));
+      serverProperties.setProperty(key, properties.getProperty(key));
     }
     this.scheduler = new BackendScheduler(backends);
 
-    // Set required properties
-    this.properties.setProperty("inputFormat", "serialized");
-    this.properties.setProperty("outputFormat", "serialized");
-    this.properties.setProperty("inputSerializer", ProtobufAnnotationSerializer.class.getName());
-    this.properties.setProperty("outputSerializer", ProtobufAnnotationSerializer.class.getName());
+    // Set required serverProperties
+    serverProperties.setProperty("inputFormat", "serialized");
+    serverProperties.setProperty("outputFormat", "serialized");
+    serverProperties.setProperty("inputSerializer", ProtobufAnnotationSerializer.class.getName());
+    serverProperties.setProperty("outputSerializer", ProtobufAnnotationSerializer.class.getName());
 
     // Create a list of all the properties, as JSON map elements
     List<String> jsonProperties = new ArrayList<>();
-    keys = this.properties.propertyNames();
+    keys = serverProperties.propertyNames();
     while (keys.hasMoreElements()) {
       Object key = keys.nextElement();
       jsonProperties.add(
           "\"" + JSONOutputter.cleanJSON(key.toString()) + "\": \"" +
-              JSONOutputter.cleanJSON(this.properties.getProperty(key.toString())) + "\"");
+              JSONOutputter.cleanJSON(serverProperties.getProperty(key.toString())) + "\"");
     }
     // Create the JSON object
     this.propsAsJSON = "{ " + StringUtils.join(jsonProperties, ", ") + " }";
@@ -259,6 +261,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
    *
    * @see CoreNLPWebClient(Properties, List)
    */
+  @SuppressWarnings("unused")
   public CoreNLPWebClient(Properties properties, String host, int port) {
     this(properties, Collections.singletonList(new Backend(host, port)));
   }
@@ -268,6 +271,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
    *
    * @see CoreNLPWebClient(Properties, List)
    */
+  @SuppressWarnings("unused")
   public CoreNLPWebClient(Properties properties, String host, int port, int threads) {
     this(properties, new ArrayList<Backend>() {{
       for (int i = 0; i < threads; ++i) {
@@ -329,7 +333,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
    */
   @SuppressWarnings("unchecked")
   public void annotate(final Annotation annotation, final Consumer<Annotation> callback){
-    scheduler.schedule( (Backend backend, Consumer<Backend> isFinishedCallback) -> new Thread() {
+    scheduler.schedule((Backend backend, Consumer<Backend> isFinishedCallback) -> new Thread() {
       @Override
       public void run() {
         try {
@@ -367,12 +371,15 @@ public class CoreNLPWebClient extends AnnotationPipeline {
           }
           // 3. Fire off the request
           connection.getOutputStream().write(message);
-          System.err.println("Wrote " + message.length + " bytes to " + backend.host + ":" + backend.port);
+//          System.err.println("Wrote " + message.length + " bytes to " + backend.host + ":" + backend.port);
           os.close();
 
           // 4. Await a response
+          // 4.1 Read the response
           // -- It might be possible to send more than one message, but we are not going to do that.
-          Annotation response =  serializer.read(connection.getInputStream()).first;
+          Annotation response = serializer.read(connection.getInputStream()).first;
+          // 4.2 Release the backend
+          isFinishedCallback.accept(backend);
 
           // 5. Copy response over to original annotation
           for (Class key : response.keySet()) {
@@ -411,9 +418,6 @@ public class CoreNLPWebClient extends AnnotationPipeline {
   private static void shell(CoreNLPWebClient pipeline) throws IOException {
     System.err.println("Entering interactive shell. Type q RETURN or EOF to quit.");
     final StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(pipeline.properties.getProperty("outputFormat", "text").toUpperCase());
-    if (pipeline.properties.getProperty("annotators") == null) {
-      pipeline.properties.setProperty("annotators", "tokenize,ssplit,pos,depparse,ner");
-    }
     IOUtils.console("NLP> ", line -> {
       if (line.length() > 0) {
         Annotation anno = pipeline.process(line);
@@ -528,7 +532,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
    * is to be processed separately as a single sentence.
    * <p>
    * Example usage:<br>
-   * java -mx6g edu.stanford.nlp.pipeline.StanfordCoreNLP properties
+   * java -mx6g edu.stanford.nlp.pipeline.StanfordCoreNLP -props properties
    *
    * @param args List of required properties
    * @throws java.io.IOException If IO problem
