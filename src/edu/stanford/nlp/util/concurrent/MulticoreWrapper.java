@@ -96,6 +96,10 @@ public class MulticoreWrapper<I,O> {
     return (ThreadPoolExecutor) Executors.newFixedThreadPool(nThreads);
   }
 
+  public int nThreads() {
+    return nThreads;
+  }
+
   /**
    * Return status information about the underlying threadpool.
    */

@@ -1641,15 +1641,6 @@ public class CoreAnnotations {
     }
   }
 
-  /**
-   * Stores an exception associated with processing this document
-   */
-  public static class ExceptionAnnotation implements CoreAnnotation<Throwable> {
-    public Class<Throwable> getType() {
-      return ErasureUtils.uncheckedCast(Throwable.class);
-    }
-  }
-
 
   /**
    * The CoreMap key identifying the annotation's antecedent.

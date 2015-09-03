@@ -74,7 +74,7 @@ public class CrossValidator<L, F> {
       if (iter == kFold) throw new NoSuchElementException("CrossValidatorIterator exhausted.");
       int start = originalTrainData.size() * iter / kFold;
       int end = originalTrainData.size() * (iter + 1) / kFold;
-      //Logging.logger(this.getClass()).info("##train data size: " +  originalTrainData.size() + " start " + start + " end " + end);
+      //System.err.println("##train data size: " +  originalTrainData.size() + " start " + start + " end " + end);
       Pair<GeneralDataset<L, F>, GeneralDataset<L, F>> split = originalTrainData.split(start, end);
 
       return new Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,SavedState>(split.first(),split.second(),savedStates[iter++]);

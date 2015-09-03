@@ -77,7 +77,7 @@
  * }
  * oos.writeObject(classifier);
  * oos.close();
- * Logging.logger(this.getClass()).info("done.");
+ * System.err.println("done.");
  * } catch (Exception e) {
  * e.printStackTrace();
  * throw new RuntimeException("Serialization failed: "+e.getMessage());

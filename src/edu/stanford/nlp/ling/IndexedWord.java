@@ -160,11 +160,6 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
   }
 
   @Override
-  public <KEY extends TypesafeMap.Key<String>> String getString(Class<KEY> key, String def) {
-    return label.getString(key, def);
-  }
-
-  @Override
   public <VALUE> VALUE remove(Class<? extends Key<VALUE>> key) {
     return label.remove(key);
   }

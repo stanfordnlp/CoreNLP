@@ -1,11 +1,17 @@
-package edu.stanford.nlp.trees.conllu;
+package edu.stanford.nlp.trees;
 
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.function.Function;
 
 import edu.stanford.nlp.international.Language;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.objectbank.DelimitRegExIterator;
@@ -24,7 +30,6 @@ import edu.stanford.nlp.util.Pair;
 public class CoNLLUDocumentReader implements
     IteratorFromReaderFactory<SemanticGraph> {
 
-  private static final String COMMENT_POS = "<COMMENT>";
 
   private IteratorFromReaderFactory<SemanticGraph> ifrf;
 
@@ -59,18 +64,7 @@ public class CoNLLUDocumentReader implements
       List<IndexedWord> wordList = new ArrayList<>(words);
 
       List<IndexedWord> sorted = new ArrayList<>(wordList.size());
-
-      List<String> comments = new LinkedList<>();
-
-      /* Increase the line number in case there are comments before the actual sentence
-       * and add them to the list of comments. */
-      wordList.stream().filter(w -> w.tag() != null && w.tag().equals(COMMENT_POS))
-              .forEach(w -> {
-                lineNumberCounter++;
-                comments.add(w.word());
-              });
-
-      wordList.stream().filter(w -> w.tag() == null || ! w.tag().equals(COMMENT_POS))
+      wordList.stream().filter(w -> w != IndexedWord.NO_WORD)
               .sorted(byIndex.thenComparing(byType))
               .forEach(w -> sorted.add(w));
 
@@ -118,8 +112,7 @@ public class CoNLLUDocumentReader implements
 
           HashMap<Integer,String> extraDeps = word.get(CoreAnnotations.CoNLLUSecondaryDepsAnnotation.class);
           for (Integer extraGovIdx : extraDeps.keySet()) {
-            GrammaticalRelation extraReln =
-                    GrammaticalRelation.valueOf(Language.UniversalEnglish, extraDeps.get(extraGovIdx));
+            GrammaticalRelation extraReln = GrammaticalRelation.valueOf(Language.UniversalEnglish, extraDeps.get(extraGovIdx));
             IndexedWord extraGov =  sortedTokens.get(extraGovIdx - 1);
             TypedDependency extraDep = new TypedDependency(extraReln, extraGov, word);
             extraDep.setExtra();
@@ -129,28 +122,23 @@ public class CoNLLUDocumentReader implements
       }
       lineNumberCounter++;
 
-      SemanticGraph sg = new SemanticGraph(deps);
-
-      comments.forEach(c -> sg.addComment(c));
-
-      return sg;
+      return new SemanticGraph(deps);
     }
   }
 
   private static class WordProcessor implements Function<String,IndexedWord> {
     public IndexedWord apply(String line) {
 
-
-      IndexedWord word = new IndexedWord();
+      /* Comments.
+       * TODO[sebschu]: Save them somewhere such that they can be output again.
+       */
       if (line.startsWith("#")) {
-        word.setWord(line);
-        word.setTag(COMMENT_POS);
-        return word;
+        return IndexedWord.NO_WORD;
       }
-
 
       String[] bits = line.split("\\s+");
 
+      IndexedWord word = new IndexedWord();
       word.set(CoreAnnotations.TextAnnotation.class, bits[1]);
 
       /* Check if it is a multiword token. */
@@ -174,15 +162,130 @@ public class CoNLLUDocumentReader implements
         word.setValue(bits[1]);
 
         /* Parse features. */
-        HashMap<String, String> features = CoNLLUUtils.parseFeatures(bits[5]);
+        HashMap<String, String> features = parseFeatures(bits[5]);
         word.set(CoreAnnotations.CoNLLUFeats.class, features);
 
         /* Parse extra dependencies. */
-        HashMap<Integer,String> extraDeps = CoNLLUUtils.parseExtraDeps(bits[8]);
+        HashMap<Integer,String> extraDeps = parseExtraDeps(bits[8]);
         word.set(CoreAnnotations.CoNLLUSecondaryDepsAnnotation.class, extraDeps);
       }
 
     return word;
+    }
+  }
+
+
+  /**
+   * Parses the value of the feature column in a CoNLL-U file
+   * and returns them in a HashMap with the feature names as keys
+   * and the feature values as values.
+   *
+   * @param featureString
+   * @return A HashMap<String,String> with the feature values.
+   */
+  public static HashMap<String,String> parseFeatures(String featureString) {
+    HashMap<String, String> features = new HashMap<String, String>();
+    if (! featureString.equals("_")) {
+      String[] featValPairs = featureString.split("\\|");
+      for (String p : featValPairs) {
+        String[] featValPair = p.split("=");
+        features.put(featValPair[0], featValPair[1]);
+      }
+    }
+    return features;
+  }
+
+  /**
+   * Converts a feature HashMap to a feature string to be used
+   * in a CoNLL-U file.
+   *
+   * @return The feature string.
+   */
+  public static String toFeatureString(HashMap<String,String> features) {
+    StringBuffer sb = new StringBuffer();
+    boolean first = true;
+    List<String> sortedKeys = new ArrayList<String>(features.keySet());
+    Collections.sort(sortedKeys, new FeatureNameComparator());
+    for (String key : sortedKeys) {
+      if ( ! first) {
+        sb.append("|");
+      } else {
+        first = false;
+      }
+
+      sb.append(key)
+        .append("=")
+        .append(features.get(key));
+
+    }
+
+    /* Empty feature list. */
+    if (first) {
+      sb.append("_");
+    }
+
+    return sb.toString();
+  }
+
+  /**
+   * Parses the value of the extra dependencies column in a CoNLL-U file
+   * and returns them in a HashMap with the governor indices as keys
+   * and the relation names as values.
+   *
+   * @param extraDepsString
+   * @return A HashMap<Integer,String> with the additional dependencies.
+   */
+  public static HashMap<Integer,String> parseExtraDeps(String extraDepsString) {
+    HashMap<Integer,String> extraDeps = new HashMap<>();
+    if ( ! extraDepsString.equals("_")) {
+      String[] extraDepParts = extraDepsString.split("\\|");
+      for (String extraDepString : extraDepParts) {
+        int sepPos = extraDepString.lastIndexOf(":");
+        String reln = extraDepString.substring(sepPos + 1);
+        Integer gov = Integer.parseInt(extraDepString.substring(0, sepPos));
+        extraDeps.put(gov, reln);
+      }
+    }
+    return extraDeps;
+  }
+
+  /**
+   * Converts an extra dependencies hash map to a string to be used
+   * in a CoNLL-U file.
+   *
+   * @param extraDeps
+   * @return The extra dependencies string.
+   */
+  public static String toExtraDepsString(HashMap<Integer,String> extraDeps) {
+    StringBuffer sb = new StringBuffer();
+    boolean first = true;
+    List<Integer> sortedKeys = new ArrayList<>(extraDeps.keySet());
+    Collections.sort(sortedKeys);
+    for (Integer key : sortedKeys) {
+      if ( ! first) {
+        sb.append("|");
+      } else {
+        first = false;
+      }
+
+      sb.append(key)
+              .append(":")
+              .append(extraDeps.get(key));
+    }
+
+    /* Empty feature list. */
+    if (first) {
+      sb.append("_");
+    }
+    return sb.toString();
+  }
+
+
+  public static class FeatureNameComparator implements Comparator<String> {
+
+    @Override
+    public int compare(String featureName1, String featureName2) {
+      return featureName1.toLowerCase().compareTo(featureName2.toLowerCase());
     }
   }
 }
