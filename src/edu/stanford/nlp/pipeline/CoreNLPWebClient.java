@@ -170,6 +170,9 @@ public class CoreNLPWebClient extends AnnotationPipeline {
     }
     // Create the JSON object
     this.propsAsJSON = "{ " + StringUtils.join(jsonProperties, ", ") + " }";
+
+    // Start 'er up
+    this.scheduler.start();
   }
 
   public CoreNLPWebClient(Properties properties, String host, int port) {
@@ -249,7 +252,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
               CoreNLPWebClient.this.path + "?" + queryParams);
           URLConnection connection = serverURL.openConnection();
           // 2.2 Set some protocol-independent properties
-          connection.setDoInput(true);
+          connection.setDoOutput(true);
           connection.setRequestProperty("Content-Type", "application/x-protobuf");
           connection.setRequestProperty("Content-Length", Integer.toString(protoSize));
           connection.setRequestProperty("Accept-Charset", "utf-8");
@@ -405,7 +408,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
     //
     // extract all the properties from the command line
     // if cmd line is empty, set the properties to null. The processor will search for the properties file in the classpath
-    if (args.length < 4) {
+    if (args.length < 2) {
       System.err.println("Usage: " + CoreNLPWebClient.class.getSimpleName() + " -host <hostname> -port <port> ...");
       System.exit(1);
     }
@@ -425,8 +428,16 @@ public class CoreNLPWebClient extends AnnotationPipeline {
       System.exit(1);
     }
 
+    // Create the backends
+    List<Backend> backends = new ArrayList<>();
+    for (String spec : props.getProperty("backend").split(",")) {
+      String host = spec.substring(0, spec.indexOf(":"));
+      int port = Integer.parseInt(spec.substring(spec.indexOf(":") + 1));
+      backends.add(new Backend(host, port));
+    }
+
     // Run the pipeline
-    new CoreNLPWebClient(props, props.getProperty("host"), Integer.parseInt(props.getProperty("port"))).run();
+    new CoreNLPWebClient(props, backends).run();
   }
 }
 
