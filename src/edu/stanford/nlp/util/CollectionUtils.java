@@ -928,24 +928,4 @@ public class CollectionUtils {
     };
   }
 
-  public static <E> Iterator<E> iteratorFromEnumerator(final Enumeration<E> lst_) {
-    return new Iterator<E>() {
-      private final Enumeration<E> lst = lst_;
-      @Override
-      public boolean hasNext() {
-        return lst.hasMoreElements();
-      }
-
-      @Override
-      public E next() {
-        return lst.nextElement();
-      }
-    };
-  }
-
-  public static <E> Iterable<E> iterableFromEnumerator(final Enumeration<E> lst) {
-    return new IterableIterator<E>(iteratorFromEnumerator(lst));
-  }
-
-
 }
