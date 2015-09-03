@@ -794,9 +794,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         if (!outputFilename.endsWith(extension)) {
           outputFilename += extension;
         }
-        OutputStream fos = new BufferedOutputStream(new FileOutputStream(outputFilename))
+        OutputStream fos = new BufferedOutputStream(new FileOutputStream(outputFilename));
 
-//        System.err.println(">>>> " + outputFormat);;
         switch (outputFormat) {
           case XML: {
             try {
@@ -1121,12 +1120,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
    * @throws java.io.IOException If IO problem
    * @throws ClassNotFoundException If class loading problem
    */
-  public static void main(String[] args) throws IOException, ClassNotFoundException //{
-    try //{
-      Thread.sleep(10000)//;
-    } catch (InterruptedException ie) //{
-      return//;
-    }
+  public static void main(String[] args) throws IOException, ClassNotFoundException {
     //
     // process the arguments
     //
