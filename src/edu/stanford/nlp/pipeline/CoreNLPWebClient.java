@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 /**
  * An annotation pipeline in spirit identical to {@link StanfordCoreNLP}, but
@@ -35,6 +35,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
   private final String path = "";
   /** The properties file to annotate with. */
   private final Properties properties;
+
   /** The properties file, serialized as JSON. */
   private final String propsAsJSON;
 
@@ -68,7 +69,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
       Object key = keys.nextElement();
       jsonProperties.add(
           "\"" + JSONOutputter.cleanJSON(key.toString()) + "\": \"" +
-              JSONOutputter.cleanJSON(this.properties.get(key).toString()) + "\"");
+              JSONOutputter.cleanJSON(this.properties.getProperty(key.toString())) + "\"");
     }
     // Create the JSON object
     this.propsAsJSON = "{ " + StringUtils.join(jsonProperties, ", ") + " }";
@@ -92,7 +93,6 @@ public class CoreNLPWebClient extends AnnotationPipeline {
       } finally {
         lock.unlock();
       }
-      return null;
     });
     try {
       lock.lock();
@@ -112,7 +112,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
    * @param callback A function to be called when an annotation finishes.
    */
   @Override
-  public void annotate(final Iterable<Annotation> annotations, int numThreads, final Function<Annotation,Object> callback){
+  public void annotate(final Iterable<Annotation> annotations, int numThreads, final Consumer<Annotation> callback){
     for (Annotation annotation : annotations) {
       annotate(annotation, callback);
     }
@@ -127,56 +127,63 @@ public class CoreNLPWebClient extends AnnotationPipeline {
    *                 The input to this callback is the same as the passed Annotation object.
    */
   @SuppressWarnings("unchecked")
-  public void annotate(final Annotation annotation, final Function<Annotation,Object> callback){
-    try {
-      // 1. Create the input
-      // 1.1 Create a protocol buffer
-      CoreNLPProtos.Document unannotatedProto = serializer.toProto(annotation);
-      int protoSize = unannotatedProto.getSerializedSize();
-      // 1.2 Create the query params
-      String queryParams = String.format(
-          "properties=%s",
-          URLEncoder.encode(this.propsAsJSON, "utf-8"));
+  public void annotate(final Annotation annotation, final Consumer<Annotation> callback){
+    new Thread() {
+      @Override
+      public void run() {
+        try {
+          // 1. Create the input
+          // 1.1 Create a protocol buffer
+          CoreNLPProtos.Document unannotatedProto = serializer.toProto(annotation);
+          int protoSize = unannotatedProto.getSerializedSize();
+          // 1.2 Create the query params
+          String queryParams = String.format(
+              "properties=%s",
+              URLEncoder.encode(CoreNLPWebClient.this.propsAsJSON, "utf-8"));
 
-      // 2. Create a connection
-      // 2.1 Open a connection
-      URL serverURL = new URL(this.protocol, this.host, this.port, this.path + "?" + queryParams);
-      URLConnection connection = serverURL.openConnection();
-      // 2.2 Set some protocol-independent properties
-      connection.setDoInput(true);
-      connection.setRequestProperty("Content-Type", "application/x-protobuf");
-      connection.setRequestProperty("Content-Length", Integer.toString(protoSize));
-      connection.setRequestProperty("Accept-Charset", "utf-8");
-      connection.setRequestProperty("User-Agent", CoreNLPWebClient.class.getName());
-      // 2.3 Set some protocol-dependent properties
-      switch (this.protocol) {
-        case "http":
-          ((HttpURLConnection) connection).setRequestMethod("POST");
-          break;
-        default:
-          throw new IllegalStateException("Haven't implemented protocol: " + this.protocol);
+          // 2. Create a connection
+          // 2.1 Open a connection
+          URL serverURL = new URL(CoreNLPWebClient.this.protocol, CoreNLPWebClient.this.host,
+              CoreNLPWebClient.this.port,
+              CoreNLPWebClient.this.path + "?" + queryParams);
+          URLConnection connection = serverURL.openConnection();
+          // 2.2 Set some protocol-independent properties
+          connection.setDoInput(true);
+          connection.setRequestProperty("Content-Type", "application/x-protobuf");
+          connection.setRequestProperty("Content-Length", Integer.toString(protoSize));
+          connection.setRequestProperty("Accept-Charset", "utf-8");
+          connection.setRequestProperty("User-Agent", CoreNLPWebClient.class.getName());
+          // 2.3 Set some protocol-dependent properties
+          switch (CoreNLPWebClient.this.protocol) {
+            case "http":
+              ((HttpURLConnection) connection).setRequestMethod("POST");
+              break;
+            default:
+              throw new IllegalStateException("Haven't implemented protocol: " + CoreNLPWebClient.this.protocol);
+          }
+
+          // 3. Fire off the request
+          OutputStream os = connection.getOutputStream();
+          os.write(unannotatedProto.toByteArray());
+          System.err.println("Wrote " + protoSize + " bytes to " + CoreNLPWebClient.this.host + ":" + CoreNLPWebClient.this.port);
+
+          // 4. Await a response
+          InputStream input = connection.getInputStream();
+          CoreNLPProtos.Document annotatedProto = CoreNLPProtos.Document.parseFrom(input);
+          Annotation response = serializer.fromProto(annotatedProto);
+
+          // 5. Copy response over to original annotation
+          for (Class key : response.keySet()) {
+            annotation.set(key, response.get(key));
+          }
+
+          // 6. Call the callback
+          callback.accept(annotation);
+        } catch (IOException e) {
+          throw new RuntimeIOException("Could not connect to server: " + host + ":" + port, e);
+        }
       }
-
-      // 3. Fire off the request
-      OutputStream os = connection.getOutputStream();
-      os.write(unannotatedProto.toByteArray());
-      System.err.println("Wrote " + protoSize + " bytes to " + this.host + ":" + this.port);
-
-      // 4. Await a response
-      InputStream input = connection.getInputStream();
-      CoreNLPProtos.Document annotatedProto = CoreNLPProtos.Document.parseFrom(input);
-      Annotation response = serializer.fromProto(annotatedProto);
-
-      // 5. Copy response over to original annotation
-      for (Class key : response.keySet()) {
-        annotation.set(key, response.get(key));
-      }
-
-      // 6. Call the callback
-      callback.apply(annotation);
-    } catch (IOException e) {
-      throw new RuntimeIOException("Could not connect to server: " + host + ":" + port, e);
-    }
+    }.start();
   }
 
   /**
@@ -311,17 +318,13 @@ public class CoreNLPWebClient extends AnnotationPipeline {
     }
 
     // Check required properties
-    if (props.getProperty("host") == null) {
-      System.err.println("Usage: " + CoreNLPWebClient.class.getSimpleName() + " -host <hostname> -port <port> ...");
-      System.err.println("Missing required option: -host <hostname>");
+    /*
+    if (props.getProperty("backend") == null) {
+      System.err.println("Usage: " + CoreNLPWebClient.class.getSimpleName() + " -backend <hostname:port,...> ...");
+      System.err.println("Missing required option: -backend <hostname:port,...>");
       System.exit(1);
     }
-    if (props.getProperty("port") == null || !props.getProperty("port").matches("[0-9]+")) {
-      System.err.println("Usage: " + CoreNLPWebClient.class.getSimpleName() + " -host <hostname> -port <port> ...");
-      System.err.println("Missing required option: -port <port_number>");
-      System.exit(1);
-    }
-
+    */
 
     // Run the pipeline
     new CoreNLPWebClient(props, props.getProperty("host"), Integer.parseInt(props.getProperty("port"))).run();

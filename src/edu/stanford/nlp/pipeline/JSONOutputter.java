@@ -1,7 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
 
-import edu.stanford.nlp.io.StringOutputStream;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
@@ -157,12 +156,6 @@ public class JSONOutputter extends AnnotationOutputter {
     } else {
       return null;
     }
-  }
-
-  public static String jsonPrint(Annotation annotation) throws IOException {
-    StringOutputStream os = new StringOutputStream();
-    new JSONOutputter().print(annotation, os);
-    return os.toString();
   }
 
   public static void jsonPrint(Annotation annotation, OutputStream os) throws IOException {

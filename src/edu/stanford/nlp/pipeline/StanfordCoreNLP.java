@@ -41,8 +41,10 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.Semaphore;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -106,6 +108,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   protected static AnnotatorPool pool = null;
 
   private Properties properties;
+
+  private Semaphore availableProcessors;
 
 
   /**
@@ -280,6 +284,14 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     this.properties = props;
     AnnotatorPool pool = getDefaultAnnotatorPool(props, annotatorImplementations);
 
+    // Set threading
+    if (this.properties.containsKey("threads")) {
+      Execution.threads = PropertiesUtils.getInt(this.properties, "threads");
+      this.availableProcessors = new Semaphore(Execution.threads);
+    } else {
+      this.availableProcessors = new Semaphore(1);
+    }
+
     // now construct the annotators from the given properties in the given order
     List<String> annoNames = Arrays.asList(getRequiredProperty(props, "annotators").split("[, \t]+"));
     Set<String> alreadyAddedAnnoNames = Generics.newHashSet();
@@ -418,6 +430,29 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       numWords += words.size();
     }
   }
+
+
+  public void annotate(final Annotation annotation, final Consumer<Annotation> callback){
+    try {
+      availableProcessors.acquire();
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+    new Thread() {
+      @Override
+      public void run() {
+        try {
+          annotate(annotation);
+        } catch (Throwable t) {
+          annotation.set(CoreAnnotations.ExceptionAnnotation.class, t);
+        }
+        callback.accept(annotation);
+        availableProcessors.release();
+      }
+    }.start();
+  }
+
+
 
   /**
    * Determines whether the parser annotator should default to
@@ -726,7 +761,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   }
 
   /**
-   * Create an outputter to be passed into {@link StanfordCoreNLP#processFiles(String, Collection, int, Properties, Consumer, BiConsumer)}.
+   * Create an outputter to be passed into {@link StanfordCoreNLP#processFiles(String, Collection, int, Properties, BiConsumer, BiConsumer)}.
    *
    * @param properties The properties file to use.
    * @param mkOptions The means of creating output options
@@ -819,7 +854,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
    * @throws IOException
    */
   protected static void processFiles(String base, final Collection<File> files, int numThreads,
-                                     Properties properties, Consumer<Annotation> annotate,
+                                     Properties properties, BiConsumer<Annotation, Consumer<Annotation>> annotate,
                                      BiConsumer<Annotation, String> print) throws IOException {
     List<Runnable> toRun = new LinkedList<Runnable>();
 
@@ -901,96 +936,84 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
       final String finalOutputFilename = outputFilename;
       //register a task...
-      toRun.add(() -> {
-        //catching exceptions...
-        try {
-          // Check whether this file should be skipped again
-          if (noClobber && new File(finalOutputFilename).exists()) {
-            err("Skipping " + file.getName() + ": output file " + finalOutputFilename + " as it already exists.  Don't use the noClobber option to override this.");
-            synchronized (totalSkipped) {
-              totalSkipped.incValue(1);
-            }
-            return;
+      //catching exceptions...
+      try {
+        // Check whether this file should be skipped again
+        if (noClobber && new File(finalOutputFilename).exists()) {
+          err("Skipping " + file.getName() + ": output file " + finalOutputFilename + " as it already exists.  Don't use the noClobber option to override this.");
+          synchronized (totalSkipped) {
+            totalSkipped.incValue(1);
           }
+          return;
+        }
 
-          forceTrack("Processing file " + file.getAbsolutePath() + " ... writing to " + finalOutputFilename);
+        log("Processing file " + file.getAbsolutePath() + " ... writing to " + finalOutputFilename);
 
-          //--Process File
-          Annotation annotation = null;
-          if (file.getAbsolutePath().endsWith(".ser.gz")) {
-            // maybe they want to continue processing a partially processed annotation
-            try {
-              // Create serializers
-              if (inputSerializerClass != null) {
-                AnnotationSerializer inputSerializer = loadSerializer(inputSerializerClass, inputSerializerName, properties);
-                InputStream is = new BufferedInputStream(new FileInputStream(file));
-                Pair<Annotation, InputStream> pair = inputSerializer.read(is);
-                pair.second.close();
-                annotation = pair.first;
-                IOUtils.closeIgnoringExceptions(is);
-              } else {
-                annotation = IOUtils.readObjectFromFile(file);
-              }
-            } catch (IOException e) {
-              // guess that's not what they wanted
-              // We hide IOExceptions because ones such as file not
-              // found will be thrown again in a moment.  Note that
-              // we are intentionally letting class cast exceptions
-              // and class not found exceptions go through.
-            } catch (ClassNotFoundException e) {
-              throw new RuntimeException(e);
-            }
-          }
-
-          //(read file)
-          if (annotation == null) {
-            String encoding = properties.getProperty("encoding", "UTF-8");
-            String text = IOUtils.slurpFile(file, encoding);
-            annotation = new Annotation(text);
-          }
-
-          boolean annotationOkay = false;
-          forceTrack("Annotating file " + file.getAbsoluteFile());
+        //--Process File
+        Annotation annotation = null;
+        if (file.getAbsolutePath().endsWith(".ser.gz")) {
+          // maybe they want to continue processing a partially processed annotation
           try {
-            annotate.accept(annotation);
-            annotationOkay = true;
-          } catch (Exception ex) {
-            if (continueOnAnnotateError) {
-              // Error annotating but still wanna continue
-              // (maybe in the middle of long job and maybe next one will be okay)
-              err("Error annotating " + file.getAbsoluteFile(), ex);
-              annotationOkay = false;
-              synchronized (totalErrorAnnotating) {
-                totalErrorAnnotating.incValue(1);
-              }
+            // Create serializers
+            if (inputSerializerClass != null) {
+              AnnotationSerializer inputSerializer = loadSerializer(inputSerializerClass, inputSerializerName, properties);
+              InputStream is = new BufferedInputStream(new FileInputStream(file));
+              Pair<Annotation, InputStream> pair = inputSerializer.read(is);
+              pair.second.close();
+              annotation = pair.first;
+              IOUtils.closeIgnoringExceptions(is);
             } else {
-              throw new RuntimeException("Error annotating " + file.getAbsoluteFile(), ex);
+              annotation = IOUtils.readObjectFromFile(file);
             }
-          } finally {
-            endTrack("Annotating file " + file.getAbsoluteFile());
+          } catch (IOException e) {
+            // guess that's not what they wanted
+            // We hide IOExceptions because ones such as file not
+            // found will be thrown again in a moment.  Note that
+            // we are intentionally letting class cast exceptions
+            // and class not found exceptions go through.
+          } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
           }
+        }
 
-          if (annotationOkay) {
+        //(read file)
+        if (annotation == null) {
+          String encoding = properties.getProperty("encoding", "UTF-8");
+          String text = IOUtils.slurpFile(file, encoding);
+          annotation = new Annotation(text);
+        }
+
+        log("Annotating file " + file.getAbsoluteFile());
+        annotate.accept(annotation, finishedAnnotation -> {
+          Throwable ex = finishedAnnotation.get(CoreAnnotations.ExceptionAnnotation.class);
+          if (ex == null) {
             //--Output File
-            print.accept(annotation, finalOutputFilename);
+            print.accept(finishedAnnotation, finalOutputFilename);
             synchronized (totalProcessed) {
               totalProcessed.incValue(1);
               if (totalProcessed.intValue() % 1000 == 0) {
                 log("Processed " + totalProcessed + " documents");
               }
             }
+          } else if (continueOnAnnotateError) {
+            // Error annotating but still wanna continue
+            // (maybe in the middle of long job and maybe next one will be okay)
+            err("Error annotating " + file.getAbsoluteFile() + ": " + ex);
+            synchronized (totalErrorAnnotating) {
+              totalErrorAnnotating.incValue(1);
+            }
+
           } else {
-            warn("Error annotating " + file.getAbsoluteFile() + " not saved to " + finalOutputFilename);
+            throw new RuntimeException("Error annotating " + file.getAbsoluteFile(), ex);
           }
+        });
 
-          endTrack("Processing file " + file.getAbsolutePath() + " ... writing to " + finalOutputFilename);
-
-        } catch (IOException e) {
-          throw new RuntimeIOException(e);
-        }
-      });
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
+      }
     }
 
+    /*
     if (randomize) {
       log("Randomly shuffling input");
       Collections.shuffle(toRun);
@@ -1004,6 +1027,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     }
     log("Processed " + totalProcessed + " documents");
     log("Skipped " + totalSkipped + " documents, error annotating " + totalErrorAnnotating + " documents");
+    */
   }
 
   public void processFiles(final Collection<File> files, int numThreads) throws IOException {
