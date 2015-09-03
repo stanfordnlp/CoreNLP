@@ -60,6 +60,83 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     return argmax;
   }
 
+  private static class ModelDerivatives {
+    // We use TreeMap for each of these so that they stay in a canonical sorted order
+    // binaryTD stands for Transform Derivatives (see the SentimentModel)
+    public final TwoDimensionalMap<String, String, SimpleMatrix> binaryTD;
+    // the derivatives of the tensors for the binary nodes
+    // will be empty if we aren't using tensors
+    public final TwoDimensionalMap<String, String, SimpleTensor> binaryTensorTD;
+    // binaryCD stands for Classification Derivatives
+    // if we combined classification derivatives, we just use an empty map
+    public TwoDimensionalMap<String, String, SimpleMatrix> binaryCD;
+
+    // unaryCD stands for Classification Derivatives
+    public Map<String, SimpleMatrix> unaryCD;
+
+    // word vector derivatives
+    // will be filled on an as-needed basis, as opposed to having all
+    // the words with a lot of empty vectors
+    public Map<String, SimpleMatrix> wordVectorD;
+
+    public ModelDerivatives(SentimentModel model) {
+      binaryTD = initDerivatives(model.binaryTransform);
+      binaryTensorTD = (model.op.useTensors) ? initTensorDerivatives(model.binaryTensors) : TwoDimensionalMap.treeMap();
+      binaryCD = (!model.op.combineClassification) ? initDerivatives(model.binaryClassification) : TwoDimensionalMap.treeMap();
+      unaryCD = initDerivatives(model.unaryClassification);
+      // wordVectorD will be filled on an as-needed basis
+      wordVectorD = Generics.newTreeMap();
+    }
+
+    /**
+     * Init a TwoDimensionalMap with 0 matrices for all the matrices in the original map.
+     */
+    private static TwoDimensionalMap<String, String, SimpleMatrix> initDerivatives(TwoDimensionalMap<String, String, SimpleMatrix> map) {
+      TwoDimensionalMap<String, String, SimpleMatrix> derivatives = TwoDimensionalMap.treeMap();
+
+      for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : map) {
+        int numRows = entry.getValue().numRows();
+        int numCols = entry.getValue().numCols();
+
+        derivatives.put(entry.getFirstKey(), entry.getSecondKey(), new SimpleMatrix(numRows, numCols));
+      }
+
+      return derivatives;
+    }
+
+    /**
+     * Init a TwoDimensionalMap with 0 tensors for all the tensors in the original map.
+     */
+    private static TwoDimensionalMap<String, String, SimpleTensor> initTensorDerivatives(TwoDimensionalMap<String, String, SimpleTensor> map) {
+      TwoDimensionalMap<String, String, SimpleTensor> derivatives = TwoDimensionalMap.treeMap();
+
+      for (TwoDimensionalMap.Entry<String, String, SimpleTensor> entry : map) {
+        int numRows = entry.getValue().numRows();
+        int numCols = entry.getValue().numCols();
+        int numSlices = entry.getValue().numSlices();
+
+        derivatives.put(entry.getFirstKey(), entry.getSecondKey(), new SimpleTensor(numRows, numCols, numSlices));
+      }
+
+      return derivatives;
+    }
+
+    /**
+     * Init a Map with 0 matrices for all the matrices in the original map.
+     */
+    private static Map<String, SimpleMatrix> initDerivatives(Map<String, SimpleMatrix> map) {
+      Map<String, SimpleMatrix> derivatives = Generics.newTreeMap();
+
+      for (Map.Entry<String, SimpleMatrix> entry : map.entrySet()) {
+        int numRows = entry.getValue().numRows();
+        int numCols = entry.getValue().numCols();
+        derivatives.put(entry.getKey(), new SimpleMatrix(numRows, numCols));
+      }
+
+      return derivatives;
+    }
+  }
+
   @Override
   public void calculate(double[] theta) {
     model.vectorToParams(theta);
@@ -67,55 +144,8 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     // double localValue = 0.0;
     // double[] localDerivative = new double[theta.length];
 
-    // We use TreeMap for each of these so that they stay in a
-    // canonical sorted order
-    // TODO: factor out the initialization routines
-    // binaryTD stands for Transform Derivatives (see the SentimentModel)
-    TwoDimensionalMap<String, String, SimpleMatrix> binaryTD = TwoDimensionalMap.treeMap();
-    // the derivatives of the tensors for the binary nodes
-    TwoDimensionalMap<String, String, SimpleTensor> binaryTensorTD = TwoDimensionalMap.treeMap();
-    // binaryCD stands for Classification Derivatives
-    TwoDimensionalMap<String, String, SimpleMatrix> binaryCD = TwoDimensionalMap.treeMap();
-
-    // unaryCD stands for Classification Derivatives
-    Map<String, SimpleMatrix> unaryCD = Generics.newTreeMap();
-
-    // word vector derivatives
-    Map<String, SimpleMatrix> wordVectorD = Generics.newTreeMap();
-
-    for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : model.binaryTransform) {
-      int numRows = entry.getValue().numRows();
-      int numCols = entry.getValue().numCols();
-
-      binaryTD.put(entry.getFirstKey(), entry.getSecondKey(), new SimpleMatrix(numRows, numCols));
-    }
-
-    if (!model.op.combineClassification) {
-      for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : model.binaryClassification) {
-        int numRows = entry.getValue().numRows();
-        int numCols = entry.getValue().numCols();
-
-        binaryCD.put(entry.getFirstKey(), entry.getSecondKey(), new SimpleMatrix(numRows, numCols));
-      }
-    }
-
-    if (model.op.useTensors) {
-      for (TwoDimensionalMap.Entry<String, String, SimpleTensor> entry : model.binaryTensors) {
-        int numRows = entry.getValue().numRows();
-        int numCols = entry.getValue().numCols();
-        int numSlices = entry.getValue().numSlices();
-
-        binaryTensorTD.put(entry.getFirstKey(), entry.getSecondKey(), new SimpleTensor(numRows, numCols, numSlices));
-      }
-    }
-
-    for (Map.Entry<String, SimpleMatrix> entry : model.unaryClassification.entrySet()) {
-      int numRows = entry.getValue().numRows();
-      int numCols = entry.getValue().numCols();
-      unaryCD.put(entry.getKey(), new SimpleMatrix(numRows, numCols));
-    }
-
-    // wordVectorD will be filled on an as-needed basis
+    // "final" makes this as fast as having separate maps declared in this function
+    final ModelDerivatives derivatives = new ModelDerivatives(model);
 
     // TODO: This part can easily be parallelized
     List<Tree> forwardPropTrees = Generics.newArrayList();
@@ -130,7 +160,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     // TODO: we may find a big speedup by separating the derivatives and then summing
     double error = 0.0;
     for (Tree tree : forwardPropTrees) {
-      backpropDerivativesAndError(tree, binaryTD, binaryCD, binaryTensorTD, unaryCD, wordVectorD);
+      backpropDerivativesAndError(tree, derivatives.binaryTD, derivatives.binaryCD, derivatives.binaryTensorTD, derivatives.unaryCD, derivatives.wordVectorD);
       error += sumError(tree);
     }
 
@@ -139,13 +169,13 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     double scale = (1.0 / trainingBatch.size());
     value = error * scale;
 
-    value += scaleAndRegularize(binaryTD, model.binaryTransform, scale, model.op.trainOptions.regTransformMatrix, false);
-    value += scaleAndRegularize(binaryCD, model.binaryClassification, scale, model.op.trainOptions.regClassification, true);
-    value += scaleAndRegularizeTensor(binaryTensorTD, model.binaryTensors, scale, model.op.trainOptions.regTransformTensor);
-    value += scaleAndRegularize(unaryCD, model.unaryClassification, scale, model.op.trainOptions.regClassification, false, true);
-    value += scaleAndRegularize(wordVectorD, model.wordVectors, scale, model.op.trainOptions.regWordVector, true, false);
+    value += scaleAndRegularize(derivatives.binaryTD, model.binaryTransform, scale, model.op.trainOptions.regTransformMatrix, false);
+    value += scaleAndRegularize(derivatives.binaryCD, model.binaryClassification, scale, model.op.trainOptions.regClassification, true);
+    value += scaleAndRegularizeTensor(derivatives.binaryTensorTD, model.binaryTensors, scale, model.op.trainOptions.regTransformTensor);
+    value += scaleAndRegularize(derivatives.unaryCD, model.unaryClassification, scale, model.op.trainOptions.regClassification, false, true);
+    value += scaleAndRegularize(derivatives.wordVectorD, model.wordVectors, scale, model.op.trainOptions.regWordVector, true, false);
 
-    derivative = NeuralUtils.paramsToVector(theta.length, binaryTD.valueIterator(), binaryCD.valueIterator(), SimpleTensor.iteratorSimpleMatrix(binaryTensorTD.valueIterator()), unaryCD.values().iterator(), wordVectorD.values().iterator());
+    derivative = NeuralUtils.paramsToVector(theta.length, derivatives.binaryTD.valueIterator(), derivatives.binaryCD.valueIterator(), SimpleTensor.iteratorSimpleMatrix(derivatives.binaryTensorTD.valueIterator()), derivatives.unaryCD.values().iterator(), derivatives.wordVectorD.values().iterator());
   }
 
   static double scaleAndRegularize(TwoDimensionalMap<String, String, SimpleMatrix> derivatives,

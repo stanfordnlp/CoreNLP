@@ -493,6 +493,7 @@ public class IOUtils {
   }
 
 
+  // todo [cdm 2015]: I think GZIPInputStream has its own buffer and so we don't need to buffer in that case.
   /**
    * Quietly opens a File. If the file ends with a ".gz" extension,
    * automatically opens a GZIPInputStream to wrap the constructed
