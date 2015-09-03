@@ -301,7 +301,8 @@ public class CoreNLPWebClient extends AnnotationPipeline {
   }
 
   /**
-   * This method fires off a request to the server. Upon returning,
+   * This method fires off a request to the server. Upon returning, it calls the provided
+   * callback method.
    *
    * @param annotations The input annotations to process
    * @param numThreads The number of threads to run on. IGNORED in this class.
@@ -360,7 +361,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
 
           // 3. Fire off the request
           OutputStream os = connection.getOutputStream();
-          os.write(unannotatedProto.toByteArray());
+          unannotatedProto.writeTo(os);
           System.err.println("Wrote " + protoSize + " bytes to " + backend.host + ":" + backend.port);
 
           // 4. Await a response
@@ -403,6 +404,9 @@ public class CoreNLPWebClient extends AnnotationPipeline {
   private static void shell(CoreNLPWebClient pipeline) throws IOException {
     System.err.println("Entering interactive shell. Type q RETURN or EOF to quit.");
     final StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(pipeline.properties.getProperty("outputFormat", "text").toUpperCase());
+    if (pipeline.properties.getProperty("annotators") == null) {
+      pipeline.properties.setProperty("annotators", "tokenize,ssplit,pos,depparse,ner");
+    }
     IOUtils.console("NLP> ", line -> {
       if (line.length() > 0) {
         Annotation anno = pipeline.process(line);
