@@ -6,10 +6,7 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.StanfordRedwoodConfiguration;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -20,6 +17,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+
+import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
 /**
  * An annotation pipeline in spirit identical to {@link StanfordCoreNLP}, but
@@ -336,9 +335,12 @@ public class CoreNLPWebClient extends AnnotationPipeline {
         try {
           // 1. Create the input
           // 1.1 Create a protocol buffer
-          CoreNLPProtos.Document unannotatedProto = serializer.toProto(annotation);
-          int protoSize = unannotatedProto.getSerializedSize();
+          ByteArrayOutputStream os = new ByteArrayOutputStream();
+          serializer.write(annotation, os);
+          os.close();
+          byte[] message = os.toByteArray();
           // 1.2 Create the query params
+
           String queryParams = String.format(
               "properties=%s",
               URLEncoder.encode(CoreNLPWebClient.this.propsAsJSON, "utf-8"));
@@ -352,7 +354,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
           // 2.2 Set some protocol-independent properties
           connection.setDoOutput(true);
           connection.setRequestProperty("Content-Type", "application/x-protobuf");
-          connection.setRequestProperty("Content-Length", Integer.toString(protoSize));
+          connection.setRequestProperty("Content-Length", Integer.toString(message.length));
           connection.setRequestProperty("Accept-Charset", "utf-8");
           connection.setRequestProperty("User-Agent", CoreNLPWebClient.class.getName());
           // 2.3 Set some protocol-dependent properties
@@ -363,17 +365,14 @@ public class CoreNLPWebClient extends AnnotationPipeline {
             default:
               throw new IllegalStateException("Haven't implemented protocol: " + backend.protocol);
           }
-
           // 3. Fire off the request
-          OutputStream os = connection.getOutputStream();
-          unannotatedProto.writeTo(os);
-          System.err.println("Wrote " + protoSize + " bytes to " + backend.host + ":" + backend.port);
+          connection.getOutputStream().write(message);
+          System.err.println("Wrote " + message.length + " bytes to " + backend.host + ":" + backend.port);
           os.close();
 
           // 4. Await a response
-          InputStream input = connection.getInputStream();
-          CoreNLPProtos.Document annotatedProto = CoreNLPProtos.Document.parseFrom(input);
-          Annotation response = serializer.fromProto(annotatedProto);
+          // -- It might be possible to send more than one message, but we are not going to do that.
+          Annotation response =  serializer.read(connection.getInputStream()).first;
 
           // 5. Copy response over to original annotation
           for (Class key : response.keySet()) {
@@ -384,6 +383,8 @@ public class CoreNLPWebClient extends AnnotationPipeline {
           callback.accept(annotation);
         } catch (IOException e) {
           throw new RuntimeIOException("Could not connect to server: " + backend.host + ":" + backend.port, e);
+        } catch (ClassNotFoundException e) {
+          e.printStackTrace();
         }
       }
     }.start());
@@ -430,6 +431,10 @@ public class CoreNLPWebClient extends AnnotationPipeline {
               System.out.println();
               break;
             case TEXT:
+              new TextOutputter().print(anno, System.out);
+              break;
+            case SERIALIZED:
+              warn("You probably cannot read the serialized output, so printing in text instead");
               new TextOutputter().print(anno, System.out);
               break;
             default:
