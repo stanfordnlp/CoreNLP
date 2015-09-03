@@ -361,7 +361,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
 
           // 3. Fire off the request
           OutputStream os = connection.getOutputStream();
-          os.write(unannotatedProto.toByteArray());
+          unannotatedProto.writeTo(os);
           System.err.println("Wrote " + protoSize + " bytes to " + backend.host + ":" + backend.port);
 
           // 4. Await a response
