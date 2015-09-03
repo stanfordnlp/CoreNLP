@@ -34,6 +34,17 @@ public class JSONOutputter extends AnnotationOutputter {
 
   protected static final String INDENT_CHAR = "  ";
 
+  public static String cleanJSON(String s) {
+    return s
+        .replace("\\", "\\\\")
+        .replace("\b", "\\b")
+        .replace("\f", "\\f")
+        .replace("\n", "\\n")
+        .replace("\r", "\\r")
+        .replace("\t", "\\t")
+        .replace("\"", "\\\"");
+  }
+
 
   /** {@inheritDoc} */
   @SuppressWarnings("RedundantCast")  // It's lying; we need the "redundant" casts (as of 2014-09-08)
@@ -171,17 +182,6 @@ public class JSONOutputter extends AnnotationOutputter {
     private final PrintWriter writer;
     private JSONWriter(PrintWriter writer) {
       this.writer = writer;
-    }
-
-    protected static String cleanJSON(String s) {
-      return s
-          .replace("\\", "\\\\")
-          .replace("\b", "\\b")
-          .replace("\f", "\\f")
-          .replace("\n", "\\n")
-          .replace("\r", "\\r")
-          .replace("\t", "\\t")
-          .replace("\"", "\\\"");
     }
 
     @SuppressWarnings("unchecked")
