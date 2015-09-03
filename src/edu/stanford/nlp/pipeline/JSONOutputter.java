@@ -1,6 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
 
+import edu.stanford.nlp.io.StringOutputStream;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
@@ -33,6 +34,17 @@ import java.util.stream.Stream;
 public class JSONOutputter extends AnnotationOutputter {
 
   protected static final String INDENT_CHAR = "  ";
+
+  public static String cleanJSON(String s) {
+    return s
+        .replace("\\", "\\\\")
+        .replace("\b", "\\b")
+        .replace("\f", "\\f")
+        .replace("\n", "\\n")
+        .replace("\r", "\\r")
+        .replace("\t", "\\t")
+        .replace("\"", "\\\"");
+  }
 
 
   /** {@inheritDoc} */
@@ -147,6 +159,12 @@ public class JSONOutputter extends AnnotationOutputter {
     }
   }
 
+  public static String jsonPrint(Annotation annotation) throws IOException {
+    StringOutputStream os = new StringOutputStream();
+    new JSONOutputter().print(annotation, os);
+    return os.toString();
+  }
+
   public static void jsonPrint(Annotation annotation, OutputStream os) throws IOException {
     new JSONOutputter().print(annotation, os);
   }
@@ -171,17 +189,6 @@ public class JSONOutputter extends AnnotationOutputter {
     private final PrintWriter writer;
     private JSONWriter(PrintWriter writer) {
       this.writer = writer;
-    }
-
-    protected static String cleanJSON(String s) {
-      return s
-          .replace("\\", "\\\\")
-          .replace("\b", "\\b")
-          .replace("\f", "\\f")
-          .replace("\n", "\\n")
-          .replace("\r", "\\r")
-          .replace("\t", "\\t")
-          .replace("\"", "\\\"");
     }
 
     @SuppressWarnings("unchecked")
