@@ -347,7 +347,6 @@ public class CoreNLPWebClient extends AnnotationPipeline {
    */
   public void run() throws IOException {
     StanfordRedwoodConfiguration.minimalSetup();
-    StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(properties.getProperty("outputFormat", "text").toUpperCase());
 
     //
     // Process one file or a directory of files
@@ -359,7 +358,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
       }
       Collection<File> files = new FileSequentialCollection(new File(fileName), properties.getProperty("extension"), true);
       StanfordCoreNLP.processFiles(null, files, 1, properties, this::annotate,
-          StanfordCoreNLP.createOutputter(properties, new AnnotationOutputter.Options()), outputFormat);
+          StanfordCoreNLP.createOutputter(properties, AnnotationOutputter.Options::new));
     }
 
     //
@@ -377,7 +376,7 @@ public class CoreNLPWebClient extends AnnotationPipeline {
         }
       }
       StanfordCoreNLP.processFiles(null, files, 1, properties, this::annotate,
-          StanfordCoreNLP.createOutputter(properties, new AnnotationOutputter.Options()), outputFormat);
+          StanfordCoreNLP.createOutputter(properties, AnnotationOutputter.Options::new));
     }
 
     //
