@@ -104,16 +104,16 @@ public class DcorefChineseBenchmarkSlowITest extends TestCase {
     Counter<String> expectedResults = new ClassicCounter<String>();
 
 
-    setAll(lowResults,highResults,expectedResults,MENTION_TP,12370);
-    setAll(lowResults,highResults,expectedResults,MENTION_F1,55.6);
+    setAll(lowResults, highResults, expectedResults, MENTION_TP, 12370);
+    setAll(lowResults, highResults, expectedResults, MENTION_F1, 55.6);
 
     setLowHighExpected(lowResults, highResults, expectedResults, MUC_TP, 5965, 5970, 5965);
     setAll(lowResults,highResults,expectedResults,MUC_F1,57.93);
 
-    setAll(lowResults,highResults,expectedResults,BCUBED_TP,6868.81);
-    setAll(lowResults,highResults,expectedResults,BCUBED_F1,51.3);
+    setLowHighExpected(lowResults, highResults, expectedResults, BCUBED_TP, 6868.8, 6869.0, 6868.81);
+    setAll(lowResults, highResults, expectedResults, BCUBED_F1,51.3);
 
-    setAll(lowResults,highResults,expectedResults,CEAFM_TP,8064);
+    setAll(lowResults, highResults, expectedResults, CEAFM_TP,8064);
     setLowHighExpected(lowResults, highResults, expectedResults, CEAFM_F1, 54.75, 54.80, 54.79);
 
     setAll(lowResults, highResults, expectedResults, CEAFE_TP, 2231.44);
