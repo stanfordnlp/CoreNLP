@@ -229,7 +229,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     if (VERBOSE) {
       System.err.println("Parsing: " + words);
     }
-    List<ScoredObject<Tree>> trees = null;
+    List<Tree> trees = null;
     // generate the constituent tree
     if (maxSentenceLength <= 0 || words.size() <= maxSentenceLength) {
       try {
@@ -261,50 +261,52 @@ public class ParserAnnotator extends SentenceAnnotator {
       }
     }
 
-    ScoredObject<Tree> so = new ScoredObject<>(tree, tree.score());
-    List<ScoredObject<Tree>> trees = Generics.newArrayList(1);
-    trees.add(so);
+    List<Tree> trees = Generics.newArrayList(1);
+    trees.add(tree);
     finishSentence(sentence, trees);
   }
 
-  private void finishSentence(CoreMap sentence, List<ScoredObject<Tree>> trees) {
+  private void finishSentence(CoreMap sentence, List<Tree> trees) {
 
     if (treeMap != null) {
-      for (ScoredObject<Tree> so : trees) {
-        Tree tree = treeMap.apply(so.object());
-        so.setObject(tree);
+      List<Tree> mappedTrees = Generics.newLinkedList();
+      for (Tree tree : trees) {
+        Tree mappedTree = treeMap.apply(tree);
+        mappedTrees.add(mappedTree);
       }
+      trees = mappedTrees;
     }
     
     ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, trees, extraDependencies);
 
     if (saveBinaryTrees) {
       TreeBinarizer binarizer = TreeBinarizer.simpleTreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack());
-      Tree binarized = binarizer.transformTree(trees.get(0).object());
+      Tree binarized = binarizer.transformTree(trees.get(0));
       Trees.convertToCoreLabels(binarized);
       sentence.set(TreeCoreAnnotations.BinarizedTreeAnnotation.class, binarized);
     }
   }
 
-  private List<ScoredObject<Tree>> doOneSentence(List<ParserConstraint> constraints,
+  private List<Tree> doOneSentence(List<ParserConstraint> constraints,
                              List<CoreLabel> words) {
     ParserQuery pq = parser.parserQuery();
     pq.setConstraints(constraints);
     pq.parse(words);
-    List<ScoredObject<Tree>> trees = null;
+    List<ScoredObject<Tree>> scoredObjects = null;
+    List<Tree> trees = Generics.newLinkedList();
     try {
-      trees = pq.getKBestPCFGParses(this.kBest);
-      if (trees == null || trees.size() < 1) {
+      scoredObjects = pq.getKBestPCFGParses(this.kBest);
+      if (scoredObjects == null || scoredObjects.size() < 1) {
         System.err.println("WARNING: Parsing of sentence failed.  " +
                 "Will ignore and continue: " +
                 Sentence.listToString(words));
       } else {
-        // -10000 denotes unknown words
-        for (ScoredObject<Tree> so : trees) {
-          so.setScore(so.score() % - 10000.0);
-          so.object().setScore(so.score());
+        for (ScoredObject<Tree> so : scoredObjects) {
+          // -10000 denotes unknown words
+          Tree tree = so.object();
+          tree.setScore(so.score() % - 10000.0);
+          trees.add(tree);
         }
-        //trees.get(0).object().setScore(pq.getPCFGScore() % -10000.0);
       }
     } catch (OutOfMemoryError e) {
       System.err.println("WARNING: Parsing of sentence ran out of memory.  " +

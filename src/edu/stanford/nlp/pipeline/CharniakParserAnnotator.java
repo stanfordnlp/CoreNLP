@@ -67,8 +67,8 @@ public class CharniakParserAnnotator implements Annotator {
           tree = ParserUtils.xTree(words);
         }
 
-        List<ScoredObject<Tree>> trees = Generics.newArrayList(1);
-        trees.add(new ScoredObject<>(tree, tree.score()));
+        List<Tree> trees = Generics.newArrayList(1);
+        trees.add(tree);
         ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, trees, GrammaticalStructure.Extras.NONE);
       }
     } else {

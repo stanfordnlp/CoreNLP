@@ -65,8 +65,8 @@ public class TreeCoreAnnotations {
   /**
    * The standard key for storing a list of k-best parses.
    */
-  public static class KBestTreesAnnotation implements CoreAnnotation<List<ScoredObject<Tree>>> {
-    public Class<List<ScoredObject<Tree>>> getType() {
+  public static class KBestTreesAnnotation implements CoreAnnotation<List<Tree>> {
+    public Class<List<Tree>> getType() {
       return ErasureUtils.uncheckedCast(List.class);
     }
   }

@@ -29,11 +29,10 @@ public class ParserAnnotatorUtils {
    */
   public static void fillInParseAnnotations(boolean verbose, boolean buildGraphs,
                                             GrammaticalStructureFactory gsf, CoreMap sentence,
-                                            List<ScoredObject<Tree>> trees, GrammaticalStructure.Extras extras) {
+                                            List<Tree> trees, GrammaticalStructure.Extras extras) {
 
     boolean first = true;
-    for (ScoredObject<Tree> so : trees) {
-      Tree tree = so.object();
+    for (Tree tree : trees) {
 
       // make sure all tree nodes are CoreLabels
       // TODO: why isn't this always true? something fishy is going on
@@ -72,7 +71,9 @@ public class ParserAnnotatorUtils {
         first = false;
       }
     }
-    sentence.set(TreeCoreAnnotations.KBestTreesAnnotation.class, trees);
+    if (trees.size() > 1) {
+      sentence.set(TreeCoreAnnotations.KBestTreesAnnotation.class, trees);
+    }
   }
 
   /**
