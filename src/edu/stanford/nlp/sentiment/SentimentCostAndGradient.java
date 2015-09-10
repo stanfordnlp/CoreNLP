@@ -12,11 +12,8 @@ import edu.stanford.nlp.neural.SimpleTensor;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.optimization.AbstractCachingDiffFunction;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.TwoDimensionalMap;
-import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
-import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
 // TODO: get rid of the word Sentiment everywhere
 public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
@@ -72,17 +69,15 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     public final TwoDimensionalMap<String, String, SimpleTensor> binaryTensorTD;
     // binaryCD stands for Classification Derivatives
     // if we combined classification derivatives, we just use an empty map
-    public final TwoDimensionalMap<String, String, SimpleMatrix> binaryCD;
+    public TwoDimensionalMap<String, String, SimpleMatrix> binaryCD;
 
     // unaryCD stands for Classification Derivatives
-    public final Map<String, SimpleMatrix> unaryCD;
+    public Map<String, SimpleMatrix> unaryCD;
 
     // word vector derivatives
     // will be filled on an as-needed basis, as opposed to having all
     // the words with a lot of empty vectors
-    public final Map<String, SimpleMatrix> wordVectorD;
-
-    public double error = 0.0;
+    public Map<String, SimpleMatrix> wordVectorD;
 
     public ModelDerivatives(SentimentModel model) {
       binaryTD = initDerivatives(model.binaryTransform);
@@ -92,68 +87,6 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       // wordVectorD will be filled on an as-needed basis
       wordVectorD = Generics.newTreeMap();
     }
-
-    public void add(ModelDerivatives other) {
-      addMatrices(binaryTD, other.binaryTD);
-      addTensors(binaryTensorTD, other.binaryTensorTD);
-      addMatrices(binaryCD, other.binaryCD);
-      addMatrices(unaryCD, other.unaryCD);
-      addMatrices(wordVectorD, other.wordVectorD);
-
-      error += other.error;
-    }
-
-    /**
-     * Add matrices from the second map to the first map, in place.
-     */
-    public static void addMatrices(TwoDimensionalMap<String, String, SimpleMatrix> first,
-                                   TwoDimensionalMap<String, String, SimpleMatrix> second) {
-      for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : first) {
-        if (second.contains(entry.getFirstKey(), entry.getSecondKey())) {
-          first.put(entry.getFirstKey(), entry.getSecondKey(), entry.getValue().plus(second.get(entry.getFirstKey(), entry.getSecondKey())));
-        }
-      }
-      for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : second) {
-        if (!first.contains(entry.getFirstKey(), entry.getSecondKey())) {
-          first.put(entry.getFirstKey(), entry.getSecondKey(), entry.getValue());
-        }
-      }
-    }
-
-    /**
-     * Add tensors from the second map to the first map, in place.
-     */
-    public static void addTensors(TwoDimensionalMap<String, String, SimpleTensor> first,
-                                  TwoDimensionalMap<String, String, SimpleTensor> second) {
-      for (TwoDimensionalMap.Entry<String, String, SimpleTensor> entry : first) {
-        if (second.contains(entry.getFirstKey(), entry.getSecondKey())) {
-          first.put(entry.getFirstKey(), entry.getSecondKey(), entry.getValue().plus(second.get(entry.getFirstKey(), entry.getSecondKey())));
-        }
-      }
-      for (TwoDimensionalMap.Entry<String, String, SimpleTensor> entry : second) {
-        if (!first.contains(entry.getFirstKey(), entry.getSecondKey())) {
-          first.put(entry.getFirstKey(), entry.getSecondKey(), entry.getValue());
-        }
-      }
-    }
-
-    /**
-     * Add matrices from the second map to the first map, in place.
-     */
-    public static void addMatrices(Map<String, SimpleMatrix> first,
-                                   Map<String, SimpleMatrix> second) {
-      for (Map.Entry<String, SimpleMatrix> entry : first.entrySet()) {
-        if (second.containsKey(entry.getKey())) {
-          first.put(entry.getKey(), entry.getValue().plus(second.get(entry.getKey())));
-        }
-      }
-      for (Map.Entry<String, SimpleMatrix> entry : second.entrySet()) {
-        if (!first.containsKey(entry.getKey())) {
-          first.put(entry.getKey(), entry.getValue());
-        }
-      }
-    }
-
 
     /**
      * Init a TwoDimensionalMap with 0 matrices for all the matrices in the original map.
@@ -204,10 +137,17 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     }
   }
 
-  private ModelDerivatives scoreDerivatives(List<Tree> trainingBatch) {
+  @Override
+  public void calculate(double[] theta) {
+    model.vectorToParams(theta);
+
+    // double localValue = 0.0;
+    // double[] localDerivative = new double[theta.length];
+
     // "final" makes this as fast as having separate maps declared in this function
     final ModelDerivatives derivatives = new ModelDerivatives(model);
 
+    // TODO: This part can easily be parallelized
     List<Tree> forwardPropTrees = Generics.newArrayList();
     for (Tree tree : trainingBatch) {
       Tree trainingTree = tree.deepCopy();
@@ -217,64 +157,17 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       forwardPropTrees.add(trainingTree);
     }
 
+    // TODO: we may find a big speedup by separating the derivatives and then summing
+    double error = 0.0;
     for (Tree tree : forwardPropTrees) {
       backpropDerivativesAndError(tree, derivatives.binaryTD, derivatives.binaryCD, derivatives.binaryTensorTD, derivatives.unaryCD, derivatives.wordVectorD);
-      derivatives.error += sumError(tree);
-    }
-
-    return derivatives;
-  }
-
-  class ScoringProcessor implements ThreadsafeProcessor<List<Tree>, ModelDerivatives> {
-    @Override
-    public ModelDerivatives process(List<Tree> trainingBatch) {
-      return scoreDerivatives(trainingBatch);
-    }
-
-    @Override
-    public ThreadsafeProcessor<List<Tree>, ModelDerivatives> newInstance() {
-      // should be threadsafe
-      return this;
-    }
-  }
-
-  @Override
-  public void calculate(double[] theta) {
-    model.vectorToParams(theta);
-
-    final ModelDerivatives derivatives;
-    if (model.op.trainOptions.nThreads == 1) {
-      derivatives = scoreDerivatives(trainingBatch);
-    } else {
-      // TODO: because some addition operations happen in different
-      // orders now, this results in slightly different values, which
-      // over time add up to significantly different models even when
-      // given the same random seed.  Probably not a big deal.
-      // To be more specific, for trees T1, T2, T3, ... Tn,
-      // when using one thread, we sum the derivatives T1 + T2 ...
-      // When using multiple threads, we first sum T1 + ... + Tk,
-      // then sum Tk+1 + ... + T2k, etc, for split size k.
-      // The splits are then summed in order.
-      // This different sum order results in slightly different numbers.
-      MulticoreWrapper<List<Tree>, ModelDerivatives> wrapper =
-        new MulticoreWrapper<List<Tree>, ModelDerivatives>(model.op.trainOptions.nThreads, new ScoringProcessor());
-      // use wrapper.nThreads in case the number of threads was automatically changed
-      for (List<Tree> chunk : CollectionUtils.partitionIntoFolds(trainingBatch, wrapper.nThreads())) {
-        wrapper.put(chunk);
-      }
-      wrapper.join();
-
-      derivatives = new ModelDerivatives(model);
-      while (wrapper.peek()) {
-        ModelDerivatives batchDerivatives = wrapper.poll();
-        derivatives.add(batchDerivatives);
-      }
+      error += sumError(tree);
     }
 
     // scale the error by the number of sentences so that the
     // regularization isn't drowned out for large training batchs
     double scale = (1.0 / trainingBatch.size());
-    value = derivatives.error * scale;
+    value = error * scale;
 
     value += scaleAndRegularize(derivatives.binaryTD, model.binaryTransform, scale, model.op.trainOptions.regTransformMatrix, false);
     value += scaleAndRegularize(derivatives.binaryCD, model.binaryClassification, scale, model.op.trainOptions.regClassification, true);

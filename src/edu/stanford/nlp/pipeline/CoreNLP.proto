@@ -59,7 +59,6 @@ message Sentence {
   optional ParseTree       binarizedParseTree                  = 31;
   optional ParseTree       annotatedParseTree                  = 32;
   optional string          sentiment                           = 33;
-  repeated ParseTree       kBestParseTrees                     = 34;
   optional DependencyGraph basicDependencies                   = 8;
   optional DependencyGraph collapsedDependencies               = 9;
   optional DependencyGraph collapsedCCProcessedDependencies    = 10;

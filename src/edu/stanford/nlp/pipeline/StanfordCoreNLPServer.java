@@ -6,7 +6,6 @@ import com.sun.net.httpserver.HttpServer;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.MetaClass;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -36,9 +35,49 @@ public class StanfordCoreNLPServer implements Runnable {
     serverPort = port;
 
     defaultProps = new Properties();
-    defaultProps.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
+    defaultProps.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse");
     defaultProps.setProperty("inputFormat", "text");
     defaultProps.setProperty("outputFormat", "json");
+  }
+
+
+  protected static Map<String, String> parseJSONMap(String json) {
+    Map<String, String> map = new HashMap<>();
+    String escaped = json
+        .replace("\\\\", "__ESCAPED_SLASH__")
+        .replace("\\\b", "__ESCAPED_B__")
+        .replace("\\\f", "__ESCAPED_F__")
+        .replace("\\\n", "__ESCAPED_N__")
+        .replace("\\\r", "__ESCAPED_R__")
+        .replace("\\\t", "__ESCAPED_T__")
+        .replace("\\\"", "__ESCAPED_QUOTE__").trim();
+    String[] mapEntries = escaped.substring(1, escaped.length() - 1).split(",");
+    for (String mapEntry : mapEntries) {
+      String[] fields = mapEntry.split(":");
+      String key = fields[0].trim()
+          .replace("__ESCAPED_SLASH__", "\\\\")
+          .replace("__ESCAPED_B__", "\\\b")
+          .replace("__ESCAPED_F__", "\\\f")
+          .replace("__ESCAPED_N__", "\\\n")
+          .replace("__ESCAPED_R__", "\\\r")
+          .replace("__ESCAPED_T__", "\\\t")
+          .replace("__ESCAPED_QUOTE__", "\\\"")
+          .replaceAll("^\"", "")
+          .replaceAll("\"$", "")
+          .trim();
+      String value = fields[1].trim()
+          .replace("__ESCAPED_SLASH__", "\\\\")
+          .replace("__ESCAPED_B__", "\\\b")
+          .replace("__ESCAPED_F__", "\\\f")
+          .replace("__ESCAPED_N__", "\\\n")
+          .replace("__ESCAPED_R__", "\\\r")
+          .replace("__ESCAPED_T__", "\\\t")
+          .replace("__ESCAPED_QUOTE__", "\\\"")
+          .replaceAll("^\"", "")
+          .replaceAll("\"$", "").trim();
+      map.put(key, value);
+    }
+    return map;
   }
 
   /**
@@ -172,6 +211,9 @@ public class StanfordCoreNLPServer implements Runnable {
         String[] queryFields = query.split("&");
         for (String queryField : queryFields) {
           String[] keyValue = queryField.split("=");
+          // Convention uses "+" for spaces.
+          keyValue[0] = keyValue[0].replace("+", " ");
+          keyValue[1] = keyValue[1].replace("+", " ");
           urlParams.put(keyValue[0], keyValue[1]);
         }
         return urlParams;
@@ -190,7 +232,7 @@ public class StanfordCoreNLPServer implements Runnable {
       Map<String, String> urlParams = getURLParams(httpExchange.getRequestURI());
       if (urlParams.containsKey("properties")) {
         // Parse properties
-        StringUtils.decodeMap(URLDecoder.decode(urlParams.get("properties"), "UTF-8")).entrySet()
+        parseJSONMap(urlParams.get("properties")).entrySet()
             .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
       }
 

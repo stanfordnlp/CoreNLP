@@ -75,7 +75,7 @@ public class ChineseSegmenterAnnotator implements Annotator {
         }
       }
     }
-    this.VERBOSE = PropertiesUtils.getBool(props, name + ".verbose", false);
+    this.VERBOSE = PropertiesUtils.getBool(props, name + ".verbose", true);
     if (model == null) {
       throw new RuntimeException("Expected a property " + name + ".model");
     }
