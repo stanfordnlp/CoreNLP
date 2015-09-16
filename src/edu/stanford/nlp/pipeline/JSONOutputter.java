@@ -1,5 +1,12 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.dcoref.CorefChain;
+import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
+import edu.stanford.nlp.ie.machinereading.structure.ExtractionObject;
+import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
+import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
+
 
 import edu.stanford.nlp.io.StringOutputStream;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -14,6 +21,8 @@ import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.TreePrint;
+import edu.stanford.nlp.util.CoreMap;
+
 
 import java.io.*;
 import java.util.Arrays;
@@ -22,6 +31,10 @@ import java.util.Iterator;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Output an Annotation to human readable JSON.
@@ -125,6 +138,51 @@ public class JSONOutputter extends AnnotationOutputter {
           }
         }));
       }
+
+      // Add coref values
+      if (doc.get(CorefCoreAnnotations.CorefChainAnnotation.class) != null) {
+        ArrayList<Map<String, Object>> corefElements = new ArrayList<Map<String, Object>>();
+        Map<Integer, CorefChain> corefChains =
+                doc.get(CorefCoreAnnotations.CorefChainAnnotation.class);
+        if (corefChains != null) {
+          //  JSONWriter corefJSON = new JSONWriter();
+          for (CorefChain chain : corefChains.values()) {
+            CorefChain.CorefMention representative =
+                chain.getRepresentativeMention();
+            for (CorefChain.CorefMention mention : chain.getMentionsInTextualOrder()) {
+              if (mention == representative)
+                continue;
+              Map<String, Object> mentionElem = new HashMap<String, Object>();
+              mentionElem.put("mention.sentNum", mention.sentNum );
+              mentionElem.put("mention.headIndex", mention.headIndex );
+              mentionElem.put("mention.startIndex", mention.startIndex );
+              mentionElem.put("mention.endIndex", mention.endIndex );
+              mentionElem.put("representative.sentNum", representative.sentNum );
+              mentionElem.put("representative.headIndex", representative.headIndex );
+              mentionElem.put("representative.startIndex", representative.startIndex );
+              mentionElem.put("representative.endIndex", representative.endIndex );
+              mentionElem.put("mention.mentionSpan", mention.mentionSpan );
+              mentionElem.put("representative.mentionSpan", representative.mentionSpan );
+              corefElements.add(mentionElem);
+            }
+          }
+          l1.set("corefs", corefElements );
+          /*
+          mention.sentNum,
+                  mention.headIndex,
+                  mention.startIndex,
+                  mention.endIndex,
+                  representative.sentNum,
+                  representative.headIndex,
+                  representative.startIndex,
+                  representative.endIndex,
+                  mention.mentionSpan,
+                  representative.mentionSpan
+          */
+
+        }
+      }
+
     });
 
     l0.writer.flush();  // flush
@@ -222,6 +280,8 @@ public class JSONOutputter extends AnnotationOutputter {
         routeObject(indent, Integer.toString((Integer) value));
       } else if (value instanceof Double) {
         routeObject(indent, Double.toString((Double) value));
+      } else if (value instanceof Map) {
+        objectMap(indent, (Map) value);
       } else {
         throw new RuntimeException("Unknown object to serialize: " + value);
       }
@@ -253,6 +313,31 @@ public class JSONOutputter extends AnnotationOutputter {
           routeObject(indent + 1, value);
         }
       });
+      writer.write("\n"); indent(indent); writer.write("}");
+    }
+
+    public void objectMap(int indent, Map<String, Object> cmap) {
+      writer.write("{");
+      final boolean[] firstCall = new boolean[]{ true };
+      for (Map.Entry<String, Object> entry : cmap.entrySet()) {
+        String key = entry.getKey();
+        Object value = entry.getValue();
+        if (key != null && value != null) {
+          // First call overhead
+          if (!firstCall[0]) {
+            writer.write(",");
+          }
+          firstCall[0] = false;
+          // Write the key
+          writer.write("\n");
+          indent(indent + 1);
+          writer.write("\"");
+          writer.write(cleanJSON(key));
+          writer.write("\": ");
+          // Write the value
+          routeObject(indent + 1, value);
+        }
+      }
       writer.write("\n"); indent(indent); writer.write("}");
     }
 
