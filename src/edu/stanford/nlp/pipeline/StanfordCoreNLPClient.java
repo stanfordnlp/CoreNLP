@@ -232,7 +232,6 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
       String key = keys.nextElement().toString();
       serverProperties.setProperty(key, properties.getProperty(key));
     }
-    Collections.shuffle(backends, new Random(System.currentTimeMillis()));
     this.scheduler = new BackendScheduler(backends);
 
     // Set required serverProperties

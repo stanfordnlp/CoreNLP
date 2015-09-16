@@ -85,8 +85,11 @@ public class TokenizerAnnotator implements Annotator {
       return Collections.unmodifiableMap(map);
     }
 
-    /***
-     * Get TokenizerType based on what's in the properties
+    /**
+     * Get TokenizerType based on what's in the properties.
+     *
+     * @param props Properties to find tokenizer options in
+     * @return An element of the TokenizerType enum indicating the tokenizer to use
      */
     public static TokenizerType getTokenizerType(Properties props) {
       String tokClass = props.getProperty("tokenize.class", null);
@@ -280,4 +283,5 @@ public class TokenizerAnnotator implements Annotator {
   public Set<Requirement> requirementsSatisfied() {
     return Collections.singleton(TOKENIZE_REQUIREMENT);
   }
+
 }

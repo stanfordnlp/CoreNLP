@@ -38,7 +38,7 @@ public class SentenceITest {
   public void testNER() {
     assertEquals(
         new ArrayList <String>(){{ add("PERSON"); add("PERSON"); add("O"); add("O"); add("O"); add("LOCATION"); add("LOCATION"); add("O"); }},
-        new Sentence("George Bush lives in the United States.").nerTags());
+        new Sentence("George Bush lives in the United States.").ners());
   }
 
   @Test
