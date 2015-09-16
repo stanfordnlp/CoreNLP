@@ -12,7 +12,7 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.ScoredObject;
+
 
 /** @author David McClosky */
 public class ParserAnnotatorUtils {
