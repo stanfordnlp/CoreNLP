@@ -416,6 +416,29 @@ public class Document {
   }
 
   /**
+   * Like the {@link Document@xml(Function...)} function, but with minified XML more suitable
+   * for sending over the wire.
+   *
+   * @param functions The (possibly empty) list of annotations to populate on the document before dumping it
+   *                  to XML.
+   * @return The XML String for this document, without unecessary whitespace.
+   *
+   */
+  @SafeVarargs
+  public final String xmlMinified(Function<Sentence, Object>... functions) {
+    for (Function<Sentence, Object> f : functions) {
+      f.apply(this.sentence(0));
+    }
+    try {
+      AnnotationOutputter.Options options = new AnnotationOutputter.Options();
+      options.pretty = false;
+      return new XMLOutputter().print(this.asAnnotation(), options);
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
+  }
+
+  /**
    * Get the sentences in this document, as a list.
    * @param props The properties to use in the {@link edu.stanford.nlp.pipeline.WordsToSentencesAnnotator}.
    * @return A list of Sentence objects representing the sentences in the document.
