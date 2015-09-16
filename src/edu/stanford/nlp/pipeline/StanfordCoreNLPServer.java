@@ -172,9 +172,6 @@ public class StanfordCoreNLPServer implements Runnable {
         String[] queryFields = query.split("&");
         for (String queryField : queryFields) {
           String[] keyValue = queryField.split("=");
-          // Convention uses "+" for spaces.
-          keyValue[0] = keyValue[0].replace("+", " ");
-          keyValue[1] = keyValue[1].replace("+", " ");
           urlParams.put(keyValue[0], keyValue[1]);
         }
         return urlParams;

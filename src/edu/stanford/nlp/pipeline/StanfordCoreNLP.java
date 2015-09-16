@@ -432,7 +432,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   public void annotate(final Annotation annotation, final Consumer<Annotation> callback){
     if (PropertiesUtils.getInt(properties, "threads", 1) == 1) {
       annotate(annotation);
-      callback.accept(annotation);
     } else {
       try {
         availableProcessors.acquire();
@@ -785,8 +784,13 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       try {
         switch (outputFormat) {
           case XML: {
-            AnnotationOutputter outputter = MetaClass.create("edu.stanford.nlp.pipeline.XMLOutputter").createInstance();
-            outputter.print(annotation, fos, outputOptions);
+            try {
+              Class clazz = Class.forName("edu.stanford.nlp.pipeline.XMLOutputter");
+              Method method = clazz.getMethod("xmlPrint", Annotation.class, OutputStream.class, StanfordCoreNLP.class);
+              method.invoke(null, annotation, fos, outputOptions);
+            } catch (NoSuchMethodException | IllegalAccessException | ClassNotFoundException | InvocationTargetException e) {
+              throw new RuntimeException(e);
+            }
             break;
           }
           case JSON: {
@@ -979,7 +983,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
         log("Annotating file " + file.getAbsoluteFile());
         annotate.accept(annotation, finishedAnnotation -> {
-          log("done.");
           Throwable ex = finishedAnnotation.get(CoreAnnotations.ExceptionAnnotation.class);
           if (ex == null) {
             //--Output File
