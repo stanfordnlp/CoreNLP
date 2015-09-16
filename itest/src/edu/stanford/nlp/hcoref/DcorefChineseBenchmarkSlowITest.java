@@ -104,17 +104,17 @@ public class DcorefChineseBenchmarkSlowITest extends TestCase {
     Counter<String> expectedResults = new ClassicCounter<String>();
 
 
-    setAll(lowResults,highResults,expectedResults,MENTION_TP,12370);
-    setAll(lowResults,highResults,expectedResults,MENTION_F1,55.6);
+    setAll(lowResults, highResults, expectedResults, MENTION_TP, 12370);
+    setAll(lowResults, highResults, expectedResults, MENTION_F1, 55.6);
 
-    setAll(lowResults,highResults,expectedResults,MUC_TP,5965);
+    setLowHighExpected(lowResults, highResults, expectedResults, MUC_TP, 5965, 5970, 5965);
     setAll(lowResults,highResults,expectedResults,MUC_F1,57.93);
 
-    setAll(lowResults,highResults,expectedResults,BCUBED_TP,6868.81);
-    setAll(lowResults,highResults,expectedResults,BCUBED_F1,51.3);
+    setLowHighExpected(lowResults, highResults, expectedResults, BCUBED_TP, 6868.8, 6869.0, 6868.81);
+    setAll(lowResults, highResults, expectedResults, BCUBED_F1,51.3);
 
-    setAll(lowResults,highResults,expectedResults,CEAFM_TP,8064);
-    setAll(lowResults, highResults, expectedResults, CEAFM_F1, 54.79);
+    setAll(lowResults, highResults, expectedResults, CEAFM_TP,8064);
+    setLowHighExpected(lowResults, highResults, expectedResults, CEAFM_F1, 54.75, 54.80, 54.79);
 
     setAll(lowResults, highResults, expectedResults, CEAFE_TP, 2231.44);
     setLowHighExpected(lowResults, highResults, expectedResults, CEAFE_F1, 50.45, 50.47, 50.47);
@@ -128,36 +128,36 @@ public class DcorefChineseBenchmarkSlowITest extends TestCase {
     BufferedReader r = new BufferedReader(new StringReader(runCorefTest(true)));
     for (String line; (line = r.readLine()) != null; ) {
       Matcher m1 = MENTION_PATTERN.matcher(line);
-      if (m1.matches() ){
+      if (m1.matches()) {
         results.setCount(MENTION_TP, Double.parseDouble(m1.group(1)));
         results.setCount(MENTION_F1, Double.parseDouble(m1.group(2)));
       }
       Matcher m2 = MUC_PATTERN.matcher(line);
-      if (m2.matches() ){
+      if (m2.matches()) {
         results.setCount(MUC_TP, Double.parseDouble(m2.group(1)));
         results.setCount(MUC_F1, Double.parseDouble(m2.group(2)));
       }
       Matcher m3 = BCUBED_PATTERN.matcher(line);
-      if (m3.matches() ){
+      if (m3.matches()) {
         results.setCount(BCUBED_TP, Double.parseDouble(m3.group(1)));
         results.setCount(BCUBED_F1, Double.parseDouble(m3.group(2)));
       }
       Matcher m4 = CEAFM_PATTERN.matcher(line);
-      if (m4.matches() ){
+      if (m4.matches()) {
         results.setCount(CEAFM_TP, Double.parseDouble(m4.group(1)));
         results.setCount(CEAFM_F1, Double.parseDouble(m4.group(2)));
       }
       Matcher m5 = CEAFE_PATTERN.matcher(line);
-      if (m5.matches() ){
+      if (m5.matches()) {
         results.setCount(CEAFE_TP, Double.parseDouble(m5.group(1)));
         results.setCount(CEAFE_F1, Double.parseDouble(m5.group(2)));
       }
       Matcher m6 = BLANC_PATTERN.matcher(line);
-      if (m6.matches() ){
+      if (m6.matches()) {
         results.setCount(BLANC_F1, Double.parseDouble(m6.group(1)));
       }
       Matcher m7 = CONLL_PATTERN.matcher(line);
-      if (m7.matches() ){
+      if (m7.matches()) {
         results.setCount(CONLL_SCORE, Double.parseDouble(m7.group(1)));
       }
     }
