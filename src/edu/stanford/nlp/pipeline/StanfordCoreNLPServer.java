@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.MetaClass;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
@@ -25,6 +26,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
   protected HttpServer server;
   protected int serverPort;
+  protected final FileHandler staticPageHandle;
 
   public static int HTTP_OK = 200;
   public static int HTTP_BAD_INPUT = 400;
@@ -32,13 +34,15 @@ public class StanfordCoreNLPServer implements Runnable {
   public final Properties defaultProps;
 
 
-  public StanfordCoreNLPServer(int port) {
+  public StanfordCoreNLPServer(int port) throws IOException {
     serverPort = port;
 
     defaultProps = new Properties();
     defaultProps.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
     defaultProps.setProperty("inputFormat", "text");
     defaultProps.setProperty("outputFormat", "json");
+
+    this.staticPageHandle = new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.html");
   }
 
   /**
@@ -50,8 +54,25 @@ public class StanfordCoreNLPServer implements Runnable {
       // Return a simple text message that says pong.
       httpExchange.getResponseHeaders().set("Content-Type", "text/plain");
       String response = "pong\n";
-      httpExchange.sendResponseHeaders(HTTP_OK, response.length());
+      httpExchange.sendResponseHeaders(HTTP_OK, response.getBytes().length);
       httpExchange.getResponseBody().write(response.getBytes());
+      httpExchange.close();
+    }
+  }
+
+  /**
+   * Serve a file from the filesystem or classpath
+   */
+  protected static class FileHandler implements HttpHandler {
+    private final String content;
+    public FileHandler(String fileOrClasspath) throws IOException {
+      this.content = IOUtils.slurpReader(IOUtils.getBufferedReaderFromClasspathOrFileSystem(fileOrClasspath));
+    }
+    @Override
+    public void handle(HttpExchange httpExchange) throws IOException {
+      httpExchange.getResponseHeaders().set("Content-Type", "text/html");
+      httpExchange.sendResponseHeaders(HTTP_OK, content.getBytes().length);
+      httpExchange.getResponseBody().write(content.getBytes());
       httpExchange.close();
     }
   }
@@ -59,7 +80,7 @@ public class StanfordCoreNLPServer implements Runnable {
   /**
    * The main handler for taking an annotation request, and annotating it.
    */
-  protected static class SimpleAnnotateHandler implements HttpHandler {
+  protected class SimpleAnnotateHandler implements HttpHandler {
     /**
      * The default properties to use in the absence of anything sent by the client.
      */
@@ -121,11 +142,18 @@ public class StanfordCoreNLPServer implements Runnable {
       Properties props;
       Annotation ann;
       StanfordCoreNLP.OutputFormat of;
-      log("Received message from " + httpExchange.getRemoteAddress());
+      log("[" + httpExchange.getRemoteAddress() + "] Received message");
       try {
         props = getProperties(httpExchange);
         ann = getDocument(props, httpExchange);
-        of = StanfordCoreNLP.OutputFormat.valueOf(props.getProperty("outputFormat").toUpperCase());
+        of = StanfordCoreNLP.OutputFormat.valueOf(props.getProperty("outputFormat", "json").toUpperCase());
+        // Handle direct browser connections (i.e., not a POST request).
+        if (ann.get(CoreAnnotations.TextAnnotation.class).length() == 0) {
+          log("[" + httpExchange.getRemoteAddress() + "] Interactive connection");
+          staticPageHandle.handle(httpExchange);
+          return;
+        }
+        log("[" + httpExchange.getRemoteAddress() + "] API call");
       } catch (IOException | ClassNotFoundException e) {
         // Return error message.
         e.printStackTrace();
@@ -138,7 +166,7 @@ public class StanfordCoreNLPServer implements Runnable {
       }
 
       try {
-        // Annoatate
+        // Annotate
         StanfordCoreNLP pipeline = mkStanfordCoreNLP(props);
         pipeline.annotate(ann);
 
@@ -219,11 +247,11 @@ public class StanfordCoreNLPServer implements Runnable {
   @Override
   public void run() {
     try {
-
       server = HttpServer.create(new InetSocketAddress(serverPort), 0); // 0 is the default 'backlog'
-      server.createContext("/ping", new PingHandler());
       server.createContext("/", new SimpleAnnotateHandler(defaultProps));
-//            server.createContext("/protobuf", new PingHandler());
+      server.createContext("/corenlp-brat.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.js"));
+      server.createContext("/corenlp-brat.cs", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.css"));
+      server.createContext("/ping", new PingHandler());
       server.start();
       log("StanfordCoreNLPServer listening at " + server.getAddress());
     } catch (IOException e) {
@@ -231,7 +259,7 @@ public class StanfordCoreNLPServer implements Runnable {
     }
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     int port = DEFAULT_PORT;
     if(args.length > 0) {
       port = Integer.parseInt(args[0]);
