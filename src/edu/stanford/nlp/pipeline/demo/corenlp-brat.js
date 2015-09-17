@@ -28,6 +28,16 @@ head.js(
 var colors = ['red'];
 
 /**
+ * Add the startsWith function to the String class
+ */
+if (typeof String.prototype.startsWith != 'function') {
+  // see below for better implementation!
+  String.prototype.startsWith = function (str){
+    return this.indexOf(str) === 0;
+  };
+}
+
+/**
  * A reverse map of PTB tokens to their original gloss
  */
 var tokensMap = {
