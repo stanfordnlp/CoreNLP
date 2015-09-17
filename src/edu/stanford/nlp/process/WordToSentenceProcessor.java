@@ -133,7 +133,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     } else if (name != null && name.contains("two")) {
       return NewlineIsSentenceBreak.TWO_CONSECUTIVE;
     } else {
-      throw new IllegalArgumentException("Not a valid NewlineIsSentenceBreak name");
+      throw new IllegalArgumentException("Not a valid NewlineIsSentenceBreak name: '" + name + "' (should be one of 'always', 'never', 'two')");
     }
   }
 

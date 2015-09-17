@@ -753,7 +753,7 @@ public class Preprocessor {
     if(!doc.speakers.containsKey(paragraphUtterIndex)) {
       if(!nextParagraphSpeaker.equals("")) {
         doc.speakers.put(paragraphUtterIndex, nextParagraphSpeaker);
-      } else if (paragraph.size() > 0) {  // find the speaker of this paragraph (John, nbc news)
+      } else {  // find the speaker of this paragraph (John, nbc news)
         CoreMap lastSent = paragraph.get(paragraph.size()-1);
         String speaker = "";
         boolean hasVerb = false;
@@ -783,9 +783,6 @@ public class Preprocessor {
   }
 
   private static String findNextParagraphSpeaker(Document doc, List<CoreMap> paragraph, int paragraphOffset, Dictionaries dict) {
-    if (paragraph.isEmpty()) {
-      return "";
-    }
     CoreMap lastSent = paragraph.get(paragraph.size()-1);
     String speaker = "";
     for(CoreLabel w : lastSent.get(CoreAnnotations.TokensAnnotation.class)) {
