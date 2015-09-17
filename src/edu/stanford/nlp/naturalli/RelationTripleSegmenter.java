@@ -45,10 +45,19 @@ public class RelationTripleSegmenter {
     add(SemgrexPattern.compile("{$}=verb >nsubjpass ( {}=subject >/conj:and/=subjIgnored {}=object )"));
   }});
 
+  /** A list of patterns to match relation extractions against */
+  public final List<SemgrexPattern> VP_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
+    for (SemgrexPattern pattern : VERB_PATTERNS) {
+      String fullPattern = pattern.pattern();
+      String vpPattern = fullPattern.replace(">/.subj(pass)?/ {}=subject", "");
+      add(SemgrexPattern.compile(vpPattern));
+    }
+  }});
+
   /**
    * A set of nominal patterns, that don't require being in a coherent clause, but do require NER information.
    */
-  private final List<TokenSequencePattern> NOUN_TOKEN_PATTERNS = Collections.unmodifiableList(new ArrayList<TokenSequencePattern>() {{
+  public final List<TokenSequencePattern> NOUN_TOKEN_PATTERNS = Collections.unmodifiableList(new ArrayList<TokenSequencePattern>() {{
     // { NER nominal_verb NER,
     //   United States president Obama }
     add(TokenSequencePattern.compile("(?$object [ner:/PERSON|ORGANIZATION|LOCATION+/]+ ) (?$beof_comp [ {tag:/NN.*/} & !{ner:/PERSON|ORGANIZATION|LOCATION/} ]+ ) (?$subject [ner:/PERSON|ORGANIZATION|LOCATION/]+ )"));
@@ -335,13 +344,13 @@ public class RelationTripleSegmenter {
   private final Counter<SemgrexPattern> VERB_PATTERN_HITS = new ClassicCounter<>();
 
   /** A set of valid arcs denoting a subject entity we are interested in */
-  private final Set<String> VALID_SUBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
+  public final Set<String> VALID_SUBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
     add("amod"); add("compound"); add("aux"); add("nummod"); add("nmod:poss"); add("nmod:tmod"); add("expl");
     add("nsubj");
   }});
 
   /** A set of valid arcs denoting an object entity we are interested in */
-  private final Set<String> VALID_OBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
+  public final Set<String> VALID_OBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
     add("amod"); add("compound"); add("aux"); add("nummod"); add("nmod"); add("nsubj"); add("nmod:*"); add("nmod:poss");
     add("nmod:tmod"); add("conj:and"); add("advmod"); add("acl");
     // add("advcl"); // Born in Hawaii, Obama is a US citizen; citizen -advcl-> Born.
@@ -369,8 +378,9 @@ public class RelationTripleSegmenter {
    * @see RelationTripleSegmenter#getValidAdverbChunk(edu.stanford.nlp.semgraph.SemanticGraph, edu.stanford.nlp.ling.IndexedWord, Optional)
    */
   @SuppressWarnings("StatementWithEmptyBody")
-  private Optional<List<CoreLabel>> getValidChunk(SemanticGraph parse, IndexedWord originalRoot,
-                                                  Set<String> validArcs, Optional<String> ignoredArc) {
+  protected Optional<List<CoreLabel>> getValidChunk(SemanticGraph parse, IndexedWord originalRoot,
+                                                    Set<String> validArcs, Optional<String> ignoredArc,
+                                                    boolean allowExtraArcs) {
     PriorityQueue<CoreLabel> chunk = new FixedPrioritiesPriorityQueue<>();
     Queue<IndexedWord> fringe = new LinkedList<>();
     IndexedWord root = originalRoot;
@@ -414,7 +424,11 @@ public class RelationTripleSegmenter {
         } else if (ignoredArc.isPresent() && ignoredArc.get().equals(name)) {
           // noop; ignore explicitly requested noop arc.
         } else if (!validArcs.contains(edge.getRelation().getShortName().replaceAll(":.*",":*"))) {
-          return Optional.empty();
+          if (!allowExtraArcs) {
+            return Optional.empty();
+          } else {
+            // noop: just some dangling arc
+          }
         } else {
           fringe.add(edge.getDependent());
         }
@@ -425,6 +439,14 @@ public class RelationTripleSegmenter {
   }
 
   /**
+   * @see RelationTripleSegmenter#getValidChunk(SemanticGraph, IndexedWord, Set, Optional, boolean)
+   */
+  protected Optional<List<CoreLabel>> getValidChunk(SemanticGraph parse, IndexedWord originalRoot,
+                                                    Set<String> validArcs, Optional<String> ignoredArc) {
+    return getValidChunk(parse, originalRoot, validArcs, ignoredArc, false);
+  }
+
+  /**
    * Get the yield of a given subtree, if it is a valid subject.
    * Otherwise, return {@link java.util.Optional#empty()}}.
    * @param parse The parse tree we are extracting a subtree from.
@@ -432,7 +454,7 @@ public class RelationTripleSegmenter {
    * @param noopArc An optional edge type to ignore in gathering the chunk.
    * @return If this subtree is a valid entity, we return its yield. Otherwise, we return empty.
    */
-  private Optional<List<CoreLabel>> getValidSubjectChunk(SemanticGraph parse, IndexedWord root, Optional<String> noopArc) {
+  protected Optional<List<CoreLabel>> getValidSubjectChunk(SemanticGraph parse, IndexedWord root, Optional<String> noopArc) {
     return getValidChunk(parse, root, VALID_SUBJECT_ARCS, noopArc);
   }
 
@@ -444,7 +466,7 @@ public class RelationTripleSegmenter {
    * @param noopArc An optional edge type to ignore in gathering the chunk.
    * @return If this subtree is a valid entity, we return its yield. Otherwise, we return empty.
    */
-  private Optional<List<CoreLabel>> getValidObjectChunk(SemanticGraph parse, IndexedWord root, Optional<String> noopArc) {
+  protected Optional<List<CoreLabel>> getValidObjectChunk(SemanticGraph parse, IndexedWord root, Optional<String> noopArc) {
     return getValidChunk(parse, root, VALID_OBJECT_ARCS, noopArc);
   }
 
@@ -456,7 +478,7 @@ public class RelationTripleSegmenter {
    * @param noopArc An optional edge type to ignore in gathering the chunk.
    * @return If this subtree is a valid adverb, we return its yield. Otherwise, we return empty.
    */
-  private Optional<List<CoreLabel>> getValidAdverbChunk(SemanticGraph parse, IndexedWord root, Optional<String> noopArc) {
+  protected Optional<List<CoreLabel>> getValidAdverbChunk(SemanticGraph parse, IndexedWord root, Optional<String> noopArc) {
     return getValidChunk(parse, root, VALID_ADVERB_ARCS, noopArc);
   }
 
@@ -478,7 +500,9 @@ public class RelationTripleSegmenter {
    * @param consumeAll if true, force the entire parse to be consumed by the pattern.
    * @return A relation triple, if this sentence matches one of the patterns of a valid relation triple.
    */
-  private Optional<RelationTriple> segmentVerb(SemanticGraph parse, Optional<Double> confidence, boolean consumeAll) {
+  private Optional<RelationTriple> segmentVerb(SemanticGraph parse,
+                                               Optional<Double> confidence,
+                                               boolean consumeAll) {
     // Run pattern loop
     PATTERN_LOOP: for (SemgrexPattern pattern : VERB_PATTERNS) {  // For every candidate pattern...
       SemgrexMatcher m = pattern.matcher(parse);
