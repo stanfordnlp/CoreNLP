@@ -37,6 +37,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Distribution;
 import edu.stanford.nlp.stats.Counters;
+import edu.stanford.nlp.util.logging.Logging;
 
 import java.io.*;
 import java.text.DecimalFormat;
@@ -98,7 +99,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
 
   private double weight(int iFeature, int iLabel) {
     if (iFeature < 0) {
-      //System.err.println("feature not seen ");
+      //Logging.logger(this.getClass()).info("feature not seen ");
       return 0.0;
     }
     assert iFeature < weights.length;
@@ -141,7 +142,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
       if (index >= 0) {
         features[i++] = index;
       } else {
-        //System.err.println("FEATURE LESS THAN ZERO: " + f);
+        //Logging.logger(this.getClass()).info("FEATURE LESS THAN ZERO: " + f);
       }
     }
     int[] activeFeatures = new int[i];
@@ -645,7 +646,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
     // (Note: can't repeatedly iterate over PriorityQueue.)
     int actualSize = biggestKeys.size();
     Pair<Integer, Integer>[] bigArray = ErasureUtils.<Pair<Integer, Integer>>mkTArray(Pair.class,actualSize);
-    // System.err.println("biggestKeys is " + biggestKeys);
+    // Logging.logger(this.getClass()).info("biggestKeys is " + biggestKeys);
     if (printDescending) {
       for (int j = actualSize - 1; j >= 0; j--) {
         bigArray[j] = biggestKeys.removeFirst();
@@ -656,7 +657,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
       }
     }
     List<Pair<Integer, Integer>> bigColl = Arrays.asList(bigArray);
-    // System.err.println("bigColl is " + bigColl);
+    // Logging.logger(this.getClass()).info("bigColl is " + bigColl);
 
     // find longest key length (for pretty printing) with a limit
     int maxLeng = 0;
@@ -1397,9 +1398,9 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
 
 
   public void adaptWeights(Dataset<L, F> adapt,LinearClassifierFactory<L, F> lcf) {
-    System.err.println("before adapting, weights size="+weights.length);
+    Logging.logger(this.getClass()).info("before adapting, weights size="+weights.length);
     weights = lcf.adaptWeights(weights,adapt);
-    System.err.println("after adapting, weights size="+weights.length);
+    Logging.logger(this.getClass()).info("after adapting, weights size=" + weights.length);
   }
 
   public double[][] weights() {
@@ -1473,7 +1474,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
       }
       out.close();
     } catch (Exception e) {
-      System.err.println("Error attempting to save classifier to file="+file);
+      Logging.logger(this.getClass()).info("Error attempting to save classifier to file=" + file);
       e.printStackTrace();
     }
   }

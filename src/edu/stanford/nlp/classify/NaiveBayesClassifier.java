@@ -34,6 +34,8 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.logging.Logging;
+
 import java.io.PrintStream;
 import java.util.Iterator;
 import java.util.Set;
@@ -124,7 +126,7 @@ public class NaiveBayesClassifier<L, F> implements Classifier<L, F>, RVFClassifi
       }
       total++;
     }
-    System.err.println("correct " + correct + " out of " + total);
+    Logging.logger(this.getClass()).info("correct " + correct + " out of " + total);
     return correct / (float) total;
   }
 
