@@ -1126,7 +1126,7 @@ public class IOUtils {
    */
   public static String slurpFile(String filename, String encoding)
           throws IOException {
-    Reader r = getBufferedReaderFromClasspathOrFileSystem(filename, encoding);
+    Reader r = readerFromString(filename, encoding);
     return IOUtils.slurpReader(r);
   }
 
@@ -1458,17 +1458,6 @@ public class IOUtils {
    */
   public static OutputStream getFileOutputStream(String filename) throws IOException {
     OutputStream out = new FileOutputStream(filename);
-    if (filename.endsWith(".gz")) {
-      out = new GZIPOutputStream(out);
-    } else if (filename.endsWith(".bz2")) {
-      //out = new CBZip2OutputStream(out);
-      out = getBZip2PipedOutputStream(filename);
-    }
-    return out;
-  }
-
-  public static OutputStream getFileOutputStream(String filename, boolean append) throws IOException {
-    OutputStream out = new FileOutputStream(filename, append);
     if (filename.endsWith(".gz")) {
       out = new GZIPOutputStream(out);
     } else if (filename.endsWith(".bz2")) {
