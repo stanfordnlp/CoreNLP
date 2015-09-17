@@ -432,7 +432,7 @@ public class OpenIE implements Annotator {
       props.setProperty("parse.extradependencies", "ref_only_uncollapsed");
     }
     if ("".equals(props.getProperty("tokenize.class", ""))) {
-      props.setProperty("tokenize.class", "WhitespaceTokenizer");
+      props.setProperty("tokenize.class", "PTBTokenizer");
     }
     if ("".equals(props.getProperty("tokenize.language", ""))) {
       props.setProperty("tokenize.language", "en");

@@ -429,7 +429,7 @@ public class RelationTripleSegmenter {
           // noop; ignore nsubj, cop for extractions with copula
         } else if (ignoredArc.isPresent() && ignoredArc.get().equals(name)) {
           // noop; ignore explicitly requested noop arc.
-        } else if (!validArcs.contains(edge.getRelation().getShortName().replaceAll(":.*",":*"))) {
+        } else if (!validArcs.contains(edge.getRelation().getShortName()) && !validArcs.contains(edge.getRelation().getShortName().replaceAll(":.*",":*"))) {
           if (!allowExtraArcs) {
             return Optional.empty();
           } else {

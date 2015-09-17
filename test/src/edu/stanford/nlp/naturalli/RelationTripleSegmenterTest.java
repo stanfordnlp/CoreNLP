@@ -20,6 +20,7 @@ import java.util.Optional;
  *
  * @author Gabor Angeli
  */
+@SuppressWarnings("AssertEqualsBetweenInconvertibleTypes")
 public class RelationTripleSegmenterTest extends TestCase {
 
   protected Optional<RelationTriple> mkExtraction(String conll) {
@@ -142,7 +143,7 @@ public class RelationTripleSegmenterTest extends TestCase {
 
 
   public void testToSentenceNoIndices() {
-    assertEquals(new ArrayList<CoreLabel>(){{
+    assertEquals(new ArrayList<CoreLabel>() {{
       add(IETestUtils.mkWord("blue", -1));
       add(IETestUtils.mkWord("cats", -1));
       add(IETestUtils.mkWord("play", -1));
@@ -225,6 +226,17 @@ public class RelationTripleSegmenterTest extends TestCase {
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tfish\tlike\tto swim", extraction.get().toString());
+  }
+
+  public void testMyCatsPlayWithYarn() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tmy\t2\tnmod:poss\n" +
+        "2\tcats\t3\tnsubj\n" +
+        "3\tplay\t0\troot\n" +
+        "5\tyarn\t3\tnmod:with\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tmy cats\tplay with\tyarn", extraction.get().toString());
   }
 
   public void testCatsAreCute() {
