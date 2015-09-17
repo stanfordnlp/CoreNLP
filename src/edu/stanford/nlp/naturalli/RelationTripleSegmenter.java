@@ -10,8 +10,6 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
-import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.PriorityQueue;
 
@@ -29,27 +27,35 @@ public class RelationTripleSegmenter {
   private final boolean allowNominalsWithoutNER;
 
   /** A list of patterns to match relation extractions against */
-  private List<SemgrexPattern> VERB_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
+  public final List<SemgrexPattern> VERB_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
     // { blue cats play [quietly] with yarn,
     //   Jill blew kisses at Jack,
     //   cats are standing next to dogs }
     add(SemgrexPattern.compile("{$}=verb ?>/cop|aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/(nmod|acl|advcl):.*/=prepEdge ( {}=object ?>appos {} = appos ) ?>dobj {pos:/N.*/}=relObj"));
+    // { cats are cute,
+    //   horses are grazing peacefully }
+    add(SemgrexPattern.compile("{$}=object >/.subj(pass)?/ {}=subject >/cop|aux(pass)?/ {}=verb"));
     // { fish like to swim }
     add(SemgrexPattern.compile("{$}=verb >/.subj(pass)?/ {}=subject >xcomp ( {}=object ?>appos {}=appos )"));
     // { cats have tails }
     add(SemgrexPattern.compile("{$}=verb ?>/aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/[di]obj|xcomp/ ( {}=object ?>appos {}=appos )"));
-    // { cats are cute,
-    //   horses are grazing peacefully }
-    add(SemgrexPattern.compile("{$}=object >/.subj(pass)?/ {}=subject >/cop|aux(pass)?/ {}=verb"));
     // { Tom and Jerry were fighting }
     add(SemgrexPattern.compile("{$}=verb >nsubjpass ( {}=subject >/conj:and/=subjIgnored {}=object )"));
   }});
 
-  /** A list of patterns to match relation extractions against */
+  /**
+   * <p>
+   *   A set of derivative patterns from {@link RelationTripleSegmenter#VERB_PATTERNS} that ignore the subject
+   *   arc. This is useful primarily for creating a training set for the clause splitter which emulates the
+   *   behavior of the relation triple segmenter component.
+   * </p>
+   */
   public final List<SemgrexPattern> VP_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
     for (SemgrexPattern pattern : VERB_PATTERNS) {
       String fullPattern = pattern.pattern();
-      String vpPattern = fullPattern.replace(">/.subj(pass)?/ {}=subject", "");
+      String vpPattern = fullPattern
+          .replace(">/.subj(pass)?/ {}=subject", "")  // drop the subject
+          .replace("$", "pos:/V.*/");                 // but, force the root to be on a verb
       add(SemgrexPattern.compile(vpPattern));
     }
   }});
@@ -337,11 +343,11 @@ public class RelationTripleSegmenter {
     return extractions;
   }
 
-  /**
-   * A counter keeping track of how many times a given pattern has matched. This allows us to learn to iterate
-   * over patterns in the optimal order; this is just an efficiency tweak (but an effective one!).
-   */
-  private final Counter<SemgrexPattern> VERB_PATTERN_HITS = new ClassicCounter<>();
+//  /**
+//   * A counter keeping track of how many times a given pattern has matched. This allows us to learn to iterate
+//   * over patterns in the optimal order; this is just an efficiency tweak (but an effective one!).
+//   */
+//  private final Counter<SemgrexPattern> VERB_PATTERN_HITS = new ClassicCounter<>();
 
   /** A set of valid arcs denoting a subject entity we are interested in */
   public final Set<String> VALID_SUBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
@@ -512,14 +518,14 @@ public class RelationTripleSegmenter {
         }
         // some JIT on the pattern ordering
         // note[Gabor]: This actually helps quite a bit; 72->86 sentences per second for the entire OpenIE pipeline.
-        VERB_PATTERN_HITS.incrementCount(pattern);
-        if (((int) VERB_PATTERN_HITS.totalCount()) % 1000 == 0) {
-          ArrayList<SemgrexPattern> newPatterns = new ArrayList<>(VERB_PATTERNS);
-          Collections.sort(newPatterns, (x, y) ->
-                  (int) (VERB_PATTERN_HITS.getCount(y) - VERB_PATTERN_HITS.getCount(x))
-          );
-          VERB_PATTERNS = newPatterns;
-        }
+//        VERB_PATTERN_HITS.incrementCount(pattern);
+//        if (((int) VERB_PATTERN_HITS.totalCount()) % 1000 == 0) {
+//          ArrayList<SemgrexPattern> newPatterns = new ArrayList<>(VERB_PATTERNS);
+//          Collections.sort(newPatterns, (x, y) ->
+//                  (int) (VERB_PATTERN_HITS.getCount(y) - VERB_PATTERN_HITS.getCount(x))
+//          );
+//          VERB_PATTERNS = newPatterns;
+//        }
         // Main code
         int numKnownDependents = 2;  // subject and object, at minimum
         // Object

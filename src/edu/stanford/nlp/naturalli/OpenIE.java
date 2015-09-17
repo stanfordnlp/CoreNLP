@@ -266,19 +266,13 @@ public class OpenIE implements Annotator {
         throw new IllegalStateException("Cannot run OpenIE without a parse tree!");
       }
       List<RelationTriple> extractions = segmenter.extract(parse, tokens);
-      if (tokens.size() > 63) {
-        System.err.println("Very long sentence (>63 tokens); " + this.getClass().getSimpleName() + " is not attempting to extract clauses.");
-        sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.EMPTY_LIST);
-        sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.EMPTY_LIST);
-      } else {
-        List<SentenceFragment> clauses = clausesInSentence(sentence);
-        List<SentenceFragment> fragments = entailmentsFromClauses(clauses);
+      List<SentenceFragment> clauses = clausesInSentence(sentence);
+      List<SentenceFragment> fragments = entailmentsFromClauses(clauses);
 //        fragments.add(new SentenceFragment(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), false));
-        extractions.addAll(relationsInFragments(fragments, sentence, canonicalMentionMap));
-        sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);
-        sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class,
-            new ArrayList<>(new HashSet<>(extractions)));  // uniq the extractions
-      }
+      extractions.addAll(relationsInFragments(fragments, sentence, canonicalMentionMap));
+      sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);
+      sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class,
+          new ArrayList<>(new HashSet<>(extractions)));  // uniq the extractions
     }
   }
 
