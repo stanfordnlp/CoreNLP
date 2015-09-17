@@ -3,7 +3,8 @@
 
 // TODO: multiple sentences
 
-var serverAddress = 'http://localhost:9000/'
+//var serverAddress = 'http://localhost:9000/'
+var serverAddress = '/'
 
 // Load Brat libraries
 var bratLocation = 'http://nlp.stanford.edu/js/brat';
@@ -262,12 +263,37 @@ function render(data) {
 
     // Open IE
     var openieEntities = [];
+    var openieEntitiesSet = {};
     var openieRelations = [];
+    var openieRelationsSet = {};
+    // Helper Functions
+    function openieID(span) {
+      return 'OPENIEENTITY' + '_' + span[0] + '_' + span[1];
+    }
+    function addEntity(span, role) {
+      // Don't add duplicate entities
+      if (openieEntitiesSet[[span, role]]) return;
+      openieEntitiesSet[[span, role]] = true;
+      // Add the entity
+      openieEntities.push([openieID(span), role, 
+        [[tokens[span[0]].characterOffsetBegin, 
+          tokens[span[1] - 1].characterOffsetEnd ]] ]);
+    }
+    function addRelation(gov, dep, role) {
+      // Don't add duplicate relations
+      if (openieRelationsSet[[gov, dep, role]]) return;
+      openieRelationsSet[[gov, dep, role]] = true;
+      // Add the relation
+      openieRelations.push(['OPENIESUBJREL_' + gov[0] + '_' + gov[1] + '_' + dep[0] + '_' + dep[1],
+                           role, 
+                           [['governor',  openieID(gov)], 
+                            ['dependent', openieID(dep)]  ] ]);
+    }
+    // Render OpenIE
     if (typeof sentence.openie != 'undefined') {
       // Register the entities + relations we'll need
-      addEntityType('SUBJECT', 'Subject');
+      addEntityType('SUBJECT',  'Entity');
       addEntityType('RELATION', 'Relation');
-      addEntityType('OBJECT', 'Object');
       addRelationType('subject');
       addRelationType('object');
       // Loop over triples
@@ -276,24 +302,12 @@ function render(data) {
         var relationSpan = sentence.openie[i].relationSpan;
         var objectSpan = sentence.openie[i].objectSpan;
         // Add the entities
-        openieEntities.push(['OPENIESUBJ' + i, 'Subject', 
-          [[tokens[subjectSpan[0]].characterOffsetBegin, 
-            tokens[subjectSpan[1] - 1].characterOffsetEnd ]] ]);
-        openieEntities.push(['OPENIEREL' + i, 'Relation', 
-          [[tokens[relationSpan[0]].characterOffsetBegin, 
-            tokens[relationSpan[1] - 1].characterOffsetEnd ]] ]);
-        openieEntities.push(['OPENIEOBJ' + i, 'Object', 
-          [[tokens[objectSpan[0]].characterOffsetBegin, 
-            tokens[objectSpan[1] - 1].characterOffsetEnd ]] ]);
+        addEntity(subjectSpan, 'Entity');
+        addEntity(relationSpan, 'Relation');
+        addEntity(objectSpan, 'Entity');
         // Add the relations
-        openieRelations.push(['OPENIESUBJREL' + i,
-                             'subject', 
-                             [['governor',  'OPENIEREL' + i], 
-                              ['dependent', 'OPENIESUBJ' + i]  ] ]);
-        openieRelations.push(['OPENIEOBJREL' + i,
-                             'object', 
-                             [['governor',  'OPENIEREL' + i], 
-                              ['dependent', 'OPENIEOBJ' + i]  ] ]);
+        addRelation(relationSpan, subjectSpan, 'subject');
+        addRelation(relationSpan, objectSpan, 'object');
       }
     }
 
