@@ -27,7 +27,7 @@ public class OpenIEITest {
     setProperty("openie.ignoreaffinity", "false");
     setProperty("openie.max_entailments_per_clause", "1000");
     setProperty("openie.triple.strict", "true");
-//    setProperty("openie.splitter.model", "/home/gabor/tmp/clauseSearcher.ser.gz");
+    setProperty("openie.splitter.model", "/home/gabor/tmp/clauseSearcher.ser.gz");
 
     setProperty("ssplit.isOneSentence", "true");
     setProperty("tokenize.class", "PTBTokenizer");
