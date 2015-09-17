@@ -1032,9 +1032,9 @@ public class SeqClassifierFlags implements Serializable {
 
   public boolean splitSlashHyphenWords;  // unused with new enum below. Remove when breaking serialization.
 
-  /** If this number is strictly positive (greater than 0; 0 means unlimited),
-   *  then add at most this many words to the knownLCwords.  (Words will only
-   *  be added if useKnownLCWords is true.) By default, this is set to 10,000,
+  /** If this number is non-negative (greater than or equal to 0; negative means
+   *  unlimited), then add at most this many words to the knownLCwords.  (Words will
+   *  only be added if useKnownLCWords is true.) By default, this is set to 10,000,
    *  so it will work on a few documents, but not cause unlimited memory growth
    *  if a SequenceClassifier is run for a long time!
    */
