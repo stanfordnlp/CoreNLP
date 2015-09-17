@@ -71,8 +71,6 @@ public class SemanticGraph implements Serializable {
   private static final MapFactory<IndexedWord, List<SemanticGraphEdge>> innerMapFactory = MapFactory.hashMapFactory();
   private static final MapFactory<IndexedWord, IndexedWord> wordMapFactory = MapFactory.hashMapFactory();
 
-  private LinkedList<String> comments = new LinkedList<>();
-
   public int edgeCount() {
     return graph.getNumEdges();
   }
@@ -1118,9 +1116,6 @@ public class SemanticGraph implements Serializable {
     return result;
   }
 
-  /**
-   * Returns the number of nodes in the graph
-   */
   public int size() {
     return this.vertexSet().size();
   }
@@ -1998,24 +1993,6 @@ public class SemanticGraph implements Serializable {
       }
     }
     return Pair.makePair(min, max);
-  }
-
-  /**
-   * Store a comment line with this semantic graph.
-   *
-   * @param comment
-   */
-  public void addComment(String comment) {
-    this.comments.add(comment);
-  }
-
-  /**
-   * Return the list of comments stored with this graph.
-   *
-   * @return A list of comments.
-   */
-  public List<String> getComments() {
-    return this.comments;
   }
 
   private static final long serialVersionUID = 1L;

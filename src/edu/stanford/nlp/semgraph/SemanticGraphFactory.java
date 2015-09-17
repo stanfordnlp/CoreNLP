@@ -137,10 +137,10 @@ public class SemanticGraphFactory {
         wordFilt = new PennTreebankLanguagePack().punctuationWordRejectFilter();
       }
       gs = new EnglishGrammaticalStructure(tree,
-              wordFilt,
+          wordFilt,
               new SemanticHeadFinder(true),
               threadSafe);
-
+            
     } else {
       Predicate<String> tagFilt;
       if (INCLUDE_PUNCTUATION_DEPENDENCIES) {
@@ -152,7 +152,7 @@ public class SemanticGraphFactory {
               tagFilt,
               new UniversalSemanticHeadFinder(true),
               threadSafe);
-
+      
     }
     return makeFromTree(gs, mode, includeExtras,
                         threadSafe, filter);

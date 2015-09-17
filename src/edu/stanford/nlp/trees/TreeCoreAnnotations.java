@@ -2,10 +2,6 @@ package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.util.ErasureUtils;
-import edu.stanford.nlp.util.ScoredObject;
-
-import java.util.List;
 
 /**
  * Set of common annotations for {@link edu.stanford.nlp.util.CoreMap}s 
@@ -62,12 +58,4 @@ public class TreeCoreAnnotations {
   public static class HeadTagLabelAnnotation implements CoreAnnotation<CoreLabel> {
     public Class<CoreLabel> getType() {  return CoreLabel.class; } }
 
-  /**
-   * The standard key for storing a list of k-best parses.
-   */
-  public static class KBestTreesAnnotation implements CoreAnnotation<List<Tree>> {
-    public Class<List<Tree>> getType() {
-      return ErasureUtils.uncheckedCast(List.class);
-    }
-  }
 }

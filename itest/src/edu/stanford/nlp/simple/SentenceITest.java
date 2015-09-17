@@ -38,7 +38,7 @@ public class SentenceITest {
   public void testNER() {
     assertEquals(
         new ArrayList <String>(){{ add("PERSON"); add("PERSON"); add("O"); add("O"); add("O"); add("LOCATION"); add("LOCATION"); add("O"); }},
-        new Sentence("George Bush lives in the United States.").nerTags());
+        new Sentence("George Bush lives in the United States.").ners());
   }
 
   @Test
@@ -159,7 +159,7 @@ public class SentenceITest {
   @Test
   public void testToCoreLabels() {
     Sentence sent = new Sentence("the quick brown fox jumped over the lazy dog");
-    List<CoreLabel> tokens = sent.asCoreLabels(Sentence::posTags);
+    List<CoreLabel> tokens = sent.asCoreLabels(sent::posTags);
     assertEquals(9, tokens.size());
     assertEquals("the", tokens.get(0).word());
     assertEquals("dog", tokens.get(8).word());

@@ -105,9 +105,12 @@ public final class SpanishVerbStripper implements Serializable {
     new Pair(Pattern.compile("ú"), "u")
   };
 
-  // CONSTRUCTOR
+  // CONSTRUCTORS
 
-  /** Access via the singleton-like getInstance() methods. */
+  private SpanishVerbStripper() {
+    this(DEFAULT_DICT);
+  }
+
   private SpanishVerbStripper(String dictPath) {
     dict = setupDictionary(dictPath);
   }
@@ -187,8 +190,6 @@ public final class SpanishVerbStripper implements Serializable {
     }
   }
 
-  private static final Pattern nosse = Pattern.compile("nos|se");
-
   /**
    * Examines the given verb pair and returns <tt>true</tt> if it is a
    * valid pairing of verb form and clitic pronoun(s).
@@ -230,7 +231,7 @@ public final class SpanishVerbStripper implements Serializable {
     // person plural imperative + object pronoun
     //
     // (vámo, nos) -> (vámos, nos)
-    if (nosse.matcher(firstPron).matches() && dict.containsKey(stripped + 's')) {
+    if (firstPron.matches("nos|se") && dict.containsKey(stripped + 's')) {
       pair.setFirst(pair.first() + getCase(pair.first(), 's'));
       return true;
     }

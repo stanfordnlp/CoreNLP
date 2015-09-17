@@ -1599,7 +1599,6 @@ public class EnglishGrammaticalRelations {
    * add new EnglishGrammaticalRelations very rarely, so the eased
    * concurrency seems to outweigh the fairly slight cost of thread-safe
    * access.
-   *
    * @param relation the relation to be added to the values list
    */
   private static void threadSafeAddRelation(GrammaticalRelation relation) {

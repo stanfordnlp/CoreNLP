@@ -331,7 +331,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
    * PARSEVAL evaluation.  Some notes on this particular parseval:
    * <ul>
    * <li> It is character-based, which allows it to be used on segmentation/parsing combination evaluation.
-   * <li> whether it gives you labeled or unlabeled bracketings depends on the value of the {@code labelConstituents}
+   * <li> whether it gives you labeled or unlabeled bracketings depends on the value of the <code>labelConstituents</code>
    * parameter
    * </ul>
    *
@@ -574,7 +574,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
    * applied to each node in the tree (depth first, left-to-right),
    * so you shouldn't write this method to apply recursively to tree
    * members.  This method is allowed to (and in some cases does)
-   * destructively change the input tree {@code t}. It changes both
+   * destructively change the input tree <code>t</code>. It changes both
    * labels and the tree shape.
    *
    * @param t The input tree (with non-language specific annotation already
@@ -587,7 +587,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
   public abstract Tree transformTree(Tree t, Tree root);
 
   /**
-   * Display (write to stderr) language-specific settings.
+   * display language-specific settings
    */
   @Override
   public abstract void display();
@@ -685,8 +685,8 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
   }
 
   /**
-   * For languages that have implementations of the
-   * original Stanford dependencies and Universal
+   * For languages that have implementations of the 
+   * original Stanford dependencies and Universal 
    * dependencies, this parameter is used to decide which
    * implementation should be used.
    */
@@ -697,12 +697,12 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
       this.tlp.setGenerateOriginalDependencies(originalDependencies);
     }
   }
-
+  
   @Override
   public boolean generateOriginalDependencies() {
     return this.generateOriginalDependencies;
   }
-
+  
   private static final String[] EMPTY_ARGS = new String[0];
 
   @Override

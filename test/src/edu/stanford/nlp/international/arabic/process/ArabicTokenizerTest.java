@@ -142,23 +142,4 @@ public class ArabicTokenizerTest extends TestCase {
       assertEquals("Tokenization deviates from reference", reference, tokenizedLine);
     }
   }
-
-  public void testCharOffsets() {
-    String untokInput = "إِنَّ- -نا هادِئ+ُونَ .";
-    int[] beginOffsets = {0, 7, 11, 22};
-    int[] endOffsets = {6, 10, 21, 23};
-    
-    TokenizerFactory<CoreLabel> tf = ArabicTokenizer.atbFactory();
-    tf.setOptions("removeProMarker");
-    tf.setOptions("removeSegMarker");
-    tf.setOptions("removeMorphMarker");
-    
-    Tokenizer<CoreLabel> tokenizer = tf.getTokenizer(new StringReader(untokInput));
-    List<CoreLabel> tokens = tokenizer.tokenize();
-    assertEquals("Number of tokens doesn't match reference", tokens.size(), beginOffsets.length);
-    for (int i = 0; i < beginOffsets.length; i++) {
-      assertEquals("Char begin offset deviates from reference", beginOffsets[i], tokens.get(i).beginPosition());
-      assertEquals("Char end offset deviates from reference", endOffsets[i], tokens.get(i).endPosition());
-    }
-  }
 }

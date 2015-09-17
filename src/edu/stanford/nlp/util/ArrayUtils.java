@@ -899,7 +899,12 @@ public class ArrayUtils {
    */
 
   public static List<Integer> getSubListIndex(Object[] tofind, Object[] tokens){
-     return getSubListIndex(tofind, tokens, (o1) -> o1.first().equals(o1.second()));
+     return getSubListIndex(tofind, tokens, new Function<Pair, Boolean>(){
+       @Override
+       public Boolean apply(Pair objectObjectPair) {
+         return objectObjectPair.first().equals(objectObjectPair.second());
+       }
+     });
   }
 
   /**

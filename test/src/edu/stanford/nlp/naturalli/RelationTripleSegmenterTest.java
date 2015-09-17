@@ -741,16 +741,4 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tweeds\tgrowing around\tplant", extraction.get().toString());
   }
-
-  public void testNmodTmod() {
-    String conll =
-        "1\tFriday\t3\tnmod:tmod\tNN\n" +
-        "2\tI\t3\tnsubj\tPR\n" +
-        "3\tmake\t0\troot\tVB\n" +
-        "4\ttea\t3\tdobj\tNN\n";
-    // Positive case
-    Optional<RelationTriple> extraction = mkExtraction(conll, true);
-    assertTrue("No extraction for sentence!", extraction.isPresent());
-    assertEquals("1.0\tI\tmake tea at_time\tFriday", extraction.get().toString());
-  }
 }

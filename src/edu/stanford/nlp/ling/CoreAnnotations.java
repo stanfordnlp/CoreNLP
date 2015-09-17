@@ -447,22 +447,13 @@ public class CoreAnnotations {
       return String.class;
     }
   }
-
-  /**
-   * CoNLL-U dep parsing - span of multiword tokens
-   */
-  public static class CoNLLUTokenSpanAnnotation implements CoreAnnotation<Pair<Integer,Integer>> {
-    public Class<Pair<Integer,Integer>> getType() {
-      return ErasureUtils.<Class<Pair<Integer,Integer>>> uncheckedCast(Pair.class);
-    }
-  }
   
   /**
    * CoNLL-U dep parsing - List of secondary dependencies
    */
-  public static class CoNLLUSecondaryDepsAnnotation implements CoreAnnotation<HashMap<Integer,String>> {
-    public Class<HashMap<Integer,String>> getType() {
-      return ErasureUtils.<Class<HashMap<Integer,String>>> uncheckedCast(Pair.class);
+  public static class CoNLLUSecondaryDepsAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
     }
   }
   
@@ -1638,15 +1629,6 @@ public class CoreAnnotations {
   public static class LeftChildrenNodeAnnotation implements CoreAnnotation<SortedSet<Pair<CoreLabel, String>>> {
     public Class<SortedSet<Pair<CoreLabel, String>>> getType() {
       return ErasureUtils.uncheckedCast(SortedSet.class);
-    }
-  }
-
-  /**
-   * Stores an exception associated with processing this document
-   */
-  public static class ExceptionAnnotation implements CoreAnnotation<Throwable> {
-    public Class<Throwable> getType() {
-      return ErasureUtils.uncheckedCast(Throwable.class);
     }
   }
 

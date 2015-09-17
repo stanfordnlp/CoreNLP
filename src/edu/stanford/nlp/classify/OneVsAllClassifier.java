@@ -8,7 +8,6 @@ import edu.stanford.nlp.util.ArrayMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
-import edu.stanford.nlp.util.logging.Logging;
 
 import java.util.Collection;
 import java.util.Map;
@@ -104,7 +103,7 @@ public class OneVsAllClassifier<L,F> implements Classifier<L,F> {
     Map<L, Classifier<String, F>> classifiers = Generics.newHashMap();
     for (L label:trainLabels) {
       int i = labelIndex.indexOf(label);
-      Logging.logger(OneVsAllClassifier.class).info("Training " + label + "=" + i + ", posIndex=" + posIndex);
+      System.err.println("Training " + label + "=" + i + ", posIndex=" + posIndex);
       // Create training data for training this classifier
       Map<L,String> posLabelMap = new ArrayMap<L,String>();
       posLabelMap.put(label, POS_LABEL);
