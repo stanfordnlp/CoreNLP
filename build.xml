@@ -124,6 +124,11 @@
         <compilerarg value="-Xmaxwarns"/>
         <compilerarg value="10000"/>  -->
     </javac>
+    <copy todir="${build.path}/edu/stanford/nlp/pipeline/demo">
+      <fileset dir="${source.path}/edu/stanford/nlp/pipeline/demo">
+        <exclude name="**/*.java"/>
+      </fileset>
+    </copy>
   </target>
 
   <target name="test" depends="classpath,compile"

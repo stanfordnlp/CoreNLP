@@ -1,0 +1,16 @@
+body {
+}
+
+.red {
+  color:#990000
+}
+
+.footer {
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 5ex;
+  padding-top: 2ex;
+  margin-top: 1ex;
+  background-color: #f5f5f5;
+}

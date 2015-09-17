@@ -10,6 +10,8 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.PriorityQueue;
 
@@ -27,43 +29,26 @@ public class RelationTripleSegmenter {
   private final boolean allowNominalsWithoutNER;
 
   /** A list of patterns to match relation extractions against */
-  public final List<SemgrexPattern> VERB_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
+  private List<SemgrexPattern> VERB_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
     // { blue cats play [quietly] with yarn,
     //   Jill blew kisses at Jack,
     //   cats are standing next to dogs }
     add(SemgrexPattern.compile("{$}=verb ?>/cop|aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/(nmod|acl|advcl):.*/=prepEdge ( {}=object ?>appos {} = appos ) ?>dobj {pos:/N.*/}=relObj"));
-    // { cats are cute,
-    //   horses are grazing peacefully }
-    add(SemgrexPattern.compile("{$}=object >/.subj(pass)?/ {}=subject >/cop|aux(pass)?/ {}=verb"));
     // { fish like to swim }
     add(SemgrexPattern.compile("{$}=verb >/.subj(pass)?/ {}=subject >xcomp ( {}=object ?>appos {}=appos )"));
     // { cats have tails }
     add(SemgrexPattern.compile("{$}=verb ?>/aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/[di]obj|xcomp/ ( {}=object ?>appos {}=appos )"));
+    // { cats are cute,
+    //   horses are grazing peacefully }
+    add(SemgrexPattern.compile("{$}=object >/.subj(pass)?/ {}=subject >/cop|aux(pass)?/ {}=verb"));
     // { Tom and Jerry were fighting }
     add(SemgrexPattern.compile("{$}=verb >nsubjpass ( {}=subject >/conj:and/=subjIgnored {}=object )"));
   }});
 
   /**
-   * <p>
-   *   A set of derivative patterns from {@link RelationTripleSegmenter#VERB_PATTERNS} that ignore the subject
-   *   arc. This is useful primarily for creating a training set for the clause splitter which emulates the
-   *   behavior of the relation triple segmenter component.
-   * </p>
-   */
-  public final List<SemgrexPattern> VP_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
-    for (SemgrexPattern pattern : VERB_PATTERNS) {
-      String fullPattern = pattern.pattern();
-      String vpPattern = fullPattern
-          .replace(">/.subj(pass)?/ {}=subject", "")  // drop the subject
-          .replace("$", "pos:/V.*/");                 // but, force the root to be on a verb
-      add(SemgrexPattern.compile(vpPattern));
-    }
-  }});
-
-  /**
    * A set of nominal patterns, that don't require being in a coherent clause, but do require NER information.
    */
-  public final List<TokenSequencePattern> NOUN_TOKEN_PATTERNS = Collections.unmodifiableList(new ArrayList<TokenSequencePattern>() {{
+  private final List<TokenSequencePattern> NOUN_TOKEN_PATTERNS = Collections.unmodifiableList(new ArrayList<TokenSequencePattern>() {{
     // { NER nominal_verb NER,
     //   United States president Obama }
     add(TokenSequencePattern.compile("(?$object [ner:/PERSON|ORGANIZATION|LOCATION+/]+ ) (?$beof_comp [ {tag:/NN.*/} & !{ner:/PERSON|ORGANIZATION|LOCATION/} ]+ ) (?$subject [ner:/PERSON|ORGANIZATION|LOCATION/]+ )"));
@@ -343,20 +328,20 @@ public class RelationTripleSegmenter {
     return extractions;
   }
 
-//  /**
-//   * A counter keeping track of how many times a given pattern has matched. This allows us to learn to iterate
-//   * over patterns in the optimal order; this is just an efficiency tweak (but an effective one!).
-//   */
-//  private final Counter<SemgrexPattern> VERB_PATTERN_HITS = new ClassicCounter<>();
+  /**
+   * A counter keeping track of how many times a given pattern has matched. This allows us to learn to iterate
+   * over patterns in the optimal order; this is just an efficiency tweak (but an effective one!).
+   */
+  private final Counter<SemgrexPattern> VERB_PATTERN_HITS = new ClassicCounter<>();
 
   /** A set of valid arcs denoting a subject entity we are interested in */
-  public final Set<String> VALID_SUBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
+  private final Set<String> VALID_SUBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
     add("amod"); add("compound"); add("aux"); add("nummod"); add("nmod:poss"); add("nmod:tmod"); add("expl");
     add("nsubj");
   }});
 
   /** A set of valid arcs denoting an object entity we are interested in */
-  public final Set<String> VALID_OBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
+  private final Set<String> VALID_OBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
     add("amod"); add("compound"); add("aux"); add("nummod"); add("nmod"); add("nsubj"); add("nmod:*"); add("nmod:poss");
     add("nmod:tmod"); add("conj:and"); add("advmod"); add("acl");
     // add("advcl"); // Born in Hawaii, Obama is a US citizen; citizen -advcl-> Born.
@@ -384,9 +369,8 @@ public class RelationTripleSegmenter {
    * @see RelationTripleSegmenter#getValidAdverbChunk(edu.stanford.nlp.semgraph.SemanticGraph, edu.stanford.nlp.ling.IndexedWord, Optional)
    */
   @SuppressWarnings("StatementWithEmptyBody")
-  protected Optional<List<CoreLabel>> getValidChunk(SemanticGraph parse, IndexedWord originalRoot,
-                                                    Set<String> validArcs, Optional<String> ignoredArc,
-                                                    boolean allowExtraArcs) {
+  private Optional<List<CoreLabel>> getValidChunk(SemanticGraph parse, IndexedWord originalRoot,
+                                                  Set<String> validArcs, Optional<String> ignoredArc) {
     PriorityQueue<CoreLabel> chunk = new FixedPrioritiesPriorityQueue<>();
     Queue<IndexedWord> fringe = new LinkedList<>();
     IndexedWord root = originalRoot;
@@ -430,11 +414,7 @@ public class RelationTripleSegmenter {
         } else if (ignoredArc.isPresent() && ignoredArc.get().equals(name)) {
           // noop; ignore explicitly requested noop arc.
         } else if (!validArcs.contains(edge.getRelation().getShortName().replaceAll(":.*",":*"))) {
-          if (!allowExtraArcs) {
-            return Optional.empty();
-          } else {
-            // noop: just some dangling arc
-          }
+          return Optional.empty();
         } else {
           fringe.add(edge.getDependent());
         }
@@ -445,14 +425,6 @@ public class RelationTripleSegmenter {
   }
 
   /**
-   * @see RelationTripleSegmenter#getValidChunk(SemanticGraph, IndexedWord, Set, Optional, boolean)
-   */
-  protected Optional<List<CoreLabel>> getValidChunk(SemanticGraph parse, IndexedWord originalRoot,
-                                                    Set<String> validArcs, Optional<String> ignoredArc) {
-    return getValidChunk(parse, originalRoot, validArcs, ignoredArc, false);
-  }
-
-  /**
    * Get the yield of a given subtree, if it is a valid subject.
    * Otherwise, return {@link java.util.Optional#empty()}}.
    * @param parse The parse tree we are extracting a subtree from.
@@ -460,7 +432,7 @@ public class RelationTripleSegmenter {
    * @param noopArc An optional edge type to ignore in gathering the chunk.
    * @return If this subtree is a valid entity, we return its yield. Otherwise, we return empty.
    */
-  protected Optional<List<CoreLabel>> getValidSubjectChunk(SemanticGraph parse, IndexedWord root, Optional<String> noopArc) {
+  private Optional<List<CoreLabel>> getValidSubjectChunk(SemanticGraph parse, IndexedWord root, Optional<String> noopArc) {
     return getValidChunk(parse, root, VALID_SUBJECT_ARCS, noopArc);
   }
 
@@ -472,7 +444,7 @@ public class RelationTripleSegmenter {
    * @param noopArc An optional edge type to ignore in gathering the chunk.
    * @return If this subtree is a valid entity, we return its yield. Otherwise, we return empty.
    */
-  protected Optional<List<CoreLabel>> getValidObjectChunk(SemanticGraph parse, IndexedWord root, Optional<String> noopArc) {
+  private Optional<List<CoreLabel>> getValidObjectChunk(SemanticGraph parse, IndexedWord root, Optional<String> noopArc) {
     return getValidChunk(parse, root, VALID_OBJECT_ARCS, noopArc);
   }
 
@@ -484,7 +456,7 @@ public class RelationTripleSegmenter {
    * @param noopArc An optional edge type to ignore in gathering the chunk.
    * @return If this subtree is a valid adverb, we return its yield. Otherwise, we return empty.
    */
-  protected Optional<List<CoreLabel>> getValidAdverbChunk(SemanticGraph parse, IndexedWord root, Optional<String> noopArc) {
+  private Optional<List<CoreLabel>> getValidAdverbChunk(SemanticGraph parse, IndexedWord root, Optional<String> noopArc) {
     return getValidChunk(parse, root, VALID_ADVERB_ARCS, noopArc);
   }
 
@@ -506,9 +478,7 @@ public class RelationTripleSegmenter {
    * @param consumeAll if true, force the entire parse to be consumed by the pattern.
    * @return A relation triple, if this sentence matches one of the patterns of a valid relation triple.
    */
-  private Optional<RelationTriple> segmentVerb(SemanticGraph parse,
-                                               Optional<Double> confidence,
-                                               boolean consumeAll) {
+  private Optional<RelationTriple> segmentVerb(SemanticGraph parse, Optional<Double> confidence, boolean consumeAll) {
     // Run pattern loop
     PATTERN_LOOP: for (SemgrexPattern pattern : VERB_PATTERNS) {  // For every candidate pattern...
       SemgrexMatcher m = pattern.matcher(parse);
@@ -518,14 +488,14 @@ public class RelationTripleSegmenter {
         }
         // some JIT on the pattern ordering
         // note[Gabor]: This actually helps quite a bit; 72->86 sentences per second for the entire OpenIE pipeline.
-//        VERB_PATTERN_HITS.incrementCount(pattern);
-//        if (((int) VERB_PATTERN_HITS.totalCount()) % 1000 == 0) {
-//          ArrayList<SemgrexPattern> newPatterns = new ArrayList<>(VERB_PATTERNS);
-//          Collections.sort(newPatterns, (x, y) ->
-//                  (int) (VERB_PATTERN_HITS.getCount(y) - VERB_PATTERN_HITS.getCount(x))
-//          );
-//          VERB_PATTERNS = newPatterns;
-//        }
+        VERB_PATTERN_HITS.incrementCount(pattern);
+        if (((int) VERB_PATTERN_HITS.totalCount()) % 1000 == 0) {
+          ArrayList<SemgrexPattern> newPatterns = new ArrayList<>(VERB_PATTERNS);
+          Collections.sort(newPatterns, (x, y) ->
+                  (int) (VERB_PATTERN_HITS.getCount(y) - VERB_PATTERN_HITS.getCount(x))
+          );
+          VERB_PATTERNS = newPatterns;
+        }
         // Main code
         int numKnownDependents = 2;  // subject and object, at minimum
         // Object

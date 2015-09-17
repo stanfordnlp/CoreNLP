@@ -1468,17 +1468,6 @@ public class IOUtils {
     return out;
   }
 
-  public static OutputStream getFileOutputStream(String filename, boolean append) throws IOException {
-    OutputStream out = new FileOutputStream(filename, append);
-    if (filename.endsWith(".gz")) {
-      out = new GZIPOutputStream(out);
-    } else if (filename.endsWith(".bz2")) {
-      //out = new CBZip2OutputStream(out);
-      out = getBZip2PipedOutputStream(filename);
-    }
-    return out;
-  }
-
   public static BufferedReader getBufferedFileReader(String filename) throws IOException {
     return getBufferedFileReader(filename, defaultEncoding);
   }
@@ -2075,18 +2064,6 @@ public class IOUtils {
       }
       System.out.print(prompt);
     }
-  }
-
-  /**
-   * Create a prompt, and read a single line of response.
-   * @param prompt An optional prompt to show the user.
-   * @throws IOException Throw from the underlying reader.
-   */
-  public static String promptUserInput(Optional<String> prompt) throws IOException {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-    String line;
-    System.out.print(prompt.orElse("> "));
-    return reader.readLine();
   }
 
   /** @see IOUtils#console(String, Consumer) */
