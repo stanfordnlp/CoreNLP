@@ -79,7 +79,7 @@ public class ForwardEntailerSearchProblem {
     public final double score;
 
     private SearchState(BitSet deletionMask, int currentIndex, SemanticGraph tree, String lastDeletedEdge, SearchState source, double score) {
-      this.deletionMask = deletionMask;
+      this.deletionMask = (BitSet) deletionMask.clone();
       this.currentIndex = currentIndex;
       this.tree = tree;
       this.lastDeletedEdge = lastDeletedEdge;
@@ -113,14 +113,10 @@ public class ForwardEntailerSearchProblem {
    */
   @SuppressWarnings("unchecked")
   public List<SentenceFragment> search() {
-    if (parseTree.vertexSet().size() > 63) {
-      return Collections.EMPTY_LIST;
-    } else {
-      return searchImplementation().stream()
-          .map(x -> new SentenceFragment(x.tree, truthOfPremise, false).changeScore(x.confidence))
-          .filter(x -> x.words.size() > 0 )
-          .collect(Collectors.toList());
-    }
+    return searchImplementation().stream()
+        .map(x -> new SentenceFragment(x.tree, truthOfPremise, false).changeScore(x.confidence))
+        .filter(x -> x.words.size() > 0 )
+        .collect(Collectors.toList());
   }
 
   /**
@@ -165,7 +161,7 @@ public class ForwardEntailerSearchProblem {
     // Find the subject / object split
     // This takes max O(n^2) time, expected O(n*log(n)) time.
     // Optimal is O(n), but I'm too lazy to implement it.
-    BitSet isSubject = new BitSet();
+    BitSet isSubject = new BitSet(256);
     for (IndexedWord vertex : parseTree.vertexSet()) {
       // Search up the tree for a subj node; if found, mark that vertex as a subject.
       Iterator<SemanticGraphEdge> incomingEdges = parseTree.incomingEdgeIterator(vertex);
@@ -227,7 +223,7 @@ public class ForwardEntailerSearchProblem {
       return results;
     }
     Stack<SearchState> fringe = new Stack<>();
-    fringe.push(new SearchState(new BitSet(), 0, parseTree, null, null, 1.0));
+    fringe.push(new SearchState(new BitSet(256), 0, parseTree, null, null, 1.0));
 
     // Start the search
     int numTicks = 0;

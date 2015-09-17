@@ -129,7 +129,8 @@ public class OpenIE implements Annotator {
         }
       }
     } catch (IOException e) {
-      throw new RuntimeIOException("Could not load clause splitter model at " + splitterModel + ": " + e.getMessage());
+      e.printStackTrace();
+      throw new RuntimeIOException("Could not load clause splitter model at " + splitterModel + ": " + e.getClass() + ": " + e.getMessage());
     }
 
     // Create the forward entailer
