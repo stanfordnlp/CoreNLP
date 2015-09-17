@@ -214,6 +214,7 @@ public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, Claus
         log("processed " + numExamplesProcessed + " training sentences: " + dataset.size() + " datums");
       }
     });
+    endTrack("Training inference");
 
     // Close the file
     if (datasetDumpWriter.isPresent()) {
