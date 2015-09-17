@@ -129,7 +129,8 @@ public class OpenIE implements Annotator {
         }
       }
     } catch (IOException e) {
-      throw new RuntimeIOException("Could not load clause splitter model at " + splitterModel + ": " + e.getMessage());
+      e.printStackTrace();
+      throw new RuntimeIOException("Could not load clause splitter model at " + splitterModel + ": " + e.getClass() + ": " + e.getMessage());
     }
 
     // Create the forward entailer
@@ -254,7 +255,7 @@ public class OpenIE implements Annotator {
   public void annotateSentence(CoreMap sentence, Map<CoreLabel, List<CoreLabel>> canonicalMentionMap) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
     if (tokens.size() < 2) {
-      System.err.println("Very short sentence (<2 tokens); " + this.getClass().getSimpleName() + " is skipping it.");
+      // Short sentence; skip annotating it.
       sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.EMPTY_LIST);
       sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.EMPTY_LIST);
     } else {
@@ -266,19 +267,13 @@ public class OpenIE implements Annotator {
         throw new IllegalStateException("Cannot run OpenIE without a parse tree!");
       }
       List<RelationTriple> extractions = segmenter.extract(parse, tokens);
-      if (tokens.size() > 63) {
-        System.err.println("Very long sentence (>63 tokens); " + this.getClass().getSimpleName() + " is not attempting to extract clauses.");
-        sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.EMPTY_LIST);
-        sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.EMPTY_LIST);
-      } else {
-        List<SentenceFragment> clauses = clausesInSentence(sentence);
-        List<SentenceFragment> fragments = entailmentsFromClauses(clauses);
+      List<SentenceFragment> clauses = clausesInSentence(sentence);
+      List<SentenceFragment> fragments = entailmentsFromClauses(clauses);
 //        fragments.add(new SentenceFragment(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), false));
-        extractions.addAll(relationsInFragments(fragments, sentence, canonicalMentionMap));
-        sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);
-        sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class,
-            new ArrayList<>(new HashSet<>(extractions)));  // uniq the extractions
-      }
+      extractions.addAll(relationsInFragments(fragments, sentence, canonicalMentionMap));
+      sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);
+      sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class,
+          new ArrayList<>(new HashSet<>(extractions)));  // uniq the extractions
     }
   }
 

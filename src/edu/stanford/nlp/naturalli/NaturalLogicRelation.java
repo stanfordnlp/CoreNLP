@@ -207,7 +207,7 @@ public enum NaturalLogicRelation {
     put("appos", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("aux", NaturalLogicRelation.INDEPENDENCE);  // he left -/-> he should leave
     put("auxpass", NaturalLogicRelation.INDEPENDENCE);  // some cat adopts -/-> some cat got adopted
-    put("ccomp", NaturalLogicRelation.INDEPENDENCE);  // interesting project here... "he said x" -> "x"?
+    put("ccomp", NaturalLogicRelation.REVERSE_ENTAILMENT);  // interesting project here... "he said x" -> "x"?
     put("cc", NaturalLogicRelation.REVERSE_ENTAILMENT);  // match dep_conj
     put("compound", NaturalLogicRelation.INDEPENDENCE);  //
     put("name", NaturalLogicRelation.INDEPENDENCE);  //
