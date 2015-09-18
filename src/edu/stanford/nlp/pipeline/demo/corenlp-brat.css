@@ -1,16 +1,22 @@
-body {
-}
 
 .red {
   color:#990000
+}
+
+#wrap {
+  min-height: 100%;
+  height: auto;
+  margin: 0 auto -6ex;
+  padding: 0 0 6ex;
 }
 
 .footer {
   bottom: 0;
   width: 100%;
   /* Set the fixed height of the footer here */
-  height: 50px;
-  padding-top: 15px;
-  margin-top: 25px;
+  height: 5ex;
+  padding-top: 1ex;
+  margin-top: 1ex;
   background-color: #f5f5f5;
 }
+

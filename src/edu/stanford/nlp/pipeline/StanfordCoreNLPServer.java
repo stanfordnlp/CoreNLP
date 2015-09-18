@@ -157,7 +157,7 @@ public class StanfordCoreNLPServer implements Runnable {
           return;
         }
         log("[" + httpExchange.getRemoteAddress() + "] API call");
-      } catch (IOException | ClassNotFoundException e) {
+      } catch (Exception e) {
         // Return error message.
         e.printStackTrace();
         String response = e.getMessage();
@@ -223,10 +223,15 @@ public class StanfordCoreNLPServer implements Runnable {
       // Try to get more properties from query string.
       Map<String, String> urlParams = getURLParams(httpExchange.getRequestURI());
       if (urlParams.containsKey("properties")) {
-        // Parse properties
+        StringUtils.decodeMap(URLDecoder.decode(urlParams.get("properties"), "UTF-8")).entrySet()
+            .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
+      } else if (urlParams.containsKey("props")) {
         StringUtils.decodeMap(URLDecoder.decode(urlParams.get("properties"), "UTF-8")).entrySet()
             .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
       }
+
+      // Make sure the properties compile
+      props.setProperty("annotators", StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+")));
 
       return props;
     }

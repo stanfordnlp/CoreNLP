@@ -332,7 +332,7 @@ public class OpenIE implements Annotator {
   /** {@inheritDoc} */
   @Override
   public Set<Requirement> requires() {
-    return Collections.singleton(Annotator.NATLOG_REQUIREMENT);
+    return Annotator.REQUIREMENTS.get(STANFORD_OPENIE);
   }
 
   /**
