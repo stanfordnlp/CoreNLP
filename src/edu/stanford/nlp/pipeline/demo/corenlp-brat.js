@@ -358,7 +358,7 @@ $(document).ready(function() {
     // Get the text to annotate
     text = $('#text').val();
     if (text == '') {
-      text = 'My dog likes to eat sausage.';
+      text = 'My dog also likes eating sausage.';
       $('#text').val(text);
     }
     // Update the UI
