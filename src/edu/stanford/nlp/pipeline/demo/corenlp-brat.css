@@ -9,8 +9,8 @@ body {
   bottom: 0;
   width: 100%;
   /* Set the fixed height of the footer here */
-  height: 5ex;
-  padding-top: 2ex;
-  margin-top: 1ex;
+  height: 50px;
+  padding-top: 15px;
+  margin-top: 25px;
   background-color: #f5f5f5;
 }

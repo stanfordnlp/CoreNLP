@@ -407,7 +407,9 @@ $(document).ready(function() {
           // Render
           render(data);
           // Re-position the footer
-          $('#footer').css('position', '');
+          if (document.body.scrollHeight > document.body.clientHeight - 75) {
+            $('#footer').css('position', '');
+          }
         }
       }
     });
