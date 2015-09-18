@@ -3,8 +3,8 @@
 
 // TODO: multiple sentences
 
-var serverAddress = 'http://localhost:9000/'
-//var serverAddress = '/'
+//var serverAddress = 'http://localhost:9000/'
+var serverAddress = '/'
 
 // Load Brat libraries
 var bratLocation = 'http://nlp.stanford.edu/js/brat';
