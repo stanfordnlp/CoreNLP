@@ -3,8 +3,8 @@
 
 // TODO: multiple sentences
 
-//var serverAddress = 'http://localhost:9000/'
-var serverAddress = '/'
+var serverAddress = 'http://localhost:9000/'
+//var serverAddress = '/'
 
 // Load Brat libraries
 var bratLocation = 'http://nlp.stanford.edu/js/brat';
@@ -407,7 +407,7 @@ $(document).ready(function() {
           // Render
           render(data);
           // Re-position the footer
-          if (document.body.scrollHeight > document.body.clientHeight - 75) {
+          if (document.body.scrollHeight > document.body.clientHeight) {
             $('#footer').css('position', '');
           }
         }
