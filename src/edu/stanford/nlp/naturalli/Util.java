@@ -195,7 +195,6 @@ public class Util {
       }
     }
     extraEdges.forEach(tree::removeEdge);
-
     // Add apposition edges (simple coref)
     for (SemanticGraphEdge extraEdge : new ArrayList<>(extraEdges)) {  // note[gabor] prevent concurrent modification exception
       for (SemanticGraphEdge candidateAppos : tree.incomingEdgeIterable(extraEdge.getDependent())) {

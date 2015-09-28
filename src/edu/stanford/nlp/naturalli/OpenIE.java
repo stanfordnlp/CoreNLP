@@ -34,30 +34,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
- * <p>
- * An OpenIE system based on valid Natural Logic deletions of a sentence.
- * The system is described in:
- * </p>
+ * A simple OpenIE system based on valid Natural Logic deletions of a sentence.
  *
- * <pre>
- *   "Leveraging Linguistic Structure For Open Domain Information Extraction." Gabor Angeli, Melvin Johnson Premkumar, Christopher Manning. ACL 2015.
- * </pre>
- *
- * <p>
- * The paper can be found at <a href="http://nlp.stanford.edu/pubs/2015angeli-openie.pdf">http://nlp.stanford.edu/pubs/2015angeli-openie.pdf</a>.
- * </p>
-
- * <p>
- * Documentation on the system can be found on <a href="http://nlp.stanford.edu/software/openie.shtml">the project homepage</a>.
- * </p>
- *
+ * TODO(gabor): handle lists ("She was the sovereign of Austria, Hungary, Croatia, Bohemia, Mantua, Milan, Lodomeria and Galicia.")
+ * TODO(gabor): handle things like "One example of chemical energy is that found in the food that we eat ."
  *
  * @author Gabor Angeli
  */
-//
-// TODO(gabor): handle lists ("She was the sovereign of Austria, Hungary, Croatia, Bohemia, Mantua, Milan, Lodomeria and Galicia.")
-// TODO(gabor): handle things like "One example of chemical energy is that found in the food that we eat ."
-//
 @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
 public class OpenIE implements Annotator {
 
@@ -226,8 +209,8 @@ public class OpenIE implements Annotator {
     }
   }
 
-  public Set<SentenceFragment> entailmentsFromClauses(Collection<SentenceFragment> clauses) {
-    Set<SentenceFragment> entailments = new HashSet<>();
+  public List<SentenceFragment> entailmentsFromClauses(Collection<SentenceFragment> clauses) {
+    List<SentenceFragment> entailments = new ArrayList<>();
     for (SentenceFragment clause : clauses) {
       entailments.addAll(entailmentsFromClause(clause));
     }
@@ -274,7 +257,7 @@ public class OpenIE implements Annotator {
     if (tokens.size() < 2) {
       // Short sentence; skip annotating it.
       sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.EMPTY_LIST);
-      sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.EMPTY_SET);
+      sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.EMPTY_LIST);
     } else {
       SemanticGraph parse = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
       if (parse == null) {
@@ -285,7 +268,7 @@ public class OpenIE implements Annotator {
       }
       List<RelationTriple> extractions = segmenter.extract(parse, tokens);
       List<SentenceFragment> clauses = clausesInSentence(sentence);
-      Set<SentenceFragment> fragments = entailmentsFromClauses(clauses);
+      List<SentenceFragment> fragments = entailmentsFromClauses(clauses);
 //        fragments.add(new SentenceFragment(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), false));
       extractions.addAll(relationsInFragments(fragments, sentence, canonicalMentionMap));
       sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);

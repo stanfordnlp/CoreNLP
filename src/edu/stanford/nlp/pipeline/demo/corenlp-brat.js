@@ -146,10 +146,12 @@ function render(data) {
       color = nerColor(type);
     } else if (name == 'COREF') {
       color = '#FFE000';
-    } else if (name == 'ENTITY') {
+    } else if (name == 'SUBJECT') {
       color = posColor('NN');
     } else if (name == 'RELATION') {
       color = posColor('VB');
+    } else if (name == 'OBJECT') {
+      color = posColor('NN');
     } else if (name == 'LEMMA') {
       color = '#FFFFFF';
     }
@@ -328,7 +330,7 @@ function render(data) {
     // Render OpenIE
     if (typeof sentence.openie != 'undefined') {
       // Register the entities + relations we'll need
-      addEntityType('ENTITY',  'Entity');
+      addEntityType('SUBJECT',  'Entity');
       addEntityType('RELATION', 'Relation');
       addRelationType('subject');
       addRelationType('object');
@@ -433,7 +435,7 @@ $(document).ready(function() {
     // Get the text to annotate
     text = $('#text').val();
     if (text == '') {
-      text = 'My dog also likes eating sausage.';
+      text = 'My dog also likes eating sausage. He is always hungry.';
       $('#text').val(text);
     }
     // Update the UI

@@ -10,7 +10,6 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.*;
-import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -28,7 +27,6 @@ public class StanfordCoreNLPServer implements Runnable {
   protected HttpServer server;
   protected int serverPort;
   protected final FileHandler staticPageHandle;
-  protected final String shutdownKey;
 
   public static int HTTP_OK = 200;
   public static int HTTP_BAD_INPUT = 400;
@@ -44,39 +42,7 @@ public class StanfordCoreNLPServer implements Runnable {
     defaultProps.setProperty("inputFormat", "text");
     defaultProps.setProperty("outputFormat", "json");
 
-    // Generate and write a shutdown key
-    String tmpDir = System.getProperty("java.io.tmpdir");
-    File tmpFile = new File(tmpDir + File.separator + "corenlp.shutdown");
-    tmpFile.deleteOnExit();
-    if (tmpFile.exists()) {
-      if (!tmpFile.delete()) {
-        throw new IllegalStateException("Could not delete shutdown key file");
-      }
-    }
-    this.shutdownKey = new BigInteger(130, new Random()).toString(32);
-    IOUtils.writeStringToFile(shutdownKey, tmpFile.getPath(), "utf-8");
-
-    // Set the static page handler
     this.staticPageHandle = new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.html");
-  }
-
-  private static Map<String, String> getURLParams(URI uri) {
-    if (uri.getQuery() != null) {
-      Map<String, String> urlParams = new HashMap<>();
-
-      String query = uri.getQuery();
-      String[] queryFields = query.split("&");
-      for (String queryField : queryFields) {
-        String[] keyValue = queryField.split("=");
-        // Convention uses "+" for spaces.
-        keyValue[0] = keyValue[0].replace("+", " ");
-        keyValue[1] = keyValue[1].replace("+", " ");
-        urlParams.put(keyValue[0], keyValue[1]);
-      }
-      return urlParams;
-    } else {
-      return Collections.emptyMap();
-    }
   }
 
   /**
@@ -91,26 +57,6 @@ public class StanfordCoreNLPServer implements Runnable {
       httpExchange.sendResponseHeaders(HTTP_OK, response.getBytes().length);
       httpExchange.getResponseBody().write(response.getBytes());
       httpExchange.close();
-    }
-  }
-
-  protected class ShutdownHandler implements HttpHandler {
-    @Override
-    public void handle(HttpExchange httpExchange) throws IOException {
-      Map<String, String> urlParams = getURLParams(httpExchange.getRequestURI());
-      httpExchange.getResponseHeaders().set("Content-Type", "text/plain");
-      boolean doExit = false;
-      String response = "Invalid shutdown key\n";
-      if (urlParams.containsKey("key") && urlParams.get("key").equals(shutdownKey)) {
-        response = "Shutdown successful!\n";
-        doExit = true;
-      }
-      httpExchange.sendResponseHeaders(HTTP_OK, response.getBytes().length);
-      httpExchange.getResponseBody().write(response.getBytes());
-      httpExchange.close();
-      if (doExit) {
-        System.exit(0);
-      }
     }
   }
 
@@ -249,6 +195,25 @@ public class StanfordCoreNLPServer implements Runnable {
       }
     }
 
+    Map<String, String> getURLParams(URI uri) {
+      if (uri.getQuery() != null) {
+        Map<String, String> urlParams = new HashMap<>();
+
+        String query = uri.getQuery();
+        String[] queryFields = query.split("&");
+        for (String queryField : queryFields) {
+          String[] keyValue = queryField.split("=");
+          // Convention uses "+" for spaces.
+          keyValue[0] = keyValue[0].replace("+", " ");
+          keyValue[1] = keyValue[1].replace("+", " ");
+          urlParams.put(keyValue[0], keyValue[1]);
+        }
+        return urlParams;
+      } else {
+        return Collections.emptyMap();
+      }
+    }
+
     private Properties getProperties(HttpExchange httpExchange) throws UnsupportedEncodingException {
       // Load the default properties
       Properties props = new Properties();
@@ -295,7 +260,6 @@ public class StanfordCoreNLPServer implements Runnable {
       server.createContext("/corenlp-brat.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.js"));
       server.createContext("/corenlp-brat.cs", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.css"));
       server.createContext("/ping", new PingHandler());
-      server.createContext("/shutdown", new ShutdownHandler());
       server.start();
       log("StanfordCoreNLPServer listening at " + server.getAddress());
     } catch (IOException e) {

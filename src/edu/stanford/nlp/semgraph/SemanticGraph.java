@@ -1,7 +1,6 @@
 package edu.stanford.nlp.semgraph;
 
 import edu.stanford.nlp.graph.DirectedMultiGraph;
-import edu.stanford.nlp.ie.machinereading.structure.*;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -638,7 +637,7 @@ public class SemanticGraph implements Serializable {
     }
     return nodes;
   }
-  
+
   public List<IndexedWord> getAllNodesByPartOfSpeechPattern(String pattern) {
     Pattern p = Pattern.compile(pattern);
     List<IndexedWord> nodes = new ArrayList<IndexedWord>();
@@ -1610,17 +1609,10 @@ public class SemanticGraph implements Serializable {
     output.append("}\n");
     return output.toString();
   }
-  
+
   public SemanticGraphEdge addEdge(IndexedWord s, IndexedWord d, GrammaticalRelation reln, double weight, boolean isExtra) {
     SemanticGraphEdge newEdge = new SemanticGraphEdge(s, d, reln, weight, isExtra);
     graph.add(s, d, newEdge);
-    return newEdge;
-  }
-
-  public SemanticGraphEdge addEdge(SemanticGraphEdge edge) {
-    SemanticGraphEdge newEdge = new SemanticGraphEdge(edge.getGovernor(), edge.getDependent(),
-        edge.getRelation(), edge.getWeight(), edge.isExtra());
-    graph.add(edge.getGovernor(), edge.getDependent(), newEdge);
     return newEdge;
   }
 
@@ -1751,7 +1743,7 @@ public class SemanticGraph implements Serializable {
   public List<SemanticGraphEdge> getShortestDirectedPathEdges(IndexedWord source, IndexedWord target) {
     return graph.getShortestPathEdges(source, target, true);
   }
-  
+
   public SemanticGraph makeSoftCopy() {
     SemanticGraph newSg = new SemanticGraph();
     if ( ! this.roots.isEmpty())
@@ -1944,7 +1936,7 @@ public class SemanticGraph implements Serializable {
     }
     return relns;
   }
-  
+
   /**
    * Delete all duplicate edges.
    *
