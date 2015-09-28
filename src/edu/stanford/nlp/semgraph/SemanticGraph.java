@@ -1616,6 +1616,13 @@ public class SemanticGraph implements Serializable {
     return newEdge;
   }
 
+  public SemanticGraphEdge addEdge(SemanticGraphEdge edge) {
+    SemanticGraphEdge newEdge = new SemanticGraphEdge(edge.getGovernor(), edge.getDependent(),
+        edge.getRelation(), edge.getWeight(), edge.isExtra());
+    graph.add(edge.getGovernor(), edge.getDependent(), newEdge);
+    return newEdge;
+  }
+
   // =======================================================================
 
   /**

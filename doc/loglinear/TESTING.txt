@@ -1,0 +1,16 @@
+The testing for the loglinear package uses functional invariants over randomly generated inputs, which in general yields
+much more durable software.
+
+This is aided by the JUnit port of Quickcheck. The general tactic for testing is to randomly generate inputs, then use
+the slow definitional approach on tractably small inputs and test that the output of our algorithms always matches
+exactly. The GitHub for the Quickcheck port is https://github.com/pholser/junit-quickcheck. The dependencies for that
+are in the lib/ folder in test1.
+
+Some of the general testing approaches are listed below:
+
+message passing -> tested against brute force factor multiplication and marginalization
+partition function -> tested against brute force multiplication and summation
+log likelihood gradient -> tested against definition of derivative
+optimization -> tested by making thousands of random perturbations around the function to check if any values are better
+concatVector -> tested against a non-sparse version
+table factor -> tested against functional invariants of results, and re-implementations using different algorithms
