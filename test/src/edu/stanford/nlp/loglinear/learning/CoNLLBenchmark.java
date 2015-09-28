@@ -135,6 +135,8 @@ public class CoNLLBenchmark {
 
             final int iFinal = i;
 
+            int numUnaryFeatures = 8;
+
             // Add the unary factor
 
             GraphicalModel.Factor f = model.addFactor(new int[]{iFinal}, new int[]{tags.size()}, (assignment) -> {
@@ -144,9 +146,7 @@ public class CoNLLBenchmark {
 
                 String tag = tags.get(assignment[0]);
 
-                int numFeatures = 8;
-
-                ConcatVector features = new ConcatVector(numFeatures*tags.size());
+                ConcatVector features = new ConcatVector(numUnaryFeatures*tags.size());
 
                 // Since we use a single set of weights, and one set of features per assignment, we need to differentiate
                 // features for different assignments in order to let them have different weights. The indexing trick
@@ -157,24 +157,24 @@ public class CoNLLBenchmark {
                     String token = sentence.token.get(iFinal);
 
                     // Feature 0, for this tag, word embedding
-                    features.setDenseComponent(assignment[0]*numFeatures, embeddings.get(token));
+                    features.setDenseComponent(assignment[0]*numUnaryFeatures, embeddings.get(token));
 
                     // Feature 1, for this tag, word
-                    features.setSparseComponent(assignment[0]*numFeatures + 1, wordIndex.indexOf(token), 1.0);
+                    features.setSparseComponent(assignment[0]*numUnaryFeatures + 1, wordIndex.indexOf(token), 1.0);
 
                     // Prefix and suffix features
                     int len = token.length();
                     if (len >= 1) {
-                        features.setSparseComponent(assignment[0] * numFeatures + 2, prefix1Index.indexOf(token.substring(0, 0)), 1.0);
-                        features.setSparseComponent(assignment[0] * numFeatures + 5, suffix1Index.indexOf(token.substring(len - 1)), 1.0);
+                        features.setSparseComponent(assignment[0] * numUnaryFeatures + 2, prefix1Index.indexOf(token.substring(0, 0)), 1.0);
+                        features.setSparseComponent(assignment[0] * numUnaryFeatures + 5, suffix1Index.indexOf(token.substring(len - 1)), 1.0);
                     }
                     if (len >= 2) {
-                        features.setSparseComponent(assignment[0]*numFeatures + 3, prefix2Index.indexOf(token.substring(0,1)), 1.0);
-                        features.setSparseComponent(assignment[0]*numFeatures + 6, suffix2Index.indexOf(token.substring(len-2)), 1.0);
+                        features.setSparseComponent(assignment[0]*numUnaryFeatures + 3, prefix2Index.indexOf(token.substring(0,1)), 1.0);
+                        features.setSparseComponent(assignment[0]*numUnaryFeatures + 6, suffix2Index.indexOf(token.substring(len-2)), 1.0);
                     }
                     if (len >= 3) {
-                        features.setSparseComponent(assignment[0]*numFeatures + 7, suffix3Index.indexOf(token.substring(len-3)), 1.0);
-                        features.setSparseComponent(assignment[0]*numFeatures + 4, prefix3Index.indexOf(token.substring(0,2)), 1.0);
+                        features.setSparseComponent(assignment[0]*numUnaryFeatures + 7, suffix3Index.indexOf(token.substring(len-3)), 1.0);
+                        features.setSparseComponent(assignment[0]*numUnaryFeatures + 4, prefix3Index.indexOf(token.substring(0,2)), 1.0);
                     }
                 }
 
@@ -199,20 +199,20 @@ public class CoNLLBenchmark {
                     // used here is ugly to expose to a user and needs a helper. Gabor wants a helper that takes counters,
                     // so perhaps we make a small suite of helper functions to assemble ConcatVectors.
 
-                    ConcatVector features = new ConcatVector(numFeatures * tags.size() * tags.size());
+                    ConcatVector features = new ConcatVector((numUnaryFeatures*tags.size())+ numFeatures * tags.size() * tags.size());
 
                     if (embeddings.containsKey(sentence.token.get(iFinal)) || embeddings.containsKey(sentence.token.get(iFinal + 1))) {
 
                         int index = assignment[0] * tags.size() + assignment[1];
 
                         if (embeddings.get(sentence.token.get(iFinal)) != null) {
-                            features.setDenseComponent(index * numFeatures, embeddings.get(sentence.token.get(iFinal)));
+                            features.setDenseComponent((numUnaryFeatures*tags.size())+(index * numFeatures), embeddings.get(sentence.token.get(iFinal)));
                         }
                         if (embeddings.get(sentence.token.get(iFinal + 1)) != null) {
-                            features.setDenseComponent(index * numFeatures + 1, embeddings.get(sentence.token.get(iFinal + 1)));
+                            features.setDenseComponent((numUnaryFeatures*tags.size())+(index * numFeatures + 1), embeddings.get(sentence.token.get(iFinal + 1)));
                         }
 
-                        features.setSparseComponent(index * numFeatures + 2, bigramIndex.indexOf(sentence.token.get(iFinal)+sentence.token.get(iFinal + 1)), 1.0);
+                        features.setSparseComponent((numUnaryFeatures*tags.size())+(index * numFeatures + 2), bigramIndex.indexOf(sentence.token.get(iFinal)+sentence.token.get(iFinal + 1)), 1.0);
                     }
 
                     return features;
