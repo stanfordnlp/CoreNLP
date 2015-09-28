@@ -2,8 +2,10 @@ Optimization for loglinear was done last, and driven by realistic benchmarks whe
 
 There are 2 major benchmarks for loglinear so far:
 
-- Training CoNLL linear chain model with a mixture of dense and sparse features
-- A bunch of microbenchmarks for ConcatVector
+- Training CoNLL linear chain model with a mixture of dense and sparse features:
+    org.stanford.nlp.loglinear.learning.CoNLLBenchmark
+- A bunch of microbenchmarks for ConcatVector:
+    org.stanford.nlp.loglinear.model.ConcatVectorBenchmark
 
 The general findings so far have been:
 

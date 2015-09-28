@@ -14,9 +14,9 @@ import java.util.Random;
 /**
  * Created by keenon on 8/26/15.
  *
- * Abstract base of all the different kinds of optimizers. This exists to both facilitate sharing test between optimizers
- * and to share certain basic bits of functionality useful for batch optimizers, like intelligent multi-thread management
- * and user interrupt handling.
+ * Abstract base of all the different kinds of batch optimizers. This exists to both facilitate sharing test between
+ * optimizers and to share certain basic bits of functionality useful for batch optimizers, like intelligent
+ * multi-thread management and user interrupt handling.
  */
 public abstract class AbstractBatchOptimizer {
     public <T> ConcatVector optimize(T[] dataset, AbstractDifferentiableFunction<T> fn) {

@@ -3,6 +3,8 @@ package edu.stanford.nlp.loglinear.learning;
 import edu.stanford.nlp.loglinear.inference.CliqueTree;
 import edu.stanford.nlp.loglinear.model.ConcatVector;
 import edu.stanford.nlp.loglinear.model.GraphicalModel;
+import edu.stanford.nlp.util.HashIndex;
+import edu.stanford.nlp.util.Index;
 
 import java.io.*;
 import java.util.*;
@@ -16,6 +18,9 @@ import java.util.zip.GZIPOutputStream;
  * and unary factors. This is a nice explanation of why it is key to have ConcatVector as a datastructure, since there
  * is no need to specify the number of words in advance anywhere, and data structures will happily resize with a minimum
  * of GCC wastage.
+ *
+ * So far, the feature set is extremely simplistic, though it would be awesome if people expanded it. Look at
+ * generateSentenceModel() to make changes.
  */
 public class CoNLLBenchmark {
     Map<String, double[]> embeddings = new HashMap<>();
@@ -108,6 +113,17 @@ public class CoNLLBenchmark {
     // GENERATING MODELS
     ////////////////////////////////////////////////////////////////////////////////////////////
 
+    // Indexes for sparse features
+
+    Index<String> wordIndex = new HashIndex<>();
+    Index<String> prefix1Index = new HashIndex<>();
+    Index<String> prefix2Index = new HashIndex<>();
+    Index<String> prefix3Index = new HashIndex<>();
+    Index<String> suffix1Index = new HashIndex<>();
+    Index<String> suffix2Index = new HashIndex<>();
+    Index<String> suffix3Index = new HashIndex<>();
+    Index<String> bigramIndex = new HashIndex<>();
+
     private GraphicalModel generateSentenceModel(CoNLLSentence sentence, List<String> tags) {
         GraphicalModel model = new GraphicalModel();
 
@@ -128,9 +144,32 @@ public class CoNLLBenchmark {
 
                 String tag = tags.get(assignment[0]);
 
-                ConcatVector features = new ConcatVector(tags.size());
+                int numFeatures = 8;
+
+                ConcatVector features = new ConcatVector(numFeatures*tags.size());
                 if (embeddings.get(sentence.token.get(iFinal)) != null) {
-                    features.setDenseComponent(assignment[0], embeddings.get(sentence.token.get(iFinal)));
+                    String token = sentence.token.get(iFinal);
+
+                    // Feature 0, for this tag, word embedding
+                    features.setDenseComponent(assignment[0]*numFeatures, embeddings.get(token));
+
+                    // Feature 1, for this tag, word
+                    features.setSparseComponent(assignment[0]*numFeatures + 1, wordIndex.indexOf(token), 1.0);
+
+                    // Prefix and suffix features
+                    int len = token.length();
+                    if (len >= 1) {
+                        features.setSparseComponent(assignment[0] * numFeatures + 2, prefix1Index.indexOf(token.substring(0, 0)), 1.0);
+                        features.setSparseComponent(assignment[0] * numFeatures + 5, suffix1Index.indexOf(token.substring(len - 1)), 1.0);
+                    }
+                    if (len >= 2) {
+                        features.setSparseComponent(assignment[0]*numFeatures + 3, prefix2Index.indexOf(token.substring(0,1)), 1.0);
+                        features.setSparseComponent(assignment[0]*numFeatures + 6, suffix2Index.indexOf(token.substring(len-2)), 1.0);
+                    }
+                    if (len >= 3) {
+                        features.setSparseComponent(assignment[0]*numFeatures + 7, suffix3Index.indexOf(token.substring(len-3)), 1.0);
+                        features.setSparseComponent(assignment[0]*numFeatures + 4, prefix3Index.indexOf(token.substring(0,2)), 1.0);
+                    }
                 }
 
                 return features;
@@ -147,18 +186,22 @@ public class CoNLLBenchmark {
                     String thisTag = tags.get(assignment[0]);
                     String nextTag = tags.get(assignment[1]);
 
-                    ConcatVector features = new ConcatVector(2 * tags.size() * tags.size());
+                    int numFeatures = 3;
+
+                    ConcatVector features = new ConcatVector(numFeatures * tags.size() * tags.size());
 
                     if (embeddings.containsKey(sentence.token.get(iFinal)) || embeddings.containsKey(sentence.token.get(iFinal + 1))) {
 
                         int index = assignment[0] * tags.size() + assignment[1];
+
                         if (embeddings.get(sentence.token.get(iFinal)) != null) {
-                            features.setDenseComponent(index, embeddings.get(sentence.token.get(iFinal)));
+                            features.setDenseComponent(index * numFeatures, embeddings.get(sentence.token.get(iFinal)));
                         }
                         if (embeddings.get(sentence.token.get(iFinal + 1)) != null) {
-                            features.setDenseComponent((tags.size() * tags.size()) + index, embeddings.get(sentence.token.get(iFinal + 1)));
+                            features.setDenseComponent(index * numFeatures + 1, embeddings.get(sentence.token.get(iFinal + 1)));
                         }
 
+                        features.setSparseComponent(index * numFeatures + 2, bigramIndex.indexOf(sentence.token.get(iFinal)+sentence.token.get(iFinal + 1)), 1.0);
                     }
 
                     return features;

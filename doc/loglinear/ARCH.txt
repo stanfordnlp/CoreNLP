@@ -96,6 +96,12 @@ An implementation of AbstractDifferentiableFunction for calculating the log-like
 a GraphicalModel.
 
 ***
+AbstractOnlineOptimizer
+
+This is the basic interface for online optimizers to follow. It is sketched out right now, but no implementations have
+been made yet.
+
+***
 AbstractBatchOptimizer
 
 There is a fair amount of redundant complexity involved in writing an optimizer that needs to calculate the gradient
