@@ -26,6 +26,10 @@
         <include name="*.jar"/>
         <exclude name="javanlp*"/>
       </fileset>
+      <fileset dir="${basedir}/liblocal">
+        <include name="*.jar"/>
+        <exclude name="javanlp*"/>
+      </fileset>
     </path>
   </target>
 
