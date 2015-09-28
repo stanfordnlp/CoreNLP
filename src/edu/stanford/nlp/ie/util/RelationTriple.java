@@ -198,10 +198,15 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
           thisChunk = 1;
         }
       }
+      // (subcase: the last chunk is the longest)
+      if (thisChunk > longestChunk) {
+        longestChunk = thisChunk;
+        longestChunkStart = thisChunkStart;
+      }
       // Return the longest chunk
       return Pair.makePair(
           relation.get(longestChunkStart).index() - 1,
-          relation.get(longestChunkStart + longestChunk).index()
+          relation.get(longestChunkStart + longestChunk - 1).index()
       );
     }
   }
