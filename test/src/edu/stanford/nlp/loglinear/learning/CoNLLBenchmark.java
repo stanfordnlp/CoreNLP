@@ -147,6 +147,12 @@ public class CoNLLBenchmark {
                 int numFeatures = 8;
 
                 ConcatVector features = new ConcatVector(numFeatures*tags.size());
+
+                // Since we use a single set of weights, and one set of features per assignment, we need to differentiate
+                // features for different assignments in order to let them have different weights. The indexing trick
+                // used here is ugly to expose to a user and needs a helper. Gabor wants a helper that takes counters,
+                // so perhaps we make a small suite of helper functions to assemble ConcatVectors.
+
                 if (embeddings.get(sentence.token.get(iFinal)) != null) {
                     String token = sentence.token.get(iFinal);
 
@@ -187,6 +193,11 @@ public class CoNLLBenchmark {
                     String nextTag = tags.get(assignment[1]);
 
                     int numFeatures = 3;
+
+                    // Since we use a single set of weights, and one set of features per assignment, we need to differentiate
+                    // features for different assignments in order to let them have different weights. The indexing trick
+                    // used here is ugly to expose to a user and needs a helper. Gabor wants a helper that takes counters,
+                    // so perhaps we make a small suite of helper functions to assemble ConcatVectors.
 
                     ConcatVector features = new ConcatVector(numFeatures * tags.size() * tags.size());
 
