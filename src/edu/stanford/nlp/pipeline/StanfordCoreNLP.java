@@ -31,6 +31,7 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.tokensregex.CoreMapSequenceMatchAction;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.util.*;
@@ -245,6 +246,62 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
   public boolean getPrintSingletons() {
     return PropertiesUtils.getBool(properties, "output.printSingletonEntities", false);
+  }
+
+  /**
+   * Take a collection of requested annotators, and produce a list of annotators such that all of the
+   * prerequisites for each of the annotators in the input is met.
+   * For example, if the user requests lemma, ensure that pos is also run because lemma depends on
+   * pos. As a side effect, this function orders the annotators in the proper order.
+   *
+   * @param annotators The annotators the user has requested.
+   * @return A sanitized annotators string with all prerequisites met.
+   */
+  public static String ensurePrerequisiteAnnotators(String[] annotators) {
+    // Get an unordered set of annotators
+    Set<String> unorderedAnnotators = new HashSet<>();
+    for (String annotator : annotators) {
+      if (!Annotator.REQUIREMENTS.containsKey(annotator.toLowerCase())) {
+        throw new IllegalArgumentException("Unknown annotator: " + annotator);
+      }
+      unorderedAnnotators.add(annotator.toLowerCase());
+      Set<Requirement> requirements = Annotator.REQUIREMENTS.get(annotator.toLowerCase());
+      for (Requirement prereq : requirements) {
+        unorderedAnnotators.add(prereq.name);
+      }
+    }
+
+    // Order the annotators
+    List<String> orderedAnnotators = new ArrayList<>();
+    while (!unorderedAnnotators.isEmpty()) {
+      boolean somethingAdded = false;  // to make sure the dependencies are satisfiable
+      // Loop over candidate annotators to add
+      Iterator<String> iter = unorderedAnnotators.iterator();
+      while (iter.hasNext()) {
+        String candidate = iter.next();
+        // Are the requirements satisfied?
+        boolean canAdd = true;
+        for (Requirement prereq : Annotator.REQUIREMENTS.get(candidate)) {
+          if (!orderedAnnotators.contains(prereq.name)) {
+            canAdd = false;
+            break;
+          }
+        }
+        // If so, add the annotator
+        if (canAdd) {
+          orderedAnnotators.add(candidate);
+          iter.remove();
+          somethingAdded = true;
+        }
+      }
+      // Make sure we're making progress every iteration, to prevent an infinite loop
+      if (!somethingAdded) {
+        throw new IllegalArgumentException("Unsatisfiable annotator list: " + StringUtils.join(annotators, ","));
+      }
+    }
+
+    // Return
+    return StringUtils.join(orderedAnnotators, ",");
   }
 
 

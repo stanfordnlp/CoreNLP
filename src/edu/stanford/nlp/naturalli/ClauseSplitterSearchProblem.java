@@ -76,7 +76,7 @@ public class ClauseSplitterSearchProblem {
       add("clone_nsubj");
       add("simple");
     }});
-    put("conj:and", new ArrayList<String>() {{
+    put("conj:*", new ArrayList<String>() {{
       add("clone_nsubj");
       add("clone_dobj");
       add("simple");
@@ -832,7 +832,11 @@ public class ClauseSplitterSearchProblem {
           continue;
         }
         // Get some variables
-        List<String> forcedArcOrder = hardCodedSplits.get(outgoingEdge.getRelation().toString());
+        String outgoingEdgeRelation = outgoingEdge.getRelation().toString();
+        List<String> forcedArcOrder = hardCodedSplits.get(outgoingEdgeRelation);
+        if (forcedArcOrder == null && outgoingEdgeRelation.contains(":")) {
+          forcedArcOrder = hardCodedSplits.get(outgoingEdgeRelation.substring(0, outgoingEdgeRelation.indexOf(":")) + ":*");
+        }
         boolean doneForcedArc = false;
         // For each action...
         for (Action action : (forcedArcOrder == null ? actionSpace : orderActions(actionSpace, forcedArcOrder))) {

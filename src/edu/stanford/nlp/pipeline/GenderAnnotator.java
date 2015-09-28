@@ -56,7 +56,7 @@ public class GenderAnnotator implements Annotator {
 
   @Override
   public Set<Requirement> requires() {
-    return TOKENIZE_SSPLIT_POS;
+    return Annotator.REQUIREMENTS.get(STANFORD_GENDER);
   }
 
   @Override
