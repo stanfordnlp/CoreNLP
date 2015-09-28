@@ -30,7 +30,7 @@ public class OptimizerTests {
                                           @ForAll(sampleSize = 50) @From(LogLikelihoodFunctionTest.GraphicalModelDatasetGenerator.class) GraphicalModel[] dataset,
                                           @ForAll(sampleSize = 2) @From(LogLikelihoodFunctionTest.WeightsGenerator.class) ConcatVector initialWeights,
                                           @ForAll(sampleSize = 4) @InRange(minDouble = 0.0, maxDouble = 5.0) double l2regularization) throws Exception {
-        AbstractFunction<GraphicalModel> ll = new LogLikelihoodFunction();
+        AbstractDifferentiableFunction<GraphicalModel> ll = new LogLikelihoodFunction();
         ConcatVector finalWeights = optimizer.optimize(dataset, ll, initialWeights, l2regularization);
         System.err.println("Finished optimizing");
 
@@ -67,7 +67,7 @@ public class OptimizerTests {
         }
     }
 
-    private <T> double getValueSum(T[] dataset, ConcatVector weights, AbstractFunction<T> fn, double l2regularization) {
+    private <T> double getValueSum(T[] dataset, ConcatVector weights, AbstractDifferentiableFunction<T> fn, double l2regularization) {
         double value = 0.0;
         for (T t : dataset) {
             value += fn.getSummaryForInstance(t, weights).value;

@@ -12,7 +12,7 @@ import java.util.Iterator;
  * Generates (potentially noisy, no promises about exactness) gradients from a batch of examples that were provided to
  * the system.
  */
-public class LogLikelihoodFunction extends AbstractFunction<GraphicalModel> {
+public class LogLikelihoodFunction extends AbstractDifferentiableFunction<GraphicalModel> {
     // This sets a gold observation for a model to use as training gold data
     public static final String VARIABLE_TRAINING_VALUE = "learning.LogLikelihoodFunction.VARIABLE_TRAINING_VALUE";
 

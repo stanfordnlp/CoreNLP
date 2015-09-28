@@ -136,9 +136,6 @@ public class CoNLLBenchmark {
                 return features;
             });
 
-            assert(f.neigborIndices.length == 1);
-            assert(f.neigborIndices[0] == iFinal);
-
             // If this is not the last variable, add a binary factor
 
             if (i < sentence.token.size() - 1) {
@@ -166,10 +163,6 @@ public class CoNLLBenchmark {
 
                     return features;
                 });
-
-                assert(jf.neigborIndices.length == 2);
-                assert(jf.neigborIndices[0] == iFinal);
-                assert(jf.neigborIndices[1] == iFinal + 1);
             }
         }
 

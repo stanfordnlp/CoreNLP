@@ -19,11 +19,11 @@ import java.util.Random;
  * and user interrupt handling.
  */
 public abstract class AbstractBatchOptimizer {
-    public <T> ConcatVector optimize(T[] dataset, AbstractFunction<T> fn) {
+    public <T> ConcatVector optimize(T[] dataset, AbstractDifferentiableFunction<T> fn) {
         return optimize(dataset, fn, new ConcatVector(0), 0.0);
     }
 
-    public <T> ConcatVector optimize(T[] dataset, AbstractFunction<T> fn, ConcatVector initialWeights, double l2regularization) {
+    public <T> ConcatVector optimize(T[] dataset, AbstractDifferentiableFunction<T> fn, ConcatVector initialWeights, double l2regularization) {
         System.err.println("\n**************\nBeginning training\n");
 
         TrainingWorker<T> mainWorker = new TrainingWorker<>(dataset, fn, initialWeights, l2regularization);
@@ -86,7 +86,7 @@ public abstract class AbstractBatchOptimizer {
         int threadIdx;
         int numThreads;
         List<T> queue;
-        AbstractFunction<T> fn;
+        AbstractDifferentiableFunction<T> fn;
         ConcatVector weights;
 
         long jvmThreadId = 0;
@@ -95,7 +95,7 @@ public abstract class AbstractBatchOptimizer {
         long finishedAtTime = 0;
         long cpuTimeRequired = 0;
 
-        public GradientWorker(TrainingWorker<T> mainWorker, int threadIdx, int numThreads, List<T> queue, AbstractFunction<T> fn, ConcatVector weights) {
+        public GradientWorker(TrainingWorker<T> mainWorker, int threadIdx, int numThreads, List<T> queue, AbstractDifferentiableFunction<T> fn, ConcatVector weights) {
             this.mainWorker = mainWorker;
             this.threadIdx = threadIdx;
             this.numThreads = numThreads;
@@ -111,7 +111,7 @@ public abstract class AbstractBatchOptimizer {
             long startTime = ManagementFactory.getThreadMXBean().getThreadCpuTime(jvmThreadId);
 
             for (T datum : queue) {
-                AbstractFunction.FunctionSummaryAtPoint summary = fn.getSummaryForInstance(datum, weights);
+                AbstractDifferentiableFunction.FunctionSummaryAtPoint summary = fn.getSummaryForInstance(datum, weights);
                 if (Double.isFinite(summary.value)) {
                     localDerivative.addVectorInPlace(summary.gradient, 1.0);
                     localLogLikelihood += summary.value;
@@ -136,10 +136,10 @@ public abstract class AbstractBatchOptimizer {
         boolean useThreads = Runtime.getRuntime().availableProcessors() > 1;
 
         T[] dataset;
-        AbstractFunction<T> fn;
+        AbstractDifferentiableFunction<T> fn;
         double l2regularization;
 
-        public TrainingWorker(T[] dataset, AbstractFunction<T> fn, ConcatVector initialWeights, double l2regularization) {
+        public TrainingWorker(T[] dataset, AbstractDifferentiableFunction<T> fn, ConcatVector initialWeights, double l2regularization) {
             optimizationState = getFreshOptimizationState(initialWeights);
             weights = initialWeights.deepClone();
 
@@ -273,7 +273,7 @@ public abstract class AbstractBatchOptimizer {
                 else {
                     for (T datum : dataset) {
                         assert(datum != null);
-                        AbstractFunction.FunctionSummaryAtPoint summary = fn.getSummaryForInstance(datum, weights);
+                        AbstractDifferentiableFunction.FunctionSummaryAtPoint summary = fn.getSummaryForInstance(datum, weights);
                         if (Double.isFinite(summary.value)) {
                             derivative.addVectorInPlace(summary.gradient, 1.0);
                             logLikelihood += summary.value;

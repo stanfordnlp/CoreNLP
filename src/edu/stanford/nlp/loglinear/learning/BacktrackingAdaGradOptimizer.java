@@ -5,7 +5,7 @@ import edu.stanford.nlp.loglinear.model.ConcatVector;
 /**
  * Created by keenon on 8/26/15.
  *
- * Handles optimizing an AbstractFunction through AdaGrad guarded by backtracking.
+ * Handles optimizing an AbstractDifferentiableFunction through AdaGrad guarded by backtracking.
  */
 public class BacktrackingAdaGradOptimizer extends AbstractBatchOptimizer {
 
