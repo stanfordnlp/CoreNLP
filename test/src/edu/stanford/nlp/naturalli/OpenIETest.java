@@ -95,9 +95,9 @@ public class OpenIETest {
     assertEquals(new HashSet<String>() {{
       add("cats have tails");
     }}, clauses(
-        "1\tcats\t2\tnsubj\tNN\n" +
-        "2\thave\t0\troot\tVB\n" +
-        "3\ttails\t2\tdobj\tNN\n"
+        "1\tcats\t2\tnsubj\n" +
+        "2\thave\t0\troot\n" +
+        "3\ttails\t2\tdobj\n"
     ));
   }
 
@@ -107,13 +107,13 @@ public class OpenIETest {
       add("I persuaded Fred to leave the room");
       add("Fred leave the room");
     }}, clauses(
-        "1\tI\t2\tnsubj\tPR\n" +
-        "2\tpersuaded\t0\troot\tVBD\n" +
-        "3\tFred\t2\tdobj\tNNP\n" +
-        "4\tto\t5\taux\tTO\n" +
-        "5\tleave\t2\txcomp\tVB\n" +
-        "6\tthe\t7\tdet\tDT\n" +
-        "7\troom\t5\tdobj\tNN\n"
+        "1\tI\t2\tnsubj\n" +
+        "2\tpersuaded\t0\troot\n" +
+        "3\tFred\t2\tdobj\n" +
+        "4\tto\t5\taux\n" +
+        "5\tleave\t2\txcomp\n" +
+        "6\tthe\t7\tdet\n" +
+        "7\troom\t5\tdobj\n"
     ));
   }
 
@@ -123,13 +123,13 @@ public class OpenIETest {
       add("I was persuaded to leave the room");
       add("I leave the room");
     }}, clauses(
-        "1\tI\t3\tnsubjpass\tPR\n" +
-        "2\twas\t3\tauxpass\tVB\n" +
-        "3\tpersuaded\t0\troot\tVBD\n" +
-        "4\tto\t5\taux\tTO\n" +
-        "5\tleave\t3\txcomp\tVB\n" +
-        "6\tthe\t7\tdet\tDT\n" +
-        "7\troom\t5\tdobj\tNN\n"
+        "1\tI\t3\tnsubjpass\n" +
+        "2\twas\t3\tauxpass\n" +
+        "3\tpersuaded\t0\troot\n" +
+        "4\tto\t5\taux\n" +
+        "5\tleave\t3\txcomp\n" +
+        "6\tthe\t7\tdet\n" +
+        "7\troom\t5\tdobj\n"
     ));
   }
 
@@ -139,13 +139,13 @@ public class OpenIETest {
       add("I suggested that he leave the room");
       add("he leave the room");
     }}, clauses(
-        "1\tI\t2\tnsubj\tPR\n" +
-        "2\tsuggested\t0\troot\tVBD\n" +
-        "3\tthat\t5\tmark\tIN\n" +
-        "4\the\t5\tnsubj\tPR\n" +
-        "5\tleave\t2\tccomp\tVB\n" +
-        "6\tthe\t7\tdet\tDT\n" +
-        "7\troom\t5\tdobj\tNN\n"
+        "1\tI\t2\tnsubj\n" +
+        "2\tsuggested\t0\troot\n" +
+        "3\tthat\t5\tmark\n" +
+        "4\the\t5\tnsubj\n" +
+        "5\tleave\t2\tccomp\n" +
+        "6\tthe\t7\tdet\n" +
+        "7\troom\t5\tdobj\n"
     ));
   }
 

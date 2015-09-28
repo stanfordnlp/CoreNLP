@@ -44,9 +44,6 @@ public class CoNLLUDocumentReader implements
   }
 
   private static class SentenceProcessor implements Function<String,SemanticGraph> {
-
-    private int lineNumberCounter = 0;
-
     public SemanticGraph apply(String line) {
       if (line == null) return null;
       Function<String,IndexedWord> func = new WordProcessor();
@@ -58,7 +55,6 @@ public class CoNLLUDocumentReader implements
       /* Construct a semantic graph. */
       List<TypedDependency> deps = new ArrayList<TypedDependency>(sorted.size());
       for (IndexedWord word : sorted) {
-        lineNumberCounter++;
         GrammaticalRelation reln = GrammaticalRelation.valueOf(Language.UniversalEnglish, word.get(CoreAnnotations.CoNLLDepTypeAnnotation.class));
         int govIdx = word.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class);
         IndexedWord gov;
@@ -72,10 +68,8 @@ public class CoNLLUDocumentReader implements
           gov = sorted.get(govIdx - 1);
         }
         TypedDependency dep = new TypedDependency(reln, gov, word);
-        word.set(CoreAnnotations.LineNumberAnnotation.class, lineNumberCounter);
         deps.add(dep);
       }
-      lineNumberCounter++;
 
       return new SemanticGraph(deps);
     }

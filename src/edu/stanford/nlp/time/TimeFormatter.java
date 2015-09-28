@@ -113,7 +113,6 @@ public class TimeFormatter {
               new SequenceMatchRules.StringPatternExtractRule<MatchedExpression>(pattern,
                       new SequenceMatchRules.StringMatchedExpressionExtractor( valueExtractor, r.matchedExpressionGroup)));
       r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(valueExtractor);
-      r.pattern = pattern;
     }
 
     protected void updateExtractRule(SequenceMatchRules.AnnotationExtractRule r,
@@ -136,7 +135,6 @@ public class TimeFormatter {
       String formatter = (String) Expressions.asObject(env, attributes.get("formatter"));
       Expression action = Expressions.asExpression(env, attributes.get("action"));
       String localeString = (String) Expressions.asObject(env, attributes.get("locale"));
-      r.pattern = expr;
       if (formatter == null) {
         if (r.annotationField == null) { r.annotationField = EnvLookup.getDefaultTextAnnotationKey(env);  }
         /* Parse pattern and figure out what the result should be.... */

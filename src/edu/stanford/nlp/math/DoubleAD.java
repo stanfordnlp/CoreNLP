@@ -1,9 +1,9 @@
 package edu.stanford.nlp.math;
 
 /**
- * The class {@code DoubleAD} was created to extend the
+ * The class <code>DoubleAD</code> was created to extend the
  * current calculations of gradient to automatically include a calculation of the
- * Hessian vector product with another vector {@code v}.  This is used with the
+ * hessian vector product with another vector <code>v</code>.  This is used with the
  * Stochastic Meta Descent Optimization, but could be extended for use in any application
  * that requires an additional order of differentiation without explicitly creating the code.
  *
@@ -18,33 +18,32 @@ public class DoubleAD extends Number {
   private double dot;
 
 
-  public DoubleAD() {
+  public DoubleAD(){
     setval(0);
     setdot(1);
   }
 
-  public DoubleAD(double initVal, double initDot) {
+  public DoubleAD(double initVal, double initDot){
     val = initVal;
     dot = initDot;
   }
 
-  public boolean equals(Object obj) {
-    if (this == obj) {
+  public boolean equals(DoubleAD b){
+    if(b.getval() == val && b.getdot() == dot){
       return true;
-    }
-    if ( ! (obj instanceof DoubleAD)) {
-      return false;
-    }
-    DoubleAD b = (DoubleAD) obj;
-    return b.getval() == val && b.getdot() == dot;
+    } else return false;
   }
 
-  public boolean equals(double valToCompare, double dotToCompare) {
-    return valToCompare == val && dotToCompare == dot;
+  public boolean equals(double valToCompare,double dotToCompare){
+    if(valToCompare == val && dotToCompare == dot){
+      return true;
+    }else return false;
   }
 
-  public boolean equals(double valToCompare, double dotToCompare, double TOL) {
-    return Math.abs(valToCompare - val) < TOL && Math.abs(dotToCompare - dot) < TOL;
+  public boolean equals(double valToCompare,double dotToCompare,double TOL){
+    if( Math.abs(valToCompare - val) < TOL && Math.abs(dotToCompare - dot) < TOL){
+      return true;
+    }else return false;
   }
 
   public double getval(){
@@ -112,17 +111,6 @@ public class DoubleAD extends Number {
   @Override
   public String toString() {
       return "Value= " + val + "; Dot= " + dot;
-  }
-
-  @Override
-  public int hashCode() {
-    int result;
-    long temp;
-    temp = Double.doubleToLongBits(val);
-    result = (int) (temp ^ (temp >>> 32));
-    temp = Double.doubleToLongBits(dot);
-    result = 31 * result + (int) (temp ^ (temp >>> 32));
-    return result;
   }
 
 }

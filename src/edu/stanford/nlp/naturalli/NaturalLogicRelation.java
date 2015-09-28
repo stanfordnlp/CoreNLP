@@ -200,7 +200,6 @@ public enum NaturalLogicRelation {
   private static final Map<String, NaturalLogicRelation> insertArcToNaturalLogicRelation = Collections.unmodifiableMap(new HashMap<String, NaturalLogicRelation>() {{
     put("acomp", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("advcl", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("acl", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("advmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("agent", NaturalLogicRelation.INDEPENDENCE);  //
     put("amod", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
@@ -209,9 +208,6 @@ public enum NaturalLogicRelation {
     put("auxpass", NaturalLogicRelation.INDEPENDENCE);  // some cat adopts -/-> some cat got adopted
     put("ccomp", NaturalLogicRelation.INDEPENDENCE);  // interesting project here... "he said x" -> "x"?
     put("cc", NaturalLogicRelation.REVERSE_ENTAILMENT);  // match dep_conj
-    put("compound", NaturalLogicRelation.INDEPENDENCE);  //
-    put("name", NaturalLogicRelation.INDEPENDENCE);  //
-    put("mwe", NaturalLogicRelation.INDEPENDENCE);  //
     put("conj:and\\/or", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("conj:and", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("conj:both", NaturalLogicRelation.REVERSE_ENTAILMENT);  //

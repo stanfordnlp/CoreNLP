@@ -96,24 +96,6 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap> {
       // Trim start/end quote and unescape \"
       return str.substring(1,str.length()-1).replaceAll("\\\\\"", "\"");
     }
-
-    private void appendSpecialTokens( StringBuilder sb, Token st ) {
-      if( st != null ) {
-        appendSpecialTokens( sb, st.specialToken );
-        sb.append( st.image );
-      }
-    }
-
-    private String getStringFromTokens(Token head, Token tail, boolean includeSpecial) {
-      StringBuilder sb = new StringBuilder();
-      for( Token p = head ; p != tail ; p = p.next ) {
-        if (includeSpecial) {
-          appendSpecialTokens( sb, p.specialToken );
-        }
-        sb.append( p.image );
-      }
-      return sb.toString();
-    }
 }
 
 PARSER_END(TokenSequenceParser)
@@ -139,7 +121,7 @@ TOKEN:
 |   < NONNEGINT: (["0"-"9"])+ >
 |   < INT: (["+","-"])? (["0"-"9"])+ >
 |   < LONGINT: (["+","-"])? (["0"-"9"])+ "L" >
-|   < REAL: (["+","-"])? (["0"-"9","E","-"])+ "." (["0"-"9","E","-"])+ >
+|   < REAL: (["+","-"])? (["0"-"9"])+ "." (["0"-"9"])+ >
 |	< REGEX: "/" ("\\/"|~["\n","\r","/"])* "/" >
 |	< STR: "\"" ("\\\""|~["\n","\r", "\""])* "\"" >
 |   < NUMCMP: "<=" | ">=" | ">" | "<" | "==" | "!=" >
@@ -303,8 +285,6 @@ Map<String,Expression> FieldValue(Env env, Map<String,Expression> attributes) : 
 
 Value BasicValue(Env env) : {
 	Token tok = null;
-	Token head = null;
-	Token tail = null;
 	SequencePattern.PatternExpr seqRegex = null;
 }   {
         tok = <REGEX> { return new Expressions.RegexValue(/*"REGEX",*/ tok.image.substring(1,tok.image.length()-1)); }
@@ -317,9 +297,8 @@ Value BasicValue(Env env) : {
         |
         tok = <REAL> { return new Expressions.PrimitiveValue<Number>("REAL", Double.valueOf(tok.image)); }
         |
-        head = "(" seqRegex = SeqRegex(env) tail = ")" {
-          String str = getStringFromTokens(head, tail, true);
-          TokenSequencePattern seqPattern = new TokenSequencePattern(str, seqRegex);
+        "(" seqRegex = SeqRegex(env) ")" {
+          TokenSequencePattern seqPattern = new TokenSequencePattern(null, seqRegex);
           return new Expressions.PrimitiveValue<TokenSequencePattern>("TOKEN_REGEX", seqPattern);
         }
 	}

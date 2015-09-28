@@ -732,7 +732,7 @@ public class IOUtils {
 
     private InputStream getStream() throws IOException {
       if (file != null) {
-        return inputStreamFromFile(file);
+        return new FileInputStream(file);
       } else if (path != null) {
         return getInputStreamFromURLOrClasspathOrFileSystem(path);
       } else {
@@ -874,22 +874,22 @@ public class IOUtils {
    * Line endings are: \r\n,\n,\r
    * Lines returns by this iterator will include the eol-characters
    **/
-  private static final class EolPreservingLineReaderIterable implements Iterable<String> {
-
+  private static final class EolPreservingLineReaderIterable implements Iterable<String>
+  {
     private final Reader reader;
     private final int bufferSize;
-
     private EolPreservingLineReaderIterable( Reader reader )
     {
       this(reader, SLURP_BUFFER_SIZE);
     }
-    private EolPreservingLineReaderIterable( Reader reader, int bufferSize ) {
+    private EolPreservingLineReaderIterable( Reader reader, int bufferSize )
+    {
       this.reader = reader;
       this.bufferSize = bufferSize;
     }
-
     @Override
-    public Iterator<String> iterator() {
+    public Iterator<String> iterator()
+    {
       return new Iterator<String>() {
         private String next;
         private boolean done = false;
@@ -961,6 +961,7 @@ public class IOUtils {
           return false;
         }
 
+
         @Override
         public boolean hasNext()
         {
@@ -973,7 +974,6 @@ public class IOUtils {
           }
           return !done;
         }
-
         @Override
         public String next()
         {
@@ -989,9 +989,8 @@ public class IOUtils {
           throw new UnsupportedOperationException();
         }
       };
-    } // end iterator()
-
-  } // end static class EolPreservingLineReaderIterable
+    }
+  }
 
   /**
    * Provides an implementation of closing a file for use in a finally block so
@@ -1126,7 +1125,7 @@ public class IOUtils {
    */
   public static String slurpFile(String filename, String encoding)
           throws IOException {
-    Reader r = getBufferedReaderFromClasspathOrFileSystem(filename, encoding);
+    Reader r = readerFromString(filename, encoding);
     return IOUtils.slurpReader(r);
   }
 
@@ -1183,7 +1182,11 @@ public class IOUtils {
     }
     BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
     StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
-    for (String temp; (temp = br.readLine()) != null; ) {
+    for (String temp; (temp = br.readLine()) != null;
+
+
+
+            ) {
       buff.append(temp);
       buff.append(lineSeparator);
     }
@@ -1315,8 +1318,10 @@ public class IOUtils {
   /**
    * Send all bytes from the input stream to the output stream.
    *
-   * @param input The input bytes.
-   * @param output Where the bytes should be written.
+   * @param input
+   *          The input bytes.
+   * @param output
+   *          Where the bytes should be written.
    */
   public static void writeStreamToStream(InputStream input, OutputStream output)
           throws IOException {
@@ -1458,17 +1463,6 @@ public class IOUtils {
    */
   public static OutputStream getFileOutputStream(String filename) throws IOException {
     OutputStream out = new FileOutputStream(filename);
-    if (filename.endsWith(".gz")) {
-      out = new GZIPOutputStream(out);
-    } else if (filename.endsWith(".bz2")) {
-      //out = new CBZip2OutputStream(out);
-      out = getBZip2PipedOutputStream(filename);
-    }
-    return out;
-  }
-
-  public static OutputStream getFileOutputStream(String filename, boolean append) throws IOException {
-    OutputStream out = new FileOutputStream(filename, append);
     if (filename.endsWith(".gz")) {
       out = new GZIPOutputStream(out);
     } else if (filename.endsWith(".bz2")) {
@@ -2055,7 +2049,6 @@ public class IOUtils {
   /**
    * Start a simple console. Read lines from stdin, and pass each line to the callback.
    * Returns on typing "exit" or "quit".
-   *
    * @param callback The function to run for every line of input.
    * @throws IOException Thrown from the underlying input stream.
    */

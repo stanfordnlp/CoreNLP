@@ -39,7 +39,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
     this.flags = flags;
     this.wrapped = wrapped;
     this.knownLCWords = knownLCWords;
-    if (flags.maxAdditionalKnownLCWords >= 0 && ((long) flags.maxAdditionalKnownLCWords) + knownLCWords.size() < Integer.MAX_VALUE) {
+    if (flags.maxAdditionalKnownLCWords > 0 && ((long) flags.maxAdditionalKnownLCWords) + knownLCWords.size() < Integer.MAX_VALUE) {
       knownLCWordsSizeLimit = knownLCWords.size() + flags.maxAdditionalKnownLCWords;
     } else {
       knownLCWordsSizeLimit = Integer.MAX_VALUE;

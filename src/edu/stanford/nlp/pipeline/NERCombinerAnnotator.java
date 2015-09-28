@@ -156,9 +156,9 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
         System.err.println(']');
       }
     } else {
-      for (CoreLabel token : tokens) {
+      for (int i = 0; i < tokens.size(); ++i) {
         // add the dummy named entity tag to each token
-        token.setNER(this.ner.backgroundSymbol());
+        tokens.get(i).setNER("O");
       }
     }
   }

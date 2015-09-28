@@ -180,33 +180,6 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
   }
 
   /**
-   * Add the given item to the index, but without taking any locks.
-   * Use this method with care!
-   * But, this offers a noticable performance improvement if it is safe to use.
-   *
-   * @see Index#addToIndex(E)
-   */
-  public int addToIndexUnsafe(E o) {
-    if (indexes.isEmpty()) {  // a surprisingly common case in TokensRegex
-      objects.add(o);
-      indexes.put(o, 0);
-      return 0;
-    } else {
-      Integer index = indexes.get(o);
-      if (index == null) {
-        if (locked) {
-          index = -1;
-        } else {
-          index = objects.size();
-          objects.add(o);
-          indexes.put(o, index);
-        }
-      }
-      return index;
-    }
-  }
-
-  /**
    * Takes an Object and returns the integer index of the Object,
    * perhaps adding it to the index first.
    * Returns -1 if the Object is not in the Index.

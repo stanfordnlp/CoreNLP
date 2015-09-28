@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
 public class OpenIE implements Annotator {
 
-  private enum OutputFormat { REVERB, OLLIE, DEFAULT }
+  private static enum OutputFormat { REVERB, OLLIE, DEFAULT }
 
   /**
    * A pattern for rewriting "NN_1 is a JJ NN_2" --> NN_1 is JJ"
@@ -57,9 +57,6 @@ public class OpenIE implements Annotator {
 
   @Execution.Option(name="format", gloss="The format to output the triples in.")
   private static OutputFormat FORMAT = OutputFormat.DEFAULT;
-
-  @Execution.Option(name="filelist", gloss="The files to annotate, as a list of files one per line.")
-  private static File FILELIST  = null;
 
   //
   // Annotator Options (for running in the pipeline)
@@ -386,7 +383,7 @@ public class OpenIE implements Annotator {
           // Print the extractions
           switch (FORMAT) {
             case REVERB:
-              System.out.println(extraction.toReverbString(docid, sentence));
+              System.out.println(extraction.toString());
               break;
             case OLLIE:
               System.out.println(extraction.confidenceGloss() + ": (" + extraction.subjectGloss() + "; " + extraction.relationGloss() + "; " + extraction.objectGloss() + ")");
@@ -417,14 +414,8 @@ public class OpenIE implements Annotator {
     ExecutorService exec = Executors.newFixedThreadPool(Execution.threads);
 
     // Parse the files to process
-    String[] filesToProcess;
-    if (FILELIST != null) {
-      filesToProcess = IOUtils.linesFromFile(FILELIST.getPath()).stream().map(String::trim).toArray(String[]::new);
-    } else if (!"".equals(props.getProperty("", ""))) {
-      filesToProcess = props.getProperty("", "").split("\\s+");
-    } else {
-      filesToProcess = new String[0];
-    }
+    String[] filesToProcess = props.getProperty("", "").split("\\s+");
+    if ("".equals(filesToProcess[0].trim())) { filesToProcess = new String[0]; }
 
     // Tweak the arguments
     if ("".equals(props.getProperty("annotators", ""))) {
@@ -447,30 +438,23 @@ public class OpenIE implements Annotator {
       System.exit(1);
     }
     // Copy properties that are missing the 'openie' prefix
-    new HashSet<>(props.keySet()).stream().filter(key -> !key.toString().startsWith("openie.")).forEach(key -> props.setProperty("openie." + key.toString(), props.getProperty(key.toString())));
+    for (Object key : new HashSet<>(props.keySet())) {
+      if (!key.toString().startsWith("openie.")) {
+        props.setProperty("openie." + key.toString(), props.getProperty(key.toString()));
+      }
+    }
 
     // Create the pipeline
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 
-    // Run OpenIE
+    // Run extractor
     if (filesToProcess.length == 0) {
       // Running from stdin; one document per line.
       System.err.println("Processing from stdin. Enter one sentence per line.");
       Scanner scanner = new Scanner(System.in);
       String line;
-      try {
-        line = scanner.nextLine();
-      } catch (NoSuchElementException e) {
-        System.err.println("No lines found on standard in");
-        return;
-      }
-      while (line != null) {
+      while ( (line = scanner.nextLine()) != null ) {
         processDocument(pipeline, "stdin", line);
-        try {
-          line = scanner.nextLine();
-        } catch (NoSuchElementException e) {
-          return;
-        }
       }
     } else {
       // Running from file parameters.

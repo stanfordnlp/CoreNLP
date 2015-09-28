@@ -29,6 +29,7 @@
 package edu.stanford.nlp.classify;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.*;
 
 import edu.stanford.nlp.ling.Datum;
@@ -57,7 +58,7 @@ import edu.stanford.nlp.util.StringUtils;
  * @param <L> The type of the labels in the Dataset
  * @param <F> The type of the features in the Dataset
  */
-public class LogisticClassifier<L, F> implements Classifier<L, F>, RVFClassifier<L, F> /* Serializable */ {
+public class LogisticClassifier<L, F> implements Classifier<L, F>, Serializable, RVFClassifier<L, F> {
 
   //TODO make it implement ProbabilisticClassifier as well. --Ramesh 12/03/2009.
   /**
@@ -94,13 +95,22 @@ public class LogisticClassifier<L, F> implements Classifier<L, F>, RVFClassifier
     return classes[0];
   }
 
-  public Counter<F> weightsAsCounter() {
-    Counter<F> c = new ClassicCounter<>();
+  // todo [cdm]: This method should be removed, and weightsAsGenericCounter renamed as weightsAsCounter!
+  public Counter<String> weightsAsCounter() {
+    Counter<String> c = new ClassicCounter<String>();
+    for (F f : featureIndex) {
+      c.incrementCount(classes[1]+" / "+f, weights[featureIndex.indexOf(f)]);
+    }
+
+    return c;
+  }
+
+  public Counter<F> weightsAsGenericCounter() {
+    Counter<F> c = new ClassicCounter<F>();
     for (F f : featureIndex) {
       double w =  weights[featureIndex.indexOf(f)];
-      if (w != 0.0) {
+      if(w != 0.0)
         c.setCount(f, w);
-      }
     }
     return c;
   }
@@ -138,7 +148,6 @@ public class LogisticClassifier<L, F> implements Classifier<L, F>, RVFClassifier
     this.biased = biased;
   }
 
-  @Override
   public Collection<L> labels() {
     Collection<L> l = new LinkedList<L>();
     l.add(classes[0]);
@@ -146,7 +155,6 @@ public class LogisticClassifier<L, F> implements Classifier<L, F>, RVFClassifier
     return l;
   }
 
-  @Override
   public L classOf(Datum<L, F> datum) {
     if(datum instanceof RVFDatum<?,?>){
       return classOfRVFDatum((RVFDatum<L,F>) datum);
@@ -154,7 +162,6 @@ public class LogisticClassifier<L, F> implements Classifier<L, F>, RVFClassifier
     return classOf(datum.asFeatures());
   }
 
-  @Override
   @Deprecated //use classOf(Datum) instead.
   public L classOf(RVFDatum<L, F> example) {
     return classOf(example.asFeaturesCounter());
@@ -231,7 +238,6 @@ public class LogisticClassifier<L, F> implements Classifier<L, F>, RVFClassifier
   /**
    * returns the scores for both the classes
    */
-  @Override
   public Counter<L> scoresOf(Datum<L, F> datum) {
     if(datum instanceof RVFDatum<?,?>)return scoresOfRVFDatum((RVFDatum<L,F>)datum);
     Collection<F> features = datum.asFeatures();
@@ -243,7 +249,6 @@ public class LogisticClassifier<L, F> implements Classifier<L, F>, RVFClassifier
   }
 
 
-  @Override
   @Deprecated //use scoresOfDatum(Datum) instead.
   public Counter<L> scoresOf(RVFDatum<L, F> example) {
     return scoresOfRVFDatum(example);
@@ -347,22 +352,16 @@ public class LogisticClassifier<L, F> implements Classifier<L, F>, RVFClassifier
     classes[1] = data.labelIndex.get(1);
   }
 
-  /** This runs a simple train and test regime.
-   *  The data file format is one item per line, space separated, with first the class label
-   *  and then a bunch of (categorical) string features.
-   *
-   *  @param args The arguments/flags are: -trainFile trainFile -testFile testFile [-l1reg num] [-biased]
-   *  @throws Exception
-   */
+
   public static void main(String[] args) throws Exception {
     Properties prop = StringUtils.argsToProperties(args);
 
     double l1reg = Double.parseDouble(prop.getProperty("l1reg","0.0"));
 
-    Dataset<String, String> ds = new Dataset<>();
+    Dataset<String, String> ds = new Dataset<String, String>();
     for (String line : ObjectBank.getLineIterator(new File(prop.getProperty("trainFile")))) {
       String[] bits = line.split("\\s+");
-      Collection<String> f = new LinkedList<>(Arrays.asList(bits).subList(1, bits.length));
+      Collection<String> f = new LinkedList<String>(Arrays.asList(bits).subList(1, bits.length));
       String l = bits[0];
       ds.add(f, l);
     }
@@ -370,17 +369,18 @@ public class LogisticClassifier<L, F> implements Classifier<L, F>, RVFClassifier
     ds.summaryStatistics();
 
     boolean biased = prop.getProperty("biased", "false").equals("true");
-    LogisticClassifierFactory<String, String> factory = new LogisticClassifierFactory<>();
+    LogisticClassifierFactory<String, String> factory = new LogisticClassifierFactory<String, String>();
     LogisticClassifier<String, String> lc = factory.trainClassifier(ds, l1reg, 1e-4, biased);
+
 
     for (String line : ObjectBank.getLineIterator(new File(prop.getProperty("testFile")))) {
       String[] bits = line.split("\\s+");
-      Collection<String> f = new LinkedList<>(Arrays.asList(bits).subList(1, bits.length));
+      Collection<String> f = new LinkedList<String>(Arrays.asList(bits).subList(1, bits.length));
       //String l = bits[0];
       String g = lc.classOf(f);
-      double prob = lc.probabilityOf(f, g);
-      System.out.printf("%4.3f\t%s\t%s%n", prob, g, line);
+      System.out.println(g + '\t' + line);
     }
   }
+
 
 }
