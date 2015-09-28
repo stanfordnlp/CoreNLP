@@ -150,11 +150,11 @@ LAST UPDATE BY: Jeff Michels
 -----------------------------------------------------------------------
 junit.jar
 
-ORIGINAL JAR NAME: junit-4.5.jar
+ORIGINAL JAR NAME: junit-4.12.jar
 
-VERSION: 4.5
+VERSION: 4.12
 
-RELEASE DATE: 2008/08/08
+RELEASE DATE: 2015/02/19
 
 SOURCE AVAILABLE: yes
 
@@ -165,7 +165,7 @@ URL: http://www.junit.org/
 USED BY: Our junit tests.
 Not needed by CoreNLP distributions.
 
-LAST UPDATE: 2008/08/24
+LAST UPDATE: 2015/08/28
 
 LAST UPDATE BY: Ilya Sherman
 
