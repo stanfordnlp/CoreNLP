@@ -329,7 +329,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     private boolean memoryConscious = true;
     private PrintWriter outputFile = null;
 
-    private int noImproveItrCount = 0;
+    // private int noImproveItrCount = 0;
     private double[] xBest;
 
     public Record(boolean beQuiet, Function monitor, double tolerance) {
@@ -937,7 +937,9 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
       value += norm * lambdaOWL;
       // step (1) in Galen & Gao except we are not computing v yet
       grad = pseudoGradientOWL(x, rawGrad, dFunction);
-    } else grad = rawGrad;
+    } else {
+      grad = rawGrad;
+    }
 
     PrintWriter outFile = null;
     PrintWriter infoFile = null;
@@ -1067,8 +1069,8 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
         // X and writes to output
         rec.add(newValue, newGrad, newX, fevals, evalScore);
 
-        //If you wanna call a function and do whatever with the information
-        if(iterCallbackFunction != null){
+        // If you want to call a function and do whatever with the information ...
+        if (iterCallbackFunction != null) {
           iterCallbackFunction.callback(newX, its, newValue, newGrad);
         }
 
