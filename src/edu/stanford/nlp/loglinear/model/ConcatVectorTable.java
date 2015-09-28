@@ -10,9 +10,9 @@ import java.util.Iterator;
 import java.util.function.Supplier;
 
 /**
- * Created by keenon on 8/9/15.
- *
  * This is basically a type specific wrapper over NDArray
+ *
+ * @author keenon
  */
 public class ConcatVectorTable extends NDArray<Supplier<ConcatVector>> {
     /**
