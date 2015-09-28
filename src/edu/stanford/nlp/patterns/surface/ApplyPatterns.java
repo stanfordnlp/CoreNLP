@@ -94,6 +94,7 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Triple<TwoDim
             boolean[] addedindices = new boolean[e-s];
             Arrays.fill(addedindices, false);
 
+
             for (int i = s; i < e; i++) {
               CoreLabel l = sent.get(i);
               l.set(PatternsAnnotations.MatchedPattern.class, true);
@@ -131,7 +132,6 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Triple<TwoDim
                 }
               }
             }
-
             for(int i =0; i < addedindices.length; i++){
               if(i > 0 && i < addedindices.length -1 && addedindices[i-1] == true && addedindices[i] == false && addedindices[i+1] == true){
                 doNotUse = true;

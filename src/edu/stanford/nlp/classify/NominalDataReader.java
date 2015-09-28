@@ -12,7 +12,6 @@ import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
-import edu.stanford.nlp.util.logging.Logging;
 
 /**
  * A class to read some UCI datasets into RVFDatum. Will incrementally add formats.
@@ -68,7 +67,7 @@ public class NominalDataReader {
       int valInd = ind.indexOf(values[index]);
       if (valInd == -1) {
         valInd = 0;
-        Logging.logger(NominalDataReader.class).info("unknown attribute value " + values[index] + " of attribute " + attrNo);
+        System.err.println("unknown attribute value " + values[index] + " of attribute " + attrNo);
       }
       c.incrementCount(featKey, valInd);
       attrNo++;

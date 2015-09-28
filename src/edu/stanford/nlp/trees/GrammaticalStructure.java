@@ -64,7 +64,7 @@ public abstract class GrammaticalStructure implements Serializable {
    * A specification for the types of extra edges to add to the dependency tree.
    * If you're in doubt, use {@link edu.stanford.nlp.trees.GrammaticalStructure.Extras#NONE}.
    */
-  public enum Extras {
+  public static enum Extras {
     /**
      * <p> Don't include any additional edges. </p>
      * <p>
@@ -161,19 +161,19 @@ public abstract class GrammaticalStructure implements Serializable {
                               Lock relationsLock, TreeTransformer transformer,
                               HeadFinder hf, Predicate<String> puncFilter,
                               Predicate<String> tagFilter) {
-    TreeGraphNode treeGraph = new TreeGraphNode(t, (TreeGraphNode) null);
+    TreeGraphNode treegraph = new TreeGraphNode(t, (TreeGraphNode) null);
     // TODO: create the tree and reuse the leaf labels in one pass,
     // avoiding a wasteful copy of the labels.
-    Trees.setLeafLabels(treeGraph, t.yield());
-    Trees.setLeafTagsIfUnset(treeGraph);
+    Trees.setLeafLabels(treegraph, t.yield());
+    Trees.setLeafTagsIfUnset(treegraph);
     if (transformer != null) {
-      Tree transformed = transformer.transformTree(treeGraph);
+      Tree transformed = transformer.transformTree(treegraph);
       if (!(transformed instanceof TreeGraphNode)) {
         throw new RuntimeException("Transformer did not change TreeGraphNode into another TreeGraphNode: " + transformer);
       }
       this.root = (TreeGraphNode) transformed;
     } else {
-      this.root = treeGraph;
+      this.root = treegraph;
     }
     indexNodes(this.root);
     // add head word and tag to phrase nodes
@@ -440,7 +440,7 @@ public abstract class GrammaticalStructure implements Serializable {
     if (t.isLeaf()) {
       return;
     }
-    if (attach && puncFilter.test(t.headWordNode().label().value()) &&
+    if (attach && puncFilter.test(t.headWordNode().label().value()) && 
         tagFilter.test(t.headWordNode().label().tag())) {
       // make faster by first looking for links from parent
       // it is necessary to look for paths using all directions
@@ -467,7 +467,7 @@ public abstract class GrammaticalStructure implements Serializable {
             if (uHigh == tHigh) {
               continue;
             }
-            if (!puncFilter.test(uHigh.headWordNode().label().value()) ||
+            if (!puncFilter.test(uHigh.headWordNode().label().value()) || 
                 ! tagFilter.test(uHigh.headWordNode().label().tag())) {
               continue;
             }
@@ -529,19 +529,19 @@ public abstract class GrammaticalStructure implements Serializable {
         }
       }
     }
-
+    
     if (rootDep != null) {
       TypedDependency rootTypedDep = new TypedDependency(ROOT, new IndexedWord(dependencyRoot.label()), new IndexedWord(rootDep.label()));
       if (puncTypedDepFilter.test(rootTypedDep)) {
         basicDep.add(rootTypedDep);
       } else { // Root is a punctuation character
-
+        
         /* Heuristic to find a root for the graph.
          * Make the first child of the current root the
          * new root and attach all other children to
-         * the new root.
+         * the new root. 
          */
-
+        
         IndexedWord root = rootTypedDep.dep();
         IndexedWord newRoot = null;
         for (TypedDependency td : basicDep) {
@@ -620,7 +620,7 @@ public abstract class GrammaticalStructure implements Serializable {
           }
         }
       }
-    }
+    } 
   }
 
   private static class NoPunctFilter implements Predicate<Dependency<Label, Label, Object>>, Serializable {
@@ -1029,11 +1029,15 @@ public abstract class GrammaticalStructure implements Serializable {
    * Print typed dependencies in either the Stanford dependency representation
    * or in the conllx format.
    *
-   * @param deps Typed dependencies to print
-   * @param tree Tree corresponding to typed dependencies (only necessary if conllx
+   * @param deps
+   *          Typed dependencies to print
+   * @param tree
+   *          Tree corresponding to typed dependencies (only necessary if conllx
    *          == true)
-   * @param conllx If true use conllx format, otherwise use Stanford representation
-   * @param extraSep If true, in the Stanford representation, the extra dependencies
+   * @param conllx
+   *          If true use conllx format, otherwise use Stanford representation
+   * @param extraSep
+   *          If true, in the Stanford representation, the extra dependencies
    *          (which do not preserve the tree structure) are printed after the
    *          basic dependencies
    */
@@ -1041,18 +1045,18 @@ public abstract class GrammaticalStructure implements Serializable {
     System.out.println(dependenciesToString(gs, deps, tree, conllx, extraSep));
   }
 
-
+  
   /**
-   * Calls dependenciesToCoNLLXString with the basic dependencies
+   * Calls dependenciesToCoNLLXString with the basic dependencies 
    * from a grammatical structure.
-   *
+   * 
    * (see {@link #dependenciesToCoNLLXString(Collection, CoreMap)})
    */
   public static String dependenciesToCoNLLXString(GrammaticalStructure gs, CoreMap sentence) {
     return dependenciesToCoNLLXString(gs.typedDependencies(), sentence);
   }
-
-
+  
+  
   /**
    *
    * Returns a dependency tree in CoNNL-X format.
@@ -1641,8 +1645,8 @@ public abstract class GrammaticalStructure implements Serializable {
     // System.out.print("GrammaticalRelations under DEPENDENT:");
     // System.out.println(DEPENDENT.toPrettyString());
 
-    /* Use a tree normalizer that removes all empty nodes.
-       This prevents wrong indexing of the nodes in the dependency relations. */
+    /* Use a tree normalizer that removes all empty nodes. 
+       This prevents wrong indexing of the nodes in the dependency relations.*/
     MemoryTreebank tb = new MemoryTreebank(new NPTmpRetainingTreeNormalizer(0, false, 1, false));
     Iterable<Tree> trees = tb;
 

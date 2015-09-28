@@ -195,7 +195,6 @@ public class Util {
       }
     }
     extraEdges.forEach(tree::removeEdge);
-
     // Add apposition edges (simple coref)
     for (SemanticGraphEdge extraEdge : new ArrayList<>(extraEdges)) {  // note[gabor] prevent concurrent modification exception
       for (SemanticGraphEdge candidateAppos : tree.incomingEdgeIterable(extraEdge.getDependent())) {
@@ -413,7 +412,7 @@ public class Util {
    * @param dataset The dataset to evaluate the classifier on.
    */
   public static void dumpAccuracy(Classifier<ClauseSplitter.ClauseClassifierLabel, String> classifier, GeneralDataset<ClauseSplitter.ClauseClassifierLabel, String> dataset) {
-    DecimalFormat df = new DecimalFormat("0.00%");
+    DecimalFormat df = new DecimalFormat("0.000");
     log("size:         " + dataset.size());
     log("split count:  " + StreamSupport.stream(dataset.spliterator(), false).filter(x -> x.label() == ClauseSplitter.ClauseClassifierLabel.CLAUSE_SPLIT).collect(Collectors.toList()).size());
     log("interm count: " + StreamSupport.stream(dataset.spliterator(), false).filter(x -> x.label() == ClauseSplitter.ClauseClassifierLabel.CLAUSE_INTERM).collect(Collectors.toList()).size());

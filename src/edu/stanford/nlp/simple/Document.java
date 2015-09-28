@@ -4,7 +4,6 @@ import edu.stanford.nlp.dcoref.CorefChain;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.dcoref.Dictionaries;
 import edu.stanford.nlp.ie.util.RelationTriple;
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
@@ -21,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -322,120 +320,6 @@ public class Document {
    */
   public static Document deserialize(InputStream in) throws IOException {
     return new Document(CoreNLPProtos.Document.parseDelimitedFrom(in));
-  }
-
-  /**
-   * <p>
-   *  Write this annotation as a JSON string.
-   *  Optionally, you can also specify a number of operations to call on the document before
-   *  dumping it to JSON.
-   *  This allows the user to ensure that certain annotations have been computed before the document
-   *  is dumped.
-   *  For example:
-   * </p>
-   *
-   * <pre>{@code
-   *   String json = new Document("Lucy in the sky with diamonds").json(Document::parse, Document::ner);
-   * }</pre>
-   *
-   * <p>
-   *   will create a JSON dump of the document, ensuring that at least the parse tree and ner tags are populated.
-   * </p>
-   *
-   * @param functions The (possibly empty) list of annotations to populate on the document before dumping it
-   *                  to JSON.
-   * @return The JSON String for this document.
-   */
-  @SafeVarargs
-  public final String json(Function<Sentence, Object>... functions) {
-    for (Function<Sentence, Object> f : functions) {
-      f.apply(this.sentence(0));
-    }
-    try {
-      return new JSONOutputter().print(this.asAnnotation());
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
-    }
-  }
-
-  /**
-   * Like the {@link Document@json(Function...)} function, but with minified JSON more suitable
-   * for sending over the wire.
-   *
-   * @param functions The (possibly empty) list of annotations to populate on the document before dumping it
-   *                  to JSON.
-   * @return The JSON String for this document, without unecessary whitespace.
-   *
-   */
-  @SafeVarargs
-  public final String jsonMinified(Function<Sentence, Object>... functions) {
-    for (Function<Sentence, Object> f : functions) {
-      f.apply(this.sentence(0));
-    }
-    try {
-      AnnotationOutputter.Options options = new AnnotationOutputter.Options();
-      options.pretty = false;
-      return new JSONOutputter().print(this.asAnnotation(), options);
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
-    }
-  }
-
-  /**
-   * <p>
-   *  Write this annotation as an XML string.
-   *  Optionally, you can also specify a number of operations to call on the document before
-   *  dumping it to XML.
-   *  This allows the user to ensure that certain annotations have been computed before the document
-   *  is dumped.
-   *  For example:
-   * </p>
-   *
-   * <pre>{@code
-   *   String xml = new Document("Lucy in the sky with diamonds").xml(Document::parse, Document::ner);
-   * }</pre>
-   *
-   * <p>
-   *   will create a XML dump of the document, ensuring that at least the parse tree and ner tags are populated.
-   * </p>
-   *
-   * @param functions The (possibly empty) list of annotations to populate on the document before dumping it
-   *                  to XML.
-   * @return The XML String for this document.
-   */
-  @SafeVarargs
-  public final String xml(Function<Sentence, Object>... functions) {
-    for (Function<Sentence, Object> f : functions) {
-      f.apply(this.sentence(0));
-    }
-    try {
-      return new XMLOutputter().print(this.asAnnotation());
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
-    }
-  }
-
-  /**
-   * Like the {@link Document@xml(Function...)} function, but with minified XML more suitable
-   * for sending over the wire.
-   *
-   * @param functions The (possibly empty) list of annotations to populate on the document before dumping it
-   *                  to XML.
-   * @return The XML String for this document, without unecessary whitespace.
-   *
-   */
-  @SafeVarargs
-  public final String xmlMinified(Function<Sentence, Object>... functions) {
-    for (Function<Sentence, Object> f : functions) {
-      f.apply(this.sentence(0));
-    }
-    try {
-      AnnotationOutputter.Options options = new AnnotationOutputter.Options();
-      options.pretty = false;
-      return new XMLOutputter().print(this.asAnnotation(), options);
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
-    }
   }
 
   /**

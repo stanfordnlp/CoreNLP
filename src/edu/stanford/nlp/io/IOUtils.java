@@ -493,7 +493,6 @@ public class IOUtils {
   }
 
 
-  // todo [cdm 2015]: I think GZIPInputStream has its own buffer and so we don't need to buffer in that case.
   /**
    * Quietly opens a File. If the file ends with a ".gz" extension,
    * automatically opens a GZIPInputStream to wrap the constructed
@@ -1468,17 +1467,6 @@ public class IOUtils {
     return out;
   }
 
-  public static OutputStream getFileOutputStream(String filename, boolean append) throws IOException {
-    OutputStream out = new FileOutputStream(filename, append);
-    if (filename.endsWith(".gz")) {
-      out = new GZIPOutputStream(out);
-    } else if (filename.endsWith(".bz2")) {
-      //out = new CBZip2OutputStream(out);
-      out = getBZip2PipedOutputStream(filename);
-    }
-    return out;
-  }
-
   public static BufferedReader getBufferedFileReader(String filename) throws IOException {
     return getBufferedFileReader(filename, defaultEncoding);
   }
@@ -2060,38 +2048,20 @@ public class IOUtils {
    * @param callback The function to run for every line of input.
    * @throws IOException Thrown from the underlying input stream.
    */
-    public static void console(String prompt, Consumer<String> callback) throws IOException {
+  public static void console(Consumer<String> callback) throws IOException {
     BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     String line;
-    System.out.print(prompt);
+    System.out.print("> ");
     while ( (line = reader.readLine()) != null) {
       switch (line.toLowerCase()) {
         case "exit":
         case "quit":
-        case "q":
           return;
         default:
           callback.accept(line);
       }
-      System.out.print(prompt);
+      System.out.print("> ");
     }
-  }
-
-  /**
-   * Create a prompt, and read a single line of response.
-   * @param prompt An optional prompt to show the user.
-   * @throws IOException Throw from the underlying reader.
-   */
-  public static String promptUserInput(Optional<String> prompt) throws IOException {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-    String line;
-    System.out.print(prompt.orElse("> "));
-    return reader.readLine();
-  }
-
-  /** @see IOUtils#console(String, Consumer) */
-  public static void console(Consumer<String> callback) throws IOException {
-    console("> ", callback);
   }
 
 }
