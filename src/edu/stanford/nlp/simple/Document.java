@@ -4,6 +4,7 @@ import edu.stanford.nlp.dcoref.CorefChain;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.dcoref.Dictionaries;
 import edu.stanford.nlp.ie.util.RelationTriple;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -69,6 +71,7 @@ public class Document {
    * The default {@link edu.stanford.nlp.pipeline.MorphaAnnotator} implementation
    */
   private static final Annotator defaultLemma = AnnotatorFactories.lemma(EMPTY_PROPS, backend).create();
+
   /**
    * The default {@link edu.stanford.nlp.pipeline.NERCombinerAnnotator} implementation
    */
@@ -79,6 +82,21 @@ public class Document {
     public synchronized Annotator get() {
       if (impl == null) {
         impl = AnnotatorFactories.nerTag(EMPTY_PROPS, backend).create();
+      }
+      return impl;
+    }
+  };
+
+  /**
+   * The default {@link edu.stanford.nlp.pipeline.RegexNERAnnotator} implementation
+   */
+  private static Supplier<Annotator> defaultRegexner = new Supplier<Annotator>() {
+    Annotator impl = null;
+
+    @Override
+    public synchronized Annotator get() {
+      if (impl == null) {
+        impl = AnnotatorFactories.regexNER(EMPTY_PROPS, backend).create();
       }
       return impl;
     }
@@ -208,7 +226,7 @@ public class Document {
   private List<Sentence> sentences = null;
 
   /** A serializer to assist in serializing and deserializing from Protocol buffers */
-  protected final ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+  protected final ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer(false );
 
   /**
    * THIS IS NONSTANDARD.
@@ -235,7 +253,7 @@ public class Document {
    */
   @SuppressWarnings("Convert2streamapi")
   public Document(Annotation ann) {
-    this.impl = new ProtobufAnnotationSerializer().toProto(ann).toBuilder();
+    this.impl = new ProtobufAnnotationSerializer(false).toProtoBuilder(ann);
     List<CoreMap> sentences = ann.get(CoreAnnotations.SentencesAnnotation.class);
     this.sentences = new ArrayList<>(sentences.size());
     for (CoreMap sentence : sentences) {
@@ -304,6 +322,120 @@ public class Document {
    */
   public static Document deserialize(InputStream in) throws IOException {
     return new Document(CoreNLPProtos.Document.parseDelimitedFrom(in));
+  }
+
+  /**
+   * <p>
+   *  Write this annotation as a JSON string.
+   *  Optionally, you can also specify a number of operations to call on the document before
+   *  dumping it to JSON.
+   *  This allows the user to ensure that certain annotations have been computed before the document
+   *  is dumped.
+   *  For example:
+   * </p>
+   *
+   * <pre>{@code
+   *   String json = new Document("Lucy in the sky with diamonds").json(Document::parse, Document::ner);
+   * }</pre>
+   *
+   * <p>
+   *   will create a JSON dump of the document, ensuring that at least the parse tree and ner tags are populated.
+   * </p>
+   *
+   * @param functions The (possibly empty) list of annotations to populate on the document before dumping it
+   *                  to JSON.
+   * @return The JSON String for this document.
+   */
+  @SafeVarargs
+  public final String json(Function<Sentence, Object>... functions) {
+    for (Function<Sentence, Object> f : functions) {
+      f.apply(this.sentence(0));
+    }
+    try {
+      return new JSONOutputter().print(this.asAnnotation());
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
+  }
+
+  /**
+   * Like the {@link Document@json(Function...)} function, but with minified JSON more suitable
+   * for sending over the wire.
+   *
+   * @param functions The (possibly empty) list of annotations to populate on the document before dumping it
+   *                  to JSON.
+   * @return The JSON String for this document, without unecessary whitespace.
+   *
+   */
+  @SafeVarargs
+  public final String jsonMinified(Function<Sentence, Object>... functions) {
+    for (Function<Sentence, Object> f : functions) {
+      f.apply(this.sentence(0));
+    }
+    try {
+      AnnotationOutputter.Options options = new AnnotationOutputter.Options();
+      options.pretty = false;
+      return new JSONOutputter().print(this.asAnnotation(), options);
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
+  }
+
+  /**
+   * <p>
+   *  Write this annotation as an XML string.
+   *  Optionally, you can also specify a number of operations to call on the document before
+   *  dumping it to XML.
+   *  This allows the user to ensure that certain annotations have been computed before the document
+   *  is dumped.
+   *  For example:
+   * </p>
+   *
+   * <pre>{@code
+   *   String xml = new Document("Lucy in the sky with diamonds").xml(Document::parse, Document::ner);
+   * }</pre>
+   *
+   * <p>
+   *   will create a XML dump of the document, ensuring that at least the parse tree and ner tags are populated.
+   * </p>
+   *
+   * @param functions The (possibly empty) list of annotations to populate on the document before dumping it
+   *                  to XML.
+   * @return The XML String for this document.
+   */
+  @SafeVarargs
+  public final String xml(Function<Sentence, Object>... functions) {
+    for (Function<Sentence, Object> f : functions) {
+      f.apply(this.sentence(0));
+    }
+    try {
+      return new XMLOutputter().print(this.asAnnotation());
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
+  }
+
+  /**
+   * Like the {@link Document@xml(Function...)} function, but with minified XML more suitable
+   * for sending over the wire.
+   *
+   * @param functions The (possibly empty) list of annotations to populate on the document before dumping it
+   *                  to XML.
+   * @return The XML String for this document, without unecessary whitespace.
+   *
+   */
+  @SafeVarargs
+  public final String xmlMinified(Function<Sentence, Object>... functions) {
+    for (Function<Sentence, Object> f : functions) {
+      f.apply(this.sentence(0));
+    }
+    try {
+      AnnotationOutputter.Options options = new AnnotationOutputter.Options();
+      options.pretty = false;
+      return new XMLOutputter().print(this.asAnnotation(), options);
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
   }
 
   /**
@@ -450,8 +582,7 @@ public class Document {
 
   protected Document runPOS(Properties props) {
     // Cached result
-    if (impl.getSentenceCount() > 0 && impl.getSentence(0).getTokenCount() > 0 &&
-        impl.getSentence(0).getToken(0).hasPos()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasPos()) {
       return this;
     }
     // Prerequisites
@@ -469,8 +600,7 @@ public class Document {
 
   protected Document runLemma(Properties props) {
     // Cached result
-    if (impl.getSentenceCount() > 0 && impl.getSentence(0).getTokenCount() > 0 &&
-        impl.getSentence(0).getToken(0).hasLemma()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasLemma()) {
       return this;
     }
     // Prerequisites
@@ -487,8 +617,7 @@ public class Document {
   }
 
   protected Document runNER(Properties props) {
-    if (impl.getSentenceCount() > 0 && impl.getSentence(0).getTokenCount() > 0 &&
-        impl.getSentence(0).getToken(0).hasNer()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasNer()) {
       return this;
     }
     // Run prerequisites
@@ -504,8 +633,22 @@ public class Document {
     return this;
   }
 
+  protected Document runRegexner(Properties props) {
+    // Run prerequisites
+    runNER(props);
+    // Run annotator
+    Annotator ner = props == EMPTY_PROPS ? defaultRegexner.get() : getOrCreate(AnnotatorFactories.regexNER(props, backend));
+    Annotation ann = asAnnotation();
+    ner.annotate(ann);
+    // Update data
+    for (int i = 0; i < sentences.size(); ++i) {
+      sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (pair) -> pair.first.setNer(pair.second), CoreLabel::ner);
+    }
+    return this;
+  }
+
   protected Document runParse(Properties props) {
-    if (impl.getSentenceCount() > 0  && impl.getSentence(0).hasParseTree()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawSentence().hasParseTree()) {
       return this;
     }
     // Run annotator
@@ -533,7 +676,8 @@ public class Document {
   }
 
   protected Document runDepparse(Properties props) {
-    if (impl.getSentenceCount() > 0  && impl.getSentence(0).hasBasicDependencies()) {
+    if (this.sentences != null && this.sentences.size() > 0 &&
+        this.sentences.get(0).rawSentence().hasBasicDependencies()) {
       return this;
     }
     // Run prerequisites
@@ -556,8 +700,7 @@ public class Document {
   }
 
   protected Document runNatlog(Properties props) {
-    if (impl.getSentenceCount() > 0 && impl.getSentence(0).getTokenCount() > 0 &&
-        impl.getSentence(0).getToken(0).hasPolarity()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasPolarity()) {
       return this;
     }
     // Run prerequisites

@@ -108,7 +108,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       LogisticClassifier logcl = ((LogisticClassifier) classifier);
 
       String l = (String) logcl.getLabelForInternalPositiveClass();
-      Counter<String> weights = logcl.weightsAsGenericCounter();
+      Counter<String> weights = logcl.weightsAsCounter();
       if (l.equals(Boolean.FALSE.toString())) {
         Counters.multiplyInPlace(weights, -1);
       }
@@ -644,7 +644,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       Counter<CandidatePhrase> allCloseToNegativePhrases = new ClassicCounter<CandidatePhrase>();
 
 
-      Set<CandidatePhrase> knownPositivePhrases = CollectionUtils.unionAsSet(constVars.getLearnedWords().get(answerLabel).keySet(), constVars.getSeedLabelDictionary().get(answerLabel));
+      Set<CandidatePhrase> knownPositivePhrases = CollectionUtils.unionAsSet(constVars.getLearnedWords(answerLabel).keySet(), constVars.getSeedLabelDictionary().get(answerLabel));
 
       Set<CandidatePhrase> allConsideredPhrases = new HashSet<CandidatePhrase>();
 
@@ -833,9 +833,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     for(String label: constVars.getLabels()) {
       if (!label.equals(answerLabel)){
         allPossiblePhrases.put(label, new HashSet<CandidatePhrase>());
-        //negPhrases.addAll(en.getValue().keySet());
-        if(constVars.getLearnedWords().containsKey(label))
-          allPossiblePhrases.get(label).addAll(constVars.getLearnedWords().get(label).keySet());
+
+        if(constVars.getLearnedWordsEachIter().containsKey(label))
+          allPossiblePhrases.get(label).addAll(constVars.getLearnedWords(label).keySet());
         allPossiblePhrases.get(label).addAll(constVars.getSeedLabelDictionary().get(label));
       }
     }
@@ -939,7 +939,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     //Set<CandidatePhrase> knownPositivePhrases = CollectionUtils.unionAsSet(constVars.getLearnedWords().get(answerLabel).keySet(), constVars.getSeedLabelDictionary().get(answerLabel));
     //TODO: this is kinda not nice; how is allpositivephrases different from positivephrases again?
-    allPositivePhrases.addAll(constVars.getLearnedWords().get(answerLabel).keySet());
+    allPositivePhrases.addAll(constVars.getLearnedWords(answerLabel).keySet());
     //allPositivePhrases.addAll(knownPositivePhrases);
 
     BufferedWriter logFile = null;
@@ -1232,7 +1232,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     return scoreslist;
   }
 */
-  
+
   public double scoreUsingClassifer(edu.stanford.nlp.classify.Classifier classifier, CandidatePhrase word, String label, boolean forLearningPatterns,
       Counter<E> patternsThatExtractedPat, Counter<E> allSelectedPatterns) {
 
@@ -1350,7 +1350,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       if(sims == null){
         //TODO: make more efficient
         Map<String, Collection<CandidatePhrase>> allPossibleNegativePhrases = getAllPossibleNegativePhrases(label);
-        Set<CandidatePhrase> knownPositivePhrases = CollectionUtils.unionAsSet(constVars.getLearnedWords().get(label).keySet(), constVars.getSeedLabelDictionary().get(label));
+        Set<CandidatePhrase> knownPositivePhrases = CollectionUtils.unionAsSet(constVars.getLearnedWords(label).keySet(), constVars.getSeedLabelDictionary().get(label));
         computeSimWithWordVectors(Arrays.asList(word), knownPositivePhrases, allPossibleNegativePhrases, label);
         sims = getSimilarities(word.getPhrase());
       }

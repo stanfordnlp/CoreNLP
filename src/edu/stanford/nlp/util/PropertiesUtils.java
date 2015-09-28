@@ -38,8 +38,24 @@ public class PropertiesUtils {
     return ! (value.equals("false") || value.equals("no") || value.equals("off"));
   }
 
-  /** Convert from Properties to String. */
+  /** Create a Properties object from the passed in String arguments.
+   *  The odd numbered arguments are the names of keys, and the even
+   *  numbered arguments are the value of the preceding key
+   *
+   *  @param args An even-length list of alternately key and value
+   */
+  public static Properties asProperties(String... args) {
+    if (args.length % 2 != 0) {
+      throw new IllegalArgumentException("Need an even number of arguments but there were " + args.length);
+    }
+    Properties properties = new Properties();
+    for (int i = 0; i < args.length; i += 2) {
+      properties.setProperty(args[i], args[i + 1]);
+    }
+    return properties;
+  }
 
+  /** Convert from Properties to String. */
   public static String asString(Properties props) {
     try {
       StringWriter sw = new StringWriter();

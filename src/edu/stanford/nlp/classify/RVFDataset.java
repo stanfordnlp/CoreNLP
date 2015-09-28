@@ -28,6 +28,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.HashIndex;
+import edu.stanford.nlp.util.logging.Logging;
 
 /**
  * An interfacing class for {@link ClassifierFactory} that incrementally builds
@@ -106,13 +107,15 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     double[][] trainValues = new double[trainSize][];
     int[] trainLabels = new int[trainSize];
 
-    System.arraycopy(data, 0, devData, 0, devSize);
-    System.arraycopy(values, 0, devValues, 0, devSize);
-    System.arraycopy(labels, 0, devLabels, 0, devSize);
+    synchronized (System.class) {
+      System.arraycopy(data, 0, devData, 0, devSize);
+      System.arraycopy(values, 0, devValues, 0, devSize);
+      System.arraycopy(labels, 0, devLabels, 0, devSize);
 
-    System.arraycopy(data, devSize, trainData, 0, trainSize);
-    System.arraycopy(values, devSize, trainValues, 0, trainSize);
-    System.arraycopy(labels, devSize, trainLabels, 0, trainSize);
+      System.arraycopy(data, devSize, trainData, 0, trainSize);
+      System.arraycopy(values, devSize, trainValues, 0, trainSize);
+      System.arraycopy(labels, devSize, trainLabels, 0, trainSize);
+    }
 
     RVFDataset<L, F> dev = new RVFDataset<L, F>(labelIndex, devLabels, featureIndex, devData, devValues);
     RVFDataset<L, F> train = new RVFDataset<L, F>(labelIndex, trainLabels, featureIndex, trainData, trainValues);
@@ -324,16 +327,18 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     double[][] trainValues = new double[trainSize][];
     int[] trainLabels = new int[trainSize];
 
-    System.arraycopy(data, start, devData, 0, devSize);
-    System.arraycopy(values, start, devValues, 0, devSize);
-    System.arraycopy(labels, start, devLabels, 0, devSize);
+    synchronized (System.class) {
+      System.arraycopy(data, start, devData, 0, devSize);
+      System.arraycopy(values, start, devValues, 0, devSize);
+      System.arraycopy(labels, start, devLabels, 0, devSize);
 
-    System.arraycopy(data, 0, trainData, 0, start);
-    System.arraycopy(data, end, trainData, start, size() - end);
-    System.arraycopy(values, 0, trainValues, 0, start);
-    System.arraycopy(values, end, trainValues, start, size() - end);
-    System.arraycopy(labels, 0, trainLabels, 0, start);
-    System.arraycopy(labels, end, trainLabels, start, size() - end);
+      System.arraycopy(data, 0, trainData, 0, start);
+      System.arraycopy(data, end, trainData, start, size() - end);
+      System.arraycopy(values, 0, trainValues, 0, start);
+      System.arraycopy(values, end, trainValues, start, size() - end);
+      System.arraycopy(labels, 0, trainLabels, 0, start);
+      System.arraycopy(labels, end, trainLabels, start, size() - end);
+    }
 
     if (this instanceof WeightedRVFDataset<?,?>) {
       float[] trainWeights = new float[trainSize];
@@ -341,9 +346,11 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
 
       WeightedRVFDataset<L, F> w = (WeightedRVFDataset<L, F>)this;
 
-      System.arraycopy(w.weights, start, devWeights, 0, devSize);
-      System.arraycopy(w.weights, 0, trainWeights, 0, start);
-      System.arraycopy(w.weights, end, trainWeights, start, size()-end);
+      synchronized (System.class) {
+        System.arraycopy(w.weights, start, devWeights, 0, devSize);
+        System.arraycopy(w.weights, 0, trainWeights, 0, start);
+        System.arraycopy(w.weights, end, trainWeights, start, size() - end);
+      }
 
       WeightedRVFDataset<L, F> dev = new WeightedRVFDataset<L, F>(labelIndex, devLabels, featureIndex, devData, devValues, devWeights);
       WeightedRVFDataset<L, F> train = new WeightedRVFDataset<L, F>(labelIndex, trainLabels, featureIndex, trainData, trainValues, trainWeights);
@@ -442,7 +449,9 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
   private void addLabel(L label) {
     if (labels.length == size) {
       int[] newLabels = new int[size * 2];
-      System.arraycopy(labels, 0, newLabels, 0, size);
+      synchronized (System.class) {
+        System.arraycopy(labels, 0, newLabels, 0, size);
+      }
       labels = newLabels;
     }
     labels[size] = labelIndex.addToIndex(label);
@@ -452,8 +461,10 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     if (data.length == size) {
       int[][] newData = new int[size * 2][];
       double[][] newValues = new double[size * 2][];
-      System.arraycopy(data, 0, newData, 0, size);
-      System.arraycopy(values, 0, newValues, 0, size);
+      synchronized (System.class) {
+        System.arraycopy(data, 0, newData, 0, size);
+        System.arraycopy(values, 0, newValues, 0, size);
+      }
       data = newData;
       values = newValues;
     }
@@ -507,7 +518,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
    */
   @Override
   public void summaryStatistics() {
-    System.err.println("numDatums: " + size);
+    Logging.logger(this.getClass()).info("numDatums: " + size);
     System.err.print("numLabels: " + labelIndex.size() + " [");
     Iterator<L> iter = labelIndex.iterator();
     while (iter.hasNext()) {
@@ -516,8 +527,8 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
         System.err.print(", ");
       }
     }
-    System.err.println("]");
-    System.err.println("numFeatures (Phi(X) types): " + featureIndex.size());
+    Logging.logger(this.getClass()).info("]");
+    Logging.logger(this.getClass()).info("numFeatures (Phi(X) types): " + featureIndex.size());
     /*for(int i = 0; i < data.length; i++) {
       for(int j = 0; j < data[i].length; j++) {
       System.out.println(data[i][j]);
@@ -923,6 +934,8 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     }
     values = trimToSize(values);
     data = trimToSize(data);
+    assert values.length == size;
+    assert values.length == size();
     return values;
   }
 

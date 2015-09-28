@@ -97,7 +97,7 @@ public class ValueFunctions {
     public TypeCheckedFunction(String name, ParamInfo... paramInfos) {
       super(name);
       this.paramInfos = Arrays.asList(paramInfos);
-      nargs = (paramInfos != null)? paramInfos.length:0;
+      nargs = paramInfos.length;
     }
 
     @Override
@@ -718,8 +718,7 @@ public class ValueFunctions {
     @Override
     public int compare(Number o1, Number o2) {
       if (isInteger(o1) && isInteger(o2)) {
-        Long l1 = o1.longValue();
-        return l1.compareTo(o2.longValue());
+        return Long.compare(o1.longValue(), o2.longValue());
       } else {
         return Double.compare(o1.doubleValue(),o2.doubleValue());
       }
@@ -733,7 +732,8 @@ public class ValueFunctions {
     }
   }
 
-  public static enum CompareType { GT, LT, GE, LE, EQ, NE }
+  public enum CompareType { GT, LT, GE, LE, EQ, NE }
+
   public static class CompareFunction<T> extends NamedValueFunction {
     Comparator<T> comparator;
     CompareType compType;
@@ -1634,9 +1634,9 @@ public class ValueFunctions {
 
   public static void main(String[] args) {
     // Dumps the registered functions
-    for (String name: registeredFunctions.keySet()) {
-      for (ValueFunction vf: registeredFunctions.get(name)) {
-        System.out.println(name + ": " + vf);
+    for (Map.Entry<String, Collection<ValueFunction>> entry : registeredFunctions.entrySet()) {
+      for (ValueFunction vf: entry.getValue()) {
+        System.out.println(entry.getKey() + ": " + vf);
       }
     }
   }

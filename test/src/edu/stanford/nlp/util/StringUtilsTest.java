@@ -1,5 +1,6 @@
 package edu.stanford.nlp.util;
 
+import edu.stanford.nlp.util.logging.Redwood;
 import junit.framework.TestCase;
 
 import java.util.*;
@@ -92,8 +93,29 @@ public class StringUtilsTest extends TestCase {
     assertEquals("", StringUtils.splitOnChar("\t\t\t\t", '\t')[0]);
     assertEquals("", StringUtils.splitOnChar("\t\t\t\t", '\t')[1]);
     assertEquals("", StringUtils.splitOnChar("\t\t\t\t", '\t')[4]);
-
   }
+
+  /*
+  public void testSplitOnCharSpeed() {
+    String line = "1;2;3;4;5;678;901;234567;1";
+    int runs = 1000000;
+
+    for (int gcIter = 0; gcIter < 10; ++gcIter) {
+      long start = System.currentTimeMillis();
+      for (int i = 0; i < runs; ++i) {
+        StringUtils.split(line, ";");
+      }
+      System.err.println("Old: " + Redwood.formatTimeDifference(System.currentTimeMillis() - start) + " for " + runs + " splits");
+
+      start = System.currentTimeMillis();
+      for (int i = 0; i < runs; ++i) {
+        StringUtils.splitOnChar(line, ';');
+      }
+      System.err.println("New: " + Redwood.formatTimeDifference(System.currentTimeMillis() - start) + " for " + runs + " splits");
+      System.err.println();
+    }
+  }
+  */
 
   public void testNormalize() {
     assertEquals("can't", StringUtils.normalize("can't"));

@@ -24,13 +24,13 @@ public class JSONOutputterTest extends TestCase {
   private static void testEscape(String input, String expected) {
     assertEquals(1, input.length());  // make sure I'm escaping right
     assertEquals(2, expected.length());  // make sure I'm escaping right
-    assertEquals(expected, JSONOutputter.JSONWriter.cleanJSON(input));
+    assertEquals(expected, JSONOutputter.cleanJSON(input));
   }
 
   private static void testNoEscape(String input, String expected) {
     assertEquals(1, input.length());  // make sure I'm escaping right
     assertEquals(1, expected.length());  // make sure I'm escaping right
-    assertEquals(expected, JSONOutputter.JSONWriter.cleanJSON(input));
+    assertEquals(expected, JSONOutputter.cleanJSON(input));
   }
 
   public void testSanitizeJSONString() {
@@ -42,7 +42,7 @@ public class JSONOutputterTest extends TestCase {
     testNoEscape("'", "'");
     testEscape("\"", "\\\"");
     testEscape("\\", "\\\\");
-    assertEquals("\\\\b", JSONOutputter.JSONWriter.cleanJSON("\\b"));
+    assertEquals("\\\\b", JSONOutputter.cleanJSON("\\b"));
   }
 
   public void testSimpleJSON() {
@@ -91,62 +91,62 @@ public class JSONOutputterTest extends TestCase {
         "{\n" +
         "\t\"sentences\": [\n" +
         "\t\t{\n" +
-        "\t\t\t\"index\": \"0\",\n" +
+        "\t\t\t\"index\": 0,\n" +
         "\t\t\t\"parse\": \"SENTENCE_SKIPPED_OR_UNPARSABLE\",\n" +
         "\t\t\t\"tokens\": [\n" +
         "\t\t\t\t{\n" +
-        "\t\t\t\t\t\"index\": \"1\",\n" +
+        "\t\t\t\t\t\"index\": 1,\n" +
         "\t\t\t\t\t\"word\": \"JSON\",\n" +
-        "\t\t\t\t\t\"characterOffsetBegin\": \"0\",\n" +
-        "\t\t\t\t\t\"characterOffsetEnd\": \"4\"\n" +
+        "\t\t\t\t\t\"characterOffsetBegin\": 0,\n" +
+        "\t\t\t\t\t\"characterOffsetEnd\": 4\n" +
         "\t\t\t\t},\n" +
         "\t\t\t\t{\n" +
-        "\t\t\t\t\t\"index\": \"2\",\n" +
+        "\t\t\t\t\t\"index\": 2,\n" +
         "\t\t\t\t\t\"word\": \"is\",\n" +
-        "\t\t\t\t\t\"characterOffsetBegin\": \"5\",\n" +
-        "\t\t\t\t\t\"characterOffsetEnd\": \"7\"\n" +
+        "\t\t\t\t\t\"characterOffsetBegin\": 5,\n" +
+        "\t\t\t\t\t\"characterOffsetEnd\": 7\n" +
         "\t\t\t\t},\n" +
         "\t\t\t\t{\n" +
-        "\t\t\t\t\t\"index\": \"3\",\n" +
+        "\t\t\t\t\t\"index\": 3,\n" +
         "\t\t\t\t\t\"word\": \"neat\",\n" +
-        "\t\t\t\t\t\"characterOffsetBegin\": \"8\",\n" +
-        "\t\t\t\t\t\"characterOffsetEnd\": \"12\"\n" +
+        "\t\t\t\t\t\"characterOffsetBegin\": 8,\n" +
+        "\t\t\t\t\t\"characterOffsetEnd\": 12\n" +
         "\t\t\t\t},\n" +
         "\t\t\t\t{\n" +
-        "\t\t\t\t\t\"index\": \"4\",\n" +
+        "\t\t\t\t\t\"index\": 4,\n" +
         "\t\t\t\t\t\"word\": \".\",\n" +
-        "\t\t\t\t\t\"characterOffsetBegin\": \"12\",\n" +
-        "\t\t\t\t\t\"characterOffsetEnd\": \"13\"\n" +
+        "\t\t\t\t\t\"characterOffsetBegin\": 12,\n" +
+        "\t\t\t\t\t\"characterOffsetEnd\": 13\n" +
         "\t\t\t\t}\n" +
         "\t\t\t]\n" +
         "\t\t},\n" +
         "\t\t{\n" +
-        "\t\t\t\"index\": \"1\",\n" +
+        "\t\t\t\"index\": 1,\n" +
         "\t\t\t\"parse\": \"SENTENCE_SKIPPED_OR_UNPARSABLE\",\n" +
         "\t\t\t\"tokens\": [\n" +
         "\t\t\t\t{\n" +
-        "\t\t\t\t\t\"index\": \"1\",\n" +
+        "\t\t\t\t\t\"index\": 1,\n" +
         "\t\t\t\t\t\"word\": \"Better\",\n" +
-        "\t\t\t\t\t\"characterOffsetBegin\": \"14\",\n" +
-        "\t\t\t\t\t\"characterOffsetEnd\": \"20\"\n" +
+        "\t\t\t\t\t\"characterOffsetBegin\": 14,\n" +
+        "\t\t\t\t\t\"characterOffsetEnd\": 20\n" +
         "\t\t\t\t},\n" +
         "\t\t\t\t{\n" +
-        "\t\t\t\t\t\"index\": \"2\",\n" +
+        "\t\t\t\t\t\"index\": 2,\n" +
         "\t\t\t\t\t\"word\": \"than\",\n" +
-        "\t\t\t\t\t\"characterOffsetBegin\": \"21\",\n" +
-        "\t\t\t\t\t\"characterOffsetEnd\": \"25\"\n" +
+        "\t\t\t\t\t\"characterOffsetBegin\": 21,\n" +
+        "\t\t\t\t\t\"characterOffsetEnd\": 25\n" +
         "\t\t\t\t},\n" +
         "\t\t\t\t{\n" +
-        "\t\t\t\t\t\"index\": \"3\",\n" +
+        "\t\t\t\t\t\"index\": 3,\n" +
         "\t\t\t\t\t\"word\": \"XML\",\n" +
-        "\t\t\t\t\t\"characterOffsetBegin\": \"26\",\n" +
-        "\t\t\t\t\t\"characterOffsetEnd\": \"29\"\n" +
+        "\t\t\t\t\t\"characterOffsetBegin\": 26,\n" +
+        "\t\t\t\t\t\"characterOffsetEnd\": 29\n" +
         "\t\t\t\t},\n" +
         "\t\t\t\t{\n" +
-        "\t\t\t\t\t\"index\": \"4\",\n" +
+        "\t\t\t\t\t\"index\": 4,\n" +
         "\t\t\t\t\t\"word\": \".\",\n" +
-        "\t\t\t\t\t\"characterOffsetBegin\": \"29\",\n" +
-        "\t\t\t\t\t\"characterOffsetEnd\": \"30\"\n" +
+        "\t\t\t\t\t\"characterOffsetBegin\": 29,\n" +
+        "\t\t\t\t\t\"characterOffsetEnd\": 30\n" +
         "\t\t\t\t}\n" +
         "\t\t\t]\n" +
         "\t\t}\n" +

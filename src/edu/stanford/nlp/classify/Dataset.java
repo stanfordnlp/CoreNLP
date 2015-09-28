@@ -27,6 +27,7 @@ import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
+import edu.stanford.nlp.util.logging.Logging;
 
 
 /**
@@ -102,13 +103,15 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     int[][] trainData = new int[trainSize][];
     int[] trainLabels = new int[trainSize];
 
-    System.arraycopy(data, start, devData, 0, devSize);
-    System.arraycopy(labels, start, devLabels, 0, devSize);
+    synchronized (System.class) {
+      System.arraycopy(data, start, devData, 0, devSize);
+      System.arraycopy(labels, start, devLabels, 0, devSize);
 
-    System.arraycopy(data, 0, trainData, 0, start);
-    System.arraycopy(data, end, trainData, start, size()-end);
-    System.arraycopy(labels, 0, trainLabels, 0, start);
-    System.arraycopy(labels, end, trainLabels, start, size()-end);
+      System.arraycopy(data, 0, trainData, 0, start);
+      System.arraycopy(data, end, trainData, start, size() - end);
+      System.arraycopy(labels, 0, trainLabels, 0, start);
+      System.arraycopy(labels, end, trainLabels, start, size() - end);
+    }
 
     if (this instanceof WeightedDataset<?,?>) {
       float[] trainWeights = new float[trainSize];
@@ -116,9 +119,11 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
 
       WeightedDataset<L, F> w = (WeightedDataset<L, F>)this;
 
-      System.arraycopy(w.weights, start, devWeights, 0, devSize);
-      System.arraycopy(w.weights, 0, trainWeights, 0, start);
-      System.arraycopy(w.weights, end, trainWeights, start, size()-end);
+      synchronized (System.class) {
+        System.arraycopy(w.weights, start, devWeights, 0, devSize);
+        System.arraycopy(w.weights, 0, trainWeights, 0, start);
+        System.arraycopy(w.weights, end, trainWeights, start, size() - end);
+      }
 
       WeightedDataset<L, F> dev = new WeightedDataset<L, F>(labelIndex, devLabels, featureIndex, devData, devSize, devWeights);
       WeightedDataset<L, F> train = new WeightedDataset<L, F>(labelIndex, trainLabels, featureIndex, trainData, trainSize, trainWeights);
@@ -212,7 +217,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     for (int i = 1; i < line.length; i++) {
       String[] f = line[i].split(":");
       if (f.length != 2) {
-        System.err.println("Dataset error: line " + line1);
+        Logging.logger(Dataset.class).info("Dataset error: line " + line1);
       }
       int val = (int) Double.parseDouble(f[1]);
       for (int j = 0; j < val; j++) {
@@ -315,10 +320,12 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
   protected void ensureSize() {
     if (labels.length == size) {
       int[] newLabels = new int[size * 2];
-      System.arraycopy(labels, 0, newLabels, 0, size);
-      labels = newLabels;
       int[][] newData = new int[size * 2][];
-      System.arraycopy(data, 0, newData, 0, size);
+      synchronized (System.class) {
+        System.arraycopy(labels, 0, newLabels, 0, size);
+        System.arraycopy(data, 0, newData, 0, size);
+      }
+      labels = newLabels;
       data = newData;
     }
   }
@@ -348,7 +355,9 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
       }
     }
     data[size] = new int[j];
-    System.arraycopy(intFeatures, 0, data[size], 0, j);
+    synchronized (System.class) {
+      System.arraycopy(intFeatures, 0, data[size], 0, j);
+    }
   }
 
   protected void addFeatureIndices(int [] features) {
@@ -377,28 +386,11 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
    */
   @Override
   public RVFDatum<L, F> getRVFDatum(int index) {
-    ClassicCounter<F> c = new ClassicCounter<>();
-    // Make sure all features are valid
-    // (count how many features are valid)
-    int validFeatureCount = 0;
-    for (int feature : data[index]) { if (feature < featureIndex.size()) validFeatureCount += 1; }
-    int validFeatures[] = data[index];
-    // (if there are invalid features, copy only the valid ones over)
-    if (validFeatureCount != validFeatures.length) {
-      validFeatures = new int[validFeatureCount];
-      int i = 0;
-      for (int feature : data[index]) {
-        if (feature < featureIndex.size()) {
-          validFeatures[i] = feature;
-          i += 1;
-        }
-      }
-    }
-    // Add features
-    for (F key : featureIndex.objects(validFeatures)) {
+     ClassicCounter<F> c = new ClassicCounter<F>();
+    for (F key : featureIndex.objects(data[index])) {
       c.incrementCount(key);
     }
-    return new RVFDatum<L, F>(c, labelIndex.get(labels[index]));
+    return new RVFDatum<>(c, labelIndex.get(labels[index]));
   }
 
   /**
@@ -406,7 +398,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
    */
   @Override
   public void summaryStatistics() {
-    System.err.println(toSummaryStatistics());
+    Logging.logger(Dataset.class).info(toSummaryStatistics());
   }
 
   /** A String that is multiple lines of text giving summary statistics.
@@ -573,7 +565,9 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
         }
       }
       newData[i] = new int[k];
-      System.arraycopy(newD, 0, newData[i], 0, k);
+      synchronized (System.class) {
+        System.arraycopy(newD, 0, newData[i], 0, k);
+      }
     }
     data = newData;
     featureIndex = newFeatureIndex;
@@ -601,7 +595,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     Index<F> newFeatureIndex = new HashIndex<F>();
     for (int i = 0; i < scoredFeatures.size() && i < numFeatures; i++) {
       newFeatureIndex.add(scoredFeatures.get(i).object());
-      //System.err.println(scoredFeatures.get(i));
+      //Logging.logger(this.getClass()).info(scoredFeatures.get(i));
     }
 
     for (int i = 0; i < size; i++) {
@@ -614,7 +608,9 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
         }
       }
       int[] newDataTrimmed = new int[curIndex];
-      System.arraycopy(newData, 0, newDataTrimmed, 0, curIndex);
+      synchronized (System.class) {
+        System.arraycopy(newData, 0, newDataTrimmed, 0, curIndex);
+      }
       data[i] = newDataTrimmed;
     }
     featureIndex = newFeatureIndex;
@@ -641,7 +637,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
 
       // convert the document to binary feature representation
       boolean[] doc = new boolean[featureIndex.size()];
-      //System.err.println(i);
+      //Logging.logger(this.getClass()).info(i);
       for (int j = 0; j < data[i].length; j++) {
         doc[data[i][j]] = true;
       }
@@ -703,8 +699,8 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
 
       }
 
-        //System.err.println(pFeature+" * "+sumFeature+" = +"+);
-        //System.err.println("^ "+pNotFeature+" "+sumNotFeature);
+        //Logging.logger(this.getClass()).info(pFeature+" * "+sumFeature+" = +"+);
+        //Logging.logger(this.getClass()).info("^ "+pNotFeature+" "+sumNotFeature);
 
       ig[i] += pFeature*sumFeature + pNotFeature*sumNotFeature;
       /* earlier the line above used to be: ig[i] = pFeature*sumFeature + pNotFeature*sumNotFeature;

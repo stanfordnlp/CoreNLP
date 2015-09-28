@@ -180,7 +180,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   @Override
   public Pair<Annotation, InputStream> read(InputStream is) throws IOException, ClassNotFoundException, ClassCastException {
     CoreNLPProtos.Document doc = CoreNLPProtos.Document.parseDelimitedFrom(is);
-    return Pair.makePair( fromProto(doc), is );
+    return Pair.makePair(fromProto(doc), is);
   }
 
   /**
@@ -309,6 +309,17 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   }
 
   /**
+   * Create a protobuf builder, rather than a compiled protobuf.
+   * Useful for, e.g., the simple CoreNLP interface.
+   * @param sentence The sentence to serialize.
+   * @return A Sentence builder.
+   */
+  @SuppressWarnings("unchecked")
+  public CoreNLPProtos.Sentence.Builder toProtoBuilder(CoreMap sentence) {
+    return toProtoBuilder(sentence, Collections.EMPTY_SET);
+  }
+
+  /**
    * Create a Sentence proto from a CoreMap instance.
    * This is not static, as it optionally throws an exception if the serialization is lossy.
    * @param sentence The CoreMap to convert. Note that it should not be a CoreLabel or an Annotation,
@@ -359,6 +370,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (sentence.containsKey(CharacterOffsetEndAnnotation.class)) { builder.setCharacterOffsetEnd(getAndRegister(sentence, keysToSerialize, CharacterOffsetEndAnnotation.class)); }
     if (sentence.containsKey(TreeAnnotation.class)) { builder.setParseTree(toProto(getAndRegister(sentence, keysToSerialize, TreeAnnotation.class))); }
     if (sentence.containsKey(BinarizedTreeAnnotation.class)) { builder.setBinarizedParseTree(toProto(getAndRegister(sentence, keysToSerialize, BinarizedTreeAnnotation.class))); }
+    if (sentence.containsKey(KBestTreesAnnotation.class)) {
+      for (Tree tree : sentence.get(KBestTreesAnnotation.class)) {
+        builder.addKBestParseTrees(toProto(tree));
+        keysToSerialize.remove(KBestTreesAnnotation.class);
+      }
+    }
     if (sentence.containsKey(SentimentCoreAnnotations.SentimentAnnotatedTree.class)) { builder.setAnnotatedParseTree(toProto(getAndRegister(sentence, keysToSerialize, SentimentCoreAnnotations.SentimentAnnotatedTree.class))); }
     if (sentence.containsKey(SentimentCoreAnnotations.SentimentClass.class)) { builder.setSentiment(getAndRegister(sentence, keysToSerialize, SentimentCoreAnnotations.SentimentClass.class)); }
     if (sentence.containsKey(BasicDependenciesAnnotation.class)) { builder.setBasicDependencies(toProto(getAndRegister(sentence, keysToSerialize, BasicDependenciesAnnotation.class))); }
@@ -409,6 +426,17 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       throw new LossySerializationException("Keys are not being serialized: " + StringUtils.join(keysToSerialize));
     }
     return builder.build();
+  }
+
+  /**
+   * Create a protobuf builder, rather than a compiled protobuf.
+   * Useful for, e.g., the simple CoreNLP interface.
+   * @param doc The document to serialize.
+   * @return A Document builder.
+   */
+  @SuppressWarnings("unchecked")
+  public CoreNLPProtos.Document.Builder toProtoBuilder(Annotation doc) {
+    return toProtoBuilder(doc, Collections.EMPTY_SET);
   }
 
   /**
@@ -820,6 +848,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasCharacterOffsetEnd()) { sentence.set(CharacterOffsetEndAnnotation.class, proto.getCharacterOffsetEnd()); }
     if (proto.hasParseTree()) { sentence.set(TreeAnnotation.class, fromProto(proto.getParseTree())); }
     if (proto.hasBinarizedParseTree()) { sentence.set(BinarizedTreeAnnotation.class, fromProto(proto.getBinarizedParseTree())); }
+    if (proto.getKBestParseTreesCount() > 0) {
+      List<Tree> trees = new LinkedList<>();
+      for (CoreNLPProtos.ParseTree protoTree : proto.getKBestParseTreesList()) {trees.add(fromProto(protoTree));}
+      sentence.set(KBestTreesAnnotation.class, trees);
+    }
     if (proto.hasAnnotatedParseTree()) { sentence.set(SentimentCoreAnnotations.SentimentAnnotatedTree.class, fromProto(proto.getAnnotatedParseTree())); }
     if (proto.hasSentiment()) { sentence.set(SentimentCoreAnnotations.SentimentClass.class, proto.getSentiment()); }
     // Non-default fields
