@@ -251,7 +251,7 @@ public enum NaturalLogicRelation {
     put("nmod:poss", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
     put("preconj", NaturalLogicRelation.INDEPENDENCE);  // forbidden to see this
     put("predet", NaturalLogicRelation.INDEPENDENCE);  // forbidden to see this
-    put("case", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("case", NaturalLogicRelation.INDEPENDENCE);  //
     put("nmod:aboard", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("nmod:about", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("nmod:above", NaturalLogicRelation.REVERSE_ENTAILMENT);  //

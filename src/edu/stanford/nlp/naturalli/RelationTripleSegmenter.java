@@ -787,7 +787,6 @@ public class RelationTripleSegmenter {
   public Optional<RelationTriple> segment(SemanticGraph parse, Optional<Double> confidence, boolean consumeAll) {
     // Copy and clean the tree
     parse = new SemanticGraph(parse);
-    Util.stripPrepCases(parse);
 
     // Special case "there is <something>". Arguably this is a job for the clause splitter, but the <something> is
     // sometimes not _really_ its own clause
