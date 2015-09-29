@@ -129,6 +129,20 @@ LAST UPDATE: 2013-06-05
 LAST UPDATE BY: Sonal Gupta
 
 -----------------------------------------------------------------------
+commons-math3.jar
+ORIGINAL JAR NAME: commons-math3-3.5.jar
+VERSION: 3.5
+RELEASE DATE: 3-14-2015
+SOURCE AVAILABLE: yes
+DESCRIPTION: self contained fast math routines
+URL: http://commons.apache.org/lang/
+
+USED BY: edu.stanford.nlp.loglinear
+
+LAST UPDATE: 2015-9-25
+LAST UPDATE BY: Keenon Werling
+
+-----------------------------------------------------------------------
 commons-logging.jar
 
 ORIGINAL JAR NAME: commons-logging.jar

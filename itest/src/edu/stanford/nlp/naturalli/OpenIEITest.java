@@ -10,7 +10,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -52,10 +51,13 @@ public class OpenIEITest {
     assertTrue("The extraction '" + expected + "' was not found in '" + text + "'", found);
   }
 
-  public void assertExtracted(Set<String> expected, String text) {
+  public void assertExtracted(Set<String> expectedSet, String text) {
     Collection<RelationTriple> extractions = annotate(text).get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
-    Set<String> guess = extractions.stream().filter(x -> x.confidence > 0.1).map(RelationTriple::toString).collect(Collectors.toSet());
-    assertEquals(StringUtils.join(expected.stream().sorted(), "\n").toLowerCase(), StringUtils.join(guess.stream().map(x -> x.substring(x.indexOf("\t") + 1)).sorted(), "\n").toLowerCase());
+    String actual = StringUtils.join(
+        extractions.stream().map(x -> x.toString().substring(x.toString().indexOf("\t") + 1).toLowerCase()).sorted(),
+        "\n");
+    String expected = StringUtils.join(expectedSet.stream().map(String::toLowerCase).sorted(), "\n");
+    assertEquals(expected, actual);
   }
 
   public void assertEntailed(String expected, String text) {
@@ -89,9 +91,9 @@ public class OpenIEITest {
   @Test
   public void testExtractionsGeorgeBoyd() {
     assertExtracted(new HashSet<String>() {{
+      add("George Boyd\tjoined on\t21 february 2013");
       add("George Boyd\tjoined for\tremainder");
       add("George Boyd\tjoined for\tremainder of season");
-      add("George Boyd\tjoined on\t21 february 2013");
       add("George Boyd\tjoined on\tloan");
       add("George Boyd\tjoined on\tloan from peterborough united");
     }}, "On 21 February 2013 George Boyd joined on loan from Peterborough United for the remainder of the season.");

@@ -94,7 +94,7 @@ public class OpenIE implements Annotator {
   private boolean splitterDisable = false;
 
   @Execution.Option(name="max_entailments_per_clause", gloss="The maximum number of entailments allowed per sentence of input.")
-  private int entailmentsPerSentence = 100;
+  private int entailmentsPerSentence = 1000;
 
   @Execution.Option(name="ignore_affinity", gloss="If true, don't use the affinity models for dobj and pp attachment.")
   private boolean ignoreAffinity = false;
@@ -132,6 +132,13 @@ public class OpenIE implements Annotator {
   public OpenIE(Properties props) {
     // Fill the properties
     Execution.fillOptions(this, props);
+    Properties withoutOpenIEPrefix = new Properties();
+    Enumeration<Object> keys = props.keys();
+    while (keys.hasMoreElements()) {
+      String key = keys.nextElement().toString();
+      withoutOpenIEPrefix.setProperty(key.replace("openie.", ""), props.getProperty(key));
+    }
+    Execution.fillOptions(this, withoutOpenIEPrefix);
 
     // Create the clause splitter
     try {

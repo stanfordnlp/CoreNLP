@@ -359,7 +359,7 @@ public class RelationTripleSegmenter {
 
   /** A set of valid arcs denoting an adverbial modifier we are interested in */
   public final Set<String> VALID_ADVERB_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
-    add("amod"); add("advmod"); add("conj"); add("conj:and"); add("conj:or"); add("auxpass");
+    add("amod"); add("advmod"); add("conj"); add("cc"); add("conj:and"); add("conj:or"); add("auxpass");
   }});
 
   /**
@@ -402,9 +402,15 @@ public class RelationTripleSegmenter {
           }
         }
       }
+
+      // Check outgoing edges
+      boolean hasConj = false;
+      boolean hasCC = false;
       for (SemanticGraphEdge edge : parse.getOutEdgesSorted(root)) {
         String shortName = edge.getRelation().getShortName();
         String name = edge.getRelation().toString();
+        if (shortName.startsWith("conj")) { hasConj = true; }
+        if (shortName.equals("cc")) { hasCC = true; }
         //noinspection StatementWithEmptyBody
         if (isCopula && (shortName.equals("cop") || shortName.contains("subj") || shortName.equals("auxpass") )) {
           // noop; ignore nsubj, cop for extractions with copula
@@ -421,6 +427,11 @@ public class RelationTripleSegmenter {
         } else {
           fringe.add(edge.getDependent());
         }
+      }
+
+      // Ensure that we don't have a conj without a cc, or vice versa
+      if (Boolean.logicalXor(hasConj, hasCC)) {
+        return Optional.empty();
       }
     }
 

@@ -558,6 +558,33 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\tObama\tBorn in\tHonolulu Hawaii", extraction.get().toString());
   }
 
+  public void testObamaPresidentOfRegression() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tObama\t3\tnsubj\n" +
+        "2\tis\t3\tcop\n" +
+        "3\tpresident\t0\troot\n" +
+        "4\tof\t5\tcase\n" +
+        "5\tUS\t3\tnmod:of\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tObama\tis president of\tUS", extraction.get().toString());
+  }
+
+  public void testObamaPresidentOfRegressionFull() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tObama\t6\tnsubj\n" +
+        "2\tis\t6\tcop\n" +
+        "3\t44th\t6\tamod\n" +
+        "4\tand\t3\tcc\n" +
+        "5\tcurrent\t3\tconj:and\n" +
+        "6\tpresident\t0\troot\n" +
+        "7\tof\t8\tcase\n" +
+        "8\tUS\t6\tnmod:of\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tObama\tis 44th and current president of\tUS", extraction.get().toString());
+  }
+
   public void testGeorgeBoydRegression() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tGeorge\t2\tcompound\n" +
