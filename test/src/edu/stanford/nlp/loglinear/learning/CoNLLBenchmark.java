@@ -26,7 +26,8 @@ public class CoNLLBenchmark {
     Map<String, double[]> embeddings = new HashMap<>();
 
     public static void main(String[] args) throws Exception {
-        new CoNLLBenchmark().benchmarkOptimizer();
+        throw new IllegalStateException("CoNLLBenchmark needs to be migrated to use local paths on the Stanford NLP cluster, so is currently disabled.");
+        // new CoNLLBenchmark().benchmarkOptimizer();
     }
 
     public void benchmarkOptimizer() throws Exception {
