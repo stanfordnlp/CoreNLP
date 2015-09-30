@@ -447,7 +447,7 @@ public class OpenIE implements Annotator {
 
     // Tweak the arguments
     if ("".equals(props.getProperty("annotators", ""))) {
-      props.setProperty("annotators", "tokenize,ssplit,pos,depparse,natlog,openie");
+      props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,natlog,openie");
     }
     if ("".equals(props.getProperty("depparse.extradependencies", ""))) {
       props.setProperty("depparse.extradependencies", "ref_only_uncollapsed");
