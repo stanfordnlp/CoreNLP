@@ -92,9 +92,9 @@ public class OpenIEITest {
   public void testPaperExamples() {
 //    assertExtracted("Fish\tlike to\tswim", "Fish like to swim");  // Parse is persistently broken
 
-//    assertExtracted("Tom\tfighting\tJerry", "Tom and Jerry are fighting.");
-//    assertExtracted("cats\tis with\ttails", "There are cats with tails.");
-//    assertExtracted("IBM\thas\tresearch group", "IBM's research group.");
+    assertExtracted("Tom\tfighting\tJerry", "Tom and Jerry are fighting.");
+    assertExtracted("cats\tis with\ttails", "There are cats with tails.");
+    assertExtracted("IBM\thas\tresearch group", "IBM's research group.");
     assertExtracted("rabbits\teat\tvegetables", "All rabbits eat vegetables.");
   }
 
