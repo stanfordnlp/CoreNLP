@@ -48,7 +48,7 @@ public class OpenIEITest {
         found = true;
       }
     }
-    assertTrue("The extraction '" + expected + "' was not found in '" + text + "'", found);
+    assertTrue("The extraction (" + expected.replace("\t", "; ") + ") was not found in '" + text + "'", found);
   }
 
   public void assertExtracted(Set<String> expectedSet, String text) {
@@ -86,6 +86,17 @@ public class OpenIEITest {
   @Test
   public void testBasicExtractions() {
     assertExtracted("cats\thave\ttails", "some cats have tails");
+  }
+
+  @Test
+  public void testPaperExamples() {
+//    assertExtracted("Fish\tlike to\tswim", "Fish like to swim");  // Parse is persistently broken
+
+    assertExtracted("Tom\tfighting\tJerry", "Tom and Jerry are fighting.");
+    assertExtracted("cats\tis with\ttails", "There are cats with tails.");
+    assertExtracted("IBM\thas\tresearch group", "IBM's research group.");
+    assertExtracted("rabbits\teat\tvegetables", "All rabbits eat vegetables.");
+
   }
 
   @Test
@@ -134,6 +145,7 @@ public class OpenIEITest {
       add("He\twas\tcommunity organizer");
 //      add("He\tearning\tlaw degree");
       add("He\tearning\this law degree");
+      add("community organizer\tis in\tChicago");
     }}, "He was a community organizer in Chicago before earning his law degree.");
   }
 
