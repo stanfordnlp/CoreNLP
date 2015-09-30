@@ -96,7 +96,13 @@ public class OpenIEITest {
     assertExtracted("cats\tis with\ttails", "There are cats with tails.");
     assertExtracted("IBM\thas\tresearch group", "IBM's research group.");
     assertExtracted("rabbits\teat\tvegetables", "All rabbits eat vegetables.");
+  }
 
+  @Test
+  public void testOtherExamples() {
+    // Preconj (but, parser currently fails)
+//    assertExtracted("Mary\tis\tbeautiful", "Mary is both beautiful and smart.");
+//    assertExtracted(Collections.EMPTY_SET, "Mary is neither beautiful and smart.");
   }
 
   @Test
