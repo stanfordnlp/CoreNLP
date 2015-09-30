@@ -225,7 +225,7 @@ public class RelationTripleSegmenter {
               subjectTokens.add(tokens.get(i));
             }
           } else {
-            subjectTokens = getValidChunk(parse, subject, VALID_SUBJECT_ARCS, Optional.ofNullable(ignoredArc), true).get();
+            subjectTokens = getValidChunk(parse, subject, VALID_SUBJECT_ARCS, Optional.ofNullable(ignoredArc), true).orElse(Collections.singletonList(subject.backingLabel()));
             subjectSpan = Util.tokensToSpan(subjectTokens);
           }
 
@@ -239,7 +239,7 @@ public class RelationTripleSegmenter {
               objectTokens.add(tokens.get(i));
             }
           } else {
-            objectTokens = getValidChunk(parse, object, VALID_OBJECT_ARCS, Optional.ofNullable(ignoredArc), true).get();
+            objectTokens = getValidChunk(parse, object, VALID_OBJECT_ARCS, Optional.ofNullable(ignoredArc), true).orElse(Collections.singletonList(object.backingLabel()));
             objectSpan = Util.tokensToSpan(objectTokens);
           }
 
@@ -620,7 +620,11 @@ public class RelationTripleSegmenter {
             }
           }
           if (prepWord != null) {
-            for (CoreLabel word : getValidChunk(parse, prepWord, Collections.singleton("mwe"), Optional.empty(), true).get()) {
+            Optional<List<CoreLabel>> chunk = getValidChunk(parse, prepWord, Collections.singleton("mwe"), Optional.empty(), true);
+            if (!chunk.isPresent()) {
+              continue PATTERN_LOOP;  // Probably something like a conj w/o a cc
+            }
+            for (CoreLabel word : chunk.get()) {
               verbChunk.add(word, Integer.MIN_VALUE / 2 - word.index());
             }
           } else if (expected.equalsIgnoreCase("tmod")) {
