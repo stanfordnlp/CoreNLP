@@ -202,7 +202,7 @@ public class DeterministicCorefAnnotator implements Annotator {
 
   @Override
   public Set<Requirement> requires() {
-    return new ArraySet<>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT, NER_REQUIREMENT, PARSE_REQUIREMENT);
+    return Annotator.REQUIREMENTS.get(STANFORD_DETERMINISTIC_COREF);
   }
 
   @Override

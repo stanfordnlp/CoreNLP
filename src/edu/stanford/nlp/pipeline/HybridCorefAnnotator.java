@@ -148,7 +148,7 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
 
   @Override
   public Set<Requirement> requires() {
-    return new ArraySet<Requirement>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT, NER_REQUIREMENT, DEPENDENCY_REQUIREMENT);
+    return Annotator.REQUIREMENTS.get(STANFORD_COREF);
   }
 
   @Override

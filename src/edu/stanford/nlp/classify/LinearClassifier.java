@@ -201,8 +201,15 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
    */
   private Counter<L> scoresOfRVFDatum(RVFDatum<L, F> example) {
     Counter<L> scores = new ClassicCounter<L>();
+    // Index the features in the datum
+    Counter<F> asCounter = example.asFeaturesCounter();
+    Counter<Integer> asIndexedCounter = new ClassicCounter<>(asCounter.size());
+    for (Map.Entry<F, Double> entry : asCounter.entrySet()) {
+      asIndexedCounter.setCount(featureIndex.indexOf(entry.getKey()), entry.getValue());
+    }
+    // Set the scores appropriately
     for (L l : labels()) {
-      scores.setCount(l, scoreOfRVFDatum(example, l));
+      scores.setCount(l, scoreOfRVFDatum(asIndexedCounter, l));
     }
     //System.out.println("Scores are: " + scores + "   (gold: " + example.label() + ")");
     return scores;
@@ -229,8 +236,20 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
     int iLabel = labelIndex.indexOf(label);
     double score = 0.0;
     Counter<F> features = example.asFeaturesCounter();
-    for (F f : features.keySet()) {
-      score += weight(f, iLabel) * features.getCount(f);
+    for (Map.Entry<F, Double> entry : features.entrySet()) {
+      score += weight(entry.getKey(), iLabel) * entry.getValue();
+    }
+    return score + thresholds[iLabel];
+  }
+
+  /** Returns the score of the RVFDatum for the specified label.
+   *  Ignores the true label of the RVFDatum.
+   */
+  private double scoreOfRVFDatum(Counter<Integer> features, L label) {
+    int iLabel = labelIndex.indexOf(label);
+    double score = 0.0;
+    for (Map.Entry<Integer, Double> entry : features.entrySet()) {
+      score += weight(entry.getKey(), iLabel) * entry.getValue();
     }
     return score + thresholds[iLabel];
   }

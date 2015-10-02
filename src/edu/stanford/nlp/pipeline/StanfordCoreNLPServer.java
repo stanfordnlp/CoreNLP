@@ -4,11 +4,13 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.MetaClass;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -25,6 +27,8 @@ public class StanfordCoreNLPServer implements Runnable {
 
   protected HttpServer server;
   protected int serverPort;
+  protected final FileHandler staticPageHandle;
+  protected final String shutdownKey;
 
   public static int HTTP_OK = 200;
   public static int HTTP_BAD_INPUT = 400;
@@ -32,13 +36,47 @@ public class StanfordCoreNLPServer implements Runnable {
   public final Properties defaultProps;
 
 
-  public StanfordCoreNLPServer(int port) {
+  public StanfordCoreNLPServer(int port) throws IOException {
     serverPort = port;
 
     defaultProps = new Properties();
-    defaultProps.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
+    defaultProps.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, depparse, natlog, openie, dcoref");
     defaultProps.setProperty("inputFormat", "text");
     defaultProps.setProperty("outputFormat", "json");
+
+    // Generate and write a shutdown key
+    String tmpDir = System.getProperty("java.io.tmpdir");
+    File tmpFile = new File(tmpDir + File.separator + "corenlp.shutdown");
+    tmpFile.deleteOnExit();
+    if (tmpFile.exists()) {
+      if (!tmpFile.delete()) {
+        throw new IllegalStateException("Could not delete shutdown key file");
+      }
+    }
+    this.shutdownKey = new BigInteger(130, new Random()).toString(32);
+    IOUtils.writeStringToFile(shutdownKey, tmpFile.getPath(), "utf-8");
+
+    // Set the static page handler
+    this.staticPageHandle = new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.html");
+  }
+
+  private static Map<String, String> getURLParams(URI uri) {
+    if (uri.getQuery() != null) {
+      Map<String, String> urlParams = new HashMap<>();
+
+      String query = uri.getQuery();
+      String[] queryFields = query.split("&");
+      for (String queryField : queryFields) {
+        String[] keyValue = queryField.split("=");
+        // Convention uses "+" for spaces.
+        keyValue[0] = keyValue[0].replace("+", " ");
+        keyValue[1] = keyValue[1].replace("+", " ");
+        urlParams.put(keyValue[0], keyValue[1]);
+      }
+      return urlParams;
+    } else {
+      return Collections.emptyMap();
+    }
   }
 
   /**
@@ -50,8 +88,45 @@ public class StanfordCoreNLPServer implements Runnable {
       // Return a simple text message that says pong.
       httpExchange.getResponseHeaders().set("Content-Type", "text/plain");
       String response = "pong\n";
-      httpExchange.sendResponseHeaders(HTTP_OK, response.length());
+      httpExchange.sendResponseHeaders(HTTP_OK, response.getBytes().length);
       httpExchange.getResponseBody().write(response.getBytes());
+      httpExchange.close();
+    }
+  }
+
+  protected class ShutdownHandler implements HttpHandler {
+    @Override
+    public void handle(HttpExchange httpExchange) throws IOException {
+      Map<String, String> urlParams = getURLParams(httpExchange.getRequestURI());
+      httpExchange.getResponseHeaders().set("Content-Type", "text/plain");
+      boolean doExit = false;
+      String response = "Invalid shutdown key\n";
+      if (urlParams.containsKey("key") && urlParams.get("key").equals(shutdownKey)) {
+        response = "Shutdown successful!\n";
+        doExit = true;
+      }
+      httpExchange.sendResponseHeaders(HTTP_OK, response.getBytes().length);
+      httpExchange.getResponseBody().write(response.getBytes());
+      httpExchange.close();
+      if (doExit) {
+        System.exit(0);
+      }
+    }
+  }
+
+  /**
+   * Serve a file from the filesystem or classpath
+   */
+  protected static class FileHandler implements HttpHandler {
+    private final String content;
+    public FileHandler(String fileOrClasspath) throws IOException {
+      this.content = IOUtils.slurpReader(IOUtils.getBufferedReaderFromClasspathOrFileSystem(fileOrClasspath));
+    }
+    @Override
+    public void handle(HttpExchange httpExchange) throws IOException {
+      httpExchange.getResponseHeaders().set("Content-Type", "text/html");
+      httpExchange.sendResponseHeaders(HTTP_OK, content.getBytes().length);
+      httpExchange.getResponseBody().write(content.getBytes());
       httpExchange.close();
     }
   }
@@ -59,7 +134,7 @@ public class StanfordCoreNLPServer implements Runnable {
   /**
    * The main handler for taking an annotation request, and annotating it.
    */
-  protected static class SimpleAnnotateHandler implements HttpHandler {
+  protected class SimpleAnnotateHandler implements HttpHandler {
     /**
      * The default properties to use in the absence of anything sent by the client.
      */
@@ -117,16 +192,26 @@ public class StanfordCoreNLPServer implements Runnable {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
+      // Set common response headers
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+
       // Get sentence.
       Properties props;
       Annotation ann;
       StanfordCoreNLP.OutputFormat of;
-      log("Received message from " + httpExchange.getRemoteAddress());
+      log("[" + httpExchange.getRemoteAddress() + "] Received message");
       try {
         props = getProperties(httpExchange);
         ann = getDocument(props, httpExchange);
-        of = StanfordCoreNLP.OutputFormat.valueOf(props.getProperty("outputFormat").toUpperCase());
-      } catch (IOException | ClassNotFoundException e) {
+        of = StanfordCoreNLP.OutputFormat.valueOf(props.getProperty("outputFormat", "json").toUpperCase());
+        // Handle direct browser connections (i.e., not a POST request).
+        if (ann.get(CoreAnnotations.TextAnnotation.class).length() == 0) {
+          log("[" + httpExchange.getRemoteAddress() + "] Interactive connection");
+          staticPageHandle.handle(httpExchange);
+          return;
+        }
+        log("[" + httpExchange.getRemoteAddress() + "] API call");
+      } catch (Exception e) {
         // Return error message.
         e.printStackTrace();
         String response = e.getMessage();
@@ -138,7 +223,7 @@ public class StanfordCoreNLPServer implements Runnable {
       }
 
       try {
-        // Annoatate
+        // Annotate
         StanfordCoreNLP pipeline = mkStanfordCoreNLP(props);
         pipeline.annotate(ann);
 
@@ -164,25 +249,6 @@ public class StanfordCoreNLPServer implements Runnable {
       }
     }
 
-    Map<String, String> getURLParams(URI uri) {
-      if (uri.getQuery() != null) {
-        Map<String, String> urlParams = new HashMap<>();
-
-        String query = uri.getQuery();
-        String[] queryFields = query.split("&");
-        for (String queryField : queryFields) {
-          String[] keyValue = queryField.split("=");
-          // Convention uses "+" for spaces.
-          keyValue[0] = keyValue[0].replace("+", " ");
-          keyValue[1] = keyValue[1].replace("+", " ");
-          urlParams.put(keyValue[0], keyValue[1]);
-        }
-        return urlParams;
-      } else {
-        return Collections.emptyMap();
-      }
-    }
-
     private Properties getProperties(HttpExchange httpExchange) throws UnsupportedEncodingException {
       // Load the default properties
       Properties props = new Properties();
@@ -192,10 +258,15 @@ public class StanfordCoreNLPServer implements Runnable {
       // Try to get more properties from query string.
       Map<String, String> urlParams = getURLParams(httpExchange.getRequestURI());
       if (urlParams.containsKey("properties")) {
-        // Parse properties
+        StringUtils.decodeMap(URLDecoder.decode(urlParams.get("properties"), "UTF-8")).entrySet()
+            .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
+      } else if (urlParams.containsKey("props")) {
         StringUtils.decodeMap(URLDecoder.decode(urlParams.get("properties"), "UTF-8")).entrySet()
             .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
       }
+
+      // Make sure the properties compile
+      props.setProperty("annotators", StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+")));
 
       return props;
     }
@@ -219,11 +290,12 @@ public class StanfordCoreNLPServer implements Runnable {
   @Override
   public void run() {
     try {
-
       server = HttpServer.create(new InetSocketAddress(serverPort), 0); // 0 is the default 'backlog'
-      server.createContext("/ping", new PingHandler());
       server.createContext("/", new SimpleAnnotateHandler(defaultProps));
-//            server.createContext("/protobuf", new PingHandler());
+      server.createContext("/corenlp-brat.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.js"));
+      server.createContext("/corenlp-brat.cs", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.css"));
+      server.createContext("/ping", new PingHandler());
+      server.createContext("/shutdown", new ShutdownHandler());
       server.start();
       log("StanfordCoreNLPServer listening at " + server.getAddress());
     } catch (IOException e) {
@@ -231,7 +303,7 @@ public class StanfordCoreNLPServer implements Runnable {
     }
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     int port = DEFAULT_PORT;
     if(args.length > 0) {
       port = Integer.parseInt(args[0]);

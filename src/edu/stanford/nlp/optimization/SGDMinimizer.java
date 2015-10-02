@@ -239,12 +239,6 @@ public class SGDMinimizer<T extends Function> implements Minimizer<T>, HasEvalua
       throw new UnsupportedOperationException();
     }
     AbstractStochasticCachingDiffUpdateFunction function = (AbstractStochasticCachingDiffUpdateFunction) f;
-    if (function instanceof LogConditionalObjectiveFunction) {
-      if (((LogConditionalObjectiveFunction)function).parallelGradientCalculation) {
-        System.err.println("\n*********\nNoting that HogWild optimization requested.\nSetting batch size = data size to minimize thread creation overhead.\nResults *should* be identical on sparse problems.\nDisable parallelGradientComputation flag in LogConditionalObjectiveFunction, or run with -threads 1 to disable.\nAlso can use another Minimizer if parallel computation is desired, but HogWild isn't delivering good results.\n*********\n");
-        bSize = function.dataDimension();
-      }
-    }
     int totalSamples = function.dataDimension();
     int tuneSampleSize = Math.min(totalSamples, tuningSamples);
     if (tuneSampleSize < tuningSamples) {
