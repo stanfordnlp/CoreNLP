@@ -65,10 +65,9 @@ message Sentence {
   optional DependencyGraph collapsedCCProcessedDependencies    = 10;
   optional DependencyGraph alternativeDependencies             = 13;
   repeated OpenIETriple    openieTriple                        = 14;   // The OpenIE triples in the sentence
-  repeated SentenceFragment entailedSentence                   = 15;   // The entailed sentences, by natural logic
   optional uint32          paragraph                           = 11;
 
-  optional string          text                                = 12;   // Only needed if we're only saving the sentence.
+  optional string          text                                = 12;
 
 
   // Fields set by other annotators in CoreNLP
@@ -332,31 +331,15 @@ message NERMention {
 }
 
 //
-// An entailed sentence fragment.
-// Created by the openie annotator.
-//
-message SentenceFragment {
-  repeated uint32 tokenIndex     = 1;
-  optional uint32 root           = 2;
-  optional bool   assumedTruth   = 3;
-  optional double score          = 4;
-}
-
-//
-// An OpenIE relation triple.
-// Created by the openie annotator.
+// An OpenIE relation triple
 //
 message OpenIETriple {
-  optional string          subject        = 1;   // The surface form of the subject
-  optional string          relation       = 2;   // The surface form of the relation (required)
-  optional string          object         = 3;   // The surface form of the object
-  optional double          confidence     = 4;   // The [optional] confidence of the extraction
-  repeated uint32          subjectTokens  = 5;   // The tokens comprising the subject of the triple
-  repeated uint32          relationTokens = 6;   // The tokens comprising the relation of the triple
-  repeated uint32          objectTokens   = 7;   // The tokens comprising the object of the triple
-  optional DependencyGraph tree           = 8;   // The dependency graph fragment for this triple
-  optional bool            istmod         = 9;   // If true, this expresses an implicit tmod relation
-  optional bool            prefixBe       = 10;  // If true, this relation string is missing a 'be' prefix
-  optional bool            suffixBe       = 11;  // If true, this relation string is missing a 'be' suffix
-  optional bool            suffixOf       = 12;  // If true, this relation string is missing a 'of' prefix
+  optional string          subject      = 1;  // The surface form of the subject
+  optional string          relation     = 2;  // The surface form of the relation (required)
+  optional string          object       = 3;  // The surface form of the object
+  required double          confidence   = 4;  // The [optional] confidence of the extraction
+  required Span            subjectSpan  = 5;  // The span of the subject in the sentence
+  required Span            relationSpan = 6;  // The span of the relation in the sentence
+  required Span            objectSpan   = 7;  // The span of the object in the sentence
+  optional DependencyGraph tree         = 8;  // The dependency graph fragment for this triple
 }

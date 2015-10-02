@@ -791,9 +791,6 @@ public class Preprocessor {
   }
 
   private static String findNextParagraphSpeaker(Document doc, List<CoreMap> paragraph, int paragraphOffset, Dictionaries dict) {
-    if (paragraph.isEmpty()) {
-      return "";
-    }
     CoreMap lastSent = paragraph.get(paragraph.size()-1);
     String speaker = "";
     for(CoreLabel w : lastSent.get(CoreAnnotations.TokensAnnotation.class)) {

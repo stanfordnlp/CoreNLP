@@ -208,22 +208,6 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
   }
 
   /**
-   * Return a set of keys such that the value of that key is not null.
-   *
-   * @return A hash set such that each element of the set is a key in this CoreMap that has a
-   *         non-null value.
-   */
-  public Set<Class<?>> keySetNotNull() {
-    Set<Class<?>> keys = new IdentityHashSet<>();
-    for (int i = 0; i < size(); ++i) {
-      if (values[i] != null) {
-        keys.add(this.keys[i]);
-      }
-    }
-    return keys;
-  }
-
-  /**
    * {@inheritDoc}
    */
   @Override

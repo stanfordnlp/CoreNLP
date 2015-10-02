@@ -494,8 +494,6 @@ public class IOUtils {
 
 
   // todo [cdm 2015]: I think GZIPInputStream has its own buffer and so we don't need to buffer in that case.
-  // todo: Though it's default size is 512 bytes so need to make 8K in constructor. Or else buffering outside gzip is faster
-  // todo: final InputStream is = new GZIPInputStream( new FileInputStream( file ), 65536 );
   /**
    * Quietly opens a File. If the file ends with a ".gz" extension,
    * automatically opens a GZIPInputStream to wrap the constructed
@@ -1470,17 +1468,6 @@ public class IOUtils {
     return out;
   }
 
-  public static OutputStream getFileOutputStream(String filename, boolean append) throws IOException {
-    OutputStream out = new FileOutputStream(filename, append);
-    if (filename.endsWith(".gz")) {
-      out = new GZIPOutputStream(out);
-    } else if (filename.endsWith(".bz2")) {
-      //out = new CBZip2OutputStream(out);
-      out = getBZip2PipedOutputStream(filename);
-    }
-    return out;
-  }
-
   public static BufferedReader getBufferedFileReader(String filename) throws IOException {
     return getBufferedFileReader(filename, defaultEncoding);
   }
@@ -1838,7 +1825,7 @@ public class IOUtils {
 
   /**
    * A raw file copy function -- this is not public since no error checks are made as to the
-   * consistency of the file being copied. Use instead:
+   * consistency of the filed being copied. Use instead:
    * @see IOUtils#cp(java.io.File, java.io.File, boolean)
    * @param source The source file. This is guaranteed to exist, and is guaranteed to be a file.
    * @param target The target file.
@@ -2077,18 +2064,6 @@ public class IOUtils {
       }
       System.out.print(prompt);
     }
-  }
-
-  /**
-   * Create a prompt, and read a single line of response.
-   * @param prompt An optional prompt to show the user.
-   * @throws IOException Throw from the underlying reader.
-   */
-  public static String promptUserInput(Optional<String> prompt) throws IOException {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-    String line;
-    System.out.print(prompt.orElse("> "));
-    return reader.readLine();
   }
 
   /** @see IOUtils#console(String, Consumer) */

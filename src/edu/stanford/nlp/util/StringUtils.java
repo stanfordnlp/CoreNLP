@@ -471,13 +471,6 @@ public class StringUtils {
     return (Arrays.asList(str.split(regex)));
   }
 
-  /**
-   * Split a string on a given single character.
-   * This method is often faster than the regular split() method.
-   * @param input The input to split.
-   * @param delimiter The character to split on.
-   * @return An array of Strings corresponding to the original input split on the delimiter character.
-   */
   public static String[] splitOnChar(String input, char delimiter) {
     // State
     String[] out = new String[input.length() + 1];

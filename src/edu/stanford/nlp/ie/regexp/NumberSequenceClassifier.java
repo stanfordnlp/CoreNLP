@@ -59,7 +59,6 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
   public static final boolean USE_SUTIME_DEFAULT = TimeExpressionExtractorFactory.DEFAULT_EXTRACTOR_PRESENT;
   public static final String USE_SUTIME_PROPERTY = "ner.useSUTime";
   public static final String USE_SUTIME_PROPERTY_BASE = "useSUTime";
-  public static final String SUTIME_PROPERTY = "sutime";
 
   private final TimeExpressionExtractor timexExtractor;
 
@@ -79,7 +78,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     super(props);
     this.useSUTime = useSUTime;
     if(this.useSUTime) {
-      this.timexExtractor = TimeExpressionExtractorFactory.createExtractor(SUTIME_PROPERTY, sutimeProps);
+      this.timexExtractor = TimeExpressionExtractorFactory.createExtractor("sutime", sutimeProps);
     } else {
       this.timexExtractor = null;
     }

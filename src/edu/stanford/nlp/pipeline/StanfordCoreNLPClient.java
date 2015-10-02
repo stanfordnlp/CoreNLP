@@ -560,14 +560,10 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
 
     // Create the backends
     List<Backend> backends = new ArrayList<>();
-    for (String spec : props.getProperty("backends", "corenlp.run").split(",")) {
-      if (spec.contains(":")) {
-        String host = spec.substring(0, spec.indexOf(":"));
-        int port = Integer.parseInt(spec.substring(spec.indexOf(":") + 1));
-        backends.add(new Backend(host, port));
-      } else {
-        backends.add(new Backend(spec, 80));
-      }
+    for (String spec : props.getProperty("backends", "104.131.152.210:80").split(",")) {
+      String host = spec.substring(0, spec.indexOf(":"));
+      int port = Integer.parseInt(spec.substring(spec.indexOf(":") + 1));
+      backends.add(new Backend(host, port));
     }
 
     // Run the pipeline
