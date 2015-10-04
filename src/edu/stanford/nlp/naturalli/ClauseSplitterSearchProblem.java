@@ -894,6 +894,7 @@ public class ClauseSplitterSearchProblem {
    * The default featurizer to use during training.
    */
   public static final Featurizer DEFAULT_FEATURIZER = new Featurizer() {
+    private static final long serialVersionUID = 42L;
     @Override
     public boolean isSimpleSplit(Counter<String> feats) {
       for (String key : feats.keySet()) {
