@@ -338,8 +338,6 @@ public class Ssurgeon {
       retEdit = new KillNonRootedNodes();
     } else if (command.equalsIgnoreCase(KillAllIncomingEdges.LABEL)) {
       retEdit = new KillAllIncomingEdges(argsBox.node);
-    } else if (command.equalsIgnoreCase(CollapseSubtree.LABEL)) {
-      retEdit = new CollapseSubtree(argsBox.node);
     } else {
       throw new IllegalArgumentException("Error in SsurgeonEdit.parseEditLine: command '"+command+"' is not supported");
     }
