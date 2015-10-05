@@ -16,7 +16,10 @@ import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 
-
+/**
+ * @author Chloe Kiddon
+ * @author Sonal Gupta
+ */
 public class SemgrexPatternTest extends TestCase {
 
   /*
@@ -120,9 +123,8 @@ public class SemgrexPatternTest extends TestCase {
   public void testMacro() throws IOException {
     SemanticGraph h = SemanticGraph.valueOf("[married/VBN nsubjpass>Hughes/NNP auxpass>was/VBD nmod:to>Gracia/NNP]");
     String macro = "macro WORD = married";
-    SemgrexBatchParser parser = new SemgrexBatchParser();
     String pattern = "({word:${WORD}}=parent >>nsubjpass {}=node)";
-    List<SemgrexPattern> pats = parser.compileStream(new ByteArrayInputStream((macro + "\n" + pattern).getBytes(StandardCharsets.UTF_8)));
+    List<SemgrexPattern> pats = SemgrexBatchParser.compileStream(new ByteArrayInputStream((macro + "\n" + pattern).getBytes(StandardCharsets.UTF_8)));
     SemgrexPattern pat3 = pats.get(0);
     boolean ignoreCase = true;
     SemgrexMatcher mat3 = pat3.matcher(h, ignoreCase);
@@ -142,11 +144,10 @@ public class SemgrexPatternTest extends TestCase {
     //SemanticGraph t = SemanticGraph
     //  .valueOf("[loved/VBD\nnsubj:Hughes/NNP\ndobj:[wife/NN poss:his/PRP$ appos:Gracia/NNP]\nconj_and:[obsessed/JJ\ncop:was/VBD\nadvmod:absolutely/RB\nprep_with:[Elicia/NN poss:his/PRP$ amod:little/JJ nn:daughter/NN]]]");
     String macro = "macro WORD = married";
-    SemgrexBatchParser parser = new SemgrexBatchParser();
     Env env = new Env();
     env.bind("pattern1",PatternsAnnotations.PatternLabel1.class);
     String pattern = "({pattern1:YES}=parent >>nsubjpass {}=node)";
-    List<SemgrexPattern> pats = parser.compileStream(new ByteArrayInputStream((macro + "\n" + pattern).getBytes(StandardCharsets.UTF_8)), env);
+    List<SemgrexPattern> pats = SemgrexBatchParser.compileStream(new ByteArrayInputStream((macro + "\n" + pattern).getBytes(StandardCharsets.UTF_8)), env);
     SemgrexPattern pat3 = pats.get(0);
     boolean ignoreCase = true;
     SemgrexMatcher mat3 = pat3.matcher(h, ignoreCase);
