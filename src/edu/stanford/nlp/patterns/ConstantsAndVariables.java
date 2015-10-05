@@ -21,6 +21,8 @@ import edu.stanford.nlp.patterns.surface.SurfacePatternFactory;
 import edu.stanford.nlp.process.WordShapeClassifier;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.Counters;
+import edu.stanford.nlp.stats.GeneralizedCounter;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.TypesafeMap.Key;
@@ -424,8 +426,8 @@ public class ConstantsAndVariables implements Serializable {
   @Option(name="clubNeighboringLabeledWords")
   public boolean clubNeighboringLabeledWords = false;
 
-  @Option(name="patternType", required=true)
-  public PatternFactory.PatternType patternType = null;
+  @Option(name="patternType")
+  public PatternFactory.PatternType patternType = PatternFactory.PatternType.SURFACE;
 
   @Option(name="subsampleUnkAsNegUsingSim", gloss="When learning a classifier, remove phrases from unknown phrases that are too close to the positive phrases")
   public boolean subsampleUnkAsNegUsingSim = false;
@@ -483,16 +485,25 @@ public class ConstantsAndVariables implements Serializable {
   @Option(name="ignoreCaseSeedMatch")
   public Map<String, String> ignoreCaseSeedMatch = new HashMap<String, String>();
 
+  @Option(name="sentsOutFile")
+  public String sentsOutFile = null;
+
+  @Option(name="savePatternsWordsDir")
+  public boolean savePatternsWordsDir = true;
+
+  @Option(name="learn")
+  public boolean learn = true;
+
 
   public Set<String> getLabels() {
     return labels;
   }
 
-  public void addLearnedWords(String trainLabel, Counter<CandidatePhrase> identifiedWords) {
-    if(!learnedWords.containsKey(trainLabel))
-      learnedWords.put(trainLabel, new ClassicCounter<CandidatePhrase>());
-    this.learnedWords.get(trainLabel).addAll(identifiedWords);
-  }
+//  public void addLearnedWords(String trainLabel, Counter<CandidatePhrase> identifiedWords) {
+//    if(!learnedWords.containsKey(trainLabel))
+//      learnedWords.put(trainLabel, new ClassicCounter<CandidatePhrase>());
+//    this.learnedWords.get(trainLabel).addAll(identifiedWords);
+//  }
 
   public Map<String, String> getAllOptions() {
     Map<String, String> values = new HashMap<String, String>();
@@ -526,6 +537,18 @@ public class ConstantsAndVariables implements Serializable {
     if(otherSemanticClassesWords.contains(p))
       return true;
     return false;
+  }
+
+  public TreeMap<Integer, Counter<CandidatePhrase>> getLearnedWordsEachIter(String label) {
+    return learnedWordsEachIter.get(label);
+  }
+
+  public Map<String, TreeMap<Integer, Counter<CandidatePhrase>>>  getLearnedWordsEachIter() {
+    return learnedWordsEachIter;
+  }
+
+  public void setLearnedWordsEachIter(TreeMap<Integer, Counter<CandidatePhrase>> words, String label) {
+    this.learnedWordsEachIter.put(label, words);
   }
 
 
@@ -818,7 +841,12 @@ public class ConstantsAndVariables implements Serializable {
 
   public ConstantsAndVariables(Properties props, Map<String, Set<CandidatePhrase>> labelDictionary, Map<String, Class<? extends Key<String>>> answerClass, Map<String, Class> generalizeClasses,
                                Map<String, Map<Class, Object>> ignoreClasses) throws IOException {
-    this.seedLabelDictionary = labelDictionary;
+
+    //make the list unmodifiable!
+    for(Entry<String, Set<CandidatePhrase>> en2: labelDictionary.entrySet()){
+      seedLabelDictionary.put(en2.getKey(), Collections.unmodifiableSet(en2.getValue()));
+    }
+
     this.labels = labelDictionary.keySet();
     this.answerClass = answerClass;
     this.generalizeClasses = generalizeClasses;
@@ -1004,7 +1032,7 @@ public class ConstantsAndVariables implements Serializable {
     }
 
     for(String label: labels){
-      learnedWords.put(label, new ClassicCounter<CandidatePhrase>());
+      learnedWordsEachIter.put(label, new TreeMap<Integer, Counter<CandidatePhrase>>());
     }
 
    if(usePhraseEvalGoogleNgram || usePatternEvalDomainNgram) {
@@ -1097,12 +1125,12 @@ public class ConstantsAndVariables implements Serializable {
     return wordShapesForLabels;
   }
 
-  public void setWordShapesForLabels(ConcurrentHashMap<String, Counter<String>> wordShapesForLabels) {
-    this.wordShapesForLabels = wordShapesForLabels;
-  }
-  public void addGeneralizeClasses(Map<String, Class> gen) {
-    this.generalizeClasses.putAll(gen);
-  }
+//  public void setWordShapesForLabels(ConcurrentHashMap<String, Counter<String>> wordShapesForLabels) {
+//    this.wordShapesForLabels = wordShapesForLabels;
+//  }
+//  public void addGeneralizeClasses(Map<String, Class> gen) {
+//    this.generalizeClasses.putAll(gen);
+//  }
 
   public static Map<String, Class> getGeneralizeClasses() {
     return generalizeClasses;
@@ -1131,56 +1159,76 @@ public class ConstantsAndVariables implements Serializable {
     }
   }
 
-  public void setSeedLabelDictionary(Map<String, Set<CandidatePhrase>> seedSets) {
-    this.seedLabelDictionary = seedSets;
-
-    if(usePhraseEvalWordShape || usePatternEvalWordShape){
-      this.wordShapesForLabels.clear();
-     for(Entry<String, Set<CandidatePhrase>> en: seedSets.entrySet())
-       addWordShapes(en.getKey(), en.getValue());
-    }
-  }
+//  public void setSeedLabelDictionary(Map<String, Set<CandidatePhrase>> seedSets) {
+//    this.seedLabelDictionary = seedSets;
+//
+//    if(usePhraseEvalWordShape || usePatternEvalWordShape){
+//      this.wordShapesForLabels.clear();
+//     for(Entry<String, Set<CandidatePhrase>> en: seedSets.entrySet())
+//       addWordShapes(en.getKey(), en.getValue());
+//    }
+//  }
 
   public Map<String, Set<CandidatePhrase>> getSeedLabelDictionary() {
+
     return this.seedLabelDictionary;
   }
 
-  public void addSeedLabelDictionary(String label, Set<CandidatePhrase> words) {
-    this.seedLabelDictionary.get(label).addAll(words);
 
-    if(usePhraseEvalWordShape || usePatternEvalWordShape)
-      addWordShapes(label, words);
-  }
-
-  Map<String, Counter<CandidatePhrase>> learnedWords = new HashMap<String, Counter<CandidatePhrase>>();
+  //Map<String, Counter<CandidatePhrase>> learnedWords = new HashMap<String, Counter<CandidatePhrase>>();
+  Map<String, TreeMap<Integer, Counter<CandidatePhrase>>> learnedWordsEachIter = new HashMap<String, TreeMap<Integer, Counter<CandidatePhrase>>>();
 
   public Counter<CandidatePhrase> getLearnedWords(String label) {
-    Counter<CandidatePhrase> learned = this.learnedWords.get(label);
+    Counter<CandidatePhrase> learned = Counters.flatten(learnedWordsEachIter.get(label));
     if(learned == null){
       learned = new ClassicCounter<CandidatePhrase>();
-      this.learnedWords.put(label, learned);
+      learnedWordsEachIter.put(label, new TreeMap<Integer, Counter<CandidatePhrase>>());
     }
     return learned;
   }
 
-  public Map<String, Counter<CandidatePhrase>> getLearnedWords() {
-    return learnedWords;
-  }
+//  public Map<String, Counter<CandidatePhrase>> getLearnedWords() {
+//    return Counters.flatten(learnedWordsEachIter);
+//  }
+  //public void setLearnedWords(Counter<CandidatePhrase> words, String label) {
+  //  this.learnedWords.put(label, words);
+  //}
 
   public String getLearnedWordsAsJson(){
     JsonObjectBuilder obj = Json.createObjectBuilder();
-    for(Map.Entry<String, Counter<CandidatePhrase>> en: learnedWords.entrySet()){
+    for(String label: getLabels()){
+    Counter<CandidatePhrase> learnedWords =  getLearnedWords(label);
       JsonArrayBuilder arr = Json.createArrayBuilder();
-      for(CandidatePhrase k: en.getValue().keySet())
+      for(CandidatePhrase k: learnedWords.keySet())
         arr.add(k.getPhrase());
-      obj.add(en.getKey(), arr);
+      obj.add(label, arr);
     }
     return obj.build().toString();
   }
 
-  public void setLearnedWords(Counter<CandidatePhrase> words, String label) {
-    this.learnedWords.put(label, words);
+  public String getLearnedWordsAsJsonLastIteration(){
+    JsonObjectBuilder obj = Json.createObjectBuilder();
+    for(String label: getLabels()){
+      Counter<CandidatePhrase> learnedWords =  getLearnedWordsEachIter(label).lastEntry().getValue();
+      JsonArrayBuilder arr = Json.createArrayBuilder();
+      for(CandidatePhrase k: learnedWords.keySet())
+        arr.add(k.getPhrase());
+      obj.add(label, arr);
+    }
+    return obj.build().toString();
   }
+
+  public String getSetWordsAsJson(Map<String, Counter<CandidatePhrase>> words){
+    JsonObjectBuilder obj = Json.createObjectBuilder();
+    for(String label: getLabels()){
+      JsonArrayBuilder arr = Json.createArrayBuilder();
+      for(CandidatePhrase k: words.get(label).keySet())
+        arr.add(k.getPhrase());
+      obj.add(label, arr);
+    }
+    return obj.build().toString();
+  }
+
 
 
   public Set<String> getEnglishWords() {
@@ -1248,8 +1296,8 @@ public class ConstantsAndVariables implements Serializable {
 //      return new Pair<String, Double>(editDistanceFromThisClassMatches.get(ph),
 //          editDistanceFromThisClass.get(ph));
 
-    Set<CandidatePhrase> words = seedLabelDictionary.get(label);
-    words.addAll(learnedWords.get(label).keySet());
+    Set<CandidatePhrase> words = new HashSet<CandidatePhrase>(seedLabelDictionary.get(label));
+    words.addAll(getLearnedWords(label).keySet());
     Pair<String, Double> minD = getEditDist(words, ph);
 
     double minDtotal = minD.second();
@@ -1434,7 +1482,10 @@ public class ConstantsAndVariables implements Serializable {
     if(!seedLabelDictionary.containsKey(label)){
       throw new Exception("label not present in the model");
     }
-    this.seedLabelDictionary.get(label).addAll(seeds);
+
+    Set<CandidatePhrase> seedWords = new HashSet<CandidatePhrase>(seedLabelDictionary.get(label));
+    seedWords.addAll(seeds);
+    seedLabelDictionary.put(label, Collections.unmodifiableSet(seedWords));
   }
 
 }

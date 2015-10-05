@@ -474,150 +474,6 @@ public class MetaClass {
 	}
 
   /**
-   * Decode an array encoded as a String. This entails a comma separated value enclosed in brackets
-   * or parentheses
-   * @param encoded The String encoded array
-   * @return A String array corresponding to the encoded array
-   */
-	private static String[] decodeArray(String encoded){
-    if (encoded.length() == 0) return new String[]{};
-		char[] chars = encoded.trim().toCharArray();
-
-		//--Parse the String
-		//(state)
-		char quoteCloseChar = (char) 0;
-		List<StringBuilder> terms = new LinkedList<StringBuilder>();
-		StringBuilder current = new StringBuilder();
-		//(start/stop overhead)
-		int start = 0; int end = chars.length;
-		if(chars[0] == '('){ start += 1; end -= 1; if(chars[end] != ')') throw new IllegalArgumentException("Unclosed paren in encoded array: " + encoded); }
-		if(chars[0] == '['){ start += 1; end -= 1; if(chars[end] != ']') throw new IllegalArgumentException("Unclosed bracket in encoded array: " + encoded); }
-    if(chars[0] == '{'){ start += 1; end -= 1; if(chars[end] != '}') throw new IllegalArgumentException("Unclosed bracket in encoded array: " + encoded); }
-		//(finite state automata)
-		for(int i=start; i<end; i++){
-      if (chars[i] == '\r') {
-        // Ignore funny windows carriage return
-        continue;
-      } else if(chars[i] == '\\'){
-				//(case: escaped character)
-				if(i == chars.length - 1) throw new IllegalArgumentException("Last character of encoded pair is escape character: " + encoded);
-				current.append(chars[i+1]);
-				i += 1;
-			} else if(quoteCloseChar != 0){
-				//(case: in quotes)
-				if(chars[i] == quoteCloseChar){
-					quoteCloseChar = (char) 0;
-				}else{
-					current.append(chars[i]);
-				}
-			}else{
-				//(case: normal)
-				if(chars[i] == '"'){
-          quoteCloseChar = '"';
-				} else if(chars[i] == '\''){
-          quoteCloseChar = '\'';
-				} else if(chars[i] == ',' || chars[i] == ';' || chars[i] == ' ' || chars[i] == '\t' || chars[i] == '\n'){
-					//break
-          if (current.length() > 0) {
-					  terms.add(current);
-          }
-					current = new StringBuilder();
-				}else{
-					current.append(chars[i]);
-				}
-			}
-		}
-
-		//--Return
-		if(current.length() > 0) terms.add(current);
-		String[] rtn = new String[terms.size()];
-		int i=0;
-		for(StringBuilder b : terms){
-			rtn[i] = b.toString().trim();
-			i += 1;
-		}
-    return rtn;
-  }
-
-  /**
-   * Decode a map encoded as a string
-   * @param encoded The String encoded map
-   * @return A String map corresponding to the encoded map
-   */
-  private static Map<String, String> decodeMap(String encoded){
-    if (encoded.length() == 0) return new HashMap<String, String>();
-    char[] chars = encoded.trim().toCharArray();
-
-    //--Parse the String
-    //(state)
-    char quoteCloseChar = (char) 0;
-    Map<String, String> map = new HashMap<String, String>();
-    String key = "";
-    String value = "";
-    boolean onKey = true;
-    StringBuilder current = new StringBuilder();
-    //(start/stop overhead)
-    int start = 0; int end = chars.length;
-    if(chars[0] == '('){ start += 1; end -= 1; if(chars[end] != ')') throw new IllegalArgumentException("Unclosed paren in encoded map: " + encoded); }
-    if(chars[0] == '['){ start += 1; end -= 1; if(chars[end] != ']') throw new IllegalArgumentException("Unclosed bracket in encoded map: " + encoded); }
-    if(chars[0] == '{'){ start += 1; end -= 1; if(chars[end] != '}') throw new IllegalArgumentException("Unclosed bracket in encoded map: " + encoded); }
-    //(finite state automata)
-    for(int i=start; i<end; i++){
-      if (chars[i] == '\r') {
-        // Ignore funny windows carriage return
-        continue;
-      } else if(chars[i] == '\\'){
-        //(case: escaped character)
-        if(i == chars.length - 1) throw new IllegalArgumentException("Last character of encoded pair is escape character: " + encoded);
-        current.append(chars[i+1]);
-        i += 1;
-      } else if(quoteCloseChar != 0){
-        //(case: in quotes)
-        if(chars[i] == quoteCloseChar){
-          quoteCloseChar = (char) 0;
-        }else{
-          current.append(chars[i]);
-        }
-      }else{
-        //(case: normal)
-        if(chars[i] == '"'){
-          quoteCloseChar = '"';
-        } else if(chars[i] == '\''){
-          quoteCloseChar = '\'';
-        } else if (chars[i] == '\n' && current.length() == 0) {
-          current.append("");  // do nothing
-        } else if(chars[i] == ',' || chars[i] == ';' || chars[i] == '\t' || chars[i] == '\n'){
-          // case: end a value
-          if (onKey) { throw new IllegalArgumentException("Encountered key without value"); }
-          if (current.length() > 0) {
-            value = current.toString().trim();
-          }
-          current = new StringBuilder();
-          onKey = true;
-          map.put(key, value);  // <- add value
-        } else if((chars[i] == '-' || chars[i] == '=') && (i < chars.length - 1 && chars[i + 1] == '>')) {
-          // case: end a key
-          if (!onKey) { throw new IllegalArgumentException("Encountered a value without a key"); }
-          if (current.length() > 0) {
-            key = current.toString().trim();
-          }
-          current = new StringBuilder();
-          onKey = false;
-          i += 1; // skip '>' character
-        } else {
-          current.append(chars[i]);
-        }
-      }
-    }
-
-    //--Return
-    if(current.toString().trim().length() > 0 && !onKey) {
-      map.put(key.trim(), current.toString().trim());
-    }
-    return map;
-  }
-
-  /**
    * Cast a String representation of an object into that object.
    * E.g. "5.4" will be cast to a Double; "[1,2,3]" will be cast
    * to an Integer[].
@@ -742,14 +598,14 @@ public class MetaClass {
       if(value == null){ return null; }
       Class <?> subType = clazz.getComponentType();
       // (case: array)
-      String[] strings = decodeArray(value);
+      String[] strings = StringUtils.decodeArray(value);
       Object[] array = (Object[]) Array.newInstance(clazz.getComponentType(), strings.length);
       for(int i=0; i<strings.length; i++){
         array[i] = cast(strings[i], subType);
       }
       return (E) array;
     } else if (Map.class.isAssignableFrom(clazz)) {
-      return (E) decodeMap(value);
+      return (E) StringUtils.decodeMap(value);
     } else if(clazz.isEnum()){
       // (case: enumeration)
       Class c = (Class) clazz;
@@ -794,6 +650,15 @@ public class MetaClass {
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
+    } else if (PrintWriter.class.isAssignableFrom(clazz)) {
+      // (case: input stream)
+      if (value.equalsIgnoreCase("stdout") || value.equalsIgnoreCase("out")) { return (E) System.out; }
+      if (value.equalsIgnoreCase("stderr") || value.equalsIgnoreCase("err")) { return (E) System.err; }
+      try {
+        return (E) IOUtils.getPrintWriter(value);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
     } else if (OutputStream.class.isAssignableFrom(clazz)) {
       // (case: output stream)
       if (value.equalsIgnoreCase("stdout") || value.equalsIgnoreCase("out")) { return (E) System.out; }
@@ -803,7 +668,7 @@ public class MetaClass {
         if (!toWriteTo.exists() && !toWriteTo.createNewFile()) {
           throw new IllegalStateException("Could not create output stream (cannot write file): " + value);
         }
-        return (E) new FileOutputStream((File) cast(value, File.class));
+        return (E) IOUtils.getFileOutputStream(value);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
@@ -843,7 +708,7 @@ public class MetaClass {
           rtn = MetaClass.create(clazz).createInstance();
         }
         Class <?> subType = clazz.getComponentType();
-        String[] strings = decodeArray(value);
+        String[] strings = StringUtils.decodeArray(value);
         for (String string : strings) {
           if (subType == null) {
             rtn.add(castWithoutKnowingType(string));

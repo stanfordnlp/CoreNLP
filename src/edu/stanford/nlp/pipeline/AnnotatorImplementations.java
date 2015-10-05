@@ -6,7 +6,6 @@ import edu.stanford.nlp.naturalli.NaturalLogicAnnotator;
 import edu.stanford.nlp.naturalli.OpenIE;
 import edu.stanford.nlp.util.MetaClass;
 import edu.stanford.nlp.util.PropertiesUtils;
-import edu.stanford.nlp.util.ReflectionLoading;
 
 import java.io.IOException;
 import java.util.*;
@@ -101,6 +100,11 @@ public class AnnotatorImplementations {
 
     Properties combinerProperties = PropertiesUtils.extractSelectedProperties(properties,
             NERClassifierCombiner.DEFAULT_PASS_DOWN_PROPERTIES);
+    if (useSUTime) {
+      // Make sure SUTime parameters are included
+      Properties sutimeProps = PropertiesUtils.extractPrefixedProperties(properties, NumberSequenceClassifier.SUTIME_PROPERTY  + ".");
+      PropertiesUtils.overWriteProperties(combinerProperties, sutimeProps);
+    }
     NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers,
             useSUTime, combinerProperties, loadPaths);
 

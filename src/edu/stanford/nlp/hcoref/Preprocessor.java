@@ -44,36 +44,39 @@ import edu.stanford.nlp.util.IntTuple;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
 
-/** 
- * Coref document preprocessor
- * 
+/**
+ * Coref document preprocessor.
+ *
  * @author heeyoung
  */
 
 public class Preprocessor {
 
-  /** 
-   * fill missing information in document including mention ID, mention attributes, syntactic relation, etc 
-   * @throws Exception 
+  private Preprocessor() {}
+
+  /**
+   * Fill missing information in document including mention ID, mention attributes, syntactic relation, etc.
+   *
+   * @throws Exception
    */
   public static void preprocess(Document doc, Dictionaries dict, LogisticClassifier<String, String> singletonPredictor, HeadFinder headFinder) throws Exception {
-    
+
     // assign mention IDs, find twin mentions, fill mention positions, sentNum, headpositions
     initializeMentions(doc, dict, singletonPredictor, headFinder);
-    
+
     // mention reordering
     mentionReordering(doc, headFinder);
-    
-    // find syntactic informations
+
+    // find syntactic information
     fillSyntacticInfo(doc);
 
     // process discourse (speaker info etc)
     setParagraphAnnotation(doc);
     processDiscourse(doc, dict);
-    
+
     // initialize cluster info
     initializeClusters(doc);
-    
+
     // extract gold clusters if we have
     if(doc.goldMentions!=null) {
       extractGoldClusters(doc);
@@ -89,22 +92,22 @@ public class Preprocessor {
         int id = m.goldCorefClusterID;
         if (id == -1) {
           throw new RuntimeException("No gold info");
-        }    
+        }
         CorefCluster c = doc.goldCorefClusters.get(id);
         if (c == null) {
           c = new CorefCluster(id);
           doc.goldCorefClusters.put(id, c);
-        }    
+        }
         c.corefMentions.add(m);
-      }    
-    }    
+      }
+    }
   }
 
 
   private static void mentionReordering(Document doc, HeadFinder headFinder) throws Exception {
     List<List<Mention>> mentions = doc.predictedMentions;
     List<CoreMap> sentences = doc.annotation.get(SentencesAnnotation.class);
-    
+
     for (int i=0 ; i<sentences.size() ; i++) {
       List<Mention> mentionsInSent = mentions.get(i);
       mentions.set(i, mentionReorderingBySpan(mentionsInSent));
@@ -133,17 +136,17 @@ public class Preprocessor {
   }
 
   private static void fillSyntacticInfo(Document doc) {
-    
+
     List<List<Mention>> mentions = doc.predictedMentions;
     List<CoreMap> sentences = doc.annotation.get(SentencesAnnotation.class);
-    
+
     for (int i=0 ; i<sentences.size() ; i++) {
       List<Mention> mentionsInSent = mentions.get(i);
       findSyntacticRelationsFromDependency(mentionsInSent);
     }
   }
 
-  /** assign mention IDs, find twin mentions, fill mention positions, initialize coref clusters, etc 
+  /** assign mention IDs, find twin mentions, fill mention positions, initialize coref clusters, etc
    * @throws Exception */
   private static void initializeMentions(Document doc, Dictionaries dict, LogisticClassifier<String, String> singletonPredictor, HeadFinder headFinder) throws Exception {
     boolean hasGold = (doc.goldMentions != null);
@@ -260,14 +263,14 @@ public class Preprocessor {
       }
     }
   }
-  
+
   /** initialize several variables for mentions
-   * @throws Exception 
+   * @throws Exception
    */
-  private static void fillMentionInfo(Document doc, Dictionaries dict, 
+  private static void fillMentionInfo(Document doc, Dictionaries dict,
       LogisticClassifier<String, String> singletonPredictor, HeadFinder headFinder) throws Exception {
     List<CoreMap> sentences = doc.annotation.get(SentencesAnnotation.class);
-    
+
     for(int i = 0; i < doc.predictedMentions.size(); i ++){
       CoreMap sentence = sentences.get(i);
       for(int j = 0; j < doc.predictedMentions.get(i).size(); j ++){
@@ -282,16 +285,16 @@ public class Preprocessor {
 
         IntTuple headPosition = new IntTuple(2);
         headPosition.set(0, i);
-        headPosition.set(1, m.headIndex);       
+        headPosition.set(1, m.headIndex);
         doc.mentionheadPositions.put(headPosition, m);    // headPositions
-        
+
         m.contextParseTree = sentence.get(TreeAnnotation.class);
 //        m.sentenceWords = sentence.get(TokensAnnotation.class);
         m.basicDependency = sentence.get(BasicDependenciesAnnotation.class);
         m.collapsedDependency = sentence.get(CollapsedDependenciesAnnotation.class);
-        
+
         m.process(dict, null, singletonPredictor);
-        
+
         // mentionSubTree (highest NP that has the same head) if constituency tree available
         if (m.contextParseTree != null) {
           Tree headTree = m.contextParseTree.getLeaves().get(m.headIndex);
@@ -302,16 +305,16 @@ public class Preprocessor {
               m.mentionSubTree = t;
             } else if(m.mentionSubTree != null){
               break;
-            }   
-          }   
+            }
+          }
           if (m.mentionSubTree == null) {
             m.mentionSubTree = headTree;
           }
         }
       }
     }
-    
-    
+
+
     boolean hasGold = (doc.goldMentions != null);
     if(hasGold) {
       doc.goldMentionsByID = Generics.newHashMap();
@@ -325,7 +328,7 @@ public class Preprocessor {
       }
     }
   }
-  
+
   private static void findSyntacticRelationsFromDependency(List<Mention> orderedMentions) {
     if(orderedMentions.size()==0) return;
     markListMemberRelation(orderedMentions);
@@ -340,7 +343,7 @@ public class Preprocessor {
       appos.add(Pair.makePair(sIdx, tIdx));
     }
     markMentionRelation(orderedMentions, appos, "APPOSITION");
-    
+
     // predicate nominatives
     Set<Pair<Integer, Integer>> preNomi = Generics.newHashSet();
     List<SemanticGraphEdge> copula = dependency.findAllRelns(EnglishGrammaticalRelations.COPULA);
@@ -350,8 +353,8 @@ public class Preprocessor {
       if(target==null) target = dependency.getChildWithReln(source, EnglishGrammaticalRelations.CLAUSAL_SUBJECT);
       // TODO
       if(target == null) continue;
-      
-      // to handle relative clause: e.g., Tim who is a student, 
+
+      // to handle relative clause: e.g., Tim who is a student,
       if(target.tag().startsWith("W")) {
         IndexedWord parent = dependency.getParent(source);
         if(parent!=null && dependency.reln(parent, source).equals(EnglishGrammaticalRelations.RELATIVE_CLAUSE_MODIFIER)) {
@@ -363,8 +366,8 @@ public class Preprocessor {
       preNomi.add(Pair.makePair(tIdx, sIdx));
     }
     markMentionRelation(orderedMentions, preNomi, "PREDICATE_NOMINATIVE");
-    
-    
+
+
     // relative pronouns  TODO
     Set<Pair<Integer, Integer>> relativePronounPairs = Generics.newHashSet();
     markMentionRelation(orderedMentions, relativePronounPairs, "RELATIVE_PRONOUN");
@@ -427,15 +430,15 @@ public class Preprocessor {
 
   /** Process discourse information */
   protected static void processDiscourse(Document doc, Dictionaries dict) {
-    
+
     setUtteranceAndSpeakerAnnotation(doc);
 //    markQuotations(this.annotation.get(CoreAnnotations.SentencesAnnotation.class), false);
-    
+
     // mention utter setting
     for(Mention m : doc.predictedMentionsByID.values()) {
       m.utter = m.headWord.get(CoreAnnotations.UtteranceAnnotation.class);
     }
-    
+
     doc.docType = findDocType(doc);
     findSpeakers(doc, dict);
 
@@ -446,14 +449,14 @@ public class Preprocessor {
           System.err.print("   "+cl.word()+"-"+cl.get(UtteranceAnnotation.class)+"-"+cl.get(SpeakerAnnotation.class));
         }
       }
-      
-      
+
+
       for(Integer utter : doc.speakers.keySet()) {
         String speakerID = doc.speakers.get(utter);
         System.err.println("utterance: "+utter);
         System.err.println("speakers value: " + speakerID);
         System.err.println("mention for it: "+
-            ( (NumberMatchingRegex.isDecimalInteger(speakerID))? 
+            ( (NumberMatchingRegex.isDecimalInteger(speakerID))?
                 doc.predictedMentionsByID.get(Integer.parseInt(doc.speakers.get(utter)))
                 : "no mention for this speaker yet") );
       }
@@ -471,11 +474,11 @@ public class Preprocessor {
     if(debug){
       System.err.println("BB SPEAKER INFO MAP: "+doc.speakerInfoMap);
     }
-    
+
     // mention -> to its speakerID: m.headWord.get(SpeakerAnnotation.class)
     // speakerID -> more info: speakerInfoMap.get(speakerID)
     // if exists, set(mentionID, its speakerID pair): speakerPairs
-    
+
     // for speakerInfo with real speaker name, find corresponding mention by strict/loose matching
     Map<String, Integer> speakerConversion = Generics.newHashMap();
     for(String speaker : doc.speakerInfoMap.keySet()) {
@@ -499,9 +502,9 @@ public class Preprocessor {
         }
       }
     }
-    
+
     if(debug) System.err.println("CC speaker conversion: " + speakerConversion);
-    
+
     // convert real name speaker to speaker mention id
     for(Integer utter : doc.speakers.keySet()) {
       String speaker = doc.speakers.get(utter);
@@ -514,7 +517,7 @@ public class Preprocessor {
       doc.speakerInfoMap.put( Integer.toString(speakerConversion.get(speaker)), doc.speakerInfoMap.get(speaker));
       doc.speakerInfoMap.remove(speaker);
     }
-    
+
     // fix SpeakerAnnotation
     for(CoreLabel cl : doc.annotation.get(TokensAnnotation.class)) {
       int utter = cl.get(UtteranceAnnotation.class);
@@ -522,7 +525,7 @@ public class Preprocessor {
         cl.set(CoreAnnotations.SpeakerAnnotation.class, doc.speakers.get(utter));
       }
     }
-    
+
     // find speakerPairs
     for(Mention m : doc.predictedMentionsByID.values()) {
       String speaker = m.headWord.get(CoreAnnotations.SpeakerAnnotation.class);
@@ -532,7 +535,7 @@ public class Preprocessor {
         doc.speakerPairs.add(new Pair<Integer, Integer>(m.mentionID, speakerMentionID));
       }
     }
-    
+
     if(debug) {
       System.err.println("==========================================================================");
       for(Integer utter : doc.speakers.keySet()) {
@@ -540,7 +543,7 @@ public class Preprocessor {
         System.err.println("utterance: "+utter);
         System.err.println("speakers value: " + speakerID);
         System.err.println("mention for it: "+
-            ( (NumberMatchingRegex.isDecimalInteger(speakerID))? 
+            ( (NumberMatchingRegex.isDecimalInteger(speakerID))?
                 doc.predictedMentionsByID.get(Integer.parseInt(doc.speakers.get(utter)))
                 : "no mention for this speaker yet") );
       }
@@ -555,13 +558,13 @@ public class Preprocessor {
     boolean insideQuotation = false;
     List<CoreLabel> tokens = doc.annotation.get(CoreAnnotations.TokensAnnotation.class);
     String preSpeaker = (tokens.size() > 0)? tokens.get(0).get(CoreAnnotations.SpeakerAnnotation.class) : null;
-    
+
     for (CoreLabel l : tokens) {
       String curSpeaker = l.get(CoreAnnotations.SpeakerAnnotation.class);
       String w = l.get(CoreAnnotations.TextAnnotation.class);
 
       if (curSpeaker!=null && !curSpeaker.equals("-")) doc.speakerInfoGiven = true;
-      
+
       boolean speakerChange = doc.speakerInfoGiven && curSpeaker!=null && !curSpeaker.equals(preSpeaker);
       boolean quoteStart = w.equals("``") || (!insideQuotation && w.equals("\""));
       boolean quoteEnd = w.equals("''") || (insideQuotation && w.equals("\""));
@@ -587,24 +590,24 @@ public class Preprocessor {
       if(doc.maxUtter < utterance) doc.maxUtter = utterance;
 
       l.set(CoreAnnotations.UtteranceAnnotation.class, utterance);
-      if(quoteStart) l.set(CoreAnnotations.UtteranceAnnotation.class, outsideQuoteUtterance);   // quote start got outside utterance idx 
-      
+      if(quoteStart) l.set(CoreAnnotations.UtteranceAnnotation.class, outsideQuoteUtterance);   // quote start got outside utterance idx
+
       boolean noSpeakerInfo = !l.containsKey(CoreAnnotations.SpeakerAnnotation.class)
       || l.get(CoreAnnotations.SpeakerAnnotation.class).equals("")
       || l.get(CoreAnnotations.SpeakerAnnotation.class).startsWith("PER");
-      
+
       if(noSpeakerInfo || insideQuotation){
         l.set(CoreAnnotations.SpeakerAnnotation.class, "PER"+utterance);
       }
       if(quoteStart) insideQuotation = true;
     }
   }
-  
+
   /** Speaker extraction */
   private static void findSpeakers(Document doc, Dictionaries dict) {
     Boolean useMarkedDiscourseBoolean = doc.annotation.get(CoreAnnotations.UseMarkedDiscourseAnnotation.class);
     boolean useMarkedDiscourse = (useMarkedDiscourseBoolean != null)? useMarkedDiscourseBoolean: false;
-    
+
     if(!useMarkedDiscourse) {
       if(doc.docType==DocType.CONVERSATION) findSpeakersInConversation(doc, dict);
       else if (doc.docType==DocType.ARTICLE) findSpeakersInArticle(doc, dict);
@@ -689,7 +692,7 @@ public class Preprocessor {
           if(findSubject(doc, dependency, w, sentNum, utterNum)) return true;
           for(IndexedWord p : dependency.getPathToRoot(w)) {
             if(!p.tag().startsWith("V") && !p.tag().startsWith("MD")) break;
-            if(findSubject(doc, dependency, p, sentNum, utterNum)) return true;    // handling something like "was talking", "can tell" 
+            if(findSubject(doc, dependency, p, sentNum, utterNum)) return true;    // handling something like "was talking", "can tell"
           }
         } else {
           Redwood.log("debug-preprocessor", "Cannot find node in dependency for word " + word);
@@ -736,6 +739,7 @@ public class Preprocessor {
     String nextParagraphSpeaker = "";
     int paragraphOffset = 0;
     for(CoreMap sent : doc.annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+      paragraph.add(sent);
       int currentUtter = sent.get(CoreAnnotations.TokensAnnotation.class).get(0).get(CoreAnnotations.UtteranceAnnotation.class);
       if(paragraphUtterIndex!=currentUtter) {
         nextParagraphSpeaker = findParagraphSpeaker(doc, paragraph, paragraphUtterIndex, nextParagraphSpeaker, paragraphOffset, dict);
@@ -743,17 +747,21 @@ public class Preprocessor {
         paragraphOffset += paragraph.size();
         paragraph = new ArrayList<CoreMap>();
       }
-      paragraph.add(sent);
     }
     findParagraphSpeaker(doc, paragraph, paragraphUtterIndex, nextParagraphSpeaker, paragraphOffset, dict);
   }
 
   private static String findParagraphSpeaker(Document doc, List<CoreMap> paragraph,
-      int paragraphUtterIndex, String nextParagraphSpeaker, int paragraphOffset, Dictionaries dict) {
-    if(!doc.speakers.containsKey(paragraphUtterIndex)) {
-      if(!nextParagraphSpeaker.equals("")) {
+            int paragraphUtterIndex, String nextParagraphSpeaker, int paragraphOffset, Dictionaries dict) {
+    if ( ! doc.speakers.containsKey(paragraphUtterIndex)) {
+      if ( ! nextParagraphSpeaker.isEmpty()) {
         doc.speakers.put(paragraphUtterIndex, nextParagraphSpeaker);
       } else {  // find the speaker of this paragraph (John, nbc news)
+        // cdm [Sept 2015] added this check to try to avoid crash
+        if (paragraph.isEmpty()) {
+          Redwood.log("debug-preprocessor", "Empty paragraph; skipping findParagraphSpeaker");
+          return "";
+        }
         CoreMap lastSent = paragraph.get(paragraph.size()-1);
         String speaker = "";
         boolean hasVerb = false;
@@ -783,6 +791,9 @@ public class Preprocessor {
   }
 
   private static String findNextParagraphSpeaker(Document doc, List<CoreMap> paragraph, int paragraphOffset, Dictionaries dict) {
+    if (paragraph.isEmpty()) {
+      return "";
+    }
     CoreMap lastSent = paragraph.get(paragraph.size()-1);
     String speaker = "";
     for(CoreLabel w : lastSent.get(CoreAnnotations.TokensAnnotation.class)) {
@@ -857,9 +868,9 @@ public class Preprocessor {
           continue;
         }
         for(Pair<Integer, Integer> foundPair: foundPairs){
-          if((foundPair.first == m1.headIndex && foundPair.second == m2.headIndex)){
+          if (foundPair.first() == m1.headIndex && foundPair.second() == m2.headIndex) {
             if(flag.equals("APPOSITION")) {
-              if(foundPair.first != foundPair.second || m2.insideIn(m1)) {
+              if ( ! foundPair.first().equals(foundPair.second()) || m2.insideIn(m1)) {
                 m2.addApposition(m1);
               }
             }

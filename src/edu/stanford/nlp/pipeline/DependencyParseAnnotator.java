@@ -85,7 +85,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
 
   @Override
   public Set<Requirement> requires() {
-    return TOKENIZE_SSPLIT_POS;
+    return Annotator.REQUIREMENTS.get(STANFORD_DEPENDENCIES);
   }
 
   @Override

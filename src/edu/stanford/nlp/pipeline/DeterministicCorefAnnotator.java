@@ -86,7 +86,7 @@ public class DeterministicCorefAnnotator implements Annotator {
           Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
           trees.add(tree);
 
-          SemanticGraph dependencies = SemanticGraphFactory.makeFromTree(tree, Mode.COLLAPSED, Extras.NONE, false, null, true);
+          SemanticGraph dependencies = SemanticGraphFactory.makeFromTree(tree, Mode.COLLAPSED, Extras.NONE, true, null, true); // locking here is crucial for correct threading!
           sentence.set(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class, dependencies);
 
           if (!hasSpeakerAnnotations) {
@@ -119,7 +119,7 @@ public class DeterministicCorefAnnotator implements Annotator {
       List<List<Mention>> orderedMentions = document.getOrderedMentions();
       if (VERBOSE) {
         for(int i = 0; i < orderedMentions.size(); i ++){
-          System.err.printf("Mentions in sentence #%d:\n", i);
+          System.err.printf("Mentions in sentence #%d:%n", i);
           for(int j = 0; j < orderedMentions.get(i).size(); j ++){
             System.err.println("\tMention #" + j + ": " + orderedMentions.get(i).get(j).spanToString());
           }
@@ -202,7 +202,7 @@ public class DeterministicCorefAnnotator implements Annotator {
 
   @Override
   public Set<Requirement> requires() {
-    return new ArraySet<>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT, NER_REQUIREMENT, PARSE_REQUIREMENT);
+    return Annotator.REQUIREMENTS.get(STANFORD_DETERMINISTIC_COREF);
   }
 
   @Override
