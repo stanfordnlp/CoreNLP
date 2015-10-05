@@ -550,7 +550,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
   public static final String TAG_SEPARATOR = "/";
 
   public enum OutputFormat {
-    VALUE_INDEX, VALUE, VALUE_TAG, VALUE_TAG_INDEX, MAP, VALUE_MAP, VALUE_INDEX_MAP, WORD, WORD_INDEX, ALL
+    VALUE_INDEX, VALUE, VALUE_TAG, VALUE_TAG_INDEX, MAP, VALUE_MAP, VALUE_INDEX_MAP, WORD, WORD_INDEX, LEMMA_INDEX, ALL
   }
 
   public static final OutputFormat DEFAULT_FORMAT = OutputFormat.VALUE_INDEX;
@@ -669,6 +669,13 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
       }
       break;
     }
+    case LEMMA_INDEX:
+      buf.append(lemma());
+      Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
+      if (index != null) {
+        buf.append('-').append((index).intValue());
+      }
+      break;
     case ALL:{
       for(Class en: this.keySet()){
         buf.append(";").append(en).append(":").append(this.get(en));
