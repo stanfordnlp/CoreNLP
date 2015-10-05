@@ -257,7 +257,7 @@ public class ProtobufAnnotationSerializerSlowITest {
 
   @Test
   public void testOpenie() {
-    testAnnotators("tokenize,ssplit,pos,depparse,natlog,openie");
+    testAnnotators("tokenize,ssplit,pos,lemma,depparse,natlog,openie");
   }
 
   @Test
@@ -413,6 +413,12 @@ public class ProtobufAnnotationSerializerSlowITest {
   @Test
   public void testSerializeNatLog() {
     testAnnotators("tokenize,ssplit,pos,lemma,depparse,natlog");
+  }
+
+
+  @Test
+  public void testGender() {
+    testAnnotators("tokenize,ssplit,pos,gender");
   }
 
   /**
