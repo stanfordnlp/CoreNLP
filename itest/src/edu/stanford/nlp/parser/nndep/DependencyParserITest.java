@@ -54,7 +54,7 @@ public class DependencyParserITest extends TestCase {
   public void testDependencyParserEnglishUD() {
     DependencyParser parser = new DependencyParser();
     parser.loadModelFile("/u/nlp/data/depparser/nn/distrib-2015-04-16/english_UD.gz");
-    double las = parser.testCoNLL("/u/nlp/data/depparser/nn/data/dependency_treebanks/USD/dev.conll", null);
+    double las = parser.testCoNLL("/u/nlp/data/depparser/nn/data/dependency_treebanks/UD-converted/dev.conll", null);
     assertEquals(String.format("English UD LAS should be %.2f but was %.2f",
         EnglishUdLas, las), EnglishUdLas, las, 1e-4);
   }
