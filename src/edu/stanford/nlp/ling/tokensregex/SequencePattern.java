@@ -227,29 +227,6 @@ public class SequencePattern<T> implements Serializable {
     return null;
   }
 
-  public <OUT> Collection<OUT> findNodePatterns(Function<NodePattern<T>, OUT> filter) {
-    List<OUT> outList = new ArrayList<OUT>();
-    Queue<State> todo = new LinkedList<State>();
-    Set<State> seen = new HashSet<State>();
-    todo.add(root);
-    seen.add(root);
-    while (!todo.isEmpty()) {
-      State state = todo.poll();
-      if (state instanceof NodePatternState) {
-        NodePattern<T> pattern = ((NodePatternState) state).pattern;
-        OUT res = filter.apply(pattern);
-        if (res != null) {
-          outList.add(res);
-        }
-      }
-      if (state.next != null) {
-        for (State s: state.next) {
-          if (!seen.contains(s)) { seen.add(s); todo.add(s); }
-        }
-      }
-    }
-    return outList;
-  }
   // Parses string to PatternExpr
   public static interface Parser<T> {
     public SequencePattern.PatternExpr parseSequence(Env env, String s) throws Exception;
@@ -1760,12 +1737,12 @@ public class SequencePattern<T> implements Serializable {
       return matchedBids;
     }
 
-    protected void updateKeepBids(BitSet bids) {
+    protected void updateKeepBids(Set<Integer> bids) {
       // TODO: Is there a point when we don't need to keep these bids anymore?
       for (Set<Pair<Integer, Integer>> v : reachableChildBids) {
         if (v != null) {
           for (Pair<Integer, Integer> p : v) {
-            bids.set(p.first());
+            bids.add(p.first());
           }
         }
       }

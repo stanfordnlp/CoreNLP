@@ -104,7 +104,7 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
   }
 
   /**
-   * Saves all arcs in the graph on two lines: first line contains the vertices, second the edges.
+   * Saves all arcs in the graph on two lines: first line contains the vertices, second the edges
    * @param graph
    * @param pw
    */
@@ -188,9 +188,10 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
     pw.println(chains.size());
 
     // save each cluster
-    for (Map.Entry<Integer, CorefChain> integerCorefChainEntry : chains.entrySet()) {
+    for(Integer cid: chains.keySet()) {
       // cluster id + how many mentions in the cluster
-      saveCorefChain(pw, integerCorefChainEntry.getKey(), integerCorefChainEntry.getValue());
+      CorefChain cluster = chains.get(cid);
+      saveCorefChain(pw, cid, cluster);
     }
 
     // an empty line at end
@@ -206,8 +207,7 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
   }
 
   /**
-   * Serializes one coref cluster (i.e., one entity).
-   *
+   * Serializes one coref cluster (i.e., one entity)
    * @param pw the buffer
    * @param cid id of cluster to save
    * @param cluster the cluster
@@ -216,13 +216,12 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
     pw.println(cid + " " + countMentions(cluster));
     // each mention saved on one line
     Map<IntPair, Set<CorefChain.CorefMention>> mentionMap = cluster.getMentionMap();
-    for (Map.Entry<IntPair, Set<CorefChain.CorefMention>> intPairSetEntry : mentionMap.entrySet()) {
+    for(IntPair mid: mentionMap.keySet()) {
       // all mentions with the same head
-      IntPair mentionIndices = intPairSetEntry.getKey();
-      Set<CorefChain.CorefMention> mentions = intPairSetEntry.getValue();
-      for (CorefChain.CorefMention mention: mentions) {
+      Set<CorefChain.CorefMention> mentions = mentionMap.get(mid);
+      for(CorefChain.CorefMention mention: mentions) {
         // one mention per line
-        pw.print(mentionIndices.getSource() + " " + mentionIndices.getTarget());
+        pw.print(mid.getSource() + " " + mid.getTarget());
         if(mention == cluster.getRepresentativeMention()) pw.print(" " + 1);
         else pw.print(" " + 0);
 
@@ -272,7 +271,7 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
    */
   private static Map<Integer, CorefChain> loadCorefChains(BufferedReader reader) throws IOException {
     String line = reader.readLine().trim();
-    if (line.isEmpty()) return null;
+    if(line.length() == 0) return null;
     int clusterCount = Integer.valueOf(line);
     Map<Integer, CorefChain> chains = Generics.newHashMap();
     // read each cluster
@@ -570,13 +569,13 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     String file = props.getProperty("file");
     String loadFile = props.getProperty("loadFile");
-    if (loadFile != null && ! loadFile.isEmpty()) {
+    if (loadFile != null && ! loadFile.equals("")) {
       CustomAnnotationSerializer ser = new CustomAnnotationSerializer(false, false);
       InputStream is = new FileInputStream(loadFile);
       Pair<Annotation, InputStream> pair = ser.read(is);
       pair.second.close();
       Annotation anno = pair.first;
-      System.out.println(anno.toShorterString(StringUtils.EMPTY_STRING_ARRAY));
+      System.out.println(anno.toShorterString(new String[0]));
       is.close();
     } else if (file != null && ! file.equals("")) {
       String text = edu.stanford.nlp.io.IOUtils.slurpFile(file);

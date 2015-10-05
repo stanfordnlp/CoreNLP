@@ -40,6 +40,12 @@ public abstract class AbstractLinearClassifierFactory<L, F> implements Classifie
     return labelIndex.size();
   }
 
+  public Classifier<L,F> trainClassifier(List<RVFDatum<L, F>> examples) {
+    Dataset<L, F> dataset = new Dataset<L, F>();
+    dataset.addAll(examples);
+    return trainClassifier(dataset);
+  }
+
   protected abstract double[][] trainWeights(GeneralDataset<L, F> dataset) ;
 
   /**

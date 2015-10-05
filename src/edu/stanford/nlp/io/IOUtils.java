@@ -493,9 +493,6 @@ public class IOUtils {
   }
 
 
-  // todo [cdm 2015]: I think GZIPInputStream has its own buffer and so we don't need to buffer in that case.
-  // todo: Though it's default size is 512 bytes so need to make 8K in constructor. Or else buffering outside gzip is faster
-  // todo: final InputStream is = new GZIPInputStream( new FileInputStream( file ), 65536 );
   /**
    * Quietly opens a File. If the file ends with a ".gz" extension,
    * automatically opens a GZIPInputStream to wrap the constructed
@@ -735,7 +732,7 @@ public class IOUtils {
 
     private InputStream getStream() throws IOException {
       if (file != null) {
-        return inputStreamFromFile(file);
+        return new FileInputStream(file);
       } else if (path != null) {
         return getInputStreamFromURLOrClasspathOrFileSystem(path);
       } else {
@@ -877,22 +874,22 @@ public class IOUtils {
    * Line endings are: \r\n,\n,\r
    * Lines returns by this iterator will include the eol-characters
    **/
-  private static final class EolPreservingLineReaderIterable implements Iterable<String> {
-
+  private static final class EolPreservingLineReaderIterable implements Iterable<String>
+  {
     private final Reader reader;
     private final int bufferSize;
-
     private EolPreservingLineReaderIterable( Reader reader )
     {
       this(reader, SLURP_BUFFER_SIZE);
     }
-    private EolPreservingLineReaderIterable( Reader reader, int bufferSize ) {
+    private EolPreservingLineReaderIterable( Reader reader, int bufferSize )
+    {
       this.reader = reader;
       this.bufferSize = bufferSize;
     }
-
     @Override
-    public Iterator<String> iterator() {
+    public Iterator<String> iterator()
+    {
       return new Iterator<String>() {
         private String next;
         private boolean done = false;
@@ -964,6 +961,7 @@ public class IOUtils {
           return false;
         }
 
+
         @Override
         public boolean hasNext()
         {
@@ -976,7 +974,6 @@ public class IOUtils {
           }
           return !done;
         }
-
         @Override
         public String next()
         {
@@ -992,9 +989,8 @@ public class IOUtils {
           throw new UnsupportedOperationException();
         }
       };
-    } // end iterator()
-
-  } // end static class EolPreservingLineReaderIterable
+    }
+  }
 
   /**
    * Provides an implementation of closing a file for use in a finally block so
@@ -1129,7 +1125,7 @@ public class IOUtils {
    */
   public static String slurpFile(String filename, String encoding)
           throws IOException {
-    Reader r = getBufferedReaderFromClasspathOrFileSystem(filename, encoding);
+    Reader r = readerFromString(filename, encoding);
     return IOUtils.slurpReader(r);
   }
 
@@ -1186,7 +1182,11 @@ public class IOUtils {
     }
     BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
     StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
-    for (String temp; (temp = br.readLine()) != null; ) {
+    for (String temp; (temp = br.readLine()) != null;
+
+
+
+            ) {
       buff.append(temp);
       buff.append(lineSeparator);
     }
@@ -1318,8 +1318,10 @@ public class IOUtils {
   /**
    * Send all bytes from the input stream to the output stream.
    *
-   * @param input The input bytes.
-   * @param output Where the bytes should be written.
+   * @param input
+   *          The input bytes.
+   * @param output
+   *          Where the bytes should be written.
    */
   public static void writeStreamToStream(InputStream input, OutputStream output)
           throws IOException {
@@ -1461,17 +1463,6 @@ public class IOUtils {
    */
   public static OutputStream getFileOutputStream(String filename) throws IOException {
     OutputStream out = new FileOutputStream(filename);
-    if (filename.endsWith(".gz")) {
-      out = new GZIPOutputStream(out);
-    } else if (filename.endsWith(".bz2")) {
-      //out = new CBZip2OutputStream(out);
-      out = getBZip2PipedOutputStream(filename);
-    }
-    return out;
-  }
-
-  public static OutputStream getFileOutputStream(String filename, boolean append) throws IOException {
-    OutputStream out = new FileOutputStream(filename, append);
     if (filename.endsWith(".gz")) {
       out = new GZIPOutputStream(out);
     } else if (filename.endsWith(".bz2")) {
@@ -1838,7 +1829,7 @@ public class IOUtils {
 
   /**
    * A raw file copy function -- this is not public since no error checks are made as to the
-   * consistency of the file being copied. Use instead:
+   * consistency of the filed being copied. Use instead:
    * @see IOUtils#cp(java.io.File, java.io.File, boolean)
    * @param source The source file. This is guaranteed to exist, and is guaranteed to be a file.
    * @param target The target file.
@@ -2058,42 +2049,23 @@ public class IOUtils {
   /**
    * Start a simple console. Read lines from stdin, and pass each line to the callback.
    * Returns on typing "exit" or "quit".
-   *
    * @param callback The function to run for every line of input.
    * @throws IOException Thrown from the underlying input stream.
    */
-    public static void console(String prompt, Consumer<String> callback) throws IOException {
+  public static void console(Consumer<String> callback) throws IOException {
     BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     String line;
-    System.out.print(prompt);
+    System.out.print("> ");
     while ( (line = reader.readLine()) != null) {
       switch (line.toLowerCase()) {
         case "exit":
         case "quit":
-        case "q":
           return;
         default:
           callback.accept(line);
       }
-      System.out.print(prompt);
+      System.out.print("> ");
     }
-  }
-
-  /**
-   * Create a prompt, and read a single line of response.
-   * @param prompt An optional prompt to show the user.
-   * @throws IOException Throw from the underlying reader.
-   */
-  public static String promptUserInput(Optional<String> prompt) throws IOException {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-    String line;
-    System.out.print(prompt.orElse("> "));
-    return reader.readLine();
-  }
-
-  /** @see IOUtils#console(String, Consumer) */
-  public static void console(Consumer<String> callback) throws IOException {
-    console("> ", callback);
   }
 
 }

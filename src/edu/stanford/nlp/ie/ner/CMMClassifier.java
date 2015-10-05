@@ -29,6 +29,7 @@ package edu.stanford.nlp.ie.ner;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -53,7 +54,6 @@ import edu.stanford.nlp.classify.SVMLightClassifierFactory;
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.NERFeatureFactory;
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.BasicDatum;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Datum;
@@ -649,12 +649,11 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
       size += doc.size();
     }
 
-    System.err.print("Making Dataset ... ");
-    System.err.flush();
+    System.err.println("Making Dataset...");
     Dataset<String, String> train;
     if (featureIndex != null && classIndex != null) {
-      System.err.println("  Using feature/class Index from existing Dataset...");
-      System.err.println("  (This is used when getting Dataset from adaptation set. We want to make the index consistent.)"); //pichuan
+      System.err.println("Using feature/class Index from existing Dataset...");
+      System.err.println("(This is used when getting Dataset from adaptation set. We want to make the index consistent.)"); //pichuan
       train = new Dataset<String, String>(size, featureIndex, classIndex);
     } else {
       train = new Dataset<String, String>(size);
@@ -702,8 +701,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
       size += doc.size();
     }
 
-    System.err.print("Making Dataset ... ");
-    System.err.flush();
+    System.err.println("Making Dataset...");
     Dataset<String, String> train = new Dataset<String, String>(size, featureIndex, classIndex);
 
     for (List<IN> doc : data) {
@@ -917,7 +915,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     }
 
     LinearClassifierFactory<String, String> lcf;
-    lcf = new LinearClassifierFactory<>(flags.tolerance, flags.useSum, prior, flags.sigma, flags.epsilon, flags.QNsize);
+    lcf = new LinearClassifierFactory<String, String>(flags.tolerance, flags.useSum, prior, flags.sigma, flags.epsilon, flags.QNsize);
     if (flags.useQN) {
       lcf.useQuasiNewton();
     } else{
@@ -1189,7 +1187,8 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
           answerArrays.add(Arrays.asList(seq));
         }
       }
-      for (IN wordInfo : doc) {
+      for (int i = 0; i < leng; i++) {
+        CoreLabel wordInfo = doc.get(i);
         classIndex.add(wordInfo.get(CoreAnnotations.AnswerAnnotation.class));
       }
 
@@ -1279,11 +1278,11 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
 
 
   private static List<Pair<Pattern, Integer>> getThresholds(String filename) {
-    BufferedReader in = null;
     try {
-      in = IOUtils.readerFromString(filename);
-      List<Pair<Pattern, Integer>> thresholds = new ArrayList<>();
-      for (String line; (line = in.readLine()) != null; ) {
+      BufferedReader in = new BufferedReader(new FileReader(filename));
+      List<Pair<Pattern, Integer>> thresholds = new ArrayList<Pair<Pattern, Integer>>();
+      String line;
+      while ((line = in.readLine()) != null) {
         int i = line.lastIndexOf(' ');
         Pattern p = Pattern.compile(line.substring(0, i));
         //System.err.println(":"+line.substring(0,i)+":");
@@ -1293,10 +1292,8 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
       }
       in.close();
       return thresholds;
-    } catch (IOException e) {
-      throw new RuntimeIOException("Error reading threshold file", e);
-    } finally {
-      IOUtils.closeIgnoringExceptions(in);
+    } catch (Exception e) {
+      throw new RuntimeException("Error reading threshold file", e);
     }
   }
 
@@ -1311,8 +1308,8 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     ObjectBank<List<IN>> biasedData =
       makeObjectBankFromFile(biasedFilename, readerAndWriter);
 
-    Index<String> featureIndex = new HashIndex<>();
-    Index<String> classIndex = new HashIndex<>();
+    Index<String> featureIndex = new HashIndex<String>();
+    Index<String> classIndex = new HashIndex<String>();
 
     Dataset<String, String> dataset = getDataset(data, featureIndex, classIndex);
     Dataset<String, String> biasedDataset = getBiasedDataset(biasedData, featureIndex, classIndex);
@@ -1355,27 +1352,25 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     trainSemiSup(dataset, biasedDataset, confusionMatrix);
   }
 
-
   static class Scorer<INN extends CoreLabel> implements SequenceModel {
+    private CMMClassifier<INN> classifier = null;
 
-    private final CMMClassifier<INN> classifier;
-
-    private final int[] tagArray;
-    private final int[] backgroundTags;
-    private final Index<String> tagIndex;
-    private final List<INN> lineInfos;
-    private final int pre;
-    private final int post;
-    private final Set<List<String>> legalTags;
+    private int[] tagArray = null;
+    private int[] backgroundTags = null;
+    private Index<String> tagIndex = null;
+    private List<INN> lineInfos = null;
+    private int pre = 0;
+    private int post = 0;
+    private Set<List<String>> legalTags = null;
 
     private static final boolean VERBOSE = false;
 
-    private static int[] buildTagArray(int sz) {
-      int[] temp = new int[sz];
+    void buildTagArray() {
+      int sz = tagIndex.size();
+      tagArray = new int[sz];
       for (int i = 0; i < sz; i++) {
-        temp[i] = i;
+        tagArray[i] = i;
       }
-      return temp;
     }
 
     @Override
@@ -1395,14 +1390,14 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
 
     @Override
     public int[] getPossibleValues(int position) {
-      // if (position == 0 || position == lineInfos.size() - 1) {
-      //   int[] a = new int[1];
-      //   a[0] = tagIndex.indexOf(BACKGROUND);
-      //   return a;
-      // }
-      // if (tagArray == null) {
-      //   buildTagArray();
-      // }
+      //             if (position == 0 || position == lineInfos.size() - 1) {
+      //                 int[] a = new int[1];
+      //                 a[0] = tagIndex.indexOf(BACKGROUND);
+      //                 return a;
+      //             }
+      if (tagArray == null) {
+        buildTagArray();
+      }
       if (position < pre) {
         return backgroundTags;
       }
@@ -1556,16 +1551,15 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
       this.classifier = classifier;
       this.legalTags = legalTags;
       backgroundTags = new int[]{tagIndex.indexOf(classifier.flags.backgroundSymbol)};
-      tagArray = buildTagArray(tagIndex.size());
     }
 
-  } // end static class Scorer
+  } // end class Scorer
 
   private boolean normalize() {
     return flags.normalize;
   }
 
-  static int lastPos = -1;  // TODO: Looks like CMMClassifier still isn't threadsafe!
+  static int lastPos = -1;
 
   public Counter<String> scoresOf(List<IN> lineInfos, int pos) {
 //     if (pos != lastPos) {

@@ -43,8 +43,6 @@ import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.MultiClassAccuracyStats;
 import edu.stanford.nlp.stats.Scorer;
 import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.logging.Logging;
-
 import java.util.function.Function;
 
 /**
@@ -480,12 +478,10 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    */
   public double[][] adaptWeights(double[][] origWeights, GeneralDataset<L, F> adaptDataset) {
     Minimizer<DiffFunction> minimizer = getMinimizer();
-    Logging.logger(this.getClass()).info("adaptWeights in LinearClassifierFactory. increase weight dim only");
+    System.err.println("adaptWeights in LinearClassifierFactory. increase weight dim only");
     double[][] newWeights = new double[adaptDataset.featureIndex.size()][adaptDataset.labelIndex.size()];
 
-    synchronized (System.class) {
-      System.arraycopy(origWeights, 0, newWeights, 0, origWeights.length);
-    }
+    System.arraycopy(origWeights,0,newWeights,0,origWeights.length);
 
     AdaptedGaussianPriorObjectiveFunction<L, F> objective = new AdaptedGaussianPriorObjectiveFunction<L, F>(adaptDataset, logPrior,newWeights);
 
@@ -524,7 +520,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     }
     LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(dataset, logPrior);
     if(initial == null && interimWeights != null && ! retrainFromScratchAfterSigmaTuning) {
-      //Logging.logger(this.getClass()).info("## taking advantage of interim weights as starting point.");
+      //System.err.println("## taking advantage of interim weights as starting point.");
       initial = interimWeights;
     }
     if (initial == null) {
@@ -720,7 +716,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    * @param dataset the data set to optimize sigma on.
    */
   public void crossValidateSetSigma(GeneralDataset<L, F> dataset,int kfold) {
-    Logging.logger(this.getClass()).info("##you are here.");
+    System.err.println("##you are here.");
     crossValidateSetSigma(dataset, kfold, new MultiClassAccuracyStats<L>(MultiClassAccuracyStats.USE_LOGLIKELIHOOD), new GoldenSectionLineSearch(true, 1e-2, min, max));
   }
 
@@ -737,8 +733,8 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    * @param dataset the data set to optimize sigma on.
    */
   public void crossValidateSetSigma(GeneralDataset<L, F> dataset,int kfold, final Scorer<L> scorer, LineSearcher minimizer) {
-    Logging.logger(this.getClass()).info("##in Cross Validate, folds = " + kfold);
-    Logging.logger(this.getClass()).info("##Scorer is " + scorer);
+    System.err.println("##in Cross Validate, folds = " + kfold);
+    System.err.println("##Scorer is " + scorer);
 
     featureIndex = dataset.featureIndex;
     labelIndex = dataset.labelIndex;
@@ -770,12 +766,12 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
           setSigma(sigmaToTry);
           Double averageScore = crossValidator.computeAverage(scoreFn);
           System.err.print("##sigma = "+getSigma()+" ");
-          Logging.logger(this.getClass()).info("-> average Score: "+averageScore);
+          System.err.println("-> average Score: "+averageScore);
           return -averageScore;
         };
 
     double bestSigma = minimizer.minimize(negativeScorer);
-    Logging.logger(this.getClass()).info("##best sigma: " + bestSigma);
+    System.err.println("##best sigma: " + bestSigma);
     setSigma(bestSigma);
   }
 
@@ -827,7 +823,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
 
     timer.start();
     double bestSigma = minimizer.minimize(negativeScorer);
-    Logging.logger(this.getClass()).info("##best sigma: " + bestSigma);
+    System.err.println("##best sigma: " + bestSigma);
     setSigma(bestSigma);
 
     return ArrayUtils.flatten(trainWeights(trainSet,negativeScorer.weights,true)); // make sure it's actually the interim weights from best sigma
@@ -862,8 +858,8 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       //System.out.println("score: "+score);
       //System.out.print(".");
       System.err.print("##sigma = "+getSigma()+" ");
-      Logging.logger(this.getClass()).info("-> average Score: " + score);
-      Logging.logger(this.getClass()).info("##time elapsed: " + timer.stop() + " milliseconds.");
+      System.err.println("-> average Score: "+ score);
+      System.err.println("##time elapsed: " + timer.stop() + " milliseconds.");
       timer.restart();
       return -score;
     }
@@ -885,7 +881,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       labelIndex.add(d.label());
       featureIndex.addAll(d.asFeatures());//If there are duplicates, it doesn't add them again.
     }
-    Logging.logger(this.getClass()).info(String.format("Training linear classifier with %d features and %d labels", featureIndex.size(), labelIndex.size()));
+    System.err.println(String.format("Training linear classifier with %d features and %d labels", featureIndex.size(), labelIndex.size()));
 
     LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(dataIterable, logPrior, featureIndex, labelIndex);
     // [cdm 2014] Commented out next line. Why not use the logPrior set up previously and used at creation???
@@ -985,10 +981,16 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       LinearClassifier<String, String> classifier = new LinearClassifier<String, String>(weights, featureIndex, labelIndex);
       return classifier;
     } catch (Exception e) {
-      Logging.logger(LinearClassifierFactory.class).info("Error in LinearClassifierFactory, loading from file=" + file);
+      System.err.println("Error in LinearClassifierFactory, loading from file="+file);
       e.printStackTrace();
       return null;
     }
+  }
+
+  @Deprecated
+  @Override
+  public LinearClassifier<L, F> trainClassifier(List<RVFDatum<L, F>> examples) {
+    throw new UnsupportedOperationException("Unsupported deprecated method");
   }
 
   public void setEvaluators(int iters, Evaluator[] evaluators)

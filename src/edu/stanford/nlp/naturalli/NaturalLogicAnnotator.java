@@ -131,7 +131,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
     int min = root.index();
     int max = root.index();
     Queue<IndexedWord> fringe = new LinkedList<>();
-    for (SemanticGraphEdge edge : tree.outgoingEdgeIterable(root)) {
+    for (SemanticGraphEdge edge : tree.getOutEdgesSorted(root)) {
       String edgeLabel = edge.getRelation().getShortName();
       if ((validArcs == null || validArcs.contains(edgeLabel)) &&
           !"punct".equals(edgeLabel)) {
@@ -576,6 +576,6 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
   /** {@inheritDoc} */
   @Override
   public Set<Requirement> requires() {
-    return Annotator.REQUIREMENTS.get(STANFORD_NATLOG);
+    return Annotator.TOKENIZE_SSPLIT_POS_DEPPARSE;  // TODO(gabor) can also use 'parse' annotator, technically
   }
 }

@@ -146,7 +146,7 @@ public class TrueCaseAnnotator implements Annotator {
 
   @Override
   public Set<Requirement> requires() {
-    return Annotator.REQUIREMENTS.get(STANFORD_TRUECASE);
+    return TOKENIZE_SSPLIT_POS_LEMMA;
   }
 
   @Override

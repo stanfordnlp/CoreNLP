@@ -339,10 +339,7 @@ public class AnnotatorFactories {
       @Override
       public String additionalSignature() {
         // keep track of all relevant properties for this annotator here!
-        boolean useSUTime = Boolean.parseBoolean(properties.getProperty(
-          NumberSequenceClassifier.USE_SUTIME_PROPERTY,
-          Boolean.toString(NumberSequenceClassifier.USE_SUTIME_DEFAULT)));
-        String nerSig = "ner.model:" +
+        return "ner.model:" +
             properties.getProperty("ner.model", "") +
             NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY + ':' +
             properties.getProperty(NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY,
@@ -350,13 +347,6 @@ public class AnnotatorFactories {
             NumberSequenceClassifier.USE_SUTIME_PROPERTY + ':' +
             properties.getProperty(NumberSequenceClassifier.USE_SUTIME_PROPERTY,
                 Boolean.toString(NumberSequenceClassifier.USE_SUTIME_DEFAULT));
-        if (useSUTime) {
-          String sutimeSig = PropertiesUtils.getSignature(NumberSequenceClassifier.SUTIME_PROPERTY, properties);
-          if (!sutimeSig.isEmpty()) {
-            nerSig = nerSig + sutimeSig;
-          }
-        }
-        return nerSig;
       }
     };
   }
