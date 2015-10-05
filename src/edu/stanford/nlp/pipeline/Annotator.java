@@ -203,7 +203,6 @@ public interface Annotator {
       add(TOKENIZE_REQUIREMENT);
       add(SSPLIT_REQUIREMENT);
       add(POS_REQUIREMENT);
-      add(LEMMA_REQUIREMENT);
       add(DEPENDENCY_REQUIREMENT);  // TODO(gabor) can also use 'parse' annotator, technically
     }}));
     put(STANFORD_OPENIE, Collections.unmodifiableSet(new HashSet<Requirement>() {{

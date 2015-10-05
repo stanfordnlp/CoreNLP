@@ -12,12 +12,9 @@ import edu.stanford.nlp.util.*;
 
 
 /**
- * An annotator which removes all XML tags (as identified by the
+ * An annotator which removes all xml tags (as identified by the
  * tokenizer) and possibly selectively keeps the text between them.
- * Can also add sentence-ending markers depending on the XML tag.
- * Note that the removal of tags is done by a finite state tokenizer.
- * Thus, this works for simple, typical XML, or equally for similar
- * SGML or XML tags, but will not work on arbitrarily complicated XML.
+ * Can also add sentence ending markers depending on the xml tag.
  *
  * @author John Bauer
  * @author Angel Chang
@@ -206,7 +203,7 @@ public class CleanXmlAnnotator implements Annotator{
 
   private static final Pattern TAG_ATTR_PATTERN = Pattern.compile("(.*)\\[(.*)\\]");
   private static void addAnnotationPatterns(CollectionValuedMap<Class, Pair<Pattern,Pattern>> annotationPatterns, String conf, boolean attrOnly) {
-    String[] annoPatternStrings = conf == null ? StringUtils.EMPTY_STRING_ARRAY : conf.trim().split("\\s*,\\s*");
+    String[] annoPatternStrings = conf == null ? new String[0] : conf.trim().split("\\s*,\\s*");
     for (String annoPatternString:annoPatternStrings) {
       String[] annoPattern = annoPatternString.split("\\s*=\\s*", 2);
       if (annoPattern.length != 2) {

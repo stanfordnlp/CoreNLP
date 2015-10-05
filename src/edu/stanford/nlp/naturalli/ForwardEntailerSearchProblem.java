@@ -229,9 +229,7 @@ public class ForwardEntailerSearchProblem {
     int numTicks = 0;
     while (!fringe.isEmpty()) {
       // Overhead with popping a node.
-      if (numTicks >= maxTicks) {
-        return results;
-      }
+      if (numTicks >= maxTicks) { return results; }
       numTicks += 1;
       if (results.size() >= maxResults) {
         return results;

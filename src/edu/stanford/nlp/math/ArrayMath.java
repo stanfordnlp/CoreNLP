@@ -1442,9 +1442,9 @@ public class ArrayMath {
     return sum(a) / a.length;
   }
 
-  /** Return the mean of an array of int. */
-  public static double mean(int[] a) {
-    return ((double) sum(a)) / a.length;
+  // Thang Mar14
+  public static int mean(int[] a) {
+    return sum(a) / a.length;
   }
 
   public static double median(double[] a) {

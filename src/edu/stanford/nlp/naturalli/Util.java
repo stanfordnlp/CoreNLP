@@ -64,11 +64,11 @@ public class Util {
   }
 
   /**
-   * Returns a coherent NER span from a list of tokens.
+   * TODO(gabor) JavaDoc
    *
-   * @param tokens The tokens of the entire sentence.
-   * @param seed The seed span of the intended NER span that should be expanded.
-   * @return A 0 indexed span corresponding to a coherent NER chunk from the given seed.
+   * @param tokens
+   * @param seed
+   * @return
    */
   public static Span extractNER(List<CoreLabel> tokens, Span seed) {
     // Error checks
@@ -487,26 +487,4 @@ public class Util {
      add("past");
      add("proposed");
   }});
-
-  /**
-   * Construct the spanning span of the given list of tokens.
-   *
-   * @param tokens The tokens that should define the span.
-   * @return A span (0-indexed) that covers all of the tokens.
-   */
-  public static Span tokensToSpan(List<CoreLabel> tokens) {
-    int min = Integer.MAX_VALUE;
-    int max = Integer.MIN_VALUE;
-    for (CoreLabel token : tokens) {
-      min = Math.min(token.index() - 1, min);
-      max = Math.max(token.index(), max);
-    }
-    if (min < 0 || max == Integer.MAX_VALUE) {
-      throw new IllegalArgumentException("Could not compute span from tokens!");
-    } else if (min >= max) {
-      throw new IllegalStateException("Either logic is broken or Gabor can't code.");
-    } else {
-      return new Span(min, max);
-    }
-  }
 }

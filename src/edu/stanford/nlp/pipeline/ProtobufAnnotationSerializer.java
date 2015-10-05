@@ -227,7 +227,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @return A protocol buffer message corresponding to this CoreLabel
    */
   public CoreNLPProtos.Token toProto(CoreLabel coreLabel) {
-    Set<Class<?>> keysToSerialize = new HashSet<>(coreLabel.keySetNotNull());
+    Set<Class<?>> keysToSerialize = new HashSet<>(coreLabel.keySet());
     CoreNLPProtos.Token.Builder builder = toProtoBuilder(coreLabel, keysToSerialize);
     // Completeness check
     if (enforceLosslessSerialization && !keysToSerialize.isEmpty()) {

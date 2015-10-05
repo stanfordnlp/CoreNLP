@@ -329,7 +329,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     private boolean memoryConscious = true;
     private PrintWriter outputFile = null;
 
-    // private int noImproveItrCount = 0;
+    private int noImproveItrCount = 0;
     private double[] xBest;
 
     public Record(boolean beQuiet, Function monitor, double tolerance) {
@@ -912,7 +912,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
       noHistory = false;
     }
 
-    double[] x, newX, rawGrad, grad, newGrad, dir;
+    double[] x, newX, grad, newGrad, dir;
     double value;
     its = 0;
     fevals = 0;
@@ -924,21 +924,18 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     x = initial;
 
     // initialize gradient
-    rawGrad = new double[x.length];
+    grad = new double[x.length];
     newGrad = new double[x.length];
     newX = new double[x.length];
     dir = new double[x.length];
 
     // initialize function value and gradient (gradient is stored in grad inside
     // evaluateFunction)
-    value = evaluateFunction(dFunction, x, rawGrad);
+    value = evaluateFunction(dFunction, x, grad);
     if (useOWLQN) {
       double norm = l1NormOWL(x, dFunction);
       value += norm * lambdaOWL;
-      // step (1) in Galen & Gao except we are not computing v yet
-      grad = pseudoGradientOWL(x, rawGrad, dFunction);
-    } else {
-      grad = rawGrad;
+      grad = pseudoGradientOWL(x, grad, dFunction); // step (1) in Galen & Gao except we are not computing v yet
     }
 
     PrintWriter outFile = null;
@@ -961,7 +958,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
 
     Record rec = new Record(quiet, monitor, functionTolerance, outFile);
     // sets the original gradient and x. Also stores the monitor.
-    rec.start(value, rawGrad, x);
+    rec.start(value, grad, x);
 
     // Check if max Evaluations and Iterations have been provided.
     maxFevals = (maxFunctionEvaluations > 0) ? maxFunctionEvaluations
@@ -1052,10 +1049,9 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
         System.arraycopy(dFunction.derivativeAt(newX), 0, newGrad, 0, newGrad.length);
 
         // This is where all the s, y updates are applied.
-        qn.update(newX, x, newGrad, rawGrad, newPoint[a]); // step (4) in Galen & Gao 2007
+        qn.update(newX, x, newGrad, grad, newPoint[a]); // step (4) in Galen & Gao 2007
 
         if (useOWLQN) {
-          System.arraycopy(newGrad, 0, rawGrad, 0, newGrad.length);
           // pseudo gradient
           newGrad = pseudoGradientOWL(newX, newGrad, dFunction);
         }
@@ -1069,8 +1065,8 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
         // X and writes to output
         rec.add(newValue, newGrad, newX, fevals, evalScore);
 
-        // If you want to call a function and do whatever with the information ...
-        if (iterCallbackFunction != null) {
+        //If you wanna call a function and do whatever with the information
+        if(iterCallbackFunction != null){
           iterCallbackFunction.callback(newX, its, newValue, newGrad);
         }
 

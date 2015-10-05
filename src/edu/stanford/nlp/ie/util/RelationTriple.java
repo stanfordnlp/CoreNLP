@@ -117,19 +117,13 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
    * The relation of this relation triple, as a String
    */
   public String relationGloss() {
-    String relationGloss = (
+    return (
         (prefixBe ? "is " : "")
         + StringUtils.join(relation.stream().map(CoreLabel::word), " ")
         + (suffixBe ? " is" : "")
         + (suffixOf ? " of" : "")
         + (istmod ? " at_time" : "")
     ).trim();
-    // Some cosmetic tweaks
-    if ("'s".equals(relationGloss)) {
-      return "has";
-    } else {
-      return relationGloss;
-    }
   }
 
   /**
@@ -137,8 +131,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
    * This method will additionally strip out punctuation as well, and lower-cases the relation.
    */
   public String relationLemmaGloss() {
-    // Construct a human readable relation string
-    String relationGloss = (
+    return (
         (prefixBe ? "be " : "")
         + StringUtils.join(relation.stream()
           .filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]") && (x.lemma() == null || !x.lemma().matches("[\\.,;'\"\\?!]"))).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ").toLowerCase()
@@ -146,12 +139,6 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
         + (suffixOf ? " of" : "")
         + (istmod ? " at_time" : "")
     ).trim();
-    // Some cosmetic tweaks
-    if ("'s".equals(relationGloss)) {
-      return "have";
-    } else {
-      return relationGloss;
-    }
   }
 
   /** A textual representation of the confidence. */
