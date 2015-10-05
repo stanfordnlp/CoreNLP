@@ -40,7 +40,7 @@ public class RelationTripleSegmenter {
     // { cats have tails }
     add(SemgrexPattern.compile("{$}=verb ?>/aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/[di]obj|xcomp/ ( {}=object ?>appos {}=appos )"));
     // { Tom and Jerry were fighting }
-    add(SemgrexPattern.compile("{$}=verb >nsubjpass ( {}=subject >/conj:and/=subjIgnored {}=object )"));
+    add(SemgrexPattern.compile("{$}=verb >/nsubj(pass)?/ ( {}=subject >/conj:and/=subjIgnored {}=object )"));
   }});
 
   /**
@@ -96,17 +96,21 @@ public class RelationTripleSegmenter {
       add(SemgrexPattern.compile("{tag:/N.*/}=subject >appos ( {}=relation >/nmod:.*/=relaux {}=object)"));
       // { Thorin's son, Durin }
       add(SemgrexPattern.compile("{}=relation >/nmod:.*/=relaux {}=subject >appos {}=object"));
+      // { Stanford's Chris Manning  }
+      add(SemgrexPattern.compile("{tag:/N.*/}=object >/nmod:poss/=relaux ( {}=subject >case {} )"));
+      // { Chris Manning of Stanford,
+      //   [There are] cats with tails,
+      if (allowNominalsWithoutNER) {
+        add(SemgrexPattern.compile("{tag:/N.*/}=subject >/nmod:(?!poss).*/=relaux {}=object"));
+      } else {
+        add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/nmod:(?!poss).*/=relaux {ner:/..+/}=object"));
+        add(SemgrexPattern.compile("{tag:/N.*/}=subject >/nmod:(in|with)/=relaux {}=object"));
+      }
       //  { President Obama }
       if (allowNominalsWithoutNER) {
         add(SemgrexPattern.compile("{tag:/N.*/}=subject >/amod/=arc {}=object"));
       } else {
         add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/amod|compound/=arc {ner:/..+/}=object"));
-      }
-      // { Chris Manning of Stanford }
-      if (allowNominalsWithoutNER) {
-        add(SemgrexPattern.compile("{tag:/N.*/}=subject >/nmod:.*/=relaux {}=object"));
-      } else {
-        add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/nmod:.*/=relaux {ner:/..+/}=object"));
       }
     }});
   }
@@ -129,6 +133,7 @@ public class RelationTripleSegmenter {
    * @param tokens The tokens of the sentence to annotate.
    * @return A list of {@link RelationTriple}s. Note that these do not have an associated tree with them.
    */
+  @SuppressWarnings("unchecked")
   public List<RelationTriple> extract(SemanticGraph parse, List<CoreLabel> tokens) {
     List<RelationTriple> extractions = new ArrayList<>();
     Set<Triple<Span,String,Span>> alreadyExtracted = new HashSet<>();
@@ -139,7 +144,7 @@ public class RelationTripleSegmenter {
     for (TokenSequencePattern tokenPattern : NOUN_TOKEN_PATTERNS) {
       TokenSequenceMatcher tokenMatcher = tokenPattern.matcher(tokens);
       while (tokenMatcher.find()) {
-        boolean missingPrefixBe = false;
+        boolean missingPrefixBe;
         boolean missingSuffixOf = false;
 
         // Create subject
@@ -203,20 +208,39 @@ public class RelationTripleSegmenter {
           boolean missingSuffixBe = false;
           boolean istmod = false;
 
+          // Get relaux if applicable
+          String relaux = matcher.getRelnString("relaux");
+          String ignoredArc = relaux;
+          if (ignoredArc == null) {
+            ignoredArc = matcher.getRelnString("arc");
+          }
+
           // Create subject
           IndexedWord subject = matcher.getNode("subject");
-          Span subjectSpan = Util.extractNER(tokens, Span.fromValues(subject.index() - 1, subject.index()));
           List<CoreLabel> subjectTokens = new ArrayList<>();
-          for (int i : subjectSpan) {
-            subjectTokens.add(tokens.get(i));
+          Span subjectSpan;
+          if (subject.ner() != null && !"O".equals(subject.ner())) {
+            subjectSpan = Util.extractNER(tokens, Span.fromValues(subject.index() - 1, subject.index()));
+            for (int i : subjectSpan) {
+              subjectTokens.add(tokens.get(i));
+            }
+          } else {
+            subjectTokens = getValidChunk(parse, subject, VALID_SUBJECT_ARCS, Optional.ofNullable(ignoredArc), true).orElse(Collections.singletonList(subject.backingLabel()));
+            subjectSpan = Util.tokensToSpan(subjectTokens);
           }
 
           // Create object
           IndexedWord object = matcher.getNode("object");
-          Span objectSpan = Util.extractNER(tokens, Span.fromValues(object.index() - 1, object.index()));
           List<CoreLabel> objectTokens = new ArrayList<>();
-          for (int i : objectSpan) {
-            objectTokens.add(tokens.get(i));
+          Span objectSpan;
+          if (object.ner() != null && !"O".equals(object.ner())) {
+            objectSpan = Util.extractNER(tokens, Span.fromValues(object.index() - 1, object.index()));
+            for (int i : objectSpan) {
+              objectTokens.add(tokens.get(i));
+            }
+          } else {
+            objectTokens = getValidChunk(parse, object, VALID_OBJECT_ARCS, Optional.ofNullable(ignoredArc), true).orElse(Collections.singletonList(object.backingLabel()));
+            objectSpan = Util.tokensToSpan(objectTokens);
           }
 
           // Check that the pair is valid
@@ -235,7 +259,6 @@ public class RelationTripleSegmenter {
           }
 
           // Get any prepositional edges
-          String relaux = matcher.getRelnString("relaux");
           String expected = relaux == null ? "" : relaux.substring(relaux.indexOf(":") + 1).replace("_", " ");
           IndexedWord prepWord = null;
           // (these usually come from the object)
@@ -324,14 +347,16 @@ public class RelationTripleSegmenter {
     Iterator<RelationTriple> iter = extractions.iterator();
     while (iter.hasNext()) {
       RelationTriple term = iter.next();
-      boolean shouldRemove = false;
+      boolean shouldRemove = true;
       for (CoreLabel token : term) {
-        if (token.get(NaturalLogicAnnotations.PolarityAnnotation.class) != null &&
-            token.get(NaturalLogicAnnotations.PolarityAnnotation.class).isDownwards() ) {
-          shouldRemove = true;
+        if (token.get(NaturalLogicAnnotations.PolarityAnnotation.class) == null ||
+            !token.get(NaturalLogicAnnotations.PolarityAnnotation.class).isDownwards() ) {
+          shouldRemove = false;
         }
       }
-      if (shouldRemove) { iter.remove(); }  // Don't extract things in downward polarity contexts.
+      if (shouldRemove) {
+        iter.remove();   // Don't extract things in downward polarity contexts.
+      }
     }
 
     // Return
@@ -359,7 +384,7 @@ public class RelationTripleSegmenter {
 
   /** A set of valid arcs denoting an adverbial modifier we are interested in */
   public final Set<String> VALID_ADVERB_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
-    add("amod"); add("advmod"); add("conj"); add("conj:and"); add("conj:or"); add("auxpass");
+    add("amod"); add("advmod"); add("conj"); add("cc"); add("conj:and"); add("conj:or"); add("auxpass");
   }});
 
   /**
@@ -402,16 +427,23 @@ public class RelationTripleSegmenter {
           }
         }
       }
+
+      // Check outgoing edges
+      boolean hasConj = false;
+      boolean hasCC = false;
       for (SemanticGraphEdge edge : parse.getOutEdgesSorted(root)) {
         String shortName = edge.getRelation().getShortName();
         String name = edge.getRelation().toString();
+        if (shortName.startsWith("conj")) { hasConj = true; }
+        if (shortName.equals("cc")) { hasCC = true; }
         //noinspection StatementWithEmptyBody
         if (isCopula && (shortName.equals("cop") || shortName.contains("subj") || shortName.equals("auxpass") )) {
           // noop; ignore nsubj, cop for extractions with copula
         } else if (edge.getDependent() == primaryCase) {
           // noop: ignore case edge
-        } else if (ignoredArc.isPresent() && ignoredArc.get().equals(name)) {
-          // noop; ignore explicitly requested noop arc.
+        } else if (ignoredArc.isPresent() &&
+                   (ignoredArc.get().equals(name) || ignoredArc.get().startsWith("conj") && name.equals("cc"))) {
+          // noop; ignore explicitly requested noop arc, or "CC" if the noop arc is a conj:*
         } else if (!validArcs.contains(edge.getRelation().getShortName()) && !validArcs.contains(edge.getRelation().getShortName().replaceAll(":.*",":*"))) {
           if (!allowExtraArcs) {
             return Optional.empty();
@@ -421,6 +453,11 @@ public class RelationTripleSegmenter {
         } else {
           fringe.add(edge.getDependent());
         }
+      }
+
+      // Ensure that we don't have a conj without a cc, or vice versa
+      if (Boolean.logicalXor(hasConj, hasCC)) {
+        return Optional.empty();
       }
     }
 
@@ -583,7 +620,11 @@ public class RelationTripleSegmenter {
             }
           }
           if (prepWord != null) {
-            for (CoreLabel word : getValidChunk(parse, prepWord, Collections.singleton("mwe"), Optional.empty(), true).get()) {
+            Optional<List<CoreLabel>> chunk = getValidChunk(parse, prepWord, Collections.singleton("mwe"), Optional.empty(), true);
+            if (!chunk.isPresent()) {
+              continue PATTERN_LOOP;  // Probably something like a conj w/o a cc
+            }
+            for (CoreLabel word : chunk.get()) {
               verbChunk.add(word, Integer.MIN_VALUE / 2 - word.index());
             }
           } else if (expected.equalsIgnoreCase("tmod")) {
