@@ -348,18 +348,6 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     return multiThreadGradient(docIDs, false);
   }
 
-  private class GradientCalculator implements Runnable {
-    @Override
-    public void run() {
-      double[][] arr = empty2D();
-    }
-  }
-
-  protected double newMultithreadGradient(List<Integer> docIDs, boolean calculateEmpirical) {
-    double objective = 0.0;
-    return objective;
-  }
-
   protected double multiThreadGradient(List<Integer> docIDs, boolean calculateEmpirical) {
     double objective = 0.0;
     // TODO: This is a bunch of unnecessary heap traffic, should all be on the stack
