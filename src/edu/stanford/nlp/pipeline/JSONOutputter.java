@@ -192,17 +192,17 @@ public class JSONOutputter extends AnnotationOutputter {
           // Roots
           graph.getRoots().stream().map( (IndexedWord root) -> (Consumer<Writer>) dep -> {
             dep.set("dep", "ROOT");
-            dep.set("governor", "0");
+            dep.set("governor", 0);
             dep.set("governorGloss", "ROOT");
-            dep.set("dependent", Integer.toString(root.index()));
+            dep.set("dependent", root.index());
             dep.set("dependentGloss", root.word());
           }),
           // Regular edges
           graph.edgeListSorted().stream().map( (SemanticGraphEdge edge) -> (Consumer<Writer>) (Writer dep) -> {
             dep.set("dep", edge.getRelation().toString());
-            dep.set("governor", Integer.toString(edge.getGovernor().index()));
+            dep.set("governor", edge.getGovernor().index());
             dep.set("governorGloss", edge.getGovernor().word());
-            dep.set("dependent", Integer.toString(edge.getDependent().index()));
+            dep.set("dependent", edge.getDependent().index());
             dep.set("dependentGloss", edge.getDependent().word());
           })
       );

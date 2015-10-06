@@ -1,9 +1,6 @@
-package edu.stanford.nlp.loglinear;
+package edu.stanford.nlp.loglinear.learning;
 
 import edu.stanford.nlp.loglinear.inference.CliqueTree;
-import edu.stanford.nlp.loglinear.learning.AbstractBatchOptimizer;
-import edu.stanford.nlp.loglinear.learning.BacktrackingAdaGradOptimizer;
-import edu.stanford.nlp.loglinear.learning.LogLikelihoodFunction;
 import edu.stanford.nlp.loglinear.model.ConcatVector;
 import edu.stanford.nlp.loglinear.model.GraphicalModel;
 import edu.stanford.nlp.util.HashIndex;
