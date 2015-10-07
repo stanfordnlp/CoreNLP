@@ -270,6 +270,7 @@ public class ComplexNodePattern<M,K> extends NodePattern<M> {
     }
 
     public Object matchWithResult(String str) {
+      if (str == null) return null;
       Matcher m = pattern.matcher(str);
       if (m.matches()) {
         return m.toMatchResult();
