@@ -227,7 +227,7 @@ public class SequencePattern<T> implements Serializable {
     return null;
   }
 
-  public <OUT> Collection<OUT> findNodePatterns(Function<NodePattern<T>, OUT> filter) {
+  public <OUT> Collection<OUT> findNodePatterns(Function<NodePattern<T>, OUT> filter, boolean allowBranching) {
     List<OUT> outList = new ArrayList<OUT>();
     Queue<State> todo = new LinkedList<State>();
     Set<State> seen = new HashSet<State>();
@@ -243,8 +243,14 @@ public class SequencePattern<T> implements Serializable {
         }
       }
       if (state.next != null) {
-        for (State s: state.next) {
-          if (!seen.contains(s)) { seen.add(s); todo.add(s); }
+        boolean addNext = allowBranching || state.next.size() == 1;
+        if (addNext) {
+          for (State s : state.next) {
+            if (!seen.contains(s)) {
+              seen.add(s);
+              todo.add(s);
+            }
+          }
         }
       }
     }
