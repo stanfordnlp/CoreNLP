@@ -250,6 +250,11 @@ public class ChunkAnnotationUtils {
       Object value = entry.getValue().aggregate(entry.getKey(), chunkList.subList(chunkIndexStart, chunkIndexEnd));
       newChunk.set(entry.getKey(), value);
     }
+    if (newChunk instanceof CoreLabel) {
+      CoreLabel cl = (CoreLabel) newChunk;
+      cl.setValue(cl.word());
+      cl.setOriginalText(cl.word());
+    }
     return newChunk;
   }
 

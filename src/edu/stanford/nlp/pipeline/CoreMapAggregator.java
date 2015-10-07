@@ -25,9 +25,10 @@ public class CoreMapAggregator implements Function<List<? extends CoreMap>, Core
     this.aggregators = aggregators;
   }
 
-  public CoreMapAggregator(Map<Class, CoreMapAttributeAggregator> aggregators, Class mergedKey) {
+  public CoreMapAggregator(Map<Class, CoreMapAttributeAggregator> aggregators, Class mergedKey, CoreLabelTokenFactory tokenFactory) {
     this.aggregators = aggregators;
     this.mergedKey = mergedKey;
+    this.tokenFactory = tokenFactory;
   }
 
   public CoreMap merge(List<? extends CoreMap> in, int start, int end)
@@ -59,7 +60,12 @@ public class CoreMapAggregator implements Function<List<? extends CoreMap>, Core
 
   public static CoreMapAggregator getAggregator(Map<Class, CoreMapAttributeAggregator> aggregators, Class key)
   {
-    return new CoreMapAggregator(aggregators, key);
+    return new CoreMapAggregator(aggregators, key, null);
+  }
+
+  public static CoreMapAggregator getAggregator(Map<Class, CoreMapAttributeAggregator> aggregators, Class key, CoreLabelTokenFactory tokenFactory)
+  {
+    return new CoreMapAggregator(aggregators, key, tokenFactory);
   }
 
   public List<CoreMap> merge(List<? extends CoreMap> list, List<? extends HasInterval<Integer>> matched)
