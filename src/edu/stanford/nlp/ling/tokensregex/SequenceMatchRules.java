@@ -449,6 +449,11 @@ public class SequenceMatchRules {
       SequencePatternExtractRule<CoreMap, MatchedExpression> exprExtractRule =
         new SequencePatternExtractRule<>(pattern, exprExtractor, r.matchFindType, r.matchWithResults);
 
+      annotationExtractor.expressionToValue = matched -> {
+        if (matched != null && matched.context != null && matched.context instanceof SequenceMatchResult ) {
+          return valueExtractor.apply( (SequenceMatchResult<CoreMap>) matched.context);
+        } else return null;
+      };
       annotationExtractor.valueExtractor = new CoreMapFunctionApplier<>(env, r.annotationField, valueExtractRule);
       r.extractRule = exprExtractRule;
       r.filterRule = new AnnotationMatchedFilter(annotationExtractor);
@@ -509,6 +514,11 @@ public class SequenceMatchRules {
       SequencePatternExtractRule<CoreMap, MatchedExpression> exprExtractRule =
         new SequencePatternExtractRule<>(pattern, exprExtractor, r.matchFindType, r.matchWithResults);
 
+      annotationExtractor.expressionToValue = matched -> {
+        if (matched != null && matched.context != null && matched.context instanceof SequenceMatchResult ) {
+          return valueExtractor.apply( (SequenceMatchResult<CoreMap>) matched.context);
+        } else return null;
+      };
       if (r.annotationField != null && r.annotationField != CoreMap.class) {
         annotationExtractor.valueExtractor = new CoreMapFunctionApplier<>(env, r.annotationField, valueExtractRule);
         r.extractRule = new CoreMapExtractRule<>(env, r.annotationField, exprExtractRule);
@@ -560,6 +570,11 @@ public class SequenceMatchRules {
       MultiSequencePatternExtractRule<CoreMap, MatchedExpression> exprExtractRule =
         new MultiSequencePatternExtractRule<>(pattern, exprExtractor);
 
+      annotationExtractor.expressionToValue = matched -> {
+        if (matched != null && matched.context != null && matched.context instanceof SequenceMatchResult ) {
+          return valueExtractor.apply( (SequenceMatchResult<CoreMap>) matched.context);
+        } else return null;
+      };
       if (r.annotationField != null && r.annotationField != CoreMap.class) {
         annotationExtractor.valueExtractor = new CoreMapFunctionApplier<>(env, r.annotationField, valueExtractRule);
         r.extractRule = new CoreMapExtractRule<>(env, r.annotationField, exprExtractRule);
@@ -1055,6 +1070,10 @@ public class SequenceMatchRules {
       }
       if (Double.isNaN(te.weight)) {
         te.weight = matched.score();
+      }
+      if (this.group != 0) {
+        // Save context so value evaluation can happen
+        te.context = matched.toBasicSequenceMatchResult();
       }
       return te;
     }

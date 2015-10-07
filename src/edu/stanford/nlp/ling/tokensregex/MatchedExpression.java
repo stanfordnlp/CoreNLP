@@ -39,6 +39,7 @@ public class MatchedExpression {
 
   // TODO: Should we keep some context from the source so we can perform more complex evaluation?
   /** Function indicating how to extract an value from annotation built from this expression */
+  protected Object context; // Some context to help to extract value from annotation
   protected SingleAnnotationExtractor extractFunc;
 
   public Value value;
@@ -64,6 +65,7 @@ public class MatchedExpression {
     public Class resultNestedAnnotationField; // Annotation field for child/nested annotations
     public boolean includeNested = false;
     public Function<CoreMap, Value> valueExtractor;
+    public Function<MatchedExpression, Value> expressionToValue;
     public Function<MatchedExpression,?> resultAnnotationExtractor;
     public Map<Class, CoreMapAttributeAggregator> tokensAggregators;
 
@@ -109,7 +111,11 @@ public class MatchedExpression {
     }
 
     public void annotate(MatchedExpression matchedExpression) {
-      matchedExpression.value = valueExtractor.apply(matchedExpression.annotation);
+      Value ev = null;
+      if (expressionToValue != null) {
+        ev = expressionToValue.apply(matchedExpression);
+      }
+      matchedExpression.value = (ev != null)? ev : valueExtractor.apply(matchedExpression.annotation);
 
       if (resultAnnotationField != null) {
         if (resultAnnotationExtractor != null) {
