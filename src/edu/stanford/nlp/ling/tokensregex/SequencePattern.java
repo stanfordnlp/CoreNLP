@@ -1378,6 +1378,15 @@ public class SequencePattern<T> implements Serializable {
           List<? extends T> nodes = matchedStates.elements();
           // TODO: Fix type checking
           Collection<HasInterval<Integer>> matched = pattern.match(nodes, cur);
+          // Order matches
+          if (pattern.isGreedyMatch()) {
+            // Sort from long to short
+            matched = CollectionUtils.sorted(matched, Interval.LENGTH_GT_COMPARATOR);
+          } else {
+            // Sort from short to long
+            matched = CollectionUtils.sorted(matched, Interval.LENGTH_LT_COMPARATOR);
+          }
+
           // TODO: Check intervals are valid?   Start at cur and ends after?
           if (matched != null && matched.size() > 0) {
             int nBranches = matched.size();

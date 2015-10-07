@@ -507,11 +507,26 @@ public class ChunkAnnotationUtils {
   public static String getTokenText(List<? extends CoreMap> tokens, Class tokenTextKey, String delimiter)
   {
     StringBuilder sb = new StringBuilder();
-    for (CoreMap t: tokens) {
-      if (sb.length() != 0) {
-        sb.append(delimiter);
+    int prevEndIndex = -1;
+    for (CoreMap cm:tokens) {
+      Object obj = cm.get(tokenTextKey);
+      boolean includeDelimiter = sb.length() > 0;
+      if (cm.containsKey(CoreAnnotations.CharacterOffsetBeginAnnotation.class) &&
+        cm.containsKey(CoreAnnotations.CharacterOffsetEndAnnotation.class)) {
+        int beginIndex = cm.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+        int endIndex = cm.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+        if (prevEndIndex == beginIndex) {
+          // No spaces
+          includeDelimiter = false;
+        }
+        prevEndIndex = endIndex;
       }
-      sb.append(t.get(tokenTextKey));
+      if (obj != null) {
+        if (includeDelimiter) {
+          sb.append(delimiter);
+        }
+        sb.append(obj);
+      }
     }
     return sb.toString();
   }

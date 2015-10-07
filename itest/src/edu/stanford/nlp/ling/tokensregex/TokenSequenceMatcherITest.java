@@ -109,7 +109,7 @@ public class TokenSequenceMatcherITest extends TestCase {
 
     match = m.find();
     assertTrue(match);
-    assertEquals("fifty .", m.group());
+    assertEquals("fifty.", m.group());
 
     match = m.find();
     assertFalse(match);
@@ -218,7 +218,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     match = m.find();
     assertTrue(match);
     assertEquals(0, m.groupCount());
-    assertEquals("London in 604 .", m.group());
+    assertEquals("London in 604.", m.group());
     match = m.find();
     assertFalse(match);
   }
@@ -1018,7 +1018,7 @@ public class TokenSequenceMatcherITest extends TestCase {
       TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
       boolean match = m.find();
       assertTrue(match);
-      assertEquals("atropine we need to have many many words here but we do n't sweating", m.group(0));
+      assertEquals("atropine we need to have many many words here but we don't sweating", m.group(0));
 
       match = m.find();
       assertFalse(match);
@@ -1044,7 +1044,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     CoreMap doc = createDocument("atropine we need to have many many words here but we don't sweating");
     MultiPatternMatcher<CoreMap> multiPatternMatcher = TokenSequencePattern.getMultiPatternMatcher(p1, p2);
     List<String> expected = new ArrayList<String>();
-    expected.add("atropine we need to have many many words here but we do n't sweating");
+    expected.add("atropine we need to have many many words here but we don't sweating");
     Iterator<String> expectedIter = expected.iterator();
 
     Iterable<SequenceMatchResult<CoreMap>> matches =
@@ -1226,7 +1226,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     match = m.find();
     assertTrue(match);
     assertEquals(0, m.groupCount());
-    assertEquals("January 3 , 2002", m.group());
+    assertEquals("January 3, 2002", m.group());
     match = m.find();
     assertFalse(match);
 
@@ -1235,7 +1235,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     match = m.find();
     assertTrue(match);
     assertEquals(0, m.groupCount());
-    assertEquals("January 3 , 2002", m.group());
+    assertEquals("January 3, 2002", m.group());
     match = m.find();
     assertFalse(match);
 
@@ -1439,6 +1439,32 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertTrue(match);
     assertEquals(0, m.groupCount());
     assertEquals("four - years", m.group());
+    match = m.find();
+    assertFalse(match);
+  }
+
+  public void testTokenSequenceMatcherMultiNodePattern2() throws IOException {
+    CoreMap doc = createDocument("Replace the lamp with model wss.32dc55c3e945384dbc5e533ab711fd24");
+
+    // Greedy
+    TokenSequencePattern p = TokenSequencePattern.compile("/model/ ((?m){1,4}/\\w+\\.\\w+/)");
+    TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
+    boolean match = m.find();
+    assertTrue(match);
+    assertEquals(1, m.groupCount());
+    assertEquals("model wss.32dc55c3e945384dbc5e533ab711fd24", m.group());
+    assertEquals("wss.32dc55c3e945384dbc5e533ab711fd24", m.group(1));
+    match = m.find();
+    assertFalse(match);
+
+    // Reluctant
+    p = TokenSequencePattern.compile("/model/ ((?m){1,4}?/\\w+\\.\\w+/)");
+    m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
+    match = m.find();
+    assertTrue(match);
+    assertEquals(1, m.groupCount());
+    assertEquals("model wss.32", m.group());
+    assertEquals("wss.32", m.group(1));
     match = m.find();
     assertFalse(match);
   }
