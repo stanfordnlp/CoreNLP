@@ -137,6 +137,8 @@ public class JSONOutputter extends AnnotationOutputter {
               l3.set("speaker", token.get(CoreAnnotations.SpeakerAnnotation.class));
               l3.set("truecase", token.get(CoreAnnotations.TrueCaseAnnotation.class));
               l3.set("truecaseText", token.get(CoreAnnotations.TrueCaseTextAnnotation.class));
+              l3.set("before", token.get(CoreAnnotations.BeforeAnnotation.class));
+              l3.set("after", token.get(CoreAnnotations.AfterAnnotation.class));
               // Timex
               Timex time = token.get(TimeAnnotations.TimexAnnotation.class);
               if (time != null) {

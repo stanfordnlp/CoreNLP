@@ -101,7 +101,9 @@ public class AnnotationOutputterITest extends TestCase {
             "          \"characterOffsetBegin\": 0,\n" +
             "          \"characterOffsetEnd\": 3,\n" +
             "          \"pos\": \"JJ\",\n" +
-            "          \"ner\": \"O\"\n" +
+            "          \"ner\": \"O\",\n" +
+            "          \"before\": \"\",\n" +
+            "          \"after\": \" \"\n" +
             "        },\n" +
             "        {\n" +
             "          \"index\": 2,\n" +
@@ -110,7 +112,9 @@ public class AnnotationOutputterITest extends TestCase {
             "          \"characterOffsetBegin\": 4,\n" +
             "          \"characterOffsetEnd\": 8,\n" +
             "          \"pos\": \"NN\",\n" +
-            "          \"ner\": \"O\"\n" +
+            "          \"ner\": \"O\",\n" +
+            "          \"before\": \" \",\n" +
+            "          \"after\": \"\"\n" +
             "        }\n" +
             "      ]\n" +
             "    }\n" +
