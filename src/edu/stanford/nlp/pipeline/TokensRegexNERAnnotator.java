@@ -246,11 +246,11 @@ public class TokensRegexNERAnnotator implements Annotator {
       for (int i = 0; i < headerFields.length; i++) {
         String field = headerFields[i];
         if (!predefinedHeaderFields.contains(field)) {
-          Class fieldClass = EnvLookup.lookupAnnotationKey(null, field);
+          Class fieldClass = EnvLookup.lookupAnnotationKeyWithClassname(null, field);
           if (fieldClass == null) {
             // check our properties
             String classname = properties.getProperty(prefix + "mapping.field." + field);
-            fieldClass = EnvLookup.lookupAnnotationKey(null, classname);
+            fieldClass = EnvLookup.lookupAnnotationKeyWithClassname(null, classname);
           }
           if (fieldClass != null) {
             fieldNames.add(field);
