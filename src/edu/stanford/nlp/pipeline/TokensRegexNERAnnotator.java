@@ -163,6 +163,9 @@ public class TokensRegexNERAnnotator implements Annotator {
 
   public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{
           new PropertiesUtils.Property("mapping", DefaultPaths.DEFAULT_REGEXNER_RULES, "Comma separated list of mapping files to use."),
+          new PropertiesUtils.Property("mapping.header", defaultHeader, "Comma separated list specifying order of fields in the mapping file"),
+          new PropertiesUtils.Property("mapping.field.<fieldname>", "", "Class mapping for annotation fields other than ner"),
+          new PropertiesUtils.Property("commonWords", "", "Comma separated list of files for common words to not annotate (in case your mapping isn't very clean)"),
           new PropertiesUtils.Property("ignorecase", "false", "Whether to ignore case or not when matching patterns."),
           new PropertiesUtils.Property("validpospattern", "", "Regular expression pattern for matching POS tags."),
           new PropertiesUtils.Property("posmatchtype", DEFAULT_POS_MATCH_TYPE.name(), "How should 'validpospattern' be used to match the POS of the tokens."),
