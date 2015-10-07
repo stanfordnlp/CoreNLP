@@ -2,6 +2,7 @@ package edu.stanford.nlp.ling.tokensregex;
 
 import edu.stanford.nlp.ling.tokensregex.types.Expressions;
 import edu.stanford.nlp.ling.tokensregex.types.Tags;
+import edu.stanford.nlp.pipeline.CoreMapAggregator;
 import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
 import java.util.function.Function;
 import edu.stanford.nlp.util.Pair;
@@ -106,6 +107,8 @@ public class Env {
    */
   public Map<Class, CoreMapAttributeAggregator> defaultTokensAggregators;
 
+  private CoreMapAggregator defaultTokensAggregator;
+
   /**
    * How annotations are extracted from the MatchedExpression.
    * If the result type is a List and more than one annotation key is specified,
@@ -148,6 +151,13 @@ public class Env {
 
   public void setDefaultTokensAggregators(Map<Class, CoreMapAttributeAggregator> defaultTokensAggregators) {
     this.defaultTokensAggregators = defaultTokensAggregators;
+  }
+
+  public CoreMapAggregator getDefaultTokensAggregator() {
+    if (defaultTokensAggregator == null && defaultTokensAggregators != null) {
+      defaultTokensAggregator = new CoreMapAggregator(defaultTokensAggregators);
+    }
+    return defaultTokensAggregator;
   }
 
   public Class getDefaultTextAnnotationKey() {

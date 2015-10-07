@@ -288,6 +288,8 @@ public abstract class CoreMapAttributeAggregator
     defaultAggr.put(CoreAnnotations.TokenBeginAnnotation.class, CoreMapAttributeAggregator.FIRST);
     defaultAggr.put(CoreAnnotations.TokenEndAnnotation.class, CoreMapAttributeAggregator.LAST);
     defaultAggr.put(CoreAnnotations.TokensAnnotation.class, CoreMapAttributeAggregator.CONCAT_TOKENS);
+    defaultAggr.put(CoreAnnotations.BeforeAnnotation.class, CoreMapAttributeAggregator.FIRST);
+    defaultAggr.put(CoreAnnotations.AfterAnnotation.class, CoreMapAttributeAggregator.LAST);
     DEFAULT_AGGREGATORS = Collections.unmodifiableMap(defaultAggr);
 
     Map<Class, CoreMapAttributeAggregator> defaultNumericAggr = new ArrayMap<Class, CoreMapAttributeAggregator>(DEFAULT_AGGREGATORS);

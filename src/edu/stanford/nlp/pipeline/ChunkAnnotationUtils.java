@@ -1,6 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.AnnotationLookup;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
@@ -186,10 +187,11 @@ public class ChunkAnnotationUtils {
    * @param origText - Text from which to extract chunk text
    * @param chunkIndexStart - Index of first chunk to merge
    * @param chunkIndexEnd - Index of last chunk to merge (exclusive)
+   * @param tokenFactory - factory for creating tokens (if we want to get a merged corelabel instead of something random)
    * @return new merged chunk
    */
   public static CoreMap getMergedChunk(List<? extends CoreMap> chunkList, String origText,
-                                       int chunkIndexStart, int chunkIndexEnd)
+                                       int chunkIndexStart, int chunkIndexEnd, CoreLabelTokenFactory tokenFactory)
   {
     CoreMap firstChunk = chunkList.get(chunkIndexStart);
     CoreMap lastChunk = chunkList.get(chunkIndexEnd-1);
@@ -199,7 +201,12 @@ public class ChunkAnnotationUtils {
     int lastTokenIndex = lastChunk.get(CoreAnnotations.TokenEndAnnotation.class);
 
     String chunkText = origText.substring(firstCharOffset, lastCharOffset);
-    CoreMap newChunk = new Annotation(chunkText);
+    CoreMap newChunk;
+    if (tokenFactory != null) {
+      newChunk = tokenFactory.makeToken(chunkText, firstCharOffset, lastCharOffset);
+    } else {
+      newChunk = new Annotation(chunkText);
+    }
 
     newChunk.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, firstCharOffset);
     newChunk.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, lastCharOffset);
@@ -222,13 +229,20 @@ public class ChunkAnnotationUtils {
    * @param chunkIndexStart - Index of first chunk to merge
    * @param chunkIndexEnd - Index of last chunk to merge (exclusive)
    * @param aggregators - Aggregators
+   * @param tokenFactory - factory for creating tokens (if we want to get a merged corelabel instead of something random)
    * @return new merged chunk
    */
   public static CoreMap getMergedChunk(List<? extends CoreMap> chunkList,
                                        int chunkIndexStart, int chunkIndexEnd,
-                                       Map<Class, CoreMapAttributeAggregator> aggregators)
+                                       Map<Class, CoreMapAttributeAggregator> aggregators,
+                                       CoreLabelTokenFactory tokenFactory)
   {
-    CoreMap newChunk = new Annotation("");
+    CoreMap newChunk;
+    if (tokenFactory != null) {
+      newChunk = tokenFactory.makeToken();
+    } else {
+      newChunk = new Annotation("");
+    }
     for (Map.Entry<Class,CoreMapAttributeAggregator> entry:aggregators.entrySet()) {
       if (chunkIndexEnd > chunkList.size()) {
         assert(false);
@@ -281,7 +295,7 @@ public class ChunkAnnotationUtils {
   public static void mergeChunks(List<CoreMap> chunkList, String origText,
                                  int chunkIndexStart, int chunkIndexEnd)
   {
-    CoreMap newChunk = getMergedChunk(chunkList, origText, chunkIndexStart, chunkIndexEnd);
+    CoreMap newChunk = getMergedChunk(chunkList, origText, chunkIndexStart, chunkIndexEnd, null);
     int nChunksToRemove = chunkIndexEnd - chunkIndexStart - 1;
     for (int i = 0; i < nChunksToRemove; i++) {
       chunkList.remove(chunkIndexStart);

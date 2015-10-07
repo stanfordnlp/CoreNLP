@@ -421,7 +421,7 @@ public class SequenceMatchRules {
     extractor.weight = r.weight;
     extractor.includeNested = r.includeNested;
     extractor.resultAnnotationExtractor = EnvLookup.getDefaultResultAnnotationExtractor(env);
-    extractor.tokensAggregators = EnvLookup.getDefaultTokensAggregators(env);
+    extractor.tokensAggregator = EnvLookup.getDefaultTokensAggregator(env);
     return extractor;
   }
 
