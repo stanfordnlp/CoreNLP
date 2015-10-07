@@ -66,7 +66,7 @@ public class CoreMapNodePattern extends ComplexNodePattern<CoreMap, Class> {
 
   public static CoreMapNodePattern valueOf(Env env, Map<String, String> attributes) {
     CoreMapNodePattern p = new CoreMapNodePattern(new ArrayList<Pair<Class,NodePattern>>(attributes.size()));
-    p.populate(env, attributes, envAttrPair -> EnvLookup.lookupAnnotationKey(envAttrPair.first, envAttrPair.second));
+    p.populate(env, attributes, envAttrPair -> EnvLookup.lookupAnnotationKeyWithClassname(envAttrPair.first, envAttrPair.second));
     return p;
   }
 

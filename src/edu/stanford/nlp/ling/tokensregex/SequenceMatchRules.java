@@ -240,7 +240,7 @@ public class SequenceMatchRules {
             if (annoKey instanceof Class) {
               annotationField = (Class) annoKey;
             } else if (annoKey instanceof String) {
-              annotationField = EnvLookup.lookupAnnotationKey(env, (String) annoKey);
+              annotationField = EnvLookup.lookupAnnotationKeyWithClassname(env, (String) annoKey);
             } else if (annotationField == null) {
               annotationField = CoreMap.class;
             } else {
