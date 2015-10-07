@@ -1,13 +1,18 @@
 package edu.stanford.nlp.ling.tokensregex;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.*;
+import edu.stanford.nlp.process.CoreLabelTokenFactory;
+import edu.stanford.nlp.process.PTBTokenizer;
+import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Timing;
 import junit.framework.TestCase;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -472,6 +477,31 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertEquals("as", m.group(3));
     match = m.find();
     assertFalse(match);
+  }
+
+  public void testTokenSequenceMatcherConj2() throws IOException {
+    String content = "The cat is sleeping on the floor.";
+    String greedyPattern = "(?: ([]* cat []*) & ([]* sleeping []*))";
+
+    TokenizerFactory tf = PTBTokenizer.factory(new CoreLabelTokenFactory(), "");
+    List<CoreLabel> tokens = tf.getTokenizer(new StringReader(content)).tokenize();
+    TokenSequencePattern seqPattern = TokenSequencePattern.compile(greedyPattern);
+    TokenSequenceMatcher matcher = seqPattern.getMatcher(tokens);
+
+    boolean entireMatch = matcher.matches();
+    assertTrue(entireMatch);
+
+    boolean match = matcher.find();
+    assertTrue(match);
+    assertEquals("The cat is sleeping on the floor.", matcher.group());
+
+    String reluctantPattern = "(?: ([]*? cat []*?) & ([]*? sleeping []*?))";
+    TokenSequencePattern seqPattern2 = TokenSequencePattern.compile(reluctantPattern);
+    TokenSequenceMatcher matcher2 = seqPattern2.getMatcher(tokens);
+
+    match = matcher2.find();
+    assertTrue(match);
+    assertEquals("The cat is sleeping", matcher2.group());
   }
 
   public void testTokenSequenceMatcherConjAll() throws IOException {
@@ -1553,17 +1583,18 @@ public class TokenSequenceMatcherITest extends TestCase {
     //assertEquals(m.group(), "matching this");
   }
 
-  //This DOES NOT work right now!!
-//  public void testCompile2(){
+  public void testBindingCompile(){
+    Env env = TokenSequencePattern.getNewEnv();
+    env.bind("wordname",CoreAnnotations.TextAnnotation.class);
+    String s = "[wordname:\"name\"]{1,2}";
+    TokenSequencePattern p = TokenSequencePattern.compile(env, s);
+  }
+
+// // This does not work!!!
+//  public void testNoBindingCompile(){
 //    Env env = TokenSequencePattern.getNewEnv();
-//    env.bind("wordname",CoreAnnotations.TextAnnotation.class);
 //    String s = "[" + CoreAnnotations.TextAnnotation.class.getName()+":\"name\"]{1,2}";
 //    TokenSequencePattern p = TokenSequencePattern.compile(env, s);
-//    for(Map.Entry<String, Object> vars: env.getVariables().entrySet()){
-//      if(vars.getValue().equals(CoreAnnotations.TextAnnotation.class)){
-//        System.out.println("Found " + vars.getKey() + " binding for " + vars.getValue());
-//      }
-//    }
 //  }
 
   public void testCaseInsensitive1(){
