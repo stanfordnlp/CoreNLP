@@ -94,8 +94,8 @@ public class SequencePattern<T> implements Serializable {
   //  1. Validate backref capture groupid
   //  2. Actions
   //  3. Inconsistent templating with T
-  //  4. Match sequence begin/end (update TokensSequenceParser to map ^ => SEQ_BEGIN_PATTERN_EXPR, and $ to SEQ_END_PATTERN_EXPR)
-  //  5. Update TokensSequenceParser to handle backref of other attributes (\9{attr1,attr2,...})
+  //  4. Update TokensSequenceParser to handle backref of other attributes (\9{attr1,attr2,...})
+  //  5. Improve nested capture groups (in matchresult) for other node types such as conjunctions/disjunctions
   private String patternStr;
   private PatternExpr patternExpr;
   private SequenceMatchAction<T> action;

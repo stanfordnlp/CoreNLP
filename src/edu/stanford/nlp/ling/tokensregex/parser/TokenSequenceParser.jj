@@ -588,8 +588,23 @@ String StringRegex(Env env) : {
 
 SequencePattern.PatternExpr SeqRegex(Env env) : {
   SequencePattern.PatternExpr expr;
+  boolean hasStart = false;
+  boolean hasEnd = false;
 } {
-    ( expr = SeqRegexDisjConj(env) )  { return expr; }
+   (
+    ( "^" { hasStart = true; } )?
+    ( expr = SeqRegexDisjConj(env) )
+    ( "$" { hasEnd = true; } )?
+   )
+   {
+     if (hasStart) {
+       expr = new SequencePattern.SequencePatternExpr(SequencePattern.SEQ_BEGIN_PATTERN_EXPR, expr);
+     }
+     if (hasEnd) {
+       expr = new SequencePattern.SequencePatternExpr(expr, SequencePattern.SEQ_END_PATTERN_EXPR);
+     }
+     return expr;
+   }
 }
 
 
