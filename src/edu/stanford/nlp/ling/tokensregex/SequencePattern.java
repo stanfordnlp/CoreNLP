@@ -227,7 +227,7 @@ public class SequencePattern<T> implements Serializable {
     return null;
   }
 
-  public <OUT> Collection<OUT> findNodePatterns(Function<NodePattern<T>, OUT> filter, boolean allowBranching) {
+  public <OUT> Collection<OUT> findNodePatterns(Function<NodePattern<T>, OUT> filter, boolean allowOptional, boolean allowBranching) {
     List<OUT> outList = new ArrayList<OUT>();
     Queue<State> todo = new LinkedList<State>();
     Set<State> seen = new HashSet<State>();
@@ -235,7 +235,7 @@ public class SequencePattern<T> implements Serializable {
     seen.add(root);
     while (!todo.isEmpty()) {
       State state = todo.poll();
-      if (state instanceof NodePatternState) {
+      if ((allowOptional || !state.isOptional) && (state instanceof NodePatternState)) {
         NodePattern<T> pattern = ((NodePatternState) state).pattern;
         OUT res = filter.apply(pattern);
         if (res != null) {
@@ -797,6 +797,9 @@ public class SequencePattern<T> implements Serializable {
             f.add(curOut);
           }
         }
+        if (minMatch == 0) {
+          f.start.markOptional(true);
+        }
         return f;
       }  else {
         // More general but more expensive matching (when branching, need to keep state explicitly)
@@ -878,6 +881,7 @@ public class SequencePattern<T> implements Serializable {
         // Add child NFA out (unlinked) states to out (unlinked) states of this fragment
         frag.add(f.out);
       }
+      frag.start.markOptional(true);
       return frag;
     }
 
@@ -1187,6 +1191,7 @@ public class SequencePattern<T> implements Serializable {
      */
     Set<State> next;
     boolean hasSavedValue;
+    boolean isOptional;    // is this state optional
 
     protected State() {}
 
@@ -1278,6 +1283,27 @@ public class SequencePattern<T> implements Serializable {
         }
       }
       return null;
+    }
+
+    public void markOptional(boolean propagate) {
+      this.isOptional = true;
+      if (propagate && next != null) {
+        Stack<State> todo = new Stack<State>();
+        Set<State> seen = new HashSet<State>();
+        todo.addAll(next);
+        while (!todo.empty()) {
+          State s = todo.pop();
+          s.isOptional = true;
+          seen.add(s);
+          if (next != null) {
+            for (State n : next) {
+              if (!seen.contains(n)) {
+                todo.push(n);
+              }
+            }
+          }
+        }
+      }
     }
   }
 
@@ -1448,6 +1474,7 @@ public class SequencePattern<T> implements Serializable {
       if (maxMatch >= 0 && minMatch > maxMatch) {
         throw new IllegalArgumentException("Invalid minMatch=" + minMatch + ", maxMatch=" + maxMatch);
       }
+      this.isOptional = this.minMatch <= 0;
     }
 
     @Override
