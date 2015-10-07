@@ -57,19 +57,25 @@ public class ComplexNodePattern<M,K> extends NodePattern<M> {
       Env env, Map<String, String> attributes, BiFunction<M,K,Object> getter, Function<Pair<Env,String>,K> getKey)
   {
     ComplexNodePattern<M,K> p = new ComplexNodePattern<M,K>(getter, new ArrayList<Pair<K,NodePattern>>(attributes.size()));
+    p.populate(env, attributes, getKey);
+    return p;
+  }
+
+  protected void populate(Env env, Map<String, String> attributes, Function<Pair<Env,String>,K> getKey) {
+    ComplexNodePattern<M,K> p = this;
     for (String attr:attributes.keySet()) {
       String value = attributes.get(attr);
       K c = getKey.apply(Pair.makePair(env, attr));
       if (c != null) {
         if (value.startsWith("\"") && value.endsWith("\"")) {
-          value = value.substring(1, value.length()-1);
+          value = value.substring(1, value.length() - 1);
           value = value.replaceAll("\\\\\"", "\""); // Unescape quotes...
           p.add(c, new StringAnnotationPattern(value, env.defaultStringMatchFlags));
         } else if (value.startsWith("/") && value.endsWith("/")) {
-          value = value.substring(1, value.length()-1);
+          value = value.substring(1, value.length() - 1);
           value = value.replaceAll("\\\\/", "/"); // Unescape forward slash
-          String regex = (env != null)? env.expandStringRegex(value): value;
-          int flags = (env != null)? env.defaultStringPatternFlags: 0;
+          String regex = (env != null) ? env.expandStringRegex(value) : value;
+          int flags = (env != null) ? env.defaultStringPatternFlags : 0;
           p.add(c, newStringRegexPattern(regex, flags));
         } else if (value.startsWith("::")) {
           switch (value) {
@@ -125,7 +131,6 @@ public class ComplexNodePattern<M,K> extends NodePattern<M> {
         throw new IllegalArgumentException("Unknown annotation key: " + attr);
       }
     }
-    return p;
   }
 
   public void add(K c, NodePattern pattern) {
