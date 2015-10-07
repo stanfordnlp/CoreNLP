@@ -1549,7 +1549,7 @@ public class UniversalEnglishGrammaticalRelations {
    * access.
    * @param relation the relation to be added to the values list
    */
-  public static void threadSafeAddRelation(GrammaticalRelation relation) {
+  private static void threadSafeAddRelation(GrammaticalRelation relation) {
     valuesLock.writeLock().lock();
     try { // try-finally structure taken from Javadoc code sample for ReentrantReadWriteLock
       synchronizedValues.add(relation);

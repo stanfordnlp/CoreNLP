@@ -767,7 +767,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       readModelAndInit(config, rf, printLoading);
       rf.close();
     } catch (IOException e) {
-      throw new RuntimeIOException("Error while loading a tagger model (probably missing model file)", e);
+      throw new RuntimeIOException("Unrecoverable error while loading a tagger model", e);
     }
   }
 
@@ -865,8 +865,10 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
         System.err.println(" prob read ");
       }
       if (printLoading) t.done();
-    } catch (IOException | ClassNotFoundException e) {
-      throw new RuntimeIOException("Error while loading a tagger model (probably missing model file)", e);
+    } catch (IOException e) {
+      throw new RuntimeIOException("Unrecoverable error while loading a tagger model", e);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeIOException("Unrecoverable error while loading a tagger model", e);
     }
   }
 
@@ -1229,7 +1231,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
     private final boolean tokenize;
     private final boolean outputVerbosity, outputLemmas;
     private final OutputStyle outputStyle;
-    // private final String tagSeparator;
+    private final String tagSeparator;
     private final Morphology morpha;
 
     protected TaggerWrapper(MaxentTagger tagger) {
@@ -1253,7 +1255,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       outputLemmas = config.getOutputLemmas();
       morpha = (outputLemmas) ? new Morphology() : null;
       tokenize = config.getTokenize();
-      // tagSeparator = config.getTagSeparator();
+      tagSeparator = config.getTagSeparator();
     }
 
     @Override
@@ -1284,9 +1286,8 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
           tagger.outputTaggedSentence(taggedSentence, outputLemmas, outputStyle, outputVerbosity, sentNum++, " ", taggedResults);
         }
       } else {
-        // there is only one thread
         for (List<? extends HasWord> sent : sentences) {
-          // Morphology morpha = (outputLemmas) ? new Morphology() : null;
+          Morphology morpha = (outputLemmas) ? new Morphology() : null;
           sent = tagger.tagCoreLabelsOrHasWords(sent, morpha, outputLemmas);
           tagger.outputTaggedSentence(sent, outputLemmas, outputStyle, outputVerbosity, sentNum++, " ", taggedResults);
         }
@@ -1660,7 +1661,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
     printErrWordsPerSec(millis, numWords);
   }
 
-  public <X extends HasWord> void runTagger(Iterable<List<X>> document,
+  public  <X extends HasWord> void runTagger(Iterable<List<X>> document,
                                             BufferedWriter writer,
                                             OutputStyle outputStyle)
     throws IOException

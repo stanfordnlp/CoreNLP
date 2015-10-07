@@ -1,6 +1,5 @@
 package edu.stanford.nlp.simple;
 
-import edu.stanford.nlp.dcoref.CorefChain;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -23,6 +22,7 @@ import java.io.OutputStream;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -391,16 +391,16 @@ public class Sentence {
    * @param props The properties to use for the {@link edu.stanford.nlp.pipeline.NERCombinerAnnotator}.
    * @return A list of named entity tags, one for each token in the sentence.
    */
-  public List<String> nerTags(Properties props) {
+  public List<String> ners(Properties props) {
     document.runNER(props);
     synchronized (impl) {
       return lazyList(tokensBuilders, CoreNLPProtos.Token.Builder::getNer);
     }
   }
 
-  /** @see Sentence#nerTags(java.util.Properties) */
-  public List<String> nerTags() {
-    return nerTags(EMPTY_PROPS);
+  /** @see Sentence#ners(java.util.Properties) */
+  public List<String> ners() {
+    return ners(EMPTY_PROPS);
   }
 
   /**
@@ -422,9 +422,9 @@ public class Sentence {
     this.document.runRegexner(props);
   }
 
-  /** @see Sentence#nerTags(java.util.Properties) */
-  public String nerTag(int index) {
-    return nerTags().get(index);
+  /** @see Sentence#ners(java.util.Properties) */
+  public String ner(int index) {
+    return ners().get(index);
   }
 
   /**
@@ -437,7 +437,7 @@ public class Sentence {
     StringBuilder lastMention = new StringBuilder();
     String lastTag = "O";
     for (int i = 0; i < length(); ++i) {
-      String ner = nerTag(i);
+      String ner = ner(i);
       if (ner.equals(nerTag) && !lastTag.equals(nerTag)) {
         // case: beginning of span
         lastMention.append(word(i)).append(' ');
@@ -468,7 +468,7 @@ public class Sentence {
     StringBuilder lastMention = new StringBuilder();
     String lastTag = "O";
     for (int i = 0; i < length(); ++i) {
-      String ner = nerTag(i);
+      String ner = ner(i);
       if (!ner.equals("O") && !lastTag.equals(ner)) {
         // case: beginning of span
         if (lastMention.length() > 0) {
@@ -823,43 +823,11 @@ public class Sentence {
    * @see Sentence@openieTriples(Properties)
    */
   public Collection<Quadruple<String, String, String, Double>> openie() {
-    document.runOpenie(EMPTY_PROPS);
     return impl.getOpenieTripleList().stream()
         .filter(proto -> proto.hasSubject() && proto.hasRelation() && proto.hasObject())
         .map(proto -> Quadruple.makeQuadruple(proto.getSubject(), proto.getRelation(), proto.getObject(),
             proto.hasConfidence() ? proto.getConfidence() : 1.0))
         .collect(Collectors.toList());
-  }
-
-  /**
-   * Get the coreference chain for just this sentence.
-   * Note that this method is actually fairly computationally expensive to call, as it constructs and prunes
-   * the coreference data structure for the entire document.
-   * @return A coreference chain, but only for this sentence
-   */
-  public Map<Integer, CorefChain> coref() {
-    // Get the raw coref structure
-    Map<Integer, CorefChain> allCorefs = document.coref();
-    // Delete coreference chains not in this sentence
-    Set<Integer> toDeleteEntirely = new HashSet<>();
-    for (Integer clusterID : allCorefs.keySet()) {
-      CorefChain chain = allCorefs.get(clusterID);
-      ArrayList<CorefChain.CorefMention> mentions = new ArrayList<>(chain.getMentionsInTextualOrder());
-      for (CorefChain.CorefMention m : mentions) {
-        if (m.sentNum != this.sentenceIndex() + 1) {
-          chain.deleteMention(m);
-        }
-      }
-      if (chain.getMentionsInTextualOrder().isEmpty()) {
-        toDeleteEntirely.add(clusterID);
-      }
-    }
-    // Clean up dangling empty chains
-    for (Integer danglingChain : toDeleteEntirely) {
-      allCorefs.remove(danglingChain);
-    }
-    // Return
-    return allCorefs;
   }
 
 
@@ -880,9 +848,9 @@ public class Sentence {
    */
   @SuppressWarnings("TypeParameterExplicitlyExtendsObject")
   @SafeVarargs
-  public final CoreMap asCoreMap(Function<Sentence,Object>... functions) {
-    for (Function<Sentence, Object> function : functions) {
-      function.apply(this);
+  public final CoreMap asCoreMap(Supplier<? extends Object>... functions) {
+    for (Supplier<?> function : functions) {
+      function.get();
     }
     return this.document.asAnnotation().get(CoreAnnotations.SentencesAnnotation.class).get(this.sentenceIndex());
   }
@@ -900,9 +868,9 @@ public class Sentence {
    */
   @SuppressWarnings("TypeParameterExplicitlyExtendsObject")
   @SafeVarargs
-  public final List<CoreLabel> asCoreLabels(Function<Sentence,Object>... functions) {
-    for (Function<Sentence, Object> function : functions) {
-      function.apply(this);
+  public final List<CoreLabel> asCoreLabels(Supplier<? extends Object>... functions) {
+    for (Supplier<?> function : functions) {
+      function.get();
     }
     return asCoreMap().get(CoreAnnotations.TokensAnnotation.class);
   }

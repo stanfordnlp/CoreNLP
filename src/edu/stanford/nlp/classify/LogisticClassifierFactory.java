@@ -108,4 +108,10 @@ public class LogisticClassifierFactory<L,F> implements ClassifierFactory<L, F, L
     return new LogisticClassifier<L,F>(weights,featureIndex,classes);
   }
 
+  @Deprecated //this method no longer required by the ClassifierFactory Interface.
+  public LogisticClassifier<L, F> trainClassifier(List<RVFDatum<L, F>> examples) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
 }

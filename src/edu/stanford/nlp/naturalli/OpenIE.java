@@ -34,30 +34,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
- * <p>
- * An OpenIE system based on valid Natural Logic deletions of a sentence.
- * The system is described in:
- * </p>
+ * A simple OpenIE system based on valid Natural Logic deletions of a sentence.
  *
- * <pre>
- *   "Leveraging Linguistic Structure For Open Domain Information Extraction." Gabor Angeli, Melvin Johnson Premkumar, Christopher Manning. ACL 2015.
- * </pre>
- *
- * <p>
- * The paper can be found at <a href="http://nlp.stanford.edu/pubs/2015angeli-openie.pdf">http://nlp.stanford.edu/pubs/2015angeli-openie.pdf</a>.
- * </p>
-
- * <p>
- * Documentation on the system can be found on <a href="http://nlp.stanford.edu/software/openie.shtml">the project homepage</a>.
- * </p>
- *
+ * TODO(gabor): handle lists ("She was the sovereign of Austria, Hungary, Croatia, Bohemia, Mantua, Milan, Lodomeria and Galicia.")
+ * TODO(gabor): handle things like "One example of chemical energy is that found in the food that we eat ."
  *
  * @author Gabor Angeli
  */
-//
-// TODO(gabor): handle lists ("She was the sovereign of Austria, Hungary, Croatia, Bohemia, Mantua, Milan, Lodomeria and Galicia.")
-// TODO(gabor): handle things like "One example of chemical energy is that found in the food that we eat ."
-//
 @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
 public class OpenIE implements Annotator {
 
@@ -94,7 +77,7 @@ public class OpenIE implements Annotator {
   private boolean splitterDisable = false;
 
   @Execution.Option(name="max_entailments_per_clause", gloss="The maximum number of entailments allowed per sentence of input.")
-  private int entailmentsPerSentence = 1000;
+  private int entailmentsPerSentence = 100;
 
   @Execution.Option(name="ignore_affinity", gloss="If true, don't use the affinity models for dobj and pp attachment.")
   private boolean ignoreAffinity = false;
@@ -132,13 +115,6 @@ public class OpenIE implements Annotator {
   public OpenIE(Properties props) {
     // Fill the properties
     Execution.fillOptions(this, props);
-    Properties withoutOpenIEPrefix = new Properties();
-    Enumeration<Object> keys = props.keys();
-    while (keys.hasMoreElements()) {
-      String key = keys.nextElement().toString();
-      withoutOpenIEPrefix.setProperty(key.replace("openie.", ""), props.getProperty(key));
-    }
-    Execution.fillOptions(this, withoutOpenIEPrefix);
 
     // Create the clause splitter
     try {
@@ -153,8 +129,7 @@ public class OpenIE implements Annotator {
         }
       }
     } catch (IOException e) {
-      e.printStackTrace();
-      throw new RuntimeIOException("Could not load clause splitter model at " + splitterModel + ": " + e.getClass() + ": " + e.getMessage());
+      throw new RuntimeIOException("Could not load clause splitter model at " + splitterModel + ": " + e.getMessage());
     }
 
     // Create the forward entailer
@@ -233,8 +208,8 @@ public class OpenIE implements Annotator {
     }
   }
 
-  public Set<SentenceFragment> entailmentsFromClauses(Collection<SentenceFragment> clauses) {
-    Set<SentenceFragment> entailments = new HashSet<>();
+  public List<SentenceFragment> entailmentsFromClauses(Collection<SentenceFragment> clauses) {
+    List<SentenceFragment> entailments = new ArrayList<>();
     for (SentenceFragment clause : clauses) {
       entailments.addAll(entailmentsFromClause(clause));
     }
@@ -279,9 +254,9 @@ public class OpenIE implements Annotator {
   public void annotateSentence(CoreMap sentence, Map<CoreLabel, List<CoreLabel>> canonicalMentionMap) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
     if (tokens.size() < 2) {
-      // Short sentence; skip annotating it.
+      System.err.println("Very short sentence (<2 tokens); " + this.getClass().getSimpleName() + " is skipping it.");
       sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.EMPTY_LIST);
-      sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.EMPTY_SET);
+      sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.EMPTY_LIST);
     } else {
       SemanticGraph parse = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
       if (parse == null) {
@@ -291,13 +266,19 @@ public class OpenIE implements Annotator {
         throw new IllegalStateException("Cannot run OpenIE without a parse tree!");
       }
       List<RelationTriple> extractions = segmenter.extract(parse, tokens);
-      List<SentenceFragment> clauses = clausesInSentence(sentence);
-      Set<SentenceFragment> fragments = entailmentsFromClauses(clauses);
+      if (tokens.size() > 63) {
+        System.err.println("Very long sentence (>63 tokens); " + this.getClass().getSimpleName() + " is not attempting to extract clauses.");
+        sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.EMPTY_LIST);
+        sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.EMPTY_LIST);
+      } else {
+        List<SentenceFragment> clauses = clausesInSentence(sentence);
+        List<SentenceFragment> fragments = entailmentsFromClauses(clauses);
 //        fragments.add(new SentenceFragment(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), false));
-      extractions.addAll(relationsInFragments(fragments, sentence, canonicalMentionMap));
-      sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);
-      sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class,
-          new ArrayList<>(new HashSet<>(extractions)));  // uniq the extractions
+        extractions.addAll(relationsInFragments(fragments, sentence, canonicalMentionMap));
+        sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);
+        sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class,
+            new ArrayList<>(new HashSet<>(extractions)));  // uniq the extractions
+      }
     }
   }
 
@@ -356,7 +337,7 @@ public class OpenIE implements Annotator {
   /** {@inheritDoc} */
   @Override
   public Set<Requirement> requires() {
-    return Annotator.REQUIREMENTS.get(STANFORD_OPENIE);
+    return Collections.singleton(Annotator.NATLOG_REQUIREMENT);
   }
 
   /**
@@ -447,7 +428,7 @@ public class OpenIE implements Annotator {
 
     // Tweak the arguments
     if ("".equals(props.getProperty("annotators", ""))) {
-      props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,natlog,openie");
+      props.setProperty("annotators", "tokenize,ssplit,pos,depparse,natlog,openie");
     }
     if ("".equals(props.getProperty("depparse.extradependencies", ""))) {
       props.setProperty("depparse.extradependencies", "ref_only_uncollapsed");
@@ -456,7 +437,7 @@ public class OpenIE implements Annotator {
       props.setProperty("parse.extradependencies", "ref_only_uncollapsed");
     }
     if ("".equals(props.getProperty("tokenize.class", ""))) {
-      props.setProperty("tokenize.class", "PTBTokenizer");
+      props.setProperty("tokenize.class", "WhitespaceTokenizer");
     }
     if ("".equals(props.getProperty("tokenize.language", ""))) {
       props.setProperty("tokenize.language", "en");

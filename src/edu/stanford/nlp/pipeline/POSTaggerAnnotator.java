@@ -166,7 +166,7 @@ public class POSTaggerAnnotator implements Annotator {
 
   @Override
   public Set<Requirement> requires() {
-    return Annotator.REQUIREMENTS.get(STANFORD_POS);
+    return TOKENIZE_AND_SSPLIT;
   }
 
   @Override

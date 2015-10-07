@@ -60,14 +60,14 @@ public class DcorefBenchmarkSlowITest extends TestCase {
 
   private static final String MENTION_TP = "Mention TP";
   private static final String MENTION_F1 = "Mention F1";
-  private static final String MUC_TP = "MUC TP";
-  private static final String MUC_F1 = "MUC F1";
-  private static final String BCUBED_TP = "Bcubed TP";
-  private static final String BCUBED_F1 = "Bcubed F1";
-  private static final String CEAFM_TP = "CEAFm TP";
-  private static final String CEAFM_F1 = "CEAFm F1";
-  private static final String CEAFE_TP = "CEAFe TP";
-  private static final String CEAFE_F1 = "CEAFe F1";
+  private static final String MUC_TP = "Mention TP";
+  private static final String MUC_F1 = "Mention F1";
+  private static final String BCUBED_TP = "Mention TP";
+  private static final String BCUBED_F1 = "Mention F1";
+  private static final String CEAFM_TP = "Mention TP";
+  private static final String CEAFM_F1 = "Mention F1";
+  private static final String CEAFE_TP = "Mention TP";
+  private static final String CEAFE_F1 = "Mention F1";
   private static final String BLANC_F1 = "BLANC F1";
   private static final String CONLL_SCORE = "CoNLL score";
 
