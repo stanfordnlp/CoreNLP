@@ -70,6 +70,29 @@ public class CoreMapNodePattern extends ComplexNodePattern<CoreMap, Class> {
     return p;
   }
 
+  public static class AttributesEqualMatchChecker<K> implements SequencePattern.NodesMatchChecker<CoreMap> {
+    Collection<Class> keys;
+
+    public AttributesEqualMatchChecker(Class... keys) {
+      this.keys = CollectionUtils.asSet(keys);
+    }
+
+    public boolean matches(CoreMap o1, CoreMap o2) {
+      for (Class key : keys) {
+        Object v1 = o1.get(key);
+        Object v2 = o2.get(key);
+        if (v1 != null) {
+          if (!v1.equals(v2)) {
+            return false;
+          }
+        } else {
+          if (v2 != null) return false;
+        }
+      }
+      return true;
+    }
+  }
+
   public static final AttributesEqualMatchChecker TEXT_ATTR_EQUAL_CHECKER =
-          new AttributesEqualMatchChecker(CoreAnnotations.TextAnnotation.class);
+          new CoreMapNodePattern.AttributesEqualMatchChecker(CoreAnnotations.TextAnnotation.class);
 }
