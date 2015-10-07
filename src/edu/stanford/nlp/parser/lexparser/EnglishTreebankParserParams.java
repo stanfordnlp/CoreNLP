@@ -26,19 +26,17 @@
 
 package edu.stanford.nlp.parser.lexparser;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
+
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.trees.*;
-
-import java.util.function.Predicate;
-
 import edu.stanford.nlp.util.Index;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.util.*;
 
 /**
  * Parser parameters for the Penn English Treebank (WSJ, Brown, Switchboard).
@@ -152,7 +150,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
     super(new PennTreebankLanguagePack());
     headFinder = new ModCollinsHeadFinder(tlp);
   }
-    
+
   private HeadFinder headFinder;
 
   private EnglishTrain englishTrain = new EnglishTrain();
@@ -237,16 +235,6 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
   @Override
   public TreebankLanguagePack treebankLanguagePack() {
     return tlp;
-  }
-
-  /**
-   * The PrintWriter used to print output to OutputStream o. It's the
-   * responsibility of pw to deal properly with character encodings
-   * for the relevant treebank.
-   */
-  @Override
-  public PrintWriter pw(OutputStream o) {
-    return new PrintWriter(o, true);
   }
 
   @Override
@@ -2219,8 +2207,8 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
       try {
         headFinder = (HeadFinder) Class.forName(args[i + 1]).newInstance();
       } catch (Exception e) {
-        System.err.println(e);
-        System.err.println("Warning: Default HeadFinder will be used.");
+        System.err.println("Error: Unable to load HeadFinder; default HeadFinder will be used.");
+        e.printStackTrace();
       }
       i += 2;
     } else if (args[i].equalsIgnoreCase("-makeCopulaHead")) {

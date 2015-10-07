@@ -453,6 +453,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    * Saves the parser defined by pd to the given filename.
    * If there is an error, a RuntimeIOException is thrown.
    */
+  // todo: [cdm 2015] This doesn't use character encoding and it should!
   public void saveParserToTextFile(String filename) {
     if (reranker != null) {
       throw new UnsupportedOperationException("Sorry, but parsers with rerankers cannot be saved to text file");

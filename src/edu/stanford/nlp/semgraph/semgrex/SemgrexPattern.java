@@ -7,7 +7,7 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.trees.CoNLLUDocumentReader;
+import edu.stanford.nlp.trees.conllu.CoNLLUDocumentReader;
 import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
@@ -50,12 +50,17 @@ import edu.stanford.nlp.util.StringUtils;
  * <table border = "1">
  * <tr><th>Symbol<th>Meaning
  * <tr><td>A &lt;reln B <td> A is the dependent of a relation reln with B
- * <tr><td>A &gt;reln B <td>A is the governer of a relation reln with B
+ * <tr><td>A &gt;reln B <td>A is the governor of a relation reln with B
  * <tr><td>A &lt;&lt;reln B <td>A is the dependent of a relation reln in a chain to B following dep-&gt;gov paths
- * <tr><td>A &gt;&gt;reln B <td>A is the governer of a relation reln in a chain to B following gov-&gt;dep paths
+ * <tr><td>A &gt;&gt;reln B <td>A is the governor of a relation reln in a chain to B following gov-&gt;dep paths
  * <tr><td>A x,y&lt;&lt;reln B <td>A is the dependent of a relation reln in a chain to B following dep-&gt;gov paths between distances of x and y
- * <tr><td>A x,y&gt;&gt;reln B <td>A is the governer of a relation reln in a chain to B following gov-&gt;dep paths between distances of x and y
+ * <tr><td>A x,y&gt;&gt;reln B <td>A is the governor of a relation reln in a chain to B following gov-&gt;dep paths between distances of x and y
  * <tr><td>A == B <td>A and B are the same nodes in the same graph
+ * <tr><td>A . B <td>A is immediately precedes B, i.e. A.index() == B.index() - 1
+ * <tr><td>A $+ B <td>B is a right immediate sibling of A, i.e. A and B have the same parent and A.index() == B.index() - 1
+ * <tr><td>A $- B <td>B is a right immediate sibling of A, i.e. A and B have the same parent and A.index() == B.index() + 1
+ * <tr><td>A $++ B <td>B is a right sibling of A, i.e. A and B have the same parent and A.index() < B.index()
+ * <tr><td>A $-- B <td>B is a left sibling of A, i.e. A and B have the same parent and A.index() > B.index()
  * <tr><td>A @ B <td>A is aligned to B
  * </table>
  * <p/>
@@ -64,8 +69,8 @@ import edu.stanford.nlp.util.StringUtils;
  * node in the chain. For example, "<code>{} &gt;nsubj {} &gt;dobj
  * {}</code>" means "any node that is the governor of both a nsubj and
  * a dobj relation".  If instead what you want is a node that is the
- * governer of a nsubj relation with a node that is itself the
- * governer of dobj relation, you should write: "<code>{} &gt;nsubj
+ * governor of a nsubj relation with a node that is itself the
+ * governor of dobj relation, you should write: "<code>{} &gt;nsubj
  * ({} &gt;dobj {})</code>". <p/>
  *
  * If a relation type is specified for the &lt;&lt; relation, the

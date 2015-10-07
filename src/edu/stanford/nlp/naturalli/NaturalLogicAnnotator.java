@@ -576,6 +576,6 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
   /** {@inheritDoc} */
   @Override
   public Set<Requirement> requires() {
-    return Annotator.TOKENIZE_SSPLIT_POS_DEPPARSE;  // TODO(gabor) can also use 'parse' annotator, technically
+    return Annotator.REQUIREMENTS.get(STANFORD_NATLOG);
   }
 }
