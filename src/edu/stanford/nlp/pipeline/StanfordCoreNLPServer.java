@@ -5,10 +5,15 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.util.Execution;
-import edu.stanford.nlp.util.MetaClass;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.ling.tokensregex.SequenceMatchResult;
+import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
+import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
+import edu.stanford.nlp.util.*;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -16,11 +21,9 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.*;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
@@ -44,12 +47,16 @@ public class StanfordCoreNLPServer implements Runnable {
   /**
    * The thread pool for the HTTP server.
    */
-  private final ExecutorService threadPool = Executors.newFixedThreadPool(Execution.threads);
+  private final ExecutorService serverExecutor = Executors.newFixedThreadPool(Execution.threads);
   /**
    * To prevent grossly wasteful over-creation of pipeline objects, cache the last
    * few we created, until the garbage collector decides we can kill them.
    */
   private final WeakHashMap<Properties, StanfordCoreNLP> pipelineCache = new WeakHashMap<>();
+  /**
+   * An executor to time out CoreNLP execution with.
+   */
+  private final ExecutorService corenlpExecutor = Executors.newFixedThreadPool(Execution.threads);
 
 
   public StanfordCoreNLPServer(int port) throws IOException {
@@ -76,18 +83,28 @@ public class StanfordCoreNLPServer implements Runnable {
     this.staticPageHandle = new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.html");
   }
 
-  private static Map<String, String> getURLParams(URI uri) {
+  /**
+   * Parse the URL parameters into a map of (key, value) pairs.
+   *
+   * @param uri The URL that was requested.
+   *
+   * @return A map of (key, value) pairs corresponding to the request parameters.
+   *
+   * @throws UnsupportedEncodingException Thrown if we could not decode the URL with utf8.
+   */
+  private static Map<String, String> getURLParams(URI uri) throws UnsupportedEncodingException {
     if (uri.getQuery() != null) {
       Map<String, String> urlParams = new HashMap<>();
 
       String query = uri.getQuery();
-      String[] queryFields = query.split("&");
+      String[] queryFields = query.replace("\\&", "___AMP___").split("&");
       for (String queryField : queryFields) {
-        String[] keyValue = queryField.split("=");
+        queryField = queryField.replace("___AMP___", "&");
+        int firstEq = queryField.indexOf('=');
         // Convention uses "+" for spaces.
-        keyValue[0] = keyValue[0].replace("+", " ");
-        keyValue[1] = keyValue[1].replace("+", " ");
-        urlParams.put(keyValue[0], keyValue[1]);
+        String key = URLDecoder.decode(queryField.substring(0, firstEq), "utf8");
+        String value = URLDecoder.decode(queryField.substring(firstEq + 1), "utf8");
+        urlParams.put(key, value);
       }
       return urlParams;
     } else {
@@ -96,7 +113,68 @@ public class StanfordCoreNLPServer implements Runnable {
   }
 
   /**
+   * Reads the POST contents of the request and parses it into an Annotation object, ready to be annotated.
+   * This method can also read a serialized document, if the input format is set to be serialized.
    *
+   * @param props The properties we are annotating with. This is where the input format is retrieved from.
+   * @param httpExchange The exchange we are reading POST data from.
+   *
+   * @return An Annotation representing the read document.
+   *
+   * @throws IOException Thrown if we cannot read the POST data.
+   * @throws ClassNotFoundException Thrown if we cannot load the serializer.
+   */
+  private Annotation getDocument(Properties props, HttpExchange httpExchange) throws IOException, ClassNotFoundException {
+    String inputFormat = props.getProperty("inputFormat", "text");
+    switch (inputFormat) {
+      case "text":
+        return new Annotation(IOUtils.slurpReader(new InputStreamReader(httpExchange.getRequestBody())));
+      case "serialized":
+        String inputSerializerName = props.getProperty("inputSerializer", ProtobufAnnotationSerializer.class.getName());
+        AnnotationSerializer serializer = MetaClass.create(inputSerializerName).createInstance();
+        Pair<Annotation, InputStream> pair = serializer.read(httpExchange.getRequestBody());
+        return pair.first;
+      default:
+        throw new IOException("Could not parse input format: " + inputFormat);
+    }
+  }
+
+
+  /**
+   * Create (or retrieve) a StanfordCoreNLP object corresponding to these properties.
+   * @param props The properties to create the object with.
+   * @return A pipeline parameterized by these properties.
+   */
+  private StanfordCoreNLP mkStanfordCoreNLP(Properties props) {
+    StanfordCoreNLP impl;
+    synchronized (pipelineCache) {
+      impl = pipelineCache.get(props);
+      if (impl == null) {
+        impl = new StanfordCoreNLP(props);
+        pipelineCache.put(props, impl);
+      }
+    }
+    return impl;
+  }
+
+  /**
+   * A helper function to respond to a request with an error.
+   * @param response The description of the error to send to the user.
+   *
+   * @param httpExchange The exchange to send the error over.
+   *
+   * @throws IOException Thrown if the HttpExchange cannot communicate the error.
+   */
+  private void respondError(String response, HttpExchange httpExchange) throws IOException {
+    httpExchange.getResponseHeaders().add("Content-Type", "text/plain");
+    httpExchange.sendResponseHeaders(HTTP_ERR, response.length());
+    httpExchange.getResponseBody().write(response.getBytes());
+    httpExchange.close();
+  }
+
+
+  /**
+   * A simple ping test. Responds with pong.
    */
   protected static class PingHandler implements HttpHandler {
     @Override
@@ -110,6 +188,11 @@ public class StanfordCoreNLPServer implements Runnable {
     }
   }
 
+  /**
+   * Sending the appropriate shutdown key will gracefully shutdown the server.
+   * This key is, by default, saved into the local file /tmp/corenlp.shutdown on the
+   * machine the server was run from.
+   */
   protected class ShutdownHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
@@ -150,41 +233,29 @@ public class StanfordCoreNLPServer implements Runnable {
   /**
    * The main handler for taking an annotation request, and annotating it.
    */
-  protected class SimpleAnnotateHandler implements HttpHandler {
+  protected class CoreNLPHandler implements HttpHandler {
     /**
      * The default properties to use in the absence of anything sent by the client.
      */
     public final Properties defaultProps;
-    /**
-     * An executor to time out CoreNLP execution with.
-     */
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     /**
      * Create a handler for accepting annotation requests.
      * @param props The properties file to use as the default if none were sent by the client.
      */
-    public SimpleAnnotateHandler(Properties props) {
+    public CoreNLPHandler(Properties props) {
       defaultProps = props;
     }
 
     /**
-     * Create (or retrieve) a StanfordCoreNLP object corresponding to these properties.
-     * @param props The properties to create the object with.
-     * @return A pipeline parameterized by these properties.
+     * Get the response data type to send to the client, based off of the output format requested from
+     * CoreNLP.
+     *
+     * @param props The properties being used by CoreNLP.
+     * @param of The output format being output by CoreNLP.
+     *
+     * @return An identifier for the type of the HTTP response (e.g., 'text/json').
      */
-    private StanfordCoreNLP mkStanfordCoreNLP(Properties props) {
-      StanfordCoreNLP impl;
-      synchronized (pipelineCache) {
-        impl = pipelineCache.get(props);
-        if (impl == null) {
-          impl = new StanfordCoreNLP(props);
-          pipelineCache.put(props, impl);
-        }
-      }
-      return impl;
-    }
-
     public String getContentType(Properties props, StanfordCoreNLP.OutputFormat of) {
       switch(of) {
         case JSON:
@@ -240,7 +311,10 @@ public class StanfordCoreNLPServer implements Runnable {
       try {
         // Annotate
         StanfordCoreNLP pipeline = mkStanfordCoreNLP(props);
-        Future<Annotation> completedAnnotationFuture = executor.submit(() -> { pipeline.annotate(ann); return ann; });
+        Future<Annotation> completedAnnotationFuture = corenlpExecutor.submit(() -> {
+          pipeline.annotate(ann);
+          return ann;
+        });
         Annotation completedAnnotation = completedAnnotationFuture.get(5, TimeUnit.SECONDS);
 
         // Get output
@@ -254,17 +328,24 @@ public class StanfordCoreNLPServer implements Runnable {
         httpExchange.sendResponseHeaders(HTTP_OK, response.length);
         httpExchange.getResponseBody().write(response);
         httpExchange.close();
+      } catch (TimeoutException e) {
+        respondError("CoreNLP request timed out", httpExchange);
       } catch (Exception e) {
         // Return error message.
-        e.printStackTrace();
-        String response = e.getMessage();
-        httpExchange.getResponseHeaders().add("Content-Type", "text/plain");
-        httpExchange.sendResponseHeaders(HTTP_ERR, response.length());
-        httpExchange.getResponseBody().write(response.getBytes());
-        httpExchange.close();
+        respondError(e.getClass().getName() + ": " + e.getMessage(), httpExchange);
       }
     }
 
+    /**
+     * Parse the parameters of a connection into a CoreNLP properties file that can be passed into
+     * {@link StanfordCoreNLP}, and used in the I/O stages.
+     *
+     * @param httpExchange The http exchange; effectively, the request information.
+     *
+     * @return A {@link Properties} object corresponding to a combination of default and passed properties.
+     *
+     * @throws UnsupportedEncodingException Thrown if we could not decode the key/value pairs with UTF-8.
+     */
     private Properties getProperties(HttpExchange httpExchange) throws UnsupportedEncodingException {
       // Load the default properties
       Properties props = new Properties();
@@ -286,33 +367,226 @@ public class StanfordCoreNLPServer implements Runnable {
 
       return props;
     }
+  }
 
-    private Annotation getDocument(Properties props, HttpExchange httpExchange) throws IOException, ClassNotFoundException {
-      String inputFormat = props.getProperty("inputFormat");
-      switch (inputFormat) {
-        case "text":
-          return new Annotation(IOUtils.slurpReader(new InputStreamReader(httpExchange.getRequestBody())));
-        case "serialized":
-          String inputSerializerName = props.getProperty("inputSerializer");
-          AnnotationSerializer serializer = MetaClass.create(inputSerializerName).createInstance();
-          Pair<Annotation, InputStream> pair = serializer.read(httpExchange.getRequestBody());
-          return pair.first;
-        default:
-          throw new IOException("Could not parse input format: " + inputFormat);
+
+
+  /**
+   * A handler for matching TokensRegex patterns against text.
+   */
+  protected class TokensRegexHandler implements HttpHandler {
+
+    @Override
+    public void handle(HttpExchange httpExchange) throws IOException {
+      // Set common response headers
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+
+      Future<String> json = corenlpExecutor.submit(() -> {
+        try {
+          // Get the document
+          Properties props = new Properties() {{
+            setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+          }};
+          Annotation doc = getDocument(props, httpExchange);
+          if (!doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
+            StanfordCoreNLP pipeline = mkStanfordCoreNLP(props);
+            pipeline.annotate(doc);
+          }
+
+          // Construct the matcher
+          Map<String, String> params = getURLParams(httpExchange.getRequestURI());
+          // (get the pattern)
+          if (!params.containsKey("pattern")) {
+            respondError("Missing required parameter 'pattern'", httpExchange);
+            return "";
+          }
+          String pattern = params.get("pattern");
+          // (get whether to filter / find)
+          String filterStr = params.getOrDefault("filter", "false");
+          final boolean filter = filterStr.trim().isEmpty() || "true".equalsIgnoreCase(filterStr.toLowerCase());
+          // (create the matcher)
+          final TokenSequencePattern regex = TokenSequencePattern.compile(pattern);
+
+          // Run TokensRegex
+          return JSONOutputter.JSONWriter.objectToJSON((docWriter) -> {
+            if (filter) {
+              // Case: just filter sentences
+              docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence ->
+                      regex.matcher(sentence.get(CoreAnnotations.TokensAnnotation.class)).matches()
+              ).collect(Collectors.toList()));
+            } else {
+              // Case: find matches
+              docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer sentWriter) -> {
+                List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+                TokenSequenceMatcher matcher = regex.matcher(tokens);
+                int i = 0;
+                while (matcher.find()) {
+                  sentWriter.set(Integer.toString(i), (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer matchWriter) -> {
+                    matchWriter.set("text", matcher.group());
+                    matchWriter.set("begin", matcher.start());
+                    matchWriter.set("end", matcher.end());
+                    for (int groupI = 0; groupI < matcher.groupCount(); ++groupI) {
+                      SequenceMatchResult.MatchedGroupInfo<CoreMap> info = matcher.groupInfo(groupI + 1);
+                      matchWriter.set(info.varName == null ? Integer.toString(groupI + 1) : info.varName, (Consumer<JSONOutputter.Writer>) groupWriter -> {
+                        groupWriter.set("text", info.text);
+                        if (info.nodes.size() > 0) {
+                          groupWriter.set("begin", info.nodes.get(0).get(CoreAnnotations.IndexAnnotation.class) - 1);
+                          groupWriter.set("end", info.nodes.get(info.nodes.size() - 1).get(CoreAnnotations.IndexAnnotation.class));
+                        }
+                      });
+                    }
+                  });
+                  i += 1;
+                }
+                sentWriter.set("length", i);
+              }));
+            }
+          });
+        } catch (Exception e) {
+          e.printStackTrace();
+          try {
+            respondError(e.getClass().getName() + ": " + e.getMessage(), httpExchange);
+          } catch (IOException ignored) {
+          }
+        }
+        return "";
+      });
+
+      // Send response
+      byte[] response = new byte[0];
+      try {
+        response = json.get(5, TimeUnit.SECONDS).getBytes();
+      } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        respondError("Timeout when executing TokensRegex query", httpExchange);
+      }
+      if (response.length > 0) {
+        httpExchange.getResponseHeaders().add("Content-Type", "text/json");
+        httpExchange.getResponseHeaders().add("Content-Length", Integer.toString(response.length));
+        httpExchange.sendResponseHeaders(HTTP_OK, response.length);
+        httpExchange.getResponseBody().write(response);
+        httpExchange.close();
       }
     }
   }
 
+
+
+  /**
+   * A handler for matching semgrex patterns against dependency trees.
+   */
+  protected class SemgrexHandler implements HttpHandler {
+
+    @Override
+    public void handle(HttpExchange httpExchange) throws IOException {
+      // Set common response headers
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+
+      Future<String> json = corenlpExecutor.submit(() -> {
+        try {
+          // Get the document
+          Properties props = new Properties() {{
+            setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,depparse");
+          }};
+          Annotation doc = getDocument(props, httpExchange);
+          if (!doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
+            StanfordCoreNLP pipeline = mkStanfordCoreNLP(props);
+            pipeline.annotate(doc);
+          }
+
+          // Construct the matcher
+          Map<String, String> params = getURLParams(httpExchange.getRequestURI());
+          // (get the pattern)
+          if (!params.containsKey("pattern")) {
+            respondError("Missing required parameter 'pattern'", httpExchange);
+            return "";
+          }
+          String pattern = params.get("pattern");
+          // (get whether to filter / find)
+          String filterStr = params.getOrDefault("filter", "false");
+          final boolean filter = filterStr.trim().isEmpty() || "true".equalsIgnoreCase(filterStr.toLowerCase());
+          // (create the matcher)
+          final SemgrexPattern regex = SemgrexPattern.compile(pattern);
+
+          // Run TokensRegex
+          return JSONOutputter.JSONWriter.objectToJSON((docWriter) -> {
+            if (filter) {
+              // Case: just filter sentences
+              docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence ->
+                      regex.matcher(sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class)).matches()
+              ).collect(Collectors.toList()));
+            } else {
+              // Case: find matches
+              docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer sentWriter) -> {
+                SemgrexMatcher matcher = regex.matcher(sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class));
+                int i = 0;
+                while (matcher.find()) {
+                  sentWriter.set(Integer.toString(i), (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer matchWriter) -> {
+                    IndexedWord match = matcher.getMatch();
+                    matchWriter.set("text", match.word());
+                    matchWriter.set("begin", match.index() - 1);
+                    matchWriter.set("end", match.index());
+                    for (String capture : matcher.getNodeNames()) {
+                      matchWriter.set("$" + capture, (Consumer<JSONOutputter.Writer>) groupWriter -> {
+                        IndexedWord node = matcher.getNode(capture);
+                        groupWriter.set("text", node.word());
+                        groupWriter.set("begin", node.index() - 1);
+                        groupWriter.set("end", node.index());
+                      });
+                    }
+                  });
+                  i += 1;
+                }
+                sentWriter.set("length", i);
+              }));
+            }
+          });
+        } catch (Exception e) {
+          e.printStackTrace();
+          try {
+            respondError(e.getClass().getName() + ": " + e.getMessage(), httpExchange);
+          } catch (IOException ignored) {
+          }
+        }
+        return "";
+      });
+
+      // Send response
+      byte[] response = new byte[0];
+      try {
+        response = json.get(5, TimeUnit.SECONDS).getBytes();
+      } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        respondError("Timeout when executing Semgrex query", httpExchange);
+      }
+      if (response.length > 0) {
+        httpExchange.getResponseHeaders().add("Content-Type", "text/json");
+        httpExchange.getResponseHeaders().add("Content-Length", Integer.toString(response.length));
+        httpExchange.sendResponseHeaders(HTTP_OK, response.length);
+        httpExchange.getResponseBody().write(response);
+        httpExchange.close();
+      }
+    }
+  }
+
+
+
+
+
+  /**
+   * Run the server.
+   * This method registers the handlers, and initializes the HTTP server.
+   */
   @Override
   public void run() {
     try {
       server = HttpServer.create(new InetSocketAddress(serverPort), 0); // 0 is the default 'backlog'
-      server.createContext("/", new SimpleAnnotateHandler(defaultProps));
+      server.createContext("/", new CoreNLPHandler(defaultProps));
+      server.createContext("/tokensregex", new TokensRegexHandler());
+      server.createContext("/semgrex", new SemgrexHandler());
       server.createContext("/corenlp-brat.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.js"));
       server.createContext("/corenlp-brat.cs", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.css"));
       server.createContext("/ping", new PingHandler());
       server.createContext("/shutdown", new ShutdownHandler());
-      server.setExecutor(threadPool);
+      server.setExecutor(serverExecutor);
       server.start();
       log("StanfordCoreNLPServer listening at " + server.getAddress());
     } catch (IOException e) {
@@ -320,6 +594,14 @@ public class StanfordCoreNLPServer implements Runnable {
     }
   }
 
+  /**
+   * The main method.
+   * Read the command line arguments and run the server.
+   *
+   * @param args The command line arguments
+   *
+   * @throws IOException Thrown if we could not start / run the server.
+   */
   public static void main(String[] args) throws IOException {
     int port = DEFAULT_PORT;
     if(args.length > 0) {
