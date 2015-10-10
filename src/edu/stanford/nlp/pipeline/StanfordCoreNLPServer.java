@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
@@ -40,7 +41,15 @@ public class StanfordCoreNLPServer implements Runnable {
   public static int HTTP_ERR = 500;
   public final Properties defaultProps;
 
+  /**
+   * The thread pool for the HTTP server.
+   */
   private final ExecutorService threadPool = Executors.newFixedThreadPool(Execution.threads);
+  /**
+   * To prevent grossly wasteful over-creation of pipeline objects, cache the last
+   * few we created, until the garbage collector decides we can kill them.
+   */
+  private final WeakHashMap<Properties, StanfordCoreNLP> pipelineCache = new WeakHashMap<>();
 
 
   public StanfordCoreNLPServer(int port) throws IOException {
@@ -146,11 +155,6 @@ public class StanfordCoreNLPServer implements Runnable {
      * The default properties to use in the absence of anything sent by the client.
      */
     public final Properties defaultProps;
-    /**
-     * To prevent grossly wasteful over-creation of pipeline objects, cache the last
-     * few we created, until the garbage collector decides we can kill them.
-     */
-    private final WeakHashMap<Properties, StanfordCoreNLP> pipelineCache = new WeakHashMap<>();
     /**
      * An executor to time out CoreNLP execution with.
      */
