@@ -72,7 +72,6 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
 
   /** Multithreading gradient calculations is a bit cheaper if you reuse the threads. */
   protected int threads = Execution.threads;
-  protected ExecutorService executorService = Executors.newFixedThreadPool(threads);
 
   @Override
   public int domainDimension() {
@@ -326,7 +325,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       CountDownLatch latch = new CountDownLatch(threads);
       for (int i = 0; i < threads; i++) {
         runnables[i] = new CLBatchDerivativeCalculation(threads, i, null, x, derivative.length, latch);
-        executorService.execute(runnables[i]);
+        new Thread(runnables[i]).start();
       }
       try {
         latch.await();
@@ -684,7 +683,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       CountDownLatch latch = new CountDownLatch(threads);
       for (int i = 0; i < threads; i++) {
         runnables[i] = new CLBatchDerivativeCalculation(threads, i, batch, x, x.length, latch);
-        executorService.execute(runnables[i]);
+        new Thread(runnables[i]).start();
       }
       try {
         latch.await();
@@ -1005,7 +1004,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       CountDownLatch latch = new CountDownLatch(threads);
       for (int i = 0; i < threads; i++) {
         runnables[i] = new RVFDerivativeCalculation(threads, i, x, derivative.length, latch);
-        executorService.execute(runnables[i]);
+        new Thread(runnables[i]).start();
       }
       try {
         latch.await();

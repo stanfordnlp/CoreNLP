@@ -49,7 +49,7 @@ public class ClauseSplitterSearchProblem {
 
   /**
    * A specification for clause splits we _always_ want to do. The format is a map from the edge label we are splitting, to
-   * the preference for the type of split we should do. The most prefered is at the front of the list, and then it backs off
+   * the preference for the type of split we should do. The most preferred is at the front of the list, and then it backs off
    * to the less and less preferred split types.
    */
   protected static final Map<String, List<String>> HARD_SPLITS = Collections.unmodifiableMap(new HashMap<String, List<String>>() {{
@@ -106,6 +106,9 @@ public class ClauseSplitterSearchProblem {
    * A mapping from a word to the extra edges that come out of it.
    */
   private final Map<IndexedWord, Collection<SemanticGraphEdge>> extraEdgesByGovernor = new HashMap<>();
+  /**
+   * A mapping from a word to the extra edges that to into it.
+   */
   private final Map<IndexedWord, Collection<SemanticGraphEdge>> extraEdgesByDependent = new HashMap<>();
   /**
    * The classifier for whether a particular dependency edge defines a clause boundary.
@@ -894,7 +897,7 @@ public class ClauseSplitterSearchProblem {
    * The default featurizer to use during training.
    */
   public static final Featurizer DEFAULT_FEATURIZER = new Featurizer() {
-    private static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 4145523451314579506l;
     @Override
     public boolean isSimpleSplit(Counter<String> feats) {
       for (String key : feats.keySet()) {

@@ -2,8 +2,11 @@ package edu.stanford.nlp.ling.tokensregex;
 
 import edu.stanford.nlp.ling.tokensregex.types.Expressions;
 import edu.stanford.nlp.ling.tokensregex.types.Tags;
+import edu.stanford.nlp.pipeline.CoreMapAggregator;
 import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
 import java.util.function.Function;
+
+import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.util.Pair;
 
 import java.util.*;
@@ -106,7 +109,15 @@ public class Env {
    */
   public Map<Class, CoreMapAttributeAggregator> defaultTokensAggregators;
 
+  private CoreMapAggregator defaultTokensAggregator;
+
   /**
+   * Whether we should merge and output corelabels or not
+   */
+  public boolean aggregateToTokens;
+
+
+   /**
    * How annotations are extracted from the MatchedExpression.
    * If the result type is a List and more than one annotation key is specified,
    * then the result is paired with the annotation key.
@@ -148,6 +159,18 @@ public class Env {
 
   public void setDefaultTokensAggregators(Map<Class, CoreMapAttributeAggregator> defaultTokensAggregators) {
     this.defaultTokensAggregators = defaultTokensAggregators;
+  }
+
+  public CoreMapAggregator getDefaultTokensAggregator() {
+    if (defaultTokensAggregator == null && (defaultTokensAggregators != null || aggregateToTokens)) {
+      CoreLabelTokenFactory tokenFactory = (aggregateToTokens)? new CoreLabelTokenFactory():null;
+      Map<Class, CoreMapAttributeAggregator> aggregators = defaultTokensAggregators;
+      if (aggregators == null) {
+        aggregators = CoreMapAttributeAggregator.DEFAULT_NUMERIC_TOKENS_AGGREGATORS;
+      }
+      defaultTokensAggregator = CoreMapAggregator.getAggregator(aggregators, null, tokenFactory);
+    }
+    return defaultTokensAggregator;
   }
 
   public Class getDefaultTextAnnotationKey() {
