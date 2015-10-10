@@ -641,7 +641,7 @@ $(document).ready(function() {
           // Render
           render(data);
           // Render patterns
-          $('#annotations').append('<h4 class="red" style="margin-top: 4ex;">Run Patterns:</h4>');  // TODO(gabor) a strange place to add this header to
+          $('#annotations').append('<h4 class="red" style="margin-top: 4ex;">CoreNLP Tools:</h4>');  // TODO(gabor) a strange place to add this header to
           $('#patterns_row').show();
         }
       },
