@@ -13,6 +13,7 @@ import edu.stanford.nlp.util.*;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -691,7 +692,8 @@ public class NumberNormalizer {
         Number v1 = matched.get(0).get(CoreAnnotations.NumericCompositeValueAnnotation.class);
         Number v2 = matched.get(matched.size()-1).get(CoreAnnotations.NumericCompositeValueAnnotation.class);
         if (v2.doubleValue() > v1.doubleValue()) {
-          CoreMap newChunk = CoreMapAggregator.getDefaultAggregator().merge(numerizedTokens, matcher.start(), matcher.end());
+          CoreMap newChunk = ChunkAnnotationUtils.getMergedChunk(numerizedTokens,  matcher.start(), matcher.end(),
+                  CoreMapAttributeAggregator.getDefaultAggregators());
           newChunk.set(CoreAnnotations.NumericCompositeTypeAnnotation.class, "NUMBER_RANGE");
           Pair<Number,Number> range = new Pair<Number,Number>(v1,v2);
           newChunk.set(CoreAnnotations.NumericCompositeObjectAnnotation.class, range);

@@ -94,8 +94,8 @@ public class SequencePattern<T> implements Serializable {
   //  1. Validate backref capture groupid
   //  2. Actions
   //  3. Inconsistent templating with T
-  //  4. Update TokensSequenceParser to handle backref of other attributes (\9{attr1,attr2,...})
-  //  5. Improve nested capture groups (in matchresult) for other node types such as conjunctions/disjunctions
+  //  4. Match sequence begin/end (update TokensSequenceParser to map ^ => SEQ_BEGIN_PATTERN_EXPR, and $ to SEQ_END_PATTERN_EXPR)
+  //  5. Update TokensSequenceParser to handle backref of other attributes (\9{attr1,attr2,...})
   private String patternStr;
   private PatternExpr patternExpr;
   private SequenceMatchAction<T> action;
@@ -227,7 +227,7 @@ public class SequencePattern<T> implements Serializable {
     return null;
   }
 
-  public <OUT> Collection<OUT> findNodePatterns(Function<NodePattern<T>, OUT> filter, boolean allowOptional, boolean allowBranching) {
+  public <OUT> Collection<OUT> findNodePatterns(Function<NodePattern<T>, OUT> filter) {
     List<OUT> outList = new ArrayList<OUT>();
     Queue<State> todo = new LinkedList<State>();
     Set<State> seen = new HashSet<State>();
@@ -235,7 +235,7 @@ public class SequencePattern<T> implements Serializable {
     seen.add(root);
     while (!todo.isEmpty()) {
       State state = todo.poll();
-      if ((allowOptional || !state.isOptional) && (state instanceof NodePatternState)) {
+      if (state instanceof NodePatternState) {
         NodePattern<T> pattern = ((NodePatternState) state).pattern;
         OUT res = filter.apply(pattern);
         if (res != null) {
@@ -243,14 +243,8 @@ public class SequencePattern<T> implements Serializable {
         }
       }
       if (state.next != null) {
-        boolean addNext = allowBranching || state.next.size() == 1;
-        if (addNext) {
-          for (State s : state.next) {
-            if (!seen.contains(s)) {
-              seen.add(s);
-              todo.add(s);
-            }
-          }
+        for (State s: state.next) {
+          if (!seen.contains(s)) { seen.add(s); todo.add(s); }
         }
       }
     }
@@ -797,9 +791,6 @@ public class SequencePattern<T> implements Serializable {
             f.add(curOut);
           }
         }
-        if (minMatch == 0) {
-          f.start.markOptional(true);
-        }
         return f;
       }  else {
         // More general but more expensive matching (when branching, need to keep state explicitly)
@@ -881,7 +872,6 @@ public class SequencePattern<T> implements Serializable {
         // Add child NFA out (unlinked) states to out (unlinked) states of this fragment
         frag.add(f.out);
       }
-      frag.start.markOptional(true);
       return frag;
     }
 
@@ -1191,7 +1181,6 @@ public class SequencePattern<T> implements Serializable {
      */
     Set<State> next;
     boolean hasSavedValue;
-    boolean isOptional;    // is this state optional
 
     protected State() {}
 
@@ -1283,27 +1272,6 @@ public class SequencePattern<T> implements Serializable {
         }
       }
       return null;
-    }
-
-    public void markOptional(boolean propagate) {
-      this.isOptional = true;
-      if (propagate && next != null) {
-        Stack<State> todo = new Stack<State>();
-        Set<State> seen = new HashSet<State>();
-        todo.addAll(next);
-        while (!todo.empty()) {
-          State s = todo.pop();
-          s.isOptional = true;
-          seen.add(s);
-          if (next != null) {
-            for (State n : next) {
-              if (!seen.contains(n)) {
-                todo.push(n);
-              }
-            }
-          }
-        }
-      }
     }
   }
 
@@ -1404,15 +1372,6 @@ public class SequencePattern<T> implements Serializable {
           List<? extends T> nodes = matchedStates.elements();
           // TODO: Fix type checking
           Collection<HasInterval<Integer>> matched = pattern.match(nodes, cur);
-          // Order matches
-          if (pattern.isGreedyMatch()) {
-            // Sort from long to short
-            matched = CollectionUtils.sorted(matched, Interval.LENGTH_GT_COMPARATOR);
-          } else {
-            // Sort from short to long
-            matched = CollectionUtils.sorted(matched, Interval.LENGTH_LT_COMPARATOR);
-          }
-
           // TODO: Check intervals are valid?   Start at cur and ends after?
           if (matched != null && matched.size() > 0) {
             int nBranches = matched.size();
@@ -1474,7 +1433,6 @@ public class SequencePattern<T> implements Serializable {
       if (maxMatch >= 0 && minMatch > maxMatch) {
         throw new IllegalArgumentException("Invalid minMatch=" + minMatch + ", maxMatch=" + maxMatch);
       }
-      this.isOptional = this.minMatch <= 0;
     }
 
     @Override

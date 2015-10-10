@@ -137,8 +137,6 @@ public class JSONOutputter extends AnnotationOutputter {
               l3.set("speaker", token.get(CoreAnnotations.SpeakerAnnotation.class));
               l3.set("truecase", token.get(CoreAnnotations.TrueCaseAnnotation.class));
               l3.set("truecaseText", token.get(CoreAnnotations.TrueCaseTextAnnotation.class));
-              l3.set("before", token.get(CoreAnnotations.BeforeAnnotation.class));
-              l3.set("after", token.get(CoreAnnotations.AfterAnnotation.class));
               // Timex
               Timex time = token.get(TimeAnnotations.TimexAnnotation.class);
               if (time != null) {
@@ -194,17 +192,17 @@ public class JSONOutputter extends AnnotationOutputter {
           // Roots
           graph.getRoots().stream().map( (IndexedWord root) -> (Consumer<Writer>) dep -> {
             dep.set("dep", "ROOT");
-            dep.set("governor", 0);
+            dep.set("governor", "0");
             dep.set("governorGloss", "ROOT");
-            dep.set("dependent", root.index());
+            dep.set("dependent", Integer.toString(root.index()));
             dep.set("dependentGloss", root.word());
           }),
           // Regular edges
           graph.edgeListSorted().stream().map( (SemanticGraphEdge edge) -> (Consumer<Writer>) (Writer dep) -> {
             dep.set("dep", edge.getRelation().toString());
-            dep.set("governor", edge.getGovernor().index());
+            dep.set("governor", Integer.toString(edge.getGovernor().index()));
             dep.set("governorGloss", edge.getGovernor().word());
-            dep.set("dependent", edge.getDependent().index());
+            dep.set("dependent", Integer.toString(edge.getDependent().index()));
             dep.set("dependentGloss", edge.getDependent().word());
           })
       );

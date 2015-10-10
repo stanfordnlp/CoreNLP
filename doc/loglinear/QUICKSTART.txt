@@ -2,7 +2,7 @@ loglinear package quickstart:
 
 First, read the ConcatVector section in ARCH.txt.
 
-To jump straight into working code, go read generateSentenceModel() in edu.stanford.nlp.loglinear.CoNLLBenchmark.
+To jump straight into working code, go read generateSentenceModel() in edu.stanford.nlp.loglinear.learning.CoNLLBenchmark.
 
 #####################################################
 

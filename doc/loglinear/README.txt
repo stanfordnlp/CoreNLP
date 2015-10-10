@@ -1,6 +1,6 @@
 For an explanation of how everything fits together, see ARCH.txt
 
-For a quick runnable object, go run edu.stanford.nlp.loglinear.CoNLLBenchmark in core's test package.
+For a quick runnable object, go run edu.stanford.nlp.loglinear.learning.CoNLLBenchmark in core's test package.
 
 For a tutorial, see QUICKSTART.txt
 

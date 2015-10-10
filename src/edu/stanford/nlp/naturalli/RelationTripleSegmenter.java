@@ -397,7 +397,6 @@ public class RelationTripleSegmenter {
                                                     Set<String> validArcs, Optional<String> ignoredArc,
                                                     boolean allowExtraArcs) {
     PriorityQueue<CoreLabel> chunk = new FixedPrioritiesPriorityQueue<>();
-    BitSet seenIndices = new BitSet();
     Queue<IndexedWord> fringe = new LinkedList<>();
     IndexedWord root = originalRoot;
     fringe.add(root);
@@ -417,13 +416,17 @@ public class RelationTripleSegmenter {
     while (!fringe.isEmpty()) {
       root = fringe.poll();
       chunk.add(root.backingLabel(), -root.index());
-
-      // Sanity check to prevent infinite loops
-      if (seenIndices.get(root.index())) {
-        // TODO(gabor) Indicates a cycle in the tree!
-        return Optional.empty();
+      for (SemanticGraphEdge edge : parse.incomingEdgeIterable(root)) {
+        if (edge.getDependent() != originalRoot) {
+          String relStr = edge.getRelation().toString();
+          if ((relStr.startsWith("nmod:") &&
+               !"nmod:poss".equals(relStr) &&
+               !"nmod:npmod".equals(relStr)
+              ) ||
+              relStr.startsWith("acl:") || relStr.startsWith("advcl:")) {
+          }
+        }
       }
-      seenIndices.set(root.index());
 
       // Check outgoing edges
       boolean hasConj = false;
@@ -439,7 +442,7 @@ public class RelationTripleSegmenter {
         } else if (edge.getDependent() == primaryCase) {
           // noop: ignore case edge
         } else if (ignoredArc.isPresent() &&
-                   (ignoredArc.get().equals(name) || (ignoredArc.get().startsWith("conj") && name.equals("cc")))) {
+                   (ignoredArc.get().equals(name) || ignoredArc.get().startsWith("conj") && name.equals("cc"))) {
           // noop; ignore explicitly requested noop arc, or "CC" if the noop arc is a conj:*
         } else if (!validArcs.contains(edge.getRelation().getShortName()) && !validArcs.contains(edge.getRelation().getShortName().replaceAll(":.*",":*"))) {
           if (!allowExtraArcs) {

@@ -42,7 +42,7 @@ public class CoreMapNodePatternTrigger implements MultiPatternMatcher.NodePatter
 
     for (SequencePattern<CoreMap> pattern:patterns) {
       // Look for first string...
-      Collection<StringTriggerCandidate> triggerCandidates = pattern.findNodePatterns(stringTriggerFilter, false, true);
+      Collection<StringTriggerCandidate> triggerCandidates = pattern.findNodePatterns(stringTriggerFilter);
       // TODO: Select most unlikely to trigger trigger from the triggerCandidates
       //  (if we had some statistics on most frequent annotation values...., then pick least frequent)
       // For now, just pick the longest: going from (text or lemma) to rest
