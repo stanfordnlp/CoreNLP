@@ -2,7 +2,7 @@ package edu.stanford.nlp.ling.tokensregex;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
-import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
+import edu.stanford.nlp.pipeline.CoreMapAggregator;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CoreMap;
 import java.util.function.Function;
@@ -90,7 +90,7 @@ public class CoreMapSequenceMatcher<T extends CoreMap> extends SequenceMatcher<T
     }  */
     if (merged == null) {
       // Okay, have to go through these one by one and merge them
-      merged = ChunkAnnotationUtils.getMergedChunk(elements, groupStart, groupEnd, CoreMapAttributeAggregator.getDefaultAggregators());
+      merged = CoreMapAggregator.getDefaultAggregator().merge(elements, groupStart, groupEnd);
     }
     return merged;
   }
