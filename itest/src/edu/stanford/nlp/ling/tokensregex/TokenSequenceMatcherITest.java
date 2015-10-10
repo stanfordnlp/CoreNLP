@@ -1,21 +1,21 @@
 package edu.stanford.nlp.ling.tokensregex;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.*;
-import edu.stanford.nlp.process.CoreLabelTokenFactory;
-import edu.stanford.nlp.process.PTBTokenizer;
-import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 import junit.framework.TestCase;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class TokenSequenceMatcherITest extends TestCase {
@@ -89,50 +89,6 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertTrue(match);
     assertEquals("fifty", m.group());
     assertEquals(50, m.groupValue());
-
-    match = m.find();
-    assertFalse(match);
-  }
-
-  public void testTokenSequenceMatcherBeginEnd() throws IOException {
-    CoreMap doc = createDocument(testText);
-
-    // Test simple sequence with begin sequence matching
-    TokenSequencePattern p = TokenSequencePattern.compile("^ [] []");
-    TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-
-    boolean match = m.find();
-    assertTrue(match);
-    assertEquals("the number", m.group());
-
-    match = m.find();
-    assertFalse(match);
-
-    // Test simple sequence with end sequence matching
-    p = TokenSequencePattern.compile("[] [] $");
-    m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-
-    match = m.find();
-    assertTrue(match);
-    assertEquals("fifty.", m.group());
-
-    match = m.find();
-    assertFalse(match);
-
-    // Test simple sequence with begin and end sequence matching
-    p = TokenSequencePattern.compile("^ [] [] $");
-    m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-
-    match = m.find();
-    assertFalse(match);
-
-    // Test simple sequence with ^$ in a string regular expression
-    p = TokenSequencePattern.compile("/^number$/");
-    m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-
-    match = m.find();
-    assertTrue(match);
-    assertEquals("number", m.group());
 
     match = m.find();
     assertFalse(match);
@@ -223,7 +179,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     match = m.find();
     assertTrue(match);
     assertEquals(0, m.groupCount());
-    assertEquals("London in 604.", m.group());
+    assertEquals("London in 604 .", m.group());
     match = m.find();
     assertFalse(match);
   }
@@ -477,31 +433,6 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertEquals("as", m.group(3));
     match = m.find();
     assertFalse(match);
-  }
-
-  public void testTokenSequenceMatcherConj2() throws IOException {
-    String content = "The cat is sleeping on the floor.";
-    String greedyPattern = "(?: ([]* cat []*) & ([]* sleeping []*))";
-
-    TokenizerFactory tf = PTBTokenizer.factory(new CoreLabelTokenFactory(), "");
-    List<CoreLabel> tokens = tf.getTokenizer(new StringReader(content)).tokenize();
-    TokenSequencePattern seqPattern = TokenSequencePattern.compile(greedyPattern);
-    TokenSequenceMatcher matcher = seqPattern.getMatcher(tokens);
-
-    boolean entireMatch = matcher.matches();
-    assertTrue(entireMatch);
-
-    boolean match = matcher.find();
-    assertTrue(match);
-    assertEquals("The cat is sleeping on the floor.", matcher.group());
-
-    String reluctantPattern = "(?: ([]*? cat []*?) & ([]*? sleeping []*?))";
-    TokenSequencePattern seqPattern2 = TokenSequencePattern.compile(reluctantPattern);
-    TokenSequenceMatcher matcher2 = seqPattern2.getMatcher(tokens);
-
-    match = matcher2.find();
-    assertTrue(match);
-    assertEquals("The cat is sleeping", matcher2.group());
   }
 
   public void testTokenSequenceMatcherConjAll() throws IOException {
@@ -1048,7 +979,7 @@ public class TokenSequenceMatcherITest extends TestCase {
       TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
       boolean match = m.find();
       assertTrue(match);
-      assertEquals("atropine we need to have many many words here but we don't sweating", m.group(0));
+      assertEquals("atropine we need to have many many words here but we do n't sweating", m.group(0));
 
       match = m.find();
       assertFalse(match);
@@ -1074,7 +1005,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     CoreMap doc = createDocument("atropine we need to have many many words here but we don't sweating");
     MultiPatternMatcher<CoreMap> multiPatternMatcher = TokenSequencePattern.getMultiPatternMatcher(p1, p2);
     List<String> expected = new ArrayList<String>();
-    expected.add("atropine we need to have many many words here but we don't sweating");
+    expected.add("atropine we need to have many many words here but we do n't sweating");
     Iterator<String> expectedIter = expected.iterator();
 
     Iterable<SequenceMatchResult<CoreMap>> matches =
@@ -1256,7 +1187,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     match = m.find();
     assertTrue(match);
     assertEquals(0, m.groupCount());
-    assertEquals("January 3, 2002", m.group());
+    assertEquals("January 3 , 2002", m.group());
     match = m.find();
     assertFalse(match);
 
@@ -1265,7 +1196,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     match = m.find();
     assertTrue(match);
     assertEquals(0, m.groupCount());
-    assertEquals("January 3, 2002", m.group());
+    assertEquals("January 3 , 2002", m.group());
     match = m.find();
     assertFalse(match);
 
@@ -1473,32 +1404,6 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
-  public void testTokenSequenceMatcherMultiNodePattern2() throws IOException {
-    CoreMap doc = createDocument("Replace the lamp with model wss.32dc55c3e945384dbc5e533ab711fd24");
-
-    // Greedy
-    TokenSequencePattern p = TokenSequencePattern.compile("/model/ ((?m){1,4}/\\w+\\.\\w+/)");
-    TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    boolean match = m.find();
-    assertTrue(match);
-    assertEquals(1, m.groupCount());
-    assertEquals("model wss.32dc55c3e945384dbc5e533ab711fd24", m.group());
-    assertEquals("wss.32dc55c3e945384dbc5e533ab711fd24", m.group(1));
-    match = m.find();
-    assertFalse(match);
-
-    // Reluctant
-    p = TokenSequencePattern.compile("/model/ ((?m){1,4}?/\\w+\\.\\w+/)");
-    m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    match = m.find();
-    assertTrue(match);
-    assertEquals(1, m.groupCount());
-    assertEquals("model wss.32", m.group());
-    assertEquals("wss.32", m.group(1));
-    match = m.find();
-    assertFalse(match);
-  }
-
   public void testTokenSequenceMatcherBackRef() throws IOException {
     CoreMap doc = createDocument("A A A A A A A B A A B A C A E A A A A A A A A A A A B A A A");
 
@@ -1583,18 +1488,17 @@ public class TokenSequenceMatcherITest extends TestCase {
     //assertEquals(m.group(), "matching this");
   }
 
-  public void testBindingCompile(){
-    Env env = TokenSequencePattern.getNewEnv();
-    env.bind("wordname",CoreAnnotations.TextAnnotation.class);
-    String s = "[wordname:\"name\"]{1,2}";
-    TokenSequencePattern p = TokenSequencePattern.compile(env, s);
-  }
-
-// // This does not work!!!
-//  public void testNoBindingCompile(){
+  //This DOES NOT work right now!!
+//  public void testCompile2(){
 //    Env env = TokenSequencePattern.getNewEnv();
+//    env.bind("wordname",CoreAnnotations.TextAnnotation.class);
 //    String s = "[" + CoreAnnotations.TextAnnotation.class.getName()+":\"name\"]{1,2}";
 //    TokenSequencePattern p = TokenSequencePattern.compile(env, s);
+//    for(Map.Entry<String, Object> vars: env.getVariables().entrySet()){
+//      if(vars.getValue().equals(CoreAnnotations.TextAnnotation.class)){
+//        System.out.println("Found " + vars.getKey() + " binding for " + vars.getValue());
+//      }
+//    }
 //  }
 
   public void testCaseInsensitive1(){

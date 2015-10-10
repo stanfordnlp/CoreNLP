@@ -1,7 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.AnnotationLookup;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
@@ -187,11 +186,10 @@ public class ChunkAnnotationUtils {
    * @param origText - Text from which to extract chunk text
    * @param chunkIndexStart - Index of first chunk to merge
    * @param chunkIndexEnd - Index of last chunk to merge (exclusive)
-   * @param tokenFactory - factory for creating tokens (if we want to get a merged corelabel instead of something random)
    * @return new merged chunk
    */
   public static CoreMap getMergedChunk(List<? extends CoreMap> chunkList, String origText,
-                                       int chunkIndexStart, int chunkIndexEnd, CoreLabelTokenFactory tokenFactory)
+                                       int chunkIndexStart, int chunkIndexEnd)
   {
     CoreMap firstChunk = chunkList.get(chunkIndexStart);
     CoreMap lastChunk = chunkList.get(chunkIndexEnd-1);
@@ -201,12 +199,7 @@ public class ChunkAnnotationUtils {
     int lastTokenIndex = lastChunk.get(CoreAnnotations.TokenEndAnnotation.class);
 
     String chunkText = origText.substring(firstCharOffset, lastCharOffset);
-    CoreMap newChunk;
-    if (tokenFactory != null) {
-      newChunk = tokenFactory.makeToken(chunkText, firstCharOffset, lastCharOffset);
-    } else {
-      newChunk = new Annotation(chunkText);
-    }
+    CoreMap newChunk = new Annotation(chunkText);
 
     newChunk.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, firstCharOffset);
     newChunk.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, lastCharOffset);
@@ -229,31 +222,19 @@ public class ChunkAnnotationUtils {
    * @param chunkIndexStart - Index of first chunk to merge
    * @param chunkIndexEnd - Index of last chunk to merge (exclusive)
    * @param aggregators - Aggregators
-   * @param tokenFactory - factory for creating tokens (if we want to get a merged corelabel instead of something random)
    * @return new merged chunk
    */
   public static CoreMap getMergedChunk(List<? extends CoreMap> chunkList,
                                        int chunkIndexStart, int chunkIndexEnd,
-                                       Map<Class, CoreMapAttributeAggregator> aggregators,
-                                       CoreLabelTokenFactory tokenFactory)
+                                       Map<Class, CoreMapAttributeAggregator> aggregators)
   {
-    CoreMap newChunk;
-    if (tokenFactory != null) {
-      newChunk = tokenFactory.makeToken();
-    } else {
-      newChunk = new Annotation("");
-    }
+    CoreMap newChunk = new Annotation("");
     for (Map.Entry<Class,CoreMapAttributeAggregator> entry:aggregators.entrySet()) {
       if (chunkIndexEnd > chunkList.size()) {
         assert(false);
       }
       Object value = entry.getValue().aggregate(entry.getKey(), chunkList.subList(chunkIndexStart, chunkIndexEnd));
       newChunk.set(entry.getKey(), value);
-    }
-    if (newChunk instanceof CoreLabel) {
-      CoreLabel cl = (CoreLabel) newChunk;
-      cl.setValue(cl.word());
-      cl.setOriginalText(cl.word());
     }
     return newChunk;
   }
@@ -300,7 +281,7 @@ public class ChunkAnnotationUtils {
   public static void mergeChunks(List<CoreMap> chunkList, String origText,
                                  int chunkIndexStart, int chunkIndexEnd)
   {
-    CoreMap newChunk = getMergedChunk(chunkList, origText, chunkIndexStart, chunkIndexEnd, null);
+    CoreMap newChunk = getMergedChunk(chunkList, origText, chunkIndexStart, chunkIndexEnd);
     int nChunksToRemove = chunkIndexEnd - chunkIndexStart - 1;
     for (int i = 0; i < nChunksToRemove; i++) {
       chunkList.remove(chunkIndexStart);
@@ -526,26 +507,11 @@ public class ChunkAnnotationUtils {
   public static String getTokenText(List<? extends CoreMap> tokens, Class tokenTextKey, String delimiter)
   {
     StringBuilder sb = new StringBuilder();
-    int prevEndIndex = -1;
-    for (CoreMap cm:tokens) {
-      Object obj = cm.get(tokenTextKey);
-      boolean includeDelimiter = sb.length() > 0;
-      if (cm.containsKey(CoreAnnotations.CharacterOffsetBeginAnnotation.class) &&
-        cm.containsKey(CoreAnnotations.CharacterOffsetEndAnnotation.class)) {
-        int beginIndex = cm.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-        int endIndex = cm.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
-        if (prevEndIndex == beginIndex) {
-          // No spaces
-          includeDelimiter = false;
-        }
-        prevEndIndex = endIndex;
+    for (CoreMap t: tokens) {
+      if (sb.length() != 0) {
+        sb.append(delimiter);
       }
-      if (obj != null) {
-        if (includeDelimiter) {
-          sb.append(delimiter);
-        }
-        sb.append(obj);
-      }
+      sb.append(t.get(tokenTextKey));
     }
     return sb.toString();
   }

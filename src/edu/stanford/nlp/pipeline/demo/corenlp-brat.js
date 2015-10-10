@@ -433,7 +433,7 @@ $(document).ready(function() {
     // Get the text to annotate
     text = $('#text').val();
     if (text == '') {
-      text = 'My dog also likes eating sausage.';
+      text = 'The quick brown fox jumped over the lazy dog.';
       $('#text').val(text);
     }
     // Update the UI

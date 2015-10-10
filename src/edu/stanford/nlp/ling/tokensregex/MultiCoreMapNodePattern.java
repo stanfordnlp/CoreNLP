@@ -43,7 +43,7 @@ public class MultiCoreMapNodePattern extends MultiNodePattern<CoreMap> {
       maxEnd = maxNodes + start;
     }
     for (int end = minEnd; end <= maxEnd; end++) {
-      CoreMap chunk = ChunkAnnotationUtils.getMergedChunk(nodes, start, end, aggregators, null);
+      CoreMap chunk = ChunkAnnotationUtils.getMergedChunk(nodes, start, end, aggregators);
       if (nodePattern.match(chunk)) {
         matched.add(Interval.toInterval(start, end));
       }

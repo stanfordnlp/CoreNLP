@@ -103,16 +103,16 @@ public class TimeFormatter {
                                      Pattern pattern,
                                      Function<String, Value> extractor)
     {
-      MatchedExpression.SingleAnnotationExtractor annotationExtractor = SequenceMatchRules.createAnnotationExtractor(env,r);
-      annotationExtractor.valueExtractor =
+      MatchedExpression.SingleAnnotationExtractor valueExtractor = SequenceMatchRules.createAnnotationExtractor(env,r);
+      valueExtractor.valueExtractor =
               new SequenceMatchRules.CoreMapFunctionApplier< String, Value>(
                       env, r.annotationField,
                       extractor);
       r.extractRule = new SequenceMatchRules.CoreMapExtractRule< String, MatchedExpression >(
               env, r.annotationField,
               new SequenceMatchRules.StringPatternExtractRule<MatchedExpression>(pattern,
-                      new SequenceMatchRules.StringMatchedExpressionExtractor( annotationExtractor, r.matchedExpressionGroup)));
-      r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(annotationExtractor);
+                      new SequenceMatchRules.StringMatchedExpressionExtractor( valueExtractor, r.matchedExpressionGroup)));
+      r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(valueExtractor);
       r.pattern = pattern;
     }
 
@@ -120,12 +120,12 @@ public class TimeFormatter {
                                      Env env,
                                      Function<CoreMap, Value> extractor)
     {
-      MatchedExpression.SingleAnnotationExtractor annotationExtractor = SequenceMatchRules.createAnnotationExtractor(env,r);
-      annotationExtractor.valueExtractor = extractor;
+      MatchedExpression.SingleAnnotationExtractor valueExtractor = SequenceMatchRules.createAnnotationExtractor(env,r);
+      valueExtractor.valueExtractor = extractor;
       r.extractRule = new SequenceMatchRules.CoreMapExtractRule<List<? extends CoreMap>, MatchedExpression >(
               env, r.annotationField,
-              new SequenceMatchRules.BasicSequenceExtractRule(annotationExtractor));
-      r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(annotationExtractor);
+              new SequenceMatchRules.BasicSequenceExtractRule(valueExtractor));
+      r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(valueExtractor);
     }
 
     @Override

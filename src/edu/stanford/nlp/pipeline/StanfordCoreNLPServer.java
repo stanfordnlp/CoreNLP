@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.MetaClass;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
@@ -15,6 +16,10 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
@@ -34,6 +39,8 @@ public class StanfordCoreNLPServer implements Runnable {
   public static int HTTP_BAD_INPUT = 400;
   public static int HTTP_ERR = 500;
   public final Properties defaultProps;
+
+  private final ExecutorService threadPool = Executors.newFixedThreadPool(Execution.threads);
 
 
   public StanfordCoreNLPServer(int port) throws IOException {
@@ -225,11 +232,12 @@ public class StanfordCoreNLPServer implements Runnable {
       try {
         // Annotate
         StanfordCoreNLP pipeline = mkStanfordCoreNLP(props);
-        pipeline.annotate(ann);
+        Future<Annotation> completedAnnotationFuture = threadPool.submit(() -> { pipeline.annotate(ann); return ann; });
+        Annotation completedAnnotation = completedAnnotationFuture.get(5, TimeUnit.SECONDS);
 
         // Get output
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        StanfordCoreNLP.createOutputter(props, AnnotationOutputter.getOptions(pipeline)).accept(ann, os);
+        StanfordCoreNLP.createOutputter(props, AnnotationOutputter.getOptions(pipeline)).accept(completedAnnotation, os);
         os.close();
         byte[] response = os.toByteArray();
 

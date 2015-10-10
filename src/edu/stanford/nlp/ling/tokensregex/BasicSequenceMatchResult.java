@@ -58,7 +58,7 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
       }
     }
     if (matchedResults != null) {
-      res.matchedResults = new Object[matchedResults.length];
+      res.matchedResults = new Object[res.matchedResults.length];
       System.arraycopy(res.matchedResults, 0, matchedResults, 0, matchedResults.length);
     }
     return res;

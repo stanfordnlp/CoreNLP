@@ -3,7 +3,7 @@ package edu.stanford.nlp.ling.tokensregex;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
 import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
-import edu.stanford.nlp.pipeline.CoreMapAggregator;
+import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
 import edu.stanford.nlp.util.Comparators;
 import edu.stanford.nlp.util.CoreMap;
 import java.util.function.Function;
@@ -39,7 +39,6 @@ public class MatchedExpression {
 
   // TODO: Should we keep some context from the source so we can perform more complex evaluation?
   /** Function indicating how to extract an value from annotation built from this expression */
-  protected Object context; // Some context to help to extract value from annotation
   protected SingleAnnotationExtractor extractFunc;
 
   public Value value;
@@ -65,9 +64,8 @@ public class MatchedExpression {
     public Class resultNestedAnnotationField; // Annotation field for child/nested annotations
     public boolean includeNested = false;
     public Function<CoreMap, Value> valueExtractor;
-    public Function<MatchedExpression, Value> expressionToValue;
     public Function<MatchedExpression,?> resultAnnotationExtractor;
-    public CoreMapAggregator tokensAggregator;
+    public Map<Class, CoreMapAttributeAggregator> tokensAggregators;
 
     @Override
     public Value apply(CoreMap in) {
@@ -111,11 +109,7 @@ public class MatchedExpression {
     }
 
     public void annotate(MatchedExpression matchedExpression) {
-      Value ev = null;
-      if (expressionToValue != null) {
-        ev = expressionToValue.apply(matchedExpression);
-      }
-      matchedExpression.value = (ev != null)? ev : valueExtractor.apply(matchedExpression.annotation);
+      matchedExpression.value = valueExtractor.apply(matchedExpression.annotation);
 
       if (resultAnnotationField != null) {
         if (resultAnnotationExtractor != null) {
@@ -182,16 +176,16 @@ public class MatchedExpression {
 
   public boolean extractAnnotation(Env env, CoreMap sourceAnnotation)
   {
-    return extractAnnotation(sourceAnnotation, extractFunc.tokensAggregator);
+    return extractAnnotation(sourceAnnotation, extractFunc.tokensAggregators);
   }
 
   private boolean extractAnnotation(CoreMap sourceAnnotation,
-                                    CoreMapAggregator aggregator)
+                                    Map<Class, CoreMapAttributeAggregator> aggregators)
   {
     Class tokensAnnotationKey = extractFunc.tokensAnnotationField;
     if (chunkOffsets != null) {
-      annotation = aggregator.merge((List<? extends CoreMap>) sourceAnnotation.get(tokensAnnotationKey),
-              chunkOffsets.getBegin(), chunkOffsets.getEnd());
+      annotation = ChunkAnnotationUtils.getMergedChunk((List<? extends CoreMap>) sourceAnnotation.get(tokensAnnotationKey),
+              chunkOffsets.getBegin(), chunkOffsets.getEnd(), aggregators );
       if (sourceAnnotation.containsKey(CoreAnnotations.TextAnnotation.class)) {
         ChunkAnnotationUtils.annotateChunkText(annotation, sourceAnnotation);
       }
@@ -215,8 +209,8 @@ public class MatchedExpression {
 
       chunkOffsets = ChunkAnnotationUtils.getChunkOffsetsUsingCharOffsets((List<? extends CoreMap>) sourceAnnotation.get(tokensAnnotationKey),
               charOffsets.getBegin() + baseCharOffset, charOffsets.getEnd()  + baseCharOffset);
-      CoreMap annotation2 = aggregator.merge((List<? extends CoreMap>) sourceAnnotation.get(tokensAnnotationKey),
-              chunkOffsets.getBegin(), chunkOffsets.getEnd());
+      CoreMap annotation2 = ChunkAnnotationUtils.getMergedChunk((List<? extends CoreMap>) sourceAnnotation.get(tokensAnnotationKey),
+              chunkOffsets.getBegin(), chunkOffsets.getEnd(), aggregators );
 
       annotation = ChunkAnnotationUtils.getAnnotatedChunkUsingCharOffsets(sourceAnnotation, charOffsets.getBegin(), charOffsets.getEnd());
       tokenOffsets = Interval.toInterval(annotation.get(CoreAnnotations.TokenBeginAnnotation.class),
@@ -230,12 +224,12 @@ public class MatchedExpression {
 
   public boolean extractAnnotation(Env env, List<? extends CoreMap> source)
   {
-    return extractAnnotation(source, CoreMapAggregator.getDefaultAggregator());
+    return extractAnnotation(source, CoreMapAttributeAggregator.getDefaultAggregators());
   }
 
-  protected boolean extractAnnotation(List<? extends CoreMap> source, CoreMapAggregator aggregator)
+  protected boolean extractAnnotation(List<? extends CoreMap> source, Map<Class, CoreMapAttributeAggregator> chunkAggregators)
   {
-    annotation = aggregator.merge(source, chunkOffsets.getBegin(), chunkOffsets.getEnd());
+    annotation = ChunkAnnotationUtils.getMergedChunk(source,  chunkOffsets.getBegin(), chunkOffsets.getEnd(), chunkAggregators);
     charOffsets = Interval.toInterval(annotation.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
             annotation.get(CoreAnnotations.CharacterOffsetEndAnnotation.class), Interval.INTERVAL_OPEN_END);
     tokenOffsets = Interval.toInterval(annotation.get(CoreAnnotations.TokenBeginAnnotation.class),
