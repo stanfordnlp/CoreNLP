@@ -151,6 +151,10 @@ public class StanfordCoreNLPServer implements Runnable {
      * few we created, until the garbage collector decides we can kill them.
      */
     private final WeakHashMap<Properties, StanfordCoreNLP> pipelineCache = new WeakHashMap<>();
+    /**
+     * An executor to time out CoreNLP execution with.
+     */
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     /**
      * Create a handler for accepting annotation requests.
@@ -232,7 +236,7 @@ public class StanfordCoreNLPServer implements Runnable {
       try {
         // Annotate
         StanfordCoreNLP pipeline = mkStanfordCoreNLP(props);
-        Future<Annotation> completedAnnotationFuture = threadPool.submit(() -> { pipeline.annotate(ann); return ann; });
+        Future<Annotation> completedAnnotationFuture = executor.submit(() -> { pipeline.annotate(ann); return ann; });
         Annotation completedAnnotation = completedAnnotationFuture.get(5, TimeUnit.SECONDS);
 
         // Get output
@@ -304,6 +308,7 @@ public class StanfordCoreNLPServer implements Runnable {
       server.createContext("/corenlp-brat.cs", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.css"));
       server.createContext("/ping", new PingHandler());
       server.createContext("/shutdown", new ShutdownHandler());
+      server.setExecutor(threadPool);
       server.start();
       log("StanfordCoreNLPServer listening at " + server.getAddress());
     } catch (IOException e) {
