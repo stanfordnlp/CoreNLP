@@ -252,6 +252,16 @@ public class Generics {
     return new HashIndex<E>();
   }
 
+  public static <E> Set<E> newConcurrentHashSet() {
+    return Collections.newSetFromMap(new ConcurrentHashMap<>());
+  }
+
+  public static <E> Set<E> newConcurrentHashSet(Set<E> set) {
+    Set<E> ret = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    ret.addAll(set);
+    return ret;
+  }
+
 
   /* Other */
   public static <T1,T2> Pair<T1,T2> newPair(T1 first, T2 second) {

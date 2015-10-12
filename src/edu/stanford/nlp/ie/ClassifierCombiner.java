@@ -511,7 +511,6 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
       // go through baseClassifiers and write each one to disk with CRFClassifier's serialize method
       System.err.println("");
       for (AbstractSequenceClassifier<IN> asc : baseClassifiers) {
-        // TODO: fix situation so that this doesn't have to just be for crf's
         //CRFClassifier crfc = (CRFClassifier) asc;
         //System.err.println("Serializing a base classifier...");
         asc.serializeClassifier(oos);
