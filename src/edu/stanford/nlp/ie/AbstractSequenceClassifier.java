@@ -290,9 +290,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
   /**
    * Classify a List of IN using whatever additional information is passed in globalInfo.
-   * Used by SUTime (NumberSequenceClassifier), which requires the doc date to resolve relative dates.
+   * Used by SUTime (NumberSequenceClassifier), which requires the doc date to resolve relative dates
    *
-   * @param tokenSequence The List of IN to be classified.
+   * @param tokenSequence
+   *          The List of IN to be classified.
    * @return The classified List of IN, where the classifier output for
    *         each token is stored in its "answer" field.
    */
@@ -1464,7 +1465,6 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public abstract void loadClassifier(ObjectInputStream in, Properties props) throws IOException, ClassCastException,
       ClassNotFoundException;
 
-  // todo [cdm 2015]: Replace this method with use of the method in IOUtils.
   private InputStream loadStreamFromClasspath(String path) {
     InputStream is = getClass().getClassLoader().getResourceAsStream(path);
     if (is == null)

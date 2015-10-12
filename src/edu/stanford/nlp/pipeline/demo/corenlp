@@ -49,10 +49,19 @@ do_stop()
   fi
 }
 
+do_restart()
+{
+  do_stop
+  sleep 3
+  do_start
+}
+
 case $1 in
 start) do_start
 ;;
 stop) do_stop
+;;
+restart) do_restart
 ;;
 esac
 

@@ -221,7 +221,7 @@ public class StanfordCoreNLPServer implements Runnable {
   protected static class FileHandler implements HttpHandler {
     private final String content;
     public FileHandler(String fileOrClasspath) throws IOException {
-      this.content = IOUtils.slurpReader(IOUtils.getBufferedReaderFromClasspathOrFileSystem(fileOrClasspath));
+      this.content = IOUtils.slurpReader(IOUtils.readerFromString(fileOrClasspath));
     }
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
