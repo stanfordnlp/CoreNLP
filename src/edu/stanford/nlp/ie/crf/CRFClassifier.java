@@ -190,7 +190,12 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     this.windowSize = crf.windowSize;
     this.featureFactories = crf.featureFactories;
     this.pad = crf.pad;
-    this.knownLCWords = (crf.knownLCWords != null) ? new MaxSizeConcurrentHashSet<>(crf.knownLCWords) : new MaxSizeConcurrentHashSet<>();
+    if (crf.knownLCWords != null) {
+      this.knownLCWords = new MaxSizeConcurrentHashSet<>(crf.flags.maxAdditionalKnownLCWords);
+    } else {
+      this.knownLCWords = new MaxSizeConcurrentHashSet<>(crf.knownLCWords);
+      this.knownLCWords.setMaxSize(this.knownLCWords.size() + crf.flags.maxAdditionalKnownLCWords);
+    }
     this.featureIndex = (crf.featureIndex != null) ? new HashIndex<String>(crf.featureIndex.objectsList()) : null;
     this.classIndex = (crf.classIndex != null) ? new HashIndex<String>(crf.classIndex.objectsList()) : null;
     if (crf.labelIndices != null) {
@@ -2649,12 +2654,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     weights = (double[][]) ois.readObject();
 
     // WordShapeClassifier.setKnownLowerCaseWords((Set) ois.readObject());
-    Set<String> lcWords = (Set<String>) ois.readObject();
-    if (lcWords instanceof MaxSizeConcurrentHashSet) {
-      knownLCWords = (MaxSizeConcurrentHashSet<String>) lcWords;
-    } else {
-      knownLCWords = new MaxSizeConcurrentHashSet<>(lcWords);
-    }
+    knownLCWords = (MaxSizeConcurrentHashSet<String>) ois.readObject();
 
     if (flags.labelDictionaryCutoff > 0) {
       labelDictionary = (LabelDictionary) ois.readObject();
@@ -2953,6 +2953,13 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       ClassNotFoundException {
     CRFClassifier<INN> crf = new CRFClassifier<INN>();
     crf.loadClassifier(loadPath, props);
+    return crf;
+  }
+
+  public static <INN extends CoreMap> CRFClassifier<INN> getClassifier(ObjectInputStream ois, Properties props) throws IOException, ClassCastException,
+      ClassNotFoundException {
+    CRFClassifier<INN> crf = new CRFClassifier<INN>();
+    crf.loadClassifier(ois, props);
     return crf;
   }
 

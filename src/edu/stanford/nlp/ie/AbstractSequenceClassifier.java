@@ -183,6 +183,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     if (knownLCWords == null || knownLCWords.isEmpty()) {
       // reinit limits max (additional) size. We temporarily loosen this during training
       knownLCWords = new MaxSizeConcurrentHashSet<>(flags.maxAdditionalKnownLCWords);
+    } else {
+      knownLCWords.setMaxSize(knownLCWords.size() + flags.maxAdditionalKnownLCWords);
     }
   }
 

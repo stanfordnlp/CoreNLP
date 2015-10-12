@@ -1152,6 +1152,14 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     return cmm;
   }
 
+  public static <INN extends CoreMap> CMMClassifier<? extends CoreLabel> getClassifier(ObjectInputStream ois, Properties props) throws IOException,
+          ClassCastException,
+          ClassNotFoundException {
+    CMMClassifier<? extends CoreLabel> cmm = new CMMClassifier<>();
+    cmm.loadClassifier(ois, props);
+    return cmm;
+  }
+
   public static CMMClassifier<? extends CoreLabel> getClassifier(InputStream in) throws IOException, ClassCastException, ClassNotFoundException {
     CMMClassifier<? extends CoreLabel> cmm = new CMMClassifier<CoreLabel>();
     cmm.loadClassifier(new BufferedInputStream(in));

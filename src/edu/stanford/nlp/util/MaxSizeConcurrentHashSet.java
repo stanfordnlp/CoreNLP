@@ -29,9 +29,7 @@ public class MaxSizeConcurrentHashSet<E> implements Set<E>, Serializable {
   private int maxSize;
 
   public MaxSizeConcurrentHashSet() {
-    this.m = new ConcurrentHashMap<>();
-    init();
-    maxSize = -1;
+    this(-1);
   }
 
   public MaxSizeConcurrentHashSet(int maxSize) {
@@ -41,8 +39,10 @@ public class MaxSizeConcurrentHashSet<E> implements Set<E>, Serializable {
   }
 
   public MaxSizeConcurrentHashSet(Set<? extends E> s) {
-    this();
+    this.m = new ConcurrentHashMap<>(Math.max(s.size(), 16));
+    init();
     addAll(s);
+    this.maxSize = -1;
   }
 
   private void init() {

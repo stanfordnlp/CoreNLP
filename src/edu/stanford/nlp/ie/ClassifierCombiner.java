@@ -209,13 +209,13 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     while (i < numClassifiers) {
       try {
         System.err.println("loading CRF...");
-        CRFClassifier newCRF = ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(ois));
+        CRFClassifier newCRF = ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(ois, props));
         baseClassifiers.add(newCRF);
         i++;
       } catch (Exception e) {
         try {
           System.err.println("loading CMM...");
-          CMMClassifier newCMM = ErasureUtils.uncheckedCast(CMMClassifier.getClassifier(ois));
+          CMMClassifier newCMM = ErasureUtils.uncheckedCast(CMMClassifier.getClassifier(ois, props));
           baseClassifiers.add(newCMM);
           i++;
         } catch (Exception ex) {
