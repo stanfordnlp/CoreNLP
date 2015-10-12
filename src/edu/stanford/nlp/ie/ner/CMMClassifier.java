@@ -1105,7 +1105,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     classIndex = (Index<String>) ois.readObject();
     answerArrays = (Set<List<String>>) ois.readObject();
 
-    knownLCWords = (Set<String>) ois.readObject();
+    knownLCWords = (MaxSizeConcurrentHashSet<String>) ois.readObject();
   }
 
 
