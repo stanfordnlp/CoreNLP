@@ -34,7 +34,6 @@ import java.util.List;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.Datum;
-import edu.stanford.nlp.ling.RVFDatum;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.optimization.*;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -231,7 +230,6 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
 
   /**
    * Set the verbose flag for {@link CGMinimizer}.
-   * Only used with conjugate-gradient minimization.
    * {@code false} is the default.
    */
   public void setVerbose(boolean verbose) {
