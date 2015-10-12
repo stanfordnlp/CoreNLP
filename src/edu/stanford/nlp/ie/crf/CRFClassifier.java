@@ -2649,7 +2649,12 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     weights = (double[][]) ois.readObject();
 
     // WordShapeClassifier.setKnownLowerCaseWords((Set) ois.readObject());
-    knownLCWords = (MaxSizeConcurrentHashSet<String>) ois.readObject();
+    Set<String> lcWords = (Set<String>) ois.readObject();
+    if (lcWords instanceof MaxSizeConcurrentHashSet) {
+      knownLCWords = (MaxSizeConcurrentHashSet<String>) lcWords;
+    } else {
+      knownLCWords = new MaxSizeConcurrentHashSet<>(lcWords);
+    }
 
     if (flags.labelDictionaryCutoff > 0) {
       labelDictionary = (LabelDictionary) ois.readObject();
