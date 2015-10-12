@@ -683,8 +683,9 @@ public class SeqClassifierFlags implements Serializable {
   // whether to print a line saying each ObjectBank entry (usually a filename)
   public boolean announceObjectBankEntries = false;
 
-  // This is for use with the OWLQNMinimizer. To use it, set useQN=false, and this to a positive number.
-  // A smaller number means more features are retained. Depending on the problem, a good value might be
+  // This is for use with the OWLQNMinimizer L1 regularization. To use it, set useQN=false,
+  // and this to a positive number. A smaller number means more features are retained.
+  // Depending on the problem, a good value might be
   // between 0.75 (POS tagger) down to 0.01 (Chinese word segmentation)
   public double l1reg = 0.0;
 
