@@ -141,11 +141,8 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
         if (flags.wordFunction != null) {
           word = flags.wordFunction.apply(word);
         }
-        if (flags.useKnownLCWords && ! word.isEmpty() && knownLCWords.size() < knownLCWordsSizeLimit) {
-          int ch = word.codePointAt(0);
-          if (Character.isLowerCase(ch)) {
-            knownLCWords.add(word);
-          }
+        if ( ! word.isEmpty() && Character.isLowerCase(word.codePointAt(0))) {
+          knownLCWords.add(word);
         }
 
         String s = intern(WordShapeClassifier.wordShape(word, flags.wordShape, knownLCWords));
