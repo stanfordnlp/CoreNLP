@@ -97,13 +97,15 @@ public class StanfordCoreNLPServer implements Runnable {
       Map<String, String> urlParams = new HashMap<>();
 
       String query = uri.getQuery();
-      String[] queryFields = query.replace("\\&", "___AMP___").split("&");
+      String[] queryFields = query
+          .replace("\\&", "___AMP___")
+          .replace("\\+", "___PLUS___")
+          .split("&");
       for (String queryField : queryFields) {
-        queryField = queryField.replace("___AMP___", "&");
         int firstEq = queryField.indexOf('=');
         // Convention uses "+" for spaces.
-        String key = URLDecoder.decode(queryField.substring(0, firstEq), "utf8");
-        String value = URLDecoder.decode(queryField.substring(firstEq + 1), "utf8");
+        String key = URLDecoder.decode(queryField.substring(0, firstEq), "utf8").replace("___AMP___", "&").replace("___PLUS___", "+");
+        String value = URLDecoder.decode(queryField.substring(firstEq + 1), "utf8").replace("___AMP___", "&").replace("___PLUS___", "+");
         urlParams.put(key, value);
       }
       return urlParams;

@@ -487,7 +487,6 @@ function renderTokensregex(data) {
  * Render a Semgrex response
  */
 function renderSemgrex(data) {
-  console.log(data);
   /**
    * Register an entity type (a tag) for Brat
    */
@@ -556,7 +555,6 @@ function renderSemgrex(data) {
     }
   }
 
-  console.log(relations);
   Util.embed('semgrex',
          {entity_types: entityTypes, relation_types: relationTypes},
          {text: currentText, entities: entities, relations: relations}
@@ -664,7 +662,7 @@ $(document).ready(function() {
     e.preventDefault();
     // Get text
     if ($('#tokensregex_search').val().trim() == '') {
-      $('#tokensregex_search').val('(?$foxtype [{pos:JJ}]* ) fox');
+      $('#tokensregex_search').val('(?$foxtype [{pos:JJ}]+ ) fox');
     }
     var pattern = $('#tokensregex_search').val();
     // Remove existing annotation
@@ -672,7 +670,7 @@ $(document).ready(function() {
     // Make ajax call
     $.ajax({
       type: 'POST',
-      url: serverAddress + 'tokensregex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&")),
+      url: serverAddress + 'tokensregex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
       data: currentQuery,
       success: function(data) {
         $('.tokensregex_error').remove();  // Clear error messages
@@ -704,7 +702,7 @@ $(document).ready(function() {
     // Make ajax call
     $.ajax({
       type: 'POST',
-      url: serverAddress + 'semgrex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&")),
+      url: serverAddress + 'semgrex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
       data: currentQuery,
       success: function(data) {
         $('.semgrex_error').remove();  // Clear error messages
