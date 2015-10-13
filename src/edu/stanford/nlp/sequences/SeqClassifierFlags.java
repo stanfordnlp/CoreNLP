@@ -408,7 +408,7 @@ public class SeqClassifierFlags implements Serializable {
   // this now controls nothing
   public boolean splitDocuments = true;
 
-  public boolean printXML = false;
+  public boolean printXML; // This is disused and can be removed when breaking serialization
 
   public boolean useSeenFeaturesOnly = false;
 
@@ -1033,13 +1033,16 @@ public class SeqClassifierFlags implements Serializable {
 
   public boolean splitSlashHyphenWords;  // unused with new enum below. Remove when breaking serialization.
 
-  /** If this number is non-negative (greater than or equal to 0; negative means
-   *  unlimited), then add at most this many words to the knownLCWords.  (Words will
-   *  only be added if useKnownLCWords is true.) By default, this is set to 10,000,
-   *  so it will work on a few documents, but not cause unlimited memory growth
-   *  if a SequenceClassifier is run for a long time!
+  /** How many words it is okay to add to knownLCWords after initial training.
+   *  If this number is negative, then add any number of further words during classifying/testing.
+   *  If this number is non-negative (greater than or equal to 0), then add at most this many words
+   *  to the knownLCWords. By default, this is now set to 0, so their is no transductive learning on the
+   *  test set, since too many people complained about results changing over runs. However, traditionally
+   *  we used a non-zero value, and this usually helps performance a bit (until 2014 it was -1, then it
+   *  was set to 10_000, so that memory would not grow without bound if a SequenceClassifier is run for
+   *  a long time.
    */
-  public int maxAdditionalKnownLCWords = 10_000;
+  public int maxAdditionalKnownLCWords = 0; // was 10_000;
 
   public enum SlashHyphenEnum { NONE, WFRAG, WORD, BOTH };
 
@@ -1701,9 +1704,7 @@ public class SeqClassifierFlags implements Serializable {
           featureFactoriesArgs.add(new Object[0]);
         }
       } else if (key.equalsIgnoreCase("printXML")) {
-        printXML = Boolean.parseBoolean(val); // todo: This appears unused now.
-        // Was it replaced by
-        // outputFormat?
+        System.err.println("printXML is disused; perhaps try using the -outputFormat xml option.");
 
       } else if (key.equalsIgnoreCase("useSeenFeaturesOnly")) {
         useSeenFeaturesOnly = Boolean.parseBoolean(val);
@@ -2549,7 +2550,8 @@ public class SeqClassifierFlags implements Serializable {
       } else if (key.equalsIgnoreCase("useGEforSup")){
         useGEforSup = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useKnownLCWords")) {
-        System.err.println("useKnownLCWords is disused; see maxAdditionalKnownLCWords (true = -1, false = 0");
+        System.err.println("useKnownLCWords is deprecated; see maxAdditionalKnownLCWords (true = -1, false = 0");
+        maxAdditionalKnownLCWords = Boolean.parseBoolean(val) ? -1: 0;
       } else if (key.equalsIgnoreCase("useNoisyLabel")) {
         useNoisyLabel = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("errorMatrix")) {
