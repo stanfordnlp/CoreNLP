@@ -25,7 +25,7 @@ SERVER_USER="nlp"
 do_start()
 {
   if [ -e '/tmp/corenlp.shutdown' ]; then
-    echo "CoreNLP server is already running!"
+    echo "CoreNLP server is alredy running!"
     echo "If you are sure this is a mistake, delete the file:"
     echo "/tmp/corenlp.shutdown"
   else
@@ -49,19 +49,10 @@ do_stop()
   fi
 }
 
-do_restart()
-{
-  do_stop
-  sleep 3
-  do_start
-}
-
 case $1 in
 start) do_start
 ;;
 stop) do_stop
-;;
-restart) do_restart
 ;;
 esac
 

@@ -209,14 +209,7 @@ public class Preprocessor {
         IntPair pos = new IntPair(p.startIndex, p.endIndex);
         if(goldMentionPositions.containsKey(pos)) {
           Collection<Mention> cm = goldMentionPositions.get(pos);
-          int minId = Integer.MAX_VALUE;
-          Mention g = null;
-          for (Mention m : cm) {
-            if (m.mentionID < minId) {
-              g = m;
-              minId = m.mentionID;
-            }
-          }
+          Mention g = cm.iterator().next();
           cm.remove(g);
           p.mentionID = g.mentionID;
           p.hasTwin = true;
@@ -300,6 +293,8 @@ public class Preprocessor {
         m.basicDependency = sentence.get(BasicDependenciesAnnotation.class);
         m.collapsedDependency = sentence.get(CollapsedDependenciesAnnotation.class);
 
+        m.process(dict, null, singletonPredictor);
+
         // mentionSubTree (highest NP that has the same head) if constituency tree available
         if (m.contextParseTree != null) {
           Tree headTree = m.contextParseTree.getLeaves().get(m.headIndex);
@@ -316,8 +311,6 @@ public class Preprocessor {
             m.mentionSubTree = headTree;
           }
         }
-
-        m.process(dict, null, singletonPredictor);
       }
     }
 

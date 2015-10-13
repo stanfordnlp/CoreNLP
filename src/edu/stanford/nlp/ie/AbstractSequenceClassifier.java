@@ -93,11 +93,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   protected IN pad;
   private CoreTokenFactory<IN> tokenFactory;
   public int windowSize;
-
-  /** Different threads can add or query knownLCWords at the same time,
-   *  so we need a concurrent data structure.  Created in reinit().
-   */
-  protected MaxSizeConcurrentHashSet<String> knownLCWords; // = null;
+  // different threads can add or query knownLCWords at the same time,
+  // so we need a concurrent data structure.  created in reinit()
+  protected Set<String> knownLCWords = null;
 
   private DocumentReaderAndWriter<IN> defaultReaderAndWriter;
   public DocumentReaderAndWriter<IN> defaultReaderAndWriter() {
@@ -180,11 +178,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       plainTextReaderAndWriter = makePlainTextReaderAndWriter();
     }
 
-    if (knownLCWords == null || knownLCWords.isEmpty()) {
-      // reinit limits max (additional) size. We temporarily loosen this during training
-      knownLCWords = new MaxSizeConcurrentHashSet<>(flags.maxAdditionalKnownLCWords);
-    } else {
-      knownLCWords.setMaxSize(knownLCWords.size() + flags.maxAdditionalKnownLCWords);
+    if (!flags.useKnownLCWords) {
+      knownLCWords = Collections.emptySet();
+    } else if (knownLCWords == null || knownLCWords.isEmpty()) {
+      knownLCWords = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>());
     }
   }
 
@@ -262,8 +259,6 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *         field.
    */
   public List<IN> classifySentence(List<? extends HasWord> sentence) {
-    // System.err.println("knownLCWords.size is " + knownLCWords.size() + "; knownLCWords.maxSize is " + knownLCWords.getMaxSize() + 
-    //                   ", prior to NER for " + getClass().toString());
     List<IN> document = new ArrayList<IN>();
     int i = 0;
     for (HasWord word : sentence) {
@@ -289,16 +284,16 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     wrapper.processDocument(document);
 
     classify(document);
-    // System.err.println("Size of knownLCWords is " + knownLCWords.size() + ", after NER for " + getClass().toString());
 
     return document;
   }
 
   /**
    * Classify a List of IN using whatever additional information is passed in globalInfo.
-   * Used by SUTime (NumberSequenceClassifier), which requires the doc date to resolve relative dates.
+   * Used by SUTime (NumberSequenceClassifier), which requires the doc date to resolve relative dates
    *
-   * @param tokenSequence The List of IN to be classified.
+   * @param tokenSequence
+   *          The List of IN to be classified.
    * @return The classified List of IN, where the classifier output for
    *         each token is stored in its "answer" field.
    */
@@ -1405,6 +1400,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public abstract void serializeClassifier(String serializePath);
 
   /** Serialize a sequence classifier to an object output stream **/
+
   public abstract void serializeClassifier(ObjectOutputStream oos);
 
   /**
@@ -1469,7 +1465,6 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public abstract void loadClassifier(ObjectInputStream in, Properties props) throws IOException, ClassCastException,
       ClassNotFoundException;
 
-  // todo [cdm 2015]: Replace this method with use of the method in IOUtils.
   private InputStream loadStreamFromClasspath(String path) {
     InputStream is = getClass().getClassLoader().getResourceAsStream(path);
     if (is == null)

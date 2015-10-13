@@ -231,17 +231,11 @@ public class Sentence {
       if (printBeforeBeforeStart) {
         // Only print Before for first token, since otherwise same as After of previous token
         // BUG: if you print a sequence of sentences, you double up between sentence spacing.
-        if (cl.get(CoreAnnotations.BeforeAnnotation.class) != null) {
-          s.append(cl.get(CoreAnnotations.BeforeAnnotation.class));
-        }
+        s.append(cl.get(CoreAnnotations.BeforeAnnotation.class));
         printBeforeBeforeStart = false;
       }
       s.append(cl.get(CoreAnnotations.OriginalTextAnnotation.class));
-      if (cl.get(CoreAnnotations.AfterAnnotation.class) != null) {
-        s.append(cl.get(CoreAnnotations.AfterAnnotation.class));
-      } else {
-        s.append(" ");
-      }
+      s.append(cl.get(CoreAnnotations.AfterAnnotation.class));
     }
     return s.toString();
   }
