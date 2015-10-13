@@ -25,8 +25,7 @@ import java.util.zip.GZIPOutputStream;
 
 public class IOUtils {
 
-  private static final int SLURP_BUFFER_SIZE = 16000;
-  private static final int GZIP_FILE_BUFFER_SIZE = 65536;
+  private static final int SLURP_BUFFER_SIZE = 16384;
 
   public static final String eolChar = System.getProperty("line.separator");
   public static final String defaultEncoding = "utf-8";
@@ -588,6 +587,7 @@ public class IOUtils {
   }
 
 
+  // TODO [cdm 2015]: Should we rename these methods. Sort of misleading: They really read files, resources, etc. specified by a String
   /**
    * Open a BufferedReader to a file, class path entry or URL specified by a String name.
    * If the String starts with https?://, then it is first tried as a URL. It
@@ -1129,7 +1129,7 @@ public class IOUtils {
    */
   public static String slurpFile(String filename, String encoding)
           throws IOException {
-    Reader r = getBufferedReaderFromClasspathOrFileSystem(filename, encoding);
+    Reader r = readerFromString(filename, encoding);
     return IOUtils.slurpReader(r);
   }
 
@@ -1481,22 +1481,16 @@ public class IOUtils {
     return out;
   }
 
+  /** @deprecated Just call readerFromString(filename) */
+  @Deprecated
   public static BufferedReader getBufferedFileReader(String filename) throws IOException {
-    return getBufferedFileReader(filename, defaultEncoding);
+    return readerFromString(filename, defaultEncoding);
   }
 
-  public static BufferedReader getBufferedFileReader(String filename, String encoding) throws IOException {
-    InputStream in = getFileInputStream(filename);
-    return new BufferedReader(new InputStreamReader(in, encoding));
-  }
-
+  /** @deprecated Just call readerFromString(filename) */
+  @Deprecated
   public static BufferedReader getBufferedReaderFromClasspathOrFileSystem(String filename) throws IOException {
-    return getBufferedReaderFromClasspathOrFileSystem(filename, defaultEncoding);
-  }
-
-  public static BufferedReader getBufferedReaderFromClasspathOrFileSystem(String filename, String encoding) throws IOException {
-    InputStream in = findStreamInClasspathOrFileSystem(filename);
-    return new BufferedReader(new InputStreamReader(in, encoding));
+    return readerFromString(filename, defaultEncoding);
   }
 
   public static PrintWriter getPrintWriter(File textFile) throws IOException {
@@ -1678,7 +1672,7 @@ public class IOUtils {
   public static List<String> linesFromFile(String filename,String encoding, boolean ignoreHeader) {
     try {
       List<String> lines = new ArrayList<String>();
-      BufferedReader in = getBufferedReaderFromClasspathOrFileSystem(filename, encoding);
+      BufferedReader in = readerFromString(filename, encoding);
       String line;
       int i = 0;
       while ((line = in.readLine()) != null) {

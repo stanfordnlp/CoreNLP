@@ -10,6 +10,14 @@
   padding: 0 0 6ex;
 }
 
+.pattern_tab {
+  margin: 1ex;
+}
+
+.pattern_brat {
+  margin-top: 1ex;
+}
+
 .footer {
   bottom: 0;
   width: 100%;

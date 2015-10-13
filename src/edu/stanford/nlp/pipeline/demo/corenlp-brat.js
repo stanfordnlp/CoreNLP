@@ -2,7 +2,7 @@
 // and uses brat to render everything.
 
 //var serverAddress = 'http://localhost:9000/'
-var serverAddress = '/'
+var serverAddress = ''
 
 // Load Brat libraries
 var bratLocation = 'http://nlp.stanford.edu/js/brat';
@@ -23,6 +23,10 @@ head.js(
   bratLocation + '/client/src/visualizer.js'
 );
 
+var currentQuery = 'The quick brown fox jumped over the lazy dog.';
+var currentSentences = '';
+var currentText = '';
+
 // ----------------------------------------------------------------------------
 // HELPERS
 // ----------------------------------------------------------------------------
@@ -35,6 +39,10 @@ if (typeof String.prototype.startsWith != 'function') {
   String.prototype.startsWith = function (str){
     return this.indexOf(str) === 0;
   };
+}
+
+function isInt(value) {
+  return !isNaN(value) && (function(x) { return (x | 0) === x; })(parseFloat(value))
 }
 
 /**
@@ -185,21 +193,22 @@ function render(data) {
   //
   // Construct text of annotation
   //
-  var text = [];
+  currentText = [];  // GLOBAL
+  currentSentences = data.sentences;  // GLOBAL
   data.sentences.forEach(function(sentence) {
     for (var i = 0; i < sentence.tokens.length; ++i) {
       var token = sentence.tokens[i];
       var word = token.word;
-      if (i > 0) { text.push(' '); }
-      token.characterOffsetBegin = text.length;
+      if (i > 0) { currentText.push(' '); }
+      token.characterOffsetBegin = currentText.length;
       for (var j = 0; j < word.length; ++j) {
-        text.push(word[j]);
+        currentText.push(word[j]);
       }
-      token.characterOffsetEnd = text.length;
+      token.characterOffsetEnd = currentText.length;
     }
-    text.push('\n');
+    currentText.push('\n');
   });
-  text = text.join('');
+  currentText = currentText.join('');
     
   //
   // Shared variables
@@ -396,7 +405,7 @@ function render(data) {
     if ($('#' + container).length > 0) {
       Util.embed(container, 
                  {entity_types: entityTypes, relation_types: relationTypes}, 
-                 {text: text, entities: entities, relations: relations}
+                 {text: currentText, entities: entities, relations: relations}
                 );
     }
   }
@@ -415,6 +424,144 @@ function render(data) {
 }  // End render function
 
 
+/**
+ * Render a TokensRegex response
+ */
+function renderTokensregex(data) {
+  /**
+   * Register an entity type (a tag) for Brat
+   */
+  var entityTypesSet = {};
+  var entityTypes = [];
+  function addEntityType(type, color) {
+    // Don't add duplicates
+    if (entityTypesSet[type]) return;
+    entityTypesSet[type] = true;
+    // Set the color
+    if (typeof color == 'undefined') {
+      color = '#ADF6A2';
+    }
+    // Register the type
+    entityTypes.push({
+      type: type,
+      labels : [type],
+      bgColor: color,
+      borderColor: 'darken'
+    });
+  }
+
+  var entities = [];
+  for (var sentI = 0; sentI < data.sentences.length; ++sentI) {
+    var tokens = currentSentences[sentI].tokens;
+    for (var matchI = 0; matchI < data.sentences[sentI].length; ++matchI) {
+      var match = data.sentences[sentI][matchI];
+      // Add groups
+      for (groupName in match) {
+        if (groupName.startsWith("$") || isInt(groupName)) {
+          addEntityType(groupName, '#FFFDA8');
+          var begin = parseInt(tokens[match[groupName].begin].characterOffsetBegin);
+          var end = parseInt(tokens[match[groupName].end - 1].characterOffsetEnd);
+          entities.push(['TOK_' + sentI + '_' + matchI + '_' + groupName,
+                              groupName,
+                              [[begin, end]]]);
+        }
+      }
+      // Add match
+      addEntityType('match', '#ADF6A2');
+      var begin = parseInt(tokens[match.begin].characterOffsetBegin);
+      var end = parseInt(tokens[match.end - 1].characterOffsetEnd);
+      entities.push(['TOK_' + sentI + '_' + matchI + '_match',
+                          'match',
+                          [[begin, end]]]);
+    }
+  }
+
+  Util.embed('tokensregex',
+         {entity_types: entityTypes, relation_types: []},
+         {text: currentText, entities: entities, relations: []}
+        );
+}  // END renderTokensregex()
+
+
+/**
+ * Render a Semgrex response
+ */
+function renderSemgrex(data) {
+  /**
+   * Register an entity type (a tag) for Brat
+   */
+  var entityTypesSet = {};
+  var entityTypes = [];
+  function addEntityType(type, color) {
+    // Don't add duplicates
+    if (entityTypesSet[type]) return;
+    entityTypesSet[type] = true;
+    // Set the color
+    if (typeof color == 'undefined') {
+      color = '#ADF6A2';
+    }
+    // Register the type
+    entityTypes.push({
+      type: type,
+      labels : [type],
+      bgColor: color,
+      borderColor: 'darken'
+    });
+  }
+
+
+  relationTypes = [{
+    type: 'semgrex',
+    labels: ['-'],
+    dashArray: '3,3',
+    arrowHead: 'none',
+  }];
+
+  var entities = [];
+  var relations = []
+
+  for (var sentI = 0; sentI < data.sentences.length; ++sentI) {
+    var tokens = currentSentences[sentI].tokens;
+    for (var matchI = 0; matchI < data.sentences[sentI].length; ++matchI) {
+      var match = data.sentences[sentI][matchI];
+      // Add match
+      addEntityType('match', '#ADF6A2');
+      var begin = parseInt(tokens[match.begin].characterOffsetBegin);
+      var end = parseInt(tokens[match.end - 1].characterOffsetEnd);
+      entities.push(['SEM_' + sentI + '_' + matchI + '_match',
+                          'match',
+                          [[begin, end]]]);
+
+      // Add groups
+      for (groupName in match) {
+        if (groupName.startsWith("$") || isInt(groupName)) {
+          // (add node)
+          group = match[groupName];
+          groupName = groupName.substring(1);
+          addEntityType(groupName, '#FFFDA8');
+          var begin = parseInt(tokens[group.begin].characterOffsetBegin);
+          var end = parseInt(tokens[group.end - 1].characterOffsetEnd);
+          entities.push(['SEM_' + sentI + '_' + matchI + '_' + groupName,
+                              groupName,
+                              [[begin, end]]]);
+
+          // (add relation)
+          relations.push(['SEMGREX_' + sentI + '_' + matchI + '_' + groupName,
+                          'semgrex',
+                          [['governor', 'SEM_' + sentI + '_' + matchI + '_match'],
+                           ['dependent', 'SEM_' + sentI + '_' + matchI + '_' + groupName] ] ]);
+        }
+      }
+    }
+  }
+
+  Util.embed('semgrex',
+         {entity_types: entityTypes, relation_types: relationTypes},
+         {text: currentText, entities: entities, relations: relations}
+        );
+}  // END renderSemgrex
+
+
 // ----------------------------------------------------------------------------
 // MAIN
 // ----------------------------------------------------------------------------
@@ -429,23 +576,37 @@ $(document).ready(function() {
   $(".chosen-select").chosen();
   $('.chosen-container').css('width', '100%');
 
+  // Submit on shift-enter
+  $('#text').keyup(function (event) {
+    if (event.keyCode == 13) {
+      if(event.shiftKey){
+        event.preventDefault();
+        $('#submit').click();
+        event.stopPropagation();
+        return false;
+      }
+    }
+  });
+
+  // Submit on clicking the 'submit' button
   $('#submit').click(function() {
     // Get the text to annotate
-    text = $('#text').val();
-    if (text == '') {
-      text = 'My dog also likes eating sausage.';
-      $('#text').val(text);
+    currentQuery = $('#text').val();
+    if (currentQuery.trim() == '') {
+      currentQuery = 'The quick brown fox jumped over the lazy dog.';
+      $('#text').val(currentQuery);
     }
     // Update the UI
     $('#submit').prop('disabled', true);
     $('#annotations').hide();
+    $('#patterns_row').hide();
     $('#loading').show();
 
     // Run query
     $.ajax({
       type: 'POST',
       url: serverAddress + '?properties=' + encodeURIComponent('{"annotators": "' + annotators() + '"}'),
-      data: text,
+      data: currentQuery,
       success: function(data) {
         $('#submit').prop('disabled', false);
         if (typeof data == undefined || data.sentences == undefined) {
@@ -486,10 +647,88 @@ $(document).ready(function() {
           createAnnotationDiv('coref',  'dcoref',   'corefs',                              'Coreference'             );
           // Update UI
           $('#loading').hide();
+          $('.corenlp_error').remove();  // Clear error messages
           $('#annotations').show();
           // Render
           render(data);
+          // Render patterns
+          $('#annotations').append('<h4 class="red" style="margin-top: 4ex;">CoreNLP Tools:</h4>');  // TODO(gabor) a strange place to add this header to
+          $('#patterns_row').show();
         }
+      },
+      error: function(data) {
+        var alertDiv = $('<div/>').addClass('alert').addClass('alert-danger').addClass('alert-dismissible').addClass('corenlp_error').attr('role', 'alert')
+        var button = $('<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>');
+        var message = $('<span/>').text(data.responseText);
+        button.appendTo(alertDiv);
+        message.appendTo(alertDiv);
+        $('#loading').hide();
+        alertDiv.appendTo($('#errors'));
+        $('#submit').prop('disabled', false);
+      }
+    });
+  });
+
+
+  $('#form_tokensregex').submit( function (e) {
+    // Don't actually submit the form
+    e.preventDefault();
+    // Get text
+    if ($('#tokensregex_search').val().trim() == '') {
+      $('#tokensregex_search').val('(?$foxtype [{pos:JJ}]+ ) fox');
+    }
+    var pattern = $('#tokensregex_search').val();
+    // Remove existing annotation
+    $('#tokensregex').remove();
+    // Make ajax call
+    $.ajax({
+      type: 'POST',
+      url: serverAddress + 'tokensregex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
+      data: currentQuery,
+      success: function(data) {
+        $('.tokensregex_error').remove();  // Clear error messages
+        $('<div id="tokensregex" class="pattern_brat"/>').appendTo($('#div_tokensregex'));
+        renderTokensregex(data);
+      },
+      error: function(data) {
+        var alertDiv = $('<div/>').addClass('alert').addClass('alert-danger').addClass('alert-dismissible').addClass('tokensregex_error').attr('role', 'alert')
+        var button = $('<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>');
+        var message = $('<span/>').text(data.responseText);
+        button.appendTo(alertDiv);
+        message.appendTo(alertDiv);
+        alertDiv.appendTo($('#div_tokensregex'));
+      }
+    });
+  });
+
+
+  $('#form_semgrex').submit( function (e) {
+    // Don't actually submit the form
+    e.preventDefault();
+    // Get text
+    if ($('#semgrex_search').val().trim() == '') {
+      $('#semgrex_search').val('{pos:/VB.*/} >nsubj {}=subject >/nmod:.*/ {}=prep_phrase');
+    }
+    var pattern = $('#semgrex_search').val();
+    // Remove existing annotation
+    $('#semgrex').remove();
+    // Make ajax call
+    $.ajax({
+      type: 'POST',
+      url: serverAddress + 'semgrex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
+      data: currentQuery,
+      success: function(data) {
+        $('.semgrex_error').remove();  // Clear error messages
+        $('<div id="semgrex" class="pattern_brat"/>').appendTo($('#div_semgrex'));
+        renderSemgrex(data);
+      },
+      error: function(data) {
+        var alertDiv = $('<div/>').addClass('alert').addClass('alert-danger').addClass('alert-dismissible').addClass('semgrex_error').attr('role', 'alert')
+        var button = $('<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>');
+        var message = $('<span/>').text(data.responseText);
+        button.appendTo(alertDiv);
+        message.appendTo(alertDiv);
+        alertDiv.appendTo($('#div_semgrex'));
       }
     });
   });

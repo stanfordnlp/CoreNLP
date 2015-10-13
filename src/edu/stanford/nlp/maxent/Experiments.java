@@ -7,6 +7,7 @@
 
 package edu.stanford.nlp.maxent;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.PrintFile;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.IntPair;
@@ -135,13 +136,13 @@ public class Experiments {
    * x1 y1
    * x2 y2
    * ..
-   * {@literal }</data>}
+   * {@literal </data>}
    * ..
    */
   public Experiments(String filename) {
     try {
       Exception e1 = new Exception("Incorrect data file format");
-      BufferedReader in = new BufferedReader(new FileReader(filename));
+      BufferedReader in = IOUtils.readerFromString(filename);
       String head = in.readLine();
       if (!head.equals("<data>")) {
         throw e1;
