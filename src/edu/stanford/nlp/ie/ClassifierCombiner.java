@@ -98,7 +98,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
           paths.add(path);
         }
       }
-      loadClassifiers(paths);
+      loadClassifiers(p, paths);
     }
 
     //
@@ -107,7 +107,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     else if((loadPath1 = p.getProperty("loadClassifier")) != null && (loadPath2 = p.getProperty("loadAuxClassifier")) != null){
       paths.add(loadPath1);
       paths.add(loadPath2);
-      loadClassifiers(paths);
+      loadClassifiers(p, paths);
     }
 
     //
@@ -116,7 +116,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     else {
       paths.add(DefaultPaths.DEFAULT_NER_THREECLASS_MODEL);
       paths.add(DefaultPaths.DEFAULT_NER_MUC_MODEL);
-      loadClassifiers(paths);
+      loadClassifiers(p, paths);
     }
     this.initLoadPaths = new ArrayList<>(paths);
     this.initProps = p;
@@ -134,7 +134,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     super(props);
     this.combinationMode = combinationMode;
     List<String> paths = new ArrayList<>(Arrays.asList(loadPaths));
-    loadClassifiers(paths);
+    loadClassifiers(props, paths);
     this.initLoadPaths = new ArrayList<>(paths);
     this.initProps = props;
   }
@@ -256,10 +256,10 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     }
   }
 
-  private void loadClassifiers(List<String> paths) throws IOException {
+  private void loadClassifiers(Properties props, List<String> paths) throws IOException {
     baseClassifiers = new ArrayList<AbstractSequenceClassifier<IN>>();
     for(String path: paths){
-      AbstractSequenceClassifier<IN> cls = loadClassifierFromPath(path);
+      AbstractSequenceClassifier<IN> cls = loadClassifierFromPath(props, path);
       baseClassifiers.add(cls);
       if(DEBUG){
         System.err.printf("Successfully loaded classifier #%d from %s.%n", baseClassifiers.size(), path);
@@ -271,11 +271,11 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   }
 
 
-  public static <INN extends CoreMap & HasWord> AbstractSequenceClassifier<INN> loadClassifierFromPath(String path)
+  public static <INN extends CoreMap & HasWord> AbstractSequenceClassifier<INN> loadClassifierFromPath(Properties props, String path)
       throws IOException {
     //try loading as a CRFClassifier
     try {
-       return ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(path));
+      return ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(path, props));
     } catch (Exception e) {
       e.printStackTrace();
     }

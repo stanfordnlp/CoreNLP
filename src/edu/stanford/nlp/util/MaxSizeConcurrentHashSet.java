@@ -17,7 +17,7 @@ import java.util.stream.Stream;
  * A hash set supporting full concurrency of retrievals and
  * high expected concurrency for updates but with an (adjustable) maximum size.
  * The maximum only prevents further add operations. It doesn't stop the maximum
- * being exceeded when first loaded.
+ * being exceeded when first loaded or via an addAll(). This is deliberate!
  *
  * @author Christopher Manning
  * @param <E> the type of elements maintained by this set
@@ -90,10 +90,18 @@ public class MaxSizeConcurrentHashSet<E> implements Set<E>, Serializable {
   @Override public boolean removeAll(Collection<?> c)   {return s.removeAll(c);}
   @Override public boolean retainAll(Collection<?> c)   {return s.retainAll(c);}
 
+  /** Add all the items.
+   *  This doesn't use the add method, because we want to bypass the limit here.
+   */
   @Override
   public boolean addAll(Collection<? extends E> c) {
-    // Use Java 8 Stream
-    return Objects.requireNonNull(c).stream().map(this::add).filter((b)->b).count() > 0;
+    boolean added = false;
+    for (E item : c) {
+      if (m.put(item, Boolean.TRUE) == null) {
+        added = true;
+      }
+    }
+    return added;
   }
 
   // Override default methods in Collection

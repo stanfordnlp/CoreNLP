@@ -262,6 +262,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *         field.
    */
   public List<IN> classifySentence(List<? extends HasWord> sentence) {
+    // System.err.println("knownLCWords.size is " + knownLCWords.size() + "; knownLCWords.maxSize is " + knownLCWords.getMaxSize() + 
+    //                   ", prior to NER for " + getClass().toString());
     List<IN> document = new ArrayList<IN>();
     int i = 0;
     for (HasWord word : sentence) {
@@ -287,6 +289,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     wrapper.processDocument(document);
 
     classify(document);
+    // System.err.println("Size of knownLCWords is " + knownLCWords.size() + ", after NER for " + getClass().toString());
 
     return document;
   }

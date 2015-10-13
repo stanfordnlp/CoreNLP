@@ -2644,11 +2644,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       }
     }
 
+    // System.err.println("properties passed into CRF's loadClassifier are:" + props);
     if (props != null) {
       flags.setProperties(props, false);
     }
-
-    reinit();
 
     windowSize = ois.readInt();
     weights = (double[][]) ois.readObject();
@@ -2660,6 +2659,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     } else {
       knownLCWords = new MaxSizeConcurrentHashSet<>(lcWords);
     }
+
+    reinit();
 
     if (flags.labelDictionaryCutoff > 0) {
       labelDictionary = (LabelDictionary) ois.readObject();
