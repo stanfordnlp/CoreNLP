@@ -998,7 +998,7 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useHardGE = false;
   public boolean useCRFforUnsup = false;
   public boolean useGEforSup = false;
-  public boolean useKnownLCWords = true; // disused, can be deleted when breaking serialization
+  public boolean useKnownLCWords = true;
   // allow for multiple feature factories.
   public String[] featureFactories = null;
   public List<Object[]> featureFactoriesArgs = null;
@@ -1034,7 +1034,7 @@ public class SeqClassifierFlags implements Serializable {
   public boolean splitSlashHyphenWords;  // unused with new enum below. Remove when breaking serialization.
 
   /** If this number is non-negative (greater than or equal to 0; negative means
-   *  unlimited), then add at most this many words to the knownLCWords.  (Words will
+   *  unlimited), then add at most this many words to the knownLCwords.  (Words will
    *  only be added if useKnownLCWords is true.) By default, this is set to 10,000,
    *  so it will work on a few documents, but not cause unlimited memory growth
    *  if a SequenceClassifier is run for a long time!
@@ -2548,9 +2548,9 @@ public class SeqClassifierFlags implements Serializable {
         useCRFforUnsup = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useGEforSup")){
         useGEforSup = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useKnownLCWords")) {
-        System.err.println("useKnownLCWords is disused; see maxAdditionalKnownLCWords (true = -1, false = 0");
-      } else if (key.equalsIgnoreCase("useNoisyLabel")) {
+      } else if (key.equalsIgnoreCase("useKnownLCWords")){
+        useKnownLCWords = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useNoisyLabel")){
         useNoisyLabel = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("errorMatrix")) {
         errorMatrix = val;

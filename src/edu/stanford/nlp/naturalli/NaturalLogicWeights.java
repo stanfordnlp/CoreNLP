@@ -96,7 +96,7 @@ public class NaturalLogicWeights {
     objReader.close();
   }
 
-  public static double deletionProbability(String edgeType) {
+  public double deletionProbability(String edgeType) {
     // TODO(gabor) this is effectively assuming hard NatLog weights
     if (edgeType.contains("prep")) {
       return 0.9;

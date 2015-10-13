@@ -1105,7 +1105,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     classIndex = (Index<String>) ois.readObject();
     answerArrays = (Set<List<String>>) ois.readObject();
 
-    knownLCWords = (MaxSizeConcurrentHashSet<String>) ois.readObject();
+    knownLCWords = (Set<String>) ois.readObject();
   }
 
 
@@ -1149,14 +1149,6 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
           ClassNotFoundException {
     CMMClassifier<? extends CoreLabel> cmm = new CMMClassifier<CoreLabel>();
     cmm.loadClassifier(ois, null);
-    return cmm;
-  }
-
-  public static <INN extends CoreMap> CMMClassifier<? extends CoreLabel> getClassifier(ObjectInputStream ois, Properties props) throws IOException,
-          ClassCastException,
-          ClassNotFoundException {
-    CMMClassifier<? extends CoreLabel> cmm = new CMMClassifier<>();
-    cmm.loadClassifier(ois, props);
     return cmm;
   }
 

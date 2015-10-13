@@ -576,10 +576,23 @@ $(document).ready(function() {
   $(".chosen-select").chosen();
   $('.chosen-container').css('width', '100%');
 
+  // Submit on shift-enter
+  $('#text').keyup(function (event) {
+    if (event.keyCode == 13) {
+      if(event.shiftKey){
+        event.preventDefault();
+        $('#submit').click();
+        event.stopPropagation();
+        return false;
+      }
+    }
+  });
+
+  // Submit on clicking the 'submit' button
   $('#submit').click(function() {
     // Get the text to annotate
     currentQuery = $('#text').val();
-    if (currentQuery == '') {
+    if (currentQuery.trim() == '') {
       currentQuery = 'The quick brown fox jumped over the lazy dog.';
       $('#text').val(currentQuery);
     }

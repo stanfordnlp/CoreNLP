@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
  *
  * @author Jenny Finkel
  */
+
 public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> {
 
   private static final long serialVersionUID = -3838331732026362075L;
@@ -30,13 +31,19 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
   private final SeqClassifierFlags flags;
   private final ObjectBank<List<IN>> wrapped;
   private final Set<String> knownLCWords;
+  private final int knownLCWordsSizeLimit;
 
 
   public ObjectBankWrapper(SeqClassifierFlags flags, ObjectBank<List<IN>> wrapped, Set<String> knownLCWords) {
-    super(null, null);
+    super(null,null);
     this.flags = flags;
     this.wrapped = wrapped;
     this.knownLCWords = knownLCWords;
+    if (flags.maxAdditionalKnownLCWords >= 0 && ((long) flags.maxAdditionalKnownLCWords) + knownLCWords.size() < Integer.MAX_VALUE) {
+      knownLCWordsSizeLimit = knownLCWords.size() + flags.maxAdditionalKnownLCWords;
+    } else {
+      knownLCWordsSizeLimit = Integer.MAX_VALUE;
+    }
   }
 
 
@@ -134,8 +141,11 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
         if (flags.wordFunction != null) {
           word = flags.wordFunction.apply(word);
         }
-        if ( ! word.isEmpty() && Character.isLowerCase(word.codePointAt(0))) {
-          knownLCWords.add(word);
+        if (flags.useKnownLCWords && ! word.isEmpty() && knownLCWords.size() < knownLCWordsSizeLimit) {
+          int ch = word.codePointAt(0);
+          if (Character.isLowerCase(ch)) {
+            knownLCWords.add(word);
+          }
         }
 
         String s = intern(WordShapeClassifier.wordShape(word, flags.wordShape, knownLCWords));
