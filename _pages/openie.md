@@ -1,6 +1,6 @@
 ---
-title: NaturalLogicAnnotator 
-keywords: natlog
+title: Open IE
+keywords: openie
 permalink: '/openie.html'
 ---
 
