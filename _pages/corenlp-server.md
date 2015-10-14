@@ -5,10 +5,9 @@ permalink: '/corenlp-server.html'
 ---
 
 
-## CoreNLP Server
 This page describes setting up the CoreNLP server included in the release. This provides both a convenient graphical way to interface with your version of CoreNLP, and provides an API to call CoreNLP using any programming languages.
 
-### Getting Started
+## Getting Started
 Stanford CoreNLP ships with a built-in server, and requires only the CoreNLP dependencies. To run this server, simply run:
 
 ```bash
@@ -32,7 +31,7 @@ wget --post-data 'the quick brown fox jumped over the lazy dog' 'localhost:9000/
 The rest of this document describes the API in more detail, describes a Java client to the API as a drop-in replacement for the `StanfordCoreNLP` pipeline, and talks about administering the server.
 
 
-### API Documentation
+## API Documentation
 The greatest strength of the server is the ability to make API calls against it. 
 
 > **NOTE**: Please do **not** make API calls against `http://corenlp.run`. It is not set up to handle a large volume of requests. Instructions for setting up your own server can be found in the [Dedicated Server](#DedicatedServer) section.
@@ -43,7 +42,7 @@ There are three endpoints provided by the server, which we'll describe in more d
 * `/tokensregex` Provides an interface for querying text for TokensRegex patterns, once it has been annotated with CoreNLP (using the enpoint above).
 * `/semgrex` Similar to `/tokensregex` above, this endpoint matches text against semgrex patterns.
 
-#### Annotate with CoreNLP: `/`
+### Annotate with CoreNLP: `/`
 This endpoint takes as input a JSON-formatted properties string under the key `properties=<properties>`, and as `POST`data text to annotate. The properties should mirror the properties file passed into the CoreNLP command line. For example, the following will tokenize the input text on whitespace, run part of speech tagging, and output it as JSON to standard out:
 
 ```bash
@@ -77,7 +76,7 @@ A complete call to the server, taking as input a protobuf serialized document at
 wget --post-file /path/to/file.proto 'localhost:9000/?properties={"inputFormat": "serialized", "inputSerializer", "edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer", "annotators:", "tokenize,ssplit,pos,lemma,ner", "outputFormat": "serialized", "serializer", "edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer"}' -O /path/to/annotated_file.proto
 ```
 
-#### Query TokensRegex: `/tokensregex`
+### Query TokensRegex: `/tokensregex`
 Similar to the CoreNLP target, `/tokensregex` takes a block of data (e.g., text) as `POST` data, and a series of `GET` parameters. Currently, only plain-text `POST` data is supported. The two relevant `GET` parameters are:
 
 * `pattern`: The TokensRegex pattern to annotate.
@@ -101,7 +100,7 @@ The response is always in JSON, formatted as follows:
 }
 ```
 
-#### Query Semgrex: `/semgrex`
+### Query Semgrex: `/semgrex`
 Similar to the CoreNLP target, and nearly identical to TokensRegex, `/semgrex` takes a block of data (e.g., text) as `POST` data, and a series of `GET` parameters. Currently, only plain-text `POST` data is supported. The two relevant `GET` parameters are:
 
 * `pattern`: The Semgrex pattern to annotate.
@@ -126,7 +125,7 @@ The response is always in JSON, formatted identically to the tokensregex output,
 ```
 
 
-### Java Client
+## Java Client
 CoreNLP includes a Java client to the server -- `StanfordCoreNLPClient` -- which mirrors the interface of the annotation pipeline (`StanfordCoreNLP.java`) as closely as possible. The primary motivating use-cases for using this class and not the local pipeline are:
 
 * The models are not re-loaded every time your program runs. This is useful when debugging a block of code which runs CoreNLP annotations, as the CoreNLP models often take on the order of minutes to load from disk.
@@ -165,10 +164,10 @@ java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLPClient -annotators 
 
 > **NOTE**: Again, please do **not** make API calls against `http://corenlp.run`. It is not set up to handle a large volume of requests. Instructions for setting up your own server can be found in the [Dedicated Server](#DedicatedServer) section.
 
-### Administration
+## Administration
 This section describes how to administer the server, including starting and stopping the server, as well as setting it up as a startup task 
 
-#### Starting the Server
+### Starting the Server
 The server is started directly though calling it with `java`. For example, the following will start the server in the background on port 1337, assuming your classpath is set properly:
 
 ```bash
@@ -177,14 +176,14 @@ nohup java -mx4g edu.stanford.nlp.pipeline.StanfordCoreNLPServer 1337 &
 
 The classpath must include all of the CoreNLP dependencies. The memory requirements of the server are the same as that of CoreNLP, though it will grow as you load more models (e.g., memory increases if you load both the PCFG and Shift-Reduce constituency parser models). A safe minimum is 4gb; 8gb is recommended if you can spare it.
 
-#### Stopping the Server
+### Stopping the Server
 The server can be stopped programmatically by making a call to the `/shutdown` endpoint with an appropriate shutdown key. This key is saved to the file `/tmp/corenlp.shutdown` when the server starts. An example command to shut down the server would be:
 
 ```bash
 wget "localhost:9000/shutdown?key=`cat /tmp/corenlp.shutdown`" -O -
 ```
 
-#### Dedicated Server
+### Dedicated Server
 This section describes how to set up a dedicated CoreNLP server on a fresh Linux install. As always, make sure you understand the command being run below, as they largely require root permissions:
 
 1. Place all of the CoreNLP jars (code, models, and library dependencies) in a directory `/opt/corenlp`. The code will be in a jar named `stanford-corenlp-version.jar`. The models will be in a jar named `stanford-corenlp-models.jar`; caseless and shift-reduce models can also be added here. The minimal library dependencies, included in the CoreNLP release, are:

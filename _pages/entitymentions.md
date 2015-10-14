@@ -1,6 +1,7 @@
 ---
 title: EntityMentionsAnnotator 
 keywords: entitymentions
+permalink: '/entitymentions.html'
 ---
 
 ## Description
