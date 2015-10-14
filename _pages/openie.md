@@ -1,5 +1,5 @@
 ---
-title: Open IE
+title: OpenIE
 keywords: openie
 permalink: '/openie.html'
 ---
