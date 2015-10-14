@@ -121,7 +121,6 @@ entries:
 
         - title: Javadoc 
           external_url: http://nlp.stanford.edu/nlp/javadoc/javanlp/
-            #useful.html
 
         - title: Release history 
           url: history.html
