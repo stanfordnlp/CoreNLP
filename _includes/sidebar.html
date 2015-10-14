@@ -10,16 +10,16 @@ $(document).ready(function() {
 $("#mysidebar").navgoco({
 caretHtml: '',
 accordion: {% if site.sidebar_accordion %}{{site.sidebar_accordion}}{% else %}true{% endif %},
-//accordion: {% if site.sidebar_accordion %}{{site.sidebar_accordion}}{% else %}false{% endif %}
+//accordion: {% if site.sidebar_accordion %}{{site.sidebar_accordion}}{% else %}false{% endif %},
 openClass: 'active', // open
-save: false, // leave false or nav highlighting doesn't work right
+save: true, // leave false or nav highlighting doesn't work right
 cookie: {
 name: 'navgoco',
 expires: false,
 path: '/'
 },
 slide: {
-duration: 400,
+duration: 100,
 easing: 'swing'
 }
 });
