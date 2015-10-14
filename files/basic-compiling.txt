@@ -1,0 +1,16 @@
+To extract the code source files
+
+mkdir src
+cd src
+jar -xf ../stanford-corenlp-<version>-sources.jar 
+cd ..
+
+The code would get extracted to the src directory
+
+
+Recompiling the code base:
+
+ant
+cd classes ; jar -cfm ../stanford-corenlp-<version>.jar ../META-INF/MANIFEST.MF edu ; cd ..
+
+For running ant, make sure you have ant installed and ANT_HOME set. 

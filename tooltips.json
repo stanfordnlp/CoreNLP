@@ -1,0 +1,17 @@
+---
+layout: none
+search: exclude
+---
+{
+	"entries": 
+[
+    {% for page in site.tooltips %}
+    {
+      "id"    : "{{ page.id }}",
+      "body": "{{ page.content | strip_newlines | replace: '\', '\\\\' | replace: '"', '\\"' }}"
+    } {% unless forloop.last %},{% endunless %}
+  {% endfor %}
+]
+}
+
+

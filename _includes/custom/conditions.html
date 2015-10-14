@@ -1,0 +1,25 @@
+{% if site.project == "doc" %}
+{% assign audience = "writers" %}
+{% assign sidebar = site.data.sidebar_doc.entries %}
+{% assign topnav = site.data.topnav_doc.topnav %}
+{% assign topnav_dropdowns = site.data.topnav_doc.topnav_dropdowns %}
+{% assign version = "all" %}
+{% assign product = "all" %}
+{% assign platform = "php" %}
+{% assign link = "custom/doc/links_doc.html" %}
+{% assign projectTags = site.data.tags_doc.allowed-tags %}
+{% assign searchGroup = "doc" %}
+{% endif %}
+
+{% if site.project == "doc" %}
+{% assign audience = "designers" %}
+{% assign sidebar = site.data.sidebar_doc.entries %}
+{% assign topnav = site.data.topnav_doc.topnav %}
+{% assign topnav_dropdowns = site.data.topnav_doc.topnav_dropdowns %}
+{% assign version = "all" %}
+{% assign product = "all" %}
+{% assign platform = "all" %}
+{% assign link = "custom/doc/links_doc.html" %}
+{% assign projectTags = site.data.tags_doc.allowed-tags %}
+{% assign searchGroup = "doc" %}
+{% endif %}

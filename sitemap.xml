@@ -1,0 +1,32 @@
+---
+layout: null
+search: exclude
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  {% for page in site.pages %}
+    {% unless page.sitemap.exclude == "yes" %}
+    <url>
+      <loc>{{ site.url }}{{ page.url | remove: "index.html" }}</loc>
+      {% if page.sitemap.last_updated %}
+        <last_updated>{{ page.sitemap.last_updated | date: "%Y-%m-%d" }}</last_updated>
+      {% elsif page.date %}
+        <last_updated>{{ page.date | date_to_xmlschema }}</last_updated>
+      {% else %}
+        <last_updated>{{ site.time | date_to_xmlschema }}</last_updated>
+      {% endif %}
+      {% if page.sitemap.changefreq %}
+        <changefreq>{{ page.sitemap.changefreq }}</changefreq>
+      {% else %}
+        <changefreq>monthly</changefreq>
+      {% endif %}
+      {% if page.sitemap.priority %}
+        <priority>{{ page.sitemap.priority }}</priority>
+      {% else %}
+        <priority>0.3</priority>
+      {% endif %}
+    </url>
+    {% endunless %}
+  {% endfor %}
+</urlset>

@@ -1,0 +1,14 @@
+{% comment %} Note that in the preview server, this code won't work because the preview sites are using different ports. These links are all relative and assume the same port. However, when you publish the built sites onto the same server, then this toggle works fine. {% endcomment %}
+
+<li class="dropdown">
+    <a href="#" class="dropdown-toggle otherProgLangs" data-toggle="dropdown">Custom Menu<b class="caret"></b></a>
+    <ul class="dropdown-menu">
+        <!--li {% if site.audience == "writers" %}class="dropdownActive"{% endif %}><a href="{% if page.homepage == true or page.switch == false %}../doc_writers/{{site.suffix}}">Writer docs</a> {% else %} ../doc_writers{{page.url}}">Writer docs</a>{% endif %}</li-->
+
+<!--li {% if site.audience == "designers" %}class="dropdownActive"{% endif %}><a href="{% if page.homepage == true or page.switch == false %}../doc_designers/{{site.suffix}}">Designer doc</a> {% else %} ../doc_designers{{page.url}}">Designer docs</a>{% endif %}</li-->
+
+<li class="dropdownActive" <a href="{% if page.homepage == true or page.switch == false %}../doc_designers/{{site.suffix}}">Designer doc</a> {% else %} ../doc_designers{{page.url}}">Designer docs</a>{% endif %}</li-->
+
+</ul>
+</li>
+

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<html>
+  <head>
+ {% include head_print.html %}
+
+<link rel="stylesheet" type="text/css" href="/css/customstyles.css">
+<link rel="stylesheet" type="text/css" href="/css/{{site.theme_file}}">
+<link rel="stylesheet" type="text/css" href="/css/printstyles.css">
+
+</head>
+
+<body class="{% if page.type == "title"%}title{% elsif page.type == "frontmatter" %}frontmatter{% elsif page.type == "first_page" %}first_page{% endif %} print">
+
+    <!-- Page Content -->
+    <div class="container">
+            <!-- Content Column -->
+            <div class="col-md-9">
+
+                {{content}}
+            </div>
+
+    </div>    <!-- /.container -->
+
+</body>
+
+</html>
+

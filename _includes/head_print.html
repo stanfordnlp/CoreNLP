@@ -1,0 +1,29 @@
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="{% if page.summary %}{{ page.summary | strip_html | strip_newlines | truncate: 160 }}{% endif %}">
+<meta name="keywords" content="{{page.tags}}{% if page.tags %}, {% endif %} {{page.keywords}}">
+<title>{% if page.homepage == true %} {{site.homepage_title}} {% elsif page.title %}{{ page.title }}{% endif %}  | {{ site.site_title }}</title>
+<link rel="stylesheet" type="text/css" href="css/syntax.css">
+<link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="css/modern-business.css">
+<link rel="stylesheet" type="text/css" href="css/lavish-bootstrap.css">
+<link rel="stylesheet" type="text/css" href="css/customstyles.css">
+<link rel="stylesheet" type="text/css" href="css/{{site.theme_file}}">
+
+<script>
+    Prince.addScriptFunc("datestamp", function() {
+        return "PDF last generated: {{ site.time | date: '%B %d, %Y' }}";
+    });
+</script>
+
+<script>
+    Prince.addScriptFunc("guideName", function() {
+        return "{{site.print_title}} User Guide";
+    });
+</script>
+
+
+
+

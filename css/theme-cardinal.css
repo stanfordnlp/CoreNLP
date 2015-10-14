@@ -1,0 +1,72 @@
+.summary {
+    color: #808080;
+    border-left: 5px solid #E50E51;
+}
+
+
+h3 {color: #E50E51; }
+h4 {color: #808080; }
+
+.nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
+    background-color: #248ec2;
+    color: white;
+}
+
+.nav > li.active > a {
+    background-color: #8C1515;
+}
+
+.nav li.thirdlevel > a {
+    background-color: #FAFAFA !important;
+    color: #8C1515;
+    font-weight: bold;
+}
+
+a[data-toggle="tooltip"] {
+    color: #649345;
+    font-style: italic;
+    cursor: default;
+}
+
+.navbar-inverse {
+    background-color: #8C1515;
+    border-color: #F5EEC6;
+}
+
+.navbar-inverse .navbar-nav > .open > a, .navbar-inverse .navbar-nav > .open > a:hover, .navbar-inverse .navbar-nav > .open > a:focus {
+    color: #F5EEC6;
+}
+
+.navbar-inverse .navbar-nav > .open > a, .navbar-inverse .navbar-nav > .open > a:hover, .navbar-inverse .navbar-nav > .open > a:focus {
+    background-color: #F5EEC6;
+    color: #ffffff;
+}
+
+/* not sure if using this ...*/
+.navbar-inverse .navbar-collapse, .navbar-inverse .navbar-form {
+    border-color: #8C1515 !important;
+}
+
+.btn-primary {
+    color: #ffffff;
+    background-color: #F5EEC6;
+    border-color: #F5EEC6;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active,
+.open .dropdown-toggle.btn-primary {
+    background-color: #8C1515;
+    border-color: #F5EEC6;
+}
+
+.printTitle {
+    color: #F5EEC6 !important;
+}
+
+body.print h1 {color: #F5EEC6 !important; font-size:28px;}
+body.print h2 {color: #595959 !important; font-size:24px;}
+body.print h3 {color: #E50E51 !important; font-size:14px;}
+body.print h4 {color: #679DCE !important; font-size:14px; font-style: italic;}

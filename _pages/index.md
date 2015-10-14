@@ -1,0 +1,41 @@
+---
+title: About
+keywords: overview, about
+type: first_page
+homepage: true
+---
+
+Stanford CoreNLP provides a set of natural language analysis
+tools which can take raw text input and give the base
+forms of words, their parts of speech, whether they are names of
+companies, people, etc., normalize dates, times, and numeric quantities,
+and mark up the structure of sentences in terms of
+phrases and word dependencies, indicate which noun phrases refer to
+the same entities, indicate sentiment, etc.  
+Stanford CoreNLP is an integrated framework. Its goal is to
+make it very easy to apply a bunch of linguistic analysis tools to a piece
+of text. Starting from plain text, you can run all the tools on it with
+just two lines of code. It is designed to be highly
+flexible and extensible.  With a single option you can change which
+tools should be enabled and which should be disabled. 
+Its analyses provide the foundational building blocks for
+higher-level and domain-specific text understanding applications.
+
+Stanford CoreNLP integrates many of our NLP tools,
+including [the part-of-speech (POS) tagger](http://nlp.stanford.edu/software/tagger.shtml), 
+[the named entity recognizer (NER)](http://nlp.stanford.edu/software/CRF-NER.shtml),
+[the parser](http://nlp.stanford.edu/software/lex-parser.shtml),
+[the coreference resolution system](http://nlp.stanford.edu/software/dcoref.shtml),
+[the sentiment analysis](http://nlp.stanford.edu/sentiment/), and
+[the bootstrapped pattern learning](http://nlp.stanford.edu/software/patternslearning.shtml) tools.
+The basic distribution provides model files for the analysis of **English**,
+but the engine is compatible with models for other languages. Below you
+can find packaged models for **Chinese** and **Spanish**, and
+Stanford NLP models for German and Arabic are usable inside CoreNLP.
+
+Stanford CoreNLP is written in Java and licensed under the [GNU General Public License](http://www.gnu.org/licenses/gpl.html) (v3 or later; in general Stanford NLP
+code is GPL v2+, but CoreNLP uses several Apache-licensed libraries, and
+so the composite is v3+).  Source is included.
+Note that this is the <i>full</i> GPL,
+which allows many free uses, but not its use in [proprietary software](http://www.gnu.org/licenses/gpl-faq.html#GPLInProprietarySystem) which is distributed to others.
+The download is 260 MB and requires Java 1.8+.

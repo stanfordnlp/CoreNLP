@@ -1,0 +1,131 @@
+# This is your sidebar TOC. The sidebar code loops through sections here and provides the appropriate formatting.
+
+# Sidebar
+entries:
+- title: Sidebar
+  subcategories:
+
+
+    - title: About
+
+      items:
+        - title: Introduction
+          url: about.html
+
+        - title: Citing Stanford CoreNLP
+          url: citing.html
+
+        - title: Download 
+          url: download.html
+
+
+    - title: Usage 
+
+      items:
+        - title: Command line usage
+          url: cmdline.html
+
+        - title: Stanford CoreNLP API
+          url: api.html
+
+        - title: Simple CoreNLP API
+          url: simple.html
+          
+        - title: CoreNLP server
+          url: corenlp-server.html
+
+
+    - title : Annotators
+
+      items:
+        - title: Summary
+          url: annotators.html
+
+        - title: Annotator dependencies 
+          url: dependencies.html
+
+        - title: Tokenization
+          url: tokenize.html
+
+        - title: Sentence Splitting
+          url: ssplit.html
+
+        - title: Lemmatization
+          url: lemma.html
+
+        - title: Named Entity Recognition
+          url: ner.html
+
+        - title: RegexNER (Named Entity Recognition)
+          url: regexner.html
+
+        - title: Constituency Parsing 
+          url: parse.html
+
+        - title: Dependency Parsing 
+          url: depparse.html
+
+        - title: Coreference Resolution (Sieve-Based)
+          url: dcoref.html
+
+        - title: Natural Logic 
+          url: natlog.html
+
+        - title: Open Information Extraction
+          url: openie.html
+
+        - title: Sentiment 
+          url: sentiment.html
+
+        - title: Relation Extraction 
+          url: relation.html
+
+        - title: Quote Annotator 
+          url: quote.html
+
+        - title: CleanXML Annotator
+          url: cleanxml.html
+
+        - title: True case Annotator
+          url: truecase.html
+
+        - title: Entity Mentions Annotator 
+          url: entitymentions.html
+          
+        - title: Adding a new annotator
+          url: new_annotator.html
+
+
+    - title: Additional tools 
+
+      items:
+
+        - title: TokensRegex
+          url: tokensregex.html
+
+        - title: Bootstrapped surface patterns
+          url: patterns.html
+
+        - title: Extensions
+          url: extensions.html
+
+    - title: Resources 
+
+      items:
+
+        - title: FAQ 
+          url: faq.html
+
+        - title: Online demo
+          external_url: http://corenlp.run/
+
+        - title: Javadoc 
+          external_url: http://nlp.stanford.edu/nlp/javadoc/javanlp/
+            #useful.html
+
+        - title: Release history 
+          url: history.html
+
+        - title: Contact
+          url: contact.html
+

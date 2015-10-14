@@ -1,0 +1,113 @@
+<!-- Content Row -->
+<div class="row">
+<!-- Sidebar Column -->
+<div class="col-md-3">
+
+<script>
+
+$(document).ready(function() {
+// Initialize navgoco with default options
+$("#mysidebar").navgoco({
+caretHtml: '',
+//accordion: {% if site.sidebar_accordion %}{{site.sidebar_accordion}}{% else %}true{% endif %},
+accordion: {% if site.sidebar_accordion %}{{site.sidebar_accordion}}{% else %}false{% endif %}
+openClass: 'active', // open
+save: false, // leave false or nav highlighting doesn't work right
+cookie: {
+name: 'navgoco',
+expires: false,
+path: '/'
+},
+slide: {
+duration: 400,
+easing: 'swing'
+}
+});
+
+$("#collapseAll").click(function(e) {
+e.preventDefault();
+$("#mysidebar").navgoco('toggle', false);
+});
+
+$("#expandAll").click(function(e) {
+e.preventDefault();
+$("#mysidebar").navgoco('toggle', true);
+});
+
+});
+
+</script>
+
+
+{% include custom/conditions.html %}
+
+<ul id="mysidebar" class="nav">
+
+<div class="siteTagline">{{site.sidebar_tagline}}</div>
+<div class="versionTagline">{{site.sidebar_version}}</div>
+
+{% for entry in sidebar %}
+	{% for subcategory in entry.subcategories %}
+
+		{% if true %}
+
+			<li><a href="#">{{ subcategory.title }}</a>
+			{% if subcategory.class == "series" %}
+				<ul class="series">
+			{% else %}
+				<ul>
+			{% endif %}
+
+			{% for item in subcategory.items %}
+				
+				{% if true %}
+					{% if item.external_url %}
+						<li><a href="{{item.external_url}}" target="_blank">{{item.title}}</a></li>
+					{% elsif page.url == item.url %}
+						<li class="active"><a href="{{item.url | replace: "/",""}}">{{item.title}}</a></li>
+					{% else %}
+						<li><a href="{{item.url | replace: "/",""}}">{{item.title}}</a></li>
+					{% endif %}
+
+					{% for thirdlevel in item.thirdlevel %}
+						{% if thirdlevel.audience contains audience and thirdlevel.product contains product and thirdlevel.platform contains platform and thirdlevel.version contains version and thirdlevel.web != false %}
+							<li class="thirdlevel"><a href="#">{{ thirdlevel.title }}</a>
+							<ul>
+							{% for deeplevel in thirdlevel.thirdlevelitems %}
+								{% if deeplevel.audience contains audience and deeplevel.product contains product and deeplevel.platform contains platform and deeplevel.version contains version and deeplevel.web != false %}
+									{% if deeplevel.external_url %}
+										<li><a href="{{deeplevel.external_url}}" target="_blank">{{deeplevel.title}}</a></li>
+									{% elsif page.url == deeplevel.url %}
+										<li class="active"><a href="{{deeplevel.url | replace: "/",""}}">{{deeplevel.title}}</a></li>
+									{% else %}
+										<li><a href="{{deeplevel.url | replace: "/",""}}">{{deeplevel.title}}</a></li>
+									{% endif %}
+
+								{% endif %}
+							{% endfor %}
+							</ul>
+							</li>
+						{% endif %}
+					{% endfor %}
+					</li>
+				{% endif %}
+			{% endfor %}
+			{% if subcategory.class == "series" %}
+				</ul>
+			{% else %}
+				</ul>
+			{% endif %}
+			</li>
+		{% endif %}
+	{% endfor %}
+{% endfor %}
+</ul>
+
+{% if site.sidebar_accordion == false %}
+<p class="external">
+<a href="#" id="collapseAll">Collapse All</a> | <a href="#" id="expandAll">Expand All</a>
+</p>
+{% endif %}
+</div>
+<!-- this highlights the active parent class in the navgoco sidebar. this is critical so that the parent expands when you're viewing a page. This must appear below the sidebar code above.-->
+<script>$("li.active").parents('li').toggleClass("active");</script>

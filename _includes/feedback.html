@@ -1,0 +1,16 @@
+<!-- Send feedback function -->
+<script>
+function SendLinkByMail(href) {
+var subject= "{{site.site_title}} feedback";
+var body = "I have some feedback about the {{page.title}} page: ";
+body += window.location.href;
+body += "";
+var uri = "mailto:{{site.feedback_email}}?subject=";
+uri += encodeURIComponent(subject);
+uri += "&body=";
+uri += encodeURIComponent(body);
+window.location.href = uri;
+}
+</script>
+
+<li><a href="javascript:(function()%7BSendLinkByMail()%3B%7D)()%3B" target="_blank"><i class="fa fa-envelope-o"></i> Feedback</a></li>

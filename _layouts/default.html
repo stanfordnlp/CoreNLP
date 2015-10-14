@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<html>
+  <head>
+
+ {% include head.html %}
+
+<script>
+  $(function () {
+      $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+{% unless site.print == true %}
+{% if page.video == true %}
+<link href="https://vjs.zencdn.net/4.12/video-js.css" rel="stylesheet">
+<script src="https://vjs.zencdn.net/4.12/video.js"></script>
+{% endif %}
+{% endunless %}
+
+{% unless site.print == true %}
+{% if page.datatable == true %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.5/css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.5/js/jquery.dataTables.js"></script>
+<script>
+  $(document).ready(function(){
+
+      $('table.datatable').DataTable( {
+                  paging: false,
+                  stateSave: true
+              }
+      );
+</script>
+{% endif %}
+{% endunless %}
+
+  </head>
+
+<body>
+
+   {% include topnav.html %}
+
+
+    <!-- Page Content -->
+    <div class="container">
+        <div class="col-lg-12">&nbsp;</div>
+
+
+{% include sidebar.html %}
+
+            <!-- Content Column -->
+            <div class="col-md-9">
+
+                {{content}}
+            </div><!-- /.row -->
+
+    </div>    <!-- /.container -->
+
+</body>
+{% if site.google_analytics %}
+{% include google_analytics.html %}
+{% endif %}
+
+</html>
+

@@ -1,0 +1,66 @@
+# project definitions
+project: doc
+audience: all 
+product: all
+platform: all
+version: all
+destination: ../doc_designers
+topnav_title: Stanford CoreNLP
+homepage_title: Stanford CoreNLP &mdash; a suite of core NLP tools 
+site_title: Stanford CoreNLP
+#disqus_shortname: idrbwjekyll
+#google_analytics: UA-66296557-1
+
+# variables
+
+#sidebar_tagline: designers
+#sidebar_version: version 3.0
+project_file_name: doc
+
+port: 4001
+
+exclude:
+  - doc_writer*
+  - configs/
+  - _site
+  - di_multi*
+
+include:
+  - _pages
+
+# same for all
+host: 127.0.0.1
+#feedback_email: tomjohnson1492@gmail.com
+sidebar_accordion: true
+markdown: redcarpet
+print: false
+theme_file: theme-cardinal.css
+# only use suffix if you need to force index.html to display
+# suffix: index.html
+
+redcarpet:
+  extensions: ["no_intra_emphasis", "fenced_code_blocks", "tables", "with_toc_data"]
+
+highlighter: pygments
+
+collections:
+  tooltips:
+    output: true
+
+defaults:
+  -
+    scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "page"
+      comments: true
+  -
+    scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+      comments: true
+
+

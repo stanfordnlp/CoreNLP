@@ -1,0 +1,42 @@
+---
+type: frontmatter
+search: exclude
+---
+
+<!-- new page -->
+<div id="navig">
+    <h1>Table of Contents</h1>
+    {% include custom/conditions.html %}
+
+    <ul id="mysidebar" class="nav">
+        {% for entry in sidebar %}
+        {% for subcategory in entry.subcategories %}
+        {% if subcategory.audience contains audience and subcategory.product contains product and subcategory.platform contains platform and subcategory.version contains version and subcategory.web != false %}
+        <li class="sectionHead">{{ subcategory.title }}
+            <ul>
+                {% for item in subcategory.items %}
+                {% if item.audience contains audience and item.product contains product and item.platform contains platform and item.version contains version and item.web != false %}
+                <li><a href="{{item.url | prepend: site.baseurl}}">{{item.title}}</a>
+                    {% for thirdlevel in item.thirdlevel %}
+                    {% if thirdlevel.audience contains buildAudience and thirdlevel.print == true %}
+                <li class="sectionHead">{{ thirdlevel.title }}
+                    <ul>
+                        {% for deeplevel in thirdlevel.thirdlevelitems%}
+                        {% if deeplevel.audience contains audience and deeplevel.product contains product and deeplevel.platform contains platform and deeplevel.version contains version and deeplevel.web != false %}
+                        <li><a href="{{deeplevel.url | prepend: site.baseurl}}">{{deeplevel.title}}</a></li>
+                        {% endif %}
+                        {% endfor %}
+                    </ul>
+                </li>
+                {% endif %}
+                {% endfor %}
+        </li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+    </li>
+    {% endif %}
+    {% endfor %}
+    {% endfor %}
+    </ul>
+</div>

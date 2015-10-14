@@ -1,0 +1,4 @@
+# Contents of annotators.md and releaseHistory.md are used as part of ../annotators.md and ../history.md respectively
+
+cat annotators.tsv | python convertTSVToMarkdown.py > annotators_table.md
+cat releaseHistory.md | python convertTSVToMarkdown.py > releaseHistory_table.md 

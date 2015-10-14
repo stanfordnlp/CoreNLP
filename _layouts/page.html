@@ -1,0 +1,37 @@
+---
+layout: default
+---
+
+<div class="post-header">
+   <h1 class="post-title-main">{% if page.homepage == true %} {{site.homepage_title}} {% else %}{{ page.title }}{% endif %}</h1>
+</div>
+
+<div class="post-content">
+
+   {% if page.summary %}
+    <div class="summary">{{page.summary}}</div>
+   {% endif %}
+{% include toc.html %}
+
+  {{content}}
+{% include linkrefs.html %}
+
+<div class="tags">
+    {% if page.tags != null %}
+    <b>Tags: </b>
+    {% include custom/conditions.html %}
+    {% for tag in page.tags %}
+    {% if projectTags contains tag %}
+    <a href="{{site.project_file_name}}_tag-{{tag}}.html"><button type="button" class="btn btn-primary navbar-btn cursorNorm">{{page.tagName}}{{tag}}</button></a>{% unless forloop.last %}{% endunless%}
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+</div>
+
+{% include disqus.html %}
+
+</div>
+
+{{hr_shaded}}
+
+{% include footer.html %}
