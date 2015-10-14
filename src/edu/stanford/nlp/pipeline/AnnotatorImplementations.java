@@ -200,9 +200,16 @@ public class AnnotatorImplementations {
   }
 
   /**
-   * Annotate for coreference
+   * Annotate for coreference (statistical)
    */
   public Annotator coref(Properties properties) {
+    return new HybridCorefAnnotator(properties);
+  }
+
+  /**
+   * Annotate for coreference (deterministic)
+   */
+  public Annotator dcoref(Properties properties) {
     return new DeterministicCorefAnnotator(properties);
   }
 
