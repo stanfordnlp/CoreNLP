@@ -1,7 +1,8 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.dcoref.CorefChain;
-import edu.stanford.nlp.dcoref.Dictionaries;
+import edu.stanford.nlp.hcoref.CorefCoreAnnotations.*;
+import edu.stanford.nlp.hcoref.data.CorefChain;
+import edu.stanford.nlp.hcoref.data.Dictionaries;
 import edu.stanford.nlp.ie.NumberNormalizer;
 import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
 import edu.stanford.nlp.ie.machinereading.structure.ExtractionObject;
@@ -26,7 +27,6 @@ import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.ling.CoreAnnotations.*;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.*;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.*;
-import edu.stanford.nlp.dcoref.CorefCoreAnnotations.*;
 import edu.stanford.nlp.time.TimeAnnotations.*;
 
 import java.io.*;
@@ -1272,11 +1272,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Set the new root
     if (fragment.hasRoot()) {
       fragmentTree.resetRoots();
-      for (IndexedWord vertex : fragmentTree.vertexSet()) {
-        if (vertex.index() - 1 == fragment.getRoot()) {
-          fragmentTree.setRoot(vertex);
-        }
-      }
+      fragmentTree.vertexSet().stream()
+          .filter(vertex -> vertex.index() - 1 == fragment.getRoot())
+          .forEach(fragmentTree::setRoot);
     }
     // Set the new vertices
     Set<Integer> keptIndices = new HashSet<>(fragment.getTokenIndexList());
@@ -1284,15 +1282,15 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         .filter(vertex -> !keptIndices.contains(vertex.index() - 1))
         .forEach(fragmentTree::removeVertex);
     // Apparently this sometimes screws up the tree
-    for (IndexedWord vertex : fragmentTree.vertexSet()) {
-      if (fragmentTree.getFirstRoot() != vertex &&
-          tree.getFirstRoot() != vertex &&
-          !fragmentTree.incomingEdgeIterable(vertex).iterator().hasNext()) {
-        SemanticGraphEdge edge = tree.incomingEdgeIterable(vertex).iterator().next();
-        fragmentTree.addEdge(fragmentTree.getFirstRoot(), edge.getDependent(), edge.getRelation(),
-            edge.getWeight(), edge.isExtra());
-      }
-    }
+    fragmentTree.vertexSet().stream()
+        .filter(vertex -> fragmentTree.getFirstRoot() != vertex &&
+                          tree.getFirstRoot() != vertex &&
+                          !fragmentTree.incomingEdgeIterable(vertex).iterator().hasNext())
+        .forEach(vertex -> {
+            SemanticGraphEdge edge = tree.incomingEdgeIterable(vertex).iterator().next();
+            fragmentTree.addEdge(fragmentTree.getFirstRoot(), edge.getDependent(), edge.getRelation(),
+                edge.getWeight(), edge.isExtra());
+        });
     // Return the fragment
     //noinspection SimplifiableConditionalExpression
     return new SentenceFragment(fragmentTree,

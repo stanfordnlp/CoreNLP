@@ -504,6 +504,23 @@ public class AnnotatorFactories {
     };
   }
 
+  public static AnnotatorFactory dcoref(Properties properties, final AnnotatorImplementations annotatorImplementation) {
+    return new AnnotatorFactory(properties, annotatorImplementation) {
+      private static final long serialVersionUID = 1L;
+
+      @Override
+      public Annotator create() {
+        return annotatorImplementation.dcoref(properties);
+      }
+
+      @Override
+      public String additionalSignature() {
+        // keep track of all relevant properties for this annotator here!
+        return DeterministicCorefAnnotator.signature(properties);
+      }
+    };
+  }
+
 
   public static AnnotatorFactory relation(Properties properties, final AnnotatorImplementations annotatorImplementation) {
     return new AnnotatorFactory(properties, annotatorImplementation) {

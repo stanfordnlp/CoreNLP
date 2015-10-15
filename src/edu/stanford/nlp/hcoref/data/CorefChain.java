@@ -339,6 +339,16 @@ public class CorefChain implements Serializable {
     Collections.sort(mentions, new CorefMentionComparator());
   }
 
+  /**
+   * Delete a mention from this coreference chain.
+   * @param m The mention to delete.
+   */
+  public void deleteMention(CorefMention m) {
+    this.mentions.remove(m);
+    IntPair position = new IntPair(m.sentNum, m.headIndex);
+    this.mentionMap.remove(position);
+  }
+
   public String toString(){
     return "CHAIN" + this.chainID + '-' + mentions;
   }

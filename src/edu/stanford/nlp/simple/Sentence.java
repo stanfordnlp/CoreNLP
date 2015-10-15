@@ -1,6 +1,6 @@
 package edu.stanford.nlp.simple;
 
-import edu.stanford.nlp.dcoref.CorefChain;
+import edu.stanford.nlp.hcoref.data.CorefChain;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
