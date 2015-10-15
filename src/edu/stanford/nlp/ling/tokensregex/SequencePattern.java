@@ -1534,12 +1534,15 @@ public class SequencePattern<T> implements Serializable {
         int pi = greedyMatch? 1:i;
         int bid2 = matchedStates.getBranchStates().getBranchId(bid,pi,totalBranches);
         if (consume) {
+          // Premark many times we have matched this pattern
+          matchedStates.getBranchStates().startMatchedCountInc(bid2, this);
           // Consuming - try to see if repeating this pattern does anything
           boolean m = repeatStart.match(bid2, matchedStates, consume);
           if (m) {
             match = true;
-            // Mark how many times we have matched this pattern
-            matchedStates.getBranchStates().startMatchedCountInc(bid2, this);
+          } else {
+            // Didn't match - decrement how many times we have matched this pattern
+            matchedStates.getBranchStates().startMatchedCountDec(bid2, this);
           }
         } else {
           // Not consuming - don't do anything, just add this back to list of states to be processed
@@ -1665,16 +1668,15 @@ public class SequencePattern<T> implements Serializable {
     protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates, boolean consume, State prevState)
     {
       // Opposite of GroupStartState
-      // Don't do anything when we are about to consume an element
-      // Only we are done consuming, and preparing to go on to the next element
-      // do we mark the end of the group
+      // Mark the end of the group
+      Object v = (prevState != null) ? prevState.value(bid, matchedStates) : null;
       if (consume) {
-        return false;
+        // We are consuming so the curPosition isn't part of our group
+        matchedStates.setGroupEnd(bid, captureGroupId, matchedStates.curPosition-1, v);
       } else {
-        Object v = (prevState != null)? prevState.value(bid, matchedStates):null;
         matchedStates.setGroupEnd(bid, captureGroupId, v);
-        return super.match(bid, matchedStates, consume, prevState);
       }
+      return super.match(bid, matchedStates, consume, prevState);
     }
   }
 

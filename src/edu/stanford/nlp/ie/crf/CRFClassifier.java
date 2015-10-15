@@ -190,12 +190,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     this.windowSize = crf.windowSize;
     this.featureFactories = crf.featureFactories;
     this.pad = crf.pad;
-    if (crf.knownLCWords != null) {
-      this.knownLCWords = new MaxSizeConcurrentHashSet<>(crf.flags.maxAdditionalKnownLCWords);
-    } else {
-      this.knownLCWords = new MaxSizeConcurrentHashSet<>(crf.knownLCWords);
-      this.knownLCWords.setMaxSize(this.knownLCWords.size() + crf.flags.maxAdditionalKnownLCWords);
-    }
+    this.knownLCWords = (crf.knownLCWords != null) ? Generics.<String>newHashSet(crf.knownLCWords) : null;
     this.featureIndex = (crf.featureIndex != null) ? new HashIndex<String>(crf.featureIndex.objectsList()) : null;
     this.classIndex = (crf.classIndex != null) ? new HashIndex<String>(crf.classIndex.objectsList()) : null;
     if (crf.labelIndices != null) {
@@ -345,7 +340,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   /**
-   * Combines weighted crf with this crf.
+   * Combines weighted crf with this crf
    *
    * @param crf
    * @param weight
@@ -368,7 +363,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     // Combine weights of the other classifier with this classifier,
     // weighing the other classifier's weights by weight
-    // First merge the feature indices
+    // First merge the feature indicies
     int oldNumFeatures1 = this.featureIndex.size();
     int oldNumFeatures2 = crf.featureIndex.size();
     int oldNumWeights1 = this.getNumWeights();
@@ -2644,23 +2639,17 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       }
     }
 
-    // System.err.println("properties passed into CRF's loadClassifier are:" + props);
     if (props != null) {
       flags.setProperties(props, false);
     }
+
+    reinit();
 
     windowSize = ois.readInt();
     weights = (double[][]) ois.readObject();
 
     // WordShapeClassifier.setKnownLowerCaseWords((Set) ois.readObject());
-    Set<String> lcWords = (Set<String>) ois.readObject();
-    if (lcWords instanceof MaxSizeConcurrentHashSet) {
-      knownLCWords = (MaxSizeConcurrentHashSet<String>) lcWords;
-    } else {
-      knownLCWords = new MaxSizeConcurrentHashSet<>(lcWords);
-    }
-
-    reinit();
+    knownLCWords = (Set<String>) ois.readObject();
 
     if (flags.labelDictionaryCutoff > 0) {
       labelDictionary = (LabelDictionary) ois.readObject();
@@ -2806,43 +2795,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return w;
   }
 
-  private void readEmbeddingsData() throws IOException {
-    System.err.println("Reading Embedding Files");
-    BufferedReader br = IOUtils.readerFromString(flags.embeddingWords);
-
-    List<String> wordList = new ArrayList<>();
-    for (String line ; (line = br.readLine()) != null; ) {
-      wordList.add(line.trim());
-    }
-    System.err.println("Found a dictionary of size " + wordList.size());
-    br.close();
-
-    embeddings = Generics.newHashMap();
-    int count = 0;
-    int vectorSize = -1;
-    boolean warned = false;
-    br = IOUtils.readerFromString(flags.embeddingVectors);
-    for (String line ; (line = br.readLine()) != null; ) {
-      double[] vector = ArrayUtils.toDoubleArray(line.trim().split(" "));
-      if (vectorSize < 0) {
-        vectorSize = vector.length;
-      } else {
-        if (vectorSize != vector.length && ! warned) {
-          System.err.println("Inconsistent vector lengths: " + vectorSize + " vs. " + vector.length);
-          warned = true;
-        }
-      }
-      embeddings.put(wordList.get(count++), vector);
-    }
-    System.err.println("Found " + count + " matching embeddings of dimension " + vectorSize);
-  }
-
-  @Override
-  public List<IN> classifyWithGlobalInformation(List<IN> tokenSeq, final CoreMap doc, final CoreMap sent) {
-    return classify(tokenSeq);
-  }
-
-
 
   /**
    * This is used to load the default supplied classifier stored within the jar
@@ -2962,13 +2914,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return crf;
   }
 
-  public static <INN extends CoreMap> CRFClassifier<INN> getClassifier(ObjectInputStream ois, Properties props) throws IOException, ClassCastException,
-      ClassNotFoundException {
-    CRFClassifier<INN> crf = new CRFClassifier<INN>();
-    crf.loadClassifier(ois, props);
-    return crf;
-  }
-
   private static CRFClassifier<CoreLabel> chooseCRFClassifier(SeqClassifierFlags flags) {
     CRFClassifier<CoreLabel> crf; // initialized in if/else
     if (flags.useFloat) {
@@ -3004,7 +2949,34 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     String serializeToText = flags.serializeToText;
 
     if (crf.flags.useEmbedding && crf.flags.embeddingWords != null && crf.flags.embeddingVectors != null) {
-      crf.readEmbeddingsData();
+      System.err.println("Reading Embedding Files");
+      BufferedReader br = IOUtils.readerFromString(crf.flags.embeddingWords);
+
+      List<String> wordList = new ArrayList<String>();
+      for (String line ; (line = br.readLine()) != null; ) {
+        wordList.add(line.trim());
+      }
+      System.err.println("Found a dictionary of size " + wordList.size());
+      br.close();
+
+      crf.embeddings = Generics.newHashMap();
+      int count = 0;
+      int vectorSize = -1;
+      boolean warned = false;
+      br = IOUtils.readerFromString(crf.flags.embeddingVectors);
+      for (String line ; (line = br.readLine()) != null; ) {
+        double[] vector = ArrayUtils.toDoubleArray(line.trim().split(" "));
+        if (vectorSize < 0) {
+          vectorSize = vector.length;
+        } else {
+          if (vectorSize != vector.length && ! warned) {
+            System.err.println("Inconsistent vector lengths: " + vectorSize + " vs. " + vector.length);
+            warned = true;
+          }
+        }
+        crf.embeddings.put(wordList.get(count++), vector);
+      }
+      System.err.println("Found " + count + " matching embeddings of dimension " + vectorSize);
     }
 
     if (crf.flags.loadClassIndexFrom != null) {
@@ -3026,11 +2998,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       crf.loadJarClassifier(crf.flags.loadJarClassifier, props);
     } else if (crf.flags.trainFile != null || crf.flags.trainFileList != null) {
       Timing timing = new Timing();
-      // temporarily unlimited size of knownLCWords
-      int knownLCWordsLimit = crf.knownLCWords.getMaxSize();
-      crf.knownLCWords.setMaxSize(-1);
       crf.train();
-      crf.knownLCWords.setMaxSize(knownLCWordsLimit);
       timing.done("CRFClassifier training");
     } else {
       crf.loadDefaultClassifier();
@@ -3100,5 +3068,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       crf.classifyStdin();
     }
   } // end main
+
+  @Override
+  public List<IN> classifyWithGlobalInformation(List<IN> tokenSeq, final CoreMap doc, final CoreMap sent) {
+    return classify(tokenSeq);
+  }
 
 } // end class CRFClassifier

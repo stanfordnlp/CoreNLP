@@ -354,18 +354,16 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
    * @param <T>
    */
   public final static class MatchedGroupInfo<T> {
-    public final String text;
-    public final List<? extends T> nodes;
-    public final List<Object> matchResults;
-    public final Object value;
-    public final String varName;
+    public String text;
+    public List<? extends T> nodes;
+    public List<Object> matchResults;
+    public Object value;
 
-    public MatchedGroupInfo(String text, List<? extends T> nodes, List<Object> matchResults, Object value, String varName) {
+    public MatchedGroupInfo(String text, List<? extends T> nodes, List<Object> matchResults, Object value) {
       this.text = text;
       this.nodes = nodes;
       this.matchResults = matchResults;
       this.value = value;
-      this.varName = varName;
     }
   }
 }

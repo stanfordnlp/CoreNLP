@@ -544,7 +544,6 @@ public abstract class GrammaticalStructure implements Serializable {
 
         IndexedWord root = rootTypedDep.dep();
         IndexedWord newRoot = null;
-        Collections.sort(basicDep);
         for (TypedDependency td : basicDep) {
           if (td.gov().equals(root)) {
             if (newRoot != null) {

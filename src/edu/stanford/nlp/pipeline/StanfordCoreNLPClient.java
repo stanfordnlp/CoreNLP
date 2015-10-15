@@ -223,7 +223,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
    * @param properties The properties file, as would be passed to {@link StanfordCoreNLP}.
    * @param backends The backends to run on.
    */
-  private StanfordCoreNLPClient(Properties properties, List<Backend> backends) {
+  public StanfordCoreNLPClient(Properties properties, List<Backend> backends) {
     // Save the constructor variables
     this.properties = properties;
     Properties serverProperties = new Properties();

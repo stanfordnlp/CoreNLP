@@ -129,7 +129,7 @@ public class MentionDetectionClassifier implements Serializable {
           }
           
           // add to remove
-          Mention keep = Counters.argmax(probs, (m1, m2) -> m1.spanToString().compareTo(m2.spanToString()));
+          Mention keep = Counters.argmax(probs);
           probs.remove(keep);
           remove.addAll(probs.keySet());
         }

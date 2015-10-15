@@ -98,7 +98,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
           paths.add(path);
         }
       }
-      loadClassifiers(p, paths);
+      loadClassifiers(paths);
     }
 
     //
@@ -107,7 +107,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     else if((loadPath1 = p.getProperty("loadClassifier")) != null && (loadPath2 = p.getProperty("loadAuxClassifier")) != null){
       paths.add(loadPath1);
       paths.add(loadPath2);
-      loadClassifiers(p, paths);
+      loadClassifiers(paths);
     }
 
     //
@@ -116,7 +116,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     else {
       paths.add(DefaultPaths.DEFAULT_NER_THREECLASS_MODEL);
       paths.add(DefaultPaths.DEFAULT_NER_MUC_MODEL);
-      loadClassifiers(p, paths);
+      loadClassifiers(paths);
     }
     this.initLoadPaths = new ArrayList<>(paths);
     this.initProps = p;
@@ -134,7 +134,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     super(props);
     this.combinationMode = combinationMode;
     List<String> paths = new ArrayList<>(Arrays.asList(loadPaths));
-    loadClassifiers(props, paths);
+    loadClassifiers(paths);
     this.initLoadPaths = new ArrayList<>(paths);
     this.initProps = props;
   }
@@ -209,13 +209,13 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     while (i < numClassifiers) {
       try {
         System.err.println("loading CRF...");
-        CRFClassifier newCRF = ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(ois, props));
+        CRFClassifier newCRF = ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(ois));
         baseClassifiers.add(newCRF);
         i++;
       } catch (Exception e) {
         try {
           System.err.println("loading CMM...");
-          CMMClassifier newCMM = ErasureUtils.uncheckedCast(CMMClassifier.getClassifier(ois, props));
+          CMMClassifier newCMM = ErasureUtils.uncheckedCast(CMMClassifier.getClassifier(ois));
           baseClassifiers.add(newCMM);
           i++;
         } catch (Exception ex) {
@@ -256,10 +256,10 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     }
   }
 
-  private void loadClassifiers(Properties props, List<String> paths) throws IOException {
+  private void loadClassifiers(List<String> paths) throws IOException {
     baseClassifiers = new ArrayList<AbstractSequenceClassifier<IN>>();
     for(String path: paths){
-      AbstractSequenceClassifier<IN> cls = loadClassifierFromPath(props, path);
+      AbstractSequenceClassifier<IN> cls = loadClassifierFromPath(path);
       baseClassifiers.add(cls);
       if(DEBUG){
         System.err.printf("Successfully loaded classifier #%d from %s.%n", baseClassifiers.size(), path);
@@ -271,11 +271,11 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   }
 
 
-  public static <INN extends CoreMap & HasWord> AbstractSequenceClassifier<INN> loadClassifierFromPath(Properties props, String path)
+  public static <INN extends CoreMap & HasWord> AbstractSequenceClassifier<INN> loadClassifierFromPath(String path)
       throws IOException {
     //try loading as a CRFClassifier
     try {
-      return ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(path, props));
+       return ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(path));
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -511,6 +511,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
       // go through baseClassifiers and write each one to disk with CRFClassifier's serialize method
       System.err.println("");
       for (AbstractSequenceClassifier<IN> asc : baseClassifiers) {
+        // TODO: fix situation so that this doesn't have to just be for crf's
         //CRFClassifier crfc = (CRFClassifier) asc;
         //System.err.println("Serializing a base classifier...");
         asc.serializeClassifier(oos);
