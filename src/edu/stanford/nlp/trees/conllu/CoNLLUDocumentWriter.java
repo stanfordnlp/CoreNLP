@@ -1,4 +1,4 @@
-package edu.stanford.nlp.trees.ud;
+package edu.stanford.nlp.trees.conllu;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -7,13 +7,13 @@ import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.Pair;
 
-import java.io.PrintWriter;
 import java.util.HashMap;
 
 /**
  * @author Sebastian Schuster
  */
 public class CoNLLUDocumentWriter {
+
 
     public String printSemanticGraph(SemanticGraph sg) {
 

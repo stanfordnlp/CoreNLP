@@ -16,7 +16,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Timer;
 import java.util.regex.Pattern;
 
 public class TokenSequenceMatcherITest extends TestCase {
@@ -524,13 +523,6 @@ public class TokenSequenceMatcherITest extends TestCase {
     match = m.find();
     assertTrue(match);
     assertEquals(3, m.groupCount());
-    assertEquals("Bishop of London", m.group());
-    assertEquals("Bishop", m.group(1));
-    assertEquals("London", m.group(2));
-    assertEquals("", m.group(3));
-    match = m.find();
-    assertTrue(match);
-    assertEquals(3, m.groupCount());
     assertEquals("as Bishop of London", m.group());
     assertEquals("as Bishop", m.group(1));
     assertEquals("London", m.group(2));
@@ -542,20 +534,6 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertEquals("as Bishop", m.group(1));
     assertEquals("London in", m.group(2));
     assertEquals("as", m.group(3));
-    match = m.find();
-    assertTrue(match);
-    assertEquals(3, m.groupCount());
-    assertEquals("Bishop of London", m.group());
-    assertEquals("Bishop", m.group(1));
-    assertEquals("London", m.group(2));
-    assertEquals("", m.group(3));
-    match = m.find();
-    assertTrue(match);
-    assertEquals(3, m.groupCount());
-    assertEquals("Bishop of London in", m.group());
-    assertEquals("Bishop", m.group(1));
-    assertEquals("London in", m.group(2));
-    assertEquals("", m.group(3));
     match = m.find();
     assertFalse(match);
   }
@@ -736,14 +714,13 @@ public class TokenSequenceMatcherITest extends TestCase {
     // Test sequence with groups
     TokenSequencePattern p = TokenSequencePattern.compile(
                       new SequencePattern.RepeatPatternExpr(
-                                    getSequencePatternExpr("[A-Za-z]+"), 1, -1));
+                                    getSequencePatternExpr("[A-Za-z]+"), 0, -1));
 
     TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
     boolean match = m.find();
     assertTrue(match);
     assertEquals(0, m.groupCount());
     assertEquals("Mellitus was the first Bishop of London", m.group());
-
     match = m.find();
     assertTrue(match);
     assertEquals(0, m.groupCount());
@@ -1326,24 +1303,6 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
-  public void testTokenSequenceMatcherAAs() throws IOException {
-    StringBuilder s = new StringBuilder();
- //   Timing timing = new Timing();
-    for (int i = 1; i <= 10; i++) {
-      s.append("A ");
-      CoreMap doc = createDocument(s.toString());
-      TokenSequencePattern p = TokenSequencePattern.compile("(A?)" + "{" + i + "} " + "A" + "{" + i + "}");
-//      TokenSequencePattern p = TokenSequencePattern.compile( "(A?)" + "{" + i + "}");
-      TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-//      timing.start();
-      boolean match = m.matches();
-      assertTrue(match);
-//      timing.stop("matched: " + match + " " + i);
-    }
-  }
-
-
-
   public void testTokenSequenceMatcherABs() throws IOException {
     CoreMap doc = createDocument("A A A A A A A B A A B A C A E A A A A A A A A A A A B A A A");
 
@@ -1378,7 +1337,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     match = m.find();
     assertFalse(match);
 
-    p = TokenSequencePattern.compile( "( A+ ( /B/+ )? )*");
+  /*  p = TokenSequencePattern.compile( "( A+ ( /B/+ )? )*");
     m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
     match = m.find();
     assertTrue(match);
@@ -1393,7 +1352,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertEquals(2, m.groupCount());
     assertEquals("A A A A A A A A A A A B A A A", m.group());
     match = m.find();
-    assertFalse(match);
+    assertFalse(match);              */
 
     p = TokenSequencePattern.compile( "(/A/+ /B/+ )+");
     m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));

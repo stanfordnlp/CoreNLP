@@ -1,8 +1,9 @@
-package edu.stanford.nlp.trees.ud;
+package edu.stanford.nlp.trees.conllu;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.trees.conllu.CoNLLUDocumentReader;
 import junit.framework.TestCase;
 
 import java.io.Reader;

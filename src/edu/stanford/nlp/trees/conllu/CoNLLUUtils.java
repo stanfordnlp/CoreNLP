@@ -1,4 +1,4 @@
-package edu.stanford.nlp.trees.ud;
+package edu.stanford.nlp.trees.conllu;
 
 import java.util.*;
 
@@ -38,21 +38,19 @@ public class CoNLLUUtils {
     public static String toFeatureString(HashMap<String,String> features) {
         StringBuffer sb = new StringBuffer();
         boolean first = true;
-        if (features != null) {
-            List<String> sortedKeys = new ArrayList<String>(features.keySet());
-            Collections.sort(sortedKeys, new FeatureNameComparator());
-            for (String key : sortedKeys) {
-                if (!first) {
-                    sb.append("|");
-                } else {
-                    first = false;
-                }
-
-                sb.append(key)
-                        .append("=")
-                        .append(features.get(key));
-
+        List<String> sortedKeys = new ArrayList<String>(features.keySet());
+        Collections.sort(sortedKeys, new FeatureNameComparator());
+        for (String key : sortedKeys) {
+            if ( ! first) {
+                sb.append("|");
+            } else {
+                first = false;
             }
+
+            sb.append(key)
+                    .append("=")
+                    .append(features.get(key));
+
         }
 
     /* Empty feature list. */
@@ -95,21 +93,20 @@ public class CoNLLUUtils {
     public static String toExtraDepsString(HashMap<Integer,String> extraDeps) {
         StringBuffer sb = new StringBuffer();
         boolean first = true;
-        if (extraDeps != null) {
-            List<Integer> sortedKeys = new ArrayList<>(extraDeps.keySet());
-            Collections.sort(sortedKeys);
-            for (Integer key : sortedKeys) {
-                if (!first) {
-                    sb.append("|");
-                } else {
-                    first = false;
-                }
-
-                sb.append(key)
-                        .append(":")
-                        .append(extraDeps.get(key));
+        List<Integer> sortedKeys = new ArrayList<>(extraDeps.keySet());
+        Collections.sort(sortedKeys);
+        for (Integer key : sortedKeys) {
+            if ( ! first) {
+                sb.append("|");
+            } else {
+                first = false;
             }
+
+            sb.append(key)
+                    .append(":")
+                    .append(extraDeps.get(key));
         }
+
     /* Empty feature list. */
         if (first) {
             sb.append("_");

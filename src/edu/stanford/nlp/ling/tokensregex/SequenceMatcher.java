@@ -64,7 +64,6 @@ import static edu.stanford.nlp.ling.tokensregex.SequenceMatcher.FindType.FIND_NO
 public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   private static final Logger logger = Logger.getLogger(SequenceMatcher.class.getName());
 
-  boolean includeEmptyMatches = false;
   boolean matchingCompleted = false;
   boolean matched = false;
   boolean matchWithResult = false; // If result of matches should be kept
@@ -89,7 +88,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   // For FIND_ALL
   Iterator<Integer> curMatchIter = null;
   MatchedStates<T> curMatchStates = null;
-  Set<String> prevMatchedSignatures = new HashSet<String>();
 
   // Branching limit for searching with back tracking. Higher value makes the search faster but uses more memory.
   int branchLimit = 2;
@@ -331,23 +329,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     return find(start, false);
   }
 
-  protected boolean find(int start, boolean matchStart) {
-    boolean done = false;
-    while (!done) {
-      boolean res = find0(start, matchStart);
-      if (res) {
-        boolean empty = this.group().isEmpty();
-        if (!empty || includeEmptyMatches) return res;
-        else {
-          start = start + 1;
-        }
-      }
-      done = !res;
-    }
-    return false;
-  }
-
-  protected boolean find0(int start, boolean matchStart)
+  protected boolean find(int start, boolean matchStart)
   {
     boolean match = false;
     matched = false;
@@ -386,25 +368,17 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   private boolean findNextAll()
   {
     if (curMatchIter != null && curMatchIter.hasNext()) {
-      while (curMatchIter.hasNext()) {
-        int next = curMatchIter.next();
-        curMatchStates.setMatchedGroups(next);
-        String sig = getMatchedSignature();
-        if (!prevMatchedSignatures.contains(sig)) {
-          prevMatchedSignatures.add(sig);
-          return true;
-        }
-      }
+      int next = curMatchIter.next();
+      curMatchStates.setMatchedGroups(next);
+      return true;
     }
     if (nextMatchStart < 0) { return false; }
-    prevMatchedSignatures.clear();
     boolean matched = find(nextMatchStart, false);
     if (matched) {
       Collection<Integer> matchedBranches = curMatchStates.getMatchIndices();
       curMatchIter = matchedBranches.iterator();
       int next = curMatchIter.next();
       curMatchStates.setMatchedGroups(next);
-      prevMatchedSignatures.add(getMatchedSignature());
     }
     return matched;
   }
@@ -717,11 +691,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     matchingCompleted = false;
     matched = false;
     clearMatched();
-
-    // Clearing for FIND_ALL
-    prevMatchedSignatures.clear();
-    curMatchIter = null;
-    curMatchStates = null;
   }
 
   /**
@@ -984,14 +953,14 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       /* note[gabor]: replaced code below with the above
       Collection<Integer> curBidStates = new ArrayList<Integer>(branchStates.keySet());
       for (int bid:curBidStates) {
-        if (!keepBidStates.get(bid)) {
+        if (!keepBidStates.contains(bid)) {
           if (logger.isLoggable(Level.FINEST)) {
             logger.finest("Remove state for bid=" + bid);
           }
           branchStates.remove(bid);
         }
-      }  */
-
+      }
+      */
 
       // TODO: We should be able to trim some bids from our bidIndex as well....
       /*
@@ -1218,22 +1187,14 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       matchStateInfo.put(node, obj);
     }
 
-    protected void startMatchedCountInc(int bid, SequencePattern.State node) {
-      startMatchedCountInc(bid, node, 1, 1);
-    }
-
-    protected void startMatchedCountDec(int bid, SequencePattern.State node) {
-      startMatchedCountInc(bid, node, 0, -1);
-    }
-
-    protected void startMatchedCountInc(int bid, SequencePattern.State node, int initialValue, int delta)
+    protected void startMatchedCountInc(int bid, SequencePattern.State node)
     {
       Map<SequencePattern.State,Object> matchStateCount = getMatchStateInfo(bid, true);
       Pair<Integer,Boolean> p = (Pair<Integer,Boolean>) matchStateCount.get(node);
       if (p == null) {
-        matchStateCount.put(node, new Pair<Integer,Boolean>(initialValue,false));
+        matchStateCount.put(node, new Pair<Integer,Boolean>(1,false));
       } else {
-        matchStateCount.put(node, new Pair<Integer,Boolean>(p.first() + delta,false));
+        matchStateCount.put(node, new Pair<Integer,Boolean>(p.first() + 1,false));
       }
     }
 
@@ -1305,15 +1266,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       }
     }
 
-  }
-
-  private String getMatchedSignature() {
-    if (matchedGroups == null) return null;
-    StringBuilder sb = new StringBuilder();
-    for (MatchedGroup g : matchedGroups) {
-      sb.append("(").append(g.matchBegin).append(",").append(g.matchEnd).append(")");
-    }
-    return sb.toString();
   }
 
   /**
@@ -1495,7 +1447,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
      */
     private Collection<Integer> getMatchIndices()
     {
-      HashSet<Integer> allMatchIndices = new LinkedHashSet<Integer>();// Generics.newHashSet();
+      Set<Integer> allMatchIndices = new HashSet<Integer>();// Generics.newHashSet();
       for (int i = 0; i < states.size(); i++) {
         State state = states.get(i);
         if (state.tstate.equals(SequencePattern.MATCH_STATE)) {
@@ -1621,11 +1573,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     protected void setGroupEnd(int bid, int captureGroupId, Object value)
     {
       branchStates.setGroupEnd(bid, captureGroupId, curPosition, value);
-    }
-
-    protected void setGroupEnd(int bid, int captureGroupId, int position, Object value)
-    {
-      branchStates.setGroupEnd(bid, captureGroupId, position, value);
     }
 
     protected void clearGroupStart(int bid, int captureGroupId)

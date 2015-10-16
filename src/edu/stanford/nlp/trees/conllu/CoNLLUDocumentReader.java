@@ -1,4 +1,4 @@
-package edu.stanford.nlp.trees.ud;
+package edu.stanford.nlp.trees.conllu;
 
 import java.io.Reader;
 import java.io.StringReader;

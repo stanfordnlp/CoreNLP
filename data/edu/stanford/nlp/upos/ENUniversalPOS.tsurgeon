@@ -78,13 +78,8 @@ relabel target AUX
 
 relabel target VERB
 
-% IN -> SCONJ (subordinating conjunctions)
-/^SBAR(-[^ ]+)?$/ < (IN=target $++ @S|FRAG|SBAR|SINV <... {/.*/})
-
-relabel target SCONJ
-
-% IN -> SCONJ (subordinating conjunctions II)
-@PP < (IN=target $+ @SBAR|S)
+% IN -> SCONJ (only in case of subordinating conjunctions)
+/^SBAR(-[^ ]+)?$/ < (IN=target $++ S|FRAG <... {/.*/})
 
 relabel target SCONJ
 
@@ -123,16 +118,6 @@ RB=target <... {/.*/}
 
 relabel target ADV
 
-%DT -> PRON (pronomial this/that/these/those)
-@NP <: (DT=target < /^[Tt]h(is|at|ose|ese)$/)
-
-relabel target PRON
-
-%DT -> DET
-DT=target < __
-
-relabel target DET
-
 % ------------------------------
 % 1 to 1 mappings
 %
@@ -146,6 +131,11 @@ relabel target CONJ
 CD=target <... {/.*/}
 
 relabel target NUM
+
+% DT -> DET
+DT=target <... {/.*/}
+
+relabel target DET
 
 % EX -> PRON
 EX=target <... {/.*/}
