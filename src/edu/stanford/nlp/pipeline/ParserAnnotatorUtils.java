@@ -31,8 +31,7 @@ public class ParserAnnotatorUtils {
    */
   public static void fillInParseAnnotations(boolean verbose, boolean buildGraphs,
                                             GrammaticalStructureFactory gsf, CoreMap sentence,
-                                            List<Tree> trees, GrammaticalStructure.Extras extras,
-                                            UniversalDependenciesFeatureAnnotator featureAnnotator) {
+                                            List<Tree> trees, GrammaticalStructure.Extras extras) {
 
     boolean first = true;
     for (Tree tree : trees) {
@@ -62,11 +61,6 @@ public class ParserAnnotatorUtils {
           SemanticGraph deps = SemanticGraphFactory.generateCollapsedDependencies(gsf.newGrammaticalStructure(tree), extras);
           SemanticGraph uncollapsedDeps = SemanticGraphFactory.generateUncollapsedDependencies(gsf.newGrammaticalStructure(tree), extras);
           SemanticGraph ccDeps = SemanticGraphFactory.generateCCProcessedDependencies(gsf.newGrammaticalStructure(tree), extras);
-
-          // add features to graphs if we are converting to English UD
-          if (featureAnnotator != null) {
-            featureAnnotator.addFeatures(deps, tree, false, true);
-          }
 
           if (verbose) {
             System.err.println("SDs:");
