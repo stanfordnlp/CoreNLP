@@ -63,10 +63,13 @@ public class VectorMap extends HashMap<String, float[]>{
       switch (this) {
         case INT8:
           out.writeByte(value);
+          break;
         case INT16:
           out.writeShort(value);
+          break;
         case INT32:
           out.writeInt(value);
+          break;
         default:
           throw new RuntimeException("Unknown itype: " + this);
       }
