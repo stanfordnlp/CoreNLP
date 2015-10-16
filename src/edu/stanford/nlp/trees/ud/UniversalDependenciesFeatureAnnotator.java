@@ -424,9 +424,12 @@ public class UniversalDependenciesFeatureAnnotator {
 
     if (addUPOS && t != null) {
       t = UniversalPOSMapper.mapTree(t);
-      Iterator<Label> uPOSTagIt = t.preTerminalYield().iterator();
-      for (IndexedWord word : sg.vertexListSorted()) {
-        Label uPOSTag = uPOSTagIt.next();
+      List<Label> uPOSTags = t.preTerminalYield();
+      List<IndexedWord> yield = sg.vertexListSorted();
+      int len = yield.size();
+      for (int i = 0; i < len; i++) {
+        IndexedWord word = yield.get(i);
+        Label uPOSTag = uPOSTags.get(word.index() - 1);
         word.set(CoreAnnotations.CoarseTagAnnotation.class, uPOSTag.value());
       }
     }

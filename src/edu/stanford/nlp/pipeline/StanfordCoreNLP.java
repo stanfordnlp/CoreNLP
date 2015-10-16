@@ -612,22 +612,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     }
   }
 
-  /**
-   * Displays the output of some annotators in CoNLL-U format.
-   * @param annotation Contains the output of all annotators
-   * @param os The output stream
-   * @throws IOException
-   */
-  public void conlluPrint(Annotation annotation, OutputStream os) throws IOException {
-    try {
-      Class clazz = Class.forName("edu.stanford.nlp.pipeline.CoNLLUOutputter");
-      Method method = clazz.getMethod("conllUPrint", Annotation.class, OutputStream.class, StanfordCoreNLP.class);
-      method.invoke(null, annotation, os, this);
-    } catch (NoSuchMethodException | IllegalAccessException | ClassNotFoundException | InvocationTargetException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
   //
   // runtime, shell-specific, and help menu methods
   //

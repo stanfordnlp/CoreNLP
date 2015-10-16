@@ -21,6 +21,7 @@ import edu.stanford.nlp.trees.ud.UniversalDependenciesFeatureAnnotator;
 import edu.stanford.nlp.util.*;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * This class will add parse information to an Annotation.
@@ -60,6 +61,8 @@ public class ParserAnnotator extends SentenceAnnotator {
 
   private final boolean saveBinaryTrees;
 
+  private final boolean keepPunct;
+
   private UniversalDependenciesFeatureAnnotator featureAnnotator = null;
 
   /** If true, don't re-annotate sentences that already have a tree annotation */
@@ -89,6 +92,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     this.treeMap = treeMap;
     this.maxParseTime = 0;
     this.kBest = 1;
+    this.keepPunct = false;
     if (this.BUILD_GRAPHS) {
       TreebankLanguagePack tlp = parser.getTLPParams().treebankLanguagePack();
       this.gsf = tlp.grammaticalStructureFactory(tlp.punctuationWordRejectFilter(), parser.getTLPParams().typedDependencyHeadFinder());
@@ -132,6 +136,9 @@ public class ParserAnnotator extends SentenceAnnotator {
 
     this.kBest = PropertiesUtils.getInt(props, annotatorName + ".kbest", 1);
 
+    this.keepPunct = PropertiesUtils.getBool(props, annotatorName + ".keepPunct", false);
+
+
     String buildGraphsProperty = annotatorName + ".buildgraphs";
     if (!this.parser.getTLPParams().supportsBasicDependencies()) {
       if (props.getProperty(buildGraphsProperty) != null && PropertiesUtils.getBool(props, buildGraphsProperty)) {
@@ -146,8 +153,8 @@ public class ParserAnnotator extends SentenceAnnotator {
       boolean generateOriginalDependencies = PropertiesUtils.getBool(props, annotatorName + ".originalDependencies", false);
       parser.getTLPParams().setGenerateOriginalDependencies(generateOriginalDependencies);
       TreebankLanguagePack tlp = parser.getTLPParams().treebankLanguagePack();
-      // TODO: expose keeping punctuation as an option to the user?
-      this.gsf = tlp.grammaticalStructureFactory(tlp.punctuationWordRejectFilter(), parser.getTLPParams().typedDependencyHeadFinder());
+      Predicate<String> punctFilter = this.keepPunct ? Filters.acceptFilter() : tlp.punctuationWordRejectFilter();
+      this.gsf = tlp.grammaticalStructureFactory(punctFilter, parser.getTLPParams().typedDependencyHeadFinder());
       if (this.gsf instanceof UniversalEnglishGrammaticalStructureFactory) {
         try {
           this.featureAnnotator = new UniversalDependenciesFeatureAnnotator();

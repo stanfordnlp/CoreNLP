@@ -66,8 +66,6 @@ public class ParserAnnotatorUtils {
           // add features to graphs if we are converting to English UD
           if (featureAnnotator != null) {
             featureAnnotator.addFeatures(deps, tree, false, true);
-            featureAnnotator.addFeatures(uncollapsedDeps, tree, false, true);
-            featureAnnotator.addFeatures(ccDeps, tree, false, true);
           }
 
           if (verbose) {
