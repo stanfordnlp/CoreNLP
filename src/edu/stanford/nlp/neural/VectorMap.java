@@ -4,6 +4,7 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.math.ArrayMath;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
@@ -151,6 +152,53 @@ public class VectorMap extends HashMap<String, float[]>{
     }
 
     return vectors;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public boolean equals(Object other) {
+    if (other instanceof Map) {
+      try {
+        Map<String, float[]> otherMap = (Map<String, float[]>) other;
+        // Key sets have the same size
+        if (this.keySet().size() != otherMap.keySet().size()) {
+          return false;
+        }
+        // Entries are the same
+        for (Entry<String, float[]> entry : this.entrySet()) {
+          float[] otherValue = otherMap.get(entry.getKey());
+          // Null checks
+          if (otherValue == null && entry.getValue() != null) {
+            return false;
+          }
+          if (otherValue != null && entry.getValue() == null) {
+            return false;
+          }
+          // Entries are the same
+          //noinspection ConstantConditions
+          if (entry.getValue() != null && otherValue != null) {
+            if (!Arrays.equals(entry.getValue(), otherValue)) {
+              return false;
+            }
+          }
+        }
+        return true;
+      } catch (ClassCastException e) {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public int hashCode() {
+    return keySet().hashCode();
+  }
+
+  @Override
+  public String toString() {
+    return "VectorMap[" + this.size() + "]";
   }
 
 }
