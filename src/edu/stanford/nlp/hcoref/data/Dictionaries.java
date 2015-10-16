@@ -15,8 +15,7 @@ import java.util.Set;
 import edu.stanford.nlp.hcoref.CorefProperties;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.math.ArrayMath;
-import edu.stanford.nlp.neural.WordVectors;
+import edu.stanford.nlp.neural.VectorMap;
 import edu.stanford.nlp.pipeline.DefaultPaths;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -203,7 +202,7 @@ public class Dictionaries {
 
   public int dimVector;
   
-  public WordVectors vectors = new WordVectors();
+  public VectorMap vectors = new VectorMap();
 
   public Map<String, String> strToEntity = Generics.newHashMap();
   public Counter<String> dictScore = new ClassicCounter<String>();
@@ -537,10 +536,10 @@ public class Dictionaries {
       System.err.println("LOAD: WordVectors");
       String wordvectorFile = CorefProperties.getPathSerializedWordVectors(props);
       if(new File(wordvectorFile).exists()) {
-        vectors = WordVectors.deserialize(wordvectorFile);
+        vectors = VectorMap.deserialize(wordvectorFile);
         dimVector = vectors.entrySet().iterator().next().getValue().length;
       } else {
-        vectors = WordVectors.readWord2Vec(CorefProperties.getPathWord2Vec(props));
+        vectors = VectorMap.readWord2Vec(CorefProperties.getPathWord2Vec(props));
         if (wordvectorFile != null && !wordvectorFile.startsWith("edu")) {
           vectors.serialize(wordvectorFile);
         }
@@ -573,8 +572,8 @@ public class Dictionaries {
         props.getProperty(CorefProperties.STATES_PROVINCES_PROP, DefaultPaths.DEFAULT_DCOREF_STATES_AND_PROVINCES),
         CorefProperties.getSieves(props).contains("CorefDictionaryMatch"),
         PropertiesUtils.getStringArray(props, CorefProperties.DICT_LIST_PROP,
-                                       new String[]{DefaultPaths.DEFAULT_DCOREF_DICT1, DefaultPaths.DEFAULT_DCOREF_DICT2,
-                                                    DefaultPaths.DEFAULT_DCOREF_DICT3, DefaultPaths.DEFAULT_DCOREF_DICT4}),
+            new String[]{DefaultPaths.DEFAULT_DCOREF_DICT1, DefaultPaths.DEFAULT_DCOREF_DICT2,
+                DefaultPaths.DEFAULT_DCOREF_DICT3, DefaultPaths.DEFAULT_DCOREF_DICT4}),
         props.getProperty(CorefProperties.DICT_PMI_PROP, DefaultPaths.DEFAULT_DCOREF_DICT1),
         props.getProperty(CorefProperties.SIGNATURES_PROP, DefaultPaths.DEFAULT_DCOREF_NE_SIGNATURES));
     if(CorefProperties.useSemantics(props)) {

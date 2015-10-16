@@ -6,6 +6,7 @@ import edu.stanford.nlp.math.ArrayMath;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * A serializer for reading / writing word vectors.
@@ -14,12 +15,12 @@ import java.util.Map;
  *
  * @author Gabor Angeli
  */
-public class WordVectors extends HashMap<String, float[]>{
+public class VectorMap extends HashMap<String, float[]>{
 
   /**
    * Create an empty word vector storage.
    */
-  public WordVectors() {
+  public VectorMap() {
     super(1024);
   }
 
@@ -27,7 +28,7 @@ public class WordVectors extends HashMap<String, float[]>{
    * Initialize word vectors from a given map.
    * @param vectors The word vectors as a simple map.
    */
-  public WordVectors(Map<String, float[]> vectors) {
+  public VectorMap(Map<String, float[]> vectors) {
     super(vectors);
   }
 
@@ -39,8 +40,14 @@ public class WordVectors extends HashMap<String, float[]>{
    * @throws IOException Thrown if the file could not be written to.
    */
   public void serialize(String file) throws IOException {
-    try (OutputStream output = new FileOutputStream(new File(file))) {
-      serialize(output);
+    try (OutputStream output = new BufferedOutputStream(new FileOutputStream(new File(file)))) {
+      if (file.endsWith(".gz")) {
+        try (GZIPOutputStream gzip = new GZIPOutputStream(output)) {
+          serialize(gzip);
+        }
+      } else {
+        serialize(output);
+      }
     }
   }
 
@@ -81,7 +88,7 @@ public class WordVectors extends HashMap<String, float[]>{
    * @return The vectors in the file.
    * @throws IOException Thrown if we could not read from the resource
    */
-  public static WordVectors deserialize(String file) throws IOException {
+  public static VectorMap deserialize(String file) throws IOException {
     try (InputStream input = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(file)) {
       return deserialize(input);
     }
@@ -94,11 +101,11 @@ public class WordVectors extends HashMap<String, float[]>{
    * @return The word vectors encoded on the stream.
    * @throws IOException Thrown if we could not read from the stream.
    */
-  public static WordVectors deserialize(InputStream in) throws IOException {
+  public static VectorMap deserialize(InputStream in) throws IOException {
     DataInputStream dataIn = new DataInputStream(in);
     int size = dataIn.readInt();
     int dim = dataIn.readInt();
-    WordVectors vectors = new WordVectors();
+    VectorMap vectors = new VectorMap();
     for (int i = 0; i < size; ++i) {
       // Read the key
       int strlen = dataIn.readInt();
@@ -125,8 +132,8 @@ public class WordVectors extends HashMap<String, float[]>{
    * @param file The word2vec text file.
    * @return The word vectors in the file.
    */
-  public static WordVectors readWord2Vec(String file) {
-    WordVectors vectors = new WordVectors();
+  public static VectorMap readWord2Vec(String file) {
+    VectorMap vectors = new VectorMap();
     int dim = -1;
     for(String line : IOUtils.readLines(file)){
       String[] split = line.toLowerCase().split("\\s+");
