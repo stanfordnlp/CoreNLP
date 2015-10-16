@@ -442,7 +442,7 @@ public class UniversalDependenciesFeatureAnnotator {
       System.err.print("Usage: ");
       System.err.print("java ");
       System.err.print(UniversalDependenciesFeatureAnnotator.class.getCanonicalName());
-      System.err.println(" CoNLL-U_file tree_file [-addUPOS]");
+      System.err.println(" CoNLL-U_file tree_file [-addUPOS -escapeParenthesis]");
       return;
     }
 
@@ -450,8 +450,14 @@ public class UniversalDependenciesFeatureAnnotator {
     String treeFile = args[1];
 
     boolean addUPOS = false;
-    if (args.length == 3 && args[2].equals("-addUPOS")) {
-      addUPOS = true;
+    boolean escapeParens = false;
+
+    for (int i = 2; i < args.length; i++) {
+      if (args[i].equals("-addUPOS")) {
+        addUPOS = true;
+      } else if (args[i].equals("-escapeParenthesis")) {
+        escapeParens = true;
+      }
     }
 
     UniversalDependenciesFeatureAnnotator featureAnnotator = new UniversalDependenciesFeatureAnnotator();
@@ -483,7 +489,7 @@ public class UniversalDependenciesFeatureAnnotator {
 
       featureAnnotator.addFeatures(sg, t, true, addUPOS);
 
-      System.out.println(depWriter.printSemanticGraph(sg));
+      System.out.print(depWriter.printSemanticGraph(sg, !escapeParens));
 
     }
   }
