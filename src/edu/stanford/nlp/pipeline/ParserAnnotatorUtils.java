@@ -1,5 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
+import java.io.IOException;
 import java.util.List;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -11,6 +12,7 @@ import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
+import edu.stanford.nlp.trees.ud.UniversalDependenciesFeatureAnnotator;
 import edu.stanford.nlp.util.CoreMap;
 
 
@@ -29,7 +31,8 @@ public class ParserAnnotatorUtils {
    */
   public static void fillInParseAnnotations(boolean verbose, boolean buildGraphs,
                                             GrammaticalStructureFactory gsf, CoreMap sentence,
-                                            List<Tree> trees, GrammaticalStructure.Extras extras) {
+                                            List<Tree> trees, GrammaticalStructure.Extras extras,
+                                            UniversalDependenciesFeatureAnnotator featureAnnotator) {
 
     boolean first = true;
     for (Tree tree : trees) {
@@ -49,6 +52,8 @@ public class ParserAnnotatorUtils {
           tree.pennPrint(System.err);
         }
 
+        setMissingTags(sentence, tree);
+
         if (buildGraphs) {
           // generate the dependency graph
           // unfortunately, it is necessary to make the
@@ -57,6 +62,12 @@ public class ParserAnnotatorUtils {
           SemanticGraph deps = SemanticGraphFactory.generateCollapsedDependencies(gsf.newGrammaticalStructure(tree), extras);
           SemanticGraph uncollapsedDeps = SemanticGraphFactory.generateUncollapsedDependencies(gsf.newGrammaticalStructure(tree), extras);
           SemanticGraph ccDeps = SemanticGraphFactory.generateCCProcessedDependencies(gsf.newGrammaticalStructure(tree), extras);
+
+          // add features to graphs if we are converting to English UD
+          if (featureAnnotator != null) {
+            featureAnnotator.addFeatures(deps, tree, false, true);
+          }
+
           if (verbose) {
             System.err.println("SDs:");
             System.err.println(deps.toString(SemanticGraph.OutputFormat.LIST));
@@ -66,7 +77,6 @@ public class ParserAnnotatorUtils {
           sentence.set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, ccDeps);
         }
 
-        setMissingTags(sentence, tree);
 
         first = false;
       }

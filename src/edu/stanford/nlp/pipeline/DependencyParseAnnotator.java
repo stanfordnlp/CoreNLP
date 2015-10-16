@@ -75,6 +75,8 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
     sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, uncollapsedDeps);
     sentence.set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, ccDeps);
 
+
+
   }
 
   @Override
