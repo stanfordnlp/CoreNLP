@@ -82,7 +82,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
 public class StanfordCoreNLP extends AnnotationPipeline {
 
-  enum OutputFormat { TEXT, XML, JSON, CONLL, SERIALIZED }
+  enum OutputFormat { TEXT, XML, JSON, CONLL, CONLLU, SERIALIZED }
 
   // other constants
   public static final String CUSTOM_ANNOTATOR_PREFIX = "customAnnotatorClass.";
@@ -612,6 +612,22 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     }
   }
 
+  /**
+   * Displays the output of some annotators in CoNLL-U format.
+   * @param annotation Contains the output of all annotators
+   * @param os The output stream
+   * @throws IOException
+   */
+  public void conlluPrint(Annotation annotation, OutputStream os) throws IOException {
+    try {
+      Class clazz = Class.forName("edu.stanford.nlp.pipeline.CoNLLUOutputter");
+      Method method = clazz.getMethod("conllUPrint", Annotation.class, OutputStream.class, StanfordCoreNLP.class);
+      method.invoke(null, annotation, os, this);
+    } catch (NoSuchMethodException | IllegalAccessException | ClassNotFoundException | InvocationTargetException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   //
   // runtime, shell-specific, and help menu methods
   //
@@ -780,6 +796,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           new CoNLLOutputter().print(anno, System.out, pipeline);
           System.out.println();
           break;
+        case CONLLU:
+          new CoNLLUOutputter().print(anno, System.out, pipeline);
+          break;
         case TEXT:
           pipeline.prettyPrint(anno, System.out);
           break;
@@ -865,6 +884,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
               break;
             }
           }
+          case CONLLU:
+            new CoNLLUOutputter().print(annotation, fos, outputOptions);
+            break;
           default:
             throw new IllegalArgumentException("Unknown output format " + outputFormat);
         }
@@ -918,6 +940,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       case XML: defaultExtension = ".xml"; break;
       case JSON: defaultExtension = ".json"; break;
       case CONLL: defaultExtension = ".conll"; break;
+      case CONLLU: defaultExtension = ".conllu"; break;
       case TEXT: defaultExtension = ".out"; break;
       case SERIALIZED: defaultExtension = ".ser.gz"; break;
       default: throw new IllegalArgumentException("Unknown output format " + outputFormat);
