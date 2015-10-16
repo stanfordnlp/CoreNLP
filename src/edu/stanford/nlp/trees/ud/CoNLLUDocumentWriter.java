@@ -9,13 +9,24 @@ import edu.stanford.nlp.util.Pair;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
 /**
  * @author Sebastian Schuster
  */
 public class CoNLLUDocumentWriter {
 
+
+    private static final String LRB_PATTERN = "(?i)-LRB-";
+    private static final String RRB_PATTERN = "(?i)-RRB-";
+
+
     public String printSemanticGraph(SemanticGraph sg) {
+        return printSemanticGraph(sg, true);
+    }
+
+    public String printSemanticGraph(SemanticGraph sg, boolean unescapeParenthesis) {
+
 
         StringBuilder sb = new StringBuilder();
 
@@ -50,6 +61,7 @@ public class CoNLLUDocumentWriter {
 
 
             String additionalDepsString = CoNLLUUtils.toExtraDepsString(additionalDeps);
+            String word = token.word();
             String featuresString = CoNLLUUtils.toFeatureString(token.get(CoreAnnotations.CoNLLUFeats.class));
             String pos = token.getString(CoreAnnotations.PartOfSpeechAnnotation.class, "_");
             String upos = token.getString(CoreAnnotations.CoarseTagAnnotation.class, "_");
@@ -63,7 +75,14 @@ public class CoNLLUDocumentWriter {
                 relnName = GrammaticalRelation.ROOT.toString();
             }
 
-            sb.append(String.format("%d\t%s\t%s\t%s\t%s\t%s\t%d\t%s\t%s\t%s%n", token.index(), token.word(),
+            if (unescapeParenthesis) {
+                word = word.replaceAll(LRB_PATTERN, "(");
+                word = word.replaceAll(RRB_PATTERN, ")");
+                lemma = lemma.replaceAll(LRB_PATTERN, "(");
+                lemma = lemma.replaceAll(RRB_PATTERN, ")");
+            }
+
+            sb.append(String.format("%d\t%s\t%s\t%s\t%s\t%s\t%d\t%s\t%s\t%s%n", token.index(), word,
                     lemma, upos, pos, featuresString, govIdx, relnName, additionalDepsString, misc));
         }
         sb.append("\n");
