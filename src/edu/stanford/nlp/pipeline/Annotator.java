@@ -108,7 +108,6 @@ public interface Annotator {
   String STANFORD_NATLOG = "natlog";
   String STANFORD_OPENIE = "openie";
   String STANFORD_QUOTE = "quote";
-  String STANFORD_UD_FEATURES = "udfeats";
 
   Requirement TOKENIZE_REQUIREMENT = new Requirement(STANFORD_TOKENIZE);
   Requirement CLEAN_XML_REQUIREMENT = new Requirement(STANFORD_CLEAN_XML);
@@ -126,7 +125,6 @@ public interface Annotator {
   Requirement NATLOG_REQUIREMENT = new Requirement(STANFORD_NATLOG);
   Requirement OPENIE_REQUIREMENT = new Requirement(STANFORD_OPENIE);
   Requirement QUOTE_REQUIREMENT = new Requirement(STANFORD_QUOTE);
-  Requirement UD_FEATURES_REQUIREMENT = new Requirement(STANFORD_UD_FEATURES);
 
   /**
    * A map from annotator name to a set of requirements for that annotator.
@@ -134,97 +132,90 @@ public interface Annotator {
    * annotators list.
    */
   @SuppressWarnings("unchecked")
-  Map<String, Set<Requirement>> REQUIREMENTS = Collections.unmodifiableMap(new HashMap<String, Set<Requirement>>() {
-    {
-      put(STANFORD_TOKENIZE, Collections.EMPTY_SET);
-      put(STANFORD_CLEAN_XML, Collections.unmodifiableSet(new HashSet<Requirement>() {{
+  Map<String, Set<Requirement>> REQUIREMENTS = Collections.unmodifiableMap(new HashMap<String, Set<Requirement>>() {{
+    put(STANFORD_TOKENIZE, Collections.EMPTY_SET);
+    put(STANFORD_CLEAN_XML, Collections.unmodifiableSet(new HashSet<Requirement>() {{
         add(TOKENIZE_REQUIREMENT);  // A requirement for STANFORD_CLEAN_XML
-      }}));
-      put(STANFORD_SSPLIT, Collections.unmodifiableSet(new HashSet<Requirement>() {{
-        add(TOKENIZE_REQUIREMENT);
-      }}));
-      put(STANFORD_POS, Collections.unmodifiableSet(new HashSet<Requirement>() {{
-        add(TOKENIZE_REQUIREMENT);
-        add(SSPLIT_REQUIREMENT);
-      }}));
-      put(STANFORD_LEMMA, Collections.unmodifiableSet(new HashSet<Requirement>() {{
-        add(TOKENIZE_REQUIREMENT);
-        add(SSPLIT_REQUIREMENT);
-        add(POS_REQUIREMENT);
-      }}));
-      put(STANFORD_NER, Collections.unmodifiableSet(new HashSet<Requirement>() {{
-        add(TOKENIZE_REQUIREMENT);
-        add(SSPLIT_REQUIREMENT);
-        add(POS_REQUIREMENT);
-        add(LEMMA_REQUIREMENT);
-      }}));
-      put(STANFORD_GENDER, Collections.unmodifiableSet(new HashSet<Requirement>() {{
-        add(TOKENIZE_REQUIREMENT);
-        add(SSPLIT_REQUIREMENT);
-        add(POS_REQUIREMENT);
-      }}));
-      put(STANFORD_TRUECASE, Collections.unmodifiableSet(new HashSet<Requirement>() {{
-        add(TOKENIZE_REQUIREMENT);
-        add(SSPLIT_REQUIREMENT);
-        add(POS_REQUIREMENT);
-        add(LEMMA_REQUIREMENT);
-      }}));
-      put(STANFORD_PARSE, Collections.unmodifiableSet(new HashSet<Requirement>() {{
-        add(TOKENIZE_REQUIREMENT);
-        add(SSPLIT_REQUIREMENT);
-      }}));
-      put(STANFORD_DEPENDENCIES, Collections.unmodifiableSet(new HashSet<Requirement>() {{
-        add(TOKENIZE_REQUIREMENT);
-        add(SSPLIT_REQUIREMENT);
-        add(POS_REQUIREMENT);
-      }}));
-      put(STANFORD_DETERMINISTIC_COREF, Collections.unmodifiableSet(new HashSet<Requirement>() {{
-        add(TOKENIZE_REQUIREMENT);
-        add(SSPLIT_REQUIREMENT);
-        add(POS_REQUIREMENT);
-        add(LEMMA_REQUIREMENT);
-        add(NER_REQUIREMENT);
-        add(PARSE_REQUIREMENT);
-      }}));
-      put(STANFORD_COREF, Collections.unmodifiableSet(new HashSet<Requirement>() {{
-        add(TOKENIZE_REQUIREMENT);
-        add(SSPLIT_REQUIREMENT);
-        add(POS_REQUIREMENT);
-        add(LEMMA_REQUIREMENT);
-        add(NER_REQUIREMENT);
-        add(PARSE_REQUIREMENT);
-      }}));
-      put(STANFORD_RELATION, Collections.unmodifiableSet(new HashSet<Requirement>() {{
-        add(TOKENIZE_REQUIREMENT);
-        add(SSPLIT_REQUIREMENT);
-        add(POS_REQUIREMENT);
-        add(LEMMA_REQUIREMENT);
-        add(NER_REQUIREMENT);
-        add(DEPENDENCY_REQUIREMENT);
-      }}));
-      put(STANFORD_NATLOG, Collections.unmodifiableSet(new HashSet<Requirement>() {{
-        add(TOKENIZE_REQUIREMENT);
-        add(SSPLIT_REQUIREMENT);
-        add(POS_REQUIREMENT);
-        add(LEMMA_REQUIREMENT);
-        add(DEPENDENCY_REQUIREMENT);  // TODO(gabor) can also use 'parse' annotator, technically
-      }}));
-      put(STANFORD_OPENIE, Collections.unmodifiableSet(new HashSet<Requirement>() {{
-        add(TOKENIZE_REQUIREMENT);
-        add(SSPLIT_REQUIREMENT);
-        add(POS_REQUIREMENT);
-        add(DEPENDENCY_REQUIREMENT);  // TODO(gabor) can also use 'parse' annotator, technically
-        add(NATLOG_REQUIREMENT);
-      }}));
-      put(STANFORD_QUOTE, Collections.unmodifiableSet(new HashSet<Requirement>() {{
-        // No requirements
-      }}));
-      put(STANFORD_UD_FEATURES, Collections.unmodifiableSet(new HashSet<Requirement>(){{
-        add(TOKENIZE_REQUIREMENT);
-        add(SSPLIT_REQUIREMENT);
-        add(POS_REQUIREMENT);
-        add(DEPENDENCY_REQUIREMENT);
-      }}));
+    }}));
+    put(STANFORD_SSPLIT, Collections.unmodifiableSet(new HashSet<Requirement>() {{
+      add(TOKENIZE_REQUIREMENT);
+    }}));
+    put(STANFORD_POS, Collections.unmodifiableSet(new HashSet<Requirement>() {{
+      add(TOKENIZE_REQUIREMENT);
+      add(SSPLIT_REQUIREMENT);
+    }}));
+    put(STANFORD_LEMMA, Collections.unmodifiableSet(new HashSet<Requirement>() {{
+      add(TOKENIZE_REQUIREMENT);
+      add(SSPLIT_REQUIREMENT);
+      add(POS_REQUIREMENT);
+    }}));
+    put(STANFORD_NER, Collections.unmodifiableSet(new HashSet<Requirement>() {{
+      add(TOKENIZE_REQUIREMENT);
+      add(SSPLIT_REQUIREMENT);
+      add(POS_REQUIREMENT);
+      add(LEMMA_REQUIREMENT);
+    }}));
+    put(STANFORD_GENDER, Collections.unmodifiableSet(new HashSet<Requirement>() {{
+      add(TOKENIZE_REQUIREMENT);
+      add(SSPLIT_REQUIREMENT);
+      add(POS_REQUIREMENT);
+    }}));
+    put(STANFORD_TRUECASE, Collections.unmodifiableSet(new HashSet<Requirement>() {{
+      add(TOKENIZE_REQUIREMENT);
+      add(SSPLIT_REQUIREMENT);
+      add(POS_REQUIREMENT);
+      add(LEMMA_REQUIREMENT);
+    }}));
+    put(STANFORD_PARSE, Collections.unmodifiableSet(new HashSet<Requirement>() {{
+      add(TOKENIZE_REQUIREMENT);
+      add(SSPLIT_REQUIREMENT);
+    }}));
+    put(STANFORD_DEPENDENCIES, Collections.unmodifiableSet(new HashSet<Requirement>() {{
+      add(TOKENIZE_REQUIREMENT);
+      add(SSPLIT_REQUIREMENT);
+      add(POS_REQUIREMENT);
+    }}));
+    put(STANFORD_DETERMINISTIC_COREF, Collections.unmodifiableSet(new HashSet<Requirement>() {{
+      add(TOKENIZE_REQUIREMENT);
+      add(SSPLIT_REQUIREMENT);
+      add(POS_REQUIREMENT);
+      add(LEMMA_REQUIREMENT);
+      add(NER_REQUIREMENT);
+      add(PARSE_REQUIREMENT);
+    }}));
+    put(STANFORD_COREF, Collections.unmodifiableSet(new HashSet<Requirement>() {{
+      add(TOKENIZE_REQUIREMENT);
+      add(SSPLIT_REQUIREMENT);
+      add(POS_REQUIREMENT);
+      add(LEMMA_REQUIREMENT);
+      add(NER_REQUIREMENT);
+      add(PARSE_REQUIREMENT);
+    }}));
+    put(STANFORD_RELATION, Collections.unmodifiableSet(new HashSet<Requirement>() {{
+      add(TOKENIZE_REQUIREMENT);
+      add(SSPLIT_REQUIREMENT);
+      add(POS_REQUIREMENT);
+      add(LEMMA_REQUIREMENT);
+      add(NER_REQUIREMENT);
+      add(DEPENDENCY_REQUIREMENT);
+    }}));
+    put(STANFORD_NATLOG, Collections.unmodifiableSet(new HashSet<Requirement>() {{
+      add(TOKENIZE_REQUIREMENT);
+      add(SSPLIT_REQUIREMENT);
+      add(POS_REQUIREMENT);
+      add(LEMMA_REQUIREMENT);
+      add(DEPENDENCY_REQUIREMENT);  // TODO(gabor) can also use 'parse' annotator, technically
+    }}));
+    put(STANFORD_OPENIE, Collections.unmodifiableSet(new HashSet<Requirement>() {{
+      add(TOKENIZE_REQUIREMENT);
+      add(SSPLIT_REQUIREMENT);
+      add(POS_REQUIREMENT);
+      add(DEPENDENCY_REQUIREMENT);  // TODO(gabor) can also use 'parse' annotator, technically
+      add(NATLOG_REQUIREMENT);
+    }}));
+    put(STANFORD_QUOTE, Collections.unmodifiableSet(new HashSet<Requirement>() {{
+      // No requirements
+    }}));
   }});
 
   /**
@@ -261,7 +252,5 @@ public interface Annotator {
   Set<Requirement> TOKENIZE_SSPLIT_POS_DEPPARSE = Collections.unmodifiableSet(new ArraySet<>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT, DEPENDENCY_REQUIREMENT));
   Set<Requirement> PARSE_AND_TAG = Collections.unmodifiableSet(new ArraySet<>(POS_REQUIREMENT, PARSE_REQUIREMENT));
   Set<Requirement> PARSE_TAG_BINARIZED_TREES = Collections.unmodifiableSet(new ArraySet<>(POS_REQUIREMENT, PARSE_REQUIREMENT, BINARIZED_TREES_REQUIREMENT));
-  Set<Requirement> PARSE_TAG_DEPPARSE_BINARIZED_TREES = Collections.unmodifiableSet(new ArraySet<>(POS_REQUIREMENT, PARSE_REQUIREMENT, DEPENDENCY_REQUIREMENT, BINARIZED_TREES_REQUIREMENT));
-  Set<Requirement> PARSE_TAG_DEPPARSE = Collections.unmodifiableSet(new ArraySet<>(POS_REQUIREMENT, PARSE_REQUIREMENT, DEPENDENCY_REQUIREMENT));
 
 }

@@ -16,6 +16,7 @@ import edu.stanford.nlp.hcoref.CorefProperties;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.math.ArrayMath;
+import edu.stanford.nlp.neural.WordVectors;
 import edu.stanford.nlp.pipeline.DefaultPaths;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -202,7 +203,7 @@ public class Dictionaries {
 
   public int dimVector;
   
-  public Map<String, float[]> vectors = Generics.newHashMap();
+  public WordVectors vectors = new WordVectors();
 
   public Map<String, String> strToEntity = Generics.newHashMap();
   public Counter<String> dictScore = new ClassicCounter<String>();
@@ -536,22 +537,13 @@ public class Dictionaries {
       System.err.println("LOAD: WordVectors");
       String wordvectorFile = CorefProperties.getPathSerializedWordVectors(props);
       if(new File(wordvectorFile).exists()) {
-        vectors = IOUtils.readObjectFromFile(wordvectorFile);
+        vectors = WordVectors.deserialize(wordvectorFile);
         dimVector = vectors.entrySet().iterator().next().getValue().length;
       } else {
-        for(String line : IOUtils.readLines(CorefProperties.getPathWord2Vec(props))){
-          String[] split = line.toLowerCase().split("\\s+");
-          if(split.length < 100) continue;
-          float[] vector = new float[split.length-1];
-          for(int i=1; i < split.length ; i++) {
-            vector[i-1] = Float.parseFloat(split[i]);
-          }
-          ArrayMath.L2normalize(vector);
-          vectors.put(split[0], vector);
-          dimVector = vector.length;
+        vectors = WordVectors.readWord2Vec(CorefProperties.getPathWord2Vec(props));
+        if (wordvectorFile != null) {
+          vectors.serialize(wordvectorFile);
         }
-        
-        if(wordvectorFile!=null) IOUtils.writeObjectToFile(vectors, wordvectorFile);
       }
       
 //    if(Boolean.parseBoolean(props.getProperty("useValDictionary"))) {
