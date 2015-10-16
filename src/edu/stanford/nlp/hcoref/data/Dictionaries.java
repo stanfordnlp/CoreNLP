@@ -541,7 +541,7 @@ public class Dictionaries {
         dimVector = vectors.entrySet().iterator().next().getValue().length;
       } else {
         vectors = WordVectors.readWord2Vec(CorefProperties.getPathWord2Vec(props));
-        if (wordvectorFile != null) {
+        if (wordvectorFile != null && !wordvectorFile.startsWith("edu")) {
           vectors.serialize(wordvectorFile);
         }
       }
