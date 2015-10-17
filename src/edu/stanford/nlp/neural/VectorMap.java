@@ -289,8 +289,11 @@ public class VectorMap extends HashMap<String, float[]>{
    */
   private static boolean sameFloat(float a, float b) {
     float absDiff = Math.abs(a - b);
+    float absA = Math.abs(a);
+    float absB = Math.abs(b);
     return absDiff < 1e-10 ||
-           absDiff < Math.max(Math.abs(a), Math.abs(b)) / 100.0f;
+           absDiff < Math.max(absA, absB) / 100.0f ||
+           (absA < 1e-5 && absB < 1e-5);
   }
 
   /**
