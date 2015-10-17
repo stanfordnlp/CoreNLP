@@ -138,7 +138,6 @@ public class VectorMap extends HashMap<String, float[]>{
     // Write the size of the dataset
     dataOut.writeInt(this.size());
 
-    int dim = -1;
     for (Map.Entry<String, float[]> entry : this.entrySet()) {
       // Write the length of the key
       byte[] key = entry.getKey().getBytes();
@@ -289,7 +288,9 @@ public class VectorMap extends HashMap<String, float[]>{
    * The check to see if two floats are "close enough."
    */
   private static boolean sameFloat(float a, float b) {
-    return Math.abs(a - b) < Math.max(Math.abs(a), Math.abs(b)) / 1e3;
+    float absDiff = Math.abs(a - b);
+    return absDiff < 1e-10 ||
+           absDiff < Math.max(Math.abs(a), Math.abs(b)) / 100.0f;
   }
 
   /**
