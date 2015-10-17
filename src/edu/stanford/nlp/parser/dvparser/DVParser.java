@@ -371,7 +371,7 @@ public class DVParser {
     System.err.println("Loading serialized model from " + filename);
     DVParser dvparser;
     try {
-      dvparser = IOUtils.readObjectFromFile(filename);
+      dvparser = IOUtils.readObjectFromURLOrClasspathOrFileSystem(filename);
       dvparser.op.setOptions(args);
     } catch (IOException e) {
       throw new RuntimeIOException(e);

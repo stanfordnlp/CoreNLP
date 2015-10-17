@@ -509,7 +509,7 @@ public class Document {
     synchronized (this.impl) {
       if (impl.getCorefChainCount() == 0) {
         // Run prerequisites
-        this.runNER(props).runParse(props);
+        this.runNER(props).runDepparse(props);  // hcoref needs dependencies only
         // Run coref
         Annotator coref = props == EMPTY_PROPS ? defaultCoref.get() : AnnotatorFactories.coref(props, backend).create();
         Annotation ann = asAnnotation();

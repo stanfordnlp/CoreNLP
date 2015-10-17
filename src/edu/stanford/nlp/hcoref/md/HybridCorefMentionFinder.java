@@ -32,7 +32,7 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
     this.headFinder = headFinder;
     this.lang = CorefProperties.getLanguage(props);
     mdClassifier = (CorefProperties.isMentionDetectionTraining(props))?
-        null : IOUtils.readObjectFromFile(CorefProperties.getPathModel(props, "md"));
+        null : IOUtils.readObjectFromURLOrClasspathOrFileSystem(CorefProperties.getPathModel(props, "md"));
   }
 
   @Override

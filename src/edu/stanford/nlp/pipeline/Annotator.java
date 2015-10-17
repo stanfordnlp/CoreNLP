@@ -192,7 +192,7 @@ public interface Annotator {
         add(POS_REQUIREMENT);
         add(LEMMA_REQUIREMENT);
         add(NER_REQUIREMENT);
-        add(PARSE_REQUIREMENT);
+        add(DEPENDENCY_REQUIREMENT);
       }}));
       put(STANFORD_RELATION, Collections.unmodifiableSet(new HashSet<Requirement>() {{
         add(TOKENIZE_REQUIREMENT);
