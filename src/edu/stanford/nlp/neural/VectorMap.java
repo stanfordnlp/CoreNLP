@@ -238,7 +238,6 @@ public class VectorMap extends HashMap<String, float[]>{
         Map<String, float[]> otherMap = (Map<String, float[]>) other;
         // Key sets have the same size
         if (this.keySet().size() != otherMap.keySet().size()) {
-          System.err.println("Different keyset");
           return false;
         }
         // Entries are the same
@@ -246,11 +245,9 @@ public class VectorMap extends HashMap<String, float[]>{
           float[] otherValue = otherMap.get(entry.getKey());
           // Null checks
           if (otherValue == null && entry.getValue() != null) {
-            System.err.println("Different null: " + entry.getValue() + " vs " + otherValue);
             return false;
           }
           if (otherValue != null && entry.getValue() == null) {
-            System.err.println("Different null: " + entry.getValue() + " vs " + otherValue);
             return false;
           }
           // Entries are the same
@@ -258,13 +255,11 @@ public class VectorMap extends HashMap<String, float[]>{
           if (entry.getValue() != null && otherValue != null) {
             // Vectors are the same length
             if (entry.getValue().length != otherValue.length) {
-              System.err.println("Different length: " + entry.getValue().length + " vs " + otherValue.length);
               return false;
             }
             // Vectors are the same value
             for (int i = 0; i < otherValue.length; ++i) {
               if (!sameFloat(entry.getValue()[i], otherValue[i])) {
-                System.err.println("Different float: " + entry.getValue()[i] + " vs " + otherValue[i]);
                 return false;
               }
             }
@@ -276,7 +271,6 @@ public class VectorMap extends HashMap<String, float[]>{
         return false;
       }
     } else {
-      System.err.println("Different class");
       return false;
     }
   }
