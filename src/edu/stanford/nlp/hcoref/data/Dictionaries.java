@@ -536,13 +536,20 @@ public class Dictionaries {
       System.err.println("LOAD: WordVectors");
       String wordvectorFile = CorefProperties.getPathSerializedWordVectors(props);
       String word2vecFile = CorefProperties.getPathWord2Vec(props);
-      if(new File(word2vecFile).exists()) {
-        vectors = VectorMap.readWord2Vec(word2vecFile);
-        if (wordvectorFile != null && !wordvectorFile.startsWith("edu")) {
-          vectors.serialize(wordvectorFile);
-        }
-      } else {
+      try {
+        // Try to read the serialized vectors
         vectors = VectorMap.deserialize(wordvectorFile);
+      } catch (IOException e) {
+        // If that fails, try to read the vectors from the word2vec file
+        if(new File(word2vecFile).exists()) {
+          vectors = VectorMap.readWord2Vec(word2vecFile);
+          if (wordvectorFile != null && !wordvectorFile.startsWith("edu")) {
+            vectors.serialize(wordvectorFile);
+          }
+        } else {
+          // If that fails, give up and crash
+          throw new RuntimeIOException(e);
+        }
       }
       dimVector = vectors.entrySet().iterator().next().getValue().length;
       
