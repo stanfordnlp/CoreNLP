@@ -1,8 +1,8 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.dcoref.CorefCoreAnnotations.*;
-import edu.stanford.nlp.dcoref.CorefChain;
-import edu.stanford.nlp.dcoref.Dictionaries;
+import edu.stanford.nlp.hcoref.CorefCoreAnnotations.*;
+import edu.stanford.nlp.hcoref.data.CorefChain;
+import edu.stanford.nlp.hcoref.data.Dictionaries;
 import edu.stanford.nlp.ie.NumberNormalizer;
 import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
 import edu.stanford.nlp.ie.machinereading.structure.ExtractionObject;
