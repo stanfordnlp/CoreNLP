@@ -158,6 +158,10 @@ public interface Annotator {
         add(POS_REQUIREMENT);
         add(LEMMA_REQUIREMENT);
       }}));
+      put(STANFORD_REGEXNER, Collections.unmodifiableSet(new HashSet<Requirement>() {{
+          add(TOKENIZE_REQUIREMENT);
+          add(SSPLIT_REQUIREMENT);
+      }}));
       put(STANFORD_GENDER, Collections.unmodifiableSet(new HashSet<Requirement>() {{
         add(TOKENIZE_REQUIREMENT);
         add(SSPLIT_REQUIREMENT);
