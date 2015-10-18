@@ -125,7 +125,11 @@ public class CoNLLDocumentReader implements DocReader {
   public CoNLLDocumentReader(String filepath, Options options)
   {
 //    this.filepath = filepath;
-    this.fileList = getFiles(filepath, options.filePattern);
+    if (filepath != null && new File(filepath).exists()) {
+      this.fileList = getFiles(filepath, options.filePattern);
+    } else {
+      this.fileList = Collections.EMPTY_LIST;
+    }
     this.options = options;
     if (options.sortFiles) {
       Collections.sort(this.fileList);
