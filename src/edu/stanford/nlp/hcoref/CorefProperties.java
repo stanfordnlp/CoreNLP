@@ -195,8 +195,8 @@ public class CorefProperties {
     return PropertiesUtils.getString(props, PATH_SINGLETON_PREDICTOR_PROP, "edu/stanford/nlp/models/dcoref/singleton.predictor.ser");
   }
   public static String getPathModel(Properties props, String sievename) {
-    return props.getProperty(PATH_SERIALIZED_PROP) + File.separator +
-        props.getProperty(PATH_MODEL_PROP.replace("SIEVENAME", sievename), "MISSING_MODEL_FOR_"+sievename);
+    return new File(props.getProperty(PATH_SERIALIZED_PROP),
+        props.getProperty(PATH_MODEL_PROP.replace("SIEVENAME", sievename), "MISSING_MODEL_FOR_"+sievename)).getAbsolutePath();
   }
   public static boolean debug(Properties props) {
     return PropertiesUtils.getBool(props, DEBUG_PROP, false);

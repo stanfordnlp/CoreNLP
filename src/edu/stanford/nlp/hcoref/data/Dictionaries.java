@@ -535,15 +535,16 @@ public class Dictionaries {
     if(CorefProperties.loadWordEmbedding(props)) {
       System.err.println("LOAD: WordVectors");
       String wordvectorFile = CorefProperties.getPathSerializedWordVectors(props);
-      if(new File(wordvectorFile).exists()) {
-        vectors = VectorMap.deserialize(wordvectorFile);
-        dimVector = vectors.entrySet().iterator().next().getValue().length;
-      } else {
-        vectors = VectorMap.readWord2Vec(CorefProperties.getPathWord2Vec(props));
+      String word2vecFile = CorefProperties.getPathWord2Vec(props);
+      if(new File(word2vecFile).exists()) {
+        vectors = VectorMap.readWord2Vec(word2vecFile);
         if (wordvectorFile != null && !wordvectorFile.startsWith("edu")) {
           vectors.serialize(wordvectorFile);
         }
+      } else {
+        vectors = VectorMap.deserialize(wordvectorFile);
       }
+      dimVector = vectors.entrySet().iterator().next().getValue().length;
       
 //    if(Boolean.parseBoolean(props.getProperty("useValDictionary"))) {
 //      System.err.println("LOAD: ValDictionary");
