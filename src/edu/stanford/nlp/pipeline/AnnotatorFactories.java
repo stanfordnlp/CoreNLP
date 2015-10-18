@@ -661,8 +661,8 @@ public class AnnotatorFactories {
 
       @Override
       public Annotator create() {
-                return annotatorImpl.udfeats(properties);
-            }
+        return annotatorImpl.udfeats(properties);
+      }
 
       @Override
       protected String additionalSignature() {

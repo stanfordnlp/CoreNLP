@@ -406,6 +406,11 @@ public class ProtobufAnnotationSerializerSlowITest {
   }
 
   @Test
+  public void testUDFeats() {
+    testAnnotators("tokenize,ssplit,pos,depparse,udfeats");
+  }
+
+  @Test
   public void testSerializeSSplitTokensRegression() {
     testAnnotators("tokenize,ssplit");
   }

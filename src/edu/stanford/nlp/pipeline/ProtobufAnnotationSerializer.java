@@ -421,6 +421,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         builder.addRelation(toProto(relation));
       }
     }
+    if (keySet.contains(CoNLLUFeats.class)) { builder.setConllUFeatures(toProto(getAndRegister(sentence, keysToSerialize, CoNLLUFeats.class))); }
     // Return
     return builder;
   }
@@ -748,6 +749,22 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     return builder.build();
   }
 
+  /**
+   * Serialize a Map (from Strings to Strings) to a proto.
+   *
+   * @param map The map to searialize.
+   *
+   * @return A proto representation of the map.
+   */
+  public static CoreNLPProtos.MapStringString toProto(Map<String,String> map) {
+    CoreNLPProtos.MapStringString.Builder proto = CoreNLPProtos.MapStringString.newBuilder();
+    for (Map.Entry<String, String> entry : map.entrySet()) {
+      proto.addKey(entry.getKey());
+      proto.addValue(entry.getValue());
+    }
+    return proto.build();
+  }
+
 
   /**
    * Convert a quote object to a protocol buffer.
@@ -847,6 +864,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.getOpenieTripleCount() > 0) {
       List<RelationTriple> triples = proto.getOpenieTripleList().stream().map(triple -> fromProto(triple, tokens, null)).collect(Collectors.toList());
       lossySentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, triples);
+    }
+    // Add CoNLLU Features
+    if (proto.hasConllUFeatures()) {
+      lossySentence.set(CoNLLUFeats.class, fromProto(proto.getConllUFeatures()));
     }
     // Add text -- missing by default as it's populated from the Document
     lossySentence.set(TextAnnotation.class, recoverOriginalText(tokens, proto));
@@ -1284,12 +1305,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Apparently this sometimes screws up the tree
     fragmentTree.vertexSet().stream()
         .filter(vertex -> fragmentTree.getFirstRoot() != vertex &&
-                          tree.getFirstRoot() != vertex &&
-                          !fragmentTree.incomingEdgeIterable(vertex).iterator().hasNext())
+            tree.getFirstRoot() != vertex &&
+            !fragmentTree.incomingEdgeIterable(vertex).iterator().hasNext())
         .forEach(vertex -> {
-            SemanticGraphEdge edge = tree.incomingEdgeIterable(vertex).iterator().next();
-            fragmentTree.addEdge(fragmentTree.getFirstRoot(), edge.getDependent(), edge.getRelation(),
-                edge.getWeight(), edge.isExtra());
+          SemanticGraphEdge edge = tree.incomingEdgeIterable(vertex).iterator().next();
+          fragmentTree.addEdge(fragmentTree.getFirstRoot(), edge.getDependent(), edge.getRelation(),
+              edge.getWeight(), edge.isExtra());
         });
     // Return the fragment
     //noinspection SimplifiableConditionalExpression
@@ -1297,6 +1318,21 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         fragment.hasAssumedTruth() ? fragment.getAssumedTruth() : true,
         false)
         .changeScore(fragment.hasScore() ? fragment.getScore() : 1.0);
+  }
+
+  /**
+   * Convert a serialized Map back into a Java Map.
+   *
+   * @param proto The serialized map.
+   *
+   * @return A Java Map corresponding to the serialized map.
+   */
+  public static HashMap<String, String> fromProto(CoreNLPProtos.MapStringString proto) {
+    HashMap<String, String> map = new HashMap<>();
+    for (int i = 0; i < proto.getKeyCount(); ++i) {
+      map.put(proto.getKey(i), proto.getValue(i));
+    }
+    return map;
   }
 
   /**
