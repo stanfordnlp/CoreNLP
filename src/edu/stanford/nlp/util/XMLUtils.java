@@ -1029,7 +1029,7 @@ public class XMLUtils {
               if (end < 0) {
                 end = tag.length();
               }
-              System.out.println(begin + " " + end);
+              // System.out.println("unqouted begin, end: " + begin + ", " + end);
               value = tag.substring(begin, end);
             }
           }
