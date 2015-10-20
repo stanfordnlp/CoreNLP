@@ -302,6 +302,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     if (keySet.contains(SentimentCoreAnnotations.SentimentClass.class)) { builder.setSentiment(getAndRegister(coreLabel, keysToSerialize, SentimentCoreAnnotations.SentimentClass.class)); }
     if (keySet.contains(QuotationIndexAnnotation.class)) { builder.setQuotationIndex(getAndRegister(coreLabel, keysToSerialize, QuotationIndexAnnotation.class)); }
+    if (keySet.contains(CoNLLUFeats.class)) { builder.setConllUFeatures(toProto(getAndRegister(coreLabel, keysToSerialize, CoNLLUFeats.class))); }
     // Non-default annotators
     if (keySet.contains(GenderAnnotation.class)) { builder.setGender(getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class)); }
     if (keySet.contains(TrueCaseAnnotation.class)) { builder.setTrueCase(getAndRegister(coreLabel, keysToSerialize, TrueCaseAnnotation.class)); }
@@ -421,7 +422,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         builder.addRelation(toProto(relation));
       }
     }
-    if (keySet.contains(CoNLLUFeats.class)) { builder.setConllUFeatures(toProto(getAndRegister(sentence, keysToSerialize, CoNLLUFeats.class))); }
     // Return
     return builder;
   }
@@ -821,6 +821,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasSpan()) { word.set(SpanAnnotation.class, new IntPair(proto.getSpan().getBegin(), proto.getSpan().getEnd())); }
     if (proto.hasSentiment()) { word.set(SentimentCoreAnnotations.SentimentClass.class, proto.getSentiment()); }
     if (proto.hasQuotationIndex()) { word.set(QuotationIndexAnnotation.class, proto.getQuotationIndex()); }
+    if (proto.hasConllUFeatures()) { word.set(CoNLLUFeats.class, fromProto(proto.getConllUFeatures())); }
     // Non-default annotators
     if (proto.hasGender()) { word.set(GenderAnnotation.class, proto.getGender()); }
     if (proto.hasTrueCase()) { word.set(TrueCaseAnnotation.class, proto.getTrueCase()); }
@@ -864,10 +865,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.getOpenieTripleCount() > 0) {
       List<RelationTriple> triples = proto.getOpenieTripleList().stream().map(triple -> fromProto(triple, tokens, null)).collect(Collectors.toList());
       lossySentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, triples);
-    }
-    // Add CoNLLU Features
-    if (proto.hasConllUFeatures()) {
-      lossySentence.set(CoNLLUFeats.class, fromProto(proto.getConllUFeatures()));
     }
     // Add text -- missing by default as it's populated from the Document
     lossySentence.set(TextAnnotation.class, recoverOriginalText(tokens, proto));
