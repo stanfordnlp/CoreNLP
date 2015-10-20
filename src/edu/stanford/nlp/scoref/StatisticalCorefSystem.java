@@ -72,7 +72,7 @@ public abstract class StatisticalCorefSystem {
   }
 
   public void runOnConll() throws Exception {
-    String baseName = StatisticalCorefTrainer.logsPath +
+    String baseName = StatisticalCorefProperties.conllOutputPath(props) +
         Calendar.getInstance().getTime().toString().replaceAll("\\s", "-").replaceAll(":", "-");
     String goldOutput = baseName + ".gold.txt";
     String beforeCorefOutput = baseName + ".predicted.txt";
@@ -81,7 +81,7 @@ public abstract class StatisticalCorefSystem {
     PrintWriter writerBeforeCoref = new PrintWriter(new FileOutputStream(beforeCorefOutput));
     PrintWriter writerAfterCoref = new PrintWriter(new FileOutputStream(afterCorefOutput));
 
-    new DocumentProcessorRunner(props, dictionaries, new DocumentProcessor() {
+    (new DocumentProcessor() {
       @Override
       public void process(int id, Document document) {
         writerGold.print(CorefPrinter.printConllOutput(document, true));
@@ -93,20 +93,21 @@ public abstract class StatisticalCorefSystem {
 
       @Override
       public void finish() throws Exception {}
-    }).run();
 
-    if(CorefProperties.doScore(props)) {
-      Logger logger = Logger.getLogger(CorefSystem.class.getName());
+      @Override
+      public String getName() {
+        return StatisticalCorefSystem.this.getClass().getSimpleName();
+      }
+    }).run(docMaker);
 
-      String summary = Scorer.getEvalSummary(CorefProperties.getPathScorer(props),
-          goldOutput, beforeCorefOutput);
-      CorefPrinter.printScoreSummary(summary, logger, false);
-
-      summary = Scorer.getEvalSummary(CorefProperties.getPathScorer(props), goldOutput,
-          afterCorefOutput);
-      CorefPrinter.printScoreSummary(summary, logger, true);
-      CorefPrinter.printFinalConllScore(summary);
-    }
+    Logger logger = Logger.getLogger(CorefSystem.class.getName());
+    String summary = Scorer.getEvalSummary(CorefProperties.getPathScorer(props),
+        goldOutput, beforeCorefOutput);
+    CorefPrinter.printScoreSummary(summary, logger, false);
+    summary = Scorer.getEvalSummary(CorefProperties.getPathScorer(props), goldOutput,
+        afterCorefOutput);
+    CorefPrinter.printScoreSummary(summary, logger, true);
+    CorefPrinter.printFinalConllScore(summary);
 
     writerGold.close();
     writerBeforeCoref.close();
@@ -114,4 +115,10 @@ public abstract class StatisticalCorefSystem {
   }
 
   public abstract void runCoref(Document document);
+
+  public static void main(String[] args) throws Exception {
+    Properties props = StatisticalCorefProperties.loadProps(args[0]);
+    StatisticalCorefSystem coref = StatisticalCorefSystem.fromProps(props);
+    coref.runOnConll();
+  }
 }
