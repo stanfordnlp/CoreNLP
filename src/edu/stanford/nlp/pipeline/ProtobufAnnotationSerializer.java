@@ -302,16 +302,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     if (keySet.contains(SentimentCoreAnnotations.SentimentClass.class)) { builder.setSentiment(getAndRegister(coreLabel, keysToSerialize, SentimentCoreAnnotations.SentimentClass.class)); }
     if (keySet.contains(QuotationIndexAnnotation.class)) { builder.setQuotationIndex(getAndRegister(coreLabel, keysToSerialize, QuotationIndexAnnotation.class)); }
-    if (keySet.contains(CoNLLUFeats.class)) { builder.setConllUFeatures(toMapStringStringProto(getAndRegister(coreLabel, keysToSerialize, CoNLLUFeats.class))); }
-    if (keySet.contains(CoNLLUTokenSpanAnnotation.class)) {
-      IntPair span = getAndRegister(coreLabel, keysToSerialize, CoNLLUTokenSpanAnnotation.class);
-      builder.setConllUTokenSpan(CoreNLPProtos.Span.newBuilder().setBegin(span.getSource()).setEnd(span.getTarget()).build());
-    }
-    if (keySet.contains(CoNLLUMisc.class)) { builder.setConllUMisc(getAndRegister(coreLabel, keysToSerialize, CoNLLUMisc.class));}
-    if (keySet.contains(CoarseTagAnnotation.class)) { builder.setCoarseTag(getAndRegister(coreLabel, keysToSerialize, CoarseTagAnnotation.class));}
-    if (keySet.contains(CoNLLUSecondaryDepsAnnotation.class)) { builder.setConllUSecondaryDeps(toMapIntStringProto(getAndRegister(coreLabel, keysToSerialize, CoNLLUSecondaryDepsAnnotation.class)));}
-
-        // Non-default annotators
+    if (keySet.contains(CoNLLUFeats.class)) { builder.setConllUFeatures(toProto(getAndRegister(coreLabel, keysToSerialize, CoNLLUFeats.class))); }
+    // Non-default annotators
     if (keySet.contains(GenderAnnotation.class)) { builder.setGender(getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class)); }
     if (keySet.contains(TrueCaseAnnotation.class)) { builder.setTrueCase(getAndRegister(coreLabel, keysToSerialize, TrueCaseAnnotation.class)); }
     if (keySet.contains(TrueCaseTextAnnotation.class)) { builder.setTrueCaseText(getAndRegister(coreLabel, keysToSerialize, TrueCaseTextAnnotation.class)); }
@@ -760,33 +752,17 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   /**
    * Serialize a Map (from Strings to Strings) to a proto.
    *
-   * @param map The map to serialize.
+   * @param map The map to searialize.
    *
    * @return A proto representation of the map.
    */
-  public static CoreNLPProtos.MapStringString toMapStringStringProto(Map<String,String> map) {
+  public static CoreNLPProtos.MapStringString toProto(Map<String,String> map) {
     CoreNLPProtos.MapStringString.Builder proto = CoreNLPProtos.MapStringString.newBuilder();
     for (Map.Entry<String, String> entry : map.entrySet()) {
       proto.addKey(entry.getKey());
       proto.addValue(entry.getValue());
     }
     return proto.build();
-  }
-
-  /**
-   * Serialize a Map (from Integers to Strings) to a proto.
-   *
-   * @param map The map to serialize.
-   *
-   * @return A proto representation of the map.
-   */
-  public static CoreNLPProtos.MapIntString toMapIntStringProto(Map<Integer,String> map) {
-      CoreNLPProtos.MapIntString.Builder proto = CoreNLPProtos.MapIntString.newBuilder();
-      for (Map.Entry<Integer, String> entry : map.entrySet()) {
-          proto.addKey(entry.getKey());
-          proto.addValue(entry.getValue());
-      }
-      return proto.build();
   }
 
 
@@ -846,13 +822,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasSentiment()) { word.set(SentimentCoreAnnotations.SentimentClass.class, proto.getSentiment()); }
     if (proto.hasQuotationIndex()) { word.set(QuotationIndexAnnotation.class, proto.getQuotationIndex()); }
     if (proto.hasConllUFeatures()) { word.set(CoNLLUFeats.class, fromProto(proto.getConllUFeatures())); }
-    if (proto.hasConllUMisc()) { word.set(CoNLLUMisc.class, proto.getConllUMisc()); }
-    if (proto.hasCoarseTag()) { word.set(CoarseTagAnnotation.class, proto.getCoarseTag()); }
-    if (proto.hasConllUTokenSpan()) { word.set(CoNLLUTokenSpanAnnotation.class, new IntPair(proto.getConllUTokenSpan().getBegin(), proto.getSpan().getEnd())); }
-    if (proto.hasConllUSecondaryDeps()) { word.set(CoNLLUSecondaryDepsAnnotation.class, fromProto(proto.getConllUSecondaryDeps())); }
-
-
-            // Non-default annotators
+    // Non-default annotators
     if (proto.hasGender()) { word.set(GenderAnnotation.class, proto.getGender()); }
     if (proto.hasTrueCase()) { word.set(TrueCaseAnnotation.class, proto.getTrueCase()); }
     if (proto.hasTrueCaseText()) { word.set(TrueCaseTextAnnotation.class, proto.getTrueCaseText()); }
@@ -1360,21 +1330,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       map.put(proto.getKey(i), proto.getValue(i));
     }
     return map;
-  }
-
-  /**
-   * Convert a serialized Map back into a Java Map.
-   *
-   * @param proto The serialized map.
-   *
-   * @return A Java Map corresponding to the serialized map.
-   */
-  public static HashMap<Integer, String> fromProto(CoreNLPProtos.MapIntString proto) {
-      HashMap<Integer, String> map = new HashMap<>();
-      for (int i = 0; i < proto.getKeyCount(); ++i) {
-          map.put(proto.getKey(i), proto.getValue(i));
-      }
-      return map;
   }
 
   /**

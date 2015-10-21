@@ -486,6 +486,7 @@ public class UniversalDependenciesFeatureAnnotator {
                 + "Tree: " + t.pennString());
       }
 
+
       featureAnnotator.addFeatures(sg, t, true, addUPOS);
 
       System.out.print(depWriter.printSemanticGraph(sg, !escapeParens));

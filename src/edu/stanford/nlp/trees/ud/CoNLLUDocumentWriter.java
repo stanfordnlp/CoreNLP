@@ -5,7 +5,6 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.trees.GrammaticalRelation;
-import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.Pair;
 
 import java.io.PrintWriter;
@@ -39,9 +38,9 @@ public class CoNLLUDocumentWriter {
         for (IndexedWord token : sg.vertexListSorted()) {
             /* Check for multiword tokens. */
             if (token.containsKey(CoreAnnotations.CoNLLUTokenSpanAnnotation.class)) {
-                IntPair tokenSpan = token.get(CoreAnnotations.CoNLLUTokenSpanAnnotation.class);
-                if (tokenSpan.getSource() == token.index()) {
-                    String range = String.format("%d-%d", tokenSpan.getSource(), tokenSpan.getTarget());
+                Pair<Integer,Integer> tokenSpan = token.get(CoreAnnotations.CoNLLUTokenSpanAnnotation.class);
+                if (tokenSpan.first == token.index()) {
+                    String range = String.format("%d-%d", tokenSpan.first, tokenSpan.second);
                     sb.append(String.format("%s\t%s\t_\t_\t_\t_\t_\t_\t_\t_%n", range, token.originalText()));
                 }
             }
