@@ -69,7 +69,7 @@ public class CharniakParserAnnotator implements Annotator {
 
         List<Tree> trees = Generics.newArrayList(1);
         trees.add(tree);
-        ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, trees, GrammaticalStructure.Extras.NONE, null);
+        ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, trees, GrammaticalStructure.Extras.NONE);
       }
     } else {
       throw new RuntimeException("unable to find sentences in: " + annotation);

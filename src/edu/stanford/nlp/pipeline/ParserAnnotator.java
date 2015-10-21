@@ -63,8 +63,6 @@ public class ParserAnnotator extends SentenceAnnotator {
 
   private final boolean keepPunct;
 
-  private UniversalDependenciesFeatureAnnotator featureAnnotator = null;
-
   /** If true, don't re-annotate sentences that already have a tree annotation */
   private final boolean noSquash;
   private final GrammaticalStructure.Extras extraDependencies;
@@ -96,13 +94,6 @@ public class ParserAnnotator extends SentenceAnnotator {
     if (this.BUILD_GRAPHS) {
       TreebankLanguagePack tlp = parser.getTLPParams().treebankLanguagePack();
       this.gsf = tlp.grammaticalStructureFactory(tlp.punctuationWordRejectFilter(), parser.getTLPParams().typedDependencyHeadFinder());
-      if (this.gsf instanceof UniversalEnglishGrammaticalStructureFactory) {
-        try {
-          this.featureAnnotator = new UniversalDependenciesFeatureAnnotator();
-        } catch (IOException e) {
-          //do nothing
-        }
-      }
     } else {
       this.gsf = null;
     }
@@ -155,13 +146,6 @@ public class ParserAnnotator extends SentenceAnnotator {
       TreebankLanguagePack tlp = parser.getTLPParams().treebankLanguagePack();
       Predicate<String> punctFilter = this.keepPunct ? Filters.acceptFilter() : tlp.punctuationWordRejectFilter();
       this.gsf = tlp.grammaticalStructureFactory(punctFilter, parser.getTLPParams().typedDependencyHeadFinder());
-      if (this.gsf instanceof UniversalEnglishGrammaticalStructureFactory) {
-        try {
-          this.featureAnnotator = new UniversalDependenciesFeatureAnnotator();
-        } catch (IOException e) {
-          //do nothing
-        }
-      }
     } else {
       this.gsf = null;
     }
@@ -302,7 +286,7 @@ public class ParserAnnotator extends SentenceAnnotator {
       trees = mappedTrees;
     }
     
-    ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, trees, extraDependencies, featureAnnotator);
+    ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, trees, extraDependencies);
 
     if (saveBinaryTrees) {
       TreeBinarizer binarizer = TreeBinarizer.simpleTreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack());
@@ -352,10 +336,18 @@ public class ParserAnnotator extends SentenceAnnotator {
 
   @Override
   public Set<Requirement> requirementsSatisfied() {
-    if (this.saveBinaryTrees) {
-      return PARSE_TAG_BINARIZED_TREES;
+    if (this.BUILD_GRAPHS) {
+      if (this.saveBinaryTrees) {
+        return PARSE_TAG_DEPPARSE_BINARIZED_TREES;
+      } else {
+        return PARSE_TAG_DEPPARSE;
+      }
     } else {
-      return PARSE_AND_TAG;
+      if (this.saveBinaryTrees) {
+        return PARSE_TAG_BINARIZED_TREES;
+      } else {
+        return PARSE_AND_TAG;
+      }
     }
   }
 }

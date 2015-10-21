@@ -51,9 +51,9 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.stats.IntCounter;
-import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
@@ -267,17 +267,13 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     features.add(String.valueOf(personNum));
     features.add(number.toString());
     features.add(getPosition());
-
-    // TODO(kevin): make these compatible with universal dependencies
-    try {
-      features.add(getRelation());
-      features.add(getQuantification(dict));
-      features.add(String.valueOf(getModifiers(dict)));
-      features.add(String.valueOf(getNegation(dict)));
-      features.add(String.valueOf(getModal(dict)));
-      features.add(String.valueOf(getReportEmbedding(dict)));
-      features.add(String.valueOf(getCoordination()));
-    } catch(IllegalArgumentException e) {}
+    features.add(getRelation());
+    features.add(getQuantification(dict));
+    features.add(String.valueOf(getModifiers(dict)));
+    features.add(String.valueOf(getNegation(dict)));
+    features.add(String.valueOf(getModal(dict)));
+    features.add(String.valueOf(getReportEmbedding(dict)));
+    features.add(String.valueOf(getCoordination()));
 
     return features;
   }
@@ -480,7 +476,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   }
   private boolean isListLikeByDependency() {
     if(this.headIndexedWord==null) return false;    // probably parser error: default is not LIST
-    IndexedWord conj = this.basicDependency.getChildWithReln(this.headIndexedWord, EnglishGrammaticalRelations.CONJUNCT);
+    IndexedWord conj = this.basicDependency.getChildWithReln(this.headIndexedWord, UniversalEnglishGrammaticalRelations.CONJUNCT);
     boolean hasConjunction = (conj!=null);
     boolean conjInMention = (hasConjunction)? this.startIndex < conj.index()-1 && conj.index()-1 < this.endIndex : false;
     return conjInMention;
@@ -1366,6 +1362,12 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
         (headParent = collapsedDependency.getParent(headIndexedWord)) : headParent;
   }
 
+  private Collection<IndexedWord> headChildren;
+  private Collection<IndexedWord> getHeadChildren() {
+    return headChildren == null ?
+        (headChildren = collapsedDependency.getChildList(headIndexedWord)) : headChildren;
+  }
+
   private Collection<IndexedWord> headSiblings;
   private Collection<IndexedWord> getHeadSiblings() {
     return headSiblings == null ?
@@ -1378,8 +1380,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
         (headPathToRoot = collapsedDependency.getPathToRoot(headIndexedWord)) : headPathToRoot;
   }
 
-  public String getRelation(){
-
+  public String getRelation() {
     if(headIndexedWord == null) return null;
 
     if(collapsedDependency.getRoots().isEmpty()) return null;
@@ -1389,17 +1390,33 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     GrammaticalRelation relation = collapsedDependency.reln(getHeadParent(), headIndexedWord);
 
     // adjunct relations
-    if(relation.toString().startsWith("prep") || relation == EnglishGrammaticalRelations.PREPOSITIONAL_OBJECT || relation == EnglishGrammaticalRelations.TEMPORAL_MODIFIER || relation == EnglishGrammaticalRelations.ADV_CLAUSE_MODIFIER || relation == EnglishGrammaticalRelations.ADVERBIAL_MODIFIER || relation == EnglishGrammaticalRelations.PREPOSITIONAL_COMPLEMENT) return "adjunct";
+    if ((relation.toString().startsWith("nmod")
+        && getHeadChildren().stream().anyMatch(c -> c.tag().equals("IN")))
+        || relation == UniversalEnglishGrammaticalRelations.TEMPORAL_MODIFIER
+        || relation == UniversalEnglishGrammaticalRelations.ADV_CLAUSE_MODIFIER
+        || relation == UniversalEnglishGrammaticalRelations.ADVERBIAL_MODIFIER
+        || relation == UniversalEnglishGrammaticalRelations.NOMINAL_MODIFIER)
+      return "adjunct";
 
     // subject relations
-    if(relation == EnglishGrammaticalRelations.NOMINAL_SUBJECT || relation == EnglishGrammaticalRelations.CLAUSAL_SUBJECT) return "subject";
-    if(relation == EnglishGrammaticalRelations.NOMINAL_PASSIVE_SUBJECT || relation == EnglishGrammaticalRelations.CLAUSAL_PASSIVE_SUBJECT) return "subject";
+    if(relation == UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT
+        || relation == UniversalEnglishGrammaticalRelations.CLAUSAL_SUBJECT) return "subject";
+    if(relation == UniversalEnglishGrammaticalRelations.NOMINAL_PASSIVE_SUBJECT
+        || relation == UniversalEnglishGrammaticalRelations.CLAUSAL_PASSIVE_SUBJECT) return "subject";
 
     // verbal argument relations
-    if(relation == EnglishGrammaticalRelations.ADJECTIVAL_COMPLEMENT || relation == EnglishGrammaticalRelations.CLAUSAL_COMPLEMENT || relation == EnglishGrammaticalRelations.XCLAUSAL_COMPLEMENT || relation == EnglishGrammaticalRelations.AGENT || relation == EnglishGrammaticalRelations.DIRECT_OBJECT || relation == EnglishGrammaticalRelations.INDIRECT_OBJECT) return "verbArg";
+    if(relation == UniversalEnglishGrammaticalRelations.CLAUSAL_COMPLEMENT
+        || relation == UniversalEnglishGrammaticalRelations.XCLAUSAL_COMPLEMENT
+        || relation == UniversalEnglishGrammaticalRelations.AGENT
+        || relation == UniversalEnglishGrammaticalRelations.DIRECT_OBJECT
+        || relation == UniversalEnglishGrammaticalRelations.INDIRECT_OBJECT) return "verbArg";
 
     // noun argument relations
-    if(relation == EnglishGrammaticalRelations.RELATIVE_CLAUSE_MODIFIER || relation == EnglishGrammaticalRelations.NOUN_COMPOUND_MODIFIER || relation == EnglishGrammaticalRelations.ADJECTIVAL_MODIFIER || relation == EnglishGrammaticalRelations.APPOSITIONAL_MODIFIER || relation == EnglishGrammaticalRelations.POSSESSION_MODIFIER) return "nounArg";
+    if(relation == UniversalEnglishGrammaticalRelations.RELATIVE_CLAUSE_MODIFIER
+        || relation == UniversalEnglishGrammaticalRelations.COMPOUND_MODIFIER //
+        || relation == UniversalEnglishGrammaticalRelations.ADJECTIVAL_MODIFIER
+        || relation == UniversalEnglishGrammaticalRelations.APPOSITIONAL_MODIFIER
+        || relation == UniversalEnglishGrammaticalRelations.POSSESSION_MODIFIER) return "nounArg";
 
     return null;
   }
@@ -1413,17 +1430,14 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     for(Pair<GrammaticalRelation, IndexedWord> childPair : childPairs) {
       GrammaticalRelation gr = childPair.first;
       IndexedWord word = childPair.second;
-      if(gr == EnglishGrammaticalRelations.ADJECTIVAL_MODIFIER || gr == EnglishGrammaticalRelations.VERBAL_MODIFIER ||
-         gr == EnglishGrammaticalRelations.RELATIVE_CLAUSE_MODIFIER || gr.toString().startsWith("prep_")) {
-        count++;
-      }
-      // add noun modifier when the mention isn't a NER
-      if(nerString.equals("O") && gr == EnglishGrammaticalRelations.NOUN_COMPOUND_MODIFIER) {
+      if(gr == UniversalEnglishGrammaticalRelations.ADJECTIVAL_MODIFIER
+          || gr == UniversalEnglishGrammaticalRelations.RELATIVE_CLAUSE_MODIFIER
+          || gr.toString().startsWith("prep_")) {
         count++;
       }
 
       // add possessive if not a personal determiner
-      if(gr == EnglishGrammaticalRelations.POSSESSION_MODIFIER && !dict.determiners.contains(word.lemma())) {
+      if(gr == UniversalEnglishGrammaticalRelations.POSSESSION_MODIFIER && !dict.determiners.contains(word.lemma())) {
         count++;
       }
     }
@@ -1436,8 +1450,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
     if(!nerString.equals("O")) return "definite";
 
-    Set<IndexedWord> quant = collapsedDependency.getChildrenWithReln(headIndexedWord, EnglishGrammaticalRelations.DETERMINER);
-    Set<IndexedWord> poss = collapsedDependency.getChildrenWithReln(headIndexedWord, EnglishGrammaticalRelations.POSSESSION_MODIFIER);
+    Set<IndexedWord> quant = collapsedDependency.getChildrenWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.DETERMINER);
+    Set<IndexedWord> poss = collapsedDependency.getChildrenWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.POSSESSION_MODIFIER);
     if (!quant.isEmpty()) {
       for (IndexedWord word : quant) {
         String det = word.lemma();
@@ -1450,7 +1464,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     } else if (!poss.isEmpty()) {
       return "definite";
     } else {
-      quant = collapsedDependency.getChildrenWithReln(headIndexedWord, EnglishGrammaticalRelations.NUMERIC_MODIFIER);
+      quant = collapsedDependency.getChildrenWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.NUMERIC_MODIFIER);
       if (!quant.isEmpty()) {
         return "quantified";
       }
@@ -1470,7 +1484,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
     // or has a sibling
     for(IndexedWord sibling : getHeadSiblings()) {
-      if(dict.negations.contains(sibling.lemma()) && !collapsedDependency.hasParentWithReln(headIndexedWord, EnglishGrammaticalRelations.NOMINAL_SUBJECT)) return 1;
+      if(dict.negations.contains(sibling.lemma()) && !collapsedDependency.hasParentWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT)) return 1;
     }
     // check the parent
     List<Pair<GrammaticalRelation,IndexedWord>> parentPairs = collapsedDependency.parentPairs(headIndexedWord);
@@ -1498,8 +1512,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if (parent != null) {
       if(dict.modals.contains(parent.lemma())) return 1;
       // check the children of the parent (that is needed for modal auxiliaries)
-      IndexedWord child = collapsedDependency.getChildWithReln(parent,EnglishGrammaticalRelations.AUX_MODIFIER);
-      if(!collapsedDependency.hasParentWithReln(headIndexedWord, EnglishGrammaticalRelations.NOMINAL_SUBJECT) && child != null && dict.modals.contains(child.lemma())) return 1;
+      IndexedWord child = collapsedDependency.getChildWithReln(parent,UniversalEnglishGrammaticalRelations.AUX_MODIFIER);
+      if(!collapsedDependency.hasParentWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT) && child != null && dict.modals.contains(child.lemma())) return 1;
     }
 
     // look at the path to root
@@ -1517,8 +1531,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
     // check adverbial clause with marker "as"
     for(IndexedWord sibling : getHeadSiblings()) {
-      if(dict.reportVerb.contains(sibling.lemma()) && collapsedDependency.hasParentWithReln(sibling,EnglishGrammaticalRelations.ADV_CLAUSE_MODIFIER)) {
-        IndexedWord marker = collapsedDependency.getChildWithReln(sibling,EnglishGrammaticalRelations.MARKER);
+      if(dict.reportVerb.contains(sibling.lemma()) && collapsedDependency.hasParentWithReln(sibling,UniversalEnglishGrammaticalRelations.ADV_CLAUSE_MODIFIER)) {
+        IndexedWord marker = collapsedDependency.getChildWithReln(sibling,UniversalEnglishGrammaticalRelations.MARKER);
         if (marker != null && marker.lemma().equals("as")) {
           return 1;
         }
@@ -1531,14 +1545,14 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     boolean isSubject = false;
 
     // if the node itself is a subject, we will not take into account its parent in the path
-    if(collapsedDependency.hasParentWithReln(headIndexedWord, EnglishGrammaticalRelations.NOMINAL_SUBJECT)) isSubject = true;
+    if(collapsedDependency.hasParentWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT)) isSubject = true;
 
     for (IndexedWord word : path) {
       if(!isSubject && (dict.reportVerb.contains(word.lemma()) || dict.reportNoun.contains(word.lemma()))) {
         return 1;
       }
       // check how to put isSubject
-      isSubject = collapsedDependency.hasParentWithReln(word, EnglishGrammaticalRelations.NOMINAL_SUBJECT);
+      isSubject = collapsedDependency.hasParentWithReln(word, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT);
     }
     return 0;
   }

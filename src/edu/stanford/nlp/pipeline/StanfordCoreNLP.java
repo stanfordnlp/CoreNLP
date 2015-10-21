@@ -415,11 +415,13 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     pool.register(STANFORD_COREF, AnnotatorFactories.coref(properties, annotatorImplementation));
     pool.register(STANFORD_RELATION, AnnotatorFactories.relation(properties, annotatorImplementation));
     pool.register(STANFORD_SENTIMENT, AnnotatorFactories.sentiment(properties, annotatorImplementation));
-    pool.register(STANFORD_COLUMN_DATA_CLASSIFIER,AnnotatorFactories.columnDataClassifier(properties,annotatorImplementation));
+    pool.register(STANFORD_COLUMN_DATA_CLASSIFIER,AnnotatorFactories.columnDataClassifier(properties, annotatorImplementation));
     pool.register(STANFORD_DEPENDENCIES, AnnotatorFactories.dependencies(properties, annotatorImplementation));
     pool.register(STANFORD_NATLOG, AnnotatorFactories.natlog(properties, annotatorImplementation));
     pool.register(STANFORD_OPENIE, AnnotatorFactories.openie(properties, annotatorImplementation));
     pool.register(STANFORD_QUOTE, AnnotatorFactories.quote(properties, annotatorImplementation));
+    pool.register(STANFORD_UD_FEATURES, AnnotatorFactories.udfeats(properties, annotatorImplementation));
+
     // Add more annotators here
 
     // add annotators loaded via reflection from classnames specified
@@ -660,7 +662,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     os.println("(if -props or -annotators is not passed in, default properties will be loaded via the classpath)");
     os.println("\t\"props\" - path to file with configuration properties");
     os.println("\t\"annotators\" - comma separated list of annotators");
-    os.println("\tThe following annotators are supported: cleanxml, tokenize, quote, ssplit, pos, lemma, ner, truecase, parse, coref, dcoref, relation");
+    os.println("\tThe following annotators are supported: cleanxml, tokenize, quote, ssplit, pos, lemma, ner, truecase, parse, hcoref, relation");
 
     os.println();
     os.println("\tIf annotator \"tokenize\" is defined:");

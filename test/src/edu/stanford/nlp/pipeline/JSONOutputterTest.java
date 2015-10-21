@@ -97,6 +97,7 @@ public class JSONOutputterTest extends TestCase {
         "\t\t\t\t{\n" +
         "\t\t\t\t\t\"index\": 1,\n" +
         "\t\t\t\t\t\"word\": \"JSON\",\n" +
+        "\t\t\t\t\t\"originalText\": \"JSON\",\n" +
         "\t\t\t\t\t\"characterOffsetBegin\": 0,\n" +
         "\t\t\t\t\t\"characterOffsetEnd\": 4,\n" +
         "\t\t\t\t\t\"before\": \"\",\n" +
@@ -105,6 +106,7 @@ public class JSONOutputterTest extends TestCase {
         "\t\t\t\t{\n" +
         "\t\t\t\t\t\"index\": 2,\n" +
         "\t\t\t\t\t\"word\": \"is\",\n" +
+        "\t\t\t\t\t\"originalText\": \"is\",\n" +
         "\t\t\t\t\t\"characterOffsetBegin\": 5,\n" +
         "\t\t\t\t\t\"characterOffsetEnd\": 7,\n" +
         "\t\t\t\t\t\"before\": \" \",\n" +
@@ -113,6 +115,7 @@ public class JSONOutputterTest extends TestCase {
         "\t\t\t\t{\n" +
         "\t\t\t\t\t\"index\": 3,\n" +
         "\t\t\t\t\t\"word\": \"neat\",\n" +
+        "\t\t\t\t\t\"originalText\": \"neat\",\n" +
         "\t\t\t\t\t\"characterOffsetBegin\": 8,\n" +
         "\t\t\t\t\t\"characterOffsetEnd\": 12,\n" +
         "\t\t\t\t\t\"before\": \" \",\n" +
@@ -121,6 +124,7 @@ public class JSONOutputterTest extends TestCase {
         "\t\t\t\t{\n" +
         "\t\t\t\t\t\"index\": 4,\n" +
         "\t\t\t\t\t\"word\": \".\",\n" +
+        "\t\t\t\t\t\"originalText\": \".\",\n" +
         "\t\t\t\t\t\"characterOffsetBegin\": 12,\n" +
         "\t\t\t\t\t\"characterOffsetEnd\": 13,\n" +
         "\t\t\t\t\t\"before\": \"\",\n" +
@@ -135,6 +139,7 @@ public class JSONOutputterTest extends TestCase {
         "\t\t\t\t{\n" +
         "\t\t\t\t\t\"index\": 1,\n" +
         "\t\t\t\t\t\"word\": \"Better\",\n" +
+        "\t\t\t\t\t\"originalText\": \"Better\",\n" +
         "\t\t\t\t\t\"characterOffsetBegin\": 14,\n" +
         "\t\t\t\t\t\"characterOffsetEnd\": 20,\n" +
         "\t\t\t\t\t\"before\": \" \",\n" +
@@ -143,6 +148,7 @@ public class JSONOutputterTest extends TestCase {
         "\t\t\t\t{\n" +
         "\t\t\t\t\t\"index\": 2,\n" +
         "\t\t\t\t\t\"word\": \"than\",\n" +
+        "\t\t\t\t\t\"originalText\": \"than\",\n" +
         "\t\t\t\t\t\"characterOffsetBegin\": 21,\n" +
         "\t\t\t\t\t\"characterOffsetEnd\": 25,\n" +
         "\t\t\t\t\t\"before\": \" \",\n" +
@@ -151,6 +157,7 @@ public class JSONOutputterTest extends TestCase {
         "\t\t\t\t{\n" +
         "\t\t\t\t\t\"index\": 3,\n" +
         "\t\t\t\t\t\"word\": \"XML\",\n" +
+        "\t\t\t\t\t\"originalText\": \"XML\",\n" +
         "\t\t\t\t\t\"characterOffsetBegin\": 26,\n" +
         "\t\t\t\t\t\"characterOffsetEnd\": 29,\n" +
         "\t\t\t\t\t\"before\": \" \",\n" +
@@ -159,6 +166,7 @@ public class JSONOutputterTest extends TestCase {
         "\t\t\t\t{\n" +
         "\t\t\t\t\t\"index\": 4,\n" +
         "\t\t\t\t\t\"word\": \".\",\n" +
+        "\t\t\t\t\t\"originalText\": \".\",\n" +
         "\t\t\t\t\t\"characterOffsetBegin\": 29,\n" +
         "\t\t\t\t\t\"characterOffsetEnd\": 30,\n" +
         "\t\t\t\t\t\"before\": \"\",\n" +

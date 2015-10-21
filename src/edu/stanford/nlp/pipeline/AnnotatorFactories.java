@@ -651,4 +651,24 @@ public class AnnotatorFactories {
     };
   }
 
+
+  //
+  // UD Features Extractor
+  //
+  public static AnnotatorFactory udfeats(Properties properties, final AnnotatorImplementations annotatorImpl) {
+    return new AnnotatorFactory(properties, annotatorImpl) {
+      private static final long serialVersionUID = -2525567112379296672L;
+
+      @Override
+      public Annotator create() {
+        return annotatorImpl.udfeats(properties);
+      }
+
+      @Override
+      protected String additionalSignature() {
+                return "";
+            }
+    };
+  }
+
 }

@@ -96,7 +96,7 @@ public class MetaFeatureExtractor {
       pairFeatures = compressor.uncompress(example.features);
       features1 = compressor.uncompress(mentionFeatures.get(example.mentionId1));
     } else {
-      features2.incrementCount("BIAS_FEATURE");
+      features2.incrementCount("bias");
     }
     if (!disallowedPrefixes.isEmpty()) {
       features1 = filterOut(features1, disallowedPrefixes);

@@ -15,7 +15,7 @@ import java.util.Set;
 import edu.stanford.nlp.hcoref.CorefProperties;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.math.ArrayMath;
+import edu.stanford.nlp.neural.VectorMap;
 import edu.stanford.nlp.pipeline.DefaultPaths;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -202,7 +202,7 @@ public class Dictionaries {
 
   public int dimVector;
   
-  public Map<String, float[]> vectors = Generics.newHashMap();
+  public VectorMap vectors = new VectorMap();
 
   public Map<String, String> strToEntity = Generics.newHashMap();
   public Counter<String> dictScore = new ClassicCounter<String>();
@@ -535,24 +535,23 @@ public class Dictionaries {
     if(CorefProperties.loadWordEmbedding(props)) {
       System.err.println("LOAD: WordVectors");
       String wordvectorFile = CorefProperties.getPathSerializedWordVectors(props);
-      if(new File(wordvectorFile).exists()) {
-        vectors = IOUtils.readObjectFromFile(wordvectorFile);
-        dimVector = vectors.entrySet().iterator().next().getValue().length;
-      } else {
-        for(String line : IOUtils.readLines(CorefProperties.getPathWord2Vec(props))){
-          String[] split = line.toLowerCase().split("\\s+");
-          if(split.length < 100) continue;
-          float[] vector = new float[split.length-1];
-          for(int i=1; i < split.length ; i++) {
-            vector[i-1] = Float.parseFloat(split[i]);
+      String word2vecFile = CorefProperties.getPathWord2Vec(props);
+      try {
+        // Try to read the serialized vectors
+        vectors = VectorMap.deserialize(wordvectorFile);
+      } catch (IOException e) {
+        // If that fails, try to read the vectors from the word2vec file
+        if(new File(word2vecFile).exists()) {
+          vectors = VectorMap.readWord2Vec(word2vecFile);
+          if (wordvectorFile != null && !wordvectorFile.startsWith("edu")) {
+            vectors.serialize(wordvectorFile);
           }
-          ArrayMath.L2normalize(vector);
-          vectors.put(split[0], vector);
-          dimVector = vector.length;
+        } else {
+          // If that fails, give up and crash
+          throw new RuntimeIOException(e);
         }
-        
-        if(wordvectorFile!=null) IOUtils.writeObjectToFile(vectors, wordvectorFile);
       }
+      dimVector = vectors.entrySet().iterator().next().getValue().length;
       
 //    if(Boolean.parseBoolean(props.getProperty("useValDictionary"))) {
 //      System.err.println("LOAD: ValDictionary");
@@ -581,8 +580,8 @@ public class Dictionaries {
         props.getProperty(CorefProperties.STATES_PROVINCES_PROP, DefaultPaths.DEFAULT_DCOREF_STATES_AND_PROVINCES),
         CorefProperties.getSieves(props).contains("CorefDictionaryMatch"),
         PropertiesUtils.getStringArray(props, CorefProperties.DICT_LIST_PROP,
-                                       new String[]{DefaultPaths.DEFAULT_DCOREF_DICT1, DefaultPaths.DEFAULT_DCOREF_DICT2,
-                                                    DefaultPaths.DEFAULT_DCOREF_DICT3, DefaultPaths.DEFAULT_DCOREF_DICT4}),
+            new String[]{DefaultPaths.DEFAULT_DCOREF_DICT1, DefaultPaths.DEFAULT_DCOREF_DICT2,
+                DefaultPaths.DEFAULT_DCOREF_DICT3, DefaultPaths.DEFAULT_DCOREF_DICT4}),
         props.getProperty(CorefProperties.DICT_PMI_PROP, DefaultPaths.DEFAULT_DCOREF_DICT1),
         props.getProperty(CorefProperties.SIGNATURES_PROP, DefaultPaths.DEFAULT_DCOREF_NE_SIGNATURES));
     if(CorefProperties.useSemantics(props)) {

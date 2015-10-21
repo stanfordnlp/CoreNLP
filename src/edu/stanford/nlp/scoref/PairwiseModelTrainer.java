@@ -217,7 +217,7 @@ public class PairwiseModelTrainer {
           break;
         }
         if (i % 10000 == 0) {
-          Redwood.log("scoref-train", String.format("On example %d/%d = %.2f%%",
+          Redwood.log("scoref-train", String.format("On train example %d/%d = %.2f%%",
               i, numTrainingExamples, 100.0 * i / numTrainingExamples));
         }
         model.learn(pair.first, pair.second, compressor);
@@ -265,7 +265,7 @@ public class PairwiseModelTrainer {
     int i  = 0;
     for (Pair<Example, Map<Integer, CompressedFeatureVector>> pair : examples) {
       if (i++ % 10000 == 0) {
-        Redwood.log("scoref-train", String.format("On example %d/%d = %.2f%%",
+        Redwood.log("scoref-train", String.format("On test example %d/%d = %.2f%%",
             i, examples.size(), 100.0 * i / examples.size()));
       }
       Example example = pair.first;

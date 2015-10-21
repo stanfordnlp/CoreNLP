@@ -81,7 +81,7 @@ public class MentionDetectionClassifier implements Serializable {
   
   public static MentionDetectionClassifier loadMentionDetectionClassifier(String filename) throws ClassNotFoundException, IOException {
     System.err.print("loading MentionDetectionClassifier ...");
-    MentionDetectionClassifier mdc = IOUtils.readObjectFromFile(filename);
+    MentionDetectionClassifier mdc = IOUtils.readObjectFromURLOrClasspathOrFileSystem(filename);
     System.err.println("done");
     return mdc;
   }

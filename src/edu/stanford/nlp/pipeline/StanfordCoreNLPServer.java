@@ -98,14 +98,14 @@ public class StanfordCoreNLPServer implements Runnable {
 
       String query = uri.getQuery();
       String[] queryFields = query
-          .replace("\\&", "___AMP___")
-          .replace("\\+", "___PLUS___")
+          .replaceAll("\\\\&", "___AMP___")
+          .replaceAll("\\\\+", "___PLUS___")
           .split("&");
       for (String queryField : queryFields) {
         int firstEq = queryField.indexOf('=');
         // Convention uses "+" for spaces.
-        String key = URLDecoder.decode(queryField.substring(0, firstEq), "utf8").replace("___AMP___", "&").replace("___PLUS___", "+");
-        String value = URLDecoder.decode(queryField.substring(firstEq + 1), "utf8").replace("___AMP___", "&").replace("___PLUS___", "+");
+        String key = URLDecoder.decode(queryField.substring(0, firstEq), "utf8").replaceAll("___AMP___", "&").replaceAll("___PLUS___", "+");
+        String value = URLDecoder.decode(queryField.substring(firstEq + 1), "utf8").replaceAll("___AMP___", "&").replaceAll("___PLUS___", "+");
         urlParams.put(key, value);
       }
       return urlParams;
@@ -300,13 +300,8 @@ public class StanfordCoreNLPServer implements Runnable {
         }
         log("[" + httpExchange.getRemoteAddress() + "] API call");
       } catch (Exception e) {
-        // Return error message.
         e.printStackTrace();
-        String response = e.getMessage();
-        httpExchange.getResponseHeaders().add("Content-Type", "text/plain");
-        httpExchange.sendResponseHeaders(HTTP_BAD_INPUT, response.length());
-        httpExchange.getResponseBody().write(response.getBytes());
-        httpExchange.close();
+        respondError("Could not handle incoming annotation", httpExchange);
         return;
       }
 
@@ -331,8 +326,10 @@ public class StanfordCoreNLPServer implements Runnable {
         httpExchange.getResponseBody().write(response);
         httpExchange.close();
       } catch (TimeoutException e) {
+        e.printStackTrace();
         respondError("CoreNLP request timed out", httpExchange);
       } catch (Exception e) {
+        e.printStackTrace();
         // Return error message.
         respondError(e.getClass().getName() + ": " + e.getMessage(), httpExchange);
       }

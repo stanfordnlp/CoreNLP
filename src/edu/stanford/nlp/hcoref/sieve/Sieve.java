@@ -111,7 +111,7 @@ public abstract class Sieve implements Serializable {
         return sieve;
         
       case RF:
-        RFSieve rfsieve = IOUtils.readObjectFromFile(CorefProperties.getPathModel(props, sievename));
+        RFSieve rfsieve = IOUtils.readObjectFromURLOrClasspathOrFileSystem(CorefProperties.getPathModel(props, sievename));
         rfsieve.thresMerge = CorefProperties.getMergeThreshold(props, sievename);
         System.err.println("Done.\nMerging threshold: "+rfsieve.thresMerge);
         return rfsieve;

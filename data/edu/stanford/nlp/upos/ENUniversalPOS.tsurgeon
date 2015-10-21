@@ -64,7 +64,7 @@ relabel target AUX
 %relabel target AUX
 
 % VB.* -> AUX (active, case 1)
-VP < VP < (/^VB.*$/=target <... {/.*/})
+VP < VP < (/^VB.*$/=target <: /^(?i:will|have|can|would|do|is|was|be|are|has|could|should|did|been|may|were|had|'ll|'ve|does|am|might|ca|'m|being|'s|must|'d|'re|wo|shall|get|ve|s|got|r|m|getting|having|d|re|ll|wilt|v|of|my|nt|gets|du|wud|woud|with|willl|wil|wase|shoul|shal|`s|ould|-ll|most|made|hvae|hav|cold|as|art|ai|ar|a)$/)
 
 relabel target AUX
 
