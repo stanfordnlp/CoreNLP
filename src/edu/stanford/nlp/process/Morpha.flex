@@ -2054,8 +2054,8 @@ SKIP = [ \t\r\n\u2028\u2029\u000B\u000C\u0085]
 <scan>"us"/_P     { return(stem(2,"we","")); }             
 <scan>"I"/_P      { return(proper_name_stem()); }
 <scan>"an"/_[AD]     { return(stem(1, "", "n")); }
-<scan>{G}+/_NN[^P] { yybegin(noun); yypushback(yylength()); return(next()); }
-<scan>{G}+/_NNP    { return(proper_name_stem()); }
+<scan>{G}+/_N{1,2}[^P] { yybegin(noun); yypushback(yylength()); return(next()); }
+<scan>{G}+/_N{1,2}P    { return(proper_name_stem()); }
 <scan>{G}+/_V     { yybegin(verb); yypushback(yylength()); return(next()); }
 <scan>{G}+/_      { return(common_noun_stem()); }
 <scan,verb,noun,any>_{G}+       { yybegin(scan); if (option(tag_output)) return yytext(); }

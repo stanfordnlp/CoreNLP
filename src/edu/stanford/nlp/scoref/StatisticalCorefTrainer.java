@@ -8,13 +8,14 @@ import edu.stanford.nlp.scoref.MetaFeatureExtractor.SingleConjunction;
 import edu.stanford.nlp.scoref.StatisticalCorefProperties.Dataset;
 
 public class StatisticalCorefTrainer {
-  public static final String CLASSIFICATION_MODEL = "classification-un";
-  public static final String RANKING_MODEL = "ranking-un";
-  public static final String ANAPHORICITY_MODEL = "anaphoricity-un";
+  public static final String CLASSIFICATION_MODEL = "classification";
+  public static final String RANKING_MODEL = "ranking";
+  public static final String ANAPHORICITY_MODEL = "anaphoricity";
   public static final String CLUSTERING_MODEL_NAME = "clusterer";
   public static final String EXTRACTED_FEATURES_NAME = "features";
 
   public static String trainingPath;
+  public static String logsPath;
   public static String pairwiseModelsPath;
   public static String clusteringModelsPath;
 
@@ -34,11 +35,17 @@ public class StatisticalCorefTrainer {
   }
 
   public static void setTrainingPath(Properties props) {
-    trainingPath = StatisticalCorefProperties.trainingPath(props);
+    trainingPath = StatisticalCorefProperties.getTrainingPath(props);
+    logsPath = trainingPath + "logs/";
     pairwiseModelsPath = trainingPath + "pairwise_models/";
     clusteringModelsPath = trainingPath + "clustering_models/";
+    makeDir(logsPath);
     makeDir(pairwiseModelsPath);
     makeDir(clusteringModelsPath);
+  }
+
+  public static void setDataPath(String name) {
+    setDataPath(name, false);
   }
 
   public static void setDataPath(String name, boolean isTraining) {
@@ -67,20 +74,28 @@ public class StatisticalCorefTrainer {
     .build();
   }
 
+  public static void runDocumentProcessor(Properties props, Dictionaries dictionaries,
+      DocumentProcessor processor) throws Exception {
+    DocumentProcessorRunner dpr = new DocumentProcessorRunner(props, dictionaries, processor);
+    dpr.run();
+  }
+
   public static void preprocess(Properties props, Dictionaries dictionaries, boolean isTrainSet)
       throws Exception {
-    (isTrainSet ? new DatasetBuilder(StatisticalCorefProperties.minClassImbalance(props),
-        StatisticalCorefProperties.minTrainExamplesPerDocument(props)) :
-          new DatasetBuilder()).run(props, dictionaries);
-    new MetadataWriter(isTrainSet).run(props, dictionaries);
-    new FeatureExtractorRunner(props, dictionaries).run(props, dictionaries);
+    runDocumentProcessor(props, dictionaries, new DatasetBuilder(
+        StatisticalCorefProperties.minClassImbalance(props),
+        StatisticalCorefProperties.minTrainExamplesPerDocument(props)));
+    runDocumentProcessor(props, dictionaries, new MetadataWriter(isTrainSet));
+    runDocumentProcessor(props, dictionaries, new FeatureExtractorRunner(props, dictionaries));
   }
+
   public static void test(PairwiseModel classificationModel, PairwiseModel rankingModel,
       PairwiseModel anaphoricityModel) throws Exception {
     PairwiseModelTrainer.test(classificationModel, predictionsName, false);
     PairwiseModelTrainer.test(rankingModel, predictionsName, false);
     PairwiseModelTrainer.test(anaphoricityModel, predictionsName, true);
   }
+
 
   public static void doTraining(Properties props) throws Exception {
     Dictionaries dictionaries = new Dictionaries(props);
@@ -89,6 +104,15 @@ public class StatisticalCorefTrainer {
     StatisticalCorefProperties.setInput(props, Dataset.TRAIN);
     preprocess(props, dictionaries, true);
 
+    setDataPath("dev");
+    StatisticalCorefProperties.setInput(props, Dataset.DEV);
+    preprocess(props, dictionaries, false);
+
+    setDataPath("test");
+    StatisticalCorefProperties.setInput(props, Dataset.TEST);
+    preprocess(props, dictionaries, false);
+
+    setDataPath("train");
     PairwiseModel classificationModel = PairwiseModel.newBuilder(CLASSIFICATION_MODEL,
         MetaFeatureExtractor.newBuilder().build()).build();
     PairwiseModel rankingModel = PairwiseModel.newBuilder(RANKING_MODEL,
@@ -99,16 +123,16 @@ public class StatisticalCorefTrainer {
     PairwiseModelTrainer.trainClassification(classificationModel, false);
     PairwiseModelTrainer.trainClassification(anaphoricityModel, true);
 
-    setDataPath("dev", false);
-    StatisticalCorefProperties.setInput(props, Dataset.DEV);
-    preprocess(props, dictionaries, false);
+    setDataPath("dev");
     test(classificationModel, rankingModel, anaphoricityModel);
+
+    Clusterer cl = new Clusterer();
+    cl.doTraining(CLUSTERING_MODEL_NAME);
   }
 
   public static void main(String[] args) throws Exception {
     Properties props = StatisticalCorefProperties.loadProps(args[0]);
     setTrainingPath(props);
     doTraining(props);
-    new Clusterer().doTraining(CLUSTERING_MODEL_NAME);
   }
 }

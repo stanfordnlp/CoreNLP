@@ -263,11 +263,4 @@ public class AnnotatorImplementations {
     return new QuoteAnnotator(relevantProperties);
   }
 
-  /**
-   * Add universal dependencies features
-   */
-  public Annotator udfeats(Properties properties) {
-    return new UDFeatureAnnotator();
-  }
-
 }

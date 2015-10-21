@@ -1,7 +1,11 @@
 package edu.stanford.nlp.pipeline;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.hcoref.CorefCoreAnnotations.CorefChainAnnotation;
@@ -9,10 +13,14 @@ import edu.stanford.nlp.hcoref.CorefSystem;
 import edu.stanford.nlp.hcoref.data.CorefChain;
 import edu.stanford.nlp.hcoref.data.CorefChain.CorefMention;
 import edu.stanford.nlp.hcoref.data.Document;
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.ArraySet;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.IntTuple;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.StringUtils;
 
 public class HybridCorefAnnotator extends TextAnnotationCreator implements Annotator {
 
@@ -25,20 +33,7 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
 
   public HybridCorefAnnotator(Properties props) {
     try {
-      // Load the default properties
-      Properties corefProps = new Properties();
-      try {
-        corefProps.load(IOUtils.readerFromString("edu/stanford/nlp/hcoref/properties/coref-default-dep.properties"));
-      } catch (IOException ignored) { }
-      // Add passed properties
-      Enumeration<Object> keys = props.keys();
-      while (keys.hasMoreElements()) {
-        String key = keys.nextElement().toString();
-        corefProps.setProperty(key, props.getProperty(key));
-      }
-      // Create coref system
-      corefSystem = new CorefSystem(corefProps);
-      corefSystem.docMaker.setNeedMissingAnnotations(false);
+      corefSystem = new CorefSystem(props);
       OLD_FORMAT = Boolean.parseBoolean(props.getProperty("oldCorefFormat", "false"));
     } catch (Exception e) {
       System.err.println("ERROR: cannot create HybridCorefAnnotator!");

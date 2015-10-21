@@ -49,26 +49,26 @@ message Document {
 // The serialized version of a CoreMap representing a sentence.
 //
 message Sentence {
-  repeated Token            token                               = 1;
-  required uint32           tokenOffsetBegin                    = 2;
-  required uint32           tokenOffsetEnd                      = 3;
-  optional uint32           sentenceIndex                       = 4;
-  optional uint32           characterOffsetBegin                = 5;
-  optional uint32           characterOffsetEnd                  = 6;
-  optional ParseTree        parseTree                           = 7;
-  optional ParseTree        binarizedParseTree                  = 31;
-  optional ParseTree        annotatedParseTree                  = 32;
-  optional string           sentiment                           = 33;
-  repeated ParseTree        kBestParseTrees                     = 34;
-  optional DependencyGraph  basicDependencies                   = 8;
-  optional DependencyGraph  collapsedDependencies               = 9;
-  optional DependencyGraph  collapsedCCProcessedDependencies    = 10;
-  optional DependencyGraph  alternativeDependencies             = 13;
-  repeated OpenIETriple     openieTriple                        = 14;   // The OpenIE triples in the sentence
-  repeated SentenceFragment entailedSentence                    = 15;   // The entailed sentences, by natural logic
-  optional uint32           paragraph                           = 11;
+  repeated Token           token                               = 1;
+  required uint32          tokenOffsetBegin                    = 2;
+  required uint32          tokenOffsetEnd                      = 3;
+  optional uint32          sentenceIndex                       = 4;
+  optional uint32          characterOffsetBegin                = 5;
+  optional uint32          characterOffsetEnd                  = 6;
+  optional ParseTree       parseTree                           = 7;
+  optional ParseTree       binarizedParseTree                  = 31;
+  optional ParseTree       annotatedParseTree                  = 32;
+  optional string          sentiment                           = 33;
+  repeated ParseTree       kBestParseTrees                     = 34;
+  optional DependencyGraph basicDependencies                   = 8;
+  optional DependencyGraph collapsedDependencies               = 9;
+  optional DependencyGraph collapsedCCProcessedDependencies    = 10;
+  optional DependencyGraph alternativeDependencies             = 13;
+  repeated OpenIETriple    openieTriple                        = 14;   // The OpenIE triples in the sentence
+  repeated SentenceFragment entailedSentence                   = 15;   // The entailed sentences, by natural logic
+  optional uint32          paragraph                           = 11;
 
-  optional string           text                                = 12;   // Only needed if we're only saving the sentence.
+  optional string          text                                = 12;   // Only needed if we're only saving the sentence.
 
 
   // Fields set by other annotators in CoreNLP
@@ -116,12 +116,6 @@ message Token {
   optional Span      span           = 29;   // The span of a leaf node of a tree
   optional string    sentiment      = 30;   // The final sentiment of the sentence
   optional int32     quotationIndex = 31;   // The index of the quotation this token refers to
-  optional MapStringString conllUFeatures = 32;
-  optional string coarseTag         = 33; //  The coarse POS tag (used to store the UPOS tag)
-  optional Span conllUTokenSpan     = 34;
-  optional string conllUMisc        = 35;
-  optional MapIntString conllUSecondaryDeps = 36;
-
 
   // Fields set by other annotators in CoreNLP
   optional string gender          = 51;  // gender annotation (machine reading)
@@ -366,23 +360,3 @@ message OpenIETriple {
   optional bool            suffixBe       = 11;  // If true, this relation string is missing a 'be' suffix
   optional bool            suffixOf       = 12;  // If true, this relation string is missing a 'of' prefix
 }
-
-
-//
-// A map from strings to strings.
-// Used, minimally, in the CoNLLU featurizer
-//
-message MapStringString {
-  repeated string key   = 1;
-  repeated string value = 2;
-}
-
-//
-// A map from integers to strings.
-// Used, minimally, in the CoNLLU featurizer
-//
-message MapIntString {
-  repeated uint32 key   = 1;
-  repeated string value = 2;
-}
-

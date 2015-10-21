@@ -22,20 +22,20 @@ public class Clusterer {
   private static final boolean USE_CLASSIFICATION = true;
   private static final boolean USE_RANKING = true;
   private static final boolean LEFT_TO_RIGHT = false;
-  private static final boolean EXACT_LOSS = false;
+  private static final boolean EXACT_LOSS = true;
   private static final double MUC_WEIGHT = 0.25;
   private static final double EXPERT_DECAY = 0.0;
-  private static final double LEARNING_RATE = 0.05;
+  private static final double LEARNING_RATE = 0.03;
   private static final int BUFFER_SIZE_MULTIPLIER = 20;
   private static final int MAX_DOCS = 1000;
   private static final int RETRAIN_ITERATIONS = 100;
   private static final int NUM_EPOCHS = 15;
   private static final int EVAL_FREQUENCY = 1;
 
-  private static final int MIN_PAIRS = 10;
-  private static final double MIN_PAIRWISE_SCORE = 0.15;
+  private static final int MIN_PAIRS = 15;
+  private static final double MIN_PAIRWISE_SCORE = 0.01;
   private static final int EARLY_STOP_THRESHOLD = 1000;
-  private static final double EARLY_STOP_VAL = 1500 / 0.2;
+  private static final double EARLY_STOP_VAL = 1500 / 0.015;
 
   public static int currentDocId = 0;
   public static int isTraining = 1;
@@ -67,12 +67,12 @@ public class Clusterer {
   }
 
   public void doTraining(String modelName) {
-    classifier.setWeight("bias", -0.7);
-    classifier.setWeight("anaphorSeen", -2);
-    classifier.setWeight("max-ranking", 2);
-    classifier.setWeight("bias-single", -0.7);
-    classifier.setWeight("anaphorSeen-single", -2);
-    classifier.setWeight("max-ranking-single", 2);
+    classifier.setWeight("bias", -7);
+    classifier.setWeight("anaphorSeen", -500);
+    classifier.setWeight("max-classification", 20);
+    classifier.setWeight("bias-single", -7);
+    classifier.setWeight("anaphorSeen-single", -500);
+    classifier.setWeight("max-classification-single", 20);
 
     String outputPath = StatisticalCorefTrainer.clusteringModelsPath +
         modelName + "/";
@@ -91,7 +91,7 @@ public class Clusterer {
       progressWriter = new PrintWriter(outputPath + "progress", "UTF-8");
 
       Redwood.log("scoref.train", "Loading training data");
-      StatisticalCorefTrainer.setDataPath("dev", false);
+      StatisticalCorefTrainer.setDataPath("dev_dcoref");
       trainDocs = ClustererDataLoader.loadDocuments(MAX_DOCS);
 
       //Redwood.log("scoref.train", "Loading validation data");
@@ -181,7 +181,7 @@ public class Clusterer {
 
   private void writeModel(String name, String modelPath) {
     try {
-      classifier.writeWeights(modelPath + name + "_model.ser");
+      classifier.writeWeights(modelPath + name + "_model");
       classifier.printWeightVector(
           IOUtils.getPrintWriter(modelPath + name + "_weights"));
     } catch (Exception e) {
@@ -211,6 +211,21 @@ public class Clusterer {
       State currentState = new State(doc);
       while (!currentState.isComplete()) {
         currentState.doBestAction(classifier);
+        /*List<Input> actions = currentState.getActions(classifier);
+        if (actions == null) {
+          continue;
+        }
+        double bestScore = Double.NEGATIVE_INFINITY;
+        int bestAction = 0;
+        for (int i = 0; i < actions.size(); i++) {
+          Input action = actions.get(i);
+          double actionScore = -action.cost;
+          if (actionScore > bestScore) {
+            bestScore = actionScore;
+            bestAction = i;
+          }
+        }
+        currentState.doAction(bestAction == 0);*/
       }
       currentState.updateEvaluator(evaluator);
     }
@@ -542,6 +557,7 @@ public class Clusterer {
     }
     double score = scores.getCount(mentionPair);
     features.incrementCount("max", score);
+    //features.incrementCount("maxLog", cappedLog(score));
     return features;
   }
 
@@ -580,10 +596,14 @@ public class Clusterer {
     }
 
     features.incrementCount("max", maxScore);
+    //features.incrementCount("maxLog", Math.log(maxScore));
     features.incrementCount("min", minScore);
+    //features.incrementCount("minLog", Math.log(minScore));
     for (String key : counts.keySet()) {
       features.incrementCount("avg" + key, totals.getCount(key) / counts.getCount(key));
       features.incrementCount("avgLog" + key, totalsLog.getCount(key) / counts.getCount(key));
+      //features.incrementCount("avg" + key, totals.getCount(key) / mentionPairs.size());
+      //features.incrementCount("avgLog" + key, totalsLog.getCount(key) / mentionPairs.size());
     }
 
     return features;
@@ -626,7 +646,7 @@ public class Clusterer {
       earliest2 = tmp;
     }
 
-    features.incrementCount("anaphoricity", doc.anaphoricityScores.getCount(earliest2));
+    //features.incrementCount("anaphoricity", doc.anaphoricityScores.getCount(earliest2));
 
     if (c1.mentions.size() == 1 && c2.mentions.size() == 1) {
       Pair<Integer, Integer> mentionPair = new Pair<>(c1.mentions.get(0),
@@ -650,13 +670,27 @@ public class Clusterer {
         }
       }
 
+      /*List<Pair<Integer, Integer>> resulting = new ArrayList<>();
+      List<Integer> allMentions = new ArrayList<Integer>();
+      allMentions.addAll(c1.mentions);
+      allMentions.addAll(c2.mentions);
+      for (int i = 0; i < allMentions.size(); i++) {
+        for (int j = 0; j < i; j++) {
+          resulting.add(new Pair<>(allMentions.get(i), allMentions.get(j)));
+        }
+      }*/
+
       if (USE_CLASSIFICATION) {
         features.addAll(addSuffix(getFeatures(doc, between, doc.classificationScores),
             "-classification"));
+        //features.addAll(addSuffix(getFeatures(doc, resulting, doc.classificationScores),
+        //    "-classification-resulting"));
       }
       if (USE_RANKING) {
         features.addAll(addSuffix(getFeatures(doc, between, doc.rankingScores),
             "-ranking"));
+        //features.addAll(addSuffix(getFeatures(doc, resulting, doc.rankingScores),
+        //    "-ranking-resulting"));
       }
     }
 

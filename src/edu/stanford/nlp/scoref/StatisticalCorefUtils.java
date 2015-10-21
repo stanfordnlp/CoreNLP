@@ -6,10 +6,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import edu.stanford.nlp.hcoref.data.CorefCluster;
 import edu.stanford.nlp.hcoref.data.Document;
 import edu.stanford.nlp.hcoref.data.Mention;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 
 public class StatisticalCorefUtils {
@@ -71,5 +77,37 @@ public class StatisticalCorefUtils {
     }
 
     return s;
+  }
+
+  private static StanfordCoreNLP pipeline = null;
+  public static StanfordCoreNLP pipeline() {
+    if (pipeline == null) {
+      Properties coreNLPProperties = new Properties();
+      coreNLPProperties.setProperty("annotators", "");
+      coreNLPProperties.setProperty("threads", "1");
+      coreNLPProperties.remove("threads");
+      coreNLPProperties.setProperty("annotators", coreNLPProperties.getProperty("annotators.noxml"));
+      pipeline = new StanfordCoreNLP(coreNLPProperties);
+    }
+    return pipeline;
+  }
+
+  public static Annotation reAnnotate(edu.stanford.nlp.dcoref.Document document) {
+    Annotation newAnn = new Annotation("pos, lemma, ner, depparse");
+    List<CoreMap> newSentences = new ArrayList<>();
+    List<CoreLabel> newTokens = new ArrayList<>();
+    List<CoreMap> sentences = document.annotation.get(CoreAnnotations.SentencesAnnotation.class);
+    for (int i = 0; i < sentences.size(); i++) {
+      CoreMap sentence = sentences.get(i);
+      Annotation sentenceAnn = new Annotation(sentence.get(CoreAnnotations.TextAnnotation.class));
+      pipeline().annotate(sentenceAnn);
+      CoreMap newSentence = sentenceAnn.get(CoreAnnotations.SentencesAnnotation.class).get(0);
+      newSentences.add(newSentence);
+      newTokens.addAll(newSentence.get(CoreAnnotations.TokensAnnotation.class));
+    }
+    newAnn.set(CoreAnnotations.SentencesAnnotation.class, newSentences);
+    newAnn.set(CoreAnnotations.TokensAnnotation.class, newTokens);
+
+    return newAnn;
   }
 }

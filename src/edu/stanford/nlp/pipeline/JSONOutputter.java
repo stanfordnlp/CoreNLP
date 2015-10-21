@@ -128,7 +128,6 @@ public class JSONOutputter extends AnnotationOutputter {
               // Add a single token
               l3.set("index", token.index());
               l3.set("word", token.word());
-              l3.set("originalText", token.originalText());
               l3.set("lemma", token.lemma());
               l3.set("characterOffsetBegin", token.beginPosition());
               l3.set("characterOffsetEnd", token.endPosition());

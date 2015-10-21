@@ -60,11 +60,9 @@ public class ClustererDataLoader {
       }
 
       mentionToGold = new HashMap<>();
-      if (goldClusters != null) {
-        for (List<Integer> gold : goldClusters) {
-          for (int m : gold) {
-            mentionToGold.put(m, gold);
-          }
+      for (List<Integer> gold : goldClusters) {
+        for (int m : gold) {
+          mentionToGold.put(m, gold);
         }
       }
     }
@@ -89,15 +87,14 @@ public class ClustererDataLoader {
         IOUtils.readObjectFromFile(StatisticalCorefTrainer.pairwiseModelsPath
             + StatisticalCorefTrainer.ANAPHORICITY_MODEL + "/"
             + StatisticalCorefTrainer.predictionsName + ".ser");
-
-    Map<Integer, Counter<Integer>> anaphoricityScores = new HashMap<>();
-    for (Map.Entry<Integer, Counter<Pair<Integer, Integer>>> e : anaphoricityScoresLoaded.entrySet()) {
+    Map<Integer, Counter<Integer>> anaphoricityScores = anaphoricityScoresLoaded.entrySet().stream()
+        .collect(Collectors.toMap(Map.Entry::getKey, e -> {
       Counter<Integer> scores = new ClassicCounter<>();
       e.getValue().entrySet().forEach(e2 -> {
         scores.incrementCount(e2.getKey().second, e2.getValue());
       });
-      anaphoricityScores.put(e.getKey(), scores);
-    }
+      return scores;
+    }));
 
     return labeledPairs.keySet().stream().sorted().limit(maxDocs).map(i -> new ClustererDoc(i,
         classificationScores.get(i), rankingScores.get(i), anaphoricityScores.get(i),

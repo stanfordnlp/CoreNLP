@@ -14,33 +14,26 @@ public class StatisticalCorefProperties {
   }
 
   public static Properties addHcorefProps(Properties props) {
-    Properties newProps = (Properties) props.clone();
+    Properties newProps = new Properties(props);
     newProps.setProperty(CorefProperties.USE_SEMANTICS_PROP, "false");
-    newProps.setProperty(CorefProperties.GENDER_NUMBER_PROP,
-        "edu/stanford/nlp/models/dcoref/gender.data.gz");
-    newProps.setProperty(CorefProperties.INPUT_TYPE_PROP, "conll");
+    newProps.setProperty(CorefProperties.GENDER_NUMBER_PROP, "edu/stanford/nlp/models/dcoref/gender.data.gz");
     if (props.containsKey("scoref.scorer")) {
-      newProps.setProperty(CorefProperties.PATH_SCORER_PROP, props.getProperty("scoref.scorer"));
+      newProps.setProperty(CorefProperties.SCORE_PROP, props.getProperty("scoref.scorer"));
     }
 
-    if (conll(props)) {
+    if (isConll(props)) {
       newProps.setProperty(CorefProperties.INPUT_TYPE_PROP, "conll");
       newProps.setProperty(CorefProperties.PARSER_PROP, "true");
       newProps.setProperty(CorefProperties.MD_TYPE_PROP, "rule");
       newProps.setProperty("hcoref.useMarkedDiscourse", "true");
     } else {
       newProps.setProperty(CorefProperties.MD_TYPE_PROP, "dependency");
-      newProps.setProperty("hcoref.md.model", "md-model.ser");
-      newProps.setProperty(CorefProperties.PATH_SERIALIZED_PROP,
-          "/Users/kevinclark/Programming/research/kbp/hybrid-conll/");
+      newProps.setProperty(CorefProperties.PATH_MODEL_PROP, "md-model");
+      newProps.setProperty(CorefProperties.PATH_MODEL_PROP, "");
       newProps.setProperty(CorefProperties.USE_GOLD_POS_PROP, "false");
       newProps.setProperty(CorefProperties.USE_GOLD_NE_PROP, "false");
       newProps.setProperty(CorefProperties.USE_GOLD_PARSES_PROP, "false");
     }
-    if (props.containsKey("scoref.test")) {
-      newProps.setProperty(CorefProperties.PATH_INPUT_PROP, props.getProperty("scoref.test"));
-    }
-
     return newProps;
   }
 
@@ -51,61 +44,44 @@ public class StatisticalCorefProperties {
             : props.getProperty("scoref.test")));
   }
 
-  public static boolean conll(Properties props) {
+  public static boolean isConll(Properties props) {
     return PropertiesUtils.getBool(props, "scoref.conll", false);
   }
 
-  public static String trainingPath(Properties props) {
-    return props.getProperty("scoref.trainingPath");
-  }
-
-  public static String conllOutputPath(Properties props) {
-    return props.getProperty("scoref.conllOutputPath");
+  public static String getTrainingPath(Properties props) {
+    return PropertiesUtils.getString(props, "scoref.trainingPath", ".");
   }
 
   public static String classificationModelPath(Properties props) {
     return PropertiesUtils.getString(props, "scoref.classificationModel",
-        defaultModelPath(props, "classification"));
+        DEFAULT_MODELS_PATH + "classification" + (isConll(props) ? "-conll" : "" + ".ser"));
   }
 
   public static String rankingModelPath(Properties props) {
     return PropertiesUtils.getString(props, "scoref.rankingModel",
-        defaultModelPath(props, "ranking"));
+        DEFAULT_MODELS_PATH + "ranking" + (isConll(props) ? "-conll" : "" + ".ser"));
   }
 
   public static String anaphoricityModelPath(Properties props) {
     return PropertiesUtils.getString(props, "scoref.anaphoricityModel",
-        defaultModelPath(props, "anaphoricity"));
+        DEFAULT_MODELS_PATH + "anaphoricity" + (isConll(props) ? "-conll" : "" + ".ser"));
   }
 
   public static String clusteringModelPath(Properties props) {
     return PropertiesUtils.getString(props, "scoref.clusteringModel",
-        defaultModelPath(props, "clustering"));
+        DEFAULT_MODELS_PATH + "clustering" + (isConll(props) ? "-conll" : "" + ".ser"));
   }
 
   public static String wordCountsPath(Properties props) {
-    return PropertiesUtils.getString(props, "scoref.wordCounts",
-        defaultModelPath(props, "wordCounts"));
-  }
-
-  private static String defaultModelPath(Properties props, String modelName) {
-    return DEFAULT_MODELS_PATH + modelName + (conll(props) ? "-conll" : "" + ".ser");
+    return PropertiesUtils.getString(props, "scoref.wordCounts", "");
   }
 
   public static boolean cluster(Properties props) {
     return PropertiesUtils.getBool(props, "scoref.doClustering", true);
   }
 
-  public static int maxMentionDistance(Properties props) {
-    return PropertiesUtils.getInt(props, "scoref.maxMentionDistance", Integer.MAX_VALUE);
-  }
-
-  public static double pairwiseScoreThreshold(Properties props) {
-    return PropertiesUtils.getDouble(props, "scoref.pairwiseScoreThreshold", 0.3);
-  }
-
   public static boolean useConstituencyParse(Properties props) {
-    return conll(props);
+    return PropertiesUtils.getBool(props, "scoref.conll", false);
   }
 
   public static double minClassImbalance(Properties props) {
@@ -114,5 +90,13 @@ public class StatisticalCorefProperties {
 
   public static int minTrainExamplesPerDocument(Properties props) {
     return PropertiesUtils.getInt(props, "scoref.minTrainExamplesPerDocument", Integer.MAX_VALUE);
+  }
+
+  public static int maxMentionDistance(Properties props) {
+    return PropertiesUtils.getInt(props, "scoref.maxMentionDistance", Integer.MAX_VALUE);
+  }
+
+  public static double pairwiseScoreThreshold(Properties props) {
+    return PropertiesUtils.getDouble(props, "scoref.pairwiseScoreThreshold", 0.3);
   }
 }

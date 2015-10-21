@@ -49,10 +49,7 @@ public class CorefDocMaker {
   StanfordCoreNLP corenlp;
   final TreeLemmatizer treeLemmatizer;
   LogisticClassifier<String, String> singletonPredictor;
-  // Should we call corenlp to add missing annotations?
-  // HACK so that when the CorefDocMaker is called from annotator, it doesn't override old annotations
-  boolean needMissingAnnotations = true;
-
+  
   public CorefDocMaker(Properties props, Dictionaries dictionaries) throws ClassNotFoundException, IOException {
     this.props = props;
     this.dict = dictionaries;
@@ -65,11 +62,7 @@ public class CorefDocMaker {
     singletonPredictor = (CorefProperties.useSingletonPredictor(props))? 
         getSingletonPredictorFromSerializedFile(CorefProperties.getPathSingletonPredictor(props)) : null;
   }
-
-  public void setNeedMissingAnnotations(boolean needMissingAnnotations) {
-    this.needMissingAnnotations = needMissingAnnotations;
-  }
-
+  
   /** Load Stanford Processor: skip unnecessary annotator */
   protected StanfordCoreNLP loadStanfordProcessor(Properties props) {
 
@@ -153,16 +146,14 @@ public class CorefDocMaker {
   /**
    *  Make Document for coref (for method coref(Document doc, StringBuilder[] outputs)).
    *  Mention detection and document preprocessing is done here.
-   * @throws Exception
+   * @throws Exception 
    */
   public Document makeDocument(InputDoc input) throws Exception {
     if (input == null) return null;
     Annotation anno = input.annotation;
     
     // add missing annotation
-    if (needMissingAnnotations) {
-      addMissingAnnotation(anno);
-    }
+    addMissingAnnotation(anno);
 
     if (Boolean.parseBoolean(props.getProperty("hcoref.useMarkedDiscourse", "false"))) {
       anno.set(CoreAnnotations.UseMarkedDiscourseAnnotation.class, true);

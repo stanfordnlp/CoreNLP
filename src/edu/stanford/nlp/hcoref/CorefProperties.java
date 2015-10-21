@@ -195,8 +195,8 @@ public class CorefProperties {
     return PropertiesUtils.getString(props, PATH_SINGLETON_PREDICTOR_PROP, "edu/stanford/nlp/models/dcoref/singleton.predictor.ser");
   }
   public static String getPathModel(Properties props, String sievename) {
-    return props.getProperty(PATH_SERIALIZED_PROP) + File.separator +
-        props.getProperty(PATH_MODEL_PROP.replace("SIEVENAME", sievename), "MISSING_MODEL_FOR_"+sievename);
+    return new File(props.getProperty(PATH_SERIALIZED_PROP),
+        props.getProperty(PATH_MODEL_PROP.replace("SIEVENAME", sievename), "MISSING_MODEL_FOR_"+sievename)).getAbsolutePath();
   }
   public static boolean debug(Properties props) {
     return PropertiesUtils.getBool(props, DEBUG_PROP, false);
@@ -325,7 +325,7 @@ public class CorefProperties {
     return PropertiesUtils.getBool(props, USE_SEMANTICS_PROP, true);
   }
   public static String getPathSerializedWordVectors(Properties props) {
-    return PropertiesUtils.getString(props, WORD2VEC_SERIALIZED_PROP, "/scr/nlp/data/coref/wordvectors/en/vector.ser.gz");
+    return PropertiesUtils.getString(props, WORD2VEC_SERIALIZED_PROP, "/scr/nlp/data/coref/wordvectors/en/vector.ser");
   }
   public static String getCurrentSieveForTrain(Properties props) {
     return PropertiesUtils.getString(props, CURRENT_SIEVE_FOR_TRAIN_PROP, null);

@@ -27,7 +27,7 @@ public class PairwiseModel {
 
     //private MetaFeatureExtractor metaAnaphor = null;
     private int trainingExamples = 15000000;
-    private int epochs = 8;
+    private int epochs = 5;
     private Loss loss = SimpleLinearClassifier.log();
     private Penalty penalty = SimpleLinearClassifier.none();
     private LearningRateSchedule learningRateSchedule =

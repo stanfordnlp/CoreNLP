@@ -97,7 +97,6 @@ public class AnnotationOutputterITest extends TestCase {
             "        {\n" +
             "          \"index\": 1,\n" +
             "          \"word\": \"Bad\",\n" +
-            "          \"originalText\": \"Bad\",\n" +
             "          \"lemma\": \"bad\",\n" +
             "          \"characterOffsetBegin\": 0,\n" +
             "          \"characterOffsetEnd\": 3,\n" +
@@ -109,7 +108,6 @@ public class AnnotationOutputterITest extends TestCase {
             "        {\n" +
             "          \"index\": 2,\n" +
             "          \"word\": \"wolf\",\n" +
-            "          \"originalText\": \"wolf\",\n" +
             "          \"lemma\": \"wolf\",\n" +
             "          \"characterOffsetBegin\": 4,\n" +
             "          \"characterOffsetEnd\": 8,\n" +

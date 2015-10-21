@@ -29,12 +29,13 @@ import edu.stanford.nlp.math.NumberMatchingRegex;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.BasicDependenciesAnnotation;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
-import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
@@ -125,7 +126,6 @@ public class Preprocessor {
 
   private static List<Mention> mentionReorderingBySpan(List<Mention> mentionsInSent) {
     TreeSet<Mention> ordering = new TreeSet<Mention>(new Comparator<Mention>(){
-      @Override
       public int compare(Mention m1, Mention m2) {
         return (m1.appearEarlierThan(m2))? -1 : (m2.appearEarlierThan(m1))? 1 : 0;
       }
@@ -298,7 +298,7 @@ public class Preprocessor {
         m.contextParseTree = sentence.get(TreeAnnotation.class);
 //        m.sentenceWords = sentence.get(TokensAnnotation.class);
         m.basicDependency = sentence.get(BasicDependenciesAnnotation.class);
-        m.collapsedDependency = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+        m.collapsedDependency = sentence.get(CollapsedDependenciesAnnotation.class);
 
         // mentionSubTree (highest NP that has the same head) if constituency tree available
         if (m.contextParseTree != null) {
@@ -343,7 +343,7 @@ public class Preprocessor {
 
     // apposition
     Set<Pair<Integer, Integer>> appos = Generics.newHashSet();
-    List<SemanticGraphEdge> appositions = dependency.findAllRelns(UniversalEnglishGrammaticalRelations.APPOSITIONAL_MODIFIER);
+    List<SemanticGraphEdge> appositions = dependency.findAllRelns(EnglishGrammaticalRelations.APPOSITIONAL_MODIFIER);
     for(SemanticGraphEdge edge : appositions) {
       int sIdx = edge.getSource().index()-1;
       int tIdx = edge.getTarget().index()-1;
@@ -353,18 +353,18 @@ public class Preprocessor {
 
     // predicate nominatives
     Set<Pair<Integer, Integer>> preNomi = Generics.newHashSet();
-    List<SemanticGraphEdge> copula = dependency.findAllRelns(UniversalEnglishGrammaticalRelations.COPULA);
+    List<SemanticGraphEdge> copula = dependency.findAllRelns(EnglishGrammaticalRelations.COPULA);
     for(SemanticGraphEdge edge : copula) {
       IndexedWord source = edge.getSource();
-      IndexedWord target = dependency.getChildWithReln(source, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT);
-      if(target==null) target = dependency.getChildWithReln(source, UniversalEnglishGrammaticalRelations.CLAUSAL_SUBJECT);
+      IndexedWord target = dependency.getChildWithReln(source, EnglishGrammaticalRelations.NOMINAL_SUBJECT);
+      if(target==null) target = dependency.getChildWithReln(source, EnglishGrammaticalRelations.CLAUSAL_SUBJECT);
       // TODO
       if(target == null) continue;
 
       // to handle relative clause: e.g., Tim who is a student,
       if(target.tag().startsWith("W")) {
         IndexedWord parent = dependency.getParent(source);
-        if(parent!=null && dependency.reln(parent, source).equals(UniversalEnglishGrammaticalRelations.RELATIVE_CLAUSE_MODIFIER)) {
+        if(parent!=null && dependency.reln(parent, source).equals(EnglishGrammaticalRelations.RELATIVE_CLAUSE_MODIFIER)) {
           target = parent;
         }
       }
@@ -412,7 +412,6 @@ public class Preprocessor {
     if(!speakerChange) return DocType.ARTICLE;
     return DocType.CONVERSATION;  // in conversation, utter index keep increasing.
   }
-
   /** Set paragraph index */
   private static void setParagraphAnnotation(Document doc) {
     int paragraphIndex = 0;
@@ -630,7 +629,6 @@ public class Preprocessor {
       }
     }
   }
-
   private static void findSpeakersInArticle(Document doc, Dictionaries dict) {
     List<CoreMap> sentences = doc.annotation.get(CoreAnnotations.SentencesAnnotation.class);
     IntPair beginQuotation = null;

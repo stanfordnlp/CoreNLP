@@ -150,18 +150,16 @@ public class FeatureExtractor {
     }
 
     // length and location features
-    addNumeric(features, "mention-length", m.spanToString().length());
-    addNumeric(features, "mention-words", m.originalSpan.size());
-    addNumeric(features, "sentence-words", m.sentenceWords.size());
+    features.incrementCount("mention-length=" + bin(m.spanToString().length()));
+    features.incrementCount("mention-words=" + bin(m.originalSpan.size()));
     features.incrementCount("sentence-words=" + bin(m.sentenceWords.size()));
     if (m.mentionType == MentionType.LIST) {
-      addNumeric(features, "num-list-items=", RFSieve.numEntitiesInList(m));
+      features.incrementCount("num-list-items=", RFSieve.numEntitiesInList(m));
     }
-    features.incrementCount("mention-position", m.mentionNum
-        / (double) doc.predictedMentions.size());
-    features.incrementCount("sentence-position", m.sentNum / (double) doc.numSentences);
+    features.incrementCount("first-appear", m.sentNum / (double) doc.predictedMentions.size());
 
     // lexical features
+    addDependencyFeatures(features, "parent", getDependencyParent(m), true);
     CoreLabel firstWord = firstWord(m);
     CoreLabel lastWord = lastWord(m);
     CoreLabel headWord = headWord(m);
@@ -191,25 +189,10 @@ public class FeatureExtractor {
     features.incrementCount("last-pos=" + lastPOS);
     features.incrementCount("next-pos-bigram=" + nextPOS + "_" + nextnextPOS);
     features.incrementCount("prev-pos-bigram=" + prevprevPOS + "_" + prevPOS);
-    addDependencyFeatures(features, "parent", getDependencyParent(m), true);
     addFeature(features, "ends-with-head", m.headIndex == m.endIndex - 1);
     addFeature(features, "is-generic", m.originalSpan.size() == 1 && firstPOS.equals("NNS"));
 
     // syntax features
-    IndexedWord w = m.headIndexedWord;
-    String depPath = "";
-    int depth = 0;
-    while (w != null) {
-      SemanticGraphEdge e = getDependencyParent(m, w);
-      depth++;
-      if (depth <= 3 && e != null) {
-        depPath += (depPath.isEmpty() ? "" : "_") + e.getRelation().toString();
-        features.incrementCount("dep-path=" + depPath);
-        w = e.getSource();
-      } else {
-         w = null;
-      }
-    }
     if (useConstituencyParse) {
       int fullEmbeddingLevel = headEmbeddingLevel(m.contextParseTree, m.headIndex);
       int mentionEmbeddingLevel = headEmbeddingLevel(m.mentionSubTree, m.headIndex - m.startIndex);
@@ -225,15 +208,13 @@ public class FeatureExtractor {
       String syntaxPath = "";
       Tree tree = m.contextParseTree;
       Tree head = tree.getLeaves().get(m.headIndex).ancestor(1, tree);
-      depth = 0;
       for (Tree node : tree.pathNodeToNode(head, tree)) {
         syntaxPath += node.value() + "-";
-        features.incrementCount("syntax-path=" + syntaxPath);
-        depth++;
-        if (depth >= 4 || node.value().equals("S")) {
+        if (node.value().equals("S")) {
           break;
         }
       }
+      features.incrementCount("syntax-path=" + syntaxPath);
     }
 
     // mention containment features
@@ -253,6 +234,17 @@ public class FeatureExtractor {
            features.incrementCount("generic-you");
     }
 
+    for (Map.Entry<String, Double> e : new ClassicCounter<>(features).entrySet()) {
+      String k = e.getKey();
+      if (k.contains("role=")) {
+        features.remove(k);
+        String role = k.substring(5);
+        if (!role.equals("unknown")) {
+          features.incrementCount("is-" + role);
+        }
+      }
+    }
+
     return features;
   }
 
@@ -261,8 +253,8 @@ public class FeatureExtractor {
     Counter<String> features = new ClassicCounter<>();
 
     // global features
-    features.incrementCount("bias");
-    features.incrementCount("doc-type=" + doc.docType);
+    features.incrementCount("BIAS_FEATURE");
+    features.incrementCount("docType=" + doc.docType);
     if(doc.docInfo != null && doc.docInfo.containsKey("DOC_ID")) {
       features.incrementCount("doc-source=" + doc.docInfo.get("DOC_ID").split("/")[1]);
     }
@@ -276,10 +268,6 @@ public class FeatureExtractor {
                 singletonFeatures2.get(e.getKey()));
       }
     }
-    SemanticGraphEdge p1 = getDependencyParent(m1);
-    SemanticGraphEdge p2 = getDependencyParent(m2);
-    features.incrementCount("dep-relations=" + (p1 == null ? "null" : p1.getRelation()) + "_"
-        + (p2 == null ? "null" : p2.getRelation()));
     features.incrementCount("roles=" + getRole(m1) + "_" + getRole(m2));
     CoreLabel headCL1 = headWord(m1);
     CoreLabel headCL2 = headWord(m2);
@@ -300,16 +288,17 @@ public class FeatureExtractor {
     // string matching features
     addFeature(features, "antecedent-head-in-anaphor", headContainedIn(m1, m2));
     addFeature(features, "anaphor-head-in-antecedent", headContainedIn(m2, m1));
+    addFeature(features, "heads-equal", m1.headString.equalsIgnoreCase(m2.headString));
+    addFeature(features, "heads-agree", m2.headsAgree(m1));
+    if (m1.mentionType == MentionType.PRONOMINAL && m2.mentionType == MentionType.PRONOMINAL
+        && m1.headWord.word().toLowerCase().equals(m2.headWord.word().toLowerCase())) {
+      features.incrementCount("pronoun-match");
+    }
     if (m1.mentionType != MentionType.PRONOMINAL && m2.mentionType != MentionType.PRONOMINAL) {
       addFeature(features, "antecedent-in-anaphor",
           m2.spanToString().toLowerCase().contains(m1.spanToString().toLowerCase()));
       addFeature(features, "anaphor-in-antecedent",
           m1.spanToString().toLowerCase().contains(m2.spanToString().toLowerCase()));
-      addFeature(features, "heads-equal", m1.headString.equalsIgnoreCase(m2.headString));
-      addFeature(features, "heads-agree", m2.headsAgree(m1));
-      addFeature(features, "exact-match", m1.toString().trim().toLowerCase().equals(
-          m2.toString().trim().toLowerCase()));
-      addFeature(features, "partial-match", partialMatch(m1, m2));
 
       addFeature(features, "exact-match", m1.toString().trim().toLowerCase().equals(
           m2.toString().trim().toLowerCase()));
@@ -327,10 +316,13 @@ public class FeatureExtractor {
     }
 
     // distance features
-    addNumeric(features, "mention-distance", m2.mentionNum -  m1.mentionNum);
-    addNumeric(features, "sentence-distance", m2.sentNum -  m1.sentNum);
+    features.incrementCount("mention-distance", m2.mentionNum -  m1.mentionNum);
+    features.incrementCount("sentence-distance", m2.sentNum -  m1.sentNum);
+    features.incrementCount("mention-distance=" + bin(m2.mentionNum -  m1.mentionNum));
+    features.incrementCount("sentence-distance=" + bin(m2.sentNum -  m1.sentNum));
     if (m2.sentNum == m1.sentNum) {
-        addNumeric(features, "word-distance", m2.startIndex -  m1.endIndex);
+        features.incrementCount("word-distance", m2.startIndex -  m1.endIndex);
+        features.incrementCount("word-distance=" + bin(m2.startIndex -  m1.endIndex));
         if (m1.endIndex > m2.startIndex) {
             features.incrementCount("spans-intersect");
         }
@@ -359,8 +351,8 @@ public class FeatureExtractor {
     addFeature(features, "discourse-you-PER0", m2.person == Person.YOU
         && doc.docType == DocType.ARTICLE
         && m2.headWord.get(CoreAnnotations.SpeakerAnnotation.class).equals("PER0"));
-    addFeature(features, "same-speaker-info", m2.speakerInfo != null && m2.speakerInfo == m1.speakerInfo);
-    addFeature(features, "speaker-match-i-i", m2.number == Number.SINGULAR
+    addFeature(features, "same-speaker", m2.speakerInfo != null && m2.speakerInfo == m1.speakerInfo);
+    addFeature(features, "1st-person-same-speaker", m2.number == Number.SINGULAR
         && dictionaries.firstPersonPronouns.contains(s1)
         && m1.number == Number.SINGULAR
         && dictionaries.firstPersonPronouns.contains(s2)
@@ -443,8 +435,8 @@ public class FeatureExtractor {
     addFeature(features, "words-included", Rules.entityWordsIncluded(c2, c1, m2, m1));
     addFeature(features, "extra-proper-noun", Rules.entityHaveExtraProperNoun(m2, m1, new HashSet<String>()));
     addFeature(features, "number-in-later-mentions", Rules.entityNumberInLaterMention(m2, m1));
-    addFeature(features, "sentence-context-incompatible",
-        Rules.sentenceContextIncompatible(m2, m1, dictionaries));
+    //addFeature(features, "sentence-context-incompatible",
+    //    Rules.sentenceContextIncompatible(m2, m1, dictionaries));
 
     // syntax features
     if (useConstituencyParse) {
@@ -481,12 +473,31 @@ public class FeatureExtractor {
       features.incrementCount("embedding=" + m1Embedded + "_" + m2Embedded);
     }
 
-    return features;
-  }
+    String firstWord2 = firstWord(m2).word().toLowerCase();
+    if (firstWord2.equals("the")) {
+        addFeature(features, "DEF_NP", true);
+    }
+    // demonstrative pronoun (soon, et al)
+    if (firstWord2.equals("this") || firstWord2.equals("that") || firstWord2.equals("these") ||
+            firstWord2.equals("those")) {
+        addFeature(features, "DEM_NP", true);
+    }
 
-  private static void addNumeric(Counter<String> features, String key, int value) {
-    features.incrementCount(key + "=" + bin(value));
-    features.incrementCount(key, value);
+    features.remove("mention-distance");
+    features.remove("sentence-distance");
+    features.remove("word-distance");
+    if (features.containsKey("antecedent-head-in-anaphor") ||
+        features.containsKey("anaphor-head-in-antecedent")) {
+      features.remove("antecedent-head-in-anaphor");
+      features.remove("anaphor-head-in-antecedent");
+      features.incrementCount("head-match");
+    }
+
+    if (m1.spanToString().equals("Orlando police chief Walter uh Zalisko who was on the same cruise that Smith travelled on as well as forensic expert Larry Kobilinsky")) {
+      System.out.println(features);
+    }
+
+    return features;
   }
 
   private static boolean partialMatch(Mention m1, Mention m2) {
@@ -555,11 +566,7 @@ public class FeatureExtractor {
   }
 
   private static SemanticGraphEdge getDependencyParent(Mention m) {
-    return getDependencyParent(m, m.headIndexedWord);
-  }
-
-  public static SemanticGraphEdge getDependencyParent(Mention m, IndexedWord w) {
-    Iterator<SemanticGraphEdge> iterator = m.collapsedDependency.incomingEdgeIterator(w);
+    Iterator<SemanticGraphEdge> iterator = m.collapsedDependency.incomingEdgeIterator(m.headIndexedWord);
     if (iterator.hasNext()) {
       return iterator.next();
     }

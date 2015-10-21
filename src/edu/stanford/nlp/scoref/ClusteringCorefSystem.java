@@ -53,7 +53,7 @@ public class ClusteringCorefSystem extends StatisticalCorefSystem {
               .predict(example, examples.mentionFeatures, compressor));
       if (!anaphoricityScores.containsKey(example.mentionId2)) {
           anaphoricityScores.incrementCount(example.mentionId2, anaphoricityModel
-                  .predict(new Example(example, false), examples.mentionFeatures, compressor));
+                  .predict(example, examples.mentionFeatures, compressor));
       }
     }
 
