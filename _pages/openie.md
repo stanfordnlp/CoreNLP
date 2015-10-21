@@ -31,24 +31,25 @@ These are stored on the `EntailedSentencesAnnotation` key of a `CoreMap`
 
 ## Options
 
-* openie.format	{reverb, ollie, default}: Change the output format of the program. Default will produce tab separated columns for confidence, the subject, relation, and the object of a relation. ReVerb will output a TSV in the ReVerb format. Ollie will output relations in the default format returned by Ollie.
-* openie.filelist	/path/to/filelist:	A path to a file, which contains files to annotate. Each file should be on its own line. If this option is set, only these files are annotated and the files passed via bare arguments are ignored.
-* openie.threads	integer:	The number of threads to run on. By default, this is the number of threads on the system.
-* openie.max_entailments_per_clause	integer:	The maximum number of entailments to produce for each clause extracted in the sentence. The larger this value is, the slower the system will run, but the more relations it can potentially extract. Setting this below 100 is not recommended; setting it above 1000 is likewise not recommended.
-* openie.ignore_affinity	boolean:	Ignore the affinity model for prepositional attachments.
-* openie.affinity_probability_cap	double:	The affinity value above which confidence of the extraction is taken as 1.0. Default is 1/3.
-* openie.triple.strict	boolean:	If true (the default), extract triples only if they consume the entire fragment. This is useful for ensuring that only logically warranted triples are extracted, but puts more burden on the entailment system to find minimal phrases (see -max_entailments_per_clause).
-* openie.triple.all_nominals	boolean:	If true, extract nominal relations always and not only when a named entity tag warrants it. This greatly overproduces such triples, but can be useful in certain situations.
+* `openie.format`	{reverb, ollie, default}: Change the output format of the program. Default will produce tab separated columns for confidence, the subject, relation, and the object of a relation. ReVerb will output a TSV in the ReVerb format. Ollie will output relations in the default format returned by Ollie.
+* `openie.filelist`	/path/to/filelist:	A path to a file, which contains files to annotate. Each file should be on its own line. If this option is set, only these files are annotated and the files passed via bare arguments are ignored.
+* `openie.threads`	integer:	The number of threads to run on. By default, this is the number of threads on the system.
+* `openie.max_entailments_per_clause`	integer:	The maximum number of entailments to produce for each clause extracted in the sentence. The larger this value is, the slower the system will run, but the more relations it can potentially extract. Setting this below 100 is not recommended; setting it above 1000 is likewise not recommended.
+* `openie.resolve_coref` boolean: If true, run coreference (and consequently NER as a dependency of coreference) and replace pronominal mentions with their canonical mention in the text.
+* `openie.ignore_affinity`	boolean:	Ignore the affinity model for prepositional attachments.
+* `openie.affinity_probability_cap`	double:	The affinity value above which confidence of the extraction is taken as 1.0. Default is 1/3.
+* `openie.triple.strict`	boolean:	If true (the default), extract triples only if they consume the entire fragment. This is useful for ensuring that only logically warranted triples are extracted, but puts more burden on the entailment system to find minimal phrases (see -max_entailments_per_clause).
+* `openie.triple.all_nominals`	boolean:	If true, extract nominal relations always and not only when a named entity tag warrants it. This greatly overproduces such triples, but can be useful in certain situations.
 
 Some additional options are provided to fine-tune the inner workings of the
 OpenIE system.
 These should be changed only in very rare situations; for example, if you are
 developing extensions to the system itself.
 
-* openie.splitter.model	/path/to/model.ser.gz:	You can override the default location of the clause splitting model with this option.
-* openie.splitter.nomodel:		Run without a clause splitting model -- that is, split on every clause.
-* openie.splitter.disable:		Don't split clauses at all, and only extract relations centered around the root verb.
-* openie.affinity_model	/path/to/model_dir:	A custom location to read the affinity models from.
+* `openie.splitter.model`	/path/to/model.ser.gz:	You can override the default location of the clause splitting model with this option.
+* `openie.splitter.nomodel`:		Run without a clause splitting model -- that is, split on every clause.
+* `openie.splitter.disable`:		Don't split clauses at all, and only extract relations centered around the root verb.
+* `openie.affinity_model`	/path/to/model_dir:	A custom location to read the affinity models from.
 
 
 ## Usage
