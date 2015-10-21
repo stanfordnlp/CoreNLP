@@ -117,6 +117,11 @@ message Token {
   optional string    sentiment      = 30;   // The final sentiment of the sentence
   optional int32     quotationIndex = 31;   // The index of the quotation this token refers to
   optional MapStringString conllUFeatures = 32;
+  optional string coarseTag         = 33; //  The coarse POS tag (used to store the UPOS tag)
+  optional Span conllUTokenSpan     = 34;
+  optional string conllUMisc        = 35;
+  optional MapIntString conllUSecondaryDeps = 36;
+
 
   // Fields set by other annotators in CoreNLP
   optional string gender          = 51;  // gender annotation (machine reading)
@@ -371,3 +376,13 @@ message MapStringString {
   repeated string key   = 1;
   repeated string value = 2;
 }
+
+//
+// A map from integers to strings.
+// Used, minimally, in the CoNLLU featurizer
+//
+message MapIntString {
+  repeated uint32 key   = 1;
+  repeated string value = 2;
+}
+
