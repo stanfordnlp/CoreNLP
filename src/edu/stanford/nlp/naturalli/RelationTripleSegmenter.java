@@ -217,29 +217,29 @@ public class RelationTripleSegmenter {
 
           // Create subject
           IndexedWord subject = matcher.getNode("subject");
-          List<CoreLabel> subjectTokens = new ArrayList<>();
+          List<IndexedWord> subjectTokens = new ArrayList<>();
           Span subjectSpan;
           if (subject.ner() != null && !"O".equals(subject.ner())) {
             subjectSpan = Util.extractNER(tokens, Span.fromValues(subject.index() - 1, subject.index()));
             for (int i : subjectSpan) {
-              subjectTokens.add(tokens.get(i));
+              subjectTokens.add(new IndexedWord(tokens.get(i)));
             }
           } else {
-            subjectTokens = getValidChunk(parse, subject, VALID_SUBJECT_ARCS, Optional.ofNullable(ignoredArc), true).orElse(Collections.singletonList(subject.backingLabel()));
+            subjectTokens = getValidChunk(parse, subject, VALID_SUBJECT_ARCS, Optional.ofNullable(ignoredArc), true).orElse(Collections.singletonList(subject));
             subjectSpan = Util.tokensToSpan(subjectTokens);
           }
 
           // Create object
           IndexedWord object = matcher.getNode("object");
-          List<CoreLabel> objectTokens = new ArrayList<>();
+          List<IndexedWord> objectTokens = new ArrayList<>();
           Span objectSpan;
           if (object.ner() != null && !"O".equals(object.ner())) {
             objectSpan = Util.extractNER(tokens, Span.fromValues(object.index() - 1, object.index()));
             for (int i : objectSpan) {
-              objectTokens.add(tokens.get(i));
+              objectTokens.add(new IndexedWord(tokens.get(i)));
             }
           } else {
-            objectTokens = getValidChunk(parse, object, VALID_OBJECT_ARCS, Optional.ofNullable(ignoredArc), true).orElse(Collections.singletonList(object.backingLabel()));
+            objectTokens = getValidChunk(parse, object, VALID_OBJECT_ARCS, Optional.ofNullable(ignoredArc), true).orElse(Collections.singletonList(object));
             objectSpan = Util.tokensToSpan(objectTokens);
           }
 
@@ -277,21 +277,26 @@ public class RelationTripleSegmenter {
               }
             }
           }
-          List<CoreLabel> prepChunk = Collections.EMPTY_LIST;
+          List<IndexedWord> prepChunk = Collections.EMPTY_LIST;
           if (prepWord != null && !expected.equals("tmod")) {
             prepChunk = getValidChunk(parse, prepWord, Collections.singleton("mwe"), Optional.empty(), true).get();
-            Collections.sort(prepChunk, (a, b) -> a.index() - b.index());  // ascending sort
+            Collections.sort(prepChunk, (a, b) -> {
+              double val = a.pseudoPosition() - b.pseudoPosition();
+              if (val < 0) { return -1; }
+              if (val > 0) { return 1; }
+              else { return 0; }
+            });  // ascending sort
           }
 
           // Get the relation
           if (subjectTokens.size() > 0 && objectTokens.size() > 0) {
-            LinkedList<CoreLabel> relationTokens = new LinkedList<>();
+            LinkedList<IndexedWord> relationTokens = new LinkedList<>();
             IndexedWord relNode = matcher.getNode("relation");
             if (relNode != null) {
 
               // Case: we have a grounded relation span
               // (add the relation)
-              relationTokens.add(relNode.backingLabel());
+              relationTokens.add(relNode);
               // (add any prepositional case markings)
               if (prepositionIsPrefix) {
                 missingSuffixBe = true;  // We're almost certainly missing a suffix 'be'
@@ -327,9 +332,12 @@ public class RelationTripleSegmenter {
 
 
             // Add extraction
-            String relationGloss = StringUtils.join(relationTokens.stream().map(CoreLabel::word), " ");
+            String relationGloss = StringUtils.join(relationTokens.stream().map(IndexedWord::word), " ");
             if (!alreadyExtracted.contains(Triple.makeTriple(subjectSpan, relationGloss, objectSpan))) {
-              RelationTriple extraction = new RelationTriple(subjectTokens, relationTokens, objectTokens);
+              RelationTriple extraction = new RelationTriple(
+                  subjectTokens.stream().map(IndexedWord::backingLabel).collect(Collectors.toList()),
+                  relationTokens.stream().map(IndexedWord::backingLabel).collect(Collectors.toList()),
+                  objectTokens.stream().map(IndexedWord::backingLabel).collect(Collectors.toList()));
               extraction.istmod(istmod);
               extraction.isPrefixBe(missingPrefixBe);
               extraction.isSuffixBe(missingSuffixBe);
@@ -393,11 +401,11 @@ public class RelationTripleSegmenter {
    * @see RelationTripleSegmenter#getValidAdverbChunk(edu.stanford.nlp.semgraph.SemanticGraph, edu.stanford.nlp.ling.IndexedWord, Optional)
    */
   @SuppressWarnings("StatementWithEmptyBody")
-  protected Optional<List<CoreLabel>> getValidChunk(SemanticGraph parse, IndexedWord originalRoot,
+  protected Optional<List<IndexedWord>> getValidChunk(SemanticGraph parse, IndexedWord originalRoot,
                                                     Set<String> validArcs, Optional<String> ignoredArc,
                                                     boolean allowExtraArcs) {
-    PriorityQueue<CoreLabel> chunk = new FixedPrioritiesPriorityQueue<>();
-    BitSet seenIndices = new BitSet();
+    PriorityQueue<IndexedWord> chunk = new FixedPrioritiesPriorityQueue<>();
+    Set<Double> seenIndices = new HashSet<>();
     Queue<IndexedWord> fringe = new LinkedList<>();
     IndexedWord root = originalRoot;
     fringe.add(root);
@@ -416,14 +424,14 @@ public class RelationTripleSegmenter {
 
     while (!fringe.isEmpty()) {
       root = fringe.poll();
-      chunk.add(root.backingLabel(), -root.index());
+      chunk.add(root, -root.pseudoPosition());
 
       // Sanity check to prevent infinite loops
-      if (seenIndices.get(root.index())) {
+      if (seenIndices.contains(root.pseudoPosition())) {
         // TODO(gabor) Indicates a cycle in the tree!
         return Optional.empty();
       }
-      seenIndices.set(root.index());
+      seenIndices.add(root.pseudoPosition());
 
       // Check outgoing edges
       boolean hasConj = false;
@@ -464,7 +472,7 @@ public class RelationTripleSegmenter {
   /**
    * @see RelationTripleSegmenter#getValidChunk(SemanticGraph, IndexedWord, Set, Optional, boolean)
    */
-  protected Optional<List<CoreLabel>> getValidChunk(SemanticGraph parse, IndexedWord originalRoot,
+  protected Optional<List<IndexedWord>> getValidChunk(SemanticGraph parse, IndexedWord originalRoot,
                                                     Set<String> validArcs, Optional<String> ignoredArc) {
     return getValidChunk(parse, originalRoot, validArcs, ignoredArc, false);
   }
@@ -477,7 +485,7 @@ public class RelationTripleSegmenter {
    * @param noopArc An optional edge type to ignore in gathering the chunk.
    * @return If this subtree is a valid entity, we return its yield. Otherwise, we return empty.
    */
-  protected Optional<List<CoreLabel>> getValidSubjectChunk(SemanticGraph parse, IndexedWord root, Optional<String> noopArc) {
+  protected Optional<List<IndexedWord>> getValidSubjectChunk(SemanticGraph parse, IndexedWord root, Optional<String> noopArc) {
     return getValidChunk(parse, root, VALID_SUBJECT_ARCS, noopArc);
   }
 
@@ -489,7 +497,7 @@ public class RelationTripleSegmenter {
    * @param noopArc An optional edge type to ignore in gathering the chunk.
    * @return If this subtree is a valid entity, we return its yield. Otherwise, we return empty.
    */
-  protected Optional<List<CoreLabel>> getValidObjectChunk(SemanticGraph parse, IndexedWord root, Optional<String> noopArc) {
+  protected Optional<List<IndexedWord>> getValidObjectChunk(SemanticGraph parse, IndexedWord root, Optional<String> noopArc) {
     return getValidChunk(parse, root, VALID_OBJECT_ARCS, noopArc);
   }
 
@@ -501,7 +509,7 @@ public class RelationTripleSegmenter {
    * @param noopArc An optional edge type to ignore in gathering the chunk.
    * @return If this subtree is a valid adverb, we return its yield. Otherwise, we return empty.
    */
-  protected Optional<List<CoreLabel>> getValidAdverbChunk(SemanticGraph parse, IndexedWord root, Optional<String> noopArc) {
+  protected Optional<List<IndexedWord>> getValidAdverbChunk(SemanticGraph parse, IndexedWord root, Optional<String> noopArc) {
     return getValidChunk(parse, root, VALID_ADVERB_ARCS, noopArc);
   }
 
@@ -554,7 +562,7 @@ public class RelationTripleSegmenter {
         }
         assert object != null;
         // Verb
-        PriorityQueue<CoreLabel> verbChunk = new FixedPrioritiesPriorityQueue<>();
+        PriorityQueue<IndexedWord> verbChunk = new FixedPrioritiesPriorityQueue<>();
         IndexedWord verb = m.getNode("verb");
         List<IndexedWord> adverbs = new ArrayList<>();
         Optional<String> subjNoopArc = Optional.empty();
@@ -572,30 +580,30 @@ public class RelationTripleSegmenter {
             }
           } else if (edge.getDependent().equals(relObj)) {
             // Add additional object to the relation
-            Optional<List<CoreLabel>> relObjSpan = getValidChunk(parse, relObj, Collections.singleton("compound"), Optional.empty());
+            Optional<List<IndexedWord>> relObjSpan = getValidChunk(parse, relObj, Collections.singleton("compound"), Optional.empty());
             if (!relObjSpan.isPresent()) {
               continue PATTERN_LOOP;
             } else {
-              for (CoreLabel token : relObjSpan.get()) {
-                verbChunk.add(token, -token.index());
+              for (IndexedWord token : relObjSpan.get()) {
+                verbChunk.add(token, -token.pseudoPosition());
               }
               numKnownDependents += 1;
             }
           }
         }
-        verbChunk.add(verb.backingLabel(), -verb.index());
+        verbChunk.add(verb, -verb.pseudoPosition());
         // Prepositions
         IndexedWord prep = m.getNode("prep");
         String prepEdge = m.getRelnString("prepEdge");
-        if (prep != null) { verbChunk.add(prep.backingLabel(), -prep.index()); numKnownDependents += 1; }
+        if (prep != null) { verbChunk.add(prep, -prep.pseudoPosition()); numKnownDependents += 1; }
         // Auxilliary "be"
         IndexedWord be = m.getNode("be");
-        if (be != null) { verbChunk.add(be.backingLabel(), -be.index()); numKnownDependents += 1; }
+        if (be != null) { verbChunk.add(be, -be.pseudoPosition()); numKnownDependents += 1; }
         // (adverbs have to be well-formed)
         if (!adverbs.isEmpty()) {
-          Set<CoreLabel> adverbialModifiers = new HashSet<>();
+          Set<IndexedWord> adverbialModifiers = new HashSet<>();
           for (IndexedWord adv : adverbs) {
-            Optional<List<CoreLabel>> adverbChunk = getValidAdverbChunk(parse, adv, Optional.empty());
+            Optional<List<IndexedWord>> adverbChunk = getValidAdverbChunk(parse, adv, Optional.empty());
             if (adverbChunk.isPresent()) {
               adverbialModifiers.addAll(adverbChunk.get().stream().collect(Collectors.toList()));
             } else {
@@ -603,8 +611,8 @@ public class RelationTripleSegmenter {
             }
             numKnownDependents += 1;
           }
-          for (CoreLabel adverbToken : adverbialModifiers) {
-            verbChunk.add(adverbToken, -adverbToken.index());
+          for (IndexedWord adverbToken : adverbialModifiers) {
+            verbChunk.add(adverbToken, -adverbToken.pseudoPosition());
           }
         }
         // (add preposition edge)
@@ -617,12 +625,12 @@ public class RelationTripleSegmenter {
             }
           }
           if (prepWord != null) {
-            Optional<List<CoreLabel>> chunk = getValidChunk(parse, prepWord, Collections.singleton("mwe"), Optional.empty(), true);
+            Optional<List<IndexedWord>> chunk = getValidChunk(parse, prepWord, Collections.singleton("mwe"), Optional.empty(), true);
             if (!chunk.isPresent()) {
               continue PATTERN_LOOP;  // Probably something like a conj w/o a cc
             }
-            for (CoreLabel word : chunk.get()) {
-              verbChunk.add(word, Integer.MIN_VALUE / 2 - word.index());
+            for (IndexedWord word : chunk.get()) {
+              verbChunk.add(word, Integer.MIN_VALUE / 2 - word.pseudoPosition());
             }
           } else if (expected.equalsIgnoreCase("tmod")) {
             istmod = true;
@@ -635,7 +643,7 @@ public class RelationTripleSegmenter {
           //noinspection UnnecessaryLabelOnContinueStatement
           continue PATTERN_LOOP;  // Too many outgoing edges; we didn't consume them all.
         }
-        List<CoreLabel> relation = verbChunk.toSortedList();
+        List<IndexedWord> relation = verbChunk.toSortedList();
 
         // Last chance to register ignored edges
         if (!subjNoopArc.isPresent()) {
@@ -654,14 +662,18 @@ public class RelationTripleSegmenter {
         IndexedWord subject = m.getNode("subject");
 
         // Subject+Object
-        Optional<List<CoreLabel>> subjectSpan = getValidSubjectChunk(parse, subject, subjNoopArc);
-        Optional<List<CoreLabel>> objectSpan = getValidObjectChunk(parse, object, objNoopArc);
+        Optional<List<IndexedWord>> subjectSpan = getValidSubjectChunk(parse, subject, subjNoopArc);
+        Optional<List<IndexedWord>> objectSpan = getValidObjectChunk(parse, object, objNoopArc);
         // Create relation
         if (subjectSpan.isPresent() && objectSpan.isPresent() &&
             CollectionUtils.intersection(new HashSet<>(subjectSpan.get()), new HashSet<>(objectSpan.get())).isEmpty()
             ) {  // ... and has a valid subject+object
           // Success! Found a valid extraction.
-          RelationTriple.WithTree extraction = new RelationTriple.WithTree(subjectSpan.get(), relation, objectSpan.get(), parse, confidence.orElse(1.0));
+          RelationTriple.WithTree extraction = new RelationTriple.WithTree(
+              subjectSpan.get().stream().map(IndexedWord::backingLabel).collect(Collectors.toList()),
+              relation.stream().map(IndexedWord::backingLabel).collect(Collectors.toList()),
+              objectSpan.get().stream().map(IndexedWord::backingLabel).collect(Collectors.toList()),
+              parse, confidence.orElse(1.0));
           extraction.istmod(istmod);
           return Optional.of(extraction);
         }
@@ -677,25 +689,25 @@ public class RelationTripleSegmenter {
    */
   private Optional<RelationTriple> segmentACL(SemanticGraph parse, Optional<Double> confidence, boolean consumeAll) {
     IndexedWord subject = parse.getFirstRoot();
-    Optional<List<CoreLabel>> subjectSpan = getValidSubjectChunk(parse, subject, Optional.of("acl"));
+    Optional<List<IndexedWord>> subjectSpan = getValidSubjectChunk(parse, subject, Optional.of("acl"));
     if (subjectSpan.isPresent()) {
       // found a valid subject
       for (SemanticGraphEdge edgeFromSubj : parse.outgoingEdgeIterable(subject)) {
         if ("acl".equals(edgeFromSubj.getRelation().toString())) {
           // found a valid relation
           IndexedWord relation = edgeFromSubj.getDependent();
-          List<CoreLabel> relationSpan = new ArrayList<>();
-          relationSpan.add(relation.backingLabel());
-          List<CoreLabel> objectSpan = new ArrayList<>();
-          List<CoreLabel> ppSpan = new ArrayList<>();
-          Optional<CoreLabel> pp = Optional.empty();
+          List<IndexedWord> relationSpan = new ArrayList<>();
+          relationSpan.add(relation);
+          List<IndexedWord> objectSpan = new ArrayList<>();
+          List<IndexedWord> ppSpan = new ArrayList<>();
+          Optional<IndexedWord> pp = Optional.empty();
 
           // Get other arguments
           for (SemanticGraphEdge edgeFromRel : parse.outgoingEdgeIterable(relation)) {
             String rel = edgeFromRel.getRelation().toString();
             // Collect adverbs
             if ("advmod".equals(rel)) {
-              Optional<List<CoreLabel>> advSpan = getValidAdverbChunk(parse, edgeFromRel.getDependent(), Optional.empty());
+              Optional<List<IndexedWord>> advSpan = getValidAdverbChunk(parse, edgeFromRel.getDependent(), Optional.empty());
               if (!advSpan.isPresent()) {
                 return Optional.empty();  // bad adverb span!
               }
@@ -706,7 +718,7 @@ public class RelationTripleSegmenter {
               if (!objectSpan.isEmpty()) {
                 return Optional.empty();  // duplicate objects!
               }
-              Optional<List<CoreLabel>> maybeObjSpan = getValidObjectChunk(parse, edgeFromRel.getDependent(), Optional.empty());
+              Optional<List<IndexedWord>> maybeObjSpan = getValidObjectChunk(parse, edgeFromRel.getDependent(), Optional.empty());
               if (!maybeObjSpan.isPresent()) {
                 return Optional.empty();  // bad object span!
               }
@@ -717,7 +729,7 @@ public class RelationTripleSegmenter {
               if (!ppSpan.isEmpty()) {
                 return Optional.empty();  // duplicate objects!
               }
-              Optional<List<CoreLabel>> maybePPSpan = getValidObjectChunk(parse, edgeFromRel.getDependent(), Optional.of("case"));
+              Optional<List<IndexedWord>> maybePPSpan = getValidObjectChunk(parse, edgeFromRel.getDependent(), Optional.of("case"));
               if (!maybePPSpan.isPresent()) {
                 return Optional.empty();  // bad object span!
               }
@@ -725,22 +737,8 @@ public class RelationTripleSegmenter {
               // Add the actual preposition, if we can find it
               for (SemanticGraphEdge edge : parse.outgoingEdgeIterable(edgeFromRel.getDependent())) {
                 if ("case".equals(edge.getRelation().toString())) {
-                  pp = Optional.of(edge.getDependent().backingLabel());
+                  pp = Optional.of(edge.getDependent());
                 }
-              }
-              // Add the actual preposition, even if we can't find it.
-              if (!pp.isPresent()) {
-                // TODO(gabor)
-//                pp = Optional.of(new CoreLabel() {{
-//                  setWord(rel.substring("nmod:".length()).replace("tmod", "at_time"));
-//                  setLemma(rel.substring("nmod:".length()).replace("tmod", "at_time"));
-//                  setTag("IN");
-//                  setNER("O");
-//                  setBeginPosition(0);
-//                  setEndPosition(0);
-//                  setSentIndex(0);
-//                  setIndex(-1);
-//                }});
               }
             }
             else if (consumeAll) {
@@ -761,13 +759,27 @@ public class RelationTripleSegmenter {
             return Optional.empty();
           }
           // (sort the relation span)
-          Collections.sort(relationSpan, (a, b) -> a.index() - b.index());
+          Collections.sort(relationSpan, (a, b) -> {
+                double val = a.pseudoPosition() - b.pseudoPosition();
+                if (val < 0) {
+                  return -1;
+                }
+                if (val > 0) {
+                  return 1;
+                } else {
+                  return 0;
+                }
+              });
           // (add in the PP node, if it exists)
           if (pp.isPresent()) {
             relationSpan.add(pp.get());
           }
           // (success!)
-          RelationTriple.WithTree extraction = new RelationTriple.WithTree(subjectSpan.get(), relationSpan, objectSpan, parse, confidence.orElse(1.0));
+          RelationTriple.WithTree extraction = new RelationTriple.WithTree(
+              subjectSpan.get().stream().map(IndexedWord::backingLabel).collect(Collectors.toList()),
+              relationSpan.stream().map(IndexedWord::backingLabel).collect(Collectors.toList()),
+              objectSpan.stream().map(IndexedWord::backingLabel).collect(Collectors.toList()),
+              parse, confidence.orElse(1.0));
           return Optional.of(extraction);
         }
       }

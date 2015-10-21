@@ -7,6 +7,7 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -26,14 +27,22 @@ public class OpenIEDemo {
 
     // Loop over sentences in the document
     for (CoreMap sentence : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
+
       // Get the OpenIE triples for the sentence
       Collection<RelationTriple> triples = sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
+
       // Print the triples
       for (RelationTriple triple : triples) {
         System.out.println(triple.confidence + "\t" +
             triple.subjectLemmaGloss() + "\t" +
             triple.relationLemmaGloss() + "\t" +
             triple.objectLemmaGloss());
+      }
+
+      // Alternately, to only run e.g., the clause splitter:
+      List<SentenceFragment> clauses = new OpenIE(props).clausesInSentence(sentence);
+      for (SentenceFragment clause : clauses) {
+        System.out.println(clause.parseTree);
       }
     }
   }

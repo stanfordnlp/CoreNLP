@@ -5,6 +5,7 @@ import edu.stanford.nlp.classify.GeneralDataset;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.HasIndex;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.AnnotationPipeline;
@@ -494,10 +495,10 @@ public class Util {
    * @param tokens The tokens that should define the span.
    * @return A span (0-indexed) that covers all of the tokens.
    */
-  public static Span tokensToSpan(List<CoreLabel> tokens) {
+  public static Span tokensToSpan(List<? extends HasIndex> tokens) {
     int min = Integer.MAX_VALUE;
     int max = Integer.MIN_VALUE;
-    for (CoreLabel token : tokens) {
+    for (HasIndex token : tokens) {
       min = Math.min(token.index() - 1, min);
       max = Math.max(token.index(), max);
     }

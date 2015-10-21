@@ -1,7 +1,7 @@
 package edu.stanford.nlp.naturalli;
 
-import edu.stanford.nlp.dcoref.CorefChain;
-import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.hcoref.data.CorefChain;
+import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.IOUtils;
@@ -19,6 +19,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.GrammaticalRelation;
+import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Pair;
@@ -48,9 +49,23 @@ import java.util.stream.Collectors;
  * </p>
 
  * <p>
- * Documentation on the system can be found on <a href="http://nlp.stanford.edu/software/openie.shtml">the project homepage</a>.
+ * Documentation on the system can be found on
+ * <a href="http://nlp.stanford.edu/software/openie.shtml">the project homepage</a>,
+ * or the <a href="http://stanfordnlp.github.io/CoreNLP/openie.html">CoreNLP annotator documentation page</a>.
+ * The simplest invocation of the system would be something like:
  * </p>
  *
+ * <pre>
+ * java -mx1g -cp stanford-openie.jar:stanford-openie-models.jar edu.stanford.nlp.naturalli.OpenIE
+ * </pre>
+ *
+ * <p>
+ *   Note that this class serves both as an entry point for the OpenIE system, but also as a CoreNLP annotator
+ *   which can be plugged into the CoreNLP pipeline (or any other annotation pipeline).
+ * </p>
+ *
+ * @see OpenIE#annotate(Annotation)
+ * @see OpenIE#main(String[])
  *
  * @author Gabor Angeli
  */
@@ -111,19 +126,43 @@ public class OpenIE implements Annotator {
   @Execution.Option(name="triple.all_nominals", gloss="If true, generate not only named entity nominal relations.")
   private boolean allNominals = false;
 
+  @Execution.Option(name="resolve_coref", gloss="If true, resolve pronouns to their canonical mention")
+  private boolean resolveCoref = false;
+
+  /**
+   * The natural logic weights loaded from the models file.
+   * This is primarily the prepositional attachment statistics.
+   */
   private final NaturalLogicWeights weights;
 
+  /**
+   * The clause splitter model, if one is to be used.
+   * This component splits a sentence into a set of entailed clauses, but does not yet
+   * maximally shorten them.
+   * This is the implementation of stage 1 of the OpenIE pipeline.
+   */
   public final Optional<ClauseSplitter> clauseSplitter;
 
+  /**
+   * The forward entailer model, running a search from clauses to maximally shortened clauses.
+   * This is the implementation of stage 2 of the OpenIE pipeline.
+   */
   public final ForwardEntailer forwardEntailer;
 
+  /**
+   * The relation triple segmenter, which converts a maximally shortened clause into an OpenIE
+   * extraction triple.
+   * This is the implementation of stage 3 of the OpenIE pipeline.
+   */
   public RelationTripleSegmenter segmenter;
+
 
   /** Create a new OpenIE system, with default properties */
   @SuppressWarnings("UnusedDeclaration")
   public OpenIE() {
     this(new Properties());
   }
+
 
   /**
    * Create a ne OpenIE system, based on the given properties.
@@ -169,6 +208,15 @@ public class OpenIE implements Annotator {
     segmenter = new RelationTripleSegmenter(allNominals);
   }
 
+  /**
+   * Find the clauses in a sentence, where the sentence is expressed as a dependency tree.
+   *
+   * @param tree The dependency tree representation of the sentence.
+   * @param assumedTruth The assumed truth of the sentence. This is almost always true, unless you are
+   *                     doing some more nuanced reasoning.
+   *
+   * @return A set of clauses extracted from the sentence. This includes the original sentence.
+   */
   @SuppressWarnings("unchecked")
   public List<SentenceFragment> clausesInSentence(SemanticGraph tree, boolean assumedTruth) {
     if (clauseSplitter.isPresent()) {
@@ -178,10 +226,29 @@ public class OpenIE implements Annotator {
     }
   }
 
+  /**
+   * Find the clauses in a sentence.
+   * This runs the clause splitting component of the OpenIE system only.
+   *
+   * @see OpenIE#clausesInSentence(SemanticGraph, boolean)
+   *
+   * @param sentence The raw sentence to extract clauses from.
+   *
+   * @return A set of clauses extracted from the sentence. This includes the original sentence.
+   */
   public List<SentenceFragment> clausesInSentence(CoreMap sentence) {
     return clausesInSentence(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), true);
   }
 
+  /**
+   * Returns all of the entailed shortened clauses (as per natural logic) from the given clause.
+   * This runs the forward entailment component of the OpenIE system only.
+   * It is usually chained together with the clause splitting component: {@link OpenIE#clausesInSentence(CoreMap)}.
+   *
+   * @param clause The premise clause, as a sentence fragment in itself.
+   *
+   * @return A list of entailed clauses.
+   */
   @SuppressWarnings("unchecked")
   public List<SentenceFragment> entailmentsFromClause(SentenceFragment clause) {
     if (clause.parseTree.size() == 0) {
@@ -233,6 +300,14 @@ public class OpenIE implements Annotator {
     }
   }
 
+  /**
+   * Returns all the maximally shortened entailed fragments (as per natural logic)
+   * from the given collection of clauses.
+   *
+   * @param clauses The clauses to shorten further.
+   *
+   * @return A set of sentence fragments corresponding to the maximally shortened entailed clauses.
+   */
   public Set<SentenceFragment> entailmentsFromClauses(Collection<SentenceFragment> clauses) {
     Set<SentenceFragment> entailments = new HashSet<>();
     for (SentenceFragment clause : clauses) {
@@ -241,29 +316,119 @@ public class OpenIE implements Annotator {
     return entailments;
   }
 
+  /**
+   * Returns the possible relation triple in this sentence fragment.
+   *
+   * @see OpenIE#relationInFragment(SentenceFragment, CoreMap)
+   */
   public Optional<RelationTriple> relationInFragment(SentenceFragment fragment) {
     return segmenter.segment(fragment.parseTree, Optional.of(fragment.score), consumeAll);
   }
 
+  /**
+   * Returns the possible relation triple in this set of sentence fragments.
+   *
+   * @see OpenIE#relationsInFragments(Collection, CoreMap)
+   */
   public List<RelationTriple> relationsInFragments(Collection<SentenceFragment> fragments) {
     return fragments.stream().map(this::relationInFragment).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
   }
 
-  private Optional<RelationTriple> relationInFragment(SentenceFragment fragment, CoreMap sentence, Map<CoreLabel, List<CoreLabel>> canonicalMentionMap) {
+  /**
+   * Returns the possible relation triple in this sentence fragment.
+   *
+   * @param fragment The sentence fragment to try to extract relations from.
+   * @param sentence The containing sentence for the fragment.
+   *
+   * @return A relation triple if we could find one; otherwise, {@link Optional#empty()}.
+   */
+  private Optional<RelationTriple> relationInFragment(SentenceFragment fragment, CoreMap sentence) {
     return segmenter.segment(fragment.parseTree, Optional.of(fragment.score), consumeAll);
   }
 
-  private List<RelationTriple> relationsInFragments(Collection<SentenceFragment> fragments, CoreMap sentence, Map<CoreLabel, List<CoreLabel>> canonicalMentionMap) {
-    return fragments.stream().map(x -> relationInFragment(x, sentence, canonicalMentionMap)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+  /**
+   * Returns a list of OpenIE relations from the given set of sentence fragments.
+   *
+   * @param fragments The sentence fragments to extract relations from.
+   * @param sentence The containing sentence that these fragments were extracted from.
+   *
+   * @return A list of OpenIE triples, corresponding to all the triples that could be extracted from the given fragments.
+   */
+  private List<RelationTriple> relationsInFragments(Collection<SentenceFragment> fragments, CoreMap sentence) {
+    return fragments.stream().map(x -> relationInFragment(x, sentence)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
   }
 
-
+  /**
+   * Extract the relations in this clause.
+   *
+   * @see OpenIE#entailmentsFromClause(SentenceFragment)
+   * @see OpenIE#relationsInFragments(Collection)
+   */
   public List<RelationTriple> relationsInClause(SentenceFragment clause) {
     return relationsInFragments(entailmentsFromClause(clause));
   }
 
+  /**
+   * Extract the relations in this sentence.
+   *
+   * @see OpenIE#clausesInSentence(CoreMap)
+   * @see OpenIE#entailmentsFromClause(SentenceFragment)
+   * @see OpenIE#relationsInFragments(Collection)
+   */
   public List<RelationTriple> relationsInSentence(CoreMap sentence) {
     return relationsInFragments(entailmentsFromClauses(clausesInSentence(sentence)));
+  }
+
+
+  /**
+   * Create a copy of the passed parse tree, canonicalizing pronominal nodes with their canonical mention.
+   * Canonical mentions are tied together with the <i>compound</i> dependency arc; otherwise, the structure of
+   * the tree remains unchanged.
+   *
+   * @param parse The original dependency parse of the sentence.
+   * @param canonicalMentionMap The map from tokens to their canonical mentions.
+   *
+   * @return A <b>copy</b> of the passed parse tree, with pronouns replaces with their canonical mention.
+   */
+  private SemanticGraph canonicalizeCoref(SemanticGraph parse, Map<CoreLabel, List<CoreLabel>> canonicalMentionMap) {
+    parse = new SemanticGraph(parse);
+    for (IndexedWord node : new HashSet<>(parse.vertexSet())) {  // copy the vertex set to prevent ConcurrentModificationExceptions
+      if (node.tag() != null && node.tag().startsWith("PRP")) {
+        List<CoreLabel> canonicalMention = canonicalMentionMap.get(node.backingLabel());
+        if (canonicalMention != null) {
+          // Case: this node is a preposition with a valid antecedent.
+          // 1. Save the attaching edges
+          List<SemanticGraphEdge> incomingEdges = parse.incomingEdgeList(node);
+          List<SemanticGraphEdge> outgoingEdges = parse.outgoingEdgeList(node);
+          // 2. Remove the node
+          parse.removeVertex(node);
+          // 3. Add the new head word
+          IndexedWord headWord = new IndexedWord(canonicalMention.get(canonicalMention.size() - 1));
+          headWord.setPseudoPosition(node.pseudoPosition());
+          parse.addVertex(headWord);
+          for (SemanticGraphEdge edge : incomingEdges) {
+            parse.addEdge(edge.getGovernor(), headWord, edge.getRelation(), edge.getWeight(), edge.isExtra());
+          }
+          for (SemanticGraphEdge edge : outgoingEdges) {
+            parse.addEdge(headWord, edge.getDependent(), edge.getRelation(), edge.getWeight(), edge.isExtra());
+          }
+          // 4. Add other words
+          double pseudoPosition = headWord.pseudoPosition() - 1e-3;
+          for (int i = canonicalMention.size() - 2; i >= 0; --i) {
+            // Create the node
+            IndexedWord dependent = new IndexedWord(canonicalMention.get(i));
+            // Set its pseudo position appropriately
+            dependent.setPseudoPosition(pseudoPosition);
+            pseudoPosition -= 1e-3;
+            // Add the node to the graph
+            parse.addVertex(dependent);
+            parse.addEdge(headWord, dependent, UniversalEnglishGrammaticalRelations.COMPOUND_MODIFIER, 1.0, false);
+          }
+
+        }
+      }
+    }
+    return parse;
   }
 
   /**
@@ -279,10 +444,14 @@ public class OpenIE implements Annotator {
   public void annotateSentence(CoreMap sentence, Map<CoreLabel, List<CoreLabel>> canonicalMentionMap) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
     if (tokens.size() < 2) {
+
       // Short sentence; skip annotating it.
       sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.EMPTY_LIST);
       sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.EMPTY_SET);
+
     } else {
+
+      // Get the dependency tree
       SemanticGraph parse = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
       if (parse == null) {
         parse = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
@@ -290,11 +459,24 @@ public class OpenIE implements Annotator {
       if (parse == null) {
         throw new IllegalStateException("Cannot run OpenIE without a parse tree!");
       }
-      List<RelationTriple> extractions = segmenter.extract(parse, tokens);
-      List<SentenceFragment> clauses = clausesInSentence(sentence);
+
+      // Resolve Coreference
+      SemanticGraph canonicalizedParse = parse;
+      if (resolveCoref && !canonicalMentionMap.isEmpty()) {
+        canonicalizedParse = canonicalizeCoref(parse, canonicalMentionMap);
+      }
+
+      // Run OpenIE
+      // (clauses)
+      List<SentenceFragment> clauses = clausesInSentence(canonicalizedParse, true);  // note: uses coref-canonicalized parse
+      // (entailment)
       Set<SentenceFragment> fragments = entailmentsFromClauses(clauses);
-//        fragments.add(new SentenceFragment(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), false));
-      extractions.addAll(relationsInFragments(fragments, sentence, canonicalMentionMap));
+      // (segment)
+      List<RelationTriple> extractions = segmenter.extract(parse, tokens);  // note: uses non-coref-canonicalized parse!
+      extractions.addAll(relationsInFragments(fragments, sentence));
+
+
+      // Set the annotations
       sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);
       sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class,
           new ArrayList<>(new HashSet<>(extractions)));  // uniq the extractions
@@ -315,13 +497,19 @@ public class OpenIE implements Annotator {
     // Accumulate Coref data
     Map<Integer, CorefChain> corefChains = annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class);
     Map<CoreLabel, List<CoreLabel>> canonicalMentionMap = new IdentityHashMap<>();
-    if (corefChains != null) {
+    if (corefChains != null && resolveCoref) {
       for (CorefChain chain : corefChains.values()) {
+        // Make sure it's a real chain and not a singleton
+        if (chain.getMentionsInTextualOrder().size() < 2) {
+          continue;
+        }
+
         // Metadata
         List<CoreLabel> canonicalMention = null;
         double canonicalMentionScore = Double.NEGATIVE_INFINITY;
         Set<CoreLabel> tokensToMark = new HashSet<>();
         List<CorefChain.CorefMention> mentions = chain.getMentionsInTextualOrder();
+
         // Iterate over mentions
         for (int i = 0; i < mentions.size(); ++i) {
           // Get some data on this mention
@@ -332,14 +520,23 @@ public class OpenIE implements Annotator {
             canonicalMention = info.first;
             canonicalMentionScore = score;
           }
+
           // Register the participating tokens
-          tokensToMark.addAll(info.first);
+          if (info.first.size() == 1) {  // Only mark single-node tokens!
+            tokensToMark.addAll(info.first);
+          }
         }
+
         // Mark the tokens as coreferent
         assert canonicalMention != null;
         for (CoreLabel token : tokensToMark) {
-          canonicalMentionMap.put(token, canonicalMention);
+          List<CoreLabel> existingMention = canonicalMentionMap.get(token);
+          if (existingMention == null || existingMention.isEmpty() ||
+              "O".equals(existingMention.get(0).ner())) {  // Don't clobber existing good mentions
+            canonicalMentionMap.put(token, canonicalMention);
+          }
         }
+
       }
     }
 
@@ -447,7 +644,11 @@ public class OpenIE implements Annotator {
 
     // Tweak the arguments
     if ("".equals(props.getProperty("annotators", ""))) {
-      props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,natlog,openie");
+      if (!"false".equalsIgnoreCase(props.getProperty("resolve_coref", props.getProperty("openie.resolve_coref", "false")))) {
+        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,ner,hcoref,natlog,openie");
+      } else {
+        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,natlog,openie");
+      }
     }
     if ("".equals(props.getProperty("depparse.extradependencies", ""))) {
       props.setProperty("depparse.extradependencies", "ref_only_uncollapsed");
