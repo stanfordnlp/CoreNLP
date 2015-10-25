@@ -182,10 +182,10 @@ public class PropertiesUtils {
     for (String keyStr : properties.stringPropertyNames()) {
       if (keyStr.startsWith(prefix)) {
         if (keepPrefix) {
+          ret.setProperty(keyStr, properties.getProperty(keyStr));
+        } else {
           String newStr = keyStr.substring(prefix.length());
           ret.setProperty(newStr, properties.getProperty(keyStr));
-        } else {
-          ret.setProperty(keyStr, properties.getProperty(keyStr));
         }
       }
     }
