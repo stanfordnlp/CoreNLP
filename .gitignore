@@ -6,3 +6,9 @@
 *.so
 .DS_Store
 .settings/**
+.gradle
+lib
+output
+build
+LICENSE.txt.xml
+stanford-corenlp-models-current.jar
