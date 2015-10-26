@@ -22,19 +22,19 @@ If no value for `port` is provided, port 9000 will be used by default. You can t
 
     http://localhost:9000/
 
-You should see a website similar to `corenlp.run`, with an input box for text and a list of annotators you can run. From this interface, you can test out each of the annotators by adding/removing them from this list. You can test out the API by sending a `POST` request to the server with the appropriate properties. An easy way to do this is with `wget`. The following will annotate the sentence "*the quick brown fox jumped over the lazy dog*" with part of speech tags:
+You should see a website similar to [corenlp.run](http://corenlp.run/), with an input box for text and a list of annotators you can run. From this interface, you can test out each of the annotators by adding/removing them from this list. You can test out the API by sending a `POST` request to the server with the appropriate properties. An easy way to do this is with [wget](https://www.gnu.org/software/wget/). The following will annotate the sentence "*the quick brown fox jumped over the lazy dog*" with part of speech tags:
 
 ```bash
-wget --post-data 'the quick brown fox jumped over the lazy dog' 'localhost:9000/?properties={"tokenize.whitespace": "true", "annotators:", "tokenize,ssplit,pos", "outputFormat": "json"}' -O -
+wget --post-data 'the quick brown fox jumped over the lazy dog' 'localhost:9000/?properties={"tokenize.whitespace": "true", "annotators": "tokenize,ssplit,pos", "outputFormat": "json"}' -O -
 ```
 
-The rest of this document describes the API in more detail, describes a Java client to the API as a drop-in replacement for the `StanfordCoreNLP` pipeline, and talks about administering the server.
+The rest of this document describes the API in more detail, describes a Java client to the API as a drop-in replacement for the `StanfordCoreNLP` annotator pipeline, and talks about administering the server.
 
 
 ## API Documentation
 The greatest strength of the server is the ability to make API calls against it. 
 
-> **NOTE**: Please do **not** make API calls against `http://corenlp.run`. It is not set up to handle a large volume of requests. Instructions for setting up your own server can be found in the [Dedicated Server](#DedicatedServer) section.
+> **NOTE**: Please do **not** make API calls against [corenlp.run](http://corenlp.run). It is not set up to handle a large volume of requests. Instructions for setting up your own server can be found in the [Dedicated Server](#DedicatedServer) section.
 
 There are three endpoints provided by the server, which we'll describe in more detail below. Each of them takes as input a series of `GET` parameters, as well as `POST` data consisting of the serialized document or raw text to be annotated. The endpoints are:
 
@@ -46,7 +46,7 @@ There are three endpoints provided by the server, which we'll describe in more d
 This endpoint takes as input a JSON-formatted properties string under the key `properties=<properties>`, and as `POST`data text to annotate. The properties should mirror the properties file passed into the CoreNLP command line. For example, the following will tokenize the input text on whitespace, run part of speech tagging, and output it as JSON to standard out:
 
 ```bash
-wget --post-data 'the quick brown fox jumped over the lazy dog' 'localhost:9000/?properties={"tokenize.whitespace": "true", "annotators:", "tokenize,ssplit,pos", "outputFormat": "json"}' -O -
+wget --post-data 'the quick brown fox jumped over the lazy dog' 'localhost:9000/?properties={"tokenize.whitespace": "true", "annotators": "tokenize,ssplit,pos", "outputFormat": "json"}' -O -
 ```
 
 A common property to set is the output format of the API. The server supports all output formats provided by CoreNLP. These are listed below, along with their relevant properties:
@@ -73,7 +73,7 @@ From the other side, the server accepts input in a variety of formats. By defaul
 A complete call to the server, taking as input a protobuf serialized document at path `/path/to/file.proto` and returning as a response the document annotated for part of speech and named entity tags (to the file `/path/to/annotated_file.proto` could be:
 
 ```bash
-wget --post-file /path/to/file.proto 'localhost:9000/?properties={"inputFormat": "serialized", "inputSerializer", "edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer", "annotators:", "tokenize,ssplit,pos,lemma,ner", "outputFormat": "serialized", "serializer", "edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer"}' -O /path/to/annotated_file.proto
+wget --post-file /path/to/file.proto 'localhost:9000/?properties={"inputFormat": "serialized", "inputSerializer", "edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer", "annotators": "tokenize,ssplit,pos,lemma,ner", "outputFormat": "serialized", "serializer", "edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer"}' -O /path/to/annotated_file.proto
 ```
 
 ### Query TokensRegex: `/tokensregex`
