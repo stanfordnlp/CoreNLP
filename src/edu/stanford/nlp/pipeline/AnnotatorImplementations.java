@@ -102,7 +102,7 @@ public class AnnotatorImplementations {
             NERClassifierCombiner.DEFAULT_PASS_DOWN_PROPERTIES);
     if (useSUTime) {
       // Make sure SUTime parameters are included
-      Properties sutimeProps = PropertiesUtils.extractPrefixedProperties(properties, NumberSequenceClassifier.SUTIME_PROPERTY  + ".");
+      Properties sutimeProps = PropertiesUtils.extractPrefixedProperties(properties, NumberSequenceClassifier.SUTIME_PROPERTY  + ".", true);
       PropertiesUtils.overWriteProperties(combinerProperties, sutimeProps);
     }
     NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers,
