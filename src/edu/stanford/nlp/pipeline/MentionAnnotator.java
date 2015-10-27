@@ -40,18 +40,19 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
   Dictionaries dictionaries;
   Properties corefProperties;
 
-  Set<Requirement> mentionDetectorRequirements;
+  Set<Requirement> mentionAnnotatorRequirements;
 
   public MentionAnnotator(Properties props) {
     try {
       corefProperties = props;
-      System.out.println("corefProperties: "+corefProperties);
+      //System.out.println("corefProperties: "+corefProperties);
       dictionaries = new Dictionaries(props);
-      System.out.println("got dictionaries");
+      //System.out.println("got dictionaries");
       headFinder = getHeadFinder(props);
-      System.out.println("got head finder");
+      //System.out.println("got head finder");
       md = getMentionFinder(props, headFinder);
-      System.err.println("using mention detector: "+mdName);
+      System.err.println("Using mention detector: "+mdName+" which requires these parses: "+mentionAnnotatorRequirements);
+      mentionAnnotatorRequirements.addAll(Annotator.REQUIREMENTS.get(STANFORD_MENTION));
     } catch (Exception e) {
       System.err.println("Error with building coref mention annotator!");
     }
@@ -59,8 +60,6 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
 
   @Override
   public void annotate(Annotation annotation) {
-    // check first sentence to see if it has the right parse information
-    checkForRequiredAnnotations(annotation);
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
     List<List<Mention>> mentions = md.findMentions(annotation, dictionaries, corefProperties);
     int currIndex = 0;
@@ -69,32 +68,6 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
       sentence.set(CorefCoreAnnotations.CorefMentionsAnnotation.class, mentionsForThisSentence);
       // increment to next list of mentions
       currIndex++;
-    }
-  }
-
-  public void checkForRequiredAnnotations(Annotation annotation) {
-    // check for necessary annotations for the mention detector
-    // throw an exception if something is missing
-    List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
-    Set<Requirement> parseRequirementsFound = new HashSet<Requirement>();
-    for (CoreMap sentence : sentences) {
-      if (sentence.get(TreeCoreAnnotations.TreeAnnotation.class) != null) {
-        parseRequirementsFound.add(PARSE_REQUIREMENT);
-      }
-      if (sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class) != null) {
-        parseRequirementsFound.add(DEPENDENCY_REQUIREMENT);
-      }
-      // mentionDetectorRequirements is set when the mention detector is set
-      for (Requirement mdRequirement : mentionDetectorRequirements) {
-        if (!parseRequirementsFound.contains(mdRequirement)) {
-          String missingRequirementMessage = "mention detector: "+mdName+"  missing  "+mdRequirement.name+" requirement";
-          missingRequirementMessage += "; add missing annotator: "+mdRequirement.name+" ";
-          missingRequirementMessage += "or change coref.md.type to resolve this issue";
-          throw new RuntimeException(missingRequirementMessage);
-        }
-      }
-      // if no problems found with first sentence don't throw exception
-      return;
     }
   }
 
@@ -112,27 +85,25 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
 
     switch (CorefProperties.getMDType(props)) {
       case RULE:
-        mentionDetectorRequirements = Collections.unmodifiableSet(new ArraySet<>(DEPENDENCY_REQUIREMENT, PARSE_REQUIREMENT));
+        mentionAnnotatorRequirements = new ArraySet<>(DEPENDENCY_REQUIREMENT, PARSE_REQUIREMENT);
         mdName = "rule";
         return new RuleBasedCorefMentionFinder(headFinder, props);
 
       case HYBRID:
         mdName = "hybrid";
-        mentionDetectorRequirements = Collections.unmodifiableSet(new ArraySet<>(DEPENDENCY_REQUIREMENT, PARSE_REQUIREMENT));
+        mentionAnnotatorRequirements = new ArraySet<>(DEPENDENCY_REQUIREMENT, PARSE_REQUIREMENT);
         return new HybridCorefMentionFinder(headFinder, props);
 
       case DEPENDENCY:
       default:  // default is dependency
         mdName = "dependency";
-        mentionDetectorRequirements = Collections.unmodifiableSet(new ArraySet<>(DEPENDENCY_REQUIREMENT));
+        mentionAnnotatorRequirements = new ArraySet<>(DEPENDENCY_REQUIREMENT);
         return new DependencyCorefMentionFinder(props);
     }
   }
 
   @Override
-  public Set<Requirement> requires() {
-    return Annotator.REQUIREMENTS.get(STANFORD_MENTION);
-  }
+  public Set<Requirement> requires() { return mentionAnnotatorRequirements; }
 
   @Override
   public Set<Requirement> requirementsSatisfied() {

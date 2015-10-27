@@ -206,7 +206,7 @@ public class AnnotatorImplementations {
     // TO DO: split up coref and mention properties
     Properties corefProperties = PropertiesUtils.extractPrefixedProperties(properties,
             Annotator.STANFORD_COREF + ".",
-            false);
+            true);
     return new MentionAnnotator(corefProperties);
   }
 
@@ -216,7 +216,7 @@ public class AnnotatorImplementations {
   public Annotator coref(Properties properties) {
     Properties corefProperties = PropertiesUtils.extractPrefixedProperties(properties,
             Annotator.STANFORD_COREF + ".",
-            false);
+            true);
     return new CorefAnnotator(corefProperties);
   }
 
