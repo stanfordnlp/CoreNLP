@@ -873,7 +873,7 @@ public class Preprocessor {
         if(m1==m2) continue;
         // Ignore if m2 and m1 are in list relationship
         if (m1.isListMemberOf(m2) || m2.isListMemberOf(m1) || m1.isMemberOfSameList(m2)) {
-          Redwood.log("debug-preprocessor", "Not checking '" + m1 + "' and '" + m2 + "' for " + flag + ": in list relationship");
+          //Redwood.log("debug-preprocessor", "Not checking '" + m1 + "' and '" + m2 + "' for " + flag + ": in list relationship");
           continue;
         }
         for(Pair<Integer, Integer> foundPair: foundPairs){

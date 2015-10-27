@@ -5,6 +5,7 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.GrammaticalStructure;
+import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.MetaClass;
 import edu.stanford.nlp.util.PropertiesUtils;
@@ -45,7 +46,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
   }
 
   public DependencyParseAnnotator(Properties properties) {
-    String modelPath = PropertiesUtils.getString(properties, "model", DependencyParser.DEFAULT_MODEL);
+    String modelPath = PropertiesUtils.getString(properties, "depparse.model", DependencyParser.DEFAULT_MODEL);
     parser = DependencyParser.loadFromModelFile(modelPath, properties);
 
     nThreads = PropertiesUtils.getInt(properties, "testThreads", DEFAULT_NTHREADS);
@@ -92,7 +93,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
 
   @Override
   public Set<Requirement> requirementsSatisfied() {
-    return Collections.singleton(DEPENDENCY_REQUIREMENT);
+    return Collections.unmodifiableSet(new ArraySet<>(DEPENDENCY_REQUIREMENT, CONSTITUENCY_OR_DEPENDENCY_REQUIREMENT));
   }
 
   public static String signature(String annotatorName, Properties props) {

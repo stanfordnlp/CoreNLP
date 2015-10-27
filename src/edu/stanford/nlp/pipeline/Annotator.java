@@ -100,7 +100,8 @@ public interface Annotator {
   String STANFORD_TRUECASE = "truecase";
   String STANFORD_PARSE = "parse";
   String STANFORD_DETERMINISTIC_COREF = "dcoref";
-  String STANFORD_COREF = "hcoref";
+  String STANFORD_COREF = "coref";
+  String STANFORD_MENTION = "mention";
   String STANFORD_RELATION = "relation";
   String STANFORD_SENTIMENT = "sentiment";
   String STANFORD_COLUMN_DATA_CLASSIFIER = "cdc";
@@ -120,6 +121,8 @@ public interface Annotator {
   Requirement TRUECASE_REQUIREMENT = new Requirement(STANFORD_TRUECASE);
   Requirement PARSE_REQUIREMENT = new Requirement(STANFORD_PARSE);
   Requirement DEPENDENCY_REQUIREMENT = new Requirement(STANFORD_DEPENDENCIES);
+  Requirement CONSTITUENCY_OR_DEPENDENCY_REQUIREMENT = new Requirement(STANFORD_PARSE+"|"+STANFORD_DEPENDENCIES);
+  Requirement MENTION_REQUIREMENT = new Requirement(STANFORD_MENTION);
   Requirement DETERMINISTIC_COREF_REQUIREMENT = new Requirement(STANFORD_DETERMINISTIC_COREF);
   Requirement COREF_REQUIREMENT = new Requirement(STANFORD_COREF);
   Requirement RELATION_EXTRACTOR_REQUIREMENT = new Requirement(STANFORD_RELATION);
@@ -182,6 +185,12 @@ public interface Annotator {
         add(SSPLIT_REQUIREMENT);
         add(POS_REQUIREMENT);
       }}));
+      put(STANFORD_MENTION, Collections.unmodifiableSet(new HashSet<Requirement>() {{
+        add(TOKENIZE_REQUIREMENT);
+        add(SSPLIT_REQUIREMENT);
+        add(POS_REQUIREMENT);
+        add(CONSTITUENCY_OR_DEPENDENCY_REQUIREMENT);
+      }}));
       put(STANFORD_DETERMINISTIC_COREF, Collections.unmodifiableSet(new HashSet<Requirement>() {{
         add(TOKENIZE_REQUIREMENT);
         add(SSPLIT_REQUIREMENT);
@@ -196,7 +205,8 @@ public interface Annotator {
         add(POS_REQUIREMENT);
         add(LEMMA_REQUIREMENT);
         add(NER_REQUIREMENT);
-        add(DEPENDENCY_REQUIREMENT);
+        add(CONSTITUENCY_OR_DEPENDENCY_REQUIREMENT);
+        add(MENTION_REQUIREMENT);
       }}));
       put(STANFORD_RELATION, Collections.unmodifiableSet(new HashSet<Requirement>() {{
         add(TOKENIZE_REQUIREMENT);
@@ -263,9 +273,9 @@ public interface Annotator {
   Set<Requirement> TOKENIZE_SSPLIT_PARSE_NER = Collections.unmodifiableSet(new ArraySet<>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, PARSE_REQUIREMENT, NER_REQUIREMENT));
   Set<Requirement> TOKENIZE_SSPLIT_POS_LEMMA = Collections.unmodifiableSet(new ArraySet<>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT, LEMMA_REQUIREMENT));
   Set<Requirement> TOKENIZE_SSPLIT_POS_DEPPARSE = Collections.unmodifiableSet(new ArraySet<>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT, DEPENDENCY_REQUIREMENT));
-  Set<Requirement> PARSE_AND_TAG = Collections.unmodifiableSet(new ArraySet<>(POS_REQUIREMENT, PARSE_REQUIREMENT));
-  Set<Requirement> PARSE_TAG_BINARIZED_TREES = Collections.unmodifiableSet(new ArraySet<>(POS_REQUIREMENT, PARSE_REQUIREMENT, BINARIZED_TREES_REQUIREMENT));
-  Set<Requirement> PARSE_TAG_DEPPARSE_BINARIZED_TREES = Collections.unmodifiableSet(new ArraySet<>(POS_REQUIREMENT, PARSE_REQUIREMENT, DEPENDENCY_REQUIREMENT, BINARIZED_TREES_REQUIREMENT));
-  Set<Requirement> PARSE_TAG_DEPPARSE = Collections.unmodifiableSet(new ArraySet<>(POS_REQUIREMENT, PARSE_REQUIREMENT, DEPENDENCY_REQUIREMENT));
+  Set<Requirement> PARSE_AND_TAG = Collections.unmodifiableSet(new ArraySet<>(POS_REQUIREMENT, PARSE_REQUIREMENT, CONSTITUENCY_OR_DEPENDENCY_REQUIREMENT));
+  Set<Requirement> PARSE_TAG_BINARIZED_TREES = Collections.unmodifiableSet(new ArraySet<>(POS_REQUIREMENT, PARSE_REQUIREMENT, BINARIZED_TREES_REQUIREMENT, CONSTITUENCY_OR_DEPENDENCY_REQUIREMENT));
+  Set<Requirement> PARSE_TAG_DEPPARSE_BINARIZED_TREES = Collections.unmodifiableSet(new ArraySet<>(POS_REQUIREMENT, PARSE_REQUIREMENT, DEPENDENCY_REQUIREMENT, BINARIZED_TREES_REQUIREMENT, CONSTITUENCY_OR_DEPENDENCY_REQUIREMENT));
+  Set<Requirement> PARSE_TAG_DEPPARSE = Collections.unmodifiableSet(new ArraySet<>(POS_REQUIREMENT, PARSE_REQUIREMENT, DEPENDENCY_REQUIREMENT, CONSTITUENCY_OR_DEPENDENCY_REQUIREMENT));
 
 }

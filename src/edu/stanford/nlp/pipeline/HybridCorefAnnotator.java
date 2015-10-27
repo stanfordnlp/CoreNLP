@@ -38,7 +38,6 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
       }
       // Create coref system
       corefSystem = new CorefSystem(corefProps);
-      corefSystem.docMaker.setNeedMissingAnnotations(false);
       OLD_FORMAT = Boolean.parseBoolean(props.getProperty("oldCorefFormat", "false"));
     } catch (Exception e) {
       System.err.println("ERROR: cannot create HybridCorefAnnotator!");

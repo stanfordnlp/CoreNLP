@@ -485,6 +485,25 @@ public class AnnotatorFactories {
   }
 
   //
+  // Mentions
+  //
+
+  public static AnnotatorFactory mention(Properties properties, final AnnotatorImplementations annotatorImplementation) {
+    return new AnnotatorFactory(properties, annotatorImplementation) {
+      private static final long serialVersionUID = 1L;
+
+      @Override
+      public Annotator create() { return annotatorImplementation.mention(properties); }
+
+      @Override
+      public String additionalSignature() {
+          // TO DO: implement this properly
+          return "";
+      }
+    };
+  }
+
+  //
   // Coreference resolution
   //
   public static AnnotatorFactory coref(Properties properties, final AnnotatorImplementations annotatorImplementation) {

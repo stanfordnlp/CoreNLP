@@ -584,11 +584,11 @@ public class Dictionaries {
                 DefaultPaths.DEFAULT_DCOREF_DICT3, DefaultPaths.DEFAULT_DCOREF_DICT4}),
         props.getProperty(CorefProperties.DICT_PMI_PROP, DefaultPaths.DEFAULT_DCOREF_DICT1),
         props.getProperty(CorefProperties.SIGNATURES_PROP, DefaultPaths.DEFAULT_DCOREF_NE_SIGNATURES));
-    if(CorefProperties.useSemantics(props)) {
+    /*if(CorefProperties.useSemantics(props)) {
       loadSemantics(props);
     } else {
       System.err.println("SEMANTICS NOT LOADED");
-    }
+    }*/
     if(props.containsKey("coref.zh.dict")) {
       loadChineseGenderNumberAnimacy(props.getProperty("coref.zh.dict"));
     }

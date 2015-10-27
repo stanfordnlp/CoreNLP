@@ -1,5 +1,6 @@
 package edu.stanford.nlp.hcoref;
 
+import java.util.ArrayList;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.List;
@@ -49,9 +50,8 @@ public class CorefDocMaker {
   StanfordCoreNLP corenlp;
   final TreeLemmatizer treeLemmatizer;
   LogisticClassifier<String, String> singletonPredictor;
-  // Should we call corenlp to add missing annotations?
-  // HACK so that when the CorefDocMaker is called from annotator, it doesn't override old annotations
-  boolean needMissingAnnotations = true;
+
+  boolean addMissingAnnotations ;
 
   public CorefDocMaker(Properties props, Dictionaries dictionaries) throws ClassNotFoundException, IOException {
     this.props = props;
@@ -60,14 +60,16 @@ public class CorefDocMaker {
     headFinder = getHeadFinder(props);
     md = getMentionFinder(props, dictionaries, headFinder);
 //    corenlp = new StanfordCoreNLP(props, false);
-    corenlp = loadStanfordProcessor(props);
+    // the property coref.addMissingAnnotations must be set to true to get the CorefDocMaker to add annotations
+    if (CorefProperties.addMissingAnnotations(props)) {
+      addMissingAnnotations = true;
+      corenlp = loadStanfordProcessor(props);
+    } else {
+      addMissingAnnotations = false;
+    }
     treeLemmatizer = new TreeLemmatizer();
     singletonPredictor = (CorefProperties.useSingletonPredictor(props))? 
         getSingletonPredictorFromSerializedFile(CorefProperties.getPathSingletonPredictor(props)) : null;
-  }
-
-  public void setNeedMissingAnnotations(boolean needMissingAnnotations) {
-    this.needMissingAnnotations = needMissingAnnotations;
   }
 
   /** Load Stanford Processor: skip unnecessary annotator */
@@ -160,7 +162,7 @@ public class CorefDocMaker {
     Annotation anno = input.annotation;
     
     // add missing annotation
-    if (needMissingAnnotations) {
+    if (addMissingAnnotations) {
       addMissingAnnotation(anno);
     }
 
@@ -173,10 +175,14 @@ public class CorefDocMaker {
     if(input.conllDoc != null && CorefProperties.getLanguage(props)==Locale.CHINESE){
       CorefProperties.setRemoveNested(props, !input.conllDoc.documentID.contains("nw"));
     }
-    
-    // mention detection: MD gives following information about mentions: mention start/end index, span, headword
-    // rest information will be set in preprocess step
-    List<List<Mention>> mentions = md.findMentions(anno, dict, props);
+
+    // each sentence should have a CorefCoreAnnotations.CorefMentionsAnnotation.class which maps to List<Mention>
+    // this is set by the mentions annotator
+    List<List<Mention>> mentions = new ArrayList<List<Mention>>() ;
+    for (CoreMap sentence : anno.get(CoreAnnotations.SentencesAnnotation.class)) {
+      mentions.add(sentence.get(CorefCoreAnnotations.CorefMentionsAnnotation.class));
+    }
+
     Document doc = new Document(input, mentions);
     
     // find headword for gold mentions
@@ -197,20 +203,24 @@ public class CorefDocMaker {
   }
 
   private void addMissingAnnotation(Annotation anno) {
-    boolean useConstituency = CorefProperties.useConstituencyTree(props);
-    final boolean LEMMATIZE = true;
+    if (addMissingAnnotations) {
+      boolean useConstituency = CorefProperties.useConstituencyTree(props);
+      final boolean LEMMATIZE = true;
 
-    List<CoreMap> sentences = anno.get(CoreAnnotations.SentencesAnnotation.class);
-    for (CoreMap sentence:sentences) {
-      boolean hasTree = sentence.containsKey(TreeCoreAnnotations.TreeAnnotation.class);
-      Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
-      
-      if(!useConstituency) {     // TODO: temp for dev: make sure we don't use constituency tree
-        sentence.remove(TreeCoreAnnotations.TreeAnnotation.class);
+      List<CoreMap> sentences = anno.get(CoreAnnotations.SentencesAnnotation.class);
+      for (CoreMap sentence : sentences) {
+        boolean hasTree = sentence.containsKey(TreeCoreAnnotations.TreeAnnotation.class);
+        Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+
+        if (!useConstituency) {     // TODO: temp for dev: make sure we don't use constituency tree
+          sentence.remove(TreeCoreAnnotations.TreeAnnotation.class);
+        }
+        if (LEMMATIZE && hasTree && useConstituency) treeLemmatizer.transformTree(tree);   // TODO don't need?
       }
-      if(LEMMATIZE && hasTree && useConstituency) treeLemmatizer.transformTree(tree);   // TODO don't need?
+      corenlp.annotate(anno);
+    } else {
+      throw new RuntimeException("Error: must set coref.addMissingAnnotations = true to call method addMissingAnnotation");
     }
-    corenlp.annotate(anno);
   }
 
   public void resetDocs() {

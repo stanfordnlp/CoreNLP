@@ -67,8 +67,6 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator {
         scorefSystem = null;
       } else if (COREF_MODE.equals(STATISTICAL_MODE)) {
         // create corefSystem for statistical
-        //Dictionaries dictionaries = new Dictionaries(props);
-        //System.out.println(COREF_THRESHOLDS);
         System.out.println("building scorefSystem...");
         scorefSystem = StatisticalCorefSystem.fromProps(props);
         hcorefSystem = null;
@@ -104,7 +102,6 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator {
         // for backward compatibility
         if(OLD_FORMAT) annotateOldFormat(result, corefDoc);
       } else if (COREF_MODE.equals(STATISTICAL_MODE)) {
-        // still need to implement
         scorefSystem.annotate(annotation);
       } else {
         System.err.println("ERROR: invalid selection for coreference mode!");
