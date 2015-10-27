@@ -23,26 +23,27 @@ public class BestFirstCorefSystem extends StatisticalCorefSystem {
 
   public BestFirstCorefSystem(Properties props, String wordCountsFile, String modelFile,
       int maxMentionDistance, double threshold) {
-    this(props, wordCountsFile, modelFile, maxMentionDistance, makeThresholds(threshold));
+    this(props, wordCountsFile, modelFile, maxMentionDistance,
+        new double[] {threshold, threshold, threshold, threshold});
   }
 
-  public BestFirstCorefSystem(Properties props, String wordCountsFile, String modelPath,
-      int maxMentionDistance, Map<Pair<Boolean, Boolean>, Double> thresholds) {
+  public BestFirstCorefSystem(Properties props, String modelPath, String wordCountsPath,
+      int maxMentionDistance, double[] thresholds) {
     super(props);
-    extractor = new FeatureExtractor(props, dictionaries, null, wordCountsFile);
+    extractor = new FeatureExtractor(props, dictionaries, null, wordCountsPath);
     classifier = PairwiseModel.newBuilder("classifier",
         MetaFeatureExtractor.newBuilder().build()).modelPath(modelPath).build();
     this.maxMentionDistance = maxMentionDistance;
-    this.thresholds = thresholds;
+    this.thresholds = makeThresholds(thresholds);
   }
 
-  private static Map<Pair<Boolean, Boolean>, Double> makeThresholds(double threshold) {
-    Map<Pair<Boolean, Boolean>, Double> thresholds = new HashMap<>();
-    thresholds.put(new Pair<>(true, true), threshold);
-    thresholds.put(new Pair<>(true, false), threshold);
-    thresholds.put(new Pair<>(false, true), threshold);
-    thresholds.put(new Pair<>(false, false), threshold);
-    return thresholds;
+  private static Map<Pair<Boolean, Boolean>, Double> makeThresholds(double[] thresholds) {
+    Map<Pair<Boolean, Boolean>, Double> thresholdsMap = new HashMap<>();
+    thresholdsMap.put(new Pair<>(true, true), thresholds[0]);
+    thresholdsMap.put(new Pair<>(true, false), thresholds[1]);
+    thresholdsMap.put(new Pair<>(false, true), thresholds[2]);
+    thresholdsMap.put(new Pair<>(false, false), thresholds[3]);
+    return thresholdsMap;
   }
 
   public static int i = 0;

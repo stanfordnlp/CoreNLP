@@ -6,7 +6,6 @@ import java.util.Map;
 
 import edu.stanford.nlp.scoref.SimpleLinearClassifier.LearningRateSchedule;
 import edu.stanford.nlp.scoref.SimpleLinearClassifier.Loss;
-import edu.stanford.nlp.scoref.SimpleLinearClassifier.Penalty;
 import edu.stanford.nlp.stats.Counter;
 
 public class PairwiseModel {
@@ -17,7 +16,6 @@ public class PairwiseModel {
   private final double singletonRatio;
   private final String str;
   protected final MetaFeatureExtractor meta;
-  //private final MetaFeatureExtractor metaAnaphor;
 
   public static class Builder {
     private final String name;
@@ -26,12 +24,12 @@ public class PairwiseModel {
     private final String source = StatisticalCorefTrainer.extractedFeaturesFile;
 
     //private MetaFeatureExtractor metaAnaphor = null;
-    private int trainingExamples = 15000000;
+    private int trainingExamples = 100000000;
     private int epochs = 8;
     private Loss loss = SimpleLinearClassifier.log();
-    private Penalty penalty = SimpleLinearClassifier.none();
     private LearningRateSchedule learningRateSchedule =
         SimpleLinearClassifier.adaGrad(0.05, 30.0);
+    private double regularizationStrength = 1e-7;
     private double singletonRatio = 0.3;
     private String modelFile = null;
 
@@ -48,8 +46,8 @@ public class PairwiseModel {
       { this.singletonRatio = singletonRatio; return this; }
     public Builder loss(Loss loss)
       { this.loss = loss; return this; }
-    public Builder penalty(Penalty penalty)
-      { this.penalty = penalty; return this; }
+    public Builder regularizationStrength(double regularizationStrength)
+      { this.regularizationStrength = regularizationStrength; return this; }
     public Builder learningRateSchedule(LearningRateSchedule learningRateSchedule)
       { this.learningRateSchedule = learningRateSchedule; return this; }
     public Builder modelPath(String modelFile)
@@ -71,9 +69,9 @@ public class PairwiseModel {
     trainingExamples = builder.trainingExamples;
     epochs = builder.epochs;
     singletonRatio = builder.singletonRatio;
-    classifier = new SimpleLinearClassifier(builder.loss, builder.penalty, builder.learningRateSchedule,
-        builder.modelFile == null ? null :
-          (builder.modelFile.endsWith("model.ser") ? builder.modelFile :
+    classifier = new SimpleLinearClassifier(builder.loss, builder.learningRateSchedule,
+        builder.regularizationStrength, builder.modelFile == null ? null :
+          (builder.modelFile.endsWith(".ser") ? builder.modelFile :
           StatisticalCorefTrainer.pairwiseModelsPath + builder.modelFile + "/model.ser"));
     str = StatisticalCorefUtils.fieldValues(builder);
   }

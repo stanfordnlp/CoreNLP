@@ -438,6 +438,14 @@ public class Preprocessor {
 
   /** Process discourse information */
   protected static void processDiscourse(Document doc, Dictionaries dict) {
+    Boolean useMarkedDiscourse =
+        doc.annotation.get(CoreAnnotations.UseMarkedDiscourseAnnotation.class);
+    if (useMarkedDiscourse == null || !useMarkedDiscourse) {
+      for (CoreLabel l : doc.annotation.get(CoreAnnotations.TokensAnnotation.class)) {
+        l.remove(CoreAnnotations.SpeakerAnnotation.class);
+        l.remove(CoreAnnotations.UtteranceAnnotation.class);
+      }
+    }
 
     setUtteranceAndSpeakerAnnotation(doc);
 //    markQuotations(this.annotation.get(CoreAnnotations.SentencesAnnotation.class), false);

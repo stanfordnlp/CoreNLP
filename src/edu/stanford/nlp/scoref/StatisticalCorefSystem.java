@@ -19,6 +19,7 @@ import edu.stanford.nlp.hcoref.data.Dictionaries;
 import edu.stanford.nlp.hcoref.data.Document;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.StringUtils;
 
 public abstract class StatisticalCorefSystem {
   public final Dictionaries dictionaries;
@@ -28,8 +29,8 @@ public abstract class StatisticalCorefSystem {
   public StatisticalCorefSystem(Properties props) {
     this.props = StatisticalCorefProperties.addHcorefProps(props);
     try {
-      dictionaries = new Dictionaries(props);
-      docMaker = new CorefDocMaker(props, dictionaries);
+      dictionaries = new Dictionaries(this.props);
+      docMaker = new CorefDocMaker(this.props, dictionaries);
     } catch (Exception e) {
       throw new RuntimeException("Error initializing coref system", e);
     }
@@ -46,10 +47,10 @@ public abstract class StatisticalCorefSystem {
              StatisticalCorefProperties.wordCountsPath(props));
        } else {
          return new BestFirstCorefSystem(props,
-             StatisticalCorefProperties.wordCountsPath(props),
              StatisticalCorefProperties.rankingModelPath(props),
+             StatisticalCorefProperties.wordCountsPath(props),
              StatisticalCorefProperties.maxMentionDistance(props),
-             StatisticalCorefProperties.pairwiseScoreThreshold(props));
+             StatisticalCorefProperties.pairwiseScoreThresholds(props));
        }
      } catch (Exception e) {
        throw new RuntimeException("Error creating coreference system", e);
@@ -57,17 +58,24 @@ public abstract class StatisticalCorefSystem {
   }
 
   public void annotate(Annotation ann) {
+    annotate(ann, true);
+  }
+
+  public void annotate(Annotation ann, boolean removeSingletonClusters) {
     try {
       Document document = docMaker.makeDocument(ann);
       runCoref(document);
-      StatisticalCorefUtils.removeSingletonClusters(document);
+      if (removeSingletonClusters) {
+        StatisticalCorefUtils.removeSingletonClusters(document);
+      }
+
       Map<Integer, CorefChain> result = Generics.newHashMap();
       for(CorefCluster c : document.corefClusters.values()) {
         result.put(c.clusterID, new CorefChain(c, document.positions));
       }
       ann.set(CorefCoreAnnotations.CorefChainAnnotation.class, result);
     } catch (Exception e) {
-      throw new RuntimeException("Error making document", e);
+      throw new RuntimeException("Error annotating document with coref", e);
     }
   }
 
@@ -117,7 +125,7 @@ public abstract class StatisticalCorefSystem {
   public abstract void runCoref(Document document);
 
   public static void main(String[] args) throws Exception {
-    Properties props = StatisticalCorefProperties.loadProps(args[0]);
+    Properties props = StringUtils.argsToProperties(new String[] {"-props", args[0]});
     StatisticalCorefSystem coref = StatisticalCorefSystem.fromProps(props);
     coref.runOnConll();
   }

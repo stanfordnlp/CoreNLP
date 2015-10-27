@@ -29,7 +29,7 @@ public class ClusteringCorefSystem extends StatisticalCorefSystem {
         MetaFeatureExtractor.newBuilder().build())
         .modelPath(rankingPath).build();
     anaphoricityModel = PairwiseModel.newBuilder("anaphoricity",
-        StatisticalCorefTrainer.anaphoricityMFE())
+        MetaFeatureExtractor.anaphoricityMFE())
         .modelPath(anaphoricityPath).build();
     extractor = new FeatureExtractor(props, dictionaries, null, wordCountsPath);
   }

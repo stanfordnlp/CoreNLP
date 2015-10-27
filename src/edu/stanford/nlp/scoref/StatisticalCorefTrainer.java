@@ -4,13 +4,13 @@ import java.io.File;
 import java.util.Properties;
 
 import edu.stanford.nlp.hcoref.data.Dictionaries;
-import edu.stanford.nlp.scoref.MetaFeatureExtractor.SingleConjunction;
 import edu.stanford.nlp.scoref.StatisticalCorefProperties.Dataset;
+import edu.stanford.nlp.util.StringUtils;
 
 public class StatisticalCorefTrainer {
-  public static final String CLASSIFICATION_MODEL = "classification-un";
-  public static final String RANKING_MODEL = "ranking-un";
-  public static final String ANAPHORICITY_MODEL = "anaphoricity-un";
+  public static final String CLASSIFICATION_MODEL = "classification";
+  public static final String RANKING_MODEL = "ranking";
+  public static final String ANAPHORICITY_MODEL = "anaphoricity";
   public static final String CLUSTERING_MODEL_NAME = "clusterer";
   public static final String EXTRACTED_FEATURES_NAME = "features";
 
@@ -41,7 +41,7 @@ public class StatisticalCorefTrainer {
     makeDir(clusteringModelsPath);
   }
 
-  public static void setDataPath(String name, boolean isTraining) {
+  public static void setDataPath(String name) {
     String dataPath = trainingPath + name + "/";
     String extractedFeaturesPath = dataPath + EXTRACTED_FEATURES_NAME + "/";
     makeDir(dataPath);
@@ -53,62 +53,52 @@ public class StatisticalCorefTrainer {
     mentionTypesFile = dataPath + "mention_types.ser";
     compressorFile = extractedFeaturesPath + "compressor.ser";
     extractedFeaturesFile = extractedFeaturesPath + "compressed_features.ser";
-    if (isTraining) {
-      wordCountsFile = dataPath + "word_counts.ser";
-    }
   }
 
-  public static MetaFeatureExtractor anaphoricityMFE() {
-    return MetaFeatureExtractor.newBuilder()
-    .singleConjunctions(new SingleConjunction[] {SingleConjunction.INDEX,
-            SingleConjunction.INDEX_LAST})
-    .disallowedPrefixes(new String[] {"parent-word"})
-    .anaphoricityClassifier(true)
-    .build();
-  }
-
-  public static void preprocess(Properties props, Dictionaries dictionaries, boolean isTrainSet)
+  private static void preprocess(Properties props, Dictionaries dictionaries, boolean isTrainSet)
       throws Exception {
     (isTrainSet ? new DatasetBuilder(StatisticalCorefProperties.minClassImbalance(props),
         StatisticalCorefProperties.minTrainExamplesPerDocument(props)) :
-          new DatasetBuilder()).run(props, dictionaries);
-    new MetadataWriter(isTrainSet).run(props, dictionaries);
-    new FeatureExtractorRunner(props, dictionaries).run(props, dictionaries);
-  }
-  public static void test(PairwiseModel classificationModel, PairwiseModel rankingModel,
-      PairwiseModel anaphoricityModel) throws Exception {
-    PairwiseModelTrainer.test(classificationModel, predictionsName, false);
-    PairwiseModelTrainer.test(rankingModel, predictionsName, false);
-    PairwiseModelTrainer.test(anaphoricityModel, predictionsName, true);
+          new DatasetBuilder()).runFromScratch(props, dictionaries);
+    new MetadataWriter(isTrainSet).runFromScratch(props, dictionaries);
+    new FeatureExtractorRunner(props, dictionaries).runFromScratch(props, dictionaries);
   }
 
   public static void doTraining(Properties props) throws Exception {
+    props = StatisticalCorefProperties.addHcorefProps(props);
+    setTrainingPath(props);
     Dictionaries dictionaries = new Dictionaries(props);
 
-    setDataPath("train", true);
+    setDataPath("train");
+    wordCountsFile = "train/word_counts.ser";
     StatisticalCorefProperties.setInput(props, Dataset.TRAIN);
     preprocess(props, dictionaries, true);
 
+    setDataPath("dev");
+    StatisticalCorefProperties.setInput(props, Dataset.DEV);
+    preprocess(props, dictionaries, false);
+
+    setDataPath("train");
+    dictionaries = null;
     PairwiseModel classificationModel = PairwiseModel.newBuilder(CLASSIFICATION_MODEL,
         MetaFeatureExtractor.newBuilder().build()).build();
     PairwiseModel rankingModel = PairwiseModel.newBuilder(RANKING_MODEL,
         MetaFeatureExtractor.newBuilder().build()).build();
     PairwiseModel anaphoricityModel = PairwiseModel.newBuilder(ANAPHORICITY_MODEL,
-        anaphoricityMFE()).trainingExamples(5000000).build();
+        MetaFeatureExtractor.anaphoricityMFE()).trainingExamples(5000000).build();
     PairwiseModelTrainer.trainRanking(rankingModel);
     PairwiseModelTrainer.trainClassification(classificationModel, false);
     PairwiseModelTrainer.trainClassification(anaphoricityModel, true);
 
-    setDataPath("dev", false);
-    StatisticalCorefProperties.setInput(props, Dataset.DEV);
-    preprocess(props, dictionaries, false);
-    test(classificationModel, rankingModel, anaphoricityModel);
+    setDataPath("dev");
+    PairwiseModelTrainer.test(classificationModel, predictionsName, false);
+    PairwiseModelTrainer.test(rankingModel, predictionsName, false);
+    PairwiseModelTrainer.test(anaphoricityModel, predictionsName, true);
+
+    new Clusterer().doTraining(CLUSTERING_MODEL_NAME);
   }
 
   public static void main(String[] args) throws Exception {
-    Properties props = StatisticalCorefProperties.loadProps(args[0]);
-    setTrainingPath(props);
-    doTraining(props);
-    new Clusterer().doTraining(CLUSTERING_MODEL_NAME);
+    doTraining(StringUtils.argsToProperties(new String[] {"-props", args[0]}));
   }
 }

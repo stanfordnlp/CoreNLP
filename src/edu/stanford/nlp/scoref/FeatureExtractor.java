@@ -20,7 +20,6 @@ import edu.stanford.nlp.hcoref.data.Document;
 import edu.stanford.nlp.hcoref.data.Document.DocType;
 import edu.stanford.nlp.hcoref.data.Mention;
 import edu.stanford.nlp.hcoref.md.RuleBasedCorefMentionFinder;
-import edu.stanford.nlp.hcoref.sieve.RFSieve;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations.SpeakerAnnotation;
@@ -56,6 +55,7 @@ public class FeatureExtractor {
   private final Set<String> vocabulary;
   private final Compressor<String> compressor;
   private final boolean useConstituencyParse;
+  private final boolean useDocSource;
 
   public FeatureExtractor(Properties props, Dictionaries dictionaries,
       Compressor<String> compressor) {
@@ -72,6 +72,7 @@ public class FeatureExtractor {
     this.dictionaries = dictionaries;
     this.compressor = compressor;
     this.vocabulary = vocabulary;
+    this.useDocSource = StatisticalCorefProperties.conll(props);
     this.useConstituencyParse = StatisticalCorefProperties.useConstituencyParse(props);
   }
 
@@ -137,7 +138,6 @@ public class FeatureExtractor {
     Counter<String> features = new ClassicCounter<>();
 
     // type features
-    features.incrementCount("role=" + getRole(m));
     features.incrementCount("mention-type=" + m.mentionType);
     features.incrementCount("gender=" + m.gender);
     features.incrementCount("person-fine=" + m.person);
@@ -154,9 +154,6 @@ public class FeatureExtractor {
     addNumeric(features, "mention-words", m.originalSpan.size());
     addNumeric(features, "sentence-words", m.sentenceWords.size());
     features.incrementCount("sentence-words=" + bin(m.sentenceWords.size()));
-    if (m.mentionType == MentionType.LIST) {
-      addNumeric(features, "num-list-items=", RFSieve.numEntitiesInList(m));
-    }
     features.incrementCount("mention-position", m.mentionNum
         / (double) doc.predictedMentions.size());
     features.incrementCount("sentence-position", m.sentNum / (double) doc.numSentences);
@@ -262,9 +259,11 @@ public class FeatureExtractor {
 
     // global features
     features.incrementCount("bias");
-    features.incrementCount("doc-type=" + doc.docType);
-    if(doc.docInfo != null && doc.docInfo.containsKey("DOC_ID")) {
-      features.incrementCount("doc-source=" + doc.docInfo.get("DOC_ID").split("/")[1]);
+    if (useDocSource) {
+      features.incrementCount("doc-type=" + doc.docType);
+      if(doc.docInfo != null && doc.docInfo.containsKey("DOC_ID")) {
+        features.incrementCount("doc-source=" + doc.docInfo.get("DOC_ID").split("/")[1]);
+      }
     }
 
     // singleton feature conjunctions
@@ -359,7 +358,6 @@ public class FeatureExtractor {
     addFeature(features, "discourse-you-PER0", m2.person == Person.YOU
         && doc.docType == DocType.ARTICLE
         && m2.headWord.get(CoreAnnotations.SpeakerAnnotation.class).equals("PER0"));
-    addFeature(features, "same-speaker-info", m2.speakerInfo != null && m2.speakerInfo == m1.speakerInfo);
     addFeature(features, "speaker-match-i-i", m2.number == Number.SINGULAR
         && dictionaries.firstPersonPronouns.contains(s1)
         && m1.number == Number.SINGULAR
@@ -381,8 +379,6 @@ public class FeatureExtractor {
         && (m2.headWord.get(CoreAnnotations.UtteranceAnnotation.class)
                 - m1.headWord.get(CoreAnnotations.UtteranceAnnotation.class) == 1)
         && doc.docType == DocType.CONVERSATION));
-    addFeature(features, "discourse-match-reflexive-pronoun",
-        dictionaries.reflexivePronouns.contains(m2.headString) && Rules.entitySubjectObject(m2, m1));
     addFeature(features, "incompatible-not-match", m1.person != Person.I
         && m2.person != Person.I
         && (Rules.antecedentIsMentionSpeaker(doc, m1, m2, dictionaries)
@@ -400,40 +396,24 @@ public class FeatureExtractor {
     }
 
     // other dcoref features
-    addFeature(features, "apposition", m1.isApposition(m2));
     String firstWord1 = firstWord(m1).word().toLowerCase();
     addFeature(features, "indefinite-article-np", (m1.appositions == null &&
         m1.predicateNominatives == null &&
         (firstWord1.equals("a") || firstWord1.equals("an"))));
-    addFeature(features, "indefinite-pronoun", dictionaries.indefinitePronouns.contains(
-        m1.lowercaseNormalizedSpanString()));
-    addFeature(features, "indefinite-pronoun-start", dictionaries.indefinitePronouns.contains(
-        firstWord1));
     addFeature(features, "far-this", m2.lowercaseNormalizedSpanString().equals("this") &&
         Math.abs(m2.sentNum - m1.sentNum) > 3);
     addFeature(features, "per0-you-in-article", m2.person == Person.YOU &&
         doc.docType == DocType.ARTICLE &&
         m2.headWord.get(CoreAnnotations.SpeakerAnnotation.class).equals("PER0"));
     addFeature(features, "inside-in", m2.insideIn(m1) || m1.insideIn(m2));
-    addFeature(features, "common-noun-poper-noun", m1.mentionType != MentionType.PROPER &&
-              (m2.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class).startsWith("NNP")
-                      || !m2.headWord.word().substring(1).equals(m2.headWord.word().substring(1)
-                              .toLowerCase())));
     addFeature(features, "indefinite-determiners",
         dictionaries.indefinitePronouns.contains(m1.originalSpan.get(0).lemma())
             || dictionaries.indefinitePronouns.contains(m2.originalSpan.get(0).lemma()));
 
     addFeature(features, "entity-attributes-agree", Rules.entityAttributesAgree(c2, c1));
     addFeature(features, "entity-token-distance", Rules.entityTokenDistance(m2, m1));
-    addFeature(features, "same-list", m1.isMemberOfSameList(m2));
-    addFeature(features, "same-proper-head-last-word",
-        Rules.entitySameProperHeadLastWord(c2, c1, m2, m1));
-
     addFeature(features, "i-within-i", Rules.entityIWithinI(m2, m1, dictionaries));
     addFeature(features, "exact-string-match", Rules.entityExactStringMatch(c2, c1,dictionaries, doc.roleSet));
-    addFeature(features, "relaxed-string-match", Rules.entityRelaxedExactStringMatch(c2, c1, m2, m1, dictionaries, doc.roleSet));
-    addFeature(features, "entity-heads-agree",
-        Rules.entityHeadsAgree(c2, c1, m2, m1, dictionaries));
     addFeature(features, "entity-relaxed-heads-agree",
         Rules.entityRelaxedHeadsAgreeBetweenMentions(c2, c1, m2, m1));
     addFeature(features, "is-acronym", Rules.entityIsAcronym(doc, c2, c1));
@@ -558,7 +538,7 @@ public class FeatureExtractor {
     return getDependencyParent(m, m.headIndexedWord);
   }
 
-  public static SemanticGraphEdge getDependencyParent(Mention m, IndexedWord w) {
+  private static SemanticGraphEdge getDependencyParent(Mention m, IndexedWord w) {
     Iterator<SemanticGraphEdge> iterator = m.collapsedDependency.incomingEdgeIterator(w);
     if (iterator.hasNext()) {
       return iterator.next();

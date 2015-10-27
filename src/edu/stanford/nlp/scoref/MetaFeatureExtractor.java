@@ -70,6 +70,15 @@ public class MetaFeatureExtractor {
     str = StatisticalCorefUtils.fieldValues(builder);
   }
 
+  public static MetaFeatureExtractor anaphoricityMFE() {
+    return MetaFeatureExtractor.newBuilder()
+    .singleConjunctions(new SingleConjunction[] {SingleConjunction.INDEX,
+            SingleConjunction.INDEX_LAST})
+    .disallowedPrefixes(new String[] {"parent-word"})
+    .anaphoricityClassifier(true)
+    .build();
+  }
+
   public static Counter<String> filterOut(Counter<String> c, List<String> disallowedPrefixes) {
     Counter<String> c2 = new ClassicCounter<>();
     for (Map.Entry<String, Double> e : c.entrySet()) {

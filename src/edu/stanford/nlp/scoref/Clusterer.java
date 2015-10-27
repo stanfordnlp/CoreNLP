@@ -67,12 +67,12 @@ public class Clusterer {
   }
 
   public void doTraining(String modelName) {
-    classifier.setWeight("bias", -0.7);
-    classifier.setWeight("anaphorSeen", -2);
-    classifier.setWeight("max-ranking", 2);
-    classifier.setWeight("bias-single", -0.7);
-    classifier.setWeight("anaphorSeen-single", -2);
-    classifier.setWeight("max-ranking-single", 2);
+    classifier.setWeight("bias", -0.3);
+    classifier.setWeight("anaphorSeen", -1);
+    classifier.setWeight("max-ranking", 1);
+    classifier.setWeight("bias-single", -0.3);
+    classifier.setWeight("anaphorSeen-single", -1);
+    classifier.setWeight("max-ranking-single", 1);
 
     String outputPath = StatisticalCorefTrainer.clusteringModelsPath +
         modelName + "/";
@@ -83,7 +83,6 @@ public class Clusterer {
 
     PrintWriter progressWriter;
     List<ClustererDoc> trainDocs;
-    List<ClustererDoc> validateDocs;
     try {
       PrintWriter configWriter = new PrintWriter(outputPath + "config", "UTF-8");
       configWriter.print(StatisticalCorefUtils.fieldValues(this));
@@ -91,21 +90,13 @@ public class Clusterer {
       progressWriter = new PrintWriter(outputPath + "progress", "UTF-8");
 
       Redwood.log("scoref.train", "Loading training data");
-      StatisticalCorefTrainer.setDataPath("dev", false);
+      StatisticalCorefTrainer.setDataPath("dev");
       trainDocs = ClustererDataLoader.loadDocuments(MAX_DOCS);
-
-      //Redwood.log("scoref.train", "Loading validation data");
-      //StatisticalCorefTrainer.setDataPath("dev");
-      //validateDocs = ClustererDataLoader.loadDocuments(MAX_DOCS);
-      validateDocs = new ArrayList<>();
     } catch (Exception e) {
       throw new RuntimeException("Error setting up training", e);
     }
 
-    double bestTrain = 0;
-    double bestTrainValidate = 0;
-    double bestValidate = 0;
-
+    double bestTrainScore = 0;
     List<List<Pair<CandidateAction, CandidateAction>>> examples = new ArrayList<>();
     for (int iteration = 0; iteration < RETRAIN_ITERATIONS; iteration++) {
       Redwood.log("scoref.train", "ITERATION " + iteration);
@@ -127,18 +118,11 @@ public class Clusterer {
 
       if (iteration % EVAL_FREQUENCY == 0) {
         double trainScore = evaluatePolicy(trainDocs, true);
-        double validateScore = evaluatePolicy(validateDocs, false);
-
-        if (trainScore > bestTrain) {
-          bestTrain = trainScore;
-          bestTrainValidate = validateScore;
+        if (trainScore > bestTrainScore) {
+          bestTrainScore = trainScore;
           writeModel("best", outputPath);
         }
 
-        if (validateScore > bestValidate) {
-          bestValidate = validateScore;
-          writeModel("best_val", outputPath);
-        }
         if (iteration % 10 == 0) {
           writeModel("iter_" + iteration, outputPath);
         }
@@ -150,30 +134,22 @@ public class Clusterer {
         double fhr = featuresCacheHits /
             (double) (featuresCacheHits + featuresCacheMisses);
         Redwood.log("scoref.train", modelName);
-        Redwood.log("scoref.train", String.format("Best train: %.4f", bestTrain));
-        Redwood.log("scoref.train", String.format("Best validate: %.4f %.4f", bestTrainValidate,
-            bestValidate));
+        Redwood.log("scoref.train", String.format("Best train: %.4f", bestTrainScore));
         Redwood.log("scoref.train", String.format("Time elapsed: %.2f", timeElapsed));
         Redwood.log("scoref.train", String.format("Cost hit rate: %.4f", ffhr));
         Redwood.log("scoref.train", String.format("Score hit rate: %.4f", shr));
         Redwood.log("scoref.train", String.format("Features hit rate: %.4f", fhr));
-        //classifier.printWeightVector(null);
         Redwood.log("scoref.train", "");
 
         progressWriter.write(iteration + " " + trainScore + " "
-            + validateScore + " " + timeElapsed + " " + ffhr + " " + shr
+            + " " + timeElapsed + " " + ffhr + " " + shr
             + " " + fhr + "\n");
         progressWriter.flush();
       }
 
       for (int docInd = 0; docInd < trainDocs.size(); docInd++) {
-        //Redwood.log("scoref.train", "On doc " + docInd);
-        //long start = System.currentTimeMillis();
         examples.add(runPolicy(trainDocs.get(docInd), Math.pow(EXPERT_DECAY,
-            (iteration + 1))));
-        //Redwood.log("scoref.train", String.format("Time spent: %.2f",
-        //    (System.currentTimeMillis() - start) / 1000.0));
-      }
+            (iteration + 1))));      }
     }
 
     progressWriter.close();
@@ -302,7 +278,6 @@ public class Clusterer {
           break;
         }
         if (i >= EARLY_STOP_THRESHOLD && i / score > EARLY_STOP_VAL) {
-          //Redwood.log("scoref.train", String.format("Early stopping at %d %.3f", i, score));
           break;
         }
       }
@@ -461,7 +436,7 @@ public class Clusterer {
       noMerge.doAction(false);
       double noMergeB3 = noMerge.getFinalCost(classifier);
 
-      double weight = 1;//doc.mentions.size() / 100.0;
+      double weight = doc.mentions.size() / 100.0;
       double maxB3 = Math.max(mergeB3, noMergeB3);
       return new Pair<CandidateAction, CandidateAction>(
           new CandidateAction(mergeFeatures, weight * (maxB3 - mergeB3)),
@@ -582,8 +557,8 @@ public class Clusterer {
     features.incrementCount("max", maxScore);
     features.incrementCount("min", minScore);
     for (String key : counts.keySet()) {
-      features.incrementCount("avg" + key, totals.getCount(key) / counts.getCount(key));
-      features.incrementCount("avgLog" + key, totalsLog.getCount(key) / counts.getCount(key));
+      features.incrementCount("avg" + key, totals.getCount(key) / mentionPairs.size());
+      features.incrementCount("avgLog" + key, totalsLog.getCount(key) / mentionPairs.size());
     }
 
     return features;
@@ -625,7 +600,6 @@ public class Clusterer {
       earliest1 = earliest2;
       earliest2 = tmp;
     }
-
     features.incrementCount("anaphoricity", doc.anaphoricityScores.getCount(earliest2));
 
     if (c1.mentions.size() == 1 && c2.mentions.size() == 1) {
@@ -673,20 +647,20 @@ public class Clusterer {
   }
 
   private static double cappedLog(double x) {
-    return Math.max(Math.log(Math.max(x, 1e-10)), -8);
+    return Math.log(Math.max(x, 1e-8));
   }
 
   private static class ClustererClassifier extends SimpleLinearClassifier {
     public ClustererClassifier(double learningRate) {
       super(SimpleLinearClassifier.risk(),
-          SimpleLinearClassifier.none(),
-          SimpleLinearClassifier.constant(learningRate));
+          SimpleLinearClassifier.constant(learningRate),
+          0);
     }
 
     public ClustererClassifier(String modelFile, double learningRate) {
       super(SimpleLinearClassifier.risk(),
-          SimpleLinearClassifier.none(),
           SimpleLinearClassifier.constant(learningRate),
+          0,
           modelFile);
     }
 

@@ -12,23 +12,19 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 public class SimpleLinearClassifier {
   private final Loss defaultLoss;
-  private final Penalty penalty;
   private final LearningRateSchedule learningRateSchedule;
+  private final double regularizationStrength;
   private final Counter<String> weights;
+  private final Counter<String> accessTimes;
+  private int examplesSeen;
 
-  public SimpleLinearClassifier(Loss loss, Penalty penalty,
-      LearningRateSchedule learningRateSchedule) {
-    this.defaultLoss = loss;
-    this.penalty = penalty;
-    this.learningRateSchedule = learningRateSchedule;
-    this.weights = new ClassicCounter<>();
+  public SimpleLinearClassifier(Loss loss, LearningRateSchedule learningRateSchedule,
+      double regularizationStrength) {
+    this(loss, learningRateSchedule, regularizationStrength, null);
   }
 
-  public SimpleLinearClassifier(Loss loss, Penalty penalty,
-      LearningRateSchedule learningRateSchedule, String modelFile) {
-    this.defaultLoss = loss;
-    this.penalty = penalty;
-    this.learningRateSchedule = learningRateSchedule;
+  public SimpleLinearClassifier(Loss loss,LearningRateSchedule learningRateSchedule,
+      double regularizationStrength, String modelFile) {
     if (modelFile != null) {
       try {
         this.weights = IOUtils.readObjectFromURLOrClasspathOrFileSystem(modelFile);
@@ -38,6 +34,12 @@ public class SimpleLinearClassifier {
     } else {
       this.weights = new ClassicCounter<>();
     }
+
+    this.defaultLoss = loss;
+    this.regularizationStrength = regularizationStrength;
+    this.learningRateSchedule = learningRateSchedule;
+    accessTimes = new ClassicCounter<>();
+    examplesSeen = 0;
   }
 
   public void learn(Counter<String> features, double label, double weight) {
@@ -45,16 +47,21 @@ public class SimpleLinearClassifier {
   }
 
   public void learn(Counter<String> features, double label, double weight, Loss loss) {
+    examplesSeen++;
     double dloss = loss.derivative(label, weightFeatureProduct(features));
     for (Map.Entry<String, Double> feature : features.entrySet()) {
-      String featureName = feature.getKey();
-      double w = weights.getCount(featureName);
-      double dobjective = weight * (-dloss * feature.getValue() - penalty.derivative(w));
-
-      learningRateSchedule.update(featureName, dobjective);
-      if (dobjective != 0) {
-        weights.incrementCount(featureName, dobjective *
-            learningRateSchedule.getLearningRate(featureName));
+      double dfeature = weight * (-dloss * feature.getValue());
+      if (dfeature != 0) {
+        String featureName = feature.getKey();
+        learningRateSchedule.update(featureName, dfeature);
+        double lr = learningRateSchedule.getLearningRate(featureName);
+        double w = weights.getCount(featureName);
+        double dreg = weight * regularizationStrength
+            * (examplesSeen - accessTimes.getCount(featureName));
+        double afterReg = (w - Math.signum(w) * dreg * lr);
+        weights.setCount(featureName, (Math.signum(afterReg) != Math.signum(w) ? 0 : afterReg)
+            + dfeature * lr);
+        accessTimes.setCount(featureName, examplesSeen);
       }
     }
   }
@@ -188,54 +195,6 @@ public class SimpleLinearClassifier {
       @Override
       public String toString() {
         return String.format("risk");
-      }
-    };
-  }
-
-  // ---------- REGULARIZATION PENALTIES ----------
-
-  public static interface Penalty {
-    public double derivative(double w);
-  }
-
-  public static Penalty none() {
-    return new Penalty() {
-      @Override
-      public double derivative(double w) {
-        return 0;
-      }
-
-      @Override
-      public String toString() {
-        return "none";
-      }
-    };
-  }
-
-  public static Penalty l1(final double alpha) {
-    return new Penalty() {
-      @Override
-      public double derivative(double w) {
-        return w == 0.0 ? 0 : alpha * Math.signum(w);
-      }
-
-      @Override
-      public String toString() {
-        return String.format("l1(%s)", alpha);
-      }
-    };
-  }
-
-  public static Penalty l2(final double alpha) {
-    return new Penalty() {
-      @Override
-      public double derivative(double w) {
-        return alpha * w;
-      }
-
-      @Override
-      public String toString() {
-        return String.format("l2(%s)", alpha);
       }
     };
   }

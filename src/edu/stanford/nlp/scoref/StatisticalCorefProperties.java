@@ -1,17 +1,13 @@
 package edu.stanford.nlp.scoref;
 
+import java.util.Arrays;
 import java.util.Properties;
 
 import edu.stanford.nlp.hcoref.CorefProperties;
 import edu.stanford.nlp.util.PropertiesUtils;
-import edu.stanford.nlp.util.StringUtils;
 
 public class StatisticalCorefProperties {
   private static final String DEFAULT_MODELS_PATH = "edu/stanford/nlp/models/dcoref/";
-
-  public static Properties loadProps(String file) {
-    return addHcorefProps(StringUtils.argsToProperties(new String[] {"-props", file}));
-  }
 
   public static Properties addHcorefProps(Properties props) {
     Properties newProps = (Properties) props.clone();
@@ -24,15 +20,17 @@ public class StatisticalCorefProperties {
     }
 
     if (conll(props)) {
-      newProps.setProperty(CorefProperties.INPUT_TYPE_PROP, "conll");
       newProps.setProperty(CorefProperties.PARSER_PROP, "true");
       newProps.setProperty(CorefProperties.MD_TYPE_PROP, "rule");
       newProps.setProperty("coref.useMarkedDiscourse", "true");
     } else {
+      String mdPath = PropertiesUtils.getString(newProps, "scoref.mentionDetectionModel",
+          "edu/stanford/nlp/models/hcoref/md-model.ser");
+      String mdDir = mdPath.substring(0, mdPath.lastIndexOf('/') + 1);
+      String mdModelName = mdPath.substring(mdPath.lastIndexOf('/') + 1);
+      newProps.setProperty("hcoref.md.model", mdModelName);
+      newProps.setProperty(CorefProperties.PATH_SERIALIZED_PROP, mdDir);
       newProps.setProperty(CorefProperties.MD_TYPE_PROP, "dependency");
-      newProps.setProperty("coref.md.model", "md-model.ser");
-      newProps.setProperty(CorefProperties.PATH_SERIALIZED_PROP,
-          "/Users/kevinclark/Programming/research/kbp/hybrid-conll/");
       newProps.setProperty(CorefProperties.USE_GOLD_POS_PROP, "false");
       newProps.setProperty(CorefProperties.USE_GOLD_NE_PROP, "false");
       newProps.setProperty(CorefProperties.USE_GOLD_PARSES_PROP, "false");
@@ -89,7 +87,7 @@ public class StatisticalCorefProperties {
   }
 
   private static String defaultModelPath(Properties props, String modelName) {
-    return DEFAULT_MODELS_PATH + modelName + (conll(props) ? "-conll" : "" + ".ser");
+    return DEFAULT_MODELS_PATH + modelName + (conll(props) ? "_conll" : "" + ".ser");
   }
 
   public static boolean cluster(Properties props) {
@@ -97,11 +95,19 @@ public class StatisticalCorefProperties {
   }
 
   public static int maxMentionDistance(Properties props) {
-    return PropertiesUtils.getInt(props, "coref.maxMentionDistance", Integer.MAX_VALUE);
+    return PropertiesUtils.getInt(props, "scoref.maxMentionDistance", 100);
   }
 
-  public static double pairwiseScoreThreshold(Properties props) {
-    return PropertiesUtils.getDouble(props, "coref.pairwiseScoreThreshold", 0.3);
+  public static double[] pairwiseScoreThresholds(Properties props) {
+    String thresholdsProp = (String) props.get("scoref.pairwiseScoreThresholds");
+    if (thresholdsProp != null) {
+      String[] split = thresholdsProp.split(",");
+      if (split.length == 4) {
+        return Arrays.stream(split).mapToDouble(Double::parseDouble).toArray();
+      }
+    }
+    double threshold = PropertiesUtils.getDouble(props, "scoref.pairwiseScoreThresholds", 0.3);
+    return new double[] {threshold, threshold, threshold, threshold};
   }
 
   public static boolean useConstituencyParse(Properties props) {

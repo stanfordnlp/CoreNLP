@@ -57,12 +57,6 @@ public class MetadataWriter implements DocumentProcessor {
       Pair<Integer, Integer> pair = e.getKey();
       boolean label = e.getValue();
       assert(pair.first >= 0 && pair.second >= 0);
-      if (!labeledPairs.containsKey(pair)) {
-        System.out.println(id + " " + pair);
-        System.out.println(savedPairs.keySet());
-        System.out.println(labeledPairs.keySet());
-        assert(labeledPairs.containsKey(pair));
-      }
       assert(label == labeledPairs.get(pair));
     }
 
