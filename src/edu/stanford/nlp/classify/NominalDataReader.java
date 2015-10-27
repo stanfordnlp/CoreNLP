@@ -12,7 +12,9 @@ import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
-import edu.stanford.nlp.util.logging.Logging;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A class to read some UCI datasets into RVFDatum. Will incrementally add formats.
@@ -24,6 +26,8 @@ import edu.stanford.nlp.util.logging.Logging;
  */
 public class NominalDataReader {
   Map<String, Index<String>> indices = Generics.newHashMap(); // an Index for each feature so that its values are coded as integers
+
+  final static Logger logger = LoggerFactory.getLogger(NominalDataReader.class);
 
   /**
    * the class is the last column and it skips the next-to-last column because it is a unique id in the audiology data
@@ -68,7 +72,7 @@ public class NominalDataReader {
       int valInd = ind.indexOf(values[index]);
       if (valInd == -1) {
         valInd = 0;
-        Logging.logger(NominalDataReader.class).info("unknown attribute value " + values[index] + " of attribute " + attrNo);
+        logger.info("unknown attribute value " + values[index] + " of attribute " + attrNo);
       }
       c.incrementCount(featKey, valInd);
       attrNo++;

@@ -34,12 +34,14 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.logging.Logging;
 
 import java.io.PrintStream;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Collection;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A Naive Bayes classifier with a fixed number of features.
@@ -61,6 +63,8 @@ public class NaiveBayesClassifier<L, F> implements Classifier<L, F>, RVFClassifi
   private Counter<L> priorZero; //if we need to add the zeros, pre-compute the weight for all zeros for each class
   private Set<L> labels;
   private final Integer zero = Integer.valueOf(0);
+
+  final static Logger logger = LoggerFactory.getLogger(NaiveBayesClassifier.class);
 
   public Collection<L> labels() {
     return labels;
@@ -126,7 +130,7 @@ public class NaiveBayesClassifier<L, F> implements Classifier<L, F>, RVFClassifi
       }
       total++;
     }
-    Logging.logger(this.getClass()).info("correct " + correct + " out of " + total);
+    logger.info("correct " + correct + " out of " + total);
     return correct / (float) total;
   }
 

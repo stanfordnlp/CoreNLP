@@ -27,7 +27,9 @@ import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
-import edu.stanford.nlp.util.logging.Logging;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -47,6 +49,8 @@ import edu.stanford.nlp.util.logging.Logging;
 public class Dataset<L, F> extends GeneralDataset<L, F> {
 
   private static final long serialVersionUID = -3883164942879961091L;
+
+  final static Logger logger = LoggerFactory.getLogger(Dataset.class);
 
   public Dataset() {
     this(10);
@@ -217,7 +221,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     for (int i = 1; i < line.length; i++) {
       String[] f = line[i].split(":");
       if (f.length != 2) {
-        Logging.logger(Dataset.class).info("Dataset error: line " + line1);
+        logger.info("Dataset error: line " + line1);
       }
       int val = (int) Double.parseDouble(f[1]);
       for (int j = 0; j < val; j++) {
@@ -398,7 +402,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
    */
   @Override
   public void summaryStatistics() {
-    Logging.logger(Dataset.class).info(toSummaryStatistics());
+    logger.info(toSummaryStatistics());
   }
 
   /** A String that is multiple lines of text giving summary statistics.
@@ -595,7 +599,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     Index<F> newFeatureIndex = new HashIndex<F>();
     for (int i = 0; i < scoredFeatures.size() && i < numFeatures; i++) {
       newFeatureIndex.add(scoredFeatures.get(i).object());
-      //Logging.logger(this.getClass()).info(scoredFeatures.get(i));
+      //logger.info(scoredFeatures.get(i));
     }
 
     for (int i = 0; i < size; i++) {
@@ -637,7 +641,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
 
       // convert the document to binary feature representation
       boolean[] doc = new boolean[featureIndex.size()];
-      //Logging.logger(this.getClass()).info(i);
+      //logger.info(i);
       for (int j = 0; j < data[i].length; j++) {
         doc[data[i][j]] = true;
       }
@@ -699,8 +703,8 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
 
       }
 
-        //Logging.logger(this.getClass()).info(pFeature+" * "+sumFeature+" = +"+);
-        //Logging.logger(this.getClass()).info("^ "+pNotFeature+" "+sumNotFeature);
+        //logger.info(pFeature+" * "+sumFeature+" = +"+);
+        //logger.info("^ "+pNotFeature+" "+sumNotFeature);
 
       ig[i] += pFeature*sumFeature + pNotFeature*sumNotFeature;
       /* earlier the line above used to be: ig[i] = pFeature*sumFeature + pNotFeature*sumNotFeature;

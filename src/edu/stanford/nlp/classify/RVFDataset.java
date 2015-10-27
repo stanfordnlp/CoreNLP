@@ -28,7 +28,9 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.HashIndex;
-import edu.stanford.nlp.util.logging.Logging;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An interfacing class for {@link ClassifierFactory} that incrementally builds
@@ -55,6 +57,8 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
                               // for normalization.
   double[] means;
   double[] stdevs; // means and stdevs of features, used for
+
+  final static Logger logger = LoggerFactory.getLogger(RVFDataset.class);
 
   /*
    * Store source and id of each datum; optional, and not fully supported.
@@ -518,7 +522,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
    */
   @Override
   public void summaryStatistics() {
-    Logging.logger(this.getClass()).info("numDatums: " + size);
+    logger.info("numDatums: " + size);
     System.err.print("numLabels: " + labelIndex.size() + " [");
     Iterator<L> iter = labelIndex.iterator();
     while (iter.hasNext()) {
@@ -527,8 +531,8 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
         System.err.print(", ");
       }
     }
-    Logging.logger(this.getClass()).info("]");
-    Logging.logger(this.getClass()).info("numFeatures (Phi(X) types): " + featureIndex.size());
+    logger.info("]");
+    logger.info("numFeatures (Phi(X) types): " + featureIndex.size());
     /*for(int i = 0; i < data.length; i++) {
       for(int j = 0; j < data[i].length; j++) {
       System.out.println(data[i][j]);

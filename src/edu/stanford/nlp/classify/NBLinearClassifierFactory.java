@@ -2,9 +2,11 @@ package edu.stanford.nlp.classify;
 
 import edu.stanford.nlp.ling.BasicDatum;
 import edu.stanford.nlp.optimization.GoldenSectionLineSearch;
-import edu.stanford.nlp.util.logging.Logging;
 
 import java.util.function.Function;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides a medium-weight implementation of Bernoulli (or binary)
@@ -36,6 +38,8 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
   private boolean tuneSigma = false;
   private int folds;
 
+  final static Logger logger = LoggerFactory.getLogger(NBLinearClassifierFactory.class);
+
 
   @Override
   protected double[][] trainWeights(GeneralDataset<L, F> data) {
@@ -54,13 +58,13 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
       tuneSigma(data, labels);
     }
     if (VERBOSE) {
-      Logging.logger(this.getClass()).info("NB CF: " + data.length + " data items ");
+      logger.info("NB CF: " + data.length + " data items ");
       for (int i = 0; i < data.length; i++) {
         System.err.print("Datum " + i + ": " + labels[i] + ":");
         for (int j = 0; j < data[i].length; j++) {
           System.err.print(" " + data[i][j]);
         }
-        Logging.logger(this.getClass()).info("");
+        logger.info("");
       }
     }
     int numFeatures = numFeatures();
@@ -94,7 +98,7 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
           double p_c = (n_c[c] + epsilon) / (n + numClasses * epsilon);
           double p_c_f = (n_fc[f][c] + sigma) / (n_f[f] + sigma * numClasses);
           if (VERBOSE) {
-            Logging.logger(this.getClass()).info("Prob ratio(f=" + f + ",c=" + c + ") = " + p_c_f / p_c + " (nc=" + n_c[c] + ", nf=" + n_f[f] + ", nfc=" + n_fc[f][c] + ")");
+            logger.info("Prob ratio(f=" + f + ",c=" + c + ") = " + p_c_f / p_c + " (nc=" + n_c[c] + ", nf=" + n_f[f] + ", nfc=" + n_fc[f][c] + ")");
           }
           weights[f][c] = Math.log(p_c_f / p_c);
         }
@@ -156,7 +160,7 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
       double score = 0.0;
       double sumScore = 0.0;
       int foldSize, nbCV;
-      Logging.logger(this.getClass()).info("Trying sigma = " + trialSigma);
+      logger.info("Trying sigma = " + trialSigma);
       //test if enough training data
       if (data.length >= folds) {
         foldSize = data.length / folds;
