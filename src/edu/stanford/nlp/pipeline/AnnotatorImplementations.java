@@ -200,10 +200,24 @@ public class AnnotatorImplementations {
   }
 
   /**
-   * Annotate for coreference (statistical)
+   * Annotate for mention (statistical or hybrid)
+   */
+  public Annotator mention(Properties properties) {
+    // TO DO: split up coref and mention properties
+    Properties corefProperties = PropertiesUtils.extractPrefixedProperties(properties,
+            Annotator.STANFORD_COREF + ".",
+            false);
+    return new MentionAnnotator(corefProperties);
+  }
+
+  /**
+   * Annotate for coreference (statistical or hybrid)
    */
   public Annotator coref(Properties properties) {
-    return new HybridCorefAnnotator(properties);
+    Properties corefProperties = PropertiesUtils.extractPrefixedProperties(properties,
+            Annotator.STANFORD_COREF + ".",
+            false);
+    return new CorefAnnotator(corefProperties);
   }
 
   /**
