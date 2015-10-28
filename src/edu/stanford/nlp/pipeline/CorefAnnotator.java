@@ -45,10 +45,6 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator {
   private String HYBRID_MODE = "hybrid";
   private String STATISTICAL_MODE = "statistical";
 
-  // some values for building the statistical coref
-  private String COREF_WORD_COUNTS = "edu/stanford/nlp/kbp/word_counts.ser.gz";
-  private String COREF_MODEL = "edu/stanford/nlp/kbp/model.ser";
-
   private static final Map<Pair<Dictionaries.MentionType, Dictionaries.MentionType>, Double> COREF_THRESHOLDS = new HashMap<>();
   static {
     COREF_THRESHOLDS.put(new Pair<>(Dictionaries.MentionType.PROPER, Dictionaries.MentionType.PROPER), 0.3);
@@ -61,7 +57,7 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator {
 
   public CorefAnnotator(Properties props) {
     try {
-      COREF_MODE = props.getProperty("coref.mode", "hybrid");
+      COREF_MODE = props.getProperty("coref.mode", STATISTICAL_MODE);
       if (COREF_MODE.equals(HYBRID_MODE)) {
         hcorefSystem = new CorefSystem(props);
         scorefSystem = null;

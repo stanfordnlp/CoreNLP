@@ -24,12 +24,12 @@ public class StatisticalCorefProperties {
       newProps.setProperty(CorefProperties.MD_TYPE_PROP, "rule");
       newProps.setProperty("coref.useMarkedDiscourse", "true");
     } else {
-      String mdPath = PropertiesUtils.getString(newProps, "scoref.mentionDetectionModel",
+      String mdPath = PropertiesUtils.getString(newProps, "coref.mentionDetectionModel",
           "edu/stanford/nlp/models/hcoref/md-model.ser");
-      String mdDir = mdPath.substring(0, mdPath.lastIndexOf('/') + 1);
-      String mdModelName = mdPath.substring(mdPath.lastIndexOf('/') + 1);
-      newProps.setProperty("hcoref.md.model", mdModelName);
-      newProps.setProperty(CorefProperties.PATH_SERIALIZED_PROP, mdDir);
+      //String mdDir = mdPath.substring(0, mdPath.lastIndexOf('/') + 1);
+      //String mdModelName = mdPath.substring(mdPath.lastIndexOf('/') + 1);
+      //newProps.setProperty("coref.md.model", mdModelName);
+      //newProps.setProperty(CorefProperties.PATH_SERIALIZED_PROP, mdDir);
       newProps.setProperty(CorefProperties.MD_TYPE_PROP, "dependency");
       newProps.setProperty(CorefProperties.USE_GOLD_POS_PROP, "false");
       newProps.setProperty(CorefProperties.USE_GOLD_NE_PROP, "false");
@@ -95,18 +95,18 @@ public class StatisticalCorefProperties {
   }
 
   public static int maxMentionDistance(Properties props) {
-    return PropertiesUtils.getInt(props, "scoref.maxMentionDistance", 100);
+    return PropertiesUtils.getInt(props, "coref.maxMentionDistance", 100);
   }
 
   public static double[] pairwiseScoreThresholds(Properties props) {
-    String thresholdsProp = (String) props.get("scoref.pairwiseScoreThresholds");
+    String thresholdsProp = (String) props.get("coref.pairwiseScoreThresholds");
     if (thresholdsProp != null) {
       String[] split = thresholdsProp.split(",");
       if (split.length == 4) {
         return Arrays.stream(split).mapToDouble(Double::parseDouble).toArray();
       }
     }
-    double threshold = PropertiesUtils.getDouble(props, "scoref.pairwiseScoreThresholds", 0.3);
+    double threshold = PropertiesUtils.getDouble(props, "coref.pairwiseScoreThresholds", 0.3);
     return new double[] {threshold, threshold, threshold, threshold};
   }
 

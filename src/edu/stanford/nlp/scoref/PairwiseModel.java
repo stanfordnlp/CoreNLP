@@ -71,7 +71,7 @@ public class PairwiseModel {
     singletonRatio = builder.singletonRatio;
     classifier = new SimpleLinearClassifier(builder.loss, builder.learningRateSchedule,
         builder.regularizationStrength, builder.modelFile == null ? null :
-          (builder.modelFile.endsWith(".ser") ? builder.modelFile :
+          ((builder.modelFile.endsWith(".ser") || builder.modelFile.endsWith(".gz"))  ? builder.modelFile :
           StatisticalCorefTrainer.pairwiseModelsPath + builder.modelFile + "/model.ser"));
     str = StatisticalCorefUtils.fieldValues(builder);
   }
