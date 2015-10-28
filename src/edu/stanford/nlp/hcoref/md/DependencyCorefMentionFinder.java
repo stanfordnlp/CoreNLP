@@ -34,8 +34,8 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder {
 
   public DependencyCorefMentionFinder(Properties props) throws ClassNotFoundException, IOException {
     this.lang = CorefProperties.getLanguage(props);
-    mdClassifier = (CorefProperties.isMentionDetectionTraining(props))? 
-        null : IOUtils.readObjectFromURLOrClasspathOrFileSystem(CorefProperties.getPathModel(props, "md"));
+    mdClassifier = (CorefProperties.isMentionDetectionTraining(props)) ?
+        null : IOUtils.readObjectFromURLOrClasspathOrFileSystem(CorefProperties.getMentionDetectionModel(props));
   }
 
   public MentionDetectionClassifier mdClassifier = null;

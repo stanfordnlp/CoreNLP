@@ -85,6 +85,7 @@ public class CorefProperties {
   // models
   public static final String PATH_SINGLETON_PREDICTOR_PROP = "coref.path.singletonPredictor";
   public static final String PATH_MODEL_PROP = "coref.SIEVENAME.model";
+  public static final String MENTION_DETECTION_MODEL_PROP = "coref.mentionDetectionModel";
   
   
   
@@ -185,7 +186,18 @@ public class CorefProperties {
     return PropertiesUtils.getBool(props, CONLL_AUTO_PROP, true);
   }
   public static MentionDetectionType getMDType(Properties props) {
-    String type = PropertiesUtils.getString(props, MD_TYPE_PROP, "RULE");
+    String defaultMD;
+    if (getLanguage(props).equals(Locale.ENGLISH)) {
+      // defaultMD for English should be DEPENDENCY because Rule requires constituency parses
+      defaultMD = "DEPENDENCY";
+    } else if (getLanguage(props).equals(Locale.CHINESE)) {
+      // defaultMD for Chinese should be RULE for now
+      defaultMD = "RULE";
+    } else {
+      // general default is "RULE" for now
+      defaultMD = "RULE";
+    }
+    String type = PropertiesUtils.getString(props, MD_TYPE_PROP, defaultMD);
     if(type.equalsIgnoreCase("dep")) type = "DEPENDENCY";
     return MentionDetectionType.valueOf(type.toUpperCase());
   }
@@ -238,6 +250,12 @@ public class CorefProperties {
   public static int getMaxSentDistForSieve(Properties props, String sievename) {
     return PropertiesUtils.getInt(props, MAX_SENT_DIST_PROP.replace("SIEVENAME", sievename), 1000);
   }
+
+  public static String getMentionDetectionModel(Properties props) {
+    return PropertiesUtils.getString(props, MENTION_DETECTION_MODEL_PROP,
+            "edu/stanford/nlp/models/hcoref/md-model.ser");
+  }
+
   public static Set<MentionType> getMentionType(Properties props, String sievename) {
     return getMentionTypes(props, MTYPE_PROP.replace("SIEVENAME", sievename));
   }
@@ -340,6 +358,11 @@ public class CorefProperties {
   public static String getPathWord2Vec(Properties props) {
     return PropertiesUtils.getString(props, WORD2VEC_PROP, null);
   }
+
+  public static String getGenderNumber(Properties props) {
+    return PropertiesUtils.getString(props, GENDER_NUMBER_PROP, "edu/stanford/nlp/models/dcoref/gender.data.gz");
+  }
+
   public static boolean storeTrainData(Properties props) {
     return PropertiesUtils.getBool(props, STORE_TRAINDATA_PROP, false);
   }

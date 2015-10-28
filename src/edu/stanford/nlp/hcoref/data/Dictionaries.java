@@ -575,7 +575,7 @@ public class Dictionaries {
         props.getProperty(CorefProperties.PLURAL_PROP),
         props.getProperty(CorefProperties.SINGULAR_PROP),
         props.getProperty(CorefProperties.STATES_PROP, DefaultPaths.DEFAULT_DCOREF_STATES),
-        props.getProperty(CorefProperties.GENDER_NUMBER_PROP, DefaultPaths.DEFAULT_DCOREF_GENDER_NUMBER),
+        props.getProperty(CorefProperties.GENDER_NUMBER_PROP, CorefProperties.getGenderNumber(props)),
         props.getProperty(CorefProperties.COUNTRIES_PROP, DefaultPaths.DEFAULT_DCOREF_COUNTRIES),
         props.getProperty(CorefProperties.STATES_PROVINCES_PROP, DefaultPaths.DEFAULT_DCOREF_STATES_AND_PROVINCES),
         CorefProperties.getSieves(props).contains("CorefDictionaryMatch"),

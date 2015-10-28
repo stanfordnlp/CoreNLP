@@ -63,27 +63,27 @@ public class StatisticalCorefProperties {
 
   public static String classificationModelPath(Properties props) {
     return PropertiesUtils.getString(props, "coref.classificationModel",
-        defaultModelPath(props, "classification"));
+        "edu/stanford/nlp/models/scoref/classification_model.ser.gz");
   }
 
   public static String rankingModelPath(Properties props) {
     return PropertiesUtils.getString(props, "coref.rankingModel",
-        defaultModelPath(props, "ranking"));
+        "edu/stanford/nlp/models/scoref/ranking_model.ser.gz");
   }
 
   public static String anaphoricityModelPath(Properties props) {
     return PropertiesUtils.getString(props, "coref.anaphoricityModel",
-        defaultModelPath(props, "anaphoricity"));
+        "edu/stanford/nlp/models/scoref/anaphoricity_model.ser.gz");
   }
 
   public static String clusteringModelPath(Properties props) {
     return PropertiesUtils.getString(props, "coref.clusteringModel",
-        defaultModelPath(props, "clustering"));
+        "edu/stanford/nlp/models/scoref/clustering_model.ser");
   }
 
   public static String wordCountsPath(Properties props) {
     return PropertiesUtils.getString(props, "coref.wordCounts",
-        defaultModelPath(props, "wordCounts"));
+        "edu/stanford/nlp/models/scoref/word_counts.ser.gz");
   }
 
   private static String defaultModelPath(Properties props, String modelName) {
