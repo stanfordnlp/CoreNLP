@@ -114,7 +114,7 @@ NFP=target <... {/.*/}
 relabel target SYM
 
 % RB -> PART when it is verbal negation (not or its reductions)
-@VP|SINV|SQ|FRAG < (RB=target < /^(?i:not|n't|nt|t|n)$/)
+@VP|SINV|SQ|FRAG|ADVP < (RB=target < /^(?i:not|n't|nt|t|n)$/)
 
 relabel target PART
 
