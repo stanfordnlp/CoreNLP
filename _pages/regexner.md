@@ -27,17 +27,37 @@ Implements a simple, rule-based NER over token sequences using Java regular expr
 | `regexner.noDefaultOverwriteLabels` | Comma separated list of output types for which default NER labels are not overwritten.  For these types, only if the matched expression has NER type matching the specified `overwriteableType` for the regex will the NER type be overwritten. |
 | `regexner.verbose` | If `true`, turns on extra debugging messages. Default: `false` |
 
-## More information
- 
-The `pattern` field can be either
+## Mapping files
 
-* a sequence of regex, each separated by whitespace (matching "\s+").
+The mapping file is a <b>tab</b> delimited file.
+
+The format of the default mapping file used by RegexNER is described in more detail on the Stanford NLP [website](http://nlp.stanford.edu/software/regexner/).
+
+The format and the output fields can be changed by specifying a different `regexner.mapping.header`.
+
+For instance, if you wanted to mark "Stanford University" as having NER tag of "SCHOOL" and linked to "https://en.wikipedia.org/wiki/Stanford_University",
+you can do so by adding `normalized` to the headers:
+
+    regexner.mapping.header=pattern,ner,normalized,overwrite,priority,group
+    # Not needed, but illustrate how to link a field to an annotation
+    regexner.mapping.field.normalized=edu.stanford.nlp.ling.CoreAnnotations$NormalizedNamedEntityTagAnnotation
+
+And having your mapping file have entries such as:    
+
+    Stanford University\tSCHOOL\thttps://en.wikipedia.org/wiki/Stanford_University
+      
+In the example, `\t` is used to indicate where a tab should occur.     
+ 
+Note that the `pattern` field can be either
+
+* a sequence of regex over the token text, each separated by whitespace (matching "\s+").
+  <br/><em>Example</em>: `University of .*\tSCHOOL`
 
 or
 
-* a TokensRegex expression (marked by starting with "( " and ending with " )".  See {@link TokenSequencePattern} for TokensRegex syntax.
-   <em>Example</em>: <code>( /University/ /of/ [ {ner:LOCATION} ] )    SCHOOL</code>
+* a [TokensRegex expression](http://nlp.stanford.edu/software/tokensregex.shtml#TokensRegexPatterns) (marked by starting with "( " and ending with " )".
+   <br/><em>Example</em>: `( /University/ /of/ [ {ner:LOCATION} ] )\tSCHOOL`
+  
+  Using TokensRegex patterns allows for matching on other annotated fields such as POS or NER.
 
 
-
-RegexNER is described in more detail on the Stanford NLP [website](http://nlp.stanford.edu/software/regexner/).
