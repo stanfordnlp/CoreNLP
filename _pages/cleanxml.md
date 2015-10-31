@@ -18,3 +18,5 @@ Remove xml tokens from the document.
 * clean.sentenceendingtags: treat tags that match this regular expression as the end of a sentence.  For example, p will treat &lt;p&gt; as the end of a sentence.
 * clean.allowflawedxml: if this is true, allow errors such as unclosed tags.  Otherwise, such xml will cause an exception.
 * clean.datetags: a regular expression that specifies which tags to treat as the reference date of a document.  Defaults to datetime|date
+* clean.docIdtags: a regular expression that specifies which tags to treat as the document id of a document.  Defaults to docid
+* clean.docTypetags: a regular expression that specifies which tags to treat as the document type of a document.  Defaults to doctype
