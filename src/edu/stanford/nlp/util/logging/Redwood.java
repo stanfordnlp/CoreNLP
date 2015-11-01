@@ -18,6 +18,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IterableIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A hierarchical channel based logger. Log messages are arranged hierarchically by depth
@@ -1203,6 +1205,7 @@ public class Redwood {
       PrettyLogger.log(this, description, obj);
     }
 
+    public void info(Object...objs){ log(Util.revConcat(objs)); }
     public void warn(Object...objs){ log(Util.revConcat(objs, WARN)); }
     public void debug(Object...objs){ log(Util.revConcat(objs, DBG)); }
     public void err(Object...objs){ log(Util.revConcat(objs, ERR, FORCE)); }
@@ -1212,7 +1215,7 @@ public class Redwood {
    /**
    * Standard channels; enum for the sake of efficiency
    */
-  protected static enum Flag {
+  protected enum Flag {
     ERROR,
     WARN,
     DEBUG,

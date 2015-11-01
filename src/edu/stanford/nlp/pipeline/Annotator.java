@@ -206,7 +206,6 @@ public interface Annotator {
         add(LEMMA_REQUIREMENT);
         add(NER_REQUIREMENT);
         add(PARSE_REQUIREMENT);
-        add(ENTITY_MENTIONS_REQUIREMENT);
       }}));
       put(STANFORD_COREF, Collections.unmodifiableSet(new HashSet<Requirement>() {{
         add(TOKENIZE_REQUIREMENT);

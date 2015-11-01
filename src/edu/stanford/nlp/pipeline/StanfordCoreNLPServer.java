@@ -63,7 +63,7 @@ public class StanfordCoreNLPServer implements Runnable {
     serverPort = port;
 
     defaultProps = new Properties();
-    defaultProps.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, depparse, natlog, openie, dcoref");
+    defaultProps.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, depparse, dcoref, natlog, openie");
     defaultProps.setProperty("inputFormat", "text");
     defaultProps.setProperty("outputFormat", "json");
 
@@ -361,8 +361,17 @@ public class StanfordCoreNLPServer implements Runnable {
             .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
       }
 
+      // Get the annotators
+      String annotators = StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+"));
+
+      // Tweak the default annotator behavior
+      if (annotators.contains("coref") /* any coref */ && annotators.contains("ner") && annotators.contains("openie") &&
+          !"false".equals(props.getProperty("openie.resolve_coref", "true"))) {
+        props.setProperty("openie.resolve_coref", "true");
+      }
+
       // Make sure the properties compile
-      props.setProperty("annotators", StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+")));
+      props.setProperty("annotators", annotators);
 
       return props;
     }
