@@ -114,7 +114,7 @@ NFP=target <... {/.*/}
 relabel target SYM
 
 % RB -> PART when it is verbal negation (not or its reductions)
-@VP|SINV|SQ|FRAG < (RB=target < /^(?i:not|n't|nt|t|n)$/)
+@VP|SINV|SQ|FRAG|ADVP < (RB=target < /^(?i:not|n't|nt|t|n)$/)
 
 relabel target PART
 
@@ -123,7 +123,7 @@ RB=target <... {/.*/}
 
 relabel target ADV
 
-%DT -> PRON (pronomial this/that/these/those)
+% DT -> PRON (pronominal this/that/these/those)
 @NP <: (DT=target < /^[Tt]h(is|at|ose|ese)$/)
 
 relabel target PRON
