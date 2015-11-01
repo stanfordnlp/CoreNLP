@@ -22,7 +22,7 @@ public class MorphologyTest extends TestCase {
                               "played", "PLAYED",
                               "<br>", "-0800", "an", "out-rode", "viii",
                               "b-", "s", "hath", "'ll", "d",
-                              "re", "no", "r", "du",
+                              "re", "no", "r",
   };
 
   private String[] exTags = { "NNS", "NNS", "VBD", "NN",
@@ -39,7 +39,7 @@ public class MorphologyTest extends TestCase {
                               "VBD", "VBD",
                               "SYM", "CD", "DT", "VBD", "FW",
                               "AFX", "VBZ", "VBP", "MD", "MD",
-                              "VBP", "VBP", "VBP", "VBP",
+                              "VBP", "VBP", "VBP",
   };
 
   private String[] exAnswers = {"brethren", "duck", "see", "saw",
@@ -56,7 +56,7 @@ public class MorphologyTest extends TestCase {
                                 "play", "play",
                                 "<br>", "-0800", "a", "out-ride", "viii",
                                 "b-", "be", "have", "will", "would",
-                                "be", "know", "be", "do",
+                                "be", "know", "be",
   };
 
   public void testMorph() {

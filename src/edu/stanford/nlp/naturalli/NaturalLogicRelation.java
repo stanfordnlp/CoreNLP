@@ -225,7 +225,7 @@ public enum NaturalLogicRelation {
     put("cop", NaturalLogicRelation.INDEPENDENCE);  //
     put("csubj", NaturalLogicRelation.INDEPENDENCE);  // don't drop subjects.
     put("csubjpass", NaturalLogicRelation.INDEPENDENCE);  // as above
-    put("dep", NaturalLogicRelation.INDEPENDENCE);  //
+    put("dep", NaturalLogicRelation.REVERSE_ENTAILMENT);  // allow cutting these off, else we just miss a bunch of sentences
     put("det", NaturalLogicRelation.FORWARD_ENTAILMENT);  // todo(gabor) better treatment of generics?
     put("discourse", NaturalLogicRelation.EQUIVALENT);  //
     put("dobj", NaturalLogicRelation.REVERSE_ENTAILMENT);  // but, "he studied NLP at Stanford" -> "he studied NLP"

@@ -485,7 +485,6 @@ SKIP = [ \t\r\n\u2028\u2029\u000B\u000C\u0085]
 <verb,any>"has"  { return(stem(1,"ve","s")); }
 <verb,any>"hath"  { return(stem(2,"ve","s")); }         /* disprefer */
 <verb,any>"does"  { return(stem(2,"","s")); }
-<verb,any>"du"  { return(stem(1,"o","")); }   /* for dunno */
 <verb,any>"did"  { return(stem(3,"do","ed")); }
 <verb,any>"done"  { return(stem(4,"do","en")); }
 <verb,any>"didst"  { return(stem(5,"do","ed")); }         /* disprefer */

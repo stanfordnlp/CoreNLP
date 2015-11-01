@@ -418,8 +418,14 @@ public class IOUtils {
       }
     }
     // if not found in the CLASSPATH, load from the file system
-    if (is == null) {
-      is = new FileInputStream(name);
+    if (is == null) is = new FileInputStream(name);
+    // make sure it's not a GZIP stream
+    if (name.endsWith(".gz")) {
+      try {
+        return new GZIPInputStream(is);
+      } catch (IOException e) {
+        System.err.println("Resource or file looks like a gzip file, but is not: " + name);
+      }
     }
     return is;
   }
@@ -443,9 +449,9 @@ public class IOUtils {
    * The CLASSPATH takes priority over the file system!
    * This stream is buffered and gunzipped (if necessary).
    *
-   * @param textFileOrUrl The String specifying the URL/resource/file to load
+   * @param textFileOrUrl
    * @return An InputStream for loading a resource
-   * @throws IOException On any IO error
+   * @throws IOException
    */
   public static InputStream getInputStreamFromURLOrClasspathOrFileSystem(String textFileOrUrl)
     throws IOException
@@ -455,6 +461,11 @@ public class IOUtils {
       URL u = new URL(textFileOrUrl);
       URLConnection uc = u.openConnection();
       in = uc.getInputStream();
+      if (textFileOrUrl.endsWith(".gz")) {
+        try {
+          in = new GZIPInputStream(in);
+        } catch (IOException e) { }
+      }
     } else {
       try {
         in = findStreamInClasspathOrFileSystem(textFileOrUrl);
@@ -465,19 +476,11 @@ public class IOUtils {
           URLConnection uc = u.openConnection();
           in = uc.getInputStream();
         } catch (IOException e2) {
-          // Don't make the original exception a cause, since it is usually bogus
-          throw new IOException("Unable to open \"" +
-                  textFileOrUrl + "\" as " + "class path, filename or URL"); // , e2);
+          // Don't make the original exception a cause, since it is almost certainly bogus
+          throw new IOException("Unable to resolve \"" +
+                  textFileOrUrl + "\" as either " +
+                  "class path, filename or URL"); // , e2);
         }
-      }
-    }
-
-    // If it is a GZIP stream then ungzip it
-    if (textFileOrUrl.endsWith(".gz")) {
-      try {
-        in = new GZIPInputStream(in);
-      } catch (IOException e) {
-        System.err.println("Resource or file looks like a gzip file, but is not: " + textFileOrUrl);
       }
     }
 

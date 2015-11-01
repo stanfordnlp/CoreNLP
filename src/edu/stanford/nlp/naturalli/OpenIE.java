@@ -645,7 +645,7 @@ public class OpenIE implements Annotator {
     // Tweak the arguments
     if ("".equals(props.getProperty("annotators", ""))) {
       if (!"false".equalsIgnoreCase(props.getProperty("resolve_coref", props.getProperty("openie.resolve_coref", "false")))) {
-        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,ner,hcoref,natlog,openie");
+        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,ner,entitymentions,coref,natlog,openie");
       } else {
         props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,natlog,openie");
       }

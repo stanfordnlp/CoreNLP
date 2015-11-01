@@ -101,7 +101,7 @@ public interface Annotator {
   String STANFORD_PARSE = "parse";
   String STANFORD_DETERMINISTIC_COREF = "dcoref";
   String STANFORD_COREF = "coref";
-  String STANFORD_MENTION = "mention";
+  String STANFORD_MENTION = "mention";  // TODO(jebolton) Merge with entitymention
   String STANFORD_RELATION = "relation";
   String STANFORD_SENTIMENT = "sentiment";
   String STANFORD_COLUMN_DATA_CLASSIFIER = "cdc";
@@ -123,6 +123,7 @@ public interface Annotator {
   Requirement DEPENDENCY_REQUIREMENT = new Requirement(STANFORD_DEPENDENCIES);
   Requirement CONSTITUENCY_OR_DEPENDENCY_REQUIREMENT = new Requirement(STANFORD_PARSE+"|"+STANFORD_DEPENDENCIES);
   Requirement MENTION_REQUIREMENT = new Requirement(STANFORD_MENTION);
+  Requirement ENTITY_MENTIONS_REQUIREMENT = new Requirement(STANFORD_ENTITY_MENTIONS);
   Requirement DETERMINISTIC_COREF_REQUIREMENT = new Requirement(STANFORD_DETERMINISTIC_COREF);
   Requirement COREF_REQUIREMENT = new Requirement(STANFORD_COREF);
   Requirement RELATION_EXTRACTOR_REQUIREMENT = new Requirement(STANFORD_RELATION);
@@ -191,6 +192,13 @@ public interface Annotator {
         add(POS_REQUIREMENT);
         add(CONSTITUENCY_OR_DEPENDENCY_REQUIREMENT);
       }}));
+      put(STANFORD_ENTITY_MENTIONS, Collections.unmodifiableSet(new HashSet<Requirement>() {{
+        add(TOKENIZE_REQUIREMENT);
+        add(SSPLIT_REQUIREMENT);
+        add(POS_REQUIREMENT);
+        add(LEMMA_REQUIREMENT);
+        add(CONSTITUENCY_OR_DEPENDENCY_REQUIREMENT);
+      }}));
       put(STANFORD_DETERMINISTIC_COREF, Collections.unmodifiableSet(new HashSet<Requirement>() {{
         add(TOKENIZE_REQUIREMENT);
         add(SSPLIT_REQUIREMENT);
@@ -198,6 +206,7 @@ public interface Annotator {
         add(LEMMA_REQUIREMENT);
         add(NER_REQUIREMENT);
         add(PARSE_REQUIREMENT);
+        add(ENTITY_MENTIONS_REQUIREMENT);
       }}));
       put(STANFORD_COREF, Collections.unmodifiableSet(new HashSet<Requirement>() {{
         add(TOKENIZE_REQUIREMENT);
@@ -206,7 +215,7 @@ public interface Annotator {
         add(LEMMA_REQUIREMENT);
         add(NER_REQUIREMENT);
         add(CONSTITUENCY_OR_DEPENDENCY_REQUIREMENT);
-        add(MENTION_REQUIREMENT);
+        add(ENTITY_MENTIONS_REQUIREMENT);
       }}));
       put(STANFORD_RELATION, Collections.unmodifiableSet(new HashSet<Requirement>() {{
         add(TOKENIZE_REQUIREMENT);
