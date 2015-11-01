@@ -31,10 +31,10 @@ public class RelationTripleSegmenter {
     // { blue cats play [quietly] with yarn,
     //   Jill blew kisses at Jack,
     //   cats are standing next to dogs }
-    add(SemgrexPattern.compile("{$}=verb ?>/cop|aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/(nmod|acl|advcl):.*/=prepEdge ( {}=object ?>appos {} = appos ) ?>dobj {pos:/N.*/}=relObj"));
+    add(SemgrexPattern.compile("{$}=verb ?>/cop|aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/(nmod|acl|advcl):.*/=prepEdge ( {}=object ?>appos {} = appos ?>case {}=prep) ?>dobj {pos:/N.*/}=relObj"));
     // { cats are cute,
     //   horses are grazing peacefully }
-    add(SemgrexPattern.compile("{$}=object >/.subj(pass)?/ {}=subject >/cop|aux(pass)?/ {}=verb"));
+    add(SemgrexPattern.compile("{$}=object >/.subj(pass)?/ {}=subject >/cop|aux(pass)?/ {}=verb ?>case {}=prep"));
     // { fish like to swim }
     add(SemgrexPattern.compile("{$}=verb >/.subj(pass)?/ {}=subject >xcomp ( {}=object ?>appos {}=appos )"));
     // { cats have tails }
@@ -592,10 +592,32 @@ public class RelationTripleSegmenter {
           }
         }
         verbChunk.add(verb, -verb.pseudoPosition());
+
         // Prepositions
         IndexedWord prep = m.getNode("prep");
         String prepEdge = m.getRelnString("prepEdge");
-        if (prep != null) { verbChunk.add(prep, -prep.pseudoPosition()); numKnownDependents += 1; }
+        if (prep != null) {
+          // (get the preposition chunk)
+          Optional<List<IndexedWord>> chunk = getValidChunk(parse, prep, Collections.singleton("mwe"), Optional.empty(), true);
+          // (continue if no chunk found)
+          if (!chunk.isPresent()) {
+            continue PATTERN_LOOP;  // Probably something like a conj w/o a cc
+          }
+          // (add the preposition)
+          for (IndexedWord word : chunk.get()) {
+            verbChunk.add(word, Integer.MIN_VALUE / 2 - word.pseudoPosition());
+          }
+          // (register the edge)
+//          numKnownDependents += 1;  // TODO(gabor) do we need this?
+        }
+        // (handle special prepositions)
+        if (prepEdge != null) {
+          String prepStringFromEdge = prepEdge.substring(prepEdge.indexOf(":") + 1).replace("_", " ");
+          if ("tmod".equals(prepStringFromEdge)) {
+            istmod = true;
+          }
+        }
+
         // Auxilliary "be"
         IndexedWord be = m.getNode("be");
         if (be != null) { verbChunk.add(be, -be.pseudoPosition()); numKnownDependents += 1; }
@@ -615,29 +637,7 @@ public class RelationTripleSegmenter {
             verbChunk.add(adverbToken, -adverbToken.pseudoPosition());
           }
         }
-        // (add preposition edge)
-        if (prepEdge != null) {
-          String expected = prepEdge.substring(prepEdge.indexOf(":") + 1).replace("_", " ");
-          IndexedWord prepWord = null;
-          for (SemanticGraphEdge edge : parse.outgoingEdgeIterable(object)) {
-            if (edge.getRelation().toString().equals("case")) {
-              prepWord = edge.getDependent();
-            }
-          }
-          if (prepWord != null) {
-            Optional<List<IndexedWord>> chunk = getValidChunk(parse, prepWord, Collections.singleton("mwe"), Optional.empty(), true);
-            if (!chunk.isPresent()) {
-              continue PATTERN_LOOP;  // Probably something like a conj w/o a cc
-            }
-            for (IndexedWord word : chunk.get()) {
-              verbChunk.add(word, Integer.MIN_VALUE / 2 - word.pseudoPosition());
-            }
-          } else if (expected.equalsIgnoreCase("tmod")) {
-            istmod = true;
-          } else {
-            continue PATTERN_LOOP;  // Invalid PP attachment
-          }
-        }
+
         // (check for additional edges)
         if (consumeAll && parse.outDegree(verb) > numKnownDependents) {
           //noinspection UnnecessaryLabelOnContinueStatement

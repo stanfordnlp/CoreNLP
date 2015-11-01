@@ -273,6 +273,17 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\tcats\tare\tcute", extraction.get().toString());
   }
 
+  public void testIAmInFlorida() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tI\t4\tnsubj\n" +
+        "2\tam\t4\tcop\n" +
+        "3\tin\t4\tcase\n" +
+        "4\tFlorida\t0\troot\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tI\tam in\tFlorida", extraction.get().toString());  // not (I; am; Florida)
+  }
+
   public void testPropagateCSubj() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\ttruffles\t2\tnsubj\n" +
@@ -398,7 +409,7 @@ public class RelationTripleSegmenterTest extends TestCase {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tNewspaper\t2\tnsubj\n" +
         "2\tpublished\t0\troot\n" +
-        "3\tin\t5\tcase\n" +
+        "3\tin\t4\tcase\n" +
         "4\tTucson\t2\tnmod:in\n" +
         "5\tArizona\t4\tappos\n"
     );
