@@ -13,30 +13,26 @@ public class SLF4JHandler extends OutputHandler {
   @Override
   public void print(Object[] channel, String line) {
     // Parse the channels
-    Class source = null;  // The class the message is coming from
-    Object backupSource = null;  // Another identifier for the message
+    Class source = null;
     Redwood.Flag flag = Redwood.Flag.STDOUT;
     for (Object c : channel) {
       if (c instanceof Class) {
-        source = (Class) c;  // This is a class the message is coming from
+        source = (Class) c;
       } else if (c instanceof Redwood.Flag) {
-        if (c != Redwood.Flag.FORCE) {  // This is a Redwood flag
+        if (c != Redwood.Flag.FORCE) {
           flag = (Redwood.Flag) c;
         }
-      } else {
-        backupSource = c;  // This is another "source" for the log message
       }
     }
 
     // Get the logger
     Logger impl = null;
-    if (source != null) {
-      impl = LoggerFactory.getLogger(source);
-    } else if (backupSource != null) {
-        impl = LoggerFactory.getLogger(backupSource.toString());
-    } else {
+    if (channel.length == 0) {
       impl = LoggerFactory.getLogger("CoreNLP");
-
+    } else if (channel[0] instanceof Class){
+      impl = LoggerFactory.getLogger((Class) channel[0]);
+    } else {
+      impl = LoggerFactory.getLogger(channel[0].toString());
     }
 
     // Route the signal
