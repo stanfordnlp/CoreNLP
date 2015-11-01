@@ -1,15 +1,15 @@
 package edu.stanford.nlp.util.logging;
 
-import org.slf4j.*;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * A handler for outputting to SLF4J rather than stderr.
+ * An outputter that writes to Java Util Logging logs.
  *
  * @author Gabor Angeli
  */
-@SuppressWarnings("unused")  // Called via reflection from RedwoodConfiguration
-public class SLF4JHandler extends OutputHandler {
-
+public class JavaUtilLoggingHandler extends OutputHandler {
   @Override
   public void print(Object[] channel, String line) {
     // Parse the channels
@@ -31,24 +31,24 @@ public class SLF4JHandler extends OutputHandler {
     // Get the logger
     Logger impl = null;
     if (source != null) {
-      impl = LoggerFactory.getLogger(source);
+      impl = Logger.getLogger(source.getName());
     } else if (backupSource != null) {
-        impl = LoggerFactory.getLogger(backupSource.toString());
+      impl = Logger.getLogger(backupSource.toString());
     } else {
-      impl = LoggerFactory.getLogger("CoreNLP");
+      impl = Logger.getLogger("CoreNLP");
 
     }
 
     // Route the signal
     switch (flag) {
       case ERROR:
-        impl.error(line);
+        impl.log(Level.SEVERE, line);
         break;
       case WARN:
-        impl.warn(line);
+        impl.log(Level.WARNING, line);
         break;
       case DEBUG:
-        impl.debug(line);
+        impl.log(Level.FINE, line);
         break;
       case STDOUT:
       case STDERR:
@@ -59,5 +59,6 @@ public class SLF4JHandler extends OutputHandler {
       default:
         throw new IllegalStateException("Unknown Redwood flag for slf4j integration: " + flag);
     }
+
   }
 }
