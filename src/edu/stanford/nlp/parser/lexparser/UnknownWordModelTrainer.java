@@ -19,13 +19,13 @@ public interface UnknownWordModelTrainer {
    * to train.  Also, it is necessary to estimate the number of trees
    * that it will be given, as many of the UWMs switch training modes
    * after seeing a fraction of the trees.
-   * <br>
+   *
    * This is an initialization method and not part of the constructor
    * because these Trainers are generally loaded by reflection, and
    * making this a method instead of a constructor lets the compiler
    * catch silly errors.
    */
-  public void initializeTraining(Options op, Lexicon lex,
+  void initializeTraining(Options op, Lexicon lex,
                                  Index<String> wordIndex,
                                  Index<String> tagIndex, double totalTrees);
 
@@ -33,42 +33,47 @@ public interface UnknownWordModelTrainer {
    * Tallies statistics for this particular collection of trees.  Can
    * be called multiple times.
    */
-  public void train(Collection<Tree> trees);
+  void train(Collection<Tree> trees);
 
   /**
    * Tallies statistics for a weighted collection of trees.  Can
    * be called multiple times.
    */
-  public void train(Collection<Tree> trees, double weight);
+  void train(Collection<Tree> trees, double weight);
 
   /**
    * Tallies statistics for a single tree.
    * Can be called multiple times.
    */
-  public void train(Tree tree, double weight);
+  void train(Tree tree, double weight);
 
   /**
    * Tallies statistics for a single word.
    * Can be called multiple times.
    */
-  public void train(TaggedWord tw, int loc, double weight);
+  void train(TaggedWord tw, int loc, double weight);
 
-  public void incrementTreesRead(double weight);
+  /**
+   * Maintains a (real-valued) count of how many (weighted) trees have
+   * been read in. Can be called multiple times.
+   *
+   * @param weight The weight of trees additionally trained on
+   */
+  void incrementTreesRead(double weight);
 
   /**
    * Returns the trained UWM.  Many of the subclasses build exactly
    * one model, and some of the finishTraining methods manipulate the
    * data in permanent ways, so this should only be called once
    */
-  public UnknownWordModel finishTraining();
+  UnknownWordModel finishTraining();
 
 
-  public static final String unknown = "UNK";
+  String unknown = "UNK";
 
-  public static final int nullWord = -1;
-  public static final short nullTag = -1;
+  int nullWord = -1;
+  short nullTag = -1;
 
-  public static final IntTaggedWord NULL_ITW =
-    new IntTaggedWord(nullWord, nullTag);
+  IntTaggedWord NULL_ITW = new IntTaggedWord(nullWord, nullTag);
 
 }

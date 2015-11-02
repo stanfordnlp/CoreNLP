@@ -91,9 +91,7 @@ public class CorefDocMaker {
     if (!CorefProperties.useGoldParse(props))  {
       if(CorefProperties.useConstituencyTree(props)) annoSb.append(", parse");
       else annoSb.append(", depparse");
-    }
-    // need to add mentions
-    annoSb.append(", mention");
+    }   
     String annoStr = annoSb.toString();
     Redwood.log("MentionExtractor ignores specified annotators, using annotators=" + annoStr);
     pipelineProps.put("annotators", annoStr);

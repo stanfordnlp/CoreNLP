@@ -379,8 +379,7 @@ public class Redwood {
       String expected = titleStack.pop();
       //(check name match)
       if (!isThreaded && !expected.equalsIgnoreCase(title)){
-        log(Flag.ERROR, "Track names do not match: expected: " + expected + " found: " + title);
-//        throw new IllegalArgumentException("Track names do not match: expected: " + expected + " found: " + title);
+        throw new IllegalArgumentException("Track names do not match: expected: " + expected + " found: " + title);
       }
       //(decrement depth)
       depth -= 1;
