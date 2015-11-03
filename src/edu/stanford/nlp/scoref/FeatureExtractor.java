@@ -421,7 +421,7 @@ public class FeatureExtractor {
     addFeature(features, "incompatible-modifier", Rules.entityHaveIncompatibleModifier(m2, m1));
     addFeature(features, "head-lemma-match", m1.headWord.lemma().equals(m2.headWord.lemma()));
     addFeature(features, "words-included", Rules.entityWordsIncluded(c2, c1, m2, m1));
-    addFeature(features, "extra-proper-noun", Rules.entityHaveExtraProperNoun(m2, m1, new HashSet<String>()));
+    addFeature(features, "extra-proper-noun", Rules.entityHaveExtraProperNoun(m2, m1, new HashSet<>()));
     addFeature(features, "number-in-later-mentions", Rules.entityNumberInLaterMention(m2, m1));
     addFeature(features, "sentence-context-incompatible",
         Rules.sentenceContextIncompatible(m2, m1, dictionaries));

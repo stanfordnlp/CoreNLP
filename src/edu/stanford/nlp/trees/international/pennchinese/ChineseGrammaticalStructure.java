@@ -77,7 +77,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
   }
 
   private static void collapsePrepAndPoss(Collection<TypedDependency> list) {
-    Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
+    Collection<TypedDependency> newTypedDeps = new ArrayList<>();
 
     // Construct a map from words to the set of typed
     // dependencies in which the word appears as governor.

@@ -49,7 +49,7 @@ public class ClustererDataLoader {
         mentionsSet.add(pair.second);
       }
 
-      mentions = new ArrayList<Integer>(mentionsSet);
+      mentions = new ArrayList<>(mentionsSet);
       Collections.sort(mentions, (m1, m2) -> {
         Pair<Integer, Integer> p = new Pair<>(m1, m2);
         return m1 == m2 ? 0 : (classificationScores.containsKey(p) ? -1 : 1);

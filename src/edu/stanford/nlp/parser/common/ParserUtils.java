@@ -19,7 +19,7 @@ public class ParserUtils {
    */
   public static Tree xTree(List<? extends HasWord> words) {
     TreeFactory lstf = new LabeledScoredTreeFactory();
-    List<Tree> lst2 = new ArrayList<Tree>();
+    List<Tree> lst2 = new ArrayList<>();
     for (HasWord obj : words) {
       String s = obj.word();
       Tree t = lstf.newLeaf(s);

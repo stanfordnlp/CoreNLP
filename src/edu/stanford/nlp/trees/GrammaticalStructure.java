@@ -190,8 +190,8 @@ public abstract class GrammaticalStructure implements Serializable {
     // NoPunctFilter puncDepFilter = new NoPunctFilter(puncFilter);
     NoPunctTypedDependencyFilter puncTypedDepFilter = new NoPunctTypedDependencyFilter(puncFilter, tagFilter);
 
-    DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph = new DirectedMultiGraph<TreeGraphNode, GrammaticalRelation>();
-    DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> completeGraph = new DirectedMultiGraph<TreeGraphNode, GrammaticalRelation>();
+    DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph = new DirectedMultiGraph<>();
+    DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> completeGraph = new DirectedMultiGraph<>();
 
     // analyze the root (and its descendants, recursively)
     if (relationsLock != null) {
@@ -336,12 +336,12 @@ public abstract class GrammaticalStructure implements Serializable {
                       .size()));
     }
 
-    List<TreeGraphNode> tgWordNodes = new ArrayList<TreeGraphNode>(tokens.size());
-    List<TreeGraphNode> tgPOSNodes = new ArrayList<TreeGraphNode>(tokens.size());
+    List<TreeGraphNode> tgWordNodes = new ArrayList<>(tokens.size());
+    List<TreeGraphNode> tgPOSNodes = new ArrayList<>(tokens.size());
 
     CoreLabel rootLabel = new CoreLabel();
     rootLabel.setValue("ROOT");
-    List<IndexedWord> nodeWords = new ArrayList<IndexedWord>(tgPOSNodes.size() + 1);
+    List<IndexedWord> nodeWords = new ArrayList<>(tgPOSNodes.size() + 1);
     nodeWords.add(new IndexedWord(rootLabel));
 
     UniversalSemanticHeadFinder headFinder = new UniversalSemanticHeadFinder();
@@ -374,7 +374,7 @@ public abstract class GrammaticalStructure implements Serializable {
     root.setIndex(0);
 
     // Build list of TypedDependencies
-    List<TypedDependency> tdeps = new ArrayList<TypedDependency>(deps.size());
+    List<TypedDependency> tdeps = new ArrayList<>(deps.size());
 
     for (String depString : deps) {
       int firstBracket = depString.indexOf('(');
@@ -419,7 +419,7 @@ public abstract class GrammaticalStructure implements Serializable {
     indexNodes(this.root);
     this.puncFilter = Filters.acceptFilter();
     this.tagFilter = Filters.acceptFilter();
-    allTypedDependencies = typedDependencies = new ArrayList<TypedDependency>(projectiveDependencies);
+    allTypedDependencies = typedDependencies = new ArrayList<>(projectiveDependencies);
   }
 
   public GrammaticalStructure(Tree t, Collection<GrammaticalRelation> relations,
@@ -712,8 +712,8 @@ public abstract class GrammaticalStructure implements Serializable {
     if (labels.size() <= 1) {
       sortedLabels = labels;
     } else {
-      sortedLabels = new ArrayList<GrammaticalRelation>(labels);
-      Collections.sort(sortedLabels, new NameComparator<GrammaticalRelation>());
+      sortedLabels = new ArrayList<>(labels);
+      Collections.sort(sortedLabels, new NameComparator<>());
     }
     // System.err.println(" gov " + govH + " dep " + depH + " arc labels: " + sortedLabels);
 
@@ -806,12 +806,12 @@ public abstract class GrammaticalStructure implements Serializable {
     // example, the English dependencies rename existing objects KILL
     // to note that they should be removed.
     if (includeExtras != Extras.NONE) {
-      deps = new ArrayList<TypedDependency>(allTypedDependencies.size());
+      deps = new ArrayList<>(allTypedDependencies.size());
       for (TypedDependency dep : allTypedDependencies) {
         deps.add(new TypedDependency(dep));
       }
     } else {
-      deps = new ArrayList<TypedDependency>(typedDependencies.size());
+      deps = new ArrayList<>(typedDependencies.size());
       for (TypedDependency dep : typedDependencies) {
         deps.add(new TypedDependency(dep));
       }
@@ -991,7 +991,7 @@ public abstract class GrammaticalStructure implements Serializable {
    */
   public static Collection<TypedDependency> getRoots(Collection<TypedDependency> list) {
 
-    Collection<TypedDependency> roots = new ArrayList<TypedDependency>();
+    Collection<TypedDependency> roots = new ArrayList<>();
 
     // need to see if more than one governor is not listed somewhere as a dependent
     // first take all the deps
@@ -1067,7 +1067,7 @@ public abstract class GrammaticalStructure implements Serializable {
   public static String dependenciesToCoNLLXString(Collection<TypedDependency> deps, CoreMap sentence) {
     StringBuilder bf = new StringBuilder();
 
-    HashMap<Integer, TypedDependency> indexedDeps = new HashMap<Integer, TypedDependency>(deps.size());
+    HashMap<Integer, TypedDependency> indexedDeps = new HashMap<>(deps.size());
     for (TypedDependency dep : deps) {
       indexedDeps.put(dep.dep().index(), dep);
     }
@@ -1112,7 +1112,7 @@ public abstract class GrammaticalStructure implements Serializable {
 
       int index = 0;
       CoreMap sentence = new CoreLabel();
-      List<CoreLabel> tokens = new ArrayList<CoreLabel>(leaves.size());
+      List<CoreLabel> tokens = new ArrayList<>(leaves.size());
       for (Tree leaf : leaves) {
         index++;
         if (!indexToPos.containsKey(index)) {
@@ -1130,7 +1130,7 @@ public abstract class GrammaticalStructure implements Serializable {
       bf.append(dependenciesToCoNLLXString(deps, sentence));
     } else {
       if (extraSep) {
-        List<TypedDependency> extraDeps = new ArrayList<TypedDependency>();
+        List<TypedDependency> extraDeps = new ArrayList<>();
         for (TypedDependency dep : deps) {
           if (dep.extra()) {
             extraDeps.add(dep);
@@ -1183,9 +1183,9 @@ public abstract class GrammaticalStructure implements Serializable {
    */
   public static List<GrammaticalStructure> readCoNLLXGrammaticalStructureCollection(String fileName, Map<String, GrammaticalRelation> shortNameToGRel, GrammaticalStructureFromDependenciesFactory factory) throws IOException {
     LineNumberReader reader = new LineNumberReader(IOUtils.readerFromString(fileName));
-    List<GrammaticalStructure> gsList = new LinkedList<GrammaticalStructure>();
+    List<GrammaticalStructure> gsList = new LinkedList<>();
 
-    List<List<String>> tokenFields = new ArrayList<List<String>>();
+    List<List<String>> tokenFields = new ArrayList<>();
 
     for (String inline = reader.readLine(); inline != null;
          inline = reader.readLine()) {
@@ -1201,7 +1201,7 @@ public abstract class GrammaticalStructure implements Serializable {
           continue; // skip excess empty lines
 
         gsList.add(buildCoNLLXGrammaticalStructure(tokenFields, shortNameToGRel, factory));
-        tokenFields = new ArrayList<List<String>>();
+        tokenFields = new ArrayList<>();
       }
     }
 
@@ -1212,8 +1212,8 @@ public abstract class GrammaticalStructure implements Serializable {
   buildCoNLLXGrammaticalStructure(List<List<String>> tokenFields,
                                 Map<String, GrammaticalRelation> shortNameToGRel,
                                 GrammaticalStructureFromDependenciesFactory factory) {
-    List<IndexedWord> tgWords = new ArrayList<IndexedWord>(tokenFields.size());
-    List<TreeGraphNode> tgPOSNodes = new ArrayList<TreeGraphNode>(tokenFields.size());
+    List<IndexedWord> tgWords = new ArrayList<>(tokenFields.size());
+    List<TreeGraphNode> tgPOSNodes = new ArrayList<>(tokenFields.size());
 
     SemanticHeadFinder headFinder = new SemanticHeadFinder();
 
@@ -1252,7 +1252,7 @@ public abstract class GrammaticalStructure implements Serializable {
     root.setChildren(tgPOSNodes.toArray(new TreeGraphNode[tgPOSNodes.size()]));
 
     // Build list of TypedDependencies
-    List<TypedDependency> tdeps = new ArrayList<TypedDependency>(tgWords.size());
+    List<TypedDependency> tdeps = new ArrayList<>(tgWords.size());
 
     // Create a node outside the tree useful for root dependencies;
     // we want to keep those if they were stored in the conll file
@@ -1475,7 +1475,7 @@ public abstract class GrammaticalStructure implements Serializable {
     private final boolean keepPunct;
     private final TreebankLangParserParams params;
 
-    private final Map<GrammaticalStructure, Tree> origTrees = new WeakHashMap<GrammaticalStructure, Tree>();
+    private final Map<GrammaticalStructure, Tree> origTrees = new WeakHashMap<>();
 
     public TreeBankGrammaticalStructureWrapper(Iterable<Tree> wrappedTrees, boolean keepPunct, TreebankLangParserParams params) {
       trees = wrappedTrees;

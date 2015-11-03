@@ -900,7 +900,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                                      Properties properties, BiConsumer<Annotation, Consumer<Annotation>> annotate,
                                      BiConsumer<Annotation, OutputStream> print,
                                      OutputFormat outputFormat) throws IOException {
-    List<Runnable> toRun = new LinkedList<Runnable>();
+    List<Runnable> toRun = new LinkedList<>();
 
     // Process properties here
     final String baseOutputDir = properties.getProperty("outputDirectory", ".");
@@ -908,7 +908,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
     // Set of files to exclude
     final String excludeFilesParam = properties.getProperty("excludeFiles");
-    final Set<String> excludeFiles = new HashSet<String>();
+    final Set<String> excludeFiles = new HashSet<>();
     if (excludeFilesParam != null) {
       Iterable<String> lines = IOUtils.readLines(excludeFilesParam);
       for (String line:lines) {
@@ -1145,7 +1145,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     else if (properties.containsKey("filelist")){
       String fileName = properties.getProperty("filelist");
       Collection<File> inputfiles = readFileList(fileName);
-      Collection<File> files = new ArrayList<File>(inputfiles.size());
+      Collection<File> files = new ArrayList<>(inputfiles.size());
       for (File file:inputfiles) {
         if (file.isDirectory()) {
           files.addAll(new FileSequentialCollection(new File(fileName), properties.getProperty("extension"), true));

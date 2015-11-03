@@ -46,7 +46,7 @@ public final class MungeTreesWithMorfetteAnalyses {
 
     private void primeNext() {
       try {
-        nextList = new ArrayList<CoreLabel>(40);
+        nextList = new ArrayList<>(40);
         for (String line; (line = reader.readLine()) != null; ++lineId) {
           line = line.trim();
           if (line.equals("")) {

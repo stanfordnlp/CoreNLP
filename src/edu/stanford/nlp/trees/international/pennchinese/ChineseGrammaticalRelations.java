@@ -1155,12 +1155,12 @@ public class ChineseGrammaticalRelations {
       CONTROLLED_SUBJECT, chineseOnly,
   };
 
-  private static final List<GrammaticalRelation> values = new ArrayList<GrammaticalRelation>();
-  public static final Set<GrammaticalRelation> universalValues = new HashSet<GrammaticalRelation>();
+  private static final List<GrammaticalRelation> values = new ArrayList<>();
+  public static final Set<GrammaticalRelation> universalValues = new HashSet<>();
 
   // Map from GrammaticalRelation short names to their corresponding
   // GrammaticalRelation objects
-  public static final Map<String, GrammaticalRelation> shortNameToGRel = new ConcurrentHashMap<String, GrammaticalRelation>();
+  public static final Map<String, GrammaticalRelation> shortNameToGRel = new ConcurrentHashMap<>();
   static {
     for (int i = 0; i < rawValues.length; i++) {
       GrammaticalRelation gr = rawValues[i];

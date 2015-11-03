@@ -21,7 +21,7 @@ public class SetRoots extends SsurgeonEdit {
   
   @Override
   public void evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    List<IndexedWord> newRoots = new ArrayList<IndexedWord>();
+    List<IndexedWord> newRoots = new ArrayList<>();
     for (String name : newRootNames)
       newRoots.add(getNamedNode(name, sm));
     sg.setRoots(newRoots);    

@@ -82,7 +82,7 @@ public class Treebanks {
     String suffix = Treebank.DEFAULT_TREE_FILE_SUFFIX;
     TreeReaderFactory trf = null;
     TreebankLanguagePack tlp = null;
-    List<Predicate<Tree>> filters = new ArrayList<Predicate<Tree>>();
+    List<Predicate<Tree>> filters = new ArrayList<>();
 
     while (i < args.length && args[i].startsWith("-")) {
       if (args[i].equals("-maxLength") && i + 1 < args.length) {
@@ -317,7 +317,7 @@ public class Treebanks {
 
 
   private static void countTaggings(Treebank tb, final PrintWriter pw) {
-    final TwoDimensionalCounter<String,String> wtc = new TwoDimensionalCounter<String,String>();
+    final TwoDimensionalCounter<String,String> wtc = new TwoDimensionalCounter<>();
     tb.apply(tree -> {
       List<TaggedWord> tags = tree.taggedYield();
       for (TaggedWord tag : tags)

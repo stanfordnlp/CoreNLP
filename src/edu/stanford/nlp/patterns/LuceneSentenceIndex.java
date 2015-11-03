@@ -152,7 +152,7 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
 
     //Map<String, List<CoreLabel>> sents = null;
     TopDocs tp = searcher.search(query, Integer.MAX_VALUE);
-    Set<String> sentids = new HashSet<String>();
+    Set<String> sentids = new HashSet<>();
     if (tp.totalHits > 0) {
       for (ScoreDoc s : tp.scoreDocs) {
         int docId = s.doc;
@@ -199,7 +199,7 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
   @Override
   public Map<E, Set<String>> queryIndex(Collection<E> patterns) {
     try{
-      Map<E, Set<String>> sents = new HashMap<E, Set<String>>();
+      Map<E, Set<String>> sents = new HashMap<>();
       for(E p : patterns){
         Set<String> sentids = queryIndexGetSentences(p.getRelevantWords());
         sents.put(p, sentids);
@@ -225,7 +225,7 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
 
   private List<CoreLabel> readProtoBufAnnotation(byte[] sent) throws IOException {
     ProtobufAnnotationSerializer p = new ProtobufAnnotationSerializer();
-    List<CoreLabel> toks = new ArrayList<CoreLabel>();
+    List<CoreLabel> toks = new ArrayList<>();
     ByteArrayInputStream is = new ByteArrayInputStream(sent);
     CoreNLPProtos.Token d;
     do{

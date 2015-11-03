@@ -59,7 +59,7 @@ public class CRFClassifierWithLOP<IN extends CoreMap> extends CRFClassifier<IN> 
   }
 
   private int[][][][] createPartialDataForLOP(int lopIter, int[][][][] data) {
-    ArrayList<Integer> newFeatureList = new ArrayList<Integer>(1000);
+    ArrayList<Integer> newFeatureList = new ArrayList<>(1000);
     Set<Integer> featureIndicesSet = featureIndicesSetArray.get(lopIter);
 
     int[][][][] newData = new int[data.length][][][];
@@ -89,8 +89,8 @@ public class CRFClassifierWithLOP<IN extends CoreMap> extends CRFClassifier<IN> 
   private void getFeatureBoundaryIndices(int numFeatures, int numLopExpert) {
     // first find begin/end feature index for each expert
     int interval = numFeatures / numLopExpert;
-    featureIndicesSetArray = new ArrayList<Set<Integer>>(numLopExpert);
-    featureIndicesListArray =  new ArrayList<List<Integer>>(numLopExpert);
+    featureIndicesSetArray = new ArrayList<>(numLopExpert);
+    featureIndicesListArray = new ArrayList<>(numLopExpert);
     for (int i = 0; i < numLopExpert; i++) {
       featureIndicesSetArray.add(Generics.<Integer>newHashSet(interval));
       featureIndicesListArray.add(Generics.<Integer>newArrayList(interval));
@@ -131,7 +131,7 @@ public class CRFClassifierWithLOP<IN extends CoreMap> extends CRFClassifier<IN> 
       try {
         System.err.println("Reading initial LOP weights from file " + flags.initialLopWeights + " ...");
         BufferedReader br = IOUtils.readerFromString(flags.initialLopWeights);
-        List<double[]> listOfWeights = new ArrayList<double[]>(numLopExpert);
+        List<double[]> listOfWeights = new ArrayList<>(numLopExpert);
         for (String line; (line = br.readLine()) != null; ) {
           line = line.trim();
           String[] parts = line.split("\t");
@@ -170,7 +170,7 @@ public class CRFClassifierWithLOP<IN extends CoreMap> extends CRFClassifier<IN> 
         }
 
         Set<Integer> newSet = Generics.newHashSet(numFeatures);
-        List<Integer> newList = new ArrayList<Integer>(numFeatures);
+        List<Integer> newList = new ArrayList<>(numFeatures);
         for (int fIndex = 0; fIndex < numFeatures; fIndex++) {
           newSet.add(fIndex);
           newList.add(fIndex);

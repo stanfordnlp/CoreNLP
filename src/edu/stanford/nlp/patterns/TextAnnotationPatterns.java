@@ -27,14 +27,14 @@ import java.util.logging.Logger;
 public class TextAnnotationPatterns {
 
 
-  Map<String, Class<? extends TypesafeMap.Key<String>>> humanLabelClasses = new HashMap<String, Class<? extends TypesafeMap.Key<String>>>();
-  Map<String, Class<? extends TypesafeMap.Key<String>>> machineAnswerClasses = new HashMap<String, Class<? extends TypesafeMap.Key<String>>>();
+  Map<String, Class<? extends TypesafeMap.Key<String>>> humanLabelClasses = new HashMap<>();
+  Map<String, Class<? extends TypesafeMap.Key<String>>> machineAnswerClasses = new HashMap<>();
   Properties props;
   String outputFile;
 
   Counter<String> matchedSeedWords;
 
-  Map<String, Set<CandidatePhrase>> seedWords = new HashMap<String, Set<CandidatePhrase>>();
+  Map<String, Set<CandidatePhrase>> seedWords = new HashMap<>();
   private String backgroundSymbol ="O";
 
   //Properties testProps = new Properties();
@@ -95,7 +95,7 @@ public class TextAnnotationPatterns {
 
   public String suggestPhrases() throws IOException, ClassNotFoundException, IllegalAccessException, InterruptedException, ExecutionException, InstantiationException, NoSuchMethodException, InvocationTargetException {
     resetPatternLabelsInSents(Data.sents);
-    GetPatternsFromDataMultiClass<SurfacePattern> model = new GetPatternsFromDataMultiClass<SurfacePattern>(props, Data.sents, seedWords, false, humanLabelClasses);
+    GetPatternsFromDataMultiClass<SurfacePattern> model = new GetPatternsFromDataMultiClass<>(props, Data.sents, seedWords, false, humanLabelClasses);
     //model.constVars.numIterationsForPatterns = 2;
     model.iterateExtractApply();
     return model.constVars.getLearnedWordsAsJson();
@@ -125,12 +125,12 @@ public class TextAnnotationPatterns {
     processText(false);
 
 
-    GetPatternsFromDataMultiClass<SurfacePattern> model = new GetPatternsFromDataMultiClass<SurfacePattern>(runProps, Data.sents, seedWords, true, humanLabelClasses);
+    GetPatternsFromDataMultiClass<SurfacePattern> model = new GetPatternsFromDataMultiClass<>(runProps, Data.sents, seedWords, true, humanLabelClasses);
     Execution.fillOptions(model, runProps);
 
     GetPatternsFromDataMultiClass.loadFromSavedPatternsWordsDir(model , runProps);
 
-    Map<String, Integer> alreadyLearnedIters = new HashMap<String, Integer>();
+    Map<String, Integer> alreadyLearnedIters = new HashMap<>();
     for(String label: model.constVars.getLabels())
       alreadyLearnedIters.put(label, model.constVars.getLearnedWordsEachIter().get(label).lastEntry().getKey());
 
@@ -143,11 +143,11 @@ public class TextAnnotationPatterns {
     }
 
 
-    Map<String, Counter<CandidatePhrase>> allExtractions = new HashMap<String, Counter<CandidatePhrase>>();
+    Map<String, Counter<CandidatePhrase>> allExtractions = new HashMap<>();
 
     //Only for one label right now!
     String label = model.constVars.getLabels().iterator().next();
-    allExtractions.put(label, new ClassicCounter<CandidatePhrase>());
+    allExtractions.put(label, new ClassicCounter<>());
 
     for(Map.Entry<String, DataInstance> sent: Data.sents.entrySet()){
       StringBuffer str = new StringBuffer();
@@ -217,7 +217,7 @@ public class TextAnnotationPatterns {
       if(o.equals("seedWords")){
         JsonObject obj = objarr.getJsonObject(o);
         for (String st : obj.keySet()){
-          seedWords.put(st, new HashSet<CandidatePhrase>());
+          seedWords.put(st, new HashSet<>());
           JsonArray arr  = obj.getJsonArray(st);
           for(int i = 0; i < arr.size(); i++){
             String val = arr.getString(i);
@@ -342,7 +342,7 @@ public class TextAnnotationPatterns {
     JsonObject objarr = jsonReader.readObject();
     for(Map.Entry<String, JsonValue> o: objarr.entrySet()){
       String label = o.getKey();
-      Set<CandidatePhrase> seed = new HashSet<CandidatePhrase>();
+      Set<CandidatePhrase> seed = new HashSet<>();
       JsonArray arr = objarr.getJsonArray(o.getKey());
       for(int i = 0; i < arr.size(); i++){
         String seedw = arr.getString(i);

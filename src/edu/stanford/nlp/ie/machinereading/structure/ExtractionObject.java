@@ -145,12 +145,12 @@ public class ExtractionObject implements Serializable {
   public static Span getSpan(ExtractionObject ... objs) {
     int left = Integer.MAX_VALUE;
     int right = Integer.MIN_VALUE;
-    for(int i = 0; i < objs.length; i ++){
-      if(objs[i].getExtentTokenStart() < left){
-        left = objs[i].getExtentTokenStart();
+    for (ExtractionObject obj : objs) {
+      if (obj.getExtentTokenStart() < left) {
+        left = obj.getExtentTokenStart();
       }
-      if(objs[i].getExtentTokenEnd() > right) {
-        right = objs[i].getExtentTokenEnd();
+      if (obj.getExtentTokenEnd() > right) {
+        right = obj.getExtentTokenEnd();
       }
     }
     assert(left < Integer.MAX_VALUE);

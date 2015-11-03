@@ -10,7 +10,7 @@ import java.util.StringTokenizer;
 public class SimpleTokenize {
   /** Basic string tokenization, skipping over white spaces */
   public static ArrayList<String> tokenize(String line) {
-    ArrayList<String> tokens = new ArrayList<String>();
+    ArrayList<String> tokens = new ArrayList<>();
     StringTokenizer tokenizer = new StringTokenizer(line);
     while (tokenizer.hasMoreElements()) {
       tokens.add(tokenizer.nextToken());
@@ -20,7 +20,7 @@ public class SimpleTokenize {
 
   /** Basic string tokenization, skipping over white spaces */
   public static ArrayList<String> tokenize(String line, String separators) {
-    ArrayList<String> tokens = new ArrayList<String>();
+    ArrayList<String> tokens = new ArrayList<>();
     StringTokenizer tokenizer = new StringTokenizer(line, separators);
     while (tokenizer.hasMoreElements()) {
       tokens.add(tokenizer.nextToken());
@@ -68,7 +68,7 @@ public class SimpleTokenize {
    * Regular quotes inside tokens MUST be preceded by \
    */
   public static ArrayList<String> tokenizeWithQuotes(String line) {
-    ArrayList<String> tokens = new ArrayList<String>();
+    ArrayList<String> tokens = new ArrayList<>();
     int position = 0;
 
     while ((position = findNonWhitespace(line, position)) != -1) {

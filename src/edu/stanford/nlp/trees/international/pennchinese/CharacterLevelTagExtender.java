@@ -57,7 +57,7 @@ public class CharacterLevelTagExtender extends BobChrisTreeNormalizer implements
     if (tree.isPreTerminal()) {
       String word = tree.firstChild().label().value();
 
-      List<Tree> newPreterms = new ArrayList<Tree>();
+      List<Tree> newPreterms = new ArrayList<>();
       for (int i = 0, size = word.length(); i < size; i++) {
         String singleCharLabel = new String(new char[]{word.charAt(i)});
         Tree newLeaf = tf.newLeaf(singleCharLabel);
@@ -83,7 +83,7 @@ public class CharacterLevelTagExtender extends BobChrisTreeNormalizer implements
       }
       return tf.newTreeNode(tag, newPreterms);
     } else {
-      List<Tree> newChildren = new ArrayList<Tree>();
+      List<Tree> newChildren = new ArrayList<>();
       for (int i = 0; i < tree.children().length; i++) {
         Tree child = tree.children()[i];
         newChildren.add(transformTree(child));

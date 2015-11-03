@@ -313,10 +313,10 @@ public abstract class Treebank extends AbstractCollection<Tree> {
     int numTreesLE40 = 0;
     int numNonUnaryRoots = 0;
     Tree nonUnaryEg = null;
-    ClassicCounter<Tree> nonUnaries = new ClassicCounter<Tree>();
-    ClassicCounter<String> roots = new ClassicCounter<String>();
-    ClassicCounter<String> starts = new ClassicCounter<String>();
-    ClassicCounter<String> puncts = new ClassicCounter<String>();
+    ClassicCounter<Tree> nonUnaries = new ClassicCounter<>();
+    ClassicCounter<String> roots = new ClassicCounter<>();
+    ClassicCounter<String> starts = new ClassicCounter<>();
+    ClassicCounter<String> puncts = new ClassicCounter<>();
     int numUnenclosedLeaves = 0;
     int numLeaves = 0;
     int numNonPhrasal = 0;
@@ -327,8 +327,8 @@ public abstract class Treebank extends AbstractCollection<Tree> {
     int longestSentence = 0;
     int numNullLabel = 0;
     Set<String> words = Generics.newHashSet();
-    ClassicCounter<String> tags = new ClassicCounter<String>();
-    ClassicCounter<String> cats = new ClassicCounter<String>();
+    ClassicCounter<String> tags = new ClassicCounter<>();
+    ClassicCounter<String> cats = new ClassicCounter<>();
     Tree leafEg = null;
     Tree preTerminalMultipleChildrenEg = null;
     Tree nullLabelEg = null;

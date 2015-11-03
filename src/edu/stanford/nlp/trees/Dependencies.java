@@ -125,7 +125,7 @@ public class Dependencies {
 
       List<TypedDependency> depList = govToDepMap.get(gov);
       if (depList == null) {
-        depList = new ArrayList<TypedDependency>();
+        depList = new ArrayList<>();
         govToDepMap.put(gov, depList);
       }
       depList.add(dep);
@@ -144,7 +144,7 @@ public class Dependencies {
         Set<List<TypedDependency>> childDepLists = getGovMaxChains(govToDepMap, childNode, depth-1);
         if (childDepLists.size() != 0) {
           for (List<TypedDependency> childDepList : childDepLists) {
-            List<TypedDependency> depList = new ArrayList<TypedDependency>(childDepList.size() + 1);
+            List<TypedDependency> depList = new ArrayList<>(childDepList.size() + 1);
             depList.add(child);
             depList.addAll(childDepList);
             depLists.add(depList);
@@ -159,7 +159,7 @@ public class Dependencies {
 
   public static Counter<List<TypedDependency>> getTypedDependencyChains(List<TypedDependency> deps, int maxLength) {
     Map<IndexedWord,List<TypedDependency>> govToDepMap = govToDepMap(deps);
-    Counter<List<TypedDependency>> tdc = new ClassicCounter<List<TypedDependency>>();
+    Counter<List<TypedDependency>> tdc = new ClassicCounter<>();
     for (IndexedWord gov : govToDepMap.keySet()) {
       Set<List<TypedDependency>> maxChains = getGovMaxChains(govToDepMap, gov, maxLength);
       for (List<TypedDependency> maxChain : maxChains) {

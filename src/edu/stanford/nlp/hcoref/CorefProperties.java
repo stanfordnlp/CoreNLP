@@ -126,10 +126,10 @@ public class CorefProperties {
   public static final boolean REMOVE_SINGLETONS = true;
 
   // current list of dcoref sieves
-  private static final Set<String> dcorefSieveNames = new HashSet<String>(Arrays.asList("MarkRole", "DiscourseMatch", 
-      "ExactStringMatch", "RelaxedExactStringMatch", "PreciseConstructs", "StrictHeadMatch1", 
-      "StrictHeadMatch2", "StrictHeadMatch3", "StrictHeadMatch4", "RelaxedHeadMatch", "PronounMatch", "SpeakerMatch",
-      "ChineseHeadMatch"));
+  private static final Set<String> dcorefSieveNames = new HashSet<>(Arrays.asList("MarkRole", "DiscourseMatch",
+          "ExactStringMatch", "RelaxedExactStringMatch", "PreciseConstructs", "StrictHeadMatch1",
+          "StrictHeadMatch2", "StrictHeadMatch3", "StrictHeadMatch4", "RelaxedHeadMatch", "PronounMatch", "SpeakerMatch",
+          "ChineseHeadMatch"));
   
   
   public static boolean doScore(Properties props) {
@@ -265,10 +265,10 @@ public class CorefProperties {
   
   private static Set<MentionType> getMentionTypes(Properties props, String propKey) {
     if(!props.containsKey(propKey) || props.getProperty(propKey).equalsIgnoreCase("all")){
-      return new HashSet<MentionType>(Arrays.asList(MentionType.values()));
+      return new HashSet<>(Arrays.asList(MentionType.values()));
     }
 
-    Set<MentionType> types = new HashSet<MentionType>();
+    Set<MentionType> types = new HashSet<>();
     for(String type : props.getProperty(propKey).trim().split(",\\s*")) {
       if(type.toLowerCase().matches("i|you|we|they|it|she|he")) type = "PRONOMINAL";
       types.add(MentionType.valueOf(type));

@@ -53,7 +53,7 @@ public class CRFClassifierWithDropout<IN extends CoreMap> extends CRFClassifier<
       System.err.println("Reading unsupervised dropout data from file: " + flags.unsupDropoutFile);
       Timing timer = new Timing();
       timer.start();
-      unsupDocs = new ArrayList<List<IN>>();
+      unsupDocs = new ArrayList<>();
       ObjectBank<List<IN>> unsupObjBank = makeObjectBankFromFile(flags.unsupDropoutFile, readerAndWriter);
       for (List<IN> doc : unsupObjBank) {
         for (IN tok: doc) {
@@ -66,7 +66,7 @@ public class CRFClassifierWithDropout<IN extends CoreMap> extends CRFClassifier<
       System.err.println("Time to read: : " + Timing.toSecondsString(elapsedMs) + " seconds");
     }
     if (unsupDocs != null && flags.doFeatureDiscovery) {
-      List<List<IN>> totalDocs = new ArrayList<List<IN>>();
+      List<List<IN>> totalDocs = new ArrayList<>();
       totalDocs.addAll(docs);
       totalDocs.addAll(unsupDocs);
       return totalDocs;

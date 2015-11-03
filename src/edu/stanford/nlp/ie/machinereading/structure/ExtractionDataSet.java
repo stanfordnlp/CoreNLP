@@ -20,14 +20,14 @@ public class ExtractionDataSet implements Serializable {
   private final List<ExtractionSentence> sentences;
 
   public ExtractionDataSet() {
-    sentences = new ArrayList<ExtractionSentence>();
+    sentences = new ArrayList<>();
   }
   
   /**
    * Copy c'tor that performs deep copy of the sentences in the original dataset
    */
   public ExtractionDataSet(ExtractionDataSet original) {
-    sentences = new ArrayList<ExtractionSentence>();
+    sentences = new ArrayList<>();
     for(ExtractionSentence sent: original.getSentences()){
       // deep copy of the sentence: we create new entity/relation/event lists here
       // however, we do not deep copy the ExtractionObjects themselves!

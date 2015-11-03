@@ -135,14 +135,14 @@ public abstract class StochasticMinimizer<T extends Function> implements Minimiz
     }
     AbstractStochasticCachingDiffFunction dfunction = (AbstractStochasticCachingDiffFunction) function;
 
-    List<Pair<Double,Double>> res = new ArrayList<Pair<Double,Double>>();
-    Pair<Double,Double> best = new Pair<Double,Double>(lower,Double.POSITIVE_INFINITY); //this is set to lower because the first it will always use the lower first, so it has to be best
-    Pair<Double,Double> low = new Pair<Double,Double>(lower,Double.POSITIVE_INFINITY);
-    Pair<Double,Double> high = new Pair<Double,Double>(upper,Double.POSITIVE_INFINITY);
-    Pair<Double,Double> cur = new Pair<Double,Double>();
-    Pair<Double,Double> tmp = new Pair<Double,Double>();
+    List<Pair<Double,Double>> res = new ArrayList<>();
+    Pair<Double,Double> best = new Pair<>(lower, Double.POSITIVE_INFINITY); //this is set to lower because the first it will always use the lower first, so it has to be best
+    Pair<Double,Double> low = new Pair<>(lower, Double.POSITIVE_INFINITY);
+    Pair<Double,Double> high = new Pair<>(upper, Double.POSITIVE_INFINITY);
+    Pair<Double,Double> cur = new Pair<>();
+    Pair<Double,Double> tmp = new Pair<>();
 
-    List<Double> queue = new ArrayList<Double>();
+    List<Double> queue = new ArrayList<>();
     queue.add(lower);
     queue.add(upper);
     //queue.add(0.5* (lower + upper));
@@ -194,7 +194,7 @@ public abstract class StochasticMinimizer<T extends Function> implements Minimiz
         toContinue = false;
       }
 
-      res.add(new Pair<Double,Double>(cur.first(),cur.second()));
+      res.add(new Pair<>(cur.first(), cur.second()));
 
       System.err.println("");
       System.err.println("Final value is: " + nf.format(cur.second()));
@@ -208,9 +208,9 @@ public abstract class StochasticMinimizer<T extends Function> implements Minimiz
     System.err.println(ps.getClass().toString());
     System.err.println("-------------");
     System.err.println("  val    ,    function after " + msPerTest + " ms");
-    for(int i=0;i<res.size();i++ ){
-      System.err.println(res.get(i).first() + "    ,    " + res.get(i).second() );
-     }
+    for (Pair<Double, Double> re : res) {
+      System.err.println(re.first() + "    ,    " + re.second());
+    }
     System.err.println("");
     System.err.println("");
 
@@ -330,7 +330,7 @@ public abstract class StochasticMinimizer<T extends Function> implements Minimiz
       }
     }
 
-    return new Pair<Integer,Double>(bOpt,gOpt);
+    return new Pair<>(bOpt, gOpt);
   }
 
 
@@ -373,7 +373,7 @@ public abstract class StochasticMinimizer<T extends Function> implements Minimiz
     x = initial;
     grad = new double[x.length];
     newX = new double[x.length];
-    gradList = new ArrayList<double[]>();
+    gradList = new ArrayList<>();
     numBatches =  dfunction.dataDimension()/ bSize;
     outputFrequency = (int) Math.ceil( ((double) numBatches) /( (double) outputFrequency) )  ;
 

@@ -152,9 +152,9 @@ public class SUTime {
 
   // Index of time id to temporal object
   public static class TimeIndex {
-    Index<TimeExpression> temporalExprIndex = new HashIndex<TimeExpression>();
-    Index<Temporal> temporalIndex = new HashIndex<Temporal>();
-    Index<Temporal> temporalFuncIndex = new HashIndex<Temporal>();
+    Index<TimeExpression> temporalExprIndex = new HashIndex<>();
+    Index<Temporal> temporalIndex = new HashIndex<>();
+    Index<Temporal> temporalFuncIndex = new HashIndex<>();
 
     SUTime.Time docDate;
 
@@ -386,7 +386,7 @@ public class SUTime {
     }
 
     public Map<String, String> getTimexAttributes(TimeIndex timeIndex) {
-      Map<String, String> map = new LinkedHashMap<String, String>();
+      Map<String, String> map = new LinkedHashMap<>();
       map.put(TimexAttr.tid.name(), getTidString(timeIndex));
       // NOTE: GUTime used "VAL" instead of TIMEX3 standard "value"
       // NOTE: attributes are case sensitive, GUTIME used mostly upper case
@@ -3023,7 +3023,7 @@ public class SUTime {
       if (JodaTimeUtils.hasField(base, DateTimeFieldType.year())
          && JodaTimeUtils.hasField(base, DateTimeFieldType.monthOfYear())
          && JodaTimeUtils.hasField(base, DateTimeFieldType.dayOfWeek())) {
-        List<Temporal> list = new ArrayList<Temporal>();
+        List<Temporal> list = new ArrayList<>();
         Partial pt = new Partial();
         pt = JodaTimeUtils.setField(pt, DateTimeFieldType.year(), base.get(DateTimeFieldType.year()));
         pt = JodaTimeUtils.setField(pt, DateTimeFieldType.monthOfYear(), base.get(DateTimeFieldType.monthOfYear()));

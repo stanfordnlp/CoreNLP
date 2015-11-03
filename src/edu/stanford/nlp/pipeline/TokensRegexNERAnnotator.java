@@ -215,7 +215,7 @@ public class TokensRegexNERAnnotator implements Annotator {
     this.posMatchType = PosMatchType.valueOf(properties.getProperty(prefix + "posmatchtype",
             DEFAULT_POS_MATCH_TYPE.name()));
     String commonWordsFile = properties.getProperty(prefix + "commonWords");
-    commonWords = new HashSet<String>();
+    commonWords = new HashSet<>();
     if (commonWordsFile != null) {
       try {
         BufferedReader reader = IOUtils.getBufferedFileReader(commonWordsFile);
@@ -241,10 +241,9 @@ public class TokensRegexNERAnnotator implements Annotator {
     } else {
       headerFields = COMMA_DELIMITERS_PATTERN.split(headerProp);
       // Take header fields and remove known headers to get annotation field names
-      List<String> fieldNames = new ArrayList<String>();
-      List<Class> fieldClasses = new ArrayList<Class>();
-      for (int i = 0; i < headerFields.length; i++) {
-        String field = headerFields[i];
+      List<String> fieldNames = new ArrayList<>();
+      List<Class> fieldClasses = new ArrayList<>();
+      for (String field : headerFields) {
         if (!predefinedHeaderFields.contains(field)) {
           Class fieldClass = EnvLookup.lookupAnnotationKeyWithClassname(null, field);
           if (fieldClass == null) {
@@ -268,7 +267,7 @@ public class TokensRegexNERAnnotator implements Annotator {
     String noDefaultOverwriteLabelsProp = properties.getProperty(prefix + "noDefaultOverwriteLabels");
     this.noDefaultOverwriteLabels = (noDefaultOverwriteLabelsProp != null)
             ? Collections.unmodifiableSet(CollectionUtils.asSet(noDefaultOverwriteLabelsProp.split("\\s*,\\s*")))
-            : Collections.unmodifiableSet(new HashSet<String>());
+            : Collections.unmodifiableSet(new HashSet<>());
     this.ignoreCase = PropertiesUtils.getBool(properties, prefix + "ignorecase", false);
     this.verbose = PropertiesUtils.getBool(properties, prefix + "verbose", false);
 
@@ -278,7 +277,7 @@ public class TokensRegexNERAnnotator implements Annotator {
       validPosPattern = null;
     }
     entries = Collections.unmodifiableList(readEntries(name, noDefaultOverwriteLabels, ignoreCase, verbose, headerFields, annotationFieldnames, mappings));
-    IdentityHashMap<SequencePattern<CoreMap>, Entry> patternToEntry = new IdentityHashMap<SequencePattern<CoreMap>, Entry>();
+    IdentityHashMap<SequencePattern<CoreMap>, Entry> patternToEntry = new IdentityHashMap<>();
     multiPatternMatcher = createPatternMatcher(patternToEntry);
     this.patternToEntry = Collections.unmodifiableMap(patternToEntry);
     Set<String> myLabels = Generics.newHashSet();
@@ -328,14 +327,14 @@ public class TokensRegexNERAnnotator implements Annotator {
     env.setDefaultStringMatchFlags(stringMatchFlags);
     NodePattern<String> posTagPattern = (validPosPattern != null && PosMatchType.MATCH_ALL_TOKENS.equals(posMatchType))?
             new CoreMapNodePattern.StringAnnotationRegexPattern(validPosPattern):null;
-    List<TokenSequencePattern> patterns = new ArrayList<TokenSequencePattern>(entries.size());
+    List<TokenSequencePattern> patterns = new ArrayList<>(entries.size());
     for (Entry entry:entries) {
       TokenSequencePattern pattern;
       if (entry.tokensRegex != null) {
         // TODO: posTagPatterns...
         pattern = TokenSequencePattern.compile(env, entry.tokensRegex);
       } else {
-        List<SequencePattern.PatternExpr> nodePatterns = new ArrayList<SequencePattern.PatternExpr>();
+        List<SequencePattern.PatternExpr> nodePatterns = new ArrayList<>();
         for (String p:entry.regex) {
           CoreMapNodePattern c = CoreMapNodePattern.valueOf(p, patternFlags);
           if (posTagPattern != null) {
@@ -541,8 +540,8 @@ public class TokensRegexNERAnnotator implements Annotator {
     // We leave it to TokensRegex NER to sort out the priorities and matches
     //   (typically after all the matches has been made since for some TokenRegex expression,
     //       we don't know how many tokens are matched until after the matching is done)
-    List<Entry> entries = new ArrayList<Entry>();
-    TrieMap<String,Entry> seenRegexes = new TrieMap<String,Entry>();
+    List<Entry> entries = new ArrayList<>();
+    TrieMap<String,Entry> seenRegexes = new TrieMap<>();
     Arrays.sort(mappings);
     for (String mapping:mappings) {
       BufferedReader rd = null;
@@ -564,7 +563,7 @@ public class TokensRegexNERAnnotator implements Annotator {
   }
 
   private static Map<String,Integer> getHeaderIndexMap(String[] headerFields) {
-    Map<String,Integer> map = new HashMap<String,Integer>();
+    Map<String,Integer> map = new HashMap<>();
     for (int i = 0; i < headerFields.length; i++) {
       String field = headerFields[i];
       if (map.containsKey(field)) {

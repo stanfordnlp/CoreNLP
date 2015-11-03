@@ -32,7 +32,7 @@ public class CollectionUtils {
   // Utils for making collections out of arrays of primitive types.
 
   public static List<Integer> asList(int[] a) {
-    List<Integer> result = new ArrayList<Integer>(a.length);
+    List<Integer> result = new ArrayList<>(a.length);
     for (int j : a) {
       result.add(Integer.valueOf(j));
     }
@@ -40,7 +40,7 @@ public class CollectionUtils {
   }
 
   public static List<Double> asList(double[] a) {
-    List<Double> result = new ArrayList<Double>(a.length);
+    List<Double> result = new ArrayList<>(a.length);
     for (double v : a) {
       result.add(new Double(v));
     }
@@ -74,7 +74,7 @@ public class CollectionUtils {
   /** Returns a new List containing the given objects. */
   @SafeVarargs
   public static <T> List<T> makeList(T... items) {
-    return new ArrayList<T>(Arrays.asList(items));
+    return new ArrayList<>(Arrays.asList(items));
   }
 
   /** Returns a new Set containing all the objects in the specified array. */
@@ -94,7 +94,7 @@ public class CollectionUtils {
   }
 
   public static <T> Collection<T> union(Collection<T> set1, Collection<T> set2) {
-    Collection<T> union = new ArrayList<T>();
+    Collection<T> union = new ArrayList<>();
     for (T t : set1) {
       union.add(t);
     }
@@ -135,7 +135,7 @@ public class CollectionUtils {
    * @return The collection difference list1 - list2
    */
   public static <T> Collection<T> diff(Collection<T> list1, Collection<T> list2) {
-    Collection<T> diff = new ArrayList<T>();
+    Collection<T> diff = new ArrayList<>();
     for (T t : list1) {
       if (!list2.contains(t)) {
         diff.add(t);
@@ -153,7 +153,7 @@ public class CollectionUtils {
    * @return The collection difference list1 - list2
    */
   public static <T> Set<T> diffAsSet(Collection<T> list1, Collection<T> list2) {
-    Set<T> diff = new HashSet<T>();
+    Set<T> diff = new HashSet<>();
     for (T t : list1) {
       if (!list2.contains(t)) {
         diff.add(t);
@@ -363,9 +363,9 @@ public class CollectionUtils {
       throw new IllegalArgumentException("n < 0: " + n);
     if (n > c.size())
       throw new IllegalArgumentException("n > size of collection: " + n + ", " + c.size());
-    List<E> copy = new ArrayList<E>(c.size());
+    List<E> copy = new ArrayList<>(c.size());
     copy.addAll(c);
-    Collection<E> result = new ArrayList<E>(n);
+    Collection<E> result = new ArrayList<>(n);
     for (int k = 0; k < n; k++) {
       double d = r.nextDouble();
       int x = (int) (d * copy.size());
@@ -402,9 +402,9 @@ public class CollectionUtils {
   public static <E> Collection<E> sampleWithReplacement(Collection<E> c, int n, Random r) {
     if (n < 0)
       throw new IllegalArgumentException("n < 0: " + n);
-    List<E> copy = new ArrayList<E>(c.size());
+    List<E> copy = new ArrayList<>(c.size());
     copy.addAll(c);
-    Collection<E> result = new ArrayList<E>(n);
+    Collection<E> result = new ArrayList<>(n);
     for (int k = 0; k < n; k++) {
       double d = r.nextDouble();
       int x = (int) (d * copy.size());
@@ -507,7 +507,7 @@ public class CollectionUtils {
    * @return A list consisting of the items of the Iterable, in the same order.
    */
   public static <T> List<T> toList(Iterable<T> items) {
-    List<T> list = new ArrayList<T>();
+    List<T> list = new ArrayList<>();
     addAll(list, items);
     return list;
   }
@@ -561,12 +561,12 @@ public class CollectionUtils {
    * @return All sub-lists of the given sizes.
    */
   public static <T> List<List<T>> getNGrams(List<T> items, int minSize, int maxSize) {
-    List<List<T>> ngrams = new ArrayList<List<T>>();
+    List<List<T>> ngrams = new ArrayList<>();
     int listSize = items.size();
     for (int i = 0; i < listSize; ++i) {
       for (int ngramSize = minSize; ngramSize <= maxSize; ++ngramSize) {
         if (i + ngramSize <= listSize) {
-          List<T> ngram = new ArrayList<T>();
+          List<T> ngram = new ArrayList<>();
           for (int j = i; j < i + ngramSize; ++j) {
             ngram.add(items.get(j));
           }
@@ -622,10 +622,10 @@ public class CollectionUtils {
     assert maxSize >= minSize;
     assert includePrefixes || includeSuffixes;
 
-    List<List<T>> prefixesAndSuffixes = new ArrayList<List<T>>();
+    List<List<T>> prefixesAndSuffixes = new ArrayList<>();
     for (int span = minSize - 1; span < maxSize; span++) {
-      List<Integer> indices = new ArrayList<Integer>();
-      List<T> seq = new ArrayList<T>();
+      List<Integer> indices = new ArrayList<>();
+      List<T> seq = new ArrayList<>();
       if (includePrefixes) {
         for (int i = 0; i <= span; i++) {
           indices.add(i);
@@ -653,7 +653,7 @@ public class CollectionUtils {
   }
 
   public static <T, M> List<T> mergeList(List<? extends T> list, Collection<M> matched, Function<M, Interval<Integer>> toIntervalFunc, Function<List<? extends T>, T> aggregator) {
-    List<Interval<Integer>> matchedIntervals = new ArrayList<Interval<Integer>>(matched.size());
+    List<Interval<Integer>> matchedIntervals = new ArrayList<>(matched.size());
     for (M m : matched) {
       matchedIntervals.add(toIntervalFunc.apply(m));
     }
@@ -666,7 +666,7 @@ public class CollectionUtils {
   }
 
   public static <T> List<T> mergeListWithSortedMatched(List<? extends T> list, List<? extends HasInterval<Integer>> matched, Function<List<? extends T>, T> aggregator) {
-    List<T> merged = new ArrayList<T>(list.size()); // Approximate size
+    List<T> merged = new ArrayList<>(list.size()); // Approximate size
     int last = 0;
     for (HasInterval<Integer> m : matched) {
       Interval<Integer> interval = m.getInterval();
@@ -687,7 +687,7 @@ public class CollectionUtils {
   }
 
   public static <T> List<T> mergeListWithSortedMatchedPreAggregated(List<? extends T> list, List<? extends T> matched, Function<T, Interval<Integer>> toIntervalFunc) {
-    List<T> merged = new ArrayList<T>(list.size()); // Approximate size
+    List<T> merged = new ArrayList<>(list.size()); // Approximate size
     int last = 0;
     for (T m : matched) {
       Interval<Integer> interval = toIntervalFunc.apply(m);
@@ -710,7 +710,7 @@ public class CollectionUtils {
    * Combines all the lists in a collection to a single list.
    */
   public static <T> List<T> flatten(Collection<List<T>> nestedList) {
-    List<T> result = new ArrayList<T>();
+    List<T> result = new ArrayList<>();
     for (List<T> list : nestedList) {
       result.addAll(list);
     }
@@ -782,11 +782,11 @@ public class CollectionUtils {
    * contain the remaining 1/numFolds of the original values.
    */
   public static <T> Collection<Pair<Collection<T>, Collection<T>>> trainTestFoldsForCV(List<T> values, int numFolds) {
-    Collection<Pair<Collection<T>, Collection<T>>> trainTestPairs = new ArrayList<Pair<Collection<T>,Collection<T>>>();
+    Collection<Pair<Collection<T>, Collection<T>>> trainTestPairs = new ArrayList<>();
     List<List<T>> folds = partitionIntoFolds(values, numFolds);
     for (int splitNum = 0; splitNum < numFolds; splitNum++) {
       Collection<T> test = folds.get(splitNum);
-      Collection<T> train = new ArrayList<T>();
+      Collection<T> train = new ArrayList<>();
       for (int foldNum = 0; foldNum < numFolds; foldNum++) {
         if (foldNum != splitNum) {
           train.addAll(folds.get(foldNum));
@@ -804,7 +804,7 @@ public class CollectionUtils {
    * highest frequency, all of them will be returned.)
    */
   public static <T> Set<T> modes(Collection<T> values) {
-    Counter<T> counter = new ClassicCounter<T>(values);
+    Counter<T> counter = new ClassicCounter<>(values);
     List<Double> sortedCounts = CollectionUtils.sorted(counter.values());
     Double highestCount = sortedCounts.get(sortedCounts.size() - 1);
     Counters.retainAbove(counter, highestCount);
@@ -839,7 +839,7 @@ public class CollectionUtils {
    *
    */
   public static<T1, T2> List<T2> transformAsList(Collection<? extends T1> original, Function<T1, ? extends T2> f){
-    List<T2> transformed = new ArrayList<T2>();
+    List<T2> transformed = new ArrayList<>();
     for(T1 t: original){
       transformed.add(f.apply(t));
     }
@@ -851,7 +851,7 @@ public class CollectionUtils {
    *
    */
   public static<T> List<T> filterAsList(Collection<? extends T> original, Predicate<? super T> f){
-    List<T> transformed = new ArrayList<T>();
+    List<T> transformed = new ArrayList<>();
     for (T t: original) {
       if (f.test(t)) {
         transformed.add(t);
@@ -868,7 +868,7 @@ public class CollectionUtils {
    * @return The corresponding list of values of type V
    */
   public static<T,V> List<V> getAll(Map<T, V> map, Collection<T> indices) {
-    List<V> result = new ArrayList<V>();
+    List<V> result = new ArrayList<>();
     for(T i: indices)
       if(map.containsKey(i)){
         result.add(map.get(i));
@@ -948,7 +948,7 @@ public class CollectionUtils {
   }
 
   public static <E> Iterable<E> iterableFromEnumerator(final Enumeration<E> lst) {
-    return new IterableIterator<E>(iteratorFromEnumerator(lst));
+    return new IterableIterator<>(iteratorFromEnumerator(lst));
   }
 
 
