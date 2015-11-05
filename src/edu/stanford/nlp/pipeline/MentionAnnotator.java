@@ -61,6 +61,16 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
   @Override
   public void annotate(Annotation annotation) {
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
+    // TO DO: be careful, this could introduce a really hard to find bug
+    // this is necessary for Chinese coreference
+    // removeNested needs to be set to "false" for newswire text or big performance drop
+    if (annotation.get(CoreAnnotations.DocIDAnnotation.class).contains("nw") &&
+            corefProperties.getProperty("coref.input.type").equals("conll") &&
+            corefProperties.getProperty("coref.language").equals("zh")) {
+      CorefProperties.setRemoveNested(corefProperties, false);
+    } else {
+      CorefProperties.setRemoveNested(corefProperties, true);
+    }
     List<List<Mention>> mentions = md.findMentions(annotation, dictionaries, corefProperties);
     int currIndex = 0;
     for (CoreMap sentence : sentences) {
