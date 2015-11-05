@@ -58,12 +58,12 @@ public class OptimizerTests {
             // Check that we're within a very small margin of error (around 7 decimal places) of the randomly
             // discovered value
 
-            if (logLikelihood < randomPerturbedLogLikelihood - Math.abs(1.0e-7 * logLikelihood)) {
+            if (logLikelihood < randomPerturbedLogLikelihood - (1.0e-7 * Math.max(1.0e-1,Math.abs(logLikelihood)))) {
                 System.err.println("Thought optimal point was: "+logLikelihood);
                 System.err.println("Discovered better point: "+randomPerturbedLogLikelihood);
             }
 
-            assertTrue(logLikelihood >= randomPerturbedLogLikelihood - Math.abs(1.0e-7 * logLikelihood));
+            assertTrue(logLikelihood >= randomPerturbedLogLikelihood - (1.0e-7 * Math.max(1.0e-1,Math.abs(logLikelihood))));
         }
     }
 
