@@ -66,7 +66,7 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
     // removeNested needs to be set to "false" for newswire text or big performance drop
     if (annotation.get(CoreAnnotations.DocIDAnnotation.class).contains("nw") &&
             corefProperties.getProperty("coref.input.type").equals("conll") &&
-            corefProperties.getProperty("coref.language").equals("zh")) {
+            corefProperties.getProperty("coref.language", "en").equals("zh")) {
       CorefProperties.setRemoveNested(corefProperties, false);
     } else {
       CorefProperties.setRemoveNested(corefProperties, true);
