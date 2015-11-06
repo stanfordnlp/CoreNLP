@@ -64,8 +64,11 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
     // TO DO: be careful, this could introduce a really hard to find bug
     // this is necessary for Chinese coreference
     // removeNested needs to be set to "false" for newswire text or big performance drop
-    if (annotation.get(CoreAnnotations.DocIDAnnotation.class).contains("nw") &&
-            corefProperties.getProperty("coref.input.type").equals("conll") &&
+    String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
+    if (docID == null) {
+      docID = "";
+    }
+    if (docID.contains("nw") && corefProperties.getProperty("coref.input.type", "raw").equals("conll") &&
             corefProperties.getProperty("coref.language", "en").equals("zh")) {
       CorefProperties.setRemoveNested(corefProperties, false);
     } else {
