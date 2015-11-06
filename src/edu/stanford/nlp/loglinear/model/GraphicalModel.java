@@ -9,6 +9,9 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
+ * Created on 8/7/15.
+ * @author keenon
+ * <p>
  * A basic graphical model representation: Factors and Variables. This should be a fairly familiar interface to anybody
  * who's taken a basic PGM course (eg https://www.coursera.org/course/pgm). The key points:
  * - Stitching together feature factors
@@ -18,8 +21,6 @@ import java.util.function.Function;
  * This is really just the data structure, and inference lives elsewhere and must use public interfaces to access these
  * models. We just provide basic utility functions here, and barely do that, because we pass through directly to maps
  * wherever appropriate.
- *
- * @author keenon
  */
 public class GraphicalModel {
   public Map<String, String> modelMetaData = new HashMap<>();
@@ -86,6 +87,19 @@ public class GraphicalModel {
       }
       return factor;
     }
+
+    /**
+     * Duplicates this factor.
+     *
+     * @return a copy of the factor
+     */
+    public Factor cloneFactor() {
+      Factor clone = new Factor();
+      clone.neigborIndices = neigborIndices.clone();
+      clone.featuresTable = featuresTable.cloneTable();
+      clone.metaData.putAll(metaData);
+      return clone;
+    }
   }
 
   /**
@@ -150,13 +164,42 @@ public class GraphicalModel {
   }
 
   /**
+   * @return an array of integers, indicating variable sizes given by each of the factors in the model
+   */
+  public int[] getVariableSizes() {
+    if (factors.size() == 0) {
+      return new int[0];
+    }
+
+    int maxVar = 0;
+    for (Factor f : factors) {
+      for (int n : f.neigborIndices) {
+        if (n > maxVar) maxVar = n;
+      }
+    }
+
+    int[] sizes = new int[maxVar + 1];
+    for (int i = 0; i < sizes.length; i++) {
+      sizes[i] = -1;
+    }
+
+    for (Factor f : factors) {
+      for (int i = 0; i < f.neigborIndices.length; i++) {
+        sizes[f.neigborIndices[i]] = f.featuresTable.getDimensions()[i];
+      }
+    }
+
+    return sizes;
+  }
+
+  /**
    * Writes the protobuf version of this graphical model to a stream. reversible with readFromStream().
    *
    * @param stream the output stream to write to
-   * @throws IOException
+   * @throws IOException passed through from the stream
    */
   public void writeToStream(OutputStream stream) throws IOException {
-    getProtoBuilder().build().writeTo(stream);
+    getProtoBuilder().build().writeDelimitedTo(stream);
   }
 
   /**
@@ -164,10 +207,10 @@ public class GraphicalModel {
    *
    * @param stream the stream to read from, assuming protobuf encoding
    * @return a new graphical model
-   * @throws IOException
+   * @throws IOException passed through from the stream
    */
   public static GraphicalModel readFromStream(InputStream stream) throws IOException {
-    return readFromProto(GraphicalModelProto.GraphicalModel.parseFrom(stream));
+    return readFromProto(GraphicalModelProto.GraphicalModel.parseDelimitedFrom(stream));
   }
 
   /**
@@ -193,6 +236,7 @@ public class GraphicalModel {
    * @return an in-memory GraphicalModel
    */
   public static GraphicalModel readFromProto(GraphicalModelProto.GraphicalModel proto) {
+    if (proto == null) return null;
     GraphicalModel model = new GraphicalModel();
     model.modelMetaData = readMetaDataFromProto(proto.getMetaData());
     model.variableMetaData = new ArrayList<>();
@@ -246,10 +290,33 @@ public class GraphicalModel {
   public String toString() {
     String s = "{";
     for (Factor f : factors) {
-      s += "\n\t" + Arrays.toString(f.neigborIndices);
+      s += "\n\t" + Arrays.toString(f.neigborIndices) + "@" + f;
     }
     s += "\n}";
     return s;
+  }
+
+  /**
+   * The point here is to allow us to save a copy of the model with a current set of factors and metadata mappings,
+   * which can come in super handy with gameplaying applications. The cloned model doesn't instantiate the feature
+   * thunks inside factors, those are just taken over individually.
+   *
+   * @return a clone
+   */
+  public GraphicalModel cloneModel() {
+    GraphicalModel clone = new GraphicalModel();
+    clone.modelMetaData.putAll(modelMetaData);
+    for (int i = 0; i < variableMetaData.size(); i++) {
+      if (variableMetaData.get(i) != null) {
+        clone.getVariableMetaDataByReference(i).putAll(variableMetaData.get(i));
+      }
+    }
+
+    for (Factor f : factors) {
+      clone.factors.add(f.cloneFactor());
+    }
+
+    return clone;
   }
 
   ////////////////////////////////////////////////////////////////////////////
