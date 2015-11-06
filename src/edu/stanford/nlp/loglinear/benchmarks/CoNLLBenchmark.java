@@ -107,12 +107,6 @@ public class CoNLLBenchmark {
       System.err.println("\tR:" + recall + " (" + correctChunk.getOrDefault(tag, 0.0).intValue() + "/" + foundCorrect.getOrDefault(tag, 0.0).intValue() + ")");
       System.err.println("\tF1:" + f1);
     }
-
-    System.err.println("\ndumping weights to 'src/benchmark/conll-features.txt'...\n");
-
-    BufferedWriter bw = new BufferedWriter(new FileWriter("src/benchmark/conll-features.txt"));
-    namespace.debugVector(weights, bw);
-    bw.close();
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////
