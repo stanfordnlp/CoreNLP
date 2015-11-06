@@ -93,7 +93,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
 
   @Override
   public Set<Requirement> requirementsSatisfied() {
-    return Collections.unmodifiableSet(new ArraySet<>(DEPENDENCY_REQUIREMENT, CONSTITUENCY_OR_DEPENDENCY_REQUIREMENT));
+    return Collections.unmodifiableSet(new ArraySet<>(DEPENDENCY_REQUIREMENT));
   }
 
   public static String signature(String annotatorName, Properties props) {
