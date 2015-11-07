@@ -55,38 +55,30 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * @param puncFilter Filter to remove punctuation dependencies
    */
   public EnglishGrammaticalStructure(Tree t, Predicate<String> puncFilter) {
-    this(t, puncFilter, new SemanticHeadFinder(true), true);
+    this(t, puncFilter, new SemanticHeadFinder(true));
   }
 
   /**
-   * This gets used by GrammaticalStructureFactory (by reflection). DON'T DELETE.
-   *
-   * @param t Parse tree to make grammatical structure from
-   * @param puncFilter Filter to remove punctuation dependencies
-   * @param hf HeadFinder to use when building it
-   */
-  public EnglishGrammaticalStructure(Tree t, Predicate<String> puncFilter, HeadFinder hf) {
-    this(t, puncFilter, hf, true);
-  }
-
-  /**
-   * Construct a new <code>GrammaticalStructure</code> from an existing parse
-   * tree. The new <code>GrammaticalStructure</code> has the same tree structure
+   * Construct a new {@code GrammaticalStructure} from an existing parse
+   * tree. The new {@code GrammaticalStructure} has the same tree structure
    * and label values as the given tree (but no shared storage). As part of
    * construction, the parse tree is analyzed using definitions from
    * {@link GrammaticalRelation <code>GrammaticalRelation</code>} to populate
-   * the new <code>GrammaticalStructure</code> with as many labeled grammatical
+   * the new {@code GrammaticalStructure} with as many labeled grammatical
    * relations as it can.
+   *
+   * Once upon a time this method had an extra parameter as to whether to operate
+   * in a threadsafe manner. We decided that that was a really bad idea, and this
+   * method now always acts in a threadsafe manner.
+   * This method gets used by GrammaticalStructureFactory (by reflection). DON'T DELETE.
    *
    * @param t Parse tree to make grammatical structure from
    * @param puncFilter Filter for punctuation words
    * @param hf HeadFinder to use when building it
-   * @param threadSafe Whether or not to support simultaneous instances among multiple
-   *          threads
    */
-  public EnglishGrammaticalStructure(Tree t, Predicate<String> puncFilter, HeadFinder hf, boolean threadSafe) {
+  public EnglishGrammaticalStructure(Tree t, Predicate<String> puncFilter, HeadFinder hf) {
     // the tree is normalized (for index and functional tag stripping) inside CoordinationTransformer
-    super(t, EnglishGrammaticalRelations.values(threadSafe), threadSafe ? EnglishGrammaticalRelations.valuesLock() : null, new CoordinationTransformer(hf), hf, puncFilter, Filters.acceptFilter());
+    super(t, EnglishGrammaticalRelations.values(), EnglishGrammaticalRelations.valuesLock(), new CoordinationTransformer(hf), hf, puncFilter, Filters.acceptFilter());
   }
 
   /** Used for postprocessing CoNLL X dependencies */

@@ -38,6 +38,7 @@ import edu.stanford.nlp.util.StringUtils;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
 import java.util.regex.Pattern;
 
 
@@ -161,9 +162,14 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
    * @param values The set of GrammaticalRelations to look for it among.
    * @return The GrammaticalRelation with that name
    */
-  public static GrammaticalRelation valueOf(String s, Collection<GrammaticalRelation> values) {
-    for (GrammaticalRelation reln : values) {
-      if (reln.toString().equals(s)) return reln;
+  public static GrammaticalRelation valueOf(String s, Collection<GrammaticalRelation> values, Lock readValuesLock) {
+    readValuesLock.lock();
+    try {
+      for (GrammaticalRelation reln : values) {
+        if (reln.toString().equals(s)) return reln;
+      }
+    } finally {
+      readValuesLock.unlock();
     }
 
     return null;
@@ -599,7 +605,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
       } else {
         return rel;
       }
-      
+
     default: {
       throw new RuntimeException("Unknown language " + language);
     }
