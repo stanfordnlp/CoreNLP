@@ -1,29 +1,29 @@
-//MaxentTagger -- StanfordMaxEnt, A Maximum Entropy Toolkit
-//Copyright (c) 2002-2010 Leland Stanford Junior University
+// MaxentTagger -- StanfordMaxEnt, A Maximum Entropy Toolkit
+// Copyright (c) 2002-2015 Leland Stanford Junior University
 
 
-//This program is free software; you can redistribute it and/or
-//modify it under the terms of the GNU General Public License
-//as published by the Free Software Foundation; either version 2
-//of the License, or (at your option) any later version.
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
 
-//This program is distributed in the hope that it will be useful,
-//but WITHOUT ANY WARRANTY; without even the implied warranty of
-//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//GNU General Public License for more details.
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 
-//You should have received a copy of the GNU General Public License
-//along with this program; if not, write to the Free Software
-//Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-//For more information, bug reports, fixes, contact:
-//Christopher Manning
-//Dept of Computer Science, Gates 1A
-//Stanford CA 94305-9010
-//USA
-//Support/Questions: java-nlp-user@lists.stanford.edu
-//Licensing: java-nlp-support@lists.stanford.edu
-//http://www-nlp.stanford.edu/software/tagger.shtml
+// For more information, bug reports, fixes, contact:
+// Christopher Manning
+// Dept of Computer Science, Gates 2A
+// Stanford CA 94305-9020
+// USA
+// Support/Questions: stanford-nlp on SO or java-nlp-user@lists.stanford.edu
+// Licensing: java-nlp-support@lists.stanford.edu
+// http://www-nlp.stanford.edu/software/tagger.shtml
 
 
 package edu.stanford.nlp.tagger.maxent;
@@ -745,7 +745,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   }
 
   /** This reads the complete tagger from a single model stored in a file, at a URL,
-   *  or as a resource in a jar file, and inits the tagger using a
+   *  or as a resource in a jar file, and initializes the tagger using a
    *  combination of the properties passed in and parameters from the file.
    *  <p>
    *  <i>Note for the future:</i> This assumes that the TaggerConfig in the file
