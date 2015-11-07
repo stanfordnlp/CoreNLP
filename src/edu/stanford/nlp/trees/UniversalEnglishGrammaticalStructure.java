@@ -72,12 +72,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   }
 
   /**
-   * Construct a new {@code GrammaticalStructure} from an existing parse
-   * tree. The new {@code GrammaticalStructure} has the same tree structure
+   * Construct a new <code>GrammaticalStructure</code> from an existing parse
+   * tree. The new <code>GrammaticalStructure</code> has the same tree structure
    * and label values as the given tree (but no shared storage). As part of
    * construction, the parse tree is analyzed using definitions from
    * {@link GrammaticalRelation <code>GrammaticalRelation</code>} to populate
-   * the new {@code GrammaticalStructure} with as many labeled grammatical
+   * the new <code>GrammaticalStructure</code> with as many labeled grammatical
    * relations as it can.
    *
    * @param t Parse tree to make grammatical structure from
@@ -89,8 +89,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   public UniversalEnglishGrammaticalStructure(Tree t, Predicate<String> tagFilter, HeadFinder hf, boolean threadSafe) {
 
     // the tree is normalized (for index and functional tag stripping) inside CoordinationTransformer
-    super(t, UniversalEnglishGrammaticalRelations.values(), UniversalEnglishGrammaticalRelations.valuesLock(),
-            new CoordinationTransformer(hf, true), hf, Filters.acceptFilter(), tagFilter);
+    super(t, UniversalEnglishGrammaticalRelations.values(threadSafe), threadSafe ? UniversalEnglishGrammaticalRelations.valuesLock() : null,
+          new CoordinationTransformer(hf, true), hf, Filters.acceptFilter(), tagFilter);
   }
 
   /** Used for postprocessing CoNLL X dependencies */

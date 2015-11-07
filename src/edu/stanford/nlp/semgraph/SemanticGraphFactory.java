@@ -20,7 +20,7 @@ public class SemanticGraphFactory {
 
   private static final boolean INCLUDE_PUNCTUATION_DEPENDENCIES = false;
 
-  public enum Mode {
+  public static enum Mode {
     COLLAPSED_TREE,
     /** collapse: Whether to do "collapsing" of pairs of dependencies into
      *  single dependencies, e.g., for prepositions and conjunctions.
@@ -138,7 +138,8 @@ public class SemanticGraphFactory {
       }
       gs = new EnglishGrammaticalStructure(tree,
               wordFilt,
-              new SemanticHeadFinder(true));
+              new SemanticHeadFinder(true),
+              threadSafe);
 
     } else {
       Predicate<String> tagFilt;
@@ -158,7 +159,7 @@ public class SemanticGraphFactory {
   }
 
   /**
-   * @see edu.stanford.nlp.semgraph.SemanticGraphFactory#makeFromTree(edu.stanford.nlp.trees.Tree, edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode, edu.stanford.nlp.trees.GrammaticalStructure.Extras, boolean, java.util.function.Predicate, boolean)
+   * @see edu.stanford.nlp.semgraph.SemanticGraphFactory#makeFromTree(edu.stanford.nlp.trees.Tree, edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode, edu.stanford.nlp.trees.GrammaticalStructure.Extras, boolean, java.util.function.Predicate)
    */
   @Deprecated
   public static SemanticGraph makeFromTree(Tree tree,
@@ -239,7 +240,7 @@ public class SemanticGraphFactory {
 
 
   /**
-   * @see edu.stanford.nlp.semgraph.SemanticGraphFactory#makeFromTree(edu.stanford.nlp.trees.Tree, edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode, edu.stanford.nlp.trees.GrammaticalStructure.Extras, boolean, java.util.function.Predicate, boolean)
+   * @see edu.stanford.nlp.semgraph.SemanticGraphFactory#makeFromTree(edu.stanford.nlp.trees.Tree, edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode, edu.stanford.nlp.trees.GrammaticalStructure.Extras, boolean, java.util.function.Predicate)
    */
   public static SemanticGraph makeFromTree(Tree tree,
                                            Mode mode,
@@ -249,7 +250,7 @@ public class SemanticGraphFactory {
   }
 
   /**
-   * @see edu.stanford.nlp.semgraph.SemanticGraphFactory#makeFromTree(edu.stanford.nlp.trees.Tree, edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode, edu.stanford.nlp.trees.GrammaticalStructure.Extras, boolean, java.util.function.Predicate, boolean)
+   * @see edu.stanford.nlp.semgraph.SemanticGraphFactory#makeFromTree(edu.stanford.nlp.trees.Tree, edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode, edu.stanford.nlp.trees.GrammaticalStructure.Extras, java.util.function.Predicate)
    */
   @Deprecated
   public static SemanticGraph makeFromTree(Tree tree,
@@ -261,7 +262,7 @@ public class SemanticGraphFactory {
 
 
   /**
-   * @see edu.stanford.nlp.semgraph.SemanticGraphFactory#makeFromTree(edu.stanford.nlp.trees.Tree, edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode, edu.stanford.nlp.trees.GrammaticalStructure.Extras, boolean, java.util.function.Predicate, boolean)
+   * @see edu.stanford.nlp.semgraph.SemanticGraphFactory#makeFromTree(edu.stanford.nlp.trees.Tree, edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode, edu.stanford.nlp.trees.GrammaticalStructure.Extras, boolean, java.util.function.Predicate)
    */
   public static SemanticGraph makeFromTree(Tree tree,
                                            Mode mode,

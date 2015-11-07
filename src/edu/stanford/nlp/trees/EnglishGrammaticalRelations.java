@@ -1502,9 +1502,6 @@ public class EnglishGrammaticalRelations {
    * <ul>
    * <li>NUMERIC_MODIFIER &lt; ADJECTIVAL_MODIFIER
    * </ul>
-   * Note: You should never directly access the values variable but
-   * rather access it through a concurrency mechanism. See immediately
-   * below in the code.
    */
   @SuppressWarnings({"RedundantArrayCreation"})
   private static final List<GrammaticalRelation> values =
@@ -1565,45 +1562,32 @@ public class EnglishGrammaticalRelations {
       DISCOURSE_ELEMENT,
       GOES_WITH,
     }));
-
   // Cache frequently used views of the values list
+  private static final List<GrammaticalRelation> unmodifiableValues =
+    Collections.unmodifiableList(values);
   private static final List<GrammaticalRelation> synchronizedValues =
     Collections.synchronizedList(values);
   private static final List<GrammaticalRelation> unmodifiableSynchronizedValues =
     Collections.unmodifiableList(values);
-
-  /** If you need exclusive access to these values lists, then you should
-   *  take out a valuesLock. If you are writing to the list, you should take
-   *  out a writeLock. If you are doing reading things that require atomicity
-   *  beyond single operations, such as iterating over the list, then you should
-   *  take out a read lock.
-   */
   public static final ReadWriteLock valuesLock = new ReentrantReadWriteLock();
 
   // Map from English GrammaticalRelation short names to their corresponding
   // GrammaticalRelation objects
   public static final Map<String, GrammaticalRelation> shortNameToGRel = new ConcurrentHashMap<String, GrammaticalRelation>();
   static {
-    valuesLock().lock();
-    try {
-      for (GrammaticalRelation gr : values()) {
-        shortNameToGRel.put(gr.toString().toLowerCase(), gr);
-      }
-    } finally {
-      valuesLock().unlock();
+    for (GrammaticalRelation gr : values(true)) {
+      shortNameToGRel.put(gr.toString().toLowerCase(), gr);
     }
   }
 
-  /** Return a synchronized list of the known GrammaticalRelation entries. */
   public static List<GrammaticalRelation> values() {
-    return unmodifiableSynchronizedValues;
+    return values(false);
   }
 
-  /** Returns a readLock for the grammatical relations values list.
-   *  Take out one of these if you want to iterate over the values list.
-   *
-   *  @return A readLock on the values list
-   */
+  public static List<GrammaticalRelation> values(boolean threadSafe) {
+    return threadSafe? unmodifiableSynchronizedValues : unmodifiableValues;
+  }
+
   public static Lock valuesLock() {
     return valuesLock.readLock();
   }
@@ -1728,7 +1712,7 @@ public class EnglishGrammaticalRelations {
    * @return The EnglishGrammaticalRelation with that name
    */
   public static GrammaticalRelation valueOf(String s) {
-    return GrammaticalRelation.valueOf(s, synchronizedValues, valuesLock());
+    return GrammaticalRelation.valueOf(s, synchronizedValues);
 
 //    // TODO does this need to be changed?
 //    // modification NOTE: do not commit until go-ahead
@@ -1753,7 +1737,7 @@ public class EnglishGrammaticalRelations {
   /**
    * Returns an EnglishGrammaticalRelation based on the argument.
    * It works if passed a GrammaticalRelation or the String
-   * representation of one (e.g., "nsubj").  It returns {@code null}
+   * representation of one (e.g. "nsubj").  It returns <code>null</code>
    * for other classes or if no string match is found.
    *
    * @param o A GrammaticalRelation or String
