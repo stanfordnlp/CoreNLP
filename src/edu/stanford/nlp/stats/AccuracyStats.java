@@ -45,12 +45,12 @@ public class AccuracyStats<L> implements Scorer<L> {
 
   public <F> double score(ProbabilisticClassifier<L,F> classifier, GeneralDataset<L,F> data) {
 
-    ArrayList<Pair<Double, Integer>> dataScores = new ArrayList<Pair<Double, Integer>>();
+    ArrayList<Pair<Double, Integer>> dataScores = new ArrayList<>();
     for (int i = 0; i < data.size(); i++) {
       Datum<L,F> d = data.getRVFDatum(i);
       Counter<L> scores = classifier.logProbabilityOf(d);
       int labelD = d.label().equals(posLabel) ? 1 : 0;
-      dataScores.add(new Pair<Double, Integer>(Math.exp(scores.getCount(posLabel)), labelD));
+      dataScores.add(new Pair<>(Math.exp(scores.getCount(posLabel)), labelD));
     }
 
     PRCurve prc = new PRCurve(dataScores);

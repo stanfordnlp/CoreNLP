@@ -80,13 +80,11 @@ class RandomWalk implements Serializable {
    */
   public RandomWalk(Collection<Pair<?,?>> data, int steps) {
     train(data);
-    for (Iterator i = seenToHidden.keySet().iterator(); i.hasNext();) {
-      Object seen = i.next();
+    for (Object seen : seenToHidden.keySet()) {
       if (!model.containsKey(seen)) {
         model.put(seen, new ClassicCounter());
       }
-      for (Iterator j = hiddenToSeen.keySet().iterator(); j.hasNext();) {
-        Object hidden = j.next();
+      for (Object hidden : hiddenToSeen.keySet()) {
         model.get(seen).setCount(hidden, score(seen, hidden, steps));
       }
     }

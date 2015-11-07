@@ -108,7 +108,7 @@ public class GenericTimeExpressionPatterns implements TimeExpressionPatterns {
 
     // BINDINGS for parsing from file!!!!!!!
     for (SUTime.TemporalOp t:SUTime.TemporalOp.values()) {
-      env.bind(t.name(), new Expressions.PrimitiveValue<SUTime.TemporalOp>("TemporalOp", t));
+      env.bind(t.name(), new Expressions.PrimitiveValue<>("TemporalOp", t));
     }
     for (SUTime.TimeUnit t: SUTime.TimeUnit.values()) {
       if (!t.equals(SUTime.TimeUnit.UNKNOWN)) {
@@ -117,7 +117,7 @@ public class GenericTimeExpressionPatterns implements TimeExpressionPatterns {
       }
     }
     for (SUTime.StandardTemporalType t: SUTime.StandardTemporalType.values()) {
-      env.bind(t.name(), new Expressions.PrimitiveValue<SUTime.StandardTemporalType>("TemporalType", t));
+      env.bind(t.name(), new Expressions.PrimitiveValue<>("TemporalType", t));
     }
     env.bind("Duration", new Expressions.PrimitiveValue<ValueFunction>(
             Expressions.TYPE_FUNCTION,

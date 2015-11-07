@@ -174,8 +174,8 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
   private static double getNorm(double[] w)
   {
     double norm = 0;
-    for (int i = 0; i < w.length; i++) {
-      norm += w[i]*w[i];
+    for (double aW : w) {
+      norm += aW * aW;
     }
     return Math.sqrt(norm);
   }
@@ -394,7 +394,7 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
             objDelta = objVal-oldObjVal;
             oldObjVal = objVal;
             if (values == null)
-              values = new ArrayList<Double>();
+              values = new ArrayList<>();
             values.add(objVal);
           } else {
             func.calculateStochasticGradient(x, bSize);
@@ -423,7 +423,7 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
           if (f instanceof HasRegularizerParamRange) {
             paramRange = ((HasRegularizerParamRange)f).getRegularizerParamRange(x);
           } else {
-            paramRange = new HashSet<Integer>();
+            paramRange = new HashSet<>();
             for (int i = 0; i < x.length; i++)
               paramRange.add(i);
           }
@@ -463,8 +463,7 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
           }
         } else {
           // System.err.println("featureGroup.length: " + featureGrouping.length);
-          for (int gIndex = 0; gIndex < featureGrouping.length; gIndex++) {
-            int[] gFeatureIndices = featureGrouping[gIndex];
+          for (int[] gFeatureIndices : featureGrouping) {
             // if (gIndex % 100 == 0) System.err.print(gIndex+" ");
             double testUpdateSquaredSum = 0;
             double testUpdateAbsSum = 0;
@@ -476,7 +475,7 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
               // arrive at x(t+1/2)
               wValue = x[index];
               testUpdate = wValue - (currentRate * gValue);
-              testUpdateSquaredSum += testUpdate*testUpdate;
+              testUpdateSquaredSum += testUpdate * testUpdate;
               testUpdateAbsSum += Math.abs(testUpdate);
               testUpdateCache[index] = testUpdate;
               currentRateCache[index] = currentRate;
@@ -485,7 +484,7 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
               double testUpdateNorm = Math.sqrt(testUpdateSquaredSum);
               boolean groupHasNonZero = false;
               for (int index : gFeatureIndices) {
-                realUpdate = testUpdateCache[index] * pospart( 1 - currentRateCache[index] * lambda * dm / testUpdateNorm );
+                realUpdate = testUpdateCache[index] * pospart(1 - currentRateCache[index] * lambda * dm / testUpdateNorm);
                 updateX(x, index, realUpdate);
                 if (realUpdate != 0) {
                   numOfNonZero++;
@@ -514,7 +513,7 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
               double bSquaredSum = 0, b = 0;
               for (int index : gFeatureIndices) {
                 b = Math.signum(testUpdateCache[index]) * pospart(Math.abs(testUpdateCache[index]) -
-                  currentRateCache[index] * alpha * lambda);
+                        currentRateCache[index] * alpha * lambda);
                 bCache[index] = b;
                 bSquaredSum += b * b;
               }
@@ -522,7 +521,7 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
               int nonZeroCount = 0;
               boolean groupHasNonZero = false;
               for (int index : gFeatureIndices) {
-                realUpdate = bCache[index] * pospart( 1 - currentRateCache[index] * (1.0-alpha) * lambda * dm / bNorm );
+                realUpdate = bCache[index] * pospart(1 - currentRateCache[index] * (1.0 - alpha) * lambda * dm / bNorm);
                 updateX(x, index, realUpdate);
                 if (realUpdate != 0) {
                   numOfNonZero++;

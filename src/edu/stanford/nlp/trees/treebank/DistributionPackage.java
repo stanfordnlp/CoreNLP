@@ -18,7 +18,7 @@ public class DistributionPackage {
   private String lastCreatedDistribution = "UNKNOWN";
 
   public DistributionPackage() {
-    distFiles = new ArrayList<String>();
+    distFiles = new ArrayList<>();
   }
 
   /**

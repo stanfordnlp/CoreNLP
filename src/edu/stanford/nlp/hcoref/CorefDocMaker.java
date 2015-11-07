@@ -180,7 +180,7 @@ public class CorefDocMaker {
 
     // each sentence should have a CorefCoreAnnotations.CorefMentionsAnnotation.class which maps to List<Mention>
     // this is set by the mentions annotator
-    List<List<Mention>> mentions = new ArrayList<List<Mention>>() ;
+    List<List<Mention>> mentions = new ArrayList<>() ;
     for (CoreMap sentence : anno.get(CoreAnnotations.SentencesAnnotation.class)) {
       mentions.add(sentence.get(CorefCoreAnnotations.CorefMentionsAnnotation.class));
     }

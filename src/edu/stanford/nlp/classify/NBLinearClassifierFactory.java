@@ -175,10 +175,10 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
         int testMin = j * foldSize;
         int testMax = testMin + foldSize;
 
-        LinearClassifier<L, F> c = new LinearClassifier<L, F>(weights(data, labels, testMin, testMax, trialSigma, foldSize), featureIndex, labelIndex);
+        LinearClassifier<L, F> c = new LinearClassifier<>(weights(data, labels, testMin, testMax, trialSigma, foldSize), featureIndex, labelIndex);
         for (int i = testMin; i < testMax; i++) {
           //System.out.println("test i: "+ i + " "+ new BasicDatum(featureIndex.objects(data[i])));
-          score -= c.logProbabilityOf(new BasicDatum<L, F>(featureIndex.objects(data[i]))).getCount(labelIndex.get(labels[i]));
+          score -= c.logProbabilityOf(new BasicDatum<>(featureIndex.objects(data[i]))).getCount(labelIndex.get(labels[i]));
         }
         //System.err.printf("%d: %8g%n", j, score);
         sumScore += score;

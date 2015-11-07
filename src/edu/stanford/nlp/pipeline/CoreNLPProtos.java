@@ -3,6 +3,8 @@
 
 package edu.stanford.nlp.pipeline;
 
+import com.google.protobuf.CodedOutputStream;
+
 public final class CoreNLPProtos {
   private CoreNLPProtos() {}
   public static void registerAllExtensions(
@@ -634,7 +636,7 @@ public final class CoreNLPProtos {
             }
             case 18: {
               if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-                sentence_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence>();
+                sentence_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000002;
               }
               sentence_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.PARSER, extensionRegistry));
@@ -642,7 +644,7 @@ public final class CoreNLPProtos {
             }
             case 26: {
               if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
-                corefChain_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain>();
+                corefChain_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000004;
               }
               corefChain_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.PARSER, extensionRegistry));
@@ -656,7 +658,7 @@ public final class CoreNLPProtos {
             }
             case 42: {
               if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
-                sentencelessToken_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Token>();
+                sentencelessToken_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000010;
               }
               sentencelessToken_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Token.PARSER, extensionRegistry));
@@ -664,7 +666,7 @@ public final class CoreNLPProtos {
             }
             case 50: {
               if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
-                quote_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Quote>();
+                quote_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000020;
               }
               quote_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Quote.PARSER, extensionRegistry));
@@ -1029,20 +1031,20 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeBytes(1, getTextBytes());
       }
-      for (int i = 0; i < sentence_.size(); i++) {
-        output.writeMessage(2, sentence_.get(i));
+      for (Sentence aSentence_ : sentence_) {
+        output.writeMessage(2, aSentence_);
       }
-      for (int i = 0; i < corefChain_.size(); i++) {
-        output.writeMessage(3, corefChain_.get(i));
+      for (CorefChain aCorefChain_ : corefChain_) {
+        output.writeMessage(3, aCorefChain_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeBytes(4, getDocIDBytes());
       }
-      for (int i = 0; i < sentencelessToken_.size(); i++) {
-        output.writeMessage(5, sentencelessToken_.get(i));
+      for (Token aSentencelessToken_ : sentencelessToken_) {
+        output.writeMessage(5, aSentencelessToken_);
       }
-      for (int i = 0; i < quote_.size(); i++) {
-        output.writeMessage(6, quote_.get(i));
+      for (Quote aQuote_ : quote_) {
+        output.writeMessage(6, aQuote_);
       }
       extensionWriter.writeUntil(256, output);
       getUnknownFields().writeTo(output);
@@ -1058,25 +1060,25 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(1, getTextBytes());
       }
-      for (int i = 0; i < sentence_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, sentence_.get(i));
+      for (Sentence aSentence_ : sentence_) {
+        size += CodedOutputStream
+                .computeMessageSize(2, aSentence_);
       }
-      for (int i = 0; i < corefChain_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, corefChain_.get(i));
+      for (CorefChain aCorefChain_ : corefChain_) {
+        size += CodedOutputStream
+                .computeMessageSize(3, aCorefChain_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(4, getDocIDBytes());
       }
-      for (int i = 0; i < sentencelessToken_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(5, sentencelessToken_.get(i));
+      for (Token aSentencelessToken_ : sentencelessToken_) {
+        size += CodedOutputStream
+                .computeMessageSize(5, aSentencelessToken_);
       }
-      for (int i = 0; i < quote_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(6, quote_.get(i));
+      for (Quote aQuote_ : quote_) {
+        size += CodedOutputStream
+                .computeMessageSize(6, aQuote_);
       }
       size += extensionsSerializedSize();
       size += getUnknownFields().getSerializedSize();
@@ -1569,7 +1571,7 @@ public final class CoreNLPProtos {
         java.util.Collections.emptyList();
       private void ensureSentenceIsMutable() {
         if (!((bitField0_ & 0x00000002) == 0x00000002)) {
-          sentence_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence>(sentence_);
+          sentence_ = new java.util.ArrayList<>(sentence_);
           bitField0_ |= 0x00000002;
          }
       }
@@ -1794,8 +1796,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence, edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceOrBuilder> 
           getSentenceFieldBuilder() {
         if (sentenceBuilder_ == null) {
-          sentenceBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence, edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceOrBuilder>(
+          sentenceBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   sentence_,
                   ((bitField0_ & 0x00000002) == 0x00000002),
                   getParentForChildren(),
@@ -1809,7 +1810,7 @@ public final class CoreNLPProtos {
         java.util.Collections.emptyList();
       private void ensureCorefChainIsMutable() {
         if (!((bitField0_ & 0x00000004) == 0x00000004)) {
-          corefChain_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain>(corefChain_);
+          corefChain_ = new java.util.ArrayList<>(corefChain_);
           bitField0_ |= 0x00000004;
          }
       }
@@ -2034,8 +2035,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain, edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChainOrBuilder> 
           getCorefChainFieldBuilder() {
         if (corefChainBuilder_ == null) {
-          corefChainBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain, edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChainOrBuilder>(
+          corefChainBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   corefChain_,
                   ((bitField0_ & 0x00000004) == 0x00000004),
                   getParentForChildren(),
@@ -2125,7 +2125,7 @@ public final class CoreNLPProtos {
         java.util.Collections.emptyList();
       private void ensureSentencelessTokenIsMutable() {
         if (!((bitField0_ & 0x00000010) == 0x00000010)) {
-          sentencelessToken_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Token>(sentencelessToken_);
+          sentencelessToken_ = new java.util.ArrayList<>(sentencelessToken_);
           bitField0_ |= 0x00000010;
          }
       }
@@ -2458,8 +2458,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.Token, edu.stanford.nlp.pipeline.CoreNLPProtos.Token.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder> 
           getSentencelessTokenFieldBuilder() {
         if (sentencelessTokenBuilder_ == null) {
-          sentencelessTokenBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Token, edu.stanford.nlp.pipeline.CoreNLPProtos.Token.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder>(
+          sentencelessTokenBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   sentencelessToken_,
                   ((bitField0_ & 0x00000010) == 0x00000010),
                   getParentForChildren(),
@@ -2473,7 +2472,7 @@ public final class CoreNLPProtos {
         java.util.Collections.emptyList();
       private void ensureQuoteIsMutable() {
         if (!((bitField0_ & 0x00000020) == 0x00000020)) {
-          quote_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Quote>(quote_);
+          quote_ = new java.util.ArrayList<>(quote_);
           bitField0_ |= 0x00000020;
          }
       }
@@ -2698,8 +2697,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.Quote, edu.stanford.nlp.pipeline.CoreNLPProtos.Quote.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.QuoteOrBuilder> 
           getQuoteFieldBuilder() {
         if (quoteBuilder_ == null) {
-          quoteBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Quote, edu.stanford.nlp.pipeline.CoreNLPProtos.Quote.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.QuoteOrBuilder>(
+          quoteBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   quote_,
                   ((bitField0_ & 0x00000020) == 0x00000020),
                   getParentForChildren(),
@@ -3203,7 +3201,7 @@ public final class CoreNLPProtos {
             }
             case 10: {
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                token_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Token>();
+                token_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000001;
               }
               token_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Token.PARSER, extensionRegistry));
@@ -3312,7 +3310,7 @@ public final class CoreNLPProtos {
             }
             case 114: {
               if (!((mutable_bitField0_ & 0x00008000) == 0x00008000)) {
-                openieTriple_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple>();
+                openieTriple_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00008000;
               }
               openieTriple_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.PARSER, extensionRegistry));
@@ -3320,7 +3318,7 @@ public final class CoreNLPProtos {
             }
             case 122: {
               if (!((mutable_bitField0_ & 0x00010000) == 0x00010000)) {
-                entailedSentence_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment>();
+                entailedSentence_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00010000;
               }
               entailedSentence_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment.PARSER, extensionRegistry));
@@ -3360,7 +3358,7 @@ public final class CoreNLPProtos {
             }
             case 274: {
               if (!((mutable_bitField0_ & 0x00000400) == 0x00000400)) {
-                kBestParseTrees_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree>();
+                kBestParseTrees_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000400;
               }
               kBestParseTrees_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.PARSER, extensionRegistry));
@@ -3373,7 +3371,7 @@ public final class CoreNLPProtos {
             }
             case 418: {
               if (!((mutable_bitField0_ & 0x00100000) == 0x00100000)) {
-                entity_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Entity>();
+                entity_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00100000;
               }
               entity_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Entity.PARSER, extensionRegistry));
@@ -3381,7 +3379,7 @@ public final class CoreNLPProtos {
             }
             case 426: {
               if (!((mutable_bitField0_ & 0x00200000) == 0x00200000)) {
-                relation_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Relation>();
+                relation_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00200000;
               }
               relation_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Relation.PARSER, extensionRegistry));
@@ -3394,7 +3392,7 @@ public final class CoreNLPProtos {
             }
             case 442: {
               if (!((mutable_bitField0_ & 0x00800000) == 0x00800000)) {
-                mentions_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention>();
+                mentions_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00800000;
               }
               mentions_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention.PARSER, extensionRegistry));
@@ -4213,8 +4211,8 @@ public final class CoreNLPProtos {
       com.google.protobuf.GeneratedMessage
         .ExtendableMessage<edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence>.ExtensionWriter extensionWriter =
           newExtensionWriter();
-      for (int i = 0; i < token_.size(); i++) {
-        output.writeMessage(1, token_.get(i));
+      for (Token aToken_ : token_) {
+        output.writeMessage(1, aToken_);
       }
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeUInt32(2, tokenOffsetBegin_);
@@ -4252,11 +4250,11 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00001000) == 0x00001000)) {
         output.writeMessage(13, alternativeDependencies_);
       }
-      for (int i = 0; i < openieTriple_.size(); i++) {
-        output.writeMessage(14, openieTriple_.get(i));
+      for (OpenIETriple anOpenieTriple_ : openieTriple_) {
+        output.writeMessage(14, anOpenieTriple_);
       }
-      for (int i = 0; i < entailedSentence_.size(); i++) {
-        output.writeMessage(15, entailedSentence_.get(i));
+      for (SentenceFragment anEntailedSentence_ : entailedSentence_) {
+        output.writeMessage(15, anEntailedSentence_);
       }
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
         output.writeMessage(31, binarizedParseTree_);
@@ -4267,23 +4265,23 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000100) == 0x00000100)) {
         output.writeBytes(33, getSentimentBytes());
       }
-      for (int i = 0; i < kBestParseTrees_.size(); i++) {
-        output.writeMessage(34, kBestParseTrees_.get(i));
+      for (ParseTree aKBestParseTrees_ : kBestParseTrees_) {
+        output.writeMessage(34, aKBestParseTrees_);
       }
       if (((bitField0_ & 0x00008000) == 0x00008000)) {
         output.writeBool(51, hasRelationAnnotations_);
       }
-      for (int i = 0; i < entity_.size(); i++) {
-        output.writeMessage(52, entity_.get(i));
+      for (Entity anEntity_ : entity_) {
+        output.writeMessage(52, anEntity_);
       }
-      for (int i = 0; i < relation_.size(); i++) {
-        output.writeMessage(53, relation_.get(i));
+      for (Relation aRelation_ : relation_) {
+        output.writeMessage(53, aRelation_);
       }
       if (((bitField0_ & 0x00010000) == 0x00010000)) {
         output.writeBool(54, hasNumerizedTokensAnnotation_);
       }
-      for (int i = 0; i < mentions_.size(); i++) {
-        output.writeMessage(55, mentions_.get(i));
+      for (NERMention aMentions_ : mentions_) {
+        output.writeMessage(55, aMentions_);
       }
       extensionWriter.writeUntil(256, output);
       getUnknownFields().writeTo(output);
@@ -4295,9 +4293,9 @@ public final class CoreNLPProtos {
       if (size != -1) return size;
 
       size = 0;
-      for (int i = 0; i < token_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, token_.get(i));
+      for (Token aToken_ : token_) {
+        size += CodedOutputStream
+                .computeMessageSize(1, aToken_);
       }
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -4347,13 +4345,13 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(13, alternativeDependencies_);
       }
-      for (int i = 0; i < openieTriple_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(14, openieTriple_.get(i));
+      for (OpenIETriple anOpenieTriple_ : openieTriple_) {
+        size += CodedOutputStream
+                .computeMessageSize(14, anOpenieTriple_);
       }
-      for (int i = 0; i < entailedSentence_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(15, entailedSentence_.get(i));
+      for (SentenceFragment anEntailedSentence_ : entailedSentence_) {
+        size += CodedOutputStream
+                .computeMessageSize(15, anEntailedSentence_);
       }
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
         size += com.google.protobuf.CodedOutputStream
@@ -4367,29 +4365,29 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(33, getSentimentBytes());
       }
-      for (int i = 0; i < kBestParseTrees_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(34, kBestParseTrees_.get(i));
+      for (ParseTree aKBestParseTrees_ : kBestParseTrees_) {
+        size += CodedOutputStream
+                .computeMessageSize(34, aKBestParseTrees_);
       }
       if (((bitField0_ & 0x00008000) == 0x00008000)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(51, hasRelationAnnotations_);
       }
-      for (int i = 0; i < entity_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(52, entity_.get(i));
+      for (Entity anEntity_ : entity_) {
+        size += CodedOutputStream
+                .computeMessageSize(52, anEntity_);
       }
-      for (int i = 0; i < relation_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(53, relation_.get(i));
+      for (Relation aRelation_ : relation_) {
+        size += CodedOutputStream
+                .computeMessageSize(53, aRelation_);
       }
       if (((bitField0_ & 0x00010000) == 0x00010000)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(54, hasNumerizedTokensAnnotation_);
       }
-      for (int i = 0; i < mentions_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(55, mentions_.get(i));
+      for (NERMention aMentions_ : mentions_) {
+        size += CodedOutputStream
+                .computeMessageSize(55, aMentions_);
       }
       size += extensionsSerializedSize();
       size += getUnknownFields().getSerializedSize();
@@ -5158,7 +5156,7 @@ public final class CoreNLPProtos {
         java.util.Collections.emptyList();
       private void ensureTokenIsMutable() {
         if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          token_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Token>(token_);
+          token_ = new java.util.ArrayList<>(token_);
           bitField0_ |= 0x00000001;
          }
       }
@@ -5383,8 +5381,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.Token, edu.stanford.nlp.pipeline.CoreNLPProtos.Token.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder> 
           getTokenFieldBuilder() {
         if (tokenBuilder_ == null) {
-          tokenBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Token, edu.stanford.nlp.pipeline.CoreNLPProtos.Token.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenOrBuilder>(
+          tokenBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   token_,
                   ((bitField0_ & 0x00000001) == 0x00000001),
                   getParentForChildren(),
@@ -5660,8 +5657,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTreeOrBuilder> 
           getParseTreeFieldBuilder() {
         if (parseTreeBuilder_ == null) {
-          parseTreeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTreeOrBuilder>(
+          parseTreeBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   getParseTree(),
                   getParentForChildren(),
                   isClean());
@@ -5776,8 +5772,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTreeOrBuilder> 
           getBinarizedParseTreeFieldBuilder() {
         if (binarizedParseTreeBuilder_ == null) {
-          binarizedParseTreeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTreeOrBuilder>(
+          binarizedParseTreeBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   getBinarizedParseTree(),
                   getParentForChildren(),
                   isClean());
@@ -5892,8 +5887,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTreeOrBuilder> 
           getAnnotatedParseTreeFieldBuilder() {
         if (annotatedParseTreeBuilder_ == null) {
-          annotatedParseTreeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTreeOrBuilder>(
+          annotatedParseTreeBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   getAnnotatedParseTree(),
                   getParentForChildren(),
                   isClean());
@@ -5982,7 +5976,7 @@ public final class CoreNLPProtos {
         java.util.Collections.emptyList();
       private void ensureKBestParseTreesIsMutable() {
         if (!((bitField0_ & 0x00000400) == 0x00000400)) {
-          kBestParseTrees_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree>(kBestParseTrees_);
+          kBestParseTrees_ = new java.util.ArrayList<>(kBestParseTrees_);
           bitField0_ |= 0x00000400;
          }
       }
@@ -6207,8 +6201,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTreeOrBuilder> 
           getKBestParseTreesFieldBuilder() {
         if (kBestParseTreesBuilder_ == null) {
-          kBestParseTreesBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTreeOrBuilder>(
+          kBestParseTreesBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   kBestParseTrees_,
                   ((bitField0_ & 0x00000400) == 0x00000400),
                   getParentForChildren(),
@@ -6324,8 +6317,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> 
           getBasicDependenciesFieldBuilder() {
         if (basicDependenciesBuilder_ == null) {
-          basicDependenciesBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder>(
+          basicDependenciesBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   getBasicDependencies(),
                   getParentForChildren(),
                   isClean());
@@ -6440,8 +6432,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> 
           getCollapsedDependenciesFieldBuilder() {
         if (collapsedDependenciesBuilder_ == null) {
-          collapsedDependenciesBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder>(
+          collapsedDependenciesBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   getCollapsedDependencies(),
                   getParentForChildren(),
                   isClean());
@@ -6556,8 +6547,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> 
           getCollapsedCCProcessedDependenciesFieldBuilder() {
         if (collapsedCCProcessedDependenciesBuilder_ == null) {
-          collapsedCCProcessedDependenciesBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder>(
+          collapsedCCProcessedDependenciesBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   getCollapsedCCProcessedDependencies(),
                   getParentForChildren(),
                   isClean());
@@ -6672,8 +6662,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> 
           getAlternativeDependenciesFieldBuilder() {
         if (alternativeDependenciesBuilder_ == null) {
-          alternativeDependenciesBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder>(
+          alternativeDependenciesBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   getAlternativeDependencies(),
                   getParentForChildren(),
                   isClean());
@@ -6686,7 +6675,7 @@ public final class CoreNLPProtos {
         java.util.Collections.emptyList();
       private void ensureOpenieTripleIsMutable() {
         if (!((bitField0_ & 0x00008000) == 0x00008000)) {
-          openieTriple_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple>(openieTriple_);
+          openieTriple_ = new java.util.ArrayList<>(openieTriple_);
           bitField0_ |= 0x00008000;
          }
       }
@@ -6983,8 +6972,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple, edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETripleOrBuilder> 
           getOpenieTripleFieldBuilder() {
         if (openieTripleBuilder_ == null) {
-          openieTripleBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple, edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETripleOrBuilder>(
+          openieTripleBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   openieTriple_,
                   ((bitField0_ & 0x00008000) == 0x00008000),
                   getParentForChildren(),
@@ -6998,7 +6986,7 @@ public final class CoreNLPProtos {
         java.util.Collections.emptyList();
       private void ensureEntailedSentenceIsMutable() {
         if (!((bitField0_ & 0x00010000) == 0x00010000)) {
-          entailedSentence_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment>(entailedSentence_);
+          entailedSentence_ = new java.util.ArrayList<>(entailedSentence_);
           bitField0_ |= 0x00010000;
          }
       }
@@ -7295,8 +7283,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment, edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragmentOrBuilder> 
           getEntailedSentenceFieldBuilder() {
         if (entailedSentenceBuilder_ == null) {
-          entailedSentenceBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment, edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragmentOrBuilder>(
+          entailedSentenceBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   entailedSentence_,
                   ((bitField0_ & 0x00010000) == 0x00010000),
                   getParentForChildren(),
@@ -7490,7 +7477,7 @@ public final class CoreNLPProtos {
         java.util.Collections.emptyList();
       private void ensureEntityIsMutable() {
         if (!((bitField0_ & 0x00100000) == 0x00100000)) {
-          entity_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Entity>(entity_);
+          entity_ = new java.util.ArrayList<>(entity_);
           bitField0_ |= 0x00100000;
          }
       }
@@ -7715,8 +7702,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.Entity, edu.stanford.nlp.pipeline.CoreNLPProtos.Entity.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.EntityOrBuilder> 
           getEntityFieldBuilder() {
         if (entityBuilder_ == null) {
-          entityBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Entity, edu.stanford.nlp.pipeline.CoreNLPProtos.Entity.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.EntityOrBuilder>(
+          entityBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   entity_,
                   ((bitField0_ & 0x00100000) == 0x00100000),
                   getParentForChildren(),
@@ -7730,7 +7716,7 @@ public final class CoreNLPProtos {
         java.util.Collections.emptyList();
       private void ensureRelationIsMutable() {
         if (!((bitField0_ & 0x00200000) == 0x00200000)) {
-          relation_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Relation>(relation_);
+          relation_ = new java.util.ArrayList<>(relation_);
           bitField0_ |= 0x00200000;
          }
       }
@@ -7955,8 +7941,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.Relation, edu.stanford.nlp.pipeline.CoreNLPProtos.Relation.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationOrBuilder> 
           getRelationFieldBuilder() {
         if (relationBuilder_ == null) {
-          relationBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Relation, edu.stanford.nlp.pipeline.CoreNLPProtos.Relation.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationOrBuilder>(
+          relationBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   relation_,
                   ((bitField0_ & 0x00200000) == 0x00200000),
                   getParentForChildren(),
@@ -8002,7 +7987,7 @@ public final class CoreNLPProtos {
         java.util.Collections.emptyList();
       private void ensureMentionsIsMutable() {
         if (!((bitField0_ & 0x00800000) == 0x00800000)) {
-          mentions_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention>(mentions_);
+          mentions_ = new java.util.ArrayList<>(mentions_);
           bitField0_ |= 0x00800000;
          }
       }
@@ -8227,8 +8212,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention, edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.NERMentionOrBuilder> 
           getMentionsFieldBuilder() {
         if (mentionsBuilder_ == null) {
-          mentionsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention, edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.NERMentionOrBuilder>(
+          mentionsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   mentions_,
                   ((bitField0_ & 0x00800000) == 0x00800000),
                   getParentForChildren(),
@@ -13499,8 +13483,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.Timex, edu.stanford.nlp.pipeline.CoreNLPProtos.Timex.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TimexOrBuilder> 
           getTimexValueFieldBuilder() {
         if (timexValueBuilder_ == null) {
-          timexValueBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Timex, edu.stanford.nlp.pipeline.CoreNLPProtos.Timex.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TimexOrBuilder>(
+          timexValueBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   getTimexValue(),
                   getParentForChildren(),
                   isClean());
@@ -14024,8 +14007,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.Operator, edu.stanford.nlp.pipeline.CoreNLPProtos.Operator.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.OperatorOrBuilder> 
           getOperatorFieldBuilder() {
         if (operatorBuilder_ == null) {
-          operatorBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Operator, edu.stanford.nlp.pipeline.CoreNLPProtos.Operator.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.OperatorOrBuilder>(
+          operatorBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   getOperator(),
                   getParentForChildren(),
                   isClean());
@@ -14176,8 +14158,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.Polarity, edu.stanford.nlp.pipeline.CoreNLPProtos.Polarity.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.PolarityOrBuilder> 
           getPolarityFieldBuilder() {
         if (polarityBuilder_ == null) {
-          polarityBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Polarity, edu.stanford.nlp.pipeline.CoreNLPProtos.Polarity.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.PolarityOrBuilder>(
+          polarityBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   getPolarity(),
                   getParentForChildren(),
                   isClean());
@@ -14328,8 +14309,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.Span, edu.stanford.nlp.pipeline.CoreNLPProtos.Span.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SpanOrBuilder> 
           getSpanFieldBuilder() {
         if (spanBuilder_ == null) {
-          spanBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Span, edu.stanford.nlp.pipeline.CoreNLPProtos.Span.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SpanOrBuilder>(
+          spanBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   getSpan(),
                   getParentForChildren(),
                   isClean());
@@ -14592,8 +14572,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString, edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringStringOrBuilder> 
           getConllUFeaturesFieldBuilder() {
         if (conllUFeaturesBuilder_ == null) {
-          conllUFeaturesBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString, edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringString.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.MapStringStringOrBuilder>(
+          conllUFeaturesBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   getConllUFeatures(),
                   getParentForChildren(),
                   isClean());
@@ -14808,8 +14787,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.Span, edu.stanford.nlp.pipeline.CoreNLPProtos.Span.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SpanOrBuilder> 
           getConllUTokenSpanFieldBuilder() {
         if (conllUTokenSpanBuilder_ == null) {
-          conllUTokenSpanBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Span, edu.stanford.nlp.pipeline.CoreNLPProtos.Span.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SpanOrBuilder>(
+          conllUTokenSpanBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   getConllUTokenSpan(),
                   getParentForChildren(),
                   isClean());
@@ -15000,8 +14978,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString, edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntStringOrBuilder> 
           getConllUSecondaryDepsFieldBuilder() {
         if (conllUSecondaryDepsBuilder_ == null) {
-          conllUSecondaryDepsBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString, edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntString.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.MapIntStringOrBuilder>(
+          conllUSecondaryDepsBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   getConllUSecondaryDeps(),
                   getParentForChildren(),
                   isClean());
@@ -16644,7 +16621,7 @@ public final class CoreNLPProtos {
             }
             case 10: {
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                child_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree>();
+                child_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000001;
               }
               child_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.PARSER, extensionRegistry));
@@ -16883,8 +16860,8 @@ public final class CoreNLPProtos {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      for (int i = 0; i < child_.size(); i++) {
-        output.writeMessage(1, child_.get(i));
+      for (ParseTree aChild_ : child_) {
+        output.writeMessage(1, aChild_);
       }
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeBytes(2, getValueBytes());
@@ -16910,9 +16887,9 @@ public final class CoreNLPProtos {
       if (size != -1) return size;
 
       size = 0;
-      for (int i = 0; i < child_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, child_.get(i));
+      for (ParseTree aChild_ : child_) {
+        size += CodedOutputStream
+                .computeMessageSize(1, aChild_);
       }
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -17219,7 +17196,7 @@ public final class CoreNLPProtos {
         java.util.Collections.emptyList();
       private void ensureChildIsMutable() {
         if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          child_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree>(child_);
+          child_ = new java.util.ArrayList<>(child_);
           bitField0_ |= 0x00000001;
          }
       }
@@ -17444,8 +17421,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTreeOrBuilder> 
           getChildFieldBuilder() {
         if (childBuilder_ == null) {
-          childBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTreeOrBuilder>(
+          childBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   child_,
                   ((bitField0_ & 0x00000001) == 0x00000001),
                   getParentForChildren(),
@@ -17796,7 +17772,7 @@ public final class CoreNLPProtos {
             }
             case 10: {
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                node_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Node>();
+                node_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000001;
               }
               node_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Node.PARSER, extensionRegistry));
@@ -17804,7 +17780,7 @@ public final class CoreNLPProtos {
             }
             case 18: {
               if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-                edge_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Edge>();
+                edge_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000002;
               }
               edge_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Edge.PARSER, extensionRegistry));
@@ -17812,7 +17788,7 @@ public final class CoreNLPProtos {
             }
             case 24: {
               if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
-                root_ = new java.util.ArrayList<java.lang.Integer>();
+                root_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000004;
               }
               root_.add(input.readUInt32());
@@ -17822,7 +17798,7 @@ public final class CoreNLPProtos {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
               if (!((mutable_bitField0_ & 0x00000004) == 0x00000004) && input.getBytesUntilLimit() > 0) {
-                root_ = new java.util.ArrayList<java.lang.Integer>();
+                root_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000004;
               }
               while (input.getBytesUntilLimit() > 0) {
@@ -19540,18 +19516,18 @@ public final class CoreNLPProtos {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      for (int i = 0; i < node_.size(); i++) {
-        output.writeMessage(1, node_.get(i));
+      for (Node aNode_ : node_) {
+        output.writeMessage(1, aNode_);
       }
-      for (int i = 0; i < edge_.size(); i++) {
-        output.writeMessage(2, edge_.get(i));
+      for (Edge anEdge_ : edge_) {
+        output.writeMessage(2, anEdge_);
       }
       if (getRootList().size() > 0) {
         output.writeRawVarint32(26);
         output.writeRawVarint32(rootMemoizedSerializedSize);
       }
-      for (int i = 0; i < root_.size(); i++) {
-        output.writeUInt32NoTag(root_.get(i));
+      for (Integer aRoot_ : root_) {
+        output.writeUInt32NoTag(aRoot_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -19562,19 +19538,19 @@ public final class CoreNLPProtos {
       if (size != -1) return size;
 
       size = 0;
-      for (int i = 0; i < node_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, node_.get(i));
+      for (Node aNode_ : node_) {
+        size += CodedOutputStream
+                .computeMessageSize(1, aNode_);
       }
-      for (int i = 0; i < edge_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, edge_.get(i));
+      for (Edge anEdge_ : edge_) {
+        size += CodedOutputStream
+                .computeMessageSize(2, anEdge_);
       }
       {
         int dataSize = 0;
-        for (int i = 0; i < root_.size(); i++) {
-          dataSize += com.google.protobuf.CodedOutputStream
-            .computeUInt32SizeNoTag(root_.get(i));
+        for (Integer aRoot_ : root_) {
+          dataSize += CodedOutputStream
+                  .computeUInt32SizeNoTag(aRoot_);
         }
         size += dataSize;
         if (!getRootList().isEmpty()) {
@@ -19891,7 +19867,7 @@ public final class CoreNLPProtos {
         java.util.Collections.emptyList();
       private void ensureNodeIsMutable() {
         if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          node_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Node>(node_);
+          node_ = new java.util.ArrayList<>(node_);
           bitField0_ |= 0x00000001;
          }
       }
@@ -20116,8 +20092,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Node, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Node.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.NodeOrBuilder> 
           getNodeFieldBuilder() {
         if (nodeBuilder_ == null) {
-          nodeBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Node, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Node.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.NodeOrBuilder>(
+          nodeBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   node_,
                   ((bitField0_ & 0x00000001) == 0x00000001),
                   getParentForChildren(),
@@ -20131,7 +20106,7 @@ public final class CoreNLPProtos {
         java.util.Collections.emptyList();
       private void ensureEdgeIsMutable() {
         if (!((bitField0_ & 0x00000002) == 0x00000002)) {
-          edge_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Edge>(edge_);
+          edge_ = new java.util.ArrayList<>(edge_);
           bitField0_ |= 0x00000002;
          }
       }
@@ -20356,8 +20331,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Edge, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Edge.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.EdgeOrBuilder> 
           getEdgeFieldBuilder() {
         if (edgeBuilder_ == null) {
-          edgeBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Edge, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Edge.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.EdgeOrBuilder>(
+          edgeBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   edge_,
                   ((bitField0_ & 0x00000002) == 0x00000002),
                   getParentForChildren(),
@@ -20370,7 +20344,7 @@ public final class CoreNLPProtos {
       private java.util.List<java.lang.Integer> root_ = java.util.Collections.emptyList();
       private void ensureRootIsMutable() {
         if (!((bitField0_ & 0x00000004) == 0x00000004)) {
-          root_ = new java.util.ArrayList<java.lang.Integer>(root_);
+          root_ = new java.util.ArrayList<>(root_);
           bitField0_ |= 0x00000004;
          }
       }
@@ -20554,7 +20528,7 @@ public final class CoreNLPProtos {
             }
             case 18: {
               if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-                mention_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMention>();
+                mention_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000002;
               }
               mention_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMention.PARSER, extensionRegistry));
@@ -22149,8 +22123,8 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeInt32(1, chainID_);
       }
-      for (int i = 0; i < mention_.size(); i++) {
-        output.writeMessage(2, mention_.get(i));
+      for (CorefMention aMention_ : mention_) {
+        output.writeMessage(2, aMention_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeUInt32(3, representative_);
@@ -22168,9 +22142,9 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, chainID_);
       }
-      for (int i = 0; i < mention_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, mention_.get(i));
+      for (CorefMention aMention_ : mention_) {
+        size += CodedOutputStream
+                .computeMessageSize(2, aMention_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
@@ -22473,7 +22447,7 @@ public final class CoreNLPProtos {
         java.util.Collections.emptyList();
       private void ensureMentionIsMutable() {
         if (!((bitField0_ & 0x00000002) == 0x00000002)) {
-          mention_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMention>(mention_);
+          mention_ = new java.util.ArrayList<>(mention_);
           bitField0_ |= 0x00000002;
          }
       }
@@ -22698,8 +22672,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMention, edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMention.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMentionOrBuilder> 
           getMentionFieldBuilder() {
         if (mentionBuilder_ == null) {
-          mentionBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMention, edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMention.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMentionOrBuilder>(
+          mentionBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   mention_,
                   ((bitField0_ & 0x00000002) == 0x00000002),
                   getParentForChildren(),
@@ -26535,7 +26508,7 @@ public final class CoreNLPProtos {
             }
             case 58: {
               if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-                arg_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Entity>();
+                arg_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000002;
               }
               arg_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Entity.PARSER, extensionRegistry));
@@ -26923,8 +26896,8 @@ public final class CoreNLPProtos {
       for (int i = 0; i < argName_.size(); i++) {
         output.writeBytes(6, argName_.getByteString(i));
       }
-      for (int i = 0; i < arg_.size(); i++) {
-        output.writeMessage(7, arg_.get(i));
+      for (Entity anArg_ : arg_) {
+        output.writeMessage(7, anArg_);
       }
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeBytes(8, getSignatureBytes());
@@ -26967,9 +26940,9 @@ public final class CoreNLPProtos {
         size += dataSize;
         size += 1 * getArgNameList().size();
       }
-      for (int i = 0; i < arg_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(7, arg_.get(i));
+      for (Entity anArg_ : arg_) {
+        size += CodedOutputStream
+                .computeMessageSize(7, anArg_);
       }
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -27385,7 +27358,7 @@ public final class CoreNLPProtos {
         java.util.Collections.emptyList();
       private void ensureArgIsMutable() {
         if (!((bitField0_ & 0x00000002) == 0x00000002)) {
-          arg_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Entity>(arg_);
+          arg_ = new java.util.ArrayList<>(arg_);
           bitField0_ |= 0x00000002;
          }
       }
@@ -27610,8 +27583,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.Entity, edu.stanford.nlp.pipeline.CoreNLPProtos.Entity.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.EntityOrBuilder> 
           getArgFieldBuilder() {
         if (argBuilder_ == null) {
-          argBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Entity, edu.stanford.nlp.pipeline.CoreNLPProtos.Entity.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.EntityOrBuilder>(
+          argBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   arg_,
                   ((bitField0_ & 0x00000002) == 0x00000002),
                   getParentForChildren(),
@@ -31278,8 +31250,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.Timex, edu.stanford.nlp.pipeline.CoreNLPProtos.Timex.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TimexOrBuilder> 
           getTimexFieldBuilder() {
         if (timexBuilder_ == null) {
-          timexBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Timex, edu.stanford.nlp.pipeline.CoreNLPProtos.Timex.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TimexOrBuilder>(
+          timexBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   getTimex(),
                   getParentForChildren(),
                   isClean());
@@ -31402,7 +31373,7 @@ public final class CoreNLPProtos {
             }
             case 8: {
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                tokenIndex_ = new java.util.ArrayList<java.lang.Integer>();
+                tokenIndex_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000001;
               }
               tokenIndex_.add(input.readUInt32());
@@ -31412,7 +31383,7 @@ public final class CoreNLPProtos {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001) && input.getBytesUntilLimit() > 0) {
-                tokenIndex_ = new java.util.ArrayList<java.lang.Integer>();
+                tokenIndex_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000001;
               }
               while (input.getBytesUntilLimit() > 0) {
@@ -31565,8 +31536,8 @@ public final class CoreNLPProtos {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      for (int i = 0; i < tokenIndex_.size(); i++) {
-        output.writeUInt32(1, tokenIndex_.get(i));
+      for (Integer aTokenIndex_ : tokenIndex_) {
+        output.writeUInt32(1, aTokenIndex_);
       }
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeUInt32(2, root_);
@@ -31588,9 +31559,9 @@ public final class CoreNLPProtos {
       size = 0;
       {
         int dataSize = 0;
-        for (int i = 0; i < tokenIndex_.size(); i++) {
-          dataSize += com.google.protobuf.CodedOutputStream
-            .computeUInt32SizeNoTag(tokenIndex_.get(i));
+        for (Integer aTokenIndex_ : tokenIndex_) {
+          dataSize += CodedOutputStream
+                  .computeUInt32SizeNoTag(aTokenIndex_);
         }
         size += dataSize;
         size += 1 * getTokenIndexList().size();
@@ -31847,7 +31818,7 @@ public final class CoreNLPProtos {
       private java.util.List<java.lang.Integer> tokenIndex_ = java.util.Collections.emptyList();
       private void ensureTokenIndexIsMutable() {
         if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          tokenIndex_ = new java.util.ArrayList<java.lang.Integer>(tokenIndex_);
+          tokenIndex_ = new java.util.ArrayList<>(tokenIndex_);
           bitField0_ |= 0x00000001;
          }
       }
@@ -32366,7 +32337,7 @@ public final class CoreNLPProtos {
             }
             case 40: {
               if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
-                subjectTokens_ = new java.util.ArrayList<java.lang.Integer>();
+                subjectTokens_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000010;
               }
               subjectTokens_.add(input.readUInt32());
@@ -32376,7 +32347,7 @@ public final class CoreNLPProtos {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
               if (!((mutable_bitField0_ & 0x00000010) == 0x00000010) && input.getBytesUntilLimit() > 0) {
-                subjectTokens_ = new java.util.ArrayList<java.lang.Integer>();
+                subjectTokens_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000010;
               }
               while (input.getBytesUntilLimit() > 0) {
@@ -32387,7 +32358,7 @@ public final class CoreNLPProtos {
             }
             case 48: {
               if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
-                relationTokens_ = new java.util.ArrayList<java.lang.Integer>();
+                relationTokens_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000020;
               }
               relationTokens_.add(input.readUInt32());
@@ -32397,7 +32368,7 @@ public final class CoreNLPProtos {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
               if (!((mutable_bitField0_ & 0x00000020) == 0x00000020) && input.getBytesUntilLimit() > 0) {
-                relationTokens_ = new java.util.ArrayList<java.lang.Integer>();
+                relationTokens_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000020;
               }
               while (input.getBytesUntilLimit() > 0) {
@@ -32408,7 +32379,7 @@ public final class CoreNLPProtos {
             }
             case 56: {
               if (!((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
-                objectTokens_ = new java.util.ArrayList<java.lang.Integer>();
+                objectTokens_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000040;
               }
               objectTokens_.add(input.readUInt32());
@@ -32418,7 +32389,7 @@ public final class CoreNLPProtos {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
               if (!((mutable_bitField0_ & 0x00000040) == 0x00000040) && input.getBytesUntilLimit() > 0) {
-                objectTokens_ = new java.util.ArrayList<java.lang.Integer>();
+                objectTokens_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000040;
               }
               while (input.getBytesUntilLimit() > 0) {
@@ -32966,14 +32937,14 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeDouble(4, confidence_);
       }
-      for (int i = 0; i < subjectTokens_.size(); i++) {
-        output.writeUInt32(5, subjectTokens_.get(i));
+      for (Integer aSubjectTokens_ : subjectTokens_) {
+        output.writeUInt32(5, aSubjectTokens_);
       }
-      for (int i = 0; i < relationTokens_.size(); i++) {
-        output.writeUInt32(6, relationTokens_.get(i));
+      for (Integer aRelationTokens_ : relationTokens_) {
+        output.writeUInt32(6, aRelationTokens_);
       }
-      for (int i = 0; i < objectTokens_.size(); i++) {
-        output.writeUInt32(7, objectTokens_.get(i));
+      for (Integer anObjectTokens_ : objectTokens_) {
+        output.writeUInt32(7, anObjectTokens_);
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         output.writeMessage(8, tree_);
@@ -33017,27 +32988,27 @@ public final class CoreNLPProtos {
       }
       {
         int dataSize = 0;
-        for (int i = 0; i < subjectTokens_.size(); i++) {
-          dataSize += com.google.protobuf.CodedOutputStream
-            .computeUInt32SizeNoTag(subjectTokens_.get(i));
+        for (Integer aSubjectTokens_ : subjectTokens_) {
+          dataSize += CodedOutputStream
+                  .computeUInt32SizeNoTag(aSubjectTokens_);
         }
         size += dataSize;
         size += 1 * getSubjectTokensList().size();
       }
       {
         int dataSize = 0;
-        for (int i = 0; i < relationTokens_.size(); i++) {
-          dataSize += com.google.protobuf.CodedOutputStream
-            .computeUInt32SizeNoTag(relationTokens_.get(i));
+        for (Integer aRelationTokens_ : relationTokens_) {
+          dataSize += CodedOutputStream
+                  .computeUInt32SizeNoTag(aRelationTokens_);
         }
         size += dataSize;
         size += 1 * getRelationTokensList().size();
       }
       {
         int dataSize = 0;
-        for (int i = 0; i < objectTokens_.size(); i++) {
-          dataSize += com.google.protobuf.CodedOutputStream
-            .computeUInt32SizeNoTag(objectTokens_.get(i));
+        for (Integer anObjectTokens_ : objectTokens_) {
+          dataSize += CodedOutputStream
+                  .computeUInt32SizeNoTag(anObjectTokens_);
         }
         size += dataSize;
         size += 1 * getObjectTokensList().size();
@@ -33759,7 +33730,7 @@ public final class CoreNLPProtos {
       private java.util.List<java.lang.Integer> subjectTokens_ = java.util.Collections.emptyList();
       private void ensureSubjectTokensIsMutable() {
         if (!((bitField0_ & 0x00000010) == 0x00000010)) {
-          subjectTokens_ = new java.util.ArrayList<java.lang.Integer>(subjectTokens_);
+          subjectTokens_ = new java.util.ArrayList<>(subjectTokens_);
           bitField0_ |= 0x00000010;
          }
       }
@@ -33853,7 +33824,7 @@ public final class CoreNLPProtos {
       private java.util.List<java.lang.Integer> relationTokens_ = java.util.Collections.emptyList();
       private void ensureRelationTokensIsMutable() {
         if (!((bitField0_ & 0x00000020) == 0x00000020)) {
-          relationTokens_ = new java.util.ArrayList<java.lang.Integer>(relationTokens_);
+          relationTokens_ = new java.util.ArrayList<>(relationTokens_);
           bitField0_ |= 0x00000020;
          }
       }
@@ -33947,7 +33918,7 @@ public final class CoreNLPProtos {
       private java.util.List<java.lang.Integer> objectTokens_ = java.util.Collections.emptyList();
       private void ensureObjectTokensIsMutable() {
         if (!((bitField0_ & 0x00000040) == 0x00000040)) {
-          objectTokens_ = new java.util.ArrayList<java.lang.Integer>(objectTokens_);
+          objectTokens_ = new java.util.ArrayList<>(objectTokens_);
           bitField0_ |= 0x00000040;
          }
       }
@@ -34180,8 +34151,7 @@ public final class CoreNLPProtos {
           edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder> 
           getTreeFieldBuilder() {
         if (treeBuilder_ == null) {
-          treeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder>(
+          treeBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   getTree(),
                   getParentForChildren(),
                   isClean());
@@ -35180,7 +35150,7 @@ public final class CoreNLPProtos {
             }
             case 8: {
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                key_ = new java.util.ArrayList<java.lang.Integer>();
+                key_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000001;
               }
               key_.add(input.readUInt32());
@@ -35190,7 +35160,7 @@ public final class CoreNLPProtos {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001) && input.getBytesUntilLimit() > 0) {
-                key_ = new java.util.ArrayList<java.lang.Integer>();
+                key_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000001;
               }
               while (input.getBytesUntilLimit() > 0) {
@@ -35321,8 +35291,8 @@ public final class CoreNLPProtos {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      for (int i = 0; i < key_.size(); i++) {
-        output.writeUInt32(1, key_.get(i));
+      for (Integer aKey_ : key_) {
+        output.writeUInt32(1, aKey_);
       }
       for (int i = 0; i < value_.size(); i++) {
         output.writeBytes(2, value_.getByteString(i));
@@ -35338,9 +35308,9 @@ public final class CoreNLPProtos {
       size = 0;
       {
         int dataSize = 0;
-        for (int i = 0; i < key_.size(); i++) {
-          dataSize += com.google.protobuf.CodedOutputStream
-            .computeUInt32SizeNoTag(key_.get(i));
+        for (Integer aKey_ : key_) {
+          dataSize += CodedOutputStream
+                  .computeUInt32SizeNoTag(aKey_);
         }
         size += dataSize;
         size += 1 * getKeyList().size();
@@ -35582,7 +35552,7 @@ public final class CoreNLPProtos {
       private java.util.List<java.lang.Integer> key_ = java.util.Collections.emptyList();
       private void ensureKeyIsMutable() {
         if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          key_ = new java.util.ArrayList<java.lang.Integer>(key_);
+          key_ = new java.util.ArrayList<>(key_);
           bitField0_ |= 0x00000001;
          }
       }

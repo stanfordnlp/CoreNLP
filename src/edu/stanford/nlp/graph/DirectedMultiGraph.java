@@ -128,13 +128,13 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
 
     List<E> outgoingList = outgoingMap.get(dest);
     if (outgoingList == null) {
-      outgoingList = new ArrayList<E>();
+      outgoingList = new ArrayList<>();
       outgoingMap.put(dest, outgoingList);
     }
 
     List<E> incomingList = incomingMap.get(source);
     if (incomingList == null) {
-      incomingList = new ArrayList<E>();
+      incomingList = new ArrayList<>();
       incomingMap.put(source, incomingList);
     }
 
@@ -333,7 +333,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
 
   @Override
   public List<E> getAllEdges() {
-    List<E> edges = new ArrayList<E>();
+    List<E> edges = new ArrayList<>();
     for (Map<V, List<E>> e : outgoingEdges.values()) {
       for (List<E> ee : e.values()) {
         edges.addAll(ee);
@@ -356,7 +356,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
    */
   @Override
   public void removeZeroDegreeNodes() {
-    List<V> toDelete = new ArrayList<V>();
+    List<V> toDelete = new ArrayList<>();
     for (V vertex : outgoingEdges.keySet()) {
       if (outgoingEdges.get(vertex).isEmpty() && incomingEdges.get(vertex).isEmpty()) {
         toDelete.add(vertex);
@@ -422,7 +422,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     if (nodes.size() <= 1)
       return Collections.emptyList();
 
-    List<E> path = new ArrayList<E>();
+    List<E> path = new ArrayList<>();
     Iterator<V> nodeIterator = nodes.iterator();
     V previous = nodeIterator.next();
     while (nodeIterator.hasNext()) {
@@ -482,13 +482,13 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
    for (V vertex : getAllVertices()) {
      for (V vertex2 : outgoingEdges.get(vertex).keySet()) {
        List<E> data = outgoingEdges.get(vertex).get(vertex2);
-       Set<E> deduplicatedData = new TreeSet<E>(data);
+       Set<E> deduplicatedData = new TreeSet<>(data);
        data.clear();
        data.addAll(deduplicatedData);
      }
      for (V vertex2 : incomingEdges.get(vertex).keySet()) {
        List<E> data = incomingEdges.get(vertex).get(vertex2);
-       Set<E> deduplicatedData = new TreeSet<E>(data);
+       Set<E> deduplicatedData = new TreeSet<>(data);
        data.clear();
        data.addAll(deduplicatedData);
      }
@@ -497,27 +497,27 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
 
   
   public Iterator<E> incomingEdgeIterator(final V vertex) {
-    return new EdgeIterator<V, E>(incomingEdges, vertex);
+    return new EdgeIterator<>(incomingEdges, vertex);
   }
 
   public Iterable<E> incomingEdgeIterable(final V vertex) {
-    return () -> new EdgeIterator<V, E>(incomingEdges, vertex);
+    return () -> new EdgeIterator<>(incomingEdges, vertex);
   }
 
   public Iterator<E> outgoingEdgeIterator(final V vertex) {
-    return new EdgeIterator<V, E>(outgoingEdges, vertex);
+    return new EdgeIterator<>(outgoingEdges, vertex);
   }
 
   public Iterable<E> outgoingEdgeIterable(final V vertex) {
-    return () -> new EdgeIterator<V, E>(outgoingEdges, vertex);
+    return () -> new EdgeIterator<>(outgoingEdges, vertex);
   }
 
   public Iterator<E> edgeIterator() {
-    return new EdgeIterator<V, E>(this);
+    return new EdgeIterator<>(this);
   }
 
   public Iterable<E> edgeIterable() {
-    return () -> new EdgeIterator<V, E>(DirectedMultiGraph.this);
+    return () -> new EdgeIterator<>(DirectedMultiGraph.this);
   }
   
  

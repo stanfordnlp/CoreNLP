@@ -333,7 +333,7 @@ abstract class Relation implements Serializable {
 
         @Override
         public void initialize() {
-          searchStack = new Stack<Tree>();
+          searchStack = new Stack<>();
           for (int i = t.numChildren() - 1; i >= 0; i--) {
             searchStack.push(t.getChild(i));
           }
@@ -390,8 +390,8 @@ abstract class Relation implements Serializable {
     @Override
     boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
       Tree[] kids = t1.children();
-      for (int i = 0, n = kids.length; i < n; i++) {
-        if (kids[i] == t2) {
+      for (Tree kid : kids) {
+        if (kid == t2) {
           return true;
         }
       }
@@ -460,7 +460,7 @@ abstract class Relation implements Serializable {
 
         @Override
         public void initialize() {
-          searchStack = new Stack<Tree>();
+          searchStack = new Stack<>();
           Tree current = t;
           Tree parent = matcher.getParent(t);
           while (parent != null) {
@@ -551,7 +551,7 @@ abstract class Relation implements Serializable {
 
         @Override
         public void initialize() {
-          searchStack = new Stack<Tree>();
+          searchStack = new Stack<>();
           Tree current = t;
           Tree parent = matcher.getParent(t);
           while (parent != null) {
@@ -1034,7 +1034,7 @@ abstract class Relation implements Serializable {
 
         @Override
         public void initialize() {
-          searchStack = new Stack<Tree>();
+          searchStack = new Stack<>();
           if (!t.isLeaf() && t.children().length == 1)
             searchStack.push(t.getChild(0));
           if (!searchStack.isEmpty()) {
@@ -1079,7 +1079,7 @@ abstract class Relation implements Serializable {
 
         @Override
         public void initialize() {
-          searchStack = new Stack<Tree>();
+          searchStack = new Stack<>();
           Tree parent = matcher.getParent(t);
           if (parent != null && !parent.isLeaf() &&
               parent.children().length == 1)
@@ -1702,7 +1702,7 @@ abstract class Relation implements Serializable {
 
         @Override
         public void initialize() {
-          searchStack = new Stack<Tree>();
+          searchStack = new Stack<>();
           for (int i = t.numChildren() - 1; i >= 0; i--) {
             searchStack.push(t.getChild(i));
           }
@@ -1899,8 +1899,8 @@ abstract class Relation implements Serializable {
 
         @Override
         public void initialize() {
-          nodesToSearch = new IdentityHashSet<Tree>();
-          searchStack = new Stack<Tree>();
+          nodesToSearch = new IdentityHashSet<>();
+          searchStack = new Stack<>();
           initializeHelper(searchStack, t, matcher.getRoot());
           advance();
         }
@@ -2025,8 +2025,8 @@ abstract class Relation implements Serializable {
 
         @Override
         public void initialize() {
-          nodesToSearch = new IdentityHashSet<Tree>();
-          searchStack = new Stack<Tree>();
+          nodesToSearch = new IdentityHashSet<>();
+          searchStack = new Stack<>();
           initializeHelper(searchStack, t, matcher.getRoot());
           advance();
         }

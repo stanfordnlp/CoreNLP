@@ -77,7 +77,7 @@ public class StripTagsProcessor<L, F> extends AbstractListProcessor<Word, Word, 
    * and the same words except tags are stripped.
    */
   public List<Word> process(List<? extends Word> in) {
-    List<Word> out = new ArrayList<Word>();
+    List<Word> out = new ArrayList<>();
     boolean justInsertedNewline = false; // to prevent contiguous newlines
     for (Word w : in) {
       String ws = w.word();

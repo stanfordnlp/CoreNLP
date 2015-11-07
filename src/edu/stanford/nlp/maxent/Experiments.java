@@ -70,7 +70,7 @@ public class Experiments {
   /**
    * v may hold the actual Experiments, i.e. Objects of type Experiments
    */
-  private ArrayList<Experiments> v = new ArrayList<Experiments>();
+  private ArrayList<Experiments> v = new ArrayList<>();
 
   /**
    * Maximum ySize.
@@ -121,7 +121,7 @@ public class Experiments {
   }
 
   public Index<IntPair> createIndex() {
-    Index<IntPair> index = new HashIndex<IntPair>();
+    Index<IntPair> index = new HashIndex<>();
     for (int x = 0; x < px.length; x++) {
       int numberY = numY(x);
       for (int y = 0; y < numberY; y++) {

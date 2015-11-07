@@ -466,7 +466,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     // no need to adjust anything; use the original list
     if(! adjustCharacterOffsets && ! forceCopy) return srcList;
 
-    List<CoreLabel> dstList = new ArrayList<CoreLabel>();
+    List<CoreLabel> dstList = new ArrayList<>();
     int adjustment = 0;
     int offset = 0; // for when offsets are not available
     for(CoreLabel src: srcList) {
@@ -606,7 +606,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
 
   private List<CoreLabel> classifyOld(List<CoreLabel> document) {
     // if (DEBUG) { System.err.println("NumberSequenceClassifier tagging"); }
-    PaddedList<CoreLabel> pl = new PaddedList<CoreLabel>(document, pad);
+    PaddedList<CoreLabel> pl = new PaddedList<>(document, pad);
     for (int i = 0, sz = pl.size(); i < sz; i++) {
       CoreLabel me = pl.get(i);
       CoreLabel prev = pl.get(i - 1);
@@ -850,7 +850,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
 
     if (textFile != null) {
       DocumentReaderAndWriter<CoreLabel> readerAndWriter =
-        new PlainTextDocumentReaderAndWriter<CoreLabel>();
+              new PlainTextDocumentReaderAndWriter<>();
       nsc.classifyAndWriteAnswers(textFile, readerAndWriter, false);
     }
   } // end main

@@ -19,7 +19,7 @@ public abstract class BooleanLogRecordHandler extends LogRecordHandler {
   public List<Record> handle(Record record) {
     boolean keep = propagateRecord(record);
     if (keep) {
-      ArrayList<Record> records = new ArrayList<Record>();
+      ArrayList<Record> records = new ArrayList<>();
       records.add(record);
       return records;
     } else {

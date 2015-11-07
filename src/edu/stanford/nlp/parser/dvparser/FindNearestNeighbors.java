@@ -61,7 +61,7 @@ public class FindNearestNeighbors {
     String testTreebankPath = null;
     FileFilter testTreebankFilter = null;
 
-    List<String> unusedArgs = new ArrayList<String>();
+    List<String> unusedArgs = new ArrayList<>();
 
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-model")) {
@@ -152,8 +152,7 @@ public class FindNearestNeighbors {
     System.err.println("  done parsing");
 
     List<Pair<Tree, SimpleMatrix>> subtrees = Generics.newArrayList();
-    for (int i = 0; i < records.size(); ++i) {
-      ParseRecord record = records.get(i);
+    for (ParseRecord record : records) {
       for (Map.Entry<Tree, SimpleMatrix> entry : record.nodeVectors.entrySet()) {
         if (entry.getKey().getLeaves().size() <= maxLength) {
           subtrees.add(Pair.makePair(entry.getKey(), entry.getValue()));
@@ -163,7 +162,7 @@ public class FindNearestNeighbors {
 
     System.err.println("There are " + subtrees.size() + " subtrees in the set of trees");
 
-    PriorityQueue<ScoredObject<Pair<Tree, Tree>>> bestmatches = new PriorityQueue<ScoredObject<Pair<Tree, Tree>>>(101, ScoredComparator.DESCENDING_COMPARATOR);
+    PriorityQueue<ScoredObject<Pair<Tree, Tree>>> bestmatches = new PriorityQueue<>(101, ScoredComparator.DESCENDING_COMPARATOR);
 
     for (int i = 0; i < subtrees.size(); ++i) {
       System.err.println(subtrees.get(i).first().yieldWords());
@@ -177,7 +176,7 @@ public class FindNearestNeighbors {
         // TODO: look at basic category?
         double normF = subtrees.get(i).second().minus(subtrees.get(j).second()).normF();
 
-        bestmatches.add(new ScoredObject<Pair<Tree, Tree>>(Pair.makePair(subtrees.get(i).first(), subtrees.get(j).first()), normF));
+        bestmatches.add(new ScoredObject<>(Pair.makePair(subtrees.get(i).first(), subtrees.get(j).first()), normF));
         if (bestmatches.size() > 100) {
           bestmatches.poll();
         }

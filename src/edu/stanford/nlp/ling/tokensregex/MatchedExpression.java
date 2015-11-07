@@ -301,7 +301,7 @@ public class MatchedExpression {
   {
     if (matchedExprs == null) return list;
     Collections.sort(matchedExprs, EXPR_TOKEN_OFFSET_COMPARATOR);
-    List<CoreMap> merged = new ArrayList<CoreMap>(list.size());   // Approximate size
+    List<CoreMap> merged = new ArrayList<>(list.size());   // Approximate size
     int last = 0;
     for (MatchedExpression expr:matchedExprs) {
       int start = expr.chunkOffsets.first();
@@ -324,8 +324,8 @@ public class MatchedExpression {
                                                       List<? extends MatchedExpression> matchedExprs)
   {
     if (matchedExprs == null) return list;
-    Map<Integer, Integer> tokenBeginToListIndexMap = new HashMap<Integer, Integer>();//Generics.newHashMap();
-    Map<Integer, Integer> tokenEndToListIndexMap = new HashMap<Integer, Integer>();//Generics.newHashMap();
+    Map<Integer, Integer> tokenBeginToListIndexMap = new HashMap<>();//Generics.newHashMap();
+    Map<Integer, Integer> tokenEndToListIndexMap = new HashMap<>();//Generics.newHashMap();
     for (int i = 0; i < list.size(); i++) {
       CoreMap cm = list.get(i);
       if (cm.has(CoreAnnotations.TokenBeginAnnotation.class) && cm.has(CoreAnnotations.TokenEndAnnotation.class)) {
@@ -337,7 +337,7 @@ public class MatchedExpression {
       }
     }
     Collections.sort(matchedExprs, EXPR_TOKEN_OFFSET_COMPARATOR);
-    List<CoreMap> merged = new ArrayList<CoreMap>(list.size());   // Approximate size
+    List<CoreMap> merged = new ArrayList<>(list.size());   // Approximate size
     int last = 0;
     for (MatchedExpression expr:matchedExprs) {
       int start = expr.tokenOffsets.first();
@@ -362,7 +362,7 @@ public class MatchedExpression {
 
   public static <T extends MatchedExpression> List<T> removeNullValues(List<T> chunks)
   {
-    List<T> okayChunks = new ArrayList<T>(chunks.size());
+    List<T> okayChunks = new ArrayList<>(chunks.size());
     for (T chunk : chunks) {
       Value v = chunk.value;
       if (v == null || v.get() == null) {

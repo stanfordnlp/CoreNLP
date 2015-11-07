@@ -35,7 +35,7 @@ public class LatticeXMLReader implements Iterable<Lattice> {
   private List<Lattice> lattices;
 
   public LatticeXMLReader() {
-    lattices = new ArrayList<Lattice>();
+    lattices = new ArrayList<>();
   }
 
   public Iterator<Lattice> iterator() { return lattices.iterator(); }
@@ -79,7 +79,7 @@ public class LatticeXMLReader implements Iterable<Lattice> {
         Lattice lattice = new Lattice();
 
         //Create the node map
-        SortedSet<Integer> nodes = new TreeSet<Integer>();
+        SortedSet<Integer> nodes = new TreeSet<>();
         NodeList xmlNodes = sentence.getElementsByTagName(NODE);
         for(int nodeIdx = 0; nodeIdx < xmlNodes.getLength(); nodeIdx++) {
           Element xmlNode = (Element) xmlNodes.item(nodeIdx);

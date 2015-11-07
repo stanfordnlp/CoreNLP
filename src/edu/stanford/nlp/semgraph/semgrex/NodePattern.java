@@ -40,7 +40,7 @@ public class NodePattern extends SemgrexPattern {
                      Map<String, String> attrs,
                      boolean root, boolean empty, String name) {
     this(r, negDesc, attrs, root, empty, name,
-         new ArrayList<Pair<Integer, String>>(0));
+            new ArrayList<>(0));
   }
 
   // TODO: there is no capacity for named variable groups in the parser right now

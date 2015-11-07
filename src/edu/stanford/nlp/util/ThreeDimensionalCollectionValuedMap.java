@@ -31,7 +31,7 @@ public class ThreeDimensionalCollectionValuedMap<K1, K2, K3, V> implements Seria
   public TwoDimensionalCollectionValuedMap<K2,K3,V> getTwoDimensionalCollectionValuedMap(K1 key1) {
     TwoDimensionalCollectionValuedMap<K2,K3,V> cvm = map.get(key1);
     if (cvm == null) {
-      cvm = new TwoDimensionalCollectionValuedMap<K2,K3,V>();
+      cvm = new TwoDimensionalCollectionValuedMap<>();
       map.put(key1, cvm);
     }
     return cvm;

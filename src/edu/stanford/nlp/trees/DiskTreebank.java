@@ -25,8 +25,8 @@ public final class DiskTreebank extends Treebank {
 
   private static boolean PRINT_FILENAMES = false;
 
-  private final List<File> filePaths = new ArrayList<File>();
-  private final List<FileFilter> fileFilters = new ArrayList<FileFilter>();
+  private final List<File> filePaths = new ArrayList<>();
+  private final List<FileFilter> fileFilters = new ArrayList<>();
 
   /*
    * Absolute path of the file currently being read.
@@ -166,8 +166,8 @@ public final class DiskTreebank extends Treebank {
     private Iterator<File> curPathIter;
 
     private DiskTreebankIterator() {
-      localPathList = new ArrayList<File>(filePaths);
-      localFilterList = new ArrayList<FileFilter>(fileFilters);
+      localPathList = new ArrayList<>(filePaths);
+      localFilterList = new ArrayList<>(fileFilters);
 
       if(primeNextPath() && primeNextFile())
         storedTree = primeNextTree();
@@ -186,7 +186,7 @@ public final class DiskTreebank extends Treebank {
         if(pathListing != null) {
           if(pathListing.size() > 1) Collections.sort(pathListing);
 
-          curFileList = new ArrayList<File>();
+          curFileList = new ArrayList<>();
           for(File path : pathListing) {
             if(path.isDirectory()) {
               localPathList.add(path);

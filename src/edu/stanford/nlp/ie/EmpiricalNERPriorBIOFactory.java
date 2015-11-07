@@ -21,7 +21,7 @@ public class EmpiricalNERPriorBIOFactory<IN extends CoreMap> implements PriorMod
                                             Pair<double[][], double[][]> entityMatrices,
                                             SeqClassifierFlags flags) {
     EntityCachingAbstractSequencePriorBIO<IN> prior =
-            new EmpiricalNERPriorBIO<IN>(flags.backgroundSymbol, classIndex, tagIndex, document, entityMatrices, flags);
+            new EmpiricalNERPriorBIO<>(flags.backgroundSymbol, classIndex, tagIndex, document, entityMatrices, flags);
     return prior;
   }
 

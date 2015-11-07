@@ -43,9 +43,9 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
   public Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>> call() throws Exception {
 
     //CollectionValuedMap<String, Integer> tokensMatchedPattern = new CollectionValuedMap<String, Integer>();
-    CollectionValuedMap<E, Triple<String, Integer, Integer>> matchedTokensByPat = new CollectionValuedMap<E, Triple<String, Integer, Integer>>();
+    CollectionValuedMap<E, Triple<String, Integer, Integer>> matchedTokensByPat = new CollectionValuedMap<>();
 
-    TwoDimensionalCounter<Pair<String, String>, E> allFreq = new TwoDimensionalCounter<Pair<String, String>, E>();
+    TwoDimensionalCounter<Pair<String, String>, E> allFreq = new TwoDimensionalCounter<>();
     for (String sentid : sentids) {
       List<CoreLabel> sent = sents.get(sentid).getTokens();
 
@@ -56,7 +56,7 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
         int s = m.start("$term");
         int e = m.end("$term");
         E matchedPat = patterns.get(m.pattern());
-        matchedTokensByPat.add(matchedPat, new Triple<String, Integer, Integer>(sentid, s, e));
+        matchedTokensByPat.add(matchedPat, new Triple<>(sentid, s, e));
         String phrase = "";
         String phraseLemma = "";
         boolean useWordNotLabeled = false;
@@ -87,7 +87,7 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
           l.set(PatternsAnnotations.MatchedPattern.class, true);
 
           if(!l.containsKey(PatternsAnnotations.MatchedPatterns.class))
-            l.set(PatternsAnnotations.MatchedPatterns.class, new HashSet<Pattern>());
+            l.set(PatternsAnnotations.MatchedPatterns.class, new HashSet<>());
           l.get(PatternsAnnotations.MatchedPatterns.class).add(matchedPat);
 
           // if (restrictToMatched) {
@@ -125,7 +125,7 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
           phrase = phrase.trim();
           phraseLemma = phraseLemma.trim();
 
-          allFreq.incrementCount(new Pair<String, String>(phrase, phraseLemma), matchedPat, 1.0);
+          allFreq.incrementCount(new Pair<>(phrase, phraseLemma), matchedPat, 1.0);
         }
       }
 
@@ -181,7 +181,7 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
 //      }
     }
 
-    return new Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>(allFreq, matchedTokensByPat);
+    return new Pair<>(allFreq, matchedTokensByPat);
   }
 
   boolean  containsStopWord(CoreLabel l, Set<String> commonEngWords, java.util.regex.Pattern ignoreWordRegex) {

@@ -182,7 +182,7 @@ public class ParseFiles {
       int num = 0;
       int numProcessed = 0;
       if (op.testOptions.testingThreads != 1) {
-        MulticoreWrapper<List<? extends HasWord>, ParserQuery> wrapper = new MulticoreWrapper<List<? extends HasWord>, ParserQuery>(op.testOptions.testingThreads, new ParsingThreadsafeProcessor(pqFactory, pwErr));
+        MulticoreWrapper<List<? extends HasWord>, ParserQuery> wrapper = new MulticoreWrapper<>(op.testOptions.testingThreads, new ParsingThreadsafeProcessor(pqFactory, pwErr));
 
         for (List<HasWord> sentence : documentPreprocessor) {
           num++;

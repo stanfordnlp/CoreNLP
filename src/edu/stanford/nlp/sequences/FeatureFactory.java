@@ -52,7 +52,7 @@ public abstract class FeatureFactory<IN> implements Serializable {
   }
 
   public static List<Clique> getCliques(int maxLeft, int maxRight) {
-    List<Clique> cliques = new ArrayList<Clique>();
+    List<Clique> cliques = new ArrayList<>();
     for (Clique c : knownCliques) {
       if (-c.maxLeft() <= maxLeft && c.maxRight() <= maxRight) {
         cliques.add(c);

@@ -46,7 +46,7 @@ public class DomReader {
 	 * Searches for all immediate children with the given name
 	 */
 	protected static List<Node> getChildrenByName(Node node, String name) {
-		List<Node> matches = new ArrayList<Node>();
+		List<Node> matches = new ArrayList<>();
 		NodeList children = node.getChildNodes();
 
 		// search children

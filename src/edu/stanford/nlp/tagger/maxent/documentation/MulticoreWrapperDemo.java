@@ -34,18 +34,19 @@ public class MulticoreWrapperDemo {
       // Configure to run with 4 worker threads
       int nThreads = 4;
       MulticoreWrapper<String,String> wrapper =
-          new MulticoreWrapper<String,String>(nThreads,
-              new ThreadsafeProcessor<String,String>() {
-                @Override
-                public String process(String input) {
-                  return tagger.tagString(input);
-                }
-                @Override
-                public ThreadsafeProcessor<String, String> newInstance() {
-                  // MaxentTagger is threadsafe
-                  return this;
-                }
-              });
+              new MulticoreWrapper<>(nThreads,
+                      new ThreadsafeProcessor<String, String>() {
+                        @Override
+                        public String process(String input) {
+                          return tagger.tagString(input);
+                        }
+
+                        @Override
+                        public ThreadsafeProcessor<String, String> newInstance() {
+                          // MaxentTagger is threadsafe
+                          return this;
+                        }
+                      });
 
       // Submit jobs, which come from stdin
       BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
