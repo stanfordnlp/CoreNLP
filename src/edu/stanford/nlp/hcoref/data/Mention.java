@@ -1577,4 +1577,51 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     return 0;
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) { return false; }
+    if (obj == this) { return true; }
+    if (obj.getClass() != getClass()) { return false; }
+
+    Mention rhs = (Mention) obj;
+
+    if (!mentionType.equals(rhs.mentionType)) { return false; }
+    if (!number.equals(rhs.number)) { return false; }
+    if (!gender.equals(rhs.gender)) { return false; }
+    if (!animacy.equals(rhs.animacy)) { return false; }
+    if (!person.equals(rhs.person)) { return false; }
+    if (!headString.equals(rhs.headString)) { return false; }
+    if (!nerString.equals(rhs.nerString)) { return false; }
+
+    if (startIndex != rhs.startIndex) { return false; }
+    if (endIndex != rhs.endIndex) { return false; }
+    if (headIndex != rhs.headIndex) { return false; }
+    if (mentionID != rhs.mentionID) { return false; }
+    if (originalRef != rhs.originalRef) { return false; }
+
+    if (!headIndexedWord.equals(rhs.headIndexedWord)) { return false; }
+
+    if (goldCorefClusterID != rhs.goldCorefClusterID) { return false; }
+    if (corefClusterID != rhs.corefClusterID) { return false; }
+    if (mentionNum != rhs.mentionNum) { return false; }
+    if (sentNum != rhs.sentNum) { return false; }
+    if (utter != rhs.utter) { return false; }
+    if (paragraph != rhs.paragraph) { return false; }
+
+    if (isSubject != rhs.isSubject) { return false; }
+    if (isDirectObject != rhs.isDirectObject) { return false; }
+    if (isIndirectObject != isIndirectObject) { return false; }
+    if (isPrepositionObject != isPrepositionObject) { return false; }
+
+    if (hasTwin != rhs.hasTwin) { return false; }
+    if (generic != rhs.generic) { return false; }
+    if (isSingleton != rhs.isSingleton) { return false; }
+
+    if (!originalSpan.equals(rhs.originalSpan)) { return false; }
+    if (!sentenceWords.equals(rhs.sentenceWords)) { return false; }
+
+
+    return true;
+  }
+
 }
