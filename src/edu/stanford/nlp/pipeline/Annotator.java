@@ -189,7 +189,6 @@ public interface Annotator {
         add(TOKENIZE_REQUIREMENT);
         add(SSPLIT_REQUIREMENT);
         add(POS_REQUIREMENT);
-        add(NER_REQUIREMENT);
         add(DEPENDENCY_REQUIREMENT);
       }}));
       put(STANFORD_ENTITY_MENTIONS, Collections.unmodifiableSet(new HashSet<Requirement>() {{

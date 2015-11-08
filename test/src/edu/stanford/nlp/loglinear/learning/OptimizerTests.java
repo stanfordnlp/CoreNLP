@@ -56,19 +56,18 @@ public class OptimizerTests {
 
       double randomPerturbedLogLikelihood = getValueSum(dataset, randomPerturbation, ll, l2regularization);
 
-      // Check that we're within a very small margin of error (around 3 decimal places) of the randomly
+      // Check that we're within a very small margin of error (around 7 decimal places) of the randomly
       // discovered value
 
-      if (logLikelihood < randomPerturbedLogLikelihood - (1.0e-3 * Math.max(1.0, Math.abs(logLikelihood)))) {
+      if (logLikelihood < randomPerturbedLogLikelihood - Math.abs(1.0e-7 * logLikelihood)) {
         System.err.println("Thought optimal point was: " + logLikelihood);
         System.err.println("Discovered better point: " + randomPerturbedLogLikelihood);
       }
 
-      assertTrue(logLikelihood >= randomPerturbedLogLikelihood - (1.0e-3 * Math.max(1.0, Math.abs(logLikelihood))));
+      assertTrue(logLikelihood >= randomPerturbedLogLikelihood - Math.abs(1.0e-7 * logLikelihood));
     }
   }
 
-  /*
   @Theory
   public void testOptimizeLogLikelihoodWithConstraints(AbstractBatchOptimizer optimizer,
                                                        @ForAll(sampleSize = 5) @From(LogLikelihoodFunctionTest.GraphicalModelDatasetGenerator.class) GraphicalModel[] dataset,
@@ -114,18 +113,17 @@ public class OptimizerTests {
 
       double randomPerturbedLogLikelihood = getValueSum(dataset, randomPerturbation, ll, l2regularization);
 
-      // Check that we're within a very small margin of error (around 3 decimal places) of the randomly
+      // Check that we're within a very small margin of error (around 7 decimal places) of the randomly
       // discovered value
 
-      if (logLikelihood < randomPerturbedLogLikelihood - (1.0e-3 * Math.max(1.0, Math.abs(logLikelihood)))) {
+      if (logLikelihood < randomPerturbedLogLikelihood - (1.0e-7 * Math.max(1.0e-1, Math.abs(logLikelihood)))) {
         System.err.println("Thought optimal point was: " + logLikelihood);
         System.err.println("Discovered better point: " + randomPerturbedLogLikelihood);
       }
 
-      assertTrue(logLikelihood >= randomPerturbedLogLikelihood - (1.0e-3 * Math.max(1.0, Math.abs(logLikelihood))));
+      assertTrue(logLikelihood >= randomPerturbedLogLikelihood - (1.0e-7 * Math.max(1.0e-1, Math.abs(logLikelihood))));
     }
   }
-  */
 
   private <T> double getValueSum(T[] dataset, ConcatVector weights, AbstractDifferentiableFunction<T> fn, double l2regularization) {
     double value = 0.0;

@@ -33,7 +33,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Set;
 
 import edu.stanford.nlp.classify.LogisticClassifier;
@@ -1580,21 +1579,19 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   @Override
   public boolean equals(Object obj) {
-
     if (obj == null) { return false; }
     if (obj == this) { return true; }
     if (obj.getClass() != getClass()) { return false; }
 
     Mention rhs = (Mention) obj;
-    
-    if (!Objects.equals(mentionType, rhs.mentionType)) { return false; }
-    if (!Objects.equals(number, rhs.number)) { return false; }
-    if (!Objects.equals(gender, rhs.gender)) { return false; }
-    if (!Objects.equals(animacy, rhs.animacy)) { return false; }
-    if (!Objects.equals(person, rhs.person)) { return false; }
-    if (!Objects.equals(headString, rhs.headString)) { return false; }
-    if (!Objects.equals(nerString, rhs.nerString)) { return false; }
 
+    if (!mentionType.equals(rhs.mentionType)) { return false; }
+    if (!number.equals(rhs.number)) { return false; }
+    if (!gender.equals(rhs.gender)) { return false; }
+    if (!animacy.equals(rhs.animacy)) { return false; }
+    if (!person.equals(rhs.person)) { return false; }
+    if (!headString.equals(rhs.headString)) { return false; }
+    if (!nerString.equals(rhs.nerString)) { return false; }
 
     if (startIndex != rhs.startIndex) { return false; }
     if (endIndex != rhs.endIndex) { return false; }
@@ -1602,7 +1599,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if (mentionID != rhs.mentionID) { return false; }
     if (originalRef != rhs.originalRef) { return false; }
 
-    if (!Objects.equals(headIndexedWord, rhs.headIndexedWord)) { return false; }
+    if (!headIndexedWord.equals(rhs.headIndexedWord)) { return false; }
 
     if (goldCorefClusterID != rhs.goldCorefClusterID) { return false; }
     if (corefClusterID != rhs.corefClusterID) { return false; }
@@ -1620,8 +1617,9 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if (generic != rhs.generic) { return false; }
     if (isSingleton != rhs.isSingleton) { return false; }
 
-    if (!Objects.equals(originalSpan, rhs.originalSpan)) { return false; }
-    if (!Objects.equals(sentenceWords, rhs.sentenceWords))  { return false; }
+    if (!originalSpan.equals(rhs.originalSpan)) { return false; }
+    if (!sentenceWords.equals(rhs.sentenceWords)) { return false; }
+
 
     return true;
   }
