@@ -1566,8 +1566,14 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
 
   private int taggedLabeledYield(List<CoreLabel> ty, int termIdx) {
     if (isPreTerminal()) {
+      // usually this will fill in all the usual keys for a token
       CoreLabel taggedWord = new CoreLabel(firstChild().label());
+      // but in case this just came from reading a tree that just has a value for words
+      if (taggedWord.word() == null) {
+        taggedWord.setWord(firstChild().value());
+      }
       final String tag = (value() == null) ? "" : value();
+      // set value and tag to the tag
       taggedWord.setValue(tag);
       taggedWord.setTag(tag);
       taggedWord.setIndex(termIdx);
