@@ -25,7 +25,7 @@ import edu.stanford.nlp.util.*;
 
 /**
  * The abstract class <code>Tree</code> is used to collect all of the
- * tree types, and acts as a generic extendable type.  This is the
+ * tree types, and acts as a generic extensible type.  This is the
  * standard implementation of inheritance-based polymorphism.
  * All <code>Tree</code> objects support accessors for their children (a
  * <code>Tree[]</code>), their label (a <code>Label</code>), and their
@@ -1531,12 +1531,10 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return a <code>List</code> of the data in the tree's leaves.
    */
   public <X extends List<TaggedWord>> X taggedYield(X ty) {
-    Tree[] kids = children();
-    // this inlines the content of isPreTerminal()
-    if (kids.length == 1 && kids[0].isLeaf()) {
-      ty.add(new TaggedWord(kids[0].label(), label()));
+    if (isPreTerminal()) {
+      ty.add(new TaggedWord(firstChild().label(), label()));
     } else {
-      for (Tree kid : kids) {
+      for (Tree kid : children()) {
         kid.taggedYield(ty);
       }
     }
@@ -1554,6 +1552,12 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     return ty;
   }
 
+  /** Returns a {@code List<CoreLabel>} from the tree.
+   *  These are a copy of the complete token representation
+   *  that adds the tag as the tag and value.
+   *
+   *  @return A tagged, labeled yield.
+   */
   public List<CoreLabel> taggedLabeledYield() {
     List<CoreLabel> ty = new ArrayList<CoreLabel>();
     taggedLabeledYield(ty, 0);
@@ -1562,12 +1566,11 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
 
   private int taggedLabeledYield(List<CoreLabel> ty, int termIdx) {
     if (isPreTerminal()) {
-      CoreLabel taggedWord = new CoreLabel();
+      CoreLabel taggedWord = new CoreLabel(firstChild().label());
       final String tag = (value() == null) ? "" : value();
       taggedWord.setValue(tag);
       taggedWord.setTag(tag);
       taggedWord.setIndex(termIdx);
-      taggedWord.setWord(firstChild().value());
       ty.add(taggedWord);
 
       return termIdx + 1;
@@ -2639,6 +2642,9 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   /**
    * Returns the positional index of the left edge of  <i>node</i> within the tree,
    * as measured by characters.  Returns -1 if <i>node is not found.</i>
+   * Note: These methods were written for internal evaluation routines. They are
+   * not the right methods to relate tree nodes to textual offsets. For these,
+   * look at the appropriate annotations on a CoreLabel (CharacterOffsetBeginAnnotation, etc.).
    */
   public int leftCharEdge(Tree node) {
     MutableInteger i = new MutableInteger(0);
@@ -2670,6 +2676,10 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    *
    * rightCharEdge returns the index of the rightmost character + 1, so that
    * rightCharEdge(getLeaves().get(i)) == leftCharEdge(getLeaves().get(i+1))
+   *
+   * Note: These methods were written for internal evaluation routines. They are
+   * not the right methods to relate tree nodes to textual offsets. For these,
+   * look at the appropriate annotations on a CoreLabel (CharacterOffsetBeginAnnotation, etc.).
    *
    * @param node The subtree to look for in this Tree
    * @return The positional index of the right edge of node
@@ -2720,8 +2730,8 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     if(this==t)
       return true;
     i.incValue(1);
-    for(int j = 0; j < t.children().length; j++) {
-      if(nodeNumberHelper(t.children()[j],i))
+    for (int j = 0; j < t.children().length; j++) {
+      if (nodeNumberHelper(t.children()[j],i))
         return true;
     }
     return false;
