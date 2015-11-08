@@ -29,8 +29,6 @@
 package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.trees.tregex.TregexMatcher;
-import edu.stanford.nlp.trees.tregex.TregexPattern;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.ling.CoreLabel;
