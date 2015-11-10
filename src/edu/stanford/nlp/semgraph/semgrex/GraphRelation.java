@@ -355,7 +355,7 @@ abstract class GraphRelation implements Serializable {
     boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
       if (l1.equals(IndexedWord.NO_WORD) || l2.equals(IndexedWord.NO_WORD) )
         return false;
-      List<Set<IndexedWord>> usedNodes = new ArrayList<Set<IndexedWord>>();
+      List<Set<IndexedWord>> usedNodes = new ArrayList<>();
       for (int i = 0; i <= endDepth; ++i) {
         usedNodes.add(Generics.<IndexedWord>newIdentityHashSet());
       }
@@ -405,9 +405,9 @@ abstract class GraphRelation implements Serializable {
             }
             searchStack = Generics.newArrayList();
             for (int i = 0; i <= endDepth; ++i) {
-              searchStack.add(new Stack<Pair<GrammaticalRelation, IndexedWord>>());
+              searchStack.add(new Stack<>());
             }
-            seenNodes = new ArrayList<Set<IndexedWord>>();
+            seenNodes = new ArrayList<>();
             for (int i = 0; i <= endDepth; ++i) {
               seenNodes.add(Generics.<IndexedWord>newIdentityHashSet());
             }
@@ -646,7 +646,7 @@ abstract class GraphRelation implements Serializable {
     boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
       if (l1.equals(IndexedWord.NO_WORD) || l2.equals(IndexedWord.NO_WORD) )
         return false;
-      List<Set<IndexedWord>> usedNodes = new ArrayList<Set<IndexedWord>>();
+      List<Set<IndexedWord>> usedNodes = new ArrayList<>();
       for (int i = 0; i <= endDepth; ++i) {
         usedNodes.add(Generics.<IndexedWord>newIdentityHashSet());
       }
@@ -696,9 +696,9 @@ abstract class GraphRelation implements Serializable {
             }
             searchStack = Generics.newArrayList();
             for (int i = 0; i <= endDepth; ++i) {
-              searchStack.add(new Stack<Pair<GrammaticalRelation, IndexedWord>>());
+              searchStack.add(new Stack<>());
             }
-            seenNodes = new ArrayList<Set<IndexedWord>>();
+            seenNodes = new ArrayList<>();
             for (int i = 0; i <= endDepth; ++i) {
               seenNodes.add(Generics.<IndexedWord>newIdentityHashSet());
             }

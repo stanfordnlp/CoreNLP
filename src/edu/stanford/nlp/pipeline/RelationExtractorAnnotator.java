@@ -83,7 +83,7 @@ public class RelationExtractorAnnotator implements Annotator {
 
   @Override
   public Set<Requirement> requires() {
-    return new ArraySet<Requirement>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT, NER_REQUIREMENT, PARSE_REQUIREMENT);
+    return new ArraySet<>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT, NER_REQUIREMENT, PARSE_REQUIREMENT);
   }
 
   @Override

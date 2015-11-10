@@ -14,11 +14,11 @@ import java.util.function.Function;
 */
 public class CoreMapNodePatternTrigger implements MultiPatternMatcher.NodePatternTrigger<CoreMap> {
   Collection<? extends SequencePattern<CoreMap>> patterns;
-  Collection<SequencePattern<CoreMap>> alwaysTriggered = new LinkedHashSet<SequencePattern<CoreMap>>();
+  Collection<SequencePattern<CoreMap>> alwaysTriggered = new LinkedHashSet<>();
   TwoDimensionalCollectionValuedMap<Class, Object, SequencePattern<CoreMap>> annotationTriggers =
-          new TwoDimensionalCollectionValuedMap<Class, Object, SequencePattern<CoreMap>>();
+          new TwoDimensionalCollectionValuedMap<>();
   TwoDimensionalCollectionValuedMap<Class, String, SequencePattern<CoreMap>> lowercaseStringTriggers =
-          new TwoDimensionalCollectionValuedMap<Class, String, SequencePattern<CoreMap>>();
+          new TwoDimensionalCollectionValuedMap<>();
 
   public CoreMapNodePatternTrigger(SequencePattern<CoreMap>... patterns) {
     this(Arrays.asList(patterns));
@@ -93,7 +93,7 @@ public class CoreMapNodePatternTrigger implements MultiPatternMatcher.NodePatter
 
   @Override
   public Collection<SequencePattern<CoreMap>> apply(CoreMap in) {
-    Set<SequencePattern<CoreMap>> triggeredPatterns = new LinkedHashSet<SequencePattern<CoreMap>>();
+    Set<SequencePattern<CoreMap>> triggeredPatterns = new LinkedHashSet<>();
     triggeredPatterns.addAll(alwaysTriggered);
     for (Class key:annotationTriggers.firstKeySet()) {
       Object value = in.get(key);

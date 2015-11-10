@@ -22,7 +22,7 @@ public class Tags implements Serializable {
 
   public Tags(String... tags) {
     if (tags != null) {
-      this.tags = new HashMap<String, Value>();// Generics.newHashMap();
+      this.tags = new HashMap<>();// Generics.newHashMap();
       for (String tag:tags) {
         this.tags.put(tag, null);
       }
@@ -38,13 +38,13 @@ public class Tags implements Serializable {
   }
 
   public void setTag(String tag, Value v) {
-    if (tags == null) { tags = new HashMap<String, Value>(1);//Generics.newHashMap(1);
+    if (tags == null) { tags = new HashMap<>(1);//Generics.newHashMap(1);
     }
     tags.put(tag, v);
   }
 
   public void addTag(String tag, Value v) {
-    if (tags == null) { tags = new HashMap<String, Value>(1);//Generics.newHashMap(1);
+    if (tags == null) { tags = new HashMap<>(1);//Generics.newHashMap(1);
     }
     // Adds v as a tag into a list of tags...
     List<Value> tagList = null;
@@ -54,12 +54,12 @@ public class Tags implements Serializable {
         tagList = ErasureUtils.uncheckedCast(oldValue.get());
       } else {
         // Put the oldValue into a new array
-        tagList = new ArrayList<Value>();
+        tagList = new ArrayList<>();
         tagList.add(oldValue);
         tags.put(tag, Expressions.createValue(Expressions.TYPE_LIST, tagList));
       }
     } else {
-      tagList = new ArrayList<Value>();
+      tagList = new ArrayList<>();
       tags.put(tag, Expressions.createValue(Expressions.TYPE_LIST, tagList));
     }
     tagList.add(v);

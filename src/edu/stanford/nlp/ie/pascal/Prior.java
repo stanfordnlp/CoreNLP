@@ -49,8 +49,7 @@ public class Prior {
    */
   public double get(Set presentFields) {
     int index = 0;
-    for (int f = 0; f < indexFields.length; ++f) {
-      String field = indexFields[f];
+    for (String field : indexFields) {
       index *= 2;
       if (presentFields.contains(field)) {
         ++index;

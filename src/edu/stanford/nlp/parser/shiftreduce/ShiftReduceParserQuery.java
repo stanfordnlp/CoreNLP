@@ -69,7 +69,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
 
     success = true;
     unparsable = false;
-    PriorityQueue<State> beam = new PriorityQueue<State>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
+    PriorityQueue<State> beam = new PriorityQueue<>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
     beam.add(initialState);
     // TODO: don't construct as many PriorityQueues
     while (beam.size() > 0) {
@@ -77,7 +77,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
       // System.err.println("Current beam:");
       // System.err.println(beam);
       PriorityQueue<State> oldBeam = beam;
-      beam = new PriorityQueue<State>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
+      beam = new PriorityQueue<>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
       State bestState = null;
       for (State state : oldBeam) {
         Collection<ScoredObject<Integer>> predictedTransitions = parser.model.findHighestScoringTransitions(state, true, maxBeamSize, constraints);
@@ -187,7 +187,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
   /** TODO: if this is a beam, return all equal parses */
   @Override
   public List<ScoredObject<Tree>> getBestPCFGParses() {
-    ScoredObject<Tree> parse = new ScoredObject<Tree>(debinarized, finalState.score);
+    ScoredObject<Tree> parse = new ScoredObject<>(debinarized, finalState.score);
     return Collections.singletonList(parse);
   }
 
@@ -199,7 +199,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
   /** TODO: return more if this used a beam */
   @Override
   public List<ScoredObject<Tree>> getKBestPCFGParses(int kbestPCFG) {
-    ScoredObject<Tree> parse = new ScoredObject<Tree>(debinarized, finalState.score);
+    ScoredObject<Tree> parse = new ScoredObject<>(debinarized, finalState.score);
     return Collections.singletonList(parse);
   }
 

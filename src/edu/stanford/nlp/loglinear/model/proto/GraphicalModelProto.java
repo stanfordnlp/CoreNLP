@@ -3,6 +3,8 @@
 
 package edu.stanford.nlp.loglinear.model.proto;
 
+import com.google.protobuf.CodedOutputStream;
+
 public final class GraphicalModelProto {
   private GraphicalModelProto() {}
   public static void registerAllExtensions(
@@ -127,7 +129,7 @@ public final class GraphicalModelProto {
             }
             case 10: {
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                factor_ = new java.util.ArrayList<edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor>();
+                factor_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000001;
               }
               factor_.add(input.readMessage(edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor.PARSER, extensionRegistry));
@@ -135,7 +137,7 @@ public final class GraphicalModelProto {
             }
             case 18: {
               if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-                variableMetaData_ = new java.util.ArrayList<edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData>();
+                variableMetaData_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000002;
               }
               variableMetaData_.add(input.readMessage(edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.PARSER, extensionRegistry));
@@ -315,11 +317,11 @@ public final class GraphicalModelProto {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      for (int i = 0; i < factor_.size(); i++) {
-        output.writeMessage(1, factor_.get(i));
+      for (Factor aFactor_ : factor_) {
+        output.writeMessage(1, aFactor_);
       }
-      for (int i = 0; i < variableMetaData_.size(); i++) {
-        output.writeMessage(2, variableMetaData_.get(i));
+      for (MetaData aVariableMetaData_ : variableMetaData_) {
+        output.writeMessage(2, aVariableMetaData_);
       }
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeMessage(3, metaData_);
@@ -333,13 +335,13 @@ public final class GraphicalModelProto {
       if (size != -1) return size;
 
       size = 0;
-      for (int i = 0; i < factor_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, factor_.get(i));
+      for (Factor aFactor_ : factor_) {
+        size += CodedOutputStream
+                .computeMessageSize(1, aFactor_);
       }
-      for (int i = 0; i < variableMetaData_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, variableMetaData_.get(i));
+      for (MetaData aVariableMetaData_ : variableMetaData_) {
+        size += CodedOutputStream
+                .computeMessageSize(2, aVariableMetaData_);
       }
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
@@ -645,7 +647,7 @@ public final class GraphicalModelProto {
         java.util.Collections.emptyList();
       private void ensureFactorIsMutable() {
         if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          factor_ = new java.util.ArrayList<edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor>(factor_);
+          factor_ = new java.util.ArrayList<>(factor_);
           bitField0_ |= 0x00000001;
          }
       }
@@ -870,8 +872,7 @@ public final class GraphicalModelProto {
           edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor.Builder, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.FactorOrBuilder> 
           getFactorFieldBuilder() {
         if (factorBuilder_ == null) {
-          factorBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.Factor.Builder, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.FactorOrBuilder>(
+          factorBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   factor_,
                   ((bitField0_ & 0x00000001) == 0x00000001),
                   getParentForChildren(),
@@ -885,7 +886,7 @@ public final class GraphicalModelProto {
         java.util.Collections.emptyList();
       private void ensureVariableMetaDataIsMutable() {
         if (!((bitField0_ & 0x00000002) == 0x00000002)) {
-          variableMetaData_ = new java.util.ArrayList<edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData>(variableMetaData_);
+          variableMetaData_ = new java.util.ArrayList<>(variableMetaData_);
           bitField0_ |= 0x00000002;
          }
       }
@@ -1110,8 +1111,7 @@ public final class GraphicalModelProto {
           edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.Builder, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder> 
           getVariableMetaDataFieldBuilder() {
         if (variableMetaDataBuilder_ == null) {
-          variableMetaDataBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.Builder, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder>(
+          variableMetaDataBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   variableMetaData_,
                   ((bitField0_ & 0x00000002) == 0x00000002),
                   getParentForChildren(),
@@ -1227,8 +1227,7 @@ public final class GraphicalModelProto {
           edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.Builder, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder> 
           getMetaDataFieldBuilder() {
         if (metaDataBuilder_ == null) {
-          metaDataBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.Builder, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder>(
+          metaDataBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   getMetaData(),
                   getParentForChildren(),
                   isClean());
@@ -1358,7 +1357,7 @@ public final class GraphicalModelProto {
             }
             case 16: {
               if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-                neighbor_ = new java.util.ArrayList<java.lang.Integer>();
+                neighbor_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000002;
               }
               neighbor_.add(input.readInt32());
@@ -1368,7 +1367,7 @@ public final class GraphicalModelProto {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
               if (!((mutable_bitField0_ & 0x00000002) == 0x00000002) && input.getBytesUntilLimit() > 0) {
-                neighbor_ = new java.util.ArrayList<java.lang.Integer>();
+                neighbor_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000002;
               }
               while (input.getBytesUntilLimit() > 0) {
@@ -1526,8 +1525,8 @@ public final class GraphicalModelProto {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeMessage(1, featuresTable_);
       }
-      for (int i = 0; i < neighbor_.size(); i++) {
-        output.writeInt32(2, neighbor_.get(i));
+      for (Integer aNeighbor_ : neighbor_) {
+        output.writeInt32(2, aNeighbor_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeMessage(3, metaData_);
@@ -1547,9 +1546,9 @@ public final class GraphicalModelProto {
       }
       {
         int dataSize = 0;
-        for (int i = 0; i < neighbor_.size(); i++) {
-          dataSize += com.google.protobuf.CodedOutputStream
-            .computeInt32SizeNoTag(neighbor_.get(i));
+        for (Integer aNeighbor_ : neighbor_) {
+          dataSize += CodedOutputStream
+                  .computeInt32SizeNoTag(aNeighbor_);
         }
         size += dataSize;
         size += 1 * getNeighborList().size();
@@ -1913,8 +1912,7 @@ public final class GraphicalModelProto {
           edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable, edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.Builder, edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTableOrBuilder> 
           getFeaturesTableFieldBuilder() {
         if (featuresTableBuilder_ == null) {
-          featuresTableBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable, edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTable.Builder, edu.stanford.nlp.loglinear.model.proto.ConcatVectorTableProto.ConcatVectorTableOrBuilder>(
+          featuresTableBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   getFeaturesTable(),
                   getParentForChildren(),
                   isClean());
@@ -1926,7 +1924,7 @@ public final class GraphicalModelProto {
       private java.util.List<java.lang.Integer> neighbor_ = java.util.Collections.emptyList();
       private void ensureNeighborIsMutable() {
         if (!((bitField0_ & 0x00000002) == 0x00000002)) {
-          neighbor_ = new java.util.ArrayList<java.lang.Integer>(neighbor_);
+          neighbor_ = new java.util.ArrayList<>(neighbor_);
           bitField0_ |= 0x00000002;
          }
       }
@@ -2095,8 +2093,7 @@ public final class GraphicalModelProto {
           edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.Builder, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder> 
           getMetaDataFieldBuilder() {
         if (metaDataBuilder_ == null) {
-          metaDataBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaData.Builder, edu.stanford.nlp.loglinear.model.proto.GraphicalModelProto.MetaDataOrBuilder>(
+          metaDataBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   getMetaData(),
                   getParentForChildren(),
                   isClean());

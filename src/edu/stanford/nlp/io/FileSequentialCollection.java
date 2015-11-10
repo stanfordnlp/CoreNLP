@@ -205,7 +205,7 @@ public class FileSequentialCollection extends AbstractCollection<File> {
     super();
     // store the arguments.  They are expanded by the iterator
     if (c == null) {
-      coll = new ArrayList<Object>();
+      coll = new ArrayList<>();
     } else {
       coll = c;
     }
@@ -261,8 +261,8 @@ public class FileSequentialCollection extends AbstractCollection<File> {
       // System.err.println("Coll is " + coll);
       roots = coll.toArray();
       rootsIndex = 0;
-      fileArrayStack = new Stack<Object>();
-      fileArrayStackIndices = new Stack<Integer>();
+      fileArrayStack = new Stack<>();
+      fileArrayStackIndices = new Stack<>();
       if (roots.length > 0) {
         fileArrayStack.add(roots[rootsIndex]);
         fileArrayStackIndices.push(Integer.valueOf(0));

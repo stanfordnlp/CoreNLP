@@ -13,7 +13,7 @@ public class Env implements Serializable {
   /**
    * Mapping of variable names to their values
    */
-  Map<String, Object> variables = new HashMap<String, Object>();
+  Map<String, Object> variables = new HashMap<>();
 
   public Env() {}
 

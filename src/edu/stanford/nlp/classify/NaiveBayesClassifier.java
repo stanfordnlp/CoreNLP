@@ -76,7 +76,7 @@ public class NaiveBayesClassifier<L, F> implements Classifier<L, F>, RVFClassifi
   }
 
   public ClassicCounter<L> scoresOf(RVFDatum<L, F> example) {
-    ClassicCounter<L> scores = new ClassicCounter<L>();
+    ClassicCounter<L> scores = new ClassicCounter<>();
     Counters.addInPlace(scores, priors);
     if (addZeroValued) {
       Counters.addInPlace(scores, priorZero);
@@ -98,12 +98,12 @@ public class NaiveBayesClassifier<L, F> implements Classifier<L, F>, RVFClassifi
 
 
   public L classOf(Datum<L, F> example) {
-    RVFDatum<L, F> rvf = new RVFDatum<L, F>(example);
+    RVFDatum<L, F> rvf = new RVFDatum<>(example);
     return classOf(rvf);
   }
 
   public ClassicCounter<L> scoresOf(Datum<L, F> example) {
-    RVFDatum<L, F> rvf = new RVFDatum<L, F>(example);
+    RVFDatum<L, F> rvf = new RVFDatum<>(example);
     return scoresOf(rvf);
   }
 
@@ -146,7 +146,7 @@ public class NaiveBayesClassifier<L, F> implements Classifier<L, F>, RVFClassifi
   }
 
   private double weight(L label, F feature, Number val) {
-    Pair<Pair<L, F>, Number> p = new Pair<Pair<L, F>, Number>(new Pair<L, F>(label, feature), val);
+    Pair<Pair<L, F>, Number> p = new Pair<>(new Pair<>(label, feature), val);
     double v = weights.getCount(p);
     return v;
   }
@@ -161,7 +161,7 @@ public class NaiveBayesClassifier<L, F> implements Classifier<L, F>, RVFClassifi
    * priorZero(l)=sum_{features} wt(l,feat=0)
    */
   private void initZeros() {
-    priorZero = new ClassicCounter<L>();
+    priorZero = new ClassicCounter<>();
     for (L label : labels) {
       double score = 0;
       for (F feature : features) {

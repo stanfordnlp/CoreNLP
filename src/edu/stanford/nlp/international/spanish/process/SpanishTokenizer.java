@@ -210,11 +210,11 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * recommended factory method
    */
   public static <T extends HasWord> TokenizerFactory<T> factory(LexedTokenFactory<T> factory, String options) {
-    return new SpanishTokenizerFactory<T>(factory, options);
+    return new SpanishTokenizerFactory<>(factory, options);
   }
 
   public static <T extends HasWord> TokenizerFactory<T> factory(LexedTokenFactory<T> factory) {
-    return new SpanishTokenizerFactory<T>(factory, ANCORA_OPTIONS);
+    return new SpanishTokenizerFactory<>(factory, ANCORA_OPTIONS);
   }
 
   /**
@@ -236,7 +236,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     protected boolean splitContractionOption = false;
 
     public static TokenizerFactory<CoreLabel> newCoreLabelTokenizerFactory() {
-      return new SpanishTokenizerFactory<CoreLabel>(new CoreLabelTokenFactory());
+      return new SpanishTokenizerFactory<>(new CoreLabelTokenFactory());
     }
 
 
@@ -274,7 +274,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
     @Override
     public Tokenizer<T> getTokenizer(Reader r) {
-      return new SpanishTokenizer<T>(r, factory, lexerProperties, splitCompoundOption, splitVerbOption, splitContractionOption);
+      return new SpanishTokenizer<>(r, factory, lexerProperties, splitCompoundOption, splitVerbOption, splitContractionOption);
     }
 
     /**

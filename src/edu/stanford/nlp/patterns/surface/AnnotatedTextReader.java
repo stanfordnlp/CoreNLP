@@ -45,13 +45,13 @@ public class AnnotatedTextReader {
 
       Iterator<List<CoreLabel>> dociter = conllreader.getIterator(reader);;
       int num = -1;
-      Map<String, DataInstance> sents = new HashMap<String, DataInstance>();
+      Map<String, DataInstance> sents = new HashMap<>();
       while(dociter.hasNext()){
 
         List<CoreLabel> doc = dociter.next();
 
-        List<String> words = new ArrayList<String>();
-        List<CoreLabel> sentcore = new ArrayList<CoreLabel>();
+        List<String> words = new ArrayList<>();
+        List<CoreLabel> sentcore = new ArrayList<>();
 
 
         int tokenindex = 0;
@@ -64,8 +64,8 @@ public class AnnotatedTextReader {
               DataInstance sentInst = DataInstance.getNewSurfaceInstance(sentcore);
               sents.put(docid, sentInst);
 
-              words = new ArrayList<String>();
-              sentcore = new ArrayList<CoreLabel>();
+              words = new ArrayList<>();
+              sentcore = new ArrayList<>();
               tokenindex = 0;
             }
             continue;
@@ -118,7 +118,7 @@ public class AnnotatedTextReader {
         + StringUtils.join(categoriesAllowed, "|") + ")>");
     String backgroundSymbol = "O";
 
-    List<CoreMap> sentences = new ArrayList<CoreMap>();
+    List<CoreMap> sentences = new ArrayList<>();
     int lineNum = -1;
     String l = null;
 
@@ -146,7 +146,7 @@ public class AnnotatedTextReader {
       for (List<HasWord> sentence : dp) {
         sentNum++;
         String sentStr = "";
-        List<CoreLabel> sent = new ArrayList<CoreLabel>();
+        List<CoreLabel> sent = new ArrayList<>();
         for (HasWord tokw : sentence) {
           String tok = tokw.word();
           Matcher startingMatcher = startingLabelToken.matcher(tok);
@@ -161,7 +161,7 @@ public class AnnotatedTextReader {
 
             CoreLabel c = new CoreLabel();
 
-            List<String> toks = new ArrayList<String>();
+            List<String> toks = new ArrayList<>();
 
             toks.add(tok);
 

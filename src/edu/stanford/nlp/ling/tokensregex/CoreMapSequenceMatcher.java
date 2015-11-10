@@ -56,7 +56,7 @@ public class CoreMapSequenceMatcher<T extends CoreMap> extends SequenceMatcher<T
 
   public List<CoreMap> getMergedList(int... groups)
   {
-    List<CoreMap> res = new ArrayList<CoreMap>();
+    List<CoreMap> res = new ArrayList<>();
     int last = 0;
     List<Integer> orderedGroups = CollectionUtils.asList(groups);
     Collections.sort(orderedGroups);

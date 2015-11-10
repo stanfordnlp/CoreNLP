@@ -171,7 +171,7 @@ public class PrettyLogger {
       channels.log("(empty)");
     } else {
       // convert keys to sorted list, if possible
-      List<K> keys = new LinkedList<K>();
+      List<K> keys = new LinkedList<>();
       for (K key : mapping.keySet()) {
         keys.add(key);
       }

@@ -50,9 +50,9 @@ public class Extractors implements Serializable {
    */
   void initTypes() {
 
-    local = new ArrayList<Pair<Integer,Extractor>>();
-    localContext = new ArrayList<Pair<Integer,Extractor>>();
-    dynamic = new ArrayList<Pair<Integer,Extractor>>();
+    local = new ArrayList<>();
+    localContext = new ArrayList<>();
+    dynamic = new ArrayList<>();
 
     for(int i=0; i<v.length; ++i) {
       Extractor e = v[i];

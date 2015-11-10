@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 import edu.stanford.nlp.classify.LogisticClassifier;
@@ -150,7 +151,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   transient private String spanString = null;
   transient private String lowercaseNormalizedSpanString = null;
 
-  public IntCounter<Integer> antecedentOrdering = new IntCounter<Integer>();
+  public IntCounter<Integer> antecedentOrdering = new IntCounter<>();
 
   @Override
   public Class<Mention> getType() {
@@ -246,7 +247,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   private void setSingleton(LogisticClassifier<String, String> predictor, Dictionaries dict){
     double coreference_score = predictor.probabilityOf(
-        new BasicDatum<String, String>(getSingletonFeatures(dict), "1"));
+            new BasicDatum<>(getSingletonFeatures(dict), "1"));
     if(coreference_score < 0.2) this.isSingleton = true;
   }
 
@@ -255,7 +256,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
    * classifier) to decide whether the mention belongs to a singleton entity
    */
   public ArrayList<String> getSingletonFeatures(Dictionaries dict){
-    ArrayList<String> features = new ArrayList<String>();
+    ArrayList<String> features = new ArrayList<>();
     features.add(mentionType.toString());
     features.add(nerString);
     features.add(animacy.toString());
@@ -279,7 +280,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   }
 
   private List<String> getMentionString() {
-    List<String> mStr = new ArrayList<String>();
+    List<String> mStr = new ArrayList<>();
     for(CoreLabel l : this.originalSpan) {
       mStr.add(l.get(CoreAnnotations.TextAnnotation.class).toLowerCase());
       if(l==this.headWord) break;   // remove words after headword
@@ -302,7 +303,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       }
 
       // find converted string with ! (e.g., "dr. martin luther king jr. boulevard" -> "dr. !")
-      List<String> convertedStr = new ArrayList<String>(2);
+      List<String> convertedStr = new ArrayList<>(2);
       convertedStr.add(mStr.get(firstNameIdx));
       convertedStr.add("!");
       if(dict.genderNumber.containsKey(convertedStr)) return dict.genderNumber.get(convertedStr);
@@ -378,7 +379,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     preprocessedTerms = this.preprocessSearchTerm();
 
     if(dict.statesAbbreviation.containsKey(this.spanToString())) {  // states abbreviations
-      preprocessedTerms = new ArrayList<String>();
+      preprocessedTerms = new ArrayList<>();
       preprocessedTerms.add(dict.statesAbbreviation.get(this.spanToString()));
     }
 
@@ -966,7 +967,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   }
 
   public List<String> preprocessSearchTerm (){
-    List<String> searchTerms = new ArrayList<String>();
+    List<String> searchTerms = new ArrayList<>();
     String[] terms = new String[4];
 
     terms[0] = this.stringWithoutArticle(this.removePhraseAfterHead());
@@ -1057,7 +1058,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   private static Pair<IndexedWord, String> findDependentVerb(Mention m) {
     if (m.collapsedDependency.getRoots().size() == 0) {
-      return new Pair<IndexedWord, String>();
+      return new Pair<>();
     }
     // would be nice to condense this pattern, but sadly =reln
     // always uses the last relation in the sequence, not the first
@@ -1066,7 +1067,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     while (matcher.find()) {
       return Pair.makePair(matcher.getNode("verb"), matcher.getRelnString("reln"));
     }
-    return new Pair<IndexedWord, String>();
+    return new Pair<>();
   }
 
   public boolean insideIn(Mention m){
@@ -1115,7 +1116,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   // Returns filtered premodifiers (no determiners or numerals)
   public ArrayList<ArrayList<IndexedWord>> getPremodifiers(){
 
-    ArrayList<ArrayList<IndexedWord>> premod = new ArrayList<ArrayList<IndexedWord>>();
+    ArrayList<ArrayList<IndexedWord>> premod = new ArrayList<>();
 
     if(headIndexedWord == null) return premod;
     for(Pair<GrammaticalRelation,IndexedWord> child : collapsedDependency.childPairs(headIndexedWord)){
@@ -1125,7 +1126,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
           && !function.endsWith("det") && !function.equals("num")
           && !function.equals("rcmod") && !function.equals("infmod")
           && !function.equals("partmod") && !function.equals("punct")){
-        ArrayList<IndexedWord> phrase = new ArrayList<IndexedWord>(collapsedDependency.descendants(child.second()));
+        ArrayList<IndexedWord> phrase = new ArrayList<>(collapsedDependency.descendants(child.second()));
         Collections.sort(phrase);
         premod.add(phrase);
       }
@@ -1136,7 +1137,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   // Returns filtered postmodifiers (no relative, -ed or -ing clauses)
   public ArrayList<ArrayList<IndexedWord>> getPostmodifiers(){
 
-    ArrayList<ArrayList<IndexedWord>> postmod = new ArrayList<ArrayList<IndexedWord>>();
+    ArrayList<ArrayList<IndexedWord>> postmod = new ArrayList<>();
 
     if(headIndexedWord == null) return postmod;
     for(Pair<GrammaticalRelation,IndexedWord> child : collapsedDependency.childPairs(headIndexedWord)){
@@ -1146,7 +1147,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
           && !function.equals("rcmod") && !function.equals("infmod")
           && !function.equals("partmod") && !function.equals("punct")
           && !(function.equals("possessive") && collapsedDependency.descendants(child.second()).size() == 1)){
-        ArrayList<IndexedWord> phrase = new ArrayList<IndexedWord>(collapsedDependency.descendants(child.second()));
+        ArrayList<IndexedWord> phrase = new ArrayList<>(collapsedDependency.descendants(child.second()));
         Collections.sort(phrase);
         postmod.add(phrase);
       }
@@ -1205,7 +1206,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   public String getPattern(List<AbstractCoreLabel> pTokens){
 
-    ArrayList<String> phrase_string = new ArrayList<String>();
+    ArrayList<String> phrase_string = new ArrayList<>();
     String ne = "";
     for(AbstractCoreLabel token : pTokens){
       if(token.index() == headWord.index()){
@@ -1262,7 +1263,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       }
     }
 
-    List<String> neStrings = new ArrayList<String>();
+    List<String> neStrings = new ArrayList<>();
     Set<String> hs = Generics.newHashSet();
     for (List<AbstractCoreLabel> namedEntity : namedEntities) {
       String ne_str = StringUtils.joinWords(namedEntity, " ");
@@ -1277,7 +1278,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   }
 
   public List<String> getPremodifierContext() {
-    List<String> neStrings = new ArrayList<String>();
+    List<String> neStrings = new ArrayList<>();
     for (List<IndexedWord> words : getPremodifiers()) {
       neStrings.addAll(getContextHelper(words));
     }
@@ -1575,6 +1576,54 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       }
     }
     return 0;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+
+    if (obj == null) { return false; }
+    if (obj == this) { return true; }
+    if (obj.getClass() != getClass()) { return false; }
+
+    Mention rhs = (Mention) obj;
+    
+    if (!Objects.equals(mentionType, rhs.mentionType)) { return false; }
+    if (!Objects.equals(number, rhs.number)) { return false; }
+    if (!Objects.equals(gender, rhs.gender)) { return false; }
+    if (!Objects.equals(animacy, rhs.animacy)) { return false; }
+    if (!Objects.equals(person, rhs.person)) { return false; }
+    if (!Objects.equals(headString, rhs.headString)) { return false; }
+    if (!Objects.equals(nerString, rhs.nerString)) { return false; }
+
+
+    if (startIndex != rhs.startIndex) { return false; }
+    if (endIndex != rhs.endIndex) { return false; }
+    if (headIndex != rhs.headIndex) { return false; }
+    if (mentionID != rhs.mentionID) { return false; }
+    if (originalRef != rhs.originalRef) { return false; }
+
+    if (!Objects.equals(headIndexedWord, rhs.headIndexedWord)) { return false; }
+
+    if (goldCorefClusterID != rhs.goldCorefClusterID) { return false; }
+    if (corefClusterID != rhs.corefClusterID) { return false; }
+    if (mentionNum != rhs.mentionNum) { return false; }
+    if (sentNum != rhs.sentNum) { return false; }
+    if (utter != rhs.utter) { return false; }
+    if (paragraph != rhs.paragraph) { return false; }
+
+    if (isSubject != rhs.isSubject) { return false; }
+    if (isDirectObject != rhs.isDirectObject) { return false; }
+    if (isIndirectObject != isIndirectObject) { return false; }
+    if (isPrepositionObject != isPrepositionObject) { return false; }
+
+    if (hasTwin != rhs.hasTwin) { return false; }
+    if (generic != rhs.generic) { return false; }
+    if (isSingleton != rhs.isSingleton) { return false; }
+
+    if (!Objects.equals(originalSpan, rhs.originalSpan)) { return false; }
+    if (!Objects.equals(sentenceWords, rhs.sentenceWords))  { return false; }
+
+    return true;
   }
 
 }

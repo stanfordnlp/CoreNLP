@@ -113,7 +113,7 @@ public class QuantifiableEntityNormalizingAnnotator implements Annotator {
 
   private <TOKEN extends CoreLabel> void annotateTokens(List<TOKEN> tokens) {
     // Make a copy of the tokens before annotating because QuantifiableEntityNormalizer may change the POS too
-    List<CoreLabel> words = new ArrayList<CoreLabel>();
+    List<CoreLabel> words = new ArrayList<>();
     for (CoreLabel token : tokens) {
       CoreLabel word = new CoreLabel();
       word.setWord(token.word());

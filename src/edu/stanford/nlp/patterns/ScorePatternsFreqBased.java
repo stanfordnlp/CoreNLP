@@ -31,11 +31,11 @@ public class ScorePatternsFreqBased<E> extends ScorePatterns<E> {
   @Override
   public Counter<E> score() {
 
-    Counter<E> currentPatternWeights4Label = new ClassicCounter<E>();
+    Counter<E> currentPatternWeights4Label = new ClassicCounter<>();
 
-    Counter<E> pos_i = new ClassicCounter<E>();
-    Counter<E> neg_i = new ClassicCounter<E>();
-    Counter<E> unlab_i = new ClassicCounter<E>();
+    Counter<E> pos_i = new ClassicCounter<>();
+    Counter<E> neg_i = new ClassicCounter<>();
+    Counter<E> unlab_i = new ClassicCounter<>();
 
     for (Entry<E, ClassicCounter<CandidatePhrase>> en : negPatternsandWords4Label
         .entrySet()) {
@@ -60,7 +60,7 @@ public class ScorePatternsFreqBased<E> extends ScorePatterns<E> {
 //    }
 
     Counter<E> posneg_i = Counters.add(pos_i, neg_i);
-    Counter<E> logFi = new ClassicCounter<E>(pos_i);
+    Counter<E> logFi = new ClassicCounter<>(pos_i);
     Counters.logInPlace(logFi);
 
     if (patternScoring.equals(PatternScoring.RlogF)) {

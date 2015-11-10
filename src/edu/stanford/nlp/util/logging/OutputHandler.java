@@ -27,11 +27,11 @@ public abstract class OutputHandler extends LogRecordHandler{
    * A list of tracks which have been started but not yet printed as no
    * log messages are in them yet.
    */
-  protected LinkedList<Record> queuedTracks = new LinkedList<Record>();
+  protected LinkedList<Record> queuedTracks = new LinkedList<>();
   /**
    * Information about the current and higher level tracks
    */
-  protected Stack<TrackInfo> trackStack = new Stack<TrackInfo>();
+  protected Stack<TrackInfo> trackStack = new Stack<>();
   /**
    * The current track info; used to avoid trackStack.peek() calls
    */
@@ -238,7 +238,7 @@ public abstract class OutputHandler extends LogRecordHandler{
     String[] content;
     if (record.content instanceof Throwable) {
       //(vars)
-      List<String> lines = new ArrayList<String>();
+      List<String> lines = new ArrayList<>();
       StackTraceElement[] trace = null;
       StackTraceElement topTraceElement= null;
       //(root message)
@@ -299,7 +299,7 @@ public abstract class OutputHandler extends LogRecordHandler{
     Color color = Color.NONE;
     Style style = Style.NONE;
     //(get channels)
-    ArrayList<Object> printableChannels = new ArrayList<Object>();
+    ArrayList<Object> printableChannels = new ArrayList<>();
     for(Object chan : record.channels()){
       if(chan instanceof Color){ color = (Color) chan; }
       else if(chan instanceof Style){ style = (Style) chan; }
@@ -359,7 +359,7 @@ public abstract class OutputHandler extends LogRecordHandler{
     if(info != null){
       info.numElementsPrinted += 1;
     }
-    ArrayList<Record> rtn = new ArrayList<Record>();
+    ArrayList<Record> rtn = new ArrayList<>();
     rtn.add(record);
     return rtn;
   }

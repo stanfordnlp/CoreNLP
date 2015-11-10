@@ -105,7 +105,7 @@ public class HeidelTimeAnnotator implements Annotator {
     }
 
     //--Build Command
-    ArrayList<String> args = new ArrayList<String>();
+    ArrayList<String> args = new ArrayList<>();
     args.add("java");
     args.add("-jar"); args.add(this.heideltimePath.getPath() + "/heideltime.jar");
     args.add("-c"); args.add(this.heideltimePath.getPath()+"/config.props");
@@ -197,7 +197,7 @@ public class HeidelTimeAnnotator implements Annotator {
         endMap.put(charEnd,tokEnd);
       }
     }
-    List<CoreMap> timexMaps = new ArrayList<CoreMap>();
+    List<CoreMap> timexMaps = new ArrayList<>();
     int offset = 0;
     NodeList docNodes = docElem.getChildNodes();
     for (int i = 0; i < docNodes.getLength(); i++) {

@@ -404,6 +404,8 @@ public class IOUtils {
 
   /**
    * Locates this file either in the CLASSPATH or in the file system. The CLASSPATH takes priority.
+   * Note that this method uses the ClassLoader methods, so that classpath resources must be specified as
+   * absolute resource paths without a leading "/".
    *
    * @param name The file or resource name
    * @throws FileNotFoundException If the file does not exist
@@ -439,6 +441,9 @@ public class IOUtils {
     InputStream is = IOUtils.class.getClassLoader().getResourceAsStream(name);
     if (is == null) {
       is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/"));
+      if (is == null) {
+        is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/").replaceAll("/+", "/"));
+      }
     }
     return is != null || new File(name).exists();
   }
@@ -598,6 +603,8 @@ public class IOUtils {
    * file accessible by URL. If the String ends in .gz, it
    * is interpreted as a gzipped file (and uncompressed). The file is then
    * interpreted as a utf-8 text file.
+   * Note that this method uses the ClassLoader methods, so that classpath resources must be specified as
+   * absolute resource paths without a leading "/".
    *
    * @param textFileOrUrl What to read from
    * @return The BufferedReader
@@ -1050,7 +1057,7 @@ public class IOUtils {
     return new Iterable<File>() {
       public Iterator<File> iterator() {
         return new AbstractIterator<File>() {
-          private final Queue<File> files = new LinkedList<File>(Collections
+          private final Queue<File> files = new LinkedList<>(Collections
                   .singleton(dir));
           private File file = this.findNext();
 
@@ -1402,7 +1409,7 @@ public class IOUtils {
     //--Variables
     StringBuilder[] buffer = new StringBuilder[numColumns];
     buffer[0] = new StringBuilder();
-    LinkedList<String[]> lines = new LinkedList<String[]>();
+    LinkedList<String[]> lines = new LinkedList<>();
     //--State
     boolean inQuotes = false;
     boolean nextIsEscaped = false;
@@ -1614,7 +1621,7 @@ public class IOUtils {
           NoSuchFieldException, NoSuchMethodException, InvocationTargetException
   {
     Pattern delimiterPattern = Pattern.compile(delimiter);
-    List<C> list = new ArrayList<C>();
+    List<C> list = new ArrayList<>();
     BufferedReader br = IOUtils.getBufferedFileReader(filename);
     String line;
     while ((line = br.readLine()) != null) {
@@ -1699,7 +1706,7 @@ public class IOUtils {
 
   public static List<String> linesFromFile(String filename,String encoding, boolean ignoreHeader) {
     try {
-      List<String> lines = new ArrayList<String>();
+      List<String> lines = new ArrayList<>();
       BufferedReader in = readerFromString(filename, encoding);
       String line;
       int i = 0;
@@ -1976,8 +1983,8 @@ public class IOUtils {
     // Variables
     RandomAccessFile raf = new RandomAccessFile(f, "r");
     int linesRead = 0;
-    List<Byte> bytes = new ArrayList<Byte>();
-    List<String> linesReversed = new ArrayList<String>();
+    List<Byte> bytes = new ArrayList<>();
+    List<String> linesReversed = new ArrayList<>();
     // Seek to end of file
     long length = raf.length() - 1;
     raf.seek(length);
@@ -1994,7 +2001,7 @@ public class IOUtils {
           str[i] = bytes.get(str.length - i - 1);
         }
         linesReversed.add(new String(str, encoding));
-        bytes = new ArrayList<Byte>();
+        bytes = new ArrayList<>();
         linesRead += 1;
         if (linesRead == n){
           break;

@@ -172,8 +172,8 @@ public class TreeAnnotator implements TreeTransformer {
       List<String> leftSis = listBasicCategories(SisterAnnotationStats.leftSisterLabels(t, parent));
       List<String> rightSis = listBasicCategories(SisterAnnotationStats.rightSisterLabels(t, parent));
 
-      List<String> leftAnn = new ArrayList<String>();
-      List<String> rightAnn = new ArrayList<String>();
+      List<String> leftAnn = new ArrayList<>();
+      List<String> rightAnn = new ArrayList<>();
 
       for (String s : leftSis) {
         //s = baseCat+"=l="+tlpParams.treebankLanguagePack().basicCategory(s);
@@ -246,7 +246,7 @@ public class TreeAnnotator implements TreeTransformer {
 
 
   private List<String> listBasicCategories(List<String> l) {
-    List<String> l1 = new ArrayList<String>();
+    List<String> l1 = new ArrayList<>();
     for (String str : l) {
       l1.add(tlpParams.treebankLanguagePack().basicCategory(str));
     }

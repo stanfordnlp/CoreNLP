@@ -126,7 +126,7 @@ public class QuantifiableEntityNormalizer {
     moneyMultipliers2.put("[0-9](m)(?:[^a-zA-Z]|$)", 1000000);
     moneyMultipliers2.put("[0-9](b)(?:[^a-zA-Z]|$)", 1000000000);
 
-    wordsToValues = new ClassicCounter<String>();
+    wordsToValues = new ClassicCounter<>();
     wordsToValues.setCount("zero", 0.0);
     wordsToValues.setCount("one", 1.0);
     wordsToValues.setCount("two", 2.0);
@@ -163,7 +163,7 @@ public class QuantifiableEntityNormalizer {
     wordsToValues.setCount("trillion", 1000000000000.0);
     wordsToValues.setCount("dozen", 12.0);
 
-    ordinalsToValues = new ClassicCounter<String>();
+    ordinalsToValues = new ClassicCounter<>();
     ordinalsToValues.setCount("zeroth", 0.0);
     ordinalsToValues.setCount("first", 1.0);
     ordinalsToValues.setCount("second", 2.0);
@@ -277,7 +277,7 @@ public class QuantifiableEntityNormalizer {
       }
     }
 
-    List<CoreLabel> s = new ArrayList<CoreLabel>();
+    List<CoreLabel> s = new ArrayList<>();
     String lastEntity = BACKGROUND_SYMBOL;
     StringBuilder entityStringCollector = null;
 
@@ -418,10 +418,10 @@ public class QuantifiableEntityNormalizer {
   private static final String dateRangeBeforeOneWord = "before|until";
   private static final List<Pair<String, String>> dateRangeBeforePairedOneWord;
   static {
-    dateRangeBeforePairedOneWord = new ArrayList<Pair<String,String>>();
-    dateRangeBeforePairedOneWord.add(new Pair<String, String>("between", "and"));
-    dateRangeBeforePairedOneWord.add(new Pair<String, String>("from", "to"));
-    dateRangeBeforePairedOneWord.add(new Pair<String, String>("from", "-"));
+    dateRangeBeforePairedOneWord = new ArrayList<>();
+    dateRangeBeforePairedOneWord.add(new Pair<>("between", "and"));
+    dateRangeBeforePairedOneWord.add(new Pair<>("from", "to"));
+    dateRangeBeforePairedOneWord.add(new Pair<>("from", "-"));
   }
 
   private static final String datePrepositionAfterWord = "in|of";
@@ -525,7 +525,7 @@ public class QuantifiableEntityNormalizer {
     int sz = list.size();
     E next = (afterIndex < sz) ? list.get(afterIndex) : null;
     E next2 = (afterIndex + 1 < sz) ? list.get(afterIndex + 1) : null;
-    List<E> toRemove = new ArrayList<E>();
+    List<E> toRemove = new ArrayList<>();
 
     String curNER = (firstDate == null ? "" : firstDate.get(CoreAnnotations.NamedEntityTagAnnotation.class));
     if(curNER == null) curNER = "";
@@ -563,7 +563,7 @@ public class QuantifiableEntityNormalizer {
               }
               next.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, rangeString);
               if (concatenate) {
-                List<E> numberWords = new ArrayList<E>();
+                List<E> numberWords = new ArrayList<>();
                 numberWords.add(firstDate);
                 numberWords.add(next);
                 numberWords.add(next2);
@@ -1321,7 +1321,7 @@ public class QuantifiableEntityNormalizer {
    * @param concatenate true if quantities should be concatenated into one label, false otherwise
    */
   public static <E extends CoreMap> void addNormalizedQuantitiesToEntities(List<E> list, boolean concatenate, boolean usesSUTime) {
-    List<E> toRemove = new ArrayList<E>(); // list for storing those objects we're going to remove at the end (e.g., if concatenate, we replace 3 November with 3_November, have to remove one of the originals)
+    List<E> toRemove = new ArrayList<>(); // list for storing those objects we're going to remove at the end (e.g., if concatenate, we replace 3 November with 3_November, have to remove one of the originals)
 
     // Goes through tokens and tries to fix up NER annotations
     fixupNerBeforeNormalization(list);
@@ -1330,7 +1330,7 @@ public class QuantifiableEntityNormalizer {
     String prevNerTag = BACKGROUND_SYMBOL;
     String timeModifier = "";
     int beforeIndex = -1;
-    ArrayList<E> collector = new ArrayList<E>();
+    ArrayList<E> collector = new ArrayList<>();
     for (int i = 0, sz = list.size(); i <= sz; i++) {
       E wi = null;
       String currNerTag = null;
@@ -1391,7 +1391,7 @@ public class QuantifiableEntityNormalizer {
             break;
         }
 
-        collector = new ArrayList<E>();
+        collector = new ArrayList<>();
         timeModifier = "";
       }
 
@@ -1408,7 +1408,7 @@ public class QuantifiableEntityNormalizer {
     if (concatenate) {
       list.removeAll(toRemove);
     }
-    List<E> moreRemoves = new ArrayList<E>();
+    List<E> moreRemoves = new ArrayList<>();
     for (int i = 0, sz = list.size(); i < sz; i++) {
       E wi = list.get(i);
       moreRemoves.addAll(detectTwoSidedRangeModifier(wi, list, i-1, i+1, concatenate));
@@ -1516,7 +1516,7 @@ public class QuantifiableEntityNormalizer {
   public static <E extends CoreLabel> List<E> applySpecializedNER(List<E> l) {
     int sz = l.size();
     // copy l
-    List<CoreLabel> copyL = new ArrayList<CoreLabel>(sz);
+    List<CoreLabel> copyL = new ArrayList<>(sz);
     for (int i = 0; i < sz; i++) {
       if (DEBUG2) {
         if (i == 1) {
