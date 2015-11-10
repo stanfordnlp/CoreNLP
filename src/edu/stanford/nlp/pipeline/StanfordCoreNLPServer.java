@@ -43,6 +43,7 @@ public class StanfordCoreNLPServer implements Runnable {
   public static int HTTP_OK = 200;
   public static int HTTP_BAD_INPUT = 400;
   public static int HTTP_ERR = 500;
+  public static int MAX_CHAR_LENGTH = 100000;
   public final Properties defaultProps;
 
   /**
@@ -337,8 +338,8 @@ public class StanfordCoreNLPServer implements Runnable {
           log("[" + httpExchange.getRemoteAddress() + "] API call w/annotators " + props.getProperty("annotators", "<unknown>"));
           String text = ann.get(CoreAnnotations.TextAnnotation.class).replace('\n', ' ');
           System.out.println(text);
-          if (text.length() > 1000) {
-            respondBadInput("Request is too long to be handled by server: " + text.length(), httpExchange);
+          if (text.length() > MAX_CHAR_LENGTH) {
+            respondBadInput("Request is too long to be handled by server: " + text.length() + " characters. Max length is " + MAX_CHAR_LENGTH + " characters.", httpExchange);
             return;
           }
         }
@@ -417,6 +418,9 @@ public class StanfordCoreNLPServer implements Runnable {
       // (set the parser max length to 60)
       if (!"-1".equals(props.getProperty("parse.maxlen", "60"))) {
         props.put("parse.maxlen", "60");
+      }
+      if (!"-1".equals(props.getProperty("pos.maxlen", "500"))) {
+        props.put("pos.maxlen", "500");
       }
 
       // Make sure the properties compile
