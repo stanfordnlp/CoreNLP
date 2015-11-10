@@ -225,7 +225,7 @@ public class EnglishGrammaticalRelations {
             // cc/conjp which does not have a , between it and the
             // target or a , which does not appear to the right of a
             // cc/conjp.  This test eliminates things such as
-            // parenthetics which come after a list, such as in the
+            // parentheticals which come after a list, such as in the
             // sentence "to see the market go down and dump everything,
             // which ..." where "go down and dump everything, which..."
             // is all in one VP node.
@@ -1582,7 +1582,7 @@ public class EnglishGrammaticalRelations {
 
   // Map from English GrammaticalRelation short names to their corresponding
   // GrammaticalRelation objects
-  public static final Map<String, GrammaticalRelation> shortNameToGRel = new ConcurrentHashMap<String, GrammaticalRelation>();
+  public static final Map<String, GrammaticalRelation> shortNameToGRel = new ConcurrentHashMap<>();
   static {
     valuesLock().lock();
     try {

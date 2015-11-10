@@ -1170,16 +1170,16 @@ public class ChineseGrammaticalRelations {
       CONTROLLED_SUBJECT, chineseOnly,
   };
 
-  private static final List<GrammaticalRelation> values = new ArrayList<GrammaticalRelation>();
+  private static final List<GrammaticalRelation> values = new ArrayList<>();
     // Cache frequently used views of the values list
   private static final List<GrammaticalRelation> synchronizedValues =
     Collections.synchronizedList(values);
 
-  public static final Set<GrammaticalRelation> universalValues = new HashSet<GrammaticalRelation>();
+  public static final Set<GrammaticalRelation> universalValues = new HashSet<>();
 
   // Map from GrammaticalRelation short names to their corresponding
   // GrammaticalRelation objects
-  public static final Map<String, GrammaticalRelation> shortNameToGRel = new ConcurrentHashMap<String, GrammaticalRelation>();
+  public static final Map<String, GrammaticalRelation> shortNameToGRel = new ConcurrentHashMap<>();
   static {
     for (int i = 0; i < rawValues.length; i++) {
       GrammaticalRelation gr = rawValues[i];

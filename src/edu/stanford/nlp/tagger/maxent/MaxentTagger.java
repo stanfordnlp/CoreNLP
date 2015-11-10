@@ -245,7 +245,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
 
   public MaxentTagger(TaggerConfig config) {
     // todo: maybe this shouldn't do this but replace the zero arg constructor.
-    // i.e., call init() not readModelAndInit(). This method is currently UNUSUED. Make non-public.
+    // i.e., call init() not readModelAndInit(). This method is currently UNUSED. Make non-public.
     this(config.getModel(), config);
   }
 
@@ -348,7 +348,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   static final boolean POSSIBLE_TAGS_ONLY = Boolean.parseBoolean(TaggerConfig.POSSIBLE_TAGS_ONLY);
 
   private double defaultScore;
-  private double[] defaultScores = null;
+  private double[] defaultScores; // = null;
 
   int leftContext;
   int rightContext;
@@ -1270,7 +1270,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
 
       // TODO: there is another almost identical block of code elsewhere.  Refactor
       if (config.getNThreads() != 1) {
-        MulticoreWrapper<List<? extends HasWord>, List<? extends HasWord>> wrapper = new MulticoreWrapper<List<? extends HasWord>, List<? extends HasWord>>(config.getNThreads(), new SentenceTaggingProcessor(tagger, outputLemmas));
+        MulticoreWrapper<List<? extends HasWord>, List<? extends HasWord>> wrapper = new MulticoreWrapper<>(config.getNThreads(), new SentenceTaggingProcessor(tagger, outputLemmas));
         for (List<? extends HasWord> sentence : sentences) {
           wrapper.put(sentence);
           while (wrapper.peek()) {
@@ -1404,46 +1404,46 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
    * elements to tag, whereas the runTagger method throws away all of
    * the surrounding structure and returns tagged plain text.
    */
-  public void tagFromXML(InputStream input, Writer writer, String ... xmlTags) {
+  public void tagFromXML(InputStream input, Writer writer, String... xmlTags) {
     OutputStyle outputStyle =
       OutputStyle.fromShortName(config.getOutputFormat());
 
-    TransformXML<String> txml = new TransformXML<String>();
+    TransformXML<String> txml = new TransformXML<>();
     switch(outputStyle) {
     case XML:
     case INLINE_XML:
       txml.transformXML(xmlTags, new TaggerWrapper(this),
                         input, writer,
-                        new TransformXML.NoEscapingSAXInterface<String>());
+                        new TransformXML.NoEscapingSAXInterface<>());
       break;
     case SLASH_TAGS:
     case TSV:
       txml.transformXML(xmlTags, new TaggerWrapper(this),
                         input, writer,
-                        new TransformXML.SAXInterface<String>());
+                        new TransformXML.SAXInterface<>());
       break;
     default:
       throw new RuntimeException("Unexpected format " + outputStyle);
     }
   }
 
-  public void tagFromXML(Reader input, Writer writer, String ... xmlTags) {
+  public void tagFromXML(Reader input, Writer writer, String... xmlTags) {
     OutputStyle outputStyle =
       OutputStyle.fromShortName(config.getOutputFormat());
 
-    TransformXML<String> txml = new TransformXML<String>();
+    TransformXML<String> txml = new TransformXML<>();
     switch(outputStyle) {
     case XML:
     case INLINE_XML:
       txml.transformXML(xmlTags, new TaggerWrapper(this),
                         input, writer,
-                        new TransformXML.NoEscapingSAXInterface<String>());
+                        new TransformXML.NoEscapingSAXInterface<>());
       break;
     case SLASH_TAGS:
     case TSV:
       txml.transformXML(xmlTags, new TaggerWrapper(this),
                         input, writer,
-                        new TransformXML.SAXInterface<String>());
+                        new TransformXML.SAXInterface<>());
       break;
     default:
       throw new RuntimeException("Unexpected format " + outputStyle);
@@ -1634,8 +1634,8 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
     }
 
     // this uses NER codebase technology to read/write SGML-ish files
-    PlainTextDocumentReaderAndWriter<CoreLabel> readerAndWriter = new PlainTextDocumentReaderAndWriter<CoreLabel>();
-    ObjectBank<List<CoreLabel>> ob = new ObjectBank<List<CoreLabel>>(new ReaderIteratorFactory(reader), readerAndWriter);
+    PlainTextDocumentReaderAndWriter<CoreLabel> readerAndWriter = new PlainTextDocumentReaderAndWriter<>();
+    ObjectBank<List<CoreLabel>> ob = new ObjectBank<>(new ReaderIteratorFactory(reader), readerAndWriter);
     PrintWriter pw = new PrintWriter(writer);
     for (List<CoreLabel> sentence : ob) {
       List<CoreLabel> s = Generics.newArrayList();
@@ -1683,7 +1683,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
 
 
     if (config.getNThreads() != 1) {
-      MulticoreWrapper<List<? extends HasWord>, List<? extends HasWord>> wrapper = new MulticoreWrapper<List<? extends HasWord>, List<? extends HasWord>>(config.getNThreads(), new SentenceTaggingProcessor(this, outputLemmas));
+      MulticoreWrapper<List<? extends HasWord>, List<? extends HasWord>> wrapper = new MulticoreWrapper<>(config.getNThreads(), new SentenceTaggingProcessor(this, outputLemmas));
       for (List<X> sentence : document) {
         wrapper.put(sentence);
         while (wrapper.peek()) {

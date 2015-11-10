@@ -176,14 +176,14 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     		return false;
     	}
     }
-    Tree[] mykids = children();
-    Tree[] theirkids = t.children();
-    //if((mykids == null && (theirkids == null || theirkids.length != 0)) || (theirkids == null && mykids.length != 0) || (mykids.length != theirkids.length)){
-    if (mykids.length != theirkids.length) {
+    Tree[] myKids = children();
+    Tree[] theirKids = t.children();
+    //if((myKids == null && (theirKids == null || theirKids.length != 0)) || (theirKids == null && myKids.length != 0) || (myKids.length != theirKids.length)){
+    if (myKids.length != theirKids.length) {
       return false;
     }
-    for (int i = 0; i < mykids.length; i++) {
-      if (!mykids[i].equals(theirkids[i])) {
+    for (int i = 0; i < myKids.length; i++) {
+      if (!myKids[i].equals(theirKids[i])) {
         return false;
       }
     }
@@ -261,7 +261,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return The children of the node
    */
   public List<Tree> getChildrenAsList() {
-    return new ArrayList<Tree>(Arrays.asList(children()));
+    return new ArrayList<>(Arrays.asList(children()));
   }
 
 
@@ -305,8 +305,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     if (childTreesList == null || childTreesList.isEmpty()) {
       setChildren(EMPTY_TREE_ARRAY);
     } else {
-      int leng = childTreesList.size();
-      Tree[] childTrees = new Tree[leng];
+      Tree[] childTrees = new Tree[childTreesList.size()];
       childTreesList.toArray(childTrees);
       setChildren(childTrees);
     }
@@ -1380,7 +1379,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return a <code>List</code> of the data in the tree's leaves.
    */
   public ArrayList<Label> yield() {
-    return yield(new ArrayList<Label>());
+    return yield(new ArrayList<>());
   }
 
   /**
@@ -1413,7 +1412,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   }
 
   public ArrayList<Word> yieldWords() {
-    return yieldWords(new ArrayList<Word>());
+    return yieldWords(new ArrayList<>());
   }
 
   public ArrayList<Word> yieldWords(ArrayList<Word> y) {
@@ -1428,7 +1427,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   }
 
   public <X extends HasWord> ArrayList<X> yieldHasWord() {
-    return yieldHasWord(new ArrayList<X>());
+    return yieldHasWord(new ArrayList<>());
   }
 
   @SuppressWarnings("unchecked")
@@ -1506,11 +1505,11 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return a <code>List</code> of the data in the tree's leaves.
    */
   public ArrayList<TaggedWord> taggedYield() {
-    return taggedYield(new ArrayList<TaggedWord>());
+    return taggedYield(new ArrayList<>());
   }
 
   public List<LabeledWord> labeledYield() {
-    return labeledYield(new ArrayList<LabeledWord>());
+    return labeledYield(new ArrayList<>());
   }
 
   /**
@@ -1559,7 +1558,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    *  @return A tagged, labeled yield.
    */
   public List<CoreLabel> taggedLabeledYield() {
-    List<CoreLabel> ty = new ArrayList<CoreLabel>();
+    List<CoreLabel> ty = new ArrayList<>();
     taggedLabeledYield(ty, 0);
     return ty;
   }
@@ -1598,7 +1597,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return a {@code List} of the data in the tree's pre-leaves.
    */
   public List<Label> preTerminalYield() {
-    return preTerminalYield(new ArrayList<Label>());
+    return preTerminalYield(new ArrayList<>());
   }
 
 
@@ -1633,7 +1632,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return a <code>List</code> of the leaves.
    */
   public <T extends Tree> List<T> getLeaves() {
-    return getLeaves(new ArrayList<T>());
+    return getLeaves(new ArrayList<>());
   }
 
   /**
@@ -1720,7 +1719,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       return this;
     }
     Tree[] kids = children();
-    List<Tree> newChildren = new ArrayList<Tree>(kids.length);
+    List<Tree> newChildren = new ArrayList<>(kids.length);
     for (Tree child : kids) {
       if (child.isLeaf() || child.isPreTerminal()) {
         newChildren.add(child);
@@ -1766,7 +1765,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return the <code>List</code> of all subtrees in the tree.
    */
   public List<Tree> subTreeList() {
-    return subTrees(new ArrayList<Tree>());
+    return subTrees(new ArrayList<>());
   }
 
 
@@ -1882,7 +1881,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       t = tf.newLeaf(label());
     } else {
       Tree[] kids = children();
-      List<Tree> newKids = new ArrayList<Tree>(kids.length);
+      List<Tree> newKids = new ArrayList<>(kids.length);
       for (Tree kid : kids) {
         newKids.add(kid.treeSkeletonCopy(tf));
       }
@@ -1915,7 +1914,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     }
     Label label = lf.newLabel(label());
     Tree[] kids = children();
-    List<Tree> newKids = new ArrayList<Tree>(kids.length);
+    List<Tree> newKids = new ArrayList<>(kids.length);
     for (Tree kid : kids) {
       newKids.add(kid.treeSkeletonConstituentCopy(tf, lf));
     }
@@ -1955,7 +1954,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       t = tf.newLeaf(label());
     } else {
       Tree[] kids = children();
-      List<Tree> newKids = new ArrayList<Tree>(kids.length);
+      List<Tree> newKids = new ArrayList<>(kids.length);
       for (Tree kid : kids) {
         newKids.add(kid.transform(transformer, tf));
       }
@@ -2011,7 +2010,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   private List<Tree> spliceOutHelper(Predicate<Tree> nodeFilter, TreeFactory tf) {
     // recurse over all children first
     Tree[] kids = children();
-    List<Tree> l = new ArrayList<Tree>();
+    List<Tree> l = new ArrayList<>();
     for (Tree kid : kids) {
       l.addAll(kid.spliceOutHelper(nodeFilter, tf));
     }
@@ -2024,7 +2023,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       } else {
         t = tf.newLeaf(label());
       }
-      l = new ArrayList<Tree>(1);
+      l = new ArrayList<>(1);
       l.add(t);
       return l;
     }
@@ -2079,7 +2078,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       return null;
     }
     // if not, recurse over all children
-    List<Tree> l = new ArrayList<Tree>();
+    List<Tree> l = new ArrayList<>();
     Tree[] kids = children();
     for (Tree kid : kids) {
       Tree prunedChild = kid.prune(filter, tf);
@@ -2217,7 +2216,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     private final List<Tree> treeStack;
 
     protected TreeIterator(Tree t) {
-      treeStack = new ArrayList<Tree>();
+      treeStack = new ArrayList<>();
       treeStack.add(t);
     }
 
@@ -2273,7 +2272,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   }
 
   public List<Tree> postOrderNodeList() {
-    List<Tree> nodes = new ArrayList<Tree>();
+    List<Tree> nodes = new ArrayList<>();
     postOrderRecurse(this, nodes);
     return nodes;
   }
@@ -2285,7 +2284,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   }
 
   public List<Tree> preOrderNodeList() {
-    List<Tree> nodes = new ArrayList<Tree>();
+    List<Tree> nodes = new ArrayList<>();
     preOrderRecurse(this, nodes);
     return nodes;
   }
@@ -2498,7 +2497,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     if (t1DomPath == null || t2DomPath == null) {
       return null;
     }
-    ArrayList<Tree> path = new ArrayList<Tree>();
+    ArrayList<Tree> path = new ArrayList<>();
     path.addAll(t1DomPath);
     Collections.reverse(path);
     path.remove(joinNode);
