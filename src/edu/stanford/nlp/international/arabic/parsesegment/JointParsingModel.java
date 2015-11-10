@@ -217,7 +217,8 @@ public class JointParsingModel {
         Tree rawTree = null;
         if(op.doPCFG && pparser.parse(lattice)) {
           rawTree = pparser.getBestParse(); //1best segmentation
-          bestSegmentationB = rawTree.yield(new ArrayList<CoreLabel>()); //has boundary symbol
+          //bestSegmentationB still has boundary symbol in it
+          bestSegmentationB = rawTree.yield(new ArrayList<CoreLabel>()); // NOTE! Type is need here for JDK8 compilation (maybe bad typing somewhere)
 
           if(op.doDep && dparser.parse(bestSegmentationB)) {
             System.err.printf("%s: Dependency parse succeeded!%n", this.getClass().getName());
