@@ -8,7 +8,12 @@ import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -399,8 +404,6 @@ public class IOUtils {
 
   /**
    * Locates this file either in the CLASSPATH or in the file system. The CLASSPATH takes priority.
-   * Note that this method uses the ClassLoader methods, so that classpath resources must be specified as
-   * absolute resource paths without a leading "/".
    *
    * @param name The file or resource name
    * @throws FileNotFoundException If the file does not exist
@@ -436,9 +439,6 @@ public class IOUtils {
     InputStream is = IOUtils.class.getClassLoader().getResourceAsStream(name);
     if (is == null) {
       is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/"));
-      if (is == null) {
-        is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/").replaceAll("/+", "/"));
-      }
     }
     return is != null || new File(name).exists();
   }
@@ -598,8 +598,6 @@ public class IOUtils {
    * file accessible by URL. If the String ends in .gz, it
    * is interpreted as a gzipped file (and uncompressed). The file is then
    * interpreted as a utf-8 text file.
-   * Note that this method uses the ClassLoader methods, so that classpath resources must be specified as
-   * absolute resource paths without a leading "/".
    *
    * @param textFileOrUrl What to read from
    * @return The BufferedReader
@@ -1052,7 +1050,7 @@ public class IOUtils {
     return new Iterable<File>() {
       public Iterator<File> iterator() {
         return new AbstractIterator<File>() {
-          private final Queue<File> files = new LinkedList<>(Collections
+          private final Queue<File> files = new LinkedList<File>(Collections
                   .singleton(dir));
           private File file = this.findNext();
 
@@ -1320,6 +1318,32 @@ public class IOUtils {
   }
 
   /**
+   * Read the contents of an input stream, decoding it according to the given character encoding.
+   * @param input The input stream to read from
+   * @return The String representation of that input stream
+   */
+  public static String slurpInputStream(InputStream input, String encoding) throws CharacterCodingException {
+    StringBuilder buff = new StringBuilder();
+    CharsetDecoder decoder = Charset.forName(encoding).newDecoder();
+    try {
+      byte[] chars = new byte[SLURP_BUFFER_SIZE];
+      while (true) {
+        int amountRead = input.read(chars, 0, SLURP_BUFFER_SIZE);
+        if (amountRead < 0) {
+          break;
+        }
+        CharBuffer chunk = decoder.decode(ByteBuffer.wrap(chars));
+        buff.append(chunk.array(), 0, amountRead);
+      }
+      input.close();
+    } catch (IOException e) {
+      throw new RuntimeIOException("slurpReader IO problem", e);
+    }
+    return buff.toString();
+
+  }
+
+  /**
    * Send all bytes from the input stream to the output stream.
    *
    * @param input The input bytes.
@@ -1378,7 +1402,7 @@ public class IOUtils {
     //--Variables
     StringBuilder[] buffer = new StringBuilder[numColumns];
     buffer[0] = new StringBuilder();
-    LinkedList<String[]> lines = new LinkedList<>();
+    LinkedList<String[]> lines = new LinkedList<String[]>();
     //--State
     boolean inQuotes = false;
     boolean nextIsEscaped = false;
@@ -1590,7 +1614,7 @@ public class IOUtils {
           NoSuchFieldException, NoSuchMethodException, InvocationTargetException
   {
     Pattern delimiterPattern = Pattern.compile(delimiter);
-    List<C> list = new ArrayList<>();
+    List<C> list = new ArrayList<C>();
     BufferedReader br = IOUtils.getBufferedFileReader(filename);
     String line;
     while ((line = br.readLine()) != null) {
@@ -1675,7 +1699,7 @@ public class IOUtils {
 
   public static List<String> linesFromFile(String filename,String encoding, boolean ignoreHeader) {
     try {
-      List<String> lines = new ArrayList<>();
+      List<String> lines = new ArrayList<String>();
       BufferedReader in = readerFromString(filename, encoding);
       String line;
       int i = 0;
@@ -1952,8 +1976,8 @@ public class IOUtils {
     // Variables
     RandomAccessFile raf = new RandomAccessFile(f, "r");
     int linesRead = 0;
-    List<Byte> bytes = new ArrayList<>();
-    List<String> linesReversed = new ArrayList<>();
+    List<Byte> bytes = new ArrayList<Byte>();
+    List<String> linesReversed = new ArrayList<String>();
     // Seek to end of file
     long length = raf.length() - 1;
     raf.seek(length);
@@ -1970,7 +1994,7 @@ public class IOUtils {
           str[i] = bytes.get(str.length - i - 1);
         }
         linesReversed.add(new String(str, encoding));
-        bytes = new ArrayList<>();
+        bytes = new ArrayList<Byte>();
         linesRead += 1;
         if (linesRead == n){
           break;

@@ -178,6 +178,6 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
       bestCurrentProduct = trace[pos + 1][bestNextProduct];
       tempTags[pos - leftWindow] = tags[pos - leftWindow][bestCurrentProduct / (productSizes[pos] / tagNum[pos - leftWindow])];
     }
-    return new Pair<>(tempTags, bestFinalScore);
+    return new Pair<int[], Double>(tempTags, bestFinalScore);
   }
 }

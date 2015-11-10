@@ -35,7 +35,7 @@ public abstract class AbstractListProcessor<IN,OUT,L,F> implements ListProcessor
    * @return a List of objects of type List, each of which has been processed.
    */
   public List<List<OUT>> processLists(List<List<IN>> lists) {
-    List<List<OUT>> result = new ArrayList<>(lists.size());
+    List<List<OUT>> result = new ArrayList<List<OUT>>(lists.size());
     for (List<IN> list : lists) {
       List<OUT> outList = process(list);
       result.add(outList);

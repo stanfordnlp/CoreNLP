@@ -196,7 +196,7 @@ public abstract class AbstractStochasticCachingDiffFunction extends AbstractCach
       //Declare the indices array if needed.
       if (allIndices == null || allIndices.size()!= this.dataDimension()){
 
-        allIndices = new ArrayList<>();
+        allIndices = new ArrayList<Integer>();
         for(int i=0;i<this.dataDimension();i++){
           allIndices.add(i);
         }
@@ -208,7 +208,7 @@ public abstract class AbstractStochasticCachingDiffFunction extends AbstractCach
       }
 
       if (curElement + batchSize > this.dataDimension()){
-        Collections.shuffle(Collections.singletonList(allIndices),randGenerator);                   //Shuffle if we got to the end of the list
+        Collections.shuffle(Arrays.asList(allIndices),randGenerator);                   //Shuffle if we got to the end of the list
       }
 
       //watch out for overflow

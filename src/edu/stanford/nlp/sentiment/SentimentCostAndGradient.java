@@ -257,7 +257,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       // The splits are then summed in order.
       // This different sum order results in slightly different numbers.
       MulticoreWrapper<List<Tree>, ModelDerivatives> wrapper =
-              new MulticoreWrapper<>(model.op.trainOptions.nThreads, new ScoringProcessor());
+        new MulticoreWrapper<List<Tree>, ModelDerivatives>(model.op.trainOptions.nThreads, new ScoringProcessor());
       // use wrapper.nThreads in case the number of threads was automatically changed
       for (List<Tree> chunk : CollectionUtils.partitionIntoFolds(trainingBatch, wrapper.nThreads())) {
         wrapper.put(chunk);

@@ -83,9 +83,9 @@ public class SimpleLinearClassifier {
   }
 
   public SortedMap<String, Double> getWeightVector() {
-    SortedMap<String, Double> m = new TreeMap<>((f1, f2) -> {
-      double weightDifference = Math.abs(weights.getCount(f2)) - Math.abs(weights.getCount(f1));
-      return weightDifference == 0 ? f1.compareTo(f2) : (int) Math.signum(weightDifference);
+    SortedMap<String, Double> m = new TreeMap<String, Double>((f1, f2) -> {
+        double weightDifference = Math.abs(weights.getCount(f2)) - Math.abs(weights.getCount(f1));
+        return weightDifference == 0 ? f1.compareTo(f2) : (int) Math.signum(weightDifference);
     });
     weights.entrySet().stream().forEach(e -> m.put(e.getKey(), e.getValue()));
     return m;

@@ -10,8 +10,8 @@ public class JJTTsurgeonParserState {
   private boolean node_created;
 
   public JJTTsurgeonParserState() {
-    nodes = new java.util.ArrayList<>();
-    marks = new java.util.ArrayList<>();
+    nodes = new java.util.ArrayList<Node>();
+    marks = new java.util.ArrayList<Integer>();
     sp = 0;
     mk = 0;
   }

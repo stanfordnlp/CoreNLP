@@ -204,8 +204,8 @@ public class SGDMinimizer<T extends Function> implements Minimizer<T>, HasEvalua
   private static double getNorm(double[] w)
   {
     double norm = 0;
-    for (double aW : w) {
-      norm += aW * aW;
+    for (int i = 0; i < w.length; i++) {
+      norm += w[i]*w[i];
     }
     return norm;
   }

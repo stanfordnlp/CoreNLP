@@ -65,7 +65,7 @@ public class BaseUnknownWordModel implements UnknownWordModel {
   protected final Map<Label,ClassicCounter<String>> tagHash;
 
   /** This is the set of all signatures that we have seen. */
-  private final Set<String> seenEnd;
+  final private Set<String> seenEnd;
 
   final Map<String,Float> unknownGT;
 
@@ -108,7 +108,7 @@ public class BaseUnknownWordModel implements UnknownWordModel {
                               Index<String> wordIndex,
                               Index<String> tagIndex) {
     this(op, lex, wordIndex, tagIndex,
-            new ClassicCounter<>(),
+         new ClassicCounter<IntTaggedWord>(),
          Generics.<Label,ClassicCounter<String>>newHashMap(),
          Generics.<String,Float>newHashMap(),
          Generics.<String>newHashSet());

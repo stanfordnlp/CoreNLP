@@ -21,7 +21,7 @@ public class UniformPriorFactory<IN extends CoreMap> implements PriorModelFactor
                                             Pair<double[][], double[][]> entityMatrices,
                                             SeqClassifierFlags flags) {
     // System.err.println("Using uniform prior!");
-    UniformPrior<IN> uniPrior = new UniformPrior<>(flags.backgroundSymbol, classIndex, document);
+    UniformPrior<IN> uniPrior = new UniformPrior<IN>(flags.backgroundSymbol, classIndex, document);
     return uniPrior;
   }
 

@@ -34,7 +34,7 @@ public class TreeBinarizer implements TreeTransformer {
   private boolean markFinalStates;
   private boolean unaryAtTop;
   private boolean doSelectiveSplit = false;
-  private ClassicCounter<String> stateCounter = new ClassicCounter<>();
+  private ClassicCounter<String> stateCounter = new ClassicCounter<String>();
   private final boolean simpleLabels;
   private final boolean noRebinarization;
 
@@ -49,7 +49,7 @@ public class TreeBinarizer implements TreeTransformer {
   public void setDoSelectiveSplit(boolean doSelectiveSplit) {
     this.doSelectiveSplit = doSelectiveSplit;
     if (!doSelectiveSplit) {
-      stateCounter = new ClassicCounter<>();
+      stateCounter = new ClassicCounter<String>();
     }
   }
 
@@ -96,7 +96,7 @@ public class TreeBinarizer implements TreeTransformer {
         t2 = markovInsideBinarizeLocalTreeNew(t, headNum, 0, t.numChildren() - 1, true);
         //          t2 = markovInsideBinarizeLocalTree(t, head, headNum, topCat, false);
       } else {
-        t2 = markovOutsideBinarizeLocalTree(t, head, headNum, topCat, new LinkedList<>(), false);
+        t2 = markovOutsideBinarizeLocalTree(t, head, headNum, topCat, new LinkedList<Tree>(), false);
       }
 
       if (DEBUG) {
@@ -120,13 +120,13 @@ public class TreeBinarizer implements TreeTransformer {
   private Tree markovOutsideBinarizeLocalTree(Tree t, TaggedWord head, int headLoc, String topCat, LinkedList<Tree> ll, boolean doneLeft) {
     String word = head.word();
     String tag = head.tag();
-    List<Tree> newChildren = new ArrayList<>(2);
+    List<Tree> newChildren = new ArrayList<Tree>(2);
     // call with t, headNum, head, topCat, false
     if (headLoc == 0) {
       if (!doneLeft) {
         // insert a unary to separate the sides
         if (tlp.isStartSymbol(topCat)) {
-          return markovOutsideBinarizeLocalTree(t, head, headLoc, topCat, new LinkedList<>(), true);
+          return markovOutsideBinarizeLocalTree(t, head, headLoc, topCat, new LinkedList<Tree>(), true);
         }
         String subLabelStr;
         if (simpleLabels) {
@@ -137,7 +137,7 @@ public class TreeBinarizer implements TreeTransformer {
         }
         Label subLabel = new CategoryWordTag(subLabelStr, word, tag);
         Tree subTree = tf.newTreeNode(subLabel, t.getChildrenAsList());
-        newChildren.add(markovOutsideBinarizeLocalTree(subTree, head, headLoc, topCat, new LinkedList<>(), true));
+        newChildren.add(markovOutsideBinarizeLocalTree(subTree, head, headLoc, topCat, new LinkedList<Tree>(), true));
         return tf.newTreeNode(t.label(), newChildren);
 
       }
@@ -218,12 +218,12 @@ public class TreeBinarizer implements TreeTransformer {
       newChildren = Collections.singletonList(children[headLoc]);
     } else if (left < headLoc) {
       // generate a left if we can
-      newChildren = new ArrayList<>(2);
+      newChildren = new ArrayList<Tree>(2);
       newChildren.add(children[left]);
       newChildren.add(markovInsideBinarizeLocalTreeNew(t, headLoc, left + 1, right, false));
     } else if (right > headLoc) {
       // generate a right if we can
-      newChildren = new ArrayList<>(2);
+      newChildren = new ArrayList<Tree>(2);
       newChildren.add(markovInsideBinarizeLocalTreeNew(t, headLoc, left, right - 1, false));
       newChildren.add(children[right]);
     } else {
@@ -389,7 +389,7 @@ public class TreeBinarizer implements TreeTransformer {
   private Tree insideBinarizeLocalTree(Tree t, int headNum, TaggedWord head, int leftProcessed, int rightProcessed) {
     String word = head.word();
     String tag = head.tag();
-    List<Tree> newChildren = new ArrayList<>(2);      // check done
+    List<Tree> newChildren = new ArrayList<Tree>(2);      // check done
     if (t.numChildren() <= leftProcessed + rightProcessed + 2) {
       Tree leftChild = t.getChild(leftProcessed);
       newChildren.add(leftChild);
@@ -433,7 +433,7 @@ public class TreeBinarizer implements TreeTransformer {
   }
 
   private Tree outsideBinarizeLocalTree(Tree t, String labelStr, String finalCat, int headNum, TaggedWord head, int leftProcessed, String leftStr, int rightProcessed, String rightStr) {
-    List<Tree> newChildren = new ArrayList<>(2);
+    List<Tree> newChildren = new ArrayList<Tree>(2);
     Label label = new CategoryWordTag(labelStr, head.word(), head.tag());
     // check if there are <=2 children already
     if (t.numChildren() - leftProcessed - rightProcessed <= 2) {
@@ -499,7 +499,7 @@ public class TreeBinarizer implements TreeTransformer {
     if (t.isPreTerminal()) {
       Tree childResult = transformTree(t.getChild(0));
       String word = childResult.value();  // would be nicer if Word/CWT ??
-      List<Tree> newChildren = new ArrayList<>(1);
+      List<Tree> newChildren = new ArrayList<Tree>(1);
       newChildren.add(childResult);
       return tf.newTreeNode(new CategoryWordTag(cat, word, cat), newChildren);
     }
@@ -517,7 +517,7 @@ public class TreeBinarizer implements TreeTransformer {
     }
     int headNum = -1;
     Tree[] kids = t.children();
-    List<Tree> newChildren = new ArrayList<>(kids.length);
+    List<Tree> newChildren = new ArrayList<Tree>(kids.length);
     for (int childNum = 0; childNum < kids.length; childNum++) {
       Tree child = kids[childNum];
       Tree childResult = transformTree(child);   // recursive call

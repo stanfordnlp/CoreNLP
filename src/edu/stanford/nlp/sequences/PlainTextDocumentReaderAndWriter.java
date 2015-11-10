@@ -78,7 +78,7 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
 
   private static final Pattern sgml = Pattern.compile("<[^>]*>");
   private final WordToSentenceProcessor<IN> wts =
-          new WordToSentenceProcessor<>(WordToSentenceProcessor.NewlineIsSentenceBreak.ALWAYS);
+          new WordToSentenceProcessor<IN>(WordToSentenceProcessor.NewlineIsSentenceBreak.ALWAYS);
 
   private SeqClassifierFlags flags; // = null;
   private TokenizerFactory<IN> tokenizerFactory;
@@ -121,7 +121,7 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
   public Iterator<List<IN>> getIterator(Reader r) {
     Tokenizer<IN> tokenizer = tokenizerFactory.getTokenizer(r);
     // PTBTokenizer.newPTBTokenizer(r, false, true);
-    List<IN> words = new ArrayList<>();
+    List<IN> words = new ArrayList<IN>();
     IN previous = null;
     StringBuilder prepend = new StringBuilder();
 

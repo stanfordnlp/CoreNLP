@@ -163,7 +163,7 @@ public class ArabicTreeNormalizer extends BobChrisTreeNormalizer {
 
         // there are some nodes "/" missing preterminals.  We'll splice in a tag for these.
         int nk = t.numChildren();
-        List<Tree> newKids = new ArrayList<>(nk);
+        List<Tree> newKids = new ArrayList<Tree>(nk);
         for (int j = 0; j < nk; j++) {
           Tree child = t.getChild(j);
           if (child.isLeaf()) {

@@ -311,7 +311,7 @@ public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachTo
       String query = "Select patterns from " + tableName + " where sentid=\'" + sentId + "\'";
       Statement stmt = conn.createStatement();
       ResultSet rs = stmt.executeQuery(query);
-      Map<Integer, Set<E>> patsToken = new HashMap<>();
+      Map<Integer, Set<E>> patsToken = new HashMap<Integer, Set<E>>();
       if(rs.next()){
         byte[] st = (byte[]) rs.getObject(1);
         ByteArrayInputStream baip = new ByteArrayInputStream(st);
@@ -484,7 +484,7 @@ public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachTo
   @Override
   public Map<String, Map<Integer, Set<E>>> getPatternsForAllTokens(Collection<String> sampledSentIds) {
     try{
-      Map<String, Map<Integer, Set<E>>> pats = new HashMap<>();
+      Map<String, Map<Integer, Set<E>>> pats = new HashMap<String, Map<Integer, Set<E>>>();
       Connection conn = SQLConnection.getConnection();
       Iterator<String> iter = sampledSentIds.iterator();
       int totalNumberOfValuesLeftToBatch = sampledSentIds.size();

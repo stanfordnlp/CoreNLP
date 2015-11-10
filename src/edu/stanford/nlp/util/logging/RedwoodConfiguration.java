@@ -23,7 +23,7 @@ public class RedwoodConfiguration {
   /**
    * A list of tasks to run when the configuration is applied
    */
-  private LinkedList<Runnable> tasks = new LinkedList<>();
+  private LinkedList<Runnable> tasks = new LinkedList<Runnable>();
 
   private OutputHandler outputHandler = Redwood.ConsoleHandler.out();
   private File defaultFile = new File("/dev/null");
@@ -105,7 +105,7 @@ public class RedwoodConfiguration {
    * @return this
    */
   public RedwoodConfiguration clear(){
-    this.tasks = new LinkedList<>();
+    this.tasks = new LinkedList<Runnable>();
     this.tasks.add(() -> {
       Redwood.clearHandlers();
       Redwood.restoreSystemStreams();
@@ -482,7 +482,7 @@ public class RedwoodConfiguration {
 
     //--Collapse
     String collapse = get(props, "log.collapse", "none", used);
-    List<LogRecordHandler> chain = new LinkedList<>();
+    List<LogRecordHandler> chain = new LinkedList<LogRecordHandler>();
     if (collapse.equalsIgnoreCase("exact")) {
       chain.add(new RepeatedRecordHandler(RepeatedRecordHandler.EXACT));
     } else if (collapse.equalsIgnoreCase("approximate")) {

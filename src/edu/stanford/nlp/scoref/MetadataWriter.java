@@ -43,9 +43,9 @@ public class MetadataWriter implements DocumentProcessor {
     for (CorefCluster c : document.goldCorefClusters.values()) {
       List<Mention> clusterMentions = new ArrayList<>(c.getCorefMentions());
       for (int i = 0; i < clusterMentions.size(); i++) {
-        for (Mention clusterMention : clusterMentions) {
+        for (int j = 0; j < clusterMentions.size(); j++) {
           Pair<Integer, Integer> mentionPair = new Pair<>(
-                  clusterMentions.get(i).mentionID, clusterMention.mentionID);
+              clusterMentions.get(i).mentionID, clusterMentions.get(j).mentionID);
           if (labeledPairs.containsKey(mentionPair)) {
             labeledPairs.put(mentionPair, true);
           }

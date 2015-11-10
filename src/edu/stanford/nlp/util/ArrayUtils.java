@@ -37,7 +37,7 @@ public class ArrayUtils {
       }
     }
 
-    List<Byte> bytes = new ArrayList<>();
+    List<Byte> bytes = new ArrayList<Byte>();
 
     int index = 0;
     int prevNum = 0;
@@ -112,7 +112,7 @@ public class ArrayUtils {
 
     boolean gettingSize = true;
     int size = 0;
-    List<Integer> ints = new ArrayList<>();
+    List<Integer> ints = new ArrayList<Integer>();
     int gap = 0;
     int prevNum = 0;
 
@@ -168,7 +168,7 @@ public class ArrayUtils {
       }
     }
 
-    List<Byte> bytes = new ArrayList<>();
+    List<Byte> bytes = new ArrayList<Byte>();
 
     int index = 0;
     int prevNum = 0;
@@ -261,7 +261,7 @@ public class ArrayUtils {
     boolean gettingSize1 = true;
     boolean gettingSize2 = false;
     int size1 = 0;
-    List<Integer> ints = new ArrayList<>();
+    List<Integer> ints = new ArrayList<Integer>();
     int gap = 0;
     int size2 = 0;
     int prevNum = 0;
@@ -665,7 +665,7 @@ public class ArrayUtils {
    * singleton list back with just that array as an element.
    */
   public static List<Integer> asList(int[] array) {
-    List<Integer> l = new ArrayList<>();
+    List<Integer> l = new ArrayList<Integer>();
     for (int i : array) {
       l.add(i);
     }
@@ -914,7 +914,7 @@ public class ArrayUtils {
   public static List<Integer> getSubListIndex(Object[] tofind, Object[] tokens, Function<Pair, Boolean> matchingFunction){
     if(tofind.length > tokens.length)
       return null;
-    List<Integer> allIndices = new ArrayList<>();
+    List<Integer> allIndices = new ArrayList<Integer>();
     boolean matched = false;
     int index = -1;
     int lastUnmatchedIndex = 0;

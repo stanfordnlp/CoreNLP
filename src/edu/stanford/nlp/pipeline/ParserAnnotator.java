@@ -318,9 +318,9 @@ public class ParserAnnotator extends SentenceAnnotator {
         }
       }
     } catch (OutOfMemoryError e) {
-      System.err.println("WARNING: Parsing of sentence ran out of memory.  " +
-              "Will ignore and continue: " +
-              Sentence.listToString(words));
+      Runtime.getRuntime().gc();
+      System.err.println("WARNING: Parsing of sentence ran out of memory (length=" + words.size() + ").  " +
+              "Will ignore and continue.");
     } catch (NoSuchParseException e) {
       System.err.println("WARNING: Parsing of sentence failed, possibly because of out of memory.  " +
               "Will ignore and continue: " +

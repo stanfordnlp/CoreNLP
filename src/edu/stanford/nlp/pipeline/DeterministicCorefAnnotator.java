@@ -72,8 +72,8 @@ public class DeterministicCorefAnnotator implements Annotator {
   @Override
   public void annotate(Annotation annotation) {
     try {
-      List<Tree> trees = new ArrayList<>();
-      List<List<CoreLabel>> sentences = new ArrayList<>();
+      List<Tree> trees = new ArrayList<Tree>();
+      List<List<CoreLabel>> sentences = new ArrayList<List<CoreLabel>>();
 
       // extract trees and sentence words
       // we are only supporting the new annotation standard for this Annotator!
@@ -164,7 +164,7 @@ public class DeterministicCorefAnnotator implements Annotator {
     // }
 
     // this graph is stored in CorefGraphAnnotation -- the raw links found by the coref system
-    List<Pair<IntTuple, IntTuple>> graph = new ArrayList<>();
+    List<Pair<IntTuple, IntTuple>> graph = new ArrayList<Pair<IntTuple,IntTuple>>();
 
     for(Pair<IntTuple, IntTuple> link: links){
       //

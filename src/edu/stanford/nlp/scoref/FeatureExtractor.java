@@ -310,6 +310,10 @@ public class FeatureExtractor {
           m2.toString().trim().toLowerCase()));
       addFeature(features, "partial-match", partialMatch(m1, m2));
 
+      addFeature(features, "exact-match", m1.toString().trim().toLowerCase().equals(
+          m2.toString().trim().toLowerCase()));
+      addFeature(features, "partial-match", partialMatch(m1, m2));
+
       double editDistance = StringUtils.editDistance(m1.spanToString(), m2.spanToString()) /
          (double) (m1.spanToString().length() + m2.spanToString().length());
       features.incrementCount("edit-distance", editDistance);
@@ -346,7 +350,7 @@ public class FeatureExtractor {
     addFeature(features, "mention-speaker-PER0",
         m2.headWord.get(SpeakerAnnotation.class).equalsIgnoreCase("PER0"));
     addFeature(features, "antecedent-is-anaphor-speaker", Rules.antecedentIsMentionSpeaker(doc, m2, m1, dictionaries));
-    addFeature(features, "same-speaker", Rules.entitySameSpeaker(doc, m2, m1));
+    //addFeature(features, "same-speaker-2", Rules.entitySameSpeaker(doc, m2, m1));
     addFeature(features, "person-disagree-same-speaker", Rules.entityPersonDisagree(doc, m2, m1, dictionaries)
         && Rules.entitySameSpeaker(doc, m2, m1));
     addFeature(features, "antecedent-matches-anaphor-speaker",
@@ -359,13 +363,13 @@ public class FeatureExtractor {
         && m1.number == Number.SINGULAR
         && dictionaries.firstPersonPronouns.contains(s2)
         && Rules.entitySameSpeaker(doc, m2, m1));
-    addFeature(features, "speaker-match-speaker-i", m2.number == Number.SINGULAR
+    addFeature(features, "1st-person-mention-speaker-match", m2.number == Number.SINGULAR
         && dictionaries.firstPersonPronouns.contains(s2)
         && Rules.antecedentIsMentionSpeaker(doc, m2, m1, dictionaries));
-    addFeature(features, "speaker-match-i-speaker", m1.number == Number.SINGULAR
+    addFeature(features, "1st-person-antecedent-speaker-match", m1.number == Number.SINGULAR
         && dictionaries.firstPersonPronouns.contains(s1)
         && Rules.antecedentIsMentionSpeaker(doc, m1, m2, dictionaries));
-    addFeature(features, "speaker-match-you-you",
+    addFeature(features, "2nd-person-same-speaker",
         dictionaries.secondPersonPronouns.contains(s1)
         && dictionaries.secondPersonPronouns.contains(s2)
         && Rules.entitySameSpeaker(doc, m2, m1));
@@ -383,11 +387,11 @@ public class FeatureExtractor {
         m2.headWord.get(CoreAnnotations.UtteranceAnnotation.class));
     if(doc.docType != DocType.ARTICLE && utteranceDist == 1
           && !Rules.entitySameSpeaker(doc, m2, m1)) {
-      addFeature(features, "speaker-mismatch-i-i", m1.person == Person.I
+      addFeature(features, "incompatibles-neighbor-I", m1.person == Person.I
           && m2.person == Person.I);
-      addFeature(features, "speaker-mismatch-you-you", m1.person == Person.YOU
+      addFeature(features, "incompatibles-neighbor-you", m1.person == Person.YOU
           && m2.person == Person.YOU);
-      addFeature(features, "speaker-mismatch-we-we", m1.person == Person.WE
+      addFeature(features, "incompatibles-neighbor-we", m1.person == Person.WE
           && m2.person == Person.WE);
     }
 
@@ -417,7 +421,7 @@ public class FeatureExtractor {
     addFeature(features, "incompatible-modifier", Rules.entityHaveIncompatibleModifier(m2, m1));
     addFeature(features, "head-lemma-match", m1.headWord.lemma().equals(m2.headWord.lemma()));
     addFeature(features, "words-included", Rules.entityWordsIncluded(c2, c1, m2, m1));
-    addFeature(features, "extra-proper-noun", Rules.entityHaveExtraProperNoun(m2, m1, new HashSet<>()));
+    addFeature(features, "extra-proper-noun", Rules.entityHaveExtraProperNoun(m2, m1, new HashSet<String>()));
     addFeature(features, "number-in-later-mentions", Rules.entityNumberInLaterMention(m2, m1));
     addFeature(features, "sentence-context-incompatible",
         Rules.sentenceContextIncompatible(m2, m1, dictionaries));

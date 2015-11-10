@@ -38,7 +38,7 @@ public class IBMMTArabicDataset implements Dataset {
   public IBMMTArabicDataset() {
     configuredOptions = Generics.newHashSet();
     toStringBuffer = new StringBuilder();
-    pathsToData = new ArrayList<>();
+    pathsToData = new ArrayList<File>();
 
     escaper = new IBMArabicEscaper(true);
     escaper.disableWarnings();
@@ -95,7 +95,7 @@ public class IBMMTArabicDataset implements Dataset {
   }
 
   public List<String> getFilenames() {
-    List<String> l = new ArrayList<>();
+    List<String> l = new ArrayList<String>();
     l.add(outFileName);
     return l;
   }

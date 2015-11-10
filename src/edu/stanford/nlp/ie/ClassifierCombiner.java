@@ -204,7 +204,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     // read in the base classifiers
     Integer numClassifiers = ois.readInt();
     // set up the list of base classifiers
-    this.baseClassifiers = new ArrayList<>();
+    this.baseClassifiers = new ArrayList<AbstractSequenceClassifier<IN>>();
     int i = 0;
     while (i < numClassifiers) {
       try {
@@ -257,7 +257,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   }
 
   private void loadClassifiers(Properties props, List<String> paths) throws IOException {
-    baseClassifiers = new ArrayList<>();
+    baseClassifiers = new ArrayList<AbstractSequenceClassifier<IN>>();
     for(String path: paths){
       AbstractSequenceClassifier<IN> cls = loadClassifierFromPath(props, path);
       baseClassifiers.add(cls);
@@ -319,7 +319,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     String background = baseClassifiers.get(0).flags.backgroundSymbol;
 
     // baseLabels.get(i) points to the labels assigned by baseClassifiers.get(i)
-    List<Set<String>> baseLabels = new ArrayList<>();
+    List<Set<String>> baseLabels = new ArrayList<Set<String>>();
     Set<String> seenLabels = Generics.newHashSet();
     for (AbstractSequenceClassifier<? extends CoreMap> baseClassifier : baseClassifiers) {
       Set<String> labs = baseClassifier.labels();
@@ -380,7 +380,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     boolean insideAuxTag = false;
     boolean auxTagValid = true;
     String prevAnswer = background;
-    Collection<INN> constituents = new ArrayList<>();
+    Collection<INN> constituents = new ArrayList<INN>();
 
     Iterator<INN> auxIterator = auxDocument.listIterator();
 
@@ -400,7 +400,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
             }
           }
           auxTagValid = true;
-          constituents = new ArrayList<>();
+          constituents = new ArrayList<INN>();
         }
         insideAuxTag = true;
         if (insideMainTag) { auxTagValid = false; }
@@ -413,7 +413,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
               wi.set(CoreAnnotations.AnswerAnnotation.class, prevAnswer);
             }
           }
-          constituents = new ArrayList<>();
+          constituents = new ArrayList<INN>();
         }
         insideAuxTag=false;
         auxTagValid = true;
@@ -440,7 +440,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     if (baseClassifiers.isEmpty()) {
       return tokens;
     }
-    List<List<IN>> baseOutputs = new ArrayList<>();
+    List<List<IN>> baseOutputs = new ArrayList<List<IN>>();
 
     // the first base model works in place, modifying the original tokens
     List<IN> output = baseClassifiers.get(0).classifySentence(tokens);

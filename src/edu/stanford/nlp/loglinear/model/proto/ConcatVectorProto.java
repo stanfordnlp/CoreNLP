@@ -3,8 +3,6 @@
 
 package edu.stanford.nlp.loglinear.model.proto;
 
-import com.google.protobuf.CodedOutputStream;
-
 public final class ConcatVectorProto {
   private ConcatVectorProto() {}
   public static void registerAllExtensions(
@@ -92,7 +90,7 @@ public final class ConcatVectorProto {
             }
             case 10: {
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                component_ = new java.util.ArrayList<>();
+                component_ = new java.util.ArrayList<edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component>();
                 mutable_bitField0_ |= 0x00000001;
               }
               component_.add(input.readMessage(edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component.PARSER, extensionRegistry));
@@ -225,7 +223,7 @@ public final class ConcatVectorProto {
               }
               case 17: {
                 if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-                  data_ = new java.util.ArrayList<>();
+                  data_ = new java.util.ArrayList<java.lang.Double>();
                   mutable_bitField0_ |= 0x00000002;
                 }
                 data_.add(input.readDouble());
@@ -235,7 +233,7 @@ public final class ConcatVectorProto {
                 int length = input.readRawVarint32();
                 int limit = input.pushLimit(length);
                 if (!((mutable_bitField0_ & 0x00000002) == 0x00000002) && input.getBytesUntilLimit() > 0) {
-                  data_ = new java.util.ArrayList<>();
+                  data_ = new java.util.ArrayList<java.lang.Double>();
                   mutable_bitField0_ |= 0x00000002;
                 }
                 while (input.getBytesUntilLimit() > 0) {
@@ -348,8 +346,8 @@ public final class ConcatVectorProto {
         if (((bitField0_ & 0x00000001) == 0x00000001)) {
           output.writeBool(1, sparse_);
         }
-        for (Double aData_ : data_) {
-          output.writeDouble(2, aData_);
+        for (int i = 0; i < data_.size(); i++) {
+          output.writeDouble(2, data_.get(i));
         }
         getUnknownFields().writeTo(output);
       }
@@ -623,7 +621,7 @@ public final class ConcatVectorProto {
         private java.util.List<java.lang.Double> data_ = java.util.Collections.emptyList();
         private void ensureDataIsMutable() {
           if (!((bitField0_ & 0x00000002) == 0x00000002)) {
-            data_ = new java.util.ArrayList<>(data_);
+            data_ = new java.util.ArrayList<java.lang.Double>(data_);
             bitField0_ |= 0x00000002;
            }
         }
@@ -754,8 +752,8 @@ public final class ConcatVectorProto {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      for (Component aComponent_ : component_) {
-        output.writeMessage(1, aComponent_);
+      for (int i = 0; i < component_.size(); i++) {
+        output.writeMessage(1, component_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -766,9 +764,9 @@ public final class ConcatVectorProto {
       if (size != -1) return size;
 
       size = 0;
-      for (Component aComponent_ : component_) {
-        size += CodedOutputStream
-                .computeMessageSize(1, aComponent_);
+      for (int i = 0; i < component_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, component_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1008,7 +1006,7 @@ public final class ConcatVectorProto {
         java.util.Collections.emptyList();
       private void ensureComponentIsMutable() {
         if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          component_ = new java.util.ArrayList<>(component_);
+          component_ = new java.util.ArrayList<edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component>(component_);
           bitField0_ |= 0x00000001;
          }
       }
@@ -1233,7 +1231,8 @@ public final class ConcatVectorProto {
           edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component, edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component.Builder, edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.ComponentOrBuilder> 
           getComponentFieldBuilder() {
         if (componentBuilder_ == null) {
-          componentBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
+          componentBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component, edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Component.Builder, edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.ComponentOrBuilder>(
                   component_,
                   ((bitField0_ & 0x00000001) == 0x00000001),
                   getParentForChildren(),

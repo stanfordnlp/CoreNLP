@@ -28,7 +28,7 @@ public class OneVsAllClassifier<L,F> implements Classifier<L,F> {
   final static Index<String> binaryIndex;
   final static int posIndex;
   static {
-    binaryIndex = new HashIndex<>();
+    binaryIndex = new HashIndex<String>();
     binaryIndex.add(POS_LABEL);
     binaryIndex.add(NEG_LABEL);
     posIndex = binaryIndex.indexOf(POS_LABEL);
@@ -76,9 +76,9 @@ public class OneVsAllClassifier<L,F> implements Classifier<L,F> {
   }
 
   public Counter<L> scoresOf(Datum<L, F> example) {
-    Counter<L> scores = new ClassicCounter<>();
+    Counter<L> scores = new ClassicCounter<L>();
     for (L label:labelIndex) {
-      Map<L,String> posLabelMap = new ArrayMap<>();
+      Map<L,String> posLabelMap = new ArrayMap<L,String>();
       posLabelMap.put(label, POS_LABEL);
       Datum<String,F> binDatum = GeneralDataset.mapDatum(example, posLabelMap, NEG_LABEL);
       Classifier<String,F> binaryClassifier = getBinaryClassifier(label);
@@ -110,13 +110,13 @@ public class OneVsAllClassifier<L,F> implements Classifier<L,F> {
       int i = labelIndex.indexOf(label);
       logger.info("Training " + label + "=" + i + ", posIndex=" + posIndex);
       // Create training data for training this classifier
-      Map<L,String> posLabelMap = new ArrayMap<>();
+      Map<L,String> posLabelMap = new ArrayMap<L,String>();
       posLabelMap.put(label, POS_LABEL);
       GeneralDataset<String,F> binaryDataset = dataset.<String>mapDataset(dataset, binaryIndex, posLabelMap, NEG_LABEL);
       Classifier<String,F> binaryClassifier = classifierFactory.trainClassifier(binaryDataset);
       classifiers.put(label, binaryClassifier);
     }
-    OneVsAllClassifier<L,F> classifier = new OneVsAllClassifier<>(featureIndex, labelIndex, classifiers);
+    OneVsAllClassifier<L,F> classifier = new OneVsAllClassifier<L,F>(featureIndex, labelIndex, classifiers);
     return classifier;
   }
 }

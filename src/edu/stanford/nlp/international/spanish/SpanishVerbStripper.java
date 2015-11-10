@@ -138,18 +138,18 @@ public final class SpanishVerbStripper implements Serializable {
    * The verbs in this set have accents in their infinitive forms;
    * don't remove the accents when stripping pronouns!
    */
-  private static final Set<String> accentedInfinitives = new HashSet<>(Arrays.asList(
-          "desleír",
-          "desoír",
-          "embaír",
-          "engreír",
-          "entreoír",
-          "freír",
-          "oír",
-          "refreír",
-          "reír",
-          "sofreír",
-          "sonreír"
+  private static final Set<String> accentedInfinitives = new HashSet<String>(Arrays.asList(
+    "desleír",
+    "desoír",
+    "embaír",
+    "engreír",
+    "entreoír",
+    "freír",
+    "oír",
+    "refreír",
+    "reír",
+    "sofreír",
+    "sonreír"
   ));
 
   // STATIC FUNCTIONS
@@ -254,7 +254,7 @@ public final class SpanishVerbStripper implements Serializable {
       String stripped = word.substring(0, m.start());
       stripped = removeAccents(stripped);
 
-      List<String> attached = new ArrayList<>();
+      List<String> attached = new ArrayList<String>();
       for (int i = 0; i < m.groupCount(); i++)
         attached.add(m.group(i + 1));
 

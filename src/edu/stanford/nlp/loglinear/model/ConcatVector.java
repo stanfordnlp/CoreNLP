@@ -8,9 +8,6 @@ import java.io.OutputStream;
 import java.util.function.Function;
 
 /**
- * Created on 12/7/14.
- * @author keenon
- * <p>
  * Implements a concat vector using an array of arrays, with all its attending resizing efficiencies, and double-pointer
  * inefficiencies. Benchmarking from MinimalML (where I adapted this design from) shows that this is the most efficient
  * of several strategies that can be used to implement this.
@@ -22,6 +19,8 @@ import java.util.function.Function;
  * However, it never physically concatenates anything, it just dot products each component, and takes the sum. That way,
  * if you need to expand a component during online learning, it's no problem. As an auxiliary benefit, you can specify
  * sparse and dense components, greatly speeding up dot product calculation when you have lots of sparse features.
+ *
+ * @author keenon
  */
 public class ConcatVector {
   double[][] pointers;
@@ -61,24 +60,6 @@ public class ConcatVector {
   }
 
   /**
-   * Creates a ConcatVector whose dimensions are the same as this one for all dense components, but is otherwise
-   * completely empty. This is useful to prevent resizing during optimizations where we're adding lots of sparse
-   * vectors.
-   *
-   * @return an empty vector suitable for use as a gradient
-   */
-  public ConcatVector newEmptyClone() {
-    ConcatVector clone = new ConcatVector(getNumberOfComponents());
-    for (int i = 0; i < pointers.length; i++) {
-      if (pointers[i] != null && !sparse[i]) {
-        clone.pointers[i] = new double[pointers[i].length];
-        clone.sparse[i] = false;
-      }
-    }
-    return clone;
-  }
-
-  /**
    * Sets a single component of the concat vector value as a dense vector. This will make a copy of you values array,
    * so you're free to continue mutating it.
    *
@@ -86,9 +67,6 @@ public class ConcatVector {
    * @param values    the array of dense values to put into the component
    */
   public void setDenseComponent(int component, double[] values) {
-    if (component >= pointers.length) {
-      increaseSizeTo(component + 1);
-    }
     pointers[component] = values;
     sparse[component] = false;
     copyOnWrite[component] = true;
@@ -102,9 +80,6 @@ public class ConcatVector {
    * @param value     the value of that index
    */
   public void setSparseComponent(int component, int index, double value) {
-    if (component >= pointers.length) {
-      increaseSizeTo(component + 1);
-    }
     double[] sparseInfo = new double[2];
     sparseInfo[0] = index;
     sparseInfo[1] = value;
@@ -176,7 +151,15 @@ public class ConcatVector {
       sparse = new boolean[other.pointers.length];
       copyOnWrite = new boolean[other.pointers.length];
     } else if (pointers.length < other.pointers.length) {
-      increaseSizeTo(other.pointers.length);
+      double[][] pointersBuf = new double[other.pointers.length][];
+      boolean[] sparseBuf = new boolean[other.pointers.length];
+      boolean[] copyOnWriteBuf = new boolean[other.pointers.length];
+      System.arraycopy(pointers, 0, pointersBuf, 0, pointers.length);
+      System.arraycopy(sparse, 0, sparseBuf, 0, pointers.length);
+      System.arraycopy(copyOnWrite, 0, copyOnWriteBuf, 0, pointers.length);
+      pointers = pointersBuf;
+      sparse = sparseBuf;
+      copyOnWrite = copyOnWriteBuf;
     }
 
     // Do the addition piece by piece
@@ -246,9 +229,7 @@ public class ConcatVector {
       } else if (!sparse[i] && other.sparse[i]) {
         int sparseIndex = (int) other.pointers[i][0];
         if (sparseIndex >= pointers[i].length) {
-          int newSize = pointers[i].length;
-          while (newSize <= sparseIndex) newSize *= 2;
-          double[] denseBuf = new double[newSize];
+          double[] denseBuf = new double[sparseIndex + 1];
           System.arraycopy(pointers[i], 0, denseBuf, 0, pointers[i].length);
           copyOnWrite[i] = false;
           pointers[i] = denseBuf;
@@ -433,7 +414,7 @@ public class ConcatVector {
    * Writes the protobuf version of this vector to a stream. reversible with readFromStream().
    *
    * @param stream the output stream to write to
-   * @throws IOException passed through from the stream
+   * @throws IOException
    */
   public void writeToStream(OutputStream stream) throws IOException {
     getProtoBuilder().build().writeDelimitedTo(stream);
@@ -444,7 +425,7 @@ public class ConcatVector {
    *
    * @param stream the stream to read from, assuming protobuf encoding
    * @return a new concat vector
-   * @throws IOException passed through from the stream
+   * @throws IOException
    */
   public static ConcatVector readFromStream(InputStream stream) throws IOException {
     return readFromProto(ConcatVectorProto.ConcatVector.parseDelimitedFrom(stream));
@@ -563,24 +544,6 @@ public class ConcatVector {
   ////////////////////////////////////////////////////////////////////////////
   // PRIVATE IMPLEMENTATION
   ////////////////////////////////////////////////////////////////////////////
-
-  /**
-   * This increases the length of the vector, while preserving its contents
-   *
-   * @param newSize the new size to increase to. Must be larger than the current size
-   */
-  private void increaseSizeTo(int newSize) {
-    assert (newSize > pointers.length);
-    double[][] pointersBuf = new double[newSize][];
-    boolean[] sparseBuf = new boolean[newSize];
-    boolean[] copyOnWriteBuf = new boolean[newSize];
-    System.arraycopy(pointers, 0, pointersBuf, 0, pointers.length);
-    System.arraycopy(sparse, 0, sparseBuf, 0, pointers.length);
-    System.arraycopy(copyOnWrite, 0, copyOnWriteBuf, 0, pointers.length);
-    pointers = pointersBuf;
-    sparse = sparseBuf;
-    copyOnWrite = copyOnWriteBuf;
-  }
 
   static boolean loadedNative = false;
 

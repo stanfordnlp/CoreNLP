@@ -71,7 +71,7 @@ public class PaddedList<E> extends AbstractList<E> implements Serializable {
    *  @return The padded list
    */
   public static <IN> PaddedList<IN> valueOf(List<IN> list, IN padding) {
-    return new PaddedList<>(list, padding);
+    return new PaddedList<IN>(list, padding);
   }
 
   /** Returns true if this PaddedList and another are wrapping the

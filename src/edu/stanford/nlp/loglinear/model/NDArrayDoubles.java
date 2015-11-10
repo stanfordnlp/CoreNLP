@@ -3,8 +3,7 @@ package edu.stanford.nlp.loglinear.model;
 import java.util.Iterator;
 
 /**
- * Created on 9/12/15.
- * @author keenon
+ * Created by keenon on 9/12/15.
  * <p>
  * Holds and provides access to an N-dimensional array.
  * <p>

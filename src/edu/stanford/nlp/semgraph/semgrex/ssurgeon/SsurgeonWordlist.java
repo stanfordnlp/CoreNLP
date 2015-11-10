@@ -13,7 +13,7 @@ import org.w3c.dom.*;
 public class SsurgeonWordlist {
   private static final String WORD_ELT = "word";
   private String id;
-  private HashSet<String> words = new java.util.HashSet<>();
+  private HashSet<String> words = new java.util.HashSet<String>();
   
   @Override
   public String toString() {

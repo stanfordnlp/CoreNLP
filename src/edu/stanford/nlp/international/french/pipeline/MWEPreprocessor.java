@@ -214,16 +214,16 @@ public final class MWEPreprocessor {
 
     final File treeFile = new File(args[0]);
     TwoDimensionalCounter<String,String> labelTerm =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
     TwoDimensionalCounter<String,String> termLabel =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
     TwoDimensionalCounter<String,String> labelPreterm =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
     TwoDimensionalCounter<String,String> pretermLabel =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
 
     TwoDimensionalCounter<String,String> unigramTagger =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
 
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(treeFile), "UTF-8"));

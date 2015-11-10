@@ -15,7 +15,7 @@ public class OutsideRuleFilter {
 
   protected static <A> List<A> reverse(List<A> list) {
     int sz = list.size();
-    List<A> reverse = new ArrayList<>(sz);
+    List<A> reverse = new ArrayList<A>(sz);
     for (int i = sz - 1; i >= 0; i--) {
       reverse.add(list.get(i));
     }
@@ -105,8 +105,8 @@ public class OutsideRuleFilter {
     allocate(numStates);
     for (int state = 0; state < numStates; state++) {
       String stateStr = stateIndex.get(state);
-      List<String> left = new ArrayList<>();
-      List<String> right = new ArrayList<>();
+      List<String> left = new ArrayList<String>();
+      List<String> right = new ArrayList<String>();
       if (!bg.isSynthetic(state)) {
         registerRule(left, right, state);
         continue;

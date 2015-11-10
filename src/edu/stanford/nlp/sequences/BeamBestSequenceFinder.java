@@ -132,9 +132,9 @@ public class BeamBestSequenceFinder implements BestSequenceFinder {
         newBeam = new Beam(beamSize, ScoredComparator.ASCENDING_COMPARATOR);
       }
       // each hypothesis gets extended and beamed
-      for (Object anOldBeam : oldBeam) {
+      for (Iterator beamI = oldBeam.iterator(); beamI.hasNext();) {
         // System.out.print("#"); System.out.flush();
-        TagSeq tagSeq = (TagSeq) anOldBeam;
+        TagSeq tagSeq = (TagSeq) beamI.next();
         for (int nextTagNum = 0; nextTagNum < tagNum[pos]; nextTagNum++) {
           TagSeq nextSeq = tagSeq.tclone();
 
@@ -153,14 +153,14 @@ public class BeamBestSequenceFinder implements BestSequenceFinder {
       // System.out.println(" done");
       if (recenter) {
         double max = Double.NEGATIVE_INFINITY;
-        for (Object aNewBeam1 : newBeam) {
-          TagSeq tagSeq = (TagSeq) aNewBeam1;
+        for (Iterator beamI = newBeam.iterator(); beamI.hasNext();) {
+          TagSeq tagSeq = (TagSeq) beamI.next();
           if (tagSeq.score > max) {
             max = tagSeq.score;
           }
         }
-        for (Object aNewBeam : newBeam) {
-          TagSeq tagSeq = (TagSeq) aNewBeam;
+        for (Iterator beamI = newBeam.iterator(); beamI.hasNext();) {
+          TagSeq tagSeq = (TagSeq) beamI.next();
           tagSeq.score -= max;
         }
       }

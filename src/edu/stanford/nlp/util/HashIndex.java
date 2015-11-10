@@ -285,7 +285,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    */
   public HashIndex() {
     super();
-    objects = new ArrayList<>();
+    objects = new ArrayList<E>();
     indexes = Generics.newHashMap();
   }
 
@@ -295,7 +295,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    */
   public HashIndex(int capacity) {
     super();
-    objects = new ArrayList<>(capacity);
+    objects = new ArrayList<E>(capacity);
     indexes = Generics.newHashMap(capacity);
   }
 
@@ -362,7 +362,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    * @return An index built out of the lines in the file
    */
   public static Index<String> loadFromFilename(String file) {
-    Index<String> index = new HashIndex<>();
+    Index<String> index = new HashIndex<String>();
     BufferedReader br = null;
     try {
       br = IOUtils.readerFromString(file);
@@ -409,7 +409,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    * @return An Index read from a file
    */
   public static Index<String> loadFromReader(BufferedReader br) throws IOException {
-    HashIndex<String> index = new HashIndex<>();
+    HashIndex<String> index = new HashIndex<String>();
     String line = br.readLine();
     // terminate if EOF reached, or if a blank line is encountered.
     while ((line != null) && (line.length() > 0)) {
@@ -511,7 +511,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    * @return An index built out of the lines in the file
    */
   public static Index<String> loadFromFileWithList(String file) {
-    Index<String> index = new HashIndex<>();
+    Index<String> index = new HashIndex<String>();
     BufferedReader br = null;
     try {
       br = new BufferedReader(new FileReader(file));

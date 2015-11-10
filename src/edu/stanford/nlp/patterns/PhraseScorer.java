@@ -49,7 +49,7 @@ public abstract class PhraseScorer<E extends Pattern> {
     this.constVars = constvar;
   }
 
-  Counter<CandidatePhrase> learnedScores = new ClassicCounter<>();
+  Counter<CandidatePhrase> learnedScores = new ClassicCounter<CandidatePhrase>();
 
   abstract Counter<CandidatePhrase> scorePhrases(String label, TwoDimensionalCounter<CandidatePhrase, E> terms,
       TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted,
@@ -69,7 +69,7 @@ public abstract class PhraseScorer<E extends Pattern> {
     } else {
       double total = 0;
 
-      Set<E> rem = new HashSet<>();
+      Set<E> rem = new HashSet<E>();
       for (Entry<E, Double> en2 : patsThatExtractedThis.entrySet()) {
         double weight = 1.0;
         if (usePatternWeights) {

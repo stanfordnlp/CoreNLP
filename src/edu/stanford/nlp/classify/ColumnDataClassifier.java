@@ -283,7 +283,7 @@ public class ColumnDataClassifier {
     }
 
     if (globalFlags.featureFormat) {
-      Collection<String> theFeatures = new ArrayList<>();
+      Collection<String> theFeatures = new ArrayList<String>();
       for (int i = 0; i < strings.length; i++) {
         if (i != globalFlags.goldAnswerColumn)
             if (globalFlags.significantColumnId) {
@@ -292,7 +292,7 @@ public class ColumnDataClassifier {
               theFeatures.add(strings[i]);
             }
       }
-      return new BasicDatum<>(theFeatures, strings[globalFlags.goldAnswerColumn]);
+      return new BasicDatum<String,String>(theFeatures, strings[globalFlags.goldAnswerColumn]);
     } else {
       //logger.info("Read in " + strings);
       return makeDatum(strings);
@@ -302,7 +302,7 @@ public class ColumnDataClassifier {
 
   private RVFDatum<String,String> makeRVFDatumFromStrings(String[] strings) {
     if (globalFlags.featureFormat) {
-      ClassicCounter<String> theFeatures = new ClassicCounter<>();
+      ClassicCounter<String> theFeatures = new ClassicCounter<String>();
       for (int i = 0; i < strings.length; i++) {
         if (i != globalFlags.goldAnswerColumn) {
           if (flags[i] != null && (flags[i].isRealValued || flags[i].logTransform || flags[i].logitTransform || flags[i].sqrtTransform)) {
@@ -312,7 +312,7 @@ public class ColumnDataClassifier {
           }
         }
       }
-      return new RVFDatum<>(theFeatures, strings[globalFlags.goldAnswerColumn]);
+      return new RVFDatum<String,String>(theFeatures, strings[globalFlags.goldAnswerColumn]);
     } else {
       //logger.info("Read in " + strings);
       return makeRVFDatum(strings);
@@ -369,7 +369,7 @@ public class ColumnDataClassifier {
   }
 
   private static List<String[]> makeSVMLightLineInfos(List<String> lines) {
-    List<String[]> lineInfos = new ArrayList<>(lines.size());
+    List<String[]> lineInfos = new ArrayList<String[]>(lines.size());
     for (String line : lines) {
       line = line.replaceFirst("#.*$", ""); // remove any trailing comments
       // in principle, it'd be nice to save the comment, though, for possible use as a displayedColumn - make it column 1??
@@ -405,7 +405,7 @@ public class ColumnDataClassifier {
     if ((inTestPhase && Flags.testFromSVMLight) || (!inTestPhase && Flags.trainFromSVMLight)) {
       List<String> lines = null;
       if (inTestPhase) {
-        lines = new ArrayList<>();
+        lines = new ArrayList<String>();
       }
       if (globalFlags.usesRealValues) {
         dataset = RVFDataset.readSVMLightFormat(filename, lines);
@@ -418,12 +418,12 @@ public class ColumnDataClassifier {
     } else {
       try {
         if (inTestPhase) {
-          lineInfos = new ArrayList<>();
+          lineInfos = new ArrayList<String[]>();
         }
         if (globalFlags.usesRealValues) {
-          dataset = new RVFDataset<>();
+          dataset = new RVFDataset<String,String>();
         } else {
-          dataset = new Dataset<>();
+          dataset = new Dataset<String,String>();
         }
         int lineNo = 0;
         int minColumns = Integer.MAX_VALUE;
@@ -472,7 +472,7 @@ public class ColumnDataClassifier {
     }
 
     logger.info("done [" + tim.toSecondsString() + "s, " + dataset.size() + " items].");
-    return new Pair<>(dataset, lineInfos);
+    return new Pair<GeneralDataset<String,String>,List<String[]>>(dataset, lineInfos);
   }
 
   //Split according to whether we are using tsv file (default) or csv files
@@ -545,7 +545,7 @@ public class ColumnDataClassifier {
     NumberFormat nf2 = new DecimalFormat("0.00000");
     logger.info("Accuracy/micro-averaged F1: " + nf2.format(microAccuracy));
     logger.info("Macro-averaged F1: " + nf2.format(macroF1));
-    return new Pair<>(microAccuracy, macroF1);
+    return new Pair<Double, Double>(microAccuracy, macroF1);
   }
 
   // These variables are only used by the private methods used by main() for displaying
@@ -703,7 +703,7 @@ public class ColumnDataClassifier {
       }
     }
 
-    Counter<String> contingency = new ClassicCounter<>();  // store tp,fp,fn,tn
+    Counter<String> contingency = new ClassicCounter<String>();  // store tp,fp,fn,tn
     for (int i = 0, sz = test.size(); i < sz; i++) {
       testExample(cl, test, lineInfos, contingency, i);
     }
@@ -749,7 +749,7 @@ public class ColumnDataClassifier {
     if (globalFlags.biasedHyperplane != null) {
       // logger.info("Biased using counter: " +
       //         globalFlags.biasedHyperplane);
-      List<String> biggestKeys = new ArrayList<>(logScores.keySet());
+      List<String> biggestKeys = new ArrayList<String>(logScores.keySet());
       Collections.sort(biggestKeys, Counters.toComparatorDescending(logScores));
       for (String key : biggestKeys) {
         double prob = dist.probabilityOf(key);
@@ -830,7 +830,7 @@ public class ColumnDataClassifier {
    */
   private Datum<String,String> makeDatum(String[] strs) {
     String goldAnswer = globalFlags.goldAnswerColumn < strs.length ? strs[globalFlags.goldAnswerColumn]: "";
-    List<String> theFeatures = new ArrayList<>();
+    List<String> theFeatures = new ArrayList<String>();
     Collection<String> globalFeatures = Generics.newHashSet();
     if (globalFlags.useClassFeature) {
       globalFeatures.add("CLASS");
@@ -847,7 +847,7 @@ public class ColumnDataClassifier {
       printFeatures(strs, theFeatures);
     }
     //System.out.println("Features are: " + theFeatures);
-    return new BasicDatum<>(theFeatures, goldAnswer);
+    return new BasicDatum<String,String>(theFeatures, goldAnswer);
   }
 
   /**
@@ -860,15 +860,15 @@ public class ColumnDataClassifier {
    */
   private RVFDatum<String,String> makeRVFDatum(String[] strs) {
     String goldAnswer = globalFlags.goldAnswerColumn < strs.length ? strs[globalFlags.goldAnswerColumn]: "";
-    ClassicCounter<String> theFeatures = new ClassicCounter<>();
-    ClassicCounter<String> globalFeatures = new ClassicCounter<>();
+    ClassicCounter<String> theFeatures = new ClassicCounter<String>();
+    ClassicCounter<String> globalFeatures = new ClassicCounter<String>();
     if (globalFlags.useClassFeature) {
       globalFeatures.setCount("CLASS", 1.0);
     }
     addAllInterningAndPrefixingRVF(theFeatures, globalFeatures, "");
 
     for (int i = 0; i < flags.length; i++) {
-      ClassicCounter<String> featuresC = new ClassicCounter<>();
+      ClassicCounter<String> featuresC = new ClassicCounter<String>();
       makeDatum(strs[i], flags[i], featuresC, goldAnswer);
       addAllInterningAndPrefixingRVF(theFeatures, featuresC, i + "-");
     }
@@ -877,7 +877,7 @@ public class ColumnDataClassifier {
       printFeatures(strs, theFeatures);
     }
     //System.out.println("Features are: " + theFeatures);
-    return new RVFDatum<>(theFeatures, goldAnswer);
+    return new RVFDatum<String,String>(theFeatures, goldAnswer);
   }
 
   private void addAllInterningAndPrefixingRVF(ClassicCounter<String> accumulator, ClassicCounter<String> addend, String prefix) {
@@ -1203,7 +1203,7 @@ public class ColumnDataClassifier {
    * Caches a hash of word to all substring features.  A <i>lot</i> of memory!
    * If the String space is large, you shouldn't turn this on.
    */
-  private static final Map<String,Collection<String>> wordToSubstrings = new ConcurrentHashMap<>();
+  private static final Map<String,Collection<String>> wordToSubstrings = new ConcurrentHashMap<String,Collection<String>>();
 
 
   private String intern(String s) {
@@ -1249,7 +1249,7 @@ public class ColumnDataClassifier {
       subs = wordToSubstrings.get(toNGrams);
     }
     if (subs == null) {
-      subs = new ArrayList<>();
+      subs = new ArrayList<String>();
       String strN = featPrefix + '-';
       String strB = featPrefix + "B-";
       String strE = featPrefix + "E-";
@@ -1370,7 +1370,7 @@ public class ColumnDataClassifier {
               + ", target=" + globalFlags.limitFeatures);
       LinearClassifierFactory<String,String> lcf;
       Minimizer<DiffFunction> minim = ReflectionLoading.loadByReflection("edu.stanford.nlp.optimization.OWLQNMinimizer", l1reg);
-      lcf = new LinearClassifierFactory<>(minim, globalFlags.tolerance, globalFlags.useSum, globalFlags.prior, globalFlags.sigma, globalFlags.epsilon);
+      lcf = new LinearClassifierFactory<String,String>(minim, globalFlags.tolerance, globalFlags.useSum, globalFlags.prior, globalFlags.sigma, globalFlags.epsilon);
       int featureCount = -1;
       try {
         LinearClassifier<String,String> c = lcf.trainClassifier(train);
@@ -1446,11 +1446,11 @@ public class ColumnDataClassifier {
       double sigma = (globalFlags.prior == 0) ? 0.0 : globalFlags.sigma;
       lc = new NBLinearClassifierFactory<String,String>(sigma, globalFlags.useClassFeature).trainClassifier(train);
     } else if (globalFlags.useBinary) {
-      LogisticClassifierFactory<String,String> lcf = new LogisticClassifierFactory<>();
+      LogisticClassifierFactory<String,String> lcf = new LogisticClassifierFactory<String,String>();
       LogPrior prior = new LogPrior(globalFlags.prior, globalFlags.sigma, globalFlags.epsilon);
       lc = lcf.trainClassifier(train, globalFlags.l1reg, globalFlags.tolerance, prior, globalFlags.biased);
     } else if (globalFlags.biased) {
-      LogisticClassifierFactory<String,String> lcf = new LogisticClassifierFactory<>();
+      LogisticClassifierFactory<String,String> lcf = new LogisticClassifierFactory<String,String>();
       LogPrior prior = new LogPrior(globalFlags.prior, globalFlags.sigma, globalFlags.epsilon);
       lc = lcf.trainClassifier(train, prior, true);
     } else if (globalFlags.useAdaptL1 && globalFlags.limitFeatures > 0) {
@@ -1459,9 +1459,9 @@ public class ColumnDataClassifier {
       LinearClassifierFactory<String,String> lcf;
       if (globalFlags.l1reg > 0.0) {
         Minimizer<DiffFunction> minim = ReflectionLoading.loadByReflection("edu.stanford.nlp.optimization.OWLQNMinimizer", globalFlags.l1reg);
-        lcf = new LinearClassifierFactory<>(minim, globalFlags.tolerance, globalFlags.useSum, globalFlags.prior, globalFlags.sigma, globalFlags.epsilon);
+        lcf = new LinearClassifierFactory<String,String>(minim, globalFlags.tolerance, globalFlags.useSum, globalFlags.prior, globalFlags.sigma, globalFlags.epsilon);
       } else {
-        lcf  = new LinearClassifierFactory<>(globalFlags.tolerance, globalFlags.useSum, globalFlags.prior, globalFlags.sigma, globalFlags.epsilon, globalFlags.QNsize);
+        lcf  = new LinearClassifierFactory<String,String>(globalFlags.tolerance, globalFlags.useSum, globalFlags.prior, globalFlags.sigma, globalFlags.epsilon, globalFlags.QNsize);
       }
       if (!globalFlags.useQN) {
         lcf.useConjugateGradientAscent();
@@ -1473,7 +1473,7 @@ public class ColumnDataClassifier {
 
 
   private static String[] regexpTokenize(Pattern tokenizerRegexp, Pattern ignoreRegexp, String inWord) {
-    List<String> al = new ArrayList<>();
+    List<String> al = new ArrayList<String>();
     String word = inWord;
     while ( ! word.isEmpty()) {
       // logger.info("String to match on is " + word);
@@ -1507,7 +1507,7 @@ public class ColumnDataClassifier {
   private static String[] splitTokenize(Pattern splitRegexp, Pattern ignoreRegexp, String cWord) {
     String[] bits = splitRegexp.split(cWord);
     if (ignoreRegexp != null) {
-      List<String> keepBits = new ArrayList<>(bits.length);
+      List<String> keepBits = new ArrayList<String>(bits.length);
       for (String bit : bits) {
         if ( ! ignoreRegexp.matcher(bit).matches()) {
           keepBits.add(bit);
@@ -1627,7 +1627,7 @@ public class ColumnDataClassifier {
         }
       } else if (key.equals("binnedLengthsStatistics")) {
         if (Boolean.parseBoolean(val)) {
-          myFlags[col].binnedLengthsCounter = new TwoDimensionalCounter<>();
+          myFlags[col].binnedLengthsCounter = new TwoDimensionalCounter<String, String>();
         }
       } else if (key.equals("splitWordCount")) {
         myFlags[col].splitWordCount = Boolean.parseBoolean(val);
@@ -1663,7 +1663,7 @@ public class ColumnDataClassifier {
         myFlags[col].binnedValuesNaN = Double.parseDouble(val);
       } else if (key.equals("binnedValuesStatistics")) {
         if (Boolean.parseBoolean(val)) {
-          myFlags[col].binnedValuesCounter = new TwoDimensionalCounter<>();
+          myFlags[col].binnedValuesCounter = new TwoDimensionalCounter<String,String>();
         }
       } else if (key.equals("useNGrams")) {
         myFlags[col].useNGrams = Boolean.parseBoolean(val);
@@ -1875,7 +1875,7 @@ public class ColumnDataClassifier {
         // logger.info("Constraints is " + constraints);
         if (val != null && val.trim().length() > 0) {
           String[] bits = val.split("[, ]+");
-          myFlags[col].biasedHyperplane = new ClassicCounter<>();
+          myFlags[col].biasedHyperplane = new ClassicCounter<String>();
           for (int i = 0; i < bits.length; i += 2) {
             myFlags[col].biasedHyperplane.setCount(bits[i], Double.parseDouble(bits[i + 1]));
           }
@@ -2128,7 +2128,7 @@ public class ColumnDataClassifier {
     logger.info("Average accuracy/micro-averaged F1: " + nf2.format(averageAccuracy));
     logger.info("Average macro-averaged F1: " + nf2.format(averageMacroF1));
     logger.info("");
-    return new Pair<>(averageAccuracy, averageMacroF1);
+    return new Pair<Double,Double>(averageAccuracy, averageMacroF1);
   }
 
   public String classOf(Datum<String,String> example) {

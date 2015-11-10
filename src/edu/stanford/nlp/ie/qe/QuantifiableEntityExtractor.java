@@ -96,7 +96,7 @@ public class QuantifiableEntityExtractor {
     List<UnitPrefix> prefixes = UnitPrefix.loadPrefixes(infile);
     PrintWriter pw = IOUtils.getPrintWriter(outfile);
     pw.println("SI_PREFIX_MAP = {");
-    List<String> items = new ArrayList<>();
+    List<String> items = new ArrayList<String>();
     for (UnitPrefix prefix:prefixes) {
       if ("SI".equals(prefix.system)) {
         items.add("\"" + prefix.name + "\": " + prefix.getName().toUpperCase());
@@ -125,7 +125,7 @@ public class QuantifiableEntityExtractor {
 
     List<Unit> units = Units.loadUnits(unitsFiles);
     pw.println("SI_UNIT_MAP = {");
-    List<String> items = new ArrayList<>();
+    List<String> items = new ArrayList<String>();
     for (Unit unit:units) {
       if ("SI".equals(unit.prefixSystem)) {
         items.add("\"" + unit.name + "\": " + (unit.getType() + "_" + unit.getName()).toUpperCase());

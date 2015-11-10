@@ -33,7 +33,7 @@ public class AnnotationPipeline implements Annotator {
     this.annotators = annotators;
     if (TIME) {
       int num = annotators.size();
-      accumulatedTime = new ArrayList<>(num);
+      accumulatedTime = new ArrayList<MutableLong>(num);
       for (int i = 0; i < num; i++) {
         accumulatedTime.add(new MutableLong());
       }
@@ -41,7 +41,7 @@ public class AnnotationPipeline implements Annotator {
   }
 
   public AnnotationPipeline() {
-    this(new ArrayList<>());
+    this(new ArrayList<Annotator>());
   }
 
   public void addAnnotator(Annotator annotator) {

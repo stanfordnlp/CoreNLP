@@ -305,12 +305,12 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     // zero gradient.
 
     // for convergence test
-    private final List<Double> evals = new ArrayList<>();
-    private final List<Double> values = new ArrayList<>();
-    List<Double> gNorms = new ArrayList<>();
+    private final List<Double> evals = new ArrayList<Double>();
+    private final List<Double> values = new ArrayList<Double>();
+    List<Double> gNorms = new ArrayList<Double>();
     // List<Double> xNorms = new ArrayList<Double>();
-    private final List<Integer> funcEvals = new ArrayList<>();
-    private final List<Double> time = new ArrayList<>();
+    private final List<Integer> funcEvals = new ArrayList<Integer>();
+    private final List<Double> time = new ArrayList<Double>();
     // gNormInit: This makes it so that if for some reason
     // you try and divide by the initial norm before it's been
     // initialized you don't get a NAN but you will also never
@@ -546,25 +546,25 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     public eScaling scaleOpt = eScaling.SCALAR;
 
     public QNInfo(int size) {
-      s = new ArrayList<>();
-      y = new ArrayList<>();
-      rho = new ArrayList<>();
+      s = new ArrayList<double[]>();
+      y = new ArrayList<double[]>();
+      rho = new ArrayList<Double>();
       gamma = 1;
       mem = size;
     }
 
     public QNInfo() {
-      s = new ArrayList<>();
-      y = new ArrayList<>();
-      rho = new ArrayList<>();
+      s = new ArrayList<double[]>();
+      y = new ArrayList<double[]>();
+      rho = new ArrayList<Double>();
       gamma = 1;
       mem = maxMem;
     }
 
     public QNInfo(List<double[]> sList, List<double[]> yList) {
-      s = new ArrayList<>();
-      y = new ArrayList<>();
-      rho = new ArrayList<>();
+      s = new ArrayList<double[]>();
+      y = new ArrayList<double[]>();
+      rho = new ArrayList<Double>();
       gamma = 1;
       setHistory(sList, yList);
     }

@@ -96,10 +96,10 @@ public class TueBaDZHeadFinder extends AbstractCollinsHeadFinder {
   /* Many TueBaDZ local trees have an explicitly marked head, as :HD or -HD.  (Almost!) all the time, there is only one :HD per local tree.  Use it if possible. */
    protected Tree findMarkedHead(Tree t) {
      Tree[] kids = t.children();
-     for (Tree kid : kids) {
-       if (headMarkedPattern.matcher(kid.label().value()).find() || headMarkedPattern2.matcher(kid.label().value()).find()) {
+     for (int i = 0, n = kids.length; i < n; i++) {
+       if (headMarkedPattern.matcher(kids[i].label().value()).find() || headMarkedPattern2.matcher(kids[i].label().value()).find()) {
          //System.err.println("found manually-labeled head " + kids[i] + " for tree " + t);
-         return kid;
+         return kids[i];
        }
      }
      return null;

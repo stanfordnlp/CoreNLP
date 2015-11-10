@@ -419,7 +419,7 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
       if(bits.length % 4 != 0){
         throw new RuntimeIOException("ERROR: Incorrect format for the serialized coref graph: " + line);
       }
-      List<Pair<IntTuple, IntTuple>> corefGraph = new ArrayList<>();
+      List<Pair<IntTuple, IntTuple>> corefGraph = new ArrayList<Pair<IntTuple,IntTuple>>();
       for(int i = 0; i < bits.length; i += 4){
         IntTuple src = new IntTuple(2);
         IntTuple dst = new IntTuple(2);
@@ -427,13 +427,13 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
         src.set(1, Integer.parseInt(bits[i + 1]));
         dst.set(0, Integer.parseInt(bits[i + 2]));
         dst.set(1, Integer.parseInt(bits[i + 3]));
-        corefGraph.add(new Pair<>(src, dst));
+        corefGraph.add(new Pair<IntTuple, IntTuple>(src, dst));
       }
       doc.set(CorefCoreAnnotations.CorefGraphAnnotation.class, corefGraph);
     }
 
     // read individual sentences
-    List<CoreMap> sentences = new ArrayList<>();
+    List<CoreMap> sentences = new ArrayList<CoreMap>();
     while((line = reader.readLine()) != null){
       CoreMap sentence = new Annotation("");
 
@@ -447,7 +447,7 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
       IntermediateSemanticGraph intermCcDeps = loadDependencyGraph(reader);
 
       // the remaining lines until empty line are tokens
-      List<CoreLabel> tokens = new ArrayList<>();
+      List<CoreLabel> tokens = new ArrayList<CoreLabel>();
       while((line = reader.readLine()) != null){
         if(line.length() == 0) break;
         CoreLabel token = loadToken(line, haveExplicitAntecedent);

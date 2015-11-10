@@ -17,7 +17,7 @@ class VariableStrings {
 
   public VariableStrings() {
     varsToStrings = Generics.newHashMap();
-    numVarsSet = new IntCounter<>();
+    numVarsSet = new IntCounter<Object>();
   }
 
   public boolean isSet(Object o) {

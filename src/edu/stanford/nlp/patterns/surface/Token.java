@@ -22,7 +22,7 @@ public class Token implements Serializable {
   //Can be semgrex.Env but does not matter
   //static public Env env = TokenSequencePattern.getNewEnv();
 
-  static Map<Class, String> class2KeyMapping = new ConcurrentHashMap<>();
+  static Map<Class, String> class2KeyMapping = new ConcurrentHashMap<Class, String>();
 
   //All the restrictions of a token: for example, word:xyz
   Map<Class, String> classORrestrictions;
@@ -49,7 +49,7 @@ public class Token implements Serializable {
   public Map<String, String> classORRestrictionsAsString(){
     if(classORrestrictions== null || classORrestrictions.isEmpty())
       return null;
-    Map<String, String> str = new HashMap<>();
+    Map<String, String> str = new HashMap<String, String>();
     for(Map.Entry<Class, String> en: classORrestrictions.entrySet()){
        str.put(class2KeyMapping.get(en.getKey()), en.getValue().toString());
     }
@@ -169,7 +169,7 @@ public class Token implements Serializable {
     if(this.envBindBooleanRestriction != null && !this.envBindBooleanRestriction.isEmpty())
       throw new RuntimeException("cannot add restriction to something that is binding to an env variable");
     if(classORrestrictions == null)
-      classORrestrictions = new TreeMap<>(new ClassComparator());
+      classORrestrictions = new TreeMap<Class, String>(new ClassComparator());
     assert value!=null;
     classORrestrictions.put(classR, value);
   }

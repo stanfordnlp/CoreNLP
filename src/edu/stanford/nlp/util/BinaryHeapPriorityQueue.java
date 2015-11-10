@@ -135,7 +135,7 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
   }
 
   private Entry<E> makeEntry(E key) {
-    Entry<E> entry = new Entry<>();
+    Entry<E> entry = new Entry<E>();
     entry.index = size();
     entry.key = key;
     entry.priority = Double.NEGATIVE_INFINITY;
@@ -413,7 +413,7 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
 
   @Override
   public List<E> toSortedList() {
-    List<E> sortedList = new ArrayList<>(size());
+    List<E> sortedList = new ArrayList<E>(size());
     BinaryHeapPriorityQueue<E> queue = this.deepCopy();
     while (!queue.isEmpty()) {
       sortedList.add(queue.removeFirst());
@@ -423,7 +423,7 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
 
   public BinaryHeapPriorityQueue<E> deepCopy(MapFactory<E, Entry<E>> mapFactory) {
     BinaryHeapPriorityQueue<E> queue =
-            new BinaryHeapPriorityQueue<>(mapFactory);
+      new BinaryHeapPriorityQueue<E>(mapFactory);
     for (Entry<E> entry : keyToEntry.values()) {
       queue.relaxPriority(entry.key, entry.priority);
     }
@@ -510,12 +510,12 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
   }
 
   public BinaryHeapPriorityQueue(MapFactory<E, Entry<E>> mapFactory) {
-    indexToEntry = new ArrayList<>();
+    indexToEntry = new ArrayList<Entry<E>>();
     keyToEntry = mapFactory.newMap();
   }
 
   public BinaryHeapPriorityQueue(MapFactory<E, Entry<E>> mapFactory, int initCapacity) {
-	indexToEntry = new ArrayList<>(initCapacity);
+	indexToEntry = new ArrayList<Entry<E>>(initCapacity);
 	keyToEntry = mapFactory.newMap(initCapacity);
   }
 

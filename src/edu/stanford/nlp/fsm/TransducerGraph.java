@@ -695,7 +695,7 @@ public class TransducerGraph implements Cloneable {
     Object node = this.getStartNode();
     Set endNodes = this.getEndNodes();
     while (!endNodes.contains(node)) {
-      List<Arc> arcs = new ArrayList<>(this.getArcsBySource(node));
+      List<Arc> arcs = new ArrayList<Arc>(this.getArcsBySource(node));
       TransducerGraph.Arc arc = arcs.get(r.nextInt(arcs.size()));
       list.add(arc.getInput());
       node = arc.getTargetNode();
@@ -734,7 +734,7 @@ public class TransducerGraph implements Cloneable {
    * For testing only.
    */
   public List<Double> getPathOutputs(List<List> pathList) {
-    List<Double> outputList = new ArrayList<>();
+    List<Double> outputList = new ArrayList<Double>();
     for (List path : pathList) {
       outputList.add(new Double(getOutputOfPathInGraph(path)));
     }
@@ -861,7 +861,7 @@ public class TransducerGraph implements Cloneable {
     int pathLength = (int) (r.nextGaussian() * pathLengthVariance + pathLengthMean);
     for (int i = 0; i < numPaths; i++) {
       // make a path
-      List<String> path = new ArrayList<>();
+      List<String> path = new ArrayList<String>();
       String input;
       for (int j = 0; j < pathLength; j++) {
         input = Integer.toString(r.nextInt(numInputs));

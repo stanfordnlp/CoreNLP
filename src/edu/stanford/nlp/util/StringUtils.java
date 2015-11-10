@@ -155,7 +155,7 @@ public class StringUtils {
 
   public static List<Pattern> regexesToPatterns(Iterable<String> regexes)
   {
-    List<Pattern> patterns = new ArrayList<>();
+    List<Pattern> patterns = new ArrayList<Pattern>();
     for (String regex:regexes) {
       patterns.add(Pattern.compile(regex));
     }
@@ -178,7 +178,7 @@ public class StringUtils {
       return null;
     }
 
-    List<String> groups = new ArrayList<>();
+    List<String> groups = new ArrayList<String>();
     for (int index = 1; index <= matcher.groupCount(); index++) {
       groups.add(matcher.group(index));
     }
@@ -549,7 +549,7 @@ public class StringUtils {
   public static List<String> valueSplit(String str, String valueRegex, String separatorRegex) {
     Pattern vPat = Pattern.compile(valueRegex);
     Pattern sPat = Pattern.compile(separatorRegex);
-    List<String> ret = new ArrayList<>();
+    List<String> ret = new ArrayList<String>();
     while (str.length() > 0) {
       Matcher vm = vPat.matcher(str);
       if (vm.lookingAt()) {
@@ -849,14 +849,14 @@ public class StringUtils {
    */
   public static Map<String, String[]> argsToMap(String[] args, Map<String, Integer> flagsToNumArgs) {
     Map<String, String[]> result = Generics.newHashMap();
-    List<String> remainingArgs = new ArrayList<>();
+    List<String> remainingArgs = new ArrayList<String>();
     for (int i = 0; i < args.length; i++) {
       String key = args[i];
       if (key.charAt(0) == '-') { // found a flag
         Integer numFlagArgs = flagsToNumArgs.get(key);
         int max = numFlagArgs == null ? 1 : numFlagArgs.intValue();
         int min = numFlagArgs == null ? 0 : numFlagArgs.intValue();
-        List<String> flagArgs = new ArrayList<>();
+        List<String> flagArgs = new ArrayList<String>();
         for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
           flagArgs.add(args[i + 1]);
         }
@@ -912,7 +912,7 @@ public class StringUtils {
    */
   public static Properties argsToProperties(String[] args, Map<String,Integer> flagsToNumArgs) {
     Properties result = new Properties();
-    List<String> remainingArgs = new ArrayList<>();
+    List<String> remainingArgs = new ArrayList<String>();
     for (int i = 0; i < args.length; i++) {
       String key = args[i];
       if (key.length() > 0 && key.charAt(0) == '-') { // found a flag
@@ -924,7 +924,7 @@ public class StringUtils {
         Integer maxFlagArgs = flagsToNumArgs.get(key);
         int max = maxFlagArgs == null ? 1 : maxFlagArgs;
         int min = maxFlagArgs == null ? 0 : maxFlagArgs;
-        List<String> flagArgs = new ArrayList<>();
+        List<String> flagArgs = new ArrayList<String>();
         // cdm oct 2007: add length check to allow for empty string argument!
         for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].isEmpty() || args[i + 1].charAt(0) != '-'); i++, j++) {
           flagArgs.add(args[i + 1]);
@@ -1281,7 +1281,7 @@ public class StringUtils {
    * @return An array of Strings that s is split into
    */
   public static String[] splitOnCharWithQuoting(String s, char splitChar, char quoteChar, char escapeChar) {
-    List<String> result = new ArrayList<>();
+    List<String> result = new ArrayList<String>();
     int i = 0;
     int length = s.length();
     StringBuilder b = new StringBuilder();
@@ -2002,8 +2002,8 @@ public class StringUtils {
    * variables. if the variable is not found then substitute it for empty string
    */
   public static Properties argsToPropertiesWithResolve(String[] args) {
-    LinkedHashMap<String, String> result = new LinkedHashMap<>();
-    Map<String, String> existingArgs = new LinkedHashMap<>();
+    LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
+    Map<String, String> existingArgs = new LinkedHashMap<String, String>();
 
     for (int i = 0; i < args.length; i++) {
       String key = args[i];
@@ -2015,7 +2015,7 @@ public class StringUtils {
 
         int max = 1;
         int min = 0;
-        List<String> flagArgs = new ArrayList<>();
+        List<String> flagArgs = new ArrayList<String>();
         // cdm oct 2007: add length check to allow for empty string argument!
         for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
           flagArgs.add(args[i + 1]);
@@ -2057,7 +2057,7 @@ public class StringUtils {
    */
   public static LinkedHashMap<String, String> propFileToLinkedHashMap(String filename, Map<String, String> existingArgs) {
 
-    LinkedHashMap<String, String> result = new LinkedHashMap<>();
+    LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
     result.putAll(existingArgs);
     for (String l : IOUtils.readLines(filename)) {
       l = l.trim();
@@ -2078,7 +2078,7 @@ public class StringUtils {
    */
   public static Collection<String> getNgrams(List<String> words, int minSize, int maxSize){
     List<List<String>> ng = CollectionUtils.getNGrams(words, minSize, maxSize);
-    Collection<String> ngrams = new ArrayList<>();
+    Collection<String> ngrams = new ArrayList<String>();
     for(List<String> n: ng)
       ngrams.add(StringUtils.join(n," "));
 
@@ -2089,11 +2089,11 @@ public class StringUtils {
    * n grams for already splitted string. the ngrams are joined with a single space
    */
   public static Collection<String> getNgramsFromTokens(List<CoreLabel> words, int minSize, int maxSize){
-    List<String> wordsStr = new ArrayList<>();
+    List<String> wordsStr = new ArrayList<String>();
     for(CoreLabel l : words)
       wordsStr.add(l.word());
     List<List<String>> ng = CollectionUtils.getNGrams(wordsStr, minSize, maxSize);
-    Collection<String> ngrams = new ArrayList<>();
+    Collection<String> ngrams = new ArrayList<String>();
     for(List<String> n: ng)
       ngrams.add(StringUtils.join(n," "));
 
@@ -2111,7 +2111,7 @@ public class StringUtils {
    * Build a list of character-based ngrams from the given string.
    */
   public static Collection<String> getCharacterNgrams(String s, int minSize, int maxSize) {
-    Collection<String> ngrams = new ArrayList<>();
+    Collection<String> ngrams = new ArrayList<String>();
     int len = s.length();
 
     for (int i = 0; i < len; i++) {
@@ -2408,7 +2408,7 @@ public class StringUtils {
 
   private static final HashMap<String, CharSequence> htmlUnescapeLookupMap;
     static {
-        htmlUnescapeLookupMap = new HashMap<>();
+        htmlUnescapeLookupMap = new HashMap<String, CharSequence>();
         for (final CharSequence[] seq : HTML_ESCAPES)
             htmlUnescapeLookupMap.put(seq[1].toString(), seq[0]);
     }
@@ -2426,7 +2426,7 @@ public class StringUtils {
 		//--Parse the String
 		//(state)
 		char quoteCloseChar = (char) 0;
-		List<StringBuilder> terms = new LinkedList<>();
+		List<StringBuilder> terms = new LinkedList<StringBuilder>();
 		StringBuilder current = new StringBuilder();
 		//(start/stop overhead)
 		int start = 0; int end = chars.length;
@@ -2485,13 +2485,13 @@ public class StringUtils {
    * @return A String map corresponding to the encoded map
    */
   public static Map<String, String> decodeMap(String encoded){
-    if (encoded.length() == 0) return new HashMap<>();
+    if (encoded.length() == 0) return new HashMap<String, String>();
     char[] chars = encoded.trim().toCharArray();
 
     //--Parse the String
     //(state)
     char quoteCloseChar = (char) 0;
-    Map<String, String> map = new HashMap<>();
+    Map<String, String> map = new HashMap<String, String>();
     String key = "";
     String value = "";
     boolean onKey = true;

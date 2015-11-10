@@ -124,10 +124,10 @@ public class Preprocessor {
   }
 
   private static List<Mention> mentionReorderingBySpan(List<Mention> mentionsInSent) {
-    TreeSet<Mention> ordering = new TreeSet<>(new Comparator<Mention>() {
+    TreeSet<Mention> ordering = new TreeSet<Mention>(new Comparator<Mention>(){
       @Override
       public int compare(Mention m1, Mention m2) {
-        return (m1.appearEarlierThan(m2)) ? -1 : (m2.appearEarlierThan(m1)) ? 1 : 0;
+        return (m1.appearEarlierThan(m2))? -1 : (m2.appearEarlierThan(m1))? 1 : 0;
       }
     });
     ordering.addAll(mentionsInSent);
@@ -188,7 +188,7 @@ public class Preprocessor {
       // For CoNLL training there are some documents with gold mentions with the same position offsets
       // See /scr/nlp/data/conll-2011/v2/data/train/data/english/annotations/nw/wsj/09/wsj_0990.v2_auto_conll
       //  (Packwood - Roth)
-      CollectionValuedMap<IntPair, Mention> goldMentionPositions = new CollectionValuedMap<>();
+      CollectionValuedMap<IntPair, Mention> goldMentionPositions = new CollectionValuedMap<IntPair, Mention>();
       for(Mention g : golds) {
         IntPair ip = new IntPair(g.startIndex, g.endIndex);
         if (goldMentionPositions.containsKey(ip)) {
@@ -237,12 +237,12 @@ public class Preprocessor {
       for(Mention g : golds) {
         goldMentionPositions.put(new IntPair(g.startIndex, g.endIndex), g);
         if(!goldMentionHeadPositions.containsKey(g.headIndex)) {
-          goldMentionHeadPositions.put(g.headIndex, new LinkedList<>());
+          goldMentionHeadPositions.put(g.headIndex, new LinkedList<Mention>());
         }
         goldMentionHeadPositions.get(g.headIndex).add(g);
       }
 
-      List<Mention> remains = new ArrayList<>();
+      List<Mention> remains = new ArrayList<Mention>();
       for (Mention p : predicts) {
         IntPair pos = new IntPair(p.startIndex, p.endIndex);
         if(goldMentionPositions.containsKey(pos)) {
@@ -548,7 +548,7 @@ public class Preprocessor {
       if(debug) System.err.println("DD: "+speaker);
       if (NumberMatchingRegex.isDecimalInteger(speaker)) {
         int speakerMentionID = Integer.parseInt(speaker);
-        doc.speakerPairs.add(new Pair<>(m.mentionID, speakerMentionID));
+        doc.speakerPairs.add(new Pair<Integer, Integer>(m.mentionID, speakerMentionID));
       }
     }
 
@@ -751,7 +751,7 @@ public class Preprocessor {
         }
       }
     }
-    List<CoreMap> paragraph = new ArrayList<>();
+    List<CoreMap> paragraph = new ArrayList<CoreMap>();
     int paragraphUtterIndex = 0;
     String nextParagraphSpeaker = "";
     int paragraphOffset = 0;
@@ -762,7 +762,7 @@ public class Preprocessor {
         nextParagraphSpeaker = findParagraphSpeaker(doc, paragraph, paragraphUtterIndex, nextParagraphSpeaker, paragraphOffset, dict);
         paragraphUtterIndex = currentUtter;
         paragraphOffset += paragraph.size();
-        paragraph = new ArrayList<>();
+        paragraph = new ArrayList<CoreMap>();
       }
     }
     findParagraphSpeaker(doc, paragraph, paragraphUtterIndex, nextParagraphSpeaker, paragraphOffset, dict);

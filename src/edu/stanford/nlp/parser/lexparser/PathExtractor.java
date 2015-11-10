@@ -27,7 +27,7 @@ class PathExtractor extends AbstractTreeExtractor<Map<String, List<List<String>>
   private List<List<String>> getList(String key) {
     List<List<String>> result = allPaths.get(key);
     if (result == null) {
-      result = new ArrayList<>();
+      result = new ArrayList<List<String>>();
       allPaths.put(key, result);
     }
     return result;
@@ -40,7 +40,7 @@ class PathExtractor extends AbstractTreeExtractor<Map<String, List<List<String>>
     if (children.length == 1) {
       return;
     }
-    List<String> path = new ArrayList<>();
+    List<String> path = new ArrayList<String>();
 
     // determine which is the head
     int headLoc = -1;

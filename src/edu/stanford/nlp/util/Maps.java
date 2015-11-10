@@ -91,7 +91,7 @@ public class Maps {
    * Sorts a list of entries.  This method is here since the entries might come from a Counter.
    */
   public static <K extends Comparable<? super K>, V> List<Map.Entry<K, V>> sortedEntries(Collection<Map.Entry<K, V>> entries) {
-    List<Entry<K,V>> entriesList = new ArrayList<>(entries);
+    List<Entry<K,V>> entriesList = new ArrayList<Map.Entry<K, V>>(entries);
     Collections.sort(entriesList, (e1, e2) -> e1.getKey().compareTo(e2.getKey()));
     return entriesList;
   }
@@ -156,7 +156,7 @@ public class Maps {
    * @return a submap corresponding to the indices
    */
   public static<T,V> Map<T, V> getAll(Map<T, V> map, Collection<T> indices){
-    Map<T,V> result = new HashMap<>();
+    Map<T,V> result = new HashMap<T,V>();
     for(T i: indices)
       if(map.containsKey(i)){
         result.put(i, map.get(i));

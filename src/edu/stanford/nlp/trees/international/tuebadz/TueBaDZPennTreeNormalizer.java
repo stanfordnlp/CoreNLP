@@ -24,7 +24,7 @@ public class TueBaDZPennTreeNormalizer extends TreeNormalizer {
   private final int nodeCleanup;
   private final String root;
   protected final TreebankLanguagePack tlp;
-  private List<TreeNormalizer> tns = new ArrayList<>();
+  private List<TreeNormalizer> tns = new ArrayList<TreeNormalizer>();
 
   public String rootSymbol() {
     return root;

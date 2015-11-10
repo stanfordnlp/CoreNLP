@@ -18,7 +18,7 @@ public class CoNLLUUtils {
      * @return A HashMap<String,String> with the feature values.
      */
     public static HashMap<String,String> parseFeatures(String featureString) {
-        HashMap<String, String> features = new HashMap<>();
+        HashMap<String, String> features = new HashMap<String, String>();
         if (! featureString.equals("_")) {
             String[] featValPairs = featureString.split("\\|");
             for (String p : featValPairs) {
@@ -39,7 +39,7 @@ public class CoNLLUUtils {
         StringBuffer sb = new StringBuffer();
         boolean first = true;
         if (features != null) {
-            List<String> sortedKeys = new ArrayList<>(features.keySet());
+            List<String> sortedKeys = new ArrayList<String>(features.keySet());
             Collections.sort(sortedKeys, new FeatureNameComparator());
             for (String key : sortedKeys) {
                 if (!first) {

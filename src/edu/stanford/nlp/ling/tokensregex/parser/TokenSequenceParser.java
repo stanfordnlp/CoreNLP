@@ -108,7 +108,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     }
 
   final public List<SequenceMatchRules.Rule> RuleList(Env env) throws ParseException {
-  List<SequenceMatchRules.Rule> rules = new ArrayList<>();
+  List<SequenceMatchRules.Rule> rules = new ArrayList<SequenceMatchRules.Rule>();
   SequenceMatchRules.Rule rule;
     label_1:
     while (true) {
@@ -252,7 +252,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   final public Expression FunctionCallExpression(Env env) throws ParseException {
   Token typeToken;
   Expression param;
-  List<Expression> params = new ArrayList<>();
+  List<Expression> params = new ArrayList<Expression>();
     typeToken = jj_consume_token(IDENTIFIER);
     jj_consume_token(25);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -322,7 +322,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   }
 
   final public Expressions.CompositeValue CompositeFieldValue(Env env) throws ParseException {
-    Map<String, Expression> attributes = new ArrayMap<>();
+    Map<String, Expression> attributes = new ArrayMap<String,Expression>();
     jj_consume_token(22);
     FieldValue(env, attributes);
     label_3:
@@ -383,7 +383,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
       break;
     case STR:
       tok = jj_consume_token(STR);
-                      {if (true) return new Expressions.PrimitiveValue<>("STRING", parseQuotedString(tok.image));}
+                      {if (true) return new Expressions.PrimitiveValue<String>("STRING", parseQuotedString(tok.image) );}
       break;
     case NONNEGINT:
     case INT:
@@ -404,7 +404,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
       tail = jj_consume_token(26);
           String str = getStringFromTokens(head, tail, true);
           TokenSequencePattern seqPattern = new TokenSequencePattern(str, seqRegex);
-          {if (true) return new Expressions.PrimitiveValue<>("TOKEN_REGEX", seqPattern);}
+          {if (true) return new Expressions.PrimitiveValue<TokenSequencePattern>("TOKEN_REGEX", seqPattern);}
       break;
     default:
       jj_la1[7] = jj_gen;
@@ -467,7 +467,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   final public Expression MethodCallExpression(Env env, Expression parent) throws ParseException {
   Token typeToken;
   Expression param;
-  List<Expression> params = new ArrayList<>();
+  List<Expression> params = new ArrayList<Expression>();
     typeToken = jj_consume_token(IDENTIFIER);
     jj_consume_token(25);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -636,7 +636,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   }
 
   final public Expression ListExpression(Env env) throws ParseException {
-  List<Expression> exprs = new ArrayList<>();
+  List<Expression> exprs = new ArrayList<Expression>();
   Expression expr;
     jj_consume_token(25);
     expr = Expression(env);
@@ -661,7 +661,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   }
 
   final public Expression ListExpression2(Env env) throws ParseException {
-  List<Expression> exprs = new ArrayList<>();
+  List<Expression> exprs = new ArrayList<Expression>();
   Expression expr;
     jj_consume_token(31);
     expr = Expression(env);
@@ -742,8 +742,8 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
 
   final public Expression CondExpression(Env env) throws ParseException {
   Expression child;
-  List<Expression> disjChildren = new ArrayList<>();
-  List<Expression> conjChildren = new ArrayList<>();
+  List<Expression> disjChildren = new ArrayList<Expression>();
+  List<Expression> conjChildren = new ArrayList<Expression>();
   Token op;
     child = CondGroup(env);
                                 conjChildren.add(child);
@@ -779,7 +779,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
                } else {
                   disjChildren.add(conjChildren.get(0));
                }
-               conjChildren = new ArrayList<>();
+               conjChildren = new ArrayList<Expression>();
                conjChildren.add(child);
              }
     }
@@ -799,7 +799,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   Expression cond = null;
   Expression expr = null;
   List<Pair<Expression, Expression>> cases
-    = new ArrayList<>();
+    = new ArrayList<Pair<Expression, Expression>>();
   Expression elseExpr = null;
     jj_consume_token(38);
     jj_consume_token(22);
@@ -808,7 +808,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
       cond = CondExpression(env);
       jj_consume_token(23);
       expr = Expression(env);
-            cases.add(new Pair<>(cond, expr));
+            cases.add(new Pair<Expression, Expression>(cond, expr));
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case 33:
         jj_consume_token(33);
@@ -919,7 +919,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   }
 
   final public SequencePattern.PatternExpr SeqRegexBasic(Env env) throws ParseException {
-  List<SequencePattern.PatternExpr> children = new ArrayList<>();
+  List<SequencePattern.PatternExpr> children = new ArrayList<SequencePattern.PatternExpr>();
   NodePattern node;
   MultiNodePattern multiNode;
   SequencePattern.PatternExpr expr;
@@ -1075,7 +1075,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   }
 
   final public SequencePattern.PatternExpr SeqRegexDisj(Env env) throws ParseException {
-  List<SequencePattern.PatternExpr> children = new ArrayList<>();
+  List<SequencePattern.PatternExpr> children = new ArrayList<SequencePattern.PatternExpr>();
   SequencePattern.PatternExpr expr;
     expr = SeqRegexBasic(env);
                                     children.add(expr);
@@ -1112,8 +1112,8 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
 
   final public SequencePattern.PatternExpr SeqRegexDisjConj(Env env) throws ParseException {
         SequencePattern.PatternExpr child;
-        List<SequencePattern.PatternExpr> disjChildren = new ArrayList<>();
-        List<SequencePattern.PatternExpr> conjChildren = new ArrayList<>();
+        List<SequencePattern.PatternExpr> disjChildren = new ArrayList<SequencePattern.PatternExpr>();
+        List<SequencePattern.PatternExpr> conjChildren = new ArrayList<SequencePattern.PatternExpr>();
         Token op;
     child = SeqRegexBasic(env);
                                     conjChildren.add(child);
@@ -1157,7 +1157,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
                } else {
                   disjChildren.add(conjChildren.get(0));
                }
-               conjChildren = new ArrayList<>();
+               conjChildren = new ArrayList<SequencePattern.PatternExpr>();
                conjChildren.add(child);
              }
     }
@@ -1281,7 +1281,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   }
 
   final public NodePattern NodeDisj(Env env) throws ParseException {
-        List<NodePattern> children = new ArrayList<>();
+        List<NodePattern> children = new ArrayList<NodePattern>();
         NodePattern child;
     child = NodeGroup(env);
                                  children.add(child);
@@ -1358,8 +1358,8 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
 
   final public NodePattern NodeDisjConj(Env env) throws ParseException {
         NodePattern child;
-        List<NodePattern> disjChildren = new ArrayList<>();
-        List<NodePattern> conjChildren = new ArrayList<>();
+        List<NodePattern> disjChildren = new ArrayList<NodePattern>();
+        List<NodePattern> conjChildren = new ArrayList<NodePattern>();
         Token op;
     child = NodeGroup(env);
                                 conjChildren.add(child);
@@ -1403,7 +1403,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
                } else {
                   disjChildren.add(conjChildren.get(0));
                }
-               conjChildren = new ArrayList<>();
+               conjChildren = new ArrayList<NodePattern>();
                conjChildren.add(child);
              }
     }
@@ -1467,7 +1467,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   }
 
   final public NodePattern CoreMapNode(Env env) throws ParseException {
-    Map<String, String> attributes = new ArrayMap<>();
+    Map<String, String> attributes = new ArrayMap<String,String>();
     NodePattern pat;
         Token value = null;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1625,7 +1625,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   }
 
   final public NodePattern CoreMapWordPattern(Env env) throws ParseException {
-    Map<String, String> attributes = new ArrayMap<>();
+    Map<String, String> attributes = new ArrayMap<String,String>();
     CoreMapNodePattern pat;
         Token value = null;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1758,7 +1758,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
       jj_la1[62] = jj_gen;
       ;
     }
-      {if (true) return new Pair<>(expr, action);}
+      {if (true) return new Pair<SequencePattern.PatternExpr, SequenceMatchAction<CoreMap>>(expr,action);}
     throw new Error("Missing return statement in function");
   }
 
@@ -1777,12 +1777,12 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     //  group = <NONNEGINT> ","
       attributes = SetAttrValues(env);
     jj_consume_token(26);
-    {if (true) return new CoreMapSequenceMatchAction.AnnotateAction<>( /*group,*/ attributes);}
+    {if (true) return new CoreMapSequenceMatchAction.AnnotateAction<CoreMap>( /*group,*/ attributes);}
     throw new Error("Missing return statement in function");
   }
 
   final public Map<String,String> SetAttrValues(Env env) throws ParseException {
-    Map<String, String> attributes = new ArrayMap<>();
+    Map<String, String> attributes = new ArrayMap<String,String>();
     jj_consume_token(22);
     SetAttrValue(env, attributes);
     label_19:
@@ -3541,8 +3541,8 @@ String VarName() : {
       jj_gen++;
       if (++jj_gc > 100) {
         jj_gc = 0;
-        for (JJCalls jj_2_rtn : jj_2_rtns) {
-          JJCalls c = jj_2_rtn;
+        for (int i = 0; i < jj_2_rtns.length; i++) {
+          JJCalls c = jj_2_rtns[i];
           while (c != null) {
             if (c.gen < jj_gen) c.first = null;
             c = c.next;
@@ -3606,7 +3606,7 @@ String VarName() : {
       return (jj_ntk = jj_nt.kind);
   }
 
-  private java.util.List<int[]> jj_expentries = new java.util.ArrayList<>();
+  private java.util.List<int[]> jj_expentries = new java.util.ArrayList<int[]>();
   private int[] jj_expentry;
   private int jj_kind = -1;
   private int[] jj_lasttokens = new int[100];
@@ -3621,9 +3621,8 @@ String VarName() : {
       for (int i = 0; i < jj_endpos; i++) {
         jj_expentry[i] = jj_lasttokens[i];
       }
-      jj_entries_loop:
-      for (int[] jj_expentry1 : jj_expentries) {
-        int[] oldentry = (int[]) (jj_expentry1);
+      jj_entries_loop: for (java.util.Iterator<?> it = jj_expentries.iterator(); it.hasNext();) {
+        int[] oldentry = (int[])(it.next());
         if (oldentry.length == jj_expentry.length) {
           for (int i = 0; i < jj_expentry.length; i++) {
             if (oldentry[i] != jj_expentry[i]) {

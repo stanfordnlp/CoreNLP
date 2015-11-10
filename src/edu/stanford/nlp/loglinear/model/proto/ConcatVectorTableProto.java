@@ -3,8 +3,6 @@
 
 package edu.stanford.nlp.loglinear.model.proto;
 
-import com.google.protobuf.CodedOutputStream;
-
 public final class ConcatVectorTableProto {
   private ConcatVectorTableProto() {}
   public static void registerAllExtensions(
@@ -105,7 +103,7 @@ public final class ConcatVectorTableProto {
             }
             case 8: {
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                dimensionSize_ = new java.util.ArrayList<>();
+                dimensionSize_ = new java.util.ArrayList<java.lang.Integer>();
                 mutable_bitField0_ |= 0x00000001;
               }
               dimensionSize_.add(input.readInt32());
@@ -115,7 +113,7 @@ public final class ConcatVectorTableProto {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001) && input.getBytesUntilLimit() > 0) {
-                dimensionSize_ = new java.util.ArrayList<>();
+                dimensionSize_ = new java.util.ArrayList<java.lang.Integer>();
                 mutable_bitField0_ |= 0x00000001;
               }
               while (input.getBytesUntilLimit() > 0) {
@@ -126,7 +124,7 @@ public final class ConcatVectorTableProto {
             }
             case 18: {
               if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
-                factorTable_ = new java.util.ArrayList<>();
+                factorTable_ = new java.util.ArrayList<edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector>();
                 mutable_bitField0_ |= 0x00000002;
               }
               factorTable_.add(input.readMessage(edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.PARSER, extensionRegistry));
@@ -257,11 +255,11 @@ public final class ConcatVectorTableProto {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      for (Integer aDimensionSize_ : dimensionSize_) {
-        output.writeInt32(1, aDimensionSize_);
+      for (int i = 0; i < dimensionSize_.size(); i++) {
+        output.writeInt32(1, dimensionSize_.get(i));
       }
-      for (ConcatVectorProto.ConcatVector aFactorTable_ : factorTable_) {
-        output.writeMessage(2, aFactorTable_);
+      for (int i = 0; i < factorTable_.size(); i++) {
+        output.writeMessage(2, factorTable_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -274,16 +272,16 @@ public final class ConcatVectorTableProto {
       size = 0;
       {
         int dataSize = 0;
-        for (Integer aDimensionSize_ : dimensionSize_) {
-          dataSize += CodedOutputStream
-                  .computeInt32SizeNoTag(aDimensionSize_);
+        for (int i = 0; i < dimensionSize_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeInt32SizeNoTag(dimensionSize_.get(i));
         }
         size += dataSize;
         size += 1 * getDimensionSizeList().size();
       }
-      for (ConcatVectorProto.ConcatVector aFactorTable_ : factorTable_) {
-        size += CodedOutputStream
-                .computeMessageSize(2, aFactorTable_);
+      for (int i = 0; i < factorTable_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, factorTable_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -539,7 +537,7 @@ public final class ConcatVectorTableProto {
       private java.util.List<java.lang.Integer> dimensionSize_ = java.util.Collections.emptyList();
       private void ensureDimensionSizeIsMutable() {
         if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          dimensionSize_ = new java.util.ArrayList<>(dimensionSize_);
+          dimensionSize_ = new java.util.ArrayList<java.lang.Integer>(dimensionSize_);
           bitField0_ |= 0x00000001;
          }
       }
@@ -606,7 +604,7 @@ public final class ConcatVectorTableProto {
         java.util.Collections.emptyList();
       private void ensureFactorTableIsMutable() {
         if (!((bitField0_ & 0x00000002) == 0x00000002)) {
-          factorTable_ = new java.util.ArrayList<>(factorTable_);
+          factorTable_ = new java.util.ArrayList<edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector>(factorTable_);
           bitField0_ |= 0x00000002;
          }
       }
@@ -831,7 +829,8 @@ public final class ConcatVectorTableProto {
           edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector, edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Builder, edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVectorOrBuilder> 
           getFactorTableFieldBuilder() {
         if (factorTableBuilder_ == null) {
-          factorTableBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
+          factorTableBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector, edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVector.Builder, edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto.ConcatVectorOrBuilder>(
                   factorTable_,
                   ((bitField0_ & 0x00000002) == 0x00000002),
                   getParentForChildren(),

@@ -32,16 +32,16 @@ import edu.stanford.nlp.util.StringUtils;
 
 public class ExtractPhraseFromPattern {
 
-  public List<String> cutoffRelations = new ArrayList<>();
+  public List<String> cutoffRelations = new ArrayList<String>();
   public int maxDepth = Integer.MAX_VALUE;
   public static List<String> ignoreTags = Arrays.asList("PRP", "PRP$", "CD",
       "DT", ".", "..", ",", "SYM");
   boolean ignoreCommonTags = true;
-  public static ArrayList<String> cutoffTags = new ArrayList<>();
+  public static ArrayList<String> cutoffTags = new ArrayList<String>();
   public int maxPhraseLength = Integer.MAX_VALUE;
   //Namespace curNS;
 
-  Map<SemgrexPattern, List<Pair<String, SemanticGraph>>> matchedGraphsForPattern = new HashMap<>();
+  Map<SemgrexPattern, List<Pair<String, SemanticGraph>>> matchedGraphsForPattern = new HashMap<SemgrexPattern, List<Pair<String, SemanticGraph>>>();
 
   // 0 means none, 1 means partial, 2 means it shows sentences and their
   // techniques, app and focus, and 3 means full
@@ -127,7 +127,7 @@ public class ExtractPhraseFromPattern {
       SemgrexPattern pattern, boolean findSubTrees,
       Collection<ExtractedPhrase> extractedPhrases, boolean lowercase, Function<CoreLabel, Boolean> acceptWord) {
 
-    Set<IndexedWord> foundWordsParents = new HashSet<>();
+    Set<IndexedWord> foundWordsParents = new HashSet<IndexedWord>();
     SemgrexMatcher m = pattern.matcher(g, lowercase);
     while (m.find()) {
 
@@ -146,9 +146,9 @@ public class ExtractPhraseFromPattern {
         List<Pair<String, SemanticGraph>> matchedGraphs = matchedGraphsForPattern.get(pattern);
 
         if (matchedGraphs == null)
-          matchedGraphs = new ArrayList<>();
-        matchedGraphs.add(new Pair<>(StringUtils.join(
-                tokens, " "), g));
+          matchedGraphs = new ArrayList<Pair<String, SemanticGraph>>();
+        matchedGraphs.add(new Pair<String, SemanticGraph>(StringUtils.join(
+          tokens, " "), g));
         //if (DEBUG >= 3)
         //  System.out.println("matched pattern is " + pattern);
         matchedGraphsForPattern.put(pattern, matchedGraphs);
@@ -158,15 +158,15 @@ public class ExtractPhraseFromPattern {
 
       // String relationName = m.getRelnString("reln");
       // System.out.println("word is " + w.lemma() + " and " + w.tag());
-      ArrayList<IndexedWord> seenNodes = new ArrayList<>();
-      List<String> cutoffrelations = new ArrayList<>();
+      ArrayList<IndexedWord> seenNodes = new ArrayList<IndexedWord>();
+      List<String> cutoffrelations = new ArrayList<String>();
 //      if (elementStr.equalsIgnoreCase("technique"))
 //        cutoffrelations = cutoffRelationsForTech;
 //      if (elementStr.equalsIgnoreCase("app"))
 //        cutoffrelations = this.cuttoffRelationsForApp;
       //System.out.println("g is ");
       //g.prettyPrint();
-      printSubGraph(g, w, cutoffrelations, tokens, outputNodes, outputIndices, seenNodes, new ArrayList<>(),
+      printSubGraph(g, w, cutoffrelations, tokens, outputNodes, outputIndices, seenNodes, new ArrayList<IndexedWord>(),
           findSubTrees, extractedPhrases, pattern, acceptWord);
     }
     return foundWordsParents;
@@ -188,9 +188,9 @@ public class ExtractPhraseFromPattern {
       if (doNotAddThese.contains(w))
         return;
 
-      List<IndexedWord> andNodes = new ArrayList<>();
+      List<IndexedWord> andNodes = new ArrayList<IndexedWord>();
 
-      descendantsWithReln(g, w, "conj_and", new ArrayList<>(),
+      descendantsWithReln(g, w, "conj_and", new ArrayList<IndexedWord>(),
           andNodes);
 
       //System.out.println("and nodes are " + andNodes);
@@ -203,7 +203,7 @@ public class ExtractPhraseFromPattern {
       }
       doNotAddThese.addAll(andNodes);
 
-      List<String> allCutOffRels = new ArrayList<>();
+      List<String> allCutOffRels = new ArrayList<String>();
       if (additionalCutOffRels != null)
         allCutOffRels.addAll(additionalCutOffRels);
       allCutOffRels.addAll(cutoffRelations);
@@ -299,7 +299,7 @@ public class ExtractPhraseFromPattern {
       IndexedWord vertex, List<String> allCutOffRels,
       List<IndexedWord> doNotAddThese, boolean ignoreCommonTags, Function<CoreLabel, Boolean> acceptWord, CollectionValuedMap<Integer, String> feat) throws Exception {
     // Do a depth first search
-    Set<IndexedWord> descendantSet = new HashSet<>();
+    Set<IndexedWord> descendantSet = new HashSet<IndexedWord>();
 
     if (doNotAddThese !=null && doNotAddThese.contains(vertex))
       return descendantSet;
@@ -308,7 +308,7 @@ public class ExtractPhraseFromPattern {
       return descendantSet;
 
     descendantsHelper(g, vertex, descendantSet, allCutOffRels, doNotAddThese,
-            new ArrayList<>(), ignoreCommonTags, acceptWord, feat);
+        new ArrayList<IndexedWord>(), ignoreCommonTags, acceptWord, feat);
 //    String descStr = "";
 //    for(IndexedWord descendant: descendantSet){
 //      descStr += descendant.word()+" ";
@@ -374,7 +374,7 @@ public class ExtractPhraseFromPattern {
       }
       if (dontuse == false){
         if(!feat.containsKey(curr.index())){
-          feat.put(curr.index(), new ArrayList<>());
+          feat.put(curr.index(), new ArrayList<String>());
         }
         GetPatternsFromDataMultiClass.getFeatures(g, curr, false, feat.get(curr.index()), rel);
         //feat.add(curr.index(), "REL-" + rel.getShortName());
