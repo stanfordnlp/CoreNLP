@@ -6,7 +6,6 @@ import edu.stanford.nlp.ling.tokensregex.parser.ParseException;
 import edu.stanford.nlp.ling.tokensregex.parser.TokenSequenceParseException;
 import edu.stanford.nlp.ling.tokensregex.parser.TokenSequenceParser;
 import edu.stanford.nlp.ling.tokensregex.types.Expression;
-import edu.stanford.nlp.ling.tokensregex.types.Expressions;
 import edu.stanford.nlp.ling.tokensregex.types.Tags;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
 import edu.stanford.nlp.util.*;
@@ -560,7 +559,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
     if (expressions.size() == 0) return expressions;
     int nfiltered = 0;
     List<T> kept = new ArrayList<>(expressions.size());   // Approximate size
-    for (T expr:expressions) {
+    for (T expr : expressions) {
       if (!filterRule.test(expr)) {
         kept.add(expr);
       } else {
@@ -585,4 +584,5 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
     this.keepTags = true;
     return this;
   }
+
 }
