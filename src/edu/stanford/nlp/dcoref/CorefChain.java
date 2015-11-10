@@ -314,7 +314,7 @@ public class CorefChain implements Serializable {
   public CorefChain(CorefCluster c, Map<Mention, IntTuple> positions){
     chainID = c.clusterID;
     // Collect mentions
-    mentions = new ArrayList<CorefMention>();
+    mentions = new ArrayList<>();
     mentionMap = Generics.newHashMap();
     CorefMention represents = null;
     for (Mention m : c.getCorefMentions()) {
@@ -341,7 +341,7 @@ public class CorefChain implements Serializable {
     this.chainID = cid;
     this.representative = representative;
     this.mentionMap = mentionMap;
-    this.mentions = new ArrayList<CorefMention>();
+    this.mentions = new ArrayList<>();
     for (Set<CorefMention> ms: mentionMap.values()) {
       for (CorefMention m: ms) {
         this.mentions.add(m);

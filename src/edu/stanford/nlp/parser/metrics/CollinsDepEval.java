@@ -53,14 +53,14 @@ public class CollinsDepEval extends AbstractEval {
     this.hf = hf;
     this.startSymbol = startSymbol;
 
-    precisions = new ClassicCounter<CollinsRelation>();
-    recalls = new ClassicCounter<CollinsRelation>();
-    f1s = new ClassicCounter<CollinsRelation>();
+    precisions = new ClassicCounter<>();
+    recalls = new ClassicCounter<>();
+    f1s = new ClassicCounter<>();
 
-    precisions2 = new ClassicCounter<CollinsRelation>();
-    recalls2 = new ClassicCounter<CollinsRelation>();
-    pnums2 = new ClassicCounter<CollinsRelation>();
-    rnums2 = new ClassicCounter<CollinsRelation>();
+    precisions2 = new ClassicCounter<>();
+    recalls2 = new ClassicCounter<>();
+    pnums2 = new ClassicCounter<>();
+    rnums2 = new ClassicCounter<>();
   }
 
   @Override
@@ -147,7 +147,7 @@ public class CollinsDepEval extends AbstractEval {
     cats.addAll(precisions.keySet());
     cats.addAll(recalls.keySet());
 
-    Map<Double,CollinsRelation> f1Map = new TreeMap<Double,CollinsRelation>();
+    Map<Double,CollinsRelation> f1Map = new TreeMap<>();
     for (CollinsRelation cat : cats) {
       double pnum2 = pnums2.getCount(cat);
       double rnum2 = rnums2.getCount(cat);

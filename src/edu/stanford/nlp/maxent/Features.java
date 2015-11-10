@@ -20,7 +20,7 @@ import java.util.ArrayList;
  * An ArrayList of Feature
  */
 public class Features {
-  private ArrayList<Feature> f = new ArrayList<Feature>();
+  private ArrayList<Feature> f = new ArrayList<>();
   private static int maxValue = 11000000;
 
   public Features() {

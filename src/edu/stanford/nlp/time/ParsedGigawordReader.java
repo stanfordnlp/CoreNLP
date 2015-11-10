@@ -189,14 +189,14 @@ public class ParsedGigawordReader implements Iterable<Annotation> {
     Element textElem = docElem.getFirstChildElement("TEXT");
     StringBuilder text = new StringBuilder();
     int offset = 0;
-    List<CoreMap> sentences = new ArrayList<CoreMap>();
+    List<CoreMap> sentences = new ArrayList<>();
     Elements sentenceElements = textElem.getChildElements("SENT");
     for (int crtsent = 0; crtsent < sentenceElements.size(); crtsent ++){
       Element sentElem = sentenceElements.get(crtsent);
       CoreMap sentence = new ArrayCoreMap();
       sentence.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, offset);
       Tree tree = Tree.valueOf(sentElem.getChild(0).getValue()); // XXX ms: is this the same as sentElem.getText() in JDOM?
-      List<CoreLabel> tokens = new ArrayList<CoreLabel>();
+      List<CoreLabel> tokens = new ArrayList<>();
       List<Tree> preTerminals = preTerminals(tree);
       for (Tree preTerminal: preTerminals) {
         String posTag = preTerminal.value();
@@ -240,7 +240,7 @@ public class ParsedGigawordReader implements Iterable<Annotation> {
   // It depends on whether the code is somehow using preterminals with multiple children.
 
   private static List<Tree> preTerminals(Tree tree) {
-    List<Tree> preTerminals = new ArrayList<Tree>();
+    List<Tree> preTerminals = new ArrayList<>();
     for (Tree descendant: tree) {
       if (isPreterminal(descendant)) {
         preTerminals.add(descendant);

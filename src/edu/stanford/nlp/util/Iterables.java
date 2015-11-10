@@ -289,7 +289,7 @@ public class Iterables {
    * varargs parameter.
    */
   public static <T> Iterable<T> chain(final T[] ... arrays) {
-    LinkedList<Iterable<T>> iterables = new LinkedList<Iterable<T>>();
+    LinkedList<Iterable<T>> iterables = new LinkedList<>();
     for (T[] array : arrays) {
       iterables.add(Arrays.asList(array));
     }
@@ -357,7 +357,7 @@ public class Iterables {
       }
 
       public Pair<T1, T2> next() {
-        return new Pair<T1,T2>(iter1.next(), iter2.next());
+        return new Pair<>(iter1.next(), iter2.next());
       }
 
       public void remove() {
@@ -448,7 +448,7 @@ public class Iterables {
                 nextB = null;
               } else {
                 // just right - return this pair
-                return new Pair<V1,V2>(nextA, nextB);
+                return new Pair<>(nextA, nextB);
               }
             }
 
@@ -501,7 +501,7 @@ public class Iterables {
 
     // flattens the pairs into triple
     Function<Pair<Pair<V1,V2>, V3>, Triple<V1,V2,V3>> flatten =
-        in -> new Triple<V1,V2,V3>(in.first.first,in.first.second,in.second);
+        in -> new Triple<>(in.first.first, in.first.second, in.second);
 
     return transform(merge(partial, iter3, inc), flatten);
   }
@@ -612,7 +612,7 @@ public class Iterables {
   public static <T> Iterable<T> sample(Iterable<T> items, int n, int k, Random random) {
 
     // assemble a list of all indexes
-    List<Integer> indexes = new ArrayList<Integer>();
+    List<Integer> indexes = new ArrayList<>();
     for (int i = 0; i < n; ++i) {
       indexes.add(i);
     }
@@ -671,7 +671,7 @@ public class Iterables {
    * Creates an ArrayList containing all of the Objects returned by the given Iterator.
    */
   public static <T> ArrayList<T> asArrayList(Iterator<? extends T> iter) {
-    ArrayList<T> al = new ArrayList<T>();
+    ArrayList<T> al = new ArrayList<>();
     return (ArrayList<T>) addAll(iter, al);
   }
 
@@ -679,7 +679,7 @@ public class Iterables {
    * Creates a HashSet containing all of the Objects returned by the given Iterator.
    */
   public static <T> HashSet<T> asHashSet(Iterator<? extends T> iter) {
-    HashSet<T> hs = new HashSet<T>();
+    HashSet<T> hs = new HashSet<>();
     return (HashSet<T>) addAll(iter, hs);
   }
 
@@ -718,7 +718,7 @@ public class Iterables {
 
     System.out.println(asCollection(l.iterator(), CollectionFactory.<String>hashSetFactory()));
 
-    ArrayList<String> al = new ArrayList<String>();
+    ArrayList<String> al = new ArrayList<>();
     al.add("d");
     System.out.println(addAll(l.iterator(), al));
   }

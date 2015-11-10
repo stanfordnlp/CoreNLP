@@ -202,8 +202,8 @@ public class TimeAnnotator implements Annotator {
     List<CoreMap> allTimeExpressions; // initialized below = null;
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
     if (sentences != null) {
-      allTimeExpressions = new ArrayList<CoreMap>();
-      List<CoreMap> allNumerics = new ArrayList<CoreMap>();
+      allTimeExpressions = new ArrayList<>();
+      List<CoreMap> allNumerics = new ArrayList<>();
       for (CoreMap sentence: sentences) {
         // make sure that token character offsets align with the actual sentence text
         // They may not align due to token normalizations, such as "(" to "-LRB-".

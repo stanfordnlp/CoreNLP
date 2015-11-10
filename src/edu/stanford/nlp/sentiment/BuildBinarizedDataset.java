@@ -72,7 +72,7 @@ public class BuildBinarizedDataset {
         }
       }
       if (found) {
-        spanToLabels.put(new Pair<Integer, Integer>(i, i + pieces.length - 1), pieces[0]);
+        spanToLabels.put(new Pair<>(i, i + pieces.length - 1), pieces[0]);
       }
     }
   }

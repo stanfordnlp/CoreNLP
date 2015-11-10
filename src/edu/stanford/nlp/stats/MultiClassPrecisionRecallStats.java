@@ -56,8 +56,8 @@ public class MultiClassPrecisionRecallStats<L> implements Scorer<L> {
 
   public <F> double score(Classifier<L,F> classifier, GeneralDataset<L,F> data) {
 
-    List<L> guesses = new ArrayList<L>();
-    List<L> labels = new ArrayList<L>();
+    List<L> guesses = new ArrayList<>();
+    List<L> labels = new ArrayList<>();
 
     for (int i = 0; i < data.size(); i++) {
       Datum<L, F> d = data.getRVFDatum(i);
@@ -71,7 +71,7 @@ public class MultiClassPrecisionRecallStats<L> implements Scorer<L> {
       labels.add(labelIndex.get(labelsArr[i]));
     }
 
-    labelIndex = new HashIndex<L>();
+    labelIndex = new HashIndex<>();
     labelIndex.addAll(data.labelIndex().objectsList());
     labelIndex.addAll(classifier.labels());
 
@@ -113,9 +113,9 @@ public class MultiClassPrecisionRecallStats<L> implements Scorer<L> {
   public Triple<Double, Integer, Integer> getPrecisionInfo(L label) {
     int i = labelIndex.indexOf(label);
     if (tpCount[i] == 0 && fpCount[i] == 0) {
-      return new Triple<Double, Integer, Integer>(1.0, tpCount[i], fpCount[i]);
+      return new Triple<>(1.0, tpCount[i], fpCount[i]);
     }
-    return new Triple<Double, Integer, Integer>((((double) tpCount[i]) / (tpCount[i] + fpCount[i])), tpCount[i], fpCount[i]);
+    return new Triple<>((((double) tpCount[i]) / (tpCount[i] + fpCount[i])), tpCount[i], fpCount[i]);
   }
 
   public double getPrecision(L label) {
@@ -129,7 +129,7 @@ public class MultiClassPrecisionRecallStats<L> implements Scorer<L> {
       tp += tpCount[i];
       fp += fpCount[i];
     }
-    return new Triple<Double, Integer, Integer>((((double) tp) / (tp + fp)), tp, fp);
+    return new Triple<>((((double) tp) / (tp + fp)), tp, fp);
   }
 
   public double getPrecision() {
@@ -156,9 +156,9 @@ public class MultiClassPrecisionRecallStats<L> implements Scorer<L> {
   public Triple<Double, Integer, Integer> getRecallInfo(L label) {
     int i = labelIndex.indexOf(label);
     if (tpCount[i] == 0 && fnCount[i] == 0) {
-      return new Triple<Double, Integer, Integer>(1.0, tpCount[i], fnCount[i]);
+      return new Triple<>(1.0, tpCount[i], fnCount[i]);
     }
-    return new Triple<Double, Integer, Integer>((((double) tpCount[i]) / (tpCount[i] + fnCount[i])), tpCount[i], fnCount[i]);
+    return new Triple<>((((double) tpCount[i]) / (tpCount[i] + fnCount[i])), tpCount[i], fnCount[i]);
   }
 
   public double getRecall(L label) {
@@ -172,7 +172,7 @@ public class MultiClassPrecisionRecallStats<L> implements Scorer<L> {
       tp += tpCount[i];
       fn += fnCount[i];
     }
-    return new Triple<Double, Integer, Integer>((((double) tp) / (tp + fn)), tp, fn);
+    return new Triple<>((((double) tp) / (tp + fn)), tp, fn);
   }
 
   public double getRecall() {

@@ -45,7 +45,7 @@ public class ChunkAnnotationUtils {
       int sentBeginToken = sentence.get(CoreAnnotations.TokenBeginAnnotation.class);
       int sentEndToken = sentence.get(CoreAnnotations.TokenEndAnnotation.class);
       String docTextSpan = docText.substring(sentBeginChar, sentEndChar);
-      List<CoreLabel> docTokenSpan = new ArrayList<CoreLabel>(docTokens.subList(sentBeginToken, sentEndToken));
+      List<CoreLabel> docTokenSpan = new ArrayList<>(docTokens.subList(sentBeginToken, sentEndToken));
       logger.finer("Checking Document " + docId + " span (" + sentBeginChar + "," + sentEndChar + ") ");
       if (!docTextSpan.equals(sentText) ) {
         okay = false;
@@ -122,7 +122,7 @@ public class ChunkAnnotationUtils {
     // First identify any tokens that need to be fixed
     String text = docAnnotation.get(CoreAnnotations.TextAnnotation.class);
     List<CoreLabel> tokens = docAnnotation.get(CoreAnnotations.TokensAnnotation.class);
-    List<CoreLabel> output = new ArrayList<CoreLabel>(tokens.size());
+    List<CoreLabel> output = new ArrayList<>(tokens.size());
     int i = 0;
     CoreLabel token = tokens.get(i);
     for (IntPair offsets:chunkCharOffsets) {
@@ -212,7 +212,7 @@ public class ChunkAnnotationUtils {
     newChunk.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, lastCharOffset);
     newChunk.set(CoreAnnotations.TokenBeginAnnotation.class, firstTokenIndex);
     newChunk.set(CoreAnnotations.TokenEndAnnotation.class, lastTokenIndex);
-    List<CoreLabel> tokens = new ArrayList<CoreLabel>(lastTokenIndex-firstTokenIndex);
+    List<CoreLabel> tokens = new ArrayList<>(lastTokenIndex - firstTokenIndex);
     for (int i = chunkIndexStart; i < chunkIndexEnd; i++) {
       CoreMap chunk = chunkList.get(i);
       tokens.addAll(chunk.get(CoreAnnotations.TokensAnnotation.class));
@@ -509,7 +509,7 @@ public class ChunkAnnotationUtils {
   public static void annotateChunk(CoreMap chunk,
                                    List<CoreLabel> tokens, int tokenStartIndex, int tokenEndIndex,  int totalTokenOffset)
   {
-    List<CoreLabel> chunkTokens = new ArrayList<CoreLabel>(tokens.subList(tokenStartIndex, tokenEndIndex));
+    List<CoreLabel> chunkTokens = new ArrayList<>(tokens.subList(tokenStartIndex, tokenEndIndex));
     chunk.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class,
             chunkTokens.get(0).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
     chunk.set(CoreAnnotations.CharacterOffsetEndAnnotation.class,
@@ -787,7 +787,7 @@ public class ChunkAnnotationUtils {
           Class tokenChunkKey, Class tokenLabelKey, boolean allowPartialTokens)
   {
     String annoText = annotation.get(CoreAnnotations.TextAnnotation.class);
-    List<CoreMap> chunks = new ArrayList<CoreMap>(charOffsets.size());
+    List<CoreMap> chunks = new ArrayList<>(charOffsets.size());
     List<CoreLabel> annoTokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
     Integer annoCharBegin = annotation.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
     if (annoCharBegin == null) { annoCharBegin = 0; }
@@ -825,7 +825,7 @@ public class ChunkAnnotationUtils {
       }
       int tokenEnd = j;
 
-      List<CoreLabel> chunkTokens = new ArrayList<CoreLabel>(annoTokens.subList(tokenBegin, tokenEnd));
+      List<CoreLabel> chunkTokens = new ArrayList<>(annoTokens.subList(tokenBegin, tokenEnd));
       String chunkText = annoText.substring(beginRelCharOffset, endRelCharOffset);
       Annotation chunk = new Annotation(chunkText);
       chunk.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, beginCharOffset);
@@ -921,7 +921,7 @@ public class ChunkAnnotationUtils {
   public static <T extends CoreMap> List<T> splitCoreMap(Pattern p, boolean includeMatched,
                                                          CoreMap cm, CoreTokenFactory<T> factory)
   {
-    List<T> res = new ArrayList<T>();
+    List<T> res = new ArrayList<>();
     String text = cm.get(CoreAnnotations.TextAnnotation.class);
     Matcher m = p.matcher(text);
     int index = 0;

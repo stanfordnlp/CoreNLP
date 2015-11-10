@@ -51,7 +51,7 @@ public class MapList<U,V> {
   protected List<V> ensureList(U key) {
     if (map.containsKey(key))
       return map.get(key);
-    List<V> newList = new ArrayList<V>();
+    List<V> newList = new ArrayList<>();
     map.put(key, newList);
     return newList;
   }

@@ -212,10 +212,10 @@ public class PerceptronModel extends BaseModel { // Serializable
       weight.score(scores);
     }
 
-    PriorityQueue<ScoredObject<Integer>> queue = new PriorityQueue<ScoredObject<Integer>>(numTransitions + 1, ScoredComparator.ASCENDING_COMPARATOR);
+    PriorityQueue<ScoredObject<Integer>> queue = new PriorityQueue<>(numTransitions + 1, ScoredComparator.ASCENDING_COMPARATOR);
     for (int i = 0; i < scores.length; ++i) {
       if (!requireLegal || transitionIndex.get(i).isLegal(state, constraints)) {
-        queue.add(new ScoredObject<Integer>(i, scores[i]));
+        queue.add(new ScoredObject<>(i, scores[i]));
         if (queue.size() > numTransitions) {
           queue.poll();
         }
@@ -299,7 +299,7 @@ public class PerceptronModel extends BaseModel { // Serializable
         throw new IllegalArgumentException("Illegal beam size " + op.trainOptions().beamSize);
       }
       List<Transition> transitions = Generics.newLinkedList(transitionLists.get(index));
-      PriorityQueue<State> agenda = new PriorityQueue<State>(op.trainOptions().beamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
+      PriorityQueue<State> agenda = new PriorityQueue<>(op.trainOptions().beamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
       State goldState = ShiftReduceParser.initialStateFromGoldTagTree(tree);
       agenda.add(goldState);
       int transitionCount = 0;
@@ -307,7 +307,7 @@ public class PerceptronModel extends BaseModel { // Serializable
         Transition goldTransition = transitions.get(0);
         Transition highestScoringTransitionFromGoldState = null;
         double highestScoreFromGoldState = 0.0;
-        PriorityQueue<State> newAgenda = new PriorityQueue<State>(op.trainOptions().beamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
+        PriorityQueue<State> newAgenda = new PriorityQueue<>(op.trainOptions().beamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
         State highestScoringState = null;
         State highestCurrentState = null;
         for (State currentState : agenda) {
@@ -481,7 +481,7 @@ public class PerceptronModel extends BaseModel { // Serializable
         numWrong += result.second;
       }
     }
-    return new Triple<List<Update>, Integer, Integer>(updates, numCorrect, numWrong);
+    return new Triple<>(updates, numCorrect, numWrong);
   }
 
 
@@ -490,7 +490,7 @@ public class PerceptronModel extends BaseModel { // Serializable
     int bestIteration = 0;
     PriorityQueue<ScoredObject<PerceptronModel>> bestModels = null;
     if (op.trainOptions().averagedModels > 0) {
-      bestModels = new PriorityQueue<ScoredObject<PerceptronModel>>(op.trainOptions().averagedModels + 1, ScoredComparator.ASCENDING_COMPARATOR);
+      bestModels = new PriorityQueue<>(op.trainOptions().averagedModels + 1, ScoredComparator.ASCENDING_COMPARATOR);
     }
 
     List<Integer> indices = Generics.newArrayList();
@@ -507,12 +507,12 @@ public class PerceptronModel extends BaseModel { // Serializable
     MulticoreWrapper<Integer, Pair<Integer, Integer>> wrapper = null;
     if (nThreads != 1) {
       updates = Collections.synchronizedList(updates);
-      wrapper = new MulticoreWrapper<Integer, Pair<Integer, Integer>>(op.trainOptions.trainingThreads, new TrainTreeProcessor(binarizedTrees, transitionLists, updates, oracle));
+      wrapper = new MulticoreWrapper<>(op.trainOptions.trainingThreads, new TrainTreeProcessor(binarizedTrees, transitionLists, updates, oracle));
     }
 
     IntCounter<String> featureFrequencies = null;
     if (op.trainOptions().featureFrequencyCutoff > 1) {
-      featureFrequencies = new IntCounter<String>();
+      featureFrequencies = new IntCounter<>();
     }
 
     for (int iteration = 1; iteration <= op.trainOptions.trainingIterations; ++iteration) {
@@ -573,7 +573,7 @@ public class PerceptronModel extends BaseModel { // Serializable
         System.err.println();
 
         if (bestModels != null) {
-          bestModels.add(new ScoredObject<PerceptronModel>(new PerceptronModel(this), labelF1));
+          bestModels.add(new ScoredObject<>(new PerceptronModel(this), labelF1));
           if (bestModels.size() > op.trainOptions().averagedModels) {
             bestModels.poll();
           }

@@ -29,7 +29,7 @@ public class MentionDetectionClassifier implements Serializable {
   }
 
   public static Counter<String> extractFeatures(Mention p, Set<Mention> shares, Set<String> neStrings, Dictionaries dict, Properties props) {
-    Counter<String> features = new ClassicCounter<String>();
+    Counter<String> features = new ClassicCounter<>();
     
     String span = p.lowercaseNormalizedSpanString();
     String ner = p.headWord.ner();
@@ -89,7 +89,7 @@ public class MentionDetectionClassifier implements Serializable {
   public double probabilityOf(Mention p, Set<Mention> shares, Set<String> neStrings, Dictionaries dict, Properties props) {
     try {
       boolean dummyLabel = false;
-      RVFDatum<Boolean, String> datum = new RVFDatum<Boolean, String>(extractFeatures(p, shares, neStrings, dict, props), dummyLabel);
+      RVFDatum<Boolean, String> datum = new RVFDatum<>(extractFeatures(p, shares, neStrings, dict, props), dummyLabel);
       return rf.probabilityOfTrue(datum);
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -98,43 +98,41 @@ public class MentionDetectionClassifier implements Serializable {
 
   public void classifyMentions(List<List<Mention>> predictedMentions, Dictionaries dict, Properties props) {
     Set<String> neStrings = Generics.newHashSet();
-    for(int i=0 ; i < predictedMentions.size() ; i++) {
-      for(Mention m : predictedMentions.get(i)) {
+    for (List<Mention> predictedMention : predictedMentions) {
+      for (Mention m : predictedMention) {
         String ne = m.headWord.ner();
-        if(ne.equals("O")) continue;
-        for(CoreLabel cl : m.originalSpan) {
-          if(!cl.ner().equals(ne)) continue;
+        if (ne.equals("O")) continue;
+        for (CoreLabel cl : m.originalSpan) {
+          if (!cl.ner().equals(ne)) continue;
         }
         neStrings.add(m.lowercaseNormalizedSpanString());
       }
     }
-    
-    for(int i=0 ; i<predictedMentions.size() ; i++) {
-      List<Mention> predicts = predictedMentions.get(i);
-      
+
+    for (List<Mention> predicts : predictedMentions) {
       Map<Integer, Set<Mention>> headPositions = Generics.newHashMap();
-      for(Mention p : predicts) {
-        if(!headPositions.containsKey(p.headIndex)) headPositions.put(p.headIndex, Generics.newHashSet());
+      for (Mention p : predicts) {
+        if (!headPositions.containsKey(p.headIndex)) headPositions.put(p.headIndex, Generics.newHashSet());
         headPositions.get(p.headIndex).add(p);
       }
-      
+
       Set<Mention> remove = Generics.newHashSet();
-      for(int hPos : headPositions.keySet()) {
+      for (int hPos : headPositions.keySet()) {
         Set<Mention> shares = headPositions.get(hPos);
-        if(shares.size() > 1) {
-          Counter<Mention> probs = new ClassicCounter<Mention>();
-          for(Mention p : shares) {
+        if (shares.size() > 1) {
+          Counter<Mention> probs = new ClassicCounter<>();
+          for (Mention p : shares) {
             double trueProb = probabilityOf(p, shares, neStrings, dict, props);
             probs.incrementCount(p, trueProb);
           }
-          
+
           // add to remove
           Mention keep = Counters.argmax(probs, (m1, m2) -> m1.spanToString().compareTo(m2.spanToString()));
           probs.remove(keep);
           remove.addAll(probs.keySet());
         }
       }
-      for(Mention r : remove) {
+      for (Mention r : remove) {
         predicts.remove(r);
       }
     }

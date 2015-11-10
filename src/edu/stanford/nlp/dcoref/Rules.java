@@ -169,8 +169,8 @@ public class Rules {
       }
     }
     int acronymPos = 0;
-    for (int wordNum = 0; wordNum < longer.size(); ++wordNum) {
-      String word = longer.get(wordNum).get(CoreAnnotations.TextAnnotation.class);
+    for (CoreLabel aLonger1 : longer) {
+      String word = aLonger1.get(CoreAnnotations.TextAnnotation.class);
       for (int charNum = 0; charNum < word.length(); ++charNum) {
         if (word.charAt(charNum) >= 'A' && word.charAt(charNum) <= 'Z') {
           // This triggers if there were more "acronym" characters in
@@ -188,8 +188,8 @@ public class Rules {
     if (acronymPos != acronym.length()) {
       return false;
     }
-    for (int i = 0; i < longer.size(); ++i) {
-      if (longer.get(i).get(CoreAnnotations.TextAnnotation.class).contains(acronym)) {
+    for (CoreLabel aLonger : longer) {
+      if (aLonger.get(CoreAnnotations.TextAnnotation.class).contains(acronym)) {
         return false;
       }
     }
@@ -593,7 +593,7 @@ public class Rules {
   /** Is the speaker for mention the same entity as the ant entity? */
   public static boolean antecedentIsMentionSpeaker(Document document,
                                                    Mention mention, Mention ant, Dictionaries dict) {
-    if(document.speakerPairs.contains(new Pair<Integer, Integer>(mention.mentionID, ant.mentionID))) {
+    if(document.speakerPairs.contains(new Pair<>(mention.mentionID, ant.mentionID))) {
       return true;
     }
 
@@ -820,9 +820,9 @@ public class Rules {
    // COREF_DICT pairwise: the two mentions match in the dict
    public static boolean entityCorefDictionary(Mention men, Mention ant, Dictionaries dict, int dictVersion, int freq){  
           
-     Pair<String, String> mention_pair = new Pair<String, String>(
-         men.getSplitPattern()[dictVersion-1].toLowerCase(), 
-         ant.getSplitPattern()[dictVersion-1].toLowerCase());     
+     Pair<String, String> mention_pair = new Pair<>(
+             men.getSplitPattern()[dictVersion - 1].toLowerCase(),
+             ant.getSplitPattern()[dictVersion - 1].toLowerCase());
      
      int high_freq = -1;
      if(dictVersion == 1){ 

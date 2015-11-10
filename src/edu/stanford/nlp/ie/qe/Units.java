@@ -112,7 +112,7 @@ public class Units {
     BufferedReader br = IOUtils.getBufferedFileReader(filename);
     String headerString = br.readLine();
     String[] header = commaPattern.split(headerString);
-    Map<String,Integer> headerIndex = new HashMap<String,Integer>();
+    Map<String,Integer> headerIndex = new HashMap<>();
     for (int i = 0; i < header.length; i++) {
       headerIndex.put(header[i], i);
     }
@@ -124,9 +124,9 @@ public class Units {
     int iDefaultUnit = headerIndex.get("defaultUnit");
     int iDefaultUnitScale = headerIndex.get("defaultUnitScale");
     String line;
-    List<Unit> list = new ArrayList<Unit>();
-    Map<String,Unit> unitsByName = new HashMap<String,Unit>();
-    Map<String,Pair<String,Double>> unitToDefaultUnits = new HashMap<String,Pair<String,Double>>();
+    List<Unit> list = new ArrayList<>();
+    Map<String,Unit> unitsByName = new HashMap<>();
+    Map<String,Pair<String,Double>> unitToDefaultUnits = new HashMap<>();
     while ((line = br.readLine()) != null) {
       String[] fields = commaPattern.split(line);
       Unit unit = new Unit(fields[iName], fields[iSymbol], fields[iType].toUpperCase());

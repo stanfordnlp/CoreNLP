@@ -77,8 +77,8 @@ public class RuleBranchingFactor {
     tb.loadPath(fileName);
 
     // Statistics
-    Counter<String> binaryRuleTypes = new ClassicCounter<String>(20000);
-    List<Integer> branchingFactors = new ArrayList<Integer>(20000);
+    Counter<String> binaryRuleTypes = new ClassicCounter<>(20000);
+    List<Integer> branchingFactors = new ArrayList<>(20000);
     int nTrees = 0;
     int nUnaryRules = 0;
     int nBinaryRules = 0;

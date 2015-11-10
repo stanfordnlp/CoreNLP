@@ -123,7 +123,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
       //line = tagMatcher.replaceAll("");
       line = line.trim();
 
-      List<CoreLabel> lwi = new ArrayList<CoreLabel>();
+      List<CoreLabel> lwi = new ArrayList<>();
       String origLine = line;
       if (DEBUG) EncodingPrintWriter.err.println("ORIG: " + line, "UTF-8");
       line = cdtos.normalization(origLine);
@@ -299,8 +299,8 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
     CoreLabel[] docArray = doc.toArray(new CoreLabel[doc.size()]);
     // Create answer lattice:
     MutableInteger nodeId = new MutableInteger(0);
-    DFSA<String, Integer> answerLattice = new DFSA<String, Integer>(null);
-    DFSAState<String, Integer> aInitState = new DFSAState<String, Integer>(nodeId.intValue(),answerLattice);
+    DFSA<String, Integer> answerLattice = new DFSA<>(null);
+    DFSAState<String, Integer> aInitState = new DFSAState<>(nodeId.intValue(), answerLattice);
     answerLattice.setInitialState(aInitState);
     Map<DFSAState<String, Integer>,DFSAState<String, Integer>> stateLinks = Generics.newHashMap();
     // Convert binary lattice into word lattice:
@@ -338,7 +338,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
     // Add "1" prediction after the end of the sentence, if applicable:
     if(tSource.isAccepting() && tSource.continuingInputs().isEmpty()) {
       tSource.addTransition
-        (new DFSATransition<String, Integer>("", tSource, new DFSAState<String, Integer>(-1, null), "1", "", 0));
+        (new DFSATransition<>("", tSource, new DFSAState<>(-1, null), "1", "", 0));
     }
     // Get current label, character, and prediction:
     CoreLabel curLabel = (pos < docArray.length) ? docArray[pos] : null;
@@ -410,15 +410,15 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
           if(stateLinks.containsKey(tSource)) {
             DFSAState<String, Integer> aDest = stateLinks.get(tSource);
             newASource.addTransition
-              (new DFSATransition<String, Integer>("", newASource, aDest, newAnswer.toString(), "", newCost));
+              (new DFSATransition<>("", newASource, aDest, newAnswer.toString(), "", newCost));
             //System.err.printf("new transition: asource=%s adest=%s edge=%s%n", newASource, aDest, newAnswer);
             continue;
           }
           // If answer destination node not visited before, create it + new edge:
           nodeId.incValue(1);
-          DFSAState<String, Integer> aDest = new DFSAState<String, Integer>(nodeId.intValue(), answerLattice, 0.0);
+          DFSAState<String, Integer> aDest = new DFSAState<>(nodeId.intValue(), answerLattice, 0.0);
           stateLinks.put(tSource,aDest);
-          newASource.addTransition(new DFSATransition<String, Integer>("", newASource, aDest, newAnswer.toString(), "", newCost));
+          newASource.addTransition(new DFSATransition<>("", newASource, aDest, newAnswer.toString(), "", newCost));
           //System.err.printf("new edge: adest=%s%n", newASource, aDest, newAnswer);
           //System.err.printf("new transition: asource=%s adest=%s edge=%s%n%n%n", newASource, aDest, newAnswer);
           // Reached an accepting state:

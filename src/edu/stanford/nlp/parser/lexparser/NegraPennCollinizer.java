@@ -54,7 +54,7 @@ class NegraPennCollinizer implements TreeTransformer {
       // NB: This deletes the boundary symbol, which is in the tree!
       return transformTree(tree.getChild(0));
     }
-    List<Tree> children = new ArrayList<Tree>();
+    List<Tree> children = new ArrayList<>();
     for (int cNum = 0, numC = tree.numChildren(); cNum < numC; cNum++) {
       Tree child = tree.getChild(cNum);
       Tree newChild = transformTree(child);

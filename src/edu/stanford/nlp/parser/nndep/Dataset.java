@@ -27,7 +27,7 @@ public class Dataset {
     n = 0;
     this.numFeatures = numFeatures;
     this.numLabels = numLabels;
-    examples = new ArrayList<Example>();
+    examples = new ArrayList<>();
   }
 
   public void addExample(List<Integer> feature, List<Integer> label) {

@@ -355,7 +355,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
       for (int i = 0; i < initialFiles.size(); ++i) {
         files[i] = new File(initialFiles.get(i));
       }
-      startFileLoadingThread(new EnumMap<FilterType,String>(FilterType.class), files);
+      startFileLoadingThread(new EnumMap<>(FilterType.class), files);
     }
 
     setVisible(true);
@@ -529,7 +529,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
       if (haveDirectory) {
         doFileFilters(selectedFiles);
       } else {
-        startFileLoadingThread(new EnumMap<FilterType,String>(FilterType.class), selectedFiles);
+        startFileLoadingThread(new EnumMap<>(FilterType.class), selectedFiles);
       }
     }
   }
@@ -641,7 +641,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
   }
 
   private static EnumMap<FilterType,String> getFilters(JPanel panel) {
-    EnumMap<FilterType,String> filters = new EnumMap<FilterType, String>(FilterType.class);
+    EnumMap<FilterType,String> filters = new EnumMap<>(FilterType.class);
     Component[] components = panel.getComponents();
     for(Component c : components) {
       if (c.getClass() != Box.class) {

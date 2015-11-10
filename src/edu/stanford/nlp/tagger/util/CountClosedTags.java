@@ -82,7 +82,7 @@ public class CountClosedTags {
   private CountClosedTags(Properties props) {
     String tagList = props.getProperty(CLOSED_TAGS_PROPERTY);
     if (tagList != null) {
-      closedTags = new TreeSet<String>();
+      closedTags = new TreeSet<>();
       String[] pieces = tagList.split("\\s+");
       Collections.addAll(closedTags, pieces);
     } else {
@@ -123,7 +123,7 @@ public class CountClosedTags {
       String tag = taggedWord.tag();
       if (closedTags == null || closedTags.contains(tag)) {
         if (!tagWordMap.containsKey(tag)) {
-          tagWordMap.put(tag, new TreeSet<String>());
+          tagWordMap.put(tag, new TreeSet<>());
         }
         tagWordMap.get(tag).add(word);
       }
@@ -167,8 +167,8 @@ public class CountClosedTags {
    * Print out the results found
    */
   void report() {
-    List<String> successfulTags = new ArrayList<String>();
-    Set<String> tags = new TreeSet<String>();
+    List<String> successfulTags = new ArrayList<>();
+    Set<String> tags = new TreeSet<>();
     tags.addAll(allWords.keySet());
     tags.addAll(trainingWords.keySet());
     if (closedTags != null)

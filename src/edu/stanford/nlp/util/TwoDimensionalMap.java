@@ -139,15 +139,15 @@ public class TwoDimensionalMap<K1, K2, V> implements Serializable, Iterable<TwoD
   }
 
   public static <K1, K2, V> TwoDimensionalMap<K1, K2, V> hashMap() {
-    return new TwoDimensionalMap<K1, K2, V>(MapFactory.<K1, Map<K2, V>>hashMapFactory(), MapFactory.<K2, V>hashMapFactory());
+    return new TwoDimensionalMap<>(MapFactory.<K1, Map<K2, V>>hashMapFactory(), MapFactory.<K2, V>hashMapFactory());
   }
 
   public static <K1, K2, V> TwoDimensionalMap<K1, K2, V> treeMap() {
-    return new TwoDimensionalMap<K1, K2, V>(MapFactory.<K1, Map<K2, V>>treeMapFactory(), MapFactory.<K2, V>treeMapFactory());
+    return new TwoDimensionalMap<>(MapFactory.<K1, Map<K2, V>>treeMapFactory(), MapFactory.<K2, V>treeMapFactory());
   }
 
   public static <K1, K2, V> TwoDimensionalMap<K1, K2, V> identityHashMap() {
-    return new TwoDimensionalMap<K1, K2, V>(MapFactory.<K1, Map<K2, V>>identityHashMapFactory(), MapFactory.<K2, V>identityHashMapFactory());
+    return new TwoDimensionalMap<>(MapFactory.<K1, Map<K2, V>>identityHashMapFactory(), MapFactory.<K2, V>identityHashMapFactory());
   }
 
   @Override
@@ -176,11 +176,11 @@ public class TwoDimensionalMap<K1, K2, V> implements Serializable, Iterable<TwoD
    * Iterate over the map using the iterator and entry inner classes.
    */
   public Iterator<Entry<K1, K2, V>> iterator() {
-    return new TwoDimensionalMapIterator<K1, K2, V>(this);
+    return new TwoDimensionalMapIterator<>(this);
   }
 
   public Iterator<V> valueIterator() {
-    return new TwoDimensionalMapValueIterator<K1, K2, V>(this);
+    return new TwoDimensionalMapValueIterator<>(this);
   }
 
   static class TwoDimensionalMapValueIterator<K1, K2, V> implements Iterator<V> {
@@ -276,7 +276,7 @@ public class TwoDimensionalMap<K1, K2, V> implements Serializable, Iterable<TwoD
         innerIterator = outerEntry.getValue().entrySet().iterator();
       }
       Map.Entry<K2, V> innerEntry = innerIterator.next();
-      next = new Entry<K1, K2, V>(k1, innerEntry.getKey(), innerEntry.getValue());
+      next = new Entry<>(k1, innerEntry.getKey(), innerEntry.getValue());
     }
 
     public void remove() {

@@ -59,7 +59,7 @@ public class GoogleNGramsSQLBacked {
 
   public static boolean existsTable(String tablename) throws SQLException {
     if(existingTablenames == null){
-      existingTablenames = new HashSet<String>();
+      existingTablenames = new HashSet<>();
       DatabaseMetaData md = connection.getMetaData();
       ResultSet rs = md.getTables(null, null, "%", null);
       while (rs.next()) {
@@ -109,7 +109,7 @@ public class GoogleNGramsSQLBacked {
 
   public static List<Pair<String, Long>> getCounts(Collection<String> strs) throws SQLException {
     connect();
-    List<Pair<String, Long>> counts = new ArrayList<Pair<String, Long>>();
+    List<Pair<String, Long>> counts = new ArrayList<>();
     String query = "";
     for(String str: strs) {
       str = str.trim();

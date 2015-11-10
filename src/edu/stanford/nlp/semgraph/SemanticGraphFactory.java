@@ -363,8 +363,8 @@ public class SemanticGraphFactory {
    * adding additional nodes.
    */
   public static SemanticGraph makeFromVertices(SemanticGraph sg, Collection<IndexedWord> nodes) {
-    List<SemanticGraphEdge> edgesToAdd = new ArrayList<SemanticGraphEdge>();
-    List<IndexedWord> nodesToAdd = new ArrayList<IndexedWord>(nodes);
+    List<SemanticGraphEdge> edgesToAdd = new ArrayList<>();
+    List<IndexedWord> nodesToAdd = new ArrayList<>(nodes);
     for (IndexedWord nodeA :nodes) {
       for (IndexedWord nodeB : nodes) {
         if (nodeA != nodeB) {
@@ -450,7 +450,7 @@ public class SemanticGraphFactory {
                                                  List<Integer> lengths) {
     SemanticGraph newGraph = new SemanticGraph();
     Map<Integer, IndexedWord> newWords = Generics.newHashMap();
-    List<IndexedWord> newRoots = new ArrayList<IndexedWord>();
+    List<IndexedWord> newRoots = new ArrayList<>();
     int vertexOffset = 0;
     for (int i = 0; i < graphs.size(); ++i) {
       SemanticGraph graph = graphs.get(i);

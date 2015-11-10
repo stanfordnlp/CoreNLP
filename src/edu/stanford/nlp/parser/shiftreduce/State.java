@@ -40,7 +40,7 @@ public class State implements Scored {
    * with CoreLabels and have HeadWord and HeadTag annotations set.
    */
   public State(List<Tree> sentence) {
-    this(new TreeShapedStack<Tree>(), new TreeShapedStack<Transition>(), findSeparators(sentence), sentence, 0, 0.0, false);
+    this(new TreeShapedStack<>(), new TreeShapedStack<>(), findSeparators(sentence), sentence, 0, 0.0, false);
   }
 
   State(TreeShapedStack<Tree> stack, TreeShapedStack<Transition> transitions, TreeMap<Integer, String> separators,
@@ -186,8 +186,8 @@ public class State implements Scored {
     for (int index = 0; index < sentence.size(); ++index) {
       Tree leaf = sentence.get(index).children()[0];
       String value = leaf.value();
-      for (int i = 0; i < equivalentSeparators.length; ++i) {
-        value = value.replace(equivalentSeparators[i][0], equivalentSeparators[i][1]);
+      for (char[] equivalentSeparator : equivalentSeparators) {
+        value = value.replace(equivalentSeparator[0], equivalentSeparator[1]);
       }
       if (separatorRegex.matcher(value).matches()) {
         // TODO: put "value" instead?  Perhaps do this next time we rebuild all models

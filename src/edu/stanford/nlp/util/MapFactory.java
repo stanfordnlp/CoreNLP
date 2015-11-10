@@ -94,7 +94,7 @@ public abstract class MapFactory<K,V> implements Serializable {
    * Return a MapFactory that returns a TreeMap with the given Comparator.
    */
   public static <K,V> MapFactory<K,V> treeMapFactory(Comparator<? super K> comparator) {
-    return new TreeMapFactory<K,V>(comparator);
+    return new TreeMapFactory<>(comparator);
   }
 
   /** Return a MapFactory that returns an LinkedHashMap.
@@ -170,17 +170,17 @@ public abstract class MapFactory<K,V> implements Serializable {
 
     @Override
     public Map<K,V> newMap() {
-      return new IdentityHashMap<K,V>();
+      return new IdentityHashMap<>();
     }
 
     @Override
     public Map<K,V> newMap(int initCapacity) {
-      return new IdentityHashMap<K,V>(initCapacity);
+      return new IdentityHashMap<>(initCapacity);
     }
 
     @Override
     public Set<K> newSet() {
-      return Collections.newSetFromMap(new IdentityHashMap<K, Boolean>());
+      return Collections.newSetFromMap(new IdentityHashMap<>());
     }
 
     @Override
@@ -192,13 +192,13 @@ public abstract class MapFactory<K,V> implements Serializable {
 
     @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map) {
-      map = new IdentityHashMap<K1,V1>();
+      map = new IdentityHashMap<>();
       return map;
     }
 
     @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map, int initCapacity) {
-      map = new IdentityHashMap<K1,V1>(initCapacity);
+      map = new IdentityHashMap<>(initCapacity);
       return map;
     }
 
@@ -211,22 +211,22 @@ public abstract class MapFactory<K,V> implements Serializable {
 
     @Override
     public Map<K,V> newMap() {
-      return new WeakHashMap<K,V>();
+      return new WeakHashMap<>();
     }
 
     @Override
     public Map<K,V> newMap(int initCapacity) {
-      return new WeakHashMap<K,V>(initCapacity);
+      return new WeakHashMap<>(initCapacity);
     }
 
     @Override
     public Set<K> newSet() {
-      return Collections.newSetFromMap(new WeakHashMap<K, Boolean>());
+      return Collections.newSetFromMap(new WeakHashMap<>());
     }
 
     @Override
     public Set<K> newSet(Collection<K> init) {
-      Set<K> set = Collections.newSetFromMap(new WeakHashMap<K, Boolean>());
+      Set<K> set = Collections.newSetFromMap(new WeakHashMap<>());
       set.addAll(init);
       return set;
     }
@@ -234,13 +234,13 @@ public abstract class MapFactory<K,V> implements Serializable {
 
     @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map) {
-      map = new WeakHashMap<K1,V1>();
+      map = new WeakHashMap<>();
       return map;
     }
 
     @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map, int initCapacity) {
-      map = new WeakHashMap<K1,V1>(initCapacity);
+      map = new WeakHashMap<>(initCapacity);
       return map;
     }
 
@@ -263,7 +263,7 @@ public abstract class MapFactory<K,V> implements Serializable {
 
     @Override
     public Map<K,V> newMap() {
-      return comparator == null ? new TreeMap<K,V>() : new TreeMap<K,V>(comparator);
+      return comparator == null ? new TreeMap<>() : new TreeMap<>(comparator);
     }
 
     @Override
@@ -273,7 +273,7 @@ public abstract class MapFactory<K,V> implements Serializable {
 
     @Override
     public Set<K> newSet() {
-      return comparator == null ? new TreeSet<K>() : new TreeSet<K>(comparator);
+      return comparator == null ? new TreeSet<>() : new TreeSet<>(comparator);
     }
 
     @Override
@@ -287,7 +287,7 @@ public abstract class MapFactory<K,V> implements Serializable {
       if (comparator == null) {
         throw new UnsupportedOperationException();
       }
-      map = new TreeMap<K1,V1>();
+      map = new TreeMap<>();
       return map;
     }
 
@@ -296,7 +296,7 @@ public abstract class MapFactory<K,V> implements Serializable {
       if (comparator == null) {
         throw new UnsupportedOperationException();
       }
-      map = new TreeMap<K1,V1>();
+      map = new TreeMap<>();
       return map;
     }
 
@@ -308,7 +308,7 @@ public abstract class MapFactory<K,V> implements Serializable {
 
     @Override
     public Map<K,V> newMap() {
-      return new LinkedHashMap<K,V>();
+      return new LinkedHashMap<>();
     }
 
     @Override
@@ -318,7 +318,7 @@ public abstract class MapFactory<K,V> implements Serializable {
 
     @Override
     public Set<K> newSet() {
-      return new LinkedHashSet<K>();
+      return new LinkedHashSet<>();
     }
 
     @Override
@@ -329,13 +329,13 @@ public abstract class MapFactory<K,V> implements Serializable {
 
     @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map) {
-      map = new LinkedHashMap<K1,V1>();
+      map = new LinkedHashMap<>();
       return map;
     }
 
     @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map, int initCapacity) {
-      map = new LinkedHashMap<K1,V1>();
+      map = new LinkedHashMap<>();
       return map;
     }
 
@@ -348,32 +348,32 @@ public abstract class MapFactory<K,V> implements Serializable {
 
     @Override
     public Map<K,V> newMap() {
-      return new ArrayMap<K,V>();
+      return new ArrayMap<>();
     }
 
     @Override
     public Map<K,V> newMap(int initCapacity) {
-      return new ArrayMap<K,V>(initCapacity);
+      return new ArrayMap<>(initCapacity);
     }
 
     @Override
     public Set<K> newSet() {
-      return new ArraySet<K>();
+      return new ArraySet<>();
     }
 
     @Override
     public Set<K> newSet(Collection<K> init) {
-      return new ArraySet<K>();
+      return new ArraySet<>();
     }
 
     @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1, V1> map) {
-      return new ArrayMap<K1,V1>();
+      return new ArrayMap<>();
     }
 
     @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map, int initCapacity) {
-      map = new ArrayMap<K1,V1>(initCapacity);
+      map = new ArrayMap<>(initCapacity);
       return map;
     }
 
@@ -386,34 +386,34 @@ public abstract class MapFactory<K,V> implements Serializable {
 
     @Override
     public Map<K,V> newMap() {
-      return new ConcurrentHashMap<K,V>();
+      return new ConcurrentHashMap<>();
     }
 
     @Override
     public Map<K,V> newMap(int initCapacity) {
-      return new ConcurrentHashMap<K,V>(initCapacity);
+      return new ConcurrentHashMap<>(initCapacity);
     }
 
     @Override
     public Set<K> newSet() {
-      return Collections.newSetFromMap(new ConcurrentHashMap<K, Boolean>());
+      return Collections.newSetFromMap(new ConcurrentHashMap<>());
     }
 
     @Override
     public Set<K> newSet(Collection<K> init) {
-      Set<K> set = Collections.newSetFromMap(new ConcurrentHashMap<K, Boolean>());
+      Set<K> set = Collections.newSetFromMap(new ConcurrentHashMap<>());
       set.addAll(init);
       return set;
     }
 
     @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1, V1> map) {
-      return new ConcurrentHashMap<K1,V1>();
+      return new ConcurrentHashMap<>();
     }
 
     @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map, int initCapacity) {
-      map = new ConcurrentHashMap<K1,V1>(initCapacity);
+      map = new ConcurrentHashMap<>(initCapacity);
       return map;
     }
 

@@ -25,7 +25,7 @@ import java.util.*;
  */
 public class TTags {
 
-  private Index<String> index = new HashIndex<String>();
+  private Index<String> index = new HashIndex<>();
   private final Set<String> closed = Generics.newHashSet();
   private Set<String> openTags = null; /* cache */
   private final boolean isEnglish; // for speed
@@ -286,7 +286,7 @@ public class TTags {
    * @return The Set of tags used by this tagger
    */
   public Set<String> tagSet() {
-    return new HashSet<String>(index.objectsList());
+    return new HashSet<>(index.objectsList());
   }
 
 
@@ -360,7 +360,7 @@ public class TTags {
   protected void read(DataInputStream file) {
     try {
       int size = file.readInt();
-      index = new HashIndex<String>();
+      index = new HashIndex<>();
       for (int i = 0; i < size; i++) {
         String tag = file.readUTF();
         boolean inClosed = file.readBoolean();
