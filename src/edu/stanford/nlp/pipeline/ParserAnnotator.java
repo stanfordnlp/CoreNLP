@@ -1,6 +1,5 @@
 package edu.stanford.nlp.pipeline;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -17,7 +16,6 @@ import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
 import edu.stanford.nlp.trees.*;
-import edu.stanford.nlp.trees.ud.UniversalDependenciesFeatureAnnotator;
 import edu.stanford.nlp.util.*;
 
 import java.util.function.Function;
@@ -97,7 +95,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     } else {
       this.gsf = null;
     }
-    
+
     this.nThreads = 1;
     this.saveBinaryTrees = false;
     this.noSquash = false;
@@ -190,7 +188,7 @@ public class ParserAnnotator extends SentenceAnnotator {
   }
 
   public static String[] convertFlagsToArray(String parserFlags) {
-    if (parserFlags == null || parserFlags.trim().equals("")) {
+    if (parserFlags == null || parserFlags.trim().isEmpty()) {
       return StringUtils.EMPTY_STRING_ARRAY;
     } else {
       return parserFlags.trim().split("\\s+");
@@ -223,7 +221,7 @@ public class ParserAnnotator extends SentenceAnnotator {
   @Override
   protected long maxTime() {
     return maxParseTime;
-  };  
+  }
 
   @Override
   protected void doOneSentence(Annotation annotation, CoreMap sentence) {
@@ -285,7 +283,7 @@ public class ParserAnnotator extends SentenceAnnotator {
       }
       trees = mappedTrees;
     }
-    
+
     ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, trees, extraDependencies);
 
     if (saveBinaryTrees) {
@@ -296,15 +294,15 @@ public class ParserAnnotator extends SentenceAnnotator {
     }
   }
 
+  // todo [cdm 2015]: This should just use bestParse method if only getting 1 best parse.
   private List<Tree> doOneSentence(List<ParserConstraint> constraints,
                              List<CoreLabel> words) {
     ParserQuery pq = parser.parserQuery();
     pq.setConstraints(constraints);
     pq.parse(words);
-    List<ScoredObject<Tree>> scoredObjects = null;
     List<Tree> trees = Generics.newLinkedList();
     try {
-      scoredObjects = pq.getKBestPCFGParses(this.kBest);
+      List<ScoredObject<Tree>> scoredObjects = pq.getKBestPCFGParses(this.kBest);
       if (scoredObjects == null || scoredObjects.size() < 1) {
         System.err.println("WARNING: Parsing of sentence failed.  " +
                 "Will ignore and continue: " +
@@ -350,4 +348,5 @@ public class ParserAnnotator extends SentenceAnnotator {
       }
     }
   }
+
 }
