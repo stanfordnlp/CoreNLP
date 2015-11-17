@@ -1581,8 +1581,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   @Override
   public boolean equals(Object obj) {
 
-    if (obj == null) { return false; }
     if (obj == this) { return true; }
+    if (obj == null) { return false; }
     if (obj.getClass() != getClass()) { return false; }
 
     Mention rhs = (Mention) obj;
@@ -1595,7 +1595,6 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if (!Objects.equals(headString, rhs.headString)) { return false; }
     if (!Objects.equals(nerString, rhs.nerString)) { return false; }
 
-
     if (startIndex != rhs.startIndex) { return false; }
     if (endIndex != rhs.endIndex) { return false; }
     if (headIndex != rhs.headIndex) { return false; }
@@ -1603,6 +1602,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if (originalRef != rhs.originalRef) { return false; }
 
     if (!Objects.equals(headIndexedWord, rhs.headIndexedWord)) { return false; }
+    if (!Objects.equals(dependingVerb, rhs.dependingVerb)) { return false; }
+    if (!Objects.equals(headWord, rhs.headWord)) { return false; }
 
     if (goldCorefClusterID != rhs.goldCorefClusterID) { return false; }
     if (corefClusterID != rhs.corefClusterID) { return false; }
@@ -1623,7 +1624,14 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if (!Objects.equals(originalSpan, rhs.originalSpan)) { return false; }
     if (!Objects.equals(sentenceWords, rhs.sentenceWords))  { return false; }
 
+    if (!Objects.equals(basicDependency, rhs.basicDependency)) { return false; }
+    if (!Objects.equals(collapsedDependency, rhs.collapsedDependency)) { return false; }
+    if (!Objects.equals(contextParseTree, rhs.contextParseTree)) { return false; }
+
+    if (!Objects.equals(dependents, rhs.dependents)) { return false; }
+    if (!Objects.equals(preprocessedTerms, rhs.preprocessedTerms)) { return false; }
+
     return true;
   }
-
+  
 }
