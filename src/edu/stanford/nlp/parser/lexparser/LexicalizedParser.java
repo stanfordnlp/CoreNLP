@@ -62,6 +62,9 @@ import java.util.zip.ZipFile;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This class provides the top-level API and command-line interface to a set
  * of reasonably good treebank-trained parsers.  The name reflects the main
@@ -88,6 +91,8 @@ import java.lang.reflect.Method;
  * @author John Bauer (made threadsafe)
  */
 public class LexicalizedParser extends ParserGrammar implements Serializable {
+
+  private static Logger logger = LoggerFactory.getLogger(LexicalizedParser.class);
 
   public Lexicon lex;
   public BinaryGrammar bg;
@@ -535,7 +540,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
   protected static LexicalizedParser getParserFromTextFile(String textFileOrUrl, Options op) {
     try {
       Timing tim = new Timing();
-      System.err.print("Loading parser from text file " + textFileOrUrl + ' ');
+      logger.info("Loading parser from text file " + textFileOrUrl + ' ');
       BufferedReader in = IOUtils.readerFromString(textFileOrUrl);
       Timing.startTime();
 
@@ -601,7 +606,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
   public static LexicalizedParser getParserFromSerializedFile(String serializedFileOrUrl) {
     try {
       Timing tim = new Timing();
-      System.err.print("Loading parser from serialized file " + serializedFileOrUrl + " ... ");
+      logger.info("Loading parser from serialized file " + serializedFileOrUrl + " ... ");
       ObjectInputStream in = IOUtils.readStreamFromString(serializedFileOrUrl);
       LexicalizedParser pd = loadModel(in);
 
