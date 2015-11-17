@@ -18,8 +18,6 @@ import edu.stanford.nlp.process.WhitespaceTokenizer;
 import edu.stanford.nlp.international.spanish.process.SpanishTokenizer;
 import edu.stanford.nlp.international.french.process.FrenchTokenizer;
 import edu.stanford.nlp.util.Generics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -34,8 +32,6 @@ import org.slf4j.LoggerFactory;
  * @author Ishita Prasad
  */
 public class TokenizerAnnotator implements Annotator {
-
-  private static Logger logger = LoggerFactory.getLogger(TokenizerAnnotator.class);
 
   /**
    * Enum to identify the different TokenizerTypes. To add a new
@@ -227,7 +223,7 @@ public class TokenizerAnnotator implements Annotator {
       break;
 
     case Unspecified:
-      logger.info("TokenizerAnnotator: No tokenizer type provided. Defaulting to PTBTokenizer.");
+      System.err.println("TokenizerAnnotator: No tokenizer type provided. Defaulting to PTBTokenizer.");
       factory = PTBTokenizer.factory(new CoreLabelTokenFactory(), options);
       break;
 
@@ -235,6 +231,7 @@ public class TokenizerAnnotator implements Annotator {
       throw new IllegalArgumentException("No valid tokenizer type provided.\n" +
                                          "Use -tokenize.language, -tokenize.class, or -tokenize.whitespace \n" +
                                          "to specify a tokenizer.");
+
     }
     return factory;
   }

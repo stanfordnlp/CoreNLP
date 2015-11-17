@@ -1,5 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
+import java.io.IOException;
 import java.util.List;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -11,6 +12,7 @@ import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
+import edu.stanford.nlp.trees.ud.UniversalDependenciesFeatureAnnotator;
 import edu.stanford.nlp.util.CoreMap;
 
 
@@ -68,6 +70,7 @@ public class ParserAnnotatorUtils {
           sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, uncollapsedDeps);
           sentence.set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, ccDeps);
         }
+
 
         first = false;
       }

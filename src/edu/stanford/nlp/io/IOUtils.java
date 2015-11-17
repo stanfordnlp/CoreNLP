@@ -20,9 +20,6 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Helper Class for various I/O related things.
  *
@@ -37,8 +34,6 @@ public class IOUtils {
 
   public static final String eolChar = System.getProperty("line.separator");
   public static final String defaultEncoding = "utf-8";
-
-  private static Logger logger = LoggerFactory.getLogger(IOUtils.class);
 
   // A class of static methods
   private IOUtils() { }
@@ -142,7 +137,7 @@ public class IOUtils {
     try {
       return writeObjectToTempFile(o, filename);
     } catch (Exception e) {
-      logger.error("Error writing object to file " + filename);
+      System.err.println("Error writing object to file " + filename);
       e.printStackTrace();
       return null;
     }
@@ -329,7 +324,7 @@ public class IOUtils {
     T obj;
     try {
       Timing timing = new Timing();
-      logger.error(msg + ' ' + path + " ... ");
+      System.err.print(msg + ' ' + path + " ... ");
       obj = IOUtils.readObjectFromURLOrClasspathOrFileSystem(path);
       timing.done();
     } catch (IOException | ClassNotFoundException e) {
@@ -1195,7 +1190,7 @@ public class IOUtils {
       is = uc.getInputStream();
     } catch (SocketTimeoutException e) {
       // e.printStackTrace();
-      logger.error("Time out. Return empty string");
+      System.err.println("Time out. Return empty string");
       return "";
     }
     BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
@@ -1386,7 +1381,7 @@ public class IOUtils {
     String[] labels = null;
     List<Map<String,String>> rows = Generics.newArrayList();
     for (String line : IOUtils.readLines(path)) {
-      logger.info("Splitting "+line);
+      System.out.println("Splitting "+line);
       if (labels == null) {
         labels = StringUtils.splitOnCharWithQuoting(line,',','"',escapeChar);
       } else {

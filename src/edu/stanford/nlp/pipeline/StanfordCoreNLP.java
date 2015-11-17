@@ -45,9 +45,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
 /**
@@ -95,8 +92,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   public static final String DEFAULT_NEWLINE_IS_SENTENCE_BREAK = "never";
 
   public static final String DEFAULT_OUTPUT_FORMAT = isXMLOutputPresent() ? "xml" : "text";
-
-  private static final Logger logger = LoggerFactory.getLogger(StanfordCoreNLP.class);
 
   /** Formats the constituent parse trees for display */
   private TreePrint constituentTreePrinter;
@@ -183,7 +178,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   private static String getRequiredProperty(Properties props, String name) {
     String val = props.getProperty(name);
     if (val == null) {
-      logger.error("Missing property \"" + name + "\"!");
+      System.err.println("Missing property \"" + name + "\"!");
       printRequiredProperties(System.err);
       throw new RuntimeException("Missing property: \"" + name + '\"');
     }
@@ -357,7 +352,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     for (String name : annoNames) {
       name = name.trim();
       if (name.isEmpty()) { continue; }
-      logger.info("Adding annotator " + name);
+      System.err.println("Adding annotator " + name);
 
       Annotator an = pool.get(name);
       this.addAnnotator(an);
@@ -440,7 +435,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         final String customName =
             property.substring(CUSTOM_ANNOTATOR_PREFIX.length());
         final String customClassName = inputProps.getProperty(property);
-        logger.info("Registering annotator " + customName + " with class " + customClassName);
+        System.err.println("Registering annotator " + customName +
+            " with class " + customClassName);
         pool.register(customName, new AnnotatorFactory(inputProps, annotatorImplementation) {
           private static final long serialVersionUID = 1L;
           @Override
@@ -471,15 +467,14 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
   public static synchronized Annotator getExistingAnnotator(String name) {
     if(pool == null){
-      logger.error("ERROR: attempted to fetch annotator \"" + name + "\" before the annotator pool was created!");
+      System.err.println("ERROR: attempted to fetch annotator \"" + name + "\" before the annotator pool was created!");
       return null;
     }
     try {
       Annotator a =  pool.get(name);
       return a;
     } catch(IllegalArgumentException e) {
-      logger.error("ERROR: attempted to fetch annotator \"" + name +
-        "\" but the annotator pool does not store any such type!");
+      System.err.println("ERROR: attempted to fetch annotator \"" + name + "\" but the annotator pool does not store any such type!");
       return null;
     }
   }
@@ -873,8 +868,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
             if (outputSerializerClass != null) {
               AnnotationSerializer outputSerializer = loadSerializer(outputSerializerClass, outputSerializerName, properties);
               outputSerializer.write(annotation, fos);
+              break;
             }
-            break;
           }
           case CONLLU:
             new CoNLLUOutputter().print(annotation, fos, outputOptions);
@@ -905,7 +900,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                                      Properties properties, BiConsumer<Annotation, Consumer<Annotation>> annotate,
                                      BiConsumer<Annotation, OutputStream> print,
                                      OutputFormat outputFormat) throws IOException {
-    // List<Runnable> toRun = new LinkedList<>();
+    List<Runnable> toRun = new LinkedList<>();
 
     // Process properties here
     final String baseOutputDir = properties.getProperty("outputDirectory", ".");
