@@ -284,7 +284,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
     for (String filename:filenames) {
       try {
         System.err.println("Reading TokensRegex rules from " + filename);
-        BufferedReader br = IOUtils.getBufferedReaderFromClasspathOrFileSystem(filename);
+        BufferedReader br = IOUtils.readerFromString(filename);
         TokenSequenceParser parser = new TokenSequenceParser();
         parser.updateExpressionExtractor(extractor, br);
         IOUtils.closeIgnoringExceptions(br);
@@ -302,16 +302,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
    * @throws RuntimeException
    */
   public static CoreMapExpressionExtractor createExtractorFromFile(Env env, String filename) throws RuntimeException {
-    try {
-      System.err.println("Reading TokensRegex rules from " + filename);
-      BufferedReader br = IOUtils.getBufferedReaderFromClasspathOrFileSystem(filename);
-      TokenSequenceParser parser = new TokenSequenceParser();
-      CoreMapExpressionExtractor extractor = parser.getExpressionExtractor(env, br);
-      IOUtils.closeIgnoringExceptions(br);
-      return extractor;
-    } catch (Exception ex) {
-      throw new RuntimeException("Error parsing file: " + filename, ex);
-    }
+    return createExtractorFromFiles(env, Collections.singletonList(filename));
   }
 
   /**
