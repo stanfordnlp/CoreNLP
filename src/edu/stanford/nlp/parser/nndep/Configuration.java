@@ -27,15 +27,15 @@ public class Configuration {
   final CoreMap sentence;
 
   public Configuration(Configuration config) {
-    stack = new ArrayList<>(config.stack);
-    buffer = new ArrayList<>(config.buffer);
+    stack = new ArrayList<Integer>(config.stack);
+    buffer = new ArrayList<Integer>(config.buffer);
     tree = new DependencyTree(config.tree);
     sentence = new CoreLabel(config.sentence);
   }
 
   public Configuration(CoreMap sentence) {
-    this.stack = new ArrayList<>();
-    this.buffer = new ArrayList<>();
+    this.stack = new ArrayList<Integer>();
+    this.buffer = new ArrayList<Integer>();
     this.tree = new DependencyTree();
     this.sentence = sentence;
   }
@@ -215,15 +215,16 @@ public class Configuration {
     if (k < 0 || k > tree.n)
       return Config.NULL;
 
-    HashSet<String> labelSet = new HashSet<>();
+    HashSet<String> labelSet = new HashSet<String>();
     for (int i = 1; i < k; ++i)
       if (tree.getHead(i) == k)
         labelSet.add(tree.getLabel(i));
 
-    List<String> ls = new ArrayList<>(labelSet);
+    List<String> ls = new ArrayList<String>(labelSet);
     Collections.sort(ls);
     String s = "";
-    for (String l : ls) s = s + "/" + l;
+    for (int i = 0; i < ls.size(); ++i)
+      s = s + "/" + ls.get(i);
     return s;
   }
 
@@ -231,15 +232,16 @@ public class Configuration {
     if (k < 0 || k > tree.n)
       return Config.NULL;
 
-    HashSet<String> labelSet = new HashSet<>();
+    HashSet<String> labelSet = new HashSet<String>();
     for (int i = k + 1; i <= tree.n; ++i)
       if (tree.getHead(i) == k)
         labelSet.add(tree.getLabel(i));
 
-    List<String> ls = new ArrayList<>(labelSet);
+    List<String> ls = new ArrayList<String>(labelSet);
     Collections.sort(ls);
     String s = "";
-    for (String l : ls) s = s + "/" + l;
+    for (int i = 0; i < ls.size(); ++i)
+      s = s + "/" + ls.get(i);
     return s;
   }
 

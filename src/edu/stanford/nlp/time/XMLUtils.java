@@ -122,7 +122,7 @@ public class XMLUtils {
   }
 
   public static List<Node> getNodes(Node node, Pattern... nodePath) {
-    List<Node> res = new ArrayList<>();
+    List<Node> res = new ArrayList<Node>();
     getMatchingNodes(node, nodePath, 0, res);
     return res;
   }
@@ -165,7 +165,7 @@ public class XMLUtils {
   }
 
   public static List<Node> getNodes(Node node, String... nodePath) {
-    List<Node> res = new ArrayList<>();
+    List<Node> res = new ArrayList<Node>();
     getMatchingNodes(node, nodePath, 0, res);
     return res;
   }
@@ -173,7 +173,7 @@ public class XMLUtils {
   public static List<String> getNodeTexts(Node node, String... nodePath) {
     List<Node> nodes = getNodes(node, nodePath);
     if (nodes != null) {
-      List<String> strs = new ArrayList<>(nodes.size());
+      List<String> strs = new ArrayList<String>(nodes.size());
       for (Node n:nodes) {
         strs.add(n.getTextContent());
       }

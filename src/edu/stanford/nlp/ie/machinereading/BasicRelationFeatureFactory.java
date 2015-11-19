@@ -84,7 +84,7 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
   }
 
   public Datum<String,String> createDatum(RelationMention rel, Logger logger) {
-    Counter<String> features = new ClassicCounter<>();
+    Counter<String> features = new ClassicCounter<String>();
     if (rel.getArgs().size() != 2) {
       return null;
     }
@@ -92,7 +92,7 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
     addFeatures(features, rel, featureList, logger);
 
     String labelString = rel.getType();
-    return new RVFDatum<>(features, labelString);
+    return new RVFDatum<String, String>(features, labelString);
   }
 
   @Override
@@ -101,7 +101,7 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
   }
 
   public Datum<String,String> createDatum(RelationMention rel, String positiveLabel) {
-    Counter<String> features = new ClassicCounter<>();
+    Counter<String> features = new ClassicCounter<String>();
     if (rel.getArgs().size() != 2) {
       return null;
     }
@@ -110,7 +110,7 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
 
     String labelString = rel.getType();
     if(! labelString.equals(positiveLabel)) labelString = RelationMention.UNRELATED;
-    return new RVFDatum<>(features, labelString);
+    return new RVFDatum<String, String>(features, labelString);
   }
 
   public boolean addFeatures(Counter<String> features, RelationMention rel, List<String> types) {
@@ -160,7 +160,7 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
 
     // Checklist keeps track of which features have been handled by an if clause
     // Should be empty after all the clauses have been gone through.
-    List<String> checklist = new ArrayList<>(types);
+    List<String> checklist = new ArrayList<String>(types);
 
     // arg_type: concatenation of the entity types of the args, e.g.
     // "arg1type=Loc_and_arg2type=Org"
@@ -292,7 +292,7 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
     //
     // conjunction_surface_windows_POS: concatenation of windows of the args
 
-    List<EntityMention> args = new ArrayList<>();
+    List<EntityMention> args = new ArrayList<EntityMention>();
     args.add(arg0); args.add(arg1);
     for (int windowSize = 1; windowSize <= 3; windowSize++) {
 
@@ -396,7 +396,7 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
 
     // entity_counts: For each type, the total number of entities of that type in the sentence (integer-valued feature)
     // entity_counts_binary: Counts of entity types as binary features.
-    Counter<String> typeCounts = new ClassicCounter<>();
+    Counter<String> typeCounts = new ClassicCounter<String>();
     if(rel.getSentence().get(MachineReadingAnnotations.EntityMentionsAnnotation.class) != null){ // may be null due to annotation errors!
       for (EntityMention arg : rel.getSentence().get(MachineReadingAnnotations.EntityMentionsAnnotation.class))
         typeCounts.incrementCount(arg.getType());
@@ -538,7 +538,7 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
         features.setCount("arg_different_gender", 1.0);
     }
 
-    List<String> tempDepFeatures = new ArrayList<>(dependencyFeatures);
+    List<String> tempDepFeatures = new ArrayList<String>(dependencyFeatures);
     if (tempDepFeatures.removeAll(types) || types.contains("all")) { // dependencyFeatures contains at least one of the features listed in types
       addDependencyPathFeatures(features, rel, arg0, arg1, types, checklist, logger);
     }
@@ -547,7 +547,7 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
       throw new AssertionError("RelationFeatureFactory: features not handled: "+checklist);
 
 
-    List<String> featureList = new ArrayList<>(features.keySet());
+    List<String> featureList = new ArrayList<String>(features.keySet());
     Collections.sort(featureList);
 
 //    for (String feature : featureList) {
@@ -646,10 +646,10 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
       features.setCount("dependency_path_lowlevel:" + depLowLevel, 1.0);
     }
 
-    List<String> pathLemmas = new ArrayList<>();
-    List<String> noArgPathLemmas = new ArrayList<>();
+    List<String> pathLemmas = new ArrayList<String>();
+    List<String> noArgPathLemmas = new ArrayList<String>();
     // do not add to pathLemmas words that belong to one of the two args
-    Set<Integer> indecesToSkip = new HashSet<>();
+    Set<Integer> indecesToSkip = new HashSet<Integer>();
     for(int i = arg0.getExtentTokenStart(); i < arg0.getExtentTokenEnd(); i ++) indecesToSkip.add(i + 1);
     for(int i = arg1.getExtentTokenStart(); i < arg1.getExtentTokenEnd(); i ++) indecesToSkip.add(i + 1);
     for (IndexedWord node : pathNodes){
@@ -933,7 +933,7 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
 
   public static List<String> dependencyPathAsList(List<SemanticGraphEdge> edgePath, IndexedWord node, boolean generalize) {
     if(edgePath == null) return null;
-    List<String> path = new ArrayList<>();
+    List<String> path = new ArrayList<String>();
     for (SemanticGraphEdge edge : edgePath) {
       IndexedWord nextNode;
       GrammaticalRelation relation;
@@ -969,8 +969,8 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
   }
 
   public Set<String> getFeatures(RelationMention rel, String featureType) {
-    Counter<String> features = new ClassicCounter<>();
-    List<String> singleton = new ArrayList<>();
+    Counter<String> features = new ClassicCounter<String>();
+    List<String> singleton = new ArrayList<String>();
     singleton.add(featureType);
     addFeatures(features, rel, singleton);
     return features.keySet();

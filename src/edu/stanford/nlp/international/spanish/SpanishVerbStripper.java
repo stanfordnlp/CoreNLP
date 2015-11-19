@@ -105,9 +105,12 @@ public final class SpanishVerbStripper implements Serializable {
     new Pair(Pattern.compile("ú"), "u")
   };
 
-  // CONSTRUCTOR
+  // CONSTRUCTORS
 
-  /** Access via the singleton-like getInstance() methods. */
+  private SpanishVerbStripper() {
+    this(DEFAULT_DICT);
+  }
+
   private SpanishVerbStripper(String dictPath) {
     dict = setupDictionary(dictPath);
   }
@@ -138,18 +141,18 @@ public final class SpanishVerbStripper implements Serializable {
    * The verbs in this set have accents in their infinitive forms;
    * don't remove the accents when stripping pronouns!
    */
-  private static final Set<String> accentedInfinitives = new HashSet<>(Arrays.asList(
-          "desleír",
-          "desoír",
-          "embaír",
-          "engreír",
-          "entreoír",
-          "freír",
-          "oír",
-          "refreír",
-          "reír",
-          "sofreír",
-          "sonreír"
+  private static final Set<String> accentedInfinitives = new HashSet<String>(Arrays.asList(
+    "desleír",
+    "desoír",
+    "embaír",
+    "engreír",
+    "entreoír",
+    "freír",
+    "oír",
+    "refreír",
+    "reír",
+    "sofreír",
+    "sonreír"
   ));
 
   // STATIC FUNCTIONS
@@ -186,8 +189,6 @@ public final class SpanishVerbStripper implements Serializable {
       return Character.toLowerCase(letter);
     }
   }
-
-  private static final Pattern nosse = Pattern.compile("nos|se");
 
   /**
    * Examines the given verb pair and returns <tt>true</tt> if it is a
@@ -230,7 +231,7 @@ public final class SpanishVerbStripper implements Serializable {
     // person plural imperative + object pronoun
     //
     // (vámo, nos) -> (vámos, nos)
-    if (nosse.matcher(firstPron).matches() && dict.containsKey(stripped + 's')) {
+    if (firstPron.matches("nos|se") && dict.containsKey(stripped + 's')) {
       pair.setFirst(pair.first() + getCase(pair.first(), 's'));
       return true;
     }
@@ -254,7 +255,7 @@ public final class SpanishVerbStripper implements Serializable {
       String stripped = word.substring(0, m.start());
       stripped = removeAccents(stripped);
 
-      List<String> attached = new ArrayList<>();
+      List<String> attached = new ArrayList<String>();
       for (int i = 0; i < m.groupCount(); i++)
         attached.add(m.group(i + 1));
 

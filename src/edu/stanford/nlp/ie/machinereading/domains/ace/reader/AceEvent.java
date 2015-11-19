@@ -39,7 +39,7 @@ public class AceEvent extends AceElement {
     mPolarity = polarity;
     mGenericity = genericity;
     mTense = tense;
-    mMentions = new ArrayList<>();
+    mMentions = new ArrayList<AceEventMention>();
   }
 
   public void addMention(AceEventMention m) { 

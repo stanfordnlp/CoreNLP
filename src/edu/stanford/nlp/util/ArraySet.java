@@ -25,7 +25,7 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
    * @param initialSize initial size of the backing array.
    */
   public ArraySet(int initialSize) {
-    backer = new ArrayList<>(initialSize);
+    backer = new ArrayList<E>(initialSize);
   }
 
   /**

@@ -103,16 +103,16 @@ public class TimeFormatter {
                                      Pattern pattern,
                                      Function<String, Value> extractor)
     {
-      MatchedExpression.SingleAnnotationExtractor annotationExtractor = SequenceMatchRules.createAnnotationExtractor(env,r);
-      annotationExtractor.valueExtractor =
-              new SequenceMatchRules.CoreMapFunctionApplier<>(
+      MatchedExpression.SingleAnnotationExtractor valueExtractor = SequenceMatchRules.createAnnotationExtractor(env,r);
+      valueExtractor.valueExtractor =
+              new SequenceMatchRules.CoreMapFunctionApplier< String, Value>(
                       env, r.annotationField,
                       extractor);
-      r.extractRule = new SequenceMatchRules.CoreMapExtractRule<>(
+      r.extractRule = new SequenceMatchRules.CoreMapExtractRule< String, MatchedExpression >(
               env, r.annotationField,
-              new SequenceMatchRules.StringPatternExtractRule<>(pattern,
-                      new SequenceMatchRules.StringMatchedExpressionExtractor(annotationExtractor, r.matchedExpressionGroup)));
-      r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(annotationExtractor);
+              new SequenceMatchRules.StringPatternExtractRule<MatchedExpression>(pattern,
+                      new SequenceMatchRules.StringMatchedExpressionExtractor( valueExtractor, r.matchedExpressionGroup)));
+      r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(valueExtractor);
       r.pattern = pattern;
     }
 
@@ -120,12 +120,12 @@ public class TimeFormatter {
                                      Env env,
                                      Function<CoreMap, Value> extractor)
     {
-      MatchedExpression.SingleAnnotationExtractor annotationExtractor = SequenceMatchRules.createAnnotationExtractor(env,r);
-      annotationExtractor.valueExtractor = extractor;
-      r.extractRule = new SequenceMatchRules.CoreMapExtractRule<>(
+      MatchedExpression.SingleAnnotationExtractor valueExtractor = SequenceMatchRules.createAnnotationExtractor(env,r);
+      valueExtractor.valueExtractor = extractor;
+      r.extractRule = new SequenceMatchRules.CoreMapExtractRule<List<? extends CoreMap>, MatchedExpression >(
               env, r.annotationField,
-              new SequenceMatchRules.BasicSequenceExtractRule(annotationExtractor));
-      r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(annotationExtractor);
+              new SequenceMatchRules.BasicSequenceExtractRule(valueExtractor));
+      r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(valueExtractor);
     }
 
     @Override
@@ -396,7 +396,7 @@ public class TimeFormatter {
       MutableDateTime.Property property = dt.property(fieldType);
       minValue = property.getMinimumValueOverall();
       maxValue = property.getMaximumValueOverall();
-      this.validValues = new ArrayList<>(maxValue - minValue + 1);
+      this.validValues = new ArrayList<String>(maxValue-minValue+1);
       this.valueMapping = Generics.newHashMap();
       for (int i = minValue; i <= maxValue; i++) {
         property.set(i);
@@ -551,7 +551,7 @@ public class TimeFormatter {
     static final List<String> timeZoneIds;
     static final String timeZoneIdsRegex;
     static {
-      timeZoneIds = new ArrayList<>(DateTimeZone.getAvailableIDs());
+      timeZoneIds = new ArrayList<String>(DateTimeZone.getAvailableIDs());
       timeZonesById = Generics.newHashMap();
       for (String str:timeZoneIds) {
         DateTimeZone dtz = DateTimeZone.forID(str);
@@ -614,7 +614,7 @@ public class TimeFormatter {
     private void updateTimeZoneNames(Locale locale) {
       long time1 = new SUTime.IsoDate(2013,1,1).getJodaTimeInstant().getMillis();
       long time2 = new SUTime.IsoDate(2013,6,1).getJodaTimeInstant().getMillis();
-      CollectionValuedMap<String,DateTimeZone> tzMap = new CollectionValuedMap<>();
+      CollectionValuedMap<String,DateTimeZone> tzMap = new CollectionValuedMap<String, DateTimeZone>();
       for (DateTimeZone dtz:TimeZoneIdComponent.timeZonesById.values()) {
         // standard timezones
         tzMap.add(dtz.getShortName(time1, locale).toLowerCase(), dtz);
@@ -626,7 +626,7 @@ public class TimeFormatter {
 //      tzMap.add(dtz.getID().toLowerCase(), dtz);
       }
       // Order by length for regex
-      List<String> tzNames = new ArrayList<>(tzMap.keySet());
+      List<String> tzNames = new ArrayList<String>(tzMap.keySet());
       Collections.sort(tzNames, STRING_LENGTH_REV_COMPARATOR);
       String tzRegex = makeRegex(tzNames);
       synchronized (TimeZoneComponent.class) {
@@ -694,7 +694,7 @@ public class TimeFormatter {
     boolean useRelaxedHour = true;
     Locale locale;
     DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder();
-    List<FormatComponent> pieces = new ArrayList<>();
+    List<FormatComponent> pieces = new ArrayList<FormatComponent>();
     int curGroup = 0;
 
     public DateTimeFormatter toFormatter() {

@@ -51,9 +51,9 @@ public class EntityExtractorResultsPrinter extends ResultsPrinter {
 	    List<CoreMap> extractorOutput) {
 		ResultsPrinter.align(goldStandard, extractorOutput);
 
-		Counter<String> correct = new ClassicCounter<>();
-		Counter<String> predicted = new ClassicCounter<>();
-		Counter<String> gold = new ClassicCounter<>();
+		Counter<String> correct = new ClassicCounter<String>();
+		Counter<String> predicted = new ClassicCounter<String>();
+		Counter<String> gold = new ClassicCounter<String>();
 
 		for (int i = 0; i < goldStandard.size(); i++) {
 			CoreMap goldSent = goldStandard.get(i);
@@ -66,11 +66,11 @@ public class EntityExtractorResultsPrinter extends ResultsPrinter {
 				System.err.println(sysSent.get(CoreAnnotations.TokensAnnotation.class));
 			}
 
-			HashSet<String> matchedGolds = new HashSet<>();
+			HashSet<String> matchedGolds = new HashSet<String>();
 			List<EntityMention> goldEntities = goldSent
 			    .get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
 			if (goldEntities == null) {
-				goldEntities = new ArrayList<>();
+				goldEntities = new ArrayList<EntityMention>();
 			}
 
 			for (EntityMention m : goldEntities) {
@@ -83,7 +83,7 @@ public class EntityExtractorResultsPrinter extends ResultsPrinter {
 			List<EntityMention> sysEntities = sysSent
 			    .get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
 			if (sysEntities == null) {
-				sysEntities = new ArrayList<>();
+				sysEntities = new ArrayList<EntityMention>();
 			}
 			for (EntityMention m : sysEntities) {
 				String label = makeLabel(m);
@@ -135,7 +135,7 @@ public class EntityExtractorResultsPrinter extends ResultsPrinter {
 		double totalCorrect = 0;
 		double totalPredicted = 0;
 		pw.println("Label\tCorrect\tPredict\tActual\tPrecn\tRecall\tF");
-		List<String> labels = new ArrayList<>(gold.keySet());
+		List<String> labels = new ArrayList<String>(gold.keySet());
 		Collections.sort(labels);
 		for (String label : labels) {
 			if (excludedClasses != null && excludedClasses.contains(label))

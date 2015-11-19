@@ -17,8 +17,8 @@ import edu.stanford.nlp.util.Generics;
 public class ConnectedComponents<V, E> {
 
   public static <V, E> List<Set<V>> getConnectedComponents(Graph<V, E> graph) {
-    List<Set<V>> ccs = new ArrayList<>();
-    LinkedList<V> todo = new LinkedList<>();
+    List<Set<V>> ccs = new ArrayList<Set<V>>();
+    LinkedList<V> todo = new LinkedList<V>();
     // TODO: why not a set?
     List<V> verticesLeft = CollectionUtils.toList(graph.getAllVertices());
     while (verticesLeft.size() > 0) {

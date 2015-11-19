@@ -23,7 +23,7 @@ public class Sets {
     Set<Pair<E,F>> s = Generics.newHashSet();
     for (E o1 : s1) {
       for (F o2 : s2) {
-        s.add(new Pair<>(o1, o2));
+        s.add(new Pair<E,F>(o1, o2));
       }
     }
     return s;

@@ -54,7 +54,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
 
   @Override
   public List<HasWord> segment(String s) {
-    List<Word> segmentedWords = new ArrayList<>();
+    List<Word> segmentedWords = new ArrayList<Word>();
     for (int start = 0, length = s.length(); start < length; ) {
       int end = Math.min(length, start + maxLength);
       while (end > start + 1) {
@@ -80,7 +80,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
       }
     }
 
-    return new ArrayList<>(segmentedWords);
+    return new ArrayList<HasWord>(segmentedWords);
   }
 
   private static final long serialVersionUID = 8260792244886911724L;

@@ -104,7 +104,7 @@ public class TopNGramRecord {
     if (queue != null) {
       return queue;
     }
-    queue = new PriorityQueue<>(ngramCount + 1, scoreComparator(prediction));
+    queue = new PriorityQueue<Tree>(ngramCount + 1, scoreComparator(prediction));
     ngrams.put(size, queue);
     return queue;
   }

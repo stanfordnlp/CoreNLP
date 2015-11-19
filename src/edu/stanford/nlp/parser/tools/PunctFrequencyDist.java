@@ -77,7 +77,7 @@ public final class PunctFrequencyDist {
       }
     }
 
-    Counter<String> puncTypes = new ClassicCounter<>();
+    Counter<String> puncTypes = new ClassicCounter<String>();
     for(Tree t : tb) {
       List<CoreLabel> yield = t.taggedLabeledYield();
       for(CoreLabel word : yield)
@@ -85,7 +85,7 @@ public final class PunctFrequencyDist {
           puncTypes.incrementCount(word.word());
     }
 
-    List<String> biggestKeys = new ArrayList<>(puncTypes.keySet());
+    List<String> biggestKeys = new ArrayList<String>(puncTypes.keySet());
     Collections.sort(biggestKeys, Counters.toComparatorDescending(puncTypes));
 
     PrintWriter pw = tlpp.pw();

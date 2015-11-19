@@ -11,8 +11,7 @@ import edu.stanford.nlp.optimization.HasRegularizerParamRange;
 /**
  * @author jtibs
  */
-public class ShiftParamsLogisticObjectiveFunction extends AbstractCachingDiffFunction implements HasRegularizerParamRange {
-
+public class ShiftParamsLogisticObjectiveFunction extends AbstractCachingDiffFunction implements HasRegularizerParamRange{
   private final int[][] data;
   private final double[][] dataValues;
   private final int numClasses;
@@ -20,7 +19,7 @@ public class ShiftParamsLogisticObjectiveFunction extends AbstractCachingDiffFun
   private final int[][] labels;
   private final int numL2Parameters;
   private final LogPrior prior;
-
+    
   public ShiftParamsLogisticObjectiveFunction(int[][] data, double[][] dataValues,
       int[][] labels, int numClasses, int numFeatures, int numL2Parameters, LogPrior prior) {
     this.data = data;
@@ -31,7 +30,7 @@ public class ShiftParamsLogisticObjectiveFunction extends AbstractCachingDiffFun
     this.numL2Parameters = numL2Parameters;
     this.prior = prior;
   }
-
+  
   @Override
   public int domainDimension() {
     return (numClasses - 1) * numFeatures;
@@ -40,19 +39,19 @@ public class ShiftParamsLogisticObjectiveFunction extends AbstractCachingDiffFun
   @Override
   protected void calculate(double[] thetasArray) {
     clearResults();
-
+    
     double[][] thetas = new double[numClasses - 1][numFeatures];
-    LogisticUtils.unflatten(thetasArray, thetas);
-
+    LogisticUtils.unflatten(thetasArray, thetas);    
+    
     for (int i = 0; i < data.length; i++) {
-      int[] featureIndices = data[i];
+      int[] featureIndices = data[i]; 
       double[] featureValues = dataValues[i];
       double[] sums = LogisticUtils.calculateSums(thetas, featureIndices, featureValues);
-
+      
       for (int c = 0; c < numClasses; c++) {
         double sum = sums[c];
         value -= sum * labels[i][c];
-
+        
         if (c == 0) continue;
         int offset = (c - 1) * numFeatures;
         double error = Math.exp(sum) - labels[i][c];
@@ -63,23 +62,23 @@ public class ShiftParamsLogisticObjectiveFunction extends AbstractCachingDiffFun
         }
       }
     }
-
+    
     // incorporate prior
     if (prior.getType().equals(LogPriorType.NULL)) return;
     double sigma = prior.getSigma();
-
+    
     for (int c = 0; c < numClasses; c++) {
       if (c == 0) continue;
       int offset = (c - 1) * numFeatures;
-
-      for (int j = 0; j < numL2Parameters; j++) {
+      
+      for (int j = 0; j < numL2Parameters; j++) {  
         double theta = thetasArray[offset + j];
         value += theta * theta / (sigma * 2.0);
         derivative[offset + j] += theta / sigma;
       }
     }
   }
-
+  
   private void clearResults() {
     value = 0.0;
     Arrays.fill(derivative, 0.0);
@@ -87,10 +86,9 @@ public class ShiftParamsLogisticObjectiveFunction extends AbstractCachingDiffFun
 
   @Override
   public Set<Integer> getRegularizerParamRange(double[] x) {
-    Set<Integer> result = new HashSet<>();
+    Set<Integer> result = new HashSet<Integer>();
     for (int i = numL2Parameters; i < x.length; i++)
       result.add(i);
     return result;
   }
-
 }

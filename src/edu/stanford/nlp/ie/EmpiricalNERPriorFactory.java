@@ -22,7 +22,7 @@ public class EmpiricalNERPriorFactory<IN extends CoreMap> implements PriorModelF
                                             Pair<double[][], double[][]> entityMatrices,
                                             SeqClassifierFlags flags) {
     EntityCachingAbstractSequencePrior<IN> prior =
-            new EmpiricalNERPrior<>(flags.backgroundSymbol, classIndex, document);
+            new EmpiricalNERPrior<IN>(flags.backgroundSymbol, classIndex, document);
     // SamplingNERPrior prior = new SamplingNERPrior(flags.backgroundSymbol, classIndex, newDocument);
     return prior;
   }

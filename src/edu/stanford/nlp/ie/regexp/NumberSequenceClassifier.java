@@ -59,7 +59,6 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
   public static final boolean USE_SUTIME_DEFAULT = TimeExpressionExtractorFactory.DEFAULT_EXTRACTOR_PRESENT;
   public static final String USE_SUTIME_PROPERTY = "ner.useSUTime";
   public static final String USE_SUTIME_PROPERTY_BASE = "useSUTime";
-  public static final String SUTIME_PROPERTY = "sutime";
 
   private final TimeExpressionExtractor timexExtractor;
 
@@ -79,7 +78,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     super(props);
     this.useSUTime = useSUTime;
     if(this.useSUTime) {
-      this.timexExtractor = TimeExpressionExtractorFactory.createExtractor(SUTIME_PROPERTY, sutimeProps);
+      this.timexExtractor = TimeExpressionExtractorFactory.createExtractor("sutime", sutimeProps);
     } else {
       this.timexExtractor = null;
     }
@@ -466,7 +465,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     // no need to adjust anything; use the original list
     if(! adjustCharacterOffsets && ! forceCopy) return srcList;
 
-    List<CoreLabel> dstList = new ArrayList<>();
+    List<CoreLabel> dstList = new ArrayList<CoreLabel>();
     int adjustment = 0;
     int offset = 0; // for when offsets are not available
     for(CoreLabel src: srcList) {
@@ -606,7 +605,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
 
   private List<CoreLabel> classifyOld(List<CoreLabel> document) {
     // if (DEBUG) { System.err.println("NumberSequenceClassifier tagging"); }
-    PaddedList<CoreLabel> pl = new PaddedList<>(document, pad);
+    PaddedList<CoreLabel> pl = new PaddedList<CoreLabel>(document, pad);
     for (int i = 0, sz = pl.size(); i < sz; i++) {
       CoreLabel me = pl.get(i);
       CoreLabel prev = pl.get(i - 1);
@@ -850,7 +849,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
 
     if (textFile != null) {
       DocumentReaderAndWriter<CoreLabel> readerAndWriter =
-              new PlainTextDocumentReaderAndWriter<>();
+        new PlainTextDocumentReaderAndWriter<CoreLabel>();
       nsc.classifyAndWriteAnswers(textFile, readerAndWriter, false);
     }
   } // end main

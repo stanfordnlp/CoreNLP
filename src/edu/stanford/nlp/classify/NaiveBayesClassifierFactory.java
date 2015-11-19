@@ -34,14 +34,10 @@ import edu.stanford.nlp.optimization.Minimizer;
 import edu.stanford.nlp.optimization.QNMinimizer;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.HashIndex;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -64,8 +60,6 @@ public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F
   private Index<L> labelIndex;
   private Index<F> featureIndex;
 
-  final static Logger logger = LoggerFactory.getLogger(NaiveBayesClassifierFactory.class);
-
   public NaiveBayesClassifierFactory() {
   }
 
@@ -81,44 +75,76 @@ public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F
       int numClasses, Index<L> labelIndex, Index<F> featureIndex) {
     Set<L> labelSet = Generics.newHashSet();
     NBWeights nbWeights = trainWeights(data, labels, numFeatures, numClasses);
-    Counter<L> priors = new ClassicCounter<>();
+    Counter<L> priors = new ClassicCounter<L>();
     double[] pr = nbWeights.priors;
     for (int i = 0; i < pr.length; i++) {
       priors.incrementCount(labelIndex.get(i), pr[i]);
       labelSet.add(labelIndex.get(i));
     }
-    Counter<Pair<Pair<L, F>, Number>> weightsCounter = new ClassicCounter<>();
+    Counter<Pair<Pair<L, F>, Number>> weightsCounter = new ClassicCounter<Pair<Pair<L, F>, Number>>();
     double[][][] wts = nbWeights.weights;
     for (int c = 0; c < numClasses; c++) {
       L label = labelIndex.get(c);
       for (int f = 0; f < numFeatures; f++) {
         F feature = featureIndex.get(f);
-        Pair<L, F> p = new Pair<>(label, feature);
+        Pair<L, F> p = new Pair<L, F>(label, feature);
         for (int val = 0; val < wts[c][f].length; val++) {
-          Pair<Pair<L, F>, Number> key = new Pair<>(p, Integer.valueOf(val));
+          Pair<Pair<L, F>, Number> key = new Pair<Pair<L, F>, Number>(p, Integer.valueOf(val));
           weightsCounter.incrementCount(key, wts[c][f][val]);
         }
       }
     }
-    return new NaiveBayesClassifier<>(weightsCounter, priors, labelSet);
+    return new NaiveBayesClassifier<L, F>(weightsCounter, priors, labelSet);
 
   }
 
   /**
    * The examples are assumed to be a list of RFVDatum.
+   * The datums are assumed to contain the zeroes as well.
+   */
+  @Override
+  @Deprecated
+  public NaiveBayesClassifier<L, F> trainClassifier(List<RVFDatum<L, F>> examples) {
+    RVFDatum<L, F> d0 = examples.get(0);
+    int numFeatures = d0.asFeatures().size();
+    int[][] data = new int[examples.size()][numFeatures];
+    int[] labels = new int[examples.size()];
+    labelIndex = new HashIndex<L>();
+    featureIndex = new HashIndex<F>();
+    for (int d = 0; d < examples.size(); d++) {
+      RVFDatum<L, F> datum = examples.get(d);
+      Counter<F> c = datum.asFeaturesCounter();
+      for (F feature: c.keySet()) {
+        if(featureIndex.add(feature)) {
+          int fNo = featureIndex.indexOf(feature);
+          int value = (int) c.getCount(feature);
+          data[d][fNo] = value;
+        }
+      }
+      labelIndex.add(datum.label());
+      labels[d] = labelIndex.indexOf(datum.label());
+
+    }
+    int numClasses = labelIndex.size();
+    return trainClassifier(data, labels, numFeatures, numClasses, labelIndex, featureIndex);
+  }
+
+
+  /**
+   * The examples are assumed to be a list of RFVDatum.
    * The datums are assumed to not contain the zeroes and then they are added to each instance.
    */
-  public NaiveBayesClassifier<L, F> trainClassifier(GeneralDataset<L, F> examples, Set<F> featureSet) {
+  public NaiveBayesClassifier<L, F> trainClassifier(List<RVFDatum<L, F>> examples, Set<F> featureSet) {
     int numFeatures = featureSet.size();
     int[][] data = new int[examples.size()][numFeatures];
     int[] labels = new int[examples.size()];
-    labelIndex = new HashIndex<>();
-    featureIndex = new HashIndex<>();
+    labelIndex = new HashIndex<L>();
+    featureIndex = new HashIndex<F>();
     for (F feat : featureSet) {
       featureIndex.add(feat);
     }
     for (int d = 0; d < examples.size(); d++) {
-      RVFDatum<L, F> datum = examples.getRVFDatum(d);
+      RVFDatum<L, F> datum = examples.get(d);
       Counter<F> c = datum.asFeaturesCounter();
       for (F feature : c.keySet()) {
         int fNo = featureIndex.indexOf(feature);
@@ -194,8 +220,8 @@ public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F
       }
     }
     int totalFeatures = sumValues[numFeatures - 1] + numValues[numFeatures - 1] + 1;
-    logger.info("total feats " + totalFeatures);
-    LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<>(totalFeatures, numClasses, newdata, labels, prior, sigma, 0.0);
+    System.err.println("total feats " + totalFeatures);
+    LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(totalFeatures, numClasses, newdata, labels, prior, sigma, 0.0);
     Minimizer<DiffFunction> min = new QNMinimizer();
     double[] argmin = min.minimize(objective, 1e-4, objective.initial());
     double[][] wts = objective.to2D(argmin);
@@ -266,81 +292,77 @@ public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F
     }
   }
 
-//  public static void main(String[] args) {
-//    List examples = new ArrayList();
-//    String leftLight = "leftLight";
-//    String rightLight = "rightLight";
-//    String broken = "BROKEN";
-//    String ok = "OK";
-//    Counter c1 = new ClassicCounter<>();
-//    c1.incrementCount(leftLight, 0);
-//    c1.incrementCount(rightLight, 0);
-//    RVFDatum d1 = new RVFDatum(c1, broken);
-//    examples.add(d1);
-//    Counter c2 = new ClassicCounter<>();
-//    c2.incrementCount(leftLight, 1);
-//    c2.incrementCount(rightLight, 1);
-//    RVFDatum d2 = new RVFDatum(c2, ok);
-//    examples.add(d2);
-//    Counter c3 = new ClassicCounter<>();
-//    c3.incrementCount(leftLight, 0);
-//    c3.incrementCount(rightLight, 1);
-//    RVFDatum d3 = new RVFDatum(c3, ok);
-//    examples.add(d3);
-//    Counter c4 = new ClassicCounter<>();
-//    c4.incrementCount(leftLight, 1);
-//    c4.incrementCount(rightLight, 0);
-//    RVFDatum d4 = new RVFDatum(c4, ok);
-//    examples.add(d4);
-//    Dataset data = new Dataset(examples.size());
-//    data.addAll(examples);
-//    NaiveBayesClassifier classifier = (NaiveBayesClassifier)
-//        new NaiveBayesClassifierFactory(200, 200, 1.0,
-//              LogPrior.LogPriorType.QUADRATIC.ordinal(),
-//              NaiveBayesClassifierFactory.CL)
-//            .trainClassifier(data);
-//    classifier.print();
-//    //now classifiy
-//    for (int i = 0; i < examples.size(); i++) {
-//      RVFDatum d = (RVFDatum) examples.get(i);
-//      Counter scores = classifier.scoresOf(d);
-//      System.out.println("for datum " + d + " scores are " + scores.toString());
-//      System.out.println(" class is " + Counters.topKeys(scores, 1));
-//      System.out.println(" class should be " + d.label());
-//    }
-//  }
+  public static void main(String[] args) {
 
+    /*
+    List examples = new ArrayList();
+    String leftLight = "leftLight";
+    String rightLight = "rightLight";
+    String broken = "BROKEN";
+    String ok = "OK";
+    Counter c1 = new Counter();
+    c1.incrementCount(leftLight, 0);
+    c1.incrementCount(rightLight, 0);
+    RVFDatum d1 = new RVFDatum(c1, broken);
+    examples.add(d1);
+    Counter c2 = new Counter();
+    c2.incrementCount(leftLight, 1);
+    c2.incrementCount(rightLight, 1);
+    RVFDatum d2 = new RVFDatum(c2, ok);
+    examples.add(d2);
+    Counter c3 = new Counter();
+    c3.incrementCount(leftLight, 0);
+    c3.incrementCount(rightLight, 1);
+    RVFDatum d3 = new RVFDatum(c3, ok);
+    examples.add(d3);
+    Counter c4 = new Counter();
+    c4.incrementCount(leftLight, 1);
+    c4.incrementCount(rightLight, 0);
+    RVFDatum d4 = new RVFDatum(c4, ok);
+    examples.add(d4);
+    NaiveBayesClassifier classifier = (NaiveBayesClassifier) new NaiveBayesClassifierFactory(200, 200, 1.0, LogPrior.QUADRATIC.ordinal(), NaiveBayesClassifierFactory.CL).trainClassifier(examples);
+    classifier.print();
+    //now classifiy
+    for (int i = 0; i < examples.size(); i++) {
+        RVFDatum d = (RVFDatum) examples.get(i);
+        Counter scores = classifier.scoresOf(d);
+        System.out.println("for datum " + d + " scores are " + scores.toString());
+        System.out.println(" class is " + scores.argmax());
+    }
 
-//    String trainFile = args[0];
-//    String testFile = args[1];
-//    NominalDataReader nR = new NominalDataReader();
-//    Map<Integer, Index<String>> indices = Generics.newHashMap();
-//    List<RVFDatum<String, Integer>> train = nR.readData(trainFile, indices);
-//    List<RVFDatum<String, Integer>> test = nR.readData(testFile, indices);
-//    System.out.println("Constrained conditional likelihood no prior :");
-//    for (int j = 0; j < 100; j++) {
-//      NaiveBayesClassifier<String, Integer> classifier = new NaiveBayesClassifierFactory<String, Integer>(0.1, 0.01, 0.6, LogPrior.LogPriorType.NULL.ordinal(), NaiveBayesClassifierFactory.CL).trainClassifier(train);
-//      classifier.print();
-//      //now classifiy
-//
-//      float accTrain = classifier.accuracy(train.iterator());
-//      System.err.println("training accuracy " + accTrain);
-//      float accTest = classifier.accuracy(test.iterator());
-//      System.err.println("test accuracy " + accTest);
-//
-//    }
-//    System.out.println("Unconstrained conditional likelihood no prior :");
-//    for (int j = 0; j < 100; j++) {
-//      NaiveBayesClassifier<String, Integer> classifier = new NaiveBayesClassifierFactory<String, Integer>(0.1, 0.01, 0.6, LogPrior.LogPriorType.NULL.ordinal(), NaiveBayesClassifierFactory.UCL).trainClassifier(train);
-//      classifier.print();
-//      //now classify
-//
-//      float accTrain = classifier.accuracy(train.iterator());
-//      System.err.println("training accuracy " + accTrain);
-//      float accTest = classifier.accuracy(test.iterator());
-//      System.err.println("test accuracy " + accTest);
-//    }
-//  }
+}
+*/
+    String trainFile = args[0];
+    String testFile = args[1];
+    NominalDataReader nR = new NominalDataReader();
+    Map<Integer, Index<String>> indices = Generics.newHashMap();
+    List<RVFDatum<String, Integer>> train = nR.readData(trainFile, indices);
+    List<RVFDatum<String, Integer>> test = nR.readData(testFile, indices);
+    System.out.println("Constrained conditional likelihood no prior :");
+    for (int j = 0; j < 100; j++) {
+      NaiveBayesClassifier<String, Integer> classifier = new NaiveBayesClassifierFactory<String, Integer>(0.1, 0.01, 0.6, LogPrior.LogPriorType.NULL.ordinal(), NaiveBayesClassifierFactory.CL).trainClassifier(train);
+      classifier.print();
+      //now classifiy
+
+      float accTrain = classifier.accuracy(train.iterator());
+      System.err.println("training accuracy " + accTrain);
+      float accTest = classifier.accuracy(test.iterator());
+      System.err.println("test accuracy " + accTest);
+
+    }
+    System.out.println("Unconstrained conditional likelihood no prior :");
+    for (int j = 0; j < 100; j++) {
+      NaiveBayesClassifier<String, Integer> classifier = new NaiveBayesClassifierFactory<String, Integer>(0.1, 0.01, 0.6, LogPrior.LogPriorType.NULL.ordinal(), NaiveBayesClassifierFactory.UCL).trainClassifier(train);
+      classifier.print();
+      //now classify
+
+      float accTrain = classifier.accuracy(train.iterator());
+      System.err.println("training accuracy " + accTrain);
+      float accTest = classifier.accuracy(test.iterator());
+      System.err.println("test accuracy " + accTest);
+
+    }
+  }
 
   @Override
   public NaiveBayesClassifier<L, F> trainClassifier(GeneralDataset<L, F> dataset) {

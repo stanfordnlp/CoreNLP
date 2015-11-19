@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 public class ISODateInstance {
 
   private static final boolean DEBUG = false;
-  private ArrayList<String> tokens = new ArrayList<>();//each token contains some piece of the date, from our input.
+  private ArrayList<String> tokens = new ArrayList<String>();//each token contains some piece of the date, from our input.
 
   public static final String OPEN_RANGE_AFTER = "A";
   public static final String OPEN_RANGE_BEFORE = "B";
@@ -304,9 +304,9 @@ public class ISODateInstance {
 
   static {
     //Add entries to the relative datemap
-    relativeDateMap.put("today", new Pair<>(DateField.DAY, 0));
-    relativeDateMap.put("tomorrow", new Pair<>(DateField.DAY, 1));
-    relativeDateMap.put("yesterday", new Pair<>(DateField.DAY, -1));
+    relativeDateMap.put("today", new Pair<DateField, Integer>(DateField.DAY, 0));
+    relativeDateMap.put("tomorrow", new Pair<DateField, Integer>(DateField.DAY, 1));
+    relativeDateMap.put("yesterday", new Pair<DateField, Integer>(DateField.DAY, -1));
 
 
   }
@@ -423,7 +423,7 @@ public class ISODateInstance {
     for (String curIndicator : rangeIndicators) {
       String[] dates = inputDate.split(curIndicator);
       if (dates.length == 2) {
-        return new Pair<>(dates[0], dates[1]);
+        return new Pair<String, String>(dates[0], dates[1]);
       }
     }
     return null;
@@ -874,7 +874,7 @@ public class ISODateInstance {
   //These methods are taken directly from or modified slightly from {@link DateInstance}
 
   private void tokenizeDate(String inputDate) {
-    tokens = new ArrayList<>();
+    tokens = new ArrayList<String>();
     Pattern pat = Pattern.compile("[-]");
     if (inputDate == null) {
       System.out.println("Null input date");

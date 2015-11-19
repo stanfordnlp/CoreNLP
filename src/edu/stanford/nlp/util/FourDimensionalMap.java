@@ -43,7 +43,7 @@ public class FourDimensionalMap <K1, K2, K3, K4, V> implements Serializable {
   public ThreeDimensionalMap<K2, K3, K4, V> getThreeDimensionalMap(K1 key1) {
     ThreeDimensionalMap<K2, K3, K4, V> m = map.get(key1);
     if (m==null) {
-      m = new ThreeDimensionalMap<>();
+      m = new ThreeDimensionalMap<K2, K3, K4, V>();
       map.put(key1, m);
     }
     return m;

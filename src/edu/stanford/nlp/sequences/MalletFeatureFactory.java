@@ -16,7 +16,7 @@ public class MalletFeatureFactory<IN extends CoreLabel> extends FeatureFactory<I
 
   @Override
   public Collection<String> getCliqueFeatures (PaddedList<IN> info, int position, Clique clique) {
-    List<String> features = new ArrayList<>(Arrays.asList(info.get(position).word().split(" ")));
+    List<String> features = new ArrayList<String>(Arrays.asList(info.get(position).word().split(" ")));
     return features;
   }
 

@@ -86,7 +86,7 @@ public class RerankingParserQuery implements ParserQuery {
   List<ScoredObject<Tree>> rerank(List<? extends HasWord> sentence, List<ScoredObject<Tree>> bestKParses) {
     this.rerankerQuery = reranker.process(sentence);
 
-    List<ScoredObject<Tree>> reranked = new ArrayList<>();
+    List<ScoredObject<Tree>> reranked = new ArrayList<ScoredObject<Tree>>();
     for (ScoredObject<Tree> scoredTree : bestKParses) {
       double score = scoredTree.score();
       try {
@@ -94,7 +94,7 @@ public class RerankingParserQuery implements ParserQuery {
       } catch (NoSuchParseException e) {
         score = Double.NEGATIVE_INFINITY;
       }
-      reranked.add(new ScoredObject<>(scoredTree.object(), score));
+      reranked.add(new ScoredObject<Tree>(scoredTree.object(), score));
     }
     Collections.sort(reranked, ScoredComparator.DESCENDING_COMPARATOR);
     return reranked;

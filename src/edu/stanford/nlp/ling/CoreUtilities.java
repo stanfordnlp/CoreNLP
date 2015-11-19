@@ -28,7 +28,7 @@ public class CoreUtilities {
   }
 
   public static List<CoreLabel> deepCopy(List<CoreLabel> tokens) {
-    List<CoreLabel> copy = new ArrayList<>();
+    List<CoreLabel> copy = new ArrayList<CoreLabel>();
     for (CoreLabel ml : tokens) {
       CoreLabel ml1 = new CoreLabel(ml);  // copy the labels
       copy.add(ml1);
@@ -37,7 +37,7 @@ public class CoreUtilities {
   }
 
   public static List<CoreLabel> toCoreLabelList(String... words) {
-    List<CoreLabel> tokens = new ArrayList<>(words.length);
+    List<CoreLabel> tokens = new ArrayList<CoreLabel>(words.length);
     for (String word : words) {
       CoreLabel cl = new CoreLabel();
       cl.setWord(word);
@@ -48,7 +48,7 @@ public class CoreUtilities {
 
   public static List<CoreLabel> toCoreLabelList(String[] words, String[] tags) {
     assert tags.length == words.length;
-    List<CoreLabel> tokens = new ArrayList<>(words.length);
+    List<CoreLabel> tokens = new ArrayList<CoreLabel>(words.length);
     for (int i = 0, sz = words.length; i < sz; i++) {
       CoreLabel cl = new CoreLabel();
       cl.setWord(words[i]);
@@ -60,7 +60,7 @@ public class CoreUtilities {
 
   public static List<CoreLabel> toCoreLabelListWithCharacterOffsets(String[] words, String[] tags) {
     assert tags.length == words.length;
-    List<CoreLabel> tokens = new ArrayList<>(words.length);
+    List<CoreLabel> tokens = new ArrayList<CoreLabel>(words.length);
     int offset = 0;
     for (int i = 0, sz = words.length; i < sz; i++) {
       CoreLabel cl = new CoreLabel();
@@ -80,7 +80,7 @@ public class CoreUtilities {
                                                 String[] answers) {
     assert tags.length == words.length;
     assert answers.length == words.length;
-    List<CoreLabel> tokens = new ArrayList<>(words.length);
+    List<CoreLabel> tokens = new ArrayList<CoreLabel>(words.length);
     for (int i = 0, sz = words.length; i < sz; i++) {
       CoreLabel cl = new CoreLabel();
       cl.setWord(words[i]);

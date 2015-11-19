@@ -146,7 +146,7 @@ public class ClassicCounter<E> implements Serializable, Counter<E>, Iterable<E> 
   }
 
   public static <E> ClassicCounter<E> identityHashMapCounter() {
-    return new ClassicCounter<>(MapFactory.<E, MutableDouble>identityHashMapFactory());
+    return new ClassicCounter<E>(MapFactory.<E, MutableDouble>identityHashMapFactory());
   }
 
 
@@ -167,7 +167,7 @@ public class ClassicCounter<E> implements Serializable, Counter<E>, Iterable<E> 
   /** {@inheritDoc} */
   @Override
   public Factory<Counter<E>> getFactory() {
-    return new ClassicCounterFactory<>(getMapFactory());
+    return new ClassicCounterFactory<E>(getMapFactory());
   }
 
   private static class ClassicCounterFactory<E> implements Factory<Counter<E>> {
@@ -182,7 +182,7 @@ public class ClassicCounter<E> implements Serializable, Counter<E>, Iterable<E> 
 
     @Override
     public Counter<E> create() {
-      return new ClassicCounter<>(mf);
+      return new ClassicCounter<E>(mf);
     }
   }
 
@@ -556,7 +556,7 @@ public class ClassicCounter<E> implements Serializable, Counter<E>, Iterable<E> 
    * @return The Counter with String keys
    */
   public static ClassicCounter<String> valueOfIgnoreComments(String s) {
-      ClassicCounter<String> result = new ClassicCounter<>();
+      ClassicCounter<String> result = new ClassicCounter<String>();
       String[] lines = s.split("\n");
       for (String line : lines) {
         String[] fields = line.split("\t");
@@ -583,7 +583,7 @@ public class ClassicCounter<E> implements Serializable, Counter<E>, Iterable<E> 
    * @return The Counter
    */
   public static ClassicCounter<String> fromString(String s) {
-    ClassicCounter<String> result = new ClassicCounter<>();
+    ClassicCounter<String> result = new ClassicCounter<String>();
     if (!s.startsWith("{") || !s.endsWith("}")) {
       throw new RuntimeException("invalid format: ||"+s+"||");
     }

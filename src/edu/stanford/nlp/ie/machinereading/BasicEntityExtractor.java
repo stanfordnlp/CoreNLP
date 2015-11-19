@@ -150,7 +150,7 @@ public class BasicEntityExtractor implements Extractor {
     List<CoreLabel> annotatedSentence = this.classifier.classify(testSentence);
     logger.finest("CLASSFIER OUTPUT: " + annotatedSentence);
 
-    List<EntityMention> extractedEntities = new ArrayList<>();
+    List<EntityMention> extractedEntities = new ArrayList<EntityMention>();
     int i = 0;
 
     // variables which keep track of partially seen entities (i.e. we've seen
@@ -275,7 +275,7 @@ public class BasicEntityExtractor implements Extractor {
     if(mentions == null)
     {  
       this.logger.info("mentions are null");
-      mentions = new ArrayList<>();
+      mentions = new ArrayList<EntityMention>();
     }
 
     for (int start = 0; start < words.size(); start ++) {
@@ -341,7 +341,7 @@ public class BasicEntityExtractor implements Extractor {
       subtype = null; // TODO: add support for subtypes! (needed at least in ACE)
     }
     EntityMention entity = entityMentionFactory.constructEntityMention(identifier, sentence, span, span, type, subtype, null);
-    Counter<String> probs = new ClassicCounter<>();
+    Counter<String> probs = new ClassicCounter<String>();
     probs.setCount(entity.getType(), 1.0);
     entity.setTypeProbabilities(probs);
     return entity;
@@ -355,14 +355,14 @@ public class BasicEntityExtractor implements Extractor {
    * This will return precision,recall and F1 measure
    */
   public void runTestSet(List<List<CoreLabel>> testSet) {
-    Counter<String> tp = new ClassicCounter<>();
-    Counter<String> fp = new ClassicCounter<>();
-    Counter<String> fn = new ClassicCounter<>();
+    Counter<String> tp = new ClassicCounter<String>();
+    Counter<String> fp = new ClassicCounter<String>();
+    Counter<String> fn = new ClassicCounter<String>();
 
-    Counter<String> actual = new ClassicCounter<>();
+    Counter<String> actual = new ClassicCounter<String>();
 
     for (List<CoreLabel> labels : testSet) {
-      List<CoreLabel> unannotatedLabels = new ArrayList<>();
+      List<CoreLabel> unannotatedLabels = new ArrayList<CoreLabel>();
       // create a new label without answer annotation
       for (CoreLabel label : labels) {
         CoreLabel newLabel = new CoreLabel();
@@ -524,7 +524,7 @@ public class BasicEntityExtractor implements Extractor {
       props.setProperty("gazette", this.gazetteerLocation);
       props.setProperty("sloppyGazette", "true");
     }
-    return new CRFClassifier<>(props);
+    return new CRFClassifier<CoreLabel>(props);
   }
 
   /**

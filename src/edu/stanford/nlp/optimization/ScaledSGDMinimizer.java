@@ -114,7 +114,7 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
       System.err.println("Results:  fixedGain: " + nf.format(this.fixedGain) + "  gain: " + nf.format(gain) + "  batch " + bSize );
     }
 
-    return new Pair<>(bSize, gain);
+    return new Pair<Integer,Double>(bSize, gain);
   }
 
   @Override
@@ -196,8 +196,8 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
     diag = new double[x.length];
     memory = 1;
     for(int i=0;i<x.length;i++){diag[i]=fixedGain/gain;}
-    sList = new ArrayList<>();
-    yList = new ArrayList<>();
+    sList = new ArrayList<double[]>();
+    yList = new ArrayList<double[]>();
   }
 
   private void updateDiag(double[] diag,double[] s,double[] y){

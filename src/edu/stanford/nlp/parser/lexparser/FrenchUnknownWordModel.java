@@ -32,7 +32,7 @@ public class FrenchUnknownWordModel extends BaseUnknownWordModel {
   public FrenchUnknownWordModel(Options op, Lexicon lex,
                                 Index<String> wordIndex,
                                 Index<String> tagIndex) {
-    this(op, lex, wordIndex, tagIndex, new ClassicCounter<>());
+    this(op, lex, wordIndex, tagIndex, new ClassicCounter<IntTaggedWord>());
   }
 
   @Override

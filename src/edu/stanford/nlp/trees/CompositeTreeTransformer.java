@@ -12,7 +12,7 @@ import java.util.ArrayList;
  */
 public class CompositeTreeTransformer implements TreeTransformer {
 
-  private final List<TreeTransformer> transformers = new ArrayList<>();
+  private final List<TreeTransformer> transformers = new ArrayList<TreeTransformer>();
 
   public CompositeTreeTransformer() {
   }

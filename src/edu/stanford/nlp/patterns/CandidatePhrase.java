@@ -22,7 +22,7 @@ public class CandidatePhrase implements Serializable, Comparable  {
 
   static final long serialVersionUID = 42L;
 
-  static ConcurrentHashMap<String, CandidatePhrase> candidatePhraseMap = new ConcurrentHashMap<>();
+  static ConcurrentHashMap<String, CandidatePhrase> candidatePhraseMap = new ConcurrentHashMap<String, CandidatePhrase>();
 
   static void setCandidatePhraseMap(ConcurrentHashMap<String, CandidatePhrase> candmap){
     candidatePhraseMap = candmap;
@@ -62,7 +62,7 @@ public class CandidatePhrase implements Serializable, Comparable  {
       //If features are non-empty, add to the current set
       if(features != null && features.size() > 0){
       if(p.features == null)
-        p.features = new ClassicCounter<>();
+        p.features = new ClassicCounter<String>();
         p.features.addAll(features);
       }
 
@@ -136,7 +136,7 @@ public class CandidatePhrase implements Serializable, Comparable  {
   }
 
   public static List<CandidatePhrase> convertStringPhrases(Collection<String> str){
-    List<CandidatePhrase> phs = new ArrayList<>();
+    List<CandidatePhrase> phs = new ArrayList<CandidatePhrase>();
     for(String s: str){
       phs.add(CandidatePhrase.createOrGet(s));
     }
@@ -144,7 +144,7 @@ public class CandidatePhrase implements Serializable, Comparable  {
   }
 
   public static List<String> convertToString(Collection<CandidatePhrase> words) {
-    List<String> phs = new ArrayList<>();
+    List<String> phs = new ArrayList<String>();
     for(CandidatePhrase ph: words){
       phs.add(ph.getPhrase());
     }
@@ -157,14 +157,14 @@ public class CandidatePhrase implements Serializable, Comparable  {
 
   public void addFeature(String s, double v) {
     if(features == null){
-      features = new ClassicCounter<>();
+      features = new ClassicCounter<String>();
     }
     features.setCount(s, v);
   }
 
   public void addFeatures(Collection<String> feat) {
     if(features == null){
-      features = new ClassicCounter<>();
+      features = new ClassicCounter<String>();
     }
     Counters.addInPlace(features, feat);
   }

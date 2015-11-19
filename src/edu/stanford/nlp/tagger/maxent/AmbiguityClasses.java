@@ -50,7 +50,7 @@ public class AmbiguityClasses {
   // protected final AmbiguityClass naClass = new AmbiguityClass(null, false, null, null);
 
   public AmbiguityClasses(TTags ttags) {
-    classes = new HashIndex<>();
+    classes = new HashIndex<AmbiguityClass>();
     // naClass.init(naWord, ttags);
   }
 

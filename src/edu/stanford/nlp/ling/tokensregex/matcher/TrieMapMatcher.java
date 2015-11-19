@@ -31,7 +31,7 @@ public class TrieMapMatcher<K,V> {
     this.multimatchDelimiter = multimatchDelimiter;
     if (multimatchDelimiter != null && !multimatchDelimiter.isEmpty()) {
       // Create a new root that always starts with the delimiter
-      rootWithDelimiter = new TrieMap<>();
+      rootWithDelimiter = new TrieMap<K, V>();
       rootWithDelimiter.putChildTrie(multimatchDelimiter, root);
     } else {
       rootWithDelimiter = root;
@@ -127,7 +127,7 @@ public class TrieMapMatcher<K,V> {
 
     // At any time, we only keep track of the last two rows
     // (prevMatches (matches[i-1][j]), curMatches (matches[i][j]) that we are working on
-    MatchQueue<K,V> best = new MatchQueue<>(n, maxCost);
+    MatchQueue<K,V> best = new MatchQueue<K, V>(n, maxCost);
     List<PartialApproxMatch<K,V>>[] prevMatches = null;
     List<PartialApproxMatch<K,V>>[] curMatches;
     for (int i = 0; i <= target.size(); i++) {
@@ -138,7 +138,7 @@ public class TrieMapMatcher<K,V> {
           // Try to pick best match from trie
           K t = (i > 0 && i <= target.size())? target.get(i-1):null;
           // Look at the top n choices we saved away and pick n new options
-          MatchQueue<K,V> queue = (multimatch)? new MultiMatchQueue<>(n, maxCost): new MatchQueue<>(n, maxCost);
+          MatchQueue<K,V> queue = (multimatch)? new MultiMatchQueue<K, V>(n, maxCost):new MatchQueue<K, V>(n, maxCost);
           if (i > 0) {
             for (PartialApproxMatch<K,V> pam:prevMatches[j-1]) {
               if (pam.trie != null) {
@@ -166,7 +166,7 @@ public class TrieMapMatcher<K,V> {
           }
           curMatches[j] = queue.toSortedList();
         } else {
-          curMatches[0] = new ArrayList<>();
+          curMatches[0] = new ArrayList<PartialApproxMatch<K,V>>();
           if (i > 0) {
             K t = (i < target.size())? target.get(i-1):null;
             for (PartialApproxMatch<K,V> pam:prevMatches[0]) {
@@ -176,7 +176,7 @@ public class TrieMapMatcher<K,V> {
               }
             }
           } else {
-            curMatches[0].add(new PartialApproxMatch<>(0, root, keepAlignments ? target.size() : 0));
+            curMatches[0].add(new PartialApproxMatch<K,V>(0, root, keepAlignments? target.size():0));
           }
         }
 //        System.out.println("i=" + i + ",j=" + j + "," + matches[i][j]);
@@ -184,7 +184,7 @@ public class TrieMapMatcher<K,V> {
       prevMatches = curMatches;
     }
     // Get the best matches
-    List<ApproxMatch<K,V>> res = new ArrayList<>();
+    List<ApproxMatch<K,V>> res = new ArrayList<ApproxMatch<K,V>>();
     for (PartialApproxMatch<K,V> m:best.toSortedList()) {
       res.add(m.toApproxMatch());
     }
@@ -220,8 +220,8 @@ public class TrieMapMatcher<K,V> {
    * @return List of matches
    */
   public List<Match<K,V>> findAllMatches(List<K> list, int start, int end) {
-    List<Match<K,V>> allMatches = new ArrayList<>();
-    updateAllMatches(root, allMatches, new ArrayList<>(), list, start, end);
+    List<Match<K,V>> allMatches = new ArrayList<Match<K,V>>();
+    updateAllMatches(root, allMatches, new ArrayList<K>(), list, start, end);
     return allMatches;
   }
 
@@ -337,19 +337,19 @@ public class TrieMapMatcher<K,V> {
    */
   public List<Match<K,V>> segment(List<K> list, int start, int end, Comparator<? super Match<K,V>> compareFunc) {
     List<Match<K,V>> nonOverlapping = findNonOverlapping(list, start, end, compareFunc);
-    List<Match<K,V>> segments = new ArrayList<>(nonOverlapping.size());
+    List<Match<K,V>> segments = new ArrayList<Match<K,V>>(nonOverlapping.size());
     int last = 0;
     for (Match<K,V> match:nonOverlapping) {
       if (match.begin > last) {
         // Create empty match and add to segments
-        Match<K,V> empty = new Match<>(list.subList(last, match.begin), null, last, match.begin);
+        Match<K,V> empty = new Match<K,V>(list.subList(last, match.begin), null, last, match.begin);
         segments.add(empty);
       }
       segments.add(match);
       last = match.end;
     }
     if (list.size() > last) {
-      Match<K,V> empty = new Match<>(list.subList(last, list.size()), null, last, list.size());
+      Match<K,V> empty = new Match<K,V>(list.subList(last, list.size()), null, last, list.size());
       segments.add(empty);
     }
     return segments;
@@ -366,19 +366,19 @@ public class TrieMapMatcher<K,V> {
    */
   public List<Match<K,V>> segment(List<K> list, int start, int end, Function<? super Match<K,V>, Double> scoreFunc) {
     List<Match<K,V>> nonOverlapping = findNonOverlapping(list, start, end, scoreFunc);
-    List<Match<K,V>> segments = new ArrayList<>(nonOverlapping.size());
+    List<Match<K,V>> segments = new ArrayList<Match<K,V>>(nonOverlapping.size());
     int last = 0;
     for (Match<K,V> match:nonOverlapping) {
       if (match.begin > last) {
         // Create empty match and add to segments
-        Match<K,V> empty = new Match<>(list.subList(last, match.begin), null, last, match.begin);
+        Match<K,V> empty = new Match<K,V>(list.subList(last, match.begin), null, last, match.begin);
         segments.add(empty);
       }
       segments.add(match);
       last = match.end;
     }
     if (list.size() > last) {
-      Match<K,V> empty = new Match<>(list.subList(last, list.size()), null, last, list.size());
+      Match<K,V> empty = new Match<K,V>(list.subList(last, list.size()), null, last, list.size());
       segments.add(empty);
     }
     return segments;
@@ -430,14 +430,14 @@ public class TrieMapMatcher<K,V> {
       K key = list.get(start);
       TrieMap<K,V> child = trie.children.get(key);
       if (child != null) {
-        List<K> p = new ArrayList<>(matched.size() + 1);
+        List<K> p = new ArrayList<K>(matched.size() + 1);
         p.addAll(matched);
         p.add(key);
         updateAllMatchesWithStart(child, matches, p, list, start + 1, end);
       }
     }
     if (trie.isLeaf()) {
-      matches.add(new Match<>(matched, trie.value, start - matched.size(), start));
+      matches.add(new Match<K,V>(matched, trie.value, start - matched.size(), start));
     }
   }
 
@@ -459,13 +459,13 @@ public class TrieMapMatcher<K,V> {
     }
 
     private PartialApproxMatch<K,V> withMatch(MatchCostFunction<K,V> costFunction, double deltaCost, K t, K k) {
-      PartialApproxMatch<K,V> res = new PartialApproxMatch<>();
+      PartialApproxMatch<K,V> res = new PartialApproxMatch<K,V>();
       res.matched = matched;
       if (k != null) {
         if (res.matched == null) {
-          res.matched = new ArrayList<>(1);
+          res.matched = new ArrayList<K>(1);
         } else {
-          res.matched = new ArrayList<>(matched.size() + 1);
+          res.matched = new ArrayList<K>(matched.size() + 1);
           res.matched.addAll(matched);
         }
         res.matched.add(k);
@@ -499,7 +499,7 @@ public class TrieMapMatcher<K,V> {
 
     private ApproxMatch<K,V> toApproxMatch() {
       // Makes a copy of this partial approx match that can be returned to the caller
-      return new ApproxMatch<>(matched, value, begin, end, multimatches, cost, alignments);
+      return new ApproxMatch<K,V>(matched, value, begin, end, multimatches, cost, alignments);
     }
 
     private PartialApproxMatch<K,V> withMatch(MatchCostFunction<K,V> costFunction, double deltaCost,
@@ -508,13 +508,13 @@ public class TrieMapMatcher<K,V> {
       if (multimatch && res.matched != null && res.value != null) {
         // Update tracking of matched keys and values for multiple entry matches
         if (res.multimatches == null) {
-          res.multimatches = new ArrayList<>(1);
+          res.multimatches = new ArrayList<Match<K,V>>(1);
         } else {
-          res.multimatches = new ArrayList<>(multimatches.size() + 1);
+          res.multimatches = new ArrayList<Match<K,V>>(multimatches.size()+1);
           res.multimatches.addAll(multimatches);
         }
         List<K> newlyMatched = res.matched.subList(lastMultimatchedMatchedStartIndex, res.matched.size());
-        res.multimatches.add(new Match<>(
+        res.multimatches.add( new Match<K, V>(
                 newlyMatched,
                 res.value,
                 lastMultimatchedOriginalStartIndex, res.end
@@ -562,18 +562,18 @@ public class TrieMapMatcher<K,V> {
     public MatchQueue(int maxSize, double maxCost) {
       this.maxSize = maxSize;
       this.maxCost = maxCost;
-      this.queue = new BoundedCostOrderedMap<>(MATCH_COST_FUNCTION, maxSize, maxCost);
+      this.queue = new BoundedCostOrderedMap<Match<K, V>, PartialApproxMatch<K, V>>(MATCH_COST_FUNCTION, maxSize, maxCost);
     }
 
     public void add(PartialApproxMatch<K,V> pam) {
       List<Match<K,V>> multiMatchesWithoutOffsets = null;
       if (pam.multimatches != null) {
-        multiMatchesWithoutOffsets = new ArrayList<>(pam.multimatches.size());
+        multiMatchesWithoutOffsets = new ArrayList<Match<K, V>>(pam.multimatches.size());
         for (Match<K,V> m:pam.multimatches) {
-          multiMatchesWithoutOffsets.add(new Match<>(m.matched, m.value, 0, 0));
+          multiMatchesWithoutOffsets.add( new Match<K, V>(m.matched, m.value, 0, 0));
         }
       }
-      Match<K,V> m = new MultiMatch<>(pam.matched, pam.value, pam.begin, pam.end, multiMatchesWithoutOffsets);
+      Match<K,V> m = new MultiMatch<K,V>(pam.matched, pam.value, pam.begin, pam.end, multiMatchesWithoutOffsets);
       queue.put(m, pam);
     }
 
@@ -595,17 +595,17 @@ public class TrieMapMatcher<K,V> {
 
     public MultiMatchQueue(int maxSize, double maxCost) {
       super(maxSize, maxCost);
-      this.multimatchQueues = new HashMap<>();
+      this.multimatchQueues = new HashMap<Integer, BoundedCostOrderedMap<Match<K, V>, PartialApproxMatch<K, V>>>();
     }
 
     public void add(PartialApproxMatch<K,V> pam) {
-      Match<K,V> m = new MultiMatch<>(
+      Match<K,V> m = new MultiMatch<K,V>(
               pam.matched, pam.value, pam.begin, pam.end, pam.multimatches);
       Integer key = (pam.multimatches != null)? pam.multimatches.size():0;
       if (pam.value == null) key = key + 1;
       BoundedCostOrderedMap<Match<K,V>, PartialApproxMatch<K,V>> mq = multimatchQueues.get(key);
       if (mq == null) {
-        multimatchQueues.put(key, mq = new BoundedCostOrderedMap<>(
+        multimatchQueues.put(key, mq = new BoundedCostOrderedMap<Match<K,V>, PartialApproxMatch<K,V>>(
                 MATCH_COST_FUNCTION, maxSize, maxCost));
       }
       mq.put(m, pam);
@@ -628,7 +628,7 @@ public class TrieMapMatcher<K,V> {
     }
 
     public List<PartialApproxMatch<K,V>> toSortedList() {
-      List<PartialApproxMatch<K,V>> all = new ArrayList<>(size());
+      List<PartialApproxMatch<K,V>> all = new ArrayList<PartialApproxMatch<K, V>>(size());
       for (BoundedCostOrderedMap<Match<K,V>, PartialApproxMatch<K,V>> q:multimatchQueues.values()) {
         all.addAll(q.valuesList());
       }

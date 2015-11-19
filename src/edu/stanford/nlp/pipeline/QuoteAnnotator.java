@@ -12,46 +12,14 @@ import java.util.regex.Pattern;
 
 /**
  * An annotator which picks quotations out of the given text. Allows
- * for embedded quotations so long as they are either directed unicode quotes or are
- * of a different type of quote than the outer quotations
- * (e.g. "'Gadzooks' is what he said to me" is legal whereas
- * "They called me "Danger" when I was..." is illegal).
- * Uses regular-expression-like rules to find quotes and does not
+ * for embedded quotations so long as they are of a different type of
+ * quote than the outer quotations (e.g. "'Gadzooks' is what he said to me"
+ * is legal whereas "They called me "Danger" when I was..." is
+ * illegal.) Uses regular-expression-like rules to find quotes and does not
  * depend on the tokenizer, which allows quotes like ''Tis true!' to be
  * correctly identified.
  *
- * Considers regular ascii ("", '', ``'', and `') as well as "smart" and
- * international quotation marks as follows:
- * “”,‘’, «», ‹›, 「」, 『』, „”, and ‚’.
- *
- * There are a number of options that can be passed to the quote annotator to
- * customize its' behaviour:
- * <ul>
- *   <li>singleQuotes: "true" or "false", indicating whether or not to consider ' tokens
- *    to be quotation marks (default=false).</li>
- *   <li>maxLength: maximum character length of quotes to consider (default=-1).</li>
- *   <li>asciiQuotes: "true" or "false", indicating whether or not to convert all quotes
- *   to ascii quotes before processing (can help when there are errors in quote directionality)
- *   (default=false).</li>
- *   <li>allowEmbeddedSame: "true" or "false" indicating whether or not to allow smart/directed
- *   (everything except " and ') quotes of the same kind to be embedded within one another
- *   (default=false).</li>
- * </ul>
- *
- * The annotator adds a QuotationsAnnotation to the Annotation
- * which returns a List<CoreMap> that
- * contain the following information:
- * <ul>
- *  <li>CharacterOffsetBeginAnnotation</li>
- *  <li>CharacterOffsetEndAnnotation</li>
- *  <li>QuotationIndexAnnotation</li>
- *  <li>QuotationsAnnotation (if there are embedded quotes)</li>
- *  <li>TokensAnnotation (if the tokenizer is run before the quote annotator)</li>
- *  <li>TokenBeginAnnotation (if the tokenizer is run before the quote annotator)</li>
- *  <li>TokenEndAnnotation (if the tokenizer is run before the quote annotator)</li>
- *  <li>SentenceBeginAnnotation (if the sentence splitter has bee run before the quote annotator)</li>
- *  <li>SentenceEndAnnotation (if the sentence splitter has bee run before the quote annotator)</li>
- * </ul>
+ * Only considers " and ' characters presently (1/23/2015).
  *
  * @author Grace Muzny
  */
@@ -90,6 +58,24 @@ public class QuoteAnnotator implements Annotator {
     DIRECTED_QUOTES = Collections.unmodifiableMap(tmp);
   }
 
+  public static final Map<String, String> QUOTE_BEGINNERS;
+  static {
+    Map<String, String> tmp = Generics.newHashMap();
+    tmp.put("“", "”");  // directed double inward
+//    tmp.put("‘", "’");  // directed single inward
+    tmp.put("«", "»");  // guillemets
+    tmp.put("‹","›");  // single guillemets
+    tmp.put("「", "」");  // cjk brackets
+    tmp.put("『", "』");  // cjk brackets
+    tmp.put("„","”");  // directed double down/up left pointing
+    tmp.put("‚","’");  // directed single down/up left pointing
+//    tmp.put("``","''");  // double latex -- single latex quotes don't belong here!
+//    tmp.put("`","'");  // single latex
+//    tmp.put("\"","\"");  // double standard
+//    tmp.put("'","'");  // single standard
+    QUOTE_BEGINNERS = Collections.unmodifiableMap(tmp);
+  }
+
   /** Return a QuoteAnnotator that isolates quotes denoted by the
    * ASCII characters " and '. If an unclosed quote appears, by default,
    * this quote will not be counted as a quote.
@@ -106,8 +92,8 @@ public class QuoteAnnotator implements Annotator {
   }
 
   /** Return a QuoteAnnotator that isolates quotes denoted by the
-   * ASCII characters " and ' as well as a variety of smart and international quotes.
-   * If an unclosed quote appears, by default, this quote will not be counted as a quote.
+   * ASCII characters " and '. If an unclosed quote appears, by default,
+   * this quote will not be counted as a quote.
    *
    *  @param  props Properties object that contains the customizable properties
    *                 attributes.
@@ -326,6 +312,47 @@ public class QuoteAnnotator implements Annotator {
 
     return quote;
   }
+
+//  public List<Pair<Integer, Integer>> iterativishQuotes(String text) {
+//    // This stack will store pairs that are quote
+//    // kind & the index that it was found at.
+//    Stack<Pair<String, Integer>> quoteSilo = Generics.newStack();
+//    List<Pair<Integer, Integer>> quotes = Generics.newArrayList();
+//
+//    for (int i = 0; i < text.length(); i++) {
+//      // is the character at this index a quote?
+//      String index = text.substring(i, i + 1);
+//      // is the character at this index possibly a two-character wide quote?
+//      // Could this string begin a quote?
+//      Pair<String, Integer> beginner = null;
+//      if (i < text.length() - 1 &&
+//              index.equals("`") &&
+//              text.substring(i, i + 2).equals("``")) {
+//        beginner = new Pair<>(text.substring(i, i + 2), i);
+//        i += 1;  // need to advance i so that we don't grab the inner bit also!
+//      } else if (QUOTE_BEGINNERS.containsKey(index)) {
+//        beginner = new Pair<>(index, i);
+//      }
+//      if (beginner != null) {
+//        quoteSilo.push(beginner);
+//        continue;  // we don't want to do the end of the loop!
+//      }
+//      // Could this string end a quote?
+//      // is is a two-wide ender?
+//      Pair<String, Integer> ender = null;
+//      if (i < text.length() - 1 &&
+//              index.equals("'") &&
+//              text.substring(i, i + 2).equals("''")) {
+//        ender = new Pair<>(text.substring(i, i + 2), i);
+//        i += 1;
+//      } else if (QUOTE_BEGINNERS.values().contains(index)) {
+//        ender = new Pair<>(index, i);
+//      }
+//      if (ender != null) {
+//        quoteSilo.push(ender);
+//      }
+//    }
+//  }
 
   public List<Pair<Integer, Integer>> getQuotes(String text) {
     return recursiveQuotes(text, 0, null);

@@ -121,7 +121,7 @@ public class TaggedFileRecord {
   public static List<TaggedFileRecord> createRecords(Properties config,
                                                      String description) {
     String[] pieces = description.split(";");
-    List<TaggedFileRecord> records = new ArrayList<>();
+    List<TaggedFileRecord> records = new ArrayList<TaggedFileRecord>();
     for (String piece : pieces) {
       records.add(createRecord(config, piece));
     }

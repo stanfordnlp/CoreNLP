@@ -21,7 +21,7 @@ public class PairsHolder {
 
   // todo: In Java 5+, just make this class an ArrayList<WordTag> and be done with it?? Or actually, probably a PaddedList. Or need a WindowedList?
 
-  private final ArrayList<WordTag> arr = new ArrayList<>();
+  private final ArrayList<WordTag> arr = new ArrayList<WordTag>();
 
   public PairsHolder() {}
 

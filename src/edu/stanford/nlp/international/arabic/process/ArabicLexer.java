@@ -1250,8 +1250,6 @@ class ArabicLexer {
     while (true) {
       zzMarkedPosL = zzMarkedPos;
 
-      yychar+= zzMarkedPosL-zzStartRead;
-
       zzAction = -1;
 
       zzCurrentPosL = zzCurrentPos = zzStartRead = zzMarkedPosL;

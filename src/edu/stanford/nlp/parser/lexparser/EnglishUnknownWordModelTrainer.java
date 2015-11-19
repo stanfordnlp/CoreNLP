@@ -28,8 +28,8 @@ public class EnglishUnknownWordModelTrainer
 
     this.indexToStartUnkCounting = (totalTrees * op.trainOptions.fractionBeforeUnseenCounting);
 
-    seenCounter = new ClassicCounter<>();
-    unSeenCounter = new ClassicCounter<>();
+    seenCounter = new ClassicCounter<IntTaggedWord>();
+    unSeenCounter = new ClassicCounter<IntTaggedWord>();
 
     model = new EnglishUnknownWordModel(op, lex, wordIndex, tagIndex,
                                         unSeenCounter);

@@ -29,10 +29,6 @@ public class ScoredObject<T> implements Scored, Serializable {
     return object;
   }
 
-  public void setObject(T object) {
-    this.object = object;
-  }
-
   public ScoredObject(T object, double score) {
     this.object = object;
     this.score = score;

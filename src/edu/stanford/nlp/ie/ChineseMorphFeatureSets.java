@@ -20,7 +20,7 @@ public class ChineseMorphFeatureSets implements Serializable {
 
   private static final long serialVersionUID = -1055526945031459198L;
 
-  private Index<String> featIndex = new HashIndex<>();
+  private Index<String> featIndex = new HashIndex<String>();
   private Map<String, Set<Character>> singletonFeatures = Generics.newHashMap();
   private Map<String, Pair<Set<Character>, Set<Character>>> affixFeatures = Generics.newHashMap();
 
@@ -127,7 +127,7 @@ public class ChineseMorphFeatureSets implements Serializable {
         if (featureSet.size() > 0) {
           Pair<Set<Character>, Set<Character>> p = affixFeatures.get(singleFeatIndexString);
           if (p == null) {
-            affixFeatures.put(singleFeatIndexString, p = new Pair<>());
+            affixFeatures.put(singleFeatIndexString, p = new Pair<Set<Character>, Set<Character>>());
           }
           if (featType == FeatType.PREFIX) {
             p.setFirst(featureSet);
@@ -151,7 +151,7 @@ public class ChineseMorphFeatureSets implements Serializable {
       } else {
         Pair<Set<Character>, Set<Character>> p = affixFeatures.get(singleFeatIndexString);
         if (p == null) {
-          affixFeatures.put(singleFeatIndexString, p = new Pair<>());
+          affixFeatures.put(singleFeatIndexString, p = new Pair<Set<Character>, Set<Character>>());
         }
         if (featType == FeatType.PREFIX) {
           p.setFirst(featureSet);
@@ -165,7 +165,7 @@ public class ChineseMorphFeatureSets implements Serializable {
   private void addTypedFeature(String featName, char featChar, boolean isPrefix) {
     Pair<Set<Character>, Set<Character>> p = affixFeatures.get(featName);
     if (p == null) {
-      affixFeatures.put(featName, p = new Pair<>());
+      affixFeatures.put(featName, p = new Pair<Set<Character>, Set<Character>>());
     }
     Set<Character> feature;
     if (isPrefix) {
