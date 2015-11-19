@@ -81,17 +81,14 @@ public class SentenceFragment {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof SentenceFragment)) return false;
-    if (!super.equals(o)) return false;
     SentenceFragment that = (SentenceFragment) o;
-    return parseTree.equals(that.parseTree);
+    return this.parseTree.vertexSet().equals((that.parseTree.vertexSet()));
 
   }
 
   @Override
   public int hashCode() {
-    int result = super.hashCode();
-    result = 31 * result + parseTree.hashCode();
-    return result;
+    return this.parseTree.vertexSet().hashCode();
   }
 
   @Override
@@ -104,9 +101,7 @@ public class SentenceFragment {
       // Find additional connectives
       for (SemanticGraphEdge edge : parseTree.incomingEdgeIterable(new IndexedWord(word))) {
         String rel = edge.getRelation().toString();
-        if (rel.contains(":") && !rel.endsWith("npmod")) {
-          addedConnective = rel.substring(rel.indexOf(":") + 1);
-        } else if (rel.contains("_")) {
+        if (rel.contains("_")) {  // for Stanford dependencies only
           addedConnective = rel.substring(rel.indexOf("_") + 1);
         }
       }

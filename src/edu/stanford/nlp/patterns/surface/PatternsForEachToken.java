@@ -38,7 +38,7 @@ public abstract class PatternsForEachToken<E> {
     for(Map.Entry<String, Map<Integer, Set<E>>> en :tempPatsForSents.entrySet()){
       Map<Integer, Set<E>> m = getPatternsForAllTokens(en.getKey());
       if(m == null)
-        m = new HashMap<Integer, Set<E>>();
+        m = new HashMap<>();
       tempPatsForSents.get(en.getKey()).putAll(m);
     }
     this.addPatterns(tempPatsForSents);

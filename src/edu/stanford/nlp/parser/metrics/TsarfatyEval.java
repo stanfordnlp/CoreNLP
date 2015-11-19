@@ -61,8 +61,7 @@ public class TsarfatyEval extends AbstractEval {
 
     } else {
       Tree[] kids = t.children();
-      for (int i = 0; i < kids.length; i++)
-        position = extractDeps(kids[i], position, deps);
+      for (Tree kid : kids) position = extractDeps(kid, position, deps);
     }
 
     return position;

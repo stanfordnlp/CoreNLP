@@ -27,20 +27,20 @@ public class ClassifierExample {
 
 
   protected static Datum<String,String> makeStopLights(String ns, String ew) {
-    List<String> features = new ArrayList<String>();
+    List<String> features = new ArrayList<>();
     // Create the north-south light feature
     features.add("NS=" + ns);
     // Create the east-west light feature
     features.add("EW=" + ew);
     // Create the label
     String label = (ns.equals(ew) ? BROKEN : WORKING);
-    return new BasicDatum<String,String>(features, label);
+    return new BasicDatum<>(features, label);
   }
 
 
   public static void main(String[] args) {
     // Create a training set
-    List<Datum<String,String>> trainingData = new ArrayList<Datum<String,String>>();
+    List<Datum<String,String>> trainingData = new ArrayList<>();
     trainingData.add(makeStopLights(GREEN, RED));
     trainingData.add(makeStopLights(GREEN, RED));
     trainingData.add(makeStopLights(GREEN, RED));
@@ -52,7 +52,7 @@ public class ClassifierExample {
     Datum<String,String> workingLights = makeStopLights(GREEN, RED);
     Datum<String,String> brokenLights = makeStopLights(RED, RED);
     // Build a classifier factory
-    LinearClassifierFactory<String,String> factory = new LinearClassifierFactory<String,String>();
+    LinearClassifierFactory<String,String> factory = new LinearClassifierFactory<>();
     factory.useConjugateGradientAscent();
     // Turn on per-iteration convergence updates
     factory.setVerbose(true);

@@ -52,7 +52,11 @@ public class XMLOutputter extends AnnotationOutputter {
   public void print(Annotation annotation, OutputStream os, Options options) throws IOException {
     Document xmlDoc = annotationToDoc(annotation, options);
     Serializer ser = new Serializer(os, options.encoding);
-    ser.setIndent(2);
+    if (options.pretty) {
+      ser.setIndent(2);
+    } else {
+      ser.setIndent(0);
+    }
     ser.setMaxLength(0);
     ser.write(xmlDoc);
     ser.flush();

@@ -13,7 +13,7 @@ import java.util.List;
 public abstract class MultiNodePattern<T> {
   int minNodes = 1;
   int maxNodes = -1;   // Set the max number of nodes this pattern can match 
-
+  boolean greedyMatch = true;
 
   /**
    * Tries to match sequence of nodes starting of start
@@ -37,6 +37,14 @@ public abstract class MultiNodePattern<T> {
 
   public void setMaxNodes(int maxNodes) {
     this.maxNodes = maxNodes;
+  }
+
+  public boolean isGreedyMatch() {
+    return greedyMatch;
+  }
+
+  public void setGreedyMatch(boolean greedyMatch) {
+    this.greedyMatch = greedyMatch;
   }
 
   protected static class IntersectMultiNodePattern<T> extends MultiNodePattern<T> {

@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -39,6 +42,8 @@ import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
  * @author John Bauer
  */
 public abstract class ParserGrammar implements Function<List<? extends HasWord>, Tree> {
+
+  private static Logger logger = LoggerFactory.getLogger(ParserGrammar.class);
 
   public abstract ParserQuery parserQuery();
 
@@ -176,7 +181,7 @@ public abstract class ParserGrammar implements Function<List<? extends HasWord>,
     ParserGrammar parser;
     try {
       Timing timing = new Timing();
-      System.err.print("Loading parser from serialized file " + path + " ... ");
+      logger.info("Loading parser from serialized file " + path + " ... ");
       parser = IOUtils.readObjectFromURLOrClasspathOrFileSystem(path);
       timing.done();
     } catch (IOException | ClassNotFoundException e) {

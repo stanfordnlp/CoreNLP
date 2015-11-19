@@ -72,8 +72,8 @@ public class FloatFactorTable {
 
   private String toString(int[] array, Index classIndex) {
     List l = new ArrayList();
-    for (int i = 0; i < array.length; i++) {
-      l.add(classIndex.get(array[i]));
+    for (int anArray : array) {
+      l.add(classIndex.get(anArray));
     }
     return l.toString();
   }
@@ -89,18 +89,18 @@ public class FloatFactorTable {
 
   private int indexOf(int[] entry) {
     int index = 0;
-    for (int i = 0; i < entry.length; i++) {
+    for (int anEntry : entry) {
       index *= numClasses;
-      index += entry[i];
+      index += anEntry;
     }
     return index;
   }
 
   private int indexOf(int[] front, int end) {
     int index = 0;
-    for (int i = 0; i < front.length; i++) {
+    for (int aFront : front) {
       index *= numClasses;
-      index += front[i];
+      index += aFront;
     }
     index *= numClasses;
     index += end;
@@ -111,9 +111,9 @@ public class FloatFactorTable {
     int[] indices = new int[SloppyMath.intPow(numClasses, windowSize - entries.length)];
     int offset = SloppyMath.intPow(numClasses, entries.length);
     int index = 0;
-    for (int i = 0; i < entries.length; i++) {
+    for (int entry : entries) {
       index *= numClasses;
-      index += entries[i];
+      index += entry;
     }
     for (int i = 0; i < indices.length; i++) {
       indices[i] = index;
@@ -126,9 +126,9 @@ public class FloatFactorTable {
     int[] indices = new int[SloppyMath.intPow(numClasses, windowSize - entries.length)];
     int offset = SloppyMath.intPow(numClasses, windowSize - entries.length);
     int start = 0;
-    for (int i = 0; i < entries.length; i++) {
+    for (int entry : entries) {
       start *= numClasses;
-      start += entries[i];
+      start += entry;
     }
     start *= offset;
     int end = 0;

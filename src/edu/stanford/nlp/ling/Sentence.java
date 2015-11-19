@@ -30,7 +30,7 @@ public class Sentence {
    * @return The Sentence
    */
   public static ArrayList<TaggedWord> toTaggedList(List<String> lex, List<String> tags) {
-    ArrayList<TaggedWord> sent = new ArrayList<TaggedWord>();
+    ArrayList<TaggedWord> sent = new ArrayList<>();
     int ls = lex.size();
     int ts = tags.size();
     if (ls != ts) {
@@ -52,7 +52,7 @@ public class Sentence {
    */
   //TODO wsg2010: This should be deprecated in favor of the method below with new labels
   public static ArrayList<Word> toUntaggedList(List<String> lex) {
-    ArrayList<Word> sent = new ArrayList<Word>();
+    ArrayList<Word> sent = new ArrayList<>();
     for (String str : lex) {
       sent.add(new Word(str));
     }
@@ -68,7 +68,7 @@ public class Sentence {
    */
   //TODO wsg2010: This should be deprecated in favor of the method below with new labels
   public static ArrayList<Word> toUntaggedList(String... words) {
-    ArrayList<Word> sent = new ArrayList<Word>();
+    ArrayList<Word> sent = new ArrayList<>();
     for (String str : words) {
       sent.add(new Word(str));
     }
@@ -76,7 +76,7 @@ public class Sentence {
   }
 
   public static List<HasWord> toWordList(String... words) {
-    List<HasWord> sent = new ArrayList<HasWord>();
+    List<HasWord> sent = new ArrayList<>();
     for (String word : words) {
       CoreLabel cl = new CoreLabel();
       cl.setValue(word);
@@ -94,7 +94,7 @@ public class Sentence {
    * @return The Sentence
    */
   public static List<CoreLabel> toCoreLabelList(String... words) {
-    List<CoreLabel> sent = new ArrayList<CoreLabel>(words.length);
+    List<CoreLabel> sent = new ArrayList<>(words.length);
     for (String word : words) {
       CoreLabel cl = new CoreLabel();
       cl.setValue(word);
@@ -112,7 +112,7 @@ public class Sentence {
    * @return The Sentence
    */
   public static List<CoreLabel> toCoreLabelList(List<? extends HasWord> words) {
-    List<CoreLabel> sent = new ArrayList<CoreLabel>(words.size());
+    List<CoreLabel> sent = new ArrayList<>(words.size());
     for (HasWord word : words) {
       CoreLabel cl = new CoreLabel();
       if (word instanceof Label) {
@@ -231,11 +231,17 @@ public class Sentence {
       if (printBeforeBeforeStart) {
         // Only print Before for first token, since otherwise same as After of previous token
         // BUG: if you print a sequence of sentences, you double up between sentence spacing.
-        s.append(cl.get(CoreAnnotations.BeforeAnnotation.class));
+        if (cl.get(CoreAnnotations.BeforeAnnotation.class) != null) {
+          s.append(cl.get(CoreAnnotations.BeforeAnnotation.class));
+        }
         printBeforeBeforeStart = false;
       }
       s.append(cl.get(CoreAnnotations.OriginalTextAnnotation.class));
-      s.append(cl.get(CoreAnnotations.AfterAnnotation.class));
+      if (cl.get(CoreAnnotations.AfterAnnotation.class) != null) {
+        s.append(cl.get(CoreAnnotations.AfterAnnotation.class));
+      } else {
+        s.append(" ");
+      }
     }
     return s.toString();
   }
