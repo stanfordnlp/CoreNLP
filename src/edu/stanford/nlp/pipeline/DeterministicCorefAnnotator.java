@@ -54,12 +54,15 @@ public class DeterministicCorefAnnotator implements Annotator {
 
   private final boolean allowReparsing;
 
+  private final boolean outputHybridVersion;
+
   public DeterministicCorefAnnotator(Properties props) {
     try {
       corefSystem = new SieveCoreferenceSystem(props);
       mentionExtractor = new MentionExtractor(corefSystem.dictionaries(), corefSystem.semantics());
       OLD_FORMAT = Boolean.parseBoolean(props.getProperty("oldCorefFormat", "false"));
       allowReparsing = PropertiesUtils.getBool(props, Constants.ALLOW_REPARSING_PROP, Constants.ALLOW_REPARSING);
+      outputHybridVersion = Boolean.parseBoolean(props.getProperty("dcoref.outputHybridVersion", "false"));
     } catch (Exception e) {
       System.err.println("ERROR: cannot create DeterministicCorefAnnotator!");
       e.printStackTrace();
@@ -128,10 +131,13 @@ public class DeterministicCorefAnnotator implements Annotator {
         }
       }
 
-      //Map<Integer, CorefChain> result = corefSystem.coref(document);
-      Map<Integer, edu.stanford.nlp.hcoref.data.CorefChain> result = corefSystem.corefReturnHybridOutput(document);
-      //annotation.set(CorefCoreAnnotations.CorefChainAnnotation.class, result);
-      annotation.set(edu.stanford.nlp.hcoref.CorefCoreAnnotations.CorefChainAnnotation.class, result);
+      if (outputHybridVersion) {
+        Map<Integer, edu.stanford.nlp.hcoref.data.CorefChain> result = corefSystem.corefReturnHybridOutput(document);
+        annotation.set(edu.stanford.nlp.hcoref.CorefCoreAnnotations.CorefChainAnnotation.class, result);
+      } else {
+        Map<Integer, CorefChain> result = corefSystem.coref(document);
+        annotation.set(CorefCoreAnnotations.CorefChainAnnotation.class, result);
+      }
 
       if(OLD_FORMAT) {
         Map<Integer, CorefChain> oldResult = corefSystem.coref(document);
