@@ -18,6 +18,8 @@ import edu.stanford.nlp.dcoref.SieveCoreferenceSystem;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.hcoref.*;
+import edu.stanford.nlp.hcoref.data.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
@@ -126,11 +128,14 @@ public class DeterministicCorefAnnotator implements Annotator {
         }
       }
 
-      Map<Integer, CorefChain> result = corefSystem.coref(document);
-      annotation.set(CorefCoreAnnotations.CorefChainAnnotation.class, result);
+      //Map<Integer, CorefChain> result = corefSystem.coref(document);
+      Map<Integer, edu.stanford.nlp.hcoref.data.CorefChain> result = corefSystem.corefReturnHybridOutput(document);
+      //annotation.set(CorefCoreAnnotations.CorefChainAnnotation.class, result);
+      annotation.set(edu.stanford.nlp.hcoref.CorefCoreAnnotations.CorefChainAnnotation.class, result);
 
       if(OLD_FORMAT) {
-        addObsoleteCoreferenceAnnotations(annotation, orderedMentions, result);
+        Map<Integer, CorefChain> oldResult = corefSystem.coref(document);
+        addObsoleteCoreferenceAnnotations(annotation, orderedMentions, oldResult);
       }
     } catch (RuntimeException e) {
       throw e;
