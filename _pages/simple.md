@@ -14,8 +14,8 @@ An example usage is given below:
 import edu.stanford.nlp.simple.*
 
 Sentence sent = new Sentence("Lucy is in the sky with diamonds.");
-List<String> nerTags = sent.ners();  // [PERSON, O, O, O, O, O, O, O]
-String firstLemma = sent.lemma(0);   // Lucy
+List<String> nerTags = sent.nerTags();  // [PERSON, O, O, O, O, O, O, O]
+String firstPOSTag = sent.posTag(0);   // NNP
 ...
 ```
 
@@ -71,8 +71,8 @@ The interface is not guaranteed to support all of the annotators in the CoreNLP 
 
 | Functionality               | Annotator in CoreNLP | Implementing Class      | Function                         |
 | --------------------------- | :------------------: | ----------------------- | -------------------------------- |
-| Tokenization                | `tokenize`           | `Sentence`              | `.words()`                       |
-| Sentence Splitting          | `ssplit`             | `Document`              | `.sentences()`                   |
+| Tokenization                | `tokenize`           | `Sentence`              | `.words()` / `.word(int)`                      |
+| Sentence Splitting          | `ssplit`             | `Document`              | `.sentences()` / `.sentence(int)`                   |
 | Part of Speech Tagging      | `pos`                | `Sentence`              | `.posTags()` / `.posTag(int)`    |
 | Lemmatization               | `lemma`              | `Sentence`              | `.lemmas()` / `.lemma(int)`      |
 | Named Entity Recognition    | `lemma`              | `Sentence`              | `.nerTags()` / `.nerTag(int)`    |
