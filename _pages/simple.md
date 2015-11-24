@@ -75,7 +75,7 @@ The interface is not guaranteed to support all of the annotators in the CoreNLP 
 | Sentence Splitting          | `ssplit`             | `Document`              | `.sentences()` / `.sentence(int)`                   |
 | Part of Speech Tagging      | `pos`                | `Sentence`              | `.posTags()` / `.posTag(int)`    |
 | Lemmatization               | `lemma`              | `Sentence`              | `.lemmas()` / `.lemma(int)`      |
-| Named Entity Recognition    | `lemma`              | `Sentence`              | `.nerTags()` / `.nerTag(int)`    |
+| Named Entity Recognition    | `ner`                | `Sentence`              | `.nerTags()` / `.nerTag(int)`    |
 | Constituency Parsing        | `parse`              | `Sentence`              | `.parse()`                       |
 | Dependency Parsing          | `depparse`           | `Sentence`              | `.governor(int)` / `.incomingDependencyLabel(int)` |
 | Coreference Resolution      | `dcoref`             | `Document`              | `.coref()`                       |
