@@ -135,7 +135,7 @@ public class TSVSentenceIteratorTest {
         add(SentenceField.NER_TAGS);
         add(SentenceField.DOC_CHAR_BEGIN);
         add(SentenceField.DOC_CHAR_END);
-        add(SentenceField.DEPENDENCIES_STANFORD);
+        add(SentenceField.DEPENDENCIES_BASIC);
         add(SentenceField.GLOSS);
       }
     });
