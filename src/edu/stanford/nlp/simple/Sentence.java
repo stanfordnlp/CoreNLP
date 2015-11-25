@@ -161,10 +161,29 @@ public class Sentence {
     }
   }
 
+  /**
+   *
+   * @param doc
+   * @param proto
+   * @param text
+   */
+  protected Sentence(Document doc, CoreNLPProtos.Sentence.Builder proto, String text) {
+    this.document = doc;
+    this.impl = proto;
+    // Set tokens
+    // This is the _only_ place we are allowed to construct tokens builders
+    tokensBuilders = new ArrayList<>(this.impl.getTokenCount());
+    for (int i = 0; i < this.impl.getTokenCount(); ++i) {
+      tokensBuilders.add(this.impl.getToken(i).toBuilder());
+    }
+    this.impl.setText(text);
+  }
+
   /** Helper for creating a sentence from a document and a CoreMap representation */
   protected Sentence(Document doc, CoreMap sentence) {
-    this(doc, doc.serializer.toProtoBuilder(sentence));
-    this.impl.setText(sentence.get(CoreAnnotations.TextAnnotation.class));
+    this.document = doc;
+    this.impl = doc.sentence(0).impl;
+    this.tokensBuilders = doc.sentence(0).tokensBuilders;
   }
 
   /**
@@ -177,6 +196,9 @@ public class Sentence {
   public Sentence(CoreMap sentence) {
     this(new Document(new Annotation(sentence.get(CoreAnnotations.TextAnnotation.class)) {{
       set(CoreAnnotations.SentencesAnnotation.class, Collections.singletonList(sentence));
+      if(sentence.containsKey(CoreAnnotations.DocIDAnnotation.class)) {
+        set(CoreAnnotations.DocIDAnnotation.class, sentence.get(CoreAnnotations.DocIDAnnotation.class));
+      }
     }}), sentence);
   }
 
@@ -1042,5 +1064,16 @@ public class Sentence {
         return tokens.size();
       }
     };
+  }
+
+  /** Returns the sentence id of the sentence, if one was found */
+  public Optional<String> sentenceid() {
+    synchronized (impl) {
+      if (impl.hasSentenceID()) {
+        return Optional.of(impl.getSentenceID());
+      } else {
+        return Optional.empty();
+      }
+    }
   }
 }
