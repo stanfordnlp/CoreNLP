@@ -756,7 +756,12 @@ public class Preprocessor {
     if ( ! doc.speakers.containsKey(paragraphUtterIndex)) {
       if ( ! nextParagraphSpeaker.isEmpty()) {
         doc.speakers.put(paragraphUtterIndex, nextParagraphSpeaker);
-      } else if (paragraph.size() > 0) {  // find the speaker of this paragraph (John, nbc news)
+      } else {  // find the speaker of this paragraph (John, nbc news)
+        // cdm [Sept 2015] added this check to try to avoid crash
+        if (paragraph.isEmpty()) {
+          Redwood.log("debug-preprocessor", "Empty paragraph; skipping findParagraphSpeaker");
+          return "";
+        }
         CoreMap lastSent = paragraph.get(paragraph.size()-1);
         String speaker = "";
         boolean hasVerb = false;

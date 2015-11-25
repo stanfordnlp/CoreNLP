@@ -391,16 +391,16 @@ public class Sentence {
    * @param props The properties to use for the {@link edu.stanford.nlp.pipeline.NERCombinerAnnotator}.
    * @return A list of named entity tags, one for each token in the sentence.
    */
-  public List<String> ners(Properties props) {
+  public List<String> nerTags(Properties props) {
     document.runNER(props);
     synchronized (impl) {
       return lazyList(tokensBuilders, CoreNLPProtos.Token.Builder::getNer);
     }
   }
 
-  /** @see Sentence#ners(java.util.Properties) */
-  public List<String> ners() {
-    return ners(EMPTY_PROPS);
+  /** @see Sentence#nerTags(java.util.Properties) */
+  public List<String> nerTags() {
+    return nerTags(EMPTY_PROPS);
   }
 
   /**
@@ -422,9 +422,9 @@ public class Sentence {
     this.document.runRegexner(props);
   }
 
-  /** @see Sentence#ners(java.util.Properties) */
-  public String ner(int index) {
-    return ners().get(index);
+  /** @see Sentence#nerTags(java.util.Properties) */
+  public String nerTag(int index) {
+    return nerTags().get(index);
   }
 
   /**
@@ -437,7 +437,7 @@ public class Sentence {
     StringBuilder lastMention = new StringBuilder();
     String lastTag = "O";
     for (int i = 0; i < length(); ++i) {
-      String ner = ner(i);
+      String ner = nerTag(i);
       if (ner.equals(nerTag) && !lastTag.equals(nerTag)) {
         // case: beginning of span
         lastMention.append(word(i)).append(' ');
@@ -468,7 +468,7 @@ public class Sentence {
     StringBuilder lastMention = new StringBuilder();
     String lastTag = "O";
     for (int i = 0; i < length(); ++i) {
-      String ner = ner(i);
+      String ner = nerTag(i);
       if (!ner.equals("O") && !lastTag.equals(ner)) {
         // case: beginning of span
         if (lastMention.length() > 0) {

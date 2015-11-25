@@ -18,8 +18,6 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
@@ -36,7 +34,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  */
 public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, ClauseSplitterSearchProblem> {
 
-  public enum ClauseClassifierLabel {
+  enum ClauseClassifierLabel {
     CLAUSE_SPLIT(2),
     CLAUSE_INTERM(1),
     NOT_A_CLAUSE(0);
@@ -49,6 +47,7 @@ public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, Claus
     public String toString() {
       return this.name();
     }
+    @SuppressWarnings("unused")
     public static ClauseClassifierLabel fromIndex(int index) {
       switch (index) {
         case 0:
@@ -63,6 +62,7 @@ public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, Claus
     }
   }
 
+
   /**
    * Train a clause searcher factory. That is, train a classifier for which arcs should be
    * new clauses.
@@ -73,28 +73,26 @@ public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, Claus
    *                       <li>The span of the subject in the sentence, as a token span.</li>
    *                       <li>The span of the object in the sentence, as a token span.</li>
    *                     </ol>
-   * @param featurizer The featurizer to use for this classifier.
-   * @param options The training options.
    * @param modelPath The path to save the model to. This is useful for {@link ClauseSplitter#load(String)}.
    * @param trainingDataDump The path to save the training data, as a set of labeled featurized datums.
+   * @param featurizer The featurizer to use for this classifier.
    *
    * @return A factory for creating searchers from a given dependency tree.
    */
   @SuppressWarnings("unchecked")
-  public static ClauseSplitter train(
-      Stream<Triple<CoreMap, Span, Span>> trainingData,
-      Featurizer featurizer,
-      TrainingOptions options,
+  static ClauseSplitter train(
+      Stream<Pair<CoreMap, Collection<Pair<Span, Span>>>> trainingData,
       Optional<File> modelPath,
-      Optional<File> trainingDataDump) {
+      Optional<File> trainingDataDump,
+      Featurizer featurizer) {
+
     // Parse options
-    ClassifierFactory<ClauseClassifierLabel, String, Classifier<ClauseClassifierLabel,String>> classifierFactory = MetaClass.create(options.classifierFactory).createInstance();
+    LinearClassifierFactory<ClauseClassifierLabel, String> factory = new LinearClassifierFactory<>();
     // Generally useful objects
     OpenIE openie = new OpenIE(new Properties() {{
       setProperty("splitter.nomodel", "true");
       setProperty("optimizefor", "GENERAL");
     }});
-    Random rand = new Random(options.seed);
     WeightedDataset<ClauseClassifierLabel, String> dataset = new WeightedDataset<>();
     AtomicInteger numExamplesProcessed = new AtomicInteger(0);
     final Optional<PrintWriter> datasetDumpWriter = trainingDataDump.map(file -> {
@@ -105,117 +103,127 @@ public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, Claus
       }
     });
 
-    // Step 1: Inference over training sentences
+
+    // Step 1: Loop over data
     forceTrack("Training inference");
-    trainingData.forEach(triple -> {
+    trainingData.forEach(rawExample -> {
       // Parse training datum
-      CoreMap sentence = triple.first;
+      CoreMap sentence = rawExample.first;
+      Collection<Pair<Span, Span>> spans = rawExample.second;
       List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
       SemanticGraph tree = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
-      Span subjectSpan = triple.second; //Util.extractNER(tokens, triple.second);
-      Span objectSpan = triple.third; //Util.extractNER(tokens, triple.third);
-//      log(StringUtils.toString(tokens));
-//      log("  -> " + StringUtils.toString(tokens.subList(subjectSpan.start(), subjectSpan.end())) + " :: " + StringUtils.toString(tokens.subList(objectSpan.start(), objectSpan.end())));
       // Create raw clause searcher (no classifier)
       ClauseSplitterSearchProblem problem = new ClauseSplitterSearchProblem(tree, true);
 
       // Run search
       problem.search(fragmentAndScore -> {
-        // Parse the search output
+        // Parse the search callback
         List<Counter<String>> features = fragmentAndScore.second;
-        Supplier<SentenceFragment> fragmentSupplier = fragmentAndScore.third;
-        SentenceFragment fragment = fragmentSupplier.get();
+        SentenceFragment fragment = fragmentAndScore.third.get();
+
         // Search for extractions
-        List<RelationTriple> extractions = openie.relationsInFragments(openie.entailmentsFromClause(fragment));
+        Set<RelationTriple> extractions = new HashSet<>(openie.relationsInFragments(openie.entailmentsFromClause(fragment)));
         Trilean correct = Trilean.FALSE;
-        for (RelationTriple extraction : extractions) {
+        RELATION_TRIPLE_LOOP: for (RelationTriple extraction : extractions) {
           // Clean up the guesses
           Span subjectGuess = Span.fromValues(extraction.subject.get(0).index() - 1, extraction.subject.get(extraction.subject.size() - 1).index());
           Span objectGuess = Span.fromValues(extraction.object.get(0).index() - 1, extraction.object.get(extraction.object.size() - 1).index());
-          // Check if it matches
-          if ((subjectGuess.equals(subjectSpan) && objectGuess.equals(objectSpan)) ||
-              (subjectGuess.equals(objectSpan) && objectGuess.equals(subjectSpan))
-              ) {
-            correct = Trilean.TRUE;
-          } else if ( Util.nerOverlap(tokens, subjectSpan, subjectGuess) && Util.nerOverlap(tokens, objectSpan, objectGuess) ||
-                      Util.nerOverlap(tokens, subjectSpan, objectGuess) && Util.nerOverlap(tokens, objectSpan, subjectGuess) ) {
-            if (!correct.isTrue()) {
+          for (Pair<Span, Span> candidateGold : spans) {
+            Span subjectSpan = candidateGold.first;
+            Span objectSpan = candidateGold.second;
+            // Check if it matches
+            if ((subjectGuess.equals(subjectSpan) && objectGuess.equals(objectSpan)) ||
+                (subjectGuess.equals(objectSpan) && objectGuess.equals(subjectSpan))
+                ) {
               correct = Trilean.TRUE;
-            }
-          } else {
-            if (!correct.isTrue()) {
-              correct = Trilean.UNKNOWN;
+              break RELATION_TRIPLE_LOOP;
+            } else if (Util.nerOverlap(tokens, subjectSpan, subjectGuess) && Util.nerOverlap(tokens, objectSpan, objectGuess) ||
+                Util.nerOverlap(tokens, subjectSpan, objectGuess) && Util.nerOverlap(tokens, objectSpan, subjectGuess)) {
+              if (!correct.isTrue()) {
+                correct = Trilean.TRUE;
+                break RELATION_TRIPLE_LOOP;
+              }
+            } else {
+              if (!correct.isTrue()) {
+                correct = Trilean.UNKNOWN;
+                break RELATION_TRIPLE_LOOP;
+              }
             }
           }
         }
+
         // Process the datum
         if (!features.isEmpty()) {
-//          log(prefix + info(fragment, tokens, tree));
-//          if (bestExtraction != null) { log("    " + bestExtraction); }
-          for (int i = (correct.isFalse() ? features.size() - 1 : 0); i < features.size(); ++i) {
-            Counter<String> decision = features.get(i);
-            // (get output label)
-            ClauseClassifierLabel label;
-            if (correct.isFalse()) {
-              label = ClauseClassifierLabel.NOT_A_CLAUSE;
-            } else {
+
+          // Convert the path to datums
+          List<Pair<Counter<String>, ClauseClassifierLabel>> decisionsToAddAsDatums = new ArrayList<>();
+          if (correct.isTrue()) {
+            // If this is a "true" path, add the k-1 decisions as INTERM and the last decision as a SPLIT
+            for (int i = 0; i < features.size(); ++i) {
               if (i == features.size() - 1) {
-                label = ClauseClassifierLabel.CLAUSE_SPLIT;
+                decisionsToAddAsDatums.add(Pair.makePair(features.get(i), ClauseClassifierLabel.CLAUSE_SPLIT));
               } else {
-                label = ClauseClassifierLabel.CLAUSE_INTERM;
+                decisionsToAddAsDatums.add(Pair.makePair(features.get(i), ClauseClassifierLabel.CLAUSE_INTERM));
               }
             }
-//            if (bestExtraction != null) { log("    " + label); }
+          } else if (correct.isFalse()) {
+            // If this is a "false" path, then we know at least the last decision was bad.
+            decisionsToAddAsDatums.add(Pair.makePair(features.get(features.size() - 1), ClauseClassifierLabel.NOT_A_CLAUSE));
+          } else if (correct.isUnknown()) {
+            // If this is an "unknown" path, only add it if it was the result of vanilla splits
+            // (check if it is a sequence of simple splits)
+            boolean isSimpleSplit = false;
+            for (Counter<String> feats : features) {
+              if (featurizer.isSimpleSplit(feats)) {
+                isSimpleSplit = true;
+                break;
+              }
+            }
+            // (if so, add it as if it were a True example)
+            if (isSimpleSplit) {
+              for (int i = 0; i < features.size(); ++i) {
+                if (i == features.size() - 1) {
+                  decisionsToAddAsDatums.add(Pair.makePair(features.get(i), ClauseClassifierLabel.CLAUSE_SPLIT));
+                } else {
+                  decisionsToAddAsDatums.add(Pair.makePair(features.get(i), ClauseClassifierLabel.CLAUSE_INTERM));
+                }
+              }
+            }
+          }
+
+          // Add the datums
+          for (Pair<Counter<String>, ClauseClassifierLabel> decision : decisionsToAddAsDatums) {
             // (create datum)
-            RVFDatum<ClauseClassifierLabel, String> datum = new RVFDatum<>(decision);
-            datum.setLabel(label);
+            RVFDatum<ClauseClassifierLabel, String> datum = new RVFDatum<>(decision.first);
+            datum.setLabel(decision.second);
             // (dump datum to debug log)
             if (datasetDumpWriter.isPresent()) {
-              datasetDumpWriter.get().println("" + label + "\t" + correct + "\t" +
-                  StringUtils.join(decision.entrySet().stream().map(entry -> "" + entry.getKey() + "->" + entry.getValue()), ";"));
-            }
-            // (get datum weight)
-            float weight;
-            if (correct.isTrue()) {
-              weight = options.positiveDatumWeight;
-            } else if (correct.isUnknown()) {
-              weight = options.unknownDatumWeight;
-            } else {
-              weight = 1.0f;
-            }
-            switch (label) {
-              case CLAUSE_INTERM:
-                weight *= options.clauseIntermWeight;
-                break;
-              case CLAUSE_SPLIT:
-                weight *= options.clauseSplitWeight;
-                break;
-              default:
-                weight *= 1.0f;
-                break;
+              datasetDumpWriter.get().println("" +
+                  decision.second + "\t" +
+                  StringUtils.join(decision.first.entrySet().stream().map(entry -> "" + entry.getKey() + "->" + entry.getValue()), ";"));
             }
             // (add datum to dataset)
-            if (weight > 0.0) {
-              if (label != ClauseClassifierLabel.NOT_A_CLAUSE || rand.nextDouble() > (1.0 - options.negativeSubsampleRatio)) {
-                dataset.add(datum, weight);
-              }
-            }
+            dataset.add(datum);
           }
         }
         return true;
       }, new LinearClassifier<>(new ClassicCounter<>()), Collections.EMPTY_MAP, featurizer, 10000);
+
       // Debug info
       if (numExamplesProcessed.incrementAndGet() % 100 == 0) {
         log("processed " + numExamplesProcessed + " training sentences: " + dataset.size() + " datums");
       }
     });
-    // Close dataset dump
-    datasetDumpWriter.ifPresent(PrintWriter::close);
     endTrack("Training inference");
+
+    // Close the file
+    if (datasetDumpWriter.isPresent()) {
+      datasetDumpWriter.get().close();
+    }
 
     // Step 2: Train classifier
     forceTrack("Training");
-    Classifier<ClauseClassifierLabel,String> fullClassifier = classifierFactory.trainClassifier(dataset);
+    Classifier<ClauseClassifierLabel,String> fullClassifier = factory.trainClassifier(dataset);
     endTrack("Training");
     if (modelPath.isPresent()) {
       Pair<Classifier<ClauseClassifierLabel,String>, Featurizer> toSave = Pair.makePair(fullClassifier, featurizer);
@@ -230,7 +238,7 @@ public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, Claus
 
     // Step 3: Check accuracy of classifier
     forceTrack("Training accuracy");
-    dataset.randomize(options.seed);
+    dataset.randomize(42l);
     Util.dumpAccuracy(fullClassifier, dataset);
     endTrack("Training accuracy");
 
@@ -240,7 +248,7 @@ public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, Claus
       forceTrack("Fold " + (fold + 1));
       forceTrack("Training");
       Pair<GeneralDataset<ClauseClassifierLabel, String>, GeneralDataset<ClauseClassifierLabel, String>> foldData = dataset.splitOutFold(fold, numFolds);
-      Classifier<ClauseClassifierLabel, String> classifier = classifierFactory.trainClassifier(foldData.first);
+      Classifier<ClauseClassifierLabel, String> classifier = factory.trainClassifier(foldData.first);
       endTrack("Training");
       forceTrack("Test");
       Util.dumpAccuracy(classifier, foldData.second);
@@ -254,27 +262,21 @@ public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, Claus
     return (tree, truth) -> new ClauseSplitterSearchProblem(tree, truth, Optional.of(fullClassifier), Optional.of(featurizer));
   }
 
-  /**
-   * A helper function for training with the default featurizer and training options.
-   *
-   * @see ClauseSplitter#train(Stream, Featurizer, TrainingOptions, Optional, Optional)
-   */
-  public static ClauseSplitter train(
-      Stream<Triple<CoreMap, Span, Span>> trainingData,
+  static ClauseSplitter train(
+      Stream<Pair<CoreMap, Collection<Pair<Span, Span>>>> trainingData,
       File modelPath,
       File trainingDataDump) {
-    // Train
-    return train(trainingData, ClauseSplitterSearchProblem.DEFAULT_FEATURIZER, new TrainingOptions(), Optional.of(modelPath), Optional.of(trainingDataDump));
+    return train(trainingData, Optional.of(modelPath), Optional.of(trainingDataDump), ClauseSplitterSearchProblem.DEFAULT_FEATURIZER);
   }
 
 
   /**
    * Load a factory model from a given path. This can be trained with
-   * {@link ClauseSplitter#train(Stream, Featurizer, TrainingOptions, Optional, Optional)}.
+   * {@link ClauseSplitter#train(Stream, Optional, Optional, Featurizer)}.
    *
    * @return A function taking a dependency tree, and returning a clause searcher.
    */
-  public static ClauseSplitter load(String serializedModel) throws IOException {
+  static ClauseSplitter load(String serializedModel) throws IOException {
     try {
       long start = System.currentTimeMillis();
       System.err.print("Loading clause searcher from " + serializedModel + "...");

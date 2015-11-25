@@ -2077,6 +2077,18 @@ public class IOUtils {
     }
   }
 
+  /**
+   * Create a prompt, and read a single line of response.
+   * @param prompt An optional prompt to show the user.
+   * @throws IOException Throw from the underlying reader.
+   */
+  public static String promptUserInput(Optional<String> prompt) throws IOException {
+    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+    String line;
+    System.out.print(prompt.orElse("> "));
+    return reader.readLine();
+  }
+
   /** @see IOUtils#console(String, Consumer) */
   public static void console(Consumer<String> callback) throws IOException {
     console("> ", callback);
