@@ -228,8 +228,8 @@ public class RelationTripleSegmenter {
               String relaux = matcher.getRelnString("relaux");
               if (relaux != null && relaux.startsWith("nmod:") && !"nmod:poss".equals(relaux)) {
                 relationTokens.add(new CoreLabel() {{
-                  setWord(relaux.substring("nmod:".length()));
-                  setLemma(relaux.substring("nmod:".length()));
+                  setWord(relaux.substring("nmod:".length()).replace("tmod", "at_time"));
+                  setLemma(relaux.substring("nmod:".length()).replace("tmod", "at_time"));
                   setTag("PP");
                   setNER("O");
                   setBeginPosition(subjectTokens.get(subjectTokens.size() - 1).endPosition());
@@ -275,7 +275,7 @@ public class RelationTripleSegmenter {
               String rel = matcher.getRelnString("relation");
               String prep = null;
               if (rel != null && rel.startsWith("nmod:") && !"nmod:poss".equals(rel)) {
-                prep = rel.substring("nmod:".length());
+                prep = rel.substring("nmod:".length()).replace("tmod", "at_time");
               } else if (rel != null && (rel.startsWith("acl:") || rel.startsWith("advcl:")) ) {
                 prep = rel.substring(rel.indexOf(":"));
               } else if (rel != null && rel.equals("nmod:poss")) {
@@ -347,9 +347,9 @@ public class RelationTripleSegmenter {
     // add("advcl"); // Born in Hawaii, Obama is a US citizen; citizen -advcl-> Born.
   }});
 
-  /** A set of valid arcs denoting an entity we are interested in */
+  /** A set of valid arcs denoting an adverbial modifier we are interested in */
   public final Set<String> VALID_ADVERB_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
-    add("amod"); add("advmod"); add("conj"); add("cc"); add("conj:and"); add("conj:or"); add("auxpass");
+    add("amod"); add("advmod"); add("conj"); add("conj:and"); add("conj:or"); add("auxpass");
   }});
 
   private static CoreLabel mockNode(CoreLabel toCopy, int offset, String word, String POS) {
@@ -390,9 +390,15 @@ public class RelationTripleSegmenter {
       for (SemanticGraphEdge edge : parse.incomingEdgeIterable(root)) {
         if (edge.getDependent() != originalRoot) {
           String relStr = edge.getRelation().toString();
-          if ((relStr.startsWith("nmod:") && !"nmod:poss".equals(relStr)) ||
+          if ((relStr.startsWith("nmod:") &&
+               !"nmod:poss".equals(relStr) &&
+               !"nmod:npmod".equals(relStr)
+              ) ||
               relStr.startsWith("acl:") || relStr.startsWith("advcl:")) {
-            chunk.add(mockNode(edge.getGovernor().backingLabel(), 1, edge.getRelation().toString().substring(edge.getRelation().toString().indexOf(":") + 1), "PP"), -(((double) edge.getGovernor().index()) + 0.9));
+            chunk.add(mockNode(edge.getGovernor().backingLabel(), 1,
+                    edge.getRelation().toString().substring(edge.getRelation().toString().indexOf(":") + 1).replace("tmod","at_time"),
+                    "PP"),
+                -(((double) edge.getGovernor().index()) + 0.9));
           }
           if (edge.getRelation().getShortName().equals("conj")) {
             chunk.add(mockNode(root.backingLabel(), -1, edge.getRelation().getSpecific(), "CC"), -(((double) root.index()) - 0.9));
@@ -540,7 +546,7 @@ public class RelationTripleSegmenter {
             verb = new IndexedWord(mockNode(subject.backingLabel(), 1, "'s", "POS"));
             objNoopArc = Optional.of("nmod:poss");
           } else if (verbName != null && verbName.startsWith("nmod:")) {
-            verbName = verbName.substring("nmod:".length()).replace("_", " ");
+            verbName = verbName.substring("nmod:".length()).replace("_", " ").replace("tmod", "at_time");
             IndexedWord subject = m.getNode("subject");
             verb = new IndexedWord(mockNode(subject.backingLabel(), 1, verbName, "IN"));
             subjNoopArc = Optional.of("nmod:" + verbName);
@@ -574,7 +580,8 @@ public class RelationTripleSegmenter {
         }
         // (add preposition edge)
         if (prepEdge != null) {
-          verbChunk.add(mockNode(verb.backingLabel(), 1, prepEdge.substring(prepEdge.indexOf(":") + 1).replace("_", " "), "PP"), -(verb.index() + 10));
+          verbChunk.add(mockNode(verb.backingLabel(), 1,
+              prepEdge.substring(prepEdge.indexOf(":") + 1).replace("_", " ").replace("tmod", "at_time"), "PP"), -(verb.index() + 10));
         }
         // (check for additional edges)
         if (consumeAll && parse.outDegree(verb) > numKnownDependents) {
@@ -684,8 +691,8 @@ public class RelationTripleSegmenter {
               // Add the actual preposition, even if we can't find it.
               if (!pp.isPresent()) {
                 pp = Optional.of(new CoreLabel() {{
-                  setWord(rel.substring("nmod:".length()));
-                  setLemma(rel.substring("nmod:".length()));
+                  setWord(rel.substring("nmod:".length()).replace("tmod", "at_time"));
+                  setLemma(rel.substring("nmod:".length()).replace("tmod", "at_time"));
                   setTag("IN");
                   setNER("O");
                   setBeginPosition(0);

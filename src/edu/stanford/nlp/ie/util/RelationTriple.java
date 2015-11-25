@@ -193,7 +193,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
 
   /** Print a description of this triple, formatted like the ReVerb outputs. */
   public String toReverbString(String docid, CoreMap sentence) {
-    return docid + "\t" +
+    return (docid == null ? "no_doc_id" : docid) + "\t" +
         relation.get(0).sentIndex() + "\t" +
         subjectGloss().replace('\t', ' ') + "\t" +
         relationGloss().replace('\t', ' ') + "\t" +
