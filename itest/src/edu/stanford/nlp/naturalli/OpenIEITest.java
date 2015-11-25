@@ -228,6 +228,18 @@ public class OpenIEITest {
     }}, "There is doubt that cats have tails.");
   }
 
+
+  @Test
+  public void testChessIsNotAPhysicalSport() {
+    assertExtracted(new HashSet<String>() {{
+      add("Chess\tis\tphysical");
+      add("Chess\tis\tphysical sport");
+      add("Chess\tis\tsport");
+    }}, "Chess is a physical sport");
+    assertExtracted(new HashSet<String>() {{
+    }}, "Chess is not a physical sport");
+  }
+
   @Test
   public void dummyTest() {
     assertTrue(true);
