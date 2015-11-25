@@ -6,9 +6,6 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.simple.Sentence;
 
-import javax.json.Json;
-import javax.json.JsonReader;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -22,11 +19,10 @@ public class TSVSentenceIterator implements Iterator<Sentence> {
   /** A list of possible fields in the sentence table */
   public enum SentenceField {
     ID,
-    DEPENDENCIES_STANFORD,
-    DEPENDENCIES_EXTRAS,
-    DEPENDENCIES_MALT,
-    DEPENDENCIES_MALT_ALT1,
-    DEPENDENCIES_MALT_ALT2,
+    DEPENDENCIES_BASIC,
+    DEPENDENCIES_COLLAPSED,
+    DEPENDENCIES_COLLAPSED_CC,
+    DEPENDENCIES_ALTERNATE,
     WORDS,
     LEMMAS,
     POS_TAGS,
@@ -160,7 +156,7 @@ public class TSVSentenceIterator implements Iterator<Sentence> {
     // High level document stuff
     map.set(CoreAnnotations.SentenceIDAnnotation.class, sentenceId.orElse("-1"));
     map.set(CoreAnnotations.DocIDAnnotation.class, docId.orElse("???"));
-    map.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIndex.orElse(-1));
+    map.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIndex.orElse(0));
 
     // Doc-char
     if(tokens.isPresent()) {
@@ -205,30 +201,29 @@ public class TSVSentenceIterator implements Iterator<Sentence> {
 
       for (Pair<SentenceField, String> entry : Iterables.zip(fields, entries)) {
         SentenceField field = entry.first;
-        String value = entry.second.replace("\"\"","\"").replace("\\\\","\\");
+        String value = entry.second;
         switch (field) {
-          case DEPENDENCIES_STANFORD: {
-            JsonReader json = Json.createReader(new StringReader(value));
-            SemanticGraph graph = TSVUtils.parseTree(json, tokens.get());
+          case DEPENDENCIES_BASIC: {
+            SemanticGraph graph = TSVUtils.parseJsonTree(value, tokens.get());
             map.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, graph);
-            if (!map.containsKey(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class))
-              map.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, graph);
-            if (!map.containsKey(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class))
-              map.set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, graph);
+//            if (!map.containsKey(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class))
+//              map.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, graph);
+//            if (!map.containsKey(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class))
+//              map.set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, graph);
           } break;
-          case DEPENDENCIES_EXTRAS: {
-            JsonReader json = Json.createReader(new StringReader(value));
-            SemanticGraph graph = TSVUtils.parseTree(json, tokens.get());
-            if (!map.containsKey(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class))
-              map.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, graph);
+          case DEPENDENCIES_COLLAPSED: {
+            SemanticGraph graph = TSVUtils.parseJsonTree(value, tokens.get());
             map.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, graph);
+          } break;
+          case DEPENDENCIES_COLLAPSED_CC: {
+            SemanticGraph graph = TSVUtils.parseJsonTree(value, tokens.get());
+//            if (!map.containsKey(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class))
+//              map.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, graph);
+//            map.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, graph);
             map.set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, graph);
           } break;
-          case DEPENDENCIES_MALT:
-          case DEPENDENCIES_MALT_ALT1:
-          case DEPENDENCIES_MALT_ALT2: {
-            JsonReader json = Json.createReader(new StringReader(value));
-            SemanticGraph graph = TSVUtils.parseTree(json, tokens.get());
+          case DEPENDENCIES_ALTERNATE: {
+            SemanticGraph graph = TSVUtils.parseJsonTree(value, tokens.get());
             map.set(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class, graph);
           } break;
           default: // ignore.
