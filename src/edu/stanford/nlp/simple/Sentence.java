@@ -1,5 +1,6 @@
 package edu.stanford.nlp.simple;
 
+import edu.stanford.nlp.hcoref.data.CorefChain;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -22,7 +23,6 @@ import java.io.OutputStream;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -823,11 +823,43 @@ public class Sentence {
    * @see Sentence@openieTriples(Properties)
    */
   public Collection<Quadruple<String, String, String, Double>> openie() {
+    document.runOpenie(EMPTY_PROPS);
     return impl.getOpenieTripleList().stream()
         .filter(proto -> proto.hasSubject() && proto.hasRelation() && proto.hasObject())
         .map(proto -> Quadruple.makeQuadruple(proto.getSubject(), proto.getRelation(), proto.getObject(),
             proto.hasConfidence() ? proto.getConfidence() : 1.0))
         .collect(Collectors.toList());
+  }
+
+  /**
+   * Get the coreference chain for just this sentence.
+   * Note that this method is actually fairly computationally expensive to call, as it constructs and prunes
+   * the coreference data structure for the entire document.
+   * @return A coreference chain, but only for this sentence
+   */
+  public Map<Integer, CorefChain> coref() {
+    // Get the raw coref structure
+    Map<Integer, CorefChain> allCorefs = document.coref();
+    // Delete coreference chains not in this sentence
+    Set<Integer> toDeleteEntirely = new HashSet<>();
+    for (Integer clusterID : allCorefs.keySet()) {
+      CorefChain chain = allCorefs.get(clusterID);
+      ArrayList<CorefChain.CorefMention> mentions = new ArrayList<>(chain.getMentionsInTextualOrder());
+      for (CorefChain.CorefMention m : mentions) {
+        if (m.sentNum != this.sentenceIndex() + 1) {
+          chain.deleteMention(m);
+        }
+      }
+      if (chain.getMentionsInTextualOrder().isEmpty()) {
+        toDeleteEntirely.add(clusterID);
+      }
+    }
+    // Clean up dangling empty chains
+    for (Integer danglingChain : toDeleteEntirely) {
+      allCorefs.remove(danglingChain);
+    }
+    // Return
+    return allCorefs;
   }
 
 
@@ -848,9 +880,9 @@ public class Sentence {
    */
   @SuppressWarnings("TypeParameterExplicitlyExtendsObject")
   @SafeVarargs
-  public final CoreMap asCoreMap(Supplier<? extends Object>... functions) {
-    for (Supplier<?> function : functions) {
-      function.get();
+  public final CoreMap asCoreMap(Function<Sentence,Object>... functions) {
+    for (Function<Sentence, Object> function : functions) {
+      function.apply(this);
     }
     return this.document.asAnnotation().get(CoreAnnotations.SentencesAnnotation.class).get(this.sentenceIndex());
   }
@@ -868,9 +900,9 @@ public class Sentence {
    */
   @SuppressWarnings("TypeParameterExplicitlyExtendsObject")
   @SafeVarargs
-  public final List<CoreLabel> asCoreLabels(Supplier<? extends Object>... functions) {
-    for (Supplier<?> function : functions) {
-      function.get();
+  public final List<CoreLabel> asCoreLabels(Function<Sentence,Object>... functions) {
+    for (Function<Sentence, Object> function : functions) {
+      function.apply(this);
     }
     return asCoreMap().get(CoreAnnotations.TokensAnnotation.class);
   }

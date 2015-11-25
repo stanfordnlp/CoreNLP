@@ -33,7 +33,7 @@ public class DeltaIndex<E> extends AbstractCollection<E> implements Index<E> {
 
 
   public DeltaIndex(Index<E> backingIndex) {
-    this(backingIndex, new HashIndex<E>());
+    this(backingIndex, new HashIndex<>());
   }
 
   public DeltaIndex(Index<E> backingIndex, Index<E> spilloverIndex) {
@@ -101,7 +101,7 @@ public class DeltaIndex<E> extends AbstractCollection<E> implements Index<E> {
 
   @Override
   public List<E> objectsList() {
-    List<E> result = new ArrayList<E>();
+    List<E> result = new ArrayList<>();
     if (result.size() > backingIndexSize) {
       // we told you not to do this
       result.addAll(backingIndex.objectsList().subList(0, backingIndexSize));
@@ -115,7 +115,7 @@ public class DeltaIndex<E> extends AbstractCollection<E> implements Index<E> {
 
   @Override
   public Collection<E> objects(int[] indices) {
-    List<E> result = new ArrayList<E>();
+    List<E> result = new ArrayList<>();
     for (int index : indices) {
       result.add(get(index));
     }

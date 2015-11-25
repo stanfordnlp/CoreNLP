@@ -202,6 +202,69 @@ public class Benchmarks {
         System.out.println("Training took "+delay+" ms");
     }
 
+    public static void benchmarkDatum() {
+        long msStart = System.currentTimeMillis();
+        Dataset<String, String> data = new Dataset<>();
+        for (int i = 0; i < 10000; i++) {
+            Random r = new Random(42);
+            Set<String> features = new HashSet<>();
+
+            boolean cl = r.nextBoolean();
+
+            for (int j = 0; j < 1000; j++) {
+                if (cl && i % 2 == 0) {
+                    if (r.nextDouble() > 0.3) {
+                        features.add("f:"+j+":true");
+                    }
+                    else {
+                        features.add("f:"+j+":false");
+                    }
+                }
+                else {
+                    if (r.nextDouble() > 0.3) {
+                        features.add("f:" + j + ":false");
+                    }
+                    else {
+                        features.add("f:"+j+":false");
+                    }
+                }
+            }
+
+            data.add(new BasicDatum<String, String>(features, "target:" + cl));
+        }
+        long delay = System.currentTimeMillis() - msStart;
+        System.out.println("Dataset construction took "+delay+" ms");
+
+        msStart = System.currentTimeMillis();
+        for (int i = 0; i < 10000; i++) {
+            Random r = new Random(42);
+            Set<String> features = new HashSet<>();
+
+            boolean cl = r.nextBoolean();
+
+            for (int j = 0; j < 1000; j++) {
+                if (cl && i % 2 == 0) {
+                    if (r.nextDouble() > 0.3) {
+
+                    }
+                    else {
+
+                    }
+                }
+                else {
+                    if (r.nextDouble() > 0.3) {
+
+                    }
+                    else {
+
+                    }
+                }
+            }
+        }
+        delay = System.currentTimeMillis() - msStart;
+        System.out.println("MultiVector took "+delay+" ms");
+    }
+
     /**
      * on my machine this results in a factor of two gain, roughly
      */

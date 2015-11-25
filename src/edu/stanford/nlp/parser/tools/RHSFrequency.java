@@ -78,7 +78,7 @@ public class RHSFrequency {
       }
     }
 
-    Counter<String> rhsCounter = new ClassicCounter<String>();
+    Counter<String> rhsCounter = new ClassicCounter<>();
     for(Tree t : tb) {
       TregexMatcher m = rootMatch.matcher(t);
       while(m.findNextMatchingNode()) {
@@ -90,7 +90,7 @@ public class RHSFrequency {
       }
     }
 
-    List<String> biggestKeys = new ArrayList<String>(rhsCounter.keySet());
+    List<String> biggestKeys = new ArrayList<>(rhsCounter.keySet());
     Collections.sort(biggestKeys, Counters.toComparatorDescending(rhsCounter));
 
     PrintWriter pw = tlpp.pw();

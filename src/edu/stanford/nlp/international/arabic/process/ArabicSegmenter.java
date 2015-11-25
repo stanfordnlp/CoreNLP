@@ -145,7 +145,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
     props.remove(optLocalFeaturesOnly);
 
     flags = new SeqClassifierFlags(props);
-    classifier = new CRFClassifier<CoreLabel>(flags);
+    classifier = new CRFClassifier<>(flags);
   }
 
   /**
@@ -325,8 +325,8 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
       }
     }
 
-    Counter<String> labelTotal = new ClassicCounter<String>();
-    Counter<String> labelCorrect = new ClassicCounter<String>();
+    Counter<String> labelTotal = new ClassicCounter<>();
+    Counter<String> labelCorrect = new ClassicCounter<>();
     int total = 0;
     int correct = 0;
     for (List<CoreLabel> line : lines) {
@@ -428,7 +428,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
   }
 
   public void loadSegmenter(String filename, Properties p) {
-    classifier = new CRFClassifier<CoreLabel>(p);
+    classifier = new CRFClassifier<>(p);
     try {
       classifier.loadClassifier(new File(filename), p);
     } catch (ClassCastException e) {
@@ -555,7 +555,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
     long nChars = 0;
     final long startTime = System.nanoTime();
     if (nThreads > 1) {
-      MulticoreWrapper<String,String> wrapper = new MulticoreWrapper<String,String>(nThreads, segmenter);
+      MulticoreWrapper<String,String> wrapper = new MulticoreWrapper<>(nThreads, segmenter);
       try {
         for (String line; (line = br.readLine()) != null;) {
           nChars += line.length();

@@ -31,7 +31,7 @@ public class AceRelation extends AceElement {
     mSubtype = subtype;
     mModality = modality;
     mTense = tense;
-    mMentions = new ArrayList<AceRelationMention>();
+    mMentions = new ArrayList<>();
   }
 
   public void addMention(AceRelationMention m) { 

@@ -33,8 +33,8 @@ public class DepPatternFactory extends PatternFactory{
   static String allowedTagsForTrigger = ".*";
 
 
-  static Set<Pattern> allowedTagPatternForTrigger = new HashSet<Pattern>();
-  static Set<GrammaticalRelation> ignoreRelsSet = new HashSet<GrammaticalRelation>();
+  static Set<Pattern> allowedTagPatternForTrigger = new HashSet<>();
+  static Set<GrammaticalRelation> ignoreRelsSet = new HashSet<>();
 
   static public void setUp(Properties props){
     Execution.fillOptions(DepPatternFactory.class, props);
@@ -56,7 +56,7 @@ public class DepPatternFactory extends PatternFactory{
   static Map<Integer, Set<DepPattern>> getPatternsForAllPhrases(DataInstance sent, Set<CandidatePhrase> commonWords)
   {
     SemanticGraph graph = ((DataInstanceDep)sent).getGraph();
-    Map<Integer, Set<DepPattern>> pats4Sent = new HashMap<Integer, Set<DepPattern>>();
+    Map<Integer, Set<DepPattern>> pats4Sent = new HashMap<>();
     if (graph == null || graph.isEmpty()){
       System.out.println("graph is empty or null!");
       return null;
@@ -94,7 +94,7 @@ public class DepPatternFactory extends PatternFactory{
   }
 
   static Set<DepPattern> getContext(IndexedWord w, SemanticGraph graph, Set<CandidatePhrase> stopWords, DataInstance sent){
-    Set<DepPattern> patterns = new HashSet<DepPattern>();
+    Set<DepPattern> patterns = new HashSet<>();
     IndexedWord node = w;
     int depth = 1;
     while (depth <= upDepth) {
@@ -105,7 +105,7 @@ public class DepPatternFactory extends PatternFactory{
       for (Pattern tagPattern : allowedTagPatternForTrigger) {
         if (tagPattern.matcher(parent.tag()).matches()) {
           if (!ifIgnoreRel(rel) && !stopWords.contains(CandidatePhrase.createOrGet(parent.word())) && parent.word().length() > 1) {
-            Pair<IndexedWord, GrammaticalRelation> pattern = new Pair<IndexedWord, GrammaticalRelation>(parent, rel);
+            Pair<IndexedWord, GrammaticalRelation> pattern = new Pair<>(parent, rel);
             DepPattern patterndep = patternToDepPattern(pattern, sent);
             if (depth <= upDepth){
               patterns.add(patterndep);

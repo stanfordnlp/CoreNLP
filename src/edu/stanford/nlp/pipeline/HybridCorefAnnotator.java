@@ -1,11 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 
 import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.hcoref.CorefCoreAnnotations.CorefChainAnnotation;
@@ -13,14 +9,10 @@ import edu.stanford.nlp.hcoref.CorefSystem;
 import edu.stanford.nlp.hcoref.data.CorefChain;
 import edu.stanford.nlp.hcoref.data.CorefChain.CorefMention;
 import edu.stanford.nlp.hcoref.data.Document;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.util.ArraySet;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.IntTuple;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.*;
 
 public class HybridCorefAnnotator extends TextAnnotationCreator implements Annotator {
 
@@ -33,7 +25,19 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
 
   public HybridCorefAnnotator(Properties props) {
     try {
-      corefSystem = new CorefSystem(props);
+      // Load the default properties
+      Properties corefProps = new Properties();
+      try {
+        corefProps.load(IOUtils.readerFromString("edu/stanford/nlp/hcoref/properties/coref-default-dep.properties"));
+      } catch (IOException ignored) { }
+      // Add passed properties
+      Enumeration<Object> keys = props.keys();
+      while (keys.hasMoreElements()) {
+        String key = keys.nextElement().toString();
+        corefProps.setProperty(key, props.getProperty(key));
+      }
+      // Create coref system
+      corefSystem = new CorefSystem(corefProps);
       OLD_FORMAT = Boolean.parseBoolean(props.getProperty("oldCorefFormat", "false"));
     } catch (Exception e) {
       System.err.println("ERROR: cannot create HybridCorefAnnotator!");
@@ -69,14 +73,14 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
   }
 
   public static List<Pair<IntTuple, IntTuple>> getLinks(Map<Integer, CorefChain> result) {
-    List<Pair<IntTuple, IntTuple>> links = new ArrayList<Pair<IntTuple, IntTuple>>();
+    List<Pair<IntTuple, IntTuple>> links = new ArrayList<>();
     CorefChain.CorefMentionComparator comparator = new CorefChain.CorefMentionComparator();
 
     for(CorefChain c : result.values()) {
       List<CorefMention> s = c.getMentionsInTextualOrder();
       for(CorefMention m1 : s){
         for(CorefMention m2 : s){
-          if(comparator.compare(m1, m2)==1) links.add(new Pair<IntTuple, IntTuple>(m1.position, m2.position));
+          if(comparator.compare(m1, m2)==1) links.add(new Pair<>(m1.position, m2.position));
         }
       }
     }
@@ -100,7 +104,7 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
     //
 
     // this graph is stored in CorefGraphAnnotation -- the raw links found by the coref system
-    List<Pair<IntTuple, IntTuple>> graph = new ArrayList<Pair<IntTuple,IntTuple>>();
+    List<Pair<IntTuple, IntTuple>> graph = new ArrayList<>();
 
     for(Pair<IntTuple, IntTuple> link: links){
       //
@@ -117,7 +121,7 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
       IntTuple src = new IntTuple(2);
       src.set(0, srcSent);
       src.set(1, srcTok);
-      graph.add(new Pair<IntTuple, IntTuple>(src, dst));
+      graph.add(new Pair<>(src, dst));
     }
     annotation.set(CorefCoreAnnotations.CorefGraphAnnotation.class, graph);
 
@@ -148,7 +152,7 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
 
   @Override
   public Set<Requirement> requires() {
-    return new ArraySet<Requirement>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT, NER_REQUIREMENT, DEPENDENCY_REQUIREMENT);
+    return Annotator.REQUIREMENTS.get(STANFORD_COREF);
   }
 
   @Override

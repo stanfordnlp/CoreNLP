@@ -23,8 +23,8 @@ public class DijkstraShortestPath {
     
     Map<V, V> previous = Generics.newHashMap();
     
-    BinaryHeapPriorityQueue<V> unsettledNodes = 
-      new BinaryHeapPriorityQueue<V>();
+    BinaryHeapPriorityQueue<V> unsettledNodes =
+            new BinaryHeapPriorityQueue<>();
 
     unsettledNodes.add(node1, 0);
 
@@ -52,7 +52,7 @@ public class DijkstraShortestPath {
     }
     if (!previous.containsKey(node2))
       return null;
-    ArrayList<V> path = new ArrayList<V>();
+    ArrayList<V> path = new ArrayList<>();
     path.add(node2);
     V n = node2;
     while (previous.containsKey(n)) {

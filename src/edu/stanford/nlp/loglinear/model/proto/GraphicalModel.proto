@@ -1,0 +1,24 @@
+package edu.stanford.nlp.loglinear.model.proto;
+
+option java_package = "edu.stanford.nlp.loglinear.model.proto";
+
+option java_outer_classname = "GraphicalModelProto";
+
+import "ConcatVectorTable.proto";
+
+message GraphicalModel {
+    repeated Factor factor = 1;
+    repeated MetaData variableMetaData = 2;
+    optional MetaData metaData = 3;
+}
+
+message Factor {
+    required ConcatVectorTable featuresTable = 1;
+    repeated int32 neighbor = 2;
+    optional MetaData metaData = 3;
+}
+
+message MetaData {
+    repeated string key = 1;
+    repeated string value = 2;
+}

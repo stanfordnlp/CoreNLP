@@ -45,16 +45,16 @@ public class ExtractionSentence implements Serializable {
   public ExtractionSentence (String docid, String textContent){
     this.documentId = docid;
     this.textContent = textContent;
-    this.entityMentions = new ArrayList<EntityMention>();
-    this.relationMentions = new ArrayList<RelationMention>();
-    this.eventMentions = new ArrayList<EventMention>();
+    this.entityMentions = new ArrayList<>();
+    this.relationMentions = new ArrayList<>();
+    this.eventMentions = new ArrayList<>();
   }
 
   public ExtractionSentence(ExtractionSentence original) {
     this.documentId = original.documentId;
-    this.relationMentions = new ArrayList<RelationMention>(original.relationMentions);
-    this.entityMentions = new ArrayList<EntityMention>(original.entityMentions);
-    this.eventMentions = new ArrayList<EventMention>(original.eventMentions);
+    this.relationMentions = new ArrayList<>(original.relationMentions);
+    this.entityMentions = new ArrayList<>(original.entityMentions);
+    this.eventMentions = new ArrayList<>(original.eventMentions);
     this.textContent = original.textContent;
   }
 
@@ -97,15 +97,15 @@ public class ExtractionSentence implements Serializable {
    * Use with care. This is an expensive call due to getAllUnrelatedRelations, which creates all non-existing relations between all entity mentions
    */
   public List<RelationMention> getAllRelations(RelationMentionFactory factory) {
-    List<RelationMention> allRelations = new ArrayList<RelationMention>(relationMentions);
+    List<RelationMention> allRelations = new ArrayList<>(relationMentions);
     allRelations.addAll(getAllUnrelatedRelations(factory));
     return allRelations;
   }
 
   public List<RelationMention> getAllUnrelatedRelations(RelationMentionFactory factory) {
 
-    List<RelationMention> nonRelations = new ArrayList<RelationMention>();
-    List<RelationMention> allRelations = new ArrayList<RelationMention>(relationMentions);
+    List<RelationMention> nonRelations = new ArrayList<>();
+    List<RelationMention> allRelations = new ArrayList<>(relationMentions);
 
     //
     // scan all possible arguments

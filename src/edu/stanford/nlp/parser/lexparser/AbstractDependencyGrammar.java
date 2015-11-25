@@ -56,7 +56,7 @@ public abstract class AbstractDependencyGrammar implements DependencyGrammar {
   protected final Options op;
 
   transient protected Interner<IntTaggedWord> itwInterner =
-    new Interner<IntTaggedWord>();
+          new Interner<>();
 
   public AbstractDependencyGrammar(TreebankLanguagePack tlp, TagProjection tagProjection, boolean directional, boolean useDistance, boolean useCoarseDistance, Options op, Index<String> wordIndex, Index<String> tagIndex) {
     this.tlp = tlp;
@@ -155,7 +155,7 @@ public abstract class AbstractDependencyGrammar implements DependencyGrammar {
   }
 
   protected void initTagBins() {
-    Index<String> tagBinIndex = new HashIndex<String>();
+    Index<String> tagBinIndex = new HashIndex<>();
     if (DEBUG) {
       System.err.println();
       System.err.println("There are " + tagIndex.size() + " tags.");
@@ -203,7 +203,7 @@ public abstract class AbstractDependencyGrammar implements DependencyGrammar {
   {
     ois.defaultReadObject();
     // reinitialize the transient objects
-    itwInterner = new Interner<IntTaggedWord>();
+    itwInterner = new Interner<>();
   }
 
   /**

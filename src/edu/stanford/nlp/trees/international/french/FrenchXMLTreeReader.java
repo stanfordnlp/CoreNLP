@@ -192,7 +192,7 @@ public class FrenchXMLTreeReader implements TreeReader {
    * @param text
    */
   private List<String> getWordString(String text) {
-    List<String> toks = new ArrayList<String>();
+    List<String> toks = new ArrayList<>();
     if(text == null || text.equals(""))
       toks.add(EMPTY_LEAF);
     else {
@@ -238,12 +238,12 @@ public class FrenchXMLTreeReader implements TreeReader {
       //Terminals can have multiple tokens (MWEs). Make these into a
       //flat structure for now.
       Tree t = null;
-      List<Tree> kids = new ArrayList<Tree>();
+      List<Tree> kids = new ArrayList<>();
       if(leafToks.size() > 1) {
         for (int i = 0; i < leafToks.size(); ++i) {
           String tok = leafToks.get(i);
           String s = treeNormalizer.normalizeTerminal(tok);
-          List<Tree> leafList = new ArrayList<Tree>();
+          List<Tree> leafList = new ArrayList<>();
           Tree leafNode = treeFactory.newLeaf(s);
           if(leafNode.label() instanceof HasWord)
             ((HasWord) leafNode.label()).setWord(s);
@@ -289,7 +289,7 @@ public class FrenchXMLTreeReader implements TreeReader {
       return t;
     }
 
-    List<Tree> kids = new ArrayList<Tree>();
+    List<Tree> kids = new ArrayList<>();
     for(Node childNode = eRoot.getFirstChild(); childNode != null; childNode = childNode.getNextSibling()) {
       if(childNode.getNodeType() != Node.ELEMENT_NODE) continue;
       Tree t = getTreeFromXML(childNode);
@@ -318,7 +318,7 @@ public class FrenchXMLTreeReader implements TreeReader {
   private Tree postProcessMWE(Tree t) {
     String tYield = Sentence.listToString(t.yield()).replaceAll("\\s+", "");
     if(tYield.matches("[\\d\\p{Punct}]*")) {
-      List<Tree> kids = new ArrayList<Tree>();
+      List<Tree> kids = new ArrayList<>();
       kids.add(treeFactory.newLeaf(tYield));
       t = treeFactory.newTreeNode(t.value(), kids);
     } else {
@@ -339,9 +339,8 @@ public class FrenchXMLTreeReader implements TreeReader {
       System.exit(-1);
     }
 
-    List<File> fileList = new ArrayList<File>();
-    for(int i = 0; i < args.length; i++)
-      fileList.add(new File(args[i]));
+    List<File> fileList = new ArrayList<>();
+    for (String arg : args) fileList.add(new File(arg));
 
     TreeReaderFactory trf = new FrenchXMLTreeReaderFactory(false);
     int totalTrees = 0;

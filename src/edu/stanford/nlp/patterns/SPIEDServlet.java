@@ -38,7 +38,7 @@ public class SPIEDServlet extends HttpServlet {
    */
   public void init()  throws ServletException {
     testPropertiesFile = getServletContext().getRealPath("/WEB-INF/data/test.properties");
-    modelNametoDirName = new HashMap<String, String>();
+    modelNametoDirName = new HashMap<>();
     modelNametoDirName.put("food","food");
 
   }

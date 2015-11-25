@@ -30,7 +30,7 @@ import edu.stanford.nlp.util.Generics;
  */
 public class ReadDataTagged {
 
-  private final ArrayList<DataWordTag> v = new ArrayList<DataWordTag>();
+  private final ArrayList<DataWordTag> v = new ArrayList<>();
   private int numElements = 0;
   private int totalSentences = 0;
   private int totalWords = 0;
@@ -72,8 +72,8 @@ public class ReadDataTagged {
   private void loadFile(TaggedFileReader reader, Map<String, IntCounter<String>> wordTagCounts) {
     System.err.println("Loading tagged words from " + reader.filename());
 
-    ArrayList<String> words = new ArrayList<String>();
-    ArrayList<String> tags = new ArrayList<String>();
+    ArrayList<String> words = new ArrayList<>();
+    ArrayList<String> tags = new ArrayList<>();
     int numSentences = 0;
     int numWords = 0;
     int maxLen = Integer.MIN_VALUE;
@@ -82,7 +82,7 @@ public class ReadDataTagged {
     for (List<TaggedWord> sentence : reader) {
       if (maxentTagger.wordFunction != null) {
         List<TaggedWord> newSentence =
-          new ArrayList<TaggedWord>(sentence.size());
+                new ArrayList<>(sentence.size());
         for (TaggedWord word : sentence) {
           TaggedWord newWord =
             new TaggedWord(maxentTagger.wordFunction.apply(word.word()),
@@ -121,7 +121,7 @@ public class ReadDataTagged {
 
         IntCounter<String> tagCounts = wordTagCounts.get(word);
         if (tagCounts == null) {
-          tagCounts = new IntCounter<String>();
+          tagCounts = new IntCounter<>();
           wordTagCounts.put(word, tagCounts);
         }
         tagCounts.incrementCount(tag, 1);

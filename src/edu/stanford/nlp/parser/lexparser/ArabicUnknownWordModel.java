@@ -48,7 +48,7 @@ public class ArabicUnknownWordModel extends BaseUnknownWordModel {
   public ArabicUnknownWordModel(Options op, Lexicon lex,
                                 Index<String> wordIndex,
                                 Index<String> tagIndex) {
-    this(op, lex, wordIndex, tagIndex, new ClassicCounter<IntTaggedWord>());
+    this(op, lex, wordIndex, tagIndex, new ClassicCounter<>());
   }
 
   @Override

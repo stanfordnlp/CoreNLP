@@ -3,8 +3,6 @@ package edu.stanford.nlp.util.logging;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import edu.stanford.nlp.util.Generics;
 
@@ -111,21 +109,20 @@ public class RedirectOutputHandler<LoggerClass, ChannelEquivalent> extends Outpu
   // LOGGER IMPLEMENTATIONS
   //
 
-  public static RedirectOutputHandler<Logger, Level> fromJavaUtilLogging(Logger logger) {
-    Map <Object, Level> channelMapping = Generics.newHashMap();
-    channelMapping.put(Redwood.WARN, Level.WARNING);
-    channelMapping.put(Redwood.DBG, Level.FINE);
-    channelMapping.put(Redwood.ERR, Level.SEVERE);
+  public static RedirectOutputHandler<java.util.logging.Logger, java.util.logging.Level> fromJavaUtilLogging(java.util.logging.Logger logger) {
+    Map <Object, java.util.logging.Level> channelMapping = Generics.newHashMap();
+    channelMapping.put(Redwood.WARN, java.util.logging.Level.WARNING);
+    channelMapping.put(Redwood.DBG,  java.util.logging.Level.FINE);
+    channelMapping.put(Redwood.ERR,  java.util.logging.Level.SEVERE);
     try {
-      return new RedirectOutputHandler<Logger, Level>(
-          logger,
-          Logger.class.getMethod("log", Level.class, String.class),
-          channelMapping,
-          Level.INFO
-          );
+      return new RedirectOutputHandler<>(
+              logger,
+              java.util.logging.Logger.class.getMethod("log", java.util.logging.Level.class, String.class),
+              channelMapping,
+              java.util.logging.Level.INFO
+      );
     } catch (NoSuchMethodException e) {
       throw new IllegalStateException(e);
     }
   }
-
 }

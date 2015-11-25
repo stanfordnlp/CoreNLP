@@ -5,6 +5,7 @@ import edu.stanford.nlp.util.Trilean;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * The catalog of the seven Natural Logic relations.
@@ -224,7 +225,7 @@ public enum NaturalLogicRelation {
     put("cop", NaturalLogicRelation.INDEPENDENCE);  //
     put("csubj", NaturalLogicRelation.INDEPENDENCE);  // don't drop subjects.
     put("csubjpass", NaturalLogicRelation.INDEPENDENCE);  // as above
-    put("dep", NaturalLogicRelation.INDEPENDENCE);  //
+    put("dep", NaturalLogicRelation.REVERSE_ENTAILMENT);  // allow cutting these off, else we just miss a bunch of sentences
     put("det", NaturalLogicRelation.FORWARD_ENTAILMENT);  // todo(gabor) better treatment of generics?
     put("discourse", NaturalLogicRelation.EQUIVALENT);  //
     put("dobj", NaturalLogicRelation.REVERSE_ENTAILMENT);  // but, "he studied NLP at Stanford" -> "he studied NLP"
@@ -251,7 +252,7 @@ public enum NaturalLogicRelation {
     put("nmod:poss", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
     put("preconj", NaturalLogicRelation.INDEPENDENCE);  // forbidden to see this
     put("predet", NaturalLogicRelation.INDEPENDENCE);  // forbidden to see this
-    put("case", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("case", NaturalLogicRelation.INDEPENDENCE);  //
     put("nmod:aboard", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("nmod:about", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("nmod:above", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
@@ -413,12 +414,29 @@ public enum NaturalLogicRelation {
    * @param isSubject Whether this is on the subject side of a relation (e.g., for CONJ_OR edges)
    */
   public static NaturalLogicRelation forDependencyInsertion(String dependencyLabel, boolean isSubject) {
+    return forDependencyInsertion(dependencyLabel, isSubject, Optional.empty());
+  }
+
+  /**
+   * Returns the natural logic relation corresponding to the given dependency arc being inserted into a sentence.
+   * @param dependencyLabel The label we are checking the relation for.
+   * @param isSubject Whether this is on the subject side of a relation (e.g., for CONJ_OR edges)
+   * @param dependent The dependent word of the dependency label.
+   */
+  public static NaturalLogicRelation forDependencyInsertion(String dependencyLabel, boolean isSubject,
+                                                            Optional<String> dependent) {
     if (!isSubject) {
       switch (dependencyLabel) {
         // 'or' in the object position behaves as and.
         case "conj:or":
         case "conj:nor":
           return forDependencyInsertion("conj:and", false);
+        case "cc:preconj":
+          if (dependent.isPresent() && "neither".equalsIgnoreCase(dependent.get())) {
+            return INDEPENDENCE;
+          } else {
+            return REVERSE_ENTAILMENT;
+          }
       }
     }
     NaturalLogicRelation rel = insertArcToNaturalLogicRelation.get(dependencyLabel.toLowerCase());
@@ -464,6 +482,18 @@ public enum NaturalLogicRelation {
    */
   public static NaturalLogicRelation forDependencyDeletion(String dependencyLabel, boolean isSubject) {
     NaturalLogicRelation rel = forDependencyInsertion(dependencyLabel, isSubject);
+    return insertionToDeletion(rel);
+  }
+
+  /**
+   * Returns the natural logic relation corresponding to the given dependency arc being deleted from a sentence.
+   * @param dependencyLabel The label we are checking the relation for
+   * @param isSubject Whether this is on the subject side of a relation (e.g., for CONJ_OR edges)
+   * @param dependent The dependent word of the dependency label.
+   */
+  public static NaturalLogicRelation forDependencyDeletion(String dependencyLabel, boolean isSubject,
+                                                           Optional<String> dependent) {
+    NaturalLogicRelation rel = forDependencyInsertion(dependencyLabel, isSubject, dependent);
     return insertionToDeletion(rel);
   }
 

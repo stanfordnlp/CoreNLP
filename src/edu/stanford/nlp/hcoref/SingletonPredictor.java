@@ -67,7 +67,7 @@ public class SingletonPredictor {
    */
   public GeneralDataset<String, String> generateFeatureVectors(Properties props) throws Exception {
 
-    GeneralDataset<String, String> dataset = new Dataset<String, String>();    
+    GeneralDataset<String, String> dataset = new Dataset<>();
     
     Dictionaries dict = new Dictionaries(props);
     CorefDocMaker docMaker = new CorefDocMaker(props, dict);
@@ -88,13 +88,13 @@ public class SingletonPredictor {
               getNodeByIndexSafe(mention.headWord.index());
           if(head == null) continue;          
           ArrayList<String> feats = mention.getSingletonFeatures(dict);
-          dataset.add(new BasicDatum<String, String>(
-              feats, "1"));
+          dataset.add(new BasicDatum<>(
+                  feats, "1"));
         }       
       }
 
       // Generate features for singletons with class label 0 
-      ArrayList<CoreLabel> gold_heads = new ArrayList<CoreLabel>();
+      ArrayList<CoreLabel> gold_heads = new ArrayList<>();
       for(Mention gold_men : document.goldMentionsByID.values()){
         gold_heads.add(gold_men.headWord);
       }      
@@ -108,8 +108,8 @@ public class SingletonPredictor {
         // If the mention is in the gold set, it is not a singleton and thus ignore
         if(gold_heads.contains(predicted_men.headWord)) continue;
 
-        dataset.add(new BasicDatum<String, String>(
-            predicted_men.getSingletonFeatures(dict), "0"));             
+        dataset.add(new BasicDatum<>(
+                predicted_men.getSingletonFeatures(dict), "0"));
       }
     }
     
@@ -124,7 +124,7 @@ public class SingletonPredictor {
    */
   public LogisticClassifier<String, String> train(GeneralDataset<String, String> pDataset){
     LogisticClassifierFactory<String, String> lcf =
-        new LogisticClassifierFactory<String, String>();
+            new LogisticClassifierFactory<>();
     LogisticClassifier<String, String> classifier = lcf.trainClassifier(pDataset);
 
     return classifier;

@@ -89,7 +89,7 @@ public class MemoryMonitor {
       int[] lineNums, int[] positions) throws IOException {
     int currLine = 0;
     int processed = 0;
-    ArrayList<String> found = new ArrayList<String>();
+    ArrayList<String> found = new ArrayList<>();
     while (br.ready()) {
       String[] fields = br.readLine().split(splitStr);
       currLine++;

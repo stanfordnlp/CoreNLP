@@ -107,10 +107,10 @@ public class NegraHeadFinder extends AbstractCollinsHeadFinder {
   /* Some Negra local trees have an explicitly marked head.  Use it if
   * possible. */
   protected Tree findMarkedHead(Tree[] kids) {
-    for (int i = 0, n = kids.length; i < n; i++) {
-      if (kids[i].label() instanceof NegraLabel && ((NegraLabel) kids[i].label()).getEdge() != null && ((NegraLabel) kids[i].label()).getEdge().equals("HD")) {
+    for (Tree kid : kids) {
+      if (kid.label() instanceof NegraLabel && ((NegraLabel) kid.label()).getEdge() != null && ((NegraLabel) kid.label()).getEdge().equals("HD")) {
         //System.err.println("found manually-labeled head");
-        return kids[i];
+        return kid;
       }
     }
     return null;

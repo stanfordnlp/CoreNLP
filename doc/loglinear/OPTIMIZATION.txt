@@ -1,0 +1,22 @@
+Optimization for loglinear was done last, and driven by realistic benchmarks wherever possible.
+
+There are 2 major benchmarks for loglinear so far:
+
+- Training CoNLL linear chain model with a mixture of dense and sparse features:
+    org.stanford.nlp.loglinear.learning.CoNLLBenchmark
+- A bunch of microbenchmarks for ConcatVector:
+    org.stanford.nlp.loglinear.model.ConcatVectorBenchmark
+
+The general findings so far have been:
+
+- The JNI doesn't speed up ConcatVector operations, even with AVX assembly, since the JIT seems to vectorize automatically,
+and occasionally will give the C code a copy of the arrays to mutate, which is absurdly slow.
+- The vast majority of training time is spent on feature vector related operations. Message passing takes less than 5%
+of total time. The rest of the time is evenly split between the initial dot product with weights to get factor values
+and the final summation of feature vectors to get the derivative of the log-likelihood.
+- Huge heap wastage occurs if you allow the featurizing code to run once and keep around ConcatVector's uselessly, which
+results in general slowdowns and long GC waits. Instead keeping featurizing code as thunks is much faster.
+- Making ConcatVector copy-on-write is a very valuable way to keep the GC from working too hard. A very common case is
+a clone vector that is only ever read from, so optimizing for that yielded a 50% drop in GC load.
+- A non-trivial fraction of time is wasted on poorly balanced work queues for different threads during batch gradient
+descent. Balancing more carefully yielded a 10% speedup.

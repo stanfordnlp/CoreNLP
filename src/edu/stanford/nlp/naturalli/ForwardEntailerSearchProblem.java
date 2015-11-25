@@ -184,7 +184,7 @@ public class ForwardEntailerSearchProblem {
         }
         numIters += 1;
         if (numIters > 100) {
-          System.err.println("ERROR: tree has apparent depth > 100");
+//          System.err.println("ERROR: tree has apparent depth > 100");
           return Collections.EMPTY_LIST;
         }
       }
@@ -216,7 +216,7 @@ public class ForwardEntailerSearchProblem {
     try {
       topologicalVertices = parseTree.topologicalSort();
     } catch (IllegalStateException e) {
-      System.err.println("Could not topologically sort the vertices! Using left-to-right traversal.");
+//      System.err.println("Could not topologically sort the vertices! Using left-to-right traversal.");
       topologicalVertices = parseTree.vertexListSorted();
     }
     if (topologicalVertices.isEmpty()) {
@@ -229,7 +229,9 @@ public class ForwardEntailerSearchProblem {
     int numTicks = 0;
     while (!fringe.isEmpty()) {
       // Overhead with popping a node.
-      if (numTicks >= maxTicks) { return results; }
+      if (numTicks >= maxTicks) {
+        return results;
+      }
       numTicks += 1;
       if (results.size() >= maxResults) {
         return results;
@@ -252,7 +254,7 @@ public class ForwardEntailerSearchProblem {
         }
         numIters += 1;
         if (numIters > 10000) {
-          System.err.println("ERROR: logic error (apparent infinite loop); returning");
+//          System.err.println("ERROR: logic error (apparent infinite loop); returning");
           return results;
         }
       }
@@ -333,7 +335,7 @@ public class ForwardEntailerSearchProblem {
             }
             numIters += 1;
             if (numIters > 10000) {
-              System.err.println("ERROR: logic error (apparent infinite loop); returning");
+//              System.err.println("ERROR: logic error (apparent infinite loop); returning");
               return results;
             }
           }

@@ -1633,7 +1633,7 @@ oScore[split][end][br.rightChild] = totR;
           // build binary split
           Tree leftChildTree = extractBestParse(br.leftChild, start, split);
           Tree rightChildTree = extractBestParse(br.rightChild, split, end);
-          List<Tree> children = new ArrayList<Tree>();
+          List<Tree> children = new ArrayList<>();
           children.add(leftChildTree);
           children.add(rightChildTree);
           Tree result = tf.newTreeNode(goalStr, children);
@@ -1732,7 +1732,7 @@ oScore[split][end][br.rightChild] = totR;
       }
     }
     // check binaries first
-    List<Tree> bestTrees = new ArrayList<Tree>();
+    List<Tree> bestTrees = new ArrayList<>();
     for (int split = start + 1; split < end; split++) {
       for (Iterator<BinaryRule> binaryI = bg.ruleIteratorByParent(goal); binaryI.hasNext(); ) {
         BinaryRule br = binaryI.next();
@@ -1747,7 +1747,7 @@ oScore[split][end][br.rightChild] = totR;
           //                 rightChildTrees.size() + " ways to build.");
           for (Tree leftChildTree : leftChildTrees) {
             for (Tree rightChildTree : rightChildTrees) {
-              List<Tree> children = new ArrayList<Tree>();
+              List<Tree> children = new ArrayList<>();
               children.add(leftChildTree);
               children.add(rightChildTree);
               Tree result = tf.newTreeNode(goalStr, children);
@@ -1829,12 +1829,12 @@ oScore[split][end][br.rightChild] = totR;
     int goal = stateIndex.indexOf(goalStr);
 
     Vertex v = new Vertex(goal, start, end);
-    List<ScoredObject<Tree>> kBestTrees = new ArrayList<ScoredObject<Tree>>();
+    List<ScoredObject<Tree>> kBestTrees = new ArrayList<>();
     for (int i = 1; i <= k; i++) {
       Tree internalTree = getTree(v, i, k);
       if (internalTree == null) { break; }
       // restoreUnaries(internalTree);
-      kBestTrees.add(new ScoredObject<Tree>(internalTree, dHat.get(v).get(i-1).score));
+      kBestTrees.add(new ScoredObject<>(internalTree, dHat.get(v).get(i - 1).score));
     }
     return kBestTrees;
   }
@@ -1876,7 +1876,7 @@ oScore[split][end][br.rightChild] = totR;
 
     Derivation d = dHatV.get(k-1);
 
-    List<Tree> children = new ArrayList<Tree>();
+    List<Tree> children = new ArrayList<>();
     for (int i = 0; i < d.arc.size(); i++) {
       Vertex child = d.arc.tails.get(i);
       Tree t = getTree(child, d.j.get(i), kPrime);
@@ -1980,11 +1980,11 @@ oScore[split][end][br.rightChild] = totR;
 
   private List<Arc> getBackwardsStar(Vertex v) {
 
-    List<Arc> bs = new ArrayList<Arc>();
+    List<Arc> bs = new ArrayList<>();
 
     // pre-terminal??
     if (isTag[v.goal] && v.start + 1 == v.end) {
-      List<Vertex> tails = new ArrayList<Vertex>();
+      List<Vertex> tails = new ArrayList<>();
       double score = iScore[v.start][v.end][v.goal];
       Arc arc = new Arc(tails, v, score);
       bs.add(arc);
@@ -1995,7 +1995,7 @@ oScore[split][end][br.rightChild] = totR;
       for (BinaryRule br : bg.ruleListByParent(v.goal)) {
         Vertex lChild = new Vertex(br.leftChild, v.start, split);
         Vertex rChild = new Vertex(br.rightChild, split, v.end);
-        List<Vertex> tails = new ArrayList<Vertex>();
+        List<Vertex> tails = new ArrayList<>();
         tails.add(lChild);
         tails.add(rChild);
         Arc arc = new Arc(tails, v, br.score);
@@ -2006,7 +2006,7 @@ oScore[split][end][br.rightChild] = totR;
     // check unaries
     for (UnaryRule ur : ug.rulesByParent(v.goal)) {
       Vertex child = new Vertex(ur.child, v.start, v.end);
-      List<Vertex> tails = new ArrayList<Vertex>();
+      List<Vertex> tails = new ArrayList<>();
       tails.add(child);
       Arc arc = new Arc(tails, v, ur.score);
       bs.add(arc);
@@ -2021,13 +2021,13 @@ oScore[split][end][br.rightChild] = totR;
   private PriorityQueue<Derivation> getCandidates(Vertex v, int k) {
     PriorityQueue<Derivation> candV = cand.get(v);
     if (candV == null) {
-      candV = new BinaryHeapPriorityQueue<Derivation>();
+      candV = new BinaryHeapPriorityQueue<>();
       List<Arc> bsV = getBackwardsStar(v);
 
       for (Arc arc : bsV) {
         int size = arc.size();
         double score = arc.ruleScore;
-        List<Double> childrenScores = new ArrayList<Double>();
+        List<Double> childrenScores = new ArrayList<>();
         for (int i = 0; i < size; i++) {
           Vertex child = arc.tails.get(i);
           double s = iScore[child.start][child.end][child.goal];
@@ -2035,14 +2035,14 @@ oScore[split][end][br.rightChild] = totR;
           score += s;
         }
         if (score == Double.NEGATIVE_INFINITY) { continue; }
-        List<Integer> j = new ArrayList<Integer>();
+        List<Integer> j = new ArrayList<>();
         for (int i = 0; i < size; i++) {
           j.add(1);
         }
         Derivation d = new Derivation(arc, j, score, childrenScores);
         candV.add(d, score);
       }
-      PriorityQueue<Derivation> tmp = new BinaryHeapPriorityQueue<Derivation>();
+      PriorityQueue<Derivation> tmp = new BinaryHeapPriorityQueue<>();
       for (int i = 0; i < k; i++) {
         if (candV.isEmpty()) { break; }
         Derivation d = candV.removeFirst();
@@ -2060,7 +2060,7 @@ oScore[split][end][br.rightChild] = totR;
 
     LinkedList<Derivation> dHatV = dHat.get(v);
     if (dHatV == null) {
-      dHatV = new LinkedList<Derivation>();
+      dHatV = new LinkedList<>();
       dHat.put(v,dHatV);
     }
     while (dHatV.size() < k) {
@@ -2080,7 +2080,7 @@ oScore[split][end][br.rightChild] = totR;
   private void lazyNext(PriorityQueue<Derivation> candV, Derivation derivation, int kPrime) {
     List<Vertex> tails = derivation.arc.tails;
     for  (int i = 0, sz = derivation.arc.size(); i < sz; i++) {
-      List<Integer> j = new ArrayList<Integer>(derivation.j);
+      List<Integer> j = new ArrayList<>(derivation.j);
       j.set(i, j.get(i)+1);
       Vertex Ti = tails.get(i);
       lazyKthBest(Ti, j.get(i), kPrime);
@@ -2089,7 +2089,7 @@ oScore[split][end][br.rightChild] = totR;
       if (j.get(i)-1 >= dHatTi.size()) { continue; }
       Derivation d = dHatTi.get(j.get(i)-1);
       double newScore = derivation.score - derivation.childrenScores.get(i) + d.score;
-      List<Double> childrenScores = new ArrayList<Double>(derivation.childrenScores);
+      List<Double> childrenScores = new ArrayList<>(derivation.childrenScores);
       childrenScores.set(i, d.score);
       Derivation newDerivation = new Derivation(derivation.arc, j, newScore, childrenScores);
       if (!candV.contains(newDerivation) && newScore > Double.NEGATIVE_INFINITY) {
@@ -2121,9 +2121,9 @@ oScore[split][end][br.rightChild] = totR;
     //   restoreUnaries(internalTree);
     // }
     //System.out.println("Restored unaries...");
-    List<ScoredObject<Tree>> scoredTrees = new ArrayList<ScoredObject<Tree>>(internalTrees.size());
+    List<ScoredObject<Tree>> scoredTrees = new ArrayList<>(internalTrees.size());
     for (Tree tr : internalTrees) {
-      scoredTrees.add(new ScoredObject<Tree>(tr, bestScore));
+      scoredTrees.add(new ScoredObject<>(tr, bestScore));
     }
     return scoredTrees;
     //TreeTransformer debinarizer = BinarizerFactory.getDebinarizer();

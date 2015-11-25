@@ -82,7 +82,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
 public class StanfordCoreNLP extends AnnotationPipeline {
 
-  enum OutputFormat { TEXT, XML, JSON, CONLL, SERIALIZED }
+  enum OutputFormat { TEXT, XML, JSON, CONLL, CONLLU, SERIALIZED }
 
   // other constants
   public static final String CUSTOM_ANNOTATOR_PREFIX = "customAnnotatorClass.";
@@ -247,6 +247,62 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     return PropertiesUtils.getBool(properties, "output.printSingletonEntities", false);
   }
 
+  /**
+   * Take a collection of requested annotators, and produce a list of annotators such that all of the
+   * prerequisites for each of the annotators in the input is met.
+   * For example, if the user requests lemma, ensure that pos is also run because lemma depends on
+   * pos. As a side effect, this function orders the annotators in the proper order.
+   *
+   * @param annotators The annotators the user has requested.
+   * @return A sanitized annotators string with all prerequisites met.
+   */
+  public static String ensurePrerequisiteAnnotators(String[] annotators) {
+    // Get an unordered set of annotators
+    Set<String> unorderedAnnotators = new HashSet<>();
+    for (String annotator : annotators) {
+      if (!Annotator.REQUIREMENTS.containsKey(annotator.toLowerCase())) {
+        throw new IllegalArgumentException("Unknown annotator: " + annotator);
+      }
+      unorderedAnnotators.add(annotator.toLowerCase());
+      Set<Requirement> requirements = Annotator.REQUIREMENTS.get(annotator.toLowerCase());
+      for (Requirement prereq : requirements) {
+        unorderedAnnotators.add(prereq.name);
+      }
+    }
+
+    // Order the annotators
+    List<String> orderedAnnotators = new ArrayList<>();
+    while (!unorderedAnnotators.isEmpty()) {
+      boolean somethingAdded = false;  // to make sure the dependencies are satisfiable
+      // Loop over candidate annotators to add
+      Iterator<String> iter = unorderedAnnotators.iterator();
+      while (iter.hasNext()) {
+        String candidate = iter.next();
+        // Are the requirements satisfied?
+        boolean canAdd = true;
+        for (Requirement prereq : Annotator.REQUIREMENTS.get(candidate)) {
+          if (!orderedAnnotators.contains(prereq.name)) {
+            canAdd = false;
+            break;
+          }
+        }
+        // If so, add the annotator
+        if (canAdd) {
+          orderedAnnotators.add(candidate);
+          iter.remove();
+          somethingAdded = true;
+        }
+      }
+      // Make sure we're making progress every iteration, to prevent an infinite loop
+      if (!somethingAdded) {
+        throw new IllegalArgumentException("Unsatisfiable annotator list: " + StringUtils.join(annotators, ","));
+      }
+    }
+
+    // Return
+    return StringUtils.join(orderedAnnotators, ",");
+  }
+
 
   public static boolean isXMLOutputPresent() {
     try {
@@ -355,14 +411,18 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     pool.register(STANFORD_GENDER, AnnotatorFactories.gender(properties, annotatorImplementation));
     pool.register(STANFORD_TRUECASE, AnnotatorFactories.truecase(properties, annotatorImplementation));
     pool.register(STANFORD_PARSE, AnnotatorFactories.parse(properties, annotatorImplementation));
-    pool.register(STANFORD_DETERMINISTIC_COREF, AnnotatorFactories.coref(properties, annotatorImplementation));
+    pool.register(STANFORD_MENTION, AnnotatorFactories.mention(properties, annotatorImplementation));
+    pool.register(STANFORD_DETERMINISTIC_COREF, AnnotatorFactories.dcoref(properties, annotatorImplementation));
+    pool.register(STANFORD_COREF, AnnotatorFactories.coref(properties, annotatorImplementation));
     pool.register(STANFORD_RELATION, AnnotatorFactories.relation(properties, annotatorImplementation));
     pool.register(STANFORD_SENTIMENT, AnnotatorFactories.sentiment(properties, annotatorImplementation));
-    pool.register(STANFORD_COLUMN_DATA_CLASSIFIER,AnnotatorFactories.columnDataClassifier(properties,annotatorImplementation));
+    pool.register(STANFORD_COLUMN_DATA_CLASSIFIER,AnnotatorFactories.columnDataClassifier(properties, annotatorImplementation));
     pool.register(STANFORD_DEPENDENCIES, AnnotatorFactories.dependencies(properties, annotatorImplementation));
     pool.register(STANFORD_NATLOG, AnnotatorFactories.natlog(properties, annotatorImplementation));
     pool.register(STANFORD_OPENIE, AnnotatorFactories.openie(properties, annotatorImplementation));
     pool.register(STANFORD_QUOTE, AnnotatorFactories.quote(properties, annotatorImplementation));
+    pool.register(STANFORD_UD_FEATURES, AnnotatorFactories.udfeats(properties, annotatorImplementation));
+
     // Add more annotators here
 
     // add annotators loaded via reflection from classnames specified
@@ -603,7 +663,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     os.println("(if -props or -annotators is not passed in, default properties will be loaded via the classpath)");
     os.println("\t\"props\" - path to file with configuration properties");
     os.println("\t\"annotators\" - comma separated list of annotators");
-    os.println("\tThe following annotators are supported: cleanxml, tokenize, quote, ssplit, pos, lemma, ner, truecase, parse, coref, dcoref, relation");
+    os.println("\tThe following annotators are supported: cleanxml, tokenize, quote, ssplit, pos, lemma, ner, truecase, parse, hcoref, relation");
 
     os.println();
     os.println("\tIf annotator \"tokenize\" is defined:");
@@ -723,6 +783,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           new CoNLLOutputter().print(anno, System.out, pipeline);
           System.out.println();
           break;
+        case CONLLU:
+          new CoNLLUOutputter().print(anno, System.out, pipeline);
+          break;
         case TEXT:
           pipeline.prettyPrint(anno, System.out);
           break;
@@ -808,6 +871,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
               break;
             }
           }
+          case CONLLU:
+            new CoNLLUOutputter().print(annotation, fos, outputOptions);
+            break;
           default:
             throw new IllegalArgumentException("Unknown output format " + outputFormat);
         }
@@ -834,7 +900,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                                      Properties properties, BiConsumer<Annotation, Consumer<Annotation>> annotate,
                                      BiConsumer<Annotation, OutputStream> print,
                                      OutputFormat outputFormat) throws IOException {
-    List<Runnable> toRun = new LinkedList<Runnable>();
+    List<Runnable> toRun = new LinkedList<>();
 
     // Process properties here
     final String baseOutputDir = properties.getProperty("outputDirectory", ".");
@@ -842,7 +908,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
     // Set of files to exclude
     final String excludeFilesParam = properties.getProperty("excludeFiles");
-    final Set<String> excludeFiles = new HashSet<String>();
+    final Set<String> excludeFiles = new HashSet<>();
     if (excludeFilesParam != null) {
       Iterable<String> lines = IOUtils.readLines(excludeFilesParam);
       for (String line:lines) {
@@ -861,6 +927,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       case XML: defaultExtension = ".xml"; break;
       case JSON: defaultExtension = ".json"; break;
       case CONLL: defaultExtension = ".conll"; break;
+      case CONLLU: defaultExtension = ".conllu"; break;
       case TEXT: defaultExtension = ".out"; break;
       case SERIALIZED: defaultExtension = ".ser.gz"; break;
       default: throw new IllegalArgumentException("Unknown output format " + outputFormat);
@@ -1078,7 +1145,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     else if (properties.containsKey("filelist")){
       String fileName = properties.getProperty("filelist");
       Collection<File> inputfiles = readFileList(fileName);
-      Collection<File> files = new ArrayList<File>(inputfiles.size());
+      Collection<File> files = new ArrayList<>(inputfiles.size());
       for (File file:inputfiles) {
         if (file.isDirectory()) {
           files.addAll(new FileSequentialCollection(new File(fileName), properties.getProperty("extension"), true));
