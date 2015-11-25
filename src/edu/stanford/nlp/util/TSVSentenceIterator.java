@@ -86,6 +86,7 @@ public class TSVSentenceIterator implements Iterator<Sentence> {
 
           int beginChar = 0;
           for (int i = 0; i < values.size(); i++) {
+            tokens.get().get(i).setValue(values.get(i));
             tokens.get().get(i).setWord(values.get(i));
             tokens.get().get(i).setBeginPosition(beginChar);
             tokens.get().get(i).setEndPosition(beginChar + values.get(i).length());
@@ -158,6 +159,30 @@ public class TSVSentenceIterator implements Iterator<Sentence> {
     map.set(CoreAnnotations.DocIDAnnotation.class, docId.orElse("???"));
     map.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIndex.orElse(-1));
 
+    // Doc-char
+    if(tokens.isPresent()) {
+      for (Pair<SentenceField, String> entry : Iterables.zip(fields, entries)) {
+        SentenceField field = entry.first;
+        String value = entry.second;
+        switch (field) {
+          case DOC_CHAR_BEGIN: {
+            List<String> values = TSVUtils.parseArray(value);
+            for (int i = 0; i < tokens.get().size(); i++) {
+              tokens.get().get(i).setBeginPosition(Integer.parseInt(values.get(i)));
+            }
+          } break;
+          case DOC_CHAR_END: {
+            List<String> values = TSVUtils.parseArray(value);
+            for (int i = 0; i < tokens.get().size(); i++) {
+              tokens.get().get(i).setEndPosition(Integer.parseInt(values.get(i)));
+            }
+          } break;
+          default: // ignore.
+            break;
+        }
+      }
+    }
+
     // Final token level stuff.
     if (tokens.isPresent()) {
       for (int i = 0; i < tokens.get().size(); i++) {
@@ -168,6 +193,8 @@ public class TSVSentenceIterator implements Iterator<Sentence> {
         tokens.get().get(i).set(CoreAnnotations.TokenEndAnnotation.class, i+1);
       }
     }
+
+    // Dependency trees
     if(tokens.isPresent()) {
       map.set(CoreAnnotations.TokensAnnotation.class, tokens.get());
       map.set(CoreAnnotations.TokenBeginAnnotation.class, 0);
