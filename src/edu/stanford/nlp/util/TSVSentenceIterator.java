@@ -79,7 +79,11 @@ public class TSVSentenceIterator implements Iterator<Sentence> {
       switch (field) {
         case WORDS: {
           List<String> values = TSVUtils.parseArray(value);
-          if (!tokens.isPresent()) tokens = Optional.of(new ArrayList<>(values.size()));
+          if (!tokens.isPresent()) {
+            tokens = Optional.of(new ArrayList<>(values.size()));
+            for (int i = 0; i < values.size(); i++) tokens.get().add(new CoreLabel());
+          }
+
           int beginChar = 0;
           for (int i = 0; i < values.size(); i++) {
             tokens.get().get(i).setWord(values.get(i));
@@ -90,21 +94,30 @@ public class TSVSentenceIterator implements Iterator<Sentence> {
         } break;
         case LEMMAS: {
           List<String> values = TSVUtils.parseArray(value);
-          if (!tokens.isPresent()) tokens = Optional.of(new ArrayList<>(values.size()));
+          if (!tokens.isPresent()) {
+            tokens = Optional.of(new ArrayList<>(values.size()));
+            for (int i = 0; i < values.size(); i++) tokens.get().add(new CoreLabel());
+          }
           for (int i = 0; i < values.size(); i++) {
             tokens.get().get(i).setLemma(values.get(i));
           }
         } break;
         case POS_TAGS: {
           List<String> values = TSVUtils.parseArray(value);
-          if (!tokens.isPresent()) tokens = Optional.of(new ArrayList<>(values.size()));
+          if (!tokens.isPresent()) {
+            tokens = Optional.of(new ArrayList<>(values.size()));
+            for (int i = 0; i < values.size(); i++) tokens.get().add(new CoreLabel());
+          }
           for (int i = 0; i < values.size(); i++) {
             tokens.get().get(i).setTag(values.get(i));
           }
         } break;
         case NER_TAGS: {
           List<String> values = TSVUtils.parseArray(value);
-          if (!tokens.isPresent()) tokens = Optional.of(new ArrayList<>(values.size()));
+          if (!tokens.isPresent()) {
+            tokens = Optional.of(new ArrayList<>(values.size()));
+            for (int i = 0; i < values.size(); i++) tokens.get().add(new CoreLabel());
+          }
           for (int i = 0; i < values.size(); i++) {
             tokens.get().get(i).setNER(values.get(i));
           }
