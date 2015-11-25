@@ -292,8 +292,12 @@ public class OpenIE implements Annotator {
           assert prep != null;
           tree.addEdge(adj, pobj, GrammaticalRelation.valueOf(Language.English, prep), Double.NEGATIVE_INFINITY, false);
         }
-        // (add tree)
-        adjFragments.add(new SentenceFragment(tree, clause.assumedTruth, false));
+        // (check for monotonicity)
+        if (adj.get(NaturalLogicAnnotations.PolarityAnnotation.class).isUpwards() &&
+            be.get(NaturalLogicAnnotations.PolarityAnnotation.class).isUpwards()) {
+          // (add tree)
+          adjFragments.add(new SentenceFragment(tree, clause.assumedTruth, false));
+        }
       }
       list.addAll(adjFragments);
       return list;
