@@ -844,12 +844,29 @@ public class RelationTripleSegmenter {
     }
 
     // Run the patterns
-    Optional<RelationTriple> verbExtraction = segmentVerb(parse, confidence, consumeAll);
-    if (verbExtraction.isPresent()) {
-      return verbExtraction;
-    } else {
-      return segmentACL(parse, confidence, consumeAll);
+    Optional<RelationTriple> extraction = segmentVerb(parse, confidence, consumeAll);
+    if (!extraction.isPresent()) {
+      extraction = segmentACL(parse, confidence, consumeAll);
     }
+
+    //
+    // Remove downward polarity extractions
+    //
+    if (extraction.isPresent()) {
+      boolean shouldRemove = true;
+      for (CoreLabel token : extraction.get()) {
+        if (token.get(NaturalLogicAnnotations.PolarityAnnotation.class) == null ||
+            !token.get(NaturalLogicAnnotations.PolarityAnnotation.class).isDownwards()) {
+          shouldRemove = false;
+        }
+      }
+      if (shouldRemove) {
+        return Optional.empty();
+      }
+    }
+
+    // Return
+    return extraction;
   }
 
   /**

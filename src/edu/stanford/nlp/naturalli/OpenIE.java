@@ -459,6 +459,8 @@ public class OpenIE implements Annotator {
       if (parse == null) {
         throw new IllegalStateException("Cannot run OpenIE without a parse tree!");
       }
+      // Clean the tree
+      Util.cleanTree(parse);
 
       // Resolve Coreference
       SemanticGraph canonicalizedParse = parse;

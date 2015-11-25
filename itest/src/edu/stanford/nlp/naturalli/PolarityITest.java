@@ -59,7 +59,7 @@ public class PolarityITest {
     assertTrue(p[1].isUpwards());
     assertTrue(p[2].isUpwards());
     assertTrue(p[3].isDownwards());
-    assertTrue(p[4].isDownwards());
+    assertTrue(p[4].isUpwards());
     assertTrue(p[5].isUpwards());
   }
 
