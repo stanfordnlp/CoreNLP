@@ -95,11 +95,7 @@ public class StatisticalCorefProperties {
   }
 
   public static int maxMentionDistance(Properties props) {
-    return PropertiesUtils.getInt(props, "coref.maxMentionDistance", 50);
-  }
-
-  public static int maxMentionDistanceWithStringMatch(Properties props) {
-    return PropertiesUtils.getInt(props, "coref.maxMentionDistanceWithStringMatch", 5000);
+    return PropertiesUtils.getInt(props, "coref.maxMentionDistance", 100);
   }
 
   public static double[] pairwiseScoreThresholds(Properties props) {
@@ -110,7 +106,7 @@ public class StatisticalCorefProperties {
         return Arrays.stream(split).mapToDouble(Double::parseDouble).toArray();
       }
     }
-    double threshold = PropertiesUtils.getDouble(props, "coref.pairwiseScoreThresholds", 0.35);
+    double threshold = PropertiesUtils.getDouble(props, "coref.pairwiseScoreThresholds", 0.3);
     return new double[] {threshold, threshold, threshold, threshold};
   }
 

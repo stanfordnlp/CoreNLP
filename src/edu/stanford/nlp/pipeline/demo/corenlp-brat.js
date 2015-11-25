@@ -668,6 +668,9 @@ $(document).ready(function() {
         $('#submit').prop('disabled', false);
       }
     });
+    event.preventDefault();
+    event.stopPropagation();
+    return false;
   });
 
 

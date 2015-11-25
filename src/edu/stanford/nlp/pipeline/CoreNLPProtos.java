@@ -10149,8 +10149,7 @@ public final class CoreNLPProtos {
     /**
      * <code>optional string after = 6;</code>
      *
-     * <pre>se
-     *
+     * <pre>
      * The whitespace/xml after the token
      * </pre>
      */
