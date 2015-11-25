@@ -6,6 +6,9 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.simple.Sentence;
 
+import javax.json.Json;
+import javax.json.JsonReader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -202,10 +205,11 @@ public class TSVSentenceIterator implements Iterator<Sentence> {
 
       for (Pair<SentenceField, String> entry : Iterables.zip(fields, entries)) {
         SentenceField field = entry.first;
-        String value = entry.second;
+        String value = entry.second.replace("\"\"","\"").replace("\\\\","\\");
         switch (field) {
           case DEPENDENCIES_STANFORD: {
-            SemanticGraph graph = TSVUtils.parseTree(value, tokens.get());
+            JsonReader json = Json.createReader(new StringReader(value));
+            SemanticGraph graph = TSVUtils.parseTree(json, tokens.get());
             map.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, graph);
             if (!map.containsKey(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class))
               map.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, graph);
@@ -213,7 +217,8 @@ public class TSVSentenceIterator implements Iterator<Sentence> {
               map.set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, graph);
           } break;
           case DEPENDENCIES_EXTRAS: {
-            SemanticGraph graph = TSVUtils.parseTree(value, tokens.get());
+            JsonReader json = Json.createReader(new StringReader(value));
+            SemanticGraph graph = TSVUtils.parseTree(json, tokens.get());
             if (!map.containsKey(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class))
               map.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, graph);
             map.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, graph);
@@ -222,7 +227,8 @@ public class TSVSentenceIterator implements Iterator<Sentence> {
           case DEPENDENCIES_MALT:
           case DEPENDENCIES_MALT_ALT1:
           case DEPENDENCIES_MALT_ALT2: {
-            SemanticGraph graph = TSVUtils.parseTree(value, tokens.get());
+            JsonReader json = Json.createReader(new StringReader(value));
+            SemanticGraph graph = TSVUtils.parseTree(json, tokens.get());
             map.set(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class, graph);
           } break;
           default: // ignore.
