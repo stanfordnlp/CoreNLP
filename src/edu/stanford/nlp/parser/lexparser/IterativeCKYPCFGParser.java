@@ -74,8 +74,10 @@ public class IterativeCKYPCFGParser extends ExhaustivePCFGParser {
           }
           BinaryRule[] leftRules = bg.splitRulesWithLC(leftState);
           //      if (spillGuts) System.out.println("Found " + leftRules.length + " left rules for state " + stateIndex.get(leftState));
-          for (BinaryRule r : leftRules) {
+          for (int i = 0; i < leftRules.length; i++) {
             //      if (spillGuts) System.out.println("Considering rule for " + start + " to " + end + ": " + leftRules[i]);
+            BinaryRule r = leftRules[i];
+
             int narrowL = narrowLExtent[end][r.rightChild];
             boolean iPossibleR = (narrowL >= narrowR); // can this right constituent fit next to the left constituent?
             if (!iPossibleR) {
@@ -217,8 +219,10 @@ public class IterativeCKYPCFGParser extends ExhaustivePCFGParser {
           }
           BinaryRule[] rightRules = bg.splitRulesWithRC(rightState);
           //      if (spillGuts) System.out.println("Found " + rightRules.length + " right rules for state " + stateIndex.get(rightState));
-          for (BinaryRule r : rightRules) {
+          for (int i = 0; i < rightRules.length; i++) {
             //      if (spillGuts) System.out.println("Considering rule for " + start + " to " + end + ": " + rightRules[i]);
+            BinaryRule r = rightRules[i];
+
             int narrowR = narrowRExtent[start][r.leftChild];
             boolean iPossibleL = (narrowR <= narrowL);
             if (!iPossibleL) {
@@ -357,7 +361,9 @@ public class IterativeCKYPCFGParser extends ExhaustivePCFGParser {
             continue;
           }
           UnaryRule[] unaries = ug.closedRulesByChild(state);
-          for (UnaryRule ur : unaries) {
+          for (int r = 0; r < unaries.length; r++) {
+
+            UnaryRule ur = unaries[r];
 
             if (getConstraints() != null) {
               boolean skip = false;

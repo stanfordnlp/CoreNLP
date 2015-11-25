@@ -159,7 +159,7 @@ public class SentenceITest {
   @Test
   public void testToCoreLabels() {
     Sentence sent = new Sentence("the quick brown fox jumped over the lazy dog");
-    List<CoreLabel> tokens = sent.asCoreLabels(Sentence::posTags);
+    List<CoreLabel> tokens = sent.asCoreLabels(sent::posTags);
     assertEquals(9, tokens.size());
     assertEquals("the", tokens.get(0).word());
     assertEquals("dog", tokens.get(8).word());

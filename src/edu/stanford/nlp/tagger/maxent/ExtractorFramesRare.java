@@ -256,7 +256,7 @@ public class ExtractorFramesRare {
    *  @return A set of extractors for rare word features
    */
   protected static Extractor[] getExtractorFramesRare(String identifier, TTags ttags) {
-    ArrayList<Extractor> extrs = new ArrayList<>();
+    ArrayList<Extractor> extrs = new ArrayList<Extractor>();
     List<String> args = StringUtils.valueSplit(identifier, "[a-zA-Z0-9]*(?:\\([^)]*\\))?", "\\s*,\\s*");
 
     for (String arg : args) {

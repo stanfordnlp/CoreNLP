@@ -1,8 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.hcoref.CorefCoreAnnotations.*;
-import edu.stanford.nlp.hcoref.data.CorefChain;
-import edu.stanford.nlp.hcoref.data.Dictionaries;
+import edu.stanford.nlp.dcoref.CorefChain;
+import edu.stanford.nlp.dcoref.Dictionaries;
 import edu.stanford.nlp.ie.NumberNormalizer;
 import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
 import edu.stanford.nlp.ie.machinereading.structure.ExtractionObject;
@@ -27,11 +26,11 @@ import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.ling.CoreAnnotations.*;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.*;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.*;
+import edu.stanford.nlp.dcoref.CorefCoreAnnotations.*;
 import edu.stanford.nlp.time.TimeAnnotations.*;
 
 import java.io.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -181,7 +180,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   @Override
   public Pair<Annotation, InputStream> read(InputStream is) throws IOException, ClassNotFoundException, ClassCastException {
     CoreNLPProtos.Document doc = CoreNLPProtos.Document.parseDelimitedFrom(is);
-    return Pair.makePair(fromProto(doc), is);
+    return Pair.makePair( fromProto(doc), is );
   }
 
   /**
@@ -227,7 +226,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @return A protocol buffer message corresponding to this CoreLabel
    */
   public CoreNLPProtos.Token toProto(CoreLabel coreLabel) {
-    Set<Class<?>> keysToSerialize = new HashSet<>(coreLabel.keySetNotNull());
+    Set<Class<?>> keysToSerialize = new HashSet<Class<?>>(coreLabel.keySet());
     CoreNLPProtos.Token.Builder builder = toProtoBuilder(coreLabel, keysToSerialize);
     // Completeness check
     if (enforceLosslessSerialization && !keysToSerialize.isEmpty()) {
@@ -249,7 +248,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    */
   protected CoreNLPProtos.Token.Builder toProtoBuilder(CoreLabel coreLabel, Set<Class<?>> keysToSerialize) {
     CoreNLPProtos.Token.Builder builder = CoreNLPProtos.Token.newBuilder();
-    Set<Class<?>> keySet = coreLabel.keySetNotNull();
     // Remove items serialized elsewhere from the required list
     keysToSerialize.remove(TextAnnotation.class);
     keysToSerialize.remove(SentenceIndexAnnotation.class);
@@ -268,53 +266,44 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Required fields
     builder.setWord(coreLabel.word());
     // Optional fields
-    if (keySet.contains(PartOfSpeechAnnotation.class)) { builder.setPos(coreLabel.tag()); keysToSerialize.remove(PartOfSpeechAnnotation.class); }
-    if (keySet.contains(ValueAnnotation.class)) { builder.setValue(coreLabel.value()); keysToSerialize.remove(ValueAnnotation.class); }
-    if (keySet.contains(CategoryAnnotation.class)) { builder.setCategory(coreLabel.category()); keysToSerialize.remove(CategoryAnnotation.class); }
-    if (keySet.contains(BeforeAnnotation.class)) { builder.setBefore(coreLabel.before()); keysToSerialize.remove(BeforeAnnotation.class); }
-    if (keySet.contains(AfterAnnotation.class)) { builder.setAfter(coreLabel.after()); keysToSerialize.remove(AfterAnnotation.class); }
-    if (keySet.contains(OriginalTextAnnotation.class)) { builder.setOriginalText(coreLabel.originalText()); keysToSerialize.remove(OriginalTextAnnotation.class); }
-    if (keySet.contains(NamedEntityTagAnnotation.class)) { builder.setNer(coreLabel.ner()); keysToSerialize.remove(NamedEntityTagAnnotation.class); }
-    if (keySet.contains(CharacterOffsetBeginAnnotation.class)) { builder.setBeginChar(coreLabel.beginPosition()); keysToSerialize.remove(CharacterOffsetBeginAnnotation.class); }
-    if (keySet.contains(CharacterOffsetEndAnnotation.class)) { builder.setEndChar(coreLabel.endPosition()); keysToSerialize.remove(CharacterOffsetEndAnnotation.class); }
-    if (keySet.contains(LemmaAnnotation.class)) { builder.setLemma(coreLabel.lemma()); keysToSerialize.remove(LemmaAnnotation.class); }
-    if (keySet.contains(UtteranceAnnotation.class)) { builder.setUtterance(getAndRegister(coreLabel, keysToSerialize, UtteranceAnnotation.class)); }
-    if (keySet.contains(SpeakerAnnotation.class)) { builder.setSpeaker(getAndRegister(coreLabel, keysToSerialize, SpeakerAnnotation.class)); }
-    if (keySet.contains(BeginIndexAnnotation.class)) { builder.setBeginIndex(getAndRegister(coreLabel, keysToSerialize, BeginIndexAnnotation.class)); }
-    if (keySet.contains(EndIndexAnnotation.class)) { builder.setEndIndex(getAndRegister(coreLabel, keysToSerialize, EndIndexAnnotation.class)); }
-    if (keySet.contains(TokenBeginAnnotation.class)) { builder.setTokenBeginIndex(getAndRegister(coreLabel, keysToSerialize, TokenBeginAnnotation.class)); }
-    if (keySet.contains(TokenEndAnnotation.class)) { builder.setTokenEndIndex(getAndRegister(coreLabel, keysToSerialize, TokenEndAnnotation.class)); }
-    if (keySet.contains(NormalizedNamedEntityTagAnnotation.class)) { builder.setNormalizedNER(getAndRegister(coreLabel, keysToSerialize, NormalizedNamedEntityTagAnnotation.class)); }
-    if (keySet.contains(TimexAnnotation.class)) { builder.setTimexValue(toProto(getAndRegister(coreLabel, keysToSerialize, TimexAnnotation.class))); }
-    if (keySet.contains(AnswerAnnotation.class)) { builder.setAnswer(getAndRegister(coreLabel, keysToSerialize, AnswerAnnotation.class)); }
-    if (keySet.contains(XmlContextAnnotation.class)) {
+    if (coreLabel.tag() != null) { builder.setPos(coreLabel.tag()); keysToSerialize.remove(PartOfSpeechAnnotation.class); }
+    if (coreLabel.value() != null) { builder.setValue(coreLabel.value()); keysToSerialize.remove(ValueAnnotation.class); }
+    if (coreLabel.category() != null) { builder.setCategory(coreLabel.category()); keysToSerialize.remove(CategoryAnnotation.class); }
+    if (coreLabel.before() != null) { builder.setBefore(coreLabel.before()); keysToSerialize.remove(BeforeAnnotation.class); }
+    if (coreLabel.after() != null) { builder.setAfter(coreLabel.after()); keysToSerialize.remove(AfterAnnotation.class); }
+    if (coreLabel.originalText() != null) { builder.setOriginalText(coreLabel.originalText()); keysToSerialize.remove(OriginalTextAnnotation.class); }
+    if (coreLabel.ner() != null) { builder.setNer(coreLabel.ner()); keysToSerialize.remove(NamedEntityTagAnnotation.class); }
+    if (coreLabel.beginPosition() >= 0) { builder.setBeginChar(coreLabel.beginPosition()); keysToSerialize.remove(CharacterOffsetBeginAnnotation.class); }
+    if (coreLabel.endPosition() >= 0) { builder.setEndChar(coreLabel.endPosition()); keysToSerialize.remove(CharacterOffsetEndAnnotation.class); }
+    if (coreLabel.lemma() != null) { builder.setLemma(coreLabel.lemma()); keysToSerialize.remove(LemmaAnnotation.class); }
+    if (coreLabel.containsKey(UtteranceAnnotation.class)) { builder.setUtterance(getAndRegister(coreLabel, keysToSerialize, UtteranceAnnotation.class)); }
+    if (coreLabel.containsKey(SpeakerAnnotation.class)) { builder.setSpeaker(getAndRegister(coreLabel, keysToSerialize, SpeakerAnnotation.class)); }
+    if (coreLabel.containsKey(BeginIndexAnnotation.class)) { builder.setBeginIndex(getAndRegister(coreLabel, keysToSerialize, BeginIndexAnnotation.class)); }
+    if (coreLabel.containsKey(EndIndexAnnotation.class)) { builder.setEndIndex(getAndRegister(coreLabel, keysToSerialize, EndIndexAnnotation.class)); }
+    if (coreLabel.containsKey(TokenBeginAnnotation.class)) { builder.setTokenBeginIndex(getAndRegister(coreLabel, keysToSerialize, TokenBeginAnnotation.class)); }
+    if (coreLabel.containsKey(TokenEndAnnotation.class)) { builder.setTokenEndIndex(getAndRegister(coreLabel, keysToSerialize, TokenEndAnnotation.class)); }
+    if (getAndRegister(coreLabel, keysToSerialize, NormalizedNamedEntityTagAnnotation.class) != null) { builder.setNormalizedNER(getAndRegister(coreLabel, keysToSerialize, NormalizedNamedEntityTagAnnotation.class)); }
+    if (coreLabel.containsKey(TimexAnnotation.class)) { builder.setTimexValue(toProto(getAndRegister(coreLabel, keysToSerialize, TimexAnnotation.class))); }
+    if (coreLabel.containsKey(AnswerAnnotation.class)) { builder.setAnswer(getAndRegister(coreLabel, keysToSerialize, AnswerAnnotation.class)); }
+    if (coreLabel.containsKey(XmlContextAnnotation.class)) {
       builder.setHasXmlContext(true);
       builder.addAllXmlContext(getAndRegister(coreLabel, keysToSerialize, XmlContextAnnotation.class));
     } else {
       builder.setHasXmlContext(false);
     }
-    if (keySet.contains(CorefClusterIdAnnotation.class)) { builder.setCorefClusterID(getAndRegister(coreLabel, keysToSerialize, CorefClusterIdAnnotation.class)); }
-    if (keySet.contains(NaturalLogicAnnotations.OperatorAnnotation.class)) { builder.setOperator(toProto(getAndRegister(coreLabel, keysToSerialize, NaturalLogicAnnotations.OperatorAnnotation.class))); }
-    if (keySet.contains(NaturalLogicAnnotations.PolarityAnnotation.class)) { builder.setPolarity(toProto(getAndRegister(coreLabel, keysToSerialize, NaturalLogicAnnotations.PolarityAnnotation.class))); }
-    if (keySet.contains(SpanAnnotation.class)) {
+    if (coreLabel.containsKey(CorefClusterIdAnnotation.class)) { builder.setCorefClusterID(getAndRegister(coreLabel, keysToSerialize, CorefClusterIdAnnotation.class)); }
+    if (coreLabel.containsKey(NaturalLogicAnnotations.OperatorAnnotation.class)) { builder.setOperator(toProto(getAndRegister(coreLabel, keysToSerialize, NaturalLogicAnnotations.OperatorAnnotation.class))); }
+    if (coreLabel.containsKey(NaturalLogicAnnotations.PolarityAnnotation.class)) { builder.setPolarity(toProto(getAndRegister(coreLabel, keysToSerialize, NaturalLogicAnnotations.PolarityAnnotation.class))); }
+    if (coreLabel.get(SpanAnnotation.class) != null) {
       IntPair span = getAndRegister(coreLabel, keysToSerialize, SpanAnnotation.class);
       builder.setSpan(CoreNLPProtos.Span.newBuilder().setBegin(span.getSource()).setEnd(span.getTarget()).build());
     }
-    if (keySet.contains(SentimentCoreAnnotations.SentimentClass.class)) { builder.setSentiment(getAndRegister(coreLabel, keysToSerialize, SentimentCoreAnnotations.SentimentClass.class)); }
-    if (keySet.contains(QuotationIndexAnnotation.class)) { builder.setQuotationIndex(getAndRegister(coreLabel, keysToSerialize, QuotationIndexAnnotation.class)); }
-    if (keySet.contains(CoNLLUFeats.class)) { builder.setConllUFeatures(toMapStringStringProto(getAndRegister(coreLabel, keysToSerialize, CoNLLUFeats.class))); }
-    if (keySet.contains(CoNLLUTokenSpanAnnotation.class)) {
-      IntPair span = getAndRegister(coreLabel, keysToSerialize, CoNLLUTokenSpanAnnotation.class);
-      builder.setConllUTokenSpan(CoreNLPProtos.Span.newBuilder().setBegin(span.getSource()).setEnd(span.getTarget()).build());
-    }
-    if (keySet.contains(CoNLLUMisc.class)) { builder.setConllUMisc(getAndRegister(coreLabel, keysToSerialize, CoNLLUMisc.class));}
-    if (keySet.contains(CoarseTagAnnotation.class)) { builder.setCoarseTag(getAndRegister(coreLabel, keysToSerialize, CoarseTagAnnotation.class));}
-    if (keySet.contains(CoNLLUSecondaryDepsAnnotation.class)) { builder.setConllUSecondaryDeps(toMapIntStringProto(getAndRegister(coreLabel, keysToSerialize, CoNLLUSecondaryDepsAnnotation.class)));}
-
-        // Non-default annotators
-    if (keySet.contains(GenderAnnotation.class)) { builder.setGender(getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class)); }
-    if (keySet.contains(TrueCaseAnnotation.class)) { builder.setTrueCase(getAndRegister(coreLabel, keysToSerialize, TrueCaseAnnotation.class)); }
-    if (keySet.contains(TrueCaseTextAnnotation.class)) { builder.setTrueCaseText(getAndRegister(coreLabel, keysToSerialize, TrueCaseTextAnnotation.class)); }
+    if (coreLabel.get(SentimentCoreAnnotations.SentimentClass.class) != null) { builder.setSentiment(getAndRegister(coreLabel, keysToSerialize, SentimentCoreAnnotations.SentimentClass.class)); }
+    if (coreLabel.get(QuotationIndexAnnotation.class) != null) { builder.setQuotationIndex(getAndRegister(coreLabel, keysToSerialize, QuotationIndexAnnotation.class)); }
+    // Non-default annotators
+    if (getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class) != null) { builder.setGender(getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class)); }
+    if (coreLabel.containsKey(TrueCaseAnnotation.class)) { builder.setTrueCase(getAndRegister(coreLabel, keysToSerialize, TrueCaseAnnotation.class)); }
+    if (coreLabel.containsKey(TrueCaseTextAnnotation.class)) { builder.setTrueCaseText(getAndRegister(coreLabel, keysToSerialize, TrueCaseTextAnnotation.class)); }
     // Return
     return builder;
   }
@@ -339,7 +328,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @throws IllegalArgumentException If the sentence is not a valid sentence (e.g., is a document or a word).
    */
   public CoreNLPProtos.Sentence toProto(CoreMap sentence) {
-    Set<Class<?>> keysToSerialize = new HashSet<>(sentence.keySet());
+    Set<Class<?>> keysToSerialize = new HashSet<Class<?>>(sentence.keySet());
     CoreNLPProtos.Sentence.Builder builder = toProtoBuilder(sentence, keysToSerialize);
     // Completeness check
     if (enforceLosslessSerialization && !keysToSerialize.isEmpty()) {
@@ -370,53 +359,35 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Required fields
     builder.setTokenOffsetBegin(getAndRegister(sentence, keysToSerialize, TokenBeginAnnotation.class));
     builder.setTokenOffsetEnd(getAndRegister(sentence, keysToSerialize, TokenEndAnnotation.class));
-    // Get key set of CoreMap
-    Set<Class<?>> keySet;
-    if (sentence instanceof ArrayCoreMap) {
-       keySet = ((ArrayCoreMap) sentence).keySetNotNull();
-    } else {
-      keySet = new IdentityHashSet<>(sentence.keySet());
-    }
     // Tokens
     if (sentence.containsKey(TokensAnnotation.class)) {
       for (CoreLabel tok : sentence.get(TokensAnnotation.class)) { builder.addToken(toProto(tok)); }
       keysToSerialize.remove(TokensAnnotation.class);
     }
     // Optional fields
-    if (keySet.contains(SentenceIndexAnnotation.class)) { builder.setSentenceIndex(getAndRegister(sentence, keysToSerialize, SentenceIndexAnnotation.class)); }
-    if (keySet.contains(CharacterOffsetBeginAnnotation.class)) { builder.setCharacterOffsetBegin(getAndRegister(sentence, keysToSerialize, CharacterOffsetBeginAnnotation.class)); }
-    if (keySet.contains(CharacterOffsetEndAnnotation.class)) { builder.setCharacterOffsetEnd(getAndRegister(sentence, keysToSerialize, CharacterOffsetEndAnnotation.class)); }
-    if (keySet.contains(TreeAnnotation.class)) { builder.setParseTree(toProto(getAndRegister(sentence, keysToSerialize, TreeAnnotation.class))); }
-    if (keySet.contains(BinarizedTreeAnnotation.class)) { builder.setBinarizedParseTree(toProto(getAndRegister(sentence, keysToSerialize, BinarizedTreeAnnotation.class))); }
-    if (keySet.contains(KBestTreesAnnotation.class)) {
-      for (Tree tree : sentence.get(KBestTreesAnnotation.class)) {
-        builder.addKBestParseTrees(toProto(tree));
-        keysToSerialize.remove(KBestTreesAnnotation.class);
-      }
-    }
-    if (keySet.contains(SentimentCoreAnnotations.SentimentAnnotatedTree.class)) { builder.setAnnotatedParseTree(toProto(getAndRegister(sentence, keysToSerialize, SentimentCoreAnnotations.SentimentAnnotatedTree.class))); }
-    if (keySet.contains(SentimentCoreAnnotations.SentimentClass.class)) { builder.setSentiment(getAndRegister(sentence, keysToSerialize, SentimentCoreAnnotations.SentimentClass.class)); }
-    if (keySet.contains(BasicDependenciesAnnotation.class)) { builder.setBasicDependencies(toProto(getAndRegister(sentence, keysToSerialize, BasicDependenciesAnnotation.class))); }
-    if (keySet.contains(CollapsedDependenciesAnnotation.class)) { builder.setCollapsedDependencies(toProto(getAndRegister(sentence, keysToSerialize, CollapsedDependenciesAnnotation.class))); }
-    if (keySet.contains(CollapsedCCProcessedDependenciesAnnotation.class)) { builder.setCollapsedCCProcessedDependencies(toProto(getAndRegister(sentence, keysToSerialize, CollapsedCCProcessedDependenciesAnnotation.class))); }
-    if (keySet.contains(AlternativeDependenciesAnnotation.class)) { builder.setAlternativeDependencies(toProto(getAndRegister(sentence, keysToSerialize, AlternativeDependenciesAnnotation.class))); }
-    if (keySet.contains(TokensAnnotation.class) && getAndRegister(sentence, keysToSerialize, TokensAnnotation.class).size() > 0 &&
+    if (sentence.containsKey(SentenceIndexAnnotation.class)) { builder.setSentenceIndex(getAndRegister(sentence, keysToSerialize, SentenceIndexAnnotation.class)); }
+    if (sentence.containsKey(CharacterOffsetBeginAnnotation.class)) { builder.setCharacterOffsetBegin(getAndRegister(sentence, keysToSerialize, CharacterOffsetBeginAnnotation.class)); }
+    if (sentence.containsKey(CharacterOffsetEndAnnotation.class)) { builder.setCharacterOffsetEnd(getAndRegister(sentence, keysToSerialize, CharacterOffsetEndAnnotation.class)); }
+    if (sentence.containsKey(TreeAnnotation.class)) { builder.setParseTree(toProto(getAndRegister(sentence, keysToSerialize, TreeAnnotation.class))); }
+    if (sentence.containsKey(BinarizedTreeAnnotation.class)) { builder.setBinarizedParseTree(toProto(getAndRegister(sentence, keysToSerialize, BinarizedTreeAnnotation.class))); }
+    if (sentence.containsKey(SentimentCoreAnnotations.SentimentAnnotatedTree.class)) { builder.setAnnotatedParseTree(toProto(getAndRegister(sentence, keysToSerialize, SentimentCoreAnnotations.SentimentAnnotatedTree.class))); }
+    if (sentence.containsKey(SentimentCoreAnnotations.SentimentClass.class)) { builder.setSentiment(getAndRegister(sentence, keysToSerialize, SentimentCoreAnnotations.SentimentClass.class)); }
+    if (sentence.containsKey(BasicDependenciesAnnotation.class)) { builder.setBasicDependencies(toProto(getAndRegister(sentence, keysToSerialize, BasicDependenciesAnnotation.class))); }
+    if (sentence.containsKey(CollapsedDependenciesAnnotation.class)) { builder.setCollapsedDependencies(toProto(getAndRegister(sentence, keysToSerialize, CollapsedDependenciesAnnotation.class))); }
+    if (sentence.containsKey(CollapsedCCProcessedDependenciesAnnotation.class)) { builder.setCollapsedCCProcessedDependencies(toProto(getAndRegister(sentence, keysToSerialize, CollapsedCCProcessedDependenciesAnnotation.class))); }
+    if (sentence.containsKey(AlternativeDependenciesAnnotation.class)) { builder.setAlternativeDependencies(toProto(getAndRegister(sentence, keysToSerialize, AlternativeDependenciesAnnotation.class))); }
+    if (sentence.containsKey(TokensAnnotation.class) && getAndRegister(sentence, keysToSerialize, TokensAnnotation.class).size() > 0 &&
         getAndRegister(sentence, keysToSerialize, TokensAnnotation.class).get(0).containsKey(ParagraphAnnotation.class)) {
       builder.setParagraph(getAndRegister(sentence, keysToSerialize, TokensAnnotation.class).get(0).get(ParagraphAnnotation.class));
     }
-    if (keySet.contains(NumerizedTokensAnnotation.class)) { builder.setHasNumerizedTokensAnnotation(true); } else { builder.setHasNumerizedTokensAnnotation(false); }
-    if (keySet.contains(NaturalLogicAnnotations.EntailedSentencesAnnotation.class)) {
-      for (SentenceFragment entailedSentence : getAndRegister(sentence, keysToSerialize, NaturalLogicAnnotations.EntailedSentencesAnnotation.class)) {
-        builder.addEntailedSentence(toProto(entailedSentence));
-      }
-    }
-    if (keySet.contains(NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
+    if (sentence.containsKey(NumerizedTokensAnnotation.class)) { builder.setHasNumerizedTokensAnnotation(true); } else { builder.setHasNumerizedTokensAnnotation(false); }
+    if (sentence.containsKey(NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
       for (RelationTriple triple : getAndRegister(sentence, keysToSerialize, NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
         builder.addOpenieTriple(toProto(triple));
       }
     }
     // Non-default annotators
-    if (keySet.contains(EntityMentionsAnnotation.class)) {
+    if (sentence.containsKey(EntityMentionsAnnotation.class)) {
       builder.setHasRelationAnnotations(true);
       for (EntityMention entity : getAndRegister(sentence, keysToSerialize, EntityMentionsAnnotation.class)) {
         builder.addEntity(toProto(entity));
@@ -424,7 +395,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     } else {
       builder.setHasRelationAnnotations(false);
     }
-    if (keySet.contains(RelationMentionsAnnotation.class)) {
+    if (sentence.containsKey(RelationMentionsAnnotation.class)) {
       if (!builder.getHasRelationAnnotations()) { throw new IllegalStateException("Registered entity mentions without relation mentions"); }
       for (RelationMention relation : getAndRegister(sentence, keysToSerialize, RelationMentionsAnnotation.class)) {
         builder.addRelation(toProto(relation));
@@ -441,7 +412,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @return A protocol buffer message corresponding to this document
    */
   public CoreNLPProtos.Document toProto(Annotation doc) {
-    Set<Class<?>> keysToSerialize = new HashSet<>(doc.keySet());
+    Set<Class<?>> keysToSerialize = new HashSet<Class<?>>(doc.keySet());
     keysToSerialize.remove(TokensAnnotation.class);  // note(gabor): tokens are saved in the sentence
     CoreNLPProtos.Document.Builder builder = toProtoBuilder(doc, keysToSerialize);
     // Completeness Check
@@ -544,7 +515,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   public static CoreNLPProtos.DependencyGraph toProto(SemanticGraph graph) {
     CoreNLPProtos.DependencyGraph.Builder builder = CoreNLPProtos.DependencyGraph.newBuilder();
     // Roots
-    Set<Integer> rootSet = graph.getRoots().stream().map(IndexedWord::index).collect(Collectors.toCollection(IdentityHashSet::new));
+    Set<Integer> rootSet = new IdentityHashSet<>();
+    for (IndexedWord root : graph.getRoots()) {
+      rootSet.add(root.index());
+    }
     // Nodes
     for (IndexedWord node : graph.vertexSet()) {
       // Register node
@@ -585,7 +559,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Set ID
     builder.setChainID(chain.getChainID());
     // Set mentions
-    Map<CorefChain.CorefMention, Integer> mentionToIndex = new IdentityHashMap<>();
+    Map<CorefChain.CorefMention, Integer> mentionToIndex = new IdentityHashMap<CorefChain.CorefMention, Integer>();
     for (Map.Entry<IntPair, Set<CorefChain.CorefMention>> entry : chain.getMentionMap().entrySet()) {
       for (CorefChain.CorefMention mention : entry.getValue()) {
         mentionToIndex.put(mention, mentionToIndex.size());
@@ -661,9 +635,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (rel.getType() != null) { builder.setType(rel.getType()); }
     if (rel.getSubType() != null) { builder.setSubtype(rel.getSubType()); }
     // From Relation
-    if (rel.getArgNames() != null) {
-      rel.getArgNames().forEach(builder::addArgName);
-    }
+    if (rel.getArgNames() != null) { for (String name : rel.getArgNames()) { builder.addArgName(name); } }
     if (rel.getArgs() != null) { for (ExtractionObject arg : rel.getArgs()) { builder.addArg(toProto((EntityMention) arg)); } }
     // Return
     return builder.build();
@@ -729,64 +701,20 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   /**
    * Return a Protobuf OpenIETriple from a RelationTriple.
    */
-  public static CoreNLPProtos.SentenceFragment toProto(SentenceFragment fragment) {
-    return CoreNLPProtos.SentenceFragment.newBuilder()
-        .setAssumedTruth(fragment.assumedTruth)
-        .setScore(fragment.score)
-        .addAllTokenIndex(fragment.words.stream().map(x -> x.index() - 1).collect(Collectors.toList()))
-        .setRoot(fragment.parseTree.getFirstRoot().index() - 1)
-        .build();
-  }
-
-  /**
-   * Return a Protobuf OpenIETriple from a RelationTriple.
-   */
   public static CoreNLPProtos.OpenIETriple toProto(RelationTriple triple) {
     CoreNLPProtos.OpenIETriple.Builder builder = CoreNLPProtos.OpenIETriple.newBuilder()
         .setSubject(triple.subjectGloss())
         .setRelation(triple.relationGloss())
         .setObject(triple.objectGloss())
         .setConfidence(triple.confidence)
-        .addAllSubjectTokens(triple.subject.stream().map(x -> x.index() - 1).collect(Collectors.toList()))
-        .addAllRelationTokens(triple.relation.stream().map(x -> x.index() - 1).collect(Collectors.toList()))
-        .addAllObjectTokens(triple.object.stream().map(x -> x.index() - 1).collect(Collectors.toList()));
+        .setSubjectSpan(CoreNLPProtos.Span.newBuilder().setBegin(triple.subjectTokenSpan().first).setEnd(triple.subjectTokenSpan().second).build())
+        .setRelationSpan(CoreNLPProtos.Span.newBuilder().setBegin(triple.relationTokenSpan().first).setEnd(triple.relationTokenSpan().second).build())
+        .setObjectSpan(CoreNLPProtos.Span.newBuilder().setBegin(triple.objectTokenSpan().first).setEnd(triple.objectTokenSpan().second).build());
     Optional<SemanticGraph> treeOptional = triple.asDependencyTree();
     if (treeOptional.isPresent()) {
       builder.setTree(toProto(treeOptional.get()));
     }
     return builder.build();
-  }
-
-  /**
-   * Serialize a Map (from Strings to Strings) to a proto.
-   *
-   * @param map The map to serialize.
-   *
-   * @return A proto representation of the map.
-   */
-  public static CoreNLPProtos.MapStringString toMapStringStringProto(Map<String,String> map) {
-    CoreNLPProtos.MapStringString.Builder proto = CoreNLPProtos.MapStringString.newBuilder();
-    for (Map.Entry<String, String> entry : map.entrySet()) {
-      proto.addKey(entry.getKey());
-      proto.addValue(entry.getValue());
-    }
-    return proto.build();
-  }
-
-  /**
-   * Serialize a Map (from Integers to Strings) to a proto.
-   *
-   * @param map The map to serialize.
-   *
-   * @return A proto representation of the map.
-   */
-  public static CoreNLPProtos.MapIntString toMapIntStringProto(Map<Integer,String> map) {
-      CoreNLPProtos.MapIntString.Builder proto = CoreNLPProtos.MapIntString.newBuilder();
-      for (Map.Entry<Integer, String> entry : map.entrySet()) {
-          proto.addKey(entry.getKey());
-          proto.addValue(entry.getValue());
-      }
-      return proto.build();
   }
 
 
@@ -845,14 +773,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasSpan()) { word.set(SpanAnnotation.class, new IntPair(proto.getSpan().getBegin(), proto.getSpan().getEnd())); }
     if (proto.hasSentiment()) { word.set(SentimentCoreAnnotations.SentimentClass.class, proto.getSentiment()); }
     if (proto.hasQuotationIndex()) { word.set(QuotationIndexAnnotation.class, proto.getQuotationIndex()); }
-    if (proto.hasConllUFeatures()) { word.set(CoNLLUFeats.class, fromProto(proto.getConllUFeatures())); }
-    if (proto.hasConllUMisc()) { word.set(CoNLLUMisc.class, proto.getConllUMisc()); }
-    if (proto.hasCoarseTag()) { word.set(CoarseTagAnnotation.class, proto.getCoarseTag()); }
-    if (proto.hasConllUTokenSpan()) { word.set(CoNLLUTokenSpanAnnotation.class, new IntPair(proto.getConllUTokenSpan().getBegin(), proto.getSpan().getEnd())); }
-    if (proto.hasConllUSecondaryDeps()) { word.set(CoNLLUSecondaryDepsAnnotation.class, fromProto(proto.getConllUSecondaryDeps())); }
-
-
-            // Non-default annotators
+    // Non-default annotators
     if (proto.hasGender()) { word.set(GenderAnnotation.class, proto.getGender()); }
     if (proto.hasTrueCase()) { word.set(TrueCaseAnnotation.class, proto.getTrueCase()); }
     if (proto.hasTrueCaseText()) { word.set(TrueCaseTextAnnotation.class, proto.getTrueCaseText()); }
@@ -871,7 +792,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   public CoreMap fromProto(CoreNLPProtos.Sentence proto) {
     CoreMap lossySentence = fromProtoNoTokens(proto);
     // Add tokens -- missing by default as they're populated as sublists of the document tokens
-    List<CoreLabel> tokens = proto.getTokenList().stream().map(this::fromProto).collect(Collectors.toList());
+    List<CoreLabel> tokens = new ArrayList<CoreLabel>();
+    for (CoreNLPProtos.Token token : proto.getTokenList()) {
+      tokens.add(fromProto(token));
+    }
     lossySentence.set(TokensAnnotation.class, tokens);
     // Add dependencies
     if (proto.hasBasicDependencies()) {
@@ -886,14 +810,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasAlternativeDependencies()) {
       lossySentence.set(AlternativeDependenciesAnnotation.class, fromProto(proto.getAlternativeDependencies(), tokens, null));
     }
-    // Add entailed sentences
-    if (proto.getEntailedSentenceCount() > 0) {
-      List<SentenceFragment> entailedSentences = proto.getEntailedSentenceList().stream().map(frag -> fromProto(frag, lossySentence.get(CollapsedDependenciesAnnotation.class))).collect(Collectors.toList());
-      lossySentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, entailedSentences);
-    }
     // Add relation triples
     if (proto.getOpenieTripleCount() > 0) {
-      List<RelationTriple> triples = proto.getOpenieTripleList().stream().map(triple -> fromProto(triple, tokens, null)).collect(Collectors.toList());
+      List<RelationTriple> triples = new ArrayList<>();
+      for (CoreNLPProtos.OpenIETriple triple : proto.getOpenieTripleList()) {
+        triples.add(fromProto(triple, tokens, null));
+      }
       lossySentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, triples);
     }
     // Add text -- missing by default as it's populated from the Document
@@ -920,19 +842,17 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasCharacterOffsetEnd()) { sentence.set(CharacterOffsetEndAnnotation.class, proto.getCharacterOffsetEnd()); }
     if (proto.hasParseTree()) { sentence.set(TreeAnnotation.class, fromProto(proto.getParseTree())); }
     if (proto.hasBinarizedParseTree()) { sentence.set(BinarizedTreeAnnotation.class, fromProto(proto.getBinarizedParseTree())); }
-    if (proto.getKBestParseTreesCount() > 0) {
-      List<Tree> trees = proto.getKBestParseTreesList().stream().map(this::fromProto).collect(Collectors.toCollection(LinkedList::new));
-      sentence.set(KBestTreesAnnotation.class, trees);
-    }
     if (proto.hasAnnotatedParseTree()) { sentence.set(SentimentCoreAnnotations.SentimentAnnotatedTree.class, fromProto(proto.getAnnotatedParseTree())); }
     if (proto.hasSentiment()) { sentence.set(SentimentCoreAnnotations.SentimentClass.class, proto.getSentiment()); }
     // Non-default fields
     if (proto.hasHasRelationAnnotations() && proto.getHasRelationAnnotations()) {
       // set entities
-      List<EntityMention> entities = proto.getEntityList().stream().map(entity -> fromProto(entity, sentence)).collect(Collectors.toList());
+      List<EntityMention> entities = new ArrayList<EntityMention>();
+      for (CoreNLPProtos.Entity entity : proto.getEntityList()) { entities.add(fromProto(entity, sentence)); }
       sentence.set(EntityMentionsAnnotation.class, entities);
       // set relations
-      List<RelationMention> relations = proto.getRelationList().stream().map(relation -> fromProto(relation, sentence)).collect(Collectors.toList());
+      List<RelationMention> relations = new ArrayList<RelationMention>();
+      for (CoreNLPProtos.Relation relation : proto.getRelationList()) { relations.add(fromProto(relation, sentence)); }
       sentence.set(RelationMentionsAnnotation.class, relations);
     }
     // Return
@@ -953,7 +873,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     Annotation ann = new Annotation(proto.getText());
 
     // Add tokens
-    List<CoreLabel> tokens = new ArrayList<>();
+    List<CoreLabel> tokens = new ArrayList<CoreLabel>();
     if (proto.getSentenceCount() > 0) {
       // Populate the tokens from the sentence
       for (CoreNLPProtos.Sentence sentence : proto.getSentenceList()) {
@@ -994,7 +914,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (!tokens.isEmpty()) { ann.set(TokensAnnotation.class, tokens); }
 
     // Add sentences
-    List<CoreMap> sentences = new ArrayList<>(proto.getSentenceCount());
+    List<CoreMap> sentences = new ArrayList<CoreMap>(proto.getSentenceCount());
     for (int sentIndex = 0; sentIndex < proto.getSentenceCount(); ++sentIndex) {
       CoreNLPProtos.Sentence sentence = proto.getSentence(sentIndex);
       CoreMap map = fromProtoNoTokens(sentence);
@@ -1036,7 +956,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
 
     // Set coref chain
-    Map<Integer, CorefChain> corefChains = new HashMap<>();
+    Map<Integer, CorefChain> corefChains = new HashMap<Integer, CorefChain>();
     for (CoreNLPProtos.CorefChain chainProto : proto.getCorefChainList()) {
       CorefChain chain = fromProto(chainProto, ann);
       corefChains.put(chain.getChainID(), chain);
@@ -1061,11 +981,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       if (sentence.hasAlternativeDependencies()) {
         map.set(AlternativeDependenciesAnnotation.class, fromProto(sentence.getAlternativeDependencies(), sentenceTokens, docid));
       }
-      // Set entailed sentences
-      if (sentence.getEntailedSentenceCount() > 0) {
-        Set<SentenceFragment> entailedSentences = sentence.getEntailedSentenceList().stream().map(frag -> fromProto(frag, map.get(CollapsedDependenciesAnnotation.class))).collect(Collectors.toSet());
-        map.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, entailedSentences);
-      }
       // Set relation triples
       if (sentence.getOpenieTripleCount() > 0) {
         List<RelationTriple> triples = new ArrayList<>();
@@ -1082,7 +997,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
 
     // Set quotes
-    List<CoreMap> quotes = proto.getQuoteList().stream().map(quote -> fromProto(quote, tokens)).collect(Collectors.toList());
+    List<CoreMap> quotes = new ArrayList<>();
+    for (CoreNLPProtos.Quote quote : proto.getQuoteList()) {
+      quotes.add(fromProto(quote, tokens));
+    }
     if (!quotes.isEmpty()) {
       ann.set(QuotationsAnnotation.class, quotes);
     }
@@ -1258,7 +1176,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
 
     if (proto.getRootCount() > 0) {
-      Collection<IndexedWord> roots = proto.getRootList().stream().map(rootI -> nodes.get(rootI, 0)).collect(Collectors.toList());
+      Collection<IndexedWord> roots = new ArrayList<>();
+      for(int rootI : proto.getRootList()){
+        roots.add(nodes.get(rootI, 0)); // copies should never be roots...
+      }
       graph.setRoots(roots);
     } else {
       // Roots were not saved away
@@ -1282,99 +1203,16 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @return A relation triple as a Java object, corresponding to the seriaized proto.
    */
   public static RelationTriple fromProto(CoreNLPProtos.OpenIETriple proto, List<CoreLabel> sentence, String docid) {
-    // Get the spans for the extraction
-    List<CoreLabel> subject = proto.getSubjectTokensList().stream().map(sentence::get).collect(Collectors.toList());
-    List<CoreLabel> relation = proto.getRelationTokensList().stream().map(sentence::get).collect(Collectors.toList());
-    List<CoreLabel> object = proto.getObjectTokensList().stream().map(sentence::get).collect(Collectors.toList());
-
-    // Create the extraction
-    RelationTriple extraction;
+    List<CoreLabel> subject = sentence.subList(proto.getSubjectSpan().getBegin(), proto.getSubjectSpan().getEnd());
+    List<CoreLabel> relation = sentence.subList(proto.getRelationSpan().getBegin(), proto.getRelationSpan().getEnd());
+    List<CoreLabel> object = sentence.subList(proto.getRelationSpan().getBegin(), proto.getRelationSpan().getEnd());
     double confidence = proto.getConfidence();
     if (proto.hasTree()) {
       SemanticGraph tree = fromProto(proto.getTree(), sentence, docid);
-      extraction =  new RelationTriple.WithTree(subject, relation, object, tree, confidence);
+      return new RelationTriple.WithTree(subject, relation, object, tree, confidence);
     } else {
-      extraction = new RelationTriple(subject, relation, object, confidence);
+      return new RelationTriple(subject, relation, object, confidence);
     }
-
-    // Tweak the extraction
-    if (proto.hasIstmod()) { extraction.istmod(proto.getIstmod()); }
-    if (proto.hasPrefixBe()) { extraction.isPrefixBe(proto.getPrefixBe()); }
-    if (proto.hasSuffixBe()) { extraction.isSuffixBe(proto.getSuffixBe()); }
-    if (proto.hasSuffixOf()) { extraction.isSuffixOf(proto.getSuffixOf()); }
-
-    // Return
-    return extraction;
-  }
-
-  /**
-   * Returns a sentence fragment from a given protocol buffer, and an associated parse tree.
-   *
-   * @param fragment The saved sentence fragment.
-   * @param tree The parse tree for the whole sentence.
-   *
-   * @return A {@link SentenceFragment} object corresponding to the saved proto.
-   */
-  public static SentenceFragment fromProto(CoreNLPProtos.SentenceFragment fragment, SemanticGraph tree) {
-    SemanticGraph fragmentTree = new SemanticGraph(tree);
-    // Set the new root
-    if (fragment.hasRoot()) {
-      fragmentTree.resetRoots();
-      fragmentTree.vertexSet().stream()
-          .filter(vertex -> vertex.index() - 1 == fragment.getRoot())
-          .forEach(fragmentTree::setRoot);
-    }
-    // Set the new vertices
-    Set<Integer> keptIndices = new HashSet<>(fragment.getTokenIndexList());
-    tree.vertexSet().stream()
-        .filter(vertex -> !keptIndices.contains(vertex.index() - 1))
-        .forEach(fragmentTree::removeVertex);
-    // Apparently this sometimes screws up the tree
-    fragmentTree.vertexSet().stream()
-        .filter(vertex -> fragmentTree.getFirstRoot() != vertex &&
-            tree.getFirstRoot() != vertex &&
-            !fragmentTree.incomingEdgeIterable(vertex).iterator().hasNext())
-        .forEach(vertex -> {
-          SemanticGraphEdge edge = tree.incomingEdgeIterable(vertex).iterator().next();
-          fragmentTree.addEdge(fragmentTree.getFirstRoot(), edge.getDependent(), edge.getRelation(),
-              edge.getWeight(), edge.isExtra());
-        });
-    // Return the fragment
-    //noinspection SimplifiableConditionalExpression
-    return new SentenceFragment(fragmentTree,
-        fragment.hasAssumedTruth() ? fragment.getAssumedTruth() : true,
-        false)
-        .changeScore(fragment.hasScore() ? fragment.getScore() : 1.0);
-  }
-
-  /**
-   * Convert a serialized Map back into a Java Map.
-   *
-   * @param proto The serialized map.
-   *
-   * @return A Java Map corresponding to the serialized map.
-   */
-  public static HashMap<String, String> fromProto(CoreNLPProtos.MapStringString proto) {
-    HashMap<String, String> map = new HashMap<>();
-    for (int i = 0; i < proto.getKeyCount(); ++i) {
-      map.put(proto.getKey(i), proto.getValue(i));
-    }
-    return map;
-  }
-
-  /**
-   * Convert a serialized Map back into a Java Map.
-   *
-   * @param proto The serialized map.
-   *
-   * @return A Java Map corresponding to the serialized map.
-   */
-  public static HashMap<Integer, String> fromProto(CoreNLPProtos.MapIntString proto) {
-      HashMap<Integer, String> map = new HashMap<>();
-      for (int i = 0; i < proto.getKeyCount(); ++i) {
-          map.put(proto.getKey(i), proto.getValue(i));
-      }
-      return map;
   }
 
   /**
@@ -1390,7 +1228,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Get chain ID
     int cid = proto.getChainID();
     // Get mentions
-    Map<IntPair, Set<CorefChain.CorefMention>> mentions = new HashMap<>();
+    Map<IntPair, Set<CorefChain.CorefMention>> mentions = new HashMap<IntPair, Set<CorefChain.CorefMention>>();
     CorefChain.CorefMention representative = null;
     for (int i = 0; i < proto.getMentionCount(); ++i) {
       CoreNLPProtos.CorefChain.CorefMention mentionProto = proto.getMention(i);
@@ -1416,7 +1254,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           mentionSpan.substring(mentionSpan.length() > 0 ? 1 : 0));
       // Register mention
       IntPair key = new IntPair(mentionProto.getSentenceIndex() - 1, mentionProto.getHeadIndex() - 1);
-      if (!mentions.containsKey(key)) { mentions.put(key, new HashSet<>()); }
+      if (!mentions.containsKey(key)) { mentions.put(key, new HashSet<CorefChain.CorefMention>()); }
       mentions.get(key).add(mention);
       // Check for representative
       if (proto.hasRepresentative() && i == proto.getRepresentative()) {
@@ -1473,7 +1311,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @return The relation mention corresponding to the serialized object.
    */
   private RelationMention fromProto(CoreNLPProtos.Relation proto, CoreMap sentence) {
-    List<ExtractionObject> args = proto.getArgList().stream().map(arg -> fromProto(arg, sentence)).collect(Collectors.toList());
+    List<ExtractionObject> args = new ArrayList<ExtractionObject>();
+    for (CoreNLPProtos.Entity arg : proto.getArgList()) {
+      args.add(fromProto(arg, sentence));
+    }
     RelationMention rtn = new RelationMention(
         proto.hasObjectID() ? proto.getObjectID() : null,
         sentence,
@@ -1491,14 +1332,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   /**
    * Convert a quote object to a protocol buffer.
    */
-  @SuppressWarnings("UnusedParameters")
   private static Annotation fromProto(CoreNLPProtos.Quote quote, List<CoreLabel> tokens) {
     List<CoreLabel> quotedTokens = null;
     // note[gabor]: This works, but apparently isn't the behavior of the quote annotator?
 //    if (quote.hasTokenBegin() && quote.hasTokenEnd() && quote.getTokenBegin() >= 0 && quote.getTokenEnd() >= 0) {
 //      quotedTokens = tokens.subList(quote.getTokenBegin(), quote.getTokenEnd());
 //    }
-    @SuppressWarnings("ConstantConditions")
     Annotation ann = QuoteAnnotator.makeQuote(
         quote.hasText() ? quote.getText() : null,
         quote.hasBegin() ? quote.getBegin() : -1,

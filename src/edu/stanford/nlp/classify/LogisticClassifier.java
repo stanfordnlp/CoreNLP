@@ -140,7 +140,7 @@ public class LogisticClassifier<L, F> implements Classifier<L, F>, RVFClassifier
 
   @Override
   public Collection<L> labels() {
-    Collection<L> l = new LinkedList<>();
+    Collection<L> l = new LinkedList<L>();
     l.add(classes[0]);
     l.add(classes[1]);
     return l;
@@ -205,7 +205,7 @@ public class LogisticClassifier<L, F> implements Classifier<L, F>, RVFClassifier
    * nmramesh@cs.stanford.edu
    */
   public Counter<F> justificationOf(Counter<F> features){
-    Counter<F> fWts = new ClassicCounter<>();
+    Counter<F> fWts = new ClassicCounter<F>();
     for (F feature : features.keySet()) {
       int f = featureIndex.indexOf(feature);
       if (f >= 0) {
@@ -218,7 +218,7 @@ public class LogisticClassifier<L, F> implements Classifier<L, F>, RVFClassifier
    * returns the weights assigned by the classifier to each feature
    */
   public Counter<F> justificationOf(Collection<F> features){
-    Counter<F> fWts = new ClassicCounter<>();
+    Counter<F> fWts = new ClassicCounter<F>();
     for (F feature : features) {
       int f = featureIndex.indexOf(feature);
       if (f >= 0) {
@@ -236,7 +236,7 @@ public class LogisticClassifier<L, F> implements Classifier<L, F>, RVFClassifier
     if(datum instanceof RVFDatum<?,?>)return scoresOfRVFDatum((RVFDatum<L,F>)datum);
     Collection<F> features = datum.asFeatures();
     double sum = scoreOf(features);
-    Counter<L> c = new ClassicCounter<>();
+    Counter<L> c = new ClassicCounter<L>();
     c.setCount(classes[0], -sum);
     c.setCount(classes[1], sum);
     return c;
@@ -253,7 +253,7 @@ public class LogisticClassifier<L, F> implements Classifier<L, F>, RVFClassifier
   private Counter<L> scoresOfRVFDatum(RVFDatum<L, F> example) {
     Counter<F> features = example.asFeaturesCounter();
     double sum = scoreOf(features);
-    Counter<L> c = new ClassicCounter<>();
+    Counter<L> c = new ClassicCounter<L>();
     c.setCount(classes[0], -sum);
     c.setCount(classes[1], sum);
     return c;

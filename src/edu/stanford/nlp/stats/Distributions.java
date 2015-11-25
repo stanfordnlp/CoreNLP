@@ -70,7 +70,7 @@ public class Distributions {
     double w2 = 1.0 - w1;
     Set<K> allKeys = getSetOfAllKeys(d1, d2);
     int numKeys = d1.getNumberOfKeys();
-    Counter<K> c = new ClassicCounter<>();
+    Counter<K> c = new ClassicCounter<K>();
 
       for (K key : allKeys){
         double newProbability = d1.probabilityOf(key) * w1 + d2.probabilityOf(key) * w2;

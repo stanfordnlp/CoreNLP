@@ -81,11 +81,11 @@ public abstract class GrammarCompactor {
       }
       trainPaths = allTrainPaths.remove(cat);// to save memory
       if (trainPaths == null) {
-        trainPaths = new ArrayList<>();
+        trainPaths = new ArrayList<List<String>>();
       }
       testPaths = allTestPaths.remove(cat);// to save memory
       if (testPaths == null) {
-        testPaths = new ArrayList<>();
+        testPaths = new ArrayList<List<String>>();
       }
       TransducerGraph compactedGraph = doCompaction(graph, trainPaths, testPaths);
       i++;
@@ -96,11 +96,11 @@ public abstract class GrammarCompactor {
       compactedGraphs.add(compactedGraph);
     }
     Pair<UnaryGrammar, BinaryGrammar> ugbg = convertGraphsToGrammar(compactedGraphs, unaryRules, binaryRules);
-    return new Triple<>(newStateIndex, ugbg.first(), ugbg.second());
+    return new Triple<Index<String>, UnaryGrammar, BinaryGrammar>(newStateIndex, ugbg.first(), ugbg.second());
   }
 
   protected static Distribution<String> computeInputPrior(Map<String, List<List<String>>> allTrainPaths) {
-    ClassicCounter<String> result = new ClassicCounter<>();
+    ClassicCounter<String> result = new ClassicCounter<String>();
     for (List<List<String>> pathList : allTrainPaths.values()) {
       for (List<String> path : pathList) {
         for (String input : path) {
@@ -276,7 +276,7 @@ public abstract class GrammarCompactor {
    */
   protected Pair<UnaryGrammar,BinaryGrammar> convertGraphsToGrammar(Set<TransducerGraph> graphs, Set<UnaryRule> unaryRules, Set<BinaryRule> binaryRules) {
     // first go through all the existing rules and number them with new numberer
-    newStateIndex = new HashIndex<>();
+    newStateIndex = new HashIndex<String>();
     for (UnaryRule rule : unaryRules) {
       String parent = stateIndex.get(rule.parent);
       rule.parent = newStateIndex.addToIndex(parent);
@@ -329,7 +329,7 @@ public abstract class GrammarCompactor {
       }
     }
     // by now, the unaryRules and binaryRules Sets have old untouched and new rules with scores
-    ClassicCounter<String> symbolCounter = new ClassicCounter<>();
+    ClassicCounter<String> symbolCounter = new ClassicCounter<String>();
     if (outputType == RAW_COUNTS) {
       // now we take the sets of rules and turn them into grammars
       // the scores of the rules we are given are actually counts
@@ -369,7 +369,7 @@ public abstract class GrammarCompactor {
 
     ug.purgeRules();
     bg.splitRules();
-    return new Pair<>(ug, bg);
+    return new Pair<UnaryGrammar,BinaryGrammar>(ug, bg);
   }
 
 }

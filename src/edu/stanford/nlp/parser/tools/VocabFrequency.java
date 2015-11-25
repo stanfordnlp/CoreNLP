@@ -74,14 +74,14 @@ public class VocabFrequency {
       }
     }
 
-    Counter<String> vocab = new ClassicCounter<>();
+    Counter<String> vocab = new ClassicCounter<String>();
     for(Tree t : tb) {
       List<Label> yield = t.yield();
       for(Label word : yield)
         vocab.incrementCount(word.value());
     }
 
-    List<String> biggestKeys = new ArrayList<>(vocab.keySet());
+    List<String> biggestKeys = new ArrayList<String>(vocab.keySet());
     Collections.sort(biggestKeys, Counters.toComparatorDescending(vocab));
 
     PrintWriter pw = tlpp.pw();

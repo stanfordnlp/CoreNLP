@@ -24,10 +24,10 @@ import edu.stanford.nlp.util.Pair;
  * @author John Bauer (refactored into a separate training class)
  */
 public class UnknownGTTrainer {
-  ClassicCounter<Pair<String,String>> wtCount = new ClassicCounter<>();
-  ClassicCounter<String> tagCount = new ClassicCounter<>();
-  ClassicCounter<String> r1 = new ClassicCounter<>(); // for each tag, # of words seen once
-  ClassicCounter<String> r0 = new ClassicCounter<>(); // for each tag, # of words not seen
+  ClassicCounter<Pair<String,String>> wtCount = new ClassicCounter<Pair<String,String>>();
+  ClassicCounter<String> tagCount = new ClassicCounter<String>();
+  ClassicCounter<String> r1 = new ClassicCounter<String>(); // for each tag, # of words seen once
+  ClassicCounter<String> r0 = new ClassicCounter<String>(); // for each tag, # of words not seen
   Set<String> seenWords = Generics.newHashSet();
 
   double tokens = 0;
@@ -60,7 +60,7 @@ public class UnknownGTTrainer {
     String tag = tw.tag();
 
     // TaggedWord has crummy equality conditions
-    Pair<String,String> wt = new Pair<>(word, tag);
+    Pair<String,String> wt = new Pair<String,String>(word, tag);
     wtCount.incrementCount(wt, weight);
 
     tagCount.incrementCount(tag, weight);
@@ -84,7 +84,7 @@ public class UnknownGTTrainer {
     /* find # of unseen words for each tag */
     for (String tag : tagCount.keySet()) {
       for (String word : seenWords) {
-        Pair<String,String> wt = new Pair<>(word, tag);
+        Pair<String,String> wt = new Pair<String,String>(word, tag);
         if (!(wtCount.keySet().contains(wt))) {
           r0.incrementCount(tag);
         }

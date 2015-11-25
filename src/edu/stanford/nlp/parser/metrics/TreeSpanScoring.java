@@ -71,7 +71,7 @@ public class TreeSpanScoring {
   }
 
   public static Set<Constituent> simplifyConstituents(TreebankLanguagePack tlp, Set<Constituent> constituents) {
-    Set<Constituent> newConstituents = new HashSet<>();
+    Set<Constituent> newConstituents = new HashSet<Constituent>();
     for (Constituent con : constituents) {
       if (!(con instanceof LabeledConstituent)) {
         throw new AssertionError("Unexpected constituent type " + con.getClass());

@@ -53,14 +53,15 @@ public class ChineseCharacterBasedLexiconTraining {
   protected static final NumberFormat formatter = new DecimalFormat("0.000");
 
   public static void printStats(Collection<Tree> trees, PrintWriter pw) {
-    ClassicCounter<Integer> wordLengthCounter = new ClassicCounter<>();
-    ClassicCounter<TaggedWord> wordCounter = new ClassicCounter<>();
-    ClassicCounter<Symbol> charCounter = new ClassicCounter<>();
+    ClassicCounter<Integer> wordLengthCounter = new ClassicCounter<Integer>();
+    ClassicCounter<TaggedWord> wordCounter = new ClassicCounter<TaggedWord>();
+    ClassicCounter<Symbol> charCounter = new ClassicCounter<Symbol>();
     int counter = 0;
     for (Tree tree : trees) {
       counter++;
       List<TaggedWord> taggedWords = tree.taggedYield();
-      for (TaggedWord taggedWord : taggedWords) {
+      for (int i = 0, size = taggedWords.size(); i < size; i++) {
+        TaggedWord taggedWord = taggedWords.get(i);
         String word = taggedWord.word();
         if (word.equals(Lexicon.BOUNDARY)) {
           continue;
@@ -78,13 +79,13 @@ public class ChineseCharacterBasedLexiconTraining {
     Set<Symbol> singletonChars = Counters.keysBelow(charCounter, 1.5);
     Set<TaggedWord> singletonWords = Counters.keysBelow(wordCounter, 1.5);
 
-    ClassicCounter<String> singletonWordPOSes = new ClassicCounter<>();
+    ClassicCounter<String> singletonWordPOSes = new ClassicCounter<String>();
     for (TaggedWord taggedWord : singletonWords) {
       singletonWordPOSes.incrementCount(taggedWord.tag());
     }
     Distribution<String> singletonWordPOSDist = Distribution.getDistribution(singletonWordPOSes);
 
-    ClassicCounter<Character> singletonCharRads = new ClassicCounter<>();
+    ClassicCounter<Character> singletonCharRads = new ClassicCounter<Character>();
     for (Symbol s : singletonChars) {
       singletonCharRads.incrementCount(Character.valueOf(RadicalMap.getRadical(s.getCh())));
     }
@@ -218,8 +219,8 @@ public class ChineseCharacterBasedLexiconTraining {
     if (argMap.containsKey("-lex")) {
       String[] lexArgs = (argMap.get("-lex"));
       if (lexArgs.length > 1) {
-        Index<String> wordIndex = new HashIndex<>();
-        Index<String> tagIndex = new HashIndex<>();
+        Index<String> wordIndex = new HashIndex<String>();
+        Index<String> tagIndex = new HashIndex<String>();
         lex = ctpp.lex(op, wordIndex, tagIndex);
         MemoryTreebank rawTrainTreebank = op.tlpParams.memoryTreebank();
         FileFilter trainFilt = new NumberRangesFileFilter(lexArgs[1], false);
@@ -229,7 +230,8 @@ public class ChineseCharacterBasedLexiconTraining {
         if (argMap.containsKey("-annotate")) {
           trainTreebank = new MemoryTreebank();
           TreeAnnotator annotator = new TreeAnnotator(ctpp.headFinder(), ctpp, op);
-          for (Tree tree : rawTrainTreebank) {
+          for (Iterator iter = rawTrainTreebank.iterator(); iter.hasNext();) {
+            Tree tree = (Tree) iter.next();
             tree = annotator.transformTree(tree);
             trainTreebank.add(tree);
           }
@@ -284,7 +286,7 @@ public class ChineseCharacterBasedLexiconTraining {
       WordCatEqualityChecker eqcheck = new WordCatEqualityChecker();
       EquivalenceClassEval basicEval = new EquivalenceClassEval(eqclass, eqcheck, "basic");
       EquivalenceClassEval collinsEval = new EquivalenceClassEval(eqclass, eqcheck, "collinized");
-      List<String> evalTypes = new ArrayList<>(3);
+      List<String> evalTypes = new ArrayList<String>(3);
       boolean goodPOS = false;
       if (segmentWords) {
         evalTypes.add(WordCatConstituent.wordType);
@@ -316,8 +318,8 @@ public class ChineseCharacterBasedLexiconTraining {
         List<HasWord> s;
         if (segmentWords) {
           StringBuilder goldCharBuf = new StringBuilder();
-          for (HasWord aGoldSentence : goldSentence) {
-            StringLabel word = (StringLabel) aGoldSentence;
+          for (Iterator<HasWord> wordIter = goldSentence.iterator(); wordIter.hasNext();) {
+            StringLabel word = (StringLabel) wordIter.next();
             goldCharBuf.append(word.value());
           }
           String goldChars = goldCharBuf.toString();

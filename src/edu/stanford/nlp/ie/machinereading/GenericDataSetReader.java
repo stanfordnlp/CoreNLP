@@ -158,7 +158,7 @@ public class GenericDataSetReader {
         for (EntityMention en : entities) {
           //System.out.println("old ner tag for " + en.getExtentString() + " was " + en.getType());
           Span s = en.getExtent();
-          Counter<String> allNertagforSpan = new ClassicCounter<>();
+          Counter<String> allNertagforSpan = new ClassicCounter<String>();
           for (int i = s.start(); i < s.end(); i++) {
             allNertagforSpan.incrementCount(tokens.get(i).ner());
           }
@@ -369,7 +369,7 @@ public class GenericDataSetReader {
     // context, so as to make the parser work better :-)
 
     int approximateness = 0;
-    List<CoreLabel> extentTokens = new ArrayList<>();
+    List<CoreLabel> extentTokens = new ArrayList<CoreLabel>();
     extentTokens.add(initCoreLabel("It"));
     extentTokens.add(initCoreLabel("was"));
     final int ADDED_WORDS = 2;
@@ -473,7 +473,7 @@ public class GenericDataSetReader {
     // no exact match found
     // in this case, we parse the actual extent of the mention
     //
-    List<CoreLabel> extentTokens = new ArrayList<>();
+    List<CoreLabel> extentTokens = new ArrayList<CoreLabel>();
     for (int i = ent.getExtentTokenStart(); i < ent.getExtentTokenEnd(); i++)
       extentTokens.add(tokens.get(i));
 
@@ -503,7 +503,7 @@ public class GenericDataSetReader {
   }
 
   protected Tree parseStrings(List<String> tokens) {
-    List<CoreLabel> labels = new ArrayList<>();
+    List<CoreLabel> labels = new ArrayList<CoreLabel>();
     for (String t : tokens) {
       CoreLabel l = initCoreLabel(t);
       labels.add(l);
@@ -521,7 +521,7 @@ public class GenericDataSetReader {
     sent.set(CoreAnnotations.TokensAnnotation.class, tokens);
     sent.set(ParserAnnotations.ConstraintAnnotation.class, constraints);
     Annotation doc = new Annotation("");
-    List<CoreMap> sents = new ArrayList<>();
+    List<CoreMap> sents = new ArrayList<CoreMap>();
     sents.add(sent);
     doc.set(CoreAnnotations.SentencesAnnotation.class, sents);
     getParser().annotate(doc);

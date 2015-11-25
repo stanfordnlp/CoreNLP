@@ -141,7 +141,7 @@ public abstract class ParsingSystem {
    */
   public Map<String, Double> evaluate(List<CoreMap> sentences, List<DependencyTree> trees,
                                       List<DependencyTree> goldTrees) {
-    Map<String, Double> result = new HashMap<>();
+    Map<String, Double> result = new HashMap<String, Double>();
 
     // We'll skip words which are punctuation. Retrieve tags indicating
     // punctuation in this treebank.

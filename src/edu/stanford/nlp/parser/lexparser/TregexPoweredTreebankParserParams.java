@@ -117,7 +117,7 @@ public abstract class TregexPoweredTreebankParserParams extends AbstractTreebank
       }
 
       Pair<TregexPattern, Function<TregexMatcher, String>> behavior =
-              new Pair<>(compiled, annotation.getValue().second());
+        new Pair<TregexPattern, Function<TregexMatcher, String>>(compiled, annotation.getValue().second());
 
       annotationPatterns.put(annotation.getKey(), behavior);
     }

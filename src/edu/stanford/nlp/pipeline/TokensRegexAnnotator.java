@@ -129,7 +129,7 @@ public class TokensRegexAnnotator implements Annotator {
     }
     List<CoreMap> allMatched;
     if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
-      allMatched = new ArrayList<>();
+      allMatched = new ArrayList<CoreMap>();
       List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
       for (CoreMap sentence : sentences) {
         List<CoreMap> matched = extract(sentence);

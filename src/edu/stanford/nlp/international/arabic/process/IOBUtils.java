@@ -93,7 +93,7 @@ public class IOBUtils {
                                             Character segMarker,
                                             boolean applyRewriteRules,
                                             boolean stripRewrites) {
-    List<CoreLabel> iobList = new ArrayList<>(tokenList.size() * 7 + tokenList.size());
+    List<CoreLabel> iobList = new ArrayList<CoreLabel>(tokenList.size()*7 + tokenList.size());
     final String strSegMarker = String.valueOf(segMarker);
 
     boolean addWhitespace = false;
@@ -101,13 +101,15 @@ public class IOBUtils {
     String lastToken = "";
     String currentWord = "";
     int wordStartIndex = 0;
-    for (CoreLabel cl : tokenList) {
+    for (int i = 0; i < numTokens; ++i) {
       // What type of token is this
+      CoreLabel cl = tokenList.get(i);
+
       if (addWhitespace) {
         fillInWordStatistics(iobList, currentWord, wordStartIndex);
         currentWord = "";
         wordStartIndex = iobList.size() + 1;
-
+        
         iobList.add(createDatum(cl, BoundaryChar, BoundarySymbol));
         final CoreLabel boundaryDatum = iobList.get(iobList.size() - 1);
         boundaryDatum.setIndex(0);
@@ -126,7 +128,7 @@ public class IOBUtils {
 
       } else {
         // Iterate over the characters in the token
-        tokenToDatums(iobList, cl, token, tokType, cl, lastToken, applyRewriteRules, stripRewrites);
+        tokenToDatums(iobList, cl, token, tokType, tokenList.get(i), lastToken, applyRewriteRules, stripRewrites);
         addWhitespace = (tokType == TokenType.BeginMarker || tokType == TokenType.NoMarker);
       }
       currentWord += token;

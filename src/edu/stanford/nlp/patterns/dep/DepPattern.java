@@ -32,15 +32,15 @@ public class DepPattern extends Pattern {
   public DepPattern(Token token, GrammaticalRelation relation)
   {
     super(PatternFactory.PatternType.DEP);
-    this.relations = new ArrayList<>();
-    relations.add(new Pair<>(token, relation));
+    this.relations =  new ArrayList<Pair<Token, GrammaticalRelation>>();
+    relations.add(new Pair<Token, GrammaticalRelation>(token, relation));
     hashCode = this.toString().hashCode();
   }
 
 
   @Override
   public CollectionValuedMap<String, String> getRelevantWords() {
-    CollectionValuedMap<String, String> relwordsThisPat = new CollectionValuedMap<>();
+    CollectionValuedMap<String, String> relwordsThisPat = new CollectionValuedMap<String, String>();
     for(Pair<Token, GrammaticalRelation> r: relations)
       getRelevantWordsBase(r.first(), relwordsThisPat);
     return relwordsThisPat;

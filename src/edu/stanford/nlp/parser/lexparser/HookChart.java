@@ -205,7 +205,7 @@ class HookChart {
     List<V> list = map.get(index);
     if (list == null) {
       // make default size small: many only ever contain 1 or 2 items
-      list = new ArrayList<>(3);
+      list = new ArrayList<V>(3);
       map.put(index, list);
     }
     list.add(item);

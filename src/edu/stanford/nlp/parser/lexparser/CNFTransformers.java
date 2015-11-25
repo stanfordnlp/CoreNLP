@@ -30,7 +30,7 @@ public class CNFTransformers {
         return t.treeFactory().newTreeNode(label, Arrays.asList(transformedChildren));
       }
       Tree tree = t;
-      List<String> conjoinedList = new ArrayList<>();
+      List<String> conjoinedList = new ArrayList<String>();
       while (tree.children().length == 1 && !tree.isPrePreTerminal()) {
         String nodeString = tree.label().value();
         if (!nodeString.startsWith("@")) {

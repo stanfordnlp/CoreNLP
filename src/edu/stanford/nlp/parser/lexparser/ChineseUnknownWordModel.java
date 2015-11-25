@@ -70,7 +70,7 @@ public class ChineseUnknownWordModel extends BaseUnknownWordModel {
                                  Index<String> wordIndex,
                                  Index<String> tagIndex) {
     this(op, lex, wordIndex, tagIndex,
-            new ClassicCounter<>(),
+         new ClassicCounter<IntTaggedWord>(),
          Generics.<Label,ClassicCounter<String>>newHashMap(),
          Generics.<String,Float>newHashMap(),
          false, Generics.<String>newHashSet());
@@ -224,7 +224,7 @@ public class ChineseUnknownWordModel extends BaseUnknownWordModel {
     }
 
     System.out.println("Testing tagged word");
-    ClassicCounter<TaggedWord> c = new ClassicCounter<>();
+    ClassicCounter<TaggedWord> c = new ClassicCounter<TaggedWord>();
     TaggedWord tw1 = new TaggedWord("w", "t");
     c.incrementCount(tw1);
     TaggedWord tw2 = new TaggedWord("w", "t2");

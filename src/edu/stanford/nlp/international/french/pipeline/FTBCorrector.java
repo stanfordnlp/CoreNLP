@@ -38,12 +38,12 @@ public class FTBCorrector implements TreeTransformer {
   }
   
   private List<Pair<TregexPattern, TsurgeonPattern>> loadOps() {
-    List<Pair<TregexPattern,TsurgeonPattern>> ops = new ArrayList<>();
+    List<Pair<TregexPattern,TsurgeonPattern>> ops = new ArrayList<Pair<TregexPattern,TsurgeonPattern>>();
     
     String line = null;
     try {
       BufferedReader br = new BufferedReader(new StringReader(editStr));
-      List<TsurgeonPattern> tsp = new ArrayList<>();
+      List<TsurgeonPattern> tsp = new ArrayList<TsurgeonPattern>();
       while ((line = br.readLine()) != null) {
         if (DEBUG) System.err.print("Pattern is " + line);
         TregexPattern matchPattern = TregexPattern.compile(line);
@@ -56,7 +56,7 @@ public class FTBCorrector implements TreeTransformer {
         }
         if ( ! tsp.isEmpty()) {
           TsurgeonPattern tp = Tsurgeon.collectOperations(tsp);
-          ops.add(new Pair<>(matchPattern, tp));
+          ops.add(new Pair<TregexPattern,TsurgeonPattern>(matchPattern, tp));
         }
       } // while not at end of file
     } catch (IOException ioe) {

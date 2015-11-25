@@ -451,9 +451,9 @@ public class CoreAnnotations {
   /**
    * CoNLL-U dep parsing - span of multiword tokens
    */
-  public static class CoNLLUTokenSpanAnnotation implements CoreAnnotation<IntPair> {
-    public Class<IntPair> getType() {
-      return ErasureUtils.<Class<IntPair>> uncheckedCast(Pair.class);
+  public static class CoNLLUTokenSpanAnnotation implements CoreAnnotation<Pair<Integer,Integer>> {
+    public Class<Pair<Integer,Integer>> getType() {
+      return ErasureUtils.<Class<Pair<Integer,Integer>>> uncheckedCast(Pair.class);
     }
   }
   

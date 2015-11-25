@@ -17,7 +17,7 @@ import java.util.function.Function;
 public class ATBEscaper implements Function<List<HasWord>, List<HasWord>> {
 
   public List<HasWord> apply(List<HasWord> in) {
-    List<HasWord> escaped = new ArrayList<>(in);
+    List<HasWord> escaped = new ArrayList<HasWord>(in);
     for (HasWord word : escaped) {
       word.setWord(ATBTreeUtils.escape(word.word()));
     }

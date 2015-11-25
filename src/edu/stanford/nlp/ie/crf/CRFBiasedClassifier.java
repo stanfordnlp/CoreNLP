@@ -57,12 +57,12 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
   public CRFDatum<List<String>, CRFLabel> makeDatum(List<IN> info, int loc, List<FeatureFactory<IN>> featureFactories) {
 
     pad.set(CoreAnnotations.AnswerAnnotation.class, flags.backgroundSymbol);
-    PaddedList<IN> pInfo = new PaddedList<>(info, pad);
+    PaddedList<IN> pInfo = new PaddedList<IN>(info, pad);
 
-    List<List<String>> features = new ArrayList<>();
+    List<List<String>> features = new ArrayList<List<String>>();
     Collection<Clique> done = Generics.newHashSet();
     for (int i = 0; i < windowSize; i++) {
-      List<String> featuresC = new ArrayList<>();
+      List<String> featuresC = new ArrayList<String>();
       List<Clique> windowCliques = FeatureFactory.getCliques(i, 0);
       windowCliques.removeAll(done);
       done.addAll(windowCliques);
@@ -84,7 +84,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
       labels[i] = classIndex.indexOf(answer);
     }
 
-    return new CRFDatum<>(features, new CRFLabel(labels), null);
+    return new CRFDatum<List<String>, CRFLabel>(features, new CRFLabel(labels), null);
   }
 
   void addBiasFeature() {
@@ -156,7 +156,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
     System.err.println();
 
     Properties props = StringUtils.argsToProperties(args);
-    CRFBiasedClassifier<CoreLabel> crf = new CRFBiasedClassifier<>(props);
+    CRFBiasedClassifier<CoreLabel> crf = new CRFBiasedClassifier<CoreLabel>(props);
     String testFile = crf.flags.testFile;
     String loadPath = crf.flags.loadClassifier;
 

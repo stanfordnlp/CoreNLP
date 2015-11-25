@@ -164,8 +164,8 @@ public class TreePrint {
       dependencyWordFilter = Filters.acceptFilter();
       puncFilter = Filters.acceptFilter();
     } else {
-      dependencyFilter = new Dependencies.DependentPuncTagRejectFilter<>(tlp.punctuationTagRejectFilter());
-      dependencyWordFilter = new Dependencies.DependentPuncWordRejectFilter<>(tlp.punctuationWordRejectFilter());
+      dependencyFilter = new Dependencies.DependentPuncTagRejectFilter<Label, Label, Object>(tlp.punctuationTagRejectFilter());
+      dependencyWordFilter = new Dependencies.DependentPuncWordRejectFilter<Label, Label, Object>(tlp.punctuationWordRejectFilter());
       //Universal dependencies filter punction by tags
       puncFilter = generateOriginalDependencies ? tlp.punctuationWordRejectFilter() : tlp.punctuationTagRejectFilter();
     }
@@ -472,7 +472,7 @@ public class TreePrint {
                                                  CoreLabel.factory());
         indexedTree.indexLeaves();
         Set<Dependency<Label, Label, Object>> depsSet = indexedTree.mapDependencies(dependencyWordFilter, hf);
-        List<Dependency<Label, Label, Object>> sortedDeps = new ArrayList<>(depsSet);
+        List<Dependency<Label, Label, Object>> sortedDeps = new ArrayList<Dependency<Label, Label, Object>>(depsSet);
         Collections.sort(sortedDeps, Dependencies.dependencyIndexComparator());
         pw.println("<dependencies style=\"untyped\">");
         for (Dependency<Label, Label, Object> d : sortedDeps) {
@@ -557,7 +557,8 @@ public class TreePrint {
         List<CoreLabel> tagged = it.taggedLabeledYield();
         List<Dependency<Label, Label, Object>> sortedDeps = getSortedDeps(it, Filters.<Dependency<Label, Label, Object>>acceptFilter());
 
-        for (Dependency<Label, Label, Object> d : sortedDeps) {
+        for (int i = 0; i < sortedDeps.size(); i++) {
+          Dependency<Label, Label, Object> d = sortedDeps.get(i);
           if (!dependencyFilter.test(d)) {
             continue;
           }
@@ -570,7 +571,7 @@ public class TreePrint {
           int depi = dep.index();
           int govi = gov.index();
 
-          CoreLabel w = tagged.get(depi - 1);
+          CoreLabel w = tagged.get(depi-1);
 
           // Used for both course and fine POS tag fields
           String tag = PTBTokenizer.ptbToken2Text(w.tag());
@@ -588,7 +589,7 @@ public class TreePrint {
           }
 
           // The 2007 format has 10 fields
-          pw.printf("%d\t%s\t%s\t%s\t%s\t%s\t%d\t%s\t%s\t%s%n", depi, word, lemma, tag, tag, feats, govi, depRel, pHead, pDepRel);
+          pw.printf("%d\t%s\t%s\t%s\t%s\t%s\t%d\t%s\t%s\t%s%n", depi,word,lemma,tag,tag,feats,govi,depRel,pHead,pDepRel);
         }
         pw.println();
       }
@@ -687,7 +688,7 @@ public class TreePrint {
     if (gsf != null) {
       GrammaticalStructure gs = gsf.newGrammaticalStructure(tree);
       Collection<TypedDependency> deps = gs.typedDependencies(GrammaticalStructure.Extras.NONE);
-      List<Dependency<Label, Label, Object>> sortedDeps = new ArrayList<>();
+      List<Dependency<Label, Label, Object>> sortedDeps = new ArrayList<Dependency<Label, Label, Object>>();
       for (TypedDependency dep : deps) {
         sortedDeps.add(new NamedDependency(dep.gov(), dep.dep(), dep.reln().toString()));
       }
@@ -695,7 +696,7 @@ public class TreePrint {
       return sortedDeps;
     } else {
       Set<Dependency<Label, Label, Object>> depsSet = tree.mapDependencies(filter, hf, "root");
-      List<Dependency<Label, Label, Object>> sortedDeps = new ArrayList<>(depsSet);
+      List<Dependency<Label, Label, Object>> sortedDeps = new ArrayList<Dependency<Label, Label, Object>>(depsSet);
       Collections.sort(sortedDeps, Dependencies.dependencyIndexComparator());
       return sortedDeps;
     }
@@ -937,7 +938,7 @@ public class TreePrint {
     CoreLabel.OutputFormat labelFormat = (includeTags) ? CoreLabel.OutputFormat.VALUE_TAG_INDEX : CoreLabel.OutputFormat.VALUE_INDEX;
     StringBuilder buf = new StringBuilder();
     if (extraSep) {
-      List<TypedDependency> extraDeps = new ArrayList<>();
+      List<TypedDependency> extraDeps =  new ArrayList<TypedDependency>();
       for (TypedDependency td : dependencies) {
         if (td.extra()) {
           extraDeps.add(td);

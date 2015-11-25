@@ -74,7 +74,7 @@ public class GenerateTrees {
 
   Map<String, Counter<List<String>>> nonTerminals = Generics.newHashMap();
   Map<String, Counter<String>> terminals = Generics.newHashMap();
-  List<Pair<TregexPattern, TsurgeonPattern>> tsurgeons = new ArrayList<>();
+  List<Pair<TregexPattern, TsurgeonPattern>> tsurgeons = new ArrayList<Pair<TregexPattern, TsurgeonPattern>>();
 
   Random random = new Random();
   
@@ -135,7 +135,7 @@ public class GenerateTrees {
         case TERMINALS: {
           Counter<String> productions = terminals.get(pieces[0]);
           if (productions == null) {
-            productions = new ClassicCounter<>();
+            productions = new ClassicCounter<String>();
             terminals.put(pieces[0], productions);
           }
           for (int i = 1; i < pieces.length; ++i) {
@@ -146,7 +146,7 @@ public class GenerateTrees {
         case NONTERMINALS: {
           Counter<List<String>> productions = nonTerminals.get(pieces[0]);
           if (productions == null) {
-            productions = new ClassicCounter<>();
+            productions = new ClassicCounter<List<String>>();
             nonTerminals.put(pieces[0], productions);
           }
           String[] sublist = Arrays.copyOfRange(pieces, 1, pieces.length);
@@ -200,7 +200,7 @@ public class GenerateTrees {
       // recursive expansions, then attach them all to a node with
       // the expected state
       List<String> labels = Counters.sample(nonTerminal, random);
-      List<Tree> children = new ArrayList<>();
+      List<Tree> children = new ArrayList<Tree>();
       for (String childLabel : labels) {
         children.add(produceTree(childLabel));
       }

@@ -71,20 +71,6 @@ public class ArrayCoreMapTest extends TestCase {
   /**
    * Test that neither hashCode() nor toString() hang
    */
-  public void testKeySet() {
-    ArrayCoreMap foo = new ArrayCoreMap();
-    foo.set(CoreAnnotations.TextAnnotation.class, "foo");
-    foo.set(CoreAnnotations.PartOfSpeechAnnotation.class, "NN");
-    foo.set(CoreAnnotations.DocIDAnnotation.class, null);
-    assertTrue(foo.keySet().contains(CoreAnnotations.TextAnnotation.class));
-    assertTrue(foo.keySet().contains(CoreAnnotations.PartOfSpeechAnnotation.class));
-    assertTrue(foo.keySet().contains(CoreAnnotations.DocIDAnnotation.class));
-    assertFalse(foo.keySet().contains(CoreAnnotations.TokensAnnotation.class));
-  }
-
-  /**
-   * Test that neither hashCode() nor toString() hang
-   */
   public void testNoHanging() {
     ArrayCoreMap foo = new ArrayCoreMap();
     List<CoreMap> paragraphs = new ArrayList<CoreMap>();

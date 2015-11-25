@@ -279,8 +279,8 @@ public class DVModel implements Serializable {
 
   public void setRulesForTrainingSet(List<Tree> sentences, Map<Tree, byte[]> compressedTrees) {
     TwoDimensionalSet<String, String> binaryRules = TwoDimensionalSet.treeSet();
-    Set<String> unaryRules = new HashSet<>();
-    Set<String> words = new HashSet<>();
+    Set<String> unaryRules = new HashSet<String>();
+    Set<String> words = new HashSet<String>();
     for (Tree sentence : sentences) {
       searchRulesForBatch(binaryRules, unaryRules, words, sentence);
 
@@ -305,8 +305,8 @@ public class DVModel implements Serializable {
    */
   public void filterRulesForBatch(Collection<Tree> trees) {
     TwoDimensionalSet<String, String> binaryRules = TwoDimensionalSet.treeSet();
-    Set<String> unaryRules = new HashSet<>();
-    Set<String> words = new HashSet<>();
+    Set<String> unaryRules = new HashSet<String>();
+    Set<String> words = new HashSet<String>();
     for (Tree tree : trees) {
       searchRulesForBatch(binaryRules, unaryRules, words, tree);
     }
@@ -316,8 +316,8 @@ public class DVModel implements Serializable {
 
   public void filterRulesForBatch(Map<Tree, byte[]> compressedTrees) {
     TwoDimensionalSet<String, String> binaryRules = TwoDimensionalSet.treeSet();
-    Set<String> unaryRules = new HashSet<>();
-    Set<String> words = new HashSet<>();
+    Set<String> unaryRules = new HashSet<String>();
+    Set<String> words = new HashSet<String>();
     for (Map.Entry<Tree, byte[]> entry : compressedTrees.entrySet()) {
       searchRulesForBatch(binaryRules, unaryRules, words, entry.getKey());
 

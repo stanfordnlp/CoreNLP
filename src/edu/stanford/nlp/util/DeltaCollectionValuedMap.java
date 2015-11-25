@@ -228,7 +228,7 @@ public class DeltaCollectionValuedMap<K, V> extends CollectionValuedMap<K, V> {
           }
         };
 
-        Iterator<Map.Entry<K, Collection<V>>> iter1 = new FilteredIterator<>(originalMap.entrySet().iterator(), filter1);
+        Iterator<Map.Entry<K, Collection<V>>> iter1 = new FilteredIterator<Map.Entry<K, Collection<V>>>(originalMap.entrySet().iterator(), filter1);
 
         Predicate<Entry<K, Collection<V>>> filter2 = new Predicate<Entry<K, Collection<V>>>() {
           private static final long serialVersionUID = 1L;
@@ -243,9 +243,9 @@ public class DeltaCollectionValuedMap<K, V> extends CollectionValuedMap<K, V> {
         };
 
 
-        Iterator<Map.Entry<K, Collection<V>>> iter2 = new FilteredIterator<>(deltaMap.entrySet().iterator(), filter2);
+        Iterator<Map.Entry<K, Collection<V>>> iter2 = new FilteredIterator<Map.Entry<K, Collection<V>>>(deltaMap.entrySet().iterator(), filter2);
 
-        return new ConcatenationIterator<>(iter1, iter2);
+        return new ConcatenationIterator<Map.Entry<K, Collection<V>>>(iter1, iter2);
       }
 
       @Override

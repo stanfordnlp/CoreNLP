@@ -59,18 +59,18 @@ public class CRFLabel implements Serializable {
   }
 
   public <E> String toString(Index<E> classIndex) {
-    List<E> l = new ArrayList<>();
-    for (int aLabel : label) {
-      l.add(classIndex.get(aLabel));
+    List<E> l = new ArrayList<E>();
+    for (int i = 0; i < label.length; i++) {
+      l.add(classIndex.get(label[i]));
     }
     return l.toString();
   }
 
   @Override
   public String toString() {
-    List<Integer> l = new ArrayList<>();
-    for (int aLabel : label) {
-      l.add(Integer.valueOf(aLabel));
+    List<Integer> l = new ArrayList<Integer>();
+    for (int i = 0; i < label.length; i++) {
+      l.add(Integer.valueOf(label[i]));
     }
     return l.toString();
   }
@@ -79,9 +79,9 @@ public class CRFLabel implements Serializable {
   public int hashCode() {
     if (hashCode < 0) {
       hashCode = 0;
-      for (int aLabel : label) {
+      for (int i = 0; i < label.length; i++) {
         hashCode *= maxNumClasses;
-        hashCode += aLabel;
+        hashCode += label[i];
       }
     }
     return hashCode;

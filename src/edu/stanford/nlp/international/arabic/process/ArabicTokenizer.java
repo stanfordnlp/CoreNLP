@@ -54,7 +54,7 @@ public class ArabicTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   }
 
   public static ArabicTokenizer<CoreLabel> newArabicTokenizer(Reader r, Properties lexerProperties) {
-    return new ArabicTokenizer<>(r, new CoreLabelTokenFactory(), lexerProperties);
+    return new ArabicTokenizer<CoreLabel>(r, new CoreLabelTokenFactory(), lexerProperties);
   }
 
   public ArabicTokenizer(Reader r, LexedTokenFactory<T> tf, Properties lexerProperties) {
@@ -89,7 +89,7 @@ public class ArabicTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     protected Properties lexerProperties = new Properties();
 
     public static TokenizerFactory<CoreLabel> newTokenizerFactory() {
-      return new ArabicTokenizerFactory<>(new CoreLabelTokenFactory());
+      return new ArabicTokenizerFactory<CoreLabel>(new CoreLabelTokenFactory());
     }
 
     private ArabicTokenizerFactory(LexedTokenFactory<T> factory) {
@@ -103,7 +103,7 @@ public class ArabicTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
     @Override
     public Tokenizer<T> getTokenizer(Reader r) {
-      return new ArabicTokenizer<>(r, factory, lexerProperties);
+      return new ArabicTokenizer<T>(r, factory, lexerProperties);
     }
 
     /**

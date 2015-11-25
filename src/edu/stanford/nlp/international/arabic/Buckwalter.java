@@ -139,7 +139,7 @@ public class Buckwalter implements SerializableFunction<String,String> {
       b2uMap.put(charB, charU);
     }
 
-    if (DEBUG) unmappable = new ClassicCounter<>();
+    if (DEBUG) unmappable = new ClassicCounter<String>();
   }
 
   public Buckwalter(boolean unicodeToBuckwalter) {

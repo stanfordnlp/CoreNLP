@@ -26,17 +26,19 @@
 
 package edu.stanford.nlp.parser.lexparser;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Predicate;
-
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.trees.*;
+
+import java.util.function.Predicate;
+
 import edu.stanford.nlp.util.Index;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * Parser parameters for the Penn English Treebank (WSJ, Brown, Switchboard).
@@ -83,7 +85,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
           if (kids.length == 1 &&
               tlp.basicCategory(kids[0].value()).equals("NP")) {
             // go through kidkids here so as to keep any annotation on me.
-            List<Tree> kidkids = new ArrayList<>();
+            List<Tree> kidkids = new ArrayList<Tree>();
             for (int cNum = 0; cNum < kids[0].children().length; cNum++) {
               Tree child = kids[0].children()[cNum];
               Tree newChild = transformTree(child);
@@ -100,7 +102,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
         if (englishTrain.splitPoss == 2 &&
             s.equals("POSSP")) {
           Tree[] kids = tree.children();
-          List<Tree> newkids = new ArrayList<>();
+          List<Tree> newkids = new ArrayList<Tree>();
           for (int j = 0; j < kids.length - 1; j++) {
             for (int cNum = 0; cNum < kids[j].children().length; cNum++) {
               Tree child = kids[0].children()[cNum];
@@ -122,7 +124,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
           tag = tlp.basicCategory(tag);
         }
       }
-      List<Tree> children = new ArrayList<>();
+      List<Tree> children = new ArrayList<Tree>();
       for (int cNum = 0; cNum < tree.numChildren(); cNum++) {
         Tree child = tree.getChild(cNum);
         Tree newChild = transformTree(child);
@@ -150,7 +152,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
     super(new PennTreebankLanguagePack());
     headFinder = new ModCollinsHeadFinder(tlp);
   }
-
+    
   private HeadFinder headFinder;
 
   private EnglishTrain englishTrain = new EnglishTrain();
@@ -235,6 +237,16 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
   @Override
   public TreebankLanguagePack treebankLanguagePack() {
     return tlp;
+  }
+
+  /**
+   * The PrintWriter used to print output to OutputStream o. It's the
+   * responsibility of pw to deal properly with character encodings
+   * for the relevant treebank.
+   */
+  @Override
+  public PrintWriter pw(OutputStream o) {
+    return new PrintWriter(o, true);
   }
 
   @Override
@@ -1813,14 +1825,14 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
           List<Tree> oldKids = t.getChildrenAsList();
           // could I use subList() here or is a true copy better?
           // lose the last child
-          List<Tree> newKids = new ArrayList<>();
+          List<Tree> newKids = new ArrayList<Tree>();
           for (int i = 0; i < oldKids.size() - 1; i++) {
             newKids.add(oldKids.get(i));
           }
           t.setChildren(newKids);
           cat = changeBaseCat(cat, "POSSP");
           Label labelTop = new CategoryWordTag(cat, word, tag);
-          List<Tree> newerChildren = new ArrayList<>(2);
+          List<Tree> newerChildren = new ArrayList<Tree>(2);
           newerChildren.add(t);
           // add POS dtr
           Tree last = oldKids.get(oldKids.size() - 1);
@@ -1844,7 +1856,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
             Label labelBot = new CategoryWordTag("NP^NP-B", word, tag);
             t.setLabel(labelBot);
             Label labelTop = new CategoryWordTag(cat, word, tag);
-            List<Tree> newerChildren = new ArrayList<>(1);
+            List<Tree> newerChildren = new ArrayList<Tree>(1);
             newerChildren.add(t);
             return categoryWordTagTreeFactory.newTreeNode(labelTop, newerChildren);
           }
@@ -2207,8 +2219,8 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
       try {
         headFinder = (HeadFinder) Class.forName(args[i + 1]).newInstance();
       } catch (Exception e) {
-        System.err.println("Error: Unable to load HeadFinder; default HeadFinder will be used.");
-        e.printStackTrace();
+        System.err.println(e);
+        System.err.println("Warning: Default HeadFinder will be used.");
       }
       i += 2;
     } else if (args[i].equalsIgnoreCase("-makeCopulaHead")) {
@@ -2318,7 +2330,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
   /** {@inheritDoc} */
   @Override
   public List<Word> defaultTestSentence() {
-    List<Word> ret = new ArrayList<>();
+    List<Word> ret = new ArrayList<Word>();
     String[] sent = {"This", "is", "just", "a", "test", "."};
     for (String str : sent) {
       ret.add(new Word(str));

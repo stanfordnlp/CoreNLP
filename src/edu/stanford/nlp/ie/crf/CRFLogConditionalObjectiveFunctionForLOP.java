@@ -180,7 +180,8 @@ public class CRFLogConditionalObjectiveFunctionForLOP extends AbstractCachingDif
           for (int lopIter = 0; lopIter < numLopExpert; lopIter++) {
             double[][] ehatOfIter = Ehat[lopIter];
             Set<Integer> indicesSet = featureIndicesSetArray.get(lopIter);
-            for (int featureIdx : docDataIJ) { // k iterates over features
+            for (int k = 0; k < docDataIJ.length; k++) { // k iterates over features
+              int featureIdx = docDataIJ[k];
               if (indicesSet.contains(featureIdx)) {
                 ehatOfIter[featureIdx][observedLabelIndex]++;
               }
@@ -232,7 +233,8 @@ public class CRFLogConditionalObjectiveFunctionForLOP extends AbstractCachingDif
           for (int lopIter = 0; lopIter < numLopExpert; lopIter++) {
             double[] sumOfELPmijIter = new double[labelIndex.size()]; 
             Set<Integer> indicesSet = featureIndicesSetArray.get(lopIter);
-            for (int featureIdx : docDataIJ) { // k iterates over features
+            for (int k = 0; k < docDataIJ.length; k++) { // k iterates over features
+              int featureIdx = docDataIJ[k];
               if (indicesSet.contains(featureIdx)) {
                 sumOfObservedLogPotential[lopIter] += learnedLopExpertWeights2D[lopIter][featureIdx][observedLabelIndex];
                 // sum over potential of this clique over all possible labels, used later in calculating expected counts

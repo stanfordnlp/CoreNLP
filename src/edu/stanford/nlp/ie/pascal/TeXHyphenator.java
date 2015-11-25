@@ -46,11 +46,11 @@ public class TeXHyphenator {
       int [] pattern = new int[linechars.length];
       char [] chars  = new char[linechars.length];
       int c = 0;
-      for (char linechar : linechars) {
-        if (Character.isDigit(linechar)) {
-          pattern[c] = Character.digit(linechar, 10);
+      for( int i = 0; i < linechars.length; ++i) {
+        if( Character.isDigit(linechars[i]) ) {
+          pattern[c] = Character.digit(linechars[i], 10);
         } else {
-          chars[c++] = linechar;
+          chars[c++] = linechars[i];
         }
       }
       char[] shortchars = new char[c];
@@ -65,8 +65,8 @@ public class TeXHyphenator {
 
   public static String toString(int[]i) {
     StringBuffer sb = new StringBuffer();
-    for (int anI : i) {
-      sb.append(anI);
+    for(int j = 0; j < i.length; ++j) {
+      sb.append(i[j]);
     }
     return sb.toString();
   }
@@ -74,12 +74,12 @@ public class TeXHyphenator {
   private void insertHyphPattern(char [] chars, int [] pattern) {
     // find target node, building as we go
     Node cur = head;
-    for (char aChar : chars) {
-      Character curchar = new Character(aChar);
+    for( int c = 0; c < chars.length; ++c) {
+      Character curchar = new Character(chars[c]);
       Node next = (Node) cur.children.get(curchar);
-      if (next == null) {
+      if( next == null ) {
         next = new Node();
-        cur.children.put(curchar, next);
+        cur.children.put( curchar, next );
       }
       cur = next;
     }
@@ -172,13 +172,13 @@ public class TeXHyphenator {
     TeXHyphenator hyphenator = new TeXHyphenator();
     hyphenator.loadDefault();
 
-    for (String arg : args) {
-      char[] chars = arg.toLowerCase().toCharArray();
-      boolean[] breakPoints = hyphenator.findBreakPoints(chars);
-      System.out.println(arg);
+    for( int a = 0; a < args.length; ++a) {
+      char[] chars = args[a].toLowerCase().toCharArray();
+      boolean [] breakPoints = hyphenator.findBreakPoints(chars);
+      System.out.println(args[a]);
       StringBuffer sb = new StringBuffer();
-      for (boolean breakPoint : breakPoints) {
-        if (breakPoint) {
+      for(int i = 0; i < breakPoints.length; ++i) {
+        if( breakPoints[i] ) {
           sb.append("^");
         } else {
           sb.append("-");

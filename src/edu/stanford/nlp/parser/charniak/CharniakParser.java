@@ -124,7 +124,7 @@ public class CharniakParser {
         outFile.delete();
         errFile.delete();
       }
-      return new IterableIterator<>(iter.iterator());
+      return new IterableIterator<List<ScoredObject<Tree>>>(iter.iterator());
     } catch (IOException ex) {
       throw new RuntimeException(ex);
     }
@@ -132,7 +132,7 @@ public class CharniakParser {
 
   public void printSentence(List<? extends HasWord> sentence, String filename)
   {
-    List<List<? extends HasWord>> sentences = new ArrayList<>();
+    List<List<? extends HasWord>> sentences = new ArrayList<List<? extends HasWord>>();
     sentences.add(sentence);
     printSentences(sentences, filename);
   }
@@ -167,7 +167,7 @@ public class CharniakParser {
       //  -K do not tokenize
       //  -N <N> N best parsing
       //  -T <beamsize>
-      List<String> args = new ArrayList<>();
+      List<String> args = new ArrayList<String>();
       args.add(parserExecutable);
       args.add("-l" + maxSentenceLength);
       args.add("-K");

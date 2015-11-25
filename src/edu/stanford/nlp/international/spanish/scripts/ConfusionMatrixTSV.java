@@ -18,7 +18,7 @@ public class ConfusionMatrixTSV {
     }
 
     try {
-      ConfusionMatrix<String> cm = new ConfusionMatrix<>();
+      ConfusionMatrix<String> cm = new ConfusionMatrix<String>();
 
       String answersFile = args[0];
       BufferedReader br = new BufferedReader(

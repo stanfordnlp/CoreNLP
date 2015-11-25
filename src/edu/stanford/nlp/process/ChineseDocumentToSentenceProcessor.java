@@ -68,11 +68,11 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
   public ChineseDocumentToSentenceProcessor(String normalizationTableFile) {
     // this.normalizationTableFile = normalizationTableFile;
     if (normalizationTableFile != null) {
-      normalizationTable = new ArrayList<>();
+      normalizationTable = new ArrayList<Pair<String,String>>();
       for (String line : ObjectBank.getLineIterator(new File(normalizationTableFile), encoding)) {
         Matcher pairMatcher = PAIR_PATTERN.matcher(line);
         if (pairMatcher.find()) {
-          normalizationTable.add(new Pair<>(pairMatcher.group(1), pairMatcher.group(2)));
+          normalizationTable.add(new Pair<String,String>(pairMatcher.group(1),pairMatcher.group(2)));
         } else {
           System.err.println("Didn't match: "+line);
         }
@@ -255,7 +255,7 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
   public static List<String> fromHTML(String inputString) throws IOException {
     //HTMLParser parser = new HTMLParser();
     //return fromPlainText(parser.parse(inputString));
-    List<String> ans = new ArrayList<>();
+    List<String> ans = new ArrayList<String>();
     MyHTMLParser parser = new MyHTMLParser();
     List<String> sents = parser.parse(inputString);
     for (String s : sents) {
@@ -289,7 +289,7 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
 
     char[] content = contentString.toCharArray();
     boolean sentenceEnd = false;
-    List<String> sentenceList = new ArrayList<>();
+    List<String> sentenceList = new ArrayList<String>();
 
     int lastCh = -1;
     for (Character c : content) {
@@ -458,7 +458,7 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
       text = text.replaceAll("<\\?","<");
       StringReader r = new StringReader(text);
       textBuffer = new StringBuffer(200);
-      sentences = new ArrayList<>();
+      sentences = new ArrayList<String>();
       new ParserDelegator().parse(r, this, true);
       return sentences;
     }

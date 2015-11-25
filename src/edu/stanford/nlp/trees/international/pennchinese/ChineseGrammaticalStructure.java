@@ -59,7 +59,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
   }
 
   public ChineseGrammaticalStructure(Tree t, Predicate<String> puncFilter, HeadFinder hf) {
-    super(t, ChineseGrammaticalRelations.values(), ChineseGrammaticalRelations.valuesLock(), null, hf, puncFilter, Filters.acceptFilter());
+    super(t, ChineseGrammaticalRelations.values(), hf, puncFilter, Filters.acceptFilter());
   }
 
   /** Used for postprocessing CoNLL X dependencies */
@@ -77,7 +77,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
   }
 
   private static void collapsePrepAndPoss(Collection<TypedDependency> list) {
-    Collection<TypedDependency> newTypedDeps = new ArrayList<>();
+    Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
 
     // Construct a map from words to the set of typed
     // dependencies in which the word appears as governor.

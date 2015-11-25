@@ -18,7 +18,7 @@ public class MLEDependencyGrammarExtractor extends AbstractTreeExtractor<Depende
   protected final Index<String> tagIndex;
 
   /** This is where all dependencies are stored (using full tag space). */
-  protected ClassicCounter<IntDependency> dependencyCounter = new ClassicCounter<>();
+  protected ClassicCounter<IntDependency> dependencyCounter = new ClassicCounter<IntDependency>();
   //private Set dependencies = new HashSet();
 
   protected TreebankLangParserParams tlpParams;

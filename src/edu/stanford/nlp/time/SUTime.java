@@ -79,16 +79,17 @@ public class SUTime {
   private SUTime() {
   }
 
-  public enum TimexType {
+  public static enum TimexType {
     DATE, TIME, DURATION, SET
   }
 
-  public enum TimexMod {
+  public static enum TimexMod {
     BEFORE("<"), AFTER(">"), ON_OR_BEFORE("<="), ON_OR_AFTER("<="), LESS_THAN("<"), MORE_THAN(">"),
     EQUAL_OR_LESS("<="), EQUAL_OR_MORE(">="), START, MID, END, APPROX("~"), EARLY /* GUTIME */, LATE; /* GUTIME */
-    private String symbol;
+    String symbol;
 
-    TimexMod() { }
+    TimexMod() {
+    }
 
     TimexMod(String symbol) {
       this.symbol = symbol;
@@ -99,11 +100,11 @@ public class SUTime {
     }
   }
 
-  public enum TimexDocFunc {
+  public static enum TimexDocFunc {
     CREATION_TIME, EXPIRATION_TIME, MODIFICATION_TIME, PUBLICATION_TIME, RELEASE_TIME, RECEPTION_TIME, NONE
   }
 
-  public enum TimexAttr {
+  public static enum TimexAttr {
     type, value, tid, beginPoint, endPoint, quant, freq, mod, anchorTimeID, comment, valueFromFunction, temporalFunction, functionInDocument
   }
 
@@ -146,15 +147,15 @@ public class SUTime {
 
   protected static final int timexVersion = 3;
 
-  public static SUTime.Time getCurrentTime() {
+  public static final SUTime.Time getCurrentTime() {
     return new GroundedTime(new DateTime());
   }
 
   // Index of time id to temporal object
   public static class TimeIndex {
-    Index<TimeExpression> temporalExprIndex = new HashIndex<>();
-    Index<Temporal> temporalIndex = new HashIndex<>();
-    Index<Temporal> temporalFuncIndex = new HashIndex<>();
+    Index<TimeExpression> temporalExprIndex = new HashIndex<TimeExpression>();
+    Index<Temporal> temporalIndex = new HashIndex<Temporal>();
+    Index<Temporal> temporalFuncIndex = new HashIndex<Temporal>();
 
     SUTime.Time docDate;
 
@@ -245,7 +246,7 @@ public class SUTime {
   }
 
   /**
-   * Basic temporal object.
+   * Basic temporal object
    *
    * <p>
    * There are 4 main types of temporal objects
@@ -266,7 +267,7 @@ public class SUTime {
    * <li>TemporalSet - A set of temporal objects
    *  <ul><li>ExplicitTemporalSet - Explicit set of temporals (not used)
    *         <br>Ex: Tuesday 1-2pm, Wednesday night</li>
-   *      <li>PeriodicTemporalSet - Reoccurring times
+   *      <li>PeriodicTemporalSet - Reoccuring times
    *         <br>Ex: Every Tuesday</li>
    *  </ul>
    * </li>
@@ -386,7 +387,7 @@ public class SUTime {
     }
 
     public Map<String, String> getTimexAttributes(TimeIndex timeIndex) {
-      Map<String, String> map = new LinkedHashMap<>();
+      Map<String, String> map = new LinkedHashMap<String, String>();
       map.put(TimexAttr.tid.name(), getTidString(timeIndex));
       // NOTE: GUTime used "VAL" instead of TIMEX3 standard "value"
       // NOTE: attributes are case sensitive, GUTIME used mostly upper case
@@ -744,7 +745,7 @@ public class SUTime {
   public static final RelativeTime TODAY = new RelativeTime(TemporalOp.THIS, SUTime.DAY);
   public static final RelativeTime TONIGHT = new RelativeTime(TemporalOp.THIS, SUTime.NIGHT);
 
-  public enum TimeUnit {
+  public static enum TimeUnit {
     // Basic time units
     MILLIS(SUTime.MILLIS), SECOND(SUTime.SECOND), MINUTE(SUTime.MINUTE), HOUR(SUTime.HOUR),
     DAY(SUTime.DAY), WEEK(SUTime.WEEK), MONTH(SUTime.MONTH), QUARTER(SUTime.QUARTER), HALFYEAR(SUTime.HALFYEAR),
@@ -774,7 +775,7 @@ public class SUTime {
     }
   }
 
-  public enum StandardTemporalType {
+  public static enum StandardTemporalType {
     REFDATE(TimexType.DATE),
     REFTIME(TimexType.TIME),
  /*   MILLIS(TimexType.TIME, TimeUnit.MILLIS),
@@ -914,7 +915,7 @@ public class SUTime {
   // lookup of temporal from string
   // creating durations, dates
   // public interface TemporalOp extends Function<Temporal,Temporal>();
-  public enum TemporalOp {
+  public static enum TemporalOp {
     // For durations: possible interpretation of next/prev:
     // next month, next week
     // NEXT: on Thursday, next week = week starting on next monday
@@ -1784,7 +1785,7 @@ public class SUTime {
       return bd;
     }
 
-    private static Range getIntersectedRange(CompositePartialTime cpt, Range r, Duration d) {
+    private Range getIntersectedRange(CompositePartialTime cpt, Range r, Duration d) {
       Time beginTime = r.beginTime();
       Time endTime = r.endTime();
       if (beginTime != TIME_UNKNOWN && endTime != TIME_UNKNOWN) {
@@ -1808,7 +1809,7 @@ public class SUTime {
         }
         return new Range(t1, t2, d);
       } else {
-        throw new RuntimeException("Unsupported range: " + r);
+        throw new RuntimeException("Unsupport range: " + r);
       }
     }
 
@@ -2138,7 +2139,7 @@ public class SUTime {
   }
 
   /**
-   * Inexact time, not sure when this is, but have some guesses.
+   * Inexact time, not sure when this is, but have some guesses
    */
   public static class InexactTime extends Time {
     Time base; // best guess
@@ -3023,7 +3024,7 @@ public class SUTime {
       if (JodaTimeUtils.hasField(base, DateTimeFieldType.year())
          && JodaTimeUtils.hasField(base, DateTimeFieldType.monthOfYear())
          && JodaTimeUtils.hasField(base, DateTimeFieldType.dayOfWeek())) {
-        List<Temporal> list = new ArrayList<>();
+        List<Temporal> list = new ArrayList<Temporal>();
         Partial pt = new Partial();
         pt = JodaTimeUtils.setField(pt, DateTimeFieldType.year(), base.get(DateTimeFieldType.year()));
         pt = JodaTimeUtils.setField(pt, DateTimeFieldType.monthOfYear(), base.get(DateTimeFieldType.monthOfYear()));
@@ -4724,7 +4725,7 @@ public class SUTime {
 
     @Override
     public PeriodicTemporalSet setTimeZone(DateTimeZone tz) {
-      return new PeriodicTemporalSet(this, Temporal.setTimeZone(base, tz), periodicity,
+      return new PeriodicTemporalSet(this, (Time) Temporal.setTimeZone(base, tz), periodicity,
               (Range) Temporal.setTimeZone(occursIn, tz), quant, freq);
     }
 

@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public class Entity {
 
-  private Map<String, List<EntityMention>> entityToEntityMentions = new HashMap<>();
+  private Map<String, List<EntityMention>> entityToEntityMentions = new HashMap<String, List<EntityMention>>();
 
   /**
    * 
@@ -24,7 +24,7 @@ public class Entity {
   public void addEntity(String entity, EntityMention em) {
     List<EntityMention> mentions = this.entityToEntityMentions.get(entity);
     if (mentions == null) {
-      mentions = new ArrayList<>();
+      mentions = new ArrayList<EntityMention>();
       this.entityToEntityMentions.put(entity, mentions);
     }
     mentions.add(em);

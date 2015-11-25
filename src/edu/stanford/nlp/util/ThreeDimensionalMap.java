@@ -63,7 +63,7 @@ public class ThreeDimensionalMap<K1, K2, K3, V> implements Serializable {
   public TwoDimensionalMap<K2, K3, V> getTwoDimensionalMap(K1 key1) {
     TwoDimensionalMap<K2, K3, V> m = map.get(key1);
     if (m == null) {
-      m = new TwoDimensionalMap<>();
+      m = new TwoDimensionalMap<K2, K3, V>();
       map.put(key1, m);
     }
     return m;

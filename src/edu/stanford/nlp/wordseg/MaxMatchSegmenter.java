@@ -94,11 +94,11 @@ public class MaxMatchSegmenter implements WordSegmenter {
     String postSentString = ChineseStringUtils.postProcessingAnswerCTB(postProcessedSent.toString(),false,false);
     printlnErr("Sighan2005 output: "+postSentString);
     String[] postSentArray = postSentString.split("\\s+");
-    ArrayList<Word> postSent = new ArrayList<>();
+    ArrayList<Word> postSent = new ArrayList<Word>();
     for(String w : postSentArray) {
       postSent.add(new Word(w));
     }
-    return new ArrayList<>(postSent);
+    return new ArrayList<HasWord>(postSent);
   }
 
   /**
@@ -147,10 +147,10 @@ public class MaxMatchSegmenter implements WordSegmenter {
     edgesNb = 0;
     len = s.length();
     // Initialize word lattice:
-    states = new ArrayList<>();
-    lattice = new DFSA<>("wordLattice");
+    states = new ArrayList<DFSAState<Word, Integer>>();
+    lattice = new DFSA<Word, Integer>("wordLattice");
     for (int i=0; i<=s.length(); ++i)
-      states.add(new DFSAState<>(i, lattice));
+      states.add(new DFSAState<Word, Integer>(i, lattice));
     // Set start and accepting state:
     lattice.setInitialState(states.get(0));
     states.get(len).setAccepting(true);
@@ -164,7 +164,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
         if (isInDict || isOneChar) {
           double cost = isInDict ? 1 : 100;
           DFSATransition<Word, Integer> trans =
-                  new DFSATransition<>(null, states.get(start), states.get(end), new Word(str), null, cost);
+            new DFSATransition<Word, Integer>(null, states.get(start), states.get(end), new Word(str), null, cost);
           //System.err.println("start="+start+" end="+end+" word="+str);
           states.get(start).addTransition(trans);
           ++edgesNb;
@@ -196,10 +196,10 @@ public class MaxMatchSegmenter implements WordSegmenter {
   public ArrayList<Word> segmentWords(MatchHeuristic h) throws UnsupportedOperationException {
     if(lattice==null || len < 0)
       throw new UnsupportedOperationException("segmentWords must be run first");
-    List<Word> segmentedWords = new ArrayList<>();
+    List<Word> segmentedWords = new ArrayList<Word>();
     // Init dynamic programming:
     double[] costs = new double[len+1];
-    List<DFSATransition<Word, Integer>> bptrs = new ArrayList<>();
+    List<DFSATransition<Word, Integer>> bptrs = new ArrayList<DFSATransition<Word, Integer>>();
     for (int i = 0; i < len + 1; ++i) {
       bptrs.add(null);
     }
@@ -249,7 +249,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
       double density = edgesNb*1.0/segmentedWords.size();
       System.err.println("latticeDensity: "+density+" cost: "+costs[len]);
     }
-    return new ArrayList<>(segmentedWords);
+    return new ArrayList<Word>(segmentedWords);
   }
 
   /**
@@ -263,7 +263,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
    * @return Segmented sentence.
    */
   public ArrayList<Word> greedilySegmentWords(String s) {
-    List<Word> segmentedWords = new ArrayList<>();
+    List<Word> segmentedWords = new ArrayList<Word>();
     int length = s.length();
     int start = 0;
     while (start < length) {
@@ -284,7 +284,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
         start = end;
       }
     }
-    return new ArrayList<>(segmentedWords);
+    return new ArrayList<Word>(segmentedWords);
   }
 
   public static void main(String[] args) {
@@ -343,7 +343,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
   }
 
   private static ArrayList<Word> postProcessSentence(ArrayList<Word> sent) {
-    ArrayList<Word> newSent = new ArrayList<>();
+    ArrayList<Word> newSent = new ArrayList<Word>();
     for(Word word : sent) {
       if(newSent.size() > 0) {
         String prevWord = newSent.get(newSent.size()-1).toString();
@@ -360,7 +360,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
       }
       newSent.add(word);
     }
-    return new ArrayList<>(newSent);
+    return new ArrayList<Word>(newSent);
   }
 
   private static boolean startsWithChinese(String str) { return chineseStartChars.matcher(str).matches(); }

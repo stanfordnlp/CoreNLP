@@ -368,7 +368,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         redoTags(tree, tagger);
       }
     } else {
-      MulticoreWrapper<Tree, Tree> wrapper = new MulticoreWrapper<>(nThreads, new RetagProcessor(tagger));
+      MulticoreWrapper<Tree, Tree> wrapper = new MulticoreWrapper<Tree, Tree>(nThreads, new RetagProcessor(tagger));
       for (Tree tree : trees) {
         wrapper.put(tree);
       }
@@ -443,7 +443,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
 
     Timing transitionTimer = new Timing();
     List<List<Transition>> transitionLists = CreateTransitionSequence.createTransitionSequences(binarizedTrees, op.compoundUnaries, rootStates, rootOnlyStates);
-    Index<Transition> transitionIndex = new HashIndex<>();
+    Index<Transition> transitionIndex = new HashIndex<Transition>();
     for (List<Transition> transitions : transitionLists) {
       transitionIndex.addAll(transitions);
     }

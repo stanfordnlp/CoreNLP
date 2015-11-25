@@ -45,7 +45,7 @@ public class CoordinationPattern extends SemgrexPattern {
   public void addRelnToNodeCoord(SemgrexPattern child) {
     if (isNodeCoord) {
       for (SemgrexPattern c : children) {
-        List<SemgrexPattern> newChildren = new ArrayList<>();
+        List<SemgrexPattern> newChildren = new ArrayList<SemgrexPattern>();
         newChildren.addAll(c.getChildren());
         newChildren.add(child);
         c.setChild(new CoordinationPattern(false, newChildren, true));
@@ -82,7 +82,8 @@ public class CoordinationPattern extends SemgrexPattern {
   public String toString(boolean hasPrecedence) {
     StringBuilder sb = new StringBuilder();
     if (isConj) {
-      for (SemgrexPattern node : children) {
+      for (Iterator<SemgrexPattern> iter = children.iterator(); iter.hasNext();) {
+        SemgrexPattern node = iter.next();
         sb.append(node.toString());
       }
     } else {
@@ -155,8 +156,8 @@ public class CoordinationPattern extends SemgrexPattern {
     @Override
     void resetChildIter() {
       currChild = 0;
-      for (SemgrexMatcher aChildren : children) {
-        aChildren.resetChildIter();
+      for (int i = 0; i < children.length; i++) {
+        children[i].resetChildIter();
       }
       nextNodeMatch = null;
     }
@@ -165,8 +166,8 @@ public class CoordinationPattern extends SemgrexPattern {
     void resetChildIter(IndexedWord node) {
       // this.tree = node;
       currChild = 0;
-      for (SemgrexMatcher aChildren : children) {
-        aChildren.resetChildIter(node);
+      for (int i = 0; i < children.length; i++) {
+        children[i].resetChildIter(node);
       }
     }
 

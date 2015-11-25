@@ -98,7 +98,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
           paths.add(path);
         }
       }
-      loadClassifiers(p, paths);
+      loadClassifiers(paths);
     }
 
     //
@@ -107,7 +107,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     else if((loadPath1 = p.getProperty("loadClassifier")) != null && (loadPath2 = p.getProperty("loadAuxClassifier")) != null){
       paths.add(loadPath1);
       paths.add(loadPath2);
-      loadClassifiers(p, paths);
+      loadClassifiers(paths);
     }
 
     //
@@ -116,7 +116,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     else {
       paths.add(DefaultPaths.DEFAULT_NER_THREECLASS_MODEL);
       paths.add(DefaultPaths.DEFAULT_NER_MUC_MODEL);
-      loadClassifiers(p, paths);
+      loadClassifiers(paths);
     }
     this.initLoadPaths = new ArrayList<>(paths);
     this.initProps = p;
@@ -134,7 +134,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     super(props);
     this.combinationMode = combinationMode;
     List<String> paths = new ArrayList<>(Arrays.asList(loadPaths));
-    loadClassifiers(props, paths);
+    loadClassifiers(paths);
     this.initLoadPaths = new ArrayList<>(paths);
     this.initProps = props;
   }
@@ -204,18 +204,18 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     // read in the base classifiers
     Integer numClassifiers = ois.readInt();
     // set up the list of base classifiers
-    this.baseClassifiers = new ArrayList<>();
+    this.baseClassifiers = new ArrayList<AbstractSequenceClassifier<IN>>();
     int i = 0;
     while (i < numClassifiers) {
       try {
         System.err.println("loading CRF...");
-        CRFClassifier newCRF = ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(ois, props));
+        CRFClassifier newCRF = ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(ois));
         baseClassifiers.add(newCRF);
         i++;
       } catch (Exception e) {
         try {
           System.err.println("loading CMM...");
-          CMMClassifier newCMM = ErasureUtils.uncheckedCast(CMMClassifier.getClassifier(ois, props));
+          CMMClassifier newCMM = ErasureUtils.uncheckedCast(CMMClassifier.getClassifier(ois));
           baseClassifiers.add(newCMM);
           i++;
         } catch (Exception ex) {
@@ -256,10 +256,10 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     }
   }
 
-  private void loadClassifiers(Properties props, List<String> paths) throws IOException {
-    baseClassifiers = new ArrayList<>();
+  private void loadClassifiers(List<String> paths) throws IOException {
+    baseClassifiers = new ArrayList<AbstractSequenceClassifier<IN>>();
     for(String path: paths){
-      AbstractSequenceClassifier<IN> cls = loadClassifierFromPath(props, path);
+      AbstractSequenceClassifier<IN> cls = loadClassifierFromPath(path);
       baseClassifiers.add(cls);
       if(DEBUG){
         System.err.printf("Successfully loaded classifier #%d from %s.%n", baseClassifiers.size(), path);
@@ -271,11 +271,11 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   }
 
 
-  public static <INN extends CoreMap & HasWord> AbstractSequenceClassifier<INN> loadClassifierFromPath(Properties props, String path)
+  public static <INN extends CoreMap & HasWord> AbstractSequenceClassifier<INN> loadClassifierFromPath(String path)
       throws IOException {
     //try loading as a CRFClassifier
     try {
-      return ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(path, props));
+       return ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(path));
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -319,7 +319,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     String background = baseClassifiers.get(0).flags.backgroundSymbol;
 
     // baseLabels.get(i) points to the labels assigned by baseClassifiers.get(i)
-    List<Set<String>> baseLabels = new ArrayList<>();
+    List<Set<String>> baseLabels = new ArrayList<Set<String>>();
     Set<String> seenLabels = Generics.newHashSet();
     for (AbstractSequenceClassifier<? extends CoreMap> baseClassifier : baseClassifiers) {
       Set<String> labs = baseClassifier.labels();
@@ -380,7 +380,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     boolean insideAuxTag = false;
     boolean auxTagValid = true;
     String prevAnswer = background;
-    Collection<INN> constituents = new ArrayList<>();
+    Collection<INN> constituents = new ArrayList<INN>();
 
     Iterator<INN> auxIterator = auxDocument.listIterator();
 
@@ -400,7 +400,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
             }
           }
           auxTagValid = true;
-          constituents = new ArrayList<>();
+          constituents = new ArrayList<INN>();
         }
         insideAuxTag = true;
         if (insideMainTag) { auxTagValid = false; }
@@ -413,7 +413,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
               wi.set(CoreAnnotations.AnswerAnnotation.class, prevAnswer);
             }
           }
-          constituents = new ArrayList<>();
+          constituents = new ArrayList<INN>();
         }
         insideAuxTag=false;
         auxTagValid = true;
@@ -440,7 +440,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     if (baseClassifiers.isEmpty()) {
       return tokens;
     }
-    List<List<IN>> baseOutputs = new ArrayList<>();
+    List<List<IN>> baseOutputs = new ArrayList<List<IN>>();
 
     // the first base model works in place, modifying the original tokens
     List<IN> output = baseClassifiers.get(0).classifySentence(tokens);
@@ -511,6 +511,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
       // go through baseClassifiers and write each one to disk with CRFClassifier's serialize method
       System.err.println("");
       for (AbstractSequenceClassifier<IN> asc : baseClassifiers) {
+        // TODO: fix situation so that this doesn't have to just be for crf's
         //CRFClassifier crfc = (CRFClassifier) asc;
         //System.err.println("Serializing a base classifier...");
         asc.serializeClassifier(oos);

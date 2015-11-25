@@ -75,15 +75,15 @@ public class LeafAncestorEval {
 
     ((HasIndex) t.label()).setIndex(0);
 
-    final Stack<Tree> treeStack = new Stack<>();
+    final Stack<Tree> treeStack = new Stack<Tree>();
     treeStack.push(t);
 
-    final Stack<CoreLabel> labelStack = new Stack<>();
+    final Stack<CoreLabel> labelStack = new Stack<CoreLabel>();
     CoreLabel rootLabel = new CoreLabel(t.label());
     rootLabel.setIndex(0);
     labelStack.push(rootLabel);
 
-    final List<List<CoreLabel>> lineages = new ArrayList<>();
+    final List<List<CoreLabel>> lineages = new ArrayList<List<CoreLabel>>();
 
     while(!treeStack.isEmpty()) {
       Tree node = treeStack.pop();
@@ -92,7 +92,7 @@ public class LeafAncestorEval {
         labelStack.pop();
 
       if(node.isPreTerminal()) {
-        List<CoreLabel> lin = new ArrayList<>(labelStack);
+        List<CoreLabel> lin = new ArrayList<CoreLabel>(labelStack);
         lineages.add(lin);
 
       } else {
@@ -212,7 +212,7 @@ public class LeafAncestorEval {
     double sentEx = 100.0 * sentExact / sentNum;
 
     if(verbose) {
-      Map<Double,List<CoreLabel>> avgMap = new TreeMap<>();
+      Map<Double,List<CoreLabel>> avgMap = new TreeMap<Double,List<CoreLabel>>();
       for (Map.Entry<List<CoreLabel>, Double> entry : catAvg.entrySet()) {
         double avg = entry.getValue() / catNum.get(entry.getKey());
         if (Double.isNaN(avg)) { avg = -1.0; }

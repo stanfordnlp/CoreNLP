@@ -1,4 +1,4 @@
-package edu.stanford.nlp.trees.ud;
+package edu.stanford.nlp.trees.conllu;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -14,7 +14,6 @@ import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.TypedDependency;
-import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.Pair;
 
 /**
@@ -83,7 +82,7 @@ public class CoNLLUDocumentReader implements
       /* Construct a semantic graph. */
       List<TypedDependency> deps = new ArrayList<>(sorted.size());
 
-      IntPair tokenSpan = null;
+      Pair<Integer,Integer> tokenSpan = null;
       String originalToken = null;
       for (IndexedWord word : sorted) {
         lineNumberCounter++;
@@ -93,7 +92,7 @@ public class CoNLLUDocumentReader implements
           originalToken = word.word();
         } else {
           /* Deal with multiword tokens. */
-          if (tokenSpan != null && tokenSpan.getTarget() >= word.index()) {
+          if (tokenSpan != null && tokenSpan.second >= word.index()) {
             word.setOriginalText(originalToken);
             word.set(CoreAnnotations.CoNLLUTokenSpanAnnotation.class, tokenSpan);
           } else {
@@ -159,7 +158,7 @@ public class CoNLLUDocumentReader implements
         String[] span = bits[0].split("-");
         Integer start = Integer.parseInt(span[0]);
         Integer end = Integer.parseInt(span[1]);
-        word.set(CoreAnnotations.CoNLLUTokenSpanAnnotation.class, new IntPair(start, end));
+        word.set(CoreAnnotations.CoNLLUTokenSpanAnnotation.class, new Pair<>(start, end));
         word.set(CoreAnnotations.IndexAnnotation.class, start);
       } else {
         word.set(CoreAnnotations.IndexAnnotation.class, Integer.parseInt(bits[0]));
