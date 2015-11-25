@@ -31,7 +31,7 @@ public class KNNClassifierFactory<K, V> {
    * NOTE: l2NormalizeVectors is NOT applied here.
    */
   public KNNClassifier<K,V> train(Collection<RVFDatum<K, V>> instances) {
-    KNNClassifier<K, V> classifier = new KNNClassifier<>(k, weightedVotes, l2NormalizeVectors);
+    KNNClassifier<K, V> classifier = new KNNClassifier<K, V>(k, weightedVotes, l2NormalizeVectors);
     classifier.addInstances(instances);
     return classifier;
   }
@@ -44,15 +44,15 @@ public class KNNClassifierFactory<K, V> {
    * NOTE: if l2NormalizeVectors is T, creates a copy and applies L2Normalize to it.
    */
   public KNNClassifier<K,V> train(Collection<Counter<V>> vectors, Map<V, K> labelMap) {
-    KNNClassifier<K, V> classifier = new KNNClassifier<>(k, weightedVotes, l2NormalizeVectors);
-    Collection<RVFDatum<K, V>> instances = new ArrayList<>();
+    KNNClassifier<K, V> classifier = new KNNClassifier<K, V>(k, weightedVotes, l2NormalizeVectors);
+    Collection<RVFDatum<K, V>> instances = new ArrayList<RVFDatum<K, V>>();
     for (Counter<V> vector : vectors) {
       K label = labelMap.get(vector);
       RVFDatum<K, V> datum;
       if (l2NormalizeVectors) { 
-        datum = new RVFDatum<>(Counters.L2Normalize(new ClassicCounter<>(vector)), label);
+        datum = new RVFDatum<K, V>(Counters.L2Normalize(new ClassicCounter<V>(vector)), label);
       } else {
-        datum = new RVFDatum<>(vector, label);
+        datum = new RVFDatum<K, V>(vector, label);
       }
       instances.add(datum);
     }
@@ -68,15 +68,15 @@ public class KNNClassifierFactory<K, V> {
    * l2Normalize to it.
    */
   public KNNClassifier<K,V> train(CollectionValuedMap<K, Counter<V>> vecBag) {
-    KNNClassifier<K, V> classifier = new KNNClassifier<>(k, weightedVotes, l2NormalizeVectors);
-    Collection<RVFDatum<K, V>> instances = new ArrayList<>();
+    KNNClassifier<K, V> classifier = new KNNClassifier<K, V>(k, weightedVotes, l2NormalizeVectors);
+    Collection<RVFDatum<K, V>> instances = new ArrayList<RVFDatum<K, V>>();
     for (K label : vecBag.keySet()) {
       RVFDatum<K, V> datum;
       for (Counter<V> vector : vecBag.get(label)) {
         if (l2NormalizeVectors) {
-          datum = new RVFDatum<>(Counters.L2Normalize(new ClassicCounter<>(vector)), label);
+          datum = new RVFDatum<K, V>(Counters.L2Normalize(new ClassicCounter<V>(vector)), label);
         }  else {
-         datum = new RVFDatum<>(vector, label);
+         datum = new RVFDatum<K, V>(vector, label);
         }
         instances.add(datum);
       }

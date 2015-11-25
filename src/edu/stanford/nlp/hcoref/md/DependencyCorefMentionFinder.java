@@ -34,8 +34,8 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder {
 
   public DependencyCorefMentionFinder(Properties props) throws ClassNotFoundException, IOException {
     this.lang = CorefProperties.getLanguage(props);
-    mdClassifier = (CorefProperties.isMentionDetectionTraining(props)) ?
-        null : IOUtils.readObjectFromURLOrClasspathOrFileSystem(CorefProperties.getMentionDetectionModel(props));
+    mdClassifier = (CorefProperties.isMentionDetectionTraining(props))? 
+        null : IOUtils.readObjectFromFile(CorefProperties.getPathModel(props, "md"));
   }
 
   public MentionDetectionClassifier mdClassifier = null;
@@ -45,13 +45,13 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder {
    */
   @Override
   public List<List<Mention>> findMentions(Annotation doc, Dictionaries dict, Properties props) {
-    List<List<Mention>> predictedMentions = new ArrayList<>();
+    List<List<Mention>> predictedMentions = new ArrayList<List<Mention>>();
     Set<String> neStrings = Generics.newHashSet();
     List<Set<IntPair>> mentionSpanSetList = Generics.newArrayList();
     List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
     
     for (CoreMap s : sentences) {
-      List<Mention> mentions = new ArrayList<>();
+      List<Mention> mentions = new ArrayList<Mention>();
       predictedMentions.add(mentions);
       Set<IntPair> mentionSpanSet = Generics.newHashSet();
       Set<IntPair> namedEntitySpanSet = Generics.newHashSet();
@@ -150,7 +150,6 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder {
     int beginIdx = npSpan.get(0);
     int endIdx = npSpan.get(1)+1;
     if (",".equals(sent.get(endIdx-1).word())) { endIdx--; } // try not to have span that ends with ,
-    if ("IN".equals(sent.get(beginIdx).tag())) { beginIdx++; }  // try to remove first IN.
     addMention(beginIdx, endIdx, headword, mentions, mentionSpanSet, namedEntitySpanSet, sent, basic, collapsed);
       
     //
@@ -243,7 +242,7 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder {
     IntPair mSpan = new IntPair(beginIdx, endIdx);
     if(!mentionSpanSet.contains(mSpan) && (!insideNE(mSpan, namedEntitySpanSet)) ) {
       int dummyMentionId = -1;
-      Mention m = new Mention(dummyMentionId, beginIdx, endIdx, sent, basic, collapsed, new ArrayList<>(sent.subList(beginIdx, endIdx)));
+      Mention m = new Mention(dummyMentionId, beginIdx, endIdx, sent, basic, collapsed, new ArrayList<CoreLabel>(sent.subList(beginIdx, endIdx)));
       m.headIndex = headword.index()-1;
       m.headWord = sent.get(m.headIndex);
       m.headString = m.headWord.word().toLowerCase(Locale.ENGLISH);
@@ -269,7 +268,7 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder {
     IntPair mSpan = new IntPair(beginIdx, endIdx);
     if(!mentionSpanSet.contains(mSpan) && (!insideNE(mSpan, namedEntitySpanSet)) ) {
       int dummyMentionId = -1;
-      Mention m = new Mention(dummyMentionId, beginIdx, endIdx, sent, basic, collapsed, new ArrayList<>(sent.subList(beginIdx, endIdx)));
+      Mention m = new Mention(dummyMentionId, beginIdx, endIdx, sent, basic, collapsed, new ArrayList<CoreLabel>(sent.subList(beginIdx, endIdx)));
       m.headIndex = headword.index()-1;
       m.headWord = sent.get(m.headIndex);
       m.headString = m.headWord.word().toLowerCase(Locale.ENGLISH);

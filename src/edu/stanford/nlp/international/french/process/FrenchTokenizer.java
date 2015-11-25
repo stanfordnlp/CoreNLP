@@ -133,7 +133,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     protected boolean splitCompoundOption = false;
 
     public static TokenizerFactory<CoreLabel> newTokenizerFactory() {
-      return new FrenchTokenizerFactory<>(new CoreLabelTokenFactory());
+      return new FrenchTokenizerFactory<CoreLabel>(new CoreLabelTokenFactory());
     }
 
     /**
@@ -143,7 +143,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
      * @return A TokenizerFactory that returns Word objects
      */
     public static TokenizerFactory<Word> newWordTokenizerFactory(String options) {
-      return new FrenchTokenizerFactory<>(new WordTokenFactory(), options);
+      return new FrenchTokenizerFactory<Word>(new WordTokenFactory(), options);
     }
 
 
@@ -163,7 +163,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
     @Override
     public Tokenizer<T> getTokenizer(Reader r) {
-      return new FrenchTokenizer<>(r, factory, lexerProperties, splitCompoundOption);
+      return new FrenchTokenizer<T>(r, factory, lexerProperties, splitCompoundOption);
     }
 
     /**
@@ -214,7 +214,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   public static <T extends HasWord> TokenizerFactory<T> factory(LexedTokenFactory<T> factory,
                                                                 String options) {
-    return new FrenchTokenizerFactory<>(factory, options);
+    return new FrenchTokenizerFactory<T>(factory, options);
   }
 
   /**

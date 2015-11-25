@@ -35,7 +35,7 @@ import java.util.List;
  */
 public class NumberRangesFileFilter implements FileFilter {
 
-  private List<Pair<Integer,Integer>> ranges = new ArrayList<>();
+  private List<Pair<Integer,Integer>> ranges = new ArrayList<Pair<Integer,Integer>>();
   private boolean recursively;
 
 
@@ -65,7 +65,7 @@ public class NumberRangesFileFilter implements FileFilter {
           } else {
             high = low;
           }
-          Pair<Integer, Integer> p = new Pair<>(Integer.valueOf(low), Integer.valueOf(high));
+          Pair<Integer, Integer> p = new Pair<Integer, Integer>(Integer.valueOf(low), Integer.valueOf(high));
           this.ranges.add(p);
         }
       }

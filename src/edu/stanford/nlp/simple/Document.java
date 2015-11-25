@@ -1,10 +1,9 @@
 package edu.stanford.nlp.simple;
 
-import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
-import edu.stanford.nlp.hcoref.data.CorefChain;
-import edu.stanford.nlp.hcoref.data.Dictionaries;
+import edu.stanford.nlp.dcoref.CorefChain;
+import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.dcoref.Dictionaries;
 import edu.stanford.nlp.ie.util.RelationTriple;
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
@@ -21,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -163,22 +161,7 @@ public class Document {
   };
 
   /**
-   * The default {@link edu.stanford.nlp.pipeline.MentionAnnotator} implementation
-   */
-  private static Supplier<Annotator> defaultMention = new Supplier<Annotator>() {
-    Annotator impl = null;
-
-    @Override
-    public synchronized Annotator get() {
-      if (impl == null) {
-        impl = AnnotatorFactories.mention(EMPTY_PROPS, backend).create();
-      }
-      return impl;
-    }
-  };
-
-  /**
-   * The default {@link edu.stanford.nlp.pipeline.CorefAnnotator} implementation
+   * The default {@link edu.stanford.nlp.pipeline.DeterministicCorefAnnotator} implementation
    */
   private static Supplier<Annotator> defaultCoref = new Supplier<Annotator>() {
     Annotator impl = null;
@@ -340,120 +323,6 @@ public class Document {
   }
 
   /**
-   * <p>
-   *  Write this annotation as a JSON string.
-   *  Optionally, you can also specify a number of operations to call on the document before
-   *  dumping it to JSON.
-   *  This allows the user to ensure that certain annotations have been computed before the document
-   *  is dumped.
-   *  For example:
-   * </p>
-   *
-   * <pre>{@code
-   *   String json = new Document("Lucy in the sky with diamonds").json(Document::parse, Document::ner);
-   * }</pre>
-   *
-   * <p>
-   *   will create a JSON dump of the document, ensuring that at least the parse tree and ner tags are populated.
-   * </p>
-   *
-   * @param functions The (possibly empty) list of annotations to populate on the document before dumping it
-   *                  to JSON.
-   * @return The JSON String for this document.
-   */
-  @SafeVarargs
-  public final String json(Function<Sentence, Object>... functions) {
-    for (Function<Sentence, Object> f : functions) {
-      f.apply(this.sentence(0));
-    }
-    try {
-      return new JSONOutputter().print(this.asAnnotation());
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
-    }
-  }
-
-  /**
-   * Like the {@link Document@json(Function...)} function, but with minified JSON more suitable
-   * for sending over the wire.
-   *
-   * @param functions The (possibly empty) list of annotations to populate on the document before dumping it
-   *                  to JSON.
-   * @return The JSON String for this document, without unecessary whitespace.
-   *
-   */
-  @SafeVarargs
-  public final String jsonMinified(Function<Sentence, Object>... functions) {
-    for (Function<Sentence, Object> f : functions) {
-      f.apply(this.sentence(0));
-    }
-    try {
-      AnnotationOutputter.Options options = new AnnotationOutputter.Options();
-      options.pretty = false;
-      return new JSONOutputter().print(this.asAnnotation(), options);
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
-    }
-  }
-
-  /**
-   * <p>
-   *  Write this annotation as an XML string.
-   *  Optionally, you can also specify a number of operations to call on the document before
-   *  dumping it to XML.
-   *  This allows the user to ensure that certain annotations have been computed before the document
-   *  is dumped.
-   *  For example:
-   * </p>
-   *
-   * <pre>{@code
-   *   String xml = new Document("Lucy in the sky with diamonds").xml(Document::parse, Document::ner);
-   * }</pre>
-   *
-   * <p>
-   *   will create a XML dump of the document, ensuring that at least the parse tree and ner tags are populated.
-   * </p>
-   *
-   * @param functions The (possibly empty) list of annotations to populate on the document before dumping it
-   *                  to XML.
-   * @return The XML String for this document.
-   */
-  @SafeVarargs
-  public final String xml(Function<Sentence, Object>... functions) {
-    for (Function<Sentence, Object> f : functions) {
-      f.apply(this.sentence(0));
-    }
-    try {
-      return new XMLOutputter().print(this.asAnnotation());
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
-    }
-  }
-
-  /**
-   * Like the {@link Document@xml(Function...)} function, but with minified XML more suitable
-   * for sending over the wire.
-   *
-   * @param functions The (possibly empty) list of annotations to populate on the document before dumping it
-   *                  to XML.
-   * @return The XML String for this document, without unecessary whitespace.
-   *
-   */
-  @SafeVarargs
-  public final String xmlMinified(Function<Sentence, Object>... functions) {
-    for (Function<Sentence, Object> f : functions) {
-      f.apply(this.sentence(0));
-    }
-    try {
-      AnnotationOutputter.Options options = new AnnotationOutputter.Options();
-      options.pretty = false;
-      return new XMLOutputter().print(this.asAnnotation(), options);
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
-    }
-  }
-
-  /**
    * Get the sentences in this document, as a list.
    * @param props The properties to use in the {@link edu.stanford.nlp.pipeline.WordsToSentencesAnnotator}.
    * @return A list of Sentence objects representing the sentences in the document.
@@ -524,13 +393,10 @@ public class Document {
     synchronized (this.impl) {
       if (impl.getCorefChainCount() == 0) {
         // Run prerequisites
-        this.runLemma(props).runNER(props).runDepparse(props);  // default is dependency mention annotator
-        // Run mention
-        Annotator mention = props == EMPTY_PROPS ? defaultMention.get() : AnnotatorFactories.mention(props, backend).create();
+        this.runNER(props).runParse(props);
         // Run coref
         Annotator coref = props == EMPTY_PROPS ? defaultCoref.get() : AnnotatorFactories.coref(props, backend).create();
         Annotation ann = asAnnotation();
-        mention.annotate(ann);
         coref.annotate(ann);
         // Convert to proto
         synchronized (serializer) {

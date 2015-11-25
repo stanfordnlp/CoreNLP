@@ -70,8 +70,8 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
   public int domainDimension() {
     if (domainDimension < 0) {
       domainDimension = 0;
-      for (int aMap : map) {
-        domainDimension += labelIndices.get(aMap).size();
+      for (int i = 0; i < map.length; i++) {
+        domainDimension += labelIndices.get(map[i]).size();
       }
     }
     return domainDimension;
@@ -95,9 +95,9 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
   public float[] to1D(float[][] weights) {
     float[] newWeights = new float[domainDimension()];
     int index = 0;
-    for (float[] weight : weights) {
-      System.arraycopy(weight, 0, newWeights, index, weight.length);
-      index += weight.length;
+    for (int i = 0; i < weights.length; i++) {
+      System.arraycopy(weights[i], 0, newWeights, index, weights[i].length);
+      index += weights[i].length;
     }
     return newWeights;
   }
@@ -368,8 +368,8 @@ public class CRFLogConditionalObjectiveFloatFunction extends AbstractCachingDiff
           Arrays.fill(sums[cl], 0.0f);
           int numClasses = labelIndices.get(cl).size();
           for (int c = 0; c < numClasses; c++) {
-            for (int feature : features) {
-              sums[cl][c] += weights[feature][c];
+            for (int f = 0; f < features.length; f++) {
+              sums[cl][c] += weights[features[f]][c];
             }
           }
         }

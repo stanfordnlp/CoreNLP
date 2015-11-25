@@ -16,8 +16,7 @@ public class ISODateInstanceTest extends TestCase {
       "June 8-10",
       "today, Saturday",
       "Saturday, June 10",
-      "Dec. 27",
-      "1438143814381434",
+      "Dec. 27"
   };
 
   private String[] dateAnswers = { "19230205",
@@ -33,8 +32,7 @@ public class ISODateInstanceTest extends TestCase {
       "****0608/****0610",
       "saturday",
       "****0610",
-      "****1227",
-      "1438",
+      "****1227"
   };
 
   private String[] staticCompatibleStrings1 = {

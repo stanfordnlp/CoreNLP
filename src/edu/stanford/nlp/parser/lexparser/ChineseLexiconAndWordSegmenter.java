@@ -200,7 +200,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
     if (op.trainOptions.collinsPunc) {
       collinsPuncTransformer = new CollinsPuncTransformer(tlpParams.treebankLanguagePack());
     }
-    List<Tree> binaryTrainTrees = new ArrayList<>();
+    List<Tree> binaryTrainTrees = new ArrayList<Tree>();
     // List<Tree> binaryTuneTrees = new ArrayList<Tree>();
 
     if (op.trainOptions.selectiveSplit) {
@@ -250,8 +250,8 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
 
   private static void printArgs(String[] args, PrintStream ps) {
     ps.print("ChineseLexiconAndWordSegmenter invoked with arguments:");
-    for (String arg : args) {
-      ps.print(" " + arg);
+    for (int i = 0; i < args.length; i++) {
+      ps.print(" " + args[i]);
     }
     ps.println();
   }
@@ -536,8 +536,8 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
         }
       }
       Treebank trainTreebank = makeTreebank(treebankPath, op, trainFilter);
-      Index<String> wordIndex = new HashIndex<>();
-      Index<String> tagIndex = new HashIndex<>();
+      Index<String> wordIndex = new HashIndex<String>();
+      Index<String> tagIndex = new HashIndex<String>();
       cs = new ChineseLexiconAndWordSegmenter(trainTreebank, op, wordIndex, tagIndex);
     } else if (textInputFileOrUrl != null) {
       // so we load the segmenter from a text grammar file

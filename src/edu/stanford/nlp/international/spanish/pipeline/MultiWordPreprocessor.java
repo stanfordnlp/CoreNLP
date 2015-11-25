@@ -57,7 +57,7 @@ public final class MultiWordPreprocessor {
    *
    *     (grup.adv (rg cerca) (sp000 de))
    */
-  private static Map<String, String> phrasalCategoryMap = new HashMap<>();
+  private static Map<String, String> phrasalCategoryMap = new HashMap<String, String>();
   static {
     phrasalCategoryMap.put("ao0000", "grup.a");
     phrasalCategoryMap.put("aq0000", "grup.a");
@@ -94,7 +94,7 @@ public final class MultiWordPreprocessor {
 
   private static class ManualUWModel {
 
-    private static Map<String, String> posMap = new HashMap<>();
+    private static Map<String, String> posMap = new HashMap<String, String>();
     static {
       // i.e., "metros cúbicos"
       posMap.put("cúbico", "aq0000");
@@ -224,15 +224,15 @@ public final class MultiWordPreprocessor {
      * unigram tagger (and which never appear as function words in
      * multi-word tokens)
      */
-    private static final Set<String> actuallyNames = new HashSet<>(Arrays.asList(
-            "Avenida",
-            "Contra",
-            "Gracias", // interjection
-            "in", // preposition; only appears in corpus as "in extremis" (preposition)
-            "Mercado",
-            "Jesús", // interjection
-            "Salvo",
-            "Van" // verb
+    private static final Set<String> actuallyNames = new HashSet<String>(Arrays.asList(
+      "Avenida",
+      "Contra",
+      "Gracias", // interjection
+      "in", // preposition; only appears in corpus as "in extremis" (preposition)
+      "Mercado",
+      "Jesús", // interjection
+      "Salvo",
+      "Van" // verb
     ));
 
     // Name-looking word that isn't "Al"
@@ -612,16 +612,16 @@ public final class MultiWordPreprocessor {
 
     final File treeFile = new File(options.getProperty(""));
     TwoDimensionalCounter<String,String> labelTerm =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
     TwoDimensionalCounter<String,String> termLabel =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
     TwoDimensionalCounter<String,String> labelPreterm =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
     TwoDimensionalCounter<String,String> pretermLabel =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
 
     TwoDimensionalCounter<String,String> unigramTagger =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
 
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(treeFile), "UTF-8"));

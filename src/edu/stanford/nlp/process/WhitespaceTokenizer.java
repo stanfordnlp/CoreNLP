@@ -56,8 +56,8 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
      * @return A TokenizerFactory that returns Word objects
      */
     public static TokenizerFactory<Word> newTokenizerFactory() {
-      return new WhitespaceTokenizerFactory<>(new WordTokenFactory(),
-              false);
+      return new WhitespaceTokenizerFactory<Word>(new WordTokenFactory(),
+                                                  false);
     }
 
     public WhitespaceTokenizerFactory(LexedTokenFactory<T> factory) {
@@ -82,7 +82,7 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
     }
 
     public Tokenizer<T> getTokenizer(Reader r) {
-      return new WhitespaceTokenizer<>(factory, r, tokenizeNLs);
+      return new WhitespaceTokenizer<T>(factory, r, tokenizeNLs);
     }
 
     public Tokenizer<T> getTokenizer(Reader r, String extraOptions) {
@@ -90,7 +90,7 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
       boolean tokenizeNewlines =
         PropertiesUtils.getBool(prop, "tokenizeNLs", this.tokenizeNLs);
 
-      return new WhitespaceTokenizer<>(factory, r, tokenizeNewlines);
+      return new WhitespaceTokenizer<T>(factory, r, tokenizeNewlines);
     }
 
 
@@ -101,11 +101,11 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
   } // end class WhitespaceTokenizerFactory
 
   public static WhitespaceTokenizerFactory<CoreLabel> newCoreLabelTokenizerFactory(String options) {
-    return new WhitespaceTokenizerFactory<>(new CoreLabelTokenFactory(), options);
+    return new WhitespaceTokenizerFactory<CoreLabel>(new CoreLabelTokenFactory(), options);
   }
 
   public static WhitespaceTokenizerFactory<CoreLabel> newCoreLabelTokenizerFactory() {
-    return new WhitespaceTokenizerFactory<>(new CoreLabelTokenFactory());
+    return new WhitespaceTokenizerFactory<CoreLabel>(new CoreLabelTokenFactory());
   }
 
   /**
@@ -152,11 +152,11 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
   }
 
   public static WhitespaceTokenizer<CoreLabel> newCoreLabelWhitespaceTokenizer(Reader r) {
-    return new WhitespaceTokenizer<>(new CoreLabelTokenFactory(), r, false);
+    return new WhitespaceTokenizer<CoreLabel>(new CoreLabelTokenFactory(), r, false);
   }
 
   public static WhitespaceTokenizer<CoreLabel> newCoreLabelWhitespaceTokenizer(Reader r, boolean tokenizeNLs) {
-    return new WhitespaceTokenizer<>(new CoreLabelTokenFactory(), r, tokenizeNLs);
+    return new WhitespaceTokenizer<CoreLabel>(new CoreLabelTokenFactory(), r, tokenizeNLs);
   }
 
   public static WhitespaceTokenizer<Word>
@@ -168,8 +168,8 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
   public static WhitespaceTokenizer<Word>
     newWordWhitespaceTokenizer(Reader r, boolean eolIsSignificant)
   {
-    return new WhitespaceTokenizer<>(new WordTokenFactory(), r,
-            eolIsSignificant);
+    return new WhitespaceTokenizer<Word>(new WordTokenFactory(), r,
+                                         eolIsSignificant);
   }
 
   /* ----
@@ -181,13 +181,13 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
   ---- */
 
   public static TokenizerFactory<Word> factory() {
-    return new WhitespaceTokenizerFactory<>(new WordTokenFactory(),
-            false);
+    return new WhitespaceTokenizerFactory<Word>(new WordTokenFactory(),
+                                                false);
   }
 
   public static TokenizerFactory<Word> factory(boolean eolIsSignificant) {
-    return new WhitespaceTokenizerFactory<>(new WordTokenFactory(),
-            eolIsSignificant);
+    return new WhitespaceTokenizerFactory<Word>(new WordTokenFactory(),
+                                                eolIsSignificant);
   }
 
   /**
@@ -210,8 +210,8 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
                                            (args[args.length - 1]), "UTF-8") :
                      new InputStreamReader(System.in, "UTF-8"));
     WhitespaceTokenizer<Word> tokenizer =
-            new WhitespaceTokenizer<>(new WordTokenFactory(), reader,
-                    eolIsSignificant);
+      new WhitespaceTokenizer<Word>(new WordTokenFactory(), reader,
+                                    eolIsSignificant);
     PrintWriter pw =
       new PrintWriter(new OutputStreamWriter(System.out, "UTF-8"), true);
     while (tokenizer.hasNext()) {

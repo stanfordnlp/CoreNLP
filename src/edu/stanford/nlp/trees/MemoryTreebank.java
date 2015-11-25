@@ -78,7 +78,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
    */
   public MemoryTreebank(TreeReaderFactory trf) {
     super(trf);
-    parseTrees = new ArrayList<>();
+    parseTrees = new ArrayList<Tree>();
   }
 
 
@@ -91,7 +91,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
    */
   public MemoryTreebank(TreeReaderFactory trf, String encoding) {
     super(trf, encoding);
-    parseTrees = new ArrayList<>();
+    parseTrees = new ArrayList<Tree>();
   }
 
   /**
@@ -128,7 +128,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
    */
   public MemoryTreebank(int initialCapacity, TreeReaderFactory trf) {
     super(initialCapacity, trf);
-    parseTrees = new ArrayList<>(initialCapacity);
+    parseTrees = new ArrayList<Tree>(initialCapacity);
   }
 
 
@@ -169,7 +169,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
       String info = bits[2];
       CollectionValuedMap<Integer,String> cvm = srlMap.get(filename);
       if (cvm == null) {
-        cvm = new CollectionValuedMap<>();
+        cvm = new CollectionValuedMap<Integer,String>();
         srlMap.put(filename, cvm);
       }
       cvm.add(treeNum, info);
@@ -369,8 +369,8 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
    */
   @Override
   public void apply(TreeVisitor tp) {
-    for (Tree parseTree : parseTrees) {
-      tp.visitTree(parseTree);
+    for (int i = 0, size = parseTrees.size(); i < size; i++) {
+      tp.visitTree(parseTrees.get(i));
     }
     // or could do as Iterator but slower
     // Iterator iter = parseTrees.iterator();

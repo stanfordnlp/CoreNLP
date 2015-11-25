@@ -19,7 +19,7 @@ public class KillNonRootedNodes extends SsurgeonEdit {
   
   @Override
   public void evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    List<IndexedWord> nodes = new ArrayList<>(sg.vertexSet());
+    List<IndexedWord> nodes = new ArrayList<IndexedWord>(sg.vertexSet());
     for (IndexedWord node : nodes) {
       List<IndexedWord> rootPath = sg.getPathToRoot(node);
       if (rootPath == null) {

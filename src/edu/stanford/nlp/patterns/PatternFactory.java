@@ -24,17 +24,12 @@ public class PatternFactory {
   public static boolean useTargetNERRestriction = false;
 
   /**
-   *
-   */
-  @Execution.Option(name="useNER")
-  public static boolean useNER = true;
-  /**
    * Can just write a number (if same for all labels) or "Label1,2;Label2,3;...."
    */
   @Execution.Option(name = "numWordsCompound")
   public static String numWordsCompound = "2";
 
-  public static Map<String, Integer> numWordsCompoundMapped = new HashMap<>();
+  public static Map<String, Integer> numWordsCompoundMapped = new HashMap<String, Integer>();
 
   public static int numWordsCompoundMax = 2;
   /**

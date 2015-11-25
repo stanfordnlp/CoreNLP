@@ -67,7 +67,7 @@ public class DVParser {
       System.err.println("Failed to use the given parser to reparse sentence \"" + sentence + "\"");
       return null;
     }
-    List<Tree> parses = new ArrayList<>();
+    List<Tree> parses = new ArrayList<Tree>();
     List<ScoredObject<Tree>> bestKParses = pq.getKBestPCFGParses(dvKBest);
     for (ScoredObject<Tree> so : bestKParses) {
       Tree result = so.object();
@@ -82,7 +82,7 @@ public class DVParser {
   static IdentityHashMap<Tree, List<Tree>> getTopParses(LexicalizedParser parser, Options op,
                                                         Collection<Tree> trees, TreeTransformer transformer,
                                                         boolean outputUpdates) {
-    IdentityHashMap<Tree, List<Tree>> topParses = new IdentityHashMap<>();
+    IdentityHashMap<Tree, List<Tree>> topParses = new IdentityHashMap<Tree, List<Tree>>();
     for (Tree tree : trees) {
       List<Tree> parses = getTopParsesForOneTree(parser, op.trainOptions.dvKBest, tree, transformer);
       topParses.put(tree, parses);
@@ -134,7 +134,7 @@ public class DVParser {
     System.err.println("Times through each training batch: " + op.trainOptions.trainingIterations);
     System.err.println("QN iterations per batch: " + op.trainOptions.qnIterationsPerBatch);
     for (int iter = 0; iter < op.trainOptions.trainingIterations; ++iter) {
-      List<Tree> shuffledSentences = new ArrayList<>(sentences);
+      List<Tree> shuffledSentences = new ArrayList<Tree>(sentences);
       Collections.shuffle(shuffledSentences, dvModel.rand);
       for (int batch = 0; batch < numBatches; ++batch) {
         ++batchCount;
@@ -371,7 +371,7 @@ public class DVParser {
     System.err.println("Loading serialized model from " + filename);
     DVParser dvparser;
     try {
-      dvparser = IOUtils.readObjectFromURLOrClasspathOrFileSystem(filename);
+      dvparser = IOUtils.readObjectFromFile(filename);
       dvparser.op.setOptions(args);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
@@ -444,8 +444,8 @@ public class DVParser {
     }
 
     System.err.println("Running DVParser with arguments:");
-    for (String arg : args) {
-      System.err.print("  " + arg);
+    for (int i = 0; i < args.length; ++i) {
+      System.err.print("  " + args[i]);
     }
     System.err.println();
 
@@ -467,33 +467,33 @@ public class DVParser {
 
     String resultsRecordPath = null;
 
-    List<String> unusedArgs = new ArrayList<>();
+    List<String> unusedArgs = new ArrayList<String>();
 
     // These parameters can be null or 0 if the model was not
     // serialized with the new parameters.  Setting the options at the
     // command line will override these defaults.
     // TODO: if/when we integrate back into the main branch and
     // rebuild models, we can get rid of this
-    List<String> argsWithDefaults = new ArrayList<>(Arrays.asList(new String[]{
-            "-wordVectorFile", Options.LexOptions.DEFAULT_WORD_VECTOR_FILE,
-            "-dvKBest", Integer.toString(TrainOptions.DEFAULT_K_BEST),
-            "-batchSize", Integer.toString(TrainOptions.DEFAULT_BATCH_SIZE),
-            "-trainingIterations", Integer.toString(TrainOptions.DEFAULT_TRAINING_ITERATIONS),
-            "-qnIterationsPerBatch", Integer.toString(TrainOptions.DEFAULT_QN_ITERATIONS_PER_BATCH),
-            "-regCost", Double.toString(TrainOptions.DEFAULT_REGCOST),
-            "-learningRate", Double.toString(TrainOptions.DEFAULT_LEARNING_RATE),
-            "-deltaMargin", Double.toString(TrainOptions.DEFAULT_DELTA_MARGIN),
-            "-unknownNumberVector",
-            "-unknownDashedWordVectors",
-            "-unknownCapsVector",
-            "-unknownchinesepercentvector",
-            "-unknownchinesenumbervector",
-            "-unknownchineseyearvector",
-            "-unkWord", "*UNK*",
-            "-transformMatrixType", "DIAGONAL",
-            "-scalingForInit", Double.toString(TrainOptions.DEFAULT_SCALING_FOR_INIT),
-            "-trainWordVectors",
-    }));
+    List<String> argsWithDefaults = new ArrayList<String>(Arrays.asList(new String[] {
+          "-wordVectorFile", Options.LexOptions.DEFAULT_WORD_VECTOR_FILE,
+          "-dvKBest", Integer.toString(TrainOptions.DEFAULT_K_BEST),
+          "-batchSize", Integer.toString(TrainOptions.DEFAULT_BATCH_SIZE),
+          "-trainingIterations", Integer.toString(TrainOptions.DEFAULT_TRAINING_ITERATIONS),
+          "-qnIterationsPerBatch", Integer.toString(TrainOptions.DEFAULT_QN_ITERATIONS_PER_BATCH),
+          "-regCost", Double.toString(TrainOptions.DEFAULT_REGCOST),
+          "-learningRate", Double.toString(TrainOptions.DEFAULT_LEARNING_RATE),
+          "-deltaMargin", Double.toString(TrainOptions.DEFAULT_DELTA_MARGIN),
+          "-unknownNumberVector",
+          "-unknownDashedWordVectors",
+          "-unknownCapsVector",
+          "-unknownchinesepercentvector",
+          "-unknownchinesenumbervector",
+          "-unknownchineseyearvector",
+          "-unkWord", "*UNK*",
+          "-transformMatrixType", "DIAGONAL",
+          "-scalingForInit", Double.toString(TrainOptions.DEFAULT_SCALING_FOR_INIT),
+          "-trainWordVectors",
+        } ));
     argsWithDefaults.addAll(Arrays.asList(args));
     args = argsWithDefaults.toArray(new String[argsWithDefaults.size()]);
 
@@ -563,7 +563,7 @@ public class DVParser {
       dvparser = new DVParser(model, lexparser);
     }
 
-    List<Tree> trainSentences = new ArrayList<>();
+    List<Tree> trainSentences = new ArrayList<Tree>();
     IdentityHashMap<Tree, byte[]> trainCompressedParses = Generics.newIdentityHashMap();
 
     if (cachedTrainTreesPath != null) {

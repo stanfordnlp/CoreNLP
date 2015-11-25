@@ -25,9 +25,9 @@ public abstract class ResultsPrinter {
   public String printResults(CoreMap goldStandard, CoreMap extractorOutput) {
     StringWriter sw = new StringWriter();
     PrintWriter pw = new PrintWriter(sw, true);
-    List<CoreMap> mutableGold = new ArrayList<>();
+    List<CoreMap> mutableGold = new ArrayList<CoreMap>();
     mutableGold.addAll(goldStandard.get(CoreAnnotations.SentencesAnnotation.class));
-    List<CoreMap> mutableOutput = new ArrayList<>();
+    List<CoreMap> mutableOutput = new ArrayList<CoreMap>();
     mutableOutput.addAll(extractorOutput.get(CoreAnnotations.SentencesAnnotation.class));
     printResults(pw, mutableGold, mutableOutput);
     return sw.getBuffer().toString();

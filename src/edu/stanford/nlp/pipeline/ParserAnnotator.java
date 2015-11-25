@@ -19,7 +19,6 @@ import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.*;
 
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * This class will add parse information to an Annotation.
@@ -51,15 +50,11 @@ public class ParserAnnotator extends SentenceAnnotator {
    */
   private final long maxParseTime;
 
-  private final int kBest;
-
   private final GrammaticalStructureFactory gsf;
 
   private final int nThreads;
 
   private final boolean saveBinaryTrees;
-
-  private final boolean keepPunct;
 
   /** If true, don't re-annotate sentences that already have a tree annotation */
   private final boolean noSquash;
@@ -87,15 +82,13 @@ public class ParserAnnotator extends SentenceAnnotator {
     this.maxSentenceLength = maxSent;
     this.treeMap = treeMap;
     this.maxParseTime = 0;
-    this.kBest = 1;
-    this.keepPunct = false;
     if (this.BUILD_GRAPHS) {
       TreebankLanguagePack tlp = parser.getTLPParams().treebankLanguagePack();
       this.gsf = tlp.grammaticalStructureFactory(tlp.punctuationWordRejectFilter(), parser.getTLPParams().typedDependencyHeadFinder());
     } else {
       this.gsf = null;
     }
-
+    
     this.nThreads = 1;
     this.saveBinaryTrees = false;
     this.noSquash = false;
@@ -123,11 +116,6 @@ public class ParserAnnotator extends SentenceAnnotator {
 
     this.maxParseTime = PropertiesUtils.getLong(props, annotatorName + ".maxtime", -1);
 
-    this.kBest = PropertiesUtils.getInt(props, annotatorName + ".kbest", 1);
-
-    this.keepPunct = PropertiesUtils.getBool(props, annotatorName + ".keepPunct", false);
-
-
     String buildGraphsProperty = annotatorName + ".buildgraphs";
     if (!this.parser.getTLPParams().supportsBasicDependencies()) {
       if (props.getProperty(buildGraphsProperty) != null && PropertiesUtils.getBool(props, buildGraphsProperty)) {
@@ -142,8 +130,8 @@ public class ParserAnnotator extends SentenceAnnotator {
       boolean generateOriginalDependencies = PropertiesUtils.getBool(props, annotatorName + ".originalDependencies", false);
       parser.getTLPParams().setGenerateOriginalDependencies(generateOriginalDependencies);
       TreebankLanguagePack tlp = parser.getTLPParams().treebankLanguagePack();
-      Predicate<String> punctFilter = this.keepPunct ? Filters.acceptFilter() : tlp.punctuationWordRejectFilter();
-      this.gsf = tlp.grammaticalStructureFactory(punctFilter, parser.getTLPParams().typedDependencyHeadFinder());
+      // TODO: expose keeping punctuation as an option to the user?
+      this.gsf = tlp.grammaticalStructureFactory(tlp.punctuationWordRejectFilter(), parser.getTLPParams().typedDependencyHeadFinder());
     } else {
       this.gsf = null;
     }
@@ -188,7 +176,7 @@ public class ParserAnnotator extends SentenceAnnotator {
   }
 
   public static String[] convertFlagsToArray(String parserFlags) {
-    if (parserFlags == null || parserFlags.trim().isEmpty()) {
+    if (parserFlags == null || parserFlags.trim().equals("")) {
       return StringUtils.EMPTY_STRING_ARRAY;
     } else {
       return parserFlags.trim().split("\\s+");
@@ -221,7 +209,7 @@ public class ParserAnnotator extends SentenceAnnotator {
   @Override
   protected long maxTime() {
     return maxParseTime;
-  }
+  };  
 
   @Override
   protected void doOneSentence(Annotation annotation, CoreMap sentence) {
@@ -236,25 +224,25 @@ public class ParserAnnotator extends SentenceAnnotator {
     if (VERBOSE) {
       System.err.println("Parsing: " + words);
     }
-    List<Tree> trees = null;
+    Tree tree = null;
     // generate the constituent tree
     if (maxSentenceLength <= 0 || words.size() <= maxSentenceLength) {
       try {
         final List<ParserConstraint> constraints = sentence.get(ParserAnnotations.ConstraintAnnotation.class);
-        trees = doOneSentence(constraints, words);
+        tree = doOneSentence(constraints, words);
       } catch (RuntimeInterruptedException e) {
         if (VERBOSE) {
           System.err.println("Took too long parsing: " + words);
         }
-        trees = null;
+        tree = null;
       }
     }
     // tree == null may happen if the parser takes too long or if
     // the sentence is longer than the max length
-    if (trees == null || trees.size() < 1) {
+    if (tree == null) {
       doOneFailedSentence(annotation, sentence);
     } else {
-      finishSentence(sentence, trees);
+      finishSentence(sentence, tree);
     }
   }
 
@@ -267,64 +255,50 @@ public class ParserAnnotator extends SentenceAnnotator {
         word.setTag("XX");
       }
     }
-
-    List<Tree> trees = Generics.newArrayList(1);
-    trees.add(tree);
-    finishSentence(sentence, trees);
+    finishSentence(sentence, tree);
   }
 
-  private void finishSentence(CoreMap sentence, List<Tree> trees) {
-
+  private void finishSentence(CoreMap sentence, Tree tree) {
     if (treeMap != null) {
-      List<Tree> mappedTrees = Generics.newLinkedList();
-      for (Tree tree : trees) {
-        Tree mappedTree = treeMap.apply(tree);
-        mappedTrees.add(mappedTree);
-      }
-      trees = mappedTrees;
+      tree = treeMap.apply(tree);
     }
-
-    ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, trees, extraDependencies);
+    
+    ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, tree, extraDependencies);
 
     if (saveBinaryTrees) {
       TreeBinarizer binarizer = TreeBinarizer.simpleTreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack());
-      Tree binarized = binarizer.transformTree(trees.get(0));
+      Tree binarized = binarizer.transformTree(tree);
       Trees.convertToCoreLabels(binarized);
       sentence.set(TreeCoreAnnotations.BinarizedTreeAnnotation.class, binarized);
     }
   }
 
-  // todo [cdm 2015]: This should just use bestParse method if only getting 1 best parse.
-  private List<Tree> doOneSentence(List<ParserConstraint> constraints,
+  private Tree doOneSentence(List<ParserConstraint> constraints,
                              List<CoreLabel> words) {
     ParserQuery pq = parser.parserQuery();
     pq.setConstraints(constraints);
     pq.parse(words);
-    List<Tree> trees = Generics.newLinkedList();
+    Tree tree = null;
     try {
-      List<ScoredObject<Tree>> scoredObjects = pq.getKBestPCFGParses(this.kBest);
-      if (scoredObjects == null || scoredObjects.size() < 1) {
+      tree = pq.getBestParse();
+      if (tree == null) {
         System.err.println("WARNING: Parsing of sentence failed.  " +
-                "Will ignore and continue: " +
-                Sentence.listToString(words));
+                         "Will ignore and continue: " +
+                         Sentence.listToString(words));
       } else {
-        for (ScoredObject<Tree> so : scoredObjects) {
-          // -10000 denotes unknown words
-          Tree tree = so.object();
-          tree.setScore(so.score() % - 10000.0);
-          trees.add(tree);
-        }
+        // -10000 denotes unknown words
+        tree.setScore(pq.getPCFGScore() % -10000.0);
       }
     } catch (OutOfMemoryError e) {
-      Runtime.getRuntime().gc();
-      System.err.println("WARNING: Parsing of sentence ran out of memory (length=" + words.size() + ").  " +
-              "Will ignore and continue.");
+      System.err.println("WARNING: Parsing of sentence ran out of memory.  " +
+                         "Will ignore and continue: " +
+                         Sentence.listToString(words));
     } catch (NoSuchParseException e) {
       System.err.println("WARNING: Parsing of sentence failed, possibly because of out of memory.  " +
-              "Will ignore and continue: " +
-              Sentence.listToString(words));
+                         "Will ignore and continue: " +
+                         Sentence.listToString(words));
     }
-    return trees;
+    return tree;
   }
 
   @Override
@@ -334,19 +308,10 @@ public class ParserAnnotator extends SentenceAnnotator {
 
   @Override
   public Set<Requirement> requirementsSatisfied() {
-    if (this.BUILD_GRAPHS) {
-      if (this.saveBinaryTrees) {
-        return PARSE_TAG_DEPPARSE_BINARIZED_TREES;
-      } else {
-        return PARSE_TAG_DEPPARSE;
-      }
+    if (this.saveBinaryTrees) {
+      return PARSE_TAG_BINARIZED_TREES;
     } else {
-      if (this.saveBinaryTrees) {
-        return PARSE_TAG_BINARIZED_TREES;
-      } else {
-        return PARSE_AND_TAG;
-      }
+      return PARSE_AND_TAG;
     }
   }
-
 }

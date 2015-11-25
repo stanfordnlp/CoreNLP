@@ -3,7 +3,6 @@ package edu.stanford.nlp.ling.tokensregex;
 import edu.stanford.nlp.ling.AnnotationLookup;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
-import edu.stanford.nlp.pipeline.CoreMapAggregator;
 import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
 import java.util.function.Function;
 
@@ -66,17 +65,6 @@ public class EnvLookup {
       }
     }
     return CoreMapAttributeAggregator.DEFAULT_NUMERIC_TOKENS_AGGREGATORS;
-  }
-
-  public static CoreMapAggregator getDefaultTokensAggregator(Env env)
-  {
-    if (env != null) {
-      CoreMapAggregator obj = env.getDefaultTokensAggregator();
-      if (obj != null) {
-        return obj;
-      }
-    }
-    return CoreMapAggregator.DEFAULT_NUMERIC_TOKENS_AGGREGATOR;
   }
 
   public static List<Class> getDefaultTokensResultAnnotationKey(Env env)

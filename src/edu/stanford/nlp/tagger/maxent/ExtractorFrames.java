@@ -154,7 +154,7 @@ public class ExtractorFrames {
     arch = arch.replaceAll("bidirectional5words", "words(-2,2),order(-2,2),twoTags(-1,1),wordTag(0,-1),wordTag(0,1),biwords(-1,1)");
     arch = arch.replaceAll("bidirectional", "words(-1,1),order(-2,2),twoTags(-1,1),wordTag(0,-1),wordTag(0,1),biwords(-1,1)");
 
-    ArrayList<Extractor> extrs = new ArrayList<>();
+    ArrayList<Extractor> extrs = new ArrayList<Extractor>();
     List<String> args = StringUtils.valueSplit(arch, "[a-zA-Z0-9]*(?:\\([^)]*\\))?", "\\s*,\\s*");
     for (String arg : args) {
       if (arg.equals("sighan2005")) {

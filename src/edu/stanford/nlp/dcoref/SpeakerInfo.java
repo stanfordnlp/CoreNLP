@@ -16,7 +16,7 @@ public class SpeakerInfo {
   private String speakerName;
   private String[] speakerNameStrings; // tokenized speaker name
   private String speakerDesc;
-  private Set<Mention> mentions = new LinkedHashSet<>();  // Mentions that corresponds to the speaker...
+  private Set<Mention> mentions = new LinkedHashSet<Mention>();  // Mentions that corresponds to the speaker...
   // private Mention originalMention;            // the mention used when creating this SpeakerInfo
   private boolean speakerIdIsNumber;          // speaker id is a number (probably mention id)
   private boolean speakerIdIsAutoDetermined;  // speaker id was auto determined by system

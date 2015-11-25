@@ -41,7 +41,7 @@ public class ConcurrentHashCounter<E> implements Serializable, Counter<E>, Itera
   }
   
   public ConcurrentHashCounter(int initialCapacity) {
-    map = new ConcurrentHashMap<>(initialCapacity);
+    map = new ConcurrentHashMap<E,AtomicDouble>(initialCapacity);
     totalCount = new AtomicDouble();
   }
 
@@ -56,7 +56,7 @@ public class ConcurrentHashCounter<E> implements Serializable, Counter<E>, Itera
       private static final long serialVersionUID = 6076144467752914760L;
       @Override
       public Counter<E> create() {
-        return new ConcurrentHashCounter<>();
+        return new ConcurrentHashCounter<E>();
       }
     };
   }

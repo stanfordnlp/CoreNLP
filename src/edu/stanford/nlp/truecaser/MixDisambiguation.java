@@ -38,7 +38,7 @@ public class MixDisambiguation {
           String lctok = tok.toLowerCase();
           Counter<String> counter = map.get(lctok);
           if (counter == null) {
-            counter = new ClassicCounter<>();
+            counter = new ClassicCounter<String>();
             map.put(lctok, counter);
           }
           counter.incrementCount(tok);

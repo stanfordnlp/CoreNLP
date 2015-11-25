@@ -55,7 +55,7 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
   public void initializeTraining(double numTrees) {
     lex.initializeTraining(numTrees);
 
-    this.initial = new ClassicCounter<>();
+    this.initial = new ClassicCounter<String>();
     this.ruleCounter = new GeneralizedCounter(2);
   }
 
@@ -97,8 +97,8 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
     initialPOSDist = Distribution.laplaceSmoothedDistribution(initial, numTags, 0.5);
     markovPOSDists = Generics.newHashMap();
     Set entries = ruleCounter.lowestLevelCounterEntrySet();
-    for (Object entry1 : entries) {
-      Map.Entry entry = (Map.Entry) entry1;
+    for (Iterator iter = entries.iterator(); iter.hasNext();) {
+      Map.Entry entry = (Map.Entry) iter.next();
       //      Map.Entry<List<String>, Counter> entry = (Map.Entry<List<String>, Counter>) iter.next();
       Distribution d = Distribution.laplaceSmoothedDistribution((ClassicCounter) entry.getValue(), numTags, 0.5);
       markovPOSDists.put(((List<String>) entry.getKey()).get(0), d);
@@ -113,7 +113,7 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
   private ArrayList<TaggedWord> basicSegmentWords(String s) {
     // We don't want to accidentally register words that we don't know
     // about in the wordIndex, so we wrap it with a DeltaIndex
-    DeltaIndex<String> deltaWordIndex = new DeltaIndex<>(wordIndex);
+    DeltaIndex<String> deltaWordIndex = new DeltaIndex<String>(wordIndex);
     int length = s.length();
     //    Set<String> POSes = (Set<String>) POSDistribution.keySet();  // 1.5
     // best score of span
@@ -135,7 +135,8 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
         }
         String word = wordBuf.toString();
         //        for (String tag : POSes) {  // 1.5
-        for (String tag : POSes) {
+        for (Iterator<String> iter = POSes.iterator(); iter.hasNext();) {
+          String tag = iter.next();
           IntTaggedWord itw = new IntTaggedWord(word, tag, deltaWordIndex, tagIndex);
           double newScore = lex.score(itw, 0, word, null) + Math.log(lex.getPOSDistribution().probabilityOf(tag));
           if (newScore > scores[start][end]) {
@@ -163,7 +164,7 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
       }
     }
 
-    List<TaggedWord> words = new ArrayList<>();
+    List<TaggedWord> words = new ArrayList<TaggedWord>();
     int start = 0;
     while (start < length) {
       int end = splitBacktrace[start][length];
@@ -178,7 +179,7 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
       start = end;
     }
 
-    return new ArrayList<>(words);
+    return new ArrayList<TaggedWord>(words);
   }
 
   /** Do max language model markov segmentation.
@@ -197,7 +198,7 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
   private ArrayList<HasWord> segmentWordsWithMarkov(String s) {
     // We don't want to accidentally register words that we don't know
     // about in the wordIndex, so we wrap it with a DeltaIndex
-    DeltaIndex<String> deltaWordIndex = new DeltaIndex<>(wordIndex);
+    DeltaIndex<String> deltaWordIndex = new DeltaIndex<String>(wordIndex);
     int length = s.length();
     //    Set<String> POSes = (Set<String>) POSDistribution.keySet();  // 1.5
     int numTags = POSes.size();
@@ -260,7 +261,7 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
       }
     }
     int nextPOS = ArrayMath.argmax(scores[0][length]);
-    ArrayList<HasWord> words = new ArrayList<>();
+    ArrayList<HasWord> words = new ArrayList<HasWord>();
 
     int start = 0;
     while (start < length) {
@@ -284,17 +285,18 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
 
   private Distribution<Integer> getSegmentedWordLengthDistribution(Treebank tb) {
     // CharacterLevelTagExtender ext = new CharacterLevelTagExtender();
-    ClassicCounter<Integer> c = new ClassicCounter<>();
-    for (Tree gold : tb) {
+    ClassicCounter<Integer> c = new ClassicCounter<Integer>();
+    for (Iterator iterator = tb.iterator(); iterator.hasNext();) {
+      Tree gold = (Tree) iterator.next();
       StringBuilder goldChars = new StringBuilder();
       ArrayList goldYield = gold.yield();
-      for (Object aGoldYield : goldYield) {
-        Word word = (Word) aGoldYield;
+      for (Iterator wordIter = goldYield.iterator(); wordIter.hasNext();) {
+        Word word = (Word) wordIter.next();
         goldChars.append(word);
       }
       List<HasWord> ourWords = segment(goldChars.toString());
-      for (HasWord ourWord : ourWords) {
-        c.incrementCount(Integer.valueOf(ourWord.word().length()));
+      for (int i = 0; i < ourWords.size(); i++) {
+        c.incrementCount(Integer.valueOf(ourWords.get(i).word().length()));
       }
     }
     return Distribution.getDistribution(c);

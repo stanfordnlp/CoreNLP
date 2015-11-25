@@ -284,17 +284,13 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
    */
   @Override
   public <KEY extends Key<String>> String getString(Class<KEY> key) {
-    return this.getString(key, "");
-  }
-
-  @Override
-  public <KEY extends Key<String>> String getString(Class<KEY> key, String def) {
     String value = get(key);
     if (value == null) {
-      return def;
+      return "";
     }
     return value;
   }
+
 
   /**
    * {@inheritDoc}
@@ -554,7 +550,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
   public static final String TAG_SEPARATOR = "/";
 
   public enum OutputFormat {
-    VALUE_INDEX, VALUE, VALUE_TAG, VALUE_TAG_INDEX, MAP, VALUE_MAP, VALUE_INDEX_MAP, WORD, WORD_INDEX, VALUE_TAG_NER, LEMMA_INDEX, ALL
+    VALUE_INDEX, VALUE, VALUE_TAG, VALUE_TAG_INDEX, MAP, VALUE_MAP, VALUE_INDEX_MAP, WORD, WORD_INDEX, VALUE_TAG_NER, ALL
   }
 
   public static final OutputFormat DEFAULT_FORMAT = OutputFormat.VALUE_INDEX;
@@ -684,13 +680,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
       }
       break;
     }
-    case LEMMA_INDEX:
-      buf.append(lemma());
-      Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
-      if (index != null) {
-        buf.append('-').append((index).intValue());
-      }
-      break;
     case ALL:{
       for(Class en: this.keySet()){
         buf.append(";").append(en).append(":").append(this.get(en));

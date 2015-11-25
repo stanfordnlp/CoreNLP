@@ -214,7 +214,7 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
   public static TokenSequencePattern compile(Env env, String... strings)
   {
     try {
-      List<SequencePattern.PatternExpr> patterns = new ArrayList<>();
+      List<SequencePattern.PatternExpr> patterns = new ArrayList<SequencePattern.PatternExpr>();
       for (String string:strings) {
         // TODO: Check token sequence parser?
         SequencePattern.PatternExpr pattern = env.parser.parseSequence(env, string);
@@ -277,8 +277,8 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
    * @return a MultiPatternMatcher
    */
   public static MultiPatternMatcher<CoreMap> getMultiPatternMatcher(Collection<TokenSequencePattern> patterns) {
-    return new MultiPatternMatcher<>(
-            new MultiPatternMatcher.BasicSequencePatternTrigger<>(
+    return new MultiPatternMatcher<CoreMap>(
+            new MultiPatternMatcher.BasicSequencePatternTrigger<CoreMap>(
                     new CoreMapNodePatternTrigger(patterns)
             ), patterns);
   }
@@ -289,8 +289,8 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
    * @return a MultiPatternMatcher
    */
   public static MultiPatternMatcher<CoreMap> getMultiPatternMatcher(TokenSequencePattern... patterns) {
-    return new MultiPatternMatcher<>(
-            new MultiPatternMatcher.BasicSequencePatternTrigger<>(
+    return new MultiPatternMatcher<CoreMap>(
+            new MultiPatternMatcher.BasicSequencePatternTrigger<CoreMap>(
                     new CoreMapNodePatternTrigger(patterns)
             ), patterns);
   }

@@ -5,13 +5,16 @@ import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.util.Generics;
 
 /**
- * A HeadFinder for Chinese based on rules described in Sun/Jurafsky NAACL 2004.
+ * A headfinder for Chinese based on rules described in Sun/Jurafsky NAACL '04.
  *
  * @author Galen Andrew
  * @version Jul 12, 2004
  */
 public class SunJurafskyChineseHeadFinder extends AbstractCollinsHeadFinder {
 
+  /**
+   * 
+   */
   private static final long serialVersionUID = -7942375587642755210L;
 
   public SunJurafskyChineseHeadFinder() {
@@ -65,33 +68,5 @@ public class SunJurafskyChineseHeadFinder extends AbstractCollinsHeadFinder {
     nonTerminalInfo.put("VC", new String[][]{{"left"}});
     nonTerminalInfo.put("VE", new String[][]{{"left"}});
   }
-
-  /* Yue Zhang and Stephen Clark 2008 based their rules on Sun/Jurafsky but changed a few things.
-  Constituent Rules
-  ADJP r ADJP JJ AD; r
-  ADVP r ADVP AD CS JJ NP PP P VA VV; r
-  CLP r CLP M NN NP; r
-  CP r CP IP VP; r
-  DNP r DEG DNP DEC QP; r
-  DP r M; l DP DT OD; l
-  DVP r DEV AD VP; r
-  FRAG r VV NR NN NT; r
-  IP r VP IP NP; r
-  LCP r LCP LC; r
-  LST r CD NP QP; r
-  NP r NP NN IP NR NT; r
-  NN r NP NN IP NR NT; r
-  PP l P PP; l
-  PRN l PU; l
-  QP r QP CLP CD; r
-  UCP l IP NP VP; l
-  VCD l VV VA VE; l
-  VP l VE VC VV VNV VPT VRD VSB
-  VCD VP; l
-  VPT l VA VV; l
-  VRD l VVI VA; l
-  VSB r VV VE; r
-  default r
-  */
 
 }

@@ -418,7 +418,7 @@ public class WordShapeClassifier {
     final char[] endChars = new char[BOUNDARY_SIZE];
     int beginUpto = 0;
     int endUpto = 0;
-    final Set<Character> seenSet = new TreeSet<>();  // TreeSet guarantees stable ordering; has no size parameter
+    final Set<Character> seenSet = new TreeSet<Character>();  // TreeSet guarantees stable ordering; has no size parameter
 
     boolean nonLetters = false;
 
@@ -618,7 +618,7 @@ public class WordShapeClassifier {
     StringBuilder sb = new StringBuilder(s.length() + 1);
     StringBuilder endSB = new StringBuilder(BOUNDARY_SIZE);
     Set<Character> boundSet = Generics.newHashSet(BOUNDARY_SIZE * 2);
-    Set<Character> seenSet = new TreeSet<>();  // TreeSet guarantees stable ordering
+    Set<Character> seenSet = new TreeSet<Character>();  // TreeSet guarantees stable ordering
     boolean nonLetters = false;
     for (int i = 0; i < len; i++) {
       char c = s.charAt(i);
@@ -911,7 +911,7 @@ public class WordShapeClassifier {
 
     public static Map<String,String> loadWordClusters(String file, String format) {
       Timing.startDoing("Loading distsim lexicon from " + file);
-      Map<String,String> lexicon = new LcMap<>();
+      Map<String,String> lexicon = new LcMap<String, String>();
       if ("terryKoo".equals(format)) {
         for (String line : ObjectBank.getLineIterator(file)) {
           String[] bits = line.split("\\t");

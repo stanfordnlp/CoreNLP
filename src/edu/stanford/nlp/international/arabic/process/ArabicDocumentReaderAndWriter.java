@@ -144,7 +144,7 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
 
         if (inputHasTags) {
           String[] toks = in.split("\\s+");
-          List<CoreLabel> input = new ArrayList<>(toks.length);
+          List<CoreLabel> input = new ArrayList<CoreLabel>(toks.length);
           final String tagDelim = Pattern.quote(tagDelimiter);
           final String rewDelim = Pattern.quote(rewriteDelimiter);
           for (String wordTag : toks) {

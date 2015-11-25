@@ -123,8 +123,8 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
   public int domainDimension() {
     if (domainDimension < 0) {
       originalFeatureCount = 0;
-      for (int aMap : map) {
-        int s = labelIndices.get(aMap).size();
+      for (int i = 0; i < map.length; i++) {
+        int s = labelIndices.get(map[i]).size();
         originalFeatureCount += s;
       }
       domainDimension = 0;
@@ -339,7 +339,7 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
       }
     }
     assert(index == x.length);
-    return new Quadruple<>(inputLayerWeights4Edge, outputLayerWeights4Edge, inputLayerWeights, outputLayerWeights);
+    return new Quadruple<double[][], double[][], double[][], double[][]>(inputLayerWeights4Edge, outputLayerWeights4Edge, inputLayerWeights, outputLayerWeights);
   }
 
   public CliquePotentialFunction getCliquePotentialFunction(double[] x) {
@@ -583,8 +583,8 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
                   } else {
                     WhatK = What4Edge[k];
                   }
-                  for (int cliqueFeature : cliqueFeatures) {
-                    WhatK[cliqueFeature] += deltaK;
+                  for (int n = 0; n < cliqueFeatures.length; n++) {
+                    WhatK[cliqueFeatures[n]] += deltaK;
                   }
                 }
               } else {
@@ -594,8 +594,8 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
                 } else {
                   WhatK = What4Edge[k];
                 }
-                for (int cliqueFeature : cliqueFeatures) {
-                  WhatK[cliqueFeature] += deltaK;
+                for (int n = 0; n < cliqueFeatures.length; n++) {
+                  WhatK[cliqueFeatures[n]] += deltaK;
                 }
               }
             } else {
@@ -606,8 +606,8 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
                 } else {
                   WhatK = What4Edge[k];
                 }
-                for (int cliqueFeature : cliqueFeatures) {
-                  WhatK[cliqueFeature] += deltaK;
+                for (int n = 0; n < cliqueFeatures.length; n++) {
+                  WhatK[cliqueFeatures[n]] += deltaK;
                 }
               }
             }
@@ -679,8 +679,8 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
                     } else {
                       eWq = eW4Edge[q];
                     }
-                    for (int cliqueFeature : cliqueFeatures) {
-                      eWq[cliqueFeature] += deltaQ * p;
+                    for (int n = 0; n < cliqueFeatures.length; n++) {
+                      eWq[cliqueFeatures[n]] += deltaQ * p;
                     }
                   }
                 } else {
@@ -690,8 +690,8 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
                   } else {
                     eWq = eW4Edge[q];
                   }
-                  for (int cliqueFeature : cliqueFeatures) {
-                    eWq[cliqueFeature] += deltaQ * p;
+                  for (int n = 0; n < cliqueFeatures.length; n++) {
+                    eWq[cliqueFeatures[n]] += deltaQ * p;
                   }
                 }
               }
@@ -705,8 +705,8 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
               } else {
                 eWK = eW4Edge[k];
               }
-              for (int cliqueFeature : cliqueFeatures) {
-                eWK[cliqueFeature] += deltaK * p;
+              for (int n = 0; n < cliqueFeatures.length; n++) {
+                eWK[cliqueFeatures[n]] += deltaK * p;
               }
             }
           }

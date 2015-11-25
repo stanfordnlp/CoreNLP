@@ -58,7 +58,7 @@ public class ParentAnnotationStats implements TreeVisitor {
 
   public static List<String> kidLabels(Tree t) {
     Tree[] kids = t.children();
-    List<String> l = new ArrayList<>(kids.length);
+    List<String> l = new ArrayList<String>(kids.length);
     for (Tree kid : kids) {
       l.add(kid.label().value());
     }
@@ -87,26 +87,26 @@ public class ParentAnnotationStats implements TreeVisitor {
       List<String> kidn = kidLabels(t);
       ClassicCounter<List<String>> cntr = nr.get(n);
       if (cntr == null) {
-        cntr = new ClassicCounter<>();
+        cntr = new ClassicCounter<List<String>>();
         nr.put(n, cntr);
       }
       cntr.incrementCount(kidn);
-      List<String> pairStr = new ArrayList<>(2);
+      List<String> pairStr = new ArrayList<String>(2);
       pairStr.add(n);
       pairStr.add(p);
       cntr = pr.get(pairStr);
       if (cntr == null) {
-        cntr = new ClassicCounter<>();
+        cntr = new ClassicCounter<List<String>>();
         pr.put(pairStr, cntr);
       }
       cntr.incrementCount(kidn);
-      List<String> tripleStr = new ArrayList<>(3);
+      List<String> tripleStr = new ArrayList<String>(3);
       tripleStr.add(n);
       tripleStr.add(p);
       tripleStr.add(gP);
       cntr = gpr.get(tripleStr);
       if (cntr == null) {
-        cntr = new ClassicCounter<>();
+        cntr = new ClassicCounter<List<String>>();
         gpr.put(tripleStr, cntr);
       }
       cntr.incrementCount(kidn);
@@ -134,29 +134,30 @@ public class ParentAnnotationStats implements TreeVisitor {
       javaSB[i] = new StringBuffer("  private static String[] splitters" + (i + 1) + " = new String[] {");
     }
 
-    ClassicCounter<List<String>> allScores = new ClassicCounter<>();
+    ClassicCounter<List<String>> allScores = new ClassicCounter<List<String>>();
     // do value of parent
     for (String node : nodeRules.keySet()) {
       ArrayList<Pair<List<String>,Double>> answers = Generics.newArrayList();
       ClassicCounter<List<String>> cntr = nodeRules.get(node);
       double support = (cntr.totalCount());
       System.out.println("Node " + node + " support is " + support);
-      for (List<String> key : pRules.keySet()) {
+      for (Iterator<List<String>> it2 = pRules.keySet().iterator(); it2.hasNext();) {
+        List<String> key = it2.next();
         if (key.get(0).equals(node)) {   // only do it if they match
           ClassicCounter<List<String>> cntr2 = pRules.get(key);
           double support2 = (cntr2.totalCount());
           double kl = Counters.klDivergence(cntr2, cntr);
           System.out.println("KL(" + key + "||" + node + ") = " + nf.format(kl) + "\t" + "support(" + key + ") = " + support2);
           double score = kl * support2;
-          answers.add(new Pair<>(key, new Double(score)));
+          answers.add(new Pair<List<String>,Double>(key, new Double(score)));
           allScores.setCount(key, score);
         }
       }
       System.out.println("----");
       System.out.println("Sorted descending support * KL");
       Collections.sort(answers, (o1, o2) -> o2.second().compareTo(o1.second()));
-      for (Pair<List<String>, Double> answer : answers) {
-        Pair p = (Pair) answer;
+      for (int i = 0, size = answers.size(); i < size; i++) {
+        Pair p = (Pair) answers.get(i);
         double psd = ((Double) p.second()).doubleValue();
         System.out.println(p.first() + ": " + nf.format(psd));
         if (psd >= CUTOFFS[0]) {
@@ -251,8 +252,8 @@ public class ParentAnnotationStats implements TreeVisitor {
       System.out.println("----");
       System.out.println("Sorted descending support * KL");
       Collections.sort(answers, (o1, o2) -> o2.second().compareTo(o1.second()));
-      for (Pair<List<String>, Double> answer : answers) {
-        Pair p = (Pair) answer;
+      for (int i = 0, size = answers.size(); i < size; i++) {
+        Pair p = (Pair) answers.get(i);
         double psd = ((Double) p.second()).doubleValue();
         System.out.println(p.first() + ": " + nf.format(psd));
         if (psd >= CUTOFFS[0]) {
@@ -311,7 +312,7 @@ public class ParentAnnotationStats implements TreeVisitor {
 
     // do value of parent
     for (String node : nr.keySet()) {
-      List<Pair<List<String>,Double>> answers = new ArrayList<>();
+      List<Pair<List<String>,Double>> answers = new ArrayList<Pair<List<String>,Double>>();
       ClassicCounter<List<String>> cntr = nr.get(node);
       double support = (cntr.totalCount());
       for (List<String> key : pr.keySet()) {
@@ -319,11 +320,12 @@ public class ParentAnnotationStats implements TreeVisitor {
           ClassicCounter<List<String>> cntr2 = pr.get(key);
           double support2 = cntr2.totalCount();
           double kl = Counters.klDivergence(cntr2, cntr);
-          answers.add(new Pair<>(key, new Double(kl * support2)));
+          answers.add(new Pair<List<String>, Double>(key, new Double(kl * support2)));
         }
       }
       Collections.sort(answers, (o1, o2) -> o2.second().compareTo(o1.second()));
-      for (Pair<List<String>, Double> p : answers) {
+      for (int i = 0, size = answers.size(); i < size; i++) {
+        Pair<List<String>,Double> p = answers.get(i);
         double psd = p.second().doubleValue();
         if (psd >= cutOff) {
           List<String> lst = p.first();
@@ -394,12 +396,12 @@ public class ParentAnnotationStats implements TreeVisitor {
           ClassicCounter<List<String>> cntr2 = gpr.get(key);
           double support2 = (cntr2.totalCount());
           double kl = Counters.klDivergence(cntr2, cntr);
-          answers.add(new Pair<>(key, new Double(kl * support2)));
+          answers.add(new Pair<List<String>,Double>(key, new Double(kl * support2)));
         }
       }
       Collections.sort(answers, (o1, o2) -> o2.second().compareTo(o1.second()));
-      for (Pair<List<String>, Double> answer : answers) {
-        Pair p = (Pair) answer;
+      for (int i = 0, size = answers.size(); i < size; i++) {
+        Pair p = (Pair) answers.get(i);
         double psd = ((Double) p.second()).doubleValue();
         if (psd >= cutOff) {
           List lst = (List) p.first();

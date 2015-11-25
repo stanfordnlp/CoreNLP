@@ -72,12 +72,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   }
 
   /**
-   * Construct a new {@code GrammaticalStructure} from an existing parse
-   * tree. The new {@code GrammaticalStructure} has the same tree structure
+   * Construct a new <code>GrammaticalStructure</code> from an existing parse
+   * tree. The new <code>GrammaticalStructure</code> has the same tree structure
    * and label values as the given tree (but no shared storage). As part of
    * construction, the parse tree is analyzed using definitions from
    * {@link GrammaticalRelation <code>GrammaticalRelation</code>} to populate
-   * the new {@code GrammaticalStructure} with as many labeled grammatical
+   * the new <code>GrammaticalStructure</code> with as many labeled grammatical
    * relations as it can.
    *
    * @param t Parse tree to make grammatical structure from
@@ -89,8 +89,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   public UniversalEnglishGrammaticalStructure(Tree t, Predicate<String> tagFilter, HeadFinder hf, boolean threadSafe) {
 
     // the tree is normalized (for index and functional tag stripping) inside CoordinationTransformer
-    super(t, UniversalEnglishGrammaticalRelations.values(), UniversalEnglishGrammaticalRelations.valuesLock(),
-            new CoordinationTransformer(hf, true), hf, Filters.acceptFilter(), tagFilter);
+    super(t, UniversalEnglishGrammaticalRelations.values(threadSafe), threadSafe ? UniversalEnglishGrammaticalRelations.valuesLock() : null,
+          new CoordinationTransformer(hf, true), hf, Filters.acceptFilter(), tagFilter);
   }
 
   /** Used for postprocessing CoNLL X dependencies */
@@ -156,7 +156,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   }
 
   private static void printListSorted(String title, Collection<TypedDependency> list) {
-    List<TypedDependency> lis = new ArrayList<>(list);
+    List<TypedDependency> lis = new ArrayList<TypedDependency>(list);
     Collections.sort(lis);
     if (title != null) {
       System.err.println(title);
@@ -949,7 +949,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       if (!map.containsKey(edge.getDependent())) {
         // NB: Here and in other places below, we use a TreeSet (which extends
         // SortedSet) to guarantee that results are deterministic)
-        map.put(edge.getDependent(), new TreeSet<>());
+        map.put(edge.getDependent(), new TreeSet<SemanticGraphEdge>());
       }
       map.get(edge.getDependent()).add(edge);
 
@@ -1114,7 +1114,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   private static void collapseReferent(SemanticGraph sg) {
     // find typed deps of form ref(gov, dep)
     // put them in a List for processing
-    List<SemanticGraphEdge> refs = new ArrayList<>(sg.findAllRelns(REFERENT));
+    List<SemanticGraphEdge> refs = new ArrayList<SemanticGraphEdge>(sg.findAllRelns(REFERENT));
 
     SemanticGraph sgCopy = sg.makeSoftCopy();
 
@@ -1336,8 +1336,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     if (sg.getRoots().isEmpty())
       return;
 
-    HashMap<String, HashSet<Integer>> bigrams = new HashMap<>();
-    HashMap<String, HashSet<Integer>> trigrams = new HashMap<>();
+    HashMap<String, HashSet<Integer>> bigrams = new HashMap<String, HashSet<Integer>>();
+    HashMap<String, HashSet<Integer>> trigrams = new HashMap<String, HashSet<Integer>>();
 
 
     List<IndexedWord> vertexList = sg.vertexListSorted();
@@ -1347,7 +1347,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       String bigram = vertexList.get(i-1).value().toLowerCase() + "_" + vertexList.get(i).value().toLowerCase();
 
       if (bigrams.get(bigram) == null) {
-        bigrams.put(bigram, new HashSet<>());
+        bigrams.put(bigram, new HashSet<Integer>());
       }
 
       bigrams.get(bigram).add(vertexList.get(i-1).index());
@@ -1356,7 +1356,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
         String trigram = vertexList.get(i-2).value().toLowerCase() + "_" + bigram;
 
         if (trigrams.get(trigram) == null) {
-          trigrams.put(trigram, new HashSet<>());
+          trigrams.put(trigram, new HashSet<Integer>());
         }
 
         trigrams.get(trigram).add(vertexList.get(i-2).index());

@@ -2,11 +2,7 @@ package edu.stanford.nlp.classify;
 
 import edu.stanford.nlp.ling.BasicDatum;
 import edu.stanford.nlp.optimization.GoldenSectionLineSearch;
-
 import java.util.function.Function;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Provides a medium-weight implementation of Bernoulli (or binary)
@@ -38,8 +34,6 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
   private boolean tuneSigma = false;
   private int folds;
 
-  final static Logger logger = LoggerFactory.getLogger(NBLinearClassifierFactory.class);
-
 
   @Override
   protected double[][] trainWeights(GeneralDataset<L, F> data) {
@@ -58,13 +52,13 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
       tuneSigma(data, labels);
     }
     if (VERBOSE) {
-      logger.info("NB CF: " + data.length + " data items ");
+      System.err.println("NB CF: " + data.length + " data items ");
       for (int i = 0; i < data.length; i++) {
         System.err.print("Datum " + i + ": " + labels[i] + ":");
         for (int j = 0; j < data[i].length; j++) {
           System.err.print(" " + data[i][j]);
         }
-        logger.info("");
+        System.err.println();
       }
     }
     int numFeatures = numFeatures();
@@ -98,7 +92,7 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
           double p_c = (n_c[c] + epsilon) / (n + numClasses * epsilon);
           double p_c_f = (n_fc[f][c] + sigma) / (n_f[f] + sigma * numClasses);
           if (VERBOSE) {
-            logger.info("Prob ratio(f=" + f + ",c=" + c + ") = " + p_c_f / p_c + " (nc=" + n_c[c] + ", nf=" + n_f[f] + ", nfc=" + n_fc[f][c] + ")");
+            System.err.println("Prob ratio(f=" + f + ",c=" + c + ") = " + p_c_f / p_c + " (nc=" + n_c[c] + ", nf=" + n_f[f] + ", nfc=" + n_fc[f][c] + ")");
           }
           weights[f][c] = Math.log(p_c_f / p_c);
         }
@@ -160,7 +154,7 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
       double score = 0.0;
       double sumScore = 0.0;
       int foldSize, nbCV;
-      logger.info("Trying sigma = " + trialSigma);
+      System.err.println("Trying sigma = " + trialSigma);
       //test if enough training data
       if (data.length >= folds) {
         foldSize = data.length / folds;
@@ -175,10 +169,10 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
         int testMin = j * foldSize;
         int testMax = testMin + foldSize;
 
-        LinearClassifier<L, F> c = new LinearClassifier<>(weights(data, labels, testMin, testMax, trialSigma, foldSize), featureIndex, labelIndex);
+        LinearClassifier<L, F> c = new LinearClassifier<L, F>(weights(data, labels, testMin, testMax, trialSigma, foldSize), featureIndex, labelIndex);
         for (int i = testMin; i < testMax; i++) {
           //System.out.println("test i: "+ i + " "+ new BasicDatum(featureIndex.objects(data[i])));
-          score -= c.logProbabilityOf(new BasicDatum<>(featureIndex.objects(data[i]))).getCount(labelIndex.get(labels[i]));
+          score -= c.logProbabilityOf(new BasicDatum<L, F>(featureIndex.objects(data[i]))).getCount(labelIndex.get(labels[i]));
         }
         //System.err.printf("%d: %8g%n", j, score);
         sumScore += score;

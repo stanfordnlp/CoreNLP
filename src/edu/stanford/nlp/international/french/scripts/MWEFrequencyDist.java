@@ -39,7 +39,7 @@ public final class MWEFrequencyDist {
     }
     
     final File treeFile = new File(args[0]);
-    TwoDimensionalCounter<String,String> mweLabelToString = new TwoDimensionalCounter<>();
+    TwoDimensionalCounter<String,String> mweLabelToString = new TwoDimensionalCounter<String,String>();
     Set<String> uniquePOSSequences = Generics.newHashSet();
     
     try {

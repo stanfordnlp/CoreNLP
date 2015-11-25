@@ -110,7 +110,7 @@ public class POSTaggerAnnotator implements Annotator {
           doOneSentence(sentence);
         }
       } else {
-        MulticoreWrapper<CoreMap, CoreMap> wrapper = new MulticoreWrapper<>(nThreads, new POSTaggerProcessor());
+        MulticoreWrapper<CoreMap, CoreMap> wrapper = new MulticoreWrapper<CoreMap, CoreMap>(nThreads, new POSTaggerProcessor());
         for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
           wrapper.put(sentence);
           while (wrapper.peek()) {
@@ -157,8 +157,8 @@ public class POSTaggerAnnotator implements Annotator {
         tokens.get(i).set(CoreAnnotations.PartOfSpeechAnnotation.class, tagged.get(i).tag());
       }
     } else {
-      for (CoreLabel token : tokens) {
-        token.set(CoreAnnotations.PartOfSpeechAnnotation.class, "X");
+      for (int i = 0, sz = tokens.size(); i < sz; i++) {
+        tokens.get(i).set(CoreAnnotations.PartOfSpeechAnnotation.class, "X");
       }
     }
     return sentence;
@@ -166,7 +166,7 @@ public class POSTaggerAnnotator implements Annotator {
 
   @Override
   public Set<Requirement> requires() {
-    return Annotator.REQUIREMENTS.get(STANFORD_POS);
+    return TOKENIZE_AND_SSPLIT;
   }
 
   @Override

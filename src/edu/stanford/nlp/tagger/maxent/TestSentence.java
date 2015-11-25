@@ -105,22 +105,22 @@ public class TestSentence implements SequenceModel {
    */
   public ArrayList<TaggedWord> tagSentence(List<? extends HasWord> s,
                                            boolean reuseTags) {
-    this.origWords = new ArrayList<>(s);
+    this.origWords = new ArrayList<HasWord>(s);
     int sz = s.size();
-    this.sent = new ArrayList<>(sz + 1);
-    for (HasWord value1 : s) {
+    this.sent = new ArrayList<String>(sz + 1);
+    for (int j = 0; j < sz; j++) {
       if (maxentTagger.wordFunction != null) {
-        sent.add(maxentTagger.wordFunction.apply(value1.word()));
+        sent.add(maxentTagger.wordFunction.apply(s.get(j).word()));
       } else {
-        sent.add(value1.word());
+        sent.add(s.get(j).word());
       }
     }
     sent.add(Tagger.EOS_WORD);
     if (reuseTags) {
-      this.originalTags = new ArrayList<>(sz + 1);
-      for (HasWord value : s) {
-        if (value instanceof HasTag) {
-          originalTags.add(((HasTag) value).tag());
+      this.originalTags = new ArrayList<String>(sz + 1);
+      for (int j = 0; j < sz; ++j) {
+        if (s.get(j) instanceof HasTag) {
+          originalTags.add(((HasTag) s.get(j)).tag());
         } else {
           originalTags.add(null);
         }
@@ -174,7 +174,7 @@ public class TestSentence implements SequenceModel {
   ArrayList<TaggedWord> getTaggedSentence() {
     final boolean hasOffset;
     hasOffset = origWords != null && origWords.size() > 0 && (origWords.get(0) instanceof HasOffset);
-    ArrayList<TaggedWord> taggedSentence = new ArrayList<>();
+    ArrayList<TaggedWord> taggedSentence = new ArrayList<TaggedWord>();
     for (int j = 0; j < size - 1; j++) {
       String tag = finalTags[j];
       TaggedWord w = new TaggedWord(sent.get(j), tag);
