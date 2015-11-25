@@ -29,7 +29,7 @@ public class TSVUtils {
    * @return The parsed array, as a list.
    */
   public static List<String> parseArray(String array) {
-    char[] input = array.substring(1, array.length() - 1).replace("\\\\", "\\").toCharArray();
+    char[] input = array.substring(1, array.length() - 1).replace("\"\"","\"").replace("\\\\", "\\").toCharArray();
     List<String> output = new ArrayList<>();
     StringBuilder elem = new StringBuilder();
     boolean inQuotes = false;
@@ -187,4 +187,6 @@ public class TSVUtils {
         tokens -> parseTree(maltDependencies, tokens),
         parseArray(words), parseArray(lemmas), parseArray(posTags), parseArray(nerTags), sentenceid);
   }
+
+
 }
