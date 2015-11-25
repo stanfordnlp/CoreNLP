@@ -489,7 +489,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
       List<CoreLabel> doubt = (List<CoreLabel>) tokenMatcher.groupNodes("$doubt");
       List<CoreLabel> target = (List<CoreLabel>) tokenMatcher.groupNodes("$target");
       for (CoreLabel word : doubt) {
-        OperatorSpec spec = new OperatorSpec(Operator.UNARY_DOUBT,
+        OperatorSpec spec = new OperatorSpec(Operator.GENERAL_NEG_POLARITY,
             word.index() - 1, word.index(),
             target.get(0).index() - 1, target.get(target.size() - 1).index(),
             0, 0,
