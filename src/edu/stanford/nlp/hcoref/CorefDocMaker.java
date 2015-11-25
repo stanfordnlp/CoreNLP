@@ -154,11 +154,7 @@ public class CorefDocMaker {
     
     // add missing annotation
     addMissingAnnotation(anno);
-
-    if (Boolean.parseBoolean(props.getProperty("hcoref.useMarkedDiscourse", "false"))) {
-      anno.set(CoreAnnotations.UseMarkedDiscourseAnnotation.class, true);
-    }
-
+    
     // remove nested NP with same headword except newswire document for chinese
     
     if(input.conllDoc != null && CorefProperties.getLanguage(props)==Locale.CHINESE){

@@ -6,9 +6,7 @@ import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.GrammaticalRelation;
-import edu.stanford.nlp.util.Pair;
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
@@ -32,17 +30,16 @@ public class RelationTripleSegmenterTest extends TestCase {
 
   protected Optional<RelationTriple> mkExtraction(String conll, int listIndex) {
     return mkExtraction(conll, listIndex, false);
+
   }
 
   /**
-   * Parse a CoNLL formatted tree into a SemanticGraph object (along with a list of tokens).
-   *
-   * @param conll The CoNLL formatted tree.
-   *
-   * @return A pair of a SemanticGraph and a token list, corresponding to the parse of the sentence
-   *         and to tokens in the sentence.
+   * Create a relation from a CoNLL format like:
+   * <pre>
+   *   word_index  word  parent_index  incoming_relation
+   * </pre>
    */
-  protected Pair<SemanticGraph, List<CoreLabel>> mkTree(String conll) {
+  protected Optional<RelationTriple> mkExtraction(String conll, int listIndex, boolean allNominals) {
     List<CoreLabel> sentence = new ArrayList<>();
     SemanticGraph tree = new SemanticGraph();
     for (String line : conll.split("\n")) {
@@ -83,20 +80,6 @@ public class RelationTripleSegmenterTest extends TestCase {
       }
       i += 1;
     }
-
-    return Pair.makePair(tree, sentence);
-  }
-
-  /**
-   * Create a relation from a CoNLL format like:
-   * <pre>
-   *   word_index  word  parent_index  incoming_relation
-   * </pre>
-   */
-  protected Optional<RelationTriple> mkExtraction(String conll, int listIndex, boolean allNominals) {
-    Pair<SemanticGraph, List<CoreLabel>> info = mkTree(conll);
-    SemanticGraph tree = info.first;
-    List<CoreLabel> sentence = info.second;
     // Run extractor
     Optional<RelationTriple> segmented = new RelationTripleSegmenter(allNominals).segment(tree, Optional.empty());
     if (segmented.isPresent() && listIndex == 0) {
@@ -769,25 +752,5 @@ public class RelationTripleSegmenterTest extends TestCase {
     Optional<RelationTriple> extraction = mkExtraction(conll, true);
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tI\tmake tea at_time\tFriday", extraction.get().toString());
-  }
-
-  public void testVPOnlyReplacedWith() {
-    String conll =
-        "1\treplaced\t0\tconj:and\tVBD\n" +
-        "2\twith\t5\tcase\tIN\n" +
-        "3\ta\t5\tdet\tDT\n" +
-        "4\tdifferent\t5\tamod\tJJ\n" +
-        "5\ttype\t1\tnmod:with\tNN\n" +
-        "6\tof\t7\tcase\tIN\n" +
-        "7\tfilter\t5\tnmod:of\tNN\n";
-    // Positive case
-    boolean matches = false;
-    SemanticGraph tree = mkTree(conll).first;
-    for (SemgrexPattern candidate : new RelationTripleSegmenter().VP_PATTERNS) {
-      if (candidate.matcher(tree).matches()) {
-        matches = true;
-      }
-    }
-    assertTrue(matches);
   }
 }

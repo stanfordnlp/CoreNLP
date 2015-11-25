@@ -231,9 +231,7 @@ public class ClauseSplitterSearchProblem {
   /**
    * Mostly just an alias, but make sure our featurizer is serializable!
    */
-  public interface Featurizer extends Function<Triple<ClauseSplitterSearchProblem.State, ClauseSplitterSearchProblem.Action, ClauseSplitterSearchProblem.State>, Counter<String>>, Serializable {
-    boolean isSimpleSplit(Counter<String> feats);
-  }
+  public interface Featurizer extends Function<Triple<ClauseSplitterSearchProblem.State, ClauseSplitterSearchProblem.Action, ClauseSplitterSearchProblem.State>, Counter<String>>, Serializable { }
 
   /**
    * Create a searcher manually, suppling a dependency tree, an optional classifier for when to split clauses,
@@ -889,107 +887,94 @@ public class ClauseSplitterSearchProblem {
   /**
    * The default featurizer to use during training.
    */
-  public static final Featurizer DEFAULT_FEATURIZER = new Featurizer() {
-    @Override
-    public boolean isSimpleSplit(Counter<String> feats) {
-      for (String key : feats.keySet()) {
-        if (key.startsWith("simple&")) {
-          return true;
-        }
-      }
-      return false;
+  public static final Featurizer DEFAULT_FEATURIZER = triple -> {
+    // Variables
+    State from = triple.first;
+    Action action = triple.second;
+    State to = triple.third;
+    String signature = action.signature();
+    String edgeRelTaken = to.edge == null ? "root" : to.edge.getRelation().toString();
+    String edgeRelShort = to.edge == null ?  "root"  : to.edge.getRelation().getShortName();
+    if (edgeRelShort.contains("_")) {
+      edgeRelShort = edgeRelShort.substring(0, edgeRelShort.indexOf("_"));
     }
 
-    @Override
-    public Counter<String> apply(Triple<State, Action, State> triple) {
-      // Variables
-      State from = triple.first;
-      Action action = triple.second;
-      State to = triple.third;
-      String signature = action.signature();
-      String edgeRelTaken = to.edge == null ? "root" : to.edge.getRelation().toString();
-      String edgeRelShort = to.edge == null ?  "root"  : to.edge.getRelation().getShortName();
-      if (edgeRelShort.contains("_")) {
-        edgeRelShort = edgeRelShort.substring(0, edgeRelShort.indexOf("_"));
+    // -- Featurize --
+    // Variables to aggregate
+    boolean parentHasSubj = false;
+    boolean parentHasObj = false;
+    boolean childHasSubj = false;
+    boolean childHasObj = false;
+    Counter<String> feats = new ClassicCounter<>();
+
+    // 1. edge taken
+    feats.incrementCount(signature + "&edge:" + edgeRelTaken);
+    feats.incrementCount(signature + "&edge_type:" + edgeRelShort);
+
+    // 2. last edge taken
+    if (from.edge == null) {
+      assert to.edge == null || to.originalTree().getRoots().contains(to.edge.getGovernor());
+      feats.incrementCount(signature + "&at_root");
+      feats.incrementCount(signature + "&at_root&root_pos:" + to.originalTree().getFirstRoot().tag());
+    } else {
+      feats.incrementCount(signature + "&not_root");
+      String lastRelShort = from.edge.getRelation().getShortName();
+      if (lastRelShort.contains("_")) {
+        lastRelShort = lastRelShort.substring(0, lastRelShort.indexOf("_"));
       }
+      feats.incrementCount(signature + "&last_edge:" + lastRelShort);
+    }
 
-      // -- Featurize --
-      // Variables to aggregate
-      boolean parentHasSubj = false;
-      boolean parentHasObj = false;
-      boolean childHasSubj = false;
-      boolean childHasObj = false;
-      Counter<String> feats = new ClassicCounter<>();
-
-      // 1. edge taken
-      feats.incrementCount(signature + "&edge:" + edgeRelTaken);
-      feats.incrementCount(signature + "&edge_type:" + edgeRelShort);
-
-      // 2. last edge taken
-      if (from.edge == null) {
-        assert to.edge == null || to.originalTree().getRoots().contains(to.edge.getGovernor());
-        feats.incrementCount(signature + "&at_root");
-        feats.incrementCount(signature + "&at_root&root_pos:" + to.originalTree().getFirstRoot().tag());
-      } else {
-        feats.incrementCount(signature + "&not_root");
-        String lastRelShort = from.edge.getRelation().getShortName();
-        if (lastRelShort.contains("_")) {
-          lastRelShort = lastRelShort.substring(0, lastRelShort.indexOf("_"));
-        }
-        feats.incrementCount(signature + "&last_edge:" + lastRelShort);
-      }
-
-      if (to.edge != null) {
-        // 3. other edges at parent
-        for (SemanticGraphEdge parentNeighbor : from.originalTree().outgoingEdgeIterable(to.edge.getGovernor())) {
-          if (parentNeighbor != to.edge) {
-            String parentNeighborRel = parentNeighbor.getRelation().toString();
-            if (parentNeighborRel.contains("subj")) {
-              parentHasSubj = true;
-            }
-            if (parentNeighborRel.contains("obj")) {
-              parentHasObj = true;
-            }
-            // (add feature)
-            feats.incrementCount(signature + "&parent_neighbor:" + parentNeighborRel);
-            feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&parent_neighbor:" + parentNeighborRel);
+    if (to.edge != null) {
+      // 3. other edges at parent
+      for (SemanticGraphEdge parentNeighbor : from.originalTree().outgoingEdgeIterable(to.edge.getGovernor())) {
+        if (parentNeighbor != to.edge) {
+          String parentNeighborRel = parentNeighbor.getRelation().toString();
+          if (parentNeighborRel.contains("subj")) {
+            parentHasSubj = true;
           }
-        }
-
-        // 4. Other edges at child
-        int childNeighborCount = 0;
-        for (SemanticGraphEdge childNeighbor : from.originalTree().outgoingEdgeIterable(to.edge.getDependent())) {
-          String childNeighborRel = childNeighbor.getRelation().toString();
-          if (childNeighborRel.contains("subj")) {
-            childHasSubj = true;
+          if (parentNeighborRel.contains("obj")) {
+            parentHasObj = true;
           }
-          if (childNeighborRel.contains("obj")) {
-            childHasObj = true;
-          }
-          childNeighborCount += 1;
           // (add feature)
-          feats.incrementCount(signature + "&child_neighbor:" + childNeighborRel);
-          feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&child_neighbor:" + childNeighborRel);
+          feats.incrementCount(signature + "&parent_neighbor:" + parentNeighborRel);
+          feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&parent_neighbor:" + parentNeighborRel);
         }
-        // 4.1 Number of other edges at child
-        feats.incrementCount(signature + "&child_neighbor_count:" + (childNeighborCount < 3 ? childNeighborCount : ">2"));
-        feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&child_neighbor_count:" + (childNeighborCount < 3 ? childNeighborCount : ">2"));
-
-
-        // 5. Subject/Object stats
-        feats.incrementCount(signature + "&parent_neighbor_subj:" + parentHasSubj);
-        feats.incrementCount(signature + "&parent_neighbor_obj:" + parentHasObj);
-        feats.incrementCount(signature + "&child_neighbor_subj:" + childHasSubj);
-        feats.incrementCount(signature + "&child_neighbor_obj:" + childHasObj);
-
-        // 6. POS tag info
-        feats.incrementCount(signature + "&parent_pos:" + to.edge.getGovernor().tag());
-        feats.incrementCount(signature + "&child_pos:" + to.edge.getDependent().tag());
-        feats.incrementCount(signature + "&pos_signature:" + to.edge.getGovernor().tag() + "_" + to.edge.getDependent().tag());
-        feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&pos_signature:" + to.edge.getGovernor().tag() + "_" + to.edge.getDependent().tag());
       }
-      return feats;
+
+      // 4. Other edges at child
+      int childNeighborCount = 0;
+      for (SemanticGraphEdge childNeighbor : from.originalTree().outgoingEdgeIterable(to.edge.getDependent())) {
+        String childNeighborRel = childNeighbor.getRelation().toString();
+        if (childNeighborRel.contains("subj")) {
+          childHasSubj = true;
+        }
+        if (childNeighborRel.contains("obj")) {
+          childHasObj = true;
+        }
+        childNeighborCount += 1;
+        // (add feature)
+        feats.incrementCount(signature + "&child_neighbor:" + childNeighborRel);
+        feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&child_neighbor:" + childNeighborRel);
+      }
+      // 4.1 Number of other edges at child
+      feats.incrementCount(signature + "&child_neighbor_count:" + (childNeighborCount < 3 ? childNeighborCount : ">2"));
+      feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&child_neighbor_count:" + (childNeighborCount < 3 ? childNeighborCount : ">2"));
+
+
+      // 5. Subject/Object stats
+      feats.incrementCount(signature + "&parent_neighbor_subj:" + parentHasSubj);
+      feats.incrementCount(signature + "&parent_neighbor_obj:" + parentHasObj);
+      feats.incrementCount(signature + "&child_neighbor_subj:" + childHasSubj);
+      feats.incrementCount(signature + "&child_neighbor_obj:" + childHasObj);
+
+      // 6. POS tag info
+      feats.incrementCount(signature + "&parent_pos:" + to.edge.getGovernor().tag());
+      feats.incrementCount(signature + "&child_pos:" + to.edge.getDependent().tag());
+      feats.incrementCount(signature + "&pos_signature:" + to.edge.getGovernor().tag() + "_" + to.edge.getDependent().tag());
+      feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&pos_signature:" + to.edge.getGovernor().tag() + "_" + to.edge.getDependent().tag());
     }
+    return feats;
   };
 
 }

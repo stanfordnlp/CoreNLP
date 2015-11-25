@@ -62,14 +62,23 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
     this.genre = genre;
   }
 
+  public static boolean insertModifierWildcard = false;
+
 
   public SurfacePattern(Token[] prevContext, PatternToken token, Token[] nextContext, SurfacePatternFactory.Genre genre) {
     super(PatternFactory.PatternType.SURFACE);
     this.setPrevContext(prevContext);
     this.setNextContext(nextContext);
-
+    //
+    // if (prevContext != null)
+    // prevContextStr = StringUtils.join(prevContext, " ");
+    //
+    // if (nextContext != null)
+    // nextContextStr = StringUtils.join(nextContext, " ");
 
     this.setToken(token);
+    // this.setOriginalPrev(originalPrev);
+    // this.setOriginalNext(originalNext);
     this.genre = genre;
 
     hashcode = toString().hashCode();
