@@ -50,7 +50,7 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
           .normalizeSoftMaxMinMaxScores(constVars.dictOddsWeights.get(label),
             true, true, false);
 
-    Counter<E> currentPatternWeights4Label = new ClassicCounter<>();
+    Counter<E> currentPatternWeights4Label = new ClassicCounter<E>();
 
     boolean useFreqPhraseExtractedByPat = false;
     if (patternScoring.equals(PatternScoring.SqrtAllRatio))
@@ -103,7 +103,7 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
 
     //Multiplying by logP
     if (patternScoring.equals(PatternScoring.PhEvalInPatLogP) || patternScoring.equals(PatternScoring.LOGREGlogP)) {
-      Counter<E> logpos_i = new ClassicCounter<>();
+      Counter<E> logpos_i = new ClassicCounter<E>();
       for (Entry<E, ClassicCounter<CandidatePhrase>> en : patternsandWords4Label
           .entrySet()) {
         logpos_i.setCount(en.getKey(), Math.log(en.getValue().size()));
@@ -123,14 +123,14 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
 //      Data.loadGoogleNGrams();
 //    }
 
-    Counter<E> patterns = new ClassicCounter<>();
+    Counter<E> patterns = new ClassicCounter<E>();
 
-    Counter<CandidatePhrase> googleNgramNormScores = new ClassicCounter<>();
-    Counter<CandidatePhrase> domainNgramNormScores = new ClassicCounter<>();
+    Counter<CandidatePhrase> googleNgramNormScores = new ClassicCounter<CandidatePhrase>();
+    Counter<CandidatePhrase> domainNgramNormScores = new ClassicCounter<CandidatePhrase>();
 
-    Counter<CandidatePhrase> externalFeatWtsNormalized = new ClassicCounter<>();
-    Counter<CandidatePhrase> editDistanceFromOtherSemanticBinaryScores = new ClassicCounter<>();
-    Counter<CandidatePhrase> editDistanceFromAlreadyExtractedBinaryScores = new ClassicCounter<>();
+    Counter<CandidatePhrase> externalFeatWtsNormalized = new ClassicCounter<CandidatePhrase>();
+    Counter<CandidatePhrase> editDistanceFromOtherSemanticBinaryScores = new ClassicCounter<CandidatePhrase>();
+    Counter<CandidatePhrase> editDistanceFromAlreadyExtractedBinaryScores = new ClassicCounter<CandidatePhrase>();
     double externalWtsDefault = 0.5;
     Counter<String> classifierScores = null;
 
@@ -201,13 +201,13 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
       classifierScores = scoreclassifier.phraseScorer.scorePhrases(label, allCandidatePhrases,  true);
     }
 
-    Counter<CandidatePhrase> cachedScoresForThisIter = new ClassicCounter<>();
+    Counter<CandidatePhrase> cachedScoresForThisIter = new ClassicCounter<CandidatePhrase>();
 
     for (Map.Entry<E, ClassicCounter<CandidatePhrase>> en: positivePatternsAndWords.entrySet()) {
 
         for(Entry<CandidatePhrase, Double> en2: en.getValue().entrySet()) {
           CandidatePhrase word = en2.getKey();
-          Counter<ScorePhraseMeasures> scoreslist = new ClassicCounter<>();
+          Counter<ScorePhraseMeasures> scoreslist = new ClassicCounter<ScorePhraseMeasures>();
           double score = 1;
           if ((patternScoring.equals(PatternScoring.PhEvalInPat) || patternScoring
             .equals(PatternScoring.PhEvalInPatLogP))

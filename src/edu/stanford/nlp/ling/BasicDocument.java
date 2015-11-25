@@ -46,7 +46,7 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
   /**
    * Label(s) for this document.
    */
-  protected final List<L> labels = new ArrayList<>();
+  protected final List<L> labels = new ArrayList<L>();
 
   /**
    * TokenizerFactory used to convert the text into words inside
@@ -91,7 +91,7 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
    * for convenience (so it's more like a constructor, but inherited).
    */
   public static <L> BasicDocument<L> init(String text, String title, boolean keepOriginalText) {
-    BasicDocument<L> basicDocument = new BasicDocument<>();
+    BasicDocument<L> basicDocument = new BasicDocument<L>();
     // initializes the List of labels and sets the title
     basicDocument.setTitle(title);
 
@@ -393,7 +393,7 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
     try {
       bd = ErasureUtils.<BasicDocument<L>>uncheckedCast(getClass().newInstance());
     } catch (Exception e) {
-      bd = new BasicDocument<>();
+      bd = new BasicDocument<L>();
     }
 
     // copies over basic meta-data

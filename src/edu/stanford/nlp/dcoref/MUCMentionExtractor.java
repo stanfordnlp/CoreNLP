@@ -85,11 +85,11 @@ public class MUCMentionExtractor extends MentionExtractor {
 
   @Override
   public Document nextDoc() throws Exception {
-    List<List<CoreLabel>> allWords = new ArrayList<>();
-    List<Tree> allTrees = new ArrayList<>();
-    List<List<Mention>> allGoldMentions = new ArrayList<>();
+    List<List<CoreLabel>> allWords = new ArrayList<List<CoreLabel>>();
+    List<Tree> allTrees = new ArrayList<Tree>();
+    List<List<Mention>> allGoldMentions = new ArrayList<List<Mention>>();
     List<List<Mention>> allPredictedMentions;
-    List<CoreMap> allSentences = new ArrayList<>();
+    List<CoreMap> allSentences = new ArrayList<CoreMap>();
     Annotation docAnno = new Annotation("");
 
     Pattern docPattern = Pattern.compile("<DOC>(.*?)</DOC>", Pattern.DOTALL+Pattern.CASE_INSENSITIVE);
@@ -131,10 +131,10 @@ public class MUCMentionExtractor extends MentionExtractor {
       }
       // END FIXING TOKENIZATION PROBLEMS
 
-      List<CoreLabel> sentence = new ArrayList<>();
+      List<CoreLabel> sentence = new ArrayList<CoreLabel>();
       // MUC accepts embedded coref mentions, so we need to keep a stack for the mentions currently open
-      Stack<Mention> stack = new Stack<>();
-      List<Mention> mentions = new ArrayList<>();
+      Stack<Mention> stack = new Stack<Mention>();
+      List<Mention> mentions = new ArrayList<Mention>();
 
       allWords.add(sentence);
       allGoldMentions.add(mentions);

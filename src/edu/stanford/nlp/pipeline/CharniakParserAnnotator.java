@@ -12,8 +12,6 @@ import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.GrammaticalStructureFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.ScoredObject;
 
 /**
  * This class will add parse information to an Annotation from the BLLIP parser.
@@ -67,9 +65,7 @@ public class CharniakParserAnnotator implements Annotator {
           tree = ParserUtils.xTree(words);
         }
 
-        List<Tree> trees = Generics.newArrayList(1);
-        trees.add(tree);
-        ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, trees, GrammaticalStructure.Extras.NONE);
+        ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, tree, GrammaticalStructure.Extras.NONE);
       }
     } else {
       throw new RuntimeException("unable to find sentences in: " + annotation);

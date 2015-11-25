@@ -53,7 +53,7 @@ public abstract class CoreMapSequenceMatchAction<T extends CoreMap> implements S
       BasicSequenceMatchResult<CoreMap> res = matchResult.toBasicSequenceMatchResult();
 
       List<? extends CoreMap> elements = matchResult.elements();
-      List<CoreMap> mergedElements = new ArrayList<>();
+      List<CoreMap> mergedElements = new ArrayList<CoreMap>();
       res.elements = mergedElements;
 
       int last = 0;

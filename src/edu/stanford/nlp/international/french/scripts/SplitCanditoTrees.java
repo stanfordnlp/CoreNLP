@@ -81,7 +81,7 @@ public final class SplitCanditoTrees {
   static List<String> readIds(String filename)
     throws IOException
   {
-    List<String> ids = new ArrayList<>();
+    List<String> ids = new ArrayList<String>();
     BufferedReader fin =
       new BufferedReader(new InputStreamReader
                          (new FileInputStream(filename), "ISO8859_1"));
@@ -126,16 +126,16 @@ public final class SplitCanditoTrees {
   static void preprocessMWEs(Map<String, Tree> treeMap) {
 
     TwoDimensionalCounter<String,String> labelTerm =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
     TwoDimensionalCounter<String,String> termLabel =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
     TwoDimensionalCounter<String,String> labelPreterm =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
     TwoDimensionalCounter<String,String> pretermLabel =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
 
     TwoDimensionalCounter<String,String> unigramTagger =
-            new TwoDimensionalCounter<>();
+      new TwoDimensionalCounter<String,String>();
 
     for (Tree t : treeMap.values()) {
       MWEPreprocessor.countMWEStatistics(t, unigramTagger,
@@ -241,8 +241,8 @@ public final class SplitCanditoTrees {
                                   Map<String, Tree> treeMap)
     throws IOException
   {
-    Queue<Integer> fSizeQueue = new LinkedList<>(Arrays.asList(fSizes));
-    Queue<String> fNameQueue = new LinkedList<>(Arrays.asList(fNames));
+    Queue<Integer> fSizeQueue = new LinkedList<Integer>(Arrays.asList(fSizes));
+    Queue<String> fNameQueue = new LinkedList<String>(Arrays.asList(fNames));
 
     TregexPattern pBadTree = TregexPattern.compile("@SENT <: @PUNC");
     TregexPattern pBadTree2 = TregexPattern.compile("@SENT <1 @PUNC <2 @PUNC !<3 __");

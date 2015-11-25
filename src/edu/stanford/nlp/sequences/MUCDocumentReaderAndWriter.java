@@ -61,7 +61,7 @@ public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreL
       PTBTokenizer ptb = PTBTokenizer.newPTBTokenizer(new BufferedReader(new StringReader(doc)), false, true);
       List<CoreLabel> words = ptb.tokenize();
 
-      List<CoreLabel> result = new ArrayList<>();
+      List<CoreLabel> result = new ArrayList<CoreLabel>();
 
       CoreLabel prev = null;
       String prevString = "";

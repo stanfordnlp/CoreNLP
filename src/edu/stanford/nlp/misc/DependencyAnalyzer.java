@@ -139,7 +139,7 @@ public class DependencyAnalyzer {
 
     // The depQueue is the queue of items in the closure whose dependencies
     // have yet to be scanned.
-    LinkedList<Identifier> depQueue = new LinkedList<>();
+    LinkedList<Identifier> depQueue = new LinkedList<Identifier>();
 
     // add all the starting classes to the closure and the depQueue
     addStartingClasses(depQueue, closure, startingClassNames);
@@ -183,14 +183,14 @@ public class DependencyAnalyzer {
 
     DependencyAnalyzer da = new DependencyAnalyzer(args[0]);
 
-    ArrayList<String> startingClasses = new ArrayList<>(args.length - 1);
+    ArrayList<String> startingClasses = new ArrayList<String>(args.length - 1);
     for (int i = 1; i < args.length; ++i) {
       startingClasses.add(args[i]);
     }
 
     Collection<Identifier> closure = da.transitiveClosure(startingClasses);
 
-    ArrayList<Identifier> sortedClosure = new ArrayList<>(closure);
+    ArrayList<Identifier> sortedClosure = new ArrayList<Identifier>(closure);
     Collections.sort(sortedClosure);
     Set<String> alreadyOutput = Generics.newHashSet();
     for (Identifier identifier : sortedClosure) {

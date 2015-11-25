@@ -227,7 +227,7 @@ public class ParserPanel extends JPanel {
     DocumentPreprocessor processor = new DocumentPreprocessor(reader);
     TokenizerFactory<? extends HasWord> tf = tlp.getTokenizerFactory();
     processor.setTokenizerFactory(tf);
-    List<Integer> boundaries = new ArrayList<>();
+    List<Integer> boundaries = new ArrayList<Integer>();
     for (List<HasWord> sentence : processor) {
       if (sentence.size() == 0)
         continue;
@@ -378,11 +378,11 @@ public class ParserPanel extends JPanel {
     try {
       if (urlOrFile.startsWith("http://") || urlOrFile.endsWith(".htm") || urlOrFile.endsWith(".html")) {
         // strip tags from html documents
-        Document<Object, Word, Word> docPre = new BasicDocument<>().init(new URL(urlOrFile));
-        DocumentProcessor<Word, Word, Object, Word> noTags = new StripTagsProcessor<>();
+        Document<Object, Word, Word> docPre = new BasicDocument<Object>().init(new URL(urlOrFile));
+        DocumentProcessor<Word, Word, Object, Word> noTags = new StripTagsProcessor<Object, Word>();
         doc = noTags.processDocument(docPre);
       } else {
-        doc = new BasicDocument<>(this.getTokenizerFactory()).init(new InputStreamReader(new FileInputStream(filename), encoding));
+        doc = new BasicDocument<Object>(this.getTokenizerFactory()).init(new InputStreamReader(new FileInputStream(filename), encoding));
       }
     } catch (Exception e) {
       JOptionPane.showMessageDialog(this, "Could not load file " + filename + "\n" + e, null, JOptionPane.ERROR_MESSAGE);
@@ -393,11 +393,11 @@ public class ParserPanel extends JPanel {
 
     // load the document into the text pane
     StringBuilder docStr = new StringBuilder();
-    for (Word aDoc : doc) {
+    for (Iterator<?> it = doc.iterator(); it.hasNext(); ) {
       if (docStr.length() > 0) {
         docStr.append(' ');
       }
-      docStr.append(aDoc.toString());
+      docStr.append(it.next().toString());
     }
     textPane.setText(docStr.toString());
     dataFileLabel.setText(urlOrFile);
@@ -450,7 +450,7 @@ public class ParserPanel extends JPanel {
     DocumentPreprocessor processor = new DocumentPreprocessor(reader);
     TokenizerFactory<? extends HasWord> tf = tlp.getTokenizerFactory();
     processor.setTokenizerFactory(tf);
-    List<List<HasWord>> sentences = new ArrayList<>();
+    List<List<HasWord>> sentences = new ArrayList<List<HasWord>>();
     for (List<HasWord> sentence : processor) {
       sentences.add(sentence);
     }

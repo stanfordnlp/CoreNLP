@@ -357,7 +357,7 @@ public class CoordinationTransformer implements TreeTransformer {
     Tree[] ccSiblings = t.children();
 
     //check if other CC
-    List<Integer> ccPositions = new ArrayList<>();
+    List<Integer> ccPositions = new ArrayList<Integer>();
     for (int i = ccIndex + 1; i < ccSiblings.length; i++) {
       if (ccSiblings[i].value().startsWith("CC") && i < ccSiblings.length - 1) { // second conjunct to ensure that a CC we add isn't the last child
         ccPositions.add(Integer.valueOf(i));

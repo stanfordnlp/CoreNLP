@@ -31,7 +31,7 @@ public class SpanishUnknownWordModel extends BaseUnknownWordModel {
   public SpanishUnknownWordModel(Options op, Lexicon lex,
                                  Index<String> wordIndex,
                                  Index<String> tagIndex) {
-    this(op, lex, wordIndex, tagIndex, new ClassicCounter<>());
+    this(op, lex, wordIndex, tagIndex, new ClassicCounter<IntTaggedWord>());
   }
 
   @Override

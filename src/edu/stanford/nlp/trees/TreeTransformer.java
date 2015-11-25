@@ -21,6 +21,6 @@ public interface TreeTransformer {
    *           that the tree passed in is not <code>null</code>.
    * @return the transformed <code>Tree</code>
    */
-  Tree transformTree(Tree t);
+  public Tree transformTree(Tree t); 
 
 }

@@ -412,7 +412,7 @@ public class StochasticDiffFunctionTester {
     double[] fullHx = new double[thisFunc.domainDimension()];
     double[] thisHx = new double[x.length];
     double[] thisGrad = new double[x.length];
-    List<double[]> HxList = new ArrayList<>();
+    List<double[]> HxList = new ArrayList<double[]>();
 
     /*
     PrintWriter file = null;

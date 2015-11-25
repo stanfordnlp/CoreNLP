@@ -172,8 +172,8 @@ public class NegraPennTreeNormalizer extends TreeNormalizer {
 
   private void insertNPinPPall(Tree t) {
     Tree[] kids = t.children();
-    for (Tree kid : kids) {
-      insertNPinPPall(kid);
+    for (int i = 0, n = kids.length; i < n; i++) {
+      insertNPinPPall(kids[i]);
     }
     insertNPinPP(t);
   }

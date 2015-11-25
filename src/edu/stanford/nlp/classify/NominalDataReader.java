@@ -12,9 +12,7 @@ import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import edu.stanford.nlp.util.logging.Logging;
 
 /**
  * A class to read some UCI datasets into RVFDatum. Will incrementally add formats.
@@ -27,8 +25,6 @@ import org.slf4j.LoggerFactory;
 public class NominalDataReader {
   Map<String, Index<String>> indices = Generics.newHashMap(); // an Index for each feature so that its values are coded as integers
 
-  final static Logger logger = LoggerFactory.getLogger(NominalDataReader.class);
-
   /**
    * the class is the last column and it skips the next-to-last column because it is a unique id in the audiology data
    *
@@ -36,7 +32,7 @@ public class NominalDataReader {
   static RVFDatum<String, Integer> readDatum(String line, String separator, Map<Integer, Index<String>> indices) {
     StringTokenizer st = new StringTokenizer(line, separator);
     //int fno = 0;
-    ArrayList<String> tokens = new ArrayList<>();
+    ArrayList<String> tokens = new ArrayList<String>();
     while (st.hasMoreTokens()) {
       String token = st.nextToken();
       tokens.add(token);
@@ -48,8 +44,8 @@ public class NominalDataReader {
   }
 
   static RVFDatum<String, Integer> readDatum(String[] values, int classColumn, Set<Integer> skip, Map<Integer, Index<String>> indices) {
-    ClassicCounter<Integer> c = new ClassicCounter<>();
-    RVFDatum<String, Integer> d = new RVFDatum<>(c);
+    ClassicCounter<Integer> c = new ClassicCounter<Integer>();
+    RVFDatum<String, Integer> d = new RVFDatum<String, Integer>(c);
     int attrNo = 0;
     for (int index = 0; index < values.length; index++) {
       if (index == classColumn) {
@@ -62,7 +58,7 @@ public class NominalDataReader {
       Integer featKey = Integer.valueOf(attrNo);
       Index<String> ind = indices.get(featKey);
       if (ind == null) {
-        ind = new HashIndex<>();
+        ind = new HashIndex<String>();
         indices.put(featKey, ind);
       }
       // MG: condition on isLocked is useless, since add(E) contains such a condition:
@@ -72,7 +68,7 @@ public class NominalDataReader {
       int valInd = ind.indexOf(values[index]);
       if (valInd == -1) {
         valInd = 0;
-        logger.info("unknown attribute value " + values[index] + " of attribute " + attrNo);
+        Logging.logger(NominalDataReader.class).info("unknown attribute value " + values[index] + " of attribute " + attrNo);
       }
       c.incrementCount(featKey, valInd);
       attrNo++;
@@ -88,7 +84,7 @@ public class NominalDataReader {
   static ArrayList<RVFDatum<String, Integer>> readData(String filename, Map<Integer, Index<String>> indices) {
     try {
       String sep = ", ";
-      ArrayList<RVFDatum<String, Integer>> examples = new ArrayList<>();
+      ArrayList<RVFDatum<String, Integer>> examples = new ArrayList<RVFDatum<String, Integer>>();
       for(String line : ObjectBank.getLineIterator(new File(filename))) {
         RVFDatum<String, Integer> next = readDatum(line, sep, indices);
         examples.add(next);

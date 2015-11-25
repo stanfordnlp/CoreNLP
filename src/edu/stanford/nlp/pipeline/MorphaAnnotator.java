@@ -102,7 +102,7 @@ public class MorphaAnnotator implements Annotator{
 
   @Override
   public Set<Requirement> requires() {
-    return Annotator.REQUIREMENTS.get(STANFORD_LEMMA);
+    return TOKENIZE_SSPLIT_POS;
   }
 
   @Override

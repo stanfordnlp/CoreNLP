@@ -38,7 +38,7 @@ public abstract class SentenceAnnotator implements Annotator {
   }
 
   private InterruptibleMulticoreWrapper<CoreMap, CoreMap> buildWrapper(Annotation annotation) {
-    InterruptibleMulticoreWrapper<CoreMap, CoreMap> wrapper = new InterruptibleMulticoreWrapper<>(nThreads(), new AnnotatorProcessor(annotation), true, maxTime());
+    InterruptibleMulticoreWrapper<CoreMap, CoreMap> wrapper = new InterruptibleMulticoreWrapper<CoreMap, CoreMap>(nThreads(), new AnnotatorProcessor(annotation), true, maxTime());
     return wrapper;
   }
 
@@ -103,9 +103,6 @@ public abstract class SentenceAnnotator implements Annotator {
 
   protected abstract int nThreads();
 
-  /**
-   * The maximum time to run this annotator for, in milliseconds.
-   */
   protected abstract long maxTime();
 
   /** annotation is included in case there is global information we care about */

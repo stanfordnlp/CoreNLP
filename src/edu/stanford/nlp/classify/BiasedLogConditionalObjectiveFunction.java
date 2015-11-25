@@ -77,8 +77,8 @@ public class BiasedLogConditionalObjectiveFunction extends AbstractCachingDiffFu
       Arrays.fill(sums, 0.0);
 
       for (int c = 0; c < numClasses; c++) {
-        for (int feature : features) {
-          int i = indexOf(feature, c);
+        for (int f = 0; f < features.length; f++) {
+          int i = indexOf(features[f], c);
           sums[c] += x[i];
         }
       }
@@ -95,8 +95,8 @@ public class BiasedLogConditionalObjectiveFunction extends AbstractCachingDiffFu
       for (int c = 0; c < numClasses; c++) {
         probs[c] = Math.exp(sums[c] - total);
         weightedProbs[c] = Math.exp(weightedSums[c] - weightedTotal);
-        for (int feature : features) {
-          int i = indexOf(feature, c);
+        for (int f = 0; f < features.length; f++) {
+          int i = indexOf(features[f], c);
           derivative[i] += probs[c] - weightedProbs[c];
         }
       }

@@ -114,7 +114,7 @@ public class MultiWordStringMatcher {
     if (end > text.length()) return null;
     List<IntPair> offsets = null;
     int i = text.indexOf(targetString, start);
-    if (i >= 0 && i < end) { offsets = new ArrayList<>(); }
+    if (i >= 0 && i < end) { offsets = new ArrayList<IntPair>(); }
     while (i >= 0 && i < end) {
       boolean matched = true;
       if (i > 0) {
@@ -140,7 +140,7 @@ public class MultiWordStringMatcher {
     return offsets;
   }
 
-  private CacheMap<String, Pattern> targetStringPatternCache = new CacheMap<>(5000);
+  private CacheMap<String, Pattern> targetStringPatternCache = new CacheMap<String,Pattern>(5000);
 
   public final static Comparator<String> LONGEST_STRING_COMPARATOR = new LongestStringComparator();
   public static class LongestStringComparator implements Comparator<String> {
@@ -301,7 +301,7 @@ public class MultiWordStringMatcher {
     List<IntPair> offsets = null;
     matcher.region(start,end);
     int i = (matcher.find())? matcher.start():-1;
-    if (i >= 0 && i < end) { offsets = new ArrayList<>(); }
+    if (i >= 0 && i < end) { offsets = new ArrayList<IntPair>(); }
     while (i >= 0 && i < end) {
       boolean matched = true;
       int matchEnd = matcher.end();

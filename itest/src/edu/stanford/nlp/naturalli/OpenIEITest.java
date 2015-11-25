@@ -10,6 +10,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -48,16 +49,13 @@ public class OpenIEITest {
         found = true;
       }
     }
-    assertTrue("The extraction (" + expected.replace("\t", "; ") + ") was not found in '" + text + "'", found);
+    assertTrue("The extraction '" + expected + "' was not found in '" + text + "'", found);
   }
 
-  public void assertExtracted(Set<String> expectedSet, String text) {
+  public void assertExtracted(Set<String> expected, String text) {
     Collection<RelationTriple> extractions = annotate(text).get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
-    String actual = StringUtils.join(
-        extractions.stream().map(x -> x.toString().substring(x.toString().indexOf("\t") + 1).toLowerCase()).sorted(),
-        "\n");
-    String expected = StringUtils.join(expectedSet.stream().map(String::toLowerCase).sorted(), "\n");
-    assertEquals(expected, actual);
+    Set<String> guess = extractions.stream().filter(x -> x.confidence > 0.1).map(RelationTriple::toString).collect(Collectors.toSet());
+    assertEquals(StringUtils.join(expected.stream().sorted(), "\n").toLowerCase(), StringUtils.join(guess.stream().map(x -> x.substring(x.indexOf("\t") + 1)).sorted(), "\n").toLowerCase());
   }
 
   public void assertEntailed(String expected, String text) {
@@ -89,28 +87,11 @@ public class OpenIEITest {
   }
 
   @Test
-  public void testPaperExamples() {
-//    assertExtracted("Fish\tlike to\tswim", "Fish like to swim");  // Parse is persistently broken
-
-    assertExtracted("Tom\tfighting\tJerry", "Tom and Jerry are fighting.");
-    assertExtracted("cats\tis with\ttails", "There are cats with tails.");
-    assertExtracted("IBM\thas\tresearch group", "IBM's research group.");
-    assertExtracted("rabbits\teat\tvegetables", "All rabbits eat vegetables.");
-  }
-
-  @Test
-  public void testOtherExamples() {
-    // Preconj (but, parser currently fails)
-//    assertExtracted("Mary\tis\tbeautiful", "Mary is both beautiful and smart.");
-//    assertExtracted(Collections.EMPTY_SET, "Mary is neither beautiful and smart.");
-  }
-
-  @Test
   public void testExtractionsGeorgeBoyd() {
     assertExtracted(new HashSet<String>() {{
-      add("George Boyd\tjoined on\t21 february 2013");
       add("George Boyd\tjoined for\tremainder");
       add("George Boyd\tjoined for\tremainder of season");
+      add("George Boyd\tjoined on\t21 february 2013");
       add("George Boyd\tjoined on\tloan");
       add("George Boyd\tjoined on\tloan from peterborough united");
     }}, "On 21 February 2013 George Boyd joined on loan from Peterborough United for the remainder of the season.");
@@ -151,7 +132,6 @@ public class OpenIEITest {
       add("He\twas\tcommunity organizer");
 //      add("He\tearning\tlaw degree");
       add("He\tearning\this law degree");
-      add("community organizer\tis in\tChicago");
     }}, "He was a community organizer in Chicago before earning his law degree.");
   }
 

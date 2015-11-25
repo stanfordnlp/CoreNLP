@@ -18,8 +18,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IterableIterator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A hierarchical channel based logger. Log messages are arranged hierarchically by depth
@@ -80,7 +78,7 @@ public class Redwood {
    * The stack of track titles, for consistency checking
    * the endTrack() call
    */
-  private static final Stack<String> titleStack = new Stack<>();
+  private static final Stack<String> titleStack = new Stack<String>();
   /**
    * Signals that no more log messages should be accepted by Redwood
    */
@@ -99,7 +97,7 @@ public class Redwood {
    * Threads which have something they wish to log, but do not yet
    * have control of Redwood
    */
-  private static final Queue<Long> threadsWaiting = new LinkedList<>();
+  private static final Queue<Long> threadsWaiting = new LinkedList<Long>();
   /**
    * Indicator that messages are coming from multiple threads
    */
@@ -123,7 +121,7 @@ public class Redwood {
     assert threadId != currentThread;
     //(get queue)
     if(!threadedLogQueue.containsKey(threadId)){
-      threadedLogQueue.put(threadId, new LinkedList<>());
+      threadedLogQueue.put(threadId, new LinkedList<Runnable>());
     }
     Queue<Runnable> threadLogQueue = threadedLogQueue.get(threadId);
     //(add to queue)
@@ -379,8 +377,7 @@ public class Redwood {
       String expected = titleStack.pop();
       //(check name match)
       if (!isThreaded && !expected.equalsIgnoreCase(title)){
-        log(Flag.ERROR, "Track names do not match: expected: " + expected + " found: " + title);
-//        throw new IllegalArgumentException("Track names do not match: expected: " + expected + " found: " + title);
+        throw new IllegalArgumentException("Track names do not match: expected: " + expected + " found: " + title);
       }
       //(decrement depth)
       depth -= 1;
@@ -603,7 +600,7 @@ public class Redwood {
     // -- Overhead --
     private final boolean isRoot;
     private final LogRecordHandler head;
-    private final List<RecordHandlerTree> children = new ArrayList<>();
+    private final List<RecordHandlerTree> children = new ArrayList<RecordHandlerTree>();
 
     public RecordHandlerTree() {
       isRoot = true;
@@ -707,7 +704,7 @@ public class Redwood {
 
     private static List<Record> append(List<Record> lst, Record toAppend){
       if(lst == LogRecordHandler.EMPTY){
-        lst = new ArrayList<>();
+        lst = new ArrayList<Record>();
       }
       lst.add(toAppend);
       return lst;
@@ -741,7 +738,7 @@ public class Redwood {
         }
       } else {
         //(case: is root)
-        toPassOn = new ArrayList<>();
+        toPassOn = new ArrayList<Record>();
         switch(type){
           case SIMPLE:
             toPassOn = append(toPassOn, toPass);
@@ -1001,14 +998,13 @@ public class Redwood {
       final AtomicInteger numPending = new AtomicInteger(0);
       final Iterator<Runnable> iter = runnables.iterator();
       //--Create Runnables
-      return new IterableIterator<>(new Iterator<Runnable>() {
+      return new IterableIterator<Runnable>(new Iterator<Runnable>() {
         @Override
         public boolean hasNext() {
           synchronized (iter) {
             return iter.hasNext();
           }
         }
-
         @Override
         public synchronized Runnable next() {
           final Runnable runnable;
@@ -1017,27 +1013,25 @@ public class Redwood {
           }
           // (don't flood the queu)
           while (numPending.get() > 100) {
-            try {
-              Thread.sleep(100);
-            } catch (InterruptedException e) {
-            }
+            try { Thread.sleep(100); }
+            catch (InterruptedException e) { }
           }
           numPending.incrementAndGet();
           // (add the job)
-          Runnable toReturn = new Runnable() {
-            public void run() {
+          Runnable toReturn = new Runnable(){
+            public void run(){
               boolean threadFinished = false;
-              try {
+              try{
                 //(signal start of threads)
                 metaInfoLock.lock();
-                if (!haveStarted.getAndSet(true)) {
+                if(!haveStarted.getAndSet(true)){
                   startThreads(title); //<--this must be a blocking operation
                 }
                 metaInfoLock.unlock();
                 //(run runnable)
-                try {
+                try{
                   runnable.run();
-                } catch (Exception | AssertionError e) {
+                } catch (Exception | AssertionError e){
                   e.printStackTrace();
                   System.exit(1);
                 }
@@ -1051,11 +1045,9 @@ public class Redwood {
                     endThreads(title);
                   }
                 }
-              } catch (Throwable t) {
+              } catch(Throwable t){
                 t.printStackTrace();
-                if (!threadFinished) {
-                  finishThread();
-                }
+                if (!threadFinished) { finishThread(); }
               }
             }
           };
@@ -1211,7 +1203,6 @@ public class Redwood {
       PrettyLogger.log(this, description, obj);
     }
 
-    public void info(Object...objs){ log(Util.revConcat(objs)); }
     public void warn(Object...objs){ log(Util.revConcat(objs, WARN)); }
     public void debug(Object...objs){ log(Util.revConcat(objs, DBG)); }
     public void err(Object...objs){ log(Util.revConcat(objs, ERR, FORCE)); }
@@ -1221,7 +1212,7 @@ public class Redwood {
    /**
    * Standard channels; enum for the sake of efficiency
    */
-  protected enum Flag {
+  protected static enum Flag {
     ERROR,
     WARN,
     DEBUG,
@@ -1250,7 +1241,7 @@ public class Redwood {
     System.exit(1);
 
     // -- STRESS TEST THREADS --
-    LinkedList<Runnable> tasks = new LinkedList<>();
+    LinkedList<Runnable> tasks = new LinkedList<Runnable>();
     for(int i=0; i<1000; i++){
       final int fI = i;
       tasks.add(() -> {

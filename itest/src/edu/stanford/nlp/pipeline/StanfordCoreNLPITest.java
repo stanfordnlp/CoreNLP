@@ -2,7 +2,6 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
 import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -15,9 +14,7 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import java.io.*;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 public class StanfordCoreNLPITest extends TestCase {
@@ -60,10 +57,10 @@ public class StanfordCoreNLPITest extends TestCase {
     Assert.assertEquals(2, sentences.size());
 
     // check that pos, lemma and ner and parses are present
-    for (CoreMap sentence : sentences) {
+    for (CoreMap sentence: sentences) {
       List<CoreLabel> sentenceTokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
       Assert.assertNotNull(sentenceTokens);
-      for (CoreLabel token : sentenceTokens) {
+      for (CoreLabel token: sentenceTokens) {
         Assert.assertNotNull(token.get(CoreAnnotations.PartOfSpeechAnnotation.class));
         Assert.assertNotNull(token.get(CoreAnnotations.LemmaAnnotation.class));
         Assert.assertNotNull(token.get(CoreAnnotations.NamedEntityTagAnnotation.class));
@@ -86,35 +83,35 @@ public class StanfordCoreNLPITest extends TestCase {
     pipeline.prettyPrint(document, new PrintWriter(stringWriter));
     String result = stringWriter.getBuffer().toString();
     Assert.assertTrue("Tokens are wrong in " + result,
-      StringUtils.find(result, "\\[Text=Dan .*PartOfSpeech=NNP Lemma=Dan NamedEntityTag=PERSON\\]"));
+            StringUtils.find(result, "\\[Text=Dan .*PartOfSpeech=NNP Lemma=Dan NamedEntityTag=PERSON\\]"));
     Assert.assertTrue("Parses are wrong in " + result,
-      result.contains("(NP (PRP He))"));
+        result.contains("(NP (PRP He))"));
     Assert.assertTrue("Parses are wrong in " + result,
-      result.contains("(VP (VBZ 's)"));
+        result.contains("(VP (VBZ 's)"));
     Assert.assertTrue("Sentence header is wrong in " + result,
-      result.contains("Sentence #1 (7 tokens)"));
+        result.contains("Sentence #1 (7 tokens)"));
     Assert.assertTrue("Dependencies are wrong in " + result,
-      result.contains("nsubj(working-4, Ramage-2)"));
+        result.contains("nsubj(working-4, Ramage-2)"));
 
     // test XML
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     pipeline.xmlPrint(document, os);
     result = new String(os.toByteArray(), "UTF-8");
     Assert.assertTrue("XML header is wrong in " + result,
-      result.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
+        result.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
     Assert.assertTrue("XML root is wrong in " + result,
-      result.contains("<?xml-stylesheet href=\"CoreNLP-to-HTML.xsl\" type=\"text/xsl\"?>"));
+        result.contains("<?xml-stylesheet href=\"CoreNLP-to-HTML.xsl\" type=\"text/xsl\"?>"));
     Assert.assertTrue("XML word info is wrong in " + result,
-      StringUtils.find(result, "<token id=\"2\">\\s*" +
-        "<word>Ramage</word>\\s*" +
-        "<lemma>Ramage</lemma>\\s*" +
-        "<CharacterOffsetBegin>4</CharacterOffsetBegin>\\s*" +
-        "<CharacterOffsetEnd>10</CharacterOffsetEnd>\\s*" +
-        "<POS>NNP</POS>\\s*" +
-        "<NER>PERSON</NER>"));
+            StringUtils.find(result, "<token id=\"2\">\\s*" +
+                    "<word>Ramage</word>\\s*" +
+                    "<lemma>Ramage</lemma>\\s*" +
+                    "<CharacterOffsetBegin>4</CharacterOffsetBegin>\\s*" +
+                    "<CharacterOffsetEnd>10</CharacterOffsetEnd>\\s*" +
+                    "<POS>NNP</POS>\\s*" +
+                    "<NER>PERSON</NER>"));
     Assert.assertTrue("XML dependencies are wrong in " + result,
-      StringUtils.find(result, "<dep type=\"compound\">\\s*<governor idx=\"2\">" +
-        "Ramage</governor>\\s*<dependent idx=\"1\">Dan</dependent>\\s*</dep>"));
+            StringUtils.find(result, "<dep type=\"compound\">\\s*<governor idx=\"2\">" +
+                    "Ramage</governor>\\s*<dependent idx=\"1\">Dan</dependent>\\s*</dep>"));
   }
 
 
@@ -124,11 +121,11 @@ public class StanfordCoreNLPITest extends TestCase {
     for (int i = 0; i < expected.length; i++) {
       CoreMap sentence = sentences.get(i);
       List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-      assertEquals(message + ": number of tokens for sentence " + (i + 1) + "\n" + coremapOutput, expected[i].length, tokens.size());
+      assertEquals(message + ": number of tokens for sentence " + (i+1) + "\n" + coremapOutput, expected[i].length, tokens.size());
       for (int j = 0; j < expected[i].length; j++) {
         String text = expected[i][j][0];
         String ner = expected[i][j][1];
-        String debug = "sentence " + (i + 1) + ", token " + (j + 1);
+        String debug = "sentence " + (i+1) + ", token " + (j+1);
         assertEquals(message + ": text mismatch for " + debug + "\n" + coremapOutput, text, tokens.get(j).word());
         assertEquals(message + ": ner mismatch for " + debug + "(" + tokens.get(j).word() + ")\n" + coremapOutput, ner, tokens.get(j).ner());
       }
@@ -191,7 +188,7 @@ public class StanfordCoreNLPITest extends TestCase {
     pipeline.annotate(document);
     CoreMap sentence = document.get(CoreAnnotations.SentencesAnnotation.class).get(0);
     List<RelationMention> rel = sentence.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
-    assertEquals(rel.get(0).getType(), "Work_For");
+    assertEquals(rel.get(0).getType(),"Work_For");
 //    StringWriter stringWriter = new StringWriter();
 //    pipeline.prettyPrint(document, new PrintWriter(stringWriter));
 //    String result = stringWriter.getBuffer().toString();
@@ -240,7 +237,8 @@ public class StanfordCoreNLPITest extends TestCase {
 
 
   public void testSerialization()
-    throws Exception {
+    throws Exception
+  {
     // Test that an annotation can be serialized and deserialized
 
     StanfordCoreNLP pipeline = new StanfordCoreNLP();
@@ -260,20 +258,21 @@ public class StanfordCoreNLPITest extends TestCase {
     assertTrue(processed instanceof Annotation);
     Annotation newDocument = (Annotation) processed;
     assertEquals(document.get(CoreAnnotations.SentencesAnnotation.class).size(),
-      newDocument.get(CoreAnnotations.SentencesAnnotation.class).size());
+                 newDocument.get(CoreAnnotations.SentencesAnnotation.class).size());
     for (int i = 0; i < document.get(CoreAnnotations.SentencesAnnotation.class).size(); ++i) {
       CoreMap oldSentence = document.get(CoreAnnotations.SentencesAnnotation.class).get(0);
       CoreMap newSentence = newDocument.get(CoreAnnotations.SentencesAnnotation.class).get(0);
       assertEquals(oldSentence.get(TreeCoreAnnotations.TreeAnnotation.class),
-        newSentence.get(TreeCoreAnnotations.TreeAnnotation.class));
+                   newSentence.get(TreeCoreAnnotations.TreeAnnotation.class));
       assertEquals(oldSentence.get(CoreAnnotations.TokensAnnotation.class),
-        newSentence.get(CoreAnnotations.TokensAnnotation.class));
+                   newSentence.get(CoreAnnotations.TokensAnnotation.class));
     }
     assertTrue(document.equals(newDocument));
   }
 
   private static Object processSerialization(Object input)
-    throws Exception {
+    throws Exception
+  {
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
     ObjectOutputStream oout = new ObjectOutputStream(bout);
     oout.writeObject(input);
@@ -351,49 +350,4 @@ public class StanfordCoreNLPITest extends TestCase {
     Assert.assertEquals("Wrong number of sentTokens: " + sentTokens, 11, sentTokens.size());
   }
 
-  private void checkSUTimeAnnotation(String message,
-                                     StanfordCoreNLP pipeline, String text,
-                                     int nExpectedSentences, int nExpectedTokens,
-                                     Map<Integer,String> expectedNormalizedNER) {
-    Annotation doc = new Annotation(text);
-    pipeline.annotate(doc);
-
-    // check that sentences and tokens are present
-    List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
-    Assert.assertNotNull(sentences);
-    Assert.assertEquals(message + ": number of sentences", nExpectedSentences, sentences.size());
-
-    List<CoreLabel> tokens = doc.get(CoreAnnotations.TokensAnnotation.class);
-    Assert.assertNotNull(tokens);
-    Assert.assertEquals(message + ": number of tokens", nExpectedTokens, tokens.size());
-
-    for (Map.Entry<Integer,String> kv : expectedNormalizedNER.entrySet()) {
-      Assert.assertEquals(message + ": token " + kv.getKey(), kv.getValue(),
-        tokens.get(kv.getKey()).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class));
-    }
-  }
-
-  public void testSUTimeProperty() {
-    // Test that SUTime properties are passed through
-    String text = "The date is 2001-10-02.  There is a meeting tomorrow.";
-    int nExpectedSentences = 2;
-    int nExpectedTokens = 11;
-
-    // CoreNLP without properties
-    StanfordCoreNLP pipeline1 = new StanfordCoreNLP();
-    Map<Integer,String> expectedValues1 = new HashMap<Integer,String>();
-    expectedValues1.put(3, "2001-10-02");
-    expectedValues1.put(9, "OFFSET P1D");
-    checkSUTimeAnnotation("Default properties", pipeline1, text, nExpectedSentences, nExpectedTokens, expectedValues1);
-
-    // CoreNLP with properties
-    Properties props = new Properties();
-    props.setProperty("sutime.searchForDocDate", "true");
-
-    StanfordCoreNLP pipeline2 = new StanfordCoreNLP(props);
-    Map<Integer,String> expectedValues2 = new HashMap<Integer,String>();
-    expectedValues2.put(3, "2001-10-02");
-    expectedValues2.put(9, "2001-10-03");
-    checkSUTimeAnnotation("With searchForDocDate", pipeline2, text, nExpectedSentences, nExpectedTokens, expectedValues2);
-  }
 }

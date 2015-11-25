@@ -17,7 +17,7 @@ public class RerouteChannel extends LogRecordHandler {
   }
 
   public List<Record> handle(Record record) {
-    List<Record> results = new ArrayList<>();
+    List<Record> results = new ArrayList<Record>();
     
     Object[] channels = record.channels();
     for (int i = 0; i < channels.length; i++) {

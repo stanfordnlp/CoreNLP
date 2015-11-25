@@ -195,7 +195,7 @@ public class KBestSequenceFinder implements BestSequenceFinder {
         bestFinalScores[k2] = scorePos[k1];
       }
     }
-    ClassicCounter<int[]> kBestWithScores = new ClassicCounter<>();
+    ClassicCounter<int[]> kBestWithScores = new ClassicCounter<int[]>();
     for (int k1 = k - 1; k1 >= 0 && bestFinalScores[k1] > Double.NEGATIVE_INFINITY; k1--) {
       int lastProduct = bestCurrentProducts[k1];
       for (int last = padLength - 1; last >= length - 1 && last >= 0; last--) {

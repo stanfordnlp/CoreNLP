@@ -71,7 +71,7 @@ public class ReaderIteratorFactory implements Iterable<Reader> {
 
 
   public ReaderIteratorFactory() {
-    c = new ArrayList<>();
+    c = new ArrayList<Object>();
   }
 
   /**
@@ -178,7 +178,7 @@ public class ReaderIteratorFactory implements Iterable<Reader> {
         if (o instanceof File) {
           File file = (File) o;
           if (file.isDirectory()) {
-            ArrayList<Object> l = new ArrayList<>();
+            ArrayList<Object> l = new ArrayList<Object>();
             l.addAll(Arrays.asList(file.listFiles()));
             while (iter.hasNext()) {
               l.add(iter.next());

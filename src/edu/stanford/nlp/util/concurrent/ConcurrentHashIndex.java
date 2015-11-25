@@ -50,11 +50,11 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
    * @param initialCapacity
    */
   public ConcurrentHashIndex(int initialCapacity) {
-    item2Index = new ConcurrentHashMap<>(initialCapacity);
+    item2Index = new ConcurrentHashMap<E,Integer>(initialCapacity);
     indexSize = 0;
     lock = new ReentrantLock();
     Object[] arr = new Object[initialCapacity];
-    index2Item = new AtomicReference<>(arr);
+    index2Item = new AtomicReference<Object[]>(arr);
   }
 
   @SuppressWarnings("unchecked")

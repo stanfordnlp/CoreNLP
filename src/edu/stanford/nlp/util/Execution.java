@@ -92,8 +92,8 @@ public class Execution {
 
     private FilenameFilter filter;
     private File[] dir;
-    private Stack<File[]> parents = new Stack<>();
-    private Stack<Integer> indices = new Stack<>();
+    private Stack<File[]> parents = new Stack<File[]>();
+    private Stack<Integer> indices = new Stack<Integer>();
 
     private int toReturn = -1;
 
@@ -265,7 +265,7 @@ public class Execution {
 
   public static Class<?>[] getVisibleClasses() {
     //--Variables
-    List<Class<?>> classes = new ArrayList<>();
+    List<Class<?>> classes = new ArrayList<Class<?>>();
     // (get classpath)
     String pathSep = System.getProperty("path.separator");
     String[] cp = System.getProperties().getProperty("java.class.path",
@@ -350,7 +350,7 @@ public class Execution {
       boolean ensureAllOptions) {
 
     //--Create Class->Object Mapping
-    Map<Class, Object> class2object = new HashMap<>();
+    Map<Class, Object> class2object = new HashMap<Class, Object>();
     if (instances != null) {
       for (int i = 0; i < classes.length; ++i) {
         assert instances[i].getClass() == classes[i];
@@ -366,9 +366,9 @@ public class Execution {
     }
 
     //--Get Fillable Options
-    Map<String, Field> canFill = new HashMap<>();
-    Map<String, Pair<Boolean, Boolean>> required = new HashMap<>(); /* <exists, is_set> */
-    Map<String, String> interner = new HashMap<>();
+    Map<String, Field> canFill = new HashMap<String, Field>();
+    Map<String, Pair<Boolean, Boolean>> required = new HashMap<String, Pair<Boolean, Boolean>>(); /* <exists, is_set> */
+    Map<String, String> interner = new HashMap<String, String>();
     for (Class c : classes) {
       Field[] fields;
       try {

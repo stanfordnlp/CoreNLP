@@ -30,7 +30,7 @@ public class MultiMatch<K,V> extends Match<K,V> {
 
   public List<List<K>> getMultimatched() {
     if (multimatches == null) return null;
-    List<List<K>> multimatched = new ArrayList<>(multimatches.size());
+    List<List<K>> multimatched = new ArrayList<List<K>>(multimatches.size());
     for (Match<K,V> m:multimatches) {
       multimatched.add(m.getMatched());
     }
@@ -39,7 +39,7 @@ public class MultiMatch<K,V> extends Match<K,V> {
 
   public List<V> getMultivalues() {
     if (multimatches == null) return null;
-    List<V> multivalues = new ArrayList<>(multimatches.size());
+    List<V> multivalues = new ArrayList<V>(multimatches.size());
     for (Match<K,V> m:multimatches) {
       multivalues.add(m.getValue());
     }
@@ -49,7 +49,7 @@ public class MultiMatch<K,V> extends Match<K,V> {
   // Offsets in the original string to which each multimatch is aligned to
   public List<HasInterval<Integer>> getMultioffsets() {
     if (multimatches == null) return null;
-    List<HasInterval<Integer>> multioffsets = new ArrayList<>(multimatches.size());
+    List<HasInterval<Integer>> multioffsets = new ArrayList<HasInterval<Integer>>(multimatches.size());
     for (Match<K,V> m:multimatches) {
       multioffsets.add(m.getInterval());
     }

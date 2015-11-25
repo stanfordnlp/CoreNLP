@@ -150,11 +150,11 @@ LAST UPDATE BY: Jeff Michels
 -----------------------------------------------------------------------
 junit.jar
 
-ORIGINAL JAR NAME: junit-4.12.jar
+ORIGINAL JAR NAME: junit-4.5.jar
 
-VERSION: 4.12
+VERSION: 4.5
 
-RELEASE DATE: 2015/02/19
+RELEASE DATE: 2008/08/08
 
 SOURCE AVAILABLE: yes
 
@@ -165,7 +165,7 @@ URL: http://www.junit.org/
 USED BY: Our junit tests.
 Not needed by CoreNLP distributions.
 
-LAST UPDATE: 2015/08/28
+LAST UPDATE: 2008/08/24
 
 LAST UPDATE BY: Ilya Sherman
 
@@ -257,9 +257,9 @@ LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
 joda-time.jar
-ORIGINAL JAR NAME: joda-time-2.9.jar
-VERSION: 2.9
-RELEASE DATE: 2015-10-24
+ORIGINAL JAR NAME: joda-time-2.1.jar
+VERSION: 2.1
+RELEASE DATE: 2012-02-22
 SOURCE AVAILABLE: yes
 DESCRIPTION: Extended date/time API that handles partial dates/times
 URL: http://joda-time.sourceforge.net/index.html
@@ -267,8 +267,8 @@ URL: http://joda-time.sourceforge.net/index.html
 USED BY: edu.stanford.nlp.time
 Needed by CoreNLP distributions.
 
-LAST UPDATE: 2015-11-10
-LAST UPDATE BY: Angel Chang
+LAST UPDATE: 2012-11-08
+LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
 jollyday-0.4.7.jar
@@ -334,14 +334,14 @@ LAST UPDATE BY: Spence Green
 -----------------------------------------------------------------
 protobuf.jar
 ORIGINAL JAR NAME: <compiled from source>
-VERSION: 2.6.1
-RELEASE DATE: Oct 2014
+VERSION: 2.4.1
+RELEASE DATE: April 2011
 SOURCE AVAILABLE: yes
 DESCRIPTION: Google's protocol buffer library
-URL: https://developers.google.com/protocol-buffers/
+URL: https://code.google.com/p/protobuf/
 USED BY: CoreMapProtos (and associated serializers)
-LAST UPDATE: 2015-09-07
-LAST UPDATE BY: Sebastian Schuster
+LAST UPDATE: 2013-09-24
+LAST UPDATE BY: Gabor Angeli
 
 ----------------------------------------------------------------
 javax.json.jar

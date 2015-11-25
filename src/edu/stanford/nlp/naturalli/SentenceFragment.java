@@ -81,14 +81,17 @@ public class SentenceFragment {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof SentenceFragment)) return false;
+    if (!super.equals(o)) return false;
     SentenceFragment that = (SentenceFragment) o;
-    return this.parseTree.vertexSet().equals((that.parseTree.vertexSet()));
+    return parseTree.equals(that.parseTree);
 
   }
 
   @Override
   public int hashCode() {
-    return this.parseTree.vertexSet().hashCode();
+    int result = super.hashCode();
+    result = 31 * result + parseTree.hashCode();
+    return result;
   }
 
   @Override

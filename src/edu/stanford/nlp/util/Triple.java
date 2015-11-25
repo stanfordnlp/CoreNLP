@@ -104,7 +104,7 @@ public class Triple<T1, T2, T3> implements Comparable<Triple<T1,T2,T3>>, Seriali
    * to write out potentially long class names.
    */
   public static <X, Y, Z> Triple<X, Y, Z> makeTriple(X x, Y y, Z z) {
-    return new Triple<>(x, y, z);
+    return new Triple<X, Y, Z>(x, y, z);
   }
 
   /**

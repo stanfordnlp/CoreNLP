@@ -55,13 +55,13 @@ public abstract class MorphoFeatureSpecification implements Serializable {
    */
   public static Pair<String,String> splitMorphString(String word, String morphStr) {
     if (morphStr == null || morphStr.trim().equals("")) {
-      return new Pair<>(word, NO_ANALYSIS);
+      return new Pair<String,String>(word, NO_ANALYSIS);
     }
     String[] toks = morphStr.split(Pattern.quote(LEMMA_MARK));
     if (toks.length != 2) {
       throw new RuntimeException("Invalid morphology string: " + morphStr);
     }
-    return new Pair<>(toks[0], toks[1]);
+    return new Pair<String,String>(toks[0], toks[1]); 
   }
   
   

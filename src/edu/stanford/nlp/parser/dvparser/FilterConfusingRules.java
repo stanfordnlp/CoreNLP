@@ -29,8 +29,8 @@ import edu.stanford.nlp.util.TwoDimensionalSet;
  * with <code>-compactGrammar 0</code>.
  */
 public class FilterConfusingRules implements Predicate<Tree>, Serializable {
-  final Set<String> unaryRules = new HashSet<>();
-  final TwoDimensionalSet<String, String> binaryRules = new TwoDimensionalSet<>();
+  final Set<String> unaryRules = new HashSet<String>();
+  final TwoDimensionalSet<String, String> binaryRules = new TwoDimensionalSet<String, String>();
   
   static final boolean DEBUG = false;
 

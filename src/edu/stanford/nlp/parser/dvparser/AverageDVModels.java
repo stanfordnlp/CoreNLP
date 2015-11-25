@@ -26,7 +26,7 @@ import edu.stanford.nlp.util.TwoDimensionalSet;
  */
 public class AverageDVModels {
   public static TwoDimensionalSet<String, String> getBinaryMatrixNames(List<TwoDimensionalMap<String, String, SimpleMatrix>> maps) {
-    TwoDimensionalSet<String, String> matrixNames = new TwoDimensionalSet<>();
+    TwoDimensionalSet<String, String> matrixNames = new TwoDimensionalSet<String, String>();
     for (TwoDimensionalMap<String, String, SimpleMatrix> map : maps) {
       for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : map) {
         matrixNames.add(entry.getFirstKey(), entry.getSecondKey());

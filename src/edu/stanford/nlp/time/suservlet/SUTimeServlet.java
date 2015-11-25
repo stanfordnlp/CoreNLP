@@ -134,8 +134,8 @@ public class SUTimeServlet extends HttpServlet
 
   private void displayAnnotation(PrintWriter out, String query, Annotation anno, boolean includeOffsets) {
     List<CoreMap> timexAnns = anno.get(TimeAnnotations.TimexAnnotations.class);
-    List<String> pieces = new ArrayList<>();
-    List<Boolean> tagged = new ArrayList<>();
+    List<String> pieces = new ArrayList<String>();
+    List<Boolean> tagged = new ArrayList<Boolean>();
     int previousEnd = 0;
     for (CoreMap timexAnn : timexAnns) {
       int begin =

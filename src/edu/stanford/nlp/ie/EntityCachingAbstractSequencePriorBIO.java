@@ -38,7 +38,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
     for (int i=0; i<numClasses; i++) {
       possibleValues[i] = i;
     }
-    this.wordDoc = new ArrayList<>(doc.size());
+    this.wordDoc = new ArrayList<String>(doc.size());
     for (IN w: doc) {
       wordDoc.add(w.get(CoreAnnotations.TextAnnotation.class));
     }
@@ -149,7 +149,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
     EntityBIO entity = new EntityBIO();
     entity.type = tagIndex.indexOf(tag);
     entity.startPosition = position;
-    entity.words = new ArrayList<>();
+    entity.words = new ArrayList<String>();
     entity.words.add(wordDoc.get(position));
     int pos = position + 1;
     for ( ; pos < sequence.length; pos++) {
@@ -171,7 +171,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
    * words in this entity occurs.
    */
   public int[] otherOccurrences(EntityBIO entity){
-    List<Integer> other = new ArrayList<>();
+    List<Integer> other = new ArrayList<Integer>();
     for (int i = 0; i < wordDoc.size(); i++) {
       if (i == entity.startPosition) { continue; }
       if (matches(entity, i)) {
@@ -232,7 +232,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
           EntityBIO oldEntity = entities[position];
           int oldLen = oldEntity.words.size();
           int offset = position - oldEntity.startPosition;
-          List<String> newWords = new ArrayList<>();
+          List<String> newWords = new ArrayList<String>();
           for (int i=0; i<offset; i++) {
             newWords.add(oldEntity.words.get(i));
           }
@@ -272,7 +272,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
             if (oldEntity != null) {// break old entity
               int oldLen = oldEntity.words.size();
               int offset = position - oldEntity.startPosition;
-              List<String> newWords = new ArrayList<>();
+              List<String> newWords = new ArrayList<String>();
               for (int i=0; i<offset; i++) {
                 newWords.add(oldEntity.words.get(i));
               }
@@ -318,7 +318,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
               EntityBIO oldEntity = entities[position];
               int oldLen = oldEntity.words.size();
               int offset = position - oldEntity.startPosition;
-              List<String> newWords = new ArrayList<>();
+              List<String> newWords = new ArrayList<String>();
               for (int i=0; i<offset; i++) {
                 newWords.add(oldEntity.words.get(i));
               }

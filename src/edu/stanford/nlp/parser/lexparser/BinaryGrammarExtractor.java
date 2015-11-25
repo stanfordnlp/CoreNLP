@@ -11,9 +11,9 @@ import edu.stanford.nlp.util.Pair;
 public class BinaryGrammarExtractor extends AbstractTreeExtractor<Pair<UnaryGrammar,BinaryGrammar>> {
 
   protected Index<String> stateIndex;
-  private ClassicCounter<UnaryRule> unaryRuleCounter = new ClassicCounter<>();
-  private ClassicCounter<BinaryRule> binaryRuleCounter = new ClassicCounter<>();
-  protected ClassicCounter<String> symbolCounter = new ClassicCounter<>();
+  private ClassicCounter<UnaryRule> unaryRuleCounter = new ClassicCounter<UnaryRule>();
+  private ClassicCounter<BinaryRule> binaryRuleCounter = new ClassicCounter<BinaryRule>();
+  protected ClassicCounter<String> symbolCounter = new ClassicCounter<String>();
   private Set<BinaryRule> binaryRules = Generics.newHashSet();
   private Set<UnaryRule> unaryRules = Generics.newHashSet();
 
@@ -68,7 +68,7 @@ public class BinaryGrammarExtractor extends AbstractTreeExtractor<Pair<UnaryGram
       }
       bg.addRule(br);
     }
-    return new Pair<>(ug, bg);
+    return new Pair<UnaryGrammar,BinaryGrammar>(ug, bg);
   }
 
 } // end class BinaryGrammarExtractor

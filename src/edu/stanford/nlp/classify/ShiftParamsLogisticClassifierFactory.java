@@ -51,7 +51,7 @@ public class ShiftParamsLogisticClassifierFactory<L, F> implements ClassifierFac
 
     labels = dataset.getLabelsArray();
 
-    return new MultinomialLogisticClassifier<>(trainWeights(), dataset.featureIndex, dataset.labelIndex);
+    return new MultinomialLogisticClassifier<L, F>(trainWeights(), dataset.featureIndex, dataset.labelIndex);
   }
   
   private double[][] trainWeights() {
