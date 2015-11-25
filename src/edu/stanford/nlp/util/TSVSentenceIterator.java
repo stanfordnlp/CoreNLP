@@ -20,7 +20,7 @@ import java.util.Optional;
 public class TSVSentenceIterator implements Iterator<Sentence> {
 
   /** A list of possible fields in the sentence table */
-  enum SentenceField {
+  public enum SentenceField {
     ID,
     DEPENDENCIES_STANFORD,
     DEPENDENCIES_EXTRAS,
