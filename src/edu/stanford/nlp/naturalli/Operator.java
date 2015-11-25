@@ -41,6 +41,7 @@ public enum Operator {
   UNARY_NOT("not",       INDEPENDENCE, "anti-additive"),
   UNARY_NO_ONE("no one", INDEPENDENCE, "anti-additive"),
   UNARY_NT("n't",        INDEPENDENCE, "anti-additive"),
+  UNARY_DOUBT("doubt",   INDEPENDENCE, "anti-additive"),
 
   // "Some" quantifiers
   SOME("some",                     FORWARD_ENTAILMENT, "additive", "additive"),

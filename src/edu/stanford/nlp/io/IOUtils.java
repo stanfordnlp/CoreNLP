@@ -1,7 +1,6 @@
 package edu.stanford.nlp.io;
 
 import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;

@@ -11,9 +11,6 @@ import java.util.Set;
 
 import edu.stanford.nlp.hcoref.data.Dictionaries.MentionType;
 import edu.stanford.nlp.hcoref.data.Document;
-import edu.stanford.nlp.hcoref.data.Mention;
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Pair;
@@ -23,22 +20,20 @@ public class BestFirstCorefSystem extends StatisticalCorefSystem {
   private final FeatureExtractor extractor;
   private final PairwiseModel classifier;
   private final int maxMentionDistance;
-  private final int maxMentionDistanceWithStringMatch;
 
   public BestFirstCorefSystem(Properties props, String wordCountsFile, String modelFile,
-      int maxMentionDistance, int maxMentionDistanceWithStringMatch, double threshold) {
-    this(props, wordCountsFile, modelFile, maxMentionDistance, maxMentionDistanceWithStringMatch,
+      int maxMentionDistance, double threshold) {
+    this(props, wordCountsFile, modelFile, maxMentionDistance,
         new double[] {threshold, threshold, threshold, threshold});
   }
 
-  public BestFirstCorefSystem(Properties props, String wordCountsFile, String modelPath,
-      int maxMentionDistance, int maxMentionDistanceWithStringMatch, double[] thresholds) {
+  public BestFirstCorefSystem(Properties props, String modelPath, String wordCountsPath,
+      int maxMentionDistance, double[] thresholds) {
     super(props);
-    extractor = new FeatureExtractor(props, dictionaries, null, wordCountsFile);
+    extractor = new FeatureExtractor(props, dictionaries, null, wordCountsPath);
     classifier = PairwiseModel.newBuilder("classifier",
         MetaFeatureExtractor.newBuilder().build()).modelPath(modelPath).build();
     this.maxMentionDistance = maxMentionDistance;
-    this.maxMentionDistanceWithStringMatch = maxMentionDistanceWithStringMatch;
     this.thresholds = makeThresholds(thresholds);
   }
 
@@ -56,37 +51,8 @@ public class BestFirstCorefSystem extends StatisticalCorefSystem {
   @Override
   public void runCoref(Document document) {
     Compressor<String> compressor = new Compressor<>();
-    List<Mention> sortedMentions = StatisticalCorefUtils.getSortedMentions(document);
-    for (int i = 0; i < sortedMentions.size(); i++) {
-      sortedMentions.get(i).mentionNum = i;
-    }
-
-    Map<Pair<Integer, Integer>, Boolean> pairs =
-        StatisticalCorefUtils.getUnlabeledMentionPairs(document, maxMentionDistance);
-    if (maxMentionDistance != Integer.MAX_VALUE) {
-      Map<String, List<Mention>> wordToMentions = new HashMap<>();
-      for (Mention m : document.predictedMentionsByID.values()) {
-        for (String word : getContentWords(m)) {
-          wordToMentions.putIfAbsent(word, new ArrayList<>());
-          wordToMentions.get(word).add(m);
-        }
-      }
-      for (Mention m1 : document.predictedMentionsByID.values()) {
-        for (String word : getContentWords(m1)) {
-          List<Mention> ms = wordToMentions.get(word);
-          if (ms != null) {
-            for (Mention m2 : ms) {
-              if (m1.mentionNum < m2.mentionNum
-                  && m1.mentionNum >= m2.mentionNum - maxMentionDistanceWithStringMatch) {
-                pairs.put(new Pair<>(m1.mentionID, m2.mentionID), false);
-              }
-            }
-          }
-        }
-      }
-    }
-
-    DocumentExamples examples = extractor.extract(0, document, pairs, compressor);
+    DocumentExamples examples = extractor.extract(0, document,
+        StatisticalCorefUtils.getUnlabeledMentionPairs(document, maxMentionDistance), compressor);
     Counter<Pair<Integer, Integer>> pairwiseScores = new ClassicCounter<>();
     for (Example mentionPair : examples.examples) {
       pairwiseScores.incrementCount(new Pair<>(mentionPair.mentionId1, mentionPair.mentionId2),
@@ -112,17 +78,5 @@ public class BestFirstCorefSystem extends StatisticalCorefSystem {
         StatisticalCorefUtils.mergeCoreferenceClusters(pair, document);
       }
     }
-  }
-
-  private static List<String> getContentWords(Mention m) {
-    List<String> words = new ArrayList<>();
-    for (int i = m.startIndex; i < m.endIndex; i++) {
-      CoreLabel cl = m.sentenceWords.get(i);
-      String POS = cl.get(CoreAnnotations.PartOfSpeechAnnotation.class);
-      if (POS.equals("NN") || POS.equals("NNS") || POS.equals("NNP") || POS.equals("NNPS")) {
-        words.add(cl.word().toLowerCase());
-      }
-    }
-    return words;
   }
 }

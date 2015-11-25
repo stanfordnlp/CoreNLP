@@ -346,7 +346,7 @@ public class QuantifiableEntityNormalizer {
    * @param openRangeMarker a marker for whether this date is not involved in
    * an open range, is involved in an open range that goes forever backward and
    * stops at s, or is involved in an open range that goes forever forward and
-   * starts at s.  See {@link ISODateInstance}.
+   * starts at s
    * @return A yyyymmdd format normalized date
    */
   static String normalizedDateString(String s, String openRangeMarker, Timex timexFromSUTime) {

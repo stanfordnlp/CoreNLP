@@ -9,8 +9,6 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 
-import javax.json.*;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,24 +23,13 @@ import java.util.regex.Pattern;
  */
 public class TSVUtils {
 
-  static String unescapeSQL(String input) {
-    // If the string is quoted
-    if (input.startsWith("\"") && input.endsWith("\"")) {
-      input = input.substring(1, input.length()-1);
-    }
-    return input.replace("\"\"","\"").replace("\\\\", "\\");
-  }
-
-
   /**
    * Parse an SQL array.
    * @param array The array to parse.
    * @return The parsed array, as a list.
    */
   public static List<String> parseArray(String array) {
-    array = unescapeSQL(array);
-    if (array.startsWith("{") && array.endsWith("}")) array = array.substring(1, array.length()-1);
-    char[] input = array.toCharArray();
+    char[] input = array.substring(1, array.length() - 1).replace("\\\\", "\\").toCharArray();
     List<String> output = new ArrayList<>();
     StringBuilder elem = new StringBuilder();
     boolean inQuotes = false;
@@ -73,6 +60,7 @@ public class TSVUtils {
     }
     return output;
   }
+
 
   private static final Pattern newline = Pattern.compile("\\\\n");
   private static final Pattern tab = Pattern.compile("\\\\t");
@@ -113,65 +101,6 @@ public class TSVUtils {
       }
       IndexedWord governor = vertices[governorIndex];
       String relation = fields[2];
-
-      // Process row
-      if (governorIndex == 0) {
-        tree.addRoot(dependent);
-      } else {
-        tree.addVertex(dependent);
-        if (!tree.containsVertex(governor)) {
-          tree.addVertex(governor);
-        }
-        if (!"ref".equals(relation)) {
-          tree.addEdge(governor, dependent, GrammaticalRelation.valueOf(Language.English, relation), Double.NEGATIVE_INFINITY, false);
-        }
-      }
-    }
-    return tree;
-  }
-
-  /**
-   * Parse a JSON formatted tree into a SemanticGraph.
-   * @param jsonString The JSON string tree to parse, e.g:
-   * "[{\"\"dependent\"\": 7, \"\"dep\"\": \"\"ROOT\"\", \"\"governorGloss\"\": \"\"ROOT\"\", \"\"governor\"\": 0, \"\"dependentGloss\"\": \"\"sport\"\"}, {\"\"dependent\"\": 1, \"\"dep\"\": \"\"nsubj\"\", \"\"governorGloss\"\": \"\"sport\"\", \"\"governor\"\": 7, \"\"dependentGloss\"\": \"\"Chess\"\"}, {\"\"dependent\"\": 2, \"\"dep\"\": \"\"cop\"\", \"\"governorGloss\"\": \"\"sport\"\", \"\"governor\"\": 7, \"\"dependentGloss\"\": \"\"is\"\"}, {\"\"dependent\"\": 3, \"\"dep\"\": \"\"neg\"\", \"\"governorGloss\"\": \"\"sport\"\", \"\"governor\"\": 7, \"\"dependentGloss\"\": \"\"not\"\"}, {\"\"dependent\"\": 4, \"\"dep\"\": \"\"det\"\", \"\"governorGloss\"\": \"\"sport\"\", \"\"governor\"\": 7, \"\"dependentGloss\"\": \"\"a\"\"}, {\"\"dependent\"\": 5, \"\"dep\"\": \"\"advmod\"\", \"\"governorGloss\"\": \"\"physical\"\", \"\"governor\"\": 6, \"\"dependentGloss\"\": \"\"predominantly\"\"}, {\"\"dependent\"\": 6, \"\"dep\"\": \"\"amod\"\", \"\"governorGloss\"\": \"\"sport\"\", \"\"governor\"\": 7, \"\"dependentGloss\"\": \"\"physical\"\"}, {\"\"dependent\"\": 9, \"\"dep\"\": \"\"advmod\"\", \"\"governorGloss\"\": \"\"sport\"\", \"\"governor\"\": 7, \"\"dependentGloss\"\": \"\"yet\"\"}, {\"\"dependent\"\": 10, \"\"dep\"\": \"\"nsubj\"\", \"\"governorGloss\"\": \"\"shooting\"\", \"\"governor\"\": 12, \"\"dependentGloss\"\": \"\"neither\"\"}, {\"\"dependent\"\": 11, \"\"dep\"\": \"\"cop\"\", \"\"governorGloss\"\": \"\"shooting\"\", \"\"governor\"\": 12, \"\"dependentGloss\"\": \"\"are\"\"}, {\"\"dependent\"\": 12, \"\"dep\"\": \"\"parataxis\"\", \"\"governorGloss\"\": \"\"sport\"\", \"\"governor\"\": 7, \"\"dependentGloss\"\": \"\"shooting\"\"}, {\"\"dependent\"\": 13, \"\"dep\"\": \"\"cc\"\", \"\"governorGloss\"\": \"\"shooting\"\", \"\"governor\"\": 12, \"\"dependentGloss\"\": \"\"and\"\"}, {\"\"dependent\"\": 14, \"\"dep\"\": \"\"parataxis\"\", \"\"governorGloss\"\": \"\"sport\"\", \"\"governor\"\": 7, \"\"dependentGloss\"\": \"\"curling\"\"}, {\"\"dependent\"\": 14, \"\"dep\"\": \"\"conj:and\"\", \"\"governorGloss\"\": \"\"shooting\"\", \"\"governor\"\": 12, \"\"dependentGloss\"\": \"\"curling\"\"}, {\"\"dependent\"\": 16, \"\"dep\"\": \"\"nsubjpass\"\", \"\"governorGloss\"\": \"\"nicknamed\"\", \"\"governor\"\": 23, \"\"dependentGloss\"\": \"\"which\"\"}, {\"\"dependent\"\": 18, \"\"dep\"\": \"\"case\"\", \"\"governorGloss\"\": \"\"fact\"\", \"\"governor\"\": 19, \"\"dependentGloss\"\": \"\"in\"\"}, {\"\"dependent\"\": 19, \"\"dep\"\": \"\"nmod:in\"\", \"\"governorGloss\"\": \"\"nicknamed\"\", \"\"governor\"\": 23, \"\"dependentGloss\"\": \"\"fact\"\"}, {\"\"dependent\"\": 21, \"\"dep\"\": \"\"aux\"\", \"\"governorGloss\"\": \"\"nicknamed\"\", \"\"governor\"\": 23, \"\"dependentGloss\"\": \"\"has\"\"}, {\"\"dependent\"\": 22, \"\"dep\"\": \"\"auxpass\"\", \"\"governorGloss\"\": \"\"nicknamed\"\", \"\"governor\"\": 23, \"\"dependentGloss\"\": \"\"been\"\"}, {\"\"dependent\"\": 23, \"\"dep\"\": \"\"dep\"\", \"\"governorGloss\"\": \"\"shooting\"\", \"\"governor\"\": 12, \"\"dependentGloss\"\": \"\"nicknamed\"\"}, {\"\"dependent\"\": 25, \"\"dep\"\": \"\"dobj\"\", \"\"governorGloss\"\": \"\"nicknamed\"\", \"\"governor\"\": 23, \"\"dependentGloss\"\": \"\"chess\"\"}, {\"\"dependent\"\": 26, \"\"dep\"\": \"\"case\"\", \"\"governorGloss\"\": \"\"ice\"\", \"\"governor\"\": 27, \"\"dependentGloss\"\": \"\"on\"\"}, {\"\"dependent\"\": 27, \"\"dep\"\": \"\"nmod:on\"\", \"\"governorGloss\"\": \"\"chess\"\", \"\"governor\"\": 25, \"\"dependentGloss\"\": \"\"ice\"\"}, {\"\"dependent\"\": 29, \"\"dep\"\": \"\"amod\"\", \"\"governorGloss\"\": \"\"chess\"\", \"\"governor\"\": 25, \"\"dependentGloss\"\": \"\"5\"\"}]");
-   * @param tokens The tokens of the sentence, to form the backing labels of the tree.
-   * @return A semantic graph of the sentence, according to the given tree.
-   */
-  public static SemanticGraph parseJsonTree(String jsonString, List<CoreLabel> tokens) {
-    // Escape quoted string parts
-    jsonString = jsonString.substring(1, jsonString.length()-1).replace("\"\"","\"").replace("\\\\","\\");
-    JsonReader json = Json.createReader(new StringReader(jsonString));
-    SemanticGraph tree = new SemanticGraph();
-    JsonArray array = json.readArray();
-
-    if (array == null || array.isEmpty()) {
-      return tree;
-    }
-
-    IndexedWord[] vertices = new IndexedWord[tokens.size() + 2];
-    // Add edges
-    for(int i = 0; i < array.size(); i++) {
-      JsonObject entry = array.getJsonObject(i);
-      // Parse row
-      int dependentIndex = entry.getInt("dependent");
-      if (vertices[dependentIndex] == null) {
-        if (dependentIndex > tokens.size()) {
-          // Bizarre mismatch in sizes; the malt parser seems to do this often
-          return new SemanticGraph();
-        }
-        vertices[dependentIndex] = new IndexedWord(tokens.get(dependentIndex - 1));
-      }
-      IndexedWord dependent = vertices[dependentIndex];
-      int governorIndex = entry.getInt("governor");
-      if (governorIndex > tokens.size()) {
-        // Bizarre mismatch in sizes; the malt parser seems to do this often
-        return new SemanticGraph();
-      }
-      if (vertices[governorIndex] == null && governorIndex > 0) {
-        vertices[governorIndex] = new IndexedWord(tokens.get(governorIndex - 1));
-      }
-      IndexedWord governor = vertices[governorIndex];
-      String relation = entry.getString("dep");
 
       // Process row
       if (governorIndex == 0) {
@@ -258,6 +187,4 @@ public class TSVUtils {
         tokens -> parseTree(maltDependencies, tokens),
         parseArray(words), parseArray(lemmas), parseArray(posTags), parseArray(nerTags), sentenceid);
   }
-
-
 }

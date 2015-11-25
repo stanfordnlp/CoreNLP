@@ -555,12 +555,17 @@ public class RelationTripleSegmenter {
         // Main code
         int numKnownDependents = 2;  // subject and object, at minimum
         boolean istmod = false;      // this is a tmod relation
+
         // Object
         IndexedWord object = m.getNode("appos");
         if (object == null) {
           object = m.getNode("object");
         }
+        if (object != null && object.tag() != null && object.tag().startsWith("W")) {
+          continue;  // don't extract WH arguments
+        }
         assert object != null;
+
         // Verb
         PriorityQueue<IndexedWord> verbChunk = new FixedPrioritiesPriorityQueue<>();
         IndexedWord verb = m.getNode("verb");
@@ -660,6 +665,9 @@ public class RelationTripleSegmenter {
         // By default, this is just the subject node; but, occasionally we want to follow a
         // csubj clause to find the real subject.
         IndexedWord subject = m.getNode("subject");
+        if (subject != null && subject.tag() != null && subject.tag().startsWith("W")) {
+          continue;  // don't extract WH subjects
+        }
 
         // Subject+Object
         Optional<List<IndexedWord>> subjectSpan = getValidSubjectChunk(parse, subject, subjNoopArc);
