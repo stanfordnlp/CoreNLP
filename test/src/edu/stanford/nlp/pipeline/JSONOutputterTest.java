@@ -24,13 +24,13 @@ public class JSONOutputterTest extends TestCase {
   private static void testEscape(String input, String expected) {
     assertEquals(1, input.length());  // make sure I'm escaping right
     assertEquals(2, expected.length());  // make sure I'm escaping right
-    assertEquals(expected, JSONOutputter.JSONWriter.cleanJSON(input));
+    assertEquals(expected, JSONOutputter.cleanJSON(input));
   }
 
   private static void testNoEscape(String input, String expected) {
     assertEquals(1, input.length());  // make sure I'm escaping right
     assertEquals(1, expected.length());  // make sure I'm escaping right
-    assertEquals(expected, JSONOutputter.JSONWriter.cleanJSON(input));
+    assertEquals(expected, JSONOutputter.cleanJSON(input));
   }
 
   public void testSanitizeJSONString() {
@@ -42,7 +42,7 @@ public class JSONOutputterTest extends TestCase {
     testNoEscape("'", "'");
     testEscape("\"", "\\\"");
     testEscape("\\", "\\\\");
-    assertEquals("\\\\b", JSONOutputter.JSONWriter.cleanJSON("\\b"));
+    assertEquals("\\\\b", JSONOutputter.cleanJSON("\\b"));
   }
 
   public void testSimpleJSON() {

@@ -399,7 +399,7 @@ public class AnCoraProcessor {
 
     // Chunk our work so that parallelization is actually worth it
     int numChunks = availableProcessors * 20;
-    List<Collection<Tree>> chunked = CollectionUtils.partitionIntoFolds(trees, numChunks);
+    List<List<Tree>> chunked = CollectionUtils.partitionIntoFolds(trees, numChunks);
     List<Tree> ret = new ArrayList<Tree>();
 
     for (final Collection<Tree> coll : chunked) {
