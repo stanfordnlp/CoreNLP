@@ -80,6 +80,8 @@ message Sentence {
   repeated Mention         mentionsForCoref                    = 56;
   optional bool            hasCorefMentionsAnnotation          = 57;
 
+  optional string          sentenceID                          = 58;  // Useful when storing sentences (e.g. ForEach)
+
   extensions 100 to 255;
 }
 

@@ -177,6 +177,9 @@ public class Sentence {
   public Sentence(CoreMap sentence) {
     this(new Document(new Annotation(sentence.get(CoreAnnotations.TextAnnotation.class)) {{
       set(CoreAnnotations.SentencesAnnotation.class, Collections.singletonList(sentence));
+      if(sentence.containsKey(CoreAnnotations.DocIDAnnotation.class)) {
+        set(CoreAnnotations.DocIDAnnotation.class, sentence.get(CoreAnnotations.DocIDAnnotation.class));
+      }
     }}), sentence);
   }
 
@@ -1042,5 +1045,16 @@ public class Sentence {
         return tokens.size();
       }
     };
+  }
+
+  /** Returns the sentence id of the sentence, if one was found */
+  public Optional<String> sentenceid() {
+    synchronized (impl) {
+      if (impl.hasSentenceID()) {
+        return Optional.of(impl.getSentenceID());
+      } else {
+        return Optional.empty();
+      }
+    }
   }
 }
