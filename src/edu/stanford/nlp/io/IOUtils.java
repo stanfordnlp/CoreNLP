@@ -1468,6 +1468,17 @@ public class IOUtils {
     return out;
   }
 
+  public static OutputStream getFileOutputStream(String filename, boolean append) throws IOException {
+    OutputStream out = new FileOutputStream(filename, append);
+    if (filename.endsWith(".gz")) {
+      out = new GZIPOutputStream(out);
+    } else if (filename.endsWith(".bz2")) {
+      //out = new CBZip2OutputStream(out);
+      out = getBZip2PipedOutputStream(filename);
+    }
+    return out;
+  }
+
   public static BufferedReader getBufferedFileReader(String filename) throws IOException {
     return getBufferedFileReader(filename, defaultEncoding);
   }
