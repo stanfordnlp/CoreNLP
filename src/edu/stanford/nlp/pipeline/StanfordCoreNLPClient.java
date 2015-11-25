@@ -223,7 +223,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
    * @param properties The properties file, as would be passed to {@link StanfordCoreNLP}.
    * @param backends The backends to run on.
    */
-  public StanfordCoreNLPClient(Properties properties, List<Backend> backends) {
+  private StanfordCoreNLPClient(Properties properties, List<Backend> backends) {
     // Save the constructor variables
     this.properties = properties;
     Properties serverProperties = new Properties();
@@ -560,10 +560,14 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
 
     // Create the backends
     List<Backend> backends = new ArrayList<>();
-    for (String spec : props.getProperty("backends", "104.131.152.210:80").split(",")) {
-      String host = spec.substring(0, spec.indexOf(":"));
-      int port = Integer.parseInt(spec.substring(spec.indexOf(":") + 1));
-      backends.add(new Backend(host, port));
+    for (String spec : props.getProperty("backends", "corenlp.run").split(",")) {
+      if (spec.contains(":")) {
+        String host = spec.substring(0, spec.indexOf(":"));
+        int port = Integer.parseInt(spec.substring(spec.indexOf(":") + 1));
+        backends.add(new Backend(host, port));
+      } else {
+        backends.add(new Backend(spec, 80));
+      }
     }
 
     // Run the pipeline

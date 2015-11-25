@@ -72,7 +72,7 @@ public class ConvertTreesToTags {
     String treeFilter = "";
     boolean noTags = false;
     boolean noSpaces = false;
-    List<String> inputFilenames = new ArrayList<String>();
+    List<String> inputFilenames = new ArrayList<>();
     for (int i = 0; i < args.length; ++i) {
       if ((args[i].equalsIgnoreCase("-output") ||
            args[i].equalsIgnoreCase("--output")) &&

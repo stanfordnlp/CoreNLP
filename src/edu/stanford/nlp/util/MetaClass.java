@@ -315,7 +315,7 @@ public class MetaClass {
    */
   public <E> ClassFactory<E> createFactory(Class<?>... classes) {
     try {
-      return new ClassFactory<E>(classname, classes);
+      return new ClassFactory<>(classname, classes);
     } catch (ClassCreationException e){
       throw e;
     } catch (Exception e) {
@@ -335,7 +335,7 @@ public class MetaClass {
    */
   public <E> ClassFactory<E> createFactory(String... classes) {
     try {
-      return new ClassFactory<E>(classname, classes);
+      return new ClassFactory<>(classname, classes);
     } catch (ClassCreationException e){
       throw e;
     } catch (Exception e) {
@@ -355,7 +355,7 @@ public class MetaClass {
    */
   public <E> ClassFactory<E> createFactory(Object... objects) {
     try {
-      return new ClassFactory<E>(classname, objects);
+      return new ClassFactory<>(classname, objects);
     } catch (ClassCreationException e){
       throw e;
     } catch (Exception e) {
@@ -761,7 +761,7 @@ public class MetaClass {
     return argmin;
   }
 
-  private static final HashMap<Class, MetaClass> abstractToConcreteCollectionMap = new HashMap<Class, MetaClass>();
+  private static final HashMap<Class, MetaClass> abstractToConcreteCollectionMap = new HashMap<>();
   static {
     abstractToConcreteCollectionMap.put(Collection.class, MetaClass.create(ArrayList.class));
     abstractToConcreteCollectionMap.put(List.class, MetaClass.create(ArrayList.class));

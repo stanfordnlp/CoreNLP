@@ -48,7 +48,7 @@ public class CharniakScoredParsesReaderWriter {
   {
     try {
       ScoredParsesIterator iter = new ScoredParsesIterator(filename);
-      return new IterableIterator<List<ScoredObject<Tree>>>(iter);
+      return new IterableIterator<>(iter);
     } catch (IOException ex) {
       throw new RuntimeException(ex);
     }
@@ -64,7 +64,7 @@ public class CharniakScoredParsesReaderWriter {
   public Iterable<List<ScoredObject<Tree>>> readScoredTrees(String inputDesc, BufferedReader br)
   {
     ScoredParsesIterator iter = new ScoredParsesIterator(inputDesc, br);
-    return new IterableIterator<List<ScoredObject<Tree>>>(iter);
+    return new IterableIterator<>(iter);
   }
 
   /**
@@ -203,14 +203,14 @@ public class CharniakScoredParsesReaderWriter {
                 }
               }
               lastSentenceId = sentenceId;
-              curParses = new ArrayList<ScoredObject<Tree>>(parsesExpected);
+              curParses = new ArrayList<>(parsesExpected);
             } else {
               if (score == null) {
                 // read score
                 score = Double.parseDouble(line);
               } else {
                 // Reading a parse
-                curParse = new ScoredObject<Tree>(Trees.readTree(line), score);
+                curParse = new ScoredObject<>(Trees.readTree(line), score);
                 curParses.add(curParse);
                 curParse = null;
                 score = null;

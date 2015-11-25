@@ -76,14 +76,14 @@ public class RothCONLL04Reader extends GenericDataSetReader {
   private static Annotation readSentence(Annotation doc, String docId, Iterator<String> lineIterator) {
     Annotation sentence = new Annotation("");
     sentence.set(CoreAnnotations.DocIDAnnotation.class, docId);
-    sentence.set(MachineReadingAnnotations.EntityMentionsAnnotation.class, new ArrayList<EntityMention>());
+    sentence.set(MachineReadingAnnotations.EntityMentionsAnnotation.class, new ArrayList<>());
     // we'll need to set things like the tokens and textContent after we've
     // fully read the sentence
 
     // contains the full text that we've read so far
     StringBuilder textContent = new StringBuilder();
     int tokenCount = 0; // how many tokens we've seen so far
-    List<CoreLabel> tokens = new ArrayList<CoreLabel>();
+    List<CoreLabel> tokens = new ArrayList<>();
 
     // when we've seen two blank lines in a row, this sentence is over (one
     // blank line separates the sentence and the relations
@@ -91,7 +91,7 @@ public class RothCONLL04Reader extends GenericDataSetReader {
     String sentenceID = null;
 
     // keeps tracks of entities we've seen so far for use by relations
-    Map<String, EntityMention> indexToEntityMention = new HashMap<String, EntityMention>();
+    Map<String, EntityMention> indexToEntityMention = new HashMap<>();
 
     while (lineIterator.hasNext() && numBlankLinesSeen < 2) {
       String currentLine = lineIterator.next();
@@ -107,7 +107,7 @@ public class RothCONLL04Reader extends GenericDataSetReader {
         break;
       case 3: // relation
         String type = pieces.get(2);
-        List<ExtractionObject> args = new ArrayList<ExtractionObject>();
+        List<ExtractionObject> args = new ArrayList<>();
         EntityMention entity1 = indexToEntityMention.get(pieces.get(0));
         EntityMention entity2 = indexToEntityMention.get(pieces.get(1));
         args.add(entity1);
@@ -234,7 +234,7 @@ public class RothCONLL04Reader extends GenericDataSetReader {
       // Re-parse the argument words by themselves
       // Get the list of words in the arg by looking at the leaves between
       // arg.getExtentTokenStart() and arg.getExtentTokenEnd() inclusive
-      List<String> argWords = new ArrayList<String>();
+      List<String> argWords = new ArrayList<>();
       for (int i = entity.getExtentTokenStart(); i <= entity.getExtentTokenEnd(); i++) {
         argWords.add(leaves.get(i).label().value());
       }

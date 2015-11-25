@@ -38,7 +38,7 @@ public class IdentityHashSet<E> extends AbstractSet<E> implements Cloneable, Ser
    *  has the default expected maximum size (21);
    */
   public IdentityHashSet() {
-    map = new IdentityHashMap<E, Boolean>();
+    map = new IdentityHashMap<>();
   }
 
   /** Construct a new, empty IdentityHashSet whose backing IdentityHashMap
@@ -49,7 +49,7 @@ public class IdentityHashSet<E> extends AbstractSet<E> implements Cloneable, Ser
    * @param expectedMaxSize the expected maximum size of the set.
    */
   public IdentityHashSet(int expectedMaxSize) {
-    map = new IdentityHashMap<E, Boolean>(expectedMaxSize);
+    map = new IdentityHashMap<>(expectedMaxSize);
   }
 
   /** Construct a new IdentityHashSet with the same elements as the supplied
@@ -60,7 +60,7 @@ public class IdentityHashSet<E> extends AbstractSet<E> implements Cloneable, Ser
    *          be initialized.
    */
   public IdentityHashSet(Collection<? extends E> c) {
-    map = new IdentityHashMap<E, Boolean>();
+    map = new IdentityHashMap<>();
     addAll(c);
   }
 
@@ -102,7 +102,7 @@ public class IdentityHashSet<E> extends AbstractSet<E> implements Cloneable, Ser
   @Override
   public Object clone() {
     Iterator<E> it = iterator();
-    IdentityHashSet<E> clone = new IdentityHashSet<E>(size() * 2);
+    IdentityHashSet<E> clone = new IdentityHashSet<>(size() * 2);
     while (it.hasNext()) {
       clone.internalAdd(it.next());
     }
@@ -178,7 +178,7 @@ public class IdentityHashSet<E> extends AbstractSet<E> implements Cloneable, Ser
     List<Integer> c = Arrays.asList(new Integer[] {x, y, z});
     List<String> d = Arrays.asList(new String[] {"Larry", "Moe", "Curly"});
     Set<List<?>> hs = Generics.newHashSet();
-    IdentityHashSet<List<?>> ihs = new IdentityHashSet<List<?>>();
+    IdentityHashSet<List<?>> ihs = new IdentityHashSet<>();
     hs.add(a);
     hs.add(b);
     ihs.add(a);
@@ -233,7 +233,7 @@ public class IdentityHashSet<E> extends AbstractSet<E> implements Cloneable, Ser
     expectedMaxSize = s.readInt();
     size = s.readInt();
 
-    map = new IdentityHashMap<E, Boolean>(expectedMaxSize);
+    map = new IdentityHashMap<>(expectedMaxSize);
     for (int i = 0; i < size; i++) {
       o = s.readObject();
       internalAdd(ErasureUtils.<E>uncheckedCast(o));

@@ -18,8 +18,8 @@
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
+//    Dept of Computer Science, Gates 2A
+//    Stanford CA 94305-9020
 //    USA
 //    parser-support@lists.stanford.edu
 //    http://nlp.stanford.edu/software/stanford-dependencies.shtml
@@ -82,7 +82,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.*;
  * ModCollinsHeadFinder, both in the trees package. That's what will be used to
  * match here.</li>
  * <li> Create and define the GrammaticalRelation similarly to the others.</li>
- * <li> Add it to the <code>values</code> array at the end of the file.</li>
+ * <li> Add it to the {@code values} array at the end of the file.</li>
  * </ul>
  * The patterns in this code assume that an NP may be followed by either a
  * -ADV or -TMP functional tag but there are no other functional tags represented.
@@ -750,9 +750,9 @@ public class UniversalEnglishGrammaticalRelations {
             "SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ",
             "@NP < (@UCP|PRN=target <# @PP)",
             // to handle "What weapon is Apollo most proficient with?"
-            "SBARQ < (WHNP=target $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj < (PP !< NP)) $++ (NP $++ =adj)))",
+            "SBARQ < (WHNP=target $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj < (PP <: IN)) $++ (NP $++ =adj)))",
             //to handle "What is the esophagus used for"? or "What radio station did Paul Harvey work for?"
-            "SBARQ < (WHNP=target [$++ (VP < (PP !< NP)) | $++ (SQ < (VP < (PP !< NP)))])");
+            "SBARQ < (WHNP=target [$++ (VP < (PP <: IN)) | $++ (SQ < (VP < (PP <: IN)))])");
 
 
 
@@ -1443,63 +1443,61 @@ public class UniversalEnglishGrammaticalRelations {
    */
   @SuppressWarnings({"RedundantArrayCreation"})
   private static final List<GrammaticalRelation> values =
-    Generics.newArrayList(Arrays.asList(new GrammaticalRelation[] {
-      GOVERNOR,
-      DEPENDENT,
-      PREDICATE,
-      AUX_MODIFIER,
-      AUX_PASSIVE_MODIFIER,
-      COPULA,
-      CONJUNCT,
-      COORDINATION,
-      PUNCTUATION,
-      ARGUMENT,
-      SUBJECT,
-      NOMINAL_SUBJECT,
-      NOMINAL_PASSIVE_SUBJECT,
-      CLAUSAL_SUBJECT,
-      CLAUSAL_PASSIVE_SUBJECT,
-      COMPLEMENT,
-      OBJECT,
-      DIRECT_OBJECT,
-      INDIRECT_OBJECT,
-      NOMINAL_MODIFIER,
-      CLAUSAL_COMPLEMENT,
-      XCLAUSAL_COMPLEMENT,
-      MARKER,
-      RELATIVE,
-      REFERENT,
-      EXPLETIVE,
-      MODIFIER,
-      ADV_CLAUSE_MODIFIER,
-      TEMPORAL_MODIFIER,
-      RELATIVE_CLAUSE_MODIFIER,
-      NUMERIC_MODIFIER,
-      ADJECTIVAL_MODIFIER,
-      COMPOUND_MODIFIER,
-      APPOSITIONAL_MODIFIER,
-      CLAUSAL_MODIFIER,
-      ADVERBIAL_MODIFIER,
-      NEGATION_MODIFIER,
-      MULTI_WORD_EXPRESSION,
-      DETERMINER,
-      PREDETERMINER,
-      PRECONJUNCT,
-      POSSESSION_MODIFIER,
-      CASE_MARKER,
-      PHRASAL_VERB_PARTICLE,
-      SEMANTIC_DEPENDENT,
-      AGENT,
-      NP_ADVERBIAL_MODIFIER,
-      PARATAXIS,
-      DISCOURSE_ELEMENT,
-      GOES_WITH,
-      LIST,
-      PREPOSITION,
+    Generics.newArrayList(Arrays.asList(new GrammaticalRelation[]{
+            GOVERNOR,
+            DEPENDENT,
+            PREDICATE,
+            AUX_MODIFIER,
+            AUX_PASSIVE_MODIFIER,
+            COPULA,
+            CONJUNCT,
+            COORDINATION,
+            PUNCTUATION,
+            ARGUMENT,
+            SUBJECT,
+            NOMINAL_SUBJECT,
+            NOMINAL_PASSIVE_SUBJECT,
+            CLAUSAL_SUBJECT,
+            CLAUSAL_PASSIVE_SUBJECT,
+            COMPLEMENT,
+            OBJECT,
+            DIRECT_OBJECT,
+            INDIRECT_OBJECT,
+            NOMINAL_MODIFIER,
+            CLAUSAL_COMPLEMENT,
+            XCLAUSAL_COMPLEMENT,
+            MARKER,
+            RELATIVE,
+            REFERENT,
+            EXPLETIVE,
+            MODIFIER,
+            ADV_CLAUSE_MODIFIER,
+            TEMPORAL_MODIFIER,
+            RELATIVE_CLAUSE_MODIFIER,
+            NUMERIC_MODIFIER,
+            ADJECTIVAL_MODIFIER,
+            COMPOUND_MODIFIER,
+            APPOSITIONAL_MODIFIER,
+            CLAUSAL_MODIFIER,
+            ADVERBIAL_MODIFIER,
+            NEGATION_MODIFIER,
+            MULTI_WORD_EXPRESSION,
+            DETERMINER,
+            PREDETERMINER,
+            PRECONJUNCT,
+            POSSESSION_MODIFIER,
+            CASE_MARKER,
+            PHRASAL_VERB_PARTICLE,
+            SEMANTIC_DEPENDENT,
+            AGENT,
+            NP_ADVERBIAL_MODIFIER,
+            PARATAXIS,
+            DISCOURSE_ELEMENT,
+            GOES_WITH,
+            LIST,
+            PREPOSITION,
     }));
   // Cache frequently used views of the values list
-  private static final List<GrammaticalRelation> unmodifiableValues =
-    Collections.unmodifiableList(values);
   private static final List<GrammaticalRelation> synchronizedValues =
     Collections.synchronizedList(values);
   private static final List<GrammaticalRelation> unmodifiableSynchronizedValues =
@@ -1521,19 +1519,20 @@ public class UniversalEnglishGrammaticalRelations {
 
   // Map from English GrammaticalRelation short names to their corresponding
   // GrammaticalRelation objects
-  public static final Map<String, GrammaticalRelation> shortNameToGRel = new ConcurrentHashMap<String, GrammaticalRelation>();
+  public static final Map<String, GrammaticalRelation> shortNameToGRel = new ConcurrentHashMap<>();
   static {
-    for (GrammaticalRelation gr : values()) {
-      shortNameToGRel.put(gr.toString().toLowerCase(), gr);
+    valuesLock().lock();
+    try {
+      for (GrammaticalRelation gr : values()) {
+        shortNameToGRel.put(gr.toString().toLowerCase(), gr);
+      }
+    } finally {
+      valuesLock().unlock();
     }
   }
 
   public static List<GrammaticalRelation> values() {
-    return values(false);
-  }
-
-  public static List<GrammaticalRelation> values(boolean threadSafe) {
-    return threadSafe? unmodifiableSynchronizedValues : unmodifiableValues;
+    return unmodifiableSynchronizedValues;
   }
 
   public static Lock valuesLock() {
@@ -1549,7 +1548,7 @@ public class UniversalEnglishGrammaticalRelations {
    * access.
    * @param relation the relation to be added to the values list
    */
-  private static void threadSafeAddRelation(GrammaticalRelation relation) {
+  public static void threadSafeAddRelation(GrammaticalRelation relation) {
     valuesLock.writeLock().lock();
     try { // try-finally structure taken from Javadoc code sample for ReentrantReadWriteLock
       synchronizedValues.add(relation);
@@ -1705,7 +1704,7 @@ public class UniversalEnglishGrammaticalRelations {
    * @return The EnglishGrammaticalRelation with that name
    */
   public static GrammaticalRelation valueOf(String s) {
-    return GrammaticalRelation.valueOf(s, values);
+    return GrammaticalRelation.valueOf(s, synchronizedValues, valuesLock());
 
 //    // TODO does this need to be changed?
 //    // modification NOTE: do not commit until go-ahead

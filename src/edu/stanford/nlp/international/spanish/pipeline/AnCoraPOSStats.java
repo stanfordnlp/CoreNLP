@@ -34,7 +34,7 @@ public class AnCoraPOSStats {
     this.fileList = fileList;
     this.outputPath = outputPath;
 
-    unigramTagger = new TwoDimensionalCounter<String, String>();
+    unigramTagger = new TwoDimensionalCounter<>();
   }
 
   public void process() throws IOException {
@@ -68,7 +68,7 @@ public class AnCoraPOSStats {
   private static final String usage =
     String.format("Usage: java %s -o <output_path> file(s)%n%n", AnCoraPOSStats.class.getName());
 
-  private static final Map<String, Integer> argOptionDefs = new HashMap<String, Integer>();
+  private static final Map<String, Integer> argOptionDefs = new HashMap<>();
   static {
     argOptionDefs.put("o", 1);
   }
@@ -86,7 +86,7 @@ public class AnCoraPOSStats {
       throw new IllegalArgumentException("-o argument (output path for built tagger) is required");
 
     String[] remainingArgs = options.getProperty("").split(" ");
-    List<File> fileList = new ArrayList<File>();
+    List<File> fileList = new ArrayList<>();
     for (String arg : remainingArgs)
       fileList.add(new File(arg));
 

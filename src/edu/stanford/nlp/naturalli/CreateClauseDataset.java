@@ -4,6 +4,7 @@ import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.HasIndex;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.process.TSVSentenceProcessor;
@@ -43,10 +44,10 @@ public class CreateClauseDataset implements TSVSentenceProcessor {
   }
 
 
-  private static Span toSpan(List<CoreLabel> chunk) {
+  private static Span toSpan(List<? extends HasIndex> chunk) {
     int min = Integer.MAX_VALUE;
     int max = -1;
-    for (CoreLabel word : chunk) {
+    for (HasIndex word : chunk) {
       min = Math.min(word.index() - 1, min);
       max = Math.max(word.index(), max);
     }
@@ -68,16 +69,16 @@ public class CreateClauseDataset implements TSVSentenceProcessor {
       // Check if the node is a noun/pronoun
       if (head.tag().startsWith("N") || head.tag().equals("PRP")) {
         // Try to get the NP chunk
-        Optional<List<CoreLabel>> subjectChunk = segmenter.getValidChunk(depparse, head, segmenter.VALID_SUBJECT_ARCS, Optional.empty(), true);
+        Optional<List<IndexedWord>> subjectChunk = segmenter.getValidChunk(depparse, head, segmenter.VALID_SUBJECT_ARCS, Optional.empty(), true);
         if (subjectChunk.isPresent()) {
           // Make sure it's not already a member of a larger NP
-          for (CoreLabel tok : subjectChunk.get()) {
+          for (IndexedWord tok : subjectChunk.get()) {
             if (consumedAsSubjects.get(tok.index())) {
               continue NEXTNODE;  // Already considered. Continue to the next node.
             }
           }
           // Register it as an NP
-          for (CoreLabel tok : subjectChunk.get()) {
+          for (IndexedWord tok : subjectChunk.get()) {
             consumedAsSubjects.set(tok.index());
           }
           // Add it as a subject
@@ -160,8 +161,8 @@ public class CreateClauseDataset implements TSVSentenceProcessor {
           }
           if (!hasSubject) {
             // Get the spans for the verb and object
-            Optional<List<CoreLabel>> verbChunk = segmenter.getValidChunk(depparse, verb, segmenter.VALID_ADVERB_ARCS, Optional.empty(), true);
-            Optional<List<CoreLabel>> objectChunk = segmenter.getValidChunk(depparse, object, segmenter.VALID_OBJECT_ARCS, Optional.empty(), true);
+            Optional<List<IndexedWord>> verbChunk = segmenter.getValidChunk(depparse, verb, segmenter.VALID_ADVERB_ARCS, Optional.empty(), true);
+            Optional<List<IndexedWord>> objectChunk = segmenter.getValidChunk(depparse, object, segmenter.VALID_OBJECT_ARCS, Optional.empty(), true);
             if (verbChunk.isPresent() && objectChunk.isPresent()) {
               Collections.sort(verbChunk.get(), (a, b) -> a.index() - b.index());
               Collections.sort(objectChunk.get(), (a, b) -> a.index() - b.index());
@@ -209,8 +210,8 @@ public class CreateClauseDataset implements TSVSentenceProcessor {
         IndexedWord subject = matcher.getNode("subject");
         IndexedWord object = matcher.getNode("object");
         if (subject != null && object != null) {
-          Optional<List<CoreLabel>> subjectChunk = segmenter.getValidChunk(depparse, subject, segmenter.VALID_SUBJECT_ARCS, Optional.empty(), true);
-          Optional<List<CoreLabel>> objectChunk = segmenter.getValidChunk(depparse, object, segmenter.VALID_OBJECT_ARCS, Optional.empty(), true);
+          Optional<List<IndexedWord>> subjectChunk = segmenter.getValidChunk(depparse, subject, segmenter.VALID_SUBJECT_ARCS, Optional.empty(), true);
+          Optional<List<IndexedWord>> objectChunk = segmenter.getValidChunk(depparse, object, segmenter.VALID_OBJECT_ARCS, Optional.empty(), true);
           if (subjectChunk.isPresent() && objectChunk.isPresent()) {
             Span subjectSpan = toSpan(subjectChunk.get());
             Span objectSpan = toSpan(objectChunk.get());

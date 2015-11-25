@@ -65,14 +65,14 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
       K element = keyIter.next();
       boolean isLast = !keyIter.hasNext();
       if (curTrie.children == null) {
-        curTrie.children = new ConcurrentHashMap<K, TrieMap<K, V>>();//Generics.newConcurrentHashMap();
+        curTrie.children = new ConcurrentHashMap<>();//Generics.newConcurrentHashMap();
       }
       parentTrie = curTrie;
       curTrie = curTrie.children.get(element);
       if (isLast) {
         parentTrie.children.put(element, child);
       } else if(curTrie == null){
-        parentTrie.children.put(element, curTrie = new TrieMap<K,V>());
+        parentTrie.children.put(element, curTrie = new TrieMap<>());
       }
     }
     if (parentTrie == null) {
@@ -95,7 +95,7 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
 
 
   public String toFormattedString() {
-    List<String> strings = new LinkedList<String>();
+    List<String> strings = new LinkedList<>();
     updateTrieStrings(strings, "");
     return StringUtils.join(strings, "\n");
   }
@@ -166,12 +166,12 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
     // go through each element
     for(K element:key){
       if (curTrie.children == null) {
-        curTrie.children = new ConcurrentHashMap<K, TrieMap<K, V>>();//Generics.newConcurrentHashMap();
+        curTrie.children = new ConcurrentHashMap<>();//Generics.newConcurrentHashMap();
       }
       TrieMap<K, V> parent = curTrie;
       curTrie = curTrie.children.get(element);
       if(curTrie == null){
-        parent.children.put(element, curTrie = new TrieMap<K,V>());
+        parent.children.put(element, curTrie = new TrieMap<>());
       }
     }
     V oldValue = curTrie.value;
@@ -233,15 +233,15 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
 
   @Override
   public Set<Iterable<K>> keySet() {
-    Set<Iterable<K>> keys = new LinkedHashSet<Iterable<K>>();
-    updateKeys(keys, new ArrayList<K>());
+    Set<Iterable<K>> keys = new LinkedHashSet<>();
+    updateKeys(keys, new ArrayList<>());
     return keys;
   }
 
   protected void updateKeys(Set<Iterable<K>> keys, List<K> prefix) {
     if (children != null) {
       for (Entry<K, TrieMap<K, V>> kTrieMapEntry : children.entrySet()) {
-        List<K> p = new ArrayList<K>(prefix.size() + 1);
+        List<K> p = new ArrayList<>(prefix.size() + 1);
         p.addAll(prefix);
         p.add(kTrieMapEntry.getKey());
         kTrieMapEntry.getValue().updateKeys(keys, p);
@@ -254,7 +254,7 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
 
   @Override
   public Collection<V> values() {
-    List<V> values = new ArrayList<V>();
+    List<V> values = new ArrayList<>();
     updateValues(values);
     return values;
   }
@@ -272,15 +272,15 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
 
   @Override
   public Set<Entry<Iterable<K>, V>> entrySet() {
-    Set<Entry<Iterable<K>, V>> entries = new LinkedHashSet<Entry<Iterable<K>,V>>();
-    updateEntries(entries, new ArrayList<K>());
+    Set<Entry<Iterable<K>, V>> entries = new LinkedHashSet<>();
+    updateEntries(entries, new ArrayList<>());
     return entries;
   }
 
   protected void updateEntries(Set<Entry<Iterable<K>,V>> entries, final List<K> prefix) {
     if (children != null) {
       for (Entry<K, TrieMap<K, V>> kTrieMapEntry : children.entrySet()) {
-        List<K> p = new ArrayList<K>(prefix.size() + 1);
+        List<K> p = new ArrayList<>(prefix.size() + 1);
         p.addAll(prefix);
         p.add(kTrieMapEntry.getKey());
         kTrieMapEntry.getValue().updateEntries(entries, p);

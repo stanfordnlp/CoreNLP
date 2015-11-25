@@ -13,12 +13,12 @@ import java.util.Map;
  */
 public class Event {
 
-  private Map<String, List<EventMention>> eventToEventMentions = new HashMap<String, List<EventMention>>();
+  private Map<String, List<EventMention>> eventToEventMentions = new HashMap<>();
 
   public void addEntity(String event, EventMention em) {
     List<EventMention> mentions = this.eventToEventMentions.get(event);
     if (mentions == null) {
-      mentions = new ArrayList<EventMention>();
+      mentions = new ArrayList<>();
       this.eventToEventMentions.put(event, mentions);
     }
     mentions.add(em);

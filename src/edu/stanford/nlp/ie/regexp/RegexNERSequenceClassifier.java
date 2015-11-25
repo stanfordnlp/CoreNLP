@@ -170,7 +170,7 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
 
   private static class Entry implements Comparable<Entry> {
     public List<Pattern> regex; // the regex, tokenized by splitting on white space
-    public List<String> exact = new ArrayList<String>();
+    public List<String> exact = new ArrayList<>();
     public String type; // the associated type
     public Set<String> overwritableTypes;
     public double priority;
@@ -257,7 +257,7 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
    *  @return a sorted list of Entries
    */
   private static List<Entry> readEntries(BufferedReader mapping, boolean ignoreCase) throws IOException {
-    List<Entry> entries = new ArrayList<Entry>();
+    List<Entry> entries = new ArrayList<>();
 
     int lineCount = 0;
     for (String line; (line = mapping.readLine()) != null; ) {
@@ -270,7 +270,7 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
       String type = split[1].trim();
       Set<String> overwritableTypes = Generics.newHashSet();
       double priority = 0.0;
-      List<Pattern> tokens = new ArrayList<Pattern>();
+      List<Pattern> tokens = new ArrayList<>();
 
       if (split.length >= 3) {
         overwritableTypes.addAll(Arrays.asList(split[2].trim().split(",")));

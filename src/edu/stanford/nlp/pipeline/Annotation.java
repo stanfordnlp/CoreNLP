@@ -92,7 +92,7 @@ public class Annotation extends ArrayCoreMap {
   public Annotation(List<CoreMap> sentences) {
     super();
     this.set(CoreAnnotations.SentencesAnnotation.class, sentences);
-    List<CoreLabel> tokens = new ArrayList<CoreLabel>();
+    List<CoreLabel> tokens = new ArrayList<>();
     StringBuilder text = new StringBuilder();
     for (CoreMap sentence : sentences) {
       List<CoreLabel> sentenceTokens = sentence.get(CoreAnnotations.TokensAnnotation.class);

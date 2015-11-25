@@ -84,7 +84,7 @@ public class PatternToken implements Serializable {
 
   String getTokenStr(List<String> notAllowedClasses) {
     String str = " (?$term ";
-    List<String> restrictions = new ArrayList<String>();
+    List<String> restrictions = new ArrayList<>();
     if (useTag) {
       restrictions.add("{tag:/" + tag + ".*/}");
     }

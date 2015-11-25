@@ -180,17 +180,17 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
   }
 
   public static ObjectBank<String> getLineIterator(Reader reader) {
-    return getLineIterator(reader, new IdentityFunction<String>());
+    return getLineIterator(reader, new IdentityFunction<>());
   }
 
   public static <X> ObjectBank<X> getLineIterator(Reader reader, Function<String,X> op) {
     ReaderIteratorFactory rif = new ReaderIteratorFactory(reader);
     IteratorFromReaderFactory<X> ifrf = LineIterator.getFactory(op);
-    return new ObjectBank<X>(rif, ifrf);
+    return new ObjectBank<>(rif, ifrf);
   }
 
   public static ObjectBank<String> getLineIterator(File file) {
-    return getLineIterator(Collections.singleton(file), new IdentityFunction<String>());
+    return getLineIterator(Collections.singleton(file), new IdentityFunction<>());
   }
 
   public static <X> ObjectBank<X> getLineIterator(File file, Function<String,X> op) {
@@ -198,29 +198,29 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
   }
 
   public static ObjectBank<String> getLineIterator(File file, String encoding) {
-    return getLineIterator(file, new IdentityFunction<String>(), encoding);
+    return getLineIterator(file, new IdentityFunction<>(), encoding);
   }
 
   public static <X> ObjectBank<X> getLineIterator(File file, Function<String,X> op, String encoding) {
     ReaderIteratorFactory rif = new ReaderIteratorFactory(file, encoding);
     IteratorFromReaderFactory<X> ifrf = LineIterator.getFactory(op);
-    return new ObjectBank<X>(rif, ifrf);
+    return new ObjectBank<>(rif, ifrf);
   }
 
   public static <X> ObjectBank<X> getLineIterator(Collection<?> filesStringsAndReaders, Function<String,X> op) {
     ReaderIteratorFactory rif = new ReaderIteratorFactory(filesStringsAndReaders);
     IteratorFromReaderFactory<X> ifrf = LineIterator.getFactory(op);
-    return new ObjectBank<X>(rif, ifrf);
+    return new ObjectBank<>(rif, ifrf);
   }
 
   public static ObjectBank<String> getLineIterator(Collection<?> filesStringsAndReaders, String encoding) {
-    return getLineIterator(filesStringsAndReaders, new IdentityFunction<String>(), encoding);
+    return getLineIterator(filesStringsAndReaders, new IdentityFunction<>(), encoding);
   }
 
   public static <X> ObjectBank<X> getLineIterator(Collection<?> filesStringsAndReaders, Function<String,X> op, String encoding) {
     ReaderIteratorFactory rif = new ReaderIteratorFactory(filesStringsAndReaders, encoding);
     IteratorFromReaderFactory<X> ifrf = LineIterator.getFactory(op);
-    return new ObjectBank<X>(rif, ifrf);
+    return new ObjectBank<>(rif, ifrf);
   }
 
   /** This is handy for having getLineIterator return a collection of files for feeding into another ObjectBank. */
@@ -241,7 +241,7 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
     // each java.io.Reader.
     if (keepInMemory) {
       if (contents == null) {
-        contents = new ArrayList<E>();
+        contents = new ArrayList<>();
         Iterator<E> iter = new OBIterator();
         while (iter.hasNext()) {
           contents.add(iter.next());
@@ -333,7 +333,7 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
   @Override
   public Object[] toArray() {
     Iterator<E> iter = iterator();
-    ArrayList<Object> al = new ArrayList<Object>();
+    ArrayList<Object> al = new ArrayList<>();
     while (iter.hasNext()) {
       al.add(iter.next());
     }
@@ -347,7 +347,7 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
   @SuppressWarnings({"SuspiciousToArrayCall"})
   public <T> T[] toArray(T[] o) {
     Iterator<E> iter = iterator();
-    ArrayList<E> al = new ArrayList<E>();
+    ArrayList<E> al = new ArrayList<>();
     while (iter.hasNext()) {
       al.add(iter.next());
     }

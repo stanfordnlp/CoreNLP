@@ -91,7 +91,7 @@ public abstract class AbstractTokenizer<T> implements Tokenizer<T> {
   @Override
   public List<T> tokenize() {
     // System.out.println("tokenize called");
-    List<T> result = new ArrayList<T>();
+    List<T> result = new ArrayList<>();
     while (hasNext()) {
       result.add(next());
     }

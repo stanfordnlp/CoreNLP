@@ -83,7 +83,7 @@ public class GUTimeAnnotator implements Annotator {
     boolean useFirstDate = 
       (!document.has(CoreAnnotations.CalendarAnnotation.class) && !document.has(CoreAnnotations.DocDateAnnotation.class));
     
-    ArrayList<String> args = new ArrayList<String>();
+    ArrayList<String> args = new ArrayList<>();
     args.add("perl");
     args.add("-I" + this.gutimePath.getPath());
     args.add(new File(this.gutimePath, "TimeTag.pl").getPath());
@@ -258,7 +258,7 @@ public class GUTimeAnnotator implements Annotator {
       }
     }
     //--Set Timexes
-    List<CoreMap> timexMaps = new ArrayList<CoreMap>();
+    List<CoreMap> timexMaps = new ArrayList<>();
     int offset = 0;
     NodeList docNodes = docElem.getChildNodes();
     Element textElem = null;

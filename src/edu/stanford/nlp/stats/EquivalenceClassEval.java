@@ -118,7 +118,7 @@ public class EquivalenceClassEval<IN, OUT> {
    * and grouping all items according to the EquivalenceClasser argument.
    */
   public EquivalenceClassEval(EquivalenceClasser<IN, OUT> eq, EqualityChecker<IN> e, String summaryName) {
-    this(eq, new Eval.CollectionContainsChecker<IN>(e), summaryName);
+    this(eq, new Eval.CollectionContainsChecker<>(e), summaryName);
   }
 
   EquivalenceClassEval(EquivalenceClasser<IN, OUT> eq, Eval.CollectionContainsChecker<IN> checker, String summaryName) {
@@ -127,14 +127,14 @@ public class EquivalenceClassEval<IN, OUT> {
     this.summaryName = summaryName;
   }
 
-  ClassicCounter<OUT> guessed = new ClassicCounter<OUT>();
-  ClassicCounter<OUT> guessedCorrect = new ClassicCounter<OUT>();
-  ClassicCounter<OUT> gold = new ClassicCounter<OUT>();
-  ClassicCounter<OUT> goldCorrect = new ClassicCounter<OUT>();
+  ClassicCounter<OUT> guessed = new ClassicCounter<>();
+  ClassicCounter<OUT> guessedCorrect = new ClassicCounter<>();
+  ClassicCounter<OUT> gold = new ClassicCounter<>();
+  ClassicCounter<OUT> goldCorrect = new ClassicCounter<>();
 
-  private ClassicCounter<OUT> lastPrecision = new ClassicCounter<OUT>();
-  private ClassicCounter<OUT> lastRecall = new ClassicCounter<OUT>();
-  private ClassicCounter<OUT> lastF1 = new ClassicCounter<OUT>();
+  private ClassicCounter<OUT> lastPrecision = new ClassicCounter<>();
+  private ClassicCounter<OUT> lastRecall = new ClassicCounter<>();
+  private ClassicCounter<OUT> lastF1 = new ClassicCounter<>();
 
   private ClassicCounter<OUT> previousGuessed;
   private ClassicCounter<OUT> previousGuessedCorrect;
@@ -183,8 +183,8 @@ public class EquivalenceClassEval<IN, OUT> {
     Collection<IN> internalGuesses = null;
     Collection<IN> internalGolds = null;
     if(bagEval) {
-      internalGuesses = new ArrayList<IN>(guesses.size());
-      internalGolds = new ArrayList<IN>(golds.size());
+      internalGuesses = new ArrayList<>(guesses.size());
+      internalGolds = new ArrayList<>(golds.size());
     }
     else {
       internalGuesses = Generics.newHashSet(guesses.size());
@@ -192,8 +192,8 @@ public class EquivalenceClassEval<IN, OUT> {
     }
     internalGuesses.addAll(guesses);
     internalGolds.addAll(golds);
-    ClassicCounter<OUT> thisGuessed = new ClassicCounter<OUT>();
-    ClassicCounter<OUT> thisCorrect = new ClassicCounter<OUT>();
+    ClassicCounter<OUT> thisGuessed = new ClassicCounter<>();
+    ClassicCounter<OUT> thisCorrect = new ClassicCounter<>();
     for (IN o : internalGuesses) {
       OUT equivalenceClass = eq.equivalenceClass(o);
       thisGuessed.incrementCount(equivalenceClass);
@@ -270,7 +270,7 @@ public class EquivalenceClassEval<IN, OUT> {
   }
 
   public ClassicCounter<OUT> lastPrecision() {
-    ClassicCounter<OUT> result = new ClassicCounter<OUT>();
+    ClassicCounter<OUT> result = new ClassicCounter<>();
     Counters.addInPlace(result, previousGuessedCorrect);
     Counters.divideInPlace(result, previousGuessed);
     return result;
@@ -281,7 +281,7 @@ public class EquivalenceClassEval<IN, OUT> {
   }
 
   public ClassicCounter<OUT> lastRecall() {
-    ClassicCounter<OUT> result = new ClassicCounter<OUT>();
+    ClassicCounter<OUT> result = new ClassicCounter<>();
     Counters.addInPlace(result, previousGoldCorrect);
     Counters.divideInPlace(result, previousGold);
     return result;
@@ -321,7 +321,7 @@ public class EquivalenceClassEval<IN, OUT> {
   }
 
   public ClassicCounter<OUT> lastF1() {
-    ClassicCounter<OUT> result = new ClassicCounter<OUT>();
+    ClassicCounter<OUT> result = new ClassicCounter<>();
     Set<OUT> keys = Sets.union(previousGuessed.keySet(),previousGold.keySet());
     for(OUT key : keys) {
       result.setCount(key,lastF1(key));
@@ -440,7 +440,7 @@ public class EquivalenceClassEval<IN, OUT> {
       m.find();
       return m.group(1);
     };
-    EquivalenceClassEval<String, String> eval = new EquivalenceClassEval<String, String>(eq, e, "testing");
+    EquivalenceClassEval<String, String> eval = new EquivalenceClassEval<>(eq, e, "testing");
     eval.setBagEval(false);
     eval.eval(guesses, golds);
     eval.displayLast();
@@ -496,7 +496,7 @@ public class EquivalenceClassEval<IN, OUT> {
     }
 
     public Eval(boolean bagEval, EqualityChecker<T> e) {
-      checker = new CollectionContainsChecker<T>(e);
+      checker = new CollectionContainsChecker<>(e);
       this.bagEval = bagEval;
     }
 
@@ -557,8 +557,8 @@ public class EquivalenceClassEval<IN, OUT> {
       Collection<T> internalGuesses;
       Collection<T> internalGolds;
       if(bagEval) {
-        internalGuesses = new ArrayList<T>(guesses.size());
-        internalGolds = new ArrayList<T>(golds.size());
+        internalGuesses = new ArrayList<>(guesses.size());
+        internalGolds = new ArrayList<>(golds.size());
       } else {
         internalGuesses = Generics.newHashSet(guesses.size());
         internalGolds = Generics.newHashSet(golds.size());
@@ -624,7 +624,7 @@ public class EquivalenceClassEval<IN, OUT> {
       String summaryName1 = summaryName;
 
       public EquivalenceClassEval<IN, OUT> equivalenceClassEval() {
-        EquivalenceClassEval<IN, OUT> e = new EquivalenceClassEval<IN, OUT>(eq1, checker1, summaryName1);
+        EquivalenceClassEval<IN, OUT> e = new EquivalenceClassEval<>(eq1, checker1, summaryName1);
         e.setBagEval(bagEval1);
         return e;
       }

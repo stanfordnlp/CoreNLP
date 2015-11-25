@@ -48,7 +48,7 @@ public abstract class AbstractEvaluate {
 
     protected static void printConfusionMatrix(String name, int[][] confusion) {
         System.err.println(name + " confusion matrix");
-        ConfusionMatrix<Integer> confusionMatrix = new ConfusionMatrix<Integer>();
+        ConfusionMatrix<Integer> confusionMatrix = new ConfusionMatrix<>();
         confusionMatrix.setUseRealLabels(true);
         for (int i = 0; i < confusion.length; ++i) {
             for (int j = 0; j < confusion[i].length; ++j) {
@@ -79,13 +79,13 @@ public abstract class AbstractEvaluate {
     protected static double approxCombinedAccuracy(int[][] confusion, int[][] classes) {
         int correct = 0;
         int total = 0;
-        for (int i = 0; i < classes.length; ++i) {
-            for (int j = 0; j < classes[i].length; ++j) {
-                for (int k = 0; k < classes[i].length; ++k) {
-                    correct += confusion[classes[i][j]][classes[i][k]];
+        for (int[] aClass : classes) {
+            for (int j = 0; j < aClass.length; ++j) {
+                for (int k = 0; k < aClass.length; ++k) {
+                    correct += confusion[aClass[j]][aClass[k]];
                 }
-                for (int k = 0; k < confusion[classes[i][j]].length; ++k) {
-                    total += confusion[classes[i][j]][k];
+                for (int k = 0; k < confusion[aClass[j]].length; ++k) {
+                    total += confusion[aClass[j]][k];
                 }
             }
         }
@@ -99,8 +99,8 @@ public abstract class AbstractEvaluate {
         rootLabelsCorrect = 0;
         rootLabelsIncorrect = 0;
         rootLabelConfusion = new int[op.numClasses][op.numClasses];
-        lengthLabelsCorrect = new IntCounter<Integer>();
-        lengthLabelsIncorrect = new IntCounter<Integer>();
+        lengthLabelsCorrect = new IntCounter<>();
+        lengthLabelsIncorrect = new IntCounter<>();
         equivalenceClasses = op.equivalenceClasses;
         equivalenceClassNames = op.equivalenceClassNames;
         if (op.testOptions.ngramRecordSize > 0) {
@@ -197,7 +197,7 @@ public abstract class AbstractEvaluate {
         Set<Integer> keys = Generics.newHashSet();
         keys.addAll(lengthLabelsCorrect.keySet());
         keys.addAll(lengthLabelsIncorrect.keySet());
-        Counter<Integer> results = new ClassicCounter<Integer>();
+        Counter<Integer> results = new ClassicCounter<>();
         for (Integer key : keys) {
             results.setCount(key, lengthLabelsCorrect.getCount(key) / (lengthLabelsCorrect.getCount(key) + lengthLabelsIncorrect.getCount(key)));
         }

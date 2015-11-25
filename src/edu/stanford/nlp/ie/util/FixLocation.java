@@ -136,9 +136,9 @@ public class FixLocation {
 
   public static void print(String[][] cols) throws Exception {
     BufferedWriter out = new BufferedWriter(new FileWriter(outputFilename));
-    for (int i = 0; i < cols.length; i++) {
-      if (cols[i].length >= 2) {
-        out.write(cols[i][0]+"\t"+cols[i][1]+"\n");
+    for (String[] col : cols) {
+      if (col.length >= 2) {
+        out.write(col[0] + "\t" + col[1] + "\n");
       } else {
         out.write("\n");
       }

@@ -77,7 +77,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
     // score of the entire tree is the sum of the scores of all of
     // its nodes
     // TODO: make the node vectors part of the tree itself?
-    IdentityHashMap<Tree, Double> scores = new IdentityHashMap<Tree, Double>();
+    IdentityHashMap<Tree, Double> scores = new IdentityHashMap<>();
     try {
       forwardPropagateTree(tree, words, nodeVectors, scores);
     } catch (AssertionError e) {
@@ -160,7 +160,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
   static final double TRAIN_LAMBDA = 1.0;
 
   public List<DeepTree> getAllHighestScoringTreesTest(List<Tree> trees){
-	  List<DeepTree> allBestTrees = new ArrayList<DeepTree>();
+	  List<DeepTree> allBestTrees = new ArrayList<>();
 	  for (Tree tree : trees) {
 		  allBestTrees.add(getHighestScoringTree(tree, 0));
 	  }
@@ -176,7 +176,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
     Tree bestTree = null;
     IdentityHashMap<Tree, SimpleMatrix> bestVectors = null;
     for (Tree hypothesis : hypotheses) {
-      IdentityHashMap<Tree, SimpleMatrix> nodeVectors = new IdentityHashMap<Tree, SimpleMatrix>();
+      IdentityHashMap<Tree, SimpleMatrix> nodeVectors = new IdentityHashMap<>();
       double scoreHyp = score(hypothesis, nodeVectors);
       double deltaMargin =0;
       if (lambda != 0){
@@ -202,7 +202,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
       // For each tree, move in the direction of the gold tree, and
       // move away from the direction of the best scoring hypothesis
 
-      IdentityHashMap<Tree, SimpleMatrix> goldVectors = new IdentityHashMap<Tree, SimpleMatrix>();
+      IdentityHashMap<Tree, SimpleMatrix> goldVectors = new IdentityHashMap<>();
       double scoreGold = score(tree, goldVectors);
       DeepTree bestTree = getHighestScoringTree(tree, TRAIN_LAMBDA);
       DeepTree goldTree = new DeepTree(tree, goldVectors, scoreGold);
@@ -231,14 +231,14 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
     binaryScoreDerivativesG = TwoDimensionalMap.treeMap();
     binaryScoreDerivativesB = TwoDimensionalMap.treeMap();
     Map<String, SimpleMatrix> unaryW_dfsG,unaryW_dfsB ;
-    unaryW_dfsG = new TreeMap<String, SimpleMatrix>();
-    unaryW_dfsB = new TreeMap<String, SimpleMatrix>();
+    unaryW_dfsG = new TreeMap<>();
+    unaryW_dfsB = new TreeMap<>();
     Map<String, SimpleMatrix> unaryScoreDerivativesG,unaryScoreDerivativesB ;
-    unaryScoreDerivativesG = new TreeMap<String, SimpleMatrix>();
-    unaryScoreDerivativesB= new TreeMap<String, SimpleMatrix>();
+    unaryScoreDerivativesG = new TreeMap<>();
+    unaryScoreDerivativesB= new TreeMap<>();
 
-    Map<String, SimpleMatrix> wordVectorDerivativesG = new TreeMap<String, SimpleMatrix>();
-    Map<String, SimpleMatrix> wordVectorDerivativesB = new TreeMap<String, SimpleMatrix>();
+    Map<String, SimpleMatrix> wordVectorDerivativesG = new TreeMap<>();
+    Map<String, SimpleMatrix> wordVectorDerivativesB = new TreeMap<>();
 
     for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : dvModel.binaryTransform) {
       int numRows = entry.getValue().numRows();
@@ -270,7 +270,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
     Timing scoreTiming = new Timing();
     scoreTiming.doing("Scoring trees");
     int treeNum = 0;
-    MulticoreWrapper<Tree, Pair<DeepTree, DeepTree>> wrapper = new MulticoreWrapper<Tree, Pair<DeepTree, DeepTree>>(op.trainOptions.trainingThreads, new ScoringProcessor());
+    MulticoreWrapper<Tree, Pair<DeepTree, DeepTree>> wrapper = new MulticoreWrapper<>(op.trainOptions.trainingThreads, new ScoringProcessor());
     for (Tree tree : trainingBatch) {
       wrapper.put(tree);
     }
@@ -359,8 +359,8 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
     // add regularization to cost:
     double[] currentParams = dvModel.paramsToVector();
     double regCost = 0;
-    for (int i = 0 ; i<currentParams.length;i++){
-      regCost += currentParams[i] * currentParams[i];
+    for (double currentParam : currentParams) {
+      regCost += currentParam * currentParam;
     }
     regCost = op.trainOptions.regCost * 0.5 * regCost;
     value  += regCost;

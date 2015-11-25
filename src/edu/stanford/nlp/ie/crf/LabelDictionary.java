@@ -41,7 +41,7 @@ public class LabelDictionary implements Serializable {
    * Constructor.
    */
   public LabelDictionary() {
-    this.observationCounts = new ClassicCounter<String>(DEFAULT_CAPACITY);
+    this.observationCounts = new ClassicCounter<>(DEFAULT_CAPACITY);
     this.observedLabels = Generics.newHashMap(DEFAULT_CAPACITY);
   }
 
@@ -57,7 +57,7 @@ public class LabelDictionary implements Serializable {
     }
     observationCounts.incrementCount(observation);
     if ( ! observedLabels.containsKey(observation)) {
-      observedLabels.put(observation, new HashSet<String>());
+      observedLabels.put(observation, new HashSet<>());
     }
     observedLabels.get(observation).add(label.intern());
   }
@@ -93,7 +93,7 @@ public class LabelDictionary implements Serializable {
     Counters.retainAbove(observationCounts, threshold);
     Set<String> constrainedObservations = observationCounts.keySet();
     labelDictionary = new int[constrainedObservations.size()][];
-    observationIndex = new HashIndex<String>(constrainedObservations.size());
+    observationIndex = new HashIndex<>(constrainedObservations.size());
     for (String observation : constrainedObservations) {
       int i = observationIndex.addToIndex(observation);
       assert i < labelDictionary.length;

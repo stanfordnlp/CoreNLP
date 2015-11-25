@@ -66,13 +66,13 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer {
 
   public EnglishPTBTreebankCorrector() {
     // initialize the transformations to be done
-    ops = new ArrayList<Pair<TregexPattern,TsurgeonPattern>>();
+    ops = new ArrayList<>();
     TreebankLanguagePack tlp = new PennTreebankLanguagePack();
     TregexPatternCompiler tpc = new TregexPatternCompiler(tlp.headFinder(), tlp.getBasicCategoryFunction());
     Macros.addAllMacros(tpc, getBufferedReader(macroStr));
     try {
       BufferedReader br = getBufferedReader(editStr);
-      List<TsurgeonPattern> tsp = new ArrayList<TsurgeonPattern>();
+      List<TsurgeonPattern> tsp = new ArrayList<>();
       for (String line; (line = br.readLine()) != null; ) {
         TregexPattern matchPattern = tpc.compile(line);
         tsp.clear();
@@ -84,7 +84,7 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer {
         }
         if ( ! tsp.isEmpty()) {
           TsurgeonPattern tp = Tsurgeon.collectOperations(tsp);
-          ops.add(new Pair<TregexPattern,TsurgeonPattern>(matchPattern, tp));
+          ops.add(new Pair<>(matchPattern, tp));
         }
       } // while not at end of file
     } catch (IOException ioe) {

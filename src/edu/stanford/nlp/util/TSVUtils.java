@@ -187,6 +187,4 @@ public class TSVUtils {
         tokens -> parseTree(maltDependencies, tokens),
         parseArray(words), parseArray(lemmas), parseArray(posTags), parseArray(nerTags), sentenceid);
   }
-
-
 }
