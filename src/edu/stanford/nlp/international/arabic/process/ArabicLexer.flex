@@ -25,6 +25,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
 %function next
 %type Object
 %caseless
+%char
 
 %{
  private LexedTokenFactory<?> tokenFactory;

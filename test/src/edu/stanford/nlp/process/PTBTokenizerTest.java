@@ -47,6 +47,11 @@ public class PTBTokenizerTest {
     "First sentence.... Second sentence.",
     "First sentence . . . . Second sentence.",
     "I wasn’t really ... well, what I mean...see . . . what I'm saying, the thing is . . . I didn’t mean it.",
+    "This is a url test. Here is one: http://google.com.",
+    "This is a url test. Here is one: htvp://google.com.",
+    "Download from ftp://myname@host.dom/%2Fetc/motd",
+    "Download from svn://user@location.edu/path/to/magic/unicorns",
+    "Download from svn+ssh://user@location.edu/path/to/magic/unicorns",
   };
 
   private final String[][] ptbGold = {
@@ -89,7 +94,11 @@ public class PTBTokenizerTest {
     { "First", "sentence", "...", ".", "Second", "sentence", "." },
     { "I", "was", "n't", "really", "...", "well", ",", "what", "I", "mean", "...", "see", "...", "what", "I", "'m", "saying",
       ",", "the", "thing", "is", "...", "I", "did", "n't", "mean", "it", "." },
-
+    {"This", "is", "a", "url", "test", ".", "Here", "is", "one", ":", "http://google.com", "."},
+    {"This", "is", "a", "url", "test", ".", "Here", "is", "one", ":", "htvp", ":", "/", "/", "google.com", "."},
+    {"Download", "from", "ftp://myname@host.dom/%2Fetc/motd"},
+    {"Download", "from", "svn://user@location.edu/path/to/magic/unicorns"},
+    {"Download", "from", "svn+ssh://user@location.edu/path/to/magic/unicorns"},
   };
 
   @Test

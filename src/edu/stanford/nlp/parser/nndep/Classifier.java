@@ -522,7 +522,7 @@ public class Classifier {
     gradSaved = new double[preMap.size()][config.hiddenSize];
 
     int numChunks = config.trainingThreads;
-    List<Collection<Example>> chunks = CollectionUtils.partitionIntoFolds(examples, numChunks);
+    List<List<Example>> chunks = CollectionUtils.partitionIntoFolds(examples, numChunks);
 
     // Submit chunks for processing on separate threads
     for (Collection<Example> chunk : chunks)
