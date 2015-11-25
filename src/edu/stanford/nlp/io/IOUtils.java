@@ -1,6 +1,7 @@
 package edu.stanford.nlp.io;
 
 import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -14,6 +15,8 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+
+import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
 /**
  * Helper Class for various I/O related things.
@@ -1344,7 +1347,7 @@ public class IOUtils {
     String[] labels = null;
     List<Map<String,String>> rows = Generics.newArrayList();
     for (String line : IOUtils.readLines(path)) {
-      System.out.println("Splitting "+line);
+//      debug("Splitting " + line);
       if (labels == null) {
         labels = StringUtils.splitOnCharWithQuoting(line,',','"',escapeChar);
       } else {
