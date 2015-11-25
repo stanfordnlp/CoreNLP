@@ -23,7 +23,7 @@ public class TreebankAnnotator {
   final Options op;
 
   public List<Tree> annotateTrees(List<Tree> trees) {
-    List<Tree> annotatedTrees = new ArrayList<Tree>();
+    List<Tree> annotatedTrees = new ArrayList<>();
     for (Tree tree : trees) {
       annotatedTrees.add(treeTransformer.transformTree(tree));
     }
@@ -31,7 +31,7 @@ public class TreebankAnnotator {
   }
 
   public List<Tree> deannotateTrees(List<Tree> trees) {
-    List<Tree> deannotatedTrees = new ArrayList<Tree>();
+    List<Tree> deannotatedTrees = new ArrayList<>();
     for (Tree tree : trees) {
       deannotatedTrees.add(treeUnTransformer.transformTree(tree));
     }
@@ -42,7 +42,7 @@ public class TreebankAnnotator {
   public static List<Tree> getTrees(String path, int low, int high, int minLength, int maxLength) {
     Treebank treebank = new DiskTreebank(in -> new PennTreeReader(in, new LabeledScoredTreeFactory(new WordFactory()), new BobChrisTreeNormalizer()));
     treebank.loadPath(path, new NumberRangeFileFilter(low, high, true));
-    List<Tree> trees = new ArrayList<Tree>();
+    List<Tree> trees = new ArrayList<>();
     for (Tree tree : treebank) {
       if (tree.yield().size() <= maxLength && tree.yield().size() >= minLength) {
         trees.add(tree);
@@ -52,7 +52,7 @@ public class TreebankAnnotator {
   }
 
   public static List<Tree> removeDependencyRoots(List<Tree> trees) {
-    List<Tree> prunedTrees = new ArrayList<Tree>();
+    List<Tree> prunedTrees = new ArrayList<>();
     for (Tree tree : trees) {
       prunedTrees.add(removeDependencyRoot(tree));
     }

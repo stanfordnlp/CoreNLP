@@ -8,3 +8,5 @@ zips we release
 
 classify, lexparser, ner, segmenter: documentation included in various
 packages, such as readmes, build files, etc
+
+loglinear: architectural explanation and various tutorials

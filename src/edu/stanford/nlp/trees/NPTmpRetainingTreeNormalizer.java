@@ -508,8 +508,8 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer {
     }
     // do the NPs under it (which may or may not be the head chain
     Tree[] kidlets = tree.children();
-    for (int k = 0; k < kidlets.length; k++) {
-      ht = kidlets[k];
+    for (Tree kidlet : kidlets) {
+      ht = kidlet;
       LabelFactory lf;
       if (tree.isPrePreTerminal() && !TmpPattern.matcher(ht.value()).matches()) {
         // System.err.println("TMP: Changing " + ht.value() + " to " +

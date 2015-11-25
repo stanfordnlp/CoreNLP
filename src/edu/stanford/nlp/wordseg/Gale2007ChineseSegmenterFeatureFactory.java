@@ -166,7 +166,7 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
 
 
   protected Collection<String> featuresC(PaddedList<? extends CoreLabel> cInfo, int loc) {
-    Collection<String> features = new ArrayList<String>();
+    Collection<String> features = new ArrayList<>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel c2 = cInfo.get(loc + 1);
     CoreLabel c3 = cInfo.get(loc + 2);
@@ -312,7 +312,7 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
 
 
   protected Collection<String> featuresCpC(PaddedList<? extends CoreLabel> cInfo, int loc) {
-    Collection<String> features = new ArrayList<String>();
+    Collection<String> features = new ArrayList<>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel c2 = cInfo.get(loc + 1);
     CoreLabel c3 = cInfo.get(loc + 2);
@@ -653,7 +653,7 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
    *  @return Collection of String features (sparse set of boolean features
    */
   protected Collection<String> featuresCnC(PaddedList<? extends CoreLabel> cInfo, int loc) {
-    Collection<String> features = new ArrayList<String>();
+    Collection<String> features = new ArrayList<>();
     if (flags.useWordn) {
       CoreLabel c = cInfo.get(loc);
       CoreLabel c2 = cInfo.get(loc + 1);
@@ -685,7 +685,7 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
    *  @return Collection of String features (sparse set of boolean features
    */
   protected Collection<String> featuresCpCp2C(PaddedList<? extends CoreLabel> cInfo, int loc) {
-    Collection<String> features = new ArrayList<String>();
+    Collection<String> features = new ArrayList<>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel c2 = cInfo.get(loc + 1);
     CoreLabel c3 = cInfo.get(loc + 2);
@@ -780,7 +780,7 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
 
 
   protected Collection<String> featuresCpCp2Cp3C(PaddedList<? extends CoreLabel> cInfo, int loc) {
-    Collection<String> features = new ArrayList<String>();
+    Collection<String> features = new ArrayList<>();
     if (flags.use4Clique && flags.maxLeft >= 3) {
       CoreLabel c = cInfo.get(loc);
       CoreLabel c2 = cInfo.get(loc + 1);

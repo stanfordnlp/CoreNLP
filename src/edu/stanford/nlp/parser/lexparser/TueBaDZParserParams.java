@@ -175,7 +175,7 @@ public class TueBaDZParserParams extends AbstractTreebankParserParams {
       return t;
     }
 
-    List<String> annotations = new ArrayList<String>();
+    List<String> annotations = new ArrayList<>();
     Label lab = t.label();
     String word = null;
     if (lab instanceof HasWord) {
@@ -271,7 +271,7 @@ public class TueBaDZParserParams extends AbstractTreebankParserParams {
 
   private List<String> childBasicCats(Tree t) {
     Tree[] kids = t.children();
-    List<String> l = new ArrayList<String>();
+    List<String> l = new ArrayList<>();
     for (Tree kid : kids) {
       l.add(basicCat(kid.label().value()));
     }

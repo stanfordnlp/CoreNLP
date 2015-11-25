@@ -48,7 +48,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
   /**
    * Default comparator for breaking ties in argmin and argmax.
    */
-  private static final Comparator<Object> naturalComparator = new NaturalComparator<Object>();
+  private static final Comparator<Object> naturalComparator = new NaturalComparator<>();
   private static final long serialVersionUID = 4;
 
   // CONSTRUCTORS
@@ -509,7 +509,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
   public String toString(NumberFormat nf, String preAppend, String postAppend, String keyValSeparator, String itemSeparator) {
     StringBuilder sb = new StringBuilder();
     sb.append(preAppend);
-    List<E> list = new ArrayList<E>(map.keySet());
+    List<E> list = new ArrayList<>(map.keySet());
     try {
       Collections.sort((List)list); // see if it can be sorted
     } catch (Exception e) {
@@ -532,7 +532,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
   public String toString(NumberFormat nf) {
     StringBuilder sb = new StringBuilder();
     sb.append("{");
-    List<E> list = new ArrayList<E>(map.keySet());
+    List<E> list = new ArrayList<>(map.keySet());
     try {
       Collections.sort((List)list); // see if it can be sorted
     } catch (Exception e) {
@@ -552,7 +552,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
 
   @Override
   public Object clone() {
-    return new IntCounter<E>(this);
+    return new IntCounter<>(this);
   }
 
   // EXTRA CALCULATION METHODS
@@ -731,7 +731,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
       private static final long serialVersionUID = 7470763055803428477L;
 
       public Counter<E> create() {
-        return new IntCounter<E>(getMapFactory());
+        return new IntCounter<>(getMapFactory());
       }
     };
   }

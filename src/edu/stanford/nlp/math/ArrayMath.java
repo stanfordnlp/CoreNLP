@@ -482,8 +482,8 @@ public class ArrayMath {
   }
 
   public static boolean hasInfinite(double[] a) {
-    for (int i = 0; i < a.length; i++) {
-      if (Double.isInfinite(a[i])) return true;
+    for (double anA : a) {
+      if (Double.isInfinite(anA)) return true;
     }
     return false;
   }
@@ -520,24 +520,24 @@ public class ArrayMath {
 
   public static int countInfinite(double[] v) {
     int c = 0;
-    for (int i = 0; i < v.length; i++)
-      if (Double.isInfinite(v[i]))
+    for (double aV : v)
+      if (Double.isInfinite(aV))
         c++;
     return c;
   }
 
   public static int countNonZero(double[] v) {
     int c = 0;
-    for (int i = 0; i < v.length; i++)
-      if (v[i] != 0.0)
+    for (double aV : v)
+      if (aV != 0.0)
         ++c;
     return c;
   }
 
   public static int countCloseToZero(double[] v, double epsilon) {
     int c = 0;
-    for (int i = 0; i < v.length; i++)
-      if (Math.abs(v[i])< epsilon)
+    for (double aV : v)
+      if (Math.abs(aV) < epsilon)
         ++c;
     return c;
   }
@@ -554,8 +554,8 @@ public class ArrayMath {
 
   public static int countNegative(double[] v) {
     int c = 0;
-    for (int i = 0; i < v.length; i++)
-      if (v[i] < 0.0)
+    for (double aV : v)
+      if (aV < 0.0)
         ++c;
     return c;
   }
@@ -563,9 +563,9 @@ public class ArrayMath {
   public static double[] filterInfinite(double[] v) {
     double[] u = new double[numRows(v) - countInfinite(v)];
     int j = 0;
-    for (int i = 0; i < v.length; i++) {
-      if (!Double.isInfinite(v[i])) {
-        u[j++] = v[i];
+    for (double aV : v) {
+      if (!Double.isInfinite(aV)) {
+        u[j++] = aV;
       }
     }
     return u;
@@ -678,9 +678,9 @@ public class ArrayMath {
    */
   public static double norm_inf(float[] a) {
     double max = Double.NEGATIVE_INFINITY;
-    for (int i = 0; i < a.length; i++) {
-      if (Math.abs(a[i]) > max) {
-        max = Math.abs(a[i]);
+    for (float anA : a) {
+      if (Math.abs(anA) > max) {
+        max = Math.abs(anA);
       }
     }
     return max;
@@ -1442,9 +1442,9 @@ public class ArrayMath {
     return sum(a) / a.length;
   }
 
-  // Thang Mar14
-  public static int mean(int[] a) {
-    return sum(a) / a.length;
+  /** Return the mean of an array of int. */
+  public static double mean(int[] a) {
+    return ((double) sum(a)) / a.length;
   }
 
   public static double median(double[] a) {

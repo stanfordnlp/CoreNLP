@@ -40,7 +40,7 @@ public class FiveDimensionalMap <K1, K2, K3, K4, K5, V> implements Serializable 
   public FourDimensionalMap<K2, K3, K4, K5, V> getFourDimensionalMap(K1 key1) {
     FourDimensionalMap<K2, K3, K4, K5, V> m = map.get(key1);
     if (m==null) {
-      m = new FourDimensionalMap<K2, K3, K4, K5, V>();
+      m = new FourDimensionalMap<>();
       map.put(key1, m);
     }
     return m;

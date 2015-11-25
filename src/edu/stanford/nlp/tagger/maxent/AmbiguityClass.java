@@ -55,7 +55,7 @@ public class AmbiguityClass {
     } else {
       this.word = null;
       String[] tags = dict.getTags(word);
-      sortedIds = new ArrayList<Integer>(tags.length);
+      sortedIds = new ArrayList<>(tags.length);
       for (String tag : tags) {
         add(ttags.getIndex(tag));
       }

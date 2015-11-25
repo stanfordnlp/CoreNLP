@@ -28,8 +28,8 @@ public class EditDistance {
     if (score == null || score.length < sourceLength + 1 || score[0].length < targetLength + 1) {
       score = new double[sourceLength + 1][targetLength + 1];
     }
-    for (int i = 0; i < score.length; i++) {
-      Arrays.fill(score[i], worst());
+    for (double[] aScore : score) {
+      Arrays.fill(aScore, worst());
     }
   }
 

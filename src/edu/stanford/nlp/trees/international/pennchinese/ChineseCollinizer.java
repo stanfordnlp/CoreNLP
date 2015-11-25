@@ -62,7 +62,7 @@ public class ChineseCollinizer implements TreeTransformer {
       // System.out.println("Deleting punctuation");
       return null;
     }
-    List<Tree> children = new ArrayList<Tree>();
+    List<Tree> children = new ArrayList<>();
 
     if (label.matches("ROOT.*") && tree.numChildren() == 1) { // keep non-unary roots for now
       return transformTree(tree.children()[0], true);

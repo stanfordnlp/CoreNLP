@@ -19,97 +19,99 @@ public class CorefProperties {
   public enum MentionDetectionType { RULE, HYBRID, DEPENDENCY };
   
   // general 
-  public static final String LANG_PROP = "hcoref.language";
-  public static final String SIEVES_PROP = "hcoref.sieves";
-  public static final String ALLOW_REPARSING_PROP = "hcoref.allowReparsing";
-  public static final String SCORE_PROP = "hcoref.doScore";
-  public static final String PARSER_PROP = "hcoref.useConstituencyTree";
-  public static final String THREADS_PROP = "hcoref.threadCount";
-  public static final String INPUT_TYPE_PROP = "hcoref.input.type";
-  public static final String POSTPROCESSING_PROP = "hcoref.postprocessing";
-  public static final String MD_TYPE_PROP = "hcoref.md.type";
-  public static final String USE_SINGLETON_PREDICTOR_PROP = "hcoref.useSingletonPredictor";
-  public static final String SEED_PROP = "hcoref.seed";
-  public static final String CONLL_AUTO_PROP = "hcoref.conll.auto";
-  public static final String MD_TRAIN_PROP = "hcoref.mdTrain";    // train MD classifier
-  public static final String USE_SEMANTICS_PROP = "hcoref.useSemantics";    // load semantics if true
-  public static final String CURRENT_SIEVE_FOR_TRAIN_PROP = "hcoref.currentSieveForTrain";
-  public static final String STORE_TRAINDATA_PROP = "hcoref.storeTrainData";
-  public static final String USE_GOLD_NE_PROP = "hcoref.useGoldNE";
-  public static final String USE_GOLD_PARSES_PROP = "hcoref.useGoldParse";
-  public static final String USE_GOLD_POS_PROP = "hcoref.useGoldPOS";
+  public static final String LANG_PROP = "coref.language";
+  public static final String SIEVES_PROP = "coref.sieves";
+  public static final String ALLOW_REPARSING_PROP = "coref.allowReparsing";
+  public static final String SCORE_PROP = "coref.doScore";
+  public static final String PARSER_PROP = "coref.useConstituencyTree";
+  public static final String THREADS_PROP = "coref.threadCount";
+  public static final String INPUT_TYPE_PROP = "coref.input.type";
+  public static final String POSTPROCESSING_PROP = "coref.postprocessing";
+  public static final String MD_TYPE_PROP = "coref.md.type";
+  public static final String USE_SINGLETON_PREDICTOR_PROP = "coref.useSingletonPredictor";
+  public static final String SEED_PROP = "coref.seed";
+  public static final String CONLL_AUTO_PROP = "coref.conll.auto";
+  public static final String MD_TRAIN_PROP = "coref.mdTrain";    // train MD classifier
+  public static final String USE_SEMANTICS_PROP = "coref.useSemantics";    // load semantics if true
+  public static final String CURRENT_SIEVE_FOR_TRAIN_PROP = "coref.currentSieveForTrain";
+  public static final String STORE_TRAINDATA_PROP = "coref.storeTrainData";
+  public static final String USE_GOLD_NE_PROP = "coref.useGoldNE";
+  public static final String USE_GOLD_PARSES_PROP = "coref.useGoldParse";
+  public static final String USE_GOLD_POS_PROP = "coref.useGoldPOS";
   private static final String REMOVE_NESTED = "removeNested";
+  private static final String ADD_MISSING_ANNOTATIONS = "coref.addMissingAnnotations";
   
   // logging & system check & analysis
-  public static final String DEBUG_PROP = "hcoref.debug";
-  public static final String LOG_PROP = "hcoref.logFile";
-  public static final String TIMER_PROP = "hcoref.checkTime";
-  public static final String MEMORY_PROP = "hcoref.checkMemory";
-  public static final String PRINT_MDLOG_PROP = "hcoref.print.md.log";
-  public static final String CALCULATE_IMPORTANCE_PROP = "hcoref.calculateFeatureImportance";
-  public static final String DO_ANALYSIS_PROP = "hcoref.analysis.doAnalysis";
-  public static final String ANALYSIS_SKIP_MTYPE_PROP = "hcoref.analysis.skip.mType";
-  public static final String ANALYSIS_SKIP_ATYPE_PROP = "hcoref.analysis.skip.aType";
+  public static final String DEBUG_PROP = "coref.debug";
+  public static final String LOG_PROP = "coref.logFile";
+  public static final String TIMER_PROP = "coref.checkTime";
+  public static final String MEMORY_PROP = "coref.checkMemory";
+  public static final String PRINT_MDLOG_PROP = "coref.print.md.log";
+  public static final String CALCULATE_IMPORTANCE_PROP = "coref.calculateFeatureImportance";
+  public static final String DO_ANALYSIS_PROP = "coref.analysis.doAnalysis";
+  public static final String ANALYSIS_SKIP_MTYPE_PROP = "coref.analysis.skip.mType";
+  public static final String ANALYSIS_SKIP_ATYPE_PROP = "coref.analysis.skip.aType";
   
   // data & io
-  public static final String STATES_PROP = "hcoref.states";
-  public static final String DEMONYM_PROP = "hcoref.demonym";
-  public static final String ANIMATE_PROP = "hcoref.animate";
-  public static final String INANIMATE_PROP = "hcoref.inanimate";
-  public static final String MALE_PROP = "hcoref.male";
-  public static final String NEUTRAL_PROP = "hcoref.neutral";
-  public static final String FEMALE_PROP = "hcoref.female";
-  public static final String PLURAL_PROP = "hcoref.plural";
-  public static final String SINGULAR_PROP = "hcoref.singular";
-  public static final String GENDER_NUMBER_PROP = "hcoref.big.gender.number";
-  public static final String COUNTRIES_PROP = "hcoref.countries";
-  public static final String STATES_PROVINCES_PROP = "hcoref.states.provinces";
-  public static final String DICT_LIST_PROP = "hcoref.dictlist";
-  public static final String DICT_PMI_PROP = "hcoref.dictpmi";
-  public static final String SIGNATURES_PROP = "hcoref.signatures";
-  public static final String LOAD_WORD_EMBEDDING_PROP = "hcoref.loadWordEmbedding";
-  public static final String WORD2VEC_PROP = "hcoref.path.word2vec";
-  public static final String WORD2VEC_SERIALIZED_PROP = "hcoref.path.word2vecSerialized";
+  public static final String STATES_PROP = "coref.states";
+  public static final String DEMONYM_PROP = "coref.demonym";
+  public static final String ANIMATE_PROP = "coref.animate";
+  public static final String INANIMATE_PROP = "coref.inanimate";
+  public static final String MALE_PROP = "coref.male";
+  public static final String NEUTRAL_PROP = "coref.neutral";
+  public static final String FEMALE_PROP = "coref.female";
+  public static final String PLURAL_PROP = "coref.plural";
+  public static final String SINGULAR_PROP = "coref.singular";
+  public static final String GENDER_NUMBER_PROP = "coref.big.gender.number";
+  public static final String COUNTRIES_PROP = "coref.countries";
+  public static final String STATES_PROVINCES_PROP = "coref.states.provinces";
+  public static final String DICT_LIST_PROP = "coref.dictlist";
+  public static final String DICT_PMI_PROP = "coref.dictpmi";
+  public static final String SIGNATURES_PROP = "coref.signatures";
+  public static final String LOAD_WORD_EMBEDDING_PROP = "coref.loadWordEmbedding";
+  public static final String WORD2VEC_PROP = "coref.path.word2vec";
+  public static final String WORD2VEC_SERIALIZED_PROP = "coref.path.word2vecSerialized";
 
-  public static final String PATH_SCORER_PROP = "hcoref.path.scorer.conll";
+  public static final String PATH_SCORER_PROP = "coref.path.scorer.conll";
 
-  public static final String PATH_INPUT_PROP = "hcoref.path.input";
-  public static final String PATH_OUTPUT_PROP = "hcoref.path.output";
+  public static final String PATH_INPUT_PROP = "coref.path.input";
+  public static final String PATH_OUTPUT_PROP = "coref.path.output";
 
-  public static final String PATH_TRAIN_PROP = "hcoref.path.traindata";
-  public static final String PATH_EVAL_PROP = "hcoref.path.evaldata";
+  public static final String PATH_TRAIN_PROP = "coref.path.traindata";
+  public static final String PATH_EVAL_PROP = "coref.path.evaldata";
 
-  public static final String PATH_SERIALIZED_PROP = "hcoref.path.serialized";
+  public static final String PATH_SERIALIZED_PROP = "coref.path.serialized";
 
   // models
-  public static final String PATH_SINGLETON_PREDICTOR_PROP = "hcoref.path.singletonPredictor";
-  public static final String PATH_MODEL_PROP = "hcoref.SIEVENAME.model";
+  public static final String PATH_SINGLETON_PREDICTOR_PROP = "coref.path.singletonPredictor";
+  public static final String PATH_MODEL_PROP = "coref.SIEVENAME.model";
+  public static final String MENTION_DETECTION_MODEL_PROP = "coref.mentionDetectionModel";
   
   
   
   // sieve option
-  public static final String CLASSIFIER_TYPE_PROP = "hcoref.SIEVENAME.classifierType";
-  public static final String NUM_TREE_PROP = "hcoref.SIEVENAME.numTrees";
-  public static final String NUM_FEATURES_PROP = "hcoref.SIEVENAME.numFeatures";
-  public static final String TREE_DEPTH_PROP = "hcoref.SIEVENAME.treeDepth";
-  public static final String MAX_SENT_DIST_PROP = "hcoref.SIEVENAME.maxSentDist";
-  public static final String MTYPE_PROP = "hcoref.SIEVENAME.mType";
-  public static final String ATYPE_PROP = "hcoref.SIEVENAME.aType";
-  public static final String DOWNSAMPLE_RATE_PROP = "hcoref.SIEVENAME.downsamplingRate";
-  public static final String THRES_FEATURECOUNT_PROP = "hcoref.SIEVENAME.thresFeatureCount";
-  public static final String FEATURE_SELECTION_PROP = "hcoref.SIEVENAME.featureSelection";
-  public static final String THRES_MERGE_PROP = "hcoref.SIEVENAME.merge.thres";
-  public static final String THRES_FEATURE_SELECTION_PROP = "hcoref.SIEVENAME.pmi.thres";
-  public static final String DEFAULT_PRONOUN_AGREEMENT_PROP = "hcoref.defaultPronounAgreement";
+  public static final String CLASSIFIER_TYPE_PROP = "coref.SIEVENAME.classifierType";
+  public static final String NUM_TREE_PROP = "coref.SIEVENAME.numTrees";
+  public static final String NUM_FEATURES_PROP = "coref.SIEVENAME.numFeatures";
+  public static final String TREE_DEPTH_PROP = "coref.SIEVENAME.treeDepth";
+  public static final String MAX_SENT_DIST_PROP = "coref.SIEVENAME.maxSentDist";
+  public static final String MTYPE_PROP = "coref.SIEVENAME.mType";
+  public static final String ATYPE_PROP = "coref.SIEVENAME.aType";
+  public static final String DOWNSAMPLE_RATE_PROP = "coref.SIEVENAME.downsamplingRate";
+  public static final String THRES_FEATURECOUNT_PROP = "coref.SIEVENAME.thresFeatureCount";
+  public static final String FEATURE_SELECTION_PROP = "coref.SIEVENAME.featureSelection";
+  public static final String THRES_MERGE_PROP = "coref.SIEVENAME.merge.thres";
+  public static final String THRES_FEATURE_SELECTION_PROP = "coref.SIEVENAME.pmi.thres";
+  public static final String DEFAULT_PRONOUN_AGREEMENT_PROP = "coref.defaultPronounAgreement";
   
   // features
-  public static final String USE_BASIC_FEATURES_PROP = "hcoref.SIEVENAME.useBasicFeatures";
-  public static final String COMBINE_OBJECTROLE_PROP = "hcoref.SIEVENAME.combineObjectRole";
-  public static final String USE_MD_FEATURES_PROP = "hcoref.SIEVENAME.useMentionDetectionFeatures";
-  public static final String USE_DCOREFRULE_FEATURES_PROP = "hcoref.SIEVENAME.useDcorefRuleFeatures";
-  public static final String USE_POS_FEATURES_PROP = "hcoref.SIEVENAME.usePOSFeatures";
-  public static final String USE_LEXICAL_FEATURES_PROP = "hcoref.SIEVENAME.useLexicalFeatures";
-  public static final String USE_WORD_EMBEDDING_FEATURES_PROP = "hcoref.SIEVENAME.useWordEmbeddingFeatures";
+  public static final String USE_BASIC_FEATURES_PROP = "coref.SIEVENAME.useBasicFeatures";
+  public static final String COMBINE_OBJECTROLE_PROP = "coref.SIEVENAME.combineObjectRole";
+  public static final String USE_MD_FEATURES_PROP = "coref.SIEVENAME.useMentionDetectionFeatures";
+  public static final String USE_DCOREFRULE_FEATURES_PROP = "coref.SIEVENAME.useDcorefRuleFeatures";
+  public static final String USE_POS_FEATURES_PROP = "coref.SIEVENAME.usePOSFeatures";
+  public static final String USE_LEXICAL_FEATURES_PROP = "coref.SIEVENAME.useLexicalFeatures";
+  public static final String USE_WORD_EMBEDDING_FEATURES_PROP = "coref.SIEVENAME.useWordEmbeddingFeatures";
 
   public static final Locale LANGUAGE_DEFAULT = Locale.ENGLISH;
   public static final int MONITOR_DIST_CMD_FINISHED_WAIT_MILLIS = 60000;
@@ -124,10 +126,10 @@ public class CorefProperties {
   public static final boolean REMOVE_SINGLETONS = true;
 
   // current list of dcoref sieves
-  private static final Set<String> dcorefSieveNames = new HashSet<String>(Arrays.asList("MarkRole", "DiscourseMatch", 
-      "ExactStringMatch", "RelaxedExactStringMatch", "PreciseConstructs", "StrictHeadMatch1", 
-      "StrictHeadMatch2", "StrictHeadMatch3", "StrictHeadMatch4", "RelaxedHeadMatch", "PronounMatch", "SpeakerMatch",
-      "ChineseHeadMatch"));
+  private static final Set<String> dcorefSieveNames = new HashSet<>(Arrays.asList("MarkRole", "DiscourseMatch",
+          "ExactStringMatch", "RelaxedExactStringMatch", "PreciseConstructs", "StrictHeadMatch1",
+          "StrictHeadMatch2", "StrictHeadMatch3", "StrictHeadMatch4", "RelaxedHeadMatch", "PronounMatch", "SpeakerMatch",
+          "ChineseHeadMatch"));
   
   
   public static boolean doScore(Properties props) {
@@ -184,7 +186,18 @@ public class CorefProperties {
     return PropertiesUtils.getBool(props, CONLL_AUTO_PROP, true);
   }
   public static MentionDetectionType getMDType(Properties props) {
-    String type = PropertiesUtils.getString(props, MD_TYPE_PROP, "RULE");
+    String defaultMD;
+    if (getLanguage(props).equals(Locale.ENGLISH)) {
+      // defaultMD for English should be DEPENDENCY because Rule requires constituency parses
+      defaultMD = "DEPENDENCY";
+    } else if (getLanguage(props).equals(Locale.CHINESE)) {
+      // defaultMD for Chinese should be RULE for now
+      defaultMD = "RULE";
+    } else {
+      // general default is "RULE" for now
+      defaultMD = "RULE";
+    }
+    String type = PropertiesUtils.getString(props, MD_TYPE_PROP, defaultMD);
     if(type.equalsIgnoreCase("dep")) type = "DEPENDENCY";
     return MentionDetectionType.valueOf(type.toUpperCase());
   }
@@ -195,8 +208,8 @@ public class CorefProperties {
     return PropertiesUtils.getString(props, PATH_SINGLETON_PREDICTOR_PROP, "edu/stanford/nlp/models/dcoref/singleton.predictor.ser");
   }
   public static String getPathModel(Properties props, String sievename) {
-    return new File(props.getProperty(PATH_SERIALIZED_PROP),
-        props.getProperty(PATH_MODEL_PROP.replace("SIEVENAME", sievename), "MISSING_MODEL_FOR_"+sievename)).getAbsolutePath();
+    return props.getProperty(PATH_SERIALIZED_PROP) + File.separator +
+        props.getProperty(PATH_MODEL_PROP.replace("SIEVENAME", sievename), "MISSING_MODEL_FOR_"+sievename);
   }
   public static boolean debug(Properties props) {
     return PropertiesUtils.getBool(props, DEBUG_PROP, false);
@@ -237,6 +250,12 @@ public class CorefProperties {
   public static int getMaxSentDistForSieve(Properties props, String sievename) {
     return PropertiesUtils.getInt(props, MAX_SENT_DIST_PROP.replace("SIEVENAME", sievename), 1000);
   }
+
+  public static String getMentionDetectionModel(Properties props) {
+    return PropertiesUtils.getString(props, MENTION_DETECTION_MODEL_PROP,
+            "edu/stanford/nlp/models/hcoref/md-model.ser");
+  }
+
   public static Set<MentionType> getMentionType(Properties props, String sievename) {
     return getMentionTypes(props, MTYPE_PROP.replace("SIEVENAME", sievename));
   }
@@ -246,10 +265,10 @@ public class CorefProperties {
   
   private static Set<MentionType> getMentionTypes(Properties props, String propKey) {
     if(!props.containsKey(propKey) || props.getProperty(propKey).equalsIgnoreCase("all")){
-      return new HashSet<MentionType>(Arrays.asList(MentionType.values()));
+      return new HashSet<>(Arrays.asList(MentionType.values()));
     }
 
-    Set<MentionType> types = new HashSet<MentionType>();
+    Set<MentionType> types = new HashSet<>();
     for(String type : props.getProperty(propKey).trim().split(",\\s*")) {
       if(type.toLowerCase().matches("i|you|we|they|it|she|he")) type = "PRONOMINAL";
       types.add(MentionType.valueOf(type));
@@ -288,7 +307,7 @@ public class CorefProperties {
     Set<String> strs = Generics.newHashSet();
     String propKey = whichMention;
     if (!props.containsKey(propKey)) {
-      String prefix = "hcoref." + sievename + ".";
+      String prefix = "coref." + sievename + ".";
       propKey = prefix + propKey;
     }
     if(props.containsKey(propKey)) strs.addAll(Arrays.asList(props.getProperty(propKey).split(",")));
@@ -325,7 +344,7 @@ public class CorefProperties {
     return PropertiesUtils.getBool(props, USE_SEMANTICS_PROP, true);
   }
   public static String getPathSerializedWordVectors(Properties props) {
-    return PropertiesUtils.getString(props, WORD2VEC_SERIALIZED_PROP, "/scr/nlp/data/coref/wordvectors/en/vector.ser");
+    return PropertiesUtils.getString(props, WORD2VEC_SERIALIZED_PROP, "/scr/nlp/data/coref/wordvectors/en/vector.ser.gz");
   }
   public static String getCurrentSieveForTrain(Properties props) {
     return PropertiesUtils.getString(props, CURRENT_SIEVE_FOR_TRAIN_PROP, null);
@@ -339,6 +358,11 @@ public class CorefProperties {
   public static String getPathWord2Vec(Properties props) {
     return PropertiesUtils.getString(props, WORD2VEC_PROP, null);
   }
+
+  public static String getGenderNumber(Properties props) {
+    return PropertiesUtils.getString(props, GENDER_NUMBER_PROP, "edu/stanford/nlp/models/dcoref/gender.data.gz");
+  }
+
   public static boolean storeTrainData(Properties props) {
     return PropertiesUtils.getBool(props, STORE_TRAINDATA_PROP, false);
   }
@@ -368,6 +392,10 @@ public class CorefProperties {
   
   public static boolean useDefaultPronounAgreement(Properties props){
     return PropertiesUtils.getBool(props, CorefProperties.DEFAULT_PRONOUN_AGREEMENT_PROP,false);
+  }
+
+  public static boolean addMissingAnnotations(Properties props) {
+    return PropertiesUtils.getBool(props, ADD_MISSING_ANNOTATIONS, false);
   }
   
 }

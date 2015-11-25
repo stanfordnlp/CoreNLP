@@ -170,7 +170,7 @@ public class Evalb extends AbstractEval {
     final boolean VERBOSE = PropertiesUtils.getBool(options, "v", false);
     final boolean sortByF1 = PropertiesUtils.hasProperty(options, "s");
     int worstKTreesToEmit = PropertiesUtils.getInt(options, "s", 0);
-    PriorityQueue<Triple<Double,Tree,Tree>> queue = sortByF1 ? new PriorityQueue<Triple<Double,Tree,Tree>>(2000, new F1Comparator()) : null;
+    PriorityQueue<Triple<Double,Tree,Tree>> queue = sortByF1 ? new PriorityQueue<>(2000, new F1Comparator()) : null;
     boolean doCatLevel = PropertiesUtils.getBool(options, "c", false);
     String labelRegex = options.getProperty("f", null);
     String encoding = options.getProperty("e", "UTF-8");
@@ -317,7 +317,7 @@ public class Evalb extends AbstractEval {
   private static void storeTrees(PriorityQueue<Triple<Double, Tree, Tree>> queue, Tree guess, Tree gold, double curF1) {
     if(queue == null) return;
 
-    queue.add(new Triple<Double,Tree,Tree>(curF1,gold,guess));
+    queue.add(new Triple<>(curF1, gold, guess));
   }
 
   private static class F1Comparator implements Comparator<Triple<Double, Tree, Tree>> {

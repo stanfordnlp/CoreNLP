@@ -63,17 +63,17 @@ public class AceDocument extends AceElement {
 
     mEntities = Generics.newHashMap();
     mEntityMentions = Generics.newHashMap();
-    mSentenceEntityMentions = new ArrayList<ArrayList<AceEntityMention>>();
+    mSentenceEntityMentions = new ArrayList<>();
 
     mRelations = Generics.newHashMap();
     mRelationMentions = Generics.newHashMap();
-    mSentenceRelationMentions = new ArrayList<ArrayList<AceRelationMention>>();
+    mSentenceRelationMentions = new ArrayList<>();
 
     mEvents = Generics.newHashMap();
     mEventMentions = Generics.newHashMap();
-    mSentenceEventMentions = new ArrayList<ArrayList<AceEventMention>>();
+    mSentenceEventMentions = new ArrayList<>();
     
-    mTokens = new Vector<AceToken>();
+    mTokens = new Vector<>();
   }
 
   public void setPrefix(String p) {
@@ -267,20 +267,20 @@ public class AceDocument extends AceElement {
     StringBuffer buf = new StringBuffer();
     boolean doPrint = false;
     buf.append("...");
-    for (int i = 0; i < mTokens.size(); i++) {
+    for (AceToken mToken : mTokens) {
       // start printing
-      if (doPrint == false && mTokens.get(i).getByteOffset().start() > start - 20
-          && mTokens.get(i).getByteOffset().end() < end) {
+      if (doPrint == false && mToken.getByteOffset().start() > start - 20
+              && mToken.getByteOffset().end() < end) {
         doPrint = true;
       }
 
       // end printing
-      else if (doPrint == true && mTokens.get(i).getByteOffset().start() > end + 20) {
+      else if (doPrint == true && mToken.getByteOffset().start() > end + 20) {
         doPrint = false;
       }
 
       if (doPrint) {
-        buf.append(" " + mTokens.get(i).display());
+        buf.append(" " + mToken.display());
       }
     }
     buf.append("...");
@@ -424,9 +424,9 @@ public class AceDocument extends AceElement {
 
       // adjust the number of rows if necessary
       while (sentence >= doc.mSentenceEntityMentions.size()) {
-        doc.mSentenceEntityMentions.add(new ArrayList<AceEntityMention>());
-        doc.mSentenceRelationMentions.add(new ArrayList<AceRelationMention>());
-        doc.mSentenceEventMentions.add(new ArrayList<AceEventMention>());
+        doc.mSentenceEntityMentions.add(new ArrayList<>());
+        doc.mSentenceRelationMentions.add(new ArrayList<>());
+        doc.mSentenceEventMentions.add(new ArrayList<>());
       }
 
       // store the entity mentions in increasing order:
@@ -495,9 +495,9 @@ public class AceDocument extends AceElement {
        * won't have created rows in mSentence*Mentions
        */
       while (sentence >= doc.mSentenceEntityMentions.size()) {
-        doc.mSentenceEntityMentions.add(new ArrayList<AceEntityMention>());
-        doc.mSentenceRelationMentions.add(new ArrayList<AceRelationMention>());
-        doc.mSentenceEventMentions.add(new ArrayList<AceEventMention>());
+        doc.mSentenceEntityMentions.add(new ArrayList<>());
+        doc.mSentenceRelationMentions.add(new ArrayList<>());
+        doc.mSentenceEventMentions.add(new ArrayList<>());
       }
 
       // store the event mentions in increasing order
@@ -592,9 +592,9 @@ public class AceDocument extends AceElement {
 
       // adjust the number of rows if necessary
       while (sentence >= doc.mSentenceEntityMentions.size()) {
-        doc.mSentenceEntityMentions.add(new ArrayList<AceEntityMention>());
-        doc.mSentenceRelationMentions.add(new ArrayList<AceRelationMention>());
-        doc.mSentenceEventMentions.add(new ArrayList<AceEventMention>());
+        doc.mSentenceEntityMentions.add(new ArrayList<>());
+        doc.mSentenceRelationMentions.add(new ArrayList<>());
+        doc.mSentenceEventMentions.add(new ArrayList<>());
       }
 
       // store the entity mentions in increasing order:
@@ -763,7 +763,7 @@ public class AceDocument extends AceElement {
     //
     // read Massi's B-ENT, I-ENT, or O labels
     //
-    ArrayList<String> labels = new ArrayList<String>();
+    ArrayList<String> labels = new ArrayList<>();
     String line;
     while ((line = is.readLine()) != null) {
       ArrayList<String> tokens = SimpleTokenize.tokenize(line);

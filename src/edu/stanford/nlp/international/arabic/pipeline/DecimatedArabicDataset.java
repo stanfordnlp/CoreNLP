@@ -148,7 +148,7 @@ public class DecimatedArabicDataset extends ATBArabicDataset {
     }
 
     public List<String> getFilenames() {
-      List<String> filenames = new ArrayList<String>();
+      List<String> filenames = new ArrayList<>();
       for(String keyForFile : outFilenames.keySet())
         filenames.add(outFilenames.get(keyForFile));
 

@@ -65,7 +65,7 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
   }
 
   protected Collection<String> featuresC(PaddedList<IN> cInfo, int loc) {
-    Collection<String> features = new ArrayList<String>();
+    Collection<String> features = new ArrayList<>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel n = cInfo.get(loc + 1);
     CoreLabel n2 = cInfo.get(loc + 2);
@@ -120,7 +120,7 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
   }
 
   protected Collection<String> featuresCpC(PaddedList<IN> cInfo, int loc) {
-    Collection<String> features = new ArrayList<String>();
+    Collection<String> features = new ArrayList<>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel p = cInfo.get(loc - 1);
 
@@ -136,7 +136,7 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
   }
 
   protected Collection<String> featuresCp2C(PaddedList<IN> cInfo, int loc) {
-    Collection<String> features = new ArrayList<String>();
+    Collection<String> features = new ArrayList<>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
@@ -154,7 +154,7 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
   }
 
   protected Collection<String> featuresCp3C(PaddedList<IN> cInfo, int loc) {
-    Collection<String> features = new ArrayList<String>();
+    Collection<String> features = new ArrayList<>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);

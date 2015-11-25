@@ -40,7 +40,7 @@ public class SegDemo {
     props.setProperty("inputEncoding", "UTF-8");
     props.setProperty("sighanPostProcessing", "true");
 
-    CRFClassifier<CoreLabel> segmenter = new CRFClassifier<CoreLabel>(props);
+    CRFClassifier<CoreLabel> segmenter = new CRFClassifier<>(props);
     segmenter.loadClassifierNoExceptions(basedir + "/ctb.gz", props);
     for (String filename : args) {
       segmenter.classifyAndWriteAnswers(filename);

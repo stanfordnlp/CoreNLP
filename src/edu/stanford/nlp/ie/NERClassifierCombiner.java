@@ -78,6 +78,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
                                String... loadPaths)
     throws IOException
   {
+    // NOTE: nscProps may contains sutime props which will not be recognized by the SeqClassifierFlags
     super(nscProps, ClassifierCombiner.extractCombinationModeSafe(nscProps), loadPaths);
     this.applyNumericClassifiers = applyNumericClassifiers;
     this.useSUTime = useSUTime;
@@ -184,6 +185,11 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
       Properties combinerProperties;
       if (passDownProperties != null) {
         combinerProperties = PropertiesUtils.extractSelectedProperties(properties, passDownProperties);
+        if (useSUTime) {
+          // Make sure SUTime parameters are included
+          Properties sutimeProps = PropertiesUtils.extractPrefixedProperties(properties, NumberSequenceClassifier.SUTIME_PROPERTY + ".", true);
+          PropertiesUtils.overWriteProperties(combinerProperties, sutimeProps);
+        }
       } else {
         // if passDownProperties is null, just pass everything through
         combinerProperties = properties;
@@ -362,7 +368,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
     // run on multiple textFiles , based off CRFClassifier code
     String textFiles = props.getProperty("textFiles");
     if (textFiles != null) {
-      List<File> files = new ArrayList<File>();
+      List<File> files = new ArrayList<>();
       for (String filename : textFiles.split(",")) {
         files.add(new File(filename));
       }

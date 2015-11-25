@@ -125,7 +125,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
 
 
   public Collection<String> featuresC(PaddedList<IN> cInfo, int loc) {
-    Collection<String> features = new ArrayList<String>();
+    Collection<String> features = new ArrayList<>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel c1 = cInfo.get(loc + 1);
     CoreLabel c2 = cInfo.get(loc + 2);
@@ -175,7 +175,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
   private static CorpusDictionary outDict = null;
 
   public Collection<String> featuresCpC(PaddedList<IN> cInfo, int loc) {
-    Collection<String> features = new ArrayList<String>();
+    Collection<String> features = new ArrayList<>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel c1 = cInfo.get(loc + 1);
     CoreLabel c2 = cInfo.get(loc + 2);
@@ -304,8 +304,8 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
       if (taDetector == null) {
         taDetector = new TagAffixDetector(flags);
       }
-      for (int k=0; k<tagsets.length; k++) {
-	features.add(taDetector.checkDic(tagsets[k]+"p", charp) + taDetector.checkDic(tagsets[k]+"i", charp) + taDetector.checkDic(tagsets[k]+"s", charc)+ taDetector.checkInDic(charp)+taDetector.checkInDic(charc)+ tagsets[k]+ "prep-sufc" );
+      for (String tagset : tagsets) {
+        features.add(taDetector.checkDic(tagset + "p", charp) + taDetector.checkDic(tagset + "i", charp) + taDetector.checkDic(tagset + "s", charc) + taDetector.checkInDic(charp) + taDetector.checkInDic(charc) + tagset + "prep-sufc");
         // features.add("|ctbchar2");  // Added a constant feature several times!!
       }
     }
@@ -426,7 +426,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
 
 
   public Collection<String> featuresCnC(PaddedList<IN> cInfo, int loc) {
-    Collection<String> features = new ArrayList<String>();
+    Collection<String> features = new ArrayList<>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel c1 = cInfo.get(loc + 1);
     CoreLabel p = cInfo.get(loc - 1);

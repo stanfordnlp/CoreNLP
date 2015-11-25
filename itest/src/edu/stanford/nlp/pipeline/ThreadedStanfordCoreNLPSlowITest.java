@@ -89,8 +89,8 @@ public class ThreadedStanfordCoreNLPSlowITest extends TestCase {
       for (int j = 0; j < numThreads; ++j) {
         //System.out.println("Thread " + j + " annotation " + i + ":");
         //System.out.println(threads[j].annotations.get(i));
-        assertEquals("For annotation " + i + ", thread " + j + " produced annotation " +
-                        threads[j].annotations.get(i) + " versus the baseline " + baseline.get(i),
+        assertEquals("Annotating document " + i + ": thread " + j + " produced annotation:\n" +
+                        threads[j].annotations.get(i) + "versus the baseline:\n" + baseline.get(i),
                      baseline.get(i), threads[j].annotations.get(i));
       }
     }

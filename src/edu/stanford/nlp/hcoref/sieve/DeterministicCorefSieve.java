@@ -511,7 +511,7 @@ public abstract class DeterministicCorefSieve extends Sieve {
       int m1Position,
       Map<Integer, CorefCluster> corefClusters,
       Dictionaries dict) {
-    List<Mention> orderedAntecedents = new ArrayList<Mention>();
+    List<Mention> orderedAntecedents = new ArrayList<>();
 
     // ordering antecedents
     if (antecedentSentence == mySentence) {   // same sentence
@@ -529,7 +529,7 @@ public abstract class DeterministicCorefSieve extends Sieve {
 
   /** Divides a sentence into clauses and sort the antecedents for pronoun matching  */
   private static List<Mention> sortMentionsForPronoun(List<Mention> l, Mention m1) {
-    List<Mention> sorted = new ArrayList<Mention>();
+    List<Mention> sorted = new ArrayList<>();
     Tree tree = m1.contextParseTree;
     Tree current = m1.mentionSubTree;
     if(tree==null || current==null) return l;

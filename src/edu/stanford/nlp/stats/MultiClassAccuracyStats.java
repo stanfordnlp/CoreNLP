@@ -92,7 +92,7 @@ public class MultiClassAccuracyStats<L> implements Scorer<L> {
     //
     //Dataset data = (Dataset)gData;
 
-    PriorityQueue<Pair<Integer, Pair<Double, Boolean>>> q = new BinaryHeapPriorityQueue<Pair<Integer, Pair<Double, Boolean>>>();
+    PriorityQueue<Pair<Integer, Pair<Double, Boolean>>> q = new BinaryHeapPriorityQueue<>();
     total = 0;
     correct = 0;
     logLikelihood = 0.0;
@@ -111,7 +111,7 @@ public class MultiClassAccuracyStats<L> implements Scorer<L> {
         correct++;
       }
       logLikelihood += correctScore;
-      q.add(new Pair<Integer, Pair<Double, Boolean>>(Integer.valueOf(i), new Pair<Double, Boolean>(new Double(guessScore), Boolean.valueOf(guessInd == correctInd))), -guessScore);
+      q.add(new Pair<>(Integer.valueOf(i), new Pair<>(new Double(guessScore), Boolean.valueOf(guessInd == correctInd))), -guessScore);
     }
     accuracy = (double) correct / (double) total;
     List<Pair<Integer, Pair<Double, Boolean>>> sorted = q.toSortedList();

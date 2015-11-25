@@ -3,7 +3,7 @@ package edu.stanford.nlp.ling.tokensregex;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
 import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
-import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
+import edu.stanford.nlp.pipeline.CoreMapAggregator;
 import edu.stanford.nlp.util.Comparators;
 import edu.stanford.nlp.util.CoreMap;
 import java.util.function.Function;
@@ -39,6 +39,7 @@ public class MatchedExpression {
 
   // TODO: Should we keep some context from the source so we can perform more complex evaluation?
   /** Function indicating how to extract an value from annotation built from this expression */
+  protected Object context; // Some context to help to extract value from annotation
   protected SingleAnnotationExtractor extractFunc;
 
   public Value value;
@@ -64,8 +65,9 @@ public class MatchedExpression {
     public Class resultNestedAnnotationField; // Annotation field for child/nested annotations
     public boolean includeNested = false;
     public Function<CoreMap, Value> valueExtractor;
+    public Function<MatchedExpression, Value> expressionToValue;
     public Function<MatchedExpression,?> resultAnnotationExtractor;
-    public Map<Class, CoreMapAttributeAggregator> tokensAggregators;
+    public CoreMapAggregator tokensAggregator;
 
     @Override
     public Value apply(CoreMap in) {
@@ -109,7 +111,11 @@ public class MatchedExpression {
     }
 
     public void annotate(MatchedExpression matchedExpression) {
-      matchedExpression.value = valueExtractor.apply(matchedExpression.annotation);
+      Value ev = null;
+      if (expressionToValue != null) {
+        ev = expressionToValue.apply(matchedExpression);
+      }
+      matchedExpression.value = (ev != null)? ev : valueExtractor.apply(matchedExpression.annotation);
 
       if (resultAnnotationField != null) {
         if (resultAnnotationExtractor != null) {
@@ -176,16 +182,16 @@ public class MatchedExpression {
 
   public boolean extractAnnotation(Env env, CoreMap sourceAnnotation)
   {
-    return extractAnnotation(sourceAnnotation, extractFunc.tokensAggregators);
+    return extractAnnotation(sourceAnnotation, extractFunc.tokensAggregator);
   }
 
   private boolean extractAnnotation(CoreMap sourceAnnotation,
-                                    Map<Class, CoreMapAttributeAggregator> aggregators)
+                                    CoreMapAggregator aggregator)
   {
     Class tokensAnnotationKey = extractFunc.tokensAnnotationField;
     if (chunkOffsets != null) {
-      annotation = ChunkAnnotationUtils.getMergedChunk((List<? extends CoreMap>) sourceAnnotation.get(tokensAnnotationKey),
-              chunkOffsets.getBegin(), chunkOffsets.getEnd(), aggregators );
+      annotation = aggregator.merge((List<? extends CoreMap>) sourceAnnotation.get(tokensAnnotationKey),
+              chunkOffsets.getBegin(), chunkOffsets.getEnd());
       if (sourceAnnotation.containsKey(CoreAnnotations.TextAnnotation.class)) {
         ChunkAnnotationUtils.annotateChunkText(annotation, sourceAnnotation);
       }
@@ -209,8 +215,8 @@ public class MatchedExpression {
 
       chunkOffsets = ChunkAnnotationUtils.getChunkOffsetsUsingCharOffsets((List<? extends CoreMap>) sourceAnnotation.get(tokensAnnotationKey),
               charOffsets.getBegin() + baseCharOffset, charOffsets.getEnd()  + baseCharOffset);
-      CoreMap annotation2 = ChunkAnnotationUtils.getMergedChunk((List<? extends CoreMap>) sourceAnnotation.get(tokensAnnotationKey),
-              chunkOffsets.getBegin(), chunkOffsets.getEnd(), aggregators );
+      CoreMap annotation2 = aggregator.merge((List<? extends CoreMap>) sourceAnnotation.get(tokensAnnotationKey),
+              chunkOffsets.getBegin(), chunkOffsets.getEnd());
 
       annotation = ChunkAnnotationUtils.getAnnotatedChunkUsingCharOffsets(sourceAnnotation, charOffsets.getBegin(), charOffsets.getEnd());
       tokenOffsets = Interval.toInterval(annotation.get(CoreAnnotations.TokenBeginAnnotation.class),
@@ -224,12 +230,12 @@ public class MatchedExpression {
 
   public boolean extractAnnotation(Env env, List<? extends CoreMap> source)
   {
-    return extractAnnotation(source, CoreMapAttributeAggregator.getDefaultAggregators());
+    return extractAnnotation(source, CoreMapAggregator.getDefaultAggregator());
   }
 
-  protected boolean extractAnnotation(List<? extends CoreMap> source, Map<Class, CoreMapAttributeAggregator> chunkAggregators)
+  protected boolean extractAnnotation(List<? extends CoreMap> source, CoreMapAggregator aggregator)
   {
-    annotation = ChunkAnnotationUtils.getMergedChunk(source,  chunkOffsets.getBegin(), chunkOffsets.getEnd(), chunkAggregators);
+    annotation = aggregator.merge(source, chunkOffsets.getBegin(), chunkOffsets.getEnd());
     charOffsets = Interval.toInterval(annotation.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
             annotation.get(CoreAnnotations.CharacterOffsetEndAnnotation.class), Interval.INTERVAL_OPEN_END);
     tokenOffsets = Interval.toInterval(annotation.get(CoreAnnotations.TokenBeginAnnotation.class),
@@ -295,7 +301,7 @@ public class MatchedExpression {
   {
     if (matchedExprs == null) return list;
     Collections.sort(matchedExprs, EXPR_TOKEN_OFFSET_COMPARATOR);
-    List<CoreMap> merged = new ArrayList<CoreMap>(list.size());   // Approximate size
+    List<CoreMap> merged = new ArrayList<>(list.size());   // Approximate size
     int last = 0;
     for (MatchedExpression expr:matchedExprs) {
       int start = expr.chunkOffsets.first();
@@ -318,8 +324,8 @@ public class MatchedExpression {
                                                       List<? extends MatchedExpression> matchedExprs)
   {
     if (matchedExprs == null) return list;
-    Map<Integer, Integer> tokenBeginToListIndexMap = new HashMap<Integer, Integer>();//Generics.newHashMap();
-    Map<Integer, Integer> tokenEndToListIndexMap = new HashMap<Integer, Integer>();//Generics.newHashMap();
+    Map<Integer, Integer> tokenBeginToListIndexMap = new HashMap<>();//Generics.newHashMap();
+    Map<Integer, Integer> tokenEndToListIndexMap = new HashMap<>();//Generics.newHashMap();
     for (int i = 0; i < list.size(); i++) {
       CoreMap cm = list.get(i);
       if (cm.has(CoreAnnotations.TokenBeginAnnotation.class) && cm.has(CoreAnnotations.TokenEndAnnotation.class)) {
@@ -331,7 +337,7 @@ public class MatchedExpression {
       }
     }
     Collections.sort(matchedExprs, EXPR_TOKEN_OFFSET_COMPARATOR);
-    List<CoreMap> merged = new ArrayList<CoreMap>(list.size());   // Approximate size
+    List<CoreMap> merged = new ArrayList<>(list.size());   // Approximate size
     int last = 0;
     for (MatchedExpression expr:matchedExprs) {
       int start = expr.tokenOffsets.first();
@@ -356,7 +362,7 @@ public class MatchedExpression {
 
   public static <T extends MatchedExpression> List<T> removeNullValues(List<T> chunks)
   {
-    List<T> okayChunks = new ArrayList<T>(chunks.size());
+    List<T> okayChunks = new ArrayList<>(chunks.size());
     for (T chunk : chunks) {
       Value v = chunk.value;
       if (v == null || v.get() == null) {

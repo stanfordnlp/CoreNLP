@@ -55,7 +55,7 @@ public class TregexPatternCompiler {
   private final HeadFinder headFinder;
 
   private final List<Pair<String, String>> macros =
-    new ArrayList<Pair<String, String>>();
+          new ArrayList<>();
 
   public static final TregexPatternCompiler defaultCompiler =
     new TregexPatternCompiler();
@@ -111,7 +111,7 @@ public class TregexPatternCompiler {
    *                  of a String.replaceAll()
    */
   public void addMacro(String original, String replacement) {
-    macros.add(new Pair<String, String>(original, replacement));
+    macros.add(new Pair<>(original, replacement));
   }
 
 

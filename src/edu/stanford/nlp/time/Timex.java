@@ -359,14 +359,14 @@ public class Timex implements Serializable {
       int year = Integer.parseInt(this.val.substring(0, 4));
       int month = Integer.parseInt(this.val.substring(4, 6));
       int day = Integer.parseInt(this.val.substring(6, 8));
-      return new Pair<Calendar, Calendar>(makeCalendar(year, month, day), makeCalendar(year, month, day));
+      return new Pair<>(makeCalendar(year, month, day), makeCalendar(year, month, day));
     }
     // YYYY-MM-DD or YYYY-MM-DDT...
     else if (val.length() >= 10 && Pattern.matches("\\d\\d\\d\\d-\\d\\d-\\d\\d", this.val.substring(0, 10))) {
       int year = Integer.parseInt(this.val.substring(0, 4));
       int month = Integer.parseInt(this.val.substring(5, 7));
       int day = Integer.parseInt(this.val.substring(8, 10));
-      return new Pair<Calendar, Calendar>(makeCalendar(year, month, day), makeCalendar(year, month, day));
+      return new Pair<>(makeCalendar(year, month, day), makeCalendar(year, month, day));
     }
 
     // YYYYMMDDL+
@@ -374,7 +374,7 @@ public class Timex implements Serializable {
       int year = Integer.parseInt(this.val.substring(0, 4));
       int month = Integer.parseInt(this.val.substring(4, 6));
       int day = Integer.parseInt(this.val.substring(6, 8));
-      return new Pair<Calendar, Calendar>(makeCalendar(year, month, day), makeCalendar(year, month, day));
+      return new Pair<>(makeCalendar(year, month, day), makeCalendar(year, month, day));
     }
 
     // YYYYMM or YYYYMMT...
@@ -384,7 +384,7 @@ public class Timex implements Serializable {
       Calendar begin = makeCalendar(year, month, 1);
       int lastDay = begin.getActualMaximum(Calendar.DATE);
       Calendar end = makeCalendar(year, month, lastDay);
-      return new Pair<Calendar, Calendar>(begin, end);
+      return new Pair<>(begin, end);
     }
 
     // YYYY-MM or YYYY-MMT...
@@ -394,13 +394,13 @@ public class Timex implements Serializable {
       Calendar begin = makeCalendar(year, month, 1);
       int lastDay = begin.getActualMaximum(Calendar.DATE);
       Calendar end = makeCalendar(year, month, lastDay);
-      return new Pair<Calendar, Calendar>(begin, end);
+      return new Pair<>(begin, end);
     }
 
     // YYYY or YYYYT...
     else if (val.length() >= 4 && Pattern.matches("\\d\\d\\d\\d", this.val.substring(0, 4))) {
       int year = Integer.parseInt(this.val.substring(0, 4));
-      return new Pair<Calendar, Calendar>(makeCalendar(year, 1, 1), makeCalendar(year, 12, 31));
+      return new Pair<>(makeCalendar(year, 1, 1), makeCalendar(year, 12, 31));
     }
 
     // PDDY
@@ -414,7 +414,7 @@ public class Timex implements Serializable {
         Calendar start = copyCalendar(rc);
         Calendar end = copyCalendar(rc);
         end.add(Calendar.YEAR, yearRange);
-        return new Pair<Calendar, Calendar>(start, end);
+        return new Pair<>(start, end);
       }
 
       // in the past
@@ -422,7 +422,7 @@ public class Timex implements Serializable {
         Calendar start = copyCalendar(rc);
         Calendar end = copyCalendar(rc);
         start.add(Calendar.YEAR, 0 - yearRange);
-        return new Pair<Calendar, Calendar>(start, end);
+        return new Pair<>(start, end);
       }
 
       throw new RuntimeException("begin and end are equal " + this);
@@ -437,7 +437,7 @@ public class Timex implements Serializable {
         Calendar start = copyCalendar(rc);
         Calendar end = copyCalendar(rc);
         end.add(Calendar.MONTH, monthRange);
-        return new Pair<Calendar, Calendar>(start, end);
+        return new Pair<>(start, end);
       }
 
       // in the past
@@ -445,7 +445,7 @@ public class Timex implements Serializable {
         Calendar start = copyCalendar(rc);
         Calendar end = copyCalendar(rc);
         start.add(Calendar.MONTH, 0 - monthRange);
-        return new Pair<Calendar, Calendar>(start, end);
+        return new Pair<>(start, end);
       }
 
       throw new RuntimeException("begin and end are equal " + this);
@@ -460,7 +460,7 @@ public class Timex implements Serializable {
         Calendar start = copyCalendar(rc);
         Calendar end = copyCalendar(rc);
         end.add(Calendar.DAY_OF_MONTH, dayRange);
-        return new Pair<Calendar, Calendar>(start, end);
+        return new Pair<>(start, end);
       }
 
       // in the past
@@ -468,7 +468,7 @@ public class Timex implements Serializable {
         Calendar start = copyCalendar(rc);
         Calendar end = copyCalendar(rc);
         start.add(Calendar.DAY_OF_MONTH, 0 - dayRange);
-        return new Pair<Calendar, Calendar>(start, end);
+        return new Pair<>(start, end);
       }
 
       throw new RuntimeException("begin and end are equal " + this);
@@ -479,28 +479,28 @@ public class Timex implements Serializable {
       int year = Integer.parseInt(this.val.substring(0, 4));
       Calendar start = makeCalendar(year, 2, 1);
       Calendar end = makeCalendar(year, 4, 31);
-      return new Pair<Calendar, Calendar>(start, end);
+      return new Pair<>(start, end);
     }
     // YYYYSU
     if (Pattern.matches("\\d+SU", this.val)) {
       int year = Integer.parseInt(this.val.substring(0, 4));
       Calendar start = makeCalendar(year, 5, 1);
       Calendar end = makeCalendar(year, 7, 31);
-      return new Pair<Calendar, Calendar>(start, end);
+      return new Pair<>(start, end);
     }
     // YYYYFA
     if (Pattern.matches("\\d+FA", this.val)) {
       int year = Integer.parseInt(this.val.substring(0, 4));
       Calendar start = makeCalendar(year, 8, 1);
       Calendar end = makeCalendar(year, 10, 31);
-      return new Pair<Calendar, Calendar>(start, end);
+      return new Pair<>(start, end);
     }
     // YYYYWI
     if (Pattern.matches("\\d+WI", this.val)) {
       int year = Integer.parseInt(this.val.substring(0, 4));
       Calendar start = makeCalendar(year, 11, 1);
       Calendar end = makeCalendar(year + 1, 1, 29);
-      return new Pair<Calendar, Calendar>(start, end);
+      return new Pair<>(start, end);
     }
 
     // YYYYWDD
@@ -511,7 +511,7 @@ public class Timex implements Serializable {
       int endDay = startDay + 6;
       Calendar start = makeCalendar(year, startDay);
       Calendar end = makeCalendar(year, endDay);
-      return new Pair<Calendar, Calendar>(start, end);
+      return new Pair<>(start, end);
     }
 
     // PRESENT_REF
@@ -519,7 +519,7 @@ public class Timex implements Serializable {
       Calendar rc = documentTime.getDate();  // todo: This case doesn't check for documentTime being null and will NPE
       Calendar start = copyCalendar(rc);
       Calendar end = copyCalendar(rc);
-      return new Pair<Calendar, Calendar>(start, end);
+      return new Pair<>(start, end);
     }
 
     throw new RuntimeException(String.format("unknown value \"%s\" in %s", this.val, this));

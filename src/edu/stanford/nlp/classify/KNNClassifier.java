@@ -25,7 +25,7 @@ public class KNNClassifier<K,V> implements Classifier<K, V> {
    */
   private static final long serialVersionUID = 7115357548209007944L;
   private boolean weightedVotes = false; // whether this is a weighted vote (by sim), or not
-  private CollectionValuedMap<K, Counter<V>> instances = new CollectionValuedMap<K, Counter<V>>();
+  private CollectionValuedMap<K, Counter<V>> instances = new CollectionValuedMap<>();
   private Map<Counter<V>, K> classLookup = Generics.newHashMap();
   private boolean l2Normalize = false;
   int k = 0;
@@ -73,17 +73,17 @@ public class KNNClassifier<K,V> implements Classifier<K, V> {
       RVFDatum<K, V> vec = (RVFDatum<K, V>) datum;
 
       if (l2Normalize) {
-        ClassicCounter<V> featVec = new ClassicCounter<V>(vec.asFeaturesCounter());
+        ClassicCounter<V> featVec = new ClassicCounter<>(vec.asFeaturesCounter());
         Counters.normalize(featVec);
-        vec = new RVFDatum<K, V>(featVec);
+        vec = new RVFDatum<>(featVec);
       }
 
-      ClassicCounter<Counter<V>> scores = new ClassicCounter<Counter<V>>();
+      ClassicCounter<Counter<V>> scores = new ClassicCounter<>();
       for (Counter<V> instance : instances.allValues()) {
         scores.setCount(instance, Counters.cosine(vec.asFeaturesCounter(), instance)); // set entry, for given instance and score
       }
       List<Counter<V>> sorted = Counters.toSortedList(scores);
-      ClassicCounter<K> classScores = new ClassicCounter<K>();
+      ClassicCounter<K> classScores = new ClassicCounter<>();
       for (int i=0;i<k && i<sorted.size(); i++) {
         K label = classLookup.get(sorted.get(i));
         double count= 1.0;
@@ -100,49 +100,49 @@ public class KNNClassifier<K,V> implements Classifier<K, V> {
 
   // Quick little sanity check
   public static void main(String[] args) {
-    Collection<RVFDatum<String, String>> trainingInstances = new ArrayList<RVFDatum<String, String>>();
+    Collection<RVFDatum<String, String>> trainingInstances = new ArrayList<>();
     {
-      ClassicCounter<String> f1 = new ClassicCounter<String>();
+      ClassicCounter<String> f1 = new ClassicCounter<>();
       f1.setCount("humidity", 5.0);
       f1.setCount("temperature", 35.0);
-      trainingInstances.add(new RVFDatum<String, String>(f1, "rain"));
+      trainingInstances.add(new RVFDatum<>(f1, "rain"));
     }
 
     {
-      ClassicCounter<String> f1 = new ClassicCounter<String>();
+      ClassicCounter<String> f1 = new ClassicCounter<>();
       f1.setCount("humidity", 4.0);
       f1.setCount("temperature", 32.0);
-      trainingInstances.add(new RVFDatum<String, String>(f1, "rain"));
+      trainingInstances.add(new RVFDatum<>(f1, "rain"));
     }
 
     {
-      ClassicCounter<String> f1 = new ClassicCounter<String>();
+      ClassicCounter<String> f1 = new ClassicCounter<>();
       f1.setCount("humidity", 6.0);
       f1.setCount("temperature", 30.0);
-      trainingInstances.add(new RVFDatum<String, String>(f1, "rain"));
+      trainingInstances.add(new RVFDatum<>(f1, "rain"));
     }
 
     {
-      ClassicCounter<String> f1 = new ClassicCounter<String>();
+      ClassicCounter<String> f1 = new ClassicCounter<>();
       f1.setCount("humidity", 2.0);
       f1.setCount("temperature", 33.0);
-      trainingInstances.add(new RVFDatum<String, String>(f1, "dry"));
+      trainingInstances.add(new RVFDatum<>(f1, "dry"));
     }
 
     {
-      ClassicCounter<String> f1 = new ClassicCounter<String>();
+      ClassicCounter<String> f1 = new ClassicCounter<>();
       f1.setCount("humidity", 1.0);
       f1.setCount("temperature", 34.0);
-      trainingInstances.add(new RVFDatum<String, String>(f1, "dry"));
+      trainingInstances.add(new RVFDatum<>(f1, "dry"));
     }
 
     KNNClassifier<String, String> classifier = new KNNClassifierFactory<String, String>(3, false, true).train(trainingInstances);
 
     {
-      ClassicCounter<String> f1 = new ClassicCounter<String>();
+      ClassicCounter<String> f1 = new ClassicCounter<>();
       f1.setCount("humidity", 2.0);
       f1.setCount("temperature", 33.0);
-      RVFDatum<String, String> testVec = new RVFDatum<String, String>(f1);
+      RVFDatum<String, String> testVec = new RVFDatum<>(f1);
       System.out.println(classifier.scoresOf(testVec));
       System.out.println(classifier.classOf(testVec));
     }

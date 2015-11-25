@@ -16,7 +16,7 @@ import java.util.Stack;
  */
 public class RepeatedRecordHandler extends LogRecordHandler {
 
-  private final Stack<RepeatedRecordInfo> stack = new Stack<RepeatedRecordInfo>();
+  private final Stack<RepeatedRecordInfo> stack = new Stack<>();
   RepeatedRecordInfo current = new RepeatedRecordInfo();
   private final RepeatSemantics repeatSemantics;
 
@@ -54,7 +54,7 @@ public class RepeatedRecordHandler extends LogRecordHandler {
   }
 
   private void flushParents(List<Record> willReturn){
-    Stack<RepeatedRecordInfo> reverseStack = new Stack<RepeatedRecordInfo>();
+    Stack<RepeatedRecordInfo> reverseStack = new Stack<>();
       while(!stack.isEmpty()){
         reverseStack.push(stack.pop());
       }
@@ -123,7 +123,7 @@ public class RepeatedRecordHandler extends LogRecordHandler {
   /** {@inheritDoc} */
   @Override
   public List<Record> handle(Record record) {
-    List<Record> willReturn = new ArrayList<Record>();
+    List<Record> willReturn = new ArrayList<>();
     if(internalHandle(record, willReturn)){
       willReturn.add(record);
     }
@@ -134,7 +134,7 @@ public class RepeatedRecordHandler extends LogRecordHandler {
   @Override
   public List<Record> signalStartTrack(Record signal) {
     //(handle record)
-    List<Record> willReturn = new ArrayList<Record>();
+    List<Record> willReturn = new ArrayList<>();
     boolean isPrinting = internalHandle(signal, willReturn);
     //(adjust state for track)
     if(!signal.force()){
@@ -156,7 +156,7 @@ public class RepeatedRecordHandler extends LogRecordHandler {
   /** {@inheritDoc} */
   @Override
   public List<Record> signalEndTrack(int newDepth, long timeEnded) {
-    List<Record> willReturn = new ArrayList<Record>();
+    List<Record> willReturn = new ArrayList<>();
     //(get state info)
     boolean trackWasNonempty = current.somethingPrinted;
     //(flush)
@@ -183,7 +183,7 @@ public class RepeatedRecordHandler extends LogRecordHandler {
   /** {@inheritDoc} */
   @Override
   public List<Record> signalShutdown(){
-    List<Record> willReturn = new ArrayList<Record>();
+    List<Record> willReturn = new ArrayList<>();
     flush(current,willReturn);
     return willReturn;
   }

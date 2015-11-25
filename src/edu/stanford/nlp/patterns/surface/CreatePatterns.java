@@ -42,7 +42,7 @@ public class CreatePatterns<E> {
    // this.patternsForEachToken = new HashMap<String, Map<Integer, Set<Integer>>>();
 
     Date startDate = new Date();
-    List<String> keyset = new ArrayList<String>(sents.keySet());
+    List<String> keyset = new ArrayList<>(sents.keySet());
 
     int num;
     if (constVars.numThreads == 1)
@@ -53,7 +53,7 @@ public class CreatePatterns<E> {
         .newFixedThreadPool(constVars.numThreads);
 
     Redwood.log(ConstantsAndVariables.extremedebug, "Computing all patterns. keyset size is " + keyset.size() + ". Assigning " + num + " values to each thread");
-    List<Future<Boolean>> list = new ArrayList<Future<Boolean>>();
+    List<Future<Boolean>> list = new ArrayList<>();
     for (int i = 0; i < constVars.numThreads; i++) {
 
       int from = i * num;
@@ -123,14 +123,14 @@ public class CreatePatterns<E> {
 
     @Override
     public Boolean call() throws Exception {
-      Map<String, Map<Integer, Set<E>>> tempPatternsForTokens = new HashMap<String, Map<Integer, Set<E>>>();
+      Map<String, Map<Integer, Set<E>>> tempPatternsForTokens = new HashMap<>();
       int numSentencesInOneCommit = 0;
 
       for (String id : sentIds) {
         DataInstance sent = sents.get(id);
 
         if(!constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY))
-          tempPatternsForTokens.put(id, new HashMap<Integer, Set<E>>());
+          tempPatternsForTokens.put(id, new HashMap<>());
 
         Map<Integer, Set<E>> p  = (Map) PatternFactory.getPatternsAroundTokens(constVars.patternType, sent, constVars.getStopWords());
         //to save number of commits to the database
