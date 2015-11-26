@@ -6,7 +6,7 @@ platform: all
 version: all
 destination: ../doc_designers
 topnav_title: Stanford CoreNLP
-homepage_title: Stanford CoreNLP &mdash; a suite of core NLP tools 
+homepage_title: Stanford CoreNLP &ndash; a suite of core NLP tools 
 site_title: Stanford CoreNLP
 #disqus_shortname: idrbwjekyll
 #google_analytics: UA-66296557-1
