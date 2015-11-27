@@ -37,7 +37,7 @@ including [the part-of-speech (POS) tagger](http://nlp.stanford.edu/software/tag
 Its analyses provide the foundational building blocks for
 higher-level and domain-specific text understanding applications.
 
-# Human languages supported
+## Human languages supported
 
 The basic distribution provides model files for the analysis of **English**,
 but the engine is compatible with models for other languages. We provide
@@ -45,7 +45,7 @@ packaged models for **Chinese** and **Spanish**, and
 Stanford NLP models for **French**, **German**, and **Arabic** are
 also usable inside CoreNLP.
 
-# Programming languages, licenses, operating systems
+## Programming languages and operating systems
 
 Stanford CoreNLP is written in **Java** and licensed under the [GNU General Public License](http://www.gnu.org/licenses/gpl.html) (v3 or later; in general Stanford NLP
 code is GPL v2+, but CoreNLP uses several Apache-licensed libraries, and
@@ -56,7 +56,24 @@ The download is 260 MB and requires **Java 1.8+**.
 You can use Stanford CoreNLP from the command-line, via its
 programmatic API or via a services on Linux, OS X, or Windows.
 
-# Citing Stanford CoreNLP in papers
+## License
+
+Stanford CoreNLP is licensed under the [GNU General Public License](http://www.gnu.org/licenses/gpl.html)
+(v3 or later; in general Stanford NLP
+code is GPL v2+, but CoreNLP uses several Apache-licensed libraries, and
+so the composite is v3+).  Source is [available on GitHub]().
+Note that the license is the <i>full</i> GPL,
+which allows many free uses, but not its use in 
+[proprietary software](http://www.gnu.org/licenses/gpl-faq.html#GPLInProprietarySystem) 
+which is distributed to others.
+For distributors of
+<a href="http://www.gnu.org/licenses/gpl-faq.html#GPLInProprietarySystem">proprietary software</a>,
+<a href="http://techfinder.stanford.edu/technology_detail.php?ID=29724">commercial licensing</a>
+is available from Stanford. You can contact us at 
+[java-nlp-support@lists.stanford.edu](mailto:java-nlp-support@lists.stanford.edu).
+
+
+## Citing Stanford CoreNLP in papers
 
 If you're just running the CoreNLP pipeline, please cite this CoreNLP
 demo paper. If you're dealing in depth with particular annotators,
