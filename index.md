@@ -5,6 +5,8 @@ type: first_page
 homepage: true
 ---
 
+## About
+
 Stanford CoreNLP provides a set of natural language analysis
 tools. It can give the base
 forms of words, their parts of speech, whether they are names of
@@ -45,7 +47,7 @@ packaged models for **Chinese** and **Spanish**, and
 Stanford NLP models for **French**, **German**, and **Arabic** are
 also usable inside CoreNLP.
 
-| Annotator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Arabic | Chinese | English | French | German | Spanish |
+| Annotator | Arabic | Chinese | English | French | German | Spanish |
 | ------------ |:---:|:---:|:---:|:---:|:---:|:---:|
 | Tokenize / Segment | &check; | &check;  | &check; | &check;  |     | &check; |
 | Sentence Split | &check; | &check;  | &check; | &check;  | &check; | &check; |
@@ -55,8 +57,8 @@ also usable inside CoreNLP.
 | Dependency Parsing |    | &check;  | &check; | &check; | &check; |     |
 | Sentiment Analysis |    |    | &check; |  |  |     |
 | Mention Detection |    | &check;  | &check; |  |  |     |
-| Coreference Resolution |    | &check;  | &check; |  |  |     |
-| Open Information Extraction |    |   | &check; |  |  |     |
+| Coreference |    | &check;  | &check; |  |  |     |
+| Open IE |    |   | &check; |  |  |     |
 
 
 ## Programming languages and operating systems
