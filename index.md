@@ -45,6 +45,14 @@ packaged models for **Chinese** and **Spanish**, and
 Stanford NLP models for **French**, **German**, and **Arabic** are
 also usable inside CoreNLP.
 
+| Annotator | Arabic | Chinese | English | French | German | Spanish |
+| --- |:---:|:---:|:---:|:---:|:---:|:---:|
+| Tokenize / Segment | &check; | &check;  | &check; | &check;  |     | &check; |
+| Sentence Split | &check; | &check;  | &check; | &check;  | &check; | &check; |
+| Part of Speech | &check; | &check;  | &check; | &check;  | &check; | &check; |
+| Named Entities |   | &check;  | &check; |    | &check; | &check; |
+| Constituency Parsing | &check; | &check;  | &check; | &check; | &check; | &check; |
+
 ## Programming languages and operating systems
 
 Stanford CoreNLP is written in **Java** and licensed under the [GNU General Public License](http://www.gnu.org/licenses/gpl.html) (v3 or later; in general Stanford NLP
