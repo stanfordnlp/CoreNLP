@@ -6,16 +6,16 @@ homepage: true
 ---
 
 Stanford CoreNLP provides a set of natural language analysis
-tools. It can take raw text input and give the base
+tools. It can give the base
 forms of words, their parts of speech, whether they are names of
 companies, people, etc., normalize dates, times, and numeric quantities,
 and mark up the structure of sentences in terms of
 phrases and word dependencies, indicate which noun phrases refer to
-the same entities, indicate sentiment, etc. 
+the same entities, indicate sentiment, extract open-class relations between mentions, etc. 
 
 Choose Stanford CoreNLP if you need:
 
-* An integrated toolkit with a good range of functionality
+* An integrated toolkit with a good range of grammatical analysis tools
 * Fast, reliable analysis of arbitrary texts
 * The overall highest quality text analytics
 * Support for a number of major (human) languages
@@ -27,7 +27,7 @@ of text. Starting from plain text, you can run all the tools on it with
 just two lines of code. It is designed to be highly
 flexible and extensible.  With a single option you can change which
 tools should be enabled and which should be disabled. 
-Stanford CoreNLP integrates many of Stanford's NLP tools,
+Stanford CoreNLP integrates many of Stanford&rsquo;s NLP tools,
 including [the part-of-speech (POS) tagger](http://nlp.stanford.edu/software/tagger.shtml), 
 [the named entity recognizer (NER)](http://nlp.stanford.edu/software/CRF-NER.shtml),
 [the parser](http://nlp.stanford.edu/software/lex-parser.shtml),
@@ -52,24 +52,29 @@ also usable inside CoreNLP.
 | Part of Speech | &check; | &check;  | &check; | &check;  | &check; | &check; |
 | Named Entities |   | &check;  | &check; |    | &check; | &check; |
 | Constituency Parsing | &check; | &check;  | &check; | &check; | &check; | &check; |
+| Dependency Parsing |    | &check;  | &check; | &check; | &check; |     |
+| Sentiment Analysis |    |    | &check; |  |  |     |
+| Mention Detection |    | &check;  | &check; |  |  |     |
+| Coreference Resolution |    | &check;  | &check; |  |  |     |
+| Open Information Extraction |    |   | &check; |  |  |     |
+
 
 ## Programming languages and operating systems
 
-Stanford CoreNLP is written in **Java** and licensed under the [GNU General Public License](http://www.gnu.org/licenses/gpl.html) (v3 or later; in general Stanford NLP
-code is GPL v2+, but CoreNLP uses several Apache-licensed libraries, and
-so the composite is v3+).  Source is [available on GitHub]().
-Note that the license is the <i>full</i> GPL,
-which allows many free uses, but not its use in [proprietary software](http://www.gnu.org/licenses/gpl-faq.html#GPLInProprietarySystem) which is distributed to others.
-The download is 260 MB and requires **Java 1.8+**.
-You can use Stanford CoreNLP from the command-line, via its
-programmatic API or via a services on Linux, OS X, or Windows.
+Stanford CoreNLP is written in **Java**; current releases  require **Java 1.8+**. 
+There is a complete zip file with everything or
+it is [available on Maven Central](http://mvnrepository.com/artifact/edu.stanford.nlp/stanford-corenlp).
+Source is [available on GitHub](https://github.com/stanfordnlp/CoreNLP).
+
+You can use Stanford CoreNLP from the command-line, via its Java
+programmatic API, via third party APIs for most major modern programming languages, or via a service.
+It works on Linux, OS X, and Windows.
 
 ## License
 
 Stanford CoreNLP is licensed under the [GNU General Public License](http://www.gnu.org/licenses/gpl.html)
 (v3 or later; in general Stanford NLP
-code is GPL v2+, but CoreNLP uses several Apache-licensed libraries, and
-so the composite is v3+).  Source is [available on GitHub]().
+code is GPL v2+, but CoreNLP uses several Apache-licensed libraries, and so the composite is v3+).
 Note that the license is the <i>full</i> GPL,
 which allows many free uses, but not its use in 
 [proprietary software](http://www.gnu.org/licenses/gpl-faq.html#GPLInProprietarySystem) 
@@ -83,9 +88,9 @@ is available from Stanford. You can contact us at
 
 ## Citing Stanford CoreNLP in papers
 
-If you're just running the CoreNLP pipeline, please cite this CoreNLP
-demo paper. If you're dealing in depth with particular annotators,
-you're also encouraged to cite the papers that cover individual
+If you&rsquo;re just running the CoreNLP pipeline, please cite this CoreNLP
+demo paper. If you&rsquo;re dealing in depth with particular annotators,
+you&rsquo;re also encouraged to cite the papers that cover individual
 components. You can find more information on the Stanford NLP
 [software pages](http://nlp.stanford.edu/software/index.shtml) and/or
 [publications page](http://nlp.stanford.edu/publications.shtml).
