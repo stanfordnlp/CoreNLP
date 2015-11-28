@@ -6,22 +6,23 @@ entries:
   subcategories:
 
 
-    - title: About
+    - title: Introduction
 
       items:
         - title: Introduction
-          url: about.html
+          url: index.html
 
-        - title: Citing Stanford CoreNLP
-          url: citing.html
-
-        - title: Download 
-          url: download.html
+      #- title: Citing Stanford CoreNLP
+      #    url: citing.html
 
 
     - title: Usage 
 
       items:
+
+        - title: Download 
+          url: download.html
+
         - title: Command line usage
           url: cmdline.html
 
