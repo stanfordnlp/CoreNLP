@@ -8,11 +8,11 @@ permalink: '/api.html'
 
 The backbone of the CoreNLP package is formed by two classes: Annotation and Annotator. Annotations are the data structure which hold the results of annotators. Annotations are basically maps, from keys to bits of the annotation, such as the parse, the part-of-speech tags, or named entity tags. Annotators are a lot like functions, except that they operate over Annotations instead of Objects. They do things like tokenize, parse, or NER tag sentences. Annotators and Annotations are integrated by AnnotationPipelines, which create sequences of generic Annotators. Stanford CoreNLP inherits from the AnnotationPipeline class, and is customized with NLP Annotators.
 
-The Annotators currently supported and the Annotations they generate are summarized [here]().
+The Annotators currently supported and the Annotations they generate are summarized [here](annotators.html).
 
 Depending on which annotators you use, please cite the corresponding papers on: [POS tagging](http://nlp.stanford.edu/software/tagger.shtml), [NER](http://nlp.stanford.edu/software/CRF-NER.shtml), [parsing (with parse annotator)](http://nlp.stanford.edu/software/lex-parser.shtml), [dependency parsing (with depparse annotator)](http://nlp.stanford.edu/software/nndep.shtml), [coreference resolution](http://nlp.stanford.edu/software/dcoref.shtml), or [sentiment](http://nlp.stanford.edu/sentiment/).
 
-To construct a Stanford CoreNLP object from a given set of properties, use `StanfordCoreNLP(Properties props)`. This method creates the pipeline using the annotators given in the "annotators" property (see below for an example setting). The complete list of accepted annotator names is listed in the first column of the table [here](). To parse an arbitrary text, use the `annotate(Annotation document)` method.
+To construct a Stanford CoreNLP object from a given set of properties, use `StanfordCoreNLP(Properties props)`. This method creates the pipeline using the annotators given in the "annotators" property (see below for an example setting). The complete list of accepted annotator names is listed in the first column of the table [here](annotators.html). To parse an arbitrary text, use the `annotate(Annotation document)` method.
 
 ``` java
 // creates a StanfordCoreNLP object, with POS tagging, lemmatization, NER, parsing, and coreference resolution 
@@ -50,7 +50,7 @@ for(CoreMap sentence: sentences) {
     // this is the POS tag of the token
     String pos = token.get(PartOfSpeechAnnotation.class);
     // this is the NER label of the token
-    String ne = token.get(NamedEntityTagAnnotation.class);       
+    String ne = token.get(NamedEntityTagAnnotation.class);
   }
 
   // this is the parse tree of the current sentence
