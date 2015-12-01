@@ -11,6 +11,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
+import static edu.stanford.nlp.util.TSVUtils.unescapeSQL;
+
 /**
  * Reads sentences from a TSV, provided a list of fields to populate.
  */
@@ -74,7 +76,7 @@ public class TSVSentenceIterator implements Iterator<Sentence> {
     // First pass - process all token level stuff.
     for(Pair<SentenceField, String> entry : Iterables.zip(fields, entries)) {
       SentenceField field = entry.first;
-      String value = entry.second;
+      String value = unescapeSQL(entry.second);
       switch (field) {
         case WORDS: {
           List<String> values = TSVUtils.parseArray(value);
@@ -134,7 +136,7 @@ public class TSVSentenceIterator implements Iterator<Sentence> {
 
     for(Pair<SentenceField, String> entry : Iterables.zip(fields, entries)) {
       SentenceField field = entry.first;
-      String value = entry.second;
+      String value = unescapeSQL(entry.second);
       switch (field) {
         case ID:
           sentenceId = Optional.of(value);
@@ -162,7 +164,7 @@ public class TSVSentenceIterator implements Iterator<Sentence> {
     if(tokens.isPresent()) {
       for (Pair<SentenceField, String> entry : Iterables.zip(fields, entries)) {
         SentenceField field = entry.first;
-        String value = entry.second;
+        String value = unescapeSQL(entry.second);
         switch (field) {
           case DOC_CHAR_BEGIN: {
             List<String> values = TSVUtils.parseArray(value);
@@ -201,7 +203,7 @@ public class TSVSentenceIterator implements Iterator<Sentence> {
 
       for (Pair<SentenceField, String> entry : Iterables.zip(fields, entries)) {
         SentenceField field = entry.first;
-        String value = entry.second;
+        String value = unescapeSQL(entry.second);
         switch (field) {
           case DEPENDENCIES_BASIC: {
             SemanticGraph graph = TSVUtils.parseJsonTree(value, tokens.get());
