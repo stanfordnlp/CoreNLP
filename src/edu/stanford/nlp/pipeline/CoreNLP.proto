@@ -293,16 +293,8 @@ message IndexedWord {
 //
 
 message SpeakerInfo {
-  optional string speakerId            = 1;
-  optional string speakerName          = 2;
-  optional string speakerDesc          = 3;
-  optional bool speakerIdIsNumber      = 4;
-  optional bool speakerIdIsAutoDetermined = 5;
-
-
-  repeated string speakerNameStrings   = 6;
-  repeated int32 mentions    = 7;
-
+  optional string speakerName          = 1;
+  repeated int32 mentions    = 2;
 }
 
 //

@@ -29518,94 +29518,29 @@ public final class CoreNLPProtos {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>optional string speakerId = 1;</code>
-     */
-    boolean hasSpeakerId();
-    /**
-     * <code>optional string speakerId = 1;</code>
-     */
-    java.lang.String getSpeakerId();
-    /**
-     * <code>optional string speakerId = 1;</code>
-     */
-    com.google.protobuf.ByteString
-        getSpeakerIdBytes();
-
-    /**
-     * <code>optional string speakerName = 2;</code>
+     * <code>optional string speakerName = 1;</code>
      */
     boolean hasSpeakerName();
     /**
-     * <code>optional string speakerName = 2;</code>
+     * <code>optional string speakerName = 1;</code>
      */
     java.lang.String getSpeakerName();
     /**
-     * <code>optional string speakerName = 2;</code>
+     * <code>optional string speakerName = 1;</code>
      */
     com.google.protobuf.ByteString
         getSpeakerNameBytes();
 
     /**
-     * <code>optional string speakerDesc = 3;</code>
-     */
-    boolean hasSpeakerDesc();
-    /**
-     * <code>optional string speakerDesc = 3;</code>
-     */
-    java.lang.String getSpeakerDesc();
-    /**
-     * <code>optional string speakerDesc = 3;</code>
-     */
-    com.google.protobuf.ByteString
-        getSpeakerDescBytes();
-
-    /**
-     * <code>optional bool speakerIdIsNumber = 4;</code>
-     */
-    boolean hasSpeakerIdIsNumber();
-    /**
-     * <code>optional bool speakerIdIsNumber = 4;</code>
-     */
-    boolean getSpeakerIdIsNumber();
-
-    /**
-     * <code>optional bool speakerIdIsAutoDetermined = 5;</code>
-     */
-    boolean hasSpeakerIdIsAutoDetermined();
-    /**
-     * <code>optional bool speakerIdIsAutoDetermined = 5;</code>
-     */
-    boolean getSpeakerIdIsAutoDetermined();
-
-    /**
-     * <code>repeated string speakerNameStrings = 6;</code>
-     */
-    com.google.protobuf.ProtocolStringList
-        getSpeakerNameStringsList();
-    /**
-     * <code>repeated string speakerNameStrings = 6;</code>
-     */
-    int getSpeakerNameStringsCount();
-    /**
-     * <code>repeated string speakerNameStrings = 6;</code>
-     */
-    java.lang.String getSpeakerNameStrings(int index);
-    /**
-     * <code>repeated string speakerNameStrings = 6;</code>
-     */
-    com.google.protobuf.ByteString
-        getSpeakerNameStringsBytes(int index);
-
-    /**
-     * <code>repeated int32 mentions = 7;</code>
+     * <code>repeated int32 mentions = 2;</code>
      */
     java.util.List<java.lang.Integer> getMentionsList();
     /**
-     * <code>repeated int32 mentions = 7;</code>
+     * <code>repeated int32 mentions = 2;</code>
      */
     int getMentionsCount();
     /**
-     * <code>repeated int32 mentions = 7;</code>
+     * <code>repeated int32 mentions = 2;</code>
      */
     int getMentions(int index);
   }
@@ -29664,54 +29599,23 @@ public final class CoreNLPProtos {
             case 10: {
               com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000001;
-              speakerId_ = bs;
-              break;
-            }
-            case 18: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000002;
               speakerName_ = bs;
               break;
             }
-            case 26: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000004;
-              speakerDesc_ = bs;
-              break;
-            }
-            case 32: {
-              bitField0_ |= 0x00000008;
-              speakerIdIsNumber_ = input.readBool();
-              break;
-            }
-            case 40: {
-              bitField0_ |= 0x00000010;
-              speakerIdIsAutoDetermined_ = input.readBool();
-              break;
-            }
-            case 50: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
-                speakerNameStrings_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000020;
-              }
-              speakerNameStrings_.add(bs);
-              break;
-            }
-            case 56: {
-              if (!((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
+            case 16: {
+              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
                 mentions_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00000040;
+                mutable_bitField0_ |= 0x00000002;
               }
               mentions_.add(input.readInt32());
               break;
             }
-            case 58: {
+            case 18: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000040) == 0x00000040) && input.getBytesUntilLimit() > 0) {
+              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002) && input.getBytesUntilLimit() > 0) {
                 mentions_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00000040;
+                mutable_bitField0_ |= 0x00000002;
               }
               while (input.getBytesUntilLimit() > 0) {
                 mentions_.add(input.readInt32());
@@ -29727,10 +29631,7 @@ public final class CoreNLPProtos {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
-          speakerNameStrings_ = speakerNameStrings_.getUnmodifiableView();
-        }
-        if (((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
           mentions_ = java.util.Collections.unmodifiableList(mentions_);
         }
         this.unknownFields = unknownFields.build();
@@ -29765,58 +29666,16 @@ public final class CoreNLPProtos {
     }
 
     private int bitField0_;
-    public static final int SPEAKERID_FIELD_NUMBER = 1;
-    private java.lang.Object speakerId_;
+    public static final int SPEAKERNAME_FIELD_NUMBER = 1;
+    private java.lang.Object speakerName_;
     /**
-     * <code>optional string speakerId = 1;</code>
+     * <code>optional string speakerName = 1;</code>
      */
-    public boolean hasSpeakerId() {
+    public boolean hasSpeakerName() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional string speakerId = 1;</code>
-     */
-    public java.lang.String getSpeakerId() {
-      java.lang.Object ref = speakerId_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          speakerId_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>optional string speakerId = 1;</code>
-     */
-    public com.google.protobuf.ByteString
-        getSpeakerIdBytes() {
-      java.lang.Object ref = speakerId_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        speakerId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int SPEAKERNAME_FIELD_NUMBER = 2;
-    private java.lang.Object speakerName_;
-    /**
-     * <code>optional string speakerName = 2;</code>
-     */
-    public boolean hasSpeakerName() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    /**
-     * <code>optional string speakerName = 2;</code>
+     * <code>optional string speakerName = 1;</code>
      */
     public java.lang.String getSpeakerName() {
       java.lang.Object ref = speakerName_;
@@ -29833,7 +29692,7 @@ public final class CoreNLPProtos {
       }
     }
     /**
-     * <code>optional string speakerName = 2;</code>
+     * <code>optional string speakerName = 1;</code>
      */
     public com.google.protobuf.ByteString
         getSpeakerNameBytes() {
@@ -29849,136 +29708,30 @@ public final class CoreNLPProtos {
       }
     }
 
-    public static final int SPEAKERDESC_FIELD_NUMBER = 3;
-    private java.lang.Object speakerDesc_;
-    /**
-     * <code>optional string speakerDesc = 3;</code>
-     */
-    public boolean hasSpeakerDesc() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
-    }
-    /**
-     * <code>optional string speakerDesc = 3;</code>
-     */
-    public java.lang.String getSpeakerDesc() {
-      java.lang.Object ref = speakerDesc_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          speakerDesc_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>optional string speakerDesc = 3;</code>
-     */
-    public com.google.protobuf.ByteString
-        getSpeakerDescBytes() {
-      java.lang.Object ref = speakerDesc_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        speakerDesc_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int SPEAKERIDISNUMBER_FIELD_NUMBER = 4;
-    private boolean speakerIdIsNumber_;
-    /**
-     * <code>optional bool speakerIdIsNumber = 4;</code>
-     */
-    public boolean hasSpeakerIdIsNumber() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
-    }
-    /**
-     * <code>optional bool speakerIdIsNumber = 4;</code>
-     */
-    public boolean getSpeakerIdIsNumber() {
-      return speakerIdIsNumber_;
-    }
-
-    public static final int SPEAKERIDISAUTODETERMINED_FIELD_NUMBER = 5;
-    private boolean speakerIdIsAutoDetermined_;
-    /**
-     * <code>optional bool speakerIdIsAutoDetermined = 5;</code>
-     */
-    public boolean hasSpeakerIdIsAutoDetermined() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
-    }
-    /**
-     * <code>optional bool speakerIdIsAutoDetermined = 5;</code>
-     */
-    public boolean getSpeakerIdIsAutoDetermined() {
-      return speakerIdIsAutoDetermined_;
-    }
-
-    public static final int SPEAKERNAMESTRINGS_FIELD_NUMBER = 6;
-    private com.google.protobuf.LazyStringList speakerNameStrings_;
-    /**
-     * <code>repeated string speakerNameStrings = 6;</code>
-     */
-    public com.google.protobuf.ProtocolStringList
-        getSpeakerNameStringsList() {
-      return speakerNameStrings_;
-    }
-    /**
-     * <code>repeated string speakerNameStrings = 6;</code>
-     */
-    public int getSpeakerNameStringsCount() {
-      return speakerNameStrings_.size();
-    }
-    /**
-     * <code>repeated string speakerNameStrings = 6;</code>
-     */
-    public java.lang.String getSpeakerNameStrings(int index) {
-      return speakerNameStrings_.get(index);
-    }
-    /**
-     * <code>repeated string speakerNameStrings = 6;</code>
-     */
-    public com.google.protobuf.ByteString
-        getSpeakerNameStringsBytes(int index) {
-      return speakerNameStrings_.getByteString(index);
-    }
-
-    public static final int MENTIONS_FIELD_NUMBER = 7;
+    public static final int MENTIONS_FIELD_NUMBER = 2;
     private java.util.List<java.lang.Integer> mentions_;
     /**
-     * <code>repeated int32 mentions = 7;</code>
+     * <code>repeated int32 mentions = 2;</code>
      */
     public java.util.List<java.lang.Integer>
         getMentionsList() {
       return mentions_;
     }
     /**
-     * <code>repeated int32 mentions = 7;</code>
+     * <code>repeated int32 mentions = 2;</code>
      */
     public int getMentionsCount() {
       return mentions_.size();
     }
     /**
-     * <code>repeated int32 mentions = 7;</code>
+     * <code>repeated int32 mentions = 2;</code>
      */
     public int getMentions(int index) {
       return mentions_.get(index);
     }
 
     private void initFields() {
-      speakerId_ = "";
       speakerName_ = "";
-      speakerDesc_ = "";
-      speakerIdIsNumber_ = false;
-      speakerIdIsAutoDetermined_ = false;
-      speakerNameStrings_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       mentions_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
@@ -29995,25 +29748,10 @@ public final class CoreNLPProtos {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, getSpeakerIdBytes());
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, getSpeakerNameBytes());
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(3, getSpeakerDescBytes());
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeBool(4, speakerIdIsNumber_);
-      }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeBool(5, speakerIdIsAutoDetermined_);
-      }
-      for (int i = 0; i < speakerNameStrings_.size(); i++) {
-        output.writeBytes(6, speakerNameStrings_.getByteString(i));
+        output.writeBytes(1, getSpeakerNameBytes());
       }
       for (int i = 0; i < mentions_.size(); i++) {
-        output.writeInt32(7, mentions_.get(i));
+        output.writeInt32(2, mentions_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -30026,32 +29764,7 @@ public final class CoreNLPProtos {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, getSpeakerIdBytes());
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, getSpeakerNameBytes());
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, getSpeakerDescBytes());
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(4, speakerIdIsNumber_);
-      }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(5, speakerIdIsAutoDetermined_);
-      }
-      {
-        int dataSize = 0;
-        for (int i = 0; i < speakerNameStrings_.size(); i++) {
-          dataSize += com.google.protobuf.CodedOutputStream
-            .computeBytesSizeNoTag(speakerNameStrings_.getByteString(i));
-        }
-        size += dataSize;
-        size += 1 * getSpeakerNameStringsList().size();
+          .computeBytesSize(1, getSpeakerNameBytes());
       }
       {
         int dataSize = 0;
@@ -30179,20 +29892,10 @@ public final class CoreNLPProtos {
 
       public Builder clear() {
         super.clear();
-        speakerId_ = "";
-        bitField0_ = (bitField0_ & ~0x00000001);
         speakerName_ = "";
-        bitField0_ = (bitField0_ & ~0x00000002);
-        speakerDesc_ = "";
-        bitField0_ = (bitField0_ & ~0x00000004);
-        speakerIdIsNumber_ = false;
-        bitField0_ = (bitField0_ & ~0x00000008);
-        speakerIdIsAutoDetermined_ = false;
-        bitField0_ = (bitField0_ & ~0x00000010);
-        speakerNameStrings_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000020);
+        bitField0_ = (bitField0_ & ~0x00000001);
         mentions_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000040);
+        bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
 
@@ -30224,31 +29927,10 @@ public final class CoreNLPProtos {
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
-        result.speakerId_ = speakerId_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
         result.speakerName_ = speakerName_;
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-          to_bitField0_ |= 0x00000004;
-        }
-        result.speakerDesc_ = speakerDesc_;
-        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-          to_bitField0_ |= 0x00000008;
-        }
-        result.speakerIdIsNumber_ = speakerIdIsNumber_;
-        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
-          to_bitField0_ |= 0x00000010;
-        }
-        result.speakerIdIsAutoDetermined_ = speakerIdIsAutoDetermined_;
-        if (((bitField0_ & 0x00000020) == 0x00000020)) {
-          speakerNameStrings_ = speakerNameStrings_.getUnmodifiableView();
-          bitField0_ = (bitField0_ & ~0x00000020);
-        }
-        result.speakerNameStrings_ = speakerNameStrings_;
-        if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
           mentions_ = java.util.Collections.unmodifiableList(mentions_);
-          bitField0_ = (bitField0_ & ~0x00000040);
+          bitField0_ = (bitField0_ & ~0x00000002);
         }
         result.mentions_ = mentions_;
         result.bitField0_ = to_bitField0_;
@@ -30267,41 +29949,15 @@ public final class CoreNLPProtos {
 
       public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo other) {
         if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.getDefaultInstance()) return this;
-        if (other.hasSpeakerId()) {
-          bitField0_ |= 0x00000001;
-          speakerId_ = other.speakerId_;
-          onChanged();
-        }
         if (other.hasSpeakerName()) {
-          bitField0_ |= 0x00000002;
+          bitField0_ |= 0x00000001;
           speakerName_ = other.speakerName_;
-          onChanged();
-        }
-        if (other.hasSpeakerDesc()) {
-          bitField0_ |= 0x00000004;
-          speakerDesc_ = other.speakerDesc_;
-          onChanged();
-        }
-        if (other.hasSpeakerIdIsNumber()) {
-          setSpeakerIdIsNumber(other.getSpeakerIdIsNumber());
-        }
-        if (other.hasSpeakerIdIsAutoDetermined()) {
-          setSpeakerIdIsAutoDetermined(other.getSpeakerIdIsAutoDetermined());
-        }
-        if (!other.speakerNameStrings_.isEmpty()) {
-          if (speakerNameStrings_.isEmpty()) {
-            speakerNameStrings_ = other.speakerNameStrings_;
-            bitField0_ = (bitField0_ & ~0x00000020);
-          } else {
-            ensureSpeakerNameStringsIsMutable();
-            speakerNameStrings_.addAll(other.speakerNameStrings_);
-          }
           onChanged();
         }
         if (!other.mentions_.isEmpty()) {
           if (mentions_.isEmpty()) {
             mentions_ = other.mentions_;
-            bitField0_ = (bitField0_ & ~0x00000040);
+            bitField0_ = (bitField0_ & ~0x00000002);
           } else {
             ensureMentionsIsMutable();
             mentions_.addAll(other.mentions_);
@@ -30335,91 +29991,15 @@ public final class CoreNLPProtos {
       }
       private int bitField0_;
 
-      private java.lang.Object speakerId_ = "";
+      private java.lang.Object speakerName_ = "";
       /**
-       * <code>optional string speakerId = 1;</code>
+       * <code>optional string speakerName = 1;</code>
        */
-      public boolean hasSpeakerId() {
+      public boolean hasSpeakerName() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional string speakerId = 1;</code>
-       */
-      public java.lang.String getSpeakerId() {
-        java.lang.Object ref = speakerId_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            speakerId_ = s;
-          }
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>optional string speakerId = 1;</code>
-       */
-      public com.google.protobuf.ByteString
-          getSpeakerIdBytes() {
-        java.lang.Object ref = speakerId_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          speakerId_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string speakerId = 1;</code>
-       */
-      public Builder setSpeakerId(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-        speakerId_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string speakerId = 1;</code>
-       */
-      public Builder clearSpeakerId() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        speakerId_ = getDefaultInstance().getSpeakerId();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string speakerId = 1;</code>
-       */
-      public Builder setSpeakerIdBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-        speakerId_ = value;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object speakerName_ = "";
-      /**
-       * <code>optional string speakerName = 2;</code>
-       */
-      public boolean hasSpeakerName() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <code>optional string speakerName = 2;</code>
+       * <code>optional string speakerName = 1;</code>
        */
       public java.lang.String getSpeakerName() {
         java.lang.Object ref = speakerName_;
@@ -30436,7 +30016,7 @@ public final class CoreNLPProtos {
         }
       }
       /**
-       * <code>optional string speakerName = 2;</code>
+       * <code>optional string speakerName = 1;</code>
        */
       public com.google.protobuf.ByteString
           getSpeakerNameBytes() {
@@ -30452,302 +30032,69 @@ public final class CoreNLPProtos {
         }
       }
       /**
-       * <code>optional string speakerName = 2;</code>
+       * <code>optional string speakerName = 1;</code>
        */
       public Builder setSpeakerName(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
+  bitField0_ |= 0x00000001;
         speakerName_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional string speakerName = 2;</code>
+       * <code>optional string speakerName = 1;</code>
        */
       public Builder clearSpeakerName() {
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000001);
         speakerName_ = getDefaultInstance().getSpeakerName();
         onChanged();
         return this;
       }
       /**
-       * <code>optional string speakerName = 2;</code>
+       * <code>optional string speakerName = 1;</code>
        */
       public Builder setSpeakerNameBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
+  bitField0_ |= 0x00000001;
         speakerName_ = value;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object speakerDesc_ = "";
-      /**
-       * <code>optional string speakerDesc = 3;</code>
-       */
-      public boolean hasSpeakerDesc() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
-      }
-      /**
-       * <code>optional string speakerDesc = 3;</code>
-       */
-      public java.lang.String getSpeakerDesc() {
-        java.lang.Object ref = speakerDesc_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            speakerDesc_ = s;
-          }
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>optional string speakerDesc = 3;</code>
-       */
-      public com.google.protobuf.ByteString
-          getSpeakerDescBytes() {
-        java.lang.Object ref = speakerDesc_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          speakerDesc_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string speakerDesc = 3;</code>
-       */
-      public Builder setSpeakerDesc(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
-        speakerDesc_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string speakerDesc = 3;</code>
-       */
-      public Builder clearSpeakerDesc() {
-        bitField0_ = (bitField0_ & ~0x00000004);
-        speakerDesc_ = getDefaultInstance().getSpeakerDesc();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string speakerDesc = 3;</code>
-       */
-      public Builder setSpeakerDescBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
-        speakerDesc_ = value;
-        onChanged();
-        return this;
-      }
-
-      private boolean speakerIdIsNumber_ ;
-      /**
-       * <code>optional bool speakerIdIsNumber = 4;</code>
-       */
-      public boolean hasSpeakerIdIsNumber() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
-      }
-      /**
-       * <code>optional bool speakerIdIsNumber = 4;</code>
-       */
-      public boolean getSpeakerIdIsNumber() {
-        return speakerIdIsNumber_;
-      }
-      /**
-       * <code>optional bool speakerIdIsNumber = 4;</code>
-       */
-      public Builder setSpeakerIdIsNumber(boolean value) {
-        bitField0_ |= 0x00000008;
-        speakerIdIsNumber_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional bool speakerIdIsNumber = 4;</code>
-       */
-      public Builder clearSpeakerIdIsNumber() {
-        bitField0_ = (bitField0_ & ~0x00000008);
-        speakerIdIsNumber_ = false;
-        onChanged();
-        return this;
-      }
-
-      private boolean speakerIdIsAutoDetermined_ ;
-      /**
-       * <code>optional bool speakerIdIsAutoDetermined = 5;</code>
-       */
-      public boolean hasSpeakerIdIsAutoDetermined() {
-        return ((bitField0_ & 0x00000010) == 0x00000010);
-      }
-      /**
-       * <code>optional bool speakerIdIsAutoDetermined = 5;</code>
-       */
-      public boolean getSpeakerIdIsAutoDetermined() {
-        return speakerIdIsAutoDetermined_;
-      }
-      /**
-       * <code>optional bool speakerIdIsAutoDetermined = 5;</code>
-       */
-      public Builder setSpeakerIdIsAutoDetermined(boolean value) {
-        bitField0_ |= 0x00000010;
-        speakerIdIsAutoDetermined_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional bool speakerIdIsAutoDetermined = 5;</code>
-       */
-      public Builder clearSpeakerIdIsAutoDetermined() {
-        bitField0_ = (bitField0_ & ~0x00000010);
-        speakerIdIsAutoDetermined_ = false;
-        onChanged();
-        return this;
-      }
-
-      private com.google.protobuf.LazyStringList speakerNameStrings_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      private void ensureSpeakerNameStringsIsMutable() {
-        if (!((bitField0_ & 0x00000020) == 0x00000020)) {
-          speakerNameStrings_ = new com.google.protobuf.LazyStringArrayList(speakerNameStrings_);
-          bitField0_ |= 0x00000020;
-         }
-      }
-      /**
-       * <code>repeated string speakerNameStrings = 6;</code>
-       */
-      public com.google.protobuf.ProtocolStringList
-          getSpeakerNameStringsList() {
-        return speakerNameStrings_.getUnmodifiableView();
-      }
-      /**
-       * <code>repeated string speakerNameStrings = 6;</code>
-       */
-      public int getSpeakerNameStringsCount() {
-        return speakerNameStrings_.size();
-      }
-      /**
-       * <code>repeated string speakerNameStrings = 6;</code>
-       */
-      public java.lang.String getSpeakerNameStrings(int index) {
-        return speakerNameStrings_.get(index);
-      }
-      /**
-       * <code>repeated string speakerNameStrings = 6;</code>
-       */
-      public com.google.protobuf.ByteString
-          getSpeakerNameStringsBytes(int index) {
-        return speakerNameStrings_.getByteString(index);
-      }
-      /**
-       * <code>repeated string speakerNameStrings = 6;</code>
-       */
-      public Builder setSpeakerNameStrings(
-          int index, java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureSpeakerNameStringsIsMutable();
-        speakerNameStrings_.set(index, value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated string speakerNameStrings = 6;</code>
-       */
-      public Builder addSpeakerNameStrings(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureSpeakerNameStringsIsMutable();
-        speakerNameStrings_.add(value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated string speakerNameStrings = 6;</code>
-       */
-      public Builder addAllSpeakerNameStrings(
-          java.lang.Iterable<java.lang.String> values) {
-        ensureSpeakerNameStringsIsMutable();
-        com.google.protobuf.AbstractMessageLite.Builder.addAll(
-            values, speakerNameStrings_);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated string speakerNameStrings = 6;</code>
-       */
-      public Builder clearSpeakerNameStrings() {
-        speakerNameStrings_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000020);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated string speakerNameStrings = 6;</code>
-       */
-      public Builder addSpeakerNameStringsBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureSpeakerNameStringsIsMutable();
-        speakerNameStrings_.add(value);
         onChanged();
         return this;
       }
 
       private java.util.List<java.lang.Integer> mentions_ = java.util.Collections.emptyList();
       private void ensureMentionsIsMutable() {
-        if (!((bitField0_ & 0x00000040) == 0x00000040)) {
+        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
           mentions_ = new java.util.ArrayList<java.lang.Integer>(mentions_);
-          bitField0_ |= 0x00000040;
+          bitField0_ |= 0x00000002;
          }
       }
       /**
-       * <code>repeated int32 mentions = 7;</code>
+       * <code>repeated int32 mentions = 2;</code>
        */
       public java.util.List<java.lang.Integer>
           getMentionsList() {
         return java.util.Collections.unmodifiableList(mentions_);
       }
       /**
-       * <code>repeated int32 mentions = 7;</code>
+       * <code>repeated int32 mentions = 2;</code>
        */
       public int getMentionsCount() {
         return mentions_.size();
       }
       /**
-       * <code>repeated int32 mentions = 7;</code>
+       * <code>repeated int32 mentions = 2;</code>
        */
       public int getMentions(int index) {
         return mentions_.get(index);
       }
       /**
-       * <code>repeated int32 mentions = 7;</code>
+       * <code>repeated int32 mentions = 2;</code>
        */
       public Builder setMentions(
           int index, int value) {
@@ -30757,7 +30104,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>repeated int32 mentions = 7;</code>
+       * <code>repeated int32 mentions = 2;</code>
        */
       public Builder addMentions(int value) {
         ensureMentionsIsMutable();
@@ -30766,7 +30113,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>repeated int32 mentions = 7;</code>
+       * <code>repeated int32 mentions = 2;</code>
        */
       public Builder addAllMentions(
           java.lang.Iterable<? extends java.lang.Integer> values) {
@@ -30777,11 +30124,11 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>repeated int32 mentions = 7;</code>
+       * <code>repeated int32 mentions = 2;</code>
        */
       public Builder clearMentions() {
         mentions_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000040);
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -44044,73 +43391,70 @@ public final class CoreNLPProtos {
       "elativePronouns\0308 \003(\005\022\023\n\013listMembers\0309 \003" +
       "(\005\022\025\n\rbelongToLists\030: \003(\005\"X\n\013IndexedWord",
       "\022\023\n\013sentenceNum\030\001 \001(\r\022\022\n\ntokenIndex\030\002 \001(" +
-      "\r\022\r\n\005docID\030\003 \001(\r\022\021\n\tcopyCount\030\004 \001(\r\"\266\001\n\013" +
-      "SpeakerInfo\022\021\n\tspeakerId\030\001 \001(\t\022\023\n\013speake" +
-      "rName\030\002 \001(\t\022\023\n\013speakerDesc\030\003 \001(\t\022\031\n\021spea" +
-      "kerIdIsNumber\030\004 \001(\010\022!\n\031speakerIdIsAutoDe" +
-      "termined\030\005 \001(\010\022\032\n\022speakerNameStrings\030\006 \003" +
-      "(\t\022\020\n\010mentions\030\007 \003(\005\"\"\n\004Span\022\r\n\005begin\030\001 " +
-      "\002(\r\022\013\n\003end\030\002 \002(\r\"w\n\005Timex\022\r\n\005value\030\001 \001(\t" +
-      "\022\020\n\010altValue\030\002 \001(\t\022\014\n\004text\030\003 \001(\t\022\014\n\004type" +
-      "\030\004 \001(\t\022\013\n\003tid\030\005 \001(\t\022\022\n\nbeginPoint\030\006 \001(\r\022",
-      "\020\n\010endPoint\030\007 \001(\r\"\333\001\n\006Entity\022\021\n\theadStar" +
-      "t\030\006 \001(\r\022\017\n\007headEnd\030\007 \001(\r\022\023\n\013mentionType\030" +
-      "\010 \001(\t\022\026\n\016normalizedName\030\t \001(\t\022\026\n\016headTok" +
-      "enIndex\030\n \001(\r\022\017\n\007corefID\030\013 \001(\t\022\020\n\010object" +
-      "ID\030\001 \001(\t\022\023\n\013extentStart\030\002 \001(\r\022\021\n\textentE" +
-      "nd\030\003 \001(\r\022\014\n\004type\030\004 \001(\t\022\017\n\007subtype\030\005 \001(\t\"" +
-      "\267\001\n\010Relation\022\017\n\007argName\030\006 \003(\t\022.\n\003arg\030\007 \003" +
-      "(\0132!.edu.stanford.nlp.pipeline.Entity\022\021\n" +
-      "\tsignature\030\010 \001(\t\022\020\n\010objectID\030\001 \001(\t\022\023\n\013ex" +
-      "tentStart\030\002 \001(\r\022\021\n\textentEnd\030\003 \001(\r\022\014\n\004ty",
-      "pe\030\004 \001(\t\022\017\n\007subtype\030\005 \001(\t\"\262\001\n\010Operator\022\014" +
-      "\n\004name\030\001 \002(\t\022\033\n\023quantifierSpanBegin\030\002 \002(" +
-      "\005\022\031\n\021quantifierSpanEnd\030\003 \002(\005\022\030\n\020subjectS" +
-      "panBegin\030\004 \002(\005\022\026\n\016subjectSpanEnd\030\005 \002(\005\022\027" +
-      "\n\017objectSpanBegin\030\006 \002(\005\022\025\n\robjectSpanEnd" +
-      "\030\007 \002(\005\"\251\004\n\010Polarity\022K\n\022projectEquivalenc" +
-      "e\030\001 \002(\0162/.edu.stanford.nlp.pipeline.Natu" +
-      "ralLogicRelation\022Q\n\030projectForwardEntail" +
-      "ment\030\002 \002(\0162/.edu.stanford.nlp.pipeline.N" +
-      "aturalLogicRelation\022Q\n\030projectReverseEnt",
-      "ailment\030\003 \002(\0162/.edu.stanford.nlp.pipelin" +
-      "e.NaturalLogicRelation\022H\n\017projectNegatio" +
-      "n\030\004 \002(\0162/.edu.stanford.nlp.pipeline.Natu" +
-      "ralLogicRelation\022K\n\022projectAlternation\030\005" +
-      " \002(\0162/.edu.stanford.nlp.pipeline.Natural" +
-      "LogicRelation\022E\n\014projectCover\030\006 \002(\0162/.ed" +
-      "u.stanford.nlp.pipeline.NaturalLogicRela" +
-      "tion\022L\n\023projectIndependence\030\007 \002(\0162/.edu." +
+      "\r\022\r\n\005docID\030\003 \001(\r\022\021\n\tcopyCount\030\004 \001(\r\"4\n\013S" +
+      "peakerInfo\022\023\n\013speakerName\030\001 \001(\t\022\020\n\010menti" +
+      "ons\030\002 \003(\005\"\"\n\004Span\022\r\n\005begin\030\001 \002(\r\022\013\n\003end\030" +
+      "\002 \002(\r\"w\n\005Timex\022\r\n\005value\030\001 \001(\t\022\020\n\010altValu" +
+      "e\030\002 \001(\t\022\014\n\004text\030\003 \001(\t\022\014\n\004type\030\004 \001(\t\022\013\n\003t" +
+      "id\030\005 \001(\t\022\022\n\nbeginPoint\030\006 \001(\r\022\020\n\010endPoint" +
+      "\030\007 \001(\r\"\333\001\n\006Entity\022\021\n\theadStart\030\006 \001(\r\022\017\n\007" +
+      "headEnd\030\007 \001(\r\022\023\n\013mentionType\030\010 \001(\t\022\026\n\016no" +
+      "rmalizedName\030\t \001(\t\022\026\n\016headTokenIndex\030\n \001",
+      "(\r\022\017\n\007corefID\030\013 \001(\t\022\020\n\010objectID\030\001 \001(\t\022\023\n" +
+      "\013extentStart\030\002 \001(\r\022\021\n\textentEnd\030\003 \001(\r\022\014\n" +
+      "\004type\030\004 \001(\t\022\017\n\007subtype\030\005 \001(\t\"\267\001\n\010Relatio" +
+      "n\022\017\n\007argName\030\006 \003(\t\022.\n\003arg\030\007 \003(\0132!.edu.st" +
+      "anford.nlp.pipeline.Entity\022\021\n\tsignature\030" +
+      "\010 \001(\t\022\020\n\010objectID\030\001 \001(\t\022\023\n\013extentStart\030\002" +
+      " \001(\r\022\021\n\textentEnd\030\003 \001(\r\022\014\n\004type\030\004 \001(\t\022\017\n" +
+      "\007subtype\030\005 \001(\t\"\262\001\n\010Operator\022\014\n\004name\030\001 \002(" +
+      "\t\022\033\n\023quantifierSpanBegin\030\002 \002(\005\022\031\n\021quanti" +
+      "fierSpanEnd\030\003 \002(\005\022\030\n\020subjectSpanBegin\030\004 ",
+      "\002(\005\022\026\n\016subjectSpanEnd\030\005 \002(\005\022\027\n\017objectSpa" +
+      "nBegin\030\006 \002(\005\022\025\n\robjectSpanEnd\030\007 \002(\005\"\251\004\n\010" +
+      "Polarity\022K\n\022projectEquivalence\030\001 \002(\0162/.e" +
+      "du.stanford.nlp.pipeline.NaturalLogicRel" +
+      "ation\022Q\n\030projectForwardEntailment\030\002 \002(\0162" +
+      "/.edu.stanford.nlp.pipeline.NaturalLogic" +
+      "Relation\022Q\n\030projectReverseEntailment\030\003 \002" +
+      "(\0162/.edu.stanford.nlp.pipeline.NaturalLo" +
+      "gicRelation\022H\n\017projectNegation\030\004 \002(\0162/.e" +
+      "du.stanford.nlp.pipeline.NaturalLogicRel",
+      "ation\022K\n\022projectAlternation\030\005 \002(\0162/.edu." +
       "stanford.nlp.pipeline.NaturalLogicRelati" +
-      "on\"\330\001\n\nNERMention\022\025\n\rsentenceIndex\030\001 \001(\r",
-      "\022%\n\035tokenStartInSentenceInclusive\030\002 \002(\r\022" +
-      "#\n\033tokenEndInSentenceExclusive\030\003 \002(\r\022\013\n\003" +
-      "ner\030\004 \002(\t\022\025\n\rnormalizedNER\030\005 \001(\t\022\022\n\nenti" +
-      "tyType\030\006 \001(\t\022/\n\005timex\030\007 \001(\0132 .edu.stanfo" +
-      "rd.nlp.pipeline.Timex\"Y\n\020SentenceFragmen" +
-      "t\022\022\n\ntokenIndex\030\001 \003(\r\022\014\n\004root\030\002 \001(\r\022\024\n\014a" +
-      "ssumedTruth\030\003 \001(\010\022\r\n\005score\030\004 \001(\001\"\232\002\n\014Ope" +
-      "nIETriple\022\017\n\007subject\030\001 \001(\t\022\020\n\010relation\030\002" +
-      " \001(\t\022\016\n\006object\030\003 \001(\t\022\022\n\nconfidence\030\004 \001(\001" +
-      "\022\025\n\rsubjectTokens\030\005 \003(\r\022\026\n\016relationToken",
-      "s\030\006 \003(\r\022\024\n\014objectTokens\030\007 \003(\r\0228\n\004tree\030\010 " +
-      "\001(\0132*.edu.stanford.nlp.pipeline.Dependen" +
-      "cyGraph\022\016\n\006istmod\030\t \001(\010\022\020\n\010prefixBe\030\n \001(" +
-      "\010\022\020\n\010suffixBe\030\013 \001(\010\022\020\n\010suffixOf\030\014 \001(\010\"-\n" +
-      "\017MapStringString\022\013\n\003key\030\001 \003(\t\022\r\n\005value\030\002" +
-      " \003(\t\"*\n\014MapIntString\022\013\n\003key\030\001 \003(\r\022\r\n\005val" +
-      "ue\030\002 \003(\t*\215\001\n\010Language\022\013\n\007Unknown\020\000\022\007\n\003An" +
-      "y\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022\013\n\007English\020" +
-      "\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013\n" +
-      "\007Spanish\020\010\022\024\n\020UniversalEnglish\020\t*h\n\tSent",
-      "iment\022\023\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGAT" +
-      "IVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n" +
-      "\017STRONG_POSITIVE\020\004*\223\001\n\024NaturalLogicRelat" +
-      "ion\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORWARD_ENTAILME" +
-      "NT\020\001\022\026\n\022REVERSE_ENTAILMENT\020\002\022\014\n\010NEGATION" +
-      "\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPE" +
-      "NDENCE\020\006B*\n\031edu.stanford.nlp.pipelineB\rC" +
-      "oreNLPProtos"
+      "on\022E\n\014projectCover\030\006 \002(\0162/.edu.stanford." +
+      "nlp.pipeline.NaturalLogicRelation\022L\n\023pro" +
+      "jectIndependence\030\007 \002(\0162/.edu.stanford.nl" +
+      "p.pipeline.NaturalLogicRelation\"\330\001\n\nNERM" +
+      "ention\022\025\n\rsentenceIndex\030\001 \001(\r\022%\n\035tokenSt" +
+      "artInSentenceInclusive\030\002 \002(\r\022#\n\033tokenEnd" +
+      "InSentenceExclusive\030\003 \002(\r\022\013\n\003ner\030\004 \002(\t\022\025" +
+      "\n\rnormalizedNER\030\005 \001(\t\022\022\n\nentityType\030\006 \001(",
+      "\t\022/\n\005timex\030\007 \001(\0132 .edu.stanford.nlp.pipe" +
+      "line.Timex\"Y\n\020SentenceFragment\022\022\n\ntokenI" +
+      "ndex\030\001 \003(\r\022\014\n\004root\030\002 \001(\r\022\024\n\014assumedTruth" +
+      "\030\003 \001(\010\022\r\n\005score\030\004 \001(\001\"\232\002\n\014OpenIETriple\022\017" +
+      "\n\007subject\030\001 \001(\t\022\020\n\010relation\030\002 \001(\t\022\016\n\006obj" +
+      "ect\030\003 \001(\t\022\022\n\nconfidence\030\004 \001(\001\022\025\n\rsubject" +
+      "Tokens\030\005 \003(\r\022\026\n\016relationTokens\030\006 \003(\r\022\024\n\014" +
+      "objectTokens\030\007 \003(\r\0228\n\004tree\030\010 \001(\0132*.edu.s" +
+      "tanford.nlp.pipeline.DependencyGraph\022\016\n\006" +
+      "istmod\030\t \001(\010\022\020\n\010prefixBe\030\n \001(\010\022\020\n\010suffix",
+      "Be\030\013 \001(\010\022\020\n\010suffixOf\030\014 \001(\010\"-\n\017MapStringS" +
+      "tring\022\013\n\003key\030\001 \003(\t\022\r\n\005value\030\002 \003(\t\"*\n\014Map" +
+      "IntString\022\013\n\003key\030\001 \003(\r\022\r\n\005value\030\002 \003(\t*\215\001" +
+      "\n\010Language\022\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022\n\n\006Arab" +
+      "ic\020\002\022\013\n\007Chinese\020\003\022\013\n\007English\020\004\022\n\n\006German" +
+      "\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spanish\020\010\022" +
+      "\024\n\020UniversalEnglish\020\t*h\n\tSentiment\022\023\n\017ST" +
+      "RONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020\001\022\013\n\007NE" +
+      "UTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STRONG_POS" +
+      "ITIVE\020\004*\223\001\n\024NaturalLogicRelation\022\017\n\013EQUI",
+      "VALENCE\020\000\022\026\n\022FORWARD_ENTAILMENT\020\001\022\026\n\022REV" +
+      "ERSE_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003\022\017\n\013ALTER" +
+      "NATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDENCE\020\006B*\n" +
+      "\031edu.stanford.nlp.pipelineB\rCoreNLPProto" +
+      "s"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -44201,7 +43545,7 @@ public final class CoreNLPProtos {
     internal_static_edu_stanford_nlp_pipeline_SpeakerInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_SpeakerInfo_descriptor,
-        new java.lang.String[] { "SpeakerId", "SpeakerName", "SpeakerDesc", "SpeakerIdIsNumber", "SpeakerIdIsAutoDetermined", "SpeakerNameStrings", "Mentions", });
+        new java.lang.String[] { "SpeakerName", "Mentions", });
     internal_static_edu_stanford_nlp_pipeline_Span_descriptor =
       getDescriptor().getMessageTypes().get(10);
     internal_static_edu_stanford_nlp_pipeline_Span_fieldAccessorTable = new
