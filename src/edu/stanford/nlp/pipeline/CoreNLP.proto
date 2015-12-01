@@ -264,6 +264,7 @@ message Mention {
   optional IndexedWord headIndexedWord = 30;
   optional IndexedWord   dependingVerb = 31;
   optional IndexedWord       headWord  = 32;
+  optional SpeakerInfo    speakerInfo  = 33;
 
   repeated IndexedWord         sentenceWords = 50;
   repeated IndexedWord         originalSpan = 51;
@@ -293,16 +294,8 @@ message IndexedWord {
 //
 
 message SpeakerInfo {
-  optional string speakerId            = 1;
-  optional string speakerName          = 2;
-  optional string speakerDesc          = 3;
-  optional bool speakerIdIsNumber      = 4;
-  optional bool speakerIdIsAutoDetermined = 5;
-
-
-  repeated string speakerNameStrings   = 6;
-  repeated int32 mentions    = 7;
-
+  optional string speakerName          = 1;
+  repeated int32 mentions    = 2;
 }
 
 //
