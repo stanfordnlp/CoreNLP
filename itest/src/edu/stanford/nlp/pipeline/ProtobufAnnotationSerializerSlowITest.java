@@ -304,7 +304,7 @@ public class ProtobufAnnotationSerializerSlowITest {
     assertNotNull(compressedProto);
 
     // Check size
-    assertTrue("" + compressedProto.length, compressedProto.length < 330000);
+    assertTrue("" + compressedProto.length, compressedProto.length < 340000);
     assertTrue("" + uncompressedProto.length, uncompressedProto.length < 1700000);
   }
 

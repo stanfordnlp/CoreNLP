@@ -23726,6 +23726,19 @@ public final class CoreNLPProtos {
     edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWordOrBuilder getHeadWordOrBuilder();
 
     /**
+     * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+     */
+    boolean hasSpeakerInfo();
+    /**
+     * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo getSpeakerInfo();
+    /**
+     * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfoOrBuilder getSpeakerInfoOrBuilder();
+
+    /**
      * <code>repeated .edu.stanford.nlp.pipeline.IndexedWord sentenceWords = 50;</code>
      */
     java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord> 
@@ -24115,44 +24128,57 @@ public final class CoreNLPProtos {
               bitField0_ |= 0x40000000;
               break;
             }
+            case 266: {
+              edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.Builder subBuilder = null;
+              if (((bitField0_ & 0x80000000) == 0x80000000)) {
+                subBuilder = speakerInfo_.toBuilder();
+              }
+              speakerInfo_ = input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(speakerInfo_);
+                speakerInfo_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x80000000;
+              break;
+            }
             case 402: {
-              if (!((mutable_bitField0_ & 0x80000000) == 0x80000000)) {
+              if (!((mutable_bitField1_ & 0x00000001) == 0x00000001)) {
                 sentenceWords_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord>();
-                mutable_bitField0_ |= 0x80000000;
+                mutable_bitField1_ |= 0x00000001;
               }
               sentenceWords_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.PARSER, extensionRegistry));
               break;
             }
             case 410: {
-              if (!((mutable_bitField1_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField1_ & 0x00000002) == 0x00000002)) {
                 originalSpan_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord>();
-                mutable_bitField1_ |= 0x00000001;
+                mutable_bitField1_ |= 0x00000002;
               }
               originalSpan_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.PARSER, extensionRegistry));
               break;
             }
             case 418: {
               com.google.protobuf.ByteString bs = input.readBytes();
-              if (!((mutable_bitField1_ & 0x00000002) == 0x00000002)) {
+              if (!((mutable_bitField1_ & 0x00000004) == 0x00000004)) {
                 dependents_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField1_ |= 0x00000002;
+                mutable_bitField1_ |= 0x00000004;
               }
               dependents_.add(bs);
               break;
             }
             case 426: {
               com.google.protobuf.ByteString bs = input.readBytes();
-              if (!((mutable_bitField1_ & 0x00000004) == 0x00000004)) {
+              if (!((mutable_bitField1_ & 0x00000008) == 0x00000008)) {
                 preprocessedTerms_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField1_ |= 0x00000004;
+                mutable_bitField1_ |= 0x00000008;
               }
               preprocessedTerms_.add(bs);
               break;
             }
             case 432: {
-              if (!((mutable_bitField1_ & 0x00000008) == 0x00000008)) {
+              if (!((mutable_bitField1_ & 0x00000010) == 0x00000010)) {
                 appositions_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField1_ |= 0x00000008;
+                mutable_bitField1_ |= 0x00000010;
               }
               appositions_.add(input.readInt32());
               break;
@@ -24160,9 +24186,9 @@ public final class CoreNLPProtos {
             case 434: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
-              if (!((mutable_bitField1_ & 0x00000008) == 0x00000008) && input.getBytesUntilLimit() > 0) {
+              if (!((mutable_bitField1_ & 0x00000010) == 0x00000010) && input.getBytesUntilLimit() > 0) {
                 appositions_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField1_ |= 0x00000008;
+                mutable_bitField1_ |= 0x00000010;
               }
               while (input.getBytesUntilLimit() > 0) {
                 appositions_.add(input.readInt32());
@@ -24171,9 +24197,9 @@ public final class CoreNLPProtos {
               break;
             }
             case 440: {
-              if (!((mutable_bitField1_ & 0x00000010) == 0x00000010)) {
+              if (!((mutable_bitField1_ & 0x00000020) == 0x00000020)) {
                 predicateNominatives_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField1_ |= 0x00000010;
+                mutable_bitField1_ |= 0x00000020;
               }
               predicateNominatives_.add(input.readInt32());
               break;
@@ -24181,9 +24207,9 @@ public final class CoreNLPProtos {
             case 442: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
-              if (!((mutable_bitField1_ & 0x00000010) == 0x00000010) && input.getBytesUntilLimit() > 0) {
+              if (!((mutable_bitField1_ & 0x00000020) == 0x00000020) && input.getBytesUntilLimit() > 0) {
                 predicateNominatives_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField1_ |= 0x00000010;
+                mutable_bitField1_ |= 0x00000020;
               }
               while (input.getBytesUntilLimit() > 0) {
                 predicateNominatives_.add(input.readInt32());
@@ -24192,9 +24218,9 @@ public final class CoreNLPProtos {
               break;
             }
             case 448: {
-              if (!((mutable_bitField1_ & 0x00000020) == 0x00000020)) {
+              if (!((mutable_bitField1_ & 0x00000040) == 0x00000040)) {
                 relativePronouns_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField1_ |= 0x00000020;
+                mutable_bitField1_ |= 0x00000040;
               }
               relativePronouns_.add(input.readInt32());
               break;
@@ -24202,9 +24228,9 @@ public final class CoreNLPProtos {
             case 450: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
-              if (!((mutable_bitField1_ & 0x00000020) == 0x00000020) && input.getBytesUntilLimit() > 0) {
+              if (!((mutable_bitField1_ & 0x00000040) == 0x00000040) && input.getBytesUntilLimit() > 0) {
                 relativePronouns_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField1_ |= 0x00000020;
+                mutable_bitField1_ |= 0x00000040;
               }
               while (input.getBytesUntilLimit() > 0) {
                 relativePronouns_.add(input.readInt32());
@@ -24213,9 +24239,9 @@ public final class CoreNLPProtos {
               break;
             }
             case 456: {
-              if (!((mutable_bitField1_ & 0x00000040) == 0x00000040)) {
+              if (!((mutable_bitField1_ & 0x00000080) == 0x00000080)) {
                 listMembers_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField1_ |= 0x00000040;
+                mutable_bitField1_ |= 0x00000080;
               }
               listMembers_.add(input.readInt32());
               break;
@@ -24223,9 +24249,9 @@ public final class CoreNLPProtos {
             case 458: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
-              if (!((mutable_bitField1_ & 0x00000040) == 0x00000040) && input.getBytesUntilLimit() > 0) {
+              if (!((mutable_bitField1_ & 0x00000080) == 0x00000080) && input.getBytesUntilLimit() > 0) {
                 listMembers_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField1_ |= 0x00000040;
+                mutable_bitField1_ |= 0x00000080;
               }
               while (input.getBytesUntilLimit() > 0) {
                 listMembers_.add(input.readInt32());
@@ -24234,9 +24260,9 @@ public final class CoreNLPProtos {
               break;
             }
             case 464: {
-              if (!((mutable_bitField1_ & 0x00000080) == 0x00000080)) {
+              if (!((mutable_bitField1_ & 0x00000100) == 0x00000100)) {
                 belongToLists_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField1_ |= 0x00000080;
+                mutable_bitField1_ |= 0x00000100;
               }
               belongToLists_.add(input.readInt32());
               break;
@@ -24244,9 +24270,9 @@ public final class CoreNLPProtos {
             case 466: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
-              if (!((mutable_bitField1_ & 0x00000080) == 0x00000080) && input.getBytesUntilLimit() > 0) {
+              if (!((mutable_bitField1_ & 0x00000100) == 0x00000100) && input.getBytesUntilLimit() > 0) {
                 belongToLists_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField1_ |= 0x00000080;
+                mutable_bitField1_ |= 0x00000100;
               }
               while (input.getBytesUntilLimit() > 0) {
                 belongToLists_.add(input.readInt32());
@@ -24262,31 +24288,31 @@ public final class CoreNLPProtos {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x80000000) == 0x80000000)) {
+        if (((mutable_bitField1_ & 0x00000001) == 0x00000001)) {
           sentenceWords_ = java.util.Collections.unmodifiableList(sentenceWords_);
         }
-        if (((mutable_bitField1_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField1_ & 0x00000002) == 0x00000002)) {
           originalSpan_ = java.util.Collections.unmodifiableList(originalSpan_);
         }
-        if (((mutable_bitField1_ & 0x00000002) == 0x00000002)) {
+        if (((mutable_bitField1_ & 0x00000004) == 0x00000004)) {
           dependents_ = dependents_.getUnmodifiableView();
         }
-        if (((mutable_bitField1_ & 0x00000004) == 0x00000004)) {
+        if (((mutable_bitField1_ & 0x00000008) == 0x00000008)) {
           preprocessedTerms_ = preprocessedTerms_.getUnmodifiableView();
         }
-        if (((mutable_bitField1_ & 0x00000008) == 0x00000008)) {
+        if (((mutable_bitField1_ & 0x00000010) == 0x00000010)) {
           appositions_ = java.util.Collections.unmodifiableList(appositions_);
         }
-        if (((mutable_bitField1_ & 0x00000010) == 0x00000010)) {
+        if (((mutable_bitField1_ & 0x00000020) == 0x00000020)) {
           predicateNominatives_ = java.util.Collections.unmodifiableList(predicateNominatives_);
         }
-        if (((mutable_bitField1_ & 0x00000020) == 0x00000020)) {
+        if (((mutable_bitField1_ & 0x00000040) == 0x00000040)) {
           relativePronouns_ = java.util.Collections.unmodifiableList(relativePronouns_);
         }
-        if (((mutable_bitField1_ & 0x00000040) == 0x00000040)) {
+        if (((mutable_bitField1_ & 0x00000080) == 0x00000080)) {
           listMembers_ = java.util.Collections.unmodifiableList(listMembers_);
         }
-        if (((mutable_bitField1_ & 0x00000080) == 0x00000080)) {
+        if (((mutable_bitField1_ & 0x00000100) == 0x00000100)) {
           belongToLists_ = java.util.Collections.unmodifiableList(belongToLists_);
         }
         this.unknownFields = unknownFields.build();
@@ -24993,6 +25019,27 @@ public final class CoreNLPProtos {
       return headWord_;
     }
 
+    public static final int SPEAKERINFO_FIELD_NUMBER = 33;
+    private edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo speakerInfo_;
+    /**
+     * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+     */
+    public boolean hasSpeakerInfo() {
+      return ((bitField0_ & 0x80000000) == 0x80000000);
+    }
+    /**
+     * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+     */
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo getSpeakerInfo() {
+      return speakerInfo_;
+    }
+    /**
+     * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+     */
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfoOrBuilder getSpeakerInfoOrBuilder() {
+      return speakerInfo_;
+    }
+
     public static final int SENTENCEWORDS_FIELD_NUMBER = 50;
     private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord> sentenceWords_;
     /**
@@ -25263,6 +25310,7 @@ public final class CoreNLPProtos {
       headIndexedWord_ = edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.getDefaultInstance();
       dependingVerb_ = edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.getDefaultInstance();
       headWord_ = edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.getDefaultInstance();
+      speakerInfo_ = edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.getDefaultInstance();
       sentenceWords_ = java.util.Collections.emptyList();
       originalSpan_ = java.util.Collections.emptyList();
       dependents_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -25378,6 +25426,9 @@ public final class CoreNLPProtos {
       }
       if (((bitField0_ & 0x40000000) == 0x40000000)) {
         output.writeMessage(32, headWord_);
+      }
+      if (((bitField0_ & 0x80000000) == 0x80000000)) {
+        output.writeMessage(33, speakerInfo_);
       }
       for (int i = 0; i < sentenceWords_.size(); i++) {
         output.writeMessage(50, sentenceWords_.get(i));
@@ -25538,6 +25589,10 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x40000000) == 0x40000000)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(32, headWord_);
+      }
+      if (((bitField0_ & 0x80000000) == 0x80000000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(33, speakerInfo_);
       }
       for (int i = 0; i < sentenceWords_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
@@ -25722,6 +25777,7 @@ public final class CoreNLPProtos {
           getHeadIndexedWordFieldBuilder();
           getDependingVerbFieldBuilder();
           getHeadWordFieldBuilder();
+          getSpeakerInfoFieldBuilder();
           getSentenceWordsFieldBuilder();
           getOriginalSpanFieldBuilder();
         }
@@ -25806,32 +25862,38 @@ public final class CoreNLPProtos {
           headWordBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x40000000);
+        if (speakerInfoBuilder_ == null) {
+          speakerInfo_ = edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.getDefaultInstance();
+        } else {
+          speakerInfoBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x80000000);
         if (sentenceWordsBuilder_ == null) {
           sentenceWords_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x80000000);
+          bitField1_ = (bitField1_ & ~0x00000001);
         } else {
           sentenceWordsBuilder_.clear();
         }
         if (originalSpanBuilder_ == null) {
           originalSpan_ = java.util.Collections.emptyList();
-          bitField1_ = (bitField1_ & ~0x00000001);
+          bitField1_ = (bitField1_ & ~0x00000002);
         } else {
           originalSpanBuilder_.clear();
         }
         dependents_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField1_ = (bitField1_ & ~0x00000002);
-        preprocessedTerms_ = com.google.protobuf.LazyStringArrayList.EMPTY;
         bitField1_ = (bitField1_ & ~0x00000004);
-        appositions_ = java.util.Collections.emptyList();
+        preprocessedTerms_ = com.google.protobuf.LazyStringArrayList.EMPTY;
         bitField1_ = (bitField1_ & ~0x00000008);
-        predicateNominatives_ = java.util.Collections.emptyList();
+        appositions_ = java.util.Collections.emptyList();
         bitField1_ = (bitField1_ & ~0x00000010);
-        relativePronouns_ = java.util.Collections.emptyList();
+        predicateNominatives_ = java.util.Collections.emptyList();
         bitField1_ = (bitField1_ & ~0x00000020);
-        listMembers_ = java.util.Collections.emptyList();
+        relativePronouns_ = java.util.Collections.emptyList();
         bitField1_ = (bitField1_ & ~0x00000040);
-        belongToLists_ = java.util.Collections.emptyList();
+        listMembers_ = java.util.Collections.emptyList();
         bitField1_ = (bitField1_ & ~0x00000080);
+        belongToLists_ = java.util.Collections.emptyList();
+        bitField1_ = (bitField1_ & ~0x00000100);
         return this;
       }
 
@@ -25997,57 +26059,65 @@ public final class CoreNLPProtos {
         } else {
           result.headWord_ = headWordBuilder_.build();
         }
+        if (((from_bitField0_ & 0x80000000) == 0x80000000)) {
+          to_bitField0_ |= 0x80000000;
+        }
+        if (speakerInfoBuilder_ == null) {
+          result.speakerInfo_ = speakerInfo_;
+        } else {
+          result.speakerInfo_ = speakerInfoBuilder_.build();
+        }
         if (sentenceWordsBuilder_ == null) {
-          if (((bitField0_ & 0x80000000) == 0x80000000)) {
+          if (((bitField1_ & 0x00000001) == 0x00000001)) {
             sentenceWords_ = java.util.Collections.unmodifiableList(sentenceWords_);
-            bitField0_ = (bitField0_ & ~0x80000000);
+            bitField1_ = (bitField1_ & ~0x00000001);
           }
           result.sentenceWords_ = sentenceWords_;
         } else {
           result.sentenceWords_ = sentenceWordsBuilder_.build();
         }
         if (originalSpanBuilder_ == null) {
-          if (((bitField1_ & 0x00000001) == 0x00000001)) {
+          if (((bitField1_ & 0x00000002) == 0x00000002)) {
             originalSpan_ = java.util.Collections.unmodifiableList(originalSpan_);
-            bitField1_ = (bitField1_ & ~0x00000001);
+            bitField1_ = (bitField1_ & ~0x00000002);
           }
           result.originalSpan_ = originalSpan_;
         } else {
           result.originalSpan_ = originalSpanBuilder_.build();
         }
-        if (((bitField1_ & 0x00000002) == 0x00000002)) {
-          dependents_ = dependents_.getUnmodifiableView();
-          bitField1_ = (bitField1_ & ~0x00000002);
-        }
-        result.dependents_ = dependents_;
         if (((bitField1_ & 0x00000004) == 0x00000004)) {
-          preprocessedTerms_ = preprocessedTerms_.getUnmodifiableView();
+          dependents_ = dependents_.getUnmodifiableView();
           bitField1_ = (bitField1_ & ~0x00000004);
         }
-        result.preprocessedTerms_ = preprocessedTerms_;
+        result.dependents_ = dependents_;
         if (((bitField1_ & 0x00000008) == 0x00000008)) {
-          appositions_ = java.util.Collections.unmodifiableList(appositions_);
+          preprocessedTerms_ = preprocessedTerms_.getUnmodifiableView();
           bitField1_ = (bitField1_ & ~0x00000008);
         }
-        result.appositions_ = appositions_;
+        result.preprocessedTerms_ = preprocessedTerms_;
         if (((bitField1_ & 0x00000010) == 0x00000010)) {
-          predicateNominatives_ = java.util.Collections.unmodifiableList(predicateNominatives_);
+          appositions_ = java.util.Collections.unmodifiableList(appositions_);
           bitField1_ = (bitField1_ & ~0x00000010);
         }
-        result.predicateNominatives_ = predicateNominatives_;
+        result.appositions_ = appositions_;
         if (((bitField1_ & 0x00000020) == 0x00000020)) {
-          relativePronouns_ = java.util.Collections.unmodifiableList(relativePronouns_);
+          predicateNominatives_ = java.util.Collections.unmodifiableList(predicateNominatives_);
           bitField1_ = (bitField1_ & ~0x00000020);
         }
-        result.relativePronouns_ = relativePronouns_;
+        result.predicateNominatives_ = predicateNominatives_;
         if (((bitField1_ & 0x00000040) == 0x00000040)) {
-          listMembers_ = java.util.Collections.unmodifiableList(listMembers_);
+          relativePronouns_ = java.util.Collections.unmodifiableList(relativePronouns_);
           bitField1_ = (bitField1_ & ~0x00000040);
         }
-        result.listMembers_ = listMembers_;
+        result.relativePronouns_ = relativePronouns_;
         if (((bitField1_ & 0x00000080) == 0x00000080)) {
-          belongToLists_ = java.util.Collections.unmodifiableList(belongToLists_);
+          listMembers_ = java.util.Collections.unmodifiableList(listMembers_);
           bitField1_ = (bitField1_ & ~0x00000080);
+        }
+        result.listMembers_ = listMembers_;
+        if (((bitField1_ & 0x00000100) == 0x00000100)) {
+          belongToLists_ = java.util.Collections.unmodifiableList(belongToLists_);
+          bitField1_ = (bitField1_ & ~0x00000100);
         }
         result.belongToLists_ = belongToLists_;
         result.bitField0_ = to_bitField0_;
@@ -26173,11 +26243,14 @@ public final class CoreNLPProtos {
         if (other.hasHeadWord()) {
           mergeHeadWord(other.getHeadWord());
         }
+        if (other.hasSpeakerInfo()) {
+          mergeSpeakerInfo(other.getSpeakerInfo());
+        }
         if (sentenceWordsBuilder_ == null) {
           if (!other.sentenceWords_.isEmpty()) {
             if (sentenceWords_.isEmpty()) {
               sentenceWords_ = other.sentenceWords_;
-              bitField0_ = (bitField0_ & ~0x80000000);
+              bitField1_ = (bitField1_ & ~0x00000001);
             } else {
               ensureSentenceWordsIsMutable();
               sentenceWords_.addAll(other.sentenceWords_);
@@ -26190,7 +26263,7 @@ public final class CoreNLPProtos {
               sentenceWordsBuilder_.dispose();
               sentenceWordsBuilder_ = null;
               sentenceWords_ = other.sentenceWords_;
-              bitField0_ = (bitField0_ & ~0x80000000);
+              bitField1_ = (bitField1_ & ~0x00000001);
               sentenceWordsBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getSentenceWordsFieldBuilder() : null;
@@ -26203,7 +26276,7 @@ public final class CoreNLPProtos {
           if (!other.originalSpan_.isEmpty()) {
             if (originalSpan_.isEmpty()) {
               originalSpan_ = other.originalSpan_;
-              bitField1_ = (bitField1_ & ~0x00000001);
+              bitField1_ = (bitField1_ & ~0x00000002);
             } else {
               ensureOriginalSpanIsMutable();
               originalSpan_.addAll(other.originalSpan_);
@@ -26216,7 +26289,7 @@ public final class CoreNLPProtos {
               originalSpanBuilder_.dispose();
               originalSpanBuilder_ = null;
               originalSpan_ = other.originalSpan_;
-              bitField1_ = (bitField1_ & ~0x00000001);
+              bitField1_ = (bitField1_ & ~0x00000002);
               originalSpanBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getOriginalSpanFieldBuilder() : null;
@@ -26228,7 +26301,7 @@ public final class CoreNLPProtos {
         if (!other.dependents_.isEmpty()) {
           if (dependents_.isEmpty()) {
             dependents_ = other.dependents_;
-            bitField1_ = (bitField1_ & ~0x00000002);
+            bitField1_ = (bitField1_ & ~0x00000004);
           } else {
             ensureDependentsIsMutable();
             dependents_.addAll(other.dependents_);
@@ -26238,7 +26311,7 @@ public final class CoreNLPProtos {
         if (!other.preprocessedTerms_.isEmpty()) {
           if (preprocessedTerms_.isEmpty()) {
             preprocessedTerms_ = other.preprocessedTerms_;
-            bitField1_ = (bitField1_ & ~0x00000004);
+            bitField1_ = (bitField1_ & ~0x00000008);
           } else {
             ensurePreprocessedTermsIsMutable();
             preprocessedTerms_.addAll(other.preprocessedTerms_);
@@ -26248,7 +26321,7 @@ public final class CoreNLPProtos {
         if (!other.appositions_.isEmpty()) {
           if (appositions_.isEmpty()) {
             appositions_ = other.appositions_;
-            bitField1_ = (bitField1_ & ~0x00000008);
+            bitField1_ = (bitField1_ & ~0x00000010);
           } else {
             ensureAppositionsIsMutable();
             appositions_.addAll(other.appositions_);
@@ -26258,7 +26331,7 @@ public final class CoreNLPProtos {
         if (!other.predicateNominatives_.isEmpty()) {
           if (predicateNominatives_.isEmpty()) {
             predicateNominatives_ = other.predicateNominatives_;
-            bitField1_ = (bitField1_ & ~0x00000010);
+            bitField1_ = (bitField1_ & ~0x00000020);
           } else {
             ensurePredicateNominativesIsMutable();
             predicateNominatives_.addAll(other.predicateNominatives_);
@@ -26268,7 +26341,7 @@ public final class CoreNLPProtos {
         if (!other.relativePronouns_.isEmpty()) {
           if (relativePronouns_.isEmpty()) {
             relativePronouns_ = other.relativePronouns_;
-            bitField1_ = (bitField1_ & ~0x00000020);
+            bitField1_ = (bitField1_ & ~0x00000040);
           } else {
             ensureRelativePronounsIsMutable();
             relativePronouns_.addAll(other.relativePronouns_);
@@ -26278,7 +26351,7 @@ public final class CoreNLPProtos {
         if (!other.listMembers_.isEmpty()) {
           if (listMembers_.isEmpty()) {
             listMembers_ = other.listMembers_;
-            bitField1_ = (bitField1_ & ~0x00000040);
+            bitField1_ = (bitField1_ & ~0x00000080);
           } else {
             ensureListMembersIsMutable();
             listMembers_.addAll(other.listMembers_);
@@ -26288,7 +26361,7 @@ public final class CoreNLPProtos {
         if (!other.belongToLists_.isEmpty()) {
           if (belongToLists_.isEmpty()) {
             belongToLists_ = other.belongToLists_;
-            bitField1_ = (bitField1_ & ~0x00000080);
+            bitField1_ = (bitField1_ & ~0x00000100);
           } else {
             ensureBelongToListsIsMutable();
             belongToLists_.addAll(other.belongToLists_);
@@ -27875,12 +27948,128 @@ public final class CoreNLPProtos {
         return headWordBuilder_;
       }
 
+      private edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo speakerInfo_ = edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo, edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfoOrBuilder> speakerInfoBuilder_;
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+       */
+      public boolean hasSpeakerInfo() {
+        return ((bitField0_ & 0x80000000) == 0x80000000);
+      }
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo getSpeakerInfo() {
+        if (speakerInfoBuilder_ == null) {
+          return speakerInfo_;
+        } else {
+          return speakerInfoBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+       */
+      public Builder setSpeakerInfo(edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo value) {
+        if (speakerInfoBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          speakerInfo_ = value;
+          onChanged();
+        } else {
+          speakerInfoBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x80000000;
+        return this;
+      }
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+       */
+      public Builder setSpeakerInfo(
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.Builder builderForValue) {
+        if (speakerInfoBuilder_ == null) {
+          speakerInfo_ = builderForValue.build();
+          onChanged();
+        } else {
+          speakerInfoBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x80000000;
+        return this;
+      }
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+       */
+      public Builder mergeSpeakerInfo(edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo value) {
+        if (speakerInfoBuilder_ == null) {
+          if (((bitField0_ & 0x80000000) == 0x80000000) &&
+              speakerInfo_ != edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.getDefaultInstance()) {
+            speakerInfo_ =
+              edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.newBuilder(speakerInfo_).mergeFrom(value).buildPartial();
+          } else {
+            speakerInfo_ = value;
+          }
+          onChanged();
+        } else {
+          speakerInfoBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x80000000;
+        return this;
+      }
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+       */
+      public Builder clearSpeakerInfo() {
+        if (speakerInfoBuilder_ == null) {
+          speakerInfo_ = edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.getDefaultInstance();
+          onChanged();
+        } else {
+          speakerInfoBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x80000000);
+        return this;
+      }
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.Builder getSpeakerInfoBuilder() {
+        bitField0_ |= 0x80000000;
+        onChanged();
+        return getSpeakerInfoFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfoOrBuilder getSpeakerInfoOrBuilder() {
+        if (speakerInfoBuilder_ != null) {
+          return speakerInfoBuilder_.getMessageOrBuilder();
+        } else {
+          return speakerInfo_;
+        }
+      }
+      /**
+       * <code>optional .edu.stanford.nlp.pipeline.SpeakerInfo speakerInfo = 33;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo, edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfoOrBuilder> 
+          getSpeakerInfoFieldBuilder() {
+        if (speakerInfoBuilder_ == null) {
+          speakerInfoBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo, edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfo.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SpeakerInfoOrBuilder>(
+                  getSpeakerInfo(),
+                  getParentForChildren(),
+                  isClean());
+          speakerInfo_ = null;
+        }
+        return speakerInfoBuilder_;
+      }
+
       private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord> sentenceWords_ =
         java.util.Collections.emptyList();
       private void ensureSentenceWordsIsMutable() {
-        if (!((bitField0_ & 0x80000000) == 0x80000000)) {
+        if (!((bitField1_ & 0x00000001) == 0x00000001)) {
           sentenceWords_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord>(sentenceWords_);
-          bitField0_ |= 0x80000000;
+          bitField1_ |= 0x00000001;
          }
       }
 
@@ -28030,7 +28219,7 @@ public final class CoreNLPProtos {
       public Builder clearSentenceWords() {
         if (sentenceWordsBuilder_ == null) {
           sentenceWords_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x80000000);
+          bitField1_ = (bitField1_ & ~0x00000001);
           onChanged();
         } else {
           sentenceWordsBuilder_.clear();
@@ -28107,7 +28296,7 @@ public final class CoreNLPProtos {
           sentenceWordsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord, edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWordOrBuilder>(
                   sentenceWords_,
-                  ((bitField0_ & 0x80000000) == 0x80000000),
+                  ((bitField1_ & 0x00000001) == 0x00000001),
                   getParentForChildren(),
                   isClean());
           sentenceWords_ = null;
@@ -28118,9 +28307,9 @@ public final class CoreNLPProtos {
       private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord> originalSpan_ =
         java.util.Collections.emptyList();
       private void ensureOriginalSpanIsMutable() {
-        if (!((bitField1_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField1_ & 0x00000002) == 0x00000002)) {
           originalSpan_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord>(originalSpan_);
-          bitField1_ |= 0x00000001;
+          bitField1_ |= 0x00000002;
          }
       }
 
@@ -28270,7 +28459,7 @@ public final class CoreNLPProtos {
       public Builder clearOriginalSpan() {
         if (originalSpanBuilder_ == null) {
           originalSpan_ = java.util.Collections.emptyList();
-          bitField1_ = (bitField1_ & ~0x00000001);
+          bitField1_ = (bitField1_ & ~0x00000002);
           onChanged();
         } else {
           originalSpanBuilder_.clear();
@@ -28347,7 +28536,7 @@ public final class CoreNLPProtos {
           originalSpanBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord, edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWordOrBuilder>(
                   originalSpan_,
-                  ((bitField1_ & 0x00000001) == 0x00000001),
+                  ((bitField1_ & 0x00000002) == 0x00000002),
                   getParentForChildren(),
                   isClean());
           originalSpan_ = null;
@@ -28357,9 +28546,9 @@ public final class CoreNLPProtos {
 
       private com.google.protobuf.LazyStringList dependents_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureDependentsIsMutable() {
-        if (!((bitField1_ & 0x00000002) == 0x00000002)) {
+        if (!((bitField1_ & 0x00000004) == 0x00000004)) {
           dependents_ = new com.google.protobuf.LazyStringArrayList(dependents_);
-          bitField1_ |= 0x00000002;
+          bitField1_ |= 0x00000004;
          }
       }
       /**
@@ -28430,7 +28619,7 @@ public final class CoreNLPProtos {
        */
       public Builder clearDependents() {
         dependents_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField1_ = (bitField1_ & ~0x00000002);
+        bitField1_ = (bitField1_ & ~0x00000004);
         onChanged();
         return this;
       }
@@ -28450,9 +28639,9 @@ public final class CoreNLPProtos {
 
       private com.google.protobuf.LazyStringList preprocessedTerms_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensurePreprocessedTermsIsMutable() {
-        if (!((bitField1_ & 0x00000004) == 0x00000004)) {
+        if (!((bitField1_ & 0x00000008) == 0x00000008)) {
           preprocessedTerms_ = new com.google.protobuf.LazyStringArrayList(preprocessedTerms_);
-          bitField1_ |= 0x00000004;
+          bitField1_ |= 0x00000008;
          }
       }
       /**
@@ -28523,7 +28712,7 @@ public final class CoreNLPProtos {
        */
       public Builder clearPreprocessedTerms() {
         preprocessedTerms_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField1_ = (bitField1_ & ~0x00000004);
+        bitField1_ = (bitField1_ & ~0x00000008);
         onChanged();
         return this;
       }
@@ -28543,9 +28732,9 @@ public final class CoreNLPProtos {
 
       private java.util.List<java.lang.Integer> appositions_ = java.util.Collections.emptyList();
       private void ensureAppositionsIsMutable() {
-        if (!((bitField1_ & 0x00000008) == 0x00000008)) {
+        if (!((bitField1_ & 0x00000010) == 0x00000010)) {
           appositions_ = new java.util.ArrayList<java.lang.Integer>(appositions_);
-          bitField1_ |= 0x00000008;
+          bitField1_ |= 0x00000010;
          }
       }
       /**
@@ -28602,16 +28791,16 @@ public final class CoreNLPProtos {
        */
       public Builder clearAppositions() {
         appositions_ = java.util.Collections.emptyList();
-        bitField1_ = (bitField1_ & ~0x00000008);
+        bitField1_ = (bitField1_ & ~0x00000010);
         onChanged();
         return this;
       }
 
       private java.util.List<java.lang.Integer> predicateNominatives_ = java.util.Collections.emptyList();
       private void ensurePredicateNominativesIsMutable() {
-        if (!((bitField1_ & 0x00000010) == 0x00000010)) {
+        if (!((bitField1_ & 0x00000020) == 0x00000020)) {
           predicateNominatives_ = new java.util.ArrayList<java.lang.Integer>(predicateNominatives_);
-          bitField1_ |= 0x00000010;
+          bitField1_ |= 0x00000020;
          }
       }
       /**
@@ -28668,16 +28857,16 @@ public final class CoreNLPProtos {
        */
       public Builder clearPredicateNominatives() {
         predicateNominatives_ = java.util.Collections.emptyList();
-        bitField1_ = (bitField1_ & ~0x00000010);
+        bitField1_ = (bitField1_ & ~0x00000020);
         onChanged();
         return this;
       }
 
       private java.util.List<java.lang.Integer> relativePronouns_ = java.util.Collections.emptyList();
       private void ensureRelativePronounsIsMutable() {
-        if (!((bitField1_ & 0x00000020) == 0x00000020)) {
+        if (!((bitField1_ & 0x00000040) == 0x00000040)) {
           relativePronouns_ = new java.util.ArrayList<java.lang.Integer>(relativePronouns_);
-          bitField1_ |= 0x00000020;
+          bitField1_ |= 0x00000040;
          }
       }
       /**
@@ -28734,16 +28923,16 @@ public final class CoreNLPProtos {
        */
       public Builder clearRelativePronouns() {
         relativePronouns_ = java.util.Collections.emptyList();
-        bitField1_ = (bitField1_ & ~0x00000020);
+        bitField1_ = (bitField1_ & ~0x00000040);
         onChanged();
         return this;
       }
 
       private java.util.List<java.lang.Integer> listMembers_ = java.util.Collections.emptyList();
       private void ensureListMembersIsMutable() {
-        if (!((bitField1_ & 0x00000040) == 0x00000040)) {
+        if (!((bitField1_ & 0x00000080) == 0x00000080)) {
           listMembers_ = new java.util.ArrayList<java.lang.Integer>(listMembers_);
-          bitField1_ |= 0x00000040;
+          bitField1_ |= 0x00000080;
          }
       }
       /**
@@ -28800,16 +28989,16 @@ public final class CoreNLPProtos {
        */
       public Builder clearListMembers() {
         listMembers_ = java.util.Collections.emptyList();
-        bitField1_ = (bitField1_ & ~0x00000040);
+        bitField1_ = (bitField1_ & ~0x00000080);
         onChanged();
         return this;
       }
 
       private java.util.List<java.lang.Integer> belongToLists_ = java.util.Collections.emptyList();
       private void ensureBelongToListsIsMutable() {
-        if (!((bitField1_ & 0x00000080) == 0x00000080)) {
+        if (!((bitField1_ & 0x00000100) == 0x00000100)) {
           belongToLists_ = new java.util.ArrayList<java.lang.Integer>(belongToLists_);
-          bitField1_ |= 0x00000080;
+          bitField1_ |= 0x00000100;
          }
       }
       /**
@@ -28866,7 +29055,7 @@ public final class CoreNLPProtos {
        */
       public Builder clearBelongToLists() {
         belongToLists_ = java.util.Collections.emptyList();
-        bitField1_ = (bitField1_ & ~0x00000080);
+        bitField1_ = (bitField1_ & ~0x00000100);
         onChanged();
         return this;
       }
@@ -43362,7 +43551,7 @@ public final class CoreNLPProtos {
       "\022\016\n\006number\030\003 \001(\t\022\016\n\006gender\030\004 \001(\t\022\017\n\007anim",
       "acy\030\005 \001(\t\022\022\n\nbeginIndex\030\006 \001(\r\022\020\n\010endInde" +
       "x\030\007 \001(\r\022\021\n\theadIndex\030\t \001(\r\022\025\n\rsentenceIn" +
-      "dex\030\n \001(\r\022\020\n\010position\030\013 \001(\r\"\263\010\n\007Mention\022" +
+      "dex\030\n \001(\r\022\020\n\010position\030\013 \001(\r\"\360\010\n\007Mention\022" +
       "\021\n\tmentionID\030\001 \001(\005\022\023\n\013mentionType\030\002 \001(\t\022" +
       "\016\n\006number\030\003 \001(\t\022\016\n\006gender\030\004 \001(\t\022\017\n\007anima" +
       "cy\030\005 \001(\t\022\016\n\006person\030\006 \001(\t\022\022\n\nstartIndex\030\007" +
@@ -43382,79 +43571,80 @@ public final class CoreNLPProtos {
       "IndexedWord\022=\n\rdependingVerb\030\037 \001(\0132&.edu",
       ".stanford.nlp.pipeline.IndexedWord\0228\n\010he" +
       "adWord\030  \001(\0132&.edu.stanford.nlp.pipeline" +
-      ".IndexedWord\022=\n\rsentenceWords\0302 \003(\0132&.ed" +
-      "u.stanford.nlp.pipeline.IndexedWord\022<\n\014o" +
-      "riginalSpan\0303 \003(\0132&.edu.stanford.nlp.pip" +
-      "eline.IndexedWord\022\022\n\ndependents\0304 \003(\t\022\031\n" +
-      "\021preprocessedTerms\0305 \003(\t\022\023\n\013appositions\030" +
-      "6 \003(\005\022\034\n\024predicateNominatives\0307 \003(\005\022\030\n\020r" +
-      "elativePronouns\0308 \003(\005\022\023\n\013listMembers\0309 \003" +
-      "(\005\022\025\n\rbelongToLists\030: \003(\005\"X\n\013IndexedWord",
-      "\022\023\n\013sentenceNum\030\001 \001(\r\022\022\n\ntokenIndex\030\002 \001(" +
-      "\r\022\r\n\005docID\030\003 \001(\r\022\021\n\tcopyCount\030\004 \001(\r\"4\n\013S" +
-      "peakerInfo\022\023\n\013speakerName\030\001 \001(\t\022\020\n\010menti" +
-      "ons\030\002 \003(\005\"\"\n\004Span\022\r\n\005begin\030\001 \002(\r\022\013\n\003end\030" +
-      "\002 \002(\r\"w\n\005Timex\022\r\n\005value\030\001 \001(\t\022\020\n\010altValu" +
-      "e\030\002 \001(\t\022\014\n\004text\030\003 \001(\t\022\014\n\004type\030\004 \001(\t\022\013\n\003t" +
-      "id\030\005 \001(\t\022\022\n\nbeginPoint\030\006 \001(\r\022\020\n\010endPoint" +
-      "\030\007 \001(\r\"\333\001\n\006Entity\022\021\n\theadStart\030\006 \001(\r\022\017\n\007" +
-      "headEnd\030\007 \001(\r\022\023\n\013mentionType\030\010 \001(\t\022\026\n\016no" +
-      "rmalizedName\030\t \001(\t\022\026\n\016headTokenIndex\030\n \001",
-      "(\r\022\017\n\007corefID\030\013 \001(\t\022\020\n\010objectID\030\001 \001(\t\022\023\n" +
-      "\013extentStart\030\002 \001(\r\022\021\n\textentEnd\030\003 \001(\r\022\014\n" +
-      "\004type\030\004 \001(\t\022\017\n\007subtype\030\005 \001(\t\"\267\001\n\010Relatio" +
-      "n\022\017\n\007argName\030\006 \003(\t\022.\n\003arg\030\007 \003(\0132!.edu.st" +
-      "anford.nlp.pipeline.Entity\022\021\n\tsignature\030" +
-      "\010 \001(\t\022\020\n\010objectID\030\001 \001(\t\022\023\n\013extentStart\030\002" +
-      " \001(\r\022\021\n\textentEnd\030\003 \001(\r\022\014\n\004type\030\004 \001(\t\022\017\n" +
-      "\007subtype\030\005 \001(\t\"\262\001\n\010Operator\022\014\n\004name\030\001 \002(" +
-      "\t\022\033\n\023quantifierSpanBegin\030\002 \002(\005\022\031\n\021quanti" +
-      "fierSpanEnd\030\003 \002(\005\022\030\n\020subjectSpanBegin\030\004 ",
-      "\002(\005\022\026\n\016subjectSpanEnd\030\005 \002(\005\022\027\n\017objectSpa" +
-      "nBegin\030\006 \002(\005\022\025\n\robjectSpanEnd\030\007 \002(\005\"\251\004\n\010" +
-      "Polarity\022K\n\022projectEquivalence\030\001 \002(\0162/.e" +
-      "du.stanford.nlp.pipeline.NaturalLogicRel" +
-      "ation\022Q\n\030projectForwardEntailment\030\002 \002(\0162" +
-      "/.edu.stanford.nlp.pipeline.NaturalLogic" +
-      "Relation\022Q\n\030projectReverseEntailment\030\003 \002" +
-      "(\0162/.edu.stanford.nlp.pipeline.NaturalLo" +
-      "gicRelation\022H\n\017projectNegation\030\004 \002(\0162/.e" +
-      "du.stanford.nlp.pipeline.NaturalLogicRel",
-      "ation\022K\n\022projectAlternation\030\005 \002(\0162/.edu." +
-      "stanford.nlp.pipeline.NaturalLogicRelati" +
-      "on\022E\n\014projectCover\030\006 \002(\0162/.edu.stanford." +
-      "nlp.pipeline.NaturalLogicRelation\022L\n\023pro" +
-      "jectIndependence\030\007 \002(\0162/.edu.stanford.nl" +
-      "p.pipeline.NaturalLogicRelation\"\330\001\n\nNERM" +
-      "ention\022\025\n\rsentenceIndex\030\001 \001(\r\022%\n\035tokenSt" +
-      "artInSentenceInclusive\030\002 \002(\r\022#\n\033tokenEnd" +
-      "InSentenceExclusive\030\003 \002(\r\022\013\n\003ner\030\004 \002(\t\022\025" +
-      "\n\rnormalizedNER\030\005 \001(\t\022\022\n\nentityType\030\006 \001(",
-      "\t\022/\n\005timex\030\007 \001(\0132 .edu.stanford.nlp.pipe" +
-      "line.Timex\"Y\n\020SentenceFragment\022\022\n\ntokenI" +
-      "ndex\030\001 \003(\r\022\014\n\004root\030\002 \001(\r\022\024\n\014assumedTruth" +
-      "\030\003 \001(\010\022\r\n\005score\030\004 \001(\001\"\232\002\n\014OpenIETriple\022\017" +
-      "\n\007subject\030\001 \001(\t\022\020\n\010relation\030\002 \001(\t\022\016\n\006obj" +
-      "ect\030\003 \001(\t\022\022\n\nconfidence\030\004 \001(\001\022\025\n\rsubject" +
-      "Tokens\030\005 \003(\r\022\026\n\016relationTokens\030\006 \003(\r\022\024\n\014" +
-      "objectTokens\030\007 \003(\r\0228\n\004tree\030\010 \001(\0132*.edu.s" +
-      "tanford.nlp.pipeline.DependencyGraph\022\016\n\006" +
-      "istmod\030\t \001(\010\022\020\n\010prefixBe\030\n \001(\010\022\020\n\010suffix",
-      "Be\030\013 \001(\010\022\020\n\010suffixOf\030\014 \001(\010\"-\n\017MapStringS" +
-      "tring\022\013\n\003key\030\001 \003(\t\022\r\n\005value\030\002 \003(\t\"*\n\014Map" +
-      "IntString\022\013\n\003key\030\001 \003(\r\022\r\n\005value\030\002 \003(\t*\215\001" +
-      "\n\010Language\022\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022\n\n\006Arab" +
-      "ic\020\002\022\013\n\007Chinese\020\003\022\013\n\007English\020\004\022\n\n\006German" +
-      "\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spanish\020\010\022" +
-      "\024\n\020UniversalEnglish\020\t*h\n\tSentiment\022\023\n\017ST" +
-      "RONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020\001\022\013\n\007NE" +
-      "UTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STRONG_POS" +
-      "ITIVE\020\004*\223\001\n\024NaturalLogicRelation\022\017\n\013EQUI",
-      "VALENCE\020\000\022\026\n\022FORWARD_ENTAILMENT\020\001\022\026\n\022REV" +
-      "ERSE_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003\022\017\n\013ALTER" +
-      "NATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDENCE\020\006B*\n" +
-      "\031edu.stanford.nlp.pipelineB\rCoreNLPProto" +
-      "s"
+      ".IndexedWord\022;\n\013speakerInfo\030! \001(\0132&.edu." +
+      "stanford.nlp.pipeline.SpeakerInfo\022=\n\rsen" +
+      "tenceWords\0302 \003(\0132&.edu.stanford.nlp.pipe" +
+      "line.IndexedWord\022<\n\014originalSpan\0303 \003(\0132&" +
+      ".edu.stanford.nlp.pipeline.IndexedWord\022\022" +
+      "\n\ndependents\0304 \003(\t\022\031\n\021preprocessedTerms\030" +
+      "5 \003(\t\022\023\n\013appositions\0306 \003(\005\022\034\n\024predicateN" +
+      "ominatives\0307 \003(\005\022\030\n\020relativePronouns\0308 \003",
+      "(\005\022\023\n\013listMembers\0309 \003(\005\022\025\n\rbelongToLists" +
+      "\030: \003(\005\"X\n\013IndexedWord\022\023\n\013sentenceNum\030\001 \001" +
+      "(\r\022\022\n\ntokenIndex\030\002 \001(\r\022\r\n\005docID\030\003 \001(\r\022\021\n" +
+      "\tcopyCount\030\004 \001(\r\"4\n\013SpeakerInfo\022\023\n\013speak" +
+      "erName\030\001 \001(\t\022\020\n\010mentions\030\002 \003(\005\"\"\n\004Span\022\r" +
+      "\n\005begin\030\001 \002(\r\022\013\n\003end\030\002 \002(\r\"w\n\005Timex\022\r\n\005v" +
+      "alue\030\001 \001(\t\022\020\n\010altValue\030\002 \001(\t\022\014\n\004text\030\003 \001" +
+      "(\t\022\014\n\004type\030\004 \001(\t\022\013\n\003tid\030\005 \001(\t\022\022\n\nbeginPo" +
+      "int\030\006 \001(\r\022\020\n\010endPoint\030\007 \001(\r\"\333\001\n\006Entity\022\021" +
+      "\n\theadStart\030\006 \001(\r\022\017\n\007headEnd\030\007 \001(\r\022\023\n\013me",
+      "ntionType\030\010 \001(\t\022\026\n\016normalizedName\030\t \001(\t\022" +
+      "\026\n\016headTokenIndex\030\n \001(\r\022\017\n\007corefID\030\013 \001(\t" +
+      "\022\020\n\010objectID\030\001 \001(\t\022\023\n\013extentStart\030\002 \001(\r\022" +
+      "\021\n\textentEnd\030\003 \001(\r\022\014\n\004type\030\004 \001(\t\022\017\n\007subt" +
+      "ype\030\005 \001(\t\"\267\001\n\010Relation\022\017\n\007argName\030\006 \003(\t\022" +
+      ".\n\003arg\030\007 \003(\0132!.edu.stanford.nlp.pipeline" +
+      ".Entity\022\021\n\tsignature\030\010 \001(\t\022\020\n\010objectID\030\001" +
+      " \001(\t\022\023\n\013extentStart\030\002 \001(\r\022\021\n\textentEnd\030\003" +
+      " \001(\r\022\014\n\004type\030\004 \001(\t\022\017\n\007subtype\030\005 \001(\t\"\262\001\n\010" +
+      "Operator\022\014\n\004name\030\001 \002(\t\022\033\n\023quantifierSpan",
+      "Begin\030\002 \002(\005\022\031\n\021quantifierSpanEnd\030\003 \002(\005\022\030" +
+      "\n\020subjectSpanBegin\030\004 \002(\005\022\026\n\016subjectSpanE" +
+      "nd\030\005 \002(\005\022\027\n\017objectSpanBegin\030\006 \002(\005\022\025\n\robj" +
+      "ectSpanEnd\030\007 \002(\005\"\251\004\n\010Polarity\022K\n\022project" +
+      "Equivalence\030\001 \002(\0162/.edu.stanford.nlp.pip" +
+      "eline.NaturalLogicRelation\022Q\n\030projectFor" +
+      "wardEntailment\030\002 \002(\0162/.edu.stanford.nlp." +
+      "pipeline.NaturalLogicRelation\022Q\n\030project" +
+      "ReverseEntailment\030\003 \002(\0162/.edu.stanford.n" +
+      "lp.pipeline.NaturalLogicRelation\022H\n\017proj",
+      "ectNegation\030\004 \002(\0162/.edu.stanford.nlp.pip" +
+      "eline.NaturalLogicRelation\022K\n\022projectAlt" +
+      "ernation\030\005 \002(\0162/.edu.stanford.nlp.pipeli" +
+      "ne.NaturalLogicRelation\022E\n\014projectCover\030" +
+      "\006 \002(\0162/.edu.stanford.nlp.pipeline.Natura" +
+      "lLogicRelation\022L\n\023projectIndependence\030\007 " +
+      "\002(\0162/.edu.stanford.nlp.pipeline.NaturalL" +
+      "ogicRelation\"\330\001\n\nNERMention\022\025\n\rsentenceI" +
+      "ndex\030\001 \001(\r\022%\n\035tokenStartInSentenceInclus" +
+      "ive\030\002 \002(\r\022#\n\033tokenEndInSentenceExclusive",
+      "\030\003 \002(\r\022\013\n\003ner\030\004 \002(\t\022\025\n\rnormalizedNER\030\005 \001" +
+      "(\t\022\022\n\nentityType\030\006 \001(\t\022/\n\005timex\030\007 \001(\0132 ." +
+      "edu.stanford.nlp.pipeline.Timex\"Y\n\020Sente" +
+      "nceFragment\022\022\n\ntokenIndex\030\001 \003(\r\022\014\n\004root\030" +
+      "\002 \001(\r\022\024\n\014assumedTruth\030\003 \001(\010\022\r\n\005score\030\004 \001" +
+      "(\001\"\232\002\n\014OpenIETriple\022\017\n\007subject\030\001 \001(\t\022\020\n\010" +
+      "relation\030\002 \001(\t\022\016\n\006object\030\003 \001(\t\022\022\n\nconfid" +
+      "ence\030\004 \001(\001\022\025\n\rsubjectTokens\030\005 \003(\r\022\026\n\016rel" +
+      "ationTokens\030\006 \003(\r\022\024\n\014objectTokens\030\007 \003(\r\022" +
+      "8\n\004tree\030\010 \001(\0132*.edu.stanford.nlp.pipelin",
+      "e.DependencyGraph\022\016\n\006istmod\030\t \001(\010\022\020\n\010pre" +
+      "fixBe\030\n \001(\010\022\020\n\010suffixBe\030\013 \001(\010\022\020\n\010suffixO" +
+      "f\030\014 \001(\010\"-\n\017MapStringString\022\013\n\003key\030\001 \003(\t\022" +
+      "\r\n\005value\030\002 \003(\t\"*\n\014MapIntString\022\013\n\003key\030\001 " +
+      "\003(\r\022\r\n\005value\030\002 \003(\t*\215\001\n\010Language\022\013\n\007Unkno" +
+      "wn\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022\013" +
+      "\n\007English\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n\n\006H" +
+      "ebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020UniversalEnglish" +
+      "\020\t*h\n\tSentiment\022\023\n\017STRONG_NEGATIVE\020\000\022\021\n\r" +
+      "WEAK_NEGATIVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POS",
+      "ITIVE\020\003\022\023\n\017STRONG_POSITIVE\020\004*\223\001\n\024Natural" +
+      "LogicRelation\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORWAR" +
+      "D_ENTAILMENT\020\001\022\026\n\022REVERSE_ENTAILMENT\020\002\022\014" +
+      "\n\010NEGATION\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COVER\020\005" +
+      "\022\020\n\014INDEPENDENCE\020\006B*\n\031edu.stanford.nlp.p" +
+      "ipelineB\rCoreNLPProtos"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -43533,7 +43723,7 @@ public final class CoreNLPProtos {
     internal_static_edu_stanford_nlp_pipeline_Mention_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_Mention_descriptor,
-        new java.lang.String[] { "MentionID", "MentionType", "Number", "Gender", "Animacy", "Person", "StartIndex", "EndIndex", "HeadIndex", "HeadString", "NerString", "OriginalRef", "GoldCorefClusterID", "CorefClusterID", "MentionNum", "SentNum", "Utter", "Paragraph", "IsSubject", "IsDirectObject", "IsIndirectObject", "IsPrepositionObject", "HasTwin", "Generic", "IsSingleton", "HasBasicDependency", "HasCollapsedDependency", "HasContextParseTree", "HeadIndexedWord", "DependingVerb", "HeadWord", "SentenceWords", "OriginalSpan", "Dependents", "PreprocessedTerms", "Appositions", "PredicateNominatives", "RelativePronouns", "ListMembers", "BelongToLists", });
+        new java.lang.String[] { "MentionID", "MentionType", "Number", "Gender", "Animacy", "Person", "StartIndex", "EndIndex", "HeadIndex", "HeadString", "NerString", "OriginalRef", "GoldCorefClusterID", "CorefClusterID", "MentionNum", "SentNum", "Utter", "Paragraph", "IsSubject", "IsDirectObject", "IsIndirectObject", "IsPrepositionObject", "HasTwin", "Generic", "IsSingleton", "HasBasicDependency", "HasCollapsedDependency", "HasContextParseTree", "HeadIndexedWord", "DependingVerb", "HeadWord", "SpeakerInfo", "SentenceWords", "OriginalSpan", "Dependents", "PreprocessedTerms", "Appositions", "PredicateNominatives", "RelativePronouns", "ListMembers", "BelongToLists", });
     internal_static_edu_stanford_nlp_pipeline_IndexedWord_descriptor =
       getDescriptor().getMessageTypes().get(8);
     internal_static_edu_stanford_nlp_pipeline_IndexedWord_fieldAccessorTable = new

@@ -264,6 +264,7 @@ message Mention {
   optional IndexedWord headIndexedWord = 30;
   optional IndexedWord   dependingVerb = 31;
   optional IndexedWord       headWord  = 32;
+  optional SpeakerInfo    speakerInfo  = 33;
 
   repeated IndexedWord         sentenceWords = 50;
   repeated IndexedWord         originalSpan = 51;
