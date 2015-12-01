@@ -24,7 +24,7 @@ public class AnnotationOutputterITest extends TestCase {
             "2\tcat\tcat\tNN\tO\t4\tnsubj\n" +
             "3\tis\tbe\tVBZ\tO\t4\tcop\n" +
             "4\tfat\tfat\tJJ\tO\t0\tROOT\n" +
-            "5\t.\t.\t.\tO\t_\t_\n" +
+            "5\t.\t.\t.\tO\t4\tpunct\n" +
             "\n" +
             "1\tThe\tthe\tDT\tO\t2\tdet\n" +
             "2\tdog\tdog\tNN\tO\t4\tnsubj\n" +
