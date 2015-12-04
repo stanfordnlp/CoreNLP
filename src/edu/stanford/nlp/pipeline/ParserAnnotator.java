@@ -59,7 +59,6 @@ public class ParserAnnotator extends SentenceAnnotator {
 
   private final boolean saveBinaryTrees;
 
-  /** Whether to include punctuation dependencies in the output. Starting in 2015, the default is true. */
   private final boolean keepPunct;
 
   /** If true, don't re-annotate sentences that already have a tree annotation */
@@ -82,14 +81,14 @@ public class ParserAnnotator extends SentenceAnnotator {
   }
 
   public ParserAnnotator(ParserGrammar parser, boolean verbose, int maxSent, Function<Tree, Tree> treeMap) {
-    this.VERBOSE = verbose;
+    VERBOSE = verbose;
     this.BUILD_GRAPHS = parser.getTLPParams().supportsBasicDependencies();
     this.parser = parser;
     this.maxSentenceLength = maxSent;
     this.treeMap = treeMap;
     this.maxParseTime = 0;
     this.kBest = 1;
-    this.keepPunct = true;
+    this.keepPunct = false;
     if (this.BUILD_GRAPHS) {
       TreebankLanguagePack tlp = parser.getTLPParams().treebankLanguagePack();
       this.gsf = tlp.grammaticalStructureFactory(tlp.punctuationWordRejectFilter(), parser.getTLPParams().typedDependencyHeadFinder());
@@ -126,7 +125,7 @@ public class ParserAnnotator extends SentenceAnnotator {
 
     this.kBest = PropertiesUtils.getInt(props, annotatorName + ".kbest", 1);
 
-    this.keepPunct = PropertiesUtils.getBool(props, annotatorName + ".keepPunct", true);
+    this.keepPunct = PropertiesUtils.getBool(props, annotatorName + ".keepPunct", false);
 
 
     String buildGraphsProperty = annotatorName + ".buildgraphs";
@@ -179,8 +178,6 @@ public class ParserAnnotator extends SentenceAnnotator {
               props.getProperty(annotatorName + ".nthreads", props.getProperty("nthreads", "")));
     os.append(annotatorName + ".nosquash:" +
       props.getProperty(annotatorName + ".nosquash", "false"));
-    os.append(annotatorName + ".keepPunct:" +
-      props.getProperty(annotatorName + ".keepPunct", "true"));
     os.append(annotatorName + ".extradependencies:" +
         props.getProperty(annotatorName + ".extradependences", "NONE").toLowerCase());
     boolean usesBinary = StanfordCoreNLP.usesBinaryTrees(props);

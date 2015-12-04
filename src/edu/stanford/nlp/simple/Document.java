@@ -476,8 +476,7 @@ public class Document {
       List<CoreMap> sentences = ann.get(CoreAnnotations.SentencesAnnotation.class);
       this.sentences = new ArrayList<>(sentences.size());
       for (CoreMap sentence : sentences) {
-        //Sentence sent = new Sentence(this, sentence);
-        Sentence sent = new Sentence(this, this.serializer.toProtoBuilder(sentence), sentence.get(CoreAnnotations.TextAnnotation.class));
+        Sentence sent = new Sentence(this, sentence);
         this.sentences.add(sent);
         this.impl.addSentence(sent.serialize());
       }

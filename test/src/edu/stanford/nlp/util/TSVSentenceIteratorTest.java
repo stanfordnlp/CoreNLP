@@ -17,9 +17,8 @@ public class TSVSentenceIteratorTest {
 
   /**
    * TODO(chaganty): Support creation of sentences with TSV iterator without any tokens annotations.
-   * Currently, Sentence does not like that.
    */
-  //@Test
+  @Test
   public void testOnlyGloss() {
     List<List<String>> entries = new ArrayList<>();
     entries.add(new ArrayList<String>() {{

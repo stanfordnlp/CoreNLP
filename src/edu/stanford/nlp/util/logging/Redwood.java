@@ -14,12 +14,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IterableIterator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A hierarchical channel based logger. Log messages are arranged hierarchically by depth
@@ -313,7 +312,20 @@ public class Redwood {
    * @param format The format string, as per java's Formatter.format() object.
    * @param args The arguments to format.
    */
-  public static void logf(String format, Object... args){ log(new Formatter().format(format, args)); }
+  public static void logf(String format, Object... args){
+    log((Supplier<String>) () -> new Formatter().format(format, args).toString());
+  }
+
+  /**
+   * The Redwood equivalent to printf(), with a logging level.
+   * For including more channels, use {@link edu.stanford.nlp.util.logging.Redwood.RedwoodChannels}.
+   * @param level The logging level to log at.
+   * @param format The format string, as per java's Formatter.format() object.
+   * @param args The arguments to format.
+   */
+  public static void logf(Flag level, String format, Object... args){
+    log(level, (Supplier<String>) () -> new Formatter().format(format, args).toString());
+  }
 
   /**
    * Begin a "track;" that is, begin logging at one level deeper.
@@ -825,7 +837,25 @@ public class Redwood {
      */
     private void sort(){
       //(sort flags)
-      if(!channelsSorted && channels.length > 1){
+      if (!channelsSorted && channels.length == 2) {
+        // Efficiency tweak for when we only have two channels. More than two, it's worth just sorting.
+        if (channels[1] instanceof Flag && !(channels[0] instanceof Flag)) {
+          // Case: second element is a flag, but first isn't.
+          // Action: put the flag first
+          Object tmp = channels[0];
+          channels[0] = channels[1];
+          channels[1] = tmp;
+        } else if (!(channels[0] instanceof Flag) && !(channels[1] instanceof Flag) &&
+                    channels[0].toString().compareTo(channels[1].toString()) > 0) {
+          // Case: neither element is a flag, and the second argument comes before the first
+          // Action: sort the two arguments
+          Object tmp = channels[0];
+          channels[0] = channels[1];
+          channels[1] = tmp;
+        }
+        // Misc case: both elements are flags, or the flag is already first.
+        // In both of these cases, we don't need to do anything
+      } else if(!channelsSorted && channels.length > 2){
         Arrays.sort(channels, (a, b) -> {
           if (a == FORCE) {
             return -1;
@@ -1193,7 +1223,32 @@ public class Redwood {
      * @param args The arguments to the printf function
      */
     public void logf(String format, Object... args) {
-      log(new Formatter().format(format, args));
+      log((Supplier<String>) () -> new Formatter().format(format, args).toString());
+    }
+
+    /**
+     * Log a printf-style formatted message to the channels specified in this RedwoodChannels object.
+     * @param level The log level to log with.
+     * @param format The format string for the printf function
+     * @param args The arguments to the printf function
+     */
+    public void logf(Flag level, String format, Object... args) {
+      log(level, (Supplier<String>) () -> new Formatter().format(format, args).toString());
+    }
+
+    /** Log to the debug channel. @see RedwoodChannels#logf(Flag, String, Object...) */
+    public void debugf(String format, Object... args) {
+      debug((Supplier<String>) () -> new Formatter().format(format, args).toString());
+    }
+
+    /** Log to the warn channel. @see RedwoodChannels#logf(Flag, String, Object...) */
+    public void warnf(String format, Object... args) {
+      warn((Supplier<String>) () -> new Formatter().format(format, args).toString());
+    }
+
+    /** Log to the error channel. @see RedwoodChannels#logf(Flag, String, Object...) */
+    public void errf(String format, Object... args) {
+      err((Supplier<String>) () -> new Formatter().format(format, args).toString());
     }
 
     /**
