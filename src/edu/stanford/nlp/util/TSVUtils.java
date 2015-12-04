@@ -139,7 +139,6 @@ public class TSVUtils {
    */
   public static SemanticGraph parseJsonTree(String jsonString, List<CoreLabel> tokens) {
     // Escape quoted string parts
-    jsonString = jsonString.substring(1, jsonString.length()-1).replace("\"\"","\"").replace("\\\\","\\");
     JsonReader json = Json.createReader(new StringReader(jsonString));
     SemanticGraph tree = new SemanticGraph();
     JsonArray array = json.readArray();

@@ -162,26 +162,20 @@ public class Sentence {
   }
 
   /**
-   *
-   * @param doc
-   * @param proto
-   * @param text
+   * Also sets the the text of the sentence.
+   * @param doc The document to link this sentence to.
+   * @param proto The sentence implementation to use for this sentence.
+   * @param text The text for the sentence
    */
   protected Sentence(Document doc, CoreNLPProtos.Sentence.Builder proto, String text) {
-    this.document = doc;
-    this.impl = proto;
-    // Set tokens
-    // This is the _only_ place we are allowed to construct tokens builders
-    tokensBuilders = new ArrayList<>(this.impl.getTokenCount());
-    for (int i = 0; i < this.impl.getTokenCount(); ++i) {
-      tokensBuilders.add(this.impl.getToken(i).toBuilder());
-    }
+    this(doc, proto);
     this.impl.setText(text);
   }
 
   /** Helper for creating a sentence from a document and a CoreMap representation */
   protected Sentence(Document doc, CoreMap sentence) {
     this.document = doc;
+    assert doc.sentences().size() > 0;
     this.impl = doc.sentence(0).impl;
     this.tokensBuilders = doc.sentence(0).tokensBuilders;
   }
