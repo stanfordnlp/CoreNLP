@@ -1,15 +1,22 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.trees.ud.CoNLLUDocumentWriter;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.StringUtils;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
-
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.trees.ud.CoNLLUDocumentWriter;
-import edu.stanford.nlp.util.CoreMap;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * <p>Write a subset of our CoreNLP output in CoNLL-U format.</p>
@@ -81,35 +88,36 @@ import edu.stanford.nlp.util.CoreMap;
  */
 public class CoNLLUOutputter extends AnnotationOutputter {
 
-  private static final CoNLLUDocumentWriter conllUWriter = new CoNLLUDocumentWriter();
+    private static final CoNLLUDocumentWriter conllUWriter = new CoNLLUDocumentWriter();
 
-  public CoNLLUOutputter() {}
+    public CoNLLUOutputter() {}
 
-  @Override
-  public void print(Annotation doc, OutputStream target, Options options) throws IOException {
-    PrintWriter writer = new PrintWriter(target);
+    @Override
+    public void print(Annotation doc, OutputStream target, Options options) throws IOException {
+        PrintWriter writer = new PrintWriter(target);
 
-    List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
-    for (CoreMap sentence : sentences) {
-      SemanticGraph sg = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
-      if (sg != null) {
-        writer.print(conllUWriter.printSemanticGraph(sg));
-      }
+
+        List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
+        for (CoreMap sentence : sentences) {
+            SemanticGraph sg = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+            if (sg != null) {
+                writer.print(conllUWriter.printSemanticGraph(sg));
+            }
+            writer.flush();
+        }
+
     }
-    writer.flush();
-  }
 
 
-  public static void conllUPrint(Annotation annotation, OutputStream os) throws IOException {
-    new CoNLLUOutputter().print(annotation, os);
-  }
+    public static void conllUPrint(Annotation annotation, OutputStream os) throws IOException {
+        new CoNLLUOutputter().print(annotation, os);
+    }
 
-  public static void conllUPrint(Annotation annotation, OutputStream os, StanfordCoreNLP pipeline) throws IOException {
-    new CoNLLUOutputter().print(annotation, os, pipeline);
-  }
+    public static void conllUPrint(Annotation annotation, OutputStream os, StanfordCoreNLP pipeline) throws IOException {
+        new CoNLLUOutputter().print(annotation, os, pipeline);
+    }
 
-  public static void conllUPrint(Annotation annotation, OutputStream os, Options options) throws IOException {
-    new CoNLLUOutputter().print(annotation, os, options);
-  }
-
+    public static void conllUPrint(Annotation annotation, OutputStream os, Options options) throws IOException {
+        new CoNLLUOutputter().print(annotation, os, options);
+    }
 }

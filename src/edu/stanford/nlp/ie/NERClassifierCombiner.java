@@ -368,7 +368,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
     // run on multiple textFiles , based off CRFClassifier code
     String textFiles = props.getProperty("textFiles");
     if (textFiles != null) {
-      List<File> files = new ArrayList<>();
+      List<File> files = new ArrayList<File>();
       for (String filename : textFiles.split(",")) {
         files.add(new File(filename));
       }

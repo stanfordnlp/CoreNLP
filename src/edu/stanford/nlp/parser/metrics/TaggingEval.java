@@ -61,17 +61,17 @@ public class TaggingEval extends AbstractEval {
     this.lex = lex;
 
     if(doCatLevelEval) {
-      precisions = new ClassicCounter<>();
-      recalls = new ClassicCounter<>();
-      f1s = new ClassicCounter<>();
+      precisions = new ClassicCounter<String>();
+      recalls = new ClassicCounter<String>();
+      f1s = new ClassicCounter<String>();
 
-      precisions2 = new ClassicCounter<>();
-      recalls2 = new ClassicCounter<>();
-      pnums2 = new ClassicCounter<>();
-      rnums2 = new ClassicCounter<>();
+      precisions2 = new ClassicCounter<String>();
+      recalls2 = new ClassicCounter<String>();
+      pnums2 = new ClassicCounter<String>();
+      rnums2 = new ClassicCounter<String>();
 
-      percentOOV = new ClassicCounter<>();
-      percentOOV2 = new ClassicCounter<>();
+      percentOOV = new ClassicCounter<String>();
+      percentOOV2 = new ClassicCounter<String>();
     }
   }
 
@@ -185,7 +185,7 @@ public class TaggingEval extends AbstractEval {
       cats.addAll(precisions.keySet());
       cats.addAll(recalls.keySet());
 
-      Map<Double,String> f1Map = new TreeMap<>();
+      Map<Double,String> f1Map = new TreeMap<Double,String>();
       for (String cat : cats) {
         double pnum2 = pnums2.getCount(cat);
         double rnum2 = rnums2.getCount(cat);

@@ -4,7 +4,7 @@ package edu.stanford.nlp.util.logging;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.logging.Redwood.Record;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.List;
 
@@ -102,18 +102,11 @@ public class VisibilityHandler extends LogRecordHandler {
           break;
         case SHOW_ALL:
           //--Default True
-          if (!this.deltaPool.isEmpty()) {  // Short-circuit for efficiency
-            boolean somethingSeen =  false;
-            for (Object tag : record.channels()) {
-              if (this.deltaPool.contains(tag)) {
-                somethingSeen = true;
-                break;
-              }
-            }
-            isPrinting = !somethingSeen;
-          } else {
-            isPrinting = true;
+          boolean somethingSeen =  false;
+          for(Object tag : record.channels()){
+            if(this.deltaPool.contains(tag)){ somethingSeen = true; break; }
           }
+          isPrinting = !somethingSeen;
           break;
         default:
           throw new IllegalStateException("Unknown default state setting: " + this.defaultState);
@@ -121,7 +114,9 @@ public class VisibilityHandler extends LogRecordHandler {
     }
     //--Return
     if(isPrinting){
-      return Collections.singletonList(record);
+      ArrayList<Record> retVal = new ArrayList<Record>();
+      retVal.add(record);
+      return retVal;
     } else {
       return EMPTY;
     }

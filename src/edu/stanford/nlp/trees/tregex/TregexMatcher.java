@@ -203,7 +203,7 @@ public abstract class TregexMatcher {
       return node.parent();
     }
     if (nodesToParents == null) {
-      nodesToParents = new IdentityHashMap<>();
+      nodesToParents = new IdentityHashMap<Tree, Tree>();
     }
     if (nodesToParents.size() == 0) {
       fillNodesToParents(root, null);

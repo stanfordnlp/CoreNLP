@@ -3,13 +3,12 @@ package edu.stanford.nlp.loglinear.model;
 import java.util.Iterator;
 
 /**
- * Created on 8/12/15.
- * @author keenon
- * <p>
  * Holds and provides access to an N-dimensional array.
  * <p>
  * Yes, generics will lead to unfortunate boxing and unboxing in the TableFactor case, we'll handle that if it becomes a
  * problem.
+ *
+ * @author keenon
  */
 public class NDArray<T> implements Iterable<int[]> {
   // public data
@@ -133,17 +132,6 @@ public class NDArray<T> implements Iterable<int[]> {
       c *= n;
     }
     return c;
-  }
-
-  /**
-   * Clones the table, but keeps the values by reference.
-   *
-   * @return a new NDArray, a perfect replica of this one
-   */
-  public NDArray<T> cloneArray() {
-    NDArray<T> copy = new NDArray<>(dimensions.clone());
-    copy.values = values.clone();
-    return copy;
   }
 
   ////////////////////////////////////////////////////////////////////////////

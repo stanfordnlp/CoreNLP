@@ -26,8 +26,8 @@ public class Alignment {
     writer.println(new String(longForm));
     writer.println(new String(shortForm));
     StringBuffer sb = new StringBuffer();
-    for (int pointer : pointers) {
-      sb.append(pointer + " ");
+    for (int i = 0; i < pointers.length; ++i) {
+      sb.append(pointers[i] + " ");
     }
     writer.println(sb.toString());
   }
@@ -104,8 +104,8 @@ public class Alignment {
   @Override
   public int hashCode() {
     int code = 0;
-    for (int pointer : pointers) {
-      code += pointer;
+    for (int i = 0; i < pointers.length; ++i) {
+      code += pointers[i];
       code *= 31;
     }
     return code;

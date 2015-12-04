@@ -135,7 +135,7 @@ public class CoreNLPServlet extends HttpServlet {
 
       // Insert divs that will be used for each visualisation type.
       final int visualiserDivPxWidth = 700;
-      Map<String, String> nameByAbbrv = new LinkedHashMap<>();
+      Map<String, String> nameByAbbrv = new LinkedHashMap<String, String>();
       nameByAbbrv.put("pos", "Part-of-Speech");
       nameByAbbrv.put("ner", "Named Entity Recognition");
       nameByAbbrv.put("coref", "Coreference");

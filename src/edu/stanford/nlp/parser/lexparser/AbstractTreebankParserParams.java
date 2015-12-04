@@ -66,7 +66,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
       String s = lab.value();
       s = treebankLanguagePack().basicCategory(s);
       int numKids = tree.numChildren();
-      List<Tree> children = new ArrayList<>(numKids);
+      List<Tree> children = new ArrayList<Tree>(numKids);
       for (int cNum = 0; cNum < numKids; cNum++) {
         Tree child = tree.getChild(cNum);
         Tree newChild = transformTree(child);
@@ -115,7 +115,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
       s = treebankLanguagePack().basicCategory(s);
       s = treebankLanguagePack().stripGF(s);
       int numKids = tree.numChildren();
-      List<Tree> children = new ArrayList<>(numKids);
+      List<Tree> children = new ArrayList<Tree>(numKids);
       for (int cNum = 0; cNum < numKids; cNum++) {
         Tree child = tree.getChild(cNum);
         Tree newChild = transformTree(child);
@@ -339,7 +339,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
    * -- Roger.)
    */
   public static Collection<Constituent> parsevalObjectify(Tree t, TreeTransformer collinizer, boolean labelConstituents) {
-    Collection<Constituent> spans = new ArrayList<>();
+    Collection<Constituent> spans = new ArrayList<Constituent>();
     Tree t1 = collinizer.transformTree(t);
     if (t1 == null) {
       return spans;
@@ -391,7 +391,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
    * Returns the set of dependencies in a tree, according to some {@link edu.stanford.nlp.trees.DependencyTyper}.
    */
   public static <E> Collection<E> dependencyObjectify(Tree t, HeadFinder hf, TreeTransformer collinizer, DependencyTyper<E> typer) {
-    Collection<E> deps = new ArrayList<>();
+    Collection<E> deps = new ArrayList<E>();
     Tree t1 = collinizer.transformTree(t);
     if(t1==null)
       return deps;
@@ -422,7 +422,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
 
     @Override
     public List<String> makeDependency(Tree head, Tree dep, Tree root) {
-      List<String> result = new ArrayList<>(3);
+      List<String> result = new ArrayList<String>(3);
       Tree headTerm = head.headTerminal(hf);
       Tree depTerm = dep.headTerminal(hf);
       boolean headLeft = root.leftCharEdge(headTerm) < root.leftCharEdge(depTerm);
@@ -446,7 +446,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
 
     @Override
     public List<String> makeDependency(Tree head, Tree dep, Tree root) {
-      List<String> result = new ArrayList<>(3);
+      List<String> result = new ArrayList<String>(3);
       Tree headTerm = head.headTerminal(hf);
       Tree depTerm = dep.headTerminal(hf);
       result.add(headTerm.value());
@@ -469,7 +469,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
 
     @Override
     public List<String> makeDependency(Tree head, Tree dep, Tree root) {
-      List<String> result = new ArrayList<>(6);
+      List<String> result = new ArrayList<String>(6);
       Tree headTerm = head.headTerminal(hf);
       Tree depTerm = dep.headTerminal(hf);
       boolean headLeft = root.leftCharEdge(headTerm) < root.leftCharEdge(depTerm);
@@ -496,7 +496,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
 
     @Override
     public List<String> makeDependency(Tree head, Tree dep, Tree root) {
-      List<String> result = new ArrayList<>(6);
+      List<String> result = new ArrayList<String>(6);
       Tree headTerm = head.headTerminal(hf);
       Tree depTerm = dep.headTerminal(hf);
       result.add(headTerm.value());

@@ -10,8 +10,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 /**
- * Created on 8/11/15.
- * @author keenon
+ * Created by keenon on 8/11/15.
  * <p>
  * Holds a factor populated by doubles that knows how to do all the important operations for PGM inference. Internally,
  * these are just different flavors of two basic data-flow operations:
@@ -58,19 +57,6 @@ public class TableFactor extends NDArrayDoubles {
   }
 
   /**
-   * Fast approximation of the exp() function
-   *
-   * @param val the value to be exponentiated
-   * @return the value we want
-   */
-  public static double exp(double val) {
-    final long tmp = (long) (1512775 * val + 1072632447);
-    return Double.longBitsToDouble(tmp << 32);
-  }
-
-  public static final boolean USE_EXP_APPROX = false;
-
-  /**
    * Construct a TableFactor for inference within a model. This is the same as the other constructor, except that the
    * table is observed out before any unnecessary dot products are done out, so hopefully we dramatically reduce the
    * number of computations required to calculate the resulting table.
@@ -110,6 +96,17 @@ public class TableFactor extends NDArrayDoubles {
         factorAssignment[forwardPointers[i]] = assn[i];
       }
       setAssignmentLogValue(assn, factor.featuresTable.getAssignmentValue(factorAssignment).get().dotProduct(weights));
+    }
+  }
+
+  /**
+   * FOR PRIVATE USE AND TESTING ONLY
+   */
+  TableFactor(int[] neighborIndices, int[] dimensions) {
+    super(dimensions);
+    this.neighborIndices = neighborIndices;
+    for (int i = 0; i < values.length; i++) {
+      values[i] = Double.NEGATIVE_INFINITY;
     }
   }
 
@@ -183,11 +180,7 @@ public class TableFactor extends NDArrayDoubles {
     while (true) {
       double v = getAssignmentLogValue(assignment);
       for (int i = 0; i < neighborIndices.length; i++) {
-        if (USE_EXP_APPROX) {
-          results[i][assignment[i]] += exp(v - maxValues[i][assignment[i]]);
-        } else {
-          results[i][assignment[i]] += Math.exp(v - maxValues[i][assignment[i]]);
-        }
+        results[i][assignment[i]] += Math.exp(v - maxValues[i][assignment[i]]);
       }
       // This mutates the resultAssignment[] array, rather than creating a new one
       if (secondFastPassByReferenceIterator.hasNext()) {
@@ -200,11 +193,7 @@ public class TableFactor extends NDArrayDoubles {
     for (int i = 0; i < neighborIndices.length; i++) {
       double sum = 0.0;
       for (int j = 0; j < results[i].length; j++) {
-        if (USE_EXP_APPROX) {
-          results[i][j] = exp(maxValues[i][j]) * results[i][j];
-        } else {
-          results[i][j] = Math.exp(maxValues[i][j]) * results[i][j];
-        }
+        results[i][j] = Math.exp(maxValues[i][j]) * results[i][j];
         sum += results[i][j];
       }
       if (Double.isInfinite(sum)) {
@@ -311,11 +300,7 @@ public class TableFactor extends NDArrayDoubles {
           for (int j = 0; j < getDimensions()[1]; j++) {
             int index = k + j;
             if (Double.isFinite(max[j])) {
-              if (USE_EXP_APPROX) {
-                marginalized.values[j] += exp(values[index] - max[j]);
-              } else {
-                marginalized.values[j] += Math.exp(values[index] - max[j]);
-              }
+              marginalized.values[j] += Math.exp(values[index] - max[j]);
             }
           }
         }
@@ -361,11 +346,7 @@ public class TableFactor extends NDArrayDoubles {
           for (int j = 0; j < getDimensions()[1]; j++) {
             int index = k + j;
             if (Double.isFinite(max[i])) {
-              if (USE_EXP_APPROX) {
-                marginalized.values[i] += exp(values[index] - max[i]);
-              } else {
-                marginalized.values[i] += Math.exp(values[index] - max[i]);
-              }
+              marginalized.values[i] += Math.exp(values[index] - max[i]);
             }
           }
         }
@@ -390,7 +371,7 @@ public class TableFactor extends NDArrayDoubles {
       TableFactor maxValues = maxOut(variable);
 
       // Then we do the sum against an offset from the pivots
-      TableFactor marginalized = marginalize(variable, 0, (marginalizedVariableValue, assignment) -> (a, b) -> a + (USE_EXP_APPROX ? exp(b - maxValues.getAssignmentLogValue(assignment)) : Math.exp(b - maxValues.getAssignmentLogValue(assignment))));
+      TableFactor marginalized = marginalize(variable, 0, (marginalizedVariableValue, assignment) -> (a, b) -> a + Math.exp(b - maxValues.getAssignmentLogValue(assignment)));
 
       // Then we factor the max values back in, and
       for (int[] assignment : marginalized) {
@@ -549,6 +530,10 @@ public class TableFactor extends NDArrayDoubles {
     return Math.exp(d);
   }
 
+  ////////////////////////////////////////////////////////////////////////////
+  // PRIVATE IMPLEMENTATION
+  ////////////////////////////////////////////////////////////////////////////
+
   /**
    * Just a pass through to the NDArray version, plus a Math.log to ensure that to the outside world the TableFactor
    * doesn't look like it's in log-space
@@ -560,10 +545,6 @@ public class TableFactor extends NDArrayDoubles {
   public void setAssignmentValue(int[] assignment, double value) {
     super.setAssignmentValue(assignment, Math.log(value));
   }
-
-  ////////////////////////////////////////////////////////////////////////////
-  // PRIVATE IMPLEMENTATION
-  ////////////////////////////////////////////////////////////////////////////
 
   private double getAssignmentLogValue(int[] assignment) {
     return super.getAssignmentValue(assignment);
@@ -686,17 +667,6 @@ public class TableFactor extends NDArrayDoubles {
       for (int i = 0; i < arr.length; i++) {
         arr[i] = Math.exp(arr[i] - logSumExp);
       }
-    }
-  }
-
-  /**
-   * FOR PRIVATE USE AND TESTING ONLY
-   */
-  TableFactor(int[] neighborIndices, int[] dimensions) {
-    super(dimensions);
-    this.neighborIndices = neighborIndices;
-    for (int i = 0; i < values.length; i++) {
-      values[i] = Double.NEGATIVE_INFINITY;
     }
   }
 

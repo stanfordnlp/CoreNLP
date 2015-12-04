@@ -14,11 +14,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
 
 import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IterableIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A hierarchical channel based logger. Log messages are arranged hierarchically by depth
@@ -79,7 +80,7 @@ public class Redwood {
    * The stack of track titles, for consistency checking
    * the endTrack() call
    */
-  private static final Stack<String> titleStack = new Stack<>();
+  private static final Stack<String> titleStack = new Stack<String>();
   /**
    * Signals that no more log messages should be accepted by Redwood
    */
@@ -98,7 +99,7 @@ public class Redwood {
    * Threads which have something they wish to log, but do not yet
    * have control of Redwood
    */
-  private static final Queue<Long> threadsWaiting = new LinkedList<>();
+  private static final Queue<Long> threadsWaiting = new LinkedList<Long>();
   /**
    * Indicator that messages are coming from multiple threads
    */
@@ -122,7 +123,7 @@ public class Redwood {
     assert threadId != currentThread;
     //(get queue)
     if(!threadedLogQueue.containsKey(threadId)){
-      threadedLogQueue.put(threadId, new LinkedList<>());
+      threadedLogQueue.put(threadId, new LinkedList<Runnable>());
     }
     Queue<Runnable> threadLogQueue = threadedLogQueue.get(threadId);
     //(add to queue)
@@ -312,20 +313,7 @@ public class Redwood {
    * @param format The format string, as per java's Formatter.format() object.
    * @param args The arguments to format.
    */
-  public static void logf(String format, Object... args){
-    log((Supplier<String>) () -> new Formatter().format(format, args).toString());
-  }
-
-  /**
-   * The Redwood equivalent to printf(), with a logging level.
-   * For including more channels, use {@link edu.stanford.nlp.util.logging.Redwood.RedwoodChannels}.
-   * @param level The logging level to log at.
-   * @param format The format string, as per java's Formatter.format() object.
-   * @param args The arguments to format.
-   */
-  public static void logf(Flag level, String format, Object... args){
-    log(level, (Supplier<String>) () -> new Formatter().format(format, args).toString());
-  }
+  public static void logf(String format, Object... args){ log(new Formatter().format(format, args)); }
 
   /**
    * Begin a "track;" that is, begin logging at one level deeper.
@@ -600,7 +588,7 @@ public class Redwood {
    * Set up the default logger.
    */
   static {
-    RedwoodConfiguration.minimal().apply();
+    RedwoodConfiguration.standard().apply();
   }
 
   /**
@@ -615,7 +603,7 @@ public class Redwood {
     // -- Overhead --
     private final boolean isRoot;
     private final LogRecordHandler head;
-    private final List<RecordHandlerTree> children = new ArrayList<>();
+    private final List<RecordHandlerTree> children = new ArrayList<RecordHandlerTree>();
 
     public RecordHandlerTree() {
       isRoot = true;
@@ -719,7 +707,7 @@ public class Redwood {
 
     private static List<Record> append(List<Record> lst, Record toAppend){
       if(lst == LogRecordHandler.EMPTY){
-        lst = new ArrayList<>();
+        lst = new ArrayList<Record>();
       }
       lst.add(toAppend);
       return lst;
@@ -753,7 +741,7 @@ public class Redwood {
         }
       } else {
         //(case: is root)
-        toPassOn = new ArrayList<>();
+        toPassOn = new ArrayList<Record>();
         switch(type){
           case SIMPLE:
             toPassOn = append(toPassOn, toPass);
@@ -837,25 +825,7 @@ public class Redwood {
      */
     private void sort(){
       //(sort flags)
-      if (!channelsSorted && channels.length == 2) {
-        // Efficiency tweak for when we only have two channels. More than two, it's worth just sorting.
-        if (channels[1] instanceof Flag && !(channels[0] instanceof Flag)) {
-          // Case: second element is a flag, but first isn't.
-          // Action: put the flag first
-          Object tmp = channels[0];
-          channels[0] = channels[1];
-          channels[1] = tmp;
-        } else if (!(channels[0] instanceof Flag) && !(channels[1] instanceof Flag) &&
-                    channels[0].toString().compareTo(channels[1].toString()) > 0) {
-          // Case: neither element is a flag, and the second argument comes before the first
-          // Action: sort the two arguments
-          Object tmp = channels[0];
-          channels[0] = channels[1];
-          channels[1] = tmp;
-        }
-        // Misc case: both elements are flags, or the flag is already first.
-        // In both of these cases, we don't need to do anything
-      } else if(!channelsSorted && channels.length > 2){
+      if(!channelsSorted && channels.length > 1){
         Arrays.sort(channels, (a, b) -> {
           if (a == FORCE) {
             return -1;
@@ -1031,14 +1001,13 @@ public class Redwood {
       final AtomicInteger numPending = new AtomicInteger(0);
       final Iterator<Runnable> iter = runnables.iterator();
       //--Create Runnables
-      return new IterableIterator<>(new Iterator<Runnable>() {
+      return new IterableIterator<Runnable>(new Iterator<Runnable>() {
         @Override
         public boolean hasNext() {
           synchronized (iter) {
             return iter.hasNext();
           }
         }
-
         @Override
         public synchronized Runnable next() {
           final Runnable runnable;
@@ -1047,27 +1016,25 @@ public class Redwood {
           }
           // (don't flood the queu)
           while (numPending.get() > 100) {
-            try {
-              Thread.sleep(100);
-            } catch (InterruptedException e) {
-            }
+            try { Thread.sleep(100); }
+            catch (InterruptedException e) { }
           }
           numPending.incrementAndGet();
           // (add the job)
-          Runnable toReturn = new Runnable() {
-            public void run() {
+          Runnable toReturn = new Runnable(){
+            public void run(){
               boolean threadFinished = false;
-              try {
+              try{
                 //(signal start of threads)
                 metaInfoLock.lock();
-                if (!haveStarted.getAndSet(true)) {
+                if(!haveStarted.getAndSet(true)){
                   startThreads(title); //<--this must be a blocking operation
                 }
                 metaInfoLock.unlock();
                 //(run runnable)
-                try {
+                try{
                   runnable.run();
-                } catch (Exception | AssertionError e) {
+                } catch (Exception | AssertionError e){
                   e.printStackTrace();
                   System.exit(1);
                 }
@@ -1081,11 +1048,9 @@ public class Redwood {
                     endThreads(title);
                   }
                 }
-              } catch (Throwable t) {
+              } catch(Throwable t){
                 t.printStackTrace();
-                if (!threadFinished) {
-                  finishThread();
-                }
+                if (!threadFinished) { finishThread(); }
               }
             }
           };
@@ -1223,32 +1188,7 @@ public class Redwood {
      * @param args The arguments to the printf function
      */
     public void logf(String format, Object... args) {
-      log((Supplier<String>) () -> new Formatter().format(format, args).toString());
-    }
-
-    /**
-     * Log a printf-style formatted message to the channels specified in this RedwoodChannels object.
-     * @param level The log level to log with.
-     * @param format The format string for the printf function
-     * @param args The arguments to the printf function
-     */
-    public void logf(Flag level, String format, Object... args) {
-      log(level, (Supplier<String>) () -> new Formatter().format(format, args).toString());
-    }
-
-    /** Log to the debug channel. @see RedwoodChannels#logf(Flag, String, Object...) */
-    public void debugf(String format, Object... args) {
-      debug((Supplier<String>) () -> new Formatter().format(format, args).toString());
-    }
-
-    /** Log to the warn channel. @see RedwoodChannels#logf(Flag, String, Object...) */
-    public void warnf(String format, Object... args) {
-      warn((Supplier<String>) () -> new Formatter().format(format, args).toString());
-    }
-
-    /** Log to the error channel. @see RedwoodChannels#logf(Flag, String, Object...) */
-    public void errf(String format, Object... args) {
-      err((Supplier<String>) () -> new Formatter().format(format, args).toString());
+      log(new Formatter().format(format, args));
     }
 
     /**
@@ -1305,7 +1245,7 @@ public class Redwood {
     System.exit(1);
 
     // -- STRESS TEST THREADS --
-    LinkedList<Runnable> tasks = new LinkedList<>();
+    LinkedList<Runnable> tasks = new LinkedList<Runnable>();
     for(int i=0; i<1000; i++){
       final int fI = i;
       tasks.add(() -> {

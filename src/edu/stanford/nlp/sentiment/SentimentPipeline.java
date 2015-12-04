@@ -275,7 +275,7 @@ public class SentimentPipeline {
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-output")) {
         String[] formats = args[argIndex + 1].split(",");
-        outputFormats = new ArrayList<>();
+        outputFormats = new ArrayList<Output>();
         for (String format : formats) {
           outputFormats.add(Output.valueOf(format.toUpperCase()));
         }

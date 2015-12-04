@@ -24,8 +24,6 @@
   ga('create', 'UA-28753732-2', 'auto');
   ga('send', 'pageview');
   </script>
-
-  <meta charset="UTF-8">
 </head>
 
 <body>
@@ -44,7 +42,6 @@
   <div class="row">
 
     <!-- Text area input -->
-    <form id="form_annotate" accept-charset="UTF-8" onsubmit="return false;">
     <div class="form-group">
       <label for="text">Please enter your text here:</label>
       <textarea class="form-control" rows="2" id="text" placeholder="e.g., The quick brown fox jumped over the lazy dog." autofocus></textarea>
@@ -69,7 +66,6 @@
         <button id="submit" class="btn btn-block">Submit</button>
       </center>
     </div>
-    </form>
 
   </div>
   <div class="row">
@@ -101,7 +97,7 @@
 
       <!-- TokensRegex -->
       <div class="tab-pane active pattern_tab" id="div_tokensregex">
-        <form id="form_tokensregex" accept-charset="UTF-8">
+        <form id="form_tokensregex">
         <label for="tokensregex_search">Enter a <a href="http://nlp.stanford.edu/software/tokensregex.shtml">TokensRegex</a>
           expression to run against the above sentence:</label>
         <div class="input-group">
@@ -115,7 +111,7 @@
 
       <!-- Semgrex -->
       <div class="tab-pane pattern_tab" id="div_semgrex">
-        <form id="form_semgrex" accept-charset="UTF-8">
+        <form id="form_semgrex">
         <label for="semgrex_search">Enter a <a href="http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/semgraph/semgrex/SemgrexPattern.html">Semgrex</a>
           expression to run against the "enhanced dependencies" above:</label>
         <div class="input-group">

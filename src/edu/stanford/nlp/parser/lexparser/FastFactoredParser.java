@@ -65,7 +65,7 @@ public class FastFactoredParser implements KBestViterbiParser {
   }
 
 
-  private List<ScoredObject<Tree>> nGoodTrees = new ArrayList<>();
+  private List<ScoredObject<Tree>> nGoodTrees = new ArrayList<ScoredObject<Tree>>();
 
 
 
@@ -119,14 +119,14 @@ public class FastFactoredParser implements KBestViterbiParser {
     int numParsesToConsider = numToFind * op.testOptions.fastFactoredCandidateMultiplier + op.testOptions.fastFactoredCandidateAddend;
     if (pparser.hasParse()) {
       List<ScoredObject<Tree>> pcfgBest = pparser.getKBestParses(numParsesToConsider);
-      Beam<ScoredObject<Tree>> goodParses = new Beam<>(numToFind);
+      Beam<ScoredObject<Tree>> goodParses = new Beam<ScoredObject<Tree>>(numToFind);
 
       for (ScoredObject<Tree> candidate : pcfgBest) {
         if (Thread.interrupted()) {
           throw new RuntimeInterruptedException();
         }
         double depScore = depScoreTree(candidate.object());
-        ScoredObject<Tree> x = new ScoredObject<>(candidate.object(), candidate.score() + depScore);
+        ScoredObject<Tree> x = new ScoredObject<Tree>(candidate.object(), candidate.score() + depScore);
         goodParses.add(x);
       }
       nGoodTrees = goodParses.asSortedList();

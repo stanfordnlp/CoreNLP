@@ -148,7 +148,7 @@ if (jjtc000) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case DELETE:{
         operator = jj_consume_token(DELETE);
-        nodeSelections = NodeSelectionList(new ArrayList<>());
+        nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>());
 jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
 {if ("" != null) return new DeleteNode(nodeSelections);}
@@ -156,7 +156,7 @@ jjtree.closeNodeScope(jjtn000, true);
         }
       case PRUNE:{
         operator = jj_consume_token(PRUNE);
-        nodeSelections = NodeSelectionList(new ArrayList<>());
+        nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>());
 jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
 {if ("" != null) return new PruneNode(nodeSelections);}
@@ -247,7 +247,7 @@ jjtree.closeNodeScope(jjtn000, true);
               case CREATE_SUBTREE:{
                 operator = jj_consume_token(CREATE_SUBTREE);
                 tree = TreeRoot(false);
-                nodeSelections = NodeSelectionList(new ArrayList<>());
+                nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>());
 jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
 if (nodeSelections.size() == 1) {
@@ -288,7 +288,7 @@ jjtree.closeNodeScope(jjtn000, true);
                 }
               case COINDEX:{
                 operator = jj_consume_token(COINDEX);
-                nodeSelections = NodeSelectionList(new ArrayList<>());
+                nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>());
 jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
 {if ("" != null) return new CoindexNodes(nodeSelections.toArray(new TsurgeonPattern[] {}));}
@@ -544,7 +544,7 @@ if (jjtc000) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case TREE_NODE_NONTERMINAL_LABEL:{
         label = jj_consume_token(TREE_NODE_NONTERMINAL_LABEL);
-        dtrs = TreeDtrs(new ArrayList<>());
+        dtrs = TreeDtrs(new ArrayList<Tree>());
 jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
 {if ("" != null) return treeFactory.newTreeNode(label.image.substring(1),dtrs);}
@@ -554,14 +554,14 @@ jjtree.closeNodeScope(jjtn000, true);
         label = jj_consume_token(TREE_NODE_TERMINAL_LABEL);
 jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-{if ("" != null) return treeFactory.newTreeNode(label.image, new ArrayList<>());}
+{if ("" != null) return treeFactory.newTreeNode(label.image,new ArrayList<Tree>());}
         break;
         }
       case IDENTIFIER:{
         label = jj_consume_token(IDENTIFIER);
 jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-{if ("" != null) return treeFactory.newTreeNode(label.image, new ArrayList<>());}
+{if ("" != null) return treeFactory.newTreeNode(label.image,new ArrayList<Tree>());}
         break;
         }
       default:
@@ -997,13 +997,13 @@ if (jjtc000) {
       jj_gen++;
       if (++jj_gc > 100) {
         jj_gc = 0;
-          for (JJCalls jj_2_rtn : jj_2_rtns) {
-              JJCalls c = jj_2_rtn;
-              while (c != null) {
-                  if (c.gen < jj_gen) c.first = null;
-                  c = c.next;
-              }
+        for (int i = 0; i < jj_2_rtns.length; i++) {
+          JJCalls c = jj_2_rtns[i];
+          while (c != null) {
+            if (c.gen < jj_gen) c.first = null;
+            c = c.next;
           }
+        }
       }
       return token;
     }
@@ -1063,7 +1063,7 @@ if (jjtc000) {
       return (jj_ntk = jj_nt.kind);
   }
 
-  private java.util.List<int[]> jj_expentries = new java.util.ArrayList<>();
+  private java.util.List<int[]> jj_expentries = new java.util.ArrayList<int[]>();
   private int[] jj_expentry;
   private int jj_kind = -1;
   private int[] jj_lasttokens = new int[100];
@@ -1078,18 +1078,17 @@ if (jjtc000) {
       for (int i = 0; i < jj_endpos; i++) {
         jj_expentry[i] = jj_lasttokens[i];
       }
-      jj_entries_loop:
-      for (int[] jj_expentry1 : jj_expentries) {
-          int[] oldentry = (int[]) (jj_expentry1);
-          if (oldentry.length == jj_expentry.length) {
-              for (int i = 0; i < jj_expentry.length; i++) {
-                  if (oldentry[i] != jj_expentry[i]) {
-                      continue jj_entries_loop;
-                  }
-              }
-              jj_expentries.add(jj_expentry);
-              break jj_entries_loop;
+      jj_entries_loop: for (java.util.Iterator<?> it = jj_expentries.iterator(); it.hasNext();) {
+        int[] oldentry = (int[])(it.next());
+        if (oldentry.length == jj_expentry.length) {
+          for (int i = 0; i < jj_expentry.length; i++) {
+            if (oldentry[i] != jj_expentry[i]) {
+              continue jj_entries_loop;
+            }
           }
+          jj_expentries.add(jj_expentry);
+          break jj_entries_loop;
+        }
       }
       if (pos != 0) jj_lasttokens[(jj_endpos = pos) - 1] = kind;
     }

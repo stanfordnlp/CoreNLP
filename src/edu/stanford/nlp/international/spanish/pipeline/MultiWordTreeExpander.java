@@ -383,32 +383,32 @@ public class MultiWordTreeExpander {
    */
   private final List<Pair<TregexPattern, TsurgeonPattern>> firstStepExpansions = Arrays.asList(
     // Should be first-ish
-          new Pair<>(parentheticalExpression, groupParentheticalExpression),
-          new Pair<>(multipleClauses, expandMultipleClauses),
+    new Pair<TregexPattern, TsurgeonPattern>(parentheticalExpression, groupParentheticalExpression),
+    new Pair<TregexPattern, TsurgeonPattern>(multipleClauses, expandMultipleClauses),
 
-          new Pair<>(leadingPrepositionalPhrase,
-                  expandPrepositionalPhrase1),
-          new Pair<>(conjunctPhrase, expandConjunctPhrase),
-          new Pair<>(prepositionalPhrase, expandPrepositionalPhrase1),
-          new Pair<>(prepositionalVP, expandPrepositionalVP1),
+    new Pair<TregexPattern, TsurgeonPattern>(leadingPrepositionalPhrase,
+                                             expandPrepositionalPhrase1),
+    new Pair<TregexPattern, TsurgeonPattern>(conjunctPhrase, expandConjunctPhrase),
+    new Pair<TregexPattern, TsurgeonPattern>(prepositionalPhrase, expandPrepositionalPhrase1),
+    new Pair<TregexPattern, TsurgeonPattern>(prepositionalVP, expandPrepositionalVP1),
 
-          new Pair<>(contractionTrailingIdiomBeforeNominalGroup,
-                  joinArticleWithNominalGroup),
-          new Pair<>(contractionInSpecifier, extendContraction),
-          new Pair<>(delTodo, extendContraction),
-          new Pair<>(contractionInRangePhrase,
-                  expandContractionInRangePhrase),
+    new Pair<TregexPattern, TsurgeonPattern>(contractionTrailingIdiomBeforeNominalGroup,
+                                             joinArticleWithNominalGroup),
+    new Pair<TregexPattern, TsurgeonPattern>(contractionInSpecifier, extendContraction),
+    new Pair<TregexPattern, TsurgeonPattern>(delTodo, extendContraction),
+    new Pair<TregexPattern, TsurgeonPattern>(contractionInRangePhrase,
+                                             expandContractionInRangePhrase),
 
     // Should not happen until the last moment! The function words
     // being targeted have weaker "scope" than others earlier
     // targeted, and so we don't want to clump things around them
     // until we know we have the right to clump
-          new Pair<>(articleLeadingNominalGroup,
-                  expandArticleLeadingNominalGroup),
-          new Pair<>(articleInsideOrphanedNominalGroup,
-                  expandArticleInsideOrphanedNominalGroup),
-          new Pair<>(determinerInsideNominalGroup,
-                  expandDeterminerInsideNominalGroup)
+    new Pair<TregexPattern, TsurgeonPattern>(articleLeadingNominalGroup,
+                                             expandArticleLeadingNominalGroup),
+    new Pair<TregexPattern, TsurgeonPattern>(articleInsideOrphanedNominalGroup,
+                                             expandArticleInsideOrphanedNominalGroup),
+    new Pair<TregexPattern, TsurgeonPattern>(determinerInsideNominalGroup,
+                                             expandDeterminerInsideNominalGroup)
   );
 
   /**
@@ -417,20 +417,20 @@ public class MultiWordTreeExpander {
    * looks like the rest of the corpus.
    */
   private final List<Pair<TregexPattern, TsurgeonPattern>> intermediateExpansions = Arrays.asList(
-          new Pair<>(intermediatePrepositionalPhrase,
-                  expandPrepositionalPhrase2),
-          new Pair<>(intermediatePrepositionalVP, expandPrepositionalVP2),
+    new Pair<TregexPattern, TsurgeonPattern>(intermediatePrepositionalPhrase,
+                                             expandPrepositionalPhrase2),
+    new Pair<TregexPattern, TsurgeonPattern>(intermediatePrepositionalVP, expandPrepositionalVP2),
 
-          new Pair<>(intermediateSubstantiveConjunct,
-                  expandIntermediateSubstantiveConjunct),
-          new Pair<>(intermediateAdjectiveConjunct,
-                  expandIntermediateAdjectiveConjunct),
-          new Pair<>(intermediateNounPhraseConjunct,
-                  expandIntermediateNounPhraseConjunct),
-          new Pair<>(intermediateVerbConjunct,
-                  expandIntermediateVerbConjunct),
-          new Pair<>(intermediateNominalGroupConjunct,
-                  expandIntermediateNominalGroupConjunct)
+    new Pair<TregexPattern, TsurgeonPattern>(intermediateSubstantiveConjunct,
+                                             expandIntermediateSubstantiveConjunct),
+    new Pair<TregexPattern, TsurgeonPattern>(intermediateAdjectiveConjunct,
+                                             expandIntermediateAdjectiveConjunct),
+    new Pair<TregexPattern, TsurgeonPattern>(intermediateNounPhraseConjunct,
+                                             expandIntermediateNounPhraseConjunct),
+    new Pair<TregexPattern, TsurgeonPattern>(intermediateVerbConjunct,
+                                             expandIntermediateVerbConjunct),
+    new Pair<TregexPattern, TsurgeonPattern>(intermediateNominalGroupConjunct,
+                                             expandIntermediateNominalGroupConjunct)
   );
 
   /**
@@ -438,38 +438,38 @@ public class MultiWordTreeExpander {
    * grammar mistakes which this class created.
    */
   private final List<Pair<TregexPattern, TsurgeonPattern>> finalCleanup = Arrays.asList(
-          new Pair<>(terminalPrepositions, extractTerminalPrepositions),
-          new Pair<>(terminalPrepositions2, extractTerminalPrepositions2),
-          new Pair<>(terminalPrepositions3, extractTerminalPrepositions3),
+    new Pair<TregexPattern, TsurgeonPattern>(terminalPrepositions, extractTerminalPrepositions),
+    new Pair<TregexPattern, TsurgeonPattern>(terminalPrepositions2, extractTerminalPrepositions2),
+    new Pair<TregexPattern, TsurgeonPattern>(terminalPrepositions3, extractTerminalPrepositions3),
 
-          new Pair<>(nominalGroupSubstantives, makeNominalGroup),
-          new Pair<>(adverbNominalGroups, replaceAdverbNominalGroup),
-          new Pair<>(adjectiveSpanInNominalGroup, groupAdjectives),
-          new Pair<>(clauseInNominalGroup, labelClause),
-          new Pair<>(clauseInNominalGroup2, labelClause2),
-          new Pair<>(clauseInNominalGroup3, labelClause3),
-          new Pair<>(loneAdjectiveInNominalGroup, labelAdjective),
+    new Pair<TregexPattern, TsurgeonPattern>(nominalGroupSubstantives, makeNominalGroup),
+    new Pair<TregexPattern, TsurgeonPattern>(adverbNominalGroups, replaceAdverbNominalGroup),
+    new Pair<TregexPattern, TsurgeonPattern>(adjectiveSpanInNominalGroup, groupAdjectives),
+    new Pair<TregexPattern, TsurgeonPattern>(clauseInNominalGroup, labelClause),
+    new Pair<TregexPattern, TsurgeonPattern>(clauseInNominalGroup2, labelClause2),
+    new Pair<TregexPattern, TsurgeonPattern>(clauseInNominalGroup3, labelClause3),
+    new Pair<TregexPattern, TsurgeonPattern>(loneAdjectiveInNominalGroup, labelAdjective),
 
     // Verb phrase-related cleanup.. order is important!
-          new Pair<>(infinitiveInVerbGroup, markInfinitive),
-          new Pair<>(floppedGerund, unflopFloppedGerund),
-          new Pair<>(floppedInfinitive, unflopFloppedInfinitive),
+    new Pair<TregexPattern, TsurgeonPattern>(infinitiveInVerbGroup, markInfinitive),
+    new Pair<TregexPattern, TsurgeonPattern>(floppedGerund, unflopFloppedGerund),
+    new Pair<TregexPattern, TsurgeonPattern>(floppedInfinitive, unflopFloppedInfinitive),
 
     // Fixes for specific common phrases
-          new Pair<>(alMenos, fixAlMenos),
-          new Pair<>(todoLoContrario, fixTodoLoContrario),
+    new Pair<TregexPattern, TsurgeonPattern>(alMenos, fixAlMenos),
+    new Pair<TregexPattern, TsurgeonPattern>(todoLoContrario, fixTodoLoContrario),
 
     // Lastly..
     //
     // These final fixes are not at all linguistically motivated -- just need to make the trees less dirty
-          new Pair<>(redundantNominalRewrite, fixRedundantNominalRewrite),
+    new Pair<TregexPattern, TsurgeonPattern>(redundantNominalRewrite, fixRedundantNominalRewrite),
 
-          new Pair<>(redundantPrepositionGroupRewrite,
-                  fixRedundantPrepositionGroupRewrite),
+    new Pair<TregexPattern, TsurgeonPattern>(redundantPrepositionGroupRewrite,
+                                             fixRedundantPrepositionGroupRewrite),
 
-          new Pair<>(redundantPrepositionGroupRewrite2,
-                  fixRedundantPrepositionGroupRewrite2),
-          new Pair<>(leftoverIntermediates, makeNominalGroup)
+    new Pair<TregexPattern, TsurgeonPattern>(redundantPrepositionGroupRewrite2,
+                                             fixRedundantPrepositionGroupRewrite2),
+    new Pair<TregexPattern, TsurgeonPattern>(leftoverIntermediates, makeNominalGroup)
   );
 
   /**

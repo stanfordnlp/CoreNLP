@@ -601,7 +601,7 @@ public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParam
 
 
   private void loadMWMap(String filename) {
-    mwCounter = new TwoDimensionalCounter<>();
+    mwCounter = new TwoDimensionalCounter<String,String>();
 
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filename)), "UTF-8"));

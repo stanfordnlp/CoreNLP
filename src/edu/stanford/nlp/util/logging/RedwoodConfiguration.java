@@ -23,7 +23,7 @@ public class RedwoodConfiguration {
   /**
    * A list of tasks to run when the configuration is applied
    */
-  private LinkedList<Runnable> tasks = new LinkedList<>();
+  private LinkedList<Runnable> tasks = new LinkedList<Runnable>();
 
   private OutputHandler outputHandler = Redwood.ConsoleHandler.out();
   private File defaultFile = new File("/dev/null");
@@ -96,7 +96,7 @@ public class RedwoodConfiguration {
    * @return this
    */
   public RedwoodConfiguration channelWidth(final int width) {
-    tasks.addFirst(() -> RedwoodConfiguration.this.channelWidth = width);
+    tasks.add(() -> RedwoodConfiguration.this.channelWidth = width);
     return this;
   }
 
@@ -105,7 +105,7 @@ public class RedwoodConfiguration {
    * @return this
    */
   public RedwoodConfiguration clear(){
-    this.tasks = new LinkedList<>();
+    this.tasks = new LinkedList<Runnable>();
     this.tasks.add(() -> {
       Redwood.clearHandlers();
       Redwood.restoreSystemStreams();
@@ -389,20 +389,11 @@ public class RedwoodConfiguration {
   }
 
   /**
-   * A standard  Redwood configuration, which prints to the console with channels.
+   * The default Redwood configuration, which prints to the console.
    * This is the usual starting point for new configurations.
    * @return  A basic Redwood Configuration.
    */
   public static RedwoodConfiguration standard(){
-    return new RedwoodConfiguration().clear().handlers(Handlers.stderr);
-  }
-
-  /**
-   * The default Redwood configuration, which prints to the console without channels.
-   * This is the usual starting point for new configurations.
-   * @return  A basic Redwood Configuration.
-   */
-  public static RedwoodConfiguration minimal(){
     return new RedwoodConfiguration().clear().handlers(
         Handlers.chain(Handlers.hideChannels(), Handlers.stderr)
     );
@@ -491,7 +482,7 @@ public class RedwoodConfiguration {
 
     //--Collapse
     String collapse = get(props, "log.collapse", "none", used);
-    List<LogRecordHandler> chain = new LinkedList<>();
+    List<LogRecordHandler> chain = new LinkedList<LogRecordHandler>();
     if (collapse.equalsIgnoreCase("exact")) {
       chain.add(new RepeatedRecordHandler(RepeatedRecordHandler.EXACT));
     } else if (collapse.equalsIgnoreCase("approximate")) {

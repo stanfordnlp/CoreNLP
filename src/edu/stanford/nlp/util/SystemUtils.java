@@ -307,7 +307,7 @@ public class SystemUtils {
     int pid = getPID();
     System.out.println("The PID is " + pid);
     System.out.println("The memory in use is " + getMemoryInUse() + "MB");
-    List<String> foo = new ArrayList<>();
+    List<String> foo = new ArrayList<String>();
     for (int i = 0; i < 5000000; i++) {
       foo.add("0123456789");
     }

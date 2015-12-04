@@ -59,7 +59,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
       while ((spilloverIter == null || !spilloverIter.hasNext()) &&
              wrappedIter.hasNext()) {
         List<IN> doc = wrappedIter.next();
-        List<List<IN>> docs = new ArrayList<>();
+        List<List<IN>> docs = new ArrayList<List<IN>>();
         docs.add(doc);
         fixDocLengths(docs);
         spilloverIter = docs.iterator();
@@ -76,7 +76,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
       // -pichuan
       while (spilloverIter == null || !spilloverIter.hasNext()) {
         List<IN> doc = wrappedIter.next();
-        List<List<IN>> docs = new ArrayList<>();
+        List<List<IN>> docs = new ArrayList<List<IN>>();
         docs.add(doc);
         fixDocLengths(docs);
         spilloverIter = docs.iterator();
@@ -173,8 +173,8 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
   private void fixDocLengths(List<List<IN>> docs) {
     final int maxDocSize = flags.maxDocSize;
 
-    WordToSentenceProcessor<IN> wts = new WordToSentenceProcessor<>();
-    List<List<IN>> newDocuments = new ArrayList<>();
+    WordToSentenceProcessor<IN> wts = new WordToSentenceProcessor<IN>();
+    List<List<IN>> newDocuments = new ArrayList<List<IN>>();
     for (List<IN> document : docs) {
       if (maxDocSize <= 0 || document.size() <= maxDocSize) {
         if (flags.keepEmptySentences || !document.isEmpty()) {
@@ -183,13 +183,13 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
         continue;
       }
       List<List<IN>> sentences = wts.process(document);
-      List<IN> newDocument = new ArrayList<>();
+      List<IN> newDocument = new ArrayList<IN>();
       for (List<IN> sentence : sentences) {
         if (newDocument.size() + sentence.size() > maxDocSize) {
           if (!newDocument.isEmpty()) {
             newDocuments.add(newDocument);
           }
-          newDocument = new ArrayList<>();
+          newDocument = new ArrayList<IN>();
         }
         newDocument.addAll(sentence);
       }

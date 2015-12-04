@@ -3,7 +3,6 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.hcoref.CorefCoreAnnotations.*;
 import edu.stanford.nlp.hcoref.data.CorefChain;
 import edu.stanford.nlp.hcoref.data.Dictionaries;
-import edu.stanford.nlp.hcoref.data.Mention;
 import edu.stanford.nlp.ie.NumberNormalizer;
 import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
 import edu.stanford.nlp.ie.machinereading.structure.ExtractionObject;
@@ -358,6 +357,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    *
    * @param sentence The sentence to save to a protocol buffer
    * @param keysToSerialize A set tracking which keys have been saved. It's important to remove any keys added to the proto
+   *                        from this set, as the code tracks annotations to ensure lossless serializationA set tracking which keys have been saved. It's important to remove any keys added to the proto*
    *                        from this set, as the code tracks annotations to ensure lossless serialization.
    */
   protected CoreNLPProtos.Sentence.Builder toProtoBuilder(CoreMap sentence, Set<Class<?>> keysToSerialize) {
@@ -430,16 +430,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         builder.addRelation(toProto(relation));
       }
     }
-    // add each of the mentions in the List<Mentions> for this sentence
-    if (keySet.contains(CorefMentionsAnnotation.class)) {
-      builder.setHasCorefMentionsAnnotation(true);
-      for (Mention m : sentence.get(CorefMentionsAnnotation.class)) {
-        builder.addMentionsForCoref(toProto(m));
-      }
-      keysToSerialize.remove(CorefMentionsAnnotation.class);
-    }
-    // add a sentence id if it exists
-    if (keySet.contains(SentenceIDAnnotation.class)) builder.setSentenceID(getAndRegister(sentence, keysToSerialize, SentenceIDAnnotation.class));
     // Return
     return builder;
   }
@@ -613,147 +603,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
     }
     // Set representative mention
-    builder.setRepresentative(mentionToIndex.get(chain.getRepresentativeMention()));
+    builder.setRepresentative( mentionToIndex.get(chain.getRepresentativeMention()) );
     // Return
     return builder.build();
   }
-
-  public CoreNLPProtos.IndexedWord createIndexedWordProtoFromIW(IndexedWord iw) {
-    CoreNLPProtos.IndexedWord.Builder builder = CoreNLPProtos.IndexedWord.newBuilder();
-    if (iw == null) {
-      builder.setSentenceNum(-1);
-      builder.setTokenIndex(-1);
-    } else {
-      builder.setSentenceNum(iw.get(SentenceIndexAnnotation.class) - 1);
-      builder.setTokenIndex(iw.get(IndexAnnotation.class) - 1);
-      builder.setCopyCount(iw.copyCount());
-    }
-    return builder.build();
-
-  }
-
-  public CoreNLPProtos.IndexedWord createIndexedWordProtoFromCL(CoreLabel cl) {
-    CoreNLPProtos.IndexedWord.Builder builder = CoreNLPProtos.IndexedWord.newBuilder();
-    if (cl == null) {
-      builder.setSentenceNum(-1);
-      builder.setTokenIndex(-1);
-    } else {
-      builder.setSentenceNum(cl.get(SentenceIndexAnnotation.class) - 1);
-      builder.setTokenIndex(cl.get(IndexAnnotation.class) - 1);
-    }
-    return builder.build();
-  }
-
-  public CoreNLPProtos.Mention toProto(Mention mention) {
-
-    // create the builder
-    CoreNLPProtos.Mention.Builder builder = CoreNLPProtos.Mention.newBuilder();
-
-    // set enums
-    if (mention.mentionType != null) { builder.setMentionType(mention.mentionType.name()); }
-    if (mention.gender != null) { builder.setGender(mention.gender.name()); }
-    if (mention.number != null) { builder.setNumber(mention.number.name()); }
-    if (mention.animacy != null) { builder.setAnimacy(mention.animacy.name()); }
-    if (mention.person != null) { builder.setPerson(mention.person.name()); }
-
-    if (mention.headString != null) {
-      builder.setHeadString(mention.headString);
-    }
-    if (mention.nerString != null) {
-      builder.setNerString(mention.nerString);
-    }
-
-    builder.setStartIndex(mention.startIndex);
-    builder.setEndIndex(mention.endIndex);
-    builder.setHeadIndex(mention.headIndex);
-    builder.setMentionID(mention.mentionID);
-    builder.setOriginalRef(mention.originalRef);
-    builder.setGoldCorefClusterID(mention.goldCorefClusterID);
-    builder.setCorefClusterID(mention.corefClusterID);
-    builder.setMentionNum(mention.mentionNum);
-    builder.setSentNum(mention.sentNum);
-    builder.setUtter(mention.utter);
-    builder.setParagraph(mention.paragraph);
-    builder.setIsSubject(mention.isSubject);
-    builder.setIsDirectObject(mention.isDirectObject);
-    builder.setIsIndirectObject(mention.isIndirectObject);
-    builder.setIsPrepositionObject(mention.isPrepositionObject);
-    builder.setHasTwin(mention.hasTwin);
-    builder.setGeneric(mention.generic);
-    builder.setIsSingleton(mention.isSingleton);
-
-    // handle the two sets of Strings
-    if (mention.dependents != null) {
-      for (String dependent : mention.dependents) {
-        builder.addDependents(dependent);
-      }
-    }
-
-    if (mention.preprocessedTerms != null) {
-      for (String preprocessed : mention.preprocessedTerms) {
-        builder.addPreprocessedTerms(preprocessed);
-      }
-    }
-
-    // set IndexedWords by storing (sentence number, token index) pairs
-    builder.setDependingVerb(createIndexedWordProtoFromIW(mention.dependingVerb));
-    builder.setHeadIndexedWord(createIndexedWordProtoFromIW(mention.headIndexedWord));
-    builder.setHeadWord(createIndexedWordProtoFromCL(mention.headWord));
-    //CoreLabel headWord = (mention.headWord != null) ? mention.headWord : null;
-    //builder.setHeadWord(createCoreLabelPositionProto(mention.headWord));
-
-    // add positions for each CoreLabel in sentence
-    if (mention.sentenceWords != null) {
-      for (CoreLabel cl : mention.sentenceWords) {
-        builder.addSentenceWords(createIndexedWordProtoFromCL(cl));
-      }
-    }
-
-    if (mention.originalSpan != null) {
-      for (CoreLabel cl : mention.originalSpan) {
-        builder.addOriginalSpan(createIndexedWordProtoFromCL(cl));
-      }
-    }
-
-    // flag if this Mention should get basicDependency, collapsedDependency, and contextParseTree or not
-    builder.setHasBasicDependency((mention.basicDependency != null));
-    builder.setHasCollapsedDependency((mention.collapsedDependency != null));
-    builder.setHasContextParseTree((mention.contextParseTree != null));
-
-    // handle the sets of Mentions, just store mentionID
-    if (mention.appositions != null) {
-      for (Mention m : mention.appositions) {
-        builder.addAppositions(m.mentionID);
-      }
-    }
-
-    if (mention.predicateNominatives != null) {
-      for (Mention m : mention.predicateNominatives) {
-        builder.addPredicateNominatives(m.mentionID);
-      }
-    }
-
-    if (mention.relativePronouns != null) {
-      for (Mention m : mention.relativePronouns) {
-        builder.addRelativePronouns(m.mentionID);
-      }
-    }
-
-    if (mention.listMembers != null) {
-      for (Mention m : mention.listMembers) {
-        builder.addListMembers(m.mentionID);
-      }
-    }
-
-    if (mention.belongToLists != null) {
-      for (Mention m : mention.belongToLists) {
-        builder.addBelongToLists(m.mentionID);
-      }
-    }
-
-    return builder.build();
-  }
-
 
   /**
    * Convert the given Timex object to a protocol buffer.
@@ -1045,7 +898,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     // Add text -- missing by default as it's populated from the Document
     lossySentence.set(TextAnnotation.class, recoverOriginalText(tokens, proto));
-
     // Return
     return lossySentence;
   }
@@ -1083,63 +935,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       List<RelationMention> relations = proto.getRelationList().stream().map(relation -> fromProto(relation, sentence)).collect(Collectors.toList());
       sentence.set(RelationMentionsAnnotation.class, relations);
     }
-
-    // if there are mentions for this sentence, add them to the annotation
-    loadSentenceMentions(proto, sentence);
-
     // Return
     return sentence;
-  }
-
-  protected void loadSentenceMentions(CoreNLPProtos.Sentence proto, CoreMap sentence) {
-    // add all Mentions for this sentence
-    if (proto.getHasCorefMentionsAnnotation()) {
-      sentence.set(CorefMentionsAnnotation.class, new ArrayList<Mention>());
-    }
-    if (proto.getMentionsForCorefList().size() != 0) {
-      HashMap<Integer, Mention> idToMention = new HashMap<Integer,Mention>();
-      List<Mention> sentenceMentions = sentence.get(CorefMentionsAnnotation.class);
-      // initial set up of all mentions
-      for (CoreNLPProtos.Mention protoMention : proto.getMentionsForCorefList()) {
-        Mention m = fromProtoNoTokens(protoMention);
-        sentenceMentions.add(m);
-        idToMention.put(m.mentionID, m);
-      }
-      // populate sets of Mentions for each Mention
-      for (CoreNLPProtos.Mention protoMention : proto.getMentionsForCorefList()) {
-        Mention m = idToMention.get(protoMention.getMentionID());
-        if (protoMention.getAppositionsList().size() != 0) {
-          m.appositions = new HashSet<Mention>();
-          for (int mentID : protoMention.getAppositionsList()) {
-            m.appositions.add(idToMention.get(mentID));
-          }
-        }
-        if (protoMention.getPredicateNominativesList().size() != 0) {
-          m.predicateNominatives = new HashSet<Mention>();
-          for (int mentID : protoMention.getPredicateNominativesList()) {
-            m.predicateNominatives.add(idToMention.get(mentID));
-          }
-        }
-        if (protoMention.getRelativePronounsList().size() != 0) {
-          m.relativePronouns = new HashSet<Mention>();
-          for (int mentID : protoMention.getRelativePronounsList()) {
-            m.relativePronouns.add(idToMention.get(mentID));
-          }
-        }
-        if (protoMention.getListMembersList().size() != 0) {
-          m.listMembers = new HashSet<Mention>();
-          for (int mentID : protoMention.getListMembersList()) {
-            m.listMembers.add(idToMention.get(mentID));
-          }
-        }
-        if (protoMention.getBelongToListsList().size() != 0) {
-          m.belongToLists = new HashSet<Mention>();
-          for (int mentID : protoMention.getBelongToListsList()) {
-            m.belongToLists.add(idToMention.get(mentID));
-          }
-        }
-      }
-    }
   }
 
   /**
@@ -1282,50 +1079,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           (!sentence.hasHasNumerizedTokensAnnotation() || sentence.getHasNumerizedTokensAnnotation())) {
         map.set(NumerizedTokensAnnotation.class, NumberNormalizer.findAndMergeNumbers(map));
       }
-      // add the CoreLabel and IndexedWord info to each mention
-      // when Mentions are serialized, just storing the index in the sentence for CoreLabels and IndexedWords
-      // this is the point where the de-serialized sentence has tokens
-      int mentionInt = 0;
-      for (CoreNLPProtos.Mention protoMention : sentence.getMentionsForCorefList()) {
-        // get the mention
-        Mention mentionToUpdate = map.get(CorefMentionsAnnotation.class).get(mentionInt);
-        int headIndexedWordIndex = protoMention.getHeadIndexedWord().getTokenIndex();
-        if (headIndexedWordIndex >= 0) {
-          mentionToUpdate.headIndexedWord = new IndexedWord(sentenceTokens.get(protoMention.getHeadIndexedWord().getTokenIndex()));
-          mentionToUpdate.headIndexedWord.setCopyCount(protoMention.getHeadIndexedWord().getCopyCount());
-        }
-        int dependingVerbIndex = protoMention.getDependingVerb().getTokenIndex();
-        if (dependingVerbIndex >= 0) {
-          mentionToUpdate.dependingVerb = new IndexedWord(sentenceTokens.get(protoMention.getDependingVerb().getTokenIndex()));
-          mentionToUpdate.dependingVerb.setCopyCount(protoMention.getDependingVerb().getCopyCount());
-        }
-        int headWordIndex = protoMention.getHeadWord().getTokenIndex();
-        if (headWordIndex >= 0) {
-          mentionToUpdate.headWord = sentenceTokens.get(protoMention.getHeadWord().getTokenIndex());
-        }
-        mentionToUpdate.sentenceWords = new ArrayList<CoreLabel>();
-        for (CoreNLPProtos.IndexedWord clp : protoMention.getSentenceWordsList()) {
-          int ti = clp.getTokenIndex();
-          mentionToUpdate.sentenceWords.add(sentenceTokens.get(ti));
-        }
-        mentionToUpdate.originalSpan = new ArrayList<CoreLabel>();
-        for (CoreNLPProtos.IndexedWord clp : protoMention.getOriginalSpanList()) {
-          int ti = clp.getTokenIndex();
-          mentionToUpdate.originalSpan.add(sentenceTokens.get(ti));
-        }
-        if (protoMention.getHasBasicDependency()) {
-          mentionToUpdate.basicDependency = map.get(BasicDependenciesAnnotation.class);
-        }
-        if (protoMention.getHasCollapsedDependency()) {
-          mentionToUpdate.collapsedDependency = map.get(CollapsedDependenciesAnnotation.class);
-        }
-        if (protoMention.getHasContextParseTree()) {
-          mentionToUpdate.contextParseTree = map.get(TreeAnnotation.class);
-        }
-        // move on to next mention
-        mentionInt++;
-      }
-
     }
 
     // Set quotes
@@ -1672,72 +1425,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     // Return
     return new CorefChain(cid, mentions, representative);
-  }
-
-  private Mention fromProtoNoTokens(CoreNLPProtos.Mention protoMention) {
-    Mention returnMention = new Mention();
-    // set enums
-    if (protoMention.getMentionType() != null && !protoMention.getMentionType().equals("")) {
-      returnMention.mentionType = Dictionaries.MentionType.valueOf(protoMention.getMentionType());
-    }
-    if (protoMention.getNumber() != null && !protoMention.getNumber().equals("")) {
-      returnMention.number = Dictionaries.Number.valueOf(protoMention.getNumber());
-    }
-    if (protoMention.getGender() != null && !protoMention.getGender().equals("")) {
-      returnMention.gender = Dictionaries.Gender.valueOf(protoMention.getGender());
-    }
-    if (protoMention.getAnimacy() != null && !protoMention.getAnimacy().equals("")) {
-      returnMention.animacy = Dictionaries.Animacy.valueOf(protoMention.getAnimacy());
-    }
-    if (protoMention.getPerson() != null && !protoMention.getPerson().equals("")) {
-      returnMention.person = Dictionaries.Person.valueOf(protoMention.getPerson());
-    }
-
-    // TO DO: if the original Mention had "" for this field it will be lost, should deal with this problem
-    if (!protoMention.getHeadString().equals("")) {
-      returnMention.headString = protoMention.getHeadString();
-    }
-    // TO DO: if the original Mention had "" for this field it will be lost, should deal with this problem
-    if (!protoMention.getNerString().equals("")) {
-      returnMention.nerString = protoMention.getNerString();
-    }
-
-    returnMention.startIndex = protoMention.getStartIndex();
-    returnMention.endIndex = protoMention.getEndIndex();
-    returnMention.headIndex = protoMention.getHeadIndex();
-    returnMention.mentionID = protoMention.getMentionID();
-    returnMention.originalRef = protoMention.getOriginalRef();
-
-    returnMention.goldCorefClusterID = protoMention.getGoldCorefClusterID();
-    returnMention.corefClusterID = protoMention.getCorefClusterID();
-    returnMention.mentionNum = protoMention.getMentionNum();
-    returnMention.sentNum = protoMention.getSentNum();
-    returnMention.utter = protoMention.getUtter();
-    returnMention.paragraph = protoMention.getParagraph();
-    returnMention.isSubject = protoMention.getIsSubject();
-    returnMention.isDirectObject = protoMention.getIsDirectObject();
-    returnMention.isIndirectObject = protoMention.getIsIndirectObject();
-    returnMention.isPrepositionObject = protoMention.getIsPrepositionObject();
-    returnMention.hasTwin = protoMention.getHasTwin();
-    returnMention.generic = protoMention.getGeneric();
-    returnMention.isSingleton = protoMention.getIsSingleton();
-
-    // handle the sets of Strings
-    if (protoMention.getDependentsCount() != 0) {
-      returnMention.dependents = new HashSet<String>();
-      for (String dependent : protoMention.getDependentsList()) {
-        returnMention.dependents.add(dependent);
-      }
-    }
-
-    if (protoMention.getPreprocessedTermsCount() != 0) {
-      returnMention.preprocessedTerms = new ArrayList<String>();
-      for (String preprocessed : protoMention.getPreprocessedTermsList()) {
-        returnMention.preprocessedTerms.add(preprocessed);
-      }
-    }
-
-    return returnMention;
   }
 
   /**

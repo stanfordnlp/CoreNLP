@@ -21,7 +21,7 @@ import java.util.*;
  */
 class PostSplitter implements TreeTransformer {
 
-  private final ClassicCounter<String> nonTerms = new ClassicCounter<>();
+  private final ClassicCounter<String> nonTerms = new ClassicCounter<String>();
   private final TreebankLangParserParams tlpParams;
   private final HeadFinder hf;
   private final TrainOptions trainOptions;
@@ -89,7 +89,7 @@ class PostSplitter implements TreeTransformer {
       }
     }
     result = tf.newTreeNode(new CategoryWordTag(cat, word, cat), Collections.<Tree>emptyList());
-    ArrayList<Tree> newKids = new ArrayList<>();
+    ArrayList<Tree> newKids = new ArrayList<Tree>();
     Tree[] kids = t.children();
     for (Tree kid : kids) {
       newKids.add(transformTreeHelper(kid, root, tf));
@@ -100,7 +100,7 @@ class PostSplitter implements TreeTransformer {
 
   public void dumpStats() {
     System.out.println("%% Counts of nonterminals:");
-    List<String> biggestCounts = new ArrayList<>(nonTerms.keySet());
+    List<String> biggestCounts = new ArrayList<String>(nonTerms.keySet());
     Collections.sort(biggestCounts, Counters.toComparatorDescending(nonTerms));
     for (String str : biggestCounts) {
       System.out.println(str + ": " + nonTerms.getCount(str));

@@ -325,7 +325,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
         else
           probSum += expectedCountsAndValueForADoc(partE, docIndex);
       }
-      return new Pair<>(tID, probSum);
+      return new Pair<Integer, Double>(tID, probSum);
     }
 
     @Override
@@ -342,7 +342,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
 
   protected double regularGradientAndValue() {
     int totalLen = data.length;
-    List<Integer> docIDs = new ArrayList<>(totalLen);
+    List<Integer> docIDs = new ArrayList<Integer>(totalLen);
     for (int m=0; m < totalLen; m++) docIDs.add(m);
 
     return multiThreadGradient(docIDs, false);
@@ -368,7 +368,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
 
     // TODO: this is a huge amount of machinery for no discernible reason
     MulticoreWrapper<Pair<Integer, List<Integer>>, Pair<Integer, Double>> wrapper =
-            new MulticoreWrapper<>(multiThreadGrad, (calculateEmpirical ? expectedAndEmpiricalThreadProcessor : expectedThreadProcessor));
+      new MulticoreWrapper<Pair<Integer, List<Integer>>, Pair<Integer, Double>>(multiThreadGrad, (calculateEmpirical ? expectedAndEmpiricalThreadProcessor : expectedThreadProcessor) );
 
     int totalLen = docIDs.size();
     int partLen = totalLen / multiThreadGrad;
@@ -379,7 +379,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
         endIndex = totalLen;
       // TODO: let's not construct a sub-list of DocIDs, unnecessary object creation, can calculate directly from ThreadID
       List<Integer> subList = docIDs.subList(currIndex, endIndex);
-      wrapper.put(new Pair<>(part, subList));
+      wrapper.put(new Pair<Integer, List<Integer>>(part, subList));
       currIndex = endIndex;
     }
     wrapper.join();
@@ -461,7 +461,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     // double[][] E = empty2D();
 
     // iterate over all the documents
-    List<Integer> docIDs = new ArrayList<>(batch.length);
+    List<Integer> docIDs = new ArrayList<Integer>(batch.length);
     for (int item : batch) {
       docIDs.add(item);
     }
@@ -528,7 +528,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     // so we adjust by + gScale(empirical count - expected count)
 
     // iterate over all the documents
-    List<Integer> docIDs = new ArrayList<>(batch.length);
+    List<Integer> docIDs = new ArrayList<Integer>(batch.length);
     for (int item : batch) {
       docIDs.add(item);
     }
@@ -568,7 +568,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     setWeights(weights);
 
     // iterate over all the documents
-    List<Integer> docIDs = new ArrayList<>(batch.length);
+    List<Integer> docIDs = new ArrayList<Integer>(batch.length);
     for (int item : batch) {
       docIDs.add(item);
     }
@@ -745,7 +745,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
       }
     }
 
-    return new Pair<>(prevGivenCurr, nextGivenCurr);
+    return new Pair<double[][][], double[][][]>(prevGivenCurr, nextGivenCurr);
   }
 
   protected static void combine2DArr(double[][] combineInto, double[][] toBeCombined, double scale) {

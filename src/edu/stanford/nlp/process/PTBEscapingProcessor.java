@@ -90,7 +90,7 @@ public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractList
    */
   @Override
   public List<HasWord> process(List<? extends IN> input) {
-    List<HasWord> output = new ArrayList<>();
+    List<HasWord> output = new ArrayList<HasWord>();
     for (IN h : input) {
       String s = h.word();
       h.setWord(escapeString(s));
@@ -105,7 +105,7 @@ public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractList
 
   private static List<HasWord> fixQuotes(List<HasWord> input) {
     int inputSize = input.size();
-    LinkedList<HasWord> result = new LinkedList<>();
+    LinkedList<HasWord> result = new LinkedList<HasWord>();
     if (inputSize == 0) {
       return result;
     }
@@ -231,12 +231,12 @@ public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractList
       Document<String, Word, Word> d; // initialized below
       if (filename.startsWith("http://")) {
         Document<String, Word, Word> dpre = new BasicDocument<String>(WhitespaceTokenizer.factory()).init(new URL(filename));
-        DocumentProcessor<Word, Word, String, Word> notags = new StripTagsProcessor<>();
+        DocumentProcessor<Word, Word, String, Word> notags = new StripTagsProcessor<String, Word>();
         d = notags.processDocument(dpre);
       } else {
         d = new BasicDocument<String>(WhitespaceTokenizer.factory()).init(new File(filename));
       }
-      DocumentProcessor<Word, HasWord, String, Word> proc = new PTBEscapingProcessor<>();
+      DocumentProcessor<Word, HasWord, String, Word> proc = new PTBEscapingProcessor<Word, String, Word>();
       Document<String, Word, HasWord> newD = proc.processDocument(d);
       for (HasWord word : newD) {
         System.out.println(word);

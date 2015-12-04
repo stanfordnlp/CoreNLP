@@ -31,7 +31,7 @@ class ParserDemo2 {
     if (args.length > 1) {
       DocumentPreprocessor dp = new DocumentPreprocessor(args[1]);
       List<List<? extends HasWord>> tmp =
-              new ArrayList<>();
+        new ArrayList<List<? extends HasWord>>();
       for (List<HasWord> sentence : dp) {
         tmp.add(sentence);
       }
@@ -39,7 +39,7 @@ class ParserDemo2 {
     } else {
       // Showing tokenization and parsing in code a couple of different ways.
       String[] sent = { "This", "is", "an", "easy", "sentence", "." };
-      List<HasWord> sentence = new ArrayList<>();
+      List<HasWord> sentence = new ArrayList<HasWord>();
       for (String word : sent) {
         sentence.add(new Word(word));
       }
@@ -53,7 +53,7 @@ class ParserDemo2 {
 
       String[] sent3 = { "It", "can", "can", "it", "." };
       String[] tag3 = { "PRP", "MD", "VB", "PRP", "." }; // Parser gets second "can" wrong without help
-      List<TaggedWord> sentence3 = new ArrayList<>();
+      List<TaggedWord> sentence3 = new ArrayList<TaggedWord>();
       for (int i = 0; i < sent3.length; i++) {
         sentence3.add(new TaggedWord(sent3[i], tag3[i]));
       }
@@ -61,7 +61,7 @@ class ParserDemo2 {
       parse.pennPrint();
 
       List<List<? extends HasWord>> tmp =
-              new ArrayList<>();
+        new ArrayList<List<? extends HasWord>>();
       tmp.add(sentence);
       tmp.add(sentence2);
       tmp.add(sentence3);

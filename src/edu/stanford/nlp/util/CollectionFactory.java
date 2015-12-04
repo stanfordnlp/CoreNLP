@@ -56,7 +56,7 @@ public abstract class CollectionFactory<T> implements Serializable {
 
     @Override
     public Collection<T> newCollection() {
-      return new ArrayList<>();
+      return new ArrayList<T>();
     }
 
     @Override
@@ -76,7 +76,7 @@ public abstract class CollectionFactory<T> implements Serializable {
 
     @Override
     public Collection<T> newCollection() {
-      return new ArrayList<>(defaultSize);
+      return new ArrayList<T>(defaultSize);
     }
 
     @Override
@@ -90,7 +90,7 @@ public abstract class CollectionFactory<T> implements Serializable {
 
     @Override
     public Collection<T> newCollection() {
-      return new LinkedList<>();
+      return new LinkedList<T>();
     }
 
     @Override
@@ -119,7 +119,7 @@ public abstract class CollectionFactory<T> implements Serializable {
 
     @Override
     public Collection<T> newCollection() {
-      return new TreeSet<>();
+      return new TreeSet<T>();
     }
 
     @Override

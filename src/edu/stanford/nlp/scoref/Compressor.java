@@ -15,8 +15,8 @@ public class Compressor<K> implements Serializable {
   private final Map<Integer, K> inverse;
 
   public Compressor() {
-    index = new HashMap<>();
-    inverse = new HashMap<>();
+    index = new HashMap<K, Integer>();
+    inverse = new HashMap<Integer, K>();
   }
 
   public CompressedFeatureVector compress(Counter<K> c) {

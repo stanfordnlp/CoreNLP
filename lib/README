@@ -257,9 +257,9 @@ LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
 joda-time.jar
-ORIGINAL JAR NAME: joda-time-2.9.jar
-VERSION: 2.9
-RELEASE DATE: 2015-10-24
+ORIGINAL JAR NAME: joda-time-2.1.jar
+VERSION: 2.1
+RELEASE DATE: 2012-02-22
 SOURCE AVAILABLE: yes
 DESCRIPTION: Extended date/time API that handles partial dates/times
 URL: http://joda-time.sourceforge.net/index.html
@@ -267,8 +267,8 @@ URL: http://joda-time.sourceforge.net/index.html
 USED BY: edu.stanford.nlp.time
 Needed by CoreNLP distributions.
 
-LAST UPDATE: 2015-11-10
-LAST UPDATE BY: Angel Chang
+LAST UPDATE: 2012-11-08
+LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
 jollyday-0.4.7.jar

@@ -95,7 +95,7 @@ public class CorefCluster implements Serializable{
     // Register mentions
     corefMentions.addAll(mentions);
     // Get list of mentions in textual order
-    List<Mention> sortedMentions = new ArrayList<>(mentions.size());
+    List<Mention> sortedMentions = new ArrayList<Mention>(mentions.size());
     sortedMentions.addAll(mentions);
     Collections.sort(sortedMentions, new CorefChain.MentionComparator());
     // Set default for first / representative mention
@@ -170,7 +170,7 @@ public class CorefCluster implements Serializable{
   public void printCorefCluster(){
     Redwood.log("debug-cluster", "Cluster ID: "+clusterID+"\tNumbers: "+numbers+"\tGenders: "+genders+"\tanimacies: "+animacies);
     Redwood.log("debug-cluster", "NE: "+nerStrings+"\tfirst Mention's ID: "+firstMention.mentionID+"\tHeads: "+heads+"\twords: "+words);
-    TreeMap<Integer, Mention> forSortedPrint = new TreeMap<>();
+    TreeMap<Integer, Mention> forSortedPrint = new TreeMap<Integer, Mention>();
     for(Mention m : this.corefMentions){
       forSortedPrint.put(m.mentionID, m);
     }

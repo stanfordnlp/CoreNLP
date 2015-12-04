@@ -108,7 +108,7 @@ public class BaseUnknownWordModel implements UnknownWordModel {
                               Index<String> wordIndex,
                               Index<String> tagIndex) {
     this(op, lex, wordIndex, tagIndex,
-            new ClassicCounter<>(),
+         new ClassicCounter<IntTaggedWord>(),
          Generics.<Label,ClassicCounter<String>>newHashMap(),
          Generics.<String,Float>newHashMap(),
          Generics.<String>newHashSet());

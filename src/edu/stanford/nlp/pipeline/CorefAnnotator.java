@@ -111,14 +111,14 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator {
   }
 
   public static List<Pair<IntTuple, IntTuple>> getLinks(Map<Integer, CorefChain> result) {
-    List<Pair<IntTuple, IntTuple>> links = new ArrayList<>();
+    List<Pair<IntTuple, IntTuple>> links = new ArrayList<Pair<IntTuple, IntTuple>>();
     CorefChain.CorefMentionComparator comparator = new CorefChain.CorefMentionComparator();
 
     for(CorefChain c : result.values()) {
       List<CorefMention> s = c.getMentionsInTextualOrder();
       for(CorefMention m1 : s){
         for(CorefMention m2 : s){
-          if(comparator.compare(m1, m2)==1) links.add(new Pair<>(m1.position, m2.position));
+          if(comparator.compare(m1, m2)==1) links.add(new Pair<IntTuple, IntTuple>(m1.position, m2.position));
         }
       }
     }
@@ -142,7 +142,7 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator {
     //
 
     // this graph is stored in CorefGraphAnnotation -- the raw links found by the coref system
-    List<Pair<IntTuple, IntTuple>> graph = new ArrayList<>();
+    List<Pair<IntTuple, IntTuple>> graph = new ArrayList<Pair<IntTuple,IntTuple>>();
 
     for(Pair<IntTuple, IntTuple> link: links){
       //
@@ -159,7 +159,7 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator {
       IntTuple src = new IntTuple(2);
       src.set(0, srcSent);
       src.set(1, srcTok);
-      graph.add(new Pair<>(src, dst));
+      graph.add(new Pair<IntTuple, IntTuple>(src, dst));
     }
     annotation.set(CorefCoreAnnotations.CorefGraphAnnotation.class, graph);
 

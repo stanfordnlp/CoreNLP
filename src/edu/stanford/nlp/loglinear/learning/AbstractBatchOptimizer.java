@@ -12,129 +12,43 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Created on 8/26/15.
+ * Abstract base of all the different kinds of batch optimizers. This exists to both facilitate sharing test between
+ * optimizers and to share certain basic bits of functionality useful for batch optimizers, like intelligent
+ * multi-thread management and user interrupt handling.
+ *
  * @author keenon
- * <p>
- * Abstract base of all the different kinds of optimizers. This exists to both facilitate sharing test between optimizers
- * and to share certain basic bits of functionality useful for batch optimizers, like intelligent multi-thread management
- * and user interrupt handling.
  */
 public abstract class AbstractBatchOptimizer {
   public <T> ConcatVector optimize(T[] dataset, AbstractDifferentiableFunction<T> fn) {
-    return optimize(dataset, fn, new ConcatVector(0), 0.0, 1.0e-5, false);
+    return optimize(dataset, fn, new ConcatVector(0), 0.0);
   }
 
-  public <T> ConcatVector optimize(T[] dataset,
-                                   AbstractDifferentiableFunction<T> fn,
-                                   ConcatVector initialWeights,
-                                   double l2regularization,
-                                   double convergenceDerivativeNorm,
-                                   boolean quiet) {
-    if (!quiet) System.err.println("\n**************\nBeginning training\n");
-    else System.err.println("[Beginning quiet training]");
+  public <T> ConcatVector optimize(T[] dataset, AbstractDifferentiableFunction<T> fn, ConcatVector initialWeights, double l2regularization) {
+    System.err.println("\n**************\nBeginning training\n");
 
-    TrainingWorker<T> mainWorker = new TrainingWorker<>(dataset, fn, initialWeights, l2regularization, convergenceDerivativeNorm, quiet);
+    TrainingWorker<T> mainWorker = new TrainingWorker<>(dataset, fn, initialWeights, l2regularization);
     new Thread(mainWorker).start();
 
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-    if (!quiet) {
-      System.err.println("NOTE: you can press any key (and maybe ENTER afterwards to jog stdin) to terminate learning early.");
-      System.err.println("The convergence criteria are quite aggressive if left uninterrupted, and will run for a while");
-      System.err.println("if left to their own devices.\n");
+    System.err.println("NOTE: you can press any key (and maybe ENTER afterwards to jog stdin) to terminate learning early.");
+    System.err.println("The convergence criteria are quite aggressive if left uninterrupted, and will run for a while");
+    System.err.println("if left to their own devices.\n");
 
-      while (true) {
-        if (mainWorker.isFinished) {
-          System.err.println("training completed without interruption");
+    while (true) {
+      if (mainWorker.isFinished) {
+        System.err.println("training completed without interruption");
+        return mainWorker.weights;
+      }
+      try {
+        if (br.ready()) {
+          System.err.println("received quit command: quitting");
+          System.err.println("training completed by interruption");
+          mainWorker.isFinished = true;
           return mainWorker.weights;
         }
-        try {
-          if (br.ready()) {
-            System.err.println("received quit command: quitting");
-            System.err.println("training completed by interruption");
-            mainWorker.isFinished = true;
-            return mainWorker.weights;
-          }
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      }
-    } else {
-      while (!mainWorker.isFinished) {
-        synchronized (mainWorker.naturalTerminationBarrier) {
-          try {
-            mainWorker.naturalTerminationBarrier.wait();
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-          }
-        }
-      }
-      System.err.println("[Quiet training complete]");
-      return mainWorker.weights;
-    }
-  }
-
-  List<Constraint> constraints = new ArrayList<>();
-
-  /**
-   * This adds a constraint on the weight vector, that a certain component must be set to a sparse index=value
-   *
-   * @param component the component to fix
-   * @param index     the index of the fixed sparse component
-   * @param value     the value to fix at
-   */
-  public void addSparseConstraint(int component, int index, double value) {
-    constraints.add(new Constraint(component, index, value));
-  }
-
-  /**
-   * This adds a constraint on the weight vector, that a certain component must be set to a dense array
-   *
-   * @param component the component to fix
-   * @param arr       the dense array to set
-   */
-  public void addDenseConstraint(int component, double[] arr) {
-    constraints.add(new Constraint(component, arr));
-  }
-
-  /**
-   * A way to record a constraint on the weight vector
-   */
-  private static class Constraint {
-    int component;
-    boolean isSparse;
-
-    int index;
-    double value;
-
-    double[] arr;
-
-    public Constraint(int component, int index, double value) {
-      isSparse = true;
-      this.component = component;
-      this.index = index;
-      this.value = value;
-    }
-
-    public Constraint(int component, double[] arr) {
-      isSparse = false;
-      this.component = component;
-      this.arr = arr;
-    }
-
-    public void applyToWeights(ConcatVector weights) {
-      if (isSparse) {
-        weights.setSparseComponent(component, index, value);
-      } else {
-        weights.setDenseComponent(component, arr);
-      }
-    }
-
-    public void applyToDerivative(ConcatVector derivative) {
-      if (isSparse) {
-        derivative.setSparseComponent(component, index, 0.0);
-      } else {
-        derivative.setDenseComponent(component, new double[]{0.0});
+      } catch (IOException e) {
+        e.printStackTrace();
       }
     }
   }
@@ -146,10 +60,9 @@ public abstract class AbstractBatchOptimizer {
    * @param gradient      the gradient at these weights
    * @param logLikelihood the log likelihood at these weights
    * @param state         any saved state the optimizer wants to keep and pass around during each optimization run
-   * @param quiet         whether or not to dump output about progress to the console
    * @return whether or not we've converged
    */
-  public abstract boolean updateWeights(ConcatVector weights, ConcatVector gradient, double logLikelihood, OptimizationState state, boolean quiet);
+  public abstract boolean updateWeights(ConcatVector weights, ConcatVector gradient, double logLikelihood, OptimizationState state);
 
   /**
    * This is subclassed by children to store any state they need to perform optimization
@@ -191,7 +104,7 @@ public abstract class AbstractBatchOptimizer {
       this.fn = fn;
       this.weights = weights;
 
-      localDerivative = weights.newEmptyClone();
+      localDerivative = new ConcatVector(weights.getNumberOfComponents());
     }
 
     @Override
@@ -199,7 +112,11 @@ public abstract class AbstractBatchOptimizer {
       long startTime = ManagementFactory.getThreadMXBean().getThreadCpuTime(jvmThreadId);
 
       for (T datum : queue) {
-        localLogLikelihood += fn.getSummaryForInstance(datum, weights, localDerivative);
+        AbstractDifferentiableFunction.FunctionSummaryAtPoint summary = fn.getSummaryForInstance(datum, weights);
+        if (Double.isFinite(summary.value)) {
+          localDerivative.addVectorInPlace(summary.gradient, 1.0);
+          localLogLikelihood += summary.value;
+        }
         // Check for user interrupt
         if (mainWorker.isFinished) return;
       }
@@ -222,20 +139,14 @@ public abstract class AbstractBatchOptimizer {
     T[] dataset;
     AbstractDifferentiableFunction<T> fn;
     double l2regularization;
-    double convergenceDerivativeNorm;
-    boolean quiet;
 
-    final Object naturalTerminationBarrier = new Object();
-
-    public TrainingWorker(T[] dataset, AbstractDifferentiableFunction<T> fn, ConcatVector initialWeights, double l2regularization, double convergenceDerivativeNorm, boolean quiet) {
+    public TrainingWorker(T[] dataset, AbstractDifferentiableFunction<T> fn, ConcatVector initialWeights, double l2regularization) {
       optimizationState = getFreshOptimizationState(initialWeights);
       weights = initialWeights.deepClone();
 
       this.dataset = dataset;
       this.fn = fn;
       this.l2regularization = l2regularization;
-      this.convergenceDerivativeNorm = convergenceDerivativeNorm;
-      this.quiet = quiet;
     }
 
     /**
@@ -294,7 +205,7 @@ public abstract class AbstractBatchOptimizer {
         long startTime = System.currentTimeMillis();
         long threadWaiting = 0;
 
-        ConcatVector derivative = weights.newEmptyClone();
+        ConcatVector derivative = new ConcatVector(weights.getNumberOfComponents());
         double logLikelihood = 0.0;
 
         if (useThreads) {
@@ -361,7 +272,11 @@ public abstract class AbstractBatchOptimizer {
         } else {
           for (T datum : dataset) {
             assert (datum != null);
-            logLikelihood += fn.getSummaryForInstance(datum, weights, derivative);
+            AbstractDifferentiableFunction.FunctionSummaryAtPoint summary = fn.getSummaryForInstance(datum, weights);
+            if (Double.isFinite(summary.value)) {
+              derivative.addVectorInPlace(summary.gradient, 1.0);
+              logLikelihood += summary.value;
+            }
             // Check for user interrupt
             if (isFinished) return;
           }
@@ -377,42 +292,21 @@ public abstract class AbstractBatchOptimizer {
         logLikelihood = logLikelihood - (l2regularization * weights.dotProduct(weights));
         derivative.addVectorInPlace(weights, -2 * l2regularization);
 
-        // Zero out the derivative on the components we're holding fixed
-
-        for (Constraint constraint : constraints) {
-          constraint.applyToDerivative(derivative);
-        }
-
         // If our derivative is sufficiently small, we've converged
 
         double derivativeNorm = derivative.dotProduct(derivative);
-        if (derivativeNorm < convergenceDerivativeNorm) {
-          if (!quiet)
-            System.err.println("Derivative norm " + derivativeNorm + " < " + convergenceDerivativeNorm + ": quitting");
+        if (derivativeNorm < 1.0e-9) {
+          System.err.println("Derivative norm " + derivativeNorm + " < 1.0e-9: quitting");
           break;
         }
 
-        // Do the actual computation
-
-        if (!quiet) {
-          System.err.println("[" + gradientComputationTime + " ms, threads waiting " + threadWaiting + " ms]");
-        }
-        boolean converged = updateWeights(weights, derivative, logLikelihood, optimizationState, quiet);
-
-        // Apply constraints to the weights vector
-
-        for (Constraint constraint : constraints) {
-          constraint.applyToWeights(weights);
-        }
-
+        System.err.println("[" + gradientComputationTime + " ms, threads waiting " + threadWaiting + " ms]");
+        boolean converged = updateWeights(weights, derivative, logLikelihood, optimizationState);
         if (converged) {
           break;
         }
       }
 
-      synchronized (naturalTerminationBarrier) {
-        naturalTerminationBarrier.notifyAll();
-      }
       isFinished = true;
     }
   }

@@ -24,7 +24,7 @@ public class UnknownWordPrinter implements Eval {
   final DVModel model;
   final SimpleMatrix unk;
 
-  final TreeSet<String> unkWords = new TreeSet<>();
+  final TreeSet<String> unkWords = new TreeSet<String>();
 
   public UnknownWordPrinter(DVModel model) {
     this.model = model;

@@ -147,10 +147,9 @@ public class Clusterer {
         progressWriter.flush();
       }
 
-      for (ClustererDoc trainDoc : trainDocs) {
-        examples.add(runPolicy(trainDoc, Math.pow(EXPERT_DECAY,
-                (iteration + 1))));
-      }
+      for (int docInd = 0; docInd < trainDocs.size(); docInd++) {
+        examples.add(runPolicy(trainDocs.get(docInd), Math.pow(EXPERT_DECAY,
+            (iteration + 1))));      }
     }
 
     progressWriter.close();
@@ -302,8 +301,8 @@ public class Clusterer {
         }
       }
 
-      Counter<Integer> seenAnaphors = new ClassicCounter<>();
-      Counter<Integer> seenAntecedents = new ClassicCounter<>();
+      Counter<Integer> seenAnaphors = new ClassicCounter<Integer>();
+      Counter<Integer> seenAntecedents = new ClassicCounter<Integer>();
       globalFeatures = new ArrayList<>();
       for (int j = 0; j < allPairs.size(); j++) {
         Pair<Integer, Integer> mentionPair = allPairs.get(j);
@@ -439,9 +438,9 @@ public class Clusterer {
 
       double weight = doc.mentions.size() / 100.0;
       double maxB3 = Math.max(mergeB3, noMergeB3);
-      return new Pair<>(
-              new CandidateAction(mergeFeatures, weight * (maxB3 - mergeB3)),
-              new CandidateAction(new ClassicCounter<>(), weight * (maxB3 - noMergeB3)));
+      return new Pair<CandidateAction, CandidateAction>(
+          new CandidateAction(mergeFeatures, weight * (maxB3 - mergeB3)),
+          new CandidateAction(new ClassicCounter<>(), weight * (maxB3 - noMergeB3)));
     }
   }
 

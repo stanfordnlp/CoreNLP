@@ -80,7 +80,7 @@ public class CRFFeatureExporter<IN extends CoreMap> {
 
       List<List<String>> features = d.asFeatures();
       for (Collection<String> cliqueFeatures : features) {
-        List<String> sortedFeatures = new ArrayList<>(cliqueFeatures);
+        List<String> sortedFeatures = new ArrayList<String>(cliqueFeatures);
         Collections.sort(sortedFeatures);
         for (String feat : sortedFeatures) {
           feat = ubPrefixFeatureString(feat);
@@ -161,7 +161,7 @@ public class CRFFeatureExporter<IN extends CoreMap> {
   public static void main(String[] args) throws Exception {
     StringUtils.printErrInvocationString("CRFFeatureExporter", args);
     Properties props = StringUtils.argsToProperties(args);
-    CRFClassifier<CoreLabel> crf = new CRFClassifier<>(props);
+    CRFClassifier<CoreLabel> crf = new CRFClassifier<CoreLabel>(props);
     String inputFile = crf.flags.trainFile;
     if (inputFile == null) {
       System.err.println("Please provide input file using -trainFile");
@@ -172,7 +172,7 @@ public class CRFFeatureExporter<IN extends CoreMap> {
       System.err.println("Please provide output file using -exportFeatures");
       System.exit(-1);
     }
-    CRFFeatureExporter<CoreLabel> featureExporter = new CRFFeatureExporter<>(crf);
+    CRFFeatureExporter<CoreLabel> featureExporter = new CRFFeatureExporter<CoreLabel>(crf);
     Collection<List<CoreLabel>> docs =
       crf.makeObjectBankFromFile(inputFile, crf.makeReaderAndWriter());
     crf.makeAnswerArraysAndTagIndex(docs);

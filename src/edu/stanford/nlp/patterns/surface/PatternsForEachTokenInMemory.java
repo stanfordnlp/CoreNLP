@@ -22,7 +22,7 @@ public class PatternsForEachTokenInMemory<E extends Pattern> extends PatternsFor
 
     //TODO: make this atomic
     if(patternsForEachToken == null)
-      patternsForEachToken = new ConcurrentHashMap<>();
+      patternsForEachToken = new ConcurrentHashMap<String, Map<Integer, Set<? extends Pattern>>>();
 
     if (pats != null)
       addPatterns(pats);
@@ -35,7 +35,7 @@ public class PatternsForEachTokenInMemory<E extends Pattern> extends PatternsFor
   @Override
   public void addPatterns(String sentId, Map<Integer, Set<E>> patterns) {
     if (!patternsForEachToken.containsKey(sentId))
-      patternsForEachToken.put(sentId, new ConcurrentHashMap<>());
+      patternsForEachToken.put(sentId, new ConcurrentHashMap<Integer, Set<? extends Pattern>>());
     patternsForEachToken.get(sentId).putAll(patterns);
 
   }
@@ -72,7 +72,7 @@ public class PatternsForEachTokenInMemory<E extends Pattern> extends PatternsFor
 
   @Override
   public Map<String, Map<Integer, Set<E>>> getPatternsForAllTokens(Collection<String> sampledSentIds) {
-    Map<String, Map<Integer, Set<E>>> pats = new HashMap<>();
+    Map<String, Map<Integer, Set<E>>> pats = new HashMap<String, Map<Integer, Set<E>>>();
     for(String s: sampledSentIds){
       pats.put(s, getPatternsForAllTokens(s));
     }

@@ -42,7 +42,6 @@ import edu.stanford.nlp.parser.KBestViterbiParser;
 import edu.stanford.nlp.parser.common.NoSuchParseException;
 import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.parser.common.ParserQuery;
-import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.trees.TreeTransformer;
@@ -117,7 +116,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     DependencyGrammar dg = parser.dg;
 
     Index<String> stateIndex = parser.stateIndex;
-    Index<String> wordIndex = new DeltaIndex<>(parser.wordIndex);
+    Index<String> wordIndex = new DeltaIndex<String>(parser.wordIndex);
     Index<String> tagIndex = parser.tagIndex;
 
     this.debinarizer = new Debinarizer(op.forceCNF);
@@ -234,7 +233,7 @@ public class LexicalizedParserQuery implements ParserQuery {
         word.setWord(op.wordFunction.apply(word.word()));
       }
     } else {
-      sentenceB = new ArrayList<>(sentence);
+      sentenceB = new ArrayList<HasWord>(sentence);
     }
 
     if (op.testOptions.addMissingFinalPunctuation) {
@@ -423,12 +422,12 @@ public class LexicalizedParserQuery implements ParserQuery {
     if (binaryTrees == null) {
       return null;
     }
-    List<ScoredObject<Tree>> trees = new ArrayList<>(k);
+    List<ScoredObject<Tree>> trees = new ArrayList<ScoredObject<Tree>>(k);
     for (ScoredObject<Tree> tp : binaryTrees) {
       Tree t = debinarizer.transformTree(tp.object());
       t = subcategoryStripper.transformTree(t);
       restoreOriginalWords(t);
-      trees.add(new ScoredObject<>(t, tp.score()));
+      trees.add(new ScoredObject<Tree>(t, tp.score()));
     }
     return trees;
   }
@@ -450,12 +449,12 @@ public class LexicalizedParserQuery implements ParserQuery {
     if (binaryTrees == null) {
       return null;
     }
-    List<ScoredObject<Tree>> trees = new ArrayList<>(k);
+    List<ScoredObject<Tree>> trees = new ArrayList<ScoredObject<Tree>>(k);
     for (ScoredObject<Tree> p : binaryTrees) {
       Tree t = debinarizer.transformTree(p.object());
       t = subcategoryStripper.transformTree(t);
       restoreOriginalWords(t);
-      trees.add(new ScoredObject<>(t, p.score()));
+      trees.add(new ScoredObject<Tree>(t, p.score()));
     }
     return trees;
   }

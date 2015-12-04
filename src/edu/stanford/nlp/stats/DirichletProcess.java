@@ -16,7 +16,7 @@ public class DirichletProcess<E> implements ProbabilityDistribution<E> {
   public DirichletProcess(ProbabilityDistribution<E> baseMeasure, double alpha) {
     this.baseMeasure = baseMeasure;
     this.alpha = alpha;
-    this.sampled = new ClassicCounter<>();
+    this.sampled = new ClassicCounter<E>();
     sampled.incrementCount(null, alpha);
   }
 

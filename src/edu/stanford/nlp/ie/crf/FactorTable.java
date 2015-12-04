@@ -94,7 +94,7 @@ public class FactorTable {
   }
 
   private static <L> String toString(int[] array, Index<L> classIndex) {
-    List<L> l = new ArrayList<>(array.length);
+    List<L> l = new ArrayList<L>(array.length);
     for (int item : array) {
       l.add(classIndex.get(item));
     }

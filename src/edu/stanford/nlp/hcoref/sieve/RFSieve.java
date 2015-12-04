@@ -56,7 +56,7 @@ public class RFSieve extends Sieve {
   public void findCoreferentAntecedent(Mention m, int mIdx, Document document, Dictionaries dict, Properties props, StringBuilder sbLog) throws Exception {
     int sentIdx = m.sentNum;
 
-    Counter<Integer> probs = new ClassicCounter<>();
+    Counter<Integer> probs = new ClassicCounter<Integer>();  
     
     int mentionDist = 0;
     for(int sentDist=0 ; sentDist <= Math.min(this.maxSentDist, sentIdx) ; sentDist++) {
@@ -102,7 +102,7 @@ public class RFSieve extends Sieve {
     try {
       
       boolean label = (document.goldMentions==null)? false : document.isCoref(m, candidate);
-      Counter<String> features = new ClassicCounter<>();
+      Counter<String> features = new ClassicCounter<String>();
       CorefCluster mC = document.corefClusters.get(m.corefClusterID);
       CorefCluster aC = document.corefClusters.get(candidate.corefClusterID);
       
@@ -242,7 +242,7 @@ public class RFSieve extends Sieve {
 
         // shape feature from Bjorkelund & Kuhn
         StringBuilder sb = new StringBuilder();
-        List<Mention> sortedMentions = new ArrayList<>(aC.corefMentions.size());
+        List<Mention> sortedMentions = new ArrayList<Mention>(aC.corefMentions.size());
         sortedMentions.addAll(aC.corefMentions);
         Collections.sort(sortedMentions, new CorefChain.MentionComparator());
         for(Mention a : sortedMentions) {
@@ -251,7 +251,7 @@ public class RFSieve extends Sieve {
         features.incrementCount("B-A-SHAPE-"+sb.toString());
         
         sb = new StringBuilder();
-        sortedMentions = new ArrayList<>(mC.corefMentions.size());
+        sortedMentions = new ArrayList<Mention>(mC.corefMentions.size());
         sortedMentions.addAll(mC.corefMentions);
         Collections.sort(sortedMentions, new CorefChain.MentionComparator());
         for(Mention men : sortedMentions) {
@@ -486,7 +486,7 @@ public class RFSieve extends Sieve {
           if(m.headString.equals(candidate.headString)) features.incrementCount("B-HEADMATCH");
           if(Rules.entityHeadsAgree(mC, aC, m, candidate, dict)) features.incrementCount("B-HEADSAGREE");
           if(Rules.entityExactStringMatch(mC, aC, dict, document.roleSet)) features.incrementCount("B-EXACTSTRINGMATCH");
-          if(Rules.entityHaveExtraProperNoun(m, candidate, new HashSet<>())) features.incrementCount("B-HAVE-EXTRA-PROPER-NOUN");
+          if(Rules.entityHaveExtraProperNoun(m, candidate, new HashSet<String>())) features.incrementCount("B-HAVE-EXTRA-PROPER-NOUN");
           if(Rules.entityBothHaveProper(mC, aC)) features.incrementCount("B-BOTH-HAVE-PROPER");
           if(Rules.entityHaveDifferentLocation(m, candidate, dict)) features.incrementCount("B-HAVE-DIFF-LOC");
           if(Rules.entityHaveIncompatibleModifier(mC, aC)) features.incrementCount("B-HAVE-INCOMPATIBLE-MODIFIER");
@@ -727,7 +727,7 @@ public class RFSieve extends Sieve {
         features.incrementCount("WORDVECTOR-AVG-DIFF", dist/cnt);
       }
       
-      return new RVFDatum<>(features, label);
+      return new RVFDatum<Boolean, String>(features, label);
     } catch (Exception e) {
       System.err.println("Datum Extraction failed in Sieve.java while processing document: "+document.docInfo.get("DOC_ID")+" part: "+document.docInfo.get("DOC_PART"));
       throw new RuntimeException(e);

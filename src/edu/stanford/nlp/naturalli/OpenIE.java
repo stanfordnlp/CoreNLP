@@ -292,12 +292,8 @@ public class OpenIE implements Annotator {
           assert prep != null;
           tree.addEdge(adj, pobj, GrammaticalRelation.valueOf(Language.English, prep), Double.NEGATIVE_INFINITY, false);
         }
-        // (check for monotonicity)
-        if (adj.get(NaturalLogicAnnotations.PolarityAnnotation.class).isUpwards() &&
-            be.get(NaturalLogicAnnotations.PolarityAnnotation.class).isUpwards()) {
-          // (add tree)
-          adjFragments.add(new SentenceFragment(tree, clause.assumedTruth, false));
-        }
+        // (add tree)
+        adjFragments.add(new SentenceFragment(tree, clause.assumedTruth, false));
       }
       list.addAll(adjFragments);
       return list;
@@ -463,8 +459,6 @@ public class OpenIE implements Annotator {
       if (parse == null) {
         throw new IllegalStateException("Cannot run OpenIE without a parse tree!");
       }
-      // Clean the tree
-      Util.cleanTree(parse);
 
       // Resolve Coreference
       SemanticGraph canonicalizedParse = parse;

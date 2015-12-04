@@ -40,21 +40,21 @@ public class CoreMapNodePattern extends ComplexNodePattern<CoreMap, Class> {
   }
 
   public static CoreMapNodePattern valueOf(String textAnnotationPattern, int flags) {
-    CoreMapNodePattern p = new CoreMapNodePattern(new ArrayList<>(1));
+    CoreMapNodePattern p = new CoreMapNodePattern(new ArrayList<Pair<Class, NodePattern>>(1));
     p.add(CoreAnnotations.TextAnnotation.class,
             newStringRegexPattern(textAnnotationPattern, flags));
     return p;
   }
 
   public static CoreMapNodePattern valueOf(Env env, String textAnnotationPattern) {
-    CoreMapNodePattern p = new CoreMapNodePattern(new ArrayList<>(1));
+    CoreMapNodePattern p = new CoreMapNodePattern(new ArrayList<Pair<Class, NodePattern>>(1));
     p.add(CoreAnnotations.TextAnnotation.class,
             newStringRegexPattern(textAnnotationPattern, (env != null)? env.defaultStringPatternFlags: 0));
     return p;
   }
 
   public static CoreMapNodePattern valueOf(Pattern textAnnotationPattern) {
-    CoreMapNodePattern p = new CoreMapNodePattern(new ArrayList<>(1));
+    CoreMapNodePattern p = new CoreMapNodePattern(new ArrayList<Pair<Class, NodePattern>>(1));
     p.add(CoreAnnotations.TextAnnotation.class,
             new StringAnnotationRegexPattern(textAnnotationPattern));
     return p;
@@ -65,7 +65,7 @@ public class CoreMapNodePattern extends ComplexNodePattern<CoreMap, Class> {
   }
 
   public static CoreMapNodePattern valueOf(Env env, Map<String, String> attributes) {
-    CoreMapNodePattern p = new CoreMapNodePattern(new ArrayList<>(attributes.size()));
+    CoreMapNodePattern p = new CoreMapNodePattern(new ArrayList<Pair<Class,NodePattern>>(attributes.size()));
     p.populate(env, attributes, envAttrPair -> EnvLookup.lookupAnnotationKeyWithClassname(envAttrPair.first, envAttrPair.second));
     return p;
   }

@@ -70,9 +70,9 @@ public class ChineseUnknownWordModelTrainer
     }
 
     this.c = Generics.newHashMap();
-    this.tc = new ClassicCounter<>();
-    this.unSeenCounter = new ClassicCounter<>();
-    this.seenCounter = new ClassicCounter<>();
+    this.tc = new ClassicCounter<Label>();
+    this.unSeenCounter = new ClassicCounter<IntTaggedWord>();
+    this.seenCounter = new ClassicCounter<IntTaggedWord>();
     this.seenFirst = Generics.newHashSet();
     this.tagHash = Generics.newHashMap();
 
@@ -116,7 +116,7 @@ public class ChineseUnknownWordModelTrainer
     String tag = tw.tag();
 
     if ( ! c.containsKey(tagL)) {
-      c.put(tagL, new ClassicCounter<>());
+      c.put(tagL, new ClassicCounter<String>());
     }
     c.get(tagL).incrementCount(first, weight);
 
@@ -150,7 +150,7 @@ public class ChineseUnknownWordModelTrainer
       ClassicCounter<String> wc = c.get(tagLab); // counts for words given a tag
 
       if ( ! tagHash.containsKey(tagLab)) {
-        tagHash.put(tagLab, new ClassicCounter<>());
+        tagHash.put(tagLab, new ClassicCounter<String>());
       }
 
       // the UNKNOWN first character is assumed to be seen once in

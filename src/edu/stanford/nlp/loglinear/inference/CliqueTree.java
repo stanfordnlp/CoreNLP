@@ -6,8 +6,7 @@ import edu.stanford.nlp.loglinear.model.GraphicalModel;
 import java.util.*;
 
 /**
- * Created on 8/11/15.
- * @author keenon
+ * Created by keenon on 8/11/15.
  * <p>
  * This is instantiated once per model, so that it can keep caches of important stuff like messages and
  * local factors during many game playing sample steps. It assumes that the model that is passed in is by-reference,
@@ -319,10 +318,6 @@ public class CliqueTree {
 
     int forceRootForCachedMessagePassing = -1;
     int[] cachedCliquesBackPointers = null;
-    // Sometimes we'll have cached versions of the factors, but they're from inference steps a long time ago, so we
-    // don't get consistent backpointers to our cache of factors. This is a flag to indicate if this happens.
-    boolean backPointersConsistent = true;
-
     if (CACHE_MESSAGES && (numFactorsCached == cliques.length - 1) && (numFactorsCached > 0)) {
       cachedCliquesBackPointers = new int[cliques.length];
 
@@ -337,15 +332,11 @@ public class CliqueTree {
           }
         }
         if (cachedCliquesBackPointers[i] == -1) {
-          if (forceRootForCachedMessagePassing != -1) {
-            backPointersConsistent = false;
-            break;
-          }
+          assert (forceRootForCachedMessagePassing == -1);
           forceRootForCachedMessagePassing = i;
         }
       }
-
-      if (!backPointersConsistent) forceRootForCachedMessagePassing = -1;
+      assert (forceRootForCachedMessagePassing != -1);
     }
 
     // Create the data structures to hold the tree pattern
@@ -570,7 +561,7 @@ public class CliqueTree {
           // Check that our partition function is the same as the trees we're attached to, or with %.1, for numerical reasons.
           // Sometimes the partition function will explode in value, which can make a non-%-based assert worthless here
 
-          if (assertsEnabled() && !TableFactor.USE_EXP_APPROX) {
+          if (assertsEnabled()) {
             double valueSum = convergedClique.valueSum();
             if (Double.isFinite(valueSum) && Double.isFinite(treePartitionFunctions[trees[i]])) {
               if (Math.abs(treePartitionFunctions[trees[i]] - valueSum) >= 1.0e-3 * treePartitionFunctions[trees[i]]) {

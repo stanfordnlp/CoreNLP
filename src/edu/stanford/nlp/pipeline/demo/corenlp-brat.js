@@ -607,7 +607,6 @@ $(document).ready(function() {
       type: 'POST',
       url: serverAddress + '?properties=' + encodeURIComponent('{"annotators": "' + annotators() + '"}'),
       data: currentQuery,
-      contentType: "application/x-www-form-urlencoded;charset=UTF-8",
       success: function(data) {
         $('#submit').prop('disabled', false);
         if (typeof data == undefined || data.sentences == undefined) {
@@ -668,9 +667,6 @@ $(document).ready(function() {
         $('#submit').prop('disabled', false);
       }
     });
-    event.preventDefault();
-    event.stopPropagation();
-    return false;
   });
 
 

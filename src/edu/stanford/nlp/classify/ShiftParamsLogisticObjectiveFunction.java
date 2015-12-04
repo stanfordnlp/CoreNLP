@@ -87,7 +87,7 @@ public class ShiftParamsLogisticObjectiveFunction extends AbstractCachingDiffFun
 
   @Override
   public Set<Integer> getRegularizerParamRange(double[] x) {
-    Set<Integer> result = new HashSet<>();
+    Set<Integer> result = new HashSet<Integer>();
     for (int i = numL2Parameters; i < x.length; i++)
       result.add(i);
     return result;

@@ -39,7 +39,7 @@ public class EventMention extends RelationMention {
       List<String> argNames) {
     super(objectId, sentence, span, type, subtype, args, argNames);
     this.anchor = anchor;
-    this.parents = new IdentityHashSet<>();
+    this.parents = new IdentityHashSet<ExtractionObject>();
     
     // set ourselves as the parent of any EventMentions in our args 
     for (ExtractionObject arg : args) {
@@ -50,8 +50,8 @@ public class EventMention extends RelationMention {
   }
   
   public void resetArguments() {
-    args = new ArrayList<>();
-    argNames = new ArrayList<>();
+    args = new ArrayList<ExtractionObject>();
+    argNames = new ArrayList<String>();
   }
   
   public void removeFromParents() {

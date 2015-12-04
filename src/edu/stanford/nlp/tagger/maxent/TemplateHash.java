@@ -22,7 +22,7 @@ import java.util.Map;
  */
 class ListInstances {
 
-  private final ArrayList<Integer> v = new ArrayList<>();
+  private final ArrayList<Integer> v = new ArrayList<Integer>();
   private int[] positions = null;
   private int num = 0;
 
@@ -106,12 +106,12 @@ public class TemplateHash {
   }
 
   protected void addPositions(int start, int end, FeatureKey fK) {
-    Pair<Integer, String> key = new Pair<>(fK.num, fK.val);
+    Pair<Integer, String> key = new Pair<Integer, String>(fK.num, fK.val);
     tempHash.get(key).addPositions(start, end);
   }
 
   protected int[] getPositions(FeatureKey s) {
-    Pair<Integer, String> p = new Pair<>(s.num, s.val);
+    Pair<Integer, String> p = new Pair<Integer, String>(s.num, s.val);
     return tempHash.get(p).getPositions();
   }
 
@@ -134,9 +134,9 @@ public class TemplateHash {
     int general = maxentTagger.extractors.size();
 
     if (nFeatFrame < general) {
-      wT = new Pair<>(nFeatFrame, maxentTagger.extractors.extract(nFeatFrame, history));
+      wT = new Pair<Integer,String>(nFeatFrame, maxentTagger.extractors.extract(nFeatFrame, history));
     } else {
-      wT = new Pair<>(nFeatFrame, maxentTagger.extractorsRare.extract(nFeatFrame - general, history));
+      wT = new Pair<Integer,String>(nFeatFrame, maxentTagger.extractorsRare.extract(nFeatFrame - general, history));
     }
 
     if (tempHash.containsKey(wT)) {
@@ -160,9 +160,9 @@ public class TemplateHash {
     int general = maxentTagger.extractors.size();
 
     if (nFeatFrame < general) {
-      wT = new Pair<>(nFeatFrame, maxentTagger.extractors.extract(nFeatFrame, history));
+      wT = new Pair<Integer,String>(nFeatFrame, maxentTagger.extractors.extract(nFeatFrame, history));
     } else {
-      wT = new Pair<>(nFeatFrame, maxentTagger.extractorsRare.extract(nFeatFrame - general, history));
+      wT = new Pair<Integer,String>(nFeatFrame, maxentTagger.extractorsRare.extract(nFeatFrame - general, history));
     }
     if (tempHash.containsKey(wT)) {
       (tempHash.get(wT)).inc();

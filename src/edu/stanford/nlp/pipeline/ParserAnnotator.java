@@ -1,5 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -16,6 +17,7 @@ import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.trees.ud.UniversalDependenciesFeatureAnnotator;
 import edu.stanford.nlp.util.*;
 
 import java.util.function.Function;
@@ -59,7 +61,6 @@ public class ParserAnnotator extends SentenceAnnotator {
 
   private final boolean saveBinaryTrees;
 
-  /** Whether to include punctuation dependencies in the output. Starting in 2015, the default is true. */
   private final boolean keepPunct;
 
   /** If true, don't re-annotate sentences that already have a tree annotation */
@@ -82,21 +83,21 @@ public class ParserAnnotator extends SentenceAnnotator {
   }
 
   public ParserAnnotator(ParserGrammar parser, boolean verbose, int maxSent, Function<Tree, Tree> treeMap) {
-    this.VERBOSE = verbose;
+    VERBOSE = verbose;
     this.BUILD_GRAPHS = parser.getTLPParams().supportsBasicDependencies();
     this.parser = parser;
     this.maxSentenceLength = maxSent;
     this.treeMap = treeMap;
     this.maxParseTime = 0;
     this.kBest = 1;
-    this.keepPunct = true;
+    this.keepPunct = false;
     if (this.BUILD_GRAPHS) {
       TreebankLanguagePack tlp = parser.getTLPParams().treebankLanguagePack();
       this.gsf = tlp.grammaticalStructureFactory(tlp.punctuationWordRejectFilter(), parser.getTLPParams().typedDependencyHeadFinder());
     } else {
       this.gsf = null;
     }
-
+    
     this.nThreads = 1;
     this.saveBinaryTrees = false;
     this.noSquash = false;
@@ -126,7 +127,7 @@ public class ParserAnnotator extends SentenceAnnotator {
 
     this.kBest = PropertiesUtils.getInt(props, annotatorName + ".kbest", 1);
 
-    this.keepPunct = PropertiesUtils.getBool(props, annotatorName + ".keepPunct", true);
+    this.keepPunct = PropertiesUtils.getBool(props, annotatorName + ".keepPunct", false);
 
 
     String buildGraphsProperty = annotatorName + ".buildgraphs";
@@ -179,8 +180,6 @@ public class ParserAnnotator extends SentenceAnnotator {
               props.getProperty(annotatorName + ".nthreads", props.getProperty("nthreads", "")));
     os.append(annotatorName + ".nosquash:" +
       props.getProperty(annotatorName + ".nosquash", "false"));
-    os.append(annotatorName + ".keepPunct:" +
-      props.getProperty(annotatorName + ".keepPunct", "true"));
     os.append(annotatorName + ".extradependencies:" +
         props.getProperty(annotatorName + ".extradependences", "NONE").toLowerCase());
     boolean usesBinary = StanfordCoreNLP.usesBinaryTrees(props);
@@ -191,7 +190,7 @@ public class ParserAnnotator extends SentenceAnnotator {
   }
 
   public static String[] convertFlagsToArray(String parserFlags) {
-    if (parserFlags == null || parserFlags.trim().isEmpty()) {
+    if (parserFlags == null || parserFlags.trim().equals("")) {
       return StringUtils.EMPTY_STRING_ARRAY;
     } else {
       return parserFlags.trim().split("\\s+");
@@ -224,7 +223,7 @@ public class ParserAnnotator extends SentenceAnnotator {
   @Override
   protected long maxTime() {
     return maxParseTime;
-  }
+  };  
 
   @Override
   protected void doOneSentence(Annotation annotation, CoreMap sentence) {
@@ -286,7 +285,7 @@ public class ParserAnnotator extends SentenceAnnotator {
       }
       trees = mappedTrees;
     }
-
+    
     ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, trees, extraDependencies);
 
     if (saveBinaryTrees) {
@@ -297,15 +296,15 @@ public class ParserAnnotator extends SentenceAnnotator {
     }
   }
 
-  // todo [cdm 2015]: This should just use bestParse method if only getting 1 best parse.
   private List<Tree> doOneSentence(List<ParserConstraint> constraints,
                              List<CoreLabel> words) {
     ParserQuery pq = parser.parserQuery();
     pq.setConstraints(constraints);
     pq.parse(words);
+    List<ScoredObject<Tree>> scoredObjects = null;
     List<Tree> trees = Generics.newLinkedList();
     try {
-      List<ScoredObject<Tree>> scoredObjects = pq.getKBestPCFGParses(this.kBest);
+      scoredObjects = pq.getKBestPCFGParses(this.kBest);
       if (scoredObjects == null || scoredObjects.size() < 1) {
         System.err.println("WARNING: Parsing of sentence failed.  " +
                 "Will ignore and continue: " +
@@ -319,9 +318,9 @@ public class ParserAnnotator extends SentenceAnnotator {
         }
       }
     } catch (OutOfMemoryError e) {
-      Runtime.getRuntime().gc();
-      System.err.println("WARNING: Parsing of sentence ran out of memory (length=" + words.size() + ").  " +
-              "Will ignore and continue.");
+      System.err.println("WARNING: Parsing of sentence ran out of memory.  " +
+              "Will ignore and continue: " +
+              Sentence.listToString(words));
     } catch (NoSuchParseException e) {
       System.err.println("WARNING: Parsing of sentence failed, possibly because of out of memory.  " +
               "Will ignore and continue: " +
@@ -351,5 +350,4 @@ public class ParserAnnotator extends SentenceAnnotator {
       }
     }
   }
-
 }
