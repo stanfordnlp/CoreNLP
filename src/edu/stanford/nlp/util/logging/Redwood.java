@@ -600,7 +600,7 @@ public class Redwood {
    * Set up the default logger.
    */
   static {
-    RedwoodConfiguration.standard().apply();
+    RedwoodConfiguration.minimal().apply();
   }
 
   /**
