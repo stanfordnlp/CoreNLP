@@ -86,7 +86,7 @@ public class BaseUnknownWordModelTrainer
 
     Label tag = new Tag(tw.tag());
     if ( ! c.containsKey(tag)) {
-      c.put(tag, new ClassicCounter<String>());
+      c.put(tag, new ClassicCounter<>());
     }
     c.get(tag).incrementCount(subString, weight);
 
@@ -120,7 +120,7 @@ public class BaseUnknownWordModelTrainer
       ClassicCounter<String> wc = entry.getValue(); // counts for words given a tag
 
       if (!tagHash.containsKey(key)) {
-        tagHash.put(key, new ClassicCounter<String>());
+        tagHash.put(key, new ClassicCounter<>());
       }
 
       /* the UNKNOWN sequence is assumed to be seen once in each tag */

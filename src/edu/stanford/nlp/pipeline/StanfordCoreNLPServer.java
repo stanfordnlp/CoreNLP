@@ -1,5 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -44,6 +45,7 @@ public class StanfordCoreNLPServer implements Runnable {
   public static int HTTP_OK = 200;
   public static int HTTP_BAD_INPUT = 400;
   public static int HTTP_ERR = 500;
+  public static int MAX_CHAR_LENGTH = 100000;
   public final Properties defaultProps;
 
   /**
@@ -133,7 +135,25 @@ public class StanfordCoreNLPServer implements Runnable {
     String inputFormat = props.getProperty("inputFormat", "text");
     switch (inputFormat) {
       case "text":
-        return new Annotation(IOUtils.slurpReader(new InputStreamReader(httpExchange.getRequestBody())));
+        // Get the encoding
+        Headers h = httpExchange.getRequestHeaders();
+        String encoding;
+        if (h.containsKey("Content-type")) {
+          String[] charsetPair = Arrays.asList(h.getFirst("Content-type").split(";")).stream()
+              .map(x -> x.split("="))
+              .filter(x -> x.length > 0 && "charset".equals(x[0]))
+              .findFirst().orElse(new String[]{"charset", "ISO-8859-1"});
+          if (charsetPair.length == 2) {
+            encoding = charsetPair[1];
+          } else {
+            encoding = "ISO-8859-1";  // default encoding for a form
+          }
+        } else {
+          encoding = "ISO-8859-1";  // default encoding for a form
+        }
+
+        // Read the annotation
+        return new Annotation(IOUtils.slurpInputStream(httpExchange.getRequestBody(), encoding));
       case "serialized":
         String inputSerializerName = props.getProperty("inputSerializer", ProtobufAnnotationSerializer.class.getName());
         AnnotationSerializer serializer = MetaClass.create(inputSerializerName).createInstance();
@@ -164,8 +184,8 @@ public class StanfordCoreNLPServer implements Runnable {
 
   /**
    * A helper function to respond to a request with an error.
-   * @param response The description of the error to send to the user.
    *
+   * @param response The description of the error to send to the user.
    * @param httpExchange The exchange to send the error over.
    *
    * @throws IOException Thrown if the HttpExchange cannot communicate the error.
@@ -173,6 +193,22 @@ public class StanfordCoreNLPServer implements Runnable {
   private void respondError(String response, HttpExchange httpExchange) throws IOException {
     httpExchange.getResponseHeaders().add("Content-Type", "text/plain");
     httpExchange.sendResponseHeaders(HTTP_ERR, response.length());
+    httpExchange.getResponseBody().write(response.getBytes());
+    httpExchange.close();
+  }
+
+  /**
+   * A helper function to respond to a request with an error specifically indicating
+   * bad input from the user.
+   *
+   * @param response The description of the error to send to the user.
+   * @param httpExchange The exchange to send the error over.
+   *
+   * @throws IOException Thrown if the HttpExchange cannot communicate the error.
+   */
+  private void respondBadInput(String response, HttpExchange httpExchange) throws IOException {
+    httpExchange.getResponseHeaders().add("Content-Type", "text/plain");
+    httpExchange.sendResponseHeaders(HTTP_BAD_INPUT, response.length());
     httpExchange.getResponseBody().write(response.getBytes());
     httpExchange.close();
   }
@@ -290,18 +326,26 @@ public class StanfordCoreNLPServer implements Runnable {
       Properties props;
       Annotation ann;
       StanfordCoreNLP.OutputFormat of;
-      log("[" + httpExchange.getRemoteAddress() + "] Received message");
       try {
         props = getProperties(httpExchange);
         ann = getDocument(props, httpExchange);
         of = StanfordCoreNLP.OutputFormat.valueOf(props.getProperty("outputFormat", "json").toUpperCase());
-        // Handle direct browser connections (i.e., not a POST request).
+
         if (ann.get(CoreAnnotations.TextAnnotation.class).length() == 0) {
+          // Handle direct browser connections (i.e., not a POST request).
           log("[" + httpExchange.getRemoteAddress() + "] Interactive connection");
           staticPageHandle.handle(httpExchange);
           return;
+        } else {
+          // Handle API request
+          log("[" + httpExchange.getRemoteAddress() + "] API call w/annotators " + props.getProperty("annotators", "<unknown>"));
+          String text = ann.get(CoreAnnotations.TextAnnotation.class).replace('\n', ' ');
+          System.out.println(text);
+          if (text.length() > MAX_CHAR_LENGTH) {
+            respondBadInput("Request is too long to be handled by server: " + text.length() + " characters. Max length is " + MAX_CHAR_LENGTH + " characters.", httpExchange);
+            return;
+          }
         }
-        log("[" + httpExchange.getRemoteAddress() + "] API call");
       } catch (Exception e) {
         e.printStackTrace();
         respondError("Could not handle incoming annotation", httpExchange);
@@ -373,6 +417,15 @@ public class StanfordCoreNLPServer implements Runnable {
         props.setProperty("openie.resolve_coref", "true");
       }
 
+      // Tweak the properties to play nicer with the server
+      // (set the parser max length to 60)
+      if (!"-1".equals(props.getProperty("parse.maxlen", "60"))) {
+        props.put("parse.maxlen", "60");
+      }
+      if (!"-1".equals(props.getProperty("pos.maxlen", "500"))) {
+        props.put("pos.maxlen", "500");
+      }
+
       // Make sure the properties compile
       props.setProperty("annotators", annotators);
 
@@ -408,7 +461,7 @@ public class StanfordCoreNLPServer implements Runnable {
           Map<String, String> params = getURLParams(httpExchange.getRequestURI());
           // (get the pattern)
           if (!params.containsKey("pattern")) {
-            respondError("Missing required parameter 'pattern'", httpExchange);
+            respondBadInput("Missing required parameter 'pattern'", httpExchange);
             return "";
           }
           String pattern = params.get("pattern");
@@ -508,7 +561,7 @@ public class StanfordCoreNLPServer implements Runnable {
           Map<String, String> params = getURLParams(httpExchange.getRequestURI());
           // (get the pattern)
           if (!params.containsKey("pattern")) {
-            respondError("Missing required parameter 'pattern'", httpExchange);
+            respondBadInput("Missing required parameter 'pattern'", httpExchange);
             return "";
           }
           String pattern = params.get("pattern");

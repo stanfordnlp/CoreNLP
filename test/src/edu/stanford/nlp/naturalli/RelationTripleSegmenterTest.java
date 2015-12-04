@@ -284,6 +284,15 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertEquals("1.0\tI\tam in\tFlorida", extraction.get().toString());  // not (I; am; Florida)
   }
 
+  public void testWh() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\twhat\t3\tnsubj\tWP\n" +
+        "2\tis\t3\tcop\tVBZ\n" +
+        "3\tlove\t0\troot\tNN\n"
+    );
+    assertFalse("Extracted on WH word!", extraction.isPresent());
+  }
+
   public void testPropagateCSubj() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\ttruffles\t2\tnsubj\n" +

@@ -7,20 +7,21 @@ import edu.stanford.nlp.loglinear.model.GraphicalModel;
 import java.util.Iterator;
 
 /**
+ * Created on 8/23/15.
+ * @author keenon
+ * <p>
  * Generates (potentially noisy, no promises about exactness) gradients from a batch of examples that were provided to
  * the system.
- *
- * @author keenon
  */
-public class LogLikelihoodFunction extends AbstractDifferentiableFunction<GraphicalModel> {
+public class LogLikelihoodDifferentiableFunction extends AbstractDifferentiableFunction<GraphicalModel> {
   // This sets a gold observation for a model to use as training gold data
-  public static final String VARIABLE_TRAINING_VALUE = "learning.LogLikelihoodFunction.VARIABLE_TRAINING_VALUE";
+  public static final String VARIABLE_TRAINING_VALUE = "learning.LogLikelihoodDifferentiableFunction.VARIABLE_TRAINING_VALUE";
 
   /**
    * Gets a summary of the log-likelihood of a singe model at a point
    * <p>
    * It assumes that the models have observations for training set as metadata in
-   * LogLikelihoodFunction.OBSERVATION_FOR_TRAINING. The models can also have observations fixed in
+   * LogLikelihoodDifferentiableFunction.OBSERVATION_FOR_TRAINING. The models can also have observations fixed in
    * CliqueTree.VARIABLE_OBSERVED_VALUE, but these will be considered fixed and will not be learned against.
    *
    * @param model   the model to find the log-likelihood of
@@ -28,10 +29,8 @@ public class LogLikelihoodFunction extends AbstractDifferentiableFunction<Graphi
    * @return the gradient and value of the function at that point
    */
   @Override
-  public FunctionSummaryAtPoint getSummaryForInstance(GraphicalModel model, ConcatVector weights) {
+  public double getSummaryForInstance(GraphicalModel model, ConcatVector weights, ConcatVector gradient) {
     double logLikelihood = 0.0;
-    // This will grow segments as necessary
-    ConcatVector gradient = new ConcatVector(weights.getNumberOfComponents());
 
     CliqueTree.MarginalResult result = new CliqueTree(model, weights).calculateMarginals();
 
@@ -40,6 +39,14 @@ public class LogLikelihoodFunction extends AbstractDifferentiableFunction<Graphi
     for (GraphicalModel.Factor factor : model.factors) {
       factor.featuresTable.cacheVectors();
     }
+
+    // Subtract log partition function
+
+    logLikelihood -= Math.log(result.partitionFunction);
+
+    // Quit if we have an infinite partition function
+
+    if (Double.isInfinite(logLikelihood)) return 0.0;
 
     // Add the determined assignment by training values
 
@@ -51,20 +58,16 @@ public class LogLikelihoodFunction extends AbstractDifferentiableFunction<Graphi
         if (deterministicValue != -1) {
           assignment[i] = deterministicValue;
         } else {
-          int trainingObservation = Integer.parseInt(model.getVariableMetaDataByReference(factor.neigborIndices[i]).get(LogLikelihoodFunction.VARIABLE_TRAINING_VALUE));
+          int trainingObservation = Integer.parseInt(model.getVariableMetaDataByReference(factor.neigborIndices[i]).get(LogLikelihoodDifferentiableFunction.VARIABLE_TRAINING_VALUE));
           assignment[i] = trainingObservation;
         }
       }
       ConcatVector features = factor.featuresTable.getAssignmentValue(assignment).get();
-      // Add the vector from this observation to the gradient
-      gradient.addVectorInPlace(features, 1.0);
       // Add the log-likelihood from this observation to the log-likelihood
       logLikelihood += features.dotProduct(weights);
+      // Add the vector from this observation to the gradient
+      gradient.addVectorInPlace(features, 1.0);
     }
-
-    // Subtract log partition function
-
-    logLikelihood -= Math.log(result.partitionFunction);
 
     // Take expectations over features given marginals
     // NOTE: This is extremely expensive. Not sure what to do about that
@@ -94,7 +97,7 @@ public class LogLikelihoodFunction extends AbstractDifferentiableFunction<Graphi
       factor.featuresTable.releaseCache();
     }
 
-    return new FunctionSummaryAtPoint(logLikelihood, gradient);
+    return logLikelihood;
   }
 
   /**

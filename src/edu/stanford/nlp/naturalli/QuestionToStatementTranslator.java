@@ -843,7 +843,7 @@ public class QuestionToStatementTranslator {
    * @see edu.stanford.nlp.naturalli.QuestionToStatementTranslator#triggerWhenDo
    */
   private List<CoreLabel> processWhatHave(TokenSequenceMatcher matcher) {
-    List<CoreLabel> sentence = new ArrayList<CoreLabel>();
+    List<CoreLabel> sentence = new ArrayList<>();
 
     // Grab the prefix of the sentence
     List<CoreLabel> preVerb = (List<CoreLabel>) matcher.groupNodes("$pre_verb");

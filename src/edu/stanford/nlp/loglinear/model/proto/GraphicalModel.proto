@@ -1,9 +1,10 @@
 package edu.stanford.nlp.loglinear.model.proto;
 
-import "ConcatVectorTable.proto";
-
 option java_package = "edu.stanford.nlp.loglinear.model.proto";
+
 option java_outer_classname = "GraphicalModelProto";
+
+import "ConcatVectorTable.proto";
 
 message GraphicalModel {
     repeated Factor factor = 1;

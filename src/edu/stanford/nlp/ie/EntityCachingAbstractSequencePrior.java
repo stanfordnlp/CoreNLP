@@ -122,7 +122,7 @@ public abstract class EntityCachingAbstractSequencePrior<IN extends CoreMap> imp
     Entity entity = new Entity();
     entity.type = sequence[position];
     entity.startPosition = position;
-    entity.words = new ArrayList<String>();
+    entity.words = new ArrayList<>();
     for ( ; position < sequence.length; position++) {
       if (sequence[position] == entity.type) {
       	String word = doc.get(position).get(CoreAnnotations.TextAnnotation.class);
@@ -143,7 +143,7 @@ public abstract class EntityCachingAbstractSequencePrior<IN extends CoreMap> imp
    * words in this entity occurs.
    */
   public int[] otherOccurrences(Entity entity){
-    List<Integer> other = new ArrayList<Integer>();
+    List<Integer> other = new ArrayList<>();
     for (int i = 0; i < doc.size(); i++) {
       if (i == entity.startPosition) { continue; }
       if (matches(entity, i)) {
@@ -282,13 +282,13 @@ public abstract class EntityCachingAbstractSequencePrior<IN extends CoreMap> imp
       Entity prev = entities[position - 1];
       Entity next = entities[position + 1];
       newEntity.startPosition = prev.startPosition;
-      newEntity.words = new ArrayList<String>();
+      newEntity.words = new ArrayList<>();
       newEntity.words.addAll(prev.words);
       String word = doc.get(position).get(CoreAnnotations.TextAnnotation.class);
       newEntity.words.add(word);
       newEntity.words.addAll(next.words);
       newEntity.type = sequence[position];
-      List<Integer> other = new ArrayList<Integer>();
+      List<Integer> other = new ArrayList<>();
       for (int i = 0; i < prev.otherOccurrences.length; i++) {
         int pos = prev.otherOccurrences[i];
         if (matches(newEntity, pos)) {
@@ -307,13 +307,13 @@ public abstract class EntityCachingAbstractSequencePrior<IN extends CoreMap> imp
       Entity prev = new Entity();
       prev.type = entity.type;
       prev.startPosition = entity.startPosition;
-      prev.words = new ArrayList<String>(entity.words.subList(0, position - entity.startPosition));
+      prev.words = new ArrayList<>(entity.words.subList(0, position - entity.startPosition));
       prev.otherOccurrences = otherOccurrences(prev);
       addEntityToEntitiesArray(prev);
       Entity next = new Entity();
       next.type = entity.type;
       next.startPosition = position + 1;
-      next.words = new ArrayList<String>(entity.words.subList(position - entity.startPosition + 1, entity.words.size()));
+      next.words = new ArrayList<>(entity.words.subList(position - entity.startPosition + 1, entity.words.size()));
       next.otherOccurrences = otherOccurrences(next);
       addEntityToEntitiesArray(next);
       if (sequence[position] == backgroundSymbol) {
@@ -322,7 +322,7 @@ public abstract class EntityCachingAbstractSequencePrior<IN extends CoreMap> imp
         Entity newEntity = new Entity();
         newEntity.startPosition = position;
         newEntity.type = sequence[position];
-        newEntity.words = new ArrayList<String>();
+        newEntity.words = new ArrayList<>();
         String word = doc.get(position).get(CoreAnnotations.TextAnnotation.class);
         newEntity.words.add(word);
         newEntity.otherOccurrences = otherOccurrences(newEntity);
@@ -337,7 +337,7 @@ public abstract class EntityCachingAbstractSequencePrior<IN extends CoreMap> imp
       Entity newEntity = new Entity();
       Entity next = entities[position + 1];
       newEntity.startPosition = position;
-      newEntity.words = new ArrayList<String>();
+      newEntity.words = new ArrayList<>();
       String word = doc.get(position).get(CoreAnnotations.TextAnnotation.class);
       newEntity.words.add(word);
       newEntity.words.addAll(next.words);
@@ -361,12 +361,12 @@ public abstract class EntityCachingAbstractSequencePrior<IN extends CoreMap> imp
       Entity newEntity = new Entity();
       Entity prev = entities[position - 1];
       newEntity.startPosition = prev.startPosition;
-      newEntity.words = new ArrayList<String>();
+      newEntity.words = new ArrayList<>();
       newEntity.words.addAll(prev.words);
       String word = doc.get(position).get(CoreAnnotations.TextAnnotation.class);
       newEntity.words.add(word);
       newEntity.type = sequence[position];
-      List<Integer> other = new ArrayList<Integer>();
+      List<Integer> other = new ArrayList<>();
       for (int i = 0; i < prev.otherOccurrences.length; i++) {
         int pos = prev.otherOccurrences[i];
         if (matches(newEntity, pos)) {
@@ -389,7 +389,7 @@ public abstract class EntityCachingAbstractSequencePrior<IN extends CoreMap> imp
       Entity newEntity = new Entity();
       if (VERBOSE) System.out.println("adding singleton entity");
       newEntity.startPosition = position;
-      newEntity.words = new ArrayList<String>();
+      newEntity.words = new ArrayList<>();
       String word = doc.get(position).get(CoreAnnotations.TextAnnotation.class);
       newEntity.words.add(word);
       newEntity.type = sequence[position];

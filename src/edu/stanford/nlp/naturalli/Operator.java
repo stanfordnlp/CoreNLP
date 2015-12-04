@@ -42,6 +42,9 @@ public enum Operator {
   UNARY_NO_ONE("no one", INDEPENDENCE, "anti-additive"),
   UNARY_NT("n't",        INDEPENDENCE, "anti-additive"),
 
+  // A general quantifier for all "doubt"-like words
+  GENERAL_NEG_POLARITY("neg_polarity_trigger",   INDEPENDENCE, "anti-additive"),
+
   // "Some" quantifiers
   SOME("some",                     FORWARD_ENTAILMENT, "additive", "additive"),
   SEVERAL("several",               FORWARD_ENTAILMENT, "additive", "additive"),

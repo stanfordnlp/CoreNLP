@@ -303,7 +303,7 @@ public class SequenceMatchRules {
   public static Rule createRule(Env env, Expressions.CompositeValue cv) {
     Map<String, Object> attributes;
     cv = cv.simplifyNoTypeConversion(env);
-    attributes = new HashMap<String, Object>();//Generics.newHashMap();
+    attributes = new HashMap<>();//Generics.newHashMap();
     for (String s:cv.getAttributes()) {
       attributes.put(s, cv.getExpression(s));
     }
@@ -331,7 +331,7 @@ public class SequenceMatchRules {
     }
     AnnotationExtractRuleCreator ruleCreator = lookupExtractRuleCreator(env, ruleType);
     if (ruleCreator != null) {
-      Map<String,Object> attributes = new HashMap<String, Object>();//Generics.newHashMap();
+      Map<String,Object> attributes = new HashMap<>();//Generics.newHashMap();
       attributes.put("ruleType", ruleType);
       attributes.put("pattern", pattern);
       attributes.put("result", result);
@@ -350,7 +350,7 @@ public class SequenceMatchRules {
   public final static TextPatternExtractRuleCreator TEXT_PATTERN_EXTRACT_RULE_CREATOR = new TextPatternExtractRuleCreator();
   public final static MultiTokenPatternExtractRuleCreator MULTI_TOKEN_PATTERN_EXTRACT_RULE_CREATOR = new MultiTokenPatternExtractRuleCreator();
   public final static AnnotationExtractRuleCreator DEFAULT_EXTRACT_RULE_CREATOR = TOKEN_PATTERN_EXTRACT_RULE_CREATOR;
-  final static Map<String, AnnotationExtractRuleCreator> registeredRuleTypes = new HashMap<String, AnnotationExtractRuleCreator>();//Generics.newHashMap();
+  final static Map<String, AnnotationExtractRuleCreator> registeredRuleTypes = new HashMap<>();//Generics.newHashMap();
   static {
     registeredRuleTypes.put(TOKEN_PATTERN_RULE_TYPE, TOKEN_PATTERN_EXTRACT_RULE_CREATOR);
     registeredRuleTypes.put(COMPOSITE_RULE_TYPE, COMPOSITE_EXTRACT_RULE_CREATOR);
@@ -770,7 +770,7 @@ public class SequenceMatchRules {
 
     public FilterExtractRule(Predicate<I> filter, ExtractRule<I,O>... rules) {
       this.filter = filter;
-      this.rule = new ListExtractRule<I,O>(rules);
+      this.rule = new ListExtractRule<>(rules);
     }
 
     public boolean extract(I in, List<O> out) {
@@ -794,12 +794,12 @@ public class SequenceMatchRules {
 
     public ListExtractRule(Collection<ExtractRule<I,O>> rules)
     {
-      this.rules = new ArrayList<ExtractRule<I,O>>(rules);
+      this.rules = new ArrayList<>(rules);
     }
 
     public ListExtractRule(ExtractRule<I,O>... rules)
     {
-      this.rules = new ArrayList<ExtractRule<I,O>>(rules.length);
+      this.rules = new ArrayList<>(rules.length);
       for (ExtractRule<I,O> rule:rules) {
         this.rules.add(rule);
       }

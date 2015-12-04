@@ -34,8 +34,8 @@ public class ScrollableTreeJPanel extends TreeJPanel   {
   private int style = Font.PLAIN;
   private Dimension preferredSize = null;
 
-  private List<Tree> matchedParts = new ArrayList<Tree>();
-  private List<Point2D.Double> matchedPartCoordinates = new ArrayList<Point2D.Double>();
+  private List<Tree> matchedParts = new ArrayList<>();
+  private List<Point2D.Double> matchedPartCoordinates = new ArrayList<>();
 
   public ScrollableTreeJPanel() {
     super();
@@ -103,13 +103,13 @@ public class ScrollableTreeJPanel extends TreeJPanel   {
 
     //Greedily draw the constituents
     final float rowOrigin = (float) (yieldHeight + 2.0*layerHeight);
-    List<List<IntPair>> rows = new ArrayList<List<IntPair>>();
+    List<List<IntPair>> rows = new ArrayList<>();
     for(Constituent c : diffConstituents) {
       for(int rowIdx = 0; rowIdx < diffConstituents.size(); rowIdx++) {
         float rowHeight = rowOrigin + (float) (rowIdx*layerHeight);
         int ext = (c.end() == (yieldOffsets.length - 1)) ? 0 : 1;
         if(rowIdx >= rows.size()) {
-          rows.add(new ArrayList<IntPair>());
+          rows.add(new ArrayList<>());
           rows.get(rowIdx).add(new IntPair(c.start(),c.end()));
           double nodeWidth = fM.stringWidth(c.value());
           g2.drawString(c.value(), yieldOffsets[c.start()], rowHeight);

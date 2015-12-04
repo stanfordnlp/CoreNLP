@@ -25,7 +25,7 @@ public class Multinomial<E> implements ProbabilityDistribution<E> {
       throw new RuntimeException("total mass must be positive!");
     }
 
-    this.parameters = new ClassicCounter<E>();
+    this.parameters = new ClassicCounter<>();
     for (E object : parameters.keySet()) {
       double oldCount = parameters.getCount(object);
       if (oldCount < 0.0) {
@@ -36,7 +36,7 @@ public class Multinomial<E> implements ProbabilityDistribution<E> {
   }
 
   public Counter<E> getParameters() {
-    return new ClassicCounter<E>(parameters);
+    return new ClassicCounter<>(parameters);
   }
   
   public double probabilityOf(E object) {

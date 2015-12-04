@@ -81,7 +81,7 @@ public final class AddMorphoAnnotations {
               nextYield = null;
             } else {
               List<CoreLabel> mLabeledLeaves = tree.taggedLabeledYield();
-              nextYield = new ArrayList<String>(mLabeledLeaves.size());
+              nextYield = new ArrayList<>(mLabeledLeaves.size());
               for (CoreLabel label : mLabeledLeaves) {
                 nextYield.add(label.tag());
               }

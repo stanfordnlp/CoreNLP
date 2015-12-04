@@ -71,7 +71,7 @@ public class CacheParseHypotheses {
 
   public static List<Tree> convertToTrees(byte[] input) {
     try {
-      List<Tree> output = new ArrayList<Tree>();
+      List<Tree> output = new ArrayList<>();
       ByteArrayInputStream bis = new ByteArrayInputStream(input);
       GZIPInputStream gis = new GZIPInputStream(bis);
       ObjectInputStream ois = new ObjectInputStream(gis);
@@ -113,7 +113,7 @@ public class CacheParseHypotheses {
   public static IdentityHashMap<Tree, List<Tree>> convertToTrees(Collection<Tree> keys, IdentityHashMap<Tree, byte[]> compressed,
                                                                  int numThreads) {
     IdentityHashMap<Tree, List<Tree>> uncompressed = Generics.newIdentityHashMap();
-    MulticoreWrapper<byte[], List<Tree>> wrapper = new MulticoreWrapper<byte[], List<Tree>>(numThreads, new DecompressionProcessor());
+    MulticoreWrapper<byte[], List<Tree>> wrapper = new MulticoreWrapper<>(numThreads, new DecompressionProcessor());
     for (Tree tree : keys) {
       wrapper.put(compressed.get(tree));
     }
@@ -241,7 +241,7 @@ public class CacheParseHypotheses {
     LexicalizedParser parser = LexicalizedParser.loadModel(parserModel, "-dvKBest", Integer.toString(dvKBest));
     CacheParseHypotheses cacher = new CacheParseHypotheses(parser);
     TreeTransformer transformer = DVParser.buildTrainTransformer(parser.getOp());
-    List<Tree> sentences = new ArrayList<Tree>();
+    List<Tree> sentences = new ArrayList<>();
     for (Pair<String, FileFilter> description : treebanks) {
       System.err.println("Reading trees from " + description.first);
       Treebank treebank = parser.getOp().tlpParams.memoryTreebank();
@@ -255,7 +255,7 @@ public class CacheParseHypotheses {
 
     List<Pair<Tree, byte[]>> cache = Generics.newArrayList();
     transformer = new SynchronizedTreeTransformer(transformer);
-    MulticoreWrapper<Tree, Pair<Tree, byte[]>> wrapper = new MulticoreWrapper<Tree, Pair<Tree, byte[]>>(numThreads, new CacheProcessor(cacher, parser, dvKBest, transformer));
+    MulticoreWrapper<Tree, Pair<Tree, byte[]>> wrapper = new MulticoreWrapper<>(numThreads, new CacheProcessor(cacher, parser, dvKBest, transformer));
     for (Tree tree : sentences) {
       wrapper.put(tree);
       while (wrapper.peek()) {

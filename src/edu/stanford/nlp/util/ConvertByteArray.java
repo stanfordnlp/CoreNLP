@@ -598,7 +598,7 @@ public final class ConvertByteArray {
 
   public static String[] byteArrToUStringArr(byte[] b) {
     int off = 0;
-    Vector<String> v = new Vector<String>();
+    Vector<String> v = new Vector<>();
     while (off < b.length) {
       int length = byteArrToInt(b, off);
       if (length != 0) {
@@ -645,7 +645,7 @@ public final class ConvertByteArray {
 
   public static String[] byteArrToAStringArr(byte[] b) {
     int off = 0;
-    Vector<String> v = new Vector<String>();
+    Vector<String> v = new Vector<>();
     while (off < b.length) {
       int length = byteArrToInt(b, off);
       if (length != 0) {

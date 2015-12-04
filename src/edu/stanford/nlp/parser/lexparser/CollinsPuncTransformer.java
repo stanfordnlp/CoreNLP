@@ -32,7 +32,7 @@ public class CollinsPuncTransformer implements TreeTransformer {
   }
 
   static LinkedList<Tree> preTerms(Tree t) {
-    LinkedList<Tree> l = new LinkedList<Tree>();
+    LinkedList<Tree> l = new LinkedList<>();
     preTermHelper(t, l);
     return l;
   }
@@ -69,7 +69,7 @@ public class CollinsPuncTransformer implements TreeTransformer {
       return tf.newTreeNode(tree.label(), Collections.singletonList(tf.newLeaf(tree.children()[0].label())));
     }
     List<Tree> children = tree.getChildrenAsList();
-    LinkedList<Tree> newChildren = new LinkedList<Tree>();
+    LinkedList<Tree> newChildren = new LinkedList<>();
     // promote lower punctuation
     for (Tree child : children) {
       LinkedList<Tree> preTerms = preTerms(child);
@@ -78,7 +78,7 @@ public class CollinsPuncTransformer implements TreeTransformer {
         preTerms.removeFirst();
       }
       Tree newChild = transformNode(child, tf);
-      LinkedList<Tree> temp = new LinkedList<Tree>();
+      LinkedList<Tree> temp = new LinkedList<>();
       if (newChild.children().length > 0) {
         newChildren.add(newChild);
       }

@@ -36,7 +36,7 @@ public class NominalDataReader {
   static RVFDatum<String, Integer> readDatum(String line, String separator, Map<Integer, Index<String>> indices) {
     StringTokenizer st = new StringTokenizer(line, separator);
     //int fno = 0;
-    ArrayList<String> tokens = new ArrayList<String>();
+    ArrayList<String> tokens = new ArrayList<>();
     while (st.hasMoreTokens()) {
       String token = st.nextToken();
       tokens.add(token);
@@ -48,8 +48,8 @@ public class NominalDataReader {
   }
 
   static RVFDatum<String, Integer> readDatum(String[] values, int classColumn, Set<Integer> skip, Map<Integer, Index<String>> indices) {
-    ClassicCounter<Integer> c = new ClassicCounter<Integer>();
-    RVFDatum<String, Integer> d = new RVFDatum<String, Integer>(c);
+    ClassicCounter<Integer> c = new ClassicCounter<>();
+    RVFDatum<String, Integer> d = new RVFDatum<>(c);
     int attrNo = 0;
     for (int index = 0; index < values.length; index++) {
       if (index == classColumn) {
@@ -62,7 +62,7 @@ public class NominalDataReader {
       Integer featKey = Integer.valueOf(attrNo);
       Index<String> ind = indices.get(featKey);
       if (ind == null) {
-        ind = new HashIndex<String>();
+        ind = new HashIndex<>();
         indices.put(featKey, ind);
       }
       // MG: condition on isLocked is useless, since add(E) contains such a condition:
@@ -88,7 +88,7 @@ public class NominalDataReader {
   static ArrayList<RVFDatum<String, Integer>> readData(String filename, Map<Integer, Index<String>> indices) {
     try {
       String sep = ", ";
-      ArrayList<RVFDatum<String, Integer>> examples = new ArrayList<RVFDatum<String, Integer>>();
+      ArrayList<RVFDatum<String, Integer>> examples = new ArrayList<>();
       for(String line : ObjectBank.getLineIterator(new File(filename))) {
         RVFDatum<String, Integer> next = readDatum(line, sep, indices);
         examples.add(next);

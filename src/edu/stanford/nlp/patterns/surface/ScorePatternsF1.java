@@ -45,8 +45,8 @@ public class ScorePatternsF1<E> extends ScorePatterns<E> {
   
   @Override
   public Counter<E> score() {
-    Counter<E> specificity = new ClassicCounter<E>();
-    Counter<E> sensitivity = new ClassicCounter<E>();
+    Counter<E> specificity = new ClassicCounter<>();
+    Counter<E> sensitivity = new ClassicCounter<>();
 
     if (p0Set.keySet().size() == 0)
       throw new RuntimeException("how come p0set size is empty for " + p0

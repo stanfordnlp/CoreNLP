@@ -55,7 +55,7 @@ public class RVFDatum<L, F> implements Datum<L, F> {
    * @param m The Datum to copy.
    */
   public RVFDatum(Datum<L, F> m) {
-    this.features = new ClassicCounter<F>();
+    this.features = new ClassicCounter<>();
     for (F key : m.asFeatures()) {
       features.incrementCount(key, 1.0);
     }

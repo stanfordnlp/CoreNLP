@@ -22,7 +22,7 @@ public class TreeToBracketProcessor {
     boolean words = evalTypes.contains(WordCatConstituent.wordType);
     boolean tags = evalTypes.contains(WordCatConstituent.tagType);
     boolean cats = evalTypes.contains(WordCatConstituent.catType);
-    List<WordCatConstituent> brackets = new ArrayList<WordCatConstituent>();
+    List<WordCatConstituent> brackets = new ArrayList<>();
     if (words || cats || tags) {
       root = ext.transformTree(root);
       for (Tree tree : root) {
@@ -46,14 +46,14 @@ public class TreeToBracketProcessor {
     root1 = ext.transformTree(root1);
     root2 = ext.transformTree(root2);
 
-    List<Tree> firstPreTerms = new ArrayList<Tree>();
+    List<Tree> firstPreTerms = new ArrayList<>();
     for (Tree tree : root1) {
       if (tree.isPrePreTerminal()) {
         firstPreTerms.add(tree);
       }
     }
 
-    List<WordCatConstituent> brackets = new ArrayList<WordCatConstituent>();
+    List<WordCatConstituent> brackets = new ArrayList<>();
     for (Tree preTerm : firstPreTerms) {
       for (Tree tree : root2) {
         if (!tree.isPrePreTerminal()) {

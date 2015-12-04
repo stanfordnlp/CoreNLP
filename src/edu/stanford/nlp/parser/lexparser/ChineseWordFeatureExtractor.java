@@ -121,7 +121,7 @@ public class ChineseWordFeatureExtractor implements WordFeatureExtractor {
   }
 
   public Collection<String> makeFeatures(String word) {
-    List<String> features = new ArrayList<String>();
+    List<String> features = new ArrayList<>();
     if (morpho) {
       for (Map.Entry<String, Set<Character>> e : cmfs.getSingletonFeatures().entrySet()) {
         if (e.getValue().contains(word.charAt(0))) {

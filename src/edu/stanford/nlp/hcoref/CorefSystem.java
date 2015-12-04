@@ -109,30 +109,30 @@ public class CorefSystem {
     /*
        run coref
     */
-    MulticoreWrapper<Pair<Document, CorefSystem>, StringBuilder[]> wrapper = new MulticoreWrapper<Pair<Document, CorefSystem>, StringBuilder[]>(
-        nThreads, new ThreadsafeProcessor<Pair<Document, CorefSystem>, StringBuilder[]>() {
-          @Override
-          public StringBuilder[] process(Pair<Document, CorefSystem> input) {
-            try {
-              Document document = input.first;
-              CorefSystem cs = input.second;
-              
-              StringBuilder[] outputs = new StringBuilder[4];    // conll output and logs
-              
-              cs.coref(document, outputs);
-              
-              return outputs;
-              
-            } catch (Exception e) {
-              throw new RuntimeException(e);
-            }
-          }
-          
-          @Override
-          public ThreadsafeProcessor<Pair<Document, CorefSystem>, StringBuilder[]> newInstance() {
-            return this;
-          }
-        });
+    MulticoreWrapper<Pair<Document, CorefSystem>, StringBuilder[]> wrapper = new MulticoreWrapper<>(
+            nThreads, new ThreadsafeProcessor<Pair<Document, CorefSystem>, StringBuilder[]>() {
+      @Override
+      public StringBuilder[] process(Pair<Document, CorefSystem> input) {
+        try {
+          Document document = input.first;
+          CorefSystem cs = input.second;
+
+          StringBuilder[] outputs = new StringBuilder[4];    // conll output and logs
+
+          cs.coref(document, outputs);
+
+          return outputs;
+
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+
+      @Override
+      public ThreadsafeProcessor<Pair<Document, CorefSystem>, StringBuilder[]> newInstance() {
+        return this;
+      }
+    });
     
     Date startTime = null;
     if(CorefProperties.checkTime(props)) {
@@ -302,9 +302,9 @@ public class CorefSystem {
   public static List<List<Mention>> filterMentionsWithSingletonClusters(Document document, List<List<Mention>> mentions)
   {
 
-    List<List<Mention>> res = new ArrayList<List<Mention>>(mentions.size());
+    List<List<Mention>> res = new ArrayList<>(mentions.size());
     for (List<Mention> ml:mentions) {
-      List<Mention> filtered = new ArrayList<Mention>();
+      List<Mention> filtered = new ArrayList<>();
       for (Mention m:ml) {
         CorefCluster cluster = document.corefClusters.get(m.corefClusterID);
         if (cluster != null && cluster.getCorefMentions().size() > 1) {

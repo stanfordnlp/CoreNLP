@@ -10,13 +10,12 @@ import java.util.Iterator;
 import java.util.function.Supplier;
 
 /**
- * This is basically a type specific wrapper over NDArray
- *
+ * Created on 8/9/15.
  * @author keenon
+ * <p>
+ * This is basically a type specific wrapper over NDArray
  */
 public class ConcatVectorTable extends NDArray<Supplier<ConcatVector>> {
-  NDArray<Supplier<ConcatVector>> originalThunks = null;
-
   /**
    * Constructor takes a list of neighbor variables to use for this factor. This must not change after construction,
    * and the number of states of those variables must also not change.
@@ -28,14 +27,41 @@ public class ConcatVectorTable extends NDArray<Supplier<ConcatVector>> {
   }
 
   /**
+   * Convenience function to write this factor directly to a stream, encoded as proto. Reversible with readFromStream.
+   *
+   * @param stream the stream to write to. does not flush automatically
+   * @throws IOException passed through from the stream
+   */
+  public void writeToStream(OutputStream stream) throws IOException {
+    getProtoBuilder().build().writeTo(stream);
+  }
+
+  /**
    * Convenience function to read a factor (assumed serialized with proto) directly from a stream.
    *
    * @param stream the stream to be read from
    * @return a new in-memory feature factor
-   * @throws IOException
+   * @throws IOException passed through from the stream
    */
   public static ConcatVectorTable readFromStream(InputStream stream) throws IOException {
     return readFromProto(ConcatVectorTableProto.ConcatVectorTable.parseFrom(stream));
+  }
+
+  /**
+   * Returns the proto builder object for this feature factor. Recursively constructs protos for all the concat
+   * vectors in factorTable.
+   *
+   * @return proto Builder object
+   */
+  public ConcatVectorTableProto.ConcatVectorTable.Builder getProtoBuilder() {
+    ConcatVectorTableProto.ConcatVectorTable.Builder b = ConcatVectorTableProto.ConcatVectorTable.newBuilder();
+    for (int n : getDimensions()) {
+      b.addDimensionSize(n);
+    }
+    for (int[] assignment : this) {
+      b.addFactorTable(getAssignmentValue(assignment).get().getProtoBuilder());
+    }
+    return b;
   }
 
   /**
@@ -60,33 +86,6 @@ public class ConcatVectorTable extends NDArray<Supplier<ConcatVector>> {
   }
 
   /**
-   * Convenience function to write this factor directly to a stream, encoded as proto. Reversible with readFromStream.
-   *
-   * @param stream the stream to write to. does not flush automatically
-   * @throws IOException
-   */
-  public void writeToStream(OutputStream stream) throws IOException {
-    getProtoBuilder().build().writeTo(stream);
-  }
-
-  /**
-   * Returns the proto builder object for this feature factor. Recursively constructs protos for all the concat
-   * vectors in factorTable.
-   *
-   * @return proto Builder object
-   */
-  public ConcatVectorTableProto.ConcatVectorTable.Builder getProtoBuilder() {
-    ConcatVectorTableProto.ConcatVectorTable.Builder b = ConcatVectorTableProto.ConcatVectorTable.newBuilder();
-    for (int n : getDimensions()) {
-      b.addDimensionSize(n);
-    }
-    for (int[] assignment : this) {
-      b.addFactorTable(getAssignmentValue(assignment).get().getProtoBuilder());
-    }
-    return b;
-  }
-
-  /**
    * Deep comparison for equality of value, plus tolerance, for every concatvector in the table, plus dimensional
    * arrangement. This is mostly useful for testing.
    *
@@ -103,6 +102,8 @@ public class ConcatVectorTable extends NDArray<Supplier<ConcatVector>> {
     }
     return true;
   }
+
+  NDArray<Supplier<ConcatVector>> originalThunks = null;
 
   /**
    * This is an optimization that will fault all the ConcatVectors into memory, and future .get() on the Supplier objs
@@ -155,6 +156,27 @@ public class ConcatVectorTable extends NDArray<Supplier<ConcatVector>> {
       // Release our replicated set of original thunks
       originalThunks = null;
     }
+  }
+
+  /**
+   * Clones the table, but keeps the values by reference.
+   *
+   * @return a new NDArray, a perfect replica of this one
+   */
+  public ConcatVectorTable cloneTable() {
+    ConcatVectorTable copy = new ConcatVectorTable(getDimensions().clone());
+    // OPTIMIZATION:
+    // Rather than use the standard iterator, which creates lots of int[] arrays on the heap, which need to be GC'd,
+    // we use the fast version that just mutates one array. Since this is read once for us here, this is ideal.
+    Iterator<int[]> fastPassByReferenceIterator = fastPassByReferenceIterator();
+    int[] assignment = fastPassByReferenceIterator.next();
+    while (true) {
+      copy.setAssignmentValue(assignment, getAssignmentValue(assignment));
+      // Set the assignment arrays correctly
+      if (fastPassByReferenceIterator.hasNext()) fastPassByReferenceIterator.next();
+      else break;
+    }
+    return copy;
   }
 }
 

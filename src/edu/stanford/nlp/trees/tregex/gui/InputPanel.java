@@ -111,7 +111,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   private InputPanel() {
     //data stuff
     compiler = new TregexPatternCompiler();
-    historyList = new ArrayList<HistoryEntry>();
+    historyList = new ArrayList<>();
 
     //layout/image stuff
     this.setLayout(new GridBagLayout());
@@ -543,7 +543,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
       public void run() {
         useProgressBar(true);
 
-        final List<TreeFromFile> trees = new ArrayList<TreeFromFile>();
+        final List<TreeFromFile> trees = new ArrayList<>();
 
         //Go through the treebanks and get all the trees
         List<FileTreeNode> treebanks = FilePanel.getInstance().getActiveTreebanks();
@@ -641,12 +641,12 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
           final TRegexGUITreeVisitor visitor = getMatchTreeVisitor(text,this);
           if (visitor == null) return; //means the tregex errored out
           if (this.isInterrupted()) {
-            returnToValidState(text, visitor, new ArrayList<TreeFromFile>());
+            returnToValidState(text, visitor, new ArrayList<>());
             return;
           }
           //System.err.println("Running Script with matches: " + visitor.getMatches());
           List<TreeFromFile> trees = visitor.getMatches();
-          final List<TreeFromFile> modifiedTrees = new ArrayList<TreeFromFile>();
+          final List<TreeFromFile> modifiedTrees = new ArrayList<>();
           for (TreeFromFile tff : trees) {
             if (this.isInterrupted()) {
               returnToValidState(text, visitor, trees);
@@ -846,7 +846,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
     TRegexGUITreeVisitor(TregexPattern p) { //String[] handles) {
       this.p = p;
       //this.handles = handles;
-      matchedTrees = new ArrayList<TreeFromFile>();
+      matchedTrees = new ArrayList<>();
       matchedParts = Generics.newHashMap();
     }
 
@@ -861,7 +861,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
       while (match.find()) {
         Tree curMatch = match.getMatch();
         //System.out.println("Found match is: " + curMatch);
-        if (matchedPartList == null) matchedPartList = new ArrayList<Tree>();
+        if (matchedPartList == null) matchedPartList = new ArrayList<>();
         matchedPartList.add(curMatch);
         numMatches++;
       } // end while match.find()

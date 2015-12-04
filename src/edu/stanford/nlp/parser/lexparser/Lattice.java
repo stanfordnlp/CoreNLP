@@ -18,9 +18,9 @@ public class Lattice implements Serializable, Iterable<LatticeEdge> {
 	private int maxNode = -1;
 	
 	public Lattice() {
-		edges = new ArrayList<LatticeEdge>();
+		edges = new ArrayList<>();
 		nodes = Generics.newHashSet();
-		constraints = new ArrayList<ParserConstraint>();
+		constraints = new ArrayList<>();
 		edgeStartsAt = Generics.newHashMap();
 	}
 
@@ -33,7 +33,7 @@ public class Lattice implements Serializable, Iterable<LatticeEdge> {
 		  maxNode = e.end;
 		
 		if(edgeStartsAt.get(e.start) == null) {
-		  List<LatticeEdge> edges = new ArrayList<LatticeEdge>();
+		  List<LatticeEdge> edges = new ArrayList<>();
 		  edges.add(e);
 		  edgeStartsAt.put(e.start, edges);
 		} else {
@@ -54,7 +54,7 @@ public class Lattice implements Serializable, Iterable<LatticeEdge> {
 	public List<LatticeEdge> getEdgesOverSpan(int start, int end) {
 	 
 	  List<LatticeEdge> allEdges = edgeStartsAt.get(start);
-	  List<LatticeEdge> spanningEdges = new ArrayList<LatticeEdge>();
+	  List<LatticeEdge> spanningEdges = new ArrayList<>();
 	  if(allEdges != null)
 	    for(LatticeEdge e : allEdges)
 	      if(e.end == end)

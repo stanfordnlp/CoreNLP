@@ -69,7 +69,7 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
       if (num > 0 && num % 1000 == 0) { System.err.print("["+num+"]"); }
       num++;
 
-      List<CoreLabel> words = new ArrayList<CoreLabel>();
+      List<CoreLabel> words = new ArrayList<>();
 
       String[] lines = doc.split("\n");
 

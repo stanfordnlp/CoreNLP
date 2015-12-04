@@ -165,7 +165,7 @@ public class MetaFeatureExtractor {
   }
 
   private List<String> identifiers(Counter<String> features, MentionType mentionType) {
-    List<String> identifiers = new ArrayList<String>();
+    List<String> identifiers = new ArrayList<>();
     if (mentionType == MentionType.PRONOMINAL) {
       for (String feature : features.keySet()) {
         if (feature.startsWith("head-word=")) {

@@ -162,25 +162,25 @@ public class CorefDocMaker {
   public Document makeDocument(InputDoc input) throws Exception {
     if (input == null) return null;
     Annotation anno = input.annotation;
+
+    if (Boolean.parseBoolean(props.getProperty("coref.useMarkedDiscourse", "false"))) {
+      anno.set(CoreAnnotations.UseMarkedDiscourseAnnotation.class, true);
+    }
     
     // add missing annotation
     if (addMissingAnnotations) {
       addMissingAnnotation(anno);
     }
 
-    if (Boolean.parseBoolean(props.getProperty("hcoref.useMarkedDiscourse", "false"))) {
-      anno.set(CoreAnnotations.UseMarkedDiscourseAnnotation.class, true);
-    }
-
     // remove nested NP with same headword except newswire document for chinese
     
-    if(input.conllDoc != null && CorefProperties.getLanguage(props)==Locale.CHINESE){
-      CorefProperties.setRemoveNested(props, !input.conllDoc.documentID.contains("nw"));
-    }
+    //if(input.conllDoc != null && CorefProperties.getLanguage(props)==Locale.CHINESE){
+      //CorefProperties.setRemoveNested(props, !input.conllDoc.documentID.contains("nw"));
+    //}
 
     // each sentence should have a CorefCoreAnnotations.CorefMentionsAnnotation.class which maps to List<Mention>
     // this is set by the mentions annotator
-    List<List<Mention>> mentions = new ArrayList<List<Mention>>() ;
+    List<List<Mention>> mentions = new ArrayList<>() ;
     for (CoreMap sentence : anno.get(CoreAnnotations.SentencesAnnotation.class)) {
       mentions.add(sentence.get(CorefCoreAnnotations.CorefMentionsAnnotation.class));
     }

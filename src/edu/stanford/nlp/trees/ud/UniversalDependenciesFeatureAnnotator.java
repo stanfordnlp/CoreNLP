@@ -76,7 +76,7 @@ public class UniversalDependenciesFeatureAnnotator {
 
 
   private HashMap<String,String> getPOSFeatures(String word, String pos) {
-    HashMap<String, String> features = new HashMap<String,String>();
+    HashMap<String, String> features = new HashMap<>();
     String wordPos = word.toLowerCase() + "_" + pos;
     if (wordPosFeatureMap.containsKey(wordPos)) {
        features.putAll(wordPosFeatureMap.get(wordPos));
@@ -117,7 +117,7 @@ public class UniversalDependenciesFeatureAnnotator {
   private static String SELF_REGEX = EnglishPatterns.selfRegex.replace("/", "");
 
   private HashMap<String, String> getGraphFeatures(SemanticGraph sg, IndexedWord word) {
-    HashMap<String, String> features = new HashMap<String,String>();
+    HashMap<String, String> features = new HashMap<>();
 
     /* Determine the case of "you". */
     if (word.tag().equals("PRP") &&
@@ -243,7 +243,7 @@ public class UniversalDependenciesFeatureAnnotator {
    * Extracts features from relative and interrogative pronouns.
    */
   private HashMap<String, String> getRelAndIntPronFeatures(SemanticGraph sg, IndexedWord word) {
-    HashMap<String, String> features = new HashMap<String, String>();
+    HashMap<String, String> features = new HashMap<>();
 
     if (word.tag().startsWith("W")) {
       boolean isRel = false;
@@ -291,7 +291,7 @@ public class UniversalDependenciesFeatureAnnotator {
    *
    */
   private Set<Integer> getImperatives(Tree t) {
-    Set<Integer> imps = new HashSet<Integer>();
+    Set<Integer> imps = new HashSet<>();
 
     TregexMatcher matcher = IMPERATIVE_PATTERN.matcher(t);
 
@@ -427,8 +427,7 @@ public class UniversalDependenciesFeatureAnnotator {
       List<Label> uPOSTags = t.preTerminalYield();
       List<IndexedWord> yield = sg.vertexListSorted();
       int len = yield.size();
-      for (int i = 0; i < len; i++) {
-        IndexedWord word = yield.get(i);
+      for (IndexedWord word : yield) {
         Label uPOSTag = uPOSTags.get(word.index() - 1);
         word.set(CoreAnnotations.CoarseTagAnnotation.class, uPOSTag.value());
       }

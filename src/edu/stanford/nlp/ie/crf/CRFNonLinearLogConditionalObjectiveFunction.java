@@ -134,8 +134,8 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
       edgeParamCount = numEdgeFeatures * labelIndices.get(1).size();
 
       originalFeatureCount = 0;
-      for (int i = 0; i < map.length; i++) {
-        int s = labelIndices.get(map[i]).size();
+      for (int aMap : map) {
+        int s = labelIndices.get(aMap).size();
         originalFeatureCount += s;
       }
 
@@ -277,8 +277,8 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
         int labelIndex = labelIndices.get(j).indexOf(crfLabel);
         int[] cliqueFeatures = docData[i][j];
         //System.err.println(crfLabel + " " + labelIndex);
-        for (int n = 0; n < cliqueFeatures.length; n++) {
-          Ehat[cliqueFeatures[n]][labelIndex]++;
+        for (int cliqueFeature : cliqueFeatures) {
+          Ehat[cliqueFeature][labelIndex]++;
         }
       }
     }
@@ -336,7 +336,7 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
       }
     }
     assert(index == x.length);
-    return new Triple<double[][], double[][], double[][]>(linearWeights2D, inputLayerWeights, outputLayerWeights);
+    return new Triple<>(linearWeights2D, inputLayerWeights, outputLayerWeights);
   }
 
   public CliquePotentialFunction getCliquePotentialFunction(double[] x) {
@@ -652,8 +652,8 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
                 }
               }
             } else { // for edge features
-              for (int n = 0; n < cliqueFeatures.length; n++) {
-                E[cliqueFeatures[n]][k] += p;
+              for (int cliqueFeature : cliqueFeatures) {
+                E[cliqueFeature][k] += p;
               }
             }
           }
@@ -767,13 +767,13 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
       double y = 0;
       double mean = 1.0 / numHiddenUnits;
       int count = 0;
-      for (int i = 0; i < U.length; i++) {
-        for (int j = 0; j < U[i].length; j++) {
-          y = U[i][j];
-          value += (y-mean) * (y-mean) * softmaxLambda;
-          double grad = (y-mean) * oneDividedByTwoSigmaSq;
+      for (double[] aU : U) {
+        for (int j = 0; j < aU.length; j++) {
+          y = aU[j];
+          value += (y - mean) * (y - mean) * softmaxLambda;
+          double grad = (y - mean) * oneDividedByTwoSigmaSq;
           // System.err.println("U["+i+"]["+j+"]="+x[beforeOutputWeights+count]+", Y["+i+"]["+j+"]="+Y[i][j]+", grad="+grad);
-          derivative[beforeOutputWeights+count] += grad;
+          derivative[beforeOutputWeights + count] += grad;
           count++;
         }
       }
@@ -830,10 +830,10 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
     if (featureGrouping != null)
       return featureGrouping;
     else {
-      List<Set<Integer>> groups = new ArrayList<Set<Integer>>();
+      List<Set<Integer>> groups = new ArrayList<>();
       if (flags.groupByInput) {
         for (int nodeFeatureIndex = 0; nodeFeatureIndex < numNodeFeatures; nodeFeatureIndex++) { // for each node feature, we enforce the sparsity
-          Set<Integer> newSet = new HashSet<Integer>();
+          Set<Integer> newSet = new HashSet<>();
           for (int outputClassIndex = 0; outputClassIndex < numClasses; outputClassIndex++) {
             for (int hiddenUnitIndex = 0; hiddenUnitIndex < numHiddenUnits; hiddenUnitIndex++) {
               int firstLayerIndex = hiddenUnitIndex * numClasses + outputClassIndex;
@@ -846,7 +846,7 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
       } else if (flags.groupByHiddenUnit) {
         for (int nodeFeatureIndex = 0; nodeFeatureIndex < numNodeFeatures; nodeFeatureIndex++) { // for each node feature, we enforce the sparsity
           for (int hiddenUnitIndex = 0; hiddenUnitIndex < numHiddenUnits; hiddenUnitIndex++) {
-            Set<Integer> newSet = new HashSet<Integer>();
+            Set<Integer> newSet = new HashSet<>();
             for (int outputClassIndex = 0; outputClassIndex < numClasses; outputClassIndex++) {
               int firstLayerIndex = hiddenUnitIndex * numClasses + outputClassIndex;
               int oneDIndex = firstLayerIndex * numNodeFeatures + nodeFeatureIndex + edgeParamCount;
@@ -858,7 +858,7 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
       } else {
         for (int nodeFeatureIndex = 0; nodeFeatureIndex < numNodeFeatures; nodeFeatureIndex++) { // for each node feature, we enforce the sparsity
           for (int outputClassIndex = 0; outputClassIndex < numClasses; outputClassIndex++) {
-            Set<Integer> newSet = new HashSet<Integer>();
+            Set<Integer> newSet = new HashSet<>();
             for (int hiddenUnitIndex = 0; hiddenUnitIndex < numHiddenUnits; hiddenUnitIndex++) {
               int firstLayerIndex = hiddenUnitIndex * numClasses + outputClassIndex;
               int oneDIndex = firstLayerIndex * numNodeFeatures + nodeFeatureIndex + edgeParamCount;

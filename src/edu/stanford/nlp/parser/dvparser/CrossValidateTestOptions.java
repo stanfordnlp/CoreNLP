@@ -20,7 +20,7 @@ public class CrossValidateTestOptions {
     String testTreebankPath = null;
     FileFilter testTreebankFilter = null;
 
-    List<String> unusedArgs = new ArrayList<String>();
+    List<String> unusedArgs = new ArrayList<>();
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-lexparser")) {
         lexparserFile = args[argIndex + 1];

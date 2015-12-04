@@ -50,6 +50,7 @@ public abstract class StatisticalCorefSystem {
              StatisticalCorefProperties.rankingModelPath(props),
              StatisticalCorefProperties.wordCountsPath(props),
              StatisticalCorefProperties.maxMentionDistance(props),
+             StatisticalCorefProperties.maxMentionDistanceWithStringMatch(props),
              StatisticalCorefProperties.pairwiseScoreThresholds(props));
        }
      } catch (Exception e) {

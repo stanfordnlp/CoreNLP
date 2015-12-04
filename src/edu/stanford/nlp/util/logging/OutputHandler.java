@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Stack;
+import java.util.function.Supplier;
 
 import edu.stanford.nlp.math.SloppyMath;
 import edu.stanford.nlp.util.logging.Redwood.Record;
@@ -27,11 +28,11 @@ public abstract class OutputHandler extends LogRecordHandler{
    * A list of tracks which have been started but not yet printed as no
    * log messages are in them yet.
    */
-  protected LinkedList<Record> queuedTracks = new LinkedList<Record>();
+  protected LinkedList<Record> queuedTracks = new LinkedList<>();
   /**
    * Information about the current and higher level tracks
    */
-  protected Stack<TrackInfo> trackStack = new Stack<TrackInfo>();
+  protected Stack<TrackInfo> trackStack = new Stack<>();
   /**
    * The current track info; used to avoid trackStack.peek() calls
    */
@@ -232,13 +233,13 @@ public abstract class OutputHandler extends LogRecordHandler{
   /** {@inheritDoc} */
   @Override
   public List<Record> handle(Record record) {
-    StringBuilder b = new StringBuilder();
+    StringBuilder b = new StringBuilder(1024);
 
     //--Special case for Exceptions
     String[] content;
     if (record.content instanceof Throwable) {
       //(vars)
-      List<String> lines = new ArrayList<String>();
+      List<String> lines = new ArrayList<>();
       StackTraceElement[] trace = null;
       StackTraceElement topTraceElement= null;
       //(root message)
@@ -277,11 +278,17 @@ public abstract class OutputHandler extends LogRecordHandler{
     } else if(record.content == null){
       content = new String[]{"null"};
     } else {
-      String toStr = record.content.toString();
+      String toStr;
+      if (record.content instanceof Supplier) {
+        //noinspection unchecked
+        toStr = ((Supplier<Object>) record.content).get().toString();
+      } else {
+        toStr = record.content.toString();
+      }
       if (toStr == null) {
         content = new String[]{"<null toString()>"};
       } else {
-        content = record.content.toString().split("\n"); //would be nice to get rid of this 'split()' call at some point
+        content = toStr.split("\n"); //would be nice to get rid of this 'split()' call at some point
       }
     }
 
@@ -299,7 +306,7 @@ public abstract class OutputHandler extends LogRecordHandler{
     Color color = Color.NONE;
     Style style = Style.NONE;
     //(get channels)
-    ArrayList<Object> printableChannels = new ArrayList<Object>();
+    ArrayList<Object> printableChannels = new ArrayList<>();
     for(Object chan : record.channels()){
       if(chan instanceof Color){ color = (Color) chan; }
       else if(chan instanceof Style){ style = (Style) chan; }
@@ -359,7 +366,7 @@ public abstract class OutputHandler extends LogRecordHandler{
     if(info != null){
       info.numElementsPrinted += 1;
     }
-    ArrayList<Record> rtn = new ArrayList<Record>();
+    ArrayList<Record> rtn = new ArrayList<>();
     rtn.add(record);
     return rtn;
   }

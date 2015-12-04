@@ -62,6 +62,9 @@ import java.util.zip.ZipFile;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This class provides the top-level API and command-line interface to a set
  * of reasonably good treebank-trained parsers.  The name reflects the main
@@ -88,6 +91,8 @@ import java.lang.reflect.Method;
  * @author John Bauer (made threadsafe)
  */
 public class LexicalizedParser extends ParserGrammar implements Serializable {
+
+  private static Logger logger = LoggerFactory.getLogger(LexicalizedParser.class);
 
   public Lexicon lex;
   public BinaryGrammar bg;
@@ -279,7 +284,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    * the parse tree associated with that list.
    */
   public Tree parseStrings(List<String> lst) {
-    List<Word> words = new ArrayList<Word>();
+    List<Word> words = new ArrayList<>();
     for (String word : lst) {
       words.add(new Word(word));
     }
@@ -309,7 +314,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
   }
 
   public List<Tree> parseMultiple(final List<? extends List<? extends HasWord>> sentences) {
-    List<Tree> trees = new ArrayList<Tree>();
+    List<Tree> trees = new ArrayList<>();
     for (List<? extends HasWord> sentence : sentences) {
       trees.add(parse(sentence));
     }
@@ -322,17 +327,18 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    * resulting parse trees in the same order.
    */
   public List<Tree> parseMultiple(final List<? extends List<? extends HasWord>> sentences, final int nthreads) {
-    MulticoreWrapper<List<? extends HasWord>, Tree> wrapper = new MulticoreWrapper<List<? extends HasWord>, Tree>(nthreads, new ThreadsafeProcessor<List<? extends HasWord>, Tree>() {
-        @Override
-        public Tree process(List<? extends HasWord> sentence) {
-          return parse(sentence);
-        }
-        @Override
-        public ThreadsafeProcessor<List<? extends HasWord>, Tree> newInstance() {
-          return this;
-        }
-      });
-    List<Tree> trees = new ArrayList<Tree>();
+    MulticoreWrapper<List<? extends HasWord>, Tree> wrapper = new MulticoreWrapper<>(nthreads, new ThreadsafeProcessor<List<? extends HasWord>, Tree>() {
+      @Override
+      public Tree process(List<? extends HasWord> sentence) {
+        return parse(sentence);
+      }
+
+      @Override
+      public ThreadsafeProcessor<List<? extends HasWord>, Tree> newInstance() {
+        return this;
+      }
+    });
+    List<Tree> trees = new ArrayList<>();
     for (List<? extends HasWord> sentence : sentences) {
       wrapper.put(sentence);
       while (wrapper.peek()) {
@@ -534,7 +540,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
   protected static LexicalizedParser getParserFromTextFile(String textFileOrUrl, Options op) {
     try {
       Timing tim = new Timing();
-      System.err.print("Loading parser from text file " + textFileOrUrl + ' ');
+      logger.info("Loading parser from text file " + textFileOrUrl + ' ');
       BufferedReader in = IOUtils.readerFromString(textFileOrUrl);
       Timing.startTime();
 
@@ -600,7 +606,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
   public static LexicalizedParser getParserFromSerializedFile(String serializedFileOrUrl) {
     try {
       Timing tim = new Timing();
-      System.err.print("Loading parser from serialized file " + serializedFileOrUrl + " ... ");
+      logger.info("Loading parser from serialized file " + serializedFileOrUrl + " ... ");
       ObjectInputStream in = IOUtils.readStreamFromString(serializedFileOrUrl);
       LexicalizedParser pd = loadModel(in);
 
@@ -714,7 +720,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
       op.trainOptions.splitters = ParentAnnotationStats.getSplitCategories(wholeTreebank, op.trainOptions.tagSelectiveSplit, 0, op.trainOptions.selectiveSplitCutOff, op.trainOptions.tagSelectiveSplitCutOff, tlp);
       removeDeleteSplittersFromSplitters(tlp, op);
       if (op.testOptions.verbose) {
-        List<String> list = new ArrayList<String>(op.trainOptions.splitters);
+        List<String> list = new ArrayList<>(op.trainOptions.splitters);
         Collections.sort(list);
         System.err.println("Parent split categories: " + list);
       }
@@ -766,7 +772,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
 
   private static void removeDeleteSplittersFromSplitters(TreebankLanguagePack tlp, Options op) {
     if (op.trainOptions.deleteSplitters != null) {
-      List<String> deleted = new ArrayList<String>();
+      List<String> deleted = new ArrayList<>();
       for (String del : op.trainOptions.deleteSplitters) {
         String baseDel = tlp.basicCategory(del);
         boolean checkBasic = del.equals(baseDel);
@@ -862,9 +868,9 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
       tagIndex = extractor.tagIndex;
       Timing.tick("done.");
     } else {
-      stateIndex = new HashIndex<String>();
-      wordIndex = new HashIndex<String>();
-      tagIndex = new HashIndex<String>();
+      stateIndex = new HashIndex<>();
+      wordIndex = new HashIndex<>();
+      tagIndex = new HashIndex<>();
 
       // extract grammars
       BinaryGrammarExtractor bgExtractor = new BinaryGrammarExtractor(op, stateIndex);
@@ -1221,7 +1227,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
     }
 
     Options op = new Options();
-    List<String> optionArgs = new ArrayList<String>();
+    List<String> optionArgs = new ArrayList<>();
     String encoding = null;
     // while loop through option arguments
     while (argIndex < args.length && args[argIndex].charAt(0) == '-') {
@@ -1376,7 +1382,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
 
       List<List<TaggedWord>> extraTaggedWords = null;
       if (op.trainOptions.taggedFiles != null) {
-        extraTaggedWords = new ArrayList<List<TaggedWord>>();
+        extraTaggedWords = new ArrayList<>();
         List<TaggedFileRecord> fileRecords = TaggedFileRecord.createRecords(new Properties(), op.trainOptions.taggedFiles);
         for (TaggedFileRecord record : fileRecords) {
           for (List<TaggedWord> sentence : record.reader()) {

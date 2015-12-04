@@ -111,10 +111,10 @@ public class ACEMentionExtractor extends MentionExtractor {
   }
 
   public Document nextDoc() throws Exception {
-    List<List<CoreLabel>> allWords = new ArrayList<List<CoreLabel>>();
-    List<List<Mention>> allGoldMentions = new ArrayList<List<Mention>>();
+    List<List<CoreLabel>> allWords = new ArrayList<>();
+    List<List<Mention>> allGoldMentions = new ArrayList<>();
     List<List<Mention>> allPredictedMentions;
-    List<Tree> allTrees = new ArrayList<Tree>();
+    List<Tree> allTrees = new ArrayList<>();
 
     Annotation anno;
 
@@ -166,12 +166,12 @@ public class ACEMentionExtractor extends MentionExtractor {
   }
 
   private void extractGoldMentions(CoreMap s, List<List<Mention>> allGoldMentions, EntityComparator comparator) {
-    List<Mention> goldMentions = new ArrayList<Mention>();
+    List<Mention> goldMentions = new ArrayList<>();
     allGoldMentions.add(goldMentions);
     List<EntityMention> goldMentionList = s.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
     List<CoreLabel> words = s.get(CoreAnnotations.TokensAnnotation.class);
 
-    TreeSet<EntityMention> treeForSortGoldMentions = new TreeSet<EntityMention>(comparator);
+    TreeSet<EntityMention> treeForSortGoldMentions = new TreeSet<>(comparator);
     if(goldMentionList!=null) treeForSortGoldMentions.addAll(goldMentionList);
     if(!treeForSortGoldMentions.isEmpty()){
       for(EntityMention e : treeForSortGoldMentions){
@@ -214,7 +214,7 @@ public class ACEMentionExtractor extends MentionExtractor {
   private static void printRawDoc(List<CoreMap> sentences, List<List<Mention>> allMentions, String filename, boolean gold) throws FileNotFoundException {
     StringBuilder doc = new StringBuilder();
     int previousOffset = 0;
-    Counter<Integer> mentionCount = new ClassicCounter<Integer>();
+    Counter<Integer> mentionCount = new ClassicCounter<>();
     for(List<Mention> l : allMentions) {
       for(Mention m : l) {
         mentionCount.incrementCount(m.goldCorefClusterID);
@@ -230,8 +230,8 @@ public class ACEMentionExtractor extends MentionExtractor {
       List<CoreLabel> t = sentence.get(CoreAnnotations.TokensAnnotation.class);
       if(previousOffset+2 < t.get(0).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class)) sent += "\n";
       previousOffset = t.get(t.size()-1).get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
-      Counter<Integer> startCounts = new ClassicCounter<Integer>();
-      Counter<Integer> endCounts = new ClassicCounter<Integer>();
+      Counter<Integer> startCounts = new ClassicCounter<>();
+      Counter<Integer> endCounts = new ClassicCounter<>();
       Map<Integer, Set<Integer>> endID = Generics.newHashMap();
       for (Mention m : mentions) {
         startCounts.incrementCount(m.startIndex);

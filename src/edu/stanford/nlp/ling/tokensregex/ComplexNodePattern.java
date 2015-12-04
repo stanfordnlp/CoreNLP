@@ -56,7 +56,7 @@ public class ComplexNodePattern<M,K> extends NodePattern<M> {
   public static <M,K> ComplexNodePattern valueOf(
       Env env, Map<String, String> attributes, BiFunction<M,K,Object> getter, Function<Pair<Env,String>,K> getKey)
   {
-    ComplexNodePattern<M,K> p = new ComplexNodePattern<M,K>(getter, new ArrayList<Pair<K,NodePattern>>(attributes.size()));
+    ComplexNodePattern<M,K> p = new ComplexNodePattern<>(getter, new ArrayList<>(attributes.size()));
     p.populate(env, attributes, getKey);
     return p;
   }
@@ -154,7 +154,7 @@ public class ComplexNodePattern<M,K> extends NodePattern<M> {
 
   @Override
   public Object matchWithResult(M token) {
-    Map<K,Object> matchResults = new HashMap<K, Object>();//Generics.newHashMap();
+    Map<K,Object> matchResults = new HashMap<>();//Generics.newHashMap();
     if (match(token, matchResults)) {
       return matchResults;
     } else {
@@ -344,7 +344,7 @@ public class ComplexNodePattern<M,K> extends NodePattern<M> {
     public StringInSetAnnotationPattern(Set<String> targets, int flags) {
       this.flags = flags;
       // if ignoreCase/normalize is true - convert targets to lowercase/normalized
-      this.targets = new HashSet<String>(targets.size());
+      this.targets = new HashSet<>(targets.size());
       for (String target:targets) {
         this.targets.add(getNormalized(target));
       }

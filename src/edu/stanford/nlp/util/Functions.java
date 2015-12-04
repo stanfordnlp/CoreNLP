@@ -59,7 +59,7 @@ public class Functions {
     if( f instanceof InvertedBijection) {
       return ((InvertedBijection<T2, T1>)f).f;
     }
-    return new InvertedBijection<T1,T2> (f);
+    return new InvertedBijection<>(f);
   }
 
 }
