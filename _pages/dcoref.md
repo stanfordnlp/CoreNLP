@@ -11,6 +11,7 @@ Implements both pronominal and nominal coreference resolution. The entire corefe
 | Property name | Annotator class name | Generated Annotation |
 | --- | --- | --- |
 | dcoref | DeterministicCorefAnnotator | CorefChainAnnotation | 
+| scoref | CorefAnnotator              | CorefChainAnnotation |
 
 ## Options
 
