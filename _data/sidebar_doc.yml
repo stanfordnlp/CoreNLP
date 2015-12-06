@@ -66,8 +66,8 @@ entries:
         - title: Dependency Parsing 
           url: depparse.html
 
-        - title: Coreference Resolution (Sieve-Based)
-          url: dcoref.html
+        - title: Coreference Resolution
+          url: coref.html
 
         - title: Natural Logic 
           url: natlog.html

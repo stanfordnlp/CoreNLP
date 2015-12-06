@@ -1,7 +1,7 @@
 ---
-title: DeterministicCorefAnnotator 
-keywords: dcoref
-permalink: '/dcoref.html'
+title: CorefAnnotator 
+keywords: coref
+permalink: '/coref.html'
 ---
 
 ## Description
@@ -11,7 +11,7 @@ Implements both pronominal and nominal coreference resolution. The entire corefe
 | Property name | Annotator class name | Generated Annotation |
 | --- | --- | --- |
 | dcoref | DeterministicCorefAnnotator | CorefChainAnnotation | 
-| scoref | CorefAnnotator              | CorefChainAnnotation |
+| coref | CorefAnnotator              | CorefChainAnnotation |
 
 ## Options
 
@@ -22,6 +22,17 @@ Implements both pronominal and nominal coreference resolution. The entire corefe
 * dcoref.plural and dcoref.singular: lists of words that are plural or singular, from (Bergsma and Lin, 2006). The format is one word per line. All the above dictionaries are already set to the files included in the stanford-corenlp-models JAR file, but they can easily be adjusted to your needs by setting these properties.
 * dcoref.maxdist: the maximum distance at which to look for mentions.  Can help keep the runtime down in long documents.
 * oldCorefFormat: produce a CorefGraphAnnotation, the output format used in releases v1.0.3 or earlier.  Note that this uses quadratic memory rather than linear.
+
+## Usage
+
+There are a variety of settings for using coreference.  The following table summarizes the options:
+
+| Annotator | Language | Mode | Mention Type | Parse Requirement | Speed | F1 score (2012 CoNLL) |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | 
+| dcoref | en | - | - | parse | fastest | 55.59 |
+| coref | en | statistical | rule | parse | slow | 63.61 |
+| coref | en | statistical | dependency | depparse | faster | 56.05 |
+| coref | zh | hybrid | rule | parse | - | 53.18 | 
 
 ## More information 
 
