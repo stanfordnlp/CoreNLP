@@ -23,16 +23,89 @@ Implements both pronominal and nominal coreference resolution. The entire corefe
 * dcoref.maxdist: the maximum distance at which to look for mentions.  Can help keep the runtime down in long documents.
 * oldCorefFormat: produce a CorefGraphAnnotation, the output format used in releases v1.0.3 or earlier.  Note that this uses quadratic memory rather than linear.
 
+## Overview
+
+There are several settings which can effect the speed and accuracy of coreference resolution.
+Some methods require both constituency and dependency parses, while others simply need the dependency parse.
+The following tables give an overview of some of the possibilities. 
+
+* the F1 scores are on the 2012 CoNLL evaluation data
+* the speed measurements were recorded on a 2014 Macbook Pro with a 2.5 GHz Intel Core i7 processor
+
+| Annotator | Language | Coreference/MD Modes | Parse Requirements | F1 score |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| dcoref | en | N/A | constituency and dependency | 55.59 |
+| coref | en | statistical/rule | constituency and dependency | 63.61 |
+| coref | en | statistical/dependency | dependency | 56.05 |
+
+| Annotator | Language | Coreference/MD Modes | Parsing Speed | Coref Speed |
+| :--- | :--- | :--- | :--- | :--- |
+| dcoref | en | N/A | 4.45 seconds per doc | .123 seconds per doc |
+| coref | en | statistical/rule | 4.45 seconds per doc | 3.50 seconds per doc | 
+| coref | en | statistical/dependency | .049 seconds per doc | 1.03 seconds per doc |
+
 ## Usage
 
-There are a variety of settings for using coreference.  The following table summarizes the options:
+### Command Line
 
-| Annotator | Language | Mode | Mention Type | Parse Requirement | Speed | F1 score (2012 CoNLL) |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | 
-| dcoref | en | - | - | parse | fastest | 55.59 |
-| coref | en | statistical | rule | parse | slow | 63.61 |
-| coref | en | statistical | dependency | depparse | faster | 56.05 |
-| coref | zh | hybrid | rule | parse | - | 53.18 | 
+Run statistical coref to maximize F1 on the 2012 CoNLL data set
+
+```bash
+java -Xmx5g -cp stanford-corenlp-3.6.0.jar:stanford-corenlp-models-3.6.0.jar edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,mention,coref -file example_file.txt
+```
+
+Run statistical coref for maximum speed
+
+```bash
+java -Xmx5g -cp stanford-corenlp-3.6.0.jar:stanford-corenlp-models-3.6.0.jar edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,depparse,mention,coref -file example_file.txt 
+-coref.md.type dependency -coref.doClustering false 
+```
+
+Run deterministic coref
+
+```bash
+java -Xmx3g -cp stanford-corenlp-3.6.0.jar:stanford-corenlp-models-3.6.0.jar edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file example_file.txt
+```
+
+### API
+
+Accessing coref and mention information from an Annotation
+
+```java
+import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.hcoref.data.CorefChain;
+import edu.stanford.nlp.hcoref.data.Mention;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.util.CoreMap;
+
+import java.util.Properties;
+
+public class CorefExample {
+
+  public static void main(String[] args) throws Exception {
+
+    Annotation document = new Annotation("Barack Obama was born in Hawaii.  He is the president.  Obama was elected in 2008.");
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,mention,coref");
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    pipeline.annotate(document);
+    System.out.println("---");
+    System.out.println("coref chains");
+    for (CorefChain cc : document.get(CorefCoreAnnotations.CorefChainAnnotation.class).values()) {
+      System.out.println("\t"+cc);
+    }
+    for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
+      System.out.println("---");
+      System.out.println("mentions");
+      for (Mention m : sentence.get(CorefCoreAnnotations.CorefMentionsAnnotation.class)) {
+        System.out.println("\t"+m);
+       }
+    }
+  }
+}
+```
 
 ## More information 
 
