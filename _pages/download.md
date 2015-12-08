@@ -6,7 +6,7 @@ permalink: '/download.html'
 
 [**Download Stanford CoreNLP version 3.6.0**](http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-06.zip).
 
-The full download, including machine learned models and required libraries is 260 MB.
+The full download, including machine learned models and required libraries is 536 MB.
 If you want to change the source code and recompile the files, see [these instructions](files/basic-compiling.txt).
 
 **GitHub**: Here is the [Stanford CoreNLP GitHub site](https://github.com/stanfordnlp/CoreNLP).
