@@ -34,16 +34,16 @@ The following tables give an overview of some of the possibilities.
 
 | Annotator | Language | Coreference/MD Modes | Parse Requirements | F1 score |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| dcoref | en | N/A | constituency and dependency | 55.59 |
 | coref | en | statistical/rule | constituency and dependency | 63.61 |
 | coref | en | statistical/dependency | dependency | 56.05 |
+| dcoref | en | N/A | constituency and dependency | 55.59 |
 | coref | zh | hybrid/rule | constituency and dependency | 53.18 |
 
 | Annotator | Language | Coreference/MD Modes | Parsing Speed | Coref Speed |
 | :--- | :--- | :--- | :--- | :--- |
-| dcoref | en | N/A | 4.45 seconds per doc | .123 seconds per doc |
 | coref | en | statistical/rule | 4.45 seconds per doc | 3.50 seconds per doc | 
 | coref | en | statistical/dependency | .049 seconds per doc | 1.03 seconds per doc |
+| dcoref | en | N/A | 4.45 seconds per doc | .123 seconds per doc |
 | coref | zh | hybrid/rule | - | - |
 
 ## Usage
@@ -67,6 +67,12 @@ Run deterministic coref
 
 ```bash
 java -Xmx3g -cp stanford-corenlp-3.6.0.jar:stanford-corenlp-models-3.6.0.jar edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file example_file.txt
+```
+
+Run Chinese coref
+
+```bash
+java -Xmx4g -cp stanford-corenlp-3.6.0.jar:stanford-chinese-corenlp-2015-12-07-models.jar edu.stanford.nlp.pipeline.StanfordCoreNLP -file example_file.txt -props edu/stanford/nlp/hcoref/properties/zh-dcoref-default.properties
 ```
 
 ### API
