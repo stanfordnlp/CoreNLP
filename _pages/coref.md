@@ -7,6 +7,7 @@ permalink: '/coref.html'
 ## Description
 
 Implements both pronominal and nominal coreference resolution. The entire coreference graph (with head words of mentions as nodes) is saved in CorefChainAnnotation. 
+Note: there are currently two annotators that perform coreference: dcoref and coref.  Long term the plan is to merge dcoref and coref into one annotator.
 
 | Property name | Annotator class name | Generated Annotation |
 | --- | --- | --- |
