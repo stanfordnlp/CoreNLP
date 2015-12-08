@@ -76,7 +76,7 @@ java -Xmx3g -cp stanford-corenlp-3.6.0.jar:stanford-corenlp-models-3.6.0.jar edu
 Run Chinese coref
 
 ```bash
-java -Xmx4g -cp stanford-corenlp-3.6.0.jar:stanford-chinese-corenlp-2015-12-07-models.jar edu.stanford.nlp.pipeline.StanfordCoreNLP -file example_file.txt -props edu/stanford/nlp/hcoref/properties/zh-coref-default.properties
+java -Xmx4g -cp stanford-corenlp-3.6.0.jar:stanford-chinese-corenlp-2015-12-08-models.jar edu.stanford.nlp.pipeline.StanfordCoreNLP -file example_file.txt -props edu/stanford/nlp/hcoref/properties/zh-coref-default.properties
 ```
 
 ### API
