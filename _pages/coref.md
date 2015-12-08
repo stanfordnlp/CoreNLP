@@ -44,7 +44,7 @@ The following tables give an overview of some of the possibilities.
 | coref | en | statistical/rule | 4.45 seconds per doc | 3.50 seconds per doc | 
 | coref | en | statistical/dependency | .049 seconds per doc | 1.03 seconds per doc |
 | dcoref | en | N/A | 4.45 seconds per doc | .123 seconds per doc |
-| coref | zh | hybrid/rule | - | - |
+| coref | zh | hybrid/rule | 19.1 seconds per doc | .044 seconds per doc |
 
 ## Usage
 
