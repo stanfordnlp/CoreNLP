@@ -37,12 +37,14 @@ The following tables give an overview of some of the possibilities.
 | dcoref | en | N/A | constituency and dependency | 55.59 |
 | coref | en | statistical/rule | constituency and dependency | 63.61 |
 | coref | en | statistical/dependency | dependency | 56.05 |
+| coref | zh | hybrid/rule | constituency and dependency | 53.18 |
 
 | Annotator | Language | Coreference/MD Modes | Parsing Speed | Coref Speed |
 | :--- | :--- | :--- | :--- | :--- |
 | dcoref | en | N/A | 4.45 seconds per doc | .123 seconds per doc |
 | coref | en | statistical/rule | 4.45 seconds per doc | 3.50 seconds per doc | 
 | coref | en | statistical/dependency | .049 seconds per doc | 1.03 seconds per doc |
+| coref | zh | hybrid/rule | - | - |
 
 ## Usage
 
