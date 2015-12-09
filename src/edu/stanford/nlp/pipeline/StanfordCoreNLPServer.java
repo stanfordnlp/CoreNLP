@@ -34,11 +34,9 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  */
 public class StanfordCoreNLPServer implements Runnable {
   protected static int DEFAULT_PORT = 9000;
-  protected static int DEFAULT_TIMEOUT = 5;
 
   protected HttpServer server;
-  protected final int serverPort;
-  protected final int timeoutSeconds;
+  protected int serverPort;
   protected final FileHandler staticPageHandle;
   protected final String shutdownKey;
 
@@ -63,9 +61,8 @@ public class StanfordCoreNLPServer implements Runnable {
   private final ExecutorService corenlpExecutor = Executors.newFixedThreadPool(Execution.threads);
 
 
-  public StanfordCoreNLPServer(int port, int timeout) throws IOException {
+  public StanfordCoreNLPServer(int port) throws IOException {
     serverPort = port;
-    timeoutSeconds = timeout;
 
     defaultProps = new Properties();
     defaultProps.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, depparse, dcoref, natlog, openie");
@@ -359,7 +356,7 @@ public class StanfordCoreNLPServer implements Runnable {
           pipeline.annotate(ann);
           return ann;
         });
-        Annotation completedAnnotation = completedAnnotationFuture.get(timeoutSeconds, TimeUnit.SECONDS);
+        Annotation completedAnnotation = completedAnnotationFuture.get(5, TimeUnit.SECONDS);
 
         // Get output
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -659,15 +656,6 @@ public class StanfordCoreNLPServer implements Runnable {
   }
 
   /**
-   * Help output
-   */
-  protected static void printHelp(PrintStream os) {
-    os.println("Usage: StanfordCoreNLPServer [port=9000] [timeout=5]");
-    os.println("port\t\t\t\t Which port to use");
-    os.println("timeout\t\t\t\t How long to wait before timing out");
-  }
-
-  /**
    * The main method.
    * Read the command line arguments and run the server.
    *
@@ -677,29 +665,10 @@ public class StanfordCoreNLPServer implements Runnable {
    */
   public static void main(String[] args) throws IOException {
     int port = DEFAULT_PORT;
-    int timeout = DEFAULT_TIMEOUT;
-
-    Properties props = new Properties();
-    if (args.length > 0) {
-      props = StringUtils.argsToProperties(args);
-      boolean hasH = props.containsKey("h");
-      boolean hasHelp = props.containsKey("help");
-      if (hasH || hasHelp) {
-        printHelp(System.err);
-        return;
-      }
+    if(args.length > 0) {
+      port = Integer.parseInt(args[0]);
     }
-    props.list(System.err);
-    if(props.containsKey("port")) {
-      port = Integer.parseInt(props.getProperty("port"));
-    }
-    if(props.containsKey("timeout")) {
-      timeout = Integer.parseInt(props.getProperty("timeout"));
-    }
-    log("Starting server on port " + port + " with timeout of " + timeout + " seconds.");
-
-    // Run the server
-    StanfordCoreNLPServer server = new StanfordCoreNLPServer(port, timeout);
+    StanfordCoreNLPServer server = new StanfordCoreNLPServer(port);
     server.run();
   }
 }

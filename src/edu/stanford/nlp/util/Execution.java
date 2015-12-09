@@ -602,10 +602,11 @@ public class Execution {
     exec(toRun, args, false);
   }
 
-  public static void exec(Runnable toRun, String[] args, Class[] optionClasses) {
+  public static void exec(Runnable toRun, String[] args, Class... optionClasses) {
     Execution.optionClasses = optionClasses;
     exec(toRun, args, false);
   }
+
   public static void exec(Runnable toRun, String[] args, Class[] optionClasses, boolean exit) {
     Execution.optionClasses = optionClasses;
     exec(toRun, StringUtils.argsToProperties(args), exit);
