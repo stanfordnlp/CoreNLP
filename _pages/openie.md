@@ -89,6 +89,7 @@ import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 
 import java.util.Collection;
@@ -102,7 +103,7 @@ public class OpenIEDemo {
   public static void main(String[] args) throws Exception {
     // Create the Stanford CoreNLP pipeline
     Properties props = new Properties();
-    props.setProperty("annotators", "tokenize,ssplit,pos,depparse,natlog,openie");
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,natlog,openie");
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 
     // Annotate an example document.
