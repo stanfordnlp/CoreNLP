@@ -121,6 +121,8 @@ public class CorefExample {
 
 ## Citing Stanford Coreference
 
+the latest statistical coreference system
+
 > Kevin Clark and Christopher D. Manning.  2015. [Entity-Centric Coreference Resolution with Model Stacking](http://cs.stanford.edu/people/kevclark/resources/clark-manning-acl15-entity.pdf) In *Proceedings of the ACL* \[[pdf](http://cs.stanford.edu/people/kevclark/resources/clark-manning-acl15-entity.pdf)\] \[[bib](http://cs.stanford.edu/people/kevclark/resources/clark-manning-acl15-entity.bib)\]
 
 ## More information 
