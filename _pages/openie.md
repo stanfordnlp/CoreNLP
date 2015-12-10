@@ -61,21 +61,21 @@ CoreNLP API
 An interactive command-line shell can be run with the command:
 
 ```bash
-java -mx1g -cp stanford-corenlp-<version>.jar:stanford-corenlp-models-<version>.jar edu.stanford.nlp.naturalli.OpenIE
+java -mx1g -cp stanford-corenlp-<version>.jar:stanford-corenlp-models-<version>.jar:* edu.stanford.nlp.naturalli.OpenIE
 ```
 
 In addition, the program can be run on a collection of files either by passing the
 files directly as command-line arguments:
 
 ```bash
-java -mx1g -cp stanford-corenlp-<version>.jar:stanford-corenlp-models-<version>.jar edu.stanford.nlp.naturalli.OpenIE  /path/to/file1  /path/to/file2 
+java -mx1g -cp stanford-corenlp-<version>.jar:stanford-corenlp-models-<version>.jar:* edu.stanford.nlp.naturalli.OpenIE  /path/to/file1  /path/to/file2 
 ```
 
 or by setting the `-filelist` argument to a file containing a list of files to annotate,
 one per line:
 
 ```bash
-java -mx1g -cp stanford-corenlp-<version>.jar:stanford-corenlp-models-<version>.jar edu.stanford.nlp.naturalli.OpenIE  -filelist /path/to/filelist
+java -mx1g -cp stanford-corenlp-<version>.jar:stanford-corenlp-models-<version>.jar:* edu.stanford.nlp.naturalli.OpenIE  -filelist /path/to/filelist
 ```
 
 
