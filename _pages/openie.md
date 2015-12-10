@@ -145,7 +145,7 @@ public class OpenIEDemo {
     Document doc = new Document("Obama was born in Hawaii. He is our president.");
 
     // Iterate over the sentences in the document
-    for (Sentence sent : doc.sentences) {
+    for (Sentence sent : doc.sentences()) {
       // Iterate over the triples in the sentence
       for (RelationTriple triple : sent.openieTriples()) {
         // Print the triple
