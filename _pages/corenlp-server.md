@@ -55,9 +55,10 @@ A common property to set is the output format of the API. The server supports al
 * **XML**: Print the annotations in XML format. This corresponds to the properties: `{"outputFormat": "xml"}`.
 * **Text**: Print the annotations in a human-readable text format. This is the default format for the CoreNLP command-line interface. This corresponds to the property: `{"outputFormat": "text"}`.  
 * **Serialized**: Print the annotations in a losslessly serialized format. This is the recommended option when calling the API programmatically from a language that supports one of the serialized formats. In addition to setting the output format flag, you must also provide a valid serializer class. For example, for protocol buffers, this would be: 
-    ```{"outputFormat": "serialized", 
-        "serializer": "edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer"}
-    ```
+  ```javascript
+{"outputFormat": "serialized", 
+ "serializer": "edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer"}
+  ```
   The serializers currently supported are:
   - `edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer` Writes the output to a protocol buffer, as defined in the definition file `edu.stanford.nlp.pipeline.CoreNLP.proto`.
   -  `edu.stanford.nlp.pipeline.GenericAnnotationSerializer` Writes the output to a Java serialized object. This is only suitable for transferring data between Java programs. This also produces relatively large serialized objects.
