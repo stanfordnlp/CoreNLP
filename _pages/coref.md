@@ -127,12 +127,13 @@ the latest statistical coreference system
 
 the deterministic coreference system
 
-
 > Marta Recasens, Marie-Catherine de Marneffe, and Christopher Potts. 2013. [The Life and Death of Discourse Entities: Identifying Singleton Mentions.] (http://nlp.stanford.edu/pubs/discourse-referent-lifespans.pdf) In *Proceedings of the NAACL* \[[pdf](http://nlp.stanford.edu/pubs/discourse-referent-lifespans.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/discourse-referent-lifespans.bib)\]
 
-> Heeyoung Lee, Angel Chang, Yves Peirsman, Nathanael Chambers, Mihai Surdeanu and Dan Jurafsky. 2013. [Deterministic coreference resolution based on entity-centric, precision-ranked rules.] (http://www.mitpressjournals.org/doi/pdf/10.1162/COLI_a_00152) In *Computational Linguistics 39(4)* \[[pdf](http://www.mitpressjournals.org/doi/pdf/10.1162/COLI_a_00152)\]
-
 > Heeyoung Lee, Yves Peirsman, Angel Chang, Nathanael Chambers, Mihai Surdeanu, Dan Jurafsky. 2013. [Stanford's Multi-Pass Sieve Coreference Resolution System at the CoNLL-2011 Shared Task.] (http://nlp.stanford.edu/pubs/conllst2011-coref.pdf) In *Proceedings of the CoNLL-2011 Shared Task, 2011.* \[[pdf](http://nlp.stanford.edu/pubs/conllst2011-coref.pdf)\] \[[bib] (http://nlp.stanford.edu/pubs/conllst2011-coref.bib)\]
+
+the Chinese coreference system
+
+> Heeyoung Lee, Angel Chang, Yves Peirsman, Nathanael Chambers, Mihai Surdeanu and Dan Jurafsky. 2013. [Deterministic coreference resolution based on entity-centric, precision-ranked rules.] (http://www.mitpressjournals.org/doi/pdf/10.1162/COLI_a_00152) In *Computational Linguistics 39(4)* \[[pdf](http://www.mitpressjournals.org/doi/pdf/10.1162/COLI_a_00152)\]
 
 
 ## More information 
