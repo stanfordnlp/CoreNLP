@@ -130,6 +130,8 @@ the deterministic coreference system
 
 > Marta Recasens, Marie-Catherine de Marneffe, and Christopher Potts. 2013. [The Life and Death of Discourse Entities: Identifying Singleton Mentions.] (http://nlp.stanford.edu/pubs/discourse-referent-lifespans.pdf) In *Proceedings of the NAACL* \[[pdf](http://nlp.stanford.edu/pubs/discourse-referent-lifespans.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/discourse-referent-lifespans.bib)\]
 
+> Heeyoung Lee, Angel Chang, Yves Peirsman, Nathanael Chambers, Mihai Surdeanu and Dan Jurafsky. 2013. [Deterministic coreference resolution based on entity-centric, precision-ranked rules.] (http://www.mitpressjournals.org/doi/pdf/10.1162/COLI_a_00152) In *Computational Linguistics 39(4)* \[[pdf](http://www.mitpressjournals.org/doi/pdf/10.1162/COLI_a_00152)\]
+
 
 ## More information 
 
