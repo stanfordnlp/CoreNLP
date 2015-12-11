@@ -55,13 +55,14 @@ A common property to set is the output format of the API. The server supports al
 * **XML**: Print the annotations in XML format. This corresponds to the properties: `{"outputFormat": "xml"}`.
 * **Text**: Print the annotations in a human-readable text format. This is the default format for the CoreNLP command-line interface. This corresponds to the property: `{"outputFormat": "text"}`.  
 * **Serialized**: Print the annotations in a losslessly serialized format. This is the recommended option when calling the API programmatically from a language that supports one of the serialized formats. In addition to setting the output format flag, you must also provide a valid serializer class. For example, for protocol buffers, this would be: 
-    ```{"outputFormat": "serialized", 
-        "serializer": "edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer"}
-    ```
-        The serializers currently supported are:
-  * `edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer` Writes the output to a protocol buffer, as defined in the definition file `edu.stanford.nlp.pipeline.CoreNLP.proto`.
-  *  `edu.stanford.nlp.pipeline.GenericAnnotationSerializer` Writes the output to a Java serialized object. This is only suitable for transferring data between Java programs. This also produces relatively large serialized objects.
-  * `edu.stanford.nlp.pipeline.CustomAnnotationSerializer` Writes the output to a (lossy!) textual representation, which is much smaller than the `GenericAnnotationSerializer` but does not include all the relevant information.
+  ```
+{"outputFormat": "serialized", 
+ "serializer": "edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer"}
+  ```
+  The serializers currently supported are:
+  - `edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer` Writes the output to a protocol buffer, as defined in the definition file `edu.stanford.nlp.pipeline.CoreNLP.proto`.
+  -  `edu.stanford.nlp.pipeline.GenericAnnotationSerializer` Writes the output to a Java serialized object. This is only suitable for transferring data between Java programs. This also produces relatively large serialized objects.
+  - `edu.stanford.nlp.pipeline.CustomAnnotationSerializer` Writes the output to a (lossy!) textual representation, which is much smaller than the `GenericAnnotationSerializer` but does not include all the relevant information.
 
 From the other side, the server accepts input in a variety of formats. By default, it takes input as raw text sent as `POST` data to the server. However, it can also be configured to read the `POST` data using one of the CoreNLP serializers. This can be set up by setting the properties `inputFormat` and `inputSerializer`. For example, to read the data as a protocol buffer (useful if, e.g., it is already partially annotated), simply include the following in your `GET` parameters:
 

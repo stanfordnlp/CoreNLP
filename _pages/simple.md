@@ -11,13 +11,15 @@ In addition to the fully-featured annotator pipeline interface to CoreNLP, Stanf
 An example usage is given below:
 
 ```java
-import edu.stanford.nlp.simple.*
+import edu.stanford.nlp.simple.*;
 
 Sentence sent = new Sentence("Lucy is in the sky with diamonds.");
 List<String> nerTags = sent.nerTags();  // [PERSON, O, O, O, O, O, O, O]
 String firstPOSTag = sent.posTag(0);   // NNP
 ...
 ```
+
+The API is included in the CoreNLP release from 3.6.0 onwards. Visit the [download page](http://stanfordnlp.github.io/CoreNLP/download.html) to download CoreNLP; make sure to include both the code jar and the models jar in your classpath!
 
 ### Advantages and Disadvantages
 
