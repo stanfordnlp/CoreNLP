@@ -125,6 +125,12 @@ the latest statistical coreference system
 
 > Kevin Clark and Christopher D. Manning.  2015. [Entity-Centric Coreference Resolution with Model Stacking](http://cs.stanford.edu/people/kevclark/resources/clark-manning-acl15-entity.pdf) In *Proceedings of the ACL* \[[pdf](http://cs.stanford.edu/people/kevclark/resources/clark-manning-acl15-entity.pdf)\] \[[bib](http://cs.stanford.edu/people/kevclark/resources/clark-manning-acl15-entity.bib)\]
 
+the deterministic coreference system
+
+
+> Marta Recasens, Marie-Catherine de Marneffe, and Christopher Potts. 2013. [The Life and Death of Discourse Entities: Identifying Singleton Mentions.] (http://nlp.stanford.edu/pubs/discourse-referent-lifespans.pdf) In *Proceedings of the NAACL* \[[pdf](http://nlp.stanford.edu/pubs/discourse-referent-lifespans.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/discourse-referent-lifespans.bib)\]
+
+
 ## More information 
 
 For more details on the underlying coreference resolution algorithm, see [this page](http://nlp.stanford.edu/software/dcoref.shtml).
