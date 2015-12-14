@@ -119,6 +119,22 @@ public class CorefExample {
 }
 ```
 
+## Running Stanford CoreNLP on CoNLL
+
+If you would like to run our system on the CoNLL eval data 
+
+1. First get CoNLL scoring script from [here](http://conll.cemantix.org/2012/software.html)
+
+2. Set up scorer.pl on your machine
+
+3. Download [scoref-conll.properties](http://nlp.stanford.edu/software/scoref-conll.properties)
+
+4. Run this command:
+
+```bash
+java -Xmx5g -cp "stanford-corenlp-full-2015-12-09/*" edu.stanford.nlp.scoref.StatisticalCorefSystem scoref-conll.properties
+```
+
 ## Citing Stanford Coreference
 
 the latest statistical coreference system
