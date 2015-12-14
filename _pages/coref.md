@@ -131,13 +131,11 @@ If you would like to run our system on the CoNLL 2012 eval data:
 
 4. Download [scoref-conll.properties](http://nlp.stanford.edu/software/scoref-conll.properties)
 
-5. Run this command:
+5. Run this command (it should show a final F1 score of 63.61):
 
 ```bash
 java -Xmx5g -cp "stanford-corenlp-full-2015-12-09/*" edu.stanford.nlp.scoref.StatisticalCorefSystem scoref-conll.properties
 ```
-
-6. When the process finishes you should see a final F1 score of: 63.61
 
 ## Citing Stanford Coreference
 
