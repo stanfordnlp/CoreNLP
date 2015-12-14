@@ -123,7 +123,7 @@ public class CorefExample {
 
 If you would like to run our system on the CoNLL eval data 
 
-1. First get CoNLL scoring script from [here](http://conll.cemantix.org/2012/software.html)
+1. First get the CoNLL scoring script from [here](http://conll.cemantix.org/2012/software.html)
 
 2. Set up scorer.pl on your machine
 
