@@ -29,7 +29,7 @@ Note: there are currently two annotators that perform coreference: dcoref and co
 
 ## Overview
 
-There are several settings which can effect the speed and accuracy of coreference resolution.
+There are several settings which can affect the speed and accuracy of coreference resolution.
 Some methods require both constituency and dependency parses, while others simply need the dependency parse.
 The following tables give an overview of some of the possibilities. 
 
