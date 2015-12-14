@@ -129,7 +129,7 @@ If you would like to run our system on the CoNLL 2012 eval data:
 
 3. Get the CoNLL 2012 eval data from [here](http://conll.cemantix.org/2012/data.html)
 
-4. Download [scoref-conll.properties](http://nlp.stanford.edu/software/scoref-conll.properties)
+4. Download [scoref-conll.properties](http://nlp.stanford.edu/software/scoref-conll.properties) and update it to your specific settings
 
 5. Run this command (it should show a final F1 score of 63.61):
 
