@@ -3,6 +3,9 @@ package edu.stanford.nlp.wordseg;
 import java.util.*;
 import java.io.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.Generics;
@@ -18,6 +21,7 @@ import edu.stanford.nlp.util.Generics;
 public class affDict {
   private String affixFilename;
 
+  private static Logger logger = LoggerFactory.getLogger(affDict.class);
   
   //public Set ctbIns, asbcIns, hkIns, pkIns, msrIns;
   public Set<String> ins;
@@ -33,8 +37,8 @@ public class affDict {
   private Set<String> readDict(String filename)  {
     Set<String> a = Generics.newHashSet();
    
-    //System.err.println("XM:::readDict(filename: " + filename + ")");
-    System.err.println("Loading affix dictionary from " + filename);
+    //logger.info("XM:::readDict(filename: " + filename + ")");
+    logger.info("Loading affix dictionary from " + filename);
     try {
       /*
       if(filename.endsWith("in.as") ||filename.endsWith("in.city") ){
@@ -47,9 +51,9 @@ public class affDict {
 
       String aDetectorLine;
    
-      //System.err.println("DEBUG: in affDict readDict");
+      //logger.debug("DEBUG: in affDict readDict");
       while ((aDetectorLine = aDetectorReader.readLine()) != null) {
-        //System.err.println("DEBUG: affDict: "+filename+" "+aDetectorLine);
+        //logger.debug("DEBUG: affDict: "+filename+" "+aDetectorLine);
         a.add(aDetectorLine);
       }
       is.close();
