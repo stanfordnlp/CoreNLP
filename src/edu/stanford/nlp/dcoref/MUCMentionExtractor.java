@@ -240,6 +240,12 @@ public class MUCMentionExtractor extends MentionExtractor {
     Map<Integer, Mention> idMention = Generics.newHashMap();    // temporary use
     for (List<Mention> goldMentions : allGoldMentions) {
       for (Mention m : goldMentions) {
+        if (idMention.containsKey(m.mentionID) && !idMention.containsKey(m.originalRef)) {
+          // use reverse (some annotations in MUC6 as distributed by LDC contain swapped IDs (REF and ID is swapped))
+          Integer tmp = m.mentionID;
+          m.mentionID = m.originalRef;
+          m.originalRef = tmp;
+        }
         idMention.put(m.mentionID, m);
       }
     }
