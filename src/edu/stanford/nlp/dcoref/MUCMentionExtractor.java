@@ -249,6 +249,15 @@ public class MUCMentionExtractor extends MentionExtractor {
         idMention.put(m.mentionID, m);
       }
     }
+    // check if all originalRef pointers point to existing mentions
+    // (in MUC7 as distributed by LDC there are some that point to non-existing mentions, causing problems in dcoref)
+    for (List<Mention> goldMentions : allGoldMentions) {
+      for (Mention m : goldMentions) {
+        if (!idMention.containsKey(m.originalRef))
+          // delete ref to non-existing mention
+          m.originalRef = -1;
+      }
+    }
     for (List<Mention> goldMentions : allGoldMentions) {
       for (Mention m : goldMentions) {
         if (m.goldCorefClusterID == -1) {
