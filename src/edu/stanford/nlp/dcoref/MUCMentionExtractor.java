@@ -104,6 +104,9 @@ public class MUCMentionExtractor extends MentionExtractor {
     // we handle this here and in the regex above
     if (doc.endsWith("<p>"))
       currentOffset -= 3;
+    // replace malformed escaped quotes by HTML entities so that tokenizer recognizes tags
+    // (such malformed tokens exist in the MUC6 corpus as distributed by LDC) 
+    doc = doc.replace("\\\"","&quot;");
     Matcher sentenceMatcher = sentencePattern.matcher(doc);
     String ner = null;
 
