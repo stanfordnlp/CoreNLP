@@ -93,12 +93,17 @@ public class MUCMentionExtractor extends MentionExtractor {
     Annotation docAnno = new Annotation("");
 
     Pattern docPattern = Pattern.compile("<DOC>(.*?)</DOC>", Pattern.DOTALL+Pattern.CASE_INSENSITIVE);
-    Pattern sentencePattern = Pattern.compile("(<s>|<hl>|<dd>|<DATELINE>)(.*?)(</s>|</hl>|</dd>|</DATELINE>)", Pattern.DOTALL+Pattern.CASE_INSENSITIVE);
+    Pattern sentencePattern = Pattern.compile("(<s>|<hl>|<dd>|<DATELINE>|<p>)(.*?)(</s>|</hl>|</dd>|</DATELINE>|</p>|<p>)", Pattern.DOTALL+Pattern.CASE_INSENSITIVE); // +Pattern.MULTILINE
     Matcher docMatcher = docPattern.matcher(fileContents);
     if (! docMatcher.find(currentOffset)) return null;
 
     currentOffset = docMatcher.end();
     String doc = docMatcher.group(1);
+    // in MUC7 as distributed by LDC,
+    // <p> are not ended with </p>, just a new <p> starts
+    // we handle this here and in the regex above
+    if (doc.endsWith("<p>"))
+      currentOffset -= 3;
     Matcher sentenceMatcher = sentencePattern.matcher(doc);
     String ner = null;
 
