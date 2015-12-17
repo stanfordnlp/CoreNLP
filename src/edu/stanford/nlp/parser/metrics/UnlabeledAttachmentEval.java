@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.stanford.nlp.international.Languages;
-import edu.stanford.nlp.international.Languages.Language;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams;
@@ -103,7 +102,7 @@ public class UnlabeledAttachmentEval extends AbstractEval {
     usage.append(String.format("Usage: java %s [OPTS] gold guess\n\n", UnlabeledAttachmentEval.class.getName()));
     usage.append("Options:\n");
     usage.append("  -v         : Verbose mode.\n");
-    usage.append("  -l lang    : Select language settings from ").append(Languages.listOfLanguages()).append('\n');
+    usage.append("  -l lang    : Select language settings from ").append(Language.langList).append('\n');
     usage.append("  -y num     : Skip gold trees with yields longer than num.\n");
     usage.append("  -e         : Input encoding.\n");
   }
@@ -136,7 +135,7 @@ public class UnlabeledAttachmentEval extends AbstractEval {
       if(opt.getKey() == null) continue;
       if(opt.getKey().equals("-l")) {
         Language lang = Language.valueOf(opt.getValue()[0].trim());
-        tlpp = Languages.getLanguageParams(lang);
+        tlpp = lang.params;
 
       } else if(opt.getKey().equals("-y")) {
         maxGoldYield = Integer.parseInt(opt.getValue()[0].trim());

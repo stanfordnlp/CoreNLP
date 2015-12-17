@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.MetaClass;
 
 /**
  * A class which encapsulates configuration settings for Redwood.
@@ -22,7 +23,7 @@ public class RedwoodConfiguration {
   /**
    * A list of tasks to run when the configuration is applied
    */
-  private LinkedList<Runnable> tasks = new LinkedList<Runnable>();
+  private LinkedList<Runnable> tasks = new LinkedList<>();
 
   private OutputHandler outputHandler = Redwood.ConsoleHandler.out();
   private File defaultFile = new File("/dev/null");
@@ -95,7 +96,7 @@ public class RedwoodConfiguration {
    * @return this
    */
   public RedwoodConfiguration channelWidth(final int width) {
-    tasks.add(() -> RedwoodConfiguration.this.channelWidth = width);
+    tasks.addFirst(() -> RedwoodConfiguration.this.channelWidth = width);
     return this;
   }
 
@@ -104,7 +105,7 @@ public class RedwoodConfiguration {
    * @return this
    */
   public RedwoodConfiguration clear(){
-    this.tasks = new LinkedList<Runnable>();
+    this.tasks = new LinkedList<>();
     this.tasks.add(() -> {
       Redwood.clearHandlers();
       Redwood.restoreSystemStreams();
@@ -163,6 +164,7 @@ public class RedwoodConfiguration {
       handler.leftMargin = config.channelWidth;
       root.addChild(handler);
     };
+
     /**
      * Output to a standard error. This is a leaf node.
      * Consider using "output" instead, unless you really
@@ -173,6 +175,33 @@ public class RedwoodConfiguration {
       handler.leftMargin = config.channelWidth;
       root.addChild(handler);
     };
+
+    /**
+     * Output to slf4j. This is a leaf node.
+     */
+    public static final Thunk slf4j = (config, root) -> {
+      try {
+        OutputHandler handler = MetaClass.create("edu.stanford.nlp.util.logging.SLF4JHandler").createInstance();
+        handler.leftMargin = config.channelWidth;
+        root.addChild(handler);
+      } catch (Exception e) {
+        throw new IllegalStateException("Could not find SLF4J in your classpath", e);
+      }
+    };
+
+    /**
+     * Output to java.util.Logging. This is a leaf node.
+     */
+    public static final Thunk javaUtil = (config, root) -> {
+      try {
+        OutputHandler handler = new JavaUtilLoggingHandler();
+        handler.leftMargin = config.channelWidth;
+        root.addChild(handler);
+      } catch (Exception e) {
+        throw new IllegalStateException("Could not find SLF4J in your classpath", e);
+      }
+    };
+
     /**
      * Output to the default location specified by the output() method.
      * Consider using this rather than stderr or stdout.
@@ -360,13 +389,42 @@ public class RedwoodConfiguration {
   }
 
   /**
-   * The default Redwood configuration, which prints to the console.
+   * A standard  Redwood configuration, which prints to the console with channels.
    * This is the usual starting point for new configurations.
    * @return  A basic Redwood Configuration.
    */
   public static RedwoodConfiguration standard(){
+    return new RedwoodConfiguration().clear().handlers(Handlers.stderr);
+  }
+
+  /**
+   * The default Redwood configuration, which prints to the console without channels.
+   * This is the usual starting point for new configurations.
+   * @return  A basic Redwood Configuration.
+   */
+  public static RedwoodConfiguration minimal(){
     return new RedwoodConfiguration().clear().handlers(
         Handlers.chain(Handlers.hideChannels(), Handlers.stderr)
+    );
+  }
+
+  /**
+   * Run Redwood with SLF4J as the console backend
+   * @return A redwood configuration. Remember to call {@link RedwoodConfiguration#apply()}.
+   */
+  public static RedwoodConfiguration slf4j(){
+    return new RedwoodConfiguration().clear().handlers(
+        Handlers.chain(Handlers.hideChannels(), Handlers.slf4j)
+    );
+  }
+
+  /**
+   * Run Redwood with java.util.logging
+   * @return A redwood configuration. Remember to call {@link RedwoodConfiguration#apply()}.
+   */
+  public static RedwoodConfiguration javaUtilLogging(){
+    return new RedwoodConfiguration().clear().handlers(
+        Handlers.chain(Handlers.hideChannels(), Handlers.javaUtil)
     );
   }
 
@@ -433,7 +491,7 @@ public class RedwoodConfiguration {
 
     //--Collapse
     String collapse = get(props, "log.collapse", "none", used);
-    List<LogRecordHandler> chain = new LinkedList<LogRecordHandler>();
+    List<LogRecordHandler> chain = new LinkedList<>();
     if (collapse.equalsIgnoreCase("exact")) {
       chain.add(new RepeatedRecordHandler(RepeatedRecordHandler.EXACT));
     } else if (collapse.equalsIgnoreCase("approximate")) {

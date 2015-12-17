@@ -27,6 +27,8 @@
 package edu.stanford.nlp.trees;
 
 import static edu.stanford.nlp.trees.EnglishPatterns.*;
+
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
 import edu.stanford.nlp.util.Generics;
 
@@ -223,7 +225,7 @@ public class EnglishGrammaticalRelations {
             // cc/conjp which does not have a , between it and the
             // target or a , which does not appear to the right of a
             // cc/conjp.  This test eliminates things such as
-            // parenthetics which come after a list, such as in the
+            // parentheticals which come after a list, such as in the
             // sentence "to see the market go down and dump everything,
             // which ..." where "go down and dump everything, which..."
             // is all in one VP node.
@@ -720,8 +722,12 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation RELATIVE =
     new GrammaticalRelation(Language.English, "rel", "relative",
-        COMPLEMENT, "SBAR", tregexCompiler,
-            "SBAR < (WHNP=target !< WRB) < (S < NP < (VP [ < SBAR | <+(VP) (PP <- IN|TO) | < (S < (VP < TO)) ] ))");
+        COMPLEMENT, "SBAR|SBARQ", tregexCompiler,
+            "SBAR < (WHNP=target !< WRB) < (S < NP < (VP [ < SBAR | <+(VP) (PP <- IN|TO) | < (S < (VP < TO)) ] ))",
+
+            // Rule for copular Wh-questions, e.g. "What am I good at?"
+            "SBARQ < (WHNP=target !< WRB !<# (/^NN/ < " + timeWordRegex + ")) <+(SQ|SINV) (/^(?:VB|AUX)/ < " + copularWordRegex + " !$++ VP)");
+
 
   /**
    * The "referent" grammatical relation.  A
@@ -766,8 +772,10 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation ADJECTIVAL_COMPLEMENT =
     new GrammaticalRelation(Language.English, "acomp", "adjectival complement",
-        COMPLEMENT, "VP", tregexCompiler,
-            "VP [ < ADJP=target | ( < (/^VB/ [ ( < " + clausalComplementRegex + " $++ VP=target ) | $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S)) ] ) !$-- (/^VB/ < " + copularWordRegex + " )) ]");
+        COMPLEMENT, "VP|SQ", tregexCompiler,
+            "VP [ < ADJP=target | ( < (/^VB/ [ ( < " + clausalComplementRegex + " $++ VP=target ) | $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S)) ] ) !$-- (/^VB/ < " + copularWordRegex + " )) ]",
+            //Questions like "What am I good at?" with the copula being the head
+            "SQ < (/^VB/ < " + copularWordRegex + " $++ ADJP=target !$++ VP)");
 
 
   /**
@@ -1494,6 +1502,9 @@ public class EnglishGrammaticalRelations {
    * <ul>
    * <li>NUMERIC_MODIFIER &lt; ADJECTIVAL_MODIFIER
    * </ul>
+   * Note: You should never directly access the values variable but
+   * rather access it through a concurrency mechanism. See immediately
+   * below in the code.
    */
   @SuppressWarnings({"RedundantArrayCreation"})
   private static final List<GrammaticalRelation> values =
@@ -1554,32 +1565,45 @@ public class EnglishGrammaticalRelations {
       DISCOURSE_ELEMENT,
       GOES_WITH,
     }));
+
   // Cache frequently used views of the values list
-  private static final List<GrammaticalRelation> unmodifiableValues =
-    Collections.unmodifiableList(values);
   private static final List<GrammaticalRelation> synchronizedValues =
     Collections.synchronizedList(values);
   private static final List<GrammaticalRelation> unmodifiableSynchronizedValues =
     Collections.unmodifiableList(values);
+
+  /** If you need exclusive access to these values lists, then you should
+   *  take out a valuesLock. If you are writing to the list, you should take
+   *  out a writeLock. If you are doing reading things that require atomicity
+   *  beyond single operations, such as iterating over the list, then you should
+   *  take out a read lock.
+   */
   public static final ReadWriteLock valuesLock = new ReentrantReadWriteLock();
 
   // Map from English GrammaticalRelation short names to their corresponding
   // GrammaticalRelation objects
-  public static final Map<String, GrammaticalRelation> shortNameToGRel = new ConcurrentHashMap<String, GrammaticalRelation>();
+  public static final Map<String, GrammaticalRelation> shortNameToGRel = new ConcurrentHashMap<>();
   static {
-    for (GrammaticalRelation gr : values()) {
-      shortNameToGRel.put(gr.toString().toLowerCase(), gr);
+    valuesLock().lock();
+    try {
+      for (GrammaticalRelation gr : values()) {
+        shortNameToGRel.put(gr.toString().toLowerCase(), gr);
+      }
+    } finally {
+      valuesLock().unlock();
     }
   }
 
+  /** Return a synchronized list of the known GrammaticalRelation entries. */
   public static List<GrammaticalRelation> values() {
-    return values(false);
+    return unmodifiableSynchronizedValues;
   }
 
-  public static List<GrammaticalRelation> values(boolean threadSafe) {
-    return threadSafe? unmodifiableSynchronizedValues : unmodifiableValues;
-  }
-
+  /** Returns a readLock for the grammatical relations values list.
+   *  Take out one of these if you want to iterate over the values list.
+   *
+   *  @return A readLock on the values list
+   */
   public static Lock valuesLock() {
     return valuesLock.readLock();
   }
@@ -1591,6 +1615,7 @@ public class EnglishGrammaticalRelations {
    * add new EnglishGrammaticalRelations very rarely, so the eased
    * concurrency seems to outweigh the fairly slight cost of thread-safe
    * access.
+   *
    * @param relation the relation to be added to the values list
    */
   private static void threadSafeAddRelation(GrammaticalRelation relation) {
@@ -1703,7 +1728,7 @@ public class EnglishGrammaticalRelations {
    * @return The EnglishGrammaticalRelation with that name
    */
   public static GrammaticalRelation valueOf(String s) {
-    return GrammaticalRelation.valueOf(s, values);
+    return GrammaticalRelation.valueOf(s, synchronizedValues, valuesLock());
 
 //    // TODO does this need to be changed?
 //    // modification NOTE: do not commit until go-ahead
@@ -1728,7 +1753,7 @@ public class EnglishGrammaticalRelations {
   /**
    * Returns an EnglishGrammaticalRelation based on the argument.
    * It works if passed a GrammaticalRelation or the String
-   * representation of one (e.g. "nsubj").  It returns <code>null</code>
+   * representation of one (e.g., "nsubj").  It returns {@code null}
    * for other classes or if no string match is found.
    *
    * @param o A GrammaticalRelation or String

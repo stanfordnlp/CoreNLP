@@ -32,8 +32,8 @@ public class ArabicUnknownWordModelTrainer
     this.totalTrees = totalTrees;
     indexToStartUnkCounting = (totalTrees * op.trainOptions.fractionBeforeUnseenCounting);
 
-    seenCounter = new ClassicCounter<IntTaggedWord>(20000);
-    unSeenCounter = new ClassicCounter<IntTaggedWord>(20000);
+    seenCounter = new ClassicCounter<>(20000);
+    unSeenCounter = new ClassicCounter<>(20000);
 
     model = new ArabicUnknownWordModel(op, lex, wordIndex, tagIndex,
                                        unSeenCounter);

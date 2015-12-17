@@ -50,7 +50,7 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
           .normalizeSoftMaxMinMaxScores(constVars.dictOddsWeights.get(label),
             true, true, false);
 
-    Counter<E> currentPatternWeights4Label = new ClassicCounter<E>();
+    Counter<E> currentPatternWeights4Label = new ClassicCounter<>();
 
     boolean useFreqPhraseExtractedByPat = false;
     if (patternScoring.equals(PatternScoring.SqrtAllRatio))
@@ -103,7 +103,7 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
 
     //Multiplying by logP
     if (patternScoring.equals(PatternScoring.PhEvalInPatLogP) || patternScoring.equals(PatternScoring.LOGREGlogP)) {
-      Counter<E> logpos_i = new ClassicCounter<E>();
+      Counter<E> logpos_i = new ClassicCounter<>();
       for (Entry<E, ClassicCounter<CandidatePhrase>> en : patternsandWords4Label
           .entrySet()) {
         logpos_i.setCount(en.getKey(), Math.log(en.getValue().size()));
@@ -123,14 +123,14 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
 //      Data.loadGoogleNGrams();
 //    }
 
-    Counter<E> patterns = new ClassicCounter<E>();
+    Counter<E> patterns = new ClassicCounter<>();
 
-    Counter<CandidatePhrase> googleNgramNormScores = new ClassicCounter<CandidatePhrase>();
-    Counter<CandidatePhrase> domainNgramNormScores = new ClassicCounter<CandidatePhrase>();
+    Counter<CandidatePhrase> googleNgramNormScores = new ClassicCounter<>();
+    Counter<CandidatePhrase> domainNgramNormScores = new ClassicCounter<>();
 
-    Counter<CandidatePhrase> externalFeatWtsNormalized = new ClassicCounter<CandidatePhrase>();
-    Counter<CandidatePhrase> editDistanceFromOtherSemanticBinaryScores = new ClassicCounter<CandidatePhrase>();
-    Counter<CandidatePhrase> editDistanceFromAlreadyExtractedBinaryScores = new ClassicCounter<CandidatePhrase>();
+    Counter<CandidatePhrase> externalFeatWtsNormalized = new ClassicCounter<>();
+    Counter<CandidatePhrase> editDistanceFromOtherSemanticBinaryScores = new ClassicCounter<>();
+    Counter<CandidatePhrase> editDistanceFromAlreadyExtractedBinaryScores = new ClassicCounter<>();
     double externalWtsDefault = 0.5;
     Counter<String> classifierScores = null;
 
@@ -165,6 +165,9 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
 
         if (constVars.usePatternEvalWordClass) {
           Integer num = constVars.getWordClassClusters().get(g);
+          if(num == null){
+            num = constVars.getWordClassClusters().get(g.toLowerCase());
+          }
           if (num != null
               && constVars.distSimWeights.get(label).containsKey(num)) {
             externalFeatWtsNormalized.setCount(gc,
@@ -191,24 +194,20 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
         && scorePhrasesInPatSelection) {
       Properties props2 = new Properties();
       props2.putAll(props);
-      props2.setProperty("phraseScorerClass", "edu.stanford.nlp.patterns.surface.ScorePhrasesLearnFeatWt");
+      props2.setProperty("phraseScorerClass", "edu.stanford.nlp.patterns.ScorePhrasesLearnFeatWt");
       ScorePhrases scoreclassifier = new ScorePhrases(props2, constVars);
       System.out.println("file is " + props.getProperty("domainNGramsFile"));
       Execution.fillOptions(Data.class, props2);
       classifierScores = scoreclassifier.phraseScorer.scorePhrases(label, allCandidatePhrases,  true);
-      // scorePhrases(Data.sents, label, true,
-      // constVars.perSelectRand, constVars.perSelectNeg, null, null,
-      // dictOddsWordWeights);
-      // throw new RuntimeException("Not implemented currently");
     }
 
-    Counter<CandidatePhrase> cachedScoresForThisIter = new ClassicCounter<CandidatePhrase>();
+    Counter<CandidatePhrase> cachedScoresForThisIter = new ClassicCounter<>();
 
     for (Map.Entry<E, ClassicCounter<CandidatePhrase>> en: positivePatternsAndWords.entrySet()) {
 
         for(Entry<CandidatePhrase, Double> en2: en.getValue().entrySet()) {
           CandidatePhrase word = en2.getKey();
-          Counter<ScorePhraseMeasures> scoreslist = new ClassicCounter<ScorePhraseMeasures>();
+          Counter<ScorePhraseMeasures> scoreslist = new ClassicCounter<>();
           double score = 1;
           if ((patternScoring.equals(PatternScoring.PhEvalInPat) || patternScoring
             .equals(PatternScoring.PhEvalInPatLogP))

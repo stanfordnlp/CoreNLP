@@ -44,9 +44,9 @@ public class FileTreeModel extends DefaultTreeModel implements FileTreeNodeListe
    super(root);
    this.root = root;
    root.addListener(this);
-   listeners = new ArrayList<TreeModelListener>();
+   listeners = new ArrayList<>();
    treeStructure = Generics.newHashMap();
-   treeStructure.put(root, new ArrayList<FileTreeNode>());
+   treeStructure.put(root, new ArrayList<>());
 
    //other data
    trf = new TregexPattern.TRegexTreeReaderFactory();
@@ -125,7 +125,7 @@ public class FileTreeModel extends DefaultTreeModel implements FileTreeNodeListe
   }
 
   private Object[] makeTreePathArray(FileTreeNode node) {
-    List<TreeNode> path = new ArrayList<TreeNode>();
+    List<TreeNode> path = new ArrayList<>();
     path.add(node);
     TreeNode child = node;
     while(child != this.getRoot()) {
@@ -145,7 +145,7 @@ public class FileTreeModel extends DefaultTreeModel implements FileTreeNodeListe
    * Forks off a new thread to load your files based on the filters you set in the interface
    */
   public void addFileFolder(final EnumMap<FilterType, String> filters, final File[] files) {
-    List<FileTreeNode> newFiles = new ArrayList<FileTreeNode>();
+    List<FileTreeNode> newFiles = new ArrayList<>();
     findLoadableFiles(filters, files, newFiles, FileTreeModel.this.getRoot());//findLoadableFiles updates newFiles
     for(FileTreeNode fileNode : newFiles) {
       Treebank treebank = new DiskTreebank(trf, curEncoding);
@@ -168,7 +168,7 @@ public class FileTreeModel extends DefaultTreeModel implements FileTreeNodeListe
         if(isLikelyInvisible(f.getName()))
           continue;
         FileTreeNode newParent = createNode(f, parent);
-        treeStructure.put(newParent, new ArrayList<FileTreeNode>());
+        treeStructure.put(newParent, new ArrayList<>());
         //recursively call on all the files inside
         findLoadableFiles(filters, f.listFiles(), newFiles, newParent);
         if(!treeStructure.get(newParent).isEmpty()) {//only add non-empty directories

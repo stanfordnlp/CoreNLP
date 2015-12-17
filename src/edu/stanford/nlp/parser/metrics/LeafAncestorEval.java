@@ -10,8 +10,7 @@ import java.util.Random;
 import java.util.Stack;
 import java.util.TreeMap;
 
-import edu.stanford.nlp.international.Languages;
-import edu.stanford.nlp.international.Languages.Language;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasIndex;
 import edu.stanford.nlp.ling.Label;
@@ -76,15 +75,15 @@ public class LeafAncestorEval {
 
     ((HasIndex) t.label()).setIndex(0);
 
-    final Stack<Tree> treeStack = new Stack<Tree>();
+    final Stack<Tree> treeStack = new Stack<>();
     treeStack.push(t);
 
-    final Stack<CoreLabel> labelStack = new Stack<CoreLabel>();
+    final Stack<CoreLabel> labelStack = new Stack<>();
     CoreLabel rootLabel = new CoreLabel(t.label());
     rootLabel.setIndex(0);
     labelStack.push(rootLabel);
 
-    final List<List<CoreLabel>> lineages = new ArrayList<List<CoreLabel>>();
+    final List<List<CoreLabel>> lineages = new ArrayList<>();
 
     while(!treeStack.isEmpty()) {
       Tree node = treeStack.pop();
@@ -93,7 +92,7 @@ public class LeafAncestorEval {
         labelStack.pop();
 
       if(node.isPreTerminal()) {
-        List<CoreLabel> lin = new ArrayList<CoreLabel>(labelStack);
+        List<CoreLabel> lin = new ArrayList<>(labelStack);
         lineages.add(lin);
 
       } else {
@@ -213,7 +212,7 @@ public class LeafAncestorEval {
     double sentEx = 100.0 * sentExact / sentNum;
 
     if(verbose) {
-      Map<Double,List<CoreLabel>> avgMap = new TreeMap<Double,List<CoreLabel>>();
+      Map<Double,List<CoreLabel>> avgMap = new TreeMap<>();
       for (Map.Entry<List<CoreLabel>, Double> entry : catAvg.entrySet()) {
         double avg = entry.getValue() / catNum.get(entry.getKey());
         if (Double.isNaN(avg)) { avg = -1.0; }
@@ -252,10 +251,10 @@ public class LeafAncestorEval {
 
 
   private static final String USAGE =
-    String.format("Usage: java %s [OPTS] goldFile guessFile%n%nOptions:%n  -l lang   : Language name %s%n" +
-            "  -y num    : Skip gold trees with yields longer than num.%n  -v        : Verbose output%n",
-            LeafAncestorEval.class.getName(),
-            Languages.listOfLanguages());
+      String.format("Usage: java %s [OPTS] goldFile guessFile%n%nOptions:%n  -l lang   : Language name %s%n" +
+              "  -y num    : Skip gold trees with yields longer than num.%n  -v        : Verbose output%n",
+              LeafAncestorEval.class.getName(),
+          Language.langList);
 
   private static final int MIN_ARGS = 2;
 
@@ -319,7 +318,7 @@ public class LeafAncestorEval {
       System.exit(-1);
     }
 
-    final TreebankLangParserParams tlpp = Languages.getLanguageParams(LANGUAGE);
+    final TreebankLangParserParams tlpp = LANGUAGE.params;
     final PrintWriter pwOut = tlpp.pw();
 
     final Treebank guessTreebank = tlpp.diskTreebank();

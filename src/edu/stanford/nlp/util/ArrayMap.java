@@ -22,7 +22,7 @@ public final class ArrayMap<K,V> extends AbstractMap<K,V> implements Serializabl
     private static final long serialVersionUID = 1L;
 
     @SuppressWarnings({"NonSerializableFieldInSerializableClass"})
-    private K key;
+    private final K key;
     @SuppressWarnings({"NonSerializableFieldInSerializableClass"})
     private V value;
 
@@ -103,11 +103,11 @@ public final class ArrayMap<K,V> extends AbstractMap<K,V> implements Serializabl
   }
 
   public static <K, V> ArrayMap<K, V> newArrayMap() {
-    return new ArrayMap<K, V>();
+    return new ArrayMap<>();
   }
 
   public static <K, V> ArrayMap<K, V> newArrayMap(int capacity) {
-    return new ArrayMap<K, V>(capacity);
+    return new ArrayMap<>(capacity);
   }
 
   @Override
@@ -168,7 +168,7 @@ public final class ArrayMap<K,V> extends AbstractMap<K,V> implements Serializabl
     if (capacity <= size) {
       resize();
     }
-    entryArray[size] = new Entry<K,V>(key, val);
+    entryArray[size] = new Entry<>(key, val);
     size++;
     return null;
   }

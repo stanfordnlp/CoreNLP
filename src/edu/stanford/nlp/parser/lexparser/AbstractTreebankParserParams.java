@@ -66,7 +66,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
       String s = lab.value();
       s = treebankLanguagePack().basicCategory(s);
       int numKids = tree.numChildren();
-      List<Tree> children = new ArrayList<Tree>(numKids);
+      List<Tree> children = new ArrayList<>(numKids);
       for (int cNum = 0; cNum < numKids; cNum++) {
         Tree child = tree.getChild(cNum);
         Tree newChild = transformTree(child);
@@ -115,7 +115,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
       s = treebankLanguagePack().basicCategory(s);
       s = treebankLanguagePack().stripGF(s);
       int numKids = tree.numChildren();
-      List<Tree> children = new ArrayList<Tree>(numKids);
+      List<Tree> children = new ArrayList<>(numKids);
       for (int cNum = 0; cNum < numKids; cNum++) {
         Tree child = tree.getChild(cNum);
         Tree newChild = transformTree(child);
@@ -139,6 +139,8 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
   protected String inputEncoding;
   protected String outputEncoding;
   protected TreebankLanguagePack tlp;
+  protected boolean generateOriginalDependencies;
+
 
   /**
    * Stores the passed-in TreebankLanguagePack and sets up charset encodings.
@@ -149,6 +151,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
     this.tlp = tlp;
     inputEncoding = tlp.getEncoding();
     outputEncoding = tlp.getEncoding();
+    generateOriginalDependencies = false;
   }
 
   @Override
@@ -328,7 +331,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
    * PARSEVAL evaluation.  Some notes on this particular parseval:
    * <ul>
    * <li> It is character-based, which allows it to be used on segmentation/parsing combination evaluation.
-   * <li> whether it gives you labeled or unlabeled bracketings depends on the value of the <code>labelConstituents</code>
+   * <li> whether it gives you labeled or unlabeled bracketings depends on the value of the {@code labelConstituents}
    * parameter
    * </ul>
    *
@@ -336,7 +339,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
    * -- Roger.)
    */
   public static Collection<Constituent> parsevalObjectify(Tree t, TreeTransformer collinizer, boolean labelConstituents) {
-    Collection<Constituent> spans = new ArrayList<Constituent>();
+    Collection<Constituent> spans = new ArrayList<>();
     Tree t1 = collinizer.transformTree(t);
     if (t1 == null) {
       return spans;
@@ -388,7 +391,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
    * Returns the set of dependencies in a tree, according to some {@link edu.stanford.nlp.trees.DependencyTyper}.
    */
   public static <E> Collection<E> dependencyObjectify(Tree t, HeadFinder hf, TreeTransformer collinizer, DependencyTyper<E> typer) {
-    Collection<E> deps = new ArrayList<E>();
+    Collection<E> deps = new ArrayList<>();
     Tree t1 = collinizer.transformTree(t);
     if(t1==null)
       return deps;
@@ -419,7 +422,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
 
     @Override
     public List<String> makeDependency(Tree head, Tree dep, Tree root) {
-      List<String> result = new ArrayList<String>(3);
+      List<String> result = new ArrayList<>(3);
       Tree headTerm = head.headTerminal(hf);
       Tree depTerm = dep.headTerminal(hf);
       boolean headLeft = root.leftCharEdge(headTerm) < root.leftCharEdge(depTerm);
@@ -443,7 +446,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
 
     @Override
     public List<String> makeDependency(Tree head, Tree dep, Tree root) {
-      List<String> result = new ArrayList<String>(3);
+      List<String> result = new ArrayList<>(3);
       Tree headTerm = head.headTerminal(hf);
       Tree depTerm = dep.headTerminal(hf);
       result.add(headTerm.value());
@@ -466,7 +469,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
 
     @Override
     public List<String> makeDependency(Tree head, Tree dep, Tree root) {
-      List<String> result = new ArrayList<String>(6);
+      List<String> result = new ArrayList<>(6);
       Tree headTerm = head.headTerminal(hf);
       Tree depTerm = dep.headTerminal(hf);
       boolean headLeft = root.leftCharEdge(headTerm) < root.leftCharEdge(depTerm);
@@ -493,7 +496,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
 
     @Override
     public List<String> makeDependency(Tree head, Tree dep, Tree root) {
-      List<String> result = new ArrayList<String>(6);
+      List<String> result = new ArrayList<>(6);
       Tree headTerm = head.headTerminal(hf);
       Tree depTerm = dep.headTerminal(hf);
       result.add(headTerm.value());
@@ -571,7 +574,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
    * applied to each node in the tree (depth first, left-to-right),
    * so you shouldn't write this method to apply recursively to tree
    * members.  This method is allowed to (and in some cases does)
-   * destructively change the input tree <code>t</code>. It changes both
+   * destructively change the input tree {@code t}. It changes both
    * labels and the tree shape.
    *
    * @param t The input tree (with non-language specific annotation already
@@ -584,7 +587,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
   public abstract Tree transformTree(Tree t, Tree root);
 
   /**
-   * display language-specific settings
+   * Display (write to stderr) language-specific settings.
    */
   @Override
   public abstract void display();
@@ -679,6 +682,25 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
   @Override
   public boolean supportsBasicDependencies() {
     return false;
+  }
+
+  /**
+   * For languages that have implementations of the
+   * original Stanford dependencies and Universal
+   * dependencies, this parameter is used to decide which
+   * implementation should be used.
+   */
+  @Override
+  public void setGenerateOriginalDependencies(boolean originalDependencies) {
+    this.generateOriginalDependencies = originalDependencies;
+    if (this.tlp != null) {
+      this.tlp.setGenerateOriginalDependencies(originalDependencies);
+    }
+  }
+
+  @Override
+  public boolean generateOriginalDependencies() {
+    return this.generateOriginalDependencies;
   }
 
   private static final String[] EMPTY_ARGS = new String[0];

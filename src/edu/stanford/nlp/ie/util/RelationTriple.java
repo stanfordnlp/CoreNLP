@@ -1,29 +1,48 @@
 package edu.stanford.nlp.ie.util;
 
+import edu.stanford.nlp.ie.machinereading.structure.Span;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
-import edu.stanford.nlp.util.FixedPrioritiesPriorityQueue;
+import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.PriorityQueue;
-import edu.stanford.nlp.util.StringUtils;
 
+import java.text.DecimalFormat;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * A (subject, relation, object) triple; e.g., as used in the KBP challenges or in OpenIE systems.
  *
  * @author Gabor Angeli
  */
-public class RelationTriple {
+@SuppressWarnings("UnusedDeclaration")
+public class RelationTriple implements Comparable<RelationTriple>, Iterable<CoreLabel> {
   /** The subject (first argument) of this triple */
   public final List<CoreLabel> subject;
-  /** The relation (second argument) of this triple */
+  /**
+   * The relation (second argument) of this triple.
+   * Note that this is only the part of the relation that can be grounded in the sentence itself.
+   * Often, for a standalone readable relation string, you want to attach additional modifiers
+   * otherwise stored in the dependnecy arc.
+   * Therefore, for getting a String form of the relation, we recommend using
+   * {@link RelationTriple#relationGloss} or {@link RelationTriple#relationLemmaGloss}.
+   */
   public final List<CoreLabel> relation;
   /** The object (third argument) of this triple */
   public final List<CoreLabel> object;
+  /** A marker for the relation expressing a tmod not grounded in a word in the sentence. */
+  private boolean istmod = false;
+  /** A marker for the relation expressing a prefix "be" not grounded in a word in the sentence. */
+  private boolean prefixBe = false;
+  /** A marker for the relation expressing a suffix "be" not grounded in a word in the sentence. */
+  private boolean suffixBe = false;
+  /** A marker for the relation expressing a suffix "of" not grounded in a word in the sentence. */
+  private boolean suffixOf = false;
+  /** An optional score (confidence) for this triple */
+  public final double confidence;
 
   /**
    * Create a new triple with known values for the subject, relation, and object.
@@ -32,10 +51,30 @@ public class RelationTriple {
    * @param relation The relation of this triple; e.g., "play with".
    * @param object The object of this triple; e.g., "yarn".
    */
-  public RelationTriple(List<CoreLabel> subject, List<CoreLabel> relation, List<CoreLabel> object) {
+  public RelationTriple(List<CoreLabel> subject, List<CoreLabel> relation, List<CoreLabel> object,
+                        double confidence) {
     this.subject = subject;
     this.relation = relation;
     this.object = object;
+    this.confidence = confidence;
+  }
+
+  /**
+   * @see edu.stanford.nlp.ie.util.RelationTriple#RelationTriple(java.util.List, java.util.List, java.util.List, double)
+   */
+  public RelationTriple(List<CoreLabel> subject, List<CoreLabel> relation, List<CoreLabel> object) {
+    this(subject, relation, object, 1.0);
+  }
+
+  /**
+   * Returns all the tokens in the extraction, in the order subject then relation then object.
+   */
+  public List<CoreLabel> allTokens() {
+    List<CoreLabel> allTokens = new ArrayList<>();
+    allTokens.addAll(subject);
+    allTokens.addAll(relation);
+    allTokens.addAll(object);
+    return allTokens;
   }
 
   /** The subject of this relation triple, as a String */
@@ -43,14 +82,239 @@ public class RelationTriple {
     return StringUtils.join(subject.stream().map(CoreLabel::word), " ");
   }
 
+  /** The head of the subject of this relation triple. */
+  public CoreLabel subjectHead() {
+    return subject.get(subject.size() - 1);
+  }
+
+  /**
+   * The subject of this relation triple, as a String of the subject's lemmas.
+   * This method will additionally strip out punctuation as well.
+   */
+   public String subjectLemmaGloss() {
+    return StringUtils.join(subject.stream().filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]")).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ");
+  }
+
   /** The object of this relation triple, as a String */
   public String objectGloss() {
     return StringUtils.join(object.stream().map(CoreLabel::word), " ");
   }
 
-  /** The relation of this relation triple, as a String */
+  /** The head of the object of this relation triple. */
+  public CoreLabel objectHead() {
+    return object.get(object.size() - 1);
+  }
+
+  /**
+   * The object of this relation triple, as a String of the object's lemmas.
+   * This method will additionally strip out punctuation as well.
+   */
+  public String objectLemmaGloss() {
+    return StringUtils.join(object.stream().filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]")).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ");
+  }
+
+  /**
+   * The relation of this relation triple, as a String
+   */
   public String relationGloss() {
-    return StringUtils.join(relation.stream().map(CoreLabel::word), " ");
+    String relationGloss = (
+        (prefixBe ? "is " : "")
+        + StringUtils.join(relation.stream().map(CoreLabel::word), " ")
+        + (suffixBe ? " is" : "")
+        + (suffixOf ? " of" : "")
+        + (istmod ? " at_time" : "")
+    ).trim();
+    // Some cosmetic tweaks
+    if ("'s".equals(relationGloss)) {
+      return "has";
+    } else {
+      return relationGloss;
+    }
+  }
+
+  /**
+   * The relation of this relation triple, as a String of the relation's lemmas.
+   * This method will additionally strip out punctuation as well, and lower-cases the relation.
+   */
+  public String relationLemmaGloss() {
+    // Construct a human readable relation string
+    String relationGloss = (
+        (prefixBe ? "be " : "")
+        + StringUtils.join(relation.stream()
+          .filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]") && (x.lemma() == null || !x.lemma().matches("[\\.,;'\"\\?!]"))).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ").toLowerCase()
+        + (suffixBe ? " be" : "")
+        + (suffixOf ? " of" : "")
+        + (istmod ? " at_time" : "")
+    ).trim();
+    // Some cosmetic tweaks
+    if ("'s".equals(relationGloss)) {
+      return "have";
+    } else {
+      return relationGloss;
+    }
+  }
+
+  /** A textual representation of the confidence. */
+  public String confidenceGloss() {
+    return new DecimalFormat("0.000").format(confidence);
+  }
+
+  protected Pair<Integer, Integer> getSpan(List<CoreLabel> tokens, Function<CoreLabel, Integer> toMin, Function<CoreLabel, Integer> toMax) {
+    int min = Integer.MAX_VALUE;
+    int max = Integer.MIN_VALUE;
+    for (CoreLabel token : tokens) {
+      min = Math.min(min, toMin.apply(token));
+      max = Math.max(max, toMax.apply(token) + 1);
+    }
+    return Pair.makePair(min, max);
+  }
+
+  public Pair<Integer, Integer> subjectTokenSpan() {
+    return getSpan(subject, x -> x.index() - 1, x -> x.index() - 1);
+  }
+
+  /**
+   * <p>
+   *   Get a representative span for the relation expressed by this triple.
+   * </p>
+   *
+   * <p>
+   *   This is a bit more complicated than the subject and object spans, as the relation
+   *   span is occasionally discontinuous.
+   *   If this is the case, this method returns the largest contiguous chunk.
+   *   If the relation span is empty, return the object span.
+   * </p>
+   */
+  public Pair<Integer, Integer> relationTokenSpan() {
+    if (relation.size() == 0) {
+      return objectTokenSpan();
+    } else if (relation.size() == 1) {
+      return Pair.makePair(relation.get(0).index() - 1, relation.get(0).index());
+    } else {
+      // Variables to keep track of the longest chunk
+      int longestChunk = 0;
+      int longestChunkStart = 0;
+      int lastIndex = relation.get(0).index() - 1;
+      int thisChunk = 1;
+      int thisChunkStart = 0;
+      // Find the longest chunk
+      for (int i = 1; i < relation.size(); ++i) {
+        CoreLabel token = relation.get(i);
+        if (token.index() - 1 == lastIndex + 1) {
+          thisChunk += 1;
+        } else {
+          if (thisChunk > longestChunk) {
+            longestChunk = thisChunk;
+            longestChunkStart = thisChunkStart;
+          }
+          thisChunkStart = i;
+          thisChunk = 1;
+        }
+      }
+      // (subcase: the last chunk is the longest)
+      if (thisChunk > longestChunk) {
+        longestChunk = thisChunk;
+        longestChunkStart = thisChunkStart;
+      }
+      // Return the longest chunk
+      return Pair.makePair(
+          relation.get(longestChunkStart).index() - 1,
+          relation.get(longestChunkStart + longestChunk - 1).index()
+      );
+    }
+  }
+
+  public Pair<Integer, Integer> objectTokenSpan() {
+    return getSpan(object, x -> x.index() - 1, x -> x.index() - 1);
+  }
+
+  /**
+   * If true, this relation expresses a "to be" relation.
+   *
+   * For example, "President Obama" expresses the relation
+   * (Obama; be; President).
+   */
+  public boolean isPrefixBe() {
+    return this.prefixBe;
+  }
+
+  /**
+   * Set the value of this relation triple expressing a "to be" relation.
+   *
+   * @param newValue The new value of this relation being a "to be" relation.
+   * @return The old value of whether this relation expressed a "to be" relation.
+   */
+  public boolean isPrefixBe(boolean newValue) {
+    boolean oldValue = this.prefixBe;
+    this.prefixBe = newValue;
+    return oldValue;
+  }
+
+  /**
+   * If true, this relation expresses a "to be" relation (with the be at the end of the sentence).
+   *
+   * For example, "Tim's father Tom" expresses the relation
+   * (Tim; 's father is; Tom).
+   */
+  public boolean isSuffixBe() {
+    return this.suffixBe;
+  }
+
+  /**
+   * Set the value of this relation triple expressing a "to be" relation (suffix).
+   *
+   * @param newValue The new value of this relation being a "to be" relation.
+   * @return The old value of whether this relation expressed a "to be" relation.
+   */
+  public boolean isSuffixBe(boolean newValue) {
+    boolean oldValue = this.suffixBe;
+    this.suffixBe = newValue;
+    return oldValue;
+  }
+
+  /**
+   * If true, this relation has an ungrounded "of" at the end of the relation.
+   *
+   * For example, "United States president Barack Obama" expresses the relation
+   * (Obama; is president of; United States).
+   */
+  public boolean isSuffixOf() {
+    return this.suffixOf;
+  }
+
+  /**
+   * Set the value of this triple missing an ungrounded "of" in the relation string.
+   *
+   * @param newValue The new value of this relation missing an "of".
+   * @return The old value of whether this relation missing an "of".
+   */
+  public boolean isSuffixOf(boolean newValue) {
+    boolean oldValue = this.suffixOf;
+    this.suffixOf = newValue;
+    return oldValue;
+  }
+
+  /**
+   * If true, this relation expresses a tmod (temporal modifier) relation that is not grounded in
+   * the sentence.
+   *
+   * For example, "I went to the store Friday" would otherwise yield a strange triple
+   * (I; go to store; Friday).
+   */
+  public boolean istmod() {
+    return this.istmod;
+  }
+
+  /**
+   * Set the value of this relation triple expressing a tmod (temporal modifier) relation.
+   *
+   * @param newValue The new value of this relation being a tmod relation.
+   * @return The old value of whether this relation expressed a tmod relation.
+   */
+  public boolean istmod(boolean newValue) {
+    boolean oldValue = this.istmod;
+    this.istmod = newValue;
+    return oldValue;
   }
 
   /** An optional method, returning the dependency tree this triple was extracted from */
@@ -90,22 +354,62 @@ public class RelationTriple {
   /** {@inheritDoc} */
   @Override
   public int hashCode() {
-    int result = subject.hashCode();
-    result = 31 * result + relation.hashCode();
-    result = 31 * result + object.hashCode();
-    return result;
+    return toString().hashCode();  // Faster than checking CoreLabels
+//    int result = subject.hashCode();
+//    result = 31 * result + relation.hashCode();
+//    result = 31 * result + object.hashCode();
+//    return result;
   }
 
   /** Print a human-readable description of this relation triple, as a tab-separated line */
   @Override
   public String toString() {
-    return subjectGloss() + "\t" + relationGloss() + "\t" + objectGloss();
+    return "" + this.confidence + "\t" + subjectGloss() + "\t" + relationGloss() + "\t" + objectGloss();
   }
+
+  /** Print a description of this triple, formatted like the ReVerb outputs. */
+  public String toReverbString(String docid, CoreMap sentence) {
+    return (docid == null ? "no_doc_id" : docid) + "\t" +
+        relation.get(0).sentIndex() + "\t" +
+        subjectGloss().replace('\t', ' ') + "\t" +
+        relationGloss().replace('\t', ' ') + "\t" +
+        objectGloss().replace('\t', ' ') + "\t" +
+        (subject.get(0).index() - 1) + "\t" +
+        subject.get(subject.size() - 1).index() + "\t" +
+        (relation.get(0).index() - 1) + "\t" +
+        relation.get(relation.size() - 1).index() + "\t" +
+        (object.get(0).index() - 1) + "\t" +
+        object.get(object.size() - 1).index() + "\t" +
+        confidenceGloss() + "\t" +
+        StringUtils.join(sentence.get(CoreAnnotations.TokensAnnotation.class).stream().map(x -> x.word().replace('\t', ' ').replace(" ", "")), " ") + "\t" +
+        StringUtils.join(sentence.get(CoreAnnotations.TokensAnnotation.class).stream().map(CoreLabel::tag), " ") + "\t" +
+        subjectLemmaGloss().replace('\t', ' ') + "\t" +
+        relationLemmaGloss().replace('\t', ' ') + "\t" +
+        objectLemmaGloss().replace('\t', ' ');
+  }
+
+  @Override
+  public int compareTo(RelationTriple o) {
+    if (this.confidence < o.confidence) {
+      return -1;
+    } else if (this.confidence > o.confidence) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public Iterator<CoreLabel> iterator() {
+    return CollectionUtils.concatIterators(subject.iterator(), relation.iterator(), object.iterator());
+  }
+
 
   /**
    * A {@link edu.stanford.nlp.ie.util.RelationTriple}, but with the tree saved as well.
    */
-  protected static class WithTree extends RelationTriple {
+  public static class WithTree extends RelationTriple {
     public final SemanticGraph sourceTree;
 
     /**
@@ -117,9 +421,38 @@ public class RelationTriple {
      * @param object   The object of this triple; e.g., "yarn".
      * @param tree     The tree this extraction was created from; we create a deep copy of the tree.
      */
-    public WithTree(List<CoreLabel> subject, List<CoreLabel> relation, List<CoreLabel> object, SemanticGraph tree) {
-      super(subject, relation, object);
+    public WithTree(List<CoreLabel> subject, List<CoreLabel> relation, List<CoreLabel> object, SemanticGraph tree,
+                    double confidence) {
+      super(subject, relation, object, confidence);
       this.sourceTree = new SemanticGraph(tree);
+    }
+
+    /** The head of the subject of this relation triple. */
+    public CoreLabel subjectHead() {
+      if (subject.size() == 1) { return subject.get(0); }
+      Span subjectSpan = Span.fromValues(subject.get(0).index(), subject.get(subject.size() - 1).index());
+      for (int i = subject.size() - 1; i >= 0; --i) {
+        for (SemanticGraphEdge edge : sourceTree.incomingEdgeIterable(new IndexedWord(subject.get(i)))) {
+          if (edge.getGovernor().index() < subjectSpan.start() || edge.getGovernor().index() >= subjectSpan.end()) {
+            return subject.get(i);
+          }
+        }
+      }
+      return subject.get(subject.size() - 1);
+    }
+
+    /** The head of the object of this relation triple. */
+    public CoreLabel objectHead() {
+      if (object.size() == 1) { return object.get(0); }
+      Span objectSpan = Span.fromValues(object.get(0).index(), object.get(object.size() - 1).index());
+      for (int i = object.size() - 1; i >= 0; --i) {
+        for (SemanticGraphEdge edge : sourceTree.incomingEdgeIterable(new IndexedWord(object.get(i)))) {
+          if (edge.getGovernor().index() < objectSpan.start() || edge.getGovernor().index() >= objectSpan.end()) {
+            return object.get(i);
+          }
+        }
+      }
+      return object.get(object.size() - 1);
     }
 
     /** {@inheritDoc} */
@@ -127,83 +460,5 @@ public class RelationTriple {
     public Optional<SemanticGraph> asDependencyTree() {
       return Optional.of(sourceTree);
     }
-  }
-
-  /** A list of patterns to match relation extractions against */
-  private static final List<SemgrexPattern> PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
-    // { blue cats play [quietly] with yarn }
-    add(SemgrexPattern.compile("{$}=verb ?>/advmod/ {}=adv >/nsubj(pass)?/ {}=subject >/prep/ ({}=prep >/pobj/ {}=object)"));
-  }});
-
-  /** A set of valid arcs denoting an entity we are interested in */
-  private static final Set<String> VALID_ENTITY_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
-    add("amod"); add("nn");
-  }});
-
-
-  /**
-   * Get the yield of a given subtree, if it is a valid entity.
-   * Otherwise, return {@link java.util.Optional#empty()}}.
-   * @param parse The parse tree we are extracting a subtree from.
-   * @param root The root of the subtree.
-   * @return If this subtree is a valid entity, we return its yield. Otherwise, we return empty.
-   */
-  private static Optional<List<CoreLabel>> getValidEntityChunk(SemanticGraph parse, IndexedWord root) {
-    PriorityQueue<CoreLabel> chunk = new FixedPrioritiesPriorityQueue<>();
-    Queue<IndexedWord> fringe = new LinkedList<>();
-    fringe.add(root);
-
-    while (!fringe.isEmpty()) {
-      root = fringe.poll();
-      chunk.add(root.backingLabel(), -root.index());
-      for (SemanticGraphEdge edge : parse.getOutEdgesSorted(root)) {
-        if (!VALID_ENTITY_ARCS.contains(edge.getRelation().getShortName())) {
-          return Optional.empty();
-        } else {
-          fringe.add(edge.getDependent());
-        }
-      }
-    }
-
-    return Optional.of(chunk.toSortedList());
-  }
-
-  /**
-   * <p>
-   * Try to segment this sentence as a relation triple.
-   * This sentence must already match one of a few strict patterns for a valid OpenIE extraction.
-   * If it does not, then no relation triple is created.
-   * That is, this is <b>not</b> a relation extractor; it is just a utility to segment what is already a
-   * (subject, relation, object) triple into these three parts.
-   * </p>
-   *
-   * @param parse The sentence to process, as a dependency tree.
-   * @return A relation triple, if this sentence matches one of the patterns of a valid relation triple.
-   */
-  public static Optional<RelationTriple> segment(SemanticGraph parse) {
-    for (SemgrexPattern pattern : PATTERNS) {  // For every candidate pattern...
-      SemgrexMatcher m = pattern.matcher(parse);
-      if (m.matches()) {  // ... see if it matches the sentence
-        // Verb
-        PriorityQueue<CoreLabel> verbChunk = new FixedPrioritiesPriorityQueue<>();
-        IndexedWord verb = m.getNode("verb");
-        IndexedWord prep = m.getNode("prep");
-        IndexedWord adv = m.getNode("adv");
-        verbChunk.add(verb.backingLabel(), -verb.index());
-        if (prep != null) { verbChunk.add(prep.backingLabel(), -prep.index()); }
-        if (adv != null) { verbChunk.add(adv.backingLabel(), -adv.index()); }
-        List<CoreLabel> relation = verbChunk.toSortedList();
-        // Subject+Object
-        Optional<List<CoreLabel>> subject = getValidEntityChunk(parse, m.getNode("subject"));
-        Optional<List<CoreLabel>> object = getValidEntityChunk(parse, m.getNode("object"));
-        // Create relation
-        if (subject.isPresent() && object.isPresent()) {  // ... and has a valid subject+object
-          // Success! Found a valid extraction.
-          return Optional.of(new WithTree(subject.get(), relation, object.get(), parse));
-        }
-      }
-    }
-    // Failed to match any pattern; return failure
-    return Optional.empty();
   }
 }

@@ -18,7 +18,8 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
  */
 public abstract class SentenceAnnotator implements Annotator {
   protected class AnnotatorProcessor implements ThreadsafeProcessor<CoreMap, CoreMap> {
-    Annotation annotation;
+
+    final Annotation annotation;
 
     AnnotatorProcessor(Annotation annotation) {
       this.annotation = annotation;
@@ -37,7 +38,7 @@ public abstract class SentenceAnnotator implements Annotator {
   }
 
   private InterruptibleMulticoreWrapper<CoreMap, CoreMap> buildWrapper(Annotation annotation) {
-    InterruptibleMulticoreWrapper<CoreMap, CoreMap> wrapper = new InterruptibleMulticoreWrapper<CoreMap, CoreMap>(nThreads(), new AnnotatorProcessor(annotation), true, maxTime());
+    InterruptibleMulticoreWrapper<CoreMap, CoreMap> wrapper = new InterruptibleMulticoreWrapper<>(nThreads(), new AnnotatorProcessor(annotation), true, maxTime());
     return wrapper;
   }
 
@@ -49,7 +50,7 @@ public abstract class SentenceAnnotator implements Annotator {
         for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
           boolean success = false;
           // We iterate twice for each sentence so that if we fail for
-          // a sentence once, we start a new queue and try again.  
+          // a sentence once, we start a new queue and try again.
           // If the sentence fails a second time we give up.
           for (int attempt = 0; attempt < 2; ++attempt) {
             try {
@@ -102,12 +103,15 @@ public abstract class SentenceAnnotator implements Annotator {
 
   protected abstract int nThreads();
 
+  /**
+   * The maximum time to run this annotator for, in milliseconds.
+   */
   protected abstract long maxTime();
 
   /** annotation is included in case there is global information we care about */
   protected abstract void doOneSentence(Annotation annotation, CoreMap sentence);
 
-  /** 
+  /**
    * Fills in empty annotations for trees, tags, etc if the annotator
    * failed or timed out.  Not supposed to do major processing.
    */

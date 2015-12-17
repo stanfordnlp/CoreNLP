@@ -1,5 +1,6 @@
 package edu.stanford.nlp.parser.nndep;
 
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -20,6 +21,8 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.TreeGraphNode;
 import edu.stanford.nlp.trees.TypedDependency;
+import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
+import edu.stanford.nlp.trees.UniversalEnglishGrammaticalStructure;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure;
 import edu.stanford.nlp.util.CoreMap;
@@ -72,7 +75,7 @@ import static java.util.stream.Collectors.toList;
  * @author Jon Gauthier
  */
 public class DependencyParser {
-  public static final String DEFAULT_MODEL = "edu/stanford/nlp/models/parser/nndep/english_SD.gz";
+  public static final String DEFAULT_MODEL = "edu/stanford/nlp/models/parser/nndep/english_UD.gz";
 
   /**
    * Words, parts of speech, and dependency relation labels which were
@@ -105,7 +108,7 @@ public class DependencyParser {
    * Language used to generate
    * {@link edu.stanford.nlp.trees.GrammaticalRelation} instances.
    */
-  private final GrammaticalRelation.Language language;
+  private final Language language;
 
   DependencyParser() {
     this(new Properties());
@@ -116,25 +119,12 @@ public class DependencyParser {
 
     // Convert Languages.Language instance to
     // GrammaticalLanguage.Language
-    switch (config.language) {
-      case English:
-        language = GrammaticalRelation.Language.English;
-        break;
-      case Chinese:
-        language = GrammaticalRelation.Language.Chinese;
-        break;
-      case Unknown:
-        language = GrammaticalRelation.Language.Any;
-        break;
-      default:
-        language = GrammaticalRelation.Language.English;  // note[gabor]: This is to conform to the default in the Parser annotator
-        break;
-    }
+    this.language = config.language;
   }
 
   /**
    * Get an integer ID for the given word. This ID can be used to index
-   * into the embeddings {@link #embeddings}.
+   * into the embeddings {@link Classifier#E}.
    *
    * @return An ID for the given word, or an ID referring to a generic
    *         "unknown" word if the word is unknown
@@ -153,9 +143,9 @@ public class DependencyParser {
 
   public List<Integer> getFeatures(Configuration c) {
     // Presize the arrays for very slight speed gain. Hardcoded, but so is the current feature list.
-    List<Integer> fWord = new ArrayList<Integer>(18);
-    List<Integer> fPos = new ArrayList<Integer>(18);
-    List<Integer> fLabel = new ArrayList<Integer>(12);
+    List<Integer> fWord = new ArrayList<>(18);
+    List<Integer> fPos = new ArrayList<>(18);
+    List<Integer> fLabel = new ArrayList<>(12);
     for (int j = 2; j >= 0; --j) {
       int index = c.getStack(j);
       fWord.add(getWordID(c.getWord(index)));
@@ -526,9 +516,9 @@ public class DependencyParser {
       s = input.readLine();
       int nPreComputed = Integer.parseInt(s.substring(s.indexOf('=') + 1));
 
-      knownWords = new ArrayList<String>();
-      knownPos = new ArrayList<String>();
-      knownLabels = new ArrayList<String>();
+      knownWords = new ArrayList<>();
+      knownPos = new ArrayList<>();
+      knownLabels = new ArrayList<>();
       double[][] E = new double[nDict + nPOS + nLabel][eSize];
       String[] splits;
       int index = 0;
@@ -581,7 +571,7 @@ public class DependencyParser {
           W2[i][j] = Double.parseDouble(splits[i]);
       }
 
-      preComputed = new ArrayList<Integer>();
+      preComputed = new ArrayList<>();
       while (preComputed.size() < nPreComputed) {
         s = input.readLine();
         splits = s.split(" ");
@@ -610,7 +600,7 @@ public class DependencyParser {
       BufferedReader input = null;
       try {
         input = IOUtils.readerFromString(embedFile);
-        List<String> lines = new ArrayList<String>();
+        List<String> lines = new ArrayList<>();
         for (String s; (s = input.readLine()) != null; ) {
           lines.add(s);
         }
@@ -637,6 +627,8 @@ public class DependencyParser {
         IOUtils.closeIgnoringExceptions(input);
       }
     }
+
+    embeddings = Util.scaling(embeddings, 0, 1.0);
     return embeddings;
   }
 
@@ -658,12 +650,12 @@ public class DependencyParser {
     System.err.println("Pre-trained Model File: " + preModel);
 
     List<CoreMap> trainSents = new ArrayList<>();
-    List<DependencyTree> trainTrees = new ArrayList<DependencyTree>();
+    List<DependencyTree> trainTrees = new ArrayList<>();
     Util.loadConllFile(trainFile, trainSents, trainTrees, config.unlabeled, config.cPOS);
     Util.printTreeStats("Train", trainTrees);
 
-    List<CoreMap> devSents = new ArrayList<CoreMap>();
-    List<DependencyTree> devTrees = new ArrayList<DependencyTree>();
+    List<CoreMap> devSents = new ArrayList<>();
+    List<DependencyTree> devTrees = new ArrayList<>();
     if (devFile != null) {
       Util.loadConllFile(devFile, devSents, devTrees, config.unlabeled, config.cPOS);
       Util.printTreeStats("Dev", devTrees);
@@ -671,7 +663,7 @@ public class DependencyParser {
     genDictionaries(trainSents, trainTrees);
 
     //NOTE: remove -NULL-, and the pass it to ParsingSystem
-    List<String> lDict = new ArrayList<String>(knownLabels);
+    List<String> lDict = new ArrayList<>(knownLabels);
     lDict.remove(0);
     system = new ArcStandard(config.tlp, lDict, true);
 
@@ -786,7 +778,7 @@ public class DependencyParser {
         W2[i][j] = random.nextDouble() * 2 * config.initRange - config.initRange;
 
     // Read embeddings into `embedID`, `embeddings`
-     Map<String, Integer> embedID = new HashMap<String, Integer>();
+     Map<String, Integer> embedID = new HashMap<>();
      double[][] embeddings = readEmbedFile(embedFile, embedID);
 
     // Try to match loaded embeddings with words in dictionary
@@ -801,8 +793,7 @@ public class DependencyParser {
       }
       if (index >= 0) {
         ++foundEmbed;
-        for (int j = 0; j < E[i].length; ++j)
-          E[i][j] = embeddings[index][j];
+        System.arraycopy(embeddings[index], 0, E[i], 0, E[i].length);
       } else {
         for (int j = 0; j < E[i].length; ++j)
           //E[i][j] = random.nextDouble() * config.initRange * 2 - config.initRange;
@@ -985,6 +976,11 @@ public class DependencyParser {
         if (stored != null)
           return stored;
         break;
+      case UniversalEnglish:
+        stored = UniversalEnglishGrammaticalRelations.shortNameToGRel.get(label);
+        if (stored != null)
+          return stored;
+        break;
       case Chinese:
         stored = ChineseGrammaticalRelations.shortNameToGRel.get(label);
         if (stored != null)
@@ -998,10 +994,11 @@ public class DependencyParser {
   private GrammaticalStructure makeGrammaticalStructure(List<TypedDependency> dependencies, TreeGraphNode rootNode) {
     switch (language) {
       case English: return new EnglishGrammaticalStructure(dependencies, rootNode);
+      case UniversalEnglish: return new UniversalEnglishGrammaticalStructure(dependencies, rootNode);
       case Chinese: return new ChineseGrammaticalStructure(dependencies, rootNode);
 
-      // TODO suboptimal: default to EnglishGrammaticalStructure return
-      default: return new EnglishGrammaticalStructure(dependencies, rootNode);
+      // TODO suboptimal: default to UniversalEnglishGrammaticalStructure return
+      default: return new UniversalEnglishGrammaticalStructure(dependencies, rootNode);
     }
   }
 
@@ -1058,7 +1055,7 @@ public class DependencyParser {
     System.err.println("Test File: " + testFile);
     Timing timer = new Timing();
     List<CoreMap> testSents = new ArrayList<>();
-    List<DependencyTree> testTrees = new ArrayList<DependencyTree>();
+    List<DependencyTree> testTrees = new ArrayList<>();
     Util.loadConllFile(testFile, testSents, testTrees, config.unlabeled, config.cPOS);
 
     // count how much to parse
@@ -1068,8 +1065,8 @@ public class DependencyParser {
     for (CoreMap testSent : testSents) {
       numSentences += 1;
       List<CoreLabel> tokens = testSent.get(CoreAnnotations.TokensAnnotation.class);
-      for (int k = 0; k < tokens.size(); ++ k) {  
-        String word = tokens.get(k).word();
+      for (CoreLabel token : tokens) {
+        String word = token.word();
         numWords += 1;
         if (!wordIDs.containsKey(word))
           numOOVWords += 1;
@@ -1079,7 +1076,7 @@ public class DependencyParser {
 
     List<DependencyTree> predicted = testSents.stream().map(this::predictInner).collect(toList());
     Map<String, Double> result = system.evaluate(testSents, predicted, testTrees);
-    
+
     double uas = config.noPunc ? result.get("UASnoPunc") : result.get("UAS");
     double las = config.noPunc ? result.get("LASnoPunc") : result.get("LAS");
     System.err.printf("UAS = %.4f%n", uas);
@@ -1280,4 +1277,5 @@ public class DependencyParser {
       parser.parseTextFile(input, output);
     }
   }
+
 }

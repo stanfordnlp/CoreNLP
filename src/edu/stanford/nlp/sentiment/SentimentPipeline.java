@@ -144,7 +144,7 @@ public class SentimentPipeline {
    * Outputs a tree using the output style requested
    */
   static void outputTree(PrintStream out, CoreMap sentence, List<Output> outputFormats) {
-    Tree tree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
+    Tree tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
     for (Output output : outputFormats) {
       switch (output) {
       case PENNTREES: {
@@ -161,7 +161,7 @@ public class SentimentPipeline {
         break;
       }
       case ROOT: {
-        out.println("  " + sentence.get(SentimentCoreAnnotations.ClassName.class));
+        out.println("  " + sentence.get(SentimentCoreAnnotations.SentimentClass.class));
         break;
       }
       case PROBABILITIES: {
@@ -275,7 +275,7 @@ public class SentimentPipeline {
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-output")) {
         String[] formats = args[argIndex + 1].split(",");
-        outputFormats = new ArrayList<Output>();
+        outputFormats = new ArrayList<>();
         for (String format : formats) {
           outputFormats.add(Output.valueOf(format.toUpperCase()));
         }

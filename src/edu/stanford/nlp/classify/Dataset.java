@@ -28,6 +28,9 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * An interfacing class for {@link ClassifierFactory} that incrementally
@@ -46,6 +49,8 @@ import edu.stanford.nlp.util.ScoredObject;
 public class Dataset<L, F> extends GeneralDataset<L, F> {
 
   private static final long serialVersionUID = -3883164942879961091L;
+
+  final static Logger logger = LoggerFactory.getLogger(Dataset.class);
 
   public Dataset() {
     this(10);
@@ -102,13 +107,15 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     int[][] trainData = new int[trainSize][];
     int[] trainLabels = new int[trainSize];
 
-    System.arraycopy(data, start, devData, 0, devSize);
-    System.arraycopy(labels, start, devLabels, 0, devSize);
+    synchronized (System.class) {
+      System.arraycopy(data, start, devData, 0, devSize);
+      System.arraycopy(labels, start, devLabels, 0, devSize);
 
-    System.arraycopy(data, 0, trainData, 0, start);
-    System.arraycopy(data, end, trainData, start, size()-end);
-    System.arraycopy(labels, 0, trainLabels, 0, start);
-    System.arraycopy(labels, end, trainLabels, start, size()-end);
+      System.arraycopy(data, 0, trainData, 0, start);
+      System.arraycopy(data, end, trainData, start, size() - end);
+      System.arraycopy(labels, 0, trainLabels, 0, start);
+      System.arraycopy(labels, end, trainLabels, start, size() - end);
+    }
 
     if (this instanceof WeightedDataset<?,?>) {
       float[] trainWeights = new float[trainSize];
@@ -116,19 +123,21 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
 
       WeightedDataset<L, F> w = (WeightedDataset<L, F>)this;
 
-      System.arraycopy(w.weights, start, devWeights, 0, devSize);
-      System.arraycopy(w.weights, 0, trainWeights, 0, start);
-      System.arraycopy(w.weights, end, trainWeights, start, size()-end);
+      synchronized (System.class) {
+        System.arraycopy(w.weights, start, devWeights, 0, devSize);
+        System.arraycopy(w.weights, 0, trainWeights, 0, start);
+        System.arraycopy(w.weights, end, trainWeights, start, size() - end);
+      }
 
-      WeightedDataset<L, F> dev = new WeightedDataset<L, F>(labelIndex, devLabels, featureIndex, devData, devSize, devWeights);
-      WeightedDataset<L, F> train = new WeightedDataset<L, F>(labelIndex, trainLabels, featureIndex, trainData, trainSize, trainWeights);
+      WeightedDataset<L, F> dev = new WeightedDataset<>(labelIndex, devLabels, featureIndex, devData, devSize, devWeights);
+      WeightedDataset<L, F> train = new WeightedDataset<>(labelIndex, trainLabels, featureIndex, trainData, trainSize, trainWeights);
 
-      return new Pair<GeneralDataset<L, F>,GeneralDataset<L, F>>(train, dev);
+      return new Pair<>(train, dev);
     }
-    Dataset<L, F> dev = new Dataset<L, F>(labelIndex, devLabels, featureIndex, devData, devSize);
-    Dataset<L, F> train = new Dataset<L, F>(labelIndex, trainLabels, featureIndex, trainData, trainSize);
+    Dataset<L, F> dev = new Dataset<>(labelIndex, devLabels, featureIndex, devData, devSize);
+    Dataset<L, F> train = new Dataset<>(labelIndex, trainLabels, featureIndex, trainData, trainSize);
 
-    return new Pair<GeneralDataset<L, F>,GeneralDataset<L, F>>(train, dev);
+    return new Pair<>(train, dev);
   }
 
 
@@ -151,7 +160,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
       i++;
     }
 
-    return new Dataset<L, F>(labelIndex, newLabels, featureIndex, newData);
+    return new Dataset<>(labelIndex, newLabels, featureIndex, newData);
   }
 
   @Override
@@ -163,7 +172,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
    * Constructs a Dataset by reading in a file in SVM light format.
    */
   public static Dataset<String, String> readSVMLightFormat(String filename) {
-    return readSVMLightFormat(filename, new HashIndex<String>(), new HashIndex<String>());
+    return readSVMLightFormat(filename, new HashIndex<>(), new HashIndex<>());
   }
 
   /**
@@ -172,7 +181,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
    * (if lines is null, it is assumed no line information is desired)
    */
   public static Dataset<String, String> readSVMLightFormat(String filename, List<String> lines) {
-    return readSVMLightFormat(filename, new HashIndex<String>(), new HashIndex<String>(), lines);
+    return readSVMLightFormat(filename, new HashIndex<>(), new HashIndex<>(), lines);
   }
 
   /**
@@ -189,7 +198,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
   public static Dataset<String, String> readSVMLightFormat(String filename, Index<String> featureIndex, Index<String> labelIndex, List<String> lines) {
     Dataset<String, String> dataset;
     try {
-      dataset = new Dataset<String, String>(10, featureIndex, labelIndex);
+      dataset = new Dataset<>(10, featureIndex, labelIndex);
       for (String line : ObjectBank.getLineIterator(new File(filename))) {
         if(lines != null)
           lines.add(line);
@@ -208,11 +217,11 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     line1++;
     l = l.replaceAll("#.*", ""); // remove any trailing comments
     String[] line = l.split("\\s+");
-    Collection<String> features = new ArrayList<String>();
+    Collection<String> features = new ArrayList<>();
     for (int i = 1; i < line.length; i++) {
       String[] f = line[i].split(":");
       if (f.length != 2) {
-        System.err.println("Dataset error: line " + line1);
+        logger.info("Dataset error: line " + line1);
       }
       int val = (int) Double.parseDouble(f[1]);
       for (int j = 0; j < val; j++) {
@@ -220,7 +229,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
       }
     }
     features.add(String.valueOf(Integer.MAX_VALUE));  // a constant feature for a class
-    Datum<String, String> d = new BasicDatum<String, String>(features, line[0]);
+    Datum<String, String> d = new BasicDatum<>(features, line[0]);
     return d;
   }
 
@@ -229,7 +238,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
    */
   public Counter<F> getFeatureCounter()
   {
-    Counter<F> featureCounts = new ClassicCounter<F>();
+    Counter<F> featureCounts = new ClassicCounter<>();
     for (int i=0; i < this.size(); i++)
     {
       BasicDatum<L, F> datum = (BasicDatum<L, F>) getDatum(i);
@@ -248,7 +257,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
    * @return RVFDatum with l1-normalized tf-idf features.
    */
   public RVFDatum<L,F> getL1NormalizedTFIDFDatum(Datum<L,F> datum,Counter<F> featureDocCounts){
-      Counter<F> tfidfFeatures = new ClassicCounter<F>();
+      Counter<F> tfidfFeatures = new ClassicCounter<>();
       for(F feature : datum.asFeatures()){
         if(featureDocCounts.containsKey(feature))
           tfidfFeatures.incrementCount(feature,1.0);
@@ -264,7 +273,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
         double tfidf = tfidfFeatures.getCount(feature);
         tfidfFeatures.setCount(feature, tfidf/l1norm);
       }
-      RVFDatum<L,F> rvfDatum = new RVFDatum<L,F>(tfidfFeatures,datum.label());
+      RVFDatum<L,F> rvfDatum = new RVFDatum<>(tfidfFeatures, datum.label());
       return rvfDatum;
   }
 
@@ -273,7 +282,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
    * @return RVFDataset
    */
   public RVFDataset<L,F> getL1NormalizedTFIDFDataset(){
-    RVFDataset<L,F> rvfDataset = new RVFDataset<L,F>(this.size(),this.featureIndex,this.labelIndex);
+    RVFDataset<L,F> rvfDataset = new RVFDataset<>(this.size(), this.featureIndex, this.labelIndex);
     Counter<F> featureDocCounts = getFeatureCounter();
     for(int i = 0; i < this.size(); i++){
       Datum<L,F> datum = this.getDatum(i);
@@ -315,10 +324,12 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
   protected void ensureSize() {
     if (labels.length == size) {
       int[] newLabels = new int[size * 2];
-      System.arraycopy(labels, 0, newLabels, 0, size);
-      labels = newLabels;
       int[][] newData = new int[size * 2][];
-      System.arraycopy(data, 0, newData, 0, size);
+      synchronized (System.class) {
+        System.arraycopy(labels, 0, newLabels, 0, size);
+        System.arraycopy(data, 0, newData, 0, size);
+      }
+      labels = newLabels;
       data = newData;
     }
   }
@@ -348,7 +359,9 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
       }
     }
     data[size] = new int[j];
-    System.arraycopy(intFeatures, 0, data[size], 0, j);
+    synchronized (System.class) {
+      System.arraycopy(intFeatures, 0, data[size], 0, j);
+    }
   }
 
   protected void addFeatureIndices(int [] features) {
@@ -357,8 +370,8 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
 
   @Override
   protected final void initialize(int numDatums) {
-    labelIndex = new HashIndex<L>();
-    featureIndex = new HashIndex<F>();
+    labelIndex = new HashIndex<>();
+    featureIndex = new HashIndex<>();
     labels = new int[numDatums];
     data = new int[numDatums][];
     size = 0;
@@ -369,7 +382,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
    */
   @Override
   public Datum<L, F> getDatum(int index) {
-    return new BasicDatum<L, F>(featureIndex.objects(data[index]), labelIndex.get(labels[index]));
+    return new BasicDatum<>(featureIndex.objects(data[index]), labelIndex.get(labels[index]));
   }
 
   /**
@@ -377,11 +390,11 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
    */
   @Override
   public RVFDatum<L, F> getRVFDatum(int index) {
-    ClassicCounter<F> c = new ClassicCounter<F>();
+     ClassicCounter<F> c = new ClassicCounter<>();
     for (F key : featureIndex.objects(data[index])) {
       c.incrementCount(key);
     }
-    return new RVFDatum<L, F>(c, labelIndex.get(labels[index]));
+    return new RVFDatum<>(c, labelIndex.get(labels[index]));
   }
 
   /**
@@ -389,7 +402,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
    */
   @Override
   public void summaryStatistics() {
-    System.err.println(toSummaryStatistics());
+    logger.info(toSummaryStatistics());
   }
 
   /** A String that is multiple lines of text giving summary statistics.
@@ -439,7 +452,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     float[] counts = getFeatureCounts();
 
     // build a new featureIndex
-    Index<F> newFeatureIndex = new HashIndex<F>();
+    Index<F> newFeatureIndex = new HashIndex<>();
     LOOP:
     for (F f : featureIndex) {
       for (Pair<Pattern, Integer> threshold : thresholds) {
@@ -466,7 +479,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     featureIndex = null;
 
     for (int i = 0; i < size; i++) {
-      List<Integer> featList = new ArrayList<Integer>(data[i].length);
+      List<Integer> featList = new ArrayList<>(data[i].length);
       for (int j = 0; j < data[i].length; j++) {
         if (featMap[data[i][j]] >= 0) {
           featList.add(featMap[data[i][j]]);
@@ -556,7 +569,9 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
         }
       }
       newData[i] = new int[k];
-      System.arraycopy(newD, 0, newData[i], 0, k);
+      synchronized (System.class) {
+        System.arraycopy(newD, 0, newData[i], 0, k);
+      }
     }
     data = newData;
     featureIndex = newFeatureIndex;
@@ -574,17 +589,17 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
    */
   public void selectFeatures(int numFeatures, double[] scores) {
 
-    List<ScoredObject<F>> scoredFeatures = new ArrayList<ScoredObject<F>>();
+    List<ScoredObject<F>> scoredFeatures = new ArrayList<>();
 
     for (int i = 0; i < scores.length; i++) {
-      scoredFeatures.add(new ScoredObject<F>(featureIndex.get(i), scores[i]));
+      scoredFeatures.add(new ScoredObject<>(featureIndex.get(i), scores[i]));
     }
 
     Collections.sort(scoredFeatures, ScoredComparator.DESCENDING_COMPARATOR);
-    Index<F> newFeatureIndex = new HashIndex<F>();
+    Index<F> newFeatureIndex = new HashIndex<>();
     for (int i = 0; i < scoredFeatures.size() && i < numFeatures; i++) {
       newFeatureIndex.add(scoredFeatures.get(i).object());
-      //System.err.println(scoredFeatures.get(i));
+      //logger.info(scoredFeatures.get(i));
     }
 
     for (int i = 0; i < size; i++) {
@@ -597,7 +612,9 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
         }
       }
       int[] newDataTrimmed = new int[curIndex];
-      System.arraycopy(newData, 0, newDataTrimmed, 0, curIndex);
+      synchronized (System.class) {
+        System.arraycopy(newData, 0, newDataTrimmed, 0, curIndex);
+      }
       data[i] = newDataTrimmed;
     }
     featureIndex = newFeatureIndex;
@@ -611,20 +628,20 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     labels = trimToSize(labels);
 
     // counts the number of times word X is present
-    ClassicCounter<F> featureCounter = new ClassicCounter<F>();
+    ClassicCounter<F> featureCounter = new ClassicCounter<>();
 
     // counts the number of time a document has label Y
-    ClassicCounter<L> labelCounter = new ClassicCounter<L>();
+    ClassicCounter<L> labelCounter = new ClassicCounter<>();
 
     // counts the number of times the document has label Y given word X is present
-    TwoDimensionalCounter<F,L> condCounter = new TwoDimensionalCounter<F,L>();
+    TwoDimensionalCounter<F,L> condCounter = new TwoDimensionalCounter<>();
 
     for (int i = 0; i < labels.length; i++) {
       labelCounter.incrementCount(labelIndex.get(labels[i]));
 
       // convert the document to binary feature representation
       boolean[] doc = new boolean[featureIndex.size()];
-      //System.err.println(i);
+      //logger.info(i);
       for (int j = 0; j < data[i].length; j++) {
         doc[data[i][j]] = true;
       }
@@ -686,8 +703,8 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
 
       }
 
-        //System.err.println(pFeature+" * "+sumFeature+" = +"+);
-        //System.err.println("^ "+pNotFeature+" "+sumNotFeature);
+        //logger.info(pFeature+" * "+sumFeature+" = +"+);
+        //logger.info("^ "+pNotFeature+" "+sumNotFeature);
 
       ig[i] += pFeature*sumFeature + pNotFeature*sumNotFeature;
       /* earlier the line above used to be: ig[i] = pFeature*sumFeature + pNotFeature*sumNotFeature;

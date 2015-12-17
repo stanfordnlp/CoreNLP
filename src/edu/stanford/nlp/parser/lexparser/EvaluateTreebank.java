@@ -22,6 +22,7 @@ import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.parser.common.NoSuchParseException;
 import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.common.ParserQuery;
+import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.common.ParsingThreadsafeProcessor;
 import edu.stanford.nlp.parser.metrics.AbstractEval;
 import edu.stanford.nlp.parser.metrics.BestOfTopKEval;
@@ -89,7 +90,7 @@ public class EvaluateTreebank {
   AbstractEval.ScoreEval factLL = null;
   AbstractEval kGoodLB = null;
 
-  private final List<BestOfTopKEval> topKEvals = new ArrayList<BestOfTopKEval>();
+  private final List<BestOfTopKEval> topKEvals = new ArrayList<>();
 
   private int kbestPCFG = 0;
 
@@ -440,7 +441,7 @@ public class EvaluateTreebank {
         }
 
         if (topKEvals.size() > 0) {
-          List<Tree> transGuesses = new ArrayList<Tree>();
+          List<Tree> transGuesses = new ArrayList<>();
           int kbest = Math.min(op.testOptions.evalPCFGkBest, kbestPCFGTrees.size());
           for (ScoredObject<Tree> guess : kbestPCFGTrees.subList(0, kbest)) {
             transGuesses.add(collinizer.transformTree(guess.object()));
@@ -613,9 +614,9 @@ public class EvaluateTreebank {
     }
 
     if (op.testOptions.testingThreads != 1) {
-      MulticoreWrapper<List<? extends HasWord>, ParserQuery> wrapper = new MulticoreWrapper<List<? extends HasWord>, ParserQuery>(op.testOptions.testingThreads, new ParsingThreadsafeProcessor(pqFactory, pwErr));
+      MulticoreWrapper<List<? extends HasWord>, ParserQuery> wrapper = new MulticoreWrapper<>(op.testOptions.testingThreads, new ParsingThreadsafeProcessor(pqFactory, pwErr));
 
-      LinkedList<Tree> goldTrees = new LinkedList<Tree>();
+      LinkedList<Tree> goldTrees = new LinkedList<>();
       for (Tree goldTree : testTreebank) {
         List<? extends HasWord> sentence = getInputSentence(goldTree);
         goldTrees.add(goldTree);

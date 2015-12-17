@@ -278,6 +278,14 @@ public class ArrayMath {
 
   // OPERATIONS WITH TWO ARRAYS - DESTRUCTIVE
 
+  public static void pairwiseAddInPlace(float[] to, float[] from) {
+    if (to.length != from.length) {
+      throw new RuntimeException("to length:" + to.length + " from length:" + from.length);
+    }
+    for (int i = 0; i < to.length; i++) {
+      to[i] = to[i] + from[i];
+    }
+  }
   public static void pairwiseAddInPlace(double[] to, double[] from) {
     if (to.length != from.length) {
       throw new RuntimeException("to length:" + to.length + " from length:" + from.length);
@@ -474,8 +482,8 @@ public class ArrayMath {
   }
 
   public static boolean hasInfinite(double[] a) {
-    for (int i = 0; i < a.length; i++) {
-      if (Double.isInfinite(a[i])) return true;
+    for (double anA : a) {
+      if (Double.isInfinite(anA)) return true;
     }
     return false;
   }
@@ -512,24 +520,24 @@ public class ArrayMath {
 
   public static int countInfinite(double[] v) {
     int c = 0;
-    for (int i = 0; i < v.length; i++)
-      if (Double.isInfinite(v[i]))
+    for (double aV : v)
+      if (Double.isInfinite(aV))
         c++;
     return c;
   }
 
   public static int countNonZero(double[] v) {
     int c = 0;
-    for (int i = 0; i < v.length; i++)
-      if (v[i] != 0.0)
+    for (double aV : v)
+      if (aV != 0.0)
         ++c;
     return c;
   }
 
   public static int countCloseToZero(double[] v, double epsilon) {
     int c = 0;
-    for (int i = 0; i < v.length; i++)
-      if (Math.abs(v[i])< epsilon)
+    for (double aV : v)
+      if (Math.abs(aV) < epsilon)
         ++c;
     return c;
   }
@@ -546,8 +554,8 @@ public class ArrayMath {
 
   public static int countNegative(double[] v) {
     int c = 0;
-    for (int i = 0; i < v.length; i++)
-      if (v[i] < 0.0)
+    for (double aV : v)
+      if (aV < 0.0)
         ++c;
     return c;
   }
@@ -555,9 +563,9 @@ public class ArrayMath {
   public static double[] filterInfinite(double[] v) {
     double[] u = new double[numRows(v) - countInfinite(v)];
     int j = 0;
-    for (int i = 0; i < v.length; i++) {
-      if (!Double.isInfinite(v[i])) {
-        u[j++] = v[i];
+    for (double aV : v) {
+      if (!Double.isInfinite(aV)) {
+        u[j++] = aV;
       }
     }
     return u;
@@ -634,6 +642,17 @@ public class ArrayMath {
     return total / a.length;
   }
 
+  /** This version avoids any possibility of overflow. */
+  public static double iterativeAverage(double[] a) {
+    double avg = 0.0;
+    int t = 1;
+    for (double x : a) {
+      avg += (x - avg) / t;
+      t++;
+    }
+    return avg;
+  }
+
   /**
    * Computes inf-norm of vector.
    * This is just the largest absolute value of an element.
@@ -659,9 +678,9 @@ public class ArrayMath {
    */
   public static double norm_inf(float[] a) {
     double max = Double.NEGATIVE_INFINITY;
-    for (int i = 0; i < a.length; i++) {
-      if (Math.abs(a[i]) > max) {
-        max = Math.abs(a[i]);
+    for (float anA : a) {
+      if (Math.abs(anA) > max) {
+        max = Math.abs(anA);
       }
     }
     return max;
@@ -1209,6 +1228,20 @@ public class ArrayMath {
     }
     multiplyInPlace(a, 1.0/total); // divide each value by total
   }
+  public static void L2normalize(double[] a) {
+    double total = L2Norm(a);
+    if (total == 0.0 || Double.isNaN(total)) {
+      if (a.length < 100) {
+        throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(a));
+      } else {
+        double[] aTrunc = new double[100];
+        System.arraycopy(a, 0, aTrunc, 0, 100);
+        throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(aTrunc) + " ... ");
+      }
+
+    }
+    multiplyInPlace(a, 1.0/total); // divide each value by total
+  }
 
   /**
    * Makes the values in this array sum to 1.0. Does it in place.
@@ -1220,6 +1253,20 @@ public class ArrayMath {
       throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN");
     }
     multiplyInPlace(a, 1.0f/total); // divide each value by total
+  }
+  public static void L2normalize(float[] a) {
+    float total = L2Norm(a);
+    if (total == 0.0 || Float.isNaN(total)) {
+      if (a.length < 100) {
+        throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(a));
+      } else {
+        float[] aTrunc = new float[100];
+        System.arraycopy(a, 0, aTrunc, 0, 100);
+        throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(aTrunc) + " ... ");
+      }
+
+    }
+    multiplyInPlace(a, 1.0/total); // divide each value by total
   }
 
   /**
@@ -1245,6 +1292,13 @@ public class ArrayMath {
       result += Math.pow(d,2);
     }
     return Math.sqrt(result);
+  }
+  public static float L2Norm(float[] a) {
+    double result = 0;
+    for(float d: a) {
+      result += Math.pow(d,2);
+    }
+    return (float) Math.sqrt(result);
   }
 
   public static double L1Norm(double[] a) {
@@ -1388,9 +1442,9 @@ public class ArrayMath {
     return sum(a) / a.length;
   }
 
-  // Thang Mar14
-  public static int mean(int[] a) {
-    return sum(a) / a.length;
+  /** Return the mean of an array of int. */
+  public static double mean(int[] a) {
+    return ((double) sum(a)) / a.length;
   }
 
   public static double median(double[] a) {

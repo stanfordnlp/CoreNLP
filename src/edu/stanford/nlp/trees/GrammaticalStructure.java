@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 import java.util.function.Function;
 
 import edu.stanford.nlp.graph.DirectedMultiGraph;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -22,7 +23,6 @@ import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
 import edu.stanford.nlp.util.*;
-
 import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
 import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
 
@@ -64,7 +64,7 @@ public abstract class GrammaticalStructure implements Serializable {
    * A specification for the types of extra edges to add to the dependency tree.
    * If you're in doubt, use {@link edu.stanford.nlp.trees.GrammaticalStructure.Extras#NONE}.
    */
-  public static enum Extras {
+  public enum Extras {
     /**
      * <p> Don't include any additional edges. </p>
      * <p>
@@ -123,12 +123,14 @@ public abstract class GrammaticalStructure implements Serializable {
       this.collapseRef = collapseRef;
     }
 
-  }
+  } // end enum Extras
+
 
   protected final List<TypedDependency> typedDependencies;
   protected final List<TypedDependency> allTypedDependencies;
 
   protected final Predicate<String> puncFilter;
+  protected final Predicate<String> tagFilter;
 
   /**
    * The root Tree node for this GrammaticalStructure.
@@ -147,31 +149,34 @@ public abstract class GrammaticalStructure implements Serializable {
    *
    * @param t             A Tree to analyze
    * @param relations     A set of GrammaticalRelations to consider
-   * @param relationsLock Something needed to make this thread-safe
-   * @param transformer   A transformer to apply to the tree before converting
+   * @param relationsLock Something needed to make this thread-safe when iterating over relations
+   * @param transformer   A tree transformer to apply to the tree before converting (this argument
+   *                      may be null if no transformer is required)
    * @param hf            A HeadFinder for analysis
    * @param puncFilter    A Filter to reject punctuation. To delete punctuation
    *                      dependencies, this filter should return false on
    *                      punctuation word strings, and true otherwise.
    *                      If punctuation dependencies should be kept, you
-   *                      should pass in a Filters.&lt;String&gt;acceptFilter().
+   *                      should pass in a {@code Filters.<String>acceptFilter()}.
+   * @param tagFilter     Appears to be unused (filters out tags??)
    */
   public GrammaticalStructure(Tree t, Collection<GrammaticalRelation> relations,
                               Lock relationsLock, TreeTransformer transformer,
-                              HeadFinder hf, Predicate<String> puncFilter) {
-    TreeGraphNode treegraph = new TreeGraphNode(t, (TreeGraphNode) null);
+                              HeadFinder hf, Predicate<String> puncFilter,
+                              Predicate<String> tagFilter) {
+    TreeGraphNode treeGraph = new TreeGraphNode(t, (TreeGraphNode) null);
     // TODO: create the tree and reuse the leaf labels in one pass,
     // avoiding a wasteful copy of the labels.
-    Trees.setLeafLabels(treegraph, t.yield());
-    Trees.setLeafTagsIfUnset(treegraph);
+    Trees.setLeafLabels(treeGraph, t.yield());
+    Trees.setLeafTagsIfUnset(treeGraph);
     if (transformer != null) {
-      Tree transformed = transformer.transformTree(treegraph);
+      Tree transformed = transformer.transformTree(treeGraph);
       if (!(transformed instanceof TreeGraphNode)) {
         throw new RuntimeException("Transformer did not change TreeGraphNode into another TreeGraphNode: " + transformer);
       }
       this.root = (TreeGraphNode) transformed;
     } else {
-      this.root = treegraph;
+      this.root = treeGraph;
     }
     indexNodes(this.root);
     // add head word and tag to phrase nodes
@@ -184,18 +189,19 @@ public abstract class GrammaticalStructure implements Serializable {
     }
     // add dependencies, using heads
     this.puncFilter = puncFilter;
+    this.tagFilter = tagFilter;
     // NoPunctFilter puncDepFilter = new NoPunctFilter(puncFilter);
-    NoPunctTypedDependencyFilter puncTypedDepFilter = new NoPunctTypedDependencyFilter(puncFilter);
+    NoPunctTypedDependencyFilter puncTypedDepFilter = new NoPunctTypedDependencyFilter(puncFilter, tagFilter);
 
-    DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph = new DirectedMultiGraph<TreeGraphNode, GrammaticalRelation>();
-    DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> completeGraph = new DirectedMultiGraph<TreeGraphNode, GrammaticalRelation>();
+    DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph = new DirectedMultiGraph<>();
+    DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> completeGraph = new DirectedMultiGraph<>();
 
     // analyze the root (and its descendants, recursively)
     if (relationsLock != null) {
       relationsLock.lock();
     }
     try {
-      analyzeNode(root, root, relations, hf, puncFilter, basicGraph, completeGraph);
+      analyzeNode(root, root, relations, hf, puncFilter, tagFilter, basicGraph, completeGraph);
     }
     finally {
       if (relationsLock != null) {
@@ -203,7 +209,7 @@ public abstract class GrammaticalStructure implements Serializable {
       }
     }
 
-    attachStrandedNodes(root, root, false, puncFilter, basicGraph);
+    attachStrandedNodes(root, root, false, puncFilter, tagFilter, basicGraph);
 
     // add typed dependencies
     typedDependencies = getDeps(puncTypedDepFilter, basicGraph);
@@ -333,15 +339,15 @@ public abstract class GrammaticalStructure implements Serializable {
                       .size()));
     }
 
-    List<TreeGraphNode> tgWordNodes = new ArrayList<TreeGraphNode>(tokens.size());
-    List<TreeGraphNode> tgPOSNodes = new ArrayList<TreeGraphNode>(tokens.size());
+    List<TreeGraphNode> tgWordNodes = new ArrayList<>(tokens.size());
+    List<TreeGraphNode> tgPOSNodes = new ArrayList<>(tokens.size());
 
     CoreLabel rootLabel = new CoreLabel();
     rootLabel.setValue("ROOT");
-    List<IndexedWord> nodeWords = new ArrayList<IndexedWord>(tgPOSNodes.size() + 1);
+    List<IndexedWord> nodeWords = new ArrayList<>(tgPOSNodes.size() + 1);
     nodeWords.add(new IndexedWord(rootLabel));
 
-    SemanticHeadFinder headFinder = new SemanticHeadFinder();
+    UniversalSemanticHeadFinder headFinder = new UniversalSemanticHeadFinder();
 
     Iterator<String> posIter = posTags.iterator();
     for (String wordString : tokens) {
@@ -371,7 +377,7 @@ public abstract class GrammaticalStructure implements Serializable {
     root.setIndex(0);
 
     // Build list of TypedDependencies
-    List<TypedDependency> tdeps = new ArrayList<TypedDependency>(deps.size());
+    List<TypedDependency> tdeps = new ArrayList<>(deps.size());
 
     for (String depString : deps) {
       int firstBracket = depString.indexOf('(');
@@ -398,7 +404,7 @@ public abstract class GrammaticalStructure implements Serializable {
 
       int childIdx = Integer.parseInt(childArg.substring(childDash+1).replace("'", ""));
 
-      GrammaticalRelation grel = new GrammaticalRelation(GrammaticalRelation.Language.Any, type, null, DEPENDENT);
+      GrammaticalRelation grel = new GrammaticalRelation(Language.Any, type, null, DEPENDENT);
 
       TypedDependency tdep = new TypedDependency(grel, nodeWords.get(parentIdx), nodeWords.get(childIdx));
       tdeps.add(tdep);
@@ -415,12 +421,8 @@ public abstract class GrammaticalStructure implements Serializable {
     this.root = root;
     indexNodes(this.root);
     this.puncFilter = Filters.acceptFilter();
-    allTypedDependencies = typedDependencies = new ArrayList<TypedDependency>(projectiveDependencies);
-  }
-
-  public GrammaticalStructure(Tree t, Collection<GrammaticalRelation> relations,
-                              HeadFinder hf, Predicate<String> puncFilter) {
-    this(t, relations, null, null, hf, puncFilter);
+    this.tagFilter = Filters.acceptFilter();
+    allTypedDependencies = typedDependencies = new ArrayList<>(projectiveDependencies);
   }
 
   @Override
@@ -432,11 +434,12 @@ public abstract class GrammaticalStructure implements Serializable {
     return sb.toString();
   }
 
-  private static void attachStrandedNodes(TreeGraphNode t, TreeGraphNode root, boolean attach, Predicate<String> puncFilter, DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph) {
+  private static void attachStrandedNodes(TreeGraphNode t, TreeGraphNode root, boolean attach, Predicate<String> puncFilter, Predicate<String> tagFilter, DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph) {
     if (t.isLeaf()) {
       return;
     }
-    if (attach && puncFilter.test(t.headWordNode().label().value())) {
+    if (attach && puncFilter.test(t.headWordNode().label().value()) &&
+        tagFilter.test(t.headWordNode().label().tag())) {
       // make faster by first looking for links from parent
       // it is necessary to look for paths using all directions
       // because sometimes there are edges created from lower nodes to
@@ -447,12 +450,12 @@ public abstract class GrammaticalStructure implements Serializable {
       }
     }
     for (TreeGraphNode kid : t.children()) {
-      attachStrandedNodes(kid, root, (kid.headWordNode() != t.headWordNode()), puncFilter, basicGraph);
+      attachStrandedNodes(kid, root, (kid.headWordNode() != t.headWordNode()), puncFilter, tagFilter, basicGraph);
     }
   }
 
   // cdm dec 2009: I changed this to automatically fail on preterminal nodes, since they shouldn't match for GR parent patterns.  Should speed it up.
-  private static void analyzeNode(TreeGraphNode t, TreeGraphNode root, Collection<GrammaticalRelation> relations, HeadFinder hf, Predicate<String> puncFilter, DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph, DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> completeGraph) {
+  private static void analyzeNode(TreeGraphNode t, TreeGraphNode root, Collection<GrammaticalRelation> relations, HeadFinder hf, Predicate<String> puncFilter, Predicate<String> tagFilter, DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph, DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> completeGraph) {
     if (t.isPhrasal()) {    // don't do leaves or preterminals!
       TreeGraphNode tHigh = t.highestNodeWithSameHead();
       for (GrammaticalRelation egr : relations) {
@@ -462,7 +465,8 @@ public abstract class GrammaticalStructure implements Serializable {
             if (uHigh == tHigh) {
               continue;
             }
-            if (!puncFilter.test(uHigh.headWordNode().label().value())) {
+            if (!puncFilter.test(uHigh.headWordNode().label().value()) ||
+                ! tagFilter.test(uHigh.headWordNode().label().tag())) {
               continue;
             }
             completeGraph.add(tHigh, uHigh, egr);
@@ -479,7 +483,7 @@ public abstract class GrammaticalStructure implements Serializable {
       }
       // now recurse into children
       for (TreeGraphNode kid : t.children()) {
-        analyzeNode(kid, root, relations, hf, puncFilter, basicGraph, completeGraph);
+        analyzeNode(kid, root, relations, hf, puncFilter, tagFilter, basicGraph, completeGraph);
       }
     }
   }
@@ -487,7 +491,7 @@ public abstract class GrammaticalStructure implements Serializable {
   private void getExtraDeps(List<TypedDependency> deps, Predicate<TypedDependency> puncTypedDepFilter, DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> completeGraph) {
     getExtras(deps);
     // adds stuff to basicDep based on the tregex patterns over the tree
-    getTreeDeps(deps, completeGraph, puncTypedDepFilter, extraTreeDepFilter());
+    this.getTreeDeps(deps, completeGraph, puncTypedDepFilter, extraTreeDepFilter());
     Collections.sort(deps);
   }
 
@@ -523,10 +527,33 @@ public abstract class GrammaticalStructure implements Serializable {
         }
       }
     }
+
     if (rootDep != null) {
       TypedDependency rootTypedDep = new TypedDependency(ROOT, new IndexedWord(dependencyRoot.label()), new IndexedWord(rootDep.label()));
       if (puncTypedDepFilter.test(rootTypedDep)) {
         basicDep.add(rootTypedDep);
+      } else { // Root is a punctuation character
+
+        /* Heuristic to find a root for the graph.
+         * Make the first child of the current root the
+         * new root and attach all other children to
+         * the new root.
+         */
+
+        IndexedWord root = rootTypedDep.dep();
+        IndexedWord newRoot = null;
+        Collections.sort(basicDep);
+        for (TypedDependency td : basicDep) {
+          if (td.gov().equals(root)) {
+            if (newRoot != null) {
+              td.setGov(newRoot);
+            } else {
+              td.setGov(td.gov());
+              td.setReln(ROOT);
+              newRoot = td.dep();
+            }
+          }
+        }
       }
     }
 
@@ -578,7 +605,7 @@ public abstract class GrammaticalStructure implements Serializable {
    * @param puncTypedDepFilter The filter that may skip punctuation dependencies
    * @param extraTreeDepFilter Additional dependencies are added only if they pass this filter
    */
-  private static void getTreeDeps(List<TypedDependency> deps,
+  protected void getTreeDeps(List<TypedDependency> deps,
                                   DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> completeGraph,
                                   Predicate<TypedDependency> puncTypedDepFilter,
                                   Predicate<TypedDependency> extraTreeDepFilter) {
@@ -621,9 +648,11 @@ public abstract class GrammaticalStructure implements Serializable {
 
   private static class NoPunctTypedDependencyFilter implements Predicate<TypedDependency>, Serializable {
     private Predicate<String> npf;
+    private Predicate<String> tf;
 
-    NoPunctTypedDependencyFilter(Predicate<String> f) {
+    NoPunctTypedDependencyFilter(Predicate<String> f, Predicate<String> tf) {
       this.npf = f;
+      this.tf = tf;
     }
 
     @Override
@@ -633,11 +662,11 @@ public abstract class GrammaticalStructure implements Serializable {
       IndexedWord l = d.dep();
       if (l == null) return false;
 
-      return npf.test(l.value());
+      return npf.test(l.value()) && tf.test(l.tag());
     }
 
-    // Automatically generated by Eclipse
     private static final long serialVersionUID = -2872766864289207468L;
+
   } // end static class NoPunctTypedDependencyFilter
 
 
@@ -681,7 +710,7 @@ public abstract class GrammaticalStructure implements Serializable {
     if (labels.size() <= 1) {
       sortedLabels = labels;
     } else {
-      sortedLabels = new ArrayList<GrammaticalRelation>(labels);
+      sortedLabels = new ArrayList<>(labels);
       Collections.sort(sortedLabels, new NameComparator<GrammaticalRelation>());
     }
     // System.err.println(" gov " + govH + " dep " + depH + " arc labels: " + sortedLabels);
@@ -775,12 +804,12 @@ public abstract class GrammaticalStructure implements Serializable {
     // example, the English dependencies rename existing objects KILL
     // to note that they should be removed.
     if (includeExtras != Extras.NONE) {
-      deps = new ArrayList<TypedDependency>(allTypedDependencies.size());
+      deps = new ArrayList<>(allTypedDependencies.size());
       for (TypedDependency dep : allTypedDependencies) {
         deps.add(new TypedDependency(dep));
       }
     } else {
-      deps = new ArrayList<TypedDependency>(typedDependencies.size());
+      deps = new ArrayList<>(typedDependencies.size());
       for (TypedDependency dep : typedDependencies) {
         deps.add(new TypedDependency(dep));
       }
@@ -935,7 +964,7 @@ public abstract class GrammaticalStructure implements Serializable {
    * Default is no-op; to be over-ridden in subclasses.
    *
    */
-  protected void correctDependencies(Collection<TypedDependency> list) {
+  protected void correctDependencies(List<TypedDependency> list) {
     // do nothing as default operation
   }
 
@@ -960,7 +989,7 @@ public abstract class GrammaticalStructure implements Serializable {
    */
   public static Collection<TypedDependency> getRoots(Collection<TypedDependency> list) {
 
-    Collection<TypedDependency> roots = new ArrayList<TypedDependency>();
+    Collection<TypedDependency> roots = new ArrayList<>();
 
     // need to see if more than one governor is not listed somewhere as a dependent
     // first take all the deps
@@ -999,20 +1028,67 @@ public abstract class GrammaticalStructure implements Serializable {
    * Print typed dependencies in either the Stanford dependency representation
    * or in the conllx format.
    *
-   * @param deps
-   *          Typed dependencies to print
-   * @param tree
-   *          Tree corresponding to typed dependencies (only necessary if conllx
+   * @param deps Typed dependencies to print
+   * @param tree Tree corresponding to typed dependencies (only necessary if conllx
    *          == true)
-   * @param conllx
-   *          If true use conllx format, otherwise use Stanford representation
-   * @param extraSep
-   *          If true, in the Stanford representation, the extra dependencies
+   * @param conllx If true use conllx format, otherwise use Stanford representation
+   * @param extraSep If true, in the Stanford representation, the extra dependencies
    *          (which do not preserve the tree structure) are printed after the
    *          basic dependencies
    */
   public static void printDependencies(GrammaticalStructure gs, Collection<TypedDependency> deps, Tree tree, boolean conllx, boolean extraSep) {
     System.out.println(dependenciesToString(gs, deps, tree, conllx, extraSep));
+  }
+
+
+  /**
+   * Calls dependenciesToCoNLLXString with the basic dependencies
+   * from a grammatical structure.
+   *
+   * (see {@link #dependenciesToCoNLLXString(Collection, CoreMap)})
+   */
+  public static String dependenciesToCoNLLXString(GrammaticalStructure gs, CoreMap sentence) {
+    return dependenciesToCoNLLXString(gs.typedDependencies(), sentence);
+  }
+
+
+  /**
+   *
+   * Returns a dependency tree in CoNNL-X format.
+   * It requires a CoreMap for the sentence with a TokensAnnotation.
+   * Each token has to contain a word and a POS tag.
+   *
+   * @param deps The list of TypedDependency relations.
+   * @param sentence The corresponding CoreMap for the sentence.
+   * @return Dependency tree in CoNLL-X format.
+   */
+  public static String dependenciesToCoNLLXString(Collection<TypedDependency> deps, CoreMap sentence) {
+    StringBuilder bf = new StringBuilder();
+
+    HashMap<Integer, TypedDependency> indexedDeps = new HashMap<>(deps.size());
+    for (TypedDependency dep : deps) {
+      indexedDeps.put(dep.dep().index(), dep);
+    }
+
+    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    if (tokens == null) {
+      throw new RuntimeException("dependenciesToCoNLLXString: CoreMap does not have required TokensAnnotation.");
+    }
+    int idx = 1;
+
+    for (CoreLabel token : tokens) {
+      String word = token.value();
+      String pos = token.tag();
+      String cPos = (token.get(CoreAnnotations.CoarseTagAnnotation.class) != null) ?
+          token.get(CoreAnnotations.CoarseTagAnnotation.class) : pos;
+      String lemma = token.lemma() != null ? token.lemma() : "_";
+      Integer gov = indexedDeps.containsKey(idx) ? indexedDeps.get(idx).gov().index() : 0;
+      String reln = indexedDeps.containsKey(idx) ? indexedDeps.get(idx).reln().toString() : "erased";
+      String out = String.format("%d\t%s\t%s\t%s\t%s\t_\t%d\t%s\t_\t_\n", idx, word, lemma, cPos, pos, gov, reln);
+      bf.append(out);
+      idx++;
+    }
+    return bf.toString();
   }
 
   public static String dependenciesToString(GrammaticalStructure gs, Collection<TypedDependency> deps, Tree tree, boolean conllx, boolean extraSep) {
@@ -1031,42 +1107,28 @@ public abstract class GrammaticalStructure implements Serializable {
       List<Tree> leaves = tree.getLeaves();
       Tree uposTree = UniversalPOSMapper.mapTree(tree);
       List<Label> uposLabels = uposTree.preTerminalYield();
-      String[] words = new String[leaves.size()];
-      String[] pos = new String[leaves.size()];
-      String[] upos = new String[leaves.size()];
-
-      String[] relns = new String[leaves.size()];
-      int[] govs = new int[leaves.size()];
 
       int index = 0;
+      CoreMap sentence = new CoreLabel();
+      List<CoreLabel> tokens = new ArrayList<>(leaves.size());
       for (Tree leaf : leaves) {
         index++;
         if (!indexToPos.containsKey(index)) {
           continue;
         }
-        int depPos = indexToPos.get(index) - 1;
-        words[depPos] = leaf.value();
-        pos[depPos] = leaf.parent(tree).value(); // use slow, but safe, parent look up
-        upos[depPos] = uposLabels.get(index - 1).value();
+        CoreLabel token = new CoreLabel();
+        token.setIndex(index);
+        token.setValue(leaf.value());
+        token.setWord(leaf.value());
+        token.setTag(leaf.parent(tree).value());
+        token.set(CoreAnnotations.CoarseTagAnnotation.class, uposLabels.get(index - 1).value());
+        tokens.add(token);
       }
-
-      for (TypedDependency dep : deps) {
-        int depPos = indexToPos.get(dep.dep().index()) - 1;
-        govs[depPos] = indexToPos.get(dep.gov().index());
-        relns[depPos] = dep.reln().toString();
-      }
-
-      for (int i = 0; i < relns.length; i++) {
-        if (words[i] == null) {
-          continue;
-        }
-        String out = String.format("%d\t%s\t_\t%s\t%s\t_\t%d\t%s\t_\t_\n", i + 1, words[i], upos[i], pos[i], govs[i], (relns[i] != null ? relns[i] : "erased"));
-        bf.append(out);
-      }
-
+      sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
+      bf.append(dependenciesToCoNLLXString(deps, sentence));
     } else {
       if (extraSep) {
-        List<TypedDependency> extraDeps = new ArrayList<TypedDependency>();
+        List<TypedDependency> extraDeps = new ArrayList<>();
         for (TypedDependency dep : deps) {
           if (dep.extra()) {
             extraDeps.add(dep);
@@ -1119,9 +1181,9 @@ public abstract class GrammaticalStructure implements Serializable {
    */
   public static List<GrammaticalStructure> readCoNLLXGrammaticalStructureCollection(String fileName, Map<String, GrammaticalRelation> shortNameToGRel, GrammaticalStructureFromDependenciesFactory factory) throws IOException {
     LineNumberReader reader = new LineNumberReader(IOUtils.readerFromString(fileName));
-    List<GrammaticalStructure> gsList = new LinkedList<GrammaticalStructure>();
+    List<GrammaticalStructure> gsList = new LinkedList<>();
 
-    List<List<String>> tokenFields = new ArrayList<List<String>>();
+    List<List<String>> tokenFields = new ArrayList<>();
 
     for (String inline = reader.readLine(); inline != null;
          inline = reader.readLine()) {
@@ -1137,7 +1199,7 @@ public abstract class GrammaticalStructure implements Serializable {
           continue; // skip excess empty lines
 
         gsList.add(buildCoNLLXGrammaticalStructure(tokenFields, shortNameToGRel, factory));
-        tokenFields = new ArrayList<List<String>>();
+        tokenFields = new ArrayList<>();
       }
     }
 
@@ -1148,8 +1210,8 @@ public abstract class GrammaticalStructure implements Serializable {
   buildCoNLLXGrammaticalStructure(List<List<String>> tokenFields,
                                 Map<String, GrammaticalRelation> shortNameToGRel,
                                 GrammaticalStructureFromDependenciesFactory factory) {
-    List<IndexedWord> tgWords = new ArrayList<IndexedWord>(tokenFields.size());
-    List<TreeGraphNode> tgPOSNodes = new ArrayList<TreeGraphNode>(tokenFields.size());
+    List<IndexedWord> tgWords = new ArrayList<>(tokenFields.size());
+    List<TreeGraphNode> tgPOSNodes = new ArrayList<>(tokenFields.size());
 
     SemanticHeadFinder headFinder = new SemanticHeadFinder();
 
@@ -1188,7 +1250,7 @@ public abstract class GrammaticalStructure implements Serializable {
     root.setChildren(tgPOSNodes.toArray(new TreeGraphNode[tgPOSNodes.size()]));
 
     // Build list of TypedDependencies
-    List<TypedDependency> tdeps = new ArrayList<TypedDependency>(tgWords.size());
+    List<TypedDependency> tdeps = new ArrayList<>(tgWords.size());
 
     // Create a node outside the tree useful for root dependencies;
     // we want to keep those if they were stored in the conll file
@@ -1387,8 +1449,8 @@ public abstract class GrammaticalStructure implements Serializable {
     try {
       Class<?>[] classes = new Class<?>[] { String.class, String[].class };
       Method method = Class.forName("edu.stanford.nlp.parser.lexparser.LexicalizedParser").getMethod("loadModel", classes);
-      String[] opts = {};
-      if (parserOptions.length() > 0) {
+      String[] opts = StringUtils.EMPTY_STRING_ARRAY;
+      if ( ! parserOptions.isEmpty()) {
         opts = parserOptions.split(" +");
       }
       lp = (Function<List<? extends HasWord>,Tree>) method.invoke(null, parserFile, opts);
@@ -1411,7 +1473,7 @@ public abstract class GrammaticalStructure implements Serializable {
     private final boolean keepPunct;
     private final TreebankLangParserParams params;
 
-    private final Map<GrammaticalStructure, Tree> origTrees = new WeakHashMap<GrammaticalStructure, Tree>();
+    private final Map<GrammaticalStructure, Tree> origTrees = new WeakHashMap<>();
 
     public TreeBankGrammaticalStructureWrapper(Iterable<Tree> wrappedTrees, boolean keepPunct, TreebankLangParserParams params) {
       trees = wrappedTrees;
@@ -1437,11 +1499,12 @@ public abstract class GrammaticalStructure implements Serializable {
       private GrammaticalStructure next;
 
       public GsIterator() {
-        // TODO: this is very english specific
         if (keepPunct) {
           puncFilter = Filters.acceptFilter();
+        } else if (params.generateOriginalDependencies()) {
+          puncFilter = params.treebankLanguagePack().punctuationWordRejectFilter();
         } else {
-          puncFilter = new PennTreebankLanguagePack().punctuationWordRejectFilter();
+          puncFilter = params.treebankLanguagePack().punctuationTagRejectFilter();
         }
         hf = params.typedDependencyHeadFinder();
         primeGs();
@@ -1537,6 +1600,8 @@ public abstract class GrammaticalStructure implements Serializable {
    *  nevertheless make the verb 'to be' the head, not the predicate noun, adjective,
    *  etc. (However, when the verb 'to be' is used as an auxiliary verb, the main
    *  verb is still treated as the head.)
+   * <li> -originalDependencies generate the dependencies using the original converter
+   * instead of the Universal Dependencies converter.
    * </ul>
    * <p>
    * The {@code -conllx} option will output the dependencies in the CoNLL format,
@@ -1565,7 +1630,7 @@ public abstract class GrammaticalStructure implements Serializable {
    * </p><p>
    * Usage: <br>
    * <code>java edu.stanford.nlp.trees.GrammaticalStructure [-treeFile FILE | -sentFile FILE | -conllxFile FILE | -filter] <br>
-   * [-collapsed -basic -CCprocessed -test]</code>
+   * [-collapsed -basic -CCprocessed -test -generateOriginalDependencies]</code>
    *
    * @param args Command-line arguments, as above
    */
@@ -1575,7 +1640,9 @@ public abstract class GrammaticalStructure implements Serializable {
     // System.out.print("GrammaticalRelations under DEPENDENT:");
     // System.out.println(DEPENDENT.toPrettyString());
 
-    MemoryTreebank tb = new MemoryTreebank(new TreeNormalizer());
+    /* Use a tree normalizer that removes all empty nodes.
+       This prevents wrong indexing of the nodes in the dependency relations. */
+    MemoryTreebank tb = new MemoryTreebank(new NPTmpRetainingTreeNormalizer(0, false, 1, false));
     Iterable<Tree> trees = tb;
 
     Iterable<GrammaticalStructure> gsBank = null;
@@ -1598,11 +1665,15 @@ public abstract class GrammaticalStructure implements Serializable {
     String filter = props.getProperty("filter");
 
     boolean makeCopulaHead = props.getProperty("makeCopulaHead") != null;
+    boolean generateOriginalDependencies = props.getProperty("originalDependencies") != null;
 
     // TODO: if a parser is specified, load this from the parser
     // instead of ever loading it from this way
     String tLPP = props.getProperty("tLPP", "edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams");
     TreebankLangParserParams params = ReflectionLoading.loadByReflection(tLPP);
+    if (generateOriginalDependencies) {
+      params.setGenerateOriginalDependencies(true);
+    }
     if (makeCopulaHead) {
       // TODO: generalize and allow for more options
       String[] options = { "-makeCopulaHead" };
@@ -1612,7 +1683,7 @@ public abstract class GrammaticalStructure implements Serializable {
     if (sentFileName == null && (altDepReaderName == null || altDepReaderFilename == null) && treeFileName == null && conllXFileName == null && filter == null) {
       try {
         System.err.println("Usage: java GrammaticalStructure [options]* [-sentFile|-treeFile|-conllxFile file] [-testGraph]");
-        System.err.println("  options: -basic, -collapsed, -CCprocessed [the default], -collapsedTree, -parseTree, -test, -parserFile file, -conllx, -keepPunct, -altprinter -altreader -altreaderfile");
+        System.err.println("  options: -basic, -collapsed, -CCprocessed [the default], -collapsedTree, -parseTree, -test, -parserFile file, -conllx, -keepPunct, -altprinter -altreader -altreaderfile -originalDependencies");
         TreeReader tr = new PennTreeReader(new StringReader("((S (NP (NNP Sam)) (VP (VBD died) (NP-TMP (NN today)))))"));
         tb.add(tr.readTree());
       } catch (Exception e) {
@@ -1866,6 +1937,7 @@ public abstract class GrammaticalStructure implements Serializable {
 
   // todo [cdm 2013]: Take this out and make it a trees class: TreeIterableByParsing
   static class LazyLoadTreesByParsing implements Iterable<Tree> {
+
     final Reader reader;
     final String filename;
     final boolean tokenized;
@@ -1876,13 +1948,6 @@ public abstract class GrammaticalStructure implements Serializable {
       this.filename = filename;
       this.encoding = encoding;
       this.reader = null;
-      this.tokenized = tokenized;
-      this.lp = lp;
-    }
-    public LazyLoadTreesByParsing(Reader reader, boolean tokenized, Function<List<? extends HasWord>, Tree> lp) {
-      this.filename = null;
-      this.encoding = null;
-      this.reader = reader;
       this.tokenized = tokenized;
       this.lp = lp;
     }
@@ -1902,7 +1967,7 @@ public abstract class GrammaticalStructure implements Serializable {
 
       return new Iterator<Tree>() {
 
-        String line = null;
+        String line; // = null;
 
         @Override
         public boolean hasNext() {

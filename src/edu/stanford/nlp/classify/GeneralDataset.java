@@ -118,7 +118,7 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
    */
   public void applyFeatureCountThreshold(int k) {
     float[] counts = getFeatureCounts();
-    Index<F> newFeatureIndex = new HashIndex<F>();
+    Index<F> newFeatureIndex = new HashIndex<>();
 
     int[] featMap = new int[featureIndex.size()];
     for (int i = 0; i < featMap.length; i++) {
@@ -137,7 +137,7 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
     // counts = null; // This is unnecessary; JVM can clean it up
 
     for (int i = 0; i < size; i++) {
-      List<Integer> featList = new ArrayList<Integer>(data[i].length);
+      List<Integer> featList = new ArrayList<>(data[i].length);
       for (int j = 0; j < data[i].length; j++) {
         if (featMap[data[i][j]] >= 0) {
           featList.add(featMap[data[i][j]]);
@@ -156,7 +156,7 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
    */
   public void retainFeatures(Set<F> features) {
     //float[] counts = getFeatureCounts();
-    Index<F> newFeatureIndex = new HashIndex<F>();
+    Index<F> newFeatureIndex = new HashIndex<>();
 
     int[] featMap = new int[featureIndex.size()];
     for (int i = 0; i < featMap.length; i++) {
@@ -175,7 +175,7 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
     // counts = null; // This is unnecessary; JVM can clean it up
 
     for (int i = 0; i < size; i++) {
-      List<Integer> featList = new ArrayList<Integer>(data[i].length);
+      List<Integer> featList = new ArrayList<>(data[i].length);
       for (int j = 0; j < data[i].length; j++) {
         if (featMap[data[i][j]] >= 0) {
           featList.add(featMap[data[i][j]]);
@@ -195,7 +195,7 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
    */
   public void applyFeatureMaxCountThreshold(int k) {
     float[] counts = getFeatureCounts();
-    HashIndex<F> newFeatureIndex = new HashIndex<F>();
+    HashIndex<F> newFeatureIndex = new HashIndex<>();
 
     int[] featMap = new int[featureIndex.size()];
     for (int i = 0; i < featMap.length; i++) {
@@ -214,7 +214,7 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
     // counts = null; // This is unnecessary; JVM can clean it up
 
     for (int i = 0; i < size; i++) {
-      List<Integer> featList = new ArrayList<Integer>(data[i].length);
+      List<Integer> featList = new ArrayList<>(data[i].length);
       for (int j = 0; j < data[i].length; j++) {
         if (featMap[data[i][j]] >= 0) {
           featList.add(featMap[data[i][j]]);
@@ -302,7 +302,9 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
   /**
    * Returns the number of examples ({@link Datum}s) in the Dataset.
    */
-  public int size() { return size; }
+  public int size() {
+    return size;
+  }
 
   protected void trimData() {
     data = trimToSize(data);
@@ -314,19 +316,25 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
 
   protected int[] trimToSize(int[] i) {
     int[] newI = new int[size];
-    System.arraycopy(i, 0, newI, 0, size);
+    synchronized (System.class) {
+      System.arraycopy(i, 0, newI, 0, size);
+    }
     return newI;
   }
 
   protected int[][] trimToSize(int[][] i) {
     int[][] newI = new int[size][];
-    System.arraycopy(i, 0, newI, 0, size);
+    synchronized (System.class) {
+      System.arraycopy(i, 0, newI, 0, size);
+    }
     return newI;
   }
 
   protected double[][] trimToSize(double[][] i) {
     double[][] newI = new double[size][];
-    System.arraycopy(i, 0, newI, 0, size);
+    synchronized (System.class) {
+      System.arraycopy(i, 0, newI, 0, size);
+    }
     return newI;
   }
 
@@ -395,9 +403,9 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
     Random rand = new Random(randomSeed);
     GeneralDataset<L,F> subset;
     if (this instanceof RVFDataset) {
-      subset = new RVFDataset<L,F>();
+      subset = new RVFDataset<>();
     } else if (this instanceof Dataset) {
-      subset = new Dataset<L,F>();
+      subset = new Dataset<>();
     }
     else {
       throw new RuntimeException("Can't handle this type of GeneralDataset.");
@@ -445,8 +453,8 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
   public GeneralDataset<L,F> mapDataset(GeneralDataset<L,F> dataset){
     GeneralDataset<L,F> newDataset;
     if(dataset instanceof RVFDataset)
-      newDataset = new RVFDataset<L,F>(this.featureIndex,this.labelIndex);
-    else newDataset = new Dataset<L,F>(this.featureIndex,this.labelIndex);
+      newDataset = new RVFDataset<>(this.featureIndex, this.labelIndex);
+    else newDataset = new Dataset<>(this.featureIndex, this.labelIndex);
     this.featureIndex.lock();
     this.labelIndex.lock();
     //System.out.println("inside mapDataset: dataset size:"+dataset.size());
@@ -471,9 +479,9 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
     }
 
     if (d instanceof RVFDatum) {
-      return new RVFDatum<L2,F>( ((RVFDatum<L,F>) d).asFeaturesCounter(), newLabel );
+      return new RVFDatum<>(((RVFDatum<L, F>) d).asFeaturesCounter(), newLabel);
     } else {
-      return new BasicDatum<L2,F>( d.asFeatures(), newLabel );
+      return new BasicDatum<>(d.asFeatures(), newLabel);
     }
   }
 
@@ -487,8 +495,8 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
  {
     GeneralDataset<L2,F> newDataset;
     if(dataset instanceof RVFDataset)
-      newDataset = new RVFDataset<L2,F>(this.featureIndex, newLabelIndex);
-    else newDataset = new Dataset<L2,F>(this.featureIndex, newLabelIndex);
+      newDataset = new RVFDataset<>(this.featureIndex, newLabelIndex);
+    else newDataset = new Dataset<>(this.featureIndex, newLabelIndex);
     this.featureIndex.lock();
     this.labelIndex.lock();
     //System.out.println("inside mapDataset: dataset size:"+dataset.size());
@@ -558,7 +566,7 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
     for (int i = 0; i < size; i++) {
       RVFDatum<L, F> d = getRVFDatum(i);
       Counter<F> c = d.asFeaturesCounter();
-      ClassicCounter<Integer> printC = new ClassicCounter<Integer>();
+      ClassicCounter<Integer> printC = new ClassicCounter<>();
       for (F f : c.keySet()) {
         printC.setCount(featureIndex.indexOf(f), c.getCount(f));
       }
@@ -608,7 +616,7 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
 
   public ClassicCounter<L> numDatumsPerLabel(){
     labels = trimToSize(labels);
-    ClassicCounter<L> numDatums = new ClassicCounter<L>();
+    ClassicCounter<L> numDatums = new ClassicCounter<>();
     for(int i : labels){
       numDatums.incrementCount(labelIndex.get(i));
     }

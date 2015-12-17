@@ -36,7 +36,7 @@ public class PatternToken implements Serializable {
     this.useTag = useTag;
     this.numWordsCompound = numWordsCompound;
     if (!getCompoundPhrases)
-      numWordsCompound = 1;
+      this.numWordsCompound = 1;
     this.nerTag = nerTag;
     this.useNER = useNER;
     this.useTargetParserParentRestriction = useTargetParserParentRestriction;
@@ -84,7 +84,7 @@ public class PatternToken implements Serializable {
 
   String getTokenStr(List<String> notAllowedClasses) {
     String str = " (?$term ";
-    List<String> restrictions = new ArrayList<String>();
+    List<String> restrictions = new ArrayList<>();
     if (useTag) {
       restrictions.add("{tag:/" + tag + ".*/}");
     }
@@ -94,12 +94,12 @@ public class PatternToken implements Serializable {
     }
 
     if (useTargetParserParentRestriction) {
-      restrictions.add("{grandparentparsetag:" + grandparentParseTag + "}");
+      restrictions.add("{grandparentparsetag:\"" + grandparentParseTag + "\"}");
     }
 
     if (notAllowedClasses != null && notAllowedClasses.size() > 0) {
       for (String na : notAllowedClasses)
-        restrictions.add("!{" + na + "}");
+        restrictions.add("!{" + na + ":" + na +"}");
     }
     str += "[" + StringUtils.join(restrictions, " & ") + "]{1,"
         + numWordsCompound + "}";
@@ -136,5 +136,10 @@ public class PatternToken implements Serializable {
   @Override
   public int hashCode() {
     return getTokenStr(null).hashCode();
+  }
+
+  public PatternToken copy() {
+    PatternToken t = new PatternToken(tag, useTag, numWordsCompound > 1, numWordsCompound, nerTag, useNER, useTargetParserParentRestriction, grandparentParseTag);
+    return t;
   }
 }

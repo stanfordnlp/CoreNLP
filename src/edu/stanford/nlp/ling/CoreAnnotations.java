@@ -3,6 +3,7 @@ package edu.stanford.nlp.ling;
 import edu.stanford.nlp.util.*;
 
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -442,6 +443,42 @@ public class CoreAnnotations {
    * CoNLL dep parsing - the dependency type
    */
   public static class CoNLLDepTypeAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  /**
+   * CoNLL-U dep parsing - span of multiword tokens
+   */
+  public static class CoNLLUTokenSpanAnnotation implements CoreAnnotation<IntPair> {
+    public Class<IntPair> getType() {
+      return ErasureUtils.<Class<IntPair>> uncheckedCast(Pair.class);
+    }
+  }
+  
+  /**
+   * CoNLL-U dep parsing - List of secondary dependencies
+   */
+  public static class CoNLLUSecondaryDepsAnnotation implements CoreAnnotation<HashMap<Integer,String>> {
+    public Class<HashMap<Integer,String>> getType() {
+      return ErasureUtils.<Class<HashMap<Integer,String>>> uncheckedCast(Pair.class);
+    }
+  }
+  
+  /**
+   * CoNLL-U dep parsing - List of morphological features
+   */
+  public static class CoNLLUFeats implements CoreAnnotation<HashMap<String,String>> {
+    public Class<HashMap<String,String>> getType() {
+      return ErasureUtils.uncheckedCast(HashMap.class);
+    }
+  }
+  
+  /**
+   * CoNLL-U dep parsing - Any other annotation
+   */
+  public static class CoNLLUMisc implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
     }
@@ -1601,6 +1638,15 @@ public class CoreAnnotations {
   public static class LeftChildrenNodeAnnotation implements CoreAnnotation<SortedSet<Pair<CoreLabel, String>>> {
     public Class<SortedSet<Pair<CoreLabel, String>>> getType() {
       return ErasureUtils.uncheckedCast(SortedSet.class);
+    }
+  }
+
+  /**
+   * Stores an exception associated with processing this document
+   */
+  public static class ExceptionAnnotation implements CoreAnnotation<Throwable> {
+    public Class<Throwable> getType() {
+      return ErasureUtils.uncheckedCast(Throwable.class);
     }
   }
 

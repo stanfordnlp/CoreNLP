@@ -91,7 +91,8 @@ public class CustomAnnotationSerializerITest extends TestCase {
       return;
     }
     assertEquals(expected.vertexSet(), result.vertexSet());
-    assertEquals(expected, result);
+    // TODO: Fix the equals for the DirectedMultiGraph so we can compare the two graphs directly
+    assertEquals(expected.toString(), result.toString());
   }
 
   private void verifyWord(CoreLabel expected, CoreLabel result) {

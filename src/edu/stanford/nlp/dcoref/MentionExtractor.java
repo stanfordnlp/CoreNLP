@@ -159,7 +159,7 @@ public class MentionExtractor {
       List<List<Mention>> unorderedMentions,
       boolean doMergeLabels) throws Exception {
 
-    List<List<Mention>> orderedMentionsBySentence = new ArrayList<List<Mention>>();
+    List<List<Mention>> orderedMentionsBySentence = new ArrayList<>();
 
     //
     // traverse all sentences and process each individual one
@@ -180,7 +180,7 @@ public class MentionExtractor {
       for (Mention mention: mentions) {
         mention.contextParseTree = tree;
         mention.sentenceWords = sentence;
-        mention.originalSpan = new ArrayList<CoreLabel>(mention.sentenceWords.subList(mention.startIndex, mention.endIndex));
+        mention.originalSpan = new ArrayList<>(mention.sentenceWords.subList(mention.startIndex, mention.endIndex));
         if(!((CoreLabel)tree.label()).has(CoreAnnotations.BeginIndexAnnotation.class)) tree.indexSpans(0);
         if(mention.headWord==null) {
           Tree headTree = ((RuleBasedCorefMentionFinder) mentionFinder).findSyntacticHead(mention, tree, sentence);
@@ -206,7 +206,7 @@ public class MentionExtractor {
 
         List<Mention> mentionsForTree = mentionsToTrees.get(treeToKey(mention.mentionSubTree));
         if(mentionsForTree == null){
-          mentionsForTree = new ArrayList<Mention>();
+          mentionsForTree = new ArrayList<>();
           mentionsToTrees.put(treeToKey(mention.mentionSubTree), mentionsForTree);
         }
         mentionsForTree.add(mention);
@@ -218,7 +218,7 @@ public class MentionExtractor {
       //
       // Order all mentions in tree-traversal order
       //
-      List<Mention> orderedMentions = new ArrayList<Mention>();
+      List<Mention> orderedMentions = new ArrayList<>();
       orderedMentionsBySentence.add(orderedMentions);
 
       // extract all mentions in tree traversal order (alternative: tree.postOrderNodeList())
@@ -241,9 +241,11 @@ public class MentionExtractor {
   }
 
   /**
-   * Sets the label of the leaf nodes to be the CoreLabels in the given sentence
-   * The original value() of the Tree nodes is preserved
+   * Sets the label of the leaf nodes of a Tree to be the CoreLabels in the given sentence.
+   * The original value() of the Tree nodes is preserved, and otherwise the label of tree
+   * leaves becomes the label from the List.
    */
+  // todo [cdm 2015]: This clearly shouldn't be here! Maybe it's not needed at all now since parsing code does this?
   public static void mergeLabels(Tree tree, List<CoreLabel> sentence) {
     int idx = 0;
     for (Tree t : tree.getLeaves()) {
@@ -312,7 +314,7 @@ public class MentionExtractor {
     Tree head2 = np2.headTerminal(headFinder);
     int h1 = ((CoreMap) head1.label()).get(CoreAnnotations.IndexAnnotation.class) - 1;
     int h2 = ((CoreMap) head2.label()).get(CoreAnnotations.IndexAnnotation.class) - 1;
-    Pair<Integer, Integer> p = new Pair<Integer, Integer>(h1, h2);
+    Pair<Integer, Integer> p = new Pair<>(h1, h2);
     foundPairs.add(p);
   }
 

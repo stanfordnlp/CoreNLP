@@ -36,7 +36,7 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
     double[] savedDeriv = new double[xLen];
     System.arraycopy(derivative, 0, savedDeriv, 0, derivative.length);
     int interval = Math.max(1, x.length / numOfChecks);
-    Set<Integer> indicesToCheck = new TreeSet<Integer>();
+    Set<Integer> indicesToCheck = new TreeSet<>();
     for (int paramIndex = 0; paramIndex < xLen; paramIndex+=interval) {
       indicesToCheck.add(paramIndex);
     }
@@ -50,7 +50,7 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
       indicesToCheck.add(generator.nextInt(xLen));
     }
     boolean returnVal = true;
-    List<Integer> badIndices = new ArrayList<Integer>();
+    List<Integer> badIndices = new ArrayList<>();
     for (int paramIndex: indicesToCheck) {
       double oldX = x[paramIndex];
       x[paramIndex] = oldX + epsilon;

@@ -12,8 +12,11 @@ import edu.stanford.nlp.neural.SimpleTensor;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.optimization.AbstractCachingDiffFunction;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.TwoDimensionalMap;
+import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
+import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
 // TODO: get rid of the word Sentiment everywhere
 public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
@@ -60,64 +63,151 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     return argmax;
   }
 
-  @Override
-  public void calculate(double[] theta) {
-    model.vectorToParams(theta);
-
-    // double localValue = 0.0;
-    // double[] localDerivative = new double[theta.length];
-
-    // We use TreeMap for each of these so that they stay in a
-    // canonical sorted order
-    // TODO: factor out the initialization routines
+  private static class ModelDerivatives {
+    // We use TreeMap for each of these so that they stay in a canonical sorted order
     // binaryTD stands for Transform Derivatives (see the SentimentModel)
-    TwoDimensionalMap<String, String, SimpleMatrix> binaryTD = TwoDimensionalMap.treeMap();
+    public final TwoDimensionalMap<String, String, SimpleMatrix> binaryTD;
     // the derivatives of the tensors for the binary nodes
-    TwoDimensionalMap<String, String, SimpleTensor> binaryTensorTD = TwoDimensionalMap.treeMap();
+    // will be empty if we aren't using tensors
+    public final TwoDimensionalMap<String, String, SimpleTensor> binaryTensorTD;
     // binaryCD stands for Classification Derivatives
-    TwoDimensionalMap<String, String, SimpleMatrix> binaryCD = TwoDimensionalMap.treeMap();
+    // if we combined classification derivatives, we just use an empty map
+    public final TwoDimensionalMap<String, String, SimpleMatrix> binaryCD;
 
     // unaryCD stands for Classification Derivatives
-    Map<String, SimpleMatrix> unaryCD = Generics.newTreeMap();
+    public final Map<String, SimpleMatrix> unaryCD;
 
     // word vector derivatives
-    Map<String, SimpleMatrix> wordVectorD = Generics.newTreeMap();
+    // will be filled on an as-needed basis, as opposed to having all
+    // the words with a lot of empty vectors
+    public final Map<String, SimpleMatrix> wordVectorD;
 
-    for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : model.binaryTransform) {
-      int numRows = entry.getValue().numRows();
-      int numCols = entry.getValue().numCols();
+    public double error = 0.0;
 
-      binaryTD.put(entry.getFirstKey(), entry.getSecondKey(), new SimpleMatrix(numRows, numCols));
+    public ModelDerivatives(SentimentModel model) {
+      binaryTD = initDerivatives(model.binaryTransform);
+      binaryTensorTD = (model.op.useTensors) ? initTensorDerivatives(model.binaryTensors) : TwoDimensionalMap.treeMap();
+      binaryCD = (!model.op.combineClassification) ? initDerivatives(model.binaryClassification) : TwoDimensionalMap.treeMap();
+      unaryCD = initDerivatives(model.unaryClassification);
+      // wordVectorD will be filled on an as-needed basis
+      wordVectorD = Generics.newTreeMap();
     }
 
-    if (!model.op.combineClassification) {
-      for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : model.binaryClassification) {
-        int numRows = entry.getValue().numRows();
-        int numCols = entry.getValue().numCols();
+    public void add(ModelDerivatives other) {
+      addMatrices(binaryTD, other.binaryTD);
+      addTensors(binaryTensorTD, other.binaryTensorTD);
+      addMatrices(binaryCD, other.binaryCD);
+      addMatrices(unaryCD, other.unaryCD);
+      addMatrices(wordVectorD, other.wordVectorD);
 
-        binaryCD.put(entry.getFirstKey(), entry.getSecondKey(), new SimpleMatrix(numRows, numCols));
+      error += other.error;
+    }
+
+    /**
+     * Add matrices from the second map to the first map, in place.
+     */
+    public static void addMatrices(TwoDimensionalMap<String, String, SimpleMatrix> first,
+                                   TwoDimensionalMap<String, String, SimpleMatrix> second) {
+      for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : first) {
+        if (second.contains(entry.getFirstKey(), entry.getSecondKey())) {
+          first.put(entry.getFirstKey(), entry.getSecondKey(), entry.getValue().plus(second.get(entry.getFirstKey(), entry.getSecondKey())));
+        }
+      }
+      for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : second) {
+        if (!first.contains(entry.getFirstKey(), entry.getSecondKey())) {
+          first.put(entry.getFirstKey(), entry.getSecondKey(), entry.getValue());
+        }
       }
     }
 
-    if (model.op.useTensors) {
-      for (TwoDimensionalMap.Entry<String, String, SimpleTensor> entry : model.binaryTensors) {
+    /**
+     * Add tensors from the second map to the first map, in place.
+     */
+    public static void addTensors(TwoDimensionalMap<String, String, SimpleTensor> first,
+                                  TwoDimensionalMap<String, String, SimpleTensor> second) {
+      for (TwoDimensionalMap.Entry<String, String, SimpleTensor> entry : first) {
+        if (second.contains(entry.getFirstKey(), entry.getSecondKey())) {
+          first.put(entry.getFirstKey(), entry.getSecondKey(), entry.getValue().plus(second.get(entry.getFirstKey(), entry.getSecondKey())));
+        }
+      }
+      for (TwoDimensionalMap.Entry<String, String, SimpleTensor> entry : second) {
+        if (!first.contains(entry.getFirstKey(), entry.getSecondKey())) {
+          first.put(entry.getFirstKey(), entry.getSecondKey(), entry.getValue());
+        }
+      }
+    }
+
+    /**
+     * Add matrices from the second map to the first map, in place.
+     */
+    public static void addMatrices(Map<String, SimpleMatrix> first,
+                                   Map<String, SimpleMatrix> second) {
+      for (Map.Entry<String, SimpleMatrix> entry : first.entrySet()) {
+        if (second.containsKey(entry.getKey())) {
+          first.put(entry.getKey(), entry.getValue().plus(second.get(entry.getKey())));
+        }
+      }
+      for (Map.Entry<String, SimpleMatrix> entry : second.entrySet()) {
+        if (!first.containsKey(entry.getKey())) {
+          first.put(entry.getKey(), entry.getValue());
+        }
+      }
+    }
+
+
+    /**
+     * Init a TwoDimensionalMap with 0 matrices for all the matrices in the original map.
+     */
+    private static TwoDimensionalMap<String, String, SimpleMatrix> initDerivatives(TwoDimensionalMap<String, String, SimpleMatrix> map) {
+      TwoDimensionalMap<String, String, SimpleMatrix> derivatives = TwoDimensionalMap.treeMap();
+
+      for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : map) {
+        int numRows = entry.getValue().numRows();
+        int numCols = entry.getValue().numCols();
+
+        derivatives.put(entry.getFirstKey(), entry.getSecondKey(), new SimpleMatrix(numRows, numCols));
+      }
+
+      return derivatives;
+    }
+
+    /**
+     * Init a TwoDimensionalMap with 0 tensors for all the tensors in the original map.
+     */
+    private static TwoDimensionalMap<String, String, SimpleTensor> initTensorDerivatives(TwoDimensionalMap<String, String, SimpleTensor> map) {
+      TwoDimensionalMap<String, String, SimpleTensor> derivatives = TwoDimensionalMap.treeMap();
+
+      for (TwoDimensionalMap.Entry<String, String, SimpleTensor> entry : map) {
         int numRows = entry.getValue().numRows();
         int numCols = entry.getValue().numCols();
         int numSlices = entry.getValue().numSlices();
 
-        binaryTensorTD.put(entry.getFirstKey(), entry.getSecondKey(), new SimpleTensor(numRows, numCols, numSlices));
+        derivatives.put(entry.getFirstKey(), entry.getSecondKey(), new SimpleTensor(numRows, numCols, numSlices));
       }
+
+      return derivatives;
     }
 
-    for (Map.Entry<String, SimpleMatrix> entry : model.unaryClassification.entrySet()) {
-      int numRows = entry.getValue().numRows();
-      int numCols = entry.getValue().numCols();
-      unaryCD.put(entry.getKey(), new SimpleMatrix(numRows, numCols));
+    /**
+     * Init a Map with 0 matrices for all the matrices in the original map.
+     */
+    private static Map<String, SimpleMatrix> initDerivatives(Map<String, SimpleMatrix> map) {
+      Map<String, SimpleMatrix> derivatives = Generics.newTreeMap();
+
+      for (Map.Entry<String, SimpleMatrix> entry : map.entrySet()) {
+        int numRows = entry.getValue().numRows();
+        int numCols = entry.getValue().numCols();
+        derivatives.put(entry.getKey(), new SimpleMatrix(numRows, numCols));
+      }
+
+      return derivatives;
     }
+  }
 
-    // wordVectorD will be filled on an as-needed basis
+  private ModelDerivatives scoreDerivatives(List<Tree> trainingBatch) {
+    // "final" makes this as fast as having separate maps declared in this function
+    final ModelDerivatives derivatives = new ModelDerivatives(model);
 
-    // TODO: This part can easily be parallelized
     List<Tree> forwardPropTrees = Generics.newArrayList();
     for (Tree tree : trainingBatch) {
       Tree trainingTree = tree.deepCopy();
@@ -127,25 +217,72 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       forwardPropTrees.add(trainingTree);
     }
 
-    // TODO: we may find a big speedup by separating the derivatives and then summing
-    double error = 0.0;
     for (Tree tree : forwardPropTrees) {
-      backpropDerivativesAndError(tree, binaryTD, binaryCD, binaryTensorTD, unaryCD, wordVectorD);
-      error += sumError(tree);
+      backpropDerivativesAndError(tree, derivatives.binaryTD, derivatives.binaryCD, derivatives.binaryTensorTD, derivatives.unaryCD, derivatives.wordVectorD);
+      derivatives.error += sumError(tree);
+    }
+
+    return derivatives;
+  }
+
+  class ScoringProcessor implements ThreadsafeProcessor<List<Tree>, ModelDerivatives> {
+    @Override
+    public ModelDerivatives process(List<Tree> trainingBatch) {
+      return scoreDerivatives(trainingBatch);
+    }
+
+    @Override
+    public ThreadsafeProcessor<List<Tree>, ModelDerivatives> newInstance() {
+      // should be threadsafe
+      return this;
+    }
+  }
+
+  @Override
+  public void calculate(double[] theta) {
+    model.vectorToParams(theta);
+
+    final ModelDerivatives derivatives;
+    if (model.op.trainOptions.nThreads == 1) {
+      derivatives = scoreDerivatives(trainingBatch);
+    } else {
+      // TODO: because some addition operations happen in different
+      // orders now, this results in slightly different values, which
+      // over time add up to significantly different models even when
+      // given the same random seed.  Probably not a big deal.
+      // To be more specific, for trees T1, T2, T3, ... Tn,
+      // when using one thread, we sum the derivatives T1 + T2 ...
+      // When using multiple threads, we first sum T1 + ... + Tk,
+      // then sum Tk+1 + ... + T2k, etc, for split size k.
+      // The splits are then summed in order.
+      // This different sum order results in slightly different numbers.
+      MulticoreWrapper<List<Tree>, ModelDerivatives> wrapper =
+              new MulticoreWrapper<>(model.op.trainOptions.nThreads, new ScoringProcessor());
+      // use wrapper.nThreads in case the number of threads was automatically changed
+      for (List<Tree> chunk : CollectionUtils.partitionIntoFolds(trainingBatch, wrapper.nThreads())) {
+        wrapper.put(chunk);
+      }
+      wrapper.join();
+
+      derivatives = new ModelDerivatives(model);
+      while (wrapper.peek()) {
+        ModelDerivatives batchDerivatives = wrapper.poll();
+        derivatives.add(batchDerivatives);
+      }
     }
 
     // scale the error by the number of sentences so that the
     // regularization isn't drowned out for large training batchs
     double scale = (1.0 / trainingBatch.size());
-    value = error * scale;
+    value = derivatives.error * scale;
 
-    value += scaleAndRegularize(binaryTD, model.binaryTransform, scale, model.op.trainOptions.regTransformMatrix, false);
-    value += scaleAndRegularize(binaryCD, model.binaryClassification, scale, model.op.trainOptions.regClassification, true);
-    value += scaleAndRegularizeTensor(binaryTensorTD, model.binaryTensors, scale, model.op.trainOptions.regTransformTensor);
-    value += scaleAndRegularize(unaryCD, model.unaryClassification, scale, model.op.trainOptions.regClassification, false, true);
-    value += scaleAndRegularize(wordVectorD, model.wordVectors, scale, model.op.trainOptions.regWordVector, true, false);
+    value += scaleAndRegularize(derivatives.binaryTD, model.binaryTransform, scale, model.op.trainOptions.regTransformMatrix, false);
+    value += scaleAndRegularize(derivatives.binaryCD, model.binaryClassification, scale, model.op.trainOptions.regClassification, true);
+    value += scaleAndRegularizeTensor(derivatives.binaryTensorTD, model.binaryTensors, scale, model.op.trainOptions.regTransformTensor);
+    value += scaleAndRegularize(derivatives.unaryCD, model.unaryClassification, scale, model.op.trainOptions.regClassification, false, true);
+    value += scaleAndRegularize(derivatives.wordVectorD, model.wordVectors, scale, model.op.trainOptions.regWordVector, true, false);
 
-    derivative = NeuralUtils.paramsToVector(theta.length, binaryTD.valueIterator(), binaryCD.valueIterator(), SimpleTensor.iteratorSimpleMatrix(binaryTensorTD.valueIterator()), unaryCD.values().iterator(), wordVectorD.values().iterator());
+    derivative = NeuralUtils.paramsToVector(theta.length, derivatives.binaryTD.valueIterator(), derivatives.binaryCD.valueIterator(), SimpleTensor.iteratorSimpleMatrix(derivatives.binaryTensorTD.valueIterator()), derivatives.unaryCD.values().iterator(), derivatives.wordVectorD.values().iterator());
   }
 
   static double scaleAndRegularize(TwoDimensionalMap<String, String, SimpleMatrix> derivatives,

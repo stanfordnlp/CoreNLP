@@ -13,6 +13,9 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This class is meant for training SVMs ({@link SVMLightClassifier}s).  It actually calls SVM Light, or
  * SVM Struct for multiclass SVMs, or SVM perf is the option is enabled, on the command line, reads in the produced
@@ -52,6 +55,8 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
   private int svmLightVerbosity = 0;  // not verbose
   private boolean doEval = false;
   private boolean useSVMPerf = false;
+
+  final static Logger logger = LoggerFactory.getLogger(SVMLightClassifierFactory.class);
 
   /** @param svmLightLearn is the fullPathname of the training program of svmLight with default value "/u/nlp/packages/svm_light/svm_learn"
    * @param svmStructLearn is the fullPathname of the training program of svmMultiClass with default value "/u/nlp/packages/svm_multiclass/svm_multiclass_learn"
@@ -129,7 +134,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
         modelLineCount ++;
       }
 
-      List<Pair<Double, ClassicCounter<Integer>>> supportVectors = new ArrayList<Pair<Double, ClassicCounter<Integer>>>();
+      List<Pair<Double, ClassicCounter<Integer>>> supportVectors = new ArrayList<>();
       // Read Threshold
       String thresholdLine = in.readLine();
       modelLineCount ++;
@@ -142,7 +147,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
         pieces = svLine.split("\\s+");
         // First Element is the alpha_i * y_i
         double  alpha = Double.parseDouble(pieces[0]);
-        ClassicCounter<Integer> supportVector  = new ClassicCounter<Integer>();
+        ClassicCounter<Integer> supportVector  = new ClassicCounter<>();
         for (int i=1; i < pieces.length; ++i) {
           String piece = pieces[i];
           if (piece.equals(stopToken)) break;
@@ -155,12 +160,12 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
             supportVector.incrementCount(Integer.valueOf(featureIndex), count);
           }
         }
-        supportVectors.add(new Pair<Double, ClassicCounter<Integer>>(alpha, supportVector));
+        supportVectors.add(new Pair<>(alpha, supportVector));
       }
 
       in.close();
 
-      return new Pair<Double, ClassicCounter<Integer>>(threshold, getWeights(supportVectors));
+      return new Pair<>(threshold, getWeights(supportVectors));
     }
     catch (Exception e) {
       e.printStackTrace();
@@ -175,9 +180,9 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
    * some reason svm_light is 1-indexed), not features.
    */
   private static ClassicCounter<Integer> getWeights(List<Pair<Double, ClassicCounter<Integer>>> supportVectors) {
-    ClassicCounter<Integer> weights = new ClassicCounter<Integer>();
+    ClassicCounter<Integer> weights = new ClassicCounter<>();
     for (Pair<Double, ClassicCounter<Integer>> sv : supportVectors) {
-      ClassicCounter<Integer> c = new ClassicCounter<Integer>(sv.second());
+      ClassicCounter<Integer> c = new ClassicCounter<>(sv.second());
       Counters.multiplyInPlace(c, sv.first());
       Counters.addInPlace(weights, c);
     }
@@ -199,14 +204,14 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
    * (which correspond to labelIndex.get(1)) are just the negation of one another.
    */
   private ClassicCounter<Pair<F, L>> convertSVMLightWeights(ClassicCounter<Integer> weights, Index<F> featureIndex, Index<L> labelIndex) {
-    ClassicCounter<Pair<F, L>> newWeights = new ClassicCounter<Pair<F, L>>();
+    ClassicCounter<Pair<F, L>> newWeights = new ClassicCounter<>();
     for (int i : weights.keySet()) {
       F f = featureIndex.get(i-1);
       double w = weights.getCount(i);
       // the first guy in the labelIndex was the +1 class and the second guy
       // was the -1 class
-      newWeights.incrementCount(new Pair<F, L>(f, labelIndex.get(0)),w);
-      newWeights.incrementCount(new Pair<F, L>(f, labelIndex.get(1)),-w);
+      newWeights.incrementCount(new Pair<>(f, labelIndex.get(0)),w);
+      newWeights.incrementCount(new Pair<>(f, labelIndex.get(1)),-w);
     }
     return newWeights;
   }
@@ -219,12 +224,12 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
   private ClassicCounter<Pair<F, L>> convertSVMStructWeights(ClassicCounter<Integer> weights, Index<F> featureIndex, Index<L> labelIndex) {
     // int numLabels = labelIndex.size();
     int numFeatures = featureIndex.size();
-    ClassicCounter<Pair<F, L>> newWeights = new ClassicCounter<Pair<F, L>>();
+    ClassicCounter<Pair<F, L>> newWeights = new ClassicCounter<>();
     for (int i : weights.keySet()) {
       L l = labelIndex.get((i-1) / numFeatures); // integer division on purpose
       F f = featureIndex.get((i-1) % numFeatures);
       double w = weights.getCount(i);
-      newWeights.incrementCount(new Pair<F, L>(f, l),w);
+      newWeights.incrementCount(new Pair<>(f, l),w);
     }
 
     return newWeights;
@@ -234,14 +239,14 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
    * Builds a sigmoid model to turn the classifier outputs into probabilities.
    */
   private LinearClassifier<L, L> fitSigmoid(SVMLightClassifier<L, F> classifier, GeneralDataset<L, F> dataset) {
-    RVFDataset<L, L> plattDataset = new RVFDataset<L, L>();
+    RVFDataset<L, L> plattDataset = new RVFDataset<>();
     for (int i = 0; i < dataset.size(); i++) {
       RVFDatum<L, F> d = dataset.getRVFDatum(i);
       Counter<L> scores = classifier.scoresOf((Datum<L,F>)d);
       scores.incrementCount(null);
-      plattDataset.add(new RVFDatum<L, L>(scores, d.label()));
+      plattDataset.add(new RVFDatum<>(scores, d.label()));
     }
-    LinearClassifierFactory<L, L> factory = new LinearClassifierFactory<L, L>();
+    LinearClassifierFactory<L, L> factory = new LinearClassifierFactory<>();
     factory.setPrior(new LogPrior(LogPrior.LogPriorType.NULL));
     return factory.trainClassifier(plattDataset);
   }
@@ -259,7 +264,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
     boolean oldUseSigmoid = useSigmoid;
     useSigmoid = false;
 
-    final CrossValidator<L, F> crossValidator = new CrossValidator<L, F>(dataset,numFolds);
+    final CrossValidator<L, F> crossValidator = new CrossValidator<>(dataset, numFolds);
     final Function<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState>,Double> score =
         fold -> {
           GeneralDataset<L, F> trainSet = fold.first();
@@ -317,15 +322,9 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
     useSigmoid = oldUseSigmoid;
   }
 
-  @Deprecated
-  public SVMLightClassifier<L, F> trainClassifier(List<RVFDatum<L, F>> examples) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
   private boolean tuneHeldOut = false;
   private boolean tuneCV = false;
-  private Scorer<L> scorer = new MultiClassAccuracyStats<L>();
+  private Scorer<L> scorer = new MultiClassAccuracyStats<>();
   private LineSearcher tuneMinimizer = new GoldenSectionLineSearch(true);
   private int folds;
   private double heldOutPercent;
@@ -445,7 +444,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
       // File and Model Data
       cmd = cmd + " " + dataFile.getAbsolutePath() + " " + modelFile.getAbsolutePath();
 
-      if (verbose) System.err.println("<< "+cmd+" >>");
+      if (verbose) logger.info("<< "+cmd+" >>");
 
       /*Process p = Runtime.getRuntime().exec(cmd);
 
@@ -463,7 +462,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
         }
         String evalCmd = (multiclass ? svmStructClassify : (useSVMPerf ? svmPerfClassify : svmLightClassify)) + " "
                 + dataFile.getAbsolutePath() + " " + modelFile.getAbsolutePath() + " " + predictFile.getAbsolutePath();
-        if (verbose) System.err.println("<< "+evalCmd+" >>");
+        if (verbose) logger.info("<< " + evalCmd + " >>");
         SystemUtils.run(new ProcessBuilder(whitespacePattern.split(evalCmd)),
                 new PrintWriter(System.err), new PrintWriter(System.err));
       }
@@ -471,12 +470,12 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
       Pair<Double, ClassicCounter<Integer>> weightsAndThresh = readModel(modelFile, multiclass);
       double threshold = weightsAndThresh.first();
       ClassicCounter<Pair<F, L>> weights = convertWeights(weightsAndThresh.second(), featureIndex, labelIndex, multiclass);
-      ClassicCounter<L> thresholds = new ClassicCounter<L>();
+      ClassicCounter<L> thresholds = new ClassicCounter<>();
       if (!multiclass) {
         thresholds.setCount(labelIndex.get(0), -threshold);
         thresholds.setCount(labelIndex.get(1), threshold);
       }
-      SVMLightClassifier<L, F> classifier = new SVMLightClassifier<L, F>(weights, thresholds);
+      SVMLightClassifier<L, F> classifier = new SVMLightClassifier<>(weights, thresholds);
       if (doEval) {
         File predictFile = File.createTempFile("svm-", ".pred2");
         if (deleteTempFilesOnExit) {

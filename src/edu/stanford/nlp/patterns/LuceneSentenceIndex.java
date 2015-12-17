@@ -28,8 +28,10 @@ import java.util.function.Function;
 
 
 /**
- * To create a lucene inverted index for tokens -> sentence ids (right now not storing all core tokens although some functions might suggest that)
- * Created by Sonal Gupta on 10/14/14.
+ * To create a lucene inverted index from tokens to sentence ids.
+ * (Right now it is not storing all core tokens although some functions might suggest that.)
+ *
+ * @author Sonal Gupta on 10/14/14.
  */
 public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
 
@@ -150,7 +152,7 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
 
     //Map<String, List<CoreLabel>> sents = null;
     TopDocs tp = searcher.search(query, Integer.MAX_VALUE);
-    Set<String> sentids = new HashSet<String>();
+    Set<String> sentids = new HashSet<>();
     if (tp.totalHits > 0) {
       for (ScoreDoc s : tp.scoreDocs) {
         int docId = s.doc;
@@ -164,12 +166,13 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
         sentids.add(d.get("sentid"));
         //}
       }
-    } else
-    throw new RuntimeException("how come no documents for " + words + ". Query formed is " + query);
-    //System.out.println("number of sentences for tokens " + words + " are " + sentids);
+    } else {
+      throw new RuntimeException("how come no documents for " + words + ". Query formed is " + query);
+      //System.out.println("number of sentences for tokens " + words + " are " + sentids);
 //    if(!saveTokens){
 //      sents = getSentences(sentids);
 //    }
+    }
     return sentids;
   }
 
@@ -196,16 +199,14 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
   @Override
   public Map<E, Set<String>> queryIndex(Collection<E> patterns) {
     try{
-      Map<E, Set<String>> sents = new HashMap<E, Set<String>>();
+      Map<E, Set<String>> sents = new HashMap<>();
       for(E p : patterns){
         Set<String> sentids = queryIndexGetSentences(p.getRelevantWords());
         sents.put(p, sentids);
       }
       return sents;
     }
-    catch (ParseException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
+    catch (ParseException | IOException e) {
       throw new RuntimeException(e);
     }
   }
@@ -224,7 +225,7 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
 
   private List<CoreLabel> readProtoBufAnnotation(byte[] sent) throws IOException {
     ProtobufAnnotationSerializer p = new ProtobufAnnotationSerializer();
-    List<CoreLabel> toks = new ArrayList<CoreLabel>();
+    List<CoreLabel> toks = new ArrayList<>();
     ByteArrayInputStream is = new ByteArrayInputStream(sent);
     CoreNLPProtos.Token d;
     do{
@@ -369,14 +370,6 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
     }
   }
 
-  public static void main(String[] args) {
-
-    try{
-
-    }catch(Exception e){
-      e.printStackTrace();
-    }
-  }
 }
 
 

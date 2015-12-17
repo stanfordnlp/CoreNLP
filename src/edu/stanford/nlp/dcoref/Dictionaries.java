@@ -212,8 +212,8 @@ public class Dictionaries {
 
   public final Map<List<String>, Gender> genderNumber = Generics.newHashMap();
 
-  public final ArrayList<Counter<Pair<String, String>>> corefDict = new ArrayList<Counter<Pair<String, String>>>(4);
-  public final Counter<Pair<String, String>> corefDictPMI = new ClassicCounter<Pair<String, String>>();
+  public final ArrayList<Counter<Pair<String, String>>> corefDict = new ArrayList<>(4);
+  public final Counter<Pair<String, String>> corefDictPMI = new ClassicCounter<>();
   public final Map<String,Counter<String>> NE_signatures = Generics.newHashMap();
 
   private void setPronouns() {
@@ -386,10 +386,14 @@ public class Dictionaries {
   private void loadGenderNumber(String file, String neutralWordsFile) {
     try {
       getWordsFromFile(neutralWordsFile, neutralWords, false);
+    } catch (IOException e) {
+      throw new RuntimeIOException("Couldn't load " + neutralWordsFile);
+    }
+    try {
       Map<List<String>, Gender> temp = IOUtils.readObjectFromURLOrClasspathOrFileSystem(file);
       genderNumber.putAll(temp);
     } catch (IOException | ClassNotFoundException e) {
-      throw new RuntimeIOException(e);
+      throw new RuntimeIOException("Couldn't load " + file);
     }
   }
 
@@ -397,7 +401,7 @@ public class Dictionaries {
       ArrayList<Counter<Pair<String, String>>> dict) {
 
     for(int i = 0; i < 4; i++){
-      dict.add(new ClassicCounter<Pair<String, String>>());
+      dict.add(new ClassicCounter<>());
 
       BufferedReader reader = null;
       try {
@@ -407,7 +411,7 @@ public class Dictionaries {
 
         while(reader.ready()) {
           String[] split = reader.readLine().split("\t");
-          dict.get(i).setCount(new Pair<String, String>(split[0], split[1]), Double.parseDouble(split[2]));
+          dict.get(i).setCount(new Pair<>(split[0], split[1]), Double.parseDouble(split[2]));
         }
 
       } catch (IOException e) {
@@ -428,7 +432,7 @@ public class Dictionaries {
 
         while(reader.ready()) {
           String[] split = reader.readLine().split("\t");
-          dict.setCount(new Pair<String, String>(split[0], split[1]), Double.parseDouble(split[3]));
+          dict.setCount(new Pair<>(split[0], split[1]), Double.parseDouble(split[3]));
         }
 
       } catch (IOException e) {
@@ -445,7 +449,7 @@ public class Dictionaries {
 
       while(reader.ready()) {
         String[] split = reader.readLine().split("\t");
-        Counter<String> cntr = new ClassicCounter<String>();
+        Counter<String> cntr = new ClassicCounter<>();
         sigs.put(split[0], cntr);
         for (int i = 1; i < split.length; i=i+2) {
           cntr.setCount(split[i], Double.parseDouble(split[i+1]));

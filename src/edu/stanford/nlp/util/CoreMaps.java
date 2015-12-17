@@ -68,7 +68,7 @@ public class CoreMaps {
   public static <V, CM extends CoreMap, COLL extends Collection<CM>> Map<CM,V>
     asMap(final COLL coremaps, final Class<? extends TypesafeMap.Key<V>> valueKey) {
 
-    final IdentityHashMap<CM,Boolean> references = new IdentityHashMap<CM,Boolean>();
+    final IdentityHashMap<CM,Boolean> references = new IdentityHashMap<>();
     for(CM map : coremaps){
       references.put(map, true);
     }

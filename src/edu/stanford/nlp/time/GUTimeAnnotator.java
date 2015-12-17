@@ -83,7 +83,7 @@ public class GUTimeAnnotator implements Annotator {
     boolean useFirstDate = 
       (!document.has(CoreAnnotations.CalendarAnnotation.class) && !document.has(CoreAnnotations.DocDateAnnotation.class));
     
-    ArrayList<String> args = new ArrayList<String>();
+    ArrayList<String> args = new ArrayList<>();
     args.add("perl");
     args.add("-I" + this.gutimePath.getPath());
     args.add(new File(this.gutimePath, "TimeTag.pl").getPath());
@@ -98,6 +98,17 @@ public class GUTimeAnnotator implements Annotator {
     String output = outputWriter.getBuffer().toString();
     Pattern docClose = Pattern.compile("</DOC>.*", Pattern.DOTALL);
     output = docClose.matcher(output).replaceAll("</DOC>");
+
+
+   //The TimeTag.pl result file contains next tags which must be removed
+    output = output.replaceAll("<lex.*?>", "");
+    output = output.replace("</lex>", "");
+    output = output.replace("<NG>", "");
+    output = output.replace("</NG>", "");
+    output = output.replace("<VG>", "");
+    output = output.replace("</VG>", "");
+    output = output.replace("<s>", "");
+    output = output.replace("</s>", "");
 
     // parse the GUTime output
     Element outputXML;
@@ -115,7 +126,10 @@ public class GUTimeAnnotator implements Annotator {
       		e, IOUtils.slurpFile(inputFile), output));
     } */
     inputFile.delete();
+
     
+
+
     // get Timex annotations
     List<CoreMap> timexAnns = toTimexCoreMaps(outputXML, document);
     document.set(TimeAnnotations.TimexAnnotations.class, timexAnns);
@@ -244,7 +258,7 @@ public class GUTimeAnnotator implements Annotator {
       }
     }
     //--Set Timexes
-    List<CoreMap> timexMaps = new ArrayList<CoreMap>();
+    List<CoreMap> timexMaps = new ArrayList<>();
     int offset = 0;
     NodeList docNodes = docElem.getChildNodes();
     Element textElem = null;

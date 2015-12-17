@@ -10,6 +10,7 @@ import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.*;
 
@@ -30,14 +31,20 @@ public class StanfordCoreNlpDemo {
       xmlOut = new PrintWriter(args[2]);
     }
 
-    // Create a CoreNLP pipeline. This line just builds the default pipeline.
-    // In comments we show how you can build a particular pipeline
-    // Properties props = new Properties();
-    // props.put("annotators", "tokenize, ssplit, pos, lemma, ner, depparse");
-    // props.put("ner.model", "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz");
-    // props.put("ner.applyNumericClassifiers", "false");
-    // StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-    StanfordCoreNLP pipeline = new StanfordCoreNLP();
+    // Create a CoreNLP pipeline. To build the default pipeline, you can just use:
+    //   StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    // Here's a more complex setup example:
+    //   Properties props = new Properties();
+    //   props.put("annotators", "tokenize, ssplit, pos, lemma, ner, depparse");
+    //   props.put("ner.model", "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz");
+    //   props.put("ner.applyNumericClassifiers", "false");
+    //   StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+
+    // Add in sentiment
+    Properties props = new Properties();
+    props.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref, sentiment");
+
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 
     // Initialize an Annotation with some text to be annotated. The text is the argument to the constructor.
     Annotation annotation;
@@ -50,7 +57,7 @@ public class StanfordCoreNlpDemo {
     // run all the selected Annotators on this text
     pipeline.annotate(annotation);
 
-    // print the results to file(s)
+    // this prints out the results of sentence analysis to file(s) in good formats
     pipeline.prettyPrint(annotation, out);
     if (xmlOut != null) {
       pipeline.xmlPrint(annotation, xmlOut);
@@ -62,12 +69,16 @@ public class StanfordCoreNlpDemo {
     out.println();
     out.println("The top level annotation");
     out.println(annotation.toShorterString());
+    out.println();
 
-    // An Annotation is a Map and you can get and use the various analyses individually.
+    // An Annotation is a Map with Class keys for the linguistic analysis types.
+    // You can get and use the various analyses individually.
     // For instance, this gets the parse tree of the first sentence in the text.
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
     if (sentences != null && ! sentences.isEmpty()) {
       CoreMap sentence = sentences.get(0);
+      out.println("The keys of the first sentence's CoreMap are:");
+      out.println(sentence.keySet());
       out.println();
       out.println("The first sentence is:");
       out.println(sentence.toShorterString());
@@ -105,6 +116,9 @@ public class StanfordCoreNlpDemo {
                   ", " + tokens.get(m.endIndex - 2).endPosition() + ")");
         }
       }
+      out.println();
+
+      out.println("The first sentence overall sentiment rating is " + sentence.get(SentimentCoreAnnotations.SentimentClass.class));
     }
     IOUtils.closeIgnoringExceptions(out);
     IOUtils.closeIgnoringExceptions(xmlOut);

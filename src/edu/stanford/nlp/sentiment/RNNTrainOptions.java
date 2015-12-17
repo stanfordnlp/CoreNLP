@@ -69,6 +69,8 @@ public class RNNTrainOptions implements Serializable {
    */
   public String initialMatrixLogPath = null;
 
+  public int nThreads = 1;
+
   @Override
   public String toString() {
     StringBuilder result = new StringBuilder();
@@ -97,6 +99,7 @@ public class RNNTrainOptions implements Serializable {
     result.append("adagradResetFrequency=" + adagradResetFrequency + "\n");
     result.append("shuffleMatrices=" + shuffleMatrices + "\n");
     result.append("initialMatrixLogPath=" + initialMatrixLogPath + "\n");
+    result.append("nThreads=" + nThreads + "\n");
     return result.toString();
   }
 
@@ -153,6 +156,9 @@ public class RNNTrainOptions implements Serializable {
       return argIndex + 1;
     } else if (args[argIndex].equalsIgnoreCase("-initialMatrixLogPath")) {
       initialMatrixLogPath = args[argIndex + 1];
+      return argIndex + 2;
+    } else if (args[argIndex].equalsIgnoreCase("-nThreads") || args[argIndex].equalsIgnoreCase("-numThreads")) {
+      nThreads = Integer.parseInt(args[argIndex + 1]);
       return argIndex + 2;
     } else {
       return argIndex;

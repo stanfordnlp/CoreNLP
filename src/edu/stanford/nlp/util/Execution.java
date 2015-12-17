@@ -92,8 +92,8 @@ public class Execution {
 
     private FilenameFilter filter;
     private File[] dir;
-    private Stack<File[]> parents = new Stack<File[]>();
-    private Stack<Integer> indices = new Stack<Integer>();
+    private Stack<File[]> parents = new Stack<>();
+    private Stack<Integer> indices = new Stack<>();
 
     private int toReturn = -1;
 
@@ -184,7 +184,7 @@ public class Execution {
       //--Permissions
       boolean accessState = true;
       if (Modifier.isFinal(f.getModifiers())) {
-        fatal("Option cannot be final: " + f);
+        runtimeException("Option cannot be final: " + f);
       }
       if (!f.isAccessible()) {
         accessState = false;
@@ -198,7 +198,7 @@ public class Execution {
           Object[] array = (Object[]) objVal;
           // error check
           if (!f.getType().isArray()) {
-            fatal("Setting an array to a non-array field. field: " + f + " value: " + Arrays.toString(array) + " src: " + value);
+            runtimeException("Setting an array to a non-array field. field: " + f + " value: " + Arrays.toString(array) + " src: " + value);
           }
           // create specific array
           Object toSet = Array.newInstance(f.getType().getComponentType(), array.length);
@@ -212,7 +212,7 @@ public class Execution {
           f.set(instance, objVal);
         }
       } else {
-        fatal("Cannot assign option field: " + f + " value: " + value + "; invalid type");
+        runtimeException("Cannot assign option field: " + f + " value: " + value + "; invalid type");
       }
       //--Permissions
       if (!accessState) {
@@ -220,13 +220,13 @@ public class Execution {
       }
     } catch (IllegalArgumentException e) {
       err(e);
-      fatal("Cannot assign option field: " + f.getDeclaringClass().getCanonicalName() + "." + f.getName() + " value: " + value + " cause: " + e.getMessage());
+      runtimeException("Cannot assign option field: " + f.getDeclaringClass().getCanonicalName() + "." + f.getName() + " value: " + value + " cause: " + e.getMessage());
     } catch (IllegalAccessException e) {
       err(e);
-      fatal("Cannot access option field: " + f.getDeclaringClass().getCanonicalName() + "." + f.getName());
+      runtimeException("Cannot access option field: " + f.getDeclaringClass().getCanonicalName() + "." + f.getName());
     } catch (Exception e) {
       err(e);
-      fatal("Cannot assign option field: " + f.getDeclaringClass().getCanonicalName() + "." + f.getName() + " value: " + value + " cause: " + e.getMessage());
+      runtimeException("Cannot assign option field: " + f.getDeclaringClass().getCanonicalName() + "." + f.getName() + " value: " + value + " cause: " + e.getMessage());
     }
   }
 
@@ -265,7 +265,7 @@ public class Execution {
 
   public static Class<?>[] getVisibleClasses() {
     //--Variables
-    List<Class<?>> classes = new ArrayList<Class<?>>();
+    List<Class<?>> classes = new ArrayList<>();
     // (get classpath)
     String pathSep = System.getProperty("path.separator");
     String[] cp = System.getProperties().getProperty("java.class.path",
@@ -350,7 +350,7 @@ public class Execution {
       boolean ensureAllOptions) {
 
     //--Create Class->Object Mapping
-    Map<Class, Object> class2object = new HashMap<Class, Object>();
+    Map<Class, Object> class2object = new HashMap<>();
     if (instances != null) {
       for (int i = 0; i < classes.length; ++i) {
         assert instances[i].getClass() == classes[i];
@@ -366,9 +366,9 @@ public class Execution {
     }
 
     //--Get Fillable Options
-    Map<String, Field> canFill = new HashMap<String, Field>();
-    Map<String, Pair<Boolean, Boolean>> required = new HashMap<String, Pair<Boolean, Boolean>>(); /* <exists, is_set> */
-    Map<String, String> interner = new HashMap<String, String>();
+    Map<String, Field> canFill = new HashMap<>();
+    Map<String, Pair<Boolean, Boolean>> required = new HashMap<>(); /* <exists, is_set> */
+    Map<String, String> interner = new HashMap<>();
     for (Class c : classes) {
       Field[] fields;
       try {
@@ -403,7 +403,7 @@ public class Execution {
             String name1 = canFill.get(name).getDeclaringClass().getCanonicalName() + "." + canFill.get(name).getName();
             String name2 = f.getDeclaringClass().getCanonicalName() + "." + f.getName();
             if (!name1.equals(name2)) {
-              fatal("Multiple declarations of option " + name + ": " + name1 + " and " + name2);
+              runtimeException("Multiple declarations of option " + name + ": " + name1 + " and " + name2);
             } else {
               err("Class is in classpath multiple times: " + canFill.get(name).getDeclaringClass().getCanonicalName());
             }
@@ -452,7 +452,8 @@ public class Execution {
         // split the key
         int lastDotIndex = rawKeyStr.lastIndexOf('.');
         if (lastDotIndex < 0) {
-          fatal("Unrecognized option: " + key);
+          err("Unrecognized option: " + key);
+          continue;
         }
         if (!rawKeyStr.startsWith("log.")) {  // ignore Redwood options
           String className = rawKeyStr.substring(0, lastDotIndex);
@@ -493,7 +494,8 @@ public class Execution {
       }
     }
     if (!good) {
-      System.exit(1);
+      throw new RuntimeException("not able to parse properties!!!!");
+      //System.exit(1);
     }
 
     return canFill;
@@ -600,10 +602,11 @@ public class Execution {
     exec(toRun, args, false);
   }
 
-  public static void exec(Runnable toRun, String[] args, Class[] optionClasses) {
+  public static void exec(Runnable toRun, String[] args, Class... optionClasses) {
     Execution.optionClasses = optionClasses;
     exec(toRun, args, false);
   }
+
   public static void exec(Runnable toRun, String[] args, Class[] optionClasses, boolean exit) {
     Execution.optionClasses = optionClasses;
     exec(toRun, StringUtils.argsToProperties(args), exit);
@@ -643,7 +646,8 @@ public class Execution {
     }
     endTracksTo("main");  // end main
     if (exit) {
-      System.exit(exitCode);
+      throw new RuntimeException("not able to parse properties!!!");
+      //System.exit(exitCode);
     }
   }
 

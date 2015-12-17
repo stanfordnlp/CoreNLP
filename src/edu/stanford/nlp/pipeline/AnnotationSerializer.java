@@ -79,13 +79,13 @@ public abstract class AnnotationSerializer {
     public List<IntermediateNode> nodes;
     public List<IntermediateEdge> edges;
     public IntermediateSemanticGraph() {
-      nodes = new ArrayList<IntermediateNode>();
-      edges = new ArrayList<IntermediateEdge>();
+      nodes = new ArrayList<>();
+      edges = new ArrayList<>();
     }
 
     public IntermediateSemanticGraph(List<IntermediateNode> nodes, List<IntermediateEdge> edges) {
-      this.nodes = new ArrayList<IntermediateNode>(nodes);
-      this.edges = new ArrayList<IntermediateEdge>(edges);
+      this.nodes = new ArrayList<>(nodes);
+      this.edges = new ArrayList<>(edges);
     }
 
     private static final Object LOCK = new Object();

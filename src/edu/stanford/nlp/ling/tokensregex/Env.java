@@ -2,9 +2,11 @@ package edu.stanford.nlp.ling.tokensregex;
 
 import edu.stanford.nlp.ling.tokensregex.types.Expressions;
 import edu.stanford.nlp.ling.tokensregex.types.Tags;
+import edu.stanford.nlp.pipeline.CoreMapAggregator;
 import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
 import java.util.function.Function;
-import edu.stanford.nlp.util.Generics;
+
+import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.util.Pair;
 
 import java.util.*;
@@ -34,12 +36,12 @@ public class Env {
   /**
    * Mapping of variable names to their values
    */
-  Map<String, Object> variables = new HashMap<String, Object>();//Generics.newHashMap();
+  Map<String, Object> variables = new HashMap<>();//Generics.newHashMap();
 
   /**
    * Mapping of per thread temporary variables to their values
    */
-  ThreadLocal<Map<String,Object>> threadLocalVariables = new ThreadLocal<Map<String,Object>>();
+  ThreadLocal<Map<String,Object>> threadLocalVariables = new ThreadLocal<>();
   /**
    * Mapping of variables that can be expanded in a regular expression for strings,
    *   to their regular expressions.
@@ -49,12 +51,12 @@ public class Env {
    *   the name of the variable to be replaced, and a <code>String</code> representing the
    *   regular expression (escaped) that is used to replace the name of the variable.
    */
-  Map<String, Pair<Pattern,String>> stringRegexVariables = new HashMap<String, Pair<Pattern, String>>();//Generics.newHashMap();
+  Map<String, Pair<Pattern,String>> stringRegexVariables = new HashMap<>();//Generics.newHashMap();
 
   /**
    * Default parameters (used when reading in rules for {@link SequenceMatchRules}.
    */
-  public Map<String, Object> defaults = new HashMap<String, Object>();//Generics.newHashMap();
+  public Map<String, Object> defaults = new HashMap<>();//Generics.newHashMap();
 
   /**
    * Default flags to use for string regular expressions match
@@ -107,12 +109,20 @@ public class Env {
    */
   public Map<Class, CoreMapAttributeAggregator> defaultTokensAggregators;
 
+  private CoreMapAggregator defaultTokensAggregator;
+
   /**
-   * How annotations be extracted from the MatchedExpression
+   * Whether we should merge and output corelabels or not
+   */
+  public boolean aggregateToTokens;
+
+
+   /**
+   * How annotations are extracted from the MatchedExpression.
    * If the result type is a List and more than one annotation key is specified,
-   *   then the result is paired with the annotation key
-   *   Example: If annotation key is [ner,normalized] and result is [CITY,San Francisco]
-   *            then the final coremap will have ner=CITY, normalized=San Francisco
+   * then the result is paired with the annotation key.
+   * Example: If annotation key is [ner,normalized] and result is [CITY,San Francisco]
+   *            then the final CoreMap will have ner=CITY, normalized=San Francisco.
    * Otherwise, the result is treated as one object (all keys will be assigned that value).
    */
   Function<MatchedExpression,?> defaultResultsAnnotationExtractor;
@@ -120,9 +130,9 @@ public class Env {
   /**
    * Interface for performing custom binding of values to the environment
    */
-  public static interface Binder {
-    public void init(String prefix, Properties props);
-    public void bind(Env env);
+  public interface Binder {
+    void init(String prefix, Properties props);
+    void bind(Env env);
   }
 
   public Env(SequencePattern.Parser p) { this.parser = p; }
@@ -149,6 +159,18 @@ public class Env {
 
   public void setDefaultTokensAggregators(Map<Class, CoreMapAttributeAggregator> defaultTokensAggregators) {
     this.defaultTokensAggregators = defaultTokensAggregators;
+  }
+
+  public CoreMapAggregator getDefaultTokensAggregator() {
+    if (defaultTokensAggregator == null && (defaultTokensAggregators != null || aggregateToTokens)) {
+      CoreLabelTokenFactory tokenFactory = (aggregateToTokens)? new CoreLabelTokenFactory():null;
+      Map<Class, CoreMapAttributeAggregator> aggregators = defaultTokensAggregators;
+      if (aggregators == null) {
+        aggregators = CoreMapAttributeAggregator.DEFAULT_NUMERIC_TOKENS_AGGREGATORS;
+      }
+      defaultTokensAggregator = CoreMapAggregator.getAggregator(aggregators, null, tokenFactory);
+    }
+    return defaultTokensAggregator;
   }
 
   public Class getDefaultTextAnnotationKey() {
@@ -261,7 +283,7 @@ public class Env {
     }
     Pattern varPattern = Pattern.compile(Pattern.quote(var));
     String replace = Matcher.quoteReplacement(regex);
-    stringRegexVariables.put(var, new Pair<Pattern, String>(varPattern, replace));
+    stringRegexVariables.put(var, new Pair<>(varPattern, replace));
   }
   public String expandStringRegex(String regex)
   {
@@ -361,11 +383,11 @@ public class Env {
   public void push(String name, Object value) {
     Map<String,Object> vars = threadLocalVariables.get();
     if (vars == null) {
-      threadLocalVariables.set(vars = new HashMap<String, Object>());//Generics.newHashMap());
+      threadLocalVariables.set(vars = new HashMap<>());//Generics.newHashMap());
     }
     Stack<Object> stack = (Stack<Object>) vars.get(name);
     if (stack == null) {
-      vars.put(name, stack = new Stack<Object>());
+      vars.put(name, stack = new Stack<>());
     }
     stack.push(value);
   }

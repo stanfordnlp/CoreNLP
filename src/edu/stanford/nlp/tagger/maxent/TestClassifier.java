@@ -104,7 +104,7 @@ public class TestClassifier {
     throws IOException
   {
     numSentences = 0;
-    confusionMatrix = new ConfusionMatrix<String>();
+    confusionMatrix = new ConfusionMatrix<>();
 
     PrintFile pf = null;
     PrintFile pf1 = null;
@@ -117,7 +117,7 @@ public class TestClassifier {
     boolean verboseResults = config.getVerboseResults();
 
     if (config.getNThreads() != 1) {
-      MulticoreWrapper<List<TaggedWord>, TestSentence> wrapper = new MulticoreWrapper<List<TaggedWord>, TestSentence>(config.getNThreads(), new TestSentenceProcessor(maxentTagger));
+      MulticoreWrapper<List<TaggedWord>, TestSentence> wrapper = new MulticoreWrapper<>(config.getNThreads(), new TestSentenceProcessor(maxentTagger));
       for (List<TaggedWord> taggedSentence : fileRecord.reader()) {
         wrapper.put(taggedSentence);
         while (wrapper.peek()) {

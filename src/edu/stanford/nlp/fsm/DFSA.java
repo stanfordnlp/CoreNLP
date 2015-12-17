@@ -51,7 +51,7 @@ public final class DFSA<T,S> implements Scored {
 
   public Set<DFSAState<T, S>> states() {
     Set<DFSAState<T, S>> visited = Generics.newHashSet();
-    List<DFSAState<T,S>> toVisit = new ArrayList<DFSAState<T,S>>();
+    List<DFSAState<T,S>> toVisit = new ArrayList<>();
     toVisit.add(initialState());
     exploreStates(toVisit, visited);
     return visited;
@@ -99,7 +99,7 @@ public final class DFSA<T,S> implements Scored {
   }
 
   public void printAttFsmFormat(Writer w) throws IOException {
-    Queue<DFSAState<T,S>> q = new LinkedList<DFSAState<T,S>>();
+    Queue<DFSAState<T,S>> q = new LinkedList<>();
     Set<DFSAState<T,S>> visited = Generics.newHashSet();
     q.offer(initialState);
     while(q.peek() != null) {
@@ -111,7 +111,7 @@ public final class DFSA<T,S> implements Scored {
         w.write(state.toString()+"\t"+state.score()+"\n");
         continue;
       }
-      TreeSet<T> inputs = new TreeSet<T>(state.continuingInputs());
+      TreeSet<T> inputs = new TreeSet<>(state.continuingInputs());
       for (T input : inputs) {
         DFSATransition<T, S> transition = state.transition(input);
         DFSAState<T,S> target = transition.target();

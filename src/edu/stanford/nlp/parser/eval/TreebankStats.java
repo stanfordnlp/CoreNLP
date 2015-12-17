@@ -12,8 +12,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Stack;
 
-import edu.stanford.nlp.international.Languages;
-import edu.stanford.nlp.international.Languages.Language;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -98,8 +97,8 @@ public class TreebankStats {
    * @param addToVocab
    */
   private static Pair<Integer,Integer> dissectTree(Tree t, ObservedCorpusStats ocs, boolean addToVocab) {
-    final Stack<Pair<Integer,Tree>> stack = new Stack<Pair<Integer,Tree>>();
-    stack.push(new Pair<Integer,Tree>(0,t));
+    final Stack<Pair<Integer,Tree>> stack = new Stack<>();
+    stack.push(new Pair<>(0, t));
 
     int maxBreadth = 0;
     int maxDepth = -1;
@@ -127,11 +126,11 @@ public class TreebankStats {
           if(addToVocab) trainVocab.add(node.value());
         }
         for(Tree kid : node.children())
-          stack.push(new Pair<Integer,Tree>(nodeDepth + 1, kid));
+          stack.push(new Pair<>(nodeDepth + 1, kid));
       }
     }
 
-    return new Pair<Integer,Integer>(maxDepth,maxBreadth);
+    return new Pair<>(maxDepth, maxBreadth);
   }
 
   private static void display(ObservedCorpusStats corpStats, boolean displayWords, boolean displayOOV) {
@@ -174,7 +173,7 @@ public class TreebankStats {
   public void run(boolean pathsAreFiles, boolean displayWords, boolean displayOOV) {
 
     if(useSplit) {
-      List<ObservedCorpusStats> allSplitStats = new ArrayList<ObservedCorpusStats>();
+      List<ObservedCorpusStats> allSplitStats = new ArrayList<>();
       makeVocab = true;
       for(Map.Entry<Split, Set<String>> split : splitFileLists.entrySet()) {
         DiskTreebank tb = tlpp.diskTreebank();
@@ -230,13 +229,13 @@ public class TreebankStats {
 
     public ObservedCorpusStats(String name) {
       corpusName = name;
-      words = new ClassicCounter<String>();
-      posTags = new ClassicCounter<String>();
-      phrasalBranching2 = new ClassicCounter<String>();
-      phrasalBranchingNum2 = new ClassicCounter<String>();
-      lengths = new ArrayList<Integer>();
-      depths = new ArrayList<Integer>();
-      breadths = new ArrayList<Integer>();
+      words = new ClassicCounter<>();
+      posTags = new ClassicCounter<>();
+      phrasalBranching2 = new ClassicCounter<>();
+      phrasalBranchingNum2 = new ClassicCounter<>();
+      lengths = new ArrayList<>();
+      depths = new ArrayList<>();
+      breadths = new ArrayList<>();
     }
 
     public String getName() { return corpusName; }
@@ -296,19 +295,19 @@ public class TreebankStats {
       System.out.println(" constituents:\t" + nf.format(meanConstituents));
       System.out.println("======================================================");
       System.out.println(">>> Branching factor means by phrasal tag:");
-      List<String> sortedKeys = new ArrayList<String>(meanBranchingByLabel.keySet());
+      List<String> sortedKeys = new ArrayList<>(meanBranchingByLabel.keySet());
       Collections.sort(sortedKeys, Counters.toComparator(phrasalBranchingNum2,false,true));
       for(String label : sortedKeys)
         System.out.printf(" %s:\t\t%s  /  %d instances\n", label,nf.format(meanBranchingByLabel.getCount(label)), (int) phrasalBranchingNum2.getCount(label));
       System.out.println("======================================================");
       System.out.println(">>> Phrasal tag counts");
-      sortedKeys = new ArrayList<String>(phrasalBranchingNum2.keySet());
+      sortedKeys = new ArrayList<>(phrasalBranchingNum2.keySet());
       Collections.sort(sortedKeys, Counters.toComparator(phrasalBranchingNum2,false,true));
       for(String label : sortedKeys)
         System.out.println(" " + label + ":\t\t" + (int) phrasalBranchingNum2.getCount(label));
       System.out.println("======================================================");
       System.out.println(">>> POS tag counts");
-      sortedKeys = new ArrayList<String>(posTags.keySet());
+      sortedKeys = new ArrayList<>(posTags.keySet());
       Collections.sort(sortedKeys, Counters.toComparator(posTags,false,true));
       for(String posTag : sortedKeys)
         System.out.println(" " + posTag + ":\t\t" + (int) posTags.getCount(posTag));
@@ -316,7 +315,7 @@ public class TreebankStats {
 
       if(displayWords) {
         System.out.println(">>> Word counts");
-        sortedKeys = new ArrayList<String>(words.keySet());
+        sortedKeys = new ArrayList<>(words.keySet());
         Collections.sort(sortedKeys, Counters.toComparator(words,false,true));
         for(String word : sortedKeys)
           System.out.println(" " + word + ":\t\t" + (int) words.getCount(word));
@@ -351,7 +350,7 @@ public class TreebankStats {
         stddevBreadth += Math.pow(b - meanBreadth, 2);
       stddevBreadth = Math.sqrt(stddevBreadth / denom);
 
-      meanBranchingByLabel = new ClassicCounter<String>();
+      meanBranchingByLabel = new ClassicCounter<>();
       for(String label : phrasalBranching2.keySet()) {
         double mean = phrasalBranching2.getCount(label) / phrasalBranchingNum2.getCount(label);
         meanBranchingByLabel.incrementCount(label, mean);
@@ -407,7 +406,7 @@ public class TreebankStats {
     String nl = System.getProperty("line.separator");
     usage.append(String.format("Usage: java %s [OPTS] LANG paths%n%n",TreebankStats.class.getName()));
     usage.append("Options:").append(nl);
-    usage.append(" LANG is one of " + Languages.listOfLanguages()).append(nl);
+    usage.append(" LANG is one of " + Language.langList).append(nl);
     usage.append("  -s prefix : Use a split (extensions must be dev/test/train)").append(nl);
     usage.append("  -w        : Show word distribution").append(nl);
     usage.append("  -f        : Path list is a set of files, and the first file is the training set").append(nl);
@@ -447,12 +446,12 @@ public class TreebankStats {
     }
 
     Language language = Language.valueOf(parsedArgs[0]);
-    List<String> corpusPaths = new ArrayList<String>(parsedArgs.length-1);
+    List<String> corpusPaths = new ArrayList<>(parsedArgs.length - 1);
     for (int i = 1; i < parsedArgs.length; ++i) {
       corpusPaths.add(parsedArgs[i]);
     }
 
-    TreebankLangParserParams tlpp = Languages.getLanguageParams(language);
+    TreebankLangParserParams tlpp = language.params;
     TreebankStats cs = new TreebankStats(language,corpusPaths,tlpp);
     if(splitPrefix != null) {
       if(!cs.useSplit(splitPrefix)) System.err.println("Could not load split!");

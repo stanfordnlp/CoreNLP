@@ -28,7 +28,7 @@ public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> i
   public InvertedIndexByTokens(Properties props, Set<String> stopWords, Function<CoreLabel, Map<String, String>> transformSentenceToString) {
     super(stopWords, transformSentenceToString);
     Execution.fillOptions(this, props);
-    index = new HashMap<String, Set<String>>();
+    index = new HashMap<>();
   }
 
   public InvertedIndexByTokens(Properties props, Set<String> stopWords, Function<CoreLabel, Map<String, String>> transformSentenceToString, Map<String, Set<String>> index) {
@@ -82,7 +82,7 @@ public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> i
     Set<String> sentids = index.get(w);
 
     if (sentids == null) {
-      sentids = new HashSet<String>();
+      sentids = new HashSet<>();
     }
 
     sentids.add(sentid);
@@ -102,7 +102,7 @@ public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> i
           String w = combineKeyValue(en.getKey(), en2);
           Set<String> st = index.get(w);
           if (st == null){
-            System.err.println("\n\nWARNING: INDEX HAS NO SENTENCES FOR " + w);
+            //System.err.println("\n\nWARNING: INDEX HAS NO SENTENCES FOR " + w);
             return Collections.emptySet();
             //throw new RuntimeException("How come the index does not have sentences for " + w);
           }
@@ -117,7 +117,7 @@ public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> i
 
   //returns for each pattern, list of sentence ids
   public Map<E, Set<String>> getFileSentIdsFromPats(Collection<E> pats) {
-    Map<E, Set<String>> sents = new HashMap<E, Set<String>>();
+    Map<E, Set<String>> sents = new HashMap<>();
     for(E pat: pats){
       Set<String> ids = getFileSentIds(pat.getRelevantWords());
       Redwood.log(ConstantsAndVariables.extremedebug, "For pattern with index " + pat + " extracted the following sentences from the index " + ids);

@@ -88,7 +88,7 @@ public class TreeCollinizer implements TreeTransformer {
     if (s.equals("PRT")) {
       s = "ADVP";
     }
-    List<Tree> children = new ArrayList<Tree>();
+    List<Tree> children = new ArrayList<>();
     for (int cNum = 0, numKids = tree.numChildren(); cNum < numKids; cNum++) {
       Tree child = tree.children()[cNum];
       Tree newChild = transformTree(child);

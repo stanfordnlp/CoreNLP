@@ -54,13 +54,13 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  *
  * <p>
  *   The serialization behavior can be safely changed by overwriting:
+ * </p>
  *   <ul>
  *     <li>@See FileBackedCache#newInputStream</li>
  *     <li>@See FileBackedCache#newOutputStream</li>
  *     <li>@See FileBackedCache#writeNextObject</li>
  *     <li>@See FileBackedCache#readNextObject</li>
  *   </ul>
- * </p>
  *
  * @param <KEY> The key to cache by
  * @param <T> The object to cache
@@ -79,16 +79,16 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
   public final int maxFiles;
 
   /** The implementation of the mapping */
-  private final Map<KEY, SoftReference<T>> mapping = new ConcurrentHashMap<KEY, SoftReference<T>>();
+  private final Map<KEY, SoftReference<T>> mapping = new ConcurrentHashMap<>();
 
   /** A reaper for soft references, to save memory on storing the keys */
-  private final ReferenceQueue<T> reaper = new ReferenceQueue<T>();
+  private final ReferenceQueue<T> reaper = new ReferenceQueue<>();
 
   /**
    * A file canonicalizer, so that we can synchronize on blocks -- static, as it should work between instances.
    * In particular, an exception is thrown if the JVM attempts to take out two locks on a file.
    */
-  private static final Interner<File> canonicalFile = new Interner<File>();
+  private static final Interner<File> canonicalFile = new Interner<>();
   /** A map indicating whether the JVM holds a file lock on the given file */
   private static final IdentityHashMap<File, FileSemaphore> fileLocks = Generics.newIdentityHashMap();
 
@@ -268,7 +268,7 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
 
   /**
    * Gets whether the cache is empty, including elements on disk.
-   * Note thaTrue if the cache is emtpy.
+   * Note that this returns true if the cache is empty.
    */
   @Override
   public boolean isEmpty() {
@@ -356,7 +356,7 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
       return existing;
     } else {
       // In-memory
-      SoftReference<T> ref = new SoftReference<T>(value, this.reaper);
+      SoftReference<T> ref = new SoftReference<>(value, this.reaper);
       mapping.put(key, ref);
       // On Disk
       if (existing == null) {
@@ -671,10 +671,7 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
         // Return
         return existingValue;
       }
-    } catch (IOException e) {
-      err(e);
-      throw throwSafe(e);
-    } catch (ClassNotFoundException e) {
+    } catch (IOException | ClassNotFoundException e) {
       err(e);
       throw throwSafe(e);
     } finally {
@@ -713,7 +710,7 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
         haveClosed = true;
         // Add elements
         for (Pair<KEY, T> elem : read) {
-          SoftReference<T> ref = new SoftReference<T>(elem.second, this.reaper);
+          SoftReference<T> ref = new SoftReference<>(elem.second, this.reaper);
           mapping.put(elem.first, ref);
         }
         return read;
@@ -773,7 +770,7 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
   // Java Hacks
   //
   /** Turns out, an ObjectOutputStream cannot append to a file. This is dumb. */
-  public class AppendingObjectOutputStream extends ObjectOutputStream {
+  public static class AppendingObjectOutputStream extends ObjectOutputStream {
     public AppendingObjectOutputStream(OutputStream out) throws IOException {
       super(out);
     }
@@ -792,15 +789,16 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
 
   private static void robustCreateFile(File candidate) throws IOException {
     int tries = 0;
-    while (!candidate.exists()) {
+    while ( ! candidate.exists()) {
       if (tries > 30) { throw new IOException("Could not create file: " + candidate); }
       if (candidate.createNewFile()) { break; }
+      tries++;
       try { Thread.sleep(1000); } catch (InterruptedException e) { log(e); }
     }
   }
 
-  public static interface CloseAction {
-    public void apply() throws IOException;
+  public interface CloseAction {
+    void apply() throws IOException;
   }
 
   public static class FileSemaphore {
@@ -879,8 +877,9 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
   /**
    * Create a new input stream, along with the code to close it and clean up.
    * This code may be overridden, but should match nextObjectOrNull().
-   * IMPORTANT NOTE: aqcquiring a lock (well, semaphore) with FileBackedCache#acquireFileLock(File)
+   * IMPORTANT NOTE: acquiring a lock (well, semaphore) with FileBackedCache#acquireFileLock(File)
    * is generally a good idea. Make sure to release() it in the close action as well.
+   *
    * @param f The file to read from
    * @return A pair, corresponding to the stream and the code to close it.
    * @throws IOException
@@ -888,15 +887,19 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
   protected Pair<? extends InputStream, CloseAction> newInputStream(File f) throws IOException {
     final FileSemaphore lock = acquireFileLock(f);
     final ObjectInputStream rtn = new ObjectInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(f))));
-    return new Pair<ObjectInputStream, CloseAction>(rtn,
-        () -> { lock.release(); rtn.close();  });
+    return new Pair<>(rtn,
+            () -> {
+              lock.release();
+              rtn.close();
+            });
   }
 
   /**
    * Create a new output stream, along with the code to close it and clean up.
    * This code may be overridden, but should match nextObjectOrNull()
-   * IMPORTANT NOTE: aqcquiring a lock (well, semaphore) with FileBackedCache#acquireFileLock(File)
+   * IMPORTANT NOTE: acquiring a lock (well, semaphore) with FileBackedCache#acquireFileLock(File)
    * is generally a good idea. Make sure to release() it in the close action as well.
+   *
    * @param f The file to write to
    * @param isAppend Signals whether the file we are writing to exists, and we are appending to it.
    * @return A pair, corresponding to the stream and the code to close it.
@@ -908,8 +911,12 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
     final ObjectOutputStream rtn = isAppend
         ? new AppendingObjectOutputStream(new GZIPOutputStream(new BufferedOutputStream(stream)))
         : new ObjectOutputStream(new GZIPOutputStream(new BufferedOutputStream(stream)));
-    return new Pair<ObjectOutputStream, CloseAction>(rtn,
-        () -> { rtn.flush(); lock.release(); rtn.close(); });
+    return new Pair<>(rtn,
+            () -> {
+              rtn.flush();
+              lock.release();
+              rtn.close();
+            });
   }
 
   /**

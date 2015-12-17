@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.Pair;
 
 /**
@@ -85,7 +86,7 @@ public class Span implements Serializable, Iterable<Integer> {
   
   @Override
   public int hashCode() {
-    return (new Pair<Integer,Integer>(start,end)).hashCode();
+    return (new Pair<>(start, end)).hashCode();
   }
   
   @Override
@@ -139,6 +140,30 @@ public class Span implements Serializable, Iterable<Integer> {
       throw new IllegalArgumentException("Span " + toString() + " contains otherSpan " + otherSpan + " (or vice versa)");
     }
     return this.start >= otherSpan.end;
+  }
+
+  /**
+   * Move a span by the given amount. Useful for, e.g., switching between 0- and 1-indexed spans.
+   * @param diff The difference to ADD to both the beginning and end of the span. So, -1 moves the span left by one.
+   * @return A new span, offset by the given difference.
+   */
+  public Span translate(int diff) {
+    return new Span(start + diff, end + diff);
+  }
+
+  /**
+   * Convert an end-exclusive span to an end-inclusive span.
+   */
+  public Span toInclusive() {
+    assert end > start;
+    return new Span(start, end - 1);
+  }
+
+  /**
+   * Convert an end-inclusive span to an end-exclusive span.
+   */
+  public Span toExclusive() {
+    return new Span(start, end + 1);
   }
 
   @Override
@@ -207,5 +232,33 @@ public class Span implements Serializable, Iterable<Integer> {
     } else {
       throw new IllegalStateException("This should be impossible...");
     }
+  }
+
+  /**
+   * A silly translation between a pair and a span.
+   */
+  public static Span fromPair(Pair<Integer, Integer> span) {
+    return fromValues(span.first, span.second);
+  }
+
+  /**
+   * Another silly translation between a pair and a span.
+   */
+  public static Span fromPair(IntPair span) {
+    return fromValues(span.getSource(), span.getTarget());
+  }
+
+  /**
+   * A silly translation between a pair and a span.
+   */
+  public static Span fromPairOneIndexed(Pair<Integer, Integer> span) {
+    return fromValues(span.first - 1, span.second - 1);
+  }
+
+  /**
+   * The union of two spans. That is, the minimal span that contains both.
+   */
+  public static Span union(Span a, Span b) {
+    return Span.fromValues(Math.min(a.start, b.start), Math.max(a.end, b.end));
   }
 }

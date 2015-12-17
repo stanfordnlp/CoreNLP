@@ -10,6 +10,8 @@ import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.Generics;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.Partial;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 // import java.net.MalformedURLException;
@@ -24,6 +26,8 @@ import java.util.*;
  */
 public class JollyDayHolidays implements Env.Binder {
 
+  private static Logger logger = LoggerFactory.getLogger(JollyDayHolidays.class);
+
   private HolidayManager holidayManager;
   // private CollectionValuedMap<String, JollyHoliday> holidays;
   private Map<String, JollyHoliday> holidays;
@@ -34,8 +38,7 @@ public class JollyDayHolidays implements Env.Binder {
     String xmlPath = props.getProperty(prefix + "xml", "edu/stanford/nlp/models/sutime/jollyday/Holidays_sutime.xml");
     String xmlPathType = props.getProperty(prefix + "pathtype", "classpath");
     varPrefix = props.getProperty(prefix + "prefix", varPrefix);
-    System.err.println(prefix);
-    System.err.println("Initializing JollyDayHoliday for sutime with " + xmlPathType + ":" + xmlPath);
+    logger.info("Initializing JollyDayHoliday for SUTime from {} {} as {}", xmlPathType, xmlPath, prefix);
     Properties managerProps = new Properties();
     managerProps.setProperty("manager.impl", "edu.stanford.nlp.time.JollyDayHolidays$MyXMLManager");
     try {
@@ -63,9 +66,9 @@ public class JollyDayHolidays implements Env.Binder {
   @Override
   public void bind(Env env) {
     if (holidays != null) {
-      for (String s:holidays.keySet()) {
-        JollyHoliday jh = holidays.get(s);
-        env.bind(varPrefix + s, jh);
+      for (Map.Entry<String, JollyHoliday> holidayEntry : holidays.entrySet()) {
+        JollyHoliday jh = holidayEntry.getValue();
+        env.bind(varPrefix + holidayEntry.getKey(), jh);
       }
     }
   }
@@ -92,7 +95,7 @@ public class JollyDayHolidays implements Env.Binder {
 
   public CollectionValuedMap<String, JollyHoliday> getAllHolidaysCVMap(Set<de.jollyday.config.Holiday> allHolidays)
   {
-    CollectionValuedMap<String, JollyHoliday> map = new CollectionValuedMap<String, JollyHoliday>();
+    CollectionValuedMap<String, JollyHoliday> map = new CollectionValuedMap<>();
     for (de.jollyday.config.Holiday h:allHolidays) {
       String descKey = h.getDescriptionPropertiesKey();
       if (descKey != null) {
@@ -155,6 +158,8 @@ public class JollyDayHolidays implements Env.Binder {
 
   public static class JollyHoliday extends SUTime.Time {
 
+    private static final long serialVersionUID = -1479143694893729803L;
+
     private final HolidayManager holidayManager;
     private final de.jollyday.config.Holiday base;
     private final String label;
@@ -211,7 +216,7 @@ public class JollyDayHolidays implements Env.Binder {
           // TODO: If we knew location of article, can use that information to resolve holidays better
           Set<de.jollyday.Holiday> holidays = holidayManager.getHolidays(year);
           // Try to find this holiday
-          for (de.jollyday.Holiday h:holidays) {
+          for (de.jollyday.Holiday h : holidays) {
             if (h.getPropertiesKey().equals(base.getDescriptionPropertiesKey())) {
               return new SUTime.PartialTime(this, new Partial(h.getDate()));
             }

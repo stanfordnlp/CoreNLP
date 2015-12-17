@@ -97,7 +97,7 @@ public class ValueFunctions {
     public TypeCheckedFunction(String name, ParamInfo... paramInfos) {
       super(name);
       this.paramInfos = Arrays.asList(paramInfos);
-      nargs = (paramInfos != null)? paramInfos.length:0;
+      nargs = paramInfos.length;
     }
 
     @Override
@@ -585,13 +585,13 @@ public class ValueFunctions {
               if (in.get(0) == null) return null;
               List list = (List) in.get(0).get();
               ValueFunction func = (ValueFunction) in.get(1).get();
-              List<Value> res = new ArrayList<Value>(list.size());
+              List<Value> res = new ArrayList<>(list.size());
               for (Object elem:list) {
-                List<Value> args = new ArrayList<Value>(1);
+                List<Value> args = new ArrayList<>(1);
                 args.add(Expressions.createValue(Expressions.TYPE_LIST, elem));
                 res.add(func.apply(env, args));
               }
-              return new Expressions.PrimitiveValue<List<Value>>(Expressions.TYPE_LIST, res);
+              return new Expressions.PrimitiveValue<>(Expressions.TYPE_LIST, res);
             }
           };
   private static final ParamInfo PARAM_INFO_FUNCTION = new ParamInfo("FUNCTION", Expressions.TYPE_FUNCTION, Function.class, false);
@@ -604,11 +604,11 @@ public class ValueFunctions {
               if (in.get(0) == null) return null;
               List list = (List) in.get(0).get();
               Function func = (Function) in.get(1).get();
-              List<Object> res = new ArrayList<Object>(list.size());
+              List<Object> res = new ArrayList<>(list.size());
               for (Object elem:list) {
                 res.add(func.apply(elem));
               }
-              return new Expressions.PrimitiveValue<List<Object>>(null, res);
+              return new Expressions.PrimitiveValue<>(null, res);
             }
           };
 
@@ -718,8 +718,7 @@ public class ValueFunctions {
     @Override
     public int compare(Number o1, Number o2) {
       if (isInteger(o1) && isInteger(o2)) {
-        Long l1 = o1.longValue();
-        return l1.compareTo(o2.longValue());
+        return Long.compare(o1.longValue(), o2.longValue());
       } else {
         return Double.compare(o1.doubleValue(),o2.doubleValue());
       }
@@ -733,7 +732,8 @@ public class ValueFunctions {
     }
   }
 
-  public static enum CompareType { GT, LT, GE, LE, EQ, NE }
+  public enum CompareType { GT, LT, GE, LE, EQ, NE }
+
   public static class CompareFunction<T> extends NamedValueFunction {
     Comparator<T> comparator;
     CompareType compType;
@@ -907,7 +907,7 @@ public class ValueFunctions {
             cm.set(annotationFieldClass, annotationObject);
           }
         }
-        List<Object> list = new ArrayList<Object>();
+        List<Object> list = new ArrayList<>();
         Value res = new Expressions.PrimitiveValue(Expressions.TYPE_LIST, list);
         for (CoreMap cm:cmList) {
           list.add(cm.get(annotationFieldClass));
@@ -959,7 +959,7 @@ public class ValueFunctions {
         res = getTag((CoreMap) v.get(), tag);
       } else if (v.get() instanceof List) {
         List<CoreMap> cmList = (List<CoreMap>) v.get();
-        List<Value> list = new ArrayList<Value>();
+        List<Value> list = new ArrayList<>();
         res = new Expressions.PrimitiveValue(Expressions.TYPE_LIST, list);
         for (CoreMap cm:cmList) {
           list.add(getTag(cm, tag));
@@ -1264,7 +1264,7 @@ public class ValueFunctions {
     public Value apply(Env env, List<Value> in) {
       if (in.get(0) == null || in.get(0).get() == null ) return null;   // Allow for null
       Expressions.CompositeValue v = (Expressions.CompositeValue) in.get(0);
-      List<String> res = new ArrayList<String>(v.getAttributes());
+      List<String> res = new ArrayList<>(v.getAttributes());
       return Expressions.createValue(Expressions.TYPE_LIST, res);
     }
   };
@@ -1315,7 +1315,7 @@ public class ValueFunctions {
                 List list = (List) fieldValue.get();
                 Type[] fieldParamTypes = ((ParameterizedType) f.getGenericType()).getActualTypeArguments();
                 if (fieldParamTypes[0] instanceof Value) {
-                  List<Value> list2 = new ArrayList<Value>(list.size());
+                  List<Value> list2 = new ArrayList<>(list.size());
                   for (Object elem:list) {
                     list2.add(Expressions.asValue(env, elem));
                   }
@@ -1468,7 +1468,7 @@ public class ValueFunctions {
     public Value apply(Env env, List<Value> in) {
       if (in.get(0) == null || in.get(0).get() == null ) return null;   // Allow for null
       Map map = (Map) in.get(0).get();
-      List<Object> res = new ArrayList<Object>(map.keySet());
+      List<Object> res = new ArrayList<>(map.keySet());
       return Expressions.createValue(Expressions.TYPE_LIST, res);
     }
   };
@@ -1498,7 +1498,7 @@ public class ValueFunctions {
     public Value apply(Env env, List<Value> in) {
       ValueFunction func = (ValueFunction) in.get(0).get();
       Value res = in.get(1);
-      List<Value> args = new ArrayList<Value>(2);
+      List<Value> args = new ArrayList<>(2);
       for (int i = 2; i < in.size(); i++) {
         args.set(0, res);
         args.set(1, in.get(i));
@@ -1529,7 +1529,7 @@ public class ValueFunctions {
     @Override
     public Value apply(Env env, List<Value> in) {
       Value res;
-      List<Value> args = new ArrayList<Value>(in.size()-1);
+      List<Value> args = new ArrayList<>(in.size() - 1);
       for (int i = 1; i < in.size(); i++) {
         args.add(in.get(i));
       }
@@ -1548,9 +1548,9 @@ public class ValueFunctions {
   };
 
   static final CollectionValuedMap<String, ValueFunction> registeredFunctions =
-    new CollectionValuedMap<String,ValueFunction>(
-      MapFactory.<String, Collection<ValueFunction>>linkedHashMapFactory(),
-      CollectionFactory.<ValueFunction>arrayListFactory(),false);
+          new CollectionValuedMap<>(
+                  MapFactory.<String, Collection<ValueFunction>>linkedHashMapFactory(),
+                  CollectionFactory.<ValueFunction>arrayListFactory(), false);
   static {
     registeredFunctions.add("Add", ADD_FUNCTION);
     registeredFunctions.add("Subtract", SUBTRACT_FUNCTION);
@@ -1580,12 +1580,12 @@ public class ValueFunctions {
     registeredFunctions.add("Replace", TOKENS_REPLACE_FUNCTION);
     registeredFunctions.add("Replace", STRING_REPLACE_FUNCTION);
 
-    registeredFunctions.add("GE", new CompareFunction<Number>("GE", NUMBER_COMPARATOR, CompareType.GE, Number.class) );
-    registeredFunctions.add("GT", new CompareFunction<Number>("GT", NUMBER_COMPARATOR, CompareType.GT, Number.class) );
-    registeredFunctions.add("LE", new CompareFunction<Number>("LE", NUMBER_COMPARATOR, CompareType.LE, Number.class) );
-    registeredFunctions.add("LT", new CompareFunction<Number>("LT", NUMBER_COMPARATOR, CompareType.LT, Number.class) );
-    registeredFunctions.add("EQ", new CompareFunction<Number>("EQ", NUMBER_COMPARATOR, CompareType.EQ, Number.class) );
-    registeredFunctions.add("NE", new CompareFunction<Number>("NE", NUMBER_COMPARATOR, CompareType.NE, Number.class) );
+    registeredFunctions.add("GE", new CompareFunction<>("GE", NUMBER_COMPARATOR, CompareType.GE, Number.class) );
+    registeredFunctions.add("GT", new CompareFunction<>("GT", NUMBER_COMPARATOR, CompareType.GT, Number.class) );
+    registeredFunctions.add("LE", new CompareFunction<>("LE", NUMBER_COMPARATOR, CompareType.LE, Number.class) );
+    registeredFunctions.add("LT", new CompareFunction<>("LT", NUMBER_COMPARATOR, CompareType.LT, Number.class) );
+    registeredFunctions.add("EQ", new CompareFunction<>("EQ", NUMBER_COMPARATOR, CompareType.EQ, Number.class) );
+    registeredFunctions.add("NE", new CompareFunction<>("NE", NUMBER_COMPARATOR, CompareType.NE, Number.class) );
     registeredFunctions.add("EQ", EQUALS_FUNCTION );
     registeredFunctions.add("NE", NOT_EQUALS_FUNCTION );
 
@@ -1634,9 +1634,9 @@ public class ValueFunctions {
 
   public static void main(String[] args) {
     // Dumps the registered functions
-    for (String name: registeredFunctions.keySet()) {
-      for (ValueFunction vf: registeredFunctions.get(name)) {
-        System.out.println(name + ": " + vf);
+    for (Map.Entry<String, Collection<ValueFunction>> entry : registeredFunctions.entrySet()) {
+      for (ValueFunction vf: entry.getValue()) {
+        System.out.println(entry.getKey() + ": " + vf);
       }
     }
   }

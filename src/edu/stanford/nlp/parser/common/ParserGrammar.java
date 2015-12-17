@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -30,15 +33,18 @@ import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
  * Objects which inherit this interface have a way to produce
  * ParserQuery objects, have a general Options object, and return a
  * list of Evals to perform on a parser.  This helps classes such as
- * {@link edu.stanford.nlp.parser.lexparser.EvaluateTreebank} 
+ * {@link edu.stanford.nlp.parser.lexparser.EvaluateTreebank}
  * analyze the performance of a parser.
- *  
+ *
  * TODO: it would be nice to actually make this an interface again.
  * Perhaps Java 8 will allow that
  *
  * @author John Bauer
  */
 public abstract class ParserGrammar implements Function<List<? extends HasWord>, Tree> {
+
+  private static Logger logger = LoggerFactory.getLogger(ParserGrammar.class);
+
   public abstract ParserQuery parserQuery();
 
   /**
@@ -164,7 +170,7 @@ public abstract class ParserGrammar implements Function<List<? extends HasWord>,
    */
   public abstract String[] defaultCoreNLPFlags();
 
-  public abstract void setOptionFlags(String ... flags);  
+  public abstract void setOptionFlags(String ... flags);
 
   /**
    * The model requires text to be pretagged
@@ -175,12 +181,10 @@ public abstract class ParserGrammar implements Function<List<? extends HasWord>,
     ParserGrammar parser;
     try {
       Timing timing = new Timing();
-      System.err.print("Loading parser from serialized file " + path + " ...");
+      logger.info("Loading parser from serialized file " + path + " ... ");
       parser = IOUtils.readObjectFromURLOrClasspathOrFileSystem(path);
       timing.done();
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
-    } catch (ClassNotFoundException e) {
+    } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeIOException(e);
     }
     if (extraFlags.length > 0) {
@@ -188,5 +192,5 @@ public abstract class ParserGrammar implements Function<List<? extends HasWord>,
     }
     return parser;
   }
-  
+
 }

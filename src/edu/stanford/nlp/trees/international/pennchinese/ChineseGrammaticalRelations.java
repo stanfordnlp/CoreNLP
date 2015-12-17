@@ -27,9 +27,9 @@
 package edu.stanford.nlp.trees.international.pennchinese;
 
 import edu.stanford.nlp.trees.GrammaticalRelation;
-import edu.stanford.nlp.trees.GrammaticalRelation.Language;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
+import edu.stanford.nlp.international.Language;
 
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +38,9 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
 
@@ -77,12 +80,26 @@ public class ChineseGrammaticalRelations {
   // dependency tregexes
   private static final TregexPatternCompiler tregexCompiler = new TregexPatternCompiler((HeadFinder) null);
 
+  /** Return an unmodifiable list of grammatical relations.
+   *  Note: the list can still be modified by others, so you
+   *  should still get a lock with {@code valuesLock()} before
+   *  iterating over this list.
+   *
+   *  @return A list of grammatical relations
+   */
   public static List<GrammaticalRelation> values() {
     return Collections.unmodifiableList(values);
   }
 
+  public static final ReadWriteLock valuesLock = new ReentrantReadWriteLock();
+
+  public static Lock valuesLock() {
+    return valuesLock.readLock();
+  }
+
+
   public static GrammaticalRelation valueOf(String s) {
-    return GrammaticalRelation.valueOf(s, values());
+    return GrammaticalRelation.valueOf(s, values(), valuesLock());
   }
 
   ////////////////////////////////////////////////////////////
@@ -1153,24 +1170,33 @@ public class ChineseGrammaticalRelations {
       CONTROLLED_SUBJECT, chineseOnly,
   };
 
-  private static final List<GrammaticalRelation> values = new ArrayList<GrammaticalRelation>();
-  public static final Set<GrammaticalRelation> universalValues = new HashSet<GrammaticalRelation>();
+  private static final List<GrammaticalRelation> values = new ArrayList<>();
+    // Cache frequently used views of the values list
+  private static final List<GrammaticalRelation> synchronizedValues =
+    Collections.synchronizedList(values);
+
+  public static final Set<GrammaticalRelation> universalValues = new HashSet<>();
 
   // Map from GrammaticalRelation short names to their corresponding
   // GrammaticalRelation objects
-  public static final Map<String, GrammaticalRelation> shortNameToGRel = new ConcurrentHashMap<String, GrammaticalRelation>();
+  public static final Map<String, GrammaticalRelation> shortNameToGRel = new ConcurrentHashMap<>();
   static {
     for (int i = 0; i < rawValues.length; i++) {
       GrammaticalRelation gr = rawValues[i];
       if (gr == chineseOnly) continue;
-      values.add(gr);
-      if (i+1 == rawValues.length || rawValues[i+1] != chineseOnly) {
+      synchronizedValues.add(gr);
+      if (i + 1 == rawValues.length || rawValues[i + 1] != chineseOnly) {
         universalValues.add(gr);
       }
     }
 
-    for (GrammaticalRelation gr : ChineseGrammaticalRelations.values()) {
-      shortNameToGRel.put(gr.getShortName(), gr);
+    valuesLock().lock();
+    try {
+      for (GrammaticalRelation gr : ChineseGrammaticalRelations.values()) {
+        shortNameToGRel.put(gr.getShortName(), gr);
+      }
+    } finally {
+      valuesLock().unlock();
     }
   }
 
@@ -1182,4 +1208,5 @@ public class ChineseGrammaticalRelations {
   public static void main(String[] args) {
     System.out.println(DEPENDENT.toPrettyString());
   }
+
 }

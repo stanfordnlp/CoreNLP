@@ -19,19 +19,19 @@ import java.util.Set;
  */
 public class TrieMapUtils {
   public static <K> Counter<Iterable<K>> trieMapCounter() {
-    return new ClassicCounter<Iterable<K>>(TrieMapUtils.<K,MutableDouble>trieMapFactory());
+    return new ClassicCounter<>(TrieMapUtils.<K, MutableDouble>trieMapFactory());
   }
 
   public static <K,V> CollectionValuedMap<Iterable<K>, V> collectionValuedTrieMap() {
-    return new CollectionValuedMap<Iterable<K>, V>(
-            TrieMapUtils.<K,Collection<V>>trieMapFactory(),
+    return new CollectionValuedMap<>(
+            TrieMapUtils.<K, Collection<V>>trieMapFactory(),
             CollectionFactory.<V>hashSetFactory(),
             false);
   }
 
   public static <K,V> CollectionValuedMap<Iterable<K>, V> collectionValuedTrieMap(CollectionFactory<V> collectionFactory) {
-    return new CollectionValuedMap<Iterable<K>, V>(
-            TrieMapUtils.<K,Collection<V>>trieMapFactory(),
+    return new CollectionValuedMap<>(
+            TrieMapUtils.<K, Collection<V>>trieMapFactory(),
             collectionFactory,
             false);
   }
@@ -50,17 +50,24 @@ public class TrieMapUtils {
 
     @Override
     public Map<Iterable<K>,V> newMap() {
-      return new TrieMap<K,V>();
+      return new TrieMap<>();
     }
 
     @Override
     public Map<Iterable<K>,V> newMap(int initCapacity) {
-      return new TrieMap<K,V>(initCapacity);
+      return new TrieMap<>(initCapacity);
     }
 
     @Override
     public Set<Iterable<K>> newSet() {
-      return Collections.newSetFromMap(new TrieMap<K,Boolean>());
+      return Collections.newSetFromMap(new TrieMap<>());
+    }
+
+    @Override
+    public Set<Iterable<K>> newSet(Collection<Iterable<K>> init) {
+      Set<Iterable<K>> set = Collections.newSetFromMap(new TrieMap<>());
+      init.addAll(init);
+      return set;
     }
 
     @Override

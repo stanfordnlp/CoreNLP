@@ -15,7 +15,7 @@ import java.util.List;
 public class OrderedCombinationTreeNormalizer extends TreeNormalizer {
   private static final long serialVersionUID = 326L;
   
-  private List<TreeNormalizer> tns = new ArrayList<TreeNormalizer>();
+  private List<TreeNormalizer> tns = new ArrayList<>();
   
   public OrderedCombinationTreeNormalizer() {
   }

@@ -49,7 +49,7 @@ public abstract class PhraseScorer<E extends Pattern> {
     this.constVars = constvar;
   }
 
-  Counter<CandidatePhrase> learnedScores = new ClassicCounter<CandidatePhrase>();
+  Counter<CandidatePhrase> learnedScores = new ClassicCounter<>();
 
   abstract Counter<CandidatePhrase> scorePhrases(String label, TwoDimensionalCounter<CandidatePhrase, E> terms,
       TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted,
@@ -69,7 +69,7 @@ public abstract class PhraseScorer<E extends Pattern> {
     } else {
       double total = 0;
 
-      Set<E> rem = new HashSet<E>();
+      Set<E> rem = new HashSet<>();
       for (Entry<E, Double> en2 : patsThatExtractedThis.entrySet()) {
         double weight = 1.0;
         if (usePatternWeights) {
@@ -90,10 +90,13 @@ public abstract class PhraseScorer<E extends Pattern> {
   }
 
   public static double getGoogleNgramScore(CandidatePhrase g) {
-    double count = GoogleNGramsSQLBacked.getCount(g.getPhrase());
+    double count = GoogleNGramsSQLBacked.getCount(g.getPhrase().toLowerCase()) + GoogleNGramsSQLBacked.getCount(g.getPhrase());
     if (count != -1) {
-      assert (Data.rawFreq.containsKey(g));
-      return (1 + Data.rawFreq.getCount(g)
+      if(!Data.rawFreq.containsKey(g))
+        //returning 1 because usually lower this tf-idf score the better. if we don't have raw freq info, give it a bad score
+        return 1;
+      else
+        return (1 + Data.rawFreq.getCount(g)
           * Math.sqrt(Data.ratioGoogleNgramFreqWithDataFreq))
           / count;
     }
@@ -125,6 +128,9 @@ public abstract class PhraseScorer<E extends Pattern> {
 
   public double getDistSimWtScore(String ph, String label) {
     Integer num = constVars.getWordClassClusters().get(ph);
+    if(num == null){
+      num = constVars.getWordClassClusters().get(ph.toLowerCase());
+    }
     if (num != null && constVars.distSimWeights.get(label).containsKey(num)) {
       return constVars.distSimWeights.get(label).getCount(num);
     } else {
@@ -138,6 +144,9 @@ public abstract class PhraseScorer<E extends Pattern> {
       for (String w : t) {
         double score = OOVExternalFeatWt;
         Integer numw = constVars.getWordClassClusters().get(w);
+        if(num == null){
+          num = constVars.getWordClassClusters().get(w.toLowerCase());
+        }
         if (numw != null
             && constVars.distSimWeights.get(label).containsKey(numw))
           score = constVars.distSimWeights.get(label).getCount(numw);
@@ -152,12 +161,17 @@ public abstract class PhraseScorer<E extends Pattern> {
     }
   }
 
-  public double getWordShapeScore(String word, String label){
+  public String wordShape(String word){
     String wordShape = constVars.getWordShapeCache().get(word);
     if(wordShape == null){
       wordShape = WordShapeClassifier.wordShape(word, constVars.wordShaper);
       constVars.getWordShapeCache().put(word, wordShape);
     }
+    return wordShape;
+  }
+
+  public double getWordShapeScore(String word, String label){
+    String wordShape = wordShape(word);
     double thislabel = 0, alllabels =0;
     for(Entry<String, Counter<String>> en: constVars.getWordShapesForLabels().entrySet()){
       if(en.getKey().equals(label))

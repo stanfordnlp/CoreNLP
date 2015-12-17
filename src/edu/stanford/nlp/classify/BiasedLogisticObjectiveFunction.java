@@ -37,8 +37,8 @@ public class BiasedLogisticObjectiveFunction extends AbstractCachingDiffFunction
       int[] features = data[d];
       double sum = 0;
 
-      for (int f = 0; f < features.length; f++) {
-        sum += x[features[f]];
+      for (int feature1 : features) {
+        sum += x[feature1];
       }
 
       double expSum, derivativeIncrement;
@@ -65,8 +65,8 @@ public class BiasedLogisticObjectiveFunction extends AbstractCachingDiffFunction
         derivativeIncrement = -(g*(1-g)*(1-2*probCorrect)) / (e);
       }
 
-      for (int f = 0; f < features.length; f++) {
-        derivative[features[f]] += derivativeIncrement;
+      for (int feature : features) {
+        derivative[feature] += derivativeIncrement;
       }
     }
 
@@ -83,8 +83,8 @@ public class BiasedLogisticObjectiveFunction extends AbstractCachingDiffFunction
       double[] values = dataValues[d];
       double sum = 0;
 
-      for (int f = 0; f < features.length; f++) {
-        sum += x[features[f]]*values[features[f]];
+      for (int feature1 : features) {
+        sum += x[feature1] * values[feature1];
       }
 
       double expSum, derivativeIncrement;
@@ -104,8 +104,8 @@ public class BiasedLogisticObjectiveFunction extends AbstractCachingDiffFunction
         derivativeIncrement *= dataweights[d];
       }
 
-      for (int f = 0; f < features.length; f++) {
-        derivative[features[f]] += values[features[f]]*derivativeIncrement;
+      for (int feature : features) {
+        derivative[feature] += values[feature] * derivativeIncrement;
       }
     }
 

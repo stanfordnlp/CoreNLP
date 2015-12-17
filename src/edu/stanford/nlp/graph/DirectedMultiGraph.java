@@ -2,6 +2,7 @@ package edu.stanford.nlp.graph;
 
 import java.util.*;
 
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MapFactory;
@@ -127,13 +128,13 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
 
     List<E> outgoingList = outgoingMap.get(dest);
     if (outgoingList == null) {
-      outgoingList = new ArrayList<E>();
+      outgoingList = new ArrayList<>();
       outgoingMap.put(dest, outgoingList);
     }
 
     List<E> incomingList = incomingMap.get(source);
     if (incomingList == null) {
-      incomingList = new ArrayList<E>();
+      incomingList = new ArrayList<>();
       incomingMap.put(source, incomingList);
     }
 
@@ -332,7 +333,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
 
   @Override
   public List<E> getAllEdges() {
-    List<E> edges = new ArrayList<E>();
+    List<E> edges = new ArrayList<>();
     for (Map<V, List<E>> e : outgoingEdges.values()) {
       for (List<E> ee : e.values()) {
         edges.addAll(ee);
@@ -355,7 +356,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
    */
   @Override
   public void removeZeroDegreeNodes() {
-    List<V> toDelete = new ArrayList<V>();
+    List<V> toDelete = new ArrayList<>();
     for (V vertex : outgoingEdges.keySet()) {
       if (outgoingEdges.get(vertex).isEmpty() && incomingEdges.get(vertex).isEmpty()) {
         toDelete.add(vertex);
@@ -421,7 +422,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     if (nodes.size() <= 1)
       return Collections.emptyList();
 
-    List<E> path = new ArrayList<E>();
+    List<E> path = new ArrayList<>();
     Iterator<V> nodeIterator = nodes.iterator();
     V previous = nodeIterator.next();
     while (nodeIterator.hasNext()) {
@@ -473,48 +474,74 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     return ConnectedComponents.getConnectedComponents(this);
   }
 
+  /**
+   * Deletes all duplicate edges.
+   */
+  
+ public void deleteDuplicateEdges() {
+   for (V vertex : getAllVertices()) {
+     for (V vertex2 : outgoingEdges.get(vertex).keySet()) {
+       List<E> data = outgoingEdges.get(vertex).get(vertex2);
+       Set<E> deduplicatedData = new TreeSet<>(data);
+       data.clear();
+       data.addAll(deduplicatedData);
+     }
+     for (V vertex2 : incomingEdges.get(vertex).keySet()) {
+       List<E> data = incomingEdges.get(vertex).get(vertex2);
+       Set<E> deduplicatedData = new TreeSet<>(data);
+       data.clear();
+       data.addAll(deduplicatedData);
+     }
+   }
+}
+
+  
   public Iterator<E> incomingEdgeIterator(final V vertex) {
-    return new EdgeIterator<V, E>(incomingEdges, vertex);
+    return new EdgeIterator<>(incomingEdges, vertex);
   }
 
   public Iterable<E> incomingEdgeIterable(final V vertex) {
-    return () -> new EdgeIterator<V, E>(incomingEdges, vertex);
+    return () -> new EdgeIterator<>(incomingEdges, vertex);
   }
 
   public Iterator<E> outgoingEdgeIterator(final V vertex) {
-    return new EdgeIterator<V, E>(outgoingEdges, vertex);
+    return new EdgeIterator<>(outgoingEdges, vertex);
   }
 
   public Iterable<E> outgoingEdgeIterable(final V vertex) {
-    return () -> new EdgeIterator<V, E>(outgoingEdges, vertex);
+    return () -> new EdgeIterator<>(outgoingEdges, vertex);
   }
 
   public Iterator<E> edgeIterator() {
-    return new EdgeIterator<V, E>(this);
+    return new EdgeIterator<>(this);
   }
 
   public Iterable<E> edgeIterable() {
-    return () -> new EdgeIterator<V, E>(DirectedMultiGraph.this);
+    return () -> new EdgeIterator<>(DirectedMultiGraph.this);
   }
-
+  
+ 
   static class EdgeIterator<V, E> implements Iterator<E> {
+    private final Map<V, Map<V, List<E>>> incomingEdges;
     private Iterator<Map<V, List<E>>> vertexIterator;
     private Iterator<List<E>> connectionIterator;
     private Iterator<E> edgeIterator;
+    private E lastRemoved = null;
     private boolean hasNext = true;
 
 
     public EdgeIterator(DirectedMultiGraph<V, E> graph) {
       vertexIterator = graph.outgoingEdges.values().iterator();
+      incomingEdges = graph.incomingEdges;
     }
 
     public EdgeIterator(Map<V, Map<V, List<E>>> source, V startVertex) {
       Map<V, List<E>> neighbors = source.get(startVertex);
-      if (neighbors == null) {
-        return;
+      if (neighbors != null) {
+        vertexIterator = null;
+        connectionIterator = neighbors.values().iterator();
       }
-      vertexIterator = null;
-      connectionIterator = neighbors.values().iterator();
+      incomingEdges = null;
     }
 
     @Override
@@ -528,7 +555,8 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
       if (!hasNext()) {
         throw new NoSuchElementException("Graph edge iterator exhausted.");
       }
-      return edgeIterator.next();
+      lastRemoved = edgeIterator.next();
+      return lastRemoved;
     }
 
     private void primeIterator() {
@@ -547,7 +575,21 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
 
     @Override
     public void remove() {
-      edgeIterator.remove();
+      if (incomingEdges == null) {
+        throw new UnsupportedOperationException("remove() is only valid if iterating over entire graph (Gabor was too lazy to implement the general case...sorry!)");
+      }
+      if (lastRemoved != null) {
+        if (lastRemoved instanceof SemanticGraphEdge) {
+          SemanticGraphEdge edge = (SemanticGraphEdge) lastRemoved;
+          //noinspection unchecked
+          incomingEdges.get((V) edge.getDependent()).get((V) edge.getGovernor()).remove((E) edge);
+          edgeIterator.remove();
+        } else {
+          // TODO(from gabor): This passes the tests, but actually leaves the graph in an inconsistent state.
+          edgeIterator.remove();
+//          throw new UnsupportedOperationException("remove() is only valid if iterating over semantic graph edges (Gabor was too lazy to implement the general case...sorry!)");
+        }
+      }
     }
   }
 

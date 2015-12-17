@@ -26,6 +26,10 @@
         <include name="*.jar"/>
         <exclude name="javanlp*"/>
       </fileset>
+      <fileset dir="${basedir}/liblocal">
+        <include name="*.jar"/>
+        <exclude name="javanlp*"/>
+      </fileset>
     </path>
   </target>
 
@@ -124,6 +128,11 @@
         <compilerarg value="-Xmaxwarns"/>
         <compilerarg value="10000"/>  -->
     </javac>
+    <copy todir="${build.path}/edu/stanford/nlp/pipeline/demo">
+      <fileset dir="${source.path}/edu/stanford/nlp/pipeline/demo">
+        <exclude name="**/*.java"/>
+      </fileset>
+    </copy>
   </target>
 
   <target name="test" depends="classpath,compile"
@@ -314,6 +323,48 @@
       <zipfileset file="${source.path}/edu/stanford/nlp/time/suservlet/calendarview.css"/>
       <zipfileset file="${source.path}/edu/stanford/nlp/time/suservlet/calendarview.js"/>
       <zipfileset file="${source.path}/edu/stanford/nlp/time/suservlet/prototype.js"/>
+    </war>
+  </target>
+  
+  <target name="openie.war" depends="compile,jar"
+          description="build the openie webapp">
+    <war destfile="openie.war"
+         webxml="${source.path}/edu/stanford/nlp/naturalli/demo/web.xml">
+      <lib dir=".">
+        <include name="javanlp-core.jar"/>
+      </lib>
+      <zipfileset prefix="WEB-INF/data"
+                  file="/u/nlp/data/pos-tagger/distrib/english-left3words-distsim.tagger"/>
+      <zipfileset prefix="WEB-INF/data"
+                  file="${source.path}/edu/stanford/nlp/time/rules/*"/>
+      <zipfileset prefix="WEB-INF/data"
+                    file="${source.path}/edu/stanford/nlp/time/holidays/*"/>
+      <zipfileset prefix="WEB-INF/data"
+                  file="/u/nlp/data/ner/goodClassifiers/english.all.3class.distsim.crf.ser.gz"/>
+      <zipfileset prefix="WEB-INF/data"
+                  file="/u/nlp/data/ner/goodClassifiers/english.conll.4class.distsim.crf.ser.gz"/>
+      <zipfileset prefix="WEB-INF/data"
+                  file="/u/nlp/data/ner/goodClassifiers/english.muc.7class.distsim.crf.ser.gz"/>
+      <zipfileset prefix="WEB-INF/data"
+                  file="/u/nlp/data/depparser/nn/distrib/english_SD.gz"/>
+      <zipfileset prefix="WEB-INF/data"
+                  file="/u/nlp/data/lexparser/englishPCFG.ser.gz"/>
+      <zipfileset prefix="WEB-INF/data"
+                   file="/home/gabor/workspace/naturalli/etc/clauseSplitterModel.ser.gz"/>
+      <zipfileset prefix="WEB-INF/data"
+                   file="/home/gabor/workspace/naturalli/etc/pp.tab.gz"/>
+      <zipfileset prefix="WEB-INF/data"
+                   file="/home/gabor/workspace/naturalli/etc/obj.tab.gz"/>
+      <zipfileset prefix="WEB-INF/data"
+                   file="/home/gabor/workspace/naturalli/etc/privative.tab.gz"/>
+      <zipfileset prefix="WEB-INF/data"
+                   file="/home/gabor/workspace/naturalli/etc/subj_obj_pp.tab.gz"/>
+      <zipfileset prefix="WEB-INF/data"
+                   file="/home/gabor/workspace/naturalli/etc/subj_pp_obj.tab.gz"/>
+      <zipfileset prefix="WEB-INF/data"
+                   file="/home/gabor/workspace/naturalli/etc/subj_pp_pp.tab.gz"/>
+      <zipfileset prefix="WEB-INF/data"
+                   file="/home/gabor/workspace/naturalli/etc/subj_pp.tab.gz"/>
     </war>
   </target>
 

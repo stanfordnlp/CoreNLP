@@ -67,7 +67,7 @@ public class CRFClassifierNonlinear<IN extends CoreMap> extends CRFClassifier<IN
     int[][][] data = result.first();
     data = transformDocData(data);
 
-    return new Triple<int[][][], int[], double[][][]>(data, result.second(), result.third());
+    return new Triple<>(data, result.second(), result.third());
   }
 
   private int[][][] transformDocData(int[][][] docData) {
@@ -193,7 +193,7 @@ public class CRFClassifierNonlinear<IN extends CoreMap> extends CRFClassifier<IN
     if (flags.secondOrderNonLinear) {
       pw.printf("inputLayerWeights4Edge.length=\t%d%n", inputLayerWeights4Edge.length);
       for (double[] ws : inputLayerWeights4Edge) {
-        ArrayList<Double> list = new ArrayList<Double>();
+        ArrayList<Double> list = new ArrayList<>();
         for (double w : ws) {
           list.add(w);
         }
@@ -201,7 +201,7 @@ public class CRFClassifierNonlinear<IN extends CoreMap> extends CRFClassifier<IN
       }
       pw.printf("outputLayerWeights4Edge.length=\t%d%n", outputLayerWeights4Edge.length);
       for (double[] ws : outputLayerWeights4Edge) {
-        ArrayList<Double> list = new ArrayList<Double>();
+        ArrayList<Double> list = new ArrayList<>();
         for (double w : ws) {
           list.add(w);
         }
@@ -210,7 +210,7 @@ public class CRFClassifierNonlinear<IN extends CoreMap> extends CRFClassifier<IN
     } else {
       pw.printf("linearWeights.length=\t%d%n", linearWeights.length);
       for (double[] ws : linearWeights) {
-        ArrayList<Double> list = new ArrayList<Double>();
+        ArrayList<Double> list = new ArrayList<>();
         for (double w : ws) {
           list.add(w);
         }
@@ -219,7 +219,7 @@ public class CRFClassifierNonlinear<IN extends CoreMap> extends CRFClassifier<IN
     }
     pw.printf("inputLayerWeights.length=\t%d%n", inputLayerWeights.length);
     for (double[] ws : inputLayerWeights) {
-      ArrayList<Double> list = new ArrayList<Double>();
+      ArrayList<Double> list = new ArrayList<>();
       for (double w : ws) {
         list.add(w);
       }
@@ -227,7 +227,7 @@ public class CRFClassifierNonlinear<IN extends CoreMap> extends CRFClassifier<IN
     }
     pw.printf("outputLayerWeights.length=\t%d%n", outputLayerWeights.length);
     for (double[] ws : outputLayerWeights) {
-      ArrayList<Double> list = new ArrayList<Double>();
+      ArrayList<Double> list = new ArrayList<>();
       for (double w : ws) {
         list.add(w);
       }
@@ -245,7 +245,7 @@ public class CRFClassifierNonlinear<IN extends CoreMap> extends CRFClassifier<IN
       throw new RuntimeException("format error in nodeFeatureIndicesMap");
     }
     int nodeFeatureIndicesMapSize = Integer.parseInt(toks[1]);
-    nodeFeatureIndicesMap = new HashIndex<Integer>();
+    nodeFeatureIndicesMap = new HashIndex<>();
     int count = 0;
     while (count < nodeFeatureIndicesMapSize) {
       line = br.readLine();
@@ -264,7 +264,7 @@ public class CRFClassifierNonlinear<IN extends CoreMap> extends CRFClassifier<IN
       throw new RuntimeException("format error");
     }
     int edgeFeatureIndicesMapSize = Integer.parseInt(toks[1]);
-    edgeFeatureIndicesMap = new HashIndex<Integer>();
+    edgeFeatureIndicesMap = new HashIndex<>();
     count = 0;
     while (count < edgeFeatureIndicesMapSize) {
       line = br.readLine();

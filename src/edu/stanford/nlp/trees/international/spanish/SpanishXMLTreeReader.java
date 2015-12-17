@@ -293,7 +293,7 @@ public class SpanishXMLTreeReader implements TreeReader {
     } else if (isEllipticNode(eRoot)) {
       return buildEllipticNode(eRoot);
     } else {
-      List<Tree> kids = new ArrayList<Tree>();
+      List<Tree> kids = new ArrayList<>();
       for (Node childNode = eRoot.getFirstChild(); childNode != null;
            childNode = childNode.getNextSibling()) {
         if (childNode.getNodeType() != Node.ELEMENT_NODE) continue;
@@ -329,7 +329,7 @@ public class SpanishXMLTreeReader implements TreeReader {
     if (leafNode.label() instanceof HasLemma && lemma != null)
       ((HasLemma) leafNode.label()).setLemma(lemma);
 
-    List<Tree> kids = new ArrayList<Tree>();
+    List<Tree> kids = new ArrayList<>();
     kids.add(leafNode);
 
     Tree t = treeFactory.newTreeNode(posStr, kids);
@@ -345,7 +345,7 @@ public class SpanishXMLTreeReader implements TreeReader {
     Element eRoot = (Element) root;
     String constituentStr = eRoot.getNodeName();
 
-    List<Tree> kids = new ArrayList<Tree>();
+    List<Tree> kids = new ArrayList<>();
     Tree leafNode = treeFactory.newLeaf(SpanishTreeNormalizer.EMPTY_LEAF_VALUE);
     if (leafNode.label() instanceof HasWord)
       ((HasWord) leafNode.label()).setWord(SpanishTreeNormalizer.EMPTY_LEAF_VALUE);
@@ -487,9 +487,8 @@ public class SpanishXMLTreeReader implements TreeReader {
     final boolean detailedAnnotations = PropertiesUtils.getBool(options, "detailedAnnotations", false);
 
     String[] remainingArgs = options.getProperty("").split(" ");
-    List<File> fileList = new ArrayList<File>();
-    for(int i = 0; i < remainingArgs.length; i++)
-      fileList.add(new File(remainingArgs[i]));
+    List<File> fileList = new ArrayList<>();
+    for (String remainingArg : remainingArgs) fileList.add(new File(remainingArg));
 
     final SpanishXMLTreeReaderFactory trf = new SpanishXMLTreeReaderFactory(true, true, ner, detailedAnnotations);
     ExecutorService pool =

@@ -15,8 +15,8 @@ import java.util.*;
  */
 public class Beam<T> extends AbstractSet<T> {
 
-  protected int maxBeamSize;
-  protected Heap<T> elements;
+  protected final int maxBeamSize;
+  protected final Heap<T> elements;
 
   public int capacity() {
     return maxBeamSize;
@@ -33,7 +33,7 @@ public class Beam<T> extends AbstractSet<T> {
   }
 
   public List<T> asSortedList() {
-    LinkedList<T> list = new LinkedList<T>();
+    LinkedList<T> list = new LinkedList<>();
     for (Iterator<T> i = elements.iterator(); i.hasNext();) {
       list.addFirst(i.next());
     }
@@ -69,7 +69,7 @@ public class Beam<T> extends AbstractSet<T> {
   }
 
   public Beam(int maxBeamSize, Comparator<? super T> cmp) {
-    elements = new ArrayHeap<T>(cmp);
+    elements = new ArrayHeap<>(cmp);
     this.maxBeamSize = maxBeamSize;
   }
 

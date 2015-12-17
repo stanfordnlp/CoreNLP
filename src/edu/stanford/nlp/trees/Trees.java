@@ -39,6 +39,23 @@ public class Trees {
     }
   }
 
+  /**
+   * Returns the positional index of the left edge of a tree <i>t</i>
+   * within a given root, as defined by the size of the yield of all
+   * material preceding <i>t</i>.
+   * This method returns -1 if no path is found, rather than exceptioning.
+   *
+   * @see Trees#leftEdge(Tree, Tree)
+   */
+  public static int leftEdgeUnsafe(Tree t, Tree root) {
+    MutableInteger i = new MutableInteger(0);
+    if (leftEdge(t, root, i)) {
+      return i.intValue();
+    } else {
+      return -1;
+    }
+  }
+
   static boolean leftEdge(Tree t, Tree t1, MutableInteger i) {
     if (t == t1) {
       return true;
@@ -69,6 +86,24 @@ public class Trees {
     } else {
       throw new RuntimeException("Tree is not a descendant of root.");
 //      return root.yield().size() + 1;
+    }
+  }
+
+  /**
+   * Returns the positional index of the right edge of a tree
+   * <i>t</i> within a given root, as defined by the size of the yield
+   * of all material preceding <i>t</i> plus all the material
+   * contained in <i>t</i>.
+   * This method returns root.yield().size() + 1 if no path is found, rather than exceptioning.
+   *
+   * @see Trees#rightEdge(Tree, Tree)
+   */
+  public static int rightEdgeUnsafe(Tree t, Tree root) {
+    MutableInteger i = new MutableInteger(root.yield().size());
+    if (rightEdge(t, root, i)) {
+      return i.intValue();
+    } else {
+      return root.yield().size() + 1;
     }
   }
 
@@ -107,7 +142,7 @@ public class Trees {
    * returns the leaves in a Tree in the order that they're found.
    */
   public static List<Tree> leaves(Tree t) {
-    List<Tree> l = new ArrayList<Tree>();
+    List<Tree> l = new ArrayList<>();
     leaves(t, l);
     return l;
   }
@@ -123,7 +158,7 @@ public class Trees {
   }
 
   public static List<Tree> preTerminals(Tree t) {
-    List<Tree> l = new ArrayList<Tree>();
+    List<Tree> l = new ArrayList<>();
     preTerminals(t, l);
     return l;
   }
@@ -143,7 +178,7 @@ public class Trees {
    * returns the labels of the leaves in a Tree in the order that they're found.
    */
   public static List<Label> leafLabels(Tree t) {
-    List<Label> l = new ArrayList<Label>();
+    List<Label> l = new ArrayList<>();
     leafLabels(t, l);
     return l;
   }
@@ -163,7 +198,7 @@ public class Trees {
    * the labels are CoreLabels.
    */
   public static List<CoreLabel> taggedLeafLabels(Tree t) {
-    List<CoreLabel> l = new ArrayList<CoreLabel>();
+    List<CoreLabel> l = new ArrayList<>();
     taggedLeafLabels(t, l);
     return l;
   }
@@ -331,7 +366,7 @@ public class Trees {
    * returns the syntactic category of the tree as a list of the syntactic categories of the mother and the daughters
    */
   public static List<String> localTreeAsCatList(Tree t) {
-    List<String> l = new ArrayList<String>(t.children().length + 1);
+    List<String> l = new ArrayList<>(t.children().length + 1);
     l.add(t.label().value());
     for (int i = 0; i < t.children().length; i++) {
       l.add(t.children()[i].label().value());
@@ -461,7 +496,7 @@ public class Trees {
    *  @return The one phrasal level Tree
    */
   public static Tree toFlatTree(List<? extends HasWord> s, LabelFactory lf) {
-    List<Tree> daughters = new ArrayList<Tree>(s.size());
+    List<Tree> daughters = new ArrayList<>(s.size());
     for (HasWord word : s) {
       Tree wordNode = new LabeledScoredTreeNode(lf.newLabel(word.word()));
       if (word instanceof TaggedWord) {
@@ -614,7 +649,7 @@ public class Trees {
    * Get lowest common ancestor of all the nodes in the list with the tree rooted at root
    */
   public static Tree getLowestCommonAncestor(List<Tree> nodes, Tree root) {
-    List<List<Tree>> paths = new ArrayList<List<Tree>>();
+    List<List<Tree>> paths = new ArrayList<>();
     int min = Integer.MAX_VALUE;
     for (Tree t : nodes) {
       List<Tree> path = pathFromRoot(t, root);
@@ -673,7 +708,7 @@ public class Trees {
 
     //System.out.println(treeListToCatList(fromPath));
     //System.out.println(treeListToCatList(toPath));
-    List<String> totalPath = new ArrayList<String>();
+    List<String> totalPath = new ArrayList<>();
 
     for (int i = fromPath.size() - 1; i >= last; i--) {
       Tree t = fromPath.get(i);
@@ -711,7 +746,7 @@ public class Trees {
   public static List<Tree> pathFromRoot(Tree t, Tree root) {
     if (t == root) {
       //if (t.equals(root)) {
-      List<Tree> l = new ArrayList<Tree>(1);
+      List<Tree> l = new ArrayList<>(1);
       l.add(t);
       return l;
     } else if (root == null) {
@@ -729,7 +764,7 @@ public class Trees {
     if (t.isLeaf())
       return;
     Tree[] kids = t.children();
-    List<Tree> newKids = new ArrayList<Tree>(kids.length);
+    List<Tree> newKids = new ArrayList<>(kids.length);
     for (Tree kid : kids) {
       if (kid != node) {
         newKids.add(kid);

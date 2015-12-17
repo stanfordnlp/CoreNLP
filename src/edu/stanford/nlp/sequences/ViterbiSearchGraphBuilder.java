@@ -13,7 +13,7 @@ public class ViterbiSearchGraphBuilder {
 
   public static DFSA<String, Integer> getGraph(SequenceModel ts, Index<String> classIndex) {
 
-    DFSA<String, Integer> viterbiSearchGraph = new DFSA<String, Integer>(null);
+    DFSA<String, Integer> viterbiSearchGraph = new DFSA<>(null);
 
     // Set up tag options
     int length = ts.length();
@@ -37,18 +37,18 @@ public class ViterbiSearchGraphBuilder {
     DFSAState<String, Integer> startState = null, endState = null;
     if(viterbiSearchGraph != null) {
       int stateId = -1;
-      startState = new DFSAState<String, Integer>(++stateId, viterbiSearchGraph, 0.0);
+      startState = new DFSAState<>(++stateId, viterbiSearchGraph, 0.0);
       viterbiSearchGraph.setInitialState(startState);
       graphStates = new DFSAState[length][];
       for(int pos = 0; pos<length; ++pos) {
         //System.err.printf("%d states at pos %d\n",tags[pos].length,pos);
         graphStates[pos] = new DFSAState[tags[pos].length];
         for(int product = 0; product < tags[pos].length; ++product) {
-          graphStates[pos][product] = new DFSAState<String, Integer>(++stateId, viterbiSearchGraph);
+          graphStates[pos][product] = new DFSAState<>(++stateId, viterbiSearchGraph);
         }
       }
       // Accepting state:
-      endState = new DFSAState<String, Integer>(++stateId, viterbiSearchGraph, 0.0);
+      endState = new DFSAState<>(++stateId, viterbiSearchGraph, 0.0);
       endState.setAccepting(true);
     }
 
@@ -105,8 +105,8 @@ public class ViterbiSearchGraphBuilder {
           // all nodes in the first spot link to startState:
           int curTag = tags[pos][product % tagNum[pos]];
           //System.err.printf("pos=%d, product=%d, tag=%d score=%.3f\n",pos,product,curTag,windowScore[pos][product]);
-          DFSATransition<String, Integer> tr = 
-            new DFSATransition<String, Integer>("",startState,graphStates[pos][product],classIndex.get(curTag),"",-windowScore[pos][product]);
+          DFSATransition<String, Integer> tr =
+                  new DFSATransition<>("", startState, graphStates[pos][product], classIndex.get(curTag), "", -windowScore[pos][product]);
           startState.addTransition(tr);
         } else {
           int sharedProduct = product / tagNum[pos + rightWindow];
@@ -122,8 +122,8 @@ public class ViterbiSearchGraphBuilder {
             //  windowScore[pos][product]);
             DFSAState<String, Integer> sourceState = graphStates[pos-leftWindow][predTag];
             DFSAState<String, Integer> destState = (pos-leftWindow+1==graphStates.length) ? endState : graphStates[pos-leftWindow+1][curTag];
-            DFSATransition<String, Integer> tr = 
-              new DFSATransition<String, Integer>("",sourceState,destState,classIndex.get(curTag),"",-windowScore[pos][product]);
+            DFSATransition<String, Integer> tr =
+                    new DFSATransition<>("", sourceState, destState, classIndex.get(curTag), "", -windowScore[pos][product]);
             graphStates[pos-leftWindow][predTag].addTransition(tr);
           }
         }

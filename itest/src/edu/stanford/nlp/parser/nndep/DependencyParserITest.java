@@ -12,9 +12,9 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.TypedDependency;
+import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import junit.framework.TestCase;
@@ -43,6 +43,20 @@ public class DependencyParserITest extends TestCase {
     double las = parser.testCoNLL("/u/nlp/data/depparser/nn/data/dependency_treebanks/PTB/Stanford_3_3_0/dev.conll", null);
     assertEquals(String.format("English SD LAS should be %.2f but was %.2f",
             EnglishSdLas, las), EnglishSdLas, las, 1e-4);
+  }
+
+  // Lower because we're evaluating on PTB + extraDevTest, not just PTB
+  private static final double EnglishUdLas = 88.72648417258083;
+
+  /**
+   * Test that the NN dependency parser performance doesn't change.
+   */
+  public void testDependencyParserEnglishUD() {
+    DependencyParser parser = new DependencyParser();
+    parser.loadModelFile("/u/nlp/data/depparser/nn/distrib-2015-04-16/english_UD.gz");
+    double las = parser.testCoNLL("/u/nlp/data/depparser/nn/data/dependency_treebanks/UD-converted/dev.conll", null);
+    assertEquals(String.format("English UD LAS should be %.2f but was %.2f",
+        EnglishUdLas, las), EnglishUdLas, las, 1e-4);
   }
 
   private static final double EnglishConll2008Las = 90.97206578058122;
@@ -89,7 +103,7 @@ public class DependencyParserITest extends TestCase {
                                             SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
     Collection<TypedDependency> dependencies = ccProcessed.typedDependencies();
 
-    GrammaticalRelation expected = EnglishGrammaticalRelations.getConj("and");
+    GrammaticalRelation expected = UniversalEnglishGrammaticalRelations.getConj("and");
     assertThat(dependencies.stream().map(TypedDependency::reln).collect(toList()),
             hasItem(expected));
   }

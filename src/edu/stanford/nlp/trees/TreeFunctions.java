@@ -45,7 +45,7 @@ public class TreeFunctions {
         return tf.newTreeNode(new StringLabel(t.label().value()), Collections.singletonList(helper(t.children()[0])));
       }
       int numKids = t.numChildren();
-      List<Tree> children = new ArrayList<Tree>(numKids);
+      List<Tree> children = new ArrayList<>(numKids);
       for (int k = 0; k < numKids; k++) {
         children.add(helper(t.children()[k]));
       }
@@ -84,7 +84,7 @@ public class TreeFunctions {
         return tf.newTreeNode(t.label().value(), Collections.singletonList(helper(t.children()[0])));
       } else {
         int numKids = t.numChildren();
-        List<Tree> children = new ArrayList<Tree>(numKids);
+        List<Tree> children = new ArrayList<>(numKids);
         for (int k = 0; k < numKids; k++) {
           children.add(helper(t.children()[k]));
         }
@@ -128,7 +128,7 @@ public class TreeFunctions {
                          Collections.singletonList(apply(t.children()[0])));
       } else {
         int numKids = t.numChildren();
-        List<Tree> children = new ArrayList<Tree>(numKids);
+        List<Tree> children = new ArrayList<>(numKids);
         for (int k = 0; k < numKids; k++) {
           children.add(apply(t.children()[k]));
         }

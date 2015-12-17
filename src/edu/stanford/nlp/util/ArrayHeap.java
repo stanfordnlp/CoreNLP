@@ -36,16 +36,16 @@ public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E> {
    * <code>indexToEntry</code> maps linear array locations (not
    * priorities) to heap entries.
    */
-  private ArrayList<HeapEntry<E>> indexToEntry;
+  private final ArrayList<HeapEntry<E>> indexToEntry;
   /**
    * <code>objectToEntry</code> maps heap objects to their heap
    * entries.
    */
-  private Map<E,HeapEntry<E>> objectToEntry;
+  private final Map<E,HeapEntry<E>> objectToEntry;
   /**
    * <code>cmp</code> is the comparator passed on construction.
    */
-  private Comparator<? super E> cmp;
+  private final Comparator<? super E> cmp;
 
   // Primitive Heap Operations
 
@@ -98,7 +98,7 @@ public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E> {
   private HeapEntry<E> getEntry(E o) {
     HeapEntry<E> entry = objectToEntry.get(o);
     if (entry == null) {
-      entry = new HeapEntry<E>();
+      entry = new HeapEntry<>();
       entry.index = size();
       entry.object = o;
       indexToEntry.add(entry);
@@ -258,8 +258,8 @@ public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E> {
 
   @Override
   public Iterator<E> iterator() {
-    Heap<E> tempHeap = new ArrayHeap<E>(cmp, size());
-    List<E> tempList = new ArrayList<E>(size());
+    Heap<E> tempHeap = new ArrayHeap<>(cmp, size());
+    List<E> tempList = new ArrayList<>(size());
     for (E obj : objectToEntry.keySet()) {
       tempHeap.add(obj);
     }
@@ -308,18 +308,18 @@ public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E> {
    */
   public ArrayHeap(Comparator<? super E> cmp) {
     this.cmp = cmp;
-    indexToEntry = new ArrayList<HeapEntry<E>>();
+    indexToEntry = new ArrayList<>();
     objectToEntry = Generics.newHashMap();
   }
 
   public ArrayHeap(Comparator<? super E> cmp, int initCapacity) {
     this.cmp = cmp;
-    indexToEntry = new ArrayList<HeapEntry<E>>(initCapacity);
+    indexToEntry = new ArrayList<>(initCapacity);
     objectToEntry = Generics.newHashMap(initCapacity);
   }
 
   public List<E> asList() {
-    return new LinkedList<E>(this);
+    return new LinkedList<>(this);
   }
 
   /**
@@ -328,7 +328,7 @@ public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E> {
    */
   @Override
   public String toString() {
-    ArrayList<E> result = new ArrayList<E>();
+    ArrayList<E> result = new ArrayList<>();
     for(E key : objectToEntry.keySet())
       result.add(key);
     Collections.sort(result,cmp);

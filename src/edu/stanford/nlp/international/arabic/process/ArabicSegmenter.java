@@ -2,13 +2,10 @@ package edu.stanford.nlp.international.arabic.process;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.Serializable;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -50,7 +47,7 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
  *
  * @author Spence Green
  */
-public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeProcessor<String,String> {
+public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<String,String> /* Serializable */ {
 
   private static final long serialVersionUID = -4791848633597417788L;
 
@@ -148,7 +145,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     props.remove(optLocalFeaturesOnly);
 
     flags = new SeqClassifierFlags(props);
-    classifier = new CRFClassifier<CoreLabel>(flags);
+    classifier = new CRFClassifier<>(flags);
   }
 
   /**
@@ -328,8 +325,8 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
       }
     }
 
-    Counter<String> labelTotal = new ClassicCounter<String>();
-    Counter<String> labelCorrect = new ClassicCounter<String>();
+    Counter<String> labelTotal = new ClassicCounter<>();
+    Counter<String> labelCorrect = new ClassicCounter<>();
     int total = 0;
     int correct = 0;
     for (List<CoreLabel> line : lines) {
@@ -410,14 +407,14 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     }
   }
 
-  private String tedEvalSanitize(String str) {
+  private static String tedEvalSanitize(String str) {
     return str.replaceAll("\\(", "#lp#").replaceAll("\\)", "#rp#");
   }
 
   /**
-   * Evaluate P/R/F1 when the input is raw text
+   * Evaluate P/R/F1 when the input is raw text.
    */
-  private void evaluateRawText(PrintWriter pwOut) {
+  private static void evaluateRawText(PrintWriter pwOut) {
     // TODO(spenceg): Evaluate raw input w.r.t. a reference that might have different numbers
     // of characters per sentence. Need to implement a monotonic sequence alignment algorithm
     // to align the two character strings.
@@ -431,7 +428,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   }
 
   public void loadSegmenter(String filename, Properties p) {
-    classifier = new CRFClassifier<CoreLabel>(p);
+    classifier = new CRFClassifier<>(p);
     try {
       classifier.loadClassifier(new File(filename), p);
     } catch (ClassCastException e) {
@@ -528,9 +525,8 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
 
       } else {
         BufferedReader br = (segmenter.flags.textFile == null) ?
-            new BufferedReader(new InputStreamReader(System.in)) :
-              new BufferedReader(new InputStreamReader(new FileInputStream(segmenter.flags.textFile),
-                  segmenter.flags.inputEncoding));
+            IOUtils.readerFromStdin() :
+                IOUtils.readerFromString(segmenter.flags.textFile, segmenter.flags.inputEncoding);
 
         double charsPerSec = decode(segmenter, br, pwOut, nThreads);
         IOUtils.closeIgnoringExceptions(br);
@@ -539,7 +535,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
 
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
-    } catch (FileNotFoundException e) {
+    } catch (IOException e) {
       System.err.printf("%s: Could not open %s%n", ArabicSegmenter.class.getName(), segmenter.flags.textFile);
     }
   }
@@ -559,7 +555,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     long nChars = 0;
     final long startTime = System.nanoTime();
     if (nThreads > 1) {
-      MulticoreWrapper<String,String> wrapper = new MulticoreWrapper<String,String>(nThreads, segmenter);
+      MulticoreWrapper<String,String> wrapper = new MulticoreWrapper<>(nThreads, segmenter);
       try {
         for (String line; (line = br.readLine()) != null;) {
           nChars += line.length();

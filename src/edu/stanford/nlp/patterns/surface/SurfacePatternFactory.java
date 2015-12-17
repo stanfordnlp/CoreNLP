@@ -28,6 +28,12 @@ public class SurfacePatternFactory extends PatternFactory {
   public static boolean usePOS4Pattern = true;
 
   /**
+   * Use first two letters of the POS tag
+   */
+  @Execution.Option(name="useCoarsePOS")
+  public static boolean useCoarsePOS = true;
+
+  /**
    * Add patterns without POS restriction as well: One of this and
    * <code>usePOS4Pattern</code> has to be true.
    */
@@ -96,8 +102,10 @@ public class SurfacePatternFactory extends PatternFactory {
   static Token fw, sw;
 
   public static void setUp(Properties props){
+    Execution.fillOptions(PatternFactory.class, props);
     Execution.fillOptions(SurfacePatternFactory.class, props);
     Execution.fillOptions(SurfacePattern.class, props);
+
     if (!addPatWithoutPOS && !usePOS4Pattern) {
       throw new RuntimeException(
         "addPatWithoutPOS and usePOS4Pattern both cannot be false ");
@@ -119,20 +127,23 @@ public class SurfacePatternFactory extends PatternFactory {
   public static Set<SurfacePattern> getContext(List<CoreLabel> sent, int i, Set<CandidatePhrase> stopWords) {
 
 
-    Set<SurfacePattern> prevpatterns = new HashSet<SurfacePattern>();
-    Set<SurfacePattern> nextpatterns = new HashSet<SurfacePattern>();
-    Set<SurfacePattern> prevnextpatterns = new HashSet<SurfacePattern>();
+    Set<SurfacePattern> prevpatterns = new HashSet<>();
+    Set<SurfacePattern> nextpatterns = new HashSet<>();
+    Set<SurfacePattern> prevnextpatterns = new HashSet<>();
     CoreLabel token = sent.get(i);
     String tag = null;
     if (usePOS4Pattern) {
       String fulltag = token.tag();
-      tag = fulltag.substring(0, Math.min(fulltag.length(), 2));
+      if(useCoarsePOS)
+        tag = fulltag.substring(0, Math.min(fulltag.length(), 2));
+      else
+        tag = fulltag;
     }
     String nerTag = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
     for (int maxWin = 1; maxWin <= maxWindow4Pattern; maxWin++) {
-      List<Token> previousTokens = new ArrayList<Token>();
-      List<String> originalPrev = new ArrayList<String>(), originalNext = new ArrayList<String>();
-      List<Token> nextTokens = new ArrayList<Token>();
+      List<Token> previousTokens = new ArrayList<>();
+      List<String> originalPrev = new ArrayList<>(), originalNext = new ArrayList<>();
+      List<Token> nextTokens = new ArrayList<>();
 
       int numStopWordsprev = 0, numStopWordsnext = 0;
       // int numPrevTokensSpecial = 0, numNextTokensSpecial = 0;
@@ -141,16 +152,17 @@ public class SurfacePatternFactory extends PatternFactory {
 
 
       PatternToken twithoutPOS = null;
+      //TODO: right now using numWordsCompoundMax.
       if (addPatWithoutPOS) {
         twithoutPOS = new PatternToken(tag, false,
-          numWordsCompound > 1, numWordsCompound,
+          numWordsCompoundMax > 1, numWordsCompoundMax,
           nerTag, useTargetNERRestriction, useTargetParserParentRestriction, token.get(CoreAnnotations.GrandparentAnnotation.class));
       }
 
       PatternToken twithPOS = null;
       if (usePOS4Pattern) {
         twithPOS = new PatternToken(tag, true,
-          numWordsCompound > 1, numWordsCompound,
+          numWordsCompoundMax > 1, numWordsCompoundMax,
           nerTag, useTargetNERRestriction, useTargetParserParentRestriction, token.get(CoreAnnotations.GrandparentAnnotation.class));
       }
 
@@ -292,8 +304,8 @@ public class SurfacePatternFactory extends PatternFactory {
 
         // prevContext = StringUtils.join(previousTokens, fw);
 
-        List<Token> prevContextList = new ArrayList<Token>();
-        List<String> prevOriginal = new ArrayList<String>();
+        List<Token> prevContextList = new ArrayList<>();
+        List<String> prevOriginal = new ArrayList<>();
         for (Token p : previousTokens) {
           prevContextList.add(p);
           if (!fw.isEmpty())
@@ -342,9 +354,9 @@ public class SurfacePatternFactory extends PatternFactory {
       if (nextTokens.size() > 0
         && (numNonStopWordsNext > 0 || numStopWordsnext > numMinStopWordsToAdd)) {
         // nextContext = StringUtils.join(nextTokens, fw);
-        List<Token> nextContextList = new ArrayList<Token>();
+        List<Token> nextContextList = new ArrayList<>();
 
-        List<String> nextOriginal = new ArrayList<String>();
+        List<String> nextOriginal = new ArrayList<>();
 
         if (!sw.isEmpty()) {
           nextContextList.add(sw);
@@ -435,7 +447,8 @@ public class SurfacePatternFactory extends PatternFactory {
 //    }
 
     for (Map.Entry<String, Class> e : ConstantsAndVariables.getGeneralizeClasses().entrySet()) {
-      assert tokenj.containsKey(e.getValue()) && tokenj.get(e.getValue()) != null: " Why does the token not have the class " + e.getValue() + " set? Existing classes " + tokenj.toString(CoreLabel.OutputFormat.ALL);
+      if(!tokenj.containsKey(e.getValue()) || tokenj.get(e.getValue()) == null)
+        throw new RuntimeException(" Why does the token not have the class " + e.getValue() + " set? Existing classes " + tokenj.toString(CoreLabel.OutputFormat.ALL));
 
 
       if (!tokenj.get(e.getValue()).equals(ConstantsAndVariables.backgroundSymbol)) {
@@ -468,8 +481,8 @@ public class SurfacePatternFactory extends PatternFactory {
       }
     }
 
-    return new Triple<Boolean, Token, String>(isLabeledO, strgeneric,
-      strOriginal);
+    return new Triple<>(isLabeledO, strgeneric,
+            strOriginal);
   }
 
   public static boolean isASCII(String text) {
@@ -483,7 +496,7 @@ public class SurfacePatternFactory extends PatternFactory {
   }
 
   public static Map<Integer, Set> getPatternsAroundTokens(DataInstance sent, Set<CandidatePhrase> stopWords) {
-    Map<Integer, Set> p = new HashMap<Integer, Set>();
+    Map<Integer, Set> p = new HashMap<>();
     List<CoreLabel> tokens = sent.getTokens();
     for (int i = 0; i < tokens.size(); i++) {
 //          p.put(

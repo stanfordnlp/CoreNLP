@@ -11,7 +11,7 @@ import java.util.Iterator;
  */
 public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 
-  private ArrayList<E> backer;
+  private final ArrayList<E> backer;
 
   /**
    * Constructs an ArraySet.
@@ -25,13 +25,14 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
    * @param initialSize initial size of the backing array.
    */
   public ArraySet(int initialSize) {
-    backer = new ArrayList<E>(initialSize);
+    backer = new ArrayList<>(initialSize);
   }
 
   /**
    * Constructs an ArraySet with the specified elements.
    * @param elements the elements to be put in the set.
    */
+  @SafeVarargs
   public ArraySet(E ... elements) {
     this(elements.length);
     for (E element : elements) {
@@ -70,4 +71,5 @@ public class ArraySet<E> extends AbstractSet<E> implements Serializable {
   }
 
   private static final long serialVersionUID = 1L;
+
 }

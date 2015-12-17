@@ -46,6 +46,14 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
 
 
   /**
+   * For languages where a Universal Dependency converter
+   * exists this variable determines whether the original
+   * or the Universal converter will be used.
+   */
+  protected boolean generateOriginalDependencies;
+
+
+  /**
    * Gives a handle to the TreebankLanguagePack.
    */
   public AbstractTreebankLanguagePack() {
@@ -580,7 +588,9 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    */
   @Override
   public GrammaticalStructureFactory grammaticalStructureFactory() {
-    throw new UnsupportedOperationException("No GrammaticalStructureFactory defined for " + getClass().getName());
+    throw new UnsupportedOperationException(
+            "No GrammaticalStructureFactory (typed dependencies) available for language/treebank " +
+                    getClass().getName());
   }
 
   /**
@@ -639,4 +649,15 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
   public MorphoFeatureSpecification morphFeatureSpec() {
     return null;
   }
+
+  @Override
+  public void setGenerateOriginalDependencies(boolean generateOriginalDependencies) {
+    this.generateOriginalDependencies = generateOriginalDependencies;
+  }
+
+  @Override
+  public boolean generateOriginalDependencies() {
+    return this.generateOriginalDependencies;
+  }
+
 }

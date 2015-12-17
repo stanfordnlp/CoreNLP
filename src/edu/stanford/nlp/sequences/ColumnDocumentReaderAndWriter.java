@@ -26,6 +26,7 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   private static final long serialVersionUID = 3806263423697973704L;
 
 //  private SeqClassifierFlags flags; // = null;
+  //map can be something like "word=0,tag=1,answer=2"
   private String[] map; // = null;
   private IteratorFromReaderFactory<List<CoreLabel>> factory;
 
@@ -68,7 +69,7 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
       if (num > 0 && num % 1000 == 0) { System.err.print("["+num+"]"); }
       num++;
 
-      List<CoreLabel> words = new ArrayList<CoreLabel>();
+      List<CoreLabel> words = new ArrayList<>();
 
       String[] lines = doc.split("\n");
 
