@@ -13,8 +13,8 @@ site_title: Stanford CoreNLP
 
 # variables
 
-#sidebar_tagline: designers
-#sidebar_version: version 3.0
+sidebar_tagline: CoreNLP
+sidebar_version: version 3.6
 project_file_name: doc
 
 port: 4001
