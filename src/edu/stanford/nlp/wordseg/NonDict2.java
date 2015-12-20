@@ -1,8 +1,5 @@
 package edu.stanford.nlp.wordseg;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 
 public class NonDict2  {
@@ -10,8 +7,6 @@ public class NonDict2  {
   //public String sighanCorporaDict = "/u/nlp/data/chinese-segmenter/";
   public String corporaDict = "/u/nlp/data/gale/segtool/stanford-seg/data/";
   private static CorpusDictionary cd = null;
-
-  private static Logger logger = LoggerFactory.getLogger(NonDict2.class);
 
   public NonDict2(SeqClassifierFlags flags) {
     if (cd == null) {
@@ -33,9 +28,9 @@ public class NonDict2  {
       // just output the msg...
       if (flags.useAs || flags.useHk || flags.useMsr) {
       } else if ( flags.usePk ) {
-        logger.info("INFO: flags.usePk=true | building NonDict2 from "+path);
+        System.err.println("INFO: flags.usePk=true | building NonDict2 from "+path);
       } else { // CTB
-        logger.info("INFO: flags.usePk=false | building NonDict2 from "+path);
+        System.err.println("INFO: flags.usePk=false | building NonDict2 from "+path);
       }
     }
   }

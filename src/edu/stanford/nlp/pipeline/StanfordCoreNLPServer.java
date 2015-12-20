@@ -34,11 +34,11 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  */
 public class StanfordCoreNLPServer implements Runnable {
   protected static int DEFAULT_PORT = 9000;
-  protected static int DEFAULT_TIMEOUT = 5;
+  protected static int DEFAULT_TIMEOUT = 5000;
 
   protected HttpServer server;
   protected final int serverPort;
-  protected final int timeoutSeconds;
+  protected final int timeoutMiliseconds;
   protected final FileHandler staticPageHandle;
   protected final String shutdownKey;
 
@@ -63,9 +63,15 @@ public class StanfordCoreNLPServer implements Runnable {
   private final ExecutorService corenlpExecutor = Executors.newFixedThreadPool(Execution.threads);
 
 
+  /**
+   * Create a new Stanford CoreNLP Server.
+   * @param port The port to host the server from.
+   * @param timeout The timeout (in milliseconds) for each command.
+   * @throws IOException Thrown from the underlying socket implementation.
+   */
   public StanfordCoreNLPServer(int port, int timeout) throws IOException {
     serverPort = port;
-    timeoutSeconds = timeout;
+    timeoutMiliseconds = timeout;
 
     defaultProps = new Properties();
     defaultProps.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, depparse, dcoref, natlog, openie");
@@ -359,7 +365,14 @@ public class StanfordCoreNLPServer implements Runnable {
           pipeline.annotate(ann);
           return ann;
         });
-        Annotation completedAnnotation = completedAnnotationFuture.get(timeoutSeconds, TimeUnit.SECONDS);
+        Annotation completedAnnotation;
+        try {
+          int timeoutMiliseconds = Integer.parseInt(props.getProperty("timeout",
+                                                Integer.toString(StanfordCoreNLPServer.this.timeoutMiliseconds)));
+          completedAnnotation = completedAnnotationFuture.get(timeoutMiliseconds, TimeUnit.SECONDS);
+        } catch (NumberFormatException e) {
+          completedAnnotation = completedAnnotationFuture.get(timeoutMiliseconds, TimeUnit.SECONDS);
+        }
 
         // Get output
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -696,7 +709,7 @@ public class StanfordCoreNLPServer implements Runnable {
     if(props.containsKey("timeout")) {
       timeout = Integer.parseInt(props.getProperty("timeout"));
     }
-    log("Starting server on port " + port + " with timeout of " + timeout + " seconds.");
+    log("Starting server on port " + port + " with timeout of " + timeout + " milliseconds.");
 
     // Run the server
     StanfordCoreNLPServer server = new StanfordCoreNLPServer(port, timeout);

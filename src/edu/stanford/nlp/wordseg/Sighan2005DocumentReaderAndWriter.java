@@ -26,12 +26,7 @@ import edu.stanford.nlp.sequences.LatticeWriter;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseUtils;
 import edu.stanford.nlp.util.Characters;
-
 import java.util.function.Function;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MutableInteger;
 import edu.stanford.nlp.util.StringUtils;
@@ -49,8 +44,6 @@ import edu.stanford.nlp.util.StringUtils;
 public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>, LatticeWriter<CoreLabel, String, Integer> /* Serializable */ {
 
   private static final long serialVersionUID = 3260295150250263237L;
-
-  private static Logger logger = LoggerFactory.getLogger(Sighan2005DocumentReaderAndWriter.class);
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_MORE = false;
@@ -124,7 +117,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
         return null;
       }
 
-      // logger.info("input: " + line);
+      // System.err.println("input: " + line);
 
       //Matcher tagMatcher = tagPattern.matcher(line);
       //line = tagMatcher.replaceAll("");
@@ -197,7 +190,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
         String nonspaceLine = nonspaceLineSB.toString();
         addDictionaryFeatures(cdict2, CoreAnnotations.D2_LBeginAnnotation.class, CoreAnnotations.D2_LMiddleAnnotation.class, CoreAnnotations.D2_LEndAnnotation.class, nonspaceLine, lwi);
       }
-      // logger.info("output: " + lwi.size());
+      // System.err.println("output: " + lwi.size());
       return lwi;
     }
   }
@@ -285,7 +278,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
       }
       lwi.get(i).set(lendFieldName, sb.toString());
 
-      //logger.info(lwi.get(i));
+      //System.err.println(lwi.get(i));
     }
   }
 
@@ -367,7 +360,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
         double transitionCost = transition.score();
         if (transitionCost < minCost) {
           if (predictSpace != null) {
-            logger.info(String.format("mincost (%s): %e -> %e%n", predictSpace, minCost, transitionCost));
+            System.err.printf("mincost (%s): %e -> %e%n", predictSpace, minCost, transitionCost);
             minCost = transitionCost;
             answerConstraint = predictSpace;
           }
@@ -379,19 +372,19 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
       DFSATransition<String, Integer> transition = tSource.transition(predictSpace);
       DFSAState<String, Integer> tDest = transition.target();
       DFSAState<String, Integer> newASource = aSource;
-      //logger.info(String.format("tsource=%s tdest=%s asource=%s pos=%d predictSpace=%s%n", tSource, tDest, newASource, pos, predictSpace));
+      //System.err.printf("tsource=%s tdest=%s asource=%s pos=%d predictSpace=%s%n", tSource, tDest, newASource, pos, predictSpace);
       StringBuilder newAnswer = new StringBuilder(answer.toString());
       int answerLen = newAnswer.length();
       String prevChr = (answerLen > 0) ? newAnswer.substring(answerLen-1) : null;
       double newCost = cost;
       // Ignore paths starting with zero:
       if(answerConstraint != null && !answerConstraint.equals(predictSpace)) {
-        logger.info(String.format("Skipping transition %s at pos 0.%n", predictSpace));
+        System.err.printf("Skipping transition %s at pos 0.%n", predictSpace);
         continue;
       }
       // Ignore paths not consistent with input segmentation:
       if(flags.keepAllWhitespaces && "0".equals(predictSpace) && "1".equals(origSpace)) {
-          logger.info(String.format("Skipping non-boundary at pos %d, since space in the input.%n",pos));
+          System.err.printf("Skipping non-boundary at pos %d, since space in the input.%n",pos);
           continue;
       }
       // Ignore paths adding segment boundaries between two latin characters, or between two digits:
@@ -400,13 +393,13 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
         char p = prevChr.charAt(0), c = curChr.charAt(0);
         if (ChineseStringUtils.isLetterASCII(p) &&
             ChineseStringUtils.isLetterASCII(c)) {
-          logger.info(String.format("Not hypothesizing a boundary at pos %d, since between two ASCII letters (%s and %s).%n",
-            pos,prevChr,curChr));
+          System.err.printf("Not hypothesizing a boundary at pos %d, since between two ASCII letters (%s and %s).%n",
+            pos,prevChr,curChr);
           continue;
         }
         if(ChineseUtils.isNumber(p) && ChineseUtils.isNumber(c)) {
-          logger.info(String.format("Not hypothesizing a boundary at pos %d, since between two numeral characters (%s and %s).%n",
-            pos,prevChr,curChr));
+          System.err.printf("Not hypothesizing a boundary at pos %d, since between two numeral characters (%s and %s).%n",
+            pos,prevChr,curChr);
           continue;
         }
       }
@@ -418,7 +411,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
             DFSAState<String, Integer> aDest = stateLinks.get(tSource);
             newASource.addTransition
               (new DFSATransition<>("", newASource, aDest, newAnswer.toString(), "", newCost));
-            //logger.info(String.format("new transition: asource=%s adest=%s edge=%s%n", newASource, aDest, newAnswer));
+            //System.err.printf("new transition: asource=%s adest=%s edge=%s%n", newASource, aDest, newAnswer);
             continue;
           }
           // If answer destination node not visited before, create it + new edge:
@@ -426,8 +419,8 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
           DFSAState<String, Integer> aDest = new DFSAState<>(nodeId.intValue(), answerLattice, 0.0);
           stateLinks.put(tSource,aDest);
           newASource.addTransition(new DFSATransition<>("", newASource, aDest, newAnswer.toString(), "", newCost));
-          //logger.info(String.format("new edge: adest=%s%n", newASource, aDest, newAnswer));
-          //logger.info(String.format("new transition: asource=%s adest=%s edge=%s%n%n%n", newASource, aDest, newAnswer));
+          //System.err.printf("new edge: adest=%s%n", newASource, aDest, newAnswer);
+          //System.err.printf("new transition: asource=%s adest=%s edge=%s%n%n%n", newASource, aDest, newAnswer);
           // Reached an accepting state:
           if(tSource.isAccepting()) {
             aDest.setAccepting(true);
