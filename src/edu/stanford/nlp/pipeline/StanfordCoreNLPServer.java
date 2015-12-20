@@ -38,7 +38,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
   protected HttpServer server;
   protected final int serverPort;
-  protected final int timeoutMiliseconds;
+  protected final int timeoutMilliseconds;
   protected final FileHandler staticPageHandle;
   protected final String shutdownKey;
 
@@ -71,7 +71,7 @@ public class StanfordCoreNLPServer implements Runnable {
    */
   public StanfordCoreNLPServer(int port, int timeout) throws IOException {
     serverPort = port;
-    timeoutMiliseconds = timeout;
+    timeoutMilliseconds = timeout;
 
     defaultProps = new Properties();
     defaultProps.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, depparse, dcoref, natlog, openie");
@@ -367,11 +367,11 @@ public class StanfordCoreNLPServer implements Runnable {
         });
         Annotation completedAnnotation;
         try {
-          int timeoutMiliseconds = Integer.parseInt(props.getProperty("timeout",
-                                                Integer.toString(StanfordCoreNLPServer.this.timeoutMiliseconds)));
-          completedAnnotation = completedAnnotationFuture.get(timeoutMiliseconds, TimeUnit.SECONDS);
+          int timeoutMilliseconds = Integer.parseInt(props.getProperty("timeout",
+                                                     Integer.toString(StanfordCoreNLPServer.this.timeoutMilliseconds)));
+          completedAnnotation = completedAnnotationFuture.get(timeoutMilliseconds, TimeUnit.MILLISECONDS);
         } catch (NumberFormatException e) {
-          completedAnnotation = completedAnnotationFuture.get(timeoutMiliseconds, TimeUnit.SECONDS);
+          completedAnnotation = completedAnnotationFuture.get(timeoutMilliseconds, TimeUnit.MILLISECONDS);
         }
 
         // Get output
