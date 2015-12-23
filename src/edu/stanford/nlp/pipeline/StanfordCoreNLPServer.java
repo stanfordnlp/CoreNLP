@@ -358,10 +358,11 @@ public class StanfordCoreNLPServer implements Runnable {
         return;
       }
 
+      Future<Annotation> completedAnnotationFuture = null;
       try {
         // Annotate
         StanfordCoreNLP pipeline = mkStanfordCoreNLP(props);
-        Future<Annotation> completedAnnotationFuture = corenlpExecutor.submit(() -> {
+        completedAnnotationFuture = corenlpExecutor.submit(() -> {
           pipeline.annotate(ann);
           return ann;
         });
@@ -373,6 +374,7 @@ public class StanfordCoreNLPServer implements Runnable {
         } catch (NumberFormatException e) {
           completedAnnotation = completedAnnotationFuture.get(timeoutMilliseconds, TimeUnit.MILLISECONDS);
         }
+        completedAnnotationFuture = null;  // No longer any need for the future
 
         // Get output
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -386,12 +388,25 @@ public class StanfordCoreNLPServer implements Runnable {
         httpExchange.getResponseBody().write(response);
         httpExchange.close();
       } catch (TimeoutException e) {
+        // Print the stack trace for debugging
         e.printStackTrace();
+        // Return error message.
         respondError("CoreNLP request timed out", httpExchange);
+        // Cancel the future if it's alive
+        //noinspection ConstantConditions
+        if (completedAnnotationFuture != null) {
+          completedAnnotationFuture.cancel(true);
+        }
       } catch (Exception e) {
+        // Print the stack trace for debugging
         e.printStackTrace();
         // Return error message.
         respondError(e.getClass().getName() + ": " + e.getMessage(), httpExchange);
+        // Cancel the future if it's alive
+        //noinspection ConstantConditions
+        if (completedAnnotationFuture != null) {  // just in case...
+          completedAnnotationFuture.cancel(true);
+        }
       }
     }
 
