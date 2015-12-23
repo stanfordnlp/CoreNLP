@@ -403,7 +403,7 @@ public class StanfordCoreNLPServer implements Runnable {
         // Print the stack trace for debugging
         e.printStackTrace();
         // Return error message.
-        respondError("CoreNLP request timed out", httpExchange);
+        respondError("CoreNLP request timed out. Your document may be too long.", httpExchange);
         // Cancel the future if it's alive
         //noinspection ConstantConditions
         if (completedAnnotationFuture != null) {
