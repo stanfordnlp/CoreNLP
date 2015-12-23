@@ -18,6 +18,7 @@ import edu.stanford.nlp.util.*;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -370,6 +371,17 @@ public class StanfordCoreNLPServer implements Runnable {
         try {
           int timeoutMilliseconds = Integer.parseInt(props.getProperty("timeout",
                                                      Integer.toString(StanfordCoreNLPServer.this.timeoutMilliseconds)));
+          // Check for too long a timeout from an unauthorized source
+          if (timeoutMilliseconds > 10000) {
+            // If two conditions:
+            //   (1) The server is running on corenlp.run (i.e., corenlp.stanford.edu)
+            //   (2) The request is not coming from a *.stanford.edu" email address
+            // Then force the timeout to be 10 seconds
+            if ("corenlp.stanford.edu".equals(InetAddress.getLocalHost().getHostName()) &&
+                !httpExchange.getRemoteAddress().getHostName().toLowerCase().endsWith("stanford.edu")) {
+              timeoutMilliseconds = 10000;
+            }
+          }
           completedAnnotation = completedAnnotationFuture.get(timeoutMilliseconds, TimeUnit.MILLISECONDS);
         } catch (NumberFormatException e) {
           completedAnnotation = completedAnnotationFuture.get(StanfordCoreNLPServer.this.timeoutMilliseconds, TimeUnit.MILLISECONDS);
@@ -395,9 +407,7 @@ public class StanfordCoreNLPServer implements Runnable {
         // Cancel the future if it's alive
         //noinspection ConstantConditions
         if (completedAnnotationFuture != null) {
-          System.err.println("Cancelling future: " + completedAnnotationFuture);
           completedAnnotationFuture.cancel(true);
-          System.err.println("KILLED future: " + completedAnnotationFuture);
         }
       } catch (Exception e) {
         // Print the stack trace for debugging
@@ -407,9 +417,7 @@ public class StanfordCoreNLPServer implements Runnable {
         // Cancel the future if it's alive
         //noinspection ConstantConditions
         if (completedAnnotationFuture != null) {  // just in case...
-          System.err.println("Cancelling future: " + completedAnnotationFuture);
           completedAnnotationFuture.cancel(true);
-          System.err.println("KILLED future: " + completedAnnotationFuture);
         }
       }
     }
