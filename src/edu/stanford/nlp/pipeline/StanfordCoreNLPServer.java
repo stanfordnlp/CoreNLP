@@ -372,7 +372,7 @@ public class StanfordCoreNLPServer implements Runnable {
                                                      Integer.toString(StanfordCoreNLPServer.this.timeoutMilliseconds)));
           completedAnnotation = completedAnnotationFuture.get(timeoutMilliseconds, TimeUnit.MILLISECONDS);
         } catch (NumberFormatException e) {
-          completedAnnotation = completedAnnotationFuture.get(timeoutMilliseconds, TimeUnit.MILLISECONDS);
+          completedAnnotation = completedAnnotationFuture.get(StanfordCoreNLPServer.this.timeoutMilliseconds, TimeUnit.MILLISECONDS);
         }
         completedAnnotationFuture = null;  // No longer any need for the future
 
@@ -395,7 +395,9 @@ public class StanfordCoreNLPServer implements Runnable {
         // Cancel the future if it's alive
         //noinspection ConstantConditions
         if (completedAnnotationFuture != null) {
+          System.err.println("Cancelling future: " + completedAnnotationFuture);
           completedAnnotationFuture.cancel(true);
+          System.err.println("KILLED future: " + completedAnnotationFuture);
         }
       } catch (Exception e) {
         // Print the stack trace for debugging
@@ -405,7 +407,9 @@ public class StanfordCoreNLPServer implements Runnable {
         // Cancel the future if it's alive
         //noinspection ConstantConditions
         if (completedAnnotationFuture != null) {  // just in case...
+          System.err.println("Cancelling future: " + completedAnnotationFuture);
           completedAnnotationFuture.cancel(true);
+          System.err.println("KILLED future: " + completedAnnotationFuture);
         }
       }
     }

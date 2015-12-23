@@ -17,6 +17,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
 
 public class BestFirstCorefSystem extends StatisticalCorefSystem {
   private final Map<Pair<Boolean, Boolean>, Double> thresholds;
@@ -57,6 +58,9 @@ public class BestFirstCorefSystem extends StatisticalCorefSystem {
   public void runCoref(Document document) {
     Compressor<String> compressor = new Compressor<>();
     List<Mention> sortedMentions = StatisticalCorefUtils.getSortedMentions(document);
+    if (Thread.interrupted()) {  // Allow interrupting
+      throw new RuntimeInterruptedException();
+    }
     for (int i = 0; i < sortedMentions.size(); i++) {
       sortedMentions.get(i).mentionNum = i;
     }
@@ -66,12 +70,18 @@ public class BestFirstCorefSystem extends StatisticalCorefSystem {
     if (maxMentionDistance != Integer.MAX_VALUE) {
       Map<String, List<Mention>> wordToMentions = new HashMap<>();
       for (Mention m : document.predictedMentionsByID.values()) {
+        if (Thread.interrupted()) {  // Allow interrupting
+          throw new RuntimeInterruptedException();
+        }
         for (String word : getContentWords(m)) {
           wordToMentions.putIfAbsent(word, new ArrayList<>());
           wordToMentions.get(word).add(m);
         }
       }
       for (Mention m1 : document.predictedMentionsByID.values()) {
+        if (Thread.interrupted()) {  // Allow interrupting
+          throw new RuntimeInterruptedException();
+        }
         for (String word : getContentWords(m1)) {
           List<Mention> ms = wordToMentions.get(word);
           if (ms != null) {
@@ -89,6 +99,9 @@ public class BestFirstCorefSystem extends StatisticalCorefSystem {
     DocumentExamples examples = extractor.extract(0, document, pairs, compressor);
     Counter<Pair<Integer, Integer>> pairwiseScores = new ClassicCounter<>();
     for (Example mentionPair : examples.examples) {
+      if (Thread.interrupted()) {  // Allow interrupting
+        throw new RuntimeInterruptedException();
+      }
       pairwiseScores.incrementCount(new Pair<>(mentionPair.mentionId1, mentionPair.mentionId2),
           classifier.predict(mentionPair, examples.mentionFeatures, compressor));
     }
@@ -103,6 +116,9 @@ public class BestFirstCorefSystem extends StatisticalCorefSystem {
     for (Pair<Integer, Integer> pair : mentionPairs) {
       if (seenAnaphors.contains(pair.second)) {
         continue;
+      }
+      if (Thread.interrupted()) {  // Allow interrupting
+        throw new RuntimeInterruptedException();
       }
       seenAnaphors.add(pair.second);
       MentionType mt1 = document.predictedMentionsByID.get(pair.first).mentionType;

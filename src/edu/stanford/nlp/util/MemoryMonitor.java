@@ -270,7 +270,7 @@ public class MemoryMonitor {
           Thread.sleep(pollFrequency);
         } catch (InterruptedException e) {
           log();
-          break;
+          throw new RuntimeInterruptedException(e);
         }
       }
     }

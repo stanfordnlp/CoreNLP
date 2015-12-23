@@ -16,6 +16,7 @@ import edu.stanford.nlp.optimization.AbstractStochasticCachingDiffUpdateFunction
 import edu.stanford.nlp.optimization.StochasticCalculateMethods;
 import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.SystemUtils;
 
 
@@ -330,7 +331,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       try {
         latch.await();
       } catch (InterruptedException e) {
-        e.printStackTrace();
+        throw new RuntimeInterruptedException(e);
       }
 
       for (int i = 0; i < threads; i++) {
@@ -688,7 +689,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       try {
         latch.await();
       } catch (InterruptedException e) {
-        e.printStackTrace();
+        throw new RuntimeInterruptedException(e);
       }
 
       for (int i = 0; i < threads; i++) {
@@ -1009,7 +1010,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       try {
         latch.await();
       } catch (InterruptedException e) {
-        e.printStackTrace();
+        throw new RuntimeInterruptedException(e);
       }
 
       for (int i = 0; i < threads; i++) {
