@@ -39,6 +39,14 @@ including [the part-of-speech (POS) tagger](http://nlp.stanford.edu/software/tag
 Its analyses provide the foundational building blocks for
 higher-level and domain-specific text understanding applications.
 
+## Download
+
+Stanford CoreNLP can be downloaded via the link below. This will download a large (536 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks) (3) the libraries required to run CoreNLP, and (4) documentation / source code for the project.
+
+<div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-09.zip">Download CoreNLP 3.6.0</a> </div>
+
+For more information, see the [download page](download.html)
+
 ## Human languages supported
 
 The basic distribution provides model files for the analysis of **English**,
