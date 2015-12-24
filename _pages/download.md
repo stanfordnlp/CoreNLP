@@ -4,7 +4,7 @@ keywords: download
 permalink: '/download.html'
 ---
 
-<center> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-09.zip">Download CoreNLP 3.6.0</a> </center>
+<div style="text-align:center;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-09.zip">Download CoreNLP 3.6.0</a> </div>
 
 The full download, including machine learned models and required libraries is 536 MB.
 If you want to change the source code and recompile the files, see [these instructions](files/basic-compiling.txt).
