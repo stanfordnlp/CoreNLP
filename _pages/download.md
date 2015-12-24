@@ -4,10 +4,12 @@ keywords: download
 permalink: '/download.html'
 ---
 
+Stanford CoreNLP can be downloaded via the link below. This will download a large (536 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks) (3) the libraries required to run CoreNLP, and (4) documentation / source code for the project.
+
 <div style="text-align:center;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-09.zip">Download CoreNLP 3.6.0</a> </div>
 
-The full download, including machine learned models and required libraries is 536 MB.
 If you want to change the source code and recompile the files, see [these instructions](files/basic-compiling.txt).
+Previous releases can be found [on the release history page](history.html)
 
 **GitHub**: Here is the [Stanford CoreNLP GitHub site](https://github.com/stanfordnlp/CoreNLP).
 
