@@ -24,7 +24,7 @@ import java.util.Properties;
  * @originAPI http://stanfordnlp.github.io/CoreNLP/coref.html 
  * @modify_author zkli
  */
-public class CorefExample {
+public class HcorefChineseAPIExampleTest {
 	public static void main(String[] args) throws Exception {
 		long startTime=System.currentTimeMillis();
 		
