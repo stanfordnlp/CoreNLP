@@ -34,7 +34,7 @@ The rest of this document describes the API in more detail, describes a Java cli
 ## API Documentation
 The greatest strength of the server is the ability to make API calls against it. 
 
-> **NOTE**: Please do **not** make API calls against [corenlp.run](http://corenlp.run). It is not set up to handle a large volume of requests. Instructions for setting up your own server can be found in the [Dedicated Server](#Dedicated-Server) section.
+> **NOTE**: Please do **not** make API calls against [corenlp.run](http://corenlp.run). It is not set up to handle a large volume of requests. Instructions for setting up your own server can be found in the [Dedicated Server](#dedicated-server) section.
 
 There are three endpoints provided by the server, which we'll describe in more detail below. Each of them takes as input a series of `GET` parameters, as well as `POST` data consisting of the serialized document or raw text to be annotated. The endpoints are:
 
@@ -163,7 +163,7 @@ You can also run the client from the command line, and get an interface similar 
 java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLPClient -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file input.txt
 ```
 
-> **NOTE**: Again, please do **not** make API calls against `http://corenlp.run`. It is not set up to handle a large volume of requests. Instructions for setting up your own server can be found in the [Dedicated Server](#Dedicated-Server) section.
+> **NOTE**: Again, please do **not** make API calls against `http://corenlp.run`. It is not set up to handle a large volume of requests. Instructions for setting up your own server can be found in the [Dedicated Server](#dedicated-server) section.
 
 ## Administration
 This section describes how to administer the server, including starting and stopping the server, as well as setting it up as a startup task 
