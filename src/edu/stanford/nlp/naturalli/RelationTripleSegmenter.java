@@ -823,7 +823,10 @@ public class RelationTripleSegmenter {
     // sometimes not _really_ its own clause
     IndexedWord root = parse.getFirstRoot();
     if ( (root.lemma() != null && root.lemma().equalsIgnoreCase("be")) ||
-         (root.lemma() == null && (root.word().equalsIgnoreCase("is") || root.word().equalsIgnoreCase("are") || root.word().equalsIgnoreCase("were") || root.word().equalsIgnoreCase("be")))) {
+         (root.lemma() == null && ("is".equalsIgnoreCase(root.word()) ||
+                                   "are".equalsIgnoreCase(root.word()) ||
+                                   "were".equalsIgnoreCase(root.word()) ||
+                                   "be".equalsIgnoreCase(root.word())))) {
       // Check for the "there is" construction
       boolean foundThere = false;
       boolean tooMayArcs = false;  // an indicator for there being too much nonsense hanging off of the root

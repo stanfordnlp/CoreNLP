@@ -447,10 +447,9 @@ public class OpenIE implements Annotator {
   @SuppressWarnings("unchecked")
   public void annotateSentence(CoreMap sentence, Map<CoreLabel, List<CoreLabel>> canonicalMentionMap) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    if (tokens.size() < 2 ||
-        !sentence.containsKey(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class)) {
+    if (tokens.size() < 2) {
 
-      // Short sentence, or sentence has no dependency tree. Skip annotating it.
+      // Short sentence. Skip annotating it.
       sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.EMPTY_LIST);
       sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.EMPTY_SET);
 
