@@ -572,10 +572,13 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
   /** {@inheritDoc} */
   @Override
   protected void doOneSentence(Annotation annotation, CoreMap sentence) {
-    annotateOperators(sentence);
-    annotateUnaries(sentence);
-    if (doPolarity) {
-      annotatePolarity(sentence);
+    if (sentence.containsKey(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class) ||
+        sentence.containsKey(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class) ) {
+      annotateOperators(sentence);
+      annotateUnaries(sentence);
+      if (doPolarity) {
+        annotatePolarity(sentence);
+      }
     }
   }
 
