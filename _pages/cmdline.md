@@ -83,13 +83,13 @@ If you do not specify any properties that load input files, you will be placed i
 
 ## Output
 
-For each input file, Stanford CoreNLP generates one file (an XML or text file) with all relevant annotation. For example, for the above configuration and a file containing the text below:
+For each input file, Stanford CoreNLP generates one output file, with a name that adds an extra extension to the input filename. This output may contain the output of all annotations that were done, or just a subset of them. For example, for the above configuration and a file containing the text below:
 
 > Stanford University is located in California. It is a great university.
 
 Stanford CoreNLP generates [this output](files/input.txt.output).
 
-Note that the XML output uses the `CoreNLP-to-HTML.xsl` stylesheet file, which can be downloaded from [here](files/CoreNLP-to-HTML.xsl). This stylesheet enables human-readable display of the above XML content. For example, the previous example should be displayed like this.
+Note that this XML output can use the `CoreNLP-to-HTML.xsl` stylesheet file, which comes with the CoreNLP download or can be downloaded from [here](files/CoreNLP-to-HTML.xsl). This stylesheet enables human-readable display of the above XML content. For example, the previous example should be displayed like (this)[files/input.txt.xml].
 
 ## Output options
 
@@ -99,7 +99,13 @@ The following properties are associated with output :
 * `-outputExtension` : Output filenames are the same as input filenames but with `-outputExtension` added to them (`.xml` by default). 
 * `-noClobber` : By default, files are overwritten (clobbered). Pass `-noClobber` to avoid this behavior. 
 * `-replaceExtension` : If you'd rather replace the extension with the `-outputExtension`, pass the `-replaceExtension` flag. This will result in filenames like `input.xml` instead of `input.txt.xml` (when given `input.txt` as an input file).
-* `-outputFormat` : different methods for outputting results.  Can be "xml", "text" or "serialized".
+* `-outputFormat` : different methods for outputting results.  Can be:
+  * "text": The default; an ad hoc human-readable text format. Tokens, s-expression parse trees, relation(head, dep) dependencies. Output file extension is `.out`.
+  * "xml": An XML format with accompanying XSLT stylesheet, which allows web browser rendering. Output file extension is `.xml`.
+  * "json": JSON. Output file extension is `.json`. 'Nuf said.
+  * "conll": A tab-separated values (TSV) format. Output extension is `.conll`. This representation may give only a partial view of an `Annotation` and doesn't correspond to any particular CoNLL format. Columns are: wordIndex, token, lemma, POS, NER, head, depRel.
+  * "conllu": (CoNLL-U)[https://universaldependencies.github.io/docs/format.html] output format, another tab-separated values (TSV) format.  Output extension is `.conllu`. This representation may give only a partial view of an `Annotation`.
+  * "serialized": Produces some serialized version of each `Annotation`. May or may not be lossy. What you actually get depends on the `outputSerializer` property, which you should also set. The default is the GenericAnnotationSerializer, which uses the built-in Java object serialization and writes a file with extension `.ser.gz`.
 
 ## cleanxml
 
