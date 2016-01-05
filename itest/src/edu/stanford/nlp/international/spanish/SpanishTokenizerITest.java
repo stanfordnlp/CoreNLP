@@ -64,7 +64,7 @@ public class SpanishTokenizerITest extends TestCase {
       { "12", "km", "/", "h" },
       { "Los", "hombres", "sentados", "están", "muy", "guapos", "." },
       { "Hizo", "abrir", "los", "." },
-      { "sal", "os", "=RRB=", "=LRB=", "1", "de" },  // ["sal", "os"] is probably a mistake, but it's what we now get....
+      { "salos", "=RRB=", "=LRB=", "1", "de" },
   };
 
 
