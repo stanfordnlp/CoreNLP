@@ -1,6 +1,7 @@
 package edu.stanford.nlp.sequences;
 
 import edu.stanford.nlp.util.Beam;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.Scored;
 import edu.stanford.nlp.util.ScoredComparator;
 
@@ -122,6 +123,9 @@ public class BeamBestSequenceFinder implements BestSequenceFinder {
     TagSeq initSeq = new TagSeq();
     newBeam.add(initSeq);
     for (int pos = 0; pos < padLength; pos++) {
+      if (Thread.interrupted()) {  // Allow interrupting
+        throw new RuntimeInterruptedException();
+      }
       //System.out.println("scoring word " + pos + " / " + (leftWindow + length) + ", tagNum = " + tagNum[pos] + "...");
       //System.out.flush();
 
@@ -133,6 +137,9 @@ public class BeamBestSequenceFinder implements BestSequenceFinder {
       }
       // each hypothesis gets extended and beamed
       for (Object anOldBeam : oldBeam) {
+        if (Thread.interrupted()) {  // Allow interrupting
+          throw new RuntimeInterruptedException();
+        }
         // System.out.print("#"); System.out.flush();
         TagSeq tagSeq = (TagSeq) anOldBeam;
         for (int nextTagNum = 0; nextTagNum < tagNum[pos]; nextTagNum++) {

@@ -267,10 +267,10 @@ public class Util {
       SemanticGraphEdge thatEdge = null;
       int dobjCount = 0;
       for (SemanticGraphEdge edge : tree.outgoingEdgeIterable(vertex)) {
-        if (edge.getDependent().word().equalsIgnoreCase("that")) {
+        if ("that".equalsIgnoreCase(edge.getDependent().word())) {
           thatEdge = edge;
         }
-        if (edge.getRelation().toString().equals("dobj")) {
+        if ("dobj".equals(edge.getRelation().toString())) {
           dobjCount += 1;
         }
       }

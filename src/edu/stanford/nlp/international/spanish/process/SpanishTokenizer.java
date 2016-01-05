@@ -78,7 +78,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     this.splitContractions = splitContractions;
     this.splitAny = (splitCompounds || splitVerbs || splitContractions);
 
-    if (splitAny) compoundBuffer = Generics.newLinkedList();
+    if (splitAny) compoundBuffer = Generics.newArrayList(4);
     if (splitVerbs) verbStripper = SpanishVerbStripper.getInstance();
   }
 
@@ -367,7 +367,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   private static String usage() {
     StringBuilder sb = new StringBuilder();
-    String nl = System.getProperty("line.separator");
+    String nl = System.lineSeparator();
     sb.append(String.format("Usage: java %s [OPTIONS] < file%n%n", SpanishTokenizer.class.getName()));
     sb.append("Options:").append(nl);
     sb.append("   -help          : Print this message.").append(nl);
@@ -375,7 +375,8 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     sb.append("   -lowerCase     : Apply lowercasing.").append(nl);
     sb.append("   -encoding type : Encoding format.").append(nl);
     sb.append("   -options str   : Orthographic options (see SpanishLexer.java)").append(nl);
-    sb.append("   -tokens        : Output tokens as line-separated instead of space-separted.").append(nl);
+    sb.append("   -tokens        : Output tokens as line-separated instead of space-separated.").append(nl);
+    sb.append("   -onePerLine    : Output tokens one per line.").append(nl);
     return sb.toString();
   }
 
@@ -425,6 +426,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     final String encoding = options.getProperty("encoding", "UTF-8");
     final boolean toLower = PropertiesUtils.getBool(options, "lowerCase", false);
     final Locale es = new Locale("es");
+    boolean onePerLine = PropertiesUtils.getBool(options, "onePerLine", false);
 
     // Read the file from stdin
     int nLines = 0;
@@ -438,13 +440,21 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
         String word = tokenizer.next().word();
         if (word.equals(SpanishLexer.NEWLINE_TOKEN)) {
           ++nLines;
-          printSpace = false;
           System.out.println();
+          if ( ! onePerLine) {
+            printSpace = false;
+          }
         } else {
-          if (printSpace) System.out.print(" ");
           String outputToken = toLower ? word.toLowerCase(es) : word;
-          System.out.print(outputToken);
-          printSpace = true;
+          if (onePerLine) {
+            System.out.println(outputToken);
+          } else {
+            if (printSpace) {
+              System.out.print(" ");
+            }
+            System.out.print(outputToken);
+            printSpace = true;
+          }
         }
       }
     } catch (UnsupportedEncodingException e) {

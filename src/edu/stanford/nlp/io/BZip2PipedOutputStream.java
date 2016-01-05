@@ -1,6 +1,7 @@
 package edu.stanford.nlp.io;
 
 import edu.stanford.nlp.util.ByteStreamGobbler;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.StreamGobbler;
 
 import java.io.*;
@@ -58,7 +59,9 @@ public class BZip2PipedOutputStream extends OutputStream
       errGobbler.join();
       outGobbler.getOutputStream().close();
       process.waitFor();
-    } catch (InterruptedException ex) {}
+    } catch (InterruptedException ex) {
+      throw new RuntimeInterruptedException(ex);
+    }
     //System.err.println("getBZip2PipedOutputStream: Closed. ");
   }
 }

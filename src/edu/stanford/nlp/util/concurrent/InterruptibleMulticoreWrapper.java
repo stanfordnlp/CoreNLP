@@ -1,5 +1,7 @@
 package edu.stanford.nlp.util.concurrent;
 
+import edu.stanford.nlp.util.RuntimeInterruptedException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -28,7 +30,7 @@ public class InterruptibleMulticoreWrapper<I,O> extends MulticoreWrapper<I,O> {
     try {
       return (timeout < 0) ? idleProcessors.take() : idleProcessors.poll(timeout, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) {
-      return null;
+      throw new RuntimeInterruptedException(e);
     }
   }
 
@@ -77,7 +79,7 @@ public class InterruptibleMulticoreWrapper<I,O> extends MulticoreWrapper<I,O> {
           threadPool.awaitTermination(10, TimeUnit.SECONDS);
         }
       } catch (InterruptedException e) {
-        throw new RuntimeException(e);
+        throw new RuntimeInterruptedException(e);
       }
     }
     return null;

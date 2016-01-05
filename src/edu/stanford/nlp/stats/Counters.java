@@ -59,18 +59,10 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.math.SloppyMath;
-import edu.stanford.nlp.util.BinaryHeapPriorityQueue;
-import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.ErasureUtils;
-import edu.stanford.nlp.util.Factory;
-import edu.stanford.nlp.util.FixedPrioritiesPriorityQueue;
+import edu.stanford.nlp.util.*;
+
 import java.util.function.Function;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.Index;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.PriorityQueue;
-import edu.stanford.nlp.util.Sets;
-import edu.stanford.nlp.util.StringUtils;
+
 import edu.stanford.nlp.util.logging.PrettyLogger;
 import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
 
@@ -252,6 +244,9 @@ public class Counters {
    * @return The key in the Counter with the largest count.
    */
   public static <E> E argmax(Counter<E> c, Comparator<E> tieBreaker, E defaultIfEmpty) {
+    if (Thread.interrupted()) {  // A good place to check for interrupts -- called from many annotators
+      throw new RuntimeInterruptedException();
+    }
     if (c.size() == 0) {
       return defaultIfEmpty;
     }

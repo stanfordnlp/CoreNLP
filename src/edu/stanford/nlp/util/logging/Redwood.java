@@ -19,6 +19,7 @@ import java.util.function.Supplier;
 import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IterableIterator;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
 
 /**
  * A hierarchical channel based logger. Log messages are arranged hierarchically by depth
@@ -1050,6 +1051,7 @@ public class Redwood {
             try {
               Thread.sleep(100);
             } catch (InterruptedException e) {
+              throw new RuntimeInterruptedException(e);
             }
           }
           numPending.incrementAndGet();
@@ -1131,6 +1133,7 @@ public class Redwood {
       try {
         exec.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
       } catch (InterruptedException e) {
+        throw new RuntimeInterruptedException(e);
       }
     }
     public static void threadAndRun(String title, Iterable<Runnable> runnables){
@@ -1409,7 +1412,9 @@ public class Redwood {
       log("iter " + i + " ended with value " + (-34587292534.0+Math.sqrt(i)*3000000000.0));
       try {
         Thread.sleep(50);
-      } catch (InterruptedException e) { }
+      } catch (InterruptedException e) {
+        throw new RuntimeInterruptedException(e);
+      }
     }
     endTrack("Fuzzy Equality (timing)");
 
@@ -1428,7 +1433,9 @@ public class Redwood {
     startTrack("But really this is the long one");
     try {
       Thread.sleep(3000);
-    } catch (InterruptedException e) { }
+    } catch (InterruptedException e) {
+      throw new RuntimeInterruptedException(e);
+    }
     for(int i=0; i<10; i++){ log(FORCE,"contents of long track"); }
     endTrack("But really this is the long one");
     endTrack("Long TracK");
@@ -1455,7 +1462,9 @@ public class Redwood {
     exec.shutdown();
     try {
       exec.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
-    } catch (InterruptedException e) {}
+    } catch (InterruptedException e) {
+      throw new RuntimeInterruptedException(e);
+    }
     endThreads("name");
 
     //--System Streams
@@ -1479,7 +1488,9 @@ public class Redwood {
     log(FORCE,"so I'm nonempty...");
     try {
       Thread.sleep(1000);
-    } catch (InterruptedException e) { }
+    } catch (InterruptedException e) {
+      throw new RuntimeInterruptedException(e);
+    }
 		throw new IllegalArgumentException();
   }
 }

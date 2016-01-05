@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import edu.stanford.nlp.io.FileSystem;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
 
 /**
  * Adds data files to a tar'd / gzip'd distribution package. Data sets marked with the DISTRIB parameter
@@ -73,6 +74,7 @@ public class DistributionPackage {
         System.err.printf("%s: Unable to add file %s to distribution %s\n", this.getClass().getName(),currentFile,distribName);
       } catch (InterruptedException e) {
         System.err.printf("%s: tar did not return from building %s.tar\n", this.getClass().getName(),distribName);
+        throw new RuntimeInterruptedException(e);
       }
     } else {
       System.err.printf("%s: Unable to create temp directory %s\n", this.getClass().getName(), distribName);

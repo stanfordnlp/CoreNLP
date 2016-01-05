@@ -64,7 +64,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
     NON_COLLAPSED_SEPARATOR, //Basic conversion + extra dependencies appended at the end
     COLLAPSED, //Collapsed relations
     CC_PROCESSED, //CCprocessed relations
-  };
+  }
 
 
   /**
