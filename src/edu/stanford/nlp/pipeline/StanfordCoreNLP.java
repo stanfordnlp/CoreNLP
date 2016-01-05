@@ -504,7 +504,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       try {
         availableProcessors.acquire();
       } catch (InterruptedException e) {
-        throw new RuntimeInterruptedException(e);
+        throw new RuntimeException(e);
       }
       new Thread() {
         @Override

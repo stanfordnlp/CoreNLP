@@ -517,27 +517,6 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
       }
     }
 
-    // Make sure every node of the dependency tree has a polarity.
-    // This is separate from the code below in case the tokens in the dependency
-    // tree don't correspond to the tokens in the sentence. This happens at least
-    // when the constituency parser craps out on a long sentence, and the
-    // dependency tree is put together haphazardly.
-    if (sentence.containsKey(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)) {
-      for (IndexedWord token : sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class).vertexSet()) {
-        token.set(PolarityAnnotation.class, Polarity.DEFAULT);
-      }
-    }
-    if (sentence.containsKey(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class)) {
-      for (IndexedWord token : sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class).vertexSet()) {
-        token.set(PolarityAnnotation.class, Polarity.DEFAULT);
-      }
-    }
-    if (sentence.containsKey(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class)) {
-      for (IndexedWord token : sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class).vertexSet()) {
-        token.set(PolarityAnnotation.class, Polarity.DEFAULT);
-      }
-    }
-
     // Set polarity for each token
     for (int i = 0; i < tokens.size(); ++i) {
       CoreLabel token = tokens.get(i);

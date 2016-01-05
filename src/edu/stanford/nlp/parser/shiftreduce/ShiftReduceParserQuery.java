@@ -20,7 +20,6 @@ import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
 
@@ -74,9 +73,6 @@ public class ShiftReduceParserQuery implements ParserQuery {
     beam.add(initialState);
     // TODO: don't construct as many PriorityQueues
     while (beam.size() > 0) {
-      if (Thread.interrupted()) { // Allow interrupting the parser
-        throw new RuntimeInterruptedException();
-      }
       // System.err.println("================================================");
       // System.err.println("Current beam:");
       // System.err.println(beam);
@@ -84,9 +80,6 @@ public class ShiftReduceParserQuery implements ParserQuery {
       beam = new PriorityQueue<>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
       State bestState = null;
       for (State state : oldBeam) {
-        if (Thread.interrupted()) {  // Allow interrupting the parser
-          throw new RuntimeInterruptedException();
-        }
         Collection<ScoredObject<Integer>> predictedTransitions = parser.model.findHighestScoringTransitions(state, true, maxBeamSize, constraints);
         // System.err.println("Examining state: " + state);
         for (ScoredObject<Integer> predictedTransition : predictedTransitions) {

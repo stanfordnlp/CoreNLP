@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Random;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
@@ -959,9 +958,6 @@ public class ArrayMath {
    * @return {@literal log(x1 + ... + xn)}
    */
   public static double logSum(double[] logInputs, int fromIndex, int toIndex) {
-    if (Thread.interrupted()) {  // A good place to check for interrupts -- many functions call this
-      throw new RuntimeInterruptedException();
-    }
     if (logInputs.length == 0)
       throw new IllegalArgumentException();
     if(fromIndex >= 0 && toIndex < logInputs.length && fromIndex >= toIndex)

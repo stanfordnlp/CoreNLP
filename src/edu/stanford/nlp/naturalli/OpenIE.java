@@ -449,7 +449,7 @@ public class OpenIE implements Annotator {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
     if (tokens.size() < 2) {
 
-      // Short sentence. Skip annotating it.
+      // Short sentence; skip annotating it.
       sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.EMPTY_LIST);
       sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.EMPTY_SET);
 

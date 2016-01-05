@@ -19,7 +19,6 @@ import edu.stanford.nlp.hcoref.data.Dictionaries;
 import edu.stanford.nlp.hcoref.data.Document;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.StringUtils;
 
 public abstract class StatisticalCorefSystem {
@@ -66,15 +65,9 @@ public abstract class StatisticalCorefSystem {
   public void annotate(Annotation ann, boolean removeSingletonClusters) {
     try {
       Document document = docMaker.makeDocument(ann);
-      if (Thread.interrupted()) {  // Allow interrupting
-        throw new RuntimeInterruptedException();
-      }
       runCoref(document);
       if (removeSingletonClusters) {
         StatisticalCorefUtils.removeSingletonClusters(document);
-      }
-      if (Thread.interrupted()) {  // Allow interrupting
-        throw new RuntimeInterruptedException();
       }
 
       Map<Integer, CorefChain> result = Generics.newHashMap();

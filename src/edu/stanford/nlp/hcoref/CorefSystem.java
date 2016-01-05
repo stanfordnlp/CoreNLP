@@ -22,7 +22,6 @@ import edu.stanford.nlp.hcoref.sieve.Sieve.ClassifierType;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
@@ -218,9 +217,6 @@ public class CorefSystem {
     output[3] = new StringBuilder();  // log from sieves
     
     for(Sieve sieve : sieves){
-      if (Thread.interrupted()) {  // Allow interrupting
-        throw new RuntimeInterruptedException();
-      }
       output[3].append(sieve.resolveMention(document, dictionaries, props));
     }
 

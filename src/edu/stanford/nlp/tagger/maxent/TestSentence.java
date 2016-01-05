@@ -20,7 +20,10 @@ import edu.stanford.nlp.sequences.BestSequenceFinder;
 import edu.stanford.nlp.sequences.ExactBestSequenceFinder;
 import edu.stanford.nlp.sequences.SequenceModel;
 import edu.stanford.nlp.tagger.common.Tagger;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.ArrayUtils;
+import edu.stanford.nlp.util.ConfusionMatrix;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Pair;
 
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -312,9 +315,6 @@ public class TestSentence implements SequenceModel {
 
   private void runTagInference() {
     this.initializeScorer();
-    if (Thread.interrupted()) {  // Allow interrupting
-      throw new RuntimeInterruptedException();
-    }
 
     BestSequenceFinder ti = new ExactBestSequenceFinder();
       //new BeamBestSequenceFinder(50);
@@ -323,10 +323,6 @@ public class TestSentence implements SequenceModel {
     finalTags = new String[bestTags.length];
     for (int j = 0; j < size; j++) {
       finalTags[j] = maxentTagger.tags.getTag(bestTags[j + leftWindow()]);
-    }
-
-    if (Thread.interrupted()) {  // Allow interrupting
-      throw new RuntimeInterruptedException();
     }
     cleanUpScorer();
   }

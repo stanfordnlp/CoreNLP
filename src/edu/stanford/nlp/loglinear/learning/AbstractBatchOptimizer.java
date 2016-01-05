@@ -2,7 +2,6 @@ package edu.stanford.nlp.loglinear.learning;
 
 import edu.stanford.nlp.loglinear.model.ConcatVector;
 import edu.stanford.nlp.loglinear.model.GraphicalModel;
-import edu.stanford.nlp.util.RuntimeInterruptedException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -66,7 +65,7 @@ public abstract class AbstractBatchOptimizer {
           try {
             mainWorker.naturalTerminationBarrier.wait();
           } catch (InterruptedException e) {
-            throw new RuntimeInterruptedException(e);
+            e.printStackTrace();
           }
         }
       }
@@ -322,7 +321,7 @@ public abstract class AbstractBatchOptimizer {
             try {
               threads[i].join();
             } catch (InterruptedException e) {
-              throw new RuntimeInterruptedException(e);
+              e.printStackTrace();
             }
             logLikelihood += workers[i].localLogLikelihood;
             derivative.addVectorInPlace(workers[i].localDerivative, 1.0);

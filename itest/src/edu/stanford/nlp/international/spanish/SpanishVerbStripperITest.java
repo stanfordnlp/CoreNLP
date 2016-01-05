@@ -1,6 +1,6 @@
 package edu.stanford.nlp.international.spanish;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -9,7 +9,6 @@ import edu.stanford.nlp.util.Pair;
 
 /**
  * @author Jon Gauthier
- * @author Christopher Manning
  */
 public class SpanishVerbStripperITest extends TestCase {
 
@@ -38,52 +37,61 @@ public class SpanishVerbStripperITest extends TestCase {
     assertTrue(SpanishVerbStripper.isStrippable("ponerlos"));
   }
 
-  private void checkPronouns(String word, String verb, String... pronouns) {
-    if (pronouns.length == 0) {
-      // special case, the method returns null if no pronouns found to separate off
-      assertNull(verbStripper.separatePronouns(word));
-    } else {
-      List<String> pronounList = Arrays.asList(pronouns);
-      assertEquals(new Pair<>(verb, pronounList), verbStripper.separatePronouns(word));
-    }
-  }
-
   @SuppressWarnings("unchecked")
   public void testSeparatePronouns() {
-
-    checkPronouns("decirme", "decir", "me");
+    List<String> pronouns = new ArrayList<String>();
+    pronouns.add("me");
+    assertEquals(new Pair("decir", pronouns),
+                 verbStripper.separatePronouns("decirme"));
 
     // Should match capitalized verbs as well
-    checkPronouns("Decirme", "Decir", "me");
+    assertEquals(new Pair("Decir", pronouns),
+      verbStripper.separatePronouns("Decirme"));
 
-    checkPronouns("contándoselo", "contando", "se", "lo");
+    pronouns.clear();
+    pronouns.add("se");
+    pronouns.add("lo");
+    assertEquals(new Pair("contando", pronouns),
+                 verbStripper.separatePronouns("contándoselo"));
 
-    checkPronouns("aplicárseles", "aplicar", "se", "les");
+    pronouns.clear();
+    pronouns.add("se");
+    pronouns.add("les");
+    assertEquals(new Pair("aplicar", pronouns),
+      verbStripper.separatePronouns("aplicárseles"));
 
     // Don't treat plural past participles as 2nd-person commands!
-    checkPronouns("sentados", "sentados");
+    Pair<String, List<String>> l = verbStripper.separatePronouns("sentados");
+		assertNull(l);
 
-    checkPronouns("sentaos", "sentad", "os");
+    pronouns.clear();
+    pronouns.add("os");
+    assertEquals(new Pair("sentad", pronouns),
+      verbStripper.separatePronouns("sentaos"));
 
-    checkPronouns("damelo", "da", "me", "lo");
-
-    checkPronouns("Imagínense", "Imaginen", "se");
+    pronouns.clear();
+    pronouns.add("se");
+    assertEquals(new Pair("Imaginen", pronouns),
+      verbStripper.separatePronouns("Imagínense"));
 
     // Match elided 1P verb forms
-    checkPronouns("vámonos", "vamos", "nos");
+    pronouns.clear();
+    pronouns.add("nos");
+    assertEquals(new Pair("vamos", pronouns),
+                 verbStripper.separatePronouns("vámonos"));
 
     // Let's write it to her
-    checkPronouns("escribámosela", "escribamos", "se", "la");
+    pronouns.clear();
+    pronouns.add("se");
+    pronouns.add("la");
+    assertEquals(new Pair("escribamos", pronouns),
+                 verbStripper.separatePronouns("escribámosela"));
 
     // Looks like a verb with a clitic pronoun.. but it's not! There are
     // a *lot* of these in Spanish.
-    checkPronouns("címbalo", "címbalo");
+    assertNull(verbStripper.separatePronouns("címbalo"));
 
-    checkPronouns("contando", "contando");
-
-    // [cdm, Jan 2016] I think this shouldn't be split, but it was being erroneously split as [sal, os, null]. Ouch! */
-    checkPronouns("salos", "salos");
-
+    assertNull(verbStripper.separatePronouns("contando"));
   }
 
   public void testStripVerb() {

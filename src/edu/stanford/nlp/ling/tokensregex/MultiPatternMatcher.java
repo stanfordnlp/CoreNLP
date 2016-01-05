@@ -74,9 +74,6 @@ public class MultiPatternMatcher<T> {
     List<SequenceMatchResult<T>> all = new ArrayList<>();
     int i = 0;
     for (SequencePattern<T> p:triggered) {
-      if (Thread.interrupted()) {  // Allow interrupting
-        throw new RuntimeInterruptedException();
-      }
       SequenceMatcher<T> m = p.getMatcher(elements);
       m.setMatchWithResult(matchWithResult);
       m.setOrder(i);
@@ -105,9 +102,6 @@ public class MultiPatternMatcher<T> {
     List<SequenceMatchResult<T>> all = new ArrayList<>();
     int i = 0;
     for (SequencePattern<T> p:triggered) {
-      if (Thread.interrupted()) {  // Allow interrupting
-        throw new RuntimeInterruptedException();
-      }
       SequenceMatcher<T> m = p.getMatcher(elements);
       m.setMatchWithResult(matchWithResult);
       m.setFindType(findType);
@@ -243,9 +237,6 @@ public class MultiPatternMatcher<T> {
       // Use LinkedHashSet to preserve original ordering of patterns.
       Set<SequencePattern<T>> triggeredPatterns = new LinkedHashSet<>();
       for (T node:elements) {
-        if (Thread.interrupted()) {  // Allow interrupting
-          throw new RuntimeInterruptedException();
-        }
         Collection<SequencePattern<T>> triggered = trigger.apply(node);
         triggeredPatterns.addAll(triggered);
       }
