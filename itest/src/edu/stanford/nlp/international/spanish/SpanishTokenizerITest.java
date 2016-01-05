@@ -15,7 +15,7 @@ import java.io.StringReader;
  */
 public class SpanishTokenizerITest extends TestCase {
 
-  private final String[] ptbInputs = {
+  private final String[] spanishInputs = {
       "Esta es una oración.",
       "¡Dímelo!",
       "Hazlo.",
@@ -36,10 +36,12 @@ public class SpanishTokenizerITest extends TestCase {
       "sp3",
       "12km",
       "12km/h",
-      "Los hombres sentados están muy guapos."
+      "Los hombres sentados están muy guapos.",
+      "Hizo abrirlos.",
+      "salos ) ( 1 de",
   };
 
-  private final String[][] ptbGold = {
+  private final String[][] spanishGold = {
       { "Esta", "es", "una", "oración", "." },
       { "¡", "Di", "me", "lo", "!" },
       { "Haz", "lo", "." },
@@ -60,28 +62,46 @@ public class SpanishTokenizerITest extends TestCase {
       { "sp3" },
       { "12", "km" },
       { "12", "km", "/", "h" },
-      { "Los", "hombres", "sentados", "están", "muy", "guapos", "." }
+      { "Los", "hombres", "sentados", "están", "muy", "guapos", "." },
+      { "Hizo", "abrir", "los", "." },
+      { "sal", "os", "=RRB=", "=LRB=", "1", "de" },  // ["sal", "os"] is probably a mistake, but it's what we now get....
   };
 
-  public void testSpanishTokenizerWord() {
-    assert (ptbInputs.length == ptbGold.length);
-    final TokenizerFactory<CoreLabel> tf = SpanishTokenizer.ancoraFactory();
-    tf.setOptions("");
-    tf.setOptions("tokenizeNLs");
 
-    for (int sent = 0; sent < ptbInputs.length; sent++) {
-      Tokenizer<CoreLabel> spanishTokenizer = tf.getTokenizer(new StringReader(ptbInputs[sent]));
+  private static void runSpanish(TokenizerFactory<CoreLabel> tf, String[] inputs, String[][] gold) {
+    for (int sent = 0; sent < inputs.length; sent++) {
+      Tokenizer<CoreLabel> spanishTokenizer = tf.getTokenizer(new StringReader(inputs[sent]));
       int i = 0;
       while (spanishTokenizer.hasNext()) {
         String w = spanishTokenizer.next().word();
         try {
-          assertEquals("SpanishTokenizer problem", ptbGold[sent][i], w);
+          assertEquals("SpanishTokenizer problem", gold[sent][i], w);
         } catch (ArrayIndexOutOfBoundsException aioobe) {
           // the assertion below outside the loop will fail
         }
         i++;
       }
-      assertEquals("SpanishTokenizer num tokens problem", i, ptbGold[sent].length);
+      assertEquals("SpanishTokenizer num tokens problem", i, gold[sent].length);
     }
   }
+
+  public void testSpanishTokenizerWord() {
+     assert spanishInputs.length == spanishGold.length;
+     final TokenizerFactory<CoreLabel> tf = SpanishTokenizer.ancoraFactory();
+     tf.setOptions("");
+     tf.setOptions("tokenizeNLs");
+
+     runSpanish(tf, spanishInputs, spanishGold);
+   }
+
+  /** Makes a Spanish tokenizer with the options that CoreNLP uses. Results actually no different.... */
+  public void testSpanishTokenizerCoreNLP() {
+    assert spanishInputs.length == spanishGold.length;
+    final TokenizerFactory<CoreLabel> tf = SpanishTokenizer.coreLabelFactory();
+    tf.setOptions("");
+    tf.setOptions("invertible,ptb3Escaping=true,splitAll=true");
+
+    runSpanish(tf, spanishInputs, spanishGold);
+  }
+
 }
