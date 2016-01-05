@@ -15,7 +15,7 @@ Stanford CoreNLP ships with a built-in server, and requires only the CoreNLP dep
 export CLASSPATH="lib/protobuf.jar:lib/joda-time.jar:lib/jollyday.jar:lib/xom-1.2.10.jar:classes/"
 
 # Run the server
-java -mx4g edu.stanford.nlp.pipeline.StanfordCoreNLPServer [port?]
+java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer [port?]
 ```
 
 If no value for `port` is provided, port 9000 will be used by default. You can then test your server by visiting
