@@ -11,8 +11,8 @@ This page describes setting up the CoreNLP server included in the release. This 
 Stanford CoreNLP ships with a built-in server, and requires only the CoreNLP dependencies. To run this server, simply run:
 
 ```bash
-# Set up your classpath. For example:
-export CLASSPATH="lib/protobuf.jar:lib/joda-time.jar:lib/jollyday.jar:lib/xom-1.2.10.jar:classes/"
+# Set up your classpath. For example, to add all jars in the current directory tree:
+export CLASSPATH="`find . -name '*.jar'`"
 
 # Run the server
 java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer [port?]
@@ -34,7 +34,7 @@ The rest of this document describes the API in more detail, describes a Java cli
 ## API Documentation
 The greatest strength of the server is the ability to make API calls against it. 
 
-> **NOTE**: Please do **not** make API calls against [corenlp.run](http://corenlp.run). It is not set up to handle a large volume of requests. Instructions for setting up your own server can be found in the [Dedicated Server](#DedicatedServer) section.
+> **NOTE**: Please do **not** make API calls against [corenlp.run](http://corenlp.run). It is not set up to handle a large volume of requests. Instructions for setting up your own server can be found in the [Dedicated Server](#dedicated-server) section.
 
 There are three endpoints provided by the server, which we'll describe in more detail below. Each of them takes as input a series of `GET` parameters, as well as `POST` data consisting of the serialized document or raw text to be annotated. The endpoints are:
 
@@ -163,7 +163,7 @@ You can also run the client from the command line, and get an interface similar 
 java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLPClient -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file input.txt
 ```
 
-> **NOTE**: Again, please do **not** make API calls against `http://corenlp.run`. It is not set up to handle a large volume of requests. Instructions for setting up your own server can be found in the [Dedicated Server](#DedicatedServer) section.
+> **NOTE**: Again, please do **not** make API calls against `http://corenlp.run`. It is not set up to handle a large volume of requests. Instructions for setting up your own server can be found in the [Dedicated Server](#dedicated-server) section.
 
 ## Administration
 This section describes how to administer the server, including starting and stopping the server, as well as setting it up as a startup task 
