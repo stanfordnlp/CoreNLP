@@ -1,4 +1,4 @@
-package edu.stanford.nlp.hcoref;
+package edu.stanford.nlp.hcoref.demo;
 
 import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.hcoref.data.CorefChain;
