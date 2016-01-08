@@ -529,7 +529,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
    * under which this is true: the sentiment annotator is used.
    */
   public static boolean usesBinaryTrees(Properties props) {
-    Set<String> annoNames = Generics.newHashSet(Arrays.asList(props.getProperty("annotators","").split("[, \t]+")));
+    Set<String> annoNames = Generics.newHashSet(Arrays.asList(getRequiredProperty(props, "annotators").split("[, \t]+")));
     return annoNames.contains(STANFORD_SENTIMENT);
   }
 
