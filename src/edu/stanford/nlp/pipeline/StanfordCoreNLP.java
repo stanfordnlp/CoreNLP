@@ -728,7 +728,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     os.println("\t             output is generated for every input file as file.outputExtension");
     os.println("\t\"outputDirectory\" - where to put output (defaults to the current directory)");
     os.println("\t\"outputExtension\" - extension to use for the output file (defaults to \".xml\" for XML, \".ser.gz\" for serialized).  Don't forget the dot!");
-    os.println("\t\"outputFormat\" - \"xml\" to output XML (default), \"serialized\" to output serialized Java objects, \"text\" to output text");
+    os.println("\t\"outputFormat\" - \"xml\" (default), \"text\", \"json\", \"conll\", \"conllu\", or \"serialized\"");
     os.println("\t\"serializer\" - Class of annotation serializer to use when outputFormat is \"serialized\".  By default, uses Java serialization.");
     os.println("\t\"replaceExtension\" - flag to chop off the last extension before adding outputExtension to file");
     os.println("\t\"noClobber\" - don't automatically override (clobber) output files that already exist");
