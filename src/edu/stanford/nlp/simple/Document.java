@@ -524,7 +524,7 @@ public class Document {
     synchronized (this.impl) {
       if (impl.getCorefChainCount() == 0) {
         // Run prerequisites
-        this.runLemma(props).runNER(props).runDepparse(props);  // default is dependency mention annotator
+        this.runLemma(props).runNER(props).runParse(props);  // default is rule mention annotator
         // Run mention
         Annotator mention = props == EMPTY_PROPS ? defaultMention.get() : AnnotatorFactories.mention(props, backend).create();
         // Run coref
