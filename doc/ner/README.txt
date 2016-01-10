@@ -90,7 +90,7 @@ the File menu, or decide to use the default text in the window. Finally,
 you can now named entity tag the text by pressing the Run NER button.
 
 From a command line, you need to have java on your PATH and the
-stanford-ner.jar file in your CLASSPATH.  (The way of doing this depends on
+stanford-ner.jar file and the lib directory in your CLASSPATH.  (The way of doing this depends on
 your OS/shell.)  The supplied ner.bat and ner.sh should work to allow
 you to tag a single file.  For example, for Windows:
 
@@ -99,12 +99,12 @@ you to tag a single file.  For example, for Windows:
 Or on Unix/Linux you should be able to parse the test file in the distribution
 directory with the command:
 
-java -mx600m edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz -textFile sample.txt
+java -mx600m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz -textFile sample.txt
 
 Here's an output option that will print out entities and their class to
 the first two columns of a tab-separated columns output file:
 
-java -mx600m -cp stanford-ner.jar edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz -outputFormat tabbedEntities -textFile sample.txt > sample.tsv
+java -mx600m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz -outputFormat tabbedEntities -textFile sample.txt > sample.tsv
 
 When run from a jar file, you also have the option of using a serialized
 classifier contained in the jar file.
@@ -201,15 +201,15 @@ SERVER VERSION
 
 The NER code may also be run as a server listening on a socket:
 
-java -mx1000m -cp stanford-ner.jar edu.stanford.nlp.ie.NERServer 1234
+java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer 1234
 
 You can specify which model to load with flags, either one on disk:
 
-java -mx1000m -cp stanford-ner.jar edu.stanford.nlp.ie.NERServer -loadClassifier classifiers/all.3class.crf.ser.gz 1234
+java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer -loadClassifier classifiers/all.3class.crf.ser.gz 1234
 
 Or if you have put a model inside the jar file:
 
-java -mx1000m -cp stanford-ner.jar edu.stanford.nlp.ie.NERServer -loadJarClassifier all.3class.crf.ser.gz 1234
+java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer -loadJarClassifier all.3class.crf.ser.gz 1234
 
 
 RUNNING CLASSIFIERS FROM INSIDE A JAR FILE
