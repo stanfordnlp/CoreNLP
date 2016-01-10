@@ -1,4 +1,4 @@
-Stanford NER - v3.6.0 - 2015-12-08
+Stanford NER - v3.6.0 - 2015-12-09
 ----------------------------------------------
 
 This package provides a high-performance machine learning based named

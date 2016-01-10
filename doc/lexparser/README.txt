@@ -1,4 +1,4 @@
-Stanford Lexicalized Parser v3.6.0 - 2015-12-08
+Stanford Lexicalized Parser v3.6.0 - 2015-12-09
 -----------------------------------------------
 
 Copyright (c) 2002-2015 The Board of Trustees of The Leland Stanford Junior
