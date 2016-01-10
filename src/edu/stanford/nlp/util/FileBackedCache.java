@@ -165,7 +165,6 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
             // Sleep a bit
             Thread.sleep(100);
           } catch (InterruptedException e) {
-            throw new RuntimeInterruptedException(e);
           }
         }
       }
@@ -501,9 +500,7 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
             warn("FileBackedCache", "Caught out of memory error (clearing cache): " + e.getMessage());
             FileBackedCache.this.clear();
             //noinspection EmptyCatchBlock
-            try { Thread.sleep(1000); } catch (InterruptedException e2) {
-              throw new RuntimeInterruptedException(e2);
-            }
+            try { Thread.sleep(1000); } catch (InterruptedException e2) { }
             elements = readBlock(files[index]).iterator();
           } catch (RuntimeException e) {
             err(e);
@@ -796,10 +793,7 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
       if (tries > 30) { throw new IOException("Could not create file: " + candidate); }
       if (candidate.createNewFile()) { break; }
       tries++;
-      try { Thread.sleep(1000); } catch (InterruptedException e) {
-        log(e);
-        throw new RuntimeInterruptedException(e);
-      }
+      try { Thread.sleep(1000); } catch (InterruptedException e) { log(e); }
     }
   }
 
@@ -858,10 +852,7 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
       for (int i = 0; i < 1000; ++i) {
         lockOrNull = channel.tryLock();
         if (lockOrNull == null || !lockOrNull.isValid()) {
-          try { Thread.sleep(1000); } catch (InterruptedException e) {
-            log(e);
-            throw new RuntimeInterruptedException(e);
-          }
+          try { Thread.sleep(1000); } catch (InterruptedException e) { log(e); }
           if (i % 60 == 59) { warn("FileBackedCache", "Lock still busy after " + ((i+1)/60) + " minutes"); }
           //noinspection UnnecessaryContinue
           continue;

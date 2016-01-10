@@ -5,7 +5,7 @@ which can be used in pipeline by adding 'hcoref' annotator.
 It includes all deterministic sieves used in dcoref system
 (however, some behaviors might be changed to make the system simpler),
 machine learning sieves based on random forest,
-and oracle sieves for the system analysis.
+and Oracle sieves for the system analysis.
 
 System training requires hcoref.train package in research,
 weka 3.7.12 (http://www.cs.waikato.ac.nz/ml/weka/documentation.html),
@@ -53,7 +53,7 @@ Here is an example code to use the system (See pipeline.HybridCorefAnnotator).
   import edu.stanford.nlp.hcoref.data.CorefChain;
   import edu.stanford.nlp.hcoref.data.CorefChain.CorefMention;
   import edu.stanford.nlp.hcoref.data.Document;
-
+  
   CorefSystem corefSystem = new CorefSystem(props);
   Document corefDoc = corefSystem.docMaker.makeDocument(annotation);
   Map<Integer, CorefChain> result = corefSystem.coref(corefDoc);

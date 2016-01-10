@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 
-import edu.stanford.nlp.util.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -34,6 +33,10 @@ import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.XMLUtils;
 
 /**
  * A reader for XML format AnCora treebank files.
@@ -512,7 +515,7 @@ public class SpanishXMLTreeReader implements TreeReader {
     try {
       pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
     } catch (InterruptedException e) {
-      throw new RuntimeInterruptedException(e);
+      e.printStackTrace();
     }
   }
 }

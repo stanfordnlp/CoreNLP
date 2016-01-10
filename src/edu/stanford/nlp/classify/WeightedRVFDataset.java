@@ -11,8 +11,6 @@ import edu.stanford.nlp.util.Index;
  */
 public class WeightedRVFDataset<L, F> extends RVFDataset<L, F> {
 
-  private static final long serialVersionUID = 1L;
-
   float[] weights = new float[16];
 
   public WeightedRVFDataset() {

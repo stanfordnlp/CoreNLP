@@ -33,7 +33,7 @@ do_start()
     for JAR in `find /opt/corenlp -name "*.jar"`; do
       CLASSPATH="$CLASSPATH:$JAR"
     done
-    nohup su "$SERVER_USER" -c "/usr/local/bin/authbind --deep java -Djava.net.preferIPv4Stack=true -cp "$CLASSPATH" -mx7g edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 80" &
+    nohup su "$SERVER_USER" -c "/usr/local/bin/authbind --deep java -Djava.net.preferIPv4Stack=true -cp "$CLASSPATH" -mx7g edu.stanford.nlp.pipeline.StanfordCoreNLPServer 80" &
     echo "CoreNLP server started."
   fi  
 }

@@ -1,7 +1,5 @@
 package edu.stanford.nlp.util.concurrent;
 
-import edu.stanford.nlp.util.RuntimeInterruptedException;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -145,7 +143,7 @@ public class MulticoreWrapper<I,O> {
     try {
       return idleProcessors.take();
     } catch (InterruptedException e) {
-      throw new RuntimeInterruptedException(e);
+      return null;
     }
   }
   

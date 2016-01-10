@@ -1,7 +1,5 @@
 package edu.stanford.nlp.util.concurrent;
 
-import edu.stanford.nlp.util.RuntimeInterruptedException;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -30,7 +28,7 @@ public class InterruptibleMulticoreWrapper<I,O> extends MulticoreWrapper<I,O> {
     try {
       return (timeout < 0) ? idleProcessors.take() : idleProcessors.poll(timeout, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) {
-      throw new RuntimeInterruptedException(e);
+      return null;
     }
   }
 
@@ -46,13 +44,13 @@ public class InterruptibleMulticoreWrapper<I,O> extends MulticoreWrapper<I,O> {
    * timeout.
    *
    * @return a list of jobs which had never been started if
-   * <code>timeout</code> was reached, or an empty list if that did not
+   * <code>timeout</code> was reached, or null if that did not
    * happen.
    */
   public List<I> joinWithTimeout() {
     if (timeout < 0) {
       join();
-      return new ArrayList<>();
+      return null;
     }
     // Make blocking calls to the last processes that are running
     if ( ! threadPool.isShutdown()) {
@@ -79,10 +77,10 @@ public class InterruptibleMulticoreWrapper<I,O> extends MulticoreWrapper<I,O> {
           threadPool.awaitTermination(10, TimeUnit.SECONDS);
         }
       } catch (InterruptedException e) {
-        throw new RuntimeInterruptedException(e);
+        throw new RuntimeException(e);
       }
     }
-    return new ArrayList<>();
+    return null;
   }
 
   /**

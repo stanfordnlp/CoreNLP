@@ -18,10 +18,10 @@ public class TokenSequenceMatcher extends CoreMapSequenceMatcher<CoreMap> {
             }
           };     */
 
-  public TokenSequenceMatcher(SequencePattern<CoreMap> pattern, List<? extends CoreMap> tokens) {
+  public TokenSequenceMatcher(SequencePattern pattern, List<? extends CoreMap> tokens) {
     super(pattern, tokens);
-    //   this.nodesToStringConverter = CORELABEL_LIST_TO_STRING_CONVERTER;
-    this.nodesToStringConverter = COREMAP_LIST_TO_STRING_CONVERTER;
+ //   this.nodesToStringConverter = CORELABEL_LIST_TO_STRING_CONVERTER;
+      this.nodesToStringConverter = COREMAP_LIST_TO_STRING_CONVERTER;
   }
-
+  
 }

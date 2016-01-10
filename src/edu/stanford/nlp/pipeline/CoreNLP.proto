@@ -80,8 +80,6 @@ message Sentence {
   repeated Mention         mentionsForCoref                    = 56;
   optional bool            hasCorefMentionsAnnotation          = 57;
 
-  optional string          sentenceID                          = 58;  // Useful when storing sentences (e.g. ForEach)
-
   extensions 100 to 255;
 }
 
@@ -264,7 +262,6 @@ message Mention {
   optional IndexedWord headIndexedWord = 30;
   optional IndexedWord   dependingVerb = 31;
   optional IndexedWord       headWord  = 32;
-  optional SpeakerInfo    speakerInfo  = 33;
 
   repeated IndexedWord         sentenceWords = 50;
   repeated IndexedWord         originalSpan = 51;
@@ -294,8 +291,16 @@ message IndexedWord {
 //
 
 message SpeakerInfo {
-  optional string speakerName          = 1;
-  repeated int32 mentions    = 2;
+  optional string speakerId            = 1;
+  optional string speakerName          = 2;
+  optional string speakerDesc          = 3;
+  optional bool speakerIdIsNumber      = 4;
+  optional bool speakerIdIsAutoDetermined = 5;
+
+
+  repeated string speakerNameStrings   = 6;
+  repeated int32 mentions    = 7;
+
 }
 
 //

@@ -257,10 +257,10 @@ public class SequencePattern<T> implements Serializable {
     return outList;
   }
   // Parses string to PatternExpr
-  public interface Parser<T> {
-    SequencePattern.PatternExpr parseSequence(Env env, String s) throws Exception;
-    Pair<SequencePattern.PatternExpr, SequenceMatchAction<T>> parseSequenceWithAction(Env env, String s) throws Exception;
-    SequencePattern.PatternExpr parseNode(Env env, String s) throws Exception;
+  public static interface Parser<T> {
+    public SequencePattern.PatternExpr parseSequence(Env env, String s) throws Exception;
+    public Pair<SequencePattern.PatternExpr, SequenceMatchAction<T>> parseSequenceWithAction(Env env, String s) throws Exception;
+    public SequencePattern.PatternExpr parseNode(Env env, String s) throws Exception;
   }
 
   // Binding of variable names to groups

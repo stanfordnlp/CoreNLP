@@ -25,10 +25,10 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  *     import edu.stanford.nlp.util.Execution.Option
  *
  *     class Props {
- *       &#64;Option(name="anIntOption", required=false, gloss="This is an int")
- *       public static int anIntOption = 7; // default value is 7
+ *       &#64;Option(name="anIntOption", required=false)
+ *       public static int anIntOption = 7 // default value is 7
  *       &#64;Option(name="anotherOption", required=false)
- *       public static File aCastableOption = new File("/foo");
+ *       public static File aCastableOption = new File("/foo")
  *     }
  *   </code>
  * </pre>
@@ -42,34 +42,6 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  *   If your default classpath has many classes in it, you can select a subset of them
  *   by using {@link Execution#fillOptions(Class[], java.util.Properties)}, or some variant.
  * </p>
- *
- * <p>
- *   A complete toy example looks like this:
- * </p>
- *
- * <pre>
- *   <code>
- *     import java.util.Properties;
- *
- *     import edu.stanford.nlp.util.Execution;
- *     import edu.stanford.nlp.util.StringUtils;
- *
- *     public class Foo {
- *
- *       &#64;Execution.Option(name="bar", gloss="This is a string option.", required=true)
- *       private static String BAR = null;
- *
- *       public static void main(String[] args) {
- *         // Parse the arguments
- *         Properties props = StringUtils.argsToProperties(args);
- *         Execution.fillOptions(new Class[]{ Foo.class, Execution.class }, props);
- *
- *         System.err.println(INPUT);
- *       }
- *     }
- *   </code>
- * </pre>
- *
  */
 public class Execution {
 
@@ -473,7 +445,7 @@ public class Execution {
       }
       // (fill the field)
       if (target != null) {
-        // (case: declared option)
+        // (case: declared option)z
         fillField(class2object.get(target.getDeclaringClass()), target, value);
       } else if (ensureAllOptions) {
         // (case: undeclared option)
@@ -630,11 +602,10 @@ public class Execution {
     exec(toRun, args, false);
   }
 
-  public static void exec(Runnable toRun, String[] args, Class... optionClasses) {
+  public static void exec(Runnable toRun, String[] args, Class[] optionClasses) {
     Execution.optionClasses = optionClasses;
     exec(toRun, args, false);
   }
-
   public static void exec(Runnable toRun, String[] args, Class[] optionClasses, boolean exit) {
     Execution.optionClasses = optionClasses;
     exec(toRun, StringUtils.argsToProperties(args), exit);

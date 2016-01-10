@@ -91,7 +91,7 @@ public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
     }
     
     // find head
-    for (int i=0, sz = sentences.size(); i < sz; i++) {
+    for(int i=0 ; i<sentences.size() ; i++ ) {
       findHead(sentences.get(i), predictedMentions.get(i));
       setBarePlural(predictedMentions.get(i));
     }

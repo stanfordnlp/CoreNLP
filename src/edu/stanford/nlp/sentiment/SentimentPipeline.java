@@ -307,6 +307,9 @@ public class SentimentPipeline {
     if (parserModel != null) {
       pipelineProps.setProperty("parse.model", parserModel);
     }
+    if (stdin) {
+      pipelineProps.setProperty("ssplit.eolonly", "true");
+    }
     if (inputFormat == Input.TREES) {
       pipelineProps.setProperty("annotators", "binarizer, sentiment");
       pipelineProps.setProperty("customAnnotatorClass.binarizer", "edu.stanford.nlp.pipeline.BinarizerAnnotator");
@@ -317,10 +320,6 @@ public class SentimentPipeline {
       pipelineProps.setProperty("enforceRequirements", "false");
       tokenizerProps = new Properties();
       tokenizerProps.setProperty("annotators", "tokenize, ssplit");
-    }
-
-    if (stdin && tokenizerProps != null) {
-      tokenizerProps.setProperty("ssplit.eolonly", "true");
     }
 
     int count = 0;
