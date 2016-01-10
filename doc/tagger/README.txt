@@ -51,25 +51,19 @@ programmatically via its API.
 There is a GUI interface, but it is for
 demonstration purposes only; most features of the tagger can only be
 accessed via the command line. To run the demonstration GUI you should
-be able to use any of the following 3 methods:
+be able to use any of the following 2 methods:
 
 1)
-java -mx200m -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTaggerGUI models/wsj-0-18-left3words.tagger
+java -mx200m -classpath stanford-postagger.jar:lib/* edu.stanford.nlp.tagger.maxent.MaxentTaggerGUI models/wsj-0-18-left3words-distsim.tagger
 
-2)
-Providing your system gives java enough memory by default, you can also
-run it by either double-clicking the stanford-postagger.jar file, or
-giving the command: 
-    java -jar stanford-postagger.jar
-
-3) Running the appropriate script for your operating system:
+2) Running the appropriate script for your operating system:
     stanford-postagger-gui.bat
     ./stanford-postagger-gui.sh
 
 To run the tagger from the command line, you can start with the provided
 script appropriate for you operating system:
-    ./stanford-postagger.sh models/wsj-0-18-left3words.tagger sample-input.txt
-    stanford-postagger models\wsj-0-18-left3words.tagger sample-input.txt
+    ./stanford-postagger.sh models/wsj-0-18-left3words-distsim.tagger sample-input.txt
+    stanford-postagger models\wsj-0-18-left3words-distsim.tagger sample-input.txt
 The output should match what is found in sample-output.txt
 
 The tagger has three modes: tagging, training, and testing.  Tagging
@@ -83,7 +77,7 @@ Many options are available for training, tagging, and testing.  These
 options can be set using a properties file.  To start, you can generate a
 default properties file by:
 
-java -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -genprops > myPropsFile.prop
+java -classpath stanford-postagger.jar:lib/* edu.stanford.nlp.tagger.maxent.MaxentTagger -genprops > myPropsFile.prop
 
 This will create the file myPropsFile.prop with descriptions of each
 option for the tagger and the default values for these options
@@ -97,7 +91,7 @@ tagger and descriptions of those options).
 To tag a file using the pre-trained bidirectional model
 =======================================================
 
-java -mx300m -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -model models/wsj-0-18-bidirectional-distsim.tagger -textFile sample-input.txt > sample-tagged.txt
+java -mx300m -classpath stanford-postagger.jar:lib/* edu.stanford.nlp.tagger.maxent.MaxentTagger -model models/wsj-0-18-bidirectional-distsim.tagger -textFile sample-input.txt > sample-tagged.txt
 
 Tagged output will be printed to standard out, which you can redirect
 as above.  Note that the bidirectional model is slightly more accurate
@@ -106,12 +100,12 @@ but significantly slower than the left3words model.
 To train a simple model
 =======================
 
-java -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -prop propertiesFile -model modelFile -trainFile trainingFile
+java -classpath stanford-postagger.jar:lib/* edu.stanford.nlp.tagger.maxent.MaxentTagger -prop propertiesFile -model modelFile -trainFile trainingFile
 
 To test a model
 ===============
 
-java -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -prop propertiesFile -model modelFile -testFile testFile
+java -classpath stanford-postagger.jar:lib/* edu.stanford.nlp.tagger.maxent.MaxentTagger -prop propertiesFile -model modelFile -testFile testFile
 
 
 
@@ -131,6 +125,10 @@ stanford-postagger-YYYY-MM-DD.jar
   This is a JAR file containing all the Stanford classes necessary to
   run the Stanford POS Tagger.  The two jar files are identical.  You can use
   either the one with a version (date) indication or without, as you prefer.
+
+lib
+
+  A directory containing dependencies for the Stanford POS Tagger.
 
 src
 
