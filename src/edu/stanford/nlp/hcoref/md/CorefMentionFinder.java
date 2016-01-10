@@ -193,7 +193,7 @@ public abstract class CorefMentionFinder {
         // formatting error
         if (m.spanToString().contains("ｑｕｏｔ")) {
           remove.add(m);
-          System.err.println("MENTION FILTERING Removed formatting error: " + m.spanToString());
+          //System.err.println("MENTION FILTERING Removed formatting error: " + m.spanToString());
         }
 
         // demonyms
