@@ -1703,11 +1703,11 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     int result = 49;
     int c = 0;
 
-    c += Objects.hashCode(mentionType.name());
-    c += Objects.hashCode(number.name());
-    c += Objects.hashCode(gender.name());
-    c += Objects.hashCode(animacy.name());
-    c += Objects.hashCode(person.name());
+    c += Objects.hashCode(mentionType);
+    c += Objects.hashCode(number);
+    c += Objects.hashCode(gender);
+    c += Objects.hashCode(animacy);
+    c += Objects.hashCode(person);
     //c += Objects.hashCode(headString);
     //c += Objects.hashCode(nerString);
 
