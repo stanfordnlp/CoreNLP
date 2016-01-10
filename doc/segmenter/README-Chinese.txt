@@ -36,7 +36,7 @@ without probabilities).
 * In addition to the command line scripts, there is a Java class 
   "SegDemo" which shows how to call the segmenter in Java code.
   Usage:
-   java -mx2g -cp seg.jar:fastutil.jar:. SegDemo test.simp.utf8
+   java -mx2g -cp "*:." SegDemo test.simp.utf8
 
 	SegDemo as supplied assumes that it is running in the home directory of the
 	installation, and to run anywhere else, you need to set the path to the
