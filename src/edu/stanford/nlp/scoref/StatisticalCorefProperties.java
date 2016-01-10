@@ -21,7 +21,7 @@ public class StatisticalCorefProperties {
 
     if (conll(props)) {
       newProps.setProperty(CorefProperties.PARSER_PROP, "true");
-      newProps.setProperty(CorefProperties.MD_TYPE_PROP, "rule");
+      newProps.setProperty(CorefProperties.MD_TYPE_PROP, props.getProperty(CorefProperties.MD_TYPE_PROP, "rule"));
       newProps.setProperty("coref.useMarkedDiscourse", "true");
     } else {
       String mdPath = PropertiesUtils.getString(newProps, "coref.mentionDetectionModel",
