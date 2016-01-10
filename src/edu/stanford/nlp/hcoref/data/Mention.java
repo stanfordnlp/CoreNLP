@@ -1698,7 +1698,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     return true;
   }
 
-  @Override
+  /*@Override
   public int hashCode() {
     int result = 49;
     int c = 0;
@@ -1737,6 +1737,6 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     result = (37 * result) + c;
 
     return result;
-  }
+  }*/
   
 }
