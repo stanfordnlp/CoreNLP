@@ -119,7 +119,7 @@ public class DcorefChineseBenchmarkSlowITest extends TestCase {
     setAll(lowResults, highResults, expectedResults, CEAFE_TP, 2205.69);
     setLowHighExpected(lowResults, highResults, expectedResults, CEAFE_F1, 50.45, 50.61, 50.47);
 
-    setAll(lowResults,highResults,expectedResults,BLANC_F1,46.18);
+    setAll(lowResults,highResults,expectedResults,BLANC_F1,46.19);
 
     setAll(lowResults,highResults,expectedResults,CONLL_SCORE,53.18);
 
