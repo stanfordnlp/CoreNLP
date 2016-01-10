@@ -201,14 +201,14 @@ public abstract class CorefMentionFinder {
         if (lastWord.length() > 0 && m.spanToString().endsWith("人") &&
             dict.countries.contains(lastWord.substring(0, lastWord.length()-1))) {
           remove.add(m);
-          System.err.println("MENTION FILTERING Removed demonym: " + m.spanToString());
+          //System.err.println("MENTION FILTERING Removed demonym: " + m.spanToString());
         }
 
         // 没 问题
         if (m.spanToString().equals("问题") && m.startIndex > 0 &&
             sent.get(m.startIndex - 1).word().endsWith("没")) {
           remove.add(m);
-          System.err.println("MENTION FILTERING Removed meiyou: " + m.spanToString());
+          //System.err.println("MENTION FILTERING Removed meiyou: " + m.spanToString());
         }
 
         if (m.spanToString().equals("人") && m.startIndex > 0) {
@@ -216,7 +216,7 @@ public abstract class CorefMentionFinder {
 
           if (priorWord.endsWith("让") || priorWord.endsWith("令") || priorWord.endsWith("")) {
             remove.add(m);
-            System.err.println("MENTION FILTERING Removed rangren: " + m.spanToString());
+            //System.err.println("MENTION FILTERING Removed rangren: " + m.spanToString());
           }
         }
 
@@ -225,7 +225,7 @@ public abstract class CorefMentionFinder {
         if (m.spanToString().equals("你") && m.startIndex < sent.size() - 1 &&
             sent.get(m.startIndex + 1).word().startsWith("知道")) {
           remove.add(m);
-          System.err.println("MENTION FILTERING Removed nizhidao: " + m.spanToString());
+          //System.err.println("MENTION FILTERING Removed nizhidao: " + m.spanToString());
         }
 
         if (m.spanToString().contains("什么") || m.spanToString().contains("多少")) {
@@ -234,7 +234,7 @@ public abstract class CorefMentionFinder {
 
         if (m.spanToString().endsWith("的")) {
           remove.add(m);
-          System.err.println("MENTION FILTERING Removed de ending: " + m.spanToString());
+          //System.err.println("MENTION FILTERING Removed de ending: " + m.spanToString());
         }
 
 
