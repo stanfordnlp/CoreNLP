@@ -415,11 +415,11 @@ public abstract class CorefMentionFinder {
   protected static void findHeadChinese(List<CoreLabel> sent, Mention m) {
     int headPos = m.endIndex - 1;
     // Skip trailing punctuations
-    while (sent.get(headPos).get(PartOfSpeechAnnotation.class).equals("PU")
-        && headPos >= m.startIndex) {
+    while (headPos > m.startIndex && sent.get(headPos).tag().equals("PU")) {
       headPos--;
     }
-    if (headPos < m.startIndex) {
+    // If we got right to the end without finding non punctuation, reset to end again
+    if (headPos == m.startIndex && sent.get(headPos).tag().equals("PU")) {
       headPos = m.endIndex - 1;
     }
     if (sent.get(headPos).originalText().equals("自己") && m.endIndex != m.startIndex) {
