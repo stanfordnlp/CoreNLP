@@ -21,6 +21,12 @@ public class StatisticalCorefProperties {
 
     if (conll(props)) {
       newProps.setProperty(CorefProperties.PARSER_PROP, "true");
+      if (props.getProperty(CorefProperties.MD_TYPE_PROP).toLowerCase().equals("dependency")) {
+        newProps.setProperty(CorefProperties.MD_TYPE_PROP, "dependency");
+        String mdPath = PropertiesUtils.getString(newProps, "coref.mentionDetectionModel",
+                "edu/stanford/nlp/models/hcoref/md-model.ser");
+        newProps.setProperty("coref.mentionDetectionModel", mdPath);
+      }
       newProps.setProperty(CorefProperties.MD_TYPE_PROP, props.getProperty(CorefProperties.MD_TYPE_PROP, "rule"));
       newProps.setProperty("coref.useMarkedDiscourse", "true");
     } else {
