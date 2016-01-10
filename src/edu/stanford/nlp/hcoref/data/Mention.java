@@ -31,6 +31,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -1578,6 +1579,60 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     return 0;
   }
 
+  // for now don't use more elaborate equals()
+
+  // helper to see if two Mentions have equivalent SpeakerInfo
+  /*public boolean checkSpeakerInfoEquality(Object obj) {
+    SpeakerInfo otherSpeakerInfo = ((Mention) obj).speakerInfo;
+    // check if one is null and other is not null
+    if (otherSpeakerInfo == null && this.speakerInfo != null) {
+      return false;
+    }
+    if (otherSpeakerInfo != null && this.speakerInfo == null) {
+      return false;
+    }
+    // check if speaker name is different
+    if (!otherSpeakerInfo.getSpeakerName().equals(this.speakerInfo.getSpeakerName())) {
+      return false;
+    }
+    // check the Mention sets are the same by looking at mentionID's
+    // need to do this so Mention.equals() does not recursively call Mention.equals()
+    Set<Integer> thisSpeakerInfoMentionIDs = new HashSet<>();
+    Set<Integer> otherSpeakerInfoMentionIDs = new HashSet<>();
+    for (Mention m : this.speakerInfo.getMentions()) {
+      thisSpeakerInfoMentionIDs.add(m.mentionID);
+    }
+    for (Mention m : otherSpeakerInfo.getMentions()) {
+      otherSpeakerInfoMentionIDs.add(m.mentionID);
+    }
+    if (!thisSpeakerInfoMentionIDs.equals(otherSpeakerInfoMentionIDs)) {
+      return false;
+    }
+    return true;
+  }*/
+
+  // helper to see if two lists of Mentions are the same list of mentionIDs
+  // this is to avoid having Mention.equals() recursively call Mention.equals()
+  /*public boolean checkMentionSetEqualityByID(Set<Mention> thisMentionList, Set<Mention> otherMentionList) {
+    // check for null mismatch
+    if (thisMentionList == null && otherMentionList != null) {
+      return false;
+    }
+    if (thisMentionList != null && otherMentionList == null) {
+      return false;
+    }
+    // now we know neither are null
+    HashSet<Integer> thisMentionIDs = new HashSet<Integer>();
+    for (Mention m : thisMentionList) {
+      thisMentionIDs.add(m.mentionID);
+    }
+    HashSet<Integer> otherMentionIDs = new HashSet<Integer>();
+    for (Mention m : otherMentionList) {
+      otherMentionIDs.add(m.mentionID);
+    }
+    return thisMentionIDs.equals(otherMentionIDs);
+  }*/
+
   @Override
   public boolean equals(Object obj) {
 
@@ -1592,20 +1647,20 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if (!Objects.equals(gender, rhs.gender)) { return false; }
     if (!Objects.equals(animacy, rhs.animacy)) { return false; }
     if (!Objects.equals(person, rhs.person)) { return false; }
-    if (!Objects.equals(headString, rhs.headString)) { return false; }
-    if (!Objects.equals(nerString, rhs.nerString)) { return false; }
+    //if (!Objects.equals(headString, rhs.headString)) { return false; }
+    //if (!Objects.equals(nerString, rhs.nerString)) { return false; }
 
     if (startIndex != rhs.startIndex) { return false; }
     if (endIndex != rhs.endIndex) { return false; }
     if (headIndex != rhs.headIndex) { return false; }
     if (mentionID != rhs.mentionID) { return false; }
-    if (originalRef != rhs.originalRef) { return false; }
+    //if (originalRef != rhs.originalRef) { return false; }
 
-    if (!Objects.equals(headIndexedWord, rhs.headIndexedWord)) { return false; }
-    if (!Objects.equals(dependingVerb, rhs.dependingVerb)) { return false; }
-    if (!Objects.equals(headWord, rhs.headWord)) { return false; }
+    //if (!Objects.equals(headIndexedWord, rhs.headIndexedWord)) { return false; }
+    //if (!Objects.equals(dependingVerb, rhs.dependingVerb)) { return false; }
+    //if (!Objects.equals(headWord, rhs.headWord)) { return false; }
 
-    if (goldCorefClusterID != rhs.goldCorefClusterID) { return false; }
+    //if (goldCorefClusterID != rhs.goldCorefClusterID) { return false; }
     if (corefClusterID != rhs.corefClusterID) { return false; }
     if (mentionNum != rhs.mentionNum) { return false; }
     if (sentNum != rhs.sentNum) { return false; }
@@ -1621,17 +1676,67 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if (generic != rhs.generic) { return false; }
     if (isSingleton != rhs.isSingleton) { return false; }
 
-    if (!Objects.equals(originalSpan, rhs.originalSpan)) { return false; }
-    if (!Objects.equals(sentenceWords, rhs.sentenceWords))  { return false; }
+    //if (!Objects.equals(originalSpan, rhs.originalSpan)) { return false; }
+    //if (!Objects.equals(sentenceWords, rhs.sentenceWords))  { return false; }
 
-    if (!Objects.equals(basicDependency, rhs.basicDependency)) { return false; }
-    if (!Objects.equals(collapsedDependency, rhs.collapsedDependency)) { return false; }
-    if (!Objects.equals(contextParseTree, rhs.contextParseTree)) { return false; }
+    //if (!Objects.equals(basicDependency, rhs.basicDependency)) { return false; }
+    //if (!Objects.equals(collapsedDependency, rhs.collapsedDependency)) { return false; }
+    //if (!Objects.equals(contextParseTree, rhs.contextParseTree)) { return false; }
 
-    if (!Objects.equals(dependents, rhs.dependents)) { return false; }
-    if (!Objects.equals(preprocessedTerms, rhs.preprocessedTerms)) { return false; }
+    //if (!Objects.equals(dependents, rhs.dependents)) { return false; }
+    //if (!Objects.equals(preprocessedTerms, rhs.preprocessedTerms)) { return false; }
+
+    //if (!checkSpeakerInfoEquality(rhs)) { return false; }
+
+    // check the Set<Mention> for each are the same
+    //if (!checkMentionSetEqualityByID(this.appositions, rhs.appositions)) { return false;}
+    //if (!checkMentionSetEqualityByID(this.predicateNominatives, rhs.predicateNominatives)) { return false; }
+    //if (!checkMentionSetEqualityByID(this.relativePronouns, rhs.relativePronouns)) { return false; }
+    //if (!checkMentionSetEqualityByID(this.listMembers, rhs.listMembers)) { return false; }
+    //if (!checkMentionSetEqualityByID(this.belongToLists, rhs.belongToLists)) { return false; }
 
     return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = 49;
+    int c = 0;
+
+    c += Objects.hashCode(mentionType.name());
+    c += Objects.hashCode(number.name());
+    c += Objects.hashCode(gender.name());
+    c += Objects.hashCode(animacy.name());
+    c += Objects.hashCode(person.name());
+    //c += Objects.hashCode(headString);
+    //c += Objects.hashCode(nerString);
+
+    c += startIndex;
+    c += endIndex;
+    c += headIndex;
+    c += mentionID;
+    //c += originalRef;
+
+    //c += goldCorefClusterID;
+    c += corefClusterID;
+    c += mentionNum;
+    c += sentNum;
+    c += utter;
+    c += paragraph;
+
+    c += (isSubject ? 0 : 1);
+    c += (isDirectObject ? 0 : 1);
+    c += (isIndirectObject ? 0 : 1);
+    c += (isPrepositionObject ? 0 : 1);
+    c += (hasTwin ? 0 : 1);
+    c += (generic ? 0 : 1);
+    c += (isSingleton ? 0 : 1);
+
+    //c += Objects.hashCode(spanToString());
+
+    result = (37 * result) + c;
+
+    return result;
   }
   
 }

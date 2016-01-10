@@ -75,12 +75,18 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
       CorefProperties.setRemoveNested(corefProperties, true);
     }
     List<List<Mention>> mentions = md.findMentions(annotation, dictionaries, corefProperties);
+    int mentionIndex = 0;
     int currIndex = 0;
     for (CoreMap sentence : sentences) {
       List<Mention> mentionsForThisSentence = mentions.get(currIndex);
       sentence.set(CorefCoreAnnotations.CorefMentionsAnnotation.class, mentionsForThisSentence);
       // increment to next list of mentions
       currIndex++;
+      // assign latest mentionID
+      for (Mention m : mentionsForThisSentence) {
+        m.mentionID = mentionIndex;
+        mentionIndex++;
+      }
     }
   }
 
