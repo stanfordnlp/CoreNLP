@@ -115,7 +115,8 @@ public class StatisticalCorefProperties {
   }
 
   public static boolean useConstituencyParse(Properties props) {
-    return conll(props);
+    boolean defaultValue = conll(props);
+    return PropertiesUtils.getBool(props, CorefProperties.PARSER_PROP, defaultValue);
   }
 
   public static double minClassImbalance(Properties props) {
