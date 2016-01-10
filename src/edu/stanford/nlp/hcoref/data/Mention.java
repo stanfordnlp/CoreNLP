@@ -1666,7 +1666,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
     result = (37 * result) + c;
 
-    System.err.println("hashCode: "+result);
+    System.err.println("hashCode: "+result+" startIndex: "+startIndex+" endIndex: "+endIndex);
 
     return result;
 
