@@ -1,4 +1,4 @@
-Stanford NER - v3.5.2 - 2015-04-20
+Stanford NER - v3.6.0 - 2015-12-08
 ----------------------------------------------
 
 This package provides a high-performance machine learning based named
@@ -238,6 +238,8 @@ PERSON	ORGANIZATION	LOCATION
 --------------------
 CHANGES
 --------------------
+
+2015-12-09    3.6.0     Updated for compatibility 
 
 2015-04-20    3.5.2     synch standalone and CoreNLP functionality 
 
