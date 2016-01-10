@@ -109,12 +109,6 @@ java -mx600m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.crf.CRFClassifier -l
 When run from a jar file, you also have the option of using a serialized
 classifier contained in the jar file.
 
-If you use the -jar command, or double-click the jar file, NERGUI is
-automatically started, and you will also be given the option (under the
-'Classifier' menu item) to load a default supplied classifier:
-
-java -mx1000m -jar stanford-ner.jar
-
 USING FULL STANFORD CORENLP NER FUNCTIONALITY
 
 This standalone distribution also allows access to the full NER 
