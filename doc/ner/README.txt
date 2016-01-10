@@ -182,7 +182,7 @@ PROGRAMMATIC USE
 The NERDemo file illustrates a couple of ways of calling the system
 programatically.  You should get the same results from
 
-java -mx300m NERDemo classifiers/all.3class.crf.ser.gz sample.txt
+java -cp stanford-ner.jar:lib/* -mx300m NERDemo classifiers/english.all.3class.distsim.crf.ser.gz sample.txt
 
 as from using CRFClassifier.  For more information on API calls, look in
 the enclosed javadoc directory: load index.html in a browser and look
