@@ -96,7 +96,7 @@ public class RedwoodConfiguration {
    * @return this
    */
   public RedwoodConfiguration channelWidth(final int width) {
-    tasks.add(() -> RedwoodConfiguration.this.channelWidth = width);
+    tasks.addFirst(() -> RedwoodConfiguration.this.channelWidth = width);
     return this;
   }
 
@@ -389,11 +389,20 @@ public class RedwoodConfiguration {
   }
 
   /**
-   * The default Redwood configuration, which prints to the console.
+   * A standard  Redwood configuration, which prints to the console with channels.
    * This is the usual starting point for new configurations.
    * @return  A basic Redwood Configuration.
    */
   public static RedwoodConfiguration standard(){
+    return new RedwoodConfiguration().clear().handlers(Handlers.stderr);
+  }
+
+  /**
+   * The default Redwood configuration, which prints to the console without channels.
+   * This is the usual starting point for new configurations.
+   * @return  A basic Redwood Configuration.
+   */
+  public static RedwoodConfiguration minimal(){
     return new RedwoodConfiguration().clear().handlers(
         Handlers.chain(Handlers.hideChannels(), Handlers.stderr)
     );

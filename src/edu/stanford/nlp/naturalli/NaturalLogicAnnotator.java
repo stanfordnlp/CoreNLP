@@ -4,6 +4,8 @@ import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
+import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.pipeline.SentenceAnnotator;
@@ -122,6 +124,18 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
    * {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotator#PATTERNS}.
    */
   private static SemgrexPattern UNARY_PATTERN = SemgrexPattern.compile("{pos:/N.*/}=subject >"+DET+" "+QUANTIFIER);
+
+  /**
+   * A list of words that suggest their complement has downward polarity.
+   * For example, "doubt" ("I doubt that X")
+   */
+  private static List<String> DOUBT_WORDS = Arrays.asList("doubt", "skeptical");
+
+  /**
+   * A pattern for recognizing the words in {@link NaturalLogicAnnotator#DOUBT_WORDS}.
+   */
+  private static TokenSequencePattern DOUBT_PATTERN
+      = TokenSequencePattern.compile("(?$doubt [{ lemma:/" + StringUtils.join(DOUBT_WORDS, "|") + "/}]) (?$target [{lemma:/that|of/}] []+ )");
 
   /** A helper method for
    * {@link NaturalLogicAnnotator#getModifierSubtreeSpan(edu.stanford.nlp.semgraph.SemanticGraph, edu.stanford.nlp.ling.IndexedWord)} and
@@ -468,6 +482,22 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
         }
       }
     }
+
+    // Match TokensRegex
+    TokenSequenceMatcher tokenMatcher = DOUBT_PATTERN.matcher(tokens);
+    while (tokenMatcher.find()) {
+      List<CoreLabel> doubt = (List<CoreLabel>) tokenMatcher.groupNodes("$doubt");
+      List<CoreLabel> target = (List<CoreLabel>) tokenMatcher.groupNodes("$target");
+      for (CoreLabel word : doubt) {
+        OperatorSpec spec = new OperatorSpec(Operator.GENERAL_NEG_POLARITY,
+            word.index() - 1, word.index(),
+            target.get(0).index() - 1, target.get(target.size() - 1).index(),
+            0, 0,
+            tokens.size());
+        word.set(OperatorAnnotation.class, spec);
+      }
+
+    }
   }
 
   /**
@@ -484,6 +514,27 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
       OperatorSpec specOrNull = token.get(OperatorAnnotation.class);
       if (specOrNull != null) {
         operators.add(specOrNull);
+      }
+    }
+
+    // Make sure every node of the dependency tree has a polarity.
+    // This is separate from the code below in case the tokens in the dependency
+    // tree don't correspond to the tokens in the sentence. This happens at least
+    // when the constituency parser craps out on a long sentence, and the
+    // dependency tree is put together haphazardly.
+    if (sentence.containsKey(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)) {
+      for (IndexedWord token : sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class).vertexSet()) {
+        token.set(PolarityAnnotation.class, Polarity.DEFAULT);
+      }
+    }
+    if (sentence.containsKey(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class)) {
+      for (IndexedWord token : sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class).vertexSet()) {
+        token.set(PolarityAnnotation.class, Polarity.DEFAULT);
+      }
+    }
+    if (sentence.containsKey(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class)) {
+      for (IndexedWord token : sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class).vertexSet()) {
+        token.set(PolarityAnnotation.class, Polarity.DEFAULT);
       }
     }
 

@@ -9,6 +9,7 @@ import edu.stanford.nlp.scoref.ClustererDataLoader.ClustererDoc;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
 
 // TODO: some serializable model class
 public class ClusteringCorefSystem extends StatisticalCorefSystem {
@@ -45,6 +46,9 @@ public class ClusteringCorefSystem extends StatisticalCorefSystem {
     Counter<Pair<Integer, Integer>> rankingScores = new ClassicCounter<>();
     Counter<Integer> anaphoricityScores = new ClassicCounter<>();
     for (Example example : examples.examples) {
+      if (Thread.interrupted()) {  // Allow interrupting
+        throw new RuntimeInterruptedException();
+      }
       Pair<Integer, Integer> mentionPair =
               new Pair<>(example.mentionId1, example.mentionId2);
       classificationScores.incrementCount(mentionPair, classificationModel
@@ -61,6 +65,9 @@ public class ClusteringCorefSystem extends StatisticalCorefSystem {
         mentionPairs, null, document.predictedMentionsByID.entrySet().stream().collect(
             Collectors.toMap(Map.Entry::getKey, e -> e.getValue().mentionType.toString())));
     for (Pair<Integer, Integer> mentionPair : clusterer.getClusterMerges(doc)) {
+      if (Thread.interrupted()) {  // Allow interrupting
+        throw new RuntimeInterruptedException();
+      }
       StatisticalCorefUtils.mergeCoreferenceClusters(mentionPair, document);
     }
   }

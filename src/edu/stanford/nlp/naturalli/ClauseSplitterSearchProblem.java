@@ -81,6 +81,9 @@ public class ClauseSplitterSearchProblem {
       add("clone_dobj");
       add("simple");
     }});
+    put("acl:relcl", new ArrayList<String>() {{  // no doubt (-> that cats have tails <-)
+      add("simple");
+    }});
   }});
 
   /**
@@ -555,7 +558,7 @@ public class ClauseSplitterSearchProblem {
       @Override
       public boolean prerequisitesMet(SemanticGraph originalTree, SemanticGraphEdge edge) {
         char tag = edge.getDependent().tag().charAt(0);
-        return !(tag != 'V' && tag != 'N');
+        return !(tag != 'V' && tag != 'N' && tag != 'J' && tag != 'P' && tag != 'D');
       }
 
       @Override
@@ -870,17 +873,23 @@ public class ClauseSplitterSearchProblem {
               if (scores.size() > 0) {
                 Counters.logNormalizeInPlace(scores);
               }
-              scores.remove(ClauseClassifierLabel.NOT_A_CLAUSE);
+              String rel = outgoingEdge.getRelation().toString();
+              if ("nsubj".equals(rel) || "dobj".equals(rel)) {
+                scores.remove(ClauseClassifierLabel.NOT_A_CLAUSE);  // Always at least yield on nsubj and dobj
+              }
               logProbability = Counters.max(scores, Double.NEGATIVE_INFINITY);
               bestLabel = Counters.argmax(scores, (x, y) -> 0, ClauseClassifierLabel.CLAUSE_SPLIT);
             }
-            Pair<State, List<Counter<String>>> childState = Pair.makePair(candidate.get().withIsDone(bestLabel), new ArrayList<Counter<String>>(featuresSoFar) {{
-              add(features);
-            }});
-            // 2. Register the child state
-            if (!seenWords.contains(childState.first.edge.getDependent())) {
+
+            if (bestLabel != ClauseClassifierLabel.NOT_A_CLAUSE) {
+              Pair<State, List<Counter<String>>> childState = Pair.makePair(candidate.get().withIsDone(bestLabel), new ArrayList<Counter<String>>(featuresSoFar) {{
+                add(features);
+              }});
+              // 2. Register the child state
+              if (!seenWords.contains(childState.first.edge.getDependent())) {
 //            System.err.println("  pushing " + action.signature() + " with " + argmax.first.edge);
-              fringe.add(childState, logProbability);
+                fringe.add(childState, logProbability);
+              }
             }
           }
         }

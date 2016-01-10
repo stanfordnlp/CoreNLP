@@ -292,8 +292,12 @@ public class OpenIE implements Annotator {
           assert prep != null;
           tree.addEdge(adj, pobj, GrammaticalRelation.valueOf(Language.English, prep), Double.NEGATIVE_INFINITY, false);
         }
-        // (add tree)
-        adjFragments.add(new SentenceFragment(tree, clause.assumedTruth, false));
+        // (check for monotonicity)
+        if (adj.get(NaturalLogicAnnotations.PolarityAnnotation.class).isUpwards() &&
+            be.get(NaturalLogicAnnotations.PolarityAnnotation.class).isUpwards()) {
+          // (add tree)
+          adjFragments.add(new SentenceFragment(tree, clause.assumedTruth, false));
+        }
       }
       list.addAll(adjFragments);
       return list;
@@ -445,7 +449,7 @@ public class OpenIE implements Annotator {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
     if (tokens.size() < 2) {
 
-      // Short sentence; skip annotating it.
+      // Short sentence. Skip annotating it.
       sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.EMPTY_LIST);
       sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.EMPTY_SET);
 
@@ -459,6 +463,8 @@ public class OpenIE implements Annotator {
       if (parse == null) {
         throw new IllegalStateException("Cannot run OpenIE without a parse tree!");
       }
+      // Clean the tree
+      Util.cleanTree(parse);
 
       // Resolve Coreference
       SemanticGraph canonicalizedParse = parse;
@@ -579,6 +585,30 @@ public class OpenIE implements Annotator {
   }
 
   /**
+   * Prints an OpenIE triple to a String, according to the output format requested in
+   * the annotator.
+   *
+   * @param extraction The triple to write.
+   * @param docid The document ID (for the ReVerb format)
+   * @param sentence The sentence the triple was extracted from (for the ReVerb format)
+   *
+   * @return A String representation of the triple.
+   */
+  public static String tripleToString(RelationTriple extraction, String docid, CoreMap sentence) {
+    switch (FORMAT) {
+      case REVERB:
+        return extraction.toReverbString(docid, sentence);
+      case OLLIE:
+        return extraction.confidenceGloss() + ": (" + extraction.subjectGloss() + "; " + extraction.relationGloss() + "; " + extraction.objectGloss() + ")";
+      case DEFAULT:
+        return extraction.toString();
+      default:
+        throw new IllegalStateException("Format is not implemented: " + FORMAT);
+    }
+
+  }
+
+  /**
    * Process a single file or line of standard in.
    * @param pipeline The annotation pipeline to run the lines of the input through.
    * @param docid The docid of the document we are extracting.
@@ -600,19 +630,7 @@ public class OpenIE implements Annotator {
       for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
         for (RelationTriple extraction : sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
           // Print the extractions
-          switch (FORMAT) {
-            case REVERB:
-              System.out.println(extraction.toReverbString(docid, sentence));
-              break;
-            case OLLIE:
-              System.out.println(extraction.confidenceGloss() + ": (" + extraction.subjectGloss() + "; " + extraction.relationGloss() + "; " + extraction.objectGloss() + ")");
-              break;
-            case DEFAULT:
-              System.out.println(extraction.toString());
-              break;
-            default:
-              throw new IllegalStateException("Format is not implemented: " + FORMAT);
-          }
+          System.out.println(tripleToString(extraction, docid, sentence));
           empty = false;
         }
       }
