@@ -51,7 +51,7 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
       headFinder = getHeadFinder(props);
       //System.out.println("got head finder");
       md = getMentionFinder(props, headFinder);
-      System.err.println("Using mention detector: "+mdName+" which requires these parses: "+mentionAnnotatorRequirements);
+      System.err.println("Using mention detector type: "+mdName);
       mentionAnnotatorRequirements.addAll(Annotator.REQUIREMENTS.get(STANFORD_MENTION));
     } catch (Exception e) {
       System.err.println("Error with building coref mention annotator!");
@@ -97,21 +97,21 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
           throws ClassNotFoundException, IOException {
 
     switch (CorefProperties.getMDType(props)) {
-      case RULE:
-        mentionAnnotatorRequirements = new ArraySet<>(DEPENDENCY_REQUIREMENT, PARSE_REQUIREMENT);
-        mdName = "rule";
-        return new RuleBasedCorefMentionFinder(headFinder, props);
+      case DEPENDENCY:
+        mentionAnnotatorRequirements = new ArraySet<>(DEPENDENCY_REQUIREMENT);
+        mdName = "dependency";
+        return new DependencyCorefMentionFinder(props);
 
       case HYBRID:
         mdName = "hybrid";
         mentionAnnotatorRequirements = new ArraySet<>(DEPENDENCY_REQUIREMENT, PARSE_REQUIREMENT);
         return new HybridCorefMentionFinder(headFinder, props);
 
-      case DEPENDENCY:
+      case RULE:
       default:  // default is dependency
-        mdName = "dependency";
-        mentionAnnotatorRequirements = new ArraySet<>(DEPENDENCY_REQUIREMENT);
-        return new DependencyCorefMentionFinder(props);
+        mdName = "rule";
+        mentionAnnotatorRequirements = new ArraySet<>(DEPENDENCY_REQUIREMENT, PARSE_REQUIREMENT);
+        return new RuleBasedCorefMentionFinder(headFinder,props);
     }
   }
 
@@ -121,10 +121,6 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
   @Override
   public Set<Requirement> requirementsSatisfied() {
     return Collections.singleton(MENTION_REQUIREMENT);
-  }
-
-  public static void main(String[] args) {
-
   }
 
 }
