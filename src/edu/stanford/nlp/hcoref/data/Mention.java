@@ -1633,5 +1633,44 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
     return true;
   }
+
+  @Override
+  public int hashCode() {
+    int result = 49;
+    int c = 0;
+
+    c += Objects.hashCode(mentionType);
+    c += Objects.hashCode(number);
+    c += Objects.hashCode(gender);
+    c += Objects.hashCode(animacy);
+    c += Objects.hashCode(person);
+
+    c += startIndex;
+    c += endIndex;
+    c += headIndex;
+    c += mentionID;
+
+    c += corefClusterID;
+    c += mentionNum;
+    c += sentNum;
+    c += utter;
+    c += paragraph;
+
+    c += (isSubject ? 0 : 1);
+    c += (isDirectObject ? 0 : 1);
+    c += (isIndirectObject ? 0 : 1);
+    c += (isPrepositionObject ? 0 : 1);
+    c += (hasTwin ? 0 : 1);
+    c += (generic ? 0 : 1);
+    c += (isSingleton ? 0 : 1);
+
+    result = (37 * result) + c;
+
+    System.err.println("hashCode: "+result);
+
+    return result;
+
+  }
+
   
 }
