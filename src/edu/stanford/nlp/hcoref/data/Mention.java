@@ -70,8 +70,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   private static final long serialVersionUID = -7524485803945717057L;
 
-  public Mention() {
-  }
+  /*public Mention() {
+  }*/
 
   public Mention(int mentionID, int startIndex, int endIndex, List<CoreLabel> sentenceWords, SemanticGraph basicDependency, SemanticGraph collapsedDependency){
     this.mentionID = mentionID;
@@ -100,8 +100,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   public String headString;
   public String nerString;
 
-  public int startIndex;
-  public int endIndex;
+  public final int startIndex;
+  public final int endIndex;
   public int headIndex;
   public int mentionID = -1;
   public int originalRef = -1;
@@ -1636,6 +1636,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   @Override
   public int hashCode() {
+
     int result = 49;
     int c = 0;
 
@@ -1643,8 +1644,6 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     c += endIndex;
 
     result = (37 * result) + c;
-
-    System.err.println("hashCode: "+result+" startIndex: "+startIndex+" endIndex: "+endIndex);
 
     return result;
 
