@@ -1647,20 +1647,20 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if (!Objects.equals(gender, rhs.gender)) { return false; }
     if (!Objects.equals(animacy, rhs.animacy)) { return false; }
     if (!Objects.equals(person, rhs.person)) { return false; }
-    //if (!Objects.equals(headString, rhs.headString)) { return false; }
-    //if (!Objects.equals(nerString, rhs.nerString)) { return false; }
+    if (!Objects.equals(headString, rhs.headString)) { return false; }
+    if (!Objects.equals(nerString, rhs.nerString)) { return false; }
 
     if (startIndex != rhs.startIndex) { return false; }
     if (endIndex != rhs.endIndex) { return false; }
     if (headIndex != rhs.headIndex) { return false; }
     if (mentionID != rhs.mentionID) { return false; }
-    //if (originalRef != rhs.originalRef) { return false; }
+    if (originalRef != rhs.originalRef) { return false; }
 
-    //if (!Objects.equals(headIndexedWord, rhs.headIndexedWord)) { return false; }
-    //if (!Objects.equals(dependingVerb, rhs.dependingVerb)) { return false; }
-    //if (!Objects.equals(headWord, rhs.headWord)) { return false; }
+    if (!Objects.equals(headIndexedWord, rhs.headIndexedWord)) { return false; }
+    if (!Objects.equals(dependingVerb, rhs.dependingVerb)) { return false; }
+    if (!Objects.equals(headWord, rhs.headWord)) { return false; }
 
-    //if (goldCorefClusterID != rhs.goldCorefClusterID) { return false; }
+    if (goldCorefClusterID != rhs.goldCorefClusterID) { return false; }
     if (corefClusterID != rhs.corefClusterID) { return false; }
     if (mentionNum != rhs.mentionNum) { return false; }
     if (sentNum != rhs.sentNum) { return false; }
@@ -1676,15 +1676,15 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if (generic != rhs.generic) { return false; }
     if (isSingleton != rhs.isSingleton) { return false; }
 
-    //if (!Objects.equals(originalSpan, rhs.originalSpan)) { return false; }
-    //if (!Objects.equals(sentenceWords, rhs.sentenceWords))  { return false; }
+    if (!Objects.equals(originalSpan, rhs.originalSpan)) { return false; }
+    if (!Objects.equals(sentenceWords, rhs.sentenceWords))  { return false; }
 
-    //if (!Objects.equals(basicDependency, rhs.basicDependency)) { return false; }
-    //if (!Objects.equals(collapsedDependency, rhs.collapsedDependency)) { return false; }
-    //if (!Objects.equals(contextParseTree, rhs.contextParseTree)) { return false; }
+    if (!Objects.equals(basicDependency, rhs.basicDependency)) { return false; }
+    if (!Objects.equals(collapsedDependency, rhs.collapsedDependency)) { return false; }
+    if (!Objects.equals(contextParseTree, rhs.contextParseTree)) { return false; }
 
-    //if (!Objects.equals(dependents, rhs.dependents)) { return false; }
-    //if (!Objects.equals(preprocessedTerms, rhs.preprocessedTerms)) { return false; }
+    if (!Objects.equals(dependents, rhs.dependents)) { return false; }
+    if (!Objects.equals(preprocessedTerms, rhs.preprocessedTerms)) { return false; }
 
     //if (!checkSpeakerInfoEquality(rhs)) { return false; }
 
@@ -1698,7 +1698,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     return true;
   }
 
-  /*@Override
+  @Override
   public int hashCode() {
     int result = 49;
     int c = 0;
@@ -1737,6 +1737,6 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     result = (37 * result) + c;
 
     return result;
-  }*/
+  }
   
 }
