@@ -121,7 +121,7 @@ public class DcorefChineseBenchmarkSlowITest extends TestCase {
 
     setAll(lowResults,highResults,expectedResults,BLANC_F1,46.19);
 
-    setAll(lowResults,highResults,expectedResults,CONLL_SCORE,53.18);
+    setAll(lowResults,highResults,expectedResults,CONLL_SCORE,53.19);
 
 
     Counter<String> results = new ClassicCounter<String>();
