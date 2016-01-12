@@ -15,14 +15,14 @@ topnav:
 topnav_dropdowns:
 - title: Topnav dropdowns
   subcategories:
-    - title: Online demos
+    - title: Quick links
       audience: writers, designers
       platform: all
       product: all
       version: all
       output: web
       items:
-        - title: Webservice API
+        - title: Online demo (Webservice API)
           externalurl: http://corenlp.run/
           audience: writers, designers
           platform: all
@@ -30,7 +30,7 @@ topnav_dropdowns:
           version: all
           output: web
 
-        - title: Traditional demo
+        - title: Online demo (Traditional)
           external_url: http://nlp.stanford.edu:8080/corenlp/
           audience: writers, designers
           platform: all
@@ -38,13 +38,6 @@ topnav_dropdowns:
           version: all
           output: web
 
-    - title: Package manager repositories
-      audience: writers, designers
-      platform: all
-      product: all
-      version: all
-      output: web
-      items:
         - title: Maven Central
           external_url: http://mvnrepository.com/artifact/edu.stanford.nlp/stanford-corenlp
           audience: writers, designers
@@ -61,7 +54,7 @@ topnav_dropdowns:
           version: all
           output: web
 
-        - title: Others
+        - title: Other packages
           url: extensions.html
           audience: writers, designers
           platform: all
@@ -69,13 +62,6 @@ topnav_dropdowns:
           version: all
           output: web
 
-    - title: Quick links
-      audience: writers, designers
-      platform: all
-      product: all
-      version: all
-      output: web
-      items:
         - title: Paper to cite
           external_url: http://www.anthology.aclweb.org/P/P14/P14-5010.pdf
           audience: writers, designers
