@@ -23,7 +23,7 @@ topnav_dropdowns:
       output: web
       items:
         - title: Online demo (Webservice API)
-          externalurl: http://corenlp.run/
+          external_url: http://corenlp.run/
           audience: writers, designers
           platform: all
           product: all
@@ -47,7 +47,7 @@ topnav_dropdowns:
           output: web
 
         - title: NuGet (.NET)
-          externalurl: https://www.nuget.org/packages/Stanford.NLP.CoreNLP/
+          external_url: https://www.nuget.org/packages/Stanford.NLP.CoreNLP/
           audience: writers, designers
           platform: all
           product: all
@@ -71,7 +71,7 @@ topnav_dropdowns:
           output: web
 
         - title: Stack Overflow
-          externalurl: http://stackoverflow.com/questions/tagged/stanford-nlp
+          external_url: http://stackoverflow.com/questions/tagged/stanford-nlp
           audience: writers, designers
           platform: all
           product: all
