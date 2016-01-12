@@ -19,6 +19,7 @@ import edu.stanford.nlp.trees.international.pennchinese.ChineseSemanticHeadFinde
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
  * This class adds mention information to an Annotation.
@@ -69,7 +70,8 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
       docID = "";
     }
     if (docID.contains("nw") && corefProperties.getProperty("coref.input.type", "raw").equals("conll") &&
-            corefProperties.getProperty("coref.language", "en").equals("zh")) {
+            corefProperties.getProperty("coref.language", "en").equals("zh") &&
+            PropertiesUtils.getBool(corefProperties,"coref.specialCaseNewswire")) {
       CorefProperties.setRemoveNested(corefProperties, false);
     } else {
       CorefProperties.setRemoveNested(corefProperties, true);
