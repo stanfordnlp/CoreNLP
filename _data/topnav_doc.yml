@@ -29,7 +29,6 @@ topnav_dropdowns:
           product: all
           version: all
           output: web
-
         - title: Traditional demo
           external_url: http://nlp.stanford.edu:8080/corenlp/
           audience: writers, designers
@@ -37,7 +36,6 @@ topnav_dropdowns:
           product: all
           version: all
           output: web
-
     - title: Repositories
       audience: writers, designers
       platform: all
@@ -52,7 +50,6 @@ topnav_dropdowns:
           product: all
           version: all
           output: web
-
         - title: NuGet (.NET)
           externalurl: https://www.nuget.org/packages/Stanford.NLP.CoreNLP/
           audience: writers, designers
@@ -60,7 +57,6 @@ topnav_dropdowns:
           product: all
           version: all
           output: web
-
         - title: Others
           url: extensions.html
           audience: writers, designers
@@ -68,7 +64,6 @@ topnav_dropdowns:
           product: all
           version: all
           output: web
-
     - title: Quick links
       audience: writers, designers
       platform: all
@@ -83,7 +78,6 @@ topnav_dropdowns:
           product: all
           version: all
           output: web
-
         - title: Stack Overflow
           externalurl: http://stackoverflow.com/questions/tagged/stanford-nlp
           audience: writers, designers
@@ -91,7 +85,6 @@ topnav_dropdowns:
           product: all
           version: all
           output: web
-
         - title: Twitter
           external_url: https://twitter.com/stanfordnlp
           audience: writers, designers
