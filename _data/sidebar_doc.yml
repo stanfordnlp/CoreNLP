@@ -117,8 +117,11 @@ entries:
         - title: FAQ 
           url: faq.html
 
-        - title: Online demo
+        - title: Online demo (API)
           external_url: http://corenlp.run/
+
+        - title: Online demo (old skool)
+          external_url: http://nlp.stanford.edu:8080/corenlp/
 
         - title: Javadoc 
           external_url: http://nlp.stanford.edu/nlp/javadoc/javanlp/
