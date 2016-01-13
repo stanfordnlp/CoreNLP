@@ -1,4 +1,87 @@
 # Topnav single links
 # if you want to list an external url, use external_url instead of url. the theme will apply a different link base.
-# topnav:
-# - title: Topnav
+topnav:
+- title: Topnav
+  subcategories:
+    - title: Github repo
+      external_url: https://github.com/stanfordnlp/CoreNLP
+      audience: writers, designers
+      platform: all
+      product: all
+      version: all
+      output: web
+
+#Topnav dropdowns
+topnav_dropdowns:
+- title: Topnav dropdowns
+  subcategories:
+    - title: Quick links
+      audience: writers, designers
+      platform: all
+      product: all
+      version: all
+      output: web
+      items:
+        - title: Online demo (Webservice API)
+          external_url: http://corenlp.run/
+          audience: writers, designers
+          platform: all
+          product: all
+          version: all
+          output: web
+
+        - title: Online demo (Traditional)
+          external_url: http://nlp.stanford.edu:8080/corenlp/
+          audience: writers, designers
+          platform: all
+          product: all
+          version: all
+          output: web
+
+        - title: Maven Central
+          external_url: http://mvnrepository.com/artifact/edu.stanford.nlp/stanford-corenlp
+          audience: writers, designers
+          platform: all
+          product: all
+          version: all
+          output: web
+
+        - title: NuGet (.NET)
+          external_url: https://www.nuget.org/packages/Stanford.NLP.CoreNLP/
+          audience: writers, designers
+          platform: all
+          product: all
+          version: all
+          output: web
+
+        - title: Other packages
+          url: extensions.html
+          audience: writers, designers
+          platform: all
+          product: all
+          version: all
+          output: web
+
+        - title: Paper to cite
+          external_url: http://www.anthology.aclweb.org/P/P14/P14-5010.pdf
+          audience: writers, designers
+          platform: all
+          product: all
+          version: all
+          output: web
+
+        - title: Stack Overflow
+          external_url: http://stackoverflow.com/questions/tagged/stanford-nlp
+          audience: writers, designers
+          platform: all
+          product: all
+          version: all
+          output: web
+
+        - title: Twitter
+          external_url: https://twitter.com/stanfordnlp
+          audience: writers, designers
+          platform: all
+          product: all
+          version: all
+          output: web

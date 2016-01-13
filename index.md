@@ -55,7 +55,7 @@ packaged models for **Chinese** and **Spanish**, and
 Stanford NLP models for **French**, **German**, and **Arabic** are
 also usable inside CoreNLP.
 
-| Annotator | Arabic | Chinese | English | French | German | Spanish |
+| Annotator | ar | zh | en | fr | de | es |
 | ------------ |:---:|:---:|:---:|:---:|:---:|:---:|
 | Tokenize / Segment | &check; | &check;  | &check; | &check;  |     | &check; |
 | Sentence Split | &check; | &check;  | &check; | &check;  | &check; | &check; |
