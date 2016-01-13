@@ -125,16 +125,28 @@ If you would like to run our system on the CoNLL 2012 eval data:
 
 1. First get the CoNLL scoring script from [here](http://conll.cemantix.org/2012/software.html)
 
-2. Set up scorer.pl on your machine
+2. Get the CoNLL 2012 eval data from [here](http://conll.cemantix.org/2012/data.html)
 
-3. Get the CoNLL 2012 eval data from [here](http://conll.cemantix.org/2012/data.html)
+3. Download [scoref-conll.properties](http://nlp.stanford.edu/software/scoref-conll.properties) and update it to your specific settings
 
-4. Download [scoref-conll.properties](http://nlp.stanford.edu/software/scoref-conll.properties) and update it to your specific settings
-
-5. Run this command (it should show a final F1 score of 63.61):
+4. Run this command (it should show a final F1 score of 63.61):
 
 ```bash
 java -Xmx5g -cp "stanford-corenlp-full-2015-12-09/*" edu.stanford.nlp.scoref.StatisticalCorefSystem scoref-conll.properties
+```
+
+For Chinese:
+
+1. First get the CoNLL scoring script from [here](http://conll.cemantix.org/2012/software.html)
+
+2. Get the CoNLL 2012 eval data from [here](http://conll.cemantix.org/2012/data.html)
+
+3. Download [zh-conll.properties](http://nlp.stanford.edu/software/zh-conll.properties) and update it to your specific settings
+
+4. Run this command (it should show a final F1 score of 61.93):
+
+```bash
+java -Xmx3g edu.stanford.nlp.hcoref.CorefSystem -props zh-test-conll.properties
 ```
 
 ## Citing Stanford Coreference
