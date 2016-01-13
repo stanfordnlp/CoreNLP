@@ -146,7 +146,7 @@ For Chinese:
 4. Run this command (it should show a final F1 score of 61.93):
 
 ```bash
-java -Xmx3g edu.stanford.nlp.hcoref.CorefSystem -props zh-test-conll.properties
+java -Xmx3g -cp "stanford-corenlp-full-2015-12-09/*:stanford-chinese-corenlp-2015-12-08-models.jar" edu.stanford.nlp.hcoref.CorefSystem -props zh-test-conll.properties
 ```
 
 ## Citing Stanford Coreference
