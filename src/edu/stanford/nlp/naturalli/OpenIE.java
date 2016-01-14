@@ -618,6 +618,7 @@ public class OpenIE implements Annotator {
    * @param docid The docid of the document we are extracting.
    * @param document the document to annotate.
    */
+  @SuppressWarnings("SynchronizeOnNonFinalField")
   private static void processDocument(AnnotationPipeline pipeline, String docid, String document) {
     // Error checks
     if (document.trim().equals("")) {
