@@ -3,6 +3,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="{% if page.summary %}{{ page.summary | strip_html | strip_newlines | truncate: 160 }}{% endif %}">
 <meta name="keywords" content="{{page.tags}}{% if page.tags %}, {% endif %} {{page.keywords}}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@stanfordnlp">
+<meta name="twitter:creator" content="@stanfordnlp">
+<meta name="twitter:title" content="Stanford CoreNLP">
+<meta name="twitter:description" content="Stanford CoreNLP is a widely used, high performance set of natural language analysis tools, available open source, written in Java.">
+<meta name="twitter:image" content="http://stanfordnlp.github.io/CoreNLP/images/Cate-Blanchett.png">
 <title>{% if page.homepage == true %} {{site.homepage_title}} {% elsif page.title %}{{ page.title }}{% endif %}  | {{ site.site_title }}</title>
 <link rel="stylesheet" type="text/css" href="/CoreNLP/css/syntax.css">
 <link rel="stylesheet" type="text/css" href="/CoreNLP/css/font-awesome.min.css">
