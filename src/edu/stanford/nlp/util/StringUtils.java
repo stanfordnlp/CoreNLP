@@ -2577,4 +2577,42 @@ public class StringUtils {
     return map;
   }
 
+
+  /**
+   * Takes an input String, and replaces any bash-style variables (e.g., $VAR_NAME)
+   * with its actual environment variable from the passed environment specification.
+   *
+   * @param raw The raw String to replace variables in.
+   * @param env The environment specification; e.g., {@link System#getenv()}.
+   * @return The input String, but with all variables replaced.
+   */
+  public static String expandEnvironmentVariables(String raw, Map<String, String> env) {
+    String pattern = "\\$\\{?([a-zA-Z_]+[a-zA-Z0-9_]*)\\}?";
+    Pattern expr = Pattern.compile(pattern);
+    String text = raw;
+    Matcher matcher = expr.matcher(text);
+    while (matcher.find()) {
+      String envValue = env.get(matcher.group(1));
+      if (envValue == null) {
+        envValue = "";
+      } else {
+        envValue = envValue.replace("\\", "\\\\");
+      }
+      Pattern subexpr = Pattern.compile(Pattern.quote(matcher.group(0)));
+      text = subexpr.matcher(text).replaceAll(envValue);
+    }
+    return text;
+  }
+
+  /**
+   * Takes an input String, and replaces any bash-style variables (e.g., $VAR_NAME)
+   * with its actual environment variable from {@link System#getenv()}.
+   *
+   * @param raw The raw String to replace variables in.
+   * @return The input String, but with all variables replaced.
+   */
+  public static String expandEnvironmentVariables(String raw) {
+    return expandEnvironmentVariables(raw, System.getenv());
+  }
+
 }

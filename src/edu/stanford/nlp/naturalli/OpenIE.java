@@ -27,6 +27,7 @@ import edu.stanford.nlp.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -92,6 +93,9 @@ public class OpenIE implements Annotator {
 
   @Execution.Option(name="filelist", gloss="The files to annotate, as a list of files one per line.")
   private static File FILELIST  = null;
+
+  @Execution.Option(name="output", gloss="The files to annotate, as a list of files one per line.")
+  private static PrintStream OUTPUT  = System.out;
 
   //
   // Annotator Options (for running in the pipeline)
@@ -626,11 +630,11 @@ public class OpenIE implements Annotator {
 
     // Get the extractions
     boolean empty = true;
-    synchronized (System.out) {
+    synchronized (OUTPUT) {
       for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
         for (RelationTriple extraction : sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
           // Print the extractions
-          System.out.println(tripleToString(extraction, docid, sentence));
+          OUTPUT.println(tripleToString(extraction, docid, sentence));
           empty = false;
         }
       }
@@ -666,7 +670,11 @@ public class OpenIE implements Annotator {
     // Parse the files to process
     String[] filesToProcess;
     if (FILELIST != null) {
-      filesToProcess = IOUtils.linesFromFile(FILELIST.getPath()).stream().map(String::trim).toArray(String[]::new);
+      filesToProcess = IOUtils.linesFromFile(FILELIST.getPath()).stream()
+          .map(String::trim)
+          .map(path -> path.replaceAll("^~", "$HOME"))
+          .map(path -> new File(path).exists() ? path : StringUtils.expandEnvironmentVariables(path))
+          .toArray(String[]::new);
     } else if (!"".equals(props.getProperty("", ""))) {
       filesToProcess = props.getProperty("", "").split("\\s+");
     } else {
