@@ -924,6 +924,10 @@ public class StringUtils {
         Integer maxFlagArgs = flagsToNumArgs.get(key);
         int max = maxFlagArgs == null ? 1 : maxFlagArgs;
         int min = maxFlagArgs == null ? 0 : maxFlagArgs;
+        if (maxFlagArgs != null && maxFlagArgs == 0 && i < args.length - 1 &&
+            ("true".equalsIgnoreCase(args[i + 1]) || "false".equalsIgnoreCase(args[i + 1]))) {
+          max = 1;  // case: we're reading a boolean flag. TODO(gabor) there's gotta be a better way...
+        }
         List<String> flagArgs = new ArrayList<>();
         // cdm oct 2007: add length check to allow for empty string argument!
         for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].isEmpty() || args[i + 1].charAt(0) != '-'); i++, j++) {

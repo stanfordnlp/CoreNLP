@@ -645,7 +645,20 @@ public class OpenIE implements Annotator {
    */
   public static void main(String[] args) throws IOException, InterruptedException {
     // Parse the arguments
-    Properties props = StringUtils.argsToProperties(args);
+    Properties props = StringUtils.argsToProperties(args, new HashMap<String, Integer>(){{
+      put("openie.resolve_coref", 0);
+      put("resolve_coref", 0);
+      put("openie.splitter.nomodel", 0);
+      put("splitter.nomodel", 0);
+      put("openie.splitter.disable", 0);
+      put("splitter.disable", 0);
+      put("openie.ignore_affinity", 0);
+      put("splitter.ignore_affinity", 0);
+      put("openie.triple.strict", 0);
+      put("splitter.triple.strict", 0);
+      put("openie.triple.all_nominals", 0);
+      put("splitter.triple.all_nominals", 0);
+    }});
     Execution.fillOptions(new Class[]{ OpenIE.class, Execution.class}, props);
     AtomicInteger exceptionCount = new AtomicInteger(0);
     ExecutorService exec = Executors.newFixedThreadPool(Execution.threads);
@@ -663,7 +676,8 @@ public class OpenIE implements Annotator {
     // Tweak the arguments
     if ("".equals(props.getProperty("annotators", ""))) {
       if (!"false".equalsIgnoreCase(props.getProperty("resolve_coref", props.getProperty("openie.resolve_coref", "false")))) {
-        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,ner,entitymentions,coref,natlog,openie");
+        props.setProperty("coref.md.type", "dep");  // so we don't need the `parse` annotator
+        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,ner,mention,coref,natlog,openie");
       } else {
         props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,natlog,openie");
       }
