@@ -50,6 +50,20 @@ The following tables give an overview of some of the possibilities.
 | dcoref | en | N/A | 4.45 seconds per doc | .123 seconds per doc |
 | coref | zh | hybrid/rule | 19.1 seconds per doc | .044 seconds per doc |
 
+## Having the appropriate parses
+
+Several settings for coreference require both constituency parses and dependency parses.
+
+You can add these to your pipeline by using the parse annotator.  Make sure you don't 
+put parse.buildgraphs=false, this will set the pipeline to not create dependencies.
+As long as you leave the default or set parse.buildgraphs=true it will work.
+
+Some settings just require dependency parses.  Two ways to add dependency parses are:
+
+* as above use the parse annotator and make sure parse.buildgraphs=true
+* use the depparse annotator
+
+
 ## Usage
 
 ### Command Line
@@ -67,7 +81,7 @@ java -Xmx5g -cp stanford-corenlp-3.6.0.jar:stanford-corenlp-models-3.6.0.jar:* e
 -coref.md.type dependency -coref.doClustering false 
 ```
 
-Run deterministic coref
+Run deterministic coref (note this version requires significantly less RAM)
 
 ```bash
 java -Xmx3g -cp stanford-corenlp-3.6.0.jar:stanford-corenlp-models-3.6.0.jar:* edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file example_file.txt
