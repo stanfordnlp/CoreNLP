@@ -882,12 +882,6 @@ public class SieveCoreferenceSystem {
         //IntPair mentionPosition = new IntPair(mention.sentNum, mention.headIndex);
         IntTuple mentionPosition = document.positions.get(mention);
         CorefMention dcorefMention = new CorefMention(mention, mentionPosition);
-        // tokens need the hcoref version of CorefClusterIdAnnotation
-        mention.headWord.set(edu.stanford.nlp.hcoref.CorefCoreAnnotations.CorefClusterIdAnnotation.class,
-                mention.corefClusterID);
-        // drop the dcoref version of CorefClusterIdAnnotation
-        mention.headWord.remove(CorefCoreAnnotations.CorefClusterIdAnnotation.class);
-        // make the hcoref mention
         edu.stanford.nlp.hcoref.data.CorefChain.CorefMention hcorefMention =
                 new edu.stanford.nlp.hcoref.data.CorefChain.CorefMention(
                         edu.stanford.nlp.hcoref.data.Dictionaries.MentionType.valueOf(dcorefMention.mentionType.name()),

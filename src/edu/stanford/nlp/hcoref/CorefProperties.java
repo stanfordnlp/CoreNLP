@@ -188,8 +188,8 @@ public class CorefProperties {
   public static MentionDetectionType getMDType(Properties props) {
     String defaultMD;
     if (getLanguage(props).equals(Locale.ENGLISH)) {
-      // defaultMD for English should be RULE since this is highest performing score for scoref
-      defaultMD = "RULE";
+      // defaultMD for English should be DEPENDENCY because Rule requires constituency parses
+      defaultMD = "DEPENDENCY";
     } else if (getLanguage(props).equals(Locale.CHINESE)) {
       // defaultMD for Chinese should be RULE for now
       defaultMD = "RULE";
