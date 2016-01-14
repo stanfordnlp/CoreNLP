@@ -16,6 +16,7 @@ site_title: Stanford CoreNLP
 sidebar_tagline: CoreNLP
 sidebar_version: version 3.6
 project_file_name: doc
+company_name: Stanford NLP
 
 port: 4001
 
