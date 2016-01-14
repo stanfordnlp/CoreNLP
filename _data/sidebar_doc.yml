@@ -7,10 +7,11 @@ entries:
 
 
     - title: Introduction
+      url: index.html
 
-      items:
-        - title: Introduction
-          url: index.html
+      # items:
+      #  - title: Introduction
+      #    url: index.html
 
       #- title: Citing Stanford CoreNLP
       #    url: citing.html
