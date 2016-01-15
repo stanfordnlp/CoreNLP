@@ -4,6 +4,7 @@ import edu.stanford.nlp.hcoref.CorefCoreAnnotations.*;
 import edu.stanford.nlp.hcoref.data.CorefChain;
 import edu.stanford.nlp.hcoref.data.Dictionaries;
 import edu.stanford.nlp.hcoref.data.Mention;
+import edu.stanford.nlp.hcoref.data.SpeakerInfo;
 import edu.stanford.nlp.ie.NumberNormalizer;
 import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
 import edu.stanford.nlp.ie.machinereading.structure.ExtractionObject;
@@ -751,6 +752,20 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
     }
 
+    if (mention.speakerInfo != null) {
+      builder.setSpeakerInfo(toProto(mention.speakerInfo));
+    }
+
+    return builder.build();
+  }
+
+  public CoreNLPProtos.SpeakerInfo toProto(SpeakerInfo speakerInfo) {
+    CoreNLPProtos.SpeakerInfo.Builder builder = CoreNLPProtos.SpeakerInfo.newBuilder();
+    builder.setSpeakerName(speakerInfo.getSpeakerName());
+    // mentionID's should be set by MentionAnnotator
+    for (Mention m : speakerInfo.getMentions()) {
+      builder.addMentions(m.mentionID);
+    }
     return builder.build();
   }
 
@@ -1246,6 +1261,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     if (!corefChains.isEmpty()) { ann.set(CorefChainAnnotation.class, corefChains); }
 
+    // hashes to access Mentions , later in this method need to add speakerInfo to Mention
+    // so we need to create id -> Mention, CoreNLPProtos.Mention maps to do this, since SpeakerInfo could reference
+    // any Mention in doc
+    HashMap<Integer, Mention> idToMention = new HashMap<>();
+    HashMap<Integer, CoreNLPProtos.Mention> idToProtoMention = new HashMap<>();
+
     // Set things in the sentence that need a document context.
     for (int i = 0; i < proto.getSentenceCount(); ++i) {
       CoreNLPProtos.Sentence sentence = proto.getSentenceList().get(i);
@@ -1289,6 +1310,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       for (CoreNLPProtos.Mention protoMention : sentence.getMentionsForCorefList()) {
         // get the mention
         Mention mentionToUpdate = map.get(CorefMentionsAnnotation.class).get(mentionInt);
+        // store these in hash for more processing later in this method
+        idToMention.put(mentionToUpdate.mentionID, mentionToUpdate);
+        idToProtoMention.put(mentionToUpdate.mentionID, protoMention);
+        // update the values
         int headIndexedWordIndex = protoMention.getHeadIndexedWord().getTokenIndex();
         if (headIndexedWordIndex >= 0) {
           mentionToUpdate.headIndexedWord = new IndexedWord(sentenceTokens.get(protoMention.getHeadIndexedWord().getTokenIndex()));
@@ -1332,6 +1357,29 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     List<CoreMap> quotes = proto.getQuoteList().stream().map(quote -> fromProto(quote, tokens)).collect(Collectors.toList());
     if (!quotes.isEmpty()) {
       ann.set(QuotationsAnnotation.class, quotes);
+    }
+
+    // add SpeakerInfo stuff to Mentions, this requires knowing all mentions in the document
+    // also add all the Set<Mention>
+    for (int mentionID : idToMention.keySet()) {
+      // this is the Mention message corresponding to this Mention
+      Mention mentionToUpdate = idToMention.get(mentionID);
+      CoreNLPProtos.Mention correspondingProtoMention = idToProtoMention.get(mentionID);
+      if (!correspondingProtoMention.hasSpeakerInfo()) {
+        // keep speakerInfo null for this Mention if it didn't store a speakerInfo
+        // so just continue to next Mention
+        continue;
+      }
+      // if we're here we know a speakerInfo was stored
+      SpeakerInfo speakerInfo = fromProto(correspondingProtoMention.getSpeakerInfo());
+      // go through all ids stored for the speakerInfo in its mentions list, and get the Mention
+      // Mentions are stored by MentionID , MentionID should be set by MentionAnnotator
+      // MentionID is ID in document, 0, 1, 2, etc...
+      for (int speakerInfoMentionID : correspondingProtoMention.getSpeakerInfo().getMentionsList()) {
+        speakerInfo.addMention(idToMention.get(speakerInfoMentionID));
+      }
+      // now the SpeakerInfo for this Mention should be fully restored
+      mentionToUpdate.speakerInfo = speakerInfo;
     }
 
     // Return
@@ -1738,6 +1786,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
 
     return returnMention;
+  }
+
+  private SpeakerInfo fromProto(CoreNLPProtos.SpeakerInfo speakerInfo) {
+    String speakerName = speakerInfo.getSpeakerName();
+    SpeakerInfo returnSpeakerInfo = new SpeakerInfo(speakerName);
+    return returnSpeakerInfo;
   }
 
   /**

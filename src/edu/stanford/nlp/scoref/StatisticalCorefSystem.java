@@ -48,8 +48,8 @@ public abstract class StatisticalCorefSystem {
              StatisticalCorefProperties.wordCountsPath(props));
        } else {
          return new BestFirstCorefSystem(props,
-             StatisticalCorefProperties.rankingModelPath(props),
              StatisticalCorefProperties.wordCountsPath(props),
+             StatisticalCorefProperties.rankingModelPath(props),
              StatisticalCorefProperties.maxMentionDistance(props),
              StatisticalCorefProperties.maxMentionDistanceWithStringMatch(props),
              StatisticalCorefProperties.pairwiseScoreThresholds(props));

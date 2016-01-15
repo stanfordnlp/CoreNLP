@@ -102,6 +102,11 @@ includeantruntime="false"
            target="${compile.target}">
       <compilerarg value="-Xmaxerrs"/>
       <compilerarg value="20"/>
+      <classpath>
+        <fileset dir="${basedir}">
+          <include name="*.jar"/>
+        </fileset>
+      </classpath>
       <!-- <compilerarg value="-Xlint"/> -->
     </javac>
 
