@@ -1,4 +1,4 @@
-Stanford Lexicalized Parser v3.6.0 - 2015-12-09
+Stanford Lexicalized Parser v3.5.2 - 2015-04-20
 -----------------------------------------------
 
 Copyright (c) 2002-2015 The Board of Trustees of The Leland Stanford Junior
@@ -223,8 +223,6 @@ LICENSE
 ---------------------------------
 CHANGES
 ---------------------------------
-
-2015-12-09    3.6.0     Updated for compatibility 
 
 2015-04-20    3.5.2     Switch to universal dependencies 
 

@@ -176,19 +176,19 @@ public class ChineseStringUtils {
    */
   private static String postProcessingAnswer(String ans, SeqClassifierFlags flags) {
     if (flags.useHk) {
-      //logger.info("Using HK post processing.");
+      //System.err.println("Using HK post processing.");
       return postProcessingAnswerHK(ans);
     } else if (flags.useAs) {
-      //logger.info("Using AS post processing.");
+      //System.err.println("Using AS post processing.");
       return postProcessingAnswerAS(ans);
     } else if (flags.usePk) {
-      //logger.info("Using PK post processing.");
+      //System.err.println("Using PK post processing.");
       return postProcessingAnswerPK(ans,flags.keepAllWhitespaces);
     } else if (flags.useMsr) {
-      //logger.info("Using MSR post processing.");
+      //System.err.println("Using MSR post processing.");
       return postProcessingAnswerMSR(ans);
     } else {
-      //logger.info("Using CTB post processing.");
+      //System.err.println("Using CTB post processing.");
       return postProcessingAnswerCTB(ans, flags.keepAllWhitespaces, flags.suppressMidDotPostprocessing);
     }
   }
@@ -205,7 +205,7 @@ public class ChineseStringUtils {
                '\u3015'};
     }
     if (puncsPat == null) {
-      //logger.info("Compile Puncs");
+      //System.err.println("Compile Puncs");
       puncsPat = new Pattern[puncs.length];
       for(int i = 0; i < puncs.length; i++) {
         Character punc = puncs[i];
@@ -227,7 +227,7 @@ public class ChineseStringUtils {
     /* These punctuations are derived directly from the training set. */
     if (puncs == null) { puncs = puncs_in; }
     if (puncsPat == null) {
-      //logger.info("Compile Puncs");
+      //System.err.println("Compile Puncs");
       puncsPat = new Pattern[puncs.length];
       for(int i = 0; i < puncs.length; i++) {
         Character punc = puncs[i];
@@ -329,7 +329,7 @@ public class ChineseStringUtils {
   private static String processPercents(String ans, String numPat) {
     //  1. if "6%" then put together
     //  2. if others, separate '%' and others
-    // logger.info("Process percents called!");
+    // System.err.println("Process percents called!");
     // first , just separate all '%'
     Matcher m = percentsPat.matcher(ans);
     ans = m.replaceAll(" $1 ");

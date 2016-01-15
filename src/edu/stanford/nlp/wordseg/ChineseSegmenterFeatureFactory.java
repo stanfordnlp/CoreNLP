@@ -5,9 +5,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.Serializable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.sequences.FeatureFactory;
@@ -51,8 +48,6 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
 
   private static final long serialVersionUID = 3387166382968763350L;
   private static TagAffixDetector taDetector = null;
-
-  private static Logger logger = LoggerFactory.getLogger(ChineseSegmenterFeatureFactory.class);
 
   public void init(SeqClassifierFlags flags) {
     super.init(flags);
@@ -267,7 +262,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
 
     if (flags.useOutDict2){
       if (outDict == null) {
-        logger.info("reading "+flags.outDict2+" as a seen lexicon");
+        System.err.println("reading "+flags.outDict2+" as a seen lexicon");
         outDict = new CorpusDictionary(flags.outDict2, true);
       }
       features.add(outDict.getW(charp+charc)+"outdict");       // -1 0
@@ -302,7 +297,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
           throw new RuntimeException("only support settings for CTB and PK now.");
         }
       } else {
-        //logger.info("Using Derived features");
+        //System.err.println("Using Derived features");
         tagsets = new String[]{"2","3","4"};
       }
 

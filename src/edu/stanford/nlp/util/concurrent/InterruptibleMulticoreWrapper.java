@@ -46,13 +46,13 @@ public class InterruptibleMulticoreWrapper<I,O> extends MulticoreWrapper<I,O> {
    * timeout.
    *
    * @return a list of jobs which had never been started if
-   * <code>timeout</code> was reached, or an empty list if that did not
+   * <code>timeout</code> was reached, or null if that did not
    * happen.
    */
   public List<I> joinWithTimeout() {
     if (timeout < 0) {
       join();
-      return new ArrayList<>();
+      return null;
     }
     // Make blocking calls to the last processes that are running
     if ( ! threadPool.isShutdown()) {
@@ -82,7 +82,7 @@ public class InterruptibleMulticoreWrapper<I,O> extends MulticoreWrapper<I,O> {
         throw new RuntimeInterruptedException(e);
       }
     }
-    return new ArrayList<>();
+    return null;
   }
 
   /**

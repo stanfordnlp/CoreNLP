@@ -1,5 +1,6 @@
 package edu.stanford.nlp.util;
 
+import edu.stanford.nlp.util.logging.Redwood;
 import junit.framework.TestCase;
 
 import java.util.*;
@@ -24,7 +25,7 @@ public class StringUtilsTest extends TestCase {
     Properties p2 = new Properties();
     p2.setProperty("fred", "true");
     p2.setProperty("2", "joe");
-    Map<String,Integer> argNums = new HashMap<>();
+    Map<String,Integer> argNums = new HashMap<String,Integer>();
     argNums.put("fred", 1);
     assertEquals(StringUtils.argsToProperties(new String[]{"-fred", "-2", "joe"}), p2);
     assertEquals(StringUtils.argsToProperties(new String[]{"-fred", "-2", "joe"}, argNums), p1);
@@ -182,33 +183,11 @@ public class StringUtilsTest extends TestCase {
     System.out.println(makeSet(expected));
     System.out.println(StringUtils.getCharacterNgrams(string, min, max));
     assertEquals(makeSet(expected),
-                 new HashSet<>(StringUtils.getCharacterNgrams(string, min, max)));
+                 new HashSet<String>(StringUtils.getCharacterNgrams(string, min, max)));
   }
 
-  @SafeVarargs
-  private final <T> Set<T> makeSet(T... elems) {
-    return new HashSet<>(Arrays.asList(elems));
-  }
-
-
-  public void testExpandEnvironmentVariables() {
-    Map<String, String> env = new HashMap<String, String>() {{
-      put("A", "[outA]");
-      put("A_B", "[outA_B]");
-      put("a_B", "[outa_B]");
-      put("a_B45", "[outa_B45]");
-      put("_A", "[out_A]");
-      put("3A", "[out_3A]");
-    }};
-    assertEquals("xxx [outA] xxx", StringUtils.expandEnvironmentVariables("xxx $A xxx", env));
-    assertEquals("xxx[outA] xxx", StringUtils.expandEnvironmentVariables("xxx$A xxx", env));
-    assertEquals("xxx[outA]xxx", StringUtils.expandEnvironmentVariables("xxx${A}xxx", env));
-    assertEquals("xxx [outA_B] xxx", StringUtils.expandEnvironmentVariables("xxx $A_B xxx", env));
-    assertEquals("xxx [outa_B] xxx", StringUtils.expandEnvironmentVariables("xxx $a_B xxx", env));
-    assertEquals("xxx [outa_B45] xxx", StringUtils.expandEnvironmentVariables("xxx $a_B45 xxx", env));
-    assertEquals("xxx [out_A] xxx", StringUtils.expandEnvironmentVariables("xxx $_A xxx", env));
-    assertEquals("xxx $3A xxx", StringUtils.expandEnvironmentVariables("xxx $3A xxx", env));
-    assertEquals("xxx  xxx", StringUtils.expandEnvironmentVariables("xxx $UNDEFINED xxx", env));
+  private <T> Set<T> makeSet(T... elems) {
+    return new HashSet<T>(Arrays.asList(elems));
   }
 
 }

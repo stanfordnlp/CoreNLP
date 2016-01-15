@@ -924,10 +924,6 @@ public class StringUtils {
         Integer maxFlagArgs = flagsToNumArgs.get(key);
         int max = maxFlagArgs == null ? 1 : maxFlagArgs;
         int min = maxFlagArgs == null ? 0 : maxFlagArgs;
-        if (maxFlagArgs != null && maxFlagArgs == 0 && i < args.length - 1 &&
-            ("true".equalsIgnoreCase(args[i + 1]) || "false".equalsIgnoreCase(args[i + 1]))) {
-          max = 1;  // case: we're reading a boolean flag. TODO(gabor) there's gotta be a better way...
-        }
         List<String> flagArgs = new ArrayList<>();
         // cdm oct 2007: add length check to allow for empty string argument!
         for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].isEmpty() || args[i + 1].charAt(0) != '-'); i++, j++) {
@@ -2575,44 +2571,6 @@ public class StringUtils {
       map.put(key.trim(), current.toString().trim());
     }
     return map;
-  }
-
-
-  /**
-   * Takes an input String, and replaces any bash-style variables (e.g., $VAR_NAME)
-   * with its actual environment variable from the passed environment specification.
-   *
-   * @param raw The raw String to replace variables in.
-   * @param env The environment specification; e.g., {@link System#getenv()}.
-   * @return The input String, but with all variables replaced.
-   */
-  public static String expandEnvironmentVariables(String raw, Map<String, String> env) {
-    String pattern = "\\$\\{?([a-zA-Z_]+[a-zA-Z0-9_]*)\\}?";
-    Pattern expr = Pattern.compile(pattern);
-    String text = raw;
-    Matcher matcher = expr.matcher(text);
-    while (matcher.find()) {
-      String envValue = env.get(matcher.group(1));
-      if (envValue == null) {
-        envValue = "";
-      } else {
-        envValue = envValue.replace("\\", "\\\\");
-      }
-      Pattern subexpr = Pattern.compile(Pattern.quote(matcher.group(0)));
-      text = subexpr.matcher(text).replaceAll(envValue);
-    }
-    return text;
-  }
-
-  /**
-   * Takes an input String, and replaces any bash-style variables (e.g., $VAR_NAME)
-   * with its actual environment variable from {@link System#getenv()}.
-   *
-   * @param raw The raw String to replace variables in.
-   * @return The input String, but with all variables replaced.
-   */
-  public static String expandEnvironmentVariables(String raw) {
-    return expandEnvironmentVariables(raw, System.getenv());
   }
 
 }
