@@ -42,8 +42,11 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2015-12-09    3.6.0     Improved coreference, OpenIE integration, 
+                        Stanford CoreNLP server 
+
 2015-04-20    3.5.2     Switch to Universal dependencies, add Chinese 
-                        coreference systemCore NLP 
+                        coreference system to CoreNLP 
 
 2015-01-29    3.5.1     NER, dependency parser, SPIED improvements; 
                         general bugfixes 

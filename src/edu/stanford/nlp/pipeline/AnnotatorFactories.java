@@ -518,7 +518,7 @@ public class AnnotatorFactories {
       @Override
       public String additionalSignature() {
         // keep track of all relevant properties for this annotator here!
-        return DeterministicCorefAnnotator.signature(properties);
+        return "" ;
       }
     };
   }

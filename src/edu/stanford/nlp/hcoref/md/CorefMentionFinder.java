@@ -52,6 +52,7 @@ public abstract class CorefMentionFinder {
   protected boolean allowReparsing;
 
   protected static final TregexPattern npOrPrpMentionPattern = TregexPattern.compile("/^(?:NP|PN|PRP)/");
+  private static final boolean VERBOSE = false;
 
   /** Get all the predicted mentions for a document.
    *
@@ -193,7 +194,13 @@ public abstract class CorefMentionFinder {
         // formatting error
         if (m.spanToString().contains("ｑｕｏｔ")) {
           remove.add(m);
-          System.err.println("MENTION FILTERING Removed formatting error: " + m.spanToString());
+          if (VERBOSE) System.err.println("MENTION FILTERING Removed formatting error: " + m.spanToString());
+        }
+
+        // punctuation-only mentions
+        if (m.headWord.tag().equals("PU")) {
+          remove.add(m);
+          if (VERBOSE) System.err.println("MENTION FILTERING Punctuation only mention: " + m.spanToString());
         }
 
         // demonyms
@@ -201,14 +208,14 @@ public abstract class CorefMentionFinder {
         if (lastWord.length() > 0 && m.spanToString().endsWith("人") &&
             dict.countries.contains(lastWord.substring(0, lastWord.length()-1))) {
           remove.add(m);
-          System.err.println("MENTION FILTERING Removed demonym: " + m.spanToString());
+          if (VERBOSE) System.err.println("MENTION FILTERING Removed demonym: " + m.spanToString());
         }
 
         // 没 问题
         if (m.spanToString().equals("问题") && m.startIndex > 0 &&
             sent.get(m.startIndex - 1).word().endsWith("没")) {
           remove.add(m);
-          System.err.println("MENTION FILTERING Removed meiyou: " + m.spanToString());
+          if (VERBOSE) System.err.println("MENTION FILTERING Removed meiyou: " + m.spanToString());
         }
 
         if (m.spanToString().equals("人") && m.startIndex > 0) {
@@ -216,7 +223,7 @@ public abstract class CorefMentionFinder {
 
           if (priorWord.endsWith("让") || priorWord.endsWith("令") || priorWord.endsWith("")) {
             remove.add(m);
-            System.err.println("MENTION FILTERING Removed rangren: " + m.spanToString());
+            if (VERBOSE) System.err.println("MENTION FILTERING Removed rangren: " + m.spanToString());
           }
         }
 
@@ -225,16 +232,17 @@ public abstract class CorefMentionFinder {
         if (m.spanToString().equals("你") && m.startIndex < sent.size() - 1 &&
             sent.get(m.startIndex + 1).word().startsWith("知道")) {
           remove.add(m);
-          System.err.println("MENTION FILTERING Removed nizhidao: " + m.spanToString());
+          if (VERBOSE) System.err.println("MENTION FILTERING Removed nizhidao: " + m.spanToString());
         }
 
         if (m.spanToString().contains("什么") || m.spanToString().contains("多少")) {
           remove.add(m);
+          if (VERBOSE) System.err.println("MENTION FILTERING Removed many/few mention ending: " + m.spanToString());
         }
 
         if (m.spanToString().endsWith("的")) {
           remove.add(m);
-          System.err.println("MENTION FILTERING Removed de ending: " + m.spanToString());
+          if (VERBOSE) System.err.println("MENTION FILTERING Removed de ending: " + m.spanToString());
         }
 
 
@@ -253,12 +261,13 @@ public abstract class CorefMentionFinder {
 //        }
 
         // handling interrogative pronouns
-        for(String interrogative : dict.interrogativePronouns) {
-          for(CoreLabel cl : m.originalSpan) {
-            if(cl.word().equals(interrogative)) remove.add(m);
+        for (CoreLabel cl : m.originalSpan) {
+//        if(dict.interrogativePronouns.contains(m.spanToString())) remove.add(m);
+          if (dict.interrogativePronouns.contains(cl.word())) {
+            remove.add(m);
+            if (VERBOSE) System.err.println("MENTION FILTERING Removed interrogative pronoun: " + m.spanToString());
           }
         }
-//        if(dict.interrogativePronouns.contains(m.spanToString())) remove.add(m);
       }
 
       // nested mention with shared headword (except apposition, enumeration): pick larger one
@@ -415,11 +424,11 @@ public abstract class CorefMentionFinder {
   protected static void findHeadChinese(List<CoreLabel> sent, Mention m) {
     int headPos = m.endIndex - 1;
     // Skip trailing punctuations
-    while (sent.get(headPos).get(PartOfSpeechAnnotation.class).equals("PU")
-        && headPos >= m.startIndex) {
+    while (headPos > m.startIndex && sent.get(headPos).tag().equals("PU")) {
       headPos--;
     }
-    if (headPos < m.startIndex) {
+    // If we got right to the end without finding non punctuation, reset to end again
+    if (headPos == m.startIndex && sent.get(headPos).tag().equals("PU")) {
       headPos = m.endIndex - 1;
     }
     if (sent.get(headPos).originalText().equals("自己") && m.endIndex != m.startIndex) {
