@@ -135,9 +135,7 @@ public class CoNLLDocumentReader implements DocReader {
       Collections.sort(this.fileList);
     }
     curFileIndex = 0;
-    if (filepath != null && new File(filepath).exists()) {
-      logger.info("Reading " + fileList.size() + " CoNLL files from " + filepath);
-    }
+    logger.info("Reading " + fileList.size() + " CoNLL files from " + filepath);
   }
 
   private static List<File> getFiles(String filepath, Pattern filter)

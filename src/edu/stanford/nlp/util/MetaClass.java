@@ -652,8 +652,8 @@ public class MetaClass {
       }
     } else if (PrintWriter.class.isAssignableFrom(clazz)) {
       // (case: input stream)
-      if (value.equalsIgnoreCase("stdout") || value.equalsIgnoreCase("out")) { return (E) new PrintWriter(System.out); }
-      if (value.equalsIgnoreCase("stderr") || value.equalsIgnoreCase("err")) { return (E) new PrintWriter(System.err); }
+      if (value.equalsIgnoreCase("stdout") || value.equalsIgnoreCase("out")) { return (E) System.out; }
+      if (value.equalsIgnoreCase("stderr") || value.equalsIgnoreCase("err")) { return (E) System.err; }
       try {
         return (E) IOUtils.getPrintWriter(value);
       } catch (IOException e) {

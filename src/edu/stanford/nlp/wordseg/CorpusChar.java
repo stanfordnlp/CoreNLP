@@ -3,9 +3,6 @@ package edu.stanford.nlp.wordseg;
 import java.util.*;
 import java.io.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.Generics;
@@ -19,8 +16,6 @@ import edu.stanford.nlp.util.Generics;
 
  
 public class CorpusChar {
-  private static Logger logger = LoggerFactory.getLogger(CorpusChar.class);
-
   private Map <String, Set <String>> charMap;
 
   public CorpusChar(String charlistFilename)  {
@@ -36,7 +31,7 @@ public class CorpusChar {
 
   private Map<String, Set<String>> readDict(String filename)  {
 
-    logger.info("Loading character dictionary file from " + filename);
+    System.err.println("Loading character dictionary file from " + filename);
 
     try {
       InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(filename);      
@@ -44,7 +39,7 @@ public class CorpusChar {
       String DetectorLine;
 
       char_dict = Generics.newHashMap();
-      //logger.debug("DEBUG: in CorpusChar readDict");
+      //System.err.println("DEBUG: in CorpusChar readDict");
       while ((DetectorLine = DetectorReader.readLine()) != null) {
         
         String[] fields = DetectorLine.split("	");
@@ -56,7 +51,7 @@ public class CorpusChar {
           chars = Generics.newHashSet();
           char_dict.put(tag,chars);
         } 
-        //logger.debug("DEBUG: CorpusChar: "+filename+" "+fields[1]);
+        //System.err.println("DEBUG: CorpusChar: "+filename+" "+fields[1]);
         chars.add(fields[1]);
     
     

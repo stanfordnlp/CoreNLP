@@ -53,6 +53,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -261,7 +262,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *         field.
    */
   public List<IN> classifySentence(List<? extends HasWord> sentence) {
-    // System.err.println("knownLCWords.size is " + knownLCWords.size() + "; knownLCWords.maxSize is " + knownLCWords.getMaxSize() +
+    // System.err.println("knownLCWords.size is " + knownLCWords.size() + "; knownLCWords.maxSize is " + knownLCWords.getMaxSize() + 
     //                   ", prior to NER for " + getClass().toString());
     List<IN> document = new ArrayList<>();
     int i = 0;
@@ -1468,6 +1469,22 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public abstract void loadClassifier(ObjectInputStream in, Properties props) throws IOException, ClassCastException,
       ClassNotFoundException;
 
+  // todo [cdm 2015]: Replace this method with use of the method in IOUtils.
+  private InputStream loadStreamFromClasspath(String path) {
+    InputStream is = getClass().getClassLoader().getResourceAsStream(path);
+    if (is == null)
+      return null;
+    try {
+      if (path.endsWith(".gz"))
+        is = new GZIPInputStream(new BufferedInputStream(is));
+      else
+        is = new BufferedInputStream(is);
+    } catch (IOException e) {
+      System.err.println("CLASSPATH resource " + path + " is not a GZIP stream!");
+    }
+    return is;
+  }
+
   /**
    * Loads a classifier from the file specified by loadPath. If loadPath ends in
    * .gz, uses a GZIPInputStream, else uses a regular FileInputStream.
@@ -1481,11 +1498,17 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * .gz, uses a GZIPInputStream, else uses a regular FileInputStream.
    */
   public void loadClassifier(String loadPath, Properties props) throws ClassCastException, IOException, ClassNotFoundException {
-    InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(loadPath);
-    Timing.startDoing("Loading classifier from " + loadPath);
-    loadClassifier(is, props);
-    is.close();
-    Timing.endDoing();
+    InputStream is;
+    // ms, 10-04-2010: check first is this path exists in our CLASSPATH. This
+    // takes priority over the file system.
+    if ((is = loadStreamFromClasspath(loadPath)) != null) {
+      Timing.startDoing("Loading classifier from " + loadPath);
+      loadClassifier(is, props);
+      is.close();
+      Timing.endDoing();
+    } else {
+      loadClassifier(new File(loadPath), props);
+    }
   }
 
   public void loadClassifierNoExceptions(String loadPath) {
@@ -1493,12 +1516,16 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   }
 
   public void loadClassifierNoExceptions(String loadPath, Properties props) {
-    try {
-      loadClassifier(loadPath, props);
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
-    } catch (ClassCastException|ClassNotFoundException e) {
-      throw new RuntimeException(e);
+    InputStream is;
+    // ms, 10-04-2010: check first is this path exists in our CLASSPATH. This
+    // takes priority over the file system. todo [cdm 2014]: change this to use IOUtils stuff that much code now uses
+    if ((is = loadStreamFromClasspath(loadPath)) != null) {
+      Timing.startDoing("Loading classifier from " + loadPath);
+      loadClassifierNoExceptions(is, props);
+      IOUtils.closeIgnoringExceptions(is);
+      Timing.endDoing();
+    } else {
+      loadClassifierNoExceptions(new File(loadPath), props);
     }
   }
 
@@ -1565,7 +1592,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *          serialized file, such as the DocumentReaderAndWriter. You can pass
    *          in <code>null</code> to override nothing.
    */
-  // todo [john bauer 2015]: This method may not be necessary.  Perhaps use the IOUtils equivalents
+  // todo [cdm 2014]: This method overlaps functionality in loadStreamFromClasspath
   public void loadJarClassifier(String modelName, Properties props) {
     Timing.startDoing("Loading JAR-internal classifier " + modelName);
     try {

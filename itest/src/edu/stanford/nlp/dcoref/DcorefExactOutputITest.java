@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import edu.stanford.nlp.hcoref.data.CorefChain;
-import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
