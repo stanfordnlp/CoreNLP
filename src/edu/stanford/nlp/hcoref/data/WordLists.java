@@ -216,7 +216,9 @@ public class WordLists {
   public static final Set<String> removeWordsZh = Generics.newHashSet(Arrays.asList(
       "_", "ｑｕｏｔ", "人", "时候", "问题", "情况",
       "未来", "战争", "可能"));
+
+  // "ｑｕｏｔ" is a formatting error in CoNLL data
   public static final Set<String> removeCharsZh = Generics.newHashSet(Arrays.asList(
       "什么的", "哪", "什么", "谁", "啥", "哪儿",
-      "哪里", "人们", "年", "原因", "啥时"));
+      "哪里", "人们", "年", "原因", "啥时", "ｑｕｏｔ"));
 }
