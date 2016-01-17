@@ -2,6 +2,7 @@ package edu.stanford.nlp.hcoref;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -123,9 +124,28 @@ public class DcorefChineseBenchmarkSlowITest extends TestCase {
 
     setLowHighExpected(lowResults, highResults, expectedResults, CONLL_SCORE, 53.18, 53.20, 53.19);
 
+    Counter<String> results = getCorefResults(runCorefTest(true));
+    for (String key : results.keySet()) {
+      double val = results.getCount(key);
+      double high = highResults.getCount(key);
+      double low = lowResults.getCount(key);
+      double expected = expectedResults.getCount(key);
+      assertTrue("Value for " + key + " = " + val + " is lower than expected minimum " + low, val >= low);
+      assertTrue("Value for " + key + " = " + val + " is higher than expected maximum " + high +
+          " [not a bug, but a breakthrough!]", val <= high);
+      if (val < (expected - 1e-4)) {
+        System.err.println("Value for " + key + " = " + val + " is fractionally lower than expected " + expected);
+      } else if (val > (expected + 1e-4)) {
+          System.err.println("Value for " + key + " = " + val + " is fractionally higher than expected " + expected);
+      } else {
+        System.err.println("Value for " + key + " = " + val + " is as expected");
+      }
+    }
+  }
 
+  private static Counter<String> getCorefResults(String resultsString) throws IOException {
     Counter<String> results = new ClassicCounter<String>();
-    BufferedReader r = new BufferedReader(new StringReader(runCorefTest(true)));
+    BufferedReader r = new BufferedReader(new StringReader(resultsString));
     for (String line; (line = r.readLine()) != null; ) {
       Matcher m1 = MENTION_PATTERN.matcher(line);
       if (m1.matches()) {
@@ -162,26 +182,20 @@ public class DcorefChineseBenchmarkSlowITest extends TestCase {
       }
     }
 
-    for (String key : results.keySet()) {
-      double val = results.getCount(key);
-      double high = highResults.getCount(key);
-      double low = lowResults.getCount(key);
-      double expected = expectedResults.getCount(key);
-      assertTrue("Value for " + key + " = " + val + " is lower than expected minimum " + low, val >= low);
-      assertTrue("Value for " + key + " = " + val + " is higher than expected maximum " + high +
-          " [not a bug, but a breakthrough!]", val <= high);
-      if (val < (expected - 1e-4)) {
-        System.err.println("Value for " + key + " = " + val + " is fractionally lower than expected " + expected);
-      } else if (val > (expected + 1e-4)) {
-          System.err.println("Value for " + key + " = " + val + " is fractionally higher than expected " + expected);
-      } else {
-        System.err.println("Value for " + key + " = " + val + " is as expected");
-      }
-    }
+    return results;
   }
 
-  public static void main(String[] args) throws Exception {
-    new DcorefChineseBenchmarkSlowITest().testChineseDcoref();
+  public static void main(String[] args) throws IOException {
+    String actualResults = IOUtils.slurpFile(args[0]);
+    Counter<String> results = new DcorefChineseBenchmarkSlowITest().getCorefResults(actualResults);
+    System.out.printf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%n" +
+            "%.0f\t%.2f\t%.0f\t%.2f\t%.0f\t%.2f\t%.0f\t%.2f\t%.0f\t%.2f\t%.2f\t%.2f%n",
+            MENTION_TP, MENTION_F1, MUC_TP, MUC_F1, BCUBED_TP, BCUBED_F1,
+            CEAFM_TP, CEAFM_F1, CEAFE_TP, CEAFE_F1, BLANC_F1, CONLL_SCORE,
+            results.getCount(MENTION_TP), results.getCount(MENTION_F1), results.getCount(MUC_TP), results.getCount(MUC_F1),
+            results.getCount(BCUBED_TP), results.getCount(BCUBED_F1), results.getCount(CEAFM_TP), results.getCount(CEAFM_F1),
+            results.getCount(CEAFE_TP), results.getCount(CEAFE_F1), results.getCount(BLANC_F1), results.getCount(CONLL_SCORE));
+
   }
 
 }
