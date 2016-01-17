@@ -217,3 +217,27 @@ The CoreNLP server will now start on startup, running on port 80 under the user 
 ```bash
 sudo service corenlp [start|stop|restart]
 ```
+
+
+## Quirks and Subtleties
+
+This section documents some of the subtle quirks of the server, and the motivations behind them.
+
+### Character Encoding
+The official HTTP specification [recommends ISO-8859-1](https://www.w3.org/International/O-HTTP-charset) as the encoding of a request, unless a different `encoding` is explicitly set otherwise by the `Content-Type` header. However, for most NLP applications this is an unintuitive default, and so the server instead defaults to UTF-8. To enable the ISO-8859-1 default, pass in the `-strict` flag to the server at startup.
+
+### Default Properties
+The server has different default properties than the regular CoreNLP pipeline. These are:
+
+  * The default output format is `json` rather than `text` (`-outputFormat json`). This is more natural for most cases when you would be making API calls against a server.
+  * By default, the server will not pretty print the output, opting instead for a minified output. This is the same as setting the property `-prettyPrint false`.
+  * The default annotators do not include the `parse` annotator. This is primarily for efficiency. The annotators enabled by default are: `-annotators tokenize, ssplit, pos, lemma, ner, depparse, coref, natlog, openie`.
+  * As a necessary consequence of not having the `parse` annotator, the default coref mention detector is changed to use dependency parsers: `-coref.md.type dep`.
+
+### Undocumented Features
+Well, I guess they're documented now:
+
+  * Hitting `Shift+Enter` on any input field in the web demo (e.g., the main text input) is equivalent to hitting the `Submit` (or `Match`) button. Furthermore, if the input is empty, it will fill itself with a default input. Useful if -- to take a purely hypothetical example -- you're developing the web server and don't want to re-type the same sentence everytime you re-load the website.
+
+
+
