@@ -248,6 +248,14 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     return PropertiesUtils.getDouble(properties, "printable.relation.beam", 0.0);
   }
 
+  /**
+   * If true, signal for outputters to pretty-print the output.
+   * If false, the outputter will try to minimize the size of the output.
+   */
+  public boolean getPrettyPrint() {
+    return PropertiesUtils.getBool(properties, "prettyPrint", true);
+  }
+
   public String getEncoding() {
     return properties.getProperty("encoding", "UTF-8");
   }

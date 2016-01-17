@@ -43,6 +43,8 @@ public class StanfordCoreNLPServer implements Runnable {
   protected HttpServer server;
   protected final int serverPort;
   protected final int timeoutMilliseconds;
+  protected final boolean strict;
+
   protected final FileHandler staticPageHandle;
   protected final String shutdownKey;
 
@@ -71,16 +73,20 @@ public class StanfordCoreNLPServer implements Runnable {
    * Create a new Stanford CoreNLP Server.
    * @param port The port to host the server from.
    * @param timeout The timeout (in milliseconds) for each command.
+   * @param strict If true, conform more strictly to the HTTP spec (e.g., for character encoding).
    * @throws IOException Thrown from the underlying socket implementation.
    */
-  public StanfordCoreNLPServer(int port, int timeout) throws IOException {
-    serverPort = port;
-    timeoutMilliseconds = timeout;
+  public StanfordCoreNLPServer(int port, int timeout, boolean strict) throws IOException {
+    this.serverPort = port;
+    this.timeoutMilliseconds = timeout;
+    this.strict = strict;
 
     defaultProps = PropertiesUtils.asProperties(
-            "annotators", "tokenize, ssplit, pos, lemma, ner, parse, depparse, dcoref, natlog, openie",
+            "annotators", "tokenize, ssplit, pos, lemma, ner, depparse, coref, natlog, openie",
+            "coref.md.type", "dep",
             "inputFormat", "text",
-            "outputFormat", "json");
+            "outputFormat", "json",
+            "prettyPrint", "false");
 
     // Generate and write a shutdown key
     String tmpDir = System.getProperty("java.io.tmpdir");
@@ -141,10 +147,13 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown if we cannot read the POST data.
    * @throws ClassNotFoundException Thrown if we cannot load the serializer.
    */
-  private static Annotation getDocument(Properties props, HttpExchange httpExchange) throws IOException, ClassNotFoundException {
+  private Annotation getDocument(Properties props, HttpExchange httpExchange) throws IOException, ClassNotFoundException {
     String inputFormat = props.getProperty("inputFormat", "text");
     switch (inputFormat) {
       case "text":
+        // The default encoding by the HTTP standard is ISO-8859-1, but most
+        // real users of CoreNLP would likely assume UTF-8 by default.
+        String defaultEncoding = this.strict ? "ISO-8859-1" : "UTF-8";
         // Get the encoding
         Headers h = httpExchange.getRequestHeaders();
         String encoding;
@@ -152,14 +161,14 @@ public class StanfordCoreNLPServer implements Runnable {
           String[] charsetPair = Arrays.asList(h.getFirst("Content-type").split(";")).stream()
               .map(x -> x.split("="))
               .filter(x -> x.length > 0 && "charset".equals(x[0]))
-              .findFirst().orElse(new String[]{"charset", "ISO-8859-1"});
+              .findFirst().orElse(new String[]{"charset", defaultEncoding});
           if (charsetPair.length == 2) {
             encoding = charsetPair[1];
           } else {
-            encoding = "ISO-8859-1";  // default encoding for a form
+            encoding = defaultEncoding;
           }
         } else {
-          encoding = "ISO-8859-1";  // default encoding for a form
+          encoding = defaultEncoding;
         }
 
         // Read the annotation
@@ -437,29 +446,34 @@ public class StanfordCoreNLPServer implements Runnable {
      * @throws UnsupportedEncodingException Thrown if we could not decode the key/value pairs with UTF-8.
      */
     private Properties getProperties(HttpExchange httpExchange) throws UnsupportedEncodingException {
+      Map<String, String> urlParams = getURLParams(httpExchange.getRequestURI());
+
       // Load the default properties
       Properties props = new Properties();
       defaultProps.entrySet().stream()
           .forEach(entry -> props.setProperty(entry.getKey().toString(), entry.getValue().toString()));
 
       // Try to get more properties from query string.
-      Map<String, String> urlParams = getURLParams(httpExchange.getRequestURI());
+      // (get the properties from the URL params)
+      Map<String, String> urlProperties = new HashMap<>();
       if (urlParams.containsKey("properties")) {
-        StringUtils.decodeMap(URLDecoder.decode(urlParams.get("properties"), "UTF-8")).entrySet()
-            .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
+        urlProperties = StringUtils.decodeMap(URLDecoder.decode(urlParams.get("properties"), "UTF-8"));
       } else if (urlParams.containsKey("props")) {
-        StringUtils.decodeMap(URLDecoder.decode(urlParams.get("properties"), "UTF-8")).entrySet()
-            .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
+        urlProperties = StringUtils.decodeMap(URLDecoder.decode(urlParams.get("props"), "UTF-8"));
       }
+      // (tweak the default properties a bit)
+      if (urlProperties.containsKey("annotators") && urlProperties.get("annotators") != null &&
+          ArrayUtils.contains(urlProperties.get("annotators").split(","), "parse")) {
+        // (case: the properties have a parse annotator --
+        //        we don't have to use the dependency mention finder)
+        props.remove("coref.md.type");
+      }
+      // (add new properties on top of the default properties)
+      urlProperties.entrySet()
+          .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
 
       // Get the annotators
       String annotators = StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+"));
-
-      // Tweak the default annotator behavior
-      if (annotators.contains("coref") /* any coref */ && annotators.contains("ner") && annotators.contains("openie") &&
-          !"false".equals(props.getProperty("openie.resolve_coref", "true"))) {
-        props.setProperty("openie.resolve_coref", "true");
-      }
 
       // Tweak the properties to play nicer with the server
       // (set the parser max length to 60)
@@ -711,6 +725,7 @@ public class StanfordCoreNLPServer implements Runnable {
   public static void main(String[] args) throws IOException {
     int port = DEFAULT_PORT;
     int timeout = DEFAULT_TIMEOUT;
+    boolean strict = false;
 
     Properties props = new Properties();
     if (args.length > 0) {
@@ -729,10 +744,15 @@ public class StanfordCoreNLPServer implements Runnable {
     if(props.containsKey("timeout")) {
       timeout = Integer.parseInt(props.getProperty("timeout"));
     }
+    if(props.containsKey("strict")) {
+      if (props.get("strict") != null && !"".equals(props.get("strict"))) {
+        strict = Boolean.parseBoolean(props.getProperty("strict"));
+      }
+    }
     log("Starting server on port " + port + " with timeout of " + timeout + " milliseconds.");
 
     // Run the server
-    StanfordCoreNLPServer server = new StanfordCoreNLPServer(port, timeout);
+    StanfordCoreNLPServer server = new StanfordCoreNLPServer(port, timeout, strict);
     server.run();
   }
 
