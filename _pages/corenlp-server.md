@@ -237,7 +237,7 @@ The server has different default properties than the regular CoreNLP pipeline. T
 ### Undocumented Features
 Well, I guess they're documented now:
 
-  * Hitting `Shift+Enter` on any input field in the web demo (e.g., the main text input) is equivalent to hitting the `Submit` (or `Match`) button. Furthermore, if the input is empty, it will fill itself with a default input. Useful if -- to take a purely hypothetical example -- you're developing the web server and don't want to re-type the same sentence everytime you re-load the website.
+  * Hitting `Shift+Enter` on any input field in the web demo (e.g., the main text input) is equivalent to clicking the `Submit` (or `Match`) button. Furthermore, if the input is empty, it will fill itself with a default input. Useful if -- to take a purely hypothetical example -- you're developing the web server and don't want to re-type the same sentence everytime you re-load the website.
 
 
 
