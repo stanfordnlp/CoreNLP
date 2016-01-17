@@ -199,6 +199,9 @@ function render(data) {
     for (var i = 0; i < sentence.tokens.length; ++i) {
       var token = sentence.tokens[i];
       var word = token.word;
+      if (!(typeof tokensMap[word] == "undefined")) {
+        word = tokensMap[word];
+      }
       if (i > 0) { currentText.push(' '); }
       token.characterOffsetBegin = currentText.length;
       for (var j = 0; j < word.length; ++j) {
