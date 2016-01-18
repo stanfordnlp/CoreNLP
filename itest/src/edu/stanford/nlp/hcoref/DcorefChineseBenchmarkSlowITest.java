@@ -3,6 +3,7 @@ package edu.stanford.nlp.hcoref;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.StringReader;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -100,31 +101,34 @@ public class DcorefChineseBenchmarkSlowITest extends TestCase {
   }
 
   public void testChineseDcoref() throws Exception {
+    Counter<String> results = getCorefResults(runCorefTest(true));
+
+    // So we can see them all at once to speed updating
+    printResultsTSV(results, System.err);
+
     Counter<String> lowResults = new ClassicCounter<String>();
     Counter<String> highResults = new ClassicCounter<String>();
     Counter<String> expectedResults = new ClassicCounter<String>();
 
+    setLowHighExpected(lowResults, highResults, expectedResults, MENTION_TP, 12550, 12700, 12600); // In 2015 was: 12370
+    setLowHighExpected(lowResults, highResults, expectedResults, MENTION_F1, 55.7, 56.0, 55.88); // In 2015 was: 55.59
 
-    setAll(lowResults, highResults, expectedResults, MENTION_TP, 12370);
-    setLowHighExpected(lowResults, highResults, expectedResults, MENTION_F1, 55.5, 55.7, 55.59);
+    setLowHighExpected(lowResults, highResults, expectedResults, MUC_TP, 6050, 6100, 6063);  // In 2015 was: 5958
+    setLowHighExpected(lowResults, highResults, expectedResults, MUC_F1, 58.30, 58.80, 58.48); // In 2015 was: 57.87
 
-    setLowHighExpected(lowResults, highResults, expectedResults, MUC_TP, 5955, 5970, 5958);
-    setLowHighExpected(lowResults, highResults, expectedResults, MUC_F1, 57.85, 57.90, 57.87);
+    setLowHighExpected(lowResults, highResults, expectedResults, BCUBED_TP, 6990, 7110.00, 7100.92); // In 2015 was: 6936.32
+    setLowHighExpected(lowResults, highResults, expectedResults, BCUBED_F1, 51.60, 52.00, 51.86); // In 2015 was: 51.07
 
-    setLowHighExpected(lowResults, highResults, expectedResults, BCUBED_TP, 6868.8, 6940.00, 6936.32);
-    setLowHighExpected(lowResults, highResults, expectedResults, BCUBED_F1, 51.05, 51.10, 51.07);
+    setLowHighExpected(lowResults, highResults, expectedResults, CEAFM_TP, 8220, 8260, 8242); // In 2015 was: 8074
+    setLowHighExpected(lowResults, highResults, expectedResults, CEAFM_F1, 55.50, 56.00, 55.77); // In 2015 was: 55.10
 
-    setAll(lowResults, highResults, expectedResults, CEAFM_TP, 8074);
-    setLowHighExpected(lowResults, highResults, expectedResults, CEAFM_F1, 54.75, 55.2, 55.10);
+    setLowHighExpected(lowResults, highResults, expectedResults, CEAFE_TP, 2250.00, 2300.00, 2272.52); // In 2015 was: 2205.72
+    setLowHighExpected(lowResults, highResults, expectedResults, CEAFE_F1, 51.50, 52.00, 51.52); // In 2015 was: 50.62
 
-    setLowHighExpected(lowResults, highResults, expectedResults, CEAFE_TP, 2205.00, 2206.00, 2205.72);
-    setLowHighExpected(lowResults, highResults, expectedResults, CEAFE_F1, 50.50, 50.65, 50.62);
+    setLowHighExpected(lowResults, highResults, expectedResults, BLANC_F1, 46.75, 47.25, 47.00); // In 2015 was: 46.19
 
-    setLowHighExpected(lowResults, highResults, expectedResults, BLANC_F1, 46.15, 46.25, 46.19);
+    setLowHighExpected(lowResults, highResults, expectedResults, CONLL_SCORE, 53.75, 54.00, 53.95); // In 2015 was: 53.19
 
-    setLowHighExpected(lowResults, highResults, expectedResults, CONLL_SCORE, 53.18, 53.20, 53.19);
-
-    Counter<String> results = getCorefResults(runCorefTest(true));
     for (String key : results.keySet()) {
       double val = results.getCount(key);
       double high = highResults.getCount(key);
@@ -185,17 +189,20 @@ public class DcorefChineseBenchmarkSlowITest extends TestCase {
     return results;
   }
 
-  public static void main(String[] args) throws IOException {
-    String actualResults = IOUtils.slurpFile(args[0]);
-    Counter<String> results = new DcorefChineseBenchmarkSlowITest().getCorefResults(actualResults);
-    System.out.printf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%n" +
-            "%.0f\t%.2f\t%.0f\t%.2f\t%.0f\t%.2f\t%.0f\t%.2f\t%.0f\t%.2f\t%.2f\t%.2f%n",
+  private static void printResultsTSV(Counter<String> results, PrintStream where) {
+    where.printf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%n" +
+            "%.0f\t%.2f\t%.0f\t%.2f\t%.2f\t%.2f\t%.0f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f%n",
             MENTION_TP, MENTION_F1, MUC_TP, MUC_F1, BCUBED_TP, BCUBED_F1,
             CEAFM_TP, CEAFM_F1, CEAFE_TP, CEAFE_F1, BLANC_F1, CONLL_SCORE,
             results.getCount(MENTION_TP), results.getCount(MENTION_F1), results.getCount(MUC_TP), results.getCount(MUC_F1),
             results.getCount(BCUBED_TP), results.getCount(BCUBED_F1), results.getCount(CEAFM_TP), results.getCount(CEAFM_F1),
             results.getCount(CEAFE_TP), results.getCount(CEAFE_F1), results.getCount(BLANC_F1), results.getCount(CONLL_SCORE));
+  }
 
+  public static void main(String[] args) throws IOException {
+    String actualResults = IOUtils.slurpFile(args[0]);
+    Counter<String> results = getCorefResults(actualResults);
+    printResultsTSV(results, System.out);
   }
 
 }

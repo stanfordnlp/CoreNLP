@@ -176,23 +176,27 @@ public abstract class CorefMentionFinder {
       for (Mention m : mentions) {
         if (m.headWord.ner().matches("PERCENT|MONEY|QUANTITY|CARDINAL")) {
           remove.add(m);
+          if (VERBOSE) System.err.println("MENTION FILTERING number NER: " + m.spanToString());
         } else if (m.originalSpan.size()==1 && m.headWord.tag().equals("CD")) {
           remove.add(m);
+          if (VERBOSE) System.err.println("MENTION FILTERING number: " + m.spanToString());
         } else if (dict.removeWords.contains(m.spanToString())) {
           remove.add(m);
+          if (VERBOSE) System.err.println("MENTION FILTERING removeWord: " + m.spanToString());
         } else if (mentionContainsRemoveChars(m, dict.removeChars)) {
           remove.add(m);
+          if (VERBOSE) System.err.println("MENTION FILTERING removeChars: " + m.spanToString());
         } else if (m.headWord.tag().equals("PU")) {
           // punctuation-only mentions
           remove.add(m);
           if (VERBOSE) System.err.println("MENTION FILTERING Punctuation only mention: " + m.spanToString());
         } else if (mentionIsDemonym(m, dict.countries)) {
-        // demonyms
+          // demonyms -- this seems to be a no-op on devset. Maybe not working?
           remove.add(m);
           if (VERBOSE) System.err.println("MENTION FILTERING Removed demonym: " + m.spanToString());
         } else if (m.spanToString().equals("问题") && m.startIndex > 0 &&
             sent.get(m.startIndex - 1).word().endsWith("没")) {
-          // 没 问题
+          // 没 问题 - this is maybe okay but having 问题 on removeWords was dangerous
           remove.add(m);
           if (VERBOSE) System.err.println("MENTION FILTERING Removed meiyou: " + m.spanToString());
         } else if (mentionIsRangren(m, sent)) {
@@ -203,15 +207,17 @@ public abstract class CorefMentionFinder {
           // 你 知道
           remove.add(m);
           if (VERBOSE) System.err.println("MENTION FILTERING Removed nizhidao: " + m.spanToString());
-        } else if (m.spanToString().contains("什么") || m.spanToString().contains("多少")) {
-          remove.add(m);
-          if (VERBOSE) System.err.println("MENTION FILTERING Removed many/few mention ending: " + m.spanToString());
+        // The words that used to be in this case are now handled more generallyin removeCharsZh
+        // } else if (m.spanToString().contains("什么") || m.spanToString().contains("多少")) {
+        //   remove.add(m);
+        //   if (VERBOSE) System.err.println("MENTION FILTERING Removed many/few mention ending: " + m.spanToString());
         } else if (m.spanToString().endsWith("的")) {
           remove.add(m);
           if (VERBOSE) System.err.println("MENTION FILTERING Removed de ending mention: " + m.spanToString());
-        } else if (mentionIsInterrogativePronoun(m, dict.interrogativePronouns)) {
-            remove.add(m);
-            if (VERBOSE) System.err.println("MENTION FILTERING Removed interrogative pronoun: " + m.spanToString());
+        // omit this case, it decreases performance. A few useful interrogative pronouns are now in the removeChars list
+        // } else if (mentionIsInterrogativePronoun(m, dict.interrogativePronouns)) {
+        //     remove.add(m);
+        //     if (VERBOSE) System.err.println("MENTION FILTERING Removed interrogative pronoun: " + m.spanToString());
         }
 
         // 的 handling
