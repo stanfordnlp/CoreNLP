@@ -52,13 +52,14 @@ import edu.stanford.nlp.util.Generics;
 /**
  * Extracts {@literal <COREF>} mentions from a file annotated in MUC format.
  *
- * @author Jenny Finkel, Mihai Surdeanu, Karthik Raghunathan
+ * @author Jenny Finkel
+ * @author Mihai Surdeanu
+ * @author Karthik Raghunathan
  */
 public class MUCMentionExtractor extends MentionExtractor {
 
-  private TokenizerFactory<CoreLabel> tokenizerFactory;
-
-  private String fileContents;
+  private final TokenizerFactory<CoreLabel> tokenizerFactory;
+  private final String fileContents;
   private int currentOffset;
 
   public MUCMentionExtractor(Dictionaries dict, Properties props, Semantics semantics) throws Exception {
@@ -84,11 +85,11 @@ public class MUCMentionExtractor extends MentionExtractor {
 
   @Override
   public Document nextDoc() throws Exception {
-    List<List<CoreLabel>> allWords = new ArrayList<List<CoreLabel>>();
-    List<Tree> allTrees = new ArrayList<Tree>();
-    List<List<Mention>> allGoldMentions = new ArrayList<List<Mention>>();
+    List<List<CoreLabel>> allWords = new ArrayList<>();
+    List<Tree> allTrees = new ArrayList<>();
+    List<List<Mention>> allGoldMentions = new ArrayList<>();
     List<List<Mention>> allPredictedMentions;
-    List<CoreMap> allSentences = new ArrayList<CoreMap>();
+    List<CoreMap> allSentences = new ArrayList<>();
     Annotation docAnno = new Annotation("");
 
     Pattern docPattern = Pattern.compile("<DOC>(.*?)</DOC>", Pattern.DOTALL+Pattern.CASE_INSENSITIVE);
@@ -130,10 +131,10 @@ public class MUCMentionExtractor extends MentionExtractor {
       }
       // END FIXING TOKENIZATION PROBLEMS
 
-      List<CoreLabel> sentence = new ArrayList<CoreLabel>();
+      List<CoreLabel> sentence = new ArrayList<>();
       // MUC accepts embedded coref mentions, so we need to keep a stack for the mentions currently open
-      Stack<Mention> stack = new Stack<Mention>();
-      List<Mention> mentions = new ArrayList<Mention>();
+      Stack<Mention> stack = new Stack<>();
+      List<Mention> mentions = new ArrayList<>();
 
       allWords.add(sentence);
       allGoldMentions.add(mentions);
@@ -184,11 +185,11 @@ public class MUCMentionExtractor extends MentionExtractor {
 
           Matcher m = idPattern.matcher(w);
           m.find();
-          mention.mentionID = Integer.valueOf(m.group(1));
+          mention.mentionID = Integer.parseInt(m.group(1));
 
           m = refPattern.matcher(w);
           if (m.find()) {
-            mention.originalRef = Integer.valueOf(m.group(1));
+            mention.originalRef = Integer.parseInt(m.group(1));
           }
 
           // open mention. keep track of all open mentions using the stack
@@ -261,23 +262,22 @@ public class MUCMentionExtractor extends MentionExtractor {
     docAnno.set(CoreAnnotations.SentencesAnnotation.class, allSentences);
     stanfordProcessor.annotate(docAnno);
 
-    if(allSentences.size()!=allWords.size()) throw new RuntimeException();
+    if(allSentences.size()!=allWords.size()) throw new IllegalStateException("allSentences != allWords");
     for(int i = 0 ; i< allSentences.size(); i++){
       List<CoreLabel> annotatedSent = allSentences.get(i).get(CoreAnnotations.TokensAnnotation.class);
       List<CoreLabel> unannotatedSent = allWords.get(i);
       List<Mention> mentionInSent = allGoldMentions.get(i);
       for (Mention m : mentionInSent){
-        m.dependency = allSentences.get(i).get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+        m.dependency = allSentences.get(i).get(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class);
       }
       if(annotatedSent.size() != unannotatedSent.size()){
-        throw new RuntimeException();
+        throw new IllegalStateException("annotatedSent != unannotatedSent");
       }
-      int k = 0;
-      for(int j = 0 ; j < annotatedSent.size(); j++, k++){
+      for (int j = 0, sz = annotatedSent.size(); j < sz; j++){
         CoreLabel annotatedWord = annotatedSent.get(j);
-        CoreLabel unannotatedWord = unannotatedSent.get(k);
-        if(!annotatedWord.get(CoreAnnotations.TextAnnotation.class).equals(unannotatedWord.get(CoreAnnotations.TextAnnotation.class))) {
-          throw new RuntimeException();
+        CoreLabel unannotatedWord = unannotatedSent.get(j);
+        if ( ! annotatedWord.get(CoreAnnotations.TextAnnotation.class).equals(unannotatedWord.get(CoreAnnotations.TextAnnotation.class))) {
+          throw new IllegalStateException("annotatedWord != unannotatedWord");
         }
       }
       allWords.set(i, annotatedSent);

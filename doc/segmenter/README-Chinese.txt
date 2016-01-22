@@ -1,4 +1,4 @@
-Stanford Chinese Segmenter - v1.6.8 - 2013-04-04
+Stanford Chinese Segmenter - v3.5.2 - 2015-04-20
 --------------------------------------------
 
 (c) 2003-2012  The Board of Trustees of The Leland Stanford Junior University.
@@ -73,8 +73,7 @@ For more information, see:
 
 [Training data]
 (Chinese Penn Treebank)
-"data/ctb.gz" is trained with all data in the LDC Chinese Treebank 6 
-(prerelease).
+"data/ctb.gz" is trained with the training data in the LDC Chinese Treebank 7 
 
 (Beijing University)
 "data/pku.gz" is trained with the data provided by Peking University 

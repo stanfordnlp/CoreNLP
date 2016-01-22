@@ -1,0 +1,55 @@
+trainFileList = /u/nlp/data/ner/column_data/muc6.ptb.train,/u/nlp/data/ner/column_data/muc7.ptb.train
+# testFile = /u/nlp/data/ner/column_data/muc7.ptb.devtest
+serializeTo = english.muc.7class.caseless.distsim.crf.ser.gz
+
+type=crf
+
+wordFunction = edu.stanford.nlp.process.LowercaseAndAmericanizeFunction
+useKnownLCWords = false
+
+distSimLexicon = /u/nlp/data/pos_tags_are_useless/egw4-reut.512.clusters
+numberEquivalenceDistSim = true
+unknownWordDistSimClass = 0
+useDistSim = true
+
+map = word=0,answer=1
+
+saveFeatureIndexToDisk = true
+
+useClassFeature=true
+useWord=true
+#useWordPairs=true
+useNGrams=true
+noMidNGrams=true
+maxNGramLeng=6
+usePrev=true
+useNext=true
+#useTags=true
+#useWordTag=true
+useLongSequences=true
+useSequences=true
+usePrevSequences=true
+useTypeSeqs=true
+useTypeSeqs2=true
+useTypeySequences=true
+useOccurrencePatterns=true
+useLastRealWord=true
+useNextRealWord=true
+#useReverse=false
+normalize=true
+# normalizeTimex=true
+wordShape=chris2useLC
+useDisjunctive=true
+disjunctionWidth=5
+#useDisjunctiveShapeInteraction=true
+
+maxLeft=1
+readerAndWriter=edu.stanford.nlp.sequences.ColumnDocumentReaderAndWriter
+
+useObservedSequencesOnly=true
+
+useQN = true
+QNsize = 25
+
+# makes it go faster
+featureDiffThresh=0.05

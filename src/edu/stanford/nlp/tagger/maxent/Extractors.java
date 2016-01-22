@@ -13,7 +13,6 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import edu.stanford.nlp.util.Pair;
 
@@ -51,9 +50,9 @@ public class Extractors implements Serializable {
    */
   void initTypes() {
 
-    local = new ArrayList<Pair<Integer,Extractor>>();
-    localContext = new ArrayList<Pair<Integer,Extractor>>();
-    dynamic = new ArrayList<Pair<Integer,Extractor>>();
+    local = new ArrayList<>();
+    localContext = new ArrayList<>();
+    dynamic = new ArrayList<>();
 
     for(int i=0; i<v.length; ++i) {
       Extractor e = v[i];
@@ -131,7 +130,7 @@ public class Extractors implements Serializable {
   }
 
 
-  public int getSize() {
+  public int size() {
     return v.length;
   }
 
@@ -144,7 +143,7 @@ public class Extractors implements Serializable {
   /*
   public void save(String filename) {
     try {
-      OutDataStreamFile rf = new OutDataStreamFile(filename);
+      DataOutputStream rf = IOUtils.getDataOutputStream(filename);
       rf.writeInt(v.length);
       for (Extractor extr : v) {
         rf.writeBytes(extr.toString());

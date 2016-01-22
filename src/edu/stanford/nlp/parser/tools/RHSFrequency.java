@@ -5,8 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import edu.stanford.nlp.international.Languages;
-import edu.stanford.nlp.international.Languages.Language;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -30,7 +29,7 @@ public class RHSFrequency {
   static {
     usage.append(String.format("Usage: java %s [OPTS] lhs tree_file \n\n",RHSFrequency.class.getName()));
     usage.append("Options:\n");
-    usage.append("  -l lang    : Select language settings from " + Languages.listOfLanguages() + "\n");
+    usage.append("  -l lang    : Select language settings from " + Language.langList + "\n");
     usage.append("  -e enc     : Encoding.\n");
   }
 
@@ -47,16 +46,19 @@ public class RHSFrequency {
     
     for(int i = 0; i < args.length; i++) {
       if(args[i].startsWith("-")) {
-        if(args[i].equals("-l")) {
-          Language lang = Language.valueOf(args[++i].trim());
-          tlpp = Languages.getLanguageParams(lang);
+        switch (args[i]) {
+          case "-l":
+            Language lang = Language.valueOf(args[++i].trim());
+            tlpp = lang.params;
 
-        } else if(args[i].equals("-e")) {
-          encoding = args[++i];
+            break;
+          case "-e":
+            encoding = args[++i];
 
-        } else {
-          System.out.println(usage.toString());
-          System.exit(-1);
+            break;
+          default:
+            System.out.println(usage.toString());
+            System.exit(-1);
         }
 
       } else {
@@ -76,7 +78,7 @@ public class RHSFrequency {
       }
     }
 
-    Counter<String> rhsCounter = new ClassicCounter<String>();
+    Counter<String> rhsCounter = new ClassicCounter<>();
     for(Tree t : tb) {
       TregexMatcher m = rootMatch.matcher(t);
       while(m.findNextMatchingNode()) {
@@ -88,7 +90,7 @@ public class RHSFrequency {
       }
     }
 
-    List<String> biggestKeys = new ArrayList<String>(rhsCounter.keySet());
+    List<String> biggestKeys = new ArrayList<>(rhsCounter.keySet());
     Collections.sort(biggestKeys, Counters.toComparatorDescending(rhsCounter));
 
     PrintWriter pw = tlpp.pw();

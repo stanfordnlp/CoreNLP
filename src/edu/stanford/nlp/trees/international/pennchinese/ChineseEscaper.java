@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.regex.*;
 
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.UTF8EquivalenceFunction;
 
@@ -29,7 +29,7 @@ public class ChineseEscaper implements Function<List<HasWord>, List<HasWord>> {
    *  This should be fixed.
    */
   public List<HasWord> apply(List<HasWord> arg) {
-    List<HasWord> ans = new ArrayList<HasWord>(arg);
+    List<HasWord> ans = new ArrayList<>(arg);
     for (HasWord wd : ans) {
       String w = wd.word();
       Matcher m2 = p2.matcher(w);

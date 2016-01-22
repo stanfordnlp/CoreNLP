@@ -1,26 +1,34 @@
-// CMMClassifier -- a probabilistic (CMM) Named Entity Recognizer
-// Copyright (c) 2002-2006 The Board of Trustees of
+// CMMClassifier -- a conditional maximum-entropy markov model, mainly used for NER.
+// Copyright (c) 2002-2014 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
-// This program has been made available for research purposes only.
-// Please do not further distribute it.
-// Commercial development of the software is not to be undertaken without
-// prior agreement from Stanford University.
-// This program is not open source nor is it in the public domain.
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
 //
-// For information contact:
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software Foundation,
+// Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+// For more information, bug reports, fixes, contact:
 //    Christopher Manning
 //    Dept of Computer Science, Gates 1A
 //    Stanford CA 94305-9010
 //    USA
-//    manning@cs.stanford.edu
+//    Support/Questions: java-nlp-user@lists.stanford.edu
+//    Licensing: java-nlp-support@lists.stanford.edu
 
 package edu.stanford.nlp.ie.ner;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -45,13 +53,10 @@ import edu.stanford.nlp.classify.SVMLightClassifierFactory;
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.NERFeatureFactory;
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.BasicDatum;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Datum;
-import edu.stanford.nlp.ling.Document;
-import edu.stanford.nlp.ling.HasTag;
-import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.WordTag;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.math.SloppyMath;
@@ -66,13 +71,8 @@ import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.sequences.SequenceModel;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.HashIndex;
-import edu.stanford.nlp.util.Index;
-import edu.stanford.nlp.util.PaddedList;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.stats.TwoDimensionalCounter;
+import edu.stanford.nlp.util.*;
 
 
 /**
@@ -144,6 +144,10 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
   }
 
 
+  public CMMClassifier(SeqClassifierFlags flags) {
+    super(flags);
+  }
+
   /**
    * Returns the Set of entities recognized by this Classifier.
    *
@@ -187,7 +191,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
       System.err.println("Using NEWGENE threshold: " + flags.newgeneThreshold);
       for (int i = 0, docSize = document.size(); i < docSize; i++) {
         CoreLabel wordInfo = document.get(i);
-        Datum<String, String> d = makeDatum(document, i, featureFactory);
+        Datum<String, String> d = makeDatum(document, i, featureFactories);
         Counter<String> scores = classifier.scoresOf(d);
         //String answer = BACKGROUND;
         String answer = flags.backgroundSymbol;
@@ -221,7 +225,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
           CoreLabel lineInfo = document.get(i);
           System.err.print("@@ Position " + i + ": ");
           System.err.println(lineInfo.word() + " chose " + lineInfo.get(CoreAnnotations.AnswerAnnotation.class));
-          lc.justificationOf(makeDatum(document, i, featureFactory));
+          lc.justificationOf(makeDatum(document, i, featureFactories));
         }
       }
     }
@@ -234,7 +238,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
    * Returns the most likely class for the word at the given position.
    */
   protected String classOf(List<IN> lineInfos, int pos) {
-    Datum<String, String> d = makeDatum(lineInfos, pos, featureFactory);
+    Datum<String, String> d = makeDatum(lineInfos, pos, featureFactories);
     return classifier.classOf(d);
   }
 
@@ -247,7 +251,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     double cll = 0.0;
 
     for (int i = 0; i < lineInfos.size(); i++) {
-      Datum<String, String> d = makeDatum(lineInfos, i, featureFactory);
+      Datum<String, String> d = makeDatum(lineInfos, i, featureFactories);
       Counter<String> c = classifier.logProbabilityOf(d);
 
       double total = Double.NEGATIVE_INFINITY;
@@ -283,12 +287,12 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     // cdm Aug 2005: why is this next line needed?  Seems really ugly!!!  [2006: it broke things! removed]
     // document.add(0, new CoreLabel());
 
-    SequenceModel ts = new Scorer<IN>(document,
-                                      classIndex,
-                                      this,
-                                      (!flags.useTaggySequences ? (flags.usePrevSequences ? 1 : 0) : flags.maxLeft),
-                                      (flags.useNextSequences ? 1 : 0),
-                                      answerArrays);
+    SequenceModel ts = new Scorer<>(document,
+            classIndex,
+            this,
+            (!flags.useTaggySequences ? (flags.usePrevSequences ? 1 : 0) : flags.maxLeft),
+            (flags.useNextSequences ? 1 : 0),
+            answerArrays);
 
     return ts;
   }
@@ -365,7 +369,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
           }
 
           // first pass, compute all of the scores
-          ClassicCounter<Pair<Integer,Integer>> prevScores = new ClassicCounter<Pair<Integer,Integer>>();
+          ClassicCounter<Pair<Integer,Integer>> prevScores = new ClassicCounter<>();
           for (j = start; j < end; j++) {
             // clear the sequence
             for (int k = start; k < end; k++) {
@@ -382,17 +386,17 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
                 scores = Scorer.recenter(scores);
                 ngScore += scores[tags[m]];
               }
-              prevScores.incrementCount(new Pair<Integer,Integer>(Integer.valueOf(j), Integer.valueOf(k)), ngScore - bgScore);
+              prevScores.incrementCount(new Pair<>(Integer.valueOf(j), Integer.valueOf(k)), ngScore - bgScore);
             }
           }
           for (j = start; j < end; j++) {
             // grow the sequence from j until the end
             for (int k = j; k < end; k++) {
-              double score = prevScores.getCount(new Pair<Integer,Integer>(Integer.valueOf(j), Integer.valueOf(k)));
-              Pair<Integer, Integer> al = new Pair<Integer,Integer>(Integer.valueOf(j - 1), Integer.valueOf(k)); // adding a word to the left
-              Pair<Integer, Integer> ar = new Pair<Integer,Integer>(Integer.valueOf(j), Integer.valueOf(k + 1)); // adding a word to the right
-              Pair<Integer, Integer> sl = new Pair<Integer,Integer>(Integer.valueOf(j + 1), Integer.valueOf(k)); // subtracting word from left
-              Pair<Integer, Integer> sr = new Pair<Integer,Integer>(Integer.valueOf(j), Integer.valueOf(k - 1)); // subtracting word from right
+              double score = prevScores.getCount(new Pair<>(Integer.valueOf(j), Integer.valueOf(k)));
+              Pair<Integer, Integer> al = new Pair<>(Integer.valueOf(j - 1), Integer.valueOf(k)); // adding a word to the left
+              Pair<Integer, Integer> ar = new Pair<>(Integer.valueOf(j), Integer.valueOf(k + 1)); // adding a word to the right
+              Pair<Integer, Integer> sl = new Pair<>(Integer.valueOf(j + 1), Integer.valueOf(k)); // subtracting word from left
+              Pair<Integer, Integer> sr = new Pair<>(Integer.valueOf(j), Integer.valueOf(k - 1)); // subtracting word from right
 
               // make sure the score is greater than all its neighbors (one add or subtract)
               if (score >= flags.newgeneThreshold && (!prevScores.containsKey(al) || score > prevScores.getCount(al)) && (!prevScores.containsKey(ar) || score > prevScores.getCount(ar)) && (!prevScores.containsKey(sl) || score > prevScores.getCount(sl)) && (!prevScores.containsKey(sr) || score > prevScores.getCount(sr))) {
@@ -440,7 +444,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
         CoreLabel lineInfo = document.get(i);
         System.err.print("@@ Position is: " + i + ": ");
         System.err.println(lineInfo.word() + ' ' + lineInfo.get(CoreAnnotations.AnswerAnnotation.class));
-        lc.justificationOf(makeDatum(document, i, featureFactory));
+        lc.justificationOf(makeDatum(document, i, featureFactories));
       }
     }
 
@@ -487,7 +491,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
 
     int prior = LogPrior.LogPriorType.QUADRATIC.ordinal();
     LinearClassifier<String, String> lc = (LinearClassifier<String, String>) classifier;
-    LinearClassifierFactory<String, String> lcf = new LinearClassifierFactory<String, String>(flags.tolerance, flags.useSum, prior, flags.sigma, flags.epsilon, flags.QNsize);
+    LinearClassifierFactory<String, String> lcf = new LinearClassifierFactory<>(flags.tolerance, flags.useSum, prior, flags.sigma, flags.epsilon, flags.QNsize);
 
     double[][] weights = lc.weights();  // old dim
     Index<String> newF = adapt.featureIndex;
@@ -532,8 +536,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
 
   public void retrain(ObjectBank<List<IN>> doc) {
     if (classifier == null) {
-      System.err.println("Cannot retrain before you train!");
-      System.exit(-1);
+      throw new UnsupportedOperationException("Cannot retrain before you train!");
     }
     Index<String> findex = ((LinearClassifier<String, String>)classifier).featureIndex();
     Index<String> lindex = ((LinearClassifier<String, String>)classifier).labelIndex();
@@ -553,9 +556,9 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
 
     for (int i = 0; i < flags.numTimesPruneFeatures; i++) {
 
-      Index<String> featuresAboveThreshhold = getFeaturesAboveThreshhold(train, flags.featureDiffThresh);
+      Index<String> featuresAboveThreshold = getFeaturesAboveThreshold(train, flags.featureDiffThresh);
       System.err.println("Removing features with weight below " + flags.featureDiffThresh + " and retraining...");
-      train = getDataset(train, featuresAboveThreshhold);
+      train = getDataset(train, featuresAboveThreshold);
 
       int tmp = flags.QNsize;
       flags.QNsize = flags.QNsize2;
@@ -577,24 +580,22 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     }
   }
 
-  public Index<String> getFeaturesAboveThreshhold(Dataset<String, String> dataset, double thresh) {
+  private Index<String> getFeaturesAboveThreshold(Dataset<String, String> dataset, double thresh) {
     if (!(classifier instanceof LinearClassifier)) {
       throw new RuntimeException("Attempting to remove features based on weight from a non-linear classifier");
     }
     Index<String> featureIndex = dataset.featureIndex;
     Index<String> labelIndex = dataset.labelIndex;
 
-    Index<String> features = new HashIndex<String>();
+    Index<String> features = new HashIndex<>();
     Iterator<String> featureIt = featureIndex.iterator();
     LinearClassifier<String, String> lc = (LinearClassifier<String, String>)classifier;
     LOOP:
     while (featureIt.hasNext()) {
       String f = featureIt.next();
-      Iterator<String> labelIt = labelIndex.iterator();
       double smallest = Double.POSITIVE_INFINITY;
       double biggest = Double.NEGATIVE_INFINITY;
-      while (labelIt.hasNext()) {
-        String l = labelIt.next();
+      for (String l : labelIndex) {
         double weight = lc.weight(f, l);
         if (weight < smallest) {
           smallest = weight;
@@ -628,7 +629,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
    * Build a Dataset from some data. Used for training a classifier.
    *
    * By passing in extra featureIndex and classIndex, you can get a Dataset based on featureIndex and
-   * classIndex
+   * classIndex.
    *
    * @param data This variable is a list of lists of CoreLabel.  That is,
    *             it is a collection of documents, each of which is represented
@@ -646,14 +647,15 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
       size += doc.size();
     }
 
-    System.err.println("Making Dataset...");
+    System.err.print("Making Dataset ... ");
+    System.err.flush();
     Dataset<String, String> train;
     if (featureIndex != null && classIndex != null) {
-      System.err.println("Using feature/class Index from existing Dataset...");
-      System.err.println("(This is used when getting Dataset from adaptation set. We want to make the index consistent.)"); //pichuan
-      train = new Dataset<String, String>(size, featureIndex, classIndex);
+      System.err.println("  Using feature/class Index from existing Dataset...");
+      System.err.println("  (This is used when getting Dataset from adaptation set. We want to make the index consistent.)"); //pichuan
+      train = new Dataset<>(size, featureIndex, classIndex);
     } else {
-      train = new Dataset<String, String>(size);
+      train = new Dataset<>(size);
     }
 
     for (List<IN> doc : data) {
@@ -661,8 +663,8 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
         Collections.reverse(doc);
       }
 
-      for (int i = 0, dsize = doc.size(); i < dsize; i++) {
-        Datum<String, String> d = makeDatum(doc, i, featureFactory);
+      for (int i = 0, dSize = doc.size(); i < dSize; i++) {
+        Datum<String, String> d = makeDatum(doc, i, featureFactories);
 
         //CoreLabel fl = doc.get(i);
 
@@ -675,11 +677,6 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     }
 
     System.err.println("done.");
-    // reset printing before test data
-    // what is this???? -JRF
-//     if (featureFactory instanceof FeatureFactory) {
-//       ((FeatureFactory) featureFactory).resetPrintFeatures();
-//     }
 
     if (flags.featThreshFile != null) {
       System.err.println("applying thresholds...");
@@ -696,15 +693,16 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
   public Dataset<String, String> getBiasedDataset(ObjectBank<List<IN>> data, Index<String> featureIndex, Index<String> classIndex) {
     makeAnswerArraysAndTagIndex(data);
 
-    Index<String> origFeatIndex = new HashIndex<String>(featureIndex.objectsList()); // mg2009: TODO: check
+    Index<String> origFeatIndex = new HashIndex<>(featureIndex.objectsList()); // mg2009: TODO: check
 
     int size = 0;
     for (List<IN> doc : data) {
       size += doc.size();
     }
 
-    System.err.println("Making Dataset...");
-    Dataset<String, String> train = new Dataset<String, String>(size, featureIndex, classIndex);
+    System.err.print("Making Dataset ... ");
+    System.err.flush();
+    Dataset<String, String> train = new Dataset<>(size, featureIndex, classIndex);
 
     for (List<IN> doc : data) {
       if (flags.useReverse) {
@@ -712,8 +710,8 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
       }
 
       for (int i = 0, dsize = doc.size(); i < dsize; i++) {
-        Datum<String, String> d = makeDatum(doc, i, featureFactory);
-        Collection<String> newFeats = new ArrayList<String>();
+        Datum<String, String> d = makeDatum(doc, i, featureFactories);
+        Collection<String> newFeats = new ArrayList<>();
         for (String f : d.asFeatures()) {
           if ( ! origFeatIndex.contains(f)) {
             newFeats.add(f);
@@ -730,11 +728,6 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     }
 
     System.err.println("done.");
-    // reset printing before test data
-    // what is this???? -JRF
-//     if (featureFactory instanceof FeatureFactory) {
-//       ((FeatureFactory) featureFactory).resetPrintFeatures();
-//     }
 
     if (flags.featThreshFile != null) {
       System.err.println("applying thresholds...");
@@ -780,10 +773,9 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
    *                     some features, specifically those features not in the {@link edu.stanford.nlp.util.Index}
    *                     goodFeatures.
    * @param goodFeatures An {@link edu.stanford.nlp.util.Index} of features we wish to retain.
-   * @return A new {@link Dataset} wheres each datapoint contains only features
+   * @return A new {@link Dataset} wheres each data point contains only features
    *         which were in goodFeatures.
    */
-
   public Dataset<String, String> getDataset(Dataset<String, String> oldData, Index<String> goodFeatures) {
     //public Dataset getDataset(List data, Collection goodFeatures) {
     //makeAnswerArraysAndTagIndex(data);
@@ -810,15 +802,15 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     for (int i = 0; i < oldDataArray.length; i++) {
       int[] data = oldDataArray[i];
       size = 0;
-      for (int j = 0; j < data.length; j++) {
-        if (oldToNewFeatureMap[data[j]] > 0) {
+      for (int oldF : data) {
+        if (oldToNewFeatureMap[oldF] > 0) {
           size++;
         }
       }
       int[] newData = new int[size];
       int index = 0;
-      for (int j = 0; j < data.length; j++) {
-        int f = oldToNewFeatureMap[data[j]];
+      for (int oldF : data) {
+        int f = oldToNewFeatureMap[oldF];
         if (f > 0) {
           newData[index++] = f;
         }
@@ -826,7 +818,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
       newDataArray[i] = newData;
     }
 
-    Dataset<String, String> train = new Dataset<String, String>(oldData.labelIndex, oldLabelArray, goodFeatures, newDataArray, newDataArray.length);
+    Dataset<String, String> train = new Dataset<>(oldData.labelIndex, oldLabelArray, goodFeatures, newDataArray, newDataArray.length);
 
     System.err.println("done.");
     if (flags.featThreshFile != null) {
@@ -858,7 +850,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
         throw new UnsupportedOperationException();
       }
 
-      LinearClassifierFactory<String, String> lcf = new LinearClassifierFactory<String, String>(flags.tolerance, flags.useSum, prior, flags.adaptSigma, flags.epsilon, flags.QNsize);
+      LinearClassifierFactory<String, String> lcf = new LinearClassifierFactory<>(flags.tolerance, flags.useSum, prior, flags.adaptSigma, flags.epsilon, flags.QNsize);
       ((LinearClassifier<String, String>)classifier).adaptWeights(adapt,lcf);
     } else {
       throw new UnsupportedOperationException();
@@ -874,7 +866,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
   }
 
   private void trainSVM(Dataset<String, String> train) {
-    SVMLightClassifierFactory<String, String> fact = new SVMLightClassifierFactory<String, String>();
+    SVMLightClassifierFactory<String, String> fact = new SVMLightClassifierFactory<>();
     classifier = fact.trainClassifier(train);
 
   }
@@ -891,7 +883,8 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     if (flags.useNB) {
       lc = new NBLinearClassifierFactory<String, String>(flags.sigma).trainClassifier(train);
     } else {
-      LinearClassifierFactory<String, String> lcf = new LinearClassifierFactory<String, String>(flags.tolerance, flags.useSum, prior, flags.sigma, flags.epsilon, flags.QNsize);
+      LinearClassifierFactory<String, String> lcf = new LinearClassifierFactory<>(flags.tolerance, flags.useSum, prior, flags.sigma, flags.epsilon, flags.QNsize);
+      lcf.setVerbose(true);
       if (flags.useQN) {
         lcf.useQuasiNewton(flags.useRobustQN);
       } else if(flags.useStochasticQN) {
@@ -923,7 +916,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     }
 
     LinearClassifierFactory<String, String> lcf;
-    lcf = new LinearClassifierFactory<String, String>(flags.tolerance, flags.useSum, prior, flags.sigma, flags.epsilon, flags.QNsize);
+    lcf = new LinearClassifierFactory<>(flags.tolerance, flags.useSum, prior, flags.sigma, flags.epsilon, flags.QNsize);
     if (flags.useQN) {
       lcf.useQuasiNewton();
     } else{
@@ -1015,7 +1008,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
 
       oos.writeObject(classifier);
       oos.writeObject(flags);
-      oos.writeObject(featureFactory);
+      oos.writeObject(featureFactories);
       oos.writeObject(classIndex);
       oos.writeObject(answerArrays);
       //oos.writeObject(WordShapeClassifier.getKnownLowerCaseWords());
@@ -1028,8 +1021,31 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     } catch (Exception e) {
       System.err.println("Error serializing to " + serializePath);
       e.printStackTrace();
-      // dont actually exit in case they're testing too
-      //System.exit(1);
+    }
+  }
+
+  public void serializeClassifier(ObjectOutputStream oos) {
+
+    //System.err.print("Serializing classifier to " + serializePath + "...");
+
+    try {
+      //ObjectOutputStream oos = IOUtils.writeStreamFromString(oos);
+
+      oos.writeObject(classifier);
+      oos.writeObject(flags);
+      oos.writeObject(featureFactories);
+      oos.writeObject(classIndex);
+      oos.writeObject(answerArrays);
+      //oos.writeObject(WordShapeClassifier.getKnownLowerCaseWords());
+
+      oos.writeObject(knownLCWords);
+
+      oos.close();
+      System.err.println("Done.");
+
+    } catch (Exception e) {
+      //System.err.println("Error serializing to " + serializePath);
+      e.printStackTrace();
     }
   }
 
@@ -1049,9 +1065,9 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
    *
    * @return A Default CMMClassifier from a jar file
    */
-  public static CMMClassifier getDefaultClassifier() {
+  public static CMMClassifier<? extends CoreLabel> getDefaultClassifier() {
 
-    CMMClassifier cmm = new CMMClassifier();
+    CMMClassifier<? extends CoreLabel> cmm = new CMMClassifier<>();
     cmm.loadDefaultClassifier();
     return cmm;
 
@@ -1073,7 +1089,13 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
   public void loadClassifier(ObjectInputStream ois, Properties props) throws ClassCastException, IOException, ClassNotFoundException {
     classifier = (LinearClassifier<String, String>) ois.readObject();
     flags = (SeqClassifierFlags) ois.readObject();
-    featureFactory = (FeatureFactory) ois.readObject();
+    Object featureFactory = ois.readObject();
+    if (featureFactory instanceof List) {
+      featureFactories = ErasureUtils.uncheckedCast(featureFactory);
+    } else if (featureFactory instanceof FeatureFactory) {
+      featureFactories = Generics.newArrayList();
+      featureFactories.add((FeatureFactory) featureFactory);
+    }
 
     if (props != null) {
       flags.setProperties(props);
@@ -1083,46 +1105,63 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     classIndex = (Index<String>) ois.readObject();
     answerArrays = (Set<List<String>>) ois.readObject();
 
-    knownLCWords = (Set<String>) ois.readObject();
+    knownLCWords = (MaxSizeConcurrentHashSet<String>) ois.readObject();
   }
 
 
-  public static CMMClassifier getClassifierNoExceptions(File file) {
-    CMMClassifier cmm = new CMMClassifier();
+  public static CMMClassifier<? extends CoreLabel> getClassifierNoExceptions(File file) {
+    CMMClassifier<? extends CoreLabel> cmm = new CMMClassifier<>();
     cmm.loadClassifierNoExceptions(file);
     return cmm;
 
   }
 
-  public static CMMClassifier getClassifier(File file) throws IOException, ClassCastException, ClassNotFoundException {
+  public static CMMClassifier<? extends CoreLabel> getClassifier(File file) throws IOException, ClassCastException, ClassNotFoundException {
 
-    CMMClassifier cmm = new CMMClassifier();
+    CMMClassifier<? extends CoreLabel> cmm = new CMMClassifier<>();
     cmm.loadClassifier(file);
     return cmm;
   }
 
-  public static CMMClassifier getClassifierNoExceptions(String loadPath) {
-    CMMClassifier cmm = new CMMClassifier();
+  public static CMMClassifier<CoreLabel> getClassifierNoExceptions(String loadPath) {
+    CMMClassifier<CoreLabel> cmm = new CMMClassifier<>();
     cmm.loadClassifierNoExceptions(loadPath);
     return cmm;
 
   }
 
-  public static CMMClassifier getClassifier(String loadPath) throws IOException, ClassCastException, ClassNotFoundException {
+  public static CMMClassifier<? extends CoreLabel> getClassifier(String loadPath) throws IOException, ClassCastException, ClassNotFoundException {
 
-    CMMClassifier cmm = new CMMClassifier();
+    CMMClassifier<? extends CoreLabel> cmm = new CMMClassifier<>();
     cmm.loadClassifier(loadPath);
     return cmm;
   }
 
-  public static CMMClassifier getClassifierNoExceptions(InputStream in) {
-    CMMClassifier cmm = new CMMClassifier();
+  public static CMMClassifier<? extends CoreLabel> getClassifierNoExceptions(InputStream in) {
+    CMMClassifier<? extends CoreLabel> cmm = new CMMClassifier<>();
     cmm.loadClassifierNoExceptions(new BufferedInputStream(in), null);
     return cmm;
   }
 
-  public static CMMClassifier getClassifier(InputStream in) throws IOException, ClassCastException, ClassNotFoundException {
-    CMMClassifier cmm = new CMMClassifier();
+  // new method for getting a CMM from an ObjectInputStream - by JB
+  public static <INN extends CoreMap> CMMClassifier<? extends CoreLabel> getClassifier(ObjectInputStream ois) throws IOException,
+          ClassCastException,
+          ClassNotFoundException {
+    CMMClassifier<? extends CoreLabel> cmm = new CMMClassifier<>();
+    cmm.loadClassifier(ois, null);
+    return cmm;
+  }
+
+  public static <INN extends CoreMap> CMMClassifier<? extends CoreLabel> getClassifier(ObjectInputStream ois, Properties props) throws IOException,
+          ClassCastException,
+          ClassNotFoundException {
+    CMMClassifier<? extends CoreLabel> cmm = new CMMClassifier<>();
+    cmm.loadClassifier(ois, props);
+    return cmm;
+  }
+
+  public static CMMClassifier<? extends CoreLabel> getClassifier(InputStream in) throws IOException, ClassCastException, ClassNotFoundException {
+    CMMClassifier<? extends CoreLabel> cmm = new CMMClassifier<>();
     cmm.loadClassifier(new BufferedInputStream(in));
     return cmm;
   }
@@ -1139,7 +1178,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
       answerArrays = Generics.newHashSet();
     }
     if (classIndex == null) {
-      classIndex = new HashIndex<String>();
+      classIndex = new HashIndex<>();
     }
 
     for (List<IN> doc : docs) {
@@ -1157,8 +1196,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
           answerArrays.add(Arrays.asList(seq));
         }
       }
-      for (int i = 0; i < leng; i++) {
-        CoreLabel wordInfo = doc.get(i);
+      for (IN wordInfo : doc) {
         classIndex.add(wordInfo.get(CoreAnnotations.AnswerAnnotation.class));
       }
 
@@ -1168,27 +1206,29 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     }
   }
 
-  /** Make an individual Datum out of the data list info, focused at position
-   *  loc.
-   *  @param info A List of WordInfo objects
+  /** Make an individual Datum out of the data list info, focused at position loc.
+   *
+   *  @param info A List of IN objects
    *  @param loc  The position in the info list to focus feature creation on
-   *  @param featureFactory The factory that constructs features out of the item
+   *  @param featureFactories The factory that constructs features out of the item
    *  @return A Datum (BasicDatum) representing this data instance
    */
-  public Datum<String, String> makeDatum(List<IN> info, int loc, FeatureFactory<IN> featureFactory) {
-    PaddedList<IN> pInfo = new PaddedList<IN>(info, pad);
+  public Datum<String, String> makeDatum(List<IN> info, int loc, List<FeatureFactory<IN>> featureFactories) {
+    PaddedList<IN> pInfo = new PaddedList<>(info, pad);
 
-    Collection<String> features = new ArrayList<String>();
-    List<Clique> cliques = featureFactory.getCliques();
-    for (Clique c : cliques) {
-      Collection<String> feats = featureFactory.getCliqueFeatures(pInfo, loc, c);
-      feats = addOtherClasses(feats, pInfo, loc, c);
-      features.addAll(feats);
+    Collection<String> features = new ArrayList<>();
+    for (FeatureFactory<IN> featureFactory : featureFactories) {
+      List<Clique> cliques = featureFactory.getCliques();
+      for (Clique c : cliques) {
+        Collection<String> feats = featureFactory.getCliqueFeatures(pInfo, loc, c);
+        feats = addOtherClasses(feats, pInfo, loc, c);
+        features.addAll(feats);
+      }
     }
 
     printFeatures(pInfo.get(loc), features);
     CoreLabel c = info.get(loc);
-    return new BasicDatum<String, String>(features, c.get(CoreAnnotations.AnswerAnnotation.class));
+    return new BasicDatum<>(features, c.get(CoreAnnotations.AnswerAnnotation.class));
   }
 
 
@@ -1246,22 +1286,24 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
 
 
   private static List<Pair<Pattern, Integer>> getThresholds(String filename) {
+    BufferedReader in = null;
     try {
-      BufferedReader in = new BufferedReader(new FileReader(filename));
-      List<Pair<Pattern, Integer>> thresholds = new ArrayList<Pair<Pattern, Integer>>();
-      String line;
-      while ((line = in.readLine()) != null) {
+      in = IOUtils.readerFromString(filename);
+      List<Pair<Pattern, Integer>> thresholds = new ArrayList<>();
+      for (String line; (line = in.readLine()) != null; ) {
         int i = line.lastIndexOf(' ');
         Pattern p = Pattern.compile(line.substring(0, i));
         //System.err.println(":"+line.substring(0,i)+":");
         Integer t = Integer.valueOf(line.substring(i + 1));
-        Pair<Pattern, Integer> pair = new Pair<Pattern, Integer>(p, t);
+        Pair<Pattern, Integer> pair = new Pair<>(p, t);
         thresholds.add(pair);
       }
       in.close();
       return thresholds;
-    } catch (Exception e) {
-      throw new RuntimeException("Error reading threshold file", e);
+    } catch (IOException e) {
+      throw new RuntimeIOException("Error reading threshold file", e);
+    } finally {
+      IOUtils.closeIgnoringExceptions(in);
     }
   }
 
@@ -1276,8 +1318,8 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     ObjectBank<List<IN>> biasedData =
       makeObjectBankFromFile(biasedFilename, readerAndWriter);
 
-    Index<String> featureIndex = new HashIndex<String>();
-    Index<String> classIndex = new HashIndex<String>();
+    Index<String> featureIndex = new HashIndex<>();
+    Index<String> classIndex = new HashIndex<>();
 
     Dataset<String, String> dataset = getDataset(data, featureIndex, classIndex);
     Dataset<String, String> biasedDataset = getBiasedDataset(biasedData, featureIndex, classIndex);
@@ -1299,8 +1341,8 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
       confusionMatrix[i2][i1] = d;
     }
 
-    for (int i = 0; i < confusionMatrix.length; i++) {
-      ArrayMath.normalize(confusionMatrix[i]);
+    for (double[] row : confusionMatrix) {
+      ArrayMath.normalize(row);
     }
 
     for (int i = 0; i < confusionMatrix.length; i++) {
@@ -1320,54 +1362,76 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     trainSemiSup(dataset, biasedDataset, confusionMatrix);
   }
 
-  static class Scorer<INN extends CoreLabel> implements SequenceModel {
-    private CMMClassifier<INN> classifier = null;
 
-    private int[] tagArray = null;
-    private int[] backgroundTags = null;
-    private Index<String> tagIndex = null;
-    private List<INN> lineInfos = null;
-    private int pre = 0;
-    private int post = 0;
-    private Set<List<String>> legalTags = null;
+
+  public double weight(String feature, String label) {
+    return ((LinearClassifier<String, String>)classifier).weight(feature, label);
+  }
+
+  public double[][] weights() {
+    return ((LinearClassifier<String, String>)classifier).weights();
+  }
+
+  @Override
+  public List<IN> classifyWithGlobalInformation(List<IN> tokenSeq, final CoreMap doc, final CoreMap sent) {
+    return classify(tokenSeq);
+  }
+
+
+  static class Scorer<INN extends CoreLabel> implements SequenceModel {
+
+    private final CMMClassifier<INN> classifier;
+
+    private final int[] tagArray;
+    private final int[] backgroundTags;
+    private final Index<String> tagIndex;
+    private final List<INN> lineInfos;
+    private final int pre;
+    private final int post;
+    private final Set<List<String>> legalTags;
 
     private static final boolean VERBOSE = false;
 
-    void buildTagArray() {
-      int sz = tagIndex.size();
-      tagArray = new int[sz];
+    private static int[] buildTagArray(int sz) {
+      int[] temp = new int[sz];
       for (int i = 0; i < sz; i++) {
-        tagArray[i] = i;
+        temp[i] = i;
       }
+      return temp;
     }
 
+    @Override
     public int length() {
       return lineInfos.size() - pre - post;
     }
 
+    @Override
     public int leftWindow() {
       return pre;
     }
 
+    @Override
     public int rightWindow() {
       return post;
     }
 
+    @Override
     public int[] getPossibleValues(int position) {
-      //             if (position == 0 || position == lineInfos.size() - 1) {
-      //                 int[] a = new int[1];
-      //                 a[0] = tagIndex.indexOf(BACKGROUND);
-      //                 return a;
-      //             }
-      if (tagArray == null) {
-        buildTagArray();
-      }
+      // if (position == 0 || position == lineInfos.size() - 1) {
+      //   int[] a = new int[1];
+      //   a[0] = tagIndex.indexOf(BACKGROUND);
+      //   return a;
+      // }
+      // if (tagArray == null) {
+      //   buildTagArray();
+      // }
       if (position < pre) {
         return backgroundTags;
       }
       return tagArray;
     }
 
+    @Override
     public double scoreOf(int[] sequence) {
       throw new UnsupportedOperationException();
     }
@@ -1376,6 +1440,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     private int[] lastWindow = null;
     //private int lastPos = -1;
 
+    @Override
     public double scoreOf(int[] tags, int pos) {
       if (false) {
         return scoresOf(tags, pos)[tags[pos]];
@@ -1413,6 +1478,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     private long hit = 0;
     private long tot = 0;
 
+    @Override
     public double[] scoresOf(int[] tags, int pos) {
       if (VERBOSE) {
         int p = (100 * pos) / length();
@@ -1494,7 +1560,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     /**
      * Build a Scorer.
      *
-     * @param lineInfos  List of WordInfo data items to classify
+     * @param lineInfos  List of INN data items to classify
      * @param classifier The trained Classifier
      * @param pre        Number of previous tags that condition current tag
      * @param post       Number of following tags that condition previous tag
@@ -1512,15 +1578,16 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
       this.classifier = classifier;
       this.legalTags = legalTags;
       backgroundTags = new int[]{tagIndex.indexOf(classifier.flags.backgroundSymbol)};
+      tagArray = buildTagArray(tagIndex.size());
     }
 
-  } // end class Scorer
+  } // end static class Scorer
 
   private boolean normalize() {
     return flags.normalize;
   }
 
-  static int lastPos = -1;
+  private static int lastPos = -1;  // TODO: Looks like CMMClassifier still isn't threadsafe!
 
   public Counter<String> scoresOf(List<IN> lineInfos, int pos) {
 //     if (pos != lastPos) {
@@ -1528,23 +1595,21 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
 //       lastPos = pos;
 //     }
 //     System.err.print("!");
-    Datum<String, String> d = makeDatum(lineInfos, pos, featureFactory);
+    Datum<String, String> d = makeDatum(lineInfos, pos, featureFactories);
     return classifier.logProbabilityOf(d);
   }
-
 
   /**
    * Takes a {@link List} of {@link CoreLabel}s and prints the likelihood
    * of each possible label at each point.
-   * TODO: Finish or delete this method!
+   * TODO: Write this method!
    *
    * @param document A {@link List} of {@link CoreLabel}s.
    */
   @Override
-  public void printProbsDocument(List<IN> document) {
-
+  public Triple<Counter<Integer>, Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<IN> document) {
     //ClassicCounter<String> c = scoresOf(document, 0);
-
+    throw new UnsupportedOperationException();
   }
 
   /** Command-line version of the classifier.  See the class
@@ -1555,7 +1620,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     StringUtils.printErrInvocationString("CMMClassifier", args);
 
     Properties props = StringUtils.argsToProperties(args);
-    CMMClassifier<CoreLabel> cmm = new CMMClassifier<CoreLabel>(props);
+    CMMClassifier<CoreLabel> cmm = new CMMClassifier<>(props);
     String testFile = cmm.flags.testFile;
     String textFile = cmm.flags.textFile;
     String loadPath = cmm.flags.loadClassifier;
@@ -1581,31 +1646,16 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     }
 
     if (testFile != null) {
-      cmm.classifyAndWriteAnswers(testFile, cmm.makeReaderAndWriter());
+      cmm.classifyAndWriteAnswers(testFile, cmm.makeReaderAndWriter(), true);
     } else if (cmm.flags.testFiles != null) {
-      cmm.classifyAndWriteAnswers(cmm.flags.baseTestDir, cmm.flags.testFiles,
-                                  cmm.makeReaderAndWriter());
+      cmm.classifyAndWriteAnswers(cmm.flags.baseTestDir, cmm.flags.testFiles, cmm.makeReaderAndWriter(), true);
     }
 
     if (textFile != null) {
       DocumentReaderAndWriter<CoreLabel> readerAndWriter =
-        new PlainTextDocumentReaderAndWriter<CoreLabel>();
-      cmm.classifyAndWriteAnswers(textFile, readerAndWriter);
+              new PlainTextDocumentReaderAndWriter<>();
+      cmm.classifyAndWriteAnswers(textFile, readerAndWriter, false);
     }
   } // end main
-
-
-  public double weight(String feature, String label) {
-    return ((LinearClassifier<String, String>)classifier).weight(feature, label);
-  }
-
-  public double[][] weights() {
-    return ((LinearClassifier<String, String>)classifier).weights();
-  }
-
-  @Override
-  public List<IN> classifyWithGlobalInformation(List<IN> tokenSeq, final CoreMap doc, final CoreMap sent) {
-    return classify(tokenSeq);
-  }
 
 } // end class CMMClassifier

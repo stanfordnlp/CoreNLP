@@ -1,0 +1,119 @@
+Architectural Overview of edu.stanford.nlp.loglinear:
+
+The goal of this package is to provide fast, general structure log-linear modelling that's easy to use and to extend.
+
+The package is broken into three parts: model, inference, and learning
+
+Model contains all of the basic storage elements, as well as means to serialize and deserialize for both storage and
+network transit. Inference depends on model, and provides an implementation of the clique tree message passing algorithm
+for efficient exact inference in tree-structured graphs. Learning depends on inference and model, and provides a simple
+interface to efficient multithreaded batch learning, with an implementation of AdaGrad guarded by backtracking.
+
+We will go over model, then inference, then learning.
+
+#####################################################
+
+Model module overview:
+
+#####################################################
+
+***
+ConcatVector:
+
+The key to the speed of loglinear is the ConcatVector class. ConcatVector provides a useful abstraction for NLP machine
+learning: a concatenation of vectors, treated as a single vector. The basic idea is to have each feature output a vector,
+which are then stored in a ConcatVector (or 'concatenated vector'). When the dot-product is taken of two ConcatVectors,
+the result is the sum of the dot product of each of the concatenated components of each vector in sequence. To write
+that out explicitly, if a feature ConcatVector f is composed of a number of vector f_i's, and a weight ConcatVector w is
+composed of a number of vector w_i's, then dot(f,w) is:
+
+\sum_i dot(f_i, w_i)
+
+This leaves us with two key advantages over a regular vector: each component can be individually tuned for sparsity, and
+each component has an isolated namespace and so can an individual feature vector can grow after training begins (say
+discovering a new word in a one-hot feature vector), and the weight vector will behave appropriately without hassle.
+
+***
+NDArray
+
+We have a basic NDArray, which allows a standard iterator over possible assignments that creates a lot of int[] arrays
+on the heap, and a more elaborate iterator that saves GC by mutating a single array passed over. You'll see this used
+throughout the code in hot loops marked by an "//OPTIMIZATION" comment
+
+***
+ConcatVectorTable
+
+ConcatVectorTable is a subclass of NDArray that we use to store factor tables for the log-linear graphical model, where
+each element of the table represents the features for one joint assignment to the variables the factor is associated
+with. In order to get a factor like you learned about in CS 228, each element of the table is dot-producted with weights.
+We don't do this at construction to allow a single set of GraphicalModel objects to be used throughout training.
+
+***
+GraphicalModel
+
+GraphicalModel is a super stripped down implementation of a graphical model. It holds factors, represented by lists of
+neighbor indices and a ConcatVectorTable for features. It was deliberate to make all downstream annotations on the model
+(like observations for inference or observations for training) go into a HashMap. This is to maintain easy backwards
+compatibility with previous serialized versions as features change, and to make life more convenient for downstream
+algorithms that may be passing GraphicalModel objects across module or network boundaries, and don't want to create tons
+of little 'ride-along' objects that add annotations to the GraphicalModel.
+
+#####################################################
+
+Inference module overview:
+
+#####################################################
+
+***
+TableFactor
+
+This is the traditional 'factor' datatype that you're used to hearing about from Daphne in 228 and "Probabilistic
+Graphical Models". It's a subclass of NDArray, and has fast operations for product and marginalize dataflows. It's the
+key building block for inference.
+
+***
+CliqueTree
+
+This object takes a GraphicalModel at creation and provides high speed tree-shaped message passing inference for both
+exact marginals and exact MAP estimates. It exists as a new object for each GraphicalModel, rather than a static call
+for each model, to allow for cacheing some messages when repeated marginals are needed on only slightly changing models.
+
+#####################################################
+
+Learning module overview:
+
+#####################################################
+
+***
+AbstractDifferentiableFunction
+
+This follows the Optimize.jl package convention of providing both gradient and function value in a single return value.
+
+***
+LogLikelihoodFunction
+
+An implementation of AbstractDifferentiableFunction for calculating the log-likelihood of a log-linear model as given by
+a GraphicalModel.
+
+***
+AbstractOnlineOptimizer
+
+This is the basic interface for online optimizers to follow. It is sketched out right now, but no implementations have
+been made yet.
+
+***
+AbstractBatchOptimizer
+
+There is a fair amount of redundant complexity involved in writing an optimizer that needs to calculate the gradient
+on the entire batch of examples every update step. The work between threads must be carefully balanced so that the
+time between the first thread finishing, and the last, during which the CPU utilization is far less than 100%, is
+minimized. This is managed through rough estimating of the amount of work each item represents, and a perceptron style
+updating once the system is running, based on CPU time used for each thread. We also implement a convenience function
+here to allow the user to interrupt training early if they are happy with convergence to this point, since that involves
+some tricky Java threading to make work.
+
+***
+BacktrackingAdaGradOptimizer
+
+This subclasses AbstractBatchOptimizer, and implements a simple AdaGrad gradient descent guarded by backtracking line
+search to maximize an AbstractDifferentiableFunction.

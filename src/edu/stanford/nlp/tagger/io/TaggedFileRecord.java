@@ -7,17 +7,24 @@ import java.util.Properties;
 import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.tagger.maxent.TaggerConfig;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.TreeNormalizer;
-import edu.stanford.nlp.util.Filter;
+import edu.stanford.nlp.trees.TreeReaderFactory;
+import edu.stanford.nlp.trees.TreeTransformer;
+import java.util.function.Predicate;
 import edu.stanford.nlp.util.ReflectionLoading;
 
+/** Parses and specifies all the details for how to read some POS tagging data.
+ *  The options for this class are documented in MaxentTagger.
+ *
+ *  @author John Bauer
+ */
 public class TaggedFileRecord {
+
   public enum Format {
     TEXT,  // represents a tokenized file separated by text
     TSV,   // represents a tsv file such as a conll file
-    TREES; // represents a file in PTB format
-  };
+    TREES // represents a file in PTB format
+  }
 
   final String file;
   final Format format;
@@ -26,16 +33,18 @@ public class TaggedFileRecord {
   final TreeTransformer treeTransformer;
   final TreeNormalizer treeNormalizer;
   final NumberRangesFileFilter treeRange;
-  final Filter<Tree> treeFilter;
+  final Predicate<Tree> treeFilter;
   final Integer wordColumn;
   final Integer tagColumn;
+  final TreeReaderFactory trf;
 
-  private TaggedFileRecord(String file, Format format, 
+  private TaggedFileRecord(String file, Format format,
                            String encoding, String tagSeparator,
                            TreeTransformer treeTransformer,
                            TreeNormalizer treeNormalizer,
+                           TreeReaderFactory trf,
                            NumberRangesFileFilter treeRange,
-                           Filter<Tree> treeFilter,
+                           Predicate<Tree> treeFilter,
                            Integer wordColumn, Integer tagColumn) {
     this.file = file;
     this.format = format;
@@ -47,17 +56,19 @@ public class TaggedFileRecord {
     this.treeFilter = treeFilter;
     this.wordColumn = wordColumn;
     this.tagColumn = tagColumn;
+    this.trf = trf;
   }
 
-  static public final String FORMAT = "format";
-  static public final String ENCODING = "encoding";
-  static public final String TAG_SEPARATOR = "tagSeparator";
-  static public final String TREE_TRANSFORMER = "treeTransformer";
-  static public final String TREE_NORMALIZER = "treeNormalizer";
-  static public final String TREE_RANGE = "treeRange";
-  static public final String TREE_FILTER = "treeFilter";
-  static public final String WORD_COLUMN = "wordColumn";
-  static public final String TAG_COLUMN = "tagColumn";
+  public static final String FORMAT = "format";
+  public static final String ENCODING = "encoding";
+  public static final String TAG_SEPARATOR = "tagSeparator";
+  public static final String TREE_TRANSFORMER = "treeTransformer";
+  public static final String TREE_NORMALIZER = "treeNormalizer";
+  public static final String TREE_RANGE = "treeRange";
+  public static final String TREE_FILTER = "treeFilter";
+  public static final String WORD_COLUMN = "wordColumn";
+  public static final String TAG_COLUMN = "tagColumn";
+  public static final String TREE_READER = "trf";
 
   public String toString() {
     StringBuilder s = new StringBuilder();
@@ -65,15 +76,19 @@ public class TaggedFileRecord {
     s.append("," + ENCODING + "=" + encoding);
     s.append("," + TAG_SEPARATOR + "=" + tagSeparator);
     if (treeTransformer != null) {
-      s.append("," + TREE_TRANSFORMER + "=" + 
+      s.append("," + TREE_TRANSFORMER + "=" +
                treeTransformer.getClass().getName());
     }
+    if (trf != null) {
+      s.append("," + TREE_READER + "=" +
+               trf.getClass().getName());
+    }
     if (treeNormalizer != null) {
-      s.append("," + TREE_NORMALIZER + "=" + 
-               treeNormalizer.getClass().getName());               
+      s.append("," + TREE_NORMALIZER + "=" +
+               treeNormalizer.getClass().getName());
     }
     if (treeRange != null) {
-      s.append("," + TREE_RANGE + "=" + 
+      s.append("," + TREE_RANGE + "=" +
                treeRange.toString().replaceAll(",", ":"));
     }
     if (treeRange != null) {
@@ -103,24 +118,24 @@ public class TaggedFileRecord {
     }
   }
 
-  static public List<TaggedFileRecord> createRecords(Properties config,
+  public static List<TaggedFileRecord> createRecords(Properties config,
                                                      String description) {
     String[] pieces = description.split(";");
-    List<TaggedFileRecord> records = new ArrayList<TaggedFileRecord>();
+    List<TaggedFileRecord> records = new ArrayList<>();
     for (String piece : pieces) {
       records.add(createRecord(config, piece));
     }
     return records;
   }
 
-  static public TaggedFileRecord createRecord(Properties config,
+  public static TaggedFileRecord createRecord(Properties config,
                                               String description) {
     String[] pieces = description.split(",");
     if (pieces.length == 1) {
       return new TaggedFileRecord(description, Format.TEXT,
                                   getEncoding(config),
                                   getTagSeparator(config),
-                                  null, null, null, null, null, null);
+                                  null, null, null, null, null, null, null);
     }
 
     String[] args = new String[pieces.length - 1];
@@ -131,8 +146,9 @@ public class TaggedFileRecord {
     String tagSeparator = getTagSeparator(config);
     TreeTransformer treeTransformer = null;
     TreeNormalizer treeNormalizer = null;
+    TreeReaderFactory trf = null;
     NumberRangesFileFilter treeRange = null;
-    Filter<Tree> treeFilter = null;
+    Predicate<Tree> treeFilter = null;
     Integer wordColumn = null, tagColumn = null;
 
     for (String arg : args) {
@@ -151,6 +167,8 @@ public class TaggedFileRecord {
         treeTransformer = ReflectionLoading.loadByReflection(argPieces[1]);
       } else if (argPieces[0].equalsIgnoreCase(TREE_NORMALIZER)) {
         treeNormalizer = ReflectionLoading.loadByReflection(argPieces[1]);
+      } else if (argPieces[0].equalsIgnoreCase(TREE_READER)) {
+        trf = ReflectionLoading.loadByReflection(argPieces[1]);
       } else if (argPieces[0].equalsIgnoreCase(TREE_RANGE)) {
         String range = argPieces[1].replaceAll(":", ",");
         treeRange = new NumberRangesFileFilter(range, true);
@@ -161,27 +179,28 @@ public class TaggedFileRecord {
       } else if (argPieces[0].equalsIgnoreCase(TAG_COLUMN)) {
         tagColumn = Integer.valueOf(argPieces[1]);
       } else {
-        throw new IllegalArgumentException("TaggedFileRecord argument " + 
+        throw new IllegalArgumentException("TaggedFileRecord argument " +
                                            argPieces[0] + " is unknown");
       }
     }
     return new TaggedFileRecord(file, format, encoding, tagSeparator,
-                                treeTransformer, treeNormalizer, treeRange,
+                                treeTransformer, treeNormalizer, trf, treeRange,
                                 treeFilter, wordColumn, tagColumn);
   }
 
-  static public String getEncoding(Properties config) {
+  public static String getEncoding(Properties config) {
     String encoding = config.getProperty(TaggerConfig.ENCODING_PROPERTY);
     if (encoding == null)
       return TaggerConfig.ENCODING;
     return encoding;
   }
 
-  static public String getTagSeparator(Properties config) {
-    String tagSeparator = 
+  public static String getTagSeparator(Properties config) {
+    String tagSeparator =
       config.getProperty(TaggerConfig.TAG_SEPARATOR_PROPERTY);
     if (tagSeparator == null)
       return TaggerConfig.TAG_SEPARATOR;
     return tagSeparator;
   }
+
 }

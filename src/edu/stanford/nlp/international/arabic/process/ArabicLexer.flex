@@ -25,6 +25,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
 %function next
 %type Object
 %caseless
+%char
 
 %{
  private LexedTokenFactory<?> tokenFactory;
@@ -38,8 +39,8 @@ import edu.stanford.nlp.util.PropertiesUtils;
  
  // Substitute newlines with newlineChar.
  // Otherwise, treat them like whitespace
- private boolean tokenizeNL;
- private String newlineChar;
+ private boolean tokenizeNLs;
+ public static final String NEWLINE_TOKEN = "*NL*";
 
  // Use \u2026 for ellipses
  private boolean useUTF8Ellipsis;
@@ -55,14 +56,14 @@ import edu.stanford.nlp.util.PropertiesUtils;
  private boolean removeProMarker;
  private boolean removeSegMarker;
  private boolean removeMorphMarker;
+ 
+ // Lengthening effects (yAAAAAAA): replace three or more of the same character with one
+ private boolean removeLengthening;
 
  private final Pattern segmentationMarker = Pattern.compile("^-+|-+$");
  
  // Escape parens for ATB parsing
  private boolean atbEscaping;
-
- // Normalize newlines to this token
- public static final String NEWLINE_TOKEN = "*NL*";
 
  private Map<String,String> normMap;
  
@@ -70,7 +71,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
    this(r);
    this.tokenFactory = tf;
    
-   tokenizeNL = PropertiesUtils.getBool(props, "tokenizeNLs", false);
+   tokenizeNLs = PropertiesUtils.getBool(props, "tokenizeNLs", false);
    useUTF8Ellipsis = PropertiesUtils.getBool(props, "useUTF8Ellipsis", false);
    invertible = PropertiesUtils.getBool(props, "invertible", false);
    normArDigits = PropertiesUtils.getBool(props, "normArDigits", false);
@@ -83,6 +84,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
    removeProMarker = PropertiesUtils.getBool(props, "removeProMarker", false);
    removeSegMarker = PropertiesUtils.getBool(props, "removeSegMarker", false);
    removeMorphMarker = PropertiesUtils.getBool(props, "removeMorphMarker", false);
+   removeLengthening = PropertiesUtils.getBool(props, "removeLengthening", false);
    atbEscaping = PropertiesUtils.getBool(props, "atbEscaping", false);
 
    setupNormalizationMap();
@@ -239,6 +241,9 @@ import edu.stanford.nlp.util.PropertiesUtils;
      if (isWord && removeMorphMarker && thisChar.equals("+")) {
        continue;
      }
+     if (removeLengthening && isLengthening(text, i)) {
+       continue;
+     }
      if (normMap.containsKey(thisChar)) {
        thisChar = normMap.get(thisChar);
      }
@@ -249,6 +254,17 @@ import edu.stanford.nlp.util.PropertiesUtils;
    return sb.toString();
  }
  
+ private boolean isLengthening(String text, int pos) {
+   if (pos == 0) return false;
+   String thisChar = String.valueOf(text.charAt(pos));
+   if (!thisChar.equals(String.valueOf(text.charAt(pos - 1))))
+     return false;
+   if (pos < text.length() - 1 && thisChar.equals(String.valueOf(text.charAt(pos + 1))))
+     return true;
+   if (pos >= 2 && thisChar.equals(String.valueOf(text.charAt(pos - 2))))
+     return true;
+   return false;
+ }
  
    /** Make the next token.
    *
@@ -279,11 +295,6 @@ import edu.stanford.nlp.util.PropertiesUtils;
     return getNext(normText, text);
   }
 
-  private Object getNewline() {
-    String nlString = tokenizeNL ? NEWLINE_TOKEN : System.getProperty("line.separator");
-    return getNext(nlString, yytext());
-  }
-
   private Object getEllipsis() {
     String ellipsisString = useUTF8Ellipsis ? "\u2026" : "...";
     return getNext(ellipsisString, yytext());
@@ -306,7 +317,8 @@ NUMBER = ({DIGITS}[_\-,\+/\\\.\u066B\u066C\u060C\u060D]*)+
 ARCHAR = [_\u060E-\u061A\u0621-\u065E\u066E-\u06D3\u06D5-\u06EF\u06FA-\u06FF]
 
 /* Null pronoun marker in the vocalized section of the ATB */
-NULLPRON = \-*\[\u0646\u064F\u0644\u0644\]\-*
+NULLPRONSEG = \-*\[\u0646\u064F\u0644\u0644\]\-
+NULLPRON = \-*\[\u0646\u064F\u0644\u0644\]
 
 /* An word is a sequence of Arabic ligatures, possibly preceded and/or
    succeeded by ATB segmentation markers "-", and possibly separated by
@@ -324,10 +336,13 @@ FULLURL = https?:\/\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-]
 LIKELYURL = ((www\.([^ \t\n\f\r\"<>|.!?(){},]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r\"`'<>|.!?(){},-_$]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-])?
 EMAIL = [a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0]*@([^ \t\n\f\r\"<>|().\u00A0]+\.)+[a-zA-Z]{2,4}
 
+PAREN = -LRB-|-RRB-
+
 %%
 
 {ELLIPSIS}  { return getEllipsis(); }
 
+{PAREN}     |
 {FULLURL}   |
 {LIKELYURL} |
 {EMAIL}     |
@@ -336,15 +351,24 @@ EMAIL = [a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0]*@([^ \t\n\f\r\"<>|().\u00A0]+\.)+[a
 {DIGITS}    |
 {PUNC}      { return getNext(false); }
 
-{NULLPRON}  { if ( ! removeProMarker) {
+{NULLPRONSEG}  { if (removeProMarker) {
+                if ( ! removeSegMarker) {
+                  return getNext("-", yytext());
+                }
+              } else {
                 return getNext(false);
               }
-	    }
+            }
+
+{NULLPRON} { if (! removeProMarker) return getNext(false); } 
 
 {ARWORD}    |
 {FORNWORD}  { return getNext(true); }
 
-{CR}        { return getNewline(); }
+{CR}        { if (tokenizeNLs) {
+                return getNext(NEWLINE_TOKEN, yytext());
+              }
+            } 
 {SPACES}    { }
 .           { System.err.printf("Untokenizable: %s%n", yytext());
 	      return getNext(true);

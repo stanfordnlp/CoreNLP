@@ -24,12 +24,13 @@ import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.international.arabic.ATBTreeUtils;
-import edu.stanford.nlp.trees.international.french.FrenchTreeReaderFactory;
 import edu.stanford.nlp.trees.international.french.FrenchTreebankLanguagePack;
+import edu.stanford.nlp.trees.international.french.FrenchXMLTreeReaderFactory;
 import edu.stanford.nlp.trees.tregex.TregexParseException;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.DataFilePaths;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
  * Produces the pre-processed version of the FTB used in the experiments of
@@ -40,6 +41,8 @@ import edu.stanford.nlp.util.Generics;
  */
 public class FTBDataset extends AbstractDataset {
 
+  private boolean CC_TAGSET = false;
+
   private Set<String> splitSet;
 
   public FTBDataset() {
@@ -47,15 +50,13 @@ public class FTBDataset extends AbstractDataset {
 
     //Need to use a MemoryTreebank so that we can compute gross corpus
     //stats for MWE pre-processing
-    treebank = new MemoryTreebank(new FrenchTreeReaderFactory(), FrenchTreebankLanguagePack.FTB_ENCODING);
+    // The treebank may be reset if setOptions changes CC_TAGSET
+    treebank = new MemoryTreebank(new FrenchXMLTreeReaderFactory(CC_TAGSET), FrenchTreebankLanguagePack.FTB_ENCODING);
     treeFileExtension = "xml";
   }
 
   /**
    * Return the ID of this tree according to the Candito split files.
-   *
-   * @param t
-   * @return
    */
   private String getCanditoTreeID(Tree t) {
     String canditoName = null;
@@ -95,7 +96,7 @@ public class FTBDataset extends AbstractDataset {
 
       preprocessMWEs();
 
-      List<TregexPattern> badTrees = new ArrayList<TregexPattern>();
+      List<TregexPattern> badTrees = new ArrayList<>();
       //These trees appear in the Candito training set
       //They are mangled by the TreeCorrector, so discard them ahead of time.
       badTrees.add(TregexPattern.compile("@SENT <: @PUNC"));
@@ -164,16 +165,16 @@ public class FTBDataset extends AbstractDataset {
   private void preprocessMWEs() {
 
     TwoDimensionalCounter<String,String> labelTerm =
-      new TwoDimensionalCounter<String,String>();
+            new TwoDimensionalCounter<>();
     TwoDimensionalCounter<String,String> termLabel =
-      new TwoDimensionalCounter<String,String>();
+            new TwoDimensionalCounter<>();
     TwoDimensionalCounter<String,String> labelPreterm =
-      new TwoDimensionalCounter<String,String>();
+            new TwoDimensionalCounter<>();
     TwoDimensionalCounter<String,String> pretermLabel =
-      new TwoDimensionalCounter<String,String>();
+            new TwoDimensionalCounter<>();
 
     TwoDimensionalCounter<String,String> unigramTagger =
-      new TwoDimensionalCounter<String,String>();
+            new TwoDimensionalCounter<>();
 
     for (Tree t : treebank) {
       MWEPreprocessor.countMWEStatistics(t, unigramTagger,
@@ -195,6 +196,9 @@ public class FTBDataset extends AbstractDataset {
       String splitFileName = opts.getProperty(ConfigParser.paramSplit);
       splitSet = makeSplitSet(splitFileName);
     }
+
+    CC_TAGSET = PropertiesUtils.getBool(opts, ConfigParser.paramCCTagset, false);
+    treebank = new MemoryTreebank(new FrenchXMLTreeReaderFactory(CC_TAGSET), FrenchTreebankLanguagePack.FTB_ENCODING);
 
     if(lexMapper == null) {
       lexMapper = new DefaultMapper();

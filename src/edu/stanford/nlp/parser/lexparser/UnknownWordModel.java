@@ -1,28 +1,24 @@
 package edu.stanford.nlp.parser.lexparser;
 
 import java.io.Serializable;
-import java.util.Collection;
 
-import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.stats.Counter;
 
 
+/** This class defines the runtime interface for unknown words
+ *  in lexparser. See UnknownWordModelTrainer for how unknown
+ *  word models are built from training data.
+ *
+ *  @author Anna Rafferty
+ *  @author Christopher Manning
+ */
 public interface UnknownWordModel extends Serializable {
-
-  /** One unknown word model may allow different options to be set; for example,
-   *  several models of unknown words for a given language could be included in one
-   *  class.  The unknown level can be used to set the model one would like.  Effects
-   *  of the level will vary based on the implementing class.  If a given class only
-   *  includes one model, setting the unknown level should have no effect.
-   *
-   *  @param unknownLevel Provides a choice between different unknown word
-   *         processing schemes
-   */
-  void setUnknownLevel(int unknownLevel);
-
 
   /**
    * Get the level of equivalence classing for the model.
+   * One unknown word model may allow different options to be set; for example,
+   * several models of unknown words for a given language could be included in one
+   *  class.  The unknown level can be queried with this method.
    *
    * @return The current level of unknown word equivalence classing
    */
@@ -30,8 +26,8 @@ public interface UnknownWordModel extends Serializable {
 
 
   /**
-   * Returns the lexicon used by this unknown word model;
-   * lexicon is used to check information about words being seen/unseen
+   * Returns the lexicon used by this unknown word model. The
+   * lexicon is used to check information about words being seen/unseen.
    *
    * @return The lexicon used by this unknown word model
    */
@@ -40,7 +36,7 @@ public interface UnknownWordModel extends Serializable {
 
   /**
    * Get the score of this word with this tag (as an IntTaggedWord) at this
-   * loc.
+   * location loc in a sentence.
    * (Presumably an estimate of P(word | tag), usually calculated as
    * P(signature | tag).)
    * Assumes the word is unknown.
@@ -58,9 +54,9 @@ public interface UnknownWordModel extends Serializable {
    */
   float score(IntTaggedWord iTW, int loc, double c_Tseen, double total, double smooth, String word);
 
-  
-  /** Calculate P(Tag|Signature) with Bayesian smoothing via just P(Tag|Unknown) */
-  public double scoreProbTagGivenWordSignature(IntTaggedWord iTW, int loc, double smooth, String word);
+
+  /** Calculate P(Tag|Signature) with Bayesian smoothing via just P(Tag|Unknown). */
+  double scoreProbTagGivenWordSignature(IntTaggedWord iTW, int loc, double smooth, String word);
 
 
   /**
@@ -75,9 +71,10 @@ public interface UnknownWordModel extends Serializable {
    *          capitalized words can be treated differently)
    * @return A String that is its signature (equivalence class)
    */
-  public String getSignature(String word, int loc);
+  String getSignature(String word, int loc);
 
-  public int getSignatureIndex(int wordIndex, int sentencePosition, String word);
+  /** Returns an unknown word signature as an integer index rather than as a String. */
+  int getSignatureIndex(int wordIndex, int sentencePosition, String word);
 
 
   /**
@@ -87,8 +84,9 @@ public interface UnknownWordModel extends Serializable {
    * @param itw The tagging
    * @param count Its weight
    */
-  public void addTagging(boolean seen, IntTaggedWord itw, double count);
+  void addTagging(boolean seen, IntTaggedWord itw, double count);
 
-  public Counter<IntTaggedWord> unSeenCounter();
+  /** Returns a Counter from IntTaggedWord to how often they have been seen. */
+  Counter<IntTaggedWord> unSeenCounter();
 
 }

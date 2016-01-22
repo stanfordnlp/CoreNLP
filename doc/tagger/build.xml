@@ -39,8 +39,8 @@
   <property name="compile.debug"       value="true"/>
   <property name="compile.deprecation" value="false"/>
   <property name="compile.optimize"    value="true"/>
-  <property name="compile.source"      value="1.6" />
-  <property name="compile.target"      value="1.6" />
+  <property name="compile.source"      value="1.8" />
+  <property name="compile.target"      value="1.8" />
 
 
 <!-- ==================== All Target ====================================== -->
@@ -171,13 +171,12 @@ includeantruntime="false">
                 destdir="${javadoc.home}"
               maxmemory="768m"
                  author="true"
-                 source="1.6"
-                Overview="${src.home}/edu/stanford/nlp/overview.html"
+                 source="1.8"
                 Doctitle="Stanford JavaNLP API Documentation"
              Windowtitle="Stanford JavaNLP API"
            packagenames="*">
       <bottom><![CDATA[<FONT SIZE=2><A HREF=\"http://nlp.stanford.edu\">Stanford NLP Group</A></FONT>]]></bottom>
-      <link href="http://java.sun.com/j2se/1.6.0/docs/api/"/>
+      <link href="http://docs.oracle.com/javase/8/docs/api/"/>
     </javadoc>
 
   </target>

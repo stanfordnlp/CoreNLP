@@ -1,8 +1,8 @@
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.process.TokenizerFactory;
-import edu.stanford.nlp.util.Function;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
 import edu.stanford.nlp.ling.HasWord;
 
@@ -98,7 +98,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The filter
    */
-  public Filter<String> punctuationTagAcceptFilter();
+  public Predicate<String> punctuationTagAcceptFilter();
 
 
   /**
@@ -107,7 +107,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The filter
    */
-  public Filter<String> punctuationTagRejectFilter();
+  public Predicate<String> punctuationTagRejectFilter();
 
   /**
    * Returns a filter that accepts a String that is a punctuation
@@ -117,7 +117,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The Filter
    */
-  public Filter<String> punctuationWordAcceptFilter();
+  public Predicate<String> punctuationWordAcceptFilter();
 
 
   /**
@@ -128,7 +128,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The Filter
    */
-  public Filter<String> punctuationWordRejectFilter();
+  public Predicate<String> punctuationWordRejectFilter();
 
 
   /**
@@ -137,7 +137,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The Filter
    */
-  public Filter<String> sentenceFinalPunctuationTagAcceptFilter();
+  public Predicate<String> sentenceFinalPunctuationTagAcceptFilter();
 
 
   /**
@@ -150,7 +150,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The Filter
    */
-  public Filter<String> evalBIgnoredPunctuationTagAcceptFilter();
+  public Predicate<String> evalBIgnoredPunctuationTagAcceptFilter();
 
 
   /**
@@ -162,7 +162,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The Filter
    */
-  public Filter<String> evalBIgnoredPunctuationTagRejectFilter();
+  public Predicate<String> evalBIgnoredPunctuationTagRejectFilter();
 
 
   /**
@@ -225,7 +225,7 @@ public interface TreebankLanguagePack extends Serializable {
    * @param puncFilter A filter which should reject punctuation words (as Strings)
    * @return A GrammaticalStructureFactory suitable for this language/treebank
    */
-  public GrammaticalStructureFactory grammaticalStructureFactory(Filter<String> puncFilter);
+  public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilter);
 
 
   /**
@@ -235,8 +235,14 @@ public interface TreebankLanguagePack extends Serializable {
    * @param typedDependencyHF A HeadFinder which finds heads for typed dependencies
    * @return A GrammaticalStructureFactory suitable for this language/treebank
    */
-  public GrammaticalStructureFactory grammaticalStructureFactory(Filter<String> puncFilter, HeadFinder typedDependencyHF);
+  public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilter, HeadFinder typedDependencyHF);
 
+  /**
+   * Whether or not we have typed dependencies for this language.  If
+   * this method returns false, a call to grammaticalStructureFactory
+   * will cause an exception.
+   */
+  public boolean supportsGrammaticalStructures();
 
   /**
    * Return the charset encoding of the Treebank.  See
@@ -310,7 +316,7 @@ public interface TreebankLanguagePack extends Serializable {
    * Returns a {@link Function Function} object that maps Strings to Strings according
    * to this TreebankLanguagePack's basicCategory method.
    *
-   * @return the String->String Function object
+   * @return the String-&gt;String Function object
    */
   public Function<String,String> getBasicCategoryFunction();
 
@@ -330,7 +336,7 @@ public interface TreebankLanguagePack extends Serializable {
    * Returns a {@link Function Function} object that maps Strings to Strings according
    * to this TreebankLanguagePack's categoryAndFunction method.
    *
-   * @return the String->String Function object
+   * @return the String-&gt;String Function object
    */
   public Function<String,String> getCategoryAndFunctionFunction();
 
@@ -349,7 +355,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The filter
    */
-  public Filter<String> startSymbolAcceptFilter();
+  public Predicate<String> startSymbolAcceptFilter();
 
 
   /**
@@ -421,4 +427,16 @@ public interface TreebankLanguagePack extends Serializable {
    * @return A language-specific MorphoFeatureSpecification
    */
   public abstract MorphoFeatureSpecification morphFeatureSpec();
+  
+  /**
+   * Used for languages where an original Stanford Dependency
+   * converter and a Universal Dependency converter exists.
+   */
+  public abstract void setGenerateOriginalDependencies(boolean generateOriginalDependencies);
+
+  /**
+   * Used for languages where an original Stanford Dependency
+   * converter and a Universal Dependency converter exists.
+   */
+  public abstract boolean generateOriginalDependencies();
 }

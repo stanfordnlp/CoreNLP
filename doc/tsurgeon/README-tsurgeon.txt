@@ -1,4 +1,4 @@
-Tsurgeon v2.0.6 - 2013-04-04
+Tsurgeon v3.5.2 - 2015-04-20
 ----------------------------------------------
 
 Copyright (c) 2003-2012 The Board of Trustees of 
@@ -20,7 +20,7 @@ TregexPattern, TregexMatcher and TregexPatternCompiler classes.
 As of version 1.2, the Tsurgeon tree-transformation utility is bundled
 together with Tregex.  See the file README.tsurgeon for details.
 
-Java version 1.6 is required to use Tregex.  If you really want to use
+Java version 1.8 is required to use Tregex.  If you really want to use
 Tregex under an earlier version of Java, look into RetroWeaver:
 
   http://retroweaver.sourceforge.net/

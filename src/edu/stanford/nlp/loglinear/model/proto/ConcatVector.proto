@@ -1,0 +1,13 @@
+package edu.stanford.nlp.loglinear.model.proto;
+
+option java_package = "edu.stanford.nlp.loglinear.model.proto";
+
+option java_outer_classname = "ConcatVectorProto";
+
+message ConcatVector {
+    message Component {
+        required bool sparse = 1;
+        repeated double data = 2;
+    }
+    repeated Component component = 1;
+}

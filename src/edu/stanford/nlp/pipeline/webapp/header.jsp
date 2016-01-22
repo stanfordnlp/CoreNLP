@@ -1,4 +1,4 @@
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="org.apache.commons.lang3.StringEscapeUtils" %>
 
 <%!
   String SELECTED(boolean value) {
@@ -40,6 +40,8 @@ bottom: 0px;
         <option value="visualise" <%=SELECTED("visualise".equals(format))%> >Visualise</option>
         <option value="pretty" <%=SELECTED("pretty".equals(format))%> >Pretty print</option>
         <option value="xml" <%=SELECTED("xml".equals(format))%> >XML</option>
+        <option value="json" <%=SELECTED("json".equals(format))%> >JSON</option>
+        <option value="conll" <%=SELECTED("conll".equals(format))%> >CoNLL</option>
       </select>
     </td></tr>
   
@@ -49,7 +51,7 @@ bottom: 0px;
                 style="width: 400px; height: 8em" rows=31 cols=7><% 
          String input = request.getParameter("input");
          if (input != null) {
-           %><%=StringEscapeUtils.escapeHtml(input)%><%
+           %><%=StringEscapeUtils.escapeHtml4(input)%><%
          }
          %></textarea>
     </td></tr>

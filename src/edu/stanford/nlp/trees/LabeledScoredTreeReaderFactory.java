@@ -20,7 +20,7 @@ public class LabeledScoredTreeReaderFactory implements TreeReaderFactory {
   private final TreeNormalizer tm;
 
   /**
-   * Create a new TreeReaderFactory with CategoryWordTag labels.
+   * Create a new TreeReaderFactory with CoreLabel labels.
    */
   public LabeledScoredTreeReaderFactory() {
     lf = CoreLabel.factory();

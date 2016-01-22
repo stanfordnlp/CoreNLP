@@ -1,6 +1,7 @@
 package edu.stanford.nlp.util;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * A Map which wraps an original Map, and only stores the changes (deltas) from
@@ -197,22 +198,22 @@ public class DeltaMap<K,V> extends AbstractMap<K,V> {
     return new AbstractSet<Map.Entry<K,V>>() {
       @Override
       public Iterator<Map.Entry<K,V>> iterator() {
-        Filter<Map.Entry<K,V>> filter1 = new Filter<Map.Entry<K,V>>() {
+        Predicate<Entry<K,V>> filter1 = new Predicate<Entry<K,V>>() {
           private static final long serialVersionUID = 1L;
 
           // only accepts stuff not overwritten by deltaMap
-          public boolean accept(Map.Entry<K,V> e) {
+          public boolean test(Map.Entry<K, V> e) {
             K key = e.getKey();
             return ! deltaMap.containsKey(key);
           }
         };
 
-        Iterator<Map.Entry<K, V>> iter1 = new FilteredIterator<Map.Entry<K, V>>(originalMap.entrySet().iterator(), filter1);
+        Iterator<Map.Entry<K, V>> iter1 = new FilteredIterator<>(originalMap.entrySet().iterator(), filter1);
 
-        Filter<Map.Entry<K,V>> filter2 = new Filter<Map.Entry<K,V>>() {
+        Predicate<Entry<K,V>> filter2 = new Predicate<Entry<K,V>>() {
           private static final long serialVersionUID = 1L;
           // only accepts stuff not overwritten by deltaMap
-          public boolean accept(Map.Entry<K,V> e) {
+          public boolean test(Map.Entry<K, V> e) {
             Object value = e.getValue();
             if (value == removedValue) {
               return false;
@@ -236,7 +237,7 @@ public class DeltaMap<K,V> extends AbstractMap<K,V> {
             Map.Entry<K,V> e = i.next();
             Object o = e.getValue();
             if (o == nullValue) {
-              return new SimpleEntry<K,V>(e.getKey(), null);
+              return new SimpleEntry<>(e.getKey(), null);
             }
             return e;
           }
@@ -246,9 +247,9 @@ public class DeltaMap<K,V> extends AbstractMap<K,V> {
           }
         }
 
-        Iterator<Entry<K, V>> iter2 = new FilteredIterator<Entry<K,V>>(new NullingIterator<K, V>(deltaMap.entrySet().iterator()), filter2);
+        Iterator<Entry<K, V>> iter2 = new FilteredIterator<>(new NullingIterator<>(deltaMap.entrySet().iterator()), filter2);
 
-        return new ConcatenationIterator<Entry<K,V>>(iter1, iter2);
+        return new ConcatenationIterator<>(iter1, iter2);
       }
 
       @Override
@@ -292,7 +293,7 @@ public class DeltaMap<K,V> extends AbstractMap<K,V> {
     }
     Map<Integer,Integer> originalCopyMap = Generics.newHashMap(originalMap);
     Map<Integer,Integer> deltaCopyMap = Generics.newHashMap(originalMap);
-    Map<Integer,Integer> deltaMap = new DeltaMap<Integer,Integer>(originalMap);
+    Map<Integer,Integer> deltaMap = new DeltaMap<>(originalMap);
     // now make a lot of changes to deltaMap;
     // add and change some stuff
     for (int i = 900; i < 1100; i++) {

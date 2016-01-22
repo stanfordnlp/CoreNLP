@@ -1,0 +1,64 @@
+# This is better than Jenny's either with or without distsim turned on
+# And using iob2 is better for optimal CoNLL performance.
+# Features titled "chris2009"
+
+trainFile = /u/nlp/data/ner/column_data/conll.4class.train
+# testFile = /u/nlp/data/ner/column_data/conll.4class.testa
+serializeTo = english.conll.4class.caseless.distsim.crf.ser.gz
+
+wordFunction = edu.stanford.nlp.process.LowercaseAndAmericanizeFunction
+useKnownLCWords = false
+
+useDistSim = true
+distSimLexicon = /u/nlp/data/pos_tags_are_useless/egw4-reut.512.clusters
+# right options for egw4-reut.512 (though effect of having or not is small)
+numberEquivalenceDistSim = true
+unknownWordDistSimClass = 0
+
+map = word=0,answer=1
+
+saveFeatureIndexToDisk = true
+
+useTitle = true
+useClassFeature=true
+useWord=true
+# useWordPairs=true
+useNGrams=true
+noMidNGrams=true
+# maxNGramLeng=6 # Having them all helps, which is the default
+usePrev=true
+useNext=true
+# useTags=true
+# useWordTag=true
+useLongSequences=true
+useSequences=true
+usePrevSequences=true
+maxLeft=1
+useTypeSeqs=true
+useTypeSeqs2=true
+useTypeySequences=true
+useOccurrencePatterns=true
+useLastRealWord=true
+useNextRealWord=true
+#useReverse=false
+normalize=true
+# normalizeTimex=true
+# dan2 better than chris2 on CoNLL data...
+wordShape=dan2useLC
+useDisjunctive=true
+# disjunctionWidth 4 is better than 5 on CoNLL data
+disjunctionWidth=4
+#useDisjunctiveShapeInteraction=true
+
+type=crf
+
+readerAndWriter=edu.stanford.nlp.sequences.ColumnDocumentReaderAndWriter
+
+useObservedSequencesOnly=true
+
+sigma = 20
+useQN = true
+QNsize = 25
+
+# makes it go faster
+featureDiffThresh=0.05

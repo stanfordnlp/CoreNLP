@@ -8,7 +8,7 @@ import java.util.regex.*;
 import edu.stanford.nlp.international.arabic.pipeline.DefaultLexicalMapper;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.trees.international.arabic.ATBTreeUtils;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 
 
 /**
@@ -152,7 +152,7 @@ public class IBMArabicEscaper implements Function<List<HasWord>, List<HasWord>> 
    *  @throws RuntimeException If a word is mapped to null
    */
   public List<HasWord> apply(List<HasWord> sentence) {
-    List<HasWord> newSentence = new ArrayList<HasWord>(sentence);
+    List<HasWord> newSentence = new ArrayList<>(sentence);
 
     for (HasWord wd : newSentence)
       wd.setWord(apply(wd.word()));

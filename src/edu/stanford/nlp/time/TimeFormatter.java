@@ -2,11 +2,12 @@ package edu.stanford.nlp.time;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.*;
+import edu.stanford.nlp.ling.tokensregex.types.Expression;
 import edu.stanford.nlp.ling.tokensregex.types.Expressions;
-import edu.stanford.nlp.ling.tokensregex.SequenceMatchRules;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
+import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import org.joda.time.*;
 import org.joda.time.format.*;
@@ -24,6 +25,7 @@ import java.util.regex.Pattern;
  * @author Angel Chang
  */
 public class TimeFormatter {
+
   public static class JavaDateFormatExtractor implements
           Function<CoreMap, Value>
   {
@@ -34,6 +36,7 @@ public class TimeFormatter {
       this.format = new SimpleDateFormat(pattern);
     }
 
+    @Override
     public Value apply(CoreMap m) {
       try {
         // TODO: Allow specification of locale, pivot year (set2DigitYearStart) for interpreting 2 digit years
@@ -60,6 +63,7 @@ public class TimeFormatter {
       this.formatter = DateTimeFormat.forPattern(pattern);
     }
 
+    @Override
     public Value apply(CoreMap m) {
       try {
         String str = m.get(textAnnotationField);
@@ -72,62 +76,88 @@ public class TimeFormatter {
     }
   }
 
+  static class ApplyActionWrapper<I,O> implements Function<I,O> {
+    Env env;
+    Function<I,O> base;
+    Expression action;
+
+    ApplyActionWrapper(Env env, Function<I,O> base, Expression action) {
+      this.env = env;
+      this.base = base;
+      this.action = action;
+    }
+
+    @Override
+    public O apply(I in) {
+      O v = base.apply(in);
+      if (action != null) {
+        action.evaluate(env, v);
+      }
+      return v;
+    }
+  }
+
   static class TimePatternExtractRuleCreator extends SequenceMatchRules.AnnotationExtractRuleCreator {
     protected void updateExtractRule(SequenceMatchRules.AnnotationExtractRule r,
                                      Env env,
                                      Pattern pattern,
                                      Function<String, Value> extractor)
     {
-      MatchedExpression.SingleAnnotationExtractor valueExtractor = SequenceMatchRules.createAnnotationExtractor(env,r);
-      valueExtractor.valueExtractor =
-              new SequenceMatchRules.CoreMapFunctionApplier< String, Value>(
-                      r.annotationField,
+      MatchedExpression.SingleAnnotationExtractor annotationExtractor = SequenceMatchRules.createAnnotationExtractor(env,r);
+      annotationExtractor.valueExtractor =
+              new SequenceMatchRules.CoreMapFunctionApplier<>(
+                      env, r.annotationField,
                       extractor);
-      r.extractRule = new SequenceMatchRules.CoreMapExtractRule< String, MatchedExpression >(
-              r.annotationField,
-              new SequenceMatchRules.StringPatternExtractRule<MatchedExpression>(pattern,
-                      new SequenceMatchRules.StringMatchedExpressionExtractor( valueExtractor, r.matchedExpressionGroup)));
-      r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(valueExtractor);
+      r.extractRule = new SequenceMatchRules.CoreMapExtractRule<>(
+              env, r.annotationField,
+              new SequenceMatchRules.StringPatternExtractRule<>(pattern,
+                      new SequenceMatchRules.StringMatchedExpressionExtractor(annotationExtractor, r.matchedExpressionGroup)));
+      r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(annotationExtractor);
+      r.pattern = pattern;
     }
 
     protected void updateExtractRule(SequenceMatchRules.AnnotationExtractRule r,
                                      Env env,
                                      Function<CoreMap, Value> extractor)
     {
-      MatchedExpression.SingleAnnotationExtractor valueExtractor = SequenceMatchRules.createAnnotationExtractor(env,r);
-      valueExtractor.valueExtractor = extractor;
-      r.extractRule = new SequenceMatchRules.CoreMapExtractRule<List<? extends CoreMap>, MatchedExpression >(
-              r.annotationField,
-              new SequenceMatchRules.BasicSequenceExtractRule(valueExtractor));
-      r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(valueExtractor);
+      MatchedExpression.SingleAnnotationExtractor annotationExtractor = SequenceMatchRules.createAnnotationExtractor(env,r);
+      annotationExtractor.valueExtractor = extractor;
+      r.extractRule = new SequenceMatchRules.CoreMapExtractRule<>(
+              env, r.annotationField,
+              new SequenceMatchRules.BasicSequenceExtractRule(annotationExtractor));
+      r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(annotationExtractor);
     }
 
+    @Override
     public SequenceMatchRules.AnnotationExtractRule create(Env env, Map<String,Object> attributes) {
       SequenceMatchRules.AnnotationExtractRule r = super.create(env, attributes);
       if (r.ruleType == null) { r.ruleType = "time"; }
       String expr = (String) Expressions.asObject(env, attributes.get("pattern"));
       String formatter = (String) Expressions.asObject(env, attributes.get("formatter"));
+      Expression action = Expressions.asExpression(env, attributes.get("action"));
+      String localeString = (String) Expressions.asObject(env, attributes.get("locale"));
+      r.pattern = expr;
       if (formatter == null) {
         if (r.annotationField == null) { r.annotationField = EnvLookup.getDefaultTextAnnotationKey(env);  }
         /* Parse pattern and figure out what the result should be.... */
-        CustomDateFormatExtractor formatExtractor = new CustomDateFormatExtractor(expr);        
+        CustomDateFormatExtractor formatExtractor = new CustomDateFormatExtractor(expr, localeString);
         //SequenceMatchRules.Expression result = (SequenceMatchRules.Expression) attributes.get("result");
-        updateExtractRule(r, env, formatExtractor.getTextPattern(), formatExtractor);
+        updateExtractRule(r, env, formatExtractor.getTextPattern(), new ApplyActionWrapper(env, formatExtractor, action));
       } else if ("org.joda.time.format.DateTimeFormat".equals(formatter)) {
         if (r.annotationField == null) { r.annotationField = r.tokensAnnotationField;  }
-        updateExtractRule(r, env, new JodaDateTimeFormatExtractor(expr));
+        updateExtractRule(r, env, new ApplyActionWrapper(env, new JodaDateTimeFormatExtractor(expr), action));
       } else if ("org.joda.time.format.ISODateTimeFormat".equals(formatter)) {
         if (r.annotationField == null) { r.annotationField = r.tokensAnnotationField;  }
         try {
           Method m = ISODateTimeFormat.class.getMethod(expr);
           DateTimeFormatter dtf = (DateTimeFormatter) m.invoke(null);
-          updateExtractRule(r, env, new JodaDateTimeFormatExtractor(expr));
+          updateExtractRule(r, env, new ApplyActionWrapper(env, new JodaDateTimeFormatExtractor(expr), action));
         } catch (Exception ex) {
           throw new RuntimeException("Error creating DateTimeFormatter", ex);
         }
       } else if ("java.text.SimpleDateFormat".equals(formatter)) {
         if (r.annotationField == null) { r.annotationField = r.tokensAnnotationField;  }
-        updateExtractRule(r, env, new JavaDateFormatExtractor(expr));
+        updateExtractRule(r, env, new ApplyActionWrapper(env, new JavaDateFormatExtractor(expr), action));
       } else {
         throw new IllegalArgumentException("Unsupported formatter: " + formatter);
       }
@@ -147,6 +177,7 @@ public class TimeFormatter {
    # m       minute of hour               number        30                           m
    # s       second of minute             number        55                           s
    # S       fraction of second           number        978                          S (Millisecond)
+   # a       half day of day marker       am/pm
    */
   /**
    * 1. Convert time string pattern to text pattern
@@ -157,9 +188,11 @@ public class TimeFormatter {
     String timePattern;
     Pattern textPattern;
 
-    public CustomDateFormatExtractor(String timePattern) {
+    public CustomDateFormatExtractor(String timePattern, String localeString) {
+      Locale locale = (localeString != null)? new Locale(localeString): Locale.getDefault();
       this.timePattern = timePattern;
       builder = new FormatterBuilder();
+      builder.locale = locale;
       parsePatternTo(builder, timePattern);
       textPattern = builder.toTextPattern();
     }
@@ -168,7 +201,7 @@ public class TimeFormatter {
     {
       return textPattern;
     }
-      
+
     public Value apply(String str) {
       Value v = null;
       Matcher m = textPattern.matcher(str);
@@ -177,7 +210,7 @@ public class TimeFormatter {
       }
       return v;
     }
-    
+
     public Value apply(MatchResult m) {
       SUTime.Temporal t = new SUTime.PartialTime();
       for (FormatComponent fc:builder.pieces) {
@@ -202,7 +235,7 @@ public class TimeFormatter {
   {
     int group = -1;
     String quantifier = null;
-    
+
     public void appendQuantifier(String str) {
       if (quantifier != null) {
         quantifier = quantifier + str;
@@ -210,7 +243,7 @@ public class TimeFormatter {
         quantifier = str;
       }
     }
-    
+
     public StringBuilder appendRegex(StringBuilder sb) {
       if (group > 0) {
         sb.append("(");
@@ -224,7 +257,7 @@ public class TimeFormatter {
       }
       return sb;
     }
-    abstract protected StringBuilder appendRegex0(StringBuilder sb);
+    protected abstract StringBuilder appendRegex0(StringBuilder sb);
 
     public SUTime.Temporal updateTemporal(SUTime.Temporal t, String fieldValueStr) { return t; }
     public int getGroup() { return group; }
@@ -259,7 +292,7 @@ public class TimeFormatter {
     int maxValue;
     int minDigits;
     int maxDigits;
-    
+
     public NumericDateComponent(DateTimeFieldType fieldType, int minDigits, int maxDigits)
     {
       this.fieldType = fieldType;
@@ -281,7 +314,7 @@ public class TimeFormatter {
       }
       return sb;
     }
-    
+
     public Integer parseValue(String str) {
       int v = Integer.valueOf(str);
       if (v >= minValue && v <= maxValue) {
@@ -334,13 +367,11 @@ public class TimeFormatter {
     }
   }
 
-  private static final Comparator<String> STRING_LENGTH_REV_COMPARATOR = new Comparator<String>()  {
-    public int compare(String o1, String o2) {
-      if (o1.length() > o2.length()) return -1;
-      else if (o1.length() < o2.length()) return 1;
-      else {
-        return o1.compareToIgnoreCase(o2);
-      }
+  private static final Comparator<String> STRING_LENGTH_REV_COMPARATOR = (o1, o2) -> {
+    if (o1.length() > o2.length()) return -1;
+    else if (o1.length() < o2.length()) return 1;
+    else {
+      return o1.compareToIgnoreCase(o2);
     }
   };
 
@@ -360,12 +391,12 @@ public class TimeFormatter {
       this.fieldType = fieldType;
       this.locale = locale;
       this.isShort = isShort;
-      
+
       MutableDateTime dt = new MutableDateTime(0L, DateTimeZone.UTC);
       MutableDateTime.Property property = dt.property(fieldType);
       minValue = property.getMinimumValueOverall();
       maxValue = property.getMaximumValueOverall();
-      this.validValues = new ArrayList<String>(maxValue-minValue+1);
+      this.validValues = new ArrayList<>(maxValue - minValue + 1);
       this.valueMapping = Generics.newHashMap();
       for (int i = minValue; i <= maxValue; i++) {
         property.set(i);
@@ -479,12 +510,13 @@ public class TimeFormatter {
                   offset += frac;
                 }
               } else {
-                throw new IllegalArgumentException("Invalid date time zone offset " + str);                
+                throw new IllegalArgumentException("Invalid date time zone offset " + str);
               }
             }
           }
         }
       }
+      if (negative) offset = -offset;
       return offset;
     }
     public SUTime.Temporal updateTemporal(SUTime.Temporal t, String fieldValueStr) {
@@ -494,40 +526,129 @@ public class TimeFormatter {
     }
   }
 
+  private static String makeRegex(List<String> strs) {
+    StringBuilder sb = new StringBuilder();
+    boolean first = true;
+    for (String v:strs) {
+      if (first) {
+        first = false;
+      } else {
+        sb.append("|");
+      }
+      sb.append(Pattern.quote(v));
+    }
+    return sb.toString();
+  }
+
+  // Timezones
+  //  ID - US/Pacific
+  //  Name - Pacific Standard Time (or Pacific Daylight Time)
+  //  ShortName  PST (or PDT depending on input milliseconds)
+  //  NameKey    PST (or PDT depending on input milliseconds)
   private static class TimeZoneIdComponent extends FormatComponent
   {
-    static Map<String, DateTimeZone> valueMapping;
-    static List<String> validValues;
+    static final Map<String, DateTimeZone> timeZonesById;
+    static final List<String> timeZoneIds;
+    static final String timeZoneIdsRegex;
     static {
-      validValues = new ArrayList<String>(DateTimeZone.getAvailableIDs());
-      valueMapping = Generics.newHashMap();
-      for (String str:validValues) {
-        valueMapping.put(str.toLowerCase(), DateTimeZone.forID(str));
+      timeZoneIds = new ArrayList<>(DateTimeZone.getAvailableIDs());
+      timeZonesById = Generics.newHashMap();
+      for (String str:timeZoneIds) {
+        DateTimeZone dtz = DateTimeZone.forID(str);
+        timeZonesById.put(str.toLowerCase(), dtz);
+//        System.out.println(str);
+//        long time = System.currentTimeMillis();
+//        System.out.println(dtz.getShortName(time));
+//        System.out.println(dtz.getName(time));
+//        System.out.println(dtz.getNameKey(time));
+//        System.out.println();
       }
       // Order by length for regex
-      Collections.sort(validValues, STRING_LENGTH_REV_COMPARATOR);
+      Collections.sort(timeZoneIds, STRING_LENGTH_REV_COMPARATOR);
+      timeZoneIdsRegex = makeRegex(timeZoneIds);
     }
 
     public TimeZoneIdComponent()
     {
     }
 
-    public DateTimeZone parseDateTimeZone(String str) {
+    private static DateTimeZone parseDateTimeZone(String str) {
       str = str.toLowerCase();
-      DateTimeZone v = valueMapping.get(str);
+      DateTimeZone v = timeZonesById.get(str);
       return v;
     }
 
     protected StringBuilder appendRegex0(StringBuilder sb) {
-      boolean first = true;
-      for (String v:validValues) {
-        if (first) {
-          first = false;
-        } else {
-          sb.append("|");
-        }
-        sb.append(Pattern.quote(v));
+      sb.append(timeZoneIdsRegex);
+      return sb;
+    }
+
+    public SUTime.Temporal updateTemporal(SUTime.Temporal t, String fieldValueStr) {
+      if (fieldValueStr != null) {
+        DateTimeZone dtz = parseDateTimeZone(fieldValueStr);
+        return t.setTimeZone(dtz);
       }
+      return t;
+    }
+  }
+
+  private static class TimeZoneComponent extends FormatComponent
+  {
+    Locale locale;
+
+    static Map<Locale, CollectionValuedMap<String, DateTimeZone>> timeZonesByName = Generics.newHashMap();
+    static Map<Locale, List<String>> timeZoneNames = Generics.newHashMap();
+    static Map<Locale, String> timeZoneRegexes = Generics.newHashMap();
+
+    public TimeZoneComponent(Locale locale)
+    {
+      this.locale = locale;
+      synchronized (TimeZoneComponent.class) {
+        String regex = timeZoneRegexes.get(locale);
+        if (regex == null) {
+          updateTimeZoneNames(locale);
+        }
+      }
+    }
+
+    private void updateTimeZoneNames(Locale locale) {
+      long time1 = new SUTime.IsoDate(2013,1,1).getJodaTimeInstant().getMillis();
+      long time2 = new SUTime.IsoDate(2013,6,1).getJodaTimeInstant().getMillis();
+      CollectionValuedMap<String,DateTimeZone> tzMap = new CollectionValuedMap<>();
+      for (DateTimeZone dtz:TimeZoneIdComponent.timeZonesById.values()) {
+        // standard timezones
+        tzMap.add(dtz.getShortName(time1, locale).toLowerCase(), dtz);
+        tzMap.add(dtz.getName(time1, locale).toLowerCase(), dtz);
+        // Add about half a year to get day light savings timezones...
+        tzMap.add(dtz.getShortName(time2, locale).toLowerCase(), dtz);
+        tzMap.add(dtz.getName(time2, locale).toLowerCase(), dtz);
+//      tzMap.add(dtz.getNameKey(time).toLowerCase(), dtz);
+//      tzMap.add(dtz.getID().toLowerCase(), dtz);
+      }
+      // Order by length for regex
+      List<String> tzNames = new ArrayList<>(tzMap.keySet());
+      Collections.sort(tzNames, STRING_LENGTH_REV_COMPARATOR);
+      String tzRegex = makeRegex(tzNames);
+      synchronized (TimeZoneComponent.class) {
+        timeZoneNames.put(locale,tzNames);
+        timeZonesByName.put(locale,tzMap);
+        timeZoneRegexes.put(locale,tzRegex);
+      }
+    }
+
+    public DateTimeZone parseDateTimeZone(String str) {
+      // TODO: do something about these multiple timezones that match the same name...
+      // pick one based on location
+      str = str.toLowerCase();
+      CollectionValuedMap<String,DateTimeZone> tzMap = timeZonesByName.get(locale);
+      Collection<DateTimeZone> v = tzMap.get(str);
+      if (v == null || v.isEmpty()) return null;
+      else return v.iterator().next();
+    }
+
+    protected StringBuilder appendRegex0(StringBuilder sb) {
+      String regex = timeZoneRegexes.get(locale);
+      sb.append(regex);
       return sb;
     }
 
@@ -543,11 +664,11 @@ public class TimeFormatter {
   private static class LiteralComponent extends FormatComponent
   {
     String text;
-    
+
     public LiteralComponent(String str) {
       this.text = str;
     }
-    
+
     protected StringBuilder appendRegex0(StringBuilder sb) {
       sb.append(Pattern.quote(text));
       return sb;
@@ -573,13 +694,13 @@ public class TimeFormatter {
     boolean useRelaxedHour = true;
     Locale locale;
     DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder();
-    List<FormatComponent> pieces = new ArrayList<FormatComponent>();
+    List<FormatComponent> pieces = new ArrayList<>();
     int curGroup = 0;
 
     public DateTimeFormatter toFormatter() {
       return builder.toFormatter();
     }
-    
+
     public String toTextRegex() {
       StringBuilder sb = new StringBuilder();
       sb.append("\\b");
@@ -589,9 +710,9 @@ public class TimeFormatter {
       sb.append("\\b");
       return sb.toString();
     }
-    
+
     public Pattern toTextPattern() {
-      return Pattern.compile(toTextRegex(), Pattern.CASE_INSENSITIVE);    
+      return Pattern.compile(toTextRegex(), Pattern.CASE_INSENSITIVE);
     }
 
     private void appendNumericFields(DateTimeFieldType[] fieldTypes, int digits) {
@@ -613,99 +734,99 @@ public class TimeFormatter {
     private void appendTextField(DateTimeFieldType fieldType, boolean isShort) {
       appendComponent(new TextDateComponent(fieldType, locale, isShort), true);
     }
-    
+
     private void appendComponent(FormatComponent fc, boolean hasGroup)
-    { 
+    {
       if (hasGroup) {
         fc.group = ++curGroup;
       }
-      pieces.add(fc);      
+      pieces.add(fc);
     }
 
     private void appendLiteralField(String s) {
       appendComponent(new LiteralComponent(s), false);
     }
-    
+
     private void appendRegexPart(String s) {
       appendComponent(new RegexComponent(s), false);
     }
 
-    protected void appendEraText() { 
-      builder.appendEraText(); 
+    protected void appendEraText() {
+      builder.appendEraText();
       appendTextField(DateTimeFieldType.era(), false);
     }
-    protected void appendCenturyOfEra(int minDigits, int maxDigits) { 
-      builder.appendCenturyOfEra(minDigits, maxDigits); 
+    protected void appendCenturyOfEra(int minDigits, int maxDigits) {
+      builder.appendCenturyOfEra(minDigits, maxDigits);
       appendNumericField(DateTimeFieldType.centuryOfEra(), minDigits, maxDigits);
     }
     protected void appendYearOfEra(int minDigits, int maxDigits) {
-      builder.appendYearOfEra(minDigits, maxDigits); 
+      builder.appendYearOfEra(minDigits, maxDigits);
       appendNumericField(DateTimeFieldType.yearOfEra(), minDigits, maxDigits);
     }
     protected void appendYear(int minDigits, int maxDigits) {
-      builder.appendYear(minDigits, maxDigits); 
+      builder.appendYear(minDigits, maxDigits);
       appendNumericField(DateTimeFieldType.year(), minDigits, maxDigits);
     }
-    protected void appendTwoDigitYear(int pivot, boolean lenient) { 
-      builder.appendTwoDigitYear(pivot, lenient);  
+    protected void appendTwoDigitYear(int pivot, boolean lenient) {
+      builder.appendTwoDigitYear(pivot, lenient);
       appendNumericField(DateTimeFieldType.yearOfCentury(), 2);
     }
-    protected void appendWeekyear(int minDigits, int maxDigits) { 
-      builder.appendWeekyear(minDigits, maxDigits); 
+    protected void appendWeekyear(int minDigits, int maxDigits) {
+      builder.appendWeekyear(minDigits, maxDigits);
       appendNumericField(DateTimeFieldType.weekyear(), minDigits, maxDigits);
     }
     protected void appendTwoDigitWeekyear(int pivot, boolean lenient) {
-      builder.appendTwoDigitYear(pivot, lenient); 
+      builder.appendTwoDigitYear(pivot, lenient);
       appendNumericField(DateTimeFieldType.yearOfCentury(), 2);
     }
-    protected void appendWeekOfWeekyear(int digits) { 
-      builder.appendWeekOfWeekyear(digits); 
+    protected void appendWeekOfWeekyear(int digits) {
+      builder.appendWeekOfWeekyear(digits);
       appendNumericField(DateTimeFieldType.weekOfWeekyear(), digits);
     }
-    
-    protected void appendMonthOfYear(int digits) { 
-      builder.appendMonthOfYear(digits); 
+
+    protected void appendMonthOfYear(int digits) {
+      builder.appendMonthOfYear(digits);
       appendNumericField(DateTimeFieldType.monthOfYear(), digits);
     }
-    protected void appendMonthOfYearShortText() { 
-      builder.appendMonthOfYearShortText(); 
+    protected void appendMonthOfYearShortText() {
+      builder.appendMonthOfYearShortText();
       appendTextField(DateTimeFieldType.monthOfYear(), true);
     }
-    protected void appendMonthOfYearText() { 
-      builder.appendMonthOfYearText(); 
+    protected void appendMonthOfYearText() {
+      builder.appendMonthOfYearText();
       appendTextField(DateTimeFieldType.monthOfYear(), false);
     }
 
-    protected void appendDayOfYear(int digits) { 
-      builder.appendDayOfYear(digits); 
+    protected void appendDayOfYear(int digits) {
+      builder.appendDayOfYear(digits);
       appendNumericField(DateTimeFieldType.dayOfYear(), digits);
     }
-    protected void appendDayOfMonth(int digits) { 
-      builder.appendDayOfMonth(digits); 
+    protected void appendDayOfMonth(int digits) {
+      builder.appendDayOfMonth(digits);
       appendNumericField(DateTimeFieldType.dayOfMonth(), digits);
     }
-    protected void appendDayOfWeek(int digits) { 
-      builder.appendDayOfWeek(digits); 
+    protected void appendDayOfWeek(int digits) {
+      builder.appendDayOfWeek(digits);
       appendNumericField(DateTimeFieldType.dayOfWeek(), digits);
     }
-    protected void appendDayOfWeekText() { 
-      builder.appendDayOfWeekText(); 
+    protected void appendDayOfWeekText() {
+      builder.appendDayOfWeekText();
       appendTextField(DateTimeFieldType.dayOfWeek(), false);
     }
-    protected void appendDayOfWeekShortText() { 
-      builder.appendDayOfWeekShortText(); 
+    protected void appendDayOfWeekShortText() {
+      builder.appendDayOfWeekShortText();
       appendTextField(DateTimeFieldType.dayOfWeek(), true);
     }
-    protected void appendHalfdayOfDayText() { 
-      builder.appendHalfdayOfDayText(); 
+    protected void appendHalfdayOfDayText() {
+      builder.appendHalfdayOfDayText();
       appendTextField(DateTimeFieldType.halfdayOfDay(), false);
     }
-    protected void appendClockhourOfDay(int digits) { 
-      builder.appendDayOfYear(digits); 
+    protected void appendClockhourOfDay(int digits) {
+      builder.appendDayOfYear(digits);
       appendNumericField(DateTimeFieldType.clockhourOfDay(), digits);
     }
-    protected void appendClockhourOfHalfday(int digits) { 
-      builder.appendClockhourOfHalfday(digits); 
+    protected void appendClockhourOfHalfday(int digits) {
+      builder.appendClockhourOfHalfday(digits);
       appendNumericField(DateTimeFieldType.clockhourOfHalfday(), digits);
     }
     protected void appendHourOfDay(int digits) {
@@ -717,20 +838,20 @@ public class TimeFormatter {
         appendNumericField(DateTimeFieldType.hourOfDay(), digits);
       }
     }
-    protected void appendHourOfHalfday(int digits) { 
-      builder.appendHourOfHalfday(digits); 
+    protected void appendHourOfHalfday(int digits) {
+      builder.appendHourOfHalfday(digits);
       appendNumericField(DateTimeFieldType.hourOfHalfday(), digits);
     }
-    protected void appendMinuteOfHour(int digits) { 
-      builder.appendMinuteOfHour(digits); 
+    protected void appendMinuteOfHour(int digits) {
+      builder.appendMinuteOfHour(digits);
       appendNumericField(DateTimeFieldType.minuteOfHour(), digits);
     }
-    protected void appendSecondOfMinute(int digits) { 
-      builder.appendSecondOfMinute(digits); 
+    protected void appendSecondOfMinute(int digits) {
+      builder.appendSecondOfMinute(digits);
       appendNumericField(DateTimeFieldType.secondOfMinute(), digits);
     }
-    protected void appendFractionOfSecond(int minDigits, int maxDigits) { 
-      builder.appendFractionOfSecond(minDigits, maxDigits); 
+    protected void appendFractionOfSecond(int minDigits, int maxDigits) {
+      builder.appendFractionOfSecond(minDigits, maxDigits);
       appendNumericField(DateTimeFieldType.millisOfSecond(), minDigits, maxDigits);
     }
 
@@ -739,19 +860,19 @@ public class TimeFormatter {
       builder.appendTimeZoneOffset(zeroOffsetText, zeroOffsetParseText, showSeparators, minFields, maxFields);
       appendComponent(new TimeZoneOffsetComponent(zeroOffsetParseText), true);
     }
-    protected void appendTimeZoneId() { 
-      builder.appendTimeZoneId(); 
+    protected void appendTimeZoneId() {
+      builder.appendTimeZoneId();
       appendComponent(new TimeZoneIdComponent(), true);
     }
-    protected void appendTimeZoneName() { 
-      builder.appendTimeZoneName(); 
+    protected void appendTimeZoneName() {
+      builder.appendTimeZoneName();
       // TODO: TimeZoneName
-      // appendComponent(new TimeZoneNameComponent(), true);
+      appendComponent(new TimeZoneComponent(locale), true);
     }
-    protected void appendTimeZoneShortName() { 
-      builder.appendTimeZoneShortName(); /* TODO: */
+    protected void appendTimeZoneShortName() {
+      builder.appendTimeZoneShortName();
       // TODO: TimeZoneName
-      // appendComponent(new TimeZoneNameComponent(), true);
+      appendComponent(new TimeZoneComponent(locale), true);
     }
 
     protected void appendQuantifier(String str) {
@@ -764,11 +885,11 @@ public class TimeFormatter {
     }
     protected void appendGroupStart() { appendRegexPart("(?:");}
     protected void appendGroupEnd() { appendRegexPart(")"); }
-    protected void appendLiteral(char c) { 
-      builder.appendLiteral(c); 
+    protected void appendLiteral(char c) {
+      builder.appendLiteral(c);
       appendLiteralField("" + c);}
-    protected void appendLiteral(String s) { 
-      builder.appendLiteral(s); 
+    protected void appendLiteral(String s) {
+      builder.appendLiteral(s);
       appendLiteralField(s); }
   }
 
@@ -955,12 +1076,12 @@ public class TimeFormatter {
       }
     }
   }
-  
-  private final static char[] SPECIAL_REGEX_CHARS = new char[]{'[', ']', '(', ')', '{', '}', '?', '*', '.', '|','\\'};
+
+  private static final char[] SPECIAL_REGEX_CHARS = new char[]{'[', ']', '(', ')', '{', '}', '?', '*', '.', '|','\\'};
   private static boolean isSpecialRegexChar(char c)
   {
-    for (int i = 0; i < SPECIAL_REGEX_CHARS.length; i++) {
-      if (c == SPECIAL_REGEX_CHARS[i]) return true;
+    for (char SPECIAL_REGEX_CHAR : SPECIAL_REGEX_CHARS) {
+      if (c == SPECIAL_REGEX_CHAR) return true;
     }
     return false;
   }
@@ -974,7 +1095,7 @@ public class TimeFormatter {
    * @return the parsed token
    */
   private static String parseToken(String pattern, int[] indexRef) {
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
 
     int i = indexRef[0];
     int length = pattern.length();

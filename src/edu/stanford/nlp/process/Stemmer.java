@@ -2,12 +2,11 @@ package edu.stanford.nlp.process;
 
 
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Iterator;
 
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 
 
 import edu.stanford.nlp.ling.Word;
@@ -595,8 +594,8 @@ public class Stemmer implements Function<Word,Word> {
 
   public String stem(String s) {
     char[] characters = s.toCharArray();
-    for (int i = 0; i < characters.length; i++) {
-      add(characters[i]);
+    for (char character : characters) {
+      add(character);
     }
     stem();
     return toString();

@@ -76,7 +76,6 @@ public class ModCollinsHeadFinder extends CollinsHeadFinder {
     //   (NAC (NML Prudential Insurance) (NNP Co.) (PP Of America))
     // Chris: This could maybe still do with more thought, but NAC is rare.
     nonTerminalInfo.put("NAC", new String[][]{{"left", "NN", "NNS", "NML", "NNP", "NNPS", "NP", "NAC", "EX", "$", "CD", "QP", "PRP", "VBG", "JJ", "JJS", "JJR", "ADJP", "JJP", "FW"}});
-    nonTerminalInfo.put("NX", new String[][]{{"right", "NP", "NX"}});
 
     // Added JJ to PP head table, since it is a head in several cases, e.g.:
     // (PP (JJ next) (PP to them))
@@ -90,7 +89,10 @@ public class ModCollinsHeadFinder extends CollinsHeadFinder {
     nonTerminalInfo.put("PRT", new String[][]{{"right", "RP"}});
     // add '#' for pounds!!
     nonTerminalInfo.put("QP", new String[][]{{"left", "$", "IN", "NNS", "NN", "JJ", "CD", "PDT", "DT", "RB", "NCD", "QP", "JJR", "JJS"}});
-    nonTerminalInfo.put("RRC", new String[][]{{"right", "VP", "NP", "ADVP", "ADJP", "JJP", "PP"}});
+    // reduced relative clause can be any predicate VP, ADJP, NP, PP.
+    // For choosing between NP and PP, really need to know which one is temporal and to choose the other.
+    // It's not clear ADVP needs to be in the list at all (delete?).
+    nonTerminalInfo.put("RRC", new String[][]{{"left", "RRC"}, {"right", "VP", "ADJP", "JJP", "NP", "PP", "ADVP"}});
 
     // delete IN -- go for main part of sentence; add FRAG
 
@@ -110,14 +112,19 @@ public class ModCollinsHeadFinder extends CollinsHeadFinder {
     nonTerminalInfo.put("WHPP", new String[][]{{"right", "IN", "TO", "FW"}});
     nonTerminalInfo.put("X", new String[][]{{"right", "S", "VP", "ADJP", "JJP", "NP", "SBAR", "PP", "X"}});
     nonTerminalInfo.put("NP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NML", "NX", "POS", "JJR"}, {"left", "NP", "PRP"}, {"rightdis", "$", "ADJP", "JJP", "PRN", "FW"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "RB", "QP", "DT", "WDT", "RBR", "ADVP"}});
+    nonTerminalInfo.put("NX", nonTerminalInfo.get("NP"));
     // TODO: seems JJ should be head of NML in this case:
     // (NP (NML (JJ former) (NML Red Sox) (JJ great)) (NNP Luis) (NNP Tiant)),
-    nonTerminalInfo.put("NML", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "NML", "POS", "JJR"}, {"left", "NP", "PRP"}, {"rightdis", "$", "ADJP", "JJP", "PRN"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "RB", "QP", "DT", "WDT", "RBR", "ADVP"}});
+    // (although JJ great is tagged wrong)
+    nonTerminalInfo.put("NML", nonTerminalInfo.get("NP"));
+
 
     nonTerminalInfo.put("POSSP", new String[][]{{"right", "POS"}});
 
     /* HJT: Adding the following to deal with oddly formed data in (for example) the Brown corpus */
     nonTerminalInfo.put("ROOT", new String[][]{{"left", "S", "SQ", "SINV", "SBAR", "FRAG"}});
+    // Just to handle trees which have TOP instead of ROOT at the root
+    nonTerminalInfo.put("TOP", nonTerminalInfo.get("ROOT"));
     nonTerminalInfo.put("TYPO", new String[][]{{"left", "NN", "NP", "NML", "NNP", "NNPS", "TO",
       "VBD", "VBN", "MD", "VBZ", "VB", "VBG", "VBP", "VP", "ADJP", "JJP", "FRAG"}}); // for Brown (Roger)
     nonTerminalInfo.put("ADV", new String[][]{{"right", "RB", "RBR", "RBS", "FW",

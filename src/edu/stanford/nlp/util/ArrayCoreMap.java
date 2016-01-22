@@ -2,15 +2,8 @@ package edu.stanford.nlp.util;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.AbstractSet;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import edu.stanford.nlp.util.logging.PrettyLogger;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -19,7 +12,7 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
 
 /**
  * <p>
- * Base implementation of {@link CoreMap} backed by Java Arrays.
+ * Base implementation of {@link CoreMap} backed by two Java arrays.
  * </p>
  *
  * <p>
@@ -37,13 +30,13 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
  * <p>
  * Equality is defined over the complete set of keys and values currently
  * stored in the map.  Because this class is mutable, it should not be used
- * as a key in a HashMap.
+ * as a key in a Map.
  * </p>
  *
  * @author dramage
  * @author rafferty
  */
-public class ArrayCoreMap implements CoreMap, Serializable {
+public class ArrayCoreMap implements CoreMap /*, Serializable */ {
 
   /** Initial capacity of the array */
   private static final int INITIAL_CAPACITY = 4;
@@ -74,6 +67,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
   public ArrayCoreMap(int capacity) {
     keys = ErasureUtils.uncheckedCast(new Class[capacity]);
     values = new Object[capacity];
+    // size starts at 0
   }
 
   /**
@@ -82,13 +76,8 @@ public class ArrayCoreMap implements CoreMap, Serializable {
    */
   public ArrayCoreMap(ArrayCoreMap other) {
     size = other.size;
-    keys = ErasureUtils.uncheckedCast(new Class[size]);
-    values = new Object[size];
-
-    for (int i = 0; i < size; i++) {
-      this.keys[i] = other.keys[i];
-      this.values[i] = other.values[i];
-    }
+    keys = Arrays.copyOf(other.keys, size);
+    values = Arrays.copyOf(other.values, size);
   }
 
   /**
@@ -162,11 +151,11 @@ public class ArrayCoreMap implements CoreMap, Serializable {
     if (size >= keys.length) {
       int capacity = keys.length + (keys.length < 16 ? 4: 8);
       Class[] newKeys = new Class[capacity];
-      Object[] newVals = new Object[capacity];
+      Object[] newValues = new Object[capacity];
       System.arraycopy(keys, 0, newKeys, 0, size);
-      System.arraycopy(values, 0, newVals, 0, size);
+      System.arraycopy(values, 0, newValues, 0, size);
       keys = newKeys;
-      values = newVals;
+      values = newValues;
     }
 
     // store value
@@ -219,6 +208,22 @@ public class ArrayCoreMap implements CoreMap, Serializable {
   }
 
   /**
+   * Return a set of keys such that the value of that key is not null.
+   *
+   * @return A hash set such that each element of the set is a key in this CoreMap that has a
+   *         non-null value.
+   */
+  public Set<Class<?>> keySetNotNull() {
+    Set<Class<?>> keys = new IdentityHashSet<>();
+    for (int i = 0; i < size(); ++i) {
+      if (values[i] != null) {
+        keys.add(this.keys[i]);
+      }
+    }
+    return keys;
+  }
+
+  /**
    * {@inheritDoc}
    */
   @Override
@@ -261,22 +266,22 @@ public class ArrayCoreMap implements CoreMap, Serializable {
   public void compact() {
     if (keys.length > size) {
       Class[] newKeys = new Class[size];
-      Object[] newVals = new Object[size];
+      Object[] newValues = new Object[size];
       System.arraycopy(keys, 0, newKeys, 0, size);
-      System.arraycopy(values, 0, newVals, 0, size);
+      System.arraycopy(values, 0, newValues, 0, size);
       keys = ErasureUtils.uncheckedCast(newKeys);
-      values = newVals;
+      values = newValues;
     }
   }
 
   public void setCapacity(int newSize) {
     if (size > newSize) { throw new RuntimeException("You cannot set capacity to smaller than the current size."); }
     Class[] newKeys = new Class[newSize];
-    Object[] newVals = new Object[newSize];
+    Object[] newValues = new Object[newSize];
     System.arraycopy(keys, 0, newKeys, 0, size);
-    System.arraycopy(values, 0, newVals, 0, size);
+    System.arraycopy(values, 0, newValues, 0, size);
     keys = ErasureUtils.uncheckedCast(newKeys);
-    values = newVals;
+    values = newValues;
   }
 
   /**
@@ -296,16 +301,22 @@ public class ArrayCoreMap implements CoreMap, Serializable {
    * state.  When a call to toString is about to return, this is reset
    * to null for that particular thread.
    */
-  private static ThreadLocal<IdentityHashSet<CoreMap>> toStringCalled = new ThreadLocal<IdentityHashSet<CoreMap>>();
+  private static final ThreadLocal<IdentityHashSet<CoreMap>> toStringCalled =
+          new ThreadLocal<IdentityHashSet<CoreMap>>() {
+            @Override protected IdentityHashSet<CoreMap> initialValue() {
+              return new IdentityHashSet<>();
+            }
+          };
 
+  /** Prints a full dump of a CoreMap. This method is robust to
+   *  circularity in the CoreMap.
+   *
+   *  @return A String representation of the CoreMap
+   */
   @Override
   public String toString() {
     IdentityHashSet<CoreMap> calledSet = toStringCalled.get();
-    boolean createdCalledSet = (calledSet == null);
-    if (createdCalledSet) {
-      calledSet = new IdentityHashSet<CoreMap>();
-      toStringCalled.set(calledSet);
-    }
+    boolean createdCalledSet = calledSet.isEmpty();
 
     if (calledSet.contains(this)) {
       return "[...]";
@@ -325,7 +336,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
     s.append(']');
 
     if (createdCalledSet) {
-      toStringCalled.set(null);
+      toStringCalled.remove();
     } else {
       // Remove the object from the already called set so that
       // potential later calls in this object graph have something
@@ -335,29 +346,43 @@ public class ArrayCoreMap implements CoreMap, Serializable {
     return s.toString();
   }
 
+  // support caching of String form of keys for speedier printing
+  private static final ConcurrentHashMap<Class, String> shortNames =
+          new ConcurrentHashMap<>(12, 0.75f, 1);
 
-  /** Attempt to provide a more human readable String for the contents of
-   *  an ArrayCoreMap.
-   *
-   *  @param what An array (varargs) of Strings that say what annotation keys
-   *     to print.  These need to be provided in a shortened form where you
-   *     are just giving the part of the class name without package and up to
-   *     "Annotation". That is,
-   *     edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation --&gt; PartOfSpeech
-   *     . As a special case, an empty array means to print everything, not nothing.
-   *  @return More human readable String giving possibly partial contents of
-   *     ArrayCoreMap.
+  private static final int SHORTER_STRING_CHARSTRING_START_SIZE = 64;
+  private static final int SHORTER_STRING_MAX_SIZE_BEFORE_HASHING = 5;
+
+  /**
+   * {@inheritDoc}
    */
+  @Override
   public String toShorterString(String... what) {
-    StringBuilder s = new StringBuilder("[");
+    StringBuilder s = new StringBuilder(SHORTER_STRING_CHARSTRING_START_SIZE);
+    s.append('[');
+    Set<String> whatSet = null;
+    if (size > SHORTER_STRING_MAX_SIZE_BEFORE_HASHING && what.length > SHORTER_STRING_MAX_SIZE_BEFORE_HASHING) {
+      // if there's a lot of stuff, hash.
+      whatSet = new HashSet<>(Arrays.asList(what));
+    }
     for (int i = 0; i < size; i++) {
-      String name = keys[i].getSimpleName();
-      int annoIdx = name.lastIndexOf("Annotation");
-      if (annoIdx >= 0) {
-        name = name.substring(0, annoIdx);
+      Class klass = keys[i];
+      String name = shortNames.get(klass);
+      if (name == null) {
+        name = klass.getSimpleName();
+        int annoIdx = name.lastIndexOf("Annotation");
+        if (annoIdx >= 0) {
+          name = name.substring(0, annoIdx);
+        }
+        shortNames.put(klass, name);
       }
+
       boolean include;
-      if (what.length > 0) {
+      if (what.length == 0) {
+        include = true;
+      } else if (whatSet != null) {
+        include = whatSet.contains(name);
+      } else {
         include = false;
         for (String item : what) {
           if (item.equals(name)) {
@@ -365,8 +390,6 @@ public class ArrayCoreMap implements CoreMap, Serializable {
             break;
           }
         }
-      } else {
-        include = true;
       }
       if (include) {
         if (s.length() > 1) {
@@ -398,6 +421,20 @@ public class ArrayCoreMap implements CoreMap, Serializable {
     return toShortString('/', what);
   }
 
+  /** This gives a very short String representation of a CoreMap
+   *  by leaving it to the content to reveal what field is being printed.
+   *
+   *  @param separator Character placed between fields in output
+   *  @param what An array (varargs) of Strings that say what annotation keys
+   *     to print.  These need to be provided in a shortened form where you
+   *     are just giving the part of the class name without package and up to
+   *     "Annotation". That is,
+   *     edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation
+   *     -&gt; PartOfSpeech . As a special case, an empty array means
+   *     to print everything, not nothing.
+   *  @return Brief string where the field values are just separated by a
+   *     character. If the string contains spaces, it is wrapped in "{...}".
+   */
   public String toShortString(char separator, String... what) {
     StringBuilder s = new StringBuilder();
     for (int i = 0; i < size; i++) {
@@ -441,7 +478,8 @@ public class ArrayCoreMap implements CoreMap, Serializable {
    * track of its own state.  When a call to toString is about to
    * return, this is reset to null for that particular thread.
    */
-  private static ThreadLocal<TwoDimensionalMap<CoreMap, CoreMap, Boolean>> equalsCalled = new ThreadLocal<TwoDimensionalMap<CoreMap, CoreMap, Boolean>>();
+  private static final ThreadLocal<TwoDimensionalMap<CoreMap, CoreMap, Boolean>> equalsCalled =
+          new ThreadLocal<>();
 
 
   /**
@@ -561,7 +599,8 @@ public class ArrayCoreMap implements CoreMap, Serializable {
    * state.  When a call to toString is about to return, this is reset
    * to null for that particular thread.
    */
-  private static ThreadLocal<IdentityHashSet<CoreMap>> hashCodeCalled = new ThreadLocal<IdentityHashSet<CoreMap>>();
+  private static final ThreadLocal<IdentityHashSet<CoreMap>> hashCodeCalled =
+          new ThreadLocal<>();
 
 
   /**
@@ -574,7 +613,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
     IdentityHashSet<CoreMap> calledSet = hashCodeCalled.get();
     boolean createdCalledSet = (calledSet == null);
     if (createdCalledSet) {
-      calledSet = new IdentityHashSet<CoreMap>();
+      calledSet = new IdentityHashSet<>();
       hashCodeCalled.set(calledSet);
     }
 
@@ -587,16 +626,16 @@ public class ArrayCoreMap implements CoreMap, Serializable {
     int keysCode = 0;
     int valuesCode = 0;
     for (int i = 0; i < size; i++) {
-      keysCode += keys[i].hashCode();
-      valuesCode += (values[i] != null ? values[i].hashCode() : 0);
+      keysCode += (i < keys.length && values[i] != null ? keys[i].hashCode() : 0);
+      valuesCode += (i < values.length && values[i] != null ? values[i].hashCode() : 0);
     }
 
     if (createdCalledSet) {
       hashCodeCalled.set(null);
     } else {
       // Remove the object after processing is complete so that if
-      // there are multiple instances of this coremap in the overall
-      // object graph, they each have their hashcode calculated.
+      // there are multiple instances of this CoreMap in the overall
+      // object graph, they each have their hash code calculated.
       // TODO: can we cache this for later?
       calledSet.remove(this);
     }
@@ -633,14 +672,9 @@ public class ArrayCoreMap implements CoreMap, Serializable {
     Redwood.startTrack(description);
 
     // sort keys by class name
-    List<Class> sortedKeys = new ArrayList<Class>(this.keySet());
+    List<Class> sortedKeys = new ArrayList<>(this.keySet());
     Collections.sort(sortedKeys,
-        new Comparator<Class>(){
-      @Override
-      public int compare(Class a, Class b) {
-        return a.getCanonicalName().compareTo(b.getCanonicalName());
-      }
-    });
+        (a, b) -> a.getCanonicalName().compareTo(b.getCanonicalName()));
 
     // log key/value pairs
     for (Class key : sortedKeys) {

@@ -16,7 +16,7 @@ import edu.stanford.nlp.io.IOUtils;
 public abstract class CounterTestBase extends TestCase {
 
   private Counter<String> c;
-  private boolean integral;
+  private final boolean integral;
 
   private static final double TOLERANCE = 0.001;
 

@@ -26,8 +26,6 @@
 //http://www-nlp.stanford.edu/software/tagger.shtml
 package edu.stanford.nlp.tagger.maxent;
 
-import edu.stanford.nlp.io.InDataStreamFile;
-import edu.stanford.nlp.io.OutDataStreamFile;
 import edu.stanford.nlp.maxent.Features;
 
 /**
@@ -40,52 +38,11 @@ public class TaggerFeatures extends Features {
 
   int[] xIndexed;
 
-  final TTags ttags;
   final TaggerExperiments domain;
 
-  TaggerFeatures(TTags ttags, TaggerExperiments domain) {
+  TaggerFeatures(TaggerExperiments domain) {
     super();
-    this.ttags = ttags;
     this.domain = domain;
-  }
-
-  @Override
-  public void save(String filename) {
-    try {
-      OutDataStreamFile rF = new OutDataStreamFile(filename);
-      rF.writeInt(xIndexed.length);
-      for (int aXIndexed : xIndexed) {
-        rF.writeInt(aXIndexed);
-      }
-      rF.writeInt(size());
-      for (int i = 0; i < size(); i++) {
-        get(i).save(rF);
-      }
-      rF.close();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  @Override
-  public void read(String filename) {
-    try {
-      InDataStreamFile rF = new InDataStreamFile(filename);
-      int len = rF.readInt();
-      xIndexed = new int[len];
-      for (int i = 0; i < xIndexed.length; i++) {
-        xIndexed[i] = rF.readInt();
-      }
-      int numFeats = rF.readInt();
-      for (int i = 0; i < numFeats; i++) {
-        TaggerFeature tF = new TaggerFeature(ttags, domain);
-        tF.read(rF);
-        this.add(tF);
-      }
-      rF.close();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
   }
 
 }

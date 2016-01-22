@@ -1,11 +1,6 @@
 package edu.stanford.nlp.parser.lexparser;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Index;
 
 /**
@@ -15,8 +10,7 @@ import edu.stanford.nlp.util.Index;
  * <i>Implementation note: the contents of this class tend to overlap somewhat
  * with {@link EnglishUnknownWordModel} and were originally included in {@link BaseLexicon}.
  *
- * @author Dan Klein
- * @author Galen Andrew
+ * @author Roger Levy
  * @author Christopher Manning
  * @author Anna Rafferty
  */
@@ -28,25 +22,18 @@ public class ArabicUnknownWordModel extends BaseUnknownWordModel {
 
   private static final int MAX_UNKNOWN = 10;
 
-  protected boolean smartMutation = false;
+  protected final boolean smartMutation;
+  protected final int unknownSuffixSize;
+  protected final int unknownPrefixSize;
 
 
-  protected int unknownSuffixSize = 0;
-  protected int unknownPrefixSize = 0;
-
-  public ArabicUnknownWordModel(Options op, Lexicon lex, 
-                                Index<String> wordIndex, 
-                                Index<String> tagIndex, 
+  public ArabicUnknownWordModel(Options op, Lexicon lex,
+                                Index<String> wordIndex,
+                                Index<String> tagIndex,
                                 ClassicCounter<IntTaggedWord> unSeenCounter) {
     super(op, lex, wordIndex, tagIndex, unSeenCounter, null, null, null);
-    unknownLevel = op.lexOptions.useUnknownWordSignatures;
     if (unknownLevel < MIN_UNKNOWN || unknownLevel > MAX_UNKNOWN) {
-      if (unknownLevel < MIN_UNKNOWN) {
-        unknownLevel = MIN_UNKNOWN;
-      } else if (unknownLevel > MAX_UNKNOWN) {
-        unknownLevel = MAX_UNKNOWN;
-      }
-      System.err.println("Invalid value for useUnknownWordSignatures");
+      throw new IllegalArgumentException("Invalid value for useUnknownWordSignatures: " + unknownLevel);
     }
     this.smartMutation = op.lexOptions.smartMutation;
     this.unknownSuffixSize = op.lexOptions.unknownSuffixSize;
@@ -59,9 +46,9 @@ public class ArabicUnknownWordModel extends BaseUnknownWordModel {
    * lines containing the data.
    */
   public ArabicUnknownWordModel(Options op, Lexicon lex,
-                                Index<String> wordIndex, 
+                                Index<String> wordIndex,
                                 Index<String> tagIndex) {
-    this(op, lex, wordIndex, tagIndex, new ClassicCounter<IntTaggedWord>());
+    this(op, lex, wordIndex, tagIndex, new ClassicCounter<>());
   }
 
   @Override
@@ -102,7 +89,7 @@ public class ArabicUnknownWordModel extends BaseUnknownWordModel {
   @Override
   public int getSignatureIndex(int index, int sentencePosition, String word) {
     String uwSig = getSignature(word, sentencePosition);
-    int sig = wordIndex.indexOf(uwSig, true);
+    int sig = wordIndex.addToIndex(uwSig);
     return sig;
   }
 
@@ -252,12 +239,6 @@ public class ArabicUnknownWordModel extends BaseUnknownWordModel {
     // System.err.println("Summarized " + word + " to " + sb.toString());
     return sb.toString();
   } // end getSignature()
-
-
-  @Override
-  public void setUnknownLevel(int unknownLevel) {
-    this.unknownLevel = unknownLevel;
-  }
 
   @Override
   public int getUnknownLevel() {

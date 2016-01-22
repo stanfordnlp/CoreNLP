@@ -61,9 +61,9 @@ public abstract class AbstractDataset implements Dataset {
   protected Properties options;
 
   public AbstractDataset() {
-    outputFileList = new ArrayList<String>();
-    pathsToData = new ArrayList<File>();
-    pathsToMappings = new ArrayList<File>();
+    outputFileList = new ArrayList<>();
+    pathsToData = new ArrayList<>();
+    pathsToMappings = new ArrayList<>();
     toStringBuffer = new StringBuilder();
 
     //Read the raw file as UTF-8 irrespective of output encoding
@@ -98,7 +98,7 @@ public abstract class AbstractDataset implements Dataset {
 
   public boolean setOptions(Properties opts) {
     options = opts;
-    List<String> sortedKeys = new ArrayList<String>(opts.stringPropertyNames());
+    List<String> sortedKeys = new ArrayList<>(opts.stringPropertyNames());
     Collections.sort(sortedKeys);
     for(String param : sortedKeys) {
       String value = opts.getProperty(param);

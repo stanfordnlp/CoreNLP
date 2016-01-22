@@ -4,15 +4,15 @@ import edu.stanford.nlp.trees.international.pennchinese.CharacterLevelTagExtende
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 /**
  * @author Galen Andrew
  */
 public class TreeToBracketProcessor {
-  public List evalTypes = new ArrayList();
-  public static CharacterLevelTagExtender ext = new CharacterLevelTagExtender();
+
+  private final List evalTypes;
+  private static final CharacterLevelTagExtender ext = new CharacterLevelTagExtender();
 
   public TreeToBracketProcessor(List evalTypes) {
     this.evalTypes = evalTypes;
@@ -22,11 +22,10 @@ public class TreeToBracketProcessor {
     boolean words = evalTypes.contains(WordCatConstituent.wordType);
     boolean tags = evalTypes.contains(WordCatConstituent.tagType);
     boolean cats = evalTypes.contains(WordCatConstituent.catType);
-    List<WordCatConstituent> brackets = new ArrayList<WordCatConstituent>();
+    List<WordCatConstituent> brackets = new ArrayList<>();
     if (words || cats || tags) {
       root = ext.transformTree(root);
-      for (Iterator<Tree> iterator = root.iterator(); iterator.hasNext();) {
-        Tree tree = iterator.next();
+      for (Tree tree : root) {
         if (tree.isPrePreTerminal() && !tree.value().equals("ROOT")) {
           if (words) {
             brackets.add(new WordCatConstituent(tree, root, WordCatConstituent.wordType));
@@ -43,23 +42,20 @@ public class TreeToBracketProcessor {
     return brackets;
   }
 
-  public Collection commonWordTagTypeBrackets(Tree root1, Tree root2) {
+  public static Collection commonWordTagTypeBrackets(Tree root1, Tree root2) {
     root1 = ext.transformTree(root1);
     root2 = ext.transformTree(root2);
 
-    List<Tree> firstPreTerms = new ArrayList<Tree>();
-    for (Iterator<Tree> iterator = root1.iterator(); iterator.hasNext();) {
-      Tree tree = iterator.next();
+    List<Tree> firstPreTerms = new ArrayList<>();
+    for (Tree tree : root1) {
       if (tree.isPrePreTerminal()) {
         firstPreTerms.add(tree);
       }
     }
 
-    List<WordCatConstituent> brackets = new ArrayList<WordCatConstituent>();
-    for (Iterator<Tree> pretermIter = firstPreTerms.iterator(); pretermIter.hasNext();) {
-      Tree preTerm = pretermIter.next();
-      for (Iterator<Tree> iter = root2.iterator(); iter.hasNext();) {
-        Tree tree = iter.next();
+    List<WordCatConstituent> brackets = new ArrayList<>();
+    for (Tree preTerm : firstPreTerms) {
+      for (Tree tree : root2) {
         if (!tree.isPrePreTerminal()) {
           continue;
         }
@@ -72,4 +68,5 @@ public class TreeToBracketProcessor {
 
     return brackets;
   }
+
 }

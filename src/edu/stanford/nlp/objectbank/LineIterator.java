@@ -3,7 +3,7 @@ package edu.stanford.nlp.objectbank;
 import java.io.*;
 import java.util.*;
 
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.AbstractIterator;
 
 
@@ -16,8 +16,8 @@ import edu.stanford.nlp.util.AbstractIterator;
  */
 public class LineIterator<X> extends AbstractIterator<X> {
 
-  private Function<String,X> op;
-  private BufferedReader in;
+  private final Function<String,X> op;
+  private final BufferedReader in;
   private X nextToken; // = null;
 
   @SuppressWarnings({"unchecked"})
@@ -72,7 +72,7 @@ public class LineIterator<X> extends AbstractIterator<X> {
    * @return An iterator over the lines of a file
    */
   public static <X> IteratorFromReaderFactory<X> getFactory() {
-    return new LineIteratorFactory<X>();
+    return new LineIteratorFactory<>();
   }
 
   /**
@@ -83,7 +83,7 @@ public class LineIterator<X> extends AbstractIterator<X> {
    * @return An iterator over the lines of a file
    */
   public static <X> IteratorFromReaderFactory<X> getFactory(Function<String,X> op) {
-    return new LineIteratorFactory<X>(op);
+    return new LineIteratorFactory<>(op);
   }
 
 
@@ -92,7 +92,7 @@ public class LineIterator<X> extends AbstractIterator<X> {
     private static final long serialVersionUID = 1L;
 
     @SuppressWarnings({"NonSerializableFieldInSerializableClass"})
-    private Function<String,X> oper;
+    private final Function<String,X> function;
 
     @SuppressWarnings({"unchecked"})
     public LineIteratorFactory() {
@@ -100,23 +100,14 @@ public class LineIterator<X> extends AbstractIterator<X> {
     }
 
     public LineIteratorFactory(Function<String,X> op) {
-      this.oper = op;
+      this.function = op;
     }
 
+    @Override
     public Iterator<X> getIterator(Reader r) {
-      return new LineIterator<X>(r, oper);
+      return new LineIterator<>(r, function);
     }
 
-  }
-
-  public static void main(String[] args) {
-    String s = "\n\n@@123\nthis\nis\na\nsentence\n\n@@124\nThis\nis\nanother\n.\n\n@125\nThis\nis\nthe\nlast\n";
-    Iterator<String> di = new LineIterator<String>(new StringReader(s), new IdentityFunction<String>());
-    System.out.println("--- start ---");
-    while (di.hasNext()) {
-      System.out.println(di.next());
-    }
-    System.out.println("---- end ----");
   }
 
 }

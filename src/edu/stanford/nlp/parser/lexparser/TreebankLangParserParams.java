@@ -4,7 +4,7 @@ import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.parser.metrics.AbstractEval;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 import edu.stanford.nlp.util.Index;
 
 import java.io.OutputStream;
@@ -14,17 +14,17 @@ import java.util.List;
 
 
 /**
- * Contains language-specific methods necessary to get the parser to parse
- * an arbitrary treebank.
+ * Contains language-specific methods commonly necessary to get a parser
+ * to parse an arbitrary treebank.
  *
  * @author Roger Levy
  * @version 03/05/2003
  */
 public interface TreebankLangParserParams extends TreebankFactory, Serializable {
 
-  public HeadFinder headFinder();
+  HeadFinder headFinder();
 
-  public HeadFinder typedDependencyHeadFinder();
+  HeadFinder typedDependencyHeadFinder();
 
   /**
    * Allows language specific processing (e.g., stemming) of head words.
@@ -33,29 +33,29 @@ public interface TreebankLangParserParams extends TreebankFactory, Serializable 
    * {@link edu.stanford.nlp.ling.HasWord} and {@link edu.stanford.nlp.ling.HasTag} interfaces.
    * @return A processed {@link edu.stanford.nlp.ling.Label}
    */
-  public Label processHeadWord(Label headWord);
+  Label processHeadWord(Label headWord);
 
-  public void setInputEncoding(String encoding);
+  void setInputEncoding(String encoding);
 
-  public void setOutputEncoding(String encoding);
+  void setOutputEncoding(String encoding);
 
   /**
    * If evalGFs = true, then the evaluation of parse trees will include evaluation on grammatical functions.
    * Otherwise, evaluation will strip the grammatical functions.
    */
-  public void setEvaluateGrammaticalFunctions(boolean evalGFs);
+  void setEvaluateGrammaticalFunctions(boolean evalGFs);
 
   /**
    * Returns the output encoding being used.
    * @return The output encoding being used.
    */
-  public String getOutputEncoding();
+  String getOutputEncoding();
 
   /**
    * Returns the input encoding being used.
    * @return The input encoding being used.
    */
-  public String getInputEncoding();
+  String getInputEncoding();
 
 
   /**
@@ -66,7 +66,7 @@ public interface TreebankLangParserParams extends TreebankFactory, Serializable 
    *
    * @return A factory that vends an appropriate TreeReader
    */
-  public TreeReaderFactory treeReaderFactory();
+  TreeReaderFactory treeReaderFactory();
 
 
   /**
@@ -74,7 +74,7 @@ public interface TreebankLangParserParams extends TreebankFactory, Serializable 
    * @param op Options as to how the Lexicon behaves
    * @return A Lexicon, constructed based on the given option
    */
-  public Lexicon lex(Options op, Index<String> wordIndex, Index<String> tagIndex);
+  Lexicon lex(Options op, Index<String> wordIndex, Index<String> tagIndex);
 
 
   /**
@@ -88,7 +88,7 @@ public interface TreebankLangParserParams extends TreebankFactory, Serializable 
    *     or equivalence class things not evaluated in the parser performance
    *     evaluation.
    */
-  public TreeTransformer collinizer();
+  TreeTransformer collinizer();
 
 
   /**
@@ -98,48 +98,48 @@ public interface TreebankLangParserParams extends TreebankFactory, Serializable 
    * things. The evalb version should strip some more stuff
    * off. (finish this doc!)
    */
-  public TreeTransformer collinizerEvalb();
+  TreeTransformer collinizerEvalb();
 
   /**
    * returns a MemoryTreebank appropriate to the treebank source
    */
-  public MemoryTreebank memoryTreebank();
+  MemoryTreebank memoryTreebank();
 
   /**
    * returns a DiskTreebank appropriate to the treebank source
    */
-  public DiskTreebank diskTreebank();
+  DiskTreebank diskTreebank();
 
   /**
    * returns a MemoryTreebank appropriate to the testing treebank source
    */
-  public MemoryTreebank testMemoryTreebank();
+  MemoryTreebank testMemoryTreebank();
 
   /**
    * Required to extend TreebankFactory
    */
-  public Treebank treebank();
+  Treebank treebank();
 
   /**
    * returns a TreebankLanguagePack containing Treebank-specific (but
    * not parser-specific) info such as what is punctuation, and also
    * information about the structure of labels
    */
-  public TreebankLanguagePack treebankLanguagePack();
+  TreebankLanguagePack treebankLanguagePack();
 
   /**
    * returns a PrintWriter used to print output. It's the
    * responsibility of the returned PrintWriter to deal properly with
    * character encodings for the relevant treebank
    */
-  public PrintWriter pw();
+  PrintWriter pw();
 
   /**
    * returns a PrintWriter used to print output to the OutputStream
    * o. It's the responsibility of the returned PrintWriter to deal
    * properly with character encodings for the relevant treebank
    */
-  public PrintWriter pw(OutputStream o);
+  PrintWriter pw(OutputStream o);
 
 
   /**
@@ -148,7 +148,7 @@ public interface TreebankLangParserParams extends TreebankFactory, Serializable 
    * @return An array containing ancestor-annotated Strings: categories
    *         should be split according to these ancestor annotations.
    */
-  public String[] sisterSplitters();
+  String[] sisterSplitters();
 
 
   /**
@@ -156,7 +156,7 @@ public interface TreebankLangParserParams extends TreebankFactory, Serializable 
    * can be used to remove functional tags (such as "-TMP") from
    * categories.
    */
-  public TreeTransformer subcategoryStripper();
+  TreeTransformer subcategoryStripper();
 
   /**
    * This method does language-specific tree transformations such
@@ -166,7 +166,7 @@ public interface TreebankLangParserParams extends TreebankFactory, Serializable 
    * applied to each node in the tree (depth first, left-to-right),
    * so you shouldn't write this method to apply recursively to tree
    * members.  This method is allowed to (and in some cases does)
-   * destructively change the input tree <code>t</code>. It changes both
+   * destructively change the input tree {@code t}. It changes both
    * labels and the tree shape.
    *
    * @param t The input tree (with non-language specific annotation already
@@ -175,12 +175,12 @@ public interface TreebankLangParserParams extends TreebankFactory, Serializable 
    * @return The fully annotated tree node (with daughters still as you
    *           want them in the final result)
    */
-  public Tree transformTree(Tree t, Tree root);
+  Tree transformTree(Tree t, Tree root);
 
   /**
    * display language-specific settings
    */
-  public void display();
+  void display();
 
   /**
    * Set a language-specific option according to command-line flags.
@@ -195,18 +195,18 @@ public interface TreebankLangParserParams extends TreebankFactory, Serializable 
    * @return The index of the item after arguments processed as part of this
    *         command line option.
    */
-  public int setOptionFlag(String[] args, int i);
+  int setOptionFlag(String[] args, int i);
 
 
   /**
    * Return a default sentence of the language (for testing).
    * @return A default sentence of the language
    */
-  public List<? extends HasWord> defaultTestSentence();
+  List<? extends HasWord> defaultTestSentence();
 
-  public TokenizerFactory<Tree> treeTokenizerFactory();
+  TokenizerFactory<Tree> treeTokenizerFactory();
 
-  public Extractor<DependencyGrammar> dependencyGrammarExtractor(Options op, Index<String> wordIndex, Index<String> tagIndex);
+  Extractor<DependencyGrammar> dependencyGrammarExtractor(Options op, Index<String> wordIndex, Index<String> tagIndex);
 
   /**
    * Give the parameters for smoothing in the MLEDependencyGrammar.
@@ -219,7 +219,7 @@ public interface TreebankLangParserParams extends TreebankFactory, Serializable 
    *
    * @return An object that implements {@link AbstractEval}
    */
-  public AbstractEval ppAttachmentEval();
+  AbstractEval ppAttachmentEval();
 
   /**
    * Returns a function which reads the given filename and turns its
@@ -234,8 +234,36 @@ public interface TreebankLangParserParams extends TreebankFactory, Serializable 
    * UnsupportedOperationException if the language doesn't support
    * dependencies or GrammaticalStructures.
    */
-  GrammaticalStructure getGrammaticalStructure(Tree t, Filter<String> filter,
+  GrammaticalStructure getGrammaticalStructure(Tree t, Predicate<String> filter,
                                                HeadFinder hf);
 
+  /** Whether our code provides support for converting phrase structure
+   *  (constituency) parses to (basic) dependency parses.
+   *  @return Whether dependencies are supported for a language
+   *
+   */
   boolean supportsBasicDependencies();
+
+  /** Set whether to generate original Stanford Dependencies or the newer
+   *  Universal Dependencies.
+   *
+   *  @param originalDependencies Whether to generate SD
+   */
+  void setGenerateOriginalDependencies(boolean originalDependencies);
+
+  /** Whether to generate original Stanford Dependencies or the newer
+   *  Universal Dependencies.
+   *
+   *  @return Whether to generate SD
+   */
+  boolean generateOriginalDependencies();
+
+
+  /** When run inside StanfordCoreNLP, which flags should be used by default.
+   *  E.g., the current use is that for English, we want it to run with the
+   *  option to retain "-TMP" functional tags but not to impose that on
+   *  other languages.
+   */
+  String[] defaultCoreNLPFlags();
+
 }

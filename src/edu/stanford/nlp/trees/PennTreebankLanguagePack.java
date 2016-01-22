@@ -3,7 +3,7 @@ package edu.stanford.nlp.trees;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.PTBTokenizer;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 
 
 /**
@@ -22,15 +22,15 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
   }
 
 
-  private static String[] pennPunctTags = {"''", "``", "-LRB-", "-RRB-", ".", ":", ","};
+  private static final String[] pennPunctTags = {"''", "``", "-LRB-", "-RRB-", ".", ":", ","};
 
-  private static String[] pennSFPunctTags = {"."};
+  private static final String[] pennSFPunctTags = {"."};
 
-  private static String[] collinsPunctTags = {"''", "``", ".", ":", ","};
+  private static final String[] collinsPunctTags = {"''", "``", ".", ":", ","};
 
-  private static String[] pennPunctWords = {"''", "'", "``", "`", "-LRB-", "-RRB-", "-LCB-", "-RCB-", ".", "?", "!", ",", ":", "-", "--", "...", ";"};
+  private static final String[] pennPunctWords = {"''", "'", "``", "`", "-LRB-", "-RRB-", "-LCB-", "-RCB-", ".", "?", "!", ",", ":", "-", "--", "...", ";"};
 
-  private static String[] pennSFPunctWords = {".", "!", "?"};
+  private static final String[] pennSFPunctWords = {".", "!", "?"};
 
 
   /**
@@ -41,12 +41,12 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
    * printing out lexicalized dependencies.  Note that ] ought to be
    * unnecessary, since it would end the annotation, not start it.
    */
-  private static char[] annotationIntroducingChars = {'-', '=', '|', '#', '^', '~', '_', '['};
+  private static final char[] annotationIntroducingChars = {'-', '=', '|', '#', '^', '~', '_', '['};
 
   /**
    * This is valid for "BobChrisTreeNormalizer" conventions only.
    */
-  private static String[] pennStartSymbols = {"ROOT", "TOP"};
+  private static final String[] pennStartSymbols = {"ROOT", "TOP"};
 
 
   /**
@@ -160,7 +160,11 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
    */
   @Override
   public GrammaticalStructureFactory grammaticalStructureFactory() {
-    return new EnglishGrammaticalStructureFactory();
+    if (generateOriginalDependencies) {
+      return new EnglishGrammaticalStructureFactory();
+    } else {
+      return new UniversalEnglishGrammaticalStructureFactory();
+    }
   }
 
   /**
@@ -171,13 +175,26 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
    * @return A GrammaticalStructure suitable for this language/treebank.
    */
   @Override
-  public GrammaticalStructureFactory grammaticalStructureFactory(Filter<String> puncFilter) {
-    return new EnglishGrammaticalStructureFactory(puncFilter);
+  public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilter) {
+    if (generateOriginalDependencies) {
+      return new EnglishGrammaticalStructureFactory(puncFilter);
+    } else {
+      return new UniversalEnglishGrammaticalStructureFactory(puncFilter);
+    }
   }
 
   @Override
-  public GrammaticalStructureFactory grammaticalStructureFactory(Filter<String> puncFilter, HeadFinder hf) {
-    return new EnglishGrammaticalStructureFactory(puncFilter, hf);
+  public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilter, HeadFinder hf) {
+    if (generateOriginalDependencies) {
+      return new EnglishGrammaticalStructureFactory(puncFilter, hf);
+    } else {
+      return new UniversalEnglishGrammaticalStructureFactory(puncFilter, hf);
+    }
+  }
+
+  @Override
+  public boolean supportsGrammaticalStructures() {
+    return true;
   }
 
   /** {@inheritDoc} */
@@ -189,7 +206,11 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
   /** {@inheritDoc} */
   @Override
   public HeadFinder typedDependencyHeadFinder() {
-    return new SemanticHeadFinder(this, true);
+    if (generateOriginalDependencies) {
+      return new SemanticHeadFinder(this, true);
+    } else {
+      return new UniversalSemanticHeadFinder(this, true);
+    }
   }
 
 

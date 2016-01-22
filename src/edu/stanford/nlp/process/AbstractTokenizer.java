@@ -33,6 +33,7 @@ public abstract class AbstractTokenizer<T> implements Tokenizer<T> {
    * @throws java.util.NoSuchElementException
    *          if the token stream has no more tokens.
    */
+  @Override
   public T next() {
     if (nextToken == null) {
       nextToken = getNext();
@@ -48,6 +49,7 @@ public abstract class AbstractTokenizer<T> implements Tokenizer<T> {
   /**
    * Returns <code>true</code> if this Tokenizer has more elements.
    */
+  @Override
   public boolean hasNext() {
     if (nextToken == null) {
       nextToken = getNext();
@@ -58,6 +60,7 @@ public abstract class AbstractTokenizer<T> implements Tokenizer<T> {
   /**
    * This is an optional operation, by default not supported.
    */
+  @Override
   public void remove() {
     throw new UnsupportedOperationException();
   }
@@ -69,6 +72,7 @@ public abstract class AbstractTokenizer<T> implements Tokenizer<T> {
    * @throws java.util.NoSuchElementException
    *          if the token stream has no more tokens.
    */
+  @Override
   public T peek() {
     if (nextToken == null) {
       nextToken = getNext();
@@ -84,9 +88,10 @@ public abstract class AbstractTokenizer<T> implements Tokenizer<T> {
    *
    * @return A list of all tokens remaining in the underlying Reader
    */
+  @Override
   public List<T> tokenize() {
     // System.out.println("tokenize called");
-    List<T> result = new ArrayList<T>();
+    List<T> result = new ArrayList<>();
     while (hasNext()) {
       result.add(next());
     }

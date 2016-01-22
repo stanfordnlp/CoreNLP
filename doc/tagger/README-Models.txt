@@ -1,4 +1,4 @@
-Stanford POS Tagger, v3.1.5 - 2013-04-04
+Stanford POS Tagger, v3.5.2 - 2015-04-20
 Copyright (c) 2002-2012 The Board of Trustees of
 The Leland Stanford Junior University. All Rights Reserved.
 
@@ -81,21 +81,13 @@ Performance:
 
 Arabic tagger
 ---------------------------
-arabic-accurate.tagger
+arabic.tagger
 Trained on the *entire* ATB p1-3.
 When trained on the train part of the ATB p1-3 split done for the 2005
 JHU Summer Workshop (Diab split), using (augmented) Bies tags, it gets
 the following performance:
-Performance:
-96.50% on dev portion according to Diab split
-(80.59% on unknown words)
-
-arabic-fast.tagger
-4x speed improvement over "accurate".
-Performance:
-96.34% on dev portion according to Diab split
-(80.28% on unknown words)
-
+96.26% on test portion according to Diab split
+(80.14% on unknown words)
 
 French tagger
 ---------------------------

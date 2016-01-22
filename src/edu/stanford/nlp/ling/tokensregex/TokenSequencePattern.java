@@ -1,31 +1,28 @@
 package edu.stanford.nlp.ling.tokensregex;
 
-import edu.stanford.nlp.ling.tokensregex.parser.TokenSequenceParser;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import edu.stanford.nlp.ling.tokensregex.parser.TokenSequenceParser;
+import edu.stanford.nlp.util.*;
 
 /**
- * Token Sequence Pattern for regular expressions for sequences over tokens (as the more general <code>CoreMap</code>)
+ * Token Sequence Pattern for regular expressions over sequences of tokens (each represented as a <code>CoreMap</code>).
  * Sequences over tokens can be matched like strings.
  * <p>
- * To use
+ * To use:
+ * </p>
  * <pre><code>
  *   TokenSequencePattern p = TokenSequencePattern.compile("....");
  *   TokenSequenceMatcher m = p.getMatcher(tokens);
  *   while (m.find()) ....
  * </code></pre>
- * </p>
  *
  * <p>
  * Supports the following:
  * <ul>
  *  <li>Concatenation: <code>X Y</code></li>
  *  <li>Or: <code>X | Y</code></li>
- *  <li>And: <code>X & Y</code></li>
+ *  <li>And: {@code X & Y}</li>
  *  <li>Groups:
  *     <ul>
  *     <li>capturing: <code>(X)</code> (with numeric group id)</li>
@@ -38,7 +35,7 @@ import java.util.List;
  *     <li>To retrieve group using id: <code>m.group(id)</code> or <code>m.groupNodes(id)</code>
  *     <br> NOTE: Capturing groups are indexed from left to right, starting at one.  Group zero is the entire matched sequence.
  *     </li>
- *     <li>To retrieve group using bind variable name: <code>m.group("$var")</code> or <code>m.groupNodes("$var")</code>
+ *     <li>To retrieve group using bound variable name: <code>m.group("$var")</code> or <code>m.groupNodes("$var")</code>
  *     </li>
  *  </ul>
  *  See {@link SequenceMatchResult} for more accessor functions to retrieve matches.
@@ -46,24 +43,28 @@ import java.util.List;
  * <li>Greedy Quantifiers:  <code>X+, X?, X*, X{n,m}, X{n}, X{n,}</code></li>
  * <li>Reluctant Quantifiers: <code>X+?, X??, X*?, X{n,m}?, X{n}?, X{n,}?</code></li>
  * <li>Back references: <code>\captureid</code> </li>
- * <li>Value binding for groups: <code>[pattern] => [value]</code>.
- *   Value for matched expression can be accessed using <code>m.groupValue()</code>
- *   <br></br>Example: <pre>( one => 1 | two => 2 | three => 3 | ...)</pre>
+ * <li>Value binding for groups: {@code [pattern] => [value]}.
+ *   Value for matched expression can be accessed using {@code m.groupValue()}
+ *   <br></br>Example: {@code ( one => 1 | two => 2 | three => 3 | ...)}
  * </li>
  * </ul>
  *
  * <p>
  * Individual tokens are marked by <code>"[" TOKEN_EXPR "]" </code>
  * <br>Possible <code>TOKEN_EXPR</code>:
+ * </p>
  * <ul>
  * <li> All specified token attributes match:
  * <br> For Strings:
- *     <code> { lemma:/.../; tag:"NNP" } </code> = attributes that need to all match
+ *     <code> { lemma:/.../; tag:"NNP" } </code> = attributes that need to all match.
+ *     If only one attribute, the {} can be dropped.
+ * <br> See {@link edu.stanford.nlp.ling.AnnotationLookup AnnotationLookup} for a list of predefined token attribute names.
+ * <br> Additional attributes can be bound using the environment (see below).
  * <br> NOTE: <code>/.../</code> used for regular expressions,
  *            <code>"..."</code> for exact string matches
  * <br> For Numbers:
- *      <code>{ word>=2 }</code>
- * <br> NOTE: Relation can be <code>">=", "<=", ">", "<",</code> or <code>"=="</code>
+ *      <code>{ word&gt;=2 }</code>
+ * <br> NOTE: Relation can be {@code ">=", "<=", ">", "<",} or {@code "=="}
  * <br> Others:
  *      <code>{ word::IS_NUM } , { word::IS_NIL } </code> or
  *      <code>{ word::NOT_EXISTS }, { word::NOT_NIL } </code> or <code> { word::EXISTS } </code>
@@ -77,10 +78,9 @@ import java.util.List;
  * </li>
  * <li>
  *  Conjunction or Disjunction:
- *     <code> {...} & {...} </code>   or  <code> {...} | {...} </code>
+ *     <code> {...} &amp; {...} </code>   or  <code> {...} | {...} </code>
  * </li>
- * </ui>
- * </p>
+ * </ul>
  *
  * <p>
  * Special tokens:
@@ -93,11 +93,17 @@ import java.util.List;
  * </p>
  *
  * <p>
+ * Special expressions: indicated by double braces: <code>{{ expr }}</code>
+ *   <br> See {@link edu.stanford.nlp.ling.tokensregex.types.Expressions} for syntax.
+ * </p>
+ *
+ * <p>
  * Binding of variables for use in compiling patterns:
+ * </p>
  * <ol>
- * <li> Use  Env env = TokenSequencePattern.getNewEnv() to create new environment for binding </li>
- * <li> Bind string to attribute key (Class) lookup
- *    env.bind("numtype", CoreAnnotations.NumericTypeAnnotation.class);
+ * <li> Use  {@code Env env = TokenSequencePattern.getNewEnv()} to create a new environment for binding </li>
+ * <li> Bind string to attribute key (Class) lookup:
+ *    {@code env.bind("numtype", CoreAnnotations.NumericTypeAnnotation.class);}
  * </li>
  * <li> Bind patterns / strings for compiling patterns
  *    <pre><code>
@@ -115,26 +121,26 @@ import java.util.List;
  *   </code></pre>
  * </li>
  * </ol>
- * </p>
  *
  * <p>
  * Actions (partially implemented)
+ * </p>
  * <ul>
- * <li> <code>pattern ==> action</code> </li>
+ * <li> {@code pattern ==> action} </li>
  * <li> Supported action:
- *    <code>&annotate( { ner="DATE" } )</code> </li>
+ *    <code> &amp;annotate( { ner="DATE" } ) </code> </li>
  * <li> Not applied automatically, associated with a pattern.</li>
  * <li> To apply, call <code>pattern.getAction().apply(match, groupid)</code></li>
  * </ul>
- * </p>
  *
  * @author Angel Chang
  * @see TokenSequenceMatcher
  */
 public class TokenSequencePattern extends SequencePattern<CoreMap> {
+
   public static final TokenSequencePattern ANY_NODE_PATTERN = TokenSequencePattern.compile(ANY_NODE_PATTERN_EXPR);
 
-  private static Env DEFAULT_ENV = getNewEnv();
+  private static final Env DEFAULT_ENV = getNewEnv();
 
   public TokenSequencePattern(String patternStr, SequencePattern.PatternExpr nodeSequencePattern) {
     super(patternStr, nodeSequencePattern);
@@ -152,7 +158,9 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
   }
 
   /**
-   * Compiles a regular expression over tokens into a TokenSequencePattern using the default environment
+   * Compiles a regular expressions over tokens into a TokenSequencePattern
+   * using the default environment.
+   *
    * @param string Regular expression to be compiled
    * @return Compiled TokenSequencePattern
    */
@@ -162,7 +170,9 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
   }
 
   /**
-   * Compiles a regular expression over tokens into a TokenSequencePattern using the specified environment
+   * Compiles a regular expression over tokens into a TokenSequencePattern
+   * using the specified environment.
+   *
    * @param env Environment to use
    * @param string Regular expression to be compiled
    * @return Compiled TokenSequencePattern
@@ -177,12 +187,14 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
       return new TokenSequencePattern(string, p.first(), p.second());
 
     } catch (Exception ex) {
-      throw new RuntimeException(ex);
+      throw new RuntimeException("When parsing " + string + "\t\t" + ex);
     }
   }
 
   /**
-   * Compiles a sequence of regular expression a TokenSequencePattern using the default environment
+   * Compiles a sequence of regular expressions into a TokenSequencePattern
+   * using the default environment.
+   *
    * @param strings List of regular expression to be compiled
    * @return Compiled TokenSequencePattern
    */
@@ -192,7 +204,9 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
   }
 
   /**
-   * Compiles a sequence of regular expression a TokenSequencePattern using the specified environment
+   * Compiles a sequence of regular expressions into a TokenSequencePattern
+   * using the specified environment.
+   *
    * @param env Environment to use
    * @param strings List of regular expression to be compiled
    * @return Compiled TokenSequencePattern
@@ -200,7 +214,7 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
   public static TokenSequencePattern compile(Env env, String... strings)
   {
     try {
-      List<SequencePattern.PatternExpr> patterns = new ArrayList<SequencePattern.PatternExpr>();
+      List<SequencePattern.PatternExpr> patterns = new ArrayList<>();
       for (String string:strings) {
         // TODO: Check token sequence parser?
         SequencePattern.PatternExpr pattern = env.parser.parseSequence(env, string);
@@ -213,17 +227,72 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
     }
   }
 
+  /**
+   * Compiles a PatternExpr into a TokenSequencePattern.
+   *
+   * @param nodeSequencePattern A sequence pattern expression (before translation into a NFA)
+   * @return Compiled TokenSequencePattern
+   */
   public static TokenSequencePattern compile(SequencePattern.PatternExpr nodeSequencePattern)
   {
     return new TokenSequencePattern(null, nodeSequencePattern);
   }
 
   /**
-   * Returns a TokenSequenceMatcher that can be used to match this pattern against the specified list of tokens
+   * Returns a TokenSequenceMatcher that can be used to match this pattern
+   * against the specified list of tokens.
+   *
    * @param tokens List of tokens to match against
    * @return TokenSequenceMatcher
    */
+  @Override
   public TokenSequenceMatcher getMatcher(List<? extends CoreMap> tokens) {
     return new TokenSequenceMatcher(this, tokens);
   }
+
+  /**
+   * Returns a TokenSequenceMatcher that can be used to match this pattern
+   * against the specified list of tokens.
+   *
+   * @param tokens List of tokens to match against
+   * @return TokenSequenceMatcher
+   */
+  public TokenSequenceMatcher matcher(List<? extends CoreMap> tokens) {
+    return getMatcher(tokens);
+  }
+
+  /** Returns a String representation of the TokenSequencePattern.
+   *
+   * @return A String representation of the TokenSequencePattern
+   */
+  @Override
+  public String toString(){
+    return this.pattern();
+  }
+
+
+  /**
+   * Create a multi-pattern matcher for matching across multiple TokensRegex patterns.
+   * @param patterns Collection of input patterns
+   * @return a MultiPatternMatcher
+   */
+  public static MultiPatternMatcher<CoreMap> getMultiPatternMatcher(Collection<TokenSequencePattern> patterns) {
+    return new MultiPatternMatcher<>(
+            new MultiPatternMatcher.BasicSequencePatternTrigger<>(
+                    new CoreMapNodePatternTrigger(patterns)
+            ), patterns);
+  }
+
+  /**
+   * Create a multi-pattern matcher for matching across multiple TokensRegex patterns.
+   * @param patterns input patterns
+   * @return a MultiPatternMatcher
+   */
+  public static MultiPatternMatcher<CoreMap> getMultiPatternMatcher(TokenSequencePattern... patterns) {
+    return new MultiPatternMatcher<>(
+            new MultiPatternMatcher.BasicSequencePatternTrigger<>(
+                    new CoreMapNodePatternTrigger(patterns)
+            ), patterns);
+  }
+
 }

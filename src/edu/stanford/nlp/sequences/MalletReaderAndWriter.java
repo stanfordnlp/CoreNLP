@@ -11,7 +11,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.objectbank.DelimitRegExIterator;
 import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
@@ -48,21 +48,20 @@ public class MalletReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>
       if (num % 1000 == 0) { System.err.print("["+num+"]"); }
       num++;
       
-      List<CoreLabel> words = new ArrayList<CoreLabel>();
+      List<CoreLabel> words = new ArrayList<>();
       
       String[] lines = doc.split("\n");
-      
-      for (int i = 0; i < lines.length; i++) {
-        String line = lines[i];
+
+      for (String line : lines) {
         if (line.trim().length() < 1)
           continue;
         int idx = line.lastIndexOf(" ");
-        if(idx < 0)
-          throw new RuntimeException("Bad line: "+line);
+        if (idx < 0)
+          throw new RuntimeException("Bad line: " + line);
         CoreLabel wi = new CoreLabel();
-        wi.setWord(line.substring(0,idx));
-        wi.set(CoreAnnotations.AnswerAnnotation.class, line.substring(idx+1));
-        wi.set(CoreAnnotations.GoldAnswerAnnotation.class, line.substring(idx+1));
+        wi.setWord(line.substring(0, idx));
+        wi.set(CoreAnnotations.AnswerAnnotation.class, line.substring(idx + 1));
+        wi.set(CoreAnnotations.GoldAnswerAnnotation.class, line.substring(idx + 1));
         words.add(wi);
       }
       return words;

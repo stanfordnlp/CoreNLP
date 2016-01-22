@@ -39,6 +39,8 @@ import edu.stanford.nlp.util.StringUtils;
  */
 public class ChineseDocumentToSentenceProcessor implements Serializable {
 
+  // todo: This class is a mess. We should try to get it out of core
+
   private static final long serialVersionUID = 4054964767812217460L;
 
   private static final Set<Character> fullStopsSet = Generics.newHashSet(Arrays.asList(new Character[]{'\u3002', '\uff01', '\uff1f', '!', '?'}));
@@ -47,13 +49,16 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
   private static final Set<Character> rightMarkSet = Generics.newHashSet(Arrays.asList(new Character[]{'\u201d', '\u2019', '\u300b', '\u300f', '\u3009', '\u300d', '\uff1e', '\uff07', '\uff09', '\'', '"', ')', ']', '>'}));
 
   // private final String normalizationTableFile;
-  private String encoding = "UTF-8";
+
+  private final String encoding = "UTF-8";
   private final List<Pair<String,String>> normalizationTable;
 
 
   public ChineseDocumentToSentenceProcessor() {
     this(null);
   }
+
+  static final Pattern PAIR_PATTERN = Pattern.compile("([^\\s]+)\\s+([^\\s]+)");
 
   /** @param normalizationTableFile A file listing character pairs for
    *     normalization.  Currently the normalization table must be in UTF-8.
@@ -63,12 +68,11 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
   public ChineseDocumentToSentenceProcessor(String normalizationTableFile) {
     // this.normalizationTableFile = normalizationTableFile;
     if (normalizationTableFile != null) {
-      normalizationTable = new ArrayList<Pair<String,String>>();
+      normalizationTable = new ArrayList<>();
       for (String line : ObjectBank.getLineIterator(new File(normalizationTableFile), encoding)) {
-        Pattern pairPattern = Pattern.compile("([^\\s]+)\\s+([^\\s]+)");
-        Matcher pairMatcher = pairPattern.matcher(line);
+        Matcher pairMatcher = PAIR_PATTERN.matcher(line);
         if (pairMatcher.find()) {
-          normalizationTable.add(new Pair<String,String>(pairMatcher.group(1),pairMatcher.group(2)));
+          normalizationTable.add(new Pair<>(pairMatcher.group(1), pairMatcher.group(2)));
         } else {
           System.err.println("Didn't match: "+line);
         }
@@ -98,12 +102,16 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
     return out;
   }
 
+  private static final Pattern WHITEPLUS_PATTERN = Pattern.compile(WHITEPLUS);
+  private static final Pattern START_WHITEPLUS_PATTERN = Pattern.compile("^" + WHITEPLUS);
+  private static final Pattern END_WHITEPLUS_PATTERN = Pattern.compile(WHITEPLUS + "$");
+
   private String normalize(String inputString) {
     if (normalizationTable == null) {
       return inputString;
     }
 
-    Pattern replacePattern = Pattern.compile(WHITEPLUS);
+    Pattern replacePattern = WHITEPLUS_PATTERN;
     Matcher replaceMatcher = replacePattern.matcher(inputString);
     inputString = replaceMatcher.replaceAll(" ");
 
@@ -247,7 +255,7 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
   public static List<String> fromHTML(String inputString) throws IOException {
     //HTMLParser parser = new HTMLParser();
     //return fromPlainText(parser.parse(inputString));
-    List<String> ans = new ArrayList<String>();
+    List<String> ans = new ArrayList<>();
     MyHTMLParser parser = new MyHTMLParser();
     List<String> sents = parser.parse(inputString);
     for (String s : sents) {
@@ -281,7 +289,7 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
 
     char[] content = contentString.toCharArray();
     boolean sentenceEnd = false;
-    List<String> sentenceList = new ArrayList<String>();
+    List<String> sentenceList = new ArrayList<>();
 
     int lastCh = -1;
     for (Character c : content) {
@@ -341,15 +349,15 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
   private static String removeWhitespace(String str, boolean segmented) {
     if (str.length() > 0) {
       //System.out.println("Add: "+sentenceString);
-      Pattern replacePattern = Pattern.compile("^" + WHITEPLUS);
+      Pattern replacePattern = START_WHITEPLUS_PATTERN;
       Matcher replaceMatcher = replacePattern.matcher(str);
       str = replaceMatcher.replaceAll("");
-      replacePattern = Pattern.compile(WHITEPLUS + "$");
+      replacePattern = END_WHITEPLUS_PATTERN;
       replaceMatcher = replacePattern.matcher(str);
       str = replaceMatcher.replaceAll("");
 
       if ( ! segmented) {
-        replacePattern = Pattern.compile(WHITEPLUS);
+        replacePattern = WHITEPLUS_PATTERN;
         replaceMatcher = replacePattern.matcher(str);
         str = replaceMatcher.replaceAll("");
       }
@@ -450,7 +458,7 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
       text = text.replaceAll("<\\?","<");
       StringReader r = new StringReader(text);
       textBuffer = new StringBuffer(200);
-      sentences = new ArrayList<String>();
+      sentences = new ArrayList<>();
       new ParserDelegator().parse(r, this, true);
       return sentences;
     }

@@ -19,7 +19,7 @@ import java.util.List;
  * for custom
  * document formats or to do a custom job of tokenization. BasicDocument should
  * only be used for documents that are small enough to store in memory.
- * <p/>
+ *
  * The easiest way to use BasicDocuments is to construct them and call an init
  * method in the same line (we use init methods instead of constructors because
  * they're inherited and allow subclasses to have other more specific constructors).
@@ -46,7 +46,7 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
   /**
    * Label(s) for this document.
    */
-  protected final List<L> labels = new ArrayList<L>();
+  protected final List<L> labels = new ArrayList<>();
 
   /**
    * TokenizerFactory used to convert the text into words inside
@@ -91,7 +91,7 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
    * for convenience (so it's more like a constructor, but inherited).
    */
   public static <L> BasicDocument<L> init(String text, String title, boolean keepOriginalText) {
-    BasicDocument<L> basicDocument = new BasicDocument<L>();
+    BasicDocument<L> basicDocument = new BasicDocument<>();
     // initializes the List of labels and sets the title
     basicDocument.setTitle(title);
 
@@ -171,7 +171,7 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
    *
    * @see #init(String,String,boolean)
    */
-  public BasicDocument<L> init(File textFile, String title, boolean keepOriginalText) throws FileNotFoundException, IOException {
+  public BasicDocument<L> init(File textFile, String title, boolean keepOriginalText) throws IOException {
     Reader in = DocumentReader.getReader(textFile);
     BasicDocument<L> bd = init(in, title, keepOriginalText);
     in.close();
@@ -211,26 +211,26 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
   /**
    * Calls init(textURL,title,true)
    */
-  public BasicDocument<L> init(URL textURL, String title) throws FileNotFoundException, IOException {
+  public BasicDocument<L> init(URL textURL, String title) throws IOException {
     return init(textURL, title, true);
   }
 
   /**
    * Calls init(textURL,textFile.toExternalForm(),keepOriginalText)
    */
-  public BasicDocument<L> init(URL textURL, boolean keepOriginalText) throws FileNotFoundException, IOException {
+  public BasicDocument<L> init(URL textURL, boolean keepOriginalText) throws IOException {
     return init(textURL, textURL.toExternalForm(), keepOriginalText);
   }
 
   /**
    * Calls init(textURL,textURL.toExternalForm(),true)
    */
-  public BasicDocument<L> init(URL textURL) throws FileNotFoundException, IOException {
+  public BasicDocument<L> init(URL textURL) throws IOException {
     return init(textURL, textURL.toExternalForm(), true);
   }
 
   /**
-   * Inits a new BasicDocument with the given list of words and title.
+   * Initializes a new BasicDocument with the given list of words and title.
    */
   public BasicDocument<L> init(List<? extends Word> words, String title) {
     // initializes the List of labels and sets the title
@@ -268,6 +268,7 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
   /**
    * Returns <tt>this</tt> (the features are the list of words).
    */
+  @Override
   public Collection<Word> asFeatures() {
     return this;
   }
@@ -276,6 +277,7 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
    * Returns the first label for this Document, or null if none have been
    * set.
    */
+  @Override
   public L label() {
     return (labels.size() > 0) ? labels.get(0) : null;
   }
@@ -284,6 +286,7 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
    * Returns the complete List of labels for this Document.
    * This is an empty collection if none have been set.
    */
+  @Override
   public Collection<L> labels() {
     return labels;
   }
@@ -322,6 +325,7 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
    * Returns the title of this document. The title may be empty ("") but will
    * never be null.
    */
+  @Override
   public String title() {
     return (title);
   }
@@ -365,8 +369,8 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
    * new Document that's like the old document but
    * can be filled with new text (e.g. if you're transforming
    * the contents non-destructively).
-   * <p/>
-   * <p>Subclasses that want to preserve extra state should
+   *
+   * Subclasses that want to preserve extra state should
    * override this method and add the extra state to the new document before
    * returning it. The new BasicDocument is created by calling
    * <tt>getClass().newInstance()</tt> so it should be of the correct subclass,
@@ -381,6 +385,7 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
    * if(blankDocument instanceof NumberedDocument) {
    *     ((NumberedDocument)blankDocument).setNumber(getNumber());</pre>
    */
+  @Override
   public <OUT> Document<L, Word, OUT> blankDocument() {
     BasicDocument<L> bd;
 
@@ -388,7 +393,7 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
     try {
       bd = ErasureUtils.<BasicDocument<L>>uncheckedCast(getClass().newInstance());
     } catch (Exception e) {
-      bd = new BasicDocument<L>();
+      bd = new BasicDocument<>();
     }
 
     // copies over basic meta-data
@@ -415,8 +420,8 @@ public class BasicDocument<L> extends ArrayList<Word> implements Document<L, Wor
    * by spaces. Specifically, each element that implements {@link HasWord}
    * has its
    * {@link HasWord#word} printed, and other elements are skipped.
-   * <p/>
-   * <p>Subclasses that maintain additional information may which to
+   *
+   * Subclasses that maintain additional information may which to
    * override this method.</p>
    */
   public String presentableText() {

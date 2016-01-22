@@ -1,6 +1,6 @@
 package edu.stanford.nlp.objectbank;
 
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.AbstractIterator;
 
 import java.io.BufferedReader;
@@ -27,7 +27,7 @@ public class DelimitRegExIterator<T> extends AbstractIterator<T> {
 
   //TODO: not sure if this is the best way to name things...
   public static DelimitRegExIterator<String> defaultDelimitRegExIterator(Reader in, String delimiter) {
-    return new DelimitRegExIterator<String>(in, delimiter, new IdentityFunction<String>());
+    return new DelimitRegExIterator<>(in, delimiter, new IdentityFunction<>());
   }
 
   public DelimitRegExIterator(Reader r, String delimiter, Function<String,T> op) {
@@ -99,7 +99,7 @@ public class DelimitRegExIterator<T> extends AbstractIterator<T> {
    * given Reader, splits on the specified delimiter, applies op, then returns the result.
    */
   public static <T> IteratorFromReaderFactory<T> getFactory(String delim, Function<String,T> op) {
-    return new DelimitRegExIteratorFactory<T>(delim, op);
+    return new DelimitRegExIteratorFactory<>(delim, op);
   }
 
   public static class DelimitRegExIteratorFactory<T> implements IteratorFromReaderFactory<T>, Serializable {
@@ -110,7 +110,7 @@ public class DelimitRegExIterator<T> extends AbstractIterator<T> {
     private final Function<String,T> op;
 
     public static DelimitRegExIteratorFactory<String> defaultDelimitRegExIteratorFactory(String delim) {
-      return new DelimitRegExIteratorFactory<String>(delim, new IdentityFunction<String>());
+      return new DelimitRegExIteratorFactory<>(delim, new IdentityFunction<>());
     }
 
     public DelimitRegExIteratorFactory(String delim, Function<String,T> op) {
@@ -119,7 +119,7 @@ public class DelimitRegExIterator<T> extends AbstractIterator<T> {
     }
 
     public Iterator<T> getIterator(Reader r) {
-      return new DelimitRegExIterator<T>(r, delim, op);
+      return new DelimitRegExIterator<>(r, delim, op);
     }
 
   }

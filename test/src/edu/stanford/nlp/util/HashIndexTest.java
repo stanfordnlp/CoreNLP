@@ -69,7 +69,7 @@ public class HashIndexTest extends TestCase  {
 
   public void testToArray() {
     String[] strs = new String[2];
-    strs = index.toArray(strs);
+    strs = index.objectsList().toArray(strs);
     assertEquals("The", strs[0]);
     assertEquals("Beast", strs[1]);
     assertEquals(2, strs.length);
@@ -81,21 +81,49 @@ public class HashIndexTest extends TestCase  {
     list.add("B");
     list.add("A");
     list.add("C");
-    HashIndex<String> index = new HashIndex<String>(list);
-    assertEquals(3, index.size());
-    assertTrue(index.contains("A"));
-    assertEquals(0, index.indexOf("A"));
-    assertEquals(1, index.indexOf("B"));
-    assertEquals(2, index.indexOf("C"));
-    assertEquals("A", index.get(0));
-    index = index.unmodifiableView();
-    assertEquals(3, index.size());
-    assertTrue(index.contains("A"));
-    assertEquals(0, index.indexOf("A"));
-    assertEquals(1, index.indexOf("B"));
-    assertEquals(2, index.indexOf("C"));
-    assertEquals("A", index.get(0));
-    assertEquals(-1, index.indexOf("D", true));
+    HashIndex<String> index4 = new HashIndex<String>(list);
+    HashIndex<String> index5 = new HashIndex<String>();
+    index5.addAll(list);
+    assertEquals("Equality failure", index4, index5);
+    index5.addToIndex("D");
+    index5.addToIndex("E");
+    index5.indexOf("F");
+    index5.addAll(list);
+    assertEquals(5, index5.size());
+    assertEquals(3, index4.size());
+    assertTrue(index4.contains("A"));
+    assertEquals(0, index4.indexOf("A"));
+    assertEquals(1, index4.indexOf("B"));
+    assertEquals(2, index4.indexOf("C"));
+    assertEquals("A", index4.get(0));
+    Index<String> index4u = index4.unmodifiableView();
+    assertEquals(3, index4u.size());
+    assertTrue(index4u.contains("A"));
+    assertEquals(0, index4u.indexOf("A"));
+    assertEquals(1, index4u.indexOf("B"));
+    assertEquals(2, index4u.indexOf("C"));
+    assertEquals("A", index4u.get(0));
+    assertEquals(-1, index4u.addToIndex("D"));
+    boolean okay = false;
+    try {
+      index4u.unlock();
+    } catch (UnsupportedOperationException uoe) {
+      okay = true;
+    } finally {
+      assertTrue(okay);
+    }
   }
 
+
+  public void testCopyConstructor() {
+    Index<String> test = new HashIndex<String>();
+    test.add("Beauty");
+    test.add("And");
+    test.add("The");
+    test.add("Beast");
+
+
+    HashIndex<String> copy = new HashIndex<String>(test);
+    assertEquals(test, copy);
+  }
 }

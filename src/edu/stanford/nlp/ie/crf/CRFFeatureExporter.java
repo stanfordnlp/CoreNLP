@@ -8,24 +8,26 @@ import edu.stanford.nlp.util.StringUtils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
 /**
- * Exports CRF features for use with other programs
- * - Usage: CRFFeatureExporter -prop <crfClassiferPropFile> -trainFile <input> -exportFeatures <output>
+ * Exports CRF features for use with other programs.
+ * Usage: CRFFeatureExporter -prop crfClassifierPropFile -trainFile inputFile -exportFeatures outputFile
  * - Output file is automatically gzipped/b2zipped if ending in gz/bz2
  * - bzip2 requires that bzip2 is available via command line
  * - Currently exports features in a format that can be read by a modified crfsgd
  *   (crfsgd assumes features are gzipped)
  * TODO: Support other formats (like crfsuite)
+ *
  * @author Angel Chang
  */
 public class CRFFeatureExporter<IN extends CoreMap> {
   private char delimiter = '\t';
-  private static String eol = System.getProperty("line.separator");
+  private static final String eol = System.getProperty("line.separator");
   private CRFClassifier<IN> classifier;
 
   public CRFFeatureExporter(CRFClassifier<IN> classifier)
@@ -54,8 +56,8 @@ public class CRFFeatureExporter<IN extends CoreMap> {
    * Constructs a big string representing the input list of CoreLabel,
    *  with one line per token using the following format
    * word label feat1 feat2 ...
-   *  (where each space is actually a tab)
-   * Assume that CoreLabel has both TextAnnotation and AnswerAnnotation
+   *  (where each space is actually a tab).
+   * Assumes that CoreLabel has both TextAnnotation and AnswerAnnotation.
    * @param document List of CoreLabel
    *        (does not have to represent a "document", just a sequence of text,
    *         like a sentence or a paragraph)
@@ -74,12 +76,13 @@ public class CRFFeatureExporter<IN extends CoreMap> {
       sb.append(delimiter);
       sb.append(token.get(CoreAnnotations.AnswerAnnotation.class));
 
-      CRFDatum d = classifier.makeDatum(document, j, classifier.featureFactory);
+      CRFDatum<List<String>,CRFLabel> d = classifier.makeDatum(document, j, classifier.featureFactories);
 
-      List features = d.asFeatures();
-      for (int k = 0, fSize = features.size(); k < fSize; k++) {
-        Collection<String> cliqueFeatures = (Collection<String>) features.get(k);
-        for (String feat: cliqueFeatures) {
+      List<List<String>> features = d.asFeatures();
+      for (Collection<String> cliqueFeatures : features) {
+        List<String> sortedFeatures = new ArrayList<>(cliqueFeatures);
+        Collections.sort(sortedFeatures);
+        for (String feat : sortedFeatures) {
           feat = ubPrefixFeatureString(feat);
           sb.append(delimiter);
           sb.append(feat);
@@ -95,11 +98,12 @@ public class CRFFeatureExporter<IN extends CoreMap> {
 
   /**
    * Output features that have already been converted into features
-   *  (using documentToDataAndLabels) in format suitable for CRFSuite
+   *  (using documentToDataAndLabels) in format suitable for CRFSuite.
    * Format is with one line per token using the following format
    * label feat1 feat2 ...
    *  (where each space is actually a tab)
-   * Each document is separated by an empty line
+   * Each document is separated by an empty line.
+   *
    * @param exportFile file to export the features to
    * @param docsData array of document features
    * @param labels correct labels indexed by document, and position within document
@@ -136,7 +140,8 @@ public class CRFFeatureExporter<IN extends CoreMap> {
    * word label feat1 feat2 ...
    *  (where each space is actually a tab)
    * Each document is separated by an empty line
-   * This format is suitable for modified crfsgd
+   * This format is suitable for modified crfsgd.
+   *
    * @param exportFile file to export the features to
    * @param documents input collection of documents
    */
@@ -156,7 +161,7 @@ public class CRFFeatureExporter<IN extends CoreMap> {
   public static void main(String[] args) throws Exception {
     StringUtils.printErrInvocationString("CRFFeatureExporter", args);
     Properties props = StringUtils.argsToProperties(args);
-    CRFClassifier crf = new CRFClassifier(props);
+    CRFClassifier<CoreLabel> crf = new CRFClassifier<>(props);
     String inputFile = crf.flags.trainFile;
     if (inputFile == null) {
       System.err.println("Please provide input file using -trainFile");
@@ -167,7 +172,7 @@ public class CRFFeatureExporter<IN extends CoreMap> {
       System.err.println("Please provide output file using -exportFeatures");
       System.exit(-1);
     }
-    CRFFeatureExporter featureExporter = new CRFFeatureExporter(crf);
+    CRFFeatureExporter<CoreLabel> featureExporter = new CRFFeatureExporter<>(crf);
     Collection<List<CoreLabel>> docs =
       crf.makeObjectBankFromFile(inputFile, crf.makeReaderAndWriter());
     crf.makeAnswerArraysAndTagIndex(docs);

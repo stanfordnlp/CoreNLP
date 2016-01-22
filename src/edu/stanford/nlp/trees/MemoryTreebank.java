@@ -78,7 +78,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
    */
   public MemoryTreebank(TreeReaderFactory trf) {
     super(trf);
-    parseTrees = new ArrayList<Tree>();
+    parseTrees = new ArrayList<>();
   }
 
 
@@ -91,7 +91,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
    */
   public MemoryTreebank(TreeReaderFactory trf, String encoding) {
     super(trf, encoding);
-    parseTrees = new ArrayList<Tree>();
+    parseTrees = new ArrayList<>();
   }
 
   /**
@@ -128,7 +128,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
    */
   public MemoryTreebank(int initialCapacity, TreeReaderFactory trf) {
     super(initialCapacity, trf);
-    parseTrees = new ArrayList<Tree>(initialCapacity);
+    parseTrees = new ArrayList<>(initialCapacity);
   }
 
 
@@ -169,7 +169,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
       String info = bits[2];
       CollectionValuedMap<Integer,String> cvm = srlMap.get(filename);
       if (cvm == null) {
-        cvm = new CollectionValuedMap<Integer,String>();
+        cvm = new CollectionValuedMap<>();
         srlMap.put(filename, cvm);
       }
       cvm.add(treeNum, info);
@@ -369,8 +369,8 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
    */
   @Override
   public void apply(TreeVisitor tp) {
-    for (int i = 0, size = parseTrees.size(); i < size; i++) {
-      tp.visitTree(parseTrees.get(i));
+    for (Tree parseTree : parseTrees) {
+      tp.visitTree(parseTree);
     }
     // or could do as Iterator but slower
     // Iterator iter = parseTrees.iterator();
@@ -474,11 +474,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
    */
   public static void main(String[] args) {
     Timing.startTime();
-    Treebank treebank = new MemoryTreebank(new TreeReaderFactory() {
-      public TreeReader newTreeReader(Reader in) {
-        return new PennTreeReader(in);
-      }
-    });
+    Treebank treebank = new MemoryTreebank(in -> new PennTreeReader(in));
     treebank.loadPath(args[0]);
     Timing.endTime();
     System.out.println(treebank);

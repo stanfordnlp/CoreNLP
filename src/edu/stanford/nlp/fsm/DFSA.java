@@ -12,7 +12,7 @@ import java.util.*;
  * without epsilon transitions.
  *
  * @author Dan Klein
- * @author Michel Galley (AT&T FSM library format printing)
+ * @author Michel Galley (AT&amp;T FSM library format printing)
  * @author Sarah Spikes (sdspikes@cs.stanford.edu) - cleanup and filling in types
  */
 public final class DFSA<T,S> implements Scored {
@@ -30,10 +30,15 @@ public final class DFSA<T,S> implements Scored {
     this.score = Double.NaN;
   }
 
-  public double score;
+  private double score;
 
+  @Override
   public double score() {
     return score;
+  }
+
+  public void setScore(double score) {
+    this.score = score;
   }
 
   public DFSAState<T,S> initialState() {
@@ -46,7 +51,7 @@ public final class DFSA<T,S> implements Scored {
 
   public Set<DFSAState<T, S>> states() {
     Set<DFSAState<T, S>> visited = Generics.newHashSet();
-    List<DFSAState<T,S>> toVisit = new ArrayList<DFSAState<T,S>>();
+    List<DFSAState<T,S>> toVisit = new ArrayList<>();
     toVisit.add(initialState());
     exploreStates(toVisit, visited);
     return visited;
@@ -94,7 +99,7 @@ public final class DFSA<T,S> implements Scored {
   }
 
   public void printAttFsmFormat(Writer w) throws IOException {
-    Queue<DFSAState<T,S>> q = new LinkedList<DFSAState<T,S>>();
+    Queue<DFSAState<T,S>> q = new LinkedList<>();
     Set<DFSAState<T,S>> visited = Generics.newHashSet();
     q.offer(initialState);
     while(q.peek() != null) {
@@ -106,7 +111,7 @@ public final class DFSA<T,S> implements Scored {
         w.write(state.toString()+"\t"+state.score()+"\n");
         continue;
       }
-      TreeSet<T> inputs = new TreeSet<T>(state.continuingInputs());
+      TreeSet<T> inputs = new TreeSet<>(state.continuingInputs());
       for (T input : inputs) {
         DFSATransition<T, S> transition = state.transition(input);
         DFSAState<T,S> target = transition.target();
@@ -149,4 +154,5 @@ public final class DFSA<T,S> implements Scored {
   public static <T, S> void printTrieAsRules(DFSA<T, S> dfsa, Writer w) throws IOException {
     printTrieAsRulesHelper(dfsa.initialState(), dfsa.dfsaID.toString(), w);
   }
+
 }

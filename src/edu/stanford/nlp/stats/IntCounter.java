@@ -14,12 +14,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import edu.stanford.nlp.util.ErasureUtils;
-import edu.stanford.nlp.util.Factory;
-import edu.stanford.nlp.util.Filter;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.MapFactory;
-import edu.stanford.nlp.util.MutableInteger;
+import edu.stanford.nlp.util.*;
+import java.util.function.Predicate;
 import edu.stanford.nlp.util.logging.PrettyLogger;
 import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
 
@@ -52,7 +48,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
   /**
    * Default comparator for breaking ties in argmin and argmax.
    */
-  private static final Comparator<Object> naturalComparator = new NaturalComparator<Object>();
+  private static final Comparator<Object> naturalComparator = new NaturalComparator<>();
   private static final long serialVersionUID = 4;
 
   // CONSTRUCTORS
@@ -118,21 +114,21 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
    * given Filter. Passing in a filter that always returns true is equivalent
    * to calling {@link #totalCount()}.
    */
-  public int totalIntCount(Filter<E> filter) {
+  public int totalIntCount(Predicate<E> filter) {
     int total = 0;
     for (E key : map.keySet()) {
-      if (filter.accept(key)) {
+      if (filter.test(key)) {
         total += getIntCount(key);
       }
     }
     return (total);
   }
 
-  public double totalDoubleCount(Filter<E> filter) {
+  public double totalDoubleCount(Predicate<E> filter) {
     return totalIntCount(filter);
   }
 
-  public double totalCount(Filter<E> filter) {
+  public double totalCount(Predicate<E> filter) {
     return totalDoubleCount(filter);
   }
 
@@ -513,7 +509,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
   public String toString(NumberFormat nf, String preAppend, String postAppend, String keyValSeparator, String itemSeparator) {
     StringBuilder sb = new StringBuilder();
     sb.append(preAppend);
-    List<E> list = new ArrayList<E>(map.keySet());
+    List<E> list = new ArrayList<>(map.keySet());
     try {
       Collections.sort((List)list); // see if it can be sorted
     } catch (Exception e) {
@@ -536,7 +532,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
   public String toString(NumberFormat nf) {
     StringBuilder sb = new StringBuilder();
     sb.append("{");
-    List<E> list = new ArrayList<E>(map.keySet());
+    List<E> list = new ArrayList<>(map.keySet());
     try {
       Collections.sort((List)list); // see if it can be sorted
     } catch (Exception e) {
@@ -556,7 +552,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
 
   @Override
   public Object clone() {
-    return new IntCounter<E>(this);
+    return new IntCounter<>(this);
   }
 
   // EXTRA CALCULATION METHODS
@@ -735,7 +731,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
       private static final long serialVersionUID = 7470763055803428477L;
 
       public Counter<E> create() {
-        return new IntCounter<E>(getMapFactory());
+        return new IntCounter<>(getMapFactory());
       }
     };
   }

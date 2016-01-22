@@ -1,0 +1,52 @@
+trainFile = /u/nlp/data/ner/goodClassifiers/data/muc67.jenny.train
+testFile = /u/nlp/data/ner/goodClassifiers/data/muc67.jenny.test
+serializeTo = english.muc.7class.nodistsim.crf.ser.gz
+
+wordFunction = edu.stanford.nlp.process.AmericanizeFunction
+
+distSimLexicon = /u/nlp/data/pos_tags_are_useless/egw.bnc.200
+useDistSim = false
+
+map = word=0,answer=1
+
+saveFeatureIndexToDisk = true
+
+useClassFeature=true
+useWord=true
+#useWordPairs=true
+useNGrams=true
+noMidNGrams=true
+maxNGramLeng=6
+usePrev=true
+useNext=true
+#useTags=true
+#useWordTag=true
+useLongSequences=true
+useSequences=true
+usePrevSequences=true
+maxLeft=1
+useTypeSeqs=true
+useTypeSeqs2=true
+useTypeySequences=true
+useOccurrencePatterns=true
+useLastRealWord=true
+useNextRealWord=true
+#useReverse=false
+normalize=true
+# normalizeTimex=true
+wordShape=chris2useLC
+useDisjunctive=true
+disjunctionWidth=5
+#useDisjunctiveShapeInteraction=true
+
+type=crf
+
+readerAndWriter=edu.stanford.nlp.sequences.ColumnDocumentReaderAndWriter
+
+useObservedSequencesOnly=true
+
+useQN = true
+QNsize = 25
+
+# makes it go faster
+featureDiffThresh=0.05

@@ -60,16 +60,16 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar {
           continue;
         }
 
-        Pair<Integer, String> iTW = new Pair<Integer, String>(wordIndex.indexOf(m.group(1), true), m.group(2));
+        Pair<Integer, String> iTW = new Pair<>(wordIndex.addToIndex(m.group(1)), m.group(2));
         double score = Double.parseDouble(m.group(5));
 
         List<Triple<Integer, String, Double>> tripleList = hashMap.get(iTW);
         if (tripleList == null) {
-          tripleList = new ArrayList<Triple<Integer, String, Double>>();
+          tripleList = new ArrayList<>();
           hashMap.put(iTW, tripleList);
         }
 
-        tripleList.add(new Triple<Integer, String, Double>(wordIndex.indexOf(m.group(3), true), m.group(4), score));
+        tripleList.add(new Triple<>(wordIndex.addToIndex(m.group(3)), m.group(4), score));
       }
     } catch (IOException e) {
       throw new RuntimeException("Problem reading similar words file!");
@@ -88,7 +88,7 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar {
     this.lex = lex;
   }
 
-  private ClassicCounter<String> statsCounter = new ClassicCounter<String>();
+  private ClassicCounter<String> statsCounter = new ClassicCounter<>();
 
   static {
     System.runFinalizersOnExit(true);
@@ -189,11 +189,11 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar {
     List<Triple<Integer, String, Double>> sim2head = null;
     List<Triple<Integer, String, Double>> sim2arg = null;
 
-    sim2arg = simArgMap.get(new Pair<Integer,String>(dependency.arg.word, stringBasicCategory(dependency.arg.tag)));
-    sim2head = simHeadMap.get(new Pair<Integer,String>(dependency.head.word, stringBasicCategory(dependency.head.tag)));
+    sim2arg = simArgMap.get(new Pair<>(dependency.arg.word, stringBasicCategory(dependency.arg.tag)));
+    sim2head = simHeadMap.get(new Pair<>(dependency.head.word, stringBasicCategory(dependency.head.tag)));
 
-    List<Integer> simArg = new ArrayList<Integer>();
-    List<Integer> simHead= new ArrayList<Integer>();
+    List<Integer> simArg = new ArrayList<>();
+    List<Integer> simHead= new ArrayList<>();
 
     if (sim2arg != null) {
       for (Triple<Integer,String,Double> t : sim2arg) {
@@ -284,8 +284,8 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar {
     List<Triple<Integer, String, Double>> sim2head = null;
     List<Triple<Integer, String, Double>> sim2arg = null;
 
-    sim2arg = simArgMap.get(new Pair<Integer,String>(dep.arg.word, stringBasicCategory(dep.arg.tag)));
-    sim2head = simHeadMap.get(new Pair<Integer,String>(dep.head.word, stringBasicCategory(dep.head.tag)));
+    sim2arg = simArgMap.get(new Pair<>(dep.arg.word, stringBasicCategory(dep.arg.tag)));
+    sim2head = simHeadMap.get(new Pair<>(dep.head.word, stringBasicCategory(dep.head.tag)));
 
     if (sim2head == null && sim2arg == null) {
       return regProb;

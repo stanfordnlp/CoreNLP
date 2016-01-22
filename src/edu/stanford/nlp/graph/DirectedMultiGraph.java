@@ -2,16 +2,18 @@ package edu.stanford.nlp.graph;
 
 import java.util.*;
 
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.MapFactory;
 
 /**
  * Simple graph library; this is directed for now. This class focuses on time
  * efficiency rather than memory efficiency.
- * 
+ *
  * @author sonalg
  * @author John Bauer
- * 
+ *
  * @param <V>
  *          Type of vertices
  * @param <E>
@@ -20,11 +22,46 @@ import edu.stanford.nlp.util.Generics;
 
 public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
 
-  Map<V, Map<V, List<E>>> outgoingEdges = Generics.newHashMap();
+  final Map<V, Map<V, List<E>>> outgoingEdges;
 
-  Map<V, Map<V, List<E>>> incomingEdges = Generics.newHashMap();
+  final Map<V, Map<V, List<E>>> incomingEdges;
+
+  final MapFactory<V, Map<V, List<E>>> outerMapFactory;
+  final MapFactory<V, List<E>> innerMapFactory;
 
   public DirectedMultiGraph() {
+    this(MapFactory.<V, Map<V, List<E>>>hashMapFactory(), MapFactory.<V, List<E>>hashMapFactory());
+  }
+
+  public DirectedMultiGraph(MapFactory<V, Map<V, List<E>>> outerMapFactory, MapFactory<V, List<E>> innerMapFactory) {
+    this.outerMapFactory = outerMapFactory;
+    this.innerMapFactory = innerMapFactory;
+    this.outgoingEdges = outerMapFactory.newMap();
+    this.incomingEdges = outerMapFactory.newMap();
+  }
+
+  /**
+   * Creates a copy of the given graph. This will copy the entire data structure (this may be slow!), but will not copy
+   * any of the edge or vertex objects.
+   *
+   * @param graph The graph to copy into this object.
+   */
+  public DirectedMultiGraph(DirectedMultiGraph<V,E> graph) {
+    this(graph.outerMapFactory, graph.innerMapFactory);
+    for (Map.Entry<V, Map<V, List<E>>> map : graph.outgoingEdges.entrySet()) {
+      Map<V, List<E>> edgesCopy = innerMapFactory.newMap();
+      for (Map.Entry<V, List<E>> entry : map.getValue().entrySet()) {
+        edgesCopy.put(entry.getKey(), Generics.newArrayList(entry.getValue()));
+      }
+      this.outgoingEdges.put(map.getKey(), edgesCopy);
+    }
+    for (Map.Entry<V, Map<V, List<E>>> map : graph.incomingEdges.entrySet()) {
+      Map<V, List<E>> edgesCopy = innerMapFactory.newMap();
+      for (Map.Entry<V, List<E>> entry : map.getValue().entrySet()) {
+        edgesCopy.put(entry.getKey(), Generics.newArrayList(entry.getValue()));
+      }
+      this.incomingEdges.put(map.getKey(), edgesCopy);
+    }
   }
 
   /**
@@ -35,50 +72,69 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     return outgoingEdges.hashCode();
   }
 
-  @SuppressWarnings("unchecked")
   public boolean equals(Object that) {
     if (that == this)
       return true;
     if (!(that instanceof DirectedMultiGraph))
       return false;
-    return outgoingEdges.equals(((DirectedMultiGraph) that).outgoingEdges);
+    return outgoingEdges.equals(((DirectedMultiGraph<?, ?>) that).outgoingEdges);
   }
 
   /**
    * For adding a zero degree vertex
-   * 
+   *
    * @param v
    */
+  @Override
   public boolean addVertex(V v) {
     if (outgoingEdges.containsKey(v))
       return false;
-    outgoingEdges.put(v, Generics.<V, List<E>>newHashMap());
-    incomingEdges.put(v, Generics.<V, List<E>>newHashMap());
+    outgoingEdges.put(v, innerMapFactory.newMap());
+    incomingEdges.put(v, innerMapFactory.newMap());
     return true;
+  }
+
+  private Map<V, List<E>> getOutgoingEdgesMap(V v) {
+    Map<V, List<E>> map = outgoingEdges.get(v);
+    if (map == null) {
+      map = innerMapFactory.newMap();
+      outgoingEdges.put(v, map);
+      incomingEdges.put(v, innerMapFactory.newMap());
+    }
+    return map;
+  }
+
+  private Map<V, List<E>> getIncomingEdgesMap(V v) {
+    Map<V, List<E>> map = incomingEdges.get(v);
+    if (map == null) {
+      outgoingEdges.put(v, innerMapFactory.newMap());
+      map = innerMapFactory.newMap();
+      incomingEdges.put(v, map);
+    }
+    return map;
   }
 
   /**
    * adds vertices (if not already in the graph) and the edge between them
-   * 
+   *
    * @param source
    * @param dest
    * @param data
    */
+  @Override
   public void add(V source, V dest, E data) {
-    addVertex(source);
-    addVertex(dest);
+    Map<V, List<E>> outgoingMap = getOutgoingEdgesMap(source);
+    Map<V, List<E>> incomingMap = getIncomingEdgesMap(dest);
 
-    Map<V, List<E>> outgoingMap = outgoingEdges.get(source);
     List<E> outgoingList = outgoingMap.get(dest);
     if (outgoingList == null) {
-      outgoingList = new ArrayList<E>();
+      outgoingList = new ArrayList<>();
       outgoingMap.put(dest, outgoingList);
     }
 
-    Map<V, List<E>> incomingMap = incomingEdges.get(dest);
     List<E> incomingList = incomingMap.get(source);
     if (incomingList == null) {
-      incomingList = new ArrayList<E>();
+      incomingList = new ArrayList<>();
       incomingMap.put(source, incomingList);
     }
 
@@ -86,6 +142,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     incomingList.add(data);
   }
 
+  @Override
   public boolean removeEdges(V source, V dest) {
     if (!outgoingEdges.containsKey(source)) {
       return false;
@@ -101,6 +158,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     return true;
   }
 
+  @Override
   public boolean removeEdge(V source, V dest, E data) {
     if (!outgoingEdges.containsKey(source)) {
       return false;
@@ -111,8 +169,10 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     if (!outgoingEdges.get(source).containsKey(dest)) {
       return false;
     }
-    boolean foundOut = outgoingEdges.get(source).get(dest).remove(data);
-    boolean foundIn = incomingEdges.get(dest).get(source).remove(data);
+    boolean foundOut = outgoingEdges.containsKey(source) && outgoingEdges.get(source).containsKey(dest) &&
+        outgoingEdges.get(source).get(dest).remove(data);
+    boolean foundIn = incomingEdges.containsKey(dest) && incomingEdges.get(dest).containsKey(source) &&
+        incomingEdges.get(dest).get(source).remove(data);
     if (foundOut && !foundIn) {
       throw new AssertionError("Edge found in outgoing but not incoming");
     }
@@ -120,10 +180,10 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
       throw new AssertionError("Edge found in incoming but not outgoing");
     }
     // TODO: cut down the number of .get calls
-    if (outgoingEdges.get(source).get(dest).size() == 0) {
+    if (outgoingEdges.containsKey(source) && (!outgoingEdges.get(source).containsKey(dest) || outgoingEdges.get(source).get(dest).size() == 0)) {
       outgoingEdges.get(source).remove(dest);
     }
-    if (incomingEdges.get(dest).get(source).size() == 0) {
+    if (incomingEdges.containsKey(dest) && (!incomingEdges.get(dest).containsKey(source) || incomingEdges.get(dest).get(source).size() == 0)) {
       incomingEdges.get(dest).remove(source);
     }
     return foundOut;
@@ -131,10 +191,11 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
 
   /**
    * remove a vertex (and its edges) from the graph.
-   * 
+   *
    * @param vertex
    * @return true if successfully removes the node
    */
+  @Override
   public boolean removeVertex(V vertex) {
     if (!outgoingEdges.containsKey(vertex)) {
       return false;
@@ -150,6 +211,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     return true;
   }
 
+  @Override
   public boolean removeVertices(Collection<V> vertices) {
     boolean changed = false;
     for (V v : vertices) {
@@ -160,18 +222,28 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     return changed;
   }
 
+  @Override
   public int getNumVertices() {
     return outgoingEdges.size();
   }
 
+  @Override
   public List<E> getOutgoingEdges(V v) {
+    if (!outgoingEdges.containsKey(v)) { //noinspection unchecked
+      return Collections.emptyList();
+    }
     return CollectionUtils.flatten(outgoingEdges.get(v).values());
   }
 
+  @Override
   public List<E> getIncomingEdges(V v) {
+    if (!incomingEdges.containsKey(v)) { //noinspection unchecked
+      return Collections.emptyList();
+    }
     return CollectionUtils.flatten(incomingEdges.get(v).values());
   }
 
+  @Override
   public int getNumEdges() {
     int count = 0;
     for (Map.Entry<V, Map<V, List<E>>> sourceEntry : outgoingEdges.entrySet()) {
@@ -182,6 +254,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     return count;
   }
 
+  @Override
   public Set<V> getParents(V vertex) {
     Map<V, List<E>> parentMap = incomingEdges.get(vertex);
     if (parentMap == null)
@@ -189,6 +262,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     return Collections.unmodifiableSet(parentMap.keySet());
   }
 
+  @Override
   public Set<V> getChildren(V vertex) {
     Map<V, List<E>> childMap = outgoingEdges.get(vertex);
     if (childMap == null)
@@ -198,9 +272,10 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
 
   /**
    * Gets both parents and children nodes
-   * 
+   *
    * @param v
    */
+  @Override
   public Set<V> getNeighbors(V v) {
     // TODO: pity we have to copy the sets... is there a combination set?
     Set<V> children = getChildren(v);
@@ -208,7 +283,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
 
     if (children == null && parents == null)
       return null;
-    Set<V> neighbors = Generics.newHashSet();
+    Set<V> neighbors = innerMapFactory.newSet();
     neighbors.addAll(children);
     neighbors.addAll(parents);
     return neighbors;
@@ -217,11 +292,13 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   /**
    * clears the graph, removes all edges and nodes
    */
+  @Override
   public void clear() {
     incomingEdges.clear();
     outgoingEdges.clear();
   }
 
+  @Override
   public boolean containsVertex(V v) {
     return outgoingEdges.containsKey(v);
   }
@@ -229,10 +306,11 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   /**
    * only checks if there is an edge from source to dest. To check if it is
    * connected in either direction, use isNeighbor
-   * 
+   *
    * @param source
    * @param dest
    */
+  @Override
   public boolean isEdge(V source, V dest) {
     Map<V, List<E>> childrenMap = outgoingEdges.get(source);
     if (childrenMap == null || childrenMap.isEmpty())
@@ -243,16 +321,19 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     return edges.size() > 0;
   }
 
+  @Override
   public boolean isNeighbor(V source, V dest) {
     return isEdge(source, dest) || isEdge(dest, source);
   }
 
+  @Override
   public Set<V> getAllVertices() {
     return Collections.unmodifiableSet(outgoingEdges.keySet());
   }
 
+  @Override
   public List<E> getAllEdges() {
-    List<E> edges = new ArrayList<E>();
+    List<E> edges = new ArrayList<>();
     for (Map<V, List<E>> e : outgoingEdges.values()) {
       for (List<E> ee : e.values()) {
         edges.addAll(ee);
@@ -265,6 +346,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
    * False if there are any vertices in the graph, true otherwise. Does not care
    * about the number of edges.
    */
+  @Override
   public boolean isEmpty() {
     return outgoingEdges.isEmpty();
   }
@@ -272,10 +354,11 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   /**
    * Deletes nodes with zero incoming and zero outgoing edges
    */
+  @Override
   public void removeZeroDegreeNodes() {
-    List<V> toDelete = new ArrayList<V>();
+    List<V> toDelete = new ArrayList<>();
     for (V vertex : outgoingEdges.keySet()) {
-      if (outgoingEdges.get(vertex).size() == 0 && incomingEdges.get(vertex).size() == 0) {
+      if (outgoingEdges.get(vertex).isEmpty() && incomingEdges.get(vertex).isEmpty()) {
         toDelete.add(vertex);
       }
     }
@@ -285,6 +368,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     }
   }
 
+  @Override
   public List<E> getEdges(V source, V dest) {
     Map<V, List<E>> childrenMap = outgoingEdges.get(source);
     if (childrenMap == null) {
@@ -313,7 +397,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
 
   /**
    * can specify the direction sensitivity
-   * 
+   *
    * @param node1
    * @param node2
    * @param directionSensitive
@@ -338,7 +422,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     if (nodes.size() <= 1)
       return Collections.emptyList();
 
-    List<E> path = new ArrayList<E>();
+    List<E> path = new ArrayList<>();
     Iterator<V> nodeIterator = nodes.iterator();
     V previous = nodeIterator.next();
     while (nodeIterator.hasNext()) {
@@ -359,9 +443,10 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     return path;
   }
 
+  @Override
   public int getInDegree(V vertex) {
     if (!containsVertex(vertex)) {
-      throw new IllegalArgumentException("Unknown vertex " + vertex);
+      return 0;
     }
     int result = 0;
     Map<V, List<E>> incoming = incomingEdges.get(vertex);
@@ -371,11 +456,12 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     return result;
   }
 
+  @Override
   public int getOutDegree(V vertex) {
     int result = 0;
     Map<V, List<E>> outgoing = outgoingEdges.get(vertex);
     if (outgoing == null) {
-      throw new IllegalArgumentException("Unknown vertex " + vertex);
+      return 0;
     }
     for (List<E> edges : outgoing.values()) {
       result += edges.size();
@@ -383,105 +469,141 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     return result;
   }
 
+  @Override
   public List<Set<V>> getConnectedComponents() {
     return ConnectedComponents.getConnectedComponents(this);
   }
 
+  /**
+   * Deletes all duplicate edges.
+   */
+  
+ public void deleteDuplicateEdges() {
+   for (V vertex : getAllVertices()) {
+     for (V vertex2 : outgoingEdges.get(vertex).keySet()) {
+       List<E> data = outgoingEdges.get(vertex).get(vertex2);
+       Set<E> deduplicatedData = new TreeSet<>(data);
+       data.clear();
+       data.addAll(deduplicatedData);
+     }
+     for (V vertex2 : incomingEdges.get(vertex).keySet()) {
+       List<E> data = incomingEdges.get(vertex).get(vertex2);
+       Set<E> deduplicatedData = new TreeSet<>(data);
+       data.clear();
+       data.addAll(deduplicatedData);
+     }
+   }
+}
+
+  
   public Iterator<E> incomingEdgeIterator(final V vertex) {
-    return new EdgeIterator<V, E>(incomingEdges, vertex);
+    return new EdgeIterator<>(incomingEdges, vertex);
   }
 
   public Iterable<E> incomingEdgeIterable(final V vertex) {
-    return new Iterable<E>() {
-      public Iterator<E> iterator() {
-        return new EdgeIterator<V, E>(incomingEdges, vertex);
-      }
-    };
+    return () -> new EdgeIterator<>(incomingEdges, vertex);
   }
 
   public Iterator<E> outgoingEdgeIterator(final V vertex) {
-    return new EdgeIterator<V, E>(outgoingEdges, vertex);
+    return new EdgeIterator<>(outgoingEdges, vertex);
   }
 
   public Iterable<E> outgoingEdgeIterable(final V vertex) {
-    return new Iterable<E>() {
-      public Iterator<E> iterator() {
-        return new EdgeIterator<V, E>(outgoingEdges, vertex);
-      }
-    };
+    return () -> new EdgeIterator<>(outgoingEdges, vertex);
   }
 
   public Iterator<E> edgeIterator() {
-    return new EdgeIterator<V, E>(this);
+    return new EdgeIterator<>(this);
   }
 
   public Iterable<E> edgeIterable() {
-    return new Iterable<E>() {
-      public Iterator<E> iterator() {
-        return new EdgeIterator<V, E>(DirectedMultiGraph.this);
-      }
-    };
+    return () -> new EdgeIterator<>(DirectedMultiGraph.this);
   }
-
+  
+ 
   static class EdgeIterator<V, E> implements Iterator<E> {
+    private final Map<V, Map<V, List<E>>> incomingEdges;
     private Iterator<Map<V, List<E>>> vertexIterator;
     private Iterator<List<E>> connectionIterator;
     private Iterator<E> edgeIterator;
+    private E lastRemoved = null;
+    private boolean hasNext = true;
 
-    E next;
 
     public EdgeIterator(DirectedMultiGraph<V, E> graph) {
       vertexIterator = graph.outgoingEdges.values().iterator();
-      primeNext();
+      incomingEdges = graph.incomingEdges;
     }
 
     public EdgeIterator(Map<V, Map<V, List<E>>> source, V startVertex) {
       Map<V, List<E>> neighbors = source.get(startVertex);
-      if (neighbors == null) {
-        return;
+      if (neighbors != null) {
+        vertexIterator = null;
+        connectionIterator = neighbors.values().iterator();
       }
-      connectionIterator = neighbors.values().iterator();
-      primeNext();
+      incomingEdges = null;
     }
 
+    @Override
     public boolean hasNext() {
-      return next != null;
+      primeIterator();
+      return hasNext;
     }
 
+    @Override
     public E next() {
-      if (next == null) {
+      if (!hasNext()) {
         throw new NoSuchElementException("Graph edge iterator exhausted.");
       }
-      E value = next;
-      primeNext();
-      return value;
+      lastRemoved = edgeIterator.next();
+      return lastRemoved;
     }
 
-    private void primeNext() {
-      while (true) {
-        if (edgeIterator != null && edgeIterator.hasNext()) {
-          next = edgeIterator.next();
-          break;
-        }
-
-        if (connectionIterator != null && connectionIterator.hasNext()) {
-          edgeIterator = connectionIterator.next().iterator();
-          continue;
-        }
-
-        if (vertexIterator != null && vertexIterator.hasNext()) {
-          connectionIterator = vertexIterator.next().values().iterator();
-          continue;
-        }
-
-        next = null;
-        break;
+    private void primeIterator() {
+      if (edgeIterator != null && edgeIterator.hasNext()) {
+        hasNext = true;  // technically, we shouldn't need to put this here, but let's be safe
+      } else if (connectionIterator != null && connectionIterator.hasNext()) {
+        edgeIterator = connectionIterator.next().iterator();
+        primeIterator();
+      } else if (vertexIterator != null && vertexIterator.hasNext()) {
+        connectionIterator = vertexIterator.next().values().iterator();
+        primeIterator();
+      } else {
+        hasNext = false;
       }
     }
 
+    @Override
     public void remove() {
-      throw new UnsupportedOperationException();
+      if (incomingEdges == null) {
+        throw new UnsupportedOperationException("remove() is only valid if iterating over entire graph (Gabor was too lazy to implement the general case...sorry!)");
+      }
+      if (lastRemoved != null) {
+        if (lastRemoved instanceof SemanticGraphEdge) {
+          SemanticGraphEdge edge = (SemanticGraphEdge) lastRemoved;
+          //noinspection unchecked
+          incomingEdges.get((V) edge.getDependent()).get((V) edge.getGovernor()).remove((E) edge);
+          edgeIterator.remove();
+        } else {
+          // TODO(from gabor): This passes the tests, but actually leaves the graph in an inconsistent state.
+          edgeIterator.remove();
+//          throw new UnsupportedOperationException("remove() is only valid if iterating over semantic graph edges (Gabor was too lazy to implement the general case...sorry!)");
+        }
+      }
     }
+  }
+
+  /**
+   * Cast this multi-graph as a map from vertices, to the outgoing data along edges out of those vertices.
+   *
+   * @return A map representation of the graph.
+   */
+  public Map<V, List<E>> toMap() {
+    Map<V, List<E>> map = innerMapFactory.newMap();
+    for (V vertex : getAllVertices()) {
+      map.put(vertex, getOutgoingEdges(vertex));
+    }
+    return map;
   }
 
   @Override

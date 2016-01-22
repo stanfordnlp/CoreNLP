@@ -7,13 +7,12 @@ import java.text.DecimalFormat;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.NumberRangesFileFilter;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.ReflectionLoading;
 
 
@@ -83,7 +82,7 @@ public class Treebanks {
     String suffix = Treebank.DEFAULT_TREE_FILE_SUFFIX;
     TreeReaderFactory trf = null;
     TreebankLanguagePack tlp = null;
-    List<Filter<Tree>> filters = new ArrayList<Filter<Tree>>();
+    List<Predicate<Tree>> filters = new ArrayList<>();
 
     while (i < args.length && args[i].startsWith("-")) {
       if (args[i].equals("-maxLength") && i + 1 < args.length) {
@@ -167,7 +166,7 @@ public class Treebanks {
         removeCodeTrees = true;
         i++;
       } else if (args[i].equals("-filter")) {
-        Filter<Tree> filter = ReflectionLoading.loadByReflection(args[i+1]);
+        Predicate<Tree> filter = ReflectionLoading.loadByReflection(args[i+1]);
         filters.add(filter);
         i += 2;
       } else {
@@ -180,11 +179,7 @@ public class Treebanks {
     minLength = minL;
     Treebank treebank;
     if (trf == null) {
-      trf = new TreeReaderFactory() {
-          public TreeReader newTreeReader(Reader in) {
-            return new PennTreeReader(in, new LabeledScoredTreeFactory());
-          }
-        };
+      trf = in -> new PennTreeReader(in, new LabeledScoredTreeFactory());
     }
     if (normalized) {
       treebank = new DiskTreebank();
@@ -192,7 +187,7 @@ public class Treebanks {
       treebank = new DiskTreebank(trf, encoding);
     }
 
-    for (Filter<Tree> filter : filters) {
+    for (Predicate<Tree> filter : filters) {
       treebank = new FilteringTreebank(treebank, filter);
     }
 
@@ -229,48 +224,40 @@ public class Treebanks {
     }
 
     if (pennPrintTrees) {
-      treebank.apply(new TreeVisitor() {
-          public void visitTree(Tree tree) {
-            int length = tree.yield().size();
-            if (length >= minLength && length <= maxLength) {
-              tree.pennPrint(pw);
-              pw.println();
-            }
-          }
-        });
+      treebank.apply(tree -> {
+        int length = tree.yield().size();
+        if (length >= minLength && length <= maxLength) {
+          tree.pennPrint(pw);
+          pw.println();
+        }
+      });
     }
 
     if (oneLinePrint) {
-      treebank.apply(new TreeVisitor() {
-          public void visitTree(Tree tree) {
-            int length = tree.yield().size();
-            if (length >= minLength && length <= maxLength) {
-              pw.println(tree);
-            }
-          }
-        });
+      treebank.apply(tree -> {
+        int length = tree.yield().size();
+        if (length >= minLength && length <= maxLength) {
+          pw.println(tree);
+        }
+      });
     }
 
     if (printWords) {
       final TreeNormalizer tn = new BobChrisTreeNormalizer();
-      treebank.apply(new TreeVisitor() {
-        public void visitTree(Tree tree) {
-          Tree tPrime = tn.normalizeWholeTree(tree, tree.treeFactory());
-          int length = tPrime.yield().size();
-          if (length >= minLength && length <= maxLength) {
-            pw.println(Sentence.listToString(tPrime.taggedYield()));
-          }
+      treebank.apply(tree -> {
+        Tree tPrime = tn.normalizeWholeTree(tree, tree.treeFactory());
+        int length = tPrime.yield().size();
+        if (length >= minLength && length <= maxLength) {
+          pw.println(Sentence.listToString(tPrime.taggedYield()));
         }
       });
     }
 
     if (printTaggedWords) {
       final TreeNormalizer tn = new BobChrisTreeNormalizer();
-      treebank.apply(new TreeVisitor() {
-        public void visitTree(Tree tree) {
-          Tree tPrime = tn.normalizeWholeTree(tree, tree.treeFactory());
-          pw.println(Sentence.listToString(tPrime.taggedYield(), false, "_"));
-        }
+      treebank.apply(tree -> {
+        Tree tPrime = tn.normalizeWholeTree(tree, tree.treeFactory());
+        pw.println(Sentence.listToString(tPrime.taggedYield(), false, "_"));
       });
     }
 
@@ -279,14 +266,12 @@ public class Treebanks {
     }
 
     if (yield) {
-      treebank.apply(new TreeVisitor() {
-          public void visitTree(Tree tree) {
-            int length = tree.yield().size();
-            if (length >= minLength && length <= maxLength) {
-              pw.println(Sentence.listToString(tree.yield()));
-            }
-          }
-        });
+      treebank.apply(tree -> {
+        int length = tree.yield().size();
+        if (length >= minLength && length <= maxLength) {
+          pw.println(Sentence.listToString(tree.yield()));
+        }
+      });
     }
 
     if (decimate) {
@@ -318,11 +303,11 @@ public class Treebanks {
     if (tlp == null) {
       System.err.println("The -punct option requires you to specify -tlp");
     } else {
-      Filter<String> punctTagFilter = tlp.punctuationTagAcceptFilter();
+      Predicate<String> punctTagFilter = tlp.punctuationTagAcceptFilter();
       for (Tree t : treebank) {
         List<TaggedWord> tws = t.taggedYield();
         for (TaggedWord tw : tws) {
-          if (punctTagFilter.accept(tw.tag())) {
+          if (punctTagFilter.test(tw.tag())) {
             pw.println(tw);
           }
         }
@@ -332,14 +317,12 @@ public class Treebanks {
 
 
   private static void countTaggings(Treebank tb, final PrintWriter pw) {
-    final TwoDimensionalCounter<String,String> wtc = new TwoDimensionalCounter<String,String>();
-    tb.apply(new TreeVisitor() {
-        public void visitTree(Tree tree) {
-          List<TaggedWord> tags = tree.taggedYield();
-          for (TaggedWord tag : tags)
-            wtc.incrementCount(tag.word(), tag.tag());
-        }
-      });
+    final TwoDimensionalCounter<String,String> wtc = new TwoDimensionalCounter<>();
+    tb.apply(tree -> {
+      List<TaggedWord> tags = tree.taggedYield();
+      for (TaggedWord tag : tags)
+        wtc.incrementCount(tag.word(), tag.tag());
+    });
     for (String key : wtc.firstKeySet()) {
       pw.print(key);
       pw.print('\t');
@@ -364,6 +347,7 @@ public class Treebanks {
 
     treebank.apply(new TreeVisitor() {
         int num = 0;
+        @Override
         public void visitTree(final Tree t) {
           num += t.yield().size();
         }

@@ -10,6 +10,7 @@ import edu.stanford.nlp.util.StringUtils;
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -35,7 +36,7 @@ import java.util.regex.Pattern;
 public class ISODateInstance {
 
   private static final boolean DEBUG = false;
-  private ArrayList<String> tokens = new ArrayList<String>();//each token contains some piece of the date, from our input.
+  private ArrayList<String> tokens = new ArrayList<>();//each token contains some piece of the date, from our input.
 
   public static final String OPEN_RANGE_AFTER = "A";
   public static final String OPEN_RANGE_BEFORE = "B";
@@ -303,9 +304,9 @@ public class ISODateInstance {
 
   static {
     //Add entries to the relative datemap
-    relativeDateMap.put("today", new Pair<DateField, Integer>(DateField.DAY, 0));
-    relativeDateMap.put("tomorrow", new Pair<DateField, Integer>(DateField.DAY, 1));
-    relativeDateMap.put("yesterday", new Pair<DateField, Integer>(DateField.DAY, -1));
+    relativeDateMap.put("today", new Pair<>(DateField.DAY, 0));
+    relativeDateMap.put("tomorrow", new Pair<>(DateField.DAY, 1));
+    relativeDateMap.put("yesterday", new Pair<>(DateField.DAY, -1));
 
 
   }
@@ -422,7 +423,7 @@ public class ISODateInstance {
     for (String curIndicator : rangeIndicators) {
       String[] dates = inputDate.split(curIndicator);
       if (dates.length == 2) {
-        return new Pair<String, String>(dates[0], dates[1]);
+        return new Pair<>(dates[0], dates[1]);
       }
     }
     return null;
@@ -554,9 +555,9 @@ public class ISODateInstance {
     String yearOther = date2.substring(0, 4);
     if (year.contains("*") || yearOther.contains("*")) {
       after = after && checkWildcardCompatibility(year, yearOther);
-    } else if (Integer.valueOf(year) > Integer.valueOf(yearOther)) {
+    } else if (Integer.parseInt(year) > Integer.parseInt(yearOther)) {
       return true;
-    } else if (Integer.valueOf(year) < Integer.valueOf(yearOther)) {
+    } else if (Integer.parseInt(year) < Integer.parseInt(yearOther)) {
       return false;
     }
 
@@ -564,7 +565,7 @@ public class ISODateInstance {
       if (year.contains("*") || yearOther.contains("*")) {
         return after;
       } else {
-        return after && (!Integer.valueOf(year).equals(Integer.valueOf(yearOther)));
+        return after && (Integer.parseInt(year) != Integer.parseInt(yearOther));
       }
     }
     //then check months
@@ -572,9 +573,9 @@ public class ISODateInstance {
     String monthOther = date2.substring(4, 6);
     if (month.contains("*") || monthOther.contains("*")) {
       after = after && checkWildcardCompatibility(month, monthOther);
-    } else if (Integer.valueOf(month) > Integer.valueOf(monthOther)) {
+    } else if (Integer.parseInt(month) > Integer.parseInt(monthOther)) {
       return true;
-    } else if (Integer.valueOf(month) < Integer.valueOf(monthOther)) {
+    } else if (Integer.parseInt(month) < Integer.parseInt(monthOther)) {
       return false;
     }
 
@@ -582,7 +583,7 @@ public class ISODateInstance {
       if (month.contains("*") || monthOther.contains("*")) {
         return after;
       } else {
-        return after && (!Integer.valueOf(month).equals(Integer.valueOf(monthOther)));
+        return after && (Integer.parseInt(month) != Integer.parseInt(monthOther));
       }
     }
 
@@ -591,9 +592,9 @@ public class ISODateInstance {
     String dayOther = date2.substring(6, 8);
     if (day.contains("*") || dayOther.contains("*")) {
       after = after && checkWildcardCompatibility(day, dayOther);
-    } else if (Integer.valueOf(day) > Integer.valueOf(dayOther)) {
+    } else if (Integer.parseInt(day) > Integer.parseInt(dayOther)) {
       return true;
-    } else if (Integer.valueOf(day) <= Integer.valueOf(dayOther)) {
+    } else if (Integer.parseInt(day) <= Integer.parseInt(dayOther)) {
       return false;
     }
 
@@ -873,7 +874,7 @@ public class ISODateInstance {
   //These methods are taken directly from or modified slightly from {@link DateInstance}
 
   private void tokenizeDate(String inputDate) {
-    tokens = new ArrayList<String>();
+    tokens = new ArrayList<>();
     Pattern pat = Pattern.compile("[-]");
     if (inputDate == null) {
       System.out.println("Null input date");
@@ -921,7 +922,7 @@ public class ISODateInstance {
   }
 
   /**
-   * This method copied from {@link DateInstance}; not sure how we tell that it
+   * Note: This method copied from {@code DateInstance}; not sure how we tell that it
    * is MMDD versus DDMM (sometimes it will be ambiguous).
    *
    */
@@ -997,10 +998,10 @@ public class ISODateInstance {
       }
       if (inputDate.charAt(inputDate.length() - 1) == 's') {//decade or century marker
         if (extract.charAt(2) == '0') {//e.g., 1900s -> 1900/1999
-          String endDate = Integer.toString((Integer.valueOf(extract) + 99));
+          String endDate = Integer.toString((Integer.parseInt(extract) + 99));
           extract = extract + '/' + endDate;
         } else {//e.g., 1920s -> 1920/1929
-          String endDate = Integer.toString((Integer.valueOf(extract) + 9));
+          String endDate = Integer.toString((Integer.parseInt(extract) + 9));
           extract = extract + '/' + endDate;
         }
       }
@@ -1043,6 +1044,9 @@ public class ISODateInstance {
       if (Character.isDigit(inputDate.charAt(0))) {
         // just parse number part, assuming last two letters are st/nd/rd
         year = QuantifiableEntityNormalizer.normalizedNumberStringQuiet(inputDate.substring(0, inputDate.length() - 2), 1, "", null);
+        if (year == null) {
+          year = "";
+        }
         if (year.contains(".")) {//number format issue
           year = year.substring(0, year.indexOf('.'));
         }
@@ -1104,8 +1108,8 @@ public class ISODateInstance {
       extract = extract.replaceAll("[^0-9]", "");
       if (!extract.equals("")) {
         try {
-          Integer i = Integer.valueOf(extract);
-          if (i.intValue() < 32 && i.intValue() > 0) {
+          Long i = Long.parseLong(extract);
+          if (i.intValue() < 32l && i.intValue() > 0l) {
             if (isoDate.length() < 6) {//should already have year and month
               if (isoDate.length() != 4)//throw new RuntimeException("Error extracting dates; should have had month and year but didn't");
               {

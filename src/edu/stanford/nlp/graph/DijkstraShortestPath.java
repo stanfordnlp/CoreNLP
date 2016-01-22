@@ -2,22 +2,17 @@ package edu.stanford.nlp.graph;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.BinaryHeapPriorityQueue;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.Pair;
 
 public class DijkstraShortestPath {
   private DijkstraShortestPath() {} // static method only
 
-  public static <V, E> List<V> getShortestPath(DirectedMultiGraph<V, E> graph, 
+  public static <V, E> List<V> getShortestPath(Graph<V, E> graph,
                                                V node1, V node2, 
                                                boolean directionSensitive) {
     if (node1.equals(node2)) {
@@ -28,8 +23,8 @@ public class DijkstraShortestPath {
     
     Map<V, V> previous = Generics.newHashMap();
     
-    BinaryHeapPriorityQueue<V> unsettledNodes = 
-      new BinaryHeapPriorityQueue<V>();
+    BinaryHeapPriorityQueue<V> unsettledNodes =
+            new BinaryHeapPriorityQueue<>();
 
     unsettledNodes.add(node1, 0);
 
@@ -57,7 +52,7 @@ public class DijkstraShortestPath {
     }
     if (!previous.containsKey(node2))
       return null;
-    ArrayList<V> path = new ArrayList<V>();
+    ArrayList<V> path = new ArrayList<>();
     path.add(node2);
     V n = node2;
     while (previous.containsKey(n)) {

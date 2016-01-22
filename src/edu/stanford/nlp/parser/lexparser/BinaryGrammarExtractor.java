@@ -11,9 +11,9 @@ import edu.stanford.nlp.util.Pair;
 public class BinaryGrammarExtractor extends AbstractTreeExtractor<Pair<UnaryGrammar,BinaryGrammar>> {
 
   protected Index<String> stateIndex;
-  private ClassicCounter<UnaryRule> unaryRuleCounter = new ClassicCounter<UnaryRule>();
-  private ClassicCounter<BinaryRule> binaryRuleCounter = new ClassicCounter<BinaryRule>();
-  protected ClassicCounter<String> symbolCounter = new ClassicCounter<String>();
+  private ClassicCounter<UnaryRule> unaryRuleCounter = new ClassicCounter<>();
+  private ClassicCounter<BinaryRule> binaryRuleCounter = new ClassicCounter<>();
+  protected ClassicCounter<String> symbolCounter = new ClassicCounter<>();
   private Set<BinaryRule> binaryRules = Generics.newHashSet();
   private Set<UnaryRule> unaryRules = Generics.newHashSet();
 
@@ -32,18 +32,15 @@ public class BinaryGrammarExtractor extends AbstractTreeExtractor<Pair<UnaryGram
   @Override
   protected void tallyInternalNode(Tree lt, double weight) {
     if (lt.children().length == 1) {
-      UnaryRule ur = new UnaryRule(stateIndex.indexOf(lt.label().value(), true),
-                        stateIndex.indexOf(lt.children()[0].label().value(),
-                                           true));
+      UnaryRule ur = new UnaryRule(stateIndex.addToIndex(lt.label().value()),
+                        stateIndex.addToIndex(lt.children()[0].label().value()));
       symbolCounter.incrementCount(stateIndex.get(ur.parent), weight);
       unaryRuleCounter.incrementCount(ur, weight);
       unaryRules.add(ur);
     } else {
-      BinaryRule br = new BinaryRule(stateIndex.indexOf(lt.label().value(), true),
-                         stateIndex.indexOf(lt.children()[0].label().value(),
-                                            true),
-                         stateIndex.indexOf(lt.children()[1].label().value(),
-                                            true));
+      BinaryRule br = new BinaryRule(stateIndex.addToIndex(lt.label().value()),
+                         stateIndex.addToIndex(lt.children()[0].label().value()),
+                         stateIndex.addToIndex(lt.children()[1].label().value()));
       symbolCounter.incrementCount(stateIndex.get(br.parent), weight);
       binaryRuleCounter.incrementCount(br, weight);
       binaryRules.add(br);
@@ -52,7 +49,7 @@ public class BinaryGrammarExtractor extends AbstractTreeExtractor<Pair<UnaryGram
 
   @Override
   public Pair<UnaryGrammar,BinaryGrammar> formResult() {
-    stateIndex.indexOf(Lexicon.BOUNDARY_TAG, true);
+    stateIndex.addToIndex(Lexicon.BOUNDARY_TAG);
     BinaryGrammar bg = new BinaryGrammar(stateIndex);
     UnaryGrammar ug = new UnaryGrammar(stateIndex);
     // add unaries
@@ -71,7 +68,7 @@ public class BinaryGrammarExtractor extends AbstractTreeExtractor<Pair<UnaryGram
       }
       bg.addRule(br);
     }
-    return new Pair<UnaryGrammar,BinaryGrammar>(ug, bg);
+    return new Pair<>(ug, bg);
   }
 
 } // end class BinaryGrammarExtractor

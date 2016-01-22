@@ -2,7 +2,11 @@ package edu.stanford.nlp.classify;
 
 import edu.stanford.nlp.ling.BasicDatum;
 import edu.stanford.nlp.optimization.GoldenSectionLineSearch;
-import edu.stanford.nlp.util.Function;
+
+import java.util.function.Function;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides a medium-weight implementation of Bernoulli (or binary)
@@ -10,7 +14,7 @@ import edu.stanford.nlp.util.Function;
  * it uses dense arrays for counts and calculation (but, hey, NB is
  * efficient to estimate).  Each feature is treated as an independent
  * binary variable.
- * <p/>
+ * <p>
  * CDM Jun 2003: I added a dirty trick so that if there is a feature
  * that is always on in input examples, then its weight is turned into
  * a prior feature!  (This will work well iff it is also always on at
@@ -34,6 +38,8 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
   private boolean tuneSigma = false;
   private int folds;
 
+  final static Logger logger = LoggerFactory.getLogger(NBLinearClassifierFactory.class);
+
 
   @Override
   protected double[][] trainWeights(GeneralDataset<L, F> data) {
@@ -52,13 +58,13 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
       tuneSigma(data, labels);
     }
     if (VERBOSE) {
-      System.err.println("NB CF: " + data.length + " data items ");
+      logger.info("NB CF: " + data.length + " data items ");
       for (int i = 0; i < data.length; i++) {
         System.err.print("Datum " + i + ": " + labels[i] + ":");
         for (int j = 0; j < data[i].length; j++) {
           System.err.print(" " + data[i][j]);
         }
-        System.err.println();
+        logger.info("");
       }
     }
     int numFeatures = numFeatures();
@@ -92,7 +98,7 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
           double p_c = (n_c[c] + epsilon) / (n + numClasses * epsilon);
           double p_c_f = (n_fc[f][c] + sigma) / (n_f[f] + sigma * numClasses);
           if (VERBOSE) {
-            System.err.println("Prob ratio(f=" + f + ",c=" + c + ") = " + p_c_f / p_c + " (nc=" + n_c[c] + ", nf=" + n_f[f] + ", nfc=" + n_fc[f][c] + ")");
+            logger.info("Prob ratio(f=" + f + ",c=" + c + ") = " + p_c_f / p_c + " (nc=" + n_c[c] + ", nf=" + n_f[f] + ", nfc=" + n_fc[f][c] + ")");
           }
           weights[f][c] = Math.log(p_c_f / p_c);
         }
@@ -150,38 +156,35 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
 
   private void tuneSigma(final int[][] data, final int[] labels) {
 
-    Function<Double, Double> CVSigmaToPerplexity = new Function<Double, Double>() {
-      @Override
-      public Double apply(Double trialSigma) {
-        double score = 0.0;
-        double sumScore = 0.0;
-        int foldSize, nbCV;
-        System.err.println("Trying sigma = " + trialSigma);
-        //test if enough training data
-        if (data.length >= folds) {
-          foldSize = data.length / folds;
-          nbCV = folds;
-        } else { //leave-one-out
-          foldSize = 1;
-          nbCV = data.length;
-        }
-
-        for (int j = 0; j < nbCV; j++) {
-          //System.out.println("CV j: "+ j);
-          int testMin = j * foldSize;
-          int testMax = testMin + foldSize;
-
-          LinearClassifier<L, F> c = new LinearClassifier<L, F>(weights(data, labels, testMin, testMax, trialSigma, foldSize), featureIndex, labelIndex);
-          for (int i = testMin; i < testMax; i++) {
-            //System.out.println("test i: "+ i + " "+ new BasicDatum(featureIndex.objects(data[i])));
-            score -= c.logProbabilityOf(new BasicDatum<L, F>(featureIndex.objects(data[i]))).getCount(labelIndex.get(labels[i]));
-          }
-          //System.err.printf("%d: %8g\n", j, score);
-          sumScore += score;
-        }
-        System.err.printf(": %8g\n", sumScore);
-        return sumScore;
+    Function<Double, Double> CVSigmaToPerplexity = trialSigma -> {
+      double score = 0.0;
+      double sumScore = 0.0;
+      int foldSize, nbCV;
+      logger.info("Trying sigma = " + trialSigma);
+      //test if enough training data
+      if (data.length >= folds) {
+        foldSize = data.length / folds;
+        nbCV = folds;
+      } else { //leave-one-out
+        foldSize = 1;
+        nbCV = data.length;
       }
+
+      for (int j = 0; j < nbCV; j++) {
+        //System.out.println("CV j: "+ j);
+        int testMin = j * foldSize;
+        int testMax = testMin + foldSize;
+
+        LinearClassifier<L, F> c = new LinearClassifier<>(weights(data, labels, testMin, testMax, trialSigma, foldSize), featureIndex, labelIndex);
+        for (int i = testMin; i < testMax; i++) {
+          //System.out.println("test i: "+ i + " "+ new BasicDatum(featureIndex.objects(data[i])));
+          score -= c.logProbabilityOf(new BasicDatum<>(featureIndex.objects(data[i]))).getCount(labelIndex.get(labels[i]));
+        }
+        //System.err.printf("%d: %8g%n", j, score);
+        sumScore += score;
+      }
+      System.err.printf(": %8g%n", sumScore);
+      return sumScore;
     };
 
     GoldenSectionLineSearch gsls = new GoldenSectionLineSearch(true);

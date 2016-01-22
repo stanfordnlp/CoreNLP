@@ -25,7 +25,7 @@ public class HistoryTable {
   private final Index<History> idx;
 
   public HistoryTable() {
-    idx = new HashIndex<History>(capacity);
+    idx = new HashIndex<>(capacity);
   }
 
   void release() {
@@ -33,7 +33,7 @@ public class HistoryTable {
   }
 
   int add(History h) {
-    return idx.indexOf(h,true);
+    return idx.addToIndex(h);
   }
 
   History getHistory(int index) {

@@ -1,5 +1,6 @@
 package edu.stanford.nlp.util;
 
+import edu.stanford.nlp.util.logging.Redwood;
 import junit.framework.TestCase;
 
 import java.util.*;
@@ -74,4 +75,119 @@ public class StringUtilsTest extends TestCase {
     assertEquals(3, StringUtils.editDistance("", "bar"));
     assertEquals(3, StringUtils.editDistance("foo", ""));
   }
+
+  public void testSplitOnChar() {
+    assertEquals(3, StringUtils.splitOnChar("hello\tthere\tworld", '\t').length);
+    assertEquals(2, StringUtils.splitOnChar("hello\tworld", '\t').length);
+    assertEquals(1, StringUtils.splitOnChar("hello", '\t').length);
+
+    assertEquals("hello", StringUtils.splitOnChar("hello\tthere\tworld", '\t')[0]);
+    assertEquals("there", StringUtils.splitOnChar("hello\tthere\tworld", '\t')[1]);
+    assertEquals("world", StringUtils.splitOnChar("hello\tthere\tworld", '\t')[2]);
+
+    assertEquals(1, StringUtils.splitOnChar("hello\tthere\tworld\n", ' ').length);
+    assertEquals("hello\tthere\tworld\n", StringUtils.splitOnChar("hello\tthere\tworld\n", ' ')[0]);
+
+    assertEquals(5, StringUtils.splitOnChar("a\tb\tc\td\te", '\t').length);
+    assertEquals(5, StringUtils.splitOnChar("\t\t\t\t", '\t').length);
+    assertEquals("", StringUtils.splitOnChar("\t\t\t\t", '\t')[0]);
+    assertEquals("", StringUtils.splitOnChar("\t\t\t\t", '\t')[1]);
+    assertEquals("", StringUtils.splitOnChar("\t\t\t\t", '\t')[4]);
+  }
+
+  /*
+  public void testSplitOnCharSpeed() {
+    String line = "1;2;3;4;5;678;901;234567;1";
+    int runs = 1000000;
+
+    for (int gcIter = 0; gcIter < 10; ++gcIter) {
+      long start = System.currentTimeMillis();
+      for (int i = 0; i < runs; ++i) {
+        StringUtils.split(line, ";");
+      }
+      System.err.println("Old: " + Redwood.formatTimeDifference(System.currentTimeMillis() - start) + " for " + runs + " splits");
+
+      start = System.currentTimeMillis();
+      for (int i = 0; i < runs; ++i) {
+        StringUtils.splitOnChar(line, ';');
+      }
+      System.err.println("New: " + Redwood.formatTimeDifference(System.currentTimeMillis() - start) + " for " + runs + " splits");
+      System.err.println();
+    }
+  }
+  */
+
+  public void testNormalize() {
+    assertEquals("can't", StringUtils.normalize("can't"));
+    assertEquals("Beyonce", StringUtils.normalize("Beyoncé"));
+    assertEquals("krouzek", StringUtils.normalize("kroužek"));
+    assertEquals("office", StringUtils.normalize("o\uFB03ce"));
+    assertEquals("DZ", StringUtils.normalize("Ǆ"));
+    assertEquals("1⁄4", StringUtils.normalize("¼"));
+    assertEquals("한국어", StringUtils.normalize("한국어"));
+    assertEquals("조선말", StringUtils.normalize("조선말"));
+    assertEquals("が", StringUtils.normalize("が"));
+    assertEquals("か", StringUtils.normalize("か"));
+  }
+
+  private static final char[] escapeInputs = {
+          '\\', '\\', '\\', '\\', '\\',
+          '\\', '\\', '\\', '\\', '\\',
+          '"', '"', '"',
+  };
+
+  private static final String[] csvInputs = {
+          "", ",", "foo", "foo,bar", "foo,    bar",
+          ",foo,bar,", "foo,\"bar\"", "\"foo,foo2\"", "1997, \"Ford\" ,E350", "foo,\"\",bar",
+          "1999,Chevy,\"Venture \"\"Extended Edition, Large\"\"\",,5000.00", "\"\"\",foo,\"", "\"\"\"\",foo",
+  };
+
+  private static final String[][] csvOutputs = {
+          {},
+          {""},
+          {"foo"},
+          {"foo", "bar"},
+          {"foo", "    bar"},
+
+          {"", "foo", "bar"},
+          {"foo", "bar"},
+          {"foo,foo2"},
+          {"1997"," Ford ","E350"},
+          {"foo", "", "bar"},
+
+          {"1999", "Chevy", "Venture \"Extended Edition, Large\"","", "5000.00"},
+          {"\",foo,"},
+          {"\"", "foo"},
+  };
+
+  public void testCSV() {
+    assertEquals("Bung test", csvInputs.length, csvOutputs.length);
+    for (int i = 0; i < csvInputs.length; i++) {
+      String[] answer = StringUtils.splitOnCharWithQuoting(csvInputs[i], ',', '"', escapeInputs[i]);
+      assertTrue("Bad CSV line handling of ex " + i +": " + Arrays.toString(csvOutputs[i]) +
+              " vs. " + Arrays.toString(answer),
+              Arrays.equals(csvOutputs[i], answer));
+    }
+  }
+
+  public void testGetCharacterNgrams() {
+    testCharacterNgram("abc", 0, 0);
+    testCharacterNgram("abc", 1, 1, "a", "b", "c");
+    testCharacterNgram("abc", 2, 2, "ab", "bc");
+    testCharacterNgram("abc", 1, 2, "a", "b", "c", "ab", "bc");
+    testCharacterNgram("abc", 1, 3, "a", "b", "c", "ab", "bc", "abc");
+    testCharacterNgram("abc", 1, 4, "a", "b", "c", "ab", "bc", "abc");
+  }
+
+  private void testCharacterNgram(String string, int min, int max, String... expected) {
+    System.out.println(makeSet(expected));
+    System.out.println(StringUtils.getCharacterNgrams(string, min, max));
+    assertEquals(makeSet(expected),
+                 new HashSet<String>(StringUtils.getCharacterNgrams(string, min, max)));
+  }
+
+  private <T> Set<T> makeSet(T... elems) {
+    return new HashSet<T>(Arrays.asList(elems));
+  }
+
 }

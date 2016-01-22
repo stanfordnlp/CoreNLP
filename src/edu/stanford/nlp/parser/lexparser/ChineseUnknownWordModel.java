@@ -1,6 +1,5 @@
 package edu.stanford.nlp.parser.lexparser;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -10,7 +9,6 @@ import edu.stanford.nlp.ling.WordTag;
 import edu.stanford.nlp.ling.Tag;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 
@@ -32,7 +30,7 @@ public class ChineseUnknownWordModel extends BaseUnknownWordModel {
   private final boolean useUnicodeType;
 
 
-  /* These strings are stored in ascii-stype Unicode encoding.  To
+  /* These strings are stored in ascii-type Unicode encoding.  To
    * edit them, either use the Unicode codes or use native2ascii or a
    * similar program to convert the file into a Chinese encoding, then
    * convert back. */
@@ -45,15 +43,15 @@ public class ChineseUnknownWordModel extends BaseUnknownWordModel {
   private final Set<String> seenFirst;
 
 
-  public ChineseUnknownWordModel(Options op, Lexicon lex, 
-                                 Index<String> wordIndex, 
+  public ChineseUnknownWordModel(Options op, Lexicon lex,
+                                 Index<String> wordIndex,
                                  Index<String> tagIndex,
                                  ClassicCounter<IntTaggedWord> unSeenCounter,
                                  Map<Label,ClassicCounter<String>> tagHash,
                                  Map<String,Float> unknownGT,
                                  boolean useGT,
                                  Set<String> seenFirst) {
-    super(op, lex, wordIndex, tagIndex, 
+    super(op, lex, wordIndex, tagIndex,
           unSeenCounter, tagHash, unknownGT, null);
     this.useFirst = !useGT;
     this.useGT = useGT;
@@ -65,14 +63,14 @@ public class ChineseUnknownWordModel extends BaseUnknownWordModel {
    * This constructor creates an UWM with empty data structures.  Only
    * use if loading in the data separately, such as by reading in text
    * lines containing the data.
-   * TODO: would need to set useGT correctly if you saved a model with 
+   * TODO: would need to set useGT correctly if you saved a model with
    * useGT and then wanted to recover it from text.
    */
   public ChineseUnknownWordModel(Options op, Lexicon lex,
-                                 Index<String> wordIndex, 
+                                 Index<String> wordIndex,
                                  Index<String> tagIndex) {
-    this(op, lex, wordIndex, tagIndex, 
-         new ClassicCounter<IntTaggedWord>(),
+    this(op, lex, wordIndex, tagIndex,
+            new ClassicCounter<>(),
          Generics.<Label,ClassicCounter<String>>newHashMap(),
          Generics.<String,Float>newHashMap(),
          false, Generics.<String>newHashSet());
@@ -226,7 +224,7 @@ public class ChineseUnknownWordModel extends BaseUnknownWordModel {
     }
 
     System.out.println("Testing tagged word");
-    ClassicCounter<TaggedWord> c = new ClassicCounter<TaggedWord>();
+    ClassicCounter<TaggedWord> c = new ClassicCounter<>();
     TaggedWord tw1 = new TaggedWord("w", "t");
     c.incrementCount(tw1);
     TaggedWord tw2 = new TaggedWord("w", "t2");

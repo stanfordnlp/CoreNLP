@@ -130,9 +130,21 @@ public class CRFLogConditionalObjectiveFunctionForLOP extends AbstractCachingDif
   private void initialize2DWeights() {
     lopExpertWeights2D = new double[numLopExpert][][];
     for (int lopIter = 0; lopIter < numLopExpert; lopIter++) {
-      lopExpertWeights2D[lopIter] = CRFLogConditionalObjectiveFunction.to2D(lopExpertWeights[lopIter], labelIndices, map); 
+      lopExpertWeights2D[lopIter] = to2D(lopExpertWeights[lopIter], labelIndices, map); 
     }
   }
+
+  public double[][] to2D(double[] weights, List<Index<CRFLabel>> labelIndices, int[] map) {
+    double[][] newWeights = new double[map.length][];
+    int index = 0;
+    for (int i = 0; i < map.length; i++) {
+      newWeights[i] = new double[labelIndices.get(map[i]).size()];
+      System.arraycopy(weights, index, newWeights[i], 0, labelIndices.get(map[i]).size());
+      index += labelIndices.get(map[i]).size();
+    }
+    return newWeights;
+  }
+  
 
   private void computeEHat() {
     Ehat = empty2D();
@@ -168,8 +180,7 @@ public class CRFLogConditionalObjectiveFunctionForLOP extends AbstractCachingDif
           for (int lopIter = 0; lopIter < numLopExpert; lopIter++) {
             double[][] ehatOfIter = Ehat[lopIter];
             Set<Integer> indicesSet = featureIndicesSetArray.get(lopIter);
-            for (int k = 0; k < docDataIJ.length; k++) { // k iterates over features
-              int featureIdx = docDataIJ[k];
+            for (int featureIdx : docDataIJ) { // k iterates over features
               if (indicesSet.contains(featureIdx)) {
                 ehatOfIter[featureIdx][observedLabelIndex]++;
               }
@@ -221,8 +232,7 @@ public class CRFLogConditionalObjectiveFunctionForLOP extends AbstractCachingDif
           for (int lopIter = 0; lopIter < numLopExpert; lopIter++) {
             double[] sumOfELPmijIter = new double[labelIndex.size()]; 
             Set<Integer> indicesSet = featureIndicesSetArray.get(lopIter);
-            for (int k = 0; k < docDataIJ.length; k++) { // k iterates over features
-              int featureIdx = docDataIJ[k];
+            for (int featureIdx : docDataIJ) { // k iterates over features
               if (indicesSet.contains(featureIdx)) {
                 sumOfObservedLogPotential[lopIter] += learnedLopExpertWeights2D[lopIter][featureIdx][observedLabelIndex];
                 // sum over potential of this clique over all possible labels, used later in calculating expected counts

@@ -2,6 +2,8 @@ package edu.stanford.nlp.util;
 
 import edu.stanford.nlp.util.logging.PrettyLoggable;
 
+import java.io.Serializable;
+
 /**
  * <p>
  * Base type for all annotatable core objects. Should usually be instantiated as
@@ -9,7 +11,7 @@ import edu.stanford.nlp.util.logging.PrettyLoggable;
  * {@link edu.stanford.nlp.ling.CoreAnnotations}, but others may be defined elsewhere. See
  * {@link edu.stanford.nlp.ling.CoreAnnotations} for details.
  * </p>
- * 
+ *
  * <p>
  * Note that implementations of this interface must take care to implement
  * equality correctly: by default, two CoreMaps are .equal if they contain the
@@ -22,8 +24,26 @@ import edu.stanford.nlp.util.logging.PrettyLoggable;
  * keys is discouraged because the hashcode can change over time. Consider using
  * a {@link HashableCoreMap}.
  * </p>
- * 
+ *
  * @author dramage
  * @author rafferty
  */
-public interface CoreMap extends TypesafeMap, PrettyLoggable { }
+public interface CoreMap extends TypesafeMap, PrettyLoggable, Serializable {
+
+  /** Attempt to provide a briefer and more human readable String for the contents of
+   *  a CoreMap.
+   *  The method may not be capable of printing circular dependencies in CoreMaps.
+   *
+   *  @param what An array (varargs) of Strings that say what annotation keys
+   *     to print.  These need to be provided in a shortened form where you
+   *     are just giving the part of the class name without package and up to
+   *     "Annotation". That is,
+   *     edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation --&gt; PartOfSpeech
+   *     . As a special case, an empty array means to print everything, not nothing.
+   *  @return A more human readable String giving possibly partial contents of a
+   *     CoreMap.
+   */
+
+  public String toShorterString(String... what);
+
+}

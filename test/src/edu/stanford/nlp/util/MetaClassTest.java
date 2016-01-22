@@ -1,373 +1,374 @@
 package edu.stanford.nlp.util;
 
 import java.io.File;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.util.*;
 
 import static org.junit.Assert.*;
 import org.junit.*;
 
-import edu.stanford.nlp.util.MetaClass;
+public class MetaClassTest {
 
-public class MetaClassTest{
-	
-	private static final String CLASS =  MetaClassTest.class.getName();
-	
-	//Interface
-	public static interface ISomething{ 
-		public String display();
-	}
-	public static class IInstSomething implements ISomething{
-		public String display(){ return "Isomething"; }
-	}
-	//Abstract
-	public static abstract class ASomething{
-		public abstract String display();
-	}
-	public static class AInstSomething extends ASomething{
-		public String display(){ return "Asomething"; }
-	}
-	//Superclass
-	public static class SSomething{
-		public String display(){ return "FAIL"; }
-	}
-	public static class SInstSomething extends SSomething{
-		public String display(){ return "Ssomething"; }
-	}
-	//Simpleclass
-	public static class Something{
-		public String display(){ return "something"; }
-	}
-	public static class SomethingWrapper{
-		private ISomething isomething;
-		private ASomething asomething;
-		private SSomething ssomething;
-		private Something something;
-		public SomethingWrapper(ISomething something){
-			this.isomething = something;
-		}
-		public SomethingWrapper(ASomething something){
-			this.asomething = something;
-		}
-		public SomethingWrapper(SSomething something){
-			this.ssomething = something;
-		}
-		public SomethingWrapper(Something something){
-			this.something = something;
-		}
-		public String display(){ return something.display(); }
-		public String displayI(){ return isomething.display(); }
-		public String displayA(){ return asomething.display(); }
-		public String displayS(){ return ssomething.display(); }
-	}
-	public static class SubSSomething extends SSomething{
-		public String display(){ return "subssomething"; }
-	}
-	public static class ManyConstructors{
-		private int constructorInvoked = -1;
-		public ManyConstructors(Object a){
-			constructorInvoked = 0;
-		}
-		public ManyConstructors(Something a){
-			constructorInvoked = 1;
-		}
-		public ManyConstructors(SSomething a){
-			constructorInvoked = 2;
-		}
-		public ManyConstructors(SubSSomething a){
-			constructorInvoked = 3;
-		}
-		public ManyConstructors(Object a, Object b){
-			this.constructorInvoked = 4;
-		}
-		public ManyConstructors(Object a, Something b){
-			this.constructorInvoked = 5;
-		}
-		public ManyConstructors(Object a, SSomething b){
-			this.constructorInvoked = 6;
-		}
-		public ManyConstructors(Object a, SubSSomething b){
-			this.constructorInvoked = 7;
-		}
-		
-		public ManyConstructors(Something a, Object b){
-			this.constructorInvoked = 8;
-		}
-		public ManyConstructors(Something a, Something b){
-			this.constructorInvoked = 9;
-		}
-		public ManyConstructors(Something a, SSomething b){
-			this.constructorInvoked = 10;
-		}
-		public ManyConstructors(Something a, SubSSomething b){
-			this.constructorInvoked = 11;
-		}
-		
-		public ManyConstructors(SSomething a, Object b){
-			this.constructorInvoked = 12;
-		}
-		public ManyConstructors(SSomething a, Something b){
-			this.constructorInvoked = 13;
-		}
-		public ManyConstructors(SSomething a, SSomething b){
-			this.constructorInvoked = 14;
-		}
-		public ManyConstructors(SSomething a, SubSSomething b){
-			this.constructorInvoked = 15;
-		}
-		
-		public ManyConstructors(SubSSomething a, Object b){
-			this.constructorInvoked = 16;
-		}
-		public ManyConstructors(SubSSomething a, Something b){
-			this.constructorInvoked = 17;
-		}
-		public ManyConstructors(SubSSomething a, SSomething b){
-			this.constructorInvoked = 18;
-		}
-		public ManyConstructors(SubSSomething a, SubSSomething b){
-			this.constructorInvoked = 19;
-		}
-		public ManyConstructors(Something a, Something b, Something c){
-			this.constructorInvoked = 20;
-		}
-		public int constructorInvoked(){ return constructorInvoked; }
-		public boolean equals(Object o){
-			if(o instanceof ManyConstructors){
-				return this.constructorInvoked == ((ManyConstructors) o).constructorInvoked;
-			}
-			return false;
-		}
-		public String toString(){
-			return "" + constructorInvoked;
-		}
-	}
+  private static final String CLASS =  MetaClassTest.class.getName();
 
-	
-	public static class Primitive{
-		public Primitive(int i){}
-		public Primitive(double d){}
-	}
-	
-	public static class VarArgs{
-		public int a[];
-		public VarArgs(int ...args){
-			a = args;
-		}
-	}
+  //Interface
+  public static interface ISomething{
+    public String display();
+  }
+  public static class IInstSomething implements ISomething{
+    public String display(){ return "Isomething"; }
+  }
+  //Abstract
+  public static abstract class ASomething{
+    public abstract String display();
+  }
+  public static class AInstSomething extends ASomething{
+    public String display(){ return "Asomething"; }
+  }
+  //Superclass
+  public static class SSomething{
+    public String display(){ return "FAIL"; }
+  }
+  public static class SInstSomething extends SSomething{
+    public String display(){ return "Ssomething"; }
+  }
+  //Simpleclass
+  public static class Something{
+    public String display(){ return "something"; }
+  }
+  public static class SomethingWrapper{
+    private ISomething isomething;
+    private ASomething asomething;
+    private SSomething ssomething;
+    private Something something;
+    public SomethingWrapper(ISomething something){
+      this.isomething = something;
+    }
+    public SomethingWrapper(ASomething something){
+      this.asomething = something;
+    }
+    public SomethingWrapper(SSomething something){
+      this.ssomething = something;
+    }
+    public SomethingWrapper(Something something){
+      this.something = something;
+    }
+    public String display(){ return something.display(); }
+    public String displayI(){ return isomething.display(); }
+    public String displayA(){ return asomething.display(); }
+    public String displayS(){ return ssomething.display(); }
+  }
+  public static class SubSSomething extends SSomething{
+    public String display(){ return "subssomething"; }
+  }
+  public static class ManyConstructors {
+    private int constructorInvoked = -1;
+    public ManyConstructors(Object a){
+      constructorInvoked = 0;
+    }
+    public ManyConstructors(Something a){
+      constructorInvoked = 1;
+    }
+    public ManyConstructors(SSomething a){
+      constructorInvoked = 2;
+    }
+    public ManyConstructors(SubSSomething a){
+      constructorInvoked = 3;
+    }
+    public ManyConstructors(Object a, Object b){
+      this.constructorInvoked = 4;
+    }
+    public ManyConstructors(Object a, Something b){
+      this.constructorInvoked = 5;
+    }
+    public ManyConstructors(Object a, SSomething b){
+      this.constructorInvoked = 6;
+    }
+    public ManyConstructors(Object a, SubSSomething b){
+      this.constructorInvoked = 7;
+    }
 
-	@Test
-	public void testBasic(){
-		//--Basics
-		//(succeed)
-		MetaClass.create("java.lang.String");
-		assertEquals(MetaClass.create("java.lang.String").createInstance("hello"), "hello");
-		//(fail)
-		try{
-			MetaClass.create(CLASS+"$SomethingWrapper").createInstance("hello");
-		} catch(MetaClass.ClassCreationException e){
-			assertTrue("Should not instantiate Super with String", true);
-		}
-		
-		//--Argument Length
-		MetaClass.create(CLASS+"$ManyConstructors").createInstance(new Something(), new Something(), new Something());
-		assertEquals(
-				((ManyConstructors) MetaClass.create(CLASS+"$ManyConstructors").createInstance(
-						new Something()
-							)).constructorInvoked(),
-				new ManyConstructors(
-						new Something()
-							).constructorInvoked()
-				);
-		assertEquals(
-			((ManyConstructors) MetaClass.create(CLASS+"$ManyConstructors").createInstance(
-					new Something(), new Something()
-						)).constructorInvoked(),
-			new ManyConstructors(
-					new Something(), new Something()
-						).constructorInvoked()
-			);
-		assertEquals(
-				((ManyConstructors) MetaClass.create(CLASS+"$ManyConstructors").createInstance(
-						new Something(), new Something(), new Something()
-							)).constructorInvoked(),
-				new ManyConstructors(
-						new Something(), new Something(), new Something()
-							).constructorInvoked()
-				);
-		
-		assertEquals(new ManyConstructors(new String("hi")), MetaClass.create(CLASS+"$ManyConstructors").createInstance(new String("hi")));
-		assertEquals(new ManyConstructors(new Something()), MetaClass.create(CLASS+"$ManyConstructors").createInstance(new Something()));
-		assertEquals(new ManyConstructors(new SSomething()), MetaClass.create(CLASS+"$ManyConstructors").createInstance(new SSomething()));
-		assertEquals(new ManyConstructors(new SubSSomething()), MetaClass.create(CLASS+"$ManyConstructors").createInstance(new SubSSomething()));
-	}
-	
-	@Test
-	public void testInheritance(){
-		//--Implementing Class
-		try{
-			Object o = MetaClass.create(CLASS+"$SomethingWrapper").createInstance(new Something());
-			assertTrue("Returned class should be a SomethingWrapper", o instanceof SomethingWrapper );
-			assertEquals(((SomethingWrapper) o).display(), "something");
-		} catch(MetaClass.ClassCreationException e){
-			e.printStackTrace();
-			assertFalse("Should not exception on this call", true);
-		}
-		//--Implementing super class
-		try{
-			Object o = MetaClass.create(CLASS+"$SomethingWrapper").createInstance(new SInstSomething());
-			assertTrue("Returned class should be a SomethingWrapper", o instanceof SomethingWrapper );
-			assertEquals(((SomethingWrapper) o).displayS(), "Ssomething");
-		} catch(MetaClass.ClassCreationException e){
-			e.printStackTrace();
-			assertFalse("Should not exception on this call", true);
-		}
-		//--Implementing abstract classes
-		try{
-			Object o = MetaClass.create(CLASS+"$SomethingWrapper").createInstance(new AInstSomething());
-			assertTrue("Returned class should be a SomethingWrapper", o instanceof SomethingWrapper );
-			assertEquals(((SomethingWrapper) o).displayA(), "Asomething");
-		} catch(MetaClass.ClassCreationException e){
-			e.printStackTrace();
-			assertFalse("Should not exception on this call", true);
-		}
-		//--Implementing interfaces
-		try{
-			Object o = MetaClass.create(CLASS+"$SomethingWrapper").createInstance(new IInstSomething());
-			assertTrue("Returned class should be a SomethingWrapper", o instanceof SomethingWrapper );
-			assertEquals(((SomethingWrapper) o).displayI(), "Isomething");
-		} catch(MetaClass.ClassCreationException e){
-			e.printStackTrace();
-			assertFalse("Should not exception on this call", true);
-		}
-	}
-	
-	private ManyConstructors makeRef(int i, int j){
-		switch(i){
-		case 0:
-			switch(j){
-			case 0:
-				return new ManyConstructors(new String("hi"), new String("hi"));
-			case 1:
-				return new ManyConstructors(new String("hi"), new Something());
-			case 2:
-				return new ManyConstructors(new String("hi"), new SSomething());
-			case 3:
-				return new ManyConstructors(new String("hi"), new SubSSomething());
-			}
-			return null;
-		case 1:
-			switch(j){
-			case 0:
-				return new ManyConstructors(new Something(), new String("hi"));
-			case 1:
-				return new ManyConstructors(new Something(), new Something());
-			case 2:
-				return new ManyConstructors(new Something(), new SSomething());
-			case 3:
-				return new ManyConstructors(new Something(), new SubSSomething());
-			}
-			return null;
-		case 2:
-			switch(j){
-			case 0:
-				return new ManyConstructors(new SSomething(), new String("hi"));
-			case 1:
-				return new ManyConstructors(new SSomething(), new Something());
-			case 2:
-				return new ManyConstructors(new SSomething(),  new SSomething());
-			case 3:
-				return new ManyConstructors(new SSomething(),  new SubSSomething());
-			}
-			return null;
-		case 3:
-			switch(j){
-			case 0:
-				return new ManyConstructors(new SubSSomething(), new String("hi"));
-			case 1:
-				return new ManyConstructors(new SubSSomething(), new Something());
-			case 2:
-				return new ManyConstructors(new SubSSomething(), new SSomething());
-			case 3:
-				return new ManyConstructors(new SubSSomething(), new SubSSomething());
-			}
-			return null;
-		}
-		return null;
-	}
-	
-	private ManyConstructors makeRef(int i){
-		switch(i){
-		case 0:
-			return new ManyConstructors(new String("hi"));
-		case 1:
-			return new ManyConstructors(new Something());
-		case 2:
-			return new ManyConstructors(new SSomething());
-		case 3:
-			return new ManyConstructors(new SubSSomething());
-		}
-		return null;
-	}
-	
-	@Test
-	public void testConsistencyWithJava(){
-		Object[] options = new Object[]{ new String("hi"), new Something(), new SSomething(), new SubSSomething() };
+    public ManyConstructors(Something a, Object b){
+      this.constructorInvoked = 8;
+    }
+    public ManyConstructors(Something a, Something b){
+      this.constructorInvoked = 9;
+    }
+    public ManyConstructors(Something a, SSomething b){
+      this.constructorInvoked = 10;
+    }
+    public ManyConstructors(Something a, SubSSomething b){
+      this.constructorInvoked = 11;
+    }
+
+    public ManyConstructors(SSomething a, Object b){
+      this.constructorInvoked = 12;
+    }
+    public ManyConstructors(SSomething a, Something b){
+      this.constructorInvoked = 13;
+    }
+    public ManyConstructors(SSomething a, SSomething b){
+      this.constructorInvoked = 14;
+    }
+    public ManyConstructors(SSomething a, SubSSomething b){
+      this.constructorInvoked = 15;
+    }
+
+    public ManyConstructors(SubSSomething a, Object b){
+      this.constructorInvoked = 16;
+    }
+    public ManyConstructors(SubSSomething a, Something b){
+      this.constructorInvoked = 17;
+    }
+    public ManyConstructors(SubSSomething a, SSomething b){
+      this.constructorInvoked = 18;
+    }
+    public ManyConstructors(SubSSomething a, SubSSomething b){
+      this.constructorInvoked = 19;
+    }
+    public ManyConstructors(Something a, Something b, Something c){
+      this.constructorInvoked = 20;
+    }
+    public int constructorInvoked(){ return constructorInvoked; }
+    public boolean equals(Object o){
+      if(o instanceof ManyConstructors){
+        return this.constructorInvoked == ((ManyConstructors) o).constructorInvoked;
+      }
+      return false;
+    }
+    public String toString(){
+      return "" + constructorInvoked;
+    }
+  }
+
+
+  public static class Primitive{
+    public Primitive(int i){}
+    public Primitive(double d){}
+  }
+
+  public static class VarArgs{
+    public int a[];
+    public VarArgs(int ...args){
+      a = args;
+    }
+  }
+
+  @Test
+  public void testBasic(){
+    //--Basics
+    //(succeed)
+    MetaClass.create("java.lang.String");
+    assertEquals(MetaClass.create("java.lang.String").createInstance("hello"), "hello");
+    //(fail)
+    try{
+      MetaClass.create(CLASS+"$SomethingWrapper").createInstance("hello");
+    } catch(MetaClass.ClassCreationException e){
+      assertTrue("Should not instantiate Super with String", true);
+    }
+
+    //--Argument Length
+    MetaClass.create(CLASS+"$ManyConstructors").createInstance(new Something(), new Something(), new Something());
+    assertEquals(
+            ((ManyConstructors) MetaClass.create(CLASS+"$ManyConstructors").createInstance(
+                    new Something()
+            )).constructorInvoked(),
+            new ManyConstructors(
+                    new Something()
+            ).constructorInvoked()
+    );
+    assertEquals(
+            ((ManyConstructors) MetaClass.create(CLASS+"$ManyConstructors").createInstance(
+                    new Something(), new Something()
+            )).constructorInvoked(),
+            new ManyConstructors(
+                    new Something(), new Something()
+            ).constructorInvoked()
+    );
+    assertEquals(
+            ((ManyConstructors) MetaClass.create(CLASS+"$ManyConstructors").createInstance(
+                    new Something(), new Something(), new Something()
+            )).constructorInvoked(),
+            new ManyConstructors(
+                    new Something(), new Something(), new Something()
+            ).constructorInvoked()
+    );
+
+    assertEquals(new ManyConstructors(new String("hi")), MetaClass.create(CLASS+"$ManyConstructors").createInstance(new String("hi")));
+    assertEquals(new ManyConstructors(new Something()), MetaClass.create(CLASS+"$ManyConstructors").createInstance(new Something()));
+    assertEquals(new ManyConstructors(new SSomething()), MetaClass.create(CLASS+"$ManyConstructors").createInstance(new SSomething()));
+    assertEquals(new ManyConstructors(new SubSSomething()), MetaClass.create(CLASS+"$ManyConstructors").createInstance(new SubSSomething()));
+  }
+
+  @Test
+  public void testInheritance(){
+    //--Implementing Class
+    try{
+      Object o = MetaClass.create(CLASS+"$SomethingWrapper").createInstance(new Something());
+      assertTrue("Returned class should be a SomethingWrapper", o instanceof SomethingWrapper );
+      assertEquals(((SomethingWrapper) o).display(), "something");
+    } catch(MetaClass.ClassCreationException e){
+      e.printStackTrace();
+      assertFalse("Should not exception on this call", true);
+    }
+    //--Implementing super class
+    try{
+      Object o = MetaClass.create(CLASS+"$SomethingWrapper").createInstance(new SInstSomething());
+      assertTrue("Returned class should be a SomethingWrapper", o instanceof SomethingWrapper );
+      assertEquals(((SomethingWrapper) o).displayS(), "Ssomething");
+    } catch(MetaClass.ClassCreationException e){
+      e.printStackTrace();
+      assertFalse("Should not exception on this call", true);
+    }
+    //--Implementing abstract classes
+    try{
+      Object o = MetaClass.create(CLASS+"$SomethingWrapper").createInstance(new AInstSomething());
+      assertTrue("Returned class should be a SomethingWrapper", o instanceof SomethingWrapper );
+      assertEquals(((SomethingWrapper) o).displayA(), "Asomething");
+    } catch(MetaClass.ClassCreationException e){
+      e.printStackTrace();
+      assertFalse("Should not exception on this call", true);
+    }
+    //--Implementing interfaces
+    try{
+      Object o = MetaClass.create(CLASS+"$SomethingWrapper").createInstance(new IInstSomething());
+      assertTrue("Returned class should be a SomethingWrapper", o instanceof SomethingWrapper );
+      assertEquals(((SomethingWrapper) o).displayI(), "Isomething");
+    } catch(MetaClass.ClassCreationException e){
+      e.printStackTrace();
+      assertFalse("Should not exception on this call", true);
+    }
+  }
+
+  private ManyConstructors makeRef(int i, int j){
+    switch(i){
+      case 0:
+        switch(j){
+          case 0:
+            return new ManyConstructors(new String("hi"), new String("hi"));
+          case 1:
+            return new ManyConstructors(new String("hi"), new Something());
+          case 2:
+            return new ManyConstructors(new String("hi"), new SSomething());
+          case 3:
+            return new ManyConstructors(new String("hi"), new SubSSomething());
+        }
+        return null;
+      case 1:
+        switch(j){
+          case 0:
+            return new ManyConstructors(new Something(), new String("hi"));
+          case 1:
+            return new ManyConstructors(new Something(), new Something());
+          case 2:
+            return new ManyConstructors(new Something(), new SSomething());
+          case 3:
+            return new ManyConstructors(new Something(), new SubSSomething());
+        }
+        return null;
+      case 2:
+        switch(j){
+          case 0:
+            return new ManyConstructors(new SSomething(), new String("hi"));
+          case 1:
+            return new ManyConstructors(new SSomething(), new Something());
+          case 2:
+            return new ManyConstructors(new SSomething(),  new SSomething());
+          case 3:
+            return new ManyConstructors(new SSomething(),  new SubSSomething());
+        }
+        return null;
+      case 3:
+        switch(j){
+          case 0:
+            return new ManyConstructors(new SubSSomething(), new String("hi"));
+          case 1:
+            return new ManyConstructors(new SubSSomething(), new Something());
+          case 2:
+            return new ManyConstructors(new SubSSomething(), new SSomething());
+          case 3:
+            return new ManyConstructors(new SubSSomething(), new SubSSomething());
+        }
+        return null;
+    }
+    return null;
+  }
+
+  private static ManyConstructors makeRef(int i){
+    switch(i){
+      case 0:
+        return new ManyConstructors(new String("hi"));
+      case 1:
+        return new ManyConstructors(new Something());
+      case 2:
+        return new ManyConstructors(new SSomething());
+      case 3:
+        return new ManyConstructors(new SubSSomething());
+    }
+    return null;
+  }
+
+  @Test
+  public void testConsistencyWithJava(){
+    Object[] options = new Object[]{ new String("hi"), new Something(), new SSomething(), new SubSSomething() };
 		/*
 		 * Single Term
 		 */
-		//--Cast everything as an object
-		for(int i=0; i<options.length; i++){
-			ManyConstructors ref = new ManyConstructors(options[i]);
-			ManyConstructors test = (ManyConstructors) 
-				MetaClass.create(CLASS+"$ManyConstructors")
-				.createFactory(Object.class)
-				.createInstance(options[i]);
-			assertEquals(ref.constructorInvoked(), test.constructorInvoked());
-		}
-		//--Use native types
-		for(int i=0; i<options.length; i++){
-			ManyConstructors ref = makeRef(i);
-			ManyConstructors test = (ManyConstructors) 
-				MetaClass.create(CLASS+"$ManyConstructors")
-				.createInstance(options[i]);
-			assertEquals(ref, test);
-		}
+    //--Cast everything as an object
+    for (Object option : options) {
+      ManyConstructors ref = new ManyConstructors(option);
+      ManyConstructors test = (ManyConstructors)
+              MetaClass.create(CLASS + "$ManyConstructors")
+                      .createFactory(Object.class)
+                      .createInstance(option);
+      assertEquals(ref.constructorInvoked(), test.constructorInvoked());
+    }
+    //--Use native types
+    for(int i=0; i<options.length; i++){
+      ManyConstructors ref = makeRef(i);
+      ManyConstructors test = (ManyConstructors)
+              MetaClass.create(CLASS+"$ManyConstructors")
+                      .createInstance(options[i]);
+      assertEquals(ref, test);
+    }
 		/*
 		 * Multi Term
 		 */
-		//--Use native types
-		for(int i=0; i<options.length; i++){
-			for(int j=0; j<options.length; j++){
-				ManyConstructors ref = makeRef(i,j);
-				ManyConstructors test = (ManyConstructors) 
-				MetaClass.create(CLASS+"$ManyConstructors")
-				.createInstance(options[i], options[j]);
-				assertEquals(ref, test);
-			}
-		}
-	}
-	
-	@Test
-	public void testPrimitives(){
-		// pass a value as a class
-		MetaClass.create(CLASS+"$Primitive").createInstance(new Integer(7));
-		MetaClass.create(CLASS+"$Primitive").createInstance(new Double(7));
-		// pass a value as a primitive
-		MetaClass.create(CLASS+"$Primitive").createInstance(7);
-		MetaClass.create(CLASS+"$Primitive").createInstance(2.8);
-		//(fail)
-		try{
-			MetaClass.create(CLASS+"$Primitive").createInstance(7L);
-		} catch(MetaClass.ClassCreationException e){
-			assertTrue("Should not be able to case Long int Primitive()", true);
-		}
-	}
+    //--Use native types
+    for(int i=0; i<options.length; i++){
+      for(int j=0; j<options.length; j++){
+        ManyConstructors ref = makeRef(i,j);
+        ManyConstructors test = (ManyConstructors)
+                MetaClass.create(CLASS+"$ManyConstructors")
+                        .createInstance(options[i], options[j]);
+        assertEquals(ref, test);
+      }
+    }
+  }
+
+  @Test
+  public void testPrimitives(){
+    // pass a value as a class
+    MetaClass.create(CLASS+"$Primitive").createInstance(new Integer(7));
+    MetaClass.create(CLASS+"$Primitive").createInstance(new Double(7));
+    // pass a value as a primitive
+    MetaClass.create(CLASS+"$Primitive").createInstance(7);
+    MetaClass.create(CLASS+"$Primitive").createInstance(2.8);
+    //(fail)
+    try{
+      MetaClass.create(CLASS+"$Primitive").createInstance(7L);
+    } catch(MetaClass.ClassCreationException e){
+      assertTrue("Should not be able to case Long int Primitive()", true);
+    }
+  }
 
   @Test
   public void testCastSimple() {
-    assertEquals(1.0, MetaClass.cast("1.0", Double.class));
-    assertEquals(1, MetaClass.cast("1", Integer.class));
-    assertEquals(1, MetaClass.cast("1.0", Integer.class));
-    assertEquals(1L, MetaClass.cast("1.0", Long.class));
+    assertEquals(new Double(1.0), MetaClass.cast("1.0", Double.class));
+    assertEquals(new Integer(1), MetaClass.cast("1", Integer.class));
+    assertEquals(new Integer(1), MetaClass.cast("1.0", Integer.class));
+    assertEquals(new Long(1L), MetaClass.cast("1.0", Long.class));
     assertEquals(new Short((short) 1), MetaClass.cast("1.0", Short.class));
     assertEquals(new Byte((byte) 1), MetaClass.cast("1.0", Byte.class));
     assertEquals("Hello", MetaClass.cast("Hello", String.class));
@@ -389,12 +390,17 @@ public class MetaClassTest{
     assertArrayEquals(new Integer[]{1,2,3}, ints4);
     Integer[] ints5 = MetaClass.cast("1   2   3", Integer[].class);
     assertArrayEquals(new Integer[]{1,2,3}, ints5);
+    Integer[] ints6 = MetaClass.cast("\n1 \n\n  2   3", Integer[].class);
+    assertArrayEquals(new Integer[]{1,2,3}, ints6);
+
+    Integer[] intsEmpty = MetaClass.cast("", Integer[].class);
+    assertArrayEquals(new Integer[]{}, intsEmpty);
   }
 
   private static enum Fruits {
     APPLE,
     Orange,
-    grape;
+    grape
   }
 
   @Test
@@ -407,6 +413,68 @@ public class MetaClassTest{
     assertEquals(Fruits.grape, MetaClass.cast("grape", Fruits.class));
     assertEquals(Fruits.grape, MetaClass.cast("Grape", Fruits.class));
     assertEquals(Fruits.grape, MetaClass.cast("GRAPE", Fruits.class));
+  }
+
+  @Test
+  public void testCastCollection() {
+    Set<String> set = new HashSet<String>();
+    set.add("apple");
+    set.add("banana");
+    Set<String> castedSet = MetaClass.cast("[apple, banana]", Set.class);
+    Set<String> castedSet2 = MetaClass.cast("[apple ,    banana ]", Set.class);
+    Set<String> castedSet3 = MetaClass.cast("{apple ,    banana }", Set.class);
+    assertEquals(set, castedSet);
+    assertEquals(set, castedSet2);
+    assertEquals(set, castedSet3);
+
+    List<String> list = new LinkedList<String>();
+    list.add("apple");
+    list.add("banana");
+    List<String> castedList = MetaClass.cast("[apple, banana]", List.class);
+    assertEquals(list, castedList);
+  }
+
+  private static class Pointer<E> {
+    public E value;
+    public Pointer(E value) {
+      this.value = value;
+    }
+    @SuppressWarnings("UnusedDeclaration") // used via reflection
+    public static <E> Pointer<E> fromString(String value) {
+      E v = MetaClass.castWithoutKnowingType(value);
+      return new Pointer<E>(v);
+    }
+  }
+
+  @Test
+  public void testCastMap() {
+    Map<String, String> a = MetaClass.cast("{ a -> 1, b -> 2 }", Map.class);
+    assertEquals(2, a.size());
+    assertEquals("1", a.get("a"));
+    assertEquals("2", a.get("b"));
+
+    Map<String, String> b = MetaClass.cast("a => 1, b -> 2", Map.class);
+    assertEquals(2, b.size());
+    assertEquals("1", b.get("a"));
+    assertEquals("2", b.get("b"));
+
+    Map<String, String> c = MetaClass.cast("[a->1;b->2]", Map.class);
+    assertEquals(2, c.size());
+    assertEquals("1", c.get("a"));
+    assertEquals("2", c.get("b"));
+
+    Map<String, String> d = MetaClass.cast("\n\na->\n1\n\n\nb->2", Map.class);
+    assertEquals(2, d.size());
+    assertEquals("1", d.get("a"));
+    assertEquals("2", d.get("b"));
+  }
+
+  @Test
+  public void testCastRegression() {
+    // Generics ordering (integer should go relatively early)
+    Pointer<Integer> x1 = MetaClass.cast("1", Pointer.class);
+    assertEquals(1, x1.value.intValue());
+
   }
 
   private static class FromStringable {
@@ -435,15 +503,26 @@ public class MetaClassTest{
     assertEquals(new FromStringable("bar"), MetaClass.cast("bar", FromStringable.class));
   }
 
+  @Test
+  public void testCastStream() {
+    assertEquals(System.out, MetaClass.cast("stdout", OutputStream.class));
+    assertEquals(System.out, MetaClass.cast("out", OutputStream.class));
+    assertEquals(System.err, MetaClass.cast("stderr", OutputStream.class));
+    assertEquals(System.err, MetaClass.cast("err", OutputStream.class));
+    assertEquals(ObjectOutputStream.class, MetaClass.cast("err", ObjectOutputStream.class).getClass());
+  }
+
 //	TODO(gabor) this would be kind of cool to implement
-	@Test
+/*
+  @Test
   @Ignore
-	public void testVariableArgConstructor(){
-		VarArgs a = MetaClass.create(CLASS+"$VarArgs").createInstance(1,2,3);
-		assertEquals(3, a.a.length);
-		assertTrue(a.a[0] == 1);
-		assertTrue(a.a[1] == 2);
-		assertTrue(a.a[2] == 3);
-	}
-	
+  public void testVariableArgConstructor(){
+    VarArgs a = MetaClass.create(CLASS+"$VarArgs").createInstance(1,2,3);
+    assertEquals(3, a.a.length);
+    assertTrue(a.a[0] == 1);
+    assertTrue(a.a[1] == 2);
+    assertTrue(a.a[2] == 3);
+  }
+*/
+
 }

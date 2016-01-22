@@ -12,7 +12,7 @@ MIN_SCORE=0.949
 train=`bash -c 'java -mx4g edu.stanford.nlp.ie.crf.CRFClassifier -prop #{PROP_FILE}'`
 test=`bash -c 'java -mx4g edu.stanford.nlp.ie.crf.CRFClassifier -prop #{TEST_PROP} -testFile #{TEST_FILE} > #{OUT}'`
 # TODO: need to find the correct lexicon..
-eval=`bash -c '/u/nlp/data/chinese-segmenter/Sighan2005/eval/score.pl /juice/scr1/htseng/gale/seg/corpus/train.lexicon #{GOLD_TEST} #{OUT}'`
+eval=`bash -c '/u/nlp/data/chinese-segmenter/Sighan2005/eval/score.pl /scr/htseng/gale/seg/corpus/train.lexicon #{GOLD_TEST} #{OUT}'`
 
 eval =~ /=== F MEASURE:\s*([\d\.]+)/ or raise "can't parse output"
 fmeasure = $1.to_f

@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Utilities for helping out with Iterables as Collections is to Collection.
@@ -288,7 +289,7 @@ public class Iterables {
    * varargs parameter.
    */
   public static <T> Iterable<T> chain(final T[] ... arrays) {
-    LinkedList<Iterable<T>> iterables = new LinkedList<Iterable<T>>();
+    LinkedList<Iterable<T>> iterables = new LinkedList<>();
     for (T[] array : arrays) {
       iterables.add(Arrays.asList(array));
     }
@@ -356,7 +357,7 @@ public class Iterables {
       }
 
       public Pair<T1, T2> next() {
-        return new Pair<T1,T2>(iter1.next(), iter2.next());
+        return new Pair<>(iter1.next(), iter2.next());
       }
 
       public void remove() {
@@ -447,7 +448,7 @@ public class Iterables {
                 nextB = null;
               } else {
                 // just right - return this pair
-                return new Pair<V1,V2>(nextA, nextB);
+                return new Pair<>(nextA, nextB);
               }
             }
 
@@ -467,11 +468,7 @@ public class Iterables {
       final Iterable<V> iter1, final Iterable<V> iter2,
       final Comparator<V> comparator) {
 
-    final IncrementComparator<V,V> inc = new IncrementComparator<V,V>() {
-      public int compare(V a, V b) {
-        return comparator.compare(a,b);
-      }
-    };
+    final IncrementComparator<V,V> inc = (a, b) -> comparator.compare(a,b);
 
     return merge(iter1, iter2, inc);
   }
@@ -504,11 +501,7 @@ public class Iterables {
 
     // flattens the pairs into triple
     Function<Pair<Pair<V1,V2>, V3>, Triple<V1,V2,V3>> flatten =
-      new Function<Pair<Pair<V1,V2>,V3>, Triple<V1,V2,V3>>() {
-      public Triple<V1, V2, V3> apply(Pair<Pair<V1, V2>, V3> in) {
-        return new Triple<V1,V2,V3>(in.first.first,in.first.second,in.second);
-      }
-    };
+        in -> new Triple<>(in.first.first, in.first.second, in.second);
 
     return transform(merge(partial, iter3, inc), flatten);
   }
@@ -521,11 +514,7 @@ public class Iterables {
       final Iterable<V> iter1, final Iterable<V> iter2, Iterable<V> iter3,
       final Comparator<V> comparator) {
 
-    final IncrementComparator<V,V> inc = new IncrementComparator<V,V>() {
-      public int compare(V a, V b) {
-        return comparator.compare(a,b);
-      }
-    };
+    final IncrementComparator<V,V> inc = (a, b) -> comparator.compare(a,b);
 
     return merge(iter1, iter2, iter3, inc, inc);
   }
@@ -553,41 +542,36 @@ public class Iterables {
           }
 
           public Iterable<V> next() {
-            return new Iterable<V>() {
-              public Iterator<V> iterator() {
-                /** Previous returned by this iterator */
-                return new Iterator<V>() {
-                  V last = null;
+            return () -> new Iterator<V>() {
+              V last = null;
 
-                  public boolean hasNext() {
-                    // get next if we need to and one is available
-                    if (next == null && it.hasNext()) {
-                      next = it.next();
-                    }
+              public boolean hasNext() {
+                // get next if we need to and one is available
+                if (next == null && it.hasNext()) {
+                  next = it.next();
+                }
 
-                    // if next and last both have values, compare them
-                    if (last != null && next != null) {
-                      return comparator.compare(last, next) == 0;
-                    }
+                // if next and last both have values, compare them
+                if (last != null && next != null) {
+                  return comparator.compare(last, next) == 0;
+                }
 
-                    // one of them was not null - have more if it was next
-                    return next != null;
-                  }
+                // one of them was not null - have more if it was next
+                return next != null;
+              }
 
-                  public V next() {
-                    if (!hasNext()) {
-                      throw new IllegalStateException("Didn't have next");
-                    }
-                    V rv = next;
-                    last = next;
-                    next = null;
-                    return rv;
-                  }
+              public V next() {
+                if (!hasNext()) {
+                  throw new IllegalStateException("Didn't have next");
+                }
+                V rv = next;
+                last = next;
+                next = null;
+                return rv;
+              }
 
-                  public void remove() {
-                    throw new UnsupportedOperationException();
-                  }
-                };
+              public void remove() {
+                throw new UnsupportedOperationException();
               }
             };
           }
@@ -628,7 +612,7 @@ public class Iterables {
   public static <T> Iterable<T> sample(Iterable<T> items, int n, int k, Random random) {
 
     // assemble a list of all indexes
-    List<Integer> indexes = new ArrayList<Integer>();
+    List<Integer> indexes = new ArrayList<>();
     for (int i = 0; i < n; ++i) {
       indexes.add(i);
     }
@@ -687,7 +671,7 @@ public class Iterables {
    * Creates an ArrayList containing all of the Objects returned by the given Iterator.
    */
   public static <T> ArrayList<T> asArrayList(Iterator<? extends T> iter) {
-    ArrayList<T> al = new ArrayList<T>();
+    ArrayList<T> al = new ArrayList<>();
     return (ArrayList<T>) addAll(iter, al);
   }
 
@@ -695,7 +679,7 @@ public class Iterables {
    * Creates a HashSet containing all of the Objects returned by the given Iterator.
    */
   public static <T> HashSet<T> asHashSet(Iterator<? extends T> iter) {
-    HashSet<T> hs = new HashSet<T>();
+    HashSet<T> hs = new HashSet<>();
     return (HashSet<T>) addAll(iter, hs);
   }
 
@@ -734,7 +718,7 @@ public class Iterables {
 
     System.out.println(asCollection(l.iterator(), CollectionFactory.<String>hashSetFactory()));
 
-    ArrayList<String> al = new ArrayList<String>();
+    ArrayList<String> al = new ArrayList<>();
     al.add("d");
     System.out.println(addAll(l.iterator(), al));
   }

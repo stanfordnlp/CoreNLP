@@ -19,10 +19,13 @@ import java.util.*;
  */
 public class PairsHolder {
 
-  private final ArrayList<WordTag> arr = new ArrayList<WordTag>();
+  // todo: In Java 5+, just make this class an ArrayList<WordTag> and be done with it?? Or actually, probably a PaddedList. Or need a WindowedList?
+
+  private final ArrayList<WordTag> arr = new ArrayList<>();
 
   public PairsHolder() {}
 
+  // todo: This method seems crazy.  Can't we either just do nothing or using ensureCapacity()?
   public void setSize(int s) {
     while (arr.size() < s) {
       arr.add(new WordTag(null,"NN"));  // todo: remove NN.  NA okay?
@@ -73,7 +76,7 @@ public class PairsHolder {
   /* Methods unused. Commented for now:
   public void save(String filename) {
     try {
-      OutDataStreamFile rf = new OutDataStreamFile(filename);
+      DataOutputStream rf = IOUtils.getDataOutputStream(filename);
       int sz = arr.size();
       rf.writeInt(sz);
       for (int i = 0; i < sz; i++) {

@@ -8,7 +8,7 @@ import java.util.IdentityHashMap;
 import java.util.Set;
 
 import edu.stanford.nlp.trees.*;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 
 public class TregexTest extends TestCase {
 
@@ -23,6 +23,31 @@ public class TregexTest extends TestCase {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  public static Tree[] treesFromString(String ... s) {
+    Tree[] trees = new Tree[s.length];
+    for (int i = 0; i < s.length; ++i) {
+      trees[i] = treeFromString(s[i]);
+    }
+    return trees;
+  }
+
+  /** This was buggy in 2010. But John Bauer fixed it. */
+  public void testJoãoSilva() {
+    final TregexPattern tregex1 = TregexPattern.compile(
+            "PNT=p >>- (__=l >, (__=t <- (__=r <, __=m <- (__ <, CONJ <- __=z))))");
+    final TregexPattern tregex2 = TregexPattern.compile(
+            "PNT=p >>- (/(.+)/#1%var=l >, (__=t <- (__=r <, /(.+)/#1%var=m <- (__ <, CONJ <- /(.+)/#1%var=z))))");
+    final TregexPattern tregex3 = TregexPattern.compile(
+            "PNT=p >>- (__=l >, (__=t <- (__=r <, ~l <- (__ <, CONJ <- ~l))))");
+    Tree tree = treeFromString("(T (X (N (N Moe (PNT ,)))) (NP (X (N Curly)) (NP (CONJ and) (X (N Larry)))))");
+    TregexMatcher matcher1 = tregex1.matcher(tree);
+    assertTrue(matcher1.find());
+    TregexMatcher matcher2 = tregex2.matcher(tree);
+    assertTrue(matcher2.find());
+    TregexMatcher matcher3 = tregex3.matcher(tree);
+    assertTrue(matcher3.find());
   }
 
   public void testNoResults() {
@@ -783,9 +808,34 @@ public class TregexTest extends TestCase {
 
     runTest("(NP < NN | < NNS)", "((NP NN) (NP foo) (NP NNS))",
             "(NP NN)", "(NP NNS)");
+    runTest("(NP (< NN | < NNS) & > S)",
+            "(foo (S (NP NN) (NP foo) (NP NNS)) (NP NNS))",
+            "(NP NN)", "(NP NNS)");
     runTest("(NP [< NN | < NNS] & > S)",
             "(foo (S (NP NN) (NP foo) (NP NNS)) (NP NNS))",
             "(NP NN)", "(NP NNS)");
+  }
+
+  /**
+   * An example from our code which looks for month-day-year patterns
+   * in PTB.  Relies on the pattern splitting and variable matching
+   * features.
+   */
+  public void testMonthDayYear() {
+    String MONTH_REGEX = "January|February|March|April|May|June|July|August|September|October|November|December|Jan\\.|Feb\\.|Mar\\.|Apr\\.|Aug\\.|Sep\\.|Sept\\.|Oct\\.|Nov\\.|Dec\\.";
+    String testPattern = "NP=root <1 (NP=monthdayroot <1 (NNP=month <: /" + MONTH_REGEX +"/) <2 (CD=day <: __)) <2 (/^,$/=comma <: /^,$/) <3 (NP=yearroot <: (CD=year <: __)) : (=root <- =yearroot) : (=monthdayroot <- =day)";
+
+    runTest(testPattern, "(ROOT (S (NP (NNP Mr.) (NNP Good)) (VP (VBZ devotes) (NP (RB much) (JJ serious) (NN space)) (PP (TO to) (NP (NP (DT the) (NNS events)) (PP (IN of) (NP (NP (NP (NNP Feb.) (CD 25)) (, ,) (NP (CD 1942))) (, ,) (SBAR (WHADVP (WRB when)) (S (NP (JJ American) (NNS gunners)) (VP (VBD spotted) (NP (NP (JJ strange) (NNS lights)) (PP (IN in) (NP (NP (DT the) (NN sky)) (PP (IN above) (NP (NNP Los) (NNP Angeles)))))))))))))) (. .)))", "(NP (NP (NNP Feb.) (CD 25)) (, ,) (NP (CD 1942)))");
+    runTest(testPattern, "(ROOT (S (NP (DT The) (JJ preferred) (NNS shares)) (VP (MD will) (VP (VB carry) (NP (NP (DT a) (JJ floating) (JJ annual) (NN dividend)) (ADJP (JJ equal) (PP (TO to) (NP (NP (CD 72) (NN %)) (PP (IN of) (NP (NP (DT the) (JJ 30-day) (NNS bankers) (POS ')) (NN acceptance) (NN rate))))))) (PP (IN until) (NP (NP (NNP Dec.) (CD 31)) (, ,) (NP (CD 1994)))))) (. .)))", "(NP (NP (NNP Dec.) (CD 31)) (, ,) (NP (CD 1994)))");
+    runTest(testPattern, "(ROOT (S (NP (PRP It)) (VP (VBD said) (SBAR (S (NP (NN debt)) (VP (VBD remained) (PP (IN at) (NP (NP (DT the) (QP ($ $) (CD 1.22) (CD billion))) (SBAR (WHNP (DT that)) (S (VP (VBZ has) (VP (VBD prevailed) (PP (IN since) (NP (JJ early) (CD 1989))))))))) (, ,) (SBAR (IN although) (S (NP (IN that)) (VP (VBN compared) (PP (IN with) (NP (NP (QP ($ $) (CD 911) (CD million))) (PP (IN at) (NP (NP (NNP Sept.) (CD 30)) (, ,) (NP (CD 1988))))))))))))) (. .)))", "(NP (NP (NNP Sept.) (CD 30)) (, ,) (NP (CD 1988)))");
+    runTest(testPattern, "(ROOT (S (NP (DT The) (JJ new) (NNS notes)) (VP (MD will) (VP (VB bear) (NP (NN interest)) (PP (PP (IN at) (NP (NP (CD 5.5) (NN %)) (PP (IN through) (NP (NP (NNP July) (CD 31)) (, ,) (NP (CD 1991)))))) (, ,) (CC and) (ADVP (RB thereafter)) (PP (IN at) (NP (CD 10) (NN %)))))) (. .)))", "(NP (NP (NNP July) (CD 31)) (, ,) (NP (CD 1991)))");
+    runTest(testPattern, "(ROOT (S (NP (NP (NNP Francis) (NNP M.) (NNP Wheat)) (, ,) (NP (NP (DT a) (JJ former) (NNPS Securities)) (CC and) (NP (NNP Exchange) (NNP Commission) (NN member))) (, ,)) (VP (VBD headed) (NP (NP (DT the) (NN panel)) (SBAR (WHNP (WDT that)) (S (VP (VBD had) (VP (VP (VBN studied) (NP (DT the) (NNS issues)) (PP (IN for) (NP (DT a) (NN year)))) (CC and) (VP (VBD proposed) (NP (DT the) (NNP FASB)) (PP (IN on) (NP (NP (NNP March) (CD 30)) (, ,) (NP (CD 1972))))))))))) (. .)))", "(NP (NP (NNP March) (CD 30)) (, ,) (NP (CD 1972)))");
+    runTest(testPattern, "(ROOT (S (NP (DT The) (NNP FASB)) (VP (VBD had) (NP (PRP$ its) (JJ initial) (NN meeting)) (PP (IN on) (NP (NP (NNP March) (CD 28)) (, ,) (NP (CD 1973))))) (. .)))", "(NP (NP (NNP March) (CD 28)) (, ,) (NP (CD 1973)))");
+    runTest(testPattern, "(ROOT (S (S (PP (IN On) (NP (NP (NNP Dec.) (CD 13)) (, ,) (NP (CD 1973)))) (, ,) (NP (PRP it)) (VP (VBD issued) (NP (PRP$ its) (JJ first) (NN rule)))) (: ;) (S (NP (PRP it)) (VP (VBD required) (S (NP (NNS companies)) (VP (TO to) (VP (VB disclose) (NP (NP (JJ foreign) (NN currency) (NNS translations)) (PP (IN in) (NP (NNP U.S.) (NNS dollars))))))))) (. .)))", "(NP (NP (NNP Dec.) (CD 13)) (, ,) (NP (CD 1973)))");
+    runTest(testPattern, "(ROOT (S (NP (NP (NNP Fidelity) (NNPS Investments)) (, ,) (NP (NP (DT the) (NN nation) (POS 's)) (JJS largest) (NN fund) (NN company)) (, ,)) (VP (VBD said) (SBAR (S (NP (NN phone) (NN volume)) (VP (VBD was) (NP (NP (QP (RBR more) (IN than) (JJ double)) (PRP$ its) (JJ typical) (NN level)) (, ,) (CC but) (ADVP (RB still)) (NP (NP (NN half) (DT that)) (PP (IN of) (NP (NP (NNP Oct.) (CD 19)) (, ,) (NP (CD 1987)))))))))) (. .)))", "(NP (NP (NNP Oct.) (CD 19)) (, ,) (NP (CD 1987)))");
+    runTest(testPattern, "(ROOT (S (NP (JJ SOFT) (NN CONTACT) (NNS LENSES)) (VP (VP (VBP WON) (NP (JJ federal) (NN blessing)) (PP (IN on) (NP (NP (NNP March) (CD 18)) (, ,) (NP (CD 1971))))) (, ,) (CC and) (VP (ADVP (RB quickly)) (VBD became) (NP (NN eye) (NNS openers)) (PP (IN for) (NP (PRP$ their) (NNS makers))))) (. .)))", "(NP (NP (NNP March) (CD 18)) (, ,) (NP (CD 1971)))");
+    runTest(testPattern, "(ROOT (NP (NP (NP (VBN Annualized) (NN interest) (NNS rates)) (PP (IN on) (NP (JJ certain) (NNS investments))) (SBAR (IN as) (S (VP (VBN reported) (PP (IN by) (NP (DT the) (NNP Federal) (NNP Reserve) (NNP Board))) (PP (IN on) (NP (DT a) (JJ weekly-average) (NN basis))))))) (: :) (NP-TMP (NP (CD 1989)) (CC and) (NP (NP (NNP Wednesday)) (NP (NP (NNP October) (CD 4)) (, ,) (NP (CD 1989))))) (. .)))", "(NP (NP (NNP October) (CD 4)) (, ,) (NP (CD 1989)))");
+    runTest(testPattern, "(ROOT (S (S (ADVP (RB Together))) (, ,) (NP (DT the) (CD two) (NNS stocks)) (VP (VP (VBD wreaked) (NP (NN havoc)) (PP (IN among) (NP (NN takeover) (NN stock) (NNS traders)))) (, ,) (CC and) (VP (VBD caused) (NP (NP (DT a) (ADJP (CD 7.3) (NN %)) (NN drop)) (PP (IN in) (NP (DT the) (NNP Dow) (NNP Jones) (NNP Transportation) (NNP Average))) (, ,) (ADJP (JJ second) (PP (IN in) (NP (NN size))) (PP (RB only) (TO to) (NP (NP (DT the) (NN stock-market) (NN crash)) (PP (IN of) (NP (NP (NNP Oct.) (CD 19)) (, ,) (NP (CD 1987)))))))))) (. .)))", "(NP (NP (NNP Oct.) (CD 19)) (, ,) (NP (CD 1987)))");
   }
 
   /**
@@ -1220,6 +1270,191 @@ public class TregexTest extends TestCase {
     // and "name" are, resulting in the groups not matching.
   }
 
+
+  public void testParenthesizedExpressions() {
+    String[] treeStrings = { "( (S (S (PP (IN In) (NP (CD 1941) )) (, ,) (NP (NP (NNP Raeder) ) (CC and) (NP (DT the) (JJ German) (NN navy) )) (VP (VBD threatened) (S (VP (TO to) (VP (VB attack) (NP (DT the) (NNP Panama) (NNP Canal) )))))) (, ,) (RB so) (S (NP (PRP we) ) (VP (VBD created) (NP (NP (DT the) (NNP Southern) (NNP Command) ) (PP-LOC (IN in) (NP (NNP Panama) ))))) (. .) ))",
+                             "(S (S (NP-SBJ (NNP Japan) ) (VP (MD can) (VP (VP (VB grow) ) (CC and) (VP (RB not) (VB cut) (PRT (RB back) ))))) (, ,) (CC and) (RB so) (S (ADVP (RB too) ) (, ,) (NP (NP (NNP New) (NNP Zealand) )) ))))",
+                             "( (S (S (NP-SBJ (PRP You) ) (VP (VBP make) (NP (DT a) (NN forecast) ))) (, ,) (CC and) (RB then) (S (NP-SBJ (PRP you) ) (VP (VBP become) (NP-PRD (PRP$ its) (NN prisoner) ))) (. .)))" };
+
+    Tree[] trees = treesFromString(treeStrings);
+
+    // First pattern: no parenthesized expressions.  All three trees should match once.
+    TregexPattern pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ $+ (RB=adv $+ /^S/)))");
+    TregexMatcher matcher = pattern.matcher(trees[0]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+
+    matcher = pattern.matcher(trees[1]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+
+    matcher = pattern.matcher(trees[2]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+
+    // Second pattern: single relation in parentheses.  First tree should not match.
+    pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ (< and) $+ (RB=adv $+ /^S/)))");
+    matcher = pattern.matcher(trees[0]);
+    assertFalse(matcher.find());
+
+    matcher = pattern.matcher(trees[1]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+
+    matcher = pattern.matcher(trees[2]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+
+    // Third pattern: single relation in parentheses and negated.  Only first tree should match.
+    pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ !(< and) $+ (RB=adv $+ /^S/)))");
+    matcher = pattern.matcher(trees[0]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+
+    matcher = pattern.matcher(trees[1]);
+    assertFalse(matcher.find());
+
+    matcher = pattern.matcher(trees[2]);
+    assertFalse(matcher.find());
+
+    // Fourth pattern: double relation in parentheses, no negation.
+    pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ (< and $+ RB) $+ (RB=adv $+ /^S/)))");
+    matcher = pattern.matcher(trees[0]);
+    assertFalse(matcher.find());
+
+    matcher = pattern.matcher(trees[1]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+
+    matcher = pattern.matcher(trees[2]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+
+    // Fifth pattern: double relation in parentheses, negated.
+    pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ !(< and $+ RB) $+ (RB=adv $+ /^S/)))");
+    matcher = pattern.matcher(trees[0]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+
+    matcher = pattern.matcher(trees[1]);
+    assertFalse(matcher.find());
+
+    matcher = pattern.matcher(trees[2]);
+    assertFalse(matcher.find());
+
+    // Six pattern: double relation in parentheses, negated.  The only
+    // tree with "and then" is the third one, so that is the one tree
+    // that should not match.
+    pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ !(< and $+ (RB < then)) $+ (RB=adv $+ /^S/)))");
+    matcher = pattern.matcher(trees[0]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+
+    matcher = pattern.matcher(trees[1]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+
+    matcher = pattern.matcher(trees[2]);
+    assertFalse(matcher.find());
+  }
+
+  /**
+   * The PARENT_EQUALS relation allows for a simplification of what
+   * would have been a pair of rules in the dependencies.
+   */
+  public void testParentEquals() {
+    runTest("A <= B", "(A (B 1))", "(A (B 1))");
+    // Note that if the child node is the same as the parent node, a
+    // double match is expected if there is nothing to eliminate it in
+    // the expression
+    runTest("A <= A", "(A (A 1) (B 2))", "(A (A 1) (B 2))", "(A (A 1) (B 2))", "(A 1)");
+    // This is the kind of expression where this relation can be useful
+    runTest("A <= (A < B)", "(A (A (B 1)))", "(A (A (B 1)))", "(A (B 1))");
+    runTest("A <= (A < B)", "(A (A (B 1)) (A (C 2)))", "(A (A (B 1)) (A (C 2)))", "(A (B 1))");
+    runTest("A <= (A < B)", "(A (A (C 2)))");
+  }
+
+  /**
+   * Test a few possible ways to make disjunctions at the root level.
+   * Note that disjunctions at lower levels can always be created by
+   * repeating the relation, but that is not true at the root, since
+   * the root "relation" is implicit.
+   */
+  public void testRootDisjunction() {
+    runTest("A | B", "(A (B 1))", "(A (B 1))", "(B 1)");
+
+    runTest("(A) | (B)", "(A (B 1))", "(A (B 1))", "(B 1)");
+
+    runTest("A < B | A < C", "(A (B 1) (C 2))", "(A (B 1) (C 2))", "(A (B 1) (C 2))");
+
+    runTest("A < B | B < C", "(A (B 1) (C 2))", "(A (B 1) (C 2))");
+    runTest("A < B | B < C", "(A (B (C 1)) (C 2))", "(A (B (C 1)) (C 2))", "(B (C 1))");
+
+    runTest("A | B | C", "(A (B (C 1)) (C 2))", "(A (B (C 1)) (C 2))", "(B (C 1))", "(C 1)", "(C 2)");
+
+    // The binding of the | should look like this:
+    // A ( (< B) | (< C) )
+    runTest("A < B | < C", "(A (B 1))", "(A (B 1))");
+    runTest("A < B | < C", "(A (B 1) (C 2))", "(A (B 1) (C 2))", "(A (B 1) (C 2))");
+    runTest("A < B | < C", "(B (C 1))");
+  }
+
+
+  /**
+   * Tests the subtree pattern, <code>&lt;...</code>, which checks for
+   * an exact subtree under our current tree
+   */
+  public void testSubtreePattern() {
+    // test the obvious expected matches and several expected match failures
+    runTest("A <... { B ; C ; D }", "(A (B 1) (C 2) (D 3))", "(A (B 1) (C 2) (D 3))");
+    runTest("A <... { B ; C ; D }", "(Z (A (B 1) (C 2) (D 3)))", "(A (B 1) (C 2) (D 3))");
+    runTest("A <... { B ; C ; D }", "(A (B 1) (C 2) (D 3) (E 4))");
+    runTest("A <... { B ; C ; D }", "(A (E 4) (B 1) (C 2) (D 3))");
+    runTest("A <... { B ; C ; D }", "(A (B 1) (C 2) (E 4) (D 3))");
+    runTest("A <... { B ; C ; D }", "(A (B 1) (C 2))");
+
+    // every test above should return the opposite when negated
+    runTest("A !<... { B ; C ; D }", "(A (B 1) (C 2) (D 3))");
+    runTest("A !<... { B ; C ; D }", "(Z (A (B 1) (C 2) (D 3)))");
+    runTest("A !<... { B ; C ; D }", "(A (B 1) (C 2) (D 3) (E 4))", "(A (B 1) (C 2) (D 3) (E 4))");
+    runTest("A !<... { B ; C ; D }", "(A (E 4) (B 1) (C 2) (D 3))", "(A (E 4) (B 1) (C 2) (D 3))");
+    runTest("A !<... { B ; C ; D }", "(A (B 1) (C 2) (E 4) (D 3))", "(A (B 1) (C 2) (E 4) (D 3))");
+    runTest("A !<... { B ; C ; D }", "(A (B 1) (C 2))", "(A (B 1) (C 2))");
+
+    // test a couple various forms of nesting
+    runTest("A <... { (B < C) ; D }", "(A (B (C 2)) (D 3))", "(A (B (C 2)) (D 3))");
+    runTest("A <... { (B <... { C ; D }) ; E }", "(A (B (C 2) (D 3)) (E 4))", "(A (B (C 2) (D 3)) (E 4))");
+    runTest("A <... { (B !< C) ; D }", "(A (B (C 2)) (D 3))");
+  }
+
+  public void testDisjunctionVariableAssignments() {
+    Tree tree = treeFromString("(NP (UCP (NNP U.S.) (CC and) (ADJP (JJ northern) (JJ European))) (NNS diplomats))");
+    TregexPattern pattern = TregexPattern.compile("UCP [ <- (ADJP=adjp < JJR) | <, NNP=np ]");
+    TregexMatcher matcher = pattern.matcher(tree);
+    assertTrue(matcher.find());
+    assertEquals("(NNP U.S.)", matcher.getNode("np").toString());
+    assertFalse(matcher.find());
+  }
+
+  public void testOptional() {
+    Tree tree = treeFromString("(A (B (C 1)) (B 2))");
+    TregexPattern pattern = TregexPattern.compile("B ? < C=c");
+    TregexMatcher matcher = pattern.matcher(tree);
+    assertTrue(matcher.find());
+    assertEquals("(C 1)", matcher.getNode("c").toString());
+    assertTrue(matcher.find());
+    assertEquals(null, matcher.getNode("c"));
+    assertFalse(matcher.find());
+
+    tree = treeFromString("(ROOT (INTJ (CC But) (S (NP (DT the) (NNP RTC)) (ADVP (RB also)) (VP (VBZ requires) (`` ``) (S (FRAG (VBG working) ('' '') (NP (NP (NN capital)) (S (VP (TO to) (VP (VB maintain) (SBAR (S (NP (NP (DT the) (JJ bad) (NNS assets)) (PP (IN of) (NP (NP (NNS thrifts)) (SBAR (WHNP (WDT that)) (S (VP (VBP are) (VBN sold) (, ,) (PP (IN until) (NP (DT the) (NNS assets))))))))) (VP (MD can) (VP (VB be) (VP (VBN sold) (ADVP (RB separately))))))))))))))) (S (VP (. .)))))");
+    // a pattern used to rearrange punctuation nodes in the srparser
+    pattern = TregexPattern.compile("__ !> __ <- (__=top <- (__ <<- (/[.]|PU/=punc < /[.!?。！？]/ ?> (__=single <: =punc))))");
+    matcher = pattern.matcher(tree);
+    assertTrue(matcher.find());
+    assertEquals("(. .)", matcher.getNode("punc").toString());
+    assertEquals("(VP (. .))", matcher.getNode("single").toString());
+    assertFalse(matcher.find());
+  }
 
   /**
    * Stores an input and the expected output.  Obviously this is only

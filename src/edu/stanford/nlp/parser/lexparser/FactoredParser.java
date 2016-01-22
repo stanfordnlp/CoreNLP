@@ -48,7 +48,7 @@ import edu.stanford.nlp.trees.TreeLengthComparator;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
@@ -177,12 +177,12 @@ public class FactoredParser {
       collinsPuncTransformer = new CollinsPuncTransformer(tlp);
     }
     TreeTransformer debinarizer = new Debinarizer(op.forceCNF);
-    List<Tree> binaryTrainTrees = new ArrayList<Tree>();
+    List<Tree> binaryTrainTrees = new ArrayList<>();
 
     if (op.trainOptions.selectiveSplit) {
       op.trainOptions.splitters = ParentAnnotationStats.getSplitCategories(trainTreebank, op.trainOptions.tagSelectiveSplit, 0, op.trainOptions.selectiveSplitCutOff, op.trainOptions.tagSelectiveSplitCutOff, op.tlpParams.treebankLanguagePack());
       if (op.trainOptions.deleteSplitters != null) {
-        List<String> deleted = new ArrayList<String>();
+        List<String> deleted = new ArrayList<>();
         for (String del : op.trainOptions.deleteSplitters) {
           String baseDel = tlp.basicCategory(del);
           boolean checkBasic = del.equals(baseDel);
@@ -229,7 +229,7 @@ public class FactoredParser {
       binarizer.dumpStats();
     }
 
-    List<Tree> binaryTestTrees = new ArrayList<Tree>();
+    List<Tree> binaryTestTrees = new ArrayList<>();
     for (Tree tree : testTreebank) {
       if (op.trainOptions.collinsPunc) {
         tree = collinsPuncTransformer.transformTree(tree);
@@ -243,7 +243,7 @@ public class FactoredParser {
     DependencyGrammar dg = null;
     // DependencyGrammar dgBLIPP = null;
     Lexicon lex = null;
-    Index<String> stateIndex = new HashIndex<String>();
+    Index<String> stateIndex = new HashIndex<>();
 
     // extract grammars
     Extractor<Pair<UnaryGrammar,BinaryGrammar>> bgExtractor = new BinaryGrammarExtractor(op, stateIndex);
@@ -256,7 +256,7 @@ public class FactoredParser {
       System.err.print("Extracting PCFG...");
       Pair<UnaryGrammar, BinaryGrammar> bgug = null;
       if (op.trainOptions.cheatPCFG) {
-        List<Tree> allTrees = new ArrayList<Tree>(binaryTrainTrees);
+        List<Tree> allTrees = new ArrayList<>(binaryTrainTrees);
         allTrees.addAll(binaryTestTrees);
         bgug = bgExtractor.extract(allTrees);
       } else {
@@ -269,8 +269,8 @@ public class FactoredParser {
       Timing.tick("done.");
     }
     System.err.print("Extracting Lexicon...");
-    Index<String> wordIndex = new HashIndex<String>();
-    Index<String> tagIndex = new HashIndex<String>();
+    Index<String> wordIndex = new HashIndex<>();
+    Index<String> tagIndex = new HashIndex<>();
     lex = op.tlpParams.lex(op, wordIndex, tagIndex);
     lex.initializeTraining(binaryTrainTrees.size());
     lex.train(binaryTrainTrees);
@@ -552,9 +552,8 @@ public class FactoredParser {
 
   private static List<TaggedWord> cleanTags(List<TaggedWord> twList, TreebankLanguagePack tlp) {
     int sz = twList.size();
-    List<TaggedWord> l = new ArrayList<TaggedWord>(sz);
-    for (int i = 0; i < sz; i++) {
-      TaggedWord tw = twList.get(i);
+    List<TaggedWord> l = new ArrayList<>(sz);
+    for (TaggedWord tw : twList) {
       TaggedWord tw2 = new TaggedWord(tw.word(), tlp.basicCategory(tw.tag()));
       l.add(tw2);
     }
@@ -562,7 +561,7 @@ public class FactoredParser {
   }
 
   private static ArrayList<Word> wordify(List wList) {
-    ArrayList<Word> s = new ArrayList<Word>();
+    ArrayList<Word> s = new ArrayList<>();
     for (Object obj : wList) {
       s.add(new Word(obj.toString()));
     }
@@ -570,11 +569,11 @@ public class FactoredParser {
   }
 
   private static ArrayList<Word> cutLast(ArrayList<Word> s) {
-    return new ArrayList<Word>(s.subList(0, s.size() - 1));
+    return new ArrayList<>(s.subList(0, s.size() - 1));
   }
 
   private static ArrayList<Word> addLast(ArrayList<? extends Word> s) {
-    ArrayList<Word> s2 = new ArrayList<Word>(s);
+    ArrayList<Word> s2 = new ArrayList<>(s);
     //s2.add(new StringLabel(Lexicon.BOUNDARY));
     s2.add(new Word(Lexicon.BOUNDARY));
     return s2;

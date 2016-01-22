@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import edu.stanford.nlp.io.NullOutputStream;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
@@ -18,13 +19,21 @@ import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.math.ArrayMath;
+import edu.stanford.nlp.parser.common.NoSuchParseException;
+import edu.stanford.nlp.parser.common.ParserGrammar;
+import edu.stanford.nlp.parser.common.ParserQuery;
+import edu.stanford.nlp.parser.common.ParserUtils;
+import edu.stanford.nlp.parser.common.ParsingThreadsafeProcessor;
 import edu.stanford.nlp.parser.metrics.AbstractEval;
 import edu.stanford.nlp.parser.metrics.BestOfTopKEval;
+import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.parser.metrics.Evalb;
 import edu.stanford.nlp.parser.metrics.EvalbByCat;
 import edu.stanford.nlp.parser.metrics.FilteredEval;
 import edu.stanford.nlp.parser.metrics.LeafAncestorEval;
+import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.parser.metrics.TaggingEval;
+import edu.stanford.nlp.parser.metrics.TopMatchEval;
 import edu.stanford.nlp.parser.metrics.UnlabeledAttachmentEval;
 import edu.stanford.nlp.trees.LeftHeadFinder;
 import edu.stanford.nlp.trees.Tree;
@@ -32,7 +41,8 @@ import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.trees.TreeTransformer;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
@@ -42,14 +52,18 @@ public class EvaluateTreebank {
   private final Options op;
   private final TreeTransformer debinarizer;
   private final TreeTransformer subcategoryStripper;
-  private final TreeTransformer tc;
-  private final TreeTransformer br;
+  private final TreeTransformer collinizer;
+  private final TreeTransformer boundaryRemover;
 
-  private final ParserQueryFactory pqFactory;
+  private final ParserGrammar pqFactory;
 
   // private final Lexicon lex;
 
-  private final boolean runningAverages, summary, tsv;
+  List<Eval> evals = null;
+  List<ParserQueryEval> parserQueryEvals = null;
+
+  private final boolean summary;
+  private final boolean tsv;
 
   // no annotation
   private final TreeAnnotatorAndBinarizer binarizerOnly;
@@ -76,7 +90,7 @@ public class EvaluateTreebank {
   AbstractEval.ScoreEval factLL = null;
   AbstractEval kGoodLB = null;
 
-  private List<BestOfTopKEval> topKEvals = new ArrayList<BestOfTopKEval>();
+  private final List<BestOfTopKEval> topKEvals = new ArrayList<>();
 
   private int kbestPCFG = 0;
 
@@ -90,40 +104,35 @@ public class EvaluateTreebank {
    * We keep it here as a function rather than a MaxentTagger so that
    * we can distribute a version of the parser that doesn't include
    * the entire tagger.
-   * <br>
-   * TODO: pass this in rather than create it here if we wind up using
-   * this in more place.  Right now it's only used in testOnTreebank.
    */
-  protected Function<List<? extends HasWord>, ArrayList<TaggedWord>> tagger;
+  protected final Function<List<? extends HasWord>, List<TaggedWord>> tagger;
 
   public EvaluateTreebank(LexicalizedParser parser) {
     this(parser.getOp(), parser.lex, parser);
   }
 
-  private EvaluateTreebank(Options op, Lexicon lex, ParserQueryFactory pqFactory) {
+  public EvaluateTreebank(Options op, Lexicon lex, ParserGrammar pqFactory) {
+    this(op, lex, pqFactory, pqFactory.loadTagger());
+  }
+
+  public EvaluateTreebank(Options op, Lexicon lex, ParserGrammar pqFactory, Function<List<? extends HasWord>,List<TaggedWord>> tagger) {
     this.op = op;
     this.debinarizer = new Debinarizer(op.forceCNF);
     this.subcategoryStripper = op.tlpParams.subcategoryStripper();
+
+    this.evals = Generics.newArrayList();
+    evals.addAll(pqFactory.getExtraEvals());
+    this.parserQueryEvals = pqFactory.getParserQueryEvals();
+
     // this.lex = lex;
     this.pqFactory = pqFactory;
 
-    if(op.testOptions.preTag) {
-      try {
-        Class[] argsClass = { String.class };
-        Object[] arguments = { op.testOptions.taggerSerializedFile };
-        System.err.printf("Loading tagger from serialized file %s ...\n",op.testOptions.taggerSerializedFile);
-        tagger = (Function<List<? extends HasWord>,ArrayList<TaggedWord>>) Class.forName("edu.stanford.nlp.tagger.maxent.MaxentTagger").getConstructor(argsClass).newInstance(arguments);
-      } catch (RuntimeException e) {
-        throw e;
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
+    this.tagger = tagger;
 
-    tc = op.tlpParams.collinizer();
-    br = new BoundaryRemover();
+    collinizer = op.tlpParams.collinizer();
+    boundaryRemover = new BoundaryRemover();
 
-    runningAverages = Boolean.parseBoolean(op.testOptions.evals.getProperty("runningAverages"));
+    boolean runningAverages = Boolean.parseBoolean(op.testOptions.evals.getProperty("runningAverages"));
     summary = Boolean.parseBoolean(op.testOptions.evals.getProperty("summary"));
     tsv = Boolean.parseBoolean(op.testOptions.evals.getProperty("tsv"));
 
@@ -177,12 +186,7 @@ public class EvaluateTreebank {
       factDA = new UnlabeledAttachmentEval("factor DA", runningAverages, null);
     }
     if (Boolean.parseBoolean(op.testOptions.evals.getProperty("factTA"))) {
-      if (op.doPCFG) {
-        factTA = new TaggingEval("factor Tag", runningAverages, lex);
-      } else {
-        // only doing dep parser, and need to get tags out in special way....
-        factTA = new TaggingEval("factor Tag", runningAverages, lex);
-      }
+      factTA = new TaggingEval("factor Tag", runningAverages, lex);
     }
     if (Boolean.parseBoolean(op.testOptions.evals.getProperty("pcfgRUO"))) {
       pcfgRUO = new AbstractEval.RuleErrorEval("pcfg Rule under/over");
@@ -201,6 +205,9 @@ public class EvaluateTreebank {
     }
     if (Boolean.parseBoolean(op.testOptions.evals.getProperty("factLL"))) {
       factLL = new AbstractEval.ScoreEval("factLL", runningAverages);
+    }
+    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("topMatch"))) {
+      evals.add(new TopMatchEval("topMatch", runningAverages));
     }
     // this one is for the various k Good/Best options.  Just for individual results
     kGoodLB = new Evalb("kGood LP/LR", false);
@@ -248,8 +255,8 @@ public class EvaluateTreebank {
   private static void nanScores(Tree tree) {
     tree.setScore(Double.NaN);
     Tree[] kids = tree.children();
-    for (int i = 0; i < kids.length; i++) {
-      nanScores(kids[i]);
+    for (Tree kid : kids) {
+      nanScores(kid);
     }
   }
 
@@ -320,7 +327,7 @@ public class EvaluateTreebank {
           int sz = parses.size();
           if (sz > 1) {
             pwOut.println("There were " + sz + " best PCFG parses with score " + parses.get(0).score() + '.');
-            Tree transGoldTree = tc.transformTree(goldTree);
+            Tree transGoldTree = collinizer.transformTree(goldTree);
             int iii = 0;
             for (ScoredObject<Tree> sot : parses) {
               iii++;
@@ -330,7 +337,7 @@ public class EvaluateTreebank {
               pq.restoreOriginalWords(tbd);
               pwOut.println("PCFG Parse #" + iii + " with score " + tbd.score());
               tbd.pennPrint(pwOut);
-              Tree tbtr = tc.transformTree(tbd);
+              Tree tbtr = collinizer.transformTree(tbd);
               // pwOut.println("Tree size = " + tbtr.size() + "; depth = " + tbtr.depth());
               kGoodLB.evaluate(tbtr, transGoldTree, pwErr);
             }
@@ -339,14 +346,14 @@ public class EvaluateTreebank {
         // Huang and Chiang (2006) Algorithm 3 output from the PCFG parser
         else if (op.testOptions.printPCFGkBest > 0 && op.testOptions.outputkBestEquivocation == null) {
           List<ScoredObject<Tree>> trees = kbestPCFGTrees.subList(0, op.testOptions.printPCFGkBest);
-          Tree transGoldTree = tc.transformTree(goldTree);
+          Tree transGoldTree = collinizer.transformTree(goldTree);
           int i = 0;
           for (ScoredObject<Tree> tp : trees) {
             i++;
             pwOut.println("PCFG Parse #" + i + " with score " + tp.score());
             Tree tbd = tp.object();
             tbd.pennPrint(pwOut);
-            Tree tbtr = tc.transformTree(tbd);
+            Tree tbtr = collinizer.transformTree(tbd);
             kGoodLB.evaluate(tbtr, transGoldTree, pwErr);
           }
         }
@@ -354,14 +361,14 @@ public class EvaluateTreebank {
         else if (op.testOptions.printFactoredKGood > 0 && pq.hasFactoredParse()) {
           // DZ: debug n best trees
           List<ScoredObject<Tree>> trees = pq.getKGoodFactoredParses(op.testOptions.printFactoredKGood);
-          Tree transGoldTree = tc.transformTree(goldTree);
+          Tree transGoldTree = collinizer.transformTree(goldTree);
           int ii = 0;
           for (ScoredObject<Tree> tp : trees) {
             ii++;
             pwOut.println("Factored Parse #" + ii + " with score " + tp.score());
             Tree tbd = tp.object();
             tbd.pennPrint(pwOut);
-            Tree tbtr = tc.transformTree(tbd);
+            Tree tbtr = collinizer.transformTree(tbd);
             kGoodLB.evaluate(tbtr, transGoldTree, pwOut);
           }
         }
@@ -397,14 +404,14 @@ public class EvaluateTreebank {
       if (tree != null) {
         //Strip subcategories and remove punctuation for evaluation
         tree = subcategoryStripper.transformTree(tree);
-        Tree treeFact = tc.transformTree(tree);
+        Tree treeFact = collinizer.transformTree(tree);
 
         //Setup the gold tree
         if (op.testOptions.verbose) {
           pwOut.println("Correct parse");
           treePrint.printTree(goldTree, pwOut);
         }
-        Tree transGoldTree = tc.transformTree(goldTree);
+        Tree transGoldTree = collinizer.transformTree(goldTree);
         if(transGoldTree != null)
           transGoldTree = subcategoryStripper.transformTree(transGoldTree);
 
@@ -434,10 +441,10 @@ public class EvaluateTreebank {
         }
 
         if (topKEvals.size() > 0) {
-          List<Tree> transGuesses = new ArrayList<Tree>();
+          List<Tree> transGuesses = new ArrayList<>();
           int kbest = Math.min(op.testOptions.evalPCFGkBest, kbestPCFGTrees.size());
           for (ScoredObject<Tree> guess : kbestPCFGTrees.subList(0, kbest)) {
-            transGuesses.add(tc.transformTree(guess.object()));
+            transGuesses.add(collinizer.transformTree(guess.object()));
           }
           for (BestOfTopKEval eval : topKEvals) {
             eval.evaluate(transGuesses, transGoldTree, pwErr);
@@ -447,7 +454,7 @@ public class EvaluateTreebank {
         //PCFG eval
         Tree treePCFG = pq.getBestPCFGParse();
         if (treePCFG != null) {
-          Tree treePCFGeval = tc.transformTree(treePCFG);
+          Tree treePCFGeval = collinizer.transformTree(treePCFG);
           if (pcfgLB != null) {
             pcfgLB.evaluate(treePCFGeval, transGoldTree, pwErr);
           }
@@ -531,13 +538,21 @@ public class EvaluateTreebank {
           factLA.evaluate(treeFact, transGoldTree, pwErr);
         }
         if (factTA != null) {
-          factTA.evaluate(tree, br.transformTree(goldTree), pwErr);
+          factTA.evaluate(tree, boundaryRemover.transformTree(goldTree), pwErr);
         }
         if (factLL != null && pq.getFactoredParser() != null) {
           factLL.recordScore(pq.getFactoredParser(), pwErr);
         }
         if (factCB != null) {
           factCB.evaluate(treeFact, transGoldTree, pwErr);
+        }
+        for (Eval eval : evals) {
+          eval.evaluate(treeFact, transGoldTree, pwErr);
+        }
+        if (parserQueryEvals != null) {
+          for (ParserQueryEval eval : parserQueryEvals) {
+            eval.evaluate(pq, transGoldTree, pwErr);
+          }
         }
         if (op.testOptions.evalb) {
           // empty out scores just in case
@@ -558,12 +573,19 @@ public class EvaluateTreebank {
    */
   public double testOnTreebank(Treebank testTreebank) {
     System.err.println("Testing on treebank");
-    Timing treebankTotalTtimer = new Timing();
+    Timing treebankTotalTimer = new Timing();
     TreePrint treePrint = op.testOptions.treePrint(op.tlpParams);
     TreebankLangParserParams tlpParams = op.tlpParams;
     TreebankLanguagePack tlp = op.langpack();
-    PrintWriter pwOut = tlpParams.pw();
-    PrintWriter pwErr = tlpParams.pw(System.err);
+    PrintWriter pwOut, pwErr;
+    if (op.testOptions.quietEvaluation) {
+      NullOutputStream quiet = new NullOutputStream();
+      pwOut = tlpParams.pw(quiet);
+      pwErr = tlpParams.pw(quiet);
+    } else {
+      pwOut = tlpParams.pw();
+      pwErr = tlpParams.pw(System.err);
+    }
     if (op.testOptions.verbose) {
       pwErr.print("Testing ");
       pwErr.println(testTreebank.textualSummary(tlp));
@@ -592,9 +614,9 @@ public class EvaluateTreebank {
     }
 
     if (op.testOptions.testingThreads != 1) {
-      MulticoreWrapper<List<? extends HasWord>, ParserQuery> wrapper = new MulticoreWrapper<List<? extends HasWord>, ParserQuery>(op.testOptions.testingThreads, new ParsingThreadsafeProcessor(pqFactory, pwErr));
+      MulticoreWrapper<List<? extends HasWord>, ParserQuery> wrapper = new MulticoreWrapper<>(op.testOptions.testingThreads, new ParsingThreadsafeProcessor(pqFactory, pwErr));
 
-      LinkedList<Tree> goldTrees = new LinkedList<Tree>();
+      LinkedList<Tree> goldTrees = new LinkedList<>();
       for (Tree goldTree : testTreebank) {
         List<? extends HasWord> sentence = getInputSentence(goldTree);
         goldTrees.add(goldTree);
@@ -628,7 +650,10 @@ public class EvaluateTreebank {
     }
 
     //Done parsing...print the results of the evaluations
-    treebankTotalTtimer.done("Testing on treebank");
+    treebankTotalTimer.done("Testing on treebank");
+    if (op.testOptions.quietEvaluation) {
+      pwErr = tlpParams.pw(System.err);
+    }
     if (saidMemMessage) {
       ParserUtils.printOutOfMemory(pwErr);
     }
@@ -636,7 +661,7 @@ public class EvaluateTreebank {
       EvalbFormatWriter.closeEVALBfiles();
     }
     if(numSkippedEvals != 0) {
-      pwOut.printf("Unable to evaluate %d parser hypotheses due to yield mismatch\n",numSkippedEvals);
+      pwErr.printf("Unable to evaluate %d parser hypotheses due to yield mismatch\n",numSkippedEvals);
     }
     // only created here so we know what parser types are supported...
     ParserQuery pq = pqFactory.parserQuery();
@@ -659,6 +684,9 @@ public class EvaluateTreebank {
       if (factTA != null) factTA.display(false, pwErr);
       if (factLL != null && pq.getFactoredParser() != null) factLL.display(false, pwErr);
       if (pcfgCatE != null) pcfgCatE.display(false, pwErr);
+      for (Eval eval : evals) {
+        eval.display(false, pwErr);
+      }
       for (BestOfTopKEval eval : topKEvals) {
         eval.display(false, pwErr);
       }
@@ -693,6 +721,12 @@ public class EvaluateTreebank {
     //Close files (if necessary)
     if(pwFileOut != null) pwFileOut.close();
     if(pwStats != null) pwStats.close();
+
+    if (parserQueryEvals != null) {
+      for (ParserQueryEval parserQueryEval : parserQueryEvals) {
+        parserQueryEval.display(false, pwErr);
+      }
+    }
 
     return f1;
   } // end testOnTreebank()

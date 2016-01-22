@@ -2,19 +2,17 @@ package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
-import edu.stanford.nlp.util.Index;
 
 /**
  * @author Mengqiu Wang
  */
-
 public class NonLinearCliquePotentialFunction implements CliquePotentialFunction {
 
-  double[][] linearWeights;
-  double[][] inputLayerWeights; // first index is number of hidden units in layer one, second index is the input feature indices
-  double[][] outputLayerWeights; // first index is the output class, second index is the number of hidden units
-  SeqClassifierFlags flags;
-  double[] layerOneCache, hiddenLayerCache;
+  private final double[][] linearWeights;
+  private final double[][] inputLayerWeights; // first index is number of hidden units in layer one, second index is the input feature indices
+  private final double[][] outputLayerWeights; // first index is the output class, second index is the number of hidden units
+  private final SeqClassifierFlags flags;
+  private double[] layerOneCache, hiddenLayerCache;
 
   private static double sigmoid(double x) {
     return 1 / (1 + Math.exp(-x));
@@ -34,9 +32,8 @@ public class NonLinearCliquePotentialFunction implements CliquePotentialFunction
     for (int i = 0; i < layerOneSize; i++) {
       double[] ws = inputLayerWeights[i];
       double lOneW = 0;
-      double dotProd = 0;
       for (int m = 0; m < nodeCliqueFeatures.length; m++) {
-        dotProd = ws[nodeCliqueFeatures[m]];
+        double dotProd = ws[nodeCliqueFeatures[m]];
         if (featureVal != null)
           dotProd *= featureVal[m];
         lOneW += dotProd;
@@ -45,7 +42,7 @@ public class NonLinearCliquePotentialFunction implements CliquePotentialFunction
     }
     if (!aFlag.useHiddenLayer)
       return layerOneCache;
-      
+
     // transform layer one through hidden
     if (hiddenLayerCache == null || layerOneSize != hiddenLayerCache.length)
       hiddenLayerCache = new double[layerOneSize];
@@ -60,11 +57,12 @@ public class NonLinearCliquePotentialFunction implements CliquePotentialFunction
   }
 
   @Override
-  public double computeCliquePotential(int cliqueSize, int labelIndex, int[] cliqueFeatures, double[] featureVal) {
+  public double computeCliquePotential(int cliqueSize, int labelIndex,
+      int[] cliqueFeatures, double[] featureVal, int posInSent) {
     double output = 0.0;
     if (cliqueSize > 1) { // linear potential for edge cliques
-      for (int m = 0; m < cliqueFeatures.length; m++) {
-        output += linearWeights[cliqueFeatures[m]][labelIndex];
+      for (int cliqueFeature : cliqueFeatures) {
+        output += linearWeights[cliqueFeature][labelIndex];
       }
     } else { // non-linear potential for node cliques
       double[] hiddenLayer = hiddenLayerOutput(inputLayerWeights, cliqueFeatures, flags, featureVal);
@@ -72,7 +70,7 @@ public class NonLinearCliquePotentialFunction implements CliquePotentialFunction
 
       // transform the hidden layer to output layer through linear transformation
       if (flags.useOutputLayer) {
-        double[] outputWs = null;
+        double[] outputWs; // initialized immediately below
         if (flags.tieOutputLayer) {
           outputWs = outputLayerWeights[0];
         } else {
@@ -96,4 +94,5 @@ public class NonLinearCliquePotentialFunction implements CliquePotentialFunction
     }
     return output;
   }
+
 }

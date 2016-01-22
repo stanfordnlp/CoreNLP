@@ -19,7 +19,6 @@ public class NumberSequenceClassifierExpectedOutputITest extends TestCase {
   private NumberSequenceClassifier nscOld = new NumberSequenceClassifier(false);
   private NumberSequenceClassifier nscNew = new NumberSequenceClassifier(true);
 
-
   private String[][] w1 = {
           { "\u20AC", "30" },
           { "500", "US$" },
@@ -178,6 +177,7 @@ public class NumberSequenceClassifierExpectedOutputITest extends TestCase {
       assertEquals("Failed on " + w2[i][i2[i]], a2[i], cl.get(i2[i]).get(CoreAnnotations.AnswerAnnotation.class));
     }
   }
+
 
   public void testCdNew() {
     assert w2.length == t2.length;

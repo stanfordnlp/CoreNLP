@@ -12,7 +12,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.XMLUtils;
 
@@ -32,7 +32,7 @@ public class TransformXML<T> {
 
   private final SAXParser saxParser;
 
-  public SAXInterface<T> buildSaxInterface() { return new SAXInterface<T>(); }
+  public SAXInterface<T> buildSaxInterface() { return new SAXInterface<>(); }
 
   public static class SAXInterface<T> extends DefaultHandler {
 
@@ -49,7 +49,7 @@ public class TransformXML<T> {
     protected int depth = 0;
 
     public SAXInterface() {
-      elementsToBeTransformed = new ArrayList<String>();
+      elementsToBeTransformed = new ArrayList<>();
       depth = 0;
       openingTag = null;
       textToBeTransformed = new StringBuffer();
@@ -365,7 +365,7 @@ public class TransformXML<T> {
   public void transformXML(String[] tags, Function<String,T> fn, InputSource in, Writer w, SAXInterface<T> saxInterface) {
     saxInterface.outWriter = new PrintWriter(w, true);
     saxInterface.function = fn;
-    saxInterface.elementsToBeTransformed = new ArrayList<String>();
+    saxInterface.elementsToBeTransformed = new ArrayList<>();
     saxInterface.elementsToBeTransformed.addAll(Arrays.asList(tags));
     try {
       saxParser.parse(in, saxInterface);

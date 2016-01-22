@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ie.machinereading.common.NoPunctuationHeadFinder;
 import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
@@ -15,9 +15,12 @@ import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
-import edu.stanford.nlp.parser.lexparser.ParserConstraint;
-import edu.stanford.nlp.parser.lexparser.ParserAnnotations;
+import edu.stanford.nlp.parser.common.ParserAnnotations;
+import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
@@ -135,9 +138,37 @@ public class GenericDataSetReader {
 
     if (preProcessSentences) {
       preProcessSentences(retVal);
+      if(MachineReadingProperties.trainUsePipelineNER){
+        logger.severe("Changing NER tags using the CoreNLP pipeline.");
+        modifyUsingCoreNLPNER(retVal);
+        }
     }
-
     return retVal;
+  }
+  
+  private void modifyUsingCoreNLPNER(Annotation doc) {
+    Properties ann = new Properties();
+    ann.setProperty("annotators", "pos, lemma, ner");
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(ann, false);
+    pipeline.annotate(doc);
+    for (CoreMap sentence : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
+      List<EntityMention> entities = sentence.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
+      if (entities != null) {
+        List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+        for (EntityMention en : entities) {
+          //System.out.println("old ner tag for " + en.getExtentString() + " was " + en.getType());
+          Span s = en.getExtent();
+          Counter<String> allNertagforSpan = new ClassicCounter<>();
+          for (int i = s.start(); i < s.end(); i++) {
+            allNertagforSpan.incrementCount(tokens.get(i).ner());
+          }
+          String entityNertag = Counters.argmax(allNertagforSpan);
+          en.setType(entityNertag);
+          //System.out.println("new ner tag is " + entityNertag);
+        }
+      }
+      
+    }
   }
 
   public Annotation read(String path) throws Exception {
@@ -338,7 +369,7 @@ public class GenericDataSetReader {
     // context, so as to make the parser work better :-)
 
     int approximateness = 0;
-    List<CoreLabel> extentTokens = new ArrayList<CoreLabel>();
+    List<CoreLabel> extentTokens = new ArrayList<>();
     extentTokens.add(initCoreLabel("It"));
     extentTokens.add(initCoreLabel("was"));
     final int ADDED_WORDS = 2;
@@ -358,10 +389,7 @@ public class GenericDataSetReader {
     // -1 to exclude the period.
     // We now let it be any kind of nominal constituent, since there
     // are VP and S ones
-    ParserConstraint constraint = new ParserConstraint();
-    constraint.start = ADDED_WORDS;
-    constraint.end = extentTokens.size() - 1;
-    constraint.state = Pattern.compile(".*");
+    ParserConstraint constraint = new ParserConstraint(ADDED_WORDS, extentTokens.size() - 1, ".*");
     List<ParserConstraint> constraints = Collections.singletonList(constraint);
     Tree tree = parse(extentTokens, constraints);
     logger.fine("No exact match found. Local parse:\n" + tree.pennString());
@@ -445,7 +473,7 @@ public class GenericDataSetReader {
     // no exact match found
     // in this case, we parse the actual extent of the mention
     //
-    List<CoreLabel> extentTokens = new ArrayList<CoreLabel>();
+    List<CoreLabel> extentTokens = new ArrayList<>();
     for (int i = ent.getExtentTokenStart(); i < ent.getExtentTokenEnd(); i++)
       extentTokens.add(tokens.get(i));
 
@@ -467,12 +495,15 @@ public class GenericDataSetReader {
   private static CoreLabel initCoreLabel(String token) {
     CoreLabel label = new CoreLabel();
     label.setWord(token);
+    label.setValue(token);
     label.set(CoreAnnotations.TextAnnotation.class, token);
+    label.set(CoreAnnotations.ValueAnnotation.class, token);
+    
     return label;
   }
 
   protected Tree parseStrings(List<String> tokens) {
-    List<CoreLabel> labels = new ArrayList<CoreLabel>();
+    List<CoreLabel> labels = new ArrayList<>();
     for (String t : tokens) {
       CoreLabel l = initCoreLabel(t);
       labels.add(l);
@@ -490,7 +521,7 @@ public class GenericDataSetReader {
     sent.set(CoreAnnotations.TokensAnnotation.class, tokens);
     sent.set(ParserAnnotations.ConstraintAnnotation.class, constraints);
     Annotation doc = new Annotation("");
-    List<CoreMap> sents = new ArrayList<CoreMap>();
+    List<CoreMap> sents = new ArrayList<>();
     sents.add(sent);
     doc.set(CoreAnnotations.SentencesAnnotation.class, sents);
     getParser().annotate(doc);

@@ -15,20 +15,24 @@ import edu.stanford.nlp.util.ErasureUtils;
 
 class ClassifierDemo {
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
     ColumnDataClassifier cdc = new ColumnDataClassifier("examples/cheese2007.prop");
     Classifier<String,String> cl =
         cdc.makeClassifier(cdc.readTrainingExamples("examples/cheeseDisease.train"));
-    for (String line : ObjectBank.getLineIterator("examples/cheeseDisease.test")) {
-      Datum<String,String> d = cdc.makeDatumFromLine(line, 0);
+    for (String line : ObjectBank.getLineIterator("examples/cheeseDisease.test", "utf-8")) {
+      // instead of the method in the line below, if you have the individual elements
+      // already you can use cdc.makeDatumFromStrings(String[])
+      Datum<String,String> d = cdc.makeDatumFromLine(line);
       System.out.println(line + "  ==>  " + cl.classOf(d));
     }
+
+    demonstrateSerialization();
   }
 
 
-  public static void demonstrateSerialization(String[] args) 
-    throws IOException, ClassNotFoundException
-  {
+  public static void demonstrateSerialization()
+    throws IOException, ClassNotFoundException {
+    System.out.println("Demonstrating working with a serialized classifier");
     ColumnDataClassifier cdc = new ColumnDataClassifier("examples/cheese2007.prop");
     Classifier<String,String> cl =
         cdc.makeClassifier(cdc.readTrainingExamples("examples/cheeseDisease.train"));
@@ -46,11 +50,14 @@ class ClassifierDemo {
     ois.close();
     ColumnDataClassifier cdc2 = new ColumnDataClassifier("examples/cheese2007.prop");
 
-    for (String line : ObjectBank.getLineIterator("examples/cheeseDisease.test")) {
-      Datum<String,String> d = cdc.makeDatumFromLine(line, 0);
-      Datum<String,String> d2 = cdc2.makeDatumFromLine(line, 0);
+    // We compare the output of the deserialized classifier lc versus the original one cl
+    // For both we use a ColumnDataClassifier to convert text lines to examples
+    for (String line : ObjectBank.getLineIterator("examples/cheeseDisease.test", "utf-8")) {
+      Datum<String,String> d = cdc.makeDatumFromLine(line);
+      Datum<String,String> d2 = cdc2.makeDatumFromLine(line);
       System.out.println(line + "  =origi=>  " + cl.classOf(d));
       System.out.println(line + "  =deser=>  " + lc.classOf(d2));
     }
   }
+
 }

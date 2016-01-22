@@ -39,10 +39,15 @@ import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.KBestViterbiParser;
+import edu.stanford.nlp.parser.common.NoSuchParseException;
+import edu.stanford.nlp.parser.common.ParserConstraint;
+import edu.stanford.nlp.parser.common.ParserQuery;
+import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.DeltaIndex;
@@ -93,6 +98,9 @@ public class LexicalizedParserQuery implements ParserQuery {
   @Override
   public List<? extends HasWord> originalSentence() { return originalSentence; }
 
+  /** Keeps track of whether the sentence had punctuation added, which affects the expected length of the sentence */
+  private boolean addedPunct = false;
+
   private boolean saidMemMessage = false;
 
   public boolean saidMemMessage() {
@@ -109,7 +117,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     DependencyGrammar dg = parser.dg;
 
     Index<String> stateIndex = parser.stateIndex;
-    Index<String> wordIndex = new DeltaIndex<String>(parser.wordIndex);
+    Index<String> wordIndex = new DeltaIndex<>(parser.wordIndex);
     Index<String> tagIndex = parser.tagIndex;
 
     this.debinarizer = new Debinarizer(op.forceCNF);
@@ -160,6 +168,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     subcategoryStripper = op.tlpParams.subcategoryStripper();
   }
 
+  @Override
   public void setConstraints(List<ParserConstraint> constraints) {
     if (pparser != null) {
       pparser.setConstraints(constraints);
@@ -194,6 +203,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     parseSkipped = false;
     parseFallback = false;
     whatFailed = null;
+    addedPunct = false;
     originalSentence = sentence;
     int length = sentence.size();
     if (length == 0) {
@@ -201,15 +211,34 @@ public class LexicalizedParserQuery implements ParserQuery {
       throw new UnsupportedOperationException("Can't parse a zero-length sentence!");
     }
 
-    for (HasWord word : sentence) {
-      if (op.wordFunction != null) {
+    List<HasWord> sentenceB;
+    if (op.wordFunction != null) {
+      sentenceB = Generics.newArrayList();
+      for (HasWord word : originalSentence) {
+        if (word instanceof Label) {
+          Label label = (Label) word;
+          Label newLabel = label.labelFactory().newLabel(label);
+          if (newLabel instanceof HasWord) {
+            sentenceB.add((HasWord) newLabel);
+          } else {
+            throw new AssertionError("This should have been a HasWord");
+          }
+        } else if (word instanceof HasTag) {
+          TaggedWord tw = new TaggedWord(word.word(), ((HasTag) word).tag());
+          sentenceB.add(tw);
+        } else {
+          sentenceB.add(new Word(word.word()));
+        }
+      }
+      for (HasWord word : sentenceB) {
         word.setWord(op.wordFunction.apply(word.word()));
       }
+    } else {
+      sentenceB = new ArrayList<>(sentence);
     }
 
-    List<HasWord> sentenceB = new ArrayList<HasWord>(sentence);
     if (op.testOptions.addMissingFinalPunctuation) {
-      addSentenceFinalPunctIfNeeded(sentenceB, length);
+      addedPunct = addSentenceFinalPunctIfNeeded(sentenceB, length);
     }
     if (length > op.testOptions.maxLength) {
       parseSkipped = true;
@@ -236,7 +265,6 @@ public class LexicalizedParserQuery implements ParserQuery {
 
     if (op.doPCFG) {
       if (!pparser.parse(sentenceB)) {
-        restoreOriginalWords(sentence);
         return parseSucceeded;
       }
       if (op.testOptions.verbose) {
@@ -250,7 +278,6 @@ public class LexicalizedParserQuery implements ParserQuery {
     }
     if (op.doDep && ! op.testOptions.useFastFactored) {
       if ( ! dparser.parse(sentenceB)) {
-        restoreOriginalWords(sentence);
         return parseSucceeded;
       }
       // cdm nov 2006: should move these printing bits to the main printing section,
@@ -265,28 +292,14 @@ public class LexicalizedParserQuery implements ParserQuery {
     }
     if (op.doPCFG && op.doDep) {
       if ( ! bparser.parse(sentenceB)) {
-        restoreOriginalWords(sentence);
         return parseSucceeded;
       } else {
         parseSucceeded = true;
       }
     }
-    restoreOriginalWords(sentence);
     return true;
   }
 
-
-  private <T extends HasWord> void restoreOriginalWords(List<T> sentence) {
-    if (originalSentence == null) {
-      return;
-    }
-    if (sentence.size() != originalSentence.size()) {
-      throw new IllegalStateException("originalWords and sentence of different sizes");
-    }
-    for (int i = 0; i < sentence.size(); i++) {
-      sentence.set(i, (T) originalSentence.get(i));
-    }
-  }
 
   @Override
   public void restoreOriginalWords(Tree tree) {
@@ -294,14 +307,19 @@ public class LexicalizedParserQuery implements ParserQuery {
       return;
     }
     List<Tree> leaves = tree.getLeaves();
-    if (leaves.size() != originalSentence.size()) {
-      throw new IllegalStateException("originalWords and sentence of different sizes: " + originalSentence.size() + " vs. " + leaves.size() +
-                                      "\n Orig: " + Sentence.listToString(originalSentence) + 
+    int expectedSize = addedPunct ? originalSentence.size() + 1 : originalSentence.size();
+    if (leaves.size() != expectedSize) {
+      throw new IllegalStateException("originalWords and sentence of different sizes: " + expectedSize + " vs. " + leaves.size() +
+                                      "\n Orig: " + Sentence.listToString(originalSentence) +
                                       "\n Pars: " + Sentence.listToString(leaves));
     }
-    Iterator<? extends Label> wordsIterator = (Iterator<? extends Label>) originalSentence.iterator();
-    for (Tree leaf : leaves) {
-      leaf.setLabel(wordsIterator.next());
+    Iterator<Tree> leafIterator = leaves.iterator();
+    for (HasWord word : originalSentence) {
+      Tree leaf = leafIterator.next();
+      if (!(word instanceof Label)) {
+        continue;
+      }
+      leaf.setLabel((Label) word);
     }
   }
 
@@ -405,12 +423,12 @@ public class LexicalizedParserQuery implements ParserQuery {
     if (binaryTrees == null) {
       return null;
     }
-    List<ScoredObject<Tree>> trees = new ArrayList<ScoredObject<Tree>>(k);
+    List<ScoredObject<Tree>> trees = new ArrayList<>(k);
     for (ScoredObject<Tree> tp : binaryTrees) {
       Tree t = debinarizer.transformTree(tp.object());
       t = subcategoryStripper.transformTree(t);
       restoreOriginalWords(t);
-      trees.add(new ScoredObject<Tree>(t, tp.score()));
+      trees.add(new ScoredObject<>(t, tp.score()));
     }
     return trees;
   }
@@ -432,12 +450,12 @@ public class LexicalizedParserQuery implements ParserQuery {
     if (binaryTrees == null) {
       return null;
     }
-    List<ScoredObject<Tree>> trees = new ArrayList<ScoredObject<Tree>>(k);
+    List<ScoredObject<Tree>> trees = new ArrayList<>(k);
     for (ScoredObject<Tree> p : binaryTrees) {
       Tree t = debinarizer.transformTree(p.object());
       t = subcategoryStripper.transformTree(t);
       restoreOriginalWords(t);
-      trees.add(new ScoredObject<Tree>(t, p.score()));
+      trees.add(new ScoredObject<>(t, p.score()));
     }
     return trees;
   }
@@ -464,6 +482,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     return t;
   }
 
+  @Override
   public double getPCFGScore() {
     return pparser.getBestScore();
   }
@@ -487,6 +506,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     return getBestDependencyParse(false);
   }
 
+  @Override
   public Tree getBestDependencyParse(boolean debinarize) {
     if (dparser == null || parseSkipped || parseUnparsable) {
       return null;
@@ -574,6 +594,7 @@ public class LexicalizedParserQuery implements ParserQuery {
    * Implements the same parsing with fallback that parse() does, but
    * also outputs status messages for failed parses to pwErr.
    */
+  @Override
   public boolean parseAndReport(List<? extends HasWord> sentence, PrintWriter pwErr) {
     boolean result = parse(sentence);
     if (result) {
@@ -637,35 +658,31 @@ public class LexicalizedParserQuery implements ParserQuery {
    *  in a parser language pack) to sentences that don't have one within
    *  the last 3 words (to allow for close parentheses, etc.).  It checks
    *  tags for punctuation, if available, otherwise words.
+   *
    *  @param sentence The sentence to check
    *  @param length The length of the sentence (just to avoid recomputation)
    */
-  void addSentenceFinalPunctIfNeeded(List<HasWord> sentence, int length) {
+  private boolean addSentenceFinalPunctIfNeeded(List<HasWord> sentence, int length) {
     int start = length - 3;
     if (start < 0) start = 0;
     TreebankLanguagePack tlp = op.tlpParams.treebankLanguagePack();
     for (int i = length - 1; i >= start; i--) {
-      Object item = sentence.get(i);
-      // An object (e.g., MapLabel) can implement HasTag but not actually store
+      HasWord item = sentence.get(i);
+      // An object (e.g., CoreLabel) can implement HasTag but not actually store
       // a tag so we need to check that there is something there for this case.
       // If there is, use only it, since word tokens can be ambiguous.
       String tag = null;
       if (item instanceof HasTag) {
         tag = ((HasTag) item).tag();
       }
-      if (tag != null && ! "".equals(tag)) {
+      if (tag != null && ! tag.isEmpty()) {
         if (tlp.isSentenceFinalPunctuationTag(tag)) {
-          return;
-        }
-      } else if (item instanceof HasWord) {
-        String str = ((HasWord) item).word();
-        if (tlp.isPunctuationWord(str)) {
-          return;
+          return false;
         }
       } else {
-        String str = item.toString();
+        String str = item.word();
         if (tlp.isPunctuationWord(str)) {
-          return;
+          return false;
         }
       }
     }
@@ -677,6 +694,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     if (sfpWords.length > 0) {
       sentence.add(new Word(sfpWords[0]));
     }
+    return true;
   }
 
 }

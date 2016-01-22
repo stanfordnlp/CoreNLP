@@ -3,8 +3,8 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.Morphology;
+import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 
 import java.util.Arrays;
@@ -45,15 +45,13 @@ public class MorphaAnnotator implements Annotator{
     }
     Morphology morphology = new Morphology();
     if (annotation.has(CoreAnnotations.SentencesAnnotation.class)) {
-      for (CoreMap sentence :
-           annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-        List<CoreLabel> tokens =
-          sentence.get(CoreAnnotations.TokensAnnotation.class);
+      for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+        List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
         //System.err.println("Lemmatizing sentence: " + tokens);
         for (CoreLabel token : tokens) {
           String text = token.get(CoreAnnotations.TextAnnotation.class);
           String posTag = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
-          this.addLemma(morphology, CoreAnnotations.LemmaAnnotation.class, token, text, posTag);
+          addLemma(morphology, CoreAnnotations.LemmaAnnotation.class, token, text, posTag);
         }
       }
     } else {
@@ -104,12 +102,16 @@ public class MorphaAnnotator implements Annotator{
 
 
   @Override
-  public Set<Requirement> requires() {
-    return TOKENIZE_SSPLIT_POS;
+  public Set<Class<? extends CoreAnnotation>> requires() {
+    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.SentencesAnnotation.class,
+        CoreAnnotations.PartOfSpeechAnnotation.class
+    )));
   }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
-    return Collections.singleton(LEMMA_REQUIREMENT);
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+    return Collections.singleton(CoreAnnotations.LemmaAnnotation.class);
   }
 }

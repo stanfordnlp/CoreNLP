@@ -2,16 +2,15 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Timing;
+import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class will add NER information to an
@@ -27,65 +26,91 @@ import java.util.Set;
  * @author Jenny Finkel
  * @author Mihai Surdeanu (modified it to work with the new NERClassifierCombiner)
  */
-public class NERCombinerAnnotator implements Annotator {
+public class NERCombinerAnnotator extends SentenceAnnotator {
 
   private final NERClassifierCombiner ner;
 
-  private final Timing timer = new Timing();
-  private boolean VERBOSE = true;
+  private final boolean VERBOSE;
+
+  private final long maxTime;
+  private final int nThreads;
+  private final int maxSentenceLength;
 
   public NERCombinerAnnotator() throws IOException, ClassNotFoundException {
     this(true);
   }
 
-  private void timerStart(String msg) {
-    if(VERBOSE){
-      timer.start();
-      System.err.println(msg);
-    }
-  }
-  private void timerStop() {
-    if(VERBOSE){
-      timer.stop("done.");
-    }
-  }
-
-  public NERCombinerAnnotator(boolean verbose) throws IOException, ClassNotFoundException {
-    VERBOSE = verbose;
-    timerStart("Loading NER combiner model...");
-    ner = new NERClassifierCombiner(new Properties());
-    timerStop();
+  public NERCombinerAnnotator(boolean verbose)
+    throws IOException, ClassNotFoundException
+  {
+    this(new NERClassifierCombiner(new Properties()), verbose);
   }
 
   public NERCombinerAnnotator(boolean verbose, String... classifiers)
-  throws IOException, ClassNotFoundException {
-    VERBOSE = verbose;
-    timerStart("Loading NER combiner model...");
-    ner = new NERClassifierCombiner(classifiers);
-    timerStop();
+    throws IOException, ClassNotFoundException
+  {
+    this(new NERClassifierCombiner(classifiers), verbose);
   }
 
   public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose) {
+    this(ner, verbose, 1, 0, Integer.MAX_VALUE);
+  }
+
+  public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose, int nThreads, long maxTime) {
+    this(ner, verbose, nThreads, maxTime, Integer.MAX_VALUE);
+  }
+
+  public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose, int nThreads, long maxTime, int maxSentenceLength) {
     VERBOSE = verbose;
     this.ner = ner;
+    this.maxTime = maxTime;
+    this.nThreads = nThreads;
+    this.maxSentenceLength = maxSentenceLength;
   }
 
+  public NERCombinerAnnotator(String name, Properties properties) {
+    this(NERClassifierCombiner.createNERClassifierCombiner(name, properties), false,
+         PropertiesUtils.getInt(properties, name + ".nthreads", PropertiesUtils.getInt(properties, "nthreads", 1)),
+         PropertiesUtils.getLong(properties, name + ".maxtime", -1),
+            PropertiesUtils.getInt(properties, name + ".maxlength", Integer.MAX_VALUE));
+  }
+
+  @Override
+  protected int nThreads() {
+    return nThreads;
+  }
+
+  @Override
+  protected long maxTime() {
+    return maxTime;
+  }
+
+  @Override
   public void annotate(Annotation annotation) {
-    timerStart("Adding NER Combiner annotation...");
-    if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
-      // classify tokens for each sentence
-      for (CoreMap sentence: annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-        doOneSentence(annotation, sentence);
-      }
-    } else {
-      throw new RuntimeException("unable to find sentences in: " + annotation);
+    if (VERBOSE) {
+      System.err.print("Adding NER Combiner annotation ... ");
     }
-    //timerStop("done.");
+
+    super.annotate(annotation);
+    this.ner.finalizeAnnotation(annotation);
+
+    if (VERBOSE) {
+      System.err.println("done.");
+    }
   }
 
-  public CoreMap doOneSentence(Annotation annotation, CoreMap sentence) {
+  @Override
+  public void doOneSentence(Annotation annotation, CoreMap sentence) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    List<CoreLabel> output = this.ner.classifySentenceWithGlobalInformation(tokens, annotation, sentence);
+    List<CoreLabel> output; // only used if try assignment works.
+    try {
+      output = this.ner.classifySentenceWithGlobalInformation(tokens, annotation, sentence);
+    } catch (RuntimeInterruptedException e) {
+      // If we get interrupted, set the NER labels to the background
+      // symbol if they are not already set, then exit.
+      doOneFailedSentence(annotation, sentence);
+      return;
+    }
     if (VERBOSE) {
       boolean first = true;
       System.err.print("NERCombinerAnnotator direct output: [");
@@ -93,32 +118,64 @@ public class NERCombinerAnnotator implements Annotator {
         if (first) { first = false; } else { System.err.print(", "); }
         System.err.print(w.toString());
       }
-      System.err.println(']');
     }
-
-    for (int i = 0; i < tokens.size(); ++i) {
-      // add the named entity tag to each token
-      String neTag = output.get(i).get(CoreAnnotations.NamedEntityTagAnnotation.class);
-      String normNeTag = output.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
-      tokens.get(i).setNER(neTag);
-      if(normNeTag != null) tokens.get(i).set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, normNeTag);
-      NumberSequenceClassifier.transferAnnotations(output.get(i), tokens.get(i));
-    }
-
-    if (VERBOSE) {
-      boolean first = true;
-      System.err.print("NERCombinerAnnotator output: [");
-      for (CoreLabel w : tokens) {
-        if (first) { first = false; } else { System.err.print(", "); }
-        System.err.print(w.toShorterString("Word", "NamedEntityTag", "NormalizedNamedEntityTag"));
+    if (output != null) {
+      if (VERBOSE) {
+        boolean first = true;
+        System.err.print("NERCombinerAnnotator direct output: [");
+        for (CoreLabel w : output) {
+          if (first) {
+            first = false;
+          } else {
+            System.err.print(", ");
+          }
+          System.err.print(w.toString());
+        }
+        System.err.println(']');
       }
-      System.err.println(']');
+
+      for (int i = 0; i < tokens.size(); ++i) {
+        // add the named entity tag to each token
+        String neTag = output.get(i).get(CoreAnnotations.NamedEntityTagAnnotation.class);
+        String normNeTag = output.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
+        tokens.get(i).setNER(neTag);
+        if (normNeTag != null) tokens.get(i).set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, normNeTag);
+        NumberSequenceClassifier.transferAnnotations(output.get(i), tokens.get(i));
+      }
+
+      if (VERBOSE) {
+        boolean first = true;
+        System.err.print("NERCombinerAnnotator output: [");
+        for (CoreLabel w : tokens) {
+          if (first) {
+            first = false;
+          } else {
+            System.err.print(", ");
+          }
+          System.err.print(w.toShorterString("Word", "NamedEntityTag", "NormalizedNamedEntityTag"));
+        }
+        System.err.println(']');
+      }
+    } else {
+      for (CoreLabel token : tokens) {
+        // add the dummy named entity tag to each token
+        token.setNER(this.ner.backgroundSymbol());
+      }
     }
-    return sentence;
   }
 
   @Override
-  public Set<Requirement> requires() {
+  public void doOneFailedSentence(Annotation annotation, CoreMap sentence) {
+    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    for (CoreLabel token : tokens) {
+      if (token.ner() == null) {
+        token.setNER(this.ner.backgroundSymbol());
+      }
+    }
+  }
+
+  @Override
+  public Set<Class<? extends CoreAnnotation>> requires() {
     // TODO: we could check the models to see which ones use lemmas
     // and which ones use pos tags
     if (ner.usesSUTime() || ner.appliesNumericClassifiers()) {
@@ -129,7 +186,7 @@ public class NERCombinerAnnotator implements Annotator {
   }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
-    return Collections.singleton(NER_REQUIREMENT);
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+    return Collections.singleton(CoreAnnotations.NamedEntityTagAnnotation.class);
   }
 }

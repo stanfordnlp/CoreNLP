@@ -9,7 +9,6 @@ import edu.stanford.nlp.ling.tokensregex.MatchedExpression;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.stats.PrecisionRecallStats;
-import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.util.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -20,9 +19,10 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Function;
 import java.util.logging.LogManager;
+import java.util.regex.Pattern;
 
-import static edu.stanford.nlp.time.SUTimeMain.InputType.TIMEBANK_CSV;
 
 /**
  * Main program for testing SUTime
@@ -58,6 +58,7 @@ import static edu.stanford.nlp.time.SUTimeMain.InputType.TIMEBANK_CSV;
  * -i &lt;directory with english data&gt;
  * -o &lt;output directory&gt;
  * -eval &lt;evaluation script&gt;
+ * -tempeval2.dct dct file (with document creation times)
  *
  * TEMPEVAL2 (download from http://timeml.org/site/timebank/timebank.html)
  * Evaluation is token based.
@@ -148,6 +149,7 @@ import static edu.stanford.nlp.time.SUTimeMain.InputType.TIMEBANK_CSV;
  * @author Angel Chang
  */
 public class SUTimeMain {
+  protected static String PYTHON = null;
 
   private SUTimeMain() {} // static class
 
@@ -194,9 +196,9 @@ public class SUTimeMain {
     String docPubDate;
     String sentId;
     String text;
-    List<TimebankTimex> timexes = new ArrayList<TimebankTimex>();
+    List<TimebankTimex> timexes = new ArrayList<>();
 
-    List<String> origItems =  new ArrayList<String>();
+    List<String> origItems = new ArrayList<>();
 
     public boolean add(String item) {
       String[] fields = item.split("\\s*\\|\\s*", 9);
@@ -240,11 +242,9 @@ public class SUTimeMain {
   private static void processTimebankCsvSent(AnnotationPipeline pipeline, TimebankSent sent, PrintWriter pw, EvalStats evalStats)
   {
     if (sent != null) {
-      Collections.sort(sent.timexes, new Comparator<TimebankTimex>() {
-        public int compare(TimebankTimex o1, TimebankTimex o2) {
-          if (o1.tid == o2.tid) { return 0; }
-          else return (o1.tid < o2.tid)? -1:1;
-        }
+      Collections.sort(sent.timexes, (o1, o2) -> {
+        if (o1.tid == o2.tid) { return 0; }
+        else return (o1.tid < o2.tid)? -1:1;
       });
       pw.println();
       for (String item:sent.origItems) {
@@ -377,11 +377,7 @@ public class SUTimeMain {
   }
 
   public static String joinWordTags(List<? extends CoreMap> l, String glue, int start, int end) {
-    return StringUtils.join(l, glue, new Function<CoreMap, String>() {
-      public String apply(CoreMap in) {
-        return in.get(CoreAnnotations.TextAnnotation.class) + "/" + in.get(CoreAnnotations.PartOfSpeechAnnotation.class);
-      }
-    }, start, end);
+    return StringUtils.join(l, glue, in -> in.get(CoreAnnotations.TextAnnotation.class) + "/" + in.get(CoreAnnotations.PartOfSpeechAnnotation.class), start, end);
   }
 
   private static void processTempEval2Doc(AnnotationPipeline pipeline, Annotation docAnnotation,
@@ -525,11 +521,12 @@ public class SUTimeMain {
   }
 
   private static CoreLabelTokenFactory tokenFactory = new CoreLabelTokenFactory();
+
   private static CoreMap wordsToSentence(List<String> sentWords)
   {
     String sentText = StringUtils.join(sentWords, " ");
     Annotation sentence = new Annotation(sentText);
-    List<CoreLabel> tokens = new ArrayList<CoreLabel>(sentWords.size());
+    List<CoreLabel> tokens = new ArrayList<>(sentWords.size());
     for (String text:sentWords) {
       CoreLabel token = tokenFactory.makeToken();
       token.set(CoreAnnotations.TextAnnotation.class, text);
@@ -548,7 +545,7 @@ public class SUTimeMain {
     document.set(CoreAnnotations.SentencesAnnotation.class, sentences);
 
     // Accumulate docTokens and label sentence with overall token begin/end, and sentence index annotations
-    List<CoreLabel> docTokens = new ArrayList<CoreLabel>();
+    List<CoreLabel> docTokens = new ArrayList<>();
     int sentenceIndex = 0;
     int tokenBegin = 0;
     for (CoreMap sentenceAnnotation:sentences) {
@@ -675,7 +672,7 @@ public class SUTimeMain {
         lastTimex = new TimexAttributes(tid, sentNo, tokenNo);
         List<TimexAttributes> list = timexMap.get(docName);
         if (list == null) {
-          timexMap.put(docName, list = new ArrayList<TimexAttributes>());
+          timexMap.put(docName, list = new ArrayList<>());
         }
         list.add(lastTimex);
       }
@@ -699,15 +696,18 @@ public class SUTimeMain {
       assert(timex.sentIndex == sentNo);
       assert(timex.tokenStart <= tokenNo && timex.tokenEnd > tokenNo);
 
-      if ("type".equals(attrname)) {
-        assert(timex.type == null || timex.type.equals(attrvalue));
-        timex.type = attrvalue;
-      } else if ("value".equals(attrname)) {
-        assert(timex.value == null || timex.value.equals(attrvalue));
-        timex.value = attrvalue;
-      } else {
-        throw new RuntimeException("Error processing " + attrsFile + ":" +
-                "Unknown attribute " + attrname + ": from line " + line);
+      switch (attrname) {
+        case "type":
+          assert (timex.type == null || timex.type.equals(attrvalue));
+          timex.type = attrvalue;
+          break;
+        case "value":
+          assert (timex.value == null || timex.value.equals(attrvalue));
+          timex.value = attrvalue;
+          break;
+        default:
+          throw new RuntimeException("Error processing " + attrsFile + ":" +
+              "Unknown attribute " + attrname + ": from line " + line);
       }
     }
     attrBr.close();
@@ -748,12 +748,12 @@ public class SUTimeMain {
           curDocName = null;
         }
         // New doc
-        tokens = new ArrayList<String>();
-        sentences = new ArrayList<CoreMap>();
+        tokens = new ArrayList<>();
+        sentences = new ArrayList<>();
       } else if (curSentNo != sentNo) {
         CoreMap lastSentence = wordsToSentence(tokens);
         sentences.add(lastSentence);
-        tokens = new ArrayList<String>();
+        tokens = new ArrayList<>();
       }
       tokens.add(tokenText);
       curDocName = docName;
@@ -779,7 +779,7 @@ public class SUTimeMain {
   {
     Map<String,String> docDates = (dct != null)? IOUtils.readMap(dct):IOUtils.readMap(in + "/dct.txt");
     if (requiredDocDateFormat != null) {
-      // convert from yyyMMdd to requiredDocDateFormat
+      // convert from yyyyMMdd to requiredDocDateFormat
       DateFormat defaultFormatter = new SimpleDateFormat("yyyyMMdd");
       DateFormat requiredFormatter = new SimpleDateFormat(requiredDocDateFormat);
       for (String docId:docDates.keySet()) {
@@ -789,10 +789,17 @@ public class SUTimeMain {
     }
     processTempEval2Tab(pipeline, in, out, docDates);
     if (eval != null) {
-      ProcessBuilder pb = new ProcessBuilder( /*"c:\\Python27\\python", */
-              eval, in + "/base-segmentation.tab",
-              in + "/timex-extents.tab", out + "/timex-extents.res.tab",
-              in + "/timex-attributes.tab", out + "/timex-attrs.res.tab");
+      List<String> command = new ArrayList<>();
+      if (PYTHON != null) {
+        command.add(PYTHON);
+      }
+      command.add(eval);
+      command.add(in + "/base-segmentation.tab");
+      command.add(in + "/timex-extents.tab");
+      command.add(out + "/timex-extents.res.tab");
+      command.add(in + "/timex-attributes.tab");
+      command.add(out + "/timex-attrs.res.tab");
+      ProcessBuilder pb = new ProcessBuilder(command);
       FileOutputStream evalFileOutput = new FileOutputStream(out + "/scores.txt");
       Writer output = new OutputStreamWriter(
               new TeeStream(System.out, evalFileOutput));
@@ -801,35 +808,109 @@ public class SUTimeMain {
     }
   }
 
+  public static void processTempEval3(AnnotationPipeline pipeline, String in, String out, String evalCmd) throws Exception
+  {
+    // Process files
+    File inFile = new File(in);
+    if (inFile.isDirectory()) {
+      // input is a directory - process files in directory
+      Pattern teinputPattern = Pattern.compile("\\.(TE3input|tml)$");
+      Iterable<File> files = IOUtils.iterFilesRecursive(inFile, teinputPattern);
+      File outDir = new File(out);
+      outDir.mkdirs();
+      for (File file: files) {
+        String inputFilename = file.getAbsolutePath();
+        String outputFilename = inputFilename.replace(in, out).replace(".TE3input", "");
+        if (!outputFilename.equalsIgnoreCase(inputFilename)) {
+          //System.out.println(inputFilename + " => " + outputFilename);
+          processTempEval3File(pipeline, inputFilename, outputFilename);
+        } else {
+          System.err.println("ABORTING: Input file and output is the same - " + inputFilename);
+          System.exit(-1);
+        }
+      }
+    } else {
+      // input is a file - process file
+      processTempEval3File(pipeline, in, out);
+    }
+    // Evaluate
+    if (evalCmd != null) {
+      // TODO: apply eval command
+    }
+  }
+
+  public static void processTempEval3File(AnnotationPipeline pipeline, String in, String out) throws Exception
+  {
+    // Process one tempeval file
+    Document doc = edu.stanford.nlp.util.XMLUtils.readDocumentFromFile(in);
+    Node timemlNode = XMLUtils.getNode(doc, "TimeML");
+    Node docIdNode = XMLUtils.getNode(timemlNode, "DOCID");
+    Node dctNode = XMLUtils.getNode(timemlNode, "DCT");
+    Node dctTimexNode = XMLUtils.getNode(dctNode, "TIMEX3");
+    Node titleNode = XMLUtils.getNode(timemlNode, "TITLE");
+    Node extraInfoNode = XMLUtils.getNode(timemlNode, "EXTRA_INFO");
+    Node textNode = XMLUtils.getNode(timemlNode, "TEXT");
+    String date = XMLUtils.getAttributeValue(dctTimexNode, "value");
+    String text = textNode.getTextContent();
+    Annotation annotation = textToAnnotation(pipeline, text, date);
+    Element annotatedTextElem = annotationToTmlTextElement(annotation);
+
+    Document annotatedDoc = XMLUtils.createDocument();
+    Node newTimemlNode = annotatedDoc.importNode(timemlNode, false);
+    if(docIdNode != null){
+        newTimemlNode.appendChild(annotatedDoc.importNode(docIdNode, true));
+    }
+    newTimemlNode.appendChild(annotatedDoc.importNode(dctNode, true));
+    if (titleNode != null) {
+      newTimemlNode.appendChild(annotatedDoc.importNode(titleNode, true));
+    }
+    if (extraInfoNode != null) {
+      newTimemlNode.appendChild(annotatedDoc.importNode(extraInfoNode, true));
+    }
+    newTimemlNode.appendChild(annotatedDoc.adoptNode(annotatedTextElem));
+    annotatedDoc.appendChild(newTimemlNode);
+
+    PrintWriter pw = (out != null)? IOUtils.getPrintWriter(out):new PrintWriter(System.out);
+    String string = XMLUtils.documentToString(annotatedDoc);
+    pw.println(string);
+    pw.flush();
+    if (out != null) pw.close();
+  }
+
   private static String requiredDocDateFormat;
   private static boolean useGUTime = false;
+
   public static AnnotationPipeline getPipeline(Properties props, boolean tokenize) throws Exception
   {
 //    useGUTime = Boolean.parseBoolean(props.getProperty("gutime", "false"));
     AnnotationPipeline pipeline = new AnnotationPipeline();
     if (tokenize) {
-      pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
+      pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
       pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
     }
     pipeline.addAnnotator(new POSTaggerAnnotator(false));
 //    pipeline.addAnnotator(new NumberAnnotator(false));
 //    pipeline.addAnnotator(new QuantifiableEntityNormalizingAnnotator(false, false));
     String timeAnnotator = props.getProperty("timeAnnotator", "sutime");
-    if ("gutime".equals(timeAnnotator)) {
-      useGUTime = true;
-      pipeline.addAnnotator(new GUTimeAnnotator());
-    } else if ("heideltime".equals(timeAnnotator)) {
-      requiredDocDateFormat = "yyyy-MM-dd";
-      pipeline.addAnnotator(new HeidelTimeAnnotator("heideltime", props));
-    } else if ("sutime".equals(timeAnnotator)){
-      pipeline.addAnnotator(new TimeAnnotator("sutime", props));
-    } else {
-      throw new IllegalArgumentException("Unknown timeAnnotator: " + timeAnnotator);
+    switch (timeAnnotator) {
+      case "gutime":
+        useGUTime = true;
+        pipeline.addAnnotator(new GUTimeAnnotator("gutime", props));
+        break;
+      case "heideltime":
+        requiredDocDateFormat = "yyyy-MM-dd";
+        pipeline.addAnnotator(new HeidelTimeAnnotator("heideltime", props));
+        break;
+      case "sutime":
+        pipeline.addAnnotator(new TimeAnnotator("sutime", props));
+        break;
+      default:
+        throw new IllegalArgumentException("Unknown timeAnnotator: " + timeAnnotator);
     }
     return pipeline;
   }
 
-  enum InputType { TEXTFILE, TEXT, TIMEBANK_CSV, TEMPEVAL2 }
+  enum InputType { TEXTFILE, TEXT, TIMEBANK_CSV, TEMPEVAL2, TEMPEVAL3 }
 
   public static void configLogger(String out) throws IOException {
     File outDir = new File(out);
@@ -848,9 +929,9 @@ public class SUTimeMain {
   }
 
   private static List<Node> createTimexNodes(String str, Integer charBeginOffset, List<CoreMap> timexAnns) {
-    List<ValuedInterval<CoreMap,Integer>> timexList = new ArrayList<ValuedInterval<CoreMap,Integer>>(timexAnns.size());
+    List<ValuedInterval<CoreMap,Integer>> timexList = new ArrayList<>(timexAnns.size());
     for (CoreMap timexAnn:timexAnns) {
-      timexList.add(new ValuedInterval<CoreMap, Integer>(timexAnn,
+      timexList.add(new ValuedInterval<>(timexAnn,
               MatchedExpression.COREMAP_TO_CHAR_OFFSETS_INTERVAL_FUNC.apply(timexAnn)));
     }
     Collections.sort(timexList, HasInterval.CONTAINS_FIRST_ENDPOINTS_COMPARATOR );
@@ -859,12 +940,12 @@ public class SUTimeMain {
 
   private static List<Node> createTimexNodesPresorted(String str, Integer charBeginOffset, List<ValuedInterval<CoreMap,Integer>> timexList) {
     if (charBeginOffset == null) charBeginOffset = 0;
-    List<Node> nodes = new ArrayList<Node>();
+    List<Node> nodes = new ArrayList<>();
     int previousEnd = 0;
-    List<Element> timexElems = new ArrayList<Element>();
-    List<ValuedInterval<CoreMap,Integer>> processed = new ArrayList<ValuedInterval<CoreMap,Integer>>();
+    List<Element> timexElems = new ArrayList<>();
+    List<ValuedInterval<CoreMap,Integer>> processed = new ArrayList<>();
     CollectionValuedMap<Integer, ValuedInterval<CoreMap,Integer>> unprocessed =
-            new CollectionValuedMap<Integer, ValuedInterval<CoreMap,Integer>>(CollectionFactory.<ValuedInterval<CoreMap,Integer>>arrayListFactory());
+            new CollectionValuedMap<>(CollectionFactory.<ValuedInterval<CoreMap, Integer>>arrayListFactory());
     for (ValuedInterval<CoreMap,Integer> v:timexList) {
       CoreMap timexAnn = v.getValue();
       int begin = timexAnn.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) - charBeginOffset;
@@ -927,11 +1008,8 @@ public class SUTimeMain {
     return XMLUtils.documentToString(xmlDoc);
   }
 
-  public static Document annotationToXmlDocument(Annotation annotation)
-  {
+  public static Element annotationToTmlTextElement(Annotation annotation) {
     List<CoreMap> timexAnnsAll = annotation.get(TimeAnnotations.TimexAnnotations.class);
-    Element dateElem = XMLUtils.createElement("DATE");
-    dateElem.setTextContent(annotation.get(CoreAnnotations.DocDateAnnotation.class));
     Element textElem = XMLUtils.createElement("TEXT");
     List<Node> timexNodes = createTimexNodes(
             annotation.get(CoreAnnotations.TextAnnotation.class),
@@ -940,6 +1018,14 @@ public class SUTimeMain {
     for (Node node:timexNodes) {
       textElem.appendChild(node);
     }
+    return textElem;
+  }
+
+  public static Document annotationToXmlDocument(Annotation annotation)
+  {
+    Element dateElem = XMLUtils.createElement("DATE");
+    dateElem.setTextContent(annotation.get(CoreAnnotations.DocDateAnnotation.class));
+    Element textElem = annotationToTmlTextElement(annotation);
 
     Element docElem = XMLUtils.createElement("DOC");
     docElem.appendChild(dateElem);
@@ -967,8 +1053,9 @@ public class SUTimeMain {
     String date = props.getProperty("date");
     String dct = props.getProperty("tempeval2.dct");
     String out = props.getProperty("o");
-    String inputTypeStr = props.getProperty("in.type", TIMEBANK_CSV.name());
+    String inputTypeStr = props.getProperty("in.type", InputType.TEXT.name());
     String eval = props.getProperty("eval");
+    PYTHON = props.getProperty("python", PYTHON);
     InputType inputType = InputType.valueOf(inputTypeStr);
     AnnotationPipeline pipeline;
     switch (inputType) {
@@ -990,6 +1077,11 @@ public class SUTimeMain {
         pipeline = getPipeline(props, false);
         processTempEval2(pipeline, in, out, eval, dct);
         break;
+      case TEMPEVAL3:
+        pipeline = getPipeline(props, true);
+        processTempEval3(pipeline, in, out, eval);
+        break;
     }
   }
+
 }

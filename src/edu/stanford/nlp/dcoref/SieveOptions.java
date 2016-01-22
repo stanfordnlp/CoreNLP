@@ -2,6 +2,7 @@ package edu.stanford.nlp.dcoref;
 
 public class SieveOptions {
   public boolean DO_PRONOUN;
+  public boolean USE_INCOMPATIBLES;
   public boolean USE_iwithini;
   public boolean USE_APPOSITION;
   public boolean USE_PREDICATENOMINATIVES;
@@ -9,6 +10,7 @@ public class SieveOptions {
   public boolean USE_RELATIVEPRONOUN;
   public boolean USE_ROLEAPPOSITION;    
   public boolean USE_EXACTSTRINGMATCH;
+  public boolean USE_NAME_MATCH;
   public boolean USE_INCLUSION_HEADMATCH;
   public boolean USE_RELAXED_HEADMATCH;
   public boolean USE_INCOMPATIBLE_MODIFIER;
@@ -33,6 +35,7 @@ public class SieveOptions {
     StringBuilder os = new StringBuilder();
     os.append("{");
     if(DO_PRONOUN) os.append("DO_PRONOUN");
+    if(USE_INCOMPATIBLES) os.append(", USE_INCOMPATIBLES");
     if(USE_iwithini) os.append(", USE_iwithini");
     if(USE_APPOSITION) os.append(", USE_APPOSITION");
     if(USE_PREDICATENOMINATIVES) os.append(", USE_PREDICATENOMINATIVES");
@@ -40,6 +43,7 @@ public class SieveOptions {
     if(USE_RELATIVEPRONOUN) os.append(", USE_RELATIVEPRONOUN");
     if(USE_ROLEAPPOSITION) os.append(", USE_ROLEAPPOSITION");
     if(USE_EXACTSTRINGMATCH) os.append(", USE_EXACTSTRINGMATCH");
+    if(USE_NAME_MATCH) os.append(", USE_NAME_MATCH");
     if(USE_INCLUSION_HEADMATCH) os.append(", USE_INCLUSION_HEADMATCH");
     if(USE_RELAXED_HEADMATCH) os.append(", USE_RELAXED_HEADMATCH");
     if(USE_INCOMPATIBLE_MODIFIER) os.append(", USE_INCOMPATIBLE_MODIFIER");
@@ -65,6 +69,7 @@ public class SieveOptions {
   
   public SieveOptions() {
     DO_PRONOUN= false;
+    USE_INCOMPATIBLES = true;
     USE_iwithini = false;
     USE_APPOSITION = false;
     USE_PREDICATENOMINATIVES = false;

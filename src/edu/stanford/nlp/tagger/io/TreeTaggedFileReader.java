@@ -2,6 +2,8 @@ package edu.stanford.nlp.tagger.io;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
+
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.trees.DiskTreebank;
 import edu.stanford.nlp.trees.LabeledScoredTreeReaderFactory;
@@ -10,7 +12,7 @@ import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreeTransformer;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 
 public class TreeTaggedFileReader implements TaggedFileReader {
   final Treebank treebank;
@@ -18,17 +20,17 @@ public class TreeTaggedFileReader implements TaggedFileReader {
   final TreeReaderFactory trf;
   final TreeTransformer transformer;
   final TreeNormalizer normalizer;
-  final Filter<Tree> treeFilter;
+  final Predicate<Tree> treeFilter;
 
   final Iterator<Tree> treeIterator;
 
   Tree next = null;
-  
-  int numSentences = 0;
+
+  // int numSentences = 0;
 
   public TreeTaggedFileReader(TaggedFileRecord record) {
     filename = record.file;
-    trf = new LabeledScoredTreeReaderFactory();
+    trf = record.trf == null ? new LabeledScoredTreeReaderFactory() : record.trf;
     transformer = record.treeTransformer;
     normalizer = record.treeNormalizer;
     treeFilter = record.treeFilter;
@@ -51,6 +53,9 @@ public class TreeTaggedFileReader implements TaggedFileReader {
   public boolean hasNext() { return next != null; }
 
   public List<TaggedWord> next() {
+    if (next == null) {
+      throw new NoSuchElementException("Iterator exhausted.");
+    }
     Tree t = next;
     if (normalizer != null) {
       t = normalizer.normalizeWholeTree(t, t.treeFactory());
@@ -68,7 +73,7 @@ public class TreeTaggedFileReader implements TaggedFileReader {
   private void findNext() {
     while (treeIterator.hasNext()) {
       next = treeIterator.next();
-      if (treeFilter == null || treeFilter.accept(next)) {
+      if (treeFilter == null || treeFilter.test(next)) {
         return;
       }
     }
@@ -76,4 +81,5 @@ public class TreeTaggedFileReader implements TaggedFileReader {
   }
 
   public void remove() { throw new UnsupportedOperationException(); }
+
 }

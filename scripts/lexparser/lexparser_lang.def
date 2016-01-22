@@ -1,0 +1,38 @@
+#Language specific options for both training and document parsing
+lang_opts=
+
+#Options for parsing input documents (used by lexparser-lang.sh)
+parse_opts=
+
+tlp=edu.stanford.nlp.parser.lexparser
+
+if [ $lang == "Arabic" ]; then
+  tlp="$tlp".ArabicTreebankParserParams
+  lang_opts="-encoding UTF-8 -arabicFactored"
+  
+  parse_opts="-tokenized"
+
+elif [ $lang == "ArabicUTM" ]; then
+  tlp="$tlp".ArabicUTMTreebankParserParams
+  lang_opts="-encoding UTF-8 -arabicFactored"
+
+  parse_opts="-tokenized"
+  
+elif [ $lang == "English" ]; then
+  tlp="$tlp".EnglishTreebankParserParams
+
+elif [ $lang == "German" ]; then
+  tlp="$tlp".NegraPennTreebankParserParams
+  lang_opts="-hMarkov 1 -vMarkov 2 -vSelSplitCutOff 300 -uwm 1 -unknownSuffixSize 2 -nodeCleanup 2"
+
+elif [ $lang == "Chinese" ]; then
+  tlp="$tlp".ChineseTreebankParserParams
+  lang_opts="-chineseFactored -encoding GB18030"
+
+  parse_opts="-tokenized -sentences newline -escaper edu.stanford.nlp.trees.international.pennchinese.ChineseEscaper"
+
+elif [ $lang == "French" ]; then
+  tlp="$tlp".FrenchTreebankParserParams
+  lang_opts="-frenchFactored -encoding UTF-8"
+  parse_opts=""
+fi

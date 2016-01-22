@@ -4,7 +4,7 @@ import edu.stanford.nlp.classify.Classifier;
 import edu.stanford.nlp.classify.GeneralDataset;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.Datum;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Triple;
@@ -51,7 +51,9 @@ public class MultiClassPrecisionRecallExtendedStats<L> extends MultiClassPrecisi
   }
 
   public <F> double score(Classifier<L,F> classifier, GeneralDataset<L,F> data) {
-    setLabelIndex(data.labelIndex);
+    labelIndex = new HashIndex<>();
+    labelIndex.addAll(classifier.labels());
+    labelIndex.addAll(data.labelIndex.objectsList());
     clearCounts();
     int[] labelsArr = data.getLabelsArray();
     for (int i = 0; i < data.size(); i++) {
@@ -100,17 +102,17 @@ public class MultiClassPrecisionRecallExtendedStats<L> extends MultiClassPrecisi
     if (foundCorrect != null) {
       foundCorrect.clear();
     } else {
-      foundCorrect = new IntCounter<L>();
+      foundCorrect = new IntCounter<>();
     }
     if (foundGuessed != null) {
       foundGuessed.clear();
     } else {
-      foundGuessed = new IntCounter<L>();
+      foundGuessed = new IntCounter<>();
     }
     if (correctGuesses != null) {
       correctGuesses.clear();
     } else {
-      correctGuesses = new IntCounter<L>();
+      correctGuesses = new IntCounter<>();
     }
     if (tpCount != null) {
       Arrays.fill(tpCount, 0);
@@ -163,7 +165,7 @@ public class MultiClassPrecisionRecallExtendedStats<L> extends MultiClassPrecisi
     }
     if (addUnknownLabels) {
       if (labelIndex == null) {
-        labelIndex = new HashIndex<L>();
+        labelIndex = new HashIndex<>();
       }
       labelIndex.add(guess);
       labelIndex.add(label);
@@ -233,7 +235,7 @@ public class MultiClassPrecisionRecallExtendedStats<L> extends MultiClassPrecisi
   {
     int totalCorrect = tokensCorrect;
     int totalWrong = tokensCount - tokensCorrect;
-    return new Triple<Double, Integer, Integer>((((double) totalCorrect) / tokensCount),
+    return new Triple<>((((double) totalCorrect) / tokensCount),
             totalCorrect, totalWrong);
   }
 

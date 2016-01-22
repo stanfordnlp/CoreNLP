@@ -47,7 +47,7 @@ public class WordToTaggedWordProcessor<IN extends HasWord, L, F> extends Abstrac
    * @return A new Document, perhaps with some of the things TaggedWords
    */
   public List<HasWord> process(List<? extends IN> words) {
-    List<HasWord> result = new ArrayList<HasWord>();
+    List<HasWord> result = new ArrayList<>();
     for (HasWord w : words) {
       result.add(splitTag(w));
     }
@@ -108,12 +108,12 @@ public class WordToTaggedWordProcessor<IN extends HasWord, L, F> extends Abstrac
       Document<HasWord, Word, Word> d;
       if (filename.startsWith("http://")) {
         Document<HasWord, Word, Word> dpre = new BasicDocument<HasWord>().init(new URL(filename));
-        DocumentProcessor<Word, Word, HasWord, Word> notags = new StripTagsProcessor<HasWord, Word>();
+        DocumentProcessor<Word, Word, HasWord, Word> notags = new StripTagsProcessor<>();
         d = notags.processDocument(dpre);
       } else {
         d = new BasicDocument<HasWord>().init(new File(filename));
       }
-      DocumentProcessor<Word, HasWord, HasWord, Word> proc = new WordToTaggedWordProcessor<Word, HasWord, Word>();
+      DocumentProcessor<Word, HasWord, HasWord, Word> proc = new WordToTaggedWordProcessor<>();
       Document<HasWord, Word, HasWord> sentd = proc.processDocument(d);
       // System.out.println(sentd);
       int i = 0;

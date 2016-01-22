@@ -18,15 +18,15 @@ import edu.stanford.nlp.util.Triple;
 
 public class TreeAnnotatorAndBinarizer implements TreeTransformer {
 
-  private TreeFactory tf;
-  private TreebankLanguagePack tlp;
-  private TreeTransformer annotator;
-  private TreeTransformer binarizer;
-  private TreeTransformer postSplitter;
-  private boolean forceCNF;
-  private ClassicCounter<Tree> annotatedRuleCounts;
-  private ClassicCounter<String> annotatedStateCounts;
-  private TrainOptions trainOptions;
+  private final TreeFactory tf;
+  private final TreebankLanguagePack tlp;
+  private final TreeTransformer annotator;
+  private final TreeBinarizer binarizer;
+  private final PostSplitter postSplitter;
+  private final boolean forceCNF;
+  private final TrainOptions trainOptions;
+  private final ClassicCounter<Tree> annotatedRuleCounts;
+  private final ClassicCounter<String> annotatedStateCounts;
 
   public TreeAnnotatorAndBinarizer(TreebankLangParserParams tlpParams, boolean forceCNF, boolean insideFactor, boolean doSubcategorization, Options op) {
     this(tlpParams.headFinder(), tlpParams.headFinder(), tlpParams, forceCNF, insideFactor, doSubcategorization, op);
@@ -42,26 +42,32 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
     binarizer = new TreeBinarizer(binarizationHF, tlpParams.treebankLanguagePack(), insideFactor, trainOptions.markovFactor, trainOptions.markovOrder, trainOptions.compactGrammar() > 0, trainOptions.compactGrammar() > 1, trainOptions.HSEL_CUT, trainOptions.markFinalStates, trainOptions.simpleBinarizedLabels, trainOptions.noRebinarization);
     if (trainOptions.selectivePostSplit) {
       postSplitter = new PostSplitter(tlpParams, op);
+    } else {
+      postSplitter = null;
     }
     this.tf = new LabeledScoredTreeFactory(new CategoryWordTagFactory());
     this.tlp = tlpParams.treebankLanguagePack();
     this.forceCNF = forceCNF;
     if (trainOptions.printAnnotatedRuleCounts) {
-      annotatedRuleCounts = new ClassicCounter<Tree>();
+      annotatedRuleCounts = new ClassicCounter<>();
+    } else {
+      annotatedRuleCounts = null;
     }
     if (trainOptions.printAnnotatedStateCounts) {
-      annotatedStateCounts = new ClassicCounter<String>();
+      annotatedStateCounts = new ClassicCounter<>();
+    } else {
+      annotatedStateCounts = null;
     }
   }
 
   public void dumpStats() {
     if (trainOptions.selectivePostSplit) {
-      ((PostSplitter) postSplitter).dumpStats();
+      postSplitter.dumpStats();
     }
   }
 
   public void setDoSelectiveSplit(boolean doSelectiveSplit) {
-    ((TreeBinarizer) binarizer).setDoSelectiveSplit(doSelectiveSplit);
+    binarizer.setDoSelectiveSplit(doSelectiveSplit);
   }
 
   /**
@@ -77,7 +83,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
       t = tf.newTreeNode(tlp.startSymbol(), Collections.singletonList(t));
     }
     t.setLabel(new CategoryWordTag(tlp.startSymbol(), Lexicon.BOUNDARY, Lexicon.BOUNDARY_TAG));
-    List<Tree> preTermChildList = new ArrayList<Tree>();
+    List<Tree> preTermChildList = new ArrayList<>();
     Tree boundaryTerm = tf.newLeaf(new Word(Lexicon.BOUNDARY));//CategoryWordTag(Lexicon.BOUNDARY,Lexicon.BOUNDARY,""));
     preTermChildList.add(boundaryTerm);
     Tree boundaryPreTerm = tf.newTreeNode(new CategoryWordTag(Lexicon.BOUNDARY_TAG, Lexicon.BOUNDARY, Lexicon.BOUNDARY_TAG), preTermChildList);
@@ -87,11 +93,10 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
   }
 
   /** The tree t is normally expected to be a Penn-Treebank-style tree
-   *  in which the top node is an extra node that rewrites unarily.
-   *  If this isn't the case, an extra node is added and the user is
-   *  warned.
+   *  in which the top node is an extra node that has a unary expansion.
+   *  If this isn't the case, an extra node is added and the user is warned.
    */
-
+  @Override
   public Tree transformTree(Tree t) {
     if (trainOptions.printTreeTransformations > 0) {
       trainOptions.printTrainTree(null, "ORIGINAL TREE:", t);
@@ -151,15 +156,12 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
     System.err.println();
     System.err.println("Annotated state counts");
     Set<String> keys = annotatedStateCounts.keySet();
-    List<String> keyList = new ArrayList<String>(keys);
+    List<String> keyList = new ArrayList<>(keys);
     Collections.sort(keyList);
     for (String s : keyList) {
       System.err.println(s + "\t" + annotatedStateCounts.getCount(s));
     }
   }
-
-
-
 
 
   // main helper function
@@ -172,10 +174,9 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
   }
 
 
-
   private static void removeDeleteSplittersFromSplitters(TreebankLanguagePack tlp, Options op) {
     if (op.trainOptions.deleteSplitters != null) {
-      List<String> deleted = new ArrayList<String>();
+      List<String> deleted = new ArrayList<>();
       for (String del : op.trainOptions.deleteSplitters) {
         String baseDel = tlp.basicCategory(del);
         boolean checkBasic = del.equals(baseDel);
@@ -196,7 +197,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
   }
 
 
-  /** @return a pair of binaryTrainTreebank,binaryTuneTreebank.
+  /** @return A Triple of binaryTrainTreebank, binarySecondaryTreebank, binaryTuneTreebank.
    */
   public static Triple<Treebank, Treebank, Treebank> getAnnotatedBinaryTreebankFromTreebank(Treebank trainTreebank,
       Treebank secondaryTreebank,
@@ -253,7 +254,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
       op.trainOptions.splitters = ParentAnnotationStats.getSplitCategories(wholeTreebank, op.trainOptions.tagSelectiveSplit, 0, op.trainOptions.selectiveSplitCutOff, op.trainOptions.tagSelectiveSplitCutOff, tlp);
       removeDeleteSplittersFromSplitters(tlp, op);
       if (op.testOptions.verbose) {
-        List<String> list = new ArrayList<String>(op.trainOptions.splitters);
+        List<String> list = new ArrayList<>(op.trainOptions.splitters);
         Collections.sort(list);
         System.err.println("Parent split categories: " + list);
       }
@@ -299,7 +300,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
       binarizer.dumpStats();
     }
 
-    return new Triple<Treebank, Treebank, Treebank>(trainTreebank, secondaryTreebank, tuneTreebank);
+    return new Triple<>(trainTreebank, secondaryTreebank, tuneTreebank);
   }
 
 
@@ -339,7 +340,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
     if (i < args.length) {
       System.err.println("usage: java TreeAnnotatorAndBinarizer options*");
       System.err.println("  Options are like for lexicalized parser including -train treebankPath fileRange]");
-      System.exit(0);
+      return;
     }
 
     System.err.println("Annotating from treebank dir: " + treebankPath);
@@ -364,16 +365,15 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
 
 
 
-
   /** This does nothing but a function to change the tree nodes into
    *  CategoryWordTag, while the leaves are StringLabels. That's what the
    *  rest of the code assumes.
    */
   static class TreeNullAnnotator implements TreeTransformer {
 
-    private TreeFactory tf =
+    private final TreeFactory tf =
       new LabeledScoredTreeFactory(new CategoryWordTagFactory());
-    private HeadFinder hf;
+    private final HeadFinder hf;
 
     public Tree transformTree(Tree t) {
       // make a defensive copy which the helper method can then mangle
@@ -382,8 +382,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
     }
 
     private Tree transformTreeHelper(Tree t) {
-      if (t == null) {
-      } else {
+      if (t != null) {
         String cat = t.label().value();
         if (t.isLeaf()) {
           Label label = new Word(cat); //new CategoryWordTag(cat,cat,"");

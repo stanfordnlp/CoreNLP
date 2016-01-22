@@ -6,18 +6,21 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.pipeline.AnnotationOutputter;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Nodes;
 import nu.xom.xslt.XSLTransform;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
@@ -99,12 +102,22 @@ public class CoreNLPServlet extends HttpServlet {
       outputFormat = this.defaultFormat;
     }
 
-    if ("xml".equals(outputFormat)) {
-      outputXml(out, annotation);
-    } else if ("pretty".equals(outputFormat)) {
-      outputPretty(out, annotation);
-    } else {
-      outputVisualise(out, annotation);
+    switch (outputFormat) {
+      case "xml":
+        outputXml(out, annotation);
+        break;
+      case "json":
+        outputJson(out, annotation);
+        break;
+      case "conll":
+        outputCoNLL(out, annotation);
+        break;
+      case "pretty":
+        outputPretty(out, annotation);
+        break;
+      default:
+        outputVisualise(out, annotation);
+        break;
     }
   }
 
@@ -122,14 +135,14 @@ public class CoreNLPServlet extends HttpServlet {
 
       // Insert divs that will be used for each visualisation type.
       final int visualiserDivPxWidth = 700;
-      Map<String, String> nameByAbbrv = new LinkedHashMap<String, String>();
+      Map<String, String> nameByAbbrv = new LinkedHashMap<>();
       nameByAbbrv.put("pos", "Part-of-Speech");
       nameByAbbrv.put("ner", "Named Entity Recognition");
       nameByAbbrv.put("coref", "Coreference");
-      nameByAbbrv.put("basic_dep", "Basic dependencies");
-      nameByAbbrv.put("collapsed_dep", "Collapsed dependencies");
+      nameByAbbrv.put("basic_dep", "Basic Dependencies");
+      //nameByAbbrv.put("collapsed_dep", "Collapsed dependencies");
       nameByAbbrv.put("collapsed_ccproc_dep",
-          "Collapsed CC-processed dependencies");
+          "Enhanced Dependencies");
       for (Map.Entry<String, String> entry : nameByAbbrv.entrySet()) {
         out.println("<h2>" + entry.getValue() + ":</h2>");
         out.println("<div id=\"" + entry.getKey() + "\" style=\"width:"
@@ -150,7 +163,7 @@ public class CoreNLPServlet extends HttpServlet {
       String escapedXml = xmlOutput.toString().replaceAll("\\r\\n|\\r|\\n", ""
           ).replace("\"", "\\\"");
       
-      // Inject the XML results into the HTML to be retrieved by the Javscript.
+      // Inject the XML results into the HTML to be retrieved by the Javascript.
       out.println("<script type=\"text/javascript\">");
       out.println("// <![CDATA[");
       out.println("    stanfordXML = \"" + escapedXml + "\";");
@@ -164,6 +177,10 @@ public class CoreNLPServlet extends HttpServlet {
       out.println("<script type=\"text/javascript\">");
       out.println("// <![CDATA[");
       out.println("    bratLocation = \"" + bratLocation + "\";");
+      out.println("    webFontURLs = [\n" +
+                  "        '"+ bratLocation + "/static/fonts/Astloch-Bold.ttf',\n" +
+                  "        '"+ bratLocation + "/static/fonts/PT_Sans-Caption-Web-Regular.ttf',\n" +
+                  "        '"+ bratLocation + "/static/fonts/Liberation_Sans-Regular.ttf'];");
       out.println("// ]]>");
       out.println("</script>");
       
@@ -200,17 +217,16 @@ public class CoreNLPServlet extends HttpServlet {
       throw new ServletException(e);
     }
   }
-   
-  public void outputXml(PrintWriter out, Annotation annotation) 
-    throws IOException
-  {
-    StringWriter xmlOutput = new StringWriter();
-    pipeline.xmlPrint(annotation, xmlOutput);
-    xmlOutput.flush();
 
-    String escapedXml = StringEscapeUtils.escapeHtml(xmlOutput.toString());
+  public void outputByWriter(Consumer<StringWriter> printer,
+                             PrintWriter out) throws IOException {
+    StringWriter output = new StringWriter();
+    printer.accept(output);
+    output.flush();
+
+    String escapedXml = StringEscapeUtils.escapeHtml4(output.toString());
     String[] lines = escapedXml.split("\n");
-    out.print("<div>");
+    out.print("<div><pre>");
     for (String line : lines) {
       int numSpaces = 0;
       while (numSpaces < line.length() && line.charAt(numSpaces) == ' ') {
@@ -218,8 +234,38 @@ public class CoreNLPServlet extends HttpServlet {
         ++numSpaces;
       }
       out.print(line.substring(numSpaces));
-      out.print("<br>\n");
+      out.print("\n");
     }
-    out.print("</div>");
+    out.print("</pre></div>");
+  }
+   
+  public void outputXml(PrintWriter out, Annotation annotation) throws IOException {
+    outputByWriter(writer -> {
+      try {
+        pipeline.xmlPrint(annotation, writer);
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
+      }
+    }, out);
+  }
+
+  public void outputJson(PrintWriter out, Annotation annotation) throws IOException {
+    outputByWriter(writer -> {
+      try {
+        pipeline.jsonPrint(annotation, writer);
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
+      }
+    }, out);
+  }
+
+  public void outputCoNLL(PrintWriter out, Annotation annotation) throws IOException {
+    outputByWriter(writer -> {
+      try {
+        pipeline.conllPrint(annotation, writer);
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
+      }
+    }, out);
   }
 }

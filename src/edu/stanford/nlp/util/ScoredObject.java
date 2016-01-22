@@ -1,13 +1,15 @@
 package edu.stanford.nlp.util;
 
 
+import java.io.Serializable;
+
 /**
  * Wrapper class for holding a scored object.
  *
  * @author Dan Klein
  * @version 2/7/01
  */
-public class ScoredObject<T> implements Scored {
+public class ScoredObject<T> implements Scored, Serializable {
 
   private double score;
 
@@ -31,7 +33,6 @@ public class ScoredObject<T> implements Scored {
     this.object = object;
   }
 
-
   public ScoredObject(T object, double score) {
     this.object = object;
     this.score = score;
@@ -42,4 +43,6 @@ public class ScoredObject<T> implements Scored {
     return object + " @ " + score;
   }
 
+  private static final long serialVersionUID = 1L;
 }
+

@@ -28,8 +28,8 @@ import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreeTransformer;
-import edu.stanford.nlp.trees.international.french.FrenchTreeReader;
-import edu.stanford.nlp.trees.international.french.FrenchTreeReaderFactory;
+import edu.stanford.nlp.trees.international.french.FrenchXMLTreeReader;
+import edu.stanford.nlp.trees.international.french.FrenchXMLTreeReaderFactory;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.Generics;
@@ -81,7 +81,7 @@ public final class SplitCanditoTrees {
   static List<String> readIds(String filename)
     throws IOException
   {
-    List<String> ids = new ArrayList<String>();
+    List<String> ids = new ArrayList<>();
     BufferedReader fin =
       new BufferedReader(new InputStreamReader
                          (new FileInputStream(filename), "ISO8859_1"));
@@ -96,14 +96,16 @@ public final class SplitCanditoTrees {
   static Map<String, Tree> readTrees(String[] filenames)
     throws IOException
   {
-    final TreeReaderFactory trf = new FrenchTreeReaderFactory();
+    // TODO: perhaps we can just pass in CC_TAGSET and get rid of replacePOSTags
+    // need to test that
+    final TreeReaderFactory trf = new FrenchXMLTreeReaderFactory(false); 
     Map<String, Tree> treeMap = Generics.newHashMap();
     for (String filename : filenames) {
       File file = new File(filename);
       String canonicalFilename =
         file.getName().substring(0, file.getName().lastIndexOf('.'));
 
-      FrenchTreeReader tr = (FrenchTreeReader)
+      FrenchXMLTreeReader tr = (FrenchXMLTreeReader)
         trf.newTreeReader(new BufferedReader
                           (new InputStreamReader
                            (new FileInputStream(file),"ISO8859_1")));
@@ -124,16 +126,16 @@ public final class SplitCanditoTrees {
   static void preprocessMWEs(Map<String, Tree> treeMap) {
 
     TwoDimensionalCounter<String,String> labelTerm =
-      new TwoDimensionalCounter<String,String>();
+            new TwoDimensionalCounter<>();
     TwoDimensionalCounter<String,String> termLabel =
-      new TwoDimensionalCounter<String,String>();
+            new TwoDimensionalCounter<>();
     TwoDimensionalCounter<String,String> labelPreterm =
-      new TwoDimensionalCounter<String,String>();
+            new TwoDimensionalCounter<>();
     TwoDimensionalCounter<String,String> pretermLabel =
-      new TwoDimensionalCounter<String,String>();
+            new TwoDimensionalCounter<>();
 
     TwoDimensionalCounter<String,String> unigramTagger =
-      new TwoDimensionalCounter<String,String>();
+            new TwoDimensionalCounter<>();
 
     for (Tree t : treeMap.values()) {
       MWEPreprocessor.countMWEStatistics(t, unigramTagger,
@@ -239,8 +241,8 @@ public final class SplitCanditoTrees {
                                   Map<String, Tree> treeMap)
     throws IOException
   {
-    Queue<Integer> fSizeQueue = new LinkedList<Integer>(Arrays.asList(fSizes));
-    Queue<String> fNameQueue = new LinkedList<String>(Arrays.asList(fNames));
+    Queue<Integer> fSizeQueue = new LinkedList<>(Arrays.asList(fSizes));
+    Queue<String> fNameQueue = new LinkedList<>(Arrays.asList(fNames));
 
     TregexPattern pBadTree = TregexPattern.compile("@SENT <: @PUNC");
     TregexPattern pBadTree2 = TregexPattern.compile("@SENT <1 @PUNC <2 @PUNC !<3 __");
@@ -314,9 +316,6 @@ public final class SplitCanditoTrees {
 
   /**
    * Converts a tree to the Morfette training format.
-   * 
-   * @param tree
-   * @return
    */
   private static String treeToMorfette(Tree tree) {
     StringBuilder sb = new StringBuilder();

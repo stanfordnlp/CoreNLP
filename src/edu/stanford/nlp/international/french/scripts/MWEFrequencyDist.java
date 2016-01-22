@@ -39,12 +39,12 @@ public final class MWEFrequencyDist {
     }
     
     final File treeFile = new File(args[0]);
-    TwoDimensionalCounter<String,String> mweLabelToString = new TwoDimensionalCounter<String,String>();
+    TwoDimensionalCounter<String,String> mweLabelToString = new TwoDimensionalCounter<>();
     Set<String> uniquePOSSequences = Generics.newHashSet();
     
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(treeFile), "UTF-8"));
-      TreeReaderFactory trf = new FrenchTreeReaderFactory(true);
+      TreeReaderFactory trf = new FrenchTreeReaderFactory();
       TreeReader tr = trf.newTreeReader(br);
 
       final TregexPattern pMWE = TregexPattern.compile("/^MW/");

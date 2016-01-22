@@ -17,9 +17,9 @@ public class AnnotationLookup {
     WORD_KEY(CoreAnnotations.TextAnnotation.class, OldFeatureLabelKeys.WORD_KEY),
     LEMMA_KEY(CoreAnnotations.LemmaAnnotation.class, OldFeatureLabelKeys.LEMMA_KEY),
     CATEGORY_KEY(CoreAnnotations.CategoryAnnotation.class, OldFeatureLabelKeys.CATEGORY_KEY),
-    PROJ_CAT_KEY(CoreAnnotations.ProjectedCategoryAnnotation.class, OldFeatureLabelKeys.PROJ_CAT_KEY),
-    HEAD_WORD_KEY("edu.stanford.nlp.ling.TreeCoreAnnotations.HeadWordAnnotation", OldFeatureLabelKeys.HEAD_WORD_KEY),
-    HEAD_TAG_KEY("edu.stanford.nlp.ling.TreeCoreAnnotations.HeadTagAnnotation", OldFeatureLabelKeys.HEAD_TAG_KEY),
+    //PROJ_CAT_KEY(CoreAnnotations.ProjectedCategoryAnnotation.class, OldFeatureLabelKeys.PROJ_CAT_KEY),
+    //HEAD_WORD_KEY("edu.stanford.nlp.ling.TreeCoreAnnotations.HeadWordAnnotation", OldFeatureLabelKeys.HEAD_WORD_KEY),
+    //HEAD_TAG_KEY("edu.stanford.nlp.ling.TreeCoreAnnotations.HeadTagAnnotation", OldFeatureLabelKeys.HEAD_TAG_KEY),
     INDEX_KEY(CoreAnnotations.IndexAnnotation.class, OldFeatureLabelKeys.INDEX_KEY),
     ARG_KEY(CoreAnnotations.ArgumentAnnotation.class, OldFeatureLabelKeys.ARG_KEY),
     MARKING_KEY(CoreAnnotations.MarkingAnnotation.class, OldFeatureLabelKeys.MARKING_KEY),
@@ -59,7 +59,31 @@ public class AnnotationLookup {
     MORPHO_GEN_KEY(CoreAnnotations.MorphoGenAnnotation.class,"gen"),
     MORPHO_CASE_KEY(CoreAnnotations.MorphoCaseAnnotation.class,"case"),
     WORDNET_SYN_KEY(CoreAnnotations.WordnetSynAnnotation.class,"wordnetsyn"),
-    PROTO_SYN_KEY(CoreAnnotations.ProtoAnnotation.class,"proto");
+    PROTO_SYN_KEY(CoreAnnotations.ProtoAnnotation.class,"proto"),
+    DOCTITLE_KEY(CoreAnnotations.DocTitleAnnotation.class,"doctitle"),
+    DOCTYPE_KEY(CoreAnnotations.DocTypeAnnotation.class,"doctype"),
+    DOCDATE_KEY(CoreAnnotations.DocDateAnnotation.class,"docdate"),
+    DOCSOURCETYPE_KEY(CoreAnnotations.DocSourceTypeAnnotation.class,"docsourcetype"),
+    LINK_KEY(CoreAnnotations.LinkAnnotation.class,"link"),
+    SPEAKER_KEY(CoreAnnotations.SpeakerAnnotation.class,"speaker"),
+    AUTHOR_KEY(CoreAnnotations.AuthorAnnotation.class,"author"),
+    SECTION_KEY(CoreAnnotations.SectionAnnotation.class,"section"),
+    SECTIONID_KEY(CoreAnnotations.SectionIDAnnotation.class,"sectionID"),
+    SECTIONDATE_KEY(CoreAnnotations.SectionDateAnnotation.class,"sectionDate"),
+
+    // Thang Sep13: for Genia NER
+    HEAD_KEY(CoreAnnotations.HeadWordStringAnnotation.class, "head"),
+    GOVERNOR_KEY(CoreAnnotations.GovernorAnnotation.class, "governor"),
+    GAZ_KEY(CoreAnnotations.GazAnnotation.class, "gaz"),
+    ABBR_KEY(CoreAnnotations.AbbrAnnotation.class, "abbr"),
+    ABSTR_KEY(CoreAnnotations.AbstrAnnotation.class, "abstr"),
+    FREQ_KEY(CoreAnnotations.FreqAnnotation.class, "freq"),
+    WEB_KEY(CoreAnnotations.WebAnnotation.class, "web"),
+
+    // Also have "pos" for PartOfTag (POS is also the TAG_KEY - "tag", but "pos" makes more sense)
+    // Still keep "tag" for POS tag so we don't break anything
+    POS_TAG_KEY(CoreAnnotations.PartOfSpeechAnnotation.class, "pos");
+
 
     public final Class coreKey;
     public final String oldKey;
@@ -79,8 +103,7 @@ public class AnnotationLookup {
       try {
        keyClass = Class.forName(className);
       } catch(ClassNotFoundException e) {
-        GenericAnnotation<Object> newKey = new GenericAnnotation<Object>() {
-          public Class<Object> getType() { return Object.class;} };
+        GenericAnnotation<Object> newKey = () -> Object.class;
         keyClass = newKey.getClass();
       }
       this.coreKey = ErasureUtils.uncheckedCast(keyClass);

@@ -14,7 +14,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
 import edu.stanford.nlp.objectbank.XMLBeginEndIterator;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.process.PTBTokenizer;
 
 /**
@@ -61,7 +61,7 @@ public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreL
       PTBTokenizer ptb = PTBTokenizer.newPTBTokenizer(new BufferedReader(new StringReader(doc)), false, true);
       List<CoreLabel> words = ptb.tokenize();
 
-      List<CoreLabel> result = new ArrayList<CoreLabel>();
+      List<CoreLabel> result = new ArrayList<>();
 
       CoreLabel prev = null;
       String prevString = "";

@@ -48,6 +48,7 @@ public class ConfigParser implements Iterable<Properties> {
   public static final String paramMaxLen = "MAXLEN";        //Max yield of the trees in the data set
   public static final String paramMorph = "MORPH";          //Add the pre-terminal morphological analysis to the leaf (using the delimiter)
   public static final String paramTransform = "TVISITOR";   //Apply a custom TreeVisitor to each tree in the dataset
+  public static final String paramCCTagset = "CC_TAGSET"; // specific to French.  TODO: move it to the French dataset
 
   //Absolute parameters
   private static final Pattern matchName = Pattern.compile(paramName + DELIM);
@@ -72,6 +73,8 @@ public class ConfigParser implements Iterable<Properties> {
   private static final Pattern matchEncode = Pattern.compile(paramEncode + DELIM);
   private static final Pattern matchEncodeArgs = Pattern.compile("Buckwalter|UTF8");
 
+  private static final Pattern matchCCTagset = Pattern.compile(paramCCTagset + DELIM);
+
   private static final Pattern booleanArgs = Pattern.compile("true|false");
 
   //Pre-fix parameters
@@ -90,33 +93,34 @@ public class ConfigParser implements Iterable<Properties> {
 
   public ConfigParser(String filename) {
     configFile = filename;
-    datasetList = new ArrayList<Properties>();
+    datasetList = new ArrayList<>();
 
     //For Pair<Pattern,Pattern>, the first pattern matches the parameter name
     //while the second (optionally) accepts the parameter values
     patternsMap = Generics.newHashMap();
-    patternsMap.put(paramName, new Pair<Pattern,Pattern>(matchName,null));
-    patternsMap.put(paramType, new Pair<Pattern,Pattern>(matchType,null));
-    patternsMap.put(paramPath, new Pair<Pattern,Pattern>(matchPath,null));
-    patternsMap.put(paramOutputPath, new Pair<Pattern,Pattern>(matchOutputPath,null));
-    patternsMap.put(paramSplit, new Pair<Pattern,Pattern>(matchSplit,null));
-    patternsMap.put(paramTagDelim, new Pair<Pattern,Pattern>(matchTagDelim,null));
-    patternsMap.put(paramFileExt, new Pair<Pattern,Pattern>(matchFileExt,null));
-    patternsMap.put(paramEncode, new Pair<Pattern,Pattern>(matchEncode,matchEncodeArgs));
-    patternsMap.put(paramMapping, new Pair<Pattern,Pattern>(matchMapping,null));
-    patternsMap.put(paramDistrib, new Pair<Pattern,Pattern>(matchDistrib,booleanArgs));
-    patternsMap.put(paramFlat, new Pair<Pattern,Pattern>(matchFlat,booleanArgs));
-    patternsMap.put(paramDT, new Pair<Pattern,Pattern>(matchDT,booleanArgs));
-    patternsMap.put(paramLexMapper, new Pair<Pattern,Pattern>(matchLexMapper,null));
-    patternsMap.put(paramNoDashTags, new Pair<Pattern,Pattern>(matchNoDashTags,booleanArgs));
-    patternsMap.put(paramAddRoot, new Pair<Pattern,Pattern>(matchAddRoot,booleanArgs));
-    patternsMap.put(paramUnEscape, new Pair<Pattern,Pattern>(matchUnEscape,booleanArgs));
-    patternsMap.put(paramLexMapOptions, new Pair<Pattern,Pattern>(matchLexMapOptions,null));
-    patternsMap.put(paramPosMapper, new Pair<Pattern,Pattern>(matchPosMapper,null));
-    patternsMap.put(paramPosMapOptions, new Pair<Pattern,Pattern>(matchPosMapOptions,null));
-    patternsMap.put(paramMaxLen, new Pair<Pattern,Pattern>(matchMaxLen,null));
-    patternsMap.put(paramMorph, new Pair<Pattern,Pattern>(matchMorph,null));
-    patternsMap.put(paramTransform, new Pair<Pattern,Pattern>(matchTransform,null));
+    patternsMap.put(paramName, new Pair<>(matchName, null));
+    patternsMap.put(paramType, new Pair<>(matchType, null));
+    patternsMap.put(paramPath, new Pair<>(matchPath, null));
+    patternsMap.put(paramOutputPath, new Pair<>(matchOutputPath, null));
+    patternsMap.put(paramSplit, new Pair<>(matchSplit, null));
+    patternsMap.put(paramTagDelim, new Pair<>(matchTagDelim, null));
+    patternsMap.put(paramFileExt, new Pair<>(matchFileExt, null));
+    patternsMap.put(paramEncode, new Pair<>(matchEncode, matchEncodeArgs));
+    patternsMap.put(paramMapping, new Pair<>(matchMapping, null));
+    patternsMap.put(paramDistrib, new Pair<>(matchDistrib, booleanArgs));
+    patternsMap.put(paramFlat, new Pair<>(matchFlat, booleanArgs));
+    patternsMap.put(paramDT, new Pair<>(matchDT, booleanArgs));
+    patternsMap.put(paramLexMapper, new Pair<>(matchLexMapper, null));
+    patternsMap.put(paramNoDashTags, new Pair<>(matchNoDashTags, booleanArgs));
+    patternsMap.put(paramAddRoot, new Pair<>(matchAddRoot, booleanArgs));
+    patternsMap.put(paramUnEscape, new Pair<>(matchUnEscape, booleanArgs));
+    patternsMap.put(paramLexMapOptions, new Pair<>(matchLexMapOptions, null));
+    patternsMap.put(paramPosMapper, new Pair<>(matchPosMapper, null));
+    patternsMap.put(paramPosMapOptions, new Pair<>(matchPosMapOptions, null));
+    patternsMap.put(paramMaxLen, new Pair<>(matchMaxLen, null));
+    patternsMap.put(paramMorph, new Pair<>(matchMorph, null));
+    patternsMap.put(paramTransform, new Pair<>(matchTransform, null));
+    patternsMap.put(paramCCTagset, new Pair<>(matchCCTagset, null));
   }
 
   public Iterator<Properties> iterator() {
@@ -156,7 +160,7 @@ public class ConfigParser implements Iterable<Properties> {
             String[] tokens = line.split(DELIM);
 
             if(tokens.length != 2) {
-              System.err.printf("%s: Skipping malformed parameter in %s (line %d)\n", this.getClass().getName(), configFile,reader.getLineNumber());
+              System.err.printf("%s: Skipping malformed parameter in %s (line %d)%n", this.getClass().getName(), configFile,reader.getLineNumber());
               break;
             }
 
@@ -167,7 +171,7 @@ public class ConfigParser implements Iterable<Properties> {
               if(paramToken.matches()) {
                 paramsForDataset.setProperty(actualParam, paramValue);
               } else {
-                System.err.printf("%s: Skipping illegal parameter value in %s (line %d)\n", this.getClass().getName(), configFile,reader.getLineNumber());
+                System.err.printf("%s: Skipping illegal parameter value in %s (line %d)%n", this.getClass().getName(), configFile,reader.getLineNumber());
                 break;
               }
             } else {
@@ -175,9 +179,10 @@ public class ConfigParser implements Iterable<Properties> {
             }
           }
         }
-        if(!matched) {
-          System.err.printf("%s: Unknown token in %s (line %d)\n", this.getClass().getName(), configFile, reader.getLineNumber());
-          System.exit(-1);
+        if (!matched) {
+          String error = this.getClass().getName() + ": Unknown token in " + configFile + " (line " + reader.getLineNumber() + ")%n";
+          System.err.printf(error);
+          throw new IllegalArgumentException(error);
         }
       }
 
@@ -186,23 +191,23 @@ public class ConfigParser implements Iterable<Properties> {
       reader.close();
 
     } catch (FileNotFoundException e) {
-      System.err.printf("%s: Cannot open file %s\n", this.getClass().getName(), configFile);
+      System.err.printf("%s: Cannot open file %s%n", this.getClass().getName(), configFile);
     } catch (IOException e) {
-      System.err.printf("%s: Error reading %s (line %d)\n", this.getClass().getName(), configFile, lineNum);
+      System.err.printf("%s: Error reading %s (line %d)%n", this.getClass().getName(), configFile, lineNum);
     }
   }
 
   @Override
   public String toString() {
     final int numDatasets = datasetList.size();
-    StringBuilder sb = new StringBuilder(String.format("Loaded %d datasets: \n",numDatasets));
+    StringBuilder sb = new StringBuilder(String.format("Loaded %d datasets: %n",numDatasets));
 
     int dataSetNum = 1;
     for(Properties sm : datasetList) {
       if(sm.containsKey(paramName))
-        sb.append(String.format(" %d: %s\n",dataSetNum++, sm.getProperty(paramName)));
+        sb.append(String.format(" %d: %s%n",dataSetNum++, sm.getProperty(paramName)));
       else
-        sb.append(String.format(" %d: %s\n",dataSetNum++,"UNKNOWN NAME"));
+        sb.append(String.format(" %d: %s%n",dataSetNum++,"UNKNOWN NAME"));
     }
 
     return sb.toString();
@@ -217,7 +222,7 @@ public class ConfigParser implements Iterable<Properties> {
     for(Properties sm : cp) {
       System.out.println("--------------------");
       for(String key : sm.stringPropertyNames())
-        System.out.printf(" %s: %s\n",key,sm.get(key));
+        System.out.printf(" %s: %s%n",key,sm.get(key));
     }
   }
 

@@ -1,5 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.ling.Sentence;
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
@@ -13,36 +14,24 @@ import edu.stanford.nlp.util.CoreMap;
 /** @author jtibs */
 public class RegexNERAnnotatorITest extends TestCase {
   private static final String MAPPING = "/u/nlp/data/TAC-KBP2010/sentence_extraction/itest_map";
-  private static RegexNERAnnotator annotator = null;
+  private static RegexNERAnnotator annotator;
 
   @Override
   public void setUp() throws Exception {
     synchronized(RegexNERAnnotator.class) {
-      if (annotator == null)
+      if (annotator == null) {
         annotator = new RegexNERAnnotator(MAPPING, false, null);
+      }
     }
   }
 
   /**
-   * helper method, converts a sentence into a sequence of tokens
-   */
-  private List<CoreLabel> makeTokens(String ... words) {
-    List<CoreLabel> result = new ArrayList<CoreLabel>();
-    for (String word : words) {
-      CoreLabel token = new CoreLabel();
-      token.setWord(word);
-      result.add(token);
-    }
-    return result;
-  }
-
-  /**
-   * helper method, checks that each token is tagged with the expected NER type
+   * Helper method, checks that each token is tagged with the expected NER type.
    */
   private static void checkTags(List<CoreLabel> tokens, String ... tags) {
     assertEquals(tags.length, tokens.size());
     for (int i = 0; i < tags.length; ++i) {
-      assertEquals("Mismatch for token " + i + " " + tokens.get(i), 
+      assertEquals("Mismatch for token " + i + " " + tokens.get(i),
                    tags[i], tokens.get(i).get(CoreAnnotations.NamedEntityTagAnnotation.class));
     }
   }
@@ -52,7 +41,7 @@ public class RegexNERAnnotatorITest extends TestCase {
     "and is a practicing Christian .";
     String[] split = str.split(" ");
 
-    List<CoreLabel> tokens = makeTokens(split);
+    List<CoreLabel> tokens = Sentence.toCoreLabelList(split);
     tokens.get(1).set(CoreAnnotations.NamedEntityTagAnnotation.class, "PERSON");
     tokens.get(2).set(CoreAnnotations.NamedEntityTagAnnotation.class, "PERSON");
     tokens.get(5).set(CoreAnnotations.NamedEntityTagAnnotation.class, "LOCATION");
@@ -75,7 +64,7 @@ public class RegexNERAnnotatorITest extends TestCase {
   }
 
   /**
-   * Neither the LOCATION nor the ORGANIZATION tags should be overridden, since neither
+   * Neither the LOCATION nor the ORGANIZATION tags should be overridden, since both
    * Ontario (STATE_OR_PROVINCE) and American (NATIONALITY) do not span the entire
    * phrase that is NamedEntityTag-annotated.
    */
@@ -83,7 +72,7 @@ public class RegexNERAnnotatorITest extends TestCase {
     String str = "I like Ontario Place , and I like the Native American Church , too .";
     String[] split = str.split(" ");
 
-    List<CoreLabel> tokens = makeTokens(split);
+    List<CoreLabel> tokens = Sentence.toCoreLabelList(split);
     tokens.get(2).set(CoreAnnotations.NamedEntityTagAnnotation.class, "LOCATION");
     tokens.get(3).set(CoreAnnotations.NamedEntityTagAnnotation.class, "LOCATION");
     tokens.get(9).set(CoreAnnotations.NamedEntityTagAnnotation.class, "ORGANIZATION");
@@ -102,19 +91,19 @@ public class RegexNERAnnotatorITest extends TestCase {
 
     annotator.annotate(corpus);
 
-    checkTags(tokens, "O", "O", "LOCATION", "LOCATION", "O", "O", "O", "O", "O", "ORGANIZATION",
-        "ORGANIZATION", "ORGANIZATION", "O", "O", "O");
+    checkTags(tokens, "O", "O", "LOCATION", "LOCATION", "O", "O", "O", "O", "O", "RELIGION",
+        "RELIGION", "RELIGION", "O", "O", "O");
   }
 
   /**
    * In the mapping file, Christianity is assigned a higher priority than Early Christianity,
-   * and so Early should not be marked as RELIGION
+   * and so Early should not be marked as RELIGION.
    */
   public void testPriority() {
     String str = "Christianity is of higher regex priority than Early Christianity . ";
     String[] split = str.split(" ");
 
-    List<CoreLabel> tokens = makeTokens(split);
+    List<CoreLabel> tokens = Sentence.toCoreLabelList(split);
 
     CoreMap sentence = new ArrayCoreMap();
     sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
@@ -144,6 +133,7 @@ public class RegexNERAnnotatorITest extends TestCase {
     } catch(RuntimeException e) {
       return;
     }
-    throw new RuntimeException("Never expected to get this far... the annotator should have thrown an exception by now");
+    fail("Never expected to get this far... the annotator should have thrown an exception by now");
   }
+
 }

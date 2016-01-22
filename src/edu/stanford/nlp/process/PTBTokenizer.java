@@ -69,53 +69,67 @@ import edu.stanford.nlp.util.StringUtils;
  *     token and the whitespace around it that a list of tokens can be
  *     faithfully converted back to the original String.  Valid only if the
  *     LexedTokenFactory is an instance of CoreLabelTokenFactory.  The
+ *
+ *
+ *
  *     keys used in it are: TextAnnotation for the tokenized form,
  *     OriginalTextAnnotation for the original string, BeforeAnnotation and
  *     AfterAnnotation for the whitespace before and after a token, and
  *     perhaps CharacterOffsetBeginAnnotation and CharacterOffsetEndAnnotation to record
  *     token begin/after end character offsets, if they were specified to be recorded
  *     in TokenFactory construction.  (Like the String class, begin and end
- *     are done so end - begin gives the token length.)
+ *     are done so end - begin gives the token length.) Default is false.
  * <li>tokenizeNLs: Whether end-of-lines should become tokens (or just
- *     be treated as part of whitespace).
+ *     be treated as part of whitespace). Default is false.
  * <li>ptb3Escaping: Enable all traditional PTB3 token transforms
  *     (like parentheses becoming -LRB-, -RRB-).  This is a macro flag that
- *     sets or clears all the options below.
+ *     sets or clears all the options below. (Default setting of the various
+ *     properties below that this flag controls is equivalent to it being set
+ *     to true.)
  * <li>americanize: Whether to rewrite common British English spellings
  *     as American English spellings. (This is useful if your training
  *     material uses American English spelling, such as the Penn Treebank.)
+ *     Default is true.
  * <li>normalizeSpace: Whether any spaces in tokens (phone numbers, fractions
  *     get turned into U+00A0 (non-breaking space).  It's dangerous to turn
  *     this off for most of our Stanford NLP software, which assumes no
- *     spaces in tokens.
+ *     spaces in tokens. Default is true.
  * <li>normalizeAmpersandEntity: Whether to map the XML &amp;amp; to an
- *      ampersand.
+ *      ampersand. Default is true.
  * <li>normalizeCurrency: Whether to do some awful lossy currency mappings
  *     to turn common currency characters into $, #, or "cents", reflecting
  *     the fact that nothing else appears in the old PTB3 WSJ.  (No Euro!)
+ *     Default is true.
  * <li>normalizeFractions: Whether to map certain common composed
  *     fraction characters to spelled out letter forms like "1/2".
+ *     Default is true.
  * <li>normalizeParentheses: Whether to map round parentheses to -LRB-,
- *     -RRB-, as in the Penn Treebank.
+ *     -RRB-, as in the Penn Treebank. Default is true.
  * <li>normalizeOtherBrackets: Whether to map other common bracket characters
  *     to -LCB-, -LRB-, -RCB-, -RRB-, roughly as in the Penn Treebank.
+ *     Default is true.
  * <li>asciiQuotes Whether to map all quote characters to the traditional ' and ".
+ *     Default is false.
  * <li>latexQuotes: Whether to map quotes to ``, `, ', '', as in Latex
  *     and the PTB3 WSJ (though this is now heavily frowned on in Unicode).
  *     If true, this takes precedence over the setting of unicodeQuotes;
- *     if both are false, no mapping is done.
+ *     if both are false, no mapping is done.  Default is true.
  * <li>unicodeQuotes: Whether to map quotes to the range U+2018 to U+201D,
  *     the preferred unicode encoding of single and double quotes.
- * <li>ptb3Ellipsis: Whether to map ellipses to three dots (...), the old PTB3 WSJ coding
- *     of an ellipsis. If true, this takes precedence over the setting of
- *     unicodeEllipsis; if both are false, no mapping is done.
+ *     Default is false.
+ * <li>ptb3Ellipsis: Whether to map ellipses to three dots (...), the
+ *     old PTB3 WSJ coding of an ellipsis. If true, this takes precedence
+ *     over the setting of unicodeEllipsis; if both are false, no mapping
+ *     is done. Default is true.
  * <li>unicodeEllipsis: Whether to map dot and optional space sequences to
- *     U+2026, the Unicode ellipsis character
+ *     U+2026, the Unicode ellipsis character. Default is false.
  * <li>ptb3Dashes: Whether to turn various dash characters into "--",
- *     the dominant encoding of dashes in the PTB3 WSJ
+ *     the dominant encoding of dashes in the PTB3 WSJ. Default is true.
+ * <li>keepAssimilations: true to tokenize "gonna", false to tokenize
+ *                        "gon na".  Default is true.
  * <li>escapeForwardSlashAsterisk: Whether to put a backslash escape in front
  *     of / and * as the old PTB3 WSJ does for some reason (something to do
- *     with Lisp readers??).
+ *     with Lisp readers??). Default is true.
  * <li>untokenizable: What to do with untokenizable characters (ones not
  *     known to the tokenizer).  Six options combining whether to log a
  *     warning for none, the first, or all, and whether to delete them or
@@ -126,13 +140,14 @@ import edu.stanford.nlp.util.StringUtils;
  *      WSJ tokenization in two cases.  Setting this improves compatibility
  *      for those cases.  They are: (i) When an acronym is followed by a
  *      sentence end, such as "U.K." at the end of a sentence, the PTB3
- *      has tokens of "U.K" and "." (except for the sole exception of "U.S.",
- *      when it returns tokens of "U.S." and "."), while by default
- *      PTBTokenizer duplicates the period in all cases,
- *      returning tokens of "U.K." and ".", and (ii) PTBTokenizer
+ *      has tokens of "Corp" and ".", while by default PTBTokenizer duplicates
+ *      the period returning tokens of "Corp." and ".", and (ii) PTBTokenizer
  *      will return numbers with a whole number and a fractional part like
- *      "5 7/8" as a single token (with a non-breaking space in the middle),
+ *      "5 7/8" as a single token, with a non-breaking space in the middle,
  *      while the PTB3 separates them into two tokens "5" and "7/8".
+ *      (Exception: for only "U.S." the treebank does have the two tokens
+ *      "U.S." and "." like our default; strictTreebank3 now does that too.)
+ *      The default is false.
  * </ol>
  * <p>
  * A single instance of a PTBTokenizer is not thread safe, as it uses
@@ -151,7 +166,7 @@ import edu.stanford.nlp.util.StringUtils;
 public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   // the underlying lexer
-  private PTBLexer lexer;
+  private final PTBLexer lexer;
 
 
   /**
@@ -163,7 +178,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    *          {@link Word}
    */
   public static PTBTokenizer<Word> newPTBTokenizer(Reader r) {
-    return new PTBTokenizer<Word>(r, new WordTokenFactory(), "");
+    return new PTBTokenizer<>(r, new WordTokenFactory(), "");
   }
 
 
@@ -171,7 +186,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * Constructs a new PTBTokenizer that makes CoreLabel tokens.
    * It optionally returns carriage returns
    * as their own token. CRs come back as Words whose text is
-   * the value of <code>PTBLexer.NEWLINE_TOKEN</code>.
+   * the value of {@code PTBLexer.NEWLINE_TOKEN}.
    *
    * @param r The Reader to read tokens from
    * @param tokenizeNLs Whether to return newlines as separate tokens
@@ -182,7 +197,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * @return A PTBTokenizer which returns CoreLabel objects
    */
   public static PTBTokenizer<CoreLabel> newPTBTokenizer(Reader r, boolean tokenizeNLs, boolean invertible) {
-    return new PTBTokenizer<CoreLabel>(r, tokenizeNLs, invertible, false, new CoreLabelTokenFactory());
+    return new PTBTokenizer<>(r, tokenizeNLs, invertible, false, new CoreLabelTokenFactory());
   }
 
 
@@ -190,7 +205,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * Constructs a new PTBTokenizer that optionally returns carriage returns
    * as their own token, and has a custom LexedTokenFactory.
    * If asked for, CRs come back as Words whose text is
-   * the value of <code>PTBLexer.cr</code>.  This constructor translates
+   * the value of {@code PTBLexer.cr}.  This constructor translates
    * between the traditional boolean options of PTBTokenizer and the new
    * options String.
    *
@@ -385,7 +400,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * @return A presentable version of the given PTB-tokenized words
    */
   public static String labelList2Text(List<? extends HasWord> ptbWords) {
-    List<String> words = new ArrayList<String>();
+    List<String> words = new ArrayList<>();
     for (HasWord hw : ptbWords) {
       words.add(hw.word());
     }
@@ -399,7 +414,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     long numTokens = 0;
     int numFiles = inputFileList.size();
     if (numFiles == 0) {
-      Reader stdin = new BufferedReader(new InputStreamReader(System.in, charset));
+      Reader stdin = IOUtils.readerFromStdin(charset);
       BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out, charset));
       numTokens += tokReader(stdin, writer, parseInsidePattern, options, preserveLines, dump, lowerCase);
       IOUtils.closeIgnoringExceptions(writer);
@@ -428,8 +443,9 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     Matcher m = null;
     if (parseInsidePattern != null) {
       m = parseInsidePattern.matcher(""); // create once as performance hack
+      // System.err.printf("parseInsidePattern is: |%s|%n", parseInsidePattern);
     }
-    for (PTBTokenizer<CoreLabel> tokenizer = new PTBTokenizer<CoreLabel>(r, new CoreLabelTokenFactory(), options); tokenizer.hasNext(); ) {
+    for (PTBTokenizer<CoreLabel> tokenizer = new PTBTokenizer<>(r, new CoreLabelTokenFactory(), options); tokenizer.hasNext(); ) {
       CoreLabel obj = tokenizer.next();
       // String origStr = obj.get(CoreAnnotations.TextAnnotation.class).replaceFirst("\n+$", ""); // DanC added this to fix a lexer bug, hopefully now corrected
       String origStr = obj.get(CoreAnnotations.TextAnnotation.class);
@@ -442,6 +458,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
       }
       if (m != null && m.reset(origStr).matches()) {
         printing = m.group(1).isEmpty(); // turn on printing if no end element slash, turn it off it there is
+        // System.err.printf("parseInsidePattern matched against: |%s|, printing is %b.%n", origStr, printing);
       } else if (printing) {
         if (dump) {
           // after having checked for tags, change str to be exhaustive
@@ -496,7 +513,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * @return A TokenizerFactory that does Penn Treebank tokenization
    */
   public static <T extends HasWord> TokenizerFactory<T> factory(LexedTokenFactory<T> factory, String options) {
-    return new PTBTokenizerFactory<T>(factory, options);
+    return new PTBTokenizerFactory<>(factory, options);
 
   }
 
@@ -530,23 +547,28 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     /**
      * Constructs a new PTBTokenizer that returns Word objects and
      * uses the options passed in.
+     * THIS METHOD IS INVOKED BY REFLECTION BY SOME OF THE JAVANLP
+     * CODE TO LOAD A TOKENIZER FACTORY.  IT SHOULD BE PRESENT IN A
+     * TokenizerFactory.
      *
      * @param options A String of options
      * @return A TokenizerFactory that returns Word objects
      */
     public static PTBTokenizerFactory<Word> newWordTokenizerFactory(String options) {
-      return new PTBTokenizerFactory<Word>(new WordTokenFactory(), options);
+      return new PTBTokenizerFactory<>(new WordTokenFactory(), options);
     }
 
     /**
      * Constructs a new PTBTokenizer that returns CoreLabel objects and
      * uses the options passed in.
      *
-     * @param options A String of options
+     * @param options A String of options. For the default, recommended
+     *                options for PTB-style tokenization compatibility, pass
+     *                in an empty String.
      * @return A TokenizerFactory that returns CoreLabel objects o
      */
     public static PTBTokenizerFactory<CoreLabel> newCoreLabelTokenizerFactory(String options) {
-      return new PTBTokenizerFactory<CoreLabel>(new CoreLabelTokenFactory(), options);
+      return new PTBTokenizerFactory<>(new CoreLabelTokenFactory(), options);
     }
 
     /**
@@ -559,11 +581,11 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
      *         LexedTokenFactory
      */
     public static <T extends HasWord> PTBTokenizerFactory<T> newPTBTokenizerFactory(LexedTokenFactory<T> tokenFactory, String options) {
-      return new PTBTokenizerFactory<T>(tokenFactory, options);
+      return new PTBTokenizerFactory<>(tokenFactory, options);
     }
 
     public static PTBTokenizerFactory<CoreLabel> newPTBTokenizerFactory(boolean tokenizeNLs, boolean invertible) {
-      return new PTBTokenizerFactory<CoreLabel>(tokenizeNLs, invertible, false, new CoreLabelTokenFactory());
+      return new PTBTokenizerFactory<>(tokenizeNLs, invertible, false, new CoreLabelTokenFactory());
     }
 
 
@@ -607,15 +629,15 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     /** Returns a tokenizer wrapping the given Reader. */
     @Override
     public Tokenizer<T> getTokenizer(Reader r) {
-      return new PTBTokenizer<T>(r, factory, options);
+      return new PTBTokenizer<>(r, factory, options);
     }
 
     @Override
     public Tokenizer<T> getTokenizer(Reader r, String extraOptions) {
       if (options == null || options.isEmpty()) {
-        return new PTBTokenizer<T>(r, factory, extraOptions);
+        return new PTBTokenizer<>(r, factory, extraOptions);
       } else {
-        return new PTBTokenizer<T>(r, factory, options + ',' + extraOptions);
+        return new PTBTokenizer<>(r, factory, options + ',' + extraOptions);
       }
     }
 
@@ -707,7 +729,8 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     Pattern parseInsidePattern = null;
     if (parseInsideKey != null) {
       try {
-        parseInsidePattern = Pattern.compile("<(/?)(?:" + parseInsideKey + ")(?:\\s[^>]*?)?>");
+        // We still allow space, but PTBTokenizer will change space to &nbsp; so need to also match it
+        parseInsidePattern = Pattern.compile("<(/?)(?:" + parseInsideKey + ")(?:(?:\\s|\u00A0)[^>]*?)?>");
       } catch (PatternSyntaxException e) {
         // just go with null parseInsidePattern
       }
@@ -717,13 +740,12 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     String parsedArgStr = options.getProperty("",null);
     String[] parsedArgs = (parsedArgStr == null) ? null : parsedArgStr.split("\\s+");
 
-    ArrayList<String> inputFileList = new ArrayList<String>();
+    ArrayList<String> inputFileList = new ArrayList<>();
     ArrayList<String> outputFileList = null;
     if (inputOutputFileList && parsedArgs != null) {
-      outputFileList = new ArrayList<String>();
+      outputFileList = new ArrayList<>();
       for (String fileName : parsedArgs) {
-        BufferedReader r = new BufferedReader(
-          new InputStreamReader(new FileInputStream(fileName), charset));
+        BufferedReader r = IOUtils.readerFromString(fileName, charset);
         for (String inLine; (inLine = r.readLine()) != null; ) {
           String[] fields = inLine.split("\\s+");
           inputFileList.add(fields[0]);

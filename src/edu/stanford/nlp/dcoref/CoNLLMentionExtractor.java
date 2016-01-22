@@ -37,8 +37,10 @@ import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.trees.TreeLemmatizer;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
@@ -82,12 +84,11 @@ public class CoNLLMentionExtractor extends MentionExtractor {
     singletonPredictor = singletonModel;
   }
 
-  private final boolean collapse = true;
-  private final boolean ccProcess = false;
-  private final boolean includeExtras = false;
-  private final boolean lemmatize = true;
-  private final boolean threadSafe = true;
+  private static final boolean includeExtras = false;
+  private static final boolean LEMMATIZE = true;
+  private static final boolean threadSafe = true;
 
+  private static final TreeLemmatizer treeLemmatizer = new TreeLemmatizer();
 
   public void resetDocs() {
     super.resetDocs();
@@ -96,8 +97,8 @@ public class CoNLLMentionExtractor extends MentionExtractor {
 
   @Override
   public Document nextDoc() throws Exception {
-    List<List<CoreLabel>> allWords = new ArrayList<List<CoreLabel>>();
-    List<Tree> allTrees = new ArrayList<Tree>();
+    List<List<CoreLabel>> allWords = new ArrayList<>();
+    List<Tree> allTrees = new ArrayList<>();
 
     CoNLL2011DocumentReader.Document conllDoc = reader.getNextDocument();
     if (conllDoc == null) {
@@ -112,14 +113,18 @@ public class CoNLLMentionExtractor extends MentionExtractor {
         sentence.remove(TreeCoreAnnotations.TreeAnnotation.class);
       } else {
         Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+        if (LEMMATIZE) {
+          treeLemmatizer.transformTree(tree);
+        }
         // generate the dependency graph
         try {
           SemanticGraph deps = SemanticGraphFactory.makeFromTree(tree,
-              collapse, ccProcess, includeExtras, lemmatize, threadSafe);
+              SemanticGraphFactory.Mode.COLLAPSED, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, threadSafe, null, true);
           SemanticGraph basicDeps = SemanticGraphFactory.makeFromTree(tree,
-              !collapse, ccProcess, includeExtras, lemmatize, threadSafe);
+              SemanticGraphFactory.Mode.BASIC, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, threadSafe, null, true);
           sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, basicDeps);
           sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, deps);
+          sentence.set(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class, deps);
         } catch(Exception e) {
           logger.log(Level.WARNING, "Exception caught during extraction of Stanford dependencies. Will ignore and continue...", e);
         }
@@ -173,9 +178,9 @@ public class CoNLLMentionExtractor extends MentionExtractor {
   }
 
   public static List<List<Mention>> makeCopy(List<List<Mention>> mentions) {
-    List<List<Mention>> copy = new ArrayList<List<Mention>>(mentions.size());
+    List<List<Mention>> copy = new ArrayList<>(mentions.size());
     for (List<Mention> sm:mentions) {
-      List<Mention> sm2 = new ArrayList<Mention>(sm.size());
+      List<Mention> sm2 = new ArrayList<>(sm.size());
       for (Mention m:sm) {
         Mention m2 = new Mention();
         m2.goldCorefClusterID = m.goldCorefClusterID;
@@ -213,9 +218,9 @@ public class CoNLLMentionExtractor extends MentionExtractor {
   }
 
   private static List<Pair<Integer,Integer>> extractSpans(List<Mention> listOfMentions) {
-    List<Pair<Integer,Integer>> mentionSpans = new ArrayList<Pair<Integer,Integer>>();
+    List<Pair<Integer,Integer>> mentionSpans = new ArrayList<>();
     for (Mention mention: listOfMentions){
-      Pair<Integer,Integer> mentionSpan = new Pair<Integer,Integer>(mention.startIndex,mention.endIndex);
+      Pair<Integer,Integer> mentionSpan = new Pair<>(mention.startIndex, mention.endIndex);
       mentionSpans.add(mentionSpan);
     }
     return mentionSpans;
@@ -223,10 +228,10 @@ public class CoNLLMentionExtractor extends MentionExtractor {
 
   public List<List<Mention>> extractGoldMentions(CoNLL2011DocumentReader.Document conllDoc) {
     List<CoreMap> sentences = conllDoc.getAnnotation().get(CoreAnnotations.SentencesAnnotation.class);
-    List<List<Mention>> allGoldMentions = new ArrayList<List<Mention>>();
+    List<List<Mention>> allGoldMentions = new ArrayList<>();
     CollectionValuedMap<String,CoreMap> corefChainMap = conllDoc.getCorefChainMap();
     for (int i = 0; i < sentences.size(); i++) {
-      allGoldMentions.add(new ArrayList<Mention>());
+      allGoldMentions.add(new ArrayList<>());
     }
     int maxCorefClusterId = -1;
     for (String corefIdStr:corefChainMap.keySet()) {
@@ -263,7 +268,7 @@ public class CoNLLMentionExtractor extends MentionExtractor {
         mention.originalSpan = m.get(CoreAnnotations.TokensAnnotation.class);
 
         // Mention dependency is collapsed dependency for sentence
-        mention.dependency = sentences.get(sentIndex).get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+        mention.dependency = sentences.get(sentIndex).get(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class);
 
         allGoldMentions.get(sentIndex).add(mention);
       }

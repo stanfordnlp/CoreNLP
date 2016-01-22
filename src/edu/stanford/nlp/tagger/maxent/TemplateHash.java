@@ -22,7 +22,7 @@ import java.util.Map;
  */
 class ListInstances {
 
-  private final ArrayList<Integer> v = new ArrayList<Integer>();
+  private final ArrayList<Integer> v = new ArrayList<>();
   private int[] positions = null;
   private int num = 0;
 
@@ -66,7 +66,7 @@ class ListInstances {
 
   /*
   Methods unused: commented for now.
-  public void save(OutDataStreamFile rf) {
+  public void save(DataOutputStream rf) {
     try {
       rf.writeInt(v.size());
       int[] arr = getInstances();
@@ -78,7 +78,7 @@ class ListInstances {
     }
   }
 
-  public void read(InDataStreamFile rf) {
+  public void read(DataInputStream rf) {
     try {
       int len = rf.readInt();
       for (int i = 0; i < len; i++) {
@@ -106,12 +106,12 @@ public class TemplateHash {
   }
 
   protected void addPositions(int start, int end, FeatureKey fK) {
-    Pair<Integer, String> key = new Pair<Integer, String>(fK.num, fK.val);
+    Pair<Integer, String> key = new Pair<>(fK.num, fK.val);
     tempHash.get(key).addPositions(start, end);
   }
 
   protected int[] getPositions(FeatureKey s) {
-    Pair<Integer, String> p = new Pair<Integer, String>(s.num, s.val);
+    Pair<Integer, String> p = new Pair<>(s.num, s.val);
     return tempHash.get(p).getPositions();
   }
 
@@ -131,12 +131,12 @@ public class TemplateHash {
 
   protected void add(int nFeatFrame, History history, int number) {
     Pair<Integer,String> wT;
-    int general = maxentTagger.extractors.getSize();
+    int general = maxentTagger.extractors.size();
 
     if (nFeatFrame < general) {
-      wT = new Pair<Integer,String>(nFeatFrame, maxentTagger.extractors.extract(nFeatFrame, history));
+      wT = new Pair<>(nFeatFrame, maxentTagger.extractors.extract(nFeatFrame, history));
     } else {
-      wT = new Pair<Integer,String>(nFeatFrame, maxentTagger.extractorsRare.extract(nFeatFrame - general, history));
+      wT = new Pair<>(nFeatFrame, maxentTagger.extractorsRare.extract(nFeatFrame - general, history));
     }
 
     if (tempHash.containsKey(wT)) {
@@ -157,12 +157,12 @@ public class TemplateHash {
 
   protected void addPrev(int nFeatFrame, History history) {
     Pair<Integer,String> wT;
-    int general = maxentTagger.extractors.getSize();
+    int general = maxentTagger.extractors.size();
 
     if (nFeatFrame < general) {
-      wT = new Pair<Integer,String>(nFeatFrame, maxentTagger.extractors.extract(nFeatFrame, history));
+      wT = new Pair<>(nFeatFrame, maxentTagger.extractors.extract(nFeatFrame, history));
     } else {
-      wT = new Pair<Integer,String>(nFeatFrame, maxentTagger.extractorsRare.extract(nFeatFrame - general, history));
+      wT = new Pair<>(nFeatFrame, maxentTagger.extractorsRare.extract(nFeatFrame - general, history));
     }
     if (tempHash.containsKey(wT)) {
       (tempHash.get(wT)).inc();
@@ -182,7 +182,7 @@ public class TemplateHash {
   }
 
   /* Methods unused. Commented for now.
-  public void save(OutDataStreamFile rf) {
+  public void save(DataOutputStream rf) {
     try {
       Pair[] keys = new Pair[tempHash.keySet().size()];
       tempHash.keySet().toArray(keys);

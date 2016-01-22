@@ -30,7 +30,6 @@ package edu.stanford.nlp.process;
 import java.io.Reader;
 import java.util.logging.Logger;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -67,10 +66,10 @@ import edu.stanford.nlp.util.StringUtils;
  *  character sequence and the non-token whitespace around it in a CoreLabel.
  *  And you can ask for newlines to be tokenized.
  *  <p>
- *  <i>Character entities:</i> For legacy reasons, this file will parse and
- *  interpret some simply SGML/XML/HTML character entities.  For modern formats
+ *  <i>Character entities:</i> For legacy reasons, this file will parse and interpret
+ *  some simple SGML/XML/HTML tags and character entities.  For modern formats
  *  like XML, you are better off doing XML parsing, and then running the
- *  tokenizer on CDATA elements.  But we and others frequently work with simple
+ *  tokenizer on CDATA elements.  But, we and others frequently work with simple
  *  SGML text corpora that are not XML (like LDC text collections).  In practice,
  *  they only include very simple markup and a few simple entities, and the
  *  combination of the -parseInside option and the minimal character entity
@@ -129,82 +128,14 @@ import edu.stanford.nlp.util.StringUtils;
    * If the String is <code>null</code> or empty, you get the traditional
    * PTB3 normalization behaviour (i.e., you get ptb3Escaping=false).  If you
    * want no normalization, then you should pass in the String
-   * "ptb3Escaping=false".  The known option names are:
-   * <ol>
-   * <li>invertible: Store enough information about the original form of the
-   *     token and the whitespace around it that a list of tokens can be
-   *     faithfully converted back to the original String.  Valid only if the
-   *     LexedTokenFactory is an instance of CoreLabelTokenFactory.  The
-   *     keys used in it are TextAnnotation for the tokenized form,
-   *     OriginalTextAnnotation for the original string, BeforeAnnotation and
-   *     AfterAnnotation for the whitespace before and after a token, and
-   *     perhaps BeginPositionAnnotation and EndPositionAnnotation to record
-   *     token begin/after end offsets, if they were specified to be recorded
-   *     in TokenFactory construction.  (Like the String class, begin and end
-   *     are done so end - begin gives the token length.)
-   * <li>tokenizeNLs: Whether end-of-lines should become tokens (or just
-   *     be treated as part of whitespace)
-   * <li>ptb3Escaping: Enable all traditional PTB3 token transforms
-   *     (like -LRB-, -RRB-).  This is a macro flag that sets or clears all the
-   *     options below.
-   * <li>americanize: Whether to rewrite common British English spellings
-   *     as American English spellings
-   * <li>normalizeSpace: Whether any spaces in tokens (phone numbers, fractions
-   *     get turned into U+00A0 (non-breaking space).  It's dangerous to turn
-   *     this off for most of our Stanford NLP software, which assumes no
-   *     spaces in tokens.
-   * <li>normalizeAmpersandEntity: Whether to map the XML &amp;amp; to an
-   *      ampersand
-   * <li>normalizeCurrency: Whether to do some awful lossy currency mappings
-   *     to turn common currency characters into $, #, or "cents", reflecting
-   *     the fact that nothing else appears in the old PTB3 WSJ.  (No Euro!)
-   * <li>normalizeFractions: Whether to map certain common composed
-   *     fraction characters to spelled out letter forms like "1/2"
-   * <li>normalizeParentheses: Whether to map round parentheses to -LRB-,
-   *     -RRB-, as in the Penn Treebank
-   * <li>normalizeOtherBrackets: Whether to map other common bracket characters
-   *     to -LCB-, -LRB-, -RCB-, -RRB-, roughly as in the Penn Treebank
-   * <li>asciiQuotes Whether to map quote characters to the traditional ' and "
-   * <li>latexQuotes: Whether to map to ``, `, ', '' for quotes, as in Latex
-   *     and the PTB3 WSJ (though this is now heavily frowned on in Unicode).
-   *     If true, this takes precedence over the setting of unicodeQuotes;
-   *     if both are false, no mapping is done.
-   * <li>unicodeQuotes: Whether to map quotes to the range U+2018 to U+201D,
-   *     the preferred unicode encoding of single and double quotes.
-   * <li>ptb3Ellipsis: Whether to map ellipses to ..., the old PTB3 WSJ coding
-   *     of an ellipsis. If true, this takes precedence over the setting of
-   *     unicodeEllipsis; if both are false, no mapping is done.
-   * <li>unicodeEllipsis: Whether to map dot and optional space sequences to
-   *     U+2026, the Unicode ellipsis character
-   * <li>ptb3Dashes: Whether to turn various dash characters into "--",
-   *     the dominant encoding of dashes in the PTB3 WSJ
-   * <li>escapeForwardSlashAsterisk: Whether to put a backslash escape in front
-   *     of / and * as the old PTB3 WSJ does for some reason (something to do
-   *     with Lisp readers??).
-   * <li>untokenizable: What to do with untokenizable characters (ones not
-   *     known to the tokenizers).  Six options combining whether to log a
-   *     warning for none, the first, or all, and whether to delete them or
-   *     to include them as single character tokens in the output: noneDelete,
-   *     firstDelete, allDelete, noneKeep, firstKeep, allKeep.
-   *     The default is "firstDelete".
-   * <li>strictTreebank3: PTBTokenizer deliberately deviates from strict PTB3
-   *      WSJ tokenization in two cases.  Setting this improves compatibility
-   *      for those cases.  They are: (i) When an acronym is followed by a
-   *      sentence end, such as "Corp." at the end of a sentence, the PTB3
-   *      has tokens of "Corp" and ".", while by default PTBTokenizer duplicates
-   *      the period returning tokens of "Corp." and ".", and (ii) PTBTokenizer
-   *      will return numbers with a whole number and a fractional part like
-   *      "5 7/8" as a single token (with a non-breaking space in the middle),
-   *      while the PTB3 separates them into two tokens "5" and "7/8".
-   *      (Exception: for "U.S." the treebank does have the two tokens
-   *      "U.S." and "." like our default; strictTreebank3 now does that too.)
-   * </ol>
+   * "ptb3Escaping=false".  See the documentation in the {@link PTBTokenizer}
+   * class for full discussion of all the available options.
    *
    * @param r The Reader to tokenize text from
    * @param tf The LexedTokenFactory that will be invoked to convert
    *    each substring extracted by the lexer into some kind of Object
    *    (such as a Word or CoreLabel).
-   * @param options Options to the tokenizer (see constructor Javadoc)
+   * @param options Options to the tokenizer (see {@link PTBTokenizer})
    */
   public PTBLexer(Reader r, LexedTokenFactory<?> tf, String options) {
     this(r);
@@ -225,7 +156,6 @@ import edu.stanford.nlp.util.StringUtils;
       } else if ("tokenizeNLs".equals(key)) {
         tokenizeNLs = val;
       } else if ("ptb3Escaping".equals(key)) {
-        americanize = val;
         normalizeSpace = val;
         normalizeAmpersandEntity = val;
         normalizeCurrency = val;
@@ -238,7 +168,6 @@ import edu.stanford.nlp.util.StringUtils;
         ptb3Ellipsis = val;
         unicodeEllipsis = val;
         ptb3Dashes = val;
-        escapeForwardSlashAsterisk = val;
       } else if ("americanize".equals(key)) {
         americanize = val;
       } else if ("normalizeSpace".equals(key)) {
@@ -266,6 +195,8 @@ import edu.stanford.nlp.util.StringUtils;
           latexQuotes = false; // need to override default
           unicodeQuotes = false;
         }
+      } else if ("splitAssimilations".equals(key)) {
+        splitAssimilations = val;
       } else if ("ptb3Ellipsis".equals(key)) {
         ptb3Ellipsis = val;
       } else if ("unicodeEllipsis".equals(key)) {
@@ -324,7 +255,7 @@ import edu.stanford.nlp.util.StringUtils;
   /* Flags begin with historical ptb3Escaping behavior */
   private boolean invertible;
   private boolean tokenizeNLs;
-  private boolean americanize = true;
+  private boolean americanize = false;
   private boolean normalizeSpace = true;
   private boolean normalizeAmpersandEntity = true;
   private boolean normalizeCurrency = true;
@@ -337,8 +268,9 @@ import edu.stanford.nlp.util.StringUtils;
   private boolean ptb3Ellipsis = true;
   private boolean unicodeEllipsis;
   private boolean ptb3Dashes = true;
-  private boolean escapeForwardSlashAsterisk = true;
+  private boolean escapeForwardSlashAsterisk = false;
   private boolean strictTreebank3 = false;
+  private boolean splitAssimilations = true;
 
   /*
    * This has now been extended to cover the main Windows CP1252 characters,
@@ -350,8 +282,41 @@ import edu.stanford.nlp.util.StringUtils;
    * single quote curly ending  92      0146    2019    8217
    * double quote curly starting        93      0147    201C    8220
    * double quote curly ending  94      0148    201D    8221
+   * bullet     95
    * en dash    96      0150    2013    8211
    * em dash    97      0151    2014    8212
+   */
+
+  /* Bracket characters and forward slash and asterisk:
+   *
+   * Original Treebank 3 WSJ
+   * Uses -LRB- -RRB- as the representation for ( ) and -LCB- -RCB- as the representation for { }.
+   * There are no occurrences of [ ], though there is some mention of -LSB- -RSB- in early documents.
+   * There are no occurrences of < >.
+   * All brackets are tagged -LRB- -RRB-  [This stays constant.]
+   * Forward slash and asterisk are escaped by a preceding \ (as \/ and \*)
+   *
+   * Treebank 3 Brown corpus
+   * Has -LRB- -RRB-
+   * Has a few instances of unescaped [ ] in compounds (the token "A[fj]"
+   * Neither forward slash or asterisk appears.
+   *
+   * Ontonotes (r4)
+   * Uses -LRB- -RRB- -LCB- -RCB- -LSB- -RSB-.
+   * Has a very few uses of < and > in longer tokens, which are not escaped.
+   * Slash is not escaped. Asterisk is not escaped.
+   *
+   * LDC2012T13-eng_web_tbk (Google web treebank)
+   * Has -LRB- -RRB-
+   * Has { and } used unescaped, treated as brackets.
+   * Has < and > used unescaped, sometimes treated as brackets.  Sometimes << and >> are treated as brackets!
+   * Has [ and ] used unescaped, treated as brackets.
+   * Slash is not escaped. Asterisk is not escaped.
+   *
+   * Reasonable conclusions for now:
+   * - Never escape < >
+   * - Still by default escape [ ] { } but it can be turned off.  Use -LSB- -RSB- -LCB- -RCB-.
+   * Move to not escaping slash and asterisk, and delete escaping in PennTreeReader.
    */
 
   public static final String openparen = "-LRB-";
@@ -497,6 +462,7 @@ import edu.stanford.nlp.util.StringUtils;
     } else {
       normTok = tok;
     }
+    // System.err.printf("handleQuotes changed %s to %s.%n", tok, normTok);
     return getNext(normTok, tok);
   }
 
@@ -565,9 +531,20 @@ import edu.stanford.nlp.util.StringUtils;
 
 %}
 
-/* Don't allow SGML to cross lines, even though it can...
-   Really SGML shouldn't be here at all, it's kind of legacy. */
-SGML = <\/?[A-Za-z!?][^>\r\n]*>
+/* Todo: Really SGML shouldn't be here at all, it's kind of legacy.
+   But we continue to tokenize some simple standard forms of concrete
+   SGML syntax, since it tends to give robustness.                    */
+/*
+( +([A-Za-z][A-Za-z0-9:.-]*( *= *['\"][^\r\n'\"]*['\"])?|['\"][^\r\n'\"]*['\"]| *\/))*
+SGML = <([!?][A-Za-z-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:.-]*([ ]+([A-Za-z][A-Za-z0-9:.-]*([ ]*=[ ]*['\"][^\r\n'\"]*['\"])?|['\"][^\r\n'\"]*['\"]|[ ]*\/))*[ ]*)>
+( +[A-Za-z][A-Za-z0-9:.-]*)*
+FOO = ([ ]+[A-Za-z][A-Za-z0-9:.-]*)*
+SGML = <([!?][A-Za-z-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:.-]* *)>
+ */
+/* SGML = \<([!\?][A-Za-z\-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*['\"][^\r\n'\"]*['\"]|['\"][^\r\n'\"]*['\"]|[ ]*\/))*[ ]*)\>
+*/
+// <STORYID cat=w pri=u>
+SGML = \<([!\?][A-Za-z\-][^>\r\n]*|[A-Za-z][A-Za-z0-9_:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*('[^']*'|\"[^\"]*\"|[A-Za-z][A-Za-z0-9_:\.\-]*)))*[ ]*\/?|\/[A-Za-z][A-Za-z0-9_:\.\-]*)[ ]*\>
 SPMDASH = &(MD|mdash|ndash);|[\u0096\u0097\u2013\u2014\u2015]
 SPAMP = &amp;
 SPPUNC = &(HT|TL|UR|LR|QC|QL|QR|odq|cdq|#[0-9]+);
@@ -598,17 +575,20 @@ DOLSIGN2 = [\u00A2\u00A3\u00A4\u00A5\u0080\u20A0\u20AC\u060B\u0E3F\u20A4\uFFE0\u
 /* not used DOLLAR      {DOLSIGN}[ \t]*{NUMBER}  */
 /* |\( ?{NUMBER} ?\))    # is for pound signs */
 /* For some reason U+0237-U+024F (dotless j) isn't in [:letter:]. Recent additions? */
-WORD = ([:letter:]|{SPLET}|[\u00AD\u0237-\u024F\u02C2-\u02C5\u02D2-\u02DF\u02E5-\u02FF\u0300-\u036F\u0370-\u037D\u0384\u0385\u03CF\u03F6\u03FC-\u03FF\u0483-\u0487\u04CF\u04F6-\u04FF\u0510-\u0525\u055A-\u055F\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7\u0615-\u061A\u063B-\u063F\u064B-\u065E\u0670\u06D6-\u06EF\u06FA-\u06FF\u070F\u0711\u0730-\u074F\u0750-\u077F\u07A6-\u07B1\u07CA-\u07F5\u07FA\u0900-\u0903\u093C\u093E-\u094E\u0951-\u0955\u0962-\u0963\u0981-\u0983\u09BC-\u09C4\u09C7\u09C8\u09CB-\u09CD\u09D7\u09E2\u09E3\u0A01-\u0A03\u0A3C\u0A3E-\u0A4F\u0A81-\u0A83\u0ABC-\u0ACF\u0B82\u0BBE-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCD\u0C01-\u0C03\u0C3E-\u0C56\u0D3E-\u0D44\u0D46-\u0D48\u0E30-\u0E3A\u0E47-\u0E4E\u0EB1-\u0EBC\u0EC8-\u0ECD])+
+LETTER = ([:letter:]|{SPLET}|[\u00AD\u0237-\u024F\u02C2-\u02C5\u02D2-\u02DF\u02E5-\u02FF\u0300-\u036F\u0370-\u037D\u0384\u0385\u03CF\u03F6\u03FC-\u03FF\u0483-\u0487\u04CF\u04F6-\u04FF\u0510-\u0525\u055A-\u055F\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7\u0615-\u061A\u063B-\u063F\u064B-\u065E\u0670\u06D6-\u06EF\u06FA-\u06FF\u070F\u0711\u0730-\u074F\u0750-\u077F\u07A6-\u07B1\u07CA-\u07F5\u07FA\u0900-\u0903\u093C\u093E-\u094E\u0951-\u0955\u0962-\u0963\u0981-\u0983\u09BC-\u09C4\u09C7\u09C8\u09CB-\u09CD\u09D7\u09E2\u09E3\u0A01-\u0A03\u0A3C\u0A3E-\u0A4F\u0A81-\u0A83\u0ABC-\u0ACF\u0B82\u0BBE-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCD\u0C01-\u0C03\u0C3E-\u0C56\u0D3E-\u0D44\u0D46-\u0D48\u0E30-\u0E3A\u0E47-\u0E4E\u0EB1-\u0EBC\u0EC8-\u0ECD])
+WORD = {LETTER}({LETTER}|{DIGIT})*([.!?]{LETTER}({LETTER}|{DIGIT})*)*
+FILENAME_EXT = bat|bmp|bz2|c|class|cgi|cpp|dll|doc|docx|exe|gif|gz|h|htm|html|jar|java|jpeg|jpg|mov|mp3|pdf|php|pl|png|ppt|ps|py|sql|tar|txt|wav|x|xml|zip|3gp|wm[va]|avi|flv|mov|mp[34g]
+FILENAME = ({LETTER}|{DIGIT})+([._-]({LETTER}|{DIGIT})+)*([.]{FILENAME_EXT})
 /* The $ was for things like New$ */
 /* WAS: only keep hyphens with short one side like co-ed */
 /* But treebank just allows hyphenated things as words! */
 THING = ([dDoOlL]{APOSETCETERA}([:letter:]|[:digit:]))?([:letter:]|[:digit:])+({HYPHEN}([dDoOlL]{APOSETCETERA}([:letter:]|[:digit:]))?([:letter:]|[:digit:])+)*
 THINGA = [A-Z]+(([+&]|{SPAMP})[A-Z]+)+
 THING3 = [A-Za-z0-9]+(-[A-Za-z]+){0,2}(\\?\/[A-Za-z0-9]+(-[A-Za-z]+){0,2}){1,2}
-APOS = ['\u0092\u2019]|&apos;
+APOS = ['\u0092\u2019]|&apos;  /* ASCII straight quote, single right curly quote in CP1252 (wrong) or Unicode or HTML SGML escape */
 /* Includes extra ones that may appear inside a word, rightly or wrongly */
-APOSETCETERA = {APOS}|[\u0091\u2018\u201B]
-HTHING = [A-Za-z0-9][A-Za-z0-9.,\u00AD]*(-([A-Za-z0-9\u00AD]+|{ACRO}\.))+
+APOSETCETERA = {APOS}|[`\u0091\u2018\u201B]
+HTHING = [A-Za-z0-9][A-Za-z0-9.,\u00AD]*(-([A-Za-z0-9\u00AD]+|{ACRO2}\.))+
 REDAUX = {APOS}([msdMSD]|re|ve|ll)
 /* For things that will have n't on the end. They can't end in 'n' */
 /* \u00AD is soft hyphen */
@@ -621,19 +601,21 @@ SREDAUX = n{APOSETCETERA}t
 /* [yY]' is for Y'know, y'all and I for I.  So exclude from one letter first */
 /* Rest are for French borrowings.  n allows n'ts in "don'ts" */
 /* Arguably, c'mon should be split to "c'm" + "on", but not yet. */
-APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[2-9]0s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeiouA-Z][:letter:]*|{APOS}cause|cont'd\.?|'twas|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l
+APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[2-9]0s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeiouA-Z][:letter:]*|{APOS}cause|cont'd\.?|'twas|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l|O{APOSETCETERA}o
 APOWORD2 = y{APOS}
-FULLURL = https?:\/\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-]
+FULLURL = https?:\/\/[^ \t\n\f\r\"<>|(){}]+[^ \t\n\f\r\"<>|.!?(){},-]
 LIKELYURL = ((www\.([^ \t\n\f\r\"<>|.!?(){},]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r\"`'<>|.!?(){},-_$]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-])?
-EMAIL = [a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0]*@([^ \t\n\f\r\"<>|().\u00A0]+\.)*([^ \t\n\f\r\"<>|().\u00A0]+)
+/* &lt;,< should match &gt;,>, but that's too complicated */
+EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0{}]*@([^ \t\n\f\r\"<>|(){}.\u00A0]+\.)*([^ \t\n\f\r\"<>|(){}.\u00A0]+)(&gt;|>)?
 
 /* Technically, names should be capped at 15 characters.  However, then
    you get into weirdness with what happens to the rest of the characters. */
 TWITTER_NAME = @[a-zA-Z_][a-zA-Z_0-9]*
-TWITTER_CATEGORY = #{WORD}
+TWITTER_CATEGORY = #{LETTER}+
 TWITTER = {TWITTER_NAME}|{TWITTER_CATEGORY}
 
-/* This block becomes ABBREV1 and is usually followed by lower case words. */
+
+/* --- This block becomes ABBREV1 and is usually followed by lower case words. --- */
 /* Abbreviations - induced from 1987 WSJ by hand */
 ABMONTH = Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec
 /* "May." isn't an abbreviation. "Jun." and "Jul." barely occur, but don't seem dangerous */
@@ -644,37 +626,36 @@ ABDAYS = Mon|Tue|Tues|Wed|Thu|Thurs|Fri
 /* Ma. or Me. isn't included as too many errors, and most sources use Mass. etc. */
 /* Fed. is tricky.  Usually sentence end, but not before "Governor" or "Natl. Mtg. Assn." */
 /* Make some states case sensitive, since they're also reasonably common words */
-ABSTATE = Ala|Ariz|[A]rk|Calif|Colo|Conn|Dak|Del|Fla|Ga|[I]ll|Ind|Kans?|Ky|La|[M]ass|Md|Mich|Minn|[M]iss|Mo|Mont|Neb|Nev|Okla|[O]re|Pa|Penn|Tenn|Tex|Va|Vt|[W]ash|Wisc?|Wyo
+ABSTATE = Ala|Ariz|[A]z|[A]rk|Calif|Colo|Conn|Ct|Dak|[D]el|Fla|Ga|[I]ll|Ind|Kans?|Ky|[L]a|[M]ass|Md|Mich|Minn|[M]iss|Mo|Mont|Neb|Nev|Okla|[O]re|[P]a|Penn|Tenn|[T]ex|Va|Vt|[W]ash|Wisc?|Wyo
 /* Bhd is Malaysian companies! Rt. is Hungarian? */
 /* Special case: Change the class of Pty when followed by Ltd to not sentence break (in main code below)... */
-ABCOMP = Inc|Cos?|Corp|Pp?t[ye]s?|Ltd|Plc|Rt|Bancorp|Dept|Bhd|Assn|Univ|Intl|Sys
-/* Don't included fl. oz. since Oz turns up too much in caseless tokenizer. ft now allows upper after it for "Fort" use. */
-ABNUM = Nos?|Prop|Ph|tel|est|ext|sq
+ABCOMP = Inc|Cos?|Corp|Pp?t[ye]s?|Ltd|Plc|Rt|Bancorp|Bhd|Assn|Univ|Intl|Sys
+/* Don't include fl. oz. since Oz turns up too much in caseless tokenizer. ft now allows upper after it for "Fort" use. */
+ABNUM = tel|est|ext|sq
 /* p used to be in ABNUM list, but it can't be any more, since the lexer
    is now caseless.  We don't want to have it recognized for P.  Both
    p. and P. are now under ABBREV4. ABLIST also went away as no-op [a-e] */
-/* est. is "estimated" -- common in some financial contexts. ext. is extension, ca. is circa */
 ABPTIT = Jr|Sr|Bros|(Ed|Ph)\.D|Blvd|Rd|Esq
 
-/* This block becomes ABBREV2 and is usually followed by upper case words. */
-/* In the caseless world S.p.A. "Società Per Azioni (Italian: shared company)" is got as a regular acronym */
-ACRO = [A-Za-z](\.[A-Za-z])+|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
-/* ABTITLE is mainly person titles, but also Mt for mountains and Ft for Fort. */
-ABTITLE = Mr|Mrs|Ms|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Maj|Sgt|Cpl|Pvt|Capt|Ste?|Ave|Pres|Lieut|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft
-ABCOMP2 = Invt|Elec|Natl|M[ft]g
-
-/* See also special cases for ca. fig. prop. in the code below. */
-
 /* ABBREV1 abbreviations are normally followed by lower case words.
-   If they're followed by an uppercase one, we assume there is also a
-   sentence boundary */
-ABBREV1 = ({ABMONTH}|{ABDAYS}|{ABSTATE}|{ABCOMP}|{ABNUM}|{ABPTIT}|etc|al|seq)\.
+ *  If they're followed by an uppercase one, we assume there is also a
+ *  sentence boundary.
+ */
+ABBREV1 = ({ABMONTH}|{ABDAYS}|{ABSTATE}|{ABCOMP}|{ABNUM}|{ABPTIT}|etc|al|seq|Bldg)\.
 
+/* --- This block becomes ABBREV2 and is usually followed by upper case words. --- */
+/* In the caseless world S.p.A. "Società Per Azioni (Italian: shared company)" is got as a regular acronym */
+/* ACRO Is a bad case -- can go either way! */
+ACRO = [A-Za-z](\.[A-Za-z])*|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
+ACRO2 = [A-Za-z](\.[A-Za-z])+|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
+/* ABTITLE is mainly person titles, but also Mt for mountains and Ft for Fort. */
+ABTITLE = Mr|Mrs|Ms|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Maj|Sgt|Cpl|Pvt|Capt|Ste?|Ave|Pres|Lieut|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc
+ABCOMP2 = Invt|Elec|Natl|M[ft]g|Dept
 
 /* ABRREV2 abbreviations are normally followed by an upper case word.
-   We assume they aren't used sentence finally */
-/* ACRO Is a bad case -- can go either way! */
-ABBREV4 = [A-Za-z]|{ABTITLE}|vs|Alex|Wm|Jos|Cie|a\.k\.a|cf|TREAS|{ACRO}|{ABCOMP2}
+ *  We assume they aren't used sentence finally. Ph is in there for Ph. D
+ */
+ABBREV4 = {ABTITLE}|vs|[v]|Alex|Wm|Jos|Cie|a\.k\.a|cf|TREAS|Ph|{ACRO}|{ABCOMP2}
 ABBREV2 = {ABBREV4}\.
 ACRONYM = ({ACRO})\.
 /* Cie. is used by French companies sometimes before and sometimes at end as in English Co.  But we treat as allowed to have Capital following without being sentence end.  Cia. is used in Spanish/South American company abbreviations, which come before the company name, but we exclude that and lose, because in a caseless segmenter, it's too confusable with CIA. */
@@ -682,15 +663,27 @@ ACRONYM = ({ACRO})\.
 /* Added Wm. for William and Jos. for Joseph */
 /* In tables: Mkt. for market Div. for division of company, Chg., Yr.: year */
 
+/* --- ABBREV3 abbreviations are allowed only before numbers. ---
+ * Otherwise, they aren't recognized as abbreviations (unless they also
+ * appear in ABBREV1 or ABBREV2.
+ * est. is "estimated" -- common in some financial contexts. ext. is extension, ca. is circa.
+ */
+/* Maybe also "op." for "op. cit." but also get a photo op. */
+ABBREV3 = (ca|figs?|prop|nos?|art|bldg|prop|pp|op)\.
+
+/* See also a couple of special cases for pty. in the code below. */
+
+
 /* phone numbers. keep multi dots pattern separate, so not confused with decimal numbers. */
 PHONE = (\([0-9]{2,3}\)[ \u00A0]?|(\+\+?)?([0-9]{2,4}[\- \u00A0])?[0-9]{2,4}[\- \u00A0])[0-9]{3,4}[\- \u00A0]?[0-9]{3,5}|((\+\+?)?[0-9]{2,4}\.)?[0-9]{2,4}\.[0-9]{3,4}\.[0-9]{3,5}
 /* Fake duck feet appear sometimes in WSJ, and aren't likely to be SGML, less than, etc., so group. */
 FAKEDUCKFEET = <<|>>
-OPBRAC = [<\[]|&lt;
-CLBRAC = [>\]]|&gt;
+LESSTHAN = <|&lt;
+GREATERTHAN = >|&gt;
 HYPHEN = [-_\u058A\u2010\u2011]
 HYPHENS = \-+
-LDOTS = \.{3,5}|(\.[ \u00A0]){2,4}\.|[\u0085\u2026]
+LDOTS = \.\.\.+|[\u0085\u2026]
+SPACEDLDOTS = \.[ \u00A0](\.[ \u00A0])+\.
 ATS = @+
 UNDS = _+
 ASTS = \*+|(\\\*){1,3}
@@ -700,16 +693,18 @@ INSENTP = [,;:\u3001]
 QUOTES = {APOS}|''|[`\u2018\u2019\u201A\u201B\u201C\u201D\u0091\u0092\u0093\u0094\u201E\u201F\u2039\u203A\u00AB\u00BB]{1,2}
 DBLQUOT = \"|&quot;
 /* Cap'n for captain, c'est for french */
-TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est
+TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est|f\*[c*]k(in[g']|e[dr])?|sh\*t(ty)?
 TBSPEC2 = {APOS}[0-9][0-9]
+BANGWORDS = (E|Yahoo|Jeopardy)\!
+BANGMAGAZINES = OK\!
 
 /* Smileys (based on Chris Potts' sentiment tutorial, but much more restricted set - e.g., no "8)", "do:" or "):", too ambiguous) and simple Asian smileys */
 SMILEY = [<>]?[:;=][\-o\*']?[\(\)DPdpO\\{@\|\[\]]
-ASIANSMILEY = [\^x=~<>]\.\[\^x=~<>]|[\-\^x=~<>']_[\-\^x=~<>']|\([\-\^x=~<>'][_.]?[\-\^x=~<>']\)
+ASIANSMILEY = [\^x=~<>]\.\[\^x=~<>]|[\-\^x=~<>']_[\-\^x=~<>']|\([\-\^x=~<>'][_.]?[\-\^x=~<>']\)|\([\^x=~<>']-[\^x=~<>'`]\)
 
 
 /* U+2200-U+2BFF has a lot of the various mathematical, etc. symbol ranges */
-MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\u00D7\u00F7\u0387\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0600-\u0603\u0606-\u060A\u060C\u0614\u061B\u061E\u066A\u066D\u0703-\u070D\u07F6\u07F7\u07F8\u0964\u0965\u0E4F\u1FBD\u2016\u2017\u2020-\u2023\u2030-\u2038\u203B\u203E-\u2042\u2044\u207A-\u207F\u208A-\u208E\u2100-\u214F\u2190-\u21FF\u2200-\u2BFF\u3012\u30FB\uFF01-\uFF0F\uFF1A-\uFF20\uFF3B-\uFF40\uFF5B-\uFF65\uFF65]
+MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\u00D7\u00F7\u0387\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0600-\u0603\u0606-\u060A\u060C\u0614\u061B\u061E\u066A\u066D\u0703-\u070D\u07F6\u07F7\u07F8\u0964\u0965\u0E4F\u1FBD\u2016\u2017\u2020-\u2023\u2030-\u2038\u203B\u2043\u203E-\u2042\u2044\u207A-\u207F\u208A-\u208E\u2100-\u214F\u2190-\u21FF\u2200-\u2BFF\u3012\u30FB\uFF01-\uFF0F\uFF1A-\uFF20\uFF3B-\uFF40\uFF5B-\uFF65\uFF65]
 /* \uFF65 is Halfwidth katakana middle dot; \u30FB is Katakana middle dot */
 /* Math and other symbols that stand alone: °²× ∀ */
 // Consider this list of bullet chars: 2219, 00b7, 2022, 2024
@@ -717,9 +712,33 @@ MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\
 
 %%
 
-cannot                  { yypushback(3) ; return getNext(); }
+c[+][+]                     { return getNext(); }
+(c|f)#			    { return getNext(); }
+cannot                  { if (splitAssimilations) {
+                            yypushback(3) ; return getNext();
+                          } else {
+                            return getNext();
+                          }
+                        }
+'twas                   { if (splitAssimilations) {
+                            yypushback(3) ; return getNext();
+                          } else {
+                            return getNext();
+                          }
+                        }
+'tis                   { if (splitAssimilations) {
+                            yypushback(2) ; return getNext();
+                          } else {
+                            return getNext();
+                          }
+                        }
 gonna|gotta|lemme|gimme|wanna
-                        { yypushback(2) ; return getNext(); }
+                        { if (splitAssimilations) {
+                            yypushback(2) ; return getNext();
+                          } else {
+                            return getNext();
+                          }
+                        }
 {SGML}                  { final String origTxt = yytext();
                           String txt = origTxt;
                           if (normalizeSpace) {
@@ -753,7 +772,7 @@ gonna|gotta|lemme|gimme|wanna
                           }
                           return getNext(tmp, origTxt);
                         }
-{APOWORD}               { return getNext(); }
+{APOWORD}               { return handleQuotes(yytext(), false); }
 {APOWORD2}/[:letter:]   { return getNext(); }
 {FULLURL}               { String txt = yytext();
                           if (escapeForwardSlashAsterisk) {
@@ -771,7 +790,7 @@ gonna|gotta|lemme|gimme|wanna
 {TWITTER}               { return getNext(); }
 {REDAUX}/[^A-Za-z]      { return handleQuotes(yytext(), false);
                         }
-{SREDAUX}               { return handleQuotes(yytext(), false);
+{SREDAUX}/[^A-Za-z]     { return handleQuotes(yytext(), false);
                         }
 {DATE}                  { String txt = yytext();
                           if (escapeForwardSlashAsterisk) {
@@ -805,6 +824,8 @@ gonna|gotta|lemme|gimme|wanna
                 }
 {FRAC2}                 { return normalizeFractions(yytext()); }
 {TBSPEC}                { return getNormalizedAmpNext(); }
+{BANGWORDS}     { return getNext(); }
+{BANGMAGAZINES}/{SPACENL}magazine   { return getNext(); }
 {THING3}                { if (escapeForwardSlashAsterisk) {
                             return getNext(delimit(yytext(), '/'), yytext());
                           } else {
@@ -818,9 +839,8 @@ gonna|gotta|lemme|gimme|wanna
                             return getNext();
                           }
                         }
-/* Any acronym can be treated as sentence final iff followed by this list of words (pronouns, determiners, and prepositions, etc.). "U.S." is the single big source of errors.  Character classes make this rule case sensitive! (This is needed!!) */
-{ACRONYM}/({SPACENLS})([A]bout|[A]ccording|[A]dditionally|[A]fter|[A]n|[A]|[A]s|[A]t|[B]ut|[E]arlier|[H]e|[H]er|[H]ere|[H]owever|[I]f|[I]n|[I]t|[L]ast|[M]any|[M]ore|[M]r\.|[M]s\.|[N]ow|[O]nce|[O]ne|[O]ther|[O]ur|[S]he|[S]ince|[S]o|[S]ome|[S]uch|[T]hat|[T]he|[T]heir|[T]hen|[T]here|[T]hese|[T]hey|[T]his|[W]e|[W]hen|[W]hile|[W]hat|[Y]et|[Y]ou|{SGML}){SPACENL} {
-                          String s;
+/* Any acronym can be treated as sentence final iff followed by this list of words (pronouns, determiners, and prepositions, etc.). "U.S." is the single big source of errors.  Character classes make this rule case sensitive! (This is needed!!). A one letter acronym candidate like "Z." or "I." in this context usually isn't, and so we return the leter and pushback the period for next time. */
+{ACRONYM}/({SPACENLS})([A]bout|[A]ccording|[A]dditionally|[A]fter|[A]n|[A]|[A]s|[A]t|[B]ut|[D]id|[D]uring|[E]arlier|[H]e|[H]er|[H]ere|[H]ow|[H]owever|[I]f|[I]n|[I]t|[L]ast|[M]any|[M]ore|[M]r\.|[M]s\.|[N]ow|[O]nce|[O]ne|[O]ther|[O]ur|[S]he|[S]ince|[S]o|[S]ome|[S]uch|[T]hat|[T]he|[T]heir|[T]hen|[T]here|[T]hese|[T]hey|[T]his|[W]e|[W]hen|[W]hile|[W]hat|[W]ho|[W]hy|[Y]et|[Y]ou|{SGML}){SPACENL} {
                           // try to work around an apparent jflex bug where it
                           // gets a space at the token end by getting
                           // wrong the length of the trailing context.
@@ -832,19 +852,36 @@ gonna|gotta|lemme|gimme|wanna
                               break;
                             }
                           }
-                          if (strictTreebank3 && ! "U.S.".equals(yytext())) {
+                          String s;
+                          if (yylength() == 2) { // "I.", etc.
+                            yypushback(1); // return a period next time;
+                            s = yytext(); // return the word without the final period
+                          } else if (strictTreebank3 && ! "U.S.".equals(yytext())) {
                             yypushback(1); // return a period for next time
-                            s = yytext();
+                            s = yytext(); // return the word without the final period
                           } else {
-                            s = yytext();
-                            yypushback(1); // return a period for next time
+                            s = yytext(); // return the word WITH the final period
+                            yypushback(1); // (redpulication:) also return a period for next time
                           }
                           return getNext(s, yytext());
                         }
 /* Special case to get ca., fig. or Prop. before numbers */
-(ca|fig|prop)\./{SPACE}[:digit:]   { return getNext(); }
-/* Special case to get pty. ltd. or pty limited */
-pt[eyEY]\./{SPACE}(ltd|lim)  { return getNext(); }
+{ABBREV3}/{SPACENL}?[:digit:]   {
+                          // try to work around an apparent jflex bug where it
+                          // gets a space at the token end by getting
+                          // wrong the length of the trailing context.
+                          while (yylength() > 0) {
+                            char last = yycharat(yylength()-1);
+                            if (last == ' ' || last == '\t' || (last >= '\n' && last <= '\r' || last == '\u0085')) {
+                              yypushback(1);
+                            } else {
+                              break;
+                            }
+                          }
+			  return getNext();
+			}
+/* Special case to get pty. ltd. or pty limited. Also added "Co." since someone complained, but usually a comma after it. */
+(pt[eyEY]|co)\./{SPACE}(ltd|lim)  { return getNext(); }
 {ABBREV1}/{SENTEND}     {
                           String s;
                           if (strictTreebank3 && ! "U.S.".equals(yytext())) {
@@ -872,8 +909,8 @@ pt[eyEY]\./{SPACE}(ltd|lim)  { return getNext(); }
 {ABBREV4}/{SPACE}       { return getNext(); }
 {ACRO}/{SPACENL}        { return getNext(); }
 {TBSPEC2}/{SPACENL}     { return getNext(); }
-{WORD}\./{INSENTP}      { return getNext(removeSoftHyphens(yytext()),
-                                         yytext()); }
+{FILENAME}/({SPACENL}|[.?!,])      { return getNext(); }
+{WORD}\./{INSENTP}      { return getNext(removeSoftHyphens(yytext()), yytext()); }
 {PHONE}                 { String txt = yytext();
                           if (normalizeSpace) {
                             // txt = SINGLE_SPACE_PATTERN.matcher(txt).replaceAll("\u00A0"); // change to non-breaking space
@@ -887,22 +924,12 @@ pt[eyEY]\./{SPACE}(ltd|lim)  { return getNext(); }
                         }
 {DBLQUOT}/[A-Za-z0-9$]  { return handleQuotes(yytext(), true); }
 {DBLQUOT}               { return handleQuotes(yytext(), false); }
-0x7f            { if (invertible) {
-                     prevWordAfter.append(yytext());
-                  } }
-{OPBRAC}        { if (normalizeOtherBrackets) {
-                    return getNext(openparen, yytext()); }
-                  else {
-                    return getNext();
-                  }
-                }
-{CLBRAC}        { if (normalizeOtherBrackets) {
-                    return getNext(closeparen, yytext()); }
-                  else {
-                    return getNext();
-                  }
-                }
-{SMILEY}/[^A-Za-z] { String txt = yytext();
+\x7f                    { if (invertible) {
+                            prevWordAfter.append(yytext());
+                        } }
+{LESSTHAN}              { return getNext("<", yytext()); }
+{GREATERTHAN}           { return getNext(">", yytext()); }
+{SMILEY}/[^A-Za-z0-9] { String txt = yytext();
                   String origText = txt;
                   if (normalizeParentheses) {
                     txt = LEFT_PAREN_PATTERN.matcher(txt).replaceAll(openparen);
@@ -930,6 +957,18 @@ pt[eyEY]\./{SPACE}(ltd|lim)  { return getNext(); }
                     return getNext();
                   }
                 }
+\[              { if (normalizeOtherBrackets) {
+                    return getNext("-LSB-", yytext()); }
+                  else {
+                    return getNext();
+                  }
+                }
+\]              { if (normalizeOtherBrackets) {
+                    return getNext("-RSB-", yytext()); }
+                  else {
+                    return getNext();
+                  }
+                }
 \(              { if (normalizeParentheses) {
                     return getNext(openparen, yytext()); }
                   else {
@@ -948,7 +987,13 @@ pt[eyEY]\./{SPACE}(ltd|lim)  { return getNext(); }
                     return getNext();
                   }
                 }
-{LDOTS}         { return handleEllipsis(yytext()); }
+{LDOTS}/\.{SPACENLS}[:letter:]    { /* attempt to treat fourth ellipsis as period if followed by space and letter. */
+                                    return handleEllipsis(yytext());
+                                  }
+{SPACEDLDOTS}/{SPACE}\.{SPACENLS}[:letter:]    { /* attempt to treat fourth ellipsis as period if followed by space and letter. */
+                                    return handleEllipsis(yytext());
+                                  }
+{LDOTS}|{SPACEDLDOTS}         { return handleEllipsis(yytext()); }
 {FNMARKS}       { return getNext(); }
 {ASTS}          { if (escapeForwardSlashAsterisk) {
                     return getNext(delimit(yytext(), '*'), yytext()); }
@@ -959,7 +1004,7 @@ pt[eyEY]\./{SPACE}(ltd|lim)  { return getNext(); }
 {INSENTP}       { return getNext(); }
 [?!]+           { return getNext(); }
 [.¡¿\u037E\u0589\u061F\u06D4\u0700-\u0702\u07FA\u3002]  { return getNext(); }
-=               { return getNext(); }
+=+               { return getNext(); }
 \/              { if (escapeForwardSlashAsterisk) {
                     return getNext(delimit(yytext(), '/'), yytext()); }
                   else {
@@ -971,17 +1016,21 @@ pt[eyEY]\./{SPACE}(ltd|lim)  { return getNext(); }
 {HTHING}\./{INSENTP}          { return getNext(removeSoftHyphens(yytext()),
                                                yytext()); }
 {HTHING}        { return getNext(removeSoftHyphens(yytext()), yytext()); }
-{THING}\./{INSENTP}          { return getNext(); }
-{THING}         { return getNext(); }
+{THING}\./{INSENTP}          { return handleQuotes(yytext(), false); }  /* A THING can contain quote like O'Malley */
+{THING}         { return handleQuotes(yytext(), false); }
 {THINGA}\./{INSENTP}    { return getNormalizedAmpNext(); }
 {THINGA}        { return getNormalizedAmpNext(); }
 '/[A-Za-z][^ \t\n\r\u00A0] { /* invert quote - often but not always right */
                   return handleQuotes(yytext(), true);
                 }
+/* This REDAUX is needed is needed in case string ends on "it's". See: testJacobEisensteinApostropheCase */
 {REDAUX}        { return handleQuotes(yytext(), false); }
+{SREDAUX}       { return handleQuotes(yytext(), false); }
 {QUOTES}        { return handleQuotes(yytext(), false); }
 {FAKEDUCKFEET}  { return getNext(); }
 {MISCSYMBOL}    { return getNext(); }
+\u0095          { return getNext("\u2022", yytext()); } /* cp1252 bullet mapped to unicode */
+\u0099	        { return getNext("\u2122", yytext()); } /* cp1252 TM sign mapped to unicode */
 \0|{SPACES}|[\u200B\u200E-\u200F\uFEFF] { if (invertible) {
                      prevWordAfter.append(yytext());
                   }

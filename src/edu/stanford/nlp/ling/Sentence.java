@@ -30,7 +30,7 @@ public class Sentence {
    * @return The Sentence
    */
   public static ArrayList<TaggedWord> toTaggedList(List<String> lex, List<String> tags) {
-    ArrayList<TaggedWord> sent = new ArrayList<TaggedWord>();
+    ArrayList<TaggedWord> sent = new ArrayList<>();
     int ls = lex.size();
     int ts = tags.size();
     if (ls != ts) {
@@ -52,7 +52,7 @@ public class Sentence {
    */
   //TODO wsg2010: This should be deprecated in favor of the method below with new labels
   public static ArrayList<Word> toUntaggedList(List<String> lex) {
-    ArrayList<Word> sent = new ArrayList<Word>();
+    ArrayList<Word> sent = new ArrayList<>();
     for (String str : lex) {
       sent.add(new Word(str));
     }
@@ -68,7 +68,7 @@ public class Sentence {
    */
   //TODO wsg2010: This should be deprecated in favor of the method below with new labels
   public static ArrayList<Word> toUntaggedList(String... words) {
-    ArrayList<Word> sent = new ArrayList<Word>();
+    ArrayList<Word> sent = new ArrayList<>();
     for (String str : words) {
       sent.add(new Word(str));
     }
@@ -76,7 +76,7 @@ public class Sentence {
   }
 
   public static List<HasWord> toWordList(String... words) {
-    List<HasWord> sent = new ArrayList<HasWord>();
+    List<HasWord> sent = new ArrayList<>();
     for (String word : words) {
       CoreLabel cl = new CoreLabel();
       cl.setValue(word);
@@ -94,7 +94,7 @@ public class Sentence {
    * @return The Sentence
    */
   public static List<CoreLabel> toCoreLabelList(String... words) {
-    List<CoreLabel> sent = new ArrayList<CoreLabel>(words.length);
+    List<CoreLabel> sent = new ArrayList<>(words.length);
     for (String word : words) {
       CoreLabel cl = new CoreLabel();
       cl.setValue(word);
@@ -112,7 +112,7 @@ public class Sentence {
    * @return The Sentence
    */
   public static List<CoreLabel> toCoreLabelList(List<? extends HasWord> words) {
-    List<CoreLabel> sent = new ArrayList<CoreLabel>(words.size());
+    List<CoreLabel> sent = new ArrayList<>(words.size());
     for (HasWord word : words) {
       CoreLabel cl = new CoreLabel();
       if (word instanceof Label) {
@@ -132,16 +132,17 @@ public class Sentence {
 
   /**
    * Returns the sentence as a string with a space between words.
-   * It strictly prints out the <code>value()</code> of each item -
-   * this will give the expected answer for a shortform representation
+   * It prints out the {@code value()} of each item -
+   * this will give the expected answer for a short form representation
    * of the "sentence" over a range of cases.  It is equivalent to
-   * calling <code>toString(true)</code>
+   * calling {@code toString(true)}.
    *
    * TODO: Sentence used to be a subclass of ArrayList, with this
    * method as the toString.  Therefore, there may be instances of
    * ArrayList being printed that expect this method to be used.
-  *
-   * @return The sentence
+   *
+   * @param list The tokenized sentence to print out
+   * @return The tokenized sentence as a String
    */
   public static <T> String listToString(List<T> list) {
     return listToString(list, true);
@@ -156,6 +157,7 @@ public class Sentence {
    * This one uses the default separators for any word type that uses
    * separators, such as TaggedWord.
    *
+   * @param list The tokenized sentence to print out
    * @param justValue If <code>true</code> and the elements are of type
    *                  <code>Label</code>, return just the
    *                  <code>value()</code> of the <code>Label</code> of each word;
@@ -186,6 +188,66 @@ public class Sentence {
     }
     return s.toString();
   }
+
+
+  /**
+   * Returns the sentence as a string, based on the original text and spacing
+   * prior to tokenization.
+   * This method assumes that this extra information has been encoded in CoreLabel
+   * objects for each token of the sentence, which do have the original spacing
+   * preserved (done with "invertible=true" for PTBTokenizer).
+   * However, the method has loose typing for easier inter-operation
+   * with old code that still works with a {@code List<HasWord>}.
+   *
+   * @param list The sentence (List of tokens) to print out
+   * @return The original sentence String, which may contain newlines or other artifacts of spacing
+   */
+  public static <T extends HasWord> String listToOriginalTextString(List<T> list) {
+    return listToOriginalTextString(list, true);
+  }
+
+  /**
+   * Returns the sentence as a string, based on the original text and spacing
+   * prior to tokenization.
+   * This method assumes that this extra information has been encoded in CoreLabel
+   * objects for each token of the sentence, which do have the original spacing
+   * preserved (done with "invertible=true" for PTBTokenizer). If that information
+   * is not there, you will see null outputs, and if you do not pass in a List
+   * of CoreLabel objects, then the code will Exception.
+   * The method has loose typing for easier inter-operation
+   * with old code that still works with a {@code List<HasWord>}.
+   *
+   * @param list The sentence (List of tokens) to print out
+   * @param printBeforeBeforeStart Whether to print the BeforeAnnotation before the first token
+   *                               of the sentence. (In general, the BeforeAnnotation is the same
+   *                               as the AfterAnnotation of the preceding token. So, usually this
+   *                               is correct to do only for the first sentence of a text.)
+   * @return The original sentence String, which may contain newlines or other artifacts of spacing
+   */
+  public static <T extends HasWord> String listToOriginalTextString(List<T> list, boolean printBeforeBeforeStart) {
+    StringBuilder s = new StringBuilder();
+    for (HasWord word : list) {
+      CoreLabel cl = (CoreLabel) word;
+      if (printBeforeBeforeStart) {
+        // Only print Before for first token, since otherwise same as After of previous token
+        // BUG: if you print a sequence of sentences, you double up between sentence spacing.
+        if (cl.get(CoreAnnotations.BeforeAnnotation.class) != null) {
+          s.append(cl.get(CoreAnnotations.BeforeAnnotation.class));
+        }
+        printBeforeBeforeStart = false;
+      }
+      s.append(cl.get(CoreAnnotations.OriginalTextAnnotation.class));
+      if (cl.get(CoreAnnotations.AfterAnnotation.class) != null) {
+        s.append(cl.get(CoreAnnotations.AfterAnnotation.class));
+      } else {
+        s.append(" ");
+      }
+    }
+    return s.toString();
+  }
+
+
+
 
   public static <T> String wordToString(T o, final boolean justValue) {
     return wordToString(o, justValue, null);

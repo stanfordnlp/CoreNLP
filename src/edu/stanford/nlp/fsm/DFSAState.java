@@ -6,9 +6,7 @@ import edu.stanford.nlp.util.Scored;
 import java.util.*;
 
 /**
- * DFSAState
- * <p/>
- * Class for representing the state of a deterministic finite state
+ * DFSAState represents the state of a deterministic finite state
  * automaton without epsilon transitions.
  *
  * @author Dan Klein
@@ -117,7 +115,7 @@ public final class DFSAState<T,S> implements Scored {
 
   public Set<DFSAState<T, S>> statesReachable() {
     Set<DFSAState<T, S>> visited = Generics.newHashSet();
-    List<DFSAState<T, S>> toVisit = new ArrayList<DFSAState<T, S>>();
+    List<DFSAState<T, S>> toVisit = new ArrayList<>();
     toVisit.add(this);
     exploreStates(toVisit, visited);
     return visited;

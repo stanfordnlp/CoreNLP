@@ -13,6 +13,7 @@ import java.io.Reader;
  * Produces LSTrees with CWT labels.  The input trees have to have CWT labels!
  * Although the binarizer always respects heads, you can get left or right
  * binarization by defining an appropriate HeadFinder.
+ * TODO: why not use CoreLabel if the input Tree used CoreLabel?
  *
  * @author Dan Klein
  * @author Teg Grenager
@@ -33,7 +34,7 @@ public class TreeBinarizer implements TreeTransformer {
   private boolean markFinalStates;
   private boolean unaryAtTop;
   private boolean doSelectiveSplit = false;
-  private ClassicCounter<String> stateCounter = new ClassicCounter<String>();
+  private ClassicCounter<String> stateCounter = new ClassicCounter<>();
   private final boolean simpleLabels;
   private final boolean noRebinarization;
 
@@ -48,7 +49,7 @@ public class TreeBinarizer implements TreeTransformer {
   public void setDoSelectiveSplit(boolean doSelectiveSplit) {
     this.doSelectiveSplit = doSelectiveSplit;
     if (!doSelectiveSplit) {
-      stateCounter = new ClassicCounter<String>();
+      stateCounter = new ClassicCounter<>();
     }
   }
 
@@ -95,7 +96,7 @@ public class TreeBinarizer implements TreeTransformer {
         t2 = markovInsideBinarizeLocalTreeNew(t, headNum, 0, t.numChildren() - 1, true);
         //          t2 = markovInsideBinarizeLocalTree(t, head, headNum, topCat, false);
       } else {
-        t2 = markovOutsideBinarizeLocalTree(t, head, headNum, topCat, new LinkedList<Tree>(), false);
+        t2 = markovOutsideBinarizeLocalTree(t, head, headNum, topCat, new LinkedList<>(), false);
       }
 
       if (DEBUG) {
@@ -119,19 +120,24 @@ public class TreeBinarizer implements TreeTransformer {
   private Tree markovOutsideBinarizeLocalTree(Tree t, TaggedWord head, int headLoc, String topCat, LinkedList<Tree> ll, boolean doneLeft) {
     String word = head.word();
     String tag = head.tag();
-    List<Tree> newChildren = new ArrayList<Tree>(2);
+    List<Tree> newChildren = new ArrayList<>(2);
     // call with t, headNum, head, topCat, false
     if (headLoc == 0) {
       if (!doneLeft) {
         // insert a unary to separate the sides
         if (tlp.isStartSymbol(topCat)) {
-          return markovOutsideBinarizeLocalTree(t, head, headLoc, topCat, new LinkedList<Tree>(), true);
+          return markovOutsideBinarizeLocalTree(t, head, headLoc, topCat, new LinkedList<>(), true);
         }
-        String headStr = t.getChild(headLoc).label().value();
-        String subLabelStr = "@" + topCat + ": " + headStr + " ]";
+        String subLabelStr;
+        if (simpleLabels) {
+          subLabelStr = "@" + topCat;
+        } else {
+          String headStr = t.getChild(headLoc).label().value();
+          subLabelStr = "@" + topCat + ": " + headStr + " ]";
+        }
         Label subLabel = new CategoryWordTag(subLabelStr, word, tag);
         Tree subTree = tf.newTreeNode(subLabel, t.getChildrenAsList());
-        newChildren.add(markovOutsideBinarizeLocalTree(subTree, head, headLoc, topCat, new LinkedList<Tree>(), true));
+        newChildren.add(markovOutsideBinarizeLocalTree(subTree, head, headLoc, topCat, new LinkedList<>(), true));
         return tf.newTreeNode(t.label(), newChildren);
 
       }
@@ -145,9 +151,14 @@ public class TreeBinarizer implements TreeTransformer {
         ll.removeLast();
       }
       // generate a right
-      String headStr = t.getChild(headLoc).label().value();
-      String rightStr = (len > markovOrder - 1 ? "... " : "") + join(ll);
-      String subLabelStr = "@" + topCat + ": " + headStr + " " + rightStr;
+      String subLabelStr;
+      if (simpleLabels) {
+        subLabelStr = "@" + topCat;
+      } else {
+        String headStr = t.getChild(headLoc).label().value();
+        String rightStr = (len > markovOrder - 1 ? "... " : "") + join(ll);
+        subLabelStr = "@" + topCat + ": " + headStr + " " + rightStr;
+      }
       Label subLabel = new CategoryWordTag(subLabelStr, word, tag);
       Tree subTree = tf.newTreeNode(subLabel, t.getChildrenAsList().subList(0, len - 1));
       newChildren.add(markovOutsideBinarizeLocalTree(subTree, head, headLoc, topCat, ll, true));
@@ -160,9 +171,14 @@ public class TreeBinarizer implements TreeTransformer {
         ll.removeFirst();
       }
       // generate a left
-      String headStr = t.getChild(headLoc).label().value();
-      String leftStr = join(ll) + (headLoc > markovOrder - 1 ? " ..." : "");
-      String subLabelStr = "@" + topCat + ": " + leftStr + " " + headStr + " ]";
+      String subLabelStr;
+      if (simpleLabels) {
+        subLabelStr = "@" + topCat;
+      } else {
+        String headStr = t.getChild(headLoc).label().value();
+        String leftStr = join(ll) + (headLoc > markovOrder - 1 ? " ..." : "");
+        subLabelStr = "@" + topCat + ": " + leftStr + " " + headStr + " ]";
+      }
       Label subLabel = new CategoryWordTag(subLabelStr, word, tag);
       Tree subTree = tf.newTreeNode(subLabel, t.getChildrenAsList().subList(1, t.numChildren()));
       newChildren.add(t.getChild(0));
@@ -202,12 +218,12 @@ public class TreeBinarizer implements TreeTransformer {
       newChildren = Collections.singletonList(children[headLoc]);
     } else if (left < headLoc) {
       // generate a left if we can
-      newChildren = new ArrayList<Tree>(2);
+      newChildren = new ArrayList<>(2);
       newChildren.add(children[left]);
       newChildren.add(markovInsideBinarizeLocalTreeNew(t, headLoc, left + 1, right, false));
     } else if (right > headLoc) {
       // generate a right if we can
-      newChildren = new ArrayList<Tree>(2);
+      newChildren = new ArrayList<>(2);
       newChildren.add(markovInsideBinarizeLocalTreeNew(t, headLoc, left, right - 1, false));
       newChildren.add(children[right]);
     } else {
@@ -267,7 +283,7 @@ public class TreeBinarizer implements TreeTransformer {
   }
 
   /**
-   * For a dotted rule VP^S -> RB VP NP PP . where VP is the head
+   * For a dotted rule VP^S -&gt; RB VP NP PP . where VP is the head
    * makes label of the form: @VP^S| [ RB [VP] ... PP ]
    * where the constituent after the @ is the passive that we are building
    * and  the constituent in brackets is the head
@@ -313,8 +329,8 @@ public class TreeBinarizer implements TreeTransformer {
   }
 
   /**
-   * for a dotted rule VP^S -> RB VP NP PP . where VP is the head
-   * makes label of the form: @VP^S| VP_ ... PP> RB[
+   * for a dotted rule VP^S -&gt; RB VP NP PP . where VP is the head
+   * makes label of the form: @VP^S| VP_ ... PP&gt; RB[
    */
   private Label makeSyntheticLabel2(Tree t, int left, int right, int headLoc, int markovOrder) {
     String topCat = t.label().value();
@@ -373,7 +389,7 @@ public class TreeBinarizer implements TreeTransformer {
   private Tree insideBinarizeLocalTree(Tree t, int headNum, TaggedWord head, int leftProcessed, int rightProcessed) {
     String word = head.word();
     String tag = head.tag();
-    List<Tree> newChildren = new ArrayList<Tree>(2);      // check done
+    List<Tree> newChildren = new ArrayList<>(2);      // check done
     if (t.numChildren() <= leftProcessed + rightProcessed + 2) {
       Tree leftChild = t.getChild(leftProcessed);
       newChildren.add(leftChild);
@@ -417,7 +433,7 @@ public class TreeBinarizer implements TreeTransformer {
   }
 
   private Tree outsideBinarizeLocalTree(Tree t, String labelStr, String finalCat, int headNum, TaggedWord head, int leftProcessed, String leftStr, int rightProcessed, String rightStr) {
-    List<Tree> newChildren = new ArrayList<Tree>(2);
+    List<Tree> newChildren = new ArrayList<>(2);
     Label label = new CategoryWordTag(labelStr, head.word(), head.tag());
     // check if there are <=2 children already
     if (t.numChildren() - leftProcessed - rightProcessed <= 2) {
@@ -432,7 +448,12 @@ public class TreeBinarizer implements TreeTransformer {
       // eat a left word
       Tree leftChild = t.getChild(leftProcessed);
       String childLeftStr = leftStr + " " + leftChild.label().value();
-      String childLabelStr = "@" + finalCat + " :" + childLeftStr + " ..." + rightStr;
+      String childLabelStr;
+      if (simpleLabels) {
+        childLabelStr = "@" + finalCat;
+      } else {
+        childLabelStr = "@" + finalCat + " :" + childLeftStr + " ..." + rightStr;
+      }
       Tree rightChild = outsideBinarizeLocalTree(t, childLabelStr, finalCat, headNum, head, leftProcessed + 1, childLeftStr, rightProcessed, rightStr);
       newChildren.add(leftChild);
       newChildren.add(rightChild);
@@ -441,7 +462,12 @@ public class TreeBinarizer implements TreeTransformer {
       // eat a right word
       Tree rightChild = t.getChild(t.numChildren() - rightProcessed - 1);
       String childRightStr = " " + rightChild.label().value() + rightStr;
-      String childLabelStr = "@" + finalCat + " :" + leftStr + " ..." + childRightStr;
+      String childLabelStr;
+      if (simpleLabels) {
+        childLabelStr = "@" + finalCat;
+      } else {
+        childLabelStr = "@" + finalCat + " :" + leftStr + " ..." + childRightStr;
+      }
       Tree leftChild = outsideBinarizeLocalTree(t, childLabelStr, finalCat, headNum, head, leftProcessed, leftStr, rightProcessed + 1, childRightStr);
       newChildren.add(leftChild);
       newChildren.add(rightChild);
@@ -473,7 +499,7 @@ public class TreeBinarizer implements TreeTransformer {
     if (t.isPreTerminal()) {
       Tree childResult = transformTree(t.getChild(0));
       String word = childResult.value();  // would be nicer if Word/CWT ??
-      List<Tree> newChildren = new ArrayList<Tree>(1);
+      List<Tree> newChildren = new ArrayList<>(1);
       newChildren.add(childResult);
       return tf.newTreeNode(new CategoryWordTag(cat, word, cat), newChildren);
     }
@@ -491,7 +517,7 @@ public class TreeBinarizer implements TreeTransformer {
     }
     int headNum = -1;
     Tree[] kids = t.children();
-    List<Tree> newChildren = new ArrayList<Tree>(kids.length);
+    List<Tree> newChildren = new ArrayList<>(kids.length);
     for (int childNum = 0; childNum < kids.length; childNum++) {
       Tree child = kids[childNum];
       Tree childResult = transformTree(child);   // recursive call
@@ -504,8 +530,8 @@ public class TreeBinarizer implements TreeTransformer {
     // XXXXX UPTO HERE!!!  ALMOST DONE!!!
     if (t.label().value().startsWith(tlp.startSymbol())) {
       // handle the ROOT tree properly
-      CategoryWordTag label = (CategoryWordTag) t.label();
       /*
+      //CategoryWordTag label = (CategoryWordTag) t.label();
       // binarize without the last kid and then add it back to the top tree
       Tree lastKid = (Tree)newChildren.remove(newChildren.size()-1);
       Tree tempTree = tf.newTreeNode(label, newChildren);
@@ -513,7 +539,7 @@ public class TreeBinarizer implements TreeTransformer {
       newChildren = tempTree.getChildrenAsList();
       newChildren.add(lastKid); // add it back
       */
-      result = tf.newTreeNode(label, newChildren); // label shouldn't have changed
+      result = tf.newTreeNode(t.label(), newChildren); // label shouldn't have changed
     } else {
 //      CategoryWordTag headLabel = (CategoryWordTag) headChild.label();
       String word = ((HasWord) headChild.label()).word();
@@ -529,6 +555,12 @@ public class TreeBinarizer implements TreeTransformer {
     return result;
   }
 
+  /**
+   * Builds a TreeBinarizer with all of the options set to simple values
+   */
+  public static TreeBinarizer simpleTreeBinarizer(HeadFinder hf, TreebankLanguagePack tlp) {
+    return new TreeBinarizer(hf, tlp, false, false, 0, false, false, 0.0, false, true, true);
+  }
 
   /** Build a custom binarizer for Trees.
    *
@@ -543,6 +575,7 @@ public class TreeBinarizer implements TreeTransformer {
    *        tree.  This is used only when compaction is happening
    * @param selectiveSplitThreshold if selective split is used, this will be the threshold used to decide which state splits to keep
    * @param markFinalStates whether or not to make the state names (labels) of the final active states distinctive
+   * @param noRebinarization if true, a node which already has exactly two children is not altered
    */
   public TreeBinarizer(HeadFinder hf, TreebankLanguagePack tlp,
                        boolean insideFactor,
@@ -565,7 +598,8 @@ public class TreeBinarizer implements TreeTransformer {
   }
 
 
-  /** Let's you test out the TreeBinarizer on the command line.
+  /** 
+   *  Lets you test out the TreeBinarizer on the command line.
    *  This main method doesn't yet handle as many flags as one would like.
    *  But it does have:
    *  <ul>
@@ -583,14 +617,10 @@ public class TreeBinarizer implements TreeTransformer {
     // TreebankLangParserParams tlpp = new EnglishTreebankParserParams();
     // TreeReaderFactory trf = new LabeledScoredTreeReaderFactory();
     // Looks like it must build CategoryWordTagFactory!!
-    TreeReaderFactory trf = new TreeReaderFactory() {
-	public TreeReader newTreeReader(Reader in) {
-	  return new PennTreeReader(in,
-				    new LabeledScoredTreeFactory(
-					      new CategoryWordTagFactory()),
-				    new BobChrisTreeNormalizer());
-	}
-      };
+    TreeReaderFactory trf = in -> new PennTreeReader(in,
+            new LabeledScoredTreeFactory(
+                new CategoryWordTagFactory()),
+            new BobChrisTreeNormalizer());
 
     String fileExt = "mrg";
     HeadFinder hf = new ModCollinsHeadFinder();

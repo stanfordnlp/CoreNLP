@@ -53,11 +53,13 @@ public class ErasureUtils {
 
   @SuppressWarnings("unchecked")
   public static <T> List<T> sortedIfPossible(Collection<T> collection) {
-    List<T> result = new ArrayList<T>(collection);
+    List<T> result = new ArrayList<>(collection);
     try {
       Collections.sort((List)result);
     } catch (ClassCastException e) {
       // unable to sort, just return the copy
+    } catch (NullPointerException npe) {
+      // this happens if there are null elements in the collection; just return the copy
     }
     return result;
   }

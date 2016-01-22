@@ -70,7 +70,7 @@ public class Distributions {
     double w2 = 1.0 - w1;
     Set<K> allKeys = getSetOfAllKeys(d1, d2);
     int numKeys = d1.getNumberOfKeys();
-    Counter<K> c = new ClassicCounter<K>();
+    Counter<K> c = new ClassicCounter<>();
 
       for (K key : allKeys){
         double newProbability = d1.probabilityOf(key) * w1 + d2.probabilityOf(key) * w2;
@@ -126,7 +126,7 @@ public class Distributions {
         p2 = (1.0 - assignedMass2) / numKeysRemaining;
         double logFract = Math.log(p1 / p2);
         if (logFract == Double.POSITIVE_INFINITY) {
-          System.out.println("Didtributions.kldivergence (remaining mass) returning +inf: p1=" + p1 + ", p2=" +p2);
+          System.out.println("Distributions.klDivergence (remaining mass) returning +inf: p1=" + p1 + ", p2=" +p2);
           System.out.flush();
           return Double.POSITIVE_INFINITY; // can't recover
         }
@@ -136,7 +136,7 @@ public class Distributions {
     return result;
   }
 
-    /**
+  /**
    * Calculates the Jensen-Shannon divergence between the two distributions.
    * That is, it calculates 1/2 [KL(d1 || avg(d1,d2)) + KL(d2 || avg(d1,d2))] .
    *
@@ -150,7 +150,7 @@ public class Distributions {
     return js;
   }
 
-    /**
+  /**
    * Calculates the skew divergence between the two distributions.
    * That is, it calculates KL(d1 || (d2*skew + d1*(1-skew))) .
    * In other words, how well can d1 be represented by a "smoothed" d2.

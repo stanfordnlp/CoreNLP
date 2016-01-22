@@ -16,7 +16,7 @@ public class CRFLabel implements Serializable {
   private static final long serialVersionUID = 7403010868396790276L;
 
   private final int[] label;
-  int hashCode = -1;
+  private int hashCode = -1;
 
   // todo: When rebuilding, change this to a better hash function like 31
   private static final int maxNumClasses = 10;
@@ -59,18 +59,18 @@ public class CRFLabel implements Serializable {
   }
 
   public <E> String toString(Index<E> classIndex) {
-    List<E> l = new ArrayList<E>();
-    for (int i = 0; i < label.length; i++) {
-      l.add(classIndex.get(label[i]));
+    List<E> l = new ArrayList<>();
+    for (int aLabel : label) {
+      l.add(classIndex.get(aLabel));
     }
     return l.toString();
   }
 
   @Override
   public String toString() {
-    List<Integer> l = new ArrayList<Integer>();
-    for (int i = 0; i < label.length; i++) {
-      l.add(Integer.valueOf(label[i]));
+    List<Integer> l = new ArrayList<>();
+    for (int aLabel : label) {
+      l.add(Integer.valueOf(aLabel));
     }
     return l.toString();
   }
@@ -79,9 +79,9 @@ public class CRFLabel implements Serializable {
   public int hashCode() {
     if (hashCode < 0) {
       hashCode = 0;
-      for (int i = 0; i < label.length; i++) {
+      for (int aLabel : label) {
         hashCode *= maxNumClasses;
-        hashCode += label[i];
+        hashCode += aLabel;
       }
     }
     return hashCode;

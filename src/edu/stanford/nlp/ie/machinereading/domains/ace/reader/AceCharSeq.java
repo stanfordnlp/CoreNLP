@@ -6,9 +6,13 @@ import java.util.Vector;
 import edu.stanford.nlp.trees.Span;
 
 /**
- * Implements the ACE <charseq> construct
+ * Implements the ACE {@literal <charseq>} construct.
+ *
+ * @author David McClosky
+ * @author Andrey Gusev
  */
 public class AceCharSeq {
+
   /** The exact text matched by this sequence */
   private String mText;
 
@@ -34,15 +38,15 @@ public class AceCharSeq {
   public String toXml(String label, int offset) {
     StringBuffer buffer = new StringBuffer();
     AceElement.appendOffset(buffer, offset);
-    buffer.append("<" + label + ">\n");
+    buffer.append('<').append(label).append(">\n");
 
     AceElement.appendOffset(buffer, offset + 2);
-    buffer.append("<charseq START=\"" + mByteOffset.start() + "\" END=\"" + mByteOffset.end() + "\">" + mText
-        + "</charseq>");
-    buffer.append("\n");
+    buffer.append("<charseq START=\"").append(mByteOffset.start()).append("\" END=\"").append(mByteOffset.end()).append("\">");
+    buffer.append(mText).append("</charseq>");
+    buffer.append('\n');
 
     AceElement.appendOffset(buffer, offset);
-    buffer.append("</" + label + ">");
+    buffer.append("</").append(label).append('>');
     return buffer.toString();
   }
 
@@ -50,9 +54,8 @@ public class AceCharSeq {
     StringBuffer buffer = new StringBuffer();
 
     AceElement.appendOffset(buffer, offset + 2);
-    buffer.append("<charseq START=\"" + mByteOffset.start() + "\" END=\"" + mByteOffset.end() + "\">" + mText
-        + "</charseq>");
-
+    buffer.append("<charseq START=\"").append(mByteOffset.start()).append("\" END=\"").append(mByteOffset.end()).append("\">");
+    buffer.append(mText).append("</charseq>");
     return buffer.toString();
   }
 
@@ -150,7 +153,7 @@ public class AceCharSeq {
   @Override
   public String toString() {
     return "AceCharSeq [mByteOffset=" + mByteOffset + ", mText=" + mText
-        + ", mTokenOffset=" + mTokenOffset + "]";
+        + ", mTokenOffset=" + mTokenOffset + ']';
   }
 
   /*
@@ -158,22 +161,23 @@ public class AceCharSeq {
    * StringBuffer word = new StringBuffer(); StringBuffer lemma = new
    * StringBuffer(); StringBuffer pos = new StringBuffer(); StringBuffer chunk =
    * new StringBuffer(); StringBuffer nerc = new StringBuffer();
-   * 
+   *
    * for(int i = span.mStart; i <= span.mEnd; i ++){ if(i > span.mStart){
    * word.append("_"); lemma.append("_"); pos.append("_"); chunk.append("_");
    * nerc.append("_"); }
-   * 
+   *
    * AceToken tok = tokens.get(i);
    * word.append(AceToken.WORDS.get(tok.getWord()));
    * lemma.append(AceToken.LEMMAS.get(tok.getLemma()));
    * pos.append(AceToken.OTHERS.get(tok.getPos()));
    * chunk.append(AceToken.OTHERS.get(tok.getChunk()));
    * nerc.append(AceToken.OTHERS.get(tok.getNerc())); }
-   * 
+   *
    * AceToken phrase = new AceToken(word.toString(), lemma.toString(),
    * pos.toString(), chunk.toString(), nerc.toString(), null, null, -1);
-   * 
+   *
    * //System.err.println("Constructed phrase: " + phrase.display()); return
    * phrase; }
    */
+
 }

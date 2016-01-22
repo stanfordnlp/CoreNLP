@@ -1,0 +1,47 @@
+SI_PREFIX_MAP = {
+"deca": DECA,
+"hecto": HECTO,
+"kilo": KILO,
+"mega": MEGA,
+"giga": GIGA,
+"tera": TERA,
+"peta": PETA,
+"exa": EXA,
+"zetta": ZETTA,
+"yotta": YOTTA,
+"deci": DECI,
+"centi": CENTI,
+"milli": MILLI,
+"micro": MICRO,
+"nano": NANO,
+"pico": PICO,
+"femto": FEMTO,
+"atto": ATTO,
+"zepto": ZEPTO,
+"yocto": YOCTO
+}
+$SiPrefixes = CreateRegex(Keys(SI_PREFIX_MAP))
+
+SI_SYM_PREFIX_MAP = {
+"da": DECA,
+"h": HECTO,
+"k": KILO,
+"M": MEGA,
+"G": GIGA,
+"T": TERA,
+"P": PETA,
+"E": EXA,
+"Z": ZETTA,
+"Y": YOTTA,
+"d": DECI,
+"c": CENTI,
+"m": MILLI,
+"μ": MICRO,
+"n": NANO,
+"p": PICO,
+"f": FEMTO,
+"a": ATTO,
+"z": ZEPTO,
+"y": YOCTO
+}
+$SiSymPrefixes = CreateRegex(Keys(SI_SYM_PREFIX_MAP))

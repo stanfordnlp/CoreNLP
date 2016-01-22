@@ -131,7 +131,7 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
     } else {
       br = new BufferedReader(r);
     }
-    return new BufferedReaderIterator<List<IN>>(new ColumnDocBufferedGetNextTokens(br));
+    return new BufferedReaderIterator<>(new ColumnDocBufferedGetNextTokens(br));
   }
 
   public Iterator<Annotation> getDocIterator(Reader r) {
@@ -141,7 +141,7 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
     } else {
       br = new BufferedReader(r);
     }
-    return new BufferedReaderIterator<Annotation>(new ColumnDocBufferedGetNext(br, false));
+    return new BufferedReaderIterator<>(new ColumnDocBufferedGetNext(br, false));
   }
 
   public Iterator<Annotation> getDocIterator(Reader r, boolean includeText) {
@@ -151,7 +151,7 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
     } else {
       br = new BufferedReader(r);
     }
-    return new BufferedReaderIterator<Annotation>(new ColumnDocBufferedGetNext(br, false, includeText));
+    return new BufferedReaderIterator<>(new ColumnDocBufferedGetNext(br, false, includeText));
   }
 
   private static interface GetNextFunction<E> {
@@ -272,10 +272,10 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
           }
         }
         if (sentenceBoundaries != null) {
-          List<CoreMap> sentences = new ArrayList<CoreMap>(sentenceBoundaries.size());
+          List<CoreMap> sentences = new ArrayList<>(sentenceBoundaries.size());
           for (IntPair p : sentenceBoundaries) {
             // get the sentence text from the first and last character offsets
-            List<IN> sentenceTokens = new ArrayList<IN>(tokens.subList(p.getSource(), p.getTarget() + 1));
+            List<IN> sentenceTokens = new ArrayList<>(tokens.subList(p.getSource(), p.getTarget() + 1));
             Integer begin = sentenceTokens.get(0).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
             int last = sentenceTokens.size() - 1;
             Integer end = sentenceTokens.get(last).get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
@@ -330,7 +330,7 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
         List<IN> words = null;
         List<IntPair> boundaries = null;
         if (keepBoundaries) {
-          boundaries = new ArrayList<IntPair>();
+          boundaries = new ArrayList<>();
         }
         while ((line = br.readLine()) != null) {
           lineCnt++;
@@ -357,11 +357,16 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
               }
             } else {
               if (words == null) {
-                words = new ArrayList<IN>();
+                words = new ArrayList<>();
                 docId = newDocId;
                 itemCnt++;
               }
-              IN wi = tokenFactory.makeToken(map, info);
+              IN wi;
+              if (info.length == map.length) {
+                wi = tokenFactory.makeToken(map, info);
+              } else {
+                wi = tokenFactory.makeToken(map, Arrays.asList(info).subList(0, map.length).toArray(new String[map.length]));
+              }
               words.add(wi);
             }
           } else {

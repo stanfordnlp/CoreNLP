@@ -1,29 +1,22 @@
 /**
  * Title:        StanfordMaxEnt<p>
  * Description:  A Maximum Entropy Toolkit<p>
- * Copyright:    Copyright (c) Kristina Toutanova<p>
- * Company:      Stanford University<p>
+ * Copyright:    Copyright (c) Trustees of Leland Stanford Junior University<p>
  */
 package edu.stanford.nlp.tagger.maxent;
 
-import edu.stanford.nlp.io.NumberRangesFileFilter;
-import edu.stanford.nlp.ling.TaggedWord;
-import edu.stanford.nlp.ling.WordTag;
-import edu.stanford.nlp.stats.IntCounter;
-import edu.stanford.nlp.tagger.common.TaggerConstants;
-import edu.stanford.nlp.tagger.io.TaggedFileReader;
-import edu.stanford.nlp.tagger.io.TaggedFileRecord;
-import edu.stanford.nlp.trees.*;
-import edu.stanford.nlp.util.Generics;
-
-import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
+
+import edu.stanford.nlp.ling.TaggedWord;
+import edu.stanford.nlp.ling.WordTag;
+import edu.stanford.nlp.stats.IntCounter;
+import edu.stanford.nlp.tagger.common.Tagger;
+import edu.stanford.nlp.tagger.io.TaggedFileReader;
+import edu.stanford.nlp.tagger.io.TaggedFileRecord;
+import edu.stanford.nlp.util.Generics;
 
 
 /**
@@ -37,8 +30,7 @@ import java.util.StringTokenizer;
  */
 public class ReadDataTagged {
 
-  private final List<TaggedFileRecord> fileRecords;
-  private ArrayList<DataWordTag> v = new ArrayList<DataWordTag>();
+  private final ArrayList<DataWordTag> v = new ArrayList<>();
   private int numElements = 0;
   private int totalSentences = 0;
   private int totalWords = 0;
@@ -48,13 +40,13 @@ public class ReadDataTagged {
   //TODO: make a class DataHolder that holds the dict, tags, pairs, etc, for tagger
   // and pass it around
 
-  protected ReadDataTagged(TaggerConfig config, MaxentTagger maxentTagger, 
-                           PairsHolder pairs) 
+  protected ReadDataTagged(TaggerConfig config, MaxentTagger maxentTagger,
+                           PairsHolder pairs)
     throws IOException
   {
     this.maxentTagger = maxentTagger;
     this.pairs = pairs;
-    fileRecords = TaggedFileRecord.createRecords(config, config.getFile());
+    List<TaggedFileRecord> fileRecords = TaggedFileRecord.createRecords(config, config.getFile());
     Map<String, IntCounter<String>> wordTagCounts = Generics.newHashMap();
     for (TaggedFileRecord record : fileRecords) {
       loadFile(record.reader(), wordTagCounts);
@@ -69,7 +61,7 @@ public class ReadDataTagged {
   /** Frees the memory that is stored in this object by dropping the word-tag data.
    */
   void release() {
-    v = null;
+    v.clear();
   }
 
 
@@ -80,8 +72,8 @@ public class ReadDataTagged {
   private void loadFile(TaggedFileReader reader, Map<String, IntCounter<String>> wordTagCounts) {
     System.err.println("Loading tagged words from " + reader.filename());
 
-    ArrayList<String> words = new ArrayList<String>();
-    ArrayList<String> tags = new ArrayList<String>();
+    ArrayList<String> words = new ArrayList<>();
+    ArrayList<String> tags = new ArrayList<>();
     int numSentences = 0;
     int numWords = 0;
     int maxLen = Integer.MIN_VALUE;
@@ -89,11 +81,11 @@ public class ReadDataTagged {
 
     for (List<TaggedWord> sentence : reader) {
       if (maxentTagger.wordFunction != null) {
-        List<TaggedWord> newSentence = 
-          new ArrayList<TaggedWord>(sentence.size());
+        List<TaggedWord> newSentence =
+                new ArrayList<>(sentence.size());
         for (TaggedWord word : sentence) {
-          TaggedWord newWord = 
-            new TaggedWord(maxentTagger.wordFunction.apply(word.word()), 
+          TaggedWord newWord =
+            new TaggedWord(maxentTagger.wordFunction.apply(word.word()),
                            word.tag());
           newSentence.add(newWord);
         }
@@ -111,25 +103,25 @@ public class ReadDataTagged {
       }
       maxLen = (sentence.size() > maxLen ? sentence.size() : maxLen);
       minLen = (sentence.size() < minLen ? sentence.size() : minLen);
-      words.add(TaggerConstants.EOS_WORD);
-      tags.add(TaggerConstants.EOS_TAG);
+      words.add(Tagger.EOS_WORD);
+      tags.add(Tagger.EOS_TAG);
       numElements = numElements + sentence.size() + 1;
       // iterate over the words in the sentence
       for (int i = 0; i < sentence.size() + 1; i++) {
-        History h = new History(totalWords + totalSentences, 
-                                totalWords + totalSentences + sentence.size(), 
-                                totalWords + totalSentences + i, 
+        History h = new History(totalWords + totalSentences,
+                                totalWords + totalSentences + sentence.size(),
+                                totalWords + totalSentences + i,
                                 pairs, maxentTagger.extractors);
         String tag = tags.get(i);
         String word = words.get(i);
         pairs.add(new WordTag(word,tag));
-        int y = maxentTagger.tags.add(tag);
-        DataWordTag dat = new DataWordTag(h, y, maxentTagger.tags);
+        int y = maxentTagger.addTag(tag);
+        DataWordTag dat = new DataWordTag(h, y, tag);
         v.add(dat);
 
         IntCounter<String> tagCounts = wordTagCounts.get(word);
         if (tagCounts == null) {
-          tagCounts = new IntCounter<String>();
+          tagCounts = new IntCounter<>();
           wordTagCounts.put(word, tagCounts);
         }
         tagCounts.incrementCount(tag, 1);
@@ -155,4 +147,5 @@ public class ReadDataTagged {
   public int getSize() {
     return numElements;
   }
+
 }

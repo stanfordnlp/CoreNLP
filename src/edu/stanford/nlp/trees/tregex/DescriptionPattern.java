@@ -1,10 +1,11 @@
 package edu.stanford.nlp.trees.tregex;
 
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
+import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.ArrayStringFilter;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -22,11 +23,11 @@ class DescriptionPattern extends TregexPattern {
   private final DescriptionMode descriptionMode;
   private final String exactMatch;
   private final Pattern descPattern;
-  private final Filter<String> stringFilter;
+  private final Predicate<String> stringFilter;
 
   // what size string matchers to use before switching to regex for
   // disjunction matches
-  private static final int MAX_STRING_MATCHER_SIZE = 6;
+  private static final int MAX_STRING_MATCHER_SIZE = 8;
 
   private final String stringDesc;
   /** The name to give the matched node */
@@ -38,14 +39,22 @@ class DescriptionPattern extends TregexPattern {
   // to make it so.
   private TregexPattern child;
   // also conceptually final, but it depends on the child
-  /**
-   * whether or not this node can change variables.  helps determine
-   * which nodes to change when backtracking
-   */
-  private boolean changesVariables;
   private final List<Pair<Integer,String>> variableGroups; // specifies the groups in a regex that are captured as matcher-global string variables
 
   private final Function<String, String> basicCatFunction;
+
+  /** Used to detect regex expressions which can be simplified to exact matches */
+  private static final Pattern SINGLE_WORD_PATTERN = Pattern.compile("/\\^(.)\\$/" + "|" + // for example, /^:$/
+                                                                     "/\\^\\[(.)\\]\\$/" + "|" + // for example, /^[$]$/
+                                                                     "/\\^([-a-zA-Z']+)\\$/"); // for example, /^-NONE-$/
+
+  private static final Pattern MULTI_WORD_PATTERN = Pattern.compile("/\\^\\(\\?\\:((?:[-a-zA-Z|]|\\\\\\$)+)\\)\\$\\/");
+
+  private static final Pattern CASE_INSENSITIVE_PATTERN = Pattern.compile("/\\^\\(\\?i\\:((?:[-a-zA-Z|]|\\\\\\$)+)\\)\\$\\/");
+
+  /** Used to detect regex expressions which can be simplified to exact matches */
+  private static final Pattern PREFIX_PATTERN = Pattern.compile("/\\^([-a-zA-Z|]+)\\/" + "|" + // for example, /^JJ/
+                                                                "/\\^\\(\\?\\:([-a-zA-Z|]+)\\)\\/");
 
   public DescriptionPattern(Relation rel, boolean negDesc, String desc,
                             String name, boolean useBasicCat,
@@ -58,11 +67,101 @@ class DescriptionPattern extends TregexPattern {
     this.linkedName = linkedName;
     if (desc != null) {
       stringDesc = desc;
+      // TODO: factor out some of these blocks of code
       if (desc.equals("__") || desc.equals("/.*/") || desc.equals("/^.*$/")) {
         descriptionMode = DescriptionMode.ANYTHING;
         descPattern = null;
         exactMatch = null;
         stringFilter = null;
+      } else if (SINGLE_WORD_PATTERN.matcher(desc).matches()) {
+        // Expressions are written like this to put special characters
+        // in the tregex matcher, but a regular expression is less
+        // efficient than a simple string match
+        descriptionMode = DescriptionMode.EXACT;
+        descPattern = null;
+        Matcher matcher = SINGLE_WORD_PATTERN.matcher(desc);
+        matcher.matches();
+        String matchedGroup = null;
+        for (int i = 1; i <= matcher.groupCount(); ++i) {
+          if (matcher.group(i) != null) {
+            matchedGroup = matcher.group(i);
+            break;
+          }
+        }
+        exactMatch = matchedGroup;
+        stringFilter = null;
+        //System.err.println("DescriptionPattern: converting " + desc + " to " + exactMatch);
+      } else if (MULTI_WORD_PATTERN.matcher(desc).matches()) {
+        Matcher matcher = MULTI_WORD_PATTERN.matcher(desc);
+        matcher.matches();
+        String matchedGroup = null;
+        for (int i = 1; i <= matcher.groupCount(); ++i) {
+          if (matcher.group(i) != null) {
+            matchedGroup = matcher.group(i);
+            break;
+          }
+        }
+        matchedGroup = matchedGroup.replaceAll("\\\\", "");
+        if (matchedGroup.split("[|]").length > MAX_STRING_MATCHER_SIZE) {
+          descriptionMode = DescriptionMode.PATTERN;
+          descPattern = Pattern.compile(desc.substring(1, desc.length() - 1));
+          exactMatch = null;
+          stringFilter = null;
+          //System.err.println("DescriptionPattern: not converting " + desc);
+        } else {
+          descriptionMode = DescriptionMode.STRINGS;
+          descPattern = null;
+          exactMatch = null;
+          stringFilter = new ArrayStringFilter(ArrayStringFilter.Mode.EXACT, matchedGroup.split("[|]")); 
+          //System.err.println("DescriptionPattern: converting " + desc + " to " + stringFilter);
+        }
+      } else if (CASE_INSENSITIVE_PATTERN.matcher(desc).matches()) {
+        Matcher matcher = CASE_INSENSITIVE_PATTERN.matcher(desc);
+        matcher.matches();
+        String matchedGroup = null;
+        for (int i = 1; i <= matcher.groupCount(); ++i) {
+          if (matcher.group(i) != null) {
+            matchedGroup = matcher.group(i);
+            break;
+          }
+        }
+        matchedGroup = matchedGroup.replaceAll("\\\\", "");
+        if (matchedGroup.split("[|]").length > MAX_STRING_MATCHER_SIZE) {
+          descriptionMode = DescriptionMode.PATTERN;
+          descPattern = Pattern.compile(desc.substring(1, desc.length() - 1));
+          exactMatch = null;
+          stringFilter = null;
+          //System.err.println("DescriptionPattern: not converting " + desc);
+        } else {
+          descriptionMode = DescriptionMode.STRINGS;
+          descPattern = null;
+          exactMatch = null;
+          stringFilter = new ArrayStringFilter(ArrayStringFilter.Mode.CASE_INSENSITIVE, matchedGroup.split("[|]")); 
+          //System.err.println("DescriptionPattern: converting " + desc + " to " + stringFilter);
+        }
+      } else if (PREFIX_PATTERN.matcher(desc).matches()) {
+        Matcher matcher = PREFIX_PATTERN.matcher(desc);
+        matcher.matches();
+        String matchedGroup = null;
+        for (int i = 1; i <= matcher.groupCount(); ++i) {
+          if (matcher.group(i) != null) {
+            matchedGroup = matcher.group(i);
+            break;
+          }
+        }
+        if (matchedGroup.split("\\|").length > MAX_STRING_MATCHER_SIZE) {
+          descriptionMode = DescriptionMode.PATTERN;
+          descPattern = Pattern.compile(desc.substring(1, desc.length() - 1));
+          exactMatch = null;
+          stringFilter = null;
+          //System.err.println("DescriptionPattern: not converting " + desc);
+        } else {
+          descriptionMode = DescriptionMode.STRINGS;
+          descPattern = null;
+          exactMatch = null;
+          stringFilter = new ArrayStringFilter(ArrayStringFilter.Mode.PREFIX, matchedGroup.split("[|]")); 
+          //System.err.println("DescriptionPattern: converting " + desc + " to " + stringFilter);
+        }
       } else if (desc.matches("/.*/")) {
         descriptionMode = DescriptionMode.PATTERN;
         descPattern = Pattern.compile(desc.substring(1, desc.length() - 1));
@@ -78,7 +177,7 @@ class DescriptionPattern extends TregexPattern {
           descriptionMode = DescriptionMode.STRINGS;
           descPattern = null;
           exactMatch = null;
-          stringFilter = new ArrayStringFilter(words);
+          stringFilter = new ArrayStringFilter(ArrayStringFilter.Mode.EXACT, words);
         } else {
           descriptionMode = DescriptionMode.PATTERN;
           descPattern = Pattern.compile("^(?:" + desc + ")$");
@@ -107,6 +206,22 @@ class DescriptionPattern extends TregexPattern {
     //    System.out.println("Made " + (negDesc ? "negated " : "") + "DescNode with " + desc);
     this.variableGroups = variableGroups;
   }
+
+  public DescriptionPattern(Relation newRelation, DescriptionPattern oldPattern) {
+    this.rel = newRelation;
+    this.negDesc = oldPattern.negDesc;
+    this.isLink = oldPattern.isLink;
+    this.linkedName = oldPattern.linkedName;
+    this.stringDesc = oldPattern.stringDesc;
+    this.descriptionMode = oldPattern.descriptionMode;
+    this.descPattern = oldPattern.descPattern;
+    this.exactMatch = oldPattern.exactMatch;
+    this.stringFilter = oldPattern.stringFilter;
+    this.name = oldPattern.name;
+    this.setChild(oldPattern.child);
+    this.basicCatFunction = oldPattern.basicCatFunction;
+    this.variableGroups = oldPattern.variableGroups;
+  }  
 
   @Override
   public String localString() {
@@ -152,9 +267,6 @@ class DescriptionPattern extends TregexPattern {
 
   public void setChild(TregexPattern n) {
     child = n;
-    changesVariables = ((descriptionMode != null || isLink) && name != null);
-    changesVariables = (changesVariables ||
-                        (child != null && child.getChangesVariables()));
   }
 
   @Override
@@ -167,17 +279,13 @@ class DescriptionPattern extends TregexPattern {
   }
 
   @Override
-  boolean getChangesVariables() {
-    return changesVariables;
-  }
-
-  @Override
   public TregexMatcher matcher(Tree root, Tree tree,
                                IdentityHashMap<Tree, Tree> nodesToParents,
                                Map<String, Tree> namesToNodes,
-                               VariableStrings variableStrings) {
+                               VariableStrings variableStrings,
+                               HeadFinder headFinder) {
     return new DescriptionMatcher(this, root, tree, nodesToParents,
-                                  namesToNodes, variableStrings);
+                                  namesToNodes, variableStrings, headFinder);
   }
 
   // TODO: Why is this a static class with a pointer to the containing
@@ -203,18 +311,22 @@ class DescriptionPattern extends TregexPattern {
     public DescriptionMatcher(DescriptionPattern n, Tree root, Tree tree,
                               IdentityHashMap<Tree, Tree> nodesToParents,
                               Map<String, Tree> namesToNodes,
-                              VariableStrings variableStrings) {
-      super(root, tree, nodesToParents, namesToNodes, variableStrings);
+                              VariableStrings variableStrings,
+                              HeadFinder headFinder) {
+      super(root, tree, nodesToParents, namesToNodes, variableStrings, headFinder);
       myNode = n;
-      resetChildIter();
+      // no need to reset anything - everything starts out as null or false.  
+      // lazy initialization of children to save time.
+      // resetChildIter();
     }
 
     @Override
     void resetChildIter() {
       decommitVariableGroups();
       removeNamedNodes();
-      treeNodeMatchCandidateIterator =
-        myNode.rel.searchNodeIterator(tree, this);
+      // lazy initialization saves quite a bit of time in use cases
+      // where we call something other than matches()
+      treeNodeMatchCandidateIterator = null;
       finished = false;
       nextTreeNodeMatchCandidate = null;
       if (childMatcher != null) {
@@ -233,11 +345,6 @@ class DescriptionPattern extends TregexPattern {
       }
     }
 
-    @Override
-    boolean getChangesVariables() {
-      return myNode.getChangesVariables();
-    }
-
     /* goes to the next node in the tree that is a successful match to my description pattern.
      * This is the hotspot method in running tregex, but not clear how to make it faster. */
     // when finished = false; break; is called, it means I successfully matched.
@@ -247,6 +354,9 @@ class DescriptionPattern extends TregexPattern {
       finished = true;
       Matcher m = null;
       String value = null;
+      if (treeNodeMatchCandidateIterator == null) {
+        treeNodeMatchCandidateIterator = myNode.rel.searchNodeIterator(tree, this);
+      }
       while (treeNodeMatchCandidateIterator.hasNext()) {
         nextTreeNodeMatchCandidate = treeNodeMatchCandidateIterator.next();
         if (myNode.descriptionMode == null) {
@@ -290,7 +400,7 @@ class DescriptionPattern extends TregexPattern {
               found = true;
               break;
             case STRINGS:
-              found = myNode.stringFilter.accept(value);
+              found = myNode.stringFilter.test(value);
               break;
             default:
               throw new IllegalArgumentException("Unexpected match mode");
@@ -369,7 +479,7 @@ class DescriptionPattern extends TregexPattern {
     }
 
     private void removeNamedNodes() {
-      if ((myNode.descPattern != null || myNode.isLink) &&
+      if ((myNode.descriptionMode != null || myNode.isLink) &&
           myNode.name != null) {
         namesToNodes.remove(myNode.name);
       }
@@ -387,7 +497,7 @@ class DescriptionPattern extends TregexPattern {
       }
       // lazy initialization of the child matcher
       if (childMatcher == null && myNode.child != null) {
-        childMatcher = myNode.child.matcher(root, nextTreeNodeMatchCandidate, nodesToParents, namesToNodes, variableStrings);
+        childMatcher = myNode.child.matcher(root, nextTreeNodeMatchCandidate, nodesToParents, namesToNodes, variableStrings, headFinder);
         //childMatcher.resetChildIter();
       }
       if (childMatcher == null) {

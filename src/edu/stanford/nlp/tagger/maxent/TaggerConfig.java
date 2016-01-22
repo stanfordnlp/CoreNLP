@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.Generics;
 
 /**
@@ -21,7 +22,7 @@ import edu.stanford.nlp.util.Generics;
  *  @author Anna Rafferty
  *  @author Michel Galley
  */
-public class TaggerConfig extends Properties /* Inherits implementation of serializable! */ {
+public class TaggerConfig extends Properties /* Inherits implementation of Serializable! */ {
 
   private static final long serialVersionUID = -4136407850147157497L;
 
@@ -52,13 +53,9 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
   VERBOSE = "false",
   VERBOSE_RESULTS = "true",
   SGML = "false",
-  INIT_FROM_TREES = "false",
   LANG = "",
   TOKENIZER_FACTORY = "",
   XML_INPUT = "",
-  TREE_TRANSFORMER = "",
-  TREE_NORMALIZER = "",
-  TREE_RANGE = "",
   TAG_INSIDE = "",
   APPROXIMATE = "-1.0",
   TOKENIZER_OPTIONS = "",
@@ -95,7 +92,6 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
     defaultValues.put("learnClosedClassTags", LEARN_CLOSED_CLASS);
     defaultValues.put("verbose", VERBOSE);
     defaultValues.put("verboseResults", VERBOSE_RESULTS);
-    defaultValues.put("sgml", SGML);
     defaultValues.put("openClassTags", "");
     defaultValues.put("lang", LANG);
     defaultValues.put("tokenizerFactory", TOKENIZER_FACTORY);
@@ -137,17 +133,22 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
     this();
 
     /* Try and use the default properties from the model */
-    //Properties modelProps = new Properties();
-    TaggerConfig oldConfig = new TaggerConfig(); // loads default values in oldConfig
-    if (!props.containsKey("trainFile")) {
-      try {
-        System.err.println("Loading default properties from tagger " + props.getProperty("model"));
-        DataInputStream in = new DataInputStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(props.getProperty("model")));
-        this.putAll(TaggerConfig.readConfig(in)); // overwrites defaults with any serialized values.
-        in.close();
-      } catch (Exception e) {
-        System.err.println("Error: No such trained tagger config file found.");
-        e.printStackTrace();
+    // Properties modelProps = new Properties();
+    // TaggerConfig oldConfig = new TaggerConfig(); // loads default values in oldConfig
+    if (! props.containsKey("trainFile")) {
+      String name = props.getProperty("model");
+      if (name == null) {
+        name = props.getProperty("dump");
+      }
+      if (name != null) {
+        try {
+          System.err.println("Loading default properties from tagger " + name);
+          DataInputStream in = new DataInputStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(name));
+          this.putAll(TaggerConfig.readConfig(in)); // overwrites defaults with any serialized values.
+          in.close();
+        } catch (Exception e) {
+          throw new RuntimeIOException("No such trained tagger config file found: " + name);
+        }
       }
     }
 
@@ -181,7 +182,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
       this.setProperty("file", props.getProperty("textFile", "").trim());
     } else if (props.containsKey("dump")) {
       this.setProperty("mode", Mode.DUMP.toString());
-      this.setProperty("file", props.getProperty("dump").trim());
+      // this.setProperty("file", props.getProperty("dump").trim());
       props.setProperty("model", props.getProperty("dump").trim());
     } else {
       this.setProperty("mode", Mode.TAG.toString());
@@ -268,8 +269,6 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
 
   public String getModel() { return getProperty("model"); }
 
-  public String getJarModel() { return getProperty("jarModel"); }
-
   public String getFile() { return getProperty("file"); }
 
   public String getOutputFile() { return getProperty("outputFile"); }
@@ -284,6 +283,10 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
 
   public boolean getOutputLemmas() {
     return getOutputOptionsContains("lemmatize");
+  }
+
+  public boolean keepEmptySentences() {
+    return getOutputOptionsContains("keepEmptySentences");    
   }
 
   public boolean getOutputOptionsContains(String sought) {
@@ -428,7 +431,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
     pw.println("                   model = " + getProperty("model"));
     pw.println("                    arch = " + getProperty("arch"));
     pw.println("            wordFunction = " + getProperty("wordFunction"));
-    if (this.getMode() == Mode.TRAIN) {
+    if (this.getMode() == Mode.TRAIN || this.getMode() == Mode.DUMP) {
       pw.println("               trainFile = " + getProperty("file"));
     } else if (this.getMode() == Mode.TAG) {
       pw.println("                textFile = " + getProperty("file"));
@@ -511,9 +514,8 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
    */
   private static void printGenProps(PrintStream out) {
     out.println("## Sample properties file for maxent tagger. This file is used for three main");
-    out.println("## operations: training, testing, and tagging. It may also be used to convert");
-    out.println("## an old multifile tagger to a single file tagger or to dump the contents of");
-    out.println("## a model.");
+    out.println("## operations: training, testing, and tagging. It may also be used to dump");
+    out.println("## the contents of a model.");
     out.println("## To train or test a model, or to tag something, run:");
     out.println("##   java edu.stanford.nlp.tagger.maxent.MaxentTagger -prop <properties file>");
     out.println("## Arguments can be overridden on the commandline, e.g.:");
@@ -546,8 +548,8 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
     out.println("# outputFormat = " + OUTPUT_FORMAT);
     out.println();
 
-    out.println("# Output format options. Comma separated list, but");
-    out.println("# currently \"lemmatize\" is the only supported option.");
+    out.println("# Output format options. Comma separated list.");
+    out.println("# currently \"lemmatize\" and \"keepEmptySentences\" are supported.");
     out.println("# outputFormatOptions = " + OUTPUT_FORMAT_OPTIONS);
     out.println();
 
@@ -620,7 +622,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
     out.println("# 'wordFunction'.  A function applied to the text before training or tagging.");
     out.println("# For example, edu.stanford.nlp.util.LowercaseFunction");
     out.println("# This function turns all the words into lowercase");
-    out.println("# The function must implement edu.stanford.nlp.util.Function<String, String>");
+    out.println("# The function must implement java.util.function.Function<String, String>");
     out.println("# Blank means no preprocessing function");
     out.println("# wordFunction = ");
     out.println();

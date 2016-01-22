@@ -1,6 +1,7 @@
 package edu.stanford.nlp.objectbank;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.util.Iterator;
@@ -40,15 +41,22 @@ public class ResettableReaderIteratorFactory extends ReaderIteratorFactory {
   /**
    * Convenience constructor to construct a ResettableReaderIteratorFactory
    * from a single input source. The Object should be of type File,
-   * String, URL and Reader.  See class
-   * description for details.
+   * String, URL or Reader.  See the class description for details.
    *
-   * @param o an input source that can be converted into a Reader
+   * @param o An input source that can be converted into a Reader
    */
   public ResettableReaderIteratorFactory(Object o) {
     super(o);
   }
 
+  /**
+   * Convenience constructor to construct a ResettableReaderIteratorFactory
+   * from a single input source. The Object should be of type File,
+   * String, URL or Reader.  See the class description for details.
+   *
+   * @param o An input source that can be converted into a Reader
+   * @param encoding The character encoding of a File or URL
+   */
   public ResettableReaderIteratorFactory(Object o, String encoding) {
     super(o, encoding);
   }
@@ -68,7 +76,7 @@ public class ResettableReaderIteratorFactory extends ReaderIteratorFactory {
    */
   @Override
   public Iterator<Reader> iterator() {
-    Collection<Object> newCollection = new ArrayList<Object>();
+    Collection<Object> newCollection = new ArrayList<>();
     for (Object o : c) {
       if (o instanceof Reader) {
         String name = o.toString()+".tmp";
@@ -76,10 +84,10 @@ public class ResettableReaderIteratorFactory extends ReaderIteratorFactory {
         try {
           tmpFile = File.createTempFile(name,"");
         } catch (Exception e) {
-          throw new RuntimeException(e.getMessage());
+          throw new RuntimeIOException(e);
         }
         tmpFile.deleteOnExit();
-        StringUtils.printToFile(tmpFile, IOUtils.slurpReader((Reader)o),
+        StringUtils.printToFile(tmpFile, IOUtils.slurpReader((Reader) o),
                                 false, false, enc);
         newCollection.add(tmpFile);
       } else {

@@ -40,11 +40,11 @@ import edu.stanford.nlp.objectbank.ResettableReaderIteratorFactory;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.CoreTokenFactory;
 import edu.stanford.nlp.sequences.*;
-import edu.stanford.nlp.sequences.FeatureFactory;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.Sampler;
+import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.concurrent.*;
 
@@ -54,6 +54,7 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
@@ -63,14 +64,17 @@ import java.util.zip.GZIPInputStream;
  * in the (deterministic) NumberSequenceClassifier. See implementing classes for
  * more information.
  * <p>
- * A full implementation should implement these 5 abstract methods: <br>
- * {@code List<CoreLabel> classify(List<CoreLabel> document); } <br>
- * {@code void train(Collection<List<CoreLabel>> docs); } <br>
- * {@code printProbsDocument(List<CoreLabel> document); } <br>
+ * An implementation must implement these 5 abstract methods: <br>
+ * {@code List<IN> classify(List<IN> document); } <br>
+ * {@code List<IN> classifyWithGlobalInformation(List<IN> tokenSequence, final CoreMap document, final CoreMap sentence); } <br>
+ * {@code void train(Collection<List<IN>> docs, DocumentReaderAndWriter<IN> readerAndWriter); } <br>
  * {@code void serializeClassifier(String serializePath); } <br>
  * {@code void loadClassifier(ObjectInputStream in, Properties props) throws IOException,
  * ClassCastException, ClassNotFoundException; } <br>
- * but a runtime (or rule-based) implementation can usefully implement just the first.
+ * but a runtime (or rule-based) implementation can usefully implement just the first,
+ * and throw UnsupportedOperationException for the rest. Additionally, this method throws
+ * UnsupportedOperationException by default, but is implemented for some classifiers: <br>
+ * {@code Pair<Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<CoreLabel> document); } <br>
  *
  * @author Jenny Finkel
  * @author Dan Klein
@@ -82,21 +86,23 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
   public SeqClassifierFlags flags;
   public Index<String> classIndex; // = null;
-  public FeatureFactory<IN> featureFactory;
+
+  // Thang Sep13: multiple feature factories (NERFeatureFactory, EmbeddingFeatureFactory)
+  public List<FeatureFactory<IN>> featureFactories;
+
   protected IN pad;
   private CoreTokenFactory<IN> tokenFactory;
-  protected int windowSize;
-  // different threads can add or query knownLCWords at the same time,
-  // so we need a concurrent data structure
-  protected Set<String> knownLCWords = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>());
+  public int windowSize;
 
-  private boolean VERBOSE = true;
+  /** Different threads can add or query knownLCWords at the same time,
+   *  so we need a concurrent data structure.  Created in reinit().
+   */
+  protected MaxSizeConcurrentHashSet<String> knownLCWords; // = null;
+
   private DocumentReaderAndWriter<IN> defaultReaderAndWriter;
   public DocumentReaderAndWriter<IN> defaultReaderAndWriter() {
     return defaultReaderAndWriter;
   }
-
-  private AtomicInteger threadCompletionCounter = new AtomicInteger(0);
 
   private DocumentReaderAndWriter<IN> plainTextReaderAndWriter;
   public DocumentReaderAndWriter<IN> plainTextReaderAndWriter() {
@@ -108,8 +114,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * Construct a SeqClassifierFlags object based on the passed in properties,
    * and then call the other constructor.
    *
-   * @param props
-   *          See SeqClassifierFlags for known properties.
+   * @param props See SeqClassifierFlags for known properties.
    */
   public AbstractSequenceClassifier(Properties props) {
     this(new SeqClassifierFlags(props));
@@ -124,18 +129,24 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public AbstractSequenceClassifier(SeqClassifierFlags flags) {
     this.flags = flags;
 
-    // try {
-    this.featureFactory = new MetaClass(flags.featureFactory).createInstance(flags.featureFactoryArgs);
-    //   this.featureFactory = (FeatureFactory<IN>) Class.forName(flags.featureFactory).newInstance();
+    // Thang Sep13: allow for multiple feature factories.
+    this.featureFactories = Generics.newArrayList();
+    if (flags.featureFactory != null) {
+      FeatureFactory<IN> factory = new MetaClass(flags.featureFactory).createInstance(flags.featureFactoryArgs); // for compatibility
+      featureFactories.add(factory);
+    }
+    if (flags.featureFactories != null) {
+      for (int i = 0; i < flags.featureFactories.length; i++) {
+        FeatureFactory<IN> indFeatureFactory = new MetaClass(flags.featureFactories[i]).
+            createInstance(flags.featureFactoriesArgs.get(i));
+        this.featureFactories.add(indFeatureFactory);
+      }
+    }
     if (flags.tokenFactory == null) {
       tokenFactory = (CoreTokenFactory<IN>) new CoreLabelTokenFactory();
     } else {
       this.tokenFactory = new MetaClass(flags.tokenFactory).createInstance(flags.tokenFactoryArgs);
-    //   this.tokenFactory = (CoreTokenFactory<IN>) Class.forName(flags.tokenFactory).newInstance();
     }
-    // } catch (Exception e) {
-    //   throw new RuntimeException(e);
-    // }
     pad = tokenFactory.makeToken();
     windowSize = flags.maxLeft + 1;
     reinit();
@@ -157,7 +168,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     pad.set(CoreAnnotations.AnswerAnnotation.class, flags.backgroundSymbol);
     pad.set(CoreAnnotations.GoldAnswerAnnotation.class, flags.backgroundSymbol);
 
-    featureFactory.init(flags);
+    for (FeatureFactory featureFactory : featureFactories) {
+      featureFactory.init(flags);
+    }
 
     defaultReaderAndWriter = makeReaderAndWriter();
     if (flags.readerAndWriter != null &&
@@ -166,6 +179,17 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     } else {
       plainTextReaderAndWriter = makePlainTextReaderAndWriter();
     }
+
+    if (knownLCWords == null || knownLCWords.isEmpty()) {
+      // reinit limits max (additional) size. We temporarily loosen this during training
+      knownLCWords = new MaxSizeConcurrentHashSet<>(flags.maxAdditionalKnownLCWords);
+    } else {
+      knownLCWords.setMaxSize(knownLCWords.size() + flags.maxAdditionalKnownLCWords);
+    }
+  }
+
+  public Set<String> getKnownLCWords() {
+    return knownLCWords;
   }
 
   /**
@@ -238,7 +262,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *         field.
    */
   public List<IN> classifySentence(List<? extends HasWord> sentence) {
-    List<IN> document = new ArrayList<IN>();
+    // System.err.println("knownLCWords.size is " + knownLCWords.size() + "; knownLCWords.maxSize is " + knownLCWords.getMaxSize() + 
+    //                   ", prior to NER for " + getClass().toString());
+    List<IN> document = new ArrayList<>();
     int i = 0;
     for (HasWord word : sentence) {
       IN wi; // initialized below
@@ -258,26 +284,26 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       i++;
     }
 
-    // TODO get rid of objectbankwrapper
-    ObjectBankWrapper<IN> wrapper = new ObjectBankWrapper<IN>(flags, null, knownLCWords);
+    // TODO get rid of ObjectBankWrapper
+    ObjectBankWrapper<IN> wrapper = new ObjectBankWrapper<>(flags, null, knownLCWords);
     wrapper.processDocument(document);
 
     classify(document);
+    // System.err.println("Size of knownLCWords is " + knownLCWords.size() + ", after NER for " + getClass().toString());
 
     return document;
   }
 
   /**
    * Classify a List of IN using whatever additional information is passed in globalInfo.
-   * Used by SUTime (NumberSequenceClassifier), which requires the doc date to resolve relative dates
+   * Used by SUTime (NumberSequenceClassifier), which requires the doc date to resolve relative dates.
    *
-   * @param tokenSequence
-   *          The List of IN to be classified.
+   * @param tokenSequence The List of IN to be classified.
    * @return The classified List of IN, where the classifier output for
    *         each token is stored in its "answer" field.
    */
   public List<IN> classifySentenceWithGlobalInformation(List<? extends HasWord> tokenSequence, final CoreMap doc, final CoreMap sentence) {
-    List<IN> document = new ArrayList<IN>();
+    List<IN> document = new ArrayList<>();
     int i = 0;
     for (HasWord word : tokenSequence) {
       IN wi; // initialized straight below
@@ -297,8 +323,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       i++;
     }
 
-    // TODO get rid of objectbankwrapper
-    ObjectBankWrapper<IN> wrapper = new ObjectBankWrapper<IN>(flags, null, knownLCWords);
+    // TODO get rid of ObjectBankWrapper
+    ObjectBankWrapper<IN> wrapper = new ObjectBankWrapper<>(flags, null, knownLCWords);
     wrapper.processDocument(document);
 
     classifyWithGlobalInformation(document, doc, sentence);
@@ -318,7 +344,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       @Override
       public List<IN> drawSample() {
         int[] sampleArray = sampler.bestSequence(model);
-        List<IN> sample = new ArrayList<IN>();
+        List<IN> sample = new ArrayList<>();
         int i = 0;
         for (IN word : input) {
 
@@ -331,15 +357,23 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     };
   }
 
+  /** Takes a list of tokens and provides the K best sequence labelings of these tokens with their scores.
+   *
+   *  @param doc The List of tokens
+   *  @param answerField The key for each token into which the label for the token will be written
+   *  @param k The number of best sequence labelings to generate
+   *  @return A Counter where each key is a List of tokens with labels written in the answerField and its value
+   *          is the score (conditional probability) assigned to this labeling of the sequence.
+   */
   public Counter<List<IN>> classifyKBest(List<IN> doc, Class<? extends CoreAnnotation<String>> answerField, int k) {
 
     if (doc.isEmpty()) {
-      return new ClassicCounter<List<IN>>();
+      return new ClassicCounter<>();
     }
 
     // TODO get rid of ObjectBankWrapper
     // i'm sorry that this is so hideous - JRF
-    ObjectBankWrapper<IN> obw = new ObjectBankWrapper<IN>(flags, null, knownLCWords);
+    ObjectBankWrapper<IN> obw = new ObjectBankWrapper<>(flags, null, knownLCWords);
     doc = obw.processDocument(doc);
 
     SequenceModel model = getSequenceModel(doc);
@@ -347,10 +381,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     KBestSequenceFinder tagInference = new KBestSequenceFinder();
     Counter<int[]> bestSequences = tagInference.kBestSequences(model, k);
 
-    Counter<List<IN>> kBest = new ClassicCounter<List<IN>>();
+    Counter<List<IN>> kBest = new ClassicCounter<>();
 
     for (int[] seq : bestSequences.keySet()) {
-      List<IN> kth = new ArrayList<IN>();
+      List<IN> kth = new ArrayList<>();
       int pos = model.leftWindow();
       for (IN fi : doc) {
         IN newFL = tokenFactory.makeToken(fi);
@@ -369,10 +403,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
   public DFSA<String, Integer> getViterbiSearchGraph(List<IN> doc, Class<? extends CoreAnnotation<String>> answerField) {
     if (doc.isEmpty()) {
-      return new DFSA<String, Integer>(null);
+      return new DFSA<>(null);
     }
-    // TODO get rid of objectbankwrapper
-    ObjectBankWrapper<IN> obw = new ObjectBankWrapper<IN>(flags, null, knownLCWords);
+    // TODO get rid of ObjectBankWrapper
+    ObjectBankWrapper<IN> obw = new ObjectBankWrapper<>(flags, null, knownLCWords);
     doc = obw.processDocument(doc);
     SequenceModel model = getSequenceModel(doc);
     return ViterbiSearchGraphBuilder.getGraph(model, classIndex);
@@ -390,12 +424,12 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public List<List<IN>> classify(String str) {
     ObjectBank<List<IN>> documents =
       makeObjectBankFromString(str, plainTextReaderAndWriter);
-    List<List<IN>> result = new ArrayList<List<IN>>();
+    List<List<IN>> result = new ArrayList<>();
 
     for (List<IN> document : documents) {
       classify(document);
 
-      List<IN> sentence = new ArrayList<IN>();
+      List<IN> sentence = new ArrayList<>();
       for (IN wi : document) {
         // TaggedWord word = new TaggedWord(wi.word(), wi.answer());
         // sentence.add(word);
@@ -410,8 +444,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * Classify the tokens in a String. Each sentence becomes a separate document.
    * Doesn't override default readerAndWriter.
    *
-   * @param str
-   *          A String with tokens in one or more sentences of text to be
+   * @param str A String with tokens in one or more sentences of text to be
    *          classified.
    * @return {@link List} of classified sentences (each a List of something that
    *         extends {@link CoreMap}).
@@ -420,12 +453,12 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
                                     DocumentReaderAndWriter<IN> readerAndWriter) {
     ObjectBank<List<IN>> documents =
       makeObjectBankFromString(str, readerAndWriter);
-    List<List<IN>> result = new ArrayList<List<IN>>();
+    List<List<IN>> result = new ArrayList<>();
 
     for (List<IN> document : documents) {
       classify(document);
 
-      List<IN> sentence = new ArrayList<IN>();
+      List<IN> sentence = new ArrayList<>();
       for (IN wi : document) {
         // TaggedWord word = new TaggedWord(wi.word(), wi.answer());
         // sentence.add(word);
@@ -446,13 +479,13 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public List<List<IN>> classifyFile(String filename) {
     ObjectBank<List<IN>> documents =
       makeObjectBankFromFile(filename, plainTextReaderAndWriter);
-    List<List<IN>> result = new ArrayList<List<IN>>();
+    List<List<IN>> result = new ArrayList<>();
 
     for (List<IN> document : documents) {
       // System.err.println(document);
       classify(document);
 
-      List<IN> sentence = new ArrayList<IN>();
+      List<IN> sentence = new ArrayList<>();
       for (IN wi : document) {
         sentence.add(wi);
         // System.err.println(wi);
@@ -503,8 +536,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *          divided into documents according to (heuristically
    *          determined) sentence boundaries.
    * @param outputFormat
-   *          The format to put the output in: one of "slashTags", "xml", or
-   *          "inlineXML"
+   *          The format to put the output in: one of "slashTags", "xml",
+   *          "inlineXML", "tsv", or "tabbedEntities"
    * @param preserveSpacing
    *          Whether to preserve the input spacing between tokens, which may
    *          sometimes be none (true) or whether to tokenize the text and print
@@ -532,7 +565,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
         plainTextReaderAndWriter.printAnswers(docOutput, pw);
         pw.flush();
         sb.append(sw.toString());
-        sb.append("\n");
+        sb.append('\n');
       }
     }
     return sb.toString();
@@ -589,8 +622,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * marker, and that abbreviation is part of a named entity, the reported
    * entity string excludes the period.
    *
-   * @param sentences
-   *          The string to be classified
+   * @param sentences The string to be classified
    * @return A {@link List} of {@link Triple}s, each of which gives an entity
    *         type and the beginning and ending character offsets.
    */
@@ -598,8 +630,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     ObjectBank<List<IN>> documents =
       makeObjectBankFromString(sentences, plainTextReaderAndWriter);
 
-    List<Triple<String, Integer, Integer>> entities =
-      new ArrayList<Triple<String, Integer, Integer>>();
+    List<Triple<String, Integer, Integer>> entities = new ArrayList<>();
     for (List<IN> doc : documents) {
       String prevEntityType = flags.backgroundSymbol;
       Triple<String, Integer, Integer> prevEntity = null;
@@ -618,8 +649,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
             if (prevEntity != null) {
               entities.add(prevEntity);
             }
-            prevEntity = new Triple<String, Integer, Integer>(guessedAnswer, fl
-                .get(CoreAnnotations.CharacterOffsetBeginAnnotation.class), fl.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+            prevEntity = new Triple<>(guessedAnswer,
+                    fl.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
+                    fl.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
           } else {
             assert prevEntity != null; // if you read the code carefully, this
                                        // should always be true!
@@ -707,6 +739,14 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public abstract List<IN> classifyWithGlobalInformation(List<IN> tokenSequence, final CoreMap document, final CoreMap sentence);
 
   /**
+   * Classification is finished for the document.
+   * Do any cleanup (if information was stored as part of the document for global classification)
+   * @param document
+   */
+  public void finalizeClassification(final CoreMap document) {
+  }
+
+  /**
    * Train the classifier based on values in flags. It will use the first of
    * these variables that is defined: trainFiles (and baseTrainDir),
    * trainFileList, trainFile.
@@ -753,8 +793,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * Trains a classifier from a Collection of sequences.
    * Note that the Collection can be (and usually is) an ObjectBank.
    *
-   * @param docs
-   *          An Objectbank or a collection of sequences of IN
+   * @param docs An ObjectBank or a collection of sequences of IN
    */
   public void train(Collection<List<IN>> docs) {
     train(docs, defaultReaderAndWriter);
@@ -764,10 +803,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * Trains a classifier from a Collection of sequences.
    * Note that the Collection can be (and usually is) an ObjectBank.
    *
-   * @param docs
-   *          An ObjectBank or a collection of sequences of IN
-   * @param readerAndWriter
-   *          A DocumentReaderAndWriter to use when loading test files
+   * @param docs An ObjectBank or a collection of sequences of IN
+   * @param readerAndWriter A DocumentReaderAndWriter to use when loading test files
    */
   public abstract void train(Collection<List<IN>> docs,
                              DocumentReaderAndWriter<IN> readerAndWriter);
@@ -798,8 +835,12 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     // return new ObjectBank<List<IN>>(new
     // ResettableReaderIteratorFactory(string), readerAndWriter);
     // TODO
-    return new ObjectBankWrapper<IN>(flags, new ObjectBank<List<IN>>(new ResettableReaderIteratorFactory(string),
-        readerAndWriter), knownLCWords);
+    return new ObjectBankWrapper<>(flags, new ObjectBank<>(new ResettableReaderIteratorFactory(string),
+            readerAndWriter), knownLCWords);
+  }
+
+  public ObjectBank<List<IN>> makeObjectBankFromFile(String filename) {
+    return makeObjectBankFromFile(filename, defaultReaderAndWriter);
   }
 
   public ObjectBank<List<IN>> makeObjectBankFromFile(String filename,
@@ -811,18 +852,17 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public ObjectBank<List<IN>> makeObjectBankFromFiles(String[] trainFileList,
                                                       DocumentReaderAndWriter<IN> readerAndWriter) {
     // try{
-    Collection<File> files = new ArrayList<File>();
+    Collection<File> files = new ArrayList<>();
     for (String trainFile : trainFileList) {
       File f = new File(trainFile);
       files.add(f);
     }
-    // System.err.printf("trainFileList contains %d file%s.\n", files.size(),
-    // files.size() == 1 ? "": "s");
-    // TODO get rid of objectbankwrapper
+    // System.err.printf("trainFileList contains %d file%s in encoding %s.%n", files.size(), files.size() == 1 ? "": "s", flags.inputEncoding);
+    // TODO get rid of ObjectBankWrapper
     // return new ObjectBank<List<IN>>(new
     // ResettableReaderIteratorFactory(files), readerAndWriter);
-    return new ObjectBankWrapper<IN>(flags, new ObjectBank<List<IN>>(new ResettableReaderIteratorFactory(files, flags.inputEncoding),
-        readerAndWriter), knownLCWords);
+    return new ObjectBankWrapper<>(flags, new ObjectBank<>(new ResettableReaderIteratorFactory(files, flags.inputEncoding),
+            readerAndWriter), knownLCWords);
     // } catch (IOException e) {
     // throw new RuntimeException(e);
     // }
@@ -834,7 +874,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     File path = new File(baseDir);
     FileFilter filter = new RegExFileFilter(Pattern.compile(filePattern));
     File[] origFiles = path.listFiles(filter);
-    Collection<File> files = new ArrayList<File>();
+    Collection<File> files = new ArrayList<>();
     for (File file : origFiles) {
       if (file.isFile()) {
         if (flags.announceObjectBankEntries) {
@@ -850,9 +890,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     // return new ObjectBank<List<IN>>(new
     // ResettableReaderIteratorFactory(files, flags.inputEncoding),
     // readerAndWriter);
-    // TODO get rid of objectbankwrapper
-    return new ObjectBankWrapper<IN>(flags, new ObjectBank<List<IN>>(new ResettableReaderIteratorFactory(files,
-        flags.inputEncoding), readerAndWriter), knownLCWords);
+    // TODO get rid of ObjectBankWrapper
+    return new ObjectBankWrapper<>(flags, new ObjectBank<>(new ResettableReaderIteratorFactory(files,
+            flags.inputEncoding), readerAndWriter), knownLCWords);
   }
 
   public ObjectBank<List<IN>> makeObjectBankFromFiles(Collection<File> files,
@@ -863,9 +903,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     // return new ObjectBank<List<IN>>(new
     // ResettableReaderIteratorFactory(files, flags.inputEncoding),
     // readerAndWriter);
-    // TODO get rid of objectbankwrapper
-    return new ObjectBankWrapper<IN>(flags, new ObjectBank<List<IN>>(new ResettableReaderIteratorFactory(files,
-        flags.inputEncoding), readerAndWriter), knownLCWords);
+    // TODO get rid of ObjectBankWrapper
+    return new ObjectBankWrapper<>(flags, new ObjectBank<>(new ResettableReaderIteratorFactory(files,
+            flags.inputEncoding), readerAndWriter), knownLCWords);
   }
 
   /**
@@ -887,11 +927,11 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     if (flags.announceObjectBankEntries) {
       System.err.println("Reading data using " + readerAndWriter.getClass());
     }
-    // TODO get rid of objectbankwrapper
+    // TODO get rid of ObjectBankWrapper
     // return new ObjectBank<List<IN>>(new ResettableReaderIteratorFactory(in),
     // readerAndWriter);
-    return new ObjectBankWrapper<IN>(flags, new ObjectBank<List<IN>>(new ResettableReaderIteratorFactory(in),
-        readerAndWriter), knownLCWords);
+    return new ObjectBankWrapper<>(flags, new ObjectBank<>(new ResettableReaderIteratorFactory(in),
+            readerAndWriter), knownLCWords);
   }
 
   /**
@@ -911,18 +951,74 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   }
 
   /**
+   * Takes the files, reads them in, and prints out the likelihood of each possible
+   * label at each point.
+   *
+   * @param testFiles A Collection of files
+   */
+  public void printProbs(Collection<File> testFiles,
+                         DocumentReaderAndWriter<IN> readerWriter) {
+
+    ObjectBank<List<IN>> documents = makeObjectBankFromFiles(testFiles, readerWriter);
+    printProbsDocuments(documents);
+  }
+
+
+  /**
    * Takes a {@link List} of documents and prints the likelihood of each
    * possible label at each point.
    *
-   * @param documents
-   *          A {@link List} of {@link List} of something that extends
+   * @param documents A {@link List} of {@link List} of something that extends
    *          {@link CoreMap}.
    */
   public void printProbsDocuments(ObjectBank<List<IN>> documents) {
+    Counter<Integer> calibration = new ClassicCounter<>();
+    Counter<Integer> correctByBin = new ClassicCounter<>();
+    TwoDimensionalCounter<Integer,String> calibratedTokens = new TwoDimensionalCounter<>();
+
     for (List<IN> doc : documents) {
-      printProbsDocument(doc);
+      Triple<Counter<Integer>, Counter<Integer>, TwoDimensionalCounter<Integer,String>> triple = printProbsDocument(doc);
+      if (triple != null) {
+        Counters.addInPlace(calibration, triple.first());
+        Counters.addInPlace(correctByBin, triple.second());
+        calibratedTokens.addAll(triple.third());
+      }
       System.out.println();
     }
+    if (calibration.size() > 0) {
+      // we stored stuff, so print it out
+      PrintWriter pw = new PrintWriter(System.err);
+      outputCalibrationInfo(pw, calibration, correctByBin, calibratedTokens);
+      pw.flush();
+    }
+  }
+
+  public static void outputCalibrationInfo(PrintWriter pw,
+                                           Counter<Integer> calibration,
+                                           Counter<Integer> correctByBin,
+                                           TwoDimensionalCounter<Integer,String> calibratedTokens) {
+    final int numBins = 10;
+    pw.println(); // in practice may well be in middle of line when called
+    pw.println("----------------------------------------");
+    pw.println("Probability distribution given to tokens (Counts for all class-token pairs; accuracy for this bin; examples are gold entity tokens in bin)");
+    pw.println("----------------------------------------");
+    for (int i = 0; i < numBins; i++) {
+      pw.printf("[%.1f-%.1f%c: %.0f  %.2f%n",
+              ((double) i) / numBins,
+              ((double) (i+1)) / numBins,
+              i == (numBins - 1) ? ']': ')',
+              calibration.getCount(i),
+              correctByBin.getCount(i) / calibration.getCount(i));
+    }
+    pw.println("----------------------------------------");
+    for (int i = 0; i < numBins; i++) {
+      pw.printf("[%.1f-%.1f%c: %s%n",
+              ((double) i) / numBins,
+              ((double) (i+1)) / numBins,
+              i == (numBins - 1) ? ']': ')',
+              Counters.toSortedString(calibratedTokens.getCounter(i), 20, "%s=%.0f", ", ", "[%s]"));
+    }
+    pw.println("----------------------------------------");
   }
 
   public void classifyStdin()
@@ -934,14 +1030,19 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public void classifyStdin(DocumentReaderAndWriter<IN> readerWriter)
     throws IOException
   {
-    BufferedReader is = new BufferedReader(new InputStreamReader(System.in, flags.inputEncoding));
+    BufferedReader is = IOUtils.readerFromStdin(flags.inputEncoding);
     for (String line; (line = is.readLine()) != null; ) {
-      ObjectBank<List<IN>> documents = makeObjectBankFromString(line, readerWriter);
-      classifyAndWriteAnswers(documents, readerWriter);
+      Collection<List<IN>> documents = makeObjectBankFromString(line, readerWriter);
+      if (flags.keepEmptySentences && documents.isEmpty()) {
+        documents = Collections.<List<IN>>singletonList(Collections.<IN>emptyList());
+      }
+      classifyAndWriteAnswers(documents, readerWriter, false);
     }
   }
 
-  public abstract void printProbsDocument(List<IN> document);
+  public Triple<Counter<Integer>, Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<IN> document) {
+    throw new UnsupportedOperationException("Not implemented for this class.");
+  }
 
   /**
    * Load a test file, run the classifier on it, and then print the answers to
@@ -953,9 +1054,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public void classifyAndWriteAnswers(String testFile)
     throws IOException
   {
-    classifyAndWriteAnswers(testFile, plainTextReaderAndWriter);
+    classifyAndWriteAnswers(testFile, plainTextReaderAndWriter, false);
   }
 
+  // todo [cdm 2014]: Change these methods to return some statistics of P/R/F1/Acc so you can use them in cross-validation loop
   /**
    * Load a test file, run the classifier on it, and then print the answers to
    * stdout (with timing to stderr). This uses the value of flags.documentReader
@@ -965,73 +1067,79 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * @param readerWriter A reader and writer to use for the output
    */
   public void classifyAndWriteAnswers(String testFile,
-                                      DocumentReaderAndWriter<IN> readerWriter)
+                                      DocumentReaderAndWriter<IN> readerWriter,
+                                      boolean outputScores)
     throws IOException
   {
     ObjectBank<List<IN>> documents =
       makeObjectBankFromFile(testFile, readerWriter);
-    classifyAndWriteAnswers(documents, readerWriter);
+    classifyAndWriteAnswers(documents, readerWriter, outputScores);
   }
 
   /** If the flag
-   * <code>outputEncoding</code> is defined, the output is written in that
-   * character encoding, otherwise in the system default character encoding.
+   *  {@code outputEncoding} is defined, the output is written in that
+   *  character encoding, otherwise in the system default character encoding.
    */
   public void classifyAndWriteAnswers(String testFile, OutputStream outStream,
-                                      DocumentReaderAndWriter<IN> readerWriter)
-    throws IOException
-  {
-    ObjectBank<List<IN>> documents =
-      makeObjectBankFromFile(testFile, readerWriter);
+                                      DocumentReaderAndWriter<IN> readerWriter, boolean outputScores)
+          throws IOException {
+    ObjectBank<List<IN>> documents = makeObjectBankFromFile(testFile, readerWriter);
     PrintWriter pw = IOUtils.encodedOutputStreamPrintWriter(outStream, flags.outputEncoding, true);
-    classifyAndWriteAnswers(documents, pw, readerWriter);
+    classifyAndWriteAnswers(documents, pw, readerWriter, outputScores);
   }
 
   public void classifyAndWriteAnswers(String baseDir, String filePattern,
-                                      DocumentReaderAndWriter<IN> readerWriter)
-    throws IOException
-  {
-    ObjectBank<List<IN>> documents =
-      makeObjectBankFromFiles(baseDir, filePattern, readerWriter);
-    classifyAndWriteAnswers(documents, readerWriter);
+                                      DocumentReaderAndWriter<IN> readerWriter,
+                                      boolean outputScores)
+          throws IOException {
+    ObjectBank<List<IN>> documents = makeObjectBankFromFiles(baseDir, filePattern, readerWriter);
+    classifyAndWriteAnswers(documents, readerWriter, outputScores);
   }
 
-  public void classifyAndWriteAnswers(Collection<File> testFiles)
-    throws IOException
-  {
-    classifyAndWriteAnswers(testFiles, plainTextReaderAndWriter);
+  public void classifyFilesAndWriteAnswers(Collection<File> testFiles)
+          throws IOException {
+    classifyFilesAndWriteAnswers(testFiles, plainTextReaderAndWriter, false);
   }
 
-  public void classifyAndWriteAnswers(Collection<File> testFiles,
-                                      DocumentReaderAndWriter<IN> readerWriter)
-    throws IOException
-  {
+  public void classifyFilesAndWriteAnswers(Collection<File> testFiles,
+                                           DocumentReaderAndWriter<IN> readerWriter, boolean outputScores)
+          throws IOException {
     ObjectBank<List<IN>> documents =
       makeObjectBankFromFiles(testFiles, readerWriter);
-    classifyAndWriteAnswers(documents, readerWriter);
-  }
-
-  private void classifyAndWriteAnswers(ObjectBank<List<IN>> documents,
-                                       DocumentReaderAndWriter<IN> readerWriter)
-    throws IOException
-  {
-    classifyAndWriteAnswers(documents,
-            IOUtils.encodedOutputStreamPrintWriter(System.out, flags.outputEncoding, true), readerWriter);
+    classifyAndWriteAnswers(documents, readerWriter, outputScores);
   }
 
   public void classifyAndWriteAnswers(Collection<List<IN>> documents,
+                                       DocumentReaderAndWriter<IN> readerWriter,
+                                       boolean outputScores)
+          throws IOException {
+    classifyAndWriteAnswers(documents,
+                            IOUtils.encodedOutputStreamPrintWriter(System.out, flags.outputEncoding, true),
+                            readerWriter, outputScores);
+  }
+
+  /** Does nothing by default.  Children classes can override if necessary */
+  public void dumpFeatures(Collection<List<IN>> documents) {}
+
+  public void classifyAndWriteAnswers(Collection<List<IN>> documents,
                                       PrintWriter printWriter,
-                                      DocumentReaderAndWriter<IN> readerWriter)
-    throws IOException
-  {
+                                      DocumentReaderAndWriter<IN> readerWriter,
+                                      boolean outputScores)
+          throws IOException {
+    if (flags.exportFeatures != null) {
+      dumpFeatures(documents);
+    }
+
     Timing timer = new Timing();
 
-    Counter<String> entityTP = new ClassicCounter<String>();
-    Counter<String> entityFP = new ClassicCounter<String>();
-    Counter<String> entityFN = new ClassicCounter<String>();
-    boolean resultsCounted = true;
+    Counter<String> entityTP = new ClassicCounter<>();
+    Counter<String> entityFP = new ClassicCounter<>();
+    Counter<String> entityFN = new ClassicCounter<>();
+    boolean resultsCounted = outputScores;
     int numWords = 0;
     int numDocs = 0;
+
+    final AtomicInteger threadCompletionCounter = new AtomicInteger(0);
 
     ThreadsafeProcessor<List<IN>, List<IN>> threadProcessor =
         new ThreadsafeProcessor<List<IN>, List<IN>>() {
@@ -1040,7 +1148,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
         doc = classify(doc);
 
         int completedNo = threadCompletionCounter.incrementAndGet();
-        if (VERBOSE) System.err.println(completedNo + " examples completed");
+        if (flags.verboseMode) System.err.println(completedNo + " examples completed");
         return doc;
       }
       @Override
@@ -1051,13 +1159,13 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
     MulticoreWrapper<List<IN>, List<IN>> wrapper = null;
     if (flags.multiThreadClassifier != 0) {
-      wrapper = new MulticoreWrapper<List<IN>, List<IN>>(flags.multiThreadClassifier, threadProcessor);
+      wrapper = new MulticoreWrapper<>(flags.multiThreadClassifier, threadProcessor);
     }
 
     for (List<IN> doc: documents) {
       numWords += doc.size();
       numDocs++;
-      if (flags.multiThreadClassifier != 0) {
+      if (wrapper != null) {
         wrapper.put(doc);
         while (wrapper.peek()) {
           List<IN> results = wrapper.poll();
@@ -1070,7 +1178,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
         resultsCounted = resultsCounted && countResults(results, entityTP, entityFP, entityFN);
       }
     }
-    if (flags.multiThreadClassifier != 0) {
+    if (wrapper != null) {
       wrapper.join();
       while (wrapper.peek()) {
         List<IN> results = wrapper.poll();
@@ -1096,16 +1204,17 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * stdout (with timing to stderr). This uses the value of flags.documentReader
    * to determine testFile format.
    *
-   * @param testFile The filename to test on.
+   * @param testFile The name of the file to test on.
+   * @param k How many best to print
+   * @param readerAndWriter Class to be used for printing answers
    */
   public void classifyAndWriteAnswersKBest(String testFile, int k,
                                        DocumentReaderAndWriter<IN> readerAndWriter)
-    throws IOException
-  {
-    ObjectBank<List<IN>> documents =
-      makeObjectBankFromFile(testFile, readerAndWriter);
+    throws IOException {
+    ObjectBank<List<IN>> documents = makeObjectBankFromFile(testFile, readerAndWriter);
     PrintWriter pw = IOUtils.encodedOutputStreamPrintWriter(System.out, flags.outputEncoding, true);
     classifyAndWriteAnswersKBest(documents, k, pw, readerAndWriter);
+    pw.flush();
   }
 
   /**
@@ -1127,10 +1236,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       List<List<IN>> sorted = Counters.toSortedList(kBest);
       int n = 1;
       for (List<IN> l : sorted) {
-        System.out.println("<sentence id=" + numSentences + " k=" + n + " logProb=" + kBest.getCount(l) + " prob="
+        printWriter.println("<sentence id=" + numSentences + " k=" + n + " logProb=" + kBest.getCount(l) + " prob="
             + Math.exp(kBest.getCount(l)) + '>');
         writeAnswers(l, printWriter, readerAndWriter);
-        System.out.println("</sentence>");
+        printWriter.println("</sentence>");
         n++;
       }
       numSentences++;
@@ -1178,7 +1287,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   }
 
   /**
-   * Write the classifications of the Sequence classifier out to a writer in a
+   * Write the classifications of the Sequence classifier to a writer in a
    * format determined by the DocumentReaderAndWriter used.
    *
    * @param doc Documents to write out
@@ -1187,7 +1296,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    */
   public void writeAnswers(List<IN> doc, PrintWriter printWriter,
                            DocumentReaderAndWriter<IN> readerAndWriter)
-    throws IOException {
+          throws IOException {
     if (flags.lowerNewgeneThreshold) {
       return;
     }
@@ -1206,278 +1315,41 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
                               Counter<String> entityFP,
                               Counter<String> entityFN) {
     String bg = (flags.evaluateBackground ? null : flags.backgroundSymbol);
-    if (flags.entitySubclassification.equalsIgnoreCase("iob2")) {
-      bg = flags.backgroundSymbol;
-      return countResultsIOB2(doc, entityTP, entityFP, entityFN, bg);
-    } else if (flags.iobTags) {
-      bg = flags.backgroundSymbol;
-      return countResultsIOB(doc, entityTP, entityFP, entityFN, bg);
-    } else {
-      return countResults(doc, entityTP, entityFP, entityFN, bg);
+    if (flags.sighanPostProcessing) {
+      // TODO: this is extremely indicative of being a Chinese Segmenter,
+      // but it would still be better to have something more concrete
+      return countResultsSegmenter(doc, entityTP, entityFP, entityFN);
     }
+    return IOBUtils.countEntityResults(doc, entityTP, entityFP, entityFN, bg);
   }
 
-  public static boolean countResultsIOB2(List<? extends CoreMap> doc,
-                                         Counter<String> entityTP,
-                                         Counter<String> entityFP,
-                                         Counter<String> entityFN,
-                                         String background) {
-    boolean entityCorrect = true;
-    // the annotations
-    String previousGold = background;
-    String previousGuess = background;
-    // the part after the I- or B- in the annotation
-    String previousGoldEntity = "";
-    String previousGuessEntity = "";
+  // TODO: could make this a parameter for the model
+  private static final String CUT_LABEL = "Cut";
 
-    for (CoreMap word : doc) {
+  public static boolean countResultsSegmenter(List<? extends CoreMap> doc,
+                                              Counter<String> entityTP,
+                                              Counter<String> entityFP,
+                                              Counter<String> entityFN) {
+    // count from 1 because each label represents cutting or
+    // not cutting at a word, so we don't count the first word
+    for (int i = 1; i < doc.size(); ++i) {
+      CoreMap word = doc.get(i);
       String gold = word.get(CoreAnnotations.GoldAnswerAnnotation.class);
       String guess = word.get(CoreAnnotations.AnswerAnnotation.class);
-      String goldEntity = (!gold.equals(background)) ? gold.substring(2) : "";
-      String guessEntity = (!guess.equals(background)) ? guess.substring(2) : "";
-
-      //System.out.println(gold + " (" + goldEntity + ") ; " + guess + " (" + guessEntity + ")");
-
-      boolean newGold = (!gold.equals(background) &&
-                         (!goldEntity.equals(previousGoldEntity)) || gold.startsWith("B-"));
-      boolean newGuess = (!guess.equals(background) &&
-                          (!guessEntity.equals(previousGuessEntity)) || guess.startsWith("B-"));
-      boolean goldEnded = (!previousGold.equals(background) &&
-                           (gold.startsWith("B-") || !goldEntity.equals(previousGoldEntity)));
-      boolean guessEnded = (!previousGuess.equals(background) &&
-                            (guess.startsWith("B-") || !guessEntity.equals(previousGuessEntity)));
-
-      //System.out.println("  " + newGold + " " + newGuess + " " + goldEnded + " " + guessEnded);
-
-      if (goldEnded && !guessEnded) {
-        entityFN.incrementCount(previousGoldEntity, 1.0);
-        entityCorrect = gold.equals(background) && guess.equals(background);
-      }
-      if (goldEnded && guessEnded) {
-        if (entityCorrect) {
-          entityTP.incrementCount(previousGoldEntity, 1.0);
-        } else {
-          entityFN.incrementCount(previousGoldEntity, 1.0);
-          entityFP.incrementCount(previousGuessEntity, 1.0);
-        }
-        entityCorrect = gold.equals(guess);
-      }
-      if (!goldEnded && guessEnded) {
-        entityCorrect = false;
-        entityFP.incrementCount(previousGuessEntity, 1.0);
-      }
-      // nothing to do if neither gold nor guess have ended
-
-      if (newGold && !newGuess) {
-        entityCorrect = false;
-      }
-      if (newGold && newGuess) {
-        entityCorrect = guessEntity.equals(goldEntity);
-      }
-      if (!newGold && newGuess) {
-        entityCorrect = false;
-      }
-
-      previousGold = gold;
-      previousGuess = guess;
-      previousGoldEntity = goldEntity;
-      previousGuessEntity = guessEntity;
-    }
-
-    // At the end, we need to check the last entity
-    if (!previousGold.equals(background)) {
-      if (entityCorrect) {
-        entityTP.incrementCount(previousGoldEntity, 1.0);
-      } else {
-        entityFN.incrementCount(previousGoldEntity, 1.0);
-      }
-    }
-    if (!previousGuess.equals(background)) {
-      if (!entityCorrect) {
-        entityFP.incrementCount(previousGuessEntity, 1.0);
-      }
-    }
-
-    return true;
-  }
-
-  public static boolean countResultsIOB(List<? extends CoreMap> doc,
-                                        Counter<String> entityTP,
-                                        Counter<String> entityFP,
-                                        Counter<String> entityFN,
-                                        String background) {
-    // first, check that all answers exist and are either O, B-, or I-
-    for (CoreMap line : doc) {
-      String gold = line.get(CoreAnnotations.GoldAnswerAnnotation.class);
-      String guess = line.get(CoreAnnotations.AnswerAnnotation.class);
-
-      if (gold == null) {
-        System.err.println("Blank gold answer");
+      if (gold == null || guess == null) {
         return false;
       }
-      if (guess == null) {
-        System.err.println("Blank guess");
-        return false;
-      }
-      if (!gold.equals(background) && !gold.startsWith("B-") &&
-          !gold.startsWith("I-")) {
-        System.err.println("Unexpected gold answer " + gold);
-        return false;
-      }
-      if (!guess.equals(background) && !guess.startsWith("B-") &&
-          !guess.startsWith("I-")) {
-        System.err.println("Unexpected guess " + guess);
-        return false;
-      }
-      // todo: verify that gold entities are in a good pattern
-    }
-
-    // We count entities in three categories.  When we have an entity
-    // in the gold, it is a true positive if the start of the entity
-    // is correctly guessed, all of the I- tags are correctly guessed,
-    // and the next guess tag after the last gold I- tag is not the
-    // same I- tag.  Otherwise, it is a false negative.  We then apply
-    // the same logic to the guesses, counting false positives for
-    // anything that did not correctly match the gold.
-    int index = 0;
-    while (index < doc.size()) {
-      index = tallyOneEntityIOB(doc, index,
-                                CoreAnnotations.GoldAnswerAnnotation.class,
-                                CoreAnnotations.AnswerAnnotation.class,
-                                entityTP, entityFN, background);
-    }
-    index = 0;
-    while (index < doc.size()) {
-      index = tallyOneEntityIOB(doc, index,
-                                CoreAnnotations.AnswerAnnotation.class,
-                                CoreAnnotations.GoldAnswerAnnotation.class,
-                                null, entityFP, background);
-    }
-
-    return true;
-  }
-
-  public static int tallyOneEntityIOB(List<? extends CoreMap> doc,
-                                      int index,
-                                      Class<? extends CoreAnnotation<String>> source,
-                                      Class<? extends CoreAnnotation<String>> target,
-                                      Counter<String> positive,
-                                      Counter<String> negative,
-                                      String background) {
-    CoreMap line = doc.get(index);
-    String gold = line.get(source);
-    String guess = line.get(target);
-
-    // uninteresting
-    if (gold.equals(background)) {
-      return index + 1;
-    }
-    String entity = gold.substring(2);
-    boolean correct = gold.equals(guess);
-    ++index;
-    while (index < doc.size()) {
-      line = doc.get(index);
-      gold = line.get(source);
-      guess = line.get(target);
-
-      if (!gold.equals("I-" + entity)) {
-        if (guess.equals("I-" + entity)) {
-          correct = false;
-        }
-        break;
-      }
-      if (!gold.equals(guess)) {
-        correct = false;
-      }
-      ++index;
-    }
-    if (correct) {
-      if (positive != null) {
-        positive.incrementCount(entity, 1.0);
-      }
-    } else {
-      negative.incrementCount(entity, 1.0);
-    }
-    return index;
-  }
-
-  /**
-   * Count the successes and failures of the model on the given document.
-   * Fills numbers in to counters for true positives, false positives,
-   * and false negatives, and also keeps track of the entities seen.
-   * <br>
-   * Returns false if we ever encounter null for gold or guess.
-   */
-  public static boolean countResults(List<? extends CoreMap> doc,
-                                     Counter<String> entityTP,
-                                     Counter<String> entityFP,
-                                     Counter<String> entityFN,
-                                     String background) {
-    int index = 0;
-    int goldIndex = 0, guessIndex = 0;
-    String lastGold = background, lastGuess = background;
-
-    // As we go through the document, there are two events we might be
-    // interested in.  One is when a gold entity ends, and the other
-    // is when a guessed entity ends.  If the gold and guessed
-    // entities end at the same time, started at the same time, and
-    // match entity type, we have a true positive.  Otherwise we
-    // either have a false positive or a false negative.
-    for (CoreMap line : doc) {
-      String gold = line.get(CoreAnnotations.GoldAnswerAnnotation.class);
-      String guess = line.get(CoreAnnotations.AnswerAnnotation.class);
-
-      if (gold == null || guess == null)
-        return false;
-
-      if (lastGold != null && !lastGold.equals(gold) && !lastGold.equals(background)) {
-        if (lastGuess.equals(lastGold) && !lastGuess.equals(guess) && goldIndex == guessIndex) {
-          entityTP.incrementCount(lastGold, 1.0);
-        } else {
-          entityFN.incrementCount(lastGold, 1.0);
-        }
-      }
-
-      if (lastGuess != null && !lastGuess.equals(guess) && !lastGuess.equals(background)) {
-        if (lastGuess.equals(lastGold) && !lastGuess.equals(guess) && goldIndex == guessIndex && !lastGold.equals(gold)) {
-          // correct guesses already tallied
-          // only need to tally false positives
-        } else {
-          entityFP.incrementCount(lastGuess, 1.0);
-        }
-      }
-
-      if (lastGold == null || !lastGold.equals(gold)) {
-        lastGold = gold;
-        goldIndex = index;
-      }
-
-      if (lastGuess == null || !lastGuess.equals(guess)) {
-        lastGuess = guess;
-        guessIndex = index;
-      }
-      ++index;
-    }
-
-    // We also have to account for entities at the very end of the
-    // document, since the above logic only occurs when we see
-    // something that tells us an entity has ended
-    if (lastGold != null && !lastGold.equals(background)) {
-      if (lastGold.equals(lastGuess) && goldIndex == guessIndex) {
-        entityTP.incrementCount(lastGold, 1.0);
-      } else {
-        entityFN.incrementCount(lastGold, 1.0);
-      }
-    }
-    if (lastGuess != null && !lastGuess.equals(background)) {
-      if (lastGold.equals(lastGuess) && goldIndex == guessIndex) {
-        // correct guesses already tallied
-      } else {
-        entityFP.incrementCount(lastGuess, 1.0);
+      if (gold.equals("1") && guess.equals("1")) {
+        entityTP.incrementCount(CUT_LABEL, 1.0);
+      } else if (gold.equals("0") && guess.equals("1")) {
+        entityFP.incrementCount(CUT_LABEL, 1.0);
+      } else if (gold.equals("1") && guess.equals("0")) {
+        entityFN.incrementCount(CUT_LABEL, 1.0);
       }
     }
     return true;
   }
+
 
   /**
    * Given counters of true positives, false positives, and false
@@ -1485,7 +1357,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    */
   public static void printResults(Counter<String> entityTP, Counter<String> entityFP,
                            Counter<String> entityFN) {
-    Set<String> entities = new TreeSet<String>();
+    Set<String> entities = new TreeSet<>();
     entities.addAll(entityTP.keySet());
     entities.addAll(entityFP.keySet());
     entities.addAll(entityFN.keySet());
@@ -1499,7 +1371,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     double tp = entityTP.totalCount();
     double fp = entityFP.totalCount();
     double fn = entityFN.totalCount();
-    printedHeader = printPRLine("Totals", tp, fp, fn, printedHeader);
+    printPRLine("Totals", tp, fp, fn, printedHeader);
   }
 
   /**
@@ -1519,7 +1391,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       System.err.println("         Entity\tP\tR\tF1\tTP\tFP\tFN");
       printedHeader = true;
     }
-    System.err.format("%15s\t%.4f\t%.4f\t%.4f\t%.0f\t%.0f\t%.0f\n",
+    System.err.format("%15s\t%.4f\t%.4f\t%.4f\t%.0f\t%.0f\t%.0f%n",
                       entity, precision, recall, f1,
                       tp, fp, fn);
     return printedHeader;
@@ -1531,6 +1403,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * @param serializePath The path/filename to write the classifier to.
    */
   public abstract void serializeClassifier(String serializePath);
+
+  /** Serialize a sequence classifier to an object output stream **/
+  public abstract void serializeClassifier(ObjectOutputStream oos);
 
   /**
    * Loads a classifier from the given input stream.
@@ -1568,17 +1443,12 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * reinitialized from the flags serialized in the classifier. This does not
    * close the InputStream.
    *
-   * @param in
-   *          The InputStream to load the serialized classifier from
-   * @param props
-   *          This Properties object will be used to update the
+   * @param in The InputStream to load the serialized classifier from
+   * @param props This Properties object will be used to update the
    *          SeqClassifierFlags which are read from the serialized classifier
-   * @throws IOException
-   *           If there are problems accessing the input stream
-   * @throws ClassCastException
-   *           If there are problems interpreting the serialized data
-   * @throws ClassNotFoundException
-   *           If there are problems interpreting the serialized data
+   * @throws IOException If there are problems accessing the input stream
+   * @throws ClassCastException If there are problems interpreting the serialized data
+   * @throws ClassNotFoundException If there are problems interpreting the serialized data
    */
   public void loadClassifier(InputStream in, Properties props) throws IOException, ClassCastException,
       ClassNotFoundException {
@@ -1589,21 +1459,17 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * Load a classifier from the specified input stream. The classifier is
    * reinitialized from the flags serialized in the classifier.
    *
-   * @param in
-   *          The InputStream to load the serialized classifier from
-   * @param props
-   *          This Properties object will be used to update the
+   * @param in The InputStream to load the serialized classifier from
+   * @param props This Properties object will be used to update the
    *          SeqClassifierFlags which are read from the serialized classifier
-   * @throws IOException
-   *           If there are problems accessing the input stream
-   * @throws ClassCastException
-   *           If there are problems interpreting the serialized data
-   * @throws ClassNotFoundException
-   *           If there are problems interpreting the serialized data
+   * @throws IOException If there are problems accessing the input stream
+   * @throws ClassCastException If there are problems interpreting the serialized data
+   * @throws ClassNotFoundException If there are problems interpreting the serialized data
    */
   public abstract void loadClassifier(ObjectInputStream in, Properties props) throws IOException, ClassCastException,
       ClassNotFoundException;
 
+  // todo [cdm 2015]: Replace this method with use of the method in IOUtils.
   private InputStream loadStreamFromClasspath(String path) {
     InputStream is = getClass().getClassLoader().getResourceAsStream(path);
     if (is == null)
@@ -1652,15 +1518,11 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public void loadClassifierNoExceptions(String loadPath, Properties props) {
     InputStream is;
     // ms, 10-04-2010: check first is this path exists in our CLASSPATH. This
-    // takes priority over the file system.
+    // takes priority over the file system. todo [cdm 2014]: change this to use IOUtils stuff that much code now uses
     if ((is = loadStreamFromClasspath(loadPath)) != null) {
       Timing.startDoing("Loading classifier from " + loadPath);
       loadClassifierNoExceptions(is, props);
-      try {
-        is.close();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+      IOUtils.closeIgnoringExceptions(is);
       Timing.endDoing();
     } else {
       loadClassifierNoExceptions(new File(loadPath), props);
@@ -1730,6 +1592,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *          serialized file, such as the DocumentReaderAndWriter. You can pass
    *          in <code>null</code> to override nothing.
    */
+  // todo [cdm 2014]: This method overlaps functionality in loadStreamFromClasspath
   public void loadJarClassifier(String modelName, Properties props) {
     Timing.startDoing("Loading JAR-internal classifier " + modelName);
     try {
@@ -1756,7 +1619,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       return;
     }
     if (cliqueWriter == null) {
-      cliqueWriter = IOUtils.getPrintWriterOrDie("feats-" + flags.printFeatures + ".txt");
+      cliqueWriter = IOUtils.getPrintWriterOrDie("features-" + flags.printFeatures + ".txt");
       writtenNum = 0;
     }
     if (wi instanceof CoreLabel) {
@@ -1767,7 +1630,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
           + wi.get(CoreAnnotations.GoldAnswerAnnotation.class) + '\t');
     }
     boolean first = true;
-    List<String> featsList = new ArrayList<String>(features);
+    List<String> featsList = new ArrayList<>(features);
     Collections.sort(featsList);
     for (String feat : featsList) {
       if (first) {
@@ -1781,13 +1644,18 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     writtenNum++;
   }
 
-  /** Print the String features generated from a token */
+  /** Print the String features generated from a token. */
   protected void printFeatureLists(IN wi, Collection<List<String>> features) {
     if (flags.printFeatures == null || writtenNum >= flags.printFeaturesUpto) {
       return;
     }
+    printFeatureListsHelper(wi, features);
+  }
+
+  // Separating this method out lets printFeatureLists be inlined, which is good since it is usually a no-op.
+  private void printFeatureListsHelper(IN wi, Collection<List<String>> features) {
     if (cliqueWriter == null) {
-      cliqueWriter = IOUtils.getPrintWriterOrDie("feats-" + flags.printFeatures + ".txt");
+      cliqueWriter = IOUtils.getPrintWriterOrDie("features-" + flags.printFeatures + ".txt");
       writtenNum = 0;
     }
     if (wi instanceof CoreLabel) {
@@ -1799,7 +1667,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     }
     boolean first = true;
     for (List<String> featList : features) {
-      List<String> sortedFeatList = new ArrayList<String>(featList);
+      List<String> sortedFeatList = new ArrayList<>(featList);
       Collections.sort(sortedFeatList);
       for (String feat : sortedFeatList) {
         if (first) {

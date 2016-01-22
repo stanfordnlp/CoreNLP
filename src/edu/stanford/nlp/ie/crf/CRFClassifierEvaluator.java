@@ -23,8 +23,9 @@ import java.util.List;
  * @author Angel Chang
  */
 public class CRFClassifierEvaluator<IN extends CoreMap> extends CmdEvaluator {
+
   private CRFClassifier<IN> classifier;
-  // NOTE: Defalt uses -r, specify without -r if IOB
+  // NOTE: Default uses -r, specify without -r if IOB
   private String cmdStr = "/u/nlp/bin/conlleval -r";
   private String[] cmd;
 
@@ -75,16 +76,18 @@ public class CRFClassifierEvaluator<IN extends CoreMap> extends CmdEvaluator {
     this.cmdStr = evalCmd;
     if (cmdStr != null) {
       cmdStr = cmdStr.trim();
-      if (cmdStr.length() == 0) { cmdStr = null; }
+      if (cmdStr.isEmpty()) { cmdStr = null; }
     }
     cmd = getCmd(cmdStr);
   }
 
+  @Override
   public void setValues(double[] x)
   {
-    classifier.updateWeights(x);
+    classifier.updateWeightsForTest(x);
   }
 
+  @Override
   public String[] getCmd()
   {
     return cmd;
@@ -118,8 +121,9 @@ public class CRFClassifierEvaluator<IN extends CoreMap> extends CmdEvaluator {
     }
   }
 
+  @Override
   public double evaluate(double[] x) {
-    double score = 0;
+    double score; // initialized below
     setValues(x);
     if (getCmd() != null) {
       evaluateCmd(getCmd());

@@ -1,12 +1,11 @@
 package edu.stanford.nlp.objectbank;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.AbstractIterator;
-import edu.stanford.nlp.io.EncodingFileReader;
 
 import java.io.*;
 import java.net.URL;
 import java.util.*;
-import java.util.zip.*;
 
 /**
  * A ReaderIteratorFactory provides a means of getting an Iterator
@@ -32,14 +31,14 @@ import java.util.zip.*;
  * @author <A HREF="mailto:jrfinkel@stanford.edu">Jenny Finkel</A>
  * @version 1.0
  */
-//TODO: does this always store the same kind of thing in a given instance, 
+//TODO: does this always store the same kind of thing in a given instance,
 //or do you want to allow having some Files, some Strings, etc.?
 public class ReaderIteratorFactory implements Iterable<Reader> {
 
   /**
    * Constructs a ReaderIteratorFactory from the input sources
    * contained in the Collection.  The Collection should contain
-   * Objects of type File, String, URL and Reader.  See class
+   * Objects of type File, String, URL and/or Reader.  See class
    * description for details.
    *
    * @param c Collection of input sources.
@@ -72,13 +71,13 @@ public class ReaderIteratorFactory implements Iterable<Reader> {
 
 
   public ReaderIteratorFactory() {
-    c = new ArrayList<Object>();
+    c = new ArrayList<>();
   }
 
   /**
    * The underlying Collection of input sources.  Currently supported
    * input sources are: Files, Strings, URLs and Readers.   The
-   * implementation automatically  determines the type of input and
+   * implementation automatically determines the type of input and
    * produces a java.util.Reader accordingly.
    */
   protected Collection<Object> c;
@@ -94,6 +93,7 @@ public class ReaderIteratorFactory implements Iterable<Reader> {
    *
    * @return an Iterator over the input sources in the underlying Collection.
    */
+  @Override
   public Iterator<Reader> iterator() {
     return new ReaderIterator();
   }
@@ -173,12 +173,12 @@ public class ReaderIteratorFactory implements Iterable<Reader> {
       }
 
       Object o = iter.next();
-      
+
       try {
         if (o instanceof File) {
           File file = (File) o;
           if (file.isDirectory()) {
-            ArrayList<Object> l = new ArrayList<Object>();
+            ArrayList<Object> l = new ArrayList<>();
             l.addAll(Arrays.asList(file.listFiles()));
             while (iter.hasNext()) {
               l.add(iter.next());
@@ -186,12 +186,7 @@ public class ReaderIteratorFactory implements Iterable<Reader> {
             iter = l.iterator();
             file = (File) iter.next();
           }
-          if (file.getName().endsWith(".gz")) {
-            nextObject = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file)), enc));
-          } else {
-            nextObject = new BufferedReader(new EncodingFileReader(file, enc));
-          }
-          //nextObject = new BufferedReader(new FileReader(file));
+          nextObject = IOUtils.readerFromFile(file, enc);
         } else if (o instanceof String) {
 //           File file = new File((String)o);
 //           if (file.exists()) {
@@ -219,7 +214,7 @@ public class ReaderIteratorFactory implements Iterable<Reader> {
         } else if (o instanceof Reader) {
           nextObject = new BufferedReader((Reader) o);
         } else {
-          throw new RuntimeException("don't know how to get Reader from " + o);
+          throw new RuntimeException("don't know how to get Reader from class " + o.getClass() + " of object " + o);
         }
       } catch (IOException e) {
         throw new RuntimeException(e);

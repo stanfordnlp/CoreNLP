@@ -1,10 +1,11 @@
 package edu.stanford.nlp.parser.lexparser;
 
-import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.TaggedWord;
+import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.trees.Tree;
 
@@ -27,6 +28,10 @@ public class TaggerReranker implements Reranker {
 
   public RerankerQuery process(List<? extends HasWord> sentence) {
     return new Query(tagger.tagSentence(sentence));
+  }
+
+  public List<Eval> getEvals() {
+    return Collections.emptyList();
   }
 
   public class Query implements RerankerQuery {

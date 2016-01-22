@@ -3,8 +3,6 @@ package edu.stanford.nlp.fsm;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,12 +30,12 @@ public class ExactAutomatonMinimizer implements AutomatonMinimizer {
 
   private static final Arc SINK_NODE = new Arc(null);
 
-  
+
   protected TransducerGraph getUnminimizedFA() {
     return unminimizedFA;
   }
 
-  protected Collection<? extends Object> getSymbols() {
+  protected Collection<?> getSymbols() {
     return getUnminimizedFA().getInputs();
   }
 
@@ -110,15 +108,15 @@ public class ExactAutomatonMinimizer implements AutomatonMinimizer {
   }
 
   protected void makeBlock(Collection<Arc> members) {
-    ExactBlock<Arc> block = new ExactBlock<Arc>(Generics.newHashSet(members));
+    ExactBlock<Arc> block = new ExactBlock<>(Generics.newHashSet(members));
     for (Arc member : block.getMembers()) {
       if (member != SINK_NODE) {
         memberToBlock.put(member, block);
       }
     }
-    for (Iterator symbolI = getSymbols().iterator(); symbolI.hasNext();) {
-      Arc symbol = (Arc) symbolI.next();
-      addActivePair(new Pair<ExactBlock<Arc>, Arc>(block, symbol));
+    for (Object o : getSymbols()) {
+      Arc symbol = (Arc) o;
+      addActivePair(new Pair<>(block, symbol));
     }
   }
 
@@ -148,7 +146,7 @@ public class ExactAutomatonMinimizer implements AutomatonMinimizer {
   }
 
   protected Collection<Object> getInverseImages(ExactBlock<Arc> block, Object symbol) {
-    List<Object> inverseImages = new ArrayList<Object>();
+    List<Object> inverseImages = new ArrayList<>();
     for (Arc member : block.getMembers()) {
       Collection<Arc> arcs = null;
       if (member != SINK_NODE) {

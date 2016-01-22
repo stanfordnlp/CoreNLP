@@ -28,16 +28,14 @@
 package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.io.File;
 import java.util.Map;
 import java.util.Set;
@@ -52,13 +50,13 @@ import java.util.regex.Pattern;
  */
 public class NERGUI {
 
-  private AbstractSequenceClassifier classifier;
+  private AbstractSequenceClassifier<CoreLabel> classifier;
 
   private JFrame frame;
   private JEditorPane editorPane;
   private JToolBar tagPanel;
-  private static int HEIGHT = 600;
-  private static int WIDTH = 650;
+  private static final int HEIGHT = 600;
+  private static final int WIDTH = 650;
   private Map<String, Color> tagToColorMap;
   private JFileChooser fileChooser = new JFileChooser();
   private MutableAttributeSet defaultAttrSet = new SimpleAttributeSet();
@@ -79,7 +77,7 @@ public class NERGUI {
 
     //Create and set up the window.
     frame = new JFrame("Stanford Named Entity Recognizer");
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     frame.getContentPane().setLayout(new BorderLayout());
     frame.getContentPane().setPreferredSize(new Dimension(WIDTH, HEIGHT));
 
@@ -114,13 +112,13 @@ public class NERGUI {
 
     JMenuItem openFile = new JMenuItem("Open File");
     openFile.setMnemonic('O');
-    openFile.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, java.awt.Event.CTRL_MASK));
+    openFile.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, InputEvent.CTRL_MASK));
     openFile.addActionListener(actor);
     fileMenu.add(openFile);
 
     JMenuItem loadURL = new JMenuItem("Load URL");
     loadURL.setMnemonic('L');
-    loadURL.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_U, java.awt.Event.CTRL_MASK));
+    loadURL.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_U, InputEvent.CTRL_MASK));
     loadURL.addActionListener(actor);
     fileMenu.add(loadURL);
 
@@ -128,20 +126,20 @@ public class NERGUI {
 
     saveUntagged = new JMenuItem("Save Untagged File");
     saveUntagged.setMnemonic('S');
-    saveUntagged.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.Event.CTRL_MASK));
+    saveUntagged.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, InputEvent.CTRL_MASK));
     saveUntagged.addActionListener(actor);
     saveUntagged.setEnabled(false);
     fileMenu.add(saveUntagged);
 
     JMenuItem saveUntaggedAs = new JMenuItem("Save Untagged File As ...");
     saveUntaggedAs.setMnemonic('U');
-    saveUntaggedAs.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_U, java.awt.Event.CTRL_MASK));
+    saveUntaggedAs.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_U, InputEvent.CTRL_MASK));
     saveUntaggedAs.addActionListener(actor);
     fileMenu.add(saveUntaggedAs);
 
     saveTaggedAs = new JMenuItem("Save Tagged File As ...");
     saveTaggedAs.setMnemonic('T');
-    saveTaggedAs.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_T, java.awt.Event.CTRL_MASK));
+    saveTaggedAs.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_T, InputEvent.CTRL_MASK));
     saveTaggedAs.addActionListener(actor);
     saveTaggedAs.setEnabled(false);
     fileMenu.add(saveTaggedAs);
@@ -150,7 +148,7 @@ public class NERGUI {
 
     JMenuItem exit = new JMenuItem("Exit");
     exit.setMnemonic('x');
-    exit.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.Event.CTRL_MASK));
+    exit.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, InputEvent.CTRL_MASK));
     exit.addActionListener(actor);
     fileMenu.add(exit);
 
@@ -161,25 +159,25 @@ public class NERGUI {
 
     JMenuItem cut = new JMenuItem("Cut");
     cut.setMnemonic('X');
-    cut.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_X, java.awt.Event.CTRL_MASK));
+    cut.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_X, InputEvent.CTRL_MASK));
     cut.addActionListener(actor);
     editMenu.add(cut);
 
     JMenuItem copy = new JMenuItem("Copy");
     copy.setMnemonic('C');
-    copy.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_C, java.awt.Event.CTRL_MASK));
+    copy.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_C, InputEvent.CTRL_MASK));
     copy.addActionListener(actor);
     editMenu.add(copy);
 
     JMenuItem paste = new JMenuItem("Paste");
     paste.setMnemonic('V');
-    paste.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_V, java.awt.Event.CTRL_MASK));
+    paste.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_V, InputEvent.CTRL_MASK));
     paste.addActionListener(actor);
     editMenu.add(paste);
 
     JMenuItem clear = new JMenuItem("Clear");
     clear.setMnemonic('C');
-    clear.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, java.awt.Event.CTRL_MASK));
+    clear.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, InputEvent.CTRL_MASK));
     clear.addActionListener(actor);
     editMenu.add(clear);
 
@@ -190,19 +188,19 @@ public class NERGUI {
 
     JMenuItem loadCRF = new JMenuItem("Load CRF From File");
     loadCRF.setMnemonic('R');
-    loadCRF.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, java.awt.Event.CTRL_MASK));
+    loadCRF.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, InputEvent.CTRL_MASK));
     loadCRF.addActionListener(actor);
     classifierMenu.add(loadCRF);
 
     JMenuItem loadDefaultCRF = new JMenuItem("Load Default CRF");
     loadDefaultCRF.setMnemonic('L');
-    loadDefaultCRF.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, java.awt.Event.CTRL_MASK));
+    loadDefaultCRF.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, InputEvent.CTRL_MASK));
     loadDefaultCRF.addActionListener(actor);
     classifierMenu.add(loadDefaultCRF);
 
     extract = new JMenuItem("Run NER");
     extract.setMnemonic('N');
-    extract.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.Event.CTRL_MASK));
+    extract.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, InputEvent.CTRL_MASK));
     extract.addActionListener(actor);
     classifierMenu.add(extract);
 
@@ -211,14 +209,16 @@ public class NERGUI {
 
 
   private class InputListener implements KeyListener {
+
+    @Override
     public void keyPressed(KeyEvent e) {
-
     }
 
+    @Override
     public void keyReleased(KeyEvent e) {
-
     }
 
+    @Override
     public void keyTyped(KeyEvent e) {
       saveTaggedAs.setEnabled(false);
     }
@@ -228,50 +228,68 @@ public class NERGUI {
 
   private class ActionPerformer implements ActionListener {
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       String com = e.getActionCommand();
 
-      if (com.equals("Open File")) {
-        File file = getFile(true);
-        if (file != null) {
-          openFile(file);
+      switch (com) {
+        case "Open File": {
+          File file = getFile(true);
+          if (file != null) {
+            openFile(file);
+          }
+          break;
         }
-      } else if (com.equals("Load URL")) {
-        String url = getURL();
-        if (url != null) {
-          openURL(url);
+        case "Load URL":
+          String url = getURL();
+          if (url != null) {
+            openURL(url);
+          }
+          break;
+        case "Exit":
+          exit();
+          break;
+        case "Clear":
+          clearDocument();
+          break;
+        case "Cut":
+          cutDocument();
+          break;
+        case "Copy":
+          copyDocument();
+          break;
+        case "Paste":
+          pasteDocument();
+          break;
+        case "Load CRF From File": {
+          File file = getFile(true);
+          if (file != null) {
+            loadClassifier(file);
+          }
+          break;
         }
-      } else if (com.equals("Exit")) {
-        exit();
-      } else if (com.equals("Clear")) {
-        clearDocument();
-      } else if (com.equals("Cut")) {
-        cutDocument();
-      } else if (com.equals("Copy")) {
-        copyDocument();
-      } else if (com.equals("Paste")) {
-        pasteDocument();
-      } else if (com.equals("Load CRF From File")) {
-        File file = getFile(true);
-        if (file != null) {
-          loadClassifier(file);
-        }
-      } else if (com.equals("Load Default CRF")) {
-        loadClassifier(null);
-      } else if (com.equals("Run NER")) {
-        extract();
-      } else if (com.equals("Save Untagged File")) {
-        saveUntaggedContents(loadedFile);
-      } else if (com.equals("Save Untagged File As ...")) {
-        saveUntaggedContents(getFile(false));
-      } else if (com.equals("Save Tagged File As ...")) {
-        File f = getFile(false);
-        if (f != null) {
-          // i.e., they didn't cancel out of the file dialog
-          saveFile (f, taggedContents);
-        }
-      } else {
-        System.err.println("Unknown Action: "+e);
+        case "Load Default CRF":
+          loadClassifier(null);
+          break;
+        case "Run NER":
+          extract();
+          break;
+        case "Save Untagged File":
+          saveUntaggedContents(loadedFile);
+          break;
+        case "Save Untagged File As ...":
+          saveUntaggedContents(getFile(false));
+          break;
+        case "Save Tagged File As ...":
+          File f = getFile(false);
+          if (f != null) {
+            // i.e., they didn't cancel out of the file dialog
+            saveFile(f, taggedContents);
+          }
+          break;
+        default:
+          System.err.println("Unknown Action: " + e);
+          break;
       }
     }
   }
@@ -441,15 +459,15 @@ public class NERGUI {
 
       Set<String> tags = classifier.labels();
       String background = classifier.backgroundSymbol();
-      String tagPattern = "";
+      StringBuilder tagPattern = new StringBuilder();
       for (String tag : tags) {
         if (background.equals(tag)) { continue; }
-        if (tagPattern.length() > 0) { tagPattern += "|"; }
-        tagPattern += tag;
+        if (tagPattern.length() > 0) { tagPattern.append('|'); }
+        tagPattern.append(tag);
       }
 
-      Pattern startPattern = Pattern.compile("<("+tagPattern+")>");
-      Pattern endPattern = Pattern.compile("</("+tagPattern+")>");
+      Pattern startPattern = Pattern.compile("<(" + tagPattern + ")>");
+      Pattern endPattern = Pattern.compile("</(" + tagPattern + ")>");
 
       String finalText = labeledText;
 
@@ -472,7 +490,7 @@ public class NERGUI {
           }
           System.err.println(tag+": "+ finalText.substring(start, end));
         } else {
-          // print error message
+          System.err.println("Couldn't find end pattern!");
         }
         m = startPattern.matcher(finalText);
       }
@@ -485,15 +503,15 @@ public class NERGUI {
 
       Set<String> tags = classifier.labels();
       String background = classifier.backgroundSymbol();
-      String tagPattern = "";
+      StringBuilder tagPattern = new StringBuilder();
       for (String tag : tags) {
         if (background.equals(tag)) { continue; }
-        if (tagPattern.length() > 0) { tagPattern += "|"; }
-        tagPattern += tag;
+        if (tagPattern.length() > 0) { tagPattern.append('|'); }
+        tagPattern.append(tag);
       }
 
-      Pattern startPattern = Pattern.compile("<("+tagPattern+")>");
-      Pattern endPattern = Pattern.compile("</("+tagPattern+")>");
+      Pattern startPattern = Pattern.compile("<(" + tagPattern + ")>");
+      Pattern endPattern = Pattern.compile("</(" + tagPattern + ")>");
 
       String finalText = taggedContents;
 
@@ -572,12 +590,12 @@ public class NERGUI {
 
 
 
-  public void exit() {
+  static void exit() {
     // ask if they're sure?
     System.exit(-1);
   }
 
-  private String initText = "In bringing his distinct vision to the Western genre, writer-director Jim Jarmusch has created a quasi-mystical avant-garde drama that remains a deeply spiritual viewing experience. After losing his parents and fianc\u00E9e, a Cleveland accountant named William Blake (a remarkable Johnny Depp) spends all his money and takes a train to the frontier town of Machine in order to work at a factory. Upon arriving in Machine, he is denied his expected job and finds himself a fugitive after murdering a man in self-defense. Wounded and helpless, Blake is befriended by Nobody (Gary Farmer), a wandering Native American who considers him to be a ghostly manifestation of the famous poet. Nobody aids Blake in his flight from three bumbling bounty hunters, preparing him for his final journey--a return to the world of the spirits.";
+  private static final String initText = "In bringing his distinct vision to the Western genre, writer-director Jim Jarmusch has created a quasi-mystical avant-garde drama that remains a deeply spiritual viewing experience. After losing his parents and fianc\u00E9e, a Cleveland accountant named William Blake (a remarkable Johnny Depp) spends all his money and takes a train to the frontier town of Machine in order to work at a factory. Upon arriving in Machine, he is denied his expected job and finds himself a fugitive after murdering a man in self-defense. Wounded and helpless, Blake is befriended by Nobody (Gary Farmer), a wandering Native American who considers him to be a ghostly manifestation of the famous poet. Nobody aids Blake in his flight from three bumbling bounty hunters, preparing him for his final journey--a return to the world of the spirits.";
   //  private String initText = "In";
 
   private void buildContentPanel() {
@@ -630,15 +648,18 @@ public class NERGUI {
       color = c;
     }
 
+    @Override
     public void paintIcon(Component c, Graphics g, int x, int y) {
       g.setColor(color);
       g.fillRect(x, y, getIconWidth(), getIconHeight());
     }
 
+    @Override
     public int getIconWidth() {
       return 10;
     }
 
+    @Override
     public int getIconHeight() {
       return 10;
     }
@@ -688,7 +709,7 @@ public class NERGUI {
     tagToColorMap = makeTagToColorMap(tags, backgroundSymbol);
   }
 
-  public static Map<String, Color> makeTagToColorMap(Set<String> tags, 
+  public static Map<String, Color> makeTagToColorMap(Set<String> tags,
                                                      String backgroundSymbol) {
     int numColors = tags.size() - 1;
     Color[] colors = getNColors(numColors);
@@ -763,17 +784,23 @@ public class NERGUI {
     return colors;
   }
 
+  public static boolean isMacOSX() {
+    return System.getProperty("os.name").toLowerCase().startsWith("mac os x");
+  }
+
   /** Run the GUI.  This program accepts no command-line arguments.
    *  Everything is entered into the GUI.
    */
   public static void main(String[] args) {
     //Schedule a job for the event-dispatching thread:
     //creating and showing this application's GUI.
-    SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          NERGUI gui = new NERGUI();
-          gui.createAndShowGUI();
-        }
-      });
+    if (isMacOSX()) {
+      System.setProperty("apple.laf.useScreenMenuBar", "true");
+    }
+    SwingUtilities.invokeLater(() -> {
+      NERGUI gui = new NERGUI();
+      gui.createAndShowGUI();
+    });
   }
+
 }

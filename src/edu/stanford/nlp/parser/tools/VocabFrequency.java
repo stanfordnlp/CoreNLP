@@ -5,8 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import edu.stanford.nlp.international.Languages;
-import edu.stanford.nlp.international.Languages.Language;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
@@ -29,7 +28,7 @@ public class VocabFrequency {
   static {
     usage.append(String.format("Usage: java %s [OPTS] tree_file \n\n",VocabFrequency.class.getName()));
     usage.append("Options:\n");
-    usage.append("  -l lang    : Select language settings from " + Languages.listOfLanguages() + "\n");
+    usage.append("  -l lang    : Select language settings from " + Language.langList + "\n");
     usage.append("  -e enc     : Encoding.\n");
   }
 
@@ -45,16 +44,19 @@ public class VocabFrequency {
 
     for(int i = 0; i < args.length; i++) {
       if(args[i].startsWith("-")) {
-        if(args[i].equals("-l")) {
-          Language lang = Language.valueOf(args[++i].trim());
-          tlpp = Languages.getLanguageParams(lang);
+        switch (args[i]) {
+          case "-l":
+            Language lang = Language.valueOf(args[++i].trim());
+            tlpp = lang.params;
 
-        } else if(args[i].equals("-e")) {
-          encoding = args[++i];
+            break;
+          case "-e":
+            encoding = args[++i];
 
-        } else {
-          System.out.println(usage.toString());
-          System.exit(-1);
+            break;
+          default:
+            System.out.println(usage.toString());
+            System.exit(-1);
         }
 
       } else {
@@ -72,14 +74,14 @@ public class VocabFrequency {
       }
     }
 
-    Counter<String> vocab = new ClassicCounter<String>();
+    Counter<String> vocab = new ClassicCounter<>();
     for(Tree t : tb) {
       List<Label> yield = t.yield();
       for(Label word : yield)
         vocab.incrementCount(word.value());
     }
 
-    List<String> biggestKeys = new ArrayList<String>(vocab.keySet());
+    List<String> biggestKeys = new ArrayList<>(vocab.keySet());
     Collections.sort(biggestKeys, Counters.toComparatorDescending(vocab));
 
     PrintWriter pw = tlpp.pw();

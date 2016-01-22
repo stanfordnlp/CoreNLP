@@ -1,6 +1,9 @@
 package edu.stanford.nlp.trees.tregex.tsurgeon;
 
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.LabelFactory;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
@@ -15,7 +18,7 @@ class AuxiliaryTree {
 
   private final String originalTreeString;
   final Tree tree;
-  final Tree foot;
+  Tree foot;
   private final IdentityHashMap<Tree,String> nodesToNames; // no one else should be able to get this one.
   private final Map<String,Tree> namesToNodes; // this one has a getter.
 
@@ -25,10 +28,10 @@ class AuxiliaryTree {
     this.tree = tree;
     this.foot = findFootNode(tree);
     if (foot == null && mustHaveFoot) {
-      throw new RuntimeException("Error -- no foot node found for " + originalTreeString);
+      throw new TsurgeonParseException("Error -- no foot node found for " + originalTreeString);
     }
     namesToNodes = Generics.newHashMap();
-    nodesToNames = new IdentityHashMap<Tree,String>();
+    nodesToNames = new IdentityHashMap<>();
     initializeNamesNodesMaps(tree);
   }
 
@@ -50,32 +53,41 @@ class AuxiliaryTree {
   }
 
   /**
-   * Copies the Auxiliary tree.  Also, puts the new names->nodes map in the TsurgeonPattern that called copy.
+   * Copies the Auxiliary tree.  Also, puts the new names-&gt;nodes map in the TsurgeonMatcher that called copy.
+   * <br>
+   * The trees and labels to use when making the copy are specified
+   * with treeFactory and labelFactory.  This lets the tsurgeon script
+   * produce trees which are of the same type as the input trees.
+   * Each of the tsurgeon relations which copies a tree should include
+   * pass in the correct factories.
    */
-  public AuxiliaryTree copy(TsurgeonPattern p) {
+  public AuxiliaryTree copy(TsurgeonMatcher matcher, TreeFactory treeFactory, LabelFactory labelFactory) {
+    if (labelFactory == null) {
+      labelFactory = CoreLabel.factory();
+    }
     Map<String,Tree> newNamesToNodes = Generics.newHashMap();
-    Pair<Tree,Tree> result = copyHelper(tree,newNamesToNodes);
+    Pair<Tree,Tree> result = copyHelper(tree, newNamesToNodes, treeFactory, labelFactory);
     //if(! result.first().dominates(result.second()))
       //System.err.println("Error -- aux tree copy doesn't dominate foot copy.");
-    p.root.newNodeNames.putAll(newNamesToNodes);
+    matcher.newNodeNames.putAll(newNamesToNodes);
     return new AuxiliaryTree(result.first(), result.second(), newNamesToNodes, originalTreeString);
   }
 
   // returns Pair<node,foot>
-  private Pair<Tree,Tree> copyHelper(Tree node,Map<String,Tree> newNamesToNodes) {
+  private Pair<Tree,Tree> copyHelper(Tree node, Map<String,Tree> newNamesToNodes, TreeFactory treeFactory, LabelFactory labelFactory) {
     Tree clone;
     Tree newFoot = null;
     if (node.isLeaf()) {
       if (node == foot) { // found the foot node; pass it up.
-        clone = node.treeFactory().newTreeNode(node.label(),new ArrayList<Tree>(0));
+        clone = treeFactory.newTreeNode(node.label(), new ArrayList<>(0));
         newFoot = clone;
       } else {
-        clone = node.treeFactory().newLeaf(node.label().labelFactory().newLabel(node.label()));
+        clone = treeFactory.newLeaf(labelFactory.newLabel(node.label()));
       }
     } else {
-      List<Tree> newChildren = new ArrayList<Tree>(node.children().length);
+      List<Tree> newChildren = new ArrayList<>(node.children().length);
       for (Tree child : node.children()) {
-        Pair<Tree,Tree> newChild = copyHelper(child,newNamesToNodes);
+        Pair<Tree,Tree> newChild = copyHelper(child, newNamesToNodes, treeFactory, labelFactory);
         newChildren.add(newChild.first());
         if (newChild.second() != null) {
           if (newFoot != null) {
@@ -84,12 +96,13 @@ class AuxiliaryTree {
           newFoot = newChild.second();
         }
       }
-      clone = node.treeFactory().newTreeNode(node.label().labelFactory().newLabel(node.label()),newChildren);
-      if (nodesToNames.containsKey(node)) {
-        newNamesToNodes.put(nodesToNames.get(node),clone);
-      }
+      clone = treeFactory.newTreeNode(labelFactory.newLabel(node.label()),newChildren);
     }
-    return new Pair<Tree,Tree>(clone,newFoot);
+
+    if (nodesToNames.containsKey(node))
+      newNamesToNodes.put(nodesToNames.get(node),clone);
+
+    return new Pair<>(clone, newFoot);
   }
 
 
@@ -114,10 +127,14 @@ class AuxiliaryTree {
     Tree footNode = findFootNodeHelper(t);
     Tree result = footNode;
     if (footNode != null) {
+      Tree newFootNode = footNode.treeFactory().newTreeNode(footNode.label(), new ArrayList<>());
+
       Tree parent = footNode.parent(t);
-      int i = parent.objectIndexOf(footNode);
-      Tree newFootNode = footNode.treeFactory().newTreeNode(footNode.label(), new ArrayList<Tree>());
-      parent.setChild(i, newFootNode);
+      if (parent != null) {
+        int i = parent.objectIndexOf(footNode);
+        parent.setChild(i, newFootNode);
+      }
+
       result = newFootNode;
     }
     return result;
@@ -138,7 +155,7 @@ class AuxiliaryTree {
       Tree thisFoundDtr = findFootNodeHelper(child);
       if (thisFoundDtr != null) {
         if (foundDtr != null) {
-          throw new RuntimeException("Error -- two foot nodes in subtree" + t.toString());
+          throw new TsurgeonParseException("Error -- two foot nodes in subtree" + t.toString());
         } else {
           foundDtr = thisFoundDtr;
         }
@@ -150,9 +167,9 @@ class AuxiliaryTree {
   }
 
 
-  /***********************************************************
+  /* ******************************************************* *
    * below here is init stuff for getting node -> names maps *
-   ***********************************************************/
+   * ******************************************************* */
 
   // There are two ways in which you can can match the start of a name
   // expression.
@@ -172,8 +189,8 @@ class AuxiliaryTree {
     for (Tree node : t.subTreeList()) {
       Matcher m = namePattern.matcher(node.label().value());
       if (m.find()) {
-        namesToNodes.put(m.group(1),node);
-        nodesToNames.put(node,m.group(1));
+        namesToNodes.put(m.group(2), node);
+        nodesToNames.put(node, m.group(2));
         node.label().setValue(m.group(1));
       }
       node.label().setValue(unescape(node.label().value()));

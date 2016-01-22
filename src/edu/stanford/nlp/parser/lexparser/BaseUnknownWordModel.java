@@ -1,21 +1,14 @@
 package edu.stanford.nlp.parser.lexparser;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.LabeledWord;
 import edu.stanford.nlp.ling.Tag;
-import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
-import edu.stanford.nlp.util.Pair;
 
 
 /**
@@ -43,7 +36,7 @@ public class BaseUnknownWordModel implements UnknownWordModel {
   private int endLength = 2; // only used if useEnd==true
 
   /** What type of equivalence classing is done in getSignature */
-  protected int unknownLevel;
+  protected final int unknownLevel;
 
   protected static final String unknown = "UNK";
 
@@ -72,7 +65,7 @@ public class BaseUnknownWordModel implements UnknownWordModel {
   protected final Map<Label,ClassicCounter<String>> tagHash;
 
   /** This is the set of all signatures that we have seen. */
-  final private Set<String> seenEnd;
+  private final Set<String> seenEnd;
 
   final Map<String,Float> unknownGT;
 
@@ -89,7 +82,7 @@ public class BaseUnknownWordModel implements UnknownWordModel {
                               Set<String> seenEnd) {
     endLength = op.lexOptions.unknownSuffixSize;
     // TODO: refactor these terms into BaseUnknownWordModelTrainer
-    useEnd = (op.lexOptions.unknownSuffixSize > 0 && 
+    useEnd = (op.lexOptions.unknownSuffixSize > 0 &&
               op.lexOptions.useUnknownWordSignatures > 0);
     useFirstCap = op.lexOptions.useUnknownWordSignatures > 0;
     useGT = (op.lexOptions.useUnknownWordSignatures == 0);
@@ -102,6 +95,7 @@ public class BaseUnknownWordModel implements UnknownWordModel {
     this.tagHash = tagHash;
     this.seenEnd = seenEnd;
     this.unknownGT = unknownGT;
+    unknownLevel = op.lexOptions.useUnknownWordSignatures;
   }
 
 
@@ -111,10 +105,10 @@ public class BaseUnknownWordModel implements UnknownWordModel {
    * lines containing the data.
    */
   public BaseUnknownWordModel(Options op, Lexicon lex,
-                              Index<String> wordIndex, 
+                              Index<String> wordIndex,
                               Index<String> tagIndex) {
-    this(op, lex, wordIndex, tagIndex, 
-         new ClassicCounter<IntTaggedWord>(),
+    this(op, lex, wordIndex, tagIndex,
+            new ClassicCounter<>(),
          Generics.<Label,ClassicCounter<String>>newHashMap(),
          Generics.<String,Float>newHashMap(),
          Generics.<String>newHashSet());
@@ -125,6 +119,7 @@ public class BaseUnknownWordModel implements UnknownWordModel {
    * Currently we don't consider loc or the other parameters in determining
    * score in the default implementation; only English uses them.
    */
+  @Override
   public float score(IntTaggedWord itw, int loc, double c_Tseen, double total, double smooth, String word) {
     return score(itw, word);
   }
@@ -179,13 +174,14 @@ public class BaseUnknownWordModel implements UnknownWordModel {
 
 
   /** Calculate P(Tag|Signature) with Bayesian smoothing via just P(Tag|Unknown) */
+  @Override
   public double scoreProbTagGivenWordSignature(IntTaggedWord iTW, int loc, double smooth, String word) {
     throw new UnsupportedOperationException();
   }
 
 
-  // todo [cdm 2012, based on error report from Thang]: this is broken because the Label passed in is a Tag, which will never match on the CoreLabel's know in unknownGT.keySet()
-  // todo [cdm 2012]: But see if this bug is only if you use Lexicon's main method, or also when training a parser in the usual way. 
+  // todo [cdm 2012, based on error report from Thang]: this is broken because the Label passed in is a Tag, which will never match on the CoreLabel's now in unknownGT.keySet()
+  // todo [cdm 2012]: But see if this bug is only if you use Lexicon's main method, or also when training a parser in the usual way.
   protected float scoreGT(String tag) {
     if (VERBOSE) System.err.println("using GT for unknown word and tag " + tag);
     if (unknownGT.containsKey(tag)) {
@@ -201,6 +197,7 @@ public class BaseUnknownWordModel implements UnknownWordModel {
    * @param loc Its sentence position
    * @return A "signature" (which represents an equivalence class of Strings), e.g., a suffix of the string
    */
+  @Override
   public String getSignature(String word, int loc) {
     StringBuilder subStr = new StringBuilder("UNK-");
     int n = word.length() - 1;
@@ -221,36 +218,30 @@ public class BaseUnknownWordModel implements UnknownWordModel {
     return subStr.toString();
   }
 
+  @Override
   public int getSignatureIndex(int wordIndex, int sentencePosition, String word) {
     return 0;
   }
-
-  // private static WordTag toWordTag(TaggedWord tw) {
-  //   return new WordTag(tw.word(), tw.tag());
-  // }
-
 
   /**
    * Get the lexicon associated with this unknown word model; usually not used, but
    * might be useful to tell you if a related word is known or unknown, for example.
    */
+  @Override
   public Lexicon getLexicon() {
     return lex;
   }
 
 
+  @Override
   public int getUnknownLevel() {
     return unknownLevel;
   }
 
-  public void setUnknownLevel(int unknownLevel) {
-    this.unknownLevel = unknownLevel;
-  }
-
-
   /**
    * Adds the tagging with count to the data structures in this Lexicon.
    */
+  @Override
   public void addTagging(boolean seen, IntTaggedWord itw, double count) {
     if (seen) {
       System.err.println("UWM.addTagging: Shouldn't call with seen word!");
@@ -262,6 +253,7 @@ public class BaseUnknownWordModel implements UnknownWordModel {
     }
   }
 
+  @Override
   public Counter<IntTaggedWord> unSeenCounter() {
     return unSeenCounter;
   }

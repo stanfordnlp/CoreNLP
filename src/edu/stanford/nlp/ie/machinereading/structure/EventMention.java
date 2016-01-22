@@ -39,7 +39,7 @@ public class EventMention extends RelationMention {
       List<String> argNames) {
     super(objectId, sentence, span, type, subtype, args, argNames);
     this.anchor = anchor;
-    this.parents = new IdentityHashSet<ExtractionObject>();
+    this.parents = new IdentityHashSet<>();
     
     // set ourselves as the parent of any EventMentions in our args 
     for (ExtractionObject arg : args) {
@@ -50,8 +50,8 @@ public class EventMention extends RelationMention {
   }
   
   public void resetArguments() {
-    args = new ArrayList<ExtractionObject>();
-    argNames = new ArrayList<String>();
+    args = new ArrayList<>();
+    argNames = new ArrayList<>();
   }
   
   public void removeFromParents() {
@@ -218,5 +218,29 @@ public class EventMention extends RelationMention {
     e.resetArguments();
     // remove e from its parent(s) to avoid using this argument in other merges of the parent
     e.removeFromParents();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof EventMention)) return false;
+    if (!super.equals(o)) return false;
+
+    EventMention that = (EventMention) o;
+
+    if (anchor != null ? !anchor.equals(that.anchor) : that.anchor != null) return false;
+    if (eventModification != null ? !eventModification.equals(that.eventModification) : that.eventModification != null)
+      return false;
+    if (parents != null ? !parents.equals(that.parents) : that.parents != null) return false;
+
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = super.hashCode();
+    result = 31 * result + (eventModification != null ? eventModification.hashCode() : 0);
+    result = 31 * result + (anchor != null ? anchor.hashCode() : 0);
+    return result;
   }
 }

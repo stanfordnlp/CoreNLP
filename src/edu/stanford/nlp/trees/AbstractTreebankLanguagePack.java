@@ -6,9 +6,10 @@ import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 import edu.stanford.nlp.util.Filters;
-import edu.stanford.nlp.util.Function;
+
+import java.util.function.Function;
 
 
 /**
@@ -45,6 +46,14 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
 
 
   /**
+   * For languages where a Universal Dependency converter
+   * exists this variable determines whether the original
+   * or the Universal converter will be used.
+   */
+  protected boolean generateOriginalDependencies;
+
+
+  /**
    * Gives a handle to the TreebankLanguagePack.
    */
   public AbstractTreebankLanguagePack() {
@@ -66,6 +75,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return The punctuation tags
    */
+  @Override
   public abstract String[] punctuationTags();
 
   /**
@@ -73,6 +83,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return The punctuation words
    */
+  @Override
   public abstract String[] punctuationWords();
 
   /**
@@ -81,6 +92,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return The sentence final punctuation tags
    */
+  @Override
   public abstract String[] sentenceFinalPunctuationTags();
 
   /**
@@ -92,6 +104,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return Whether this is a EVALB-ignored punctuation tag
    */
+  @Override
   public String[] evalBIgnoredPunctuationTags() {
     return punctuationTags();
   }
@@ -103,8 +116,9 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return Whether this is a punctuation tag
    */
+  @Override
   public boolean isPunctuationTag(String str) {
-    return punctTagStringAcceptFilter.accept(str);
+    return punctTagStringAcceptFilter.test(str);
   }
 
 
@@ -116,8 +130,9 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return Whether this is a punctuation word
    */
+  @Override
   public boolean isPunctuationWord(String str) {
-    return punctWordStringAcceptFilter.accept(str);
+    return punctWordStringAcceptFilter.test(str);
   }
 
 
@@ -127,8 +142,9 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return Whether this is a sentence final punctuation tag
    */
+  @Override
   public boolean isSentenceFinalPunctuationTag(String str) {
-    return sFPunctTagStringAcceptFilter.accept(str);
+    return sFPunctTagStringAcceptFilter.test(str);
   }
 
 
@@ -142,8 +158,9 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return Whether this is a EVALB-ignored punctuation tag
    */
+  @Override
   public boolean isEvalBIgnoredPunctuationTag(String str) {
-    return eIPunctTagStringAcceptFilter.accept(str);
+    return eIPunctTagStringAcceptFilter.test(str);
   }
 
 
@@ -153,7 +170,8 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return The filter
    */
-  public Filter<String> punctuationTagAcceptFilter() {
+  @Override
+  public Predicate<String> punctuationTagAcceptFilter() {
     return punctTagStringAcceptFilter;
   }
 
@@ -164,7 +182,8 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return The filter
    */
-  public Filter<String> punctuationTagRejectFilter() {
+  @Override
+  public Predicate<String> punctuationTagRejectFilter() {
     return Filters.notFilter(punctTagStringAcceptFilter);
   }
 
@@ -177,7 +196,8 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return The Filter
    */
-  public Filter<String> punctuationWordAcceptFilter() {
+  @Override
+  public Predicate<String> punctuationWordAcceptFilter() {
     return punctWordStringAcceptFilter;
   }
 
@@ -190,7 +210,8 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return The Filter
    */
-  public Filter<String> punctuationWordRejectFilter() {
+  @Override
+  public Predicate<String> punctuationWordRejectFilter() {
     return Filters.notFilter(punctWordStringAcceptFilter);
   }
 
@@ -201,7 +222,8 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return The Filter
    */
-  public Filter<String> sentenceFinalPunctuationTagAcceptFilter() {
+  @Override
+  public Predicate<String> sentenceFinalPunctuationTagAcceptFilter() {
     return sFPunctTagStringAcceptFilter;
   }
 
@@ -216,7 +238,8 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return The Filter
    */
-  public Filter<String> evalBIgnoredPunctuationTagAcceptFilter() {
+  @Override
+  public Predicate<String> evalBIgnoredPunctuationTagAcceptFilter() {
     return eIPunctTagStringAcceptFilter;
   }
 
@@ -230,7 +253,8 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return The Filter
    */
-  public Filter<String> evalBIgnoredPunctuationTagRejectFilter() {
+  @Override
+  public Predicate<String> evalBIgnoredPunctuationTagRejectFilter() {
     return Filters.notFilter(eIPunctTagStringAcceptFilter);
   }
 
@@ -241,6 +265,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return Name of Charset
    */
+  @Override
   public String getEncoding() {
     return DEFAULT_ENCODING;
   }
@@ -258,6 +283,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return An array of characters that set off label name suffixes
    */
+  @Override
   public char[] labelAnnotationIntroducingCharacters() {
     return EMPTY_CHAR_ARRAY;
   }
@@ -295,7 +321,12 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
         } else if (sawAtZero && i > 1 && ch == seenAtZero) {
           sawAtZero = false;
         } else {
+          // still skip past identical ones for weird negra-penn "---CJ" (should we just delete it?)
+          // if (i + 1 < leng && category.charAt(i + 1) == ch) {
+            // keep looping
+          // } else {
           break;
+          // }
         }
       }
     }
@@ -317,6 +348,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * @param category The whole String name of the label
    * @return The basic category of the String
    */
+  @Override
   public String basicCategory(String category) {
     if (category == null) {
       return null;
@@ -325,6 +357,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
   }
 
 
+  @Override
   public String stripGF(String category) {
     if(category == null) {
       return null;
@@ -340,8 +373,9 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * Returns a {@link Function Function} object that maps Strings to Strings according
    * to this TreebankLanguagePack's basicCategory() method.
    *
-   * @return The String->String Function object
+   * @return The String-&gt;String Function object
    */
+  @Override
   public Function<String,String> getBasicCategoryFunction() {
     return new BasicCategoryStringFunction(this);
   }
@@ -357,6 +391,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
       this.tlp = tlp;
     }
 
+    @Override
     public String apply(String in) {
       return tlp.basicCategory(in);
     }
@@ -374,6 +409,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
       this.tlp = tlp;
     }
 
+    @Override
     public String apply(String in) {
       return tlp.categoryAndFunction(in);
     }
@@ -394,6 +430,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * @param category The whole String name of the label
    * @return A String giving the category and function
    */
+  @Override
   public String categoryAndFunction(String category) {
     if (category == null) {
       return null;
@@ -446,8 +483,9 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * Returns a {@link Function Function} object that maps Strings to Strings according
    * to this TreebankLanguagePack's categoryAndFunction() method.
    *
-   * @return The String->String Function object
+   * @return The String-&gt;String Function object
    */
+  @Override
   public Function<String,String> getCategoryAndFunctionFunction() {
     return new CategoryAndFunctionStringFunction(this);
   }
@@ -460,6 +498,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * @param ch The character to check
    * @return Whether it is an annotation introducing character
    */
+  @Override
   public boolean isLabelAnnotationIntroducingCharacter(char ch) {
     char[] cutChars = labelAnnotationIntroducingCharacters();
     for (char cutChar : cutChars) {
@@ -476,8 +515,9 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return Whether this is a start symbol
    */
+  @Override
   public boolean isStartSymbol(String str) {
-    return startSymbolAcceptFilter.accept(str);
+    return startSymbolAcceptFilter.test(str);
   }
 
 
@@ -487,7 +527,8 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return The filter
    */
-  public Filter<String> startSymbolAcceptFilter() {
+  @Override
+  public Predicate<String> startSymbolAcceptFilter() {
     return startSymbolAcceptFilter;
   }
 
@@ -497,6 +538,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return The start symbols
    */
+  @Override
   public abstract String[] startSymbols();
 
 
@@ -506,6 +548,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return The start symbol
    */
+  @Override
   public String startSymbol() {
     String[] ssyms = startSymbols();
     if (ssyms == null || ssyms.length == 0) {
@@ -515,15 +558,15 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
   }
 
 
-  private final Filter<String> punctTagStringAcceptFilter = Filters.collectionAcceptFilter(punctuationTags());
+  private final Predicate<String> punctTagStringAcceptFilter = Filters.collectionAcceptFilter(punctuationTags());
 
-  private final Filter<String> punctWordStringAcceptFilter = Filters.collectionAcceptFilter(punctuationWords());
+  private final Predicate<String> punctWordStringAcceptFilter = Filters.collectionAcceptFilter(punctuationWords());
 
-  private final Filter<String> sFPunctTagStringAcceptFilter = Filters.collectionAcceptFilter(sentenceFinalPunctuationTags());
+  private final Predicate<String> sFPunctTagStringAcceptFilter = Filters.collectionAcceptFilter(sentenceFinalPunctuationTags());
 
-  private final Filter<String> eIPunctTagStringAcceptFilter = Filters.collectionAcceptFilter(evalBIgnoredPunctuationTags());
+  private final Predicate<String> eIPunctTagStringAcceptFilter = Filters.collectionAcceptFilter(evalBIgnoredPunctuationTags());
 
-  private final Filter<String> startSymbolAcceptFilter = Filters.collectionAcceptFilter(startSymbols());
+  private final Predicate<String> startSymbolAcceptFilter = Filters.collectionAcceptFilter(startSymbols());
 
   /**
    * Return a tokenizer which might be suitable for tokenizing text that
@@ -532,6 +575,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return A tokenizer
    */
+  @Override
   public TokenizerFactory<? extends HasWord> getTokenizerFactory() {
     return WhitespaceTokenizer.factory(false);
   }
@@ -542,8 +586,11 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return A GrammaticalStructureFactory suitable for this language/treebank
    */
+  @Override
   public GrammaticalStructureFactory grammaticalStructureFactory() {
-    throw new UnsupportedOperationException("No GrammaticalStructureFactory defined for " + getClass().getName());
+    throw new UnsupportedOperationException(
+            "No GrammaticalStructureFactory (typed dependencies) available for language/treebank " +
+                    getClass().getName());
   }
 
   /**
@@ -552,7 +599,8 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return A GrammaticalStructureFactory suitable for this language/treebank
    */
-  public GrammaticalStructureFactory grammaticalStructureFactory(Filter<String> puncFilt) {
+  @Override
+  public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilt) {
     return grammaticalStructureFactory();
   }
 
@@ -562,8 +610,14 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    *
    * @return A GrammaticalStructureFactory suitable for this language/treebank
    */
-  public GrammaticalStructureFactory grammaticalStructureFactory(Filter<String> puncFilt, HeadFinder typedDependencyHeadFinder) {
+  @Override
+  public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilt, HeadFinder typedDependencyHeadFinder) {
     return grammaticalStructureFactory();
+  }
+
+  @Override
+  public boolean supportsGrammaticalStructures() {
+    return false;
   }
 
   public char getGfCharacter() {
@@ -571,16 +625,19 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
   }
 
 
+  @Override
   public void setGfCharacter(char gfCharacter) {
     this.gfCharacter = gfCharacter;
   }
 
   /** {@inheritDoc} */
+  @Override
   public TreeReaderFactory treeReaderFactory() {
     return new PennTreeReaderFactory();
   }
 
   /** {@inheritDoc} */
+  @Override
   public TokenizerFactory<Tree> treeTokenizerFactory() {
     return new TreeTokenizerFactory(treeReaderFactory());
   }
@@ -588,7 +645,19 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
   /**
    * Returns a morphological feature specification for words in this language.
    */
+  @Override
   public MorphoFeatureSpecification morphFeatureSpec() {
     return null;
   }
+
+  @Override
+  public void setGenerateOriginalDependencies(boolean generateOriginalDependencies) {
+    this.generateOriginalDependencies = generateOriginalDependencies;
+  }
+
+  @Override
+  public boolean generateOriginalDependencies() {
+    return this.generateOriginalDependencies;
+  }
+
 }

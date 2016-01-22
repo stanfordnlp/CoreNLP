@@ -11,8 +11,6 @@ import edu.stanford.nlp.util.Triple;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,7 +18,8 @@ import java.util.Set;
 
 /**
  * Implementation of Generalized Expectation Objective function for
- * an I.I.D. log-linear model. See Mann and McCallum, ACL 2008.
+ * an I.I.D. log-linear model. See Mann and McCallum, ACL 2008 for GE in CRFs.
+ * This code, however, is just for log-linear model
  * IMPORTANT: the current implementation is only correct as long as
  * the labeled features passed to GE are binary.
  * However, other features are allowed to be real valued.
@@ -77,7 +76,7 @@ public class GeneralizedExpectationObjectiveFunction<L,F> extends AbstractCachin
     } else {
       Arrays.fill(derivative, 0.0);
     }
-    Counter<Triple<Integer,Integer,Integer>> feature2classPairDerivatives = new ClassicCounter<Triple<Integer,Integer,Integer>>();
+    Counter<Triple<Integer,Integer,Integer>> feature2classPairDerivatives = new ClassicCounter<>();
 
     value = 0.0;
     for(int n = 0; n < geFeatures.size(); n++){
@@ -110,7 +109,7 @@ public class GeneralizedExpectationObjectiveFunction<L,F> extends AbstractCachin
           for(int c = 0; c < numClasses; c++) {
             int wtIndex = indexOf(f,c);
             for(int cPrime = 0;  cPrime < numClasses; cPrime++){
-              derivative[wtIndex] += feature2classPairDerivatives.getCount(new Triple<Integer,Integer,Integer>(f,c,cPrime))*geFeature2EmpiricalDist[n][cPrime]/modelDist[cPrime];
+              derivative[wtIndex] += feature2classPairDerivatives.getCount(new Triple<>(f, c, cPrime))*geFeature2EmpiricalDist[n][cPrime]/modelDist[cPrime];
             }
             derivative[wtIndex] /= activeData.size();
           }
@@ -127,9 +126,9 @@ public class GeneralizedExpectationObjectiveFunction<L,F> extends AbstractCachin
          for (int c = 0; c < numClasses; c++) {
            for (int cPrime = 0; cPrime < numClasses; cPrime++) {
              if (cPrime == c) {
-               feature2classPairDerivatives.incrementCount(new Triple<Integer,Integer,Integer>(fID,c,cPrime), - probs[c]*(1-probs[c])*valueOfFeature(feature,datum));
+               feature2classPairDerivatives.incrementCount(new Triple<>(fID, c, cPrime), - probs[c]*(1-probs[c])*valueOfFeature(feature,datum));
              } else {
-               feature2classPairDerivatives.incrementCount(new Triple<Integer,Integer,Integer>(fID,c,cPrime), probs[c]*probs[cPrime]*valueOfFeature(feature,datum));
+               feature2classPairDerivatives.incrementCount(new Triple<>(fID, c, cPrime), probs[c]*probs[cPrime]*valueOfFeature(feature,datum));
              }
            }
          }
@@ -149,12 +148,12 @@ public class GeneralizedExpectationObjectiveFunction<L,F> extends AbstractCachin
     private void computeEmpiricalStatistics(List<F> geFeatures){
       //allocate memory to the containers and initialize them
       geFeature2EmpiricalDist = new double[geFeatures.size()][labeledDataset.labelIndex.size()];
-      geFeature2DatumList = new ArrayList<List<Integer>>(geFeatures.size());
+      geFeature2DatumList = new ArrayList<>(geFeatures.size());
       Map<F,Integer> geFeatureMap = Generics.newHashMap();
       Set<Integer> activeUnlabeledExamples = Generics.newHashSet();
       for(int n = 0; n < geFeatures.size(); n++){
         F geFeature = geFeatures.get(n);
-        geFeature2DatumList.add(new ArrayList<Integer>());
+        geFeature2DatumList.add(new ArrayList<>());
         Arrays.fill(geFeature2EmpiricalDist[n], 0);
         geFeatureMap.put(geFeature,n);
       }
@@ -216,7 +215,7 @@ public class GeneralizedExpectationObjectiveFunction<L,F> extends AbstractCachin
     this.labeledDataset = labeledDataset;
     this.unlabeledDataList = unlabeledDataList;
     this.geFeatures = geFeatures;
-    this.classifier = new LinearClassifier<L,F>(null,labeledDataset.featureIndex,labeledDataset.labelIndex);
+    this.classifier = new LinearClassifier<>(null, labeledDataset.featureIndex, labeledDataset.labelIndex);
     computeEmpiricalStatistics(geFeatures);
     //empirical distributions don't change with iterations, so compute them only once.
     //model distributions will have to be recomputed every iteration though.

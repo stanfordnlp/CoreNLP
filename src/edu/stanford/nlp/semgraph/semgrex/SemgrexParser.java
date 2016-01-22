@@ -3,22 +3,24 @@ package edu.stanford.nlp.semgraph.semgrex;
 // all generated classes are in this package
 
 //imports
-import java.io.StringReader;
 import java.util.*;
 import edu.stanford.nlp.util.Generics;
 
 class SemgrexParser implements SemgrexParserConstants {
 
-        // this is so we can tell, at any point during the parse
-        // whether we are under a negation, which we need to know
-        // because labeling nodes under negation is illegal
-        private boolean underNegation = false;
-        private boolean underNodeNegation = false;
+  // this is so we can tell, at any point during the parse
+  // whether we are under a negation, which we need to know
+  // because labeling nodes under negation is illegal
+  private boolean underNegation = false;
+  private boolean underNodeNegation = false;
+  // keep track of which variables we've already seen
+  // lets us make sure we don't name new nodes under a negation
+  private Set<String> knownVariables = Generics.newHashSet();
 
   final public SemgrexPattern Root() throws ParseException {
   SemgrexPattern node;
   Token reverse = null;
-  List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
+  List<SemgrexPattern> children = new ArrayList<>();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case ALIGNRELN:
       reverse = jj_consume_token(ALIGNRELN);
@@ -80,7 +82,7 @@ class SemgrexParser implements SemgrexParserConstants {
         ;
       }
                 if (child != null) {
-                List<SemgrexPattern> newChildren = new ArrayList<SemgrexPattern>();
+                List<SemgrexPattern> newChildren = new ArrayList<>();
                 newChildren.addAll(result.getChildren());
                 newChildren.add(child);
                 result.setChild(new CoordinationPattern(false, newChildren, true));
@@ -117,7 +119,7 @@ class SemgrexParser implements SemgrexParserConstants {
 
   final public SemgrexPattern RelationDisj() throws ParseException {
         SemgrexPattern child;
-        List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
+        List<SemgrexPattern> children = new ArrayList<>();
     child = RelationConj();
                                      children.add(child);
     label_2:
@@ -134,16 +136,17 @@ class SemgrexParser implements SemgrexParserConstants {
       child = RelationConj();
                                            children.add(child);
     }
-          if (children.size() == 1)
+          if (children.size() == 1) {
                 {if (true) return child;}
-          else
+          } else {
                 {if (true) return new CoordinationPattern(false, children, false);}
+      }
     throw new Error("Missing return statement in function");
   }
 
   final public SemgrexPattern RelationConj() throws ParseException {
         SemgrexPattern child;
-        List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
+        List<SemgrexPattern> children = new ArrayList<>();
     child = ModRelation();
                                      children.add(child);
     label_3:
@@ -173,10 +176,11 @@ class SemgrexParser implements SemgrexParserConstants {
       child = ModRelation();
                                              children.add(child);
     }
-          if (children.size() == 1)
+          if (children.size() == 1) {
                 {if (true) return child;}
-          else
+          } else {
                 {if (true) return new CoordinationPattern(false, children, true);}
+      }
     throw new Error("Missing return statement in function");
   }
 
@@ -340,7 +344,7 @@ class SemgrexParser implements SemgrexParserConstants {
 
   final public SemgrexPattern NodeDisj(GraphRelation r) throws ParseException {
         SemgrexPattern child;
-        List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
+        List<SemgrexPattern> children = new ArrayList<>();
     jj_consume_token(19);
     child = NodeConj(r);
                                         children.add(child);
@@ -368,7 +372,7 @@ class SemgrexParser implements SemgrexParserConstants {
 
   final public SemgrexPattern NodeConj(GraphRelation r) throws ParseException {
         SemgrexPattern child;
-        List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
+        List<SemgrexPattern> children = new ArrayList<>();
     child = ModNode(r);
                                  children.add(child);
     label_5:
@@ -523,8 +527,14 @@ class SemgrexParser implements SemgrexParserConstants {
       jj_consume_token(22);
                   link = true;
       name = jj_consume_token(IDENTIFIER);
-                 if (underNegation)
-                                {if (true) throw new ParseException("No named semgrex nodes allowed in the scope of negation");}
+              String nodeName = name.image;
+              if (underNegation) {
+                if (!knownVariables.contains(nodeName)) {
+                  {if (true) throw new ParseException("Cannot add new variable names under negation.  Node '" + nodeName + "' not seen before");}
+                }
+              } else {
+                knownVariables.add(nodeName);
+              }
       break;
     default:
       jj_la1[26] = jj_gen;
@@ -661,7 +671,7 @@ class SemgrexParser implements SemgrexParserConstants {
       return (jj_ntk = jj_nt.kind);
   }
 
-  private java.util.List<int[]> jj_expentries = new java.util.ArrayList<int[]>();
+  private java.util.List<int[]> jj_expentries = new java.util.ArrayList<>();
   private int[] jj_expentry;
   private int jj_kind = -1;
 

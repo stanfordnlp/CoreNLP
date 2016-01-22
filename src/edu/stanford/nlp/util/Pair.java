@@ -100,7 +100,7 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
    * <code>String</code>.
    */
   public static Pair<String, String> readStringPair(DataInputStream in) {
-    Pair<String, String> p = new Pair<String, String>();
+    Pair<String, String> p = new Pair<>();
     try {
       p.first = in.readUTF();
       p.second = in.readUTF();
@@ -116,7 +116,7 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
    * don't have to write out potentially long class names.
    */
   public static <X, Y> Pair<X, Y> makePair(X x, Y y) {
-    return new Pair<X, Y>(x, y);
+    return new Pair<>(x, y);
   }
 
   /**
@@ -158,12 +158,22 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
    */
   @SuppressWarnings("unchecked")
   public int compareTo(Pair<T1,T2> another) {
-    int comp = ((Comparable<T1>) first()).compareTo(another.first());
-    if (comp != 0) {
-      return comp;
-    } else {
+    if (first() instanceof Comparable) {
+      int comp = ((Comparable<T1>) first()).compareTo(another.first());
+      if (comp != 0) {
+        return comp;
+      }
+    }
+
+    if (second() instanceof Comparable) {
       return ((Comparable<T2>) second()).compareTo(another.second());
     }
+
+    if ((!(first() instanceof Comparable)) && (!(second() instanceof Comparable))) {
+      throw new AssertionError("Neither element of pair comparable");
+    }
+
+    return 0;
   }
 
   /**

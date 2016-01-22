@@ -31,7 +31,24 @@
 
 package edu.stanford.nlp.classify;
 
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.ling.BasicDatum;
+import edu.stanford.nlp.ling.Datum;
+import edu.stanford.nlp.ling.RVFDatum;
+import edu.stanford.nlp.ling.Word;
+import edu.stanford.nlp.objectbank.ObjectBank;
+import edu.stanford.nlp.optimization.DiffFunction;
+import edu.stanford.nlp.optimization.Minimizer;
+import edu.stanford.nlp.process.PTBTokenizer;
+import edu.stanford.nlp.process.Tokenizer;
+import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.process.WordShapeClassifier;
+import edu.stanford.nlp.stats.*;
+import edu.stanford.nlp.util.*;
+
 import java.io.*;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,26 +56,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.ling.BasicDatum;
-import edu.stanford.nlp.ling.Datum;
-import edu.stanford.nlp.ling.RVFDatum;
-import edu.stanford.nlp.optimization.DiffFunction;
-import edu.stanford.nlp.optimization.Minimizer;
-import edu.stanford.nlp.process.WordShapeClassifier;
-import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.stats.Counters;
-import edu.stanford.nlp.stats.Distribution;
-import edu.stanford.nlp.stats.TwoDimensionalCounter;
-import edu.stanford.nlp.objectbank.ObjectBank;
-import edu.stanford.nlp.util.ErasureUtils;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.ReflectionLoading;
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.Triple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -69,13 +68,17 @@ import edu.stanford.nlp.util.Triple;
  * features will interpret these variables as numbers, but
  * the code is mainly oriented towards generating features for string
  * classification.  To designate a real-valued feature, use the realValued
- * option described below. The classifier can be either a Bernoulli Naive
- * Bayes model or a loglinear discriminative (i.e., maxent) model.
+ * option described below. The classifier by default is a maxent classifier
+ * (also known as a softmax classifier or a discriminative loglinear classifier;
+ * equivalent to multiclass logistic regression apart from a slightly different
+ * symmetric parameterization. It also implements a Bernoulli Naive
+ * Bayes model and can implement an SVM by an external call to SVMlight.
  * <p/>
  * You can also use ColumnDataClassifier programmatically, where its main
  * usefulness beyond simply building your own LinearClassifier is that it
  * provides easy conversion of data items into features, using the same
- * properties as the command-line version.
+ * properties as the command-line version. You can see example of usage in
+ * the class {@link edu.stanford.nlp.classify.demo.ClassifierDemo}.
  * <p/>
  * Input files are expected to
  * be one data item per line with two or more columns indicating the class
@@ -106,7 +109,7 @@ import edu.stanford.nlp.util.Triple;
  * Manning and Klein maxent classifier tutorial, slides 46-49, available at
  * http://nlp.stanford.edu/downloads/classifier.shtml are included in the
  * classify package source directory (files starting with "easy").  Other
- * examples appear in the <code>examples</code> directory of the distributed
+ * examples appear in the {@code examples} directory of the distributed
  * classifier.
  * <p/>
  * In many instances, parameters can either be given on the command line
@@ -119,10 +122,10 @@ import edu.stanford.nlp.util.Triple;
  * describing the datum.  If you have multidimensional data, you need to use
  * a properties file.  Property names, as below, are either global (things
  * like the testFile name) or are seen as properties that define features
- * for the first data column (we count columns from 0 - unlike the Unix cut
+ * for the first data column (NOTE: we count columns from 0 - unlike the Unix cut
  * command!).  To specify features for a particular data column, precede a
  * feature by a column number and then a period (for example,
- * <code>3.wordShape=chris4</code>).  If no number is specified, then the
+ * {@code 3.wordShape=chris4}).  If no number is specified, then the
  * default interpretation is column 0. Note that in properties files you must
  * give a value to boolean properties (e.g., <code>2.useString=true</code>);
  * just giving the property name (as <code>2.useString</code>) isn't
@@ -131,19 +134,21 @@ import edu.stanford.nlp.util.Triple;
  * The following properties are recognized:
  * </p>
  * <table border="1">
- * <tr><td><b>Property Name</b></td><td><b>Type</b></td><td><b>Default Value</b></td><td><b>Description</b></td><td><b>FeatName</b></td></tr>
+ *   <caption>Properties for ColumnDataClassifier</caption>
+ * <tr><th><b>Property Name</b></th><th><b>Type</b></th><th><b>Default Value</b></th><th><b>Description</b></th><th><b>FeatName</b></th></tr>
  * <tr><td> loadClassifier </td><td>String</td><td>n/a</td><td>Path of serialized classifier file to load</td></tr>
  * <tr><td> serializeTo</td><td>String</td><td>n/a</td><td>Path to serialize classifier to</td></tr>
  * <tr><td> printTo</td><td>String</td><td>n/a</td><td>Path to print a text representation of the linear classifier to</td></tr>
  * <tr><td> trainFile</td><td>String</td><td>n/a</td><td>Path of file to use as training data</td></tr>
  * <tr><td> testFile</td><td>String</td><td>n/a</td><td>Path of file to use as test data</td></tr>
- * <tr><td> encoding</td><td>String</td><td><i>platform default</i></td><td>Character encoding of training and test file, e.g. utf-8 or iso-8859-1</td></tr>
+ * <tr><td> encoding</td><td>String</td><td><i>utf-8</i></td><td>Character encoding of training and test file, e.g., utf-8, GB18030, or iso-8859-1</td></tr>
  * <tr><td> displayedColumn</td><td>int</td><td>1</td><td>Column number that will be printed out to stdout in the output next to the gold class and the chosen class.  This is just an aide memoire.  If the value is negative, nothing is printed. </td></tr>
+ * <tr><td> displayAllAnswers</td><td>boolean</td><td>false</td><td>If true, print all classes and their probability, sorted by probability, rather than just the highest scoring and correct classes. </td></tr>
  * <tr><td> goldAnswerColumn</td><td>int</td><td>0</td><td>Column number that contains the correct class for each data item (again, columns are numbered from 0 up).</td></tr>
  * <tr><td> groupingColumn</td><td>int</td><td>-1</td><td>Column for grouping multiple data items for the purpose of computing ranking accuracy.  This is appropriate when only one datum in a group can be correct, and the intention is to choose the highest probability one, rather than accepting all above a threshold.  Multiple items in the same group must be contiguous in the test file (otherwise it would be necessary to cache probabilities and groups for the entire test file to check matches).  If it is negative, no grouping column is used, and no ranking accuracy is reported.</td></tr>
  * <tr><td> rankingScoreColumn</td><td>int</td><td>-1</td><td>If this parameter is non-negative and a groupingColumn is defined, then an average ranking score will be calculated by scoring the chosen candidate from a group according to its value in this column (for instance, the values of this column can be set to a mean reciprocal rank of 1.0 for the best answer, 0.5 for the second best and so on, or the value of this column can be a similarity score reflecting the similarity of the answer to the true answer.</td></tr>
  * <tr><td> rankingAccuracyClass</td><td>String</td><td>null</td><td>If this and groupingColumn are defined (positive), then the system will compute a ranking accuracy under the assumption that there is (at most) one assignment of this class for each group, and ranking accuracy counts the classifier as right if that datum is the one with highest probability according to the model.</td></tr>
- * <p/>
+ * <tr></tr>
  * <tr><td> useString</td><td>boolean</td><td>false</td><td>Gives you a feature for whole string s</td><td>S-<i>str</i></td></tr>
  * <tr><td> useClassFeature</td><td>boolean</td><td>false</td><td>Include a feature for the class (as a class marginal)</td><td>CLASS</td></tr>
  * <tr><td> binnedLengths</td><td>String</td><td>null</td><td>If non-null, treat as a sequence of comma separated integer bounds, where items above the previous bound (if any) up to the next bound (inclusive) are binned (e.g., "1,5,15,30,60"). The feature represents the length of the String in this column.</td><td>Len-<i>range</i></td></tr>
@@ -154,24 +159,34 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td> countChars</td><td>String</td><td>null</td><td>If non-null, count the number of occurrences of each character in the String, and make a feature for each character, binned according to <code>countCharsBins</code></td><td>Char-<i>ch</i>-<i>range</i></td></tr>
  * <tr><td> countCharsBins</td><td>String</td><td>"0,1"</td><td>Treat as a sequence of comma separated integer bounds, where character counts above the previous bound up to and including the next bound are binned. For instance, a value of "0,2" will give 3 bins, dividing a character count into bins of 0, 1-or-2, and 3-or-more occurrences.</td><td></td></tr>
  * <tr><td> splitWordsRegexp</td><td>String</td><td>null</td><td>If defined, use this as a regular expression on which to split the whole string (as in the String.split() function, which will return the things between delimiters, and discard the delimiters).  The resulting split-up "words" will be used in classifier features iff one of the other "useSplit" options is turned on.</td></tr>
- * <tr><td> splitWordsTokenizerRegexp</td><td>String</td><td>null</td><td>If defined, use this as a regular expression to cut initial pieces off a String.  This regular expression <i>should always match</i> the String, and the size of the token is the number of characters matched.  So, for example, one can group letter and number characters but do nothing else with a regular expression like <code>([A-Za-z]+|[0-9]+|.)</code>.  (If the regular expression doesn't match, the first character of the string is treated as a one character word, and then matching is tried again, but in this case a warning message is printed.)  Note that, for Java regular expressions with disjunctions like this, the match is the first matching disjunction, not the longest matching disjunction, so patterns with common prefixes need to be ordered from most specific (longest) to least specific (shortest).)  The resulting split up "words" will be used in classifier features iff one of the other "useSplit" options is turned on.  Note that as usual for Java String processing, backslashes must be doubled in the regular expressions that you write.</td></tr>
- * <tr><td> splitWordsIgnoreRegexp</td><td>String</td><td>null</td><td>If defined, this regexp is used to determine character sequences which should not be returned as tokens when using the splitWordsTokenizerRegexp.  Typically, these might be whitespace tokens (i.e., \\s+).</td></tr>
+ * <tr><td> splitWordsTokenizerRegexp</td><td>String</td><td>null</td><td>If defined, use this as a regular expression to cut initial pieces off a String.  Either this regular expression or <code>splitWordsIgnoreRegexp</code> <i>should always match</i> the start of the String, and the size of the token is the number of characters matched.  So, for example, one can group letter and number characters but do nothing else with a regular expression like <code>([A-Za-z]+|[0-9]+|.)</code>, where the last disjunct will match any other single character.  (If neither regular expression matches, the first character of the string is treated as a one character word, and then matching is tried again, but in this case a warning message is printed.)  Note that, for Java regular expressions with disjunctions like this, the match is the first matching disjunction, not the longest matching disjunction, so patterns with common prefixes need to be ordered from most specific (longest) to least specific (shortest).)  The resulting split up "words" will be used in classifier features iff one of the other "useSplit" options is turned on.  Note that as usual for Java String processing, backslashes must be doubled in the regular expressions that you write.</td></tr>
+ * <tr><td> splitWordsIgnoreRegexp</td><td>String</td><td>\\s+</td><td>If non-empty, this regexp is used to determine character sequences which should not be returned as tokens when using <code>splitWordsTokenizerRegexp</code> or <code>splitWordsRegexp</code>. With the former, first the program attempts to match this regular expression at the start of the string (with <code>lookingAt()</code>) and if it matches, those characters are discarded, but if it doesn't match then <code>splitWordsTokenizerRegexp</code> is tried. With <code>splitWordsRegexp</code>, this is used to filter tokens (with <code>matches()</code> resulting from the splitting.  By default this regular expression is set to be all whitespace tokens (i.e., \\s+). Set it to an empty string to get all tokens returned.</td></tr>
+ * <tr><td> splitWordsWithPTBTokenizer</td><td>boolean</td><td>false</td><td>If true, and <code>splitWordsRegexp</code> and <code>splitWordsTokenizerRegexp</code> are false, then will tokenize using the <code>PTBTokenizer</code></td></tr>
  * <tr><td> useSplitWords</td><td>boolean</td><td>false</td><td>Make features from the "words" that are returned by dividing the string on splitWordsRegexp or splitWordsTokenizerRegexp.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>SW-<i>str</i></td></tr>
- * <tr><td> useLowercaseSplitWords</td><td>boolean</td><td>false</td><td>Make features from the "words" that are returned by dividing the string on splitWordsRegexp or splitWordsTokenizerRegexp and then lowercasing the result.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.  Note that this can be specified independently of useSplitWords. You can put either or both original cased and lowercased words in as features.</td><td>SW-<i>str</i></td></tr>
- * <tr><td> useSplitWordPairs</td><td>boolean</td><td>false</td><td>Make features from the pairs of adjacent "words" that are returned by dividing the string into splitWords.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>SWP-<i>str1</i>-<i>str2</i></td></tr>
+ * <tr><td> useLowercaseSplitWords</td><td>boolean</td><td>false</td><td>Make features from the "words" that are returned by dividing the string on splitWordsRegexp or splitWordsTokenizerRegexp and then lowercasing the result.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.  Note that this can be specified independently of useSplitWords. You can put either or both original cased and lowercased words in as features.</td><td>LSW-<i>str</i></td></tr>
+ * <tr><td> useSplitWordPairs</td><td>boolean</td><td>false</td><td>Make features from the pairs of adjacent "words" that are returned by dividing the string into splitWords.  Requires splitWordsRegexp or splitWordsTokenizerRegexp. This doesn't add features for the first and last words being next to a boundary; if you want those, also set useSplitFirstLastWords.</td><td>SWP-<i>str1</i>-<i>str2</i></td></tr>
+ * <tr><td> useLowercaseSplitWordPairs</td><td>boolean</td><td>false</td><td>Make features from the lowercased form of the pairs of adjacent "words" that are returned by dividing the string into splitWords.  Requires splitWordsRegexp or splitWordsTokenizerRegexp. This doesn't add features for the first and last words being next to a boundary; if you want those, also set useLowercaseSplitFirstLastWords.</td><td>LSWP-<i>str1</i>-<i>str2</i></td></tr>
  * <tr><td> useAllSplitWordPairs</td><td>boolean</td><td>false</td><td>Make features from all pairs of "words" that are returned by dividing the string into splitWords.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>ASWP-<i>str1</i>-<i>str2</i></td></tr>
  * <tr><td> useAllSplitWordTriples</td><td>boolean</td><td>false</td><td>Make features from all triples of "words" that are returned by dividing the string into splitWords.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>ASWT-<i>str1</i>-<i>str2</i>-<i>str3</i></td></tr>
- * <tr><td> useSplitWordNGrams</td><td>boolean</td><td>false</td><td>Make features of adjacent word n-grams of lengths between minWordNGramLeng and maxWordNGramLeng inclusive.</td><td>SW#-<i>str1-str2-strN</i></td></tr>
+ * <tr><td> useSplitWordNGrams</td><td>boolean</td><td>false</td><td>Make features of adjacent word n-grams of lengths between minWordNGramLeng and maxWordNGramLeng inclusive. Note that these are word sequences, not character n-grams.</td><td>SW#-<i>str1-str2-strN</i></td></tr>
+ *
+ * <tr><td> splitWordCount</td><td>boolean</td><td>false</td><td>If true, the value of this real-valued feature is the number of split word tokens in the column.</td><td>SWNUM</td></tr>
+ * <tr><td> logSplitWordCount</td><td>boolean</td><td>false</td><td>If true, the value of this real-valued feature is the log of the number of split word tokens in the column.</td><td>LSWNUM</td></tr>
+ * <tr><td> binnedSplitWordCounts</td><td>String</td><td>null</td><td>If non-null, treat as a sequence of comma-separated integer bounds, where items above the previous bound (if any) up to the next bound (inclusive) are binned (e.g., "1,5,15,30,60"). The feature represents the number of split words in this column.</td><td>SWNUMBIN-<i>range</i></td></tr>
+
  * <tr><td> maxWordNGramLeng</td><td>int</td><td>-1</td><td>If this number is positive, word n-grams above this size will not be used in the model</td></tr>
  * <tr><td> minWordNGramLeng</td><td>int</td><td>1</td><td>Must be positive. word n-grams below this size will not be used in the model</td></tr>
  * <tr><td> wordNGramBoundaryRegexp</td><td>String</td><td>null</td><td>If this is defined and the regexp matches, then the ngram stops</td></tr>
- * <tr><td> useSplitFirstLastWords</td><td>boolean</td><td>false</td><td>Make a feature from each of the first and last "words" that are returned as splitWords.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>SFW-<i>str</i>, SLW-<i>str</i></td></tr>
+ * <tr><td> useSplitFirstLastWords</td><td>boolean</td><td>false</td><td>Make a feature from each of the first and last "words" that are returned as splitWords.  This is equivalent to having word bigrams with boundary tokens at each end of the sequence (they get a special feature).  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>SFW-<i>str</i>, SLW-<i>str</i></td></tr>
+ * <tr><td> useLowercaseSplitFirstLastWords</td><td>boolean</td><td>false</td><td>Make a feature from each of the first and last "words" that are returned as splitWords.  This is equivalent to having word bigrams with boundary tokens at each end of the sequence (they get a special feature).  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>LSFW-<i>str</i>, LSLW-<i>str</i></td></tr>
  * <tr><td> useSplitNGrams</td><td>boolean</td><td>false</td><td>Make features from letter n-grams - internal as well as edge all treated the same - after the data string has been split into tokens.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>S#-<i>str</i></td></tr>
- * <tr><td> useSplitPrefixSuffixNGrams</td><td>boolean</td><td>false</td><td>Make features from prefixes and suffixes after splitting with splitWordsRegexp.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>S#B-<i>str</i>, S#E-<i>str</i></td></tr>
+ * <tr><td> useSplitPrefixSuffixNGrams</td><td>boolean</td><td>false</td><td>Make features from prefixes and suffixes of each token, after splitting string with splitWordsRegexp.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>S#B-<i>str</i>, S#E-<i>str</i></td></tr>
+ * <tr><td> useSplitWordVectors</td><td>String</td><td>null</td><td>(If non-null) load word vectors from this file and add their average over all split words as real-valued features.  Requires splitWordsRegexp or splitWordsTokenizerRegexp. Note that for best results you need a close match between your tokenization and that used by the word vectors.</td><td>SWV-<i>num</i></td></tr>
+
  * <tr><td> useNGrams</td><td>boolean</td><td>false</td><td>Make features from letter n-grams - internal as well as edge all treated the same.</td><td>#-<i>str</i></td></tr>
- * <tr><td> usePrefixSuffixNGrams</td><td>boolean</td><td>false</td><td>Make features from prefix and suffix strings.</td><td>#B-<i>str</i>, #E-<i>str</i></td></tr>
- * <tr><td> lowercase</td><td>boolean</td><td>false</td><td>Make the input string lowercase so all features work unicase</td></tr>
- * <tr><td> lowercaseNGrams</td><td>boolean</td><td>false</td><td>Make features from letter n-grams all lowercase (for both useNGrams and usePrefixSuffixNGrams)</td></tr>
+ * <tr><td> usePrefixSuffixNGrams</td><td>boolean</td><td>false</td><td>Make features from prefix and suffix substrings of the string.</td><td>#B-<i>str</i>, #E-<i>str</i></td></tr>
+ * <tr><td> lowercase</td><td>boolean</td><td>false</td><td>Make the input string lowercase so all features work uncased</td></tr>
+ * <tr><td> lowercaseNGrams</td><td>boolean</td><td>false</td><td>Make features from letter n-grams all lowercase (for all of useNGrams, usePrefixSuffixNGrams, useSplitNGrams, and useSplitPrefixSuffixNGrams)</td></tr>
  * <tr><td> maxNGramLeng</td><td>int</td><td>-1</td><td>If this number is positive, n-grams above this size will not be used in the model</td></tr>
  * <tr><td> minNGramLeng</td><td>int</td><td>2</td><td>Must be positive. n-grams below this size will not be used in the model</td></tr>
  * <tr><td> partialNGramRegexp</td><td>String</td><td>null</td><td>If this is defined and the regexp matches, then n-grams are made only from the matching text (if no capturing groups are defined) or from the first capturing group of the regexp, if there is one.  This substring is used for both useNGrams and usePrefixSuffixNGrams.</td></tr>
@@ -182,7 +197,7 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td> filename</td><td>boolean</td><td>false</td><td>Treat this column as a filename (path) and then use the contents of that file (assumed to be plain text) in the calculation of features according to other flag specifications.</td><td></td></tr>
  * <tr><td> wordShape</td><td>String</td><td>none</td><td>Either "none" for no wordShape use, or the name of a word shape function recognized by {@link edu.stanford.nlp.process.WordShapeClassifier#lookupShaper(String)}, such as "dan1" or "chris4".  WordShape functions equivalence-class strings based on the pattern of letter, digit, and symbol characters that they contain.  The details depend on the particular function chosen.</td><td>SHAPE-<i>str</i></td></tr>
  * <tr><td> splitWordShape</td><td>String</td><td>none</td><td>Either "none" for no wordShape or the name of a word shape function recognized by {@link WordShapeClassifier#lookupShaper(String)}.  This is applied to each "word" found by splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>SSHAPE-<i>str</i></td></tr>
- * <p/>
+ * <tr></tr>
  * <tr><td> featureMinimumSupport</td><td>int</td><td>0</td><td>A feature, that is, an (observed,class) pair, will only be included in the model providing it is seen a minimum of this number of times in the training data.</td></tr>
  * <tr><td> biasedHyperplane</td><td>String</td><td>null</td><td>If non-null, a sequence of comma-separated pairs of <i>className prob</i>.  An item will only be classified to a certain class <i>className</i> if its probability of class membership exceeds the given conditional probability <i>prob</i>; otherwise it will be assigned to a different class.  If this list of classes is exhaustive, and no condition is satisfied, then the most probable class is chosen.</td></tr>
  * <tr><td> printFeatures</td><td>String</td><td>null</td><td>Print out the features and their values for each instance to a file based on this name.</td></tr>
@@ -190,10 +205,10 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td> printClassifierParam</td><td>int</td><td>100</td><td>A parameter to the printing style, which may give, for example the number of parameters to print (for HighWeight or HighMagnitude).</td></tr>
  * <tr><td> justify</td><td>boolean</td><td>false</td><td>For each test data item, print justification (weights) for active features used in classification.</td></tr>
  * <tr><td> exitAfterTrainingFeaturization</td><td>boolean</td><td>false</td><td>If true, the program exits after reading the training data (trainFile) and before building a classifier.  This is useful in conjunction with printFeatures, if one only wants to convert data to features for use with another classifier.</td></tr>
- * <p/>
+ * <tr></tr>
  * <tr><td> intern</td><td>boolean</td><td>false</td><td>If true, (String) intern all of the (final) feature names.  Recommended (this saves memory, but slows down feature generation in training).</td></tr>
  * <tr><td> cacheNGrams</td><td>boolean</td><td>false</td><td>If true, record the NGram features that correspond to a String (under the current option settings and reuse rather than recalculating if the String is seen again.  <b>Disrecommended (speeds training but can require enormous amounts of memory).</b></td></tr>
- * <p/>
+ * <tr></tr>
  * <tr><td> useNB</td><td>boolean</td><td>false</td><td>Use a Naive Bayes generative classifier (over all features) rather than a discriminative logistic regression classifier.  (Set <code>useClass</code> to true to get a prior term.)</td></tr>
  * <tr><td> useBinary</td><td>boolean</td><td>false</td><td>Use the binary classifier (i.e. use LogisticClassifierFactory, rather than LinearClassifierFactory) to get classifier</td></tr>
  * <tr><td> l1reg</td><td>double</td><td>0.0</td><td>If set to be larger than 0, uses L1 regularization</td></tr>
@@ -211,90 +226,97 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td>useQN</td><td>boolean</td><td>true</td><td>Use Quasi-Newton optimization if true, otherwise use Conjugate Gradient optimization.  Recommended.</td></tr>
  * <tr><td>QNsize</td><td>int</td><td>15</td><td>Number of previous iterations of Quasi-Newton to store (this increases memory use, but speeds convergence by letting the Quasi-Newton optimization more effectively approximate the second derivative).</td></tr>
  * <tr><td>featureFormat</td><td>boolean</td><td>false</td><td>Assumes the input file isn't text strings but already featurized.  One column is treated as the class column (as defined by <code>goldAnswerColumn</code>, and all other columns are treated as features of the instance.  (If answers are not present, set <code>goldAnswerColumn</code> to a negative number.)</td></tr>
- * <tr><td>trainFromSVMLight</td><td>boolean</td><td>false</td><td>Assumes the trainFile is in SVMLight format (see <a href="http://svmlight.joachims.org/">SVMLight webpage</a> for more information)</td></tr>
+ * <tr><td>trainFromSVMLight</td><td>boolean</td><td>false</td><td>Assumes the trainFile is in SVMLight format (see <a href="http://svmlight.joachims.org/">SVMLight web page</a> for more information)</td></tr>
  * <tr><td>testFromSVMLight</td><td>boolean</td><td>false</td><td>Assumes the testFile is in SVMLight format</td></tr>
- * <tr><td>printSVMLightFormatTo</td><td>String</td><td>null</td><td>If non-null, print the featurized training data to an SVMLight format file (usually used with exitAfterTrainingFeaturization)</td></tr>
+ * <tr><td>printSVMLightFormatTo</td><td>String</td><td>null</td><td>If non-null, print the featurized training data to an SVMLight format file (usually used with exitAfterTrainingFeaturization). This is just an option to write out data in a particular format. After that, you're on your own using some other piece of software that reads SVMlight format files.</td></tr>
+ * <tr><td>crossValidationFolds</td><td>int</td><td>-1</td><td>If positive, the training data is divided in to this many folds and cross-validation is done on the training data (prior to testing on test data, if it is also specified)</td></tr>
+ * <tr><td>printCrossValidationDecisions</td><td>boolean</td><td>false</td><td>Whether to print the individual classification decisions in cross-validation training, if crossValidationFolds is positive.</td></tr>
+ * <tr><td>shuffleTrainingData</td><td>boolean</td><td>false</td><td>If true, the training data is shuffled prior to training and cross-validation. This is vital in cross-validation if the training data is otherwise sorted by class.</td></tr>
+ * <tr><td>shuffleSeed</td><td>long</td><td>0</td><td>If non-zero, and the training data is being shuffled, this is used as the seed for the Random. Otherwise, System.nanoTime() is used.</td></tr>
+ * <tr><td>csvInput</td><td>boolean</td><td>false</td><td>If true, reads train and test file in csv format, with support for quoted fields.</td></tr>
+ * <tr><td>inputFormat</td><td>String</td><td>null</td><td>If "header" then reads file with first line treated as header; if "comments" treats lines starting with # as comments; else treated as "plain" tsv/csv file</td></tr>
+ *  <tr><td>csvOutput</td><td>String</td><td>null</td><td>If non-null, used to format the output of the classifier. This is a printf-style format specification where %0 through %9 can print columns of the input, %c prints the assigned class and %n a newline character. This option can produce Kaggle-format output files!</td></tr>
  * </table>
  *
  * @author Christopher Manning
  * @author Anna Rafferty
- * @author Angel Chang (add options for using l1reg)
+ * @author Angel Chang (added options for using l1reg)
  */
 public class ColumnDataClassifier {
 
   private static final double DEFAULT_VALUE = 1.0; // default value for setting categorical, boolean features
+  private static final String DEFAULT_IGNORE_REGEXP = "\\s+";
 
   private final Flags[] flags;
   private final Flags globalFlags; // simply points to flags[0]
-  private Classifier<String,String> classifier = null; // really only assigned once too, but it's too hard for the compiler
+  private Classifier<String,String> classifier; // really only assigned once too (either in train or load in setProperties)
+  private TokenizerFactory<Word> ptbFactory;
+
+  enum InputFormat { PLAIN, COMMENTS, HEADER }
+
+  final static Logger logger = LoggerFactory.getLogger(ColumnDataClassifier.class);
+
+  /**
+   * Entry point for taking a String (formatted as a line of a TSV file) and
+   * translating it into a Datum of features. If real-valued features are used,
+   * this method returns an RVFDatum; otherwise, categorical features are used.
+   *
+   * @param line Line of file
+   * @return A Datum (may be an RVFDatum; never null)
+   */
+  public Datum<String,String> makeDatumFromLine(String line) {
+    return makeDatumFromStrings(splitLineToFields(line));
+  }
 
 
   /**
-   * Entry point for taking a String (formatted as a line of a TSV file)
-   * and translating it into a Datum of features.
+   * Takes a String[] of elements and translates them into a Datum of features.
    * If real-valued features are used, this method accesses makeRVFDatumFromLine
    * and returns an RVFDatum; otherwise, categorical features are used.
    *
-   * @param line Line of file
-   * @param lineNo The line number. This is just used in error messages if there is an input format problem. You can make it 0.
-   * @return A Datum (may be an RVFDatum)
+   * @param strings The elements that features are made from (the columns of a TSV/CSV file)
+   * @return A Datum (may be an RVFDatum; never null)
    */
-  public Datum<String,String> makeDatumFromLine(String line, int lineNo) {
+  public Datum<String,String> makeDatumFromStrings(String[] strings) {
     if (globalFlags.usesRealValues) {
-      return makeRVFDatumFromLine(line,lineNo);
+      return makeRVFDatumFromStrings(strings);
     }
 
     if (globalFlags.featureFormat) {
-      String[] fields = tab.split(line);
-      Collection<String> theFeatures = new ArrayList<String>();
-      for (int i = 0; i < fields.length; i++) {
+      Collection<String> theFeatures = new ArrayList<>();
+      for (int i = 0; i < strings.length; i++) {
         if (i != globalFlags.goldAnswerColumn)
             if (globalFlags.significantColumnId) {
-              theFeatures.add(String.format("%d:%s", i, fields[i]));
+              theFeatures.add(String.format("%d:%s", i, strings[i]));
             } else {
-              theFeatures.add(fields[i]);
+              theFeatures.add(strings[i]);
             }
       }
-      return new BasicDatum<String,String>(theFeatures, fields[globalFlags.goldAnswerColumn]);
+      return new BasicDatum<>(theFeatures, strings[globalFlags.goldAnswerColumn]);
     } else {
-      String[] wi = makeSimpleLineInfo(line, lineNo);
-      // System.err.println("Read in " + wi);
-      return makeDatum(wi);
+      //logger.info("Read in " + strings);
+      return makeDatum(strings);
     }
   }
 
 
-  private RVFDatum<String,String> makeRVFDatumFromLine(String line, int lineNo) {
+  private RVFDatum<String,String> makeRVFDatumFromStrings(String[] strings) {
     if (globalFlags.featureFormat) {
-      String[] fields = tab.split(line);
-      ClassicCounter<String> theFeatures = new ClassicCounter<String>();
-      for (int i = 0; i < fields.length; i++) {
+      ClassicCounter<String> theFeatures = new ClassicCounter<>();
+      for (int i = 0; i < strings.length; i++) {
         if (i != globalFlags.goldAnswerColumn) {
           if (flags[i] != null && (flags[i].isRealValued || flags[i].logTransform || flags[i].logitTransform || flags[i].sqrtTransform)) {
-            addFeatureValue(fields[i], flags[i], theFeatures);
+            addFeatureValue(strings[i], flags[i], theFeatures);
           } else {
-            theFeatures.setCount(fields[i], 1.0);
+            theFeatures.setCount(strings[i], 1.0);
           }
         }
       }
-
-      return new RVFDatum<String,String>(theFeatures, fields[globalFlags.goldAnswerColumn]);
+      return new RVFDatum<>(theFeatures, strings[globalFlags.goldAnswerColumn]);
     } else {
-      String[] wi = makeSimpleLineInfo(line, lineNo);
-      // System.err.println("Read in " + wi);
-      return makeRVFDatum(wi);
+      //logger.info("Read in " + strings);
+      return makeRVFDatum(strings);
     }
-  }
-
-  // NB: This is meant to do splitting strictly only on tabs, and to thus work with things that are exactly TSV files.  It shouldn't split on all whitespace, because it is useful to be able to have spaces inside fields for short text documents, and then to be able to split them into words with features like useSplitWords
-  private static final Pattern tab = Pattern.compile("\\t");
-
-  private static String[] makeSimpleLineInfo(String line, int lineNo) {
-    String[] strings = tab.split(line);
-    if (strings.length < 2) {
-      throw new RuntimeException("Line format error at line " + lineNo + ": " + line);
-    }
-    return strings;
   }
 
 
@@ -302,30 +324,40 @@ public class ColumnDataClassifier {
    *  featurized form. If feature selection is asked for, the returned
    *  featurized form is after feature selection has been applied.
    *
-   * @param fileName File with supervised training examples.
-   * @return A GeneralDataset, where the labels and features are Strings.
+   *  @param fileName File with supervised training examples.
+   *  @return A GeneralDataset, where the labels and features are Strings.
    */
   public GeneralDataset<String,String> readTrainingExamples(String fileName) {
+    return readAndReturnTrainingExamples(fileName).first();
+  }
+
+
+  /** Read a set of training examples from a file, and return the data in a
+   *  featurized form and in String form. If feature selection is asked for, the returned
+   *  featurized form is after feature selection has been applied.
+   *
+   *  @param fileName File with supervised training examples.
+   *  @return A Pair of a GeneralDataset, where the labels and features are Strings and a List of the input examples
+   */
+  public Pair<GeneralDataset<String,String>, List<String[]>> readAndReturnTrainingExamples(String fileName) {
     if (globalFlags.printFeatures != null) {
-      newFeaturePrinter(globalFlags.printFeatures, "train");
+      newFeaturePrinter(globalFlags.printFeatures, "train", Flags.encoding);
     }
-    Pair<GeneralDataset<String,String>, List<String[]>> dataInfo = readDataset(fileName, false);
+    Pair<GeneralDataset<String,String>, List<String[]>> dataInfo = readDataset(fileName, true);
     GeneralDataset<String,String> train = dataInfo.first();
     if (globalFlags.featureMinimumSupport > 1) {
-
-      System.err.println("Removing Features with counts < " + globalFlags.featureMinimumSupport);
+      logger.info("Removing Features with counts < " + globalFlags.featureMinimumSupport);
       train.applyFeatureCountThreshold(globalFlags.featureMinimumSupport);
     }
     train.summaryStatistics();
-    return train;
-
+    return dataInfo;
   }
 
 
   /** Read a data set from a file at test time, and return it.
    *
-   * @param filename The file to read the examples from.
-   * @return A Pair. The first item of the pair is the featurized data set,
+   *  @param filename The file to read the examples from.
+   *  @return A Pair. The first item of the pair is the featurized data set,
    *     ready for passing to the classifier.  The second item of the pair
    *     is simply each line of the file split into tab-separated columns.
    *     This is at present necessary for the built-in evaluation, which uses
@@ -337,7 +369,7 @@ public class ColumnDataClassifier {
   }
 
   private static List<String[]> makeSVMLightLineInfos(List<String> lines) {
-    List<String[]> lineInfos = new ArrayList<String[]>(lines.size());
+    List<String[]> lineInfos = new ArrayList<>(lines.size());
     for (String line : lines) {
       line = line.replaceFirst("#.*$", ""); // remove any trailing comments
       // in principle, it'd be nice to save the comment, though, for possible use as a displayedColumn - make it column 1??
@@ -345,6 +377,15 @@ public class ColumnDataClassifier {
     }
     return lineInfos;
   }
+
+
+  /** NB: This is meant to do splitting strictly only on tabs, and to thus
+   *  work with things that are exactly TSV files.  It shouldn't split on
+   *  all whitespace, because it is useful to be able to have spaces inside
+   *  fields for short text documents, and then to be able to split them into
+   *  words with features like useSplitWords.
+   */
+  private static final Pattern tab = Pattern.compile("\\t");
 
 
   /** Read a data set from a file and convert it into a Dataset object.
@@ -355,13 +396,16 @@ public class ColumnDataClassifier {
    *  @param inTestPhase Whether to return the read String[] for each data item
    *  @return A Pair of a GeneralDataSet of Datums and a List of datums in String form.
    */
+  @SuppressWarnings("NonThreadSafeLazyInitialization")
   private Pair<GeneralDataset<String,String>, List<String[]>> readDataset(String filename, boolean inTestPhase) {
+    Timing tim = new Timing();
+    logger.info("Reading dataset from " + filename + " ... ");
     GeneralDataset<String,String> dataset;
     List<String[]> lineInfos = null;
     if ((inTestPhase && Flags.testFromSVMLight) || (!inTestPhase && Flags.trainFromSVMLight)) {
       List<String> lines = null;
       if (inTestPhase) {
-        lines = new ArrayList<String>();
+        lines = new ArrayList<>();
       }
       if (globalFlags.usesRealValues) {
         dataset = RVFDataset.readSVMLightFormat(filename, lines);
@@ -374,47 +418,88 @@ public class ColumnDataClassifier {
     } else {
       try {
         if (inTestPhase) {
-          lineInfos = new ArrayList<String[]>();
+          lineInfos = new ArrayList<>();
         }
         if (globalFlags.usesRealValues) {
-          dataset = new RVFDataset<String,String>();
+          dataset = new RVFDataset<>();
         } else {
-          dataset = new Dataset<String,String>();
+          dataset = new Dataset<>();
         }
         int lineNo = 0;
+        int minColumns = Integer.MAX_VALUE;
+        int maxColumns = 0;
         for (String line : ObjectBank.getLineIterator(new File(filename), Flags.encoding)) {
           lineNo++;
+          if (Flags.inputFormat == InputFormat.HEADER) {
+            if (lineNo == 1) {
+              if (storedHeader == null) {
+                storedHeader = line; // store it because need elements of it to print header in output
+              }
+              continue;
+            }
+          } else if (Flags.inputFormat == InputFormat.COMMENTS) {
+            if (line.matches("\\s#.*")) {
+              continue;
+            }
+          }
+          String[] strings = splitLineToFields(line);
+          if (strings.length < 2) {
+            throw new RuntimeException("Line format error at line " + lineNo + ": " + line);
+          }
+          if (strings.length < minColumns) {
+            minColumns = strings.length;
+          }
+          if (strings.length > maxColumns) {
+            maxColumns = strings.length;
+          }
           if (inTestPhase) {
-            String[] wi = makeSimpleLineInfo(line, lineNo);
-            lineInfos.add(wi);
+            lineInfos.add(strings);
           }
-          Datum<String,String> d = makeDatumFromLine(line, lineNo);
-          if (d != null) {
-            dataset.add(d);
+          if (strings.length < flags.length) {
+            throw new RuntimeException("Error: Line has too few tab-separated columns (" + maxColumns +
+                    ") for " + flags.length + " columns required by specified properties: " + line);
           }
+          dataset.add(makeDatumFromStrings(strings));
+        }
+        if (lineNo > 0 && minColumns != maxColumns) {
+          logger.info("");
+          logger.info("WARNING: Number of tab-separated columns in " +
+                  filename + " varies between " + minColumns + " and " + maxColumns);
         }
       } catch (Exception e) {
-        throw new RuntimeException("Training dataset could not be processed", e);
+        throw new RuntimeException("Dataset could not be loaded", e);
       }
     }
 
-    return new Pair<GeneralDataset<String,String>,List<String[]>>(dataset, lineInfos);
+    logger.info("done [" + tim.toSecondsString() + "s, " + dataset.size() + " items].");
+    return new Pair<>(dataset, lineInfos);
   }
 
+  //Split according to whether we are using tsv file (default) or csv files
+  private String[] splitLineToFields(String line) {
+    if(globalFlags.csvInput) {
+      String[] strings = StringUtils.splitOnCharWithQuoting(line, ',', '"', '"');
+      for (int i = 0; i < strings.length; ++i) {
+        if (strings[i].startsWith("\"") && strings[i].endsWith("\""))
+          strings[i] = strings[i].substring(1,strings[i].length()-1);
+      }
+      return strings;
+    }
+    else
+      return tab.split(line);
+  }
 
   /**
    * Write summary statistics about a group of answers.
    */
-  private void writeResultsSummary(int num, Counter<String> contingency, Collection<String> labels) {
-    System.err.println();
-    NumberFormat nf = NumberFormat.getNumberInstance();
-    nf.setMinimumFractionDigits(3);
-    nf.setMaximumFractionDigits(3);
-    System.err.print(num + " examples");
+  private Pair<Double, Double> writeResultsSummary(int num, Counter<String> contingency, Collection<String> labels) {
+    logger.info("");
+    String message = "";
+    message += num + " examples";
     if (globalFlags.groupingColumn >= 0 && globalFlags.rankingAccuracyClass != null) {
-      System.err.print(" and " + numGroups + " ranking groups");
+      message += " and " + numGroups + " ranking groups";
     }
-    System.err.println(" in test set");
+    logger.info(message + " in test set");
     int numClasses = 0;
     double microAccuracy = 0.0;
     double macroF1 = 0.0;
@@ -424,13 +509,13 @@ public class ColumnDataClassifier {
       int fn = (int) contingency.getCount(key + "|FN");
       int fp = (int) contingency.getCount(key + "|FP");
       int tn = (int) contingency.getCount(key + "|TN");
-      double p = (tp == 0) ? 0.0 : ((double) tp) / (tp + fp);
-      double r = (tp == 0) ? 0.0 : ((double) tp) / (tp + fn);
+      double p = (tp + fp == 0) ? 1.0 : ((double) tp) / (tp + fp); // If nothing selected, then vacuous 1.0
+      double r = (tp + fn == 0) ? 1.0 : ((double) tp) / (tp + fn); // If nothing to find, then vacuous 1.0
       double f = (p == 0.0 && r == 0.0) ? 0.0 : 2 * p * r / (p + r);
       double acc = ((double) tp + tn)/num;
       macroF1 += f;
       microAccuracy += tp;
-      System.err.println("Cls " + key + ": TP=" + tp + " FN=" + fn + " FP=" + fp + " TN=" + tn + "; Acc " + nf.format(acc) + " P " + nf.format(p) + " R " + nf.format(r) + " F1 " + nf.format(f));
+      logger.info("Cls " + key + ": TP=" + tp + " FN=" + fn + " FP=" + fp + " TN=" + tn + "; Acc " + nf.format(acc) + " P " + nf.format(p) + " R " + nf.format(r) + " F1 " + nf.format(f));
     }
 
     if (globalFlags.groupingColumn >= 0 && globalFlags.rankingAccuracyClass != null) {
@@ -444,23 +529,23 @@ public class ColumnDataClassifier {
       if (coverr > 0.5) {
         double ce = (int) (contingency.getCount("Ranking|Error") - contingency.getCount("Ranking|Uncovered"));
         double crankacc = (cor + ce == 0) ? 0 : cor / (cor + ce);
-        System.err.println(" (on " + nf.format(covacc) + " of groups with correct answer: " + nf.format(crankacc) + ')');
+        logger.info(" (on " + nf.format(covacc) + " of groups with correct answer: " + nf.format(crankacc) + ')');
       } else {
-        System.err.println();
+        logger.info("");
       }
 
       if (globalFlags.rankingScoreColumn >= 0) {
         double totalSim = contingency.getCount("Ranking|Score");
         double ranksim = (cor + err == 0) ? 0 : totalSim / (cor + err);
-        System.err.println("Ranking average score: " + nf.format(ranksim));
+        logger.info("Ranking average score: " + nf.format(ranksim));
       }
     }
     microAccuracy = microAccuracy / num;
     macroF1 = macroF1 / numClasses;
-    nf.setMinimumFractionDigits(5);
-    nf.setMaximumFractionDigits(5);
-    System.err.println("Micro-averaged accuracy/F1: " + nf.format(microAccuracy));
-    System.err.println("Macro-averaged F1: " + nf.format(macroF1));
+    NumberFormat nf2 = new DecimalFormat("0.00000");
+    logger.info("Accuracy/micro-averaged F1: " + nf2.format(microAccuracy));
+    logger.info("Macro-averaged F1: " + nf2.format(macroF1));
+    return new Pair<>(microAccuracy, macroF1);
   }
 
   // These variables are only used by the private methods used by main() for displaying
@@ -474,22 +559,49 @@ public class ColumnDataClassifier {
   private static boolean currentHighestProbCorrect = false;
   private static boolean foundAnswerInGroup = false;
 
+  private static String storedHeader;
+
+  private static final NumberFormat nf = new DecimalFormat("0.000");
+
   /**
    * Write out an answer, and update statistics.
    */
-  private void writeAnswer(String[] strs, String clAnswer, Distribution<String> cntr, Counter<String> contingency, Classifier<String,String> c, double sim) {
-    String goldAnswer = strs[globalFlags.goldAnswerColumn];
+  private void writeAnswer(String[] strs, String clAnswer, Distribution<String> cntr) {
+    String goldAnswer = globalFlags.goldAnswerColumn < strs.length ? strs[globalFlags.goldAnswerColumn]: "";
     String printedText = "";
     if (globalFlags.displayedColumn >= 0) {
       printedText = strs[globalFlags.displayedColumn];
     }
-    String line;
-    if ("".equals(printedText)) {
-      line = goldAnswer + '\t' + clAnswer + '\t' + cntr.probabilityOf(clAnswer);
+    String results;
+    if (globalFlags.displayAllAnswers) {
+      // sort the labels by probability
+      TreeSet<Pair<Double,String>> sortedLabels = new TreeSet<>();
+      for (String key : cntr.keySet()) {
+        sortedLabels.add(new Pair<>(cntr.probabilityOf(key), key));
+      }
+      StringBuilder builder = new StringBuilder();
+      for (Pair<Double,String> pair : sortedLabels.descendingSet()) {
+        if (builder.length() > 0) {
+          builder.append('\t');
+        }
+        builder.append(pair.first().toString()).append('\t').append(pair.second());
+      }
+      results = builder.toString();
     } else {
-      line = printedText + '\t' + goldAnswer + '\t' + clAnswer + '\t' + cntr.probabilityOf(clAnswer);
+      results = clAnswer + '\t' + nf.format(cntr.probabilityOf(clAnswer)) + '\t' + nf.format(cntr.probabilityOf(goldAnswer));
+    }
+
+    String line;
+    if (printedText.isEmpty()) {
+      line = goldAnswer + '\t' + results;
+     } else {
+      line = printedText + '\t' + goldAnswer + '\t' + results;
     }
     System.out.println(line);
+  }
+
+  private void updatePerformanceStatistics(String[] strs, String clAnswer, Distribution<String> cntr, Counter<String> contingency, Classifier<String, String> c, double sim) {
+    String goldAnswer = globalFlags.goldAnswerColumn < strs.length ? strs[globalFlags.goldAnswerColumn]: "";
     // NB: This next bit judges correctness by surface String equality, not our internal indices, so strs has to be right even for svmlightFormat
     for (String next : c.labels()) {
       if (next.equals(goldAnswer)) {
@@ -508,15 +620,15 @@ public class ColumnDataClassifier {
     }
     if (globalFlags.groupingColumn >= 0 && globalFlags.rankingAccuracyClass != null) {
       String group = strs[globalFlags.groupingColumn];
-      // System.err.println("Group is " + group);
+      // logger.info("Group is " + group);
       if (group.equals(lastGroup)) {
         numInGroup++;
         double prob = cntr.probabilityOf(globalFlags.rankingAccuracyClass);
-        // System.err.println("  same group; prob is " + prob);
+        // logger.info("  same group; prob is " + prob);
         if (prob > bestProb) {
           bestProb = prob;
           bestSim = sim;
-          // System.err.println("  better prob than before");
+          // logger.info("  better prob than before");
           currentHighestProbCorrect = goldAnswer.equals(globalFlags.rankingAccuracyClass);
         }
         if (globalFlags.rankingAccuracyClass.equals(goldAnswer)) {
@@ -528,7 +640,7 @@ public class ColumnDataClassifier {
         lastGroup = group;
         bestProb = cntr.probabilityOf(globalFlags.rankingAccuracyClass);
         bestSim = sim;
-        // System.err.println("  different; prob is " + bestProb);
+        // logger.info("  different; prob is " + bestProb);
         numInGroup = 1;
         currentHighestProbCorrect = goldAnswer.equals(globalFlags.rankingAccuracyClass);
         foundAnswerInGroup = globalFlags.rankingAccuracyClass.equals(goldAnswer);
@@ -539,16 +651,15 @@ public class ColumnDataClassifier {
 
   private void finishRanking(Counter<String> contingency, double sim) {
     if (numInGroup > 0) {
+      String message = "";
       if (globalFlags.justify) {
-        NumberFormat nf = NumberFormat.getNumberInstance();
-        nf.setMinimumFractionDigits(3);
-        nf.setMaximumFractionDigits(3);
-        System.err.print("Previous group of " + numInGroup + ": ");
+        message += "Previous group of " + numInGroup + ": ";
         if (!foundAnswerInGroup) {
-          System.err.print("no correct answer; ");
+          message += "no correct answer; ";
         }
-        System.err.print("highest ranked guess was: " + ((currentHighestProbCorrect ? "correct" : "incorrect")));
-        System.err.println(" (sim. = " + nf.format(sim) + ')');
+        message += "highest ranked guess was: " + ((currentHighestProbCorrect ? "correct" : "incorrect"));
+        logger.info(message);
+        logger.info(" (sim. = " + nf.format(sim) + ')');
       }
       if (currentHighestProbCorrect) {
         contingency.incrementCount("Ranking|Correct");
@@ -565,85 +676,150 @@ public class ColumnDataClassifier {
   }
 
 
-  private void readAndTestExamples(Classifier<String,String> cl, String filename) {
-    if (globalFlags.printFeatures != null) {
-      newFeaturePrinter(globalFlags.printFeatures, "test");
+  /** Test and evaluate classifier on examples with their String representation and gold classification available.
+   *
+   * @param cl The classifier to test
+   * @param test The dataset to test on
+   * @param lineInfos Duplicate List of the items to be classified, each an array of Strings (like a line of a TSV file)
+   * @return A Pair consisting of the accuracy (micro-averaged F1) and macro-averaged F1 for the dataset
+   */
+  private Pair<Double, Double> testExamples(Classifier<String, String> cl, GeneralDataset<String, String> test, List<String[]> lineInfos) {
+    // usually suppress item level printing in crossvalidation
+    if ( ! (globalFlags.crossValidationFolds > 0 && ! globalFlags.printCrossValidationDecisions)) {
+      String message = "";
+      if (globalFlags.csvOutput != null) {
+        message += formatCsv(globalFlags.csvOutput, storedHeader.split("\t"), null);
+      } else {
+        message += "Output format: ";
+        if (globalFlags.displayedColumn >= 0) {
+          message += "dataColumn" + globalFlags.displayedColumn + "\t";
+        }
+        message += "goldAnswer\t";
+        if (globalFlags.displayAllAnswers) {
+          logger.info(message + "[P(class) class]+ {sorted by probability}");
+        } else {
+          logger.info(message + "classifierAnswer\tP(clAnswer)\tP(goldAnswer)");
+        }
+      }
     }
 
-    Counter<String> contingency = new ClassicCounter<String>();  // store tp,fp,fn,tn
-    Pair<GeneralDataset<String,String>,List<String[]>> testInfo = readTestExamples(filename);
-    GeneralDataset<String,String> test = testInfo.first();
-    List<String[]> lineInfos = testInfo.second();
-    for (int i = 0; i < test.size; i++) {
-      String[] simpleLineInfo = lineInfos.get(i);
-      Datum<String,String> d;
-      if (globalFlags.usesRealValues) {
-        d = test.getRVFDatum(i);
-      } else {
-        d = test.getDatum(i);
-      }
-      if (globalFlags.justify) {
-        System.err.println("### Test item " + i);
-        for (String field : simpleLineInfo) {
-          System.err.print(field);
-          System.err.print('\t');
-        }
-        System.err.println();
-        if (cl instanceof LinearClassifier) {
-          ((LinearClassifier<String,String>)cl).justificationOf(d);
-        }
-        System.err.println();
-      }
-      Counter<String> logScores;
-      if (globalFlags.usesRealValues) {
-        logScores = ErasureUtils.<RVFClassifier<String,String>>uncheckedCast(cl).scoresOf((RVFDatum<String,String>)d);
-      } else {
-        logScores = cl.scoresOf(d);
-      }
-      Distribution<String> dist = Distribution.distributionFromLogisticCounter(logScores);
-      String answer = null;
-      if (globalFlags.biasedHyperplane != null) {
-        // System.err.println("Biased using counter: " +
-        //         globalFlags.biasedHyperplane);
-        List<String> biggestKeys = new ArrayList<String>(logScores.keySet());
-        Collections.sort(biggestKeys, Counters.toComparatorDescending(logScores));
-        for (String key : biggestKeys) {
-          double prob = dist.probabilityOf(key);
-          double threshold = globalFlags.biasedHyperplane.getCount(key);
-          // System.err.println("  Trying " + key + " prob is " + prob +
-          //           " threshold is " + threshold);
-          if (prob > threshold) {
-            answer = key;
-            break;
-          }
-        }
-      }
-      if (answer == null) {
-        if (globalFlags.usesRealValues) {
-          answer = ErasureUtils.<RVFClassifier<String,String>>uncheckedCast(cl).classOf((RVFDatum<String,String>) d);
-        } else {
-          answer = cl.classOf(d);
-        }
-      }
-      double sim = 0.0;
-      if (globalFlags.rankingScoreColumn >= 0) {
-        try {
-          sim = Double.parseDouble(simpleLineInfo[globalFlags.rankingScoreColumn]);
-        } catch (NumberFormatException nfe) {
-          // just don't print it
-        }
-      }
-      writeAnswer(simpleLineInfo, answer, dist, contingency, cl, sim);
+    Counter<String> contingency = new ClassicCounter<>();  // store tp,fp,fn,tn
+    for (int i = 0, sz = test.size(); i < sz; i++) {
+      testExample(cl, test, lineInfos, contingency, i);
     }
+
     if (globalFlags.groupingColumn >= 0 && globalFlags.rankingAccuracyClass != null)
       finishRanking(contingency, bestSim);
 
-    if (globalFlags.printFeatures != null) {
-      closeFeaturePrinter();
-    }
-    writeResultsSummary(test.size, contingency, cl.labels());
+    return writeResultsSummary(test.size(), contingency, cl.labels());
   }
 
+  private void testExample(Classifier<String, String> cl,
+                           GeneralDataset<String, String> test,
+                           List<String[]> lineInfos,
+                           Counter<String> contingency,
+                           int i) {
+    String[] example = lineInfos.get(i);
+    Datum<String,String> d;
+    if (globalFlags.usesRealValues) {
+      d = test.getRVFDatum(i);
+    } else {
+      d = test.getDatum(i);
+    }
+    if (globalFlags.justify) {
+      logger.info("### Test item " + i);
+      String message = "";
+      for (String field : example) {
+        message += field + "\t";
+      }
+      logger.info(message + "\n");
+      if (cl instanceof LinearClassifier) {
+        ((LinearClassifier<String,String>)cl).justificationOf(d);
+      }
+      logger.info("");
+    }
+    Counter<String> logScores;
+    if (globalFlags.usesRealValues) {
+      logScores = ErasureUtils.<RVFClassifier<String,String>>uncheckedCast(cl).scoresOf((RVFDatum<String,String>)d);
+    } else {
+      logScores = cl.scoresOf(d);
+    }
+    Distribution<String> dist = Distribution.distributionFromLogisticCounter(logScores);
+    String answer = null;
+    if (globalFlags.biasedHyperplane != null) {
+      // logger.info("Biased using counter: " +
+      //         globalFlags.biasedHyperplane);
+      List<String> biggestKeys = new ArrayList<>(logScores.keySet());
+      Collections.sort(biggestKeys, Counters.toComparatorDescending(logScores));
+      for (String key : biggestKeys) {
+        double prob = dist.probabilityOf(key);
+        double threshold = globalFlags.biasedHyperplane.getCount(key);
+        // logger.info("  Trying " + key + " prob is " + prob +
+        //           " threshold is " + threshold);
+        if (prob > threshold) {
+          answer = key;
+          break;
+        }
+      }
+    }
+    if (answer == null) {
+      if (globalFlags.usesRealValues) {
+        answer = ErasureUtils.<RVFClassifier<String,String>>uncheckedCast(cl).classOf((RVFDatum<String,String>) d);
+      } else {
+        answer = cl.classOf(d);
+      }
+    }
+    double sim = 0.0;
+    if (globalFlags.rankingScoreColumn >= 0) {
+      try {
+        sim = Double.parseDouble(example[globalFlags.rankingScoreColumn]);
+      } catch (NumberFormatException nfe) {
+        // just don't print it
+      }
+    }
+    if ( ! (globalFlags.crossValidationFolds > 0 && ! globalFlags.printCrossValidationDecisions)) {
+      if (globalFlags.csvOutput != null) {
+        System.out.print(formatCsv(globalFlags.csvOutput, example, answer));
+      } else {
+        writeAnswer(example, answer, dist);
+      }
+    }
+    updatePerformanceStatistics(example, answer, dist, contingency, cl, sim);
+  }
+
+  private String formatCsv(String format, String[] fields, String answer) {
+    StringBuilder out = new StringBuilder();
+    for (int i = 0, len = format.length(); i < len; i++) {
+      char ch = format.charAt(i);
+      if (ch == '%' && i + 1 < len) {
+        char ch2 = format.charAt(i + 1);
+        if (ch2 >= '0' && ch2 <= '9') {
+          int field = ch2 - '0';
+          if (field < fields.length) {
+            out.append(fields[field]);
+          } else {
+            throw new IllegalArgumentException("Not enough columns for format " + format);
+          }
+        } else if (ch2 == 'c') {
+          if (answer != null) {
+            out.append(answer);
+          } else if (globalFlags.goldAnswerColumn < fields.length) {
+            out.append(fields[globalFlags.goldAnswerColumn]);
+          } else {
+            out.append("Class");
+          }
+        } else if (ch2 == 'n') {
+          out.append('\n');
+        } else {
+          throw new IllegalArgumentException("Unrecognized format specification in " + format);
+        }
+        i++; // have also dealt with next character giving format
+      } else {
+        out.append(ch);
+      }
+    }
+    return out.toString();
+  }
 
 
   /**
@@ -653,7 +829,8 @@ public class ColumnDataClassifier {
    * @return The constructed Datum
    */
   private Datum<String,String> makeDatum(String[] strs) {
-    List<String> theFeatures = new ArrayList<String>();
+    String goldAnswer = globalFlags.goldAnswerColumn < strs.length ? strs[globalFlags.goldAnswerColumn]: "";
+    List<String> theFeatures = new ArrayList<>();
     Collection<String> globalFeatures = Generics.newHashSet();
     if (globalFlags.useClassFeature) {
       globalFeatures.add("CLASS");
@@ -662,7 +839,7 @@ public class ColumnDataClassifier {
 
     for (int i = 0; i < flags.length; i++) {
       Collection<String> featuresC = Generics.newHashSet();//important that this is a hash set to prevent same feature from being added multiple times
-      makeDatum(strs[i], flags[i], featuresC, strs[globalFlags.goldAnswerColumn]);
+      makeDatum(strs[i], flags[i], featuresC, goldAnswer);
       addAllInterningAndPrefixing(theFeatures, featuresC, i + "-");
     }
 
@@ -670,7 +847,7 @@ public class ColumnDataClassifier {
       printFeatures(strs, theFeatures);
     }
     //System.out.println("Features are: " + theFeatures);
-    return new BasicDatum<String,String>(theFeatures, strs[globalFlags.goldAnswerColumn]);
+    return new BasicDatum<>(theFeatures, goldAnswer);
   }
 
   /**
@@ -682,16 +859,17 @@ public class ColumnDataClassifier {
    * @return The constructed RVFDatum
    */
   private RVFDatum<String,String> makeRVFDatum(String[] strs) {
-    ClassicCounter<String> theFeatures = new ClassicCounter<String>();
-    ClassicCounter<String> globalFeatures = new ClassicCounter<String>();
+    String goldAnswer = globalFlags.goldAnswerColumn < strs.length ? strs[globalFlags.goldAnswerColumn]: "";
+    ClassicCounter<String> theFeatures = new ClassicCounter<>();
+    ClassicCounter<String> globalFeatures = new ClassicCounter<>();
     if (globalFlags.useClassFeature) {
-      globalFeatures.setCount("CLASS",1.0);
+      globalFeatures.setCount("CLASS", 1.0);
     }
     addAllInterningAndPrefixingRVF(theFeatures, globalFeatures, "");
 
     for (int i = 0; i < flags.length; i++) {
-      ClassicCounter<String> featuresC = new ClassicCounter<String>();
-      makeDatum(strs[i], flags[i], featuresC, strs[globalFlags.goldAnswerColumn]);
+      ClassicCounter<String> featuresC = new ClassicCounter<>();
+      makeDatum(strs[i], flags[i], featuresC, goldAnswer);
       addAllInterningAndPrefixingRVF(theFeatures, featuresC, i + "-");
     }
 
@@ -699,25 +877,27 @@ public class ColumnDataClassifier {
       printFeatures(strs, theFeatures);
     }
     //System.out.println("Features are: " + theFeatures);
-    return new RVFDatum<String,String>(theFeatures, strs[globalFlags.goldAnswerColumn]);
+    return new RVFDatum<>(theFeatures, goldAnswer);
   }
 
   private void addAllInterningAndPrefixingRVF(ClassicCounter<String> accumulator, ClassicCounter<String> addend, String prefix) {
+    assert prefix != null;
     for (String protoFeat : addend.keySet()) {
       double count = addend.getCount(protoFeat);
-      if (!"".equals(prefix)) {
+      if ( ! prefix.isEmpty()) {
         protoFeat = prefix + protoFeat;
       }
       if (globalFlags.intern) {
         protoFeat = protoFeat.intern();
       }
-      accumulator.incrementCount(protoFeat,count);
+      accumulator.incrementCount(protoFeat, count);
     }
   }
 
   private void addAllInterningAndPrefixing(Collection<String> accumulator, Collection<String> addend, String prefix) {
+    assert prefix != null;
     for (String protoFeat : addend) {
-      if ( ! "".equals(prefix)) {
+      if ( ! prefix.isEmpty()) {
         protoFeat = prefix + protoFeat;
       }
       if (globalFlags.intern) {
@@ -737,13 +917,13 @@ public class ColumnDataClassifier {
     if (flags.logTransform) {
       double log = Math.log(value);
       if(Double.isInfinite(log) || Double.isNaN(log)) {
-        System.err.println("WARNING: Log transform attempted on out of range value; feature ignored");
+        logger.info("WARNING: Log transform attempted on out of range value; feature ignored");
       } else
         addFeature(featuresC, "Log", log);
     } else if(flags.logitTransform) {
       double logit = Math.log(value/(1-value));
       if(Double.isInfinite(logit) || Double.isNaN(logit)) {
-        System.err.println("WARNING: Logit transform attempted on out of range value; feature ignored");
+        logger.info("WARNING: Logit transform attempted on out of range value; feature ignored");
       } else {
         addFeature(featuresC, "Logit", logit);
       }
@@ -761,7 +941,7 @@ public class ColumnDataClassifier {
    * iff it is a counter
    */
     private static <F> void addFeature(Object features, F newFeature, double value) {
-      if(features instanceof Counter<?>) {
+      if (features instanceof Counter<?>) {
         ErasureUtils.<Counter<F>>uncheckedCast(features).setCount(newFeature, value);
       } else if(features instanceof Collection<?>) {
         ErasureUtils.<Collection<F>>uncheckedCast(features).add(newFeature);
@@ -774,9 +954,12 @@ public class ColumnDataClassifier {
      * Extracts all the features from a certain input column.
      *
      * @param cWord The String to extract data from
+     * @param goldAns The goldAnswer for this whole datum or emptyString if none.
+     *                    This is used only for filling in the binned lengths histogram counters
      */
     private void makeDatum(String cWord, Flags flags, Object featuresC, String goldAns) {
-       //System.err.println("Making features for " + cWord + " flags " + flags);
+
+      //logger.info("Making features for " + cWord + " flags " + flags);
       if (flags == null) {
         // no features for this column
         return;
@@ -785,7 +968,7 @@ public class ColumnDataClassifier {
         cWord = IOUtils.slurpFileNoExceptions(cWord);
       }
       if (flags.lowercase) {
-        cWord = cWord.toLowerCase();
+        cWord = cWord.toLowerCase(Locale.ENGLISH);
       }
 
       if (flags.useString) {
@@ -848,25 +1031,37 @@ public class ColumnDataClassifier {
           addFeature(featuresC,featureName,DEFAULT_VALUE);
         }
       }
-      if (flags.splitWordsRegexp != null || flags.splitWordsTokenizerRegexp != null ) {
+      if (flags.splitWordsPattern != null || flags.splitWordsTokenizerPattern != null ||
+              flags.splitWordsWithPTBTokenizer) {
         String[] bits;
-        if (flags.splitWordsTokenizerRegexp != null) {
+        if (flags.splitWordsTokenizerPattern != null) {
           bits = regexpTokenize(flags.splitWordsTokenizerPattern, flags.splitWordsIgnorePattern, cWord);
-        } else {
-          bits = flags.splitWordsPattern.split(cWord);
-          if (flags.splitWordsIgnorePattern != null) {
-            List<String> keepBits = new ArrayList<String>(bits.length);
-            for (String bit:bits) {
-              if (!flags.splitWordsIgnorePattern.matcher(bit).matches()) {
-                keepBits.add(bit);
-              }
-            }
-            if (keepBits.size() != bits.length) {
-              bits = new String[keepBits.size()];
-              keepBits.toArray(bits);
+        } else if (flags.splitWordsPattern != null) {
+          bits = splitTokenize(flags.splitWordsPattern, flags.splitWordsIgnorePattern, cWord);
+        } else { //PTB tokenizer
+          bits = ptbTokenize(cWord);
+        }
+        if (flags.showTokenization) {
+          logger.info("Tokenization: " + Arrays.toString(bits));
+        }
+
+        if (flags.splitWordCount) {
+          addFeature(featuresC, "SWNUM", bits.length);
+        }
+        if (flags.logSplitWordCount) {
+          addFeature(featuresC, "LSWNUM", Math.log(bits.length));
+        }
+        if (flags.binnedSplitWordCounts != null) {
+          String featureName = null;
+          for (int i = 0; i <= flags.binnedSplitWordCounts.length; i++) {
+            if (i == flags.binnedSplitWordCounts.length || bits.length <= flags.binnedSplitWordCounts[i]) {
+              featureName = "SWNUMBIN-" + ((i == 0) ? 0 : (flags.binnedSplitWordCounts[i - 1] + 1)) + '-' + ((i == flags.binnedSplitWordCounts.length) ? "Inf" : Integer.toString(flags.binnedSplitWordCounts[i]));
+              break;
             }
           }
+          addFeature(featuresC, featureName, DEFAULT_VALUE);
         }
+        // add features over splitWords
         for (int i = 0; i < bits.length; i++) {
           if (flags.useSplitWords) {
             addFeature(featuresC, "SW-" + bits[i], DEFAULT_VALUE);
@@ -877,6 +1072,11 @@ public class ColumnDataClassifier {
           if (flags.useSplitWordPairs) {
             if (i + 1 < bits.length) {
               addFeature(featuresC, "SWP-" + bits[i] + '-' + bits[i + 1], DEFAULT_VALUE);
+            }
+          }
+          if (flags.useLowercaseSplitWordPairs) {
+            if (i + 1 < bits.length) {
+              addFeature(featuresC, "LSWP-" + bits[i].toLowerCase() + '-' + bits[i + 1].toLowerCase(), DEFAULT_VALUE);
             }
           }
           if (flags.useAllSplitWordPairs) {
@@ -920,28 +1120,59 @@ public class ColumnDataClassifier {
               addFeature(featuresC, sb.toString(), DEFAULT_VALUE);
             }
           }
+          // this is equivalent to having boundary tokens in splitWordPairs -- they get a special feature
           if (flags.useSplitFirstLastWords) {
             if (i == 0) {
-              addFeature(featuresC,"SFW-" + bits[i],DEFAULT_VALUE);
+              addFeature(featuresC,"SFW-" + bits[i], DEFAULT_VALUE);
             } else if (i == bits.length - 1) {
-              addFeature(featuresC,"SLW-" + bits[i],DEFAULT_VALUE);
+              addFeature(featuresC,"SLW-" + bits[i], DEFAULT_VALUE);
+            }
+          }
+          if (flags.useLowercaseSplitFirstLastWords) {
+            if (i == 0) {
+              addFeature(featuresC,"LSFW-" + bits[i].toLowerCase(), DEFAULT_VALUE);
+            } else if (i == bits.length - 1) {
+              addFeature(featuresC,"SLW-" + bits[i].toLowerCase(), DEFAULT_VALUE);
             }
           }
           if (flags.useSplitNGrams || flags.useSplitPrefixSuffixNGrams) {
             Collection<String> featureNames = makeNGramFeatures(bits[i], flags, true, "S#");
             for(String featureName : featureNames)
-              addFeature(featuresC,featureName,DEFAULT_VALUE);
+              addFeature(featuresC, featureName, DEFAULT_VALUE);
           }
           if (flags.splitWordShape > edu.stanford.nlp.process.WordShapeClassifier.NOWORDSHAPE) {
             String shape = edu.stanford.nlp.process.WordShapeClassifier.wordShape(bits[i], flags.splitWordShape);
-            // System.err.println("Shaper is " + flags.splitWordShape + " word len " + bits[i].length() + " shape is " + shape);
+            // logger.info("Shaper is " + flags.splitWordShape + " word len " + bits[i].length() + " shape is " + shape);
             addFeature(featuresC,"SSHAPE-" + shape,DEFAULT_VALUE);
           }
-        }
-      }
+        } // for bits
+        if (flags.wordVectors != null) {
+          double[] averages = null;
+          for (String bit : bits) {
+            float[] wv = flags.wordVectors.get(bit);
+            if (wv != null) {
+              if (averages == null) {
+                averages = new double[wv.length];
+                for (int j = 0; j < wv.length; j++) {
+                  averages[j] += wv[j];
+                }
+              }
+            }
+          }
+          if (averages != null) {
+            for (int j = 0; j < averages.length; j++) {
+              averages[j] /= bits.length;
+              addFeature(featuresC, "SWV-" + j, averages[j]);
+            }
+          // } else {
+          //   logger.info("No word vectors found for words in |" + cWord + '|');
+          }
+        } // end if wordVectors
+      } // end if uses some split words features
+
       if (flags.wordShape > WordShapeClassifier.NOWORDSHAPE) {
         String shape = edu.stanford.nlp.process.WordShapeClassifier.wordShape(cWord, flags.wordShape);
-        addFeature(featuresC,"SHAPE-" + shape,DEFAULT_VALUE);
+        addFeature(featuresC, "SHAPE-" + shape, DEFAULT_VALUE);
       }
       if (flags.useNGrams || flags.usePrefixSuffixNGrams) {
         Collection<String> featureNames = makeNGramFeatures(cWord, flags, false, "#");
@@ -952,17 +1183,27 @@ public class ColumnDataClassifier {
         addFeatureValue(cWord, flags, featuresC);
 
       }
-       //System.err.println("Made featuresC " + featuresC);
+       //logger.info("Made featuresC " + featuresC);
     }  //end makeDatum
 
-
-
+  //return the tokens using PTB tokenizer
+  private String[] ptbTokenize(String cWord) {
+    if(ptbFactory==null)
+      ptbFactory = PTBTokenizer.factory();
+    Tokenizer<Word> tokenizer = ptbFactory.getTokenizer(new StringReader(cWord));
+    List<Word> words = tokenizer.tokenize();
+    String[] res = new String[words.size()];
+    for(int i = 0; i < words.size(); ++i) {
+      res[i] = words.get(i).word();
+    }
+    return res;
+  }
 
   /**
-   * Caches a hash of word -> all substring features.  A <i>lot</i> of memory!
+   * Caches a hash of word to all substring features.  A <i>lot</i> of memory!
    * If the String space is large, you shouldn't turn this on.
    */
-  private static Map<String,Collection<String>> wordToSubstrings = new ConcurrentHashMap<String,Collection<String>>();
+  private static final Map<String,Collection<String>> wordToSubstrings = new ConcurrentHashMap<>();
 
 
   private String intern(String s) {
@@ -973,7 +1214,7 @@ public class ColumnDataClassifier {
   }
 
   /**
-   * Return a Collection of NGrams from the input.
+   * Return a Collection of NGrams from the input String.
    */
   private Collection<String> makeNGramFeatures(final String input, Flags flags, boolean useSplit, String featPrefix) {
     String toNGrams = input;
@@ -987,7 +1228,7 @@ public class ColumnDataClassifier {
       prefixSuffixNGrams = flags.usePrefixSuffixNGrams;
     }
     if (flags.lowercaseNGrams) {
-      toNGrams = toNGrams.toLowerCase();
+      toNGrams = toNGrams.toLowerCase(Locale.ENGLISH);
     }
     if (flags.partialNGramRegexp != null) {
       Matcher m = flags.partialNGramPattern.matcher(toNGrams);
@@ -1001,14 +1242,14 @@ public class ColumnDataClassifier {
         }
         // System.err.print(" Matched |" + toNGrams + "|");
       }
-      // System.err.println();
+      // logger.info();
     }
     Collection<String> subs = null;
     if (flags.cacheNGrams) {
       subs = wordToSubstrings.get(toNGrams);
     }
     if (subs == null) {
-      subs = new ArrayList<String>();
+      subs = new ArrayList<>();
       String strN = featPrefix + '-';
       String strB = featPrefix + "B-";
       String strE = featPrefix + "E-";
@@ -1038,12 +1279,12 @@ public class ColumnDataClassifier {
 
   private static PrintWriter cliqueWriter;
 
-  private static void newFeaturePrinter(String prefix, String suffix) {
+  private static void newFeaturePrinter(String prefix, String suffix, String encoding) {
     if (cliqueWriter != null) {
       closeFeaturePrinter();
     }
     try {
-      cliqueWriter = new PrintWriter(new FileOutputStream(prefix + '.' + suffix), true);
+      cliqueWriter = IOUtils.getPrintWriter(prefix + '.' + suffix, encoding);
     } catch (IOException ioe) {
       cliqueWriter = null;
     }
@@ -1103,11 +1344,11 @@ public class ColumnDataClassifier {
     double l1regmax = globalFlags.l1regmax;
     double l1regmin = globalFlags.l1regmin;
     if (globalFlags.l1reg <= 0.0)  {
-      System.err.println("WARNING: useAdaptL1 set and limitFeatures to " + globalFlags.limitFeatures
+      logger.info("WARNING: useAdaptL1 set and limitFeatures to " + globalFlags.limitFeatures
               + ", but invalid value of l1reg=" + globalFlags.l1reg + ", defaulting to " + globalFlags.l1regmax);
       l1reg = l1regmax;
     } else {
-      System.err.println("TRAIN: useAdaptL1 set and limitFeatures to " + globalFlags.limitFeatures
+      logger.info("TRAIN: useAdaptL1 set and limitFeatures to " + globalFlags.limitFeatures
               + ", l1reg=" + globalFlags.l1reg + ", l1regmax=" + globalFlags.l1regmax + ", l1regmin=" + globalFlags.l1regmin);
 
     }
@@ -1125,33 +1366,33 @@ public class ColumnDataClassifier {
     int limitFeatureTol = 5;
     double l1regminchange = 0.05;
     while (true) {
-      System.err.println("Training: l1reg=" + l1reg + ", threshold=" + globalFlags.featureWeightThreshold
+      logger.info("Training: l1reg=" + l1reg + ", threshold=" + globalFlags.featureWeightThreshold
               + ", target=" + globalFlags.limitFeatures);
       LinearClassifierFactory<String,String> lcf;
       Minimizer<DiffFunction> minim = ReflectionLoading.loadByReflection("edu.stanford.nlp.optimization.OWLQNMinimizer", l1reg);
-      lcf = new LinearClassifierFactory<String,String>(minim, globalFlags.tolerance, globalFlags.useSum, globalFlags.prior, globalFlags.sigma, globalFlags.epsilon);
+      lcf = new LinearClassifierFactory<>(minim, globalFlags.tolerance, globalFlags.useSum, globalFlags.prior, globalFlags.sigma, globalFlags.epsilon);
       int featureCount = -1;
       try {
         LinearClassifier<String,String> c = lcf.trainClassifier(train);
         lc = c;
         featureCount = c.getFeatureCount(limitFeatureLabels, globalFlags.featureWeightThreshold, false /*useMagnitude*/);
 
-        System.err.println("Training Done: l1reg=" + l1reg + ", threshold=" + globalFlags.featureWeightThreshold
+        logger.info("Training Done: l1reg=" + l1reg + ", threshold=" + globalFlags.featureWeightThreshold
                 + ", features=" + featureCount + ", target=" + globalFlags.limitFeatures);
         //         String classifierDesc = c.toString(globalFlags.printClassifier, globalFlags.printClassifierParam);
         List<Triple<String,String,Double>> topFeatures = c.getTopFeatures(
                 limitFeatureLabels, globalFlags.featureWeightThreshold, false /*useMagnitude*/,
                 globalFlags.limitFeatures, true /*descending order*/);
         String classifierDesc = c.topFeaturesToString(topFeatures);
-        System.err.println("Printing top " + globalFlags.limitFeatures + " features with weights above "
+        logger.info("Printing top " + globalFlags.limitFeatures + " features with weights above "
                 + globalFlags.featureWeightThreshold);
         if (globalFlags.limitFeaturesLabels != null) {
-          System.err.println("  Limited to labels: " + globalFlags.limitFeaturesLabels);
+          logger.info("  Limited to labels: " + globalFlags.limitFeaturesLabels);
         }
-        System.err.println(classifierDesc);
+        logger.info(classifierDesc);
       } catch (RuntimeException ex) {
         if (ex.getMessage() != null && ex.getMessage().startsWith("L-BFGS chose a non-descent direction")) {
-          System.err.println("Error in optimization, will try again with different l1reg");
+          logger.info("Error in optimization, will try again with different l1reg");
           ex.printStackTrace(System.err);
         } else {
           throw ex;
@@ -1162,7 +1403,7 @@ public class ColumnDataClassifier {
         l1regtop = l1reg;
         l1reg = 0.5*(l1reg + l1regbottom);
         if (l1regtop - l1reg < l1regminchange) {
-          System.err.println("Stopping: old l1reg  " + l1regtop + "- new l1reg " + l1reg
+          logger.info("Stopping: old l1reg  " + l1regtop + "- new l1reg " + l1reg
                   + ", difference less than " + l1regminchange);
           break;
         }
@@ -1171,12 +1412,12 @@ public class ColumnDataClassifier {
         l1regbottom = l1reg;
         l1reg = 0.5*(l1reg + l1regtop);
         if (l1reg - l1regbottom < l1regminchange) {
-          System.err.println("Stopping: new l1reg  " + l1reg + "- old l1reg " + l1regbottom
+          logger.info("Stopping: new l1reg  " + l1reg + "- old l1reg " + l1regbottom
                   + ", difference less than " + l1regminchange);
           break;
         }
       } else {
-        System.err.println("Stopping: # of features within " + limitFeatureTol + " of target");
+        logger.info("Stopping: # of features within " + limitFeatureTol + " of target");
         break;
       }
     }
@@ -1205,11 +1446,11 @@ public class ColumnDataClassifier {
       double sigma = (globalFlags.prior == 0) ? 0.0 : globalFlags.sigma;
       lc = new NBLinearClassifierFactory<String,String>(sigma, globalFlags.useClassFeature).trainClassifier(train);
     } else if (globalFlags.useBinary) {
-      LogisticClassifierFactory<String,String> lcf = new LogisticClassifierFactory<String,String>();
+      LogisticClassifierFactory<String,String> lcf = new LogisticClassifierFactory<>();
       LogPrior prior = new LogPrior(globalFlags.prior, globalFlags.sigma, globalFlags.epsilon);
       lc = lcf.trainClassifier(train, globalFlags.l1reg, globalFlags.tolerance, prior, globalFlags.biased);
     } else if (globalFlags.biased) {
-      LogisticClassifierFactory<String,String> lcf = new LogisticClassifierFactory<String,String>();
+      LogisticClassifierFactory<String,String> lcf = new LogisticClassifierFactory<>();
       LogPrior prior = new LogPrior(globalFlags.prior, globalFlags.sigma, globalFlags.epsilon);
       lc = lcf.trainClassifier(train, prior, true);
     } else if (globalFlags.useAdaptL1 && globalFlags.limitFeatures > 0) {
@@ -1218,9 +1459,9 @@ public class ColumnDataClassifier {
       LinearClassifierFactory<String,String> lcf;
       if (globalFlags.l1reg > 0.0) {
         Minimizer<DiffFunction> minim = ReflectionLoading.loadByReflection("edu.stanford.nlp.optimization.OWLQNMinimizer", globalFlags.l1reg);
-        lcf = new LinearClassifierFactory<String,String>(minim, globalFlags.tolerance, globalFlags.useSum, globalFlags.prior, globalFlags.sigma, globalFlags.epsilon);
+        lcf = new LinearClassifierFactory<>(minim, globalFlags.tolerance, globalFlags.useSum, globalFlags.prior, globalFlags.sigma, globalFlags.epsilon);
       } else {
-        lcf  = new LinearClassifierFactory<String,String>(globalFlags.tolerance, globalFlags.useSum, globalFlags.prior, globalFlags.sigma, globalFlags.epsilon, globalFlags.QNsize);
+        lcf  = new LinearClassifierFactory<>(globalFlags.tolerance, globalFlags.useSum, globalFlags.prior, globalFlags.sigma, globalFlags.epsilon, globalFlags.QNsize);
       }
       if (!globalFlags.useQN) {
         lcf.useConjugateGradientAscent();
@@ -1231,11 +1472,11 @@ public class ColumnDataClassifier {
   }
 
 
-  private static String[] regexpTokenize(Pattern splitRegexp, Pattern ignoreRegexp, String inWord) {
-    List<String> al = new ArrayList<String>();
+  private static String[] regexpTokenize(Pattern tokenizerRegexp, Pattern ignoreRegexp, String inWord) {
+    List<String> al = new ArrayList<>();
     String word = inWord;
-    while (word.length() > 0) {
-      // System.err.println("String to match on is " + word);
+    while ( ! word.isEmpty()) {
+      // logger.info("String to match on is " + word);
       Matcher mig = null;
       if (ignoreRegexp != null) {
         mig = ignoreRegexp.matcher(word);
@@ -1243,15 +1484,16 @@ public class ColumnDataClassifier {
       if (mig != null && mig.lookingAt()) {
         word = word.substring(mig.end());
       } else {
-        Matcher m = splitRegexp.matcher(word);
+        Matcher m = tokenizerRegexp.matcher(word);
         if (m.lookingAt()) {
-          // System.err.println("Matched " + m.end() + " chars: " +
+          // Logging.logger(ColumnDataClassifier.class).info("Matched " + m.end() + " chars: " +
           //		       word.substring(0, m.end()));
           al.add(word.substring(0, m.end()));
           word = word.substring(m.end());
         } else {
-          System.err.println("Warning: regexpTokenize pattern " + splitRegexp + " didn't match on " + word);
-          // System.err.println("Default matched 1 char: " +
+          logger.info("Warning: regexpTokenize pattern " + tokenizerRegexp + " didn't match on |" +
+                  word.substring(0, 1) + "| of |" + word + '|');
+          // logger.info("Default matched 1 char: " +
           //		       word.substring(0, 1));
           al.add(word.substring(0, 1));
           word = word.substring(1);
@@ -1259,13 +1501,60 @@ public class ColumnDataClassifier {
       }
     }
     String[] bits = al.toArray(new String[al.size()]);
-//    System.err.println("Split |" + inWord + "| as: ");
-//    for (int i = 0; i < bits.length; i++) {
-//      System.err.println("  |" + bits[i] + "|");
-//    }
     return bits;
   }
 
+  private static String[] splitTokenize(Pattern splitRegexp, Pattern ignoreRegexp, String cWord) {
+    String[] bits = splitRegexp.split(cWord);
+    if (ignoreRegexp != null) {
+      List<String> keepBits = new ArrayList<>(bits.length);
+      for (String bit : bits) {
+        if ( ! ignoreRegexp.matcher(bit).matches()) {
+          keepBits.add(bit);
+        }
+      }
+      if (keepBits.size() != bits.length) {
+        bits = new String[keepBits.size()];
+        keepBits.toArray(bits);
+      }
+    }
+    return bits;
+  }
+
+  static Map<String, float[]> loadWordVectors(String filename) {
+    Timing timing = new Timing();
+    logger.info("Loading word vectors from " + filename + " ... ");
+    Map<String,float[]> map = new HashMap<>(10000); // presumably they'll load a fair-sized vocab!?
+    BufferedReader br = null;
+    try {
+      br = IOUtils.readerFromString(filename);
+      int numDimensions = -1;
+      boolean warned = false;
+      for (String line; (line = br.readLine()) != null; ) {
+        String[] fields = line.split("\\s+");
+        if (numDimensions < 0) {
+          numDimensions = fields.length - 1;
+        } else {
+          if (numDimensions != fields.length -1 && ! warned) {
+            logger.info("loadWordVectors: Inconsistent vector size: " + numDimensions +
+                    " vs. " + (fields.length - 1));
+            warned = true;
+          }
+        }
+        float[] vector = new float[fields.length - 1];
+        for (int i = 1; i < fields.length; i++) {
+          vector[i-1] = Float.parseFloat(fields[i]);
+        }
+        map.put(fields[0], vector);
+      }
+    } catch (IOException ioe) {
+      throw new RuntimeIOException("Couldn't load word vectors", ioe);
+    } finally {
+      IOUtils.closeIgnoringExceptions(br);
+    }
+    timing.done();
+    return map;
+  }
 
 
   /**
@@ -1290,16 +1579,15 @@ public class ColumnDataClassifier {
     // other command-line arguments
     String loadPath = props.getProperty("loadClassifier");
     if (loadPath != null) {
-      System.err.println("Loading classifier from " + loadPath + "...");
+      logger.info("Loading classifier from " + loadPath + "...");
       ObjectInputStream ois = null;
       try {
         // load the classifier
-        //ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(loadPath)));
         ois = IOUtils.readStreamFromString(loadPath);
         classifier = ErasureUtils.<LinearClassifier<String,String>>uncheckedCast(ois.readObject());
         myFlags = (Flags[]) ois.readObject();
         assert flags.length > 0;
-        System.err.println("Done.");
+        logger.info("Done.");
       } catch (Exception e) {
         throw new RuntimeIOException("Error deserializing " + loadPath, e);
       } finally {
@@ -1310,20 +1598,18 @@ public class ColumnDataClassifier {
       myFlags[0] = new Flags();  // initialize zero column flags used for global flags; it can't be null
     }
 
-    for (Enumeration<?> e = props.propertyNames(); e.hasMoreElements();) {
-      String key = (String) e.nextElement();
+    for (String key : props.stringPropertyNames()) {
       String val = props.getProperty(key);
+
       int col = 0;  // the default (first after class)
-      // System.err.println(key + " = " + val);
+       logger.info(key + " = " + val);
       Matcher matcher = prefix.matcher(key);
       if (matcher.matches()) {
         col = Integer.parseInt(matcher.group(1));
         key = matcher.group(2);
       }
       if (col >= myFlags.length) {
-        Flags[] newFl = new Flags[col + 1];
-        System.arraycopy(myFlags, 0, newFl, 0, myFlags.length);
-        myFlags = newFl;
+        myFlags = Arrays.copyOf(myFlags, col + 1);
       }
       if (myFlags[col] == null) {
         myFlags[col] = new Flags();
@@ -1341,7 +1627,19 @@ public class ColumnDataClassifier {
         }
       } else if (key.equals("binnedLengthsStatistics")) {
         if (Boolean.parseBoolean(val)) {
-          myFlags[col].binnedLengthsCounter = new TwoDimensionalCounter<String,String>();
+          myFlags[col].binnedLengthsCounter = new TwoDimensionalCounter<>();
+        }
+      } else if (key.equals("splitWordCount")) {
+        myFlags[col].splitWordCount = Boolean.parseBoolean(val);
+      } else if (key.equals("logSplitWordCount")) {
+        myFlags[col].logSplitWordCount = Boolean.parseBoolean(val);
+      } else if (key.equals("binnedSplitWordCounts")) {
+        if (val != null) {
+          String[] binnedSplitWordCountStrs = val.split("[, ]+");
+          myFlags[col].binnedSplitWordCounts = new int[binnedSplitWordCountStrs.length];
+          for (int i = 0; i < myFlags[col].binnedSplitWordCounts.length; i++) {
+            myFlags[col].binnedSplitWordCounts[i] = Integer.parseInt(binnedSplitWordCountStrs[i]);
+          }
         }
       } else if (key.equals("countChars")) {
         myFlags[col].countChars = val.toCharArray();
@@ -1365,7 +1663,7 @@ public class ColumnDataClassifier {
         myFlags[col].binnedValuesNaN = Double.parseDouble(val);
       } else if (key.equals("binnedValuesStatistics")) {
         if (Boolean.parseBoolean(val)) {
-          myFlags[col].binnedValuesCounter = new TwoDimensionalCounter<String,String>();
+          myFlags[col].binnedValuesCounter = new TwoDimensionalCounter<>();
         }
       } else if (key.equals("useNGrams")) {
         myFlags[col].useNGrams = Boolean.parseBoolean(val);
@@ -1440,7 +1738,7 @@ public class ColumnDataClassifier {
           try {
             myFlags[col].prior = Integer.parseInt(val);
           } catch (NumberFormatException nfe) {
-            System.err.println("Unknown prior " + val + "; using none.");
+            logger.info("Unknown prior " + val + "; using none.");
           }
         }
       } else if (key.equals("sigma")) {
@@ -1456,38 +1754,38 @@ public class ColumnDataClassifier {
         try {
           myFlags[col].partialNGramPattern = Pattern.compile(myFlags[col].partialNGramRegexp);
         } catch (PatternSyntaxException pse) {
-          System.err.println("Ill-formed partialNGramPattern: " + myFlags[col].partialNGramPattern);
+          logger.info("Ill-formed partialNGramPattern: " + myFlags[col].partialNGramPattern);
           myFlags[col].partialNGramRegexp = null;
         }
       } else if (key.equals("splitWordsRegexp")) {
-        myFlags[col].splitWordsRegexp = val;
         try {
-          myFlags[col].splitWordsPattern = Pattern.compile(myFlags[col].splitWordsRegexp);
+          myFlags[col].splitWordsPattern = Pattern.compile(val);
         } catch (PatternSyntaxException pse) {
-          System.err.println("Ill-formed splitWords regexp: " + myFlags[col].splitWordsRegexp);
-          myFlags[col].splitWordsRegexp = null;
+          logger.info("Ill-formed splitWordsRegexp: " + val);
         }
       } else if (key.equals("splitWordsTokenizerRegexp")) {
-        myFlags[col].splitWordsTokenizerRegexp = val;
         try {
-          myFlags[col].splitWordsTokenizerPattern = Pattern.compile(myFlags[col].splitWordsTokenizerRegexp);
+          myFlags[col].splitWordsTokenizerPattern = Pattern.compile(val);
         } catch (PatternSyntaxException pse) {
-          System.err.println("Ill-formed splitWordsTokenizerRegexp: " + myFlags[col].splitWordsTokenizerRegexp);
-          myFlags[col].splitWordsTokenizerRegexp = null;
+          logger.info("Ill-formed splitWordsTokenizerRegexp: " + val);
         }
       } else if (key.equals("splitWordsIgnoreRegexp")) {
-        myFlags[col].splitWordsIgnoreRegexp = val;
-        try {
-          myFlags[col].splitWordsIgnorePattern = Pattern.compile(myFlags[col].splitWordsIgnoreRegexp);
-        } catch (PatternSyntaxException pse) {
-          System.err.println("Ill-formed splitWordsIgnoreRegexp: " + myFlags[col].splitWordsIgnoreRegexp);
-          myFlags[col].splitWordsIgnoreRegexp = null;
+        String trimVal = val.trim();
+        if (trimVal.isEmpty()) {
+          myFlags[col].splitWordsIgnorePattern = null;
+        } else {
+          try {
+            myFlags[col].splitWordsIgnorePattern = Pattern.compile(trimVal);
+          } catch (PatternSyntaxException pse) {
+            logger.info("Ill-formed splitWordsIgnoreRegexp: " + trimVal);
+          }
         }
-
       } else if (key.equals("useSplitWords")) {
         myFlags[col].useSplitWords = Boolean.parseBoolean(val);
       } else if (key.equals("useSplitWordPairs")) {
         myFlags[col].useSplitWordPairs = Boolean.parseBoolean(val);
+      } else if (key.equals("useLowercaseSplitWordPairs")) {
+        myFlags[col].useLowercaseSplitWordPairs = Boolean.parseBoolean(val);
       } else if (key.equals("useAllSplitWordPairs")) {
         myFlags[col].useAllSplitWordPairs = Boolean.parseBoolean(val);
       } else if (key.equals("useAllSplitWordTriples")) {
@@ -1499,7 +1797,7 @@ public class ColumnDataClassifier {
       } else if (key.equals("minWordNGramLeng")) {
         myFlags[col].minWordNGramLeng = Integer.parseInt(val);
         if (myFlags[col].minWordNGramLeng < 1) {
-          System.err.println("minWordNGramLeng set to " + myFlags[col].minWordNGramLeng + ", resetting to 1");
+          logger.info("minWordNGramLeng set to " + myFlags[col].minWordNGramLeng + ", resetting to 1");
           myFlags[col].minWordNGramLeng = 1;
         }
       } else if (key.equals("wordNGramBoundaryRegexp")) {
@@ -1507,11 +1805,13 @@ public class ColumnDataClassifier {
         try {
           myFlags[col].wordNGramBoundaryPattern = Pattern.compile(myFlags[col].wordNGramBoundaryRegexp);
         } catch (PatternSyntaxException pse) {
-          System.err.println("Ill-formed wordNGramBoundary regexp: " + myFlags[col].wordNGramBoundaryRegexp);
+          logger.info("Ill-formed wordNGramBoundary regexp: " + myFlags[col].wordNGramBoundaryRegexp);
           myFlags[col].wordNGramBoundaryRegexp = null;
         }
       } else if (key.equals("useSplitFirstLastWords")) {
         myFlags[col].useSplitFirstLastWords = Boolean.parseBoolean(val);
+      } else if (key.equals("useLowercaseSplitFirstLastWords")) {
+        myFlags[col].useLowercaseSplitFirstLastWords = Boolean.parseBoolean(val);
       } else if (key.equals("loadClassifier")) {
         myFlags[col].loadClassifier = val;
       } else if (key.equals("serializeTo")) {
@@ -1520,6 +1820,8 @@ public class ColumnDataClassifier {
         Flags.printTo = val;
       } else if (key.equals("trainFile")) {
         Flags.trainFile = val;
+      } else if (key.equals("displayAllAnswers")) {
+        Flags.displayAllAnswers = Boolean.parseBoolean(val);
       } else if (key.equals("testFile")) {
         myFlags[col].testFile = val;
       } else if (key.equals("trainFromSVMLight")) {
@@ -1534,15 +1836,15 @@ public class ColumnDataClassifier {
         myFlags[col].displayedColumn = Integer.parseInt(val);
       } else if (key.equals("groupingColumn")) {
         myFlags[col].groupingColumn = Integer.parseInt(val);
-        // System.err.println("Grouping column is " + (myFlags[col].groupingColumn));
+        // logger.info("Grouping column is " + (myFlags[col].groupingColumn));
       } else if (key.equals("rankingScoreColumn")) {
         myFlags[col].rankingScoreColumn = Integer.parseInt(val);
-        // System.err.println("Ranking score column is " + (myFlags[col].rankingScoreColumn));
+        // logger.info("Ranking score column is " + (myFlags[col].rankingScoreColumn));
       } else if (key.equals("rankingAccuracyClass")) {
         myFlags[col].rankingAccuracyClass = val;
       } else if (key.equals("goldAnswerColumn")) {
         myFlags[col].goldAnswerColumn = Integer.parseInt(val);
-        // System.err.println("Gold answer column is " + (myFlags[col].goldAnswerColumn));  // it's a nuisance to print this when used programmatically
+        // logger.info("Gold answer column is " + (myFlags[col].goldAnswerColumn));  // it's a nuisance to print this when used programmatically
       } else if (key.equals("useQN")) {
         myFlags[col].useQN = Boolean.parseBoolean(val);
       } else if (key.equals("QNsize")) {
@@ -1570,17 +1872,47 @@ public class ColumnDataClassifier {
       } else if (key.equals("biased")) {
         myFlags[col].biased = Boolean.parseBoolean(val);
       } else if (key.equals("biasedHyperplane")) {
-        // System.err.println("Constraints is " + constraints);
+        // logger.info("Constraints is " + constraints);
         if (val != null && val.trim().length() > 0) {
           String[] bits = val.split("[, ]+");
-          myFlags[col].biasedHyperplane = new ClassicCounter<String>();
+          myFlags[col].biasedHyperplane = new ClassicCounter<>();
           for (int i = 0; i < bits.length; i += 2) {
             myFlags[col].biasedHyperplane.setCount(bits[i], Double.parseDouble(bits[i + 1]));
           }
         }
-        // System.err.println("Biased Hyperplane is " + biasedHyperplane);
-      } else if (key.length() > 0 && !key.equals("prop")) {
-        System.err.println("Unknown property: |" + key + '|');
+        // logger.info("Biased Hyperplane is " + biasedHyperplane);
+      } else if (key.equals("crossValidationFolds")) {
+        myFlags[col].crossValidationFolds = Integer.parseInt(val);
+      } else if (key.equals("printCrossValidationDecisions")) {
+        myFlags[col].printCrossValidationDecisions = Boolean.parseBoolean(val);
+      } else if (key.equals("shuffleTrainingData")) {
+        myFlags[col].shuffleTrainingData = Boolean.parseBoolean(val);
+      } else if (key.equals("shuffleSeed")) {
+        myFlags[col].shuffleSeed = Long.parseLong(val);
+      } else if (key.equals("csvInput")) {
+        myFlags[col].csvInput = Boolean.parseBoolean(val);
+      } else if (key.equals("inputFormat")) {
+        if (val.equalsIgnoreCase("header")) {
+          myFlags[col].inputFormat = InputFormat.HEADER;
+        } else if (val.equalsIgnoreCase("comments")) {
+          myFlags[col].inputFormat = InputFormat.COMMENTS;
+        } else if (val.equalsIgnoreCase("plain")) {
+          myFlags[col].inputFormat = InputFormat.PLAIN;
+        } else {
+          logger.info("Unknown inputFormat: " + val);
+        }
+      } else if (key.equals("splitWordsWithPTBTokenizer")) {
+        // System.out.println("splitting with ptb tokenizer");
+        myFlags[col].splitWordsWithPTBTokenizer = Boolean.parseBoolean(val);
+      } else if (key.equals("useSplitWordVectors")) {
+        myFlags[col].wordVectors = loadWordVectors(val);
+        myUsesRealValues = true;
+      } else if (key.equals("showTokenization")) {
+        myFlags[col].showTokenization = Boolean.parseBoolean(val);
+      } else if (key.equals("csvOutput")) {
+        myFlags[col].csvOutput = val;
+      } else if ( ! key.isEmpty() && ! key.equals("prop")) {
+        logger.info("Unknown property: |" + key + '|');
       }
     }
     myFlags[0].usesRealValues = myUsesRealValues;
@@ -1621,16 +1953,26 @@ public class ColumnDataClassifier {
    * @throws IOException If IO problems
    */
   public static void main(String[] args) throws IOException {
-    System.err.println(StringUtils.toInvocationString("ColumnDataClassifier", args));
+    logger.info(StringUtils.toInvocationString("ColumnDataClassifier", args));
     // the constructor will load a classifier if one is specified with loadClassifier
     ColumnDataClassifier cdc = new ColumnDataClassifier(StringUtils.argsToProperties(args));
+    String testFile = cdc.globalFlags.testFile;
+
+    // check that we have roughly sensible options or else warn and exit
+    if ((testFile == null && Flags.serializeTo == null && cdc.globalFlags.crossValidationFolds < 2) ||
+            (Flags.trainFile == null && cdc.globalFlags.loadClassifier == null)) {
+      logger.info("usage: java edu.stanford.nlp.classify.ColumnDataClassifier -prop propFile");
+      logger.info("  and/or: -trainFile trainFile -testFile testFile|-serializeTo modelFile [-useNGrams|-sigma sigma|...]");
+      return; // ENDS PROCESSING
+    }
+
     if (cdc.globalFlags.loadClassifier == null) {
       // Otherwise we attempt to train one and exit if we don't succeed
       if ( ! cdc.trainClassifier()) {
         return;
       }
     }
-    String testFile = cdc.globalFlags.testFile;
+
     if (testFile != null) {
       cdc.testClassifier(testFile);
     }
@@ -1638,51 +1980,79 @@ public class ColumnDataClassifier {
 
 
   private boolean trainClassifier() throws IOException {
-    String trainFile = Flags.trainFile;
-    String testFile = globalFlags.testFile;
-    String serializeTo = Flags.serializeTo;
+    // build dataset of training data featurized
+    Pair<GeneralDataset<String,String>, List<String[]>> dataInfo = readAndReturnTrainingExamples(Flags.trainFile);
+    GeneralDataset<String,String> train = dataInfo.first();
+    List<String[]> lineInfos = dataInfo.second();
 
-    // if we are training the classifier now
-    if ((testFile == null && serializeTo == null) || trainFile == null) {
-      System.err.println("usage: java edu.stanford.nlp.classify.ColumnDataClassifier -prop propFile");
-      System.err.println("  and/or: -trainFile trainFile -testFile testFile|-serializeTo modelFile [-useNGrams|-sigma sigma|...]");
-      return false; // ENDS PROCESSING
+    // For things like cross validation, we may well need to sort data!  Data sets are often ordered by class.
+    if (globalFlags.shuffleTrainingData) {
+      long seed;
+      if (globalFlags.shuffleSeed != 0) {
+        seed = globalFlags.shuffleSeed;
+      } else {
+        seed = System.nanoTime();
+      }
+      train.shuffleWithSideInformation(seed, lineInfos);
     }
 
-    // build dataset of training data featureized
-    GeneralDataset<String,String> train = readTrainingExamples(trainFile);
     // print any binned value histograms
     for (int i = 0; i < flags.length; i++) {
       if (flags[i] != null && flags[i].binnedValuesCounter != null) {
-        System.err.println("BinnedValuesStatistics for column " + i);
-        System.err.println(flags[i].binnedValuesCounter.toString());
+        logger.info("BinnedValuesStatistics for column " + i);
+        logger.info(flags[i].binnedValuesCounter.toString());
       }
     }
     // print any binned length histograms
     for (int i = 0; i < flags.length; i++) {
       if (flags[i] != null && flags[i].binnedLengthsCounter != null) {
-        System.err.println("BinnedLengthsStatistics for column " + i);
-        System.err.println(flags[i].binnedLengthsCounter.toString());
+        logger.info("BinnedLengthsStatistics for column " + i);
+        logger.info(flags[i].binnedLengthsCounter.toString());
       }
     }
     // print the training data in SVMlight format if desired
     if (Flags.printSVMLightFormatTo != null) {
-      PrintWriter pw = new PrintWriter(IOUtils.getPrintWriter(Flags.printSVMLightFormatTo, Flags.encoding));
+      PrintWriter pw = IOUtils.getPrintWriter(Flags.printSVMLightFormatTo, Flags.encoding);
       train.printSVMLightFormat(pw);
       IOUtils.closeIgnoringExceptions(pw);
       train.featureIndex().saveToFilename(Flags.printSVMLightFormatTo + ".featureIndex");
       train.labelIndex().saveToFilename(Flags.printSVMLightFormatTo + ".labelIndex");
     }
 
+    if (globalFlags.crossValidationFolds > 1) {
+      crossValidate(train, lineInfos);
+    }
+
     if (globalFlags.exitAfterTrainingFeaturization) {
       return false; // ENDS PROCESSING
     }
+
     // build the classifier
     classifier = makeClassifier(train);
-    String classString = null;
+    printClassifier(classifier);
+
+    // serialize the classifier
+    String serializeTo = Flags.serializeTo;
+    if (serializeTo != null) {
+      logger.info("Serializing classifier to " + serializeTo + "...");
+      ObjectOutputStream oos = IOUtils.writeStreamFromString(serializeTo);
+      oos.writeObject(classifier);
+      // Fiddle: Don't write a testFile to the serialized classifier.  It makes no sense and confuses people
+      String testFile = globalFlags.testFile;
+      globalFlags.testFile = null;
+      oos.writeObject(flags);
+      globalFlags.testFile = testFile;
+      oos.close();
+      logger.info("Done.");
+    }
+    return true;
+  }
+
+  private void printClassifier(Classifier classifier) {
+    String classString;
     if (classifier instanceof LinearClassifier<?,?>) {
       classString = ((LinearClassifier<?,?>)classifier).toString(globalFlags.printClassifier, globalFlags.printClassifierParam);
-    } else if (classifier instanceof LogisticClassifier<?,?>) {
+    } else {
       classString = classifier.toString();
     }
     if (Flags.printTo != null) {
@@ -1696,39 +2066,76 @@ public class ColumnDataClassifier {
       } finally {
         IOUtils.closeIgnoringExceptions(fw);
       }
-      System.err.println("Built classifier described in file " + Flags.printTo);
+      logger.info("Built classifier described in file " + Flags.printTo);
     } else {
-      System.err.print("Built this classifier: ");
-      System.err.println(classString);
+      logger.info("Built this classifier: " + classString);
     }
-
-    // serialize the classifier
-    if (serializeTo != null) {
-      System.err.println("Serializing classifier to " + serializeTo + "...");
-      //ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(serializeTo)));
-      ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(IOUtils.getFileOutputStream(serializeTo)));
-      oos.writeObject(classifier);
-      // Fiddle: Don't write a testFile to the serialized classifier.  It makes no sense and confuses people
-      globalFlags.testFile = null;
-      oos.writeObject(flags);
-      globalFlags.testFile = testFile;
-      oos.close();
-      System.err.println("Done.");
-    }
-    return true;
   }
 
   private void testClassifier(String testFile) {
-    System.err.print("Output format: ");
-    if (globalFlags.displayedColumn >= 0) {
-      System.err.printf("dataColumn%d ", globalFlags.displayedColumn);
+    if (globalFlags.printFeatures != null) {
+      newFeaturePrinter(globalFlags.printFeatures, "test", Flags.encoding);
     }
-    System.err.println("goldAnswer classifierAnswer P(classifierAnswer)");
 
-    readAndTestExamples(classifier, testFile);
+    Pair<GeneralDataset<String,String>,List<String[]>> testInfo = readTestExamples(testFile);
+    GeneralDataset<String,String> test = testInfo.first();
+    List<String[]> lineInfos = testInfo.second();
+
+    testExamples(classifier, test, lineInfos);
     // ((LinearClassifier) classifier).dumpSorted();
+    if (globalFlags.printFeatures != null) {
+      closeFeaturePrinter();
+    }
   }
 
+  /** Run cross-validation on a dataset, and return accuracy and macro-F1 scores.
+   *  The number of folds is given by the crossValidationFolds property.
+   *
+   *  @param dataset The dataset of examples to cross-validate on.
+   *  @param lineInfos The String form of the items in the dataset. (Must be present.)
+   *  @return Accuracy and macro F1
+   */
+  public Pair<Double,Double> crossValidate(GeneralDataset<String,String> dataset, List<String[]> lineInfos) {
+    final int numFolds = globalFlags.crossValidationFolds;
+    double accuracySum = 0.0;
+    double macroF1Sum = 0.0;
+    for (int fold = 0; fold < numFolds; fold++) {
+      logger.info("");
+      logger.info("### Fold " + fold);
+      Pair<GeneralDataset<String,String>,GeneralDataset<String,String>> split =
+              dataset.splitOutFold(fold, numFolds);
+      GeneralDataset<String,String> devTrain = split.first();
+      GeneralDataset<String,String> devTest = split.second();
+
+      Classifier<String,String> cl = makeClassifier(devTrain);
+      printClassifier(cl);
+
+      int normalFoldSize = lineInfos.size()/numFolds;
+      int start = normalFoldSize * fold;
+      int end = start + normalFoldSize;
+      if (fold == (numFolds - 1)) {
+        end = lineInfos.size();
+      }
+
+      List<String[]> devTestLineInfos = lineInfos.subList(start, end);
+      Pair<Double,Double> accuracies = testExamples(cl, devTest, devTestLineInfos);
+      accuracySum += accuracies.first();
+      macroF1Sum += accuracies.second();
+    }
+    double averageAccuracy = accuracySum / numFolds;
+    double averageMacroF1 = macroF1Sum / numFolds;
+    NumberFormat nf2 = new DecimalFormat("0.00000");
+    logger.info("Average accuracy/micro-averaged F1: " + nf2.format(averageAccuracy));
+    logger.info("Average macro-averaged F1: " + nf2.format(averageMacroF1));
+    logger.info("");
+    return new Pair<>(averageAccuracy, averageMacroF1);
+  }
+
+  public String classOf(Datum<String,String> example) {
+    if(classifier==null)
+      throw new RuntimeException("Classifier is not initialized");
+    return classifier.classOf(example);
+  }
 
   static class Flags implements Serializable {
 
@@ -1760,16 +2167,15 @@ public class ColumnDataClassifier {
 
     boolean intern = false;
 
-    String splitWordsRegexp = null;
     Pattern splitWordsPattern = null;
-    String splitWordsTokenizerRegexp = null;
     Pattern splitWordsTokenizerPattern = null;
-    String splitWordsIgnoreRegexp = null;
-    Pattern splitWordsIgnorePattern = null;
+    Pattern splitWordsIgnorePattern = Pattern.compile(DEFAULT_IGNORE_REGEXP);
     boolean useSplitWords = false;
     boolean useSplitWordPairs = false;
+    boolean useLowercaseSplitWordPairs = false;
     boolean useSplitFirstLastWords = false;
-    boolean useLowercaseSplitWords;
+    boolean useLowercaseSplitWords = false;
+    boolean useLowercaseSplitFirstLastWords = false;
 
     int wordShape = edu.stanford.nlp.process.WordShapeClassifier.NOWORDSHAPE;
     int splitWordShape = WordShapeClassifier.NOWORDSHAPE;
@@ -1837,8 +2243,8 @@ public class ColumnDataClassifier {
     double l1regmax = 500.0;
     double featureWeightThreshold = 0;
 
-    String testFile = null;
-    String loadClassifier = null;
+    String testFile = null;  // this one would be better off static (we avoid serializing it)
+    String loadClassifier = null;   // this one could also be static
 
     // these are static because we don't want them serialized
     static String trainFile = null;
@@ -1849,6 +2255,8 @@ public class ColumnDataClassifier {
     static String encoding = null;
     static String printSVMLightFormatTo;
 
+    static boolean displayAllAnswers = false;
+
     // Distinguishes whether this file has real valued features or if the more efficient non-RVF representation can be used.
     // This is set as a summary flag in globalFeatures based on whether anything uses real values.
     boolean usesRealValues;
@@ -1856,6 +2264,24 @@ public class ColumnDataClassifier {
 
     boolean useAllSplitWordPairs;
     boolean useAllSplitWordTriples;
+
+    boolean showTokenization = false;
+
+    int crossValidationFolds = -1;
+    boolean shuffleTrainingData = false;
+    long shuffleSeed = 0;
+
+    static boolean csvInput = false; //train and test files are in csv format
+    static InputFormat inputFormat = InputFormat.PLAIN;
+    boolean splitWordsWithPTBTokenizer = false;
+
+    boolean splitWordCount;
+    boolean logSplitWordCount;
+    int[] binnedSplitWordCounts;
+    Map<String, float[]> wordVectors;
+
+    static String csvOutput = null;
+    boolean printCrossValidationDecisions = false;
 
     @Override
     public String toString() {
