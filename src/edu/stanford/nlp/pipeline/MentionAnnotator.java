@@ -41,7 +41,7 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
   Dictionaries dictionaries;
   Properties corefProperties;
 
-  Set<Class<? extends CoreAnnotation>> mentionAnnotatorRequirements;
+  Set<Class<? extends CoreAnnotation>> mentionAnnotatorRequirements = new HashSet<>();
 
   public MentionAnnotator(Properties props) {
     try {
