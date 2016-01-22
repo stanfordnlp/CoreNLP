@@ -1,9 +1,9 @@
 package edu.stanford.nlp.parser.lexparser;
 
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.trees.Tree;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +35,7 @@ public class HTKLatticeReader {
     }
 
     // READ LATTICE
-    latticeWords = new ArrayList<>();
+    latticeWords = new ArrayList<HTKLatticeReader.LatticeWord>();
 
     Pattern wordLinePattern = Pattern.compile("(\\d+)\\s+(\\d+)\\s+lm=(-?\\d+\\.\\d+),am=(-?\\d+\\.\\d+)\\s+([^( ]+)(?:\\((\\d+)\\))?.*");
     Matcher wordLineMatcher = wordLinePattern.matcher(line);
@@ -188,7 +188,7 @@ public class HTKLatticeReader {
   private void buildWordsAtTime() {
     wordsAtTime = new ArrayList[numStates];
     for (int i = 0; i < wordsAtTime.length; i++) {
-      wordsAtTime[i] = new ArrayList<>();
+      wordsAtTime[i] = new ArrayList<LatticeWord>();
     }
 
     for (LatticeWord lw : latticeWords) {
@@ -201,7 +201,7 @@ public class HTKLatticeReader {
   private void buildWordsStartAt() {
     wordsStartAt = new ArrayList[numStates];
     for (int i = 0; i < wordsStartAt.length; i++) {
-      wordsStartAt[i] = new ArrayList<>();
+      wordsStartAt[i] = new ArrayList<LatticeWord>();
     }
 
     for (LatticeWord lw : latticeWords) {
@@ -212,7 +212,7 @@ public class HTKLatticeReader {
   private void buildWordsEndAt() {
     wordsEndAt = new ArrayList[numStates];
     for (int i = 0; i < wordsEndAt.length; i++) {
-      wordsEndAt[i] = new ArrayList<>();
+      wordsEndAt[i] = new ArrayList<LatticeWord>();
     }
 
     for (LatticeWord lw : latticeWords) {
@@ -226,15 +226,14 @@ public class HTKLatticeReader {
 
     while (changed) {
       changed = false;
-      for (ArrayList<LatticeWord> aWordsAtTime : wordsAtTime) {
-        if (aWordsAtTime.size() < 2) {
+      for (int i = 0; i < wordsAtTime.length; i++) {
+        if (wordsAtTime[i].size() < 2) {
           continue;
         }
-        INNER:
-        for (int j = 0; j < aWordsAtTime.size() - 1; j++) {
-          LatticeWord w1 = aWordsAtTime.get(j);
-          for (int k = j + 1; k < aWordsAtTime.size(); k++) {
-            LatticeWord w2 = aWordsAtTime.get(k);
+        INNER: for (int j = 0; j < wordsAtTime[i].size() - 1; j++) {
+          LatticeWord w1 = wordsAtTime[i].get(j);
+          for (int k = j + 1; k < wordsAtTime[i].size(); k++) {
+            LatticeWord w2 = wordsAtTime[i].get(k);
             if (w1.word.equalsIgnoreCase(w2.word)) {
               if (removeRedundentPair(w1, w2)) {
                 //int numMerged = mergeDuplicates();
@@ -318,7 +317,7 @@ public class HTKLatticeReader {
 
 
   private void changeStartTimes(List<LatticeWord> words, int newStartTime) {
-    ArrayList<LatticeWord> toRemove = new ArrayList<>();
+    ArrayList<LatticeWord> toRemove = new ArrayList<LatticeWord>();
     for (LatticeWord lw : words) {
       latticeWords.remove(lw);
       int oldStartTime = lw.startNode;
@@ -360,7 +359,7 @@ public class HTKLatticeReader {
   }
 
   private void changeEndTimes(List<LatticeWord> words, int newEndTime) {
-    ArrayList<LatticeWord> toRemove = new ArrayList<>();
+    ArrayList<LatticeWord> toRemove = new ArrayList<LatticeWord>();
     for (LatticeWord lw : words) {
       latticeWords.remove(lw);
       int oldEndTime = lw.endNode;
@@ -402,7 +401,7 @@ public class HTKLatticeReader {
   }
 
   private void removeSilence() {
-    ArrayList<HTKLatticeReader.LatticeWord> silences = new ArrayList<>();
+    ArrayList<HTKLatticeReader.LatticeWord> silences = new ArrayList<HTKLatticeReader.LatticeWord>();
     for (LatticeWord lw : latticeWords) {
       if (lw.word.equalsIgnoreCase(SILENCE)) {
         silences.add(lw);
@@ -506,7 +505,7 @@ public class HTKLatticeReader {
     this.PRETTYPRINT = prettyPrint;
     this.mergeType = mergeType;
 
-    BufferedReader in = IOUtils.readerFromString(filename);
+    BufferedReader in = new BufferedReader(new FileReader(filename));
     //System.err.println(-1);
     readInput(in);
     //System.err.println(0);
@@ -527,7 +526,7 @@ public class HTKLatticeReader {
   }
 
   public List<HTKLatticeReader.LatticeWord> getWordsOverSpan(int a, int b) {
-    ArrayList<HTKLatticeReader.LatticeWord> words = new ArrayList<>();
+    ArrayList<HTKLatticeReader.LatticeWord> words = new ArrayList<HTKLatticeReader.LatticeWord>();
     for (LatticeWord lw : wordsStartAt[a]) {
       if (lw.endNode == b) {
         words.add(lw);

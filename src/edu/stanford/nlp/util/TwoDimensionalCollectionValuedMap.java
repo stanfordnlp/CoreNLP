@@ -73,17 +73,13 @@ public class TwoDimensionalCollectionValuedMap<K1, K2, V> implements Serializabl
     return map.toString();
   }
   
-  public void putAll(Map<K1, CollectionValuedMap<K2, V>> toAdd){
-    map.putAll(toAdd);
-  }
-  
   /**
    * @return the Collection mapped to by key, never null, but may be empty.
    */
   public CollectionValuedMap<K2,V> getCollectionValuedMap(K1 key1) {
     CollectionValuedMap<K2,V> cvm = map.get(key1);
     if (cvm == null) {
-      cvm = new CollectionValuedMap<>(mf, cf, treatCollectionsAsImmutable);
+      cvm = new CollectionValuedMap<K2,V>(mf,cf,treatCollectionsAsImmutable);
       map.put(key1, cvm);
     }
     return cvm;
@@ -100,7 +96,7 @@ public class TwoDimensionalCollectionValuedMap<K1, K2, V> implements Serializabl
   public void add(K1 key1, K2 key2, V value) {
     CollectionValuedMap<K2,V> cvm = map.get(key1);
     if (cvm == null) {
-      cvm = new CollectionValuedMap<>(mf, cf, treatCollectionsAsImmutable);
+      cvm = new CollectionValuedMap<K2,V>(mf,cf,treatCollectionsAsImmutable);
       map.put(key1,cvm);
     }
     cvm.add(key2,value);
@@ -113,7 +109,7 @@ public class TwoDimensionalCollectionValuedMap<K1, K2, V> implements Serializabl
   public void add(K1 key1, K2 key2, Collection<V> value) {
     CollectionValuedMap<K2,V> cvm = map.get(key1);
     if (cvm == null) {
-      cvm = new CollectionValuedMap<>(mf, cf, treatCollectionsAsImmutable);
+      cvm = new CollectionValuedMap<K2,V>(mf,cf,treatCollectionsAsImmutable);
       map.put(key1,cvm);
     }
     for(V v: value)
@@ -127,7 +123,7 @@ public class TwoDimensionalCollectionValuedMap<K1, K2, V> implements Serializabl
   public void addKey(K1 key1) {
     CollectionValuedMap<K2,V> cvm = map.get(key1);
     if (cvm == null) {
-      cvm = new CollectionValuedMap<>(mf, cf, treatCollectionsAsImmutable);
+      cvm = new CollectionValuedMap<K2,V>(mf,cf,treatCollectionsAsImmutable);
       map.put(key1,cvm);
     }
   }
@@ -152,7 +148,7 @@ public class TwoDimensionalCollectionValuedMap<K1, K2, V> implements Serializabl
   }
   
   public void retainAll(Set<K1> keys) {
-    for (K1 key : new LinkedList<>(map.keySet())) {
+    for (K1 key : new LinkedList<K1>(map.keySet())) {
       if (!keys.contains(key)) {
         map.remove(key);
       }

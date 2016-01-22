@@ -18,7 +18,7 @@ import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.util.CoreMap;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 
 public class SUTimeServlet extends HttpServlet
 {
@@ -74,6 +74,7 @@ public class SUTimeServlet extends HttpServlet
       if (sb.length() > 0) {
         sb.append(",");
       }
+//      sb.append(rulesDir + File.pathSeparator + file);
       sb.append(rulesDir + "/" + file);
     }
     return sb.toString();
@@ -88,7 +89,8 @@ public class SUTimeServlet extends HttpServlet
             parseBoolean(request.getParameter("includeNested"));
     boolean includeRange =
             parseBoolean(request.getParameter("includeRange"));
-    boolean readRules = true;
+    boolean readRules =
+            parseBoolean(request.getParameter("readRules"));
 
     String heuristicLevel = request.getParameter("relativeHeuristicLevel");
     Options.RelativeHeuristicLevel relativeHeuristicLevel =
@@ -120,8 +122,6 @@ public class SUTimeServlet extends HttpServlet
       props.setProperty("sutime.rules", ruleFile);
       props.setProperty("sutime.binders", "1");
       props.setProperty("sutime.binder.1", "edu.stanford.nlp.time.JollyDayHolidays");
-      props.setProperty("sutime.binder.1.xml", getServletContext().getRealPath("/WEB-INF/data/holidays/Holidays_sutime.xml"));
-      props.setProperty("sutime.binder.1.pathtype", "file");
     }
     props.setProperty("sutime.teRelHeurLevel",
             relativeHeuristicLevel.toString());
@@ -134,8 +134,8 @@ public class SUTimeServlet extends HttpServlet
 
   private void displayAnnotation(PrintWriter out, String query, Annotation anno, boolean includeOffsets) {
     List<CoreMap> timexAnns = anno.get(TimeAnnotations.TimexAnnotations.class);
-    List<String> pieces = new ArrayList<>();
-    List<Boolean> tagged = new ArrayList<>();
+    List<String> pieces = new ArrayList<String>();
+    List<Boolean> tagged = new ArrayList<Boolean>();
     int previousEnd = 0;
     for (CoreMap timexAnn : timexAnns) {
       int begin =
@@ -159,10 +159,10 @@ public class SUTimeServlet extends HttpServlet
     for (int i = 0; i < pieces.size(); ++i) {
       if (tagged.get(i)) {
         out.print("<span style=\"background-color: #FF8888\">");
-        out.print(StringEscapeUtils.escapeHtml4(pieces.get(i)));
+        out.print(StringEscapeUtils.escapeHtml(pieces.get(i)));
         out.print("</span>");
       } else {
-        out.print(StringEscapeUtils.escapeHtml4(pieces.get(i)));
+        out.print(StringEscapeUtils.escapeHtml(pieces.get(i)));
       }
     }
     out.println("</td></tr></table>");
@@ -182,15 +182,15 @@ public class SUTimeServlet extends HttpServlet
                 timexAnn.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
         int end =
                 timexAnn.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
-        out.print("<td>" + StringEscapeUtils.escapeHtml4(query.substring(begin, end)) + "</td>");
-        out.print("<td>" + ((timex.value() != null)? StringEscapeUtils.escapeHtml4(timex.value()):"") + "</td>");
+        out.print("<td>" + StringEscapeUtils.escapeHtml(query.substring(begin, end)) + "</td>");
+        out.print("<td>" + ((timex.value() != null)? StringEscapeUtils.escapeHtml(timex.value()):"") + "</td>");
         if (includeOffsets) {
           out.print("<td>" + begin + "</td>");
           out.print("<td>" + end + "</td>");
           out.print("<td>" + timexAnn.get(CoreAnnotations.TokenBeginAnnotation.class) + "</td>");
           out.print("<td>" + timexAnn.get(CoreAnnotations.TokenEndAnnotation.class) + "</td>");
         }
-        out.print("<td>" + StringEscapeUtils.escapeHtml4(timex.toString()) + "</td>");
+        out.print("<td>" + StringEscapeUtils.escapeHtml(timex.toString()) + "</td>");
         out.println("</tr>");
       }
       out.println("</table>");
@@ -204,7 +204,7 @@ public class SUTimeServlet extends HttpServlet
       List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
       for (CoreLabel token : tokens) {
         String tokenOutput =
-                StringEscapeUtils.escapeHtml4(token.word() + "/" + token.tag());
+                StringEscapeUtils.escapeHtml(token.word() + "/" + token.tag());
         out.print(tokenOutput + " ");
       }
       out.println("<br>");
@@ -228,7 +228,7 @@ public class SUTimeServlet extends HttpServlet
     PrintWriter out = response.getWriter();
     if (dateError) {
       out.println("<br><br>Warning: unparseable date " + 
-                  StringEscapeUtils.escapeHtml4(dateString));
+                  StringEscapeUtils.escapeHtml(dateString));
     }
 
     if (query != null && !query.equals("")) {

@@ -1,14 +1,13 @@
 package edu.stanford.nlp.process;
 
 
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 
 
 import edu.stanford.nlp.ling.BasicDocument;
 import edu.stanford.nlp.ling.Document;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Word;
-import edu.stanford.nlp.util.StringUtils;
 
 import java.io.File;
 import java.net.URL;
@@ -28,27 +27,17 @@ import java.util.*;
 public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractListProcessor<IN, HasWord, L, F>
   implements Function<List<IN>, List<HasWord>> {
 
-  private static final char[] EMPTY_CHAR_ARRAY = new char[0];
-
   private static final char[] SUBST_CHARS = {'(', ')', '[', ']', '{', '}'};
   private static final String[] REPLACE_SUBSTS = {"-LRB-", "-RRB-", "-LSB-", "-RSB-", "-LCB-", "-RCB-"};
 
-  private final char[] substChars;
-  private final String[] replaceSubsts;
+  protected char[] substChars = SUBST_CHARS;
+  protected String[] replaceSubsts = REPLACE_SUBSTS;
+  protected char[] escapeChars = {'/', '*'};
+  protected String[] replaceEscapes = {"\\/", "\\*"};
 
-  // starting about 2013, we no longer escape  * and /. We de-escape them when reading Treebank3
-  private final char[] escapeChars; // was  {'/', '*'};
-  private final String[] replaceEscapes; // was = {"\\/", "\\*"};
-
-  private final boolean fixQuotes;
-
+  protected boolean fixQuotes = true;
 
   public PTBEscapingProcessor() {
-    this(true);
-  }
-
-  public PTBEscapingProcessor(boolean fixQuotes) {
-    this(EMPTY_CHAR_ARRAY, StringUtils.EMPTY_STRING_ARRAY, SUBST_CHARS, REPLACE_SUBSTS, fixQuotes);
   }
 
   public PTBEscapingProcessor(char[] escapeChars, String[] replaceEscapes, char[] substChars, String[] replaceSubsts, boolean fixQuotes) {
@@ -72,7 +61,6 @@ public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractList
   /** Escape a List of HasWords.  Implements the
    *  Function&lt;List&lt;HasWord&gt;, List&lt;HasWord&gt;&gt; interface.
    */
-  @Override
   public List<HasWord> apply(List<IN> hasWordsList) {
     return process(hasWordsList);
   }
@@ -88,9 +76,8 @@ public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractList
   /**
    * @param input must be a List of objects of type HasWord
    */
-  @Override
   public List<HasWord> process(List<? extends IN> input) {
-    List<HasWord> output = new ArrayList<>();
+    List<HasWord> output = new ArrayList<HasWord>();
     for (IN h : input) {
       String s = h.word();
       h.setWord(escapeString(s));
@@ -105,7 +92,7 @@ public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractList
 
   private static List<HasWord> fixQuotes(List<HasWord> input) {
     int inputSize = input.size();
-    LinkedList<HasWord> result = new LinkedList<>();
+    LinkedList<HasWord> result = new LinkedList<HasWord>();
     if (inputSize == 0) {
       return result;
     }
@@ -131,7 +118,8 @@ public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractList
     } else {
       // alternate from the beginning
       begin = true;
-      for (HasWord hw : input) {
+      for (int i = 0; i < inputSize; i++) {
+        HasWord hw = input.get(i);
         String tok = hw.word();
         if (tok.equals("\"")) {
           if (begin) {
@@ -231,12 +219,12 @@ public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractList
       Document<String, Word, Word> d; // initialized below
       if (filename.startsWith("http://")) {
         Document<String, Word, Word> dpre = new BasicDocument<String>(WhitespaceTokenizer.factory()).init(new URL(filename));
-        DocumentProcessor<Word, Word, String, Word> notags = new StripTagsProcessor<>();
+        DocumentProcessor<Word, Word, String, Word> notags = new StripTagsProcessor<String, Word>();
         d = notags.processDocument(dpre);
       } else {
         d = new BasicDocument<String>(WhitespaceTokenizer.factory()).init(new File(filename));
       }
-      DocumentProcessor<Word, HasWord, String, Word> proc = new PTBEscapingProcessor<>();
+      DocumentProcessor<Word, HasWord, String, Word> proc = new PTBEscapingProcessor<Word, String, Word>();
       Document<String, Word, HasWord> newD = proc.processDocument(d);
       for (HasWord word : newD) {
         System.out.println(word);
@@ -244,6 +232,7 @@ public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractList
     } catch (Exception e) {
       e.printStackTrace();
     }
+
   }
 
 }

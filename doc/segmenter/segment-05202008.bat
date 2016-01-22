@@ -58,7 +58,7 @@ echo ------------------------------- >&2
 set BASEDIR=%~dp0
 set DATADIR=%BASEDIR%data
 :: set LEXDIR=%DATADIR%lexicons
-set JAVACMD=java -mx1024m -cp "%BASEDIR%*;" edu.stanford.nlp.ie.crf.CRFClassifier -sighanCorporaDict "%DATADIR%" -textFile "%file%" -inputEncoding %enc% -sighanPostProcessing true %ARGS%
+set JAVACMD=java -mx1024m -cp "%BASEDIR%seg.jar" edu.stanford.nlp.ie.crf.CRFClassifier -sighanCorporaDict "%DATADIR%" -testFile "%file%" -inputEncoding %enc% -sighanPostProcessing true %ARGS%
 set DICTS=%DATADIR%\dict-chris6.ser.gz
 set KBESTCMD=
 if not %kBest%==0 set kBestCmd=-kBest %kBest%
@@ -79,6 +79,6 @@ goto :EOF
   echo   pku  : Beijing University segmentation >&2
   echo   kBest: print kBest best segmenations; 0 means kBest mode is off. >&2
   echo. >&2
-  echo Example: %1 ctb test.simp.utf8 UTF-8 0 >&2
-  echo Example: %1 pku test.simp.utf8 UTF-8 0 >&2
+  echo Example: %0 ctb test.simp.utf8 UTF-8 0 >&2
+  echo Example: %0 pku test.simp.utf8 UTF-8 0 >&2
   goto :EOF

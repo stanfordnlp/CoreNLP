@@ -1,18 +1,23 @@
 package edu.stanford.nlp.util;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
-import java.util.function.Function;
 
 /**
  * Utilities for Maps, including inverting, composing, and support for list/set values.
- *
+ * <p/>
  * @author Dan Klein (klein@cs.stanford.edu)
+ * Date: Oct 22, 2003
+ * Time: 8:56:16 PM
  */
 public class Maps {
-
-  private Maps() {}
-
   /**
    * Adds the value to the HashSet given by map.get(key), creating a new HashMap if needed.
    *
@@ -45,7 +50,7 @@ public class Maps {
   }
 
   /**
-   * Compose two maps map1:x-&gt;y and map2:y-&gt;z to get a map x-&gt;z
+   * Compose two maps map1:x->y and map2:y->z to get a map x->z
    *
    * @return The composed map
    */
@@ -58,7 +63,7 @@ public class Maps {
   }
 
   /**
-   * Inverts a map x-&gt;y to a map y-&gt;x assuming unique preimages.  If they are not unique, you get an arbitrary ones as the values in the inverted map.
+   * Inverts a map x->y to a map y->x assuming unique preimages.  If they are not unique, you get an arbitrary ones as the values in the inverted map.
    *
    * @return The inverted map
    */
@@ -73,7 +78,7 @@ public class Maps {
   }
 
   /**
-   * Inverts a map x-&gt;y to a map y-&gt;pow(x) not assuming unique preimages.
+   * Inverts a map x->y to a map y->pow(x) not assuming unique preimages.
    *
    * @return The inverted set
    */
@@ -88,11 +93,15 @@ public class Maps {
   }
 
   /**
-   * Sorts a list of entries.  This method is here since the entries might come from a Counter.
+   * Sorts a list of entries.  This menthod is here since the entries might come from a Counter.
    */
   public static <K extends Comparable<? super K>, V> List<Map.Entry<K, V>> sortedEntries(Collection<Map.Entry<K, V>> entries) {
-    List<Entry<K,V>> entriesList = new ArrayList<>(entries);
-    Collections.sort(entriesList, (e1, e2) -> e1.getKey().compareTo(e2.getKey()));
+    List<Entry<K,V>> entriesList = new ArrayList<Map.Entry<K, V>>(entries);
+    Collections.sort(entriesList, new Comparator<Map.Entry<K, V>>() {
+      public int compare(Map.Entry<K, V> e1, Map.Entry<K, V> e2) {
+        return e1.getKey().compareTo(e2.getKey());
+      }
+    });
     return entriesList;
   }
 
@@ -128,7 +137,7 @@ public class Maps {
     toStringSorted(map, builder);
     return builder.toString();
   }
-
+  
   /**
    * Removes keys from the map
    */
@@ -147,43 +156,6 @@ public class Maps {
     for (Map.Entry<K, V2> entry : from.entrySet()) {
       to.put(entry.getKey(), function.apply(entry.getValue()));
     }
-  }
-
-  /**
-   * get all values corresponding to the indices (if they exist in the map)
-   * @param map
-   * @param indices
-   * @return a submap corresponding to the indices
-   */
-  public static<T,V> Map<T, V> getAll(Map<T, V> map, Collection<T> indices){
-    Map<T,V> result = new HashMap<>();
-    for(T i: indices)
-      if(map.containsKey(i)){
-        result.put(i, map.get(i));
-      }
-    return result;
-  }
-
-  /**
-   * Pretty print a Counter. This one has more flexibility in formatting, and
-   * doesn't sort the keys.
-   */
-  public static<T,V> String toString(Map<T, V> map, String preAppend, String postAppend, String keyValSeparator, String itemSeparator){
-
-    StringBuilder sb = new StringBuilder();
-    sb.append(preAppend);
-    int i = 0;
-    for (Entry<T, V> en: map.entrySet()) {
-      if(i != 0)
-        sb.append(itemSeparator);
-
-      sb.append(en.getKey());
-      sb.append(keyValSeparator);
-      sb.append(en.getValue());
-      i++;
-    }
-    sb.append(postAppend);
-    return sb.toString();
   }
 
   public static void main(String[] args) {

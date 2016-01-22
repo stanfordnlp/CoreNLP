@@ -48,7 +48,7 @@ public class CharniakScoredParsesReaderWriter {
   {
     try {
       ScoredParsesIterator iter = new ScoredParsesIterator(filename);
-      return new IterableIterator<>(iter);
+      return new IterableIterator<List<ScoredObject<Tree>>>(iter);
     } catch (IOException ex) {
       throw new RuntimeException(ex);
     }
@@ -64,7 +64,7 @@ public class CharniakScoredParsesReaderWriter {
   public Iterable<List<ScoredObject<Tree>>> readScoredTrees(String inputDesc, BufferedReader br)
   {
     ScoredParsesIterator iter = new ScoredParsesIterator(inputDesc, br);
-    return new IterableIterator<>(iter);
+    return new IterableIterator<List<ScoredObject<Tree>>>(iter);
   }
 
   /**
@@ -178,7 +178,6 @@ public class CharniakScoredParsesReaderWriter {
         int parsesExpected = 0;
         int sentenceId = lastSentenceId;
         ScoredObject<Tree> curParse = null;
-        Double score = null;
         List<ScoredObject<Tree>> curParses = null;
         while ((line = br.readLine()) != null) {
           line = line.trim();
@@ -203,17 +202,16 @@ public class CharniakScoredParsesReaderWriter {
                 }
               }
               lastSentenceId = sentenceId;
-              curParses = new ArrayList<>(parsesExpected);
+              curParses = new ArrayList<ScoredObject<Tree>>(parsesExpected);
             } else {
-              if (score == null) {
+              if (curParse == null) {
                 // read score
-                score = Double.parseDouble(line);
+                double score = Double.parseDouble(line);
+                curParses.add(curParse = new ScoredObject<Tree>(null, score));
               } else {
                 // Reading a parse
-                curParse = new ScoredObject<>(Trees.readTree(line), score);
-                curParses.add(curParse);
+                curParse.setObject(Trees.readTree(line));
                 curParse = null;
-                score = null;
                 parsesExpected--;
                 if (parsesExpected == 0) {
                   return curParses;

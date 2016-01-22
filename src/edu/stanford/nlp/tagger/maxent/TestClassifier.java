@@ -1,12 +1,13 @@
 package edu.stanford.nlp.tagger.maxent;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.stanford.nlp.io.PrintFile;
 import edu.stanford.nlp.ling.TaggedWord;
+import edu.stanford.nlp.tagger.common.TaggerConstants;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;
-import edu.stanford.nlp.util.ConfusionMatrix;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
@@ -29,15 +30,12 @@ public class TestClassifier {
   private int numWrongUnknown;
   private int numCorrectSentences;
   private int numSentences;
-
-  private ConfusionMatrix<String> confusionMatrix;
-
-  // TODO: only one boolean here instead of 4?  They all use the same
+ 
+  // TODO: only one boolean here instead of 3?  They all use the same
   // debug status
   private boolean writeUnknDict;
   private boolean writeWords;
   private boolean writeTopWords;
-  private boolean writeConfusionMatrix;
 
   MaxentTagger maxentTagger;
   TaggerConfig config;
@@ -60,12 +58,6 @@ public class TestClassifier {
     }
 
     test();
-
-    if (writeConfusionMatrix) {
-      PrintFile pf = new PrintFile(saveRoot + ".confusion");
-      pf.print(confusionMatrix.toString());
-      pf.close();
-    }
   }
 
   private void processResults(TestSentence testS,
@@ -76,8 +68,6 @@ public class TestClassifier {
     testS.writeTagsAndErrors(testS.finalTags, unknDictFile, verboseResults);
     if (writeUnknDict) testS.printUnknown(numSentences, unknDictFile);
     if (writeTopWords) testS.printTop(topWordsFile);
-
-    testS.updateConfusionMatrix(testS.finalTags, confusionMatrix);
 
     numWrong = numWrong + testS.numWrong;
     numRight = numRight + testS.numRight;
@@ -104,8 +94,6 @@ public class TestClassifier {
     throws IOException
   {
     numSentences = 0;
-    confusionMatrix = new ConfusionMatrix<>();
-
     PrintFile pf = null;
     PrintFile pf1 = null;
     PrintFile pf3 = null;
@@ -117,7 +105,7 @@ public class TestClassifier {
     boolean verboseResults = config.getVerboseResults();
 
     if (config.getNThreads() != 1) {
-      MulticoreWrapper<List<TaggedWord>, TestSentence> wrapper = new MulticoreWrapper<>(config.getNThreads(), new TestSentenceProcessor(maxentTagger));
+      MulticoreWrapper<List<TaggedWord>, TestSentence> wrapper = new MulticoreWrapper<List<TaggedWord>, TestSentence>(config.getNThreads(), new TestSentenceProcessor(maxentTagger));
       for (List<TaggedWord> taggedSentence : fileRecord.reader()) {
         wrapper.put(taggedSentence);
         while (wrapper.peek()) {
@@ -145,28 +133,25 @@ public class TestClassifier {
 
   String resultsString(MaxentTagger maxentTagger) {
     StringBuilder output = new StringBuilder();
-    output.append(String.format("Model %s has xSize=%d, ySize=%d, and numFeatures=%d.%n",
-            maxentTagger.config.getModel(),
-            maxentTagger.xSize,
-            maxentTagger.ySize,
-            maxentTagger.getLambdaSolve().lambda.length));
-    output.append(String.format("Results on %d sentences and %d words, of which %d were unknown.%n",
-            numSentences, numRight + numWrong, unknownWords));
-    output.append(String.format("Total sentences right: %d (%f%%); wrong: %d (%f%%).%n",
+    output.append("Model " + maxentTagger.config.getModel() + " has xSize=" + maxentTagger.xSize +
+                  ", ySize=" + maxentTagger.ySize + ", and numFeatures=" +
+                  maxentTagger.prob.lambda.length + ".\n");
+    output.append("Results on " + numSentences + " sentences and " +
+                  (numRight + numWrong) + " words, of which " +
+                  unknownWords + " were unknown.\n");
+    output.append(String.format("Total sentences right: %d (%f%%); wrong: %d (%f%%).\n",
                                 numCorrectSentences, numCorrectSentences * 100.0 / numSentences,
                                 numSentences - numCorrectSentences,
                                 (numSentences - numCorrectSentences) * 100.0 / (numSentences)));
-    output.append(String.format("Total tags right: %d (%f%%); wrong: %d (%f%%).%n",
+    output.append(String.format("Total tags right: %d (%f%%); wrong: %d (%f%%).\n",
                                 numRight, numRight * 100.0 / (numRight + numWrong), numWrong,
                                 numWrong * 100.0 / (numRight + numWrong)));
-
     if (unknownWords > 0) {
-      output.append(String.format("Unknown words right: %d (%f%%); wrong: %d (%f%%).%n",
+      output.append(String.format("Unknown words right: %d (%f%%); wrong: %d (%f%%).\n",
                                   (unknownWords - numWrongUnknown),
                                   100.0 - (numWrongUnknown * 100.0 / unknownWords),
                                   numWrongUnknown, numWrongUnknown * 100.0 / unknownWords));
     }
-
     return output.toString();
   }
 
@@ -184,7 +169,6 @@ public class TestClassifier {
     writeUnknDict = status;
     writeWords = status;
     writeTopWords = status;
-    writeConfusionMatrix = status;
   }
 
   static class TestSentenceProcessor implements ThreadsafeProcessor<List<TaggedWord>, TestSentence> {
@@ -200,8 +184,8 @@ public class TestClassifier {
       testS.setCorrectTags(taggedSentence);
       testS.tagSentence(taggedSentence, false);
       return testS;
-    }
-
+    } 
+    
     @Override
     public ThreadsafeProcessor<List<TaggedWord>, TestSentence> newInstance() {
       // MaxentTagger is threadsafe

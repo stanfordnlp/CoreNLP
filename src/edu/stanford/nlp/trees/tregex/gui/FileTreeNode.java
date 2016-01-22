@@ -23,7 +23,7 @@ public class FileTreeNode extends DefaultMutableTreeNode {
   private JCheckBox check = null;
   private JLabel label =null;
   private Treebank t;
-  private final ArrayList<FileTreeNodeListener> listeners = new ArrayList<>();
+  private final ArrayList<FileTreeNodeListener> listeners = new ArrayList<FileTreeNodeListener>();
 
   //this is only for a root node
   public FileTreeNode() {

@@ -2,6 +2,7 @@ package edu.stanford.nlp.international.arabic.process;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -13,8 +14,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
 
 /**
- * Feature factory for the IOB clitic segmentation model described by
- * Green and DeNero (2012).
+ * Feature factory for an IOB clitic segmentation model.
  * 
  * @author Spence Green
  *
@@ -24,10 +24,8 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
   
   private static final long serialVersionUID = -4560226365250020067L;
   
-  private static final String DOMAIN_MARKER = "@";
-  private static final int MAX_BEFORE = 5;
-  private static final int MAX_AFTER = 9;
-  private static final int MAX_LENGTH = 10;
+  private static final Pattern isPunc = Pattern.compile("\\p{Punct}+");
+  private static final Pattern isDigit = Pattern.compile("\\p{Digit}+");
   
   public void init(SeqClassifierFlags flags) {
     super.init(flags);
@@ -52,20 +50,11 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
       addAllInterningAndSuffixing(features, featuresCp3C(cInfo, loc), "Cp3C");
     }
 
-    String domain = cInfo.get(loc).get(CoreAnnotations.DomainAnnotation.class);
-    if (domain != null) {
-      Collection<String> domainFeatures = Generics.newHashSet();
-      for (String feature : features) {
-        domainFeatures.add(feature + DOMAIN_MARKER + domain);
-      }
-      features.addAll(domainFeatures);
-    }
-    
     return features;
   }
 
-  protected Collection<String> featuresC(PaddedList<IN> cInfo, int loc) {
-    Collection<String> features = new ArrayList<>();
+  protected Collection<String> featuresC(PaddedList<? extends CoreLabel> cInfo, int loc) {
+    Collection<String> features = new ArrayList<String>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel n = cInfo.get(loc + 1);
     CoreLabel n2 = cInfo.get(loc + 2);
@@ -85,42 +74,36 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
     features.add(charn2 + "-n2" );
     features.add(charp + "-p");
     features.add(charp2 + "-p2");
+
+    // Digit and punctuation features for current word
+    if (isPunc.matcher(charc).find()) {
+      features.add("haspunc");
+    }
+    if (isDigit.matcher(charc).find()) {
+      features.add("hasdigit");
+    }
     
     // Length feature 
     if (charc.length() > 1) {
       features.add("length");
     }
     
-    // Character-level class features
-    boolean seenPunc = false;
-    boolean seenDigit = false;
-    for (int i = 0, limit = charc.length(); i < limit; ++i) {
-      char charcC = charc.charAt(i);
-      seenPunc = seenPunc || Characters.isPunctuation(charcC);
-      seenDigit = seenDigit || Character.isDigit(charcC);
-      String cuBlock = Characters.unicodeBlockStringOf(charcC);
+    // Unicode block and type features
+    for (int i = 0; i < charc.length(); ++i) {
+      String cuBlock = Characters.unicodeBlockStringOf(charc.charAt(i));
       features.add(cuBlock + "-uBlock");
-      String cuType = String.valueOf(Character.getType(charcC));
+      String cuType = String.valueOf(Character.getType(charc.charAt(i)));
       features.add(cuType + "-uType");
     }
-    if (seenPunc) features.add("haspunc");        
-    if (seenDigit) features.add("hasdigit");        
-    
-    // Token-level features
-    String word = c.word();
-    int index = c.index();
-    features.add(Math.min(MAX_BEFORE, index) + "-before");
-    features.add(Math.min(MAX_AFTER, word.length() - charc.length() - index) + "-after");
-    features.add(Math.min(MAX_LENGTH, word.length()) + "-length");
 
     // Indicator transition feature
     features.add("cliqueC");
-    
+
     return features;
   }
 
-  protected Collection<String> featuresCpC(PaddedList<IN> cInfo, int loc) {
-    Collection<String> features = new ArrayList<>();
+  private Collection<String> featuresCpC(PaddedList<IN> cInfo, int loc) {
+    Collection<String> features = new ArrayList<String>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel p = cInfo.get(loc - 1);
 
@@ -135,8 +118,8 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
     return features;
   }
 
-  protected Collection<String> featuresCp2C(PaddedList<IN> cInfo, int loc) {
-    Collection<String> features = new ArrayList<>();
+  private Collection<String> featuresCp2C(PaddedList<IN> cInfo, int loc) {
+    Collection<String> features = new ArrayList<String>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
@@ -153,8 +136,8 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
     return features;
   }
 
-  protected Collection<String> featuresCp3C(PaddedList<IN> cInfo, int loc) {
-    Collection<String> features = new ArrayList<>();
+  private Collection<String> featuresCp3C(PaddedList<IN> cInfo, int loc) {
+    Collection<String> features = new ArrayList<String>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);

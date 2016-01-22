@@ -35,11 +35,6 @@ public class RVFDatum<L, F> implements Datum<L, F> {
   private L label; // = null;
 
   /**
-   * Id of this instance
-   */
-  private String id = null;
-  
-  /**
    * Constructs a new RVFDatum with the given features and label.
    */
   public RVFDatum(Counter<F> features, L label) {
@@ -55,7 +50,7 @@ public class RVFDatum<L, F> implements Datum<L, F> {
    * @param m The Datum to copy.
    */
   public RVFDatum(Datum<L, F> m) {
-    this.features = new ClassicCounter<>();
+    this.features = new ClassicCounter<F>();
     for (F key : m.asFeatures()) {
       features.incrementCount(key, 1.0);
     }
@@ -97,14 +92,6 @@ public class RVFDatum<L, F> implements Datum<L, F> {
   public void setLabel(L label) {
     this.label = label;
   }
-  
-  /**
-   * Sets id for this instance
-   * @param id
-   */
-  public void setID(String id){
-    this.id = id;
-  }
 
   /**
    * Returns a String representation of this BasicDatum (lists features and
@@ -112,7 +99,7 @@ public class RVFDatum<L, F> implements Datum<L, F> {
    */
   @Override
   public String toString() {
-    return "RVFDatum[id="+id+", features=" + asFeaturesCounter() + ",label=" + label() + "]";
+    return "RVFDatum[features=" + asFeaturesCounter() + ",label=" + label() + "]";
   }
 
   public L label() {
@@ -125,10 +112,6 @@ public class RVFDatum<L, F> implements Datum<L, F> {
 
   public double getFeatureCount(F feature) {
     return features.getCount(feature);
-  }
-  
-  public String id(){
-    return id;
   }
 
   /**

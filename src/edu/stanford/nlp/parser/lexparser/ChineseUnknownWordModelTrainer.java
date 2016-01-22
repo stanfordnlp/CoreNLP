@@ -1,5 +1,7 @@
 package edu.stanford.nlp.parser.lexparser;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -7,43 +9,42 @@ import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Tag;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 
-public class ChineseUnknownWordModelTrainer
-  extends AbstractUnknownWordModelTrainer
+public class ChineseUnknownWordModelTrainer 
+  extends AbstractUnknownWordModelTrainer 
 {
   // Records the number of times word/tag pair was seen in training data.
-  private ClassicCounter<IntTaggedWord> seenCounter;
-  private ClassicCounter<IntTaggedWord> unSeenCounter;
+  ClassicCounter<IntTaggedWord> seenCounter;
+  ClassicCounter<IntTaggedWord> unSeenCounter;
 
   // c has a map from tags as Label to a Counter from word
   // signatures to Strings; it is used to collect counts that will
   // initialize the probabilities in tagHash
-  private Map<Label,ClassicCounter<String>> c;
-
+  Map<Label,ClassicCounter<String>> c;
   // tc record the marginal counts for each tag as an unknown.  It
   // should be the same as c's totalCount ??
-  private ClassicCounter<Label> tc;
+  ClassicCounter<Label> tc;
 
-  private boolean useFirst, useGT, useUnicodeType;
+  boolean useFirst, useGT, useUnicodeType;
 
-  private Map<Label, ClassicCounter<String>> tagHash;
+  Map<Label, ClassicCounter<String>> tagHash;
 
-  private Set<String> seenFirst;
+  Set<String> seenFirst;
 
-  private double indexToStartUnkCounting;
+  double indexToStartUnkCounting;
 
-  private UnknownGTTrainer unknownGTTrainer;
+  UnknownGTTrainer unknownGTTrainer;
+  
+  IntTaggedWord iTotal = new IntTaggedWord(nullWord, nullTag);
 
-  private IntTaggedWord iTotal = new IntTaggedWord(nullWord, nullTag);
-
-  private UnknownWordModel model;
-
-
+  UnknownWordModel model;
+  
   @Override
-  public void initializeTraining(Options op, Lexicon lex,
-                                 Index<String> wordIndex,
+  public void initializeTraining(Options op, Lexicon lex, 
+                                 Index<String> wordIndex, 
                                  Index<String> tagIndex, double totalTrees) {
     super.initializeTraining(op, lex, wordIndex, tagIndex, totalTrees);
 
@@ -70,38 +71,37 @@ public class ChineseUnknownWordModelTrainer
     }
 
     this.c = Generics.newHashMap();
-    this.tc = new ClassicCounter<>();
-    this.unSeenCounter = new ClassicCounter<>();
-    this.seenCounter = new ClassicCounter<>();
+    this.tc = new ClassicCounter<Label>();
+    this.unSeenCounter = new ClassicCounter<IntTaggedWord>();
+    this.seenCounter = new ClassicCounter<IntTaggedWord>();
     this.seenFirst = Generics.newHashSet();
     this.tagHash = Generics.newHashMap();
-
+    
     this.indexToStartUnkCounting = (totalTrees * op.trainOptions.fractionBeforeUnseenCounting);
-
+    
     this.unknownGTTrainer = (useGT) ? new UnknownGTTrainer() : null;
 
     Map<String,Float> unknownGT = null;
     if (useGT) {
       unknownGT = unknownGTTrainer.unknownGT;
     }
-    this.model = new ChineseUnknownWordModel(op, lex, wordIndex, tagIndex,
-                                             unSeenCounter, tagHash,
+    this.model = new ChineseUnknownWordModel(op, lex, wordIndex, tagIndex, 
+                                             unSeenCounter, tagHash, 
                                              unknownGT, useGT, seenFirst);
   }
-
+  
   /**
-   * Trains the first-character based unknown word model.
+   * trains the first-character based unknown word model.
    *
    * @param tw The word we are currently training on
    * @param loc The position of that word
    * @param weight The weight to give this word in terms of training
    */
-  @Override
   public void train(TaggedWord tw, int loc, double weight) {
     if (useGT) {
       unknownGTTrainer.train(tw, weight);
     }
-
+    
     String word = tw.word();
     Label tagL = new Tag(tw.tag());
     String first = word.substring(0, 1);
@@ -114,20 +114,20 @@ public class ChineseUnknownWordModelTrainer
       }
     }
     String tag = tw.tag();
-
+    
     if ( ! c.containsKey(tagL)) {
-      c.put(tagL, new ClassicCounter<>());
+      c.put(tagL, new ClassicCounter<String>());
     }
     c.get(tagL).incrementCount(first, weight);
-
+    
     tc.incrementCount(tagL, weight);
-
+          
     seenFirst.add(first);
-
+    
     IntTaggedWord iW = new IntTaggedWord(word, IntTaggedWord.ANY, wordIndex, tagIndex);
     seenCounter.incrementCount(iW, weight);
     if (treesRead > indexToStartUnkCounting) {
-      // start doing this once some way through trees;
+      // start doing this once some way through trees; 
       // treesRead is 1 based counting
       if (seenCounter.getCount(iW) < 2) {
         IntTaggedWord iT = new IntTaggedWord(IntTaggedWord.ANY, tag, wordIndex, tagIndex);
@@ -136,40 +136,38 @@ public class ChineseUnknownWordModelTrainer
       }
     }
   }
-
-  @Override
+  
   public UnknownWordModel finishTraining() {
-    // Map<String,Float> unknownGT = null;
+    Map<String,Float> unknownGT = null;
     if (useGT) {
       unknownGTTrainer.finishTraining();
-      // unknownGT = unknownGTTrainer.unknownGT;
+      unknownGT = unknownGTTrainer.unknownGT;
     }
-
+    
     for (Label tagLab : c.keySet()) {
       // outer iteration is over tags as Labels
       ClassicCounter<String> wc = c.get(tagLab); // counts for words given a tag
-
+      
       if ( ! tagHash.containsKey(tagLab)) {
-        tagHash.put(tagLab, new ClassicCounter<>());
+        tagHash.put(tagLab, new ClassicCounter<String>());
       }
-
+      
       // the UNKNOWN first character is assumed to be seen once in
       // each tag
       // this is really sort of broken!  (why??)
       tc.incrementCount(tagLab);
       wc.setCount(unknown, 1.0);
-
+      
       // inner iteration is over words  as strings
       for (String first : wc.keySet()) {
         double prob = Math.log(((wc.getCount(first))) / tc.getCount(tagLab));
         tagHash.get(tagLab).setCount(first, prob);
         //if (Test.verbose)
-        //EncodingPrintWriter.out.println(tag + " rewrites as " + first + " first char with probability " + prob,encoding);
+        //EncodingPrintWriter.out.println(tag + " rewrites as " + first + " firstchar with probability " + prob,encoding);
       }
     }
 
     return model;
   }
-
 }
 

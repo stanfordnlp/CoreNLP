@@ -7,21 +7,21 @@ import java.util.Properties;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 import edu.stanford.nlp.dcoref.Constants;
-import edu.stanford.nlp.hcoref.data.CorefChain;
-import edu.stanford.nlp.hcoref.data.CorefChain.CorefMention;
+import edu.stanford.nlp.dcoref.CorefChain;
+import edu.stanford.nlp.dcoref.CorefChain.CorefMention;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 
 public class DeterministicCorefAnnotatorITest extends TestCase {
   private static AnnotationPipeline pipeline;
 
-  @Override
   public void setUp() throws Exception {
     synchronized(DeterministicCorefAnnotatorITest.class) {
       pipeline = new AnnotationPipeline();
-      pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
+      pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
       pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
       pipeline.addAnnotator(new POSTaggerAnnotator(false));
       pipeline.addAnnotator(new MorphaAnnotator(false));
@@ -29,9 +29,14 @@ public class DeterministicCorefAnnotatorITest extends TestCase {
       pipeline.addAnnotator(new ParserAnnotator(false, -1));
 
       Properties corefProps = new Properties();
-      corefProps.setProperty(Constants.DEMONYM_PROP, DefaultPaths.DEFAULT_DCOREF_DEMONYM);
-      corefProps.setProperty(Constants.ANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_ANIMATE);
-      corefProps.setProperty(Constants.INANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_INANIMATE);
+      corefProps.put(Constants.DEMONYM_PROP, DefaultPaths.DEFAULT_DCOREF_DEMONYM);
+      corefProps.put(Constants.ANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_ANIMATE);
+      corefProps.put(Constants.INANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_INANIMATE);
+      corefProps.put(Constants.MALE_PROP, DefaultPaths.DEFAULT_DCOREF_MALE);
+      corefProps.put(Constants.NEUTRAL_PROP, DefaultPaths.DEFAULT_DCOREF_NEUTRAL);
+      corefProps.put(Constants.FEMALE_PROP, DefaultPaths.DEFAULT_DCOREF_FEMALE);
+      corefProps.put(Constants.PLURAL_PROP, DefaultPaths.DEFAULT_DCOREF_PLURAL);
+      corefProps.put(Constants.SINGULAR_PROP, DefaultPaths.DEFAULT_DCOREF_SINGULAR);
       pipeline.addAnnotator(new DeterministicCorefAnnotator(corefProps));
     }
   }
@@ -131,5 +136,4 @@ public class DeterministicCorefAnnotatorITest extends TestCase {
     DeterministicCorefAnnotatorITest itest = new DeterministicCorefAnnotatorITest();
     itest.testDeterministicCorefAnnotator();
   }
-
 }

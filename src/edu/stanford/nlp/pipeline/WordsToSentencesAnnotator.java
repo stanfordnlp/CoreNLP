@@ -1,27 +1,29 @@
 package edu.stanford.nlp.pipeline;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.process.WordToSentenceProcessor;
-import edu.stanford.nlp.util.ArrayUtils;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 
 
 /**
- * This class assumes that there is a {@code List<CoreLabel>}
- * under the {@code TokensAnnotation} field, and runs it
- * through {@link edu.stanford.nlp.process.WordToSentenceProcessor}
- * and puts the new {@code List<Annotation>}
- * under the {@code SentencesAnnotation} field.
+ * This class assumes that there is either a
+ * <code>List&lt;? extends CoreLabel&gt;</code> under the
+ * <code>TokensAnnotation</code> field, and runs it
+ * through {@link edu.stanford.nlp.process.WordToSentenceProcessor} and
+ * puts the new <code>List&lt;List&lt;? extends CoreLabel&gt;&gt;</code>
+ * (it is now definitely a
+ * <code>List&lt;List&lt;? extends CoreLabel&gt;&gt;</code>) back under
+ * the Annotation.WORDS_KEY field.
  *
  * @author Jenny Finkel
- * @author Christopher Manning
  */
 public class WordsToSentencesAnnotator implements Annotator {
 
@@ -29,171 +31,95 @@ public class WordsToSentencesAnnotator implements Annotator {
 
   private final boolean VERBOSE;
 
-  private final boolean countLineNumbers;
-
   public WordsToSentencesAnnotator() {
     this(false);
   }
 
   public WordsToSentencesAnnotator(boolean verbose) {
-    this(verbose, false, new WordToSentenceProcessor<>());
+    this(new WordToSentenceProcessor<CoreLabel>(), verbose);
   }
 
-  public WordsToSentencesAnnotator(boolean verbose, String boundaryTokenRegex,
-                                   Set<String> boundaryToDiscard, Set<String> htmlElementsToDiscard,
-                                   String newlineIsSentenceBreak) {
-    this(verbose, false,
-            new WordToSentenceProcessor<>(boundaryTokenRegex,
-                    boundaryToDiscard, htmlElementsToDiscard,
-                    WordToSentenceProcessor.stringToNewlineIsSentenceBreak(newlineIsSentenceBreak)));
+  public WordsToSentencesAnnotator(boolean verbose, String boundaryTokenRegex) {
+    this(new WordToSentenceProcessor<CoreLabel>(boundaryTokenRegex), verbose);
   }
 
-  public WordsToSentencesAnnotator(boolean verbose, String boundaryTokenRegex,
-                                   Set<String> boundaryToDiscard, Set<String> htmlElementsToDiscard,
-                                   String newlineIsSentenceBreak, String boundaryMultiTokenRegex,
-                                   Set<String> tokenRegexesToDiscard) {
-    this(verbose, false,
-            new WordToSentenceProcessor<>(boundaryTokenRegex,
-                    boundaryToDiscard, htmlElementsToDiscard,
-                    WordToSentenceProcessor.stringToNewlineIsSentenceBreak(newlineIsSentenceBreak),
-                    (boundaryMultiTokenRegex != null) ? TokenSequencePattern.compile(boundaryMultiTokenRegex) : null, tokenRegexesToDiscard));
-  }
-
-  private WordsToSentencesAnnotator(boolean verbose, boolean countLineNumbers,
-                                    WordToSentenceProcessor<CoreLabel> wts) {
+  private WordsToSentencesAnnotator(WordToSentenceProcessor<CoreLabel> wts, boolean verbose) {
     VERBOSE = verbose;
-    this.countLineNumbers = countLineNumbers;
     this.wts = wts;
   }
 
-
-  /** Return a WordsToSentencesAnnotator that splits on newlines (only), which are then deleted.
-   *  This constructor counts the lines by putting in empty token lists for empty lines.
-   *  It tells the underlying splitter to return empty lists of tokens
-   *  and then treats those empty lists as empty lines.  We don't
-   *  actually include empty sentences in the annotation, though. But they
-   *  are used in numbering the sentence. Only this constructor leads to
-   *  empty sentences.
-   *
-   *  @param verbose Whether it is verbose.
-   *  @param  nlToken Zero or more new line tokens, which might be a {@literal \n} or the fake
-   *                 newline tokens returned from the tokenizer.
-   *  @return A WordsToSentenceAnnotator.
-   */
   public static WordsToSentencesAnnotator newlineSplitter(boolean verbose, String ... nlToken) {
-    // this constructor will keep empty lines as empty sentences
-    WordToSentenceProcessor<CoreLabel> wts =
-            new WordToSentenceProcessor<>(ArrayUtils.asImmutableSet(nlToken));
-    return new WordsToSentencesAnnotator(verbose, true, wts);
+    WordToSentenceProcessor<CoreLabel> wts;
+    if (nlToken.length == 0) {
+      wts = new WordToSentenceProcessor<CoreLabel>("",
+                                                   Collections.<String>emptySet(),
+                                                   Collections.<String>emptySet());
+    } else if (nlToken.length == 1) {
+      wts = new WordToSentenceProcessor<CoreLabel>("",
+                                                   Collections.<String>emptySet(),
+                                                   Collections.singleton(nlToken[0]));
+    } else {
+      Set<String> nlTokens = Generics.newHashSet(Arrays.asList(nlToken));
+      wts = new WordToSentenceProcessor<CoreLabel>("",
+                                                   Collections.<String>emptySet(),
+                                                   nlTokens);
+    }
+    return new WordsToSentencesAnnotator(wts, verbose);
   }
 
 
-  /** Return a WordsToSentencesAnnotator that never splits the token stream. You just get one sentence.
-   *
-   *  @param verbose Whether it is verbose.
-   *  @return A WordsToSentenceAnnotator.
-   */
-  public static WordsToSentencesAnnotator nonSplitter(boolean verbose) {
-    WordToSentenceProcessor<CoreLabel> wts = new WordToSentenceProcessor<>(true);
-    return new WordsToSentencesAnnotator(verbose, false, wts);
+  public void setSentenceBoundaryToDiscard(Set<String> boundaries) {
+    wts.setSentenceBoundaryToDiscard(boundaries);
   }
 
+  public void addHtmlSentenceBoundaryToDiscard(Set<String> boundaries) {
+    wts.addHtmlSentenceBoundaryToDiscard(boundaries);
+  }
 
-  /**
-   * If setCountLineNumbers is set to true, we count line numbers by
-   * telling the underlying splitter to return empty lists of tokens
-   * and then treating those empty lists as empty lines.  We don't
-   * actually include empty sentences in the annotation, though.
-   **/
+  public void setOneSentence(boolean isOneSentence) {
+    wts.setOneSentence(isOneSentence);
+  }
+
   @Override
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
       System.err.print("Sentence splitting ...");
     }
-    if ( ! annotation.has(CoreAnnotations.TokensAnnotation.class)) {
-      throw new IllegalArgumentException("WordsToSentencesAnnotator: unable to find words/tokens in: " + annotation);
-    }
+    if (annotation.has(CoreAnnotations.TokensAnnotation.class)) {
 
-    // get text and tokens from the document
-    String text = annotation.get(CoreAnnotations.TextAnnotation.class);
-    List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
-    String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
-    // System.err.println("Tokens are: " + tokens);
+      // get text and tokens from the document
+      String text = annotation.get(CoreAnnotations.TextAnnotation.class);
+      List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
+      // System.err.println("Tokens are: " + tokens);
 
-    // assemble the sentence annotations
-    int tokenOffset = 0;
-    int lineNumber = 0;
-    // section annotations to mark sentences with
-    CoreMap sectionAnnotations = null;
-    List<CoreMap> sentences = new ArrayList<>();
-    for (List<CoreLabel> sentenceTokens: this.wts.process(tokens)) {
-      if (countLineNumbers) {
-        ++lineNumber;
-      }
-      if (sentenceTokens.isEmpty()) {
-        if (!countLineNumbers) {
-          throw new IllegalStateException("unexpected empty sentence: " + sentenceTokens);
-        } else {
-          continue;
+      // assemble the sentence annotations
+      int tokenOffset = 0;
+      List<CoreMap> sentences = new ArrayList<CoreMap>();
+      for (List<CoreLabel> sentenceTokens: this.wts.process(tokens)) {
+        if (sentenceTokens.isEmpty()) {
+          throw new RuntimeException("unexpected empty sentence: " + sentenceTokens);
         }
+
+        // get the sentence text from the first and last character offsets
+        int begin = sentenceTokens.get(0).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+        int last = sentenceTokens.size() - 1;
+        int end = sentenceTokens.get(last).get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+        String sentenceText = text.substring(begin, end);
+
+        // create a sentence annotation with text and token offsets
+        Annotation sentence = new Annotation(sentenceText);
+        sentence.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, begin);
+        sentence.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, end);
+        sentence.set(CoreAnnotations.TokensAnnotation.class, sentenceTokens);
+        sentence.set(CoreAnnotations.TokenBeginAnnotation.class, tokenOffset);
+        tokenOffset += sentenceTokens.size();
+        sentence.set(CoreAnnotations.TokenEndAnnotation.class, tokenOffset);
+        sentence.set(CoreAnnotations.SentenceIndexAnnotation.class, sentences.size());
+
+        // add the sentence to the list
+        sentences.add(sentence);
       }
-
-      // get the sentence text from the first and last character offsets
-      int begin = sentenceTokens.get(0).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-      int last = sentenceTokens.size() - 1;
-      int end = sentenceTokens.get(last).get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
-      String sentenceText = text.substring(begin, end);
-
-      // create a sentence annotation with text and token offsets
-      Annotation sentence = new Annotation(sentenceText);
-      sentence.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, begin);
-      sentence.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, end);
-      sentence.set(CoreAnnotations.TokensAnnotation.class, sentenceTokens);
-      sentence.set(CoreAnnotations.TokenBeginAnnotation.class, tokenOffset);
-      tokenOffset += sentenceTokens.size();
-      sentence.set(CoreAnnotations.TokenEndAnnotation.class, tokenOffset);
-      sentence.set(CoreAnnotations.SentenceIndexAnnotation.class, sentences.size());
-
-      if (countLineNumbers) {
-        sentence.set(CoreAnnotations.LineNumberAnnotation.class, lineNumber);
-      }
-
-      // Annotate sentence with section information.
-      // Assume section start and end appear as first and last tokens of sentence
-      CoreLabel sentenceStartToken = sentenceTokens.get(0);
-      CoreLabel sentenceEndToken = sentenceTokens.get(sentenceTokens.size()-1);
-
-      CoreMap sectionStart = sentenceStartToken.get(CoreAnnotations.SectionStartAnnotation.class);
-      if (sectionStart != null) {
-        // Section is started
-        sectionAnnotations = sectionStart;
-      }
-      if (sectionAnnotations != null) {
-        // transfer annotations over to sentence
-        ChunkAnnotationUtils.copyUnsetAnnotations(sectionAnnotations, sentence);
-      }
-      String sectionEnd = sentenceEndToken.get(CoreAnnotations.SectionEndAnnotation.class);
-      if (sectionEnd != null) {
-        sectionAnnotations = null;
-      }
-
-      if (docID != null) {
-        sentence.set(CoreAnnotations.DocIDAnnotation.class, docID);
-      }
-
-      int index = 1;
-      for (CoreLabel token : sentenceTokens) {
-        token.setIndex(index++);
-        token.setSentIndex(sentences.size());
-        if (docID != null) {
-          token.setDocID(docID);
-        }
-      }
-
-      // add the sentence to the list
-      sentences.add(sentence);
-    }
-    // the condition below is possible if sentenceBoundaryToDiscard is initialized!
+      // the condition below is possible if sentenceBoundaryToDiscard is initialized!
       /*
       if (tokenOffset != tokens.size()) {
         throw new RuntimeException(String.format(
@@ -201,8 +127,12 @@ public class WordsToSentencesAnnotator implements Annotator {
       }
       */
 
-    // add the sentences annotations to the document
-    annotation.set(CoreAnnotations.SentencesAnnotation.class, sentences);
+      // add the sentences annotations to the document
+      annotation.set(CoreAnnotations.SentencesAnnotation.class, sentences);
+
+    } else {
+      throw new RuntimeException("unable to find words/tokens in: " + annotation);
+    }
   }
 
 
@@ -215,5 +145,4 @@ public class WordsToSentencesAnnotator implements Annotator {
   public Set<Requirement> requirementsSatisfied() {
     return Collections.singleton(SSPLIT_REQUIREMENT);
   }
-
 }

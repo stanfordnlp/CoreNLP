@@ -15,7 +15,7 @@ public class TwoDimensionalSet<K1, K2> implements Serializable, Iterable<Pair<K1
   private final TwoDimensionalMap<K1, K2, Boolean> backingMap;
 
   public TwoDimensionalSet() {
-    this(new TwoDimensionalMap<>());
+    this(new TwoDimensionalMap<K1, K2, Boolean>());
   }
 
   public TwoDimensionalSet(TwoDimensionalMap<K1, K2, Boolean> backingMap) {
@@ -23,11 +23,7 @@ public class TwoDimensionalSet<K1, K2> implements Serializable, Iterable<Pair<K1
   }
 
   public static <K1, K2> TwoDimensionalSet<K1, K2> treeSet() { 
-    return new TwoDimensionalSet<>(TwoDimensionalMap.<K1, K2, Boolean>treeMap());
-  }
-
-  public static <K1, K2> TwoDimensionalSet<K1, K2> hashSet() { 
-    return new TwoDimensionalSet<>(TwoDimensionalMap.<K1, K2, Boolean>hashMap());
+    return new TwoDimensionalSet<K1, K2>(TwoDimensionalMap.<K1, K2, Boolean>treeMap()); 
   }
 
   public boolean add(K1 k1, K2 k2) {
@@ -38,19 +34,6 @@ public class TwoDimensionalSet<K1, K2> implements Serializable, Iterable<Pair<K1
     boolean result = false;
     for (Pair<? extends K1, ? extends K2> pair : set) {
       if (add(pair.first, pair.second)) {
-        result = true;
-      }
-    }
-    return result;
-  }
-
-  /**
-   * Adds all the keys in the given TwoDimensionalMap.  Returns true iff at least one key is added.
-   */
-  public boolean addAllKeys(TwoDimensionalMap<? extends K1, ? extends K2, ?> map) {
-    boolean result = false;
-    for (TwoDimensionalMap.Entry<? extends K1, ? extends K2, ?> entry : map) {
-      if (add(entry.getFirstKey(), entry.getSecondKey())) {
         result = true;
       }
     }
@@ -113,19 +96,11 @@ public class TwoDimensionalSet<K1, K2> implements Serializable, Iterable<Pair<K1
     return backingMap.size();
   }
 
-  public Set<K1> firstKeySet() {
-    return backingMap.firstKeySet();
-  }
-
-  public Set<K2> secondKeySet(K1 k1) {
-    return backingMap.getMap(k1).keySet();
-  }
-
   /**
    * Iterate over the map using the iterator and entry inner classes.
    */
   public Iterator<Pair<K1, K2>> iterator() {
-    return new TwoDimensionalSetIterator<>(this);
+    return new TwoDimensionalSetIterator<K1, K2>(this);
   }
 
   static class TwoDimensionalSetIterator<K1, K2> implements Iterator<Pair<K1, K2>> {

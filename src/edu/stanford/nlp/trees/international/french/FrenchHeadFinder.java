@@ -85,7 +85,7 @@ public class FrenchHeadFinder extends AbstractCollinsHeadFinder {
     nonTerminalInfo.put("MWET", new String[][] {{"left", "ET", "N"}, {"left"}});
 
     //TODO: wsg2011: For phrasal nodes that lacked a label.
-    nonTerminalInfo.put(FrenchXMLTreeReader.MISSING_PHRASAL, new String[][]{{"left"}});
+    nonTerminalInfo.put(FrenchTreeReader.MISSING_PHRASAL, new String[][]{{"left"}});
     
   }
 
@@ -104,10 +104,12 @@ public class FrenchHeadFinder extends AbstractCollinsHeadFinder {
     CategoryWordTag.suppressTerminalDetails = true;
     treebank.loadPath(args[0]);
     final HeadFinder chf = new FrenchHeadFinder();
-    treebank.apply(pt -> {
-      pt.percolateHeads(chf);
-      pt.pennPrint();
-      System.out.println();
+    treebank.apply(new TreeVisitor() {
+      public void visitTree(Tree pt) {
+        pt.percolateHeads(chf);
+        pt.pennPrint();
+        System.out.println();
+      }
     });
   }
 

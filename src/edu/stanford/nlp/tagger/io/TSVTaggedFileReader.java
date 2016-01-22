@@ -70,7 +70,7 @@ public class TSVTaggedFileReader implements TaggedFileReader {
     // we hit something with text, so now we read one line at a time
     // until we hit the next blank line.  the next blank line (or EOF)
     // ends the sentence.
-    next = new ArrayList<>();
+    next = new ArrayList<TaggedWord>();
     while (line != null && !line.trim().equals("")) {
       String[] pieces = line.split("\t");
       if (pieces.length <= wordColumn || pieces.length <= tagColumn) {

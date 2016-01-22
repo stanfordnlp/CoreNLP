@@ -1,7 +1,6 @@
 package edu.stanford.nlp.util;
 
 import java.io.Serializable;
-import java.util.function.Function;
 
 /**
  * A word function that can be applied to Chinese text in the tagger

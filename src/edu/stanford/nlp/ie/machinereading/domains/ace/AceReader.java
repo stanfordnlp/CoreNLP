@@ -44,7 +44,7 @@ import edu.stanford.nlp.util.StringUtils;
 
 /**
  *
- * Simple wrapper of Mihai's ACE code to ie.machinereading.structure objects.
+ * Simple wrapper of Mihai's ACE code to ie.machinereading.structure objects
  *
  * @author David McClosky
  *
@@ -74,12 +74,12 @@ public class AceReader extends GenericDataSetReader {
   public AceReader(StanfordCoreNLP processor, boolean preprocess, String version) {
     super(processor, preprocess, false, true);
 
-    entityCounts = new ClassicCounter<>();
-    adjacentEntityMentions = new ClassicCounter<>();
-    nameRelationCounts = new ClassicCounter<>();
-    relationCounts = new ClassicCounter<>();
-    eventCounts = new ClassicCounter<>();
-    mentionTypeCounts = new ClassicCounter<>();
+    entityCounts = new ClassicCounter<String>();
+    adjacentEntityMentions = new ClassicCounter<String>();
+    nameRelationCounts = new ClassicCounter<String>();
+    relationCounts = new ClassicCounter<String>();
+    eventCounts = new ClassicCounter<String>();
+    mentionTypeCounts = new ClassicCounter<String>();
 
     logger = Logger.getLogger(AceReader.class.getName());
     // run quietly by default
@@ -102,7 +102,7 @@ public class AceReader extends GenericDataSetReader {
    */
   @Override
   public Annotation read(String path) throws IOException, SAXException, ParserConfigurationException {
-    List<CoreMap> allSentences = new ArrayList<>();
+    List<CoreMap> allSentences = new ArrayList<CoreMap>();
     File basePath = new File(path);
     assert basePath.exists();
     Annotation corpus = new Annotation("");
@@ -219,7 +219,7 @@ public class AceReader extends GenericDataSetReader {
   private List<CoreMap> readDocument(String prefix, Annotation corpus) throws IOException, SAXException,
       ParserConfigurationException {
     logger.info("Reading document: " + prefix);
-    List<CoreMap> results = new ArrayList<>();
+    List<CoreMap> results = new ArrayList<CoreMap>();
     AceDocument aceDocument;
     if(aceVersion.equals("ACE2004")){
       aceDocument = AceDocument.parseDocument(prefix, false, aceVersion);
@@ -244,12 +244,11 @@ public class AceReader extends GenericDataSetReader {
     for (int sentenceIndex = 0; sentenceIndex < aceDocument.getSentenceCount(); sentenceIndex++) {
       List<AceToken> tokens = aceDocument.getSentence(sentenceIndex);
 
-      List<CoreLabel> words = new ArrayList<>();
+      List<CoreLabel> words = new ArrayList<CoreLabel>();
       StringBuilder textContent = new StringBuilder();
       for(int i = 0; i < tokens.size(); i ++){
         CoreLabel l = new CoreLabel();
         l.setWord(tokens.get(i).getLiteral());
-        l.set(CoreAnnotations.ValueAnnotation.class, l.word());
         l.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, tokens.get(i).getByteStart());
         l.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, tokens.get(i).getByteEnd());
         words.add(l);
@@ -331,9 +330,9 @@ public class AceReader extends GenericDataSetReader {
       CoreMap sentence, Map<String, EntityMention> entityMap,
       int tokenOffset) {
     Set<String> roleSet = aceEventMention.getRoles();
-    List<String> roles = new ArrayList<>();
+    List<String> roles = new ArrayList<String>();
     for(String role: roleSet) roles.add(role);
-    List<ExtractionObject> convertedArgs = new ArrayList<>();
+    List<ExtractionObject> convertedArgs = new ArrayList<ExtractionObject>();
 
     int left = Integer.MAX_VALUE;
     int right = Integer.MIN_VALUE;
@@ -373,8 +372,8 @@ public class AceReader extends GenericDataSetReader {
   private RelationMention convertAceRelationMention(AceRelationMention aceRelationMention, String docId,
       CoreMap sentence, Map<String, EntityMention> entityMap) {
     List<AceRelationMentionArgument> args = Arrays.asList(aceRelationMention.getArgs());
-    List<ExtractionObject> convertedArgs = new ArrayList<>();
-    List<String> argNames = new ArrayList<>();
+    List<ExtractionObject> convertedArgs = new ArrayList<ExtractionObject>();
+    List<String> argNames = new ArrayList<String>();
 
     // the arguments are already stored in semantic order. Make sure we preserve the same ordering!
     int left = Integer.MAX_VALUE;
@@ -490,9 +489,7 @@ public class AceReader extends GenericDataSetReader {
     AceReader r = new AceReader(new StanfordCoreNLP(props, false), false);
     r.setLoggerLevel(Level.INFO);
     r.parse("/scr/nlp/data/ACE2005/");
-    // Annotation a = r.parse("/user/mengqiu/scr/twitter/nlp/corpus_prep/standalone/ar/data");
-    // BasicEntityExtractor.saveCoNLLFiles("/tmp/conll", a, false, false);
-    System.err.println("done");
+    System.out.println("done");
   }
 
 }

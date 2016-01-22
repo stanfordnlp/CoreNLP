@@ -5,7 +5,7 @@ import java.util.Set;
 
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
@@ -48,8 +48,8 @@ public class LinearGrammarSmoother implements Function<Pair<UnaryGrammar,BinaryG
   public Pair<UnaryGrammar,BinaryGrammar> apply(Pair<UnaryGrammar,BinaryGrammar> bgug) {
     
     ALPHA = trainOptions.ruleSmoothingAlpha;
-    Counter<String> symWeights = new ClassicCounter<>();
-    Counter<String> symCounts = new ClassicCounter<>();
+    Counter<String> symWeights = new ClassicCounter<String>();
+    Counter<String> symCounts = new ClassicCounter<String>();
 
     //Tally unary rules
     for (UnaryRule rule : bgug.first()) {

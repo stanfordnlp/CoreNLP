@@ -10,7 +10,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,34 +40,20 @@ public class ValueFunctions {
       this.name = name;
     }
 
-    @Override
-    public String getDescription() { return ""; }
-
     public String getParamDesc() { return "..."; }
-
-    protected static String getParamDesc(String type, int nargs) {
-      if (nargs < 0) {
-        return type + "...";
-      } else if (nargs <= 3) {
-        String[] tmp = new String[nargs];
-        Arrays.fill(tmp, type);
-        return StringUtils.join(tmp, ",");
-      } else return type + "[" + nargs + "]";
-    }
-
-    protected static String getTypeName(Class c) {
-      return c.getCanonicalName();
-    }
 
     public String toString() {
       if (signature == null) {
-        signature = name + '(' + getParamDesc() + ')';
+        StringBuilder sb = new StringBuilder();
+        sb.append(name);
+        sb.append("(");
+        sb.append(getParamDesc());
+        sb.append(")");
+        signature = sb.toString();
       }
       return signature;
     }
-
-  } // end static class NamedValueFunction
-
+  }
 
   public static class ParamInfo {
     public final String name;
@@ -97,7 +82,7 @@ public class ValueFunctions {
     public TypeCheckedFunction(String name, ParamInfo... paramInfos) {
       super(name);
       this.paramInfos = Arrays.asList(paramInfos);
-      nargs = paramInfos.length;
+      nargs = (paramInfos != null)? paramInfos.length:0;
     }
 
     @Override
@@ -110,7 +95,7 @@ public class ValueFunctions {
         if (p.typeName != null) {
           sb.append(p.typeName);
         } else {
-          sb.append(getTypeName(p.className));
+          sb.append(p.className);
         }
       }
       return sb.toString();
@@ -144,7 +129,7 @@ public class ValueFunctions {
   }
 
   public abstract static class NumericFunction extends NamedValueFunction {
-    protected String resultTypeName = Expressions.TYPE_NUMBER;
+    protected String resultTypeName = "Number";
     protected int nargs = 2;
 
     protected NumericFunction(String name, int nargs) {
@@ -156,11 +141,6 @@ public class ValueFunctions {
       super(name);
       this.resultTypeName = resultTypeName;
       this.nargs = nargs;
-    }
-
-    @Override
-    public String getParamDesc() {
-      return getParamDesc(Expressions.TYPE_NUMBER, nargs);
     }
 
     public abstract Number compute(Number...ns);
@@ -229,9 +209,7 @@ public class ValueFunctions {
     @Override
     public Number compute(Number... in) {
       if (isInteger(in[0]) && isInteger(in[1])) {
-        if ( in[0].longValue() % in[1].longValue() == 0)
-          return in[0].longValue() / in[1].longValue();
-        else return in[0].doubleValue() / in[1].doubleValue();
+        return in[0].longValue() / in[1].longValue();
       } else {
         return in[0].doubleValue() / in[1].doubleValue();
       }
@@ -246,35 +224,6 @@ public class ValueFunctions {
       } else {
         return in[0].doubleValue() % in[1].doubleValue();
       }
-    }
-  };
-
-  public static final ValueFunction MAX_FUNCTION = new NumericFunction("MAX", 2) {
-    @Override
-    public Number compute(Number... in) {
-      if (isInteger(in[0]) && isInteger(in[1])) {
-        return Math.max(in[0].longValue(), in[1].longValue());
-      } else {
-        return Math.max(in[0].doubleValue(), in[1].doubleValue());
-      }
-    }
-  };
-
-  public static final ValueFunction MIN_FUNCTION = new NumericFunction("MIN", 2) {
-    @Override
-    public Number compute(Number... in) {
-      if (isInteger(in[0]) && isInteger(in[1])) {
-        return Math.min(in[0].longValue(), in[1].longValue());
-      } else {
-        return Math.min(in[0].doubleValue(), in[1].doubleValue());
-      }
-    }
-  };
-
-  public static final ValueFunction POW_FUNCTION = new NumericFunction("POW", 2) {
-    @Override
-    public Number compute(Number... in) {
-      return Math.pow(in[0].doubleValue(), in[1].doubleValue());
     }
   };
 
@@ -305,11 +254,6 @@ public class ValueFunctions {
     }
 
     public abstract Boolean compute(Boolean...ns);
-
-    @Override
-    public String getParamDesc() {
-      return getParamDesc(Expressions.TYPE_BOOLEAN, nargs);
-    }
 
     @Override
     public boolean checkArgs(List<Value> in) {
@@ -366,21 +310,6 @@ public class ValueFunctions {
     }
   };
 
-  private static String join(Object[] args, String glue) {
-    String res = null;
-    if (args.length == 1) {
-      // Only one element - check if it is a list or array and do join on that
-      if (args[0] instanceof Iterable) {
-        res = StringUtils.join((Iterable) args[0], glue);
-      } else {
-        res = StringUtils.join(args, glue);
-      }
-    } else {
-      res = StringUtils.join(args, glue);
-    }
-    return res;
-  }
-
   public abstract static class StringFunction extends NamedValueFunction {
     protected String resultTypeName = Expressions.TYPE_STRING;
     protected int nargs = 2;
@@ -397,11 +326,6 @@ public class ValueFunctions {
     }
 
     public abstract String compute(String... strs);
-
-    @Override
-    public String getParamDesc() {
-      return getParamDesc(Expressions.TYPE_STRING, nargs);
-    }
 
     @Override
     public boolean checkArgs(List<Value> in) {
@@ -439,7 +363,7 @@ public class ValueFunctions {
   public static final ValueFunction CONCAT_FUNCTION = new StringFunction("CONCAT", -1) {
     @Override
     public String compute(String... in) {
-      return join(in, "");
+      return StringUtils.join(in, "");
     }
   };
 
@@ -457,46 +381,7 @@ public class ValueFunctions {
     }
   };
 
-  public static final ValueFunction PRINT_FUNCTION = new NamedValueFunction("PRINT") {
-    @Override
-    public String getParamDesc() {
-      return "...";
-    }
-
-    @Override
-    public boolean checkArgs(List<Value> in) {
-      if (in.size() < 1) {
-        return false;
-      }
-      if (in.size() > 1 && (in.get(0) == null || !(in.get(0).get() instanceof String))) {
-        return false;
-      }
-      return true;
-    }
-
-    @Override
-    public Value apply(Env env, List<Value> in) {
-      if (in.size() > 1) {
-        String format = (String) in.get(0).get();
-        Object[] args = new Object[in.size()-1];
-        for (int i = 1; i < in.size(); i++) {
-          args[i-1] = in.get(i).get();
-        }
-        String res = String.format(format,  args);
-        System.out.print(res);
-      } else {
-        System.out.print(in.get(0));
-      }
-      return null;
-    }
-  };
-
   public static final ValueFunction FORMAT_FUNCTION = new NamedValueFunction("FORMAT") {
-    @Override
-    public String getParamDesc() {
-      return Expressions.TYPE_STRING + ",...";
-    }
-
     @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() < 1) {
@@ -522,11 +407,6 @@ public class ValueFunctions {
 
   public static final ValueFunction JOIN_FUNCTION = new NamedValueFunction("JOIN") {
     @Override
-    public String getParamDesc() {
-      return "String glue,...";
-    }
-
-    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() < 1) {
         return false;
@@ -544,7 +424,7 @@ public class ValueFunctions {
       for (int i = 1; i < in.size(); i++) {
         args[i-1] = in.get(i).get();
       }
-      String res = join(args, glue);
+      String res = StringUtils.join(args, glue);
       return new Expressions.PrimitiveValue(Expressions.TYPE_STRING, res);
     }
   };
@@ -585,13 +465,13 @@ public class ValueFunctions {
               if (in.get(0) == null) return null;
               List list = (List) in.get(0).get();
               ValueFunction func = (ValueFunction) in.get(1).get();
-              List<Value> res = new ArrayList<>(list.size());
+              List<Value> res = new ArrayList<Value>(list.size());
               for (Object elem:list) {
-                List<Value> args = new ArrayList<>(1);
+                List<Value> args = new ArrayList<Value>(1);
                 args.add(Expressions.createValue(Expressions.TYPE_LIST, elem));
                 res.add(func.apply(env, args));
               }
-              return new Expressions.PrimitiveValue<>(Expressions.TYPE_LIST, res);
+              return new Expressions.PrimitiveValue<List<Value>>(Expressions.TYPE_LIST, res);
             }
           };
   private static final ParamInfo PARAM_INFO_FUNCTION = new ParamInfo("FUNCTION", Expressions.TYPE_FUNCTION, Function.class, false);
@@ -604,11 +484,11 @@ public class ValueFunctions {
               if (in.get(0) == null) return null;
               List list = (List) in.get(0).get();
               Function func = (Function) in.get(1).get();
-              List<Object> res = new ArrayList<>(list.size());
+              List<Object> res = new ArrayList<Object>(list.size());
               for (Object elem:list) {
                 res.add(func.apply(elem));
               }
-              return new Expressions.PrimitiveValue<>(null, res);
+              return new Expressions.PrimitiveValue<List<Object>>(null, res);
             }
           };
 
@@ -718,7 +598,8 @@ public class ValueFunctions {
     @Override
     public int compare(Number o1, Number o2) {
       if (isInteger(o1) && isInteger(o2)) {
-        return Long.compare(o1.longValue(), o2.longValue());
+        Long l1 = o1.longValue();
+        return l1.compareTo(o2.longValue());
       } else {
         return Double.compare(o1.doubleValue(),o2.doubleValue());
       }
@@ -732,8 +613,7 @@ public class ValueFunctions {
     }
   }
 
-  public enum CompareType { GT, LT, GE, LE, EQ, NE }
-
+  public static enum CompareType { GT, LT, GE, LE, EQ, NE }
   public static class CompareFunction<T> extends NamedValueFunction {
     Comparator<T> comparator;
     CompareType compType;
@@ -744,11 +624,6 @@ public class ValueFunctions {
       this.comparator = comparator;
       this.compType = compType;
       this.clazz = clazz;
-    }
-
-    @Override
-    public String getParamDesc() {
-      return "(" + getTypeName(clazz) + "," + getTypeName(clazz) + ")";
     }
 
     public Boolean compare(T o1, T o2) {
@@ -770,10 +645,10 @@ public class ValueFunctions {
         return false;
       }
       if (clazz != null) {
-        if (in.get(0) == null || in.get(0).get() == null || !(clazz.isAssignableFrom(in.get(0).get().getClass()))) {
+        if (in.get(0) == null || !(clazz.isAssignableFrom(in.get(0).get().getClass()))) {
           return false;
         }
-        if (in.get(1) == null || in.get(1).get() == null || !(clazz.isAssignableFrom(in.get(1).get().getClass()))) {
+        if (in.get(1) == null || !(clazz.isAssignableFrom(in.get(1).get().getClass()))) {
           return false;
         }
       }
@@ -794,11 +669,6 @@ public class ValueFunctions {
   }
 
   public static final ValueFunction NOT_EQUALS_FUNCTION = new NamedValueFunction("EQUALS") {
-    @Override
-    public String getParamDesc() {
-      return "Object,Object";
-    }
-
     @Override
     public boolean checkArgs(List<Value> in) {
       return in.size() == 2;
@@ -824,11 +694,6 @@ public class ValueFunctions {
 
   public static final ValueFunction EQUALS_FUNCTION = new NamedValueFunction("EQUALS") {
     @Override
-    public String getParamDesc() {
-      return "Object,Object";
-    }
-
-    @Override
     public boolean checkArgs(List<Value> in) {
       return in.size() == 2;
     }
@@ -851,11 +716,6 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction ANNOTATION_FUNCTION = new NamedValueFunction("ANNOTATION_VALUE") {
-    @Override
-    public String getParamDesc() {
-      return "CoreMap coremap,String fieldName|Class field,[Object value]";
-    }
-
     // First argument is what (CoreMap) to get annotation for
     // Second argument is field (Class or String) to get annotation for
     // Third argument (optional) is annotation value to set
@@ -907,7 +767,7 @@ public class ValueFunctions {
             cm.set(annotationFieldClass, annotationObject);
           }
         }
-        List<Object> list = new ArrayList<>();
+        List<Object> list = new ArrayList<Object>();
         Value res = new Expressions.PrimitiveValue(Expressions.TYPE_LIST, list);
         for (CoreMap cm:cmList) {
           list.add(cm.get(annotationFieldClass));
@@ -920,11 +780,6 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction GET_ANNOTATION_TAG_FUNCTION = new NamedValueFunction("GET_ANNOTATION_TAG") {
-    @Override
-    public String getParamDesc() {
-      return "CoreMap or List<CoreMap>,String tag";
-    }
-
     // First argument is what (CoreMap or List<CoreMap>) to tag
     // Second argument is tag
     @Override
@@ -959,7 +814,7 @@ public class ValueFunctions {
         res = getTag((CoreMap) v.get(), tag);
       } else if (v.get() instanceof List) {
         List<CoreMap> cmList = (List<CoreMap>) v.get();
-        List<Value> list = new ArrayList<>();
+        List<Value> list = new ArrayList<Value>();
         res = new Expressions.PrimitiveValue(Expressions.TYPE_LIST, list);
         for (CoreMap cm:cmList) {
           list.add(getTag(cm, tag));
@@ -972,11 +827,6 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction SET_ANNOTATION_TAG_FUNCTION = new NamedValueFunction("SET_ANNOTATION_TAG") {
-    @Override
-    public String getParamDesc() {
-      return "CoreMap or List<CoreMap>,String tag,[Object value]";
-    }
-
     // First argument is what (CoreMap or List<CoreMap>) to tag
     // Second argument is tag
     // Third argument is tag value
@@ -1001,7 +851,7 @@ public class ValueFunctions {
       if (tags == null) {
         cm.set(Tags.TagsAnnotation.class, tags = new Tags());
       }
-      tags.setTag(tag, tagValue);
+      tags.addTag(tag, tagValue);
     }
 
     @Override
@@ -1024,11 +874,6 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction REMOVE_ANNOTATION_TAG_FUNCTION = new NamedValueFunction("REMOVE_ANNOTATION_TAG") {
-    @Override
-    public String getParamDesc() {
-      return "CoreMap or List<CoreMap>,String tag";
-    }
-
     // First argument is what (CoreMap) to tag
     // Second argument is tag
     @Override
@@ -1072,11 +917,6 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction TAGS_VALUE_FUNCTION = new NamedValueFunction("TAGS_VALUE") {
-    @Override
-    public String getParamDesc() {
-      return getTypeName(Tags.class) + " tags,String field,[Object value]";
-    }
-
     // First argument is tags object
     // Second argument is tag
     // Third argument (optional) is tag value
@@ -1100,18 +940,13 @@ public class ValueFunctions {
       String tag = (String) in.get(1).get();
       if (in.size() >= 3) {
         Value tagValue = in.get(2);
-        tags.setTag(tag, tagValue);
+        tags.addTag(tag, tagValue);
       }
       return tags.getTag(tag);
     }
   };
 
   public static final ValueFunction SET_VALUE_TAG_FUNCTION = new NamedValueFunction("VALUE_TAG") {
-    @Override
-    public String getParamDesc() {
-      return "Value,String tag,[Object value]";
-    }
-
     // First argument is what to tag
     // Second argument is tag
     // Third argument is tag value
@@ -1137,17 +972,12 @@ public class ValueFunctions {
       }
       String tag = (String) in.get(1).get();
       Value tagValue = (in.size() >= 3)? in.get(2):null;
-      tags.setTag(tag, tagValue);
+      tags.addTag(tag, tagValue);
       return v;
     }
   };
 
   public static final ValueFunction GET_VALUE_TAG_FUNCTION = new NamedValueFunction("GET_VALUE_TAG") {
-    @Override
-    public String getParamDesc() {
-      return "Value,String tag";
-    }
-
     // First argument is what to tag
     // Second argument is tag
     @Override
@@ -1174,12 +1004,7 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction REMOVE_VALUE_TAG_FUNCTION = new NamedValueFunction("REMOVE_VALUE_TAG") {
-    @Override
-    public String getParamDesc() {
-      return "Value,String tag";
-    }
-
-    // First argument is what to tag
+    // First argument is what (CoreMap) to tag
     // Second argument is tag
     @Override
     public boolean checkArgs(List<Value> in) {
@@ -1208,11 +1033,6 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction COMPOSITE_VALUE_FUNCTION = new NamedValueFunction("COMPOSITE_VALUE") {
-    @Override
-    public String getParamDesc() {
-      return Expressions.TYPE_COMPOSITE + " obj,String field,[Object value]";
-    }
-
     // First argument is composite value
     // Second argument is field to select
     // Third argument (optional) is value to set composite value field to
@@ -1243,11 +1063,6 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction COMPOSITE_KEYS_FUNCTION = new NamedValueFunction("COMPOSITE_KEYS") {
-    @Override
-    public String getParamDesc() {
-      return Expressions.TYPE_COMPOSITE;
-    }
-
     // First argument is composite value
     @Override
     public boolean checkArgs(List<Value> in) {
@@ -1264,17 +1079,12 @@ public class ValueFunctions {
     public Value apply(Env env, List<Value> in) {
       if (in.get(0) == null || in.get(0).get() == null ) return null;   // Allow for null
       Expressions.CompositeValue v = (Expressions.CompositeValue) in.get(0);
-      List<String> res = new ArrayList<>(v.getAttributes());
+      List<String> res = new ArrayList<String>(v.getAttributes());
       return Expressions.createValue(Expressions.TYPE_LIST, res);
     }
   };
 
   public static final ValueFunction OBJECT_FIELD_FUNCTION = new NamedValueFunction("OBJECT_FIELD") {
-    @Override
-    public String getParamDesc() {
-      return "Object obj,String fieldName,[Object value]";
-    }
-
     // First argument is object
     // Second argument is field to select
     // Third argument (optional) is value to assign to object field
@@ -1315,7 +1125,7 @@ public class ValueFunctions {
                 List list = (List) fieldValue.get();
                 Type[] fieldParamTypes = ((ParameterizedType) f.getGenericType()).getActualTypeArguments();
                 if (fieldParamTypes[0] instanceof Value) {
-                  List<Value> list2 = new ArrayList<>(list.size());
+                  List<Value> list2 = new ArrayList<Value>(list.size());
                   for (Object elem:list) {
                     list2.add(Expressions.asValue(env, elem));
                   }
@@ -1349,11 +1159,6 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction LIST_VALUE_FUNCTION = new NamedValueFunction("LIST_VALUE") {
-    @Override
-    public String getParamDesc() {
-      return "List list,int index,[Object value]";
-    }
-
     // First argument is List
     // Second argument is index of element to select
     // Third argument (optional) is value to assign list element
@@ -1379,10 +1184,6 @@ public class ValueFunctions {
       if (index < 0) {
         index = list.size() + index;
       }
-      if (index >= list.size() || index < 0) {
-        // index out of bounds
-        return null;
-      }
       if (in.size() >= 3) {
         Value fieldValue = in.get(2);
         if (fieldValue != null) {
@@ -1398,11 +1199,6 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction MAP_VALUE_FUNCTION = new NamedValueFunction("MAP_VALUE") {
-    @Override
-    public String getParamDesc() {
-      return "Map map,Object key,[Object value]";
-    }
-
     // First argument is Map
     // Second argument is key of element to select
     // Third argument (optional) is value to assign to element
@@ -1447,11 +1243,6 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction MAP_KEYS_FUNCTION = new NamedValueFunction("MAP_KEYS") {
-    @Override
-    public String getParamDesc() {
-      return "Map";
-    }
-
     // First argument is Map
     @Override
     public boolean checkArgs(List<Value> in) {
@@ -1468,17 +1259,12 @@ public class ValueFunctions {
     public Value apply(Env env, List<Value> in) {
       if (in.get(0) == null || in.get(0).get() == null ) return null;   // Allow for null
       Map map = (Map) in.get(0).get();
-      List<Object> res = new ArrayList<>(map.keySet());
+      List<Object> res = new ArrayList<Object>(map.keySet());
       return Expressions.createValue(Expressions.TYPE_LIST, res);
     }
   };
 
   public static final ValueFunction AGGREGATE_FUNCTION = new NamedValueFunction("AGGREGATE") {
-    @Override
-    public String getParamDesc() {
-      return "ValueFunction func,Object initialValue,...";
-    }
-
     // First argument is function to apply
     // Second argument is initial value
     @Override
@@ -1498,7 +1284,7 @@ public class ValueFunctions {
     public Value apply(Env env, List<Value> in) {
       ValueFunction func = (ValueFunction) in.get(0).get();
       Value res = in.get(1);
-      List<Value> args = new ArrayList<>(2);
+      List<Value> args = new ArrayList<Value>(2);
       for (int i = 2; i < in.size(); i++) {
         args.set(0, res);
         args.set(1, in.get(i));
@@ -1508,58 +1294,14 @@ public class ValueFunctions {
     }
   };
 
-  public static final ValueFunction CALL_FUNCTION = new NamedValueFunction("CALL") {
-    @Override
-    public String getParamDesc() {
-      return "ValueFunction func or String funcname,...";
-    }
-
-    // First argument is function to apply
-    @Override
-    public boolean checkArgs(List<Value> in) {
-      if (in.size() < 1) {
-        return false;
-      }
-      if (in.get(0) == null ||
-        !(in.get(0).get() instanceof ValueFunction || in.get(0).get() instanceof String)) {
-        return false;
-      }
-      return true;
-    }
-    @Override
-    public Value apply(Env env, List<Value> in) {
-      Value res;
-      List<Value> args = new ArrayList<>(in.size() - 1);
-      for (int i = 1; i < in.size(); i++) {
-        args.add(in.get(i));
-      }
-      if (in.get(0).get() instanceof ValueFunction) {
-        ValueFunction func = (ValueFunction) in.get(0).get();
-        res = func.apply(env, args);
-      } else if (in.get(0).get() instanceof String) {
-        Expressions.FunctionCallExpression func =
-          new Expressions.FunctionCallExpression((String) in.get(0).get(), args);
-        res = func.evaluate(env);
-      } else {
-        throw new IllegalArgumentException("Type mismatch on arg0: Cannot apply " + this + " to " + in);
-      }
-      return res;
-    }
-  };
-
   static final CollectionValuedMap<String, ValueFunction> registeredFunctions =
-          new CollectionValuedMap<>(
-                  MapFactory.<String, Collection<ValueFunction>>linkedHashMapFactory(),
-                  CollectionFactory.<ValueFunction>arrayListFactory(), false);
+          new CollectionValuedMap<String,ValueFunction>(CollectionFactory.<ValueFunction>arrayListFactory());
   static {
     registeredFunctions.add("Add", ADD_FUNCTION);
     registeredFunctions.add("Subtract", SUBTRACT_FUNCTION);
     registeredFunctions.add("Multiply", MULTIPLY_FUNCTION);
     registeredFunctions.add("Divide", DIVIDE_FUNCTION);
     registeredFunctions.add("Mod", MOD_FUNCTION);
-    registeredFunctions.add("Min", MIN_FUNCTION);
-    registeredFunctions.add("Max", MAX_FUNCTION);
-    registeredFunctions.add("Pow", POW_FUNCTION);
     registeredFunctions.add("Negate", NEGATE_FUNCTION);
 
     registeredFunctions.add("And", AND_FUNCTION);
@@ -1580,12 +1322,12 @@ public class ValueFunctions {
     registeredFunctions.add("Replace", TOKENS_REPLACE_FUNCTION);
     registeredFunctions.add("Replace", STRING_REPLACE_FUNCTION);
 
-    registeredFunctions.add("GE", new CompareFunction<>("GE", NUMBER_COMPARATOR, CompareType.GE, Number.class) );
-    registeredFunctions.add("GT", new CompareFunction<>("GT", NUMBER_COMPARATOR, CompareType.GT, Number.class) );
-    registeredFunctions.add("LE", new CompareFunction<>("LE", NUMBER_COMPARATOR, CompareType.LE, Number.class) );
-    registeredFunctions.add("LT", new CompareFunction<>("LT", NUMBER_COMPARATOR, CompareType.LT, Number.class) );
-    registeredFunctions.add("EQ", new CompareFunction<>("EQ", NUMBER_COMPARATOR, CompareType.EQ, Number.class) );
-    registeredFunctions.add("NE", new CompareFunction<>("NE", NUMBER_COMPARATOR, CompareType.NE, Number.class) );
+    registeredFunctions.add("GE", new CompareFunction<Number>("GE", NUMBER_COMPARATOR, CompareType.GE, Number.class) );
+    registeredFunctions.add("GT", new CompareFunction<Number>("GT", NUMBER_COMPARATOR, CompareType.GT, Number.class) );
+    registeredFunctions.add("LE", new CompareFunction<Number>("LE", NUMBER_COMPARATOR, CompareType.LE, Number.class) );
+    registeredFunctions.add("LT", new CompareFunction<Number>("LT", NUMBER_COMPARATOR, CompareType.LT, Number.class) );
+    registeredFunctions.add("EQ", new CompareFunction<Number>("EQ", NUMBER_COMPARATOR, CompareType.EQ, Number.class) );
+    registeredFunctions.add("NE", new CompareFunction<Number>("NE", NUMBER_COMPARATOR, CompareType.NE, Number.class) );
     registeredFunctions.add("EQ", EQUALS_FUNCTION );
     registeredFunctions.add("NE", NOT_EQUALS_FUNCTION );
 
@@ -1601,13 +1343,12 @@ public class ValueFunctions {
     registeredFunctions.add("Annotate", ANNOTATION_FUNCTION);
     registeredFunctions.add("Aggregate", AGGREGATE_FUNCTION);
 
-    registeredFunctions.add("Call", CALL_FUNCTION);
-
     registeredFunctions.add("CreateRegex", CREATE_REGEX_FUNCTION);
 
     registeredFunctions.add("Select", COMPOSITE_VALUE_FUNCTION);
     registeredFunctions.add("Select", MAP_VALUE_FUNCTION);
     registeredFunctions.add("Select", TAGS_VALUE_FUNCTION);
+    registeredFunctions.add("Select", ANNOTATION_FUNCTION);
     registeredFunctions.add("Select", ANNOTATION_FUNCTION);
     registeredFunctions.add("Select", OBJECT_FIELD_FUNCTION);
     registeredFunctions.add("ListSelect", LIST_VALUE_FUNCTION);
@@ -1627,18 +1368,5 @@ public class ValueFunctions {
     registeredFunctions.add("Get", ANNOTATION_FUNCTION);
     registeredFunctions.add("Get", OBJECT_FIELD_FUNCTION);
     registeredFunctions.add("Get", LIST_VALUE_FUNCTION);
-
-    // For debugging
-    registeredFunctions.add("Print", PRINT_FUNCTION);
   }
-
-  public static void main(String[] args) {
-    // Dumps the registered functions
-    for (Map.Entry<String, Collection<ValueFunction>> entry : registeredFunctions.entrySet()) {
-      for (ValueFunction vf: entry.getValue()) {
-        System.out.println(entry.getKey() + ": " + vf);
-      }
-    }
-  }
-
 }

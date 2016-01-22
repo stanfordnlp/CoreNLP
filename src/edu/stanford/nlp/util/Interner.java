@@ -69,7 +69,7 @@ public class Interner<T> {
    * itself is returned, this is the first request for an object
    * .equals to o.
    */
-  public synchronized T intern(T o) {
+  public T intern(T o) {
     WeakReference<T> ref = map.get(o);
     if (ref == null) {
       ref = Generics.newWeakReference(o);
@@ -102,7 +102,8 @@ public class Interner<T> {
    * Test method: interns its arguments and says whether they == themselves.
    */
   public static void main(String[] args) {
-    for (String str : args) {
+    for (int i = 0; i < args.length; i++) {
+      String str = args[i];
       System.out.println(Interner.globalIntern(str) == str);
     }
   }

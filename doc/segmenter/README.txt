@@ -32,24 +32,6 @@ LICENSE
 CHANGES
 ------------------------------------
 
-2015-12-09    3.6.0     Update for compatibility 
-
-2015-04-20    3.5.2     Update for compatibility 
-
-2015-01-29    3.5.1     Update for compatibility 
-
-2014-10-26    3.5.0     Upgrade to Java 1.8 
-
-2014-08-27    3.4.1     Update for compatibility 
-
-2014-06-16      3.4     Update Arabic segmenter 
-
-2014-01-04    3.3.1     Bugfix release 
-
-2013-11-12    3.3.0     Update for compatibility 
-
-2013-06-19    3.2.0     Improve handling of line-by-line input 
-
 2013-04-04    1.6.8     ctb7 model, -nthreads option 
 
 2012-11-11    1.6.7     Bugfixes to both Arabic and Chinese 

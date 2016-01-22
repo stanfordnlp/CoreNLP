@@ -18,7 +18,7 @@ public class MLEDependencyGrammarExtractor extends AbstractTreeExtractor<Depende
   protected final Index<String> tagIndex;
 
   /** This is where all dependencies are stored (using full tag space). */
-  protected ClassicCounter<IntDependency> dependencyCounter = new ClassicCounter<>();
+  protected ClassicCounter<IntDependency> dependencyCounter = new ClassicCounter<IntDependency>();
   //private Set dependencies = new HashSet();
 
   protected TreebankLangParserParams tlpParams;
@@ -57,7 +57,7 @@ public class MLEDependencyGrammarExtractor extends AbstractTreeExtractor<Depende
 
   @Override
   public DependencyGrammar formResult() {
-    wordIndex.addToIndex(Lexicon.UNKNOWN_WORD);
+    wordIndex.indexOf(Lexicon.UNKNOWN_WORD, true);
     MLEDependencyGrammar dg = new MLEDependencyGrammar(tlpParams, directional, useDistance, useCoarseDistance, basicCategoryTagsInDependencyGrammar, op, wordIndex, tagIndex);
     for (IntDependency dependency : dependencyCounter.keySet()) {
       dg.addRule(dependency, dependencyCounter.getCount(dependency));

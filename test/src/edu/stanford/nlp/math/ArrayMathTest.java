@@ -7,7 +7,6 @@ public class ArrayMathTest extends TestCase {
   private double[] d2 = new double[3];
   private double[] d3 = new double[3];
   private double[] d4 = new double[3];
-  private double[] d5 = new double[4];
 
   @Override
   public void setUp() {
@@ -23,17 +22,6 @@ public class ArrayMathTest extends TestCase {
     d4[0] = 0.1;
     d4[1] = 0.2;
     d4[2] = 0.3;
-    d5[0] = 0.1;
-    d5[1] = 0.2;
-    d5[2] = 0.3;
-    d5[3] = 0.8;
-  }
-
-  public void testInnerProduct() {
-    double inner = ArrayMath.innerProduct(d4, d4);
-    assertEquals("Wrong inner product", 0.14, inner, 1e-6);
-    inner = ArrayMath.innerProduct(d5, d5);
-    assertEquals("Wrong inner product", 0.78, inner, 1e-6);
   }
 
   public void testNumRows() {
@@ -240,16 +228,6 @@ public class ArrayMathTest extends TestCase {
     helpTestSafeSumAndMean(d2);
     helpTestSafeSumAndMean(d3);
     helpTestSafeSumAndMean(d4);
-  }
-
-  public void testJensenShannon() {
-    double[] a = { 0.1, 0.1, 0.7, 0.1, 0.0, 0.0 };
-    double[] b = { 0.0, 0.1, 0.1, 0.7, 0.1, 0.0 };
-    assertEquals(0.46514844544032313, ArrayMath.jensenShannonDivergence(a, b), 1e-5);
-
-    double[] c = { 1.0, 0.0, 0.0 };
-    double[] d = { 0.0, 0.5, 0.5 };
-    assertEquals(1.0, ArrayMath.jensenShannonDivergence(c, d), 1e-5);
   }
 
 }

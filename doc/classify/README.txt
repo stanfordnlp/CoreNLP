@@ -1,4 +1,4 @@
-Stanford Classifier v3.6.0 - 2015-12-09
+Stanford Classifier v2.1.8 - 2013-04-04
 -------------------------------------------------
 
 Copyright (c) 2003-2012 The Board of Trustees of 
@@ -15,7 +15,7 @@ This package contains a maximum entropy classifier.
 
 For more information about the classifier, point a web browser at the included javadoc directory, starting at the Package page for the edu.stanford.nlp.classify package, and looking also at the ColumnDataClassifier class documentation therein.
 
-This software requires Java 8 (JDK 1.8.0+).  (You must have installed it
+This software requires Java 5 (JDK 1.6.0+).  (You must have installed it
 separately. Check the command "java -version".)
 
 
@@ -24,7 +24,7 @@ QUICKSTART
 COMMAND LINE INTERFACE
 To classify the included example dataset cheeseDisease (in the examples directory), type the following at the command line while in the main classifier directory:
 
-java -cp "*:." edu.stanford.nlp.classify.ColumnDataClassifier -prop examples/cheese2007.prop
+java -jar stanford-classifier.jar -prop examples/cheese2007.prop
 
 This will classify the included test data, cheeseDisease.test, based on the probability that each example is a cheese or a disease, as calculated by a linear classifier trained on cheeseDisease.train.  
 
@@ -75,25 +75,6 @@ LICENSE
 -------------------------
 CHANGES
 -------------------------
-
-2015-12-09    3.6.0     Update for compatibility 
-
-2015-04-20    3.5.2     Update for compatibility 
-
-2015-01-29    3.5.1     New input/output options, support for GloVe 
-                        word vectors 
-
-2014-10-26    3.5.0     Upgrade to Java 1.8 
-
-2014-08-27    3.4.1     Update for compatibility 
-
-2014-06-16      3.4     Update for compatibility 
-
-2014-01-04    3.3.1     Bugfix release 
-
-2013-11-12    3.3.0     Update for compatibility 
-
-2013-06-19    3.2.0     Update for compatibility 
 
 2013-04-04    2.1.8     Update to maintain compatibility 
 

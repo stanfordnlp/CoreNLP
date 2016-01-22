@@ -21,20 +21,21 @@ import java.util.*;
  */
 class PostSplitter implements TreeTransformer {
 
-  private final ClassicCounter<String> nonTerms = new ClassicCounter<>();
-  private final TreebankLangParserParams tlpParams;
-  private final HeadFinder hf;
+  private ClassicCounter<String> nonTerms = new ClassicCounter<String>();
+  private TreebankLangParserParams tlpParams;
+  private TreeFactory tf;
+  private HeadFinder hf;
   private final TrainOptions trainOptions;
 
-  @Override
   public Tree transformTree(Tree t) {
-    TreeFactory tf = t.treeFactory();
-    return transformTreeHelper(t, t, tf);
+    tf = t.treeFactory();
+    return transformTreeHelper(t, t);
   }
 
-  public Tree transformTreeHelper(Tree t, Tree root, TreeFactory tf) {
+  public Tree transformTreeHelper(Tree t, Tree root) {
     Tree result;
     Tree parent;
+    Tree grandParent;
     String parentStr;
     String grandParentStr;
     if (root == null || t.equals(root)) {
@@ -45,9 +46,10 @@ class PostSplitter implements TreeTransformer {
       parentStr = parent.label().value();
     }
     if (parent == null || parent.equals(root)) {
+      grandParent = null;
       grandParentStr = "";
     } else {
-      Tree grandParent = parent.parent(root);
+      grandParent = parent.parent(root);
       grandParentStr = grandParent.label().value();
     }
     String cat = t.label().value();
@@ -64,9 +66,9 @@ class PostSplitter implements TreeTransformer {
       if (trainOptions.postPA && !trainOptions.smoothing && baseParentStr.length() > 0) {
         String cat2;
         if (trainOptions.postSplitWithBaseCategory) {
-          cat2 = cat + '^' + baseParentStr;
+          cat2 = cat + "^" + baseParentStr;
         } else {
-          cat2 = cat + '^' + parentStr;
+          cat2 = cat + "^" + parentStr;
         }
         if (!trainOptions.selectivePostSplit || trainOptions.postSplitters.contains(cat2)) {
           cat = cat2;
@@ -75,9 +77,9 @@ class PostSplitter implements TreeTransformer {
       if (trainOptions.postGPA && !trainOptions.smoothing && grandParentStr.length() > 0) {
         String cat2;
         if (trainOptions.postSplitWithBaseCategory) {
-          cat2 = cat + '~' + baseGrandParentStr;
+          cat2 = cat + "~" + baseGrandParentStr;
         } else {
-          cat2 = cat + '~' + grandParentStr;
+          cat2 = cat + "~" + grandParentStr;
         }
         if (trainOptions.selectivePostSplit) {
           if (cat.contains("^") && trainOptions.postSplitters.contains(cat2)) {
@@ -88,11 +90,11 @@ class PostSplitter implements TreeTransformer {
         }
       }
     }
-    result = tf.newTreeNode(new CategoryWordTag(cat, word, cat), Collections.<Tree>emptyList());
-    ArrayList<Tree> newKids = new ArrayList<>();
+    result = tf.newTreeNode(new CategoryWordTag(cat, word, cat), Collections.EMPTY_LIST);
+    ArrayList<Tree> newKids = new ArrayList<Tree>();
     Tree[] kids = t.children();
     for (Tree kid : kids) {
-      newKids.add(transformTreeHelper(kid, root, tf));
+      newKids.add(transformTreeHelper(kid, root));
     }
     result.setChildren(newKids);
     return result;
@@ -100,7 +102,7 @@ class PostSplitter implements TreeTransformer {
 
   public void dumpStats() {
     System.out.println("%% Counts of nonterminals:");
-    List<String> biggestCounts = new ArrayList<>(nonTerms.keySet());
+    List<String> biggestCounts = new ArrayList<String>(nonTerms.keySet());
     Collections.sort(biggestCounts, Counters.toComparatorDescending(nonTerms));
     for (String str : biggestCounts) {
       System.out.println(str + ": " + nonTerms.getCount(str));

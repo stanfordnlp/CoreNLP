@@ -45,7 +45,6 @@ public class CollocationFinder {
     this(t, w, new CollinsHeadFinder());
   }
 
-
   /**
    * Construct a new {@code CollocationFinder} over the {@code Tree} t.
    * @param t parse tree
@@ -53,12 +52,23 @@ public class CollocationFinder {
    * @param hf {@link HeadFinder} to use
    */
   public CollocationFinder(Tree t, WordNetConnection w, HeadFinder hf) {
-    CoordinationTransformer transformer = new CoordinationTransformer(hf);
+    this(t, w, hf, false);
+  }
+
+  /**
+   * Construct a new {@code CollocationFinder} over the {@code Tree} t.
+   * @param t parse tree
+   * @param w wordnet connection
+   * @param hf {@link HeadFinder} to use
+   * @param threadSafe whether to include synchronization, etc.
+   */
+  public CollocationFinder(Tree t, WordNetConnection w, HeadFinder hf, boolean threadSafe) {
+    CoordinationTransformer transformer = new CoordinationTransformer();
     this.wnConnect = w;
     this.qTree = transformer.transformTree(t);
     this.collocationCollector = Generics.newArrayList();
     this.hf = hf;
-    this.getCollocationsList();
+    this.getCollocationsList(threadSafe);
     if (DEBUG) {
       System.err.println("Collected collocations: " + collocationCollector);
     }
@@ -107,7 +117,7 @@ public class CollocationFinder {
       Tree[] allChildren = t.children();
       // get the earliest child in the collocation and store it as first child.
       // delete the rest.
-      StringBuilder mutatedString = new StringBuilder(160);
+      StringBuffer mutatedString = new StringBuffer(160);
       for (int i : matchingColl.indicesOfConstituentChildren) {
         String strToAppend = mergeLeavesIntoCollocatedString(allChildren[i]);
         mutatedString.append(strToAppend);
@@ -146,22 +156,22 @@ public class CollocationFinder {
     }
   }
 
-  /**
-   * Traverses the parse tree to find WordNet collocations.
-   */
-  private void getCollocationsList() {
-    getCollocationsList(qTree);
+/**
+ * Traverses the parse tree to find WordNet collocations.
+ */
+  private void getCollocationsList(boolean threadSafe) {
+    getCollocationsList(qTree, threadSafe);
   }
 
   /**
    * Prints the collocations found in this <code>Tree</code> as strings.
    * Each is followed by its boundary constituent indices in the original tree.
    * <br>Example: <code> throw_up (2,3) </code>
-   * <br>         <code> came_up_with (7,9) </code>
+   *   <br>       <code> came_up_with (7,9) </code>
    */
-  public void printCollocationStrings(PrintWriter pw){
+  public void PrintCollocationStrings(PrintWriter pw){
     //ArrayList<String> strs = new ArrayList<String>();
-    for (Collocation c: collocationCollector) {
+    for(Collocation c: collocationCollector){
       String cs = c.collocationString;
       pw.println(cs+" ("+(c.span.first()+1)+","+(c.span.second()+1)+")");
     }
@@ -173,7 +183,7 @@ public class CollocationFinder {
    *
    * @param t Tree to get collocations from.
    */
-  private void getCollocationsList(Tree t) {
+  private void getCollocationsList(Tree t, boolean threadSafe) {
     int leftMostLeaf = Trees.leftEdge(t,qTree);
     if (t.isPreTerminal()) return;
     List<Tree> children = t.getChildrenAsList();
@@ -182,22 +192,23 @@ public class CollocationFinder {
     // - in phrases like "World Trade Organization 's" the head of the parent NP is "POS".
     // - this is problematic for the collocationFinder which assigns this head
     // as the POS for the collocation "World_Trade_Organization"!
-    Label headLabel = hf.determineHead(t).label();
-    int leftSistersBuffer = 0; //measures the length of sisters in words when reading
+    Label headLabel= hf.determineHead(t).label();
+    StringBuffer testString = null;
+    Integer leftSistersBuffer=0;//measures the length of sisters in words when reading
     for (int i = 0; i < children.size();i++){
-      ArrayList<Integer> childConstituents = new ArrayList<>();
+      ArrayList<Integer> childConstituents = new ArrayList<Integer>();
       childConstituents.add(i);
       Tree subtree = children.get(i);
-      int currWindowLength = 0; //measures the length in words of the current collocation.
-      getCollocationsList(subtree); //recursive call to get colls in subtrees.
-      StringBuilder testString = new StringBuilder(160);
-      testString.append(treeAsStemmedCollocation(subtree));
-      testString.append('_');
+      Integer currWindowLength=0; //measures the length in words of the current collocation.
+      getCollocationsList(subtree, threadSafe); //recursive call to get colls in subtrees.
+      testString = new StringBuffer(160);
+      testString.append(treeAsStemmedCollocation(subtree, threadSafe));
+      testString.append("_");
       Integer thisSubtreeLength = subtree.yield().size();
       currWindowLength+=thisSubtreeLength;
-      StringBuilder testStringNonStemmed = new StringBuilder(160);
+      StringBuffer testStringNonStemmed = new StringBuffer(160);
       testStringNonStemmed.append(treeAsNonStemmedCollocation(subtree));
-      testStringNonStemmed.append('_');
+      testStringNonStemmed.append("_");
 
       //for each subtree i, we iteratively append word yields of succeeding sister
       //subtrees j and check their wordnet entries.  if they exist we write them to
@@ -207,7 +218,7 @@ public class CollocationFinder {
       for (int j = i+1; j < children.size(); j++) {
         Tree sisterNode = children.get(j);
         childConstituents.add(j);
-        testString.append(treeAsStemmedCollocation(sisterNode));
+        testString.append(treeAsStemmedCollocation(sisterNode, threadSafe));
         testStringNonStemmed.append(treeAsNonStemmedCollocation(sisterNode));
         currWindowLength+=sisterNode.yield().size();
         if (DEBUG) {
@@ -221,31 +232,31 @@ public class CollocationFinder {
                 testString);
           }
         } else if (wordNetContains(testString.toString())) {
-          Pair <Integer, Integer> c = new Pair<>(leftMostLeaf + leftSistersBuffer, leftMostLeaf + leftSistersBuffer + currWindowLength - 1);
+          Pair <Integer, Integer> c = new Pair<Integer,Integer>(leftMostLeaf+leftSistersBuffer,leftMostLeaf+leftSistersBuffer+currWindowLength-1);
 
-          ArrayList<Integer> childConstituentsClone = new ArrayList<>(childConstituents);
+          ArrayList<Integer> childConstituentsClone = new ArrayList<Integer>(childConstituents);
           Collocation col = new Collocation(c,t,childConstituentsClone,testString.toString(),headLabel);
           collocationCollector.add(col);
           if (DEBUG) {
-            err.println("Found collocation in wordnet: "+ testString);
+            err.println("Found collocation in wordnet: "+ testString.toString());
             err.println("  Span of collocation is: " + c +
                 "; childConstituents is: " + c);
           }
         }
-        testString.append('_');
+        testString.append("_");
         if (StringUtils.lookingAt(testStringNonStemmed.toString(), "(?:[Tt]he|THE|[Aa][Nn]?)[ _]")) {
           if (false) {
             err.println("CollocationFinder: Not collapsing the/a word: " +
                 testStringNonStemmed);
           }
         } else if (wordNetContains(testStringNonStemmed.toString())) {
-          Pair <Integer, Integer> c = new Pair<>(leftMostLeaf + leftSistersBuffer, leftMostLeaf + leftSistersBuffer + currWindowLength - 1);
+          Pair <Integer, Integer> c = new Pair<Integer,Integer>(leftMostLeaf+leftSistersBuffer,leftMostLeaf+leftSistersBuffer+currWindowLength-1);
 
-          ArrayList<Integer> childConstituentsClone = new ArrayList<>(childConstituents);
+          ArrayList<Integer> childConstituentsClone = new ArrayList<Integer>(childConstituents);
           Collocation col = new Collocation(c,t,childConstituentsClone,testStringNonStemmed.toString(),headLabel);
           collocationCollector.add(col);
           if (DEBUG) {
-            err.println("Found collocation in wordnet: "+ testStringNonStemmed);
+            err.println("Found collocation in wordnet: "+ testStringNonStemmed.toString());
             err.println("  Span of collocation is: " + c +
                 "; childConstituents is: " + c);
           }
@@ -256,10 +267,10 @@ public class CollocationFinder {
     }
   }
 
-  private static String treeAsStemmedCollocation(Tree t) {
-    List<WordTag> list= getStemmedWordTagsFromTree(t);
+  private static String treeAsStemmedCollocation(Tree t, boolean threadSafe) {
+    List<WordTag> list= getStemmedWordTagsFromTree(t, threadSafe);
     // err.println(list.size());
-    StringBuilder s = new StringBuilder(160);
+    StringBuffer s = new StringBuffer(160);
     WordTag firstWord = list.remove(0);
     s.append(firstWord.word());
     for(WordTag wt : list) {
@@ -273,11 +284,11 @@ public class CollocationFinder {
   private static String treeAsNonStemmedCollocation(Tree t) {
     List<WordTag> list= getNonStemmedWordTagsFromTree(t);
 
-    StringBuilder s = new StringBuilder(160);
+    StringBuffer s = new StringBuffer(160);
     WordTag firstWord = list.remove(0);
     s.append(firstWord.word());
     for(WordTag wt : list) {
-      s.append('_');
+      s.append("_");
       s.append(wt.word());
     }
     return s.toString();
@@ -287,7 +298,7 @@ public class CollocationFinder {
     StringBuilder sb = new StringBuilder(160);
     ArrayList<TaggedWord> sent = t.taggedYield();
     for (TaggedWord aSent : sent) {
-      sb.append(aSent.word()).append('_');
+      sb.append(aSent.word()).append("_");
     }
     return sb.substring(0,sb.length() -1);
   }
@@ -297,7 +308,7 @@ public class CollocationFinder {
     for (Tree t: trees) {
       ArrayList<TaggedWord> sent = t.taggedYield();
       for (TaggedWord aSent : sent) {
-        sb.append(aSent.word()).append('_');
+        sb.append(aSent.word()).append("_");
       }
     }
     return sb.substring(0,sb.length() -1);
@@ -309,11 +320,12 @@ public class CollocationFinder {
    * @return the WordTags corresponding to the leaves of the tree,
    * stemmed according to their POS tags in the tree.
    */
-  private static List<WordTag> getStemmedWordTagsFromTree(Tree t) {
+  private static List<WordTag> getStemmedWordTagsFromTree(Tree t, boolean threadSafe) {
     List<WordTag> stemmedWordTags = Generics.newArrayList();
     ArrayList<TaggedWord> s = t.taggedYield();
     for (TaggedWord w : s) {
-      WordTag wt = Morphology.stemStatic(w.word(), w.tag());
+      WordTag wt = threadSafe ? Morphology.stemStaticSynchronized(w.word(), w.tag())
+              : Morphology.stemStatic(w.word(), w.tag());
       stemmedWordTags.add(wt);
     }
     return stemmedWordTags;
@@ -329,6 +341,7 @@ public class CollocationFinder {
     return wordTags;
   }
 
+  // Convert arg from StringBuffer to String - EY 02/02/07
   /**
    * Checks to see if WordNet contains the given word in its lexicon.
    * @param s Token
@@ -344,11 +357,11 @@ public class CollocationFinder {
    */
   private static class Collocation {
 
-    final Pair<Integer,Integer> span;
-    final Tree parentNode;
-    final Label headLabel;
-    final List<Integer> indicesOfConstituentChildren;
-    final String collocationString;
+    Pair<Integer,Integer> span;
+    Tree parentNode;
+    Label headLabel;
+    List<Integer> indicesOfConstituentChildren;
+    String collocationString;
 
     private Collocation(Pair<Integer,Integer> span,
                         Tree parentNode,

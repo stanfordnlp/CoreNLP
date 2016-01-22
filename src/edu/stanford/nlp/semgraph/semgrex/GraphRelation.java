@@ -11,9 +11,8 @@ import java.util.Stack;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphEdge;
-import edu.stanford.nlp.util.*;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Pair;
 
 /**
  * An abstract base class for relations between graph nodes in semgrex. There
@@ -27,23 +26,23 @@ import java.util.function.Predicate;
  * careful to make the appropriate adjustments to
  * <code>getRelation()</code>. Finally, if you are using the SemgrexParser, you
  * need to add the new relation symbol to the list of tokens. <p/>
- *
+ * 
  * @author Chloe Kiddon
  */
 abstract class GraphRelation implements Serializable {
-  final String symbol;
-  final Predicate<String> type;
-  final String rawType;
-
-  final String name;
-
+  String symbol;
+  String type;
+  String rawType;
+	
+  String name;
+	
   //"<" | ">" | ">>" | "<<" | "<#" | ">#" | ":" | "@">
 
 
   /**
    * Returns <code>true</code> iff this <code>GraphRelation</code> holds between
    * the given pair of nodes in the given semantic graph.
-   */
+   */	
   abstract boolean satisfies(IndexedWord n1, IndexedWord n2, SemanticGraph sg);
 
   /**
@@ -58,36 +57,36 @@ abstract class GraphRelation implements Serializable {
     this.rawType = type;
     this.name = name;
   }
-
+	
   private GraphRelation(String symbol, String type) {
     this(symbol, type, null);
   }
-
+	
   private GraphRelation(String symbol) {
     this(symbol, null);
   }
-
+	
   @Override
   public String toString() {
     return symbol + ((rawType != null) ? rawType : "") + ((name != null) ? "=" + name : "");
   }
-
-  public Predicate<String> getPattern(String relnType)
+	
+  public String getPattern(String relnType)
   {
     if ((relnType == null) || (relnType.equals(""))) {
-      return Filters.acceptFilter();
+      return ".*";
     } else if (relnType.matches("/.*/")) {
-      return new RegexStringFilter(relnType.substring(1, relnType.length() - 1));
+      return relnType.substring(1, relnType.length() - 1);
     } else { // raw description
-      return new ArrayStringFilter(ArrayStringFilter.Mode.EXACT, relnType);
+      return "^(" + relnType + ")$";
     }
   }
-
+	
   public String getName() {
     if (name == null || name == "") return null;
     return name;
   }
-
+	
 
   // ALIGNMENT graph relation: "@" ==============================================
 
@@ -100,14 +99,14 @@ abstract class GraphRelation implements Serializable {
       super("@", "");
       hypToText = true;
     }
-
+		
     void setAlignment(Alignment alignment, boolean hypToText, SearchNodeIterator itr) {
       this.alignment = alignment;
       this.hypToText = hypToText;
       //System.err.println("setting alignment");
       itr.advance();
     }
-
+		  
     @Override
     boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
       if (alignment == null) return false;
@@ -121,14 +120,14 @@ abstract class GraphRelation implements Serializable {
     @Override
     Iterator<IndexedWord> searchNodeIterator(final IndexedWord node, final SemanticGraph sg) {
       return new SearchNodeIterator() {
-
+		    	  
           boolean foundOnce = false;
           int nextNum;
-
+		        
           // not really initialized until alignment is set
           @Override
           public void initialize() {
-
+		    		
           }
 
           @Override
@@ -148,7 +147,7 @@ abstract class GraphRelation implements Serializable {
                 //System.err.println("next: null");
               }
             } else {
-
+		        		
               int num = 0;
               for (Map.Entry<IndexedWord, IndexedWord> pair : alignment.getMap().entrySet()) {
                 if (pair.getValue().equals(node)) {
@@ -165,23 +164,23 @@ abstract class GraphRelation implements Serializable {
               next = null;
             }
           }
-
+		        
         };
     }
-
-    // Generated automatically by Eclipse
+    
+    // Generated automatically by Eclipse 
     private static final long serialVersionUID = -2936526066368043778L;
   };
 
-
+	
   // ROOT graph relation: "Root" ================================================
-
+	  
   static final GraphRelation ROOT = new GraphRelation("", "") {
       @Override
       boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
         return l1 == l2;
       }
-
+      
       @Override
       Iterator<IndexedWord> searchNodeIterator(final IndexedWord node, final SemanticGraph sg) {
         return new SearchNodeIterator() {
@@ -201,17 +200,17 @@ abstract class GraphRelation implements Serializable {
         return true;
       }
 
-      Iterator<IndexedWord> searchNodeIterator(final IndexedWord node,
+      Iterator<IndexedWord> searchNodeIterator(final IndexedWord node, 
                                                final SemanticGraph sg) {
         return sg.vertexSet().iterator();
       }
       // automatically generated by Eclipse
       private static final long serialVersionUID = 5259713498453659251L;
     };
-
+			  
 
   // ALIGNED_ROOT graph relation: "AlignRoot" ===================================
-
+	  
   static final GraphRelation ALIGNED_ROOT = new GraphRelation("AlignRoot", "") {
       @Override
       boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
@@ -227,26 +226,27 @@ abstract class GraphRelation implements Serializable {
             }
           };
       }
-
+      
       // automatically generated by Eclipse
-      private static final long serialVersionUID = -3088857488269777611L;
+      private static final long serialVersionUID = -3088857488269777611L;  
   };
 
 
   // GOVERNOR graph relation: ">" ===============================================
-
+	  
   static private class GOVERNER extends GraphRelation {
     GOVERNER(String reln, String name) {
       super(">", reln, name);
     }
-
+		  
     @Override
     boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
       List<Pair<GrammaticalRelation, IndexedWord>> deps = sg.childPairs(l1);
       for (Pair<GrammaticalRelation, IndexedWord> dep : deps) {
-        if (this.type.test(dep.first().toString()) &&
+        if (dep.first().toString().matches(this.type) &&
             dep.second().equals(l2)) {
-          return true;
+          name = dep.second().toString();
+          return true;  
         }
       }
       return false;
@@ -255,7 +255,13 @@ abstract class GraphRelation implements Serializable {
     @Override
     Iterator<IndexedWord> searchNodeIterator(final IndexedWord node, final SemanticGraph sg) {
       return new SearchNodeIterator() {
-          Iterator<SemanticGraphEdge> iterator;
+          int nextNum; // subtle bug warning here: if we use int nextNum=0;
+
+          // instead,
+
+          // we get the first daughter twice because the assignment occurs after
+          // advance() has already been
+          // called once by the constructor of SearchNodeIterator.
 
           @Override
           public void advance() {
@@ -263,30 +269,29 @@ abstract class GraphRelation implements Serializable {
               next = null;
               return;
             }
-            if (iterator == null) {
-              iterator = sg.outgoingEdgeIterator(node);
+            List<Pair<GrammaticalRelation, IndexedWord>> deps = sg.childPairs(node);
+		        	
+            while (nextNum < deps.size() && !deps.get(nextNum).first().toString().matches(type)) { 
+              nextNum++;
             }
-            while (iterator.hasNext()) {
-              SemanticGraphEdge edge = iterator.next();
-              relation = edge.getRelation().toString();
-              if (!type.test(relation)) {
-                continue;
-              }
-              this.next = edge.getTarget();
-              return;
+            if (nextNum < deps.size()) {
+              next = deps.get(nextNum).second();
+              relation = deps.get(nextNum).first().toString();
+              nextNum++;
+            } else {
+              next = null;
             }
-            this.next = null;
           }
         };
     }
-
+    
     // automatically generated by Eclipse
     private static final long serialVersionUID = -7003148918274183951L;
   };
 
-
+	
   // DEPENDENT graph relation: "<" ===============================================
-
+  
   static private class DEPENDENT extends GraphRelation {
     DEPENDENT(String reln, String name) {
       super("<", reln, name);
@@ -294,12 +299,12 @@ abstract class GraphRelation implements Serializable {
 
     @Override
     boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
-      if (l1.equals(IndexedWord.NO_WORD) || l2.equals(IndexedWord.NO_WORD) )
+      if (l1.equals(IndexedWord.NO_WORD) || l2.equals(IndexedWord.NO_WORD) ) 
         return false;
       List<Pair<GrammaticalRelation, IndexedWord>> govs = sg.parentPairs(l1);
       for (Pair<GrammaticalRelation, IndexedWord> gov : govs) {
-        if (this.type.test(gov.first().toString()) &&
-            gov.second().equals(l2)) return true;
+        if (gov.first().toString().matches(this.type) &&
+            gov.second().equals(l2)) return true;  
       }
       return false;
     }
@@ -322,7 +327,7 @@ abstract class GraphRelation implements Serializable {
               return;
             }
             List<Pair<GrammaticalRelation, IndexedWord>> govs = sg.parentPairs(node);
-            while (nextNum < govs.size() && !type.test(govs.get(nextNum).first().toString())) {
+            while (nextNum < govs.size() && !govs.get(nextNum).first().toString().matches(type)) {  
               nextNum++;
             }
             if (nextNum < govs.size()) {
@@ -339,29 +344,122 @@ abstract class GraphRelation implements Serializable {
     // automatically generated by Eclipse
     private static final long serialVersionUID = -5115389883698108694L;
   };
+	
 
+  // GRANDPARENT graph relation: ">>" ===========================================
+  
+  static private class GRANDPARENT extends GraphRelation {
+    GRANDPARENT(String reln, String name) {
+      super(">>", reln, name);
+    }
+		  
+    @Override
+    boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
+      if (l1.equals(IndexedWord.NO_WORD) || l2.equals(IndexedWord.NO_WORD) ) 
+        return false;
+      return l1 != l2 && satisfyHelper(l1, l2, sg, new ArrayList<IndexedWord>());
+    }
+		  
+    private boolean satisfyHelper(IndexedWord parent,
+                                  IndexedWord l2,
+                                  SemanticGraph sg,
+				  List<IndexedWord> usedNodes) {
+      List<Pair<GrammaticalRelation, IndexedWord>> deps = sg.childPairs(parent);
+      for (Pair<GrammaticalRelation, IndexedWord> dep : deps) {
+        if (dep.first().toString().matches(this.type) &&
+            dep.second().equals(l2)) return true;  
+      }
+		      
+      usedNodes.add(parent);
+		      
+      for (Pair<GrammaticalRelation, IndexedWord> dep : deps) {
+        if (!usedNodes.contains(dep.second()) && satisfyHelper(dep.second(), l2, sg, usedNodes))
+          return true;
+      }
+      return false;
+    }
+
+    @Override
+    Iterator<IndexedWord> searchNodeIterator(final IndexedWord node, final SemanticGraph sg) {
+      return new SearchNodeIterator() {
+          Stack<Pair<GrammaticalRelation, IndexedWord>> searchStack;
+          Set<IndexedWord> seenNodes;
+
+          @Override
+          public void initialize() {
+            if (node.equals(IndexedWord.NO_WORD)) {
+              next = null;
+              return;
+            }
+            searchStack = Generics.newStack();
+            seenNodes = Generics.newHashSet();
+            List<Pair<GrammaticalRelation, IndexedWord>> children = sg.childPairs(node);
+            for (int i = children.size() - 1; i >= 0; i--) {
+              searchStack.push(children.get(i));
+            }
+            if (!searchStack.isEmpty()) {
+              advance();
+            }
+          }
+
+          @Override
+          void advance() {
+            if (node.equals(IndexedWord.NO_WORD)) {
+              next = null;
+              return;
+            }
+            Pair<GrammaticalRelation, IndexedWord> nextPair;
+            while (!searchStack.isEmpty()) {
+              nextPair = searchStack.pop();
+              if (seenNodes.contains(nextPair.second())) {
+                continue;
+              }
+              
+              seenNodes.add(nextPair.second());
+              List<Pair<GrammaticalRelation, IndexedWord>> children = 
+                sg.childPairs(nextPair.second());
+              for (int i = children.size() - 1; i >= 0; i--) {
+                if (!seenNodes.contains(children.get(i).second()))
+                  searchStack.push(children.get(i));
+              }
+              if (nextPair.first().toString().matches(type)) {
+                next = nextPair.second();
+                relation = nextPair.first().toString();
+                return;
+              }
+            }
+            // oh well, fell through with no results
+            next = null;
+          }
+        };
+    }
+    
+    // automatically generated by Eclipse
+    private static final long serialVersionUID = 1L;
+  };
+	
 
   static private class LIMITED_GRANDPARENT extends GraphRelation {
     final int startDepth, endDepth;
-
-    LIMITED_GRANDPARENT(String reln, String name,
+    
+    LIMITED_GRANDPARENT(String reln, String name, 
                         int startDepth, int endDepth) {
       super(startDepth + "," + endDepth + ">>", reln, name);
       this.startDepth = startDepth;
       this.endDepth = endDepth;
     }
-
+		  
     @Override
     boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
-      if (l1.equals(IndexedWord.NO_WORD) || l2.equals(IndexedWord.NO_WORD) )
+      if (l1.equals(IndexedWord.NO_WORD) || l2.equals(IndexedWord.NO_WORD) ) 
         return false;
-      List<Set<IndexedWord>> usedNodes = new ArrayList<>();
+      List<Set<IndexedWord>> usedNodes = new ArrayList<Set<IndexedWord>>();
       for (int i = 0; i <= endDepth; ++i) {
-        usedNodes.add(Generics.<IndexedWord>newIdentityHashSet());
+        usedNodes.add(Generics.<IndexedWord>newHashSet());
       }
       return l1 != l2 && satisfyHelper(l1, l2, sg, 0, usedNodes);
     }
-
+		  
     private boolean satisfyHelper(IndexedWord parent,
                                   IndexedWord l2,
                                   SemanticGraph sg,
@@ -373,16 +471,16 @@ abstract class GraphRelation implements Serializable {
       }
       if (depth + 1 >= startDepth) {
         for (Pair<GrammaticalRelation, IndexedWord> dep : deps) {
-          if (this.type.test(dep.first().toString()) &&
-              dep.second().equals(l2)) return true;
+          if (dep.first().toString().matches(this.type) &&
+              dep.second().equals(l2)) return true;  
         }
       }
-
+      
       usedNodes.get(depth).add(parent);
-
+      	      
       for (Pair<GrammaticalRelation, IndexedWord> dep : deps) {
-        if ((usedNodes.size() < depth + 1 ||
-             !usedNodes.get(depth + 1).contains(dep.second())) &&
+        if ((usedNodes.size() < depth + 1 || 
+             !usedNodes.get(depth + 1).contains(dep.second())) && 
             satisfyHelper(dep.second(), l2, sg, depth + 1, usedNodes))
           return true;
       }
@@ -405,13 +503,13 @@ abstract class GraphRelation implements Serializable {
             }
             searchStack = Generics.newArrayList();
             for (int i = 0; i <= endDepth; ++i) {
-              searchStack.add(new Stack<>());
+              searchStack.add(new Stack<Pair<GrammaticalRelation, IndexedWord>>());
             }
-            seenNodes = new ArrayList<>();
+            seenNodes = new ArrayList<Set<IndexedWord>>();
             for (int i = 0; i <= endDepth; ++i) {
-              seenNodes.add(Generics.<IndexedWord>newIdentityHashSet());
+              seenNodes.add(Generics.<IndexedWord>newHashSet());
             }
-            returnedNodes = Generics.newIdentityHashSet();
+            returnedNodes = Generics.newHashSet();
             currentDepth = 1;
             List<Pair<GrammaticalRelation, IndexedWord>> children = sg.childPairs(node);
             for (int i = children.size() - 1; i >= 0; i--) {
@@ -447,17 +545,17 @@ abstract class GraphRelation implements Serializable {
                 if (thisSeen.contains(nextPair.second())) {
                   continue;
                 }
-
+              
                 thisSeen.add(nextPair.second());
-                List<Pair<GrammaticalRelation, IndexedWord>> children =
+                List<Pair<GrammaticalRelation, IndexedWord>> children = 
                   sg.childPairs(nextPair.second());
                 for (int i = children.size() - 1; i >= 0; i--) {
-                  if (nextSeen != null &&
+                  if (nextSeen != null && 
                       !nextSeen.contains(children.get(i).second()))
                     nextStack.push(children.get(i));
                 }
                 if (currentDepth >= startDepth &&
-                    type.test(nextPair.first().toString()) &&
+                    nextPair.first().toString().matches(type) &&
                     !returnedNodes.contains(nextPair.second())) {
                   next = nextPair.second();
                   relation = nextPair.first().toString();
@@ -473,44 +571,33 @@ abstract class GraphRelation implements Serializable {
           }
         };
     }
-
+    
     // automatically generated by Eclipse
     private static final long serialVersionUID = 1L;
   };
-
-
-  /**
-   * Factored out the common code from GRANDKID and GRANDPARENT
-   * <br>
-   * In general, the only differences are which ways to go on edges,
-   * so that is gotten through abstract methods
-   */
-  static private abstract class GRANDSOMETHING extends GraphRelation {
-    GRANDSOMETHING(String symbol, String reln, String name) {
-      super(symbol, reln, name);
+	
+  // GRANDKID graph relation: "<<" ==============================================
+  	  
+  static private class GRANDKID extends GraphRelation {
+    GRANDKID(String reln, String name) {
+      super("<<", reln, name);
     }
-
-    abstract List<Pair<GrammaticalRelation, IndexedWord>> getNeighborPairs(SemanticGraph sg, IndexedWord node);
-
-    abstract Iterator<SemanticGraphEdge> neighborIterator(SemanticGraph sg, IndexedWord search);
-
-    abstract IndexedWord followEdge(SemanticGraphEdge edge);
-
+			  
     @Override
     boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
-      return l1 != l2 && satisfyHelper(l1, l2, sg, Generics.<IndexedWord>newIdentityHashSet());
+      return l1 != l2 && satisfyHelper(l1, l2, sg, new ArrayList<IndexedWord>());
     }
-
-    private boolean satisfyHelper(IndexedWord node, IndexedWord l2, SemanticGraph sg,
-                                  Set<IndexedWord> usedNodes) {
-      List<Pair<GrammaticalRelation, IndexedWord>> govs = getNeighborPairs(sg, node);
+			  
+    private boolean satisfyHelper(IndexedWord child, IndexedWord l2, SemanticGraph sg,
+                                  List<IndexedWord> usedNodes) {
+      List<Pair<GrammaticalRelation, IndexedWord>> govs = sg.parentPairs(child);
       for (Pair<GrammaticalRelation, IndexedWord> gov : govs) {
-        if (this.type.test(gov.first().toString()) &&
-            gov.second().equals(l2)) return true;
+        if (gov.first().toString().matches(this.type) &&
+            gov.second().equals(l2)) return true;  
       }
-
-      usedNodes.add(node);
-
+			      
+      usedNodes.add(child);
+			      
       for (Pair<GrammaticalRelation, IndexedWord> gov : govs) {
         if (!usedNodes.contains(gov.second()) && satisfyHelper(gov.second(), l2, sg, usedNodes))
           return true;
@@ -521,24 +608,24 @@ abstract class GraphRelation implements Serializable {
     @Override
     Iterator<IndexedWord> searchNodeIterator(final IndexedWord node, final SemanticGraph sg) {
       return new SearchNodeIterator() {
-          Stack<IndexedWord> searchStack;
-          Set<IndexedWord> searchedNodes;
-          Set<IndexedWord> matchedNodes;
-
-          Iterator<SemanticGraphEdge> neighborIterator;
-
+          Stack<Pair<GrammaticalRelation, IndexedWord>> searchStack;
+          Set<IndexedWord> seenNodes;
+          
           @Override
           public void initialize() {
             if (node.equals(IndexedWord.NO_WORD)) {
               next = null;
               return;
             }
-            neighborIterator = null;
-            searchedNodes = Generics.newIdentityHashSet();
-            matchedNodes = Generics.newIdentityHashSet();
             searchStack = Generics.newStack();
-            searchStack.push(node);
-            advance();
+            seenNodes = Generics.newHashSet();
+            List<Pair<GrammaticalRelation, IndexedWord>> parents = sg.parentPairs(node);
+            for (int i = parents.size() - 1; i >= 0; i--) {
+              searchStack.push(parents.get(i));
+            }
+            if (!searchStack.isEmpty()) {
+              advance();
+            }
           }
 
           @Override
@@ -547,26 +634,24 @@ abstract class GraphRelation implements Serializable {
               next = null;
               return;
             }
-
+            Pair<GrammaticalRelation, IndexedWord> nextPair;
             while (!searchStack.isEmpty()) {
-              if (neighborIterator == null || !neighborIterator.hasNext()) {
-                IndexedWord search = searchStack.pop();
-                neighborIterator = neighborIterator(sg, search);
+              nextPair = searchStack.pop();
+              if (seenNodes.contains(nextPair.second())) {
+                continue;
               }
-
-              while (neighborIterator.hasNext()) {
-                SemanticGraphEdge edge = neighborIterator.next();
-                IndexedWord otherEnd = followEdge(edge);
-                if (!searchedNodes.contains(otherEnd)) {
-                  searchStack.push(otherEnd);
-                  searchedNodes.add(otherEnd);
-                }
-                if (type.test(edge.getRelation().toString()) && !matchedNodes.contains(otherEnd)) {
-                  matchedNodes.add(otherEnd);
-                  next = otherEnd;
-                  relation = edge.getRelation().toString();
-                  return;
-                }
+              
+              seenNodes.add(nextPair.second());
+              List<Pair<GrammaticalRelation, IndexedWord>> parents = 
+                sg.parentPairs(nextPair.second());
+              for (int i = parents.size() - 1; i >= 0; i--) {
+                if (!seenNodes.contains(parents.get(i).second()))
+                  searchStack.push(parents.get(i));
+              }
+              if (nextPair.first().toString().matches(type)) {
+                next = nextPair.second();
+                relation = nextPair.first().toString();
+                return;
               }
             }
             // oh well, fell through with no results
@@ -574,85 +659,34 @@ abstract class GraphRelation implements Serializable {
           }
         };
     }
-
-    // automatically generated by Eclipse
+    
+    // automatically generated by Eclipse   
     private static final long serialVersionUID = 1L;
   };
-
-  // GRANDPARENT graph relation: ">>" ===========================================
-
-  static private class GRANDPARENT extends GRANDSOMETHING {
-    GRANDPARENT(String reln, String name) {
-      super(">>", reln, name);
-    }
-
-    @Override
-    List<Pair<GrammaticalRelation, IndexedWord>> getNeighborPairs(SemanticGraph sg, IndexedWord node) {
-      return sg.childPairs(node);
-    }
-
-    @Override
-    Iterator<SemanticGraphEdge> neighborIterator(SemanticGraph sg, IndexedWord search) {
-      return sg.outgoingEdgeIterator(search);
-    }
-
-    @Override
-    IndexedWord followEdge(SemanticGraphEdge edge) {
-      return edge.getTarget();
-    }
-
-    // automatically generated by Eclipse
-    private static final long serialVersionUID = 1L;
-  }
-
-  // GRANDKID graph relation: "<<" ==============================================
-
-  static private class GRANDKID extends GRANDSOMETHING {
-    GRANDKID(String reln, String name) {
-      super("<<", reln, name);
-    }
-
-    @Override
-    List<Pair<GrammaticalRelation, IndexedWord>> getNeighborPairs(SemanticGraph sg, IndexedWord node) {
-      return sg.parentPairs(node);
-    }
-
-    @Override
-    Iterator<SemanticGraphEdge> neighborIterator(SemanticGraph sg, IndexedWord search) {
-      return sg.incomingEdgeIterator(search);
-    }
-
-    @Override
-    IndexedWord followEdge(SemanticGraphEdge edge) {
-      return edge.getSource();
-    }
-
-    // automatically generated by copying some other serialVersionUID
-    private static final long serialVersionUID = 1L;
-  }
-
+	
+	
 
   static private class LIMITED_GRANDKID extends GraphRelation {
     final int startDepth, endDepth;
-
-    LIMITED_GRANDKID(String reln, String name,
+    
+    LIMITED_GRANDKID(String reln, String name, 
                         int startDepth, int endDepth) {
       super(startDepth + "," + endDepth + "<<", reln, name);
       this.startDepth = startDepth;
       this.endDepth = endDepth;
     }
-
+		  
     @Override
     boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
-      if (l1.equals(IndexedWord.NO_WORD) || l2.equals(IndexedWord.NO_WORD) )
+      if (l1.equals(IndexedWord.NO_WORD) || l2.equals(IndexedWord.NO_WORD) ) 
         return false;
-      List<Set<IndexedWord>> usedNodes = new ArrayList<>();
+      List<Set<IndexedWord>> usedNodes = new ArrayList<Set<IndexedWord>>();
       for (int i = 0; i <= endDepth; ++i) {
-        usedNodes.add(Generics.<IndexedWord>newIdentityHashSet());
+        usedNodes.add(Generics.<IndexedWord>newHashSet());
       }
       return l1 != l2 && satisfyHelper(l1, l2, sg, 0, usedNodes);
     }
-
+		  
     private boolean satisfyHelper(IndexedWord child,
                                   IndexedWord l2,
                                   SemanticGraph sg,
@@ -664,16 +698,16 @@ abstract class GraphRelation implements Serializable {
       }
       if (depth + 1 >= startDepth) {
         for (Pair<GrammaticalRelation, IndexedWord> dep : deps) {
-          if (this.type.test(dep.first().toString()) &&
-              dep.second().equals(l2)) return true;
+          if (dep.first().toString().matches(this.type) &&
+              dep.second().equals(l2)) return true;  
         }
       }
-
+      
       usedNodes.get(depth).add(child);
-
+      	      
       for (Pair<GrammaticalRelation, IndexedWord> dep : deps) {
-        if ((usedNodes.size() < depth + 1 ||
-             !usedNodes.get(depth + 1).contains(dep.second())) &&
+        if ((usedNodes.size() < depth + 1 || 
+             !usedNodes.get(depth + 1).contains(dep.second())) && 
             satisfyHelper(dep.second(), l2, sg, depth + 1, usedNodes))
           return true;
       }
@@ -696,13 +730,13 @@ abstract class GraphRelation implements Serializable {
             }
             searchStack = Generics.newArrayList();
             for (int i = 0; i <= endDepth; ++i) {
-              searchStack.add(new Stack<>());
+              searchStack.add(new Stack<Pair<GrammaticalRelation, IndexedWord>>());
             }
-            seenNodes = new ArrayList<>();
+            seenNodes = new ArrayList<Set<IndexedWord>>();
             for (int i = 0; i <= endDepth; ++i) {
-              seenNodes.add(Generics.<IndexedWord>newIdentityHashSet());
+              seenNodes.add(Generics.<IndexedWord>newHashSet());
             }
-            returnedNodes = Generics.newIdentityHashSet();
+            returnedNodes = Generics.newHashSet();
             currentDepth = 1;
             List<Pair<GrammaticalRelation, IndexedWord>> parents = sg.parentPairs(node);
             for (int i = parents.size() - 1; i >= 0; i--) {
@@ -738,17 +772,17 @@ abstract class GraphRelation implements Serializable {
                 if (thisSeen.contains(nextPair.second())) {
                   continue;
                 }
-
+              
                 thisSeen.add(nextPair.second());
-                List<Pair<GrammaticalRelation, IndexedWord>> parents =
+                List<Pair<GrammaticalRelation, IndexedWord>> parents = 
                   sg.parentPairs(nextPair.second());
                 for (int i = parents.size() - 1; i >= 0; i--) {
-                  if (nextSeen != null &&
+                  if (nextSeen != null && 
                       !nextSeen.contains(parents.get(i).second()))
                     nextStack.push(parents.get(i));
                 }
                 if (currentDepth >= startDepth &&
-                    type.test(nextPair.first().toString()) &&
+                    nextPair.first().toString().matches(type) &&
                     !returnedNodes.contains(nextPair.second())) {
                   returnedNodes.add(nextPair.second());
                   next = nextPair.second();
@@ -764,216 +798,18 @@ abstract class GraphRelation implements Serializable {
           }
         };
     }
-
+    
     // automatically generated by Eclipse
     private static final long serialVersionUID = 1L;
   };
-
-  static private class EQUALS extends GraphRelation {
-    EQUALS(String reln, String name) {
-      super("==", reln, name);
-    }
-
-    @Override
-    boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
-      if (l1 == l2) {
-        return true;
-      }
-      return false;
-    }
-
-    @Override
-    Iterator<IndexedWord> searchNodeIterator(final IndexedWord node, final SemanticGraph sg) {
-      return new SearchNodeIterator() {
-        boolean alreadyIterated;
-
-        @Override
-        public void advance() {
-          if (node.equals(IndexedWord.NO_WORD)) {
-            next = null;
-            return;
-          }
-          if (alreadyIterated) {
-            next = null;
-            return;
-          }
-          alreadyIterated = true;
-          next = node;
-          return;
-        }
-      };
-    }
-  }
-
-  static private abstract class SIBLING_RELATION extends GraphRelation {
-
-    private static final long serialVersionUID = 1L;
-
-    SIBLING_RELATION(String symbol, String reln, String name) {
-      super(symbol, reln, name);
-    }
-
-    abstract boolean satisfiesOrder(IndexedWord l1, IndexedWord l2);
-
-    @Override
-    boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
-      IndexedWord parent = sg.getCommonAncestor(l1, l2);
-      Set<IndexedWord> l1Parents = sg.getParents(l1);
-      if (parent != null
-          && l1Parents.contains(parent)
-          && satisfiesOrder(l1, l2)) {
-        return true;
-      }
-      return false;
-    }
-
-    @Override
-    Iterator<IndexedWord> searchNodeIterator(final IndexedWord node, final SemanticGraph sg) {
-      return new SearchNodeIterator() {
-        Iterator<IndexedWord> iterator;
-
-        @Override
-        public void advance() {
-          if (node.equals(IndexedWord.NO_WORD)) {
-            next = null;
-            return;
-          }
-
-          if (iterator == null) {
-            Set<IndexedWord> parents = sg.getParents(node);
-            Set<IndexedWord> neighbors = Generics.newIdentityHashSet();
-            for (IndexedWord parent : parents) {
-              neighbors.addAll(sg.getChildren(parent));
-            }
-            iterator = neighbors.iterator();
-          }
-
-          while (iterator.hasNext()) {
-            IndexedWord word = iterator.next();
-            if ( ! satisfiesOrder(node, word)) {
-              continue;
-            }
-            this.next = word;
-            return;
-          }
-          this.next = null;
-        }
-      };
-    }
-
-  }
-
-
-  static private class RIGHT_IMMEDIATE_SIBLING extends SIBLING_RELATION {
-
-    RIGHT_IMMEDIATE_SIBLING(String reln, String name) {
-      super("$+", reln, name);
-    }
-
-    private static final long serialVersionUID = 1L;
-
-    boolean satisfiesOrder(IndexedWord l1, IndexedWord l2) {
-      return (l1.index() == (l2.index() - 1));
-    }
-  }
-
-  static private class LEFT_IMMEDIATE_SIBLING extends SIBLING_RELATION {
-
-    LEFT_IMMEDIATE_SIBLING(String reln, String name) {
-      super("$-", reln, name);
-    }
-
-    private static final long serialVersionUID = 1L;
-
-    boolean satisfiesOrder(IndexedWord l1, IndexedWord l2) {
-      return (l1.index() == (l2.index() + 1));
-    }
-  }
-
-  static private class RIGHT_SIBLING extends SIBLING_RELATION {
-
-    RIGHT_SIBLING(String reln, String name) {
-      super("$++", reln, name);
-    }
-
-    private static final long serialVersionUID = 1L;
-
-    boolean satisfiesOrder(IndexedWord l1, IndexedWord l2) {
-      return (l1.index() < l2.index());
-    }
-  }
-
-  static private class LEFT_SIBLING extends SIBLING_RELATION {
-
-    LEFT_SIBLING(String reln, String name) {
-      super("$--", reln, name);
-    }
-
-    private static final long serialVersionUID = 1L;
-
-    boolean satisfiesOrder(IndexedWord l1, IndexedWord l2) {
-      return (l1.index() > l2.index());
-    }
-  }
-
-  static private class ADJACENT_NODE extends GraphRelation {
-
-    private static final long serialVersionUID = 1L;
-
-    ADJACENT_NODE(String reln, String name) {
-      super(".", reln, name);
-    }
-
-
-    @Override
-    boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
-      if (l1.index() == (l2.index() - 1)) {
-        return true;
-      }
-      return false;
-    }
-
-    @Override
-    Iterator<IndexedWord> searchNodeIterator(final IndexedWord node, final SemanticGraph sg) {
-      return new SearchNodeIterator() {
-        Iterator<IndexedWord> iterator;
-
-        @Override
-        public void advance() {
-          if (node.equals(IndexedWord.NO_WORD)) {
-            next = null;
-            return;
-          }
-
-          if (iterator == null) {
-            iterator = sg.vertexSet().iterator();
-          }
-
-          while (iterator.hasNext()) {
-            IndexedWord word = iterator.next();
-            if (node.index() != (word.index() - 1)) {
-              continue;
-            }
-            this.next = word;
-            return;
-          }
-          this.next = null;
-        }
-      };
-    }
-
-  }
-
+	
 
   // ============================================================================
-
+  
   public static boolean isKnownRelation(String reln) {
-    return (reln.equals(">") || reln.equals("<") ||
+    return (reln.equals(">") || reln.equals("<") || 
             reln.equals(">>") || reln.equals("<<") ||
-            reln.equals("@") || reln.equals("==") ||
-            reln.equals("$+") || reln.equals("$++") ||
-            reln.equals("$-") || reln.equals("$--") ||
-            reln.equals("."));
+            reln.equals("@"));
   }
 
   public static GraphRelation getRelation(String reln,
@@ -984,36 +820,21 @@ abstract class GraphRelation implements Serializable {
     if (!isKnownRelation(reln)) {
       throw new ParseException("Unknown relation " + reln);
     }
-    switch (reln) {
-      case ">":
-        return new GOVERNER(type, name);
-      case "<":
-        return new DEPENDENT(type, name);
-      case ">>":
-        return new GRANDPARENT(type, name);
-      case "<<":
-        return new GRANDKID(type, name);
-      case "==":
-        return new EQUALS(type, name);
-      case "$+":
-        return new RIGHT_IMMEDIATE_SIBLING(type, name);
-      case "$-":
-        return new LEFT_IMMEDIATE_SIBLING(type, name);
-      case "$++":
-        return new RIGHT_SIBLING(type, name);
-      case "$--":
-        return new LEFT_SIBLING(type, name);
-      case ".":
-        return new ADJACENT_NODE(type, name);
-      case "@":
-        return new ALIGNMENT();
-      default:
-//error
-        throw new ParseException("Relation " + reln +
-            " not handled by getRelation");
-    }
+    if (reln.equals(">"))
+      return new GOVERNER(type, name);
+    else if (reln.equals("<"))
+      return new DEPENDENT(type, name);
+    else if (reln.equals(">>"))
+      return new GRANDPARENT(type, name);
+    else if (reln.equals("<<"))
+      return new GRANDKID(type, name);
+    else if (reln.equals("@"))
+      return new ALIGNMENT();
+    else //error
+      throw new ParseException("Relation " + reln + 
+                               " not handled by getRelation");
   }
-
+	  
   public static GraphRelation getRelation(String reln,
                                           String type,
                                           int num,
@@ -1025,13 +846,13 @@ abstract class GraphRelation implements Serializable {
     else if (reln.equals("<<"))
       return new LIMITED_GRANDKID(type, name, num, num);
     else if (isKnownRelation(reln))
-      throw new ParseException("Relation " + reln +
+      throw new ParseException("Relation " + reln + 
                                " does not use numeric arguments");
     else //error
       throw new ParseException("Unrecognized compound relation " + reln + " "
                                + type);
   }
-
+	  
   public static GraphRelation getRelation(String reln,
                                           String type,
                                           int num, int num2,
@@ -1043,18 +864,18 @@ abstract class GraphRelation implements Serializable {
     else if (reln.equals("<<"))
       return new LIMITED_GRANDKID(type, name, num, num2);
     else if (isKnownRelation(reln))
-      throw new ParseException("Relation " + reln +
+      throw new ParseException("Relation " + reln + 
                                " does not use numeric arguments");
     else //error
       throw new ParseException("Unrecognized compound relation " + reln + " "
                                + type);
   }
-
+	  
   @Override
   public int hashCode() {
     return symbol.hashCode();
   }
-
+	  
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -1065,7 +886,7 @@ abstract class GraphRelation implements Serializable {
     }
 
     final GraphRelation relation = (GraphRelation) o;
-
+		    
     if (!symbol.equals(relation.symbol) ||
         !type.equals(relation.type)) {
       return false;
@@ -1073,7 +894,7 @@ abstract class GraphRelation implements Serializable {
 
     return true;
   }
-
+			  
   /**
    * This abstract Iterator implements a NULL iterator, but by subclassing and
    * overriding advance and/or initialize, it is an efficient implementation.
@@ -1093,7 +914,7 @@ abstract class GraphRelation implements Serializable {
      * Current relation string for next;
      */
     String relation = null;
-
+	    
     /**
      * This method must insure that next points to first item, or null if there
      * are no items.
@@ -1122,14 +943,14 @@ abstract class GraphRelation implements Serializable {
       advance();
       return ret;
     }
-
+	    
     String getReln() {return relation;}
 
     public void remove() {
       throw new UnsupportedOperationException("SearchNodeIterator does not support remove().");
     }
   }
-
+	
   // Automatically generated by Eclipse
   private static final long serialVersionUID = -9128973950911993056L;
 }

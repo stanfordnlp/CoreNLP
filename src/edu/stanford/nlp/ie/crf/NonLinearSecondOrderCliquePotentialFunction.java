@@ -2,19 +2,21 @@ package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
+import edu.stanford.nlp.util.Index;
 
 /**
  * @author Mengqiu Wang
  */
+
 public class NonLinearSecondOrderCliquePotentialFunction implements CliquePotentialFunction {
 
-  private final double[][] inputLayerWeights4Edge; // first index is number of hidden units in layer one, second index is the input feature indices
-  private final double[][] outputLayerWeights4Edge; // first index is the output class, second index is the number of hidden units
-  private final double[][] inputLayerWeights; // first index is number of hidden units in layer one, second index is the input feature indices
-  private final double[][] outputLayerWeights; // first index is the output class, second index is the number of hidden units
-  private double[] layerOneCache, hiddenLayerCache;
-  private double[] layerOneCache4Edge, hiddenLayerCache4Edge;
-  private final SeqClassifierFlags flags;
+  double[][] inputLayerWeights4Edge; // first index is number of hidden units in layer one, second index is the input feature indices
+  double[][] outputLayerWeights4Edge; // first index is the output class, second index is the number of hidden units
+  double[][] inputLayerWeights; // first index is number of hidden units in layer one, second index is the input feature indices
+  double[][] outputLayerWeights; // first index is the output class, second index is the number of hidden units
+  double[] layerOneCache, hiddenLayerCache;
+  double[] layerOneCache4Edge, hiddenLayerCache4Edge;
+  SeqClassifierFlags flags;
 
   public NonLinearSecondOrderCliquePotentialFunction(double[][] inputLayerWeights4Edge, double[][] outputLayerWeights4Edge, double[][] inputLayerWeights, double[][] outputLayerWeights, SeqClassifierFlags flags) {
     this.inputLayerWeights4Edge = inputLayerWeights4Edge;
@@ -51,7 +53,7 @@ public class NonLinearSecondOrderCliquePotentialFunction implements CliquePotent
     }
     if (!aFlag.useHiddenLayer)
       return layerCache;
-
+      
     // transform layer one through hidden
     if (cliqueSize > 1) {
       if (hiddenLayerCache4Edge == null || layerOneSize != hiddenLayerCache4Edge.length)
@@ -76,8 +78,7 @@ public class NonLinearSecondOrderCliquePotentialFunction implements CliquePotent
   }
 
   @Override
-  public double computeCliquePotential(int cliqueSize, int labelIndex,
-      int[] cliqueFeatures, double[] featureVal, int posInSent) {
+  public double computeCliquePotential(int cliqueSize, int labelIndex, int[] cliqueFeatures, double[] featureVal) {
     double output = 0.0;
     double[][] inputWeights, outputWeights = null;
     if (cliqueSize > 1) {
@@ -114,8 +115,7 @@ public class NonLinearSecondOrderCliquePotentialFunction implements CliquePotent
     } else {
       output = hiddenLayer[labelIndex];
     }
-
+    
     return output;
   }
-
 }

@@ -20,10 +20,10 @@ public class SemanticGraphEdge
 
   public static boolean printOnlyRelation = false; // a hack for displaying SemanticGraph in JGraph.  Should be redone better.
 
-  private GrammaticalRelation relation;
-  private double weight;
+  private final GrammaticalRelation relation;
+  private final double weight;
 
-  private boolean isExtra;
+  private final boolean isExtra;
 
   private final IndexedWord source;
   private final IndexedWord target;
@@ -52,7 +52,7 @@ public class SemanticGraphEdge
 
   @Override
   public String toString() {
-    if (!printOnlyRelation) {
+    if (printOnlyRelation) {
       return getSource() + " -> " + getTarget() + " (" + getRelation() + ")";
     } else {
       return getRelation().toString();
@@ -63,10 +63,6 @@ public class SemanticGraphEdge
     return relation;
   }
 
-  public void setRelation(GrammaticalRelation relation) {
-    this.relation = relation;
-  }
-  
   public IndexedWord getSource() {
     return source;
   }
@@ -86,17 +82,9 @@ public class SemanticGraphEdge
   public double getWeight() {
     return weight;
   }
-  
-  public void setWeight(double weight) {
-    this.weight = weight;
-  }
-  
+
   public boolean isExtra() {
     return isExtra;
-  }
-  
-  public void setIsExtra(boolean isExtra) {
-    this.isExtra = isExtra;
   }
 
   /**

@@ -24,13 +24,13 @@ public class SisterAnnotationStats implements TreeVisitor {
 
 
   /**
-   * nodeRules is a HashMap -&gt; Counter: label-&gt;rewrite-&gt;count
+   * nodeRules is a HashMap -> Counter: label->rewrite->count
    */
   private Map nodeRules = new HashMap();
 
   /**
-   * leftRules and rightRules are HashMap -&gt; HashMap -&gt; Counter:
-   * label-&gt;sister_label-&gt;rewrite-&gt;count
+   * leftRules and rightRules are HashMap -> HashMap -> Counter:
+   * label->sister_label->rewrite->count
    */
   private Map leftRules = new HashMap();
   private Map rightRules = new HashMap();
@@ -64,8 +64,8 @@ public class SisterAnnotationStats implements TreeVisitor {
       sisterCounters(t, p);
     }
     Tree[] kids = t.children();
-    for (Tree kid : kids) {
-      recurse(kid, t);
+    for (int i = 0; i < kids.length; i++) {
+      recurse(kids[i], t);
     }
   }
 
@@ -73,16 +73,16 @@ public class SisterAnnotationStats implements TreeVisitor {
    * string-value labels of left sisters; from inside to outside (right-left)
    */
   public static List<String> leftSisterLabels(Tree t, Tree p) {
-    List<String> l = new ArrayList<>();
+    List<String> l = new ArrayList<String>();
     if (p == null) {
       return l;
     }
     Tree[] kids = p.children();
-    for (Tree kid : kids) {
-      if (kid.equals(t)) {
+    for (int i = 0; i < kids.length; i++) {
+      if (kids[i].equals(t)) {
         break;
       } else {
-        l.add(0, kid.label().value());
+        l.add(0, kids[i].label().value());
       }
     }
     return l;
@@ -92,7 +92,7 @@ public class SisterAnnotationStats implements TreeVisitor {
    * string-value labels of right sisters; from inside to outside (left-right)
    */
   public static List<String> rightSisterLabels(Tree t, Tree p) {
-    List<String> l = new ArrayList<>();
+    List<String> l = new ArrayList<String>();
     if (p == null) {
       return l;
     }
@@ -110,9 +110,9 @@ public class SisterAnnotationStats implements TreeVisitor {
 
   public static List<String> kidLabels(Tree t) {
     Tree[] kids = t.children();
-    List<String> l = new ArrayList<>(kids.length);
-    for (Tree kid : kids) {
-      l.add(kid.label().value());
+    List<String> l = new ArrayList<String>(kids.length);
+    for (int i = 0; i < kids.length; i++) {
+      l.add(kids[i].label().value());
     }
     return l;
   }
@@ -146,8 +146,8 @@ public class SisterAnnotationStats implements TreeVisitor {
   }
 
   protected void sideCounters(String label, List rewrite, List sideSisters, Map sideRules) {
-    for (Object sideSister : sideSisters) {
-      String sis = (String) sideSister;
+    for (Iterator i = sideSisters.iterator(); i.hasNext();) {
+      String sis = (String) i.next();
 
       if (!((Map) sideRules.get(label)).containsKey(sis)) {
         ((Map) sideRules.get(label)).put(sis, new ClassicCounter());
@@ -178,16 +178,16 @@ public class SisterAnnotationStats implements TreeVisitor {
      * later */
     ArrayList topScores = new ArrayList();
 
-    for (Object o : nodeRules.keySet()) {
+    for (Iterator it = nodeRules.keySet().iterator(); it.hasNext();) {
       ArrayList answers = new ArrayList();
-      String label = (String) o;
+      String label = (String) it.next();
       ClassicCounter cntr = (ClassicCounter) nodeRules.get(label);
       double support = (cntr.totalCount());
       System.out.println("Node " + label + " support is " + support);
 
 
-      for (Object o4 : ((HashMap) leftRules.get(label)).keySet()) {
-        String sis = (String) o4;
+      for (Iterator it2 = ((HashMap) leftRules.get(label)).keySet().iterator(); it2.hasNext();) {
+        String sis = (String) it2.next();
         ClassicCounter cntr2 = (ClassicCounter) ((HashMap) leftRules.get(label)).get(sis);
         double support2 = (cntr2.totalCount());
 
@@ -216,8 +216,8 @@ public class SisterAnnotationStats implements TreeVisitor {
         topScores.add(new Pair(annotatedLabel, new Double(kl * support2)));
       }
 
-      for (Object o3 : ((HashMap) rightRules.get(label)).keySet()) {
-        String sis = (String) o3;
+      for (Iterator it2 = ((HashMap) rightRules.get(label)).keySet().iterator(); it2.hasNext();) {
+        String sis = (String) it2.next();
         ClassicCounter cntr2 = (ClassicCounter) ((HashMap) rightRules.get(label)).get(sis);
         double support2 = (cntr2.totalCount());
         double kl = Counters.klDivergence(cntr2, cntr);
@@ -227,26 +227,28 @@ public class SisterAnnotationStats implements TreeVisitor {
         topScores.add(new Pair(annotatedLabel, new Double(kl * support2)));
       }
 
-
+		    
       // upto
-
+		    
       System.out.println("----");
       System.out.println("Sorted descending support * KL");
-      Collections.sort(answers, (o1, o2) -> {
-        Pair p1 = (Pair) o1;
-        Pair p2 = (Pair) o2;
-        Double p12 = (Double) p1.second();
-        Double p22 = (Double) p2.second();
-        return p22.compareTo(p12);
+      Collections.sort(answers, new Comparator() {
+        public int compare(Object o1, Object o2) {
+          Pair p1 = (Pair) o1;
+          Pair p2 = (Pair) o2;
+          Double p12 = (Double) p1.second();
+          Double p22 = (Double) p2.second();
+          return p22.compareTo(p12);
+        }
       });
-      for (Object answer : answers) {
-        Pair p = (Pair) answer;
+      for (int i = 0, size = answers.size(); i < size; i++) {
+        Pair p = (Pair) answers.get(i);
         double psd = ((Double) p.second()).doubleValue();
         System.out.println(p.first() + ": " + nf.format(psd));
         if (psd >= CUTOFFS[0]) {
           String annotatedLabel = (String) p.first();
-          for (double CUTOFF : CUTOFFS) {
-            if (psd >= CUTOFF) {
+          for (int j = 0; j < CUTOFFS.length; j++) {
+            if (psd >= CUTOFFS[j]) {
               //javaSB[j].append("\"").append(annotatedLabel);
               //javaSB[j].append("\",");
             }
@@ -257,16 +259,18 @@ public class SisterAnnotationStats implements TreeVisitor {
     }
 
 
-    Collections.sort(topScores, (o1, o2) -> {
-      Pair p1 = (Pair) o1;
-      Pair p2 = (Pair) o2;
-      Double p12 = (Double) p1.second();
-      Double p22 = (Double) p2.second();
-      return p22.compareTo(p12);
+    Collections.sort(topScores, new Comparator() {
+      public int compare(Object o1, Object o2) {
+        Pair p1 = (Pair) o1;
+        Pair p2 = (Pair) o2;
+        Double p12 = (Double) p1.second();
+        Double p22 = (Double) p2.second();
+        return p22.compareTo(p12);
+      }
     });
     String outString = "All enriched categories, sorted by score\n";
-    for (Object topScore : topScores) {
-      Pair p = (Pair) topScore;
+    for (int i = 0, size = topScores.size(); i < size; i++) {
+      Pair p = (Pair) topScores.get(i);
       double psd = ((Double) p.second()).doubleValue();
       System.out.println(p.first() + ": " + nf.format(psd));
     }
@@ -323,7 +327,7 @@ public class SisterAnnotationStats implements TreeVisitor {
    */
   public static void main(String[] args) {
 
-    ClassicCounter<String> c = new ClassicCounter<>();
+    ClassicCounter<String> c = new ClassicCounter<String>();
     c.setCount("A", 0);
     c.setCount("B", 1);
 
@@ -339,7 +343,11 @@ public class SisterAnnotationStats implements TreeVisitor {
       System.out.println("Usage: ParentAnnotationStats treebankPath");
     } else {
       SisterAnnotationStats pas = new SisterAnnotationStats();
-      Treebank treebank = new DiskTreebank(in -> new PennTreeReader(in, new LabeledScoredTreeFactory(new StringLabelFactory()), new BobChrisTreeNormalizer()), encoding);
+      Treebank treebank = new DiskTreebank(new TreeReaderFactory() {
+        public TreeReader newTreeReader(Reader in) {
+          return new PennTreeReader(in, new LabeledScoredTreeFactory(new StringLabelFactory()), new BobChrisTreeNormalizer());
+        }
+      }, encoding);
       treebank.loadPath(args[0]);
       treebank.apply(pas);
       pas.printStats();

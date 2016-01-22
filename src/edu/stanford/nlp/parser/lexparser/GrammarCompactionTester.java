@@ -78,7 +78,7 @@ public class GrammarCompactionTester {
       op.trainOptions.postSplitters = ParentAnnotationStats.getSplitCategories(annotatedTB, op.trainOptions.selectivePostSplitCutOff, op.tlpParams.treebankLanguagePack());
     }
 
-    List<Tree> trainTrees = new ArrayList<>();
+    List<Tree> trainTrees = new ArrayList<Tree>();
     HeadFinder hf = null;
     if (op.trainOptions.leftToRight) {
       hf = new LeftHeadFinder();
@@ -105,8 +105,8 @@ public class GrammarCompactionTester {
   public void runTest(String[] args) {
     System.out.println("Currently " + new Date());
     System.out.print("Invoked with arguments:");
-    for (String arg : args) {
-      System.out.print(" " + arg);
+    for (int i = 0; i < args.length; i++) {
+      System.out.print(" " + args[i]);
     }
 
     System.out.println();
@@ -441,7 +441,7 @@ public class GrammarCompactionTester {
   public Pair<UnaryGrammar, BinaryGrammar> translateAndSort(Pair<UnaryGrammar, BinaryGrammar> grammar, Index<String> oldIndex, Index<String> newIndex) {
     System.out.println("oldIndex.size()" + oldIndex.size() + " newIndex.size()" + newIndex.size());
     UnaryGrammar ug = grammar.first;
-    List<UnaryRule> unaryRules = new ArrayList<>();
+    List<UnaryRule> unaryRules = new ArrayList<UnaryRule>();
     for (UnaryRule rule : ug.rules()) {
       rule.parent = translate(rule.parent, oldIndex, newIndex);
       rule.child = translate(rule.child, oldIndex, newIndex);
@@ -456,7 +456,7 @@ public class GrammarCompactionTester {
     newUG.purgeRules();
 
     BinaryGrammar bg = grammar.second;
-    List<BinaryRule> binaryRules = new ArrayList<>();
+    List<BinaryRule> binaryRules = new ArrayList<BinaryRule>();
     for (BinaryRule rule : bg.rules()) {
       rule.parent = translate(rule.parent, oldIndex, newIndex);
       rule.leftChild = translate(rule.leftChild, oldIndex, newIndex);
@@ -475,7 +475,7 @@ public class GrammarCompactionTester {
   }
 
   private static int translate(int i, Index<String> oldIndex, Index<String> newIndex) {
-    return newIndex.addToIndex(oldIndex.get(i));
+    return newIndex.indexOf(oldIndex.get(i), true);
   }
 
   // WTF is this?
@@ -483,7 +483,7 @@ public class GrammarCompactionTester {
     String s = n.get(i);
     if (s.equals("NP^PP")) {
       System.out.println("changed");
-      return n.addToIndex("NP-987928374");
+      return n.indexOf("NP-987928374", true);
     }
     return i;
   }
@@ -633,7 +633,7 @@ public class GrammarCompactionTester {
     for (String key : allTrainPaths.keySet()) {
       System.out.println("creating graph for " + key);
       List<List<String>> paths = allTrainPaths.get(key);
-      ClassicCounter<List<String>> pathCounter = new ClassicCounter<>();
+      ClassicCounter<List<String>> pathCounter = new ClassicCounter<List<String>>();
       for (List<String> o : paths) {
         pathCounter.incrementCount(o);
       }
@@ -676,7 +676,7 @@ public class GrammarCompactionTester {
   }
 
   private static ClassicCounter<List<String>> removeLowCountPaths(ClassicCounter<List<String>> paths, double thresh) {
-    ClassicCounter<List<String>> result = new ClassicCounter<>();
+    ClassicCounter<List<String>> result = new ClassicCounter<List<String>>();
     int numRetained = 0;
     for (List<String> path : paths.keySet()) {
       double count = paths.getCount(path);

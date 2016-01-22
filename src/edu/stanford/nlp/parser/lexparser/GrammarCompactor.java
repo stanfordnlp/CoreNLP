@@ -81,11 +81,11 @@ public abstract class GrammarCompactor {
       }
       trainPaths = allTrainPaths.remove(cat);// to save memory
       if (trainPaths == null) {
-        trainPaths = new ArrayList<>();
+        trainPaths = new ArrayList<List<String>>();
       }
       testPaths = allTestPaths.remove(cat);// to save memory
       if (testPaths == null) {
-        testPaths = new ArrayList<>();
+        testPaths = new ArrayList<List<String>>();
       }
       TransducerGraph compactedGraph = doCompaction(graph, trainPaths, testPaths);
       i++;
@@ -96,11 +96,11 @@ public abstract class GrammarCompactor {
       compactedGraphs.add(compactedGraph);
     }
     Pair<UnaryGrammar, BinaryGrammar> ugbg = convertGraphsToGrammar(compactedGraphs, unaryRules, binaryRules);
-    return new Triple<>(newStateIndex, ugbg.first(), ugbg.second());
+    return new Triple<Index<String>, UnaryGrammar, BinaryGrammar>(newStateIndex, ugbg.first(), ugbg.second());
   }
 
   protected static Distribution<String> computeInputPrior(Map<String, List<List<String>>> allTrainPaths) {
-    ClassicCounter<String> result = new ClassicCounter<>();
+    ClassicCounter<String> result = new ClassicCounter<String>();
     for (List<List<String>> pathList : allTrainPaths.values()) {
       for (List<String> path : pathList) {
         for (String input : path) {
@@ -276,20 +276,20 @@ public abstract class GrammarCompactor {
    */
   protected Pair<UnaryGrammar,BinaryGrammar> convertGraphsToGrammar(Set<TransducerGraph> graphs, Set<UnaryRule> unaryRules, Set<BinaryRule> binaryRules) {
     // first go through all the existing rules and number them with new numberer
-    newStateIndex = new HashIndex<>();
+    newStateIndex = new HashIndex<String>();
     for (UnaryRule rule : unaryRules) {
       String parent = stateIndex.get(rule.parent);
-      rule.parent = newStateIndex.addToIndex(parent);
+      rule.parent = newStateIndex.indexOf(parent, true);
       String child = stateIndex.get(rule.child);
-      rule.child = newStateIndex.addToIndex(child);
+      rule.child = newStateIndex.indexOf(child, true);
     }
     for (BinaryRule rule : binaryRules) {
       String parent = stateIndex.get(rule.parent);
-      rule.parent = newStateIndex.addToIndex(parent);
+      rule.parent = newStateIndex.indexOf(parent, true);
       String leftChild = stateIndex.get(rule.leftChild);
-      rule.leftChild = newStateIndex.addToIndex(leftChild);
+      rule.leftChild = newStateIndex.indexOf(leftChild, true);
       String rightChild = stateIndex.get(rule.rightChild);
-      rule.rightChild = newStateIndex.addToIndex(rightChild);
+      rule.rightChild = newStateIndex.indexOf(rightChild, true);
     }
 
     // now go through the graphs and add the rules
@@ -304,11 +304,11 @@ public abstract class GrammarCompactor {
         double output = ((Double) arc.getOutput()).doubleValue();
         if (source.equals(startNode)) {
           // make a UnaryRule
-          UnaryRule ur = new UnaryRule(newStateIndex.addToIndex(target), newStateIndex.addToIndex(inputString), smartNegate(output));
+          UnaryRule ur = new UnaryRule(newStateIndex.indexOf(target, true), newStateIndex.indexOf(inputString, true), smartNegate(output));
           unaryRules.add(ur);
         } else if (inputString.equals(END) || inputString.equals(EPSILON)) {
           // make a UnaryRule
-          UnaryRule ur = new UnaryRule(newStateIndex.addToIndex(target), newStateIndex.addToIndex(source), smartNegate(output));
+          UnaryRule ur = new UnaryRule(newStateIndex.indexOf(target, true), newStateIndex.indexOf(source, true), smartNegate(output));
           unaryRules.add(ur);
         } else {
           // make a BinaryRule
@@ -318,9 +318,9 @@ public abstract class GrammarCompactor {
           inputString = inputString.substring(0, length - 1);
           BinaryRule br;
           if (leftOrRight == '<' || leftOrRight == '[') {
-            br = new BinaryRule(newStateIndex.addToIndex(target), newStateIndex.addToIndex(inputString), newStateIndex.addToIndex(source), smartNegate(output));
+            br = new BinaryRule(newStateIndex.indexOf(target, true), newStateIndex.indexOf(inputString, true), newStateIndex.indexOf(source, true), smartNegate(output));
           } else if (leftOrRight == '>' || leftOrRight == ']') {
-            br = new BinaryRule(newStateIndex.addToIndex(target), newStateIndex.addToIndex(source), newStateIndex.addToIndex(inputString), smartNegate(output));
+            br = new BinaryRule(newStateIndex.indexOf(target, true), newStateIndex.indexOf(source, true), newStateIndex.indexOf(inputString, true), smartNegate(output));
           } else {
             throw new RuntimeException("Arc input is in unexpected format: " + arc);
           }
@@ -329,7 +329,7 @@ public abstract class GrammarCompactor {
       }
     }
     // by now, the unaryRules and binaryRules Sets have old untouched and new rules with scores
-    ClassicCounter<String> symbolCounter = new ClassicCounter<>();
+    ClassicCounter<String> symbolCounter = new ClassicCounter<String>();
     if (outputType == RAW_COUNTS) {
       // now we take the sets of rules and turn them into grammars
       // the scores of the rules we are given are actually counts
@@ -369,7 +369,7 @@ public abstract class GrammarCompactor {
 
     ug.purgeRules();
     bg.splitRules();
-    return new Pair<>(ug, bg);
+    return new Pair<UnaryGrammar,BinaryGrammar>(ug, bg);
   }
 
 }

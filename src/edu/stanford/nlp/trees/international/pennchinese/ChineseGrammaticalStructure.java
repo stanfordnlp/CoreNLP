@@ -1,11 +1,9 @@
 package edu.stanford.nlp.trees.international.pennchinese;
 
-import edu.stanford.nlp.international.Language;
-import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams;
 import edu.stanford.nlp.parser.ViterbiParserWithOptions;
 import edu.stanford.nlp.trees.*;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Filters;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
@@ -21,11 +19,11 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
  *
  * @author Galen Andrew
  * @author Pi-Chuan Chang
- * @author Daniel Cer - support for printing CoNLL-X format, encoding update,
- *                      and preliminary changes to make
- *                      ChineseGrammaticalStructure behave more like
- *                      EnglishGrammaticalStructure on the command line
- *                      (ultimately, both classes should probably use the same
+ * @author Daniel Cer - support for printing CoNLL-X format, encoding update, 
+ *                      and preliminary changes to make 
+ *                      ChineseGrammaticalStructure behave more like 
+ *                      EnglishGrammaticalStructure on the command line 
+ *                      (ultimately, both classes should probably use the same 
  *                      abstract main method).
  */
 public class ChineseGrammaticalStructure extends GrammaticalStructure {
@@ -50,7 +48,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
     this(t, new ChineseTreebankLanguagePack().punctuationWordRejectFilter());
   }
 
-  public ChineseGrammaticalStructure(Tree t, Predicate<String> puncFilter) {
+  public ChineseGrammaticalStructure(Tree t, Filter<String> puncFilter) {
     this (t, puncFilter, shf);
   }
 
@@ -58,8 +56,8 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
     this (t, null, hf);
   }
 
-  public ChineseGrammaticalStructure(Tree t, Predicate<String> puncFilter, HeadFinder hf) {
-    super(t, ChineseGrammaticalRelations.values(), ChineseGrammaticalRelations.valuesLock(), null, hf, puncFilter, Filters.acceptFilter());
+  public ChineseGrammaticalStructure(Tree t, Filter<String> puncFilter, HeadFinder hf) {
+    super(t, ChineseGrammaticalRelations.values(), hf, puncFilter);
   }
 
   /** Used for postprocessing CoNLL X dependencies */
@@ -70,18 +68,18 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
 
 
   @Override
-  protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess, Extras includeExtras) {
+  protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess, boolean includeExtras) {
     //      collapseConj(list);
     collapsePrepAndPoss(list);
     //      collapseMultiwordPreps(list);
   }
 
   private static void collapsePrepAndPoss(Collection<TypedDependency> list) {
-    Collection<TypedDependency> newTypedDeps = new ArrayList<>();
+    Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
 
-    // Construct a map from words to the set of typed
-    // dependencies in which the word appears as governor.
-    Map<IndexedWord, Set<TypedDependency>> map = Generics.newHashMap();
+    // Construct a map from tree nodes to the set of typed
+    // dependencies in which the node appears as governor.
+    Map<TreeGraphNode, Set<TypedDependency>> map = Generics.newHashMap();
     for (TypedDependency typedDep : list) {
       if (!map.containsKey(typedDep.gov())) {
         map.put(typedDep.gov(), Generics.<TypedDependency>newHashSet());
@@ -92,8 +90,8 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
 
     for (TypedDependency td1 : list) {
       if (td1.reln() != GrammaticalRelation.KILL) {
-        IndexedWord td1Dep = td1.dep();
-        String td1DepPOS = td1Dep.tag();
+        TreeGraphNode td1Dep = td1.dep();
+        String td1DepPOS = td1Dep.parent().value();
         // find all other typedDeps having our dep as gov
         Set<TypedDependency> possibles = map.get(td1Dep);
         if (possibles != null) {
@@ -104,7 +102,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
             if (td1.reln() == DEPENDENT && td2.reln() == DEPENDENT && td1DepPOS.equals("P")) {
               GrammaticalRelation td3reln = ChineseGrammaticalRelations.valueOf(td1Dep.value());
               if (td3reln == null) {
-                td3reln = GrammaticalRelation.valueOf(Language.Chinese,
+                td3reln = GrammaticalRelation.valueOf(GrammaticalRelation.Language.Chinese,
                                                       td1Dep.value());
               }
               TypedDependency td3 = new TypedDependency(td3reln, td1.gov(), td2.dep());
@@ -155,7 +153,6 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
       while ((t = tr.readTree()) != null) {
         tb.add(t);
       }
-      tr.close();
     } catch (IOException e) {
       throw new RuntimeException("File problem: " + e);
     }
@@ -164,11 +161,11 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
   /**
    * Tests generation of Chinese grammatical relations from a file.
    * Default encoding is utf-8.
-   *
+   * 
    * TODO: remove this main method and use the one in the abstract class GrammaticalStructure. Making this
    * change is non-trivial due to some of the English specific assumptions in the code currently invoked by
-   * GrammaticalStructure#main.
-   *
+   * GrammaticalStructure#main. 
+   * 
    * Usage: <br> <code>
    * java edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure -treeFile [treeFile] <br>
    * java edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure -sentFile [sentenceFile] </code>
@@ -182,40 +179,32 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
 
     Treebank tb = new MemoryTreebank();
     Properties props = StringUtils.argsToProperties(args);
-
-    String encoding = props.getProperty("encoding", "utf-8");
-    try {
-      System.setOut(new PrintStream(System.out, true, encoding));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-
     String treeFileName = props.getProperty("treeFile");
     String treeDirname = props.getProperty("treeDir");
     String sentFileName = props.getProperty("sentFile");
+    String encoding = props.getProperty("encoding", "utf-8");
     boolean conllx = props.getProperty("conllx") != null;
     boolean basic = props.getProperty("basic") != null;
-    boolean nonCollapsed = props.getProperty("nonCollapsed") != null;
     boolean collapsed = props.getProperty("collapsed") != null;
     boolean parseTree = props.getProperty("parseTree") != null;
     boolean keepPunct = props.getProperty("keepPunct") != null;
-
+    
     // force keepPunct, if conllx is turned on
     if (conllx) {
       keepPunct = true;
     }
-
+    
     String hf = props.getProperty("hf");
     String parserModel = props.getProperty("parserModel", "/u/nlp/data/lexparser/chineseFactored.ser.gz");
 
     if (!basic && !collapsed) {
       if (conllx) {
-        basic = true;     // default to basic dependencies for conllx
+        basic = true;     // default to basic dependencies for conllx 
       } else {
         collapsed = true; // otherwise, default to collapsed dependencies
       }
     }
-
+    
     try {
       if (hf != null) {
         shf = (HeadFinder)Class.forName(hf).newInstance();
@@ -231,10 +220,10 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
       System.err.println("\nOptional flags:");
       System.err.println("\t-parseTree  : print phrase-structure parse tree");
       System.err.println("\t-basic : basic non-collapsed dependencies preserving a tree structure");
-      System.err.println("\t-collapsed : collapsed dependencies");
+      System.err.println("\t-collapsed : collapsed dependencies");      
       System.err.println("\t-conllx : conllx formatted dependencies, can be used with either basic\n\t or collaped dependencies, but basic is recommended");
 
-    } else {
+    } else { 
       if (treeDirname != null && treeFileName != null) {
         throw new RuntimeException("Only one of treeDirname or treeFileName should be set");
       }
@@ -284,16 +273,16 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
       }
     }
 
-
-    for (Tree t : tb) {
-      Predicate<String> puncFilter;
-
+    
+    for (Tree t : tb) {      
+      Filter<String> puncFilter;
+      
       if (keepPunct) {
-        puncFilter = Filters.acceptFilter();
+        puncFilter = Filters.acceptFilter();        
       } else {
         puncFilter = new ChineseTreebankLanguagePack().punctuationWordRejectFilter();
       }
-
+      
       GrammaticalStructure gs = new ChineseGrammaticalStructure(t, puncFilter);
 
       if (parseTree) {
@@ -308,24 +297,17 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
       //System.out.println(gs);
 
       if (basic) {
-        if (collapsed || nonCollapsed) {
+        if (collapsed) {
           System.out.println("------------- basic dependencies ---------------");
-        }
-        printDependencies(gs, gs.typedDependencies(Extras.NONE), t, conllx, false);
-      }
-
-      if (nonCollapsed) {
-        if (basic || collapsed) {
-          System.out.println("------------- noncollapsed dependencies ---------------");
-        }
-        printDependencies(gs, gs.typedDependencies(Extras.MAXIMAL), t, conllx, false);
+        }        
+        printDependencies(gs, gs.typedDependencies(true), t, conllx, false);
       }
 
       if (collapsed) {
-        if (basic || nonCollapsed) {
+        if (basic) {
           System.out.println("----------- collapsed dependencies -----------");
         }
-        printDependencies(gs, gs.typedDependenciesCollapsed(Extras.MAXIMAL), t, conllx, false);
+        printDependencies(gs, gs.typedDependenciesCollapsed(true), t, conllx, false);
       }
 
       //gs.printTypedDependencies("xml");
@@ -333,12 +315,12 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
   }
 
 
-  public static List<GrammaticalStructure> readCoNLLXGrammaticalStructureCollection(String fileName) throws IOException {
-    return readCoNLLXGrammaticalStructureCollection(fileName, ChineseGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
+  public static List<GrammaticalStructure> readCoNLLXGrammaticStructureCollection(String fileName) throws IOException {
+    return readCoNLLXGrammaticStructureCollection(fileName, ChineseGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
   }
 
-  public static ChineseGrammaticalStructure buildCoNLLXGrammaticalStructure(List<List<String>> tokenFields) {
-    return (ChineseGrammaticalStructure) buildCoNLLXGrammaticalStructure(tokenFields, ChineseGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
+  public static ChineseGrammaticalStructure buildCoNNLXGrammaticStructure(List<List<String>> tokenFields) {
+    return (ChineseGrammaticalStructure) buildCoNNLXGrammaticStructure(tokenFields, ChineseGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
   }
 
   public static class FromDependenciesFactory

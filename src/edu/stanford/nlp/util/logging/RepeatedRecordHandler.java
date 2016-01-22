@@ -10,15 +10,15 @@ import java.util.Stack;
 
 /**
  * Filters repeated messages and replaces them with the number of times they were logged.
- *
  * @author David McClosky,
  * @author Gabor Angeli (angeli at cs.stanford): approximate record equality, repeated tracks squashed
+ *
  */
 public class RepeatedRecordHandler extends LogRecordHandler {
 
-  private final Stack<RepeatedRecordInfo> stack = new Stack<>();
+  private Stack<RepeatedRecordInfo> stack = new Stack<RepeatedRecordInfo>();
   RepeatedRecordInfo current = new RepeatedRecordInfo();
-  private final RepeatSemantics repeatSemantics;
+  private RepeatSemantics repeatSemantics;
 
   /**
    * Create a new repeated log message handler, using the given semantics for what
@@ -28,7 +28,7 @@ public class RepeatedRecordHandler extends LogRecordHandler {
   public RepeatedRecordHandler(RepeatSemantics repeatSemantics){
     this.repeatSemantics = repeatSemantics;
   }
-
+  
   private void flush(RepeatedRecordInfo info, List<Record> willReturn) {
     //(suppress all printing)
     if(info.suppressRecord){ return; }
@@ -45,6 +45,8 @@ public class RepeatedRecordHandler extends LogRecordHandler {
           repeatSemantics.message(repeatedRecordCount),
           newTags,
           info.lastRecord.depth,
+          info.lastRecord.callingClass,
+          info.lastRecord.callingMethod,
           info.lastRecord.timesstamp);
       //((pass record))
       willReturn.add(newRecord);
@@ -54,7 +56,7 @@ public class RepeatedRecordHandler extends LogRecordHandler {
   }
 
   private void flushParents(List<Record> willReturn){
-    Stack<RepeatedRecordInfo> reverseStack = new Stack<>();
+    Stack<RepeatedRecordInfo> reverseStack = new Stack<RepeatedRecordInfo>();
       while(!stack.isEmpty()){
         reverseStack.push(stack.pop());
       }
@@ -121,9 +123,8 @@ public class RepeatedRecordHandler extends LogRecordHandler {
   }
 
   /** {@inheritDoc} */
-  @Override
   public List<Record> handle(Record record) {
-    List<Record> willReturn = new ArrayList<>();
+    List<Record> willReturn = new ArrayList<Record>();
     if(internalHandle(record, willReturn)){
       willReturn.add(record);
     }
@@ -134,7 +135,7 @@ public class RepeatedRecordHandler extends LogRecordHandler {
   @Override
   public List<Record> signalStartTrack(Record signal) {
     //(handle record)
-    List<Record> willReturn = new ArrayList<>();
+    List<Record> willReturn = new ArrayList<Record>();
     boolean isPrinting = internalHandle(signal, willReturn);
     //(adjust state for track)
     if(!signal.force()){
@@ -156,7 +157,7 @@ public class RepeatedRecordHandler extends LogRecordHandler {
   /** {@inheritDoc} */
   @Override
   public List<Record> signalEndTrack(int newDepth, long timeEnded) {
-    List<Record> willReturn = new ArrayList<>();
+    List<Record> willReturn = new ArrayList<Record>();
     //(get state info)
     boolean trackWasNonempty = current.somethingPrinted;
     //(flush)
@@ -183,14 +184,12 @@ public class RepeatedRecordHandler extends LogRecordHandler {
   /** {@inheritDoc} */
   @Override
   public List<Record> signalShutdown(){
-    List<Record> willReturn = new ArrayList<>();
+    List<Record> willReturn = new ArrayList<Record>();
     flush(current,willReturn);
     return willReturn;
   }
 
-
-  private static enum PendingType { NONE, PRINTING, SEEN }
-
+  private static enum PendingType{ NONE, PRINTING, SEEN }
 
   private static class RepeatedRecordInfo {
     private Record lastRecord = null;
@@ -202,7 +201,6 @@ public class RepeatedRecordHandler extends LogRecordHandler {
     private PendingType trackCountPending = PendingType.NONE;
   }
 
-
   /**
    * Determines the semantics of what constitutes a repeated record
    */
@@ -213,67 +211,58 @@ public class RepeatedRecordHandler extends LogRecordHandler {
     public String message(int linesOmitted);
   }
 
-
   /**
    *  Judges two records to be equal if they come from the same place,
    *  and begin with the same string, modulo numbers
    */
   public static class ApproximateRepeatSemantics implements RepeatSemantics {
-    private static boolean sameMessage(String last, String current){
+    private boolean sameMessage(String last, String current){
       String lastNoNumbers = last.replaceAll("[0-9\\.\\-]+","#");
       String currentNoNumbers = current.replaceAll("[0-9\\.\\-]+","#");
       return lastNoNumbers.startsWith(currentNoNumbers.substring(0, Math.min(7, currentNoNumbers.length())));
     }
-    @Override
     public boolean equals(Record lastRecord, Record record) {
-      return Arrays.equals(record.channels(), lastRecord.channels()) &&
+      return record.callingClass.equals(lastRecord.callingClass) &&
+          record.callingMethod.equals(lastRecord.callingMethod) &&
+          Arrays.equals(record.channels(), lastRecord.channels()) &&
           sameMessage(
             lastRecord.content == null ? "null" : lastRecord.content.toString(),
             record.content == null ? "null" : record.content.toString()
           );
     }
-    @Override
     public long maxWaitTimeInMillis() {
       return 1000;
     }
-    @Override
     public int numToForcePrint(){
       return 3;
     }
-    @Override
     public String message(int linesOmitted){
       return "... "+linesOmitted+" similar messages";
     }
   }
-
-  public static final ApproximateRepeatSemantics APPROXIMATE = new ApproximateRepeatSemantics();
-
+  public static ApproximateRepeatSemantics APPROXIMATE = new ApproximateRepeatSemantics();
 
   /**
    * Judges two records to be equal if they are from the same place,
    * and have the same message
    */
   public static class ExactRepeatSemantics implements RepeatSemantics {
-    @Override
     public boolean equals(Record lastRecord, Record record) {
-      return Arrays.equals(record.channels(), lastRecord.channels()) &&
+      return record.callingClass.equals(lastRecord.callingClass) &&
+          record.callingMethod.equals(lastRecord.callingMethod) &&
+          Arrays.equals(record.channels(), lastRecord.channels()) &&
           ( (record.content == null && lastRecord.content == null) ||
             (record.content != null && record.content.equals(lastRecord.content)) );
     }
-    @Override
     public long maxWaitTimeInMillis() {
       return Long.MAX_VALUE;
     }
-    @Override
     public int numToForcePrint(){
       return 1;
     }
-    @Override
     public String message(int linesOmitted){
       return "(last message repeated " + linesOmitted + " times)";
     }
   }
-
-  public static final ExactRepeatSemantics EXACT = new ExactRepeatSemantics();
-
+  public static ExactRepeatSemantics EXACT = new ExactRepeatSemantics();
 }

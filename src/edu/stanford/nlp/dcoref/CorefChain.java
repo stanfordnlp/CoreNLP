@@ -27,13 +27,16 @@
 package edu.stanford.nlp.dcoref;
 
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.dcoref.Dictionaries.Animacy;
 import edu.stanford.nlp.dcoref.Dictionaries.Gender;
 import edu.stanford.nlp.dcoref.Dictionaries.MentionType;
@@ -43,14 +46,12 @@ import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.IntTuple;
 
 /**
- * Output of (deterministic) coref system.  Each CorefChain represents a set
- * of mentions in the text which should all correspond to the same actual
+ * Output of coref system.  Each CorefChain represents a set of
+ * entries in the text which should all correspond to the same actual
  * entity.  There is a representative mention, which stores the best
- * mention of an entity, and then there is a List of all mentions
- * that are coreferent with that mention. The mentionMap maps from pairs of
- * a sentence number and a head word index to a CorefMention. The chainID is
- * an arbitrary integer for the chain number.
- *
+ * mention of an entity, and then there is a sequence of other
+ * mentions which connect to that mention.
+ * 
  * @author Heeyoung Lee
  */
 public class CorefChain implements Serializable {
@@ -60,7 +61,7 @@ public class CorefChain implements Serializable {
   private final Map<IntPair, Set<CorefMention>> mentionMap;
 
   /** The most representative mention in this cluster */
-  private final CorefMention representative;
+  private CorefMention representative = null;
 
   @Override
   public boolean equals(Object aThat) {
@@ -73,11 +74,9 @@ public class CorefChain implements Serializable {
       return false;
     if (!mentions.equals(that.mentions))
       return false;
-    if (representative == null && that.representative == null) {
-      return true;
-    }
-    if (representative == null || that.representative == null ||
-        ! representative.equals(that.representative)) {
+    if ((representative == null && that.representative != null) ||
+        (representative != null && that.representative == null) ||
+        (!representative.equals(that.representative))) {
       return false;
     }
     // mentionMap is another view of mentions, so no need to compare
@@ -98,7 +97,7 @@ public class CorefChain implements Serializable {
 
   /** get CorefMention by position */
   public Set<CorefMention> getMentionsWithSameHead(int sentenceNumber, int headIndex) {
-    return getMentionsWithSameHead(new IntPair(sentenceNumber, headIndex));
+    return mentionMap.get(new IntPair(sentenceNumber, headIndex));
   }
 
   public Map<IntPair, Set<CorefMention>> getMentionMap() { return mentionMap; }
@@ -110,8 +109,7 @@ public class CorefChain implements Serializable {
   public int getChainID() { return chainID; }
 
   /** Mention for coref output.  This is one instance of the entity
-   * referred to by a given CorefChain.
-   */
+   * referred to by a given CorefChain.  */
   public static class CorefMention implements Serializable {
     public final MentionType mentionType;
     public final Number number;
@@ -144,7 +142,6 @@ public class CorefChain implements Serializable {
     public final IntTuple position;
     public final String mentionSpan;
 
-    /** This constructor is used to recreate a CorefMention following serialization. */
     public CorefMention(MentionType mentionType,
             Number number,
             Gender gender,
@@ -171,7 +168,6 @@ public class CorefChain implements Serializable {
       this.mentionSpan = mentionSpan;
     }
 
-    /** This constructor builds the external CorefMention class from the internal Mention. */
     public CorefMention(Mention m, IntTuple pos){
       mentionType = m.mentionType;
       number = m.number;
@@ -234,16 +230,18 @@ public class CorefChain implements Serializable {
     }
 
     @Override
-    public String toString() {
-      return '"' + mentionSpan + "\" in sentence " + sentNum;
+    public String toString(){
+      StringBuilder s = new StringBuilder();
+      s.append("\"").append(mentionSpan).append("\"").append(" in sentence ").append(sentNum);
+      return s.toString();
       //      return "(sentence:" + sentNum + ", startIndex:" + startIndex + "-endIndex:" + endIndex + ")";
     }
-
-    private boolean moreRepresentativeThan(CorefMention m) {
-      if (m==null) return true;
-      if (mentionType != m.mentionType) {
-        return (mentionType == MentionType.PROPER)
-            || (mentionType == MentionType.NOMINAL && m.mentionType == MentionType.PRONOMINAL);
+    private boolean moreRepresentativeThan(CorefMention m){
+      if(m==null) return true;
+      if(mentionType!=m.mentionType) {
+        if((mentionType==MentionType.PROPER && m.mentionType!=MentionType.PROPER)
+            || (mentionType==MentionType.NOMINAL && m.mentionType==MentionType.PRONOMINAL)) return true;
+        else return false;
       } else {
         // First, check length
         if (headIndex - startIndex > m.headIndex - m.startIndex) return true;
@@ -263,12 +261,9 @@ public class CorefChain implements Serializable {
     }
 
     private static final long serialVersionUID = 3657691243504173L;
+  }
 
-  } // end static class CorefMention
-
-
-  protected static class CorefMentionComparator implements Comparator<CorefMention> {
-    @Override
+  protected static class MentionComparator implements Comparator<CorefMention> {
     public int compare(CorefMention m1, CorefMention m2) {
       if(m1.sentNum < m2.sentNum) return -1;
       else if(m1.sentNum > m2.sentNum) return 1;
@@ -283,55 +278,19 @@ public class CorefChain implements Serializable {
       }
     }
   }
-
-  protected static class MentionComparator implements Comparator<Mention> {
-    @Override
-    public int compare(Mention m1, Mention m2) {
-      if(m1.sentNum < m2.sentNum) return -1;
-      else if(m1.sentNum > m2.sentNum) return 1;
-      else{
-        if(m1.startIndex < m2.startIndex) return -1;
-        else if(m1.startIndex > m2.startIndex) return 1;
-        else {
-          if(m1.endIndex > m2.endIndex) return -1;
-          else if(m1.endIndex < m2.endIndex) return 1;
-          else return 0;
-        }
-      }
-    }
-  }
-
-  /**
-   * Delete a mention from this coreference chain.
-   * @param m The mention to delete.
-   */
-  public void deleteMention(CorefMention m) {
-    this.mentions.remove(m);
-    IntPair position = new IntPair(m.sentNum, m.headIndex);
-    this.mentionMap.remove(position);
-  }
-
   public CorefChain(CorefCluster c, Map<Mention, IntTuple> positions){
     chainID = c.clusterID;
-    // Collect mentions
-    mentions = new ArrayList<>();
+    mentions = new ArrayList<CorefMention>();
     mentionMap = Generics.newHashMap();
-    CorefMention represents = null;
     for (Mention m : c.getCorefMentions()) {
       CorefMention men = new CorefMention(m, positions.get(m));
       mentions.add(men);
-    }
-    Collections.sort(mentions, new CorefMentionComparator());
-    // Find representative mention
-    for (CorefMention men : mentions) {
       IntPair position = new IntPair(men.sentNum, men.headIndex);
-      if (!mentionMap.containsKey(position)) mentionMap.put(position, Generics.<CorefMention>newHashSet());
+      if(!mentionMap.containsKey(position)) mentionMap.put(position, Generics.<CorefMention>newHashSet());
       mentionMap.get(position).add(men);
-      if (men.moreRepresentativeThan(represents)) {
-        represents = men;
-      }
+      if(men.moreRepresentativeThan(representative)) representative = men;
     }
-    representative = represents;
+    Collections.sort(mentions, new MentionComparator());
   }
 
   /** Constructor required by CustomAnnotationSerializer */
@@ -341,17 +300,17 @@ public class CorefChain implements Serializable {
     this.chainID = cid;
     this.representative = representative;
     this.mentionMap = mentionMap;
-    this.mentions = new ArrayList<>();
-    for (Set<CorefMention> ms: mentionMap.values()) {
-      for (CorefMention m: ms) {
+    this.mentions = new ArrayList<CorefMention>();
+    for(Set<CorefMention> ms: mentionMap.values()){
+      for(CorefMention m: ms) {
         this.mentions.add(m);
       }
     }
-    Collections.sort(mentions, new CorefMentionComparator());
+    Collections.sort(mentions, new MentionComparator());
   }
 
   public String toString(){
-    return "CHAIN" + this.chainID + '-' + mentions;
+    return "CHAIN"+this.chainID+ "-" +mentions.toString();
   }
 
   private static final long serialVersionUID = 3657691243506528L;

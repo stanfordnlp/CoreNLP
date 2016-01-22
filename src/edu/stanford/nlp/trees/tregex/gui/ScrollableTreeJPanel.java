@@ -33,9 +33,7 @@ public class ScrollableTreeJPanel extends TreeJPanel   {
   private String fontName = "";
   private int style = Font.PLAIN;
   private Dimension preferredSize = null;
-
-  private List<Tree> matchedParts = new ArrayList<>();
-  private List<Point2D.Double> matchedPartCoordinates = new ArrayList<>();
+  private List<Tree> matchedParts = new ArrayList<Tree>();
 
   public ScrollableTreeJPanel() {
     super();
@@ -103,13 +101,13 @@ public class ScrollableTreeJPanel extends TreeJPanel   {
 
     //Greedily draw the constituents
     final float rowOrigin = (float) (yieldHeight + 2.0*layerHeight);
-    List<List<IntPair>> rows = new ArrayList<>();
+    List<List<IntPair>> rows = new ArrayList<List<IntPair>>();
     for(Constituent c : diffConstituents) {
       for(int rowIdx = 0; rowIdx < diffConstituents.size(); rowIdx++) {
         float rowHeight = rowOrigin + (float) (rowIdx*layerHeight);
         int ext = (c.end() == (yieldOffsets.length - 1)) ? 0 : 1;
         if(rowIdx >= rows.size()) {
-          rows.add(new ArrayList<>());
+          rows.add(new ArrayList<IntPair>());
           rows.get(rowIdx).add(new IntPair(c.start(),c.end()));
           double nodeWidth = fM.stringWidth(c.value());
           g2.drawString(c.value(), yieldOffsets[c.start()], rowHeight);
@@ -191,12 +189,9 @@ public class ScrollableTreeJPanel extends TreeJPanel   {
     for (int i = 0; i < t.children().length; i++) {
       Tree child = t.children()[i];
       double cWidth;
-      if(matchedParts != null && matchedParts.contains(child)) {
-        // Track where we've painted this matched child
-        Point2D.Double coord = new Point2D.Double(childStartX, childStartY);
-        matchedPartCoordinates.add(coord);
-        cWidth = paintTree(child, coord, g2, fM, matchedColor);
-      } else {
+      if(matchedParts != null && matchedParts.contains(child))
+        cWidth = paintTree(child, new Point2D.Double(childStartX, childStartY), g2, fM, matchedColor);
+      else {
         Color col = defaultColor;
         if(((CoreLabel) child.label()).has(CoreAnnotations.DoAnnotation.class))
           col = (((CoreLabel) child.label()).get(CoreAnnotations.DoAnnotation.class)) ? tdiffColor : defaultColor;
@@ -241,10 +236,6 @@ public class ScrollableTreeJPanel extends TreeJPanel   {
 
   public void setMatchedParts(List<Tree> matchedParts) {
     this.matchedParts = matchedParts;
-  }
-
-  public List<Point2D.Double> getMatchedPartCoordinates() {
-    return matchedPartCoordinates;
   }
 
   public int getFontSize() {

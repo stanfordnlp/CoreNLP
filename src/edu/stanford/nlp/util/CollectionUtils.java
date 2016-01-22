@@ -6,9 +6,18 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -22,7 +31,6 @@ import edu.stanford.nlp.stats.Counters;
  * @author Joseph Smarr (jsmarr@stanford.edu)
  */
 public class CollectionUtils {
-
   /**
    * Private constructor to prevent direct instantiation.
    */
@@ -32,17 +40,17 @@ public class CollectionUtils {
   // Utils for making collections out of arrays of primitive types.
 
   public static List<Integer> asList(int[] a) {
-    List<Integer> result = new ArrayList<>(a.length);
-    for (int j : a) {
-      result.add(Integer.valueOf(j));
+    List<Integer> result = new ArrayList<Integer>(a.length);
+    for (int i = 0; i < a.length; i++) {
+      result.add(Integer.valueOf(a[i]));
     }
     return result;
   }
 
   public static List<Double> asList(double[] a) {
-    List<Double> result = new ArrayList<>(a.length);
-    for (double v : a) {
-      result.add(new Double(v));
+    List<Double> result = new ArrayList<Double>(a.length);
+    for (int i = 0; i < a.length; i++) {
+      result.add(new Double(a[i]));
     }
     return result;
   }
@@ -72,14 +80,12 @@ public class CollectionUtils {
   }
 
   /** Returns a new List containing the given objects. */
-  @SafeVarargs
   public static <T> List<T> makeList(T... items) {
-    return new ArrayList<>(Arrays.asList(items));
+    return new ArrayList<T>(Arrays.asList(items));
   }
 
   /** Returns a new Set containing all the objects in the specified array. */
-  @SafeVarargs
-  public static <T> Set<T> asSet(T... o) {
+  public static <T> Set<T> asSet(T[] o) {
     return Generics.newHashSet(Arrays.asList(o));
   }
 
@@ -94,7 +100,7 @@ public class CollectionUtils {
   }
 
   public static <T> Collection<T> union(Collection<T> set1, Collection<T> set2) {
-    Collection<T> union = new ArrayList<>();
+    Collection<T> union = new ArrayList<T>();
     for (T t : set1) {
       union.add(t);
     }
@@ -115,19 +121,8 @@ public class CollectionUtils {
     return union;
   }
 
-  @SafeVarargs
-  public static <T> Set<T> unionAsSet(Collection<T>... sets) {
-    Set<T> union = Generics.newHashSet();
-    for(Collection<T> set: sets){
-      for (T t : set) {
-        union.add(t);
-      }
-    }
-    return union;
-  }
-
   /**
-   * Returns all objects in list1 that are not in list2.
+   * Returns all objects in list1 that are not in list2
    *
    * @param <T> Type of items in the collection
    * @param list1 First collection
@@ -135,25 +130,7 @@ public class CollectionUtils {
    * @return The collection difference list1 - list2
    */
   public static <T> Collection<T> diff(Collection<T> list1, Collection<T> list2) {
-    Collection<T> diff = new ArrayList<>();
-    for (T t : list1) {
-      if (!list2.contains(t)) {
-        diff.add(t);
-      }
-    }
-    return diff;
-  }
-
-  /**
-   * Returns all objects in list1 that are not in list2.
-   *
-   * @param <T> Type of items in the collection
-   * @param list1 First collection
-   * @param list2 Second collection
-   * @return The collection difference list1 - list2
-   */
-  public static <T> Set<T> diffAsSet(Collection<T> list1, Collection<T> list2) {
-    Set<T> diff = new HashSet<>();
+    Collection<T> diff = new ArrayList<T>();
     for (T t : list1) {
       if (!list2.contains(t)) {
         diff.add(t);
@@ -165,8 +142,10 @@ public class CollectionUtils {
   // Utils for loading and saving Collections to/from text files
 
   /**
-   * @param filename The path to the file to load the List from
-   * @param c The Class to instantiate each member of the List. Must have a
+   * @param filename
+   *          the path to the file to load the List from
+   * @param c
+   *          the Class to instantiate each member of the List. Must have a
    *          String constructor.
    */
   public static <T> Collection<T> loadCollection(String filename, Class<T> c, CollectionFactory<T> cf) throws Exception {
@@ -174,8 +153,10 @@ public class CollectionUtils {
   }
 
   /**
-   * @param file The file to load the List from
-   * @param c The Class to instantiate each member of the List. Must have a
+   * @param file
+   *          the file to load the List from
+   * @param c
+   *          the Class to instantiate each member of the List. Must have a
    *          String constructor.
    */
   public static <T> Collection<T> loadCollection(File file, Class<T> c, CollectionFactory<T> cf) throws Exception {
@@ -200,10 +181,15 @@ public class CollectionUtils {
   /**
    * Adds the items from the file to the collection.
    *
-   * @param <T> The type of the items.
-   * @param fileName The name of the file from which items should be loaded.
-   * @param itemClass The class of the items (must have a constructor that accepts a String).
-   * @param collection The collection to which items should be added.
+   * @param <T>
+   *          The type of the items.
+   * @param fileName
+   *          The name of the file from which items should be loaded.
+   * @param itemClass
+   *          The class of the items (must have a constructor that accepts a
+   *          String).
+   * @param collection
+   *          The collection to which items should be added.
    */
   public static <T> void loadCollection(String fileName, Class<T> itemClass, Collection<T> collection) throws NoSuchMethodException, InstantiationException,
       IllegalAccessException, InvocationTargetException, IOException {
@@ -213,10 +199,15 @@ public class CollectionUtils {
   /**
    * Adds the items from the file to the collection.
    *
-   * @param <T> The type of the items.
-   * @param file The file from which items should be loaded.
-   * @param itemClass The class of the items (must have a constructor that accepts a String).
-   * @param collection The collection to which items should be added.
+   * @param <T>
+   *          The type of the items.
+   * @param file
+   *          The file from which items should be loaded.
+   * @param itemClass
+   *          The class of the items (must have a constructor that accepts a
+   *          String).
+   * @param collection
+   *          The collection to which items should be added.
    */
   public static <T> void loadCollection(File file, Class<T> itemClass, Collection<T> collection) throws NoSuchMethodException, InstantiationException, IllegalAccessException,
       InvocationTargetException, IOException {
@@ -299,8 +290,10 @@ public class CollectionUtils {
    * object, using object identity (==) not equality as the criterion for object
    * presence. If this list does not contain the element, return -1.
    *
-   * @param l The {@link List} to find the object in.
-   * @param o The sought-after object.
+   * @param l
+   *          The {@link List} to find the object in.
+   * @param o
+   *          The sought-after object.
    * @return Whether or not the List was changed.
    */
   public static <T> int getIndex(List<T> l, T o) {
@@ -319,9 +312,12 @@ public class CollectionUtils {
    * in the list of the specified object, using object equals function. If this
    * list does not contain the element, return -1.
    *
-   * @param l The {@link List} to find the object in.
-   * @param o The sought-after object.
-   * @param fromIndex The start index
+   * @param l
+   *          The {@link List} to find the object in.
+   * @param o
+   *          The sought-after object.
+   * @param fromIndex
+   *          The start index
    * @return Whether or not the List was changed.
    */
   public static <T> int getIndex(List<T> l, T o, int fromIndex) {
@@ -341,8 +337,10 @@ public class CollectionUtils {
   /**
    * Samples without replacement from a collection.
    *
-   * @param c The collection to be sampled from
-   * @param n The number of samples to take
+   * @param c
+   *          The collection to be sampled from
+   * @param n
+   *          The number of samples to take
    * @return a new collection with the sample
    */
   public static <E> Collection<E> sampleWithoutReplacement(Collection<E> c, int n) {
@@ -353,9 +351,12 @@ public class CollectionUtils {
    * Samples without replacement from a collection, using your own
    * {@link Random} number generator.
    *
-   * @param c The collection to be sampled from
-   * @param n The number of samples to take
-   * @param r The random number generator
+   * @param c
+   *          The collection to be sampled from
+   * @param n
+   *          The number of samples to take
+   * @param r
+   *          the random number generator
    * @return a new collection with the sample
    */
   public static <E> Collection<E> sampleWithoutReplacement(Collection<E> c, int n, Random r) {
@@ -363,9 +364,9 @@ public class CollectionUtils {
       throw new IllegalArgumentException("n < 0: " + n);
     if (n > c.size())
       throw new IllegalArgumentException("n > size of collection: " + n + ", " + c.size());
-    List<E> copy = new ArrayList<>(c.size());
+    List<E> copy = new ArrayList<E>(c.size());
     copy.addAll(c);
-    Collection<E> result = new ArrayList<>(n);
+    Collection<E> result = new ArrayList<E>(n);
     for (int k = 0; k < n; k++) {
       double d = r.nextDouble();
       int x = (int) (d * copy.size());
@@ -380,10 +381,12 @@ public class CollectionUtils {
   }
 
   /**
-   * Samples with replacement from a collection.
+   * Samples with replacement from a collection
    *
-   * @param c The collection to be sampled from
-   * @param n The number of samples to take
+   * @param c
+   *          The collection to be sampled from
+   * @param n
+   *          The number of samples to take
    * @return a new collection with the sample
    */
   public static <E> Collection<E> sampleWithReplacement(Collection<E> c, int n) {
@@ -392,19 +395,22 @@ public class CollectionUtils {
 
   /**
    * Samples with replacement from a collection, using your own {@link Random}
-   * number generator.
+   * number generator
    *
-   * @param c The collection to be sampled from
-   * @param n The number of samples to take
-   * @param r The random number generator
+   * @param c
+   *          The collection to be sampled from
+   * @param n
+   *          The number of samples to take
+   * @param r
+   *          the random number generator
    * @return a new collection with the sample
    */
   public static <E> Collection<E> sampleWithReplacement(Collection<E> c, int n, Random r) {
     if (n < 0)
       throw new IllegalArgumentException("n < 0: " + n);
-    List<E> copy = new ArrayList<>(c.size());
+    List<E> copy = new ArrayList<E>(c.size());
     copy.addAll(c);
-    Collection<E> result = new ArrayList<>(n);
+    Collection<E> result = new ArrayList<E>(n);
     for (int k = 0; k < n; k++) {
       double d = r.nextDouble();
       int x = (int) (d * copy.size());
@@ -415,7 +421,7 @@ public class CollectionUtils {
 
   /**
    * Returns true iff l1 is a sublist of l (i.e., every member of l1 is in l,
-   * and for every e1 &lt; e2 in l1, there is an e1 &lt; e2 occurrence in l).
+   * and for every e1 < e2 in l1, there is an e1 < e2 occurrence in l).
    */
   public static <T> boolean isSubList(List<T> l1, List<? super T> l) {
     Iterator<? super T> it = l.iterator();
@@ -470,14 +476,20 @@ public class CollectionUtils {
   }
 
   public static <C extends Comparable<C>> Comparator<List<C>> getListComparator() {
-    return CollectionUtils::compareLists;
+    return new Comparator<List<C>>() {
+      public int compare(List<C> list1, List<C> list2) {
+        return compareLists(list1, list2);
+      }
+    };
   }
 
   /**
    * Return the items of an Iterable as a sorted list.
    *
-   * @param <T> The type of items in the Iterable.
-   * @param items The collection to be sorted.
+   * @param <T>
+   *          The type of items in the Iterable.
+   * @param items
+   *          The collection to be sorted.
    * @return A list containing the same items as the Iterable, but sorted.
    */
   public static <T extends Comparable<T>> List<T> sorted(Iterable<T> items) {
@@ -489,8 +501,10 @@ public class CollectionUtils {
   /**
    * Return the items of an Iterable as a sorted list.
    *
-   * @param <T> The type of items in the Iterable.
-   * @param items The collection to be sorted.
+   * @param <T>
+   *          The type of items in the Iterable.
+   * @param items
+   *          The collection to be sorted.
    * @return A list containing the same items as the Iterable, but sorted.
    */
   public static <T> List<T> sorted(Iterable<T> items, Comparator<T> comparator) {
@@ -502,12 +516,14 @@ public class CollectionUtils {
   /**
    * Create a list out of the items in the Iterable.
    *
-   * @param <T> The type of items in the Iterable.
-   * @param items The items to be made into a list.
+   * @param <T>
+   *          The type of items in the Iterable.
+   * @param items
+   *          The items to be made into a list.
    * @return A list consisting of the items of the Iterable, in the same order.
    */
   public static <T> List<T> toList(Iterable<T> items) {
-    List<T> list = new ArrayList<>();
+    List<T> list = new ArrayList<T>();
     addAll(list, items);
     return list;
   }
@@ -515,8 +531,10 @@ public class CollectionUtils {
   /**
    * Create a set out of the items in the Iterable.
    *
-   * @param <T> The type of items in the Iterable.
-   * @param items The items to be made into a set.
+   * @param <T>
+   *          The type of items in the Iterable.
+   * @param items
+   *          The items to be made into a set.
    * @return A set consisting of the items from the Iterable.
    */
   public static <T> Set<T> toSet(Iterable<T> items) {
@@ -528,9 +546,12 @@ public class CollectionUtils {
   /**
    * Add all the items from an iterable to a collection.
    *
-   * @param <T> The type of items in the iterable and the collection
-   * @param collection The collection to which the items should be added.
-   * @param items The items to add to the collection.
+   * @param <T>
+   *          The type of items in the iterable and the collection
+   * @param collection
+   *          The collection to which the items should be added.
+   * @param items
+   *          The items to add to the collection.
    */
   public static <T> void addAll(Collection<T> collection, Iterable<? extends T> items) {
     for (T item : items) {
@@ -554,19 +575,23 @@ public class CollectionUtils {
    * [[a], [a, b], [b], [b, c], [c], [c, d], [d]]
    * </pre>
    *
-   * @param <T> The type of items contained in the list.
-   * @param items The list of items.
-   * @param minSize The minimum size of an ngram.
-   * @param maxSize The maximum size of an ngram.
+   * @param <T>
+   *          The type of items contained in the list.
+   * @param items
+   *          The list of items.
+   * @param minSize
+   *          The minimum size of an ngram.
+   * @param maxSize
+   *          The maximum size of an ngram.
    * @return All sub-lists of the given sizes.
    */
   public static <T> List<List<T>> getNGrams(List<T> items, int minSize, int maxSize) {
-    List<List<T>> ngrams = new ArrayList<>();
+    List<List<T>> ngrams = new ArrayList<List<T>>();
     int listSize = items.size();
     for (int i = 0; i < listSize; ++i) {
       for (int ngramSize = minSize; ngramSize <= maxSize; ++ngramSize) {
         if (i + ngramSize <= listSize) {
-          List<T> ngram = new ArrayList<>();
+          List<T> ngram = new ArrayList<T>();
           for (int j = i; j < i + ngramSize; ++j) {
             ngram.add(items.get(j));
           }
@@ -607,14 +632,21 @@ public class CollectionUtils {
    * [[a], [a], [a, a], [a, null], [a, null], [a, null, a, null]]
    * </pre>
    *
-   * @param <T> The type of items contained in the list.
-   * @param items The list of items.
-   * @param minSize The minimum length of a prefix/suffix span (should be at least 1)
-   * @param maxSize The maximum length of a prefix/suffix span
-   * @param paddingSymbol Symbol to be included if we run out of bounds (e.g. if items has
+   * @param <T>
+   *          The type of items contained in the list.
+   * @param items
+   *          The list of items.
+   * @param minSize
+   *          The minimum length of a prefix/suffix span (should be at least 1)
+   * @param maxSize
+   *          The maximum length of a prefix/suffix span
+   * @param paddingSymbol
+   *          Symbol to be included if we run out of bounds (e.g. if items has
    *          size 3 and we try to extract a span of length 4).
-   * @param includePrefixes Whether to extract prefixes
-   * @param includeSuffixes Whether to extract suffixes
+   * @param includePrefixes
+   *          whether to extract prefixes
+   * @param includeSuffixes
+   *          whether to extract suffixes
    * @return All prefix/suffix combinations of the given sizes.
    */
   public static <T> List<List<T>> getPrefixesAndSuffixes(List<T> items, int minSize, int maxSize, T paddingSymbol, boolean includePrefixes, boolean includeSuffixes) {
@@ -622,10 +654,10 @@ public class CollectionUtils {
     assert maxSize >= minSize;
     assert includePrefixes || includeSuffixes;
 
-    List<List<T>> prefixesAndSuffixes = new ArrayList<>();
+    List<List<T>> prefixesAndSuffixes = new ArrayList<List<T>>();
     for (int span = minSize - 1; span < maxSize; span++) {
-      List<Integer> indices = new ArrayList<>();
-      List<T> seq = new ArrayList<>();
+      List<Integer> indices = new ArrayList<Integer>();
+      List<T> seq = new ArrayList<T>();
       if (includePrefixes) {
         for (int i = 0; i <= span; i++) {
           indices.add(i);
@@ -653,7 +685,7 @@ public class CollectionUtils {
   }
 
   public static <T, M> List<T> mergeList(List<? extends T> list, Collection<M> matched, Function<M, Interval<Integer>> toIntervalFunc, Function<List<? extends T>, T> aggregator) {
-    List<Interval<Integer>> matchedIntervals = new ArrayList<>(matched.size());
+    List<Interval<Integer>> matchedIntervals = new ArrayList<Interval<Integer>>(matched.size());
     for (M m : matched) {
       matchedIntervals.add(toIntervalFunc.apply(m));
     }
@@ -666,7 +698,7 @@ public class CollectionUtils {
   }
 
   public static <T> List<T> mergeListWithSortedMatched(List<? extends T> list, List<? extends HasInterval<Integer>> matched, Function<List<? extends T>, T> aggregator) {
-    List<T> merged = new ArrayList<>(list.size()); // Approximate size
+    List<T> merged = new ArrayList<T>(list.size()); // Approximate size
     int last = 0;
     for (HasInterval<Integer> m : matched) {
       Interval<Integer> interval = m.getInterval();
@@ -687,7 +719,7 @@ public class CollectionUtils {
   }
 
   public static <T> List<T> mergeListWithSortedMatchedPreAggregated(List<? extends T> list, List<? extends T> matched, Function<T, Interval<Integer>> toIntervalFunc) {
-    List<T> merged = new ArrayList<>(list.size()); // Approximate size
+    List<T> merged = new ArrayList<T>(list.size()); // Approximate size
     int last = 0;
     for (T m : matched) {
       Interval<Integer> interval = toIntervalFunc.apply(m);
@@ -707,10 +739,10 @@ public class CollectionUtils {
   }
 
   /**
-   * Combines all the lists in a collection to a single list.
+   * combines all the lists in a collection to a single list
    */
   public static <T> List<T> flatten(Collection<List<T>> nestedList) {
-    List<T> result = new ArrayList<>();
+    List<T> result = new ArrayList<T>();
     for (List<T> list : nestedList) {
       result.addAll(list);
     }
@@ -748,13 +780,9 @@ public class CollectionUtils {
   /**
    * Split a list into numFolds (roughly) equally sized folds. The earlier folds
    * may have one more item in them than later folds.
-   * <br>
-   * The lists returned are subList()s of the original list.
-   * Therefore, don't try to modify the sublists, and don't modify the
-   * original list while the sublists are in use.
    */
-  public static <T> List<List<T>> partitionIntoFolds(List<T> values, int numFolds) {
-    List<List<T>> folds = Generics.newArrayList();
+  public static <T> List<Collection<T>> partitionIntoFolds(List<T> values, int numFolds) {
+    List<Collection<T>> folds = new ArrayList<Collection<T>>();
     int numValues = values.size();
     int foldSize = numValues / numFolds;
     int remainder = numValues % numFolds;
@@ -782,18 +810,18 @@ public class CollectionUtils {
    * contain the remaining 1/numFolds of the original values.
    */
   public static <T> Collection<Pair<Collection<T>, Collection<T>>> trainTestFoldsForCV(List<T> values, int numFolds) {
-    Collection<Pair<Collection<T>, Collection<T>>> trainTestPairs = new ArrayList<>();
-    List<List<T>> folds = partitionIntoFolds(values, numFolds);
+    Collection<Pair<Collection<T>, Collection<T>>> trainTestPairs = new ArrayList<Pair<Collection<T>,Collection<T>>>();
+    List<Collection<T>> folds = partitionIntoFolds(values, numFolds);
     for (int splitNum = 0; splitNum < numFolds; splitNum++) {
       Collection<T> test = folds.get(splitNum);
-      Collection<T> train = new ArrayList<>();
+      Collection<T> train = new ArrayList<T>();
       for (int foldNum = 0; foldNum < numFolds; foldNum++) {
         if (foldNum != splitNum) {
           train.addAll(folds.get(foldNum));
         }
       }
 
-      trainTestPairs.add(new Pair<>(train, test));
+      trainTestPairs.add(new Pair<Collection<T>, Collection<T>>(train, test));
     }
 
     return trainTestPairs;
@@ -804,7 +832,7 @@ public class CollectionUtils {
    * highest frequency, all of them will be returned.)
    */
   public static <T> Set<T> modes(Collection<T> values) {
-    Counter<T> counter = new ClassicCounter<>(values);
+    Counter<T> counter = new ClassicCounter<T>(values);
     List<Double> sortedCounts = CollectionUtils.sorted(counter.values());
     Double highestCount = sortedCounts.get(sortedCounts.size() - 1);
     Counters.retainAbove(counter, highestCount);
@@ -822,7 +850,7 @@ public class CollectionUtils {
 
 
   /**
-   * Transforms the keyset of collection according to the given Function and returns a set of the keys.
+   * Transforms the keyset of collection according to the given Function and returns a set of the keys
    *
    */
   public static<T1, T2> Set<T2> transformAsSet(Collection<? extends T1> original, Function<T1, ? extends T2> f){
@@ -835,11 +863,11 @@ public class CollectionUtils {
 
 
   /**
-   * Transforms the keyset of collection according to the given Function and returns a list.
+   * Transforms the keyset of collection according to the given Function and returns a list
    *
    */
   public static<T1, T2> List<T2> transformAsList(Collection<? extends T1> original, Function<T1, ? extends T2> f){
-    List<T2> transformed = new ArrayList<>();
+    List<T2> transformed = new ArrayList<T2>();
     for(T1 t: original){
       transformed.add(f.apply(t));
     }
@@ -847,109 +875,16 @@ public class CollectionUtils {
   }
 
   /**
-   * Filters the objects in the collection according to the given Filter and returns a list.
+   * Filters the objects in the collection according to the given Filter and returns a list
    *
    */
-  public static<T> List<T> filterAsList(Collection<? extends T> original, Predicate<? super T> f){
-    List<T> transformed = new ArrayList<>();
+  public static<T> List<T> filterAsList(Collection<? extends T> original, Filter<? super T> f){
+    List<T> transformed = new ArrayList<T>();
     for (T t: original) {
-      if (f.test(t)) {
+      if (f.accept(t)) {
         transformed.add(t);
       }
     }
     return transformed;
   }
-
-  /**
-   * Get all values corresponding to the indices (if they exist in the map).
-   *
-   * @param map Any map from T to V
-   * @param indices A collection of indices of type T
-   * @return The corresponding list of values of type V
-   */
-  public static<T,V> List<V> getAll(Map<T, V> map, Collection<T> indices) {
-    List<V> result = new ArrayList<>();
-    for(T i: indices)
-      if(map.containsKey(i)){
-        result.add(map.get(i));
-      }
-    return result;
-  }
-
-  public static<T extends Comparable<? super T>> int maxIndex(List<T> list){
-   T max = null;
-   int i = 0;
-   int maxIndex = -1;
-   for(T t: list)
-   {
-     if(max == null || t.compareTo(max) > 0)
-     {
-       max = t;
-       maxIndex = i;
-     }
-     i++;
-   }
-   return maxIndex;
-  }
-
-
-  /**
-   * Concatenate a number of iterators together, to form one big iterator.
-   * This should respect the remove() functionality of the constituent iterators.
-   *
-   * @param iterators The iterators to concatenate.
-   * @param <E> The type of the iterators.
-   * @return An iterator consisting of all the component iterators concatenated together in order.
-   */
-  @SafeVarargs
-  public static <E> Iterator<E> concatIterators(final Iterator<E>... iterators) {
-    return new Iterator<E>() {
-      Iterator<E> lastIter = null;
-      List<Iterator<E>> iters = new LinkedList<>(Arrays.asList(iterators));
-      @Override
-      public boolean hasNext() {
-        return !iters.isEmpty() && iters.get(0).hasNext();
-      }
-      @Override
-      public E next() {
-        if (!hasNext()) {
-          throw new IllegalArgumentException("Iterator is empty!");
-        }
-        E next = iters.get(0).next();
-        lastIter = iters.get(0);
-        while (!iters.isEmpty() && !iters.get(0).hasNext()) {
-          iters.remove(0);
-        }
-        return next;
-      }
-      @Override
-      public void remove() {
-        if (lastIter == null) {
-          throw new IllegalStateException("Call next() before calling remove()!");
-        }
-        lastIter.remove();
-      }
-    };
-  }
-
-  public static <E> Iterator<E> iteratorFromEnumerator(final Enumeration<E> lst_) {
-    return new Iterator<E>() {
-      private final Enumeration<E> lst = lst_;
-      @Override
-      public boolean hasNext() {
-        return lst.hasMoreElements();
-      }
-
-      @Override
-      public E next() {
-        return lst.nextElement();
-      }
-    };
-  }
-
-  public static <E> Iterable<E> iterableFromEnumerator(final Enumeration<E> lst) {
-    return new IterableIterator<>(iteratorFromEnumerator(lst));
-  }
-
-
 }

@@ -3,28 +3,28 @@ package edu.stanford.nlp.io;
 import java.io.*;
 
 /**
- * An {@code OutputStream} that can be turned into a {@code String}.
+ * An <code>OutputStream</code> that can be turned into a <code>String</code>.
  *
  * @author Bill MacCartney
  */
 public class StringOutputStream extends OutputStream {
 
-  private final StringBuilder sb = new StringBuilder();
+  StringBuilder sb = new StringBuilder();
 
   public StringOutputStream() {}
 
-  public synchronized void clear() {
+  synchronized public void clear() {
     sb.setLength(0);
   }
 
   @Override
-  public synchronized void write(int i) {
+  synchronized public void write(int i) {
     sb.append((char) i);
   }
 
   @Override
-  public synchronized String toString()  {
+  synchronized public String toString()  {
     return sb.toString();
   }
-
+  
 }

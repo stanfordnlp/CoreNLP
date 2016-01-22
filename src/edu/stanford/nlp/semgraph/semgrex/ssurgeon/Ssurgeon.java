@@ -62,15 +62,15 @@ public class Ssurgeon {
     log.addHandler(fh);
     log.setLevel(Level.FINE);
     fh.setFormatter(new NewlineLogFormatter());
-
+    
     System.out.println("Starting Ssurgeon log, at "+logFilePath.getAbsolutePath()+" date=" + DateFormat.getDateInstance(DateFormat.FULL).format(new Date()));
     log.info("Starting Ssurgeon log, date=" + DateFormat.getDateInstance(DateFormat.FULL).format(new Date()));
   }
-
+  
   public void setLogPrefix(String logPrefix) {
     this.logPrefix = logPrefix;
   }
-
+  
 
 
   /**
@@ -79,7 +79,7 @@ public class Ssurgeon {
    * the result of each edit applied against a copy of the graph.
    */
   public  List<SemanticGraph> expandFromPatterns(List<SsurgeonPattern> patternList, SemanticGraph sg) throws Exception {
-    List<SemanticGraph> retList = new ArrayList<>();
+    List<SemanticGraph> retList = new ArrayList<SemanticGraph>();
     for (SsurgeonPattern pattern :patternList) {
       Collection<SemanticGraph> generated = pattern.execute(sg);
       for (SemanticGraph orderedGraph : generated) {
@@ -89,7 +89,7 @@ public class Ssurgeon {
         System.out.println("\ncompact = "+orderedGraph.toCompactString());
         System.out.println("regular="+orderedGraph.toString());
       }
-
+      
       if (generated.size() > 0) {
         if (log != null) {
           log.info("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *");
@@ -112,7 +112,7 @@ public class Ssurgeon {
     }
     return retList;
   }
-
+  
   /**
    * Similar to the expandFromPatterns, but performs an exhaustive
    * search, performing simplifications on the graphs until exhausted.
@@ -133,7 +133,7 @@ public class Ssurgeon {
     return generated;
   }
   private  List<SemanticGraph> exhaustFromPatterns(List<SsurgeonPattern> patternList, SemanticGraph sg, int depth) throws Exception {
-    List<SemanticGraph> retList = new ArrayList<>();
+    List<SemanticGraph> retList = new ArrayList<SemanticGraph>();
     for (SsurgeonPattern pattern : patternList) {
       Collection<SemanticGraph> generated = pattern.execute(sg);
       for (SemanticGraph modGraph : generated) {
@@ -142,7 +142,7 @@ public class Ssurgeon {
         //modGraph.edgeList(true);
         retList.add(modGraph);
       }
-
+      
       if (log != null && generated.size() > 0) {
         log.info("* * * * * * * * * ** * * * * * * * * *");
         log.info("Exhaust from patterns, depth="+depth);
@@ -157,9 +157,9 @@ public class Ssurgeon {
         }
       }
     }
-
+    
     if (retList.size() > 0) {
-      List<SemanticGraph> referenceList = new ArrayList<>();
+      List<SemanticGraph> referenceList = new ArrayList<SemanticGraph>();
       referenceList.addAll(retList);
       for (SemanticGraph childGraph : referenceList) {
         if (depth < 3)
@@ -168,8 +168,8 @@ public class Ssurgeon {
     }
     return retList;
   }
-
-
+  
+  
   /**
    * Given a path to a file, converts it into a SsurgeonPattern
    * TODO: finish implementing this stub.
@@ -177,34 +177,34 @@ public class Ssurgeon {
   public static SsurgeonPattern getOperationFromFile(String path) {
     return null;
   }
-
+  
   //
   // Resource management
   //
   private Map<String, SsurgeonWordlist> wordListResources = Generics.newHashMap();
-
+  
   /**
-   * Places the given word list resource under the given ID.
+   * Places the given word list resource under the given ID.  
    * Note: can overwrite existing one in place.
    *
    */
   protected void addResource(SsurgeonWordlist resource) {
     wordListResources.put(resource.getID(), resource);
   }
-
+  
   /**
-   * Returns the given resource with the id.
+   * Returns the given resource with the id.  
    * If does not exist, will throw exception.
    */
   public SsurgeonWordlist getResource(String id) {
     return wordListResources.get(id);
   }
-
+  
   public Collection<SsurgeonWordlist> getResources() {
     return wordListResources.values();
   }
-
-
+  
+  
   public static final String GOV_NODENAME_ARG = "-gov";
   public static final String DEP_NODENAME_ARG = "-dep";
   public static final String EDGE_NAME_ARG = "-edge";
@@ -213,16 +213,16 @@ public class Ssurgeon {
   public static final String NODE_PROTO_ARG = "-nodearg";
   public static final String WEIGHT_ARG = "-weight";
   public static final String NAME_ARG = "-name";
-
-
+  
+  
   // We use the RA arg extractor to parse args for Ssurgeon edits, allowing us to not
   // worry about arg order (and to make things appear less confusing)
   protected static class SsurgeonArgs {
     // Below are values keyed by Semgrex name
     public String govNodeName = null;
-
+    
     public String dep = null;
-
+    
     public String edge = null;
 
     public String reln = null;
@@ -243,7 +243,7 @@ public class Ssurgeon {
    * in hashmaps in String form.
    */
   public static String[] parseArgs(String argsString) {
-    List<String> retList = new ArrayList<>();
+    List<String> retList = new ArrayList<String>();
     String patternString = "(?:[^\\s\\\"]++|\\\"[^\\\"]*+\\\"|(\\\"))++";
     Pattern pattern = Pattern.compile(patternString);
     Matcher matcher = pattern.matcher(argsString);
@@ -260,7 +260,7 @@ public class Ssurgeon {
     }
     return retList.toArray(new String[0]);
   }
-
+  
   /**
    * Given a string entry, converts it into a SsurgeonEdit object.
    */
@@ -276,45 +276,36 @@ public class Ssurgeon {
     SsurgeonArgs argsBox = new SsurgeonArgs();
 
     for (int argIndex = 0; argIndex < argsArray.length; ++argIndex) {
-      switch (argsArray[argIndex]) {
-        case GOV_NODENAME_ARG:
-          argsBox.govNodeName = argsArray[argIndex + 1];
-          argIndex += 2;
-          break;
-        case DEP_NODENAME_ARG:
-          argsBox.dep = argsArray[argIndex + 1];
-          argIndex += 2;
-          break;
-        case EDGE_NAME_ARG:
-          argsBox.edge = argsArray[argIndex + 1];
-          argIndex += 2;
-          break;
-        case RELN_ARG:
-          argsBox.reln = argsArray[argIndex + 1];
-          argIndex += 2;
-          break;
-        case NODENAME_ARG:
-          argsBox.node = argsArray[argIndex + 1];
-          argIndex += 2;
-          break;
-        case NODE_PROTO_ARG:
-          argsBox.nodeString = argsArray[argIndex + 1];
-          argIndex += 2;
-          break;
-        case WEIGHT_ARG:
-          argsBox.weight = Double.valueOf(argsArray[argIndex + 1]);
-          argIndex += 2;
-          break;
-        case NAME_ARG:
-          argsBox.name = argsArray[argIndex + 1];
-          argIndex += 2;
-          break;
-        default:
-          throw new IllegalArgumentException("Parsing Ssurgeon args: unknown flag " + argsArray[argIndex]);
+      if (argsArray[argIndex].equals(GOV_NODENAME_ARG)) {
+        argsBox.govNodeName = argsArray[argIndex + 1];
+        argIndex += 2;
+      } else if (argsArray[argIndex].equals(DEP_NODENAME_ARG)) {
+        argsBox.dep = argsArray[argIndex + 1];
+        argIndex += 2;
+      } else if (argsArray[argIndex].equals(EDGE_NAME_ARG)) {
+        argsBox.edge = argsArray[argIndex + 1];
+        argIndex += 2;
+      } else if (argsArray[argIndex].equals(RELN_ARG)) {
+        argsBox.reln = argsArray[argIndex + 1];
+        argIndex += 2;
+      } else if (argsArray[argIndex].equals(NODENAME_ARG)) {
+        argsBox.node = argsArray[argIndex + 1];
+        argIndex += 2;
+      } else if (argsArray[argIndex].equals(NODE_PROTO_ARG)) {
+        argsBox.nodeString = argsArray[argIndex + 1];
+        argIndex += 2;
+      } else if (argsArray[argIndex].equals(WEIGHT_ARG)) {
+        argsBox.weight = Double.valueOf(argsArray[argIndex + 1]);
+        argIndex += 2;
+      } else if (argsArray[argIndex].equals(NAME_ARG)) {
+        argsBox.name = argsArray[argIndex + 1];
+        argIndex += 2;
+      } else {
+        throw new IllegalArgumentException("Parsing Ssurgeon args: unknown flag " + argsArray[argIndex]);
       }
     }
-
-
+    
+    
     // Parse the arguments based upon the type of command to execute.
     // TODO: this logic really should be moved into the individual classes.  The string-->class
     // mappings should also be stored in more appropriate data structure.
@@ -343,13 +334,13 @@ public class Ssurgeon {
     }
     return retEdit;
   }
-
+  
   //public static SsurgeonPattern fromXML(String xmlString) throws Exception {
   //SAXBuilder builder = new SAXBuilder();
   //Document jdomDoc = builder.build(xmlString);
   //jdomDoc.getRootElement().getChildren(SsurgeonPattern.SSURGEON_ELEM_TAG);
   //}
-
+  
   /**
    * Given a target filepath and a list of Ssurgeon patterns, writes them out as XML forms.
    */
@@ -367,10 +358,10 @@ public class Ssurgeon {
       log.throwing(Ssurgeon.class.getName(), "writeToFile", e);
     }
   }
-
+  
   public static String writeToString(SsurgeonPattern pattern) {
     try {
-      List<SsurgeonPattern> patterns = new LinkedList<>();
+      List<SsurgeonPattern> patterns = new LinkedList<SsurgeonPattern>();
       patterns.add(pattern);
       Document domDoc = createPatternXMLDoc(patterns);
       if (domDoc != null) {
@@ -389,8 +380,8 @@ public class Ssurgeon {
     }
     return "";
   }
-
-
+  
+  
   private static Document createPatternXMLDoc(List<SsurgeonPattern> patterns) {
     try {
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -411,7 +402,7 @@ public class Ssurgeon {
         Element notesElem = domDoc.createElement(SsurgeonPattern.NOTES_ELEM_TAG);
         notesElem.appendChild(domDoc.createTextNode(pattern.getNotes()));
         patElt.appendChild(notesElem);
-
+        
         SemanticGraph semgrexGraph = pattern.getSemgrexGraph();
         if (semgrexGraph != null) {
           Element patNode = domDoc.createElement(SsurgeonPattern.SEMGREX_GRAPH_ELEM_TAG);
@@ -436,7 +427,7 @@ public class Ssurgeon {
       return null;
     }
   }
-
+  
 
   /**
    * Given a path to a file containing a list of SsurgeonPatterns, returns
@@ -446,12 +437,12 @@ public class Ssurgeon {
    */
   @SuppressWarnings("unchecked")
   public List<SsurgeonPattern> readFromFile(File file) throws Exception {
-    List<SsurgeonPattern> retList = new ArrayList<>();
+    List<SsurgeonPattern> retList = new ArrayList<SsurgeonPattern>();
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file);
-
+    
     if (VERBOSE)
       System.out.println("Reading ssurgeon file="+file.getAbsolutePath());
-
+    
     NodeList patternNodes = doc.getElementsByTagName(SsurgeonPattern.SSURGEON_ELEM_TAG);
     for (int i=0; i<patternNodes.getLength(); i++) {
       Node node = patternNodes.item(i);
@@ -461,7 +452,7 @@ public class Ssurgeon {
         retList.add(pattern);
       }
     }
-
+    
     NodeList resourceNodes = doc.getElementsByTagName(SsurgeonPattern.RESOURCE_TAG);
     for (int i=0; i < resourceNodes.getLength(); i++) {
       Node node = patternNodes.item(i);
@@ -471,10 +462,10 @@ public class Ssurgeon {
         addResource(wlRsrc);
       }
     }
-
+    
     return retList;
   }
-
+  
   /**
    * Reads all Ssurgeon patterns from file.
    * @throws Exception
@@ -483,8 +474,9 @@ public class Ssurgeon {
     if (!dir.isDirectory()) throw new Exception("Given path not a directory, path="+dir.getAbsolutePath());
     if (VERBOSE)
       System.out.println("Reading Ssurgeon patterns from directory = "+dir.getAbsolutePath());
-    File[] files = dir.listFiles((dir1, name) -> name.toLowerCase().endsWith(".xml"));
-    List<SsurgeonPattern> patterns = new ArrayList<>();
+    File[] files = dir.listFiles(new FilenameFilter() {
+        public boolean accept(File dir, String name) { return name.toLowerCase().endsWith(".xml");}} );
+    List<SsurgeonPattern> patterns = new ArrayList<SsurgeonPattern>();
     for (File file : files) {
       try {
         patterns.addAll(readFromFile(file));
@@ -494,7 +486,7 @@ public class Ssurgeon {
     }
     return patterns;
   }
-
+  
   /**
    * Given the root Element for a SemgrexPattern (SSURGEON_ELEM_TAG), converts
    * it into its corresponding SemgrexPattern object.
@@ -534,63 +526,59 @@ public class Ssurgeon {
    */
   public static SsurgPred assemblePredFromXML(Element elt) throws Exception {
     String eltName = elt.getTagName();
-    switch (eltName) {
-      case SsurgeonPattern.PREDICATE_AND_TAG:
-        SsurgAndPred andPred = new SsurgAndPred();
-        for (Element childElt : getChildElements(elt)) {
-          SsurgPred childPred = assemblePredFromXML(childElt);
-          andPred.add(childPred);
-          return andPred;
-        }
-        break;
-      case SsurgeonPattern.PREDICATE_OR_TAG:
-        SsurgOrPred orPred = new SsurgOrPred();
-        for (Element childElt : getChildElements(elt)) {
-          SsurgPred childPred = assemblePredFromXML(childElt);
-          orPred.add(childPred);
-          return orPred;
-        }
-        break;
-      case SsurgeonPattern.PRED_WORDLIST_TEST_TAG:
-        String id = elt.getAttribute(SsurgeonPattern.PRED_ID_ATTR);
-        String resourceID = elt.getAttribute("resourceID");
-        String typeStr = elt.getAttribute("type");
-        String matchName = getEltText(elt).trim(); // node name to match on
-
-        if (matchName == null) {
-          throw new Exception("Could not find match name for " + elt.toString());
-        }
-        if (id == null) {
-          throw new Exception("No ID attribute for element = " + elt.toString());
-        }
-        return new WordlistTest(id, resourceID, typeStr, matchName);
+    if (eltName.equals(SsurgeonPattern.PREDICATE_AND_TAG)) {
+      SsurgAndPred andPred = new SsurgAndPred();
+      for (Element childElt : getChildElements(elt)) {
+        SsurgPred childPred = assemblePredFromXML(childElt);
+        andPred.add(childPred);
+        return andPred;
+      }
+    } else if (eltName.equals(SsurgeonPattern.PREDICATE_OR_TAG)) {
+      SsurgOrPred orPred = new SsurgOrPred();
+      for (Element childElt : getChildElements(elt)) {
+        SsurgPred childPred = assemblePredFromXML(childElt);
+        orPred.add(childPred);
+        return orPred;
+      }
+    } else if (eltName.equals(SsurgeonPattern.PRED_WORDLIST_TEST_TAG)) {
+      String id = elt.getAttribute(SsurgeonPattern.PRED_ID_ATTR);
+      String resourceID = elt.getAttribute("resourceID");
+      String typeStr = elt.getAttribute("type");
+      String matchName = getEltText(elt).trim(); // node name to match on
+      if (matchName == null) {
+        throw new Exception("Could not find match name for "+elt.toString());
+      }
+      if (id == null) {
+        throw new Exception("No ID attribute for element = "+elt.toString());
+      }
+      return new WordlistTest(id, resourceID, typeStr, matchName);
     }
-
+    
     // Not a valid node, error out!
     throw new Exception("Invalid node encountered during Ssurgeon predicate processing, node name="+eltName);
   }
-
-
-
+  
+  
+  
   /**
    * Reads in the test file and prints readable to string (for debugging).
    * Input file consists of semantic graphs, in compact form.
    */
   public void testRead(File tgtDirPath) throws Exception {
     List<SsurgeonPattern> patterns = readFromDirectory(tgtDirPath);
-
+    
     System.out.println("Patterns, num="+patterns.size());
     int num = 1;
     for (SsurgeonPattern pattern : patterns) {
       System.out.println("\n# "+(num++));
       System.out.println(pattern);
     }
-
+    
     System.out.println("\n\nRESOURCES ");
     for (SsurgeonWordlist rsrc : inst().getResources()) {
       System.out.println(rsrc+"* * * * *");
     }
-
+    
     BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
     String line;
     boolean runFlag = true;
@@ -618,12 +606,12 @@ public class Ssurgeon {
       }
     }
   }
-
-
+  
+  
   /*
    * XML convenience routines
    */
-
+  
   /**
    * For the given element, returns the text for the first child Element with
    * the given tag.
@@ -640,7 +628,7 @@ public class Ssurgeon {
     }
     return "";
   }
-
+  
   /**
    * For a given Element, treats the first child as a text element
    * and returns its value.
@@ -655,7 +643,7 @@ public class Ssurgeon {
     }
     return "";
   }
-
+  
   /**
    * For the given element, finds the first child Element with the given tag.
    */
@@ -673,7 +661,7 @@ public class Ssurgeon {
     }
     return null;
   }
-
+  
   /**
    * Returns the first child whose node type is Element under the given Element.
    */
@@ -690,14 +678,14 @@ public class Ssurgeon {
     }
     return null;
   }
-
-
+  
+  
   /**
    * Returns all of the Element typed children from the given element.  Note: disregards
    * other node types.
    */
   public static List<Element> getChildElements(Element element) {
-    LinkedList<Element> childElements = new LinkedList<>();
+    LinkedList<Element> childElements = new LinkedList<Element>();
     try {
       NodeList nodeList = element.getChildNodes();
       for (int i=0; i<nodeList.getLength(); i++) {
@@ -711,33 +699,33 @@ public class Ssurgeon {
     }
     return childElements;
   }
-
+  
   /*
    * Main class evocation stuff
    */
-
-
+  
+  
   public static enum RUNTYPE {
     interactive, // interactively test contents of pattern directory against entered sentences
     testinfo // test against a given infofile (RTE), generating rewrites for hypotheses
   }
-
-
+  
+  
   public static class ArgsBox {
     public RUNTYPE type = RUNTYPE.interactive;
-
+    
     public String patternDirStr = null;
     public File patternDir = null;
-
+    
     public String info = null;
     public File infoPath = null;
-
+    
     public void init() {
       patternDir = new File(patternDirStr);
       if (type == RUNTYPE.testinfo)
         infoPath = new File(info);
     }
-
+    
     @Override
     public String toString() {
       StringWriter buf = new StringWriter();
@@ -751,9 +739,9 @@ public class Ssurgeon {
       return buf.toString();
     }
   }
-
+  
   protected static ArgsBox argsBox = new ArgsBox();
-
+  
   /**
    * Performs a simple test and print of a given file
    */

@@ -1,6 +1,9 @@
 package edu.stanford.nlp.process;
 
-// Copyright 2010, Stanford University, GPLv2
+// Copyright 2010, Stanford NLP
+// Author: John Bauer
+
+// Test the effects of various operations using a DocumentPreprocessor.
 
 import junit.framework.TestCase;
 
@@ -15,89 +18,32 @@ import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Sentence;
 
 
-/** Test the effects of various operations using a DocumentPreprocessor.
- *
- *  @author John Bauer
- *  @version 2010
- */
 public class DocumentPreprocessorTest extends TestCase {
-
-  private static void runTest(String input, String[] expected) {
-    runTest(input, expected, null, false);
-  }
-
-  private static void runTest(String input, String[] expected, String[] sentenceFinalPuncWords, boolean whitespaceTokenize) {
-    List<String> results = new ArrayList<>();
-    DocumentPreprocessor document =
-      new DocumentPreprocessor(new BufferedReader(new StringReader(input)));
-    if (sentenceFinalPuncWords != null) {
-      document.setSentenceFinalPuncWords(sentenceFinalPuncWords);
-    }
-    if (whitespaceTokenize) {
-      document.setTokenizerFactory(null);
-      document.setSentenceDelimiter("\n");
-    }
-    for (List<HasWord> sentence : document) {
-      results.add(Sentence.listToString(sentence));
-    }
-
-    assertEquals("Should be " + expected.length + " sentences but got " + results.size() + ": " + results,
-            expected.length, results.size());
-    for (int i = 0; i < results.size(); ++i) {
-      assertEquals("Failed on sentence " + i, expected[i], results.get(i));
-    }
-  }
-
-  /** Test to see if it is correctly splitting text readers. */
+  // Test to see if it is correctly splitting text readers
   public void testText() {
     String test = "This is a test of the preprocessor2.  It should split this text into sentences.  I like resting my feet on my desk.  Hopefully the people around my office don't hear me singing along to my music, and if they do, hopefully they aren't annoyed.  My test cases are probably terrifying looks into my psyche.";
-    String[] expectedResults = {"This is a test of the preprocessor2 .",
+    String []expectedResults = {"This is a test of the preprocessor2 .",
                                 "It should split this text into sentences .",
                                 "I like resting my feet on my desk .",
                                 "Hopefully the people around my office do n't hear me singing along to my music , and if they do , hopefully they are n't annoyed .",
                                 "My test cases are probably terrifying looks into my psyche ."};
-    runTest(test, expectedResults);
+    ArrayList<String> results = new ArrayList<String>();
+    DocumentPreprocessor document =
+      new DocumentPreprocessor(new BufferedReader(new StringReader(test)));
+    for (List<HasWord> sentence : document) {
+      results.add(Sentence.listToString(sentence));
+    }
+
+    assertEquals(expectedResults.length, results.size());
+    for (int i = 0; i < results.size(); ++i) {
+      assertEquals(expectedResults[i], results.get(i));
+    }
   }
 
-  /** Test if fails with punctuation near end. We did at one point. */
-  public void testNearFinalPunctuation() {
-    String test = "Mount. Annaguan";
-    String[] expectedResults = {"Mount .",
-                                "Annaguan", };
-    runTest(test, expectedResults);
-  }
-
-  /** Test if fails with punctuation near end. We did at one point. */
-  public void testNearFinalPunctuation2() {
-    String test = "(I lied.)";
-    String[] expectedResults = { "-LRB- I lied . -RRB-" };
-    runTest(test, expectedResults);
-  }
-
-  public void testSetSentencePunctWords() {
-    String test = "This is a test of the preprocessor2... it should split this text into sentences? This should be a different sentence.This should be attached to the previous sentence, though.";
-    String[] expectedResults = {"This is a test of the preprocessor2 ...",
-        "it should split this text into sentences ?","This should be a different sentence.This should be attached to the previous sentence , though ."};
-    String[] sentenceFinalPuncWords = {".", "?","!","...","\n"};
-    runTest(test, expectedResults, sentenceFinalPuncWords, false);
-  }
-
-  public void testWhitespaceTokenization() {
-    String test = "This is a whitespace tokenized test case . \n  This should be the second sentence    . \n \n  \n\n  This should be the third sentence .  \n  This should be one sentence . The period should not break it . \n This is the fifth sentence , with a weird period at the end.";
-
-    String[] expectedResults = {"This is a whitespace tokenized test case .",
-                                "This should be the second sentence .",
-                                "This should be the third sentence .",
-            "This should be one sentence . The period should not break it .",
-            "This is the fifth sentence , with a weird period at the end."};
-    runTest(test, expectedResults, null, true);
-  }
-
-
-  private static void compareXMLResults(String input,
+  public static void compareXMLResults(String input,
                                 String element,
                                 String ... expectedResults) {
-    ArrayList<String> results = new ArrayList<>();
+    ArrayList<String> results = new ArrayList<String>();
     DocumentPreprocessor document = new DocumentPreprocessor(new BufferedReader(new StringReader(input)), DocumentPreprocessor.DocType.XML);
     document.setElementDelimiter(element);
     for (List<HasWord> sentence : document) {
@@ -110,13 +56,13 @@ public class DocumentPreprocessorTest extends TestCase {
     }
   }
 
-  private static final String BASIC_XML_TEST = "<xml><text>The previous test was a lie.  I didn't make this test in my office; I made it at home.</text>\nMy home currently smells like dog vomit.\n<text apartment=\"stinky\">My dog puked everywhere after eating some carrots the other day.\n  Hopefully I have cleaned the last of it, though.</text>\n\nThis tests to see what happens on an empty tag:<text></text><text>It shouldn't include a blank sentence, but it should include this sentence.</text>this is madness...<text>no, this <text> is </text> NESTED!</text>This only prints 'no, this is' instead of 'no, this is NESTED'.  Doesn't do what i would expect, but it's consistent with the old behavior.</xml>";
+  String BASIC_XML_TEST = "<xml><text>The previous test was a lie.  I didn't make this test in my office; I made it at home.</text>\nMy home currently smells like dog vomit.\n<text apartment=\"stinky\">My dog puked everywhere after eating some carrots the other day.\n  Hopefully I have cleaned the last of it, though.</text>\n\nThis tests to see what happens on an empty tag:<text></text><text>It shouldn't include a blank sentence, but it should include this sentence.</text>this is madness...<text>no, this <text> is </text> NESTED!</text>This only prints 'no, this is' instead of 'no, this is NESTED'.  Doesn't do what i would expect, but it's consistent with the old behavior.</xml>";
 
-  /** Tests various ways of finding sentences with an XML
-   *  DocumentPreprocessor2.  We test to make sure it does find the
-   *  text between {@code <text>} tags and that it doesn't find any text if we
-   *  look for {@code <zzzz>} tags.
-   */
+
+  // Tests various ways of finding sentences with an XML
+  // DocumentPreprocessor2.  We test to make sure it does find the
+  // text between <text> tags and that it doesn't find any text if we
+  // look for <zzzz> tags.
   public void testXMLBasic() {
     // This subsequent block of code can be uncommented to demonstrate
     // that the results from the new DP are the same as from the old DP.
@@ -150,9 +96,8 @@ public class DocumentPreprocessorTest extends TestCase {
     compareXMLResults(BASIC_XML_TEST, "zzzz");
   }
 
-  /** Yeah... a bug that failed this test bug not the NotInText test
-   *  was part of the preprocessor for a while.
-   */
+  // Yeah... a bug that failed this test bug not the NotInText test
+  // was part of the preprocessor for a while.
   public void testXMLElementInText() {
     String TAG_IN_TEXT = "<xml><wood>There are many trees in the woods</wood></xml>";
     compareXMLResults(TAG_IN_TEXT, "wood",
@@ -165,6 +110,30 @@ public class DocumentPreprocessorTest extends TestCase {
                       "There are many trees in the forest");
   }
 
+  public void testWhitespaceTokenization() {
+    String test = "This is a whitespace tokenized test case . \n  This should be the second sentence    . \n \n  \n\n  This should be the third sentence .  \n  This should be one sentence . The period should not break it . \n This is the fifth sentence , with a weird period at the end.";
+
+    String[] expectedResults = {"This is a whitespace tokenized test case .",
+                                "This should be the second sentence .",
+                                "This should be the third sentence .",
+            "This should be one sentence . The period should not break it .",
+            "This is the fifth sentence , with a weird period at the end."};
+
+
+    ArrayList<String> results = new ArrayList<String>();
+    DocumentPreprocessor document =
+      new DocumentPreprocessor(new BufferedReader(new StringReader(test)));
+    document.setTokenizerFactory(null);
+    document.setSentenceDelimiter("\n");
+    for (List<HasWord> sentence : document) {
+      results.add(Sentence.listToString(sentence));
+    }
+
+    assertEquals(expectedResults.length, results.size());
+    for (int i = 0; i < results.size(); ++i) {
+      assertEquals(expectedResults[i], results.get(i));
+    }
+  }
 
   public void testPlainTextIterator() {
     String test = "This is a one line test . \n";
@@ -198,6 +167,5 @@ public class DocumentPreprocessorTest extends TestCase {
     // just in case
     assertFalse(iterator.hasNext());
   }
-
 }
 

@@ -34,8 +34,6 @@ import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.math.SloppyMath;
 import edu.stanford.nlp.parser.KBestViterbiParser;
-import edu.stanford.nlp.parser.common.ParserAnnotations;
-import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.Tree;
@@ -111,13 +109,8 @@ public class ExhaustivePCFGParser implements Scorer, KBestViterbiParser {
    * (as regular expression) the state Pattern given.  See the
    * documentation of the ParserConstraint class for information on
    * specifying a ParserConstraint.
-   * <br>
-   * Implementation note: It would be cleaner to make this a
-   * Collections.emptyList, but that actually significantly slows down
-   * the processing in the case of empty lists.  Checking for null
-   * saves quite a bit of time.
    */
-  protected List<ParserConstraint> constraints = null;
+  protected List<ParserConstraint> constraints = Collections.emptyList();
 
   private CoreLabel getCoreLabel(int labelIndex) {
     if (originalCoreLabels[labelIndex] != null) {
@@ -140,7 +133,6 @@ public class ExhaustivePCFGParser implements Scorer, KBestViterbiParser {
     return terminalLabel;
   }
 
-  @Override
   public double oScore(Edge edge) {
     double oS = oScore[edge.start][edge.end][edge.state];
     if (op.testOptions.pcfgThreshold) {
@@ -404,7 +396,7 @@ public class ExhaustivePCFGParser implements Scorer, KBestViterbiParser {
       //if (words[i] == unkIndex) {
       //  ++unkIndex;
       //}
-      words[i] = wordIndex.addToIndex(s);
+      words[i] = wordIndex.indexOf(s, true);
       //if (wordIndex.contains(s)) {
       //  words[i] = wordIndex.indexOf(s);
       //} else {
@@ -857,11 +849,9 @@ oScore[split][end][br.rightChild] = totR;
     int end = start + diff;
 
     final List<ParserConstraint> constraints = getConstraints();
-    if (constraints != null) {
-      for (ParserConstraint c : constraints) {
-        if ((start > c.start && start < c.end && end > c.end) || (end > c.start && end < c.end && start < c.start)) {
-          return;
-        }
+    for (ParserConstraint c : constraints) {
+      if ((start > c.start && start < c.end && end > c.end) || (end > c.start && end < c.end && start < c.start)) {
+        return;
       }
     }
 
@@ -910,33 +900,31 @@ oScore[split][end][br.rightChild] = totR;
           // find the split that can use this rule to make the max score
           for (int split = min; split <= max; split++) {
 
-            if (constraints != null) {
-              boolean skip = false;
-              for (ParserConstraint c : constraints) {
-                if (((start < c.start && end >= c.end) || (start <= c.start && end > c.end)) && split > c.start && split < c.end) {
+            boolean skip = false;
+            for (ParserConstraint c : constraints) {
+              if (((start < c.start && end >= c.end) || (start <= c.start && end > c.end)) && split > c.start && split < c.end) {
+                skip = true;
+                break;
+              }
+              if ((start == c.start && split == c.end)) {
+                String tag = stateIndex.get(leftState);
+                Matcher m = c.state.matcher(tag);
+                if (!m.matches()) {
                   skip = true;
                   break;
                 }
-                if ((start == c.start && split == c.end)) {
-                  String tag = stateIndex.get(leftState);
-                  Matcher m = c.state.matcher(tag);
-                  if (!m.matches()) {
-                    skip = true;
-                    break;
-                  }
-                }
-                if ((split == c.start && end == c.end)) {
-                  String tag = stateIndex.get(rightChild);
-                  Matcher m = c.state.matcher(tag);
-                  if (!m.matches()) {
-                    skip = true;
-                    break;
-                  }
+              }
+              if ((split == c.start && end == c.end)) {
+                String tag = stateIndex.get(rightChild);
+                Matcher m = c.state.matcher(tag);
+                if (!m.matches()) {
+                  skip = true;
+                  break;
                 }
               }
-              if (skip) {
-                continue;
-              }
+            }
+            if (skip) {
+              continue;
             }
 
             float lS = iScore_start[split][leftState];
@@ -1039,41 +1027,37 @@ oScore[split][end][br.rightChild] = totR;
           // find the split that can use this rule to make the max score
           for (int split = min; split <= max; split++) {
 
-            if (constraints != null) {
-              boolean skip = false;
-              for (ParserConstraint c : constraints) {
-                if (((start < c.start && end >= c.end) || (start <= c.start && end > c.end)) && split > c.start && split < c.end) {
+            boolean skip = false;
+            for (ParserConstraint c : constraints) {
+              if (((start < c.start && end >= c.end) || (start <= c.start && end > c.end)) && split > c.start && split < c.end) {
+                skip = true;
+                break;
+              }
+              if ((start == c.start && split == c.end)) {
+                String tag = stateIndex.get(leftChild);
+                Matcher m = c.state.matcher(tag);
+                if (!m.matches()) {
+                  //if (!tag.startsWith(c.state+"^")) {
                   skip = true;
                   break;
                 }
-                if ((start == c.start && split == c.end)) {
-                  String tag = stateIndex.get(leftChild);
-                  Matcher m = c.state.matcher(tag);
-                  if (!m.matches()) {
-                    //if (!tag.startsWith(c.state+"^")) {
-                    skip = true;
-                    break;
-                  }
-                }
-                if ((split == c.start && end == c.end)) {
-                  String tag = stateIndex.get(rightState);
-                  Matcher m = c.state.matcher(tag);
-                  if (!m.matches()) {
-                    //if (!tag.startsWith(c.state+"^")) {
-                    skip = true;
-                    break;
-                  }
+              }
+              if ((split == c.start && end == c.end)) {
+                String tag = stateIndex.get(rightState);
+                Matcher m = c.state.matcher(tag);
+                if (!m.matches()) {
+                  //if (!tag.startsWith(c.state+"^")) {
+                  skip = true;
+                  break;
                 }
               }
-              if (skip) {
-                continue;
-              }
+            }
+            if (skip) {
+              continue;
             }
 
             float lS = iScore_start[split][leftChild];
-            // cdm [2012]: Test whether removing these 2 tests might speed things up because less branching?
-            // jab [2014]: oddly enough, removing these tests helps the chinese parser but not the english parser.
-            if (lS == Float.NEGATIVE_INFINITY) {
+            if (lS == Float.NEGATIVE_INFINITY) {        // cdm [2012]: Test whether removing these 2 tests might speed things up because less branching?
               continue;
             }
             float rS = iScore[split][end][rightState];
@@ -1145,22 +1129,20 @@ oScore[split][end][br.rightChild] = totR;
       UnaryRule[] unaries = ug.closedRulesByChild(state);
       for (UnaryRule ur : unaries) {
 
-        if (constraints != null) {
-          boolean skip = false;
-          for (ParserConstraint c : constraints) {
-            if ((start == c.start && end == c.end)) {
-              String tag = stateIndex.get(ur.parent);
-              Matcher m = c.state.matcher(tag);
-              if (!m.matches()) {
-                //if (!tag.startsWith(c.state+"^")) {
-                skip = true;
-                break;
-              }
+        boolean skip = false;
+        for (ParserConstraint c : constraints) {
+          if ((start == c.start && end == c.end)) {
+            String tag = stateIndex.get(ur.parent);
+            Matcher m = c.state.matcher(tag);
+            if (!m.matches()) {
+              //if (!tag.startsWith(c.state+"^")) {
+              skip = true;
+              break;
             }
           }
-          if (skip) {
-            continue;
-          }
+        }
+        if (skip) {
+          continue;
         }
 
         int parentState = ur.parent;
@@ -1491,7 +1473,6 @@ oScore[split][end][br.rightChild] = totR;
   } // end initializeChart(List sentence)
 
 
-  @Override
   public boolean hasParse() {
     return getBestScore() > Double.NEGATIVE_INFINITY;
   }
@@ -1504,7 +1485,6 @@ oScore[split][end][br.rightChild] = totR;
   }
 
 
-  @Override
   public double getBestScore() {
     return getBestScore(goalStr);
   }
@@ -1517,14 +1497,10 @@ oScore[split][end][br.rightChild] = totR;
       return Double.NEGATIVE_INFINITY;
     }
     int goal = stateIndex.indexOf(stateName);
-    if (iScore == null || iScore.length == 0 || iScore[0].length <= length || iScore[0][length].length <= goal) {
-      return Double.NEGATIVE_INFINITY;
-    }
     return iScore[0][length][goal];
   }
 
 
-  @Override
   public Tree getBestParse() {
     Tree internalTree = extractBestParse(goalStr, 0, length);
     //System.out.println("Got internal best parse...");
@@ -1633,7 +1609,7 @@ oScore[split][end][br.rightChild] = totR;
           // build binary split
           Tree leftChildTree = extractBestParse(br.leftChild, start, split);
           Tree rightChildTree = extractBestParse(br.rightChild, split, end);
-          List<Tree> children = new ArrayList<>();
+          List<Tree> children = new ArrayList<Tree>();
           children.add(leftChildTree);
           children.add(rightChildTree);
           Tree result = tf.newTreeNode(goalStr, children);
@@ -1732,7 +1708,7 @@ oScore[split][end][br.rightChild] = totR;
       }
     }
     // check binaries first
-    List<Tree> bestTrees = new ArrayList<>();
+    List<Tree> bestTrees = new ArrayList<Tree>();
     for (int split = start + 1; split < end; split++) {
       for (Iterator<BinaryRule> binaryI = bg.ruleIteratorByParent(goal); binaryI.hasNext(); ) {
         BinaryRule br = binaryI.next();
@@ -1747,7 +1723,7 @@ oScore[split][end][br.rightChild] = totR;
           //                 rightChildTrees.size() + " ways to build.");
           for (Tree leftChildTree : leftChildTrees) {
             for (Tree rightChildTree : rightChildTrees) {
-              List<Tree> children = new ArrayList<>();
+              List<Tree> children = new ArrayList<Tree>();
               children.add(leftChildTree);
               children.add(rightChildTree);
               Tree result = tf.newTreeNode(goalStr, children);
@@ -1787,7 +1763,6 @@ oScore[split][end][br.rightChild] = totR;
    *  @return A list of k good parses for the sentence, with
    *         each accompanied by its score
    */
-  @Override
   public List<ScoredObject<Tree>> getKGoodParses(int k) {
     return getKBestParses(k);
   }
@@ -1799,7 +1774,6 @@ oScore[split][end][br.rightChild] = totR;
    *  @return A list of k parse samples for the sentence, with
    *         each accompanied by its score
    */
-  @Override
   public List<ScoredObject<Tree>> getKSampledParses(int k) {
     throw new UnsupportedOperationException("ExhaustivePCFGParser doesn't sample.");
   }
@@ -1818,7 +1792,6 @@ oScore[split][end][br.rightChild] = totR;
    *         each accompanied by its score (typically a
    *         negative log probability).
    */
-  @Override
   public List<ScoredObject<Tree>> getKBestParses(int k) {
 
     cand = Generics.newHashMap();
@@ -1829,12 +1802,12 @@ oScore[split][end][br.rightChild] = totR;
     int goal = stateIndex.indexOf(goalStr);
 
     Vertex v = new Vertex(goal, start, end);
-    List<ScoredObject<Tree>> kBestTrees = new ArrayList<>();
+    List<ScoredObject<Tree>> kBestTrees = new ArrayList<ScoredObject<Tree>>();
     for (int i = 1; i <= k; i++) {
       Tree internalTree = getTree(v, i, k);
       if (internalTree == null) { break; }
       // restoreUnaries(internalTree);
-      kBestTrees.add(new ScoredObject<>(internalTree, dHat.get(v).get(i - 1).score));
+      kBestTrees.add(new ScoredObject<Tree>(internalTree, dHat.get(v).get(i-1).score));
     }
     return kBestTrees;
   }
@@ -1848,7 +1821,7 @@ oScore[split][end][br.rightChild] = totR;
 
     List<Derivation> dHatV = dHat.get(v);
 
-    if (isTag[v.goal] && v.start + 1 == v.end) {
+    if (isTag[v.goal]) {
       IntTaggedWord tagging = new IntTaggedWord(words[start], tagIndex.indexOf(goalStr));
       String contextStr = getCoreLabel(start).originalText();
       float tagScore = lex.score(tagging, start, wordIndex.get(words[start]), contextStr);
@@ -1876,7 +1849,7 @@ oScore[split][end][br.rightChild] = totR;
 
     Derivation d = dHatV.get(k-1);
 
-    List<Tree> children = new ArrayList<>();
+    List<Tree> children = new ArrayList<Tree>();
     for (int i = 0; i < d.arc.size(); i++) {
       Vertex child = d.arc.tails.get(i);
       Tree t = getTree(child, d.j.get(i), kPrime);
@@ -1980,11 +1953,11 @@ oScore[split][end][br.rightChild] = totR;
 
   private List<Arc> getBackwardsStar(Vertex v) {
 
-    List<Arc> bs = new ArrayList<>();
+    List<Arc> bs = new ArrayList<Arc>();
 
     // pre-terminal??
-    if (isTag[v.goal] && v.start + 1 == v.end) {
-      List<Vertex> tails = new ArrayList<>();
+    if (isTag[v.goal]) {
+      List<Vertex> tails = new ArrayList<Vertex>();
       double score = iScore[v.start][v.end][v.goal];
       Arc arc = new Arc(tails, v, score);
       bs.add(arc);
@@ -1995,7 +1968,7 @@ oScore[split][end][br.rightChild] = totR;
       for (BinaryRule br : bg.ruleListByParent(v.goal)) {
         Vertex lChild = new Vertex(br.leftChild, v.start, split);
         Vertex rChild = new Vertex(br.rightChild, split, v.end);
-        List<Vertex> tails = new ArrayList<>();
+        List<Vertex> tails = new ArrayList<Vertex>();
         tails.add(lChild);
         tails.add(rChild);
         Arc arc = new Arc(tails, v, br.score);
@@ -2006,7 +1979,7 @@ oScore[split][end][br.rightChild] = totR;
     // check unaries
     for (UnaryRule ur : ug.rulesByParent(v.goal)) {
       Vertex child = new Vertex(ur.child, v.start, v.end);
-      List<Vertex> tails = new ArrayList<>();
+      List<Vertex> tails = new ArrayList<Vertex>();
       tails.add(child);
       Arc arc = new Arc(tails, v, ur.score);
       bs.add(arc);
@@ -2021,13 +1994,13 @@ oScore[split][end][br.rightChild] = totR;
   private PriorityQueue<Derivation> getCandidates(Vertex v, int k) {
     PriorityQueue<Derivation> candV = cand.get(v);
     if (candV == null) {
-      candV = new BinaryHeapPriorityQueue<>();
+      candV = new BinaryHeapPriorityQueue<Derivation>();
       List<Arc> bsV = getBackwardsStar(v);
 
       for (Arc arc : bsV) {
         int size = arc.size();
         double score = arc.ruleScore;
-        List<Double> childrenScores = new ArrayList<>();
+        List<Double> childrenScores = new ArrayList<Double>();
         for (int i = 0; i < size; i++) {
           Vertex child = arc.tails.get(i);
           double s = iScore[child.start][child.end][child.goal];
@@ -2035,14 +2008,14 @@ oScore[split][end][br.rightChild] = totR;
           score += s;
         }
         if (score == Double.NEGATIVE_INFINITY) { continue; }
-        List<Integer> j = new ArrayList<>();
+        List<Integer> j = new ArrayList<Integer>();
         for (int i = 0; i < size; i++) {
           j.add(1);
         }
         Derivation d = new Derivation(arc, j, score, childrenScores);
         candV.add(d, score);
       }
-      PriorityQueue<Derivation> tmp = new BinaryHeapPriorityQueue<>();
+      PriorityQueue<Derivation> tmp = new BinaryHeapPriorityQueue<Derivation>();
       for (int i = 0; i < k; i++) {
         if (candV.isEmpty()) { break; }
         Derivation d = candV.removeFirst();
@@ -2060,7 +2033,7 @@ oScore[split][end][br.rightChild] = totR;
 
     LinkedList<Derivation> dHatV = dHat.get(v);
     if (dHatV == null) {
-      dHatV = new LinkedList<>();
+      dHatV = new LinkedList<Derivation>();
       dHat.put(v,dHatV);
     }
     while (dHatV.size() < k) {
@@ -2080,7 +2053,7 @@ oScore[split][end][br.rightChild] = totR;
   private void lazyNext(PriorityQueue<Derivation> candV, Derivation derivation, int kPrime) {
     List<Vertex> tails = derivation.arc.tails;
     for  (int i = 0, sz = derivation.arc.size(); i < sz; i++) {
-      List<Integer> j = new ArrayList<>(derivation.j);
+      List<Integer> j = new ArrayList<Integer>(derivation.j);
       j.set(i, j.get(i)+1);
       Vertex Ti = tails.get(i);
       lazyKthBest(Ti, j.get(i), kPrime);
@@ -2089,7 +2062,7 @@ oScore[split][end][br.rightChild] = totR;
       if (j.get(i)-1 >= dHatTi.size()) { continue; }
       Derivation d = dHatTi.get(j.get(i)-1);
       double newScore = derivation.score - derivation.childrenScores.get(i) + d.score;
-      List<Double> childrenScores = new ArrayList<>(derivation.childrenScores);
+      List<Double> childrenScores = new ArrayList<Double>(derivation.childrenScores);
       childrenScores.set(i, d.score);
       Derivation newDerivation = new Derivation(derivation.arc, j, newScore, childrenScores);
       if (!candV.contains(newDerivation) && newScore > Double.NEGATIVE_INFINITY) {
@@ -2121,9 +2094,9 @@ oScore[split][end][br.rightChild] = totR;
     //   restoreUnaries(internalTree);
     // }
     //System.out.println("Restored unaries...");
-    List<ScoredObject<Tree>> scoredTrees = new ArrayList<>(internalTrees.size());
+    List<ScoredObject<Tree>> scoredTrees = new ArrayList<ScoredObject<Tree>>(internalTrees.size());
     for (Tree tr : internalTrees) {
-      scoredTrees.add(new ScoredObject<>(tr, bestScore));
+      scoredTrees.add(new ScoredObject<Tree>(tr, bestScore));
     }
     return scoredTrees;
     //TreeTransformer debinarizer = BinarizerFactory.getDebinarizer();

@@ -11,10 +11,8 @@ import javax.swing.tree.TreePath;
 
 import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.trees.DiskTreebank;
-import edu.stanford.nlp.trees.TransformingTreebank;
-import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.trees.TreeReaderFactory;
-import edu.stanford.nlp.trees.TreeTransformer;
+import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.gui.FileTreeNode.FileTreeNodeListener;
 import edu.stanford.nlp.trees.tregex.gui.TregexGUI.FilterType;
@@ -44,9 +42,9 @@ public class FileTreeModel extends DefaultTreeModel implements FileTreeNodeListe
    super(root);
    this.root = root;
    root.addListener(this);
-   listeners = new ArrayList<>();
+   listeners = new ArrayList<TreeModelListener>();
    treeStructure = Generics.newHashMap();
-   treeStructure.put(root, new ArrayList<>());
+   treeStructure.put(root, new ArrayList<FileTreeNode>());
 
    //other data
    trf = new TregexPattern.TRegexTreeReaderFactory();
@@ -125,7 +123,7 @@ public class FileTreeModel extends DefaultTreeModel implements FileTreeNodeListe
   }
 
   private Object[] makeTreePathArray(FileTreeNode node) {
-    List<TreeNode> path = new ArrayList<>();
+    List<TreeNode> path = new ArrayList<TreeNode>();
     path.add(node);
     TreeNode child = node;
     while(child != this.getRoot()) {
@@ -145,15 +143,11 @@ public class FileTreeModel extends DefaultTreeModel implements FileTreeNodeListe
    * Forks off a new thread to load your files based on the filters you set in the interface
    */
   public void addFileFolder(final EnumMap<FilterType, String> filters, final File[] files) {
-    List<FileTreeNode> newFiles = new ArrayList<>();
+    List<FileTreeNode> newFiles = new ArrayList<FileTreeNode>();
     findLoadableFiles(filters, files, newFiles, FileTreeModel.this.getRoot());//findLoadableFiles updates newFiles
     for(FileTreeNode fileNode : newFiles) {
       Treebank treebank = new DiskTreebank(trf, curEncoding);
       treebank.loadPath(fileNode.getFile(), null, true);
-      TreeTransformer transformer = TregexGUI.getInstance().transformer;
-      if (transformer != null) {
-        treebank = new TransformingTreebank(treebank, transformer);
-      }
       fileNode.setTreebank(treebank);
     }
     // System.out.println("Loadable files are: " + newFiles);
@@ -168,7 +162,7 @@ public class FileTreeModel extends DefaultTreeModel implements FileTreeNodeListe
         if(isLikelyInvisible(f.getName()))
           continue;
         FileTreeNode newParent = createNode(f, parent);
-        treeStructure.put(newParent, new ArrayList<>());
+        treeStructure.put(newParent, new ArrayList<FileTreeNode>());
         //recursively call on all the files inside
         findLoadableFiles(filters, f.listFiles(), newFiles, newParent);
         if(!treeStructure.get(newParent).isEmpty()) {//only add non-empty directories

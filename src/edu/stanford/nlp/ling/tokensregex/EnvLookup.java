@@ -3,9 +3,8 @@ package edu.stanford.nlp.ling.tokensregex;
 import edu.stanford.nlp.ling.AnnotationLookup;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
-import edu.stanford.nlp.pipeline.CoreMapAggregator;
 import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 
 import java.util.List;
 import java.util.Map;
@@ -16,9 +15,6 @@ import java.util.Map;
  * @author Angel Chang
  */
 public class EnvLookup {
-
-  private EnvLookup() {} // static methods
-
   // TODO: For additional keys, read map of name to Class from file???
   public static Class lookupAnnotationKey(Env env, String name)
   {
@@ -39,21 +35,11 @@ public class EnvLookup {
     if (lookup != null) {
       return lookup.coreKey;
     } else {
-      return null;
-    }
-  }
-
-  public static Class lookupAnnotationKeyWithClassname(Env env, String name) {
-    Class annotationKey = lookupAnnotationKey(env, name);
-    if (annotationKey == null) {
       try {
         Class clazz = Class.forName(name);
         return clazz;
-      } catch (ClassNotFoundException ex) {
-      }
+      } catch (ClassNotFoundException ex) {}
       return null;
-    } else {
-      return annotationKey;
     }
   }
 
@@ -66,17 +52,6 @@ public class EnvLookup {
       }
     }
     return CoreMapAttributeAggregator.DEFAULT_NUMERIC_TOKENS_AGGREGATORS;
-  }
-
-  public static CoreMapAggregator getDefaultTokensAggregator(Env env)
-  {
-    if (env != null) {
-      CoreMapAggregator obj = env.getDefaultTokensAggregator();
-      if (obj != null) {
-        return obj;
-      }
-    }
-    return CoreMapAggregator.DEFAULT_NUMERIC_TOKENS_AGGREGATOR;
   }
 
   public static List<Class> getDefaultTokensResultAnnotationKey(Env env)
@@ -110,7 +85,7 @@ public class EnvLookup {
       }
     }
     return null;
-  }
+  }  
 
   public static Class getDefaultNestedResultsAnnotationKey(Env env)
   {
@@ -144,5 +119,4 @@ public class EnvLookup {
     }
     return CoreAnnotations.TokensAnnotation.class;
   }
-
 }

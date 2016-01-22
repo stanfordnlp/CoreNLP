@@ -17,9 +17,9 @@ import java.util.regex.Pattern;
 
 /**
  * Represents dates and times according to ISO8601 standard while also allowing for
- * wild cards - e.g., can represent "21 June" without a year.
+ * wild cards - e.g., can represent "21 June" without a year
  * (Standard ISO8601 only allows removing less precise annotations (e.g.,
- * 200706 rather than 20070621 but not a way to represent 0621 without a year.)
+ * 200706 rather than 20070621 but not a way to represent 0621 without a year)
  * <p/>
  * Format stores date and time separately since the majority of current use
  * cases involve only one of these items.  Standard ISO 8601 instead
@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 public class ISODateInstance {
 
   private static final boolean DEBUG = false;
-  private ArrayList<String> tokens = new ArrayList<>(); //each token contains some piece of the date, from our input.
+  private ArrayList<String> tokens = new ArrayList<String>();//each token contains some piece of the date, from our input.
 
   public static final String OPEN_RANGE_AFTER = "A";
   public static final String OPEN_RANGE_BEFORE = "B";
@@ -72,6 +72,7 @@ public class ISODateInstance {
   /**
    * Takes a string that represents a date, and attempts to
    * normalize it into ISO 8601-compatible format.
+   *
    */
   public ISODateInstance(String date) {
     extractFields(date);
@@ -302,9 +303,9 @@ public class ISODateInstance {
 
   static {
     //Add entries to the relative datemap
-    relativeDateMap.put("today", new Pair<>(DateField.DAY, 0));
-    relativeDateMap.put("tomorrow", new Pair<>(DateField.DAY, 1));
-    relativeDateMap.put("yesterday", new Pair<>(DateField.DAY, -1));
+    relativeDateMap.put("today", new Pair<DateField, Integer>(DateField.DAY, 0));
+    relativeDateMap.put("tomorrow", new Pair<DateField, Integer>(DateField.DAY, 1));
+    relativeDateMap.put("yesterday", new Pair<DateField, Integer>(DateField.DAY, -1));
 
 
   }
@@ -353,10 +354,10 @@ public class ISODateInstance {
   }
 
   /**
-   * Uses regexp matching to match  month, day, and year fields.
-   * TODO: Find a way to mark what's already been handled in the string
+   * Uses regexp matching to match  month, day, and year fields
+   * TODO: Find a way to mark what;s already been handled in the string
    */
-  private boolean extractFields(String inputDate) {
+  public boolean extractFields(String inputDate) {
 
     if (tokens.size() < 2) {
       tokenizeDate(inputDate);
@@ -421,7 +422,7 @@ public class ISODateInstance {
     for (String curIndicator : rangeIndicators) {
       String[] dates = inputDate.split(curIndicator);
       if (dates.length == 2) {
-        return new Pair<>(dates[0], dates[1]);
+        return new Pair<String, String>(dates[0], dates[1]);
       }
     }
     return null;
@@ -553,9 +554,9 @@ public class ISODateInstance {
     String yearOther = date2.substring(0, 4);
     if (year.contains("*") || yearOther.contains("*")) {
       after = after && checkWildcardCompatibility(year, yearOther);
-    } else if (Integer.parseInt(year) > Integer.parseInt(yearOther)) {
+    } else if (Integer.valueOf(year) > Integer.valueOf(yearOther)) {
       return true;
-    } else if (Integer.parseInt(year) < Integer.parseInt(yearOther)) {
+    } else if (Integer.valueOf(year) < Integer.valueOf(yearOther)) {
       return false;
     }
 
@@ -563,7 +564,7 @@ public class ISODateInstance {
       if (year.contains("*") || yearOther.contains("*")) {
         return after;
       } else {
-        return after && (Integer.parseInt(year) != Integer.parseInt(yearOther));
+        return after && (!Integer.valueOf(year).equals(Integer.valueOf(yearOther)));
       }
     }
     //then check months
@@ -571,9 +572,9 @@ public class ISODateInstance {
     String monthOther = date2.substring(4, 6);
     if (month.contains("*") || monthOther.contains("*")) {
       after = after && checkWildcardCompatibility(month, monthOther);
-    } else if (Integer.parseInt(month) > Integer.parseInt(monthOther)) {
+    } else if (Integer.valueOf(month) > Integer.valueOf(monthOther)) {
       return true;
-    } else if (Integer.parseInt(month) < Integer.parseInt(monthOther)) {
+    } else if (Integer.valueOf(month) < Integer.valueOf(monthOther)) {
       return false;
     }
 
@@ -581,7 +582,7 @@ public class ISODateInstance {
       if (month.contains("*") || monthOther.contains("*")) {
         return after;
       } else {
-        return after && (Integer.parseInt(month) != Integer.parseInt(monthOther));
+        return after && (!Integer.valueOf(month).equals(Integer.valueOf(monthOther)));
       }
     }
 
@@ -590,9 +591,9 @@ public class ISODateInstance {
     String dayOther = date2.substring(6, 8);
     if (day.contains("*") || dayOther.contains("*")) {
       after = after && checkWildcardCompatibility(day, dayOther);
-    } else if (Integer.parseInt(day) > Integer.parseInt(dayOther)) {
+    } else if (Integer.valueOf(day) > Integer.valueOf(dayOther)) {
       return true;
-    } else if (Integer.parseInt(day) <= Integer.parseInt(dayOther)) {
+    } else if (Integer.valueOf(day) <= Integer.valueOf(dayOther)) {
       return false;
     }
 
@@ -872,7 +873,7 @@ public class ISODateInstance {
   //These methods are taken directly from or modified slightly from {@link DateInstance}
 
   private void tokenizeDate(String inputDate) {
-    tokens = new ArrayList<>();
+    tokens = new ArrayList<String>();
     Pattern pat = Pattern.compile("[-]");
     if (inputDate == null) {
       System.out.println("Null input date");
@@ -920,7 +921,7 @@ public class ISODateInstance {
   }
 
   /**
-   * Note: This method copied from {@code DateInstance}; not sure how we tell that it
+   * This method copied from {@link DateInstance}; not sure how we tell that it
    * is MMDD versus DDMM (sometimes it will be ambiguous).
    *
    */
@@ -996,10 +997,10 @@ public class ISODateInstance {
       }
       if (inputDate.charAt(inputDate.length() - 1) == 's') {//decade or century marker
         if (extract.charAt(2) == '0') {//e.g., 1900s -> 1900/1999
-          String endDate = Integer.toString((Integer.parseInt(extract) + 99));
+          String endDate = Integer.toString((Integer.valueOf(extract) + 99));
           extract = extract + '/' + endDate;
         } else {//e.g., 1920s -> 1920/1929
-          String endDate = Integer.toString((Integer.parseInt(extract) + 9));
+          String endDate = Integer.toString((Integer.valueOf(extract) + 9));
           extract = extract + '/' + endDate;
         }
       }
@@ -1042,9 +1043,6 @@ public class ISODateInstance {
       if (Character.isDigit(inputDate.charAt(0))) {
         // just parse number part, assuming last two letters are st/nd/rd
         year = QuantifiableEntityNormalizer.normalizedNumberStringQuiet(inputDate.substring(0, inputDate.length() - 2), 1, "", null);
-        if (year == null) {
-          year = "";
-        }
         if (year.contains(".")) {//number format issue
           year = year.substring(0, year.indexOf('.'));
         }
@@ -1096,19 +1094,21 @@ public class ISODateInstance {
   }
 
   public boolean extractDay(String inputDate) {
-    try {
-      for (String extract : tokens) {
-        if (QuantifiableEntityNormalizer.wordsToValues.containsKey(extract)) {
-          extract = Integer.toString(Double.valueOf(QuantifiableEntityNormalizer.wordsToValues.getCount(extract)).intValue());
-        } else if (QuantifiableEntityNormalizer.ordinalsToValues.containsKey(extract)) {
-          extract = Integer.toString(Double.valueOf(QuantifiableEntityNormalizer.ordinalsToValues.getCount(extract)).intValue());
-        }
-        extract = extract.replaceAll("[^0-9]", "");
-        if ( ! extract.isEmpty()) {
-          Long i = Long.parseLong(extract);
-          if (i.intValue() < 32L && i.intValue() > 0L) {
-            if (isoDate.length() < 6) { //should already have year and month
-              if (isoDate.length() != 4) { //throw new RuntimeException("Error extracting dates; should have had month and year but didn't");
+    for (int a = 0; a < tokens.size(); a++) {
+      String extract = tokens.get(a);
+      if (QuantifiableEntityNormalizer.wordsToValues.containsKey(extract)) {
+        extract = Integer.toString(Double.valueOf(QuantifiableEntityNormalizer.wordsToValues.getCount(extract)).intValue());
+      } else if (QuantifiableEntityNormalizer.ordinalsToValues.containsKey(extract)) {
+        extract = Integer.toString(Double.valueOf(QuantifiableEntityNormalizer.ordinalsToValues.getCount(extract)).intValue());
+      }
+      extract = extract.replaceAll("[^0-9]", "");
+      if (!extract.equals("")) {
+        try {
+          Integer i = Integer.valueOf(extract);
+          if (i.intValue() < 32 && i.intValue() > 0) {
+            if (isoDate.length() < 6) {//should already have year and month
+              if (isoDate.length() != 4)//throw new RuntimeException("Error extracting dates; should have had month and year but didn't");
+              {
                 isoDate = isoDate + "******";
               } else {
                 isoDate = isoDate + "**";
@@ -1118,17 +1118,17 @@ public class ISODateInstance {
             isoDate = isoDate + day;
             return true;
           }
+        } catch (NumberFormatException e) {
+          System.err.println("Exception in extract Day.");
+          System.err.println("tokens size :" + tokens.size());
+          e.printStackTrace();
         }
       }
-    } catch (NumberFormatException e) {
-      System.err.println("Exception in extract Day.");
-      System.err.println("tokens size :" + tokens.size());
-      e.printStackTrace();
     }
     return false;
   }
 
-  private static final Pattern[] weekdayArray = {Pattern.compile("[Ss]unday"), Pattern.compile("[Mm]onday"), Pattern.compile("[Tt]uesday"), Pattern.compile("[Ww]ednesday"), Pattern.compile("[Tt]hursday"), Pattern.compile("[Ff]riday"), Pattern.compile("[Ss]aturday")};
+  private static Pattern[] weekdayArray = {Pattern.compile("[Ss]unday"), Pattern.compile("[Mm]onday"), Pattern.compile("[Tt]uesday"), Pattern.compile("[Ww]ednesday"), Pattern.compile("[Tt]hursday"), Pattern.compile("[Ff]riday"), Pattern.compile("[Ss]aturday")};
 
   /**
    * This is a backup method if everything else fails.  It searches for named

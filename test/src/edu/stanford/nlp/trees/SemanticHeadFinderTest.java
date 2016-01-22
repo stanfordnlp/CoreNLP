@@ -22,14 +22,12 @@ public class SemanticHeadFinderTest extends TestCase {
           Tree.valueOf("(VP (TO na) (VP (VB say) (NP (WP who)))))"), // complement in "I 'm not gon na say who"
           Tree.valueOf("(VP (VBZ s) (RB not) (NP-PRD (NP (DT any)) (PP (IN of) (NP (PRP you)))))"), // complement of "Its not any of you
           Tree.valueOf("(VP (VBZ ve) (VP (VBN been) (VP (VBG feeling) (ADJP (JJ unwell)))))"), // complement of "Ive been feeling unwell
-          Tree.valueOf("(PP (SYM -) (NP (CD 3))))"),
-          Tree.valueOf("(VP (`` \") (VBN forced) ('' \") (PP-CLR (IN into) (S-NOM (VP (VBG taking) (NP (DT a) (JJ hawkish) (NN line))))))"),
 
   };
 
-  private String[] shfHeads = { "NNS", "NP", "VP", "NP", "S", "VP", "VP", "VP", "NP", "VP", "VP", "NP", "VP", "SYM", "VBN" };
+  private String[] shfHeads = { "NNS", "NP", "VP", "NP", "S", "VP", "VP", "VP", "NP", "VP", "VP", "NP", "VP" };
 
-  private String[] shfcHeads = { "NNS", "VBZ", "VP", "VBG", "S", "VP", "VP", "VP", "VBN", "VP", "VP", "VBZ", "VP", "SYM", "VBN" };
+  private String[] shfcHeads = { "NNS", "VBZ", "VP", "VBG", "S", "VP", "VP", "VP", "VBN", "VP", "VP", "VBZ", "VP" };
 
   private void runTesting(HeadFinder hf, String[] heads) {
     assertEquals("Test arrays out of balance", testTrees.length, heads.length);

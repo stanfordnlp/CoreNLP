@@ -56,15 +56,14 @@ public class SUTimePipeline {
   public Annotator getTimeAnnotator(String annotatorType,
                                     Properties props)
   {
-    switch (annotatorType) {
-      case "sutime":
-        return new TimeAnnotator("sutime", props);
-      case "gutime":
+    if ("sutime".equals(annotatorType)) {
+      return new TimeAnnotator("sutime", props);
+    } else if ("gutime".equals(annotatorType)) {
         return new GUTimeAnnotator("gutime", props);
-      case "heideltime":
+    } else if ("heideltime".equals(annotatorType)) {
         return new HeidelTimeAnnotator("heidelTime", props);
-      default:
-        return null;
+    } else {
+      return null;
     }
   }
 

@@ -1,4 +1,4 @@
-Stanford Chinese Segmenter - v3.6.0 - 2015-12-09
+Stanford Chinese Segmenter - v1.6.8 - 2013-04-04
 --------------------------------------------
 
 (c) 2003-2012  The Board of Trustees of The Leland Stanford Junior University.
@@ -36,7 +36,7 @@ without probabilities).
 * In addition to the command line scripts, there is a Java class 
   "SegDemo" which shows how to call the segmenter in Java code.
   Usage:
-   java -mx2g -cp "*:." SegDemo test.simp.utf8
+   java -mx2g -cp seg.jar:fastutil.jar:. SegDemo test.simp.utf8
 
 	SegDemo as supplied assumes that it is running in the home directory of the
 	installation, and to run anywhere else, you need to set the path to the
@@ -73,7 +73,8 @@ For more information, see:
 
 [Training data]
 (Chinese Penn Treebank)
-"data/ctb.gz" is trained with the training data in the LDC Chinese Treebank 7 
+"data/ctb.gz" is trained with all data in the LDC Chinese Treebank 6 
+(prerelease).
 
 (Beijing University)
 "data/pku.gz" is trained with the data provided by Peking University 

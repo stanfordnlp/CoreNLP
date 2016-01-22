@@ -91,29 +91,6 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
       c.add(value); // modifying the old collection
     }
   }
-  
-  /**
-   * Adds the values to the Collection mapped to by the key.
-   */
-  
-  public void addAll(K key, Collection<V> values) {
-    if (treatCollectionsAsImmutable) {
-      Collection<V> newC = cf.newCollection();
-      Collection<V> c = map.get(key);
-      if (c != null) {
-        newC.addAll(c);
-      }
-      newC.addAll(values);
-      map.put(key, newC); // replacing the old collection
-    } else {
-      Collection<V> c = map.get(key);
-      if (c == null) {
-        c = cf.newCollection();
-        map.put(key, c);
-      }
-      c.addAll(values); // modifying the old collection
-    }
-  }
 
   // Just add the key (empty collection, but key is in the keySet
   public void addKey(K key) {
@@ -333,8 +310,8 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
    * represented.
    */
   public CollectionValuedMap<K, V> deltaClone() {
-    CollectionValuedMap<K, V> result = new CollectionValuedMap<>(null, cf, true);
-    result.map = new DeltaMap<>(this.map);
+    CollectionValuedMap<K, V> result = new CollectionValuedMap<K, V>(null, cf, true);
+    result.map = new DeltaMap<K, Collection<V>>(this.map);
     return result;
   }
 
@@ -343,7 +320,7 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
    */
   @Override
   public CollectionValuedMap<K, V> clone() {
-    CollectionValuedMap<K, V> result = new CollectionValuedMap<>(this);
+    CollectionValuedMap<K, V> result = new CollectionValuedMap<K, V>(this);
     return result;
   }
 
@@ -442,7 +419,7 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
    *          from command line
    */
   public static void main(String[] args) {
-    CollectionValuedMap<Integer, Integer> originalMap = new CollectionValuedMap<>();
+    CollectionValuedMap<Integer, Integer> originalMap = new CollectionValuedMap<Integer, Integer>();
     /*
         for (int i=0; i<4; i++) {
           for (int j=0; j<4; j++) {
@@ -461,9 +438,9 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
       originalMap.add(rInt1, rInt2);
       System.out.println("Adding " + rInt1 + ' ' + rInt2);
     }
-    CollectionValuedMap<Integer, Integer> originalCopyMap = new CollectionValuedMap<>(originalMap);
-    CollectionValuedMap<Integer, Integer> deltaCopyMap = new CollectionValuedMap<>(originalMap);
-    CollectionValuedMap<Integer, Integer> deltaMap = new DeltaCollectionValuedMap<>(originalMap);
+    CollectionValuedMap<Integer, Integer> originalCopyMap = new CollectionValuedMap<Integer, Integer>(originalMap);
+    CollectionValuedMap<Integer, Integer> deltaCopyMap = new CollectionValuedMap<Integer, Integer>(originalMap);
+    CollectionValuedMap<Integer, Integer> deltaMap = new DeltaCollectionValuedMap<Integer, Integer>(originalMap);
     // now make a lot of changes to deltaMap;
     // add and change some stuff
     for (int i = 0; i < 400; i++) {

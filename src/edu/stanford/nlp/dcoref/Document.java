@@ -40,7 +40,6 @@ import edu.stanford.nlp.dcoref.Dictionaries.Person;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.math.NumberMatchingRegex;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -51,8 +50,6 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.IntTuple;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.TwoDimensionalMap;
-import edu.stanford.nlp.util.TwoDimensionalSet;
 
 public class Document implements Serializable {
 
@@ -97,8 +94,7 @@ public class Document implements Serializable {
    * Each mention occurrence with sentence # and position within sentence
    * (Nth mention, not Nth token)
    */
-  public Map<Mention, IntTuple> positions;              // mentions may be removed from this due to post processing
-  public Map<Mention, IntTuple> allPositions;           // all mentions (mentions will not be removed from this)
+  public Map<Mention, IntTuple> positions;
 
   public final Map<IntTuple, Mention> mentionheadPositions;
 
@@ -108,21 +104,15 @@ public class Document implements Serializable {
   /** UtteranceAnnotation -> String (speaker): mention ID or speaker string  */
   public Map<Integer, String> speakers;
 
-  /** Pair of mention id, and the mention's speaker id  */
+  /** mention ID pair  */
   public Set<Pair<Integer, Integer>> speakerPairs;
 
   public int maxUtter;
   public int numParagraph;
   public int numSentences;
 
-  /** Set of incompatible clusters pairs */
-  private TwoDimensionalSet<Integer, Integer> incompatibles;
-  private TwoDimensionalSet<Integer, Integer> incompatibleClusters;
-  
-  protected TwoDimensionalMap<Integer, Integer, Boolean> acronymCache;
-
-  /** Map of speaker name/id to speaker info */
-  transient private Map<String, SpeakerInfo> speakerInfoMap = Generics.newHashMap();
+  /** Set of incompatible mention pairs */
+  public Set<Pair<Integer, Integer>> incompatibles;
 
   public Document() {
     positions = Generics.newHashMap();
@@ -134,9 +124,7 @@ public class Document implements Serializable {
     allGoldMentions = Generics.newHashMap();
     speakers = Generics.newHashMap();
     speakerPairs = Generics.newHashSet();
-    incompatibles = TwoDimensionalSet.hashSet();
-    incompatibleClusters = TwoDimensionalSet.hashSet();
-    acronymCache = TwoDimensionalMap.hashMap();    
+    incompatibles = Generics.newHashSet();
   }
 
   public Document(Annotation anno, List<List<Mention>> predictedMentions,
@@ -170,31 +158,15 @@ public class Document implements Serializable {
     // find 'speaker mention' for each mention
     for(Mention m : allPredictedMentions.values()) {
       int utter = m.headWord.get(CoreAnnotations.UtteranceAnnotation.class);
-      String speaker = m.headWord.get(CoreAnnotations.SpeakerAnnotation.class);
-      if (speaker != null) {
-        // Populate speaker info
-        SpeakerInfo speakerInfo = speakerInfoMap.get(speaker);
-        if (speakerInfo == null) {
-          speakerInfoMap.put(speaker, speakerInfo = new SpeakerInfo(speaker));
-          // span indicates this is the speaker
-          if (Rules.mentionMatchesSpeaker(m, speakerInfo, true)) {
-            m.speakerInfo = speakerInfo;
-          }
+      try{
+        int speakerMentionID = Integer.parseInt(m.headWord.get(CoreAnnotations.SpeakerAnnotation.class));
+        if (utter != 0) {
+          speakerPairs.add(new Pair<Integer, Integer>(m.mentionID, speakerMentionID));
+          speakerPairs.add(new Pair<Integer, Integer>(speakerMentionID, m.mentionID));
         }
-
-        if (NumberMatchingRegex.isDecimalInteger(speaker)) {
-          try{
-            int speakerMentionID = Integer.parseInt(speaker);
-            if (utter != 0) {
-              // Add pairs of mention id and the mention id of the speaker
-              speakerPairs.add(new Pair<>(m.mentionID, speakerMentionID));
-//              speakerPairs.add(new Pair<Integer, Integer>(speakerMentionID, m.mentionID));
-            }
-          } catch (Exception e){
-            // no mention found for the speaker
-            // nothing to do
-          }
-        }
+      } catch (Exception e){
+        // no mention found for the speaker
+        // nothing to do
       }
       // set generic 'you' : e.g., you know in conversation
       if(docType!=DocType.ARTICLE && m.person==Person.YOU && m.endIndex < m.sentenceWords.size()-1
@@ -202,21 +174,6 @@ public class Document implements Serializable {
         m.generic = true;
       }
     }
-    // now that we have identified the speakers, first pass to check if mentions should cluster with the speakers
-    for(Mention m : allPredictedMentions.values()) {
-      if (m.speakerInfo == null) {
-        for (SpeakerInfo speakerInfo: speakerInfoMap.values()) {
-          if (speakerInfo.hasRealSpeakerName()) {
-            // do loose match - assumes that there isn't that many speakers....
-            if (Rules.mentionMatchesSpeaker(m, speakerInfo, false)) {
-              m.speakerInfo = speakerInfo;
-              break;
-            }
-          }
-        }
-      }
-    }
-
   }
 
   /** Document initialize */
@@ -224,7 +181,6 @@ public class Document implements Serializable {
     if(goldOrderedMentionsBySentence==null) assignOriginalID();
     setParagraphAnnotation();
     initializeCorefCluster();
-    this.allPositions = Generics.newHashMap(this.positions);
   }
 
   /** initialize positions and corefClusters (put each mention in each CorefCluster) */
@@ -261,77 +217,6 @@ public class Document implements Serializable {
     }
   }
 
-  public boolean isIncompatible(CorefCluster c1, CorefCluster c2) {
-    // Was any of the pairs of mentions marked as incompatible
-    int cid1 = Math.min(c1.clusterID, c2.clusterID);
-    int cid2 = Math.max(c1.clusterID, c2.clusterID);
-    return incompatibleClusters.contains(cid1,cid2);
-  }
-
-  // Update incompatibles for two clusters that are about to be merged
-  public void mergeIncompatibles(CorefCluster to, CorefCluster from) {
-    List<Pair<Pair<Integer,Integer>, Pair<Integer,Integer>>> replacements =
-            new ArrayList<>();
-    for (Pair<Integer, Integer> p : incompatibleClusters) {
-      Integer other = null;
-      if (p.first == from.clusterID) {
-        other = p.second;
-      } else if (p.second == from.clusterID) {
-        other = p.first;
-      }
-      if (other != null && other != to.clusterID) {
-        int cid1 = Math.min(other, to.clusterID);
-        int cid2 = Math.max(other, to.clusterID);
-        replacements.add(Pair.makePair(p, Pair.makePair(cid1, cid2)));
-      }
-    }
-    for (Pair<Pair<Integer,Integer>, Pair<Integer,Integer>> r:replacements)  {
-      incompatibleClusters.remove(r.first.first(), r.first.second());
-      incompatibleClusters.add(r.second.first(), r.second.second());
-    }
-  }
-
-  public void mergeAcronymCache(CorefCluster to, CorefCluster from) {
-    TwoDimensionalSet<Integer, Integer> replacements = TwoDimensionalSet.hashSet();
-    for (Integer first : acronymCache.firstKeySet()) {
-      for (Integer second : acronymCache.get(first).keySet()) {
-        if (acronymCache.get(first, second)) {
-          Integer other = null;
-          if (first == from.clusterID) {
-            other = second;
-          } else if (second == from.clusterID) {
-            other = first;
-          }
-          if (other != null && other != to.clusterID) {
-            int cid1 = Math.min(other, to.clusterID);
-            int cid2 = Math.max(other, to.clusterID);
-            replacements.add(cid1, cid2);
-          }
-        }
-      }
-    }
-    for (Integer first : replacements.firstKeySet()) {
-      for (Integer second : replacements.secondKeySet(first)) {
-        acronymCache.put(first, second, true);
-      }
-    }
-  }
-
-  public boolean isIncompatible(Mention m1, Mention m2) {
-    int mid1 = Math.min(m1.mentionID, m2.mentionID);
-    int mid2 = Math.max(m1.mentionID, m2.mentionID);
-    return incompatibles.contains(mid1,mid2);
-  }
-
-  public void addIncompatible(Mention m1, Mention m2) {
-    int mid1 = Math.min(m1.mentionID, m2.mentionID);
-    int mid2 = Math.max(m1.mentionID, m2.mentionID);
-    incompatibles.add(mid1,mid2);
-    int cid1 = Math.min(m1.corefClusterID, m2.corefClusterID);
-    int cid2 = Math.max(m1.corefClusterID, m2.corefClusterID);
-    incompatibleClusters.add(cid1,cid2);
-  }
-
   /** Mark twin mentions in gold and predicted mentions */
   protected void findTwinMentions(boolean strict){
     if(strict) findTwinMentionsStrict();
@@ -347,7 +232,7 @@ public class Document implements Serializable {
       // For CoNLL training there are some documents with gold mentions with the same position offsets
       // See /scr/nlp/data/conll-2011/v2/data/train/data/english/annotations/nw/wsj/09/wsj_0990.v2_auto_conll
       //  (Packwood - Roth)
-      CollectionValuedMap<IntPair, Mention> goldMentionPositions = new CollectionValuedMap<>();
+      CollectionValuedMap<IntPair, Mention> goldMentionPositions = new CollectionValuedMap<IntPair, Mention>();
       for(Mention g : golds) {
         IntPair ip = new IntPair(g.startIndex, g.endIndex);
         if (goldMentionPositions.containsKey(ip)) {
@@ -393,12 +278,12 @@ public class Document implements Serializable {
       for(Mention g : golds) {
         goldMentionPositions.put(new IntPair(g.startIndex, g.endIndex), g);
         if(!goldMentionHeadPositions.containsKey(g.headIndex)) {
-          goldMentionHeadPositions.put(g.headIndex, new LinkedList<>());
+          goldMentionHeadPositions.put(g.headIndex, new LinkedList<Mention>());
         }
         goldMentionHeadPositions.get(g.headIndex).add(g);
       }
 
-      List<Mention> remains = new ArrayList<>();
+      List<Mention> remains = new ArrayList<Mention>();
       for (Mention p : predicts) {
         IntPair pos = new IntPair(p.startIndex, p.endIndex);
         if(goldMentionPositions.containsKey(pos)) {
@@ -520,7 +405,7 @@ public class Document implements Serializable {
   /** Extract gold coref link information */
   protected void extractGoldLinks() {
     //    List<List<Mention>> orderedMentionsBySentence = this.getOrderedMentions();
-    List<Pair<IntTuple, IntTuple>> links = new ArrayList<>();
+    List<Pair<IntTuple, IntTuple>> links = new ArrayList<Pair<IntTuple,IntTuple>>();
 
     // position of each mention in the input matrix, by id
     Map<Integer, IntTuple> positions = Generics.newHashMap();
@@ -534,7 +419,7 @@ public class Document implements Serializable {
         pos.set(0, i);
         pos.set(1, j);
         positions.put(id, pos);
-        antecedents.put(id, new ArrayList<>());
+        antecedents.put(id, new ArrayList<IntTuple>());
       }
     }
 
@@ -570,14 +455,14 @@ public class Document implements Serializable {
               IntTuple missed = new IntTuple(2);
               missed.set(0, k);
               missed.set(1, l);
-              if (links.contains(new Pair<>(missed, dst))) {
+              if (links.contains(new Pair<IntTuple, IntTuple>(missed, dst))) {
                 antecedents.get(id).add(missed);
-                links.add(new Pair<>(src, missed));
+                links.add(new Pair<IntTuple, IntTuple>(src, missed));
               }
             }
           }
 
-          links.add(new Pair<>(src, dst));
+          links.add(new Pair<IntTuple, IntTuple>(src, dst));
 
           assert (antecedents.get(id) != null);
           antecedents.get(id).add(dst);
@@ -586,7 +471,7 @@ public class Document implements Serializable {
           assert (ants != null);
           for (IntTuple ant : ants) {
             antecedents.get(id).add(ant);
-            links.add(new Pair<>(src, ant));
+            links.add(new Pair<IntTuple, IntTuple>(src, ant));
           }
         }
       }
@@ -627,9 +512,7 @@ public class Document implements Serializable {
 
   /** Speaker extraction */
   private void findSpeakers(Dictionaries dict) {
-    Boolean useMarkedDiscourseBoolean = annotation.get(CoreAnnotations.UseMarkedDiscourseAnnotation.class);
-    boolean useMarkedDiscourse = (useMarkedDiscourseBoolean != null)? useMarkedDiscourseBoolean: false;
-    if (Constants.USE_GOLD_SPEAKER_TAGS || useMarkedDiscourse) {
+    if(Constants.USE_GOLD_SPEAKER_TAGS) {
       for(CoreMap sent : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         for(CoreLabel w : sent.get(CoreAnnotations.TokensAnnotation.class)) {
           int utterIndex = w.get(CoreAnnotations.UtteranceAnnotation.class);
@@ -653,8 +536,8 @@ public class Document implements Serializable {
   }
   private void findSpeakersInArticle(Dictionaries dict) {
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
-    Pair<Integer, Integer> beginQuotation = new Pair<>();
-    Pair<Integer, Integer> endQuotation = new Pair<>();
+    Pair<Integer, Integer> beginQuotation = new Pair<Integer, Integer>();
+    Pair<Integer, Integer> endQuotation = new Pair<Integer, Integer>();
     boolean insideQuotation = false;
     int utterNum = -1;
 
@@ -711,7 +594,7 @@ public class Document implements Serializable {
       String word = sent.get(i).get(CoreAnnotations.TextAnnotation.class);
       if(dict.reportVerb.contains(lemma)) {
         // find subject
-        SemanticGraph dependency = sentences.get(sentNum).get(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class);
+        SemanticGraph dependency = sentences.get(sentNum).get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
         IndexedWord w = dependency.getNodeByWordPattern(word);
 
         if (w != null) {
@@ -751,7 +634,7 @@ public class Document implements Serializable {
         }
       }
     }
-    List<CoreMap> paragraph = new ArrayList<>();
+    List<CoreMap> paragraph = new ArrayList<CoreMap>();
     int paragraphUtterIndex = 0;
     String nextParagraphSpeaker = "";
     int paragraphOffset = 0;
@@ -761,7 +644,7 @@ public class Document implements Serializable {
         nextParagraphSpeaker = findParagraphSpeaker(paragraph, paragraphUtterIndex, nextParagraphSpeaker, paragraphOffset, dict);
         paragraphUtterIndex = currentUtter;
         paragraphOffset += paragraph.size();
-        paragraph = new ArrayList<>();
+        paragraph = new ArrayList<CoreMap>();
       }
       paragraph.add(sent);
     }
@@ -808,7 +691,7 @@ public class Document implements Serializable {
     for(CoreLabel w : lastSent.get(CoreAnnotations.TokensAnnotation.class)) {
       if(w.get(CoreAnnotations.LemmaAnnotation.class).equals("report") || w.get(CoreAnnotations.LemmaAnnotation.class).equals("say")) {
         String word = w.get(CoreAnnotations.TextAnnotation.class);
-        SemanticGraph dependency = lastSent.get(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class);
+        SemanticGraph dependency = lastSent.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
         IndexedWord t = dependency.getNodeByWordPattern(word);
 
         for(Pair<GrammaticalRelation,IndexedWord> child : dependency.childPairs(t)){
@@ -826,14 +709,6 @@ public class Document implements Serializable {
       }
     }
     return speaker;
-  }
-
-  public SpeakerInfo getSpeakerInfo(String speaker) {
-    return speakerInfoMap.get(speaker);
-  }
-
-  public int numberOfSpeakers() {
-    return speakerInfoMap.size();
   }
 
   /** Check one mention is the speaker of the other mention */

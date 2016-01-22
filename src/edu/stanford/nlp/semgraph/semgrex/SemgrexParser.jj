@@ -10,20 +10,17 @@ package edu.stanford.nlp.semgraph.semgrex;
 // all generated classes are in this package
 
 //imports
+import java.io.StringReader;
 import java.util.*;
 import edu.stanford.nlp.util.Generics;
 
 class SemgrexParser {
 
-  // this is so we can tell, at any point during the parse
-  // whether we are under a negation, which we need to know
-  // because labeling nodes under negation is illegal
-  private boolean underNegation = false;
-  private boolean underNodeNegation = false;
-  // keep track of which variables we've already seen
-  // lets us make sure we don't name new nodes under a negation
-  private Set<String> knownVariables = Generics.newHashSet();
-
+	// this is so we can tell, at any point during the parse
+	// whether we are under a negation, which we need to know
+  	// because labeling nodes under negation is illegal
+	private boolean underNegation = false;
+      	private boolean underNodeNegation = false;
 }
 
 PARSER_END(SemgrexParser)
@@ -37,9 +34,9 @@ SKIP:
 
 TOKEN:
 {
-	< RELATION: "<" | ">" | ">>" | "<<" | "==" | "$+" | "$-" | "$++" | "$--" | "." >
+	< RELATION: "<" | ">" | ">>" | "<<">
 |	< ALIGNRELN: "@" >
-|	< IDENTIFIER: (~[" ", "\n", "\r", "(", "/", "|", "@", "!", "#", "%", "&", ")", "=", "?", "[", "]", ">", "<", "~", ".", ",", "$", ":", ";", "{", "}", "+", "-"])+ >
+|	< IDENTIFIER: (~[" ", "\n", "\r", "(", "/", "|", "@", "!", "#", "%", "&", ")", "=", "?", "[", "]", ">", "<", "~", ".", ",", "$", ":", ";", "{", "}"])+ >
 |	< NUMBER: ( ["0"-"9"] )+ >
 |	< EMPTY: "#" >
 |	< ROOT: "$" >
@@ -52,15 +49,15 @@ SemgrexPattern Root() : {
   List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
   // a local variable
 } {
-  (
+  ( 
     (reverse = <ALIGNRELN> node = SubNode(GraphRelation.ALIGNED_ROOT) "\n")
     |
-    ( node = SubNode(GraphRelation.ROOT) { children.add(node); }
+    ( node = SubNode(GraphRelation.ROOT) { children.add(node); } 
       ( ":" node = SubNode(GraphRelation.ITERATOR) { children.add(node); } )*
       "\n"
     )
   )
-  {
+  { 
     if (children.size() <= 1)
       return node;
     return new CoordinationPattern(true, children, true);
@@ -73,7 +70,7 @@ SemgrexPattern SubNode(GraphRelation r) : {
 	SemgrexPattern child = null;
 } {
 	( "(" result = SubNode(r) ")" ( child = RelationDisj() )? )
-	{
+	{ 	
 		if (child != null) {
 		List<SemgrexPattern> newChildren = new ArrayList<SemgrexPattern>();
 		newChildren.addAll(result.getChildren());
@@ -93,12 +90,11 @@ SemgrexPattern RelationDisj() : {
 } {
     (	 (child = RelationConj() ) { children.add(child); }
 	( ( "|" child = RelationConj() ) { children.add(child); } )* )
- 	{ if (children.size() == 1) {
+ 	{ if (children.size() == 1)
 		return child;
-	  } else {
+	  else
 		return new CoordinationPattern(false, children, false);
-      }
-    }
+  }
 }
 
 SemgrexPattern RelationConj() : {
@@ -107,12 +103,11 @@ SemgrexPattern RelationConj() : {
 } {
     (	  (child = ModRelation() ) { children.add(child); }
 	( ( ("&")? child = ModRelation() ) { children.add(child); } )* )
- 	{ if (children.size() == 1) {
+ 	{ if (children.size() == 1)
 		return child;
-	  } else {
+	  else
 		return new CoordinationPattern(false, children, true);
-      }
-    }
+  }
 }
 
 SemgrexPattern ModRelation() : {
@@ -147,33 +142,33 @@ SemgrexPattern Relation() : {
 	boolean pC = false;
 } {
 	(
-	( ( ( (numArg = <IDENTIFIER> ("," numArg2 = <IDENTIFIER>)?)? rel = <RELATION>
+	( ( ( (numArg = <IDENTIFIER> ("," numArg2 = <IDENTIFIER>)?)? rel = <RELATION> 
 		(relnType = <IDENTIFIER> | relnType = <REGEX>)?)
 		(( ("=") name = <IDENTIFIER> )   )? )
 	  | (rel = <ALIGNRELN>))
-
+	  
 	{
           if (numArg == null && numArg2 == null) {
-            reln = GraphRelation.getRelation(rel != null ? rel.image : null,
-                      relnType != null ? relnType.image : null,
+            reln = GraphRelation.getRelation(rel != null ? rel.image : null, 
+                      relnType != null ? relnType.image : null, 
                       name != null ? name.image : null);
           } else if (numArg2 == null) {
-            reln = GraphRelation.getRelation(rel != null ? rel.image : null,
-                      relnType != null ? relnType.image : null,
+            reln = GraphRelation.getRelation(rel != null ? rel.image : null, 
+                      relnType != null ? relnType.image : null, 
 	              Integer.parseInt(numArg.image),
                       name != null ? name.image : null);
           } else {
-            reln = GraphRelation.getRelation(rel != null ? rel.image : null,
-                      relnType != null ? relnType.image : null,
-                      Integer.parseInt(numArg.image),
+            reln = GraphRelation.getRelation(rel != null ? rel.image : null, 
+                      relnType != null ? relnType.image : null, 
+                      Integer.parseInt(numArg.image), 
                       Integer.parseInt(numArg2.image),
                       name != null ? name.image : null);
 	  }
 	}
 	( (node = ModNode(reln)) |
 	  	("(" node = SubNode(reln) ")") ) )
-
-	 {
+	
+	 { 		
 	 return node;
 	}
 }
@@ -213,7 +208,7 @@ SemgrexPattern ModNode(GraphRelation r) : {
 		  { startUnderNeg = underNodeNegation;
 		    underNodeNegation = true; } child = Child(r) { underNodeNegation = startUnderNeg; } )
 	   )
-	   {
+	   { 
 	   	return child; }
 }
 
@@ -223,7 +218,7 @@ SemgrexPattern Child(GraphRelation r) : {
 } {
 	(( child = NodeDisj(r) )
 		| child = Description(r) )
-	  {
+	  { 
 	  return child; }
 }
 
@@ -237,34 +232,26 @@ NodePattern Description(GraphRelation r) : {
 	Map<String, String> attributes = Generics.newHashMap();
 	NodePattern pat;
 } {
-
+	
 	( "{" ( (  ( (attr = <IDENTIFIER> ":" (value = <IDENTIFIER> | value = <REGEX>) )
 	 { if (attr != null && value != null) attributes.put(attr.image, value.image); } )
-
+	 
 			 (";" ((attr = <IDENTIFIER> ":" (value = <IDENTIFIER> | value = <REGEX>)) {
 		if (attr != null && value != null) attributes.put(attr.image, value.image); }) )* "}")
 	|
-	(( attr = <ROOT> "}") {
+	(( attr = <ROOT> "}") { 
 	isRoot = true; } )
 	|
 	(( attr = <EMPTY> "}") {
 	isEmpty = true; } )
-	| ( "}") )
+	| ( "}") ) 
 
-	(( ("=" { link = true; }) name = <IDENTIFIER> )
-            {
-              String nodeName = name.image;
-              if (underNegation) {
-                if (!knownVariables.contains(nodeName)) {
-                  throw new ParseException("Cannot add new variable names under negation.  Node '" + nodeName + "' not seen before");
-                }
-              } else {
-                knownVariables.add(nodeName);
-              }
-            }
-	  )?
+	(( ("=" { link = true; }) name = <IDENTIFIER> ) 
+		{if (underNegation)
+				throw new ParseException("No named semgrex nodes allowed in the scope of negation");} 
+	  )? 
 	)
-  	{ pat = new NodePattern(r, underNodeNegation, attributes, isRoot, isEmpty, name != null ? name.image : null);
+  	{ pat = new NodePattern(r, underNodeNegation, attributes, isRoot, isEmpty, name != null ? name.image : null); 
 	   if (link) pat.makeLink();
 	  return pat;
 	}

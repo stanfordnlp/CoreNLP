@@ -7,9 +7,11 @@ import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.TokenizerFactory;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.process.WordSegmentingTokenizer;
 import edu.stanford.nlp.process.WordSegmenter;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.trees.international.pennchinese.ChineseTreebankLanguagePack;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseEscaper;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
@@ -37,36 +39,25 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
   public ChineseLexiconAndWordSegmenter(ChineseLexicon lex, WordSegmenter seg) {
     chineseLexicon = lex;
     wordSegmenter = seg;
+    ChineseTreebankLanguagePack.setTokenizerFactory(WordSegmentingTokenizer.factory(seg));
   }
 
-  @Override
   public List<HasWord> segment(String s) {
     return wordSegmenter.segment(s);
   }
 
-  @Override
   public boolean isKnown(int word) {
     return chineseLexicon.isKnown(word);
   }
 
-  @Override
   public boolean isKnown(String word) {
     return chineseLexicon.isKnown(word);
   }
 
-  /** {@inheritDoc} */
-  @Override
-  public Set<String> tagSet(Function<String,String> basicCategoryFunction) {
-    return chineseLexicon.tagSet(basicCategoryFunction);
-  }
-
-
-  @Override
   public Iterator<IntTaggedWord> ruleIteratorByWord(int word, int loc, String featureSpec) {
     return chineseLexicon.ruleIteratorByWord(word, loc, null);
   }
 
-  @Override
   public Iterator<IntTaggedWord> ruleIteratorByWord(String word, int loc, String featureSpec) {
     return chineseLexicon.ruleIteratorByWord(word, loc, null);
   }
@@ -74,7 +65,6 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
   /** Returns the number of rules (tag rewrites as word) in the Lexicon.
    *  This method assumes that the lexicon has been initialized.
    */
-  @Override
   public int numRules() {
     return chineseLexicon.numRules();
   }
@@ -140,25 +130,26 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
     wordSegmenter.finishTraining();
   }
 
-  @Override
   public float score(IntTaggedWord iTW, int loc, String word, String featureSpec) {
     return chineseLexicon.score(iTW, loc, word, null);
   } // end score()
 
 
-  @Override
   public void loadSegmenter(String filename) {
     throw new UnsupportedOperationException();
   }
 
-  @Override
   public void readData(BufferedReader in) throws IOException {
     chineseLexicon.readData(in);
   }
 
-  @Override
   public void writeData(Writer w) throws IOException {
     chineseLexicon.writeData(w);
+  }
+
+  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+    in.defaultReadObject();
+    ChineseTreebankLanguagePack.setTokenizerFactory(WordSegmentingTokenizer.factory(wordSegmenter));
   }
 
   // the data & functions below are for standalone segmenter. -pichuan
@@ -200,7 +191,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
     if (op.trainOptions.collinsPunc) {
       collinsPuncTransformer = new CollinsPuncTransformer(tlpParams.treebankLanguagePack());
     }
-    List<Tree> binaryTrainTrees = new ArrayList<>();
+    List<Tree> binaryTrainTrees = new ArrayList<Tree>();
     // List<Tree> binaryTuneTrees = new ArrayList<Tree>();
 
     if (op.trainOptions.selectiveSplit) {
@@ -250,8 +241,8 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
 
   private static void printArgs(String[] args, PrintStream ps) {
     ps.print("ChineseLexiconAndWordSegmenter invoked with arguments:");
-    for (String arg : args) {
-      ps.print(" " + arg);
+    for (int i = 0; i < args.length; i++) {
+      ps.print(" " + args[i]);
     }
     ps.println();
   }
@@ -396,7 +387,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
     String textOutputFileOrUrl = null;
     String treebankPath = null;
     Treebank testTreebank = null;
-    // Treebank tuneTreebank = null;
+    Treebank tuneTreebank = null;
     String testPath = null;
     FileFilter testFilter = null;
     FileFilter trainFilter = null;
@@ -407,14 +398,14 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
 //    DocumentPreprocessor documentPreprocessor = new DocumentPreprocessor();
     boolean tokenized = false; // whether or not the input file has already been tokenized
     Function<List<HasWord>, List<HasWord>> escaper = new ChineseEscaper();
-    // int tagDelimiter = -1;
-    // String sentenceDelimiter = "\n";
-    // boolean fromXML = false;
+    int tagDelimiter = -1;
+    String sentenceDelimiter = "\n";
+    boolean fromXML = false;
     int argIndex = 0;
     if (args.length < 1) {
       System.err.println("usage: java edu.stanford.nlp.parser.lexparser." +
                          "LexicalizedParser parserFileOrUrl filename*");
-      return;
+      System.exit(1);
     }
 
     Options op = new Options();
@@ -536,8 +527,8 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
         }
       }
       Treebank trainTreebank = makeTreebank(treebankPath, op, trainFilter);
-      Index<String> wordIndex = new HashIndex<>();
-      Index<String> tagIndex = new HashIndex<>();
+      Index<String> wordIndex = new HashIndex<String>();
+      Index<String> tagIndex = new HashIndex<String>();
       cs = new ChineseLexiconAndWordSegmenter(trainTreebank, op, wordIndex, tagIndex);
     } else if (textInputFileOrUrl != null) {
       // so we load the segmenter from a text grammar file
@@ -709,12 +700,10 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
   private static final long serialVersionUID = -6554995189795187918L;
 
 
-  @Override
   public UnknownWordModel getUnknownWordModel() {
     return chineseLexicon.getUnknownWordModel();
   }
 
-  @Override
   public void setUnknownWordModel(UnknownWordModel uwm) {
     chineseLexicon.setUnknownWordModel(uwm);
   }

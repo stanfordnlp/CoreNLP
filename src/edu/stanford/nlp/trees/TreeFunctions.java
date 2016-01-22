@@ -1,10 +1,11 @@
 package edu.stanford.nlp.trees;
 
+import edu.stanford.nlp.ling.CategoryWordTag;
 import edu.stanford.nlp.ling.CategoryWordTagFactory;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.StringLabel;
 import edu.stanford.nlp.ling.StringLabelFactory;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -45,7 +46,7 @@ public class TreeFunctions {
         return tf.newTreeNode(new StringLabel(t.label().value()), Collections.singletonList(helper(t.children()[0])));
       }
       int numKids = t.numChildren();
-      List<Tree> children = new ArrayList<>(numKids);
+      List<Tree> children = new ArrayList<Tree>(numKids);
       for (int k = 0; k < numKids; k++) {
         children.add(helper(t.children()[k]));
       }
@@ -72,7 +73,7 @@ public class TreeFunctions {
 
   private static class LabeledTreeToCategoryWordTagTreeFunction implements Function<Tree, Tree> {
 
-    protected TreeFactory tf =
+    protected TreeFactory tf = 
       new LabeledScoredTreeFactory(new CategoryWordTagFactory());
 
     public Tree helper(Tree t) {
@@ -84,7 +85,7 @@ public class TreeFunctions {
         return tf.newTreeNode(t.label().value(), Collections.singletonList(helper(t.children()[0])));
       } else {
         int numKids = t.numChildren();
-        List<Tree> children = new ArrayList<>(numKids);
+        List<Tree> children = new ArrayList<Tree>(numKids);
         for (int k = 0; k < numKids; k++) {
           children.add(helper(t.children()[k]));
         }
@@ -115,7 +116,7 @@ public class TreeFunctions {
   private static class LabeledToDescriptiveCoreLabelTreeFunction
     implements Function<Tree, Tree> {
 
-    protected TreeFactory tf =
+    protected TreeFactory tf = 
       new LabeledScoredTreeFactory(CoreLabel.factory());
 
     public Tree apply(Tree t) {
@@ -124,11 +125,11 @@ public class TreeFunctions {
       } else if (t.isLeaf()) {
         return tf.newLeaf(t.label().toString());
       } else if (t.isPreTerminal()) {
-        return tf.newTreeNode(t.label().toString(),
+        return tf.newTreeNode(t.label().toString(), 
                          Collections.singletonList(apply(t.children()[0])));
       } else {
         int numKids = t.numChildren();
-        List<Tree> children = new ArrayList<>(numKids);
+        List<Tree> children = new ArrayList<Tree>(numKids);
         for (int k = 0; k < numKids; k++) {
           children.add(apply(t.children()[k]));
         }
@@ -144,7 +145,7 @@ public class TreeFunctions {
    * tree with CoreLabels which contain the toString() of each of
    * the input labels.
    */
-  public static Function<Tree, Tree>
+  public static Function<Tree, Tree> 
     getLabeledToDescriptiveCoreLabelTreeFunction() {
     return new LabeledToDescriptiveCoreLabelTreeFunction();
   }

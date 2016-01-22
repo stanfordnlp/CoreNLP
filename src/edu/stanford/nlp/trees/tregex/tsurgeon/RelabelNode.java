@@ -8,7 +8,6 @@ import java.util.regex.Matcher;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Roger Levy (rog@stanford.edu)
@@ -71,7 +70,7 @@ class RelabelNode extends TsurgeonPattern {
       mode = RelabelMode.REGEX;
       this.labelRegex = Pattern.compile(m1.group(1));
       this.replacementString = m1.group(2);
-      replacementPieces = new ArrayList<>();
+      replacementPieces = new ArrayList<String>();
       Matcher generalMatcher = 
         oneGeneralReplacementPattern.matcher(m1.group(2));
       int lastPosition = 0;
@@ -130,45 +129,34 @@ class RelabelNode extends TsurgeonPattern {
 
 
   @Override
-  public TsurgeonMatcher matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
-    return new RelabelMatcher(newNodeNames, coindexer);
-  }
-
-  private class RelabelMatcher extends TsurgeonMatcher {
-    public RelabelMatcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
-      super(RelabelNode.this, newNodeNames, coindexer);
+  public Tree evaluate(Tree t, TregexMatcher tm) {
+    Tree nodeToRelabel = children[0].evaluate(t, tm);
+    switch (mode) {
+    case FIXED: {
+      nodeToRelabel.label().setValue(newLabel);
+      break;
     }
-
-    @Override
-    public Tree evaluate(Tree tree, TregexMatcher tregex) {
-      Tree nodeToRelabel = childMatcher[0].evaluate(tree, tregex);
-      switch (mode) {
-      case FIXED: {
-        nodeToRelabel.label().setValue(newLabel);
-        break;
-      }
-      case REGEX: {
-        Matcher m = labelRegex.matcher(nodeToRelabel.label().value());
-        StringBuilder label = new StringBuilder();
-        for (String chunk : replacementPieces) {
-          if (variablePattern.matcher(chunk).matches()) {
-            String name = chunk.substring(2, chunk.length() - 1);
-            label.append(Matcher.quoteReplacement(tregex.getVariableString(name)));
-          } else if (nodePattern.matcher(chunk).matches()) {
-            String name = chunk.substring(2, chunk.length() - 1);
-            label.append(Matcher.quoteReplacement(tregex.getNode(name).value()));
-          } else {
-            label.append(chunk);
-          }
+    case REGEX: {
+      Matcher m = labelRegex.matcher(nodeToRelabel.label().value());
+      StringBuilder label = new StringBuilder();
+      for (String chunk : replacementPieces) {
+        if (variablePattern.matcher(chunk).matches()) {
+          String name = chunk.substring(2, chunk.length() - 1);
+          label.append(Matcher.quoteReplacement(tm.getVariableString(name)));
+        } else if (nodePattern.matcher(chunk).matches()) {
+          String name = chunk.substring(2, chunk.length() - 1);
+          label.append(Matcher.quoteReplacement(tm.getNode(name).value()));
+        } else {
+          label.append(chunk);
         }
-        nodeToRelabel.label().setValue(m.replaceAll(label.toString()));
-        break;
       }
-      default:
-        throw new AssertionError("Unsupported relabel mode " + mode);
-      }
-      return tree;
+      nodeToRelabel.label().setValue(m.replaceAll(label.toString()));
+      break;
     }
+    default:
+      throw new AssertionError("Unsupported relabel mode " + mode);
+    }
+    return t;
   }
 
   @Override

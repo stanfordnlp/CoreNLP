@@ -115,7 +115,8 @@ public class ExtractionObject implements Serializable {
   public boolean equals(Object other) {
     if(! (other instanceof ExtractionObject)) return false;
     ExtractionObject o = (ExtractionObject) other;
-    return o.objectId.equals(objectId) && o.sentence.get(CoreAnnotations.TextAnnotation.class).equals(sentence.get(CoreAnnotations.TextAnnotation.class));
+    if(o.objectId.equals(objectId) && o.sentence == sentence) return true;
+    return false;
   }
 
   static class CompByExtent implements Comparator<ExtractionObject> {
@@ -145,12 +146,12 @@ public class ExtractionObject implements Serializable {
   public static Span getSpan(ExtractionObject ... objs) {
     int left = Integer.MAX_VALUE;
     int right = Integer.MIN_VALUE;
-    for (ExtractionObject obj : objs) {
-      if (obj.getExtentTokenStart() < left) {
-        left = obj.getExtentTokenStart();
+    for(int i = 0; i < objs.length; i ++){
+      if(objs[i].getExtentTokenStart() < left){
+        left = objs[i].getExtentTokenStart();
       }
-      if (obj.getExtentTokenEnd() > right) {
-        right = obj.getExtentTokenEnd();
+      if(objs[i].getExtentTokenEnd() > right) {
+        right = objs[i].getExtentTokenEnd();
       }
     }
     assert(left < Integer.MAX_VALUE);
@@ -245,7 +246,6 @@ public class ExtractionObject implements Serializable {
    * @param nilLabel
    */
   public boolean printableObject(double beam, String nilLabel) {
-    if (typeProbabilities == null) { return false; }
     List<Pair<String, Double>> sorted = Counters.toDescendingMagnitudeSortedListWithCounts(typeProbabilities);
     
     // first choice not nil

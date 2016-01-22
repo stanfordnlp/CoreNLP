@@ -1,11 +1,12 @@
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.io.IOUtils;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MutableInteger;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.ling.CoreAnnotations;
 
 import java.util.*;
 import java.io.*;
@@ -39,23 +40,6 @@ public class Trees {
     }
   }
 
-  /**
-   * Returns the positional index of the left edge of a tree <i>t</i>
-   * within a given root, as defined by the size of the yield of all
-   * material preceding <i>t</i>.
-   * This method returns -1 if no path is found, rather than exceptioning.
-   *
-   * @see Trees#leftEdge(Tree, Tree)
-   */
-  public static int leftEdgeUnsafe(Tree t, Tree root) {
-    MutableInteger i = new MutableInteger(0);
-    if (leftEdge(t, root, i)) {
-      return i.intValue();
-    } else {
-      return -1;
-    }
-  }
-
   static boolean leftEdge(Tree t, Tree t1, MutableInteger i) {
     if (t == t1) {
       return true;
@@ -86,24 +70,6 @@ public class Trees {
     } else {
       throw new RuntimeException("Tree is not a descendant of root.");
 //      return root.yield().size() + 1;
-    }
-  }
-
-  /**
-   * Returns the positional index of the right edge of a tree
-   * <i>t</i> within a given root, as defined by the size of the yield
-   * of all material preceding <i>t</i> plus all the material
-   * contained in <i>t</i>.
-   * This method returns root.yield().size() + 1 if no path is found, rather than exceptioning.
-   *
-   * @see Trees#rightEdge(Tree, Tree)
-   */
-  public static int rightEdgeUnsafe(Tree t, Tree root) {
-    MutableInteger i = new MutableInteger(root.yield().size());
-    if (rightEdge(t, root, i)) {
-      return i.intValue();
-    } else {
-      return root.yield().size() + 1;
     }
   }
 
@@ -142,7 +108,7 @@ public class Trees {
    * returns the leaves in a Tree in the order that they're found.
    */
   public static List<Tree> leaves(Tree t) {
-    List<Tree> l = new ArrayList<>();
+    List<Tree> l = new ArrayList<Tree>();
     leaves(t, l);
     return l;
   }
@@ -158,7 +124,7 @@ public class Trees {
   }
 
   public static List<Tree> preTerminals(Tree t) {
-    List<Tree> l = new ArrayList<>();
+    List<Tree> l = new ArrayList<Tree>();
     preTerminals(t, l);
     return l;
   }
@@ -178,7 +144,7 @@ public class Trees {
    * returns the labels of the leaves in a Tree in the order that they're found.
    */
   public static List<Label> leafLabels(Tree t) {
-    List<Label> l = new ArrayList<>();
+    List<Label> l = new ArrayList<Label>();
     leafLabels(t, l);
     return l;
   }
@@ -198,7 +164,7 @@ public class Trees {
    * the labels are CoreLabels.
    */
   public static List<CoreLabel> taggedLeafLabels(Tree t) {
-    List<CoreLabel> l = new ArrayList<>();
+    List<CoreLabel> l = new ArrayList<CoreLabel>();
     taggedLeafLabels(t, l);
     return l;
   }
@@ -212,47 +178,6 @@ public class Trees {
       for (Tree kid : t.children()) {
         taggedLeafLabels(kid, l);
       }
-    }
-  }
-
-  /**
-   * Given a tree, set the tags on the leaf nodes if they are not
-   * already set.  Do this by using the preterminal's value as a tag.
-   */
-  public static void setLeafTagsIfUnset(Tree tree) {
-    if (tree.isPreTerminal()) {
-      Tree leaf = tree.children()[0];
-      if (!(leaf.label() instanceof HasTag)) {
-        return;
-      }
-      HasTag label = (HasTag) leaf.label();
-      if (label.tag() == null) {
-        label.setTag(tree.value());
-      }
-    } else {
-      for (Tree child : tree.children()) {
-        setLeafTagsIfUnset(child);
-      }
-    }
-  }
-
-  /**
-   * Replace the labels of the leaves with the given leaves.
-   */
-  public static void setLeafLabels(Tree tree, List<Label> labels) {
-    Iterator<Tree> leafIterator = tree.getLeaves().iterator();
-    Iterator<Label> labelIterator = labels.iterator();
-    while (leafIterator.hasNext() && labelIterator.hasNext()) {
-      Tree leaf = leafIterator.next();
-      Label label = labelIterator.next();
-      leaf.setLabel(label);
-      //leafIterator.next().setLabel(labelIterator.next());
-    }
-    if (leafIterator.hasNext()) {
-      throw new IllegalArgumentException("Tree had more leaves than the labels provided");
-    }
-    if (labelIterator.hasNext()) {
-      throw new IllegalArgumentException("More labels provided than tree had leaves");
     }
   }
 
@@ -366,7 +291,7 @@ public class Trees {
    * returns the syntactic category of the tree as a list of the syntactic categories of the mother and the daughters
    */
   public static List<String> localTreeAsCatList(Tree t) {
-    List<String> l = new ArrayList<>(t.children().length + 1);
+    List<String> l = new ArrayList<String>(t.children().length + 1);
     l.add(t.label().value());
     for (int i = 0; i < t.children().length; i++) {
       l.add(t.children()[i].label().value());
@@ -475,7 +400,7 @@ public class Trees {
 
 
   /** Turns a sentence into a flat phrasal tree.
-   *  The structure is S -&gt; tag*.  And then each tag goes to a word.
+   *  The structure is S -> tag*.  And then each tag goes to a word.
    *  The tag is either found from the label or made "WD".
    *  The tag and phrasal node have a StringLabel.
    *
@@ -487,7 +412,7 @@ public class Trees {
   }
 
   /** Turns a sentence into a flat phrasal tree.
-   *  The structure is S -&gt; tag*.  And then each tag goes to a word.
+   *  The structure is S -> tag*.  And then each tag goes to a word.
    *  The tag is either found from the label or made "WD".
    *  The tag and phrasal node have a StringLabel.
    *
@@ -496,7 +421,7 @@ public class Trees {
    *  @return The one phrasal level Tree
    */
   public static Tree toFlatTree(List<? extends HasWord> s, LabelFactory lf) {
-    List<Tree> daughters = new ArrayList<>(s.size());
+    List<Tree> daughters = new ArrayList<Tree>(s.size());
     for (HasWord word : s) {
       Tree wordNode = new LabeledScoredTreeNode(lf.newLabel(word.word()));
       if (word instanceof TaggedWord) {
@@ -649,7 +574,7 @@ public class Trees {
    * Get lowest common ancestor of all the nodes in the list with the tree rooted at root
    */
   public static Tree getLowestCommonAncestor(List<Tree> nodes, Tree root) {
-    List<List<Tree>> paths = new ArrayList<>();
+    List<List<Tree>> paths = new ArrayList<List<Tree>>();
     int min = Integer.MAX_VALUE;
     for (Tree t : nodes) {
       List<Tree> path = pathFromRoot(t, root);
@@ -708,7 +633,7 @@ public class Trees {
 
     //System.out.println(treeListToCatList(fromPath));
     //System.out.println(treeListToCatList(toPath));
-    List<String> totalPath = new ArrayList<>();
+    List<String> totalPath = new ArrayList<String>();
 
     for (int i = fromPath.size() - 1; i >= last; i--) {
       Tree t = fromPath.get(i);
@@ -746,7 +671,7 @@ public class Trees {
   public static List<Tree> pathFromRoot(Tree t, Tree root) {
     if (t == root) {
       //if (t.equals(root)) {
-      List<Tree> l = new ArrayList<>(1);
+      List<Tree> l = new ArrayList<Tree>(1);
       l.add(t);
       return l;
     } else if (root == null) {
@@ -764,7 +689,7 @@ public class Trees {
     if (t.isLeaf())
       return;
     Tree[] kids = t.children();
-    List<Tree> newKids = new ArrayList<>(kids.length);
+    List<Tree> newKids = new ArrayList<Tree>(kids.length);
     for (Tree kid : kids) {
       if (kid != node) {
         newKids.add(kid);
@@ -796,7 +721,6 @@ public class Trees {
     return commonAncestor;
   }
 
-  // todo [cdm 2015]: These next two methods duplicate the Tree.valueOf methods!
   /**
    * Simple tree reading utility method.  Given a tree formatted as a PTB string, returns a Tree made by a specific TreeFactory.
    */
@@ -851,18 +775,4 @@ public class Trees {
     }
   }
 
-
-  /**
-   * Set the sentence index of all the leaves in the tree
-   * (only works on CoreLabel)
-   */
-  public static void setSentIndex(Tree tree, int sentIndex) {
-    List<Label> leaves = tree.yield();
-    for (Label leaf : leaves) {
-      if (!(leaf instanceof CoreLabel)) {
-        throw new IllegalArgumentException("Only works on CoreLabel");
-      }
-      ((CoreLabel) leaf).setSentIndex(sentIndex);
-    }
-  }
 }

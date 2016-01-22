@@ -1,17 +1,14 @@
 package edu.stanford.nlp.ling.tokensregex.types;
 
 /**
-* An expression that has been evaluated to a Java object of type T.
+* A expression that has been evaluated to a Java object of type T
 *
 * @author Angel Chang
 */
 public interface Value<T> extends Expression {
-
   /**
-   * The Java object representing the value of the expression.
-   *
+   * The Java object representing the value of the expressions
    * @return a Java object
    */
   public T get();
-
 }

@@ -50,7 +50,7 @@ public class AmbiguityClasses {
   // protected final AmbiguityClass naClass = new AmbiguityClass(null, false, null, null);
 
   public AmbiguityClasses(TTags ttags) {
-    classes = new HashIndex<>();
+    classes = new HashIndex<AmbiguityClass>();
     // naClass.init(naWord, ttags);
   }
 
@@ -91,7 +91,7 @@ public class AmbiguityClasses {
 
   public void save(String filename) {
     try {
-      DataOutputStream rf = IOUtils.getDataOutputStream(filename);
+      OutDataStreamFile rf = new OutDataStreamFile(filename);
       Object[] arrClasses = classes.objectsList().toArray();//s.keySet().toArray();
 //      System.out.println("Number of ambiguity classes is " + arrClasses.length);
 //      rf.writeInt(arrClasses.length);
@@ -105,7 +105,7 @@ public class AmbiguityClasses {
 
   }// save
 
-  public void save(DataOutputStream file) {
+  public void save(OutDataStreamFile file) {
     try {
       Object[] arrClasses = classes.objectsList().toArray();//s.keySet().toArray();
 //      System.out.println("Number of ambiguity classes is " + arrClasses.length);

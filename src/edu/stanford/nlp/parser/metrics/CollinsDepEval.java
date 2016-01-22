@@ -11,7 +11,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 
-import edu.stanford.nlp.international.Language;
+import edu.stanford.nlp.international.Languages;
+import edu.stanford.nlp.international.Languages.Language;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -53,14 +54,14 @@ public class CollinsDepEval extends AbstractEval {
     this.hf = hf;
     this.startSymbol = startSymbol;
 
-    precisions = new ClassicCounter<>();
-    recalls = new ClassicCounter<>();
-    f1s = new ClassicCounter<>();
+    precisions = new ClassicCounter<CollinsRelation>();
+    recalls = new ClassicCounter<CollinsRelation>();
+    f1s = new ClassicCounter<CollinsRelation>();
 
-    precisions2 = new ClassicCounter<>();
-    recalls2 = new ClassicCounter<>();
-    pnums2 = new ClassicCounter<>();
-    rnums2 = new ClassicCounter<>();
+    precisions2 = new ClassicCounter<CollinsRelation>();
+    recalls2 = new ClassicCounter<CollinsRelation>();
+    pnums2 = new ClassicCounter<CollinsRelation>();
+    rnums2 = new ClassicCounter<CollinsRelation>();
   }
 
   @Override
@@ -147,7 +148,7 @@ public class CollinsDepEval extends AbstractEval {
     cats.addAll(precisions.keySet());
     cats.addAll(recalls.keySet());
 
-    Map<Double,CollinsRelation> f1Map = new TreeMap<>();
+    Map<Double,CollinsRelation> f1Map = new TreeMap<Double,CollinsRelation>();
     for (CollinsRelation cat : cats) {
       double pnum2 = pnums2.getCount(cat);
       double rnum2 = rnums2.getCount(cat);
@@ -187,7 +188,7 @@ public class CollinsDepEval extends AbstractEval {
     usage.append(String.format("Usage: java %s [OPTS] goldFile guessFile%n%n",CollinsDepEval.class.getName()));
     usage.append("Options:").append(nl);
     usage.append("  -v        : Verbose output").append(nl);
-    usage.append("  -l lang   : Language name " + Language.langList).append(nl);
+    usage.append("  -l lang   : Language name " + Languages.listOfLanguages()).append(nl);
     usage.append("  -y num    : Max yield of gold trees").append(nl);
     usage.append("  -g num    : Max yield of guess trees").append(nl);
     return usage.toString();
@@ -224,8 +225,8 @@ public class CollinsDepEval extends AbstractEval {
     }
     File goldFile = new File(parsedArgs[0]);
     File guessFile = new File(parsedArgs[1]);
-
-    final TreebankLangParserParams tlpp = LANGUAGE.params;
+    
+    final TreebankLangParserParams tlpp = Languages.getLanguageParams(LANGUAGE);
     final PrintWriter pwOut = tlpp.pw();
 
     final Treebank guessTreebank = tlpp.diskTreebank();

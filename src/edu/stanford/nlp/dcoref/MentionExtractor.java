@@ -57,7 +57,7 @@ import edu.stanford.nlp.util.Pair;
  */
 public class MentionExtractor {
 
-  private final HeadFinder headFinder;
+  protected final HeadFinder headFinder;
 
   protected String currentDocumentID;
 
@@ -109,17 +109,14 @@ public class MentionExtractor {
   }
 
   protected int getHeadIndex(Tree t) {
-    // The trees passed in do not have the CoordinationTransformer
-    // applied, but that just means the SemanticHeadFinder results are
-    // slightly worse.
     Tree ht = t.headTerminal(headFinder);
     if(ht==null) return -1;  // temporary: a key which is matched to nothing
     CoreLabel l = (CoreLabel) ht.label();
-    return l.get(CoreAnnotations.IndexAnnotation.class);
+    return (int) l.get(CoreAnnotations.IndexAnnotation.class);
   }
-  private String treeToKey(Tree t) {
+  private String treeToKey(Tree t){
     int idx = getHeadIndex(t);
-    String key = Integer.toString(idx) + ':' + t.toString();
+    String key = Integer.toString(idx) + ":" + t.toString();
     return key;
   }
 
@@ -159,12 +156,12 @@ public class MentionExtractor {
       List<List<Mention>> unorderedMentions,
       boolean doMergeLabels) throws Exception {
 
-    List<List<Mention>> orderedMentionsBySentence = new ArrayList<>();
+    List<List<Mention>> orderedMentionsBySentence = new ArrayList<List<Mention>>();
 
     //
     // traverse all sentences and process each individual one
     //
-    for (int sent = 0, sz = words.size(); sent < sz; sent ++) {
+    for(int sent = 0; sent < words.size(); sent ++){
       List<CoreLabel> sentence = words.get(sent);
       Tree tree = trees.get(sent);
       List<Mention> mentions = unorderedMentions.get(sent);
@@ -177,10 +174,10 @@ public class MentionExtractor {
       // set the surface information and the syntactic info in each mention
       // startIndex and endIndex MUST be set before!
       //
-      for (Mention mention: mentions) {
+      for(Mention mention: mentions){
         mention.contextParseTree = tree;
         mention.sentenceWords = sentence;
-        mention.originalSpan = new ArrayList<>(mention.sentenceWords.subList(mention.startIndex, mention.endIndex));
+        mention.originalSpan = new ArrayList<CoreLabel>(mention.sentenceWords.subList(mention.startIndex, mention.endIndex));
         if(!((CoreLabel)tree.label()).has(CoreAnnotations.BeginIndexAnnotation.class)) tree.indexSpans(0);
         if(mention.headWord==null) {
           Tree headTree = ((RuleBasedCorefMentionFinder) mentionFinder).findSyntacticHead(mention, tree, sentence);
@@ -206,7 +203,7 @@ public class MentionExtractor {
 
         List<Mention> mentionsForTree = mentionsToTrees.get(treeToKey(mention.mentionSubTree));
         if(mentionsForTree == null){
-          mentionsForTree = new ArrayList<>();
+          mentionsForTree = new ArrayList<Mention>();
           mentionsToTrees.put(treeToKey(mention.mentionSubTree), mentionsForTree);
         }
         mentionsForTree.add(mention);
@@ -218,7 +215,7 @@ public class MentionExtractor {
       //
       // Order all mentions in tree-traversal order
       //
-      List<Mention> orderedMentions = new ArrayList<>();
+      List<Mention> orderedMentions = new ArrayList<Mention>();
       orderedMentionsBySentence.add(orderedMentions);
 
       // extract all mentions in tree traversal order (alternative: tree.postOrderNodeList())
@@ -241,11 +238,9 @@ public class MentionExtractor {
   }
 
   /**
-   * Sets the label of the leaf nodes of a Tree to be the CoreLabels in the given sentence.
-   * The original value() of the Tree nodes is preserved, and otherwise the label of tree
-   * leaves becomes the label from the List.
+   * Sets the label of the leaf nodes to be the CoreLabels in the given sentence
+   * The original value() of the Tree nodes is preserved
    */
-  // todo [cdm 2015]: This clearly shouldn't be here! Maybe it's not needed at all now since parsing code does this?
   public static void mergeLabels(Tree tree, List<CoreLabel> sentence) {
     int idx = 0;
     for (Tree t : tree.getLeaves()) {
@@ -257,16 +252,13 @@ public class MentionExtractor {
     tree.indexLeaves();
   }
 
-  private static boolean inside(int i, Mention m) {
+  static boolean inside(int i, Mention m) {
     return i >= m.startIndex && i < m.endIndex;
   }
 
   /** Find syntactic relations (e.g., appositives) in a sentence */
   private void findSyntacticRelations(Tree tree, List<Mention> orderedMentions) {
-    markListMemberRelation(orderedMentions);
-
     Set<Pair<Integer, Integer>> appos = Generics.newHashSet();
-    // TODO: This apposition finding doesn't seem to be very good - what about using "appos" from dependencies?
     findAppositions(tree, appos);
     markMentionRelation(orderedMentions, appos, "APPOSITION");
 
@@ -280,25 +272,16 @@ public class MentionExtractor {
   }
 
   /** Find syntactic pattern in a sentence by tregex */
-  private void findTreePattern(Tree tree, String tregex, Set<Pair<Integer, Integer>> foundPairs) {
+  private void findTreePattern(Tree tree, String pattern, Set<Pair<Integer, Integer>> foundPairs) {
     try {
-      TregexPattern tgrepPattern = TregexPattern.compile(tregex);
-      findTreePattern(tree, tgrepPattern, foundPairs);
-    } catch (Exception e) {
-      // shouldn't happen....
-      throw new RuntimeException(e);
-    }
-  }
-
-  private void findTreePattern(Tree tree, TregexPattern tgrepPattern, Set<Pair<Integer, Integer>> foundPairs) {
-    try {
+      TregexPattern tgrepPattern = TregexPattern.compile(pattern);
       TregexMatcher m = tgrepPattern.matcher(tree);
       while (m.find()) {
         Tree t = m.getMatch();
         Tree np1 = m.getNode("m1");
         Tree np2 = m.getNode("m2");
         Tree np3 = null;
-        if(tgrepPattern.pattern().contains("m3")) np3 = m.getNode("m3");
+        if(pattern.contains("m3")) np3 = m.getNode("m3");
         addFoundPair(np1, np2, t, foundPairs);
         if(np3!=null) addFoundPair(np2, np3, t, foundPairs);
       }
@@ -314,78 +297,48 @@ public class MentionExtractor {
     Tree head2 = np2.headTerminal(headFinder);
     int h1 = ((CoreMap) head1.label()).get(CoreAnnotations.IndexAnnotation.class) - 1;
     int h2 = ((CoreMap) head2.label()).get(CoreAnnotations.IndexAnnotation.class) - 1;
-    Pair<Integer, Integer> p = new Pair<>(h1, h2);
+    Pair<Integer, Integer> p = new Pair<Integer, Integer>(h1, h2);
     foundPairs.add(p);
   }
 
-  private static final TregexPattern appositionPattern = TregexPattern.compile("NP=m1 < (NP=m2 $.. (/,/ $.. NP=m3))");
-  private static final TregexPattern appositionPattern2 = TregexPattern.compile("NP=m1 < (NP=m2 $.. (/,/ $.. (SBAR < (WHNP < WP|WDT=m3))))");
-  private static final TregexPattern appositionPattern3 = TregexPattern.compile("/^NP(?:-TMP|-ADV)?$/=m1 < (NP=m2 $- /^,$/ $-- NP=m3 !$ CC|CONJP)");
-  private static final TregexPattern appositionPattern4 = TregexPattern.compile("/^NP(?:-TMP|-ADV)?$/=m1 < (PRN=m2 < (NP < /^NNS?|CD$/ $-- /^-LRB-$/ $+ /^-RRB-$/))");
   private void findAppositions(Tree tree, Set<Pair<Integer, Integer>> appos) {
+    String appositionPattern = "NP=m1 < (NP=m2 $.. (/,/ $.. NP=m3))";
+    String appositionPattern2 = "NP=m1 < (NP=m2 $.. (/,/ $.. (SBAR < (WHNP < WP|WDT=m3))))";
+    String appositionPattern3 = "/^NP(?:-TMP|-ADV)?$/=m1 < (NP=m2 $- /^,$/ $-- NP=m3 !$ CC|CONJP)";
+    String appositionPattern4 = "/^NP(?:-TMP|-ADV)?$/=m1 < (PRN=m2 < (NP < /^NNS?|CD$/ $-- /^-LRB-$/ $+ /^-RRB-$/))";
     findTreePattern(tree, appositionPattern, appos);
     findTreePattern(tree, appositionPattern2, appos);
     findTreePattern(tree, appositionPattern3, appos);
     findTreePattern(tree, appositionPattern4, appos);
   }
 
-  private static final TregexPattern predicateNominativePattern = TregexPattern.compile("S < (NP=m1 $.. (VP < ((/VB/ < /^(am|are|is|was|were|'m|'re|'s|be)$/) $.. NP=m2)))");
-  private static final TregexPattern predicateNominativePattern2 = TregexPattern.compile("S < (NP=m1 $.. (VP < (VP < ((/VB/ < /^(be|been|being)$/) $.. NP=m2))))");
   private void findPredicateNominatives(Tree tree, Set<Pair<Integer, Integer>> preNomi) {
+    String predicateNominativePattern = "S < (NP=m1 $.. (VP < ((/VB/ < /^(am|are|is|was|were|'m|'re|'s|be)$/) $.. NP=m2)))";
+    String predicateNominativePattern2 = "S < (NP=m1 $.. (VP < (VP < ((/VB/ < /^(be|been|being)$/) $.. NP=m2))))";
     //    String predicateNominativePattern2 = "NP=m1 $.. (VP < ((/VB/ < /^(am|are|is|was|were|'m|'re|'s|be)$/) $.. NP=m2))";
     findTreePattern(tree, predicateNominativePattern, preNomi);
     findTreePattern(tree, predicateNominativePattern2, preNomi);
   }
 
-  private static final TregexPattern relativePronounPattern = TregexPattern.compile("NP < (NP=m1 $.. (SBAR < (WHNP < WP|WDT=m2)))");
   private void findRelativePronouns(Tree tree, Set<Pair<Integer, Integer>> relativePronounPairs) {
+    String relativePronounPattern = "NP < (NP=m1 $.. (SBAR < (WHNP < WP|WDT=m2)))";
     findTreePattern(tree, relativePronounPattern, relativePronounPairs);
-  }
-
-  private static void markListMemberRelation(List<Mention> orderedMentions) {
-    for(Mention m1 : orderedMentions){
-      for(Mention m2 : orderedMentions){
-        // Mark if m2 and m1 are in list relationship
-        if (m1.isListMemberOf(m2)) {
-          m2.addListMember(m1);
-          m1.addBelongsToList(m2);
-        } else if (m2.isListMemberOf(m1)) {
-          m1.addListMember(m2);
-          m2.addBelongsToList(m1);
-        }
-      }
-    }
   }
 
   private static void markMentionRelation(List<Mention> orderedMentions, Set<Pair<Integer, Integer>> foundPairs, String flag) {
     for(Mention m1 : orderedMentions){
       for(Mention m2 : orderedMentions){
-        // Ignore if m2 and m1 are in list relationship
-        if (m1.isListMemberOf(m2) || m2.isListMemberOf(m1) || m1.isMemberOfSameList(m2)) {
-          SieveCoreferenceSystem.logger.finest("Not checking '" + m1 + "' and '" + m2 + "' for " + flag + ": in list relationship");
-          continue;
-        }
         for(Pair<Integer, Integer> foundPair: foundPairs){
           if((foundPair.first == m1.headIndex && foundPair.second == m2.headIndex)){
-            switch (flag) {
-              case "APPOSITION":
-                m2.addApposition(m1);
-                break;
-              case "PREDICATE_NOMINATIVE":
-                m2.addPredicateNominatives(m1);
-                break;
-              case "RELATIVE_PRONOUN":
-                m2.addRelativePronoun(m1);
-                break;
-              default:
-                throw new RuntimeException("check flag in markMentionRelation (dcoref/MentionExtractor.java)");
-            }
+            if(flag.equals("APPOSITION")) m2.addApposition(m1);
+            else if(flag.equals("PREDICATE_NOMINATIVE")) m2.addPredicateNominatives(m1);
+            else if(flag.equals("RELATIVE_PRONOUN")) m2.addRelativePronoun(m1);
+            else throw new RuntimeException("check flag in markMentionRelation (dcoref/MentionExtractor.java)");
           }
         }
       }
     }
   }
-
   /**
    * Finds the tree the matches this span exactly
    * @param tree Leaves must be indexed!
@@ -429,17 +382,14 @@ public class MentionExtractor {
       annoSb.append(", parse");
     }
     String annoStr = annoSb.toString();
-    SieveCoreferenceSystem.logger.info("MentionExtractor ignores specified annotators, using annotators=" + annoStr);
-    pipelineProps.setProperty("annotators", annoStr);
+    SieveCoreferenceSystem.logger.info("Ignoring specified annotators, using annotators=" + annoStr);
+    pipelineProps.put("annotators", annoStr);
     return new StanfordCoreNLP(pipelineProps, false);
   }
 
   public static void initializeUtterance(List<CoreLabel> tokens) {
     for(CoreLabel l : tokens){
-      if (l.get(CoreAnnotations.UtteranceAnnotation.class) == null) {
-        l.set(CoreAnnotations.UtteranceAnnotation.class, 0);
-      }
+      l.set(CoreAnnotations.UtteranceAnnotation.class, 0);
     }
   }
-
 }

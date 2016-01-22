@@ -11,21 +11,21 @@ import java.util.*;
  */
 public class FastDisjointSet<T> implements DisjointSet<T> {
 
-  static class Element<TT> {
-    Element<TT> parent;
+  class Element {
+    Element parent;
     int rank;
-    TT object;
+    T object;
 
-    Element(TT o) {
+    Element(T o) {
       object = o;
       rank = 0;
       parent = this;
     }
   }
 
-  private Map<T, Element<T>> objectToElement;
+  Map<T, Element> objectToElement;
 
-  private static <TTT> void linkElements(Element<TTT> e, Element<TTT> f) {
+  private void linkElements(Element e, Element f) {
     if (e.rank > f.rank) {
       f.parent = e;
     } else {
@@ -36,29 +36,27 @@ public class FastDisjointSet<T> implements DisjointSet<T> {
     }
   }
 
-  private static <TTT> Element<TTT> findElement(Element<TTT> e) {
+  private Element findElement(Element e) {
     if (e.parent == e) {
       return e;
     }
-    Element<TTT> rep = findElement(e.parent);
+    Element rep = findElement(e.parent);
     e.parent = rep;
     return rep;
   }
 
-  @Override
   public T find(T o) {
-    Element<T> e = objectToElement.get(o);
+    Element e = objectToElement.get(o);
     if (e == null) {
       return null;
     }
-    Element<T> element = findElement(e);
+    Element element = findElement(e);
     return element.object;
   }
 
-  @Override
   public void union(T a, T b) {
-    Element<T> e = objectToElement.get(a);
-    Element<T> f = objectToElement.get(b);
+    Element e = objectToElement.get(a);
+    Element f = objectToElement.get(b);
     if (e == null || f == null) {
       return;
     }
@@ -70,11 +68,13 @@ public class FastDisjointSet<T> implements DisjointSet<T> {
 
   public FastDisjointSet(Set<? extends T> objectSet) {
     objectToElement = Generics.newHashMap();
-    for (T o : objectSet) {
+    for (Iterator<? extends T> i = objectSet.iterator(); i.hasNext();) {
       // create an element
-      Element<T> e = new Element<>(o);
+      T o = i.next();
+      Element e = new Element(o);
       objectToElement.put(o, e);
     }
   }
 
+ 
 }

@@ -62,7 +62,7 @@ public class TextTaggedFileReader implements TaggedFileReader {
     }
 
     ++numSentences;
-    next = new ArrayList<>();
+    next = new ArrayList<TaggedWord>();
     StringTokenizer st = new StringTokenizer(line);
     //loop over words in a single sentence
 

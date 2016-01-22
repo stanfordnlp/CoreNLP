@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 
-import edu.stanford.nlp.international.Language;
+import edu.stanford.nlp.international.Languages;
+import edu.stanford.nlp.international.Languages.Language;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams;
@@ -61,7 +62,8 @@ public class TsarfatyEval extends AbstractEval {
 
     } else {
       Tree[] kids = t.children();
-      for (Tree kid : kids) position = extractDeps(kid, position, deps);
+      for (int i = 0; i < kids.length; i++)
+        position = extractDeps(kids[i], position, deps);
     }
 
     return position;
@@ -73,7 +75,7 @@ public class TsarfatyEval extends AbstractEval {
     usage.append(String.format("Usage: java %s [OPTS] gold guess\n\n",TsarfatyEval.class.getName()));
     usage.append("Options:\n");
     usage.append("  -v         : Verbose mode.\n");
-    usage.append("  -l lang    : Select language settings from " + Language.class.getName() + "\n");
+    usage.append("  -l lang    : Select language settings from " + Languages.class.getName() + "\n");
     usage.append("  -y num     : Skip gold trees with yields longer than num.\n");
     usage.append("  -g num     : Skip guess trees with yields longer than num.\n");
     usage.append("  -t         : Tagging mode (default: segmentation).\n");
@@ -105,32 +107,26 @@ public class TsarfatyEval extends AbstractEval {
 
       if(args[i].startsWith("-")) {
 
-        switch (args[i]) {
-          case "-l":
-            Language lang = Language.valueOf(args[++i].trim());
-            tlpp = lang.params;
+        if(args[i].equals("-l")) {
+          Language lang = Language.valueOf(args[++i].trim());
+          tlpp = Languages.getLanguageParams(lang);
 
-            break;
-          case "-y":
-            maxGoldYield = Integer.parseInt(args[++i].trim());
+        } else if(args[i].equals("-y")) {
+          maxGoldYield = Integer.parseInt(args[++i].trim());
 
-            break;
-          case "-t":
-            tagMode = true;
+        } else if(args[i].equals("-t")) {
+          tagMode = true;
 
-            break;
-          case "-v":
-            VERBOSE = true;
+        } else if(args[i].equals("-v")) {
+          VERBOSE = true;
 
-            break;
-          case "-g":
-            maxGuessYield = Integer.parseInt(args[++i].trim());
-            skipGuess = true;
+        } else if(args[i].equals("-g")) {
+          maxGuessYield = Integer.parseInt(args[++i].trim());
+          skipGuess = true;
 
-            break;
-          default:
-            System.out.println(usage.toString());
-            System.exit(-1);
+        } else {
+          System.out.println(usage.toString());
+          System.exit(-1);
         }
 
       } else {

@@ -202,7 +202,7 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
     boolean[][] hasTag = new boolean[length][numTags];
     for (int i = 0; i < length; i++) {
       //if (wordIndex.contains(sentence.get(i).toString()))
-      words[i] = wordIndex.addToIndex(sentence.get(i).word());
+      words[i] = wordIndex.indexOf(sentence.get(i).word(), true);
       //else
       //words[i] = wordIndex.indexOf(Lexicon.UNKNOWN_WORD);
     }
@@ -610,8 +610,8 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
     int numTags = tagIndex.size();
     System.out.println("---- headScore matrix (head x dep, best tags) ----");
     System.out.print(StringUtils.padOrTrim("", 6));
-    for (int word : words) {
-      System.out.print(" " + StringUtils.padOrTrim(wordIndex.get(word), 2));
+    for (int i = 0; i < words.length; i++) {
+      System.out.print(" " + StringUtils.padOrTrim(wordIndex.get(words[i]), 2));
     }
     System.out.println();
     for (int hWord = 0; hWord < words.length; hWord++) {
@@ -683,7 +683,7 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
       return tf.newTreeNode(headLabel, Collections.singletonList(leaf));
     }
     // find backtrace
-    List<Tree> children = new ArrayList<>();
+    List<Tree> children = new ArrayList<Tree>();
     double bestScore = iScore(start, end, hWord, hTag);
     for (int split = start + 1; split < end; split++) {
       int binD = binDistance[hWord][split];
@@ -729,7 +729,7 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
     if (tree.isLeaf() || tree.isPreTerminal()) {
       return tree;
     }
-    List<Tree> newChildren = new ArrayList<>();
+    List<Tree> newChildren = new ArrayList<Tree>();
     Tree[] children = tree.children();
     for (Tree child : children) {
       Tree newChild = flatten(child);

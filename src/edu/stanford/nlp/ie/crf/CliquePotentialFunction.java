@@ -3,7 +3,7 @@ package edu.stanford.nlp.ie.crf;
 /**
  * @author Mengqiu Wang
  */
-@FunctionalInterface
+
 public interface CliquePotentialFunction {
 
   /**
@@ -14,7 +14,6 @@ public interface CliquePotentialFunction {
    *
    * @return clique potential value
    */
-  public double computeCliquePotential(int cliqueSize, int labelIndex,
-    int[] cliqueFeatures, double[] featureVal, int posInSent);
+  public double computeCliquePotential(int cliqueSize, int labelIndex, int[] cliqueFeatures, double[] featureVal);
 
 }

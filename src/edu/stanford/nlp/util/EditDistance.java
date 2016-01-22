@@ -28,8 +28,8 @@ public class EditDistance {
     if (score == null || score.length < sourceLength + 1 || score[0].length < targetLength + 1) {
       score = new double[sourceLength + 1][targetLength + 1];
     }
-    for (double[] aScore : score) {
-      Arrays.fill(aScore, worst());
+    for (int i = 0; i < score.length; i++) {
+      Arrays.fill(score[i], worst());
     }
   }
 
@@ -134,8 +134,6 @@ public class EditDistance {
   }
 
   public double score(String sourceStr, String targetStr) {
-    if(sourceStr.equals(targetStr))
-      return 0;
     Object[] source = Characters.asCharacterArray(sourceStr);
     Object[] target = Characters.asCharacterArray(targetStr);
     clear(source.length, target.length);

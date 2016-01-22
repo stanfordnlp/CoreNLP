@@ -16,7 +16,7 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author Dan Klein
  */
-public abstract class AbstractEval implements Eval {
+public abstract class AbstractEval {
 
   private static final boolean DEBUG = false;
 
@@ -228,8 +228,8 @@ public abstract class AbstractEval implements Eval {
 
     //private boolean verbose = false;
 
-    private ClassicCounter<String> over = new ClassicCounter<>();
-    private ClassicCounter<String> under = new ClassicCounter<>();
+    private ClassicCounter<String> over = new ClassicCounter<String>();
+    private ClassicCounter<String> under = new ClassicCounter<String>();
 
     protected static String localize(Tree tree) {
       if (tree.isLeaf()) {
@@ -271,7 +271,7 @@ public abstract class AbstractEval implements Eval {
     }
 
     private static <T> void display(ClassicCounter<T> c, int num, PrintWriter pw) {
-      List<T> rules = new ArrayList<>(c.keySet());
+      List<T> rules = new ArrayList<T>(c.keySet());
       Collections.sort(rules, Counters.toComparatorDescending(c));
       int rSize = rules.size();
       if (num > rSize) {
@@ -302,8 +302,8 @@ public abstract class AbstractEval implements Eval {
    */
   public static class CatErrorEval extends AbstractEval {
 
-    private ClassicCounter<String> over = new ClassicCounter<>();
-    private ClassicCounter<String> under = new ClassicCounter<>();
+    private ClassicCounter<String> over = new ClassicCounter<String>();
+    private ClassicCounter<String> under = new ClassicCounter<String>();
 
     /** Unused. Fake satisfying the abstract class. */
     @Override
@@ -312,7 +312,7 @@ public abstract class AbstractEval implements Eval {
     }
 
     private static List<String> myMakeObjects(Tree tree) {
-      List<String> cats = new LinkedList<>();
+      List<String> cats = new LinkedList<String>();
       for (Tree st : tree.subTreeList()) {
         cats.add(st.value());
       }
@@ -323,7 +323,7 @@ public abstract class AbstractEval implements Eval {
     public void evaluate(Tree t1, Tree t2, PrintWriter pw) {
       List<String> s1 = myMakeObjects(t1);
       List<String> s2 = myMakeObjects(t2);
-      List<String> del2 = new LinkedList<>(s2);
+      List<String> del2 = new LinkedList<String>(s2);
       // we delete out as we find them so we can score correctly a cat with
       // a certain cardinality in a tree.
       for (String o1 : s1) {
@@ -339,7 +339,7 @@ public abstract class AbstractEval implements Eval {
     }
 
     private static <T> void display(ClassicCounter<T> c, PrintWriter pw) {
-      List<T> cats = new ArrayList<>(c.keySet());
+      List<T> cats = new ArrayList<T>(c.keySet());
       Collections.sort(cats, Counters.toComparatorDescending(c));
       for (T ob : cats) {
         pw.println(ob + " " + c.getCount(ob));

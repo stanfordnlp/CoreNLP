@@ -4,7 +4,9 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import java.util.*;
 
 /**
- * QuasiDeterminizer performing quasi-determinization on TransducerGraphs.
+ * QuasiDeterminizer.
+ * <p/>
+ * Class for performing quasi-determinization on TransducerGraphs.
  *
  * @author Teg Grenager
  * @version 11/02/03
@@ -83,13 +85,7 @@ public class QuasiDeterminizer implements TransducerGraph.GraphProcessor {
    * Takes time linear in number of arcs.
    */
   public TransducerGraph pushLambdas(TransducerGraph graph, ClassicCounter lambda) {
-
-    TransducerGraph result = null;
-    try {
-      result = graph.clone(); // arcs have been copied too so we don't mess up graph
-    } catch (CloneNotSupportedException cnse) {
-      throw new RuntimeException(cnse);
-    }
+    TransducerGraph result = graph.clone(); // arcs have been copied too so we don't mess up graph
     Set<TransducerGraph.Arc> arcs = result.getArcs();
     for (TransducerGraph.Arc arc : arcs) {
       double sourceLambda = lambda.getCount(arc.getSourceNode());
@@ -130,7 +126,7 @@ public class QuasiDeterminizer implements TransducerGraph.GraphProcessor {
     TransducerGraph.GraphProcessor qd = new QuasiDeterminizer();
     List pathList = new ArrayList();
     TransducerGraph graph = TransducerGraph.createRandomGraph(1000, 10, 1.0, 10, pathList);
-    StringBuilder b = new StringBuilder();
+    StringBuffer b = new StringBuffer();
     graph.depthFirstSearch(true, b);
     System.out.println(b.toString());
     System.out.println("Done creating random graph");

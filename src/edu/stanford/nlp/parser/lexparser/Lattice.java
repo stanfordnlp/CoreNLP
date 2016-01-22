@@ -3,7 +3,6 @@ package edu.stanford.nlp.parser.lexparser;
 import java.io.*;
 import java.util.*;
 
-import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.util.Generics;
 
 public class Lattice implements Serializable, Iterable<LatticeEdge> {
@@ -18,9 +17,9 @@ public class Lattice implements Serializable, Iterable<LatticeEdge> {
 	private int maxNode = -1;
 	
 	public Lattice() {
-		edges = new ArrayList<>();
+		edges = new ArrayList<LatticeEdge>();
 		nodes = Generics.newHashSet();
-		constraints = new ArrayList<>();
+		constraints = new ArrayList<ParserConstraint>();
 		edgeStartsAt = Generics.newHashMap();
 	}
 
@@ -33,7 +32,7 @@ public class Lattice implements Serializable, Iterable<LatticeEdge> {
 		  maxNode = e.end;
 		
 		if(edgeStartsAt.get(e.start) == null) {
-		  List<LatticeEdge> edges = new ArrayList<>();
+		  List<LatticeEdge> edges = new ArrayList<LatticeEdge>();
 		  edges.add(e);
 		  edgeStartsAt.put(e.start, edges);
 		} else {
@@ -54,7 +53,7 @@ public class Lattice implements Serializable, Iterable<LatticeEdge> {
 	public List<LatticeEdge> getEdgesOverSpan(int start, int end) {
 	 
 	  List<LatticeEdge> allEdges = edgeStartsAt.get(start);
-	  List<LatticeEdge> spanningEdges = new ArrayList<>();
+	  List<LatticeEdge> spanningEdges = new ArrayList<LatticeEdge>();
 	  if(allEdges != null)
 	    for(LatticeEdge e : allEdges)
 	      if(e.end == end)

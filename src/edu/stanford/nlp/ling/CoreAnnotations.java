@@ -1,12 +1,15 @@
 package edu.stanford.nlp.ling;
 
-import edu.stanford.nlp.util.*;
-
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.ErasureUtils;
+import edu.stanford.nlp.util.IntPair;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.Triple;
 
 /**
  * <p>
@@ -168,45 +171,6 @@ public class CoreAnnotations {
   }
 
   /**
-   * The CoreMap key for getting the quotations contained by an annotation.
-   *
-   * This key is typically set only on document annotations.
-   */
-  public static class QuotationsAnnotation implements CoreAnnotation<List<CoreMap>> {
-    public Class<List<CoreMap>> getType() {
-      return ErasureUtils.uncheckedCast(List.class);
-    }
-  }
-
-  /**
-   * Unique identifier within a document for a given quotation.
-   */
-  public static class QuotationIndexAnnotation implements CoreAnnotation<Integer> {
-    public Class<Integer> getType() {
-      return Integer.class;
-    }
-  }
-
-  /**
-   * The index of the sentence that this annotation begins in.
-   */
-  public static class SentenceBeginAnnotation implements CoreAnnotation<Integer> {
-    public Class<Integer> getType() {
-      return Integer.class;
-    }
-  }
-
-  /**
-   * The index of the sentence that this annotation begins in.
-   */
-  public static class SentenceEndAnnotation implements CoreAnnotation<Integer> {
-    public Class<Integer> getType() {
-      return Integer.class;
-    }
-  }
-
-
-  /**
    * The CoreMap key for getting the paragraphs contained by an annotation.
    *
    * This key is typically set only on document annotations.
@@ -310,19 +274,6 @@ public class CoreAnnotations {
   }
 
   /**
-   * This indicates that starting at this token, the sentence should not be ended until
-   * we see a ForcedSentenceEndAnnotation.  Used to force the ssplit annotator
-   * (eg the WordToSentenceProcessor) to keep tokens in the same sentence
-   * until ForcedSentenceEndAnnotation is seen.
-   */
-  public static class ForcedSentenceUntilEndAnnotation
-          implements CoreAnnotation<Boolean> {
-    public Class<Boolean> getType() {
-      return Boolean.class;
-    }
-  }
-
-  /**
    * This indicates the sentence should end at this token.  Used to
    * force the ssplit annotator (eg the WordToSentenceProcessor) to
    * start a new sentence at the next token.
@@ -338,17 +289,6 @@ public class CoreAnnotations {
    * Unique identifier within a document for a given sentence.
    */
   public static class SentenceIndexAnnotation implements CoreAnnotation<Integer> {
-    public Class<Integer> getType() {
-      return Integer.class;
-    }
-  }
-
-  /**
-   * Line number for a sentence in a document delimited by newlines
-   * instead of punctuation.  May skip numbers if there are blank
-   * lines not represented as sentences.  Indexed from 1 rather than 0.
-   */
-  public static class LineNumberAnnotation implements CoreAnnotation<Integer> {
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -449,42 +389,6 @@ public class CoreAnnotations {
   }
 
   /**
-   * CoNLL-U dep parsing - span of multiword tokens
-   */
-  public static class CoNLLUTokenSpanAnnotation implements CoreAnnotation<IntPair> {
-    public Class<IntPair> getType() {
-      return ErasureUtils.<Class<IntPair>> uncheckedCast(Pair.class);
-    }
-  }
-  
-  /**
-   * CoNLL-U dep parsing - List of secondary dependencies
-   */
-  public static class CoNLLUSecondaryDepsAnnotation implements CoreAnnotation<HashMap<Integer,String>> {
-    public Class<HashMap<Integer,String>> getType() {
-      return ErasureUtils.<Class<HashMap<Integer,String>>> uncheckedCast(Pair.class);
-    }
-  }
-  
-  /**
-   * CoNLL-U dep parsing - List of morphological features
-   */
-  public static class CoNLLUFeats implements CoreAnnotation<HashMap<String,String>> {
-    public Class<HashMap<String,String>> getType() {
-      return ErasureUtils.uncheckedCast(HashMap.class);
-    }
-  }
-  
-  /**
-   * CoNLL-U dep parsing - Any other annotation
-   */
-  public static class CoNLLUMisc implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  /**
    * CoNLL dep parsing - the index of the word which is the parent of this word
    * in the dependency tree
    */
@@ -500,6 +404,20 @@ public class CoreAnnotations {
   public static class IDFAnnotation implements CoreAnnotation<Double> {
     public Class<Double> getType() {
       return Double.class;
+    }
+  }
+
+  /**
+   * Keys from AbstractMapLabel (descriptions taken from that class)
+   */
+  /**
+   * The standard key for storing a projected category in the map, as a String.
+   * For any word (leaf node), the projected category is the syntactic category
+   * of the maximal constituent headed by the word. Used in SemanticGraph.
+   */
+  public static class ProjectedCategoryAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
     }
   }
 
@@ -966,18 +884,6 @@ public class CoreAnnotations {
     }
   }
 
-  public static class LinkAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  public static class MentionsAnnotation implements CoreAnnotation<List<CoreMap>> {
-    public Class<List<CoreMap>> getType() {
-      return ErasureUtils.uncheckedCast(List.class);
-    }
-  }
-
   public static class EntityTypeAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
@@ -994,6 +900,13 @@ public class CoreAnnotations {
   }
 
   public static class PredictedAnswerAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  /** Seems like this could be consolidated with something else... */
+  public static class OriginalAnswerAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
     }
@@ -1018,47 +931,7 @@ public class CoreAnnotations {
     }
   }
 
-  /**
-   * Section of a document
-   */
   public static class SectionAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  /**
-   * Date for a section of a document
-   */
-  public static class SectionDateAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  /**
-   * Id for a section of a document
-   */
-  public static class SectionIDAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  /**
-   * Indicates that the token starts a new section and the attributes
-   *   that should go into that section
-   */
-  public static class SectionStartAnnotation implements CoreAnnotation<CoreMap> {
-    public Class<CoreMap> getType() {
-      return CoreMap.class;
-    }
-  }
-
-  /**
-   * Indicates that the token end a section and the label of the section
-   */
-  public static class SectionEndAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
     }
@@ -1404,6 +1277,17 @@ public class CoreAnnotations {
   }
 
   /**
+   * Used in nlp.trees. When nodes are duplicated in Stanford Dependencies
+   * conversion (to represent conjunction of PPs with preposition collapsing,
+   * this gets set to a positive number on duplicated nodes.
+   */
+  public static class CopyAnnotation implements CoreAnnotation<Integer> {
+    public Class<Integer> getType() {
+      return Integer.class;
+    }
+  }
+
+  /**
    * Used in SimpleXMLAnnotator. The value is an XML element name String for the
    * innermost element in which this token was contained.
    */
@@ -1413,10 +1297,6 @@ public class CoreAnnotations {
     }
   }
 
-  /**
-   * Used in CleanXMLAnnotator.  The value is a list of XML element names indicating
-   * the XML tag the token was nested inside.
-   */
   public static class XmlContextAnnotation implements CoreAnnotation<List<String>> {
 
     public Class<List<String>> getType() {
@@ -1442,7 +1322,7 @@ public class CoreAnnotations {
       return String.class;
     }
   }
-
+  
   //to get words of the phrase
   public static class PhraseWordsTagAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
@@ -1456,14 +1336,14 @@ public class CoreAnnotations {
       return ErasureUtils.uncheckedCast(List.class);
     }
   }
-
+  
   //to get prototype feature, see Haghighi Exemplar driven learning
   public static class ProtoAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
     }
   }
-
+  
   //which common words list does this word belong to
   public static class CommonWordsAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
@@ -1474,55 +1354,6 @@ public class CoreAnnotations {
   // Document date
   // Needed by SUTime
   public static class DocDateAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  /**
-   * Document type
-   * What kind of document is it: story, multi-part article, listing, email, etc
-   */
-  public static class DocTypeAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  /**
-   * Document source type
-   * What kind of place did the document come from: newswire, discussion forum, web...
-   */
-  public static class DocSourceTypeAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  /**
-   * Document title
-   * What is the document title
-   */
-  public static class DocTitleAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  /**
-   * Reference location for the document
-   */
-  public static class LocationAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  /**
-   * Author for the document
-   * (really should be a set of authors, but just have single string for simplicity)
-   */
-  public static class AuthorAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
     }
@@ -1581,17 +1412,6 @@ public class CoreAnnotations {
       return ErasureUtils.<Class<List<CoreMap>>> uncheckedCast(List.class);
     }
   }
-
-  /**
-   * used in dcoref.
-   * to indicate that the it should use the discourse information annotated in the document
-   */
-  public static class UseMarkedDiscourseAnnotation implements CoreAnnotation<Boolean> {
-    public Class<Boolean> getType() {
-      return Boolean.class;
-    }
-  }
-
   /**
    * used in dcoref.
    * to store discourse information. (marking <TURN> or quotation)
@@ -1623,30 +1443,11 @@ public class CoreAnnotations {
   }
 
   /**
-   * used in dcoref.
-   * to store premarked entity mentions.
-   */
-  public static class MentionTokenAnnotation implements CoreAnnotation<MultiTokenTag> {
-    public Class<MultiTokenTag> getType() {
-      return MultiTokenTag.class;
-    }
-  }
-
-  /**
    * used in incremental DAG parser
    */
   public static class LeftChildrenNodeAnnotation implements CoreAnnotation<SortedSet<Pair<CoreLabel, String>>> {
     public Class<SortedSet<Pair<CoreLabel, String>>> getType() {
       return ErasureUtils.uncheckedCast(SortedSet.class);
-    }
-  }
-
-  /**
-   * Stores an exception associated with processing this document
-   */
-  public static class ExceptionAnnotation implements CoreAnnotation<Throwable> {
-    public Class<Throwable> getType() {
-      return ErasureUtils.uncheckedCast(Throwable.class);
     }
   }
 
@@ -1660,9 +1461,7 @@ public class CoreAnnotations {
    * entire pumpkin pie", then "dog" would have the
    * AntecedentAnnotation "cirrus".
    *
-   * This annotation is currently used ONLY in the KBP slot filling project.
-   * In that project, "cirrus" from the example above would also have an
-   * AntecedentAnnotation of "cirrus".
+   * This annotation is currently used ONLY in the KBP slot filling project
    * Generally, you want to use the usual coref graph annotations
    */
   public static class AntecedentAnnotation implements CoreAnnotation<String> {
@@ -1670,18 +1469,10 @@ public class CoreAnnotations {
       return String.class;
     }
   }
-
+  
   public static class LabelWeightAnnotation implements CoreAnnotation<Double>{
    public Class<Double> getType(){
      return Double.class;
    }
-  }
-
-  public static class ColumnDataClassifierAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() { return String.class; }
-  }
-
-  public static class LabelIDAnnotation implements CoreAnnotation<Integer>{
-    public Class<Integer> getType() { return Integer.class; }
   }
 }

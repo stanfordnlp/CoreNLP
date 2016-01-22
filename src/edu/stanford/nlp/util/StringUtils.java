@@ -2,7 +2,6 @@ package edu.stanford.nlp.util;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasOffset;
 import edu.stanford.nlp.ling.HasWord;
@@ -12,34 +11,14 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.text.Normalizer;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 /**
- * StringUtils is a class for random String things, including output formatting and command line argument parsing.
- * <p>
- * Many of these methods will be familiar to perl users: {@link #join(Iterable)}, {@link #split(String, String)}, {@link
- * #trim(String, int)}, {@link #find(String, String)}, {@link #lookingAt(String, String)}, and {@link #matches(String,
- * String)}.
- * <p>
- * There are also useful methods for padding Strings/Objects with spaces on the right or left for printing even-width
- * table columns: {@link #padLeft(int, int)}, {@link #pad(String, int)}.
- *
- * <p>Example: print a comma-separated list of numbers:</p>
- * <p><code>System.out.println(StringUtils.pad(nums, &quot;, &quot;));</code></p>
- * <p>Example: print a 2D array of numbers with 8-char cells:</p>
- * <p><code>for(int i = 0; i &lt; nums.length; i++) {<br>
- * &nbsp;&nbsp;&nbsp; for(int j = 0; j &lt; nums[i].length; j++) {<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
- * System.out.print(StringUtils.leftPad(nums[i][j], 8));<br>
- * &nbsp;&nbsp;&nbsp; <br>
- * &nbsp;&nbsp;&nbsp; System.out.println();<br>
- * </code></p>
+ * StringUtils is a class for random String things, including output
+ * formatting and command line argument parsing.
  *
  * @author Dan Klein
  * @author Christopher Manning
@@ -52,7 +31,8 @@ public class StringUtils {
   /**
    * Don't let anyone instantiate this class.
    */
-  private StringUtils() {}
+  private StringUtils() {
+  }
 
   public static final String[] EMPTY_STRING_ARRAY = new String[0];
   private static final String PROP = "prop";
@@ -107,8 +87,7 @@ public class StringUtils {
   /**
    * Takes a string of the form "x1=y1,x2=y2,..." such
    * that each y is an integer and each x is a key.  A
-   * String[] s is returned such that s[yn]=xn.
-   *
+   * String[] s is returned such that s[yn]=xn
    * @param map A string of the form "x1=y1,x2=y2,..." such
    *     that each y is an integer and each x is a key.
    * @return  A String[] s is returned such that s[yn]=xn
@@ -136,8 +115,7 @@ public class StringUtils {
 
 
   /**
-   * Takes a string of the form "x1=y1,x2=y2,..." and returns Map.
-   *
+   * Takes a string of the form "x1=y1,x2=y2,..." and returns Map
    * @param map A string of the form "x1=y1,x2=y2,..."
    * @return  A Map m is returned such that m.get(xn) = yn
    */
@@ -155,7 +133,7 @@ public class StringUtils {
 
   public static List<Pattern> regexesToPatterns(Iterable<String> regexes)
   {
-    List<Pattern> patterns = new ArrayList<>();
+    List<Pattern> patterns = new ArrayList<Pattern>();
     for (String regex:regexes) {
       patterns.add(Pattern.compile(regex));
     }
@@ -178,7 +156,7 @@ public class StringUtils {
       return null;
     }
 
-    List<String> groups = new ArrayList<>();
+    List<String> groups = new ArrayList<String>();
     for (int index = 1; index <= matcher.groupCount(); index++) {
       groups.add(matcher.group(index));
     }
@@ -217,7 +195,7 @@ public class StringUtils {
 
 
   public static String joinWords(Iterable<? extends HasWord> l, String glue) {
-    StringBuilder sb = new StringBuilder(l instanceof Collection ? ((Collection) l).size() : 64);
+    StringBuilder sb = new StringBuilder();
     boolean first = true;
     for (HasWord o : l) {
       if ( ! first) {
@@ -248,68 +226,11 @@ public class StringUtils {
   }
 
   public static String joinWords(List<? extends HasWord> l, String glue, int start, int end) {
-    return join(l, glue, in -> in.word(), start, end);
-  }
-
-  public static final Function<Object,String> DEFAULT_TOSTRING = new Function<Object, String>() {
-    @Override
-    public String apply(Object in) {
-      return in.toString();
-    }
-  };
-
-  public static String joinFields(List<? extends CoreMap> l, final Class field, final String defaultFieldValue,
-                                  String glue, int start, int end, final Function<Object,String> toStringFunc) {
-    return join(l, glue, new Function<CoreMap, String>() {
-      public String apply(CoreMap in) {
-        Object val = in.get(field);
-        return (val != null)? toStringFunc.apply(val):defaultFieldValue;
+    return join(l, glue, new Function<HasWord, String>() {
+      public String apply(HasWord in) {
+        return in.word();
       }
     }, start, end);
-  }
-
-  public static String joinFields(List<? extends CoreMap> l, final Class field, final String defaultFieldValue,
-                                  String glue, int start, int end) {
-    return joinFields(l, field, defaultFieldValue, glue, start, end, DEFAULT_TOSTRING);
-  }
-
-  public static String joinFields(List<? extends CoreMap> l, final Class field, final Function<Object,String> toStringFunc) {
-    return joinFields(l, field, "-", " ", 0, l.size(), toStringFunc);
-  }
-
-  public static String joinFields(List<? extends CoreMap> l, final Class field) {
-    return joinFields(l, field, "-", " ", 0, l.size());
-  }
-
-  public static String joinMultipleFields(List<? extends CoreMap> l, final Class[] fields, final String defaultFieldValue,
-                                          final String fieldGlue, String glue, int start, int end, final Function<Object,String> toStringFunc) {
-    return join(l, glue, new Function<CoreMap, String>() {
-      public String apply(CoreMap in) {
-        StringBuilder sb = new StringBuilder();
-        for (Class field: fields) {
-          if (sb.length() > 0) {
-            sb.append(fieldGlue);
-          }
-          Object val = in.get(field);
-          String str = (val != null)? toStringFunc.apply(val):defaultFieldValue;
-          sb.append(str);
-        }
-        return sb.toString();
-      }
-    }, start, end);
-  }
-
-  public static String joinMultipleFields(List<? extends CoreMap> l, final Class[] fields, final Function<Object,String> toStringFunc) {
-    return joinMultipleFields(l, fields, "-", "/", " ", 0, l.size(), toStringFunc);
-  }
-
-  public static String joinMultipleFields(List<? extends CoreMap> l, final Class[] fields, final String defaultFieldValue,
-                                          final String fieldGlue, String glue, int start, int end) {
-    return joinMultipleFields(l, fields, defaultFieldValue, fieldGlue, glue, start, end, DEFAULT_TOSTRING);
-  }
-
-  public static String joinMultipleFields(List<? extends CoreMap> l, final Class[] fields) {
-    return joinMultipleFields(l, fields, "-", "/", " ", 0, l.size());
   }
 
   /**
@@ -341,11 +262,9 @@ public class StringUtils {
   }
 
   /**
-   * Joins each elem in the {@link Iterable} with the given glue.
+   * Joins each elem in the {@code Collection} with the given glue.
    * For example, given a list of {@code Integers}, you can create
    * a comma-separated list by calling {@code join(numbers, ", ")}.
-   *
-   * @see StringUtils#join(Stream, String)
    */
   public static <X> String join(Iterable<X> l, String glue) {
     StringBuilder sb = new StringBuilder();
@@ -357,28 +276,6 @@ public class StringUtils {
         first = false;
       }
       sb.append(o);
-    }
-    return sb.toString();
-  }
-
-  /**
-   * Joins each elem in the {@link Stream} with the given glue.
-   * For example, given a list of {@code Integers}, you can create
-   * a comma-separated list by calling {@code join(numbers, ", ")}.
-   *
-   * @see StringUtils#join(Iterable, String)
-   */
-  public static <X> String join(Stream<X> l, String glue) {
-    StringBuilder sb = new StringBuilder();
-    boolean first = true;
-    Iterator<X> iter = l.iterator();
-    while (iter.hasNext()) {
-      if ( ! first) {
-        sb.append(glue);
-      } else {
-        first = false;
-      }
-      sb.append(iter.next());
     }
     return sb.toString();
   }
@@ -408,28 +305,6 @@ public class StringUtils {
    */
   public static String join(Object[] elements, String glue) {
     return (join(Arrays.asList(elements), glue));
-  }
-
-  /**
-   * Joins an array of elements in a given span.
-   * @param elements The elements to join.
-   * @param start The start index to join from.
-   * @param end The end (non-inclusive) to join until.
-   * @param glue The glue to hold together the elements.
-   * @return The string form of the sub-array, joined on the given glue.
-   */
-  public static String join(Object[] elements, int start, int end, String glue) {
-    StringBuilder b = new StringBuilder(127);
-    boolean isFirst = true;
-    for (int i = start; i < end; ++i) {
-      if (isFirst) {
-        b.append(elements[i].toString());
-        isFirst = false;
-      } else {
-        b.append(glue).append(elements[i].toString());
-      }
-    }
-    return b.toString();
   }
 
   /**
@@ -471,62 +346,6 @@ public class StringUtils {
     return (Arrays.asList(str.split(regex)));
   }
 
-  /**
-   * Split a string on a given single character.
-   * This method is often faster than the regular split() method.
-   * @param input The input to split.
-   * @param delimiter The character to split on.
-   * @return An array of Strings corresponding to the original input split on the delimiter character.
-   */
-  public static String[] splitOnChar(String input, char delimiter) {
-    // State
-    String[] out = new String[input.length() + 1];
-    int nextIndex = 0;
-    int lastDelimiterIndex = -1;
-    char[] chars = input.toCharArray();
-    // Split
-    for ( int i = 0; i <= chars.length; ++i ) {
-      if (i >= chars.length || chars[i] == delimiter) {
-        char[] tokenChars = new char[i - (lastDelimiterIndex + 1)];
-        System.arraycopy(chars, lastDelimiterIndex + 1, tokenChars, 0, tokenChars.length);
-        out[nextIndex] = new String(tokenChars);
-        nextIndex += 1;
-        lastDelimiterIndex = i;
-      }
-    }
-    // Clean Result
-    String[] trimmedOut = new String[nextIndex];
-    System.arraycopy(out, 0, trimmedOut, 0, trimmedOut.length);
-    return trimmedOut;
-  }
-
-  /**
-   * Splits a string into whitespace tokenized fields based on a delimiter. For example,
-   * "aa bb | bb cc | ccc ddd" would be split into "[aa,bb],[bb,cc],[ccc,ddd]" based on
-   * the delimiter "|". This method uses the old StringTokenizer class, which is up to
-   * 3x faster than the regex-based "split()" methods.
-   *
-   * @param delimiter
-   * @return
-   */
-  public static List<List<String>> splitFieldsFast(String str, String delimiter) {
-    List<List<String>> fields = Generics.newArrayList();
-    StringTokenizer tokenizer = new StringTokenizer(str.trim());
-    List<String> currentField = Generics.newArrayList();
-    while(tokenizer.hasMoreTokens()) {
-      String token = tokenizer.nextToken();
-      if (token.equals(delimiter)) {
-        fields.add(currentField);
-        currentField = Generics.newArrayList();
-      } else {
-        currentField.add(token.trim());
-      }
-    }
-    if (currentField.size() > 0) {
-      fields.add(currentField);
-    }
-    return fields;
-  }
 
   /** Split a string into tokens.  Because there is a tokenRegex as well as a
    *  separatorRegex (unlike for the conventional split), you can do things
@@ -549,7 +368,7 @@ public class StringUtils {
   public static List<String> valueSplit(String str, String valueRegex, String separatorRegex) {
     Pattern vPat = Pattern.compile(valueRegex);
     Pattern sPat = Pattern.compile(separatorRegex);
-    List<String> ret = new ArrayList<>();
+    List<String> ret = new ArrayList<String>();
     while (str.length() > 0) {
       Matcher vm = vPat.matcher(str);
       if (vm.lookingAt()) {
@@ -842,21 +661,22 @@ public class StringUtils {
    * the String[] value for that flag.
    *
    * @param args           the argument array to be parsed
-   * @param flagsToNumArgs a {@link Map} of flag names to {@link Integer}
+   * @param flagsToNumArgs a {@link Map} of flag names to {@link Integer
    *                       values specifying the number of arguments
    *                       for that flag (default min 0, max 1).
-   * @return a {@link Map} of flag names to flag argument {@link String}
+   * @return a {@link Map} of flag names to flag argument {@link
+   *         String} arrays.
    */
   public static Map<String, String[]> argsToMap(String[] args, Map<String, Integer> flagsToNumArgs) {
     Map<String, String[]> result = Generics.newHashMap();
-    List<String> remainingArgs = new ArrayList<>();
+    List<String> remainingArgs = new ArrayList<String>();
     for (int i = 0; i < args.length; i++) {
       String key = args[i];
       if (key.charAt(0) == '-') { // found a flag
         Integer numFlagArgs = flagsToNumArgs.get(key);
         int max = numFlagArgs == null ? 1 : numFlagArgs.intValue();
         int min = numFlagArgs == null ? 0 : numFlagArgs.intValue();
-        List<String> flagArgs = new ArrayList<>();
+        List<String> flagArgs = new ArrayList<String>();
         for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
           flagArgs.add(args[i + 1]);
         }
@@ -887,7 +707,7 @@ public class StringUtils {
    * @param args Command line arguments
    * @return A Properties object representing the arguments.
    */
-  public static Properties argsToProperties(String... args) {
+  public static Properties argsToProperties(String[] args) {
     return argsToProperties(args, Collections.<String,Integer>emptyMap());
   }
 
@@ -912,7 +732,7 @@ public class StringUtils {
    */
   public static Properties argsToProperties(String[] args, Map<String,Integer> flagsToNumArgs) {
     Properties result = new Properties();
-    List<String> remainingArgs = new ArrayList<>();
+    List<String> remainingArgs = new ArrayList<String>();
     for (int i = 0; i < args.length; i++) {
       String key = args[i];
       if (key.length() > 0 && key.charAt(0) == '-') { // found a flag
@@ -924,34 +744,32 @@ public class StringUtils {
         Integer maxFlagArgs = flagsToNumArgs.get(key);
         int max = maxFlagArgs == null ? 1 : maxFlagArgs;
         int min = maxFlagArgs == null ? 0 : maxFlagArgs;
-        if (maxFlagArgs != null && maxFlagArgs == 0 && i < args.length - 1 &&
-            ("true".equalsIgnoreCase(args[i + 1]) || "false".equalsIgnoreCase(args[i + 1]))) {
-          max = 1;  // case: we're reading a boolean flag. TODO(gabor) there's gotta be a better way...
-        }
-        List<String> flagArgs = new ArrayList<>();
+        List<String> flagArgs = new ArrayList<String>();
         // cdm oct 2007: add length check to allow for empty string argument!
-        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].isEmpty() || args[i + 1].charAt(0) != '-'); i++, j++) {
+        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
           flagArgs.add(args[i + 1]);
         }
         if (flagArgs.isEmpty()) {
           result.setProperty(key, "true");
         } else {
           result.setProperty(key, join(flagArgs, " "));
-          if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
+          if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS))
+          {
             try {
-              BufferedReader reader = IOUtils.readerFromString(result.getProperty(key));
+              InputStream is = new BufferedInputStream(new FileInputStream(result.getProperty(key)));
+              InputStreamReader reader = new InputStreamReader(is, "utf-8");
               result.remove(key); // location of this line is critical
               result.load(reader);
               // trim all values
-              for (String propKey : result.stringPropertyNames()){
-                String newVal = result.getProperty(propKey);
-                result.setProperty(propKey, newVal.trim());
+              for(Object propKey : result.keySet()){
+                String newVal = result.getProperty((String)propKey);
+                result.setProperty((String)propKey,newVal.trim());
               }
-              reader.close();
+              is.close();
             } catch (IOException e) {
-              String msg = "argsToProperties could not read properties file: " + result.getProperty(key);
               result.remove(key);
-              throw new RuntimeIOException(msg, e);
+              System.err.println("argsToProperties could not read properties file: " + result.getProperty(key));
+              throw new RuntimeException(e);
             }
           }
         }
@@ -966,10 +784,11 @@ public class StringUtils {
     if (result.containsKey(PROP)) {
       String file = result.getProperty(PROP);
       result.remove(PROP);
-      Properties toAdd = argsToProperties("-prop", file);
-      for (String key : toAdd.stringPropertyNames()) {
+      Properties toAdd = argsToProperties(new String[]{"-prop", file});
+      for (Enumeration<?> e = toAdd.propertyNames(); e.hasMoreElements(); ) {
+        String key = (String) e.nextElement();
         String val = toAdd.getProperty(key);
-        if ( ! result.containsKey(key)) {
+        if (!result.containsKey(key)) {
           result.setProperty(key, val);
         }
       }
@@ -983,7 +802,6 @@ public class StringUtils {
    * This method reads in properties listed in a file in the format prop=value, one property per line.
    * Although <code>Properties.load(InputStream)</code> exists, I implemented this method to trim the lines,
    * something not implemented in the <code>load()</code> method.
-   *
    * @param filename A properties file to read
    * @return The corresponding Properties object
    */
@@ -993,9 +811,9 @@ public class StringUtils {
       InputStream is = new BufferedInputStream(new FileInputStream(filename));
       result.load(is);
       // trim all values
-      for (String propKey : result.stringPropertyNames()){
-        String newVal = result.getProperty(propKey);
-        result.setProperty(propKey,newVal.trim());
+      for (Object propKey : result.keySet()){
+        String newVal = result.getProperty((String)propKey);
+        result.setProperty((String)propKey,newVal.trim());
       }
       is.close();
       return result;
@@ -1275,17 +1093,16 @@ public class StringUtils {
    * splitChar.  However, it provides a quoting facility: it is possible to
    * quote strings with the quoteChar.
    * If the quoteChar occurs within the quotedExpression, it must be prefaced
-   * by the escapeChar.
-   * This routine can be useful for processing a line of a CSV file.
+   * by the escapeChar
    *
-   * @param s         The String to split into fields. Cannot be null.
+   * @param s         The String to split
    * @param splitChar The character to split on
    * @param quoteChar The character to quote items with
    * @param escapeChar The character to escape the quoteChar with
    * @return An array of Strings that s is split into
    */
   public static String[] splitOnCharWithQuoting(String s, char splitChar, char quoteChar, char escapeChar) {
-    List<String> result = new ArrayList<>();
+    List<String> result = new ArrayList<String>();
     int i = 0;
     int length = s.length();
     StringBuilder b = new StringBuilder();
@@ -1293,11 +1110,10 @@ public class StringUtils {
       char curr = s.charAt(i);
       if (curr == splitChar) {
         // add last buffer
-        // cdm 2014: Do this even if the field is empty!
-        // if (b.length() > 0) {
-        result.add(b.toString());
-        b = new StringBuilder();
-        // }
+        if (b.length() > 0) {
+          result.add(b.toString());
+          b = new StringBuilder();
+        }
         i++;
       } else if (curr == quoteChar) {
         // find next instance of quoteChar
@@ -1322,7 +1138,6 @@ public class StringUtils {
         i++;
       }
     }
-    // RFC 4180 disallows final comma. At any rate, don't produce a field after it unless non-empty
     if (b.length() > 0) {
       result.add(b.toString());
     }
@@ -1662,31 +1477,22 @@ public class StringUtils {
   }
 
   /**
-   * Returns a text table containing the matrix of objects passed in.
+   * Returns a text table containing the matrix of Strings passed in.
    * The first dimension of the matrix should represent the rows, and the
-   * second dimension the columns. Each object is printed in a cell with toString().
-   * The printing may be padded with spaces on the left and then on the right to
-   * ensure that the String form is of length at least padLeft or padRight.
-   * If tsv is true, a tab is put between columns.
-   *
-   * @return A String form of the table
+   * second dimension the columns.
    */
-  public static String makeTextTable(Object[][] table, Object[] rowLabels, Object[] colLabels, int padLeft, int padRight, boolean tsv) {
+  public static String makeAsciiTable(Object[][] table, Object[] rowLabels, Object[] colLabels, int padLeft, int padRight, boolean tsv) {
     StringBuilder buff = new StringBuilder();
-    if (colLabels != null) {
-      // top row
-      buff.append(makeAsciiTableCell("", padLeft, padRight, tsv)); // the top left cell
-      for (int j = 0; j < table[0].length; j++) { // assume table is a rectangular matrix
-        buff.append(makeAsciiTableCell(colLabels[j], padLeft, padRight, (j != table[0].length - 1) && tsv));
-      }
-      buff.append('\n');
+    // top row
+    buff.append(makeAsciiTableCell("", padLeft, padRight, tsv)); // the top left cell
+    for (int j = 0; j < table[0].length; j++) { // assume table is a rectangular matrix
+      buff.append(makeAsciiTableCell(colLabels[j], padLeft, padRight, (j != table[0].length - 1) && tsv));
     }
+    buff.append('\n');
     // all other rows
     for (int i = 0; i < table.length; i++) {
       // one row
-      if (rowLabels != null) {
-        buff.append(makeAsciiTableCell(rowLabels[i], padLeft, padRight, tsv));
-      }
+      buff.append(makeAsciiTableCell(rowLabels[i], padLeft, padRight, tsv));
       for (int j = 0; j < table[i].length; j++) {
         buff.append(makeAsciiTableCell(table[i][j], padLeft, padRight, (j != table[0].length - 1) && tsv));
       }
@@ -1979,7 +1785,7 @@ public class StringUtils {
     if (str == null)
       return null;
     // ${VAR_NAME} or $VAR_NAME
-    Pattern p = Pattern.compile("\\$\\{(\\w+)\\}");
+    Pattern p = Pattern.compile("\\$\\{(\\w+)\\}|\\$(\\w+)");
     Matcher m = p.matcher(str);
     StringBuffer sb = new StringBuffer();
     while (m.find()) {
@@ -1987,7 +1793,7 @@ public class StringUtils {
       String vrValue;
       //either in the props file
       if (props.containsKey(varName)) {
-        vrValue = ((String) props.get(varName));
+        vrValue = (String) props.get(varName);
       } else {
         //or as the environment variable
         vrValue = System.getenv(varName);
@@ -2006,9 +1812,7 @@ public class StringUtils {
    * variables. if the variable is not found then substitute it for empty string
    */
   public static Properties argsToPropertiesWithResolve(String[] args) {
-    LinkedHashMap<String, String> result = new LinkedHashMap<>();
-    Map<String, String> existingArgs = new LinkedHashMap<>();
-
+    TreeMap<String, String> result = new TreeMap<String, String>();
     for (int i = 0; i < args.length; i++) {
       String key = args[i];
       if (key.length() > 0 && key.charAt(0) == '-') { // found a flag
@@ -2016,31 +1820,13 @@ public class StringUtils {
           key = key.substring(2); // strip off 2 hyphens
         else
           key = key.substring(1); // strip off the hyphen
-
-        int max = 1;
-        int min = 0;
-        List<String> flagArgs = new ArrayList<>();
-        // cdm oct 2007: add length check to allow for empty string argument!
-        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
-          flagArgs.add(args[i + 1]);
+        if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
+          result.putAll(propFileToTreeMap(args[i + 1]));
+          i++;
         }
 
-        if (flagArgs.isEmpty()) {
-          existingArgs.put(key, "true");
-        } else {
-
-          if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
-            for(String flagArg: flagArgs)
-              result.putAll(propFileToLinkedHashMap(flagArg, existingArgs));
-
-            existingArgs.clear();
-          } else
-            existingArgs.put(key, join(flagArgs, " "));
-        }
       }
     }
-    result.putAll(existingArgs);
-
     for (Entry<String, String> o : result.entrySet()) {
       String val = resolveVars(o.getValue(), result);
       result.put(o.getKey(), val);
@@ -2052,17 +1838,15 @@ public class StringUtils {
 
   /**
    * This method reads in properties listed in a file in the format prop=value,
-   * one property per line. and reads them into a LinkedHashMap (insertion order preserving)
+   * one property per line. and reads them into a TreeMap (order preserving)
    * Flags not having any arguments is set to "true".
    *
    * @param filename A properties file to read
-   * @return The corresponding LinkedHashMap where the ordering is the same as in the
+   * @return The corresponding TreeMap where the ordering is the same as in the
    *         props file
    */
-  public static LinkedHashMap<String, String> propFileToLinkedHashMap(String filename, Map<String, String> existingArgs) {
-
-    LinkedHashMap<String, String> result = new LinkedHashMap<>();
-    result.putAll(existingArgs);
+  public static TreeMap<String, String> propFileToTreeMap(String filename) {
+    TreeMap<String, String> result = new TreeMap<String, String>();
     for (String l : IOUtils.readLines(filename)) {
       l = l.trim();
       if (l.isEmpty() || l.startsWith("#"))
@@ -2076,543 +1860,31 @@ public class StringUtils {
     }
     return result;
   }
-
+  
   /**
    * n grams for already splitted string. the ngrams are joined with a single space
+   * @param s string
+   * @param minSize
+   * @param maxSize
+   * @return
    */
   public static Collection<String> getNgrams(List<String> words, int minSize, int maxSize){
     List<List<String>> ng = CollectionUtils.getNGrams(words, minSize, maxSize);
-    Collection<String> ngrams = new ArrayList<>();
+    Collection<String> ngrams = new ArrayList<String>();
     for(List<String> n: ng)
       ngrams.add(StringUtils.join(n," "));
-
+  
     return ngrams;
   }
-
-  /**
-   * n grams for already splitted string. the ngrams are joined with a single space
-   */
-  public static Collection<String> getNgramsFromTokens(List<CoreLabel> words, int minSize, int maxSize){
-    List<String> wordsStr = new ArrayList<>();
-    for(CoreLabel l : words)
-      wordsStr.add(l.word());
-    List<List<String>> ng = CollectionUtils.getNGrams(wordsStr, minSize, maxSize);
-    Collection<String> ngrams = new ArrayList<>();
-    for(List<String> n: ng)
-      ngrams.add(StringUtils.join(n," "));
-
-    return ngrams;
-  }
-
+  
   /**
    * The string is split on whitespace and the ngrams are joined with a single space
+   * @param s string
+   * @param minSize
+   * @param maxSize
+   * @return
    */
   public static Collection<String> getNgramsString(String s, int minSize, int maxSize){
     return getNgrams(Arrays.asList(s.split("\\s+")), minSize, maxSize);
   }
-
-  /**
-   * Build a list of character-based ngrams from the given string.
-   */
-  public static Collection<String> getCharacterNgrams(String s, int minSize, int maxSize) {
-    Collection<String> ngrams = new ArrayList<>();
-    int len = s.length();
-
-    for (int i = 0; i < len; i++) {
-      for (int ngramSize = minSize;
-           ngramSize > 0 && ngramSize <= maxSize && i + ngramSize <= len;
-           ngramSize++) {
-        ngrams.add(s.substring(i, i + ngramSize));
-      }
-    }
-
-    return ngrams;
-  }
-
-  private static Pattern diacriticalMarksPattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}");
-  public static String normalize(String s) {
-    // Normalizes string and strips diacritics (map to ascii) by
-    // 1. taking the NFKD (compatibility decomposition -
-    //   in compatibility equivalence, formatting such as subscripting is lost -
-    //   see http://unicode.org/reports/tr15/)
-    // 2. Removing diacriticals
-    // 3. Recombining into NFKC form (compatibility composition)
-    // This process may be slow.
-    //
-    // The main purpose of the function is to remove diacritics for asciis,
-    //  but it may normalize other stuff as well.
-    // A more conservative approach is to do explicit folding just for ascii character
-    //   (see RuleBasedNameMatcher.normalize)
-    String d = Normalizer.normalize(s, Normalizer.Form.NFKD);
-    d = diacriticalMarksPattern.matcher(d).replaceAll("");
-    return Normalizer.normalize(d, Normalizer.Form.NFKC);
-  }
-
-  /**
-   * Convert a list of labels into a string, by simply joining them with spaces.
-   * @param words The words to join.
-   * @return A string representation of the sentence, tokenized by a single space.
-   */
-  public static String toString(List<CoreLabel> words) {
-    return join(words.stream().map(CoreLabel::word), " ");
-  }
-
-  /**
-   * Convert a CoreMap representing a sentence into a string, by simply joining them with spaces.
-   * @param sentence The sentence to stringify.
-   * @return A string representation of the sentence, tokenized by a single space.
-   */
-  public static String toString(CoreMap sentence) {
-    return toString(sentence.get(CoreAnnotations.TokensAnnotation.class));
-  }
-
-  /** I shamefully stole this from: http://rosettacode.org/wiki/Levenshtein_distance#Java --Gabor */
-  public static int levenshteinDistance(String s1, String s2) {
-    s1 = s1.toLowerCase();
-    s2 = s2.toLowerCase();
-
-    int[] costs = new int[s2.length() + 1];
-    for (int i = 0; i <= s1.length(); i++) {
-      int lastValue = i;
-      for (int j = 0; j <= s2.length(); j++) {
-        if (i == 0)
-          costs[j] = j;
-        else {
-          if (j > 0) {
-            int newValue = costs[j - 1];
-            if (s1.charAt(i - 1) != s2.charAt(j - 1))
-              newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-            costs[j - 1] = lastValue;
-            lastValue = newValue;
-          }
-        }
-      }
-      if (i > 0)
-        costs[s2.length()] = lastValue;
-    }
-    return costs[s2.length()];
-  }
-
-  /** I shamefully stole this from: http://rosettacode.org/wiki/Levenshtein_distance#Java --Gabor */
-  public static <E> int levenshteinDistance(E[] s1, E[] s2) {
-
-    int[] costs = new int[s2.length + 1];
-    for (int i = 0; i <= s1.length; i++) {
-      int lastValue = i;
-      for (int j = 0; j <= s2.length; j++) {
-        if (i == 0)
-          costs[j] = j;
-        else {
-          if (j > 0) {
-            int newValue = costs[j - 1];
-            if (!s1[i - 1].equals(s2[j - 1]))
-              newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-            costs[j - 1] = lastValue;
-            lastValue = newValue;
-          }
-        }
-      }
-      if (i > 0)
-        costs[s2.length] = lastValue;
-    }
-    return costs[s2.length];
-  }
-
-  /**
-   * Unescape an HTML string.
-   * Taken from: http://stackoverflow.com/questions/994331/java-how-to-decode-html-character-entities-in-java-like-httputility-htmldecode
-   * @param input The string to unescape
-   * @return The unescaped String
-   */
-  public static String unescapeHtml3(final String input) {
-        StringWriter writer = null;
-        int len = input.length();
-        int i = 1;
-        int st = 0;
-        while (true) {
-            // look for '&'
-            while (i < len && input.charAt(i-1) != '&')
-                i++;
-            if (i >= len)
-                break;
-
-            // found '&', look for ';'
-            int j = i;
-            while (j < len && j < i + 6 + 1 && input.charAt(j) != ';')
-                j++;
-            if (j == len || j < i + 2 || j == i + 6 + 1) {
-                i++;
-                continue;
-            }
-
-            // found escape
-            if (input.charAt(i) == '#') {
-                // numeric escape
-                int k = i + 1;
-                int radix = 10;
-
-                final char firstChar = input.charAt(k);
-                if (firstChar == 'x' || firstChar == 'X') {
-                    k++;
-                    radix = 16;
-                }
-
-                try {
-                    int entityValue = Integer.parseInt(input.substring(k, j), radix);
-
-                    if (writer == null)
-                        writer = new StringWriter(input.length());
-                    writer.append(input.substring(st, i - 1));
-
-                    if (entityValue > 0xFFFF) {
-                        final char[] chrs = Character.toChars(entityValue);
-                        writer.write(chrs[0]);
-                        writer.write(chrs[1]);
-                    } else {
-                        writer.write(entityValue);
-                    }
-
-                } catch (NumberFormatException ex) {
-                    i++;
-                    continue;
-                }
-            }
-            else {
-                // named escape
-                CharSequence value = htmlUnescapeLookupMap.get(input.substring(i, j));
-                if (value == null) {
-                    i++;
-                    continue;
-                }
-
-                if (writer == null)
-                    writer = new StringWriter(input.length());
-                writer.append(input.substring(st, i - 1));
-
-                writer.append(value);
-            }
-
-            // skip escape
-            st = j + 1;
-            i = st;
-        }
-
-        if (writer != null) {
-            writer.append(input.substring(st, len));
-            return writer.toString();
-        }
-        return input;
-    }
-
-    private static final String[][] HTML_ESCAPES = {
-        {"\"",     "quot"}, // " - double-quote
-        {"&",      "amp"}, // & - ampersand
-        {"<",      "lt"}, // < - less-than
-        {">",      "gt"}, // > - greater-than
-        {"-",      "ndash"}, // - - dash
-
-        // Mapping to escape ISO-8859-1 characters to their named HTML 3.x equivalents.
-        {"\u00A0", "nbsp"}, // non-breaking space
-        {"\u00A1", "iexcl"}, // inverted exclamation mark
-        {"\u00A2", "cent"}, // cent sign
-        {"\u00A3", "pound"}, // pound sign
-        {"\u00A4", "curren"}, // currency sign
-        {"\u00A5", "yen"}, // yen sign = yuan sign
-        {"\u00A6", "brvbar"}, // broken bar = broken vertical bar
-        {"\u00A7", "sect"}, // section sign
-        {"\u00A8", "uml"}, // diaeresis = spacing diaeresis
-        {"\u00A9", "copy"}, // © - copyright sign
-        {"\u00AA", "ordf"}, // feminine ordinal indicator
-        {"\u00AB", "laquo"}, // left-pointing double angle quotation mark = left pointing guillemet
-        {"\u00AC", "not"}, // not sign
-        {"\u00AD", "shy"}, // soft hyphen = discretionary hyphen
-        {"\u00AE", "reg"}, // ® - registered trademark sign
-        {"\u00AF", "macr"}, // macron = spacing macron = overline = APL overbar
-        {"\u00B0", "deg"}, // degree sign
-        {"\u00B1", "plusmn"}, // plus-minus sign = plus-or-minus sign
-        {"\u00B2", "sup2"}, // superscript two = superscript digit two = squared
-        {"\u00B3", "sup3"}, // superscript three = superscript digit three = cubed
-        {"\u00B4", "acute"}, // acute accent = spacing acute
-        {"\u00B5", "micro"}, // micro sign
-        {"\u00B6", "para"}, // pilcrow sign = paragraph sign
-        {"\u00B7", "middot"}, // middle dot = Georgian comma = Greek middle dot
-        {"\u00B8", "cedil"}, // cedilla = spacing cedilla
-        {"\u00B9", "sup1"}, // superscript one = superscript digit one
-        {"\u00BA", "ordm"}, // masculine ordinal indicator
-        {"\u00BB", "raquo"}, // right-pointing double angle quotation mark = right pointing guillemet
-        {"\u00BC", "frac14"}, // vulgar fraction one quarter = fraction one quarter
-        {"\u00BD", "frac12"}, // vulgar fraction one half = fraction one half
-        {"\u00BE", "frac34"}, // vulgar fraction three quarters = fraction three quarters
-        {"\u00BF", "iquest"}, // inverted question mark = turned question mark
-        {"\u00C0", "Agrave"}, // А - uppercase A, grave accent
-        {"\u00C1", "Aacute"}, // Б - uppercase A, acute accent
-        {"\u00C2", "Acirc"}, // В - uppercase A, circumflex accent
-        {"\u00C3", "Atilde"}, // Г - uppercase A, tilde
-        {"\u00C4", "Auml"}, // Д - uppercase A, umlaut
-        {"\u00C5", "Aring"}, // Е - uppercase A, ring
-        {"\u00C6", "AElig"}, // Ж - uppercase AE
-        {"\u00C7", "Ccedil"}, // З - uppercase C, cedilla
-        {"\u00C8", "Egrave"}, // И - uppercase E, grave accent
-        {"\u00C9", "Eacute"}, // Й - uppercase E, acute accent
-        {"\u00CA", "Ecirc"}, // К - uppercase E, circumflex accent
-        {"\u00CB", "Euml"}, // Л - uppercase E, umlaut
-        {"\u00CC", "Igrave"}, // М - uppercase I, grave accent
-        {"\u00CD", "Iacute"}, // Н - uppercase I, acute accent
-        {"\u00CE", "Icirc"}, // О - uppercase I, circumflex accent
-        {"\u00CF", "Iuml"}, // П - uppercase I, umlaut
-        {"\u00D0", "ETH"}, // Р - uppercase Eth, Icelandic
-        {"\u00D1", "Ntilde"}, // С - uppercase N, tilde
-        {"\u00D2", "Ograve"}, // Т - uppercase O, grave accent
-        {"\u00D3", "Oacute"}, // У - uppercase O, acute accent
-        {"\u00D4", "Ocirc"}, // Ф - uppercase O, circumflex accent
-        {"\u00D5", "Otilde"}, // Х - uppercase O, tilde
-        {"\u00D6", "Ouml"}, // Ц - uppercase O, umlaut
-        {"\u00D7", "times"}, // multiplication sign
-        {"\u00D8", "Oslash"}, // Ш - uppercase O, slash
-        {"\u00D9", "Ugrave"}, // Щ - uppercase U, grave accent
-        {"\u00DA", "Uacute"}, // Ъ - uppercase U, acute accent
-        {"\u00DB", "Ucirc"}, // Ы - uppercase U, circumflex accent
-        {"\u00DC", "Uuml"}, // Ь - uppercase U, umlaut
-        {"\u00DD", "Yacute"}, // Э - uppercase Y, acute accent
-        {"\u00DE", "THORN"}, // Ю - uppercase THORN, Icelandic
-        {"\u00DF", "szlig"}, // Я - lowercase sharps, German
-        {"\u00E0", "agrave"}, // а - lowercase a, grave accent
-        {"\u00E1", "aacute"}, // б - lowercase a, acute accent
-        {"\u00E2", "acirc"}, // в - lowercase a, circumflex accent
-        {"\u00E3", "atilde"}, // г - lowercase a, tilde
-        {"\u00E4", "auml"}, // д - lowercase a, umlaut
-        {"\u00E5", "aring"}, // е - lowercase a, ring
-        {"\u00E6", "aelig"}, // ж - lowercase ae
-        {"\u00E7", "ccedil"}, // з - lowercase c, cedilla
-        {"\u00E8", "egrave"}, // и - lowercase e, grave accent
-        {"\u00E9", "eacute"}, // й - lowercase e, acute accent
-        {"\u00EA", "ecirc"}, // к - lowercase e, circumflex accent
-        {"\u00EB", "euml"}, // л - lowercase e, umlaut
-        {"\u00EC", "igrave"}, // м - lowercase i, grave accent
-        {"\u00ED", "iacute"}, // н - lowercase i, acute accent
-        {"\u00EE", "icirc"}, // о - lowercase i, circumflex accent
-        {"\u00EF", "iuml"}, // п - lowercase i, umlaut
-        {"\u00F0", "eth"}, // р - lowercase eth, Icelandic
-        {"\u00F1", "ntilde"}, // с - lowercase n, tilde
-        {"\u00F2", "ograve"}, // т - lowercase o, grave accent
-        {"\u00F3", "oacute"}, // у - lowercase o, acute accent
-        {"\u00F4", "ocirc"}, // ф - lowercase o, circumflex accent
-        {"\u00F5", "otilde"}, // х - lowercase o, tilde
-        {"\u00F6", "ouml"}, // ц - lowercase o, umlaut
-        {"\u00F7", "divide"}, // division sign
-        {"\u00F8", "oslash"}, // ш - lowercase o, slash
-        {"\u00F9", "ugrave"}, // щ - lowercase u, grave accent
-        {"\u00FA", "uacute"}, // ъ - lowercase u, acute accent
-        {"\u00FB", "ucirc"}, // ы - lowercase u, circumflex accent
-        {"\u00FC", "uuml"}, // ь - lowercase u, umlaut
-        {"\u00FD", "yacute"}, // э - lowercase y, acute accent
-        {"\u00FE", "thorn"}, // ю - lowercase thorn, Icelandic
-        {"\u00FF", "yuml"}, // я - lowercase y, umlaut
-    };
-
-  private static final HashMap<String, CharSequence> htmlUnescapeLookupMap;
-    static {
-        htmlUnescapeLookupMap = new HashMap<>();
-        for (final CharSequence[] seq : HTML_ESCAPES)
-            htmlUnescapeLookupMap.put(seq[1].toString(), seq[0]);
-    }
-
-  /**
-   * Decode an array encoded as a String. This entails a comma separated value enclosed in brackets
-   * or parentheses
-   * @param encoded The String encoded array
-   * @return A String array corresponding to the encoded array
-   */
-  public static String[] decodeArray(String encoded){
-    if (encoded.length() == 0) return new String[]{};
-    char[] chars = encoded.trim().toCharArray();
-
-    //--Parse the String
-    //(state)
-    char quoteCloseChar = (char) 0;
-    List<StringBuilder> terms = new LinkedList<>();
-    StringBuilder current = new StringBuilder();
-    //(start/stop overhead)
-    int start = 0; int end = chars.length;
-    if(chars[0] == '('){ start += 1; end -= 1; if(chars[end] != ')') throw new IllegalArgumentException("Unclosed paren in encoded array: " + encoded); }
-    if(chars[0] == '['){ start += 1; end -= 1; if(chars[end] != ']') throw new IllegalArgumentException("Unclosed bracket in encoded array: " + encoded); }
-    if(chars[0] == '{'){ start += 1; end -= 1; if(chars[end] != '}') throw new IllegalArgumentException("Unclosed bracket in encoded array: " + encoded); }
-    //(finite state automata)
-    for(int i=start; i<end; i++){
-      if (chars[i] == '\r') {
-        // Ignore funny windows carriage return
-        continue;
-      } else if(chars[i] == '\\'){
-        //(case: escaped character)
-        if(i == chars.length - 1) throw new IllegalArgumentException("Last character of encoded pair is escape character: " + encoded);
-        current.append(chars[i+1]);
-        i += 1;
-      } else if(quoteCloseChar != 0){
-        //(case: in quotes)
-        if(chars[i] == quoteCloseChar){
-          quoteCloseChar = (char) 0;
-        }else{
-          current.append(chars[i]);
-        }
-      }else{
-        //(case: normal)
-        if(chars[i] == '"'){
-          quoteCloseChar = '"';
-        } else if(chars[i] == '\''){
-          quoteCloseChar = '\'';
-        } else if(chars[i] == ',' || chars[i] == ';' || chars[i] == ' ' || chars[i] == '\t' || chars[i] == '\n'){
-          //break
-          if (current.length() > 0) {
-            terms.add(current);
-          }
-          current = new StringBuilder();
-        }else{
-          current.append(chars[i]);
-        }
-      }
-    }
-
-    //--Return
-    if(current.length() > 0) terms.add(current);
-    String[] rtn = new String[terms.size()];
-    int i=0;
-    for(StringBuilder b : terms){
-      rtn[i] = b.toString().trim();
-      i += 1;
-    }
-    return rtn;
-  }
-
-  /**
-   * Decode a map encoded as a string
-   * @param encoded The String encoded map
-   * @return A String map corresponding to the encoded map
-   */
-  public static Map<String, String> decodeMap(String encoded){
-    if (encoded.length() == 0) return new HashMap<>();
-    char[] chars = encoded.trim().toCharArray();
-
-    //--Parse the String
-    //(state)
-    char quoteCloseChar = (char) 0;
-    Map<String, String> map = new HashMap<>();
-    String key = "";
-    String value = "";
-    boolean onKey = true;
-    StringBuilder current = new StringBuilder();
-    //(start/stop overhead)
-    int start = 0; int end = chars.length;
-    if(chars[0] == '('){ start += 1; end -= 1; if(chars[end] != ')') throw new IllegalArgumentException("Unclosed paren in encoded map: " + encoded); }
-    if(chars[0] == '['){ start += 1; end -= 1; if(chars[end] != ']') throw new IllegalArgumentException("Unclosed bracket in encoded map: " + encoded); }
-    if(chars[0] == '{'){ start += 1; end -= 1; if(chars[end] != '}') throw new IllegalArgumentException("Unclosed bracket in encoded map: " + encoded); }
-    //(finite state automata)
-    for(int i=start; i<end; i++){
-      if (chars[i] == '\r') {
-        // Ignore funny windows carriage return
-        continue;
-      } else if(chars[i] == '\\'){
-        //(case: escaped character)
-        if(i == chars.length - 1) {
-          throw new IllegalArgumentException("Last character of encoded pair is escape character: " + encoded);
-        }
-        current.append(chars[i+1]);
-        i += 1;
-      } else if(quoteCloseChar != 0){
-        //(case: in quotes)
-        if(chars[i] == quoteCloseChar){
-          quoteCloseChar = (char) 0;
-        }else{
-          current.append(chars[i]);
-        }
-      }else{
-        //(case: normal)
-        if(chars[i] == '"'){
-          quoteCloseChar = '"';
-        } else if(chars[i] == '\''){
-          quoteCloseChar = '\'';
-        } else if (chars[i] == '\n' && current.length() == 0) {
-          current.append("");  // do nothing
-        } else if(chars[i] == ',' || chars[i] == ';' || chars[i] == '\t' || chars[i] == '\n'){
-          // case: end a value
-          if (onKey) {
-            throw new IllegalArgumentException("Encountered key without value");
-          }
-          if (current.length() > 0) {
-            value = current.toString().trim();
-          }
-          current = new StringBuilder();
-          onKey = true;
-          map.put(key, value);  // <- add value
-        } else if((chars[i] == '-' || chars[i] == '=') && (i < chars.length - 1 && chars[i + 1] == '>')) {
-          // case: end a key
-          if (!onKey) {
-            throw new IllegalArgumentException("Encountered a value without a key");
-          }
-          if (current.length() > 0) {
-            key = current.toString().trim();
-          }
-          current = new StringBuilder();
-          onKey = false;
-          i += 1; // skip '>' character
-        } else if (chars[i] == ':') {
-          // case: end a key
-          if (!onKey) {
-            throw new IllegalArgumentException("Encountered a value without a key");
-          }
-          if (current.length() > 0) {
-            key = current.toString().trim();
-          }
-          current = new StringBuilder();
-          onKey = false;
-        } else {
-          current.append(chars[i]);
-        }
-      }
-    }
-
-    //--Return
-    if(current.toString().trim().length() > 0 && !onKey) {
-      map.put(key.trim(), current.toString().trim());
-    }
-    return map;
-  }
-
-
-  /**
-   * Takes an input String, and replaces any bash-style variables (e.g., $VAR_NAME)
-   * with its actual environment variable from the passed environment specification.
-   *
-   * @param raw The raw String to replace variables in.
-   * @param env The environment specification; e.g., {@link System#getenv()}.
-   * @return The input String, but with all variables replaced.
-   */
-  public static String expandEnvironmentVariables(String raw, Map<String, String> env) {
-    String pattern = "\\$\\{?([a-zA-Z_]+[a-zA-Z0-9_]*)\\}?";
-    Pattern expr = Pattern.compile(pattern);
-    String text = raw;
-    Matcher matcher = expr.matcher(text);
-    while (matcher.find()) {
-      String envValue = env.get(matcher.group(1));
-      if (envValue == null) {
-        envValue = "";
-      } else {
-        envValue = envValue.replace("\\", "\\\\");
-      }
-      Pattern subexpr = Pattern.compile(Pattern.quote(matcher.group(0)));
-      text = subexpr.matcher(text).replaceAll(envValue);
-    }
-    return text;
-  }
-
-  /**
-   * Takes an input String, and replaces any bash-style variables (e.g., $VAR_NAME)
-   * with its actual environment variable from {@link System#getenv()}.
-   *
-   * @param raw The raw String to replace variables in.
-   * @return The input String, but with all variables replaced.
-   */
-  public static String expandEnvironmentVariables(String raw) {
-    return expandEnvironmentVariables(raw, System.getenv());
-  }
-
 }

@@ -4,13 +4,12 @@ import edu.stanford.nlp.fsm.DFSA;
 import edu.stanford.nlp.fsm.DFSAState;
 import edu.stanford.nlp.fsm.DFSATransition;
 import edu.stanford.nlp.io.EncodingPrintWriter;
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.WordSegmenter;
-import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
@@ -18,9 +17,6 @@ import edu.stanford.nlp.util.StringUtils;
 import java.util.*;
 import java.io.*;
 import java.util.regex.Pattern;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Lexicon-based semgenter. Uses dynamic programming to find a word
@@ -40,14 +36,13 @@ public class MaxMatchSegmenter implements WordSegmenter {
 
   private static final boolean DEBUG = false;
 
-  private static Logger logger = LoggerFactory.getLogger(MaxMatchSegmenter.class);
-
   private Set<String> words = Generics.newHashSet();
   private int len=-1;
   private int edgesNb=0;
   private static final int maxLength = 10;
   private List<DFSAState<Word, Integer>> states;
   private DFSA<Word, Integer> lattice=null;
+  private Sighan2005DocumentReaderAndWriter writer = new Sighan2005DocumentReaderAndWriter();
   public enum MatchHeuristic { MINWORDS, MAXWORDS, MAXLEN }
 
   private static final Pattern chineseStartChars = Pattern.compile("^[\u4E00-\u9FFF]");
@@ -99,11 +94,11 @@ public class MaxMatchSegmenter implements WordSegmenter {
     String postSentString = ChineseStringUtils.postProcessingAnswerCTB(postProcessedSent.toString(),false,false);
     printlnErr("Sighan2005 output: "+postSentString);
     String[] postSentArray = postSentString.split("\\s+");
-    ArrayList<Word> postSent = new ArrayList<>();
+    ArrayList<Word> postSent = new ArrayList<Word>();
     for(String w : postSentArray) {
       postSent.add(new Word(w));
     }
-    return new ArrayList<>(postSent);
+    return new ArrayList<HasWord>(postSent);
   }
 
   /**
@@ -111,15 +106,15 @@ public class MaxMatchSegmenter implements WordSegmenter {
    */
   public void addStringToLexicon(String str) {
     if(str.equals("")) {
-      logger.warn("WARNING: blank line in lexicon");
+      System.err.println("WARNING: blank line in lexicon");
     } else if(str.contains(" ")) {
-      logger.warn("WARNING: word with space in lexicon");
+      System.err.println("WARNING: word with space in lexicon");
     } else {
       if(excludeChar(str)) {
         printlnErr("skipping word: "+str);
         return;
       }
-      // printlnErr("adding word: "+str);
+      printlnErr("adding word: "+str);
       words.add(str);
     }
   }
@@ -135,10 +130,10 @@ public class MaxMatchSegmenter implements WordSegmenter {
         addStringToLexicon(lexiconLine);
       }
     } catch (FileNotFoundException e) {
-      logger.error("Lexicon not found: "+ filename);
+      System.err.println("Lexicon not found: "+ filename);
       System.exit(-1);
     } catch (IOException e) {
-      logger.error("IO error while reading: "+ filename, e);
+      System.err.println("IO error while reading: "+ filename);
       throw new RuntimeException(e);
     }
   }
@@ -152,10 +147,10 @@ public class MaxMatchSegmenter implements WordSegmenter {
     edgesNb = 0;
     len = s.length();
     // Initialize word lattice:
-    states = new ArrayList<>();
-    lattice = new DFSA<>("wordLattice");
+    states = new ArrayList<DFSAState<Word, Integer>>();
+    lattice = new DFSA<Word, Integer>("wordLattice");
     for (int i=0; i<=s.length(); ++i)
-      states.add(new DFSAState<>(i, lattice));
+      states.add(new DFSAState<Word, Integer>(i, lattice));
     // Set start and accepting state:
     lattice.setInitialState(states.get(0));
     states.get(len).setAccepting(true);
@@ -169,8 +164,8 @@ public class MaxMatchSegmenter implements WordSegmenter {
         if (isInDict || isOneChar) {
           double cost = isInDict ? 1 : 100;
           DFSATransition<Word, Integer> trans =
-                  new DFSATransition<>(null, states.get(start), states.get(end), new Word(str), null, cost);
-          //logger.info("start="+start+" end="+end+" word="+str);
+            new DFSATransition<Word, Integer>(null, states.get(start), states.get(end), new Word(str), null, cost);
+          //System.err.println("start="+start+" end="+end+" word="+str);
           states.get(start).addTransition(trans);
           ++edgesNb;
         }
@@ -201,10 +196,10 @@ public class MaxMatchSegmenter implements WordSegmenter {
   public ArrayList<Word> segmentWords(MatchHeuristic h) throws UnsupportedOperationException {
     if(lattice==null || len < 0)
       throw new UnsupportedOperationException("segmentWords must be run first");
-    List<Word> segmentedWords = new ArrayList<>();
+    List<Word> segmentedWords = new ArrayList<Word>();
     // Init dynamic programming:
-    double[] costs = new double[len+1];
-    List<DFSATransition<Word, Integer>> bptrs = new ArrayList<>();
+    double costs[] = new double[len+1];
+    List<DFSATransition<Word, Integer>> bptrs = new ArrayList<DFSATransition<Word, Integer>>();
     for (int i = 0; i < len + 1; ++i) {
       bptrs.add(null);
     }
@@ -219,13 +214,13 @@ public class MaxMatchSegmenter implements WordSegmenter {
         DFSAState<Word, Integer> toState = tr.getTarget();
         double lcost = tr.score();
         int end = toState.stateID();
-        //logger.debug("start="+start+" end="+end+" word="+tr.getInput());
+        //System.err.println("start="+start+" end="+end+" word="+tr.getInput());
         if (h == MatchHeuristic.MINWORDS) {
           // Minimize number of words:
           if (costs[start]+1 < costs[end]) {
             costs[end] = costs[start]+lcost;
             bptrs.set(end, tr);
-            //logger.debug("start="+start+" end="+end+" word="+tr.getInput());
+            //System.err.println("start="+start+" end="+end+" word="+tr.getInput());
           }
         } else if (h == MatchHeuristic.MAXWORDS) {
           // Maximze number of words:
@@ -252,9 +247,9 @@ public class MaxMatchSegmenter implements WordSegmenter {
       // Print lattice density ([1,+inf[) : if equal to 1, it means
       // there is only one segmentation using words of the lexicon.
       double density = edgesNb*1.0/segmentedWords.size();
-      logger.debug("latticeDensity: "+density+" cost: "+costs[len]);
+      System.err.println("latticeDensity: "+density+" cost: "+costs[len]);
     }
-    return new ArrayList<>(segmentedWords);
+    return new ArrayList<Word>(segmentedWords);
   }
 
   /**
@@ -268,7 +263,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
    * @return Segmented sentence.
    */
   public ArrayList<Word> greedilySegmentWords(String s) {
-    List<Word> segmentedWords = new ArrayList<>();
+    List<Word> segmentedWords = new ArrayList<Word>();
     int length = s.length();
     int start = 0;
     while (start < length) {
@@ -289,58 +284,46 @@ public class MaxMatchSegmenter implements WordSegmenter {
         start = end;
       }
     }
-    return new ArrayList<>(segmentedWords);
+    return new ArrayList<Word>(segmentedWords);
   }
 
   public static void main(String[] args) {
     Properties props = StringUtils.argsToProperties(args);
-    // logger.debug(props.toString());
-    SeqClassifierFlags flags = new SeqClassifierFlags(props);
+    System.err.println(props.toString());
     MaxMatchSegmenter seg = new MaxMatchSegmenter();
     String lexiconFile = props.getProperty("lexicon");
     if(lexiconFile != null) {
       seg.addLexicon(lexiconFile);
     } else {
-      logger.error("Error: no lexicon file!");
+      System.err.println("Error: no lexicon file!");
       System.exit(1);
     }
 
-    Sighan2005DocumentReaderAndWriter sighanRW = new Sighan2005DocumentReaderAndWriter();
-    sighanRW.init(flags);
-
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-    PrintWriter stdoutW = new PrintWriter(System.out);
     int lineNb = 0;
-    for ( ; ; ) {
+    for(;;) {
       ++lineNb;
-      logger.info("line: "+lineNb);
+      System.err.println("line: "+lineNb);
       try {
         String line = br.readLine();
         if(line == null)
           break;
-        String outputLine = null;
         if(props.getProperty("greedy") != null) {
           ArrayList<Word> sentence = seg.greedilySegmentWords(line);
-          outputLine = Sentence.listToString(sentence);
+          System.out.println(Sentence.listToString(sentence));
         } else if(props.getProperty("maxwords") != null) {
           seg.buildSegmentationLattice(line);
-          outputLine = Sentence.listToString(seg.segmentWords(MatchHeuristic.MAXWORDS));
+          System.out.println
+            (Sentence.listToString(seg.segmentWords(MatchHeuristic.MAXWORDS)));
         } else {
           seg.buildSegmentationLattice(line);
-          outputLine = Sentence.listToString(seg.maxMatchSegmentation());
+          System.out.println(Sentence.listToString(seg.maxMatchSegmentation()));
         }
-        StringReader strR = new StringReader(outputLine);
-        Iterator<List<CoreLabel>> itr = sighanRW.getIterator(strR);
-        while(itr.hasNext()) {
-          sighanRW.printAnswers(itr.next(), stdoutW);
-        }
-        // System.out.println(outputLine);
       }
       catch (IOException e) {
         break;
       }
     }
-    stdoutW.flush();
   }
 
   private static void printlnErr(String s) {
@@ -348,7 +331,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
   }
 
   private static ArrayList<Word> postProcessSentence(ArrayList<Word> sent) {
-    ArrayList<Word> newSent = new ArrayList<>();
+    ArrayList<Word> newSent = new ArrayList<Word>();
     for(Word word : sent) {
       if(newSent.size() > 0) {
         String prevWord = newSent.get(newSent.size()-1).toString();
@@ -365,7 +348,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
       }
       newSent.add(word);
     }
-    return new ArrayList<>(newSent);
+    return new ArrayList<Word>(newSent);
   }
 
   private static boolean startsWithChinese(String str) { return chineseStartChars.matcher(str).matches(); }

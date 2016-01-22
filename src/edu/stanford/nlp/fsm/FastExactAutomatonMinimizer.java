@@ -75,7 +75,8 @@ public class FastExactAutomatonMinimizer implements AutomatonMinimizer {
   protected TransducerGraph buildMinimizedFA() {
     TransducerGraph minimizedFA = new TransducerGraph();
     TransducerGraph unminimizedFA = getUnminimizedFA();
-    for (TransducerGraph.Arc arc : unminimizedFA.getArcs()) {
+    for (Iterator arcI = unminimizedFA.getArcs().iterator(); arcI.hasNext();) {
+      TransducerGraph.Arc arc = (TransducerGraph.Arc) arcI.next();
       Object source = projectNode(arc.getSourceNode());
       Object target = projectNode(arc.getTargetNode());
       try {
@@ -87,7 +88,8 @@ public class FastExactAutomatonMinimizer implements AutomatonMinimizer {
       }
     }
     minimizedFA.setStartNode(projectNode(unminimizedFA.getStartNode()));
-    for (Object o : unminimizedFA.getEndNodes()) {
+    for (Iterator endIter = unminimizedFA.getEndNodes().iterator(); endIter.hasNext();) {
+      Object o = endIter.next();
       minimizedFA.setEndNode(projectNode(o));
     }
 
@@ -123,7 +125,8 @@ public class FastExactAutomatonMinimizer implements AutomatonMinimizer {
 
   protected Map sortIntoBlocks(Collection nodes) {
     Map blockToMembers = new IdentityHashMap();
-    for (Object o : nodes) {
+    for (Iterator nodeI = nodes.iterator(); nodeI.hasNext();) {
+      Object o = nodeI.next();
       Block block = getBlock(o);
       Maps.putIntoValueHashSet(blockToMembers, block, o);
     }
@@ -132,7 +135,8 @@ public class FastExactAutomatonMinimizer implements AutomatonMinimizer {
 
   protected void makeBlock(Collection members) {
     Block block = new Block(new HashSet(members));
-    for (Object member : block.getMembers()) {
+    for (Iterator memberI = block.getMembers().iterator(); memberI.hasNext();) {
+      Object member = memberI.next();
       if (member != SINK_NODE) {
         //        System.out.println("putting in memberToBlock: " + member + " " + block);
         memberToBlock.put(member, block);
@@ -143,29 +147,33 @@ public class FastExactAutomatonMinimizer implements AutomatonMinimizer {
 
   protected void addSplits(Block block) {
     Map symbolToTarget = new HashMap();
-    for (Object member : block.getMembers()) {
-      for (Object o : getInverseArcs(member)) {
-        TransducerGraph.Arc arc = (TransducerGraph.Arc) o;
+    for (Iterator memberI = block.getMembers().iterator(); memberI.hasNext();) {
+      Object member = memberI.next();
+      for (Iterator symbolI = getInverseArcs(member).iterator(); symbolI.hasNext();) {
+        TransducerGraph.Arc arc = (TransducerGraph.Arc) symbolI.next();
         Object symbol = arc.getInput();
         Object target = arc.getTargetNode();
         Maps.putIntoValueArrayList(symbolToTarget, symbol, target);
       }
     }
-    for (Object symbol : symbolToTarget.keySet()) {
+    for (Iterator symbolI = symbolToTarget.keySet().iterator(); symbolI.hasNext();) {
+      Object symbol = symbolI.next();
       addSplit(new Split((List) symbolToTarget.get(symbol), symbol, block));
     }
   }
 
   protected void removeAll(Collection block, Collection members) {
     // this is because AbstractCollection/Set.removeAll() isn't always linear in members.size()
-    for (Object member : members) {
+    for (Iterator memberI = members.iterator(); memberI.hasNext();) {
+      Object member = memberI.next();
       block.remove(member);
     }
   }
 
   protected Collection difference(Collection block, Collection members) {
     Set difference = new HashSet();
-    for (Object member : block) {
+    for (Iterator memberI = block.iterator(); memberI.hasNext();) {
+      Object member = memberI.next();
       if (!members.contains(member)) {
         difference.add(member);
       }
@@ -178,8 +186,8 @@ public class FastExactAutomatonMinimizer implements AutomatonMinimizer {
     if (result == null) {
       System.out.println("No block found for: " + o); // debug
       System.out.println("But I do have blocks for: ");
-      for (Object o1 : memberToBlock.keySet()) {
-        System.out.println(o1);
+      for (Iterator i = memberToBlock.keySet().iterator(); i.hasNext();) {
+        System.out.println(i.next());
       }
       throw new RuntimeException("FastExactAutomatonMinimizer: no block found");
     }
@@ -190,13 +198,14 @@ public class FastExactAutomatonMinimizer implements AutomatonMinimizer {
     List inverseImages = new ArrayList();
     Object symbol = split.getSymbol();
     Block block = split.getBlock();
-    for (Object member : split.getMembers()) {
+    for (Iterator memberI = split.getMembers().iterator(); memberI.hasNext();) {
+      Object member = memberI.next();
       if (!block.getMembers().contains(member)) {
         continue;
       }
       Collection arcs = getInverseArcs(member, symbol);
-      for (Object arc1 : arcs) {
-        TransducerGraph.Arc arc = (TransducerGraph.Arc) arc1;
+      for (Iterator arcI = arcs.iterator(); arcI.hasNext();) {
+        TransducerGraph.Arc arc = (TransducerGraph.Arc) arcI.next();
         Object source = arc.getSourceNode();
         inverseImages.add(source);
       }
@@ -236,8 +245,8 @@ public class FastExactAutomatonMinimizer implements AutomatonMinimizer {
       Split split = getSplit();
       Collection inverseImages = getInverseImages(split);
       Map inverseImagesByBlock = sortIntoBlocks(inverseImages);
-      for (Object o : inverseImagesByBlock.keySet()) {
-        Block block = (Block) o;
+      for (Iterator blockI = inverseImagesByBlock.keySet().iterator(); blockI.hasNext();) {
+        Block block = (Block) blockI.next();
         Collection members = (Collection) inverseImagesByBlock.get(block);
         if (members.size() == 0 || members.size() == block.getMembers().size()) {
           continue;

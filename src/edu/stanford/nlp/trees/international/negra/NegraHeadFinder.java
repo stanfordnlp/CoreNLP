@@ -107,10 +107,10 @@ public class NegraHeadFinder extends AbstractCollinsHeadFinder {
   /* Some Negra local trees have an explicitly marked head.  Use it if
   * possible. */
   protected Tree findMarkedHead(Tree[] kids) {
-    for (Tree kid : kids) {
-      if (kid.label() instanceof NegraLabel && ((NegraLabel) kid.label()).getEdge() != null && ((NegraLabel) kid.label()).getEdge().equals("HD")) {
+    for (int i = 0, n = kids.length; i < n; i++) {
+      if (kids[i].label() instanceof NegraLabel && ((NegraLabel) kids[i].label()).getEdge() != null && ((NegraLabel) kids[i].label()).getEdge().equals("HD")) {
         //System.err.println("found manually-labeled head");
-        return kid;
+        return kids[i];
       }
     }
     return null;
@@ -172,9 +172,6 @@ public class NegraHeadFinder extends AbstractCollinsHeadFinder {
   protected Tree determineNonTrivialHead(Tree t, Tree parent) {
     Tree theHead = null;
     String motherCat = basicCategory(t.label().value());
-    if (motherCat.startsWith("@")) {
-      motherCat = motherCat.substring(1);
-    }
     if (DEBUG) {
       System.err.println("Looking for head of " + t.label() +
                          "; value is |" + t.label().value() + "|, " +

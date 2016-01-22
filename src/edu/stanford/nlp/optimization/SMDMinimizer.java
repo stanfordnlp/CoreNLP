@@ -128,7 +128,7 @@ public class SMDMinimizer<T extends Function> extends StochasticMinimizer<T> {
 
     System.err.println("Results:  gain: " + nf.format(gain) + "  batch " + bSize  + "   mu" + nf.format(this.mu) + "  lam" + nf.format(this.lam));
 
-    return new Pair<>(bSize, gain);
+    return new Pair<Integer,Double>(bSize, gain);
   }
 
 
@@ -217,7 +217,7 @@ public class SMDMinimizer<T extends Function> extends StochasticMinimizer<T> {
       }
     };
 
-    SMDMinimizer<DiffFunction> min = new SMDMinimizer<>();
+    SMDMinimizer<DiffFunction> min = new SMDMinimizer<DiffFunction>();
 
     min.minimize(f, 1.0E-4, init);
   }

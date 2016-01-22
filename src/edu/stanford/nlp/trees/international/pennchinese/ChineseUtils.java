@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  *  <p/>
  *  <b>Warning:</b> The code contains a version that uses codePoint methods
  *  to handle full Unicode.  But it seems to tickle some bugs in
- *  Sun's JDK 1.5.  It works correctly with JDK 1.6+.  By default it is
+ *  Sun's JDK 1.5.  It works correctly with JDK 1.6.  By default it is
  *  disabled and a version that only handles BMP characters is used.  The
  *  latter prints a warning message if it sees a high-surrogate character.
  *
@@ -90,204 +90,194 @@ public class ChineseUtils {
         spaceChar < 0 || spaceChar > MAX_LEGAL) {
       throw new IllegalArgumentException("ChineseUtils: Unknown parameter option");
     }
+    StringBuilder out = new StringBuilder();
+    int len = in.length();
+    boolean delete;
     if (ONLY_BMP) {
-      return normalizeBMP(in, ascii, spaceChar, midDot);
-    } else {
-      return normalizeUnicode(in, ascii, spaceChar, midDot);
-    }
-  }
+      for (int i = 0; i < len; i++) {
+        char cp = in.charAt(i);
+        if (Character.isHighSurrogate(cp)) {
+          if (i + 1 < len) {
+            EncodingPrintWriter.err.println("ChineseUtils.normalize warning: non-BMP codepoint U+" +
+                    Integer.toHexString(Character.codePointAt(in, i)) + " in " + in);
+          } else {
+            EncodingPrintWriter.err.println("ChineseUtils.normalize warning: unmatched high surrogate character U+" +
+                    Integer.toHexString(Character.codePointAt(in, i)) + " in " + in);
 
-
-  private static String normalizeBMP(String in, int ascii, int spaceChar, int midDot) {
-    StringBuilder out = new StringBuilder();
-    int len = in.length();
-    for (int i = 0; i < len; i++) {
-      char cp = in.charAt(i);
-      if (Character.isHighSurrogate(cp)) {
-        if (i + 1 < len) {
-          EncodingPrintWriter.err.println("ChineseUtils.normalize warning: non-BMP codepoint U+" +
-                  Integer.toHexString(Character.codePointAt(in, i)) + " in " + in);
-        } else {
-          EncodingPrintWriter.err.println("ChineseUtils.normalize warning: unmatched high surrogate character U+" +
-                  Integer.toHexString(Character.codePointAt(in, i)) + " in " + in);
-
+          }
         }
-      }
-      Character.UnicodeBlock cub = Character.UnicodeBlock.of(cp);
-      if (cub == Character.UnicodeBlock.PRIVATE_USE_AREA ||
-              cub == Character.UnicodeBlock.SUPPLEMENTARY_PRIVATE_USE_AREA_A ||
-              cub == Character.UnicodeBlock.SUPPLEMENTARY_PRIVATE_USE_AREA_B) {
-        EncodingPrintWriter.err.println("ChineseUtils.normalize warning: private use area codepoint U+" + Integer.toHexString(cp) + " in " + in);
-      }
-      boolean delete = false;
-      switch (ascii) {
-        case LEAVE:
-          break;
-        case ASCII:
-          if (cp >= '\uFF01' && cp <= '\uFF5E') {
-            cp -= (0xFF00 - 0x0020);
-          }
-          break;
-        case FULLWIDTH:
-          if (cp >= '\u0021' && cp <= '\u007E') {
-            cp += (0xFF00 - 0x0020);
-          }
-          break;
-        default:
-          throw new IllegalArgumentException("ChineseUtils: Unsupported parameter option: ascii=" + ascii);
-      }
-      switch (spaceChar) {
-        case LEAVE:
-          break;
-        case ASCII:
-          if (Character.isSpaceChar(cp)) {
-            cp = ' ';
-          }
-          break;
-        case FULLWIDTH:
-          if (Character.isSpaceChar(cp)) {
-            cp = '\u3000';
-          }
-          break;
-        case DELETE:
-          if (Character.isSpaceChar(cp)) {
-            delete = true;
-          }
-          break;
-        case DELETE_EXCEPT_BETWEEN_ASCII:
-          char cpp = 0;
-          if (i > 0) { cpp = in.charAt(i - 1); }
-          char cpn = 0;
-          if (i < (len - 1)) { cpn = in.charAt(i + 1); }
-          // EncodingPrintWriter.out.println("cp: " + cp + "; cpp: " + cpp + "cpn: " + cpn +
-          //      "; isSpace: " + Character.isSpaceChar(cp) + "; isAsciiLHL: " + isAsciiLowHigh(cpp) +
-          //      "; isAsciiLHR: " + isAsciiLowHigh(cpn), "UTF-8");
-          if (Character.isSpaceChar(cp) && ! (isAsciiLowHigh(cpp) && isAsciiLowHigh(cpn))) {
-            delete = true;
-          }
-      }
-      switch (midDot) {
-        case LEAVE:
-          break;
-        case NORMALIZE:
-          if (cp == '\u00B7' || cp == '\u0387' || cp == '\u2022' ||
-              cp == '\u2024' || cp == '\u2027' || cp == '\u2219' ||
-              cp == '\u22C5' || cp == '\u30FB') {
-            cp = '\u00B7';
-          }
-          break;
-        case FULLWIDTH:
-          if (cp == '\u00B7' || cp == '\u0387' || cp == '\u2022' ||
-              cp == '\u2024' || cp == '\u2027' || cp == '\u2219' ||
-              cp == '\u22C5' || cp == '\u30FB') {
-            cp = '\u30FB';
-          }
-          break;
-        case DELETE:
-          if (cp == '\u00B7' || cp == '\u0387' || cp == '\u2022' ||
-              cp == '\u2024' || cp == '\u2027' || cp == '\u2219' ||
-              cp == '\u22C5' || cp == '\u30FB') {
-            delete = true;
-          }
-          break;
-        default:
-          throw new IllegalArgumentException("ChineseUtils: Unsupported parameter option: midDot=" + midDot);
-      }
-      if ( ! delete) {
-        out.append(cp);
-      }
-    } // end for
-    return out.toString();
-  }
-  private static String normalizeUnicode(String in, int ascii, int spaceChar, int midDot) {
-    StringBuilder out = new StringBuilder();
-    int len = in.length();
-    // Do it properly with codepoints, for non-BMP Unicode as well
-    int numCP = in.codePointCount(0, len);
-    for (int i = 0; i < numCP; i++) {
-      int offset = in.offsetByCodePoints(0, i);
-      int cp = in.codePointAt(offset);
-      Character.UnicodeBlock cub = Character.UnicodeBlock.of(cp);
-      if (cub == Character.UnicodeBlock.PRIVATE_USE_AREA ||
-              cub == Character.UnicodeBlock.SUPPLEMENTARY_PRIVATE_USE_AREA_A ||
-              cub == Character.UnicodeBlock.SUPPLEMENTARY_PRIVATE_USE_AREA_B) {
-        EncodingPrintWriter.err.println("ChineseUtils.normalize warning: private use area codepoint U+" + Integer.toHexString(cp) + " in " + in);
-      }
-      boolean delete = false;
-      switch (ascii) {
-        case LEAVE:
-          break;
-        case ASCII:
-          if (cp >= '\uFF01' && cp <= '\uFF5E') {
-            cp -= (0xFF00 - 0x0020);
-          }
-          break;
-        case FULLWIDTH:
-          if (cp >= '\u0021' && cp <= '\u007E') {
-            cp += (0xFF00 - 0x0020);
-          }
-          break;
-        default:
-          throw new IllegalArgumentException("ChineseUtils: Unsupported parameter option: ascii=" + ascii);
-      }
-      switch (spaceChar) {
-        case LEAVE:
-          break;
-        case ASCII:
-          if (Character.isSpaceChar(cp)) {
-            cp = ' ';
-          }
-          break;
-        case FULLWIDTH:
-          if (Character.isSpaceChar(cp)) {
-            cp = '\u3000';
-          }
-          break;
-        case DELETE:
-          if (Character.isSpaceChar(cp)) {
-            delete = true;
-          }
-          break;
-        case DELETE_EXCEPT_BETWEEN_ASCII:
-          int cpp = 0;
-          if (i > 0) { cpp = in.codePointAt(i - 1); }
-          int cpn = 0;
-          if (i < (numCP - 1)) { cpn = in.codePointAt(i + 1); }
-          if (Character.isSpaceChar(cp) && ! (isAsciiLowHigh(cpp) && isAsciiLowHigh(cpn))) {
-            delete = true;
-          }
-      }
-      switch (midDot) {
-        case LEAVE:
-          break;
-        case NORMALIZE:
-          if (cp == '\u00B7' || cp == '\u0387' || cp == '\u2022' ||
-              cp == '\u2024' || cp == '\u2027' || cp == '\u2219' ||
-              cp == '\u22C5' || cp == '\u30FB') {
-            cp = '\u00B7';
-          }
-          break;
-        case FULLWIDTH:
-          if (cp == '\u00B7' || cp == '\u0387' || cp == '\u2022' ||
-              cp == '\u2024' || cp == '\u2027' || cp == '\u2219' ||
-              cp == '\u22C5' || cp == '\u30FB') {
-            cp = '\u30FB';
-          }
-          break;
-        case DELETE:
-          if (cp == '\u00B7' || cp == '\u0387' || cp == '\u2022' ||
-              cp == '\u2024' || cp == '\u2027' || cp == '\u2219' ||
-              cp == '\u22C5' || cp == '\u30FB') {
-            delete = true;
-          }
-          break;
-        default:
-          throw new IllegalArgumentException("ChineseUtils: Unsupported parameter option: midDot=" + midDot);
-      }
-      if ( ! delete) {
-        out.appendCodePoint(cp);
-      }
-    } // end for
+        Character.UnicodeBlock cub = Character.UnicodeBlock.of(cp);
+        if (cub == Character.UnicodeBlock.PRIVATE_USE_AREA ||
+                cub == Character.UnicodeBlock.SUPPLEMENTARY_PRIVATE_USE_AREA_A ||
+                cub == Character.UnicodeBlock.SUPPLEMENTARY_PRIVATE_USE_AREA_A) {
+          EncodingPrintWriter.err.println("ChineseUtils.normalize warning: private use area codepoint U+" + Integer.toHexString(cp) + " in " + in);
+        }
+        delete = false;
+        switch (ascii) {
+          case LEAVE:
+            break;
+          case ASCII:
+            if (cp >= '\uFF01' && cp <= '\uFF5E') {
+              cp -= (0xFF00 - 0x0020);
+            }
+            break;
+          case FULLWIDTH:
+            if (cp >= '\u0021' && cp <= '\u007E') {
+              cp += (0xFF00 - 0x0020);
+            }
+            break;
+          default:
+            throw new IllegalArgumentException("ChineseUtils: Unsupported parameter option: ascii=" + ascii);
+        }
+        switch (spaceChar) {
+          case LEAVE:
+            break;
+          case ASCII:
+            if (Character.isSpaceChar(cp)) {
+              cp = ' ';
+            }
+            break;
+          case FULLWIDTH:
+            if (Character.isSpaceChar(cp)) {
+              cp = '\u3000';
+            }
+            break;
+          case DELETE:
+            if (Character.isSpaceChar(cp)) {
+              delete = true;
+            }
+            break;
+          case DELETE_EXCEPT_BETWEEN_ASCII:
+            char cpp = 0;
+            if (i > 0) { cpp = in.charAt(i - 1); }
+            char cpn = 0;
+            if (i < (len - 1)) { cpn = in.charAt(i + 1); }
+            // EncodingPrintWriter.out.println("cp: " + cp + "; cpp: " + cpp + "cpn: " + cpn +
+            //      "; isSpace: " + Character.isSpaceChar(cp) + "; isAsciiLHL: " + isAsciiLowHigh(cpp) +
+            //      "; isAsciiLHR: " + isAsciiLowHigh(cpn), "UTF-8");
+            if (Character.isSpaceChar(cp) && ! (isAsciiLowHigh(cpp) && isAsciiLowHigh(cpn))) {
+              delete = true;
+            }
+        }
+        switch (midDot) {
+          case LEAVE:
+            break;
+          case NORMALIZE:
+            if (cp == '\u00B7' || cp == '\u0387' || cp == '\u2022' ||
+                cp == '\u2024' || cp == '\u2027' || cp == '\u2219' ||
+                cp == '\u22C5' || cp == '\u30FB') {
+              cp = '\u00B7';
+            }
+            break;
+          case FULLWIDTH:
+            if (cp == '\u00B7' || cp == '\u0387' || cp == '\u2022' ||
+                cp == '\u2024' || cp == '\u2027' || cp == '\u2219' ||
+                cp == '\u22C5' || cp == '\u30FB') {
+              cp = '\u30FB';
+            }
+            break;
+          case DELETE:
+            if (cp == '\u00B7' || cp == '\u0387' || cp == '\u2022' ||
+                cp == '\u2024' || cp == '\u2027' || cp == '\u2219' ||
+                cp == '\u22C5' || cp == '\u30FB') {
+              delete = true;
+            }
+            break;
+          default:
+            throw new IllegalArgumentException("ChineseUtils: Unsupported parameter option: midDot=" + midDot);
+        }
+        if ( ! delete) {
+          out.append(cp);
+        }
+      } // end for
+    } else {
+      // Do it properly with codepoints, for non-BMP Unicode as well
+      int numCP = in.codePointCount(0, len);
+      for (int i = 0; i < numCP; i++) {
+        int offset = in.offsetByCodePoints(0, i);
+        int cp = in.codePointAt(offset);
+        Character.UnicodeBlock cub = Character.UnicodeBlock.of(cp);
+        if (cub == Character.UnicodeBlock.PRIVATE_USE_AREA ||
+                cub == Character.UnicodeBlock.SUPPLEMENTARY_PRIVATE_USE_AREA_A ||
+                cub == Character.UnicodeBlock.SUPPLEMENTARY_PRIVATE_USE_AREA_B) {
+          EncodingPrintWriter.err.println("ChineseUtils.normalize warning: private use area codepoint U+" + Integer.toHexString(cp) + " in " + in);
+        }
+        delete = false;
+        switch (ascii) {
+          case LEAVE:
+            break;
+          case ASCII:
+            if (cp >= '\uFF01' && cp <= '\uFF5E') {
+              cp -= (0xFF00 - 0x0020);
+            }
+            break;
+          case FULLWIDTH:
+            if (cp >= '\u0021' && cp <= '\u007E') {
+              cp += (0xFF00 - 0x0020);
+            }
+            break;
+          default:
+            throw new IllegalArgumentException("ChineseUtils: Unsupported parameter option: ascii=" + ascii);
+        }
+        switch (spaceChar) {
+          case LEAVE:
+            break;
+          case ASCII:
+            if (Character.isSpaceChar(cp)) {
+              cp = ' ';
+            }
+            break;
+          case FULLWIDTH:
+            if (Character.isSpaceChar(cp)) {
+              cp = '\u3000';
+            }
+            break;
+          case DELETE:
+            if (Character.isSpaceChar(cp)) {
+              delete = true;
+            }
+            break;
+          case DELETE_EXCEPT_BETWEEN_ASCII:
+            int cpp = 0;
+            if (i > 0) { cpp = in.codePointAt(i - 1); }
+            int cpn = 0;
+            if (i < (numCP - 1)) { cpn = in.codePointAt(i + 1); }
+            if (Character.isSpaceChar(cp) && ! (isAsciiLowHigh(cpp) && isAsciiLowHigh(cpn))) {
+              delete = true;
+            }
+        }
+        switch (midDot) {
+          case LEAVE:
+            break;
+          case NORMALIZE:
+            if (cp == '\u00B7' || cp == '\u0387' || cp == '\u2022' ||
+                cp == '\u2024' || cp == '\u2027' || cp == '\u2219' ||
+                cp == '\u22C5' || cp == '\u30FB') {
+              cp = '\u00B7';
+            }
+            break;
+          case FULLWIDTH:
+            if (cp == '\u00B7' || cp == '\u0387' || cp == '\u2022' ||
+                cp == '\u2024' || cp == '\u2027' || cp == '\u2219' ||
+                cp == '\u22C5' || cp == '\u30FB') {
+              cp = '\u30FB';
+            }
+            break;
+          case DELETE:
+            if (cp == '\u00B7' || cp == '\u0387' || cp == '\u2022' ||
+                cp == '\u2024' || cp == '\u2027' || cp == '\u2219' ||
+                cp == '\u22C5' || cp == '\u30FB') {
+              delete = true;
+            }
+            break;
+          default:
+            throw new IllegalArgumentException("ChineseUtils: Unsupported parameter option: midDot=" + midDot);
+        }
+        if ( ! delete) {
+          out.appendCodePoint(cp);
+        }
+      } // end for
+    }
     return out.toString();
   }
 
@@ -383,6 +373,7 @@ public class ChineseUtils {
       shape = "C";
     }
     return shape;
+
   }
 
 }

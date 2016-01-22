@@ -21,25 +21,23 @@ public class MorphologyTest extends TestCase {
                               "Am", "AM", "ARE", "Was", "WERE", "was",
                               "played", "PLAYED",
                               "<br>", "-0800", "an", "out-rode", "viii",
-                              "b-", "s", "hath", "'ll", "d",
-                              "re", "no", "r", "du",
+                              "b-",
   };
 
-  private String[] exTags = { "NNS", "NNS", "VBD", "NN",
-                              "VBG", "VBG", "VBG",
-                              "VBD", "VBD",
-                              "NN", "JJR", "VBD", "VBD",
-                              "VBP", "VBD", "VBD", "RB", "MD",
-                              "VBZ", "POS", "MD", "PRP", "PRP$", "PRP$",
-                              "NNPS", "JJ", "NN",
-                              "NNP", "NNS",
-                              "VBD", "VBP", "MD", "VBZ", "POS", "VBP",
-                              "MD", "PRP", "PRP",
-                              "VBP", "VBP", "VBP", "VBD", "VBD", "VBD",
-                              "VBD", "VBD",
-                              "SYM", "CD", "DT", "VBD", "FW",
-                              "AFX", "VBZ", "VBP", "MD", "MD",
-                              "VBP", "VBP", "VBP", "VBP",
+  private String[] exTags = {"NNS", "NNS", "VBD", "NN",
+                             "VBG", "VBG", "VBG",
+                             "VBD", "VBD",
+                             "NN", "JJR", "VBD", "VBD",
+                             "VBP", "VBD", "VBD", "RB", "MD",
+                             "VBZ", "POS", "MD", "PRP", "PRP$", "PRP$",
+                             "NNPS", "JJ", "NN",
+                             "NNP", "NNS",
+                             "VBD", "VBP", "MD", "VBZ", "POS", "VBP",
+                             "MD", "PRP", "PRP",
+                             "VBP", "VBP", "VBP", "VBD", "VBD", "VBD",
+                             "VBD", "VBD",
+                             "SYM", "CD", "DT", "VBD", "FW",
+                             "AFX",
   };
 
   private String[] exAnswers = {"brethren", "duck", "see", "saw",
@@ -55,8 +53,7 @@ public class MorphologyTest extends TestCase {
                                 "be", "be", "be", "be", "be", "be",
                                 "play", "play",
                                 "<br>", "-0800", "a", "out-ride", "viii",
-                                "b-", "be", "have", "will", "would",
-                                "be", "know", "be", "do",
+                                "b-",
   };
 
   public void testMorph() {
@@ -64,8 +61,8 @@ public class MorphologyTest extends TestCase {
     assert(exWords.length == exAnswers.length);
     for (int i = 0; i < exWords.length; i++) {
       WordLemmaTag ans = lemmatizeStatic(new WordTag(exWords[i], exTags[i]));
-      assertEquals("Stemmed " + exWords[i] + '/' + exTags[i] + " to lemma " +
-                   ans.lemma() + " versus correct " + exAnswers[i],
+      assertEquals("Stemmed " + exWords[i] + "/" + exTags[i] + " to lemma " +
+                   ans.lemma() + " versus " + exAnswers[i],
                    ans.lemma(), exAnswers[i]);
     }
   }
@@ -82,20 +79,4 @@ public class MorphologyTest extends TestCase {
     Morphology morpha = new Morphology();
     morpha.stem("b-");
   }
-
-  public void testStemStatic() {
-    WordTag wt2 = new WordTag("objecting", "VBG");
-    WordTag wt = Morphology.stemStatic(wt2);
-    assertEquals("object", wt.word());
-    wt2 = new WordTag("broken", "VBN");
-    wt = Morphology.stemStatic(wt2);
-    assertEquals("break", wt.word());
-    wt2 = new WordTag("topoi", "NNS");
-    wt = Morphology.stemStatic(wt2);
-    assertEquals("topos", wt.word());
-    wt2 = new WordTag("radii", "NNS");
-    wt = Morphology.stemStatic(wt2);
-    assertEquals("radius", wt.word());
-  }
-
 }

@@ -11,36 +11,19 @@ import java.text.DecimalFormat;
  * preferred usage is to instantiate a Timing object and use instance
  * methods.
  *
- * <p>To use, call {@link #startTime()} before running the code in
- * question. Call {@link #tick()} to print an intermediate update, and {@link #endTime()} to
- * finish the timing and print the result. You can optionally pass a descriptive
- * string and <code>PrintStream</code> to <code>tick</code> and <code>endTime</code>
- * for more control over what gets printed where.</p>
- *
- * <p>Example: time reading in a big file and transforming it:</p>
- * <p><code>Timing.startTime();<br>
- * String bigFileContents = IOUtils.slurpFile(bigFile);<br>
- * Timing.tick(&quot;read in big file&quot;, System.err);<br>
- * String output = costlyTransform(bigFileContents);<br>
- * Timing.endTime(&quot;transformed big file&quot;, System.err);</code></p>
- *
  * @author Bill MacCartney
  */
 public class Timing {
 
-  private static final long MILLISECONDS_TO_SECONDS = 1000L;
-  private static final long SECOND_DIVISOR = 1000000000L;
-  private static final long MILLISECOND_DIVISOR = 1000000L;
-
   /**
-   * Stores the time at which the timer was started. Now stored as nanoseconds.
+   * Stores the time at which the timer was started.
    */
   private long start;
 
   /**
-   * Stores the time at which the (static) timer was started. Stored as nanoseconds.
+   * Stores the time at which the (static) timer was started.
    */
-  private static long startTime = System.nanoTime();
+  private static long startTime = System.currentTimeMillis();
 
   /** Stores a suitable formatter for printing seconds nicely. */
   private static final NumberFormat nf = new DecimalFormat("0.0");
@@ -59,20 +42,7 @@ public class Timing {
    * Start timer.
    */
   public void start() {
-    start = System.nanoTime();
-  }
-
-  /**
-   * Start timer & print a message.
-   */
-  // Thang Mar14
-  public void start(String msg, PrintStream stream) {
-    start = System.nanoTime();
-    stream.println(msg);
-  }
-
-  public void start(String msg) {
-    start(msg, System.err);
+    start = System.currentTimeMillis();
   }
 
   // report =========================================================
@@ -83,16 +53,7 @@ public class Timing {
    * @return Number of milliseconds elapsed
    */
   public long report() {
-    return (System.nanoTime() - start) / MILLISECOND_DIVISOR;
-  }
-
-  /**
-   * Return elapsed time (without stopping timer).
-   *
-   * @return Number of nanoseconds elapsed
-   */
-  public long reportNano() {
-    return System.nanoTime() - start;
+    return System.currentTimeMillis() - start;
   }
 
   /**
@@ -104,7 +65,7 @@ public class Timing {
    */
   public long report(String str, PrintStream stream) {
     long elapsed = this.report();
-    stream.println(str + " Time elapsed: " + elapsed + " ms");
+    stream.println(str + " Time elapsed: " + (elapsed) + " ms");
     return elapsed;
   }
 
@@ -131,27 +92,12 @@ public class Timing {
     return elapsed;
   }
 
-  /** Returns the number of seconds passed since the timer started in the form "d.d". */
   public String toSecondsString() {
     return toSecondsString(report());
   }
 
-  /** Format with one decimal place elapsed milliseconds in seconds.
-   *
-   * @param elapsed Number of milliseconds elapsed
-   * @return Formatted String
-   */
   public static String toSecondsString(long elapsed) {
-    return nf.format(((double) elapsed) / MILLISECONDS_TO_SECONDS);
-  }
-
-  /** Format with one decimal place elapsed milliseconds.
-   *
-   * @param elapsed Number of milliseconds elapsed
-   * @return Formatted String
-   */
-  public static String toMilliSecondsString(long elapsed) {
-    return nf.format(elapsed);
+    return nf.format(((double) elapsed) / 1000);
   }
 
 
@@ -203,18 +149,6 @@ public class Timing {
     this.start();
     return elapsed;
   }
-
-  /**
-   * Print the timing done message with elapsed time in x.y seconds.
-   * Restart the timer too.
-   */
-  // Thang Mar14
-  public void end(String msg) {
-    long elapsed = System.nanoTime() - start;
-    System.err.println(msg + " done [" + nf.format(((double) elapsed) / SECOND_DIVISOR) + " sec].");
-    this.start();
-  }
-
 
   // stop ===========================================================
 
@@ -269,7 +203,7 @@ public class Timing {
    * Start (static) timer.
    */
   public static void startTime() {
-    startTime = System.nanoTime();
+    startTime = System.currentTimeMillis();
   }
 
   // endTime ========================================================
@@ -280,7 +214,7 @@ public class Timing {
    * @return Number of milliseconds elapsed
    */
   public static long endTime() {
-    return (System.nanoTime() - startTime) / MILLISECOND_DIVISOR;
+    return System.currentTimeMillis() - startTime;
   }
 
   /**
@@ -343,8 +277,8 @@ public class Timing {
    *  and elapsed time in x.y seconds.
    */
   public static void endDoing() {
-    long elapsed = System.nanoTime() - startTime;
-    System.err.println("done [" + nf.format(((double) elapsed) / SECOND_DIVISOR) +
+    long elapsed = System.currentTimeMillis() - startTime;
+    System.err.println("done [" + nf.format(((double) elapsed) / 1000) +
                        " sec].");
   }
 
@@ -352,8 +286,8 @@ public class Timing {
    *  and elapsed time in x.y seconds.
    */
   public static void endDoing(String msg) {
-    long elapsed = System.nanoTime() - startTime;
-    System.err.println(msg + " done [" + nf.format(((double) elapsed) / SECOND_DIVISOR) +
+    long elapsed = System.currentTimeMillis() - startTime;
+    System.err.println(msg + " done [" + nf.format(((double) elapsed) / 1000) +
                        " sec].");
   }
 
@@ -365,7 +299,7 @@ public class Timing {
    * @return Number of milliseconds elapsed
    */
   public static long tick() {
-    long elapsed = (System.nanoTime() - startTime) / MILLISECOND_DIVISOR;
+    long elapsed = System.currentTimeMillis() - startTime;
     startTime();
     return elapsed;
   }

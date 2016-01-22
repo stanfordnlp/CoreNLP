@@ -3,7 +3,7 @@ package edu.stanford.nlp.stats;
 
 import edu.stanford.nlp.io.RecordIterator;
 import edu.stanford.nlp.util.Pair;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import java.util.*;
 import java.io.*;
 
@@ -53,11 +53,11 @@ public interface DataSeries {
     public void setDomain(DataSeries domain) { this.domain = domain; }
 
     public List<Pair<Double, Double>> toListPairDouble() {
-      List<Pair<Double, Double>> list = new ArrayList<>();
+      List<Pair<Double, Double>> list = new ArrayList<Pair<Double, Double>>();
       for (int i = 0; i < size(); i++) {
         double x = (domain() != null ? domain().get(i) : (double) i);
         double y = get(i);
-        list.add(new Pair<>(x, y));
+        list.add(new Pair<Double, Double>(x, y));
       }
       return list;
     }
@@ -109,7 +109,9 @@ public interface DataSeries {
     public int size() { return sizeFn.apply(null); }
 
     private static Function<Object, Integer> constantSizeFn(final int size) {
-      return o -> size;
+      return new Function<Object, Integer>() {
+        public Integer apply(Object o) { return size; }
+      };
     }
 
   }
@@ -164,7 +166,7 @@ public interface DataSeries {
 
     public ListDataSeries(String name) { 
       setName(name);
-      setData(new ArrayList<>());
+      setData(new ArrayList<Double>());
     }
 
     public ListDataSeries(String name, List<Double> data) { 

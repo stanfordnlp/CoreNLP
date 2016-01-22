@@ -1,4 +1,4 @@
-Stanford POS Tagger, v3.6.0 - 2015-12-09
+Stanford POS Tagger, v3.1.5 - 2013-04-04
 Copyright (c) 2002-2012 The Board of Trustees of
 The Leland Stanford Junior University. All Rights Reserved.
 
@@ -27,7 +27,7 @@ Kristina Toutanova, Dan Klein, Christopher Manning, and Yoram
 Singer. 2003. Feature-Rich Part-of-Speech Tagging with a Cyclic
 Dependency Network. In Proceedings of HLT-NAACL 2003 pages 252-259.
 
-The system requires Java 1.8+ to be installed. About 60 MB of memory is
+The system requires Java 1.6+ to be installed. About 60 MB of memory is
 required to run a trained tagger, depending on the OS, tagging model
 chosen, etc.  (i.e., you may need to give to java an option like java
 -mx120m). Plenty of memory is needed to train a tagger. It depends on
@@ -51,19 +51,25 @@ programmatically via its API.
 There is a GUI interface, but it is for
 demonstration purposes only; most features of the tagger can only be
 accessed via the command line. To run the demonstration GUI you should
-be able to use any of the following 2 methods:
+be able to use any of the following 3 methods:
 
 1)
-java -mx200m -classpath stanford-postagger.jar:lib/* edu.stanford.nlp.tagger.maxent.MaxentTaggerGUI models/wsj-0-18-left3words-distsim.tagger
+java -mx200m -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTaggerGUI models/wsj-0-18-left3words.tagger
 
-2) Running the appropriate script for your operating system:
+2)
+Providing your system gives java enough memory by default, you can also
+run it by either double-clicking the stanford-postagger.jar file, or
+giving the command: 
+    java -jar stanford-postagger.jar
+
+3) Running the appropriate script for your operating system:
     stanford-postagger-gui.bat
     ./stanford-postagger-gui.sh
 
 To run the tagger from the command line, you can start with the provided
 script appropriate for you operating system:
-    ./stanford-postagger.sh models/wsj-0-18-left3words-distsim.tagger sample-input.txt
-    stanford-postagger models\wsj-0-18-left3words-distsim.tagger sample-input.txt
+    ./stanford-postagger.sh models/wsj-0-18-left3words.tagger sample-input.txt
+    stanford-postagger models\wsj-0-18-left3words.tagger sample-input.txt
 The output should match what is found in sample-output.txt
 
 The tagger has three modes: tagging, training, and testing.  Tagging
@@ -77,7 +83,7 @@ Many options are available for training, tagging, and testing.  These
 options can be set using a properties file.  To start, you can generate a
 default properties file by:
 
-java -classpath stanford-postagger.jar:lib/* edu.stanford.nlp.tagger.maxent.MaxentTagger -genprops > myPropsFile.prop
+java -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -genprops > myPropsFile.prop
 
 This will create the file myPropsFile.prop with descriptions of each
 option for the tagger and the default values for these options
@@ -91,7 +97,7 @@ tagger and descriptions of those options).
 To tag a file using the pre-trained bidirectional model
 =======================================================
 
-java -mx300m -classpath stanford-postagger.jar:lib/* edu.stanford.nlp.tagger.maxent.MaxentTagger -model models/wsj-0-18-bidirectional-distsim.tagger -textFile sample-input.txt > sample-tagged.txt
+java -mx300m -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -model models/wsj-0-18-bidirectional-distsim.tagger -textFile sample-input.txt > sample-tagged.txt
 
 Tagged output will be printed to standard out, which you can redirect
 as above.  Note that the bidirectional model is slightly more accurate
@@ -100,12 +106,12 @@ but significantly slower than the left3words model.
 To train a simple model
 =======================
 
-java -classpath stanford-postagger.jar:lib/* edu.stanford.nlp.tagger.maxent.MaxentTagger -prop propertiesFile -model modelFile -trainFile trainingFile
+java -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -prop propertiesFile -model modelFile -trainFile trainingFile
 
 To test a model
 ===============
 
-java -classpath stanford-postagger.jar:lib/* edu.stanford.nlp.tagger.maxent.MaxentTagger -prop propertiesFile -model modelFile -testFile testFile
+java -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -prop propertiesFile -model modelFile -testFile testFile
 
 
 
@@ -126,13 +132,9 @@ stanford-postagger-YYYY-MM-DD.jar
   run the Stanford POS Tagger.  The two jar files are identical.  You can use
   either the one with a version (date) indication or without, as you prefer.
 
-lib
-
-  A directory containing dependencies for the Stanford POS Tagger.
-
 src
 
-  A directory containing the Java 1.8 source code for the Stanford POS
+  A directory containing the Java 1.5 source code for the Stanford POS
   Tagger distribution.
 
 build.xml, Makefile
@@ -199,25 +201,6 @@ processing.
 
 CHANGES
 -----------------------------------------------
-
-2015-12-09    3.6.0     Updated for compatibility 
-
-2015-04-20    3.5.2     Update for compatibility 
-
-2015-01-29    3.5.1     General bugfixes 
-
-2014-10-26    3.5.0     Upgrade to Java 1.8 
-
-2014-08-27    3.4.1     Add Spanish models 
-
-2014-06-16      3.4     Using CC tagset for French 
-
-2014-01-04    3.3.1     Bugfix release 
-
-2013-11-12    3.3.0     Add imperatives to English training data 
-
-2013-06-19    3.2.0     Decrease size and improve speed of tagger 
-                        models for all languages 
 
 2013-04-04    3.1.5     Speed improvements, ctb7 model, -nthreads 
                         option 

@@ -34,6 +34,7 @@ import java.util.List;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.Datum;
+import edu.stanford.nlp.ling.RVFDatum;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.optimization.*;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -42,26 +43,21 @@ import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.MultiClassAccuracyStats;
 import edu.stanford.nlp.stats.Scorer;
 import edu.stanford.nlp.util.*;
-
-import java.util.function.Function;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import edu.stanford.nlp.util.Function;
 
 /**
  * Builds various types of linear classifiers, with functionality for
  * setting objective function, optimization method, and other parameters.
  * Classifiers can be defined with passed constructor arguments or using setter methods.
- * Defaults to Quasi-newton optimization of a {@code LogConditionalObjectiveFunction}.
- * (Merges old classes: CGLinearClassifierFactory, QNLinearClassifierFactory, and MaxEntClassifierFactory.)
+ * Defaults to Quasi-newton optimization of a {@code LogConditionalObjectiveFunction}
+ * (Merges old classes: CGLinearClassifierFactory, QNLinearClassifierFactory, and MaxEntClassifierFactory).
  * Note that a bias term is not assumed, and so if you want to learn
  * a bias term you should add an "always-on" feature to your examples.
  *
  * @author Jenny Finkel
  * @author Chris Cox (merged factories, 8/11/04)
  * @author Dan Klein (CGLinearClassifierFactory, MaxEntClassifierFactory)
- * @author Galen Andrew (tuneSigma),
- * @author Marie-Catherine de Marneffe (CV in tuneSigma)
+ * @author Galen Andrew (tuneSigma), Marie-Catherine de Marneffe (CV in tuneSigma)
  * @author Sarah Spikes (Templatization, though I don't know what to do with the Minimizer)
  * @author Ramesh Nallapati (nmramesh@cs.stanford.edu) {@link #trainSemiSupGE} methods
  */
@@ -90,84 +86,262 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   private int evalIters = -1;
   private Evaluator[] evaluators = null;
 
-  final static Logger logger = LoggerFactory.getLogger(LinearClassifierFactory.class);
 
-  /** This is the {@code Factory<Minimizer<DiffFunction>>} that we use over and over again. */
-  private static class Factory15 implements Factory<Minimizer<DiffFunction>> {
-
-    private static final long serialVersionUID = 6215752553371189173L;
-
-    @Override
-    public Minimizer<DiffFunction> create() { return new QNMinimizer(15); }
-
+  private Minimizer<DiffFunction> getMinimizer() {
+    // Create a new minimizer
+    Minimizer<DiffFunction> minimizer = minimizerCreator.create();
+    if (minimizer instanceof HasEvaluators) {
+      ((HasEvaluators) minimizer).setEvaluators(evalIters, evaluators);
+    }
+    return minimizer;
   }
 
+
+  /**
+   * Adapt classifier (adjust the mean of Gaussian prior)
+   * under construction -pichuan
+   * @param origWeights the original weights trained from the training data
+   * @param adaptDataset the Dataset used to adapt the trained weights
+   * @return adapted weights
+   */
+  public double[][] adaptWeights(double[][] origWeights, GeneralDataset<L, F> adaptDataset) {
+    Minimizer<DiffFunction> minimizer = getMinimizer();
+    System.err.println("adaptWeights in LinearClassifierFactory. increase weight dim only");
+    double[][] newWeights = new double[adaptDataset.featureIndex.size()][adaptDataset.labelIndex.size()];
+
+    System.arraycopy(origWeights,0,newWeights,0,origWeights.length);
+
+    AdaptedGaussianPriorObjectiveFunction<L, F> objective = new AdaptedGaussianPriorObjectiveFunction<L, F>(adaptDataset, logPrior,newWeights);
+
+    double[] initial = objective.initial();
+
+    double[] weights = minimizer.minimize(objective, TOL, initial);
+    return objective.to2D(weights);
+
+    //Question: maybe the adaptWeights can be done just in LinearClassifier ?? (pichuan)
+  }
+
+  @Override
+  public double[][] trainWeights(GeneralDataset<L, F> dataset) {
+    return trainWeights(dataset, null);
+  }
+
+  public double[][] trainWeights(GeneralDataset<L, F> dataset, double[] initial) {
+    return trainWeights(dataset, initial, false);
+  }
+
+  public double[][] trainWeights(GeneralDataset<L, F> dataset, double[] initial, boolean bypassTuneSigma) {
+    return trainWeights(dataset, initial, bypassTuneSigma, null);
+  }
+
+  public double[][] trainWeights(GeneralDataset<L, F> dataset, double[] initial, boolean bypassTuneSigma, Minimizer<DiffFunction> minimizer) {
+    if (minimizer == null) minimizer = minimizerCreator.create();
+    if(dataset instanceof RVFDataset)
+      ((RVFDataset<L,F>)dataset).ensureRealValues();
+    double[] interimWeights = null;
+    if(! bypassTuneSigma) {
+      if (tuneSigmaHeldOut) {
+        interimWeights = heldOutSetSigma(dataset); // the optimum interim weights from held-out training data have already been found.
+      } else if (tuneSigmaCV) {
+        crossValidateSetSigma(dataset,folds); // TODO: assign optimum interim weights as part of this process.
+      }
+    }
+    LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(dataset, logPrior);
+    if(initial == null && interimWeights != null && ! retrainFromScratchAfterSigmaTuning) {
+      //System.err.println("## taking advantage of interim weights as starting point.");
+      initial = interimWeights;
+    }
+    if (initial == null) {
+      initial = objective.initial();
+    }
+
+    double[] weights = minimizer.minimize(objective, TOL, initial);
+    return objective.to2D(weights);
+  }
+
+  /**
+   * IMPORTANT: dataset and biasedDataset must have same featureIndex, labelIndex
+   */
+  public Classifier<L, F> trainClassifierSemiSup(GeneralDataset<L, F> data, GeneralDataset<L, F> biasedData, double[][] confusionMatrix, double[] initial) {
+    double[][] weights =  trainWeightsSemiSup(data, biasedData, confusionMatrix, initial);
+    LinearClassifier<L, F> classifier = new LinearClassifier<L, F>(weights, data.featureIndex(), data.labelIndex());
+    return classifier;
+  }
+
+  public double[][] trainWeightsSemiSup(GeneralDataset<L, F> data, GeneralDataset<L, F> biasedData, double[][] confusionMatrix, double[] initial) {
+    Minimizer<DiffFunction> minimizer = minimizerCreator.create();
+    LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(data, new LogPrior(LogPrior.LogPriorType.NULL));
+    BiasedLogConditionalObjectiveFunction biasedObjective = new BiasedLogConditionalObjectiveFunction(biasedData, confusionMatrix, new LogPrior(LogPrior.LogPriorType.NULL));
+    SemiSupervisedLogConditionalObjectiveFunction semiSupObjective = new SemiSupervisedLogConditionalObjectiveFunction(objective, biasedObjective, logPrior);
+    if (initial == null) {
+      initial = objective.initial();
+    }
+    double[] weights = minimizer.minimize(semiSupObjective, TOL, initial);
+    return objective.to2D(weights);
+  }
+
+  /**
+   * Trains the linear classifier using Generalized Expectation criteria as described in
+   * <tt>Generalized Expectation Criteria for Semi Supervised Learning of Conditional Random Fields</tt>, Mann and McCallum, ACL 2008.
+   * The original algorithm is proposed for CRFs but has been adopted to LinearClassifier (which is a simpler special case of a CRF).
+   * IMPORTANT: the labeled features that are passed as an argument are assumed to be binary valued, although
+   * other features are allowed to be real valued.
+   */
+  public LinearClassifier<L,F> trainSemiSupGE(GeneralDataset<L, F> labeledDataset, List<? extends Datum<L, F>> unlabeledDataList, List<F> GEFeatures, double convexComboCoeff) {
+    Minimizer<DiffFunction> minimizer = minimizerCreator.create();
+    LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(labeledDataset, new LogPrior(LogPrior.LogPriorType.NULL));
+    GeneralizedExpectationObjectiveFunction<L,F> geObjective = new GeneralizedExpectationObjectiveFunction<L,F>(labeledDataset, unlabeledDataList, GEFeatures);
+    SemiSupervisedLogConditionalObjectiveFunction semiSupObjective = new SemiSupervisedLogConditionalObjectiveFunction(objective, geObjective, null,convexComboCoeff);
+    double[] initial = objective.initial();
+    double[] weights = minimizer.minimize(semiSupObjective, TOL, initial);
+    return new LinearClassifier<L, F>(objective.to2D(weights), labeledDataset.featureIndex(), labeledDataset.labelIndex());
+  }
+
+
+  /**
+   * Trains the linear classifier using Generalized Expectation criteria as described in
+   * <tt>Generalized Expectation Criteria for Semi Supervised Learning of Conditional Random Fields</tt>, Mann and McCallum, ACL 2008.
+   * The original algorithm is proposed for CRFs but has been adopted to LinearClassifier (which is a simpler, special case of a CRF).
+   * Automatically discovers high precision, high frequency labeled features to be used as GE constraints.
+   * IMPORTANT: the current feature selector assumes the features are binary. The GE constraints assume the constraining features are binary anyway, although
+   * it doesn't make such assumptions about other features.
+   */
+  public LinearClassifier<L,F> trainSemiSupGE(GeneralDataset<L, F> labeledDataset, List<? extends Datum<L, F>> unlabeledDataList) {
+    List<F> GEFeatures = getHighPrecisionFeatures(labeledDataset,0.9,10);
+    return trainSemiSupGE(labeledDataset, unlabeledDataList, GEFeatures,0.5);
+  }
+
+  public LinearClassifier<L,F> trainSemiSupGE(GeneralDataset<L, F> labeledDataset, List<? extends Datum<L, F>> unlabeledDataList, double convexComboCoeff) {
+    List<F> GEFeatures = getHighPrecisionFeatures(labeledDataset,0.9,10);
+    return trainSemiSupGE(labeledDataset, unlabeledDataList, GEFeatures,convexComboCoeff);
+  }
+
+
+  /**
+   * Returns a list of featured thresholded by minPrecision and sorted by their frequency of occurrence.
+   * precision in this case, is defined as the frequency of majority label over total frequency for that feature.
+   * @return list of high precision features.
+   */
+  private List<F> getHighPrecisionFeatures(GeneralDataset<L,F> dataset, double minPrecision, int maxNumFeatures){
+    int[][] feature2label = new int[dataset.numFeatures()][dataset.numClasses()];
+    for(int f = 0; f < dataset.numFeatures(); f++)
+      Arrays.fill(feature2label[f],0);
+
+    int[][] data = dataset.data;
+    int[] labels = dataset.labels;
+    for(int d = 0; d < data.length; d++){
+      int label = labels[d];
+      //System.out.println("datum id:"+d+" label id: "+label);
+      if(data[d] != null){
+        //System.out.println(" number of features:"+data[d].length);
+        for(int n = 0; n < data[d].length; n++){
+          feature2label[data[d][n]][label]++;
+        }
+      }
+    }
+    Counter<F> feature2freq = new ClassicCounter<F>();
+    for(int f = 0; f < dataset.numFeatures(); f++){
+     int maxF = ArrayMath.max(feature2label[f]);
+     int total = ArrayMath.sum(feature2label[f]);
+     double precision = ((double)maxF)/total;
+     F feature = dataset.featureIndex.get(f);
+     if(precision >= minPrecision){
+       feature2freq.incrementCount(feature, total);
+     }
+    }
+    if(feature2freq.size() > maxNumFeatures){
+      Counters.retainTop(feature2freq, maxNumFeatures);
+    }
+    //for(F feature : feature2freq.keySet())
+      //System.out.println(feature+" "+feature2freq.getCount(feature));
+    //System.exit(0);
+    return Counters.toSortedList(feature2freq);
+  }
+
+  /**
+   * Train a classifier with a sigma tuned on a validation set.
+   *
+   * @return The constructed classifier
+   */
+  public LinearClassifier<L, F> trainClassifierV(GeneralDataset<L, F> train, GeneralDataset<L, F> validation, double min, double max, boolean accuracy) {
+    labelIndex = train.labelIndex();
+    featureIndex = train.featureIndex();
+    this.min = min;
+    this.max = max;
+    heldOutSetSigma(train, validation);
+    double[][] weights = trainWeights(train);
+    return new LinearClassifier<L, F>(weights, train.featureIndex(), train.labelIndex());
+  }
+
+  /**
+   * Train a classifier with a sigma tuned on a validation set.
+   * In this case we are fitting on the last 30% of the training data.
+   *
+   * @param train The data to train (and validate) on.
+   * @return The constructed classifier
+   */
+  public LinearClassifier<L, F> trainClassifierV(GeneralDataset<L, F> train, double min, double max, boolean accuracy) {
+    labelIndex = train.labelIndex();
+    featureIndex = train.featureIndex();
+    tuneSigmaHeldOut = true;
+    this.min = min;
+    this.max = max;
+    heldOutSetSigma(train);
+    double[][] weights = trainWeights(train);
+    return new LinearClassifier<L, F>(weights, train.featureIndex(), train.labelIndex());
+  }
+
+  /** NOTE: Constructors that takes in a Minimizer creates a LinearClassifierFactory that will reuse the minimizer
+   *  and will not be threadsafe (unless the Minimzer itself is ThreadSafe which is probably not the case)
+   */
+
+
   public LinearClassifierFactory() {
-    this(new Factory15());
+    this(new QNMinimizer(15));
     this.mem = 15;
     this.useQuasiNewton();
   }
 
-  /** NOTE: Constructors that take in a Minimizer create a LinearClassifierFactory that will reuse the minimizer
-   *  and will not be threadsafe (unless the Minimizer itself is ThreadSafe which is probably not the case).
-   */
   public LinearClassifierFactory(Minimizer<DiffFunction> min) {
     this(min, false);
   }
 
-  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min) {
-    this(min, false);
-  }
-
   public LinearClassifierFactory(boolean useSum) {
-    this(new Factory15(), useSum);
+    this(new QNMinimizer(15), useSum);
     this.mem = 15;
     this.useQuasiNewton();
   }
 
   public LinearClassifierFactory(double tol) {
-    this(new Factory15(), tol, false);
+    this(new QNMinimizer(15), tol, false);
     this.mem = 15;
     this.useQuasiNewton();
   }
   public LinearClassifierFactory(Minimizer<DiffFunction> min, boolean useSum) {
     this(min, 1e-4, useSum);
   }
-  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, boolean useSum) {
-    this(min, 1e-4, useSum);
-  }
   public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum) {
     this(min, tol, useSum, 1.0);
   }
-  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, double tol, boolean useSum) {
-    this(min, tol, useSum, 1.0);
-  }
   public LinearClassifierFactory(double tol, boolean useSum, double sigma) {
-    this(new Factory15(), tol, useSum, sigma);
+    this(new QNMinimizer(15), tol, useSum, sigma);
     this.mem = 15;
     this.useQuasiNewton();
   }
   public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum, double sigma) {
     this(min, tol, useSum, LogPrior.LogPriorType.QUADRATIC.ordinal(), sigma);
   }
-  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, double tol, boolean useSum, double sigma) {
-    this(min, tol, useSum, LogPrior.LogPriorType.QUADRATIC.ordinal(), sigma);
-  }
   public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum, int prior, double sigma) {
     this(min, tol, useSum, prior, sigma, 0.0);
   }
-  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, double tol, boolean useSum, int prior, double sigma) {
-    this(min, tol, useSum, prior, sigma, 0.0);
-  }
-
   public LinearClassifierFactory(double tol, boolean useSum, int prior, double sigma, double epsilon) {
-    this(new Factory15(), tol, useSum, new LogPrior(prior, sigma, epsilon));
+    this(new QNMinimizer(15), tol, useSum, new LogPrior(prior, sigma, epsilon));
     this.mem = 15;
     this.useQuasiNewton();
   }
 
-  public LinearClassifierFactory(double tol, boolean useSum, int prior, double sigma, double epsilon, final int mem) {
-    this(new Factory15(), tol, useSum, new LogPrior(prior, sigma, epsilon));
+  public LinearClassifierFactory(double tol, boolean useSum, int prior, double sigma, double epsilon, int mem) {
+    this(new QNMinimizer(mem), tol, useSum, new LogPrior(prior, sigma, epsilon));
     this.useQuasiNewton();
   }
 
@@ -189,15 +363,9 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum, int prior, double sigma, double epsilon) {
     this(min, tol, useSum, new LogPrior(prior, sigma, epsilon));
   }
-  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, double tol, boolean useSum, int prior, double sigma, double epsilon) {
-    this(min, tol, useSum, new LogPrior(prior, sigma, epsilon));
-  }
 
   public LinearClassifierFactory(final Minimizer<DiffFunction> min, double tol, boolean useSum, LogPrior logPrior) {
     this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      private static final long serialVersionUID = -6439748445540743949L;
-
-      @Override
       public Minimizer<DiffFunction> create() {
         return min;
       }
@@ -225,8 +393,8 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    * Set the prior.
    *
    * @param logPrior One of the priors defined in
-   *              {@code LogConditionalObjectiveFunction}.
-   *              {@code LogPrior.QUADRATIC} is the default.
+   *              <code>LogConditionalObjectiveFunction</code>.
+   *              <code>LogPrior.QUADRATIC</code> is the default.
    */
   public void setPrior(LogPrior logPrior) {
     this.logPrior = logPrior;
@@ -234,8 +402,10 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
 
   /**
    * Set the verbose flag for {@link CGMinimizer}.
-   * {@code false} is the default.
+   * Only used with conjugate-gradient minimization.
+   * <code>false</code> is the default.
    */
+
   public void setVerbose(boolean verbose) {
     this.verbose = verbose;
   }
@@ -267,61 +437,37 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    */
   public void useQuasiNewton() {
     this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      private static final long serialVersionUID = 9028306475652690036L;
-      @Override
       public Minimizer<DiffFunction> create() {
-          QNMinimizer qnMinimizer = new QNMinimizer(LinearClassifierFactory.this.mem);
-          if (!verbose) {
-              qnMinimizer.shutUp();
-          }
-          return qnMinimizer;
+        return new QNMinimizer(LinearClassifierFactory.this.mem);
       }
     };
   }
 
   public void useQuasiNewton(final boolean useRobust) {
     this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      private static final long serialVersionUID = -9108222058357693242L;
-      @Override
       public Minimizer<DiffFunction> create() {
-          QNMinimizer qnMinimizer = new QNMinimizer(LinearClassifierFactory.this.mem, useRobust);
-          if (!verbose) {
-              qnMinimizer.shutUp();
-          }
-          return qnMinimizer;
+        return new QNMinimizer(LinearClassifierFactory.this.mem, useRobust);
       }
     };
   }
 
   public void useStochasticQN(final double initialSMDGain, final int stochasticBatchSize){
     this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      private static final long serialVersionUID = -7760753348350678588L;
-      @Override
       public Minimizer<DiffFunction> create() {
-          SQNMinimizer<DiffFunction> sqnMinimizer = new SQNMinimizer<>(LinearClassifierFactory.this.mem, initialSMDGain, stochasticBatchSize, false);
-          if (!verbose) {
-              sqnMinimizer.shutUp();
-          }
-          return sqnMinimizer;
+        return new SQNMinimizer<DiffFunction>(LinearClassifierFactory.this.mem, initialSMDGain, stochasticBatchSize, false);
       }
     };
   }
 
   public void useStochasticMetaDescent(){
-    useStochasticMetaDescent(0.1, 15, StochasticCalculateMethods.ExternalFiniteDifference, 20);
+    useStochasticMetaDescent(0.1,15,StochasticCalculateMethods.ExternalFiniteDifference,20);
   }
 
   public void useStochasticMetaDescent(final double initialSMDGain, final int stochasticBatchSize,
                                        final StochasticCalculateMethods stochasticMethod,final int passes) {
     this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      private static final long serialVersionUID = 6860437108371914482L;
-      @Override
       public Minimizer<DiffFunction> create() {
-          SMDMinimizer<DiffFunction> smdMinimizer = new SMDMinimizer<>(initialSMDGain, stochasticBatchSize, stochasticMethod, passes);
-          if (!verbose) {
-              smdMinimizer.shutUp();
-          }
-          return smdMinimizer;
+        return new SMDMinimizer<DiffFunction>(initialSMDGain,stochasticBatchSize,stochasticMethod,passes);
       }
     };
   }
@@ -332,14 +478,8 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
 
   public void useStochasticGradientDescent(final double gainSGD, final int stochasticBatchSize){
     this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      private static final long serialVersionUID = 2564615420955196299L;
-      @Override
       public Minimizer<DiffFunction> create() {
-          InefficientSGDMinimizer<DiffFunction> sgdMinimizer = new InefficientSGDMinimizer<>(gainSGD, stochasticBatchSize);
-          if (!verbose) {
-              sgdMinimizer.shutUp();
-          }
-          return sgdMinimizer;
+        return new SGDMinimizer<DiffFunction>(gainSGD,stochasticBatchSize);
       }
     };
   }
@@ -350,30 +490,18 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
 
   public void useInPlaceStochasticGradientDescent(final int SGDPasses, final int tuneSampleSize, final double sigma) {
     this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      private static final long serialVersionUID = -5319225231759162616L;
-      @Override
       public Minimizer<DiffFunction> create() {
-          SGDMinimizer<DiffFunction> sgdMinimizer = new SGDMinimizer<>(sigma, SGDPasses, tuneSampleSize);
-          if (!verbose) {
-              sgdMinimizer.shutUp();
-          }
-          return sgdMinimizer;
+        return new StochasticInPlaceMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
       }
     };
   }
 
   public void useHybridMinimizerWithInPlaceSGD(final int SGDPasses, final int tuneSampleSize, final double sigma) {
     this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      private static final long serialVersionUID = -3042400543337763144L;
-      @Override
       public Minimizer<DiffFunction> create() {
-          SGDMinimizer<DiffFunction> firstMinimizer = new SGDMinimizer<>(sigma, SGDPasses, tuneSampleSize);
-          QNMinimizer secondMinimizer = new QNMinimizer(mem);
-          if (!verbose) {
-              firstMinimizer.shutUp();
-              secondMinimizer.shutUp();
-          }
-          return new HybridMinimizer(firstMinimizer, secondMinimizer, SGDPasses);
+        Minimizer<DiffFunction> firstMinimizer = new StochasticInPlaceMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
+        Minimizer<DiffFunction> secondMinimizer = new QNMinimizer(mem);
+        return new HybridMinimizer(firstMinimizer, secondMinimizer, SGDPasses);
       }
     };
   }
@@ -382,33 +510,25 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
                                                         final int qnPasses, final int hessSamples, final int QNMem,
                                                         final boolean outputToFile) {
     this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      private static final long serialVersionUID = 5823852936137599566L;
-      @Override
       public Minimizer<DiffFunction> create() {
-          SGDToQNMinimizer sgdToQNMinimizer = new SGDToQNMinimizer(SGDGain, batchSize, sgdPasses,
-                  qnPasses, hessSamples, QNMem, outputToFile);
-          if (!verbose) {
-              sgdToQNMinimizer.shutUp();
-          }
-          return sgdToQNMinimizer;
+        return new SGDToQNMinimizer(SGDGain, batchSize, sgdPasses,
+                                    qnPasses, hessSamples, QNMem, outputToFile);
       }
     };
   }
 
   public void useHybridMinimizer() {
-    useHybridMinimizer(0.1, 15, StochasticCalculateMethods.ExternalFiniteDifference, 0);
+    useHybridMinimizer(0.1,15,StochasticCalculateMethods.ExternalFiniteDifference , 0);
   }
 
   public void useHybridMinimizer(final double initialSMDGain, final int stochasticBatchSize,
                                  final StochasticCalculateMethods stochasticMethod, final int cutoffIteration){
-    this.minimizerCreator = () -> {
-        SMDMinimizer<DiffFunction> firstMinimizer = new SMDMinimizer<>(initialSMDGain, stochasticBatchSize, stochasticMethod, cutoffIteration);
-        QNMinimizer secondMinimizer = new QNMinimizer(mem);
-        if (!verbose) {
-            firstMinimizer.shutUp();
-            secondMinimizer.shutUp();
-        }
-        return new HybridMinimizer(firstMinimizer, secondMinimizer, cutoffIteration);
+    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
+      public Minimizer<DiffFunction> create() {
+        Minimizer<DiffFunction> firstMinimizer = new SMDMinimizer<DiffFunction>(initialSMDGain, stochasticBatchSize,stochasticMethod,cutoffIteration);
+        Minimizer<DiffFunction> secondMinimizer = new QNMinimizer(mem);
+        return new HybridMinimizer(firstMinimizer,secondMinimizer,cutoffIteration);
+      }
     };
   }
 
@@ -429,7 +549,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   }
 
   /**
-   * Sets the minimizer to {@link CGMinimizer}, with the passed {@code verbose} flag.
+   * Sets the minimizer to {@link CGMinimizer}, with the passed <code>verbose</code> flag.
    */
   public void useConjugateGradientAscent(boolean verbose) {
     this.verbose = verbose;
@@ -441,9 +561,6 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    */
   public void useConjugateGradientAscent() {
     this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      private static final long serialVersionUID = -561168861131879990L;
-
-      @Override
       public Minimizer<DiffFunction> create() {
         return new CGMinimizer(!LinearClassifierFactory.this.verbose);
       }
@@ -459,215 +576,6 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    */
   public void setUseSum(boolean useSum) {
     //this.useSum = useSum;
-  }
-
-
-  private Minimizer<DiffFunction> getMinimizer() {
-    // Create a new minimizer
-    Minimizer<DiffFunction> minimizer = minimizerCreator.create();
-    if (minimizer instanceof HasEvaluators) {
-      ((HasEvaluators) minimizer).setEvaluators(evalIters, evaluators);
-    }
-    return minimizer;
-  }
-
-
-  /**
-   * Adapt classifier (adjust the mean of Gaussian prior).
-   * Under construction -pichuan
-   *
-   * @param origWeights the original weights trained from the training data
-   * @param adaptDataset the Dataset used to adapt the trained weights
-   * @return adapted weights
-   */
-  public double[][] adaptWeights(double[][] origWeights, GeneralDataset<L, F> adaptDataset) {
-    Minimizer<DiffFunction> minimizer = getMinimizer();
-    logger.info("adaptWeights in LinearClassifierFactory. increase weight dim only");
-    double[][] newWeights = new double[adaptDataset.featureIndex.size()][adaptDataset.labelIndex.size()];
-
-    synchronized (System.class) {
-      System.arraycopy(origWeights, 0, newWeights, 0, origWeights.length);
-    }
-
-    AdaptedGaussianPriorObjectiveFunction<L, F> objective = new AdaptedGaussianPriorObjectiveFunction<>(adaptDataset, logPrior, newWeights);
-
-    double[] initial = objective.initial();
-
-    double[] weights = minimizer.minimize(objective, TOL, initial);
-    return objective.to2D(weights);
-
-    //Question: maybe the adaptWeights can be done just in LinearClassifier ?? (pichuan)
-  }
-
-  @Override
-  public double[][] trainWeights(GeneralDataset<L, F> dataset) {
-    return trainWeights(dataset, null);
-  }
-
-  public double[][] trainWeights(GeneralDataset<L, F> dataset, double[] initial) {
-    return trainWeights(dataset, initial, false);
-  }
-
-  public double[][] trainWeights(GeneralDataset<L, F> dataset, double[] initial, boolean bypassTuneSigma) {
-    return trainWeights(dataset, initial, bypassTuneSigma, null);
-  }
-
-  public double[][] trainWeights(GeneralDataset<L, F> dataset, double[] initial, boolean bypassTuneSigma, Minimizer<DiffFunction> minimizer) {
-    if (minimizer == null) minimizer = getMinimizer();
-    if(dataset instanceof RVFDataset)
-      ((RVFDataset<L,F>)dataset).ensureRealValues();
-    double[] interimWeights = null;
-    if(! bypassTuneSigma) {
-      if (tuneSigmaHeldOut) {
-        interimWeights = heldOutSetSigma(dataset); // the optimum interim weights from held-out training data have already been found.
-      } else if (tuneSigmaCV) {
-        crossValidateSetSigma(dataset,folds); // TODO: assign optimum interim weights as part of this process.
-      }
-    }
-    LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<>(dataset, logPrior);
-    if(initial == null && interimWeights != null && ! retrainFromScratchAfterSigmaTuning) {
-      //logger.info("## taking advantage of interim weights as starting point.");
-      initial = interimWeights;
-    }
-    if (initial == null) {
-      initial = objective.initial();
-    }
-
-    double[] weights = minimizer.minimize(objective, TOL, initial);
-    return objective.to2D(weights);
-  }
-
-  /**
-   * IMPORTANT: dataset and biasedDataset must have same featureIndex, labelIndex
-   */
-  public Classifier<L, F> trainClassifierSemiSup(GeneralDataset<L, F> data, GeneralDataset<L, F> biasedData, double[][] confusionMatrix, double[] initial) {
-    double[][] weights =  trainWeightsSemiSup(data, biasedData, confusionMatrix, initial);
-    LinearClassifier<L, F> classifier = new LinearClassifier<>(weights, data.featureIndex(), data.labelIndex());
-    return classifier;
-  }
-
-  public double[][] trainWeightsSemiSup(GeneralDataset<L, F> data, GeneralDataset<L, F> biasedData, double[][] confusionMatrix, double[] initial) {
-    Minimizer<DiffFunction> minimizer = getMinimizer();
-    LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<>(data, new LogPrior(LogPrior.LogPriorType.NULL));
-    BiasedLogConditionalObjectiveFunction biasedObjective = new BiasedLogConditionalObjectiveFunction(biasedData, confusionMatrix, new LogPrior(LogPrior.LogPriorType.NULL));
-    SemiSupervisedLogConditionalObjectiveFunction semiSupObjective = new SemiSupervisedLogConditionalObjectiveFunction(objective, biasedObjective, logPrior);
-    if (initial == null) {
-      initial = objective.initial();
-    }
-    double[] weights = minimizer.minimize(semiSupObjective, TOL, initial);
-    return objective.to2D(weights);
-  }
-
-  /**
-   * Trains the linear classifier using Generalized Expectation criteria as described in
-   * <tt>Generalized Expectation Criteria for Semi Supervised Learning of Conditional Random Fields</tt>, Mann and McCallum, ACL 2008.
-   * The original algorithm is proposed for CRFs but has been adopted to LinearClassifier (which is a simpler special case of a CRF).
-   * IMPORTANT: the labeled features that are passed as an argument are assumed to be binary valued, although
-   * other features are allowed to be real valued.
-   */
-  public LinearClassifier<L,F> trainSemiSupGE(GeneralDataset<L, F> labeledDataset, List<? extends Datum<L, F>> unlabeledDataList, List<F> GEFeatures, double convexComboCoeff) {
-    Minimizer<DiffFunction> minimizer = getMinimizer();
-    LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<>(labeledDataset, new LogPrior(LogPrior.LogPriorType.NULL));
-    GeneralizedExpectationObjectiveFunction<L,F> geObjective = new GeneralizedExpectationObjectiveFunction<>(labeledDataset, unlabeledDataList, GEFeatures);
-    SemiSupervisedLogConditionalObjectiveFunction semiSupObjective = new SemiSupervisedLogConditionalObjectiveFunction(objective, geObjective, null,convexComboCoeff);
-    double[] initial = objective.initial();
-    double[] weights = minimizer.minimize(semiSupObjective, TOL, initial);
-    return new LinearClassifier<>(objective.to2D(weights), labeledDataset.featureIndex(), labeledDataset.labelIndex());
-  }
-
-
-  /**
-   * Trains the linear classifier using Generalized Expectation criteria as described in
-   * <tt>Generalized Expectation Criteria for Semi Supervised Learning of Conditional Random Fields</tt>, Mann and McCallum, ACL 2008.
-   * The original algorithm is proposed for CRFs but has been adopted to LinearClassifier (which is a simpler, special case of a CRF).
-   * Automatically discovers high precision, high frequency labeled features to be used as GE constraints.
-   * IMPORTANT: the current feature selector assumes the features are binary. The GE constraints assume the constraining features are binary anyway, although
-   * it doesn't make such assumptions about other features.
-   */
-  public LinearClassifier<L,F> trainSemiSupGE(GeneralDataset<L, F> labeledDataset, List<? extends Datum<L, F>> unlabeledDataList) {
-    List<F> GEFeatures = getHighPrecisionFeatures(labeledDataset,0.9,10);
-    return trainSemiSupGE(labeledDataset, unlabeledDataList, GEFeatures, 0.5);
-  }
-
-  public LinearClassifier<L,F> trainSemiSupGE(GeneralDataset<L, F> labeledDataset, List<? extends Datum<L, F>> unlabeledDataList, double convexComboCoeff) {
-    List<F> GEFeatures = getHighPrecisionFeatures(labeledDataset,0.9,10);
-    return trainSemiSupGE(labeledDataset, unlabeledDataList, GEFeatures, convexComboCoeff);
-  }
-
-
-  /**
-   * Returns a list of featured thresholded by minPrecision and sorted by their frequency of occurrence.
-   * precision in this case, is defined as the frequency of majority label over total frequency for that feature.
-   *
-   * @return list of high precision features.
-   */
-  private List<F> getHighPrecisionFeatures(GeneralDataset<L,F> dataset, double minPrecision, int maxNumFeatures){
-    int[][] feature2label = new int[dataset.numFeatures()][dataset.numClasses()];
-    for(int f = 0; f < dataset.numFeatures(); f++)
-      Arrays.fill(feature2label[f],0);
-
-    int[][] data = dataset.data;
-    int[] labels = dataset.labels;
-    for(int d = 0; d < data.length; d++){
-      int label = labels[d];
-      //System.out.println("datum id:"+d+" label id: "+label);
-      if(data[d] != null){
-        //System.out.println(" number of features:"+data[d].length);
-        for(int n = 0; n < data[d].length; n++){
-          feature2label[data[d][n]][label]++;
-        }
-      }
-    }
-    Counter<F> feature2freq = new ClassicCounter<>();
-    for(int f = 0; f < dataset.numFeatures(); f++){
-     int maxF = ArrayMath.max(feature2label[f]);
-     int total = ArrayMath.sum(feature2label[f]);
-     double precision = ((double)maxF)/total;
-     F feature = dataset.featureIndex.get(f);
-     if(precision >= minPrecision){
-       feature2freq.incrementCount(feature, total);
-     }
-    }
-    if(feature2freq.size() > maxNumFeatures){
-      Counters.retainTop(feature2freq, maxNumFeatures);
-    }
-    //for(F feature : feature2freq.keySet())
-      //System.out.println(feature+" "+feature2freq.getCount(feature));
-    //System.exit(0);
-    return Counters.toSortedList(feature2freq);
-  }
-
-  /**
-   * Train a classifier with a sigma tuned on a validation set.
-   *
-   * @return The constructed classifier
-   */
-  public LinearClassifier<L, F> trainClassifierV(GeneralDataset<L, F> train, GeneralDataset<L, F> validation, double min, double max, boolean accuracy) {
-    labelIndex = train.labelIndex();
-    featureIndex = train.featureIndex();
-    this.min = min;
-    this.max = max;
-    heldOutSetSigma(train, validation);
-    double[][] weights = trainWeights(train);
-    return new LinearClassifier<>(weights, train.featureIndex(), train.labelIndex());
-  }
-
-  /**
-   * Train a classifier with a sigma tuned on a validation set.
-   * In this case we are fitting on the last 30% of the training data.
-   *
-   * @param train The data to train (and validate) on.
-   * @return The constructed classifier
-   */
-  public LinearClassifier<L, F> trainClassifierV(GeneralDataset<L, F> train, double min, double max, boolean accuracy) {
-    labelIndex = train.labelIndex();
-    featureIndex = train.featureIndex();
-    tuneSigmaHeldOut = true;
-    this.min = min;
-    this.max = max;
-    heldOutSetSigma(train);
-    double[][] weights = trainWeights(train);
-    return new LinearClassifier<>(weights, train.featureIndex(), train.labelIndex());
   }
 
   /**
@@ -715,39 +623,39 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   }
 
   /**
-   * Calls the method {@link #crossValidateSetSigma(GeneralDataset, int, Scorer, LineSearcher)} with
+   * callls the method {@link #crossValidateSetSigma(GeneralDataset, int, Scorer, LineSearcher)} with
    * multi-class log-likelihood scoring (see {@link MultiClassAccuracyStats}) and golden-section line search
    * (see {@link GoldenSectionLineSearch}).
-   *
    * @param dataset the data set to optimize sigma on.
    */
   public void crossValidateSetSigma(GeneralDataset<L, F> dataset,int kfold) {
-    logger.info("##you are here.");
-    crossValidateSetSigma(dataset, kfold, new MultiClassAccuracyStats<>(MultiClassAccuracyStats.USE_LOGLIKELIHOOD), new GoldenSectionLineSearch(true, 1e-2, min, max));
+    System.err.println("##you are here.");
+    crossValidateSetSigma(dataset, kfold, new MultiClassAccuracyStats<L>(MultiClassAccuracyStats.USE_LOGLIKELIHOOD), new GoldenSectionLineSearch(true, 1e-2, min, max));
   }
 
   public void crossValidateSetSigma(GeneralDataset<L, F> dataset,int kfold, final Scorer<L> scorer) {
     crossValidateSetSigma(dataset, kfold, scorer, new GoldenSectionLineSearch(true, 1e-2, min, max));
   }
   public void crossValidateSetSigma(GeneralDataset<L, F> dataset,int kfold, LineSearcher minimizer) {
-    crossValidateSetSigma(dataset, kfold, new MultiClassAccuracyStats<>(MultiClassAccuracyStats.USE_LOGLIKELIHOOD), minimizer);
+    crossValidateSetSigma(dataset, kfold, new MultiClassAccuracyStats<L>(MultiClassAccuracyStats.USE_LOGLIKELIHOOD), minimizer);
   }
   /**
    * Sets the sigma parameter to a value that optimizes the cross-validation score given by <code>scorer</code>.  Search for an optimal value
-   * is carried out by <code>minimizer</code>.
-   *
+   * is carried out by <code>minimizer</code>
    * @param dataset the data set to optimize sigma on.
    */
   public void crossValidateSetSigma(GeneralDataset<L, F> dataset,int kfold, final Scorer<L> scorer, LineSearcher minimizer) {
-    logger.info("##in Cross Validate, folds = " + kfold);
-    logger.info("##Scorer is " + scorer);
+    System.err.println("##in Cross Validate, folds = " + kfold);
+    System.err.println("##Scorer is " + scorer);
 
     featureIndex = dataset.featureIndex;
     labelIndex = dataset.labelIndex;
 
-    final CrossValidator<L, F> crossValidator = new CrossValidator<>(dataset, kfold);
-    final Function<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState>,Double> scoreFn =
-        fold -> {
+    final CrossValidator<L, F> crossValidator = new CrossValidator<L, F>(dataset,kfold);
+    final Function<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState>,Double> score =
+      new Function<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState>,Double> ()
+      {
+        public Double apply (Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState> fold) {
           GeneralDataset<L, F> trainSet = fold.first();
           GeneralDataset<L, F> devSet   = fold.second();
 
@@ -758,26 +666,30 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
 
           fold.third().state = ArrayUtils.flatten(weights2D);
 
-          LinearClassifier<L, F> classifier = new LinearClassifier<>(weights2D, trainSet.featureIndex, trainSet.labelIndex);
+          LinearClassifier<L, F> classifier = new LinearClassifier<L, F>(weights2D, trainSet.featureIndex, trainSet.labelIndex);
 
           double score = scorer.score(classifier, devSet);
           //System.out.println("score: "+score);
           System.out.print(".");
           return score;
-        };
+        }
+      };
 
     Function<Double,Double> negativeScorer =
-        sigmaToTry -> {
+      new Function<Double,Double> ()
+      {
+        public Double apply(Double sigmaToTry) {
           //sigma = sigmaToTry;
           setSigma(sigmaToTry);
-          Double averageScore = crossValidator.computeAverage(scoreFn);
+          Double averageScore = crossValidator.computeAverage(score);
           System.err.print("##sigma = "+getSigma()+" ");
-          logger.info("-> average Score: "+averageScore);
+          System.err.println("-> average Score: "+averageScore);
           return -averageScore;
-        };
+        }
+      };
 
     double bestSigma = minimizer.minimize(negativeScorer);
-    logger.info("##best sigma: " + bestSigma);
+    System.err.println("##best sigma: " + bestSigma);
     setSigma(bestSigma);
   }
 
@@ -800,14 +712,14 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   }
 
   public double[] heldOutSetSigma(GeneralDataset<L, F> train, GeneralDataset<L, F> dev) {
-    return heldOutSetSigma(train, dev, new MultiClassAccuracyStats<>(MultiClassAccuracyStats.USE_LOGLIKELIHOOD), heldOutSearcher == null ? new GoldenSectionLineSearch(true, 1e-2, min, max) : heldOutSearcher);
+    return heldOutSetSigma(train, dev, new MultiClassAccuracyStats<L>(MultiClassAccuracyStats.USE_LOGLIKELIHOOD), heldOutSearcher == null ? new GoldenSectionLineSearch(true, 1e-2, min, max) : heldOutSearcher);
   }
 
   public double[] heldOutSetSigma(GeneralDataset<L, F> train, GeneralDataset<L, F> dev, final Scorer<L> scorer) {
     return heldOutSetSigma(train, dev, scorer, new GoldenSectionLineSearch(true, 1e-2, min, max));
   }
   public double[]  heldOutSetSigma(GeneralDataset<L, F> train, GeneralDataset<L, F> dev, LineSearcher minimizer) {
-    return heldOutSetSigma(train, dev, new MultiClassAccuracyStats<>(MultiClassAccuracyStats.USE_LOGLIKELIHOOD), minimizer);
+    return heldOutSetSigma(train, dev, new MultiClassAccuracyStats<L>(MultiClassAccuracyStats.USE_LOGLIKELIHOOD), minimizer);
   }
 
   /**
@@ -815,7 +727,6 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    * is carried out by <code>minimizer</code>
    * dataset the data set to optimize sigma on.
    * kfold
-   *
    * @return an interim set of optimal weights: the weights
    */
   public double[] heldOutSetSigma(final GeneralDataset<L, F> trainSet, final GeneralDataset<L, F> devSet, final Scorer<L> scorer, LineSearcher minimizer) {
@@ -829,7 +740,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
 
     timer.start();
     double bestSigma = minimizer.minimize(negativeScorer);
-    logger.info("##best sigma: " + bestSigma);
+    System.err.println("##best sigma: " + bestSigma);
     setSigma(bestSigma);
 
     return ArrayUtils.flatten(trainWeights(trainSet,negativeScorer.weights,true)); // make sure it's actually the interim weights from best sigma
@@ -858,14 +769,14 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
 
       weights = ArrayUtils.flatten(weights2D);
 
-      LinearClassifier<L, F> classifier = new LinearClassifier<>(weights2D, trainSet.featureIndex, trainSet.labelIndex);
+      LinearClassifier<L, F> classifier = new LinearClassifier<L, F>(weights2D, trainSet.featureIndex, trainSet.labelIndex);
 
       double score = scorer.score(classifier, devSet);
       //System.out.println("score: "+score);
       //System.out.print(".");
       System.err.print("##sigma = "+getSigma()+" ");
-      logger.info("-> average Score: " + score);
-      logger.info("##time elapsed: " + timer.stop() + " milliseconds.");
+      System.err.println("-> average Score: "+ score);
+      System.err.println("##time elapsed: " + timer.stop() + " milliseconds.");
       timer.restart();
       return -score;
     }
@@ -887,30 +798,28 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       labelIndex.add(d.label());
       featureIndex.addAll(d.asFeatures());//If there are duplicates, it doesn't add them again.
     }
-    logger.info(String.format("Training linear classifier with %d features and %d labels", featureIndex.size(), labelIndex.size()));
+    System.err.println(String.format("Training linear classifier with %d features and %d labels", featureIndex.size(), labelIndex.size()));
 
-    LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<>(dataIterable, logPrior, featureIndex, labelIndex);
-    // [cdm 2014] Commented out next line. Why not use the logPrior set up previously and used at creation???
-    // objective.setPrior(new LogPrior(LogPrior.LogPriorType.QUADRATIC));
+    LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(dataIterable, logPrior, featureIndex, labelIndex);
+    objective.setPrior(new LogPrior(LogPrior.LogPriorType.QUADRATIC));
 
     double[] initial = objective.initial();
     double[] weights = minimizer.minimize(objective, TOL, initial);
 
-    LinearClassifier<L, F> classifier = new LinearClassifier<>(objective.to2D(weights), featureIndex, labelIndex);
+    LinearClassifier<L, F> classifier = new LinearClassifier<L, F>(objective.to2D(weights), featureIndex, labelIndex);
     return classifier;
   }
 
   public Classifier<L, F> trainClassifier(GeneralDataset<L, F> dataset, float[] dataWeights, LogPrior prior) {
     Minimizer<DiffFunction> minimizer = getMinimizer();
-    if (dataset instanceof RVFDataset) {
+    if(dataset instanceof RVFDataset)
       ((RVFDataset<L,F>)dataset).ensureRealValues();
-    }
-    LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<>(dataset, dataWeights, prior);
+    LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(dataset, dataWeights, logPrior);
 
     double[] initial = objective.initial();
     double[] weights = minimizer.minimize(objective, TOL, initial);
 
-    LinearClassifier<L, F> classifier = new LinearClassifier<>(objective.to2D(weights), dataset.featureIndex(), dataset.labelIndex());
+    LinearClassifier<L, F> classifier = new LinearClassifier<L, F>(objective.to2D(weights), dataset.featureIndex(), dataset.labelIndex());
     return classifier;
   }
 
@@ -920,19 +829,10 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     return trainClassifier(dataset, null);
   }
   public LinearClassifier<L, F> trainClassifier(GeneralDataset<L, F> dataset, double[] initial) {
-    // Sanity check
     if(dataset instanceof RVFDataset)
       ((RVFDataset<L,F>)dataset).ensureRealValues();
-    if (initial != null) {
-      for (double weight : initial) {
-        if (Double.isNaN(weight) || Double.isInfinite(weight)) {
-          throw new IllegalArgumentException("Initial weights are invalid!");
-        }
-      }
-    }
-    // Train classifier
     double[][] weights =  trainWeights(dataset, initial, false);
-    LinearClassifier<L, F> classifier = new LinearClassifier<>(weights, dataset.featureIndex(), dataset.labelIndex());
+    LinearClassifier<L, F> classifier = new LinearClassifier<L, F>(weights, dataset.featureIndex(), dataset.labelIndex());
     return classifier;
   }
   public LinearClassifier<L, F> trainClassifierWithInitialWeights(GeneralDataset<L, F> dataset, double[][] initialWeights2D) {
@@ -968,29 +868,36 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
                 + currLine + " in file " + file);
         }
         currLine++;
-        int feature = Integer.parseInt(tuples[0]);
-        int label = Integer.parseInt(tuples[1]);
-        double value = Double.parseDouble(tuples[2]);
+        int feature = Integer.valueOf(tuples[0]);
+        int label = Integer.valueOf(tuples[1]);
+        double value = Double.valueOf(tuples[2]);
         weights[feature][label] = value;
         line = in.readLine();
       }
 
       // First line in thresholds is the number of thresholds
-      int numThresholds = Integer.parseInt(in.readLine());
+      int numThresholds = Integer.valueOf(in.readLine());
       double[] thresholds = new double[numThresholds];
       int curr = 0;
       while ((line = in.readLine()) != null) {
-        double tval = Double.parseDouble(line.trim());
+        double tval = Double.valueOf(line.trim());
         thresholds[curr++] = tval;
       }
       in.close();
-      LinearClassifier<String, String> classifier = new LinearClassifier<>(weights, featureIndex, labelIndex);
+      LinearClassifier<String, String> classifier = new LinearClassifier<String, String>(weights, featureIndex, labelIndex);
       return classifier;
     } catch (Exception e) {
-      logger.info("Error in LinearClassifierFactory, loading from file=" + file);
+      System.err.println("Error in LinearClassifierFactory, loading from file="+file);
       e.printStackTrace();
       return null;
     }
+  }
+
+  @Deprecated
+  @Override
+  public LinearClassifier<L, F> trainClassifier(List<RVFDatum<L, F>> examples) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
   public void setEvaluators(int iters, Evaluator[] evaluators)
@@ -1001,7 +908,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
 
   public LinearClassifierCreator<L,F> getClassifierCreator(GeneralDataset<L, F> dataset) {
 //    LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(dataset, logPrior);
-    return new LinearClassifierCreator<>(dataset.featureIndex, dataset.labelIndex);
+    return new LinearClassifierCreator<L,F>(dataset.featureIndex, dataset.labelIndex);
   }
 
   public static class LinearClassifierCreator<L,F> implements ClassifierCreator, ProbabilisticClassifierCreator
@@ -1030,7 +937,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       } else {
         weights2D = ArrayUtils.to2D(weights, featureIndex.size(), labelIndex.size());
       }
-      return new LinearClassifier<>(weights2D, featureIndex, labelIndex);
+      return new LinearClassifier<L, F>(weights2D, featureIndex, labelIndex);
     }
 
     @Override

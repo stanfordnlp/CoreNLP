@@ -28,7 +28,7 @@ public class BasicDatum<LabelType, FeatureType> implements Datum<LabelType, Feat
    * labels for this Datum. Invariant: always non-null
    */
   @SuppressWarnings({"NonSerializableFieldInSerializableClass"})
-  private final List<LabelType> labels = new ArrayList<>();
+  private final List<LabelType> labels = new ArrayList<LabelType>();
 
   /**
    * Constructs a new BasicDatum with the given features and labels.

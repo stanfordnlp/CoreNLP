@@ -34,7 +34,7 @@ public class FindTreebankTree {
     String tagSeparator = "_";
     String encoding = "utf-8";
     String fileRegex = "";
-    List<String> paths = new ArrayList<>();
+    List<String> paths = new ArrayList<String>();
     for (int i = 0; i < args.length; ++i) {
       if ((args[i].equalsIgnoreCase("-tagSeparator") ||
            args[i].equalsIgnoreCase("--tagSeparator")) &&
@@ -65,8 +65,12 @@ public class FindTreebankTree {
     FileFilter filter = null;
     if (!fileRegex.equals("")) {
       final Pattern filePattern = Pattern.compile(fileRegex);
-      filter = pathname -> (pathname.isDirectory() ||
-              filePattern.matcher(pathname.getName()).matches());
+      filter = new FileFilter() {
+          public boolean accept(File pathname) {
+            return (pathname.isDirectory() || 
+                    filePattern.matcher(pathname.getName()).matches());
+          }
+        };
     }
 
     for (String path : paths) {

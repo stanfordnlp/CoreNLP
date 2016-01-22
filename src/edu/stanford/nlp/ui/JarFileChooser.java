@@ -11,6 +11,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
+import java.awt.Frame;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -45,7 +46,7 @@ public class JarFileChooser {
     try {
       files = getFiles(jarFile);
     } catch (Exception e) {
-      // Something went wrong reading the file.
+      // Something went wrong reading the file.  
       JOptionPane.showMessageDialog(panel, "Filename " + jarFile + " had an error:\n" + e, null, JOptionPane.ERROR_MESSAGE);
       return null;
     }
@@ -63,7 +64,7 @@ public class JarFileChooser {
     //frame.setLocation(location);
     final JDialog dialog = new JDialog(frame, "Jar File Chooser", true);
     dialog.setLocation(location);
-    final JList fileList = new JList(new Vector<>(files));
+    final JList fileList = new JList(new Vector<String>(files));
     fileList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     MouseListener mouseListener = new MouseAdapter() {
         public void mouseClicked(MouseEvent e) {
@@ -80,18 +81,25 @@ public class JarFileChooser {
     JButton okay = new javax.swing.JButton();
     okay.setText("Okay");
     okay.setToolTipText("Okay");
-    okay.addActionListener(evt -> dialog.setVisible(false));
+    okay.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        dialog.setVisible(false);
+      }
+    });
+    
     JButton cancel = new javax.swing.JButton();
     cancel.setText("Cancel");
     cancel.setToolTipText("Cancel");
-    cancel.addActionListener(evt -> {
-      fileList.clearSelection();
-      dialog.setVisible(false);
+    cancel.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        fileList.clearSelection();
+        dialog.setVisible(false);
+      }
     });
 
     GridBagLayout gridbag = new GridBagLayout();
     GridBagConstraints constraints = new GridBagConstraints();
-
+    
     dialog.setLayout(gridbag);
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
@@ -120,11 +128,11 @@ public class JarFileChooser {
     return files.get(fileList.getSelectedIndex());
   }
 
-  public List<String> getFiles(File jarFile)
+  public List<String> getFiles(File jarFile) 
     throws ZipException, IOException
   {
     //System.out.println("Looking at " + jarFile);
-    List<String> files = new ArrayList<>();
+    List<String> files = new ArrayList<String>();
 
     ZipFile zin = new ZipFile(jarFile);
     Enumeration<? extends ZipEntry> entries = zin.entries();

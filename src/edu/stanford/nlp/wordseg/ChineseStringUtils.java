@@ -18,11 +18,8 @@ import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseUtils;
 
 public class ChineseStringUtils {
-
   private static final boolean DEBUG = false;
-
-  private ChineseStringUtils() {} // static methods
-
+  private static final boolean DEBUG_MORE = false;
 
   public static boolean isLetterASCII(char c) {
     return c <= 127 && Character.isLetter(c);
@@ -60,13 +57,15 @@ public class ChineseStringUtils {
            testContentIdx++) {
         CoreLabel pwi = wi;
         wi = wordIter.next();
+        //System.err.println(wi);
         boolean originalWhiteSpace = "1".equals(wi.get(CoreAnnotations.SpaceBeforeAnnotation.class));
 
         //  if the CRF says "START" (segmented), and it's not the first word..
         if (wi.get(CoreAnnotations.AnswerAnnotation.class).equals("1") && !("0".equals(String.valueOf(wi.get(CoreAnnotations.PositionAnnotation.class))))) {
           // check if we need to preserve the "no space" between English
           // characters
-          boolean seg = true; // since it's in the "1" condition.. default is to seg
+          boolean seg = true; // since it's in the "1" condition.. default
+                              // is to seg
           if (flags.keepEnglishWhitespaces) {
             if (testContentIdx > 0) {
               char prevChar = pwi.get(CoreAnnotations.OriginalCharAnnotation.class).charAt(0);
@@ -111,7 +110,7 @@ public class ChineseStringUtils {
                 // cdm: you would get here if you had an ASCII number next to a
                 // Unihan range number.  Does that happen?  It presumably
                 // shouldn't do any harm.... [cdm, oct 2007]
-              } else if (flags.separateASCIIandRange) {
+              } else {
                 seg = true;
               }
             }
@@ -176,19 +175,19 @@ public class ChineseStringUtils {
    */
   private static String postProcessingAnswer(String ans, SeqClassifierFlags flags) {
     if (flags.useHk) {
-      //logger.info("Using HK post processing.");
+      //System.err.println("Using HK post processing.");
       return postProcessingAnswerHK(ans);
     } else if (flags.useAs) {
-      //logger.info("Using AS post processing.");
+      //System.err.println("Using AS post processing.");
       return postProcessingAnswerAS(ans);
     } else if (flags.usePk) {
-      //logger.info("Using PK post processing.");
+      //System.err.println("Using PK post processing.");
       return postProcessingAnswerPK(ans,flags.keepAllWhitespaces);
     } else if (flags.useMsr) {
-      //logger.info("Using MSR post processing.");
+      //System.err.println("Using MSR post processing.");
       return postProcessingAnswerMSR(ans);
     } else {
-      //logger.info("Using CTB post processing.");
+      //System.err.println("Using CTB post processing.");
       return postProcessingAnswerCTB(ans, flags.keepAllWhitespaces, flags.suppressMidDotPostprocessing);
     }
   }
@@ -205,7 +204,7 @@ public class ChineseStringUtils {
                '\u3015'};
     }
     if (puncsPat == null) {
-      //logger.info("Compile Puncs");
+      //System.err.println("Compile Puncs");
       puncsPat = new Pattern[puncs.length];
       for(int i = 0; i < puncs.length; i++) {
         Character punc = puncs[i];
@@ -227,7 +226,7 @@ public class ChineseStringUtils {
     /* These punctuations are derived directly from the training set. */
     if (puncs == null) { puncs = puncs_in; }
     if (puncsPat == null) {
-      //logger.info("Compile Puncs");
+      //System.err.println("Compile Puncs");
       puncsPat = new Pattern[puncs.length];
       for(int i = 0; i < puncs.length; i++) {
         Character punc = puncs[i];
@@ -329,7 +328,7 @@ public class ChineseStringUtils {
   private static String processPercents(String ans, String numPat) {
     //  1. if "6%" then put together
     //  2. if others, separate '%' and others
-    // logger.info("Process percents called!");
+    // System.err.println("Process percents called!");
     // first , just separate all '%'
     Matcher m = percentsPat.matcher(ans);
     ans = m.replaceAll(" $1 ");
@@ -450,33 +449,34 @@ public class ChineseStringUtils {
 
   private static String postProcessingAnswerPK(String ans, boolean keepAllWhitespaces) {
     Character[] puncs = {'\u3001', '\u3002', '\u3003', '\u3008', '\u3009', '\u300a', '\u300b',
-            '\u300c', '\u300d', '\u300e', '\u300f', '\u3010', '\u3011', '\u3014',
-            '\u3015', '\u2103'};
+                         '\u300c', '\u300d', '\u300e', '\u300f', '\u3010', '\u3011', '\u3014',
+                         '\u3015', '\u2103'};
 
     ans = separatePuncs(puncs, ans);
-    if (!keepAllWhitespaces) {
-      /* Note!! All the "digits" are actually extracted/learned from the training data!!!!
-         They are not real "digits" knowledge.
-         See /u/nlp/data/chinese-segmenter/Sighan2005/dict/wordlist for the list we extracted
-      */
-      String numPat = "[0-9\uff10-\uff19\uff0e\u00b7\u4e00\u5341\u767e]+";
-      ans = processColons(ans, numPat);
-      ans = processPercents(ans, numPat);
-      ans = processDots(ans, numPat);
-      ans = processCommas(ans);
+    /* Note!! All the "digits" are actually extracted/learned from the training data!!!!
+       They are not real "digits" knowledge.
+       See /u/nlp/data/chinese-segmenter/Sighan2005/dict/wordlist for the list we extracted
+    */
+    String numPat = "[0-9\uff10-\uff19\uff0e\u00b7\u4e00\u5341\u767e]+";
+		if (!keepAllWhitespaces) {
+			ans = processColons(ans, numPat);
+			ans = processPercents(ans, numPat);
+			ans = processDots(ans, numPat);
+			ans = processCommas(ans);
 
-      /* "\u2014\u2014\u2014" and "\u2026\u2026" should be together */
 
-      String[] puncPatterns = {"\u2014" + WHITE + "\u2014" + WHITE + "\u2014", "\u2026" + WHITE + "\u2026"};
-      String[] correctPunc = {"\u2014\u2014\u2014", "\u2026\u2026"};
-      //String[] puncPatterns = {"\u2014 \u2014 \u2014", "\u2026 \u2026"};
+			/* "\u2014\u2014\u2014" and "\u2026\u2026" should be together */
 
-      for (int i = 0; i < puncPatterns.length; i++) {
-        Pattern p = Pattern.compile(WHITE + puncPatterns[i]+ WHITE);
-        Matcher m = p.matcher(ans);
-        ans = m.replaceAll(" "+correctPunc[i]+" ");
-      }
-    }
+			String[] puncPatterns = {"\u2014" + WHITE + "\u2014" + WHITE + "\u2014", "\u2026" + WHITE + "\u2026"};
+			String[] correctPunc = {"\u2014\u2014\u2014", "\u2026\u2026"};
+			//String[] puncPatterns = {"\u2014 \u2014 \u2014", "\u2026 \u2026"};
+
+			for (int i = 0; i < puncPatterns.length; i++) {
+				Pattern p = Pattern.compile(WHITE + puncPatterns[i]+ WHITE);
+				Matcher m = p.matcher(ans);
+				ans = m.replaceAll(" "+correctPunc[i]+" ");
+			}
+		}
     ans = ans.trim();
 
     return ans;
@@ -501,6 +501,8 @@ public class ChineseStringUtils {
     ans = processPercents(ans, numPat);
     ans = processDots(ans, numPat);
     ans = processCommas(ans);
+
+
 
     return ans;
   }

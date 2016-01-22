@@ -13,55 +13,59 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Timing;
 
 /**
- * This class adds gender information (MALE / FEMALE) to tokens as GenderAnnotations. It uses the
- * RegexNERSequenceClassifier and a manual mapping from token text to gender labels. Assumes
- * that the Annotation has already been split into sentences, then tokenized into Lists of CoreLabels.
- *
+ * This class adds gender information (MALE / FEMALE) to tokens as GenderAnnotations. It uses the 
+ * RegexNERSequenceClassifier and a manual mapping from token text to gender labels. Assumes 
+ * that the Annotation has already been split into sentences, then tokenized into Lists of CoreLabels. 
+ * 
  * @author jtibs
+ * 
  */
 
 public class GenderAnnotator implements Annotator {
-
-  private final RegexNERSequenceClassifier classifier;
-  private final boolean verbose;
-
+  private RegexNERSequenceClassifier classifier;
+  private Timing timer;
+  private boolean verbose;
+  
   public GenderAnnotator() {
     this(false, DefaultPaths.DEFAULT_GENDER_FIRST_NAMES);
   }
-
+  
   public GenderAnnotator(boolean verbose, String mapping) {
     classifier = new RegexNERSequenceClassifier(mapping, true, true);
+    timer = new Timing();
     this.verbose = verbose;
   }
 
   public void annotate(Annotation annotation) {
-    if (verbose) {
+    if (verbose) {    
+      timer.start();
       System.err.print("Adding gender annotation...");
     }
-
+    
     if (! annotation.containsKey(CoreAnnotations.SentencesAnnotation.class))
       throw new RuntimeException("Unable to find sentences in " + annotation);
-
+  
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
     for (CoreMap sentence : sentences) {
       List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
       classifier.classify(tokens);
-
-      for (CoreLabel token : tokens) {
+  
+      for (CoreLabel token : tokens) 
         token.set(MachineReadingAnnotations.GenderAnnotation.class, token.get(CoreAnnotations.AnswerAnnotation.class));
-      }
     }
+    
+    if (verbose)
+      timer.stop("done.");
   }
 
 
   @Override
   public Set<Requirement> requires() {
-    return Annotator.REQUIREMENTS.get(STANFORD_GENDER);
+    return TOKENIZE_AND_SSPLIT;
   }
 
   @Override
   public Set<Requirement> requirementsSatisfied() {
     return Collections.singleton(GENDER_REQUIREMENT);
   }
-
 }

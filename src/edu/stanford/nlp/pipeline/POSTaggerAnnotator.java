@@ -1,13 +1,15 @@
 package edu.stanford.nlp.pipeline;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.util.CoreMap;
@@ -20,52 +22,39 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
  * Wrapper for the maxent part of speech tagger.
  *
  * @author Anna Rafferty
+ *
  */
 public class POSTaggerAnnotator implements Annotator {
 
   private final MaxentTagger pos;
 
-  private final int maxSentenceLength;
+  private int maxSentenceLength;
 
-  private final int nThreads;
+  private int nThreads = 1;
 
-  private final boolean reuseTags;
-
-  /** Create a tagger annotator using the default English tagger from the models jar
-   *  (and non-verbose initialization).
-   */
   public POSTaggerAnnotator() {
-    this(false);
+    this(true);
   }
 
   public POSTaggerAnnotator(boolean verbose) {
-    this(System.getProperty("pos.model", MaxentTagger.DEFAULT_JAR_PATH), verbose);
+    this(System.getProperty("pos.model", MaxentTagger.DEFAULT_NLP_GROUP_MODEL_PATH), verbose);
   }
 
   public POSTaggerAnnotator(String posLoc, boolean verbose) {
-    this(posLoc, verbose, Integer.MAX_VALUE, 1);
+    this(posLoc, verbose, Integer.MAX_VALUE);
   }
 
-  /** Create a POS tagger annotator.
-   *
-   *  @param posLoc Location of POS tagger model (may be file path, classpath resource, or URL
-   *  @param verbose Whether to show verbose information on model loading
-   *  @param maxSentenceLength Sentences longer than this length will be skipped in processing
-   *  @param numThreads The number of threads for the POS tagger annotator to use
-   */
-  public POSTaggerAnnotator(String posLoc, boolean verbose, int maxSentenceLength, int numThreads) {
-    this(loadModel(posLoc, verbose), maxSentenceLength, numThreads);
+  public POSTaggerAnnotator(String posLoc, boolean verbose, int maxSentenceLength) {
+    this(loadModel(posLoc, verbose), maxSentenceLength);
   }
 
   public POSTaggerAnnotator(MaxentTagger model) {
-    this(model, Integer.MAX_VALUE, 1);
+    this(model, Integer.MAX_VALUE);
   }
 
-  public POSTaggerAnnotator(MaxentTagger model, int maxSentenceLength, int numThreads) {
+  public POSTaggerAnnotator(MaxentTagger model, int maxSentenceLength) {
     this.pos = model;
     this.maxSentenceLength = maxSentenceLength;
-    this.nThreads = numThreads;
-    this.reuseTags = false;
   }
 
   public POSTaggerAnnotator(String annotatorName, Properties props) {
@@ -77,15 +66,10 @@ public class POSTaggerAnnotator implements Annotator {
     this.pos = loadModel(posLoc, verbose);
     this.maxSentenceLength = PropertiesUtils.getInt(props, annotatorName + ".maxlen", Integer.MAX_VALUE);
     this.nThreads = PropertiesUtils.getInt(props, annotatorName + ".nthreads", PropertiesUtils.getInt(props, "nthreads", 1));
-    this.reuseTags = PropertiesUtils.getBool(props, annotatorName + ".reuseTags", false);
   }
 
-  public static String signature(Properties props) {
-    return ("pos.maxlen:" + props.getProperty("pos.maxlen", "") +
-            "pos.verbose:" + PropertiesUtils.getBool(props, "pos.verbose") + 
-            "pos.reuseTags:" + PropertiesUtils.getBool(props, "pos.reuseTags") + 
-            "pos.model:" + props.getProperty("pos.model", DefaultPaths.DEFAULT_POS_MODEL) +
-            "pos.nthreads:" + props.getProperty("pos.nthreads", props.getProperty("nthreads", "")));
+  public void setMaxSentenceLength(int maxLen) {
+    this.maxSentenceLength = maxLen;
   }
 
   private static MaxentTagger loadModel(String loc, boolean verbose) {
@@ -94,7 +78,8 @@ public class POSTaggerAnnotator implements Annotator {
       timer = new Timing();
       timer.doing("Loading POS Model [" + loc + ']');
     }
-    MaxentTagger tagger = new MaxentTagger(loc);
+    MaxentTagger tagger;
+    tagger = new MaxentTagger(loc);
     if (verbose) {
       timer.done();
     }
@@ -110,7 +95,7 @@ public class POSTaggerAnnotator implements Annotator {
           doOneSentence(sentence);
         }
       } else {
-        MulticoreWrapper<CoreMap, CoreMap> wrapper = new MulticoreWrapper<>(nThreads, new POSTaggerProcessor());
+        MulticoreWrapper<CoreMap, CoreMap> wrapper = new MulticoreWrapper<CoreMap, CoreMap>(nThreads, new POSTaggerProcessor());
         for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
           wrapper.put(sentence);
           while (wrapper.peek()) {
@@ -141,37 +126,21 @@ public class POSTaggerAnnotator implements Annotator {
 
   private CoreMap doOneSentence(CoreMap sentence) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    List<TaggedWord> tagged = null;
-    if (tokens.size() <= maxSentenceLength) {
-      try {
-        tagged = pos.tagSentence(tokens, this.reuseTags);
-      } catch (OutOfMemoryError e) {
-        System.err.println("WARNING: Tagging of sentence ran out of memory. " +
-                           "Will ignore and continue: " +
-                           Sentence.listToString(tokens));
-      }
-    }
+    List<TaggedWord> tagged = pos.apply(tokens);
 
-    if (tagged != null) {
-      for (int i = 0, sz = tokens.size(); i < sz; i++) {
-        tokens.get(i).set(CoreAnnotations.PartOfSpeechAnnotation.class, tagged.get(i).tag());
-      }
-    } else {
-      for (CoreLabel token : tokens) {
-        token.set(CoreAnnotations.PartOfSpeechAnnotation.class, "X");
-      }
+    for (int i = 0; i < tokens.size(); ++i) {
+      tokens.get(i).set(CoreAnnotations.PartOfSpeechAnnotation.class, tagged.get(i).tag());
     }
     return sentence;
   }
 
   @Override
   public Set<Requirement> requires() {
-    return Annotator.REQUIREMENTS.get(STANFORD_POS);
+    return TOKENIZE_AND_SSPLIT;
   }
 
   @Override
   public Set<Requirement> requirementsSatisfied() {
     return Collections.singleton(POS_REQUIREMENT);
   }
-
 }

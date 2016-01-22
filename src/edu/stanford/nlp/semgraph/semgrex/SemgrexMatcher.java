@@ -21,6 +21,9 @@ public abstract class SemgrexMatcher {
   Map<String, String> namesToRelations;
   VariableStrings variableStrings;
 
+  LinkedList<IndexedWord> nodesToCheck;
+  List<IndexedWord> seenNodes;
+
   IndexedWord node;
 
   // to be used for patterns involving "@"
@@ -48,6 +51,9 @@ public abstract class SemgrexMatcher {
     this.namesToNodes = namesToNodes;
     this.namesToRelations = namesToRelations;
     this.variableStrings = variableStrings;
+    nodesToCheck = new LinkedList<IndexedWord>();
+    nodesToCheck.add(sg.getFirstRoot());
+    seenNodes = new ArrayList<IndexedWord>();
   }
   
   SemgrexMatcher(SemanticGraph sg,
@@ -65,6 +71,7 @@ public abstract class SemgrexMatcher {
     findIterator = null;
     namesToNodes.clear();
     namesToRelations.clear();
+    seenNodes.clear();
   }
 
   /**
@@ -113,18 +120,6 @@ public abstract class SemgrexMatcher {
 
 
   /**
-   * Topological sorting actually takes a rather large amount of time, if you call multiple
-   * patterns on the same tree.
-   * This is a weak cache that stores all the trees sorted since the garbage collector last kicked in.
-   * The key on this map is the identity hash code (i.e., memory address) of the semantic graph; the
-   * value is the sorted list of vertices.
-   *
-   * Note that this optimization will cause strange things to happen if you mutate a semantic graph between
-   * calls to Semgrex.
-   */
-  private static final WeakHashMap<Integer, List<IndexedWord>> topologicalSortCache = new WeakHashMap<>();
-
-  /**
    * Find the next match of the pattern in the graph
    *
    * @return whether there is a match somewhere in the graph
@@ -133,35 +128,20 @@ public abstract class SemgrexMatcher {
     // System.err.println("hyp: " + hyp);
     if (findIterator == null) {
       try {
-        if (hyp) {
-          synchronized (topologicalSortCache) {
-            List<IndexedWord> topoSort = topologicalSortCache.get(System.identityHashCode(sg));
-            if (topoSort == null || topoSort.size() != sg.size()) {  // size check to mitigate a stale cache
-              topoSort = sg.topologicalSort();
-              topologicalSortCache.put(System.identityHashCode(sg), topoSort);
-            }
-            findIterator = topoSort.iterator();
-          }
-        } else if (sg_aligned == null) {
+        if (hyp)
+          findIterator = sg.topologicalSort().iterator();
+        else if (sg_aligned == null)
           return false;
-        } else {
-          synchronized (topologicalSortCache) {
-            List<IndexedWord> topoSort = topologicalSortCache.get(System.identityHashCode(sg_aligned));
-            if (topoSort == null || topoSort.size() != sg_aligned.size()) {  // size check to mitigate a stale cache
-              topoSort = sg_aligned.topologicalSort();
-              topologicalSortCache.put(System.identityHashCode(sg_aligned), topoSort);
-            }
-            findIterator = topoSort.iterator();
-          }
-        }
+        else
+          findIterator = sg_aligned.topologicalSort().iterator();
+    			
       } catch (Exception ex) {
-        if (hyp) {
+        if (hyp)
           findIterator = sg.vertexSet().iterator();
-        } else if (sg_aligned == null) {
+        else if (sg_aligned == null)
           return false;
-        } else {
+        else
           findIterator = sg_aligned.vertexSet().iterator();
-        }
       }
     }
   //  System.out.println("first");

@@ -2,13 +2,14 @@ package edu.stanford.nlp.international.arabic.process;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,7 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
  *
  * @author Spence Green
  */
-public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<String,String> /* Serializable */ {
+public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeProcessor<String,String> {
 
   private static final long serialVersionUID = -4791848633597417788L;
 
@@ -55,42 +56,19 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
   // passed to the constructor).
 
   // The input already been tokenized. Do not run the Arabic tokenizer.
-  private static final String optTokenized = "tokenized";
+  private final String optTokenized = "tokenized";
 
   // Tokenizer options
-  private static final String optTokenizer = "orthoOptions";
+  private final String optTokenizer = "orthoOptions";
 
   // Mark segmented prefixes with this String
-  private static final String optPrefix = "prefixMarker";
+  private final String optPrefix = "prefixMarker";
 
   // Mark segmented suffixes with this String
-  private static final String optSuffix = "suffixMarker";
+  private final String optSuffix = "suffixMarker";
 
   // Number of decoding threads
-  private static final String optThreads = "nthreads";
-
-  // Write TedEval files
-  private static final String optTedEval = "tedEval";
-
-  // Use a custom feature factory
-  private static final String optFeatureFactory = "featureFactory";
-  private static final String defaultFeatureFactory =
-      "edu.stanford.nlp.international.arabic.process.StartAndEndArabicSegmenterFeatureFactory";
-  private static final String localOnlyFeatureFactory =
-      "edu.stanford.nlp.international.arabic.process.ArabicSegmenterFeatureFactory";
-
-  // Training and evaluation files have domain labels
-  private static final String optWithDomains = "withDomains";
-
-  // Training and evaluation text are all in the same domain (default:atb)
-  private static final String optDomain = "domain";
-
-  // Ignore rewrites (training only, produces a model that then can be used to do
-  // no-rewrite segmentation)
-  private static final String optNoRewrites = "noRewrites";
-
-  // Use the original feature set which doesn't contain start-and-end "wrapper" features
-  private static final String optLocalFeaturesOnly = "localFeaturesOnly";
+  private final String optThreads = "nthreads";
 
   private transient CRFClassifier<CoreLabel> classifier;
   private final SeqClassifierFlags flags;
@@ -99,38 +77,14 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
   private final String suffixMarker;
   private final boolean isTokenized;
   private final String tokenizerOptions;
-  private final String tedEvalPrefix;
-  private final boolean hasDomainLabels;
-  private final String domain;
-  private final boolean noRewrites;
 
-  /**
-   * Make an Arabic Segmenter.
-   *
-   *  @param props Options for how to tokenize. See the main method of {@see ArabicTokenizer} for details
-   */
   public ArabicSegmenter(Properties props) {
     isTokenized = props.containsKey(optTokenized);
     tokenizerOptions = props.getProperty(optTokenizer, null);
-    tedEvalPrefix = props.getProperty(optTedEval, null);
-    hasDomainLabels = props.containsKey(optWithDomains);
-    domain = props.getProperty(optDomain, "atb");
-    noRewrites = props.containsKey(optNoRewrites);
     tf = getTokenizerFactory();
 
     prefixMarker = props.getProperty(optPrefix, "");
     suffixMarker = props.getProperty(optSuffix, "");
-
-    if (props.containsKey(optLocalFeaturesOnly)) {
-      if (props.containsKey(optFeatureFactory))
-        throw new RuntimeException("Cannot use custom feature factory with localFeaturesOnly flag--" +
-            "have your custom feature factory extend ArabicSegmenterFeatureFactory instead of " +
-            "StartAndEndArabicSegmenterFeatureFactory and remove the localFeaturesOnly flag.");
-
-      props.setProperty(optFeatureFactory, localOnlyFeatureFactory);
-    }
-    if (!props.containsKey(optFeatureFactory))
-      props.setProperty(optFeatureFactory, defaultFeatureFactory);
 
     // Remove all command-line properties that are specific to ArabicSegmenter
     props.remove(optTokenizer);
@@ -138,14 +92,12 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
     props.remove(optPrefix);
     props.remove(optSuffix);
     props.remove(optThreads);
-    props.remove(optTedEval);
-    props.remove(optWithDomains);
-    props.remove(optDomain);
-    props.remove(optNoRewrites);
-    props.remove(optLocalFeaturesOnly);
+
+    // Currently, this class only supports one featureFactory.
+    props.put("featureFactory", "edu.stanford.nlp.international.arabic.process.ArabicSegmenterFeatureFactory");
 
     flags = new SeqClassifierFlags(props);
-    classifier = new CRFClassifier<>(flags);
+    classifier = new CRFClassifier<CoreLabel>(flags);
   }
 
   /**
@@ -158,10 +110,6 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
     tokenizerOptions = other.tokenizerOptions;
     prefixMarker = other.prefixMarker;
     suffixMarker = other.suffixMarker;
-    tedEvalPrefix = other.tedEvalPrefix;
-    hasDomainLabels = other.hasDomainLabels;
-    domain = other.domain;
-    noRewrites = other.noRewrites;
     flags = other.flags;
 
     // ArabicTokenizerFactory is *not* threadsafe. Make a new copy.
@@ -172,18 +120,19 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
   }
 
   /**
-   * Creates an ArabicTokenizer. The default tokenizer
-   * is ArabicTokenizer.atbFactory(), which produces the
+   * Creates an ArabicTokenizer from the user-specified options. The
+   * default is ArabicTokenizer.atbFactory(), which produces the
    * same orthographic normalization as Green and Manning (2010).
    *
-   * @return A TokenizerFactory that produces each Arabic token as a CoreLabel
+   * @param props
+   * @return
    */
   private TokenizerFactory<CoreLabel> getTokenizerFactory() {
     TokenizerFactory<CoreLabel> tokFactory = null;
     if ( ! isTokenized) {
       if (tokenizerOptions == null) {
         tokFactory = ArabicTokenizer.atbFactory();
-        String atbVocOptions = "removeProMarker,removeMorphMarker,removeLengthening";
+        String atbVocOptions = "removeProMarker,removeMorphMarker";
         tokFactory.setOptions(atbVocOptions);
       } else {
         if (tokenizerOptions.contains("removeSegMarker")) {
@@ -247,7 +196,6 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
       List<CoreLabel> tokens = tf.getTokenizer(new StringReader(line)).tokenize();
       tokenList = IOBUtils.StringToIOB(tokens, null, false);
     }
-    IOBUtils.labelDomain(tokenList, domain);
     tokenList = classifier.classify(tokenList);
     String segmentedString = IOBUtils.IOBToString(tokenList, prefixMarker, suffixMarker);
     return segmentedString;
@@ -281,11 +229,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
     boolean hasSegmentationMarkers = true;
     boolean hasTags = true;
     DocumentReaderAndWriter<CoreLabel> docReader = new ArabicDocumentReaderAndWriter(hasSegmentationMarkers,
-                                                                                     hasTags,
-                                                                                     hasDomainLabels,
-                                                                                     domain,
-                                                                                     noRewrites,
-                                                                                     tf);
+                                                                                     hasTags, tf);
     ObjectBank<List<CoreLabel>> lines =
       classifier.makeObjectBankFromFile(flags.trainFile, docReader);
 
@@ -305,35 +249,16 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
     boolean hasSegmentationMarkers = true;
     boolean hasTags = true;
     DocumentReaderAndWriter<CoreLabel> docReader = new ArabicDocumentReaderAndWriter(hasSegmentationMarkers,
-                                                                                     hasTags,
-                                                                                     hasDomainLabels,
-                                                                                     domain,
-                                                                                     tf);
+                                                                                     hasTags, tf);
     ObjectBank<List<CoreLabel>> lines =
       classifier.makeObjectBankFromFile(flags.testFile, docReader);
 
-    PrintWriter tedEvalGoldTree = null, tedEvalParseTree = null;
-    PrintWriter tedEvalGoldSeg = null, tedEvalParseSeg = null;
-    if (tedEvalPrefix != null) {
-      try {
-        tedEvalGoldTree = new PrintWriter(tedEvalPrefix + "_gold.ftree");
-        tedEvalGoldSeg = new PrintWriter(tedEvalPrefix + "_gold.segmentation");
-        tedEvalParseTree = new PrintWriter(tedEvalPrefix + "_parse.ftree");
-        tedEvalParseSeg = new PrintWriter(tedEvalPrefix + "_parse.segmentation");
-      } catch (FileNotFoundException e) {
-        System.err.printf("%s: %s%n", ArabicSegmenter.class.getName(), e.getMessage());
-      }
-    }
-
-    Counter<String> labelTotal = new ClassicCounter<>();
-    Counter<String> labelCorrect = new ClassicCounter<>();
+    Counter<String> labelTotal = new ClassicCounter<String>();
+    Counter<String> labelCorrect = new ClassicCounter<String>();
     int total = 0;
     int correct = 0;
     for (List<CoreLabel> line : lines) {
-      final String[] inputTokens = tedEvalSanitize(IOBUtils.IOBToString(line).replaceAll(":", "#pm#")).split(" ");
-      final String[] goldTokens = tedEvalSanitize(IOBUtils.IOBToString(line, ":")).split(" ");
       line = classifier.classify(line);
-      final String[] parseTokens = tedEvalSanitize(IOBUtils.IOBToString(line, ":")).split(" ");
       for (CoreLabel label : line) {
         // Do not evaluate labeling of whitespace
         String observation = label.get(CoreAnnotations.CharAnnotation.class);
@@ -347,37 +272,6 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
             labelCorrect.incrementCount(reference);
           }
         }
-      }
-      if (tedEvalParseSeg != null) {
-        tedEvalGoldTree.printf("(root");
-        tedEvalParseTree.printf("(root");
-        int safeLength = inputTokens.length;
-        if (inputTokens.length != goldTokens.length) {
-          System.err.println("In generating TEDEval files: Input and gold do not have the same number of tokens");
-          System.err.println("    (ignoring any extras)");
-          System.err.println("  input: " + Arrays.toString(inputTokens));
-          System.err.println("  gold: " + Arrays.toString(goldTokens));
-          safeLength = Math.min(inputTokens.length, goldTokens.length);
-        }
-        if (inputTokens.length != parseTokens.length) {
-          System.err.println("In generating TEDEval files: Input and parse do not have the same number of tokens");
-          System.err.println("    (ignoring any extras)");
-          System.err.println("  input: " + Arrays.toString(inputTokens));
-          System.err.println("  parse: " + Arrays.toString(parseTokens));
-          safeLength = Math.min(inputTokens.length, parseTokens.length);
-        }
-        for (int i = 0; i < safeLength; i++) {
-          for (String segment : goldTokens[i].split(":"))
-            tedEvalGoldTree.printf(" (seg %s)", segment);
-          tedEvalGoldSeg.printf("%s\t%s%n", inputTokens[i], goldTokens[i]);
-          for (String segment : parseTokens[i].split(":"))
-            tedEvalParseTree.printf(" (seg %s)", segment);
-          tedEvalParseSeg.printf("%s\t%s%n", inputTokens[i], parseTokens[i]);
-        }
-        tedEvalGoldTree.printf(")%n");
-        tedEvalGoldSeg.println();
-        tedEvalParseTree.printf(")%n");
-        tedEvalParseSeg.println();
       }
     }
 
@@ -398,23 +292,12 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
       double acc = (nCorrect / nTotal) * 100.0;
       pwOut.printf(" %s\t%.2f%n", refLabel, acc);
     }
-
-    if (tedEvalParseSeg != null) {
-      tedEvalGoldTree.close();
-      tedEvalGoldSeg.close();
-      tedEvalParseTree.close();
-      tedEvalParseSeg.close();
-    }
-  }
-
-  private static String tedEvalSanitize(String str) {
-    return str.replaceAll("\\(", "#lp#").replaceAll("\\)", "#rp#");
   }
 
   /**
-   * Evaluate P/R/F1 when the input is raw text.
+   * Evaluate P/R/F1 when the input is raw text
    */
-  private static void evaluateRawText(PrintWriter pwOut) {
+  private void evaluateRawText(PrintWriter pwOut) {
     // TODO(spenceg): Evaluate raw input w.r.t. a reference that might have different numbers
     // of characters per sentence. Need to implement a monotonic sequence alignment algorithm
     // to align the two character strings.
@@ -428,7 +311,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
   }
 
   public void loadSegmenter(String filename, Properties p) {
-    classifier = new CRFClassifier<>(p);
+    classifier = new CRFClassifier<CoreLabel>(p);
     try {
       classifier.loadClassifier(new File(filename), p);
     } catch (ClassCastException e) {
@@ -461,11 +344,6 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
     sb.append("  -prefixMarker char   : Mark segmented prefixes with specified character.").append(nl);
     sb.append("  -suffixMarker char   : Mark segmented suffixes with specified character.").append(nl);
     sb.append("  -nthreads num        : Number of threads  (default: 1)").append(nl);
-    sb.append("  -tedEval prefix      : Output TedEval-compliant gold and parse files.").append(nl);
-    sb.append("  -featureFactory cls  : Name of feature factory class  (default: ").append(defaultFeatureFactory);
-    sb.append(")").append(nl);
-    sb.append("  -withDomains         : Train file (if given) and eval file have domain labels.").append(nl);
-    sb.append("  -domain dom          : Assume one domain for all data (default: 123)").append(nl);
     sb.append(nl).append(" Otherwise, all flags correspond to those present in SeqClassifierFlags.java.").append(nl);
     return sb.toString();
   }
@@ -482,10 +360,6 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
     optionArgDefs.put("prefixMarker", 1);
     optionArgDefs.put("suffixMarker", 1);
     optionArgDefs.put("nthreads", 1);
-    optionArgDefs.put("tedEval", 1);
-    optionArgDefs.put("featureFactory", 1);
-    optionArgDefs.put("withDomains", 0);
-    optionArgDefs.put("domain", 1);
     return optionArgDefs;
   }
 
@@ -506,16 +380,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
 
     // Decode either an evaluation file or raw text
     try {
-      PrintWriter pwOut;
-      if (segmenter.flags.outputEncoding != null) {
-        OutputStreamWriter out = new OutputStreamWriter(System.out, segmenter.flags.outputEncoding);
-        pwOut = new PrintWriter(out, true);
-      } else if (segmenter.flags.inputEncoding != null) {
-        OutputStreamWriter out = new OutputStreamWriter(System.out, segmenter.flags.inputEncoding);
-        pwOut = new PrintWriter(out, true);
-      } else {
-        pwOut = new PrintWriter(System.out, true);
-      }
+      PrintWriter pwOut = new PrintWriter(System.out, true);
       if (segmenter.flags.testFile != null) {
         if (segmenter.flags.answerFile == null) {
           segmenter.evaluate(pwOut);
@@ -525,8 +390,9 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
 
       } else {
         BufferedReader br = (segmenter.flags.textFile == null) ?
-            IOUtils.readerFromStdin() :
-                IOUtils.readerFromString(segmenter.flags.textFile, segmenter.flags.inputEncoding);
+            new BufferedReader(new InputStreamReader(System.in)) :
+              new BufferedReader(new InputStreamReader(new FileInputStream(segmenter.flags.textFile),
+                  segmenter.flags.inputEncoding));
 
         double charsPerSec = decode(segmenter, br, pwOut, nThreads);
         IOUtils.closeIgnoringExceptions(br);
@@ -535,7 +401,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
 
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
-    } catch (IOException e) {
+    } catch (FileNotFoundException e) {
       System.err.printf("%s: Could not open %s%n", ArabicSegmenter.class.getName(), segmenter.flags.textFile);
     }
   }
@@ -555,7 +421,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
     long nChars = 0;
     final long startTime = System.nanoTime();
     if (nThreads > 1) {
-      MulticoreWrapper<String,String> wrapper = new MulticoreWrapper<>(nThreads, segmenter);
+      MulticoreWrapper<String,String> wrapper = new MulticoreWrapper<String,String>(nThreads, segmenter);
       try {
         for (String line; (line = br.readLine()) != null;) {
           nChars += line.length();
@@ -583,13 +449,10 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
   }
 
   /**
-   * Train a new segmenter or load an trained model from file.  First
-   * checks to see if there is a "model" or "loadClassifier" flag to
-   * load from, and if not tries to run training using the given
-   * options.
+   * Train a new segmenter or load an trained model from file.
    *
    * @param options
-   * @return the trained or loaded model
+   * @return
    */
   private static ArabicSegmenter getSegmenter(Properties options) {
     ArabicSegmenter segmenter = new ArabicSegmenter(options);
@@ -614,5 +477,4 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
     }
     return segmenter;
   }
-
 }

@@ -6,12 +6,11 @@ import de.jollyday.config.Holidays;
 // import de.jollyday.configuration.ConfigurationProvider;
 import de.jollyday.impl.XMLManager;
 import edu.stanford.nlp.ling.tokensregex.Env;
+import edu.stanford.nlp.net.ClasspathURLStreamHandler;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.Generics;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.Partial;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 // import java.net.MalformedURLException;
@@ -25,37 +24,23 @@ import java.util.*;
  * @author Angel Chang
  */
 public class JollyDayHolidays implements Env.Binder {
-
-  private static Logger logger = LoggerFactory.getLogger(JollyDayHolidays.class);
-
-  private HolidayManager holidayManager;
-  // private CollectionValuedMap<String, JollyHoliday> holidays;
-  private Map<String, JollyHoliday> holidays;
-  private String varPrefix = "JH_";
+  HolidayManager holidayManager;
+  //CollectionValuedMap<String, JollyHoliday> holidays;
+  Map<String, JollyHoliday> holidays;
+  String varPrefix = "JH_";
 
   @Override
   public void init(String prefix, Properties props) {
-    String xmlPath = props.getProperty(prefix + "xml", "edu/stanford/nlp/models/sutime/jollyday/Holidays_sutime.xml");
-    String xmlPathType = props.getProperty(prefix + "pathtype", "classpath");
+    String country = props.getProperty(prefix + "country", "sutime");
     varPrefix = props.getProperty(prefix + "prefix", varPrefix);
-    logger.info("Initializing JollyDayHoliday for SUTime from {} {} as {}", xmlPathType, xmlPath, prefix);
     Properties managerProps = new Properties();
     managerProps.setProperty("manager.impl", "edu.stanford.nlp.time.JollyDayHolidays$MyXMLManager");
     try {
-      URL holidayXmlUrl;
-      if (xmlPathType.equalsIgnoreCase("classpath")) {
-        holidayXmlUrl = getClass().getClassLoader().getResource(xmlPath);
-      } else if (xmlPathType.equalsIgnoreCase("file")) {
-        holidayXmlUrl = new URL("file:///" + xmlPath);
-      } else if (xmlPathType.equalsIgnoreCase("url")) {
-        holidayXmlUrl = new URL(xmlPath);
-      } else {
-        throw new IllegalArgumentException("Unsupported " + prefix + "pathtype = " + xmlPathType);
-      }
-      holidayManager = HolidayManager.getInstance(holidayXmlUrl, managerProps);
+      holidayManager = HolidayManager.getInstance(new URL("classpath", null, 0, "edu/stanford/nlp/models/sutime/jollyday/Holidays_sutime.xml", new ClasspathURLStreamHandler()), managerProps);
     } catch (java.net.MalformedURLException e) {
       throw new RuntimeException(e);
     }
+    System.err.println("Initializing JollyDayHoliday for " + country);
     if (!(holidayManager instanceof MyXMLManager)) {
       throw new AssertionError("Did not get back JollyDayHolidays$MyXMLManager");
     }
@@ -63,12 +48,11 @@ public class JollyDayHolidays implements Env.Binder {
     holidays = getAllHolidaysMap(config);
   }
 
-  @Override
   public void bind(Env env) {
     if (holidays != null) {
-      for (Map.Entry<String, JollyHoliday> holidayEntry : holidays.entrySet()) {
-        JollyHoliday jh = holidayEntry.getValue();
-        env.bind(varPrefix + holidayEntry.getKey(), jh);
+      for (String s:holidays.keySet()) {
+        JollyHoliday jh = holidays.get(s);
+        env.bind(varPrefix + s, jh);
       }
     }
   }
@@ -95,7 +79,7 @@ public class JollyDayHolidays implements Env.Binder {
 
   public CollectionValuedMap<String, JollyHoliday> getAllHolidaysCVMap(Set<de.jollyday.config.Holiday> allHolidays)
   {
-    CollectionValuedMap<String, JollyHoliday> map = new CollectionValuedMap<>();
+    CollectionValuedMap<String, JollyHoliday> map = new CollectionValuedMap<String, JollyHoliday>();
     for (de.jollyday.config.Holiday h:allHolidays) {
       String descKey = h.getDescriptionPropertiesKey();
       if (descKey != null) {
@@ -157,20 +141,17 @@ public class JollyDayHolidays implements Env.Binder {
   }
 
   public static class JollyHoliday extends SUTime.Time {
-
-    private static final long serialVersionUID = -1479143694893729803L;
-
-    private final HolidayManager holidayManager;
-    private final de.jollyday.config.Holiday base;
-    private final String label;
+    HolidayManager holidayManager;
+    de.jollyday.config.Holiday base;
+    String label;
 
     public JollyHoliday(String label, HolidayManager holidayManager, de.jollyday.config.Holiday base) {
       this.label = label;
       this.holidayManager = holidayManager;
       this.base = base;
     }
+    public JollyHoliday() {}
 
-    @Override
     public String toFormattedString(int flags) {
       if (getTimeLabel() != null) {
         return getTimeLabel();
@@ -181,23 +162,12 @@ public class JollyDayHolidays implements Env.Binder {
       return label;
     }
 
-    @Override
     public boolean isGrounded()  { return false; }
-
-    @Override
     public SUTime.Time getTime() { return this; }
-
     // TODO: compute duration/range => uncertainty of this time
-    @Override
     public SUTime.Duration getDuration() { return SUTime.DURATION_NONE; }
-
-    @Override
     public SUTime.Range getRange(int flags, SUTime.Duration granularity) { return new SUTime.Range(this,this); }
-
-    @Override
     public String toISOString() { return base.toString(); }
-
-    @Override
     public SUTime.Time intersect(SUTime.Time t) {
       SUTime.Time resolved = resolve(t, 0);
       if (resolved != this) {
@@ -206,8 +176,6 @@ public class JollyDayHolidays implements Env.Binder {
         return super.intersect(t);
       }
     }
-
-    @Override
     public SUTime.Time resolve(SUTime.Time t, int flags) {
       Partial p = (t != null)? t.getJodaTimePartial():null;
       if (p != null) {
@@ -216,7 +184,7 @@ public class JollyDayHolidays implements Env.Binder {
           // TODO: If we knew location of article, can use that information to resolve holidays better
           Set<de.jollyday.Holiday> holidays = holidayManager.getHolidays(year);
           // Try to find this holiday
-          for (de.jollyday.Holiday h : holidays) {
+          for (de.jollyday.Holiday h:holidays) {
             if (h.getPropertiesKey().equals(base.getDescriptionPropertiesKey())) {
               return new SUTime.PartialTime(this, new Partial(h.getDate()));
             }
@@ -226,10 +194,8 @@ public class JollyDayHolidays implements Env.Binder {
       return this;
     }
 
-    @Override
     public SUTime.Time add(SUTime.Duration offset) {
-      return new SUTime.RelativeTime(this, SUTime.TemporalOp.OFFSET_EXACT, offset);
+      return new SUTime.RelativeTime(this, SUTime.TemporalOp.OFFSET, offset);
     }
   }
-
 }

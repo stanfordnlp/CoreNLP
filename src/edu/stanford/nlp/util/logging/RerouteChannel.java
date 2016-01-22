@@ -17,7 +17,7 @@ public class RerouteChannel extends LogRecordHandler {
   }
 
   public List<Record> handle(Record record) {
-    List<Record> results = new ArrayList<>();
+    List<Record> results = new ArrayList<Record>();
     
     Object[] channels = record.channels();
     for (int i = 0; i < channels.length; i++) {
@@ -25,7 +25,7 @@ public class RerouteChannel extends LogRecordHandler {
       if (oldChannelName.equals(channel)) {
         // make a new version of the Record with a different channel name
         channels[i] = newChannelName;
-        Record reroutedRecord = new Record(record.content, channels, record.depth, record.timesstamp);
+        Record reroutedRecord = new Record(record.content, channels, record.depth, record.callingClass, record.callingMethod, record.timesstamp);
         results.add(reroutedRecord);
         return results;
       }

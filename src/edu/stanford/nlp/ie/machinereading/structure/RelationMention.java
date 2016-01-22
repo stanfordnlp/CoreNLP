@@ -118,7 +118,7 @@ public class RelationMention extends ExtractionObject {
    * @return List of entity-mention args sorted in semantic order
    */
   public List<EntityMention> getEntityMentionArgs() {
-    List<EntityMention> ents = new ArrayList<>();
+    List<EntityMention> ents = new ArrayList<EntityMention>();
     for(ExtractionObject o: args) {
       if(o instanceof EntityMention){
         ents.add((EntityMention) o);
@@ -208,7 +208,7 @@ public class RelationMention extends ExtractionObject {
    * @param predictedMentions
    */
   public boolean replaceGoldArgsWithPredicted(List<EntityMention> predictedMentions) {
-  	List<ExtractionObject> newArgs = new ArrayList<>();
+  	List<ExtractionObject> newArgs = new ArrayList<ExtractionObject>();
   	for(ExtractionObject arg: args){
   		if(! (arg instanceof EntityMention)){
   			continue;
@@ -239,14 +239,14 @@ public class RelationMention extends ExtractionObject {
   }
   
   public void removeArgument(ExtractionObject argToRemove, boolean removeParent) {
-    Set<ExtractionObject> thisEvent = new IdentityHashSet<>();
+    Set<ExtractionObject> thisEvent = new IdentityHashSet<ExtractionObject>();
     thisEvent.add(argToRemove);
     removeArguments(thisEvent, removeParent);
   }
   
   public void removeArguments(Set<ExtractionObject> argsToRemove, boolean removeParent) {
-    List<ExtractionObject> newArgs = new ArrayList<>();
-    List<String> newArgNames = new ArrayList<>();
+    List<ExtractionObject> newArgs = new ArrayList<ExtractionObject>();
+    List<String> newArgNames = new ArrayList<String>();
     for(int i = 0; i < args.size(); i ++){
       ExtractionObject a = args.get(i);
       String n = argNames.get(i);
@@ -275,7 +275,7 @@ public class RelationMention extends ExtractionObject {
    */
 
   public static Collection<RelationMention> filterUnrelatedRelations(Collection<RelationMention> relationMentions) {
-    Collection<RelationMention> filtered = new ArrayList<>();
+    Collection<RelationMention> filtered = new ArrayList<RelationMention>();
     for (RelationMention relation : relationMentions) {
       if (!relation.getType().equals(UNRELATED)) {
         filtered.add(relation);
@@ -305,28 +305,5 @@ public class RelationMention extends ExtractionObject {
   
   public static boolean isUnrelatedLabel(String label) {
     return label.startsWith(UNRELATED);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof RelationMention)) return false;
-    if (!super.equals(o)) return false;
-
-    RelationMention that = (RelationMention) o;
-
-    if (argNames != null ? !argNames.equals(that.argNames) : that.argNames != null) return false;
-    if (args != null ? !args.equals(that.args) : that.args != null) return false;
-    if (signature != null ? !signature.equals(that.signature) : that.signature != null) return false;
-
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    int result = argNames != null ? argNames.hashCode() : 0;
-    result = 31 * result + (args != null ? args.hashCode() : 0);
-    result = 31 * result + (signature != null ? signature.hashCode() : 0);
-    return result;
   }
 }

@@ -1,24 +1,21 @@
 package edu.stanford.nlp.wordseg;
 
 import java.io.*;
+import java.io.BufferedInputStream;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.EncodingPrintWriter;
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.process.ChineseDocumentToSentenceProcessor;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
+import java.util.zip.GZIPInputStream;
 
 /** This class provides a main method that loads various dictionaries, and
- *  saves them in a serialized version, and runtime compiles them into a word list used as a feature in the segmenter.
- *
- *  @author Pi-Chuan Chang
+ *  saves them in a serialized version, and runtime compiles them into a word list used as a feature in the segmenter, and
+ * @author Pi-Chuan Chang
  */
 
 public class ChineseDictionary {
@@ -26,15 +23,13 @@ public class ChineseDictionary {
   private static final boolean DEBUG = false;
 
   public static final int MAX_LEXICON_LENGTH = 6;
-
-  private static Logger logger = LoggerFactory.getLogger(ChineseDictionary.class);
   @SuppressWarnings({"unchecked"})
   Set<String>[] words_ = new HashSet[MAX_LEXICON_LENGTH+1];
 
   private ChineseDocumentToSentenceProcessor cdtos_; // = null;
 
   private void serializeDictionary(String serializePath) {
-    logger.info("Serializing dictionaries to " + serializePath + " ... ");
+    System.err.print("Serializing dictionaries to " + serializePath + "...");
 
     try {
       ObjectOutputStream oos = IOUtils.writeStreamFromString(serializePath);
@@ -43,10 +38,10 @@ public class ChineseDictionary {
       oos.writeObject(words_);
       //oos.writeObject(cdtos_);
       oos.close();
-      logger.info("done.");
+      System.err.println("done.");
     } catch (Exception e) {
-      logger.error("Failed", e);
-      throw new RuntimeIOException(e);
+      System.err.println("Failed");
+      throw new RuntimeException(e);
     }
   }
 
@@ -57,7 +52,7 @@ public class ChineseDictionary {
       dict[i] = Generics.newHashSet();
     }
 
-    // logger.info("loading dictionaries from " + serializePath + "...");
+    System.err.print("loading dictionaries from " + serializePath + "...");
 
     try {
       // once we read MAX_LEXICON_LENGTH and cdtos as well
@@ -65,7 +60,7 @@ public class ChineseDictionary {
       //ChineseDictionary.MAX_LEXICON_LENGTH = (int) ois.readObject();
       dict = IOUtils.readObjectFromURLOrClasspathOrFileSystem(serializePath);
     } catch (Exception e) {
-      logger.error("Failed to load Chinese dictionary " + serializePath, e);
+      System.err.println("Failed to load Chinese dictionary " + serializePath);
       throw new RuntimeException(e);
     }
     return dict;
@@ -87,8 +82,9 @@ public class ChineseDictionary {
 
   /**
    * The first argument can be one file path, or multiple files separated by
-   * commas.
-   */
+   * commas
+   *
+   **/
   public ChineseDictionary(String serDicts,
                            ChineseDocumentToSentenceProcessor cdtos,
                            boolean expandMidDot) {
@@ -98,10 +94,13 @@ public class ChineseDictionary {
   public ChineseDictionary(String[] dicts,
                            ChineseDocumentToSentenceProcessor cdtos,
                            boolean expandMidDot) {
-    logger.info(String.format("Loading Chinese dictionaries from %d file%s:%n", dicts.length, (dicts.length == 1) ? "" : "s"));
-    for (String dict : dicts) {
-      logger.info("  " + dict);
+    System.err.println("Loading Chinese dictionaries from "
+                       +dicts.length
+                       +" files:");
+    for(String dict : dicts) {
+      System.err.println("  "+dict);
     }
+    System.err.println();
 
     for (int i = 0; i <= MAX_LEXICON_LENGTH; i++) {
       words_[i] = Generics.newHashSet();
@@ -109,10 +108,8 @@ public class ChineseDictionary {
 
     this.cdtos_ = cdtos;
 
-    for (String dict : dicts) {
+    for(String dict : dicts) {
       if(dict.endsWith("ser.gz")) {
-        // TODO: the way this is written would not work if we allow
-        // dictionaries to have different settings of MAX_LEXICON_LENGTH
         Set<String>[] dictwords = loadDictionary(dict);
         for (int i = 0; i <= MAX_LEXICON_LENGTH; i++) {
           words_[i].addAll(dictwords[i]);
@@ -124,18 +121,18 @@ public class ChineseDictionary {
     }
 
     int total = 0;
-    for (int i = 0; i <= MAX_LEXICON_LENGTH; i++) {
+    for(int i = 0; i <= MAX_LEXICON_LENGTH; i++) {
       total += words_[i].size();
     }
-    logger.info(String.format("Done. Unique words in ChineseDictionary is: %d.%n", total));
+    System.err.println("Done. Unique words in ChineseDictionary is: " + total);
   }
 
-  private static final Pattern midDot = Pattern.compile(ChineseUtils.MID_DOT_REGEX_STR);
+  private final Pattern midDot = Pattern.compile(ChineseUtils.MID_DOT_REGEX_STR);
 
   private void addDict(String dict, boolean expandMidDot) {
     String content = IOUtils.slurpFileNoExceptions(dict,"utf-8");
     String[] lines = content.split("\n");
-    logger.info("  " + dict + ": " + lines.length + " entries");
+    System.err.println("  " + dict + ": " + lines.length + " entries");
     for (String line : lines) {
       line = line.trim();
       // normalize any midDot
@@ -165,13 +162,13 @@ public class ChineseDictionary {
       words_[length].add(item);
     } else {
       // insist on new String as it may save memory
-      String subItem = new String(item.substring(0,MAX_LEXICON_LENGTH));
+      String subitem = new String(item.substring(0,MAX_LEXICON_LENGTH));
       if (cdtos_ != null) {
-        subItem = cdtos_.normalization(subItem);
+        subitem = cdtos_.normalization(subitem);
       }
-      if (DEBUG) EncodingPrintWriter.err.println("DICT: "+subItem, "UTF-8");
+      if (DEBUG) EncodingPrintWriter.err.println("DICT: "+subitem, "UTF-8");
       // length=MAX_LEXICON_LENGTH and MAX_LEXICON_LENGTH+
-      words_[MAX_LEXICON_LENGTH].add(subItem);
+      words_[MAX_LEXICON_LENGTH].add(subitem);
     }
   }
 
@@ -215,10 +212,10 @@ public class ChineseDictionary {
     /*
     //ChineseDictionary dict = new ChineseDictionary(args[0]);
     for (int i = 0; i <= MAX_LEXICON_LENGTH; i++) {
-      logger.info("Length: " + i+": "+dict.words[i].size());
+      System.err.println("Length: " + i+": "+dict.words[i].size());
     }
     for (int i = 0; i <= MAX_LEXICON_LENGTH; i++) {
-      logger.info("Length: " + i+": "+dict.words[i].size());
+      System.err.println("Length: " + i+": "+dict.words[i].size());
       if (dict.words[i].size() < 1000) {
         for (String word : dict.words[i]) {
           EncodingPrintWriter.err.println(word, "UTF-8");
@@ -226,7 +223,7 @@ public class ChineseDictionary {
       }
     }
     for  (int i = 1; i < args.length; i++) {
-      logger.info(args[i] + " " + Boolean.valueOf(dict.contains(args[i])).toString());
+      System.err.println(args[i] + " " + Boolean.valueOf(dict.contains(args[i])).toString());
     }
     */
   }

@@ -3,20 +3,18 @@ package edu.stanford.nlp.util.concurrent;
 import junit.framework.TestCase;
 
 public class SynchronizedInternerTest extends TestCase {
-
   private final Object[] objects = {
       "salamander",
       "kitten",
       new String[]{"fred", "george", "sam"},
-      Integer.valueOf(5),
-      Float.valueOf(5f),
+      new Integer(5),
+      new Float(5f),
   };
   private final Thread[] threads = new Thread[100];
-
+  
   public void testGlobal() {
     for (int i = 0; i < threads.length; i++) {
       threads[i] = new Thread(new Runnable(){
-        @Override
         public void run() {
           for (Object object : objects) {
             Object interned = SynchronizedInterner.globalIntern(object);
@@ -38,5 +36,4 @@ public class SynchronizedInternerTest extends TestCase {
       }
     }
   }
-
 }

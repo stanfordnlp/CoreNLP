@@ -38,7 +38,6 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.StringLabelFactory;
 import edu.stanford.nlp.trees.*;
-import edu.stanford.nlp.util.ArrayMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
@@ -105,9 +104,7 @@ import edu.stanford.nlp.util.Timing;
  * <tr><td>A &lt;&#35; B <td>B is the immediate head of phrase A
  * <tr><td>A &gt;&#35; B <td>A is the immediate head of phrase B
  * <tr><td>A == B <td>A and B are the same node
- * <tr><td>A &lt;= B <td>A and B are the same node or A is the parent of B
  * <tr><td>A : B<td>[this is a pattern-segmenting operator that places no constraints on the relationship between A and B]
- * <tr><td>A &lt;... { B ; C ; ... }<td>A has exactly B, C, etc as its subtree, with no other children.
  * </table>
  * <p> Label descriptions can be literal strings, which much match labels
  * exactly, or regular expressions in regular expression bars: /regex/.
@@ -393,11 +390,12 @@ public abstract class TregexPattern implements Serializable {
     return opt;
   }
 
+  abstract boolean getChangesVariables();
+
   abstract TregexMatcher matcher(Tree root, Tree tree,
                                  IdentityHashMap<Tree, Tree> nodesToParents,
                                  Map<String, Tree> namesToNodes,
-                                 VariableStrings variableStrings,
-                                 HeadFinder headFinder);
+                                 VariableStrings variableStrings);
 
   /**
    * Get a {@link TregexMatcher} for this pattern on this tree.
@@ -406,22 +404,7 @@ public abstract class TregexPattern implements Serializable {
    * @return a TregexMatcher
    */
   public TregexMatcher matcher(Tree t) {
-    // In the assumption that there will usually be very few names in
-    // the pattern, we use an ArrayMap instead of a hash map
-    // TODO: it would be even more efficient if we set this to be
-    // exactly the right size
-    return matcher(t, t, null, ArrayMap.<String, Tree>newArrayMap(), new VariableStrings(), null);
-  }
-
-  /**
-   * Get a {@link TregexMatcher} for this pattern on this tree.  Any Relations which use heads of trees should use the provided HeadFinder.
-   *
-   * @param t a tree to match on
-   * @param headFinder a HeadFinder to use when matching
-   * @return a TregexMatcher
-   */
-  public TregexMatcher matcher(Tree t, HeadFinder headFinder) {
-    return matcher(t, t, null, ArrayMap.<String, Tree>newArrayMap(), new VariableStrings(), headFinder);
+    return matcher(t, t, null, Generics.<String, Tree>newHashMap(), new VariableStrings());
   }
 
   /**
@@ -465,8 +448,7 @@ public abstract class TregexPattern implements Serializable {
     return patternString;
   }
 
-  /** Only used by the TregexPatternCompiler to set the pattern. Pseudo-final. */
-  void setPatternString(String patternString) {
+  public void setPatternString(String patternString) {
     this.patternString = patternString;
   }
 
@@ -504,11 +486,11 @@ public abstract class TregexPattern implements Serializable {
   private static final Pattern codePattern = Pattern.compile("([0-9]+):([0-9]+)");
 
   private static void extractSubtrees(List<String> codeStrings, String treeFile) {
-    List<Pair<Integer,Integer>> codes = new ArrayList<>();
+    List<Pair<Integer,Integer>> codes = new ArrayList<Pair<Integer,Integer>>();
     for(String s : codeStrings) {
       Matcher m = codePattern.matcher(s);
       if(m.matches())
-        codes.add(new Pair<>(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2))));
+        codes.add(new Pair<Integer,Integer>(Integer.parseInt(m.group(1)),Integer.parseInt(m.group(2))));
       else
         throw new RuntimeException("Error: illegal node code " + s);
     }
@@ -554,7 +536,6 @@ public abstract class TregexPattern implements Serializable {
    * <li> <code>-hf &lt;headfinder-class-name&gt;</code> use the specified {@link HeadFinder} class to determine headship relations.
    * <li> <code>-hfArg &lt;string&gt;</code> pass a string argument in to the {@link HeadFinder} class's constructor.  <code>-hfArg</code> can be used multiple times to pass in multiple arguments.
    * <li> <code>-trf &lt;TreeReaderFactory-class-name&gt;</code> use the specified {@link TreeReaderFactory} class to read trees from files.
-   * <li> <code>-e &lt;extension&gt;</code> Only attempt to read files with the given extension. If not provided, will attempt to read all files.</li>
    * <li> <code>-v</code> print every tree that contains no matches of the specified pattern, but print no matches to the pattern.
    *
    * <li> <code>-x</code> Instead of the matched subtree, print the matched subtree's identifying number as defined in <tt>tgrep2</tt>:a
@@ -583,8 +564,6 @@ public abstract class TregexPattern implements Serializable {
     String headFinderOption = "-hf";
     String headFinderArgOption = "-hfArg";
     String trfOption = "-trf";
-    String extensionOption = "-e";
-    String extension = null;
     String headFinderClassName = null;
     String[] headFinderArgs = StringUtils.EMPTY_STRING_ARRAY;
     String treeReaderFactoryClassName = null;
@@ -594,15 +573,6 @@ public abstract class TregexPattern implements Serializable {
     String encoding = "UTF-8";
     String macroOption = "-macros";
     String macroFilename = "";
-    String yieldOnly = "-t";
-    String printAllTrees = "-T";
-    String quietMode = "-C";
-    String wholeTreeMode = "-w";
-    String filenameOption = "-f";
-    String oneMatchPerRootNodeMode = "-o";
-    String reportTreeNumbers = "-n";
-    String rootLabelOnly = "-u";
-    String oneLine = "-s";
     Map<String,Integer> flagMap = Generics.newHashMap();
     flagMap.put(extractSubtreesOption,2);
     flagMap.put(extractSubtreesFileOption,2);
@@ -615,17 +585,7 @@ public abstract class TregexPattern implements Serializable {
     flagMap.put(headFinderOption,1);
     flagMap.put(headFinderArgOption,1);
     flagMap.put(trfOption,1);
-    flagMap.put(extensionOption, 1);
     flagMap.put(macroOption, 1);
-    flagMap.put(yieldOnly, 0);
-    flagMap.put(quietMode, 0);
-    flagMap.put(wholeTreeMode, 0);
-    flagMap.put(printAllTrees, 0);
-    flagMap.put(filenameOption, 0);
-    flagMap.put(oneMatchPerRootNodeMode, 0);
-    flagMap.put(reportTreeNumbers, 0);
-    flagMap.put(rootLabelOnly, 0);
-    flagMap.put(oneLine, 0);
     Map<String, String[]> argsMap = StringUtils.argsToMap(args, flagMap);
     args = argsMap.get(null);
 
@@ -647,7 +607,7 @@ public abstract class TregexPattern implements Serializable {
     }
 
     if (args.length < 1) {
-      errPW.println("Usage: java edu.stanford.nlp.trees.tregex.TregexPattern [-T] [-C] [-w] [-f] [-o] [-n] [-s] [-filter]  [-hf class] [-trf class] [-h handle]* [-e ext] pattern [filepath]");
+      errPW.println("Usage: java edu.stanford.nlp.trees.tregex.TregexPattern [-T] [-C] [-w] [-f] [-o] [-n] [-s] [-filter]  [-hf class] [-trf class] [-h handle]* pattern [filepath]");
       return;
     }
     String matchString = args[0];
@@ -666,10 +626,7 @@ public abstract class TregexPattern implements Serializable {
       treeReaderFactoryClassName = argsMap.get(trfOption)[0];
       errPW.println("Using tree reader factory " + treeReaderFactoryClassName + "...");
     }
-    if (argsMap.containsKey(extensionOption)) {
-      extension = argsMap.get(extensionOption)[0];
-    }
-    if (argsMap.containsKey(printAllTrees)) {
+    if (argsMap.containsKey("-T")) {
       TRegexTreeVisitor.printTree = true;
     }
     if (argsMap.containsKey(inputFileOption)) {
@@ -679,33 +636,33 @@ public abstract class TregexPattern implements Serializable {
       System.arraycopy(args,0,newArgs,1,args.length);
       args = newArgs;
     }
-    if (argsMap.containsKey(quietMode)) {
+    if (argsMap.containsKey("-C")) {
       TRegexTreeVisitor.printMatches = false;
       TRegexTreeVisitor.printNumMatchesToStdOut = true ;
 
     }
-    if (argsMap.containsKey(printNonMatchingTreesOption)) {
+    if (argsMap.containsKey("-v")) {
       TRegexTreeVisitor.printNonMatchingTrees = true;
     }
-    if (argsMap.containsKey(subtreeCodeOption)) {
+    if (argsMap.containsKey("-x")) {
       TRegexTreeVisitor.printSubtreeCode = true;
       TRegexTreeVisitor.printMatches = false;
     }
-    if (argsMap.containsKey(wholeTreeMode)) {
+    if (argsMap.containsKey("-w")) {
       TRegexTreeVisitor.printWholeTree = true;
     }
-    if (argsMap.containsKey(filenameOption)) {
+    if (argsMap.containsKey("-f")) {
       TRegexTreeVisitor.printFilename = true;
     }
-    if(argsMap.containsKey(oneMatchPerRootNodeMode))
+    if(argsMap.containsKey("-o"))
       TRegexTreeVisitor.oneMatchPerRootNode = true;
-    if(argsMap.containsKey(reportTreeNumbers))
+    if(argsMap.containsKey("-n"))
       TRegexTreeVisitor.reportTreeNumbers = true;
-    if (argsMap.containsKey(rootLabelOnly)) {
+    if (argsMap.containsKey("-u")) {
       treePrintFormats.append(TreePrint.rootLabelOnlyFormat).append(',');
-    } else if (argsMap.containsKey(oneLine)) { // display short form
+    } else if (argsMap.containsKey("-s")) { // display short form
       treePrintFormats.append("oneline,");
-    } else if (argsMap.containsKey(yieldOnly)) {
+    } else if (argsMap.containsKey("-t")) {
       treePrintFormats.append("words,");
     } else {
       treePrintFormats.append("penn,");
@@ -750,9 +707,8 @@ public abstract class TregexPattern implements Serializable {
         int last = args.length - 1;
         errPW.println("Reading trees from file(s) " + args[last]);
         TreeReaderFactory trf = getTreeReaderFactory(treeReaderFactoryClassName);
-
         treebank = new DiskTreebank(trf, encoding);
-        treebank.loadPath(args[last], extension, true);
+        treebank.loadPath(args[last], null, true);
       }
       TRegexTreeVisitor vis = new TRegexTreeVisitor(p, handles, encoding);
 

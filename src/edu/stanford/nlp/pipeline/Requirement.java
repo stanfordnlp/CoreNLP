@@ -42,7 +42,7 @@ import edu.stanford.nlp.util.StringUtils;
  */
 public class Requirement {
 
-  private final List<List<String>> requirements = new ArrayList<>();
+  private final List<List<String>> requirements = new ArrayList<List<String>>();
 
   public Requirement(String ... disjunctions) {
       for (String disjunction : disjunctions) {

@@ -235,9 +235,11 @@ public abstract class Treebank extends AbstractCollection<Tree> {
   @Override
   public String toString() {
     final StringBuilder sb = new StringBuilder();
-    apply(t -> {
-      sb.append(t.toString());
-      sb.append('\n');
+    apply(new TreeVisitor() {
+      public void visitTree(Tree t) {
+        sb.append(t.toString());
+        sb.append('\n');
+      }
     });
     return sb.toString();
   }
@@ -313,10 +315,10 @@ public abstract class Treebank extends AbstractCollection<Tree> {
     int numTreesLE40 = 0;
     int numNonUnaryRoots = 0;
     Tree nonUnaryEg = null;
-    ClassicCounter<Tree> nonUnaries = new ClassicCounter<>();
-    ClassicCounter<String> roots = new ClassicCounter<>();
-    ClassicCounter<String> starts = new ClassicCounter<>();
-    ClassicCounter<String> puncts = new ClassicCounter<>();
+    ClassicCounter<Tree> nonUnaries = new ClassicCounter<Tree>();
+    ClassicCounter<String> roots = new ClassicCounter<String>();
+    ClassicCounter<String> starts = new ClassicCounter<String>();
+    ClassicCounter<String> puncts = new ClassicCounter<String>();
     int numUnenclosedLeaves = 0;
     int numLeaves = 0;
     int numNonPhrasal = 0;
@@ -327,8 +329,8 @@ public abstract class Treebank extends AbstractCollection<Tree> {
     int longestSentence = 0;
     int numNullLabel = 0;
     Set<String> words = Generics.newHashSet();
-    ClassicCounter<String> tags = new ClassicCounter<>();
-    ClassicCounter<String> cats = new ClassicCounter<>();
+    ClassicCounter<String> tags = new ClassicCounter<String>();
+    ClassicCounter<String> cats = new ClassicCounter<String>();
     Tree leafEg = null;
     Tree preTerminalMultipleChildrenEg = null;
     Tree nullLabelEg = null;
