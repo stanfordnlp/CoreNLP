@@ -64,8 +64,7 @@ public class UDFeatureAnnotator extends SentenceAnnotator {
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
     return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-      SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
-      TreeCoreAnnotations.TreeAnnotation.class
+      SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class
     )));
   }
 }

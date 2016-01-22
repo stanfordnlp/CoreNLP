@@ -40,6 +40,8 @@ import java.util.*;
  */
 public interface Annotator {
 
+  public static final Set<Class<? extends CoreAnnotation>> ANNOTATIONS_USED = new HashSet<>();
+
   /**
    * Given an Annotation, perform a task on this Annotation.
    */
@@ -344,6 +346,7 @@ public interface Annotator {
       CoreAnnotations.PartOfSpeechAnnotation.class,
       TreeCoreAnnotations.TreeAnnotation.class,
       SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
+      SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
       SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
   )));
 

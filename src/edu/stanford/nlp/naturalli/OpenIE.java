@@ -564,16 +564,18 @@ public class OpenIE implements Annotator {
   /** {@inheritDoc} */
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+    Set<Class<? extends CoreAnnotation>> requirements = new HashSet<>(Arrays.asList(
         CoreAnnotations.TokensAnnotation.class,
         CoreAnnotations.SentencesAnnotation.class,
         CoreAnnotations.PartOfSpeechAnnotation.class,
         NaturalLogicAnnotations.PolarityAnnotation.class,
         SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
         SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class,
-        resolveCoref ? CorefCoreAnnotations.CorefChainAnnotation.class : null
-    )));
+        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class));
+    if (resolveCoref) {
+      requirements.add(edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefChainAnnotation.class);
+    }
+    return Collections.unmodifiableSet(requirements);
   }
 
   /**

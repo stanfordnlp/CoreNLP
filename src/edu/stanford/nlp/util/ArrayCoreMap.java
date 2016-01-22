@@ -5,6 +5,8 @@ import java.io.ObjectOutputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import edu.stanford.nlp.ling.CoreAnnotation;
+import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.util.logging.PrettyLogger;
 import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
@@ -108,6 +110,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
   public <VALUE> VALUE get(Class<? extends Key<VALUE>> key) {
     for (int i = 0; i < size; i++) {
       if (key == keys[i]) {
+        Annotator.ANNOTATIONS_USED.add((Class<? extends CoreAnnotation>) keys[i]);
         return (VALUE)values[i];
       }
     }

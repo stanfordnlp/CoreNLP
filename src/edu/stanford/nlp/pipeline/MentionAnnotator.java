@@ -41,7 +41,7 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
   Dictionaries dictionaries;
   Properties corefProperties;
 
-  Set<Class<? extends CoreAnnotation>> mentionAnnotatorRequirements;
+  Set<Class<? extends CoreAnnotation>> mentionAnnotatorRequirements = new HashSet<>();
 
   public MentionAnnotator(Properties props) {
     try {
@@ -57,10 +57,7 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
           CoreAnnotations.TokensAnnotation.class,
           CoreAnnotations.SentencesAnnotation.class,
           CoreAnnotations.PartOfSpeechAnnotation.class,
-          CoreAnnotations.NamedEntityTagAnnotation.class,
-          SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
-          SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
-          SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
+          CoreAnnotations.NamedEntityTagAnnotation.class
       ));
     } catch (Exception e) {
       System.err.println("Error with building coref mention annotator!");
@@ -115,6 +112,9 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
     switch (CorefProperties.getMDType(props)) {
       case DEPENDENCY:
         mdName = "dependency";
+        mentionAnnotatorRequirements.add(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+        mentionAnnotatorRequirements.add(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+        mentionAnnotatorRequirements.add(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
         return new DependencyCorefMentionFinder(props);
 
       case HYBRID:
