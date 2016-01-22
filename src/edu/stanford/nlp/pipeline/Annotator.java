@@ -344,6 +344,7 @@ public interface Annotator {
       CoreAnnotations.PartOfSpeechAnnotation.class,
       TreeCoreAnnotations.TreeAnnotation.class,
       SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
+      SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
       SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
   )));
 

@@ -186,17 +186,29 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+    Set<Class<? extends CoreAnnotation>> requirements = new HashSet<>(Arrays.asList(
         CoreAnnotations.TokensAnnotation.class,
         CoreAnnotations.SentencesAnnotation.class,
         CoreAnnotations.PartOfSpeechAnnotation.class,
         CoreAnnotations.LemmaAnnotation.class,
-        CoreAnnotations.NamedEntityTagAnnotation.class,
-        TreeCoreAnnotations.TreeAnnotation.class,
-        SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
-    )));
+        CoreAnnotations.NamedEntityTagAnnotation.class
+        ));
+    switch (COREF_MODE) {
+      case HYBRID_MODE:
+        requirements.add(TreeCoreAnnotations.TreeAnnotation.class);
+        requirements.add(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+        requirements.add(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+        requirements.add(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
+        break;
+      case STATISTICAL_MODE:
+        requirements.add(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+        requirements.add(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+        requirements.add(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
+        break;
+      default:
+        break;
+    }
+    return Collections.unmodifiableSet(requirements);
   }
 
   @Override
