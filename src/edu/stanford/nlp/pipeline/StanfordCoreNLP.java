@@ -358,8 +358,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
     // Set threading
     if (this.properties.containsKey("threads")) {
-      Execution.threads = PropertiesUtils.getInt(this.properties, "threads");
-      this.availableProcessors = new Semaphore(Execution.threads);
+      ArgumentParser.threads = PropertiesUtils.getInt(this.properties, "threads");
+      this.availableProcessors = new Semaphore(ArgumentParser.threads);
     } else {
       this.availableProcessors = new Semaphore(1);
     }

@@ -1146,7 +1146,7 @@ public class Redwood {
       threadAndRun(String.valueOf(numThreads), runnables, numThreads);
     }
     public static void threadAndRun(Iterable<Runnable> runnables){
-      threadAndRun(runnables, Execution.threads);
+      threadAndRun(runnables, ArgumentParser.threads);
     }
 
     /**

@@ -37,7 +37,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  */
 public class CreateClauseDataset implements TSVSentenceProcessor {
 
-  @Execution.Option(name="in", gloss="The input to read from")
+  @ArgumentParser.Option(name="in", gloss="The input to read from")
   private static InputStream in = System.in;
 
   public CreateClauseDataset() {

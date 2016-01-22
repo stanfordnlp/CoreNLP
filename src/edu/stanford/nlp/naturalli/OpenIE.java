@@ -86,49 +86,49 @@ public class OpenIE implements Annotator {
   // Static Options (for running standalone)
   //
 
-  @Execution.Option(name="format", gloss="The format to output the triples in.")
+  @ArgumentParser.Option(name="format", gloss="The format to output the triples in.")
   private static OutputFormat FORMAT = OutputFormat.DEFAULT;
 
-  @Execution.Option(name="filelist", gloss="The files to annotate, as a list of files one per line.")
+  @ArgumentParser.Option(name="filelist", gloss="The files to annotate, as a list of files one per line.")
   private static File FILELIST  = null;
 
-  @Execution.Option(name="output", gloss="The files to annotate, as a list of files one per line.")
+  @ArgumentParser.Option(name="output", gloss="The files to annotate, as a list of files one per line.")
   private static PrintStream OUTPUT  = System.out;
 
   //
   // Annotator Options (for running in the pipeline)
   //
-  @Execution.Option(name="splitter.model", gloss="The location of the clause splitting model.")
+  @ArgumentParser.Option(name="splitter.model", gloss="The location of the clause splitting model.")
   private String splitterModel = DefaultPaths.DEFAULT_OPENIE_CLAUSE_SEARCHER;
 
-  @Execution.Option(name="splitter.nomodel", gloss="If true, don't load a clause splitter model. This is primarily useful for training.")
+  @ArgumentParser.Option(name="splitter.nomodel", gloss="If true, don't load a clause splitter model. This is primarily useful for training.")
   private boolean noModel = false;
 
-  @Execution.Option(name="splitter.threshold", gloss="The minimum threshold for accepting a clause.")
+  @ArgumentParser.Option(name="splitter.threshold", gloss="The minimum threshold for accepting a clause.")
   private double splitterThreshold = 0.1;
 
-  @Execution.Option(name="splitter.disable", gloss="If true, don't run the sentence splitter")
+  @ArgumentParser.Option(name="splitter.disable", gloss="If true, don't run the sentence splitter")
   private boolean splitterDisable = false;
 
-  @Execution.Option(name="max_entailments_per_clause", gloss="The maximum number of entailments allowed per sentence of input.")
+  @ArgumentParser.Option(name="max_entailments_per_clause", gloss="The maximum number of entailments allowed per sentence of input.")
   private int entailmentsPerSentence = 1000;
 
-  @Execution.Option(name="ignore_affinity", gloss="If true, don't use the affinity models for dobj and pp attachment.")
+  @ArgumentParser.Option(name="ignore_affinity", gloss="If true, don't use the affinity models for dobj and pp attachment.")
   private boolean ignoreAffinity = false;
 
-  @Execution.Option(name="affinity_models", gloss="The directory (or classpath directory) containing the affinity models for pp/obj attachments.")
+  @ArgumentParser.Option(name="affinity_models", gloss="The directory (or classpath directory) containing the affinity models for pp/obj attachments.")
   private String affinityModels = DefaultPaths.DEFAULT_NATURALLI_AFFINITIES;
 
-  @Execution.Option(name="affinity_probability_cap", gloss="The affinity to consider 1.0")
+  @ArgumentParser.Option(name="affinity_probability_cap", gloss="The affinity to consider 1.0")
   private double affinityProbabilityCap = 1.0 / 3.0;
 
-  @Execution.Option(name="triple.strict", gloss="If true, only generate triples if the entire fragment has been consumed.")
+  @ArgumentParser.Option(name="triple.strict", gloss="If true, only generate triples if the entire fragment has been consumed.")
   private boolean consumeAll = true;
 
-  @Execution.Option(name="triple.all_nominals", gloss="If true, generate not only named entity nominal relations.")
+  @ArgumentParser.Option(name="triple.all_nominals", gloss="If true, generate not only named entity nominal relations.")
   private boolean allNominals = false;
 
-  @Execution.Option(name="resolve_coref", gloss="If true, resolve pronouns to their canonical mention")
+  @ArgumentParser.Option(name="resolve_coref", gloss="If true, resolve pronouns to their canonical mention")
   private boolean resolveCoref = false;
 
   /**
@@ -172,14 +172,14 @@ public class OpenIE implements Annotator {
    */
   public OpenIE(Properties props) {
     // Fill the properties
-    Execution.fillOptions(this, props);
+    ArgumentParser.fillOptions(this, props);
     Properties withoutOpenIEPrefix = new Properties();
     Enumeration<Object> keys = props.keys();
     while (keys.hasMoreElements()) {
       String key = keys.nextElement().toString();
       withoutOpenIEPrefix.setProperty(key.replace("openie.", ""), props.getProperty(key));
     }
-    Execution.fillOptions(this, withoutOpenIEPrefix);
+    ArgumentParser.fillOptions(this, withoutOpenIEPrefix);
 
     // Create the clause splitter
     try {
@@ -676,9 +676,9 @@ public class OpenIE implements Annotator {
       put("openie.triple.all_nominals", 0);
       put("splitter.triple.all_nominals", 0);
     }});
-    Execution.fillOptions(new Class[]{ OpenIE.class, Execution.class}, props);
+    ArgumentParser.fillOptions(new Class[]{OpenIE.class, ArgumentParser.class}, props);
     AtomicInteger exceptionCount = new AtomicInteger(0);
-    ExecutorService exec = Executors.newFixedThreadPool(Execution.threads);
+    ExecutorService exec = Executors.newFixedThreadPool(ArgumentParser.threads);
 
     // Parse the files to process
     String[] filesToProcess;
@@ -764,7 +764,7 @@ public class OpenIE implements Annotator {
       // Actually process the files.
       for (String file : filesToProcess) {
         System.err.println("Processing file: " + file);
-        if (Execution.threads > 1) {
+        if (ArgumentParser.threads > 1) {
           // Multi-threaded: submit a job to run
           final String fileToSubmit = file;
           exec.submit(() -> {

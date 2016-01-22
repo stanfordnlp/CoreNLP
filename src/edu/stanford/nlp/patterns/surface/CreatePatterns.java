@@ -20,13 +20,13 @@ public class CreatePatterns<E> {
   public CreatePatterns(Properties props, ConstantsAndVariables constVars)
       throws IOException {
     this.constVars = constVars;
-    Execution.fillOptions(ConstantsAndVariables.class, props);
+    ArgumentParser.fillOptions(ConstantsAndVariables.class, props);
     constVars.setUp(props);
     setUp(props);
   }
 
   void setUp(Properties props) {
-    Execution.fillOptions(this, props);
+    ArgumentParser.fillOptions(this, props);
   }
 
 
