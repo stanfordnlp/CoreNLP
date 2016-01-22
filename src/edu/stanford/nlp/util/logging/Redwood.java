@@ -339,16 +339,13 @@ public class Redwood {
     final long timestamp = System.currentTimeMillis();
     System.arraycopy(args,0,tags,0,len);
     //--Create Task
-    final Runnable startTrack = new Runnable(){
-      @Override
-      public void run(){
-        assert !isThreaded || control.isHeldByCurrentThread();
-        Record toPass = new Record(content,tags,depth,timestamp);
-        depth += 1;
-        titleStack.push(args.length == 0 ? "" : args[len].toString());
-        handlers.process(toPass, MessageType.START_TRACK, depth, toPass.timesstamp);
-        assert !isThreaded || control.isHeldByCurrentThread();
-      }
+    final Runnable startTrack = () -> {
+      assert !isThreaded || control.isHeldByCurrentThread();
+      Record toPass = new Record(content,tags,depth,timestamp);
+      depth += 1;
+      titleStack.push(args.length == 0 ? "" : args[len].toString());
+      handlers.process(toPass, MessageType.START_TRACK, depth, toPass.timesstamp);
+      assert !isThreaded || control.isHeldByCurrentThread();
     };
     //--Run Task
     if(isThreaded){
@@ -842,6 +839,7 @@ public class Redwood {
      * Sort the channels alphabetically, with the standard channels in front.
      * Note that the special FORCE tag is always first.
      */
+    @SuppressWarnings("ConstantConditions")
     private void sort(){
       //(sort flags)
       if (!channelsSorted && channels.length == 2) {
@@ -978,7 +976,7 @@ public class Redwood {
     public static void err(Object...objs){ Redwood.log(revConcat(objs, ERR, FORCE)); }
     public static void error(Object...objs){ Redwood.log(revConcat(objs, ERR, FORCE)); }
     public static void fatal(Object...objs){ Redwood.log(revConcat(objs, ERR, FORCE)); System.exit(1); }
-    public static void runtimeException(Object...objs){ Redwood.log(revConcat(objs, ERR, FORCE)); throw new RuntimeException(objs.toString()); }
+    public static void runtimeException(Object...objs){ Redwood.log(revConcat(objs, ERR, FORCE)); throw new RuntimeException(Arrays.toString(objs)); }
     public static void println(Object o){ System.out.println(o); }
 
     /** Exits with a given status code */
@@ -1054,7 +1052,7 @@ public class Redwood {
           synchronized (iter) {
             runnable = iter.next();
           }
-          // (don't flood the queu)
+          // (don't flood the queue)
           while (numPending.get() > 100) {
             try {
               Thread.sleep(100);
@@ -1064,42 +1062,39 @@ public class Redwood {
           }
           numPending.incrementAndGet();
           // (add the job)
-          Runnable toReturn = new Runnable() {
-            public void run() {
-              boolean threadFinished = false;
+          return () -> {
+            boolean threadFinished = false;
+            try {
+              //(signal start of threads)
+              metaInfoLock.lock();
+              if (!haveStarted.getAndSet(true)) {
+                startThreads(title); //<--this must be a blocking operation
+              }
+              metaInfoLock.unlock();
+              //(run runnable)
               try {
-                //(signal start of threads)
-                metaInfoLock.lock();
-                if (!haveStarted.getAndSet(true)) {
-                  startThreads(title); //<--this must be a blocking operation
+                runnable.run();
+              } catch (Exception | AssertionError e) {
+                e.printStackTrace();
+                System.exit(1);
+              }
+              //(signal end of thread)
+              finishThread();
+              threadFinished = true;
+              //(signal end of threads)
+              int numStillPending = numPending.decrementAndGet();
+              synchronized (iter) {
+                if (numStillPending <= 0 && !iter.hasNext()) {
+                  endThreads(title);
                 }
-                metaInfoLock.unlock();
-                //(run runnable)
-                try {
-                  runnable.run();
-                } catch (Exception | AssertionError e) {
-                  e.printStackTrace();
-                  System.exit(1);
-                }
-                //(signal end of thread)
+              }
+            } catch (Throwable t) {
+              t.printStackTrace();
+              if (!threadFinished) {
                 finishThread();
-                threadFinished = true;
-                //(signal end of threads)
-                int numStillPending = numPending.decrementAndGet();
-                synchronized (iter) {
-                  if (numStillPending <= 0 && !iter.hasNext()) {
-                    endThreads(title);
-                  }
-                }
-              } catch (Throwable t) {
-                t.printStackTrace();
-                if (!threadFinished) {
-                  finishThread();
-                }
               }
             }
           };
-          return toReturn;
         }
 
         @Override
@@ -1195,6 +1190,7 @@ public class Redwood {
    * Builder Pattern so Redwood.channels("chanA", "chanB").log("message") is equivalent to
    * Redwood.channels("chanA").channels("chanB").log("message")
    */
+  @SuppressWarnings("unused")
   public static class RedwoodChannels {
     private final Object[] channelNames;
 
@@ -1309,6 +1305,7 @@ public class Redwood {
    *
    */
   // TODO(gabor) update this with the new RedwoodConfiguration
+  @SuppressWarnings("deprecation")
   public static void main(String[] args){
 
     Redwood.log(Redwood.DBG, "hello world!");
@@ -1462,7 +1459,7 @@ public class Redwood {
           log("tick " + time + " from " + theI + " (" + Thread.currentThread().getId() + ")");
           try {
             Thread.sleep(50);
-          } catch (Exception e) {}
+          } catch (Exception ignored) {}
         }
         endTrack("Thread " + theI + " (" + Thread.currentThread().getId() + ")");
         finishThread();
