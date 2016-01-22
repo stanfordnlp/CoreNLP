@@ -16,10 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
-import edu.stanford.nlp.util.Execution;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.IterableIterator;
-import edu.stanford.nlp.util.RuntimeInterruptedException;
+import edu.stanford.nlp.util.*;
 
 /**
  * A hierarchical channel based logger. Log messages are arranged hierarchically by depth
@@ -590,6 +587,9 @@ public class Redwood {
   }
 
 
+  /**
+   * Check if the console supports ANSI escape codes.
+   */
   public static final boolean supportsAnsi;
   static {
     String os = System.getProperty("os.name").toLowerCase();
@@ -599,15 +599,21 @@ public class Redwood {
 
   /**
    * Set up the default logger.
+   * If SLF4J is in the code's classpath
    */
   static {
-    RedwoodConfiguration.minimal().apply();
+    RedwoodConfiguration config = RedwoodConfiguration.minimal();
+    try {
+      MetaClass.create("edu.stanford.nlp.util.logging.SLF4JHandler");
+      config = RedwoodConfiguration.slf4j().capture(System.err);  // everything should go through slf4j
+    } catch (Exception ignored) { }
+    config.apply();
   }
 
   /**
    * An enumeration of the types of "messages" you can send a handler
    */
-  private static enum MessageType{ SIMPLE, START_TRACK, SHUTDOWN, END_TRACK }
+  private enum MessageType{ SIMPLE, START_TRACK, SHUTDOWN, END_TRACK }
 
   /**
    * A tree structure of record handlers
@@ -967,8 +973,10 @@ public class Redwood {
     public static void log(Object...objs){ Redwood.log(objs); }
     public static void logf(String format, Object... args){ Redwood.logf(format, args); }
     public static void warn(Object...objs){ Redwood.log(revConcat(objs, WARN)); }
+    public static void warning(Object...objs){ Redwood.log(revConcat(objs, WARN)); }
     public static void debug(Object...objs){ Redwood.log(revConcat(objs, DBG)); }
     public static void err(Object...objs){ Redwood.log(revConcat(objs, ERR, FORCE)); }
+    public static void error(Object...objs){ Redwood.log(revConcat(objs, ERR, FORCE)); }
     public static void fatal(Object...objs){ Redwood.log(revConcat(objs, ERR, FORCE)); System.exit(1); }
     public static void runtimeException(Object...objs){ Redwood.log(revConcat(objs, ERR, FORCE)); throw new RuntimeException(objs.toString()); }
     public static void println(Object o){ System.out.println(o); }
@@ -1271,8 +1279,10 @@ public class Redwood {
 
     public void info(Object...objs){ log(Util.revConcat(objs)); }
     public void warn(Object...objs){ log(Util.revConcat(objs, WARN)); }
+    public void warning(Object...objs){ log(Util.revConcat(objs, WARN)); }
     public void debug(Object...objs){ log(Util.revConcat(objs, DBG)); }
     public void err(Object...objs){ log(Util.revConcat(objs, ERR, FORCE)); }
+    public void error(Object...objs){ log(Util.revConcat(objs, ERR, FORCE)); }
     public void fatal(Object...objs){ log(Util.revConcat(objs, ERR, FORCE)); System.exit(1); }
   }
 

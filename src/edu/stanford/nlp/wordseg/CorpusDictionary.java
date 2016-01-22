@@ -3,8 +3,8 @@ package edu.stanford.nlp.wordseg;
 import java.util.*;
 import java.io.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.io.IOUtils;
@@ -23,7 +23,7 @@ import edu.stanford.nlp.util.Generics;
 
 public class CorpusDictionary {
 
-  private static Logger logger = LoggerFactory.getLogger(CorpusDictionary.class);
+  private static Redwood.RedwoodChannels logger = Redwood.channels(CorpusDictionary.class);
 
   private Set<String> oneWord; // = null;
 

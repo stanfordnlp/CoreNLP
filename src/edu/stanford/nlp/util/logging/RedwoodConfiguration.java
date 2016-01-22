@@ -198,7 +198,7 @@ public class RedwoodConfiguration {
         handler.leftMargin = config.channelWidth;
         root.addChild(handler);
       } catch (Exception e) {
-        throw new IllegalStateException("Could not find SLF4J in your classpath", e);
+        throw new IllegalStateException("Could not find java.util.logging in your classpath", e);
       }
     };
 

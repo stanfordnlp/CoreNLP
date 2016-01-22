@@ -20,8 +20,8 @@ import edu.stanford.nlp.international.spanish.process.SpanishTokenizer;
 import edu.stanford.nlp.international.french.process.FrenchTokenizer;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TokenizerAnnotator implements Annotator {
 
-  private static Logger logger = LoggerFactory.getLogger(TokenizerAnnotator.class);
+  private static Redwood.RedwoodChannels logger = Redwood.channels(TokenizerAnnotator.class);
 
   /**
    * Enum to identify the different TokenizerTypes. To add a new

@@ -12,8 +12,8 @@ import edu.stanford.nlp.util.Index;
 import java.util.Collection;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * One vs All multiclass classifier
@@ -39,7 +39,7 @@ public class OneVsAllClassifier<L,F> implements Classifier<L,F> {
   Map<L, Classifier<String,F>> binaryClassifiers;
   L defaultLabel;
 
-  final static Logger logger = LoggerFactory.getLogger(OneVsAllClassifier.class);
+  final static Redwood.RedwoodChannels logger = Redwood.channels(OneVsAllClassifier.class);
 
   public OneVsAllClassifier(Index<F> featureIndex, Index<L> labelIndex) {
     this(featureIndex, labelIndex, Generics.<L, Classifier<String, F>>newHashMap(), null);

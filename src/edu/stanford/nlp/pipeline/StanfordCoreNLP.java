@@ -46,8 +46,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
@@ -97,7 +97,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
   public static final String DEFAULT_OUTPUT_FORMAT = isXMLOutputPresent() ? "xml" : "text";
 
-  private static final Logger logger = LoggerFactory.getLogger(StanfordCoreNLP.class);
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(StanfordCoreNLP.class);
 
   /** Formats the constituent parse trees for display. */
   private TreePrint constituentTreePrinter;
@@ -372,7 +372,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         Set<Class<? extends CoreAnnotation>> allRequirements = an.requires();
         for (Class<? extends CoreAnnotation> requirement : allRequirements) {
           if (!requirementsSatisfied.contains(requirement)) {
-            String fmt = "annotator \"%s\" requires annotation \"%s\"";
+            String fmt = "annotator \"%s\" requires annotator \"%s\"";
             throw new IllegalArgumentException(String.format(fmt, name, requirement));
           }
         }
