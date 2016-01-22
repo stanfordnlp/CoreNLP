@@ -201,7 +201,7 @@ public class DeterministicCorefAnnotator implements Annotator {
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
     return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.MentionTokenAnnotation.class,
+        edu.stanford.nlp.hcoref.CorefCoreAnnotations.CorefMentionsAnnotation.class,
         SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class
     )));
   }
