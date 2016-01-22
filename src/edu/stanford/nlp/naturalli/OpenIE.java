@@ -696,6 +696,7 @@ public class OpenIE implements Annotator {
     if ("".equals(props.getProperty("annotators", ""))) {
       if (!"false".equalsIgnoreCase(props.getProperty("resolve_coref", props.getProperty("openie.resolve_coref", "false")))) {
         props.setProperty("coref.md.type", "dep");  // so we don't need the `parse` annotator
+        props.setProperty("coref.mode", "statistical");  // explicitly ask for scoref
         props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,ner,mention,coref,natlog,openie");
       } else {
         props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,natlog,openie");
