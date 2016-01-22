@@ -19,6 +19,7 @@ import edu.stanford.nlp.process.WhitespaceTokenizer;
 import edu.stanford.nlp.international.spanish.process.SpanishTokenizer;
 import edu.stanford.nlp.international.french.process.FrenchTokenizer;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.PropertiesUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,6 +133,7 @@ public class TokenizerAnnotator implements Annotator {
 
   // CONSTRUCTORS
 
+  /** Gives a verbose, English tokenizer. Probably no one wants that! */
   public TokenizerAnnotator() {
     this(true);
   }
@@ -153,12 +155,11 @@ public class TokenizerAnnotator implements Annotator {
   }
 
   public TokenizerAnnotator(boolean verbose, String lang, String options) {
-    VERBOSE = verbose;
     Properties props = new Properties();
     if (lang != null) {
       props.setProperty("tokenize.language", lang);
     }
-
+    VERBOSE = PropertiesUtils.getBool(props, "tokenize.verbose", verbose);
     TokenizerType type = TokenizerType.getTokenizerType(props);
     factory = initFactory(type, props, options);
   }
@@ -168,11 +169,10 @@ public class TokenizerAnnotator implements Annotator {
   }
 
   public TokenizerAnnotator(boolean verbose, Properties props, String options) {
-    VERBOSE = verbose;
     if (props == null) {
       props = new Properties();
     }
-
+    VERBOSE = PropertiesUtils.getBool(props, "tokenize.verbose", verbose);
     TokenizerType type = TokenizerType.getTokenizerType(props);
     factory = initFactory(type, props, options);
   }

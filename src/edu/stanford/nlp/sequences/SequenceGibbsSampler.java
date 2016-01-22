@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sequences;
 
+import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.concurrent.*;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.ling.HasWord;
@@ -117,6 +118,9 @@ public class SequenceGibbsSampler implements BestSequenceFinder {
       positionsChanged = Generics.newHashSet();
 
     for (int i=0; i<schedule.numIterations(); i++) {
+      if (Thread.interrupted()) {  // Allow interrupting the parser
+        throw new RuntimeInterruptedException();
+      }
       double temperature = schedule.getTemperature(i);
       if (speedUpThreshold <= 0) {
         score = sampleSequenceForward(model, sequence, temperature, null); // modifies tagSequence

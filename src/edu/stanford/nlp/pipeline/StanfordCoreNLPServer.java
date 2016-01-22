@@ -18,6 +18,7 @@ import edu.stanford.nlp.util.*;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -34,9 +35,11 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  */
 public class StanfordCoreNLPServer implements Runnable {
   protected static int DEFAULT_PORT = 9000;
+  protected static int DEFAULT_TIMEOUT = 5000;
 
   protected HttpServer server;
-  protected int serverPort;
+  protected final int serverPort;
+  protected final int timeoutMilliseconds;
   protected final FileHandler staticPageHandle;
   protected final String shutdownKey;
 
@@ -61,8 +64,15 @@ public class StanfordCoreNLPServer implements Runnable {
   private final ExecutorService corenlpExecutor = Executors.newFixedThreadPool(Execution.threads);
 
 
-  public StanfordCoreNLPServer(int port) throws IOException {
+  /**
+   * Create a new Stanford CoreNLP Server.
+   * @param port The port to host the server from.
+   * @param timeout The timeout (in milliseconds) for each command.
+   * @throws IOException Thrown from the underlying socket implementation.
+   */
+  public StanfordCoreNLPServer(int port, int timeout) throws IOException {
     serverPort = port;
+    timeoutMilliseconds = timeout;
 
     defaultProps = new Properties();
     defaultProps.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, depparse, dcoref, natlog, openie");
@@ -349,14 +359,34 @@ public class StanfordCoreNLPServer implements Runnable {
         return;
       }
 
+      Future<Annotation> completedAnnotationFuture = null;
       try {
         // Annotate
         StanfordCoreNLP pipeline = mkStanfordCoreNLP(props);
-        Future<Annotation> completedAnnotationFuture = corenlpExecutor.submit(() -> {
+        completedAnnotationFuture = corenlpExecutor.submit(() -> {
           pipeline.annotate(ann);
           return ann;
         });
-        Annotation completedAnnotation = completedAnnotationFuture.get(5, TimeUnit.SECONDS);
+        Annotation completedAnnotation;
+        try {
+          int timeoutMilliseconds = Integer.parseInt(props.getProperty("timeout",
+                                                     Integer.toString(StanfordCoreNLPServer.this.timeoutMilliseconds)));
+          // Check for too long a timeout from an unauthorized source
+          if (timeoutMilliseconds > 10000) {
+            // If two conditions:
+            //   (1) The server is running on corenlp.run (i.e., corenlp.stanford.edu)
+            //   (2) The request is not coming from a *.stanford.edu" email address
+            // Then force the timeout to be 10 seconds
+            if ("corenlp.stanford.edu".equals(InetAddress.getLocalHost().getHostName()) &&
+                !httpExchange.getRemoteAddress().getHostName().toLowerCase().endsWith("stanford.edu")) {
+              timeoutMilliseconds = 10000;
+            }
+          }
+          completedAnnotation = completedAnnotationFuture.get(timeoutMilliseconds, TimeUnit.MILLISECONDS);
+        } catch (NumberFormatException e) {
+          completedAnnotation = completedAnnotationFuture.get(StanfordCoreNLPServer.this.timeoutMilliseconds, TimeUnit.MILLISECONDS);
+        }
+        completedAnnotationFuture = null;  // No longer any need for the future
 
         // Get output
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -370,12 +400,25 @@ public class StanfordCoreNLPServer implements Runnable {
         httpExchange.getResponseBody().write(response);
         httpExchange.close();
       } catch (TimeoutException e) {
+        // Print the stack trace for debugging
         e.printStackTrace();
-        respondError("CoreNLP request timed out", httpExchange);
+        // Return error message.
+        respondError("CoreNLP request timed out. Your document may be too long.", httpExchange);
+        // Cancel the future if it's alive
+        //noinspection ConstantConditions
+        if (completedAnnotationFuture != null) {
+          completedAnnotationFuture.cancel(true);
+        }
       } catch (Exception e) {
+        // Print the stack trace for debugging
         e.printStackTrace();
         // Return error message.
         respondError(e.getClass().getName() + ": " + e.getMessage(), httpExchange);
+        // Cancel the future if it's alive
+        //noinspection ConstantConditions
+        if (completedAnnotationFuture != null) {  // just in case...
+          completedAnnotationFuture.cancel(true);
+        }
       }
     }
 
@@ -656,6 +699,15 @@ public class StanfordCoreNLPServer implements Runnable {
   }
 
   /**
+   * Help output
+   */
+  protected static void printHelp(PrintStream os) {
+    os.println("Usage: StanfordCoreNLPServer [port=9000] [timeout=5]");
+    os.println("port\t\t\t\t Which port to use");
+    os.println("timeout\t\t\t\t How long to wait before timing out");
+  }
+
+  /**
    * The main method.
    * Read the command line arguments and run the server.
    *
@@ -665,10 +717,29 @@ public class StanfordCoreNLPServer implements Runnable {
    */
   public static void main(String[] args) throws IOException {
     int port = DEFAULT_PORT;
-    if(args.length > 0) {
-      port = Integer.parseInt(args[0]);
+    int timeout = DEFAULT_TIMEOUT;
+
+    Properties props = new Properties();
+    if (args.length > 0) {
+      props = StringUtils.argsToProperties(args);
+      boolean hasH = props.containsKey("h");
+      boolean hasHelp = props.containsKey("help");
+      if (hasH || hasHelp) {
+        printHelp(System.err);
+        return;
+      }
     }
-    StanfordCoreNLPServer server = new StanfordCoreNLPServer(port);
+    props.list(System.err);
+    if(props.containsKey("port")) {
+      port = Integer.parseInt(props.getProperty("port"));
+    }
+    if(props.containsKey("timeout")) {
+      timeout = Integer.parseInt(props.getProperty("timeout"));
+    }
+    log("Starting server on port " + port + " with timeout of " + timeout + " milliseconds.");
+
+    // Run the server
+    StanfordCoreNLPServer server = new StanfordCoreNLPServer(port, timeout);
     server.run();
   }
 }

@@ -823,7 +823,10 @@ public class RelationTripleSegmenter {
     // sometimes not _really_ its own clause
     IndexedWord root = parse.getFirstRoot();
     if ( (root.lemma() != null && root.lemma().equalsIgnoreCase("be")) ||
-         (root.lemma() == null && (root.word().equalsIgnoreCase("is") || root.word().equalsIgnoreCase("are") || root.word().equalsIgnoreCase("were") || root.word().equalsIgnoreCase("be")))) {
+         (root.lemma() == null && ("is".equalsIgnoreCase(root.word()) ||
+                                   "are".equalsIgnoreCase(root.word()) ||
+                                   "were".equalsIgnoreCase(root.word()) ||
+                                   "be".equalsIgnoreCase(root.word())))) {
       // Check for the "there is" construction
       boolean foundThere = false;
       boolean tooMayArcs = false;  // an indicator for there being too much nonsense hanging off of the root
@@ -844,12 +847,29 @@ public class RelationTripleSegmenter {
     }
 
     // Run the patterns
-    Optional<RelationTriple> verbExtraction = segmentVerb(parse, confidence, consumeAll);
-    if (verbExtraction.isPresent()) {
-      return verbExtraction;
-    } else {
-      return segmentACL(parse, confidence, consumeAll);
+    Optional<RelationTriple> extraction = segmentVerb(parse, confidence, consumeAll);
+    if (!extraction.isPresent()) {
+      extraction = segmentACL(parse, confidence, consumeAll);
     }
+
+    //
+    // Remove downward polarity extractions
+    //
+    if (extraction.isPresent()) {
+      boolean shouldRemove = true;
+      for (CoreLabel token : extraction.get()) {
+        if (token.get(NaturalLogicAnnotations.PolarityAnnotation.class) == null ||
+            !token.get(NaturalLogicAnnotations.PolarityAnnotation.class).isDownwards()) {
+          shouldRemove = false;
+        }
+      }
+      if (shouldRemove) {
+        return Optional.empty();
+      }
+    }
+
+    // Return
+    return extraction;
   }
 
   /**

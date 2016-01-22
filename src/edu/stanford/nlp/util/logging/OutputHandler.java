@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Stack;
+import java.util.function.Supplier;
 
 import edu.stanford.nlp.math.SloppyMath;
 import edu.stanford.nlp.util.logging.Redwood.Record;
@@ -232,7 +233,7 @@ public abstract class OutputHandler extends LogRecordHandler{
   /** {@inheritDoc} */
   @Override
   public List<Record> handle(Record record) {
-    StringBuilder b = new StringBuilder();
+    StringBuilder b = new StringBuilder(1024);
 
     //--Special case for Exceptions
     String[] content;
@@ -277,11 +278,17 @@ public abstract class OutputHandler extends LogRecordHandler{
     } else if(record.content == null){
       content = new String[]{"null"};
     } else {
-      String toStr = record.content.toString();
+      String toStr;
+      if (record.content instanceof Supplier) {
+        //noinspection unchecked
+        toStr = ((Supplier<Object>) record.content).get().toString();
+      } else {
+        toStr = record.content.toString();
+      }
       if (toStr == null) {
         content = new String[]{"<null toString()>"};
       } else {
-        content = record.content.toString().split("\n"); //would be nice to get rid of this 'split()' call at some point
+        content = toStr.split("\n"); //would be nice to get rid of this 'split()' call at some point
       }
     }
 

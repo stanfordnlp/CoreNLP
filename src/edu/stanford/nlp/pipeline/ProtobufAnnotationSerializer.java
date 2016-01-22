@@ -358,7 +358,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    *
    * @param sentence The sentence to save to a protocol buffer
    * @param keysToSerialize A set tracking which keys have been saved. It's important to remove any keys added to the proto
-   *                        from this set, as the code tracks annotations to ensure lossless serializationA set tracking which keys have been saved. It's important to remove any keys added to the proto*
    *                        from this set, as the code tracks annotations to ensure lossless serialization.
    */
   protected CoreNLPProtos.Sentence.Builder toProtoBuilder(CoreMap sentence, Set<Class<?>> keysToSerialize) {
@@ -439,6 +438,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
       keysToSerialize.remove(CorefMentionsAnnotation.class);
     }
+    // add a sentence id if it exists
+    if (keySet.contains(SentenceIDAnnotation.class)) builder.setSentenceID(getAndRegister(sentence, keysToSerialize, SentenceIDAnnotation.class));
     // Return
     return builder;
   }

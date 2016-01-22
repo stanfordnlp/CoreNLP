@@ -131,8 +131,8 @@ public class ForwardEntailerSearchProblem {
     assert Util.isTree(parseTree);
     // (remove common determiners)
     List<String> determinerRemovals = new ArrayList<>();
-    parseTree.getLeafVertices().stream().filter(vertex -> vertex.word().equalsIgnoreCase("the") || vertex.word().equalsIgnoreCase("a") ||
-        vertex.word().equalsIgnoreCase("an")).forEach(vertex -> {
+    parseTree.getLeafVertices().stream().filter(vertex -> "the".equalsIgnoreCase(vertex.word()) || "a".equalsIgnoreCase(vertex.word()) ||
+        "an".equalsIgnoreCase(vertex.word())).forEach(vertex -> {
       parseTree.removeVertex(vertex);
       assert Util.isTree(parseTree);
       determinerRemovals.add("det");
@@ -143,7 +143,7 @@ public class ForwardEntailerSearchProblem {
       if( parseTree.inDegree(vertex) > 1 ) {
         SemanticGraphEdge conjAnd = null;
         for (SemanticGraphEdge edge : parseTree.incomingEdgeIterable(vertex)) {
-          if (edge.getRelation().toString().equals("conj:and")) {
+          if ("conj:and".equals(edge.getRelation().toString())) {
             conjAnd = edge;
           }
         }
