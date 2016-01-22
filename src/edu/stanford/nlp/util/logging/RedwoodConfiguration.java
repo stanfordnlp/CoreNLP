@@ -47,6 +47,7 @@ public class RedwoodConfiguration {
    * @return this
    */
   public RedwoodConfiguration capture(final OutputStream stream) {
+    // Capture the stream
     if (stream == System.out) {
       tasks.add(() -> Redwood.captureSystemStreams(true, Redwood.realSysErr == System.err));
     } else if (stream == System.err) {

@@ -602,7 +602,7 @@ public class Redwood {
     RedwoodConfiguration config = RedwoodConfiguration.minimal();
     try {
       MetaClass.create("edu.stanford.nlp.util.logging.SLF4JHandler");
-      config = RedwoodConfiguration.slf4j().capture(System.err);  // everything should go through slf4j
+      config = RedwoodConfiguration.slf4j();
     } catch (Exception ignored) { }
     config.apply();
   }
