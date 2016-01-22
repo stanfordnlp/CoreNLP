@@ -238,6 +238,12 @@ public class SentenceAlgorithms {
       throw new IllegalArgumentException("Cannot find head word of empty span!");
     }
     List<Optional<Integer>> governors = sentence.governors();
+    if (tokenSpan.start() >= governors.size()) {
+      throw new IllegalArgumentException("Span is out of range: " + tokenSpan + "; sentence: " + sentence);
+    }
+    if (tokenSpan.end() > governors.size()) {
+      throw new IllegalArgumentException("Span is out of range: " + tokenSpan + "; sentence: " + sentence);
+    }
 
     // Find where to start searching up the dependency tree
     int candidateStart = tokenSpan.end() - 1;

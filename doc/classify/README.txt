@@ -1,4 +1,4 @@
-Stanford Classifier v3.5.2 - 2015-04-20
+Stanford Classifier v3.6.0 - 2015-12-09
 -------------------------------------------------
 
 Copyright (c) 2003-2012 The Board of Trustees of 
@@ -24,7 +24,7 @@ QUICKSTART
 COMMAND LINE INTERFACE
 To classify the included example dataset cheeseDisease (in the examples directory), type the following at the command line while in the main classifier directory:
 
-java -jar stanford-classifier.jar -prop examples/cheese2007.prop
+java -cp "*:." edu.stanford.nlp.classify.ColumnDataClassifier -prop examples/cheese2007.prop
 
 This will classify the included test data, cheeseDisease.test, based on the probability that each example is a cheese or a disease, as calculated by a linear classifier trained on cheeseDisease.train.  
 
@@ -75,6 +75,8 @@ LICENSE
 -------------------------
 CHANGES
 -------------------------
+
+2015-12-09    3.6.0     Update for compatibility 
 
 2015-04-20    3.5.2     Update for compatibility 
 

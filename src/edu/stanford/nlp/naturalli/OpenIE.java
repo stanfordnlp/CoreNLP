@@ -25,6 +25,7 @@ import edu.stanford.nlp.util.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -90,6 +91,9 @@ public class OpenIE implements Annotator {
 
   @Execution.Option(name="filelist", gloss="The files to annotate, as a list of files one per line.")
   private static File FILELIST  = null;
+
+  @Execution.Option(name="output", gloss="The files to annotate, as a list of files one per line.")
+  private static PrintStream OUTPUT  = System.out;
 
   //
   // Annotator Options (for running in the pipeline)
@@ -624,6 +628,7 @@ public class OpenIE implements Annotator {
    * @param docid The docid of the document we are extracting.
    * @param document the document to annotate.
    */
+  @SuppressWarnings("SynchronizeOnNonFinalField")
   private static void processDocument(AnnotationPipeline pipeline, String docid, String document) {
     // Error checks
     if (document.trim().equals("")) {
@@ -636,11 +641,11 @@ public class OpenIE implements Annotator {
 
     // Get the extractions
     boolean empty = true;
-    synchronized (System.out) {
+    synchronized (OUTPUT) {
       for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
         for (RelationTriple extraction : sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
           // Print the extractions
-          System.out.println(tripleToString(extraction, docid, sentence));
+          OUTPUT.println(tripleToString(extraction, docid, sentence));
           empty = false;
         }
       }
@@ -655,7 +660,20 @@ public class OpenIE implements Annotator {
    */
   public static void main(String[] args) throws IOException, InterruptedException {
     // Parse the arguments
-    Properties props = StringUtils.argsToProperties(args);
+    Properties props = StringUtils.argsToProperties(args, new HashMap<String, Integer>(){{
+      put("openie.resolve_coref", 0);
+      put("resolve_coref", 0);
+      put("openie.splitter.nomodel", 0);
+      put("splitter.nomodel", 0);
+      put("openie.splitter.disable", 0);
+      put("splitter.disable", 0);
+      put("openie.ignore_affinity", 0);
+      put("splitter.ignore_affinity", 0);
+      put("openie.triple.strict", 0);
+      put("splitter.triple.strict", 0);
+      put("openie.triple.all_nominals", 0);
+      put("splitter.triple.all_nominals", 0);
+    }});
     Execution.fillOptions(new Class[]{ OpenIE.class, Execution.class}, props);
     AtomicInteger exceptionCount = new AtomicInteger(0);
     ExecutorService exec = Executors.newFixedThreadPool(Execution.threads);
@@ -663,7 +681,11 @@ public class OpenIE implements Annotator {
     // Parse the files to process
     String[] filesToProcess;
     if (FILELIST != null) {
-      filesToProcess = IOUtils.linesFromFile(FILELIST.getPath()).stream().map(String::trim).toArray(String[]::new);
+      filesToProcess = IOUtils.linesFromFile(FILELIST.getPath()).stream()
+          .map(String::trim)
+          .map(path -> path.replaceAll("^~", "$HOME"))
+          .map(path -> new File(path).exists() ? path : StringUtils.expandEnvironmentVariables(path))
+          .toArray(String[]::new);
     } else if (!"".equals(props.getProperty("", ""))) {
       filesToProcess = props.getProperty("", "").split("\\s+");
     } else {
@@ -673,7 +695,8 @@ public class OpenIE implements Annotator {
     // Tweak the arguments
     if ("".equals(props.getProperty("annotators", ""))) {
       if (!"false".equalsIgnoreCase(props.getProperty("resolve_coref", props.getProperty("openie.resolve_coref", "false")))) {
-        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,ner,entitymentions,coref,natlog,openie");
+        props.setProperty("coref.md.type", "dep");  // so we don't need the `parse` annotator
+        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,ner,mention,coref,natlog,openie");
       } else {
         props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,natlog,openie");
       }

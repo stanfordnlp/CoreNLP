@@ -60,7 +60,6 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator {
         scorefSystem = null;
       } else if (COREF_MODE.equals(STATISTICAL_MODE)) {
         // create corefSystem for statistical
-        System.out.println("building scorefSystem...");
         scorefSystem = StatisticalCorefSystem.fromProps(props);
         hcorefSystem = null;
       } else {
@@ -211,7 +210,4 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator {
     }
   }
 
-  public static void main(String[] args) {
-
-  }
 }

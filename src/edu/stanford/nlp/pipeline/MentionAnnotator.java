@@ -19,6 +19,7 @@ import edu.stanford.nlp.trees.SemanticHeadFinder;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseSemanticHeadFinder;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
  * This class adds mention information to an Annotation.
@@ -51,7 +52,7 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
       headFinder = getHeadFinder(props);
       //System.out.println("got head finder");
       md = getMentionFinder(props, headFinder);
-      System.err.println("Using mention detector: "+mdName+" which requires these parses: "+mentionAnnotatorRequirements);
+      System.err.println("Using mention detector type: "+mdName);
       mentionAnnotatorRequirements.addAll(Arrays.asList(
           CoreAnnotations.TokensAnnotation.class,
           CoreAnnotations.SentencesAnnotation.class,
@@ -77,18 +78,25 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
       docID = "";
     }
     if (docID.contains("nw") && corefProperties.getProperty("coref.input.type", "raw").equals("conll") &&
-            corefProperties.getProperty("coref.language", "en").equals("zh")) {
+            corefProperties.getProperty("coref.language", "en").equals("zh") &&
+            PropertiesUtils.getBool(corefProperties,"coref.specialCaseNewswire")) {
       CorefProperties.setRemoveNested(corefProperties, false);
     } else {
       CorefProperties.setRemoveNested(corefProperties, true);
     }
     List<List<Mention>> mentions = md.findMentions(annotation, dictionaries, corefProperties);
+    int mentionIndex = 0;
     int currIndex = 0;
     for (CoreMap sentence : sentences) {
       List<Mention> mentionsForThisSentence = mentions.get(currIndex);
       sentence.set(CorefCoreAnnotations.CorefMentionsAnnotation.class, mentionsForThisSentence);
       // increment to next list of mentions
       currIndex++;
+      // assign latest mentionID
+      for (Mention m : mentionsForThisSentence) {
+        m.mentionID = mentionIndex;
+        mentionIndex++;
+      }
     }
   }
 
@@ -105,20 +113,20 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
           throws ClassNotFoundException, IOException {
 
     switch (CorefProperties.getMDType(props)) {
-      case RULE:
-        mentionAnnotatorRequirements.add(TreeCoreAnnotations.TreeAnnotation.class);
-        mdName = "rule";
-        return new RuleBasedCorefMentionFinder(headFinder, props);
+      case DEPENDENCY:
+        mdName = "dependency";
+        return new DependencyCorefMentionFinder(props);
 
       case HYBRID:
         mdName = "hybrid";
         mentionAnnotatorRequirements.add(TreeCoreAnnotations.TreeAnnotation.class);
         return new HybridCorefMentionFinder(headFinder, props);
 
-      case DEPENDENCY:
-      default:  // default is dependency
-        mdName = "dependency";
-        return new DependencyCorefMentionFinder(props);
+      case RULE:
+      default:
+        mentionAnnotatorRequirements.add(TreeCoreAnnotations.TreeAnnotation.class);
+        mdName = "rule";
+        return new RuleBasedCorefMentionFinder(headFinder, props);
     }
   }
 
@@ -130,10 +138,6 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     return Collections.singleton(CorefCoreAnnotations.CorefMentionsAnnotation.class);
-  }
-
-  public static void main(String[] args) {
-
   }
 
 }

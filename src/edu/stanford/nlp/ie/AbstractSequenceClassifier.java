@@ -53,7 +53,6 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -262,7 +261,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *         field.
    */
   public List<IN> classifySentence(List<? extends HasWord> sentence) {
-    // System.err.println("knownLCWords.size is " + knownLCWords.size() + "; knownLCWords.maxSize is " + knownLCWords.getMaxSize() + 
+    // System.err.println("knownLCWords.size is " + knownLCWords.size() + "; knownLCWords.maxSize is " + knownLCWords.getMaxSize() +
     //                   ", prior to NER for " + getClass().toString());
     List<IN> document = new ArrayList<>();
     int i = 0;
