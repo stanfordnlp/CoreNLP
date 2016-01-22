@@ -199,6 +199,9 @@ function render(data) {
     for (var i = 0; i < sentence.tokens.length; ++i) {
       var token = sentence.tokens[i];
       var word = token.word;
+      if (!(typeof tokensMap[word] == "undefined")) {
+        word = tokensMap[word];
+      }
       if (i > 0) { currentText.push(' '); }
       token.characterOffsetBegin = currentText.length;
       for (var j = 0; j < word.length; ++j) {
@@ -577,11 +580,18 @@ $(document).ready(function() {
   $('.chosen-container').css('width', '100%');
 
   // Submit on shift-enter
+  $('#text').keydown(function (event) {
+    if (event.keyCode == 13) {
+      if(event.shiftKey){
+        event.preventDefault();  // don't register the enter key when pressed
+        return false;
+      }
+    }
+  });
   $('#text').keyup(function (event) {
     if (event.keyCode == 13) {
       if(event.shiftKey){
-        event.preventDefault();
-        $('#submit').click();
+        $('#submit').click();  // submit the form when the enter key is released
         event.stopPropagation();
         return false;
       }
@@ -605,7 +615,7 @@ $(document).ready(function() {
     // Run query
     $.ajax({
       type: 'POST',
-      url: serverAddress + '?properties=' + encodeURIComponent('{"annotators": "' + annotators() + '"}'),
+      url: serverAddress + '?properties=' + encodeURIComponent('{"annotators": "' + annotators() + '", "openie.resolve_coref": "true"}'),
       data: currentQuery,
       contentType: "application/x-www-form-urlencoded;charset=UTF-8",
       success: function(data) {
@@ -645,7 +655,7 @@ $(document).ready(function() {
           createAnnotationDiv('deps',   'depparse', 'basic-dependencies',                  'Basic Dependencies'      );
           createAnnotationDiv('deps2',  'depparse', 'collapsed-ccprocessed-dependencies',  'Enhanced Dependencies'   );
           createAnnotationDiv('openie', 'openie',   'openie',                              'Open IE'                 );
-          createAnnotationDiv('coref',  'dcoref',   'corefs',                              'Coreference'             );
+          createAnnotationDiv('coref',  'coref',    'corefs',                              'Coreference'             );
           // Update UI
           $('#loading').hide();
           $('.corenlp_error').remove();  // Clear error messages

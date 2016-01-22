@@ -171,7 +171,7 @@ public abstract class SemgrexPattern implements Serializable {
   private boolean opt = false;
   private String patternString; // conceptually final, but can't do because of parsing
 
-  Env env;
+  protected Env env; //always set with setEnv to make sure that it is also availble to child patterns
 
   // package private constructor
   SemgrexPattern() {
@@ -277,7 +277,7 @@ public abstract class SemgrexPattern implements Serializable {
     try {
       SemgrexParser parser = new SemgrexParser(new StringReader(semgrex + "\n"));
       SemgrexPattern newPattern = parser.Root();
-      newPattern.env = env;
+      newPattern.setEnv(env);
       newPattern.patternString = semgrex;
       return newPattern;
     } catch (ParseException ex) {
@@ -294,6 +294,18 @@ public abstract class SemgrexPattern implements Serializable {
   public String pattern() {
     return patternString;
   }
+
+  /**
+   * Recursively sets the env variable to this pattern and all its children
+   *
+   * @param env
+   */
+  public void setEnv(Env env) {
+    this.env = env;
+    this.getChildren().stream().forEach(p -> p.setEnv(env));
+  }
+
+
 
   // printing methods
   // -----------------------------------------------------------

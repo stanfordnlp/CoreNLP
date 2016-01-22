@@ -81,6 +81,7 @@ public abstract class AnnotationOutputter {
     options.encoding = pipeline.getEncoding();
     options.printSingletons = pipeline.getPrintSingletons();
     options.beamPrintingOption = pipeline.getBeamPrintingOption();
+    options.pretty = pipeline.getPrettyPrint();
     return options;
   }
 

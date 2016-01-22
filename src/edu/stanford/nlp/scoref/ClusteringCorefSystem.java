@@ -39,6 +39,10 @@ public class ClusteringCorefSystem extends StatisticalCorefSystem {
   public void runCoref(Document document) {
     Map<Pair<Integer, Integer>, Boolean> mentionPairs =
         StatisticalCorefUtils.getUnlabeledMentionPairs(document);
+    // when the mention count is 0 or 1, just return since there is no coref work to be done
+    if (mentionPairs.keySet().size() == 0) {
+        return;
+    }
     Compressor<String> compressor = new Compressor<>();
     DocumentExamples examples = extractor.extract(0, document, mentionPairs, compressor);
 

@@ -1070,6 +1070,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     return new Pair<>();
   }
 
+  /** Returns true if this mention is contained inside m. That is, it is a subspan of the same sentence. */
   public boolean insideIn(Mention m){
     return this.sentNum == m.sentNum
             && m.startIndex <= this.startIndex
@@ -1586,7 +1587,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if (obj.getClass() != getClass()) { return false; }
 
     Mention rhs = (Mention) obj;
-    
+
     if (!Objects.equals(mentionType, rhs.mentionType)) { return false; }
     if (!Objects.equals(number, rhs.number)) { return false; }
     if (!Objects.equals(gender, rhs.gender)) { return false; }
@@ -1649,5 +1650,5 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   }
 
-  
+
 }
