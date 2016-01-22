@@ -41,7 +41,7 @@ The following tables give an overview of some of the possibilities.
 | coref | en | statistical/rule | constituency and dependency | 63.61 |
 | coref | en | statistical/dependency | dependency | 56.05 |
 | dcoref | en | N/A | constituency and dependency | 55.59 |
-| coref | zh | hybrid/rule | constituency and dependency | 61.93 |
+| coref | zh | hybrid/rule | constituency and dependency | 63.21 |
 
 | Annotator | Language | Coreference/MD Modes | Parsing Speed | Coref Speed |
 | :--- | :--- | :--- | :--- | :--- |
@@ -157,7 +157,7 @@ For Chinese:
 
 3. Download [zh-conll.properties](http://nlp.stanford.edu/software/zh-conll.properties) and update it to your specific settings
 
-4. Run this command (it should show a final F1 score of 61.93):
+4. Run this command (it should show a final F1 score of 63.21):
 
 ```bash
 java -Xmx3g -cp "stanford-corenlp-full-2015-12-09/*:stanford-chinese-corenlp-2015-12-08-models.jar" edu.stanford.nlp.hcoref.CorefSystem -props zh-conll.properties
