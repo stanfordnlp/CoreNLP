@@ -14,8 +14,6 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
-import edu.stanford.nlp.hcoref.*;
-import edu.stanford.nlp.hcoref.data.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
@@ -200,10 +198,7 @@ public class DeterministicCorefAnnotator implements Annotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        edu.stanford.nlp.hcoref.CorefCoreAnnotations.CorefMentionsAnnotation.class,
-        SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class
-    )));
+    return TOKENIZE_SSPLIT_PARSE_NER;
   }
 
   @Override
