@@ -30,12 +30,12 @@ just two lines of code. It is designed to be highly
 flexible and extensible.  With a single option you can change which
 tools should be enabled and which should be disabled. 
 Stanford CoreNLP integrates many of Stanford&rsquo;s NLP tools,
-including [the part-of-speech (POS) tagger](http://nlp.stanford.edu/software/tagger.shtml), 
-[the named entity recognizer (NER)](http://nlp.stanford.edu/software/CRF-NER.shtml),
-[the parser](http://nlp.stanford.edu/software/lex-parser.shtml),
-[the coreference resolution system](http://nlp.stanford.edu/software/dcoref.shtml),
+including [the part-of-speech (POS) tagger](http://nlp.stanford.edu/software/tagger.html), 
+[the named entity recognizer (NER)](http://nlp.stanford.edu/software/CRF-NER.html),
+[the parser](http://nlp.stanford.edu/software/lex-parser.html),
+[the coreference resolution system](http://nlp.stanford.edu/software/dcoref.html),
 [sentiment analysis](http://nlp.stanford.edu/sentiment/), and
-[the bootstrapped pattern learning](http://nlp.stanford.edu/software/patternslearning.shtml) tools.
+[the bootstrapped pattern learning](http://nlp.stanford.edu/software/patternslearning.html) tools.
 Its analyses provide the foundational building blocks for
 higher-level and domain-specific text understanding applications.
 
@@ -102,8 +102,8 @@ If you&rsquo;re just running the CoreNLP pipeline, please cite this CoreNLP
 demo paper. If you&rsquo;re dealing in depth with particular annotators,
 you&rsquo;re also encouraged to cite the papers that cover individual
 components. You can find more information on the Stanford NLP
-[software pages](http://nlp.stanford.edu/software/index.shtml) and/or
-[publications page](http://nlp.stanford.edu/publications.shtml).
+[software pages](http://nlp.stanford.edu/software/) and/or
+[publications page](http://nlp.stanford.edu/pubs/).
 
 > Manning, Christopher D., Mihai Surdeanu, John Bauer, Jenny Finkel, Steven J. Bethard, and David McClosky. 2014. [The Stanford CoreNLP Natural Language Processing Toolkit](http://nlp.stanford.edu/pubs/StanfordCoreNlp2014.pdf) In *Proceedings of the 52nd Annual Meeting of the Association for Computational Linguistics: System Demonstrations*, pp. 55-60. \[[pdf](http://nlp.stanford.edu/pubs/StanfordCoreNlp2014.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/StanfordCoreNlp2014.bib)\]
 
