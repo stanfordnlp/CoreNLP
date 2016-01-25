@@ -8,7 +8,7 @@ permalink: '/cmdline.html'
 
 The minimal command to run Stanford CoreNLP from the command line is:
 
-```bash
+```sh
 java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file input.txt
 ```
 
