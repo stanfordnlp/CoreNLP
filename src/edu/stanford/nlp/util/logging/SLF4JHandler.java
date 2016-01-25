@@ -20,7 +20,7 @@ public class SLF4JHandler extends OutputHandler {
     Class source = null;  // The class the message is coming from
     Object backupSource = null;  // Another identifier for the message
     Redwood.Flag flag = Redwood.Flag.STDOUT;
-    for (Object c : channel) {
+    for (Object c : ((channel == null) ? new Object[0] : channel)) {
       if (c instanceof Class) {
         source = (Class) c;  // This is a class the message is coming from
       } else if (c instanceof Redwood.Flag) {
