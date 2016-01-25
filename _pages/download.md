@@ -4,12 +4,12 @@ keywords: download
 permalink: '/download.html'
 ---
 
-Stanford CoreNLP can be downloaded via the link below. This will download a large (536 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks) (3) the libraries required to run CoreNLP, and (4) documentation / source code for the project.
+Stanford CoreNLP can be downloaded via the link below. This will download a large (536 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks) (3) the libraries required to run CoreNLP, and (4) documentation / source code for the project. This is everything for getting going on English!
 
 <div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-09.zip">Download CoreNLP 3.6.0</a> </div>
 
-We have model files for several other languages. And we have more
-model files for English, including for dealing with uncased English.
+**Other languages:** For working with another language, you need additional model files. We have model files for several other languages. And we have more
+model files for English, including for dealing with uncased English (that is, English which is not conventionally capitalized, whether texting or telegrams).
 You can find these for the current version on [the release history page](history.html).
 
 If you want to change the source code and recompile the files, see [these instructions](files/basic-compiling.txt).
