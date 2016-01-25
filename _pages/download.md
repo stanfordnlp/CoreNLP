@@ -8,8 +8,12 @@ Stanford CoreNLP can be downloaded via the link below. This will download a larg
 
 <div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-09.zip">Download CoreNLP 3.6.0</a> </div>
 
+We have model files for several other languages. And we have more
+model files for English, including for dealing with uncased English.
+You can find these for the current version on [the release history page](history.html).
+
 If you want to change the source code and recompile the files, see [these instructions](files/basic-compiling.txt).
-Previous releases can be found [on the release history page](history.html).
+Previous releases can be found on [the release history page](history.html).
 
 **GitHub**: Here is the [Stanford CoreNLP GitHub site](https://github.com/stanfordnlp/CoreNLP).
 

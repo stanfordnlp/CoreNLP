@@ -9,8 +9,17 @@ entries:
     - title: Overview
 
       items:
-        - title: Introduction
+        - title: About
           url: index.html
+	  
+        - title: Download
+          url: index.html#download
+
+        - title: Human languages supported
+          url: index.html#human-languages-supported
+
+        - title: Download
+          url: index.html#download
 
     - title: Usage 
 

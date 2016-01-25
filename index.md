@@ -45,14 +45,18 @@ Stanford CoreNLP can be downloaded via the link below. This will download a larg
 
 <div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-09.zip">Download CoreNLP 3.6.0</a> </div>
 
-For more information, see the [download page](download.html).
+Or Stanford CoreNLP is [available on Maven Central](http://mvnrepository.com/artifact/edu.stanford.nlp/stanford-corenlp).
+Source is [available on GitHub](https://github.com/stanfordnlp/CoreNLP).
+For more information on obtaining CoreNLP, see the [download page](download.html).
+
 
 ## Human languages supported
 
-The basic distribution provides model files for the analysis of **English**,
+The basic distribution provides model files for the analysis of well-edited **English**,
 but the engine is compatible with models for other languages. We provide
-packaged models for **Chinese** and **Spanish**, and
-Stanford NLP models for **French**, **German**, and **Arabic** are
+packaged models for **Chinese**, **French**, **German**, **Spanish**,
+and not-so-well-edited English.
+Stanford NLP models for  **Arabic** are
 also usable inside CoreNLP.
 
 | Annotator | ar | zh | en | fr | de | es |
@@ -72,9 +76,6 @@ also usable inside CoreNLP.
 ## Programming languages and operating systems
 
 Stanford CoreNLP is written in **Java**; current releases  require **Java 1.8+**. 
-There is a complete zip file with everything or
-it is [available on Maven Central](http://mvnrepository.com/artifact/edu.stanford.nlp/stanford-corenlp).
-Source is [available on GitHub](https://github.com/stanfordnlp/CoreNLP).
 
 You can use Stanford CoreNLP from the command-line, via its Java
 programmatic API, via third party APIs for most major modern programming languages, or via a service.

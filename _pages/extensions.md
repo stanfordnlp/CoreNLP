@@ -35,7 +35,7 @@ and our recommended way of using Stanford CoreNLP within UIMA.
 * [Stanford CoreNLP for .NET](http://sergey-tihon.github.io/Stanford.NLP.NET/StanfordCoreNLP.html) by Sergey Tihon.  (See also: [NuGet page](https://www.nuget.org/packages/Stanford.NLP.CoreNLP/)
 
 #### Python
-* [A Python wrapper for Stanford CoreNLP](https://github.com/smilli/py-corenlp) by Smitha Milli that uses the CoreNLP v3.6.0 server.
+* [A Python wrapper for Stanford CoreNLP](https://github.com/smilli/py-corenlp) by Smitha Milli that uses the new CoreNLP v3.6.0 server. Available on [PyPI](https://pypi.python.org/pypi/pycorenlp/).
 * [Brendan O'Connor's Python wrapper](https://github.com/brendano/stanford-corepywrapper) or maybe [John Beieler's fork](https://github.com/johnb30/stanford-corepywrapper). At CoreNLP v3.5.0, last we checked.
 * [An up-to-date fork of Smith (below) by Hiroyoshi Komatsu and Johannes Castner](https://bitbucket.org/torotoki/corenlp-python) (see also: [PyPI page](https://pypi.python.org/pypi/corenlp-python)). At CoreNLP v3.4.1, last we checked.
 * [A Python wrapper for Stanford CoreNLP](https://github.com/Wordseer/stanford-corenlp-python) (see also: [PyPI page](https://pypi.python.org/pypi/stanford-corenlp-python)).  This "Wordseer fork" seems to merge the work of a number of people building on the original Dustin Smith wrapper, namely: Hiroyoshi Komatsu, Johannes Castner, Robert Elwell, Tristan Chong, Aditi Muralidharan. At Stanford CoreNLP v3.2.0, last we checked.  See also [Robert Elwell's version](https://github.com/relwell/stanford-corenlp-python) (also at CoreNLP v3.2.0, last we checked).
