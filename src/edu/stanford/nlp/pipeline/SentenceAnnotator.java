@@ -44,71 +44,62 @@ public abstract class SentenceAnnotator implements Annotator {
 
   @Override
   public void annotate(Annotation annotation) {
-    Annotator.ANNOTATIONS_USED.clear();
-    try {
-      if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
-        if (nThreads() != 1 || maxTime() > 0) {
-          InterruptibleMulticoreWrapper<CoreMap, CoreMap> wrapper = buildWrapper(annotation);
-          for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-            boolean success = false;
-            // We iterate twice for each sentence so that if we fail for
-            // a sentence once, we start a new queue and try again.
-            // If the sentence fails a second time we give up.
-            for (int attempt = 0; attempt < 2; ++attempt) {
-              try {
-                wrapper.put(sentence);
-                success = true;
-                break;
-              } catch (RejectedExecutionException e) {
-                // If we time out, for now, we just throw away all jobs which were running at the time.
-                // Note that in order for this to be useful, the underlying job needs to handle Thread.interrupted()
-                List<CoreMap> failedSentences = wrapper.joinWithTimeout();
-                if (failedSentences != null) {
-                  for (CoreMap failed : failedSentences) {
-                    doOneFailedSentence(annotation, failed);
-                  }
+    if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
+      if (nThreads() != 1 || maxTime() > 0) {
+        InterruptibleMulticoreWrapper<CoreMap, CoreMap> wrapper = buildWrapper(annotation);
+        for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+          boolean success = false;
+          // We iterate twice for each sentence so that if we fail for
+          // a sentence once, we start a new queue and try again.
+          // If the sentence fails a second time we give up.
+          for (int attempt = 0; attempt < 2; ++attempt) {
+            try {
+              wrapper.put(sentence);
+              success = true;
+              break;
+            } catch (RejectedExecutionException e) {
+              // If we time out, for now, we just throw away all jobs which were running at the time.
+              // Note that in order for this to be useful, the underlying job needs to handle Thread.interrupted()
+              List<CoreMap> failedSentences = wrapper.joinWithTimeout();
+              if (failedSentences != null) {
+                for (CoreMap failed : failedSentences) {
+                  doOneFailedSentence(annotation, failed);
                 }
-                // We don't wait for termination here, and perhaps this
-                // is a mistake.  If the processor used does not respect
-                // interruption, we could easily create many threads
-                // which are all doing useless work.  However, there is
-                // no clean way to interrupt the thread and then
-                // guarantee it finishes without running the risk of
-                // waiting forever for the thread to finish, which is
-                // exactly what we don't want with the timeout.
-                wrapper = buildWrapper(annotation);
               }
-            }
-            if (!success) {
-              doOneFailedSentence(annotation, sentence);
-            }
-            while (wrapper.peek()) {
-              wrapper.poll();
+              // We don't wait for termination here, and perhaps this
+              // is a mistake.  If the processor used does not respect
+              // interruption, we could easily create many threads
+              // which are all doing useless work.  However, there is
+              // no clean way to interrupt the thread and then
+              // guarantee it finishes without running the risk of
+              // waiting forever for the thread to finish, which is
+              // exactly what we don't want with the timeout.
+              wrapper = buildWrapper(annotation);
             }
           }
-          List<CoreMap> failedSentences = wrapper.joinWithTimeout();
+          if (!success) {
+            doOneFailedSentence(annotation, sentence);
+          }
           while (wrapper.peek()) {
             wrapper.poll();
           }
-          if (failedSentences != null) {
-            for (CoreMap failed : failedSentences) {
-              doOneFailedSentence(annotation, failed);
-            }
-          }
-        } else {
-          for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-            doOneSentence(annotation, sentence);
+        }
+        List<CoreMap> failedSentences = wrapper.joinWithTimeout();
+        while (wrapper.peek()) {
+          wrapper.poll();
+        }
+        if (failedSentences != null) {
+          for (CoreMap failed : failedSentences) {
+            doOneFailedSentence(annotation, failed);
           }
         }
       } else {
-        throw new RuntimeException("unable to find sentences in: " + annotation);
+        for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+          doOneSentence(annotation, sentence);
+        }
       }
-    } finally {
-      if (!Annotator.ANNOTATIONS_USED.equals(requires())) {
-        throw new IllegalStateException("Annotations used and requested don't match in annotator " + this.getClass().getSimpleName() + ":\n\t "
-            + Annotator.ANNOTATIONS_USED + "\n\tvs\n\t" + requires());
-      }
-      Annotator.ANNOTATIONS_USED.clear();
+    } else {
+      throw new RuntimeException("unable to find sentences in: " + annotation);
     }
   }
 

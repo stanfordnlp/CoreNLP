@@ -40,8 +40,6 @@ import java.util.*;
  */
 public interface Annotator {
 
-  public static final Set<Class<? extends CoreAnnotation>> ANNOTATIONS_USED = new HashSet<>();
-
   /**
    * Given an Annotation, perform a task on this Annotation.
    */
