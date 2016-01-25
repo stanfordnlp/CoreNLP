@@ -30,12 +30,12 @@ but [the JRE](http://java.com/) will do if you are only going to be a user.
 <dependency>
     <groupId>edu.stanford.nlp</groupId>
     <artifactId>stanford-corenlp</artifactId>
-    <version>3.5.2</version>
+    <version>3.6.0</version>
 </dependency>
 <dependency>
     <groupId>edu.stanford.nlp</groupId>
     <artifactId>stanford-corenlp</artifactId>
-    <version>3.5.2</version>
+    <version>3.6.0</version>
     <classifier>models</classifier>
 </dependency>
 </dependencies>
@@ -47,7 +47,7 @@ NEW: If you want to get a language models jar off of Maven for Chinese, Spanish,
 <dependency>
     <groupId>edu.stanford.nlp</groupId>
     <artifactId>stanford-corenlp</artifactId>
-    <version>3.5.2</version>
+    <version>3.6.0</version>
     <classifier>models-chinese</classifier>
 </dependency>
 ```
