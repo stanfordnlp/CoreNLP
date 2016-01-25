@@ -10,8 +10,6 @@ The backbone of the CoreNLP package is formed by two classes: Annotation and Ann
 
 The Annotators currently supported and the Annotations they generate are summarized [here](annotators.html).
 
-Depending on which annotators you use, please cite the corresponding papers on: [POS tagging](http://nlp.stanford.edu/software/tagger.shtml), [NER](http://nlp.stanford.edu/software/CRF-NER.shtml), [parsing (with parse annotator)](http://nlp.stanford.edu/software/lex-parser.shtml), [dependency parsing (with depparse annotator)](http://nlp.stanford.edu/software/nndep.shtml), [coreference resolution](http://nlp.stanford.edu/software/dcoref.shtml), or [sentiment](http://nlp.stanford.edu/sentiment/).
-
 To construct a Stanford CoreNLP object from a given set of properties, use `StanfordCoreNLP(Properties props)`. This method creates the pipeline using the annotators given in the "annotators" property (see below for an example setting). The complete list of accepted annotator names is listed in the first column of the table [here](annotators.html). To parse an arbitrary text, use the `annotate(Annotation document)` method.
 
 ``` java

@@ -100,11 +100,16 @@ is available from Stanford. You can contact us at
 ## Citing Stanford CoreNLP in papers
 
 If you&rsquo;re just running the CoreNLP pipeline, please cite this CoreNLP
-demo paper. If you&rsquo;re dealing in depth with particular annotators,
+demo paper: 
+
+> Manning, Christopher D., Mihai Surdeanu, John Bauer, Jenny Finkel, Steven J. Bethard, and David McClosky. 2014. [The Stanford CoreNLP Natural Language Processing Toolkit](http://nlp.stanford.edu/pubs/StanfordCoreNlp2014.pdf) In *Proceedings of the 52nd Annual Meeting of the Association for Computational Linguistics: System Demonstrations*, pp. 55-60. \[[pdf](http://nlp.stanford.edu/pubs/StanfordCoreNlp2014.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/StanfordCoreNlp2014.bib)\]
+
+If you&rsquo;re dealing in depth with particular annotators,
 you&rsquo;re also encouraged to cite the papers that cover individual
-components. You can find more information on the Stanford NLP
+components:
+[POS tagging](http://nlp.stanford.edu/software/tagger.shtml), [NER](http://nlp.stanford.edu/software/CRF-NER.shtml), [parsing (with parse annotator)](http://nlp.stanford.edu/software/lex-parser.shtml), [dependency parsing (with depparse annotator)](http://nlp.stanford.edu/software/nndep.shtml), [coreference resolution](http://nlp.stanford.edu/software/dcoref.shtml), or [sentiment](http://nlp.stanford.edu/sentiment/).
+You can find more information on the Stanford NLP
 [software pages](http://nlp.stanford.edu/software/) and/or
 [publications page](http://nlp.stanford.edu/pubs/).
 
-> Manning, Christopher D., Mihai Surdeanu, John Bauer, Jenny Finkel, Steven J. Bethard, and David McClosky. 2014. [The Stanford CoreNLP Natural Language Processing Toolkit](http://nlp.stanford.edu/pubs/StanfordCoreNlp2014.pdf) In *Proceedings of the 52nd Annual Meeting of the Association for Computational Linguistics: System Demonstrations*, pp. 55-60. \[[pdf](http://nlp.stanford.edu/pubs/StanfordCoreNlp2014.pdf)\] \[[bib](http://nlp.stanford.edu/pubs/StanfordCoreNlp2014.bib)\]
 

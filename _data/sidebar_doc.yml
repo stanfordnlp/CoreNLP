@@ -11,7 +11,7 @@ entries:
       items:
         - title: About
           url: index.html
-	  
+
         - title: Download
           url: index.html#download
 
