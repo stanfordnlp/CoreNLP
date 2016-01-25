@@ -12,28 +12,28 @@ The minimal command to run Stanford CoreNLP from the command line is:
 java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file input.txt
 ```
 
-This processes the included [sample file](files/input.txt) `input.txt` if run from the distribution directory. We use a wildcard "*" after `-cp` to load all jar files in the current directory - it needs to be in quotes. This command writes the output to an XML [file](files/input.txt.xml.txt) named `input.txt.xml` in the same directory.
-
-**Note** : Processing a short text like this is very inefficient. It takes a minute to load everything before processing begins. You should batch your processing.
+If this command is run from the distribution directory, it processes the included [sample file](files/input.txt) `input.txt`. We use a wildcard `"*"` after `-cp` to load all jar files in the current directory - it needs to be in quotes. This command writes the output to an XML [file](files/input.txt.xml.txt) named `input.txt.out` in the same directory.
 
 ## Notes
+* Processing a short text like this is very inefficient. It takes a minute to load everything before processing begins. You should batch your processing.
 * Stanford CoreNLP requires Java version 1.8 or higher.
 * Specifying memory: `-Xmx2g` specifies the amount of RAM that Java will make available for CoreNLP. On a 64-bit machine, Stanford CoreNLP typically requires 2GB to run (and it may need even more, depending on the size of the document to parse). On a 32 bit machine (in 2016, this is most commonly a 32-bit Windows machine), you cannot allocate 2GB of RAM; probably you should try with `-Xmx1800m`. You are probably okay with a minimum -f `-Xmx1500m`, but this amount of memory is a bit marginal.
 * Stanford CoreNLP includes an interactive shell for analyzing sentences. If you do not specify any properties that load input files, you will be placed in the interactive shell. Type `q` to exit.
 
 ## Classpath
 
-Your command line has to load the code, library, and model jars that CoreNLP uses. The easiest way to do that is with a command line this:
+Your command line has to load the code, library, and model jars that CoreNLP uses. The easiest way to do that is with a command line this, where `/Users/me/corenlp/` should be changed to the path where you put CoreNLP:
 
 ```
 java -cp "/Users/me/corenlp/*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -file inputFile
 ```
 
+Alternatively, you can add this path to your CLASSPATH, so these libraries are always available.
+
 You can also individually specify the needed jar files. Use the following sort of command line, adjusting the JAR file date extensions `VV` to your downloaded release.
 
-
 ```
-java -cp stanford-corenlp-VV.jar:stanford-corenlp-VV-models.jar:xom.jar:joda-time.jar:jollyday.jar:ejml-VV.jar -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -file <YOUR INPUT FILE>
+java -cp stanford-corenlp-VV.jar:stanford-corenlp-VV-models.jar:xom.jar:joda-time.jar:jollyday.jar:ejml-VV.jar -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -file inputFile
 ```
 
 The command above works for Mac OS X or Linux. For Windows, the colons (:) separating the jar files need to be semi-colons (;). If you are not sitting in the distribution directory, you'll also need to include a path to the files before each.
@@ -44,42 +44,76 @@ Before using Stanford CoreNLP, it is usual to create a configuration file (a Jav
 
 > annotators = tokenize, ssplit, pos, lemma, ner, parse, dcoref
 
-Run using these properties with a command of the sort:
-
-```
-java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -props <YOUR CONFIG FILE> -file input.txt
-```
-
-For example, using the properties file [sampleProps.properties](files/sampleProps.properties) as follows
+For example, using the properties file [sampleProps.properties](files/sampleProps.properties), you can run using these properties as follows:
 
 ```
 java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -props sampleProps.properties
 ```
 
-results in the output file [input.txt.output](files/input.txt.output) given the same input file `input.txt`.
+This results in the output file [input.txt.output](files/input.txt.output) given the same input file `input.txt`.
 
 However, if you just want to specify one or two properties, you can instead place them on the command line, as in the first example, where annotators were specified in the command.
 
 ```
-java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file input.txt
+java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner -file input.txt
 ```
 
 The `-props` parameter is optional. By default, Stanford CoreNLP will search for StanfordCoreNLP.properties in your classpath and use the defaults included in the distribution.
 
 The `-annotators` argument is actually optional. If you leave it out, the code uses a built in properties file, which enables the following annotators: tokenization and sentence splitting, POS tagging, lemmatization, NER, parsing, and coreference resolution (that is, what we used in these examples).
 
+If you have a lot of text but all you want to do is to, say, get part-of-speech (POS) tags, then you should definitely specify an annotators list, since you can then omit later annotators which invoke much more expensive processing that you don't need. For example, you might give the command:
+
+```
+java -cp "*" -Xmx500m edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos -file wikipedia.txt -outputFormat conll
+```
+
+We provide a small shell script `corenlp.sh`. On Linux or OS X, this may be useful in allowing you to type shorter command lines to invoke CoreNLP. For example, you can instead say:
+
+```
+./corenlp.sh -annotators tokenize,ssplit,pos -file wikipedia.txt -outputFormat conll
+```
+
+
+## Languages other than English
+
+You first have to have available a models jar file for the language you wish to use. You can download it from this site or you can use
+the models file on [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22stanford-corenlp%22). You add it to your pom file like this:
+
+``` xml
+<dependency>
+    <groupId>edu.stanford.nlp</groupId>
+    <artifactId>stanford-corenlp</artifactId>
+    <version>3.6.0</version>
+    <classifier>models-chinese</classifier>
+</dependency>
+```
+
+Our examples assume that you are in the root directory of CoreNLP and that these extra jar files are also available there. Each language jar contains a default properties file for the appropriate language. Working with text in another language is then as easy as specifying this properties file. For example, for Chinese:
+
+```
+java -mx3g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -props StanfordCoreNLP-chinese.properties -file chinese.txt -outputFormat text
+```
+
+You can as usual specify details on the annotators and properties:
+
+```
+java -mx1g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -props StanfordCoreNLP-french.properties -annotators tokenize,ssplit,pos,depparse -file french.txt -outputFormat conllu
+```
 
 ## Input options
 
-To process a list of files, use the `-filelist` parameter:
+To process one file, use the `-file` option.  To process a list of files, use the `-filelist` parameter:
 
 ```
-java -cp stanford-corenlp-VV.jar:stanford-corenlp-VV-models.jar:xom.jar:joda-time.jar:jollyday.jar:ejml-VV.jar -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP [ -props <YOUR CONFIGURATION FILE> ] -filelist <A FILE CONTAINING YOUR LIST OF FILES>
+java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP [ -props myprops.props ] -filelist filelist.txt
 ```
 
 where the `-filelist` parameter points to a file whose content lists all files to be processed (one per line).
 
 If you do not specify any properties that load input files, you will be placed in the interactive shell. Type `q` to exit.
+
+If your input files have XML tags in them, you may wish to use the `cleanxml` annotator to preprocess it.
 
 ## Output
 
@@ -107,19 +141,6 @@ The following properties are associated with output :
   * "conllu": [CoNLL-U](https://universaldependencies.github.io/docs/format.html) output format, another tab-separated values (TSV) format.  Output extension is `.conllu`. This representation may give only a partial view of an `Annotation`.
   * "serialized": Produces some serialized version of each `Annotation`. May or may not be lossy. What you actually get depends on the `outputSerializer` property, which you should also set. The default is the `GenericAnnotationSerializer`, which uses the built-in Java object serialization and writes a file with extension `.ser.gz`.
 
-## cleanxml
-
-Stanford CoreNLP also has the ability to remove most XML from a document before processing it. (CDATA is not correctly handled.) For example, if run with the annotators
-
-```
-annotators = tokenize, cleanxml, ssplit, pos, lemma, ner, parse, dcoref
-```
-
-and given the text
-> `<xml>Stanford University is located in California. It is a great university.</xml>`
-
-Stanford CoreNLP generates the following output. Note that the only difference between this and the original output is the change in CharacterOffsets. 
-
-## Encoding
+## Character Encoding
 
 The default encoding is Unicode's UTF-8. You can change the encoding used by supplying the program with the command line flag -encoding FOO (or including the corresponding property in a properties file that you are using).

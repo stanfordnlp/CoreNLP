@@ -10,9 +10,32 @@ permalink: '/cleanxml.html'
 
 ## Description
 
-Remove xml tokens from the document.
+This annotator removes XML tags from an input document.
+Stanford CoreNLP also has the ability to remove most XML from a
+document before processing it. This functionality is provided by a
+finite automaton. It works fine for typical XML, but complex
+constructions and CDATA sections will not be correctly handled. Many
+more complex options are also available: You can choose to only delete
+some XML tags, to treat certain XML tags as sentence ending, as
+marking the speaker in a dialog, etc.
+
+For example, if run with the annotators 
+
+```
+annotators = tokenize, cleanxml, ssplit, pos, lemma, ner, parse, dcoref
+```
+
+and given the text
+> `<xml>Stanford University is located in California. It is a great university.</xml>`
+
+Stanford CoreNLP generates output that is basically the same as for the default
+`input.txt` example. The only difference between this and the original output is a change in CharacterOffsets. 
+
 
 ## Options
+
+Some of the supported options are documented below. At present, there
+are others that can only be found in the source code.
 
 * clean.xmltags: Discard xml tag tokens that match this regular expression.  For example, .* will discard all xml tags.
 * clean.sentenceendingtags: treat tags that match this regular expression as the end of a sentence.  For example, p will treat &lt;p&gt; as the end of a sentence.

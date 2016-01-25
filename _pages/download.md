@@ -15,6 +15,11 @@ You can find these for the current version on [the release history page](history
 If you want to change the source code and recompile the files, see [these instructions](files/basic-compiling.txt).
 Previous releases can be found on [the release history page](history.html).
 
+**Java:** Stanford CoreNLP now requires Java 8. If you do not have
+this installed you should first of all install Java 8.  Probably
+[the JDK](http://www.oracle.com/technetwork/java/javase/downloads/index.html),
+but [the JRE](http://java.com/) will do if you are only going to be a user.
+
 **GitHub**: Here is the [Stanford CoreNLP GitHub site](https://github.com/stanfordnlp/CoreNLP).
 
 **Maven**: You can find Stanford CoreNLP on [Maven Central](http://search.maven.org/#browse%7C11864822). The crucial thing to know is that CoreNLP needs its models to run (most parts beyond the tokenizer) and so you need to specify both the code jar and the models jar in your `pom.xml`, as follows:

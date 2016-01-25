@@ -45,7 +45,7 @@ Stanford CoreNLP can be downloaded via the link below. This will download a larg
 
 <div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-09.zip">Download CoreNLP 3.6.0</a> </div>
 
-Or Stanford CoreNLP is [available on Maven Central](http://mvnrepository.com/artifact/edu.stanford.nlp/stanford-corenlp).
+Or Stanford CoreNLP is [available on Maven Central](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22stanford-corenlp%22).
 Source is [available on GitHub](https://github.com/stanfordnlp/CoreNLP).
 For more information on obtaining CoreNLP, see the [download page](download.html).
 
