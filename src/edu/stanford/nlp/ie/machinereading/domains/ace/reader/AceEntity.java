@@ -27,7 +27,7 @@ public class AceEntity extends AceElement {
     mType = type;
     mSubtype = subtype;
     mClass = cls;
-    mMentions = new ArrayList<AceEntityMention>();
+    mMentions = new ArrayList<>();
   }
 
   public void addMention(AceEntityMention m) {

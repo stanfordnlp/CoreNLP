@@ -44,8 +44,8 @@ public class AceEntityMention extends AceMention {
     mExtent = extent;
     mHeadTokenPosition = -1;
     mParent = null;
-    mRelationMentions = new ArrayList<AceRelationMention>();
-    mEventMentions = new ArrayList<AceEventMention>();
+    mRelationMentions = new ArrayList<>();
+    mEventMentions = new ArrayList<>();
   }
 
   public String getMention() { return mType; }
@@ -114,8 +114,8 @@ public class AceEntityMention extends AceMention {
   
   private static boolean contains(ArrayList<Integer> set,
 				  int elem) {
-    for(int i = 0; i < set.size(); i ++){
-      if(elem == set.get(i)) return true;
+    for (Integer aSet : set) {
+      if (elem == aSet) return true;
     }
     return false;
   }
@@ -128,7 +128,7 @@ public class AceEntityMention extends AceMention {
    * Note: the mHead must be already matched against tokens!
    */
   public void detectHeadToken(AceDocument doc) {
-    ArrayList<Integer> preps = new ArrayList<Integer>();
+    ArrayList<Integer> preps = new ArrayList<>();
     preps.add(AceToken.OTHERS.get("IN"));
 
     for(int i = mHead.getTokenStart(); i <= mHead.getTokenEnd(); i ++){

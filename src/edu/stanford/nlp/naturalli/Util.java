@@ -14,6 +14,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
+import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.IterableIterator;
 import edu.stanford.nlp.util.Pair;
@@ -257,6 +258,29 @@ public class Util {
       for (SemanticGraphEdge edge : invalidEdges) {
         tree.removeEdge(edge);
         changed = true;
+      }
+    }
+
+    // Edge case: remove duplicate dobj to "that."
+    //            This is a common parse error.
+    for (IndexedWord vertex : tree.vertexSet()) {
+      SemanticGraphEdge thatEdge = null;
+      int dobjCount = 0;
+      for (SemanticGraphEdge edge : tree.outgoingEdgeIterable(vertex)) {
+        if (edge.getDependent().word().equalsIgnoreCase("that")) {
+          thatEdge = edge;
+        }
+        if (edge.getRelation().toString().equals("dobj")) {
+          dobjCount += 1;
+        }
+      }
+      if (dobjCount > 1 && thatEdge != null) {
+        // Case: there are two dobj edges, one of which goes to the word "that"
+        // Action: rewrite the dobj edge to "that" to be a "mark" edge.
+        tree.removeEdge(thatEdge);
+        tree.addEdge(thatEdge.getGovernor(), thatEdge.getDependent(),
+            GrammaticalRelation.valueOf(thatEdge.getRelation().getLanguage(), "mark"),
+            thatEdge.getWeight(), thatEdge.isExtra());
       }
     }
 

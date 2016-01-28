@@ -49,8 +49,8 @@ public class RothResultsByRelation extends ResultsPrinter {
     
     ResultsPrinter.align(goldStandard, extractorOutput);
     
-    List<RelationMention> relations = new ArrayList<RelationMention>();
-    final Map<RelationMention,String> predictions = new HashMap<RelationMention,String>();
+    List<RelationMention> relations = new ArrayList<>();
+    final Map<RelationMention,String> predictions = new HashMap<>();
     for (int i = 0; i < goldStandard.size(); i++) {
   		List<RelationMention> goldRelations = AnnotationUtils.getAllRelations(mentionFactory, goldStandard.get(i), true);
   		relations.addAll(goldRelations);
@@ -59,19 +59,19 @@ public class RothResultsByRelation extends ResultsPrinter {
   		}
   	}
         
-  	final Counter<Pair<Pair<String, String>, String>> pathCounts = new ClassicCounter<Pair<Pair<String, String>, String>>();
+  	final Counter<Pair<Pair<String, String>, String>> pathCounts = new ClassicCounter<>();
   
   	for (RelationMention rel : relations) {
-  		pathCounts.incrementCount(new Pair<Pair<String, String>, String>(new Pair<String, String>(
-  				rel.getArg(0).getType(), rel.getArg(1).getType()), featureFactory.getFeature(rel, "dependency_path_lowlevel")));
+  		pathCounts.incrementCount(new Pair<>(new Pair<>(
+				rel.getArg(0).getType(), rel.getArg(1).getType()), featureFactory.getFeature(rel, "dependency_path_lowlevel")));
   	}
   
-  	Counter<String> singletonCorrect = new ClassicCounter<String>();
-  	Counter<String> singletonPredicted = new ClassicCounter<String>();
-  	Counter<String> singletonActual = new ClassicCounter<String>();
+  	Counter<String> singletonCorrect = new ClassicCounter<>();
+  	Counter<String> singletonPredicted = new ClassicCounter<>();
+  	Counter<String> singletonActual = new ClassicCounter<>();
   	for (RelationMention rel : relations) {
-  		if (pathCounts.getCount(new Pair<Pair<String, String>, String>(new Pair<String, String>(rel.getArg(0).getType(),
-  				rel.getArg(1).getType()), featureFactory.getFeature(rel, "dependency_path_lowlevel"))) == 1.0) {
+  		if (pathCounts.getCount(new Pair<>(new Pair<>(rel.getArg(0).getType(),
+				rel.getArg(1).getType()), featureFactory.getFeature(rel, "dependency_path_lowlevel"))) == 1.0) {
   			String prediction = predictions.get(rel);
   			if (prediction.equals(rel.getType())) {
   				singletonCorrect.incrementCount(prediction);
@@ -99,10 +99,10 @@ public class RothResultsByRelation extends ResultsPrinter {
   			int predictionComp = prediction1.compareTo(prediction2);
   			// int pathComp =
   			// getFeature(rel1,"generalized_dependency_path").compareTo(getFeature(rel2,"generalized_dependency_path"));
-  			double pathCount1 = pathCounts.getCount(new Pair<Pair<String, String>, String>(new Pair<String, String>(rel1
-  					.getArg(0).getType(), rel1.getArg(1).getType()), featureFactory.getFeature(rel1, "dependency_path_lowlevel")));
-  			double pathCount2 = pathCounts.getCount(new Pair<Pair<String, String>, String>(new Pair<String, String>(rel2
-  					.getArg(0).getType(), rel2.getArg(1).getType()), featureFactory.getFeature(rel2, "dependency_path_lowlevel")));
+  			double pathCount1 = pathCounts.getCount(new Pair<>(new Pair<>(rel1
+					.getArg(0).getType(), rel1.getArg(1).getType()), featureFactory.getFeature(rel1, "dependency_path_lowlevel")));
+  			double pathCount2 = pathCounts.getCount(new Pair<>(new Pair<>(rel2
+					.getArg(0).getType(), rel2.getArg(1).getType()), featureFactory.getFeature(rel2, "dependency_path_lowlevel")));
   			if (entComp != 0) {
   				return entComp;
   				// } else if (pathComp != 0) {

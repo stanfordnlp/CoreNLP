@@ -81,26 +81,26 @@ public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F
       int numClasses, Index<L> labelIndex, Index<F> featureIndex) {
     Set<L> labelSet = Generics.newHashSet();
     NBWeights nbWeights = trainWeights(data, labels, numFeatures, numClasses);
-    Counter<L> priors = new ClassicCounter<L>();
+    Counter<L> priors = new ClassicCounter<>();
     double[] pr = nbWeights.priors;
     for (int i = 0; i < pr.length; i++) {
       priors.incrementCount(labelIndex.get(i), pr[i]);
       labelSet.add(labelIndex.get(i));
     }
-    Counter<Pair<Pair<L, F>, Number>> weightsCounter = new ClassicCounter<Pair<Pair<L, F>, Number>>();
+    Counter<Pair<Pair<L, F>, Number>> weightsCounter = new ClassicCounter<>();
     double[][][] wts = nbWeights.weights;
     for (int c = 0; c < numClasses; c++) {
       L label = labelIndex.get(c);
       for (int f = 0; f < numFeatures; f++) {
         F feature = featureIndex.get(f);
-        Pair<L, F> p = new Pair<L, F>(label, feature);
+        Pair<L, F> p = new Pair<>(label, feature);
         for (int val = 0; val < wts[c][f].length; val++) {
-          Pair<Pair<L, F>, Number> key = new Pair<Pair<L, F>, Number>(p, Integer.valueOf(val));
+          Pair<Pair<L, F>, Number> key = new Pair<>(p, Integer.valueOf(val));
           weightsCounter.incrementCount(key, wts[c][f][val]);
         }
       }
     }
-    return new NaiveBayesClassifier<L, F>(weightsCounter, priors, labelSet);
+    return new NaiveBayesClassifier<>(weightsCounter, priors, labelSet);
 
   }
 
@@ -112,8 +112,8 @@ public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F
     int numFeatures = featureSet.size();
     int[][] data = new int[examples.size()][numFeatures];
     int[] labels = new int[examples.size()];
-    labelIndex = new HashIndex<L>();
-    featureIndex = new HashIndex<F>();
+    labelIndex = new HashIndex<>();
+    featureIndex = new HashIndex<>();
     for (F feat : featureSet) {
       featureIndex.add(feat);
     }
@@ -195,7 +195,7 @@ public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F
     }
     int totalFeatures = sumValues[numFeatures - 1] + numValues[numFeatures - 1] + 1;
     logger.info("total feats " + totalFeatures);
-    LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(totalFeatures, numClasses, newdata, labels, prior, sigma, 0.0);
+    LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<>(totalFeatures, numClasses, newdata, labels, prior, sigma, 0.0);
     Minimizer<DiffFunction> min = new QNMinimizer();
     double[] argmin = min.minimize(objective, 1e-4, objective.initial());
     double[][] wts = objective.to2D(argmin);

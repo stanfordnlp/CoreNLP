@@ -143,9 +143,9 @@ public class DependencyParser {
 
   public List<Integer> getFeatures(Configuration c) {
     // Presize the arrays for very slight speed gain. Hardcoded, but so is the current feature list.
-    List<Integer> fWord = new ArrayList<Integer>(18);
-    List<Integer> fPos = new ArrayList<Integer>(18);
-    List<Integer> fLabel = new ArrayList<Integer>(12);
+    List<Integer> fWord = new ArrayList<>(18);
+    List<Integer> fPos = new ArrayList<>(18);
+    List<Integer> fLabel = new ArrayList<>(12);
     for (int j = 2; j >= 0; --j) {
       int index = c.getStack(j);
       fWord.add(getWordID(c.getWord(index)));
@@ -516,9 +516,9 @@ public class DependencyParser {
       s = input.readLine();
       int nPreComputed = Integer.parseInt(s.substring(s.indexOf('=') + 1));
 
-      knownWords = new ArrayList<String>();
-      knownPos = new ArrayList<String>();
-      knownLabels = new ArrayList<String>();
+      knownWords = new ArrayList<>();
+      knownPos = new ArrayList<>();
+      knownLabels = new ArrayList<>();
       double[][] E = new double[nDict + nPOS + nLabel][eSize];
       String[] splits;
       int index = 0;
@@ -571,7 +571,7 @@ public class DependencyParser {
           W2[i][j] = Double.parseDouble(splits[i]);
       }
 
-      preComputed = new ArrayList<Integer>();
+      preComputed = new ArrayList<>();
       while (preComputed.size() < nPreComputed) {
         s = input.readLine();
         splits = s.split(" ");
@@ -600,7 +600,7 @@ public class DependencyParser {
       BufferedReader input = null;
       try {
         input = IOUtils.readerFromString(embedFile);
-        List<String> lines = new ArrayList<String>();
+        List<String> lines = new ArrayList<>();
         for (String s; (s = input.readLine()) != null; ) {
           lines.add(s);
         }
@@ -650,12 +650,12 @@ public class DependencyParser {
     System.err.println("Pre-trained Model File: " + preModel);
 
     List<CoreMap> trainSents = new ArrayList<>();
-    List<DependencyTree> trainTrees = new ArrayList<DependencyTree>();
+    List<DependencyTree> trainTrees = new ArrayList<>();
     Util.loadConllFile(trainFile, trainSents, trainTrees, config.unlabeled, config.cPOS);
     Util.printTreeStats("Train", trainTrees);
 
-    List<CoreMap> devSents = new ArrayList<CoreMap>();
-    List<DependencyTree> devTrees = new ArrayList<DependencyTree>();
+    List<CoreMap> devSents = new ArrayList<>();
+    List<DependencyTree> devTrees = new ArrayList<>();
     if (devFile != null) {
       Util.loadConllFile(devFile, devSents, devTrees, config.unlabeled, config.cPOS);
       Util.printTreeStats("Dev", devTrees);
@@ -663,7 +663,7 @@ public class DependencyParser {
     genDictionaries(trainSents, trainTrees);
 
     //NOTE: remove -NULL-, and the pass it to ParsingSystem
-    List<String> lDict = new ArrayList<String>(knownLabels);
+    List<String> lDict = new ArrayList<>(knownLabels);
     lDict.remove(0);
     system = new ArcStandard(config.tlp, lDict, true);
 
@@ -778,7 +778,7 @@ public class DependencyParser {
         W2[i][j] = random.nextDouble() * 2 * config.initRange - config.initRange;
 
     // Read embeddings into `embedID`, `embeddings`
-     Map<String, Integer> embedID = new HashMap<String, Integer>();
+     Map<String, Integer> embedID = new HashMap<>();
      double[][] embeddings = readEmbedFile(embedFile, embedID);
 
     // Try to match loaded embeddings with words in dictionary
@@ -1055,7 +1055,7 @@ public class DependencyParser {
     System.err.println("Test File: " + testFile);
     Timing timer = new Timing();
     List<CoreMap> testSents = new ArrayList<>();
-    List<DependencyTree> testTrees = new ArrayList<DependencyTree>();
+    List<DependencyTree> testTrees = new ArrayList<>();
     Util.loadConllFile(testFile, testSents, testTrees, config.unlabeled, config.cPOS);
 
     // count how much to parse
@@ -1065,8 +1065,8 @@ public class DependencyParser {
     for (CoreMap testSent : testSents) {
       numSentences += 1;
       List<CoreLabel> tokens = testSent.get(CoreAnnotations.TokensAnnotation.class);
-      for (int k = 0; k < tokens.size(); ++ k) {
-        String word = tokens.get(k).word();
+      for (CoreLabel token : tokens) {
+        String word = token.word();
         numWords += 1;
         if (!wordIDs.containsKey(word))
           numOOVWords += 1;

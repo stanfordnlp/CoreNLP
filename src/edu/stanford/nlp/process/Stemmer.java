@@ -594,8 +594,8 @@ public class Stemmer implements Function<Word,Word> {
 
   public String stem(String s) {
     char[] characters = s.toCharArray();
-    for (int i = 0; i < characters.length; i++) {
-      add(characters[i]);
+    for (char character : characters) {
+      add(character);
     }
     stem();
     return toString();

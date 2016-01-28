@@ -79,7 +79,7 @@ public class Ssurgeon {
    * the result of each edit applied against a copy of the graph.
    */
   public  List<SemanticGraph> expandFromPatterns(List<SsurgeonPattern> patternList, SemanticGraph sg) throws Exception {
-    List<SemanticGraph> retList = new ArrayList<SemanticGraph>();
+    List<SemanticGraph> retList = new ArrayList<>();
     for (SsurgeonPattern pattern :patternList) {
       Collection<SemanticGraph> generated = pattern.execute(sg);
       for (SemanticGraph orderedGraph : generated) {
@@ -133,7 +133,7 @@ public class Ssurgeon {
     return generated;
   }
   private  List<SemanticGraph> exhaustFromPatterns(List<SsurgeonPattern> patternList, SemanticGraph sg, int depth) throws Exception {
-    List<SemanticGraph> retList = new ArrayList<SemanticGraph>();
+    List<SemanticGraph> retList = new ArrayList<>();
     for (SsurgeonPattern pattern : patternList) {
       Collection<SemanticGraph> generated = pattern.execute(sg);
       for (SemanticGraph modGraph : generated) {
@@ -159,7 +159,7 @@ public class Ssurgeon {
     }
 
     if (retList.size() > 0) {
-      List<SemanticGraph> referenceList = new ArrayList<SemanticGraph>();
+      List<SemanticGraph> referenceList = new ArrayList<>();
       referenceList.addAll(retList);
       for (SemanticGraph childGraph : referenceList) {
         if (depth < 3)
@@ -243,7 +243,7 @@ public class Ssurgeon {
    * in hashmaps in String form.
    */
   public static String[] parseArgs(String argsString) {
-    List<String> retList = new ArrayList<String>();
+    List<String> retList = new ArrayList<>();
     String patternString = "(?:[^\\s\\\"]++|\\\"[^\\\"]*+\\\"|(\\\"))++";
     Pattern pattern = Pattern.compile(patternString);
     Matcher matcher = pattern.matcher(argsString);
@@ -370,7 +370,7 @@ public class Ssurgeon {
 
   public static String writeToString(SsurgeonPattern pattern) {
     try {
-      List<SsurgeonPattern> patterns = new LinkedList<SsurgeonPattern>();
+      List<SsurgeonPattern> patterns = new LinkedList<>();
       patterns.add(pattern);
       Document domDoc = createPatternXMLDoc(patterns);
       if (domDoc != null) {
@@ -446,7 +446,7 @@ public class Ssurgeon {
    */
   @SuppressWarnings("unchecked")
   public List<SsurgeonPattern> readFromFile(File file) throws Exception {
-    List<SsurgeonPattern> retList = new ArrayList<SsurgeonPattern>();
+    List<SsurgeonPattern> retList = new ArrayList<>();
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file);
 
     if (VERBOSE)
@@ -484,7 +484,7 @@ public class Ssurgeon {
     if (VERBOSE)
       System.out.println("Reading Ssurgeon patterns from directory = "+dir.getAbsolutePath());
     File[] files = dir.listFiles((dir1, name) -> name.toLowerCase().endsWith(".xml"));
-    List<SsurgeonPattern> patterns = new ArrayList<SsurgeonPattern>();
+    List<SsurgeonPattern> patterns = new ArrayList<>();
     for (File file : files) {
       try {
         patterns.addAll(readFromFile(file));
@@ -697,7 +697,7 @@ public class Ssurgeon {
    * other node types.
    */
   public static List<Element> getChildElements(Element element) {
-    LinkedList<Element> childElements = new LinkedList<Element>();
+    LinkedList<Element> childElements = new LinkedList<>();
     try {
       NodeList nodeList = element.getChildNodes();
       for (int i=0; i<nodeList.getLength(); i++) {

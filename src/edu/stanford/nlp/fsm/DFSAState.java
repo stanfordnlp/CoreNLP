@@ -115,7 +115,7 @@ public final class DFSAState<T,S> implements Scored {
 
   public Set<DFSAState<T, S>> statesReachable() {
     Set<DFSAState<T, S>> visited = Generics.newHashSet();
-    List<DFSAState<T, S>> toVisit = new ArrayList<DFSAState<T, S>>();
+    List<DFSAState<T, S>> toVisit = new ArrayList<>();
     toVisit.add(this);
     exploreStates(toVisit, visited);
     return visited;

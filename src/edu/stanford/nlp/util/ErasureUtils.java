@@ -53,7 +53,7 @@ public class ErasureUtils {
 
   @SuppressWarnings("unchecked")
   public static <T> List<T> sortedIfPossible(Collection<T> collection) {
-    List<T> result = new ArrayList<T>(collection);
+    List<T> result = new ArrayList<>(collection);
     try {
       Collections.sort((List)result);
     } catch (ClassCastException e) {

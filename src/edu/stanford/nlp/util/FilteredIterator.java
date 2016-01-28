@@ -68,7 +68,7 @@ public class FilteredIterator<T> implements Iterator<T> {
 
   public static void main(String[] args) {
     Collection<String> c = Arrays.asList(new String[]{"a", "aa", "b", "bb", "cc"});
-    Iterator<String> i = new FilteredIterator<String>(c.iterator(), new Predicate<String>() {
+    Iterator<String> i = new FilteredIterator<>(c.iterator(), new Predicate<String>() {
       private static final long serialVersionUID = 1L;
 
       public boolean test(String o) {

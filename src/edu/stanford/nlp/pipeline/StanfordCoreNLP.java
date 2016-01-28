@@ -45,6 +45,9 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
 /**
@@ -93,15 +96,21 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
   public static final String DEFAULT_OUTPUT_FORMAT = isXMLOutputPresent() ? "xml" : "text";
 
-  /** Formats the constituent parse trees for display */
+  private static final Logger logger = LoggerFactory.getLogger(StanfordCoreNLP.class);
+
+  /** Formats the constituent parse trees for display. */
   private TreePrint constituentTreePrinter;
-  /** Formats the dependency parse trees for human-readable display */
+  /** Formats the dependency parse trees for human-readable display. */
   private TreePrint dependencyTreePrinter;
 
-  /** Stores the overall number of words processed */
+  /** Stores the overall number of words processed. */
   private int numWords;
 
-  /** Maintains the shared pool of annotators */
+  /** Stores the time (in milliseconds) required to construct the last pipeline. */
+  private long pipelineSetupTime;
+
+
+  /** Maintains the shared pool of annotators. */
   protected static AnnotatorPool pool = null;
 
   private Properties properties;
@@ -132,7 +141,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
   /**
    * Constructs a pipeline with the properties read from this file, which must be found in the classpath
-   * @param propsFileNamePrefix
+   * @param propsFileNamePrefix Filename/resource name of properties file without extension
    */
   public StanfordCoreNLP(String propsFileNamePrefix) {
     this(propsFileNamePrefix, true);
@@ -178,7 +187,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   private static String getRequiredProperty(Properties props, String name) {
     String val = props.getProperty(name);
     if (val == null) {
-      System.err.println("Missing property \"" + name + "\"!");
+      logger.error("Missing property \"" + name + "\"!");
       printRequiredProperties(System.err);
       throw new RuntimeException("Missing property: \"" + name + '\"');
     }
@@ -211,7 +220,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     Properties result = null;
 
     // Returns null on lookup failures
-    System.err.println("Searching for resource: " + name);
+    logger.info("Searching for resource: " + name);
     InputStream in = loader.getResourceAsStream (name);
     try {
       if (in != null) {
@@ -320,6 +329,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   //
 
   private void construct(Properties props, boolean enforceRequirements, AnnotatorImplementations annotatorImplementations) {
+    Timing tim = new Timing();
     this.numWords = 0;
     this.constituentTreePrinter = new TreePrint("penn");
     this.dependencyTreePrinter = new TreePrint("typedDependenciesCollapsed");
@@ -352,7 +362,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     for (String name : annoNames) {
       name = name.trim();
       if (name.isEmpty()) { continue; }
-      System.err.println("Adding annotator " + name);
+      logger.info("Adding annotator " + name);
 
       Annotator an = pool.get(name);
       this.addAnnotator(an);
@@ -376,6 +386,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     if (! alreadyAddedAnnoNames.contains(STANFORD_SSPLIT)) {
       System.setProperty(NEWLINE_SPLITTER_PROPERTY, "false");
     }
+    this.pipelineSetupTime = tim.report();
   }
 
   /**
@@ -425,18 +436,14 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
     // Add more annotators here
 
-    // add annotators loaded via reflection from classnames specified
+    // add annotators loaded via reflection from class names specified
     // in the properties
-    for (Object propertyKey : inputProps.stringPropertyNames()) {
-      if (!(propertyKey instanceof String))
-        continue; // should this be an Exception?
-      final String property = (String) propertyKey;
+    for (String property : inputProps.stringPropertyNames()) {
       if (property.startsWith(CUSTOM_ANNOTATOR_PREFIX)) {
         final String customName =
             property.substring(CUSTOM_ANNOTATOR_PREFIX.length());
         final String customClassName = inputProps.getProperty(property);
-        System.err.println("Registering annotator " + customName +
-            " with class " + customClassName);
+        logger.info("Registering annotator " + customName + " with class " + customClassName);
         pool.register(customName, new AnnotatorFactory(inputProps, annotatorImplementation) {
           private static final long serialVersionUID = 1L;
           @Override
@@ -449,9 +456,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
             // since we don't know what props they need, let's copy all
             // TODO: can we do better here? maybe signature() should be a method in the Annotator?
             StringBuilder os = new StringBuilder();
-            for(Object key: properties.keySet()) {
-              String skey = (String) key;
-              os.append(skey + ":" + properties.getProperty(skey));
+            for (String skey : properties.stringPropertyNames()) {
+              os.append(skey).append(':').append(properties.getProperty(skey));
             }
             return os.toString();
           }
@@ -467,14 +473,15 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
   public static synchronized Annotator getExistingAnnotator(String name) {
     if(pool == null){
-      System.err.println("ERROR: attempted to fetch annotator \"" + name + "\" before the annotator pool was created!");
+      logger.error("ERROR: attempted to fetch annotator \"" + name + "\" before the annotator pool was created!");
       return null;
     }
     try {
       Annotator a =  pool.get(name);
       return a;
     } catch(IllegalArgumentException e) {
-      System.err.println("ERROR: attempted to fetch annotator \"" + name + "\" but the annotator pool does not store any such type!");
+      logger.error("ERROR: attempted to fetch annotator \"" + name +
+        "\" but the annotator pool does not store any such type!");
       return null;
     }
   }
@@ -562,7 +569,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   /**
    * Wrapper around xmlPrint(Annotation, OutputStream).
    * Added for backward compatibility.
-   * @param annotation
+   * @param annotation The Annotation to print
    * @param w The Writer to send the output to
    * @throws IOException
    */
@@ -801,7 +808,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   }
 
   private static AnnotationSerializer loadSerializer(String serializerClass, String name, Properties properties) {
-    AnnotationSerializer serializer = null;
+    AnnotationSerializer serializer; // initialized below
     try {
       // Try loading with properties
       serializer = ReflectionLoading.loadByReflection(serializerClass, name, properties);
@@ -868,8 +875,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
             if (outputSerializerClass != null) {
               AnnotationSerializer outputSerializer = loadSerializer(outputSerializerClass, outputSerializerName, properties);
               outputSerializer.write(annotation, fos);
-              break;
             }
+            break;
           }
           case CONLLU:
             new CoNLLUOutputter().print(annotation, fos, outputOptions);
@@ -891,7 +898,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
    * @param files The files to process.
    * @param numThreads The number of threads to annotate on.
    * @param properties The properties file to use during annotation.
-   *                   This should match the properties file used in the implementation of the anontate function.
+   *                   This should match the properties file used in the implementation of the annotate function.
    * @param annotate The function used to annotate a document.
    * @param print The function used to print a document.
    * @throws IOException
@@ -900,7 +907,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                                      Properties properties, BiConsumer<Annotation, Consumer<Annotation>> annotate,
                                      BiConsumer<Annotation, OutputStream> print,
                                      OutputFormat outputFormat) throws IOException {
-    List<Runnable> toRun = new LinkedList<Runnable>();
+    // List<Runnable> toRun = new LinkedList<>();
 
     // Process properties here
     final String baseOutputDir = properties.getProperty("outputDirectory", ".");
@@ -908,7 +915,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
     // Set of files to exclude
     final String excludeFilesParam = properties.getProperty("excludeFiles");
-    final Set<String> excludeFiles = new HashSet<String>();
+    final Set<String> excludeFiles = new HashSet<>();
     if (excludeFilesParam != null) {
       Iterable<String> lines = IOUtils.readLines(excludeFilesParam);
       for (String line:lines) {
@@ -1122,8 +1129,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       err("-threads [number]: was not given a valid number: " + numThreadsString);
     }
 
-    long setupTime = tim.report();
-
     // blank line after all the loading statements to make output more readable
     log("");
 
@@ -1144,9 +1149,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     //
     else if (properties.containsKey("filelist")){
       String fileName = properties.getProperty("filelist");
-      Collection<File> inputfiles = readFileList(fileName);
-      Collection<File> files = new ArrayList<File>(inputfiles.size());
-      for (File file:inputfiles) {
+      Collection<File> inputFiles = readFileList(fileName);
+      Collection<File> files = new ArrayList<>(inputFiles.size());
+      for (File file : inputFiles) {
         if (file.isDirectory()) {
           files.addAll(new FileSequentialCollection(new File(fileName), properties.getProperty("extension"), true));
         } else {
@@ -1167,9 +1172,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       log();
       log(this.timingInformation());
       log("Pipeline setup: " +
-          Timing.toSecondsString(setupTime) + " sec.");
+          Timing.toSecondsString(pipelineSetupTime) + " sec.");
       log("Total time for StanfordCoreNLP pipeline: " +
-          tim.toSecondsString() + " sec.");
+          Timing.toSecondsString(pipelineSetupTime + tim.report()) + " sec.");
     }
 
   }

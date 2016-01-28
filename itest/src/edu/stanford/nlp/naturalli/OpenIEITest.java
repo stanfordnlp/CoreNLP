@@ -126,6 +126,12 @@ public class OpenIEITest {
       add("Barack Hussein Obama II\tis\tPresident");
 //      add("Barack Hussein Obama II\tis\tcurrent President");
       add("Barack Hussein Obama II\tis\t44th President");
+      // These are a bit fishy...
+      add("first African American\thold\toffice");
+      add("first American\thold\toffice");
+      add("African American\thold\toffice");
+      add("American\thold\toffice");
+      // End odd extractions
     }}, "Barack Hussein Obama II is the 44th and current President of the United States, and the first African American to hold the office.");
   }
 
@@ -208,6 +214,30 @@ public class OpenIEITest {
 //      add("Republican nominee John McCain\twas inaugurated as\tpresident on january 20 2009");
       // note[gabor] end wrong extractions
     }}, "He then defeated Republican nominee John McCain in the general election, and was inaugurated as president on January 20, 2009.");
+  }
+
+  @Test
+  public void testThereIsNoDoubt() {
+    assertExtracted(new HashSet<String>() {{
+      add("I\tam\tgreat");
+    }}, "There is no doubt that I am great.");
+    assertExtracted(new HashSet<String>() {{
+      add("cats\thave\ttails");
+    }}, "There is no doubt that cats have tails.");
+    assertExtracted(new HashSet<String>() {{
+    }}, "There is doubt that cats have tails.");
+  }
+
+
+  @Test
+  public void testChessIsNotAPhysicalSport() {
+    assertExtracted(new HashSet<String>() {{
+      add("Chess\tis\tphysical");
+      add("Chess\tis\tphysical sport");
+      add("Chess\tis\tsport");
+    }}, "Chess is a physical sport");
+    assertExtracted(new HashSet<String>() {{
+    }}, "Chess is not a physical sport");
   }
 
   @Test

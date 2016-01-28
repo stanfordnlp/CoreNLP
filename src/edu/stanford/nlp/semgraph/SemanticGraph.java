@@ -137,7 +137,7 @@ public class SemanticGraph implements Serializable {
    * @return Ordered list of vertices
    */
   public List<IndexedWord> vertexListSorted() {
-    ArrayList<IndexedWord> vlist = new ArrayList<IndexedWord>(vertexSet());
+    ArrayList<IndexedWord> vlist = new ArrayList<>(vertexSet());
     Collections.sort(vlist);
     return vlist;
   }
@@ -455,7 +455,7 @@ public class SemanticGraph implements Serializable {
     if (!containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
-    List<IndexedWord> result = new ArrayList<IndexedWord>(getChildren(vertex));
+    List<IndexedWord> result = new ArrayList<>(getChildren(vertex));
     Collections.sort(result);
     return result;
   }
@@ -487,7 +487,7 @@ public class SemanticGraph implements Serializable {
     if (!containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
-    List<IndexedWord> result = new ArrayList<IndexedWord>(getParents(vertex));
+    List<IndexedWord> result = new ArrayList<>(getParents(vertex));
     Collections.sort(result);
     return result;
   }
@@ -628,7 +628,7 @@ public class SemanticGraph implements Serializable {
    */
   public List<IndexedWord> getAllNodesByWordPattern(String pattern) {
     Pattern p = Pattern.compile(pattern);
-    List<IndexedWord> nodes = new ArrayList<IndexedWord>();
+    List<IndexedWord> nodes = new ArrayList<>();
     for (IndexedWord vertex : vertexSet()) {
       String w = vertex.word();
       if ((w == null && pattern == null) || w != null && p.matcher(w).matches()) {
@@ -640,7 +640,7 @@ public class SemanticGraph implements Serializable {
 
   public List<IndexedWord> getAllNodesByPartOfSpeechPattern(String pattern) {
     Pattern p = Pattern.compile(pattern);
-    List<IndexedWord> nodes = new ArrayList<IndexedWord>();
+    List<IndexedWord> nodes = new ArrayList<>();
     for (IndexedWord vertex : vertexSet()) {
       String pos = vertex.tag();
       if ((pos == null && pattern == null) || pos != null && p.matcher(pos).matches()) {
@@ -685,7 +685,7 @@ public class SemanticGraph implements Serializable {
     List<Pair<GrammaticalRelation, IndexedWord>> childPairs =
       Generics.newArrayList();
     for (SemanticGraphEdge e : outgoingEdgeIterable(vertex)) {
-      childPairs.add(new Pair<GrammaticalRelation, IndexedWord>(e.getRelation(), e.getTarget()));
+      childPairs.add(new Pair<>(e.getRelation(), e.getTarget()));
     }
     return childPairs;
   }
@@ -700,7 +700,7 @@ public class SemanticGraph implements Serializable {
     }
     List<Pair<GrammaticalRelation, IndexedWord>> parentPairs = Generics.newArrayList();
     for (SemanticGraphEdge e : incomingEdgeIterable(vertex)) {
-      parentPairs.add(new Pair<GrammaticalRelation, IndexedWord>(e.getRelation(), e.getSource()));
+      parentPairs.add(new Pair<>(e.getRelation(), e.getSource()));
     }
     return parentPairs;
   }
@@ -769,7 +769,7 @@ public class SemanticGraph implements Serializable {
    * @return A list of root nodes or an empty list.
    */
   private List<IndexedWord> getVerticesWithoutParents() {
-    List<IndexedWord> result = new ArrayList<IndexedWord>();
+    List<IndexedWord> result = new ArrayList<>();
     for (IndexedWord v : vertexSet()) {
       int inDegree = inDegree(v);
       if (inDegree == 0) {
@@ -1339,7 +1339,7 @@ public class SemanticGraph implements Serializable {
         // Insert the specific at the leftmost token that is not governed by
         // this node.
         if (specific != null) {
-          Pair<String, IndexedWord> specPair = new Pair<String, IndexedWord>(specific, word);
+          Pair<String, IndexedWord> specPair = new Pair<>(specific, word);
           specifics.add(specPair);
         }
       }
@@ -1676,7 +1676,7 @@ public class SemanticGraph implements Serializable {
   }
 
   public SemanticGraph() {
-    graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>(outerMapFactory, innerMapFactory);
+    graph = new DirectedMultiGraph<>(outerMapFactory, innerMapFactory);
     roots = wordMapFactory.newSet();
   }
 
@@ -1696,7 +1696,7 @@ public class SemanticGraph implements Serializable {
    */
   public SemanticGraph(SemanticGraph g,
                        Map<IndexedWord, IndexedWord> prevToNewMap) {
-    graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>(outerMapFactory, innerMapFactory);
+    graph = new DirectedMultiGraph<>(outerMapFactory, innerMapFactory);
     if (prevToNewMap == null) {
       prevToNewMap = wordMapFactory.newMap();
     }
@@ -1723,7 +1723,7 @@ public class SemanticGraph implements Serializable {
    * This is the constructor used by the parser.
    */
   public SemanticGraph(Collection<TypedDependency> dependencies) {
-    graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>(outerMapFactory, innerMapFactory);
+    graph = new DirectedMultiGraph<>(outerMapFactory, innerMapFactory);
     roots = wordMapFactory.newSet();
 
     for (TypedDependency d : dependencies) {
@@ -1893,7 +1893,7 @@ public class SemanticGraph implements Serializable {
       } else {
         word = matcher.group(1);
         Integer index = Integer.valueOf(matcher.group(2));
-        return new Pair<String, Integer>(word, index);
+        return new Pair<>(word, index);
       }
     }
 
@@ -1970,7 +1970,7 @@ public class SemanticGraph implements Serializable {
    *
    */
   public List<SemanticGraphEdge> findAllRelns(GrammaticalRelation tgtRelation) {
-    ArrayList<SemanticGraphEdge> relns = new ArrayList<SemanticGraphEdge>();
+    ArrayList<SemanticGraphEdge> relns = new ArrayList<>();
     for (SemanticGraphEdge edge : edgeIterable()) {
       GrammaticalRelation edgeRelation = edge.getRelation();
       if ((edgeRelation != null) && (edgeRelation.equals(tgtRelation))) {
@@ -1996,7 +1996,7 @@ public class SemanticGraph implements Serializable {
    *  @return A List of TypedDependency in the graph
    */
   public Collection<TypedDependency> typedDependencies() {
-    Collection<TypedDependency> dependencies = new ArrayList<TypedDependency>();
+    Collection<TypedDependency> dependencies = new ArrayList<>();
     IndexedWord root = null;
     for (IndexedWord node : roots) {
       if (root == null) {

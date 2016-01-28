@@ -28,7 +28,7 @@ public class Debinarizer implements TreeTransformer {
       leaf.setScore(t.score());
       return leaf;
     }
-    List<Tree> newChildren = new ArrayList<Tree>();
+    List<Tree> newChildren = new ArrayList<>();
     for (int childNum = 0, numKids = t.numChildren(); childNum < numKids; childNum++) {
       Tree child = t.getChild(childNum);
       Tree newChild = transformTreeHelper(child);

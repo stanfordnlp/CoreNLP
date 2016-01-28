@@ -91,7 +91,7 @@ public class InterruptibleMulticoreWrapper<I,O> extends MulticoreWrapper<I,O> {
    * clean up.
    */
   private List<I> shutdownNow() {
-    List<I> orphans = new ArrayList<I>();
+    List<I> orphans = new ArrayList<>();
     List<Runnable> runnables = threadPool.shutdownNow();
     for (Runnable runnable : runnables) {
       if (!(runnable instanceof NamedTask)) {
@@ -146,7 +146,7 @@ public class InterruptibleMulticoreWrapper<I,O> extends MulticoreWrapper<I,O> {
    */
   private static class FixedNamedThreadPoolExecutor<I, O> extends ThreadPoolExecutor {
     FixedNamedThreadPoolExecutor(int nThreads) {
-      super(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+      super(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
     }
 
     protected <V> RunnableFuture<V> newTaskFor(Callable<V> c) {

@@ -135,7 +135,7 @@ public class FilePanel extends JPanel {
    * @return active treebanks
    */
   public List<FileTreeNode> getActiveTreebanks() {
-    List<FileTreeNode> active = new ArrayList<FileTreeNode>();
+    List<FileTreeNode> active = new ArrayList<>();
     setActiveTreebanksFromParent(active, treeModel.getRoot());
     return active;
   }

@@ -306,7 +306,7 @@ public class PatternsForEachTokenLucene<E extends Pattern> extends PatternsForEa
   public Map<String, Map<Integer, Set<E>>> getPatternsForAllTokens(Collection<String> sentIds) {
     close();
     setIndexReaderSearcher();
-    Map<String, Map<Integer, Set<E>>> pats = new HashMap<String, Map<Integer, Set<E>>>();
+    Map<String, Map<Integer, Set<E>>> pats = new HashMap<>();
     for(String s: sentIds){
       pats.put(s, getPatternsForAllTokens(s));
     }

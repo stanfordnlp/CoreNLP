@@ -76,7 +76,7 @@ public class LogConditionalEqConstraintFunction extends AbstractCachingDiffFunct
    *
    */
   protected Index<IntTuple> createIndex() {
-    Index<IntTuple> index = new HashIndex<IntTuple>();
+    Index<IntTuple> index = new HashIndex<>();
     for (int c = 0; c < numClasses; c++) {
       index.add(new IntUni(c));
       for (int f = 0; f < numFeatures; f++) {

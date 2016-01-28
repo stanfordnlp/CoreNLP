@@ -77,6 +77,10 @@ message Sentence {
   repeated Relation        relation                            = 53;
   optional bool            hasNumerizedTokensAnnotation        = 54;
   repeated NERMention      mentions                            = 55;
+  repeated Mention         mentionsForCoref                    = 56;
+  optional bool            hasCorefMentionsAnnotation          = 57;
+
+  optional string          sentenceID                          = 58;  // Useful when storing sentences (e.g. ForEach)
 
   extensions 100 to 255;
 }
@@ -222,6 +226,76 @@ message CorefChain {
   required int32        chainID        = 1;
   repeated CorefMention mention        = 2;
   required uint32       representative = 3;
+}
+
+//
+// a mention
+//
+
+message Mention {
+  optional int32 mentionID             = 1;
+  optional string mentionType          = 2;
+  optional string number               = 3;
+  optional string gender               = 4;
+  optional string animacy              = 5;
+  optional string person               = 6;
+  optional uint32 startIndex           = 7;
+  optional uint32 endIndex             = 9;
+  optional uint32 headIndex            = 10;
+  optional string headString           = 11;
+  optional string nerString            = 12;
+  optional uint32 originalRef          = 13;
+  optional int32 goldCorefClusterID    = 14;
+  optional int32 corefClusterID        = 15;
+  optional uint32 mentionNum           = 16;
+  optional uint32 sentNum              = 17;
+  optional uint32 utter                = 18;
+  optional uint32 paragraph            = 19;
+  optional bool isSubject              = 20;
+  optional bool isDirectObject         = 21;
+  optional bool isIndirectObject       = 22;
+  optional bool isPrepositionObject    = 23;
+  optional bool hasTwin                = 24;
+  optional bool generic                = 25;
+  optional bool isSingleton            = 26;
+  optional bool hasBasicDependency     = 27;
+  optional bool hasCollapsedDependency = 28;
+  optional bool hasContextParseTree    = 29;
+  optional IndexedWord headIndexedWord = 30;
+  optional IndexedWord   dependingVerb = 31;
+  optional IndexedWord       headWord  = 32;
+  optional SpeakerInfo    speakerInfo  = 33;
+
+  repeated IndexedWord         sentenceWords = 50;
+  repeated IndexedWord         originalSpan = 51;
+  repeated string dependents           = 52;
+  repeated string preprocessedTerms    = 53;
+  repeated int32 appositions = 54;
+  repeated int32 predicateNominatives = 55;
+  repeated int32 relativePronouns = 56;
+  repeated int32 listMembers = 57;
+  repeated int32 belongToLists = 58;
+
+}
+
+//
+// store the position (sentence, token index) of a CoreLabel
+//
+
+message IndexedWord {
+  optional uint32 sentenceNum          = 1;
+  optional uint32 tokenIndex           = 2;
+  optional uint32 docID                = 3;
+  optional uint32 copyCount            = 4;
+}
+
+//
+// speaker info, this is used for Mentions
+//
+
+message SpeakerInfo {
+  optional string speakerName          = 1;
+  repeated int32 mentions    = 2;
 }
 
 //

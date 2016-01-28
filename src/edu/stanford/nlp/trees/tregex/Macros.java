@@ -36,7 +36,7 @@ public class Macros {
 
   public static List<Pair<String, String>> readMacros(BufferedReader bin) {
     try {
-      List<Pair<String, String>> macros = new ArrayList<Pair<String, String>>();
+      List<Pair<String, String>> macros = new ArrayList<>();
       String line;
       int lineNumber = 0;
       while ((line = bin.readLine()) != null) {
@@ -52,7 +52,7 @@ public class Macros {
                                              "Line number " + lineNumber +
                                              " does not match.");
         }
-        macros.add(new Pair<String, String>(pieces[0], pieces[1]));
+        macros.add(new Pair<>(pieces[0], pieces[1]));
       }
       return macros;
     } catch (IOException e) {

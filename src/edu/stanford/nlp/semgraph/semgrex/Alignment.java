@@ -55,7 +55,7 @@ public class Alignment {
     StringBuilder sb = new StringBuilder();
     if (format == "readable") {
       // sb.append("Alignment map:\n");
-      List<IndexedWord> keys = new ArrayList<IndexedWord>(map.keySet());
+      List<IndexedWord> keys = new ArrayList<>(map.keySet());
       Collections.sort(keys);
       for (IndexedWord key : keys) {
         sb.append(String.format("%-20s ==> %s%n",
@@ -64,7 +64,7 @@ public class Alignment {
       }
       sb.append(String.format("%s %6.3f%n", "Alignment score:", score));
     }  else if (format == "readable-tag-index") {
-      List<IndexedWord> keys = new ArrayList<IndexedWord>(map.keySet());
+      List<IndexedWord> keys = new ArrayList<>(map.keySet());
       Collections.sort(keys);
       for (IndexedWord key : keys) {
         sb.append(String.format("%-20s ==> %s%n",
