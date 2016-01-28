@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.hcoref.data.CorefChain;
+import edu.stanford.nlp.hcoref.data.Mention;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.ErasureUtils;
@@ -85,6 +86,15 @@ public class CorefCoreAnnotations {
   public static class CorefChainAnnotation implements CoreAnnotation<Map<Integer, CorefChain>> {
     public Class<Map<Integer, CorefChain>> getType() {
       return ErasureUtils.uncheckedCast(Map.class);
+    }
+  }
+
+  /**
+   * this annotation marks in every sentence the mentions used for coref
+   */
+  public static class CorefMentionsAnnotation implements CoreAnnotation<List<Mention>> {
+    public Class<List<Mention>> getType() {
+      return ErasureUtils.uncheckedCast(List.class);
     }
   }
 

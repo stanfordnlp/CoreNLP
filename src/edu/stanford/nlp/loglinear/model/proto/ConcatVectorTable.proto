@@ -1,0 +1,11 @@
+package edu.stanford.nlp.loglinear.model.proto;
+
+import "ConcatVector.proto";
+
+option java_package = "edu.stanford.nlp.loglinear.model.proto";
+option java_outer_classname = "ConcatVectorTableProto";
+
+message ConcatVectorTable {
+    repeated int32 dimensionSize = 1;
+    repeated ConcatVector factorTable = 2;
+}

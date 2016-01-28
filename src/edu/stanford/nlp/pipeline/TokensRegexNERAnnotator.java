@@ -28,11 +28,17 @@ import java.util.regex.Pattern;
  * </pre>
  * where each argument is tab-separated, and the last two arguments are optional. Several regexes can be
  * associated with a single type. In the case where multiple regexes match a phrase, the priority ranking
- * is used to choose between the possible types. When the priority is the same, then longer matches are favored.
- * This classifier is designed to be used as part of a full
+ * (higher priority is favored) is used to choose between the possible types.
+ * When the priority is the same, then longer matches are favored.
+ *
+ * This annotator is designed to be used as part of a full
  * NER system to label entities that don't fall into the usual NER categories. It only records the label
  * if the token has not already been NER-annotated, or it has been annotated but the NER-type has been
  * designated overwritable (the third argument).
+ *
+ * It is also possible to use this annotator to annotate fields other than the
+ * <code>NamedEntityTagAnnotation</code> field by
+ * and providing the header
  * </p>
  *
  * <p>
@@ -64,6 +70,7 @@ import java.util.regex.Pattern;
  * <p>
  * Main differences from {@link RegexNERAnnotator}:
  * <ul>
+ *   <li>Supports annotation of fields other than the <code>NamedEntityTagAnnotation</code> field</li>
  *   <li>Supports both TokensRegex patterns and patterns over the text of the tokens</li>
  *   <li>When NER annotation can be overwritten based on the original NER labels.  The rules for when the new NER labels are used
  *       are given below:
@@ -84,6 +91,13 @@ import java.util.regex.Pattern;
  *   <tr><td><code>mapping</code></td><td>Comma separated list of mapping files to use </td>
  *      <td><code>edu/stanford/nlp/models/regexner/type_map_clean</code></td>
  *   </tr>
+ *   <tr><td><code>mapping.header</code></td>
+ *       <td>Comma separated list of header fields (or <code>true</code> if header is specified in the file)</td>
+ *       <td>pattern,ner,overwrite,priority,group</td></tr>
+ *   <tr><td><code>mapping.field.&lt;fieldname&gt;</code></td>
+ *       <td>Class mapping for annotation fields other than ner</td></tr>
+ *   <tr><td><code>commonWords</code></td>
+ *       <td>Comma separated list of files for common words to not annotate (in case your mapping isn't very clean)</td></tr>
  *   <tr><td><code>backgroundSymbol</code></td><td>Comma separated list of NER labels to always replace</td>
  *      <td><code>O,MISC</code></td></tr>
  *   <tr><td><code>posmatchtype</code></td>
@@ -113,11 +127,21 @@ import java.util.regex.Pattern;
  */
 public class TokensRegexNERAnnotator implements Annotator {
   protected static final Redwood.RedwoodChannels logger = Redwood.channels("TokenRegexNER");
+  protected static final String PATTERN_FIELD = "pattern";
+  protected static final String OVERWRITE_FIELD = "overwrite";
+  protected static final String PRIORITY_FIELD = "priority";
+  protected static final String WEIGHT_FIELD = "weight";
+  protected static final String GROUP_FIELD = "group";
+
+  protected static final Set<String> predefinedHeaderFields = CollectionUtils.asSet(new String[]{PATTERN_FIELD, OVERWRITE_FIELD, PRIORITY_FIELD, WEIGHT_FIELD, GROUP_FIELD});
+  protected static final String defaultHeader = "pattern,ner,overwrite,priority,group";
 
   private final boolean ignoreCase;
+  private final Set<String> commonWords;
   private final List<Entry> entries;
   private final Map<SequencePattern<CoreMap>,Entry> patternToEntry;
   private final MultiPatternMatcher<CoreMap>  multiPatternMatcher;
+  private final List<Class> annotationFields; // list of fields to annotate (default to just NamedEntityTag)
 
   private final Set<String> myLabels;  // set of labels to always overwrite
   private final Pattern validPosPattern;
@@ -139,6 +163,9 @@ public class TokensRegexNERAnnotator implements Annotator {
 
   public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{
           new PropertiesUtils.Property("mapping", DefaultPaths.DEFAULT_REGEXNER_RULES, "Comma separated list of mapping files to use."),
+          new PropertiesUtils.Property("mapping.header", defaultHeader, "Comma separated list specifying order of fields in the mapping file"),
+          new PropertiesUtils.Property("mapping.field.<fieldname>", "", "Class mapping for annotation fields other than ner"),
+          new PropertiesUtils.Property("commonWords", "", "Comma separated list of files for common words to not annotate (in case your mapping isn't very clean)"),
           new PropertiesUtils.Property("ignorecase", "false", "Whether to ignore case or not when matching patterns."),
           new PropertiesUtils.Property("validpospattern", "", "Regular expression pattern for matching POS tags."),
           new PropertiesUtils.Property("posmatchtype", DEFAULT_POS_MATCH_TYPE.name(), "How should 'validpospattern' be used to match the POS of the tokens."),
@@ -176,15 +203,67 @@ public class TokensRegexNERAnnotator implements Annotator {
     return props;
   }
 
+  private static Pattern FILE_DELIMITERS_PATTERN = Pattern.compile("\\s*[,;]\\s*");
+  private static Pattern COMMA_DELIMITERS_PATTERN = Pattern.compile("\\s*,\\s*");
   public TokensRegexNERAnnotator(String name, Properties properties) {
     String prefix = (name != null && !name.isEmpty())? name + ".":"";
     String backgroundSymbol = properties.getProperty(prefix + "backgroundSymbol", DEFAULT_BACKGROUND_SYMBOL);
-    String[] backgroundSymbols = backgroundSymbol.split("\\s*,\\s*");
+    String[] backgroundSymbols = COMMA_DELIMITERS_PATTERN.split(backgroundSymbol);
     String mappingFiles = properties.getProperty(prefix + "mapping", DefaultPaths.DEFAULT_REGEXNER_RULES);
-    String[] mappings = mappingFiles.split("\\s*[,;]\\s*");
+    String[] mappings = FILE_DELIMITERS_PATTERN.split(mappingFiles);
     String validPosRegex = properties.getProperty(prefix + "validpospattern");
     this.posMatchType = PosMatchType.valueOf(properties.getProperty(prefix + "posmatchtype",
             DEFAULT_POS_MATCH_TYPE.name()));
+    String commonWordsFile = properties.getProperty(prefix + "commonWords");
+    commonWords = new HashSet<String>();
+    if (commonWordsFile != null) {
+      try {
+        BufferedReader reader = IOUtils.getBufferedFileReader(commonWordsFile);
+        String line;
+        while ((line = reader.readLine()) != null) {
+          commonWords.add(line);
+        }
+        reader.close();
+      } catch (IOException ex) {
+        throw new RuntimeException("TokensRegexNERAnnotator " + name
+            + ": Error opening the common words file: " + commonWordsFile, ex);
+      }
+    }
+
+    String headerProp = properties.getProperty(prefix + "mapping.header", defaultHeader);
+    boolean readHeaderFromFile = headerProp.equalsIgnoreCase("true");
+    String[] annotationFieldnames = null;
+    String[] headerFields = null;
+    if (readHeaderFromFile) {
+      // Get header as first line from all files...
+      // TODO: support reading header from file
+      throw new UnsupportedOperationException("Reading header from file not yet supported!!!");
+    } else {
+      headerFields = COMMA_DELIMITERS_PATTERN.split(headerProp);
+      // Take header fields and remove known headers to get annotation field names
+      List<String> fieldNames = new ArrayList<String>();
+      List<Class> fieldClasses = new ArrayList<Class>();
+      for (int i = 0; i < headerFields.length; i++) {
+        String field = headerFields[i];
+        if (!predefinedHeaderFields.contains(field)) {
+          Class fieldClass = EnvLookup.lookupAnnotationKeyWithClassname(null, field);
+          if (fieldClass == null) {
+            // check our properties
+            String classname = properties.getProperty(prefix + "mapping.field." + field);
+            fieldClass = EnvLookup.lookupAnnotationKeyWithClassname(null, classname);
+          }
+          if (fieldClass != null) {
+            fieldNames.add(field);
+            fieldClasses.add(fieldClass);
+          } else {
+            logger.warn("TokensRegexNERAnnotator " + name + ": Unknown field: " + field + " cannot find suitable annotation class");
+          }
+        }
+      }
+      annotationFieldnames = new String[fieldNames.size()];
+      fieldNames.toArray(annotationFieldnames);
+      annotationFields = fieldClasses;
+    }
 
     String noDefaultOverwriteLabelsProp = properties.getProperty(prefix + "noDefaultOverwriteLabels");
     this.noDefaultOverwriteLabels = (noDefaultOverwriteLabelsProp != null)
@@ -198,7 +277,7 @@ public class TokensRegexNERAnnotator implements Annotator {
     } else {
       validPosPattern = null;
     }
-    entries = Collections.unmodifiableList(readEntries(name, noDefaultOverwriteLabels, ignoreCase, verbose, mappings));
+    entries = Collections.unmodifiableList(readEntries(name, noDefaultOverwriteLabels, ignoreCase, verbose, headerFields, annotationFieldnames, mappings));
     IdentityHashMap<SequencePattern<CoreMap>, Entry> patternToEntry = new IdentityHashMap<SequencePattern<CoreMap>, Entry>();
     multiPatternMatcher = createPatternMatcher(patternToEntry);
     this.patternToEntry = Collections.unmodifiableMap(patternToEntry);
@@ -207,7 +286,11 @@ public class TokensRegexNERAnnotator implements Annotator {
     Collections.addAll(myLabels, backgroundSymbols);
     myLabels.add(null);
     // Always overwrite labels
-    for (Entry entry: entries) myLabels.add(entry.type);
+    for (Entry entry: entries) {
+      for (String type:entry.types) {
+        myLabels.add(type);
+      }
+    }
     this.myLabels = Collections.unmodifiableSet(myLabels);
   }
 
@@ -267,6 +350,7 @@ public class TokensRegexNERAnnotator implements Annotator {
         throw new RuntimeException("Invalid match group for entry " + entry);
       }
       pattern.setPriority(entry.priority);
+      pattern.setWeight(entry.weight);
       patterns.add(pattern);
       patternToEntry.put(pattern, entry);
     }
@@ -283,19 +367,33 @@ public class TokensRegexNERAnnotator implements Annotator {
       int start = m.start(g);
       int end = m.end(g);
 
+      String str = m.group(g);
+      if (commonWords.contains(str)) {
+        if (verbose) {
+          System.err.println("Not annotating (common word) '" + str + "': " +
+              StringUtils.joinFields(m.groupNodes(g), CoreAnnotations.NamedEntityTagAnnotation.class)
+              + " with " + entry.getTypeDescription() + ", sentence is '" + StringUtils.joinWords(tokens, " ") + "'");
+        }
+        continue;
+      }
+
       boolean overwriteOriginalNer = checkPosTags(tokens, start, end);
       if (overwriteOriginalNer) {
         overwriteOriginalNer = checkOrigNerTags(entry, tokens, start, end);
       }
       if (overwriteOriginalNer) {
         for (int i = start; i < end; i++) {
-          tokens.get(i).set(CoreAnnotations.NamedEntityTagAnnotation.class, entry.type);
+          CoreLabel token = tokens.get(i);
+          for (int j = 0; j < annotationFields.size(); j++) {
+            token.set(annotationFields.get(j), entry.types[j]);
+          }
+         // tokens.get(i).set(CoreAnnotations.NamedEntityTagAnnotation.class, entry.type);
         }
       } else {
         if (verbose) {
           System.err.println("Not annotating  '" + m.group(g) + "': " +
                   StringUtils.joinFields(m.groupNodes(g), CoreAnnotations.NamedEntityTagAnnotation.class)
-                  + " with " + entry.type + ", sentence is '" + StringUtils.joinWords(tokens, " ") + "'");
+                  + " with " + entry.getTypeDescription() + ", sentence is '" + StringUtils.joinWords(tokens, " ") + "'");
         }
       }
     }
@@ -384,7 +482,7 @@ public class TokensRegexNERAnnotator implements Annotator {
         } else {
           // if this ner type doesn't belong to the labels for which we don't overwrite the default labels (noDefaultOverwriteLabels)
           // we check mylabels to see if we can overwrite this entry
-          if (/*entry.overwritableTypes.isEmpty() || */!noDefaultOverwriteLabels.contains(entry.type)) {
+          if (/*entry.overwritableTypes.isEmpty() || */!hasNoOverwritableType(noDefaultOverwriteLabels, entry.types)) {
             overwriteOriginalNer = myLabels.contains(startNer);
           }
         }
@@ -397,22 +495,33 @@ public class TokensRegexNERAnnotator implements Annotator {
   private static class Entry {
     public final String tokensRegex;
     public final String[] regex; // the regex, tokenized by splitting on white space
-    public final String type; // the associated type
+    public final String[] types; // the associated types
     public final Set<String> overwritableTypes; // what types can be overwritten by this entry
     public final double priority;
+    public final double weight;
     public final int annotateGroup;
 
-    public Entry(String tokensRegex, String[] regex, String type, Set<String> overwritableTypes, double priority, int annotateGroup) {
+    public Entry(String tokensRegex, String[] regex, String[] types, Set<String> overwritableTypes, double priority, double weight, int annotateGroup) {
       this.tokensRegex = tokensRegex;
       this.regex = regex;
-      this.type = type.intern();
+      this.types = new String[types.length];
+      for (int i = 0; i < types.length; i++) {
+        // TODO: for some types, it doesn't make sense to be interning...
+        this.types[i] = types[i].intern();
+      }
       this.overwritableTypes = overwritableTypes;
       this.priority = priority;
+      this.weight = weight;
       this.annotateGroup = annotateGroup;
     }
 
+    public String getTypeDescription() {
+      return "[" + StringUtils.join(types, ",") + "]";
+    }
+
     public String toString() {
-      return "Entry{" + ((tokensRegex != null) ? tokensRegex: StringUtils.join(regex)) + ' ' + type + ' ' + overwritableTypes + ' ' + priority + '}';
+      return "Entry{" + ((tokensRegex != null) ? tokensRegex: StringUtils.join(regex)) + ' '
+          + StringUtils.join(types) + ' ' + overwritableTypes + ' ' + priority + '}';
     }
   }
 
@@ -425,6 +534,8 @@ public class TokensRegexNERAnnotator implements Annotator {
   private static List<Entry> readEntries(String annotatorName,
                                          Set<String> noDefaultOverwriteLabels,
                                          boolean ignoreCase, boolean verbose,
+                                         String[] headerFields,
+                                         String[] annotationFieldnames,
                                          String... mappings) {
     // Unlike RegexNERClassifier, we don't bother sorting the entries
     // We leave it to TokensRegex NER to sort out the priorities and matches
@@ -437,7 +548,7 @@ public class TokensRegexNERAnnotator implements Annotator {
       BufferedReader rd = null;
       try {
         rd = IOUtils.readerFromString(mapping);
-        readEntries(annotatorName, entries, seenRegexes, mapping, rd, noDefaultOverwriteLabels, ignoreCase, verbose);
+        readEntries(annotatorName, headerFields, annotationFieldnames, entries, seenRegexes, mapping, rd, noDefaultOverwriteLabels, ignoreCase, verbose);
       } catch (IOException e) {
         throw new RuntimeIOException("Couldn't read TokensRegexNER from " + mapping, e);
       } finally {
@@ -452,6 +563,24 @@ public class TokensRegexNERAnnotator implements Annotator {
     return entries;
   }
 
+  private static Map<String,Integer> getHeaderIndexMap(String[] headerFields) {
+    Map<String,Integer> map = new HashMap<String,Integer>();
+    for (int i = 0; i < headerFields.length; i++) {
+      String field = headerFields[i];
+      if (map.containsKey(field)) {
+        throw new IllegalArgumentException("Duplicate header field: " + field);
+      }
+      map.put(field,i);
+    }
+    return map;
+  }
+
+
+  private static int getIndex(Map<String,Integer> map, String name) {
+    Integer index = map.get(name);
+    if (index == null) return -1;
+    else return index;
+  }
   /**
    *  Reads a list of Entries from a mapping file and update the given entries.
    *  Line numbers start from 1.
@@ -459,6 +588,8 @@ public class TokensRegexNERAnnotator implements Annotator {
    *  @return the updated list of Entries
    */
   private static List<Entry> readEntries(String annotatorName,
+                                         String[] headerFields,
+                                         String[] annotationFieldnames,
                                          List<Entry> entries,
                                          TrieMap<String,Entry> seenRegexes,
                                          String mappingFilename,
@@ -468,13 +599,39 @@ public class TokensRegexNERAnnotator implements Annotator {
     int origEntriesSize = entries.size();
     int isTokensRegex = 0;
     int lineCount = 0;
+    Map<String,Integer> headerIndexMap = getHeaderIndexMap(headerFields);
+    int iPattern = getIndex(headerIndexMap, PATTERN_FIELD);
+    if (iPattern < 0) {
+      throw new IllegalArgumentException("TokensRegexNERAnnotator " + annotatorName
+        + " ERROR: Header does not contain 'pattern': " + StringUtils.join(headerFields));
+    }
+    int iOverwrite = getIndex(headerIndexMap, OVERWRITE_FIELD);
+    int iPriority = getIndex(headerIndexMap, PRIORITY_FIELD);
+    int iWeight = getIndex(headerIndexMap, WEIGHT_FIELD);
+    int iGroup = getIndex(headerIndexMap, GROUP_FIELD);
+    int[] annotationCols = new int[annotationFieldnames.length];
+    int iLastAnnotationField = -1;
+    for (int i = 0; i < annotationFieldnames.length; i++) {
+      annotationCols[i] = getIndex(headerIndexMap, annotationFieldnames[i]);
+      if (annotationCols[i] < 0) {
+        throw new IllegalArgumentException("TokensRegexNERAnnotator " + annotatorName
+            + " ERROR: Header does not contain annotation field '" + annotationFieldnames[i] + "': " + StringUtils.join(headerFields));
+      }
+      if (annotationCols[i] > iLastAnnotationField) {
+        iLastAnnotationField = annotationCols[i];
+      }
+    }
+
+    int minFields = Math.min(iPattern, iLastAnnotationField);  // Take minimum of "pattern" and last annotation field
+    int maxFields = headerFields.length;  // Take maximum number of headerFields
     for (String line; (line = mapping.readLine()) != null; ) {
       lineCount ++;
       String[] split = line.split("\t");
-      if (split.length < 2 || split.length > 5) {
-        throw new IllegalArgumentException("Provided mapping file is in wrong format. This line is bad: " + line);
+      if (split.length < minFields || split.length > maxFields) {
+        throw new IllegalArgumentException("TokensRegexNERAnnotator " + annotatorName
+            + " ERROR: Provided mapping file is in wrong format. Line " + lineCount + " is bad: " + line);
       }
-      String regex = split[0].trim();
+      String regex = split[iPattern].trim();
       String tokensRegex = null;
       String[] regexes = null;
       if (regex.startsWith("( ") && regex.endsWith(" )")) {
@@ -491,46 +648,66 @@ public class TokensRegexNERAnnotator implements Annotator {
         }
         key = norm;
       }
-      String type = split[1].trim();
+      String[] types = new String[annotationCols.length];
+      for (int i=0; i < annotationCols.length; i++) {
+        types[i] = split[annotationCols[i]].trim();
+      }
 
       Set<String> overwritableTypes = Generics.newHashSet();
       double priority = 0.0;
 
-      if (split.length >= 3) {
-        overwritableTypes.addAll(Arrays.asList(split[2].trim().split("\\s*,\\s*")));
+      if (iOverwrite >= 0 && split.length > iOverwrite) {
+        overwritableTypes.addAll(Arrays.asList(split[iOverwrite].trim().split("\\s*,\\s*")));
       }
-      if (split.length >= 4) {
+      if (iPriority >= 0 && split.length > iPriority) {
         try {
-          priority = Double.parseDouble(split[3].trim());
+          priority = Double.parseDouble(split[iPriority].trim());
         } catch (NumberFormatException e) {
-          throw new IllegalArgumentException("ERROR: Invalid priority in line " + lineCount
-                  + " in regexner file " + mappingFilename + ": \"" + line + "\"!", e);
+          throw new IllegalArgumentException("TokensRegexNERAnnotator " + annotatorName
+              + " ERROR: Invalid priority in line " + lineCount
+              + " in regexner file " + mappingFilename + ": \"" + line + "\"!", e);
+        }
+      }
+
+      double weight = 0.0;
+      if (iWeight >= 0 && split.length > iWeight) {
+        try {
+          weight = Double.parseDouble(split[iWeight].trim());
+        } catch (NumberFormatException e) {
+          throw new IllegalArgumentException("TokensRegexNERAnnotator " + annotatorName
+              + " ERROR: Invalid weight in line " + lineCount
+              + " in regexner file " + mappingFilename + ": \"" + line + "\"!", e);
         }
       }
       int annotateGroup = 0;
       // Get annotate group from input....
-      if (split.length >= 5) {
+      if (iGroup>= 0 && split.length > iGroup) {
         // Which group to take (allow for context)
-        String context = split[4].trim();
+        String context = split[iGroup].trim();
         try {
           annotateGroup = Integer.parseInt(context);
         } catch (NumberFormatException e) {
-          throw new IllegalArgumentException("ERROR: Invalid group in line " + lineCount
-                  + " in regexner file " + mappingFilename + ": \"" + line + "\"!", e);
+          throw new IllegalArgumentException("TokensRegexNERAnnotator " + annotatorName
+              + " ERROR: Invalid group in line " + lineCount
+              + " in regexner file " + mappingFilename + ": \"" + line + "\"!", e);
         }
       }
 
-      // Print some warning about the type
-      int commaPos = type.indexOf(',');
-      if (commaPos > 0) {
-        // Strip the "," and just take first type
-        String newType = type.substring(0, commaPos).trim();
-        logger.warn("TokensRegexNERAnnotator " + annotatorName +
-                ": Entry has multiple types: " + line + ".  Taking type to be " + newType);
-        type = newType;
+      // Print some warnings about the type
+      for (int i = 0; i < types.length; i++) {
+        String type = types[i];
+        // TODO: Have option to allow commas in types
+        int commaPos = type.indexOf(',');
+        if (commaPos > 0) {
+          // Strip the "," and just take first type
+          String newType = type.substring(0, commaPos).trim();
+          logger.warn("TokensRegexNERAnnotator " + annotatorName +
+                  ": Entry has multiple types for " + annotationFieldnames[i] + ": " + line + ".  Taking type to be " + newType);
+          types[i] = newType;
+        }
       }
 
-      Entry entry = new Entry(tokensRegex, regexes, type, overwritableTypes, priority, annotateGroup);
+      Entry entry = new Entry(tokensRegex, regexes, types, overwritableTypes, priority, weight, annotateGroup);
 
       if (seenRegexes.containsKey(key)) {
         Entry oldEntry = seenRegexes.get(key);
@@ -538,10 +715,12 @@ public class TokensRegexNERAnnotator implements Annotator {
           logger.warn("TokensRegexNERAnnotator " + annotatorName +
                   ": Replace duplicate entry (higher priority): old=" + oldEntry + ", new=" + entry);
         } else {
-          if (!oldEntry.type.equals(type)) {
+          String oldTypeDesc = oldEntry.getTypeDescription();
+          String newTypeDesc = entry.getTypeDescription();
+          if (!oldTypeDesc.equals(newTypeDesc)) {
             if (verbose) {
               logger.warn("TokensRegexNERAnnotator " + annotatorName +
-                      ": Ignoring duplicate entry: " + split[0] + ", old type = " + oldEntry.type + ", new type = " + type);
+                      ": Ignoring duplicate entry: " + split[0] + ", old type = " + oldTypeDesc + ", new type = " + newTypeDesc);
             }
           // } else {
           //   if (verbose) {
@@ -554,7 +733,7 @@ public class TokensRegexNERAnnotator implements Annotator {
       }
 
       // Print some warning if label belongs to noDefaultOverwriteLabels but there is no overwritable types
-      if (entry.overwritableTypes.isEmpty() && noDefaultOverwriteLabels.contains(entry.type)) {
+      if (entry.overwritableTypes.isEmpty() && hasNoOverwritableType(noDefaultOverwriteLabels, entry.types)) {
         logger.warn("TokensRegexNERAnnotator " + annotatorName +
                 ": Entry doesn't have overwriteable types " + entry + ", but entry type is in noDefaultOverwriteLabels");
       }
@@ -570,6 +749,12 @@ public class TokensRegexNERAnnotator implements Annotator {
     return entries;
   }
 
+  private static boolean hasNoOverwritableType(Set<String> noDefaultOverwriteLabels, String[] types) {
+    for (String type:types) {
+      if (noDefaultOverwriteLabels.contains(type)) return true;
+    }
+    return false;
+  }
 
   @Override
   public Set<Requirement> requires() {

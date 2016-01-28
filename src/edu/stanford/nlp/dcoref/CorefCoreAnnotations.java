@@ -73,7 +73,7 @@ public class CorefCoreAnnotations {
    * CoreLabel.  Note that the list includes the CoreLabel that was
    * annotated which creates a cycle.
    *
-   * @deprecated This was an original dcoref annotation. You should know use CorefChainAnnotation
+   * @deprecated This was an original dcoref annotation. You should now use CorefChainAnnotation
    */
   @Deprecated
   public static class CorefClusterAnnotation implements CoreAnnotation<Set<CoreLabel>> {

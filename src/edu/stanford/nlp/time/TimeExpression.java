@@ -6,6 +6,7 @@ import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.MatchedExpression;
 import edu.stanford.nlp.ling.tokensregex.types.Expressions;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
+import edu.stanford.nlp.pipeline.CoreMapAggregator;
 import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ErasureUtils;
@@ -89,7 +90,7 @@ public class TimeExpression extends MatchedExpression {
     extractFunc.resultAnnotationField = Collections.singletonList((Class) TimeExpression.Annotation.class);
     extractFunc.resultNestedAnnotationField = TimeExpression.ChildrenAnnotation.class;
     extractFunc.resultAnnotationExtractor = TimeExpressionConverter;
-    extractFunc.tokensAggregators = CoreMapAttributeAggregator.DEFAULT_NUMERIC_TOKENS_AGGREGATORS;
+    extractFunc.tokensAggregator = CoreMapAggregator.DEFAULT_NUMERIC_TOKENS_AGGREGATOR;
     return extractFunc;
   }
 

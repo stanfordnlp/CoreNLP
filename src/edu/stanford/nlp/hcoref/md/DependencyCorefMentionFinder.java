@@ -34,8 +34,8 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder {
 
   public DependencyCorefMentionFinder(Properties props) throws ClassNotFoundException, IOException {
     this.lang = CorefProperties.getLanguage(props);
-    mdClassifier = (CorefProperties.isMentionDetectionTraining(props))? 
-        null : IOUtils.readObjectFromFile(CorefProperties.getPathModel(props, "md"));
+    mdClassifier = (CorefProperties.isMentionDetectionTraining(props)) ?
+        null : IOUtils.readObjectFromURLOrClasspathOrFileSystem(CorefProperties.getMentionDetectionModel(props));
   }
 
   public MentionDetectionClassifier mdClassifier = null;
@@ -150,6 +150,7 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder {
     int beginIdx = npSpan.get(0);
     int endIdx = npSpan.get(1)+1;
     if (",".equals(sent.get(endIdx-1).word())) { endIdx--; } // try not to have span that ends with ,
+    if ("IN".equals(sent.get(beginIdx).tag())) { beginIdx++; }  // try to remove first IN.
     addMention(beginIdx, endIdx, headword, mentions, mentionSpanSet, namedEntitySpanSet, sent, basic, collapsed);
       
     //

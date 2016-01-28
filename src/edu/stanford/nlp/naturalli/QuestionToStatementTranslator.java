@@ -147,7 +147,7 @@ public class QuestionToStatementTranslator {
           "(?: /the/ (?$answer_type [word:/name/]) [tag:/[PW].*/])? " +
           "(?$statement_body []+?) " +
           "(?$prep_num [!{tag:IN}] [tag:CD] )? " +
-          "(?$suffix [tag:/[RI].*/]? )? " +
+          "(?$suffix [tag:/[RI].*/] )? " +
           "(?$punct [word:/[?\\.!]/])");
 
   /**

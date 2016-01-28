@@ -65,7 +65,7 @@ public class BaseUnknownWordModel implements UnknownWordModel {
   protected final Map<Label,ClassicCounter<String>> tagHash;
 
   /** This is the set of all signatures that we have seen. */
-  final private Set<String> seenEnd;
+  private final Set<String> seenEnd;
 
   final Map<String,Float> unknownGT;
 

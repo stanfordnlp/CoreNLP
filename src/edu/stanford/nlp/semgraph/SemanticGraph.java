@@ -1,7 +1,6 @@
 package edu.stanford.nlp.semgraph;
 
 import edu.stanford.nlp.graph.DirectedMultiGraph;
-import edu.stanford.nlp.ie.machinereading.structure.*;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -70,6 +69,8 @@ public class SemanticGraph implements Serializable {
   private static final MapFactory<IndexedWord, Map<IndexedWord, List<SemanticGraphEdge>>> outerMapFactory = MapFactory.hashMapFactory();
   private static final MapFactory<IndexedWord, List<SemanticGraphEdge>> innerMapFactory = MapFactory.hashMapFactory();
   private static final MapFactory<IndexedWord, IndexedWord> wordMapFactory = MapFactory.hashMapFactory();
+
+  private LinkedList<String> comments = new LinkedList<>();
 
   public int edgeCount() {
     return graph.getNumEdges();
@@ -636,7 +637,7 @@ public class SemanticGraph implements Serializable {
     }
     return nodes;
   }
-  
+
   public List<IndexedWord> getAllNodesByPartOfSpeechPattern(String pattern) {
     Pattern p = Pattern.compile(pattern);
     List<IndexedWord> nodes = new ArrayList<IndexedWord>();
@@ -1116,8 +1117,35 @@ public class SemanticGraph implements Serializable {
     return result;
   }
 
+  /**
+   * Returns the number of nodes in the graph
+   */
   public int size() {
     return this.vertexSet().size();
+  }
+
+
+  /**
+   * Returns all nodes reachable from <code>root</code>.
+   *
+   * @param root the root node of the subgraph
+   * @return all nodes in subgraph
+   */
+  public Set<IndexedWord> getSubgraphVertices(IndexedWord root) {
+    Set<IndexedWord> result = wordMapFactory.newSet();
+    result.add(root);
+    List<IndexedWord> queue = Generics.newLinkedList();
+    queue.add(root);
+    while (! queue.isEmpty()) {
+      IndexedWord current = queue.remove(0);
+      for (IndexedWord child : this.getChildren(current)) {
+        if ( ! result.contains(child)) {
+          result.add(child);
+          queue.add(child);
+        }
+      }
+    }
+    return result;
   }
 
   /**
@@ -1135,6 +1163,26 @@ public class SemanticGraph implements Serializable {
     }
     return true;
   }
+
+  /**
+   *
+   * @param root root node of the subgraph.
+   * @return true if the subgraph rooted at <code>root</code> contains no cycles.
+   */
+
+  public boolean isDag(IndexedWord root) {
+    Set<IndexedWord> unused = wordMapFactory.newSet();
+    unused.addAll(this.getSubgraphVertices(root));
+    while (!unused.isEmpty()) {
+      IndexedWord arbitrary = unused.iterator().next();
+      boolean result = isDagHelper(arbitrary, unused, wordMapFactory.newSet());
+      if (result) {
+        return false;
+      }
+    }
+    return true;
+  }
+
 
   private boolean isDagHelper(IndexedWord current, Set<IndexedWord> unused, Set<IndexedWord> trail) {
     if (trail.contains(current)) {
@@ -1419,12 +1467,12 @@ public class SemanticGraph implements Serializable {
     StringBuilder buf = new StringBuilder();
     for (IndexedWord root : getRoots()) {
       buf.append("root(ROOT-0, ");
-      buf.append(toDepStyle(root)).append(")\n");
+      buf.append(root.toString(CoreLabel.OutputFormat.VALUE_INDEX)).append(")\n");
     }
     for (SemanticGraphEdge edge : this.edgeListSorted()) {
       buf.append(edge.getRelation().toString()).append("(");
-      buf.append(toDepStyle(edge.getSource())).append(", ");
-      buf.append(toDepStyle(edge.getTarget())).append(")\n");
+      buf.append(edge.getSource().toString(CoreLabel.OutputFormat.VALUE_INDEX)).append(", ");
+      buf.append(edge.getTarget().toString(CoreLabel.OutputFormat.VALUE_INDEX)).append(")\n");
     }
     return buf.toString();
   }
@@ -1436,20 +1484,10 @@ public class SemanticGraph implements Serializable {
     StringBuilder buf = new StringBuilder();
     for (SemanticGraphEdge edge : this.edgeListSorted()) {
       buf.append(edge.getRelation().toString()).append("(");
-      buf.append(toPOSStyle(edge.getSource())).append(",");
-      buf.append(toPOSStyle(edge.getTarget())).append(")\n");
+      buf.append(edge.getSource().toString()).append(",");
+      buf.append(edge.getTarget()).append(")\n");
     }
     return buf.toString();
-  }
-
-  // todo [cdm 2013]: These next two methods should really be toString options on indexed word but are different from all the current ones....
-
-  private static String toDepStyle(IndexedWord fl) {
-    return fl.toString(CoreLabel.OutputFormat.VALUE_INDEX);
-  }
-
-  private static String toPOSStyle(IndexedWord fl) {
-    return fl.toString(CoreLabel.OutputFormat.VALUE_TAG_INDEX);
   }
 
   private String toReadableString() {
@@ -1457,11 +1495,13 @@ public class SemanticGraph implements Serializable {
     buf.append(String.format("%-20s%-20s%-20s%n", "dep", "reln", "gov"));
     buf.append(String.format("%-20s%-20s%-20s%n", "---", "----", "---"));
     for (IndexedWord root : getRoots()) {
-      buf.append(String.format("%-20s%-20s%-20s%n", toDepStyle(root), "root", "root"));
+      buf.append(String.format("%-20s%-20s%-20s%n", root.toString(CoreLabel.OutputFormat.VALUE_TAG_INDEX), "root", "root"));
     }
     for (SemanticGraphEdge edge : this.edgeListSorted()) {
-      buf.append(String.format("%-20s%-20s%-20s%n", toDepStyle(edge.getTarget()), edge.getRelation().toString(),
-          toDepStyle(edge.getSource())));
+      buf.append(String.format("%-20s%-20s%-20s%n",
+          edge.getTarget().toString(CoreLabel.OutputFormat.VALUE_TAG_INDEX),
+          edge.getRelation().toString(),
+          edge.getSource().toString(CoreLabel.OutputFormat.VALUE_TAG_INDEX)));
     }
     return buf.toString();
   }
@@ -1605,10 +1645,17 @@ public class SemanticGraph implements Serializable {
     output.append("}\n");
     return output.toString();
   }
-  
+
   public SemanticGraphEdge addEdge(IndexedWord s, IndexedWord d, GrammaticalRelation reln, double weight, boolean isExtra) {
     SemanticGraphEdge newEdge = new SemanticGraphEdge(s, d, reln, weight, isExtra);
     graph.add(s, d, newEdge);
+    return newEdge;
+  }
+
+  public SemanticGraphEdge addEdge(SemanticGraphEdge edge) {
+    SemanticGraphEdge newEdge = new SemanticGraphEdge(edge.getGovernor(), edge.getDependent(),
+        edge.getRelation(), edge.getWeight(), edge.isExtra());
+    graph.add(edge.getGovernor(), edge.getDependent(), newEdge);
     return newEdge;
   }
 
@@ -1739,7 +1786,7 @@ public class SemanticGraph implements Serializable {
   public List<SemanticGraphEdge> getShortestDirectedPathEdges(IndexedWord source, IndexedWord target) {
     return graph.getShortestPathEdges(source, target, true);
   }
-  
+
   public SemanticGraph makeSoftCopy() {
     SemanticGraph newSg = new SemanticGraph();
     if ( ! this.roots.isEmpty())
@@ -1932,7 +1979,7 @@ public class SemanticGraph implements Serializable {
     }
     return relns;
   }
-  
+
   /**
    * Delete all duplicate edges.
    *
@@ -1993,6 +2040,24 @@ public class SemanticGraph implements Serializable {
       }
     }
     return Pair.makePair(min, max);
+  }
+
+  /**
+   * Store a comment line with this semantic graph.
+   *
+   * @param comment
+   */
+  public void addComment(String comment) {
+    this.comments.add(comment);
+  }
+
+  /**
+   * Return the list of comments stored with this graph.
+   *
+   * @return A list of comments.
+   */
+  public List<String> getComments() {
+    return this.comments;
   }
 
   private static final long serialVersionUID = 1L;

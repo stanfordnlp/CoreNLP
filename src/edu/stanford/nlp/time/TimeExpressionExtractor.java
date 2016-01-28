@@ -6,11 +6,12 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * A TimeExpressionExtractor extracts a list of time expression from a document annotation
+ * A TimeExpressionExtractor extracts a list of time expressions from a document annotation.
  *
  * @author Angel Chang
  */
 public interface TimeExpressionExtractor {
+
   void init(String name, Properties props);
 
   void init(Options options);
@@ -25,7 +26,7 @@ public interface TimeExpressionExtractor {
    * @param docAnnotation - Annotation for the entire document
    *                        Uses the following annotations:
    *                          CoreAnnotations.DocDateAnnotation.class (String representing document date)
-   *                          TimeExpression.TimeIndexAnnotation.class (Holds index used to generated tids)
+   *                          TimeExpression.TimeIndexAnnotation.class (Holds index used to generate tids)
    * @return List of CoreMaps
    */
   List<CoreMap> extractTimeExpressionCoreMaps(CoreMap annotation, CoreMap docAnnotation);
@@ -49,8 +50,9 @@ public interface TimeExpressionExtractor {
 
   /**
    * Indicates that all annotations on the document has been completed
-   * Performs cleanup on the document annotation
-   * @param docAnnotation
+   * Performs cleanup on the document annotation.
+   *
+   * @param docAnnotation A document annotation.
    */
   void finalize(CoreMap docAnnotation);
 

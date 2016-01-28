@@ -25,8 +25,7 @@ import java.util.zip.GZIPOutputStream;
 
 public class IOUtils {
 
-  private static final int SLURP_BUFFER_SIZE = 16000;
-  private static final int GZIP_FILE_BUFFER_SIZE = 65536;
+  private static final int SLURP_BUFFER_SIZE = 16384;
 
   public static final String eolChar = System.getProperty("line.separator");
   public static final String defaultEncoding = "utf-8";
@@ -419,14 +418,8 @@ public class IOUtils {
       }
     }
     // if not found in the CLASSPATH, load from the file system
-    if (is == null) is = new FileInputStream(name);
-    // make sure it's not a GZIP stream
-    if (name.endsWith(".gz")) {
-      try {
-        return new GZIPInputStream(is);
-      } catch (IOException e) {
-        System.err.println("Resource or file looks like a gzip file, but is not: " + name);
-      }
+    if (is == null) {
+      is = new FileInputStream(name);
     }
     return is;
   }
@@ -450,9 +443,9 @@ public class IOUtils {
    * The CLASSPATH takes priority over the file system!
    * This stream is buffered and gunzipped (if necessary).
    *
-   * @param textFileOrUrl
+   * @param textFileOrUrl The String specifying the URL/resource/file to load
    * @return An InputStream for loading a resource
-   * @throws IOException
+   * @throws IOException On any IO error
    */
   public static InputStream getInputStreamFromURLOrClasspathOrFileSystem(String textFileOrUrl)
     throws IOException
@@ -462,11 +455,6 @@ public class IOUtils {
       URL u = new URL(textFileOrUrl);
       URLConnection uc = u.openConnection();
       in = uc.getInputStream();
-      if (textFileOrUrl.endsWith(".gz")) {
-        try {
-          in = new GZIPInputStream(in);
-        } catch (IOException e) { }
-      }
     } else {
       try {
         in = findStreamInClasspathOrFileSystem(textFileOrUrl);
@@ -477,11 +465,19 @@ public class IOUtils {
           URLConnection uc = u.openConnection();
           in = uc.getInputStream();
         } catch (IOException e2) {
-          // Don't make the original exception a cause, since it is almost certainly bogus
-          throw new IOException("Unable to resolve \"" +
-                  textFileOrUrl + "\" as either " +
-                  "class path, filename or URL"); // , e2);
+          // Don't make the original exception a cause, since it is usually bogus
+          throw new IOException("Unable to open \"" +
+                  textFileOrUrl + "\" as " + "class path, filename or URL"); // , e2);
         }
+      }
+    }
+
+    // If it is a GZIP stream then ungzip it
+    if (textFileOrUrl.endsWith(".gz")) {
+      try {
+        in = new GZIPInputStream(in);
+      } catch (IOException e) {
+        System.err.println("Resource or file looks like a gzip file, but is not: " + textFileOrUrl);
       }
     }
 
@@ -493,6 +489,9 @@ public class IOUtils {
   }
 
 
+  // todo [cdm 2015]: I think GZIPInputStream has its own buffer and so we don't need to buffer in that case.
+  // todo: Though it's default size is 512 bytes so need to make 8K in constructor. Or else buffering outside gzip is faster
+  // todo: final InputStream is = new GZIPInputStream( new FileInputStream( file ), 65536 );
   /**
    * Quietly opens a File. If the file ends with a ".gz" extension,
    * automatically opens a GZIPInputStream to wrap the constructed
@@ -585,6 +584,7 @@ public class IOUtils {
   }
 
 
+  // TODO [cdm 2015]: Should we rename these methods. Sort of misleading: They really read files, resources, etc. specified by a String
   /**
    * Open a BufferedReader to a file, class path entry or URL specified by a String name.
    * If the String starts with https?://, then it is first tried as a URL. It
@@ -1126,7 +1126,7 @@ public class IOUtils {
    */
   public static String slurpFile(String filename, String encoding)
           throws IOException {
-    Reader r = getBufferedReaderFromClasspathOrFileSystem(filename, encoding);
+    Reader r = readerFromString(filename, encoding);
     return IOUtils.slurpReader(r);
   }
 
@@ -1467,22 +1467,27 @@ public class IOUtils {
     return out;
   }
 
+  public static OutputStream getFileOutputStream(String filename, boolean append) throws IOException {
+    OutputStream out = new FileOutputStream(filename, append);
+    if (filename.endsWith(".gz")) {
+      out = new GZIPOutputStream(out);
+    } else if (filename.endsWith(".bz2")) {
+      //out = new CBZip2OutputStream(out);
+      out = getBZip2PipedOutputStream(filename);
+    }
+    return out;
+  }
+
+  /** @deprecated Just call readerFromString(filename) */
+  @Deprecated
   public static BufferedReader getBufferedFileReader(String filename) throws IOException {
-    return getBufferedFileReader(filename, defaultEncoding);
+    return readerFromString(filename, defaultEncoding);
   }
 
-  public static BufferedReader getBufferedFileReader(String filename, String encoding) throws IOException {
-    InputStream in = getFileInputStream(filename);
-    return new BufferedReader(new InputStreamReader(in, encoding));
-  }
-
+  /** @deprecated Just call readerFromString(filename) */
+  @Deprecated
   public static BufferedReader getBufferedReaderFromClasspathOrFileSystem(String filename) throws IOException {
-    return getBufferedReaderFromClasspathOrFileSystem(filename, defaultEncoding);
-  }
-
-  public static BufferedReader getBufferedReaderFromClasspathOrFileSystem(String filename, String encoding) throws IOException {
-    InputStream in = findStreamInClasspathOrFileSystem(filename);
-    return new BufferedReader(new InputStreamReader(in, encoding));
+    return readerFromString(filename, defaultEncoding);
   }
 
   public static PrintWriter getPrintWriter(File textFile) throws IOException {
@@ -1664,7 +1669,7 @@ public class IOUtils {
   public static List<String> linesFromFile(String filename,String encoding, boolean ignoreHeader) {
     try {
       List<String> lines = new ArrayList<String>();
-      BufferedReader in = getBufferedReaderFromClasspathOrFileSystem(filename, encoding);
+      BufferedReader in = readerFromString(filename, encoding);
       String line;
       int i = 0;
       while ((line = in.readLine()) != null) {
@@ -1824,7 +1829,7 @@ public class IOUtils {
 
   /**
    * A raw file copy function -- this is not public since no error checks are made as to the
-   * consistency of the filed being copied. Use instead:
+   * consistency of the file being copied. Use instead:
    * @see IOUtils#cp(java.io.File, java.io.File, boolean)
    * @param source The source file. This is guaranteed to exist, and is guaranteed to be a file.
    * @param target The target file.
@@ -2048,20 +2053,38 @@ public class IOUtils {
    * @param callback The function to run for every line of input.
    * @throws IOException Thrown from the underlying input stream.
    */
-  public static void console(Consumer<String> callback) throws IOException {
+    public static void console(String prompt, Consumer<String> callback) throws IOException {
     BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     String line;
-    System.out.print("> ");
+    System.out.print(prompt);
     while ( (line = reader.readLine()) != null) {
       switch (line.toLowerCase()) {
         case "exit":
         case "quit":
+        case "q":
           return;
         default:
           callback.accept(line);
       }
-      System.out.print("> ");
+      System.out.print(prompt);
     }
+  }
+
+  /**
+   * Create a prompt, and read a single line of response.
+   * @param prompt An optional prompt to show the user.
+   * @throws IOException Throw from the underlying reader.
+   */
+  public static String promptUserInput(Optional<String> prompt) throws IOException {
+    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+    String line;
+    System.out.print(prompt.orElse("> "));
+    return reader.readLine();
+  }
+
+  /** @see IOUtils#console(String, Consumer) */
+  public static void console(Consumer<String> callback) throws IOException {
+    console("> ", callback);
   }
 
 }

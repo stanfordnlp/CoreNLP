@@ -178,17 +178,21 @@ public class TimeAnnotator implements Annotator {
   }
 
   public TimeAnnotator(String name, Properties props) {
+    this(name, props, false);
+  }
+
+  public TimeAnnotator(String name, Properties props, boolean quiet) {
     timexExtractor = new TimeExpressionExtractorImpl(name, props);
-    this.quiet = false;
+    this.quiet = quiet;
   }
 
   @Override
   public void annotate(Annotation annotation) {
     SUTime.TimeIndex timeIndex = new SUTime.TimeIndex();
     String docDate = annotation.get(CoreAnnotations.DocDateAnnotation.class);
-    if(docDate == null) {
+    if (docDate == null) {
       Calendar cal = annotation.get(CoreAnnotations.CalendarAnnotation.class);
-      if(cal == null) {
+      if (cal == null) {
         if (!quiet) { Redwood.log(Redwood.WARN, "No document date specified"); }
       } else {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
@@ -234,7 +238,7 @@ public class TimeAnnotator implements Annotator {
    */
   public List<CoreMap> annotateSingleSentence(CoreMap sentence, String docDate, SUTime.TimeIndex timeIndex) {
     CoreMap annotationCopy = NumberSequenceClassifier.alignSentence(sentence);
-    if (docDate.equals("")) {
+    if (docDate.isEmpty()) {
       docDate = null;
     }
     return timexExtractor.extractTimeExpressionCoreMaps(annotationCopy, docDate, timeIndex);

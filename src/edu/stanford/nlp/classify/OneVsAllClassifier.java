@@ -12,6 +12,9 @@ import edu.stanford.nlp.util.Index;
 import java.util.Collection;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * One vs All multiclass classifier
  *
@@ -35,6 +38,8 @@ public class OneVsAllClassifier<L,F> implements Classifier<L,F> {
   Index<L> labelIndex;
   Map<L, Classifier<String,F>> binaryClassifiers;
   L defaultLabel;
+
+  final static Logger logger = LoggerFactory.getLogger(OneVsAllClassifier.class);
 
   public OneVsAllClassifier(Index<F> featureIndex, Index<L> labelIndex) {
     this(featureIndex, labelIndex, Generics.<L, Classifier<String, F>>newHashMap(), null);
@@ -103,7 +108,7 @@ public class OneVsAllClassifier<L,F> implements Classifier<L,F> {
     Map<L, Classifier<String, F>> classifiers = Generics.newHashMap();
     for (L label:trainLabels) {
       int i = labelIndex.indexOf(label);
-      System.err.println("Training " + label + "=" + i + ", posIndex=" + posIndex);
+      logger.info("Training " + label + "=" + i + ", posIndex=" + posIndex);
       // Create training data for training this classifier
       Map<L,String> posLabelMap = new ArrayMap<L,String>();
       posLabelMap.put(label, POS_LABEL);

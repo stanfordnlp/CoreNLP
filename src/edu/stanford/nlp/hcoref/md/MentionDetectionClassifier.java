@@ -81,7 +81,7 @@ public class MentionDetectionClassifier implements Serializable {
   
   public static MentionDetectionClassifier loadMentionDetectionClassifier(String filename) throws ClassNotFoundException, IOException {
     System.err.print("loading MentionDetectionClassifier ...");
-    MentionDetectionClassifier mdc = IOUtils.readObjectFromFile(filename);
+    MentionDetectionClassifier mdc = IOUtils.readObjectFromURLOrClasspathOrFileSystem(filename);
     System.err.println("done");
     return mdc;
   }
@@ -129,7 +129,7 @@ public class MentionDetectionClassifier implements Serializable {
           }
           
           // add to remove
-          Mention keep = Counters.argmax(probs);
+          Mention keep = Counters.argmax(probs, (m1, m2) -> m1.spanToString().compareTo(m2.spanToString()));
           probs.remove(keep);
           remove.addAll(probs.keySet());
         }

@@ -739,7 +739,7 @@ public class RFSieve extends Sieve {
     double inner = ArrayMath.innerProduct(normalizedVector1, normalizedVector2);
     return inner;
   }
-  private static int numEntitiesInList(Mention m) {
+  public static int numEntitiesInList(Mention m) {
     int num = 0;
     for(int i=1 ; i < m.originalSpan.size() ; i++) {
       CoreLabel cl = m.originalSpan.get(i);

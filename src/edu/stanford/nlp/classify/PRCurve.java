@@ -11,6 +11,9 @@ import edu.stanford.nlp.util.PriorityQueue;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Triple;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /** A class to create recall-precision curves given scores
  *  used to fit the best monotonic function for logistic regression and SVMs.
  *
@@ -24,6 +27,8 @@ public class PRCurve {
   int[] guesses; // the guess of example i according to the argmax
   int[] numpositive; // number positive in the i-th highest scores
   int[] numnegative; // number negative in the i-th lowest scores
+
+  final static Logger logger = LoggerFactory.getLogger(PRCurve.class);
 
   /**
    * reads scores with classes from a file, sorts by score and creates the arrays
@@ -91,7 +96,7 @@ public class PRCurve {
     List<Pair<Integer, Pair<Double, Integer>>> sorted = q.toSortedList();
     scores = new double[sorted.size()];
     classes = new int[sorted.size()];
-    System.err.println("incoming size " + dataScores.size() + " resulting " + sorted.size());
+    logger.info("incoming size " + dataScores.size() + " resulting " + sorted.size());
 
     for (int i = 0; i < sorted.size(); i++) {
       Pair<Double, Integer> next = sorted.get(i).second();
@@ -111,7 +116,7 @@ public class PRCurve {
     scores = new double[sorted.size()];
     classes = new int[sorted.size()];
     guesses = new int[sorted.size()];
-    System.err.println("incoming size " + dataScores.size() + " resulting " + sorted.size());
+    logger.info("incoming size " + dataScores.size() + " resulting " + sorted.size());
 
     for (int i = 0; i < sorted.size(); i++) {
       Triple<Double, Integer, Integer> next = sorted.get(i).second();
@@ -138,7 +143,7 @@ public class PRCurve {
     for (int i = 1; i <= num; i++) {
       numpositive[i] = numpositive[i - 1] + (classes[num - i] == 0 ? 0 : 1);
     }
-    System.err.println("total positive " + numpositive[num] + " total negative " + numnegative[num] + " total " + num);
+    logger.info("total positive " + numpositive[num] + " total negative " + numnegative[num] + " total " + num);
     for (int i = 1; i < numpositive.length; i++) {
       //System.out.println(i + " positive " + numpositive[i] + " negative " + numnegative[i] + " classes " + classes[i - 1] + " " + classes[num - i]);
     }
@@ -208,7 +213,7 @@ public class PRCurve {
       } else {
         leftIndex++;
       }
-      //System.err.println("chose "+chosen+" score "+scores[chosen]+" class "+classes[chosen]+" correct "+correct(scores[chosen],classes[chosen]));
+      //logger.info("chose "+chosen+" score "+scores[chosen]+" class "+classes[chosen]+" correct "+correct(scores[chosen],classes[chosen]));
       if ((scores[chosen] >= .5) && (classes[chosen] == 1)) {
         totalcorrect++;
       }
@@ -262,7 +267,7 @@ public class PRCurve {
       } else {
         leftIndex++;
       }
-      //System.err.println("chose "+chosen+" score "+scores[chosen]+" class "+classes[chosen]+" correct "+correct(scores[chosen],classes[chosen]));
+      //logger.info("chose "+chosen+" score "+scores[chosen]+" class "+classes[chosen]+" correct "+correct(scores[chosen],classes[chosen]));
       if ((scores[chosen] >= .5)) {
         if (classes[chosen] == 1) {
           tp++;
@@ -353,13 +358,13 @@ public class PRCurve {
     PriorityQueue<String> q = new BinaryHeapPriorityQueue<String>();
     q.add("bla", 2);
     q.add("bla3", 2);
-    System.err.println("size of q " + q.size());
+    logger.info("size of q " + q.size());
 
     PRCurve pr = new PRCurve("c:/data0204/precsvm", true);
-    System.err.println("acc " + pr.accuracy() + " opt " + pr.optimalAccuracy() + " cwa " + pr.cwa() + " optcwa " + pr.optimalCwa());
+    logger.info("acc " + pr.accuracy() + " opt " + pr.optimalAccuracy() + " cwa " + pr.cwa() + " optcwa " + pr.optimalCwa());
     for (int r = 1; r <= pr.numSamples(); r++) {
-      System.err.println("optimal precision at recall " + r + " " + pr.precision(r));
-      System.err.println("model precision at recall " + r + " " + pr.logPrecision(r));
+      logger.info("optimal precision at recall " + r + " " + pr.precision(r));
+      logger.info("model precision at recall " + r + " " + pr.logPrecision(r));
     }
   }
 

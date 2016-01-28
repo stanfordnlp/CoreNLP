@@ -13,7 +13,7 @@ import java.io.Serializable;
  * If you subclass this interface, all of the other
  * mechanisms necessary for getting your data into a
  * sequence classifier will be taken care of
- * for you.  Subclasses <b>MUST</b> have an empty constructor as
+ * for you.  Subclasses <b>MUST</b> have an empty constructor so
  * they can be instantiated by reflection, and
  * there is a promise that the init method will
  * be called immediately after construction.
@@ -31,7 +31,7 @@ public interface DocumentReaderAndWriter<IN extends CoreMap>
    *
    * @param flags Flags specifying behavior
    */
-  public void init(SeqClassifierFlags flags);
+  void init(SeqClassifierFlags flags);
 
   /**
    * This method prints the output of the classifier to a
@@ -40,6 +40,6 @@ public interface DocumentReaderAndWriter<IN extends CoreMap>
    * @param doc The document which has answers (it has been classified)
    * @param out Where to send the output
    */
-  public void printAnswers(List<IN> doc, PrintWriter out);
+  void printAnswers(List<IN> doc, PrintWriter out);
 
 }

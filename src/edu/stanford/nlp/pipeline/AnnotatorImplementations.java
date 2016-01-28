@@ -100,6 +100,11 @@ public class AnnotatorImplementations {
 
     Properties combinerProperties = PropertiesUtils.extractSelectedProperties(properties,
             NERClassifierCombiner.DEFAULT_PASS_DOWN_PROPERTIES);
+    if (useSUTime) {
+      // Make sure SUTime parameters are included
+      Properties sutimeProps = PropertiesUtils.extractPrefixedProperties(properties, NumberSequenceClassifier.SUTIME_PROPERTY  + ".", true);
+      PropertiesUtils.overWriteProperties(combinerProperties, sutimeProps);
+    }
     NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers,
             useSUTime, combinerProperties, loadPaths);
 
@@ -195,9 +200,30 @@ public class AnnotatorImplementations {
   }
 
   /**
-   * Annotate for coreference
+   * Annotate for mention (statistical or hybrid)
+   */
+  public Annotator mention(Properties properties) {
+    // TO DO: split up coref and mention properties
+    Properties corefProperties = PropertiesUtils.extractPrefixedProperties(properties,
+            Annotator.STANFORD_COREF + ".",
+            true);
+    return new MentionAnnotator(corefProperties);
+  }
+
+  /**
+   * Annotate for coreference (statistical or hybrid)
    */
   public Annotator coref(Properties properties) {
+    Properties corefProperties = PropertiesUtils.extractPrefixedProperties(properties,
+            Annotator.STANFORD_COREF + ".",
+            true);
+    return new CorefAnnotator(corefProperties);
+  }
+
+  /**
+   * Annotate for coreference (deterministic)
+   */
+  public Annotator dcoref(Properties properties) {
     return new DeterministicCorefAnnotator(properties);
   }
 
@@ -249,6 +275,13 @@ public class AnnotatorImplementations {
     Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
         Annotator.STANFORD_QUOTE + '.');
     return new QuoteAnnotator(relevantProperties);
+  }
+
+  /**
+   * Add universal dependencies features
+   */
+  public Annotator udfeats(Properties properties) {
+    return new UDFeatureAnnotator();
   }
 
 }

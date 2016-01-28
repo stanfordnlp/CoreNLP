@@ -79,17 +79,16 @@ public class SUTime {
   private SUTime() {
   }
 
-  public static enum TimexType {
+  public enum TimexType {
     DATE, TIME, DURATION, SET
   }
 
-  public static enum TimexMod {
+  public enum TimexMod {
     BEFORE("<"), AFTER(">"), ON_OR_BEFORE("<="), ON_OR_AFTER("<="), LESS_THAN("<"), MORE_THAN(">"),
     EQUAL_OR_LESS("<="), EQUAL_OR_MORE(">="), START, MID, END, APPROX("~"), EARLY /* GUTIME */, LATE; /* GUTIME */
-    String symbol;
+    private String symbol;
 
-    TimexMod() {
-    }
+    TimexMod() { }
 
     TimexMod(String symbol) {
       this.symbol = symbol;
@@ -100,11 +99,11 @@ public class SUTime {
     }
   }
 
-  public static enum TimexDocFunc {
+  public enum TimexDocFunc {
     CREATION_TIME, EXPIRATION_TIME, MODIFICATION_TIME, PUBLICATION_TIME, RELEASE_TIME, RECEPTION_TIME, NONE
   }
 
-  public static enum TimexAttr {
+  public enum TimexAttr {
     type, value, tid, beginPoint, endPoint, quant, freq, mod, anchorTimeID, comment, valueFromFunction, temporalFunction, functionInDocument
   }
 
@@ -147,7 +146,7 @@ public class SUTime {
 
   protected static final int timexVersion = 3;
 
-  public static final SUTime.Time getCurrentTime() {
+  public static SUTime.Time getCurrentTime() {
     return new GroundedTime(new DateTime());
   }
 
@@ -246,7 +245,7 @@ public class SUTime {
   }
 
   /**
-   * Basic temporal object
+   * Basic temporal object.
    *
    * <p>
    * There are 4 main types of temporal objects
@@ -267,7 +266,7 @@ public class SUTime {
    * <li>TemporalSet - A set of temporal objects
    *  <ul><li>ExplicitTemporalSet - Explicit set of temporals (not used)
    *         <br>Ex: Tuesday 1-2pm, Wednesday night</li>
-   *      <li>PeriodicTemporalSet - Reoccuring times
+   *      <li>PeriodicTemporalSet - Reoccurring times
    *         <br>Ex: Every Tuesday</li>
    *  </ul>
    * </li>
@@ -745,7 +744,7 @@ public class SUTime {
   public static final RelativeTime TODAY = new RelativeTime(TemporalOp.THIS, SUTime.DAY);
   public static final RelativeTime TONIGHT = new RelativeTime(TemporalOp.THIS, SUTime.NIGHT);
 
-  public static enum TimeUnit {
+  public enum TimeUnit {
     // Basic time units
     MILLIS(SUTime.MILLIS), SECOND(SUTime.SECOND), MINUTE(SUTime.MINUTE), HOUR(SUTime.HOUR),
     DAY(SUTime.DAY), WEEK(SUTime.WEEK), MONTH(SUTime.MONTH), QUARTER(SUTime.QUARTER), HALFYEAR(SUTime.HALFYEAR),
@@ -775,7 +774,7 @@ public class SUTime {
     }
   }
 
-  public static enum StandardTemporalType {
+  public enum StandardTemporalType {
     REFDATE(TimexType.DATE),
     REFTIME(TimexType.TIME),
  /*   MILLIS(TimexType.TIME, TimeUnit.MILLIS),
@@ -915,7 +914,7 @@ public class SUTime {
   // lookup of temporal from string
   // creating durations, dates
   // public interface TemporalOp extends Function<Temporal,Temporal>();
-  public static enum TemporalOp {
+  public enum TemporalOp {
     // For durations: possible interpretation of next/prev:
     // next month, next week
     // NEXT: on Thursday, next week = week starting on next monday
@@ -1785,7 +1784,7 @@ public class SUTime {
       return bd;
     }
 
-    private Range getIntersectedRange(CompositePartialTime cpt, Range r, Duration d) {
+    private static Range getIntersectedRange(CompositePartialTime cpt, Range r, Duration d) {
       Time beginTime = r.beginTime();
       Time endTime = r.endTime();
       if (beginTime != TIME_UNKNOWN && endTime != TIME_UNKNOWN) {
@@ -1809,7 +1808,7 @@ public class SUTime {
         }
         return new Range(t1, t2, d);
       } else {
-        throw new RuntimeException("Unsupport range: " + r);
+        throw new RuntimeException("Unsupported range: " + r);
       }
     }
 
@@ -2139,7 +2138,7 @@ public class SUTime {
   }
 
   /**
-   * Inexact time, not sure when this is, but have some guesses
+   * Inexact time, not sure when this is, but have some guesses.
    */
   public static class InexactTime extends Time {
     Time base; // best guess
@@ -4725,7 +4724,7 @@ public class SUTime {
 
     @Override
     public PeriodicTemporalSet setTimeZone(DateTimeZone tz) {
-      return new PeriodicTemporalSet(this, (Time) Temporal.setTimeZone(base, tz), periodicity,
+      return new PeriodicTemporalSet(this, Temporal.setTimeZone(base, tz), periodicity,
               (Range) Temporal.setTimeZone(occursIn, tz), quant, freq);
     }
 

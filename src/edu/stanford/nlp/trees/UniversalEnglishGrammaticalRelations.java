@@ -750,9 +750,9 @@ public class UniversalEnglishGrammaticalRelations {
             "SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ",
             "@NP < (@UCP|PRN=target <# @PP)",
             // to handle "What weapon is Apollo most proficient with?"
-            "SBARQ < (WHNP=target $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj < (PP !< NP)) $++ (NP $++ =adj)))",
+            "SBARQ < (WHNP=target $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj < (PP <: IN)) $++ (NP $++ =adj)))",
             //to handle "What is the esophagus used for"? or "What radio station did Paul Harvey work for?"
-            "SBARQ < (WHNP=target [$++ (VP < (PP !< NP)) | $++ (SQ < (VP < (PP !< NP)))])");
+            "SBARQ < (WHNP=target [$++ (VP < (PP <: IN)) | $++ (SQ < (VP < (PP <: IN)))])");
 
 
 
@@ -1549,7 +1549,7 @@ public class UniversalEnglishGrammaticalRelations {
    * access.
    * @param relation the relation to be added to the values list
    */
-  private static void threadSafeAddRelation(GrammaticalRelation relation) {
+  public static void threadSafeAddRelation(GrammaticalRelation relation) {
     valuesLock.writeLock().lock();
     try { // try-finally structure taken from Javadoc code sample for ReentrantReadWriteLock
       synchronizedValues.add(relation);
