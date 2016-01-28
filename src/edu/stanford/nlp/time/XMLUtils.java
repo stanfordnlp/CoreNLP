@@ -20,7 +20,14 @@ import java.util.regex.Pattern;
  * @author Angel Chang
  */
 public class XMLUtils {
-  private static Document document = createDocument();
+
+  private static final Document document = createDocument();
+  private static final TransformerFactory tFactory = TransformerFactory.newInstance();
+  // todo: revert: According to the docs, neither TransformerFactory nor DocumentBuilderFactory is guaranteed threadsafe.
+  // todo: A good application might make one of these per thread, but maybe easier just to revert to creating one each time, sigh.
+
+
+  private XMLUtils() {} // static class
 
   public static String documentToString(Document document) {
     StringOutputStream s = new StringOutputStream();
@@ -34,18 +41,15 @@ public class XMLUtils {
     return s.toString();
   }
 
-  public static void printNode(OutputStream out, Node node, boolean prettyPrint, boolean includeXmlDeclaration)
-  {
-    TransformerFactory tfactory = TransformerFactory.newInstance();
-    Transformer serializer;
+  public static void printNode(OutputStream out, Node node, boolean prettyPrint, boolean includeXmlDeclaration) {
     try {
-      serializer = tfactory.newTransformer();
+      Transformer serializer = tFactory.newTransformer();
       if (prettyPrint) {
         //Setup indenting to "pretty print"
         serializer.setOutputProperty(OutputKeys.INDENT, "yes");
         serializer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
       }
-      if (!includeXmlDeclaration) {
+      if ( ! includeXmlDeclaration) {
         serializer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
       }
 
@@ -59,8 +63,8 @@ public class XMLUtils {
 
   public static Document createDocument() {
     try {
-      DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
-      DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
+      DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+      DocumentBuilder docBuilder = dbFactory.newDocumentBuilder();
       Document doc = docBuilder.newDocument();
       return doc;
     } catch (Exception e) {
@@ -78,8 +82,8 @@ public class XMLUtils {
 
   public static Element parseElement(String xml) {
     try {
-      DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
-      DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
+      DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+      DocumentBuilder docBuilder = dbFactory.newDocumentBuilder();
       Document doc = docBuilder.parse(new ByteArrayInputStream(xml.getBytes()));
       return doc.getDocumentElement();
     } catch (Exception e) {
@@ -100,7 +104,7 @@ public class XMLUtils {
       e.removeChild(n);
     }
   }
-  static private void getMatchingNodes(Node node, Pattern[] nodePath, int cur, List<Node> res) {
+  private static void getMatchingNodes(Node node, Pattern[] nodePath, int cur, List<Node> res) {
     if (cur < 0 || cur >= nodePath.length) return;
     boolean last = (cur == nodePath.length-1);
     Pattern pattern = nodePath[cur];
@@ -117,13 +121,13 @@ public class XMLUtils {
     }
   }
 
-  static public List<Node> getNodes(Node node, Pattern... nodePath) {
+  public static List<Node> getNodes(Node node, Pattern... nodePath) {
     List<Node> res = new ArrayList<Node>();
     getMatchingNodes(node, nodePath, 0, res);
     return res;
   }
 
-  static public String getNodeText(Node node, Pattern... nodePath) {
+  public static String getNodeText(Node node, Pattern... nodePath) {
     List<Node> nodes = getNodes(node, nodePath);
     if (nodes != null && nodes.size() > 0) {
       return nodes.get(0).getTextContent();
@@ -132,7 +136,7 @@ public class XMLUtils {
     }
   }
 
-  static public Node getNode(Node node, Pattern... nodePath) {
+  public static Node getNode(Node node, Pattern... nodePath) {
     List<Node> nodes = getNodes(node, nodePath);
     if (nodes != null && nodes.size() > 0) {
       return nodes.get(0);
@@ -141,7 +145,7 @@ public class XMLUtils {
     }
   }
 
-  static private void getMatchingNodes(Node node, String[] nodePath, int cur, List<Node> res) {
+  private static void getMatchingNodes(Node node, String[] nodePath, int cur, List<Node> res) {
     if (cur < 0 || cur >= nodePath.length) return;
     boolean last = (cur == nodePath.length-1);
     String name = nodePath[cur];
@@ -160,13 +164,13 @@ public class XMLUtils {
     }
   }
 
-  static public List<Node> getNodes(Node node, String... nodePath) {
+  public static List<Node> getNodes(Node node, String... nodePath) {
     List<Node> res = new ArrayList<Node>();
     getMatchingNodes(node, nodePath, 0, res);
     return res;
   }
 
-  static public List<String> getNodeTexts(Node node, String... nodePath) {
+  public static List<String> getNodeTexts(Node node, String... nodePath) {
     List<Node> nodes = getNodes(node, nodePath);
     if (nodes != null) {
       List<String> strs = new ArrayList<String>(nodes.size());
@@ -179,7 +183,7 @@ public class XMLUtils {
     }
   }
 
-  static public String getNodeText(Node node, String... nodePath) {
+  public static String getNodeText(Node node, String... nodePath) {
     List<Node> nodes = getNodes(node, nodePath);
     if (nodes != null && nodes.size() > 0) {
       return nodes.get(0).getTextContent();
@@ -188,16 +192,16 @@ public class XMLUtils {
     }
   }
 
-  static public String getAttributeValue(Node node, String name) {
+  public static String getAttributeValue(Node node, String name) {
     Node attr = getAttribute(node, name);
     return (attr != null)? attr.getNodeValue():null;
   }
 
-  static public Node getAttribute(Node node, String name) {
+  public static Node getAttribute(Node node, String name) {
     return node.getAttributes().getNamedItem(name);
   }
 
-  static public Node getNode(Node node, String... nodePath) {
+  public static Node getNode(Node node, String... nodePath) {
     List<Node> nodes = getNodes(node, nodePath);
     if (nodes != null && nodes.size() > 0) {
       return nodes.get(0);
@@ -205,4 +209,5 @@ public class XMLUtils {
       return null;
     }
   }
+
 }

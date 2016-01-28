@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.ling.AnnotationLookup;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.util.Generics;
@@ -19,7 +18,8 @@ public class NodePattern extends SemgrexPattern {
   private static final long serialVersionUID = -5981133879119233896L;
   private GraphRelation reln;
   private boolean negDesc;
-  private Map<String, Pattern> attributes;
+  /** A hash map from a key to a pair (case_sensitive_pattern, case_insensitive_pattern) */
+  private Map<String, Pair<Pattern, Pattern>> attributes;
   private boolean isRoot;
   private boolean isLink;
   private boolean isEmpty;
@@ -37,8 +37,7 @@ public class NodePattern extends SemgrexPattern {
          new ArrayList<Pair<Integer, String>>(0));
   }
 
-  // TODO: there is no capacity for named variable groups in the
-  // parser right now
+  // TODO: there is no capacity for named variable groups in the parser right now
   public NodePattern(GraphRelation r, boolean negDesc,
                      Map<String, String> attrs,
                      boolean root, boolean empty, String name,
@@ -53,11 +52,17 @@ public class NodePattern extends SemgrexPattern {
       String key = entry.getKey();
       String value = entry.getValue();
       if (value.equals("__")) {
-        attributes.put(key, Pattern.compile(".*"));
+        attributes.put(key, Pair.makePair(Pattern.compile(".*"), Pattern.compile(".*", Pattern.CASE_INSENSITIVE)));
       } else if (value.matches("/.*/")) {
-        attributes.put(key, Pattern.compile(value.substring(1, value.length() - 1)));
+        attributes.put(key, Pair.makePair(
+            Pattern.compile(value.substring(1, value.length() - 1)),
+            Pattern.compile(value.substring(1, value.length() - 1), Pattern.CASE_INSENSITIVE))
+        );
       } else { // raw description
-        attributes.put(key, Pattern.compile("^(" + value + ")$"));
+        attributes.put(key, Pair.makePair(
+            Pattern.compile("^(" + value + ")$"),
+            Pattern.compile("^(" + value + ")$", Pattern.CASE_INSENSITIVE))
+        );
       }
       descString += (key + ':' + value);
     }
@@ -85,7 +90,7 @@ public class NodePattern extends SemgrexPattern {
       return (negDesc ? !node.equals(IndexedWord.NO_WORD) : node.equals(IndexedWord.NO_WORD));
 
     // System.err.println("Attributes are: " + attributes);
-    for (Map.Entry<String, Pattern> attr : attributes.entrySet()) {
+    for (Map.Entry<String, Pair<Pattern, Pattern>> attr : attributes.entrySet()) {
       String key = attr.getKey();
       // System.out.println(key);
       String nodeValue;
@@ -105,18 +110,13 @@ public class NodePattern extends SemgrexPattern {
       // System.out.println(nodeValue);
       if (nodeValue == null)
         return negDesc;
-      Pattern valuePattern = attr.getValue();
+      Pattern valuePattern = ignoreCase ? attr.getValue().second : attr.getValue().first;
       boolean matches = false;
-      if (ignoreCase) {
-        if (Pattern.compile(valuePattern.pattern(), Pattern.CASE_INSENSITIVE).matcher(nodeValue).matches())
-          matches = true;
-      } else {
-        if (nodeValue.matches(valuePattern.pattern()))
-          matches = true;
+      if (valuePattern.matcher(nodeValue).matches()) {
+        matches = true;
       }
       if (!matches) {
-
-        // System.out.println("doesnt match");
+        // System.out.println("doesn't match");
         // System.out.println("");
         return negDesc;
       }
@@ -327,9 +327,7 @@ public class NodePattern extends SemgrexPattern {
           IndexedWord otherNode = namesToNodes.get(myNode.name);
           if (otherNode != null) {
             if (otherNode.equals(nextMatch)) {
-              if (myNode.negDesc) {
-                continue;
-              } else {
+              if ( ! myNode.negDesc) {
                 finished = false;
                 break;
               }
@@ -337,8 +335,6 @@ public class NodePattern extends SemgrexPattern {
               if (myNode.negDesc) {
                 finished = false;
                 break;
-              } else {
-                continue;
               }
             }
           } else {
@@ -389,8 +385,9 @@ public class NodePattern extends SemgrexPattern {
             break;
           }
         }
-      }
-      if (!finished) { // I successfully matched.
+      } // end while
+
+      if ( ! finished) { // I successfully matched.
         resetChild();
         if (myNode.name != null) {
           // note: have to fill in the map as we go for backreferencing
@@ -533,6 +530,7 @@ public class NodePattern extends SemgrexPattern {
     public String toString() {
       return "node matcher for: " + myNode.localString();
     }
-  }
+
+  } // end static class NodeMatcher
 
 }

@@ -190,11 +190,11 @@ public class JointParsingModel {
     final LatticeXMLReader reader = new LatticeXMLReader();
 
     if(!reader.load(inputStream,serInput)) {
-      System.err.printf("%s: Error loading input lattice xml from stdin\n", this.getClass().getName());
+      System.err.printf("%s: Error loading input lattice xml from stdin%n", this.getClass().getName());
       return false;
     }
 
-    System.err.printf("%s: Entering main parsing loop...\n", this.getClass().getName());
+    System.err.printf("%s: Entering main parsing loop...%n", this.getClass().getName());
 
     int latticeNum = 0;
     int parseable = 0;
@@ -203,7 +203,7 @@ public class JointParsingModel {
     for(final Lattice lattice : reader) {
 
       if (lattice.getNumNodes() > op.testOptions.maxLength + 1) {  // + 1 for boundary symbol
-        System.err.printf("%s: Lattice %d too big! (%d nodes)\n",this.getClass().getName(),latticeNum,lattice.getNumNodes());
+        System.err.printf("%s: Lattice %d too big! (%d nodes)%n",this.getClass().getName(),latticeNum,lattice.getNumNodes());
         latticeNum++;
         continue;
       }
@@ -220,24 +220,24 @@ public class JointParsingModel {
           bestSegmentationB = rawTree.yield(new ArrayList<CoreLabel>()); //has boundary symbol
 
           if(op.doDep && dparser.parse(bestSegmentationB)) {
-            System.err.printf("%s: Dependency parse succeeded!\n", this.getClass().getName());
+            System.err.printf("%s: Dependency parse succeeded!%n", this.getClass().getName());
             if(bparser.parse(bestSegmentationB)) {
-              System.err.printf("%s: Factored parse succeeded!\n", this.getClass().getName());
+              System.err.printf("%s: Factored parse succeeded!%n", this.getClass().getName());
               rawTree = bparser.getBestParse();
               fParseSucceeded++;
             }
 
           } else {
-            System.out.printf("%s: Dependency parse failed. Backing off to PCFG...\n", this.getClass().getName());
+            System.out.printf("%s: Dependency parse failed. Backing off to PCFG...%n", this.getClass().getName());
           }
 
         } else {
-          System.out.printf("%s: WARNING: parsing failed for lattice %d\n", this.getClass().getName(), latticeNum);
+          System.out.printf("%s: WARNING: parsing failed for lattice %d%n", this.getClass().getName(), latticeNum);
         }
 
         //Post-process the tree
         if (rawTree == null) {
-          System.out.printf("%s: WARNING: Could not extract best parse for lattice %d\n", this.getClass().getName(), latticeNum);
+          System.out.printf("%s: WARNING: Could not extract best parse for lattice %d%n", this.getClass().getName(), latticeNum);
 
         } else {
           Tree t = debinarizer.transformTree(rawTree);
@@ -249,7 +249,7 @@ public class JointParsingModel {
 
         //When a best parse can't be extracted
       } catch (Exception e) {
-        System.out.printf("%s: WARNING: Could not extract best parse for lattice %d\n", this.getClass().getName(), latticeNum);
+        System.out.printf("%s: WARNING: Could not extract best parse for lattice %d%n", this.getClass().getName(), latticeNum);
         e.printStackTrace();
       }
 
@@ -320,8 +320,9 @@ public class JointParsingModel {
    */
   private static class GenericLatticeScorer implements LatticeScorer {
 
+    @Override
     public Item convertItemSpan(Item item) {
-      if(bestSegmentationB == null || bestSegmentationB.size() == 0)
+      if(bestSegmentationB == null || bestSegmentationB.isEmpty())
         throw new RuntimeException(this.getClass().getName() + ": No 1best segmentation available");
 
       item.start = bestSegmentationB.get(item.start).beginPosition();
@@ -329,6 +330,7 @@ public class JointParsingModel {
       return item;
     }
 
+    @Override
     public double oScore(Edge edge) {
       final Edge latticeEdge = (Edge) convertItemSpan(new Edge(edge));
 
@@ -338,6 +340,7 @@ public class JointParsingModel {
       return pOscore + dOscore;
     }
 
+    @Override
     public double iScore(Edge edge) {
       final Edge latticeEdge = (Edge) convertItemSpan(new Edge(edge));
 
@@ -347,18 +350,21 @@ public class JointParsingModel {
       return pIscore + dIscore;
     }
 
+    @Override
     public boolean oPossible(Hook hook) {
       final Hook latticeHook = (Hook) convertItemSpan(new Hook(hook));
 
       return pparser.oPossible(latticeHook) && dparser.oPossible(hook);
     }
 
+    @Override
     public boolean iPossible(Hook hook) {
       final Hook latticeHook = (Hook) convertItemSpan(new Hook(hook));
 
       return pparser.iPossible(latticeHook) && dparser.iPossible(hook);
     }
 
+    @Override
     public boolean parse(List<? extends HasWord> words) {
       throw new UnsupportedOperationException(this.getClass().getName() + ": Does not support parse operation.");
     }

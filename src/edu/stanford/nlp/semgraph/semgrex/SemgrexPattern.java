@@ -350,12 +350,22 @@ public abstract class SemgrexPattern implements Serializable {
     return this.toString().hashCode();
   }
 
+  public enum OutputFormat {
+    LIST,
+    OFFSET
+  };
+
+
   static final String PATTERN = "-pattern";
   static final String TREE_FILE = "-treeFile";
   static final String MODE = "-mode";
   static final String DEFAULT_MODE = "BASIC";
   static final String EXTRAS = "-extras";
   static final String CONLLU_FILE = "-conlluFile";
+  static final String OUTPUT_FORMAT_OPTION = "-outputFormat";
+  static final String DEFAULT_OUTPUT_FORMAT = "LIST";
+
+
 
   public static void help() {
     System.err.println("Possible arguments for SemgrexPattern:");
@@ -364,6 +374,8 @@ public abstract class SemgrexPattern implements Serializable {
     System.err.println(CONLLU_FILE + ": a CoNLL-U file of dependency trees to process");
     System.err.println(MODE + ": what mode for dependencies.  basic, collapsed, or ccprocessed.  To get 'noncollapsed', use basic with extras");
     System.err.println(EXTRAS + ": whether or not to use extras");
+    System.err.println(OUTPUT_FORMAT_OPTION + ": output format of matches. list or offset. 'list' prints the graph as a list of dependencies, "
+                         + "'offset' prints the filename and the line offset in the ConLL-U file.");
     System.err.println();
     System.err.println(PATTERN + " is required");
   }
@@ -383,6 +395,9 @@ public abstract class SemgrexPattern implements Serializable {
     flagMap.put(TREE_FILE, 1);
     flagMap.put(MODE, 1);
     flagMap.put(EXTRAS, 1);
+    flagMap.put(CONLLU_FILE, 1);
+    flagMap.put(OUTPUT_FORMAT_OPTION, 1);
+
 
     Map<String, String[]> argsMap = StringUtils.argsToMap(args, flagMap);
     args = argsMap.get(null);
@@ -399,6 +414,12 @@ public abstract class SemgrexPattern implements Serializable {
       modeString = argsMap.get(MODE)[0].toUpperCase();
     }
     SemanticGraphFactory.Mode mode = SemanticGraphFactory.Mode.valueOf(modeString);
+
+    String outputFormatString = DEFAULT_OUTPUT_FORMAT;
+    if (argsMap.containsKey(OUTPUT_FORMAT_OPTION) && argsMap.get(OUTPUT_FORMAT_OPTION).length > 0) {
+      outputFormatString = argsMap.get(OUTPUT_FORMAT_OPTION)[0].toUpperCase();
+    }
+    OutputFormat outputFormat = OutputFormat.valueOf(outputFormatString);
 
     boolean useExtras = true;
     if (argsMap.containsKey(EXTRAS) && argsMap.get(EXTRAS).length > 0) {
@@ -438,19 +459,28 @@ public abstract class SemgrexPattern implements Serializable {
       if (!(matcher.find())) {
         continue;
       }
-      System.err.println("Matched graph:");
-      System.err.println(graph.toString(SemanticGraph.OutputFormat.LIST));
-      boolean found = true;
-      while (found) {
-        System.err.println("Matches at: " + matcher.getMatch().value() + "-" + matcher.getMatch().index());
-        List<String> nodeNames = Generics.newArrayList();
-        nodeNames.addAll(matcher.getNodeNames());
-        Collections.sort(nodeNames);
-        for (String name : nodeNames) {
-          System.err.println("  " + name + ": " + matcher.getNode(name).value() + "-" + matcher.getNode(name).index());
+
+      if (outputFormat == OutputFormat.LIST) {
+        System.err.println("Matched graph:");
+        System.err.println(graph.toString(SemanticGraph.OutputFormat.LIST));
+        boolean found = true;
+        while (found) {
+          System.err.println("Matches at: " + matcher.getMatch().value() + "-" + matcher.getMatch().index());
+          List<String> nodeNames = Generics.newArrayList();
+          nodeNames.addAll(matcher.getNodeNames());
+          Collections.sort(nodeNames);
+          for (String name : nodeNames) {
+            System.err.println("  " + name + ": " + matcher.getNode(name).value() + "-" + matcher.getNode(name).index());
+          }
+          System.err.println();
+          found = matcher.find();
         }
-        System.err.println();
-        found = matcher.find();
+      } else if (outputFormat == OutputFormat.OFFSET) {
+        if (graph.vertexListSorted().isEmpty()) {
+          continue;
+        }
+        System.out.printf("+%d %s%n", graph.vertexListSorted().get(0).get(CoreAnnotations.LineNumberAnnotation.class),
+            argsMap.get(CONLLU_FILE)[0]);
       }
     }
   }

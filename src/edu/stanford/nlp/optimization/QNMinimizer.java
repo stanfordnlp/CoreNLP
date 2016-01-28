@@ -94,7 +94,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   private int fevals = 0; // the number of function evaluations
   private int maxFevals = -1;
   private int mem = 10; // the number of s,y pairs to retain for BFGS
-  private int its = 0; // the number of iterations
+  private int its = 0; // the number of iterations through the main do-while loop of L-BFGS's minimize()
   private final Function monitor;
   private boolean quiet;
   private static final NumberFormat nf = new DecimalFormat("0.000E0");
@@ -1111,7 +1111,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
         }
       }
 
-    } while ((state = rec.toContinue()) == eState.CONTINUE); // do
+    } while ((state = rec.toContinue()) == eState.CONTINUE); // end do while
 
     if (evaluateIters > 0) {
       // do final evaluation
