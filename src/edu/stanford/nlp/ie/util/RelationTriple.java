@@ -178,10 +178,11 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
   /** {@inheritDoc} */
   @Override
   public int hashCode() {
-    int result = subject.hashCode();
-    result = 31 * result + relation.hashCode();
-    result = 31 * result + object.hashCode();
-    return result;
+    return toString().hashCode();  // Faster than checking CoreLabels
+//    int result = subject.hashCode();
+//    result = 31 * result + relation.hashCode();
+//    result = 31 * result + object.hashCode();
+//    return result;
   }
 
   /** Print a human-readable description of this relation triple, as a tab-separated line */
@@ -284,5 +285,4 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
       return Optional.of(sourceTree);
     }
   }
-
 }

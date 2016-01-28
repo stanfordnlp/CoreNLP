@@ -100,6 +100,7 @@ public class CorefProperties {
   public static final String FEATURE_SELECTION_PROP = "hcoref.SIEVENAME.featureSelection";
   public static final String THRES_MERGE_PROP = "hcoref.SIEVENAME.merge.thres";
   public static final String THRES_FEATURE_SELECTION_PROP = "hcoref.SIEVENAME.pmi.thres";
+  public static final String DEFAULT_PRONOUN_AGREEMENT_PROP = "hcoref.defaultPronounAgreement";
   
   // features
   public static final String USE_BASIC_FEATURES_PROP = "hcoref.SIEVENAME.useBasicFeatures";
@@ -232,6 +233,7 @@ public class CorefProperties {
   public static boolean calculateFeatureImportance(Properties props) {
     return PropertiesUtils.getBool(props, CALCULATE_IMPORTANCE_PROP, false);
   }
+  
   public static int getMaxSentDistForSieve(Properties props, String sievename) {
     return PropertiesUtils.getInt(props, MAX_SENT_DIST_PROP.replace("SIEVENAME", sievename), 1000);
   }
@@ -362,6 +364,10 @@ public class CorefProperties {
   }
   public static boolean removeNested(Properties props){
     return PropertiesUtils.getBool(props, CorefProperties.REMOVE_NESTED, true);
+  }
+  
+  public static boolean useDefaultPronounAgreement(Properties props){
+    return PropertiesUtils.getBool(props, CorefProperties.DEFAULT_PRONOUN_AGREEMENT_PROP,false);
   }
   
 }

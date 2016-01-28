@@ -459,8 +459,11 @@ public abstract class DeterministicCorefSieve extends Sieve {
       }
 
       boolean mIsPronoun = (m.isPronominal() || dict.allPronouns.contains(m.toString()));
+      boolean attrAgree = CorefProperties.useDefaultPronounAgreement(props)?
+          Rules.entityAttributesAgree(mentionCluster, potentialAntecedent):
+            Rules.entityAttributesAgree(mentionCluster, potentialAntecedent, lang);
       
-      if(mIsPronoun && Rules.entityAttributesAgree(mentionCluster, potentialAntecedent, lang)){
+      if(mIsPronoun && attrAgree){
 
         if(dict.demonymSet.contains(ant.lowercaseNormalizedSpanString()) && dict.notOrganizationPRP.contains(m.headString)){
           document.addIncompatible(m, ant);
