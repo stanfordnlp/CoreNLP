@@ -35,6 +35,8 @@ public class QuoteAnnotator implements Annotator {
   // whether to convert unicode quotes to non-unicode " and '
   // before processing
   public boolean ASCII_QUOTES = false;
+  // Whether or not to allow quotes of the same type embedded inside of each other
+  public boolean ALLOW_EMBEDDED_SAME = false;
 
   // TODO: implement this
 //  public boolean closeUnclosedQuotes = false;
@@ -54,6 +56,24 @@ public class QuoteAnnotator implements Annotator {
     tmp.put("‚","’");  // directed single down/up left pointing
     tmp.put("``","''");  // double latex -- single latex quotes don't belong here!
     DIRECTED_QUOTES = Collections.unmodifiableMap(tmp);
+  }
+
+  public static final Map<String, String> QUOTE_BEGINNERS;
+  static {
+    Map<String, String> tmp = Generics.newHashMap();
+    tmp.put("“", "”");  // directed double inward
+//    tmp.put("‘", "’");  // directed single inward
+    tmp.put("«", "»");  // guillemets
+    tmp.put("‹","›");  // single guillemets
+    tmp.put("「", "」");  // cjk brackets
+    tmp.put("『", "』");  // cjk brackets
+    tmp.put("„","”");  // directed double down/up left pointing
+    tmp.put("‚","’");  // directed single down/up left pointing
+//    tmp.put("``","''");  // double latex -- single latex quotes don't belong here!
+//    tmp.put("`","'");  // single latex
+//    tmp.put("\"","\"");  // double standard
+//    tmp.put("'","'");  // single standard
+    QUOTE_BEGINNERS = Collections.unmodifiableMap(tmp);
   }
 
   /** Return a QuoteAnnotator that isolates quotes denoted by the
@@ -96,6 +116,7 @@ public class QuoteAnnotator implements Annotator {
     USE_SINGLE = Boolean.parseBoolean(props.getProperty("singleQuotes", "false"));
     MAX_LENGTH = Integer.parseInt(props.getProperty("maxLength", "-1"));
     ASCII_QUOTES = Boolean.parseBoolean(props.getProperty("asciiQuotes", "false"));
+    ALLOW_EMBEDDED_SAME = Boolean.parseBoolean(props.getProperty("allowEmbeddedSame", "false"));
 
     VERBOSE = verbose;
     Timing timer = null;
@@ -292,6 +313,47 @@ public class QuoteAnnotator implements Annotator {
     return quote;
   }
 
+//  public List<Pair<Integer, Integer>> iterativishQuotes(String text) {
+//    // This stack will store pairs that are quote
+//    // kind & the index that it was found at.
+//    Stack<Pair<String, Integer>> quoteSilo = Generics.newStack();
+//    List<Pair<Integer, Integer>> quotes = Generics.newArrayList();
+//
+//    for (int i = 0; i < text.length(); i++) {
+//      // is the character at this index a quote?
+//      String index = text.substring(i, i + 1);
+//      // is the character at this index possibly a two-character wide quote?
+//      // Could this string begin a quote?
+//      Pair<String, Integer> beginner = null;
+//      if (i < text.length() - 1 &&
+//              index.equals("`") &&
+//              text.substring(i, i + 2).equals("``")) {
+//        beginner = new Pair<>(text.substring(i, i + 2), i);
+//        i += 1;  // need to advance i so that we don't grab the inner bit also!
+//      } else if (QUOTE_BEGINNERS.containsKey(index)) {
+//        beginner = new Pair<>(index, i);
+//      }
+//      if (beginner != null) {
+//        quoteSilo.push(beginner);
+//        continue;  // we don't want to do the end of the loop!
+//      }
+//      // Could this string end a quote?
+//      // is is a two-wide ender?
+//      Pair<String, Integer> ender = null;
+//      if (i < text.length() - 1 &&
+//              index.equals("'") &&
+//              text.substring(i, i + 2).equals("''")) {
+//        ender = new Pair<>(text.substring(i, i + 2), i);
+//        i += 1;
+//      } else if (QUOTE_BEGINNERS.values().contains(index)) {
+//        ender = new Pair<>(index, i);
+//      }
+//      if (ender != null) {
+//        quoteSilo.push(ender);
+//      }
+//    }
+//  }
+
   public List<Pair<Integer, Integer>> getQuotes(String text) {
     return recursiveQuotes(text, 0, null);
   }
@@ -367,7 +429,6 @@ public class QuoteAnnotator implements Annotator {
         quote = null;
       }
 
-
       if (c.length() > 1) {
         i += c.length() - 1;
       }
@@ -416,16 +477,22 @@ public class QuoteAnnotator implements Annotator {
     } else {
       for (String qKind : quotesMap.keySet()) {
         for (Pair<Integer, Integer> q : quotesMap.get(qKind)) {
-          if (q.first() < q.second() - qKind.length() * 2) {
+          if (q.second() - q.first() >= qKind.length() * 2) {
             String toPass = text.substring(q.first() + qKind.length(),
                 q.second() - qKind.length());
-            String qKindToPass = DIRECTED_QUOTES.containsKey(qKind) || qKind.equals("`") ? null : qKind;
+            String qKindToPass = null;
+            if (!(DIRECTED_QUOTES.containsKey(qKind) || qKind.equals("`"))
+                    || !ALLOW_EMBEDDED_SAME) {
+              qKindToPass = qKind;
+            }
             List<Pair<Integer, Integer>> embedded = recursiveQuotes(toPass,
                 q.first() + qKind.length() + offset, qKindToPass);
             for (Pair<Integer, Integer> e : embedded) {
               // don't add offset here because the
               // recursive method already added it
-              quotes.add(new Pair(e.first(), e.second()));
+              if (e.second() - e.first() > 2) {
+                quotes.add(new Pair(e.first(), e.second()));
+              }
             }
           }
           quotes.add(new Pair(q.first() + offset, q.second() + offset));
