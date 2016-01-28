@@ -573,7 +573,7 @@ public class OpenIE implements Annotator {
         SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
         SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class));
     if (resolveCoref) {
-      requirements.add(edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefChainAnnotation.class);
+      requirements.add(edu.stanford.nlp.hcoref.CorefCoreAnnotations.CorefChainAnnotation.class);
     }
     return Collections.unmodifiableSet(requirements);
   }
