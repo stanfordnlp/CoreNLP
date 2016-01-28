@@ -102,7 +102,7 @@ public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> i
           String w = combineKeyValue(en.getKey(), en2);
           Set<String> st = index.get(w);
           if (st == null){
-            System.err.println("\n\nWARNING: INDEX HAS NO SENTENCES FOR " + w);
+            //System.err.println("\n\nWARNING: INDEX HAS NO SENTENCES FOR " + w);
             return Collections.emptySet();
             //throw new RuntimeException("How come the index does not have sentences for " + w);
           }
