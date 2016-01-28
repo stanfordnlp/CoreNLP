@@ -4,9 +4,6 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import edu.stanford.nlp.ling.Datum;
 import edu.stanford.nlp.math.ADMath;
@@ -14,9 +11,9 @@ import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.math.DoubleAD;
 import edu.stanford.nlp.optimization.AbstractStochasticCachingDiffUpdateFunction;
 import edu.stanford.nlp.optimization.StochasticCalculateMethods;
-import edu.stanford.nlp.util.Execution;
+import edu.stanford.nlp.util.ArgumentParser;
 import edu.stanford.nlp.util.Index;
-import edu.stanford.nlp.util.SystemUtils;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
 
 
 /**
@@ -71,7 +68,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
   protected boolean parallelGradientCalculation = true;
 
   /** Multithreading gradient calculations is a bit cheaper if you reuse the threads. */
-  protected int threads = Execution.threads;
+  protected int threads = ArgumentParser.threads;
 
   @Override
   public int domainDimension() {
@@ -330,7 +327,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       try {
         latch.await();
       } catch (InterruptedException e) {
-        e.printStackTrace();
+        throw new RuntimeInterruptedException(e);
       }
 
       for (int i = 0; i < threads; i++) {
@@ -688,7 +685,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       try {
         latch.await();
       } catch (InterruptedException e) {
-        e.printStackTrace();
+        throw new RuntimeInterruptedException(e);
       }
 
       for (int i = 0; i < threads; i++) {
@@ -1009,7 +1006,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       try {
         latch.await();
       } catch (InterruptedException e) {
-        e.printStackTrace();
+        throw new RuntimeInterruptedException(e);
       }
 
       for (int i = 0; i < threads; i++) {

@@ -487,7 +487,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if ((this.mentionSubTree!=null && isListLike())
         || (this.mentionSubTree==null && isListLikeByDependency()) ) {
       mentionType = MentionType.LIST;
-      Redwood.log("debug-mention", "IS LIST: " + this);
+      //Redwood.log("debug-mention", "IS LIST: " + this);
     } else if (headWord.has(CoreAnnotations.EntityTypeAnnotation.class)){    // ACE gold mention type
       if (headWord.get(CoreAnnotations.EntityTypeAnnotation.class).equals("PRO")) {
         mentionType = MentionType.PRONOMINAL;
@@ -499,7 +499,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     } else {    // MUC
       if(!headWord.has(CoreAnnotations.NamedEntityTagAnnotation.class)) {   // temporary fix
         mentionType = MentionType.NOMINAL;
-        Redwood.log("debug-mention", "no NamedEntityTagAnnotation: "+headWord);
+        //Redwood.log("debug-mention", "no NamedEntityTagAnnotation: "+headWord);
       } else if (headWord.tag().startsWith("PRP") || headWord.tag().startsWith("PN")
           || (originalSpan.size() == 1 && headWord.get(CoreAnnotations.NamedEntityTagAnnotation.class).equals("O")
               && (dict.allPronouns.contains(headString) || dict.relativePronouns.contains(headString) ))) {
@@ -1070,6 +1070,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     return new Pair<>();
   }
 
+  /** Returns true if this mention is contained inside m. That is, it is a subspan of the same sentence. */
   public boolean insideIn(Mention m){
     return this.sentNum == m.sentNum
             && m.startIndex <= this.startIndex
@@ -1586,7 +1587,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if (obj.getClass() != getClass()) { return false; }
 
     Mention rhs = (Mention) obj;
-    
+
     if (!Objects.equals(mentionType, rhs.mentionType)) { return false; }
     if (!Objects.equals(number, rhs.number)) { return false; }
     if (!Objects.equals(gender, rhs.gender)) { return false; }
@@ -1633,5 +1634,21 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
     return true;
   }
-  
+
+  @Override
+  public int hashCode() {
+
+    int result = 49;
+    int c = 0;
+
+    c += startIndex;
+    c += endIndex;
+
+    result = (37 * result) + c;
+
+    return result;
+
+  }
+
+
 }

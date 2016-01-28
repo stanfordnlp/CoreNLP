@@ -92,10 +92,10 @@ public class Env {
   public List<Class> defaultTokensResultAnnotationKey;
 
   /**
-   * List of keys indicating what fields should be annotated for the aggregated coremap.
-   * If specified, the aggregated coremap is annotated with the extracted results from the
+   * List of keys indicating what fields should be annotated for the aggregated CoreMap.
+   * If specified, the aggregated CoreMap is annotated with the extracted results from the
    *   {@link #defaultResultsAnnotationExtractor}.
-   * If null, then the aggregated coremap is not annotated.
+   * If null, then the aggregated CoreMap is not annotated.
    */
   public List<Class> defaultResultAnnotationKey;
 
@@ -112,7 +112,7 @@ public class Env {
   private CoreMapAggregator defaultTokensAggregator;
 
   /**
-   * Whether we should merge and output corelabels or not
+   * Whether we should merge and output CoreLabels or not
    */
   public boolean aggregateToTokens;
 
@@ -285,12 +285,12 @@ public class Env {
     String replace = Matcher.quoteReplacement(regex);
     stringRegexVariables.put(var, new Pair<>(varPattern, replace));
   }
-  public String expandStringRegex(String regex)
-  {
+
+  public String expandStringRegex(String regex) {
     // Replace all variables in regex
     String expanded = regex;
-    for (String v:stringRegexVariables.keySet()) {
-      Pair<Pattern,String> p = stringRegexVariables.get(v);
+    for (Map.Entry<String, Pair<Pattern, String>> stringPairEntry : stringRegexVariables.entrySet()) {
+      Pair<Pattern,String> p = stringPairEntry.getValue();
       expanded = p.first().matcher(expanded).replaceAll(p.second());
     }
     return expanded;
@@ -380,10 +380,11 @@ public class Env {
 
   // Functions for storing temporary thread specific variables
   //  that are used when running tokensregex
+
   public void push(String name, Object value) {
     Map<String,Object> vars = threadLocalVariables.get();
     if (vars == null) {
-      threadLocalVariables.set(vars = new HashMap<>());//Generics.newHashMap());
+      threadLocalVariables.set(vars = new HashMap<>()); //Generics.newHashMap());
     }
     Stack<Object> stack = (Stack<Object>) vars.get(name);
     if (stack == null) {

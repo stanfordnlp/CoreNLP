@@ -18,6 +18,7 @@ import edu.stanford.nlp.util.*;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -31,14 +32,19 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 /**
  * This class creates a server that runs a new Java annotator in each thread.
  *
+ * @author Gabor Angeli
+ * @author Arun Chaganty
  */
 public class StanfordCoreNLPServer implements Runnable {
+
   protected static int DEFAULT_PORT = 9000;
-  protected static int DEFAULT_TIMEOUT = 5;
+  protected static int DEFAULT_TIMEOUT = 5000;
 
   protected HttpServer server;
   protected final int serverPort;
-  protected final int timeoutSeconds;
+  protected final int timeoutMilliseconds;
+  protected final boolean strict;
+
   protected final FileHandler staticPageHandle;
   protected final String shutdownKey;
 
@@ -51,7 +57,7 @@ public class StanfordCoreNLPServer implements Runnable {
   /**
    * The thread pool for the HTTP server.
    */
-  private final ExecutorService serverExecutor = Executors.newFixedThreadPool(Execution.threads);
+  private final ExecutorService serverExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
   /**
    * To prevent grossly wasteful over-creation of pipeline objects, cache the last
    * few we created, until the garbage collector decides we can kill them.
@@ -60,17 +66,27 @@ public class StanfordCoreNLPServer implements Runnable {
   /**
    * An executor to time out CoreNLP execution with.
    */
-  private final ExecutorService corenlpExecutor = Executors.newFixedThreadPool(Execution.threads);
+  private final ExecutorService corenlpExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
 
 
-  public StanfordCoreNLPServer(int port, int timeout) throws IOException {
-    serverPort = port;
-    timeoutSeconds = timeout;
+  /**
+   * Create a new Stanford CoreNLP Server.
+   * @param port The port to host the server from.
+   * @param timeout The timeout (in milliseconds) for each command.
+   * @param strict If true, conform more strictly to the HTTP spec (e.g., for character encoding).
+   * @throws IOException Thrown from the underlying socket implementation.
+   */
+  public StanfordCoreNLPServer(int port, int timeout, boolean strict) throws IOException {
+    this.serverPort = port;
+    this.timeoutMilliseconds = timeout;
+    this.strict = strict;
 
-    defaultProps = new Properties();
-    defaultProps.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, depparse, dcoref, natlog, openie");
-    defaultProps.setProperty("inputFormat", "text");
-    defaultProps.setProperty("outputFormat", "json");
+    defaultProps = PropertiesUtils.asProperties(
+            "annotators", "tokenize, ssplit, pos, lemma, ner, depparse, coref, natlog, openie",
+            "coref.md.type", "dep",
+            "inputFormat", "text",
+            "outputFormat", "json",
+            "prettyPrint", "false");
 
     // Generate and write a shutdown key
     String tmpDir = System.getProperty("java.io.tmpdir");
@@ -135,6 +151,9 @@ public class StanfordCoreNLPServer implements Runnable {
     String inputFormat = props.getProperty("inputFormat", "text");
     switch (inputFormat) {
       case "text":
+        // The default encoding by the HTTP standard is ISO-8859-1, but most
+        // real users of CoreNLP would likely assume UTF-8 by default.
+        String defaultEncoding = this.strict ? "ISO-8859-1" : "UTF-8";
         // Get the encoding
         Headers h = httpExchange.getRequestHeaders();
         String encoding;
@@ -142,14 +161,14 @@ public class StanfordCoreNLPServer implements Runnable {
           String[] charsetPair = Arrays.asList(h.getFirst("Content-type").split(";")).stream()
               .map(x -> x.split("="))
               .filter(x -> x.length > 0 && "charset".equals(x[0]))
-              .findFirst().orElse(new String[]{"charset", "ISO-8859-1"});
+              .findFirst().orElse(new String[]{"charset", defaultEncoding});
           if (charsetPair.length == 2) {
             encoding = charsetPair[1];
           } else {
-            encoding = "ISO-8859-1";  // default encoding for a form
+            encoding = defaultEncoding;
           }
         } else {
-          encoding = "ISO-8859-1";  // default encoding for a form
+          encoding = defaultEncoding;
         }
 
         // Read the annotation
@@ -190,7 +209,7 @@ public class StanfordCoreNLPServer implements Runnable {
    *
    * @throws IOException Thrown if the HttpExchange cannot communicate the error.
    */
-  private void respondError(String response, HttpExchange httpExchange) throws IOException {
+  private static void respondError(String response, HttpExchange httpExchange) throws IOException {
     httpExchange.getResponseHeaders().add("Content-Type", "text/plain");
     httpExchange.sendResponseHeaders(HTTP_ERR, response.length());
     httpExchange.getResponseBody().write(response.getBytes());
@@ -206,7 +225,7 @@ public class StanfordCoreNLPServer implements Runnable {
    *
    * @throws IOException Thrown if the HttpExchange cannot communicate the error.
    */
-  private void respondBadInput(String response, HttpExchange httpExchange) throws IOException {
+  private static void respondBadInput(String response, HttpExchange httpExchange) throws IOException {
     httpExchange.getResponseHeaders().add("Content-Type", "text/plain");
     httpExchange.sendResponseHeaders(HTTP_BAD_INPUT, response.length());
     httpExchange.getResponseBody().write(response.getBytes());
@@ -312,6 +331,7 @@ public class StanfordCoreNLPServer implements Runnable {
               outputSerializerName.equals(ProtobufAnnotationSerializer.class.getName())) {
             return "application/x-protobuf";
           }
+          //noinspection fallthrough
         default:
           return "application/octet-stream";
       }
@@ -331,7 +351,7 @@ public class StanfordCoreNLPServer implements Runnable {
         ann = getDocument(props, httpExchange);
         of = StanfordCoreNLP.OutputFormat.valueOf(props.getProperty("outputFormat", "json").toUpperCase());
 
-        if (ann.get(CoreAnnotations.TextAnnotation.class).length() == 0) {
+        if (ann.get(CoreAnnotations.TextAnnotation.class).isEmpty()) {
           // Handle direct browser connections (i.e., not a POST request).
           log("[" + httpExchange.getRemoteAddress() + "] Interactive connection");
           staticPageHandle.handle(httpExchange);
@@ -352,14 +372,34 @@ public class StanfordCoreNLPServer implements Runnable {
         return;
       }
 
+      Future<Annotation> completedAnnotationFuture = null;
       try {
         // Annotate
         StanfordCoreNLP pipeline = mkStanfordCoreNLP(props);
-        Future<Annotation> completedAnnotationFuture = corenlpExecutor.submit(() -> {
+        completedAnnotationFuture = corenlpExecutor.submit(() -> {
           pipeline.annotate(ann);
           return ann;
         });
-        Annotation completedAnnotation = completedAnnotationFuture.get(timeoutSeconds, TimeUnit.SECONDS);
+        Annotation completedAnnotation;
+        try {
+          int timeoutMilliseconds = Integer.parseInt(props.getProperty("timeout",
+                                                     Integer.toString(StanfordCoreNLPServer.this.timeoutMilliseconds)));
+          // Check for too long a timeout from an unauthorized source
+          if (timeoutMilliseconds > 10000) {
+            // If two conditions:
+            //   (1) The server is running on corenlp.run (i.e., corenlp.stanford.edu)
+            //   (2) The request is not coming from a *.stanford.edu" email address
+            // Then force the timeout to be 10 seconds
+            if ("corenlp.stanford.edu".equals(InetAddress.getLocalHost().getHostName()) &&
+                !httpExchange.getRemoteAddress().getHostName().toLowerCase().endsWith("stanford.edu")) {
+              timeoutMilliseconds = 10000;
+            }
+          }
+          completedAnnotation = completedAnnotationFuture.get(timeoutMilliseconds, TimeUnit.MILLISECONDS);
+        } catch (NumberFormatException e) {
+          completedAnnotation = completedAnnotationFuture.get(StanfordCoreNLPServer.this.timeoutMilliseconds, TimeUnit.MILLISECONDS);
+        }
+        completedAnnotationFuture = null;  // No longer any need for the future
 
         // Get output
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -373,12 +413,25 @@ public class StanfordCoreNLPServer implements Runnable {
         httpExchange.getResponseBody().write(response);
         httpExchange.close();
       } catch (TimeoutException e) {
+        // Print the stack trace for debugging
         e.printStackTrace();
-        respondError("CoreNLP request timed out", httpExchange);
+        // Return error message.
+        respondError("CoreNLP request timed out. Your document may be too long.", httpExchange);
+        // Cancel the future if it's alive
+        //noinspection ConstantConditions
+        if (completedAnnotationFuture != null) {
+          completedAnnotationFuture.cancel(true);
+        }
       } catch (Exception e) {
+        // Print the stack trace for debugging
         e.printStackTrace();
         // Return error message.
         respondError(e.getClass().getName() + ": " + e.getMessage(), httpExchange);
+        // Cancel the future if it's alive
+        //noinspection ConstantConditions
+        if (completedAnnotationFuture != null) {  // just in case...
+          completedAnnotationFuture.cancel(true);
+        }
       }
     }
 
@@ -393,29 +446,34 @@ public class StanfordCoreNLPServer implements Runnable {
      * @throws UnsupportedEncodingException Thrown if we could not decode the key/value pairs with UTF-8.
      */
     private Properties getProperties(HttpExchange httpExchange) throws UnsupportedEncodingException {
+      Map<String, String> urlParams = getURLParams(httpExchange.getRequestURI());
+
       // Load the default properties
       Properties props = new Properties();
       defaultProps.entrySet().stream()
           .forEach(entry -> props.setProperty(entry.getKey().toString(), entry.getValue().toString()));
 
       // Try to get more properties from query string.
-      Map<String, String> urlParams = getURLParams(httpExchange.getRequestURI());
+      // (get the properties from the URL params)
+      Map<String, String> urlProperties = new HashMap<>();
       if (urlParams.containsKey("properties")) {
-        StringUtils.decodeMap(URLDecoder.decode(urlParams.get("properties"), "UTF-8")).entrySet()
-            .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
+        urlProperties = StringUtils.decodeMap(URLDecoder.decode(urlParams.get("properties"), "UTF-8"));
       } else if (urlParams.containsKey("props")) {
-        StringUtils.decodeMap(URLDecoder.decode(urlParams.get("properties"), "UTF-8")).entrySet()
-            .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
+        urlProperties = StringUtils.decodeMap(URLDecoder.decode(urlParams.get("props"), "UTF-8"));
       }
+      // (tweak the default properties a bit)
+      if (urlProperties.containsKey("annotators") && urlProperties.get("annotators") != null &&
+          ArrayUtils.contains(urlProperties.get("annotators").split(","), "parse")) {
+        // (case: the properties have a parse annotator --
+        //        we don't have to use the dependency mention finder)
+        props.remove("coref.md.type");
+      }
+      // (add new properties on top of the default properties)
+      urlProperties.entrySet()
+          .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
 
       // Get the annotators
       String annotators = StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+"));
-
-      // Tweak the default annotator behavior
-      if (annotators.contains("coref") /* any coref */ && annotators.contains("ner") && annotators.contains("openie") &&
-          !"false".equals(props.getProperty("openie.resolve_coref", "true"))) {
-        props.setProperty("openie.resolve_coref", "true");
-      }
 
       // Tweak the properties to play nicer with the server
       // (set the parser max length to 60)
@@ -448,9 +506,7 @@ public class StanfordCoreNLPServer implements Runnable {
       Future<String> json = corenlpExecutor.submit(() -> {
         try {
           // Get the document
-          Properties props = new Properties() {{
-            setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
-          }};
+          Properties props = PropertiesUtils.asProperties("annotators", "tokenize,ssplit,pos,lemma,ner");
           Annotation doc = getDocument(props, httpExchange);
           if (!doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
             StanfordCoreNLP pipeline = mkStanfordCoreNLP(props);
@@ -517,18 +573,11 @@ public class StanfordCoreNLPServer implements Runnable {
       });
 
       // Send response
-      byte[] response = new byte[0];
       try {
-        response = json.get(5, TimeUnit.SECONDS).getBytes();
+        byte[] response = json.get(5, TimeUnit.SECONDS).getBytes();
+        sendAndGetResponse(httpExchange, response);
       } catch (InterruptedException | ExecutionException | TimeoutException e) {
         respondError("Timeout when executing TokensRegex query", httpExchange);
-      }
-      if (response.length > 0) {
-        httpExchange.getResponseHeaders().add("Content-Type", "text/json");
-        httpExchange.getResponseHeaders().add("Content-Length", Integer.toString(response.length));
-        httpExchange.sendResponseHeaders(HTTP_OK, response.length);
-        httpExchange.getResponseBody().write(response);
-        httpExchange.close();
       }
     }
   }
@@ -548,9 +597,7 @@ public class StanfordCoreNLPServer implements Runnable {
       Future<String> json = corenlpExecutor.submit(() -> {
         try {
           // Get the document
-          Properties props = new Properties() {{
-            setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,depparse");
-          }};
+          Properties props = PropertiesUtils.asProperties("annotators", "tokenize,ssplit,pos,lemma,ner,depparse");
           Annotation doc = getDocument(props, httpExchange);
           if (!doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
             StanfordCoreNLP pipeline = mkStanfordCoreNLP(props);
@@ -615,24 +662,24 @@ public class StanfordCoreNLPServer implements Runnable {
       });
 
       // Send response
-      byte[] response = new byte[0];
       try {
-        response = json.get(5, TimeUnit.SECONDS).getBytes();
+        byte[] response = json.get(5, TimeUnit.SECONDS).getBytes();
+        sendAndGetResponse(httpExchange, response);
       } catch (InterruptedException | ExecutionException | TimeoutException e) {
         respondError("Timeout when executing Semgrex query", httpExchange);
-      }
-      if (response.length > 0) {
-        httpExchange.getResponseHeaders().add("Content-Type", "text/json");
-        httpExchange.getResponseHeaders().add("Content-Length", Integer.toString(response.length));
-        httpExchange.sendResponseHeaders(HTTP_OK, response.length);
-        httpExchange.getResponseBody().write(response);
-        httpExchange.close();
       }
     }
   }
 
-
-
+  private static void sendAndGetResponse(HttpExchange httpExchange, byte[] response) throws IOException {
+    if (response.length > 0) {
+      httpExchange.getResponseHeaders().add("Content-Type", "text/json");
+      httpExchange.getResponseHeaders().add("Content-Length", Integer.toString(response.length));
+      httpExchange.sendResponseHeaders(HTTP_OK, response.length);
+      httpExchange.getResponseBody().write(response);
+      httpExchange.close();
+    }
+  }
 
 
   /**
@@ -678,6 +725,7 @@ public class StanfordCoreNLPServer implements Runnable {
   public static void main(String[] args) throws IOException {
     int port = DEFAULT_PORT;
     int timeout = DEFAULT_TIMEOUT;
+    boolean strict = false;
 
     Properties props = new Properties();
     if (args.length > 0) {
@@ -696,10 +744,16 @@ public class StanfordCoreNLPServer implements Runnable {
     if(props.containsKey("timeout")) {
       timeout = Integer.parseInt(props.getProperty("timeout"));
     }
-    log("Starting server on port " + port + " with timeout of " + timeout + " seconds.");
+    if(props.containsKey("strict")) {
+      if (props.get("strict") != null && !"".equals(props.get("strict"))) {
+        strict = Boolean.parseBoolean(props.getProperty("strict"));
+      }
+    }
+    log("Starting server on port " + port + " with timeout of " + timeout + " milliseconds.");
 
     // Run the server
-    StanfordCoreNLPServer server = new StanfordCoreNLPServer(port, timeout);
+    StanfordCoreNLPServer server = new StanfordCoreNLPServer(port, timeout, strict);
     server.run();
   }
+
 }

@@ -21,8 +21,8 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Helper Class for various I/O related things.
@@ -39,7 +39,7 @@ public class IOUtils {
   public static final String eolChar = System.getProperty("line.separator");
   public static final String defaultEncoding = "utf-8";
 
-  private static Logger logger = LoggerFactory.getLogger(IOUtils.class);
+  private static Redwood.RedwoodChannels logger = Redwood.channels(IOUtils.class);
 
   // A class of static methods
   private IOUtils() { }

@@ -138,6 +138,8 @@ import edu.stanford.nlp.util.*;
  */
 public class TokenSequencePattern extends SequencePattern<CoreMap> {
 
+  private static final long serialVersionUID = -4760710834202406916L;
+
   public static final TokenSequencePattern ANY_NODE_PATTERN = TokenSequencePattern.compile(ANY_NODE_PATTERN_EXPR);
 
   private static final Env DEFAULT_ENV = getNewEnv();

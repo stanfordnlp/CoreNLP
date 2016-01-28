@@ -3,19 +3,16 @@ package edu.stanford.nlp.pipeline;
 import java.util.*;
 
 import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
-import edu.stanford.nlp.hcoref.CorefCoreAnnotations.CorefChainAnnotation;
 import edu.stanford.nlp.hcoref.CorefSystem;
 import edu.stanford.nlp.hcoref.data.CorefChain;
 import edu.stanford.nlp.hcoref.data.CorefChain.CorefMention;
 import edu.stanford.nlp.hcoref.data.Document;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.util.ArraySet;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.IntTuple;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.util.*;
 
 import edu.stanford.nlp.hcoref.data.Dictionaries;
 import edu.stanford.nlp.scoref.StatisticalCorefSystem;
@@ -42,8 +39,8 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator {
 
   // String to determine whether to use hybrid or statistical mode
   private String COREF_MODE;
-  private String HYBRID_MODE = "hybrid";
-  private String STATISTICAL_MODE = "statistical";
+  private final String HYBRID_MODE = "hybrid";
+  private final String STATISTICAL_MODE = "statistical";
 
   private static final Map<Pair<Dictionaries.MentionType, Dictionaries.MentionType>, Double> COREF_THRESHOLDS = new HashMap<>();
   static {
@@ -63,7 +60,6 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator {
         scorefSystem = null;
       } else if (COREF_MODE.equals(STATISTICAL_MODE)) {
         // create corefSystem for statistical
-        System.out.println("building scorefSystem...");
         scorefSystem = StatisticalCorefSystem.fromProps(props);
         hcorefSystem = null;
       } else {
@@ -189,16 +185,41 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator {
   }
 
   @Override
-  public Set<Requirement> requires() {
-    return Annotator.REQUIREMENTS.get(STANFORD_COREF);
+  public Set<Class<? extends CoreAnnotation>> requires() {
+    Set<Class<? extends CoreAnnotation>> requirements = new HashSet<>(Arrays.asList(
+        CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.SentencesAnnotation.class,
+        CoreAnnotations.PartOfSpeechAnnotation.class,
+        CoreAnnotations.LemmaAnnotation.class,
+        CoreAnnotations.NamedEntityTagAnnotation.class
+        ));
+    switch (COREF_MODE) {
+      case HYBRID_MODE:
+        requirements.add(TreeCoreAnnotations.TreeAnnotation.class);
+        requirements.add(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+        requirements.add(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+        requirements.add(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
+        break;
+      case STATISTICAL_MODE:
+        requirements.add(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+        requirements.add(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+        requirements.add(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
+        break;
+      default:
+        break;
+    }
+    return Collections.unmodifiableSet(requirements);
   }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
-    return Collections.singleton(COREF_REQUIREMENT);
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+    switch (COREF_MODE) {
+      case STATISTICAL_MODE:
+      case HYBRID_MODE:
+        return Collections.singleton(CorefCoreAnnotations.CorefChainAnnotation.class);
+      default:
+        throw new IllegalStateException("Unknown requirementsSatisfied() for coref mode: " + COREF_MODE);
+    }
   }
 
-  public static void main(String[] args) {
-
-  }
 }

@@ -41,11 +41,12 @@ public final class SpanishVerbStripper implements Serializable {
   private static final String DEFAULT_DICT =
     "edu/stanford/nlp/international/spanish/enclitic-inflections.data";
 
+  /** Any attached pronouns. The extra grouping around this pattern allows it to be used in String concatenations. */
   private static final String PATTERN_ATTACHED_PRONOUNS =
-    "(?:(?:(?:[mts]e|n?os|les?)(?:l[oa]s?)?)|l[oa]s?)$";
+    "(?:(?:[mts]e|n?os|les?)(?:l[oa]s?)?|l[oa]s?)$";
 
   private static final Pattern pTwoAttachedPronouns =
-    Pattern.compile("(?:([mts]e|n?os|les?)(l[eoa]s?)?)$");
+    Pattern.compile("([mts]e|n?os|les?)(l[eoa]s?)$");
 
   private static final Pattern pOneAttachedPronoun =
     Pattern.compile("([mts]e|n?os|les?|l[oa]s?)$");
@@ -205,16 +206,13 @@ public final class SpanishVerbStripper implements Serializable {
     String pos = dict.get(stripped);
 
     if (pos != null) {
-      if (pos.equals("VMM02P0") && firstPron.equalsIgnoreCase("os")) {
-        // Invalid combination of verb root and pronoun.
-        // (If we combine a second-person plural imperative and the
-        // second person plural object pronoun, we expect to see an
-        // elided verb root, not the normal one that's in the
-        // dictionary.)
-        return false;
-      }
+      // Check not invalid combination of verb root and pronoun.
+      // (If we combine a second-person plural imperative and the
+      // second person plural object pronoun, we expect to see an
+      // elided verb root, not the normal one that's in the
+      // dictionary.)
+      return ! (pos.equals("VMM02P0") && firstPron.equalsIgnoreCase("os"));
 
-      return true;
     }
 
     // Special case: de-elide elided verb root in the case of a second
@@ -278,13 +276,15 @@ public final class SpanishVerbStripper implements Serializable {
 
     // Try to strip just one pronoun first
     separated = stripSuffix(verb, pOneAttachedPronoun);
-    if (separated != null && validateVerbPair(separated))
+    if (separated != null && validateVerbPair(separated)) {
       return separated;
+    }
 
     // Now two
     separated = stripSuffix(verb, pTwoAttachedPronouns);
-    if (separated != null && validateVerbPair(separated))
+    if (separated != null && validateVerbPair(separated)) {
       return separated;
+    }
 
     return null;
   }

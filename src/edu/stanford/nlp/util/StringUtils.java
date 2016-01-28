@@ -924,6 +924,10 @@ public class StringUtils {
         Integer maxFlagArgs = flagsToNumArgs.get(key);
         int max = maxFlagArgs == null ? 1 : maxFlagArgs;
         int min = maxFlagArgs == null ? 0 : maxFlagArgs;
+        if (maxFlagArgs != null && maxFlagArgs == 0 && i < args.length - 1 &&
+            ("true".equalsIgnoreCase(args[i + 1]) || "false".equalsIgnoreCase(args[i + 1]))) {
+          max = 1;  // case: we're reading a boolean flag. TODO(gabor) there's gotta be a better way...
+        }
         List<String> flagArgs = new ArrayList<>();
         // cdm oct 2007: add length check to allow for empty string argument!
         for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].isEmpty() || args[i + 1].charAt(0) != '-'); i++, j++) {
@@ -2419,63 +2423,63 @@ public class StringUtils {
    * @param encoded The String encoded array
    * @return A String array corresponding to the encoded array
    */
-	public static String[] decodeArray(String encoded){
+  public static String[] decodeArray(String encoded){
     if (encoded.length() == 0) return new String[]{};
-		char[] chars = encoded.trim().toCharArray();
+    char[] chars = encoded.trim().toCharArray();
 
-		//--Parse the String
-		//(state)
-		char quoteCloseChar = (char) 0;
-		List<StringBuilder> terms = new LinkedList<>();
-		StringBuilder current = new StringBuilder();
-		//(start/stop overhead)
-		int start = 0; int end = chars.length;
-		if(chars[0] == '('){ start += 1; end -= 1; if(chars[end] != ')') throw new IllegalArgumentException("Unclosed paren in encoded array: " + encoded); }
-		if(chars[0] == '['){ start += 1; end -= 1; if(chars[end] != ']') throw new IllegalArgumentException("Unclosed bracket in encoded array: " + encoded); }
+    //--Parse the String
+    //(state)
+    char quoteCloseChar = (char) 0;
+    List<StringBuilder> terms = new LinkedList<>();
+    StringBuilder current = new StringBuilder();
+    //(start/stop overhead)
+    int start = 0; int end = chars.length;
+    if(chars[0] == '('){ start += 1; end -= 1; if(chars[end] != ')') throw new IllegalArgumentException("Unclosed paren in encoded array: " + encoded); }
+    if(chars[0] == '['){ start += 1; end -= 1; if(chars[end] != ']') throw new IllegalArgumentException("Unclosed bracket in encoded array: " + encoded); }
     if(chars[0] == '{'){ start += 1; end -= 1; if(chars[end] != '}') throw new IllegalArgumentException("Unclosed bracket in encoded array: " + encoded); }
-		//(finite state automata)
-		for(int i=start; i<end; i++){
+    //(finite state automata)
+    for(int i=start; i<end; i++){
       if (chars[i] == '\r') {
         // Ignore funny windows carriage return
         continue;
       } else if(chars[i] == '\\'){
-				//(case: escaped character)
-				if(i == chars.length - 1) throw new IllegalArgumentException("Last character of encoded pair is escape character: " + encoded);
-				current.append(chars[i+1]);
-				i += 1;
-			} else if(quoteCloseChar != 0){
-				//(case: in quotes)
-				if(chars[i] == quoteCloseChar){
-					quoteCloseChar = (char) 0;
-				}else{
-					current.append(chars[i]);
-				}
-			}else{
-				//(case: normal)
-				if(chars[i] == '"'){
+        //(case: escaped character)
+        if(i == chars.length - 1) throw new IllegalArgumentException("Last character of encoded pair is escape character: " + encoded);
+        current.append(chars[i+1]);
+        i += 1;
+      } else if(quoteCloseChar != 0){
+        //(case: in quotes)
+        if(chars[i] == quoteCloseChar){
+          quoteCloseChar = (char) 0;
+        }else{
+          current.append(chars[i]);
+        }
+      }else{
+        //(case: normal)
+        if(chars[i] == '"'){
           quoteCloseChar = '"';
-				} else if(chars[i] == '\''){
+        } else if(chars[i] == '\''){
           quoteCloseChar = '\'';
-				} else if(chars[i] == ',' || chars[i] == ';' || chars[i] == ' ' || chars[i] == '\t' || chars[i] == '\n'){
-					//break
+        } else if(chars[i] == ',' || chars[i] == ';' || chars[i] == ' ' || chars[i] == '\t' || chars[i] == '\n'){
+          //break
           if (current.length() > 0) {
-					  terms.add(current);
+            terms.add(current);
           }
-					current = new StringBuilder();
-				}else{
-					current.append(chars[i]);
-				}
-			}
-		}
+          current = new StringBuilder();
+        }else{
+          current.append(chars[i]);
+        }
+      }
+    }
 
-		//--Return
-		if(current.length() > 0) terms.add(current);
-		String[] rtn = new String[terms.size()];
-		int i=0;
-		for(StringBuilder b : terms){
-			rtn[i] = b.toString().trim();
-			i += 1;
-		}
+    //--Return
+    if(current.length() > 0) terms.add(current);
+    String[] rtn = new String[terms.size()];
+    int i=0;
+    for(StringBuilder b : terms){
+      rtn[i] = b.toString().trim();
+      i += 1;
+    }
     return rtn;
   }
 
@@ -2572,4 +2576,43 @@ public class StringUtils {
     }
     return map;
   }
+
+
+  /**
+   * Takes an input String, and replaces any bash-style variables (e.g., $VAR_NAME)
+   * with its actual environment variable from the passed environment specification.
+   *
+   * @param raw The raw String to replace variables in.
+   * @param env The environment specification; e.g., {@link System#getenv()}.
+   * @return The input String, but with all variables replaced.
+   */
+  public static String expandEnvironmentVariables(String raw, Map<String, String> env) {
+    String pattern = "\\$\\{?([a-zA-Z_]+[a-zA-Z0-9_]*)\\}?";
+    Pattern expr = Pattern.compile(pattern);
+    String text = raw;
+    Matcher matcher = expr.matcher(text);
+    while (matcher.find()) {
+      String envValue = env.get(matcher.group(1));
+      if (envValue == null) {
+        envValue = "";
+      } else {
+        envValue = envValue.replace("\\", "\\\\");
+      }
+      Pattern subexpr = Pattern.compile(Pattern.quote(matcher.group(0)));
+      text = subexpr.matcher(text).replaceAll(envValue);
+    }
+    return text;
+  }
+
+  /**
+   * Takes an input String, and replaces any bash-style variables (e.g., $VAR_NAME)
+   * with its actual environment variable from {@link System#getenv()}.
+   *
+   * @param raw The raw String to replace variables in.
+   * @return The input String, but with all variables replaced.
+   */
+  public static String expandEnvironmentVariables(String raw) {
+    return expandEnvironmentVariables(raw, System.getenv());
+  }
+
 }

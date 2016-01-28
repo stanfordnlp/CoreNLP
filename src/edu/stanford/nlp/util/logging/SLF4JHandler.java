@@ -20,7 +20,7 @@ public class SLF4JHandler extends OutputHandler {
     Class source = null;  // The class the message is coming from
     Object backupSource = null;  // Another identifier for the message
     Redwood.Flag flag = Redwood.Flag.STDOUT;
-    for (Object c : channel) {
+    for (Object c : ((channel == null) ? new Object[0] : channel)) {
       if (c instanceof Class) {
         source = (Class) c;  // This is a class the message is coming from
       } else if (c instanceof Redwood.Flag) {
@@ -33,7 +33,7 @@ public class SLF4JHandler extends OutputHandler {
     }
 
     // Get the logger
-    Logger impl = null;
+    Logger impl;
     if (source != null) {
       impl = LoggerFactory.getLogger(source);
     } else if (backupSource != null) {
@@ -91,6 +91,11 @@ public class SLF4JHandler extends OutputHandler {
   public void print(Object[] channel, String line) {
     // Get the implementing SLF4J logger
     Pair<Logger, Redwood.Flag> loggerAndLevel = getLoggerAndLevel(channel);
+
+    // Format the line
+    if (line.length() > 0 && line.charAt(line.length() - 1) == '\n') {
+      line = line.substring(0, line.length() - 1);
+    }
 
     // Route the signal
     switch (loggerAndLevel.second) {

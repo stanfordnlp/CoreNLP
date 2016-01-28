@@ -1,8 +1,13 @@
 package edu.stanford.nlp.wordseg;
 
+
+import edu.stanford.nlp.util.logging.Redwood;
+
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 
 class TagAffixDetector {
+
+  private static Redwood.RedwoodChannels logger = Redwood.channels(TagAffixDetector.class);
 
   private CorpusChar cc;
   private affDict aD;
@@ -38,9 +43,9 @@ class TagAffixDetector {
       ccPath = corporaDict+"dict/pos_close/char.ctb.list";
       adPath = corporaDict+"dict/in.ctb";
     }
-    System.err.println("INFO: TagAffixDetector: useChPos=" + flags.useChPos +
+    logger.info("INFO: TagAffixDetector: useChPos=" + flags.useChPos +
             " | useCTBChar2=" + flags.useCTBChar2 + " | usePKChar2=" + flags.usePKChar2);
-    System.err.println("INFO: TagAffixDetector: building TagAffixDetector from "+ccPath+" and "+adPath);
+    logger.info("INFO: TagAffixDetector: building TagAffixDetector from "+ccPath+" and "+adPath);
     cc = new CorpusChar(ccPath);
     aD = new affDict(adPath);
   }

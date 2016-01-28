@@ -3,6 +3,8 @@ package edu.stanford.nlp.pipeline;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.Set;
+
+import edu.stanford.nlp.ling.CoreAnnotation;
 import junit.framework.TestCase;
 import junit.framework.Assert;
 
@@ -24,13 +26,13 @@ public class AnnotatorPoolTest extends TestCase {
         }
 
         @Override
-        public Set<Requirement> requirementsSatisfied() {
+        public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
           // empty body; we don't actually use it here
           return Collections.emptySet();
         }
 
         @Override
-        public Set<Requirement> requires() {
+        public Set<Class<? extends CoreAnnotation>> requires() {
           // empty body; we don't actually use it here
           return Collections.emptySet();
         }

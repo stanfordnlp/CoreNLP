@@ -1,6 +1,8 @@
 package edu.stanford.nlp.sequences;
 
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
+
 import java.util.Arrays;
 
 
@@ -43,6 +45,9 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
     int[] tagNum = new int[padLength];
     if (DEBUG) { System.err.println("Doing bestSequence length " + length + "; leftWin " + leftWindow + "; rightWin " + rightWindow + "; padLength " + padLength); }
     for (int pos = 0; pos < padLength; pos++) {
+      if (Thread.interrupted()) {  // Allow interrupting
+        throw new RuntimeInterruptedException();
+      }
       tags[pos] = ts.getPossibleValues(pos);
       tagNum[pos] = tags[pos].length;
       if (DEBUG) { System.err.println("There are " + tagNum[pos] + " values at position " + pos + ": " + Arrays.toString(tags[pos])); }
@@ -58,6 +63,9 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
       curProduct *= tagNum[i];
     }
     for (int pos = leftWindow + rightWindow; pos < padLength; pos++) {
+      if (Thread.interrupted()) {  // Allow interrupting
+        throw new RuntimeInterruptedException();
+      }
       if (pos > leftWindow + rightWindow) {
         curProduct /= tagNum[pos - leftWindow - rightWindow - 1]; // shift off
       }
@@ -68,12 +76,18 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
     // Score all of each window's options
     double[][] windowScore = new double[padLength][];
     for (int pos = leftWindow; pos < leftWindow + length; pos++) {
+      if (Thread.interrupted()) {  // Allow interrupting
+        throw new RuntimeInterruptedException();
+      }
       if (DEBUG) { System.err.println("scoring word " + pos + " / " + (leftWindow + length) + ", productSizes =  " + productSizes[pos] + ", tagNum = " + tagNum[pos] + "..."); }
       windowScore[pos] = new double[productSizes[pos]];
       Arrays.fill(tempTags, tags[0][0]);
       if (DEBUG) { System.err.println("windowScore[" + pos + "] has size (productSizes[pos]) " + windowScore[pos].length); }
 
       for (int product = 0; product < productSizes[pos]; product++) {
+        if (Thread.interrupted()) {  // Allow interrupting
+          throw new RuntimeInterruptedException();
+        }
         int p = product;
         int shift = 1;
         for (int curPos = pos + rightWindow; curPos >= pos - leftWindow; curPos--) {
@@ -105,6 +119,9 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
     double[][] score = new double[padLength][];
     int[][] trace = new int[padLength][];
     for (int pos = 0; pos < padLength; pos++) {
+      if (Thread.interrupted()) {  // Allow interrupting
+        throw new RuntimeInterruptedException();
+      }
       score[pos] = new double[productSizes[pos]];
       trace[pos] = new int[productSizes[pos]];
     }
@@ -117,6 +134,9 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
       //System.err.print(".");
       // loop over window product types
       for (int product = 0; product < productSizes[pos]; product++) {
+        if (Thread.interrupted()) {  // Allow interrupting
+          throw new RuntimeInterruptedException();
+        }
         // check for initial spot
         if (pos == leftWindow) {
           // no predecessor type

@@ -6,6 +6,7 @@ import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -20,13 +21,11 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Execution;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -87,46 +86,49 @@ public class OpenIE implements Annotator {
   // Static Options (for running standalone)
   //
 
-  @Execution.Option(name="format", gloss="The format to output the triples in.")
+  @ArgumentParser.Option(name="format", gloss="The format to output the triples in.")
   private static OutputFormat FORMAT = OutputFormat.DEFAULT;
 
-  @Execution.Option(name="filelist", gloss="The files to annotate, as a list of files one per line.")
+  @ArgumentParser.Option(name="filelist", gloss="The files to annotate, as a list of files one per line.")
   private static File FILELIST  = null;
+
+  @ArgumentParser.Option(name="output", gloss="The files to annotate, as a list of files one per line.")
+  private static PrintStream OUTPUT  = System.out;
 
   //
   // Annotator Options (for running in the pipeline)
   //
-  @Execution.Option(name="splitter.model", gloss="The location of the clause splitting model.")
+  @ArgumentParser.Option(name="splitter.model", gloss="The location of the clause splitting model.")
   private String splitterModel = DefaultPaths.DEFAULT_OPENIE_CLAUSE_SEARCHER;
 
-  @Execution.Option(name="splitter.nomodel", gloss="If true, don't load a clause splitter model. This is primarily useful for training.")
+  @ArgumentParser.Option(name="splitter.nomodel", gloss="If true, don't load a clause splitter model. This is primarily useful for training.")
   private boolean noModel = false;
 
-  @Execution.Option(name="splitter.threshold", gloss="The minimum threshold for accepting a clause.")
+  @ArgumentParser.Option(name="splitter.threshold", gloss="The minimum threshold for accepting a clause.")
   private double splitterThreshold = 0.1;
 
-  @Execution.Option(name="splitter.disable", gloss="If true, don't run the sentence splitter")
+  @ArgumentParser.Option(name="splitter.disable", gloss="If true, don't run the sentence splitter")
   private boolean splitterDisable = false;
 
-  @Execution.Option(name="max_entailments_per_clause", gloss="The maximum number of entailments allowed per sentence of input.")
+  @ArgumentParser.Option(name="max_entailments_per_clause", gloss="The maximum number of entailments allowed per sentence of input.")
   private int entailmentsPerSentence = 1000;
 
-  @Execution.Option(name="ignore_affinity", gloss="If true, don't use the affinity models for dobj and pp attachment.")
+  @ArgumentParser.Option(name="ignore_affinity", gloss="If true, don't use the affinity models for dobj and pp attachment.")
   private boolean ignoreAffinity = false;
 
-  @Execution.Option(name="affinity_models", gloss="The directory (or classpath directory) containing the affinity models for pp/obj attachments.")
+  @ArgumentParser.Option(name="affinity_models", gloss="The directory (or classpath directory) containing the affinity models for pp/obj attachments.")
   private String affinityModels = DefaultPaths.DEFAULT_NATURALLI_AFFINITIES;
 
-  @Execution.Option(name="affinity_probability_cap", gloss="The affinity to consider 1.0")
+  @ArgumentParser.Option(name="affinity_probability_cap", gloss="The affinity to consider 1.0")
   private double affinityProbabilityCap = 1.0 / 3.0;
 
-  @Execution.Option(name="triple.strict", gloss="If true, only generate triples if the entire fragment has been consumed.")
+  @ArgumentParser.Option(name="triple.strict", gloss="If true, only generate triples if the entire fragment has been consumed.")
   private boolean consumeAll = true;
 
-  @Execution.Option(name="triple.all_nominals", gloss="If true, generate not only named entity nominal relations.")
+  @ArgumentParser.Option(name="triple.all_nominals", gloss="If true, generate not only named entity nominal relations.")
   private boolean allNominals = false;
 
-  @Execution.Option(name="resolve_coref", gloss="If true, resolve pronouns to their canonical mention")
+  @ArgumentParser.Option(name="resolve_coref", gloss="If true, resolve pronouns to their canonical mention")
   private boolean resolveCoref = false;
 
   /**
@@ -170,14 +172,14 @@ public class OpenIE implements Annotator {
    */
   public OpenIE(Properties props) {
     // Fill the properties
-    Execution.fillOptions(this, props);
+    ArgumentParser.fillOptions(this, props);
     Properties withoutOpenIEPrefix = new Properties();
     Enumeration<Object> keys = props.keys();
     while (keys.hasMoreElements()) {
       String key = keys.nextElement().toString();
       withoutOpenIEPrefix.setProperty(key.replace("openie.", ""), props.getProperty(key));
     }
-    Execution.fillOptions(this, withoutOpenIEPrefix);
+    ArgumentParser.fillOptions(this, withoutOpenIEPrefix);
 
     // Create the clause splitter
     try {
@@ -449,7 +451,7 @@ public class OpenIE implements Annotator {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
     if (tokens.size() < 2) {
 
-      // Short sentence; skip annotating it.
+      // Short sentence. Skip annotating it.
       sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.EMPTY_LIST);
       sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.EMPTY_SET);
 
@@ -552,14 +554,28 @@ public class OpenIE implements Annotator {
 
   /** {@inheritDoc} */
   @Override
-  public Set<Requirement> requirementsSatisfied() {
-    return Collections.singleton(Annotator.OPENIE_REQUIREMENT);
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        NaturalLogicAnnotations.RelationTriplesAnnotation.class,
+        NaturalLogicAnnotations.EntailedSentencesAnnotation.class
+    )));
   }
 
   /** {@inheritDoc} */
   @Override
-  public Set<Requirement> requires() {
-    return Annotator.REQUIREMENTS.get(STANFORD_OPENIE);
+  public Set<Class<? extends CoreAnnotation>> requires() {
+    Set<Class<? extends CoreAnnotation>> requirements = new HashSet<>(Arrays.asList(
+        CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.SentencesAnnotation.class,
+        CoreAnnotations.PartOfSpeechAnnotation.class,
+        NaturalLogicAnnotations.PolarityAnnotation.class,
+        SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
+        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
+        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class));
+    if (resolveCoref) {
+      requirements.add(edu.stanford.nlp.hcoref.CorefCoreAnnotations.CorefChainAnnotation.class);
+    }
+    return Collections.unmodifiableSet(requirements);
   }
 
   /**
@@ -585,11 +601,36 @@ public class OpenIE implements Annotator {
   }
 
   /**
+   * Prints an OpenIE triple to a String, according to the output format requested in
+   * the annotator.
+   *
+   * @param extraction The triple to write.
+   * @param docid The document ID (for the ReVerb format)
+   * @param sentence The sentence the triple was extracted from (for the ReVerb format)
+   *
+   * @return A String representation of the triple.
+   */
+  public static String tripleToString(RelationTriple extraction, String docid, CoreMap sentence) {
+    switch (FORMAT) {
+      case REVERB:
+        return extraction.toReverbString(docid, sentence);
+      case OLLIE:
+        return extraction.confidenceGloss() + ": (" + extraction.subjectGloss() + "; " + extraction.relationGloss() + "; " + extraction.objectGloss() + ")";
+      case DEFAULT:
+        return extraction.toString();
+      default:
+        throw new IllegalStateException("Format is not implemented: " + FORMAT);
+    }
+
+  }
+
+  /**
    * Process a single file or line of standard in.
    * @param pipeline The annotation pipeline to run the lines of the input through.
    * @param docid The docid of the document we are extracting.
    * @param document the document to annotate.
    */
+  @SuppressWarnings("SynchronizeOnNonFinalField")
   private static void processDocument(AnnotationPipeline pipeline, String docid, String document) {
     // Error checks
     if (document.trim().equals("")) {
@@ -602,23 +643,11 @@ public class OpenIE implements Annotator {
 
     // Get the extractions
     boolean empty = true;
-    synchronized (System.out) {
+    synchronized (OUTPUT) {
       for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
         for (RelationTriple extraction : sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
           // Print the extractions
-          switch (FORMAT) {
-            case REVERB:
-              System.out.println(extraction.toReverbString(docid, sentence));
-              break;
-            case OLLIE:
-              System.out.println(extraction.confidenceGloss() + ": (" + extraction.subjectGloss() + "; " + extraction.relationGloss() + "; " + extraction.objectGloss() + ")");
-              break;
-            case DEFAULT:
-              System.out.println(extraction.toString());
-              break;
-            default:
-              throw new IllegalStateException("Format is not implemented: " + FORMAT);
-          }
+          OUTPUT.println(tripleToString(extraction, docid, sentence));
           empty = false;
         }
       }
@@ -633,15 +662,32 @@ public class OpenIE implements Annotator {
    */
   public static void main(String[] args) throws IOException, InterruptedException {
     // Parse the arguments
-    Properties props = StringUtils.argsToProperties(args);
-    Execution.fillOptions(new Class[]{ OpenIE.class, Execution.class}, props);
+    Properties props = StringUtils.argsToProperties(args, new HashMap<String, Integer>(){{
+      put("openie.resolve_coref", 0);
+      put("resolve_coref", 0);
+      put("openie.splitter.nomodel", 0);
+      put("splitter.nomodel", 0);
+      put("openie.splitter.disable", 0);
+      put("splitter.disable", 0);
+      put("openie.ignore_affinity", 0);
+      put("splitter.ignore_affinity", 0);
+      put("openie.triple.strict", 0);
+      put("splitter.triple.strict", 0);
+      put("openie.triple.all_nominals", 0);
+      put("splitter.triple.all_nominals", 0);
+    }});
+    ArgumentParser.fillOptions(new Class[]{OpenIE.class, ArgumentParser.class}, props);
     AtomicInteger exceptionCount = new AtomicInteger(0);
-    ExecutorService exec = Executors.newFixedThreadPool(Execution.threads);
+    ExecutorService exec = Executors.newFixedThreadPool(ArgumentParser.threads);
 
     // Parse the files to process
     String[] filesToProcess;
     if (FILELIST != null) {
-      filesToProcess = IOUtils.linesFromFile(FILELIST.getPath()).stream().map(String::trim).toArray(String[]::new);
+      filesToProcess = IOUtils.linesFromFile(FILELIST.getPath()).stream()
+          .map(String::trim)
+          .map(path -> path.replaceAll("^~", "$HOME"))
+          .map(path -> new File(path).exists() ? path : StringUtils.expandEnvironmentVariables(path))
+          .toArray(String[]::new);
     } else if (!"".equals(props.getProperty("", ""))) {
       filesToProcess = props.getProperty("", "").split("\\s+");
     } else {
@@ -651,7 +697,9 @@ public class OpenIE implements Annotator {
     // Tweak the arguments
     if ("".equals(props.getProperty("annotators", ""))) {
       if (!"false".equalsIgnoreCase(props.getProperty("resolve_coref", props.getProperty("openie.resolve_coref", "false")))) {
-        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,ner,entitymentions,coref,natlog,openie");
+        props.setProperty("coref.md.type", "dep");  // so we don't need the `parse` annotator
+        props.setProperty("coref.mode", "statistical");  // explicitly ask for scoref
+        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,ner,mention,coref,natlog,openie");
       } else {
         props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,natlog,openie");
       }
@@ -716,7 +764,7 @@ public class OpenIE implements Annotator {
       // Actually process the files.
       for (String file : filesToProcess) {
         System.err.println("Processing file: " + file);
-        if (Execution.threads > 1) {
+        if (ArgumentParser.threads > 1) {
           // Multi-threaded: submit a job to run
           final String fileToSubmit = file;
           exec.submit(() -> {

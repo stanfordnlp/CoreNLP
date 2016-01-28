@@ -29,6 +29,7 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.io.FileSequentialCollection;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.objectbank.ObjectBank;
@@ -45,8 +46,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
@@ -96,7 +97,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
   public static final String DEFAULT_OUTPUT_FORMAT = isXMLOutputPresent() ? "xml" : "text";
 
-  private static final Logger logger = LoggerFactory.getLogger(StanfordCoreNLP.class);
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(StanfordCoreNLP.class);
 
   /** Formats the constituent parse trees for display. */
   private TreePrint constituentTreePrinter;
@@ -248,6 +249,14 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     return PropertiesUtils.getDouble(properties, "printable.relation.beam", 0.0);
   }
 
+  /**
+   * If true, signal for outputters to pretty-print the output.
+   * If false, the outputter will try to minimize the size of the output.
+   */
+  public boolean getPrettyPrint() {
+    return PropertiesUtils.getBool(properties, "prettyPrint", true);
+  }
+
   public String getEncoding() {
     return properties.getProperty("encoding", "UTF-8");
   }
@@ -349,8 +358,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
     // Set threading
     if (this.properties.containsKey("threads")) {
-      Execution.threads = PropertiesUtils.getInt(this.properties, "threads");
-      this.availableProcessors = new Semaphore(Execution.threads);
+      ArgumentParser.threads = PropertiesUtils.getInt(this.properties, "threads");
+      this.availableProcessors = new Semaphore(ArgumentParser.threads);
     } else {
       this.availableProcessors = new Semaphore(1);
     }
@@ -358,7 +367,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     // now construct the annotators from the given properties in the given order
     List<String> annoNames = Arrays.asList(getRequiredProperty(props, "annotators").split("[, \t]+"));
     Set<String> alreadyAddedAnnoNames = Generics.newHashSet();
-    Set<Requirement> requirementsSatisfied = Generics.newHashSet();
+    Set<Class<? extends CoreAnnotation>> requirementsSatisfied = Generics.newHashSet();
     for (String name : annoNames) {
       name = name.trim();
       if (name.isEmpty()) { continue; }
@@ -368,10 +377,10 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       this.addAnnotator(an);
 
       if (enforceRequirements) {
-        Set<Requirement> allRequirements = an.requires();
-        for (Requirement requirement : allRequirements) {
+        Set<Class<? extends CoreAnnotation>> allRequirements = an.requires();
+        for (Class<? extends CoreAnnotation> requirement : allRequirements) {
           if (!requirementsSatisfied.contains(requirement)) {
-            String fmt = "annotator \"%s\" requires annotator \"%s\"";
+            String fmt = "annotator \"%s\" requires annotation \"%s\"";
             throw new IllegalArgumentException(String.format(fmt, name, requirement));
           }
         }
@@ -504,7 +513,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       try {
         availableProcessors.acquire();
       } catch (InterruptedException e) {
-        throw new RuntimeException(e);
+        throw new RuntimeInterruptedException(e);
       }
       new Thread() {
         @Override
@@ -529,7 +538,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
    * under which this is true: the sentiment annotator is used.
    */
   public static boolean usesBinaryTrees(Properties props) {
-    Set<String> annoNames = Generics.newHashSet(Arrays.asList(getRequiredProperty(props, "annotators").split("[, \t]+")));
+    Set<String> annoNames = Generics.newHashSet(Arrays.asList(props.getProperty("annotators","").split("[, \t]+")));
     return annoNames.contains(STANFORD_SENTIMENT);
   }
 
@@ -728,7 +737,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     os.println("\t             output is generated for every input file as file.outputExtension");
     os.println("\t\"outputDirectory\" - where to put output (defaults to the current directory)");
     os.println("\t\"outputExtension\" - extension to use for the output file (defaults to \".xml\" for XML, \".ser.gz\" for serialized).  Don't forget the dot!");
-    os.println("\t\"outputFormat\" - \"xml\" to output XML (default), \"serialized\" to output serialized Java objects, \"text\" to output text");
+    os.println("\t\"outputFormat\" - \"xml\" (default), \"text\", \"json\", \"conll\", \"conllu\", or \"serialized\"");
     os.println("\t\"serializer\" - Class of annotation serializer to use when outputFormat is \"serialized\".  By default, uses Java serialization.");
     os.println("\t\"replaceExtension\" - flag to chop off the last extension before adding outputExtension to file");
     os.println("\t\"noClobber\" - don't automatically override (clobber) output files that already exist");

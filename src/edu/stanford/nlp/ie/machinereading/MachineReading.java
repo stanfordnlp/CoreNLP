@@ -28,7 +28,7 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Execution;
+import edu.stanford.nlp.util.ArgumentParser;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -199,7 +199,7 @@ public class MachineReading {
     // install global parameters
     MachineReading mr = new MachineReading(args);
     //TODO: 
-    Execution.fillOptions(MachineReadingProperties.class, args);
+    ArgumentParser.fillOptions(MachineReadingProperties.class, args);
     //Arguments.parse(args, mr);
     System.err.println("PERCENTAGE OF TRAIN: " + MachineReadingProperties.percentageOfTrain);
     
@@ -406,7 +406,7 @@ public class MachineReading {
         relationExtractor = BasicRelationExtractor.load(modelName);
       } else {
         RelationFeatureFactory rff = makeRelationFeatureFactory(MachineReadingProperties.relationFeatureFactoryClass, MachineReadingProperties.relationFeatures, MachineReadingProperties.doNotLexicalizeFirstArg);
-        Execution.fillOptions(rff, args);
+        ArgumentParser.fillOptions(rff, args);
 
         if (MachineReadingProperties.trainRelationsUsingPredictedEntities) {
       		// generate predicted entities
@@ -449,7 +449,7 @@ public class MachineReading {
       	//relationExtractor = new BasicRelationExtractor(rff, MachineReadingProperties.createUnrelatedRelations, makeRelationMentionFactory(MachineReadingProperties.relationMentionFactoryClass));
         relationExtractor = makeRelationExtractor(MachineReadingProperties.relationClassifier, rff, MachineReadingProperties.createUnrelatedRelations,
           makeRelationMentionFactory(MachineReadingProperties.relationMentionFactoryClass));
-        Execution.fillOptions(relationExtractor, args);
+        ArgumentParser.fillOptions(relationExtractor, args);
       	//Arguments.parse(args,relationExtractor);
         MachineReadingProperties.logger.info("Training relation extraction model...");
         relationExtractor.train(dataset);

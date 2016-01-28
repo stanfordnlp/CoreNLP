@@ -3,6 +3,9 @@ package edu.stanford.nlp.wordseg;
 import java.util.*;
 import java.io.*;
 
+
+import edu.stanford.nlp.util.logging.Redwood;
+
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.Generics;
@@ -16,6 +19,8 @@ import edu.stanford.nlp.util.Generics;
 
  
 public class CorpusChar {
+  private static Redwood.RedwoodChannels logger = Redwood.channels(CorpusChar.class);
+
   private Map <String, Set <String>> charMap;
 
   public CorpusChar(String charlistFilename)  {
@@ -31,7 +36,7 @@ public class CorpusChar {
 
   private Map<String, Set<String>> readDict(String filename)  {
 
-    System.err.println("Loading character dictionary file from " + filename);
+    logger.info("Loading character dictionary file from " + filename);
 
     try {
       InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(filename);      
@@ -39,7 +44,7 @@ public class CorpusChar {
       String DetectorLine;
 
       char_dict = Generics.newHashMap();
-      //System.err.println("DEBUG: in CorpusChar readDict");
+      //logger.debug("DEBUG: in CorpusChar readDict");
       while ((DetectorLine = DetectorReader.readLine()) != null) {
         
         String[] fields = DetectorLine.split("	");
@@ -51,7 +56,7 @@ public class CorpusChar {
           chars = Generics.newHashSet();
           char_dict.put(tag,chars);
         } 
-        //System.err.println("DEBUG: CorpusChar: "+filename+" "+fields[1]);
+        //logger.debug("DEBUG: CorpusChar: "+filename+" "+fields[1]);
         chars.add(fields[1]);
     
     

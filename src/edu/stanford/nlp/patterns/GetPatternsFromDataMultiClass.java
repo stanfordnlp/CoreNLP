@@ -4,9 +4,6 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.CopyOption;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -15,7 +12,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 
@@ -282,8 +278,8 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException, ExecutionException, ClassNotFoundException {
 
     Data.sents = sents;
-    Execution.fillOptions(Data.class, props);
-    Execution.fillOptions(ConstantsAndVariables.class, props);
+    ArgumentParser.fillOptions(Data.class, props);
+    ArgumentParser.fillOptions(ConstantsAndVariables.class, props);
     PatternFactory.setUp(props, PatternFactory.PatternType.valueOf(props.getProperty(Flags.patternType)), seedSets.keySet());
 
     constVars = new ConstantsAndVariables(props, seedSets, answerClass, generalizeClasses, ignoreClasses);
@@ -459,7 +455,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         if (!f.exists()) {
           Redwood.log(Redwood.DBG, "externalweightsfile for the label " + label + " does not exist: learning weights!");
           LearnImportantFeatures lmf = new LearnImportantFeatures();
-          Execution.fillOptions(lmf, props);
+          ArgumentParser.fillOptions(lmf, props);
           lmf.answerClass = answerClass.get(label);
           lmf.answerLabel = label;
           lmf.setUp();
@@ -3312,7 +3308,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
   static<E extends Pattern> GetPatternsFromDataMultiClass<E> runNineYards(GetPatternsFromDataMultiClass<E> model, Properties props, Map<String, DataInstance> evalsents) throws IOException, ClassNotFoundException {
 
-    Execution.fillOptions(model, props);
+    ArgumentParser.fillOptions(model, props);
 
     // If you want to reuse patterns and words learned previously (may be on another dataset etc)
     boolean loadSavedPatternsWordsDir = Boolean.parseBoolean(props.getProperty("loadSavedPatternsWordsDir"));
