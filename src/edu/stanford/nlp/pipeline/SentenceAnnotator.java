@@ -38,7 +38,7 @@ public abstract class SentenceAnnotator implements Annotator {
   }
 
   private InterruptibleMulticoreWrapper<CoreMap, CoreMap> buildWrapper(Annotation annotation) {
-    InterruptibleMulticoreWrapper<CoreMap, CoreMap> wrapper = new InterruptibleMulticoreWrapper<>(nThreads(), new AnnotatorProcessor(annotation), true, maxTime());
+    InterruptibleMulticoreWrapper<CoreMap, CoreMap> wrapper = new InterruptibleMulticoreWrapper<CoreMap, CoreMap>(nThreads(), new AnnotatorProcessor(annotation), true, maxTime());
     return wrapper;
   }
 
@@ -61,10 +61,8 @@ public abstract class SentenceAnnotator implements Annotator {
               // If we time out, for now, we just throw away all jobs which were running at the time.
               // Note that in order for this to be useful, the underlying job needs to handle Thread.interrupted()
               List<CoreMap> failedSentences = wrapper.joinWithTimeout();
-              if (failedSentences != null) {
-                for (CoreMap failed : failedSentences) {
-                  doOneFailedSentence(annotation, failed);
-                }
+              for (CoreMap failed : failedSentences) {
+                doOneFailedSentence(annotation, failed);
               }
               // We don't wait for termination here, and perhaps this
               // is a mistake.  If the processor used does not respect
@@ -105,9 +103,6 @@ public abstract class SentenceAnnotator implements Annotator {
 
   protected abstract int nThreads();
 
-  /**
-   * The maximum time to run this annotator for, in milliseconds.
-   */
   protected abstract long maxTime();
 
   /** annotation is included in case there is global information we care about */

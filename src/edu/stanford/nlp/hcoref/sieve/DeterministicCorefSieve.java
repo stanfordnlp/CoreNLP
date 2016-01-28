@@ -459,11 +459,8 @@ public abstract class DeterministicCorefSieve extends Sieve {
       }
 
       boolean mIsPronoun = (m.isPronominal() || dict.allPronouns.contains(m.toString()));
-      boolean attrAgree = CorefProperties.useDefaultPronounAgreement(props)?
-          Rules.entityAttributesAgree(mentionCluster, potentialAntecedent):
-            Rules.entityAttributesAgree(mentionCluster, potentialAntecedent, lang);
       
-      if(mIsPronoun && attrAgree){
+      if(mIsPronoun && Rules.entityAttributesAgree(mentionCluster, potentialAntecedent, lang)){
 
         if(dict.demonymSet.contains(ant.lowercaseNormalizedSpanString()) && dict.notOrganizationPRP.contains(m.headString)){
           document.addIncompatible(m, ant);
@@ -511,7 +508,7 @@ public abstract class DeterministicCorefSieve extends Sieve {
       int m1Position,
       Map<Integer, CorefCluster> corefClusters,
       Dictionaries dict) {
-    List<Mention> orderedAntecedents = new ArrayList<>();
+    List<Mention> orderedAntecedents = new ArrayList<Mention>();
 
     // ordering antecedents
     if (antecedentSentence == mySentence) {   // same sentence
@@ -529,7 +526,7 @@ public abstract class DeterministicCorefSieve extends Sieve {
 
   /** Divides a sentence into clauses and sort the antecedents for pronoun matching  */
   private static List<Mention> sortMentionsForPronoun(List<Mention> l, Mention m1) {
-    List<Mention> sorted = new ArrayList<>();
+    List<Mention> sorted = new ArrayList<Mention>();
     Tree tree = m1.contextParseTree;
     Tree current = m1.mentionSubTree;
     if(tree==null || current==null) return l;

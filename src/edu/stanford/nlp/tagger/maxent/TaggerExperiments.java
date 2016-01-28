@@ -164,7 +164,7 @@ public class TaggerExperiments extends Experiments {
       for (FeatureKey fK : sTemplates) {
         int numF = fK.num;
         int[] xValues;
-        Pair<Integer, String> wT = new Pair<>(numF, fK.val);
+        Pair<Integer, String> wT = new Pair<Integer, String>(numF, fK.val);
         xValues = tFeature.getXValues(wT);
         if (xValues == null) {
           System.err.println("  xValues is null: " + fK.toString()); //  + " " + i

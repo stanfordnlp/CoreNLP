@@ -49,12 +49,12 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
     this.tlp = tlpParams.treebankLanguagePack();
     this.forceCNF = forceCNF;
     if (trainOptions.printAnnotatedRuleCounts) {
-      annotatedRuleCounts = new ClassicCounter<>();
+      annotatedRuleCounts = new ClassicCounter<Tree>();
     } else {
       annotatedRuleCounts = null;
     }
     if (trainOptions.printAnnotatedStateCounts) {
-      annotatedStateCounts = new ClassicCounter<>();
+      annotatedStateCounts = new ClassicCounter<String>();
     } else {
       annotatedStateCounts = null;
     }
@@ -83,7 +83,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
       t = tf.newTreeNode(tlp.startSymbol(), Collections.singletonList(t));
     }
     t.setLabel(new CategoryWordTag(tlp.startSymbol(), Lexicon.BOUNDARY, Lexicon.BOUNDARY_TAG));
-    List<Tree> preTermChildList = new ArrayList<>();
+    List<Tree> preTermChildList = new ArrayList<Tree>();
     Tree boundaryTerm = tf.newLeaf(new Word(Lexicon.BOUNDARY));//CategoryWordTag(Lexicon.BOUNDARY,Lexicon.BOUNDARY,""));
     preTermChildList.add(boundaryTerm);
     Tree boundaryPreTerm = tf.newTreeNode(new CategoryWordTag(Lexicon.BOUNDARY_TAG, Lexicon.BOUNDARY, Lexicon.BOUNDARY_TAG), preTermChildList);
@@ -156,7 +156,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
     System.err.println();
     System.err.println("Annotated state counts");
     Set<String> keys = annotatedStateCounts.keySet();
-    List<String> keyList = new ArrayList<>(keys);
+    List<String> keyList = new ArrayList<String>(keys);
     Collections.sort(keyList);
     for (String s : keyList) {
       System.err.println(s + "\t" + annotatedStateCounts.getCount(s));
@@ -176,7 +176,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
 
   private static void removeDeleteSplittersFromSplitters(TreebankLanguagePack tlp, Options op) {
     if (op.trainOptions.deleteSplitters != null) {
-      List<String> deleted = new ArrayList<>();
+      List<String> deleted = new ArrayList<String>();
       for (String del : op.trainOptions.deleteSplitters) {
         String baseDel = tlp.basicCategory(del);
         boolean checkBasic = del.equals(baseDel);
@@ -197,7 +197,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
   }
 
 
-  /** @return A Triple of binaryTrainTreebank, binarySecondaryTreebank, binaryTuneTreebank.
+  /** @return a pair of binaryTrainTreebank,binaryTuneTreebank.
    */
   public static Triple<Treebank, Treebank, Treebank> getAnnotatedBinaryTreebankFromTreebank(Treebank trainTreebank,
       Treebank secondaryTreebank,
@@ -254,7 +254,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
       op.trainOptions.splitters = ParentAnnotationStats.getSplitCategories(wholeTreebank, op.trainOptions.tagSelectiveSplit, 0, op.trainOptions.selectiveSplitCutOff, op.trainOptions.tagSelectiveSplitCutOff, tlp);
       removeDeleteSplittersFromSplitters(tlp, op);
       if (op.testOptions.verbose) {
-        List<String> list = new ArrayList<>(op.trainOptions.splitters);
+        List<String> list = new ArrayList<String>(op.trainOptions.splitters);
         Collections.sort(list);
         System.err.println("Parent split categories: " + list);
       }
@@ -300,7 +300,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer {
       binarizer.dumpStats();
     }
 
-    return new Triple<>(trainTreebank, secondaryTreebank, tuneTreebank);
+    return new Triple<Treebank, Treebank, Treebank>(trainTreebank, secondaryTreebank, tuneTreebank);
   }
 
 

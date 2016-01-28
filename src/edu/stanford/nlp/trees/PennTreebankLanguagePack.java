@@ -180,7 +180,7 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
       return new EnglishGrammaticalStructureFactory(puncFilter);
     } else {
       return new UniversalEnglishGrammaticalStructureFactory(puncFilter);
-    }
+    }  
   }
 
   @Override
@@ -189,7 +189,7 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
       return new EnglishGrammaticalStructureFactory(puncFilter, hf);
     } else {
       return new UniversalEnglishGrammaticalStructureFactory(puncFilter, hf);
-    }
+    }  
   }
 
   @Override
@@ -206,11 +206,7 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
   /** {@inheritDoc} */
   @Override
   public HeadFinder typedDependencyHeadFinder() {
-    if (generateOriginalDependencies) {
-      return new SemanticHeadFinder(this, true);
-    } else {
-      return new UniversalSemanticHeadFinder(this, true);
-    }
+    return new SemanticHeadFinder(this, true);
   }
 
 

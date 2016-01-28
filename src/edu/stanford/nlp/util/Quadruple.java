@@ -115,7 +115,7 @@ public class Quadruple<T1,T2,T3,T4> implements Comparable<Quadruple<T1,T2,T3,T4>
    * don't have to write out potentially long class names.
    */
   public static <T1, T2, T3, T4> Quadruple<T1, T2, T3, T4> makeQuadruple(T1 t1, T2 t2, T3 t3, T4 t4) {
-    return new Quadruple<>(t1, t2, t3, t4);
+    return new Quadruple<T1, T2, T3, T4>(t1, t2, t3, t4);
   }
 
   public List<Object> asList() {

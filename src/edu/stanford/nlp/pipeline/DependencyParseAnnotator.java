@@ -1,13 +1,10 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.ling.CoreAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.parser.nndep.DependencyParser;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.GrammaticalStructure;
-import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.MetaClass;
 import edu.stanford.nlp.util.PropertiesUtils;
@@ -33,10 +30,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
    * Maximum parse time (in milliseconds) for a sentence
    */
   private final long maxTime;
-  /**
-   * The default maximum parse time.
-   */
-  private static final long DEFAULT_MAXTIME = -1;
+  private static final long DEFAULT_MAXTIME = Long.MAX_VALUE;
 
   /**
    * If true, include the extra arcs in the dependency representation.
@@ -78,8 +72,6 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
     sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, uncollapsedDeps);
     sentence.set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, ccDeps);
 
-
-
   }
 
   @Override
@@ -89,21 +81,13 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class,
-        CoreAnnotations.PartOfSpeechAnnotation.class
-    )));
+  public Set<Requirement> requires() {
+    return TOKENIZE_SSPLIT_POS;
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
-    )));
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(DEPENDENCY_REQUIREMENT);
   }
 
   public static String signature(String annotatorName, Properties props) {

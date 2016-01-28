@@ -13,6 +13,7 @@ import edu.stanford.nlp.util.*;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -447,7 +448,7 @@ public class NumberNormalizer {
     // TODO: Should we allow "," in written out numbers?
     // TODO: Handle "-" that is not with token?
     TokenSequenceMatcher matcher = numberPattern.getMatcher(tokens);
-    List<CoreMap> numbers = new ArrayList<>();
+    List<CoreMap> numbers = new ArrayList<CoreMap>();
     while (matcher.find()) {
       @SuppressWarnings("unused")
       List<CoreMap> matchedTokens = matcher.groupNodes();
@@ -673,7 +674,7 @@ public class NumberNormalizer {
           if (v2.doubleValue() > v1.doubleValue()) {
             token.set(CoreAnnotations.NumericTypeAnnotation.class, "NUMBER_RANGE");
             token.set(CoreAnnotations.NumericCompositeTypeAnnotation.class, "NUMBER_RANGE");
-            Pair<Number,Number> range = new Pair<>(v1, v2);
+            Pair<Number,Number> range = new Pair<Number,Number>(v1,v2);
             token.set(CoreAnnotations.NumericCompositeObjectAnnotation.class, range);
           }
         } catch (Exception ex) {
@@ -681,7 +682,7 @@ public class NumberNormalizer {
         }
       }
     }
-    List<CoreMap> numberRanges = new ArrayList<>();
+    List<CoreMap> numberRanges = new ArrayList<CoreMap>();
     TokenSequenceMatcher matcher = rangePattern.getMatcher(numerizedTokens);
     while (matcher.find()) {
       List<CoreMap> matched = matcher.groupNodes();
@@ -691,9 +692,10 @@ public class NumberNormalizer {
         Number v1 = matched.get(0).get(CoreAnnotations.NumericCompositeValueAnnotation.class);
         Number v2 = matched.get(matched.size()-1).get(CoreAnnotations.NumericCompositeValueAnnotation.class);
         if (v2.doubleValue() > v1.doubleValue()) {
-          CoreMap newChunk = CoreMapAggregator.getDefaultAggregator().merge(numerizedTokens, matcher.start(), matcher.end());
+          CoreMap newChunk = ChunkAnnotationUtils.getMergedChunk(numerizedTokens,  matcher.start(), matcher.end(),
+                  CoreMapAttributeAggregator.getDefaultAggregators());
           newChunk.set(CoreAnnotations.NumericCompositeTypeAnnotation.class, "NUMBER_RANGE");
-          Pair<Number,Number> range = new Pair<>(v1, v2);
+          Pair<Number,Number> range = new Pair<Number,Number>(v1,v2);
           newChunk.set(CoreAnnotations.NumericCompositeObjectAnnotation.class, range);
           numberRanges.add(newChunk);
         }
@@ -728,8 +730,8 @@ public class NumberNormalizer {
     }
     //set token offsets
     int i = 0;
-    List<Integer> savedTokenBegins = new LinkedList<>();
-    List<Integer> savedTokenEnds = new LinkedList<>();
+    List<Integer> savedTokenBegins = new LinkedList<Integer>();
+    List<Integer> savedTokenEnds = new LinkedList<Integer>();
     for (CoreMap c:annotation.get(CoreAnnotations.TokensAnnotation.class)) {
       //set token begin
       if( (i==0 && c.get(CoreAnnotations.TokenBeginAnnotation.class) != null) || (i > 0 && !savedTokenBegins.isEmpty()) ){

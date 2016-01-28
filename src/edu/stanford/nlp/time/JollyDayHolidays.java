@@ -11,8 +11,6 @@ import edu.stanford.nlp.util.Generics;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.Partial;
 
-import edu.stanford.nlp.util.logging.Redwood;
-
 import java.lang.reflect.Method;
 // import java.net.MalformedURLException;
 import java.net.URL;
@@ -26,8 +24,6 @@ import java.util.*;
  */
 public class JollyDayHolidays implements Env.Binder {
 
-  private static Redwood.RedwoodChannels logger = Redwood.channels(JollyDayHolidays.class);
-
   private HolidayManager holidayManager;
   // private CollectionValuedMap<String, JollyHoliday> holidays;
   private Map<String, JollyHoliday> holidays;
@@ -38,7 +34,7 @@ public class JollyDayHolidays implements Env.Binder {
     String xmlPath = props.getProperty(prefix + "xml", "edu/stanford/nlp/models/sutime/jollyday/Holidays_sutime.xml");
     String xmlPathType = props.getProperty(prefix + "pathtype", "classpath");
     varPrefix = props.getProperty(prefix + "prefix", varPrefix);
-    logger.info("Initializing JollyDayHoliday for SUTime from {} {} as {}", xmlPathType, xmlPath, prefix);
+    System.err.printf("Initializing JollyDayHoliday for SUTime from %s: %s as %s%n", xmlPathType, xmlPath, prefix);
     Properties managerProps = new Properties();
     managerProps.setProperty("manager.impl", "edu.stanford.nlp.time.JollyDayHolidays$MyXMLManager");
     try {
@@ -216,7 +212,7 @@ public class JollyDayHolidays implements Env.Binder {
           // TODO: If we knew location of article, can use that information to resolve holidays better
           Set<de.jollyday.Holiday> holidays = holidayManager.getHolidays(year);
           // Try to find this holiday
-          for (de.jollyday.Holiday h : holidays) {
+          for (de.jollyday.Holiday h:holidays) {
             if (h.getPropertiesKey().equals(base.getDescriptionPropertiesKey())) {
               return new SUTime.PartialTime(this, new Partial(h.getDate()));
             }

@@ -89,7 +89,7 @@ public class MemoryMonitor {
       int[] lineNums, int[] positions) throws IOException {
     int currLine = 0;
     int processed = 0;
-    ArrayList<String> found = new ArrayList<>();
+    ArrayList<String> found = new ArrayList<String>();
     while (br.ready()) {
       String[] fields = br.readLine().split(splitStr);
       currLine++;
@@ -270,7 +270,7 @@ public class MemoryMonitor {
           Thread.sleep(pollFrequency);
         } catch (InterruptedException e) {
           log();
-          throw new RuntimeInterruptedException(e);
+          break;
         }
       }
     }

@@ -437,7 +437,7 @@ public class RobustTokenizer<T extends Word> extends AbstractTokenizer<Word> {
    * @return List of WordTokens
    */
   public List<WordToken> tokenizeToWordTokens() {
-    List<WordToken> result = new ArrayList<>();
+    List<WordToken> result = new ArrayList<WordToken>();
 
     //
     // replace illegal characters with SPACE
@@ -521,7 +521,7 @@ public class RobustTokenizer<T extends Word> extends AbstractTokenizer<Word> {
     //
     // Merge known abreviations
     //
-    List<WordToken> resultWithAbs = new ArrayList<>();
+    List<WordToken> resultWithAbs = new ArrayList<WordToken>();
     for(int i = 0; i < result.size(); i ++){
       // where the mw ends
       int end = result.size();
@@ -591,7 +591,7 @@ public class RobustTokenizer<T extends Word> extends AbstractTokenizer<Word> {
 
     private static List<String> normalizeCase(boolean caseInsensitive, List<String> words) {
       if(! caseInsensitive) return words;
-      List<String> normWords = new ArrayList<>();
+      List<String> normWords = new ArrayList<String>();
       for(String word: words) normWords.add(word.toLowerCase());
       return normWords;
     }
@@ -1136,11 +1136,11 @@ public class RobustTokenizer<T extends Word> extends AbstractTokenizer<Word> {
     while((ch = is.read()) != -1) buffer.append((char) ch);
     
     // create the tokenizer object
-    RobustTokenizer<Word> t = new RobustTokenizer<>(buffer.toString());
+    RobustTokenizer<Word> t = new RobustTokenizer<Word>(buffer.toString());
 
     List<Word> tokens = t.tokenize();
-    for (Word token : tokens) {
-      System.out.println(token);
+    for(int i = 0; i < tokens.size(); i ++){
+      System.out.println(tokens.get(i));
     }
   }
 }

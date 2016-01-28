@@ -5,9 +5,6 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
-import edu.stanford.nlp.util.logging.Redwood;
-
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -48,8 +45,6 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
 
   private static final int DEBUG = 0;
 
-  private static Redwood.RedwoodChannels logger = Redwood.channels(Gale2007ChineseSegmenterFeatureFactory.class);
-
   private transient TagAffixDetector taDetector; // = null;
   private transient CorpusDictionary outDict; // = null;
 
@@ -66,7 +61,7 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
 
   private synchronized void createOutDict() {
     if (outDict == null) {
-      logger.info("reading "+flags.outDict2+" as a seen lexicon");
+      System.err.println("reading "+flags.outDict2+" as a seen lexicon");
       outDict = new CorpusDictionary(flags.outDict2);
     }
   }
@@ -171,7 +166,7 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
 
 
   protected Collection<String> featuresC(PaddedList<? extends CoreLabel> cInfo, int loc) {
-    Collection<String> features = new ArrayList<>();
+    Collection<String> features = new ArrayList<String>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel c2 = cInfo.get(loc + 1);
     CoreLabel c3 = cInfo.get(loc + 2);
@@ -317,7 +312,7 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
 
 
   protected Collection<String> featuresCpC(PaddedList<? extends CoreLabel> cInfo, int loc) {
-    Collection<String> features = new ArrayList<>();
+    Collection<String> features = new ArrayList<String>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel c2 = cInfo.get(loc + 1);
     CoreLabel c3 = cInfo.get(loc + 2);
@@ -519,7 +514,7 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
           throw new RuntimeException("only support settings for CTB and PK now.");
         }
       } else {
-        //logger.info("Using Derived features");
+        //System.err.println("Using Derived features");
         tagsets = new String[]{"2","3","4"};
       }
 
@@ -658,7 +653,7 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
    *  @return Collection of String features (sparse set of boolean features
    */
   protected Collection<String> featuresCnC(PaddedList<? extends CoreLabel> cInfo, int loc) {
-    Collection<String> features = new ArrayList<>();
+    Collection<String> features = new ArrayList<String>();
     if (flags.useWordn) {
       CoreLabel c = cInfo.get(loc);
       CoreLabel c2 = cInfo.get(loc + 1);
@@ -690,7 +685,7 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
    *  @return Collection of String features (sparse set of boolean features
    */
   protected Collection<String> featuresCpCp2C(PaddedList<? extends CoreLabel> cInfo, int loc) {
-    Collection<String> features = new ArrayList<>();
+    Collection<String> features = new ArrayList<String>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel c2 = cInfo.get(loc + 1);
     CoreLabel c3 = cInfo.get(loc + 2);
@@ -785,7 +780,7 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
 
 
   protected Collection<String> featuresCpCp2Cp3C(PaddedList<? extends CoreLabel> cInfo, int loc) {
-    Collection<String> features = new ArrayList<>();
+    Collection<String> features = new ArrayList<String>();
     if (flags.use4Clique && flags.maxLeft >= 3) {
       CoreLabel c = cInfo.get(loc);
       CoreLabel c2 = cInfo.get(loc + 1);

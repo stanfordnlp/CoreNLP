@@ -1,10 +1,15 @@
 package edu.stanford.nlp.pipeline;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
-import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
-import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.Timing;
@@ -105,7 +110,7 @@ public class POSTaggerAnnotator implements Annotator {
           doOneSentence(sentence);
         }
       } else {
-        MulticoreWrapper<CoreMap, CoreMap> wrapper = new MulticoreWrapper<>(nThreads, new POSTaggerProcessor());
+        MulticoreWrapper<CoreMap, CoreMap> wrapper = new MulticoreWrapper<CoreMap, CoreMap>(nThreads, new POSTaggerProcessor());
         for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
           wrapper.put(sentence);
           while (wrapper.peek()) {
@@ -152,24 +157,21 @@ public class POSTaggerAnnotator implements Annotator {
         tokens.get(i).set(CoreAnnotations.PartOfSpeechAnnotation.class, tagged.get(i).tag());
       }
     } else {
-      for (CoreLabel token : tokens) {
-        token.set(CoreAnnotations.PartOfSpeechAnnotation.class, "X");
+      for (int i = 0, sz = tokens.size(); i < sz; i++) {
+        tokens.get(i).set(CoreAnnotations.PartOfSpeechAnnotation.class, "X");
       }
     }
     return sentence;
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class
-    )));
+  public Set<Requirement> requires() {
+    return TOKENIZE_AND_SSPLIT;
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CoreAnnotations.PartOfSpeechAnnotation.class);
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(POS_REQUIREMENT);
   }
 
 }

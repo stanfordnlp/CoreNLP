@@ -3,22 +3,18 @@ package edu.stanford.nlp.pipeline;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import edu.stanford.nlp.hcoref.data.CorefChain;
-import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.dcoref.CorefChain;
+import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
 import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
-import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
-import edu.stanford.nlp.naturalli.OpenIE;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
@@ -139,16 +135,6 @@ public class TextOutputter extends AnnotationOutputter {
             }
           }
         }
-
-        // display OpenIE triples
-        Collection<RelationTriple> openieTriples = sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
-        if (openieTriples != null && openieTriples.size() > 0) {
-          pw.println("Extracted the following Open IE triples:");
-          for (RelationTriple triple : openieTriples) {
-            pw.println(OpenIE.tripleToString(triple, docId, sentence));
-          }
-        }
-
       }
     }
 

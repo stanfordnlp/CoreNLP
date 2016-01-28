@@ -1,6 +1,5 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.CoreMapExpressionExtractor;
 import edu.stanford.nlp.ling.tokensregex.Env;
@@ -130,7 +129,7 @@ public class TokensRegexAnnotator implements Annotator {
     }
     List<CoreMap> allMatched;
     if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
-      allMatched = new ArrayList<>();
+      allMatched = new ArrayList<CoreMap>();
       List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
       for (CoreMap sentence : sentences) {
         List<CoreMap> matched = extract(sentence);
@@ -155,12 +154,12 @@ public class TokensRegexAnnotator implements Annotator {
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.singleton(CoreAnnotations.TokensAnnotation.class);
+  public Set<Requirement> requires() {
+    return Collections.singleton(TOKENIZE_REQUIREMENT);
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+  public Set<Requirement> requirementsSatisfied() {
     // TODO: not sure what goes here
     return Collections.emptySet();
   }

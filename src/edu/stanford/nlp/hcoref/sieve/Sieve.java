@@ -27,7 +27,7 @@ public abstract class Sieve implements Serializable {
   
   private static final long serialVersionUID = 3986463332365306868L;
   
-  public enum ClassifierType {RULE, RF, ORACLE}
+  public enum ClassifierType {RULE, RF, ORACLE};
   
   public ClassifierType classifierType = null;
   
@@ -39,21 +39,21 @@ public abstract class Sieve implements Serializable {
   public int maxSentDist = -1;
   
   /** type of mention we want to resolve. e.g., if mType is PRONOMINAL, we only resolve pronoun mentions */
-  public final Set<MentionType> mType;
+  public Set<MentionType> mType = null;
   
   /** type of mention we want to compare to. e.g., if aType is PROPER, the resolution can be done only with PROPER antecedent  */
-  public final Set<MentionType> aType;
+  public Set<MentionType> aType = null;
   
-  public final Set<String> mTypeStr;
-  public final Set<String> aTypeStr;
+  public Set<String> mTypeStr = null;
+  public Set<String> aTypeStr = null;
   
   public Properties props = null;
   
   public Sieve() {
     this.lang = Locale.ENGLISH;
     this.sievename = this.getClass().getSimpleName();
-    this.aType = new HashSet<>(Arrays.asList(MentionType.values()));
-    this.mType = new HashSet<>(Arrays.asList(MentionType.values()));
+    this.aType = new HashSet<MentionType>(Arrays.asList(MentionType.values()));
+    this.mType = new HashSet<MentionType>(Arrays.asList(MentionType.values()));
     this.maxSentDist = 1000;
     this.mTypeStr = Generics.newHashSet();
     this.aTypeStr = Generics.newHashSet();
@@ -102,7 +102,7 @@ public abstract class Sieve implements Serializable {
   
   // load sieve (from file or make a deterministic sieve)
   public static Sieve loadSieve(Properties props, String sievename) throws Exception {
-    // System.err.println("Loading sieve: "+sievename+" ...");
+    System.err.println("Loading sieve: "+sievename+" ...");
     switch(CorefProperties.getClassifierType(props, sievename)) {
       case RULE:
         DeterministicCorefSieve sieve = (DeterministicCorefSieve) Class.forName("edu.stanford.nlp.hcoref.sieve."+sievename).getConstructor().newInstance();
@@ -111,10 +111,9 @@ public abstract class Sieve implements Serializable {
         return sieve;
         
       case RF:
-        System.err.print("Loading sieve: " + sievename + " from " + CorefProperties.getPathModel(props, sievename) + " ... ");
-        RFSieve rfsieve = IOUtils.readObjectFromURLOrClasspathOrFileSystem(CorefProperties.getPathModel(props, sievename));
+        RFSieve rfsieve = IOUtils.readObjectFromFile(CorefProperties.getPathModel(props, sievename));
         rfsieve.thresMerge = CorefProperties.getMergeThreshold(props, sievename);
-        System.err.println("done. Merging threshold: " + rfsieve.thresMerge);
+        System.err.println("Done.\nMerging threshold: "+rfsieve.thresMerge);
         return rfsieve;
         
       case ORACLE:
@@ -129,7 +128,7 @@ public abstract class Sieve implements Serializable {
   
   
   public static List<Sieve> loadSieves(Properties props) throws Exception {
-    List<Sieve> sieves = new ArrayList<>();
+    List<Sieve> sieves = new ArrayList<Sieve>();
     String sieveProp = CorefProperties.getSieves(props);
     String currentSieveForTrain = CorefProperties.getCurrentSieveForTrain(props);
     String[] sievenames = (currentSieveForTrain==null)? 
@@ -226,7 +225,7 @@ public abstract class Sieve implements Serializable {
       int mPosition,
       List<List<Mention>> orderedMentionsBySentence,
       Dictionaries dict) {
-    List<Mention> orderedAntecedents = new ArrayList<>();
+    List<Mention> orderedAntecedents = new ArrayList<Mention>();
     // ordering antecedents
     if (antecedentSentence == m.sentNum) {   // same sentence
       orderedAntecedents.addAll(orderedMentionsBySentence.get(m.sentNum).subList(0, mPosition));
@@ -244,7 +243,7 @@ public abstract class Sieve implements Serializable {
 
   /** Divides a sentence into clauses and sort the antecedents for pronoun matching  */
   private static List<Mention> sortMentionsByClause(List<Mention> l, Mention m1) {
-    List<Mention> sorted = new ArrayList<>();
+    List<Mention> sorted = new ArrayList<Mention>();
     Tree tree = m1.contextParseTree;
     Tree current = m1.mentionSubTree;
     if(tree==null || current==null) return l;

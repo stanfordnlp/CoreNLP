@@ -31,7 +31,7 @@ class AuxiliaryTree {
       throw new TsurgeonParseException("Error -- no foot node found for " + originalTreeString);
     }
     namesToNodes = Generics.newHashMap();
-    nodesToNames = new IdentityHashMap<>();
+    nodesToNames = new IdentityHashMap<Tree,String>();
     initializeNamesNodesMaps(tree);
   }
 
@@ -79,13 +79,13 @@ class AuxiliaryTree {
     Tree newFoot = null;
     if (node.isLeaf()) {
       if (node == foot) { // found the foot node; pass it up.
-        clone = treeFactory.newTreeNode(node.label(), new ArrayList<>(0));
+        clone = treeFactory.newTreeNode(node.label(), new ArrayList<Tree>(0));
         newFoot = clone;
       } else {
         clone = treeFactory.newLeaf(labelFactory.newLabel(node.label()));
       }
     } else {
-      List<Tree> newChildren = new ArrayList<>(node.children().length);
+      List<Tree> newChildren = new ArrayList<Tree>(node.children().length);
       for (Tree child : node.children()) {
         Pair<Tree,Tree> newChild = copyHelper(child, newNamesToNodes, treeFactory, labelFactory);
         newChildren.add(newChild.first());
@@ -102,7 +102,7 @@ class AuxiliaryTree {
     if (nodesToNames.containsKey(node))
       newNamesToNodes.put(nodesToNames.get(node),clone);
 
-    return new Pair<>(clone, newFoot);
+    return new Pair<Tree,Tree>(clone,newFoot);
   }
 
 
@@ -127,7 +127,7 @@ class AuxiliaryTree {
     Tree footNode = findFootNodeHelper(t);
     Tree result = footNode;
     if (footNode != null) {
-      Tree newFootNode = footNode.treeFactory().newTreeNode(footNode.label(), new ArrayList<>());
+      Tree newFootNode = footNode.treeFactory().newTreeNode(footNode.label(), new ArrayList<Tree>());
 
       Tree parent = footNode.parent(t);
       if (parent != null) {

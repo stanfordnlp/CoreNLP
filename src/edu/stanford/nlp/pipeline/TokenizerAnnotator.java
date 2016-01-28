@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Properties;
 
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.TokenizerFactory;
@@ -19,9 +18,6 @@ import edu.stanford.nlp.process.WhitespaceTokenizer;
 import edu.stanford.nlp.international.spanish.process.SpanishTokenizer;
 import edu.stanford.nlp.international.french.process.FrenchTokenizer;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.PropertiesUtils;
-
-import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -36,8 +32,6 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author Ishita Prasad
  */
 public class TokenizerAnnotator implements Annotator {
-
-  private static Redwood.RedwoodChannels logger = Redwood.channels(TokenizerAnnotator.class);
 
   /**
    * Enum to identify the different TokenizerTypes. To add a new
@@ -91,11 +85,8 @@ public class TokenizerAnnotator implements Annotator {
       return Collections.unmodifiableMap(map);
     }
 
-    /**
-     * Get TokenizerType based on what's in the properties.
-     *
-     * @param props Properties to find tokenizer options in
-     * @return An element of the TokenizerType enum indicating the tokenizer to use
+    /***
+     * Get TokenizerType based on what's in the properties
      */
     public static TokenizerType getTokenizerType(Properties props) {
       String tokClass = props.getProperty("tokenize.class", null);
@@ -133,7 +124,6 @@ public class TokenizerAnnotator implements Annotator {
 
   // CONSTRUCTORS
 
-  /** Gives a verbose, English tokenizer. Probably no one wants that! */
   public TokenizerAnnotator() {
     this(true);
   }
@@ -155,11 +145,12 @@ public class TokenizerAnnotator implements Annotator {
   }
 
   public TokenizerAnnotator(boolean verbose, String lang, String options) {
+    VERBOSE = verbose;
     Properties props = new Properties();
     if (lang != null) {
       props.setProperty("tokenize.language", lang);
     }
-    VERBOSE = PropertiesUtils.getBool(props, "tokenize.verbose", verbose);
+
     TokenizerType type = TokenizerType.getTokenizerType(props);
     factory = initFactory(type, props, options);
   }
@@ -169,10 +160,11 @@ public class TokenizerAnnotator implements Annotator {
   }
 
   public TokenizerAnnotator(boolean verbose, Properties props, String options) {
+    VERBOSE = verbose;
     if (props == null) {
       props = new Properties();
     }
-    VERBOSE = PropertiesUtils.getBool(props, "tokenize.verbose", verbose);
+
     TokenizerType type = TokenizerType.getTokenizerType(props);
     factory = initFactory(type, props, options);
   }
@@ -228,7 +220,7 @@ public class TokenizerAnnotator implements Annotator {
       break;
 
     case Unspecified:
-      logger.info("TokenizerAnnotator: No tokenizer type provided. Defaulting to PTBTokenizer.");
+      System.err.println("TokenizerAnnotator: No tokenizer type provided. Defaulting to PTBTokenizer.");
       factory = PTBTokenizer.factory(new CoreLabelTokenFactory(), options);
       break;
 
@@ -236,6 +228,7 @@ public class TokenizerAnnotator implements Annotator {
       throw new IllegalArgumentException("No valid tokenizer type provided.\n" +
                                          "Use -tokenize.language, -tokenize.class, or -tokenize.whitespace \n" +
                                          "to specify a tokenizer.");
+
     }
     return factory;
   }
@@ -279,13 +272,12 @@ public class TokenizerAnnotator implements Annotator {
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
+  public Set<Requirement> requires() {
     return Collections.emptySet();
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CoreAnnotations.TokensAnnotation.class);
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(TOKENIZE_REQUIREMENT);
   }
-
 }

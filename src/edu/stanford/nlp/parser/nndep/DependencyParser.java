@@ -26,7 +26,6 @@ import edu.stanford.nlp.trees.UniversalEnglishGrammaticalStructure;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 
@@ -125,7 +124,7 @@ public class DependencyParser {
 
   /**
    * Get an integer ID for the given word. This ID can be used to index
-   * into the embeddings {@link Classifier#E}.
+   * into the embeddings {@link #embeddings}.
    *
    * @return An ID for the given word, or an ID referring to a generic
    *         "unknown" word if the word is unknown
@@ -144,9 +143,9 @@ public class DependencyParser {
 
   public List<Integer> getFeatures(Configuration c) {
     // Presize the arrays for very slight speed gain. Hardcoded, but so is the current feature list.
-    List<Integer> fWord = new ArrayList<>(18);
-    List<Integer> fPos = new ArrayList<>(18);
-    List<Integer> fLabel = new ArrayList<>(12);
+    List<Integer> fWord = new ArrayList<Integer>(18);
+    List<Integer> fPos = new ArrayList<Integer>(18);
+    List<Integer> fLabel = new ArrayList<Integer>(12);
     for (int j = 2; j >= 0; --j) {
       int index = c.getStack(j);
       fWord.add(getWordID(c.getWord(index)));
@@ -517,9 +516,9 @@ public class DependencyParser {
       s = input.readLine();
       int nPreComputed = Integer.parseInt(s.substring(s.indexOf('=') + 1));
 
-      knownWords = new ArrayList<>();
-      knownPos = new ArrayList<>();
-      knownLabels = new ArrayList<>();
+      knownWords = new ArrayList<String>();
+      knownPos = new ArrayList<String>();
+      knownLabels = new ArrayList<String>();
       double[][] E = new double[nDict + nPOS + nLabel][eSize];
       String[] splits;
       int index = 0;
@@ -572,7 +571,7 @@ public class DependencyParser {
           W2[i][j] = Double.parseDouble(splits[i]);
       }
 
-      preComputed = new ArrayList<>();
+      preComputed = new ArrayList<Integer>();
       while (preComputed.size() < nPreComputed) {
         s = input.readLine();
         splits = s.split(" ");
@@ -601,7 +600,7 @@ public class DependencyParser {
       BufferedReader input = null;
       try {
         input = IOUtils.readerFromString(embedFile);
-        List<String> lines = new ArrayList<>();
+        List<String> lines = new ArrayList<String>();
         for (String s; (s = input.readLine()) != null; ) {
           lines.add(s);
         }
@@ -651,12 +650,12 @@ public class DependencyParser {
     System.err.println("Pre-trained Model File: " + preModel);
 
     List<CoreMap> trainSents = new ArrayList<>();
-    List<DependencyTree> trainTrees = new ArrayList<>();
+    List<DependencyTree> trainTrees = new ArrayList<DependencyTree>();
     Util.loadConllFile(trainFile, trainSents, trainTrees, config.unlabeled, config.cPOS);
     Util.printTreeStats("Train", trainTrees);
 
-    List<CoreMap> devSents = new ArrayList<>();
-    List<DependencyTree> devTrees = new ArrayList<>();
+    List<CoreMap> devSents = new ArrayList<CoreMap>();
+    List<DependencyTree> devTrees = new ArrayList<DependencyTree>();
     if (devFile != null) {
       Util.loadConllFile(devFile, devSents, devTrees, config.unlabeled, config.cPOS);
       Util.printTreeStats("Dev", devTrees);
@@ -664,7 +663,7 @@ public class DependencyParser {
     genDictionaries(trainSents, trainTrees);
 
     //NOTE: remove -NULL-, and the pass it to ParsingSystem
-    List<String> lDict = new ArrayList<>(knownLabels);
+    List<String> lDict = new ArrayList<String>(knownLabels);
     lDict.remove(0);
     system = new ArcStandard(config.tlp, lDict, true);
 
@@ -779,7 +778,7 @@ public class DependencyParser {
         W2[i][j] = random.nextDouble() * 2 * config.initRange - config.initRange;
 
     // Read embeddings into `embedID`, `embeddings`
-     Map<String, Integer> embedID = new HashMap<>();
+     Map<String, Integer> embedID = new HashMap<String, Integer>();
      double[][] embeddings = readEmbedFile(embedFile, embedID);
 
     // Try to match loaded embeddings with words in dictionary
@@ -794,7 +793,8 @@ public class DependencyParser {
       }
       if (index >= 0) {
         ++foundEmbed;
-        System.arraycopy(embeddings[index], 0, E[i], 0, E[i].length);
+        for (int j = 0; j < E[i].length; ++j)
+          E[i][j] = embeddings[index][j];
       } else {
         for (int j = 0; j < E[i].length; ++j)
           //E[i][j] = random.nextDouble() * config.initRange * 2 - config.initRange;
@@ -907,9 +907,6 @@ public class DependencyParser {
 
     Configuration c = system.initialConfiguration(sentence);
     while (!system.isTerminal(c)) {
-      if (Thread.interrupted()) {  // Allow interrupting
-        throw new RuntimeInterruptedException();
-      }
       double[] scores = classifier.computeScores(getFeatureArray(c));
 
       double optScore = Double.NEGATIVE_INFINITY;
@@ -1059,7 +1056,7 @@ public class DependencyParser {
     System.err.println("Test File: " + testFile);
     Timing timer = new Timing();
     List<CoreMap> testSents = new ArrayList<>();
-    List<DependencyTree> testTrees = new ArrayList<>();
+    List<DependencyTree> testTrees = new ArrayList<DependencyTree>();
     Util.loadConllFile(testFile, testSents, testTrees, config.unlabeled, config.cPOS);
 
     // count how much to parse
@@ -1069,8 +1066,8 @@ public class DependencyParser {
     for (CoreMap testSent : testSents) {
       numSentences += 1;
       List<CoreLabel> tokens = testSent.get(CoreAnnotations.TokensAnnotation.class);
-      for (CoreLabel token : tokens) {
-        String word = token.word();
+      for (int k = 0; k < tokens.size(); ++ k) {  
+        String word = tokens.get(k).word();
         numWords += 1;
         if (!wordIDs.containsKey(word))
           numOOVWords += 1;
@@ -1080,7 +1077,7 @@ public class DependencyParser {
 
     List<DependencyTree> predicted = testSents.stream().map(this::predictInner).collect(toList());
     Map<String, Double> result = system.evaluate(testSents, predicted, testTrees);
-
+    
     double uas = config.noPunc ? result.get("UASnoPunc") : result.get("UAS");
     double las = config.noPunc ? result.get("LASnoPunc") : result.get("LAS");
     System.err.printf("UAS = %.4f%n", uas);
@@ -1281,5 +1278,4 @@ public class DependencyParser {
       parser.parseTextFile(input, output);
     }
   }
-
 }

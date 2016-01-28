@@ -41,10 +41,10 @@ public class ExtractorMerger implements Extractor {
     extractors[0].annotate(dataset);
     
     // store all the RelationMentions per sentence
-    List<Set<RelationMention>> allRelationMentions = new ArrayList<>();
+    List<Set<RelationMention>> allRelationMentions = new ArrayList<Set<RelationMention>>();
     for (CoreMap sentence : dataset.get(CoreAnnotations.SentencesAnnotation.class)) {
       List<RelationMention> relationMentions = sentence.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
-      Set<RelationMention> uniqueRelationMentions = new HashSet<>(relationMentions);
+      Set<RelationMention> uniqueRelationMentions = new HashSet<RelationMention>(relationMentions);
       allRelationMentions.add(uniqueRelationMentions);
     }
 
@@ -66,7 +66,7 @@ public class ExtractorMerger implements Extractor {
     int sentenceIndex = 0;
     for (CoreMap sentence : dataset.get(CoreAnnotations.SentencesAnnotation.class)) {
       Set<RelationMention> uniqueRelationMentions = allRelationMentions.get(sentenceIndex);
-      List<RelationMention> relationMentions = new ArrayList<>(uniqueRelationMentions);
+      List<RelationMention> relationMentions = new ArrayList<RelationMention>(uniqueRelationMentions);
       sentence.set(MachineReadingAnnotations.RelationMentionsAnnotation.class, relationMentions);
       sentenceIndex++;
     }

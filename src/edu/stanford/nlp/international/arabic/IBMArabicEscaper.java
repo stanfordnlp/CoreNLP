@@ -152,7 +152,7 @@ public class IBMArabicEscaper implements Function<List<HasWord>, List<HasWord>> 
    *  @throws RuntimeException If a word is mapped to null
    */
   public List<HasWord> apply(List<HasWord> sentence) {
-    List<HasWord> newSentence = new ArrayList<>(sentence);
+    List<HasWord> newSentence = new ArrayList<HasWord>(sentence);
 
     for (HasWord wd : newSentence)
       wd.setWord(apply(wd.word()));

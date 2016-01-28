@@ -17,16 +17,16 @@ class DependencyTree {
 
   public DependencyTree() {
     n = 0;
-    head = new ArrayList<>();
+    head = new ArrayList<Integer>();
     head.add(Config.NONEXIST);
-    label = new ArrayList<>();
+    label = new ArrayList<String>();
     label.add(Config.UNKNOWN);
   }
 
   public DependencyTree(DependencyTree tree) {
     n = tree.n;
-    head = new ArrayList<>(tree.head);
-    label = new ArrayList<>(tree.label);
+    head = new ArrayList<Integer>(tree.head);
+    label = new ArrayList<String>(tree.label);
   }
 
   /**
@@ -92,7 +92,7 @@ class DependencyTree {
 
   // check if the tree is legal, O(n)
   public boolean isTree() {
-    List<Integer> h = new ArrayList<>();
+    List<Integer> h = new ArrayList<Integer>();
     h.add(-1);
     for (int i = 1; i <= n; ++i) {
       if (getHead(i) < 0 || getHead(i) > n)

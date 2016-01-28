@@ -38,7 +38,6 @@ import edu.stanford.nlp.util.StringUtils;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.*;
-import java.util.concurrent.locks.Lock;
 import java.util.regex.Pattern;
 
 
@@ -120,7 +119,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
   private static final boolean DEBUG = System.getProperty("GrammaticalRelation", null) != null;
 
   private static final EnumMap<Language, Map<String, GrammaticalRelation>>
-    stringsToRelations = new EnumMap<>(Language.class);
+    stringsToRelations = new EnumMap<Language, Map<String, GrammaticalRelation>>(Language.class);
 
   /**
    * The "governor" grammatical relation, which is the inverse of "dependent".<p>
@@ -162,31 +161,11 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
    * @param values The set of GrammaticalRelations to look for it among.
    * @return The GrammaticalRelation with that name
    */
-  public static GrammaticalRelation valueOf(String s, Collection<GrammaticalRelation> values, Lock readValuesLock) {
-    readValuesLock.lock();
-    try {
-      for (GrammaticalRelation reln : values) {
-        if (reln.toString().equals(s)) return reln;
-      }
-    } finally {
-      readValuesLock.unlock();
+  public static GrammaticalRelation valueOf(String s, Collection<GrammaticalRelation> values) {
+    for (GrammaticalRelation reln : values) {
+      if (reln.toString().equals(s)) return reln;
     }
 
-    return null;
-  }
-
-  /**
-   * Returns the GrammaticalRelation having the given string
-   * representation (e.g. "nsubj"), or null if no such is found.
-   *
-   * @param s The short name of the GrammaticalRelation
-   * @param map The map from string to GrammaticalRelation
-   * @return The GrammaticalRelation with that name
-   */
-  public static GrammaticalRelation valueOf(String s, Map<String, GrammaticalRelation> map) {
-    if (map.containsKey(s)) {
-      return map.get(s);
-    }
     return null;
   }
 
@@ -206,7 +185,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
   public static GrammaticalRelation valueOf(Language language, String s) {
     GrammaticalRelation reln;
     synchronized (stringsToRelations) {
-      reln = (stringsToRelations.get(language) != null ? valueOf(s, stringsToRelations.get(language)) : null);
+      reln = (stringsToRelations.get(language) != null ? valueOf(s, stringsToRelations.get(language).values()) : null);
     }
     if (reln == null) {
       // TODO this breaks the hierarchical structure of the classes,
@@ -258,10 +237,10 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
   private final String shortName;
   private final String longName;
   private final GrammaticalRelation parent;
-  private final List<GrammaticalRelation> children = new ArrayList<>();
+  private final List<GrammaticalRelation> children = new ArrayList<GrammaticalRelation>();
   // a regexp for node values at which this relation can hold
   private final Pattern sourcePattern;
-  private final List<TregexPattern> targetPatterns = new ArrayList<>();
+  private final List<TregexPattern> targetPatterns = new ArrayList<TregexPattern>();
   private final String specific; // to hold the specific prep or conjunction associated with the grammatical relation
 
   // TODO document constructor
@@ -366,7 +345,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
    *  @return A Collection of dependent nodes to which t bears this GR
    */
   public Collection<TreeGraphNode> getRelatedNodes(TreeGraphNode t, TreeGraphNode root, HeadFinder headFinder) {
-    Set<TreeGraphNode> nodeList = new ArraySet<>();
+    Set<TreeGraphNode> nodeList = new ArraySet<TreeGraphNode>();
     for (TregexPattern p : targetPatterns) {    // cdm: I deleted: && nodeList.isEmpty()
       // Initialize the TregexMatcher with the HeadFinder so that we
       // can use the same HeadFinder through the entire process of
@@ -605,7 +584,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
       } else {
         return rel;
       }
-
+      
     default: {
       throw new RuntimeException("Unknown language " + language);
     }

@@ -34,14 +34,10 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.Pair;
-
 import java.io.PrintStream;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Collection;
-
-
-import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * A Naive Bayes classifier with a fixed number of features.
@@ -64,8 +60,6 @@ public class NaiveBayesClassifier<L, F> implements Classifier<L, F>, RVFClassifi
   private Set<L> labels;
   private final Integer zero = Integer.valueOf(0);
 
-  final static Redwood.RedwoodChannels logger = Redwood.channels(NaiveBayesClassifier.class);
-
   public Collection<L> labels() {
     return labels;
   }
@@ -76,7 +70,7 @@ public class NaiveBayesClassifier<L, F> implements Classifier<L, F>, RVFClassifi
   }
 
   public ClassicCounter<L> scoresOf(RVFDatum<L, F> example) {
-    ClassicCounter<L> scores = new ClassicCounter<>();
+    ClassicCounter<L> scores = new ClassicCounter<L>();
     Counters.addInPlace(scores, priors);
     if (addZeroValued) {
       Counters.addInPlace(scores, priorZero);
@@ -98,12 +92,12 @@ public class NaiveBayesClassifier<L, F> implements Classifier<L, F>, RVFClassifi
 
 
   public L classOf(Datum<L, F> example) {
-    RVFDatum<L, F> rvf = new RVFDatum<>(example);
+    RVFDatum<L, F> rvf = new RVFDatum<L, F>(example);
     return classOf(rvf);
   }
 
   public ClassicCounter<L> scoresOf(Datum<L, F> example) {
-    RVFDatum<L, F> rvf = new RVFDatum<>(example);
+    RVFDatum<L, F> rvf = new RVFDatum<L, F>(example);
     return scoresOf(rvf);
   }
 
@@ -130,7 +124,7 @@ public class NaiveBayesClassifier<L, F> implements Classifier<L, F>, RVFClassifi
       }
       total++;
     }
-    logger.info("correct " + correct + " out of " + total);
+    System.err.println("correct " + correct + " out of " + total);
     return correct / (float) total;
   }
 
@@ -146,7 +140,7 @@ public class NaiveBayesClassifier<L, F> implements Classifier<L, F>, RVFClassifi
   }
 
   private double weight(L label, F feature, Number val) {
-    Pair<Pair<L, F>, Number> p = new Pair<>(new Pair<>(label, feature), val);
+    Pair<Pair<L, F>, Number> p = new Pair<Pair<L, F>, Number>(new Pair<L, F>(label, feature), val);
     double v = weights.getCount(p);
     return v;
   }
@@ -161,7 +155,7 @@ public class NaiveBayesClassifier<L, F> implements Classifier<L, F>, RVFClassifi
    * priorZero(l)=sum_{features} wt(l,feat=0)
    */
   private void initZeros() {
-    priorZero = new ClassicCounter<>();
+    priorZero = new ClassicCounter<L>();
     for (L label : labels) {
       double score = 0;
       for (F feature : features) {

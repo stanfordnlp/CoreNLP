@@ -13,13 +13,13 @@ import java.util.Map;
  */
 public class Relation {
 
-  private Map<String, List<RelationMention>> relationToRelationMentions = new HashMap<>();
+  private Map<String, List<RelationMention>> relationToRelationMentions = new HashMap<String, List<RelationMention>>();
 
   public void addRelation(String relation, RelationMention rm) {
     List<RelationMention> mentions = this.relationToRelationMentions
         .get(relation);
     if (mentions == null) {
-      mentions = new ArrayList<>();
+      mentions = new ArrayList<RelationMention>();
       this.relationToRelationMentions.put(relation, mentions);
     }
     mentions.add(rm);

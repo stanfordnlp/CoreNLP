@@ -1,5 +1,6 @@
 package edu.stanford.nlp.patterns.dep;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.patterns.CandidatePhrase;
@@ -8,8 +9,10 @@ import edu.stanford.nlp.patterns.PatternFactory;
 import edu.stanford.nlp.patterns.PatternsAnnotations;
 import edu.stanford.nlp.patterns.surface.Token;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
+import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.trees.GrammaticalRelation;
-import edu.stanford.nlp.util.ArgumentParser;
+import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Pair;
 
 import java.util.*;
@@ -20,22 +23,22 @@ import java.util.regex.Pattern;
  */
 public class DepPatternFactory extends PatternFactory{
 
-  @ArgumentParser.Option(name="ignoreRels")
+  @Execution.Option(name="ignoreRels")
   static String ignoreRels = "";
 
-  @ArgumentParser.Option(name="upDepth")
+  @Execution.Option(name="upDepth")
   static int upDepth = 2;
 
-  @ArgumentParser.Option(name="allowedTagsForTrigger")
+  @Execution.Option(name="allowedTagsForTrigger")
   static String allowedTagsForTrigger = ".*";
 
 
-  static Set<Pattern> allowedTagPatternForTrigger = new HashSet<>();
-  static Set<GrammaticalRelation> ignoreRelsSet = new HashSet<>();
+  static Set<Pattern> allowedTagPatternForTrigger = new HashSet<Pattern>();
+  static Set<GrammaticalRelation> ignoreRelsSet = new HashSet<GrammaticalRelation>();
 
   static public void setUp(Properties props){
-    ArgumentParser.fillOptions(DepPatternFactory.class, props);
-    ArgumentParser.fillOptions(PatternFactory.class, props);
+    Execution.fillOptions(DepPatternFactory.class, props);
+    Execution.fillOptions(PatternFactory.class, props);
     for(String s: ignoreRels.split("[,;]")){
       ignoreRelsSet.add(GrammaticalRelation.valueOf(s));
     }
@@ -53,7 +56,7 @@ public class DepPatternFactory extends PatternFactory{
   static Map<Integer, Set<DepPattern>> getPatternsForAllPhrases(DataInstance sent, Set<CandidatePhrase> commonWords)
   {
     SemanticGraph graph = ((DataInstanceDep)sent).getGraph();
-    Map<Integer, Set<DepPattern>> pats4Sent = new HashMap<>();
+    Map<Integer, Set<DepPattern>> pats4Sent = new HashMap<Integer, Set<DepPattern>>();
     if (graph == null || graph.isEmpty()){
       System.out.println("graph is empty or null!");
       return null;
@@ -91,7 +94,7 @@ public class DepPatternFactory extends PatternFactory{
   }
 
   static Set<DepPattern> getContext(IndexedWord w, SemanticGraph graph, Set<CandidatePhrase> stopWords, DataInstance sent){
-    Set<DepPattern> patterns = new HashSet<>();
+    Set<DepPattern> patterns = new HashSet<DepPattern>();
     IndexedWord node = w;
     int depth = 1;
     while (depth <= upDepth) {
@@ -102,7 +105,7 @@ public class DepPatternFactory extends PatternFactory{
       for (Pattern tagPattern : allowedTagPatternForTrigger) {
         if (tagPattern.matcher(parent.tag()).matches()) {
           if (!ifIgnoreRel(rel) && !stopWords.contains(CandidatePhrase.createOrGet(parent.word())) && parent.word().length() > 1) {
-            Pair<IndexedWord, GrammaticalRelation> pattern = new Pair<>(parent, rel);
+            Pair<IndexedWord, GrammaticalRelation> pattern = new Pair<IndexedWord, GrammaticalRelation>(parent, rel);
             DepPattern patterndep = patternToDepPattern(pattern, sent);
             if (depth <= upDepth){
               patterns.add(patterndep);

@@ -119,9 +119,9 @@ public class Document implements Serializable {
    *  the key is the value of the variable 'speakers' */
   public Map<String, SpeakerInfo> speakerInfoMap = Generics.newHashMap();
   
-  public Counter<String> properNouns = new ClassicCounter<>();
-  public Counter<String> phraseCounter = new ClassicCounter<>();
-  public Counter<String> headwordCounter = new ClassicCounter<>();
+  public Counter<String> properNouns = new ClassicCounter<String>();
+  public Counter<String> phraseCounter = new ClassicCounter<String>();
+  public Counter<String> headwordCounter = new ClassicCounter<String>();
 
   /** Additional information about the document. Can be used as features */
   public Map<String, String> docInfo;
@@ -168,7 +168,7 @@ public class Document implements Serializable {
   // Update incompatibles for two clusters that are about to be merged
   public void mergeIncompatibles(CorefCluster to, CorefCluster from) {
     List<Pair<Pair<Integer,Integer>, Pair<Integer,Integer>>> replacements =
-            new ArrayList<>();
+            new ArrayList<Pair<Pair<Integer,Integer>, Pair<Integer,Integer>>>();
     for (Pair<Integer, Integer> p:incompatibleClusters) {
       Integer other = null;
       if (p.first == from.clusterID) {
@@ -254,7 +254,7 @@ public class Document implements Serializable {
   /** Extract gold coref link information */
   protected void extractGoldLinks() {
     //    List<List<Mention>> orderedMentionsBySentence = this.getOrderedMentions();
-    List<Pair<IntTuple, IntTuple>> links = new ArrayList<>();
+    List<Pair<IntTuple, IntTuple>> links = new ArrayList<Pair<IntTuple,IntTuple>>();
 
     // position of each mention in the input matrix, by id
     Map<Integer, IntTuple> positions = Generics.newHashMap();
@@ -268,7 +268,7 @@ public class Document implements Serializable {
         pos.set(0, i);
         pos.set(1, j);
         positions.put(id, pos);
-        antecedents.put(id, new ArrayList<>());
+        antecedents.put(id, new ArrayList<IntTuple>());
       }
     }
 
@@ -304,14 +304,14 @@ public class Document implements Serializable {
               IntTuple missed = new IntTuple(2);
               missed.set(0, k);
               missed.set(1, l);
-              if (links.contains(new Pair<>(missed, dst))) {
+              if (links.contains(new Pair<IntTuple, IntTuple>(missed, dst))) {
                 antecedents.get(id).add(missed);
-                links.add(new Pair<>(src, missed));
+                links.add(new Pair<IntTuple, IntTuple>(src, missed));
               }
             }
           }
 
-          links.add(new Pair<>(src, dst));
+          links.add(new Pair<IntTuple, IntTuple>(src, dst));
 
           assert (antecedents.get(id) != null);
           antecedents.get(id).add(dst);
@@ -320,7 +320,7 @@ public class Document implements Serializable {
           assert (ants != null);
           for (IntTuple ant : ants) {
             antecedents.get(id).add(ant);
-            links.add(new Pair<>(src, ant));
+            links.add(new Pair<IntTuple, IntTuple>(src, ant));
           }
         }
       }

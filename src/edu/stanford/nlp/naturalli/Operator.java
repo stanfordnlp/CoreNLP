@@ -42,15 +42,12 @@ public enum Operator {
   UNARY_NO_ONE("no one", INDEPENDENCE, "anti-additive"),
   UNARY_NT("n't",        INDEPENDENCE, "anti-additive"),
 
-  // A general quantifier for all "doubt"-like words
-  GENERAL_NEG_POLARITY("neg_polarity_trigger",   INDEPENDENCE, "anti-additive"),
-
   // "Some" quantifiers
   SOME("some",                     FORWARD_ENTAILMENT, "additive", "additive"),
   SEVERAL("several",               FORWARD_ENTAILMENT, "additive", "additive"),
   EITHER("either",                 FORWARD_ENTAILMENT, "additive", "additive"),
-  A("a",                           FORWARD_ENTAILMENT, "additive-multiplicative", "additive-multiplicative"),
-  THE("the",                       FORWARD_ENTAILMENT, "additive-multiplicative", "additive-multiplicative"),
+  A("a",                           FORWARD_ENTAILMENT, "additive", "additive"),
+  THE("the",                       FORWARD_ENTAILMENT, "additive", "additive"),
   LESS_THAN("less than --num--",   FORWARD_ENTAILMENT, "additive", "additive"),
   SOME_OF("some of",               FORWARD_ENTAILMENT, "additive", "additive"),
   ONE_OF("one of",                 FORWARD_ENTAILMENT, "additive", "additive"),
@@ -73,6 +70,7 @@ public enum Operator {
   MANY("many",                  FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
   ENOUGH("enough",              FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
   MORE_THAN("more than __num_", FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
+  A_LOT_OF("a lot of",          FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
   LOTS_OF("lots of",            FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
   PLENTY_OF("plenty of",        FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
   HEAPS_OF("heap of",           FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),

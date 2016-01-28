@@ -4,7 +4,6 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.Morphology;
-import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 
 import java.util.Arrays;
@@ -102,16 +101,12 @@ public class MorphaAnnotator implements Annotator{
 
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class,
-        CoreAnnotations.PartOfSpeechAnnotation.class
-    )));
+  public Set<Requirement> requires() {
+    return TOKENIZE_SSPLIT_POS;
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CoreAnnotations.LemmaAnnotation.class);
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(LEMMA_REQUIREMENT);
   }
 }

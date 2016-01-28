@@ -98,7 +98,7 @@ public class MultiClassChunkEvalStats extends MultiClassPrecisionRecallExtendedS
   {
     if (addUnknownLabels) {
       if (labelIndex == null) {
-        labelIndex = new HashIndex<>();
+        labelIndex = new HashIndex<String>();
       }
       labelIndex.add(getTypeLabel(guess));
       labelIndex.add(getTypeLabel(correct));

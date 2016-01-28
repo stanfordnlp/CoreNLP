@@ -246,7 +246,7 @@ public class RecordIterator implements Iterator<List<String>> {
            (tokens.length == 1 && tokens[0].equals("")))) // it's a blank line
         continue;                       // skip this line
       
-      nextResult = new ArrayList<>();
+      nextResult = new ArrayList<String>();
       for (String token : tokens) nextResult.add(token);
       return;                           // this line will be our next result
 

@@ -5,15 +5,7 @@ import java.util.Set;
 
 import edu.stanford.nlp.util.Generics;
 
-/** Word lists for Chinese and English used in the coref system.
- *
- *  @author Heeyoung Lee
- *  @author Rob Voigt
- *  @author Christopher Manning
- */
 public class WordLists {
-
-  private WordLists() { } // just variable declarations
 
   //
   // WordLists for English
@@ -29,7 +21,7 @@ public class WordLists {
       "debate", "decide", "declare", "defend", "demand", "demonstrate", "deny",
       "describe", "determine", "disagree", "disclose", "discount", "discover", "discuss",
       "dismiss", "dispute", "disregard", "doubt", "emphasize", "encourage", "endorse",
-      "equate", "estimate", "expect", "explain", "express", "extol", "fear", "feel",
+      "equate", "estimate", "expect", "explain", "express", "extoll", "fear", "feel",
       "find", "forbid", "forecast", "foretell", "forget", "gather", "guarantee", "guess",
       "hear", "hint", "hope", "illustrate", "imagine", "imply", "indicate", "inform",
       "insert", "insist", "instruct", "interpret", "interview", "invite", "issue",
@@ -199,7 +191,7 @@ public class WordLists {
   public static final Set<String> inanimatePronounsZh = Generics.newHashSet(Arrays.asList(new String[]{ "它", "它们", "那", "那儿", "那个", "那里", "哪", "哪个", "哪儿", "哪里", "这","这儿", "这个", "这里" }));
   public static final Set<String> animatePronounsZh = Generics.newHashSet(Arrays.asList(new String[]{ "我", "我们", "你", "你们", "她", "她们", "他", "他们", "谁" }));
   public static final Set<String> indefinitePronounsZh = Generics.newHashSet(Arrays.asList(new String[]{ "谁", "另外", "任何", "每", "所有", "许多", "一些" }));
-  public static final Set<String> relativePronounsZh = Generics.newHashSet(); // Chinese doesn't have relative pronouns
+  public static final Set<String> relativePronounsZh = Generics.newHashSet(Arrays.asList(new String[]{})); // Chinese doesn't have relative pronouns
   public static final Set<String> interrogativePronounsZh = Generics.newHashSet(Arrays.asList(new String[]{"什", "什么时候", "哪边", "怎", "甚么", "谁们", "啥", "干什么", "为何", "哪里", "哪个", "么", "哪", "哪些", "什么样", "多少", "怎样", "怎么样", "为什么", "谁", "怎么", "几", "什么"})); // Need to filter these
   public static final Set<String> GPEPronounsZh = Generics.newHashSet(Arrays.asList(new String[]{ "它", "它们", "他们", "那", "那儿", "那个", "那里", "哪", "哪个", "哪儿", "哪里", "这","这儿", "这个", "这里" }));
   public static final Set<String> pluralPronounsZh = Generics.newHashSet(Arrays.asList(new String[]{ "我们", "你们", "她们", "他们", "它们", "咱们" }));
@@ -215,41 +207,16 @@ public class WordLists {
   public static final Set<String> quantifiers2Zh = Generics.newHashSet(Arrays.asList( "每", "所有" ));
   public static final Set<String> determinersZh = Generics.newHashSet(Arrays.asList( "这", "这个", "这些", "那", "那个", "那些" ));
   public static final Set<String> negationsZh = Generics.newHashSet(Arrays.asList( "不", "没", "否", "如果", "可能", "输", "失败", "否认" ));
-  public static final Set<String> neg_relationsZh = Generics.newHashSet();
+  public static final Set<String> neg_relationsZh = Generics.newHashSet(Arrays.asList(""));
   public static final Set<String> modalsZh = Generics.newHashSet(Arrays.asList( "能", "可能", "可以", "应该", "必须" ));
   public static final Set<String> titleWordsZh = Generics.newHashSet(Arrays.asList(
       "总统", "总理", "顾问", "部长", "市长", "省长", "先生", "外长", "教授", "副总理", "副总统",
       "大使", "同志", "王妃", "国王", "主席", "王后", "王子", "首相", "经理", "秘书", "女士",
       "总经理"));
   public static final Set<String> removeWordsZh = Generics.newHashSet(Arrays.asList(
-          "_", // [cdm] Don't know the source of this one; doesn't seem to be in devset (with gold mentions)
-          "ｑｕｏｔ", //"ｑｕｏｔ" is a formatting error in CoNLL data
-          // "人", // a little dangerous 14 real cases though many not.
-          "时候", // okay but rare
-          // "问题", // dangerous - real case 1/3 of the time
-          // "情况", // dangerous - real case 1/3 of the time
-          "未来", // ok
-          // "战争", // a little dangerous
-          "可能",  // ok
-          "新华社", // Xinhua news agency -- kind of a cheat, but....
-          "第一", "第二", "第三", "第四", "第五", "第六", "第七", "第八", "第九", // ordinals - should have regex or NER; there are also some with arabic numerals
-          "美军", "中央台", "时间" // cdm added these ones
-  ));
-
+      "_", "ｑｕｏｔ", "人", "时候", "问题", "情况",
+      "未来", "战争", "可能"));
   public static final Set<String> removeCharsZh = Generics.newHashSet(Arrays.asList(
-          // "什么的", // in one spurious mention, but caught by general de rule!
-          // "哪", // slightly dangerous
-          "什么", // "what" -- good one, this interrogative isn't in mentions
-          "谁", // "Who" -- good interrogative to have
-          "啥", // "What"
-          "哪儿", // "where" -- rare but okay
-          // "哪里", // "where" but some are mentions
-          // "人们", // "people" -- dangerous
-          // "年", // year -- dangerous
-          "原因", // "reason" -- okay
-          // "啥时", // doesn't seem to appear in devset; ends in de
-          // "ｑｕｏｔ",
-          "多少" // "How many" [cdm added used to be t ested separately]
-  ));
-
+      "什么的", "哪", "什么", "谁", "啥", "哪儿",
+      "哪里", "人们", "年", "原因", "啥时"));
 }

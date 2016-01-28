@@ -22,25 +22,10 @@ import java.util.function.Function;
 public class RelationTriple implements Comparable<RelationTriple>, Iterable<CoreLabel> {
   /** The subject (first argument) of this triple */
   public final List<CoreLabel> subject;
-  /**
-   * The relation (second argument) of this triple.
-   * Note that this is only the part of the relation that can be grounded in the sentence itself.
-   * Often, for a standalone readable relation string, you want to attach additional modifiers
-   * otherwise stored in the dependnecy arc.
-   * Therefore, for getting a String form of the relation, we recommend using
-   * {@link RelationTriple#relationGloss} or {@link RelationTriple#relationLemmaGloss}.
-   */
+  /** The relation (second argument) of this triple */
   public final List<CoreLabel> relation;
   /** The object (third argument) of this triple */
   public final List<CoreLabel> object;
-  /** A marker for the relation expressing a tmod not grounded in a word in the sentence. */
-  private boolean istmod = false;
-  /** A marker for the relation expressing a prefix "be" not grounded in a word in the sentence. */
-  private boolean prefixBe = false;
-  /** A marker for the relation expressing a suffix "be" not grounded in a word in the sentence. */
-  private boolean suffixBe = false;
-  /** A marker for the relation expressing a suffix "of" not grounded in a word in the sentence. */
-  private boolean suffixOf = false;
   /** An optional score (confidence) for this triple */
   public final double confidence;
 
@@ -117,19 +102,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
    * The relation of this relation triple, as a String
    */
   public String relationGloss() {
-    String relationGloss = (
-        (prefixBe ? "is " : "")
-        + StringUtils.join(relation.stream().map(CoreLabel::word), " ")
-        + (suffixBe ? " is" : "")
-        + (suffixOf ? " of" : "")
-        + (istmod ? " at_time" : "")
-    ).trim();
-    // Some cosmetic tweaks
-    if ("'s".equals(relationGloss)) {
-      return "has";
-    } else {
-      return relationGloss;
-    }
+    return StringUtils.join(relation.stream().map(CoreLabel::word), " ");
   }
 
   /**
@@ -137,21 +110,8 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
    * This method will additionally strip out punctuation as well, and lower-cases the relation.
    */
   public String relationLemmaGloss() {
-    // Construct a human readable relation string
-    String relationGloss = (
-        (prefixBe ? "be " : "")
-        + StringUtils.join(relation.stream()
-          .filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]") && (x.lemma() == null || !x.lemma().matches("[\\.,;'\"\\?!]"))).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ").toLowerCase()
-        + (suffixBe ? " be" : "")
-        + (suffixOf ? " of" : "")
-        + (istmod ? " at_time" : "")
-    ).trim();
-    // Some cosmetic tweaks
-    if ("'s".equals(relationGloss)) {
-      return "have";
-    } else {
-      return relationGloss;
-    }
+    return StringUtils.join(relation.stream()
+        .filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]") && (x.lemma() == null || !x.lemma().matches("[\\.,;'\"\\?!]"))).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ").toLowerCase();
   }
 
   /** A textual representation of the confidence. */
@@ -173,148 +133,12 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     return getSpan(subject, x -> x.index() - 1, x -> x.index() - 1);
   }
 
-  /**
-   * <p>
-   *   Get a representative span for the relation expressed by this triple.
-   * </p>
-   *
-   * <p>
-   *   This is a bit more complicated than the subject and object spans, as the relation
-   *   span is occasionally discontinuous.
-   *   If this is the case, this method returns the largest contiguous chunk.
-   *   If the relation span is empty, return the object span.
-   * </p>
-   */
   public Pair<Integer, Integer> relationTokenSpan() {
-    if (relation.size() == 0) {
-      return objectTokenSpan();
-    } else if (relation.size() == 1) {
-      return Pair.makePair(relation.get(0).index() - 1, relation.get(0).index());
-    } else {
-      // Variables to keep track of the longest chunk
-      int longestChunk = 0;
-      int longestChunkStart = 0;
-      int lastIndex = relation.get(0).index() - 1;
-      int thisChunk = 1;
-      int thisChunkStart = 0;
-      // Find the longest chunk
-      for (int i = 1; i < relation.size(); ++i) {
-        CoreLabel token = relation.get(i);
-        if (token.index() - 1 == lastIndex + 1) {
-          thisChunk += 1;
-        } else {
-          if (thisChunk > longestChunk) {
-            longestChunk = thisChunk;
-            longestChunkStart = thisChunkStart;
-          }
-          thisChunkStart = i;
-          thisChunk = 1;
-        }
-      }
-      // (subcase: the last chunk is the longest)
-      if (thisChunk > longestChunk) {
-        longestChunk = thisChunk;
-        longestChunkStart = thisChunkStart;
-      }
-      // Return the longest chunk
-      return Pair.makePair(
-          relation.get(longestChunkStart).index() - 1,
-          relation.get(longestChunkStart + longestChunk - 1).index()
-      );
-    }
+    return getSpan(relation, x -> x.index() - 1, x -> x.index() - 1);
   }
 
   public Pair<Integer, Integer> objectTokenSpan() {
     return getSpan(object, x -> x.index() - 1, x -> x.index() - 1);
-  }
-
-  /**
-   * If true, this relation expresses a "to be" relation.
-   *
-   * For example, "President Obama" expresses the relation
-   * (Obama; be; President).
-   */
-  public boolean isPrefixBe() {
-    return this.prefixBe;
-  }
-
-  /**
-   * Set the value of this relation triple expressing a "to be" relation.
-   *
-   * @param newValue The new value of this relation being a "to be" relation.
-   * @return The old value of whether this relation expressed a "to be" relation.
-   */
-  public boolean isPrefixBe(boolean newValue) {
-    boolean oldValue = this.prefixBe;
-    this.prefixBe = newValue;
-    return oldValue;
-  }
-
-  /**
-   * If true, this relation expresses a "to be" relation (with the be at the end of the sentence).
-   *
-   * For example, "Tim's father Tom" expresses the relation
-   * (Tim; 's father is; Tom).
-   */
-  public boolean isSuffixBe() {
-    return this.suffixBe;
-  }
-
-  /**
-   * Set the value of this relation triple expressing a "to be" relation (suffix).
-   *
-   * @param newValue The new value of this relation being a "to be" relation.
-   * @return The old value of whether this relation expressed a "to be" relation.
-   */
-  public boolean isSuffixBe(boolean newValue) {
-    boolean oldValue = this.suffixBe;
-    this.suffixBe = newValue;
-    return oldValue;
-  }
-
-  /**
-   * If true, this relation has an ungrounded "of" at the end of the relation.
-   *
-   * For example, "United States president Barack Obama" expresses the relation
-   * (Obama; is president of; United States).
-   */
-  public boolean isSuffixOf() {
-    return this.suffixOf;
-  }
-
-  /**
-   * Set the value of this triple missing an ungrounded "of" in the relation string.
-   *
-   * @param newValue The new value of this relation missing an "of".
-   * @return The old value of whether this relation missing an "of".
-   */
-  public boolean isSuffixOf(boolean newValue) {
-    boolean oldValue = this.suffixOf;
-    this.suffixOf = newValue;
-    return oldValue;
-  }
-
-  /**
-   * If true, this relation expresses a tmod (temporal modifier) relation that is not grounded in
-   * the sentence.
-   *
-   * For example, "I went to the store Friday" would otherwise yield a strange triple
-   * (I; go to store; Friday).
-   */
-  public boolean istmod() {
-    return this.istmod;
-  }
-
-  /**
-   * Set the value of this relation triple expressing a tmod (temporal modifier) relation.
-   *
-   * @param newValue The new value of this relation being a tmod relation.
-   * @return The old value of whether this relation expressed a tmod relation.
-   */
-  public boolean istmod(boolean newValue) {
-    boolean oldValue = this.istmod;
-    this.istmod = newValue;
-    return oldValue;
   }
 
   /** An optional method, returning the dependency tree this triple was extracted from */
@@ -354,11 +178,10 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
   /** {@inheritDoc} */
   @Override
   public int hashCode() {
-    return toString().hashCode();  // Faster than checking CoreLabels
-//    int result = subject.hashCode();
-//    result = 31 * result + relation.hashCode();
-//    result = 31 * result + object.hashCode();
-//    return result;
+    int result = subject.hashCode();
+    result = 31 * result + relation.hashCode();
+    result = 31 * result + object.hashCode();
+    return result;
   }
 
   /** Print a human-readable description of this relation triple, as a tab-separated line */
@@ -369,7 +192,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
 
   /** Print a description of this triple, formatted like the ReVerb outputs. */
   public String toReverbString(String docid, CoreMap sentence) {
-    return (docid == null ? "no_doc_id" : docid) + "\t" +
+    return docid + "\t" +
         relation.get(0).sentIndex() + "\t" +
         subjectGloss().replace('\t', ' ') + "\t" +
         relationGloss().replace('\t', ' ') + "\t" +
@@ -461,4 +284,5 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
       return Optional.of(sourceTree);
     }
   }
+
 }

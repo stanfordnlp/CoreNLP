@@ -10,6 +10,7 @@ import edu.stanford.nlp.util.StringUtils;
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -17,9 +18,9 @@ import java.util.regex.Pattern;
 
 /**
  * Represents dates and times according to ISO8601 standard while also allowing for
- * wild cards - e.g., can represent "21 June" without a year.
+ * wild cards - e.g., can represent "21 June" without a year
  * (Standard ISO8601 only allows removing less precise annotations (e.g.,
- * 200706 rather than 20070621 but not a way to represent 0621 without a year.)
+ * 200706 rather than 20070621 but not a way to represent 0621 without a year)
  * <p/>
  * Format stores date and time separately since the majority of current use
  * cases involve only one of these items.  Standard ISO 8601 instead
@@ -35,7 +36,7 @@ import java.util.regex.Pattern;
 public class ISODateInstance {
 
   private static final boolean DEBUG = false;
-  private ArrayList<String> tokens = new ArrayList<>(); //each token contains some piece of the date, from our input.
+  private ArrayList<String> tokens = new ArrayList<String>();//each token contains some piece of the date, from our input.
 
   public static final String OPEN_RANGE_AFTER = "A";
   public static final String OPEN_RANGE_BEFORE = "B";
@@ -72,6 +73,7 @@ public class ISODateInstance {
   /**
    * Takes a string that represents a date, and attempts to
    * normalize it into ISO 8601-compatible format.
+   *
    */
   public ISODateInstance(String date) {
     extractFields(date);
@@ -302,9 +304,9 @@ public class ISODateInstance {
 
   static {
     //Add entries to the relative datemap
-    relativeDateMap.put("today", new Pair<>(DateField.DAY, 0));
-    relativeDateMap.put("tomorrow", new Pair<>(DateField.DAY, 1));
-    relativeDateMap.put("yesterday", new Pair<>(DateField.DAY, -1));
+    relativeDateMap.put("today", new Pair<DateField, Integer>(DateField.DAY, 0));
+    relativeDateMap.put("tomorrow", new Pair<DateField, Integer>(DateField.DAY, 1));
+    relativeDateMap.put("yesterday", new Pair<DateField, Integer>(DateField.DAY, -1));
 
 
   }
@@ -353,10 +355,10 @@ public class ISODateInstance {
   }
 
   /**
-   * Uses regexp matching to match  month, day, and year fields.
-   * TODO: Find a way to mark what's already been handled in the string
+   * Uses regexp matching to match  month, day, and year fields
+   * TODO: Find a way to mark what;s already been handled in the string
    */
-  private boolean extractFields(String inputDate) {
+  public boolean extractFields(String inputDate) {
 
     if (tokens.size() < 2) {
       tokenizeDate(inputDate);
@@ -421,7 +423,7 @@ public class ISODateInstance {
     for (String curIndicator : rangeIndicators) {
       String[] dates = inputDate.split(curIndicator);
       if (dates.length == 2) {
-        return new Pair<>(dates[0], dates[1]);
+        return new Pair<String, String>(dates[0], dates[1]);
       }
     }
     return null;
@@ -872,7 +874,7 @@ public class ISODateInstance {
   //These methods are taken directly from or modified slightly from {@link DateInstance}
 
   private void tokenizeDate(String inputDate) {
-    tokens = new ArrayList<>();
+    tokens = new ArrayList<String>();
     Pattern pat = Pattern.compile("[-]");
     if (inputDate == null) {
       System.out.println("Null input date");
@@ -1096,19 +1098,21 @@ public class ISODateInstance {
   }
 
   public boolean extractDay(String inputDate) {
-    try {
-      for (String extract : tokens) {
-        if (QuantifiableEntityNormalizer.wordsToValues.containsKey(extract)) {
-          extract = Integer.toString(Double.valueOf(QuantifiableEntityNormalizer.wordsToValues.getCount(extract)).intValue());
-        } else if (QuantifiableEntityNormalizer.ordinalsToValues.containsKey(extract)) {
-          extract = Integer.toString(Double.valueOf(QuantifiableEntityNormalizer.ordinalsToValues.getCount(extract)).intValue());
-        }
-        extract = extract.replaceAll("[^0-9]", "");
-        if ( ! extract.isEmpty()) {
+    for (int a = 0; a < tokens.size(); a++) {
+      String extract = tokens.get(a);
+      if (QuantifiableEntityNormalizer.wordsToValues.containsKey(extract)) {
+        extract = Integer.toString(Double.valueOf(QuantifiableEntityNormalizer.wordsToValues.getCount(extract)).intValue());
+      } else if (QuantifiableEntityNormalizer.ordinalsToValues.containsKey(extract)) {
+        extract = Integer.toString(Double.valueOf(QuantifiableEntityNormalizer.ordinalsToValues.getCount(extract)).intValue());
+      }
+      extract = extract.replaceAll("[^0-9]", "");
+      if (!extract.equals("")) {
+        try {
           Long i = Long.parseLong(extract);
-          if (i.intValue() < 32L && i.intValue() > 0L) {
-            if (isoDate.length() < 6) { //should already have year and month
-              if (isoDate.length() != 4) { //throw new RuntimeException("Error extracting dates; should have had month and year but didn't");
+          if (i.intValue() < 32l && i.intValue() > 0l) {
+            if (isoDate.length() < 6) {//should already have year and month
+              if (isoDate.length() != 4)//throw new RuntimeException("Error extracting dates; should have had month and year but didn't");
+              {
                 isoDate = isoDate + "******";
               } else {
                 isoDate = isoDate + "**";
@@ -1118,17 +1122,17 @@ public class ISODateInstance {
             isoDate = isoDate + day;
             return true;
           }
+        } catch (NumberFormatException e) {
+          System.err.println("Exception in extract Day.");
+          System.err.println("tokens size :" + tokens.size());
+          e.printStackTrace();
         }
       }
-    } catch (NumberFormatException e) {
-      System.err.println("Exception in extract Day.");
-      System.err.println("tokens size :" + tokens.size());
-      e.printStackTrace();
     }
     return false;
   }
 
-  private static final Pattern[] weekdayArray = {Pattern.compile("[Ss]unday"), Pattern.compile("[Mm]onday"), Pattern.compile("[Tt]uesday"), Pattern.compile("[Ww]ednesday"), Pattern.compile("[Tt]hursday"), Pattern.compile("[Ff]riday"), Pattern.compile("[Ss]aturday")};
+  private static Pattern[] weekdayArray = {Pattern.compile("[Ss]unday"), Pattern.compile("[Mm]onday"), Pattern.compile("[Tt]uesday"), Pattern.compile("[Ww]ednesday"), Pattern.compile("[Tt]hursday"), Pattern.compile("[Ff]riday"), Pattern.compile("[Ss]aturday")};
 
   /**
    * This is a backup method if everything else fails.  It searches for named

@@ -44,16 +44,16 @@ public class LibSVMReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>
       if (num % 1000 == 0) { System.err.print("["+num+"]"); }
       num++;
       
-      List<CoreLabel> words = new ArrayList<>();
+      List<CoreLabel> words = new ArrayList<CoreLabel>();
       
       String[] lines = doc.split("\n");
-
-      for (String line : lines) {
-        if (line.trim().length() < 1) {
+      
+      for (int i = 0; i < lines.length; i++) {
+        if (lines[i].trim().length() < 1) {
           continue;
         }
         CoreLabel wi = new CoreLabel();
-        String[] info = line.split("\\s+");
+        String[] info = lines[i].split("\\s+");              
         wi.set(CoreAnnotations.AnswerAnnotation.class, info[0]);
         wi.set(CoreAnnotations.GoldAnswerAnnotation.class, info[0]);
         for (int j = 1; j < info.length; j++) {

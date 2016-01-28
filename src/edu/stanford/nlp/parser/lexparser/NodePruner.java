@@ -29,7 +29,7 @@ class NodePruner {
     Tree pcfgTree = debinarizer.transformTree(tempTree);
     Set<Constituent> pcfgConstituents = pcfgTree.constituents(new LabeledScoredConstituentFactory());
     // delete child labels that are not in reference but do not cross reference
-    List<Tree> prunedChildren = new ArrayList<>();
+    List<Tree> prunedChildren = new ArrayList<Tree>();
     int childStart = 0;
     for (int c = 0, numCh = testTree.numChildren(); c < numCh; c++) {
       Tree child = testTree.getChild(c);
@@ -64,7 +64,7 @@ class NodePruner {
   }
 
   private List<Tree> helper(List<Tree> treeList, int start) {
-    List<Tree> newTreeList = new ArrayList<>(treeList.size());
+    List<Tree> newTreeList = new ArrayList<Tree>(treeList.size());
     for (Tree tree : treeList) {
       int end = start + tree.yield().size();
       newTreeList.add(prune(tree, start));

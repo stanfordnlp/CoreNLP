@@ -7,8 +7,8 @@ import edu.stanford.nlp.pipeline.CoreNLPProtos;
 import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.LuceneFieldType;
-import edu.stanford.nlp.util.ArgumentParser;
-import edu.stanford.nlp.util.ArgumentParser.Option;
+import edu.stanford.nlp.util.Execution;
+import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.logging.Redwood;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
@@ -76,7 +76,7 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
   //The fields in index are: tokens, sentence id, List<CoreLabel> annotation of the sentence (optional; not used when sentences are in memory)
   public LuceneSentenceIndex(Properties props, Set<String> stopWords, String indexDirStr, Function<CoreLabel, Map<String, String>> transformer) {
     super(stopWords, transformer);
-    ArgumentParser.fillOptions(this, props);
+    Execution.fillOptions(this, props);
     indexDir = new File(indexDirStr);
   }
 
@@ -152,7 +152,7 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
 
     //Map<String, List<CoreLabel>> sents = null;
     TopDocs tp = searcher.search(query, Integer.MAX_VALUE);
-    Set<String> sentids = new HashSet<>();
+    Set<String> sentids = new HashSet<String>();
     if (tp.totalHits > 0) {
       for (ScoreDoc s : tp.scoreDocs) {
         int docId = s.doc;
@@ -199,7 +199,7 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
   @Override
   public Map<E, Set<String>> queryIndex(Collection<E> patterns) {
     try{
-      Map<E, Set<String>> sents = new HashMap<>();
+      Map<E, Set<String>> sents = new HashMap<E, Set<String>>();
       for(E p : patterns){
         Set<String> sentids = queryIndexGetSentences(p.getRelevantWords());
         sents.put(p, sentids);
@@ -225,7 +225,7 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
 
   private List<CoreLabel> readProtoBufAnnotation(byte[] sent) throws IOException {
     ProtobufAnnotationSerializer p = new ProtobufAnnotationSerializer();
-    List<CoreLabel> toks = new ArrayList<>();
+    List<CoreLabel> toks = new ArrayList<CoreLabel>();
     ByteArrayInputStream is = new ByteArrayInputStream(sent);
     CoreNLPProtos.Token d;
     do{

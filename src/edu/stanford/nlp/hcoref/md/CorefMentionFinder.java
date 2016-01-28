@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.hcoref.data.Dictionaries;
 import edu.stanford.nlp.hcoref.data.Mention;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
@@ -43,16 +44,15 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author Angel Chang
  */
 public abstract class CorefMentionFinder {
+  
+  Locale lang;
 
-  protected Locale lang;
-
-  protected HeadFinder headFinder;
+  public HeadFinder headFinder;
   protected Annotator parserProcessor;
   protected boolean allowReparsing;
-
+  
   protected static final TregexPattern npOrPrpMentionPattern = TregexPattern.compile("/^(?:NP|PN|PRP)/");
-  private static final boolean VERBOSE = false;
-
+  
   /** Get all the predicted mentions for a document.
    *
    * @param doc The syntactically annotated document
@@ -60,14 +60,14 @@ public abstract class CorefMentionFinder {
    * @return For each of the List of sentences in the document, a List of Mention objects
    */
   public abstract List<List<Mention>> findMentions(Annotation doc, Dictionaries dict, Properties props);
-
+  
 
   protected static void extractPremarkedEntityMentions(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     SemanticGraph basicDependency = s.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
     SemanticGraph collapsedDependency = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
     int beginIndex = -1;
-    for (CoreLabel w : sent) {
+    for(CoreLabel w : sent) {
       MultiTokenTag t = w.get(CoreAnnotations.MentionTokenAnnotation.class);
       if (t != null) {
         // Part of a mention
@@ -81,7 +81,7 @@ public abstract class CorefMentionFinder {
           if (beginIndex >= 0) {
             IntPair mSpan = new IntPair(beginIndex, endIndex);
             int dummyMentionId = -1;
-            Mention m = new Mention(dummyMentionId, beginIndex, endIndex, sent, basicDependency, collapsedDependency, new ArrayList<>(sent.subList(beginIndex, endIndex)));
+            Mention m = new Mention(dummyMentionId, beginIndex, endIndex, sent, basicDependency, collapsedDependency, new ArrayList<CoreLabel>(sent.subList(beginIndex, endIndex)));
             mentions.add(m);
             mentionSpanSet.add(mSpan);
             beginIndex = -1;
@@ -94,7 +94,7 @@ public abstract class CorefMentionFinder {
       }
     }
   }
-
+  
 
   /** Extract enumerations (A, B, and C) */
   protected static final TregexPattern enumerationsMentionPattern = TregexPattern.compile("NP < (/^(?:NP|NNP|NML)/=m1 $.. (/^CC|,/ $.. /^(?:NP|NNP|NML)/=m2))");
@@ -123,15 +123,14 @@ public abstract class CorefMentionFinder {
       endIdx = ((CoreLabel)mLeaves.get(mLeaves.size()-1).label()).get(CoreAnnotations.IndexAnnotation.class);
       spanToMentionSubTree.put(new IntPair(beginIdx, endIdx), m2);
     }
-
-    for (Map.Entry<IntPair, Tree> spanMention : spanToMentionSubTree.entrySet()) {
-      IntPair span = spanMention.getKey();
-      if (!mentionSpanSet.contains(span) && !insideNE(span, namedEntitySpanSet)) {
+    
+    for(IntPair mSpan : spanToMentionSubTree.keySet()){
+      if(!mentionSpanSet.contains(mSpan) && !insideNE(mSpan, namedEntitySpanSet)) {
         int dummyMentionId = -1;
-        Mention m = new Mention(dummyMentionId, span.get(0), span.get(1), sent, basicDependency, collapsedDependency,
-                new ArrayList<>(sent.subList(span.get(0), span.get(1))), spanMention.getValue());
+        Mention m = new Mention(dummyMentionId, mSpan.get(0), mSpan.get(1), sent, basicDependency, collapsedDependency,
+                                new ArrayList<CoreLabel>(sent.subList(mSpan.get(0), mSpan.get(1))), spanToMentionSubTree.get(mSpan));
         mentions.add(m);
-        mentionSpanSet.add(span);
+        mentionSpanSet.add(mSpan);
       }
     }
   }
@@ -156,7 +155,7 @@ public abstract class CorefMentionFinder {
 
     return false;
   }
-
+  
   protected void removeSpuriousMentions(Annotation doc, List<List<Mention>> predictedMentions, Dictionaries dict, boolean removeNested, Locale lang) {
     if(lang == Locale.ENGLISH) removeSpuriousMentionsEn(doc, predictedMentions, dict);
     else if (lang == Locale.CHINESE) removeSpuriousMentionsZh(doc, predictedMentions, dict, removeNested);
@@ -164,65 +163,84 @@ public abstract class CorefMentionFinder {
 
   protected abstract void removeSpuriousMentionsEn(Annotation doc, List<List<Mention>> predictedMentions, Dictionaries dict);
 
-  protected static void removeSpuriousMentionsZh(Annotation doc, List<List<Mention>> predictedMentions, Dictionaries dict, boolean removeNested) {
+  protected void removeSpuriousMentionsZh(Annotation doc, List<List<Mention>> predictedMentions, Dictionaries dict, boolean removeNested) {
     List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
-
-    // this goes through each sentence -- predictedMentions has a list for each sentence
-    for (int i=0, sz = predictedMentions.size(); i < sz ; i++) {
+    
+    for(int i=0 ; i < predictedMentions.size() ; i++) {
       List<Mention> mentions = predictedMentions.get(i);
       List<CoreLabel> sent = sentences.get(i).get(CoreAnnotations.TokensAnnotation.class);
       Set<Mention> remove = Generics.newHashSet();
-
-      for (Mention m : mentions) {
+      
+      for(Mention m : mentions){
         if (m.headWord.ner().matches("PERCENT|MONEY|QUANTITY|CARDINAL")) {
           remove.add(m);
-          if (VERBOSE) System.err.println("MENTION FILTERING number NER: " + m.spanToString());
-        } else if (m.originalSpan.size()==1 && m.headWord.tag().equals("CD")) {
-          remove.add(m);
-          if (VERBOSE) System.err.println("MENTION FILTERING number: " + m.spanToString());
-        } else if (dict.removeWords.contains(m.spanToString())) {
-          remove.add(m);
-          if (VERBOSE) System.err.println("MENTION FILTERING removeWord: " + m.spanToString());
-        } else if (mentionContainsRemoveChars(m, dict.removeChars)) {
-          remove.add(m);
-          if (VERBOSE) System.err.println("MENTION FILTERING removeChars: " + m.spanToString());
-        } else if (m.headWord.tag().equals("PU")) {
-          // punctuation-only mentions
-          remove.add(m);
-          if (VERBOSE) System.err.println("MENTION FILTERING Punctuation only mention: " + m.spanToString());
-        } else if (mentionIsDemonym(m, dict.countries)) {
-          // demonyms -- this seems to be a no-op on devset. Maybe not working?
-          remove.add(m);
-          if (VERBOSE) System.err.println("MENTION FILTERING Removed demonym: " + m.spanToString());
-        } else if (m.spanToString().equals("问题") && m.startIndex > 0 &&
-            sent.get(m.startIndex - 1).word().endsWith("没")) {
-          // 没 问题 - this is maybe okay but having 问题 on removeWords was dangerous
-          remove.add(m);
-          if (VERBOSE) System.err.println("MENTION FILTERING Removed meiyou: " + m.spanToString());
-        } else if (mentionIsRangren(m, sent)) {
-            remove.add(m);
-            if (VERBOSE) System.err.println("MENTION FILTERING Removed rangren: " + m.spanToString());
-        } else if (m.spanToString().equals("你") && m.startIndex < sent.size() - 1 &&
-            sent.get(m.startIndex + 1).word().startsWith("知道")) {
-          // 你 知道
-          remove.add(m);
-          if (VERBOSE) System.err.println("MENTION FILTERING Removed nizhidao: " + m.spanToString());
-        // The words that used to be in this case are now handled more generallyin removeCharsZh
-        // } else if (m.spanToString().contains("什么") || m.spanToString().contains("多少")) {
-        //   remove.add(m);
-        //   if (VERBOSE) System.err.println("MENTION FILTERING Removed many/few mention ending: " + m.spanToString());
-        } else if (m.spanToString().endsWith("的")) {
-          remove.add(m);
-          if (VERBOSE) System.err.println("MENTION FILTERING Removed de ending mention: " + m.spanToString());
-        // omit this case, it decreases performance. A few useful interrogative pronouns are now in the removeChars list
-        // } else if (mentionIsInterrogativePronoun(m, dict.interrogativePronouns)) {
-        //     remove.add(m);
-        //     if (VERBOSE) System.err.println("MENTION FILTERING Removed interrogative pronoun: " + m.spanToString());
         }
-
+        
+        if(m.originalSpan.size()==1 && m.headWord.tag().equals("CD")) {
+          remove.add(m);
+        }
+        
+        if (dict.removeWords.contains(m.spanToString())) {
+          remove.add(m);
+        }
+        
+        for (String ch : dict.removeChars) {
+          if (m.spanToString().contains(ch)) {
+            remove.add(m);
+          }
+        }
+        
+        // formatting error
+        if (m.spanToString().contains("ｑｕｏｔ")) {
+          remove.add(m);
+          System.err.println("MENTION FILTERING Removed formatting error: " + m.spanToString());
+        }
+        
+        // demonyms
+        String lastWord = m.originalSpan.get(m.originalSpan.size()-1).word();
+        if (lastWord.length() > 0 && m.spanToString().endsWith("人") && 
+            dict.countries.contains(lastWord.substring(0, lastWord.length()-1))) {
+          remove.add(m);
+          System.err.println("MENTION FILTERING Removed demonym: " + m.spanToString());
+        }
+        
+        // 没 问题
+        if (m.spanToString().equals("问题") && m.startIndex > 0 &&
+            sent.get(m.startIndex - 1).word().endsWith("没")) {
+          remove.add(m);
+          System.err.println("MENTION FILTERING Removed meiyou: " + m.spanToString());
+        }
+        
+        if (m.spanToString().equals("人") && m.startIndex > 0) {
+          String priorWord = sent.get(m.startIndex - 1).word();
+          
+          if (priorWord.endsWith("让") || priorWord.endsWith("令") || priorWord.endsWith("")) {
+            remove.add(m);
+            System.err.println("MENTION FILTERING Removed rangren: " + m.spanToString());
+          }
+        }
+        
+        
+        // 你 知道
+        if (m.spanToString().equals("你") && m.startIndex < sent.size() - 1 && 
+            sent.get(m.startIndex + 1).word().startsWith("知道")) {
+          remove.add(m);
+          System.err.println("MENTION FILTERING Removed nizhidao: " + m.spanToString());
+        }
+        
+        if (m.spanToString().contains("什么") || m.spanToString().contains("多少")) {
+          remove.add(m);
+        }
+        
+        if (m.spanToString().endsWith("的")) {
+          remove.add(m);
+          System.err.println("MENTION FILTERING Removed de ending: " + m.spanToString());
+        }
+        
+        
         // 的 handling
 //        if(m.startIndex>0 && sent.get(m.startIndex-1).word().equals("的")) {
-//          // remove.add(m);
+////          remove.add(m);
 //          Tree t = sentences.get(i).get(TreeAnnotation.class);
 //          Tree mTree = m.mentionSubTree;
 //          if(mTree==null) continue;
@@ -233,11 +251,18 @@ public abstract class CorefMentionFinder {
 //            }
 //          }
 //        }
-
-      } // for each mention
-
+        
+        // handling interrogative pronouns
+        for(String interrogative : dict.interrogativePronouns) {
+          for(CoreLabel cl : m.originalSpan) {
+            if(cl.word().equals(interrogative)) remove.add(m);
+          }
+        }
+//        if(dict.interrogativePronouns.contains(m.spanToString())) remove.add(m);
+      }
+      
       // nested mention with shared headword (except apposition, enumeration): pick larger one
-      if (removeNested) {
+      if(removeNested) {
         for (Mention m1 : mentions){
           for (Mention m2 : mentions){
             if (m1==m2 || remove.contains(m1) || remove.contains(m2)) continue;
@@ -251,62 +276,23 @@ public abstract class CorefMentionFinder {
           }
         }
       }
-
       mentions.removeAll(remove);
-    } // for each sentence
-  }
-
-  private static boolean mentionContainsRemoveChars(Mention m, Set<String> removeChars) {
-    String spanString = m.spanToString();
-    for (String ch : removeChars) {
-      if (spanString.contains(ch)) {
-        return true;
-      }
     }
-    return false;
   }
-
-  private static boolean mentionIsDemonym(Mention m, Set<String> countries) {
-    String lastWord = m.originalSpan.get(m.originalSpan.size()-1).word();
-    return lastWord.length() > 0 && m.spanToString().endsWith("人") &&
-        countries.contains(lastWord.substring(0, lastWord.length()-1));
-  }
-
-  private static boolean mentionIsRangren(Mention m, List<CoreLabel> sent) {
-    if (m.spanToString().equals("人") && m.startIndex > 0) {
-      String priorWord = sent.get(m.startIndex - 1).word();
-      // cdm [2016]: This test matches everything because of the 3rd clause! That can't be right!
-      if (priorWord.endsWith("让") || priorWord.endsWith("令") || priorWord.endsWith("")) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private static boolean mentionIsInterrogativePronoun(Mention m, Set<String> interrogatives) {
-    // handling interrogative pronouns
-    for (CoreLabel cl : m.originalSpan) {
-      // if (dict.interrogativePronouns.contains(m.spanToString())) remove.add(m);
-      if (interrogatives.contains(cl.word())) {
-        return true;
-      }
-    }
-    return false;
-  }
-
+  
   // extract mentions which have same string as another stand-alone mention
-  protected static void extractNamedEntityModifiers(List<CoreMap> sentences, List<Set<IntPair>> mentionSpanSetList, List<List<Mention>> predictedMentions, Set<String> neStrings) {
-    for (int i=0, sz = sentences.size(); i < sz ; i++ ) {
+  protected void extractNamedEntityModifiers(List<CoreMap> sentences, List<Set<IntPair>> mentionSpanSetList, List<List<Mention>> predictedMentions, Set<String> neStrings) {
+    for(int i=0 ; i<sentences.size() ; i++ ) {
       List<Mention> mentions = predictedMentions.get(i);
       CoreMap sent = sentences.get(i);
       List<CoreLabel> tokens = sent.get(TokensAnnotation.class);
       Set<IntPair> mentionSpanSet = mentionSpanSetList.get(i);
-
-      for (int j=0, tSize=tokens.size(); j < tSize; j++) {
-        for (String ne : neStrings) {
+      
+      for(int j=0 ; j<tokens.size() ; j++) {
+        for(String ne : neStrings) {
           int len = ne.split(" ").length;
-          if (j+len > tokens.size()) continue;
-
+          if(j+len > tokens.size()) continue;
+          
           StringBuilder sb = new StringBuilder();
           for(int k=0 ; k < len ; k++) {
             sb.append(tokens.get(k+j).word()).append(" ");
@@ -314,7 +300,7 @@ public abstract class CorefMentionFinder {
           String phrase = sb.toString().trim();
           int beginIndex = j;
           int endIndex = j+len;
-
+          
           // include "'s" if it belongs to this named entity
           if( endIndex < tokens.size() && tokens.get(endIndex).word().equals("'s") && tokens.get(endIndex).tag().equals("POS")) {
             Tree tree = sent.get(TreeAnnotation.class);
@@ -327,7 +313,7 @@ public abstract class CorefMentionFinder {
               endIndex++;
             }
           }
-
+          
           // include DT if it belongs to this named entity
           if( beginIndex > 0 && tokens.get(beginIndex-1).tag().equals("DT")) {
             Tree tree = sent.get(TreeAnnotation.class);
@@ -340,14 +326,14 @@ public abstract class CorefMentionFinder {
               beginIndex--;
             }
           }
-
+          
           IntPair span = new IntPair(beginIndex, endIndex);
           if(phrase.equalsIgnoreCase(ne) && !mentionSpanSet.contains(span)) {
             int dummyMentionId = -1;
             Mention m = new Mention(dummyMentionId, beginIndex, endIndex, tokens,
-                sent.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class),
-                sent.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class),
-                    new ArrayList<>(tokens.subList(beginIndex, endIndex)));
+                sent.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class), 
+                sent.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), 
+                new ArrayList<CoreLabel>(tokens.subList(beginIndex, endIndex)));
             mentions.add(m);
             mentionSpanSet.add(span);
           }
@@ -370,50 +356,50 @@ public abstract class CorefMentionFinder {
       neStrings.add(str);
     }
   }
-
+  
 
   // temporary for debug
-  protected static void addGoldMentions(List<CoreMap> sentences,
+  protected void addGoldMentions(List<CoreMap> sentences,
       List<Set<IntPair>> mentionSpanSetList,
       List<List<Mention>> predictedMentions, List<List<Mention>> allGoldMentions) {
-    for (int i=0, sz = sentences.size(); i < sz; i++) {
+    for(int i=0 ; i<sentences.size() ; i++) {
       List<Mention> mentions = predictedMentions.get(i);
       CoreMap sent = sentences.get(i);
       List<CoreLabel> tokens = sent.get(TokensAnnotation.class);
       Set<IntPair> mentionSpanSet = mentionSpanSetList.get(i);
       List<Mention> golds = allGoldMentions.get(i);
-
-      for (Mention g : golds) {
+      
+      for(Mention g : golds) {
         IntPair pair = new IntPair(g.startIndex, g.endIndex);
         if(!mentionSpanSet.contains(pair)) {
           int dummyMentionId = -1;
           Mention m = new Mention(dummyMentionId, g.startIndex, g.endIndex, tokens,
-              sent.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class),
-              sent.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class),
-                  new ArrayList<>(tokens.subList(g.startIndex, g.endIndex)));
+              sent.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class), 
+              sent.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), 
+              new ArrayList<CoreLabel>(tokens.subList(g.startIndex, g.endIndex)));
           mentions.add(m);
           mentionSpanSet.add(pair);
         }
       }
     }
-
+    
   }
-
+  
   public void findHead(CoreMap s, List<Mention> mentions) {
     Tree tree = s.get(TreeCoreAnnotations.TreeAnnotation.class);
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     tree.indexSpans(0);
     for (Mention m : mentions){
-
-      if (lang == Locale.CHINESE) {
+      
+      if(lang == Locale.CHINESE){
         findHeadChinese(sent, m);
-      } else {
+      }else{
         CoreLabel head = (CoreLabel) findSyntacticHead(m, tree, sent).label();
         m.headIndex = head.get(CoreAnnotations.IndexAnnotation.class)-1;
         m.headWord = sent.get(m.headIndex);
         m.headString = m.headWord.get(CoreAnnotations.TextAnnotation.class).toLowerCase(Locale.ENGLISH);
       }
-
+      
       int start = m.headIndex - m.startIndex;
       if (start < 0 || start >= m.originalSpan.size()) {
         Redwood.log("Invalid index for head " + start + "=" + m.headIndex + "-" + m.startIndex
@@ -425,15 +411,15 @@ public abstract class CorefMentionFinder {
       }
     }
   }
-
-  protected static void findHeadChinese(List<CoreLabel> sent, Mention m) {
+  
+  protected void findHeadChinese(List<CoreLabel> sent, Mention m) {
     int headPos = m.endIndex - 1;
     // Skip trailing punctuations
-    while (headPos > m.startIndex && sent.get(headPos).tag().equals("PU")) {
+    while (sent.get(headPos).get(PartOfSpeechAnnotation.class).equals("PU") 
+        && headPos >= m.startIndex) {
       headPos--;
     }
-    // If we got right to the end without finding non punctuation, reset to end again
-    if (headPos == m.startIndex && sent.get(headPos).tag().equals("PU")) {
+    if (headPos < m.startIndex) {
       headPos = m.endIndex - 1;
     }
     if (sent.get(headPos).originalText().equals("自己") && m.endIndex != m.startIndex) {
@@ -466,7 +452,7 @@ public abstract class CorefMentionFinder {
     // context, so as to make the parser work better :-)
     if (allowReparsing) {
       int approximateness = 0;
-      List<CoreLabel> extentTokens = new ArrayList<>();
+      List<CoreLabel> extentTokens = new ArrayList<CoreLabel>();
       extentTokens.add(initCoreLabel("It"));
       extentTokens.add(initCoreLabel("was"));
       final int ADDED_WORDS = 2;
@@ -594,7 +580,7 @@ public abstract class CorefMentionFinder {
     sent.set(CoreAnnotations.TokensAnnotation.class, tokens);
     sent.set(ParserAnnotations.ConstraintAnnotation.class, constraints);
     Annotation doc = new Annotation("");
-    List<CoreMap> sents = new ArrayList<>(1);
+    List<CoreMap> sents = new ArrayList<CoreMap>(1);
     sents.add(sent);
     doc.set(CoreAnnotations.SentencesAnnotation.class, sents);
     getParser().annotate(doc);
@@ -714,7 +700,7 @@ public abstract class CorefMentionFinder {
     boolean isPleonastic = false;
     int patternIdx = -1;
     int matchedPattern = -1;
-
+    
     for (TregexPattern p : pleonasticPatterns) {
       patternIdx++;
       if (checkPleonastic(m, tree, p)) {
@@ -726,7 +712,7 @@ public abstract class CorefMentionFinder {
     sbLog.append("PLEONASTIC IT: mention ID: "+m.mentionID +"\thastwin: "+m.hasTwin+"\tpleonastic it? "+isPleonastic+"\tcorrect? "+(m.hasTwin!=isPleonastic)+"\tmatched pattern: "+matchedPattern+"\n");
     sbLog.append(m.contextParseTree.pennString()).append("\n");
     sbLog.append("PLEONASTIC IT END\n");
-
+    
     return isPleonastic;
   }
 

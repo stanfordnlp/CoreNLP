@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.MultiTokenTag;
@@ -13,12 +12,9 @@ import edu.stanford.nlp.util.*;
 
 
 /**
- * An annotator which removes all XML tags (as identified by the
+ * An annotator which removes all xml tags (as identified by the
  * tokenizer) and possibly selectively keeps the text between them.
- * Can also add sentence-ending markers depending on the XML tag.
- * Note that the removal of tags is done by a finite state tokenizer.
- * Thus, this works for simple, typical XML, or equally for similar
- * SGML or XML tags, but will not work on arbitrarily complicated XML.
+ * Can also add sentence ending markers depending on the xml tag.
  *
  * @author John Bauer
  * @author Angel Chang
@@ -207,7 +203,7 @@ public class CleanXmlAnnotator implements Annotator{
 
   private static final Pattern TAG_ATTR_PATTERN = Pattern.compile("(.*)\\[(.*)\\]");
   private static void addAnnotationPatterns(CollectionValuedMap<Class, Pair<Pattern,Pattern>> annotationPatterns, String conf, boolean attrOnly) {
-    String[] annoPatternStrings = conf == null ? StringUtils.EMPTY_STRING_ARRAY : conf.trim().split("\\s*,\\s*");
+    String[] annoPatternStrings = conf == null ? new String[0] : conf.trim().split("\\s*,\\s*");
     for (String annoPatternString:annoPatternStrings) {
       String[] annoPattern = annoPatternString.split("\\s*=\\s*", 2);
       if (annoPattern.length != 2) {
@@ -286,7 +282,7 @@ public class CleanXmlAnnotator implements Annotator{
                                      Map<Class, List<CoreLabel>> savedTokens,
                                      Collection<Class> toAnnotate,
                                      Map<Class, Stack<Pair<String, String>>> savedTokenAnnotations) {
-    Set<Class> foundAnnotations = new HashSet<>();
+    Set<Class> foundAnnotations = new HashSet<Class>();
     if (annotationPatterns == null) { return foundAnnotations; }
     if (toAnnotate == null) {
       toAnnotate = annotationPatterns.keySet();
@@ -304,7 +300,7 @@ public class CleanXmlAnnotator implements Annotator{
                   if (savedTokenAnnotations != null) {
                     Stack<Pair<String, String>> stack = savedTokenAnnotations.get(key);
                     if (stack == null) {
-                      savedTokenAnnotations.put(key, stack = new Stack<>());
+                      savedTokenAnnotations.put(key, stack = new Stack<Pair<String,String>>());
                     }
                     stack.push(Pair.makePair(tag.name, entry.getValue()));
                   }
@@ -343,7 +339,7 @@ public class CleanXmlAnnotator implements Annotator{
               }
             } else {
               // Start tag
-              savedTokens.put(key, new ArrayList<>());
+              savedTokens.put(key, new ArrayList<CoreLabel>());
             }
           }
           if (matched) break;
@@ -356,14 +352,14 @@ public class CleanXmlAnnotator implements Annotator{
   public List<CoreLabel> process(Annotation annotation, List<CoreLabel> tokens) {
     // As we are processing, this stack keeps track of which tags we
     // are currently inside
-    Stack<String> enclosingTags = new Stack<>();
+    Stack<String> enclosingTags = new Stack<String>();
     // here we keep track of the current enclosingTags
     // this lets multiple tokens reuse the same tag stack
     List<String> currentTagSet = null;
     // How many matching tags we've seen
     int matchDepth = 0;
     // stores the filtered tags as we go
-    List<CoreLabel> newTokens = new ArrayList<>();
+    List<CoreLabel> newTokens = new ArrayList<CoreLabel>();
 
     // we use this to store the before & after annotations if the
     // tokens were tokenized for "invertible"
@@ -373,27 +369,27 @@ public class CleanXmlAnnotator implements Annotator{
 
     // Keeps track of what we still need to doc level annotations
     // we still need to look for
-    Set<Class> toAnnotate = new HashSet<>();
+    Set<Class> toAnnotate = new HashSet<Class>();
     toAnnotate.addAll(docAnnotationPatterns.keySet());
 
     int utteranceIndex = 0;
     boolean inUtterance = false;
     boolean inSpeakerTag = false;
     String currentSpeaker = null;
-    List<CoreLabel> speakerTokens = new ArrayList<>();
-    List<CoreLabel> docDateTokens = new ArrayList<>();
-    List<CoreLabel> docTypeTokens = new ArrayList<>();
-    List<CoreLabel> docIdTokens = new ArrayList<>();
+    List<CoreLabel> speakerTokens = new ArrayList<CoreLabel>();
+    List<CoreLabel> docDateTokens = new ArrayList<CoreLabel>();
+    List<CoreLabel> docTypeTokens = new ArrayList<CoreLabel>();
+    List<CoreLabel> docIdTokens = new ArrayList<CoreLabel>();
 
     // Local variables for additional per token annotations
     CoreMap tokenAnnotations = (tokenAnnotationPatterns != null && !tokenAnnotationPatterns.isEmpty())? new ArrayCoreMap():null;
-    Map<Class, Stack<Pair<String, String>>> savedTokenAnnotations = new ArrayMap<>();
+    Map<Class, Stack<Pair<String, String>>> savedTokenAnnotations = new ArrayMap<Class, Stack<Pair<String, String>>>();
 
     // Local variable for annotating sections
     XMLUtils.XMLTag sectionStartTag = null;
     CoreLabel sectionStartToken = null;
     CoreMap sectionAnnotations = null;
-    Map<Class, List<CoreLabel>> savedTokensForSection = new HashMap<>();
+    Map<Class, List<CoreLabel>> savedTokensForSection = new HashMap<Class, List<CoreLabel>>();
 
     boolean markSingleSentence = false;
     for (CoreLabel token : tokens) {
@@ -446,7 +442,7 @@ public class CleanXmlAnnotator implements Annotator{
           // the same list object many times.  We don't want to
           // let someone modify one list and screw up all the others.
           currentTagSet =
-            Collections.unmodifiableList(new ArrayList<>(enclosingTags));
+            Collections.unmodifiableList(new ArrayList<String>(enclosingTags));
         }
         token.set(CoreAnnotations.XmlContextAnnotation.class, currentTagSet);
 
@@ -692,13 +688,13 @@ public class CleanXmlAnnotator implements Annotator{
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.singleton(CoreAnnotations.TokensAnnotation.class);
+  public Set<Requirement> requires() {
+    return Collections.singleton(TOKENIZE_REQUIREMENT);
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.emptySet();
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(CLEAN_XML_REQUIREMENT);
   }
 
 }

@@ -208,22 +208,6 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
   }
 
   /**
-   * Return a set of keys such that the value of that key is not null.
-   *
-   * @return A hash set such that each element of the set is a key in this CoreMap that has a
-   *         non-null value.
-   */
-  public Set<Class<?>> keySetNotNull() {
-    Set<Class<?>> keys = new IdentityHashSet<>();
-    for (int i = 0; i < size(); ++i) {
-      if (values[i] != null) {
-        keys.add(this.keys[i]);
-      }
-    }
-    return keys;
-  }
-
-  /**
    * {@inheritDoc}
    */
   @Override
@@ -479,7 +463,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
    * return, this is reset to null for that particular thread.
    */
   private static final ThreadLocal<TwoDimensionalMap<CoreMap, CoreMap, Boolean>> equalsCalled =
-          new ThreadLocal<>();
+          new ThreadLocal<TwoDimensionalMap<CoreMap, CoreMap, Boolean>>();
 
 
   /**
@@ -600,7 +584,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
    * to null for that particular thread.
    */
   private static final ThreadLocal<IdentityHashSet<CoreMap>> hashCodeCalled =
-          new ThreadLocal<>();
+          new ThreadLocal<IdentityHashSet<CoreMap>>();
 
 
   /**
@@ -613,7 +597,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
     IdentityHashSet<CoreMap> calledSet = hashCodeCalled.get();
     boolean createdCalledSet = (calledSet == null);
     if (createdCalledSet) {
-      calledSet = new IdentityHashSet<>();
+      calledSet = new IdentityHashSet<CoreMap>();
       hashCodeCalled.set(calledSet);
     }
 
@@ -672,7 +656,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
     Redwood.startTrack(description);
 
     // sort keys by class name
-    List<Class> sortedKeys = new ArrayList<>(this.keySet());
+    List<Class> sortedKeys = new ArrayList<Class>(this.keySet());
     Collections.sort(sortedKeys,
         (a, b) -> a.getCanonicalName().compareTo(b.getCanonicalName()));
 

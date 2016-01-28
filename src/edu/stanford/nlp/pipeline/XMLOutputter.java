@@ -4,21 +4,18 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import edu.stanford.nlp.hcoref.data.CorefChain;
-import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.dcoref.CorefChain;
+import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
 import edu.stanford.nlp.ie.machinereading.structure.ExtractionObject;
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
 import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
-import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.stats.Counters;
@@ -55,11 +52,7 @@ public class XMLOutputter extends AnnotationOutputter {
   public void print(Annotation annotation, OutputStream os, Options options) throws IOException {
     Document xmlDoc = annotationToDoc(annotation, options);
     Serializer ser = new Serializer(os, options.encoding);
-    if (options.pretty) {
-      ser.setIndent(2);
-    } else {
-      ser.setIndent(0);
-    }
+    ser.setIndent(2);
     ser.setMaxLength(0);
     ser.write(xmlDoc);
     ser.flush();
@@ -168,14 +161,6 @@ public class XMLOutputter extends AnnotationOutputter {
           }
         }
 
-        // add Open IE triples
-        Collection<RelationTriple> openieTriples = sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
-        if (openieTriples != null) {
-          Element openieElem = new Element("openie", NAMESPACE_URI);
-          addTriples(openieTriples, openieElem, NAMESPACE_URI);
-          sentElem.appendChild(openieElem);
-        }
-
         // add the MR entities and relations
         List<EntityMention> entities = sentence.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
         List<RelationMention> relations = sentence.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
@@ -227,15 +212,6 @@ public class XMLOutputter extends AnnotationOutputter {
     //
 
     return xmlDoc;
-  }
-
-  /**
-   * Generates the XML content for a list of OpenIE triples.
-   */
-  private static void addTriples(Collection<RelationTriple> openieTriples, Element top, String namespaceUri) {
-    for (RelationTriple triple : openieTriples) {
-      top.appendChild(toXML(triple, namespaceUri));
-    }
   }
 
   /**
@@ -472,49 +448,6 @@ public class XMLOutputter extends AnnotationOutputter {
       cur.appendChild(value);
       tokenElement.appendChild(cur);
     }
-  }
-
-  private static Element toXML(RelationTriple triple, String curNS) {
-    Element top = new Element("triple", curNS);
-    top.addAttribute(new Attribute("confidence", triple.confidenceGloss()));
-
-    // Create the subject
-    Element subject = new Element("subject", curNS);
-    subject.addAttribute(new Attribute("begin", Integer.toString(triple.subjectTokenSpan().first)));
-    subject.addAttribute(new Attribute("end", Integer.toString(triple.subjectTokenSpan().second)));
-    Element text = new Element("text", curNS);
-    text.appendChild(triple.subjectGloss());
-    Element lemma = new Element("lemma", curNS);
-    lemma.appendChild(triple.subjectLemmaGloss());
-    subject.appendChild(text);
-    subject.appendChild(lemma);
-    top.appendChild(subject);
-
-    // Create the relation
-    Element relation = new Element("relation", curNS);
-    relation.addAttribute(new Attribute("begin", Integer.toString(triple.relationTokenSpan().first)));
-    relation.addAttribute(new Attribute("end", Integer.toString(triple.relationTokenSpan().second)));
-    text = new Element("text", curNS);
-    text.appendChild(triple.relationGloss());
-    lemma = new Element("lemma", curNS);
-    lemma.appendChild(triple.relationLemmaGloss());
-    relation.appendChild(text);
-    relation.appendChild(lemma);
-    top.appendChild(relation);
-
-    // Create the object
-    Element object = new Element("object", curNS);
-    object.addAttribute(new Attribute("begin", Integer.toString(triple.objectTokenSpan().first)));
-    object.addAttribute(new Attribute("end", Integer.toString(triple.objectTokenSpan().second)));
-    text = new Element("text", curNS);
-    text.appendChild(triple.objectGloss());
-    lemma = new Element("lemma", curNS);
-    lemma.appendChild(triple.objectLemmaGloss());
-    object.appendChild(text);
-    object.appendChild(lemma);
-    top.appendChild(object);
-
-    return top;
   }
 
   private static Element toXML(EntityMention entity, String curNS) {

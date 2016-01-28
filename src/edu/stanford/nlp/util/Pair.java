@@ -100,7 +100,7 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
    * <code>String</code>.
    */
   public static Pair<String, String> readStringPair(DataInputStream in) {
-    Pair<String, String> p = new Pair<>();
+    Pair<String, String> p = new Pair<String, String>();
     try {
       p.first = in.readUTF();
       p.second = in.readUTF();
@@ -116,7 +116,7 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
    * don't have to write out potentially long class names.
    */
   public static <X, Y> Pair<X, Y> makePair(X x, Y y) {
-    return new Pair<>(x, y);
+    return new Pair<X, Y>(x, y);
   }
 
   /**

@@ -41,7 +41,7 @@ public class FontDetector {
       throw new IllegalArgumentException();
     }
 
-    List<Font> fonts = new ArrayList<>();
+    List<Font> fonts = new ArrayList<Font>();
     Font[] systemFonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts();
     for (Font systemFont : systemFonts) {
       boolean canDisplay = true;

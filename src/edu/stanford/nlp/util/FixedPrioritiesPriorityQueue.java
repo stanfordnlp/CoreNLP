@@ -150,7 +150,7 @@ public class FixedPrioritiesPriorityQueue<E>
 
   public List<E> toSortedList() {
     // initialize with size
-    List<E> list = new ArrayList<>();
+    List<E> list = new ArrayList<E>();
     while (hasNext()) {
       list.add(next());
     }
@@ -183,7 +183,7 @@ public class FixedPrioritiesPriorityQueue<E>
   // -----------------------------------------------------------------------
 
   private void grow(int newCapacity) {
-    List<E> newElements = new ArrayList<>(newCapacity);
+    List<E> newElements = new ArrayList<E>(newCapacity);
     double[] newPriorities = new double[newCapacity];
     if (size > 0) {
       newElements.addAll(elements);
@@ -305,7 +305,7 @@ public class FixedPrioritiesPriorityQueue<E>
     } catch (CloneNotSupportedException cnse) {
       throw new AssertionError("Should be able to clone.");
     }
-    clonePQ.elements = new ArrayList<>(capacity);
+    clonePQ.elements = new ArrayList<E>(capacity);
     clonePQ.priorities = new double[capacity];
     if (size() > 0) {
       clonePQ.elements.addAll(elements);

@@ -1,11 +1,13 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.Timex;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.ArraySet;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -32,33 +34,24 @@ public class EntityMentionsAnnotator implements Annotator {
 
   // Currently relies on NER annotations being okay
   // - Replace with calling NER classifiers and timeAnnotator directly
-  private final LabeledChunkIdentifier chunkIdentifier;
-
-  /**
-   * If true, heuristically search for organization acronyms, even if they are not marked
-   * explicitly by an NER tag.
-   * This is super useful (+20% recall) for KBP.
-   */
-  private final boolean doAcronyms;
+  LabeledChunkIdentifier chunkIdentifier;
 
   // TODO: Provide properties
   public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{};
 
   public EntityMentionsAnnotator() {
     chunkIdentifier = new LabeledChunkIdentifier();
-    doAcronyms = false;
   }
 
   // note: used in annotate.properties
   @SuppressWarnings("UnusedDeclaration")
   public EntityMentionsAnnotator(String name, Properties props) {
-    chunkIdentifier = new LabeledChunkIdentifier();
-    doAcronyms = Boolean.parseBoolean(props.getProperty(name + ".acronyms", props.getProperty("acronyms", "false")));
+    this();
   }
 
   private static boolean checkStrings(String s1, String s2) {
     if (s1 == null || s2 == null) {
-      return Objects.equals(s1, s2);
+      return s1 == s2;
     } else {
       return s1.equals(s2);
     }
@@ -66,7 +59,7 @@ public class EntityMentionsAnnotator implements Annotator {
 
   private static boolean checkNumbers(Number n1, Number n2) {
     if (n1 == null || n2 == null) {
-      return Objects.equals(n1, n2);
+      return n1 == n2;
     } else {
       return n1.equals(n2);
     }
@@ -152,69 +145,22 @@ public class EntityMentionsAnnotator implements Annotator {
           }
         }
       }
-      if (mentions != null) {
-        allMentions.addAll(mentions);
-      }
+      allMentions.addAll(mentions);
       sentenceIndex++;
     }
-
-    // Post-process with acronyms
-    if (doAcronyms) {
-      addAcronyms(annotation, allMentions);
-    }
-
     annotation.set(CoreAnnotations.MentionsAnnotation.class, allMentions);
   }
 
 
-  private void addAcronyms(Annotation ann, List<CoreMap> mentions) {
-    // Find all the organizations in a document
-    List<List<CoreLabel>> organizations = new ArrayList<>();
-    for (CoreMap mention : mentions) {
-      if ("ORGANIZATION".equals(mention.get(CoreAnnotations.NamedEntityTagAnnotation.class))) {
-        organizations.add(mention.get(CoreAnnotations.TokensAnnotation.class));
-      }
-    }
-    // Skip very long documents
-    if (organizations.size() > 100) { return; }
-
-    // Iterate over tokens...
-    for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
-      List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-      Integer totalTokensOffset = sentence.get(CoreAnnotations.TokenBeginAnnotation.class);
-      for (int i = 0; i < tokens.size(); ++i) {
-        // ... that look like they might be an acronym and are not already a mention
-        CoreLabel token = tokens.get(i);
-        if ("O".equals(token.ner()) && token.word().toUpperCase().equals(token.word()) && token.word().length() >= 3) {
-          for (List<CoreLabel> org : organizations) {
-            // ... and actually are an acronym
-            if (AcronymMatcher.isAcronym(token.word(), org)) {
-              // ... and add them.
-              token.setNER("ORGANIZATION");
-              CoreMap chunk = ChunkAnnotationUtils.getAnnotatedChunk(tokens,
-                  i, i + 1, totalTokensOffset, null, null, null);
-              mentions.add(chunk);
-
-            }
-          }
-        }
-      }
-    }
-  }
-
-
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class,
-        CoreAnnotations.NamedEntityTagAnnotation.class
-    )));
+  public Set<Requirement> requires() {
+    return new ArraySet<Requirement>(TOKENIZE_REQUIREMENT, NER_REQUIREMENT);
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CoreAnnotations.MentionsAnnotation.class);
+  public Set<Requirement> requirementsSatisfied() {
+    // TODO: figure out what this produces
+    return Collections.emptySet();
   }
 
 }

@@ -82,10 +82,10 @@ public class CacheMap<K,V> extends LinkedHashMap<K,V> implements Map<K,V>, Clone
       return c;
     } catch (FileNotFoundException ex) {
       System.err.println("Cache file " + file + " has not been created yet.  Making new one.");
-      return new CacheMap<>(numEntries, loadFactor, accessOrder, file);
+      return new CacheMap<K, V>(numEntries, loadFactor, accessOrder, file);
     } catch (Exception ex) {
       System.err.println("Error reading cache file " + file + ".  Making a new cache and NOT backing to file.");
-      return new CacheMap<>(numEntries, loadFactor, accessOrder);
+      return new CacheMap<K, V>(numEntries, loadFactor, accessOrder);
     }
   }
 

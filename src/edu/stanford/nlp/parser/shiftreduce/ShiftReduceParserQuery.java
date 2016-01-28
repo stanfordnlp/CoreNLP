@@ -20,7 +20,6 @@ import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
 
@@ -70,23 +69,17 @@ public class ShiftReduceParserQuery implements ParserQuery {
 
     success = true;
     unparsable = false;
-    PriorityQueue<State> beam = new PriorityQueue<>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
+    PriorityQueue<State> beam = new PriorityQueue<State>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
     beam.add(initialState);
     // TODO: don't construct as many PriorityQueues
     while (beam.size() > 0) {
-      if (Thread.interrupted()) { // Allow interrupting the parser
-        throw new RuntimeInterruptedException();
-      }
       // System.err.println("================================================");
       // System.err.println("Current beam:");
       // System.err.println(beam);
       PriorityQueue<State> oldBeam = beam;
-      beam = new PriorityQueue<>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
+      beam = new PriorityQueue<State>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
       State bestState = null;
       for (State state : oldBeam) {
-        if (Thread.interrupted()) {  // Allow interrupting the parser
-          throw new RuntimeInterruptedException();
-        }
         Collection<ScoredObject<Integer>> predictedTransitions = parser.model.findHighestScoringTransitions(state, true, maxBeamSize, constraints);
         // System.err.println("Examining state: " + state);
         for (ScoredObject<Integer> predictedTransition : predictedTransitions) {
@@ -194,7 +187,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
   /** TODO: if this is a beam, return all equal parses */
   @Override
   public List<ScoredObject<Tree>> getBestPCFGParses() {
-    ScoredObject<Tree> parse = new ScoredObject<>(debinarized, finalState.score);
+    ScoredObject<Tree> parse = new ScoredObject<Tree>(debinarized, finalState.score);
     return Collections.singletonList(parse);
   }
 
@@ -206,7 +199,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
   /** TODO: return more if this used a beam */
   @Override
   public List<ScoredObject<Tree>> getKBestPCFGParses(int kbestPCFG) {
-    ScoredObject<Tree> parse = new ScoredObject<>(debinarized, finalState.score);
+    ScoredObject<Tree> parse = new ScoredObject<Tree>(debinarized, finalState.score);
     return Collections.singletonList(parse);
   }
 

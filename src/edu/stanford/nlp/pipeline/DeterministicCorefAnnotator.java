@@ -1,6 +1,11 @@
 package edu.stanford.nlp.pipeline;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 import edu.stanford.nlp.dcoref.Constants;
 import edu.stanford.nlp.dcoref.CorefChain;
@@ -10,7 +15,6 @@ import edu.stanford.nlp.dcoref.Mention;
 import edu.stanford.nlp.dcoref.MentionExtractor;
 import edu.stanford.nlp.dcoref.RuleBasedCorefMentionFinder;
 import edu.stanford.nlp.dcoref.SieveCoreferenceSystem;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
@@ -21,7 +25,12 @@ import edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.GrammaticalStructure.Extras;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.ArraySet;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.IntTuple;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
  * Implements the Annotator for the new deterministic coreference resolution system.
@@ -63,8 +72,8 @@ public class DeterministicCorefAnnotator implements Annotator {
   @Override
   public void annotate(Annotation annotation) {
     try {
-      List<Tree> trees = new ArrayList<>();
-      List<List<CoreLabel>> sentences = new ArrayList<>();
+      List<Tree> trees = new ArrayList<Tree>();
+      List<List<CoreLabel>> sentences = new ArrayList<List<CoreLabel>>();
 
       // extract trees and sentence words
       // we are only supporting the new annotation standard for this Annotator!
@@ -77,7 +86,7 @@ public class DeterministicCorefAnnotator implements Annotator {
           Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
           trees.add(tree);
 
-          SemanticGraph dependencies = SemanticGraphFactory.makeFromTree(tree, Mode.COLLAPSED, Extras.NONE, true, null, true); // locking here is crucial for correct threading!
+          SemanticGraph dependencies = SemanticGraphFactory.makeFromTree(tree, Mode.COLLAPSED, Extras.NONE, false, null, true);
           sentence.set(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class, dependencies);
 
           if (!hasSpeakerAnnotations) {
@@ -110,23 +119,18 @@ public class DeterministicCorefAnnotator implements Annotator {
       List<List<Mention>> orderedMentions = document.getOrderedMentions();
       if (VERBOSE) {
         for(int i = 0; i < orderedMentions.size(); i ++){
-          System.err.printf("Mentions in sentence #%d:%n", i);
+          System.err.printf("Mentions in sentence #%d:\n", i);
           for(int j = 0; j < orderedMentions.get(i).size(); j ++){
             System.err.println("\tMention #" + j + ": " + orderedMentions.get(i).get(j).spanToString());
           }
         }
       }
 
-
-      Map<Integer, edu.stanford.nlp.hcoref.data.CorefChain> result = corefSystem.corefReturnHybridOutput(document);
-      annotation.set(edu.stanford.nlp.hcoref.CorefCoreAnnotations.CorefChainAnnotation.class, result);
-      //Map<Integer, CorefChain> result = corefSystem.coref(document);
-      //annotation.set(CorefCoreAnnotations.CorefChainAnnotation.class, result);
-
+      Map<Integer, CorefChain> result = corefSystem.coref(document);
+      annotation.set(CorefCoreAnnotations.CorefChainAnnotation.class, result);
 
       if(OLD_FORMAT) {
-        Map<Integer, CorefChain> oldResult = corefSystem.coref(document);
-        addObsoleteCoreferenceAnnotations(annotation, orderedMentions, oldResult);
+        addObsoleteCoreferenceAnnotations(annotation, orderedMentions, result);
       }
     } catch (RuntimeException e) {
       throw e;
@@ -160,7 +164,7 @@ public class DeterministicCorefAnnotator implements Annotator {
     // }
 
     // this graph is stored in CorefGraphAnnotation -- the raw links found by the coref system
-    List<Pair<IntTuple, IntTuple>> graph = new ArrayList<>();
+    List<Pair<IntTuple, IntTuple>> graph = new ArrayList<Pair<IntTuple,IntTuple>>();
 
     for(Pair<IntTuple, IntTuple> link: links){
       //
@@ -197,13 +201,13 @@ public class DeterministicCorefAnnotator implements Annotator {
 
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return TOKENIZE_SSPLIT_PARSE_NER;
+  public Set<Requirement> requires() {
+    return new ArraySet<>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT, NER_REQUIREMENT, PARSE_REQUIREMENT);
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CorefCoreAnnotations.CorefChainAnnotation.class);
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(DETERMINISTIC_COREF_REQUIREMENT);
   }
 
 }

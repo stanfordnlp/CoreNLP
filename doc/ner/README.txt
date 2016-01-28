@@ -1,4 +1,4 @@
-Stanford NER - v3.6.0 - 2015-12-09
+Stanford NER - v3.5.2 - 2015-04-20
 ----------------------------------------------
 
 This package provides a high-performance machine learning based named
@@ -67,7 +67,7 @@ more memory.  The distsim models are included in the release package.
 The nodistsim versions of the same models may be available on the
 Stanford NER webpage.
 
-Finally, we have models for other languages, including two German models,
+Finally, we have models for other languages, include two German models,
 a Chinese model, and a Spanish model.  The files for these models can be
 found at:
 
@@ -78,19 +78,20 @@ QUICKSTART INSTRUCTIONS
 
 This NER system requires Java 1.8 or later.
 
-Providing java is on your PATH, you should be able to run an NER GUI
-demonstration by just clicking.  It might work to double-click on the
-stanford-ner.jar archive but this may well fail as the operating system
-does not give Java enough memory for our NER system, so it is safer to
-instead double click on the ner-gui.bat icon (Windows) or ner-gui.sh
-(Linux/Unix/MacOSX).  Then, using the top option from the Classifier
-menu, load a CRF classifier from the classifiers directory of the
-distribution.  You can then `either load a text file or web page from
-the File menu, or decide to use the default text in the window. Finally,
-you can now named entity tag the text by pressing the Run NER button.
+Providing java is on your PATH, you should just be able to run an NER
+GUI demonstration by just clicking.  It might work to double-click on
+the stanford-ner.jar archive but this may well fail as the operating
+system does not give Java enough memory for our NER system, so it is
+safer to instead double click on the ner-gui.bat icon (Windows) or
+ner-gui.sh (Linux/Unix/MacOSX).  Then, from the Classifier menu, either
+load a CRF classifier from the classifiers directory of the distribution
+or you should be able to use the Load Default CRF option.  You can then
+either load a text file or web page from the File menu, or decide to use
+the default text in the window.  Finally, you can now named entity tag
+the text by pressing the Run NER button.
 
 From a command line, you need to have java on your PATH and the
-stanford-ner.jar file and the lib directory in your CLASSPATH.  (The way of doing this depends on
+stanford-ner.jar file in your CLASSPATH.  (The way of doing this depends on
 your OS/shell.)  The supplied ner.bat and ner.sh should work to allow
 you to tag a single file.  For example, for Windows:
 
@@ -99,24 +100,26 @@ you to tag a single file.  For example, for Windows:
 Or on Unix/Linux you should be able to parse the test file in the distribution
 directory with the command:
 
-java -mx600m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz -textFile sample.txt
-
-Here's an output option that will print out entities and their class to
-the first two columns of a tab-separated columns output file:
-
-java -mx600m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz -outputFormat tabbedEntities -textFile sample.txt > sample.tsv
+java -mx600m edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier classifiers/all.3class.crf.ser.gz -textFile sample.txt
 
 When run from a jar file, you also have the option of using a serialized
 classifier contained in the jar file.
 
+If you use the -jar command, or double-click the jar file, NERGUI is
+automatically started, and you will also be given the option (under the
+'Classifier' menu item) to load a default supplied classifier:
+
+java -mx1000m -jar stanford-ner.jar
+
 USING FULL STANFORD CORENLP NER FUNCTIONALITY
 
 This standalone distribution also allows access to the full NER 
-capabilities of the Stanford CoreNLP pipeline. These capabilities 
+capabilities of the Stanford CoreNLP pipeline.  These capabilities
 can be accessed via the NERClassifierCombiner class.
-NERClassifierCombiner allows for multiple CRFs to be used together,
+
+NERClassifierCombiner allows for multiple CRF's to be layered together,
 and has options for recognizing numeric sequence patterns and time
-patterns with the rule-based NER of SUTime. 
+patterns with Stanford CoreNLP's SUTime. 
 
 Suppose one combines three CRF's CRF-1,CRF-2, and CRF-3 with the
 NERClassifierCombiner.  When the NERClassiferCombiner runs, it will
@@ -182,7 +185,7 @@ PROGRAMMATIC USE
 The NERDemo file illustrates a couple of ways of calling the system
 programatically.  You should get the same results from
 
-java -cp stanford-ner.jar:lib/*:. -mx300m NERDemo classifiers/english.all.3class.distsim.crf.ser.gz sample.txt
+java -mx300m NERDemo classifiers/all.3class.crf.ser.gz sample.txt
 
 as from using CRFClassifier.  For more information on API calls, look in
 the enclosed javadoc directory: load index.html in a browser and look
@@ -195,15 +198,15 @@ SERVER VERSION
 
 The NER code may also be run as a server listening on a socket:
 
-java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer 1234
+java -mx1000m -cp stanford-ner.jar edu.stanford.nlp.ie.NERServer 1234
 
 You can specify which model to load with flags, either one on disk:
 
-java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer -loadClassifier classifiers/all.3class.crf.ser.gz 1234
+java -mx1000m -cp stanford-ner.jar edu.stanford.nlp.ie.NERServer -loadClassifier classifiers/all.3class.crf.ser.gz 1234
 
 Or if you have put a model inside the jar file:
 
-java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer -loadJarClassifier all.3class.crf.ser.gz 1234
+java -mx1000m -cp stanford-ner.jar edu.stanford.nlp.ie.NERServer -loadJarClassifier all.3class.crf.ser.gz 1234
 
 
 RUNNING CLASSIFIERS FROM INSIDE A JAR FILE
@@ -232,8 +235,6 @@ PERSON	ORGANIZATION	LOCATION
 --------------------
 CHANGES
 --------------------
-
-2015-12-09    3.6.0     Updated for compatibility 
 
 2015-04-20    3.5.2     synch standalone and CoreNLP functionality 
 

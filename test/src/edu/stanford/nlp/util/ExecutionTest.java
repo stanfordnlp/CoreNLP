@@ -8,26 +8,26 @@ import java.util.Properties;
 import static org.junit.Assert.*;
 
 /**
- * A small test for the {@link ArgumentParser} class for loading command line options
+ * A small test for the {@link Execution} class for loading command line options
  *
  * @author Gabor Angeli
  */
-public class ArgumentParserTest {
+public class ExecutionTest {
 
   public static class StaticClass {
-    @ArgumentParser.Option(name="option.static")
+    @Execution.Option(name="option.static")
     public static int staticOption = -1;
   }
 
   public static class NonstaticClass {
-    @ArgumentParser.Option(name="option.nonstatic")
+    @Execution.Option(name="option.nonstatic")
     public int staticOption = -1;
   }
 
   public static class MixedClass {
-    @ArgumentParser.Option(name="option.static")
+    @Execution.Option(name="option.static")
     public static int staticOption = -1;
-    @ArgumentParser.Option(name="option.nonstatic")
+    @Execution.Option(name="option.nonstatic")
     public int nonstaticOption = -1;
   }
 
@@ -40,7 +40,7 @@ public class ArgumentParserTest {
   @Test
   public void testFillStaticField() {
     assertEquals(-1, StaticClass.staticOption);
-    ArgumentParser.fillOptions(StaticClass.class, new String[]{"-option.static", "42"});
+    Execution.fillOptions(StaticClass.class, new String[]{ "-option.static", "42" });
     assertEquals(42, StaticClass.staticOption);
   }
 
@@ -49,7 +49,7 @@ public class ArgumentParserTest {
     assertEquals(-1, StaticClass.staticOption);
     Properties props = new Properties();
     props.setProperty("option.static", "42");
-    ArgumentParser.fillOptions(StaticClass.class, props);
+    Execution.fillOptions(StaticClass.class, props);
     assertEquals(42, StaticClass.staticOption);
   }
 
@@ -57,7 +57,7 @@ public class ArgumentParserTest {
   public void fillNonstaticField() {
     NonstaticClass x = new NonstaticClass();
     assertEquals(-1, x.staticOption);
-    ArgumentParser.fillOptions(x, new String[]{"-option.nonstatic", "42"});
+    Execution.fillOptions(x, new String[]{ "-option.nonstatic", "42" });
     assertEquals(42, x.staticOption);
   }
 
@@ -67,7 +67,7 @@ public class ArgumentParserTest {
     assertEquals(-1, x.staticOption);
     Properties props = new Properties();
     props.setProperty("option.nonstatic", "42");
-    ArgumentParser.fillOptions(x, props);
+    Execution.fillOptions(x, props);
     assertEquals(42, x.staticOption);
   }
 
@@ -76,7 +76,7 @@ public class ArgumentParserTest {
     MixedClass x = new MixedClass();
     assertEquals(-1, MixedClass.staticOption);
     assertEquals(-1, x.nonstaticOption);
-    ArgumentParser.fillOptions(x, new String[]{"-option.nonstatic", "42", "-option.static", "43"});
+    Execution.fillOptions(x, new String[]{ "-option.nonstatic", "42", "-option.static", "43" });
     assertEquals(43, MixedClass.staticOption);
     assertEquals(42, x.nonstaticOption);
   }
@@ -86,7 +86,7 @@ public class ArgumentParserTest {
     MixedClass x = new MixedClass();
     assertEquals(-1, MixedClass.staticOption);
     assertEquals(-1, x.nonstaticOption);
-    ArgumentParser.fillOptions(MixedClass.class, new String[]{"-option.nonstatic", "42", "-option.static", "43"});
+    Execution.fillOptions(MixedClass.class, new String[]{ "-option.nonstatic", "42", "-option.static", "43" });
     assertEquals(43, MixedClass.staticOption);
     assertEquals(-1, x.nonstaticOption);
   }

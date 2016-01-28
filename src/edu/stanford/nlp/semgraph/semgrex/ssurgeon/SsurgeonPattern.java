@@ -44,7 +44,7 @@ public class SsurgeonPattern {
   public SsurgeonPattern(String UID, SemgrexPattern pattern) {
     this.UID = UID;
     this.semgrexPattern = pattern;
-    this.editScript = new ArrayList<>();
+    this.editScript = new ArrayList<SsurgeonEdit>();
   }
 
   public SsurgeonPattern(String UID, SemgrexPattern pattern, SemanticGraph patternGraph) {
@@ -119,7 +119,7 @@ public class SsurgeonPattern {
    * @return True if a match was found and executed, otherwise false.
    */
   public Collection<SemanticGraph> execute(SemanticGraph sg) throws Exception {
-    Collection<SemanticGraph> generated = new ArrayList<>();
+    Collection<SemanticGraph> generated = new ArrayList<SemanticGraph>();
     SemgrexMatcher matcher = semgrexPattern.matcher(sg);
     nextMatch:
     while (matcher.find()) {
@@ -163,7 +163,7 @@ public class SsurgeonPattern {
    */
   public Collection<SemanticGraph> execute(SemanticGraph sg, SemgrexPattern overridePattern) throws Exception {
     SemgrexMatcher matcher = overridePattern.matcher(sg);
-    Collection<SemanticGraph> generated = new ArrayList<>();
+    Collection<SemanticGraph> generated = new ArrayList<SemanticGraph>();
     while (matcher.find()) {
       if (predicateTest != null) {        
         if (!predicateTest.test(matcher))

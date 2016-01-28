@@ -135,14 +135,14 @@ public class CoreNLPServlet extends HttpServlet {
 
       // Insert divs that will be used for each visualisation type.
       final int visualiserDivPxWidth = 700;
-      Map<String, String> nameByAbbrv = new LinkedHashMap<>();
+      Map<String, String> nameByAbbrv = new LinkedHashMap<String, String>();
       nameByAbbrv.put("pos", "Part-of-Speech");
       nameByAbbrv.put("ner", "Named Entity Recognition");
       nameByAbbrv.put("coref", "Coreference");
-      nameByAbbrv.put("basic_dep", "Basic Dependencies");
-      //nameByAbbrv.put("collapsed_dep", "Collapsed dependencies");
+      nameByAbbrv.put("basic_dep", "Basic dependencies");
+      nameByAbbrv.put("collapsed_dep", "Collapsed dependencies");
       nameByAbbrv.put("collapsed_ccproc_dep",
-          "Enhanced Dependencies");
+          "Collapsed CC-processed dependencies");
       for (Map.Entry<String, String> entry : nameByAbbrv.entrySet()) {
         out.println("<h2>" + entry.getValue() + ":</h2>");
         out.println("<div id=\"" + entry.getKey() + "\" style=\"width:"
@@ -177,10 +177,6 @@ public class CoreNLPServlet extends HttpServlet {
       out.println("<script type=\"text/javascript\">");
       out.println("// <![CDATA[");
       out.println("    bratLocation = \"" + bratLocation + "\";");
-      out.println("    webFontURLs = [\n" +
-                  "        '"+ bratLocation + "/static/fonts/Astloch-Bold.ttf',\n" +
-                  "        '"+ bratLocation + "/static/fonts/PT_Sans-Caption-Web-Regular.ttf',\n" +
-                  "        '"+ bratLocation + "/static/fonts/Liberation_Sans-Regular.ttf'];");
       out.println("// ]]>");
       out.println("</script>");
       
@@ -226,7 +222,7 @@ public class CoreNLPServlet extends HttpServlet {
 
     String escapedXml = StringEscapeUtils.escapeHtml4(output.toString());
     String[] lines = escapedXml.split("\n");
-    out.print("<div><pre>");
+    out.print("<div>");
     for (String line : lines) {
       int numSpaces = 0;
       while (numSpaces < line.length() && line.charAt(numSpaces) == ' ') {
@@ -234,9 +230,9 @@ public class CoreNLPServlet extends HttpServlet {
         ++numSpaces;
       }
       out.print(line.substring(numSpaces));
-      out.print("\n");
+      out.print("<br>\n");
     }
-    out.print("</pre></div>");
+    out.print("</div>");
   }
    
   public void outputXml(PrintWriter out, Annotation annotation) throws IOException {

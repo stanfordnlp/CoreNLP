@@ -5,9 +5,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.Serializable;
 
-
-import edu.stanford.nlp.util.logging.Redwood;
-
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.sequences.FeatureFactory;
@@ -51,8 +48,6 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
 
   private static final long serialVersionUID = 3387166382968763350L;
   private static TagAffixDetector taDetector = null;
-
-  private static Redwood.RedwoodChannels logger = Redwood.channels(ChineseSegmenterFeatureFactory.class);
 
   public void init(SeqClassifierFlags flags) {
     super.init(flags);
@@ -130,7 +125,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
 
 
   public Collection<String> featuresC(PaddedList<IN> cInfo, int loc) {
-    Collection<String> features = new ArrayList<>();
+    Collection<String> features = new ArrayList<String>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel c1 = cInfo.get(loc + 1);
     CoreLabel c2 = cInfo.get(loc + 2);
@@ -180,7 +175,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
   private static CorpusDictionary outDict = null;
 
   public Collection<String> featuresCpC(PaddedList<IN> cInfo, int loc) {
-    Collection<String> features = new ArrayList<>();
+    Collection<String> features = new ArrayList<String>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel c1 = cInfo.get(loc + 1);
     CoreLabel c2 = cInfo.get(loc + 2);
@@ -267,7 +262,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
 
     if (flags.useOutDict2){
       if (outDict == null) {
-        logger.info("reading "+flags.outDict2+" as a seen lexicon");
+        System.err.println("reading "+flags.outDict2+" as a seen lexicon");
         outDict = new CorpusDictionary(flags.outDict2, true);
       }
       features.add(outDict.getW(charp+charc)+"outdict");       // -1 0
@@ -302,15 +297,15 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
           throw new RuntimeException("only support settings for CTB and PK now.");
         }
       } else {
-        //logger.info("Using Derived features");
+        //System.err.println("Using Derived features");
         tagsets = new String[]{"2","3","4"};
       }
 
       if (taDetector == null) {
         taDetector = new TagAffixDetector(flags);
       }
-      for (String tagset : tagsets) {
-        features.add(taDetector.checkDic(tagset + "p", charp) + taDetector.checkDic(tagset + "i", charp) + taDetector.checkDic(tagset + "s", charc) + taDetector.checkInDic(charp) + taDetector.checkInDic(charc) + tagset + "prep-sufc");
+      for (int k=0; k<tagsets.length; k++) {
+	features.add(taDetector.checkDic(tagsets[k]+"p", charp) + taDetector.checkDic(tagsets[k]+"i", charp) + taDetector.checkDic(tagsets[k]+"s", charc)+ taDetector.checkInDic(charp)+taDetector.checkInDic(charc)+ tagsets[k]+ "prep-sufc" );
         // features.add("|ctbchar2");  // Added a constant feature several times!!
       }
     }
@@ -431,7 +426,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
 
 
   public Collection<String> featuresCnC(PaddedList<IN> cInfo, int loc) {
-    Collection<String> features = new ArrayList<>();
+    Collection<String> features = new ArrayList<String>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel c1 = cInfo.get(loc + 1);
     CoreLabel p = cInfo.get(loc - 1);

@@ -56,7 +56,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
 
   @Override
   public void initializeTraining(double numTrees) {
-    trainingSentences = new ArrayList<>();
+    trainingSentences = new ArrayList<List<TaggedWord>>();
   }
 
   /**
@@ -112,7 +112,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
   @Override
   public void finishTraining() {
     Timing.tick("Counting characters...");
-    ClassicCounter<Symbol> charCounter = new ClassicCounter<>();
+    ClassicCounter<Symbol> charCounter = new ClassicCounter<Symbol>();
 
     // first find all chars that occur only once
     for (List<TaggedWord> labels : trainingSentences) {
@@ -138,8 +138,8 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
       POSspecificCharNGrams[i] = new GeneralizedCounter(i + 2);
     }
 
-    ClassicCounter<String> POSCounter = new ClassicCounter<>();
-    List<Serializable> context = new ArrayList<>(CONTEXT_LENGTH + 1);
+    ClassicCounter<String> POSCounter = new ClassicCounter<String>();
+    List<Serializable> context = new ArrayList<Serializable>(CONTEXT_LENGTH + 1);
     for (List<TaggedWord> words : trainingSentences) {
       for (TaggedWord taggedWord : words) {
         String word = taggedWord.word();
@@ -248,7 +248,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
     String tag = tagIndex.get(iTW.tag);
     assert !word.equals(BOUNDARY);
     char[] chars = word.toCharArray();
-    List<Serializable> charList = new ArrayList<>(chars.length + CONTEXT_LENGTH + 1); // this starts of storing Symbol's and then starts storing String's. Clean this up someday!
+    List<Serializable> charList = new ArrayList<Serializable>(chars.length + CONTEXT_LENGTH + 1); // this starts of storing Symbol's and then starts storing String's. Clean this up someday!
 
     // charList is constructed backward
     // END_WORD char[length-1] char[length-2] ... char[0] BEGIN_WORD BEGIN_WORD
@@ -311,7 +311,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
    */
   public String sampleFrom(String tag) {
     StringBuilder buf = new StringBuilder();
-    List<Serializable> context = new ArrayList<>(CONTEXT_LENGTH + 1);
+    List<Serializable> context = new ArrayList<Serializable>(CONTEXT_LENGTH + 1);
 
     // context must contain [tag prevChar prevPrevChar]
     context.add(tag);
@@ -380,7 +380,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
 
   private Distribution<Integer> getWordLengthDistribution() {
     int samples = 0;
-    ClassicCounter<Integer> c = new ClassicCounter<>();
+    ClassicCounter<Integer> c = new ClassicCounter<Integer>();
     while (samples++ < 10000) {
       String s = sampleFrom();
       c.incrementCount(Integer.valueOf(s.length()));
@@ -416,7 +416,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
   /** {@inheritDoc} */
   @Override
   public Set<String> tagSet(Function<String,String> basicCategoryFunction) {
-    Set<String> tagSet = new HashSet<>();
+    Set<String> tagSet = new HashSet<String>();
     for (String tag : tagIndex.objectsList()) {
       tagSet.add(basicCategoryFunction.apply(tag));
     }
@@ -444,7 +444,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
     public static final Symbol BEGIN_WORD = new Symbol(BEGIN_WORD_TYPE);
     public static final Symbol END_WORD = new Symbol(END_WORD_TYPE);
 
-    public static final Interner<Symbol> interner = new Interner<>();
+    public static final Interner<Symbol> interner = new Interner<Symbol>();
 
     public Symbol(char ch) {
       type = CHAR_TYPE;

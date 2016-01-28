@@ -32,7 +32,7 @@ public class CombineDVModels {
     String testTreebankPath = null;
     FileFilter testTreebankFilter = null;
 
-    List<String> unusedArgs = new ArrayList<>();
+    List<String> unusedArgs = new ArrayList<String>();
 
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-model")) {
@@ -45,7 +45,7 @@ public class CombineDVModels {
         testTreebankFilter = treebankDescription.second();
       } else if (args[argIndex].equalsIgnoreCase("-baseModels")) {
         argIndex++;
-        baseModelPaths = new ArrayList<>();
+        baseModelPaths = new ArrayList<String>();
         while (argIndex < args.length && args[argIndex].charAt(0) != '-') {
           baseModelPaths.add(args[argIndex++]);
         }
@@ -62,7 +62,7 @@ public class CombineDVModels {
     Options options = null;
     LexicalizedParser combinedParser = null;
     if (baseModelPaths != null) {
-      List<DVModel> dvparsers = new ArrayList<>();
+      List<DVModel> dvparsers = new ArrayList<DVModel>();
       for (String baseModelPath : baseModelPaths) {
         System.err.println("Loading serialized DVParser from " + baseModelPath);
         LexicalizedParser dvparser = LexicalizedParser.loadModel(baseModelPath);

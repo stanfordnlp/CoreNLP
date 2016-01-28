@@ -3,9 +3,6 @@ package edu.stanford.nlp.wordseg;
 import java.util.*;
 import java.io.*;
 
-
-import edu.stanford.nlp.util.logging.Redwood;
-
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -22,8 +19,6 @@ import edu.stanford.nlp.util.Generics;
 
 
 public class CorpusDictionary {
-
-  private static Redwood.RedwoodChannels logger = Redwood.channels(CorpusDictionary.class);
 
   private Set<String> oneWord; // = null;
 
@@ -49,7 +44,7 @@ public class CorpusDictionary {
   private static Set<String> readDict(String filename, boolean normalize)  {
     Set<String> word = Generics.newHashSet();
 
-    logger.info("Loading " + (normalize ? "normalized" : "unnormalized") + " dictionary from " + filename);
+    System.err.println("Loading " + (normalize ? "normalized" : "unnormalized") + " dictionary from " + filename);
 
     try {
       InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(filename);
@@ -58,7 +53,7 @@ public class CorpusDictionary {
       for (String wordDetectorLine; (wordDetectorLine = wordDetectorReader.readLine()) != null; ) {
         i++;
         //String[] fields = wordDetectorLine.split("	");
-        //logger.debug("DEBUG: "+filename+" "+wordDetectorLine);
+        //System.err.println("DEBUG: "+filename+" "+wordDetectorLine);
         int origLeng = wordDetectorLine.length();
         wordDetectorLine = wordDetectorLine.trim();
         int newLeng = wordDetectorLine.length();

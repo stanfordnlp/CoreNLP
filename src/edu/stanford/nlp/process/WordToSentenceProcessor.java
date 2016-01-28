@@ -133,7 +133,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     } else if (name != null && name.contains("two")) {
       return NewlineIsSentenceBreak.TWO_CONSECUTIVE;
     } else {
-      throw new IllegalArgumentException("Not a valid NewlineIsSentenceBreak name: '" + name + "' (should be one of 'always', 'never', 'two')");
+      throw new IllegalArgumentException("Not a valid NewlineIsSentenceBreak name");
     }
   }
 
@@ -189,7 +189,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     if (isOneSentence) {
       // put all the words in one sentence
       List<List<IN>> sentences = Generics.newArrayList();
-      sentences.add(new ArrayList<>(words));
+      sentences.add(new ArrayList<IN>(words));
       return sentences;
     } else {
       return wordsToSentences(words);
@@ -215,7 +215,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     if (sentenceBoundaryMultiTokenPattern != null) {
       // Do initial pass using tokensregex to identify multi token patterns that need to be matched
       // and add the last token to our table of sentence boundary tokens
-      isSentenceBoundary = new IdentityHashMap<>();
+      isSentenceBoundary = new IdentityHashMap<Object, Boolean>();
       SequenceMatcher<? super IN> matcher = sentenceBoundaryMultiTokenPattern.getMatcher(words);
       while (matcher.find()) {
         List nodes = matcher.groupNodes();
@@ -227,7 +227,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
 
     // Split tokens into sentences!!!
     List<List<IN>> sentences = Generics.newArrayList();
-    List<IN> currentSentence = new ArrayList<>();
+    List<IN> currentSentence = new ArrayList<IN>();
     List<IN> lastSentence = null;
     boolean insideRegion = false;
     boolean inWaitForForcedEnd = false;
@@ -354,7 +354,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
         sentences.add(currentSentence);
         // adds this sentence now that it's complete
         lastSentence = currentSentence;
-        currentSentence = new ArrayList<>(); // clears the current sentence
+        currentSentence = new ArrayList<IN>(); // clears the current sentence
       }
     }
 
@@ -549,7 +549,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     if (xmlBreakElementsToDiscard == null || xmlBreakElementsToDiscard.isEmpty()) {
       this.xmlBreakElementsToDiscard = null;
     } else {
-      this.xmlBreakElementsToDiscard = new ArrayList<>(xmlBreakElementsToDiscard.size());
+      this.xmlBreakElementsToDiscard = new ArrayList<Pattern>(xmlBreakElementsToDiscard.size());
       for (String s: xmlBreakElementsToDiscard) {
         String regex = "<\\s*(?:/\\s*)?(?:" + s + ")(?:\\s+[^>]+?|\\s*(?:/\\s*)?)>";
         // System.err.println("Regex is |" + regex + "|");
@@ -573,7 +573,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
       this.sentenceBoundaryMultiTokenPattern = null;
     }
     if (tokenRegexesToDiscard != null) {
-      this.tokenPatternsToDiscard = new ArrayList<>(tokenRegexesToDiscard.size());
+      this.tokenPatternsToDiscard = new ArrayList<Pattern>(tokenRegexesToDiscard.size());
       for (String s: tokenRegexesToDiscard) {
         this.tokenPatternsToDiscard.add(Pattern.compile(s));
       }

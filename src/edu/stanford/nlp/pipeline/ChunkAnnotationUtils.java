@@ -1,7 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.AnnotationLookup;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
@@ -45,7 +44,7 @@ public class ChunkAnnotationUtils {
       int sentBeginToken = sentence.get(CoreAnnotations.TokenBeginAnnotation.class);
       int sentEndToken = sentence.get(CoreAnnotations.TokenEndAnnotation.class);
       String docTextSpan = docText.substring(sentBeginChar, sentEndChar);
-      List<CoreLabel> docTokenSpan = new ArrayList<>(docTokens.subList(sentBeginToken, sentEndToken));
+      List<CoreLabel> docTokenSpan = new ArrayList<CoreLabel>(docTokens.subList(sentBeginToken, sentEndToken));
       logger.finer("Checking Document " + docId + " span (" + sentBeginChar + "," + sentEndChar + ") ");
       if (!docTextSpan.equals(sentText) ) {
         okay = false;
@@ -122,7 +121,7 @@ public class ChunkAnnotationUtils {
     // First identify any tokens that need to be fixed
     String text = docAnnotation.get(CoreAnnotations.TextAnnotation.class);
     List<CoreLabel> tokens = docAnnotation.get(CoreAnnotations.TokensAnnotation.class);
-    List<CoreLabel> output = new ArrayList<>(tokens.size());
+    List<CoreLabel> output = new ArrayList<CoreLabel>(tokens.size());
     int i = 0;
     CoreLabel token = tokens.get(i);
     for (IntPair offsets:chunkCharOffsets) {
@@ -187,11 +186,10 @@ public class ChunkAnnotationUtils {
    * @param origText - Text from which to extract chunk text
    * @param chunkIndexStart - Index of first chunk to merge
    * @param chunkIndexEnd - Index of last chunk to merge (exclusive)
-   * @param tokenFactory - factory for creating tokens (if we want to get a merged corelabel instead of something random)
    * @return new merged chunk
    */
   public static CoreMap getMergedChunk(List<? extends CoreMap> chunkList, String origText,
-                                       int chunkIndexStart, int chunkIndexEnd, CoreLabelTokenFactory tokenFactory)
+                                       int chunkIndexStart, int chunkIndexEnd)
   {
     CoreMap firstChunk = chunkList.get(chunkIndexStart);
     CoreMap lastChunk = chunkList.get(chunkIndexEnd-1);
@@ -201,18 +199,13 @@ public class ChunkAnnotationUtils {
     int lastTokenIndex = lastChunk.get(CoreAnnotations.TokenEndAnnotation.class);
 
     String chunkText = origText.substring(firstCharOffset, lastCharOffset);
-    CoreMap newChunk;
-    if (tokenFactory != null) {
-      newChunk = tokenFactory.makeToken(chunkText, firstCharOffset, lastCharOffset);
-    } else {
-      newChunk = new Annotation(chunkText);
-    }
+    CoreMap newChunk = new Annotation(chunkText);
 
     newChunk.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, firstCharOffset);
     newChunk.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, lastCharOffset);
     newChunk.set(CoreAnnotations.TokenBeginAnnotation.class, firstTokenIndex);
     newChunk.set(CoreAnnotations.TokenEndAnnotation.class, lastTokenIndex);
-    List<CoreLabel> tokens = new ArrayList<>(lastTokenIndex - firstTokenIndex);
+    List<CoreLabel> tokens = new ArrayList<CoreLabel>(lastTokenIndex-firstTokenIndex);
     for (int i = chunkIndexStart; i < chunkIndexEnd; i++) {
       CoreMap chunk = chunkList.get(i);
       tokens.addAll(chunk.get(CoreAnnotations.TokensAnnotation.class));
@@ -229,31 +222,19 @@ public class ChunkAnnotationUtils {
    * @param chunkIndexStart - Index of first chunk to merge
    * @param chunkIndexEnd - Index of last chunk to merge (exclusive)
    * @param aggregators - Aggregators
-   * @param tokenFactory - factory for creating tokens (if we want to get a merged corelabel instead of something random)
    * @return new merged chunk
    */
   public static CoreMap getMergedChunk(List<? extends CoreMap> chunkList,
                                        int chunkIndexStart, int chunkIndexEnd,
-                                       Map<Class, CoreMapAttributeAggregator> aggregators,
-                                       CoreLabelTokenFactory tokenFactory)
+                                       Map<Class, CoreMapAttributeAggregator> aggregators)
   {
-    CoreMap newChunk;
-    if (tokenFactory != null) {
-      newChunk = tokenFactory.makeToken();
-    } else {
-      newChunk = new Annotation("");
-    }
+    CoreMap newChunk = new Annotation("");
     for (Map.Entry<Class,CoreMapAttributeAggregator> entry:aggregators.entrySet()) {
       if (chunkIndexEnd > chunkList.size()) {
         assert(false);
       }
       Object value = entry.getValue().aggregate(entry.getKey(), chunkList.subList(chunkIndexStart, chunkIndexEnd));
       newChunk.set(entry.getKey(), value);
-    }
-    if (newChunk instanceof CoreLabel) {
-      CoreLabel cl = (CoreLabel) newChunk;
-      cl.setValue(cl.word());
-      cl.setOriginalText(cl.word());
     }
     return newChunk;
   }
@@ -300,7 +281,7 @@ public class ChunkAnnotationUtils {
   public static void mergeChunks(List<CoreMap> chunkList, String origText,
                                  int chunkIndexStart, int chunkIndexEnd)
   {
-    CoreMap newChunk = getMergedChunk(chunkList, origText, chunkIndexStart, chunkIndexEnd, null);
+    CoreMap newChunk = getMergedChunk(chunkList, origText, chunkIndexStart, chunkIndexEnd);
     int nChunksToRemove = chunkIndexEnd - chunkIndexStart - 1;
     for (int i = 0; i < nChunksToRemove; i++) {
       chunkList.remove(chunkIndexStart);
@@ -509,7 +490,7 @@ public class ChunkAnnotationUtils {
   public static void annotateChunk(CoreMap chunk,
                                    List<CoreLabel> tokens, int tokenStartIndex, int tokenEndIndex,  int totalTokenOffset)
   {
-    List<CoreLabel> chunkTokens = new ArrayList<>(tokens.subList(tokenStartIndex, tokenEndIndex));
+    List<CoreLabel> chunkTokens = new ArrayList<CoreLabel>(tokens.subList(tokenStartIndex, tokenEndIndex));
     chunk.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class,
             chunkTokens.get(0).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
     chunk.set(CoreAnnotations.CharacterOffsetEndAnnotation.class,
@@ -526,26 +507,11 @@ public class ChunkAnnotationUtils {
   public static String getTokenText(List<? extends CoreMap> tokens, Class tokenTextKey, String delimiter)
   {
     StringBuilder sb = new StringBuilder();
-    int prevEndIndex = -1;
-    for (CoreMap cm:tokens) {
-      Object obj = cm.get(tokenTextKey);
-      boolean includeDelimiter = sb.length() > 0;
-      if (cm.containsKey(CoreAnnotations.CharacterOffsetBeginAnnotation.class) &&
-        cm.containsKey(CoreAnnotations.CharacterOffsetEndAnnotation.class)) {
-        int beginIndex = cm.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-        int endIndex = cm.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
-        if (prevEndIndex == beginIndex) {
-          // No spaces
-          includeDelimiter = false;
-        }
-        prevEndIndex = endIndex;
+    for (CoreMap t: tokens) {
+      if (sb.length() != 0) {
+        sb.append(delimiter);
       }
-      if (obj != null) {
-        if (includeDelimiter) {
-          sb.append(delimiter);
-        }
-        sb.append(obj);
-      }
+      sb.append(t.get(tokenTextKey));
     }
     return sb.toString();
   }
@@ -787,7 +753,7 @@ public class ChunkAnnotationUtils {
           Class tokenChunkKey, Class tokenLabelKey, boolean allowPartialTokens)
   {
     String annoText = annotation.get(CoreAnnotations.TextAnnotation.class);
-    List<CoreMap> chunks = new ArrayList<>(charOffsets.size());
+    List<CoreMap> chunks = new ArrayList<CoreMap>(charOffsets.size());
     List<CoreLabel> annoTokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
     Integer annoCharBegin = annotation.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
     if (annoCharBegin == null) { annoCharBegin = 0; }
@@ -825,7 +791,7 @@ public class ChunkAnnotationUtils {
       }
       int tokenEnd = j;
 
-      List<CoreLabel> chunkTokens = new ArrayList<>(annoTokens.subList(tokenBegin, tokenEnd));
+      List<CoreLabel> chunkTokens = new ArrayList<CoreLabel>(annoTokens.subList(tokenBegin, tokenEnd));
       String chunkText = annoText.substring(beginRelCharOffset, endRelCharOffset);
       Annotation chunk = new Annotation(chunkText);
       chunk.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, beginCharOffset);
@@ -921,7 +887,7 @@ public class ChunkAnnotationUtils {
   public static <T extends CoreMap> List<T> splitCoreMap(Pattern p, boolean includeMatched,
                                                          CoreMap cm, CoreTokenFactory<T> factory)
   {
-    List<T> res = new ArrayList<>();
+    List<T> res = new ArrayList<T>();
     String text = cm.get(CoreAnnotations.TextAnnotation.class);
     Matcher m = p.matcher(text);
     int index = 0;

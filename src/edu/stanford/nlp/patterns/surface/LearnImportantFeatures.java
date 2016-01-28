@@ -19,17 +19,17 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.CollectionValuedMap;
-import edu.stanford.nlp.util.ArgumentParser;
-import edu.stanford.nlp.util.ArgumentParser.Option;
+import edu.stanford.nlp.util.Execution;
+import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
  * The idea is that you can learn features that are important using ML algorithm
  * and use those features in learning weights for patterns.
- *
+ * 
  * @author Sonal Gupta (sonalg@stanford.edu)
- *
+ * 
  */
 public class LearnImportantFeatures {
 
@@ -45,12 +45,12 @@ public class LearnImportantFeatures {
   @Option(name = "thresholdWeight")
   Double thresholdWeight = null;
 
-  Map<String, Integer> clusterIds = new HashMap<>();
-  CollectionValuedMap<Integer, String> clusters = new CollectionValuedMap<>();
+  Map<String, Integer> clusterIds = new HashMap<String, Integer>();
+  CollectionValuedMap<Integer, String> clusters = new CollectionValuedMap<Integer, String>();
 
   @Option(name = "negativeWordsFiles")
   String negativeWordsFiles = null;
-  HashSet<String> negativeWords = new HashSet<>();
+  HashSet<String> negativeWords = new HashSet<String>();
 
   public void setUp() {
     assert (wordClassClusterFile != null);
@@ -105,7 +105,7 @@ public class LearnImportantFeatures {
   // System.out.println(j48decisiontree.toString());
   //
   // }
-
+  
   private int sample(Map<String, DataInstance> sents, Random r, Random rneg, double perSelectNeg, double perSelectRand, int numrand, List<Pair<String, Integer>> chosen, RVFDataset<String, String> dataset){
     for (Entry<String, DataInstance> en : sents.entrySet()) {
       CoreLabel[] sent = en.getValue().getTokens().toArray(new CoreLabel[0]);
@@ -138,12 +138,12 @@ public class LearnImportantFeatures {
 
   public Counter<String> getTopFeatures(Iterator<Pair<Map<String, DataInstance>, File>> sentsf,
       double perSelectRand, double perSelectNeg, String externalFeatureWeightsFileLabel) throws IOException, ClassNotFoundException {
-    Counter<String> features = new ClassicCounter<>();
-    RVFDataset<String, String> dataset = new RVFDataset<>();
+    Counter<String> features = new ClassicCounter<String>();
+    RVFDataset<String, String> dataset = new RVFDataset<String, String>();
     Random r = new Random(10);
     Random rneg = new Random(10);
     int numrand = 0;
-    List<Pair<String, Integer>> chosen = new ArrayList<>();
+    List<Pair<String, Integer>> chosen = new ArrayList<Pair<String, Integer>>();
     while(sentsf.hasNext()){
       Pair<Map<String, DataInstance>, File> sents = sentsf.next();
       numrand = this.sample(sents.first(), r, rneg, perSelectNeg, perSelectRand, numrand, chosen, dataset);
@@ -160,14 +160,14 @@ public class LearnImportantFeatures {
     System.out.println("Number of datums per label: "
         + dataset.numDatumsPerLabel());
 
-    LogisticClassifierFactory<String, String> logfactory = new LogisticClassifierFactory<>();
+    LogisticClassifierFactory<String, String> logfactory = new LogisticClassifierFactory<String, String>();
     LogisticClassifier<String, String> classifier = logfactory
         .trainClassifier(dataset);
-    Counter<String> weights = classifier.weightsAsCounter();
+    Counter<String> weights = classifier.weightsAsGenericCounter();
     if (!classifier.getLabelForInternalPositiveClass().equals(answerLabel))
       weights = Counters.scale(weights, -1);
     if (thresholdWeight != null) {
-      HashSet<String> removeKeys = new HashSet<>();
+      HashSet<String> removeKeys = new HashSet<String>();
       for (Entry<String, Double> en : weights.entrySet()) {
         if (Math.abs(en.getValue()) <= thresholdWeight)
           removeKeys.add(en.getKey());
@@ -183,7 +183,7 @@ public class LearnImportantFeatures {
   }
 
   private RVFDatum<String, String> getDatum(CoreLabel[] sent, int i) {
-    Counter<String> feat = new ClassicCounter<>();
+    Counter<String> feat = new ClassicCounter<String>();
     CoreLabel l = sent[i];
 
     String label;
@@ -191,11 +191,11 @@ public class LearnImportantFeatures {
       label = answerLabel;
     else
       label = "O";
-
+    
       CollectionValuedMap<String, CandidatePhrase> matchedPhrases = l
           .get(PatternsAnnotations.MatchedPhrases.class);
       if (matchedPhrases == null) {
-        matchedPhrases = new CollectionValuedMap<>();
+        matchedPhrases = new CollectionValuedMap<String, CandidatePhrase>();
         matchedPhrases.add(label, CandidatePhrase.createOrGet(l.word()));
       }
 
@@ -206,7 +206,7 @@ public class LearnImportantFeatures {
         feat.setCount("Cluster-" + num, 1.0);
       }
 
-
+    
 
     // feat.incrementCount("WORD-" + l.word());
     // feat.incrementCount("LEMMA-" + l.lemma());
@@ -228,7 +228,7 @@ public class LearnImportantFeatures {
 
 
     // System.out.println("adding " + l.word() + " as " + label);
-    return new RVFDatum<>(feat, label);
+    return new RVFDatum<String, String>(feat, label);
   }
 
   public static void main(String[] args) {
@@ -236,7 +236,7 @@ public class LearnImportantFeatures {
 
       LearnImportantFeatures lmf = new LearnImportantFeatures();
       Properties props = StringUtils.argsToPropertiesWithResolve(args);
-      ArgumentParser.fillOptions(lmf, props);
+      Execution.fillOptions(lmf, props);
       lmf.setUp();
       String sentsFile = props.getProperty("sentsFile");
       Map<String, DataInstance> sents = IOUtils

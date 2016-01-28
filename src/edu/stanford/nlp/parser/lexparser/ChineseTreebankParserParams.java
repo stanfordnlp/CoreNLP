@@ -824,7 +824,7 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams {
 
 
   private List<String> listBasicCategories(List<String> l) {
-    List<String> l1 = new ArrayList<>();
+    List<String> l1 = new ArrayList<String>();
     for (String s : l) {
       l1.add(ctlp.basicCategory(s));
     }
@@ -833,8 +833,8 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams {
 
   // TODO: Rewrite this as general matching predicate
   private static boolean hasV(List tags) {
-    for (Object tag : tags) {
-      String str = tag.toString();
+    for (int i = 0, tsize = tags.size(); i < tsize; i++) {
+      String str = tags.get(i).toString();
       if (str.startsWith("V")) {
         return true;
       }

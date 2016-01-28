@@ -1,7 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.StringUtils;
@@ -48,11 +47,7 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
 
   protected static TokensRegexNERAnnotator getTokensRegexNerAnnotator(String[][] patterns, boolean ignoreCase) throws Exception
   {
-    return getTokensRegexNerAnnotator(new Properties(), patterns, ignoreCase);
-  }
-
-  protected static TokensRegexNERAnnotator getTokensRegexNerAnnotator(Properties props, String[][] patterns, boolean ignoreCase) throws Exception
-  {
+    Properties props = new Properties();
     File tempFile = File.createTempFile("tokensregexnertest.patterns", "txt");
     tempFile.deleteOnExit();
     PrintWriter pw = IOUtils.getPrintWriter(tempFile.getAbsolutePath());
@@ -74,19 +69,11 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
   /**
    * Helper method, checks that each token is tagged with the expected NER type.
    */
-  private static void checkNerTags(List<CoreLabel> tokens, String... tags) {
+  private static void checkTags(List<CoreLabel> tokens, String ... tags) {
     assertEquals(tags.length, tokens.size());
     for (int i = 0; i < tags.length; ++i) {
-      assertEquals("Mismatch for token tag NER " + i + " " + tokens.get(i),
+      assertEquals("Mismatch for token " + i + " " + tokens.get(i),
                    tags[i], tokens.get(i).get(CoreAnnotations.NamedEntityTagAnnotation.class));
-    }
-  }
-
-  private static void checkTags(List<CoreLabel> tokens, Class key, String... tags) {
-    assertEquals(tags.length, tokens.size());
-    for (int i = 0; i < tags.length; ++i) {
-      assertEquals("Mismatch for token tag " + key + " " + i + " " + tokens.get(i),
-        tags[i], tokens.get(i).get(key));
     }
   }
 
@@ -115,15 +102,15 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
     annotatorCased.annotate(document);
     List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);
 
-    checkNerTags(tokens,
-      "ORGANIZATION", "ORGANIZATION", "ORGANIZATION", "O", "O", "O", "LOCATION", "O");
+    checkTags(tokens,
+            "ORGANIZATION", "ORGANIZATION", "ORGANIZATION", "O", "O", "O", "LOCATION", "O");
 
     reannotate(tokens, CoreAnnotations.NamedEntityTagAnnotation.class,
             "O", "O", "LOCATION", "O", "O", "O", "LOCATION", "O");
     annotatorCased.annotate(document);
 
-    checkNerTags(tokens,
-      "SCHOOL", "SCHOOL", "SCHOOL", "O", "O", "O", "LOCATION", "O");
+    checkTags(tokens,
+            "SCHOOL", "SCHOOL", "SCHOOL", "O", "O", "O", "LOCATION", "O");
 
     // Try lowercase
     Annotator annotatorCaseless = getTokensRegexNerAnnotator(regexes, true);
@@ -131,14 +118,14 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
     str = "university of alaska is located in alaska.";
     document = createDocument(str);
     tokens = document.get(CoreAnnotations.TokensAnnotation.class);
-    checkNerTags(tokens,
-      "O", "O", "LOCATION", "O", "O", "O", "LOCATION", "O");
+    checkTags(tokens,
+              "O", "O", "LOCATION", "O", "O", "O", "LOCATION", "O");
     annotatorCased.annotate(document);
-    checkNerTags(tokens,
-      "O", "O", "LOCATION", "O", "O", "O", "LOCATION", "O");
+    checkTags(tokens,
+              "O", "O", "LOCATION", "O", "O", "O", "LOCATION", "O");
     annotatorCaseless.annotate(document);
-    checkNerTags(tokens,
-      "SCHOOL", "SCHOOL", "SCHOOL", "O", "O", "O", "LOCATION", "O");
+    checkTags(tokens,
+              "SCHOOL", "SCHOOL", "SCHOOL", "O", "O", "O", "LOCATION", "O");
   }
 
   // Tests for TokensRegex syntax with match group
@@ -154,59 +141,9 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
     annotatorCased.annotate(document);
     List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);
 
-    checkNerTags(tokens,
+    checkTags(tokens,
       "O", "O", "MOVIE", "O", "O", "O");
 
-  }
-
-  // Tests for TokensRegexNer annotator annotating other fields
-  public void testTokensRegexNormalizedAnnotate() throws Exception {
-    Properties props = new Properties();
-    props.setProperty(REGEX_ANNOTATOR_NAME + ".mapping.header", "pattern,ner,normalized,overwrite,priority,group");
-
-    String[][] regexes =
-      new String[][]{
-        new String[]{"blue",  "COLOR", "B", "", "0"},
-        new String[]{"red",   "COLOR", "R", "", "0"},
-        new String[]{"green", "COLOR", "G", "", "0"}
-      };
-    Annotator annotatorCased = getTokensRegexNerAnnotator(props, regexes, false);
-
-    String str = "These are all colors: blue, red, and green.";
-    Annotation document = createDocument(str);
-    annotatorCased.annotate(document);
-    List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);
-
-    checkTags(tokens, CoreAnnotations.TextAnnotation.class, "These", "are", "all", "colors", ":", "blue", ",", "red", ",", "and", "green", ".");
-    checkTags(tokens, CoreAnnotations.NamedEntityTagAnnotation.class,  "O", "O", "O", "O", "O", "COLOR", "O", "COLOR", "O", "O", "COLOR", "O");
-    checkTags(tokens, CoreAnnotations.NormalizedNamedEntityTagAnnotation.class,  null, null, null, null, null, "B", null, "R", null, null, "G", null);
-  }
-
-  public static class TestAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  // Tests for TokensRegexNer annotator annotating other fields with custom key mapping
-  public void testTokensRegexCustomAnnotate() throws Exception {
-
-    Properties props = new Properties();
-    props.setProperty(REGEX_ANNOTATOR_NAME + ".mapping.header", "pattern,test,overwrite,priority,group");
-    props.setProperty(REGEX_ANNOTATOR_NAME + ".mapping.field.test", "edu.stanford.nlp.pipeline.TokensRegexNERAnnotatorITest$TestAnnotation");
-    String[][] regexes =
-      new String[][]{
-        new String[]{"test", "TEST", "", "0"}
-      };
-    Annotator annotatorCased = getTokensRegexNerAnnotator(props, regexes, true);
-
-    String str = "Marking all test as test";
-    Annotation document = createDocument(str);
-    annotatorCased.annotate(document);
-    List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);
-
-    checkTags(tokens, CoreAnnotations.TextAnnotation.class, "Marking", "all", "test", "as", "test");
-    checkTags(tokens, TestAnnotation.class, null, null, "TEST", null, "TEST");
   }
 
   // Basic tests from RegexNERAnnotatorITest
@@ -217,9 +154,9 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
     annotator.annotate(document);
     List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);
 
-    checkNerTags(tokens,
-      "TITLE", "PERSON", "PERSON", "O", "O", "LOCATION", "O", "STATE_OR_PROVINCE",
-      "O", "O", "O", "O", "O", "IDEOLOGY", "O");
+    checkTags(tokens,
+            "TITLE", "PERSON", "PERSON", "O", "O", "LOCATION", "O", "STATE_OR_PROVINCE",
+            "O", "O", "O", "O", "O", "IDEOLOGY", "O");
 
   }
 
@@ -234,8 +171,8 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
     annotator.annotate(document);
     List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);
 
-    checkNerTags(tokens, "O", "O", "LOCATION", "LOCATION", "O", "O", "O", "O", "O", "RELIGION",
-      "RELIGION", "RELIGION", "O", "O", "O");
+    checkTags(tokens, "O", "O", "LOCATION", "LOCATION", "O", "O", "O", "O", "O", "RELIGION",
+        "RELIGION", "RELIGION", "O", "O", "O");
 
   }
 
@@ -248,7 +185,7 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
     Annotation document = createDocument(str);
     annotator.annotate(document);
     List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);
-    checkNerTags(tokens, "RELIGION", "O", "O", "O", "O", "O", "O", "O", "RELIGION", "O");
+    checkTags(tokens, "RELIGION", "O", "O", "O", "O", "O", "O", "O", "RELIGION", "O");
   }
 
 

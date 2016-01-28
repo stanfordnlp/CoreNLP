@@ -51,7 +51,7 @@ public class MultiClassPrecisionRecallExtendedStats<L> extends MultiClassPrecisi
   }
 
   public <F> double score(Classifier<L,F> classifier, GeneralDataset<L,F> data) {
-    labelIndex = new HashIndex<>();
+    labelIndex = new HashIndex<L>();
     labelIndex.addAll(classifier.labels());
     labelIndex.addAll(data.labelIndex.objectsList());
     clearCounts();
@@ -102,17 +102,17 @@ public class MultiClassPrecisionRecallExtendedStats<L> extends MultiClassPrecisi
     if (foundCorrect != null) {
       foundCorrect.clear();
     } else {
-      foundCorrect = new IntCounter<>();
+      foundCorrect = new IntCounter<L>();
     }
     if (foundGuessed != null) {
       foundGuessed.clear();
     } else {
-      foundGuessed = new IntCounter<>();
+      foundGuessed = new IntCounter<L>();
     }
     if (correctGuesses != null) {
       correctGuesses.clear();
     } else {
-      correctGuesses = new IntCounter<>();
+      correctGuesses = new IntCounter<L>();
     }
     if (tpCount != null) {
       Arrays.fill(tpCount, 0);
@@ -165,7 +165,7 @@ public class MultiClassPrecisionRecallExtendedStats<L> extends MultiClassPrecisi
     }
     if (addUnknownLabels) {
       if (labelIndex == null) {
-        labelIndex = new HashIndex<>();
+        labelIndex = new HashIndex<L>();
       }
       labelIndex.add(guess);
       labelIndex.add(label);
@@ -235,7 +235,7 @@ public class MultiClassPrecisionRecallExtendedStats<L> extends MultiClassPrecisi
   {
     int totalCorrect = tokensCorrect;
     int totalWrong = tokensCount - tokensCorrect;
-    return new Triple<>((((double) totalCorrect) / tokensCount),
+    return new Triple<Double, Integer, Integer>((((double) totalCorrect) / tokensCount),
             totalCorrect, totalWrong);
   }
 

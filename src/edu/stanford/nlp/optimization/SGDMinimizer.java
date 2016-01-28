@@ -1,9 +1,7 @@
 package edu.stanford.nlp.optimization;
 
-import edu.stanford.nlp.classify.LogConditionalObjectiveFunction;
 import edu.stanford.nlp.classify.LogPrior;
 import edu.stanford.nlp.math.ArrayMath;
-import edu.stanford.nlp.util.SystemUtils;
 import edu.stanford.nlp.util.Timing;
 
 import java.text.DecimalFormat;
@@ -120,7 +118,7 @@ public class SGDMinimizer<T extends Function> implements Minimizer<T>, HasEvalua
   public double getObjective(AbstractStochasticCachingDiffUpdateFunction function, double[] w, double wscale, int[] sample)
   {
     double wnorm = getNorm(w) * wscale*wscale;
-    double obj = function.valueAt(w, wscale, sample);
+    double obj = function.valueAt(w,wscale,sample);
     // Calculate objective with L2 regularization
     return obj + 0.5*sample.length*lambda*wnorm;
   }
@@ -204,8 +202,8 @@ public class SGDMinimizer<T extends Function> implements Minimizer<T>, HasEvalua
   private static double getNorm(double[] w)
   {
     double norm = 0;
-    for (double aW : w) {
-      norm += aW * aW;
+    for (int i = 0; i < w.length; i++) {
+      norm += w[i]*w[i];
     }
     return norm;
   }

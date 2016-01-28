@@ -196,9 +196,9 @@ public class SUTimeMain {
     String docPubDate;
     String sentId;
     String text;
-    List<TimebankTimex> timexes = new ArrayList<>();
+    List<TimebankTimex> timexes = new ArrayList<TimebankTimex>();
 
-    List<String> origItems = new ArrayList<>();
+    List<String> origItems =  new ArrayList<String>();
 
     public boolean add(String item) {
       String[] fields = item.split("\\s*\\|\\s*", 9);
@@ -526,7 +526,7 @@ public class SUTimeMain {
   {
     String sentText = StringUtils.join(sentWords, " ");
     Annotation sentence = new Annotation(sentText);
-    List<CoreLabel> tokens = new ArrayList<>(sentWords.size());
+    List<CoreLabel> tokens = new ArrayList<CoreLabel>(sentWords.size());
     for (String text:sentWords) {
       CoreLabel token = tokenFactory.makeToken();
       token.set(CoreAnnotations.TextAnnotation.class, text);
@@ -545,7 +545,7 @@ public class SUTimeMain {
     document.set(CoreAnnotations.SentencesAnnotation.class, sentences);
 
     // Accumulate docTokens and label sentence with overall token begin/end, and sentence index annotations
-    List<CoreLabel> docTokens = new ArrayList<>();
+    List<CoreLabel> docTokens = new ArrayList<CoreLabel>();
     int sentenceIndex = 0;
     int tokenBegin = 0;
     for (CoreMap sentenceAnnotation:sentences) {
@@ -672,7 +672,7 @@ public class SUTimeMain {
         lastTimex = new TimexAttributes(tid, sentNo, tokenNo);
         List<TimexAttributes> list = timexMap.get(docName);
         if (list == null) {
-          timexMap.put(docName, list = new ArrayList<>());
+          timexMap.put(docName, list = new ArrayList<TimexAttributes>());
         }
         list.add(lastTimex);
       }
@@ -748,12 +748,12 @@ public class SUTimeMain {
           curDocName = null;
         }
         // New doc
-        tokens = new ArrayList<>();
-        sentences = new ArrayList<>();
+        tokens = new ArrayList<String>();
+        sentences = new ArrayList<CoreMap>();
       } else if (curSentNo != sentNo) {
         CoreMap lastSentence = wordsToSentence(tokens);
         sentences.add(lastSentence);
-        tokens = new ArrayList<>();
+        tokens = new ArrayList<String>();
       }
       tokens.add(tokenText);
       curDocName = docName;
@@ -789,7 +789,7 @@ public class SUTimeMain {
     }
     processTempEval2Tab(pipeline, in, out, docDates);
     if (eval != null) {
-      List<String> command = new ArrayList<>();
+      List<String> command = new ArrayList<String>();
       if (PYTHON != null) {
         command.add(PYTHON);
       }
@@ -929,9 +929,9 @@ public class SUTimeMain {
   }
 
   private static List<Node> createTimexNodes(String str, Integer charBeginOffset, List<CoreMap> timexAnns) {
-    List<ValuedInterval<CoreMap,Integer>> timexList = new ArrayList<>(timexAnns.size());
+    List<ValuedInterval<CoreMap,Integer>> timexList = new ArrayList<ValuedInterval<CoreMap,Integer>>(timexAnns.size());
     for (CoreMap timexAnn:timexAnns) {
-      timexList.add(new ValuedInterval<>(timexAnn,
+      timexList.add(new ValuedInterval<CoreMap, Integer>(timexAnn,
               MatchedExpression.COREMAP_TO_CHAR_OFFSETS_INTERVAL_FUNC.apply(timexAnn)));
     }
     Collections.sort(timexList, HasInterval.CONTAINS_FIRST_ENDPOINTS_COMPARATOR );
@@ -940,12 +940,12 @@ public class SUTimeMain {
 
   private static List<Node> createTimexNodesPresorted(String str, Integer charBeginOffset, List<ValuedInterval<CoreMap,Integer>> timexList) {
     if (charBeginOffset == null) charBeginOffset = 0;
-    List<Node> nodes = new ArrayList<>();
+    List<Node> nodes = new ArrayList<Node>();
     int previousEnd = 0;
-    List<Element> timexElems = new ArrayList<>();
-    List<ValuedInterval<CoreMap,Integer>> processed = new ArrayList<>();
+    List<Element> timexElems = new ArrayList<Element>();
+    List<ValuedInterval<CoreMap,Integer>> processed = new ArrayList<ValuedInterval<CoreMap,Integer>>();
     CollectionValuedMap<Integer, ValuedInterval<CoreMap,Integer>> unprocessed =
-            new CollectionValuedMap<>(CollectionFactory.<ValuedInterval<CoreMap, Integer>>arrayListFactory());
+            new CollectionValuedMap<Integer, ValuedInterval<CoreMap,Integer>>(CollectionFactory.<ValuedInterval<CoreMap,Integer>>arrayListFactory());
     for (ValuedInterval<CoreMap,Integer> v:timexList) {
       CoreMap timexAnn = v.getValue();
       int begin = timexAnn.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) - charBeginOffset;

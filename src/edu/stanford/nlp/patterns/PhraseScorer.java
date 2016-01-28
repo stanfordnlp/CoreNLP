@@ -1,7 +1,9 @@
 package edu.stanford.nlp.patterns;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -10,7 +12,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
-import edu.stanford.nlp.util.ArgumentParser.Option;
+import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.GoogleNGramsSQLBacked;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -47,7 +49,7 @@ public abstract class PhraseScorer<E extends Pattern> {
     this.constVars = constvar;
   }
 
-  Counter<CandidatePhrase> learnedScores = new ClassicCounter<>();
+  Counter<CandidatePhrase> learnedScores = new ClassicCounter<CandidatePhrase>();
 
   abstract Counter<CandidatePhrase> scorePhrases(String label, TwoDimensionalCounter<CandidatePhrase, E> terms,
       TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted,
@@ -67,7 +69,7 @@ public abstract class PhraseScorer<E extends Pattern> {
     } else {
       double total = 0;
 
-      Set<E> rem = new HashSet<>();
+      Set<E> rem = new HashSet<E>();
       for (Entry<E, Double> en2 : patsThatExtractedThis.entrySet()) {
         double weight = 1.0;
         if (usePatternWeights) {

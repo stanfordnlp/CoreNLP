@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 
-import edu.stanford.nlp.util.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -34,6 +33,10 @@ import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.XMLUtils;
 
 /**
  * A reader for XML format AnCora treebank files.
@@ -290,7 +293,7 @@ public class SpanishXMLTreeReader implements TreeReader {
     } else if (isEllipticNode(eRoot)) {
       return buildEllipticNode(eRoot);
     } else {
-      List<Tree> kids = new ArrayList<>();
+      List<Tree> kids = new ArrayList<Tree>();
       for (Node childNode = eRoot.getFirstChild(); childNode != null;
            childNode = childNode.getNextSibling()) {
         if (childNode.getNodeType() != Node.ELEMENT_NODE) continue;
@@ -326,7 +329,7 @@ public class SpanishXMLTreeReader implements TreeReader {
     if (leafNode.label() instanceof HasLemma && lemma != null)
       ((HasLemma) leafNode.label()).setLemma(lemma);
 
-    List<Tree> kids = new ArrayList<>();
+    List<Tree> kids = new ArrayList<Tree>();
     kids.add(leafNode);
 
     Tree t = treeFactory.newTreeNode(posStr, kids);
@@ -342,7 +345,7 @@ public class SpanishXMLTreeReader implements TreeReader {
     Element eRoot = (Element) root;
     String constituentStr = eRoot.getNodeName();
 
-    List<Tree> kids = new ArrayList<>();
+    List<Tree> kids = new ArrayList<Tree>();
     Tree leafNode = treeFactory.newLeaf(SpanishTreeNormalizer.EMPTY_LEAF_VALUE);
     if (leafNode.label() instanceof HasWord)
       ((HasWord) leafNode.label()).setWord(SpanishTreeNormalizer.EMPTY_LEAF_VALUE);
@@ -484,8 +487,9 @@ public class SpanishXMLTreeReader implements TreeReader {
     final boolean detailedAnnotations = PropertiesUtils.getBool(options, "detailedAnnotations", false);
 
     String[] remainingArgs = options.getProperty("").split(" ");
-    List<File> fileList = new ArrayList<>();
-    for (String remainingArg : remainingArgs) fileList.add(new File(remainingArg));
+    List<File> fileList = new ArrayList<File>();
+    for(int i = 0; i < remainingArgs.length; i++)
+      fileList.add(new File(remainingArgs[i]));
 
     final SpanishXMLTreeReaderFactory trf = new SpanishXMLTreeReaderFactory(true, true, ner, detailedAnnotations);
     ExecutorService pool =
@@ -512,7 +516,7 @@ public class SpanishXMLTreeReader implements TreeReader {
     try {
       pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
     } catch (InterruptedException e) {
-      throw new RuntimeInterruptedException(e);
+      e.printStackTrace();
     }
   }
 }

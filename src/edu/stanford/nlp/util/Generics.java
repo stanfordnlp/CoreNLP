@@ -51,43 +51,43 @@ public class Generics {
 
   /* Collections */
   public static <E> ArrayList<E> newArrayList() {
-    return new ArrayList<>();
+    return new ArrayList<E>();
   }
 
   public static <E> ArrayList<E> newArrayList(int size) {
-    return new ArrayList<>(size);
+    return new ArrayList<E>(size);
   }
 
   public static <E> ArrayList<E> newArrayList(Collection<? extends E> c) {
-    return new ArrayList<>(c);
+    return new ArrayList<E>(c);
   }
 
   public static <E> LinkedList<E> newLinkedList() {
-    return new LinkedList<>();
+    return new LinkedList<E>();
   }
 
   public static <E> LinkedList<E> newLinkedList(Collection<? extends E> c) {
-    return new LinkedList<>(c);
+    return new LinkedList<E>(c);
   }
 
   public static <E> Stack<E> newStack() {
-    return new Stack<>();
+    return new Stack<E>();
   }
 
   public static <E> BinaryHeapPriorityQueue<E> newBinaryHeapPriorityQueue() {
-    return new BinaryHeapPriorityQueue<>();
+    return new BinaryHeapPriorityQueue<E>();
   }
 
   public static <E> TreeSet<E> newTreeSet() {
-    return new TreeSet<>();
+    return new TreeSet<E>();
   }
 
   public static <E> TreeSet<E> newTreeSet(Comparator<? super E> comparator) {
-    return new TreeSet<>(comparator);
+    return new TreeSet<E>(comparator);
   }
 
   public static <E> TreeSet<E> newTreeSet(SortedSet<E> s) {
-    return new TreeSet<>(s);
+    return new TreeSet<E>(s);
   }
 
   public static final String HASH_SET_PROPERTY = "edu.stanford.nlp.hashset.impl";
@@ -220,7 +220,7 @@ public class Generics {
   }
 
   public static <K,V> IdentityHashMap<K,V> newIdentityHashMap() {
-    return new IdentityHashMap<>();
+    return new IdentityHashMap<K,V>();
   }
 
   public static <K> Set<K> newIdentityHashSet() {
@@ -228,64 +228,54 @@ public class Generics {
   }
 
   public static <K,V> WeakHashMap<K,V> newWeakHashMap() {
-    return new WeakHashMap<>();
+    return new WeakHashMap<K,V>();
   }
 
   public static <K,V> ConcurrentHashMap<K,V> newConcurrentHashMap() {
-    return new ConcurrentHashMap<>();
+    return new ConcurrentHashMap<K,V>();
   }
 
   public static <K,V> ConcurrentHashMap<K,V> newConcurrentHashMap(int initialCapacity) {
-    return new ConcurrentHashMap<>(initialCapacity);
+    return new ConcurrentHashMap<K,V>(initialCapacity);
   }
 
   public static <K,V> ConcurrentHashMap<K,V> newConcurrentHashMap(int initialCapacity,
       float loadFactor, int concurrencyLevel) {
-    return new ConcurrentHashMap<>(initialCapacity, loadFactor, concurrencyLevel);
+    return new ConcurrentHashMap<K,V>(initialCapacity, loadFactor, concurrencyLevel);
   }
 
   public static <K,V> TreeMap<K,V> newTreeMap() {
-    return new TreeMap<>();
+    return new TreeMap<K,V>();
   }
 
   public static <E> Index<E> newIndex() {
-    return new HashIndex<>();
-  }
-
-  public static <E> Set<E> newConcurrentHashSet() {
-    return Collections.newSetFromMap(new ConcurrentHashMap<>());
-  }
-
-  public static <E> Set<E> newConcurrentHashSet(Set<E> set) {
-    Set<E> ret = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    ret.addAll(set);
-    return ret;
+    return new HashIndex<E>();
   }
 
 
   /* Other */
   public static <T1,T2> Pair<T1,T2> newPair(T1 first, T2 second) {
-    return new Pair<>(first, second);
+    return new Pair<T1,T2>(first, second);
   }
 
   public static <T1,T2, T3> Triple<T1,T2, T3> newTriple(T1 first, T2 second, T3 third) {
-    return new Triple<>(first, second, third);
+    return new Triple<T1,T2, T3>(first, second, third);
   }
 
   public static <T> Interner<T> newInterner() {
-    return new Interner<>();
+    return new Interner<T>();
   }
 
   public static <T> SynchronizedInterner<T> newSynchronizedInterner(Interner<T> interner) {
-    return new SynchronizedInterner<>(interner);
+    return new SynchronizedInterner<T>(interner);
   }
 
   public static <T> SynchronizedInterner<T> newSynchronizedInterner(Interner<T> interner,
                                                                     Object mutex) {
-    return new SynchronizedInterner<>(interner, mutex);
+    return new SynchronizedInterner<T>(interner, mutex);
   }
 
   public static <T> WeakReference<T> newWeakReference(T referent) {
-    return new WeakReference<>(referent);
+    return new WeakReference<T>(referent);
   }
 }
