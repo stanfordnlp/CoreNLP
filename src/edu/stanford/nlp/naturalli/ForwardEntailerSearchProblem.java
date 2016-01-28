@@ -161,7 +161,7 @@ public class ForwardEntailerSearchProblem {
       if( parseTree.inDegree(vertex) > 1 ) {
         SemanticGraphEdge conjAnd = null;
         for (SemanticGraphEdge edge : parseTree.incomingEdgeIterable(vertex)) {
-          if (edge.getRelation().toString().equals("conj_and")) {
+          if (edge.getRelation().toString().equals("conj:and")) {
             conjAnd = edge;
           }
         }

@@ -50,7 +50,7 @@ public class ClauseSplitterSearchProblem {
   /**
    * A specification for clause splits we _always_ want to do. The format is a map from the edge label we are splitting, to
    * the preference for the type of split we should do. The most prefered is at the front of the list, and then it backs off
-   * to the less and less prefered split types.
+   * to the less and less preferred split types.
    */
   protected static final Map<String, List<String>> HARD_SPLITS = Collections.unmodifiableMap(new HashMap<String, List<String>>() {{
     put("comp", new ArrayList<String>() {{
@@ -69,6 +69,15 @@ public class ClauseSplitterSearchProblem {
       add("simple");
     }});
     put("csubj", new ArrayList<String>() {{
+      add("clone_dobj");
+      add("simple");
+    }});
+    put("advcl", new ArrayList<String>() {{
+      add("clone_nsubj");
+      add("simple");
+    }});
+    put("conj:and", new ArrayList<String>() {{
+      add("clone_nsubj");
       add("clone_dobj");
       add("simple");
     }});
@@ -166,11 +175,11 @@ public class ClauseSplitterSearchProblem {
   /**
    * An action being taken; that is, the type of clause splitting going on.
    */
-  public static interface Action {
+  public interface Action {
     /**
      * The name of this action.
      */
-    public String signature();
+    String signature();
 
     /**
      * A check to make sure this is actually a valid action to take, in the context of the given tree.
@@ -179,7 +188,7 @@ public class ClauseSplitterSearchProblem {
      * @return True if this is a valid action.
      */
     @SuppressWarnings("UnusedParameters")
-    public default boolean prerequisitesMet(SemanticGraph originalTree, SemanticGraphEdge edge) {
+    default boolean prerequisitesMet(SemanticGraph originalTree, SemanticGraphEdge edge) {
       return true;
     }
 
@@ -192,10 +201,10 @@ public class ClauseSplitterSearchProblem {
      * @param ppOrNull The preposition attachment of the parent tree, if there is one.
      * @return A new state, or {@link Optional#empty()} if this action was not successful.
      */
-    public Optional<State> applyTo(SemanticGraph tree, State source,
-                                   SemanticGraphEdge outgoingEdge,
-                                   SemanticGraphEdge subjectOrNull,
-                                   SemanticGraphEdge ppOrNull);
+    Optional<State> applyTo(SemanticGraph tree, State source,
+                            SemanticGraphEdge outgoingEdge,
+                            SemanticGraphEdge subjectOrNull,
+                            SemanticGraphEdge ppOrNull);
   }
 
   /**
@@ -222,7 +231,7 @@ public class ClauseSplitterSearchProblem {
   /**
    * Mostly just an alias, but make sure our featurizer is serializable!
    */
-  public static interface Featurizer extends Function<Triple<ClauseSplitterSearchProblem.State, ClauseSplitterSearchProblem.Action, ClauseSplitterSearchProblem.State>, Counter<String>>, Serializable { }
+  public interface Featurizer extends Function<Triple<ClauseSplitterSearchProblem.State, ClauseSplitterSearchProblem.Action, ClauseSplitterSearchProblem.State>, Counter<String>>, Serializable { }
 
   /**
    * Create a searcher manually, suppling a dependency tree, an optional classifier for when to split clauses,
@@ -539,6 +548,12 @@ public class ClauseSplitterSearchProblem {
       }
 
       @Override
+      public boolean prerequisitesMet(SemanticGraph originalTree, SemanticGraphEdge edge) {
+        char tag = edge.getDependent().tag().charAt(0);
+        return !(tag != 'V' && tag != 'N');
+      }
+
+      @Override
       public Optional<State> applyTo(SemanticGraph tree, State source, SemanticGraphEdge outgoingEdge, SemanticGraphEdge subjectOrNull, SemanticGraphEdge objectOrNull) {
         return Optional.of(new State(
             outgoingEdge,
@@ -612,6 +627,17 @@ public class ClauseSplitterSearchProblem {
       }
 
       @Override
+      public boolean prerequisitesMet(SemanticGraph originalTree, SemanticGraphEdge edge) {
+        // Don't split into anything but verbs or nouns
+        char tag = edge.getDependent().tag().charAt(0);
+        if (tag != 'V' && tag != 'N') { return false; }
+        for (SemanticGraphEdge grandchild : originalTree.outgoingEdgeIterable(edge.getDependent())) {
+          if (grandchild.getRelation().toString().contains("subj")) { return false; }
+        }
+        return true;
+      }
+
+      @Override
       public Optional<State> applyTo(SemanticGraph tree, State source, SemanticGraphEdge outgoingEdge, SemanticGraphEdge subjectOrNull, SemanticGraphEdge objectOrNull) {
         if (subjectOrNull != null && !outgoingEdge.equals(subjectOrNull)) {
           return Optional.of(new State(
@@ -640,6 +666,17 @@ public class ClauseSplitterSearchProblem {
       @Override
       public String signature() {
         return "clone_dobj";
+      }
+
+      @Override
+      public boolean prerequisitesMet(SemanticGraph originalTree, SemanticGraphEdge edge) {
+        // Don't split into anything but verbs or nouns
+        char tag = edge.getDependent().tag().charAt(0);
+        if (tag != 'V' && tag != 'N') { return false; }
+        for (SemanticGraphEdge grandchild : originalTree.outgoingEdgeIterable(edge.getDependent())) {
+          if (grandchild.getRelation().toString().contains("subj")) { return false; }
+        }
+        return true;
       }
 
       @Override
@@ -732,7 +769,6 @@ public class ClauseSplitterSearchProblem {
     }, true);  // First state is implicitly "done"
     fringe.add(Pair.makePair(firstState, new ArrayList<>(0)), -0.0);
     int ticks = 0;
-    int classifierEvals = 0;
 
     while (!fringe.isEmpty()) {
       if (++ticks > maxTicks) {
@@ -822,7 +858,6 @@ public class ClauseSplitterSearchProblem {
               bestLabel = ClauseClassifierLabel.CLAUSE_INTERM;
             } else {
               Counter<ClauseClassifierLabel> scores = classifier.scoresOf(new RVFDatum<>(features));
-              classifierEvals += 1;
               if (scores.size() > 0) {
                 Counters.logNormalizeInPlace(scores);
               }

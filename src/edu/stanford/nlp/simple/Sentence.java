@@ -409,15 +409,16 @@ public class Sentence {
    * Therefore, every time this function is called, it re-runs the annotator!
    *
    * @param mappingFile The regexner mapping file.
+   * @param ignorecase If true, run a caseless match on the regexner file.
    *
-   * @return
    */
-  public void regexner(String mappingFile) {
+  public void regexner(String mappingFile, boolean ignorecase) {
     Properties props = new Properties();
     for (Object prop : EMPTY_PROPS.keySet()) {
       props.setProperty(prop.toString(), EMPTY_PROPS.getProperty(prop.toString()));
     }
     props.setProperty(Annotator.STANFORD_REGEXNER + ".mapping", mappingFile);
+    props.setProperty(Annotator.STANFORD_REGEXNER + ".ignorecase", Boolean.toString(ignorecase));
     this.document.runRegexner(props);
   }
 

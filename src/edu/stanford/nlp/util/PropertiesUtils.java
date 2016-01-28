@@ -50,6 +50,17 @@ public class PropertiesUtils {
     }
   }
 
+  public static Properties asProperties(String... args) {
+    if (args.length % 2 != 0) {
+      throw new IllegalArgumentException("Need an even number of arguments but there were " + args.length);
+    }
+    Properties properties = new Properties();
+    for (int i = 0; i < args.length; i += 2) {
+      properties.setProperty(args[i], args[i + 1]);
+    }
+    return properties;
+  }
+
   /** Convert from String to Properties. */
   public static Properties fromString(String str) {
     try {

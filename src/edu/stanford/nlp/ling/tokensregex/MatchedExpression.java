@@ -259,6 +259,10 @@ public class MatchedExpression {
     return priority;
   }
 
+  public double getWeight() {
+    return weight;
+  }
+
   public int getOrder() {
     return order;
   }
@@ -386,6 +390,20 @@ public class MatchedExpression {
     } else {
       return chunks;
     }
+  }
+
+  public static <T extends MatchedExpression> T getBestMatched(List<T> matches, Function<MatchedExpression, Double> scorer) {
+    if (matches == null || matches.isEmpty()) return null;
+    T best = null;
+    double bestScore = Double.NEGATIVE_INFINITY;
+    for (T m : matches) {
+      double s = scorer.apply(m);
+      if (best == null || s > bestScore) {
+        best = m;
+        bestScore = s;
+      }
+    }
+    return best;
   }
 
   @SuppressWarnings("unused")

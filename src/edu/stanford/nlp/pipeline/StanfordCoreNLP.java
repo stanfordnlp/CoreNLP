@@ -422,13 +422,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
    * under which this is true: the sentiment annotator is used.
    */
   public static boolean usesBinaryTrees(Properties props) {
-    String annotators = props.getProperty("annotators");
     Set<String> annoNames = Generics.newHashSet(Arrays.asList(getRequiredProperty(props, "annotators").split("[, \t]+")));
-    if (annoNames.contains(STANFORD_SENTIMENT)) {
-      return true;
-    } else {
-      return false;
-    }
+    return annoNames.contains(STANFORD_SENTIMENT);
   }
 
   /**
@@ -986,8 +981,11 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     //
     // Process one file or a directory of files
     //
-    if(properties.containsKey("file")){
+    if (properties.containsKey("file") || properties.containsKey("textFile")) {
       String fileName = properties.getProperty("file");
+      if (fileName == null) {
+        fileName = properties.getProperty("textFile");
+      }
       Collection<File> files = new FileSequentialCollection(new File(fileName), properties.getProperty("extension"), true);
       this.processFiles(null, files, numThreads);
     }

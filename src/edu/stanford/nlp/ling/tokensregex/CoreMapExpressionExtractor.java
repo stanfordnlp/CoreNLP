@@ -6,6 +6,7 @@ import edu.stanford.nlp.ling.tokensregex.parser.ParseException;
 import edu.stanford.nlp.ling.tokensregex.parser.TokenSequenceParseException;
 import edu.stanford.nlp.ling.tokensregex.parser.TokenSequenceParser;
 import edu.stanford.nlp.ling.tokensregex.types.Expression;
+import edu.stanford.nlp.ling.tokensregex.types.Expressions;
 import edu.stanford.nlp.ling.tokensregex.types.Tags;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
 import edu.stanford.nlp.util.*;
@@ -47,6 +48,8 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
   private final Env env;
   /* Keeps temporary tags created by extractor */
   private boolean keepTags = false;
+  /* Collapses extraction rules - use with care */
+  private boolean collapseExtractionRules = false;
   private final Class tokensAnnotationKey;
   private final Map<Integer, Stage<T>> stages;
 
@@ -131,6 +134,10 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
     this.stages = new HashMap<Integer, Stage<T>>();//Generics.newHashMap();
     this.env = env;
     this.tokensAnnotationKey = EnvLookup.getDefaultTokensAnnotationKey(env);
+    this.collapseExtractionRules = false;
+    if (env != null) {
+      this.collapseExtractionRules = Objects.equals((Boolean) env.get("collapseExtractionRules"), true);
+    }
   }
 
   /**
@@ -149,7 +156,12 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
    */
   public void appendRules(List<SequenceMatchRules.Rule> rules)
   {
+    logger.log(Level.INFO, "Read " + rules.size() + " rules");
     // Put rules into stages
+    if (collapseExtractionRules) {
+      rules = collapse(rules);
+      logger.log(Level.INFO, "Collapsing into " + rules.size() + " rules");
+    }
     for (SequenceMatchRules.Rule r:rules) {
       if (r instanceof SequenceMatchRules.AssignmentRule) {
         // Nothing to do
@@ -186,6 +198,50 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
         }
       }
     }
+  }
+
+  private SequenceMatchRules.AnnotationExtractRule createMergedRule(SequenceMatchRules.AnnotationExtractRule aerTemplate, List<TokenSequencePattern> patterns) {
+    return SequenceMatchRules.createMultiTokenPatternRule(env, aerTemplate, patterns);
+  }
+
+  private List<SequenceMatchRules.Rule> collapse(List<SequenceMatchRules.Rule> rules) {
+    List<SequenceMatchRules.Rule> collapsed = new ArrayList<SequenceMatchRules.Rule>();
+    List<TokenSequencePattern> patterns = null;
+    SequenceMatchRules.AnnotationExtractRule aerTemplate = null;
+    for (SequenceMatchRules.Rule rule:rules) {
+      boolean ruleHandled = false;
+      if (rule instanceof SequenceMatchRules.AnnotationExtractRule) {
+        SequenceMatchRules.AnnotationExtractRule aer = (SequenceMatchRules.AnnotationExtractRule) rule;
+        if (aer.hasTokensRegexPattern()) {
+          if (aerTemplate == null || aerTemplate.isMostlyCompatible(aer)) {
+            if (aerTemplate == null) {
+              aerTemplate = aer;
+            }
+            if (patterns == null) {
+              patterns = new ArrayList<TokenSequencePattern>();
+            }
+            patterns.add((TokenSequencePattern) aer.pattern);
+            ruleHandled = true;
+          }
+        }
+      }
+
+      // Did we handle this rule?
+      if (!ruleHandled) {
+        if (aerTemplate != null) {
+          SequenceMatchRules.AnnotationExtractRule merged = createMergedRule(aerTemplate, patterns);
+          collapsed.add(merged);
+          aerTemplate = null;
+          patterns = null;
+        }
+        collapsed.add(rule);
+      }
+    }
+    if (aerTemplate != null) {
+      SequenceMatchRules.AnnotationExtractRule merged = createMergedRule(aerTemplate, patterns);
+      collapsed.add(merged);
+    }
+    return collapsed;
   }
 
   public Env getEnv() {
@@ -529,5 +585,4 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
     this.keepTags = true;
     return this;
   }
-
 }

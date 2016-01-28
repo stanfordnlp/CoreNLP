@@ -73,7 +73,7 @@ public final class SpanishVerbStripper implements Serializable {
    *
    * @param dictPath the path to the dictionary file
    */
-  private HashMap<String, String> setupDictionary(String dictPath) {
+  private static HashMap<String, String> setupDictionary(String dictPath) {
     HashMap<String, String> dictionary = new HashMap<>();
     BufferedReader br = null;
     try {
@@ -83,7 +83,7 @@ public final class SpanishVerbStripper implements Serializable {
         if (words.length < 3) {
           System.err.printf("SpanishVerbStripper: adding words to dict, missing fields, ignoring line: %s%n", line);
         } else {
-          dict.put(words[0], words[2]);
+          dictionary.put(words[0], words[2]);
         }
       }
     } catch (UnsupportedEncodingException e) {
