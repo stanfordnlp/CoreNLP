@@ -1,8 +1,8 @@
 package edu.stanford.nlp.util;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.util.ArgumentParser.Option;
-
+import edu.stanford.nlp.util.Execution.Option;
+import edu.stanford.nlp.util.Execution;
 import java.io.File;
 import java.sql.*;
 import java.util.*;
@@ -232,7 +232,7 @@ public class GoogleNGramsSQLBacked {
   public static void main(String[] args){
     try{
       Properties props = StringUtils.argsToPropertiesWithResolve(args);
-      ArgumentParser.fillOptions(GoogleNGramsSQLBacked.class, props);
+      Execution.fillOptions(GoogleNGramsSQLBacked.class, props);
 
       connect();
 

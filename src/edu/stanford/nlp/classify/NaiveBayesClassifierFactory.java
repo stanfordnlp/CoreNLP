@@ -40,8 +40,8 @@ import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.HashIndex;
 
-
-import edu.stanford.nlp.util.logging.Redwood;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -64,7 +64,7 @@ public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F
   private Index<L> labelIndex;
   private Index<F> featureIndex;
 
-  final static Redwood.RedwoodChannels logger = Redwood.channels(NaiveBayesClassifierFactory.class);
+  final static Logger logger = LoggerFactory.getLogger(NaiveBayesClassifierFactory.class);
 
   public NaiveBayesClassifierFactory() {
   }

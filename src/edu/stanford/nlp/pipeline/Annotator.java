@@ -1,9 +1,5 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.ling.CoreAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.ArraySet;
 
 import java.util.*;
@@ -79,14 +75,14 @@ public interface Annotator {
    * Returns a set of requirements for which tasks this annotator can
    * provide.  For example, the POS annotator will return "pos".
    */
-  Set<Class<? extends CoreAnnotation>> requirementsSatisfied();
+  Set<Requirement> requirementsSatisfied();
 
   /**
    * Returns the set of tasks which this annotator requires in order
    * to perform.  For example, the POS annotator will return
    * "tokenize", "ssplit".
    */
-  Set<Class<? extends CoreAnnotation>> requires();
+  Set<Requirement> requires();
 
   /**
    * These are annotators which StanfordCoreNLP knows how to create.
@@ -274,78 +270,20 @@ public interface Annotator {
    */
   Requirement BINARIZED_TREES_REQUIREMENT = new Requirement("binarized_trees");
 
-  /*
+  /**
    * These are typical combinations of annotators which may be used as
    * requirements by other annotators.
    */
-  Set<Class<? extends CoreAnnotation>> TOKENIZE_AND_SSPLIT = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-      CoreAnnotations.TokensAnnotation.class,
-      CoreAnnotations.SentencesAnnotation.class
-  )));
-  Set<Class<? extends CoreAnnotation>> TOKENIZE_SSPLIT_POS = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-      CoreAnnotations.TokensAnnotation.class,
-      CoreAnnotations.SentencesAnnotation.class,
-      CoreAnnotations.PartOfSpeechAnnotation.class
-  )));
-  Set<Class<? extends CoreAnnotation>> TOKENIZE_SSPLIT_NER = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-      CoreAnnotations.TokensAnnotation.class,
-      CoreAnnotations.SentencesAnnotation.class,
-      CoreAnnotations.NamedEntityTagAnnotation.class
-  )));
-  Set<Class<? extends CoreAnnotation>> TOKENIZE_SSPLIT_PARSE = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-      CoreAnnotations.TokensAnnotation.class,
-      CoreAnnotations.SentencesAnnotation.class,
-      TreeCoreAnnotations.TreeAnnotation.class
-  )));
-  Set<Class<? extends CoreAnnotation>> TOKENIZE_SSPLIT_PARSE_NER = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-      CoreAnnotations.TokensAnnotation.class,
-      CoreAnnotations.SentencesAnnotation.class,
-      TreeCoreAnnotations.TreeAnnotation.class,
-      CoreAnnotations.NamedEntityTagAnnotation.class
-  )));
-  Set<Class<? extends CoreAnnotation>> TOKENIZE_SSPLIT_POS_LEMMA = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-      CoreAnnotations.TokensAnnotation.class,
-      CoreAnnotations.SentencesAnnotation.class,
-      CoreAnnotations.PartOfSpeechAnnotation.class,
-      CoreAnnotations.LemmaAnnotation.class
-  )));
-  Set<Class<? extends CoreAnnotation>> TOKENIZE_SSPLIT_POS_DEPPARSE = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-      CoreAnnotations.TokensAnnotation.class,
-      CoreAnnotations.SentencesAnnotation.class,
-      CoreAnnotations.PartOfSpeechAnnotation.class,
-      SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
-      SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
-      SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
-  )));
-
-
-
-  /*
-   * These are typically requirements satisfied by an annotator
-   */
-  Set<Class<? extends CoreAnnotation>> PARSE_AND_TAG = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-      CoreAnnotations.PartOfSpeechAnnotation.class,
-      TreeCoreAnnotations.TreeAnnotation.class
-  )));
-  Set<Class<? extends CoreAnnotation>> PARSE_TAG_BINARIZED_TREES = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-      CoreAnnotations.PartOfSpeechAnnotation.class,
-      TreeCoreAnnotations.TreeAnnotation.class,
-      TreeCoreAnnotations.BinarizedTreeAnnotation.class
-  )));
-  Set<Class<? extends CoreAnnotation>> PARSE_TAG_DEPPARSE_BINARIZED_TREES = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-      CoreAnnotations.PartOfSpeechAnnotation.class,
-      TreeCoreAnnotations.TreeAnnotation.class,
-      TreeCoreAnnotations.BinarizedTreeAnnotation.class,
-      SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
-      SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
-      SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
-  )));
-  Set<Class<? extends CoreAnnotation>> PARSE_TAG_DEPPARSE = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-      CoreAnnotations.PartOfSpeechAnnotation.class,
-      TreeCoreAnnotations.TreeAnnotation.class,
-      SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
-      SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
-      SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
-  )));
+  Set<Requirement> TOKENIZE_AND_SSPLIT = Collections.unmodifiableSet(new ArraySet<>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT));
+  Set<Requirement> TOKENIZE_SSPLIT_POS = Collections.unmodifiableSet(new ArraySet<>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT));
+  Set<Requirement> TOKENIZE_SSPLIT_NER = Collections.unmodifiableSet(new ArraySet<>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, NER_REQUIREMENT));
+  Set<Requirement> TOKENIZE_SSPLIT_PARSE = Collections.unmodifiableSet(new ArraySet<>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, PARSE_REQUIREMENT));
+  Set<Requirement> TOKENIZE_SSPLIT_PARSE_NER = Collections.unmodifiableSet(new ArraySet<>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, PARSE_REQUIREMENT, NER_REQUIREMENT));
+  Set<Requirement> TOKENIZE_SSPLIT_POS_LEMMA = Collections.unmodifiableSet(new ArraySet<>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT, LEMMA_REQUIREMENT));
+  Set<Requirement> TOKENIZE_SSPLIT_POS_DEPPARSE = Collections.unmodifiableSet(new ArraySet<>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT, DEPENDENCY_REQUIREMENT));
+  Set<Requirement> PARSE_AND_TAG = Collections.unmodifiableSet(new ArraySet<>(POS_REQUIREMENT, PARSE_REQUIREMENT));
+  Set<Requirement> PARSE_TAG_BINARIZED_TREES = Collections.unmodifiableSet(new ArraySet<>(POS_REQUIREMENT, PARSE_REQUIREMENT, BINARIZED_TREES_REQUIREMENT));
+  Set<Requirement> PARSE_TAG_DEPPARSE_BINARIZED_TREES = Collections.unmodifiableSet(new ArraySet<>(POS_REQUIREMENT, PARSE_REQUIREMENT, DEPENDENCY_REQUIREMENT, BINARIZED_TREES_REQUIREMENT));
+  Set<Requirement> PARSE_TAG_DEPPARSE = Collections.unmodifiableSet(new ArraySet<>(POS_REQUIREMENT, PARSE_REQUIREMENT, DEPENDENCY_REQUIREMENT));
 
 }

@@ -19,8 +19,8 @@ import java.util.*;
 import java.io.*;
 import java.util.regex.Pattern;
 
-
-import edu.stanford.nlp.util.logging.Redwood;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Lexicon-based semgenter. Uses dynamic programming to find a word
@@ -40,7 +40,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
 
   private static final boolean DEBUG = false;
 
-  private static Redwood.RedwoodChannels logger = Redwood.channels(MaxMatchSegmenter.class);
+  private static Logger logger = LoggerFactory.getLogger(MaxMatchSegmenter.class);
 
   private Set<String> words = Generics.newHashSet();
   private int len=-1;

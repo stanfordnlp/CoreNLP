@@ -5,8 +5,8 @@ import edu.stanford.nlp.optimization.GoldenSectionLineSearch;
 
 import java.util.function.Function;
 
-
-import edu.stanford.nlp.util.logging.Redwood;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides a medium-weight implementation of Bernoulli (or binary)
@@ -38,7 +38,7 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
   private boolean tuneSigma = false;
   private int folds;
 
-  final static Redwood.RedwoodChannels logger = Redwood.channels(NBLinearClassifierFactory.class);
+  final static Logger logger = LoggerFactory.getLogger(NBLinearClassifierFactory.class);
 
 
   @Override

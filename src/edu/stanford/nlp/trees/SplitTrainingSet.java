@@ -11,7 +11,7 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.stanford.nlp.util.ArgumentParser;
+import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
@@ -28,19 +28,19 @@ import edu.stanford.nlp.util.StringUtils;
 public class SplitTrainingSet {
   private static Logger logger = LoggerFactory.getLogger(SplitTrainingSet.class);
 
-  @ArgumentParser.Option(name="input", gloss="The file to use as input.", required=true)
+  @Execution.Option(name="input", gloss="The file to use as input.", required=true)
   private static String INPUT = null;
 
-  @ArgumentParser.Option(name="output", gloss="Where to send the splits.", required=true)
+  @Execution.Option(name="output", gloss="Where to send the splits.", required=true)
   private static String OUTPUT = null;
 
-  @ArgumentParser.Option(name="split_names", gloss="Divisions to use for the output")
+  @Execution.Option(name="split_names", gloss="Divisions to use for the output")
   private static String[] SPLIT_NAMES = { "train", "dev", "test" };
 
-  @ArgumentParser.Option(name="split_weights", gloss="Portions to use for the divisions")
+  @Execution.Option(name="split_weights", gloss="Portions to use for the divisions")
   private static Double[] SPLIT_WEIGHTS = { 0.7, 0.15, 0.15 };
 
-  @ArgumentParser.Option(name="seed", gloss="Random seed to use")
+  @Execution.Option(name="seed", gloss="Random seed to use")
   private static long SEED = 0L;
 
   public static int weightedIndex(List<Double> weights, Random random) {
@@ -59,7 +59,7 @@ public class SplitTrainingSet {
   public static void main(String[] args) throws IOException {
     // Parse the arguments
     Properties props = StringUtils.argsToProperties(args);
-    ArgumentParser.fillOptions(new Class[]{ArgumentParser.class, SplitTrainingSet.class}, props);
+    Execution.fillOptions(new Class[]{ Execution.class, SplitTrainingSet.class }, props);
 
     if (SPLIT_NAMES.length != SPLIT_WEIGHTS.length) {
       throw new IllegalArgumentException("Name and weight arrays must be of the same length");

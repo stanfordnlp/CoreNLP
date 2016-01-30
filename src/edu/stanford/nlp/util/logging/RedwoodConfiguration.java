@@ -47,7 +47,6 @@ public class RedwoodConfiguration {
    * @return this
    */
   public RedwoodConfiguration capture(final OutputStream stream) {
-    // Capture the stream
     if (stream == System.out) {
       tasks.add(() -> Redwood.captureSystemStreams(true, Redwood.realSysErr == System.err));
     } else if (stream == System.err) {
@@ -199,7 +198,7 @@ public class RedwoodConfiguration {
         handler.leftMargin = config.channelWidth;
         root.addChild(handler);
       } catch (Exception e) {
-        throw new IllegalStateException("Could not find java.util.logging in your classpath", e);
+        throw new IllegalStateException("Could not find SLF4J in your classpath", e);
       }
     };
 

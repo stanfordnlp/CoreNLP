@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Sentence;
@@ -332,12 +331,12 @@ public class ParserAnnotator extends SentenceAnnotator {
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
+  public Set<Requirement> requires() {
     return parser.requiresTags() ? TOKENIZE_SSPLIT_POS : TOKENIZE_AND_SSPLIT;
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+  public Set<Requirement> requirementsSatisfied() {
     if (this.BUILD_GRAPHS) {
       if (this.saveBinaryTrees) {
         return PARSE_TAG_DEPPARSE_BINARIZED_TREES;

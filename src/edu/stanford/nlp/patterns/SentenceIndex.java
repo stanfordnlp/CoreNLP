@@ -1,7 +1,7 @@
 package edu.stanford.nlp.patterns;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.util.ArgumentParser;
+import edu.stanford.nlp.util.Execution;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -82,7 +82,7 @@ public abstract class SentenceIndex<E extends Pattern> {
   public static SentenceIndex createIndex(Class<? extends SentenceIndex> indexClass, Map<String, List<CoreLabel>> sents, Properties props, Set<String> stopWords,
                                           String indexDirectory, Function<CoreLabel, Map<String, String>> transformCoreLabeltoString)  {
     try{
-      ArgumentParser.fillOptions(SentenceIndex.class, props);
+      Execution.fillOptions(SentenceIndex.class, props);
       Method m = indexClass.getMethod("createIndex", Map.class, Properties.class, Set.class, String.class, Function.class);
       SentenceIndex index = (SentenceIndex) m.invoke(null, new Object[]{sents, props, stopWords, indexDirectory, transformCoreLabeltoString});
       return index;
@@ -99,7 +99,7 @@ public abstract class SentenceIndex<E extends Pattern> {
   public abstract Map<E, Set<String>> queryIndex(Collection<E> Es);//,  EIndex EIndex);
 
   public void setUp(Properties props) {
-    ArgumentParser.fillOptions(this, props);
+    Execution.fillOptions(this, props);
   }
 
   protected abstract void add(List<CoreLabel> value, String sentId, boolean addProcessedText);
@@ -112,7 +112,7 @@ public abstract class SentenceIndex<E extends Pattern> {
 
   public static SentenceIndex loadIndex(Class<? extends SentenceIndex> indexClass, Properties props, Set<String> stopWords, String indexDirectory, Function<CoreLabel, Map<String, String>> transformCoreLabeltoString){
     try{
-      ArgumentParser.fillOptions(SentenceIndex.class, props);
+      Execution.fillOptions(SentenceIndex.class, props);
       Method m = indexClass.getMethod("loadIndex", Properties.class, Set.class, String.class, Function.class);
       SentenceIndex index = (SentenceIndex) m.invoke(null, new Object[]{props, stopWords, indexDirectory, transformCoreLabeltoString});
       return index;

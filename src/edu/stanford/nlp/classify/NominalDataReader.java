@@ -13,8 +13,8 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 
-
-import edu.stanford.nlp.util.logging.Redwood;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A class to read some UCI datasets into RVFDatum. Will incrementally add formats.
@@ -27,7 +27,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class NominalDataReader {
   Map<String, Index<String>> indices = Generics.newHashMap(); // an Index for each feature so that its values are coded as integers
 
-  final static Redwood.RedwoodChannels logger = Redwood.channels(NominalDataReader.class);
+  final static Logger logger = LoggerFactory.getLogger(NominalDataReader.class);
 
   /**
    * the class is the last column and it skips the next-to-last column because it is a unique id in the audiology data
