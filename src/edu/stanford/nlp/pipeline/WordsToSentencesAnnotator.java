@@ -126,7 +126,7 @@ public class WordsToSentencesAnnotator implements Annotator {
     // section annotations to mark sentences with
     CoreMap sectionAnnotations = null;
     List<CoreMap> sentences = new ArrayList<>();
-    for (List<CoreLabel> sentenceTokens: this.wts.process(tokens)) {
+    for (List<CoreLabel> sentenceTokens: wts.process(tokens)) {
       if (countLineNumbers) {
         ++lineNumber;
       }
