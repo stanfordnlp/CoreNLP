@@ -3,6 +3,7 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.ie.NumberNormalizer;
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
@@ -453,7 +454,7 @@ public class ProtobufAnnotationSerializerSlowITest {
           String annotator = iter.next();
           boolean valid = true;
           try {
-            for (Annotator.Requirement requirement : StanfordCoreNLP.getExistingAnnotator(annotator).requires()) {
+            for (Class<? extends CoreAnnotation> requirement : StanfordCoreNLP.getExistingAnnotator(annotator).requires()) {
               if (!annotatorsAdded.contains(requirement.toString())) { valid = false; }
             }
           } catch (NullPointerException ignored) { }

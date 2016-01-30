@@ -1,7 +1,7 @@
 package edu.stanford.nlp.wordseg;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 
@@ -11,7 +11,7 @@ public class NonDict2  {
   public String corporaDict = "/u/nlp/data/gale/segtool/stanford-seg/data/";
   private static CorpusDictionary cd = null;
 
-  private static Logger logger = LoggerFactory.getLogger(NonDict2.class);
+  private static Redwood.RedwoodChannels logger = Redwood.channels(NonDict2.class);
 
   public NonDict2(SeqClassifierFlags flags) {
     if (cd == null) {

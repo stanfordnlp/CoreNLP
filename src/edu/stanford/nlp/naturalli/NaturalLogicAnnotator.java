@@ -1,27 +1,25 @@
 package edu.stanford.nlp.naturalli;
 
 import edu.stanford.nlp.ie.machinereading.structure.Span;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.pipeline.SentenceAnnotator;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.Triple;
+import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotations.*;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * An annotator marking operators with their scope.
@@ -156,13 +154,10 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
       IndexedWord node = fringe.poll();
       min = Math.min(node.index(), min);
       max = Math.max(node.index(), max);
-      for (SemanticGraphEdge edge : tree.getOutEdgesSorted(node)) {
-        if (edge.getGovernor().equals(node) &&
-            !(edge.getGovernor().equals(edge.getDependent())) &&
-            !"punct".equals(edge.getRelation().getShortName())) {  // ignore punctuation
-          fringe.add(edge.getDependent());
-        }
-      }
+      // ignore punctuation
+      fringe.addAll(tree.getOutEdgesSorted(node).stream().filter(edge -> edge.getGovernor().equals(node) &&
+          !(edge.getGovernor().equals(edge.getDependent())) &&
+          !"punct".equals(edge.getRelation().getShortName())).map(SemanticGraphEdge::getDependent).collect(Collectors.toList()));
     }
     return Pair.makePair(min, max + 1);
   }
@@ -419,11 +414,9 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
     // Ensure we didn't select overlapping quantifiers. For example, "a" and "a few" can often overlap.
     // In these cases, take the longer quantifier match.
     List<OperatorSpec> quantifiers = new ArrayList<>();
-    for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
-      if (token.has(OperatorAnnotation.class)) {
-        quantifiers.add(token.get(OperatorAnnotation.class));
-      }
-    }
+    sentence.get(CoreAnnotations.TokensAnnotation.class).stream()
+        .filter(token -> token.has(OperatorAnnotation.class))
+        .forEach(token -> quantifiers.add(token.get(OperatorAnnotation.class)));
     quantifiers.sort( (x, y) -> y.quantifierLength() - x.quantifierLength());
     for (OperatorSpec quantifier : quantifiers) {
       for (int i = quantifier.quantifierBegin; i < quantifier.quantifierEnd; ++i) {
@@ -620,13 +613,22 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
 
   /** {@inheritDoc} */
   @Override
-  public Set<Requirement> requirementsSatisfied() {
-    return Collections.singleton(NATLOG_REQUIREMENT);
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        doPolarity ? NaturalLogicAnnotations.PolarityAnnotation.class : null,
+        NaturalLogicAnnotations.OperatorAnnotation.class
+    )));
   }
 
   /** {@inheritDoc} */
   @Override
-  public Set<Requirement> requires() {
-    return Annotator.REQUIREMENTS.get(STANFORD_NATLOG);
+  public Set<Class<? extends CoreAnnotation>> requires() {
+    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.SentencesAnnotation.class,
+        CoreAnnotations.PartOfSpeechAnnotation.class,
+        SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
+        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class
+    )));
   }
 }

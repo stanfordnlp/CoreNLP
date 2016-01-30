@@ -62,8 +62,8 @@ import java.util.zip.ZipFile;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * This class provides the top-level API and command-line interface to a set
@@ -92,7 +92,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LexicalizedParser extends ParserGrammar implements Serializable {
 
-  private static Logger logger = LoggerFactory.getLogger(LexicalizedParser.class);
+  private static Redwood.RedwoodChannels logger = Redwood.channels(LexicalizedParser.class);
 
   public Lexicon lex;
   public BinaryGrammar bg;

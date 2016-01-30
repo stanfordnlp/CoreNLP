@@ -6,6 +6,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import edu.stanford.nlp.ie.regexp.RegexNERSequenceClassifier;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
@@ -128,12 +129,12 @@ public class RegexNERAnnotator implements Annotator {
 
 
   @Override
-  public Set<Requirement> requires() {
+  public Set<Class<? extends CoreAnnotation>> requires() {
     return StanfordCoreNLP.TOKENIZE_SSPLIT_POS;
   }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     // TODO: we might want to allow for different RegexNER annotators
     // to satisfy different requirements
     return Collections.emptySet();

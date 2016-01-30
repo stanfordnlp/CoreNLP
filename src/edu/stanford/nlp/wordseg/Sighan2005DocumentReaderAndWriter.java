@@ -29,8 +29,8 @@ import edu.stanford.nlp.util.Characters;
 
 import java.util.function.Function;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MutableInteger;
@@ -50,7 +50,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
 
   private static final long serialVersionUID = 3260295150250263237L;
 
-  private static Logger logger = LoggerFactory.getLogger(Sighan2005DocumentReaderAndWriter.class);
+  private static Redwood.RedwoodChannels logger = Redwood.channels(Sighan2005DocumentReaderAndWriter.class);
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_MORE = false;

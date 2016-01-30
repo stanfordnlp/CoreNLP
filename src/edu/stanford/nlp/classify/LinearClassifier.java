@@ -44,8 +44,9 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.function.Function;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import edu.stanford.nlp.util.logging.Redwood;
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -82,7 +83,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
 
   public static final String TEXT_SERIALIZATION_DELIMITER = "\t";
 
-  final static Logger logger = LoggerFactory.getLogger(LinearClassifier.class);
+  final static Redwood.RedwoodChannels logger = Redwood.channels(LinearClassifier.class);
 
   @Override
   public Collection<L> labels() {

@@ -1,5 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
@@ -23,6 +24,10 @@ import java.util.regex.Pattern;
  * Considers regular ascii ("", '', ``'', and `') as well as "smart" and
  * international quotation marks as follows:
  * “”,‘’, «», ‹›, 「」, 『』, „”, and ‚’.
+ *
+ * Note: extracts everything within these pairs as a whole quote segment, which may or may
+ * not be the desired behaviour for texts that use different formatting styles than
+ * standard english ones.
  *
  * There are a number of options that can be passed to the quote annotator to
  * customize its' behaviour:
@@ -516,13 +521,13 @@ public class QuoteAnnotator implements Annotator {
   }
 
   @Override
-  public Set<Requirement> requires() {
+  public Set<Class<? extends CoreAnnotation>> requires() {
     return Collections.emptySet();
   }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
-    return Collections.singleton(QUOTE_REQUIREMENT);
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+    return Collections.singleton(CoreAnnotations.QuotationsAnnotation.class);
   }
 
 }
