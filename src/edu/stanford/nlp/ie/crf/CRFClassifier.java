@@ -139,7 +139,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   CliquePotentialFunction cliquePotentialFunction;
   HasCliquePotentialFunction cliquePotentialFunctionHelper;
 
-  /** Parameter weights of the classifier. */
+  /** Parameter weights of the classifier.  weights[featureIndex][labelIndex] */
   double[][] weights;
 
   /** index the features of CRF */
@@ -1290,8 +1290,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     PriorModelFactory<IN> pmf = (PriorModelFactory<IN>) Class.forName(flags.priorModelFactory).newInstance();
     ListeningSequenceModel prior = pmf.getInstance(flags.backgroundSymbol, classIndex, tagIndex, newDocument, entityMatrices, flags);
 
-    if (flags.useUniformPrior) {
-    } else {
+    if ( ! flags.useUniformPrior) {
       throw new RuntimeException("no prior specified");
     }
 
@@ -1498,8 +1497,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * Takes a {@link List} of something that extends {@link CoreMap} and prints
    * the factor table at each point.
    *
-   * @param document
-   *          A {@link List} of something that extends {@link CoreMap}.
+   * @param document A {@link List} of something that extends {@link CoreMap}.
    */
   public void printFactorTableDocument(List<IN> document) {
 
@@ -1746,7 +1744,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       if (flags.saveFeatureIndexToDisk) {
         try {
           System.err.println("Reading temporary feature index file.");
-          featureIndex = (Index<String>) IOUtils.readObjectFromFile(featIndexFile);
+          featureIndex = IOUtils.readObjectFromFile(featIndexFile);
         } catch (Exception e) {
           throw new RuntimeException("Could not open temporary feature index file for reading.");
         }
@@ -2806,8 +2804,13 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return w;
   }
 
+  /** Read real-valued vector embeddings for (lowercased) word tokens.
+   *  A lexicon is contained in the file flags.embeddingWords.
+   *  The word vectors are then in the same order in the file flags.embeddingVectors.
+   * @throws IOException
+   */
   private void readEmbeddingsData() throws IOException {
-    System.err.println("Reading Embedding Files");
+    System.err.printf("Reading embedding files %s and %s.%n", flags.embeddingWords, flags.embeddingVectors);
     BufferedReader br = IOUtils.readerFromString(flags.embeddingWords);
 
     List<String> wordList = new ArrayList<>();
