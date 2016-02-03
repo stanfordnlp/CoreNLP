@@ -312,7 +312,7 @@ if (pp == null) {
                 <p>
                   Sorry, can't parse sentences containing more than
                   <%= MAXWORDS %> words. <br/>
-                  The sentence <em><%= Sentence.listToString(sentence) %></em> has
+                  The sentence <em><%= SentenceUtils.listToString(sentence) %></em> has
                   <%= queryWords.length %> words.
                 </p>
               <%
