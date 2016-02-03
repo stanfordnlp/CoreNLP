@@ -10,7 +10,7 @@ import java.util.PriorityQueue;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.parser.KBestViterbiParser;
 import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.parser.common.ParserQuery;
@@ -284,8 +284,8 @@ public class ShiftReduceParserQuery implements ParserQuery {
     List<Tree> leaves = tree.getLeaves();
     if (leaves.size() != originalSentence.size()) {
       throw new IllegalStateException("originalWords and sentence of different sizes: " + originalSentence.size() + " vs. " + leaves.size() +
-                                      "\n Orig: " + Sentence.listToString(originalSentence) +
-                                      "\n Pars: " + Sentence.listToString(leaves));
+                                      "\n Orig: " + SentenceUtils.listToString(originalSentence) +
+                                      "\n Pars: " + SentenceUtils.listToString(leaves));
     }
     // TODO: get rid of this cast
     Iterator<? extends Label> wordsIterator = (Iterator<? extends Label>) originalSentence.iterator();

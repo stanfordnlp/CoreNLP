@@ -7,7 +7,7 @@ import edu.stanford.nlp.international.morph.MorphoFeatures;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.process.SerializableFunction;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.DiskTreebank;
@@ -570,7 +570,7 @@ public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParam
 
   public List<HasWord> defaultTestSentence() {
     String[] sent = {"Ceci", "est", "seulement", "un", "test", "."};
-    return Sentence.toWordList(sent);
+    return SentenceUtils.toWordList(sent);
   }
 
   @Override

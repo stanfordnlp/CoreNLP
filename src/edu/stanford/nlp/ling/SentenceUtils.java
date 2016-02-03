@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Sentence holds a couple utility methods for lists.
+ * SentenceUtils holds a couple utility methods for lists.
  * Those include a method that nicely prints a list and methods that
  * construct lists of words from lists of strings.
  *
@@ -14,9 +14,9 @@ import java.util.List;
  * @author John Bauer
  * @version 2010
  */
-public class Sentence {
+public class SentenceUtils {
 
-  private Sentence() {} // static methods
+  private SentenceUtils() {} // static methods
 
   /**
    * Create an ArrayList as a list of <code>TaggedWord</code> from two

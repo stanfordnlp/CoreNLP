@@ -1,6 +1,6 @@
 package edu.stanford.nlp.tagger.util;
 
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.tagger.maxent.TaggerConfig;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;
@@ -37,9 +37,9 @@ public class MakePrefixFile {
     TaggedFileRecord record = TaggedFileRecord.createRecord(config, config.getProperty("input"));
     for (List<TaggedWord> sentence : record.reader()) {
       int len = random.nextInt(sentence.size()) + 1;
-      System.out.println(Sentence.listToString(sentence.subList(0, len), false, tagSeparator));
+      System.out.println(SentenceUtils.listToString(sentence.subList(0, len), false, tagSeparator));
       if (fullSentence) {
-        System.out.println(Sentence.listToString(sentence, false, tagSeparator));        
+        System.out.println(SentenceUtils.listToString(sentence, false, tagSeparator));
       }
     }
   }

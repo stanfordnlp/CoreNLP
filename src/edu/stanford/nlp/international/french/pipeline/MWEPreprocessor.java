@@ -5,7 +5,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.Tree;
@@ -191,8 +191,8 @@ public final class MWEPreprocessor {
       if(RESOLVE_DUMMY_TAGS && label.equals(FrenchXMLTreeReader.MISSING_PHRASAL))
         continue;
 
-      String preterm = Sentence.listToString(match.preTerminalYield());
-      String term = Sentence.listToString(match.yield());
+      String preterm = SentenceUtils.listToString(match.preTerminalYield());
+      String term = SentenceUtils.listToString(match.yield());
 
       labelPreterm.incrementCount(label,preterm);
       pretermLabel.incrementCount(preterm,label);

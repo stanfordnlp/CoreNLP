@@ -5,6 +5,7 @@ import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 
+import edu.stanford.nlp.ling.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -12,14 +13,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import edu.stanford.nlp.io.ReaderInputStream;
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.HasCategory;
-import edu.stanford.nlp.ling.HasContext;
-import edu.stanford.nlp.ling.HasTag;
-import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
@@ -316,7 +310,7 @@ public class FrenchXMLTreeReader implements TreeReader {
 
 
   private Tree postProcessMWE(Tree t) {
-    String tYield = Sentence.listToString(t.yield()).replaceAll("\\s+", "");
+    String tYield = SentenceUtils.listToString(t.yield()).replaceAll("\\s+", "");
     if(tYield.matches("[\\d\\p{Punct}]*")) {
       List<Tree> kids = new ArrayList<>();
       kids.add(treeFactory.newLeaf(tYield));

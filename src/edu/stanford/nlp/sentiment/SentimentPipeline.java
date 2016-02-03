@@ -11,13 +11,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import edu.stanford.nlp.ling.SentenceUtils;
 import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
@@ -225,7 +225,7 @@ public class SentimentPipeline {
 
       List<Annotation> annotations = Generics.newArrayList();
       for (Tree tree : trees) {
-        CoreMap sentence = new Annotation(Sentence.listToString(tree.yield()));
+        CoreMap sentence = new Annotation(SentenceUtils.listToString(tree.yield()));
         sentence.set(TreeCoreAnnotations.TreeAnnotation.class, tree);
         List<CoreMap> sentences = Collections.singletonList(sentence);
         Annotation annotation = new Annotation("");

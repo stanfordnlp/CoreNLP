@@ -18,7 +18,7 @@ import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.objectbank.ObjectBank;
@@ -235,7 +235,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
   @Override
   public List<HasWord> segment(String line) {
     String segmentedString = segmentString(line);
-    return Sentence.toWordList(segmentedString.split("\\s+"));
+    return SentenceUtils.toWordList(segmentedString.split("\\s+"));
   }
 
   public String segmentString(String line) {

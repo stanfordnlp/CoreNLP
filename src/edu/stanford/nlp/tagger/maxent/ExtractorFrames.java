@@ -783,8 +783,6 @@ class ExtractorWordShapeConjunction extends Extractor {
  */
 class ExtractorSpanishAuxiliaryTag extends Extractor {
 
-  private static final long serialVersionUID = -3352770856914897103L;
-
   public ExtractorSpanishAuxiliaryTag() {
     super(-1, true);
   }
@@ -807,11 +805,9 @@ class ExtractorSpanishAuxiliaryTag extends Extractor {
 
 /**
  * Extracts a boolean indicating whether the given word is preceded by
- * a semi-auxiliary verb.
+ * a semiauxiliary verb.
  */
 class ExtractorSpanishSemiauxiliaryTag extends Extractor {
-
-  private static final long serialVersionUID = -164942945521643734L;
 
   public ExtractorSpanishSemiauxiliaryTag() {
     super(-1, true);

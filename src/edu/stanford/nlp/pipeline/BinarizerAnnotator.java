@@ -29,11 +29,10 @@ import edu.stanford.nlp.util.ReflectionLoading;
  * @author John Bauer
  */
 public class BinarizerAnnotator implements Annotator {
-
   private static final String DEFAULT_TLPP_CLASS = "edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams";
-
-  private final TreeBinarizer binarizer;
-  private final String tlppClass;
+  
+  final TreeBinarizer binarizer;
+  final String tlppClass;
 
   public BinarizerAnnotator(String annotatorName, Properties props) {
     this.tlppClass = props.getProperty(annotatorName + ".tlppClass", DEFAULT_TLPP_CLASS);
@@ -41,8 +40,8 @@ public class BinarizerAnnotator implements Annotator {
     this.binarizer = TreeBinarizer.simpleTreeBinarizer(tlpp.headFinder(), tlpp.treebankLanguagePack());
   }
 
-  public String signature(String annotatorName, Properties props) {
-    // String tlppClass = props.getProperty(annotatorName + ".tlppClass", DEFAULT_TLPP_CLASS);
+  public static String signature(String annotatorName, Properties props) {
+    String tlppClass = props.getProperty(annotatorName + ".tlppClass", DEFAULT_TLPP_CLASS);
     return tlppClass;
   }
 
@@ -67,12 +66,12 @@ public class BinarizerAnnotator implements Annotator {
     }
     Trees.convertToCoreLabels(binarized);
     sentence.set(TreeCoreAnnotations.BinarizedTreeAnnotation.class, binarized);
-  }
+  }  
 
   /**
    * Recursively check that a tree is not already binarized.
    */
-  private static boolean isBinarized(Tree tree) {
+  private boolean isBinarized(Tree tree) {
     if (tree.isLeaf()) {
       return true;
     }
@@ -103,5 +102,4 @@ public class BinarizerAnnotator implements Annotator {
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     return Collections.singleton(TreeCoreAnnotations.BinarizedTreeAnnotation.class);
   }
-
 }

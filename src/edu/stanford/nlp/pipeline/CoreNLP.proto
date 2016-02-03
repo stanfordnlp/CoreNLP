@@ -1,3 +1,4 @@
+syntax="proto2";
 package edu.stanford.nlp.pipeline;
 
 option java_package = "edu.stanford.nlp.pipeline";

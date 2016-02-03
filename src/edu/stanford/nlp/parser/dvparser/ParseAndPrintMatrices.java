@@ -12,11 +12,11 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.stanford.nlp.ling.SentenceUtils;
 import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.FileSystem;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.parser.common.ArgUtils;
 import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
@@ -125,7 +125,7 @@ public class ParseAndPrintMatrices {
         FileWriter fout = new FileWriter(outputPath + File.separator + "sentence" + count + ".txt");
         BufferedWriter bout = new BufferedWriter(fout);
 
-        bout.write(Sentence.listToString(sentence));
+        bout.write(SentenceUtils.listToString(sentence));
         bout.newLine();
         bout.write(deepTree.getTree().toString());
         bout.newLine();

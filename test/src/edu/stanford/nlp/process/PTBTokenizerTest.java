@@ -5,13 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
+
+import edu.stanford.nlp.ling.*;
 import org.junit.Test;
 
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.Sentence;
-import edu.stanford.nlp.ling.Word;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.international.negra.NegraPennLanguagePack;
 
@@ -154,7 +152,7 @@ public class PTBTokenizerTest {
         List<CoreLabel> tokens = new PTBTokenizer<CoreLabel>(new StringReader(corpInputs[sent / 2]),
               new CoreLabelTokenFactory(),
               (sent % 2 == 0) ? "strictTreebank3": "").tokenize();
-        System.out.println("Guess: " + Sentence.listToString(tokens));
+        System.out.println("Guess: " + SentenceUtils.listToString(tokens));
         System.out.flush();
       }
       assertEquals("PTBTokenizer num tokens problem", i, corpGold[sent % 2].length);
@@ -319,7 +317,7 @@ public class PTBTokenizerTest {
     TreebankLanguagePack tlp = new NegraPennLanguagePack();
     Tokenizer<? extends HasWord> toke =tlp.getTokenizerFactory().getTokenizer(new StringReader(sample));
     List<? extends HasWord> tokens = toke.tokenize();
-    List<? extends HasWord> goldTokens = Sentence.toWordList(tokenized);
+    List<? extends HasWord> goldTokens = SentenceUtils.toWordList(tokenized);
     assertEquals("Tokenization length mismatch", goldTokens.size(), tokens.size());
     for (int i = 0, sz = goldTokens.size(); i < sz; i++) {
       assertEquals("Bad tokenization", goldTokens.get(i).word(), tokens.get(i).word());

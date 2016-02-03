@@ -8,7 +8,7 @@ import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.StringOutputStream;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -164,7 +164,7 @@ public class JSONOutputter extends AnnotationOutputter {
               CorefChain.CorefMention representative = chain.getRepresentativeMention();
               chainWriter.set(Integer.toString(chain.getChainID()), chain.getMentionsInTextualOrder().stream().map(mention -> (Consumer<Writer>) (Writer mentionWriter) -> {
                 mentionWriter.set("id", mention.mentionID);
-                mentionWriter.set("text", Sentence.listToOriginalTextString(doc.get(CoreAnnotations.SentencesAnnotation.class).get(mention.sentNum - 1).get(CoreAnnotations.TokensAnnotation.class).subList(mention.startIndex - 1, mention.endIndex - 1)).trim());
+                mentionWriter.set("text", SentenceUtils.listToOriginalTextString(doc.get(CoreAnnotations.SentencesAnnotation.class).get(mention.sentNum - 1).get(CoreAnnotations.TokensAnnotation.class).subList(mention.startIndex - 1, mention.endIndex - 1)).trim());
                 mentionWriter.set("type", mention.mentionType);
                 mentionWriter.set("number", mention.number);
                 mentionWriter.set("gender", mention.gender);

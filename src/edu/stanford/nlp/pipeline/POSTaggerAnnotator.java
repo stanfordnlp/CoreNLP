@@ -143,7 +143,7 @@ public class POSTaggerAnnotator implements Annotator {
       } catch (OutOfMemoryError e) {
         System.err.println("WARNING: Tagging of sentence ran out of memory. " +
                            "Will ignore and continue: " +
-                           Sentence.listToString(tokens));
+                           SentenceUtils.listToString(tokens));
       }
     }
 
