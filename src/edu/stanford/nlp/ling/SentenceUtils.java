@@ -225,6 +225,9 @@ public class SentenceUtils {
    * @return The original sentence String, which may contain newlines or other artifacts of spacing
    */
   public static <T extends HasWord> String listToOriginalTextString(List<T> list, boolean printBeforeBeforeStart) {
+    if (list == null) {
+      return null;
+    }
     StringBuilder s = new StringBuilder();
     for (HasWord word : list) {
       CoreLabel cl = (CoreLabel) word;
