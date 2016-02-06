@@ -22,6 +22,7 @@ Choose Stanford CoreNLP if you need:
 * The overall highest quality text analytics
 * Support for a number of major (human) languages
 * Interfaces available for various major modern programming languages
+* Ability to run as a simple web service
 
 Stanford CoreNLP is an integrated framework. Its goal is to
 make it very easy to apply a bunch of linguistic analysis tools to a piece
@@ -38,6 +39,9 @@ including [the part-of-speech (POS) tagger](http://nlp.stanford.edu/software/tag
 [the bootstrapped pattern learning](http://nlp.stanford.edu/software/patternslearning.html) tools.
 Its analyses provide the foundational building blocks for
 higher-level and domain-specific text understanding applications.
+
+![CoreNLP screenshot]({{ site.github.url }}/images/Xi-Jinping.png)
+
 
 ## Download
 

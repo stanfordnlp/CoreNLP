@@ -19,7 +19,7 @@ String firstPOSTag = sent.posTag(0);   // NNP
 ...
 ```
 
-The API is included in the CoreNLP release from 3.6.0 onwards. Visit the [download page](http://stanfordnlp.github.io/CoreNLP/download.html) to download CoreNLP; make sure to include both the code jar and the models jar in your classpath!
+The API is included in the CoreNLP release from 3.6.0 onwards. Visit the [download page]({{ site.github.url}}/download.html) to download CoreNLP; make sure to include both the code jar and the models jar in your classpath!
 
 ### Advantages and Disadvantages
 
