@@ -43,6 +43,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -270,6 +271,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
    * prerequisites for each of the annotators in the input is met.
    * For example, if the user requests lemma, ensure that pos is also run because lemma depends on
    * pos. As a side effect, this function orders the annotators in the proper order.
+   * Note that this is not guaranteed to return a valid set of annotators,
+   * as properties passed to the annotators can change their requirements.
    *
    * @param annotators The annotators the user has requested.
    * @return A sanitized annotators string with all prerequisites met.
@@ -278,13 +281,26 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     // Get an unordered set of annotators
     Set<String> unorderedAnnotators = new HashSet<>();
     for (String annotator : annotators) {
-      if (!Annotator.REQUIREMENTS.containsKey(annotator.toLowerCase())) {
+      // Add the annotator
+      if (!getNamedAnnotators().containsKey(annotator.toLowerCase())) {
         throw new IllegalArgumentException("Unknown annotator: " + annotator);
       }
+
+      // Add its transitive dependencies
       unorderedAnnotators.add(annotator.toLowerCase());
-      Set<Requirement> requirements = Annotator.REQUIREMENTS.get(annotator.toLowerCase());
-      for (Requirement prereq : requirements) {
-        unorderedAnnotators.add(prereq.name);
+      if (!Annotator.DEFAULT_REQUIREMENTS.containsKey(annotator.toLowerCase())) {
+        throw new IllegalArgumentException("Cannot infer requirements for annotator: " + annotator);
+      }
+      Queue<String> fringe = new LinkedList<>(Annotator.DEFAULT_REQUIREMENTS.get(annotator.toLowerCase()));
+      int ticks = 0;
+      while (!fringe.isEmpty()) {
+        ticks += 1;
+        if (ticks == 1000000) {
+          throw new IllegalStateException("[INTERNAL ERROR] Annotators have a circular dependency.");
+        }
+        String prereq = fringe.poll();
+        unorderedAnnotators.add(prereq);
+        fringe.addAll(Annotator.DEFAULT_REQUIREMENTS.get(prereq.toLowerCase()));
       }
     }
 
@@ -298,8 +314,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         String candidate = iter.next();
         // Are the requirements satisfied?
         boolean canAdd = true;
-        for (Requirement prereq : Annotator.REQUIREMENTS.get(candidate)) {
-          if (!orderedAnnotators.contains(prereq.name)) {
+        for (String prereq : Annotator.DEFAULT_REQUIREMENTS.get(candidate.toLowerCase())) {
+          if (!orderedAnnotators.contains(prereq)) {
             canAdd = false;
             break;
           }
@@ -322,9 +338,12 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   }
 
 
+  /**
+   * Check if we can construct an XML outputter.
+   */
   public static boolean isXMLOutputPresent() {
     try {
-      Class clazz = Class.forName("edu.stanford.nlp.pipeline.XMLOutputter");
+      Class.forName("edu.stanford.nlp.pipeline.XMLOutputter");
     } catch (ClassNotFoundException ex) {
       return false;
     } catch (NoClassDefFoundError ex) {
@@ -406,6 +425,40 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     pool = null;
   }
 
+
+  /**
+   * This function defines the list of named annotators in CoreNLP, along with how to construct
+   * them.
+   * @return A map from annotator name, to the function which constructs that annotator.
+   */
+  private static Map<String, BiFunction<Properties, AnnotatorImplementations, AnnotatorFactory>> getNamedAnnotators() {
+    Map<String, BiFunction<Properties, AnnotatorImplementations, AnnotatorFactory>> pool = new HashMap<>();
+    pool.put(STANFORD_TOKENIZE, AnnotatorFactories::tokenize);
+    pool.put(STANFORD_CLEAN_XML, AnnotatorFactories::cleanXML);
+    pool.put(STANFORD_SSPLIT, AnnotatorFactories::sentenceSplit);
+    pool.put(STANFORD_POS, AnnotatorFactories::posTag);
+    pool.put(STANFORD_LEMMA, AnnotatorFactories::lemma);
+    pool.put(STANFORD_NER, AnnotatorFactories::nerTag);
+    pool.put(STANFORD_REGEXNER, AnnotatorFactories::regexNER);
+    pool.put(STANFORD_ENTITY_MENTIONS, AnnotatorFactories::entityMentions);
+    pool.put(STANFORD_GENDER, AnnotatorFactories::gender);
+    pool.put(STANFORD_TRUECASE, AnnotatorFactories::truecase);
+    pool.put(STANFORD_PARSE, AnnotatorFactories::parse);
+    pool.put(STANFORD_MENTION, AnnotatorFactories::mention);
+    pool.put(STANFORD_DETERMINISTIC_COREF, AnnotatorFactories::dcoref);
+    pool.put(STANFORD_COREF, AnnotatorFactories::coref);
+    pool.put(STANFORD_RELATION, AnnotatorFactories::relation);
+    pool.put(STANFORD_SENTIMENT, AnnotatorFactories::sentiment);
+    pool.put(STANFORD_COLUMN_DATA_CLASSIFIER, AnnotatorFactories::columnDataClassifier);
+    pool.put(STANFORD_DEPENDENCIES, AnnotatorFactories::dependencies);
+    pool.put(STANFORD_NATLOG, AnnotatorFactories::natlog);
+    pool.put(STANFORD_OPENIE, AnnotatorFactories::openie);
+    pool.put(STANFORD_QUOTE, AnnotatorFactories::quote);
+    pool.put(STANFORD_UD_FEATURES, AnnotatorFactories::udfeats);
+    return pool;
+  }
+
+
   /**
    * Construct the default annotator pool from the passed properties, and overwriting annotations which have changed
    * since the last
@@ -420,28 +473,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       pool = new AnnotatorPool();
     }
 
-    pool.register(STANFORD_TOKENIZE, AnnotatorFactories.tokenize(properties, annotatorImplementation));
-    pool.register(STANFORD_CLEAN_XML, AnnotatorFactories.cleanXML(properties, annotatorImplementation));
-    pool.register(STANFORD_SSPLIT, AnnotatorFactories.sentenceSplit(properties, annotatorImplementation));
-    pool.register(STANFORD_POS, AnnotatorFactories.posTag(properties, annotatorImplementation));
-    pool.register(STANFORD_LEMMA, AnnotatorFactories.lemma(properties, annotatorImplementation));
-    pool.register(STANFORD_NER, AnnotatorFactories.nerTag(properties, annotatorImplementation));
-    pool.register(STANFORD_REGEXNER, AnnotatorFactories.regexNER(properties, annotatorImplementation));
-    pool.register(STANFORD_ENTITY_MENTIONS, AnnotatorFactories.entityMentions(properties, annotatorImplementation));
-    pool.register(STANFORD_GENDER, AnnotatorFactories.gender(properties, annotatorImplementation));
-    pool.register(STANFORD_TRUECASE, AnnotatorFactories.truecase(properties, annotatorImplementation));
-    pool.register(STANFORD_PARSE, AnnotatorFactories.parse(properties, annotatorImplementation));
-    pool.register(STANFORD_MENTION, AnnotatorFactories.mention(properties, annotatorImplementation));
-    pool.register(STANFORD_DETERMINISTIC_COREF, AnnotatorFactories.dcoref(properties, annotatorImplementation));
-    pool.register(STANFORD_COREF, AnnotatorFactories.coref(properties, annotatorImplementation));
-    pool.register(STANFORD_RELATION, AnnotatorFactories.relation(properties, annotatorImplementation));
-    pool.register(STANFORD_SENTIMENT, AnnotatorFactories.sentiment(properties, annotatorImplementation));
-    pool.register(STANFORD_COLUMN_DATA_CLASSIFIER,AnnotatorFactories.columnDataClassifier(properties, annotatorImplementation));
-    pool.register(STANFORD_DEPENDENCIES, AnnotatorFactories.dependencies(properties, annotatorImplementation));
-    pool.register(STANFORD_NATLOG, AnnotatorFactories.natlog(properties, annotatorImplementation));
-    pool.register(STANFORD_OPENIE, AnnotatorFactories.openie(properties, annotatorImplementation));
-    pool.register(STANFORD_QUOTE, AnnotatorFactories.quote(properties, annotatorImplementation));
-    pool.register(STANFORD_UD_FEATURES, AnnotatorFactories.udfeats(properties, annotatorImplementation));
+    for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, AnnotatorFactory>> entry : getNamedAnnotators().entrySet()) {
+      pool.register(entry.getKey(), entry.getValue().apply(properties, annotatorImplementation));
+    }
 
     // Add more annotators here
 
@@ -482,14 +516,14 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
   public static synchronized Annotator getExistingAnnotator(String name) {
     if(pool == null){
-      logger.error("ERROR: attempted to fetch annotator \"" + name + "\" before the annotator pool was created!");
+      logger.error("Attempted to fetch annotator \"" + name + "\" before the annotator pool was created!");
       return null;
     }
     try {
       Annotator a =  pool.get(name);
       return a;
     } catch(IllegalArgumentException e) {
-      logger.error("ERROR: attempted to fetch annotator \"" + name +
+      logger.error("Attempted to fetch annotator \"" + name +
         "\" but the annotator pool does not store any such type!");
       return null;
     }

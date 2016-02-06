@@ -455,7 +455,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
         // TODO: these assertions rule out the possibility of alternately named parse/pos annotators
         throw new AssertionError("Failed to get parser - this should not be possible");
       }
-      if (parser.requires().contains(Annotator.POS_REQUIREMENT)) {
+      if (parser.requires().contains(CoreAnnotations.PartOfSpeechAnnotation.class)) {
         Annotator tagger = StanfordCoreNLP.getExistingAnnotator("pos");
         if (tagger == null) {
           throw new AssertionError("Parser required tagger, but failed to find the pos annotator");
