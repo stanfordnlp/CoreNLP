@@ -45,11 +45,11 @@ higher-level and domain-specific text understanding applications.
 
 ## Download
 
-Stanford CoreNLP can be downloaded via the link below. This will download a large (536 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks) (3) the libraries required to run CoreNLP, and (4) documentation / source code for the project.
+Stanford CoreNLP can be downloaded via the link below. This will download a large (536 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks) (3) the libraries required to run CoreNLP, and (4) documentation / source code for the project. Unzip this file, open the folder that results and you're ready to use it.
 
 <div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-09.zip">Download CoreNLP 3.6.0</a> </div>
 
-Or Stanford CoreNLP is [available on Maven Central](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22stanford-corenlp%22).
+Alternatively, Stanford CoreNLP is [available on Maven Central](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22stanford-corenlp%22).
 Source is [available on GitHub](https://github.com/stanfordnlp/CoreNLP).
 For more information on obtaining CoreNLP, see the [download page](download.html).
 
@@ -64,7 +64,7 @@ Stanford NLP models for  **Arabic** are
 also usable inside CoreNLP.
 
 | Annotator | ar | zh | en | fr | de | es |
-| ------------ |:---:|:---:|:---:|:---:|:---:|:---:|
+| --------------- |:---:|:---:|:---:|:---:|:---:|:---:|
 | Tokenize / Segment | &check; | &check;  | &check; | &check;  |     | &check; |
 | Sentence Split | &check; | &check;  | &check; | &check;  | &check; | &check; |
 | Part of Speech | &check; | &check;  | &check; | &check;  | &check; | &check; |

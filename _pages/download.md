@@ -4,7 +4,7 @@ keywords: download
 permalink: '/download.html'
 ---
 
-Stanford CoreNLP can be downloaded via the link below. This will download a large (536 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks) (3) the libraries required to run CoreNLP, and (4) documentation / source code for the project. This is everything for getting going on English!
+Stanford CoreNLP can be downloaded via the link below. This will download a large (536 MB) zip file containing (1) the CoreNLP code jar, (2) the CoreNLP models jar (required in your classpath for most tasks) (3) the libraries required to run CoreNLP, and (4) documentation / source code for the project. This is everything for getting going on English!  Unzip this file, open the folder that results and you're ready to use it.
 
 <div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-09.zip">Download CoreNLP 3.6.0</a> </div>
 
@@ -52,6 +52,6 @@ NEW: If you want to get a language models jar off of Maven for Chinese, Spanish,
 </dependency>
 ```
 
-Replace "models-chinese" with "models-german" or "models-spanish" for the other two languages!
+Replace "models-chinese" with one or more of "models-english", "models-french", "models-german" or "models-spanish" for resources for other languages!
 
 

@@ -1,5 +1,5 @@
 ---
-title: Using Stanford CoreNLP through the command line
+title: Using Stanford CoreNLP from the command line
 keywords: command-line
 permalink: '/cmdline.html'
 ---
