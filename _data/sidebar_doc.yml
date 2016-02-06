@@ -15,6 +15,9 @@ entries:
         - title: Download
           url: index.html#download
 
+        - title: Languages
+          url: index.html#human-languages-supported
+
         - title: License and Citing
           url: index.html#license
 

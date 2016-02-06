@@ -68,6 +68,7 @@ also usable inside CoreNLP.
 | Tokenize / Segment | &check; | &check;  | &check; | &check;  |     | &check; |
 | Sentence Split | &check; | &check;  | &check; | &check;  | &check; | &check; |
 | Part of Speech | &check; | &check;  | &check; | &check;  | &check; | &check; |
+| Lemma |   |   | &check; |   |   |    |
 | Named Entities |   | &check;  | &check; |    | &check; | &check; |
 | Constituency Parsing | &check; | &check;  | &check; | &check; | &check; | &check; |
 | Dependency Parsing |    | &check;  | &check; | &check; | &check; |     |
