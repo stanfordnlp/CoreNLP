@@ -27,13 +27,7 @@
 package edu.stanford.nlp.dcoref;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import edu.stanford.nlp.dcoref.Dictionaries.Number;
 import edu.stanford.nlp.dcoref.Dictionaries.Person;
@@ -85,7 +79,7 @@ public class Document implements Serializable {
   /** Gold Clusters for coreferent mentions */
   public Map<Integer, CorefCluster> goldCorefClusters;
 
-  /** All mentions in a document mentionID -> mention*/
+  /** For all mentions in a document, map mentionID to mention. */
   public Map<Integer, Mention> allPredictedMentions;
   public Map<Integer, Mention> allGoldMentions;
 
@@ -105,7 +99,7 @@ public class Document implements Serializable {
   /** List of gold links in a document by positions */
   private List<Pair<IntTuple,IntTuple>> goldLinks;
 
-  /** UtteranceAnnotation -> String (speaker): mention ID or speaker string  */
+  /** Map UtteranceAnnotation to String (speaker): mention ID or speaker string  */
   public Map<Integer, String> speakers;
 
   /** Pair of mention id, and the mention's speaker id  */
@@ -118,7 +112,7 @@ public class Document implements Serializable {
   /** Set of incompatible clusters pairs */
   private TwoDimensionalSet<Integer, Integer> incompatibles;
   private TwoDimensionalSet<Integer, Integer> incompatibleClusters;
-  
+
   protected TwoDimensionalMap<Integer, Integer, Boolean> acronymCache;
 
   /** Map of speaker name/id to speaker info */
@@ -136,7 +130,7 @@ public class Document implements Serializable {
     speakerPairs = Generics.newHashSet();
     incompatibles = TwoDimensionalSet.hashSet();
     incompatibleClusters = TwoDimensionalSet.hashSet();
-    acronymCache = TwoDimensionalMap.hashMap();    
+    acronymCache = TwoDimensionalMap.hashMap();
   }
 
   public Document(Annotation anno, List<List<Mention>> predictedMentions,
@@ -250,7 +244,7 @@ public class Document implements Serializable {
         m.sentNum = i;
 
         assert(!corefClusters.containsKey(m.mentionID));
-        corefClusters.put(m.mentionID, new CorefCluster(m.mentionID, Generics.newHashSet(Arrays.asList(m))));
+        corefClusters.put(m.mentionID, new CorefCluster(m.mentionID, Generics.newHashSet(Collections.singletonList(m))));
         m.corefClusterID = m.mentionID;
 
         IntTuple headPosition = new IntTuple(2);
