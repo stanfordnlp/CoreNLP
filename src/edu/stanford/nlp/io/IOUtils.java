@@ -22,8 +22,6 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 
-import edu.stanford.nlp.util.logging.Redwood;
-
 /**
  * Helper Class for various I/O related things.
  *
