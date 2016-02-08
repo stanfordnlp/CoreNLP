@@ -45,8 +45,8 @@ import edu.stanford.nlp.util.*;
 
 import java.util.function.Function;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Builds various types of linear classifiers, with functionality for
@@ -90,7 +90,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   private int evalIters = -1;
   private Evaluator[] evaluators = null;
 
-  final static Logger logger = LoggerFactory.getLogger(LinearClassifierFactory.class);
+  final static Redwood.RedwoodChannels logger = Redwood.channels(LinearClassifierFactory.class);
 
   /** This is the {@code Factory<Minimizer<DiffFunction>>} that we use over and over again. */
   private static class Factory15 implements Factory<Minimizer<DiffFunction>> {

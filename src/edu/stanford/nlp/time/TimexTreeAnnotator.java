@@ -1,20 +1,19 @@
 package edu.stanford.nlp.time;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
-import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CoreMap;
-import java.util.function.Function;
 import edu.stanford.nlp.util.Iterables;
 
 public class TimexTreeAnnotator implements Annotator {
@@ -106,12 +105,12 @@ public class TimexTreeAnnotator implements Annotator {
   }
 
   @Override
-  public Set<Requirement> requires() {
+  public Set<Class<? extends CoreAnnotation>> requires() {
     return TOKENIZE_AND_SSPLIT;
   }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     // TODO: not sure what goes here
     return Collections.emptySet();
   }

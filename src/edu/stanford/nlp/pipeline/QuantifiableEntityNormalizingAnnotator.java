@@ -2,6 +2,7 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.QuantifiableEntityNormalizer;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
@@ -142,14 +143,14 @@ public class QuantifiableEntityNormalizingAnnotator implements Annotator {
 
 
   @Override
-  public Set<Requirement> requires() {
-    return Collections.singleton(TOKENIZE_REQUIREMENT);
+  public Set<Class<? extends CoreAnnotation>> requires() {
+    return TOKENIZE_AND_SSPLIT;
   }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     // technically it adds some NER, but someone who wants full NER
     // labels will be very disappointed, so we do not claim to produce NER
-    return Collections.singleton(QUANTIFIABLE_ENTITY_NORMALIZATION_REQUIREMENT);
+    return Collections.singleton(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
   }
 }

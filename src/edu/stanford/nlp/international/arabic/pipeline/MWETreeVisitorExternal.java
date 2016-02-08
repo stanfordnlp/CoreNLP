@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
@@ -62,7 +62,7 @@ public class MWETreeVisitorExternal implements TreeVisitor {
    */
   public void visitTree(Tree tree) {
     if (tree == null) return;
-    String yield = Sentence.listToString(tree.yield());
+    String yield = SentenceUtils.listToString(tree.yield());
     if (mweDictionary.contains(yield)) {
       List<Tree> children = getPreterminalSubtrees(tree);
       String newLabel = "MW" + tree.value();

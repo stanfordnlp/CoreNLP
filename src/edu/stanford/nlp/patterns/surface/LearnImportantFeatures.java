@@ -19,8 +19,8 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.CollectionValuedMap;
-import edu.stanford.nlp.util.Execution;
-import edu.stanford.nlp.util.Execution.Option;
+import edu.stanford.nlp.util.ArgumentParser;
+import edu.stanford.nlp.util.ArgumentParser.Option;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -236,7 +236,7 @@ public class LearnImportantFeatures {
 
       LearnImportantFeatures lmf = new LearnImportantFeatures();
       Properties props = StringUtils.argsToPropertiesWithResolve(args);
-      Execution.fillOptions(lmf, props);
+      ArgumentParser.fillOptions(lmf, props);
       lmf.setUp();
       String sentsFile = props.getProperty("sentsFile");
       Map<String, DataInstance> sents = IOUtils

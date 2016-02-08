@@ -15,7 +15,7 @@
 <%@ page import="edu.stanford.nlp.ie.crf.CRFClassifier" %>
 <%@ page import="edu.stanford.nlp.ie.AbstractSequenceClassifier" %>
 <%@ page import="edu.stanford.nlp.ling.HasWord" %>
-<%@ page import="edu.stanford.nlp.ling.Sentence" %>
+<%@ page import="edu.stanford.nlp.ling.SentenceUtils" %>
 <%@ page import="edu.stanford.nlp.ling.Word" %>
 <%@ page import="edu.stanford.nlp.parser.lexparser.LexicalizedParser" %>
 <%@ page import="edu.stanford.nlp.parser.lexparser.Options" %>
@@ -312,7 +312,7 @@ if (pp == null) {
                 <p>
                   Sorry, can't parse sentences containing more than
                   <%= MAXWORDS %> words. <br/>
-                  The sentence <em><%= Sentence.listToString(sentence) %></em> has
+                  The sentence <em><%= SentenceUtils.listToString(sentence) %></em> has
                   <%= queryWords.length %> words.
                 </p>
               <%

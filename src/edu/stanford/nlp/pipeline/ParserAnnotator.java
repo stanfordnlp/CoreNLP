@@ -4,9 +4,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.parser.common.NoSuchParseException;
 import edu.stanford.nlp.parser.common.ParserAnnotations;
 import edu.stanford.nlp.parser.common.ParserConstraint;
@@ -315,7 +316,7 @@ public class ParserAnnotator extends SentenceAnnotator {
         if (scoredObjects == null || scoredObjects.size() < 1) {
           System.err.println("WARNING: Parsing of sentence failed.  " +
               "Will ignore and continue: " +
-              Sentence.listToString(words));
+              SentenceUtils.listToString(words));
         } else {
           for (ScoredObject<Tree> so : scoredObjects) {
             // -10000 denotes unknown words
@@ -332,18 +333,18 @@ public class ParserAnnotator extends SentenceAnnotator {
     } catch (NoSuchParseException e) {
       System.err.println("WARNING: Parsing of sentence failed, possibly because of out of memory.  " +
               "Will ignore and continue: " +
-              Sentence.listToString(words));
+              SentenceUtils.listToString(words));
     }
     return trees;
   }
 
   @Override
-  public Set<Requirement> requires() {
+  public Set<Class<? extends CoreAnnotation>> requires() {
     return parser.requiresTags() ? TOKENIZE_SSPLIT_POS : TOKENIZE_AND_SSPLIT;
   }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     if (this.BUILD_GRAPHS) {
       if (this.saveBinaryTrees) {
         return PARSE_TAG_DEPPARSE_BINARIZED_TREES;

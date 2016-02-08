@@ -35,7 +35,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.KBestViterbiParser;
@@ -310,8 +310,8 @@ public class LexicalizedParserQuery implements ParserQuery {
     int expectedSize = addedPunct ? originalSentence.size() + 1 : originalSentence.size();
     if (leaves.size() != expectedSize) {
       throw new IllegalStateException("originalWords and sentence of different sizes: " + expectedSize + " vs. " + leaves.size() +
-                                      "\n Orig: " + Sentence.listToString(originalSentence) +
-                                      "\n Pars: " + Sentence.listToString(leaves));
+                                      "\n Orig: " + SentenceUtils.listToString(originalSentence) +
+                                      "\n Pars: " + SentenceUtils.listToString(leaves));
     }
     Iterator<Tree> leafIterator = leaves.iterator();
     for (HasWord word : originalSentence) {

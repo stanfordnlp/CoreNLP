@@ -40,8 +40,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Collection;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * A Naive Bayes classifier with a fixed number of features.
@@ -64,7 +64,7 @@ public class NaiveBayesClassifier<L, F> implements Classifier<L, F>, RVFClassifi
   private Set<L> labels;
   private final Integer zero = Integer.valueOf(0);
 
-  final static Logger logger = LoggerFactory.getLogger(NaiveBayesClassifier.class);
+  final static Redwood.RedwoodChannels logger = Redwood.channels(NaiveBayesClassifier.class);
 
   public Collection<L> labels() {
     return labels;

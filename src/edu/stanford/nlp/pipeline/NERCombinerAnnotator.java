@@ -2,6 +2,7 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
@@ -174,7 +175,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
   }
 
   @Override
-  public Set<Requirement> requires() {
+  public Set<Class<? extends CoreAnnotation>> requires() {
     // TODO: we could check the models to see which ones use lemmas
     // and which ones use pos tags
     if (ner.usesSUTime() || ner.appliesNumericClassifiers()) {
@@ -185,7 +186,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
   }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
-    return Collections.singleton(NER_REQUIREMENT);
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+    return Collections.singleton(CoreAnnotations.NamedEntityTagAnnotation.class);
   }
 }

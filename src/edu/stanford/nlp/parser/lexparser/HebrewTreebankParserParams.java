@@ -3,7 +3,7 @@ package edu.stanford.nlp.parser.lexparser;
 import java.util.List;
 
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.trees.DiskTreebank;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.LeftHeadFinder;
@@ -94,7 +94,7 @@ public class HebrewTreebankParserParams extends AbstractTreebankParserParams {
 
   public List<? extends HasWord> defaultTestSentence() {
     String[] sent = {"H", "MWX", "MTPLC", "LA", "RQ", "M", "H", "TWPEH", "H", "MBIFH", "ALA", "GM", "M", "DRKI", "H", "HERMH", "yyDOT"};
-    return Sentence.toWordList(sent);
+    return SentenceUtils.toWordList(sent);
   }
 
   public TreeReaderFactory treeReaderFactory() {

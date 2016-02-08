@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;
 
@@ -143,7 +143,7 @@ public class ConvertTreesToTags {
       TaggedFileRecord record =
         TaggedFileRecord.createRecord(props, description);
       for (List<TaggedWord> sentence : record.reader()) {
-        String output = Sentence.listToString(sentence, noTags, tagSeparator);
+        String output = SentenceUtils.listToString(sentence, noTags, tagSeparator);
         if (noSpaces) {
           output = output.replaceAll(" ", "");
         }

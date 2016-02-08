@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 
 
 /** Test the effects of various operations using a DocumentPreprocessor.
@@ -38,7 +38,7 @@ public class DocumentPreprocessorTest extends TestCase {
       document.setSentenceDelimiter("\n");
     }
     for (List<HasWord> sentence : document) {
-      results.add(Sentence.listToString(sentence));
+      results.add(SentenceUtils.listToString(sentence));
     }
 
     assertEquals("Should be " + expected.length + " sentences but got " + results.size() + ": " + results,
@@ -101,7 +101,7 @@ public class DocumentPreprocessorTest extends TestCase {
     DocumentPreprocessor document = new DocumentPreprocessor(new BufferedReader(new StringReader(input)), DocumentPreprocessor.DocType.XML);
     document.setElementDelimiter(element);
     for (List<HasWord> sentence : document) {
-      results.add(Sentence.listToString(sentence));
+      results.add(SentenceUtils.listToString(sentence));
     }
 
     assertEquals(expectedResults.length, results.size());

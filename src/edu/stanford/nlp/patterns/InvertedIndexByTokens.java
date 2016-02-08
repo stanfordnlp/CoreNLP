@@ -9,7 +9,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.patterns.surface.Token;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CollectionValuedMap;
-import edu.stanford.nlp.util.Execution;
+import edu.stanford.nlp.util.ArgumentParser;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
@@ -27,13 +27,13 @@ public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> i
 
   public InvertedIndexByTokens(Properties props, Set<String> stopWords, Function<CoreLabel, Map<String, String>> transformSentenceToString) {
     super(stopWords, transformSentenceToString);
-    Execution.fillOptions(this, props);
+    ArgumentParser.fillOptions(this, props);
     index = new HashMap<>();
   }
 
   public InvertedIndexByTokens(Properties props, Set<String> stopWords, Function<CoreLabel, Map<String, String>> transformSentenceToString, Map<String, Set<String>> index) {
     super(stopWords, transformSentenceToString);
-    Execution.fillOptions(this, props);
+    ArgumentParser.fillOptions(this, props);
     this.index = index;
   }
 

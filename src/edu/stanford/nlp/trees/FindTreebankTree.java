@@ -1,13 +1,12 @@
 package edu.stanford.nlp.trees;
 
-import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.ling.TaggedWord;
 
 /**
@@ -91,11 +90,11 @@ public class FindTreebankTree {
         // The tree can match in one of three ways: tagged, untagged,
         // or untagged and unsegmented (which is useful for Chinese,
         // for example)
-        String haystack = Sentence.listToString(sentence, true);
+        String haystack = SentenceUtils.listToString(sentence, true);
         found = needle.equals(haystack);
         haystack = haystack.replaceAll(" ", "");
         found = found || needle.equals(haystack);
-        haystack = Sentence.listToString(sentence, false, tagSeparator);
+        haystack = SentenceUtils.listToString(sentence, false, tagSeparator);
         found = found || needle.equals(haystack);
         if (found) {
           System.out.println("needle found in " +  currentFile + 

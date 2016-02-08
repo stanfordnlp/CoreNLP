@@ -11,13 +11,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import edu.stanford.nlp.ling.SentenceUtils;
 import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
@@ -30,7 +30,7 @@ import edu.stanford.nlp.util.Generics;
 /**
  * A wrapper class which creates a suitable pipeline for the sentiment
  * model and processes raw text.
- *<br>
+ *
  * The main program has the following options: <br>
  * <code>-parserModel</code> Which parser model to use, defaults to englishPCFG.ser.gz <br>
  * <code>-sentimentModel</code> Which sentiment model to use, defaults to sentiment.ser.gz <br>
@@ -38,7 +38,7 @@ import edu.stanford.nlp.util.Generics;
  * <code>-fileList</code> A comma separated list of files to process. <br>
  * <code>-stdin</code> Read one line at a time from stdin. <br>
  * <code>-output</code> pennTrees: Output trees with scores at each binarized node.  vectors: Number tree nodes and print out the vectors.  probabilities: Output the scores for different labels for each node. Defaults to printing just the root. <br>
- * <code>-filterUnknown</code> remove unknown trees from the input.  Only applies to TREES input, in which case the trees must be binarized with sentiment labels <br>
+ * <code>-filterUnknown</code> Remove unknown trees from the input.  Only applies to TREES input, in which case the trees must be binarized with sentiment labels <br>
  * <code>-help</code> Print out help <br>
  *
  * @author John Bauer
@@ -47,11 +47,11 @@ public class SentimentPipeline {
 
   private static final NumberFormat NF = new DecimalFormat("0.0000");
 
-  static enum Output {
+  enum Output {
     PENNTREES, VECTORS, ROOT, PROBABILITIES
   }
 
-  static enum Input {
+  enum Input {
     TEXT, TREES
   }
 
@@ -179,7 +179,7 @@ public class SentimentPipeline {
 
   static final String DEFAULT_TLPP_CLASS = "edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams";
 
-  public static void help() {
+  static void help() {
     System.err.println("Known command line arguments:");
     System.err.println("  -sentimentModel <model>: Which model to use");
     System.err.println("  -parserModel <model>: Which parser to use");
@@ -225,7 +225,7 @@ public class SentimentPipeline {
 
       List<Annotation> annotations = Generics.newArrayList();
       for (Tree tree : trees) {
-        CoreMap sentence = new Annotation(Sentence.listToString(tree.yield()));
+        CoreMap sentence = new Annotation(SentenceUtils.listToString(tree.yield()));
         sentence.set(TreeCoreAnnotations.TreeAnnotation.class, tree);
         List<CoreMap> sentences = Collections.singletonList(sentence);
         Annotation annotation = new Annotation("");
@@ -239,6 +239,7 @@ public class SentimentPipeline {
     }
   }
 
+  /** Runs the tree-based sentiment model on some text. */
   public static void main(String[] args) throws IOException {
     String parserModel = null;
     String sentimentModel = null;
@@ -320,7 +321,7 @@ public class SentimentPipeline {
     }
 
     if (stdin && tokenizerProps != null) {
-      tokenizerProps.setProperty("ssplit.eolonly", "true");
+      tokenizerProps.setProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "true");
     }
 
     int count = 0;
@@ -379,7 +380,7 @@ public class SentimentPipeline {
 
       for (String line; (line = reader.readLine()) != null; ) {
         line = line.trim();
-        if (line.length() > 0) {
+        if ( ! line.isEmpty()) {
           Annotation annotation = tokenizer.process(line);
           pipeline.annotate(annotation);
           for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
@@ -388,7 +389,7 @@ public class SentimentPipeline {
         } else {
           // Output blank lines for blank lines so the tool can be
           // used for line-by-line text processing
-          System.out.println("");
+          System.out.println();
         }
       }
 

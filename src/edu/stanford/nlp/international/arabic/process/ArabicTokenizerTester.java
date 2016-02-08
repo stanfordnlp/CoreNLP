@@ -5,7 +5,7 @@ import java.util.*;
 
 import edu.stanford.nlp.international.arabic.pipeline.DefaultLexicalMapper;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.trees.treebank.Mapper;
 
@@ -45,7 +45,7 @@ public class ArabicTokenizerTester {
 
         // Tokenize with the tokenizer
         List<CoreLabel> tokenizedLine = tf.getTokenizer(new StringReader(line)).tokenize();
-        System.out.println(Sentence.listToString(tokenizedLine));
+        System.out.println(SentenceUtils.listToString(tokenizedLine));
 
         // Tokenize with the mapper
         StringBuilder sb = new StringBuilder();
@@ -60,8 +60,8 @@ public class ArabicTokenizerTester {
         if (mappedToks.size() != tokenizedLine.size()) {
           System.err.printf("Line length mismatch:%norig: %s%ntok: %s%nmap: %s%n%n",
               line,
-              Sentence.listToString(tokenizedLine),
-              Sentence.listToString(mappedToks));
+              SentenceUtils.listToString(tokenizedLine),
+              SentenceUtils.listToString(mappedToks));
         } else {
           boolean printLines = false;
           for (int i = 0; i < mappedToks.size(); ++i) {
@@ -75,8 +75,8 @@ public class ArabicTokenizerTester {
           if (printLines) {
             System.err.printf("orig: %s%ntok: %s%nmap: %s%n%n",
                 line,
-                Sentence.listToString(tokenizedLine),
-                Sentence.listToString(mappedToks));
+                SentenceUtils.listToString(tokenizedLine),
+                SentenceUtils.listToString(mappedToks));
           }
         }
       }

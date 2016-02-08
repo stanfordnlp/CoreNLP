@@ -3,6 +3,7 @@ package edu.stanford.nlp.pipeline;
 import java.util.List;
 import java.util.Set;
 
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.parser.common.ParserUtils;
@@ -13,7 +14,6 @@ import edu.stanford.nlp.trees.GrammaticalStructureFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.ScoredObject;
 
 /**
  * This class will add parse information to an Annotation from the BLLIP parser.
@@ -77,12 +77,12 @@ public class CharniakParserAnnotator implements Annotator {
   }
 
   @Override
-  public Set<Requirement> requires() {
+  public Set<Class<? extends CoreAnnotation>> requires() {
     return TOKENIZE_AND_SSPLIT;
   }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     return PARSE_AND_TAG;
   }
 

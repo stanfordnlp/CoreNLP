@@ -13,7 +13,7 @@ import edu.stanford.nlp.international.morph.MorphoFeatureSpecification.MorphoFea
 import edu.stanford.nlp.international.morph.MorphoFeatures;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
@@ -341,7 +341,7 @@ public class IOBUtils {
 
   public static List<CoreLabel> StringToIOB(String str, Character segMarker) {
     // Whitespace tokenization
-    List<CoreLabel> toks = Sentence.toCoreLabelList(str.trim().split("\\s+"));
+    List<CoreLabel> toks = SentenceUtils.toCoreLabelList(str.trim().split("\\s+"));
     return StringToIOB(toks, segMarker, false);
   }
 

@@ -61,7 +61,7 @@ public abstract class SentenceAnnotator implements Annotator {
               // If we time out, for now, we just throw away all jobs which were running at the time.
               // Note that in order for this to be useful, the underlying job needs to handle Thread.interrupted()
               List<CoreMap> failedSentences = wrapper.joinWithTimeout();
-              if (failedSentences !=  null) {
+              if (failedSentences != null) {
                 for (CoreMap failed : failedSentences) {
                   doOneFailedSentence(annotation, failed);
                 }

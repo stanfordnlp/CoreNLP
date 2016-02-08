@@ -1,5 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.*;
@@ -200,8 +201,8 @@ public class AnnotationPipeline implements Annotator {
   }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
-    Set<Requirement> satisfied = Generics.newHashSet();
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+    Set<Class<? extends CoreAnnotation>> satisfied = Generics.newHashSet();
     for (Annotator annotator : annotators) {
       satisfied.addAll(annotator.requirementsSatisfied());
     }
@@ -209,7 +210,7 @@ public class AnnotationPipeline implements Annotator {
   }
 
   @Override
-  public Set<Requirement> requires() {
+  public Set<Class<? extends CoreAnnotation>> requires() {
     if (annotators.isEmpty()) {
       return Collections.emptySet();
     }

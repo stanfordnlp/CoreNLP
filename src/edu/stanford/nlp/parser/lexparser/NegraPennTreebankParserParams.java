@@ -5,7 +5,7 @@ import java.util.*;
 import edu.stanford.nlp.ling.CategoryWordTag;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.trees.DiskTreebank;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.MemoryTreebank;
@@ -378,7 +378,7 @@ public class NegraPennTreebankParserParams extends AbstractTreebankParserParams 
    */
   public List<? extends HasWord> defaultTestSentence() {
     String[] sent = {"Solch", "einen", "Zuspruch", "hat", "Angela", "Merkel", "lange", "nicht", "mehr", "erlebt", "."};
-    return Sentence.toWordList(sent);
+    return SentenceUtils.toWordList(sent);
   }
 
 }

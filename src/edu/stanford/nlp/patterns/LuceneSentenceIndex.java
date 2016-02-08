@@ -7,8 +7,8 @@ import edu.stanford.nlp.pipeline.CoreNLPProtos;
 import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.LuceneFieldType;
-import edu.stanford.nlp.util.Execution;
-import edu.stanford.nlp.util.Execution.Option;
+import edu.stanford.nlp.util.ArgumentParser;
+import edu.stanford.nlp.util.ArgumentParser.Option;
 import edu.stanford.nlp.util.logging.Redwood;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
@@ -76,7 +76,7 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
   //The fields in index are: tokens, sentence id, List<CoreLabel> annotation of the sentence (optional; not used when sentences are in memory)
   public LuceneSentenceIndex(Properties props, Set<String> stopWords, String indexDirStr, Function<CoreLabel, Map<String, String>> transformer) {
     super(stopWords, transformer);
-    Execution.fillOptions(this, props);
+    ArgumentParser.fillOptions(this, props);
     indexDir = new File(indexDirStr);
   }
 

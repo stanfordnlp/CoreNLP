@@ -4,8 +4,8 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.EncodingPrintWriter;
@@ -27,7 +27,7 @@ public class ChineseDictionary {
 
   public static final int MAX_LEXICON_LENGTH = 6;
 
-  private static Logger logger = LoggerFactory.getLogger(ChineseDictionary.class);
+  private static Redwood.RedwoodChannels logger = Redwood.channels(ChineseDictionary.class);
   @SuppressWarnings({"unchecked"})
   Set<String>[] words_ = new HashSet[MAX_LEXICON_LENGTH+1];
 
