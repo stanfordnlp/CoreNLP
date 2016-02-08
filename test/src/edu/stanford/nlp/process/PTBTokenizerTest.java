@@ -255,6 +255,7 @@ public class PTBTokenizerTest {
     // In WMT 2015 from GigaWord (mis)processing. Do not always want to allow newline within SGML as messes too badly with CoNLL and one-sentence-per-line processing
     "<!-- copy from here --> <a href=\"http://strategis.gc.ca/epic/internet/inabc-eac.nsf/en/home\"><img src=\"id-images/ad-220x80_01e.jpg\" alt=\"Aboriginal Business Canada:\n" +
                   "Opening New Doors for Your Business\" width=\"220\" height=\"80\" border=\"0\"></a> <!-- copy to here --> Small ABC Graphic Instructions 1.",
+    "We traveled from No.\nKorea to the U.S.A.\nWhy?"
   };
 
   private final String[][] sgmlGold = {
@@ -284,6 +285,7 @@ public class PTBTokenizerTest {
             "<img\u00A0src=\"id-images/ad-220x80_01e.jpg\"\u00A0alt=\"Aboriginal\u00A0Business\u00A0Canada:\u00A0" +
             "Opening\u00A0New\u00A0Doors\u00A0for\u00A0Your\u00A0Business\"\u00A0width=\"220\"\u00A0height=\"80\"\u00A0border=\"0\">",
             "</a>",  "<!--\u00A0copy\u00A0to\u00A0here\u00A0-->", "Small", "ABC", "Graphic", "Instructions", "1", "." },
+    { "We", "traveled", "from", "No.", "Korea", "to", "the", "U.S.A.", ".", "Why", "?" },
   };
 
   @Test
@@ -321,6 +323,7 @@ public class PTBTokenizerTest {
             "Opening", "New", "Doors", "for", "Your", "Business", "''",
             "width", "=", "``", "220", "''", "height", "=", "``", "80", "''", "border", "=", "``", "0", "''", ">",
             "</a>",  "<!--\u00A0copy\u00A0to\u00A0here\u00A0-->", "Small", "ABC", "Graphic", "Instructions", "1", "." },
+    { "We", "traveled", "from", "No", ".", "Korea", "to", "the", "U.S.A.", "Why", "?" },
   };
 
   @Test
@@ -387,6 +390,7 @@ public class PTBTokenizerTest {
     "{1}block name={2}",
     "1202-03-04 5:32:56 2004-03-04T18:32:56",
     "20°C is 68°F because 0℃ is 32℉",
+    "a.jpg a-b.jpg a.b.jpg a-b.jpg a_b.jpg a-b-c.jpg 0-1-2.jpg a-b/c-d_e.jpg a-b/c-9a9_9a.jpg\n"
   };
 
   private final String[][] mtGold = {
@@ -396,6 +400,7 @@ public class PTBTokenizerTest {
     { "-LCB-", "1", "-RCB-", "block", "name", "=", "-LCB-", "2", "-RCB-" },
     { "1202-03-04", "5:32:56", "2004-03-04T18:32:56" },
     { "20", "°C", "is", "68", "°F", "because", "0", "℃", "is", "32", "℉" },
+    { "a.jpg", "a-b.jpg", "a.b.jpg", "a-b.jpg", "a_b.jpg", "a-b-c.jpg", "0-1-2.jpg", "a-b/c-d_e.jpg", "a-b/c-9a9_9a.jpg"}
   };
 
   @Test
