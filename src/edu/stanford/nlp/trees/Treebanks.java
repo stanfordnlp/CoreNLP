@@ -8,9 +8,8 @@ import java.text.DecimalFormat;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.NumberRangesFileFilter;
 import java.util.function.Predicate;
-
-import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.util.Timing;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -249,7 +248,7 @@ public class Treebanks {
         Tree tPrime = tn.normalizeWholeTree(tree, tree.treeFactory());
         int length = tPrime.yield().size();
         if (length >= minLength && length <= maxLength) {
-          pw.println(SentenceUtils.listToString(tPrime.taggedYield()));
+          pw.println(Sentence.listToString(tPrime.taggedYield()));
         }
       });
     }
@@ -258,7 +257,7 @@ public class Treebanks {
       final TreeNormalizer tn = new BobChrisTreeNormalizer();
       treebank.apply(tree -> {
         Tree tPrime = tn.normalizeWholeTree(tree, tree.treeFactory());
-        pw.println(SentenceUtils.listToString(tPrime.taggedYield(), false, "_"));
+        pw.println(Sentence.listToString(tPrime.taggedYield(), false, "_"));
       });
     }
 
@@ -270,7 +269,7 @@ public class Treebanks {
       treebank.apply(tree -> {
         int length = tree.yield().size();
         if (length >= minLength && length <= maxLength) {
-          pw.println(SentenceUtils.listToString(tree.yield()));
+          pw.println(Sentence.listToString(tree.yield()));
         }
       });
     }

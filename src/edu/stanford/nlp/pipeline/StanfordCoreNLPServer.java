@@ -57,7 +57,7 @@ public class StanfordCoreNLPServer implements Runnable {
   /**
    * The thread pool for the HTTP server.
    */
-  private final ExecutorService serverExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
+  private final ExecutorService serverExecutor = Executors.newFixedThreadPool(Execution.threads);
   /**
    * To prevent grossly wasteful over-creation of pipeline objects, cache the last
    * few we created, until the garbage collector decides we can kill them.
@@ -66,7 +66,7 @@ public class StanfordCoreNLPServer implements Runnable {
   /**
    * An executor to time out CoreNLP execution with.
    */
-  private final ExecutorService corenlpExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
+  private final ExecutorService corenlpExecutor = Executors.newFixedThreadPool(Execution.threads);
 
 
   /**

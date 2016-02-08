@@ -1,7 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.classify.ColumnDataClassifier;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.Datum;
 import edu.stanford.nlp.util.StringUtils;
@@ -58,12 +57,12 @@ public class ColumnDataClassifierAnnotator implements Annotator {
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.emptySet();
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(COLUMN_DATA_CLASSIFIER);
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
+  public Set<Requirement> requires() {
     return Collections.emptySet();
   }
 

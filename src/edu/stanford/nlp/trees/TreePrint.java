@@ -363,7 +363,7 @@ public class TreePrint {
         }
         pw.println("  </words>");
       } else {
-        String sent = SentenceUtils.listToString(outputTree.yield(), false);
+        String sent = Sentence.listToString(outputTree.yield(), false);
         if(ptb2text) {
           pw.println(PTBTokenizer.ptb2Text(sent));
         } else {
@@ -514,7 +514,7 @@ public class TreePrint {
     } else {
       // non-XML printing
       if (formats.containsKey("wordsAndTags")) {
-        pw.println(SentenceUtils.listToString(outputTree.taggedYield(), false));
+        pw.println(Sentence.listToString(outputTree.taggedYield(), false));
         pw.println();
       }
       if (formats.containsKey("oneline")) {

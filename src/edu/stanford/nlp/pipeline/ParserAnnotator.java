@@ -4,10 +4,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.parser.common.NoSuchParseException;
 import edu.stanford.nlp.parser.common.ParserAnnotations;
 import edu.stanford.nlp.parser.common.ParserConstraint;
@@ -298,7 +297,6 @@ public class ParserAnnotator extends SentenceAnnotator {
     }
   }
 
-  // todo [cdm 2015]: This should just use bestParse method if only getting 1 best parse.
   private List<Tree> doOneSentence(List<ParserConstraint> constraints,
                              List<CoreLabel> words) {
     ParserQuery pq = parser.parserQuery();
@@ -306,17 +304,25 @@ public class ParserAnnotator extends SentenceAnnotator {
     pq.parse(words);
     List<Tree> trees = Generics.newLinkedList();
     try {
-      List<ScoredObject<Tree>> scoredObjects = pq.getKBestPCFGParses(this.kBest);
-      if (scoredObjects == null || scoredObjects.size() < 1) {
-        System.err.println("WARNING: Parsing of sentence failed.  " +
-                "Will ignore and continue: " +
-                SentenceUtils.listToString(words));
+      // Use bestParse if kBest is set to 1.
+      if (this.kBest == 1) {
+        Tree t = pq.getBestParse();
+        double score = pq.getBestScore();
+        t.setScore(score % -10000.0);
+        trees.add(t);
       } else {
-        for (ScoredObject<Tree> so : scoredObjects) {
-          // -10000 denotes unknown words
-          Tree tree = so.object();
-          tree.setScore(so.score() % - 10000.0);
-          trees.add(tree);
+        List<ScoredObject<Tree>> scoredObjects = pq.getKBestParses(this.kBest);
+        if (scoredObjects == null || scoredObjects.size() < 1) {
+          System.err.println("WARNING: Parsing of sentence failed.  " +
+              "Will ignore and continue: " +
+              Sentence.listToString(words));
+        } else {
+          for (ScoredObject<Tree> so : scoredObjects) {
+            // -10000 denotes unknown words
+            Tree tree = so.object();
+            tree.setScore(so.score() % -10000.0);
+            trees.add(tree);
+          }
         }
       }
     } catch (OutOfMemoryError e) {
@@ -326,18 +332,18 @@ public class ParserAnnotator extends SentenceAnnotator {
     } catch (NoSuchParseException e) {
       System.err.println("WARNING: Parsing of sentence failed, possibly because of out of memory.  " +
               "Will ignore and continue: " +
-              SentenceUtils.listToString(words));
+              Sentence.listToString(words));
     }
     return trees;
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
+  public Set<Requirement> requires() {
     return parser.requiresTags() ? TOKENIZE_SSPLIT_POS : TOKENIZE_AND_SSPLIT;
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+  public Set<Requirement> requirementsSatisfied() {
     if (this.BUILD_GRAPHS) {
       if (this.saveBinaryTrees) {
         return PARSE_TAG_DEPPARSE_BINARIZED_TREES;

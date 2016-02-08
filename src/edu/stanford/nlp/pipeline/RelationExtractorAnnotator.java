@@ -1,6 +1,9 @@
 package edu.stanford.nlp.pipeline;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
 import edu.stanford.nlp.ie.machinereading.BasicRelationExtractor;
 import edu.stanford.nlp.ie.machinereading.Extractor;
@@ -11,11 +14,8 @@ import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations.RelationMentionsAnnotation;
 import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
@@ -82,25 +82,13 @@ public class RelationExtractorAnnotator implements Annotator {
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class,
-        CoreAnnotations.PartOfSpeechAnnotation.class,
-        CoreAnnotations.NamedEntityTagAnnotation.class,
-        TreeCoreAnnotations.TreeAnnotation.class,
-        SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
-    )));
+  public Set<Requirement> requires() {
+    return new ArraySet<>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT, NER_REQUIREMENT, PARSE_REQUIREMENT);
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        MachineReadingAnnotations.EntityMentionsAnnotation.class,
-        RelationMentionsAnnotation.class
-    )));
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(RELATION_EXTRACTOR_REQUIREMENT);
   }
 
   public static void main(String[] args){

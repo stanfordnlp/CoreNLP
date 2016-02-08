@@ -1287,25 +1287,29 @@ public class Counters {
    * @return The dot product of the two counter (as vectors)
    */
   public static <E> double optimizedDotProduct(Counter<E> c1, Counter<E> c2) {
+    double dotProd = 0.0;
     int size1 = c1.size();
     int size2 = c2.size();
     if (size1 < size2) {
-      return getDotProd(c1, c2);
+      for (E key : c1.keySet()) {
+        double count1 = c1.getCount(key);
+        if (count1 != 0.0) {
+          double count2 = c2.getCount(key);
+          if (count2 != 0.0)
+            dotProd += (count1 * count2);
+        }
+      }
     } else {
-      return getDotProd(c2, c1);
-    }
-  }
-
-  private static <E> double getDotProd(Counter<E> c1, Counter<E> c2) {
-    double dotProd = 0.0;
-    for (E key : c1.keySet()) {
-      double count1 = c1.getCount(key);
-      if (count1 != 0.0) {
+      for (E key : c2.keySet()) {
         double count2 = c2.getCount(key);
-        if (count2 != 0.0)
-          dotProd += (count1 * count2);
+        if (count2 != 0.0) {
+          double count1 = c1.getCount(key);
+          if (count1 != 0.0)
+            dotProd += (count1 * count2);
+        }
       }
     }
+
     return dotProd;
   }
 

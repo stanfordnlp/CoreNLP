@@ -1,11 +1,11 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
-import edu.stanford.nlp.ling.SentenceUtils;
 import junit.framework.TestCase;
 
 import java.util.Collections;
 import java.util.List;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
@@ -26,14 +26,14 @@ public class ShiftReduceParserITest extends TestCase {
   }
 
   public void testSimpleParse() {
-    List<CoreLabel> sentence = SentenceUtils.toCoreLabelList("This", "is", "a", "simple", "test", ".");
+    List<CoreLabel> sentence = Sentence.toCoreLabelList("This", "is", "a", "simple", "test", ".");
     englishTagger.tagCoreLabels(sentence);
     Tree result = englishParser.apply(sentence);
     // just care that it didn't crash
   }
 
   public void testBasicConstraint() {
-    List<CoreLabel> sentence = SentenceUtils.toCoreLabelList("It", "was", "Carolina", "Reapers", ".");
+    List<CoreLabel> sentence = Sentence.toCoreLabelList("It", "was", "Carolina", "Reapers", ".");
     englishTagger.tagCoreLabels(sentence);
     Tree result = englishParser.apply(sentence);
     // pretty much need to make the test rely on the parser being consistent

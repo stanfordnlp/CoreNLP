@@ -22,8 +22,9 @@ import edu.stanford.nlp.process.WordShapeClassifier;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
+import edu.stanford.nlp.stats.GeneralizedCounter;
 import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.ArgumentParser.Option;
+import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.TypesafeMap.Key;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -900,10 +901,10 @@ public class ConstantsAndVariables implements Serializable {
 
     Redwood.log(Redwood.DBG, "Setting up ConstantsAndVariables");
 
-    ArgumentParser.fillOptions(this, props);
-    ArgumentParser.fillOptions(PatternFactory.class, props);
-    ArgumentParser.fillOptions(SurfacePatternFactory.class, props);
-    ArgumentParser.fillOptions(DepPatternFactory.class, props);
+    Execution.fillOptions(this, props);
+    Execution.fillOptions(PatternFactory.class, props);
+    Execution.fillOptions(SurfacePatternFactory.class, props);
+    Execution.fillOptions(DepPatternFactory.class, props);
 
     if (wordIgnoreRegex != null && !wordIgnoreRegex.isEmpty()) {
       Redwood.log(Redwood.DBG, "Ignore word regex is " + wordIgnoreRegex);
@@ -1036,7 +1037,7 @@ public class ConstantsAndVariables implements Serializable {
 
    if(usePhraseEvalGoogleNgram || usePatternEvalDomainNgram) {
      Data.usingGoogleNgram = true;
-     ArgumentParser.fillOptions(GoogleNGramsSQLBacked.class, props);
+     Execution.fillOptions(GoogleNGramsSQLBacked.class, props);
    }
   if(goldEntitiesEvalFiles !=null && evaluate)
     goldEntities = readGoldEntities(goldEntitiesEvalFiles);

@@ -1,12 +1,12 @@
 package edu.stanford.nlp.dcoref;
 
-import edu.stanford.nlp.ling.SentenceUtils;
 import junit.framework.TestCase;
 
 import java.util.List;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.Sentence;
 
 /**
  * Test some of the "rules" which compose the coref system
@@ -14,10 +14,10 @@ import edu.stanford.nlp.ling.CoreLabel;
  * @author John Bauer
  */
 public class RulesTest extends TestCase {
-  List<CoreLabel> IBM = SentenceUtils.toCoreLabelList("IBM");
-  List<CoreLabel> IBM2 = SentenceUtils.toCoreLabelList("International", "Business", "Machines");
-  List<CoreLabel> IBMM = SentenceUtils.toCoreLabelList("IBMM");
-  List<CoreLabel> MIBM = SentenceUtils.toCoreLabelList("MIBM");
+  List<CoreLabel> IBM = Sentence.toCoreLabelList("IBM");
+  List<CoreLabel> IBM2 = Sentence.toCoreLabelList("International", "Business", "Machines");
+  List<CoreLabel> IBMM = Sentence.toCoreLabelList("IBMM");
+  List<CoreLabel> MIBM = Sentence.toCoreLabelList("MIBM");
 
   public void testIsAcronym() {
     assertTrue(Rules.isAcronym(IBM, IBM2));

@@ -60,7 +60,7 @@ public class IBMMTArabicDataset implements Dataset {
         currentInfile = path.getPath();
 
         while(infile.ready()) {
-          ArrayList<Word> sent = SentenceUtils.toUntaggedList(infile.readLine().split("\\s+"));
+          ArrayList<Word> sent = Sentence.toUntaggedList(infile.readLine().split("\\s+"));
 
           for(Word token : sent) {
             Matcher hasArabic = utf8ArabicChart.matcher(token.word());
@@ -70,7 +70,7 @@ public class IBMMTArabicDataset implements Dataset {
             }
           }
 
-          outfile.println(SentenceUtils.listToString(sent));
+          outfile.println(Sentence.listToString(sent));
         }
 
         toStringBuffer.append(String.format(" Read %d input lines from %s",infile.getLineNumber(),path.getPath()));

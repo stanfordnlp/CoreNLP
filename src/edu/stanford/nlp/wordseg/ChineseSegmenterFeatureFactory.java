@@ -5,8 +5,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.Serializable;
 
-
-import edu.stanford.nlp.util.logging.Redwood;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -52,7 +52,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
   private static final long serialVersionUID = 3387166382968763350L;
   private static TagAffixDetector taDetector = null;
 
-  private static Redwood.RedwoodChannels logger = Redwood.channels(ChineseSegmenterFeatureFactory.class);
+  private static Logger logger = LoggerFactory.getLogger(ChineseSegmenterFeatureFactory.class);
 
   public void init(SeqClassifierFlags flags) {
     super.init(flags);

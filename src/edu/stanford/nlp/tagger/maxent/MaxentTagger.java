@@ -910,7 +910,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
    * @return The same string with tags inserted in the form word/tag
    */
   public String tagTokenizedString(String toTag) {
-    List<Word> sent = SentenceUtils.toUntaggedList(Arrays.asList(toTag.split("\\s+")));
+    List<Word> sent = Sentence.toUntaggedList(Arrays.asList(toTag.split("\\s+")));
     TestSentence testSentence = new TestSentence(this);
     testSentence.tagSentence(sent, false);
     return testSentence.getTaggedNice();
@@ -1265,7 +1265,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
         sentences = tokenizeText(new StringReader(o), tokenizerFactory);
       } else {
         sentences = Generics.newArrayList();
-        sentences.add(SentenceUtils.toWordList(o.split("\\s+")));
+        sentences.add(Sentence.toWordList(o.split("\\s+")));
       }
 
       // TODO: there is another almost identical block of code elsewhere.  Refactor
@@ -1390,7 +1390,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       w.write(getXMLWords(sent, sentNum, outputLemmas));
     } catch (IOException e) {
       System.err.println("Error writing sentence " + sentNum + ": " +
-                         SentenceUtils.listToString(sent));
+                         Sentence.listToString(sent));
       throw new RuntimeIOException(e);
     }
   }
@@ -1812,7 +1812,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
         writeXMLSentence(writer, sentence, numSentences, outputLemmas);
         break;
       case SLASH_TAGS:
-        writer.write(SentenceUtils.listToString(sentence, false, config.getTagSeparator()));
+        writer.write(Sentence.listToString(sentence, false, config.getTagSeparator()));
         writer.write(separator);
         break;
       default:

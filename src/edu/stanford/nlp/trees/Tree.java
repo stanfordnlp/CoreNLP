@@ -17,7 +17,7 @@ import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.LabelFactory;
 import edu.stanford.nlp.ling.LabeledWord;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -814,7 +814,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       } else {
         sb.append("leaf value=\"");
       }
-      sb.append(XMLUtils.escapeXML(SentenceUtils.wordToString(label, true)));
+      sb.append(XMLUtils.escapeXML(Sentence.wordToString(label, true)));
       sb.append("\"");
       if (printScores) {
         sb.append(" score=");

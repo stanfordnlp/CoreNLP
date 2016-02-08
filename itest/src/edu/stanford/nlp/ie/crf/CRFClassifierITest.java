@@ -6,7 +6,7 @@ import java.util.List;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.sequences.ExactBestSequenceFinder;
 import edu.stanford.nlp.sequences.KBestSequenceFinder;
 import edu.stanford.nlp.sequences.ObjectBankWrapper;
@@ -398,7 +398,7 @@ public class CRFClassifierITest extends TestCase {
   private static void runKBestTest(CRFClassifier<CoreLabel> crf, String str, boolean isStoredAnswer) {
     final int K_BEST = 12;
     String[] txt = str.split(" ");
-    List<CoreLabel> input = SentenceUtils.toCoreLabelList(txt);
+    List<CoreLabel> input = Sentence.toCoreLabelList(txt);
 
     // do the ugliness that the CRFClassifier routines do to augment the input
     ObjectBankWrapper<CoreLabel> obw = new ObjectBankWrapper<>(crf.flags, null, crf.getKnownLCWords());

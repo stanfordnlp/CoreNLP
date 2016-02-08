@@ -11,7 +11,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
-import edu.stanford.nlp.util.ArgumentParser;
+import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Pair;
 
 public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
@@ -197,7 +197,7 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
       props2.setProperty("phraseScorerClass", "edu.stanford.nlp.patterns.ScorePhrasesLearnFeatWt");
       ScorePhrases scoreclassifier = new ScorePhrases(props2, constVars);
       System.out.println("file is " + props.getProperty("domainNGramsFile"));
-      ArgumentParser.fillOptions(Data.class, props2);
+      Execution.fillOptions(Data.class, props2);
       classifierScores = scoreclassifier.phraseScorer.scorePhrases(label, allCandidatePhrases,  true);
     }
 

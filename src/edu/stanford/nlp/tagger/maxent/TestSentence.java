@@ -9,8 +9,11 @@ package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.io.PrintFile;
-import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.HasOffset;
+import edu.stanford.nlp.ling.HasTag;
+import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.math.SloppyMath;
 import edu.stanford.nlp.sequences.BestSequenceFinder;
@@ -123,7 +126,7 @@ public class TestSentence implements SequenceModel {
     }
     size = sz + 1;
     if (VERBOSE) {
-      System.err.println("Sentence is " + SentenceUtils.listToString(sent, false, tagSeparator));
+      System.err.println("Sentence is " + Sentence.listToString(sent, false, tagSeparator));
     }
     init();
     result = testTagInference();

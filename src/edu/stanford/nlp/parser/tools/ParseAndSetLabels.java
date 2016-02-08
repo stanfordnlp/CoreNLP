@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
@@ -54,7 +54,7 @@ public class ParseAndSetLabels {
     if (tree.isLeaf()) {
       return;
     }
-    String text = SentenceUtils.listToString(tree.yield());
+    String text = Sentence.listToString(tree.yield());
     String label = labelMap.get(text);
     if (label != null) {
       tree.label().setValue(label);

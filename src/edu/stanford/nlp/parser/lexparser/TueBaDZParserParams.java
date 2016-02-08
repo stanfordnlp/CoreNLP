@@ -3,8 +3,11 @@ package edu.stanford.nlp.parser.lexparser;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.CategoryWordTag;
+import edu.stanford.nlp.ling.HasTag;
+import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.tuebadz.TueBaDZHeadFinder;
 import edu.stanford.nlp.trees.international.tuebadz.TueBaDZLanguagePack;
@@ -44,7 +47,7 @@ public class TueBaDZParserParams extends AbstractTreebankParserParams {
   /** Returns the first sentence of TueBaDZ. */
   @Override
   public List<? extends HasWord> defaultTestSentence() {
-    return SentenceUtils.toWordList("Veruntreute", "die", "AWO", "Spendengeld", "?");
+    return Sentence.toWordList("Veruntreute", "die", "AWO", "Spendengeld", "?");
   }
 
   @Override

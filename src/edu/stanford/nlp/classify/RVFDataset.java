@@ -29,8 +29,8 @@ import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.HashIndex;
 
-
-import edu.stanford.nlp.util.logging.Redwood;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An interfacing class for {@link ClassifierFactory} that incrementally builds
@@ -58,7 +58,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
   double[] means;
   double[] stdevs; // means and stdevs of features, used for
 
-  final static Redwood.RedwoodChannels logger = Redwood.channels(RVFDataset.class);
+  final static Logger logger = LoggerFactory.getLogger(RVFDataset.class);
 
   /*
    * Store source and id of each datum; optional, and not fully supported.

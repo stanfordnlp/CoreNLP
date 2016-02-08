@@ -3,11 +3,11 @@ package edu.stanford.nlp.international.arabic.process;
 import java.io.StringReader;
 import java.util.List;
 
-import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.process.TokenizerFactory;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.process.Tokenizer;
 
 /**
@@ -137,7 +137,7 @@ public class ArabicTokenizerTest extends TestCase {
       String line = untokInputs[i];
       Tokenizer<CoreLabel> tokenizer = tf.getTokenizer(new StringReader(line));
       List<CoreLabel> tokens = tokenizer.tokenize();
-      String tokenizedLine = SentenceUtils.listToString(tokens);
+      String tokenizedLine = Sentence.listToString(tokens);
       String reference = tokReferences[i];
       assertEquals("Tokenization deviates from reference", reference, tokenizedLine);
     }

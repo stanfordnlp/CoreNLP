@@ -10,8 +10,8 @@ import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.Generics;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.Partial;
-
-import edu.stanford.nlp.util.logging.Redwood;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 // import java.net.MalformedURLException;
@@ -26,7 +26,7 @@ import java.util.*;
  */
 public class JollyDayHolidays implements Env.Binder {
 
-  private static Redwood.RedwoodChannels logger = Redwood.channels(JollyDayHolidays.class);
+  private static Logger logger = LoggerFactory.getLogger(JollyDayHolidays.class);
 
   private HolidayManager holidayManager;
   // private CollectionValuedMap<String, JollyHoliday> holidays;

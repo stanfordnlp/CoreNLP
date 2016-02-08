@@ -1,7 +1,7 @@
 package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.process.SerializableFunction;
 import edu.stanford.nlp.trees.DiskTreebank;
 import edu.stanford.nlp.trees.HeadFinder;
@@ -313,7 +313,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
 
   public List<HasWord> defaultTestSentence() {
     String[] sent = {"Ésto", "es", "sólo", "una", "prueba", "."};
-    return SentenceUtils.toWordList(sent);
+    return Sentence.toWordList(sent);
   }
 
   @Override

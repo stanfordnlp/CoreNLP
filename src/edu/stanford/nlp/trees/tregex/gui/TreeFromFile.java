@@ -7,7 +7,7 @@ import javax.swing.JTextField;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasIndex;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.trees.Constituent;
 import edu.stanford.nlp.trees.Tree;
 
@@ -32,7 +32,7 @@ public class TreeFromFile {
 
   public TreeFromFile(Tree t) {
     this.treeString = t.toString();
-    sentence = SentenceUtils.listToString(t.yield());
+    sentence = Sentence.listToString(t.yield());
     if(t.label() instanceof HasIndex) {
       sentId = ((CoreLabel)t.label()).sentIndex();
       filename = ((CoreLabel)t.label()).docID();

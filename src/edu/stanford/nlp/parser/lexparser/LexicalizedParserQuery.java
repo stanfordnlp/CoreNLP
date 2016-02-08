@@ -35,7 +35,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.KBestViterbiParser;
@@ -310,8 +310,8 @@ public class LexicalizedParserQuery implements ParserQuery {
     int expectedSize = addedPunct ? originalSentence.size() + 1 : originalSentence.size();
     if (leaves.size() != expectedSize) {
       throw new IllegalStateException("originalWords and sentence of different sizes: " + expectedSize + " vs. " + leaves.size() +
-                                      "\n Orig: " + SentenceUtils.listToString(originalSentence) +
-                                      "\n Pars: " + SentenceUtils.listToString(leaves));
+                                      "\n Orig: " + Sentence.listToString(originalSentence) +
+                                      "\n Pars: " + Sentence.listToString(leaves));
     }
     Iterator<Tree> leafIterator = leaves.iterator();
     for (HasWord word : originalSentence) {
@@ -367,6 +367,7 @@ public class LexicalizedParserQuery implements ParserQuery {
    * @throws NoSuchParseException If no previously successfully parsed
    *                                sentence
    */
+  @Override
   public Tree getBestParse() {
     return getBestParse(true);
   }
@@ -400,6 +401,72 @@ public class LexicalizedParserQuery implements ParserQuery {
     }
   }
 
+
+  /**
+   * Return the k best parses of the sentence most recently parsed.
+   * These will be from the factored parser, if it was used and it succeeded
+   * else from the PCFG if it was used and succeed, else from the dependency
+   * parser.
+   *
+   *
+   * Note that the dependency parser does not implement a k-best method
+   * and therefore always returns a list of size 1.
+   *
+   * Also note that the factored parser does not guarantee to return the
+   * k best parses; the result is simply an approximation.
+   *
+   * @return A list of scored trees
+   * @throws NoSuchParseException If no previously successfully parsed
+   *                                sentence   */
+  @Override
+  public List<ScoredObject<Tree>> getKBestParses(int k) {
+    if (parseSkipped) {
+      return null;
+    }
+    if (bparser != null && parseSucceeded) {
+     return this.getKGoodFactoredParses(k);
+    } else if (pparser != null && pparser.hasParse() && fallbackToPCFG) {
+      return this.getKBestPCFGParses(k);
+    } else if (dparser != null && dparser.hasParse()) { // && fallbackToDG
+      // The dependency parser doesn't support k-best parse extraction, so just
+      // return the best parse
+      Tree tree = this.getBestDependencyParse(true);
+      double score = dparser.getBestScore();
+      ScoredObject<Tree> so = new ScoredObject<>(tree, score);
+      List<ScoredObject<Tree>> trees = new ArrayList<>(1);
+      trees.add(so);
+      return trees;
+    } else {
+      throw new NoSuchParseException();
+    }
+  }
+
+  /**
+   *
+   * Checks which parser (factored, PCFG, or dependency) was used and
+   * returns the score of the best parse from this parser.
+   *
+   * If no parse could be obtained, it returns Double.NEGATIVE_INFINITY.
+   *
+   * @return the score of the best parse, or Double.NEGATIVE_INFINITY
+   */
+  @Override
+  public double getBestScore() {
+    if (parseSkipped) {
+      return Double.NEGATIVE_INFINITY;
+    }
+    if (bparser != null && parseSucceeded) {
+      return bparser.getBestScore();
+    } else if (pparser != null && pparser.hasParse() && fallbackToPCFG) {
+      return pparser.getBestScore();
+    } else if (dparser != null && dparser.hasParse()) {
+      return dparser.getBestScore();
+    } else {
+      return Double.NEGATIVE_INFINITY;
+    }
+  }
+
+
   public List<ScoredObject<Tree>> getBestPCFGParses() {
     return pparser.getBestParses();
   }
@@ -419,17 +486,24 @@ public class LexicalizedParserQuery implements ParserQuery {
     if (bparser == null || parseSkipped) {
       return null;
     }
+
     List<ScoredObject<Tree>> binaryTrees = bparser.getKGoodParses(k);
     if (binaryTrees == null) {
       return null;
     }
+
     List<ScoredObject<Tree>> trees = new ArrayList<>(k);
     for (ScoredObject<Tree> tp : binaryTrees) {
       Tree t = debinarizer.transformTree(tp.object());
+      if (op.nodePrune) {
+        NodePruner np = new NodePruner(pparser, debinarizer);
+        t = np.prune(t);
+      }
       t = subcategoryStripper.transformTree(t);
       restoreOriginalWords(t);
       trees.add(new ScoredObject<>(t, tp.score()));
     }
+
     return trees;
   }
 

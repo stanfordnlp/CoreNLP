@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
@@ -38,6 +37,15 @@ public class WordsToSentencesAnnotator implements Annotator {
 
   public WordsToSentencesAnnotator(boolean verbose) {
     this(verbose, false, new WordToSentenceProcessor<>());
+  }
+
+  public WordsToSentencesAnnotator(boolean verbose, String boundaryTokenRegex,
+                                   Set<String> boundaryToDiscard, Set<String> htmlElementsToDiscard,
+                                   String newlineIsSentenceBreak) {
+    this(verbose, false,
+            new WordToSentenceProcessor<>(boundaryTokenRegex,
+                    boundaryToDiscard, htmlElementsToDiscard,
+                    WordToSentenceProcessor.stringToNewlineIsSentenceBreak(newlineIsSentenceBreak)));
   }
 
   public WordsToSentencesAnnotator(boolean verbose, String boundaryTokenRegex,
@@ -118,7 +126,7 @@ public class WordsToSentencesAnnotator implements Annotator {
     // section annotations to mark sentences with
     CoreMap sectionAnnotations = null;
     List<CoreMap> sentences = new ArrayList<>();
-    for (List<CoreLabel> sentenceTokens: wts.process(tokens)) {
+    for (List<CoreLabel> sentenceTokens: this.wts.process(tokens)) {
       if (countLineNumbers) {
         ++lineNumber;
       }
@@ -199,13 +207,13 @@ public class WordsToSentencesAnnotator implements Annotator {
 
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.singleton(CoreAnnotations.TokensAnnotation.class);
+  public Set<Requirement> requires() {
+    return Collections.singleton(TOKENIZE_REQUIREMENT);
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CoreAnnotations.SentencesAnnotation.class);
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(SSPLIT_REQUIREMENT);
   }
 
 }

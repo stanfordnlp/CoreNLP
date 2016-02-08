@@ -33,7 +33,7 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.ArgumentParser.Option;
+import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.logging.Redwood;
 
 public class ScorePhrases<E extends Pattern> {
@@ -47,7 +47,7 @@ public class ScorePhrases<E extends Pattern> {
   PhraseScorer phraseScorer = null;
 
   public ScorePhrases(Properties props, ConstantsAndVariables cv){
-    ArgumentParser.fillOptions(this, props);
+    Execution.fillOptions(this, props);
     this.constVars = cv;
     try {
       phraseScorer = phraseScorerClass
@@ -55,7 +55,7 @@ public class ScorePhrases<E extends Pattern> {
     } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
       throw new RuntimeException(e);
     }
-    ArgumentParser.fillOptions(phraseScorer, props);
+    Execution.fillOptions(phraseScorer, props);
   }
 
   public Counter<CandidatePhrase> chooseTopWords(Counter<CandidatePhrase> newdt,

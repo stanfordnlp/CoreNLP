@@ -56,8 +56,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-
-import edu.stanford.nlp.util.logging.Redwood;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -254,7 +254,7 @@ public class ColumnDataClassifier {
 
   enum InputFormat { PLAIN, COMMENTS, HEADER }
 
-  final static Redwood.RedwoodChannels logger = Redwood.channels(ColumnDataClassifier.class);
+  final static Logger logger = LoggerFactory.getLogger(ColumnDataClassifier.class);
 
   /**
    * Entry point for taking a String (formatted as a line of a TSV file) and

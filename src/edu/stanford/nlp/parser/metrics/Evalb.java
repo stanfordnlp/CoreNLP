@@ -16,7 +16,7 @@ import java.util.Set;
 
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.trees.Constituent;
 import edu.stanford.nlp.trees.ConstituentFactory;
@@ -75,8 +75,8 @@ public class Evalb extends AbstractEval {
 
     } else if (guess.yield().size() != gold.yield().size()) {
       System.err.println("Warning: yield differs:");
-      System.err.println("Guess: " + SentenceUtils.listToString(guess.yield()));
-      System.err.println("Gold:  " + SentenceUtils.listToString(gold.yield()));
+      System.err.println("Guess: " + Sentence.listToString(guess.yield()));
+      System.err.println("Gold:  " + Sentence.listToString(gold.yield()));
     }
 
     super.evaluate(guess, gold, pw);

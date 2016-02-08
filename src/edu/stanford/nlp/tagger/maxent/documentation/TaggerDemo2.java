@@ -7,7 +7,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.List;
 
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -41,11 +41,11 @@ class TaggerDemo2 {
     documentPreprocessor.setTokenizerFactory(ptbTokenizerFactory);
     for (List<HasWord> sentence : documentPreprocessor) {
       List<TaggedWord> tSentence = tagger.tagSentence(sentence);
-      pw.println(SentenceUtils.listToString(tSentence, false));
+      pw.println(Sentence.listToString(tSentence, false));
     }
 
     // print the adjectives in one more sentence. This shows how to get at words and tags in a tagged sentence.
-    List<HasWord> sent = SentenceUtils.toWordList("The", "slimy", "slug", "crawled", "over", "the", "long", ",", "green", "grass", ".");
+    List<HasWord> sent = Sentence.toWordList("The", "slimy", "slug", "crawled", "over", "the", "long", ",", "green", "grass", ".");
     List<TaggedWord> taggedSent = tagger.tagSentence(sent);
     for (TaggedWord tw : taggedSent) {
       if (tw.tag().startsWith("JJ")) {

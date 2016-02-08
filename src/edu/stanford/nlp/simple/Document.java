@@ -672,7 +672,7 @@ public class Document {
     }
     // Run annotator
     Annotator parse = props == EMPTY_PROPS ? defaultParse.get() : getOrCreate(AnnotatorFactories.parse(props, backend));
-    if (parse.requires().contains(CoreAnnotations.PartOfSpeechAnnotation.class)) {
+    if (parse.requires().contains(Annotator.POS_REQUIREMENT)) {
       runPOS(props);
     } else {
       sentences();

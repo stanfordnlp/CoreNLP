@@ -7,7 +7,6 @@ import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.pipeline.TokenizerAnnotator;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import edu.stanford.nlp.util.Generics;
@@ -153,7 +152,7 @@ public class WordToSentenceProcessorTest extends TestCase {
             new WordToSentenceProcessor<CoreLabel>(WordToSentenceProcessor.DEFAULT_BOUNDARY_REGEX,
                     WordToSentenceProcessor.DEFAULT_BOUNDARY_FOLLOWERS,
                     WordToSentenceProcessor.DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD,
-                    Generics.newHashSet(Collections.singletonList("p")),
+                    Generics.newHashSet(Arrays.asList("p")),
                     "chapter|preface", WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER, null, null, false, false);
     String input1 = "<title>Chris rules!</title><preface><p>Para one</p><p>Para two</p></preface>" +
             "<chapter><p>Text we like. Two sentences \n\n in it.</p></chapter><coda>Some more text here</coda>";

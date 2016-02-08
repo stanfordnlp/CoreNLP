@@ -7,8 +7,11 @@ import edu.stanford.nlp.international.arabic.ArabicMorphoFeatureSpecification;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification.MorphoFeatureType;
 import edu.stanford.nlp.international.morph.MorphoFeatures;
-import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.HasTag;
+import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.process.SerializableFunction;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.arabic.*;
@@ -125,7 +128,7 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams {
    */
   public List<? extends HasWord> defaultTestSentence() {
     String[] sent = {"هو","استنكر","الحكومة","يوم","امس","."};
-    return SentenceUtils.toWordList(sent);
+    return Sentence.toWordList(sent);
   }
 
   protected class ArabicSubcategoryStripper implements TreeTransformer {

@@ -6,7 +6,7 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CategoryWordTag;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.WordSegmenter;
 import edu.stanford.nlp.process.WordSegmentingTokenizer;
@@ -1207,7 +1207,7 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams {
    */
   @Override
   public ArrayList<Word> defaultTestSentence() {
-    return SentenceUtils.toUntaggedList("\u951f\u65a4\u62f7", "\u951f\u65a4\u62f7", "\u5b66\u6821", "\u951f\u65a4\u62f7", "\u5b66\u4e60", "\u951f\u65a4\u62f7");
+    return Sentence.toUntaggedList("\u951f\u65a4\u62f7", "\u951f\u65a4\u62f7", "\u5b66\u6821", "\u951f\u65a4\u62f7", "\u5b66\u4e60", "\u951f\u65a4\u62f7");
   }
 
 

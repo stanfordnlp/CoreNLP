@@ -18,7 +18,7 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.ArgumentParser.Option;
+import edu.stanford.nlp.util.Execution.Option;
 
 public class BasicRelationExtractor implements Extractor {
 

@@ -2,7 +2,7 @@ package edu.stanford.nlp.trees.international.pennchinese;
 
 import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.Options;
@@ -191,8 +191,8 @@ public class CharacterLevelTagExtender extends BobChrisTreeNormalizer implements
         continue;
       }
       gold = gold.firstChild();
-      pw.println(SentenceUtils.listToString(gold.preTerminalYield()));
-      pw.println(SentenceUtils.listToString(gold.yield()));
+      pw.println(Sentence.listToString(gold.preTerminalYield()));
+      pw.println(Sentence.listToString(gold.yield()));
       gold.pennPrint(pw);
 
       pw.println(tree.preTerminalYield());
