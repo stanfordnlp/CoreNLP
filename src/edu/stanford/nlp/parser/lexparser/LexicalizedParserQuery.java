@@ -404,16 +404,11 @@ public class LexicalizedParserQuery implements ParserQuery {
 
   /**
    * Return the k best parses of the sentence most recently parsed.
-   * These will be from the factored parser, if it was used and it succeeded
-   * else from the PCFG if it was used and succeed, else from the dependency
-   * parser.
    *
-   *
-   * Note that the dependency parser does not implement a k-best method
-   * and therefore always returns a list of size 1.
-   *
-   * Also note that the factored parser does not guarantee to return the
-   * k best parses; the result is simply an approximation.
+   * NB: The dependency parser does not implement a k-best method
+   * and the factored parser's method seems to be broken and therefore
+   * this method always returns a list of size 1 if either of these
+   * two parsers was used.
    *
    * @return A list of scored trees
    * @throws NoSuchParseException If no previously successfully parsed
@@ -424,7 +419,22 @@ public class LexicalizedParserQuery implements ParserQuery {
       return null;
     }
     if (bparser != null && parseSucceeded) {
-     return this.getKGoodFactoredParses(k);
+      //The getKGoodParses seems to be broken, so just return the best parse
+      Tree binaryTree = bparser.getBestParse();
+      Tree tree = debinarizer.transformTree(binaryTree);
+
+      if (op.nodePrune) {
+        NodePruner np = new NodePruner(pparser, debinarizer);
+        tree = np.prune(tree);
+      }
+      tree = subcategoryStripper.transformTree(tree);
+      restoreOriginalWords(tree);
+
+      double score = dparser.getBestScore();
+      ScoredObject<Tree> so = new ScoredObject<>(tree, score);
+      List<ScoredObject<Tree>> trees = new ArrayList<>(1);
+      trees.add(so);
+      return trees;
     } else if (pparser != null && pparser.hasParse() && fallbackToPCFG) {
       return this.getKBestPCFGParses(k);
     } else if (dparser != null && dparser.hasParse()) { // && fallbackToDG
