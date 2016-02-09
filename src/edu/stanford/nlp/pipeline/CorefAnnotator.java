@@ -191,7 +191,8 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator {
         CoreAnnotations.SentencesAnnotation.class,
         CoreAnnotations.PartOfSpeechAnnotation.class,
         CoreAnnotations.LemmaAnnotation.class,
-        CoreAnnotations.NamedEntityTagAnnotation.class
+        CoreAnnotations.NamedEntityTagAnnotation.class,
+        CorefCoreAnnotations.CorefMentionsAnnotation.class
         ));
     switch (COREF_MODE) {
       case HYBRID_MODE:

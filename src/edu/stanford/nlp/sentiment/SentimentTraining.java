@@ -17,19 +17,19 @@ public class SentimentTraining {
   private static final NumberFormat NF = new DecimalFormat("0.00");
   private static final NumberFormat FILENAME = new DecimalFormat("0000");
 
-  private SentimentTraining() {} // static methods
-
   public static void executeOneTrainingBatch(SentimentModel model, List<Tree> trainingBatch, double[] sumGradSquare) {
     SentimentCostAndGradient gcFunc = new SentimentCostAndGradient(model, trainingBatch);
     double[] theta = model.paramsToVector();
 
     // AdaGrad
     double eps = 1e-3;
+    double currCost = 0;
+
     // TODO: do we want to iterate multiple times per batch?
     double[] gradf = gcFunc.derivativeAt(theta);
-    double currCost = gcFunc.valueAt(theta);
+    currCost = gcFunc.valueAt(theta);
     System.err.println("batch cost: " + currCost);
-    for (int feature = 0; feature<gradf.length; feature++ ) {
+    for (int feature = 0; feature<gradf.length;feature++ ) {
       sumGradSquare[feature] = sumGradSquare[feature] + gradf[feature]*gradf[feature];
       theta[feature] = theta[feature] - (model.op.trainOptions.learningRate * gradf[feature]/(Math.sqrt(sumGradSquare[feature])+eps));
     }
@@ -41,7 +41,7 @@ public class SentimentTraining {
     Timing timing = new Timing();
     long maxTrainTimeMillis = model.op.trainOptions.maxTrainTimeSeconds * 1000;
     int debugCycle = 0;
-    // double bestAccuracy = 0.0;
+    double bestAccuracy = 0.0;
 
     // train using AdaGrad (seemed to work best during the dvparser project)
     double[] sumGradSquare = new double[model.totalParamSize()];
@@ -97,7 +97,7 @@ public class SentimentTraining {
 
           // output an intermediate model
           if (modelPath != null) {
-            String tempPath;
+            String tempPath = modelPath;
             if (modelPath.endsWith(".ser.gz")) {
               tempPath = modelPath.substring(0, modelPath.length() - 7) + "-" + FILENAME.format(debugCycle) + "-" + NF.format(score) + ".ser.gz";
             } else if (modelPath.endsWith(".gz")) {
@@ -125,16 +125,6 @@ public class SentimentTraining {
     return gcFunc.gradientCheck(model.totalParamSize(), 50, model.paramsToVector());
   }
 
-  /** Trains a sentiment model.
-   *  The -trainPath argument points to a labeled sentiment treebank.
-   *  The trees in this data will be used to train the model parameters (also to seed the model vocabulary).
-   *  The -devPath argument points to a second labeled sentiment treebank.
-   *  The trees in this data will be used to periodically evaluate the performance of the model.
-   *  We won't train on this data; it will only be used to test how well the model generalizes to unseen data.
-   *  The -model argument specifies where to save the learned sentiment model.
-   *
-   *  @param args Command line arguments
-   */
   public static void main(String[] args) {
     RNNOptions op = new RNNOptions();
 
@@ -201,7 +191,7 @@ public class SentimentTraining {
     // However, when we handle trees given to us from the Stanford Parser,
     // we will have to perform this step
 
-    // build an uninitialized SentimentModel from the binary productions
+    // build an unitialized SentimentModel from the binary productions
     System.err.println("Sentiment model options:\n" + op);
     SentimentModel model = new SentimentModel(op, trainingTrees);
 
@@ -227,5 +217,4 @@ public class SentimentTraining {
       model.saveSerialized(modelPath);
     }
   }
-
 }

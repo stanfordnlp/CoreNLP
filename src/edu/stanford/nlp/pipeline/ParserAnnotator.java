@@ -298,6 +298,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     }
   }
 
+  // todo [cdm 2015]: This should just use bestParse method if only getting 1 best parse.
   private List<Tree> doOneSentence(List<ParserConstraint> constraints,
                              List<CoreLabel> words) {
     ParserQuery pq = parser.parserQuery();
@@ -305,25 +306,17 @@ public class ParserAnnotator extends SentenceAnnotator {
     pq.parse(words);
     List<Tree> trees = Generics.newLinkedList();
     try {
-      // Use bestParse if kBest is set to 1.
-      if (this.kBest == 1) {
-        Tree t = pq.getBestParse();
-        double score = pq.getBestScore();
-        t.setScore(score % -10000.0);
-        trees.add(t);
+      List<ScoredObject<Tree>> scoredObjects = pq.getKBestPCFGParses(this.kBest);
+      if (scoredObjects == null || scoredObjects.size() < 1) {
+        System.err.println("WARNING: Parsing of sentence failed.  " +
+                "Will ignore and continue: " +
+                SentenceUtils.listToString(words));
       } else {
-        List<ScoredObject<Tree>> scoredObjects = pq.getKBestParses(this.kBest);
-        if (scoredObjects == null || scoredObjects.size() < 1) {
-          System.err.println("WARNING: Parsing of sentence failed.  " +
-              "Will ignore and continue: " +
-              SentenceUtils.listToString(words));
-        } else {
-          for (ScoredObject<Tree> so : scoredObjects) {
-            // -10000 denotes unknown words
-            Tree tree = so.object();
-            tree.setScore(so.score() % -10000.0);
-            trees.add(tree);
-          }
+        for (ScoredObject<Tree> so : scoredObjects) {
+          // -10000 denotes unknown words
+          Tree tree = so.object();
+          tree.setScore(so.score() % - 10000.0);
+          trees.add(tree);
         }
       }
     } catch (OutOfMemoryError e) {

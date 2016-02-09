@@ -62,6 +62,7 @@ import edu.stanford.nlp.dcoref.Dictionaries.MentionType;
 import edu.stanford.nlp.dcoref.ScorerBCubed.BCubedType;
 import edu.stanford.nlp.dcoref.sievepasses.DeterministicCorefSieve;
 import edu.stanford.nlp.dcoref.sievepasses.ExactStringMatch;
+import edu.stanford.nlp.hcoref.data.*;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.io.StringOutputStream;
@@ -377,8 +378,8 @@ public class SieveCoreferenceSystem {
     SieveCoreferenceSystem corefSystem = new SieveCoreferenceSystem(props);
 
     // MentionExtractor extracts MUC, ACE, or CoNLL documents
-    MentionExtractor mentionExtractor;
-    if (props.containsKey(Constants.MUC_PROP)){
+    MentionExtractor mentionExtractor = null;
+    if(props.containsKey(Constants.MUC_PROP)){
       mentionExtractor = new MUCMentionExtractor(corefSystem.dictionaries, props,
           corefSystem.semantics, corefSystem.singletonPredictor);
     } else if(props.containsKey(Constants.ACE2004_PROP) || props.containsKey(Constants.ACE2005_PROP)) {
@@ -387,10 +388,10 @@ public class SieveCoreferenceSystem {
     } else if (props.containsKey(Constants.CONLL2011_PROP)) {
       mentionExtractor = new CoNLLMentionExtractor(corefSystem.dictionaries, props,
           corefSystem.semantics, corefSystem.singletonPredictor);
-    } else {
+    }
+    if(mentionExtractor == null){
       throw new RuntimeException("No input file specified!");
     }
-
     if (!Constants.USE_GOLD_MENTIONS) {
       // Set mention finder
       String mentionFinderClass = props.getProperty(Constants.MENTION_FINDER_PROP);

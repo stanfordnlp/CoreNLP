@@ -42,6 +42,15 @@ public class WordsToSentencesAnnotator implements Annotator {
 
   public WordsToSentencesAnnotator(boolean verbose, String boundaryTokenRegex,
                                    Set<String> boundaryToDiscard, Set<String> htmlElementsToDiscard,
+                                   String newlineIsSentenceBreak) {
+    this(verbose, false,
+            new WordToSentenceProcessor<>(boundaryTokenRegex,
+                    boundaryToDiscard, htmlElementsToDiscard,
+                    WordToSentenceProcessor.stringToNewlineIsSentenceBreak(newlineIsSentenceBreak)));
+  }
+
+  public WordsToSentencesAnnotator(boolean verbose, String boundaryTokenRegex,
+                                   Set<String> boundaryToDiscard, Set<String> htmlElementsToDiscard,
                                    String newlineIsSentenceBreak, String boundaryMultiTokenRegex,
                                    Set<String> tokenRegexesToDiscard) {
     this(verbose, false,
