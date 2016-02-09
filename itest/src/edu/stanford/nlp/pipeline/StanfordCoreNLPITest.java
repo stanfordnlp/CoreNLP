@@ -38,6 +38,22 @@ public class StanfordCoreNLPITest extends TestCase {
     new StanfordCoreNLP(props);
   }
 
+  public void testRequiresForCoref() throws Exception {
+    Properties props = new Properties();
+    try {
+      // Put the lemma before pos and you have a problem
+      props.setProperty("annotators", "tokenize,ssplit,lemma,pos,ner,coref");
+      new StanfordCoreNLP(props);
+      throw new RuntimeException("Should have thrown an exception");
+    } catch (IllegalArgumentException e) {
+      // yay
+    }
+
+    // This should be okay: parse can take the place of pos
+    props.setProperty("annotators", "tokenize,ssplit,parse,lemma,ner");
+    new StanfordCoreNLP(props);
+  }
+
   public void test() throws Exception {
     // create a properties that enables all the annotators
     Properties props = new Properties();
