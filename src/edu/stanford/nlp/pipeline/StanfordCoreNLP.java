@@ -399,7 +399,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         Set<Class<? extends CoreAnnotation>> allRequirements = an.requires();
         for (Class<? extends CoreAnnotation> requirement : allRequirements) {
           if (!requirementsSatisfied.contains(requirement)) {
-            String fmt = "annotator \"%s\" requires annotation \"%s\". The common requirements for this annotator are: %s";
+            String fmt = "annotator \"%s\" requires annotation \"%s\". The usual requirements for this annotator are: %s";
             throw new IllegalArgumentException(
                 String.format(fmt, name, requirement.getSimpleName(),
                     StringUtils.join(Annotator.DEFAULT_REQUIREMENTS.getOrDefault(name, Collections.singleton("unknown")), ",")

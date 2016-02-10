@@ -210,7 +210,7 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown if the HttpExchange cannot communicate the error.
    */
   private static void respondError(String response, HttpExchange httpExchange) throws IOException {
-    httpExchange.getResponseHeaders().add("Content-Type", "text/plain");
+    httpExchange.getResponseHeaders().add("Content-type", "text/plain");
     httpExchange.sendResponseHeaders(HTTP_ERR, response.length());
     httpExchange.getResponseBody().write(response.getBytes());
     httpExchange.close();
@@ -226,7 +226,7 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown if the HttpExchange cannot communicate the error.
    */
   private static void respondBadInput(String response, HttpExchange httpExchange) throws IOException {
-    httpExchange.getResponseHeaders().add("Content-Type", "text/plain");
+    httpExchange.getResponseHeaders().add("Content-type", "text/plain");
     httpExchange.sendResponseHeaders(HTTP_BAD_INPUT, response.length());
     httpExchange.getResponseBody().write(response.getBytes());
     httpExchange.close();
@@ -240,7 +240,7 @@ public class StanfordCoreNLPServer implements Runnable {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
       // Return a simple text message that says pong.
-      httpExchange.getResponseHeaders().set("Content-Type", "text/plain");
+      httpExchange.getResponseHeaders().set("Content-type", "text/plain");
       String response = "pong\n";
       httpExchange.sendResponseHeaders(HTTP_OK, response.getBytes().length);
       httpExchange.getResponseBody().write(response.getBytes());
@@ -257,7 +257,7 @@ public class StanfordCoreNLPServer implements Runnable {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
       Map<String, String> urlParams = getURLParams(httpExchange.getRequestURI());
-      httpExchange.getResponseHeaders().set("Content-Type", "text/plain");
+      httpExchange.getResponseHeaders().set("Content-type", "text/plain");
       boolean doExit = false;
       String response = "Invalid shutdown key\n";
       if (urlParams.containsKey("key") && urlParams.get("key").equals(shutdownKey)) {
@@ -283,7 +283,7 @@ public class StanfordCoreNLPServer implements Runnable {
     }
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      httpExchange.getResponseHeaders().set("Content-Type", "text/html");
+      httpExchange.getResponseHeaders().set("Content-type", "text/html");
       httpExchange.sendResponseHeaders(HTTP_OK, content.getBytes().length);
       httpExchange.getResponseBody().write(content.getBytes());
       httpExchange.close();
@@ -319,7 +319,7 @@ public class StanfordCoreNLPServer implements Runnable {
     public String getContentType(Properties props, StanfordCoreNLP.OutputFormat of) {
       switch(of) {
         case JSON:
-          return "text/json";
+          return "application/json";
         case TEXT:
         case CONLL:
           return "text/plain";
@@ -407,8 +407,12 @@ public class StanfordCoreNLPServer implements Runnable {
         os.close();
         byte[] response = os.toByteArray();
 
-        httpExchange.getResponseHeaders().add("Content-Type", getContentType(props, of));
-        httpExchange.getResponseHeaders().add("Content-Length", Integer.toString(response.length));
+        String contentType = getContentType(props, of);
+        if (contentType.equals("application/json") || contentType.startsWith("text/")) {
+          contentType += ";charset=utf-8";
+        }
+        httpExchange.getResponseHeaders().add("Content-type", contentType);
+        httpExchange.getResponseHeaders().add("Content-length", Integer.toString(response.length));
         httpExchange.sendResponseHeaders(HTTP_OK, response.length);
         httpExchange.getResponseBody().write(response);
         httpExchange.close();
@@ -673,8 +677,8 @@ public class StanfordCoreNLPServer implements Runnable {
 
   private static void sendAndGetResponse(HttpExchange httpExchange, byte[] response) throws IOException {
     if (response.length > 0) {
-      httpExchange.getResponseHeaders().add("Content-Type", "text/json");
-      httpExchange.getResponseHeaders().add("Content-Length", Integer.toString(response.length));
+      httpExchange.getResponseHeaders().add("Content-type", "application/json");
+      httpExchange.getResponseHeaders().add("Content-length", Integer.toString(response.length));
       httpExchange.sendResponseHeaders(HTTP_OK, response.length);
       httpExchange.getResponseBody().write(response);
       httpExchange.close();
