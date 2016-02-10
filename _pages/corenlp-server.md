@@ -22,7 +22,7 @@ If no value for `port` is provided, port 9000 will be used by default. You can t
 
     http://localhost:9000/
 
-You should see a website similar to [corenlp.run](http://corenlp.run/), with an input box for text and a list of annotators you can run. From this interface, you can test out each of the annotators by adding/removing them from this list. You can test out the API by sending a `POST` request to the server with the appropriate properties. An easy way to do this is with [wget](https://www.gnu.org/software/wget/). The following will annotate the sentence "*the quick brown fox jumped over the lazy dog*" with part of speech tags:
+You should see a website similar to [corenlp.run](http://corenlp.run/), with an input box for text and a list of annotators you can run. From this interface, you can test out each of the annotators by adding/removing them from this list. You can test out the API by sending a `POST` request to the server with the appropriate properties. An easy way to do this is with [wget](https://www.gnu.org/software/wget/). The following will annotate the sentence "*the quick brown fox jumped over the lazy dog*" with part of speech tags (and tokenizing on whitespace -- recall, you can pass in any property recognized by CoreNLP):
 
 ```bash
 wget --post-data 'the quick brown fox jumped over the lazy dog' 'localhost:9000/?properties={"tokenize.whitespace": "true", "annotators": "tokenize,ssplit,pos", "outputFormat": "json"}' -O -
@@ -43,10 +43,10 @@ There are three endpoints provided by the server, which we'll describe in more d
 * `/semgrex` Similar to `/tokensregex` above, this endpoint matches text against semgrex patterns.
 
 ### Annotate with CoreNLP: `/`
-This endpoint takes as input a JSON-formatted properties string under the key `properties=<properties>`, and as `POST`data text to annotate. The properties should mirror the properties file passed into the CoreNLP command line. For example, the following will tokenize the input text on whitespace, run part of speech tagging, and output it as JSON to standard out:
+This endpoint takes as input a JSON-formatted properties string under the key `properties=<properties>`, and as `POST`data text to annotate. The properties should mirror the properties file passed into the CoreNLP command line. For example, the following will tokenize the input text, run part of speech tagging, and output it as JSON to standard out:
 
 ```bash
-wget --post-data 'the quick brown fox jumped over the lazy dog' 'localhost:9000/?properties={"tokenize.whitespace": "true", "annotators": "tokenize,ssplit,pos", "outputFormat": "json"}' -O -
+wget --post-data 'the quick brown fox jumped over the lazy dog' 'localhost:9000/?properties={"annotators": "tokenize,ssplit,pos", "outputFormat": "json"}' -O -
 ```
 
 A common property to set is the output format of the API. The server supports all output formats provided by CoreNLP. These are listed below, along with their relevant properties:
