@@ -109,6 +109,16 @@ public class RerankingParserQuery implements ParserQuery {
   }
 
   @Override
+  public List<ScoredObject<Tree>> getKBestParses(int k) {
+    return this.getKBestPCFGParses(k);
+  }
+
+  @Override
+  public double getBestScore() {
+    return this.getPCFGScore();
+  }
+
+  @Override
   public Tree getBestPCFGParse() {
     return getBestParse();
   }

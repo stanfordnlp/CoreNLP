@@ -5,6 +5,7 @@ import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
 
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ie.util.RelationTriple;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.StringOutputStream;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -25,6 +26,7 @@ import edu.stanford.nlp.util.Pointer;
 
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collection;
@@ -64,7 +66,8 @@ public class JSONOutputter extends AnnotationOutputter {
   @SuppressWarnings("RedundantCast")  // It's lying; we need the "redundant" casts (as of 2014-09-08)
   @Override
   public void print(Annotation doc, OutputStream target, Options options) throws IOException {
-    JSONWriter l0 = new JSONWriter(new PrintWriter(target), options);
+    PrintWriter writer = new PrintWriter(IOUtils.encodedOutputStreamWriter(target, options.encoding));
+    JSONWriter l0 = new JSONWriter(writer, options);
 
     l0.object(l1 -> {
 

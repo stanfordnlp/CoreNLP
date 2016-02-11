@@ -1,5 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -11,7 +12,9 @@ import edu.stanford.nlp.util.StringUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -108,7 +111,7 @@ public class CoNLLOutputter extends AnnotationOutputter {
 
   @Override
   public void print(Annotation doc, OutputStream target, Options options) throws IOException {
-    PrintWriter writer = new PrintWriter(target);
+    PrintWriter writer = new PrintWriter(IOUtils.encodedOutputStreamWriter(target, options.encoding));
 
     // vv A bunch of nonsense to get tokens vv
     if (doc.get(CoreAnnotations.SentencesAnnotation.class) != null) {
