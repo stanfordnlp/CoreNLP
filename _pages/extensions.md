@@ -47,7 +47,7 @@ and our recommended way of using Stanford CoreNLP within UIMA.
 #### R (CRAN)
 
 * [coreNLP: Wrappers Around Stanford CoreNLP Tools](https://cran.r-project.org/web/packages/coreNLP/) by Taylor Arnold and Lauren Tilton.  [Github](https://github.com/statsmaths/coreNLP). 
-* [https://cran.r-project.org/web/packages/NLP/](https://cran.r-project.org/web/packages/NLP/) by Kurt Hornik.
+* [NLP: Natural Language Processing Infrastructure](https://cran.r-project.org/web/packages/NLP/) by Kurt Hornik.
 
 #### Ruby
 
