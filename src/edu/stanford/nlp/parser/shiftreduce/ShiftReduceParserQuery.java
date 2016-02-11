@@ -175,12 +175,6 @@ public class ShiftReduceParserQuery implements ParserQuery {
     return debinarized;
   }
 
-  @Override
-  public List<ScoredObject<Tree>> getKBestParses(int k) { return this.getKBestPCFGParses(k); }
-
-  @Override
-  public double getBestScore() { return this.getPCFGScore(); }
-
   /** TODO: can we get away with not calling this PCFG? */
   @Override
   public Tree getBestPCFGParse() {
