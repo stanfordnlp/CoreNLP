@@ -32,7 +32,7 @@ include:
 # same for all
 host: 127.0.0.1
 sidebar_accordion: true
-markdown: redcarpet
+markdown: kramdown
 print: false
 theme_file: theme-cardinal.css
 # only use suffix if you need to force index.html to display
