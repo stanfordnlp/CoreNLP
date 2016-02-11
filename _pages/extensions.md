@@ -44,6 +44,11 @@ and our recommended way of using Stanford CoreNLP within UIMA.
 * [Original Python wrapper including JSON-RPC server](https://github.com/dasmith/stanford-corenlp-python) by Dustin Smith. At CoreNLP v1.3.3, last we checked.
 * [Python interface for converting Penn Treebank trees to Stanford Dependencies](https://github.com/dmcc/PyStanfordDependencies) by David McClosky (see also: [PyPI page](https://pypi.python.org/pypi/PyStanfordDependencies)). Last we checked, it is at Stanford CoreNLP v3.5.2 and can do Universal and Stanford dependencies (though it's currently missing Universal POS tags and features).
 
+#### R (CRAN)
+
+* [coreNLP: Wrappers Around Stanford CoreNLP Tools](https://cran.r-project.org/web/packages/coreNLP/) by Taylor Arnold and Lauren Tilton.  [Github](https://github.com/statsmaths/coreNLP). 
+* [https://cran.r-project.org/web/packages/NLP/](https://cran.r-project.org/web/packages/NLP/) by Kurt Hornik.
+
 #### Ruby
 
 * [Ruby bindings](https://github.com/louismullie/stanford-core-nlp) by Louis Mullie (see also: [Ruby Gems page](https://rubygems.org/gems/stanford-core-nlp)).
