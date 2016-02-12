@@ -503,7 +503,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
 
   private void distSimAnnotate(PaddedList<IN> info) {
     for (CoreLabel fl : info) {
-      if (fl.has(CoreAnnotations.DistSimAnnotation.class)) { return; }
+      if (fl.containsKey(CoreAnnotations.DistSimAnnotation.class)) { return; }
       String word = getWord(fl);
       if ( ! flags.casedDistSim) {
         word = word.toLowerCase();

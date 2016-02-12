@@ -102,7 +102,7 @@ public class WordsToSentencesAnnotator implements Annotator {
     if (VERBOSE) {
       System.err.print("Sentence splitting ...");
     }
-    if ( ! annotation.has(CoreAnnotations.TokensAnnotation.class)) {
+    if ( !annotation.containsKey(CoreAnnotations.TokensAnnotation.class)) {
       throw new IllegalArgumentException("WordsToSentencesAnnotator: unable to find words/tokens in: " + annotation);
     }
 

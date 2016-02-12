@@ -115,21 +115,6 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
   }
 
 
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public <VALUE> boolean has(Class<? extends Key<VALUE>> key) {
-    for (int i = 0; i < size; i++) {
-      if (keys[i] == key) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
   /**
    * {@inheritDoc}
    */
@@ -511,7 +496,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
       return false;
     }
     for (Class key : this.keySet()) {
-      if (!other.has(key)) {
+      if (!other.containsKey(key)) {
         return false;
       }
       Object thisV = this.get(key), otherV = other.get(key);

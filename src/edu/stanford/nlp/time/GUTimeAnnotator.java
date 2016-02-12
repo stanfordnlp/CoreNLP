@@ -8,11 +8,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
-import edu.stanford.nlp.util.ArrayCoreMap;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.DataFilePaths;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.SystemUtils;
+import edu.stanford.nlp.util.*;
 import org.w3c.dom.*;
 
 import java.io.File;
@@ -80,8 +76,8 @@ public class GUTimeAnnotator implements Annotator {
    // new XMLOutputter().output(inputXML, inputWriter);
     inputWriter.close();
 
-    boolean useFirstDate = 
-      (!document.has(CoreAnnotations.CalendarAnnotation.class) && !document.has(CoreAnnotations.DocDateAnnotation.class));
+    boolean useFirstDate =
+      (!document.containsKey(CoreAnnotations.CalendarAnnotation.class) && !document.containsKey(CoreAnnotations.DocDateAnnotation.class));
     
     ArrayList<String> args = new ArrayList<>();
     args.add("perl");

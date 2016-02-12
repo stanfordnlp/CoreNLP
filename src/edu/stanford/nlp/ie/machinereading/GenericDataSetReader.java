@@ -540,7 +540,7 @@ public class GenericDataSetReader {
    */
   private static Tree findTreeWithSpan(Tree tree, int start, int end) {
     CoreLabel l = (CoreLabel) tree.label();
-    if (l != null && l.has(CoreAnnotations.BeginIndexAnnotation.class) && l.has(CoreAnnotations.EndIndexAnnotation.class)) {
+    if (l != null && l.containsKey(CoreAnnotations.BeginIndexAnnotation.class) && l.containsKey(CoreAnnotations.EndIndexAnnotation.class)) {
       int myStart = l.get(CoreAnnotations.BeginIndexAnnotation.class);
       int myEnd = l.get(CoreAnnotations.EndIndexAnnotation.class);
       if (start == myStart && end == myEnd){

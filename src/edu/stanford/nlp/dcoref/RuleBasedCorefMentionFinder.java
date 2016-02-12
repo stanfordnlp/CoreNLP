@@ -28,10 +28,7 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.IntPair;
-import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.*;
 
 public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
 
@@ -527,7 +524,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
 
   private static Tree findTreeWithSpan(Tree tree, int start, int end) {
     CoreLabel l = (CoreLabel) tree.label();
-    if (l != null && l.has(CoreAnnotations.BeginIndexAnnotation.class) && l.has(CoreAnnotations.EndIndexAnnotation.class)) {
+    if (l != null && l.containsKey(CoreAnnotations.BeginIndexAnnotation.class) && l.containsKey(CoreAnnotations.EndIndexAnnotation.class)) {
       int myStart = l.get(CoreAnnotations.BeginIndexAnnotation.class);
       int myEnd = l.get(CoreAnnotations.EndIndexAnnotation.class);
       if (start == myStart && end == myEnd){

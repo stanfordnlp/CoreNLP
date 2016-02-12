@@ -198,7 +198,7 @@ public class ScrollableTreeJPanel extends TreeJPanel   {
         cWidth = paintTree(child, coord, g2, fM, matchedColor);
       } else {
         Color col = defaultColor;
-        if(((CoreLabel) child.label()).has(CoreAnnotations.DoAnnotation.class))
+        if(((CoreLabel) child.label()).containsKey(CoreAnnotations.DoAnnotation.class))
           col = (((CoreLabel) child.label()).get(CoreAnnotations.DoAnnotation.class)) ? tdiffColor : defaultColor;
         cWidth = paintTree(child, new Point2D.Double(childStartX, childStartY), g2, fM, col);
       }

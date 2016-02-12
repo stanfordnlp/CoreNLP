@@ -257,7 +257,7 @@ public class TokenizerAnnotator implements Annotator {
       System.err.print("Tokenizing ... ");
     }
 
-    if (annotation.has(CoreAnnotations.TextAnnotation.class)) {
+    if (annotation.containsKey(CoreAnnotations.TextAnnotation.class)) {
       String text = annotation.get(CoreAnnotations.TextAnnotation.class);
       Reader r = new StringReader(text);
       // don't wrap in BufferedReader.  It gives you nothing for in-memory String unless you need the readLine() method!

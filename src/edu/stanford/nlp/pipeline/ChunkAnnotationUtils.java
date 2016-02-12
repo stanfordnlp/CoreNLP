@@ -1,7 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.AnnotationLookup;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
@@ -105,7 +104,7 @@ public class ChunkAnnotationUtils {
    */
   public static void copyUnsetAnnotations(CoreMap src, CoreMap dest) {
     for (Class key : src.keySet()) {
-      if (!dest.has(key)) {
+      if (!dest.containsKey(key)) {
         dest.set(key, src.get(key));
       }
     }

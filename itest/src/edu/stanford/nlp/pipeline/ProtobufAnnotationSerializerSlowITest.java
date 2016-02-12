@@ -68,7 +68,7 @@ public class ProtobufAnnotationSerializerSlowITest {
     if (doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       for (CoreMap sentence : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
         if (sentence.containsKey(CoreAnnotations.TokensAnnotation.class)) {
-          boolean hasTokenBeginAnnotation = sentence.size() > 0 && sentence.get(CoreAnnotations.TokensAnnotation.class).get(0).has(CoreAnnotations.TokenBeginAnnotation.class);
+          boolean hasTokenBeginAnnotation = sentence.size() > 0 && sentence.get(CoreAnnotations.TokensAnnotation.class).get(0).containsKey(CoreAnnotations.TokenBeginAnnotation.class);
           if (hasTokenBeginAnnotation) {
             sentence.set(CoreAnnotations.NumerizedTokensAnnotation.class, NumberNormalizer.findAndMergeNumbers(sentence));
           }

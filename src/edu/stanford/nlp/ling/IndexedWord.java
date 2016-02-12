@@ -148,11 +148,6 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
   }
 
   @Override
-  public <VALUE> boolean has(Class<? extends TypesafeMap.Key<VALUE>> key) {
-    return label.has(key);
-  }
-
-  @Override
   public <VALUE> boolean containsKey(Class<? extends TypesafeMap.Key<VALUE>> key) {
     return label.containsKey(key);
   }
@@ -429,11 +424,11 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
       result = get(CoreAnnotations.DocIDAnnotation.class).hashCode();
       sensible = true;
     }
-    if (has(CoreAnnotations.SentenceIndexAnnotation.class)) {
+    if (containsKey(CoreAnnotations.SentenceIndexAnnotation.class)) {
       result = 29 * result + get(CoreAnnotations.SentenceIndexAnnotation.class).hashCode();
       sensible = true;
     }
-    if (has(CoreAnnotations.IndexAnnotation.class)) {
+    if (containsKey(CoreAnnotations.IndexAnnotation.class)) {
       result = 29 * result + get(CoreAnnotations.IndexAnnotation.class).hashCode();
       sensible = true;
     }

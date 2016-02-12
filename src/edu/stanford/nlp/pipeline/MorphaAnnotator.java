@@ -44,7 +44,7 @@ public class MorphaAnnotator implements Annotator{
       System.err.print("Finding lemmas ...");
     }
     Morphology morphology = new Morphology();
-    if (annotation.has(CoreAnnotations.SentencesAnnotation.class)) {
+    if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
         //System.err.println("Lemmatizing sentence: " + tokens);

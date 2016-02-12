@@ -422,7 +422,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return an IntPair: the SpanAnnotation of this node.
    */
   public IntPair getSpan() {
-    if(label() instanceof CoreMap && ((CoreMap) label()).has(CoreAnnotations.SpanAnnotation.class))
+    if(label() instanceof CoreMap && ((CoreMap) label()).containsKey(CoreAnnotations.SpanAnnotation.class))
       return ((CoreMap) label()).get(CoreAnnotations.SpanAnnotation.class);
     return null;
   }
