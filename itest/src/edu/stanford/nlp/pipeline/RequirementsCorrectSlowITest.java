@@ -83,7 +83,7 @@ public class RequirementsCorrectSlowITest {
 
   @Test
   public void testQuotePipeline() {
-    testAnnotatorSequence(Arrays.asList("tokenize","ssplit","quote"));
+    testAnnotatorSequence(Arrays.asList("quote"));
   }
 
   @Test

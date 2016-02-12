@@ -1,10 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
@@ -202,7 +198,20 @@ public class ChineseSegmenterAnnotator implements Annotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CoreAnnotations.TokensAnnotation.class);
+    return new HashSet<>(Arrays.asList(
+        CoreAnnotations.TextAnnotation.class,
+        CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+        CoreAnnotations.CharacterOffsetEndAnnotation.class,
+        CoreAnnotations.BeforeAnnotation.class,
+        CoreAnnotations.AfterAnnotation.class,
+        CoreAnnotations.TokenBeginAnnotation.class,
+        CoreAnnotations.TokenEndAnnotation.class,
+        CoreAnnotations.PositionAnnotation.class,
+        CoreAnnotations.IndexAnnotation.class,
+        CoreAnnotations.OriginalTextAnnotation.class,
+        CoreAnnotations.ValueAnnotation.class
+    ));
   }
 
 }

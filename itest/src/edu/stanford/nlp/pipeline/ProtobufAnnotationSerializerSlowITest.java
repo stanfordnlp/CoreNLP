@@ -424,7 +424,7 @@ public class ProtobufAnnotationSerializerSlowITest {
 
   @Test
   public void testGender() {
-    testAnnotators("tokenize,ssplit,pos,gender");
+    testAnnotators("tokenize,ssplit,pos,lemma,ner,gender");
   }
 
   /**
