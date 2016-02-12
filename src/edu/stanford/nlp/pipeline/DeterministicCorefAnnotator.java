@@ -198,7 +198,15 @@ public class DeterministicCorefAnnotator implements Annotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    return TOKENIZE_SSPLIT_PARSE_NER;
+    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        CoreAnnotations.TextAnnotation.class,
+        CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+        CoreAnnotations.CharacterOffsetEndAnnotation.class,
+        CoreAnnotations.SentencesAnnotation.class,
+        TreeCoreAnnotations.TreeAnnotation.class,
+        CoreAnnotations.NamedEntityTagAnnotation.class
+    )));
   }
 
   @Override

@@ -14,6 +14,7 @@ import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.*;
 
@@ -371,15 +372,43 @@ public class ParserAnnotator extends SentenceAnnotator {
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     if (this.BUILD_GRAPHS) {
       if (this.saveBinaryTrees) {
-        return PARSE_TAG_DEPPARSE_BINARIZED_TREES;
+        return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+            CoreAnnotations.PartOfSpeechAnnotation.class,
+            TreeCoreAnnotations.TreeAnnotation.class,
+            TreeCoreAnnotations.BinarizedTreeAnnotation.class,
+            SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
+            SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
+            SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class,
+            CoreAnnotations.BeginIndexAnnotation.class,
+            CoreAnnotations.EndIndexAnnotation.class,
+            CoreAnnotations.CategoryAnnotation.class
+        )));
       } else {
-        return PARSE_TAG_DEPPARSE;
+        return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+            CoreAnnotations.PartOfSpeechAnnotation.class,
+            TreeCoreAnnotations.TreeAnnotation.class,
+            SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
+            SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
+            SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class,
+            CoreAnnotations.BeginIndexAnnotation.class,
+            CoreAnnotations.EndIndexAnnotation.class,
+            CoreAnnotations.CategoryAnnotation.class
+        )));
       }
     } else {
       if (this.saveBinaryTrees) {
-        return PARSE_TAG_BINARIZED_TREES;
+        return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+            CoreAnnotations.PartOfSpeechAnnotation.class,
+            TreeCoreAnnotations.TreeAnnotation.class,
+            TreeCoreAnnotations.BinarizedTreeAnnotation.class,
+            CoreAnnotations.CategoryAnnotation.class
+        )));
       } else {
-        return PARSE_AND_TAG;
+        return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+            CoreAnnotations.PartOfSpeechAnnotation.class,
+            TreeCoreAnnotations.TreeAnnotation.class,
+            CoreAnnotations.CategoryAnnotation.class
+        )));
       }
     }
   }
