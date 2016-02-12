@@ -624,11 +624,16 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
     return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        CoreAnnotations.TextAnnotation.class,
         CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.IndexAnnotation.class,
         CoreAnnotations.SentencesAnnotation.class,
+        CoreAnnotations.SentenceIndexAnnotation.class,
         CoreAnnotations.PartOfSpeechAnnotation.class,
+        CoreAnnotations.LemmaAnnotation.class,
         SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class
+        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
+        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
     )));
   }
 }

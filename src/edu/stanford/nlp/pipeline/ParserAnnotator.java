@@ -1,8 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -157,6 +155,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     this.extraDependencies = MetaClass.cast(props.getProperty(annotatorName + ".extradependencies", "NONE"), GrammaticalStructure.Extras.class);
   }
 
+  @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
   public static String signature(String annotatorName, Properties props) {
     StringBuilder os = new StringBuilder();
     os.append(annotatorName + ".model:" +
@@ -340,7 +339,32 @@ public class ParserAnnotator extends SentenceAnnotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    return parser.requiresTags() ? TOKENIZE_SSPLIT_POS : TOKENIZE_AND_SSPLIT;
+    if (parser.requiresTags()) {
+      return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+          CoreAnnotations.TextAnnotation.class,
+          CoreAnnotations.TokensAnnotation.class,
+          CoreAnnotations.ValueAnnotation.class,
+          CoreAnnotations.OriginalTextAnnotation.class,
+          CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+          CoreAnnotations.CharacterOffsetEndAnnotation.class,
+          CoreAnnotations.IndexAnnotation.class,
+          CoreAnnotations.SentencesAnnotation.class,
+          CoreAnnotations.SentenceIndexAnnotation.class,
+          CoreAnnotations.PartOfSpeechAnnotation.class
+      )));
+    } else {
+      return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+          CoreAnnotations.TextAnnotation.class,
+          CoreAnnotations.TokensAnnotation.class,
+          CoreAnnotations.ValueAnnotation.class,
+          CoreAnnotations.OriginalTextAnnotation.class,
+          CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+          CoreAnnotations.CharacterOffsetEndAnnotation.class,
+          CoreAnnotations.IndexAnnotation.class,
+          CoreAnnotations.SentencesAnnotation.class,
+          CoreAnnotations.SentenceIndexAnnotation.class
+      )));
+    }
   }
 
   @Override

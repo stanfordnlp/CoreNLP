@@ -5,6 +5,9 @@ import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.tokensregex.types.Tags;
+import edu.stanford.nlp.time.TimeAnnotations;
+import edu.stanford.nlp.time.TimeExpression;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
@@ -179,14 +182,60 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
     // TODO: we could check the models to see which ones use lemmas
     // and which ones use pos tags
     if (ner.usesSUTime() || ner.appliesNumericClassifiers()) {
-      return TOKENIZE_SSPLIT_POS_LEMMA;
+      return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+          CoreAnnotations.TextAnnotation.class,
+          CoreAnnotations.TokensAnnotation.class,
+          CoreAnnotations.SentencesAnnotation.class,
+          CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+          CoreAnnotations.CharacterOffsetEndAnnotation.class,
+          CoreAnnotations.PartOfSpeechAnnotation.class,
+          CoreAnnotations.LemmaAnnotation.class,
+          CoreAnnotations.BeforeAnnotation.class,
+          CoreAnnotations.AfterAnnotation.class,
+          CoreAnnotations.TokenBeginAnnotation.class,
+          CoreAnnotations.TokenEndAnnotation.class,
+          CoreAnnotations.IndexAnnotation.class,
+          CoreAnnotations.OriginalTextAnnotation.class,
+          CoreAnnotations.SentenceIndexAnnotation.class
+      )));
     } else {
-      return TOKENIZE_AND_SSPLIT;
+      return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+          CoreAnnotations.TextAnnotation.class,
+          CoreAnnotations.TokensAnnotation.class,
+          CoreAnnotations.SentencesAnnotation.class,
+          CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+          CoreAnnotations.CharacterOffsetEndAnnotation.class,
+          CoreAnnotations.BeforeAnnotation.class,
+          CoreAnnotations.AfterAnnotation.class,
+          CoreAnnotations.TokenBeginAnnotation.class,
+          CoreAnnotations.TokenEndAnnotation.class,
+          CoreAnnotations.IndexAnnotation.class,
+          CoreAnnotations.OriginalTextAnnotation.class,
+          CoreAnnotations.SentenceIndexAnnotation.class
+      )));
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CoreAnnotations.NamedEntityTagAnnotation.class);
+    return new HashSet<>(Arrays.asList(
+        CoreAnnotations.NamedEntityTagAnnotation.class,
+        CoreAnnotations.NormalizedNamedEntityTagAnnotation.class,
+        CoreAnnotations.ValueAnnotation.class,
+        TimeExpression.Annotation.class,
+        TimeExpression.TimeIndexAnnotation.class,
+        CoreAnnotations.DistSimAnnotation.class,
+        CoreAnnotations.NumericCompositeTypeAnnotation.class,
+        TimeAnnotations.TimexAnnotation.class,
+        CoreAnnotations.NumericValueAnnotation.class,
+        TimeExpression.ChildrenAnnotation.class,
+        CoreAnnotations.NumericTypeAnnotation.class,
+        CoreAnnotations.ShapeAnnotation.class,
+        Tags.TagsAnnotation.class,
+        CoreAnnotations.NumerizedTokensAnnotation.class,
+        CoreAnnotations.AnswerAnnotation.class,
+        CoreAnnotations.NumericCompositeValueAnnotation.class
+    ));
   }
 }

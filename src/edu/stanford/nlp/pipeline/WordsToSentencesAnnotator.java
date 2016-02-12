@@ -1,9 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -200,12 +197,15 @@ public class WordsToSentencesAnnotator implements Annotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.singleton(CoreAnnotations.TokensAnnotation.class);
+    return Annotator.TOKENIZE;
   }
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CoreAnnotations.SentencesAnnotation.class);
+    return new HashSet<>(Arrays.asList(
+        CoreAnnotations.SentencesAnnotation.class,
+        CoreAnnotations.SentenceIndexAnnotation.class
+    ));
   }
 
 }

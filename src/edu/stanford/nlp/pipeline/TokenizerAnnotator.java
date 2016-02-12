@@ -2,11 +2,7 @@ package edu.stanford.nlp.pipeline;
 
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Properties;
+import java.util.*;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -285,7 +281,20 @@ public class TokenizerAnnotator implements Annotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CoreAnnotations.TokensAnnotation.class);
+    return new HashSet<>(Arrays.asList(
+        CoreAnnotations.TextAnnotation.class,
+        CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+        CoreAnnotations.CharacterOffsetEndAnnotation.class,
+        CoreAnnotations.BeforeAnnotation.class,
+        CoreAnnotations.AfterAnnotation.class,
+        CoreAnnotations.TokenBeginAnnotation.class,
+        CoreAnnotations.TokenEndAnnotation.class,
+        CoreAnnotations.PositionAnnotation.class,
+        CoreAnnotations.IndexAnnotation.class,
+        CoreAnnotations.OriginalTextAnnotation.class,
+        CoreAnnotations.ValueAnnotation.class
+    ));
   }
 
 }

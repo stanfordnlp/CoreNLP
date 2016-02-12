@@ -158,10 +158,7 @@ public class POSTaggerAnnotator implements Annotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class
-    )));
+    return TOKENIZE_AND_SSPLIT;
   }
 
   @Override
