@@ -724,7 +724,7 @@ public class OpenIE implements Annotator {
     // Tweak properties for console mode.
     // In particular, in this mode we can assume every line of standard in is a new sentence.
     if (filesToProcess.length == 0 && "".equals(props.getProperty("ssplit.isOneSentence", ""))) {
-      props.setProperty("ssplit.isOneSentence", "ref_only_uncollapsed");
+      props.setProperty("ssplit.isOneSentence", "true");
     }
     // Some error checks on the arguments
     if (!props.getProperty("annotators").toLowerCase().contains("openie")) {
