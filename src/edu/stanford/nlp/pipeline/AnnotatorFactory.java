@@ -40,7 +40,7 @@ public abstract class AnnotatorFactory implements Factory<Annotator> {
    * the same annotator type but with different parameters.
    */
   public String signature() {
-    return this.implementations.getClass().getName() + ":" + additionalSignature();
+    return this.implementations.getClass().getName() + ':' + additionalSignature();
   }
 
   protected abstract String additionalSignature();
@@ -52,11 +52,11 @@ public abstract class AnnotatorFactory implements Factory<Annotator> {
    * ssplit using tokenize.whitespace
    */
   static String baseSignature(Properties props, String name) {
-    String prefix = name + ".";
+    String prefix = name + '.';
     StringBuilder signature = new StringBuilder();
     for (String key : props.stringPropertyNames()) {
       if (key.startsWith(prefix)) {
-        signature.append(key).append("=").append(props.getProperty(key)).append("\n");
+        signature.append(key).append('=').append(props.getProperty(key)).append('\n');
       }
     }
     return signature.toString();
