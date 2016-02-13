@@ -22,7 +22,7 @@ public class GenericAnnotationSerializer extends AnnotationSerializer {
   }
 
   /** Turns out, an ObjectOutputStream cannot append to a file. This is dumb. */
-  public static class AppendingObjectOutputStream extends ObjectOutputStream {
+  public class AppendingObjectOutputStream extends ObjectOutputStream {
     public AppendingObjectOutputStream(OutputStream out) throws IOException {
       super(out);
     }

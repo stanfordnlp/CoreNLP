@@ -194,8 +194,8 @@ public class OpenIE implements Annotator {
         }
       }
     } catch (IOException e) {
-      //throw new RuntimeIOException("Could not load clause splitter model at " + splitterModel + ": " + e.getClass() + ": " + e.getMessage());
-      throw new RuntimeIOException("Could not load clause splitter model at " + splitterModel, e);
+      e.printStackTrace();
+      throw new RuntimeIOException("Could not load clause splitter model at " + splitterModel + ": " + e.getClass() + ": " + e.getMessage());
     }
 
     // Create the forward entailer
@@ -224,7 +224,7 @@ public class OpenIE implements Annotator {
     if (clauseSplitter.isPresent()) {
       return clauseSplitter.get().apply(tree, assumedTruth).topClauses(splitterThreshold);
     } else {
-      return Collections.emptyList();
+      return Collections.EMPTY_LIST;
     }
   }
 
@@ -253,8 +253,8 @@ public class OpenIE implements Annotator {
    */
   @SuppressWarnings("unchecked")
   public List<SentenceFragment> entailmentsFromClause(SentenceFragment clause) {
-    if (clause.parseTree.isEmpty()) {
-      return Collections.emptyList();
+    if (clause.parseTree.size() == 0) {
+      return Collections.EMPTY_LIST;
     } else {
       // Get the forward entailments
       List<SentenceFragment> list = new ArrayList<>();
@@ -396,7 +396,7 @@ public class OpenIE implements Annotator {
    *
    * @return A <b>copy</b> of the passed parse tree, with pronouns replaces with their canonical mention.
    */
-  private static SemanticGraph canonicalizeCoref(SemanticGraph parse, Map<CoreLabel, List<CoreLabel>> canonicalMentionMap) {
+  private SemanticGraph canonicalizeCoref(SemanticGraph parse, Map<CoreLabel, List<CoreLabel>> canonicalMentionMap) {
     parse = new SemanticGraph(parse);
     for (IndexedWord node : new HashSet<>(parse.vertexSet())) {  // copy the vertex set to prevent ConcurrentModificationExceptions
       if (node.tag() != null && node.tag().startsWith("PRP")) {
@@ -452,8 +452,8 @@ public class OpenIE implements Annotator {
     if (tokens.size() < 2) {
 
       // Short sentence. Skip annotating it.
-      sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.emptyList());
-      sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.emptySet());
+      sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.EMPTY_LIST);
+      sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.EMPTY_SET);
 
     } else {
 
