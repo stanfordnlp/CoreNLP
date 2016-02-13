@@ -193,11 +193,10 @@ public class AnnotatorFactories {
     };
   }
 
-  //
-  // Sentence splitter: splits the above sequence of tokens into
-  // sentences.  This is required when processing entire documents or
-  // text consisting of multiple sentences.
-  //
+  /** Sentence splitter: splits the above sequence of tokens into
+   *  sentences.  This is required when processing entire documents or
+   * text consisting of multiple sentences.
+   */
   public static AnnotatorFactory sentenceSplit(Properties properties, final AnnotatorImplementations annotatorImplementation) {
     return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
@@ -209,12 +208,12 @@ public class AnnotatorFactories {
         if (nlSplitting) {
           boolean whitespaceTokenization = Boolean.valueOf(properties.getProperty("tokenize.whitespace", "false"));
           if (whitespaceTokenization) {
-            if (System.getProperty("line.separator").equals("\n")) {
+            if (System.lineSeparator().equals("\n")) {
               return WordsToSentencesAnnotator.newlineSplitter(false, "\n");
             } else {
               // throw "\n" in just in case files use that instead of
               // the system separator
-              return WordsToSentencesAnnotator.newlineSplitter(false, System.getProperty("line.separator"), "\n");
+              return WordsToSentencesAnnotator.newlineSplitter(false, System.lineSeparator(), "\n");
             }
           } else {
             return WordsToSentencesAnnotator.newlineSplitter(false, PTBTokenizer.getNewlineToken());
