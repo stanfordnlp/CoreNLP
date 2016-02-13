@@ -18,16 +18,12 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
-import edu.stanford.nlp.util.logging.RedwoodConfiguration;
 
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
 /**
  * A relation extractor to work with Victor's new KBP data.
@@ -38,20 +34,15 @@ public class KBPRelationExtractor {
   @ArgumentParser.Option(name="train", gloss="The dataset to train on")
   public static File TRAIN_FILE = new File("train.conll");
 
-  @ArgumentParser.Option(name="test", gloss="The dataset to test on")
-  public static File TEST_FILE = new File("test.conll");
-
   private enum MinimizerType{ QN, SGD, HYBRID, L1 }
   @ArgumentParser.Option(name="minimizer", gloss="The minimizer to use for training the classifier")
-  private static MinimizerType minimizer = MinimizerType.L1;
+  private static MinimizerType minimizer = MinimizerType.QN;
 
   @ArgumentParser.Option(name="feature_threshold", gloss="The minimum number of times to see a feature to count it")
   private static int FEATURE_THRESHOLD = 0;
 
   @ArgumentParser.Option(name="sigma", gloss="The regularizer for the classifier")
   private static double SIGMA = 1.0;
-
-  private static final String NO_RELATION = "no_relation";
 
   private static final Redwood.RedwoodChannels log = Redwood.channels(KBPRelationExtractor.class);
 
@@ -174,7 +165,6 @@ public class KBPRelationExtractor {
           return 2.0 * precision * recall / (precision + recall);
         }
       }
-      @SuppressWarnings("NullableProblems")
       @Override
       public int compareTo(PerRelationStat o) {
         if (this.precision < o.precision) {
@@ -199,11 +189,7 @@ public class KBPRelationExtractor {
     public final ConfusionMatrix<String> confusion = new ConfusionMatrix<>();
 
 
-    public void predict(Set<String> predictedRelationsRaw, Set<String> goldRelationsRaw) {
-      Set<String> predictedRelations = new HashSet<>(predictedRelationsRaw);
-      predictedRelations.remove(NO_RELATION);
-      Set<String> goldRelations = new HashSet<>(goldRelationsRaw);
-      goldRelations.remove(NO_RELATION);
+    public void predict(Set<String> predictedRelations, Set<String> goldRelations) {
       // Register the prediction
       for (String pred : predictedRelations) {
         if (goldRelations.contains(pred)) {
@@ -211,9 +197,13 @@ public class KBPRelationExtractor {
         }
         predictedCount.incrementCount(pred);
       }
-      goldRelations.forEach(goldCount::incrementCount);
+      for (String gold : goldRelations) {
+        goldCount.incrementCount(gold);
+      }
       HashSet<String> allRelations = new HashSet<String>(){{ addAll(predictedRelations); addAll(goldRelations); }};
-      allRelations.forEach(totalCount::incrementCount);
+      for (String rel : allRelations) {
+        totalCount.incrementCount(rel);
+      }
 
       // Register the confusion matrix
       if (predictedRelations.size() == 1 && goldRelations.size() == 1) {
@@ -302,7 +292,10 @@ public class KBPRelationExtractor {
     }
 
     public void dumpPerRelationStats(PrintStream out) {
-      List<PerRelationStat> stats = goldCount.keySet().stream().map(relation -> new PerRelationStat(relation, precision(relation), recall(relation), (int) predictedCount.getCount(relation), (int) goldCount.getCount(relation))).collect(Collectors.toList());
+      List<PerRelationStat> stats = new ArrayList<>();
+      for (String relation : goldCount.keySet()) {
+        stats.add(new PerRelationStat(relation, precision(relation), recall(relation), (int) predictedCount.getCount(relation), (int) goldCount.getCount(relation)));
+      }
       Collections.sort(stats);
       out.println("Per-relation Accuracy");
       for (PerRelationStat stat : stats) {
@@ -702,7 +695,6 @@ public class KBPRelationExtractor {
     }
 
     // Add the edge features
-    //noinspection Convert2streamapi
     for (String node : depparsePath) {
       if (!node.startsWith("-") && !node.startsWith("<-")) {
         indicator(feats, "deppath_word", node);
@@ -889,9 +881,7 @@ public class KBPRelationExtractor {
     String relation = null;
     List<String> tokens = new ArrayList<>();
     Span subject = new Span(Integer.MAX_VALUE, Integer.MIN_VALUE);
-    NERTag subjectNER = null;
     Span object = new Span(Integer.MAX_VALUE, Integer.MIN_VALUE);
-    NERTag objectNER = null;
 
     String line;
     while ( (line = reader.readLine()) != null ) {
@@ -904,16 +894,14 @@ public class KBPRelationExtractor {
         // Case: read the relation
         assert fields.length == 1;
         relation = fields[0];
-      } else if (fields.length == 3) {
+      } else if (fields.length == 2) {
         // Case: read a token
         tokens.add(fields[0]);
         if ("SUBJECT".equals(fields[1])) {
           subject = new Span(Math.min(subject.start(), i), Math.max(subject.end(), i + 1));
-          subjectNER = NERTag.valueOf(fields[2].toUpperCase());
         } else if ("OBJECT".equals(fields[1])) {
           object = new Span(Math.min(object.start(), i), Math.max(object.end(), i + 1));
-          objectNER = NERTag.valueOf(fields[2].toUpperCase());
-        } else if ("-".equals(fields[1])) {
+        } else if ("O".equals(fields[1])) {
           // do nothing
         } else {
           throw new IllegalStateException("Could not parse CoNLL file");
@@ -924,8 +912,8 @@ public class KBPRelationExtractor {
         examples.add(Pair.makePair(new FeaturizerInput(
             subject,
             object,
-            subjectNER,
-            objectNER,
+            NERTag.PERSON,   // TODO(gabor) actually get the proper NER tags.
+            NERTag.PERSON,
             new Sentence(tokens)
         ), relation));
 
@@ -968,17 +956,8 @@ public class KBPRelationExtractor {
         };
         break;
       case L1:
-        minimizerFactory = () -> {
-          try {
-            return MetaClass.create("edu.stanford.nlp.optimization.OWLQNMinimizer").createInstance(sigma);
-          } catch (Exception e) {
-            log.err("Could not create l1 minimizer! Reverting to l2.");
-            return new QNMinimizer(15);
-          }
-        };
-        break;
-      default:
-        throw new IllegalStateException("Unknown minimizer: " + minimizer);
+        throw new IllegalStateException("No L1 minimization implemented!");
+      default: throw new IllegalStateException("Unknown minimizer: " + minimizer);
     }
     factory.setMinimizerCreator(minimizerFactory);
     return factory;
@@ -1023,59 +1002,24 @@ public class KBPRelationExtractor {
 
 
   public static void main(String[] args) throws IOException {
-    RedwoodConfiguration.standard().apply();  // Disable SLF4J crap.
-    ArgumentParser.fillOptions(KBPRelationExtractor.class, args);  // Fill command-line options
+    ArgumentParser.fillOptions(KBPRelationExtractor.class, args);
 
-    // Load the data
-    forceTrack("Loading training data");
-    forceTrack("Training data");
     List<Pair<FeaturizerInput, String>> trainExamples = readDataset(TRAIN_FILE);
     log.info("Read " + trainExamples.size() + " examples");
-    log.info("" + trainExamples.stream().map(Pair::second).filter(NO_RELATION::equals).count() + " are " + NO_RELATION);
-    endTrack("Training data");
-    forceTrack("Test data");
-    List<Pair<FeaturizerInput, String>> testExamples = readDataset(TEST_FILE);
-    log.info("Read " + testExamples.size() + " examples");
-    endTrack("Test data");
-    endTrack("Loading training data");
+    log.info("" + trainExamples.stream().map(Pair::second).filter("no_relation"::equals).count() + " are no_relation");
 
-    // Featurize + create the dataset
-    forceTrack("Creating dataset");
     RVFDataset<String, String> dataset = new RVFDataset<>();
-    final AtomicInteger i = new AtomicInteger(0);
-    long beginTime = System.currentTimeMillis();
-    trainExamples.stream().parallel().forEach(example -> {
-      if (i.incrementAndGet() % 1000 == 0) {
-        log.info("[" + Redwood.formatTimeDifference(System.currentTimeMillis() - beginTime) +
-            "] Featurized " + i.get() + " / " + trainExamples.size() + " examples");
+    int i = 0;
+    for (Pair<FeaturizerInput, String> example : trainExamples) {
+      i += 1;
+      if (i % 100 == 0) {
+        log.info("Featurized " + i + " / " + trainExamples.size() + " examples");
       }
-      Counter<String> features = features(example.first);  // This takes a while per example
-      synchronized (dataset) {
-        dataset.add(new RVFDatum<>(features, example.second));
-      }
-    });
-    trainExamples.clear();  // Free up some memory
-    endTrack("Creating dataset");
+      dataset.add(new RVFDatum<>(features(example.first), example.second));
+    }
 
-    // Train the classifier
-    log.info("Training classifier:");
+    log.info("Training classifier");
     Classifier<String, String> classifier = trainMultinomialClassifier(dataset, FEATURE_THRESHOLD, SIGMA);
-    dataset.clear();  // Free up some memory
-
-    // Evaluate the classifier
-    forceTrack("Test accuracy");
-    Accuracy accuracy = new Accuracy();
-    forceTrack("Featurizing");
-    testExamples.stream().parallel().forEach( example -> {
-      RVFDatum<String, String> datum = new RVFDatum<>(features(example.first));
-      String predicted = classifier.classOf(datum);
-      synchronized (accuracy) {
-        accuracy.predict(Collections.singleton(predicted), Collections.singleton(example.second));
-      }
-    });
-    endTrack("Featurizing");
-    log(accuracy.toString());
-    endTrack("Test accuracy");
   }
 
 }
