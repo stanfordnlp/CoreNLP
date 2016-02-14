@@ -1,4 +1,4 @@
-package edu.stanford.nlp.parser.shiftreduce; 
+package edu.stanford.nlp.parser.shiftreduce;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.text.DecimalFormat;
@@ -611,7 +611,7 @@ public class PerceptronModel extends BaseModel  {
           // TODO: this is kind of ugly, would prefer a separate object
           averageScoredModels(models.subList(0, i));
           ShiftReduceParser temp = new ShiftReduceParser(op, this);
-          EvaluateTreebank evaluator = new EvaluateTreebank(temp.op, null, temp, tagger);
+          EvaluateTreebank evaluator = new EvaluateTreebank(temp.getOp(), null, temp, tagger);
           evaluator.testOnTreebank(devTreebank);
           double labelF1 = evaluator.getLBScore();
           log.info("Label F1 for " + i + " models: " + labelF1);

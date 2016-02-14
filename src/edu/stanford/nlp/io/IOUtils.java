@@ -327,12 +327,12 @@ public class IOUtils  {
     return ErasureUtils.uncheckedCast(o);
   }
 
-  public static <T> T readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(String msg, String path) {
+  public static <T> T readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(Redwood.RedwoodChannels log, String msg, String path) {
     T obj;
     try {
       Timing timing = new Timing();
       obj = IOUtils.readObjectFromURLOrClasspathOrFileSystem(path);
-      logger.info(msg + ' ' + path + " ... done [" + timing.toSecondsString() + " sec].");
+      log.info(msg + ' ' + path + " ... done [" + timing.toSecondsString() + " sec].");
     } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeIOException(e);
     }

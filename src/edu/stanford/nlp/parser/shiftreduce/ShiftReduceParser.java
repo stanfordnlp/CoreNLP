@@ -24,7 +24,7 @@
 //    parser-support@lists.stanford.edu
 //    http://nlp.stanford.edu/software/srparser.shtml
 
-package edu.stanford.nlp.parser.shiftreduce; 
+package edu.stanford.nlp.parser.shiftreduce;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.FileFilter;
@@ -86,7 +86,7 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 public class ShiftReduceParser extends ParserGrammar implements Serializable  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ShiftReduceParser.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ShiftReduceParser.class);
 
   final ShiftReduceOptions op;
 
@@ -473,7 +473,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable  {
 
   public static ShiftReduceParser loadModel(String path, String ... extraFlags) {
     ShiftReduceParser parser = IOUtils.readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(
-            "Loading parser from serialized file", path);
+            log, "Loading parser from serialized file", path);
     if (extraFlags.length > 0) {
       parser.setOptionFlags(extraFlags);
     }
