@@ -1,4 +1,4 @@
-package edu.stanford.nlp.util; 
+package edu.stanford.nlp.util;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.PrintStream;
@@ -64,19 +64,6 @@ public class Timing  {
    */
   public void start() {
     start = System.nanoTime();
-  }
-
-  /**
-   * Start timer & print a message.
-   */
-  // Thang Mar14
-  public void start(String msg, PrintStream stream) {
-    start = System.nanoTime();
-    stream.println(msg);
-  }
-
-  public void start(String msg) {
-    start(msg, System.err);
   }
 
   // report =========================================================
@@ -316,9 +303,7 @@ public class Timing  {
 
   /** Print the start of timing message to stderr and start the timer. */
   public void doing(String str) {
-    log.info(str);
-    log.info(" ... ");
-    System.err.flush();
+    log.info(str + " ... ");
     start();
   }
 
@@ -337,9 +322,7 @@ public class Timing  {
 
   /** Print the start of timing message to stderr and start the timer. */
   public static void startDoing(String str) {
-    log.info(str);
-    log.info(" ... ");
-    System.err.flush();
+    log.info(str + " ... ");
     startTime();
   }
 

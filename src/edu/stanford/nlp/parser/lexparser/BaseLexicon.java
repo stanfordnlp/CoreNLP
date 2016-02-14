@@ -1,4 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
+package edu.stanford.nlp.parser.lexparser;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.TaggedWord;
@@ -296,16 +296,18 @@ public class BaseLexicon implements Lexicon  {
       }
     }
     if (testOptions.verbose || DEBUG_LEXICON) {
-      log.info("The " + rulesWithWord[unkWord].size() + " open class tags are: [");
+      StringBuilder sb = new StringBuilder();
+      sb.append("The ").append(rulesWithWord[unkWord].size()).append(" open class tags are: [");
       for (IntTaggedWord item : rulesWithWord[unkWord]) {
-        log.info(" " + tagIndex.get(item.tag()));
+        sb.append(' ').append(tagIndex.get(item.tag()));
         if (DEBUG_LEXICON) {
           IntTaggedWord iTprint = new IntTaggedWord(nullWord, item.tag);
-          log.info(" (tag " + item.tag() + ", type count is " +
-                           uwModel.unSeenCounter().getCount(iTprint) + ')');
+          sb.append(" (tag ").append(item.tag()).append(", type count is ");
+          sb.append(uwModel.unSeenCounter().getCount(iTprint)).append(')');
         }
       }
-      log.info(" ] ");
+      sb.append(" ]");
+      log.info(sb.toString());
     }
 
     for (IntTaggedWord iTW : seenCounter.keySet()) {
