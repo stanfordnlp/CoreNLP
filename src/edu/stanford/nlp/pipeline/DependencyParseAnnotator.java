@@ -1,5 +1,4 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -23,10 +22,7 @@ import java.util.*;
  *
  * @author Jon Gauthier
  */
-public class DependencyParseAnnotator extends SentenceAnnotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(DependencyParseAnnotator.class);
+public class DependencyParseAnnotator extends SentenceAnnotator {
 
   private final DependencyParser parser;
 
@@ -89,7 +85,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator  {
   @Override
   protected void doOneFailedSentence(Annotation annotation, CoreMap sentence) {
     // TODO
-    log.info("fail");
+    System.err.println("fail");
   }
 
   @Override

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.optimization; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.optimization;
 
 import edu.stanford.nlp.math.ArrayMath;
 
@@ -15,10 +14,7 @@ import java.io.IOException;
 /**
  * @author Alex Kleeman
  */
-public class StochasticDiffFunctionTester  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(StochasticDiffFunctionTester.class);
+public class StochasticDiffFunctionTester {
   static private double EPS = 1e-8;
   static private boolean quiet = false;
 
@@ -35,7 +31,7 @@ public class StochasticDiffFunctionTester  {
 
     // check for derivatives
     if (!(function instanceof AbstractStochasticCachingDiffFunction)) {
-      log.info("Attempt to test non stochastic function using StochasticDiffFunctionTester");
+      System.err.println("Attempt to test non stochastic function using StochasticDiffFunctionTester");
       throw new UnsupportedOperationException();
     }
 
@@ -48,7 +44,7 @@ public class StochasticDiffFunctionTester  {
 
     //  Again make sure that our calculated batchSize is actually valid
     if(testBatchSize < 0 || testBatchSize > thisFunc.dataDimension() || (thisFunc.dataDimension()%testBatchSize != 0)){
-      log.info("Invalid testBatchSize found, testing aborted.  Data size: " + thisFunc.dataDimension() + " batchSize: " + testBatchSize);
+      System.err.println("Invalid testBatchSize found, testing aborted.  Data size: " + thisFunc.dataDimension() + " batchSize: " + testBatchSize);
       System.exit(1);
     }
 
@@ -65,7 +61,7 @@ public class StochasticDiffFunctionTester  {
 
   private void sayln(String s) {
     if (!quiet) {
-      log.info(s);
+      System.err.println(s);
     }
   }
 
@@ -134,7 +130,7 @@ public class StochasticDiffFunctionTester  {
 
     // Calculate the batchsize for the factors
     if( factorCount == 0 ){
-      log.info("Attempt to test function on data of prime dimension.  This would involve a batchSize of 1 and may take a very long time.");
+      System.err.println("Attempt to test function on data of prime dimension.  This would involve a batchSize of 1 and may take a very long time.");
       System.exit(1);
     }else if (factorCount == 2){
       testBatchSize = (int) factors[1];
@@ -168,7 +164,7 @@ public class StochasticDiffFunctionTester  {
 
   public boolean testSumOfBatches(double[] x, double functionTolerance){
     boolean ret = false;
-    log.info("Making sure that the sum of stochastic gradients equals the full gradient");
+    System.err.println("Making sure that the sum of stochastic gradients equals the full gradient");
 
 
     AbstractStochasticCachingDiffFunction.SamplingMethod tmpSampleMethod = thisFunc.sampleMethod;
@@ -178,7 +174,7 @@ public class StochasticDiffFunctionTester  {
     thisFunc.sampleMethod = AbstractStochasticCachingDiffFunction.SamplingMethod.Ordered;
 
     if(thisFunc.method==StochasticCalculateMethods.NoneSpecified){
-      log.info("No calculate method has been specified");
+      System.err.println("No calculate method has been specified");
     }
 
     approxValue = 0;
@@ -211,7 +207,7 @@ public class StochasticDiffFunctionTester  {
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // Get the full gradient and value, these should equal the approximates
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    log.info("About to calculate the full derivative and value");
+    System.err.println("About to calculate the full derivative and value");
     System.arraycopy(thisFunc.derivativeAt(x),0,fullGrad,0,fullGrad.length);
     thisFunc.returnPreviousValues = true;
     fullValue = thisFunc.valueAt(x);
@@ -268,7 +264,7 @@ public class StochasticDiffFunctionTester  {
   public boolean testDerivatives(double[] x, double functionTolerance){
     boolean ret = false;
     boolean compareHess = true;
-    log.info("Making sure that the stochastic derivatives are ok.");
+    System.err.println("Making sure that the stochastic derivatives are ok.");
 
 
     AbstractStochasticCachingDiffFunction.SamplingMethod tmpSampleMethod = thisFunc.sampleMethod;
@@ -278,7 +274,7 @@ public class StochasticDiffFunctionTester  {
     thisFunc.sampleMethod = AbstractStochasticCachingDiffFunction.SamplingMethod.Ordered;
 
     if(thisFunc.method==StochasticCalculateMethods.NoneSpecified){
-      log.info("No calculate method has been specified");
+      System.err.println("No calculate method has been specified");
     } else if( !thisFunc.method.calculatesHessianVectorProduct() ){
       compareHess = false;
     }
@@ -367,7 +363,7 @@ public class StochasticDiffFunctionTester  {
         thisX[i] = generator.nextDouble();
       }
 
-      log.info("Evaluating Hessian Product");
+      System.err.println("Evaluating Hessian Product");
       System.arraycopy(thisFunc.derivativeAt(thisX,thisV,testBatchSize ), 0,gradFD, 0, gradFD.length);
       thisFunc.recalculatePrevBatch = true;
       System.arraycopy(thisFunc.HdotVAt(thisX,thisV,gradFD,testBatchSize),0,HvFD,0,HvFD.length);
@@ -394,7 +390,7 @@ public class StochasticDiffFunctionTester  {
         isSemi = true;
       }
 
-      log.info("It:" + j + "  C:" + maxSeen/minSeen + "N:" + isNeg + "P:" + isPos + "S:" + isSemi);
+      System.err.println("It:" + j + "  C:" + maxSeen/minSeen + "N:" + isNeg + "P:" + isPos + "S:" + isSemi);
     }
 
     System.out.println("Condition Number of: " + maxSeen/minSeen);
@@ -426,7 +422,7 @@ public class StochasticDiffFunctionTester  {
       file = new PrintWriter(new FileOutputStream("var.out"),true);
     }
     catch (IOException e){
-      log.info("Caught IOException outputing List to file: " + e.getMessage());
+      System.err.println("Caught IOException outputing List to file: " + e.getMessage());
       System.exit(1);
     }
     */
@@ -447,7 +443,7 @@ public class StochasticDiffFunctionTester  {
     double simS = 0;
     double ratS = 0;
     int k = 0;
-    log.info(fullHx[4] +"  " + x[4]);
+    System.err.println(fullHx[4] +"  " + x[4]);
     for(int i = 0; i<n; i++){
       System.arraycopy(thisFunc.derivativeAt(x,x,batchSize),0,thisGrad,0,thisGrad.length);
       System.arraycopy(thisFunc.HdotVAt(x,x,thisGrad,batchSize),0,thisHx,0,thisHx.length);
@@ -496,7 +492,7 @@ public class StochasticDiffFunctionTester  {
       file = new PrintWriter(new FileOutputStream("var.out"),true);
     }
     catch (IOException e){
-      log.info("Caught IOException outputing List to file: " + e.getMessage());
+      System.err.println("Caught IOException outputing List to file: " + e.getMessage());
       System.exit(1);
     }
 
@@ -504,7 +500,7 @@ public class StochasticDiffFunctionTester  {
 
       varResult = getVariance(x,bSize);
       file.println(bSize + "," + nf.format(varResult[0]) + "," + nf.format(varResult[1]) + "," + nf.format(varResult[2]) + "," + nf.format(varResult[3]));
-      log.info("Batch size of: " + bSize + "   " + varResult[0] + "," + nf.format(varResult[1]) + "," + nf.format(varResult[2]) + "," + nf.format(varResult[3]));
+      System.err.println("Batch size of: " + bSize + "   " + varResult[0] + "," + nf.format(varResult[1]) + "," + nf.format(varResult[2]) + "," + nf.format(varResult[3]));
     }
 
 
@@ -569,7 +565,7 @@ public class StochasticDiffFunctionTester  {
       file = new PrintWriter(new FileOutputStream(fileName),true);
     }
     catch (IOException e){
-      log.info("Caught IOException outputing List to file: " + e.getMessage());
+      System.err.println("Caught IOException outputing List to file: " + e.getMessage());
       System.exit(1);
     }
 
@@ -592,7 +588,7 @@ public class StochasticDiffFunctionTester  {
       file = new PrintWriter(new FileOutputStream(fileName),true);
     }
     catch (IOException e){
-      log.info("Caught IOException outputing List to file: " + e.getMessage());
+      System.err.println("Caught IOException outputing List to file: " + e.getMessage());
       System.exit(1);
     }
 

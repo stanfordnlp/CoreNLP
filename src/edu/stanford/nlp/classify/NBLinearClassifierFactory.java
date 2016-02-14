@@ -28,10 +28,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @param <L> The type of the labels in the Classifier
  * @param <F> The type of the features in the Classifier
  */
-public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFactory<L, F>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(NBLinearClassifierFactory.class);
+public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFactory<L, F> {
 
   private static final boolean VERBOSE = false;
 
@@ -63,9 +60,9 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
     if (VERBOSE) {
       logger.info("NB CF: " + data.length + " data items ");
       for (int i = 0; i < data.length; i++) {
-        log.info("Datum " + i + ": " + labels[i] + ":");
+        System.err.print("Datum " + i + ": " + labels[i] + ":");
         for (int j = 0; j < data[i].length; j++) {
-          log.info(" " + data[i][j]);
+          System.err.print(" " + data[i][j]);
         }
         logger.info("");
       }

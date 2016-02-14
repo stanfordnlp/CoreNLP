@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.util.*;
 
@@ -27,10 +26,7 @@ import edu.stanford.nlp.util.Index;
  * @author Roger Levy
  */
 
-public class NegraPennTreebankParserParams extends AbstractTreebankParserParams  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(NegraPennTreebankParserParams.class);
+public class NegraPennTreebankParserParams extends AbstractTreebankParserParams {
 
   private static final long serialVersionUID = 757812264219400466L;
 
@@ -200,8 +196,8 @@ public class NegraPennTreebankParserParams extends AbstractTreebankParserParams 
       try {
         headFinder = (HeadFinder) Class.forName(args[i + 1]).newInstance();
       } catch (Exception e) {
-        log.info(e);
-        log.info(this.getClass().getName() + ": Could not load head finder " + args[i + 1]);
+        System.err.println(e);
+        System.err.println(this.getClass().getName() + ": Could not load head finder " + args[i + 1]);
       }
       i+=2;
     }
@@ -210,10 +206,10 @@ public class NegraPennTreebankParserParams extends AbstractTreebankParserParams 
 
   @Override
   public void display() {
-    log.info("NegraPennTreebankParserParams");
-    log.info("  markZuVP=" + markZuVP);
-    log.info("  insertNPinPP=" + treeNormalizerInsertNPinPP);
-    log.info("  leaveGF=" + treeNormalizerLeaveGF);
+    System.err.println("NegraPennTreebankParserParams");
+    System.err.println("  markZuVP=" + markZuVP);
+    System.err.println("  insertNPinPP=" + treeNormalizerInsertNPinPP);
+    System.err.println("  leaveGF=" + treeNormalizerLeaveGF);
     System.out.println("markLP=" + markLP);
     System.out.println("markColon=" + markColon);
   }

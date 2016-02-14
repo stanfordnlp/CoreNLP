@@ -1,5 +1,4 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
@@ -20,10 +19,7 @@ import java.util.*;
  *
  * @author Gabor Angeli
  */
-public class AnnotatorImplementations  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AnnotatorImplementations.class);
+public class AnnotatorImplementations {
 
   /**
    * Tokenize, emulating the Penn Treebank
@@ -86,7 +82,7 @@ public class AnnotatorImplementations  {
     if (models.isEmpty()) {
       // Allow for no real NER model - can just use numeric classifiers or SUTime.
       // Have to unset ner.model, so unlikely that people got here by accident.
-      log.info("WARNING: no NER models specified");
+      System.err.println("WARNING: no NER models specified");
     }
 
     boolean applyNumericClassifiers =

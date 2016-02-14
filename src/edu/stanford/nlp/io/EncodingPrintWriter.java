@@ -1,5 +1,4 @@
-package edu.stanford.nlp.io; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.io;
 
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -15,10 +14,7 @@ import java.io.UnsupportedEncodingException;
  * @author Christopher Manning
  */
 
-public class EncodingPrintWriter  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(EncodingPrintWriter.class);
+public class EncodingPrintWriter {
 
   private static final String DEFAULT_ENCODING = "UTF-8";
 
@@ -47,7 +43,7 @@ public class EncodingPrintWriter  {
           cachedErrWriter = new PrintWriter(new OutputStreamWriter(System.err, encoding), true);
           cachedErrEncoding = encoding;
         } catch (UnsupportedEncodingException e) {
-          log.info("Error " + e + "Printing as default encoding.");
+          System.err.println("Error " + e + "Printing as default encoding.");
           cachedErrWriter = new PrintWriter(new OutputStreamWriter(System.err), true);
           cachedErrEncoding = "";
         }
@@ -92,7 +88,7 @@ public class EncodingPrintWriter  {
           cachedOutWriter = new PrintWriter(new OutputStreamWriter(System.out, encoding), true);
           cachedOutEncoding = encoding;
         } catch (UnsupportedEncodingException e) {
-          log.info("Error " + e + "Printing as default encoding.");
+          System.err.println("Error " + e + "Printing as default encoding.");
           cachedOutWriter = new PrintWriter(new OutputStreamWriter(System.out), true);
           cachedOutEncoding = "";
         }

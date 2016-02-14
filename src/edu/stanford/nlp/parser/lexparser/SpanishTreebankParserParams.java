@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.SentenceUtils;
@@ -30,10 +29,7 @@ import java.util.List;
  * @author Jon Gauthier
  *
  */
-public class SpanishTreebankParserParams extends TregexPoweredTreebankParserParams  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SpanishTreebankParserParams.class);
+public class SpanishTreebankParserParams extends TregexPoweredTreebankParserParams {
 
   private static final long serialVersionUID = -8734165273482119424L;
 
@@ -302,8 +298,8 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
 
         optionsString.append("HeadFinder: " + args[i + 1] + "\n");
       } catch (Exception e) {
-        log.info(e);
-        log.info(this.getClass().getName() + ": Could not load head finder " + args[i + 1]);
+        System.err.println(e);
+        System.err.println(this.getClass().getName() + ": Could not load head finder " + args[i + 1]);
       }
       i += 2;
     }
@@ -322,7 +318,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
 
   @Override
   public void display() {
-    log.info(optionsString.toString());
+    System.err.println(optionsString.toString());
     super.display();
   }
 

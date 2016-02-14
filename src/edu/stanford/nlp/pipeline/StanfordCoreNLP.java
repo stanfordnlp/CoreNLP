@@ -85,10 +85,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  * @author Steven Bethard
  */
 
-public class StanfordCoreNLP extends AnnotationPipeline  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(StanfordCoreNLP.class);
+public class StanfordCoreNLP extends AnnotationPipeline {
 
   enum OutputFormat { TEXT, XML, JSON, CONLL, CONLLU, SERIALIZED }
 

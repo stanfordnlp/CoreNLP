@@ -30,10 +30,7 @@ import java.util.zip.GZIPOutputStream;
  * @author Christopher Manning
  */
 
-public class IOUtils  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(IOUtils.class);
+public class IOUtils {
 
   private static final int SLURP_BUFFER_SIZE = 16384;
 
@@ -494,7 +491,7 @@ public class IOUtils  {
       try {
         in = new GZIPInputStream(in);
       } catch (IOException e) {
-        log.error("Resource or file looks like a gzip file, but is not: " + textFileOrUrl);
+        System.err.println("Resource or file looks like a gzip file, but is not: " + textFileOrUrl);
       }
     }
 
@@ -1580,7 +1577,7 @@ public class IOUtils  {
     String bzcat = System.getProperty("bzcat", "bzcat");
     Runtime rt = Runtime.getRuntime();
     String cmd = bzcat + " " + filename;
-    //log.info("getBZip2PipedInputStream: Running command: "+cmd);
+    //System.err.println("getBZip2PipedInputStream: Running command: "+cmd);
     Process p = rt.exec(cmd);
     Writer errWriter = new BufferedWriter(new OutputStreamWriter(System.err));
     StreamGobbler errGobbler = new StreamGobbler(p.getErrorStream(), errWriter);

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.tagger.util; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.tagger.util;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -49,10 +48,7 @@ import edu.stanford.nlp.util.StringUtils;
  * <br>
  * @author John Bauer
  */
-public class CountClosedTags  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CountClosedTags.class);
+public class CountClosedTags {
   /**
    * Which tags to look for
    */
@@ -225,7 +221,7 @@ public class CountClosedTags  {
 
   private static void help(String error) {
     if (error != null && !error.equals("")) {
-      log.info(error);
+      System.err.println(error);
     }
     System.exit(2);
   }

@@ -32,10 +32,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  *
  * @author Gabor Angeli
  */
-public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, ClauseSplitterSearchProblem>  {
-
-  /** A logger for this class */
-  Redwood.RedwoodChannels log = Redwood.channels(ClauseSplitter.class);
+public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, ClauseSplitterSearchProblem> {
 
   enum ClauseClassifierLabel {
     CLAUSE_SPLIT(2),
@@ -282,10 +279,10 @@ public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, Claus
   static ClauseSplitter load(String serializedModel) throws IOException {
     try {
       long start = System.currentTimeMillis();
-      log.info("Loading clause searcher from " + serializedModel + "...");
+      System.err.print("Loading clause searcher from " + serializedModel + "...");
       Pair<Classifier<ClauseClassifierLabel,String>, Featurizer> data = IOUtils.readObjectFromURLOrClasspathOrFileSystem(serializedModel);
       ClauseSplitter rtn =  (tree, truth) -> new ClauseSplitterSearchProblem(tree, truth, Optional.of(data.first), Optional.of(data.second));
-      log.info("done [" + Redwood.formatTimeDifference(System.currentTimeMillis() - start) + "]");
+      System.err.println("done [" + Redwood.formatTimeDifference(System.currentTimeMillis() - start) + "]");
       return rtn;
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException("Invalid model at path: " + serializedModel, e);

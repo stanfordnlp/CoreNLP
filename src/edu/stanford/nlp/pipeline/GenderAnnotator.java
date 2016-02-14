@@ -1,5 +1,4 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,10 +21,7 @@ import edu.stanford.nlp.util.CoreMap;
  * @author jtibs
  */
 
-public class GenderAnnotator implements Annotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(GenderAnnotator.class);
+public class GenderAnnotator implements Annotator {
 
   private final RegexNERSequenceClassifier classifier;
   private final boolean verbose;
@@ -41,7 +37,7 @@ public class GenderAnnotator implements Annotator  {
 
   public void annotate(Annotation annotation) {
     if (verbose) {
-      log.info("Adding gender annotation...");
+      System.err.print("Adding gender annotation...");
     }
 
     if (! annotation.containsKey(CoreAnnotations.SentencesAnnotation.class))

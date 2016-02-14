@@ -1,5 +1,4 @@
-package edu.stanford.nlp.hcoref.data; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.hcoref.data;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -24,10 +23,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 
-public class Dictionaries  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Dictionaries.class);
+public class Dictionaries {
 
   public enum MentionType {
     PRONOMINAL(1), NOMINAL(3), PROPER(4), LIST(2);
@@ -531,13 +527,13 @@ public class Dictionaries  {
   }
   
   public void loadSemantics(Properties props) throws ClassNotFoundException, IOException {
-    log.info("LOADING SEMANTICS");
+    System.err.println("LOADING SEMANTICS");
 
 //    wordnet = new WordNet();
     
     // load word vector
     if(CorefProperties.loadWordEmbedding(props)) {
-      log.info("LOAD: WordVectors");
+      System.err.println("LOAD: WordVectors");
       String wordvectorFile = CorefProperties.getPathSerializedWordVectors(props);
       String word2vecFile = CorefProperties.getPathWord2Vec(props);
       try {
@@ -558,7 +554,7 @@ public class Dictionaries  {
       dimVector = vectors.entrySet().iterator().next().getValue().length;
       
 //    if(Boolean.parseBoolean(props.getProperty("useValDictionary"))) {
-//      log.info("LOAD: ValDictionary");
+//      System.err.println("LOAD: ValDictionary");
 //      for(String line : IOUtils.readLines(valDict)) {
 //        String[] split = line.toLowerCase().split("\t");
 //        strToEntity.put(split[0], split[2]);
@@ -591,7 +587,7 @@ public class Dictionaries  {
     /*if(CorefProperties.useSemantics(props)) {
       loadSemantics(props);
     } else {
-      log.info("SEMANTICS NOT LOADED");
+      System.err.println("SEMANTICS NOT LOADED");
     }*/
     if(props.containsKey("coref.zh.dict")) {
       loadChineseGenderNumberAnimacy(props.getProperty("coref.zh.dict"));

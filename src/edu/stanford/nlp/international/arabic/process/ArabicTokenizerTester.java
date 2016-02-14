@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.arabic.process; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.arabic.process;
 
 import java.io.*;
 import java.util.*;
@@ -17,10 +16,7 @@ import edu.stanford.nlp.trees.treebank.Mapper;
  * @author Spence Green
  *
  */
-public class ArabicTokenizerTester  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ArabicTokenizerTester.class);
+public class ArabicTokenizerTester {
 
   /**
    * arg[0] := tokenizer options
@@ -35,7 +31,7 @@ public class ArabicTokenizerTester  {
     }
     String tokOptions = args[0];
     File path = new File(args[1]);
-    log.info("Reading from: " + path.getPath());
+    System.err.println("Reading from: " + path.getPath());
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path), "UTF-8"));
       TokenizerFactory<CoreLabel> tf = ArabicTokenizer.factory();

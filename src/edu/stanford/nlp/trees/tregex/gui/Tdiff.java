@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees.tregex.gui; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.tregex.gui;
 
 import java.io.*;
 import java.util.*;
@@ -23,10 +22,7 @@ import edu.stanford.nlp.util.IntPair;
  * @author Spence Green
  *
  */
-public class Tdiff  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Tdiff.class);
+public class Tdiff {
 
   private static final ConstituentFactory cf = LabeledConstituent.factory();
 
@@ -96,9 +92,9 @@ public class Tdiff  {
 
 
     } catch (FileNotFoundException e) {
-      log.info("File not found!");
+      System.err.println("File not found!");
     } catch (IOException e) {
-      log.info("Unable to read file!");
+      System.err.println("Unable to read file!");
     }
   }
 

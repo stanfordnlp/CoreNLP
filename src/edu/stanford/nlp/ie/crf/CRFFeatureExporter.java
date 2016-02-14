@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie.crf; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -26,10 +25,7 @@ import java.util.Properties;
  *
  * @author Angel Chang
  */
-public class CRFFeatureExporter<IN extends CoreMap>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CRFFeatureExporter.class);
+public class CRFFeatureExporter<IN extends CoreMap> {
   private char delimiter = '\t';
   private static final String eol = System.getProperty("line.separator");
   private CRFClassifier<IN> classifier;
@@ -168,12 +164,12 @@ public class CRFFeatureExporter<IN extends CoreMap>  {
     CRFClassifier<CoreLabel> crf = new CRFClassifier<>(props);
     String inputFile = crf.flags.trainFile;
     if (inputFile == null) {
-      log.info("Please provide input file using -trainFile");
+      System.err.println("Please provide input file using -trainFile");
       System.exit(-1);
     }
     String outputFile = crf.flags.exportFeatures;
     if (outputFile == null) {
-      log.info("Please provide output file using -exportFeatures");
+      System.err.println("Please provide output file using -exportFeatures");
       System.exit(-1);
     }
     CRFFeatureExporter<CoreLabel> featureExporter = new CRFFeatureExporter<>(crf);

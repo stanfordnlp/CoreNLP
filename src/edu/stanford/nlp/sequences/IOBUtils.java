@@ -1,5 +1,4 @@
-package edu.stanford.nlp.sequences; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sequences;
 
 import java.util.List;
 import java.util.Locale;
@@ -17,10 +16,7 @@ import edu.stanford.nlp.util.TypesafeMap;
  *
  *  @author Christopher Manning
  */
-public class IOBUtils  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(IOBUtils.class);
+public class IOBUtils {
 
   private IOBUtils() {} // static methods
 
@@ -264,7 +260,7 @@ public class IOBUtils  {
       char goldPrefix;
       char guessPrefix;
       if (gold == null || gold.isEmpty()) {
-        log.info("Missing gold entity");
+        System.err.println("Missing gold entity");
         return false;
       } else if (gold.length() > 2 && gold.charAt(1) == '-') {
         goldEntity = gold.substring(2, gold.length());
@@ -274,7 +270,7 @@ public class IOBUtils  {
         goldPrefix = ' ';
       }
       if (guess == null || guess.isEmpty()) {
-        log.info("Missing guess entity");
+        System.err.println("Missing guess entity");
         return false;
       } else if (guess.length() > 2 && guess.charAt(1) == '-') {
         guessEntity = guess.substring(2, guess.length());

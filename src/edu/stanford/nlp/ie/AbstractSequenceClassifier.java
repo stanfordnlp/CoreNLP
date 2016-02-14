@@ -25,8 +25,7 @@
 //    Licensing: java-nlp-support@lists.stanford.edu
 //    http://nlp.stanford.edu/downloads/crf-classifier.shtml
 
-package edu.stanford.nlp.ie; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie;
 
 import edu.stanford.nlp.fsm.DFSA;
 import edu.stanford.nlp.io.IOUtils;
@@ -82,10 +81,7 @@ import java.util.zip.GZIPInputStream;
  * @author Dan Cer
  * @author sonalg (made the class generic)
  */
-public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements Function<String, String>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AbstractSequenceClassifier.class);
+public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements Function<String, String> {
 
   public SeqClassifierFlags flags;
   public Index<String> classIndex; // = null;
@@ -265,7 +261,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *         field.
    */
   public List<IN> classifySentence(List<? extends HasWord> sentence) {
-    // log.info("knownLCWords.size is " + knownLCWords.size() + "; knownLCWords.maxSize is " + knownLCWords.getMaxSize() +
+    // System.err.println("knownLCWords.size is " + knownLCWords.size() + "; knownLCWords.maxSize is " + knownLCWords.getMaxSize() +
     //                   ", prior to NER for " + getClass().toString());
     List<IN> document = new ArrayList<>();
     int i = 0;
@@ -292,7 +288,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     wrapper.processDocument(document);
 
     classify(document);
-    // log.info("Size of knownLCWords is " + knownLCWords.size() + ", after NER for " + getClass().toString());
+    // System.err.println("Size of knownLCWords is " + knownLCWords.size() + ", after NER for " + getClass().toString());
 
     return document;
   }
@@ -485,13 +481,13 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     List<List<IN>> result = new ArrayList<>();
 
     for (List<IN> document : documents) {
-      // log.info(document);
+      // System.err.println(document);
       classify(document);
 
       List<IN> sentence = new ArrayList<>();
       for (IN wi : document) {
         sentence.add(wi);
-        // log.info(wi);
+        // System.err.println(wi);
       }
       result.add(sentence);
     }
@@ -827,12 +823,12 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
                              DocumentReaderAndWriter<IN> readerAndWriter)
   {
     if (flags.announceObjectBankEntries) {
-      log.info("Reading data using " + readerAndWriter.getClass());
+      System.err.print("Reading data using " + readerAndWriter.getClass());
 
       if (flags.inputEncoding == null) {
-        log.info("Getting data from " + string + " (default encoding)");
+        System.err.println("Getting data from " + string + " (default encoding)");
       } else {
-        log.info("Getting data from " + string + " (" + flags.inputEncoding + " encoding)");
+        System.err.println("Getting data from " + string + " (" + flags.inputEncoding + " encoding)");
       }
     }
     // return new ObjectBank<List<IN>>(new
@@ -881,7 +877,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     for (File file : origFiles) {
       if (file.isFile()) {
         if (flags.announceObjectBankEntries) {
-          log.info("Getting data from " + file + " (" + flags.inputEncoding + " encoding)");
+          System.err.println("Getting data from " + file + " (" + flags.inputEncoding + " encoding)");
         }
         files.add(file);
       }
@@ -928,7 +924,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public ObjectBank<List<IN>> makeObjectBankFromReader(BufferedReader in,
                                                        DocumentReaderAndWriter<IN> readerAndWriter) {
     if (flags.announceObjectBankEntries) {
-      log.info("Reading data using " + readerAndWriter.getClass());
+      System.err.println("Reading data using " + readerAndWriter.getClass());
     }
     // TODO get rid of ObjectBankWrapper
     // return new ObjectBank<List<IN>>(new ResettableReaderIteratorFactory(in),
@@ -1151,7 +1147,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
         doc = classify(doc);
 
         int completedNo = threadCompletionCounter.incrementAndGet();
-        if (flags.verboseMode) log.info(completedNo + " examples completed");
+        if (flags.verboseMode) System.err.println(completedNo + " examples completed");
         return doc;
       }
       @Override
@@ -1193,7 +1189,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     long millis = timer.stop();
     double wordspersec = numWords / (((double) millis) / 1000);
     NumberFormat nf = new DecimalFormat("0.00"); // easier way!
-    log.info(StringUtils.getShortClassName(this) +
+    System.err.println(StringUtils.getShortClassName(this) +
                        " tagged " + numWords + " words in " + numDocs +
                        " documents at " + nf.format(wordspersec) +
                        " words per second.");
@@ -1251,7 +1247,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     long millis = timer.stop();
     double wordspersec = numWords / (((double) millis) / 1000);
     NumberFormat nf = new DecimalFormat("0.00"); // easier way!
-    log.info(this.getClass().getName() + " tagged " + numWords + " words in " + numSentences
+    System.err.println(this.getClass().getName() + " tagged " + numWords + " words in " + numSentences
         + " documents at " + nf.format(wordspersec) + " words per second.");
   }
 
@@ -1285,7 +1281,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     long millis = timer.stop();
     double wordspersec = numWords / (((double) millis) / 1000);
     NumberFormat nf = new DecimalFormat("0.00"); // easier way!
-    log.info(this.getClass().getName() + " tagged " + numWords + " words in " + numSentences
+    System.err.println(this.getClass().getName() + " tagged " + numWords + " words in " + numSentences
         + " documents at " + nf.format(wordspersec) + " words per second.");
   }
 
@@ -1391,7 +1387,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     double f1 = ((precision == 0.0 || recall == 0.0) ?
                  0.0 : 2.0 / (1.0 / precision + 1.0 / recall));
     if (!printedHeader) {
-      log.info("         Entity\tP\tR\tF1\tTP\tFP\tFN");
+      System.err.println("         Entity\tP\tR\tF1\tTP\tFP\tFN");
       printedHeader = true;
     }
     System.err.format("%15s\t%.4f\t%.4f\t%.4f\t%.0f\t%.0f\t%.0f%n",
@@ -1550,7 +1546,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     try {
       loadClassifier(file, props);
     } catch (Exception e) {
-      log.info("Error deserializing " + file.getAbsolutePath());
+      System.err.println("Error deserializing " + file.getAbsolutePath());
       throw new RuntimeException(e);
     }
   }

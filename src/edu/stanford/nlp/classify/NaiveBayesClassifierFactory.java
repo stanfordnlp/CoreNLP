@@ -50,10 +50,7 @@ import java.util.*;
  *
  * @author Kristina Toutanova (kristina@cs.stanford.edu)
  */
-public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F, NaiveBayesClassifier<L, F>>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(NaiveBayesClassifierFactory.class);
+public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F, NaiveBayesClassifier<L, F>> {
 
   private static final long serialVersionUID = -8164165428834534041L;
   public static final int JL = 0;
@@ -327,9 +324,9 @@ public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F
 //      //now classifiy
 //
 //      float accTrain = classifier.accuracy(train.iterator());
-//      log.info("training accuracy " + accTrain);
+//      System.err.println("training accuracy " + accTrain);
 //      float accTest = classifier.accuracy(test.iterator());
-//      log.info("test accuracy " + accTest);
+//      System.err.println("test accuracy " + accTest);
 //
 //    }
 //    System.out.println("Unconstrained conditional likelihood no prior :");
@@ -339,9 +336,9 @@ public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F
 //      //now classify
 //
 //      float accTrain = classifier.accuracy(train.iterator());
-//      log.info("training accuracy " + accTrain);
+//      System.err.println("training accuracy " + accTrain);
 //      float accTest = classifier.accuracy(test.iterator());
-//      log.info("test accuracy " + accTest);
+//      System.err.println("test accuracy " + accTest);
 //    }
 //  }
 

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees;
 
 import java.io.*;
 import java.util.*;
@@ -30,10 +29,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.*;
  * @author John Bauer
  * @author Sebastian Schuster
  */
-public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(UniversalEnglishGrammaticalStructure.class);
+public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
   private static final long serialVersionUID = 1L;
 
@@ -163,9 +159,9 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
     List<TypedDependency> lis = new ArrayList<>(list);
     Collections.sort(lis);
     if (title != null) {
-      log.info(title);
+      System.err.println(title);
     }
-    log.info(lis);
+    System.err.println(lis);
   }
 
   @Override
@@ -991,10 +987,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
       }
     }
 
-    // log.info(map);
-    // if (DEBUG) log.info("Subject map: " + subjectMap);
-    // if (DEBUG) log.info("Object map: " + objectMap);
-    // log.info(rcmodHeads);
+    // System.err.println(map);
+    // if (DEBUG) System.err.println("Subject map: " + subjectMap);
+    // if (DEBUG) System.err.println("Object map: " + objectMap);
+    // System.err.println(rcmodHeads);
 
     // create a new list of typed dependencies
     //Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>(list);
@@ -1009,10 +1005,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
         // look at the dep in the conjunct
         Set<SemanticGraphEdge> gov_relations = map.get(gov);
-        // log.info("gov " + gov);
+        // System.err.println("gov " + gov);
         if (gov_relations != null) {
           for (SemanticGraphEdge edge1 : gov_relations) {
-            // log.info("gov rel " + td1);
+            // System.err.println("gov rel " + td1);
             IndexedWord newGov = edge1.getGovernor();
             // in the case of errors in the basic dependencies, it
             // is possible to have overlapping newGov & dep
@@ -1027,13 +1023,13 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
                 // to prevent wrong propagation in the case of long dependencies in relative clauses
                 if (newRel != DIRECT_OBJECT && newRel != NOMINAL_SUBJECT) {
                   if (DEBUG) {
-                    log.info("Adding new " + newRel + " dependency from " + newGov + " to " + dep + " (subj/obj case)");
+                    System.err.println("Adding new " + newRel + " dependency from " + newGov + " to " + dep + " (subj/obj case)");
                   }
                   sg.addEdge(newGov, dep, newRel, Double.NEGATIVE_INFINITY, true);
                 }
               } else {
                 if (DEBUG) {
-                  log.info("Adding new " + newRel + " dependency from " + newGov + " to " + dep);
+                  System.err.println("Adding new " + newRel + " dependency from " + newGov + " to " + dep);
                 }
                 sg.addEdge(newGov, dep, newRel, Double.NEGATIVE_INFINITY, true);
               }
@@ -1075,7 +1071,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
             }
           }
           if (DEBUG) {
-            log.info("Adding new " + relation + " dependency from " + dep + " to " + tdsubj.getDependent() + " (subj propagation case)");
+            System.err.println("Adding new " + relation + " dependency from " + dep + " to " + tdsubj.getDependent() + " (subj propagation case)");
           }
           sg.addEdge(dep, tdsubj.getDependent(), relation, Double.NEGATIVE_INFINITY, true);
         }
@@ -1094,7 +1090,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
         // && ! prepcDep.contains(gov)) {
         // TypedDependency tdobj = objectMap.get(gov);
         // if (DEBUG) {
-        // log.info("Adding new " + tdobj.reln() + " dependency from "
+        // System.err.println("Adding new " + tdobj.reln() + " dependency from "
         // + dep + " to " + tdobj.dep() + " (obj propagation case)");
         // }
         // newTypedDeps.add(new TypedDependency(tdobj.reln(), dep,

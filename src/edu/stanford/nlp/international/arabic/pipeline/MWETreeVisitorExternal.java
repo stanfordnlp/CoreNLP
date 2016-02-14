@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.arabic.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.arabic.pipeline;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -25,10 +24,7 @@ import edu.stanford.nlp.util.Generics;
  * @author Spence Green
  *
  */
-public class MWETreeVisitorExternal implements TreeVisitor  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MWETreeVisitorExternal.class);
+public class MWETreeVisitorExternal implements TreeVisitor {
 
   private static final String mweFile = "/home/rayder441/sandbox/javanlp/projects/core/data/edu/stanford/nlp/pipeline/attia-mwe-list.txt.out.tok.fixed.proc.uniq";
   

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import java.util.*;
 
@@ -23,10 +22,7 @@ import edu.stanford.nlp.util.CoreMap;
  * @author Jenny Finkel
  * @author Christopher Manning
  */
-public class WordsToSentencesAnnotator implements Annotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(WordsToSentencesAnnotator.class);
+public class WordsToSentencesAnnotator implements Annotator {
 
   private final WordToSentenceProcessor<CoreLabel> wts;
 
@@ -102,7 +98,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
   @Override
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
-      log.info("Sentence splitting ...");
+      System.err.print("Sentence splitting ...");
     }
     if ( !annotation.containsKey(CoreAnnotations.TokensAnnotation.class)) {
       throw new IllegalArgumentException("WordsToSentencesAnnotator: unable to find words/tokens in: " + annotation);
@@ -112,7 +108,7 @@ public class WordsToSentencesAnnotator implements Annotator  {
     String text = annotation.get(CoreAnnotations.TextAnnotation.class);
     List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
     String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
-    // log.info("Tokens are: " + tokens);
+    // System.err.println("Tokens are: " + tokens);
 
     // assemble the sentence annotations
     int tokenOffset = 0;

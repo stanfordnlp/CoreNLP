@@ -24,8 +24,7 @@
 //    parser-support@lists.stanford.edu
 //    http://nlp.stanford.edu/downloads/lex-parser.shtml
 
-package edu.stanford.nlp.parser.ui; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.ui;
 
 import edu.stanford.nlp.io.ui.OpenPageDialog;
 import edu.stanford.nlp.ling.*;
@@ -71,10 +70,7 @@ import java.util.List;
  *
  * @author Huy Nguyen (htnguyen@cs.stanford.edu)
  */
-public class ParserPanel extends JPanel  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ParserPanel.class);
+public class ParserPanel extends JPanel {
 
   /**
    *
@@ -306,7 +302,7 @@ public class ParserPanel extends JPanel  {
       Font font = new Font(fonts.get(0).getName(), Font.PLAIN, 14);
       textPane.setFont(font);
       treePanel.setFont(font);
-      log.info("Selected font " + font);
+      System.err.println("Selected font " + font);
     } else if (FontDetector.hasFont("Watanabe Mincho")) {
       textPane.setFont(new Font("Watanabe Mincho", Font.PLAIN, 14));
       treePanel.setFont(new Font("Watanabe Mincho", Font.PLAIN, 14));
@@ -520,7 +516,7 @@ public class ParserPanel extends JPanel  {
           Tree tree = parser.parseTree(sentence);
           if (tree == null) {
             ++failures;
-            log.info("Failed on sentence " + sentence);
+            System.err.println("Failed on sentence " + sentence);
           } else {
             bw.write(tree.toString());
             bw.newLine();

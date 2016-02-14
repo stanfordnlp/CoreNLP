@@ -23,10 +23,7 @@ import java.util.function.Consumer;
  * @author Jenny Finkel
  */
 
-public class AnnotationPipeline implements Annotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AnnotationPipeline.class);
+public class AnnotationPipeline implements Annotator {
 
   protected static final boolean TIME = true;
 
@@ -250,7 +247,7 @@ public class AnnotationPipeline implements Annotator  {
 
     if (TIME) {
       System.out.println(ap.timingInformation());
-      log.info("Total time for AnnotationPipeline: " +
+      System.err.println("Total time for AnnotationPipeline: " +
                          tim.toSecondsString() + " sec.");
     }
   }

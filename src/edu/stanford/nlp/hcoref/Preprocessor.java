@@ -49,10 +49,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author heeyoung
  */
 
-public class Preprocessor  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Preprocessor.class);
+public class Preprocessor {
 
   private Preprocessor() {}
 
@@ -465,21 +462,21 @@ public class Preprocessor  {
     if(debug) {
       for(CoreMap sent : doc.annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         for(CoreLabel cl : sent.get(TokensAnnotation.class)) {
-          log.info("   "+cl.word()+"-"+cl.get(UtteranceAnnotation.class)+"-"+cl.get(SpeakerAnnotation.class));
+          System.err.print("   "+cl.word()+"-"+cl.get(UtteranceAnnotation.class)+"-"+cl.get(SpeakerAnnotation.class));
         }
       }
 
 
       for(Integer utter : doc.speakers.keySet()) {
         String speakerID = doc.speakers.get(utter);
-        log.info("utterance: "+utter);
-        log.info("speakers value: " + speakerID);
-        log.info("mention for it: "+
+        System.err.println("utterance: "+utter);
+        System.err.println("speakers value: " + speakerID);
+        System.err.println("mention for it: "+
             ( (NumberMatchingRegex.isDecimalInteger(speakerID))?
                 doc.predictedMentionsByID.get(Integer.parseInt(doc.speakers.get(utter)))
                 : "no mention for this speaker yet") );
       }
-      log.info("AA SPEAKERS: "+ doc.speakers);
+      System.err.println("AA SPEAKERS: "+ doc.speakers);
     }
 
     // build 'speakerInfo' from 'speakers'
@@ -491,7 +488,7 @@ public class Preprocessor  {
       }
     }
     if(debug){
-      log.info("BB SPEAKER INFO MAP: "+doc.speakerInfoMap);
+      System.err.println("BB SPEAKER INFO MAP: "+doc.speakerInfoMap);
     }
 
     // mention -> to its speakerID: m.headWord.get(SpeakerAnnotation.class)
@@ -522,7 +519,7 @@ public class Preprocessor  {
       }
     }
 
-    if(debug) log.info("CC speaker conversion: " + speakerConversion);
+    if(debug) System.err.println("CC speaker conversion: " + speakerConversion);
 
     // convert real name speaker to speaker mention id
     for(Integer utter : doc.speakers.keySet()) {
@@ -548,7 +545,7 @@ public class Preprocessor  {
     // find speakerPairs
     for(Mention m : doc.predictedMentionsByID.values()) {
       String speaker = m.headWord.get(CoreAnnotations.SpeakerAnnotation.class);
-      if(debug) log.info("DD: "+speaker);
+      if(debug) System.err.println("DD: "+speaker);
       if (NumberMatchingRegex.isDecimalInteger(speaker)) {
         int speakerMentionID = Integer.parseInt(speaker);
         doc.speakerPairs.add(new Pair<>(m.mentionID, speakerMentionID));
@@ -556,17 +553,17 @@ public class Preprocessor  {
     }
 
     if(debug) {
-      log.info("==========================================================================");
+      System.err.println("==========================================================================");
       for(Integer utter : doc.speakers.keySet()) {
         String speakerID = doc.speakers.get(utter);
-        log.info("utterance: "+utter);
-        log.info("speakers value: " + speakerID);
-        log.info("mention for it: "+
+        System.err.println("utterance: "+utter);
+        System.err.println("speakers value: " + speakerID);
+        System.err.println("mention for it: "+
             ( (NumberMatchingRegex.isDecimalInteger(speakerID))?
                 doc.predictedMentionsByID.get(Integer.parseInt(doc.speakers.get(utter)))
                 : "no mention for this speaker yet") );
       }
-      log.info(doc.speakers);
+      System.err.println(doc.speakers);
     }
   }
 

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.sentiment; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sentiment;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -44,10 +43,7 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author John Bauer
  */
-public class SentimentPipeline  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SentimentPipeline.class);
+public class SentimentPipeline {
 
   private static final NumberFormat NF = new DecimalFormat("0.0000");
 
@@ -184,16 +180,16 @@ public class SentimentPipeline  {
   static final String DEFAULT_TLPP_CLASS = "edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams";
 
   static void help() {
-    log.info("Known command line arguments:");
-    log.info("  -sentimentModel <model>: Which model to use");
-    log.info("  -parserModel <model>: Which parser to use");
-    log.info("  -file <filename>: Which file to process");
-    log.info("  -fileList <file>,<file>,...: Comma separated list of files to process.  Output goes to file.out");
-    log.info("  -stdin: Process stdin instead of a file");
-    log.info("  -input <format>: Which format to input, TEXT or TREES.  Will not process stdin as trees.  If trees are not already binarized, they will be binarized with -tlppClass's headfinder, which means they must have labels in that treebank's tagset.");
-    log.info("  -output <format>: Which format to output, PENNTREES, VECTORS, PROBABILITIES, or ROOT.  Multiple formats can be specified as a comma separated list.");
-    log.info("  -filterUnknown: remove unknown trees from the input.  Only applies to TREES input, in which case the trees must be binarized with sentiment labels");
-    log.info("  -tlppClass: a class to use for building the binarizer if using non-binarized TREES as input.  Defaults to " + DEFAULT_TLPP_CLASS);
+    System.err.println("Known command line arguments:");
+    System.err.println("  -sentimentModel <model>: Which model to use");
+    System.err.println("  -parserModel <model>: Which parser to use");
+    System.err.println("  -file <filename>: Which file to process");
+    System.err.println("  -fileList <file>,<file>,...: Comma separated list of files to process.  Output goes to file.out");
+    System.err.println("  -stdin: Process stdin instead of a file");
+    System.err.println("  -input <format>: Which format to input, TEXT or TREES.  Will not process stdin as trees.  If trees are not already binarized, they will be binarized with -tlppClass's headfinder, which means they must have labels in that treebank's tagset.");
+    System.err.println("  -output <format>: Which format to output, PENNTREES, VECTORS, PROBABILITIES, or ROOT.  Multiple formats can be specified as a comma separated list.");
+    System.err.println("  -filterUnknown: remove unknown trees from the input.  Only applies to TREES input, in which case the trees must be binarized with sentiment labels");
+    System.err.println("  -tlppClass: a class to use for building the binarizer if using non-binarized TREES as input.  Defaults to " + DEFAULT_TLPP_CLASS);
   }
 
   /**
@@ -295,7 +291,7 @@ public class SentimentPipeline  {
         help();
         System.exit(0);
       } else {
-        log.info("Unknown argument " + args[argIndex + 1]);
+        System.err.println("Unknown argument " + args[argIndex + 1]);
         help();
         throw new IllegalArgumentException("Unknown argument " + args[argIndex + 1]);
       }
@@ -377,9 +373,9 @@ public class SentimentPipeline  {
       }
     } else {
       // Process stdin.  Each line will be treated as a single sentence.
-      log.info("Reading in text from stdin.");
-      log.info("Please enter one sentence per line.");
-      log.info("Processing will end when EOF is reached.");
+      System.err.println("Reading in text from stdin.");
+      System.err.println("Please enter one sentence per line.");
+      System.err.println("Processing will end when EOF is reached.");
       BufferedReader reader = IOUtils.readerFromStdin("utf-8");
 
       for (String line; (line = reader.readLine()) != null; ) {

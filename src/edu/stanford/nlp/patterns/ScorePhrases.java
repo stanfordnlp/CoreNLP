@@ -36,10 +36,7 @@ import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.ArgumentParser.Option;
 import edu.stanford.nlp.util.logging.Redwood;
 
-public class ScorePhrases<E extends Pattern>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ScorePhrases.class);
+public class ScorePhrases<E extends Pattern> {
 
   Map<String, Boolean> writtenInJustification = new HashMap<>();
 
@@ -208,7 +205,7 @@ public class ScorePhrases<E extends Pattern>  {
         TokenSequencePattern pat = TokenSequencePattern.compile(constVars.env.get(label), patternStr);
         surfacePatternsLearnedThisIterConverted.put(pat, pattern);
       }catch(Exception e){
-        log.info("Error applying patterrn " + patternStr + ". Probably an ill formed pattern (can be because of special symbols in label names). Contact the software developer.");
+        System.err.println("Error applying patterrn " + patternStr + ". Probably an ill formed pattern (can be because of special symbols in label names). Contact the software developer.");
         throw e;
       }
     }else if(constVars.patternType.equals(PatternFactory.PatternType.DEP)){

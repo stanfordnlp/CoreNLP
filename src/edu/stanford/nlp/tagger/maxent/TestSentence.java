@@ -5,8 +5,7 @@
  * Company:      Stanford University<p>
  */
 
-package edu.stanford.nlp.tagger.maxent; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.io.PrintFile;
@@ -34,10 +33,7 @@ import java.text.DecimalFormat;
  * @author Michel Galley
  * @version 1.0
  */
-public class TestSentence implements SequenceModel  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TestSentence.class);
+public class TestSentence implements SequenceModel {
 
   protected final boolean VERBOSE;
   protected static final String naTag = "NA";
@@ -127,7 +123,7 @@ public class TestSentence implements SequenceModel  {
     }
     size = sz + 1;
     if (VERBOSE) {
-      log.info("Sentence is " + SentenceUtils.listToString(sent, false, tagSeparator));
+      System.err.println("Sentence is " + SentenceUtils.listToString(sent, false, tagSeparator));
     }
     init();
     result = testTagInference();
@@ -221,16 +217,16 @@ public class TestSentence implements SequenceModel  {
         double[] probs = getHistories(tags, h);
         ArrayMath.logNormalize(probs);
 
-        // log.info("word: " + pairs.getWord(current));
-        // log.info("tags: " + Arrays.asList(tags));
-        // log.info("probs: " + ArrayMath.toString(probs));
+        // System.err.println("word: " + pairs.getWord(current));
+        // System.err.println("tags: " + Arrays.asList(tags));
+        // System.err.println("probs: " + ArrayMath.toString(probs));
 
         for (int j = 0; j < tags.length; j++) {
           // score the j-th tag
           String tag = tags[j];
           boolean approximate = maxentTagger.hasApproximateScoring();
           int tagindex = approximate ? maxentTagger.tags.getIndex(tag) : j;
-          // log.info("Mapped from j="+ j + " " + tag + " to " + tagindex);
+          // System.err.println("Mapped from j="+ j + " " + tag + " to " + tagindex);
           probabilities[current][hyp][tagindex] = probs[j];
         }
       } // for current
@@ -710,8 +706,8 @@ public class TestSentence implements SequenceModel  {
   @Override
   public double[] scoresOf(int[] tags, int pos) {
     if (DBG) {
-      log.info("scoresOf(): length of tags is " + tags.length + "; position is " + pos + "; endSizePairs = " + endSizePairs + "; size is " + size + "; leftWindow is " + leftWindow());
-      log.info("  History h = new History(" + (endSizePairs - size) + ", " + (endSizePairs - 1) + ", " + (endSizePairs - size + pos - leftWindow()) + ")");
+      System.err.println("scoresOf(): length of tags is " + tags.length + "; position is " + pos + "; endSizePairs = " + endSizePairs + "; size is " + size + "; leftWindow is " + leftWindow());
+      System.err.println("  History h = new History(" + (endSizePairs - size) + ", " + (endSizePairs - 1) + ", " + (endSizePairs - size + pos - leftWindow()) + ")");
     }
     history.init(endSizePairs - size, endSizePairs - 1, endSizePairs - size + pos - leftWindow());
     setHistory(pos, history, tags);

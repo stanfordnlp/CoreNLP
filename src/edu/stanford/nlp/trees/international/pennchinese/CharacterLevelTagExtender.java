@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees.international.pennchinese; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.international.pennchinese;
 
 import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.io.IOUtils;
@@ -31,10 +30,7 @@ import java.util.List;
  *
  * @author Galen Andrew (galand@cs.stanford.edu) Date: May 13, 2004
  */
-public class CharacterLevelTagExtender extends BobChrisTreeNormalizer implements TreeTransformer  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CharacterLevelTagExtender.class);
+public class CharacterLevelTagExtender extends BobChrisTreeNormalizer implements TreeTransformer {
 
   private static final long serialVersionUID = 7893996593626523700L;
 
@@ -159,13 +155,13 @@ public class CharacterLevelTagExtender extends BobChrisTreeNormalizer implements
       lp = LexicalizedParser.trainFromTreebank(args[0], trainFilt, op);
       try {
         String filename = "chineseCharTagPCFG.ser.gz";
-        log.info("Writing parser in serialized format to file " + filename + " ");
+        System.err.println("Writing parser in serialized format to file " + filename + " ");
         System.err.flush();
         ObjectOutputStream out = IOUtils.writeStreamFromString(filename);
 
         out.writeObject(lp);
         out.close();
-        log.info("done.");
+        System.err.println("done.");
       } catch (IOException ioe) {
         ioe.printStackTrace();
       }

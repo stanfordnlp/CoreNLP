@@ -1,5 +1,4 @@
-package edu.stanford.nlp.stats; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.stats;
 
 
 import edu.stanford.nlp.io.RecordIterator;
@@ -32,10 +31,7 @@ import java.io.*;
  *
  * @author Bill MacCartney
  */
-public interface DataSeries  {
-
-  /** A logger for this class */
-  Redwood.RedwoodChannels log = Redwood.channels(DataSeries.class);
+public interface DataSeries {
 
   public String     name();
   public double     get(int i);         // SAFE! if index out of bounds, return (double) i
@@ -275,7 +271,7 @@ public interface DataSeries  {
       if (args.length > 0) {
         serieses = readDataSeries(args[0], true);
       } else {
-        log.info("[Reading from stdin...]");
+        System.err.println("[Reading from stdin...]");
         serieses = readDataSeries(System.in, true);
       }
 

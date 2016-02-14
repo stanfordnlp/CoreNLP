@@ -1,5 +1,4 @@
-package edu.stanford.nlp.hcoref.sieve; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.hcoref.sieve;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,10 +35,7 @@ import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 
-public class RFSieve extends Sieve  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(RFSieve.class);
+public class RFSieve extends Sieve {
   
   private static final long serialVersionUID = -4090017054885920527L;
   
@@ -733,7 +729,7 @@ public class RFSieve extends Sieve  {
       
       return new RVFDatum<>(features, label);
     } catch (Exception e) {
-      log.info("Datum Extraction failed in Sieve.java while processing document: "+document.docInfo.get("DOC_ID")+" part: "+document.docInfo.get("DOC_PART"));
+      System.err.println("Datum Extraction failed in Sieve.java while processing document: "+document.docInfo.get("DOC_ID")+" part: "+document.docInfo.get("DOC_PART"));
       throw new RuntimeException(e);
     }
   }

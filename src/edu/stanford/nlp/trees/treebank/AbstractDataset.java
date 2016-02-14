@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees.treebank; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.treebank;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -25,10 +24,7 @@ import edu.stanford.nlp.util.Generics;
  * @author Spence Green
  *
  */
-public abstract class AbstractDataset implements Dataset  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AbstractDataset.class);
+public abstract class AbstractDataset implements Dataset {
 
   protected final List<String> outputFileList;
   protected Mapper posMapper = null;

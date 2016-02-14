@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.shiftreduce; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.shiftreduce;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -32,10 +31,7 @@ import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
-public class PerceptronModel extends BaseModel  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(PerceptronModel.class); // Serializable
+public class PerceptronModel extends BaseModel { // Serializable
   Map<String, Weight> featureWeights;
   final FeatureFactory featureFactory;
 
@@ -80,11 +76,11 @@ public class PerceptronModel extends BaseModel  {
       throw new IllegalArgumentException("Cannot average empty models");
     }
 
-    log.info("Averaging " + scoredModels.size() + " models with scores");
+    System.err.print("Averaging " + scoredModels.size() + " models with scores");
     for (ScoredObject<PerceptronModel> model : scoredModels) {
-      log.info(" " + NF.format(model.score()));
+      System.err.print(" " + NF.format(model.score()));
     }
-    log.info();
+    System.err.println();
 
     List<PerceptronModel> models = CollectionUtils.transformAsList(scoredModels, ScoredObject::object);
     averageModels(models);
@@ -149,20 +145,20 @@ public class PerceptronModel extends BaseModel  {
    * Output some random facts about the model
    */
   public void outputStats() {
-    log.info("Number of known features: " + featureWeights.size());
+    System.err.println("Number of known features: " + featureWeights.size());
     int numWeights = 0;
     for (Map.Entry<String, Weight> stringWeightEntry : featureWeights.entrySet()) {
       numWeights += stringWeightEntry.getValue().size();
     }
-    log.info("Number of non-zero weights: " + numWeights);
+    System.err.println("Number of non-zero weights: " + numWeights);
 
     int wordLength = 0;
     for (String feature : featureWeights.keySet()) {
       wordLength += feature.length();
     }
-    log.info("Total word length: " + wordLength);
+    System.err.println("Total word length: " + wordLength);
 
-    log.info("Number of transitions: " + transitionIndex.size());
+    System.err.println("Number of transitions: " + transitionIndex.size());
   }
 
   /** Reconstruct that tag set that was used to train the model by decoding some of the features.
@@ -552,7 +548,7 @@ public class PerceptronModel extends BaseModel  {
         updates.clear();
       }
       trainingTimer.done("Iteration " + iteration);
-      log.info("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
+      System.err.println("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
       outputStats();
 
 
@@ -561,20 +557,20 @@ public class PerceptronModel extends BaseModel  {
         EvaluateTreebank evaluator = new EvaluateTreebank(op, null, new ShiftReduceParser(op, this), tagger);
         evaluator.testOnTreebank(devTreebank);
         labelF1 = evaluator.getLBScore();
-        log.info("Label F1 after " + iteration + " iterations: " + labelF1);
+        System.err.println("Label F1 after " + iteration + " iterations: " + labelF1);
 
         if (labelF1 > bestScore) {
-          log.info("New best dev score (previous best " + bestScore + ")");
+          System.err.println("New best dev score (previous best " + bestScore + ")");
           bestScore = labelF1;
           bestIteration = iteration;
         } else {
-          log.info("Failed to improve for " + (iteration - bestIteration) + " iteration(s) on previous best score of " + bestScore);
+          System.err.println("Failed to improve for " + (iteration - bestIteration) + " iteration(s) on previous best score of " + bestScore);
           if (op.trainOptions.stalledIterationLimit > 0 && (iteration - bestIteration >= op.trainOptions.stalledIterationLimit)) {
-            log.info("Failed to improve for too long, stopping training");
+            System.err.println("Failed to improve for too long, stopping training");
             break;
           }
         }
-        log.info();
+        System.err.println();
 
         if (bestModels != null) {
           bestModels.add(new ScoredObject<>(new PerceptronModel(this), labelF1));
@@ -607,14 +603,14 @@ public class PerceptronModel extends BaseModel  {
         double bestF1 = 0.0;
         int bestSize = 0;
         for (int i = 1; i <= models.size(); ++i) {
-          log.info("Testing with " + i + " models averaged together");
+          System.err.println("Testing with " + i + " models averaged together");
           // TODO: this is kind of ugly, would prefer a separate object
           averageScoredModels(models.subList(0, i));
           ShiftReduceParser temp = new ShiftReduceParser(op, this);
           EvaluateTreebank evaluator = new EvaluateTreebank(temp.op, null, temp, tagger);
           evaluator.testOnTreebank(devTreebank);
           double labelF1 = evaluator.getLBScore();
-          log.info("Label F1 for " + i + " models: " + labelF1);
+          System.err.println("Label F1 for " + i + " models: " + labelF1);
           if (labelF1 > bestF1) {
             bestF1 = labelF1;
             bestSize = i;

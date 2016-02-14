@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.util.*;
 import java.io.FileFilter;
@@ -17,10 +16,7 @@ import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Triple;
 
 
-public class TreeAnnotatorAndBinarizer implements TreeTransformer  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TreeAnnotatorAndBinarizer.class);
+public class TreeAnnotatorAndBinarizer implements TreeTransformer {
 
   private final TreeFactory tf;
   private final TreebankLanguagePack tlp;
@@ -83,7 +79,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer  {
    */
   public void addRoot(Tree t) {
     if (t.isLeaf()) {
-      log.info("Warning: tree is leaf: " + t);
+      System.err.println("Warning: tree is leaf: " + t);
       t = tf.newTreeNode(tlp.startSymbol(), Collections.singletonList(t));
     }
     t.setLabel(new CategoryWordTag(tlp.startSymbol(), Lexicon.BOUNDARY, Lexicon.BOUNDARY_TAG));
@@ -144,26 +140,26 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer  {
   }
 
   public void printRuleCounts() {
-    log.info();
+    System.err.println();
     for (Tree t : annotatedRuleCounts.keySet()) {
-      log.info(annotatedRuleCounts.getCount(t) + "\t" +
+      System.err.print(annotatedRuleCounts.getCount(t) + "\t" +
                        t.label().value() + " -->");
       for (Tree dtr : t.getChildrenAsList()) {
-        log.info(" ");
-        log.info(dtr.label().value());
+        System.err.print(" ");
+        System.err.print(dtr.label().value());
       }
-      log.info();
+      System.err.println();
     }
   }
 
   public void printStateCounts() {
-    log.info();
-    log.info("Annotated state counts");
+    System.err.println();
+    System.err.println("Annotated state counts");
     Set<String> keys = annotatedStateCounts.keySet();
     List<String> keyList = new ArrayList<>(keys);
     Collections.sort(keyList);
     for (String s : keyList) {
-      log.info(s + "\t" + annotatedStateCounts.getCount(s));
+      System.err.println(s + "\t" + annotatedStateCounts.getCount(s));
     }
   }
 
@@ -195,7 +191,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer  {
         }
       }
       if (op.testOptions.verbose) {
-        log.info("Removed from vertical splitters: " + deleted);
+        System.err.println("Removed from vertical splitters: " + deleted);
       }
     }
   }
@@ -232,7 +228,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer  {
       trainTransformer.addTransformer(collinsPuncTransformer);
     }
 
-    log.info("Binarizing trees...");
+    System.err.print("Binarizing trees...");
     TreeAnnotatorAndBinarizer binarizer;
     if (!op.trainOptions.leftToRight) {
       binarizer = new TreeAnnotatorAndBinarizer(tlpParams, op.forceCNF, !op.trainOptions.outsideFactor(), !op.trainOptions.predictSplits, op);
@@ -260,7 +256,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer  {
       if (op.testOptions.verbose) {
         List<String> list = new ArrayList<>(op.trainOptions.splitters);
         Collections.sort(list);
-        log.info("Parent split categories: " + list);
+        System.err.println("Parent split categories: " + list);
       }
     }
 
@@ -270,7 +266,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer  {
       wholeTreebank = wholeTreebank.transform(myTransformer);
       op.trainOptions.postSplitters = ParentAnnotationStats.getSplitCategories(wholeTreebank, true, 0, op.trainOptions.selectivePostSplitCutOff, op.trainOptions.tagSelectivePostSplitCutOff, tlp);
       if (op.testOptions.verbose) {
-        log.info("Parent post annotation split categories: " + op.trainOptions.postSplitters);
+        System.err.println("Parent post annotation split categories: " + op.trainOptions.postSplitters);
       }
     }
     if (op.trainOptions.hSelSplit) {
@@ -342,12 +338,12 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer  {
       }
     }
     if (i < args.length) {
-      log.info("usage: java TreeAnnotatorAndBinarizer options*");
-      log.info("  Options are like for lexicalized parser including -train treebankPath fileRange]");
+      System.err.println("usage: java TreeAnnotatorAndBinarizer options*");
+      System.err.println("  Options are like for lexicalized parser including -train treebankPath fileRange]");
       return;
     }
 
-    log.info("Annotating from treebank dir: " + treebankPath);
+    System.err.println("Annotating from treebank dir: " + treebankPath);
     Treebank trainTreebank = op.tlpParams.diskTreebank();
     if (trainFilter == null) {
       trainTreebank.loadPath(treebankPath);
@@ -400,7 +396,7 @@ public class TreeAnnotatorAndBinarizer implements TreeTransformer  {
           String tag;
           String word;
           if (headChild == null) {
-            log.error("null head for tree\n" + t.toString());
+            System.err.println("ERROR: null head for tree\n" + t.toString());
             word = null;
             tag = null;
           } else if (headChild.isLeaf()) {

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.spanish.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.spanish.pipeline;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
@@ -24,10 +23,7 @@ import java.util.*;
  *
  * @author Jon Gauthier
  */
-public class AnCoraPOSStats  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AnCoraPOSStats.class);
+public class AnCoraPOSStats {
 
   private final TwoDimensionalCounter<String, String> unigramTagger;
 
@@ -79,7 +75,7 @@ public class AnCoraPOSStats  {
 
   public static void main(String[] args) throws IOException {
     if (args.length < 1) {
-      log.info(usage);
+      System.err.println(usage);
       System.exit(1);
     }
 

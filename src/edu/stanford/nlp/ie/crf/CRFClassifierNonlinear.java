@@ -24,8 +24,7 @@
 //    Support/Questions: java-nlp-user@lists.stanford.edu
 //    Licensing: java-nlp-support@lists.stanford.edu
 
-package edu.stanford.nlp.ie.crf; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.optimization.*;
@@ -41,10 +40,7 @@ import java.util.zip.GZIPInputStream;
  *
  * @author Mengqiu Wang
  */
-public class CRFClassifierNonlinear<IN extends CoreMap> extends CRFClassifier<IN>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CRFClassifierNonlinear.class);
+public class CRFClassifierNonlinear<IN extends CoreMap> extends CRFClassifier<IN> {
 
   /** Parameter weights of the classifier. */
   double[][] linearWeights;
@@ -148,7 +144,7 @@ public class CRFClassifierNonlinear<IN extends CoreMap> extends CRFClassifier<IN
       initialWeights = func.initial();
     } else {
       try {
-        log.info("Reading initial weights from file " + flags.initialWeights);
+        System.err.println("Reading initial weights from file " + flags.initialWeights);
         DataInputStream dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(
             flags.initialWeights))));
         initialWeights = ConvertByteArray.readDoubleArr(dis);
@@ -156,15 +152,15 @@ public class CRFClassifierNonlinear<IN extends CoreMap> extends CRFClassifier<IN
         throw new RuntimeException("Could not read from double initial weight file " + flags.initialWeights);
       }
     }
-    log.info("numWeights: " + initialWeights.length);
+    System.err.println("numWeights: " + initialWeights.length);
 
     if (flags.testObjFunction) {
       StochasticDiffFunctionTester tester = new StochasticDiffFunctionTester(func);
       if (tester.testSumOfBatches(initialWeights, 1e-4)) {
-        log.info("Testing complete... exiting");
+        System.err.println("Testing complete... exiting");
         System.exit(1);
       } else {
-        log.info("Testing failed....exiting");
+        System.err.println("Testing failed....exiting");
         System.exit(1);
       }
 
@@ -172,7 +168,7 @@ public class CRFClassifierNonlinear<IN extends CoreMap> extends CRFClassifier<IN
     //check gradient
     if (flags.checkGradient) {
       if (func.gradientCheck()) {
-        log.info("gradient check passed");
+        System.err.println("gradient check passed");
       } else {
         throw new RuntimeException("gradient check failed");
       }

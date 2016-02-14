@@ -1,6 +1,5 @@
 
-package edu.stanford.nlp.util.logging; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.util.logging;
 
 import java.io.File;
 import java.io.OutputStream;
@@ -19,10 +18,7 @@ import edu.stanford.nlp.util.MetaClass;
  * calls.
  * @author Gabor Angeli (angeli at cs.stanford)
  */
-public class RedwoodConfiguration  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(RedwoodConfiguration.class);
+public class RedwoodConfiguration {
 
   /**
    * A list of tasks to run when the configuration is applied
@@ -563,7 +559,7 @@ public class RedwoodConfiguration  {
     Redwood.log("foo");
     Redwood.log(Redwood.DBG, "debug");
     System.out.println("Bar");
-    log.info("Baz");
+    System.err.println("Baz");
   }
   */
 }

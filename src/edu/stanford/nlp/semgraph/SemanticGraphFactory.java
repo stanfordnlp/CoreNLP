@@ -1,5 +1,4 @@
-package edu.stanford.nlp.semgraph; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.semgraph;
 
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.trees.*;
@@ -15,10 +14,7 @@ import java.util.*;
  *
  * @author rafferty
  */
-public class SemanticGraphFactory  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SemanticGraphFactory.class);
+public class SemanticGraphFactory {
 
   private SemanticGraphFactory() {} // just static factory methods
 
@@ -216,7 +212,7 @@ public class SemanticGraphFactory  {
     // which meant they were ignored by the RTE system. Changed. (pado)
     // See also the SemanticGraph constructor.
 
-    //log.info(deps.toString());
+    //System.err.println(deps.toString());
     return new SemanticGraph(deps);
   }
 

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.process.PTBTokenizer;
@@ -23,10 +22,7 @@ import java.util.function.Predicate;
  * @author Christopher Manning
  * @author Galen Andrew
  */
-public class TreePrint  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TreePrint.class);
+public class TreePrint {
 
   // TODO: Add support for makeCopulaHead as an outputFormatOption here.
 
@@ -386,7 +382,7 @@ public class TreePrint  {
           // It's not quite clear what to do if the tree isn't unary at the top
           // but we then don't strip the ROOT symbol, since that seems closer
           // than losing part of the tree altogether....
-          log.info("TreePrint: can't remove top bracket: not unary");
+          System.err.println("TreePrint: can't remove top bracket: not unary");
         }
       }
       // Note that TreePrint is also called on dependency trees that have
@@ -485,7 +481,7 @@ public class TreePrint  {
         pw.println("</dependencies>");
       }
       if (formats.containsKey("conll2007") || formats.containsKey("conllStyleDependencies")) {
-        log.info("The \"conll2007\" and \"conllStyleDependencies\" formats are ignored in xml.");
+        System.err.println("The \"conll2007\" and \"conllStyleDependencies\" formats are ignored in xml.");
       }
       if (formats.containsKey("typedDependencies")) {
         GrammaticalStructure gs = gsf.newGrammaticalStructure(outputTree);
@@ -618,9 +614,9 @@ public class TreePrint  {
           failed = true;
         }
         if (failed) {
-          log.info("failed: ");
-          log.info(t);
-          log.info();
+          System.err.println("failed: ");
+          System.err.println(t);
+          System.err.println();
         } else {
           Map<Integer,Integer> deps = Generics.newHashMap();
           for (Dependency<Label, Label, Object> dep : depsSet) {
@@ -630,7 +626,7 @@ public class TreePrint  {
               child.get(CoreAnnotations.IndexAnnotation.class);
             Integer parentIndex =
               parent.get(CoreAnnotations.IndexAnnotation.class);
-//            log.info(childIndex+"\t"+parentIndex);
+//            System.err.println(childIndex+"\t"+parentIndex);
             deps.put(childIndex, parentIndex);
           }
           boolean foundRoot = false;
@@ -723,7 +719,7 @@ public class TreePrint  {
         Class<?> cl = Class.forName("edu.stanford.nlp.trees.WordNetInstance");
         wnc = (WordNetConnection) cl.newInstance();
       } catch (Exception e) {
-        log.info("Couldn't open WordNet Connection.  Aborting collocation detection.");
+        System.err.println("Couldn't open WordNet Connection.  Aborting collocation detection.");
         e.printStackTrace();
         wnc = null;
       }
@@ -732,7 +728,7 @@ public class TreePrint  {
       CollocationFinder cf = new CollocationFinder(tree, wnc, hf);
       tree = cf.getMangledTree();
     } else {
-      log.error("WordNetConnection unavailable for collocations.");
+      System.err.println("ERROR: WordNetConnection unavailable for collocations.");
     }
     return tree;
   }

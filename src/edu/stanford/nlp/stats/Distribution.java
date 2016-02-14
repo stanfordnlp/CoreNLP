@@ -1,5 +1,4 @@
-package edu.stanford.nlp.stats; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.stats;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -18,10 +17,7 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author Galen Andrew (galand@cs.stanford.edu), Sebastian Pado
  */
-public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Distribution.class);
+public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E> {
 
   private static final long serialVersionUID = 6707148234288637809L;
 
@@ -232,23 +228,23 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E>  
     norm.numberOfKeys = numberOfKeys;
     norm.reservedMass = reservedMass / total;
     if (verbose) {
-      log.info("unseenKeys=" + (norm.numberOfKeys - norm.counter.size()) + " seenKeys=" + norm.counter.size() + " reservedMass=" + norm.reservedMass);
+      System.err.println("unseenKeys=" + (norm.numberOfKeys - norm.counter.size()) + " seenKeys=" + norm.counter.size() + " reservedMass=" + norm.reservedMass);
       double zeroCountProb = (norm.reservedMass / (numberOfKeys - norm.counter.size()));
-      log.info("0 count prob: " + zeroCountProb);
+      System.err.println("0 count prob: " + zeroCountProb);
       if (discount >= 1.0) {
-        log.info("1 count prob: " + zeroCountProb);
+        System.err.println("1 count prob: " + zeroCountProb);
       } else {
-        log.info("1 count prob: " + (1.0 - discount) / total);
+        System.err.println("1 count prob: " + (1.0 - discount) / total);
       }
       if (discount >= 2.0) {
-        log.info("2 count prob: " + zeroCountProb);
+        System.err.println("2 count prob: " + zeroCountProb);
       } else {
-        log.info("2 count prob: " + (2.0 - discount) / total);
+        System.err.println("2 count prob: " + (2.0 - discount) / total);
       }
       if (discount >= 3.0) {
-        log.info("3 count prob: " + zeroCountProb);
+        System.err.println("3 count prob: " + zeroCountProb);
       } else {
-        log.info("3 count prob: " + (3.0 - discount) / total);
+        System.err.println("3 count prob: " + (3.0 - discount) / total);
       }
     }
     //    System.out.println("UNSEEN: " + reservedMass / total / (numberOfKeys - counter.size()));
@@ -278,23 +274,23 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E>  
     double newTotal = total + (lambda * numberOfKeys);
     double reservedMass = ((double) numberOfKeys - counter.size()) * lambda / newTotal;
     if (verbose) {
-      log.info(((double) numberOfKeys - counter.size()) + " * " + lambda + " / (" + total + " + ( " + lambda + " * " + (double) numberOfKeys + ") )");
+      System.err.println(((double) numberOfKeys - counter.size()) + " * " + lambda + " / (" + total + " + ( " + lambda + " * " + (double) numberOfKeys + ") )");
     }
     norm.numberOfKeys = numberOfKeys;
     norm.reservedMass = reservedMass;
     if (verbose) {
-      log.info("reserved mass=" + reservedMass);
+      System.err.println("reserved mass=" + reservedMass);
     }
     for (E key : counter.keySet()) {
       double count = counter.getCount(key);
       norm.counter.setCount(key, (count + lambda) / newTotal);
     }
     if (verbose) {
-      log.info("unseenKeys=" + (norm.numberOfKeys - norm.counter.size()) + " seenKeys=" + norm.counter.size() + " reservedMass=" + norm.reservedMass);
-      log.info("0 count prob: " + lambda / newTotal);
-      log.info("1 count prob: " + (1.0 + lambda) / newTotal);
-      log.info("2 count prob: " + (2.0 + lambda) / newTotal);
-      log.info("3 count prob: " + (3.0 + lambda) / newTotal);
+      System.err.println("unseenKeys=" + (norm.numberOfKeys - norm.counter.size()) + " seenKeys=" + norm.counter.size() + " reservedMass=" + norm.reservedMass);
+      System.err.println("0 count prob: " + lambda / newTotal);
+      System.err.println("1 count prob: " + (1.0 + lambda) / newTotal);
+      System.err.println("2 count prob: " + (2.0 + lambda) / newTotal);
+      System.err.println("3 count prob: " + (3.0 + lambda) / newTotal);
     }
     return norm;
   }
@@ -632,8 +628,8 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E>  
           return o;
         }
       }
-      log.error("Distribution sums to less than 1");
-      log.info("Sampled " + d + "      sum is " + totalCount());
+      System.err.println("ERROR: Distribution sums to less than 1");
+      System.err.println("Sampled " + d + "      sum is " + totalCount());
       throw new RuntimeException("");
     }
   }

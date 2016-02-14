@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.arabic.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.arabic.pipeline;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -30,10 +29,7 @@ import java.util.function.Predicate;
  * @author Spence Green
  *
  */
-public class ATBArabicDataset extends AbstractDataset  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ATBArabicDataset.class);
+public class ATBArabicDataset extends AbstractDataset {
 
   public ATBArabicDataset() {
     super();

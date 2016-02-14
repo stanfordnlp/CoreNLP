@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,10 +20,7 @@ import edu.stanford.nlp.util.Index;
  *  @author Roger Levy (rog@stanford.edu)
  *  @author Wolfgang Maier (wmaier@sfs.uni-tuebingen.de)
  */
-public class TueBaDZParserParams extends AbstractTreebankParserParams  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TueBaDZParserParams.class);
+public class TueBaDZParserParams extends AbstractTreebankParserParams {
 
   private HeadFinder hf = new TueBaDZHeadFinder();
 
@@ -152,7 +148,7 @@ public class TueBaDZParserParams extends AbstractTreebankParserParams  {
 
   @Override
   public void display() {
-    log.info("TueBaDZParserParams nodeCleanup=" + nodeCleanup +
+    System.err.println("TueBaDZParserParams nodeCleanup=" + nodeCleanup +
                        " mKonjParent=" + markKonjParent + " mContainsV=" + markContainsV +
                        " mZu=" + markZu + " mColons=" + markColons);
   }

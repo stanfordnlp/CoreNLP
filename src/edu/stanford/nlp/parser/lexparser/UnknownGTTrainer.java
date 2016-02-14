@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.util.Collection;
 import java.util.Map;
@@ -24,10 +23,7 @@ import edu.stanford.nlp.util.Pair;
  * @author Anna Rafferty
  * @author John Bauer (refactored into a separate training class)
  */
-public class UnknownGTTrainer  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(UnknownGTTrainer.class);
+public class UnknownGTTrainer {
   ClassicCounter<Pair<String,String>> wtCount = new ClassicCounter<>();
   ClassicCounter<String> tagCount = new ClassicCounter<>();
   ClassicCounter<String> r1 = new ClassicCounter<>(); // for each tag, # of words seen once
@@ -73,10 +69,10 @@ public class UnknownGTTrainer  {
 
   public void finishTraining() {
     // testing: get some stats here
-    log.info("Total tokens: " + tokens);
-    log.info("Total WordTag types: " + wtCount.keySet().size());
-    log.info("Total tag types: " + tagCount.keySet().size());
-    log.info("Total word types: " + seenWords.size());
+    System.err.println("Total tokens: " + tokens);
+    System.err.println("Total WordTag types: " + wtCount.keySet().size());
+    System.err.println("Total tag types: " + tagCount.keySet().size());
+    System.err.println("Total word types: " + seenWords.size());
 
     /* find # of once-seen words for each tag */
     for (Pair<String,String> wt : wtCount.keySet()) {

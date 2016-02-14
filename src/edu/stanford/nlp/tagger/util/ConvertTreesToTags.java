@@ -1,5 +1,4 @@
-package edu.stanford.nlp.tagger.util; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.tagger.util;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -61,10 +60,7 @@ import edu.stanford.nlp.tagger.io.TaggedFileRecord;
  *
  * @author John Bauer
  */
-public class ConvertTreesToTags  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ConvertTreesToTags.class);
+public class ConvertTreesToTags {
   private ConvertTreesToTags() {}; // main method only
 
   public static void main(String[] args) throws IOException {
@@ -119,11 +115,11 @@ public class ConvertTreesToTags  {
       }
     }
     if (outputFilename.equals("")) {
-      log.info("Must specify an output filename, -output");
+      System.err.println("Must specify an output filename, -output");
       System.exit(2);
     }
     if (inputFilenames.size() == 0) {
-      log.info("Must specify one or more input filenames");
+      System.err.println("Must specify one or more input filenames");
       System.exit(2);
     }
 

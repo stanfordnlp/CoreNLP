@@ -1,5 +1,4 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import java.util.*;
 
@@ -29,10 +28,7 @@ import edu.stanford.nlp.scoref.StatisticalCorefSystem;
  * @author Jason Bolton
  */
 
-public class CorefAnnotator extends TextAnnotationCreator implements Annotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CorefAnnotator.class);
+public class CorefAnnotator extends TextAnnotationCreator implements Annotator {
 
   private static final boolean VERBOSE = false;
 
@@ -76,7 +72,7 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
       }
       OLD_FORMAT = Boolean.parseBoolean(props.getProperty("oldCorefFormat", "false"));
     } catch (Exception e) {
-      log.error("cannot create CorefAnnotator!");
+      System.err.println("ERROR: cannot create CorefAnnotator!");
       e.printStackTrace();
       throw new RuntimeException(e);
     }
@@ -86,7 +82,7 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
   public void annotate(Annotation annotation){
     try {
       if (!annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
-        log.error("this coreference resolution system requires SentencesAnnotation!");
+        System.err.println("ERROR: this coreference resolution system requires SentencesAnnotation!");
         return;
       }
 
@@ -104,7 +100,7 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
       } else if (COREF_MODE.equals(STATISTICAL_MODE)) {
         scorefSystem.annotate(annotation);
       } else {
-        log.error("invalid selection for coreference mode!");
+        System.err.println("ERROR: invalid selection for coreference mode!");
         throw new RuntimeException() ;
       }
     } catch (RuntimeException e) {

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.arabic; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.arabic;
 
 import java.io.*;
 import java.util.Arrays;
@@ -17,10 +16,7 @@ import edu.stanford.nlp.international.morph.MorphoFeatures;
  * @author Spence Green
  *
  */
-public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ArabicMorphoFeatureSpecification.class);
+public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification {
 
   private static final long serialVersionUID = 4448045447200922076L;
 

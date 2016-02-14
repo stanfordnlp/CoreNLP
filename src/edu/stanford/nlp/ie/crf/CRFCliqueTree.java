@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie.crf; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.sequences.ListeningSequenceModel;
@@ -19,10 +18,7 @@ import java.util.List;
  * @param <E> The type of the label (usually String in our uses)
  * @author Jenny Finkel
  */
-public class CRFCliqueTree<E> implements ListeningSequenceModel  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CRFCliqueTree.class);
+public class CRFCliqueTree<E> implements ListeningSequenceModel {
 
   private final FactorTable[] factorTables;
   private final double z; // norm constant
@@ -563,22 +559,22 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel  {
         featureValByCliqueSize = featureVals[i];
       factorTables[i] = getFactorTable(data[i], labelIndices, numClasses, cliquePotentialFunc, featureValByCliqueSize, i);
 
-      // log.info("before calibration,FT["+i+"] = " + factorTables[i].toProbString());
+      // System.err.println("before calibration,FT["+i+"] = " + factorTables[i].toProbString());
 
       if (i > 0) {
         messages[i - 1] = factorTables[i - 1].sumOutFront();
-        // log.info("forward message, message["+(i-1)+"] = " + messages[i-1].toProbString());
+        // System.err.println("forward message, message["+(i-1)+"] = " + messages[i-1].toProbString());
         factorTables[i].multiplyInFront(messages[i - 1]);
-        // log.info("after forward calibration, FT["+i+"] = " + factorTables[i].toProbString());
+        // System.err.println("after forward calibration, FT["+i+"] = " + factorTables[i].toProbString());
       }
     }
 
     for (int i = factorTables.length - 2; i >= 0; i--) {
       FactorTable summedOut = factorTables[i + 1].sumOutEnd();
       summedOut.divideBy(messages[i]);
-      // log.info("backward summedOut, summedOut= " + summedOut.toProbString());
+      // System.err.println("backward summedOut, summedOut= " + summedOut.toProbString());
       factorTables[i].multiplyInEnd(summedOut);
-      // log.info("after backward calibration, FT["+i+"] = " + factorTables[i].toProbString());
+      // System.err.println("after backward calibration, FT["+i+"] = " + factorTables[i].toProbString());
     }
 
     return new CRFCliqueTree<>(factorTables, classIndex, backgroundSymbol);

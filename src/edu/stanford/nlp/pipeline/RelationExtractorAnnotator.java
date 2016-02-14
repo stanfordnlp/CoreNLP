@@ -1,5 +1,4 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import java.util.*;
 
@@ -27,10 +26,7 @@ import edu.stanford.nlp.util.StringUtils;
  *
  */
 
-public class RelationExtractorAnnotator implements Annotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(RelationExtractorAnnotator.class);
+public class RelationExtractorAnnotator implements Annotator {
   MachineReading mr;
   private static boolean verbose = false;
 
@@ -41,7 +37,7 @@ public class RelationExtractorAnnotator implements Annotator  {
       Extractor entityExtractor = new RothEntityExtractor();
       BasicRelationExtractor relationExtractor = BasicRelationExtractor.load(relationModel);
       
-      log.info("Loading relation model from " + relationModel);
+      System.err.println("Loading relation model from " + relationModel);
       mr = MachineReading.makeMachineReadingForAnnotation(new RothCONLL04Reader(), entityExtractor, relationExtractor, null, null,
           null, true, verbose);
     } catch(Exception e){
@@ -64,9 +60,9 @@ public class RelationExtractorAnnotator implements Annotator  {
       List<EntityMention> entities = outSent.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
       origSent.set(MachineReadingAnnotations.EntityMentionsAnnotation.class, entities);
       if(verbose && entities != null){
-        log.info("Extracted the following entities:");
+        System.err.println("Extracted the following entities:");
         for(EntityMention e: entities){
-          log.info("\t" + e);
+          System.err.println("\t" + e);
         }
       }
       
@@ -74,10 +70,10 @@ public class RelationExtractorAnnotator implements Annotator  {
       List<RelationMention> relations = outSent.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
       origSent.set(MachineReadingAnnotations.RelationMentionsAnnotation.class, relations);
       if(verbose && relations != null){
-        log.info("Extracted the following relations:");
+        System.err.println("Extracted the following relations:");
         for(RelationMention r: relations){
           if(! r.getType().equals(RelationMention.UNRELATED)){
-            log.info(r);
+            System.err.println(r);
           }
         }
       }

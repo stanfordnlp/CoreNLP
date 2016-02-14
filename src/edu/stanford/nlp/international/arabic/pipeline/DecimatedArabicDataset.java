@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.arabic.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.arabic.pipeline;
 
 import java.io.*;
 import java.util.*;
@@ -16,10 +15,7 @@ import edu.stanford.nlp.util.Generics;
  * @author Spence Green
  *
  */
-public class DecimatedArabicDataset extends ATBArabicDataset  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(DecimatedArabicDataset.class);
+public class DecimatedArabicDataset extends ATBArabicDataset {
 
   private boolean taggedOutput = false;
   private String wordTagDelim = "_";

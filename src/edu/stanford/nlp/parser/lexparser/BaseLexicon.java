@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.io.NumberRangesFileFilter;
@@ -34,10 +33,7 @@ import java.util.regex.Pattern;
  * @author Galen Andrew
  * @author Christopher Manning
  */
-public class BaseLexicon implements Lexicon  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(BaseLexicon.class);
+public class BaseLexicon implements Lexicon {
 
   protected UnknownWordModel uwModel;
   protected final String uwModelTrainerClass;
@@ -261,7 +257,7 @@ public class BaseLexicon implements Lexicon  {
 
   protected void initRulesWithWord() {
     if (testOptions.verbose || DEBUG_LEXICON) {
-      log.info("\nInitializing lexicon scores ... ");
+      System.err.print("\nInitializing lexicon scores ... ");
     }
     // int numWords = words.size()+sigs.size()+1;
     int unkWord = wordIndex.addToIndex(UNKNOWN_WORD);
@@ -281,13 +277,13 @@ public class BaseLexicon implements Lexicon  {
 
     // tags for unknown words
     if (DEBUG_LEXICON) {
-      log.info("Lexicon initializing tags for UNKNOWN WORD (" +
+      System.err.println("Lexicon initializing tags for UNKNOWN WORD (" +
                          Lexicon.UNKNOWN_WORD + ", " + unkWord + ')');
     }
-    if (DEBUG_LEXICON) log.info("unSeenCounter is: " + uwModel.unSeenCounter());
-    if (DEBUG_LEXICON) log.info("Train.openClassTypesThreshold is " + trainOptions.openClassTypesThreshold);
+    if (DEBUG_LEXICON) System.err.println("unSeenCounter is: " + uwModel.unSeenCounter());
+    if (DEBUG_LEXICON) System.err.println("Train.openClassTypesThreshold is " + trainOptions.openClassTypesThreshold);
     for (IntTaggedWord iT : tags) {
-      if (DEBUG_LEXICON) log.info("Entry for " + iT + " is " + uwModel.unSeenCounter().getCount(iT));
+      if (DEBUG_LEXICON) System.err.println("Entry for " + iT + " is " + uwModel.unSeenCounter().getCount(iT));
       double types = uwModel.unSeenCounter().getCount(iT);
       if (types > trainOptions.openClassTypesThreshold) {
         // Number of types before it's treated as open class
@@ -296,16 +292,16 @@ public class BaseLexicon implements Lexicon  {
       }
     }
     if (testOptions.verbose || DEBUG_LEXICON) {
-      log.info("The " + rulesWithWord[unkWord].size() + " open class tags are: [");
+      System.err.print("The " + rulesWithWord[unkWord].size() + " open class tags are: [");
       for (IntTaggedWord item : rulesWithWord[unkWord]) {
-        log.info(" " + tagIndex.get(item.tag()));
+        System.err.print(" " + tagIndex.get(item.tag()));
         if (DEBUG_LEXICON) {
           IntTaggedWord iTprint = new IntTaggedWord(nullWord, item.tag);
-          log.info(" (tag " + item.tag() + ", type count is " +
+          System.err.print(" (tag " + item.tag() + ", type count is " +
                            uwModel.unSeenCounter().getCount(iTprint) + ')');
         }
       }
-      log.info(" ] ");
+      System.err.println(" ] ");
     }
 
     for (IntTaggedWord iTW : seenCounter.keySet()) {
@@ -582,7 +578,7 @@ public class BaseLexicon implements Lexicon  {
 
       // known word model for P(T|W)
       if (DEBUG_LEXICON_SCORE) {
-        log.info("Lexicon.score " + wordIndex.get(iTW.word) + "/" + tagIndex.get(iTW.tag) + " as known word.");
+        System.err.println("Lexicon.score " + wordIndex.get(iTW.word) + "/" + tagIndex.get(iTW.tag) + " as known word.");
       }
 
       // c_TW = Math.sqrt(c_TW); [cdm: funny math scaling? dunno who played with this]
@@ -591,14 +587,14 @@ public class BaseLexicon implements Lexicon  {
       double p_T_U;
       if (useSignatureForKnownSmoothing) { // only works for English currently
         p_T_U = getUnknownWordModel().scoreProbTagGivenWordSignature(iTW, loc, smooth[0], word);
-        if (DEBUG_LEXICON_SCORE) log.info("With useSignatureForKnownSmoothing, P(T|U) is " + p_T_U + " rather than " + (c_Tunseen / totalUnseen));
+        if (DEBUG_LEXICON_SCORE) System.err.println("With useSignatureForKnownSmoothing, P(T|U) is " + p_T_U + " rather than " + (c_Tunseen / totalUnseen));
       } else {
         p_T_U = c_Tunseen / totalUnseen;
       }
       double pb_T_W; // always set below
 
       if (DEBUG_LEXICON_SCORE) {
-        log.info("c_W is " + c_W  + " mle = " + (c_TW/c_W)+ " smoothInUnknownsThresh is " +
+        System.err.println("c_W is " + c_W  + " mle = " + (c_TW/c_W)+ " smoothInUnknownsThresh is " +
                 smoothInUnknownsThreshold + " base p_T_U is " + c_Tunseen + "/" + totalUnseen + " = " + p_T_U);
       }
       if (c_W > smoothInUnknownsThreshold && c_TW > 0.0 && c_W > 0.0) {
@@ -627,7 +623,7 @@ public class BaseLexicon implements Lexicon  {
           }
         }
         if (DEBUG_LEXICON_SCORE) {
-          log.info("c_TW = " + c_TW + " c_W = " + c_W +
+          System.err.println("c_TW = " + c_TW + " c_W = " + c_W +
                              " p_T_U = " + p_T_U);
         }
         // double pb_T_W = (c_TW+smooth[1]*x_TW)/(c_W+smooth[1]*x_W);
@@ -704,7 +700,7 @@ public class BaseLexicon implements Lexicon  {
         double score = 0.0;
         // score = scoreAll(trees);
         if (testOptions.verbose) {
-          log.info("Tuning lexicon: s0 " + smooth[0] +
+          System.err.println("Tuning lexicon: s0 " + smooth[0] +
                              " s1 " + smooth[1] + " is " + score);
         }
         if (score > bestScore) {
@@ -724,7 +720,7 @@ public class BaseLexicon implements Lexicon  {
       smooth[0] = testOptions.unseenSmooth;
     }
     if (testOptions.verbose) {
-      log.info("Tuning selected smoothUnseen " + smooth[0] + " smoothSeen " + smooth[1]
+      System.err.println("Tuning selected smoothUnseen " + smooth[0] + " smoothSeen " + smooth[1]
                          + " at " + bestScore);
     }
   }
@@ -819,9 +815,9 @@ public class BaseLexicon implements Lexicon  {
     if (knownTypes.size() != 0) {
       System.err.printf("|intersect|: %d%n", knownTypes.size());
       for (String word : knownTypes) {
-        log.info(word + " ");
+        System.err.print(word + " ");
       }
-      log.info();
+      System.err.println();
     }
   }
 
@@ -959,7 +955,7 @@ public class BaseLexicon implements Lexicon  {
    */
   public static void main(String[] args) {
     if (args.length < 3) {
-      log.info("java BaseLexicon treebankPath fileRange unknownWordModel words*");
+      System.err.println("java BaseLexicon treebankPath fileRange unknownWordModel words*");
       return;
     }
     System.out.print("Training BaseLexicon from " + args[0] + ' ' + args[1] + " ... ");

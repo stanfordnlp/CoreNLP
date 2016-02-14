@@ -1,5 +1,4 @@
-package edu.stanford.nlp.optimization; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.optimization;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.util.Timing;
@@ -39,10 +38,7 @@ import edu.stanford.nlp.util.Pair;
  * @version 1.0
  * @since 1.0
  */
-public abstract class StochasticMinimizer<T extends Function> implements Minimizer<T>, HasEvaluators  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(StochasticMinimizer.class);
+public abstract class StochasticMinimizer<T extends Function> implements Minimizer<T>, HasEvaluators {
 
   public boolean outputIterationsToFile = false;
   public int outputFrequency = 1000;
@@ -116,7 +112,7 @@ public abstract class StochasticMinimizer<T extends Function> implements Minimiz
         infoFile = new PrintWriter(new FileOutputStream(infoName),true);
       }
       catch (IOException e) {
-        log.info("Caught IOException outputting data to file: " + e.getMessage());
+        System.err.println("Caught IOException outputting data to file: " + e.getMessage());
         System.exit(1);
       }
     }
@@ -164,8 +160,8 @@ public abstract class StochasticMinimizer<T extends Function> implements Minimiz
 
       ps.set(cur.first() );
 
-      log.info("");
-      log.info("About to test with batch size:  " + bSize +
+      System.err.println("");
+      System.err.println("About to test with batch size:  " + bSize +
               "  gain: "  + gain + " and  " +
               ps.toString() + " set to  " + cur.first());
 
@@ -200,23 +196,23 @@ public abstract class StochasticMinimizer<T extends Function> implements Minimiz
 
       res.add(new Pair<>(cur.first(), cur.second()));
 
-      log.info("");
-      log.info("Final value is: " + nf.format(cur.second()));
-      log.info("Optimal so far using " + ps.toString() + " is: "+ best.first() );
+      System.err.println("");
+      System.err.println("Final value is: " + nf.format(cur.second()));
+      System.err.println("Optimal so far using " + ps.toString() + " is: "+ best.first() );
     } while(toContinue);
 
 
     //output the results to screen.
-    log.info("-------------");
-    log.info(" RESULTS          ");
-    log.info(ps.getClass().toString());
-    log.info("-------------");
-    log.info("  val    ,    function after " + msPerTest + " ms");
+    System.err.println("-------------");
+    System.err.println(" RESULTS          ");
+    System.err.println(ps.getClass().toString());
+    System.err.println("-------------");
+    System.err.println("  val    ,    function after " + msPerTest + " ms");
     for (Pair<Double, Double> re : res) {
-      log.info(re.first() + "    ,    " + re.second());
+      System.err.println(re.first() + "    ,    " + re.second());
     }
-    log.info("");
-    log.info("");
+    System.err.println("");
+    System.err.println("");
 
     return best.first();
 
@@ -272,8 +268,8 @@ public abstract class StochasticMinimizer<T extends Function> implements Minimiz
 
     do {
       System.arraycopy(initial, 0, xTest, 0, initial.length);
-      log.info("");
-      log.info("Testing with batch size:  " + b );
+      System.err.println("");
+      System.err.println("Testing with batch size:  " + b );
       bSize = b;
       shutUp();
       this.minimize(function, 1e-5, xTest);
@@ -291,9 +287,9 @@ public abstract class StochasticMinimizer<T extends Function> implements Minimiz
         toContinue = false;
       }
 
-      log.info("");
-      log.info("Final value is: " + nf.format(result));
-      log.info("Optimal so far is:  batch size: " + bOpt );
+      System.err.println("");
+      System.err.println("Final value is: " + nf.format(result));
+      System.err.println("Optimal so far is:  batch size: " + bOpt );
     } while (toContinue);
 
     return bOpt;
@@ -315,8 +311,8 @@ public abstract class StochasticMinimizer<T extends Function> implements Minimiz
         System.arraycopy(initial, 0, xtest, 0, initial.length);
         bSize = batchSizes.get(b);
         gain = gains.get(g);
-        log.info("");
-        log.info("Testing with batch size: " + bSize + "    gain:  " + nf.format(gain) );
+        System.err.println("");
+        System.err.println("Testing with batch size: " + bSize + "    gain:  " + nf.format(gain) );
         this.quiet = true;
         this.minimize(function, 1e-100, xtest);
         results[b][g] = function.valueAt(xtest);
@@ -327,9 +323,9 @@ public abstract class StochasticMinimizer<T extends Function> implements Minimiz
           gOpt = gain;
         }
 
-        log.info("");
-        log.info("Final value is: " + nf.format(results[b][g]));
-        log.info("Optimal so far is:  batch size: " + bOpt + "   gain:  " + nf.format(gOpt) );
+        System.err.println("");
+        System.err.println("Final value is: " + nf.format(results[b][g]));
+        System.err.println("Optimal so far is:  batch size: " + bOpt + "   gain:  " + nf.format(gOpt) );
 
       }
     }
@@ -474,13 +470,13 @@ public abstract class StochasticMinimizer<T extends Function> implements Minimiz
         say(" "+dfunction.lastValue());
 
         if (quiet) {
-          log.info(".");
+          System.err.print(".");
         }else{
           sayln("");
         }
 
       }catch(ArrayMath.InvalidElementException e){
-        log.info(e.toString());
+        System.err.println(e.toString());
         for(int i=0;i<x.length;i++){ x[i]=Double.NaN; }
         break;
       }
@@ -498,7 +494,7 @@ public abstract class StochasticMinimizer<T extends Function> implements Minimiz
 
       infoFile.close();
       file.close();
-      log.info("Output Files Closed");
+      System.err.println("Output Files Closed");
       //System.exit(1);
     }
 
@@ -514,13 +510,13 @@ public abstract class StochasticMinimizer<T extends Function> implements Minimiz
 
   protected void sayln(String s) {
     if (!quiet) {
-      log.info(s);
+      System.err.println(s);
     }
   }
 
   protected void say(String s) {
     if (!quiet) {
-      log.info(s);
+      System.err.print(s);
     }
   }
 

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.time.suservlet; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.time.suservlet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,10 +14,7 @@ import edu.stanford.nlp.time.HeidelTimeAnnotator;
 import edu.stanford.nlp.time.TimeAnnotator;
 import edu.stanford.nlp.time.TimeAnnotations;
 
-public class SUTimePipeline  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SUTimePipeline.class);
+public class SUTimePipeline {
   final StanfordCoreNLP pipeline;
 
   public SUTimePipeline() {
@@ -74,7 +70,7 @@ public class SUTimePipeline  {
 
   public Annotation process(String sentence, String dateString, Annotator timeAnnotator)
   {
-    log.info("Processing text \"" + sentence + "\" with dateString = " + dateString);
+    System.err.println("Processing text \"" + sentence + "\" with dateString = " + dateString);
     Annotation anno = new Annotation(sentence);
     if (dateString != null && !dateString.equals("")) {
       anno.set(CoreAnnotations.DocDateAnnotation.class, dateString);

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import java.util.*;
 
@@ -23,10 +22,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
  *
  * @author Pi-Chuan Chang
  */
-public class ChineseSegmenterAnnotator implements Annotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseSegmenterAnnotator.class);
+public class ChineseSegmenterAnnotator implements Annotator {
 
   private AbstractSequenceClassifier<?> segmenter;
   private final boolean VERBOSE;
@@ -87,7 +83,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
   private void loadModel(String segLoc) {
     // don't write very much, because the CRFClassifier already reports loading
     if (VERBOSE) {
-      log.info("Loading segmentation model ... ");
+      System.err.print("Loading segmentation model ... ");
     }
     segmenter = CRFClassifier.getClassifierNoExceptions(segLoc);
   }
@@ -95,7 +91,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
   private void loadModel(String segLoc, Properties props) {
     // don't write very much, because the CRFClassifier already reports loading
     if (VERBOSE) {
-      log.info("Loading Segmentation Model ... ");
+      System.err.print("Loading Segmentation Model ... ");
     }
     try {
       segmenter = CRFClassifier.getClassifier(segLoc, props);
@@ -109,7 +105,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
   @Override
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
-      log.info("Adding Segmentation annotation ... ");
+      System.err.print("Adding Segmentation annotation ... ");
     }
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
     if (sentences != null) {
@@ -172,9 +168,9 @@ public class ChineseSegmenterAnnotator implements Annotator  {
 
     List<String> words = segmenter.segmentString(text);
     if (VERBOSE) {
-      log.info(text);
-      log.info("--->");
-      log.info(words);
+      System.err.println(text);
+      System.err.println("--->");
+      System.err.println(words);
     }
 
     int pos = 0;

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.trees.CompositeTreeTransformer;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
@@ -24,10 +23,7 @@ import java.util.*;
  * @author Christopher Manning
  * @author John Bauer
  */
-public class Options implements Serializable  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Options.class);
+public class Options implements Serializable {
 
   public Options() {
     this(new EnglishTreebankParserParams());
@@ -139,7 +135,7 @@ public class Options implements Serializable  {
       j = tlpParams.setOptionFlag(flags, i);
     }
     if (j == i) {
-      log.info("WARNING! lexparser.Options: Unknown option ignored: " + flags[i]);
+      System.err.println("WARNING! lexparser.Options: Unknown option ignored: " + flags[i]);
       j++;
     }
     return j;
@@ -556,7 +552,7 @@ public class Options implements Serializable  {
       dcTags = false;
       String[] delSplit = { "-deleteSplitters", "VP^NP,VP^VP,VP^SINV,VP^SQ" };
       if (this.setOptionFlag(delSplit, 0) != 2) {
-        log.info("Error processing deleteSplitters");
+        System.err.println("Error processing deleteSplitters");
       }
       // don't increment i so it gets language specific stuff as well
     } else if (args[i].equalsIgnoreCase("-linguisticPCFG")) {
@@ -1017,7 +1013,7 @@ public class Options implements Serializable  {
         String key = line.substring(0, idx);
         String value = line.substring(idx + 1);
         if ( ! key.equalsIgnoreCase(params[i])) {
-          log.info("Yikes!!! Expected " + params[i] + " got " + key);
+          System.err.println("Yikes!!! Expected " + params[i] + " got " + key);
         }
         switch (i) {
         case 0:
@@ -1185,7 +1181,7 @@ public class Options implements Serializable  {
 
   public void display() {
 //    try {
-      log.info("Options parameters:");
+      System.err.println("Options parameters:");
       writeData(new PrintWriter(System.err));
 /*    } catch (IOException e) {
       e.printStackTrace();

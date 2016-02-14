@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie.machinereading; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.machinereading;
 
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
@@ -18,10 +17,7 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
 
-public class EntityExtractorResultsPrinter extends ResultsPrinter  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(EntityExtractorResultsPrinter.class);
+public class EntityExtractorResultsPrinter extends ResultsPrinter {
 
 	/** Contains a set of labels that should be excluded from scoring */
 	private Set<String> excludedClasses;
@@ -66,8 +62,8 @@ public class EntityExtractorResultsPrinter extends ResultsPrinter  {
 			String goldText = goldSent.get(TextAnnotation.class);
 
 			if (verbose) {
-			  log.info("SCORING THE FOLLOWING SENTENCE:");
-				log.info(sysSent.get(CoreAnnotations.TokensAnnotation.class));
+			  System.err.println("SCORING THE FOLLOWING SENTENCE:");
+				System.err.println(sysSent.get(CoreAnnotations.TokensAnnotation.class));
 			}
 
 			HashSet<String> matchedGolds = new HashSet<>();
@@ -95,21 +91,21 @@ public class EntityExtractorResultsPrinter extends ResultsPrinter  {
 					continue;
 				predicted.incrementCount(label);
 				if (verbose)
-					log.info("COMPARING PREDICTED MENTION: " + m);
+					System.err.println("COMPARING PREDICTED MENTION: " + m);
 
 				boolean found = false;
 				for (EntityMention gm : goldEntities) {
 					if (matchedGolds.contains(gm.getObjectId()))
 						continue;
 					if (verbose)
-						log.info("\tagainst: " + gm);
+						System.err.println("\tagainst: " + gm);
 					if(gm.equals(m, useSubTypes)){
-						if (verbose) log.info("\t\t\tMATCH!");
+						if (verbose) System.err.println("\t\t\tMATCH!");
 						found = true;
 						matchedGolds.add(gm.getObjectId());
 						if(verboseInstances){
-						  log.info("TRUE POSITIVE: " + m + " matched " + gm);
-						  log.info("In sentence: " + sysText);
+						  System.err.println("TRUE POSITIVE: " + m + " matched " + gm);
+						  System.err.println("In sentence: " + sysText);
 						}
 						break;
 					}
@@ -118,8 +114,8 @@ public class EntityExtractorResultsPrinter extends ResultsPrinter  {
 				if (found) {
 					correct.incrementCount(label);
 				} else if(verboseInstances){
-				  log.info("FALSE POSITIVE: " + m.toString());
-				  log.info("In sentence: " + sysText);
+				  System.err.println("FALSE POSITIVE: " + m.toString());
+				  System.err.println("In sentence: " + sysText);
 				}
 			}
 			
@@ -128,8 +124,8 @@ public class EntityExtractorResultsPrinter extends ResultsPrinter  {
 					String label = makeLabel(m);
 					if (!matchedGolds.contains(m.getObjectId())
 					    && (excludedClasses == null || !excludedClasses.contains(label))) {
-					  log.info("FALSE NEGATIVE: " + m.toString());
-	          log.info("In sentence: " + goldText);
+					  System.err.println("FALSE NEGATIVE: " + m.toString());
+	          System.err.println("In sentence: " + goldText);
 					}
 				}
 			}

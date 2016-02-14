@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.french.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.french.pipeline;
 
 import java.io.*;
 import java.util.*;
@@ -24,10 +23,7 @@ import edu.stanford.nlp.util.Generics;
  * @author Spence Green
  *
  */
-public final class MWEPreprocessor  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MWEPreprocessor.class);
+public final class MWEPreprocessor {
 
   private static final boolean RESOLVE_DUMMY_TAGS = true;
 
@@ -74,7 +70,7 @@ public final class MWEPreprocessor  {
       else if(preps.contains(word))
         return "P";
 
-      log.info("No POS tag for " + word);
+      System.err.println("No POS tag for " + word);
       return "N";
     }
   }

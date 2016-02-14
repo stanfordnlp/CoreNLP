@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees.tregex.gui; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.tregex.gui;
 
 import java.awt.*;
 import java.awt.geom.Line2D;
@@ -25,10 +24,7 @@ import edu.stanford.nlp.util.IntPair;
  * @author Anna Rafferty
  */
 @SuppressWarnings("serial")
-public class ScrollableTreeJPanel extends TreeJPanel    {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ScrollableTreeJPanel.class);
+public class ScrollableTreeJPanel extends TreeJPanel   {
 
   private int fontSize = 12;
   private Color defaultColor = Color.BLACK;

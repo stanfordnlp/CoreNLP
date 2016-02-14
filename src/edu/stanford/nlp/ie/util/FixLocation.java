@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie.util; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.util;
 
 import java.util.*;
 import java.io.*;
@@ -13,10 +12,7 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author jrfinkel
  */
-public class FixLocation  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(FixLocation.class);
+public class FixLocation {
 
   public static final BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
@@ -27,13 +23,13 @@ public class FixLocation  {
 
   public static void main(String[] args) throws Exception {
     if (args.length < 1) {
-      log.info("Input filename?");
+      System.err.println("Input filename?");
       inputFilename = in.readLine();
     } else {
       inputFilename = args[0];
     }
     if (args.length < 2) {
-      log.info("Output filename?");
+      System.err.println("Output filename?");
       outputFilename = in.readLine();
     } else {
       outputFilename = args[1];
@@ -114,11 +110,11 @@ public class FixLocation  {
     String ans = (answers == null) ? "": answers.readLine();
     String loc = pre+","+post+" ?";
 
-    log.info(loc);
+    System.err.println(loc);
 
     if (ans.equals(loc)) {
       String response = answers.readLine();
-      log.info(response);
+      System.err.println(response);
       if (ans.equalsIgnoreCase("Y")) {
         cols[pos][1] = "LOCATION";
       }
@@ -133,7 +129,7 @@ public class FixLocation  {
         }
       } else if (ans.equalsIgnoreCase("Y")) {
         cols[pos][1] = "LOCATION";
-        log.info("Y");
+        System.err.println("Y");
       }
     }
   }

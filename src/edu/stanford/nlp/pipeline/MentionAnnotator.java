@@ -1,5 +1,4 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import java.io.IOException;
 import java.util.*;
@@ -35,10 +34,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
  * @author Jason Bolton
  */
 
-public class MentionAnnotator extends TextAnnotationCreator implements Annotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MentionAnnotator.class);
+public class MentionAnnotator extends TextAnnotationCreator implements Annotator {
 
   HeadFinder headFinder;
   CorefMentionFinder md;
@@ -57,7 +53,7 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
       headFinder = getHeadFinder(props);
       //System.out.println("got head finder");
       md = getMentionFinder(props, headFinder);
-      log.info("Using mention detector type: "+mdName);
+      System.err.println("Using mention detector type: "+mdName);
       mentionAnnotatorRequirements.addAll(Arrays.asList(
           CoreAnnotations.TokensAnnotation.class,
           CoreAnnotations.SentencesAnnotation.class,
@@ -73,7 +69,7 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
 
       ));
     } catch (Exception e) {
-      log.info("Error with building coref mention annotator!");
+      System.err.println("Error with building coref mention annotator!");
     }
   }
 

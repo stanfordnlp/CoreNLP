@@ -24,8 +24,7 @@
 //    Support/Questions: java-nlp-user@lists.stanford.edu
 //    Licensing: java-nlp-support@lists.stanford.edu
 
-package edu.stanford.nlp.ie.crf; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.optimization.*;
@@ -41,10 +40,7 @@ import java.util.zip.GZIPInputStream;
  *
  * @author Mengqiu Wang
  */
-public class CRFClassifierFloat<IN extends CoreMap> extends CRFClassifier<IN>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CRFClassifierFloat.class);
+public class CRFClassifierFloat<IN extends CoreMap> extends CRFClassifier<IN> {
 
   protected CRFClassifierFloat() {
     super(new SeqClassifierFlags());
@@ -83,7 +79,7 @@ public class CRFClassifierFloat<IN extends CoreMap> extends CRFClassifier<IN>  {
       initialWeights = func.initial();
     } else {
       try {
-        log.info("Reading initial weights from file " + flags.initialWeights);
+        System.err.println("Reading initial weights from file " + flags.initialWeights);
         DataInputStream dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(
             flags.initialWeights))));
         initialWeights = ConvertByteArray.readFloatArr(dis);
@@ -91,7 +87,7 @@ public class CRFClassifierFloat<IN extends CoreMap> extends CRFClassifier<IN>  {
         throw new RuntimeException("Could not read from float initial weight file " + flags.initialWeights);
       }
     }
-    log.info("numWeights: " + initialWeights.length);
+    System.err.println("numWeights: " + initialWeights.length);
     float[] weights = minimizer.minimize(func, (float) flags.tolerance, initialWeights);
     return ArrayMath.floatArrayToDoubleArray(weights);
   }

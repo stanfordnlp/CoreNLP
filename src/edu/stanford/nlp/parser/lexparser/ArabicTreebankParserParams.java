@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.util.*;
 import java.util.regex.*;
@@ -29,10 +28,7 @@ import edu.stanford.nlp.util.Pair;
  * @author Christopher Manning
  * @author Spence Green
  */
-public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ArabicTreebankParserParams.class);
+public class ArabicTreebankParserParams extends AbstractTreebankParserParams {
 
   private static final long serialVersionUID = 8853426784197984653L;
 
@@ -413,7 +409,7 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
     } catch (TregexParseException e) {
       int nth = annotationPatterns.size() + 1;
       String nthStr = (nth == 1) ? "1st": ((nth == 2) ? "2nd": nth + "th");
-      log.info("Parse exception on " + nthStr + " annotation pattern initialization:" + e);
+      System.err.println("Parse exception on " + nthStr + " annotation pattern initialization:" + e);
       throw e;
     }
   }
@@ -496,7 +492,7 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
       try {
         this.pattern = Pattern.compile(regex);
       } catch (PatternSyntaxException pse) {
-        log.info("Bad pattern: " + regex);
+        System.err.println("Bad pattern: " + regex);
         pattern = null;
         throw new IllegalArgumentException(pse);
       }
@@ -727,7 +723,7 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
 
   @Override
   public void display() {
-    log.info(optionsString.toString());
+    System.err.println(optionsString.toString());
   }
 
   /** Some options for setOptionFlag:
@@ -745,7 +741,7 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
    */
   @Override
   public int setOptionFlag(String[] args, int i) {
-    //log.info("Setting option flag: "  + args[i]);
+    //System.err.println("Setting option flag: "  + args[i]);
 
     //lang. specific options
     boolean didSomething = false;
@@ -805,8 +801,8 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
         optionsString.append("HeadFinder: " + args[i + 1] + "\n");
 
       } catch (Exception e) {
-        log.info(e);
-        log.info(this.getClass().getName() +
+        System.err.println(e);
+        System.err.println(this.getClass().getName() +
                            ": Could not load head finder " + args[i + 1]);
       }
       i++;
@@ -837,10 +833,10 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams  {
     //        TokenizerFactory<Word> aTF = WordSegmentingTokenizer.factory(aSeg);
     //        ((ArabicTreebankLanguagePack) treebankLanguagePack()).setTokenizerFactory(aTF);
     //      } catch (RuntimeIOException ex) {
-    //        log.info("Couldn't load ArabicSegmenter " + modelFile);
+    //        System.err.println("Couldn't load ArabicSegmenter " + modelFile);
     //        ex.printStackTrace();
     //      } catch (Exception e) {
-    //        log.info("Couldn't instantiate segmenter: edu.stanford.nlp.wordseg.ArabicSegmenter");
+    //        System.err.println("Couldn't instantiate segmenter: edu.stanford.nlp.wordseg.ArabicSegmenter");
     //        e.printStackTrace();
     //      }
     //      i++; // 2 args

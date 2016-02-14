@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.shiftreduce.demo; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.shiftreduce.demo;
 
 import java.io.StringReader;
 import java.util.List;
@@ -18,10 +17,7 @@ import edu.stanford.nlp.trees.Tree;
  *
  * @author John Bauer
  */
-public class ShiftReduceDemo  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ShiftReduceDemo.class);
+public class ShiftReduceDemo {
   public static void main(String[] args) {
     String modelPath = "edu/stanford/nlp/models/srparser/englishSR.ser.gz";
     String taggerPath = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger";
@@ -50,7 +46,7 @@ public class ShiftReduceDemo  {
     for (List<HasWord> sentence : tokenizer) {
       List<TaggedWord> tagged = tagger.tagSentence(sentence);
       Tree tree = model.apply(tagged);
-      log.info(tree);
+      System.err.println(tree);
     }
   }
 }

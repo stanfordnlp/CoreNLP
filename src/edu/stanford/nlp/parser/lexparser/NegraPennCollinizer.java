@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,10 +11,7 @@ import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.TreeTransformer;
 
 
-public class NegraPennCollinizer implements TreeTransformer {
-
-  /** A logger for this class */
-  Redwood.RedwoodChannels log = Redwood.channels(NegraPennCollinizer.class);
+class NegraPennCollinizer implements TreeTransformer {
 
   private TreebankLangParserParams tlpp; 
   private final boolean deletePunct;
@@ -49,7 +45,7 @@ public class NegraPennCollinizer implements TreeTransformer {
     }
     // TEMPORARY: eliminate the TOPP constituent
     if (tree.children()[0].label().value().equals("TOPP")) {
-      log.info("Found a TOPP");
+      System.err.println("Found a TOPP");
       tree.setChildren(tree.children()[0].children());
     }
 

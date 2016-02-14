@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees.international.arabic; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.international.arabic;
 
 import edu.stanford.nlp.trees.PennTreebankTokenizer;
 import edu.stanford.nlp.process.Tokenizer;
@@ -19,10 +18,7 @@ import java.io.Reader;
  * @author Christopher Manning
  * @author Spence Green
  */
-public class ArabicTreebankTokenizer extends PennTreebankTokenizer  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ArabicTreebankTokenizer.class);
+public class ArabicTreebankTokenizer extends PennTreebankTokenizer {
 
   public ArabicTreebankTokenizer(Reader r) {
     super(r);

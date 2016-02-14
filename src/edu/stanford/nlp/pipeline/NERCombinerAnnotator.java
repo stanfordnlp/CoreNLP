@@ -1,5 +1,4 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
@@ -30,10 +29,7 @@ import java.util.*;
  * @author Jenny Finkel
  * @author Mihai Surdeanu (modified it to work with the new NERClassifierCombiner)
  */
-public class NERCombinerAnnotator extends SentenceAnnotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(NERCombinerAnnotator.class);
+public class NERCombinerAnnotator extends SentenceAnnotator {
 
   private final NERClassifierCombiner ner;
 
@@ -95,14 +91,14 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   @Override
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
-      log.info("Adding NER Combiner annotation ... ");
+      System.err.print("Adding NER Combiner annotation ... ");
     }
 
     super.annotate(annotation);
     this.ner.finalizeAnnotation(annotation);
 
     if (VERBOSE) {
-      log.info("done.");
+      System.err.println("done.");
     }
   }
 
@@ -120,25 +116,25 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     }
     if (VERBOSE) {
       boolean first = true;
-      log.info("NERCombinerAnnotator direct output: [");
+      System.err.print("NERCombinerAnnotator direct output: [");
       for (CoreLabel w : output) {
-        if (first) { first = false; } else { log.info(", "); }
-        log.info(w.toString());
+        if (first) { first = false; } else { System.err.print(", "); }
+        System.err.print(w.toString());
       }
     }
     if (output != null) {
       if (VERBOSE) {
         boolean first = true;
-        log.info("NERCombinerAnnotator direct output: [");
+        System.err.print("NERCombinerAnnotator direct output: [");
         for (CoreLabel w : output) {
           if (first) {
             first = false;
           } else {
-            log.info(", ");
+            System.err.print(", ");
           }
-          log.info(w.toString());
+          System.err.print(w.toString());
         }
-        log.info(']');
+        System.err.println(']');
       }
 
       for (int i = 0; i < tokens.size(); ++i) {
@@ -152,16 +148,16 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
 
       if (VERBOSE) {
         boolean first = true;
-        log.info("NERCombinerAnnotator output: [");
+        System.err.print("NERCombinerAnnotator output: [");
         for (CoreLabel w : tokens) {
           if (first) {
             first = false;
           } else {
-            log.info(", ");
+            System.err.print(", ");
           }
-          log.info(w.toShorterString("Word", "NamedEntityTag", "NormalizedNamedEntityTag"));
+          System.err.print(w.toShorterString("Word", "NamedEntityTag", "NormalizedNamedEntityTag"));
         }
-        log.info(']');
+        System.err.println(']');
       }
     } else {
       for (CoreLabel token : tokens) {

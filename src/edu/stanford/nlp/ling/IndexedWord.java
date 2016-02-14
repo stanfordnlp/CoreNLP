@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ling; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ling;
 
 import java.util.Set;
 
@@ -30,10 +29,7 @@ import edu.stanford.nlp.util.TypesafeMap;
  * @author John Bauer
  * @author Sonal Gupta
  */
-public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(IndexedWord.class);
+public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
 
   private static final long serialVersionUID = 3739633991145239829L;
 
@@ -437,7 +433,7 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
       sensible = true;
     }
     if ( ! sensible) {
-      log.info("WARNING!!!  You have hashed an IndexedWord with no docID, sentIndex or wordIndex. You will almost certainly lose");
+      System.err.println("WARNING!!!  You have hashed an IndexedWord with no docID, sentIndex or wordIndex. You will almost certainly lose");
     }
     cachedHashCode = result;
     return result;

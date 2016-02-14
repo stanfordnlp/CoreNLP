@@ -1,5 +1,4 @@
-package edu.stanford.nlp.tagger.maxent.documentation; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.tagger.maxent.documentation;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -24,16 +23,13 @@ import edu.stanford.nlp.tagger.maxent.MaxentTagger;
  *
  *  @author Christopher Manning
  */
-public class TaggerDemo2  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TaggerDemo2.class);
+class TaggerDemo2 {
 
   private TaggerDemo2() {}
 
   public static void main(String[] args) throws Exception {
     if (args.length != 2) {
-      log.info("usage: java TaggerDemo2 modelFile fileToTag");
+      System.err.println("usage: java TaggerDemo2 modelFile fileToTag");
       return;
     }
     MaxentTagger tagger = new MaxentTagger(args[0]);

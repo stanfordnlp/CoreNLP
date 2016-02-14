@@ -1,5 +1,4 @@
-package edu.stanford.nlp.sentiment; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sentiment;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -13,10 +12,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 
-public class SentimentTraining  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SentimentTraining.class);
+public class SentimentTraining {
 
   private static final NumberFormat NF = new DecimalFormat("0.00");
   private static final NumberFormat FILENAME = new DecimalFormat("0000");
@@ -32,7 +28,7 @@ public class SentimentTraining  {
     // TODO: do we want to iterate multiple times per batch?
     double[] gradf = gcFunc.derivativeAt(theta);
     double currCost = gcFunc.valueAt(theta);
-    log.info("batch cost: " + currCost);
+    System.err.println("batch cost: " + currCost);
     for (int feature = 0; feature<gradf.length; feature++ ) {
       sumGradSquare[feature] = sumGradSquare[feature] + gradf[feature]*gradf[feature];
       theta[feature] = theta[feature] - (model.op.trainOptions.learningRate * gradf[feature]/(Math.sqrt(sumGradSquare[feature])+eps));
@@ -52,14 +48,14 @@ public class SentimentTraining  {
     Arrays.fill(sumGradSquare, model.op.trainOptions.initialAdagradWeight);
 
     int numBatches = trainingTrees.size() / model.op.trainOptions.batchSize + 1;
-    log.info("Training on " + trainingTrees.size() + " trees in " + numBatches + " batches");
-    log.info("Times through each training batch: " + model.op.trainOptions.epochs);
+    System.err.println("Training on " + trainingTrees.size() + " trees in " + numBatches + " batches");
+    System.err.println("Times through each training batch: " + model.op.trainOptions.epochs);
     for (int epoch = 0; epoch < model.op.trainOptions.epochs; ++epoch) {
-      log.info("======================================");
-      log.info("Starting epoch " + epoch);
+      System.err.println("======================================");
+      System.err.println("Starting epoch " + epoch);
       if (epoch > 0 && model.op.trainOptions.adagradResetFrequency > 0 &&
           (epoch % model.op.trainOptions.adagradResetFrequency == 0)) {
-        log.info("Resetting adagrad weights to " + model.op.trainOptions.initialAdagradWeight);
+        System.err.println("Resetting adagrad weights to " + model.op.trainOptions.initialAdagradWeight);
         Arrays.fill(sumGradSquare, model.op.trainOptions.initialAdagradWeight);
       }
 
@@ -68,8 +64,8 @@ public class SentimentTraining  {
         Collections.shuffle(shuffledSentences, model.rand);
       }
       for (int batch = 0; batch < numBatches; ++batch) {
-        log.info("======================================");
-        log.info("Epoch " + epoch + " batch " + batch);
+        System.err.println("======================================");
+        System.err.println("Epoch " + epoch + " batch " + batch);
 
         // Each batch will be of the specified batch size, except the
         // last batch will include any leftover trees at the end of
@@ -83,7 +79,7 @@ public class SentimentTraining  {
         executeOneTrainingBatch(model, shuffledSentences.subList(startTree, endTree), sumGradSquare);
 
         long totalElapsed = timing.report();
-        log.info("Finished epoch " + epoch + " batch " + batch + "; total training time " + totalElapsed + " ms");
+        System.err.println("Finished epoch " + epoch + " batch " + batch + "; total training time " + totalElapsed + " ms");
 
         if (maxTrainTimeMillis > 0 && totalElapsed > maxTrainTimeMillis) {
           // no need to debug output, we're done now
@@ -118,7 +114,7 @@ public class SentimentTraining  {
       long totalElapsed = timing.report();
 
       if (maxTrainTimeMillis > 0 && totalElapsed > maxTrainTimeMillis) {
-        log.info("Max training time exceeded, exiting");
+        System.err.println("Max training time exceeded, exiting");
         break;
       }
     }
@@ -182,19 +178,19 @@ public class SentimentTraining  {
 
     // read in the trees
     List<Tree> trainingTrees = SentimentUtils.readTreesWithGoldLabels(trainPath);
-    log.info("Read in " + trainingTrees.size() + " training trees");
+    System.err.println("Read in " + trainingTrees.size() + " training trees");
     if (filterUnknown) {
       trainingTrees = SentimentUtils.filterUnknownRoots(trainingTrees);
-      log.info("Filtered training trees: " + trainingTrees.size());
+      System.err.println("Filtered training trees: " + trainingTrees.size());
     }
 
     List<Tree> devTrees = null;
     if (devPath != null) {
       devTrees = SentimentUtils.readTreesWithGoldLabels(devPath);
-      log.info("Read in " + devTrees.size() + " dev trees");
+      System.err.println("Read in " + devTrees.size() + " dev trees");
       if (filterUnknown) {
         devTrees = SentimentUtils.filterUnknownRoots(devTrees);
-        log.info("Filtered dev trees: " + devTrees.size());
+        System.err.println("Filtered dev trees: " + devTrees.size());
       }
     }
 
@@ -206,7 +202,7 @@ public class SentimentTraining  {
     // we will have to perform this step
 
     // build an uninitialized SentimentModel from the binary productions
-    log.info("Sentiment model options:\n" + op);
+    System.err.println("Sentiment model options:\n" + op);
     SentimentModel model = new SentimentModel(op, trainingTrees);
 
     if (op.trainOptions.initialMatrixLogPath != null) {

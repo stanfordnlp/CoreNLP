@@ -1,5 +1,4 @@
-package edu.stanford.nlp.time; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.time;
 
 import edu.stanford.nlp.ling.tokensregex.types.Expressions;
 import edu.stanford.nlp.util.*;
@@ -33,10 +32,7 @@ import java.util.regex.Pattern;
  *
  * @author Angel Chang
  */
-public class SUTime  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SUTime.class);
+public class SUTime {
 
   // TODO:
   // 1. Decrease dependency on JodaTime...
@@ -2916,13 +2912,13 @@ public class SUTime  {
         resolved = this;
       } else {
         resolved = new PartialTime(this, p);
-        // log.info("Resolved " + this + " to " + resolved + ", ref=" + ref);
+        // System.err.println("Resolved " + this + " to " + resolved + ", ref=" + ref);
       }
 
       Duration resolvedGranularity = resolved.getGranularity();
       Duration refGranularity = ref.getGranularity();
-      // log.info("refGranularity is " + refGranularity);
-      // log.info("resolvedGranularity is " + resolvedGranularity);
+      // System.err.println("refGranularity is " + refGranularity);
+      // System.err.println("resolvedGranularity is " + resolvedGranularity);
       if (resolvedGranularity != null && refGranularity != null && resolvedGranularity.compareTo(refGranularity) >= 0) {
         if ((flags & RESOLVE_TO_PAST) != 0) {
           if (resolved.compareTo(ref) > 0) {
@@ -2931,7 +2927,7 @@ public class SUTime  {
               resolved = (Time) t.resolve(ref, 0);
             }
           }
-          // log.info("Resolved " + this + " to past " + resolved + ", ref=" + ref);
+          // System.err.println("Resolved " + this + " to past " + resolved + ", ref=" + ref);
         } else if ((flags & RESOLVE_TO_FUTURE) != 0) {
           if (resolved.compareTo(ref) < 0) {
             Time t = (Time) this.next();
@@ -2939,7 +2935,7 @@ public class SUTime  {
               resolved = (Time) t.resolve(ref, 0);
             }
           }
-          // log.info("Resolved " + this + " to future " + resolved + ", ref=" + ref);
+          // System.err.println("Resolved " + this + " to future " + resolved + ", ref=" + ref);
         } else if ((flags & RESOLVE_TO_CLOSEST) != 0) {
           if (resolved.compareTo(ref) > 0) {
             Time t = (Time) this.prev();
@@ -2954,7 +2950,7 @@ public class SUTime  {
               resolved = Time.closest(ref, resolved, resolved2);
             }
           }
-          // log.info("Resolved " + this + " to closest " + resolved + ", ref=" + ref);
+          // System.err.println("Resolved " + this + " to closest " + resolved + ", ref=" + ref);
         }
       }
 

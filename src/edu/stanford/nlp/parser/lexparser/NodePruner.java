@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.util.*;
 
@@ -14,10 +13,7 @@ import edu.stanford.nlp.ling.Label;
 /** Gets rid of extra NP under NP nodes.
  *  @author Dan Klein
  */
-public class NodePruner  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(NodePruner.class);
+class NodePruner {
 
   private final ExhaustivePCFGParser parser;
   private final TreeTransformer debinarizer;
@@ -56,8 +52,8 @@ public class NodePruner  {
         isExtra = false;
       }
       if (isExtra) {
-        log.info("Pruning: " + child.label() + " from " + (childStart + start) + " to " + (childEnd + start));
-        log.info("Was: " + testTree + " vs " + pcfgTree);
+        System.err.println("Pruning: " + child.label() + " from " + (childStart + start) + " to " + (childEnd + start));
+        System.err.println("Was: " + testTree + " vs " + pcfgTree);
         prunedChildren.addAll(child.getChildrenAsList());
       } else {
         prunedChildren.add(child);
