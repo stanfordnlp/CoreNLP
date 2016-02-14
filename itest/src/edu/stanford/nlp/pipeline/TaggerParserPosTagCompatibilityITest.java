@@ -7,6 +7,7 @@ import junit.framework.TestCase;
 
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
+import org.junit.Test;
 
 /**
  * @author Christopher Manning
@@ -61,7 +62,7 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
   private static final String[] germanTaggers = {
     "edu/stanford/nlp/models/pos-tagger/german/german-fast.tagger",
     "edu/stanford/nlp/models/pos-tagger/german/german-fast-caseless.tagger",
-    "edu/stanford/nlp/models/pos-tagger/german/german-fast.tagger",
+    "edu/stanford/nlp/models/pos-tagger/german/german-dewac.tagger",
     "edu/stanford/nlp/models/pos-tagger/german/german-hgc.tagger"
   };
 
@@ -119,6 +120,26 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
     testTagSet3(spanishParsers, spanishTaggers, spanishSrParsers);
   }
 
-  // todo: Add French and Arabic sometime
+
+  private static final String[] frenchTaggers = {
+    "edu/stanford/nlp/models/pos-tagger/french/french.tagger",
+  };
+
+  private static final String[] frenchParsers = {
+    "edu/stanford/nlp/models/lexparser/frenchFactored.ser.gz",
+  };
+
+  private static final String[] frenchSrParsers = {
+    "edu/stanford/nlp/models/srparser/frenchSR.beam.ser.gz",
+    "edu/stanford/nlp/models/srparser/frenchSR.ser.gz",
+  };
+
+  public void testFrenchTagSet() {
+    testTagSet3(frenchParsers, frenchTaggers, frenchSrParsers);
+  }
+
+
+  // todo: Add Arabic sometime
+  // todo: Add nndep parsers sometime
 
 }
