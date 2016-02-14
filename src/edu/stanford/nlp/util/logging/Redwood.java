@@ -1,6 +1,5 @@
 
 package edu.stanford.nlp.util.logging; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -91,7 +90,7 @@ public class Redwood  {
   /**
    * Queue of tasks to be run in various threads
    */
-  private static final Map<Long,Queue<Runnable>> threadedLogQueue = Generics.newHashMap();
+  private static final Map<Long,Queue<Runnable>> threadedLogQueue = new HashMap<>();  // Don't replace with Generics.newHashMap()! Classloader goes haywire
   /**
    * Thread id which currently has control of the Redwood
    */
@@ -606,7 +605,6 @@ public class Redwood  {
     RedwoodConfiguration config = RedwoodConfiguration.minimal();
     try {
       MetaClass.create("org.slf4j.LoggerFactory").createInstance();
-      System.err.println("FOUND SLF4J");
       config = RedwoodConfiguration.slf4j();
     } catch (Exception ignored) { }
     config.apply();
