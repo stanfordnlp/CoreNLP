@@ -33,11 +33,11 @@ import java.util.zip.GZIPOutputStream;
 public class IOUtils  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(IOUtils.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(IOUtils.class);
 
   private static final int SLURP_BUFFER_SIZE = 16384;
 
-  public static final String eolChar = System.getProperty("line.separator");
+  public static final String eolChar = System.lineSeparator();  // todo: Inline
   public static final String defaultEncoding = "utf-8";
 
   private static Redwood.RedwoodChannels logger = Redwood.channels(IOUtils.class);
@@ -331,9 +331,8 @@ public class IOUtils  {
     T obj;
     try {
       Timing timing = new Timing();
-      logger.error(msg + ' ' + path + " ... ");
       obj = IOUtils.readObjectFromURLOrClasspathOrFileSystem(path);
-      timing.done();
+      logger.info(msg + ' ' + path + " ... done [" + timing.toSecondsString() + " sec].");
     } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeIOException(e);
     }
@@ -1674,6 +1673,7 @@ public class IOUtils  {
    * empty, if the file is empty.  If there is an IOException, it is caught
    * and null is returned.  Encoding can also be specified.
    */
+  // todo: This is same as slurpFile (!)
   public static String stringFromFile(String filename, String encoding) {
     try {
       StringBuilder sb = new StringBuilder();
@@ -1730,26 +1730,6 @@ public class IOUtils  {
       e.printStackTrace();
       return null;
     }
-  }
-
-  public static String backupName(String filename) {
-    return backupFile(new File(filename)).toString();
-  }
-
-  public static File backupFile(File file) {
-    int max = 1000;
-    String filename = file.toString();
-    File backup = new File(filename + "~");
-    if (!backup.exists()) { return backup; }
-    for (int i = 1; i <= max; i++) {
-      backup = new File(filename + ".~" + i + ".~");
-      if (!backup.exists()) { return backup; }
-    }
-    return null;
-  }
-
-  public static boolean renameToBackupName(File file) {
-    return file.renameTo(backupFile(file));
   }
 
 
