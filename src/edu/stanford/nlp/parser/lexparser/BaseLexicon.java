@@ -261,7 +261,7 @@ public class BaseLexicon implements Lexicon  {
 
   protected void initRulesWithWord() {
     if (testOptions.verbose || DEBUG_LEXICON) {
-      log.info("\nInitializing lexicon scores ... ");
+      log.info("Initializing lexicon scores ... ");
     }
     // int numWords = words.size()+sigs.size()+1;
     int unkWord = wordIndex.addToIndex(UNKNOWN_WORD);
