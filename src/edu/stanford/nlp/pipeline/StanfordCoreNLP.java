@@ -817,10 +817,10 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   private static void shell(StanfordCoreNLP pipeline) throws IOException {
     String encoding = pipeline.getEncoding();
     BufferedReader r = new BufferedReader(IOUtils.encodedInputStreamReader(System.in, encoding));
-    log.info("Entering interactive shell. Type q RETURN or EOF to quit.");
+    System.err.println("Entering interactive shell. Type q RETURN or EOF to quit.");
     final OutputFormat outputFormat = OutputFormat.valueOf(pipeline.properties.getProperty("outputFormat", "text").toUpperCase());
     while (true) {
-      log.info("NLP> ");
+      System.err.print("NLP> ");
       String line = r.readLine();
       if (line == null || line.equalsIgnoreCase("q")) {
         break;

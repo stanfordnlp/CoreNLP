@@ -494,7 +494,7 @@ public class IOUtils  {
       try {
         in = new GZIPInputStream(in);
       } catch (IOException e) {
-        log.info("Resource or file looks like a gzip file, but is not: " + textFileOrUrl);
+        log.error("Resource or file looks like a gzip file, but is not: " + textFileOrUrl);
       }
     }
 

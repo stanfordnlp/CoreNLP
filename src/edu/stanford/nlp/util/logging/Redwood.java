@@ -605,7 +605,8 @@ public class Redwood  {
   static {
     RedwoodConfiguration config = RedwoodConfiguration.minimal();
     try {
-      MetaClass.create("edu.stanford.nlp.util.logging.SLF4JHandler");
+      MetaClass.create("org.slf4j.LoggerFactory").createInstance();
+      System.err.println("FOUND SLF4J");
       config = RedwoodConfiguration.slf4j();
     } catch (Exception ignored) { }
     config.apply();
