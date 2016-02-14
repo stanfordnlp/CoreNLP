@@ -7,7 +7,6 @@ import junit.framework.TestCase;
 
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
-import org.junit.Test;
 
 /**
  * @author Christopher Manning
