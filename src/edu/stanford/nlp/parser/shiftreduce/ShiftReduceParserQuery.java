@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.shiftreduce;
+package edu.stanford.nlp.parser.shiftreduce; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 import java.io.PrintWriter;
@@ -24,7 +25,10 @@ import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
 
-public class ShiftReduceParserQuery implements ParserQuery {
+public class ShiftReduceParserQuery implements ParserQuery  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ShiftReduceParserQuery.class);
   Debinarizer debinarizer = new Debinarizer(false);
 
   List<? extends HasWord> originalSentence;
@@ -77,9 +81,9 @@ public class ShiftReduceParserQuery implements ParserQuery {
       if (Thread.interrupted()) { // Allow interrupting the parser
         throw new RuntimeInterruptedException();
       }
-      // System.err.println("================================================");
-      // System.err.println("Current beam:");
-      // System.err.println(beam);
+      // log.info("================================================");
+      // log.info("Current beam:");
+      // log.info(beam);
       PriorityQueue<State> oldBeam = beam;
       beam = new PriorityQueue<>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
       State bestState = null;
@@ -88,11 +92,11 @@ public class ShiftReduceParserQuery implements ParserQuery {
           throw new RuntimeInterruptedException();
         }
         Collection<ScoredObject<Integer>> predictedTransitions = parser.model.findHighestScoringTransitions(state, true, maxBeamSize, constraints);
-        // System.err.println("Examining state: " + state);
+        // log.info("Examining state: " + state);
         for (ScoredObject<Integer> predictedTransition : predictedTransitions) {
           Transition transition = parser.model.transitionIndex.get(predictedTransition.object());
           State newState = transition.apply(state, predictedTransition.score());
-          // System.err.println("  Transition: " + transition + " (" + predictedTransition.score() + ")");
+          // log.info("  Transition: " + transition + " (" + predictedTransition.score() + ")");
           if (bestState == null || bestState.score() < newState.score()) {
             bestState = newState;
           }
@@ -152,8 +156,8 @@ public class ShiftReduceParserQuery implements ParserQuery {
   @Override
   public boolean parseAndReport(List<? extends HasWord> sentence, PrintWriter pwErr) {
     boolean success = parse(sentence);
-    //System.err.println(getBestTransitionSequence());
-    //System.err.println(getBestBinarizedParse());
+    //log.info(getBestTransitionSequence());
+    //log.info(getBestBinarizedParse());
     return success;
   }
 

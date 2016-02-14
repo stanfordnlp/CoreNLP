@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees;
+package edu.stanford.nlp.trees; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -22,7 +23,10 @@ import edu.stanford.nlp.util.Generics;
  *
  *  @author Christopher Manning
  */
-public class Dependencies {
+public class Dependencies  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(Dependencies.class);
 
   private Dependencies() {} // only static methods
 
@@ -38,7 +42,7 @@ public class Dependencies {
     @Override
     public boolean test(Dependency<G, D, N> d) {
       /*
-      System.err.println("DRF: Checking " + d + ": hasTag?: " +
+      log.info("DRF: Checking " + d + ": hasTag?: " +
                          (d.dependent() instanceof HasTag) + "; value: " +
                          ((d.dependent() instanceof HasTag)? ((HasTag) d.dependent()).tag(): null));
       */
@@ -68,14 +72,14 @@ public class Dependencies {
     /** @param wrf A filter that rejects punctuation words.
      */
     public DependentPuncWordRejectFilter(Predicate<String> wrf) {
-      // System.err.println("wrf is " + wrf);
+      // log.info("wrf is " + wrf);
       wordRejectFilter = wrf;
     }
 
     @Override
     public boolean test(Dependency<G, D, N> d) {
       /*
-      System.err.println("DRF: Checking " + d + ": hasWord?: " +
+      log.info("DRF: Checking " + d + ": hasWord?: " +
                          (d.dependent() instanceof HasWord) + "; value: " +
                          ((d.dependent() instanceof HasWord)? ((HasWord) d.dependent()).word(): d.dependent().value()));
       */
@@ -89,7 +93,7 @@ public class Dependencies {
       if (word == null) {
         word = d.dependent().value();
       }
-      // System.err.println("Dep: kid is " + ((MapLabel) d.dependent()).toString("value{map}"));
+      // log.info("Dep: kid is " + ((MapLabel) d.dependent()).toString("value{map}"));
       return wordRejectFilter.test(word);
     }
 

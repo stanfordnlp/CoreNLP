@@ -31,7 +31,10 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author Christopher Manning
  * @author Ishita Prasad
  */
-public class TokenizerAnnotator implements Annotator {
+public class TokenizerAnnotator implements Annotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TokenizerAnnotator.class);
 
   private static Redwood.RedwoodChannels logger = Redwood.channels(TokenizerAnnotator.class);
 
@@ -250,7 +253,7 @@ public class TokenizerAnnotator implements Annotator {
   @Override
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
-      System.err.print("Tokenizing ... ");
+      log.info("Tokenizing ... ");
     }
 
     if (annotation.containsKey(CoreAnnotations.TextAnnotation.class)) {
@@ -266,8 +269,8 @@ public class TokenizerAnnotator implements Annotator {
 
       annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
       if (VERBOSE) {
-        System.err.println("done.");
-        System.err.println("Tokens: " + annotation.get(CoreAnnotations.TokensAnnotation.class));
+        log.info("done.");
+        log.info("Tokens: " + annotation.get(CoreAnnotations.TokensAnnotation.class));
       }
     } else {
       throw new RuntimeException("Tokenizer unable to find text in annotation: " + annotation);

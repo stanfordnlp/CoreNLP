@@ -1,4 +1,5 @@
-package edu.stanford.nlp.optimization;
+package edu.stanford.nlp.optimization; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.util.MemoryMonitor;
 
@@ -7,7 +8,10 @@ import edu.stanford.nlp.util.MemoryMonitor;
  *
  * @author Angel Chang
  */
-public class MemoryEvaluator implements Evaluator {
+public class MemoryEvaluator implements Evaluator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(MemoryEvaluator.class);
   private MemoryMonitor memMonitor;
 
   public MemoryEvaluator()
@@ -26,7 +30,7 @@ public class MemoryEvaluator implements Evaluator {
     sb.append(" maxAvailable(KB):").append(memMonitor.getMaxAvailableMemory(false));
     sb.append(" max(KB):").append(memMonitor.getMaxMemory());
     String memString = sb.toString();
-    System.err.println(memString);
+    log.info(memString);
     return 0;
   }
 }

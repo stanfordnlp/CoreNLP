@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.List;
 
@@ -25,7 +26,10 @@ import edu.stanford.nlp.trees.international.hebrew.HebrewTreebankLanguagePack;
  * @author Spence Green
  *
  */
-public class HebrewTreebankParserParams extends AbstractTreebankParserParams {
+public class HebrewTreebankParserParams extends AbstractTreebankParserParams  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(HebrewTreebankParserParams.class);
 
   private static final long serialVersionUID = -3466519995341208619L;
 
@@ -67,7 +71,7 @@ public class HebrewTreebankParserParams extends AbstractTreebankParserParams {
 
   @Override
   public void display() {
-    System.err.println(optionsString.toString());
+    log.info(optionsString.toString());
   }
 
   //TODO Add Reut's rules (from her thesis).

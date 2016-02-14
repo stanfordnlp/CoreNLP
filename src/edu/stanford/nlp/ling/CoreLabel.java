@@ -1,4 +1,5 @@
-package edu.stanford.nlp.ling;
+package edu.stanford.nlp.ling; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -30,7 +31,10 @@ import edu.stanford.nlp.util.Generics;
  * @author dramage
  * @author rafferty
  */
-public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCategory, HasContext {
+public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCategory, HasContext  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CoreLabel.class);
 
   private static final long serialVersionUID = 2L;
 
@@ -186,7 +190,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
         //}
         // unknown key; ignore
         //if (VERBOSE) {
-        //  System.err.println("CORE: CoreLabel.fromAbstractMapLabel: " +
+        //  log.info("CORE: CoreLabel.fromAbstractMapLabel: " +
         //      "Unknown key "+key);
         //}
       } else {

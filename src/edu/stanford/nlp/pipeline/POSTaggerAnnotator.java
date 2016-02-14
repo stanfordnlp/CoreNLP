@@ -1,4 +1,5 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 
@@ -13,7 +14,10 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
  *
  * @author Anna Rafferty
  */
-public class POSTaggerAnnotator implements Annotator {
+public class POSTaggerAnnotator implements Annotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(POSTaggerAnnotator.class);
 
   private final MaxentTagger pos;
 
@@ -138,7 +142,7 @@ public class POSTaggerAnnotator implements Annotator {
       try {
         tagged = pos.tagSentence(tokens, this.reuseTags);
       } catch (OutOfMemoryError e) {
-        System.err.println("WARNING: Tagging of sentence ran out of memory. " +
+        log.info("WARNING: Tagging of sentence ran out of memory. " +
                            "Will ignore and continue: " +
                            SentenceUtils.listToString(tokens));
       }

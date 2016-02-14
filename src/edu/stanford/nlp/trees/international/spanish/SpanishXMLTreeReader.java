@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.international.spanish;
+package edu.stanford.nlp.trees.international.spanish; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -39,7 +40,10 @@ import edu.stanford.nlp.trees.TreebankLanguagePack;
  * @author Spence Green (original French XML reader)
  *
  */
-public class SpanishXMLTreeReader implements TreeReader {
+public class SpanishXMLTreeReader implements TreeReader  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(SpanishXMLTreeReader.class);
 
   private InputStream stream;
   private final TreeNormalizer treeNormalizer;
@@ -110,7 +114,7 @@ public class SpanishXMLTreeReader implements TreeReader {
       sentIdx = 0;
 
     } catch (SAXException e) {
-      System.err.println("Parse exception while reading " + filename);
+      log.info("Parse exception while reading " + filename);
       e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
@@ -465,7 +469,7 @@ public class SpanishXMLTreeReader implements TreeReader {
   public static void main(String[] args) {
     final Properties options = StringUtils.argsToProperties(args, argOptionDefs());
     if(args.length < 1 || options.containsKey("help")) {
-      System.err.println(usage());
+      log.info(usage());
       return;
     }
 

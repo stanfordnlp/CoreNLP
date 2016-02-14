@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees;
+package edu.stanford.nlp.trees; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -56,7 +57,10 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
  * @see GrammaticalRelation
  * @see EnglishGrammaticalStructure
  */
-public abstract class GrammaticalStructure implements Serializable {
+public abstract class GrammaticalStructure implements Serializable  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(GrammaticalStructure.class);
 
   private static final boolean PRINT_DEBUGGING = System.getProperty("GrammaticalStructure", null) != null;
 
@@ -475,7 +479,7 @@ public abstract class GrammaticalStructure implements Serializable {
             Set<TreeGraphNode> parents = basicGraph.getParents(uHigh);
             if ((parents == null || parents.size() == 0 || parents.contains(tHigh)) &&
                 basicGraph.getShortestPath(uHigh, tHigh, true) == null) {
-              // System.err.println("Adding " + egr.getShortName() + " from " + t + " to " + u + " tHigh=" + tHigh + "(" + tHigh.headWordNode() + ") uHigh=" + uHigh + "(" + uHigh.headWordNode() + ")");
+              // log.info("Adding " + egr.getShortName() + " from " + t + " to " + u + " tHigh=" + tHigh + "(" + tHigh.headWordNode() + ") uHigh=" + uHigh + "(" + uHigh.headWordNode() + ")");
               basicGraph.add(tHigh, uHigh, egr);
             }
           }
@@ -505,7 +509,7 @@ public abstract class GrammaticalStructure implements Serializable {
     for (TreeGraphNode gov : basicGraph.getAllVertices()) {
       for (TreeGraphNode dep : basicGraph.getChildren(gov)) {
         GrammaticalRelation reln = getGrammaticalRelationCommonAncestor(gov.headWordNode().label(), gov.label(), dep.headWordNode().label(), dep.label(), basicGraph.getEdges(gov, dep));
-        // System.err.println("  Gov: " + gov + " Dep: " + dep + " Reln: " + reln);
+        // log.info("  Gov: " + gov + " Dep: " + dep + " Reln: " + reln);
         basicDep.add(new TypedDependency(reln, new IndexedWord(gov.headWordNode().label()), new IndexedWord(dep.headWordNode().label())));
       }
     }
@@ -713,13 +717,13 @@ public abstract class GrammaticalStructure implements Serializable {
       sortedLabels = new ArrayList<>(labels);
       Collections.sort(sortedLabels, new NameComparator<GrammaticalRelation>());
     }
-    // System.err.println(" gov " + govH + " dep " + depH + " arc labels: " + sortedLabels);
+    // log.info(" gov " + govH + " dep " + depH + " arc labels: " + sortedLabels);
 
     for (GrammaticalRelation reln2 : sortedLabels) {
       if (reln.isAncestor(reln2)) {
         reln = reln2;
       } else if (PRINT_DEBUGGING && ! reln2.isAncestor(reln)) {
-        System.err.println("@@@\t" + reln + "\t" + reln2 + "\t" +
+        log.info("@@@\t" + reln + "\t" + reln2 + "\t" +
                            govH.get(CoreAnnotations.ValueAnnotation.class) + "\t" + depH.get(CoreAnnotations.ValueAnnotation.class));
       }
     }
@@ -730,7 +734,7 @@ public abstract class GrammaticalStructure implements Serializable {
       String botCat = depH.get(CoreAnnotations.ValueAnnotation.class);
       String botTag = dep.tag();
       String botWord = dep.value();
-      System.err.println("### dep\t" + topCat + "\t" + topTag + "\t" + topWord +
+      log.info("### dep\t" + topCat + "\t" + topTag + "\t" + topWord +
                          "\t" + botCat + "\t" + botTag + "\t" + botWord + "\t");
     }
     return reln;
@@ -1332,7 +1336,7 @@ public abstract class GrammaticalStructure implements Serializable {
       }
     }
     if (altDepReaderClass == null) {
-      System.err.println("Can't load dependency reader " + altDepReaderName + " or edu.stanford.nlp.trees." + altDepReaderName);
+      log.info("Can't load dependency reader " + altDepReaderName + " or edu.stanford.nlp.trees." + altDepReaderName);
       return null;
     }
 
@@ -1343,7 +1347,7 @@ public abstract class GrammaticalStructure implements Serializable {
       } catch (InstantiationException e) {
         throw new RuntimeException(e);
       } catch (IllegalAccessException e) {
-        System.err.println("No argument constructor to " + altDepReaderName + " is not public");
+        log.info("No argument constructor to " + altDepReaderName + " is not public");
         return null;
       }
     } else {
@@ -1355,10 +1359,10 @@ public abstract class GrammaticalStructure implements Serializable {
         e.printStackTrace();
         return null;
       } catch (IllegalAccessException e) {
-        System.err.println(depReaderArgs.length + " argument constructor to " + altDepReaderName + " is not public.");
+        log.info(depReaderArgs.length + " argument constructor to " + altDepReaderName + " is not public.");
         return null;
       } catch (NoSuchMethodException e) {
-        System.err.println("String arguments constructor to " + altDepReaderName + " does not exist.");
+        log.info("String arguments constructor to " + altDepReaderName + " does not exist.");
         return null;
       }
     }
@@ -1514,8 +1518,8 @@ public abstract class GrammaticalStructure implements Serializable {
         GrammaticalStructure gs = null;
         while (gs == null && tbIterator.hasNext()) {
           Tree t = tbIterator.next();
-          // System.err.println("GsIterator: Next tree is");
-          // System.err.println(t);
+          // log.info("GsIterator: Next tree is");
+          // log.info(t);
           if (t == null) {
             continue;
           }
@@ -1523,12 +1527,12 @@ public abstract class GrammaticalStructure implements Serializable {
             gs = params.getGrammaticalStructure(t, puncFilter, hf);
             origTrees.put(gs, t);
             next = gs;
-            // System.err.println("GsIterator: Next tree is");
-            // System.err.println(t);
+            // log.info("GsIterator: Next tree is");
+            // log.info(t);
             return;
           } catch (NullPointerException npe) {
-            System.err.println("Bung tree caused below dump. Continuing....");
-            System.err.println(t);
+            log.info("Bung tree caused below dump. Continuing....");
+            log.info(t);
             npe.printStackTrace();
           }
         }
@@ -1682,12 +1686,12 @@ public abstract class GrammaticalStructure implements Serializable {
 
     if (sentFileName == null && (altDepReaderName == null || altDepReaderFilename == null) && treeFileName == null && conllXFileName == null && filter == null) {
       try {
-        System.err.println("Usage: java GrammaticalStructure [options]* [-sentFile|-treeFile|-conllxFile file] [-testGraph]");
-        System.err.println("  options: -basic, -collapsed, -CCprocessed [the default], -collapsedTree, -parseTree, -test, -parserFile file, -conllx, -keepPunct, -altprinter -altreader -altreaderfile -originalDependencies");
+        log.info("Usage: java GrammaticalStructure [options]* [-sentFile|-treeFile|-conllxFile file] [-testGraph]");
+        log.info("  options: -basic, -collapsed, -CCprocessed [the default], -collapsedTree, -parseTree, -test, -parserFile file, -conllx, -keepPunct, -altprinter -altreader -altreaderfile -originalDependencies");
         TreeReader tr = new PennTreeReader(new StringReader("((S (NP (NNP Sam)) (VP (VBD died) (NP-TMP (NN today)))))"));
         tb.add(tr.readTree());
       } catch (Exception e) {
-        System.err.println("Horrible error: " + e);
+        log.info("Horrible error: " + e);
         e.printStackTrace();
       }
     } else if (altDepReaderName != null && altDepReaderFilename != null) {
@@ -1695,7 +1699,7 @@ public abstract class GrammaticalStructure implements Serializable {
       try {
         gsBank = altDepReader.readDependencies(altDepReaderFilename);
       } catch (IOException e) {
-        System.err.println("Error reading " + altDepReaderFilename);
+        log.info("Error reading " + altDepReaderFilename);
         return;
       }
     } else if (treeFileName != null) {
@@ -1706,7 +1710,7 @@ public abstract class GrammaticalStructure implements Serializable {
       try {
         gsBank = params.readGrammaticalStructureFromFile(conllXFileName);
       } catch (RuntimeIOException e) {
-        System.err.println("Error reading " + conllXFileName);
+        log.info("Error reading " + conllXFileName);
         return;
       }
     } else {
@@ -1753,8 +1757,8 @@ public abstract class GrammaticalStructure implements Serializable {
       altDepPrinter = loadAlternateDependencyPrinter(altDepPrinterName);
     }
 
-    // System.err.println("First tree in tb is");
-    // System.err.println(((MemoryTreebank) tb).get(0));
+    // log.info("First tree in tb is");
+    // log.info(((MemoryTreebank) tb).get(0));
 
     Method m = null;
     if (test) {
@@ -1764,7 +1768,7 @@ public abstract class GrammaticalStructure implements Serializable {
         Class sgf = Class.forName("edu.stanford.nlp.semgraph.SemanticGraphFactory");
         m = sgf.getDeclaredMethod("makeFromTree", GrammaticalStructure.class, boolean.class, boolean.class, boolean.class, boolean.class, boolean.class, boolean.class, Predicate.class, String.class, int.class);
       } catch (Exception e) {
-        System.err.println("Test cannot check for cycles in tree format (classes not available)");
+        log.info("Test cannot check for cycles in tree format (classes not available)");
       }
     }
 
@@ -1776,15 +1780,15 @@ public abstract class GrammaticalStructure implements Serializable {
 
       Tree tree;
       if (gsBank instanceof TreeBankGrammaticalStructureWrapper) {
-        // System.err.println("Using TreeBankGrammaticalStructureWrapper branch");
+        // log.info("Using TreeBankGrammaticalStructureWrapper branch");
         tree = ((TreeBankGrammaticalStructureWrapper) gsBank).getOriginalTree(gs);
-        // System.err.println("Tree is: ");
-        // System.err.println(t);
+        // log.info("Tree is: ");
+        // log.info(t);
       } else {
-        // System.err.println("Using gs.root() branch");
+        // log.info("Using gs.root() branch");
         tree = gs.root(); // recover tree
-        // System.err.println("Tree from gs is");
-        // System.err.println(t);
+        // log.info("Tree from gs is");
+        // log.info(t);
       }
 
       if (test) { // print the grammatical structure, the basic, collapsed and CCprocessed
@@ -1898,9 +1902,9 @@ public abstract class GrammaticalStructure implements Serializable {
           List<TypedDependency> deps = gs.typedDependenciesCCprocessed(Extras.MAXIMAL);
           if (checkConnected) {
             if (!GrammaticalStructure.isConnected(deps)) {
-              System.err.println("Graph is not connected for:");
-              System.err.println(tree);
-              System.err.println("possible offending nodes: " + GrammaticalStructure.getRoots(deps));
+              log.info("Graph is not connected for:");
+              log.info(tree);
+              log.info("possible offending nodes: " + GrammaticalStructure.getRoots(deps));
             }
           }
           printDependencies(gs, deps, tree, conllx, false);

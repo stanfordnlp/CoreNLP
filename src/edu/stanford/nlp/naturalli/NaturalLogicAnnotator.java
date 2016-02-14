@@ -1,4 +1,5 @@
-package edu.stanford.nlp.naturalli;
+package edu.stanford.nlp.naturalli; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreAnnotation;
@@ -31,7 +32,10 @@ import java.util.stream.Collectors;
  * @author Gabor Angeli
  */
 @SuppressWarnings("unchecked")
-public class NaturalLogicAnnotator extends SentenceAnnotator {
+public class NaturalLogicAnnotator extends SentenceAnnotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(NaturalLogicAnnotator.class);
 
   /**
    * A regex for arcs that act as determiners.
@@ -608,7 +612,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
   /** {@inheritDoc} */
   @Override
   protected void doOneFailedSentence(Annotation annotation, CoreMap sentence) {
-    System.err.println("Failed to annotate: " + sentence.get(CoreAnnotations.TextAnnotation.class));
+    log.info("Failed to annotate: " + sentence.get(CoreAnnotations.TextAnnotation.class));
   }
 
   /** {@inheritDoc} */

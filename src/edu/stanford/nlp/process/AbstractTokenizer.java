@@ -1,4 +1,5 @@
-package edu.stanford.nlp.process;
+package edu.stanford.nlp.process; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 import java.util.ArrayList;
@@ -15,7 +16,10 @@ import java.util.NoSuchElementException;
  * @author Teg Grenager (grenager@stanford.edu)
  */
 
-public abstract class AbstractTokenizer<T> implements Tokenizer<T> {
+public abstract class AbstractTokenizer<T> implements Tokenizer<T>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(AbstractTokenizer.class);
 
   protected T nextToken; // = null;
 
@@ -94,7 +98,7 @@ public abstract class AbstractTokenizer<T> implements Tokenizer<T> {
     while (hasNext()) {
       result.add(next());
     }
-    // System.err.println("tokenize() produced " + result);
+    // log.info("tokenize() produced " + result);
     return result;
   }
 

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Map;
 import java.util.Set;
@@ -13,6 +14,10 @@ import edu.stanford.nlp.util.Index;
 public class ChineseUnknownWordModelTrainer
   extends AbstractUnknownWordModelTrainer
 {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseUnknownWordModelTrainer.class);
+
   // Records the number of times word/tag pair was seen in training data.
   private ClassicCounter<IntTaggedWord> seenCounter;
   private ClassicCounter<IntTaggedWord> unSeenCounter;
@@ -63,10 +68,10 @@ public class ChineseUnknownWordModelTrainer
     this.useUnicodeType = op.lexOptions.useUnicodeType;
 
     if (useFirst) {
-      System.err.println("ChineseUWM: treating unknown word as the average of their equivalents by first-character identity. useUnicodeType: " + useUnicodeType);
+      log.info("ChineseUWM: treating unknown word as the average of their equivalents by first-character identity. useUnicodeType: " + useUnicodeType);
     }
     if (useGT) {
-      System.err.println("ChineseUWM: using Good-Turing smoothing for unknown words.");
+      log.info("ChineseUWM: using Good-Turing smoothing for unknown words.");
     }
 
     this.c = Generics.newHashMap();

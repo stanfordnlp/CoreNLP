@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.arabic;
+package edu.stanford.nlp.international.arabic; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -14,7 +15,10 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author Spence Green
  */
-public class ArabicVerbStemBank {
+public class ArabicVerbStemBank  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ArabicVerbStemBank.class);
 
   private static ArabicVerbStemBank thisInstance = null;
 

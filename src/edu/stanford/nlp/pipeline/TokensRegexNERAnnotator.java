@@ -126,7 +126,10 @@ import java.util.regex.Pattern;
  *
  * @author Angel Chang
  */
-public class TokensRegexNERAnnotator implements Annotator {
+public class TokensRegexNERAnnotator implements Annotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TokensRegexNERAnnotator.class);
   protected static final Redwood.RedwoodChannels logger = Redwood.channels("TokenRegexNER");
   protected static final String PATTERN_FIELD = "pattern";
   protected static final String OVERWRITE_FIELD = "overwrite";
@@ -297,7 +300,7 @@ public class TokensRegexNERAnnotator implements Annotator {
   @Override
   public void annotate(Annotation annotation) {
     if (verbose) {
-      System.err.print("Adding TokensRegexNER annotations ... ");
+      log.info("Adding TokensRegexNER annotations ... ");
     }
 
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
@@ -316,7 +319,7 @@ public class TokensRegexNERAnnotator implements Annotator {
     }
 
     if (verbose)
-      System.err.println("done.");
+      log.info("done.");
   }
 
   private MultiPatternMatcher<CoreMap> createPatternMatcher(Map<SequencePattern<CoreMap>, Entry> patternToEntry) {
@@ -370,7 +373,7 @@ public class TokensRegexNERAnnotator implements Annotator {
       String str = m.group(g);
       if (commonWords.contains(str)) {
         if (verbose) {
-          System.err.println("Not annotating (common word) '" + str + "': " +
+          log.info("Not annotating (common word) '" + str + "': " +
               StringUtils.joinFields(m.groupNodes(g), CoreAnnotations.NamedEntityTagAnnotation.class)
               + " with " + entry.getTypeDescription() + ", sentence is '" + StringUtils.joinWords(tokens, " ") + "'");
         }
@@ -391,7 +394,7 @@ public class TokensRegexNERAnnotator implements Annotator {
         }
       } else {
         if (verbose) {
-          System.err.println("Not annotating  '" + m.group(g) + "': " +
+          log.info("Not annotating  '" + m.group(g) + "': " +
                   StringUtils.joinFields(m.groupNodes(g), CoreAnnotations.NamedEntityTagAnnotation.class)
                   + " with " + entry.getTypeDescription() + ", sentence is '" + StringUtils.joinWords(tokens, " ") + "'");
         }

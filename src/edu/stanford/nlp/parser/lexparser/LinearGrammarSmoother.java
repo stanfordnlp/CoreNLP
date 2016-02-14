@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -16,7 +17,10 @@ import edu.stanford.nlp.util.Pair;
  * @author Spence Green
  *
  */
-public class LinearGrammarSmoother implements Function<Pair<UnaryGrammar,BinaryGrammar>, Pair<UnaryGrammar,BinaryGrammar>> {
+public class LinearGrammarSmoother implements Function<Pair<UnaryGrammar,BinaryGrammar>, Pair<UnaryGrammar,BinaryGrammar>>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(LinearGrammarSmoother.class);
 
   private static final boolean DEBUG = false;
   
@@ -78,8 +82,8 @@ public class LinearGrammarSmoother implements Function<Pair<UnaryGrammar,BinaryG
     if(DEBUG) {
       System.err.printf("%s: %d basic symbols in the grammar%n",this.getClass().getName(),symWeights.keySet().size());
       for(String s : symWeights.keySet())
-        System.err.print(s + ",");
-      System.err.println();
+        log.info(s + ",");
+      log.info();
     }
     
     return bgug;

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.arabic.parsesegment;
+package edu.stanford.nlp.international.arabic.parsesegment; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,7 +21,10 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Spence Green
  *
  */
-public final class JointParser {
+public final class JointParser  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(JointParser.class);
 
   private JointParser() {}
 
@@ -50,7 +54,7 @@ public final class JointParser {
    */
   public static void main(String[] args) {
     if(args.length < MIN_ARGS) {
-      System.err.println(usage());
+      log.info(usage());
       System.exit(-1);
     }
     Properties options = StringUtils.argsToProperties(args, optionArgDefs());
@@ -61,15 +65,15 @@ public final class JointParser {
 
     String[] parsedArgs = options.getProperty("","").split("\\s+");
     if (parsedArgs.length != MIN_ARGS) {
-      System.err.println(usage());
+      log.info(usage());
       System.exit(-1);
     }
     File trainTreebank = new File(parsedArgs[0]);
 
     Date startTime = new Date();
-    System.err.println("###################################");
-    System.err.println("### Joint Segmentation / Parser ###");
-    System.err.println("###################################");
+    log.info("###################################");
+    log.info("### Joint Segmentation / Parser ###");
+    log.info("###################################");
     System.err.printf("Start time: %s\n", startTime);
 
     JointParsingModel parsingModel = new JointParsingModel();
@@ -96,19 +100,19 @@ public final class JointParser {
     }
 
     if(!trainTreebank.exists())
-      System.err.println("Training treebank does not exist!\n  " + trainTreebank.getPath());
+      log.info("Training treebank does not exist!\n  " + trainTreebank.getPath());
     else if(testTreebank != null && !testTreebank.exists())
-      System.err.println("Test treebank does not exist!\n  " + testTreebank.getPath());
+      log.info("Test treebank does not exist!\n  " + testTreebank.getPath());
     else if(parsingModel.run(trainTreebank, testTreebank, inputStream))
-      System.err.println("Successful shutdown!");
+      log.info("Successful shutdown!");
     else
-      System.err.println("ERROR: Parsing model failure.");
+      log.error("Parsing model failure.");
 
 
     Date stopTime = new Date();
     long elapsedTime = stopTime.getTime() - startTime.getTime();
-    System.err.println();
-    System.err.println();
+    log.info();
+    log.info();
     System.err.printf("Completed processing at %s\n",stopTime);
     System.err.printf("Elapsed time: %d seconds\n", (int) (elapsedTime / 1000F));
   }

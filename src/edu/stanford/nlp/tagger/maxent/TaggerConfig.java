@@ -1,4 +1,5 @@
-package edu.stanford.nlp.tagger.maxent;
+package edu.stanford.nlp.tagger.maxent; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.util.StringUtils;
 
@@ -22,7 +23,10 @@ import edu.stanford.nlp.util.Generics;
  *  @author Anna Rafferty
  *  @author Michel Galley
  */
-public class TaggerConfig extends Properties /* Inherits implementation of Serializable! */ {
+public class TaggerConfig extends Properties /* Inherits implementation of Serializable! */  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TaggerConfig.class);
 
   private static final long serialVersionUID = -4136407850147157497L;
 
@@ -142,7 +146,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
       }
       if (name != null) {
         try {
-          System.err.println("Loading default properties from tagger " + name);
+          log.info("Loading default properties from tagger " + name);
           DataInputStream in = new DataInputStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(name));
           this.putAll(TaggerConfig.readConfig(in)); // overwrites defaults with any serialized values.
           in.close();

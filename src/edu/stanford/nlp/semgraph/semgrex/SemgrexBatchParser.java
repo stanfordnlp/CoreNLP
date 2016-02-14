@@ -1,4 +1,5 @@
-package edu.stanford.nlp.semgraph.semgrex;
+package edu.stanford.nlp.semgraph.semgrex; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,7 +23,10 @@ import edu.stanford.nlp.util.Pair;
  *   macro JOB = president|ceo|star
  *   {}=entity &gt;appos ({lemma:/${JOB}/} &gt;nn {ner:ORGANIZATION}=slot)
  */
-public class SemgrexBatchParser {
+public class SemgrexBatchParser  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(SemgrexBatchParser.class);
 
   /** Maximum stream size in characters */
   private static final int MAX_STREAM_SIZE = 1024 * 1024;
@@ -76,7 +80,7 @@ public class SemgrexBatchParser {
     }
     if(offset < line.length()) out.append(line.substring(offset));
     String postProcessed =  out.toString();
-    if(! postProcessed.equals(line)) System.err.println("Line \"" + line + "\" changed to \"" + postProcessed + '"');
+    if(! postProcessed.equals(line)) log.info("Line \"" + line + "\" changed to \"" + postProcessed + '"');
     return postProcessed;
   }
 

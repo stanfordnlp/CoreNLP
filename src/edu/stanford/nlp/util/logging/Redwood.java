@@ -1,5 +1,6 @@
 
-package edu.stanford.nlp.util.logging;
+package edu.stanford.nlp.util.logging; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -39,7 +40,10 @@ import edu.stanford.nlp.util.*;
  * @author David McClosky
  */
 
-public class Redwood {
+public class Redwood  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(Redwood.class);
 
   /*
       ---------------------------------------------------------
@@ -601,7 +605,8 @@ public class Redwood {
   static {
     RedwoodConfiguration config = RedwoodConfiguration.minimal();
     try {
-      MetaClass.create("edu.stanford.nlp.util.logging.SLF4JHandler");
+      MetaClass.create("org.slf4j.LoggerFactory").createInstance();
+      System.err.println("FOUND SLF4J");
       config = RedwoodConfiguration.slf4j();
     } catch (Exception ignored) { }
     config.apply();
@@ -1477,7 +1482,7 @@ public class Redwood {
     //--System Streams
     Redwood.captureSystemStreams(true, true);
     System.out.println("Hello World");
-    System.err.println("This is an error!");
+    log.info("This is an error!");
 
     //--Neat Exit
 //    RedwoodConfiguration.standard().collapseExact().apply();

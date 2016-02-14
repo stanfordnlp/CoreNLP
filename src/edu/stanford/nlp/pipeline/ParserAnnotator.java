@@ -1,4 +1,5 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 
@@ -34,7 +35,10 @@ import java.util.function.Predicate;
  *
  * @author Jenny Finkel
  */
-public class ParserAnnotator extends SentenceAnnotator {
+public class ParserAnnotator extends SentenceAnnotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ParserAnnotator.class);
 
   private final boolean VERBOSE;
   private final boolean BUILD_GRAPHS;
@@ -132,7 +136,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     String buildGraphsProperty = annotatorName + ".buildgraphs";
     if (!this.parser.getTLPParams().supportsBasicDependencies()) {
       if (props.getProperty(buildGraphsProperty) != null && PropertiesUtils.getBool(props, buildGraphsProperty)) {
-        System.err.println("WARNING: " + buildGraphsProperty + " set to true, but " + this.parser.getTLPParams().getClass() + " does not support dependencies");
+        log.info("WARNING: " + buildGraphsProperty + " set to true, but " + this.parser.getTLPParams().getClass() + " does not support dependencies");
       }
       this.BUILD_GRAPHS = false;
     } else {
@@ -203,12 +207,12 @@ public class ParserAnnotator extends SentenceAnnotator {
                                          boolean verbose,
                                          String[] flags) {
     if (verbose) {
-      System.err.println("Loading Parser Model [" + parserLoc + "] ...");
-      System.err.print("  Flags:");
+      log.info("Loading Parser Model [" + parserLoc + "] ...");
+      log.info("  Flags:");
       for (String flag : flags) {
-        System.err.print("  " + flag);
+        log.info("  " + flag);
       }
-      System.err.println();
+      log.info();
     }
     ParserGrammar result = ParserGrammar.loadModel(parserLoc);
     result.setOptionFlags(result.defaultCoreNLPFlags());
@@ -238,7 +242,7 @@ public class ParserAnnotator extends SentenceAnnotator {
 
     final List<CoreLabel> words = sentence.get(CoreAnnotations.TokensAnnotation.class);
     if (VERBOSE) {
-      System.err.println("Parsing: " + words);
+      log.info("Parsing: " + words);
     }
     List<Tree> trees = null;
     // generate the constituent tree
@@ -248,7 +252,7 @@ public class ParserAnnotator extends SentenceAnnotator {
         trees = doOneSentence(constraints, words);
       } catch (RuntimeInterruptedException e) {
         if (VERBOSE) {
-          System.err.println("Took too long parsing: " + words);
+          log.info("Took too long parsing: " + words);
         }
         trees = null;
       }
@@ -314,7 +318,7 @@ public class ParserAnnotator extends SentenceAnnotator {
       } else {
         List<ScoredObject<Tree>> scoredObjects = pq.getKBestParses(this.kBest);
         if (scoredObjects == null || scoredObjects.size() < 1) {
-          System.err.println("WARNING: Parsing of sentence failed.  " +
+          log.info("WARNING: Parsing of sentence failed.  " +
               "Will ignore and continue: " +
               SentenceUtils.listToString(words));
         } else {
@@ -328,10 +332,10 @@ public class ParserAnnotator extends SentenceAnnotator {
       }
     } catch (OutOfMemoryError e) {
       Runtime.getRuntime().gc();
-      System.err.println("WARNING: Parsing of sentence ran out of memory (length=" + words.size() + ").  " +
+      log.info("WARNING: Parsing of sentence ran out of memory (length=" + words.size() + ").  " +
               "Will ignore and continue.");
     } catch (NoSuchParseException e) {
-      System.err.println("WARNING: Parsing of sentence failed, possibly because of out of memory.  " +
+      log.info("WARNING: Parsing of sentence failed, possibly because of out of memory.  " +
               "Will ignore and continue: " +
               SentenceUtils.listToString(words));
     }

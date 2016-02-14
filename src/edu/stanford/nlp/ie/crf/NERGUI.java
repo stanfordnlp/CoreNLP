@@ -25,7 +25,8 @@
 //    Licensing: java-nlp-support@lists.stanford.edu
 //    http://nlp.stanford.edu/downloads/crf-classifier.shtml
 
-package edu.stanford.nlp.ie.crf;
+package edu.stanford.nlp.ie.crf; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -48,7 +49,10 @@ import java.util.regex.Pattern;
  *  @author Jenny Finkel
  *  @author Christopher Manning
  */
-public class NERGUI {
+public class NERGUI  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(NERGUI.class);
 
   private AbstractSequenceClassifier<CoreLabel> classifier;
 
@@ -288,7 +292,7 @@ public class NERGUI {
           }
           break;
         default:
-          System.err.println("Unknown Action: " + e);
+          log.info("Unknown Action: " + e);
           break;
       }
     }
@@ -370,7 +374,7 @@ public class NERGUI {
       } else {
         message = "Error loading default CRF";
       }
-      System.err.println(message);
+      log.info(message);
       String title = "CRF Load Error";
       String msg = e.toString();
       if (msg != null) {
@@ -396,7 +400,7 @@ public class NERGUI {
     try {
       editorPane.setPage(url);
     } catch (Exception e) {
-      System.err.println("Error loading |" + url + "|");
+      log.info("Error loading |" + url + "|");
       e.printStackTrace();
       displayError("Error Loading URL " + url, "Message: " + e.toString());
       return;
@@ -444,7 +448,7 @@ public class NERGUI {
 
 
   private void extract() {
-    System.err.println("content type: "+editorPane.getContentType());
+    log.info("content type: "+editorPane.getContentType());
     if (!editorPane.getContentType().equals("text/html")) {
 
       DefaultStyledDocument doc = (DefaultStyledDocument)editorPane.getDocument();
@@ -488,9 +492,9 @@ public class NERGUI {
             ex.printStackTrace();
             System.exit(-1);
           }
-          System.err.println(tag+": "+ finalText.substring(start, end));
+          log.info(tag+": "+ finalText.substring(start, end));
         } else {
-          System.err.println("Couldn't find end pattern!");
+          log.info("Couldn't find end pattern!");
         }
         m = startPattern.matcher(finalText);
       }
@@ -525,7 +529,7 @@ public class NERGUI {
         Matcher m1 = endPattern.matcher(finalText);
         m1.find(m.end());
         String entity = finalText.substring(start, m1.start());
-        System.err.println(tag+": "+ entity);
+        log.info(tag+": "+ entity);
         finalText = m1.replaceFirst("</span>");
         m = startPattern.matcher(finalText);
       }
@@ -534,7 +538,7 @@ public class NERGUI {
       editorPane.revalidate();
       editorPane.repaint();
 
-      // System.err.println(finalText);
+      // log.info(finalText);
     }
     saveTaggedAs.setEnabled(true);
   }
@@ -553,7 +557,7 @@ public class NERGUI {
     editorPane.setDocument(doc);
     //    defaultAttrSet = ((StyledEditorKit)editorPane.getEditorKit()).getInputAttributes();
     //    StyleConstants.setFontFamily(defaultAttrSet, "Lucinda Sans Unicode");
-    System.err.println("attr: "+defaultAttrSet);
+    log.info("attr: "+defaultAttrSet);
 
     try {
       doc.insertString(0, " ", defaultAttrSet);

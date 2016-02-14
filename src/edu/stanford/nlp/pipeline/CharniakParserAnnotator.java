@@ -1,4 +1,5 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,7 +28,10 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author David McClosky
  */
-public class CharniakParserAnnotator implements Annotator {
+public class CharniakParserAnnotator implements Annotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CharniakParserAnnotator.class);
 
   // TODO: make this an option?
   private static final boolean BUILD_GRAPHS = true;
@@ -55,7 +59,7 @@ public class CharniakParserAnnotator implements Annotator {
       for (CoreMap sentence: annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         List<CoreLabel> words = sentence.get(CoreAnnotations.TokensAnnotation.class);
         if (VERBOSE) {
-          System.err.println("Parsing: " + words);
+          log.info("Parsing: " + words);
         }
         int maxSentenceLength = parser.getMaxSentenceLength();
         // generate the constituent tree

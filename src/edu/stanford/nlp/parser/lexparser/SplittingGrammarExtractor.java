@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +51,10 @@ import java.io.*;
  *
  * @author John Bauer
  */
-public class SplittingGrammarExtractor {
+public class SplittingGrammarExtractor  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(SplittingGrammarExtractor.class);
   static final int MIN_DEBUG_ITERATION=0;
   static final int MAX_DEBUG_ITERATION=0;
   static final int MAX_ITERATIONS = Integer.MAX_VALUE;
@@ -1544,7 +1548,7 @@ public class SplittingGrammarExtractor {
       }
       treeCount += trees2.size();
     }
-    System.err.println("Found " + treeCount +
+    log.info("Found " + treeCount +
                        " trees with total weight " + trainSize);
   }
 
@@ -1609,7 +1613,7 @@ public class SplittingGrammarExtractor {
         ++iteration;
       }
 
-      System.err.println("Converged for cycle " + cycle +
+      log.info("Converged for cycle " + cycle +
                          " in " + iteration + " iterations");
 
       mergeStates();

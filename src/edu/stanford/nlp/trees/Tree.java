@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees;
+package edu.stanford.nlp.trees; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -52,7 +53,10 @@ import edu.stanford.nlp.util.*;
  * @author Dan Klein
  * @author Sarah Spikes (sdspikes@cs.stanford.edu) - filled in types
  */
-public abstract class Tree extends AbstractCollection<Tree> implements Label, Labeled, Scored, Serializable {
+public abstract class Tree extends AbstractCollection<Tree> implements Label, Labeled, Scored, Serializable  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(Tree.class);
 
   private static final long serialVersionUID = 5441849457648722744L;
 
@@ -550,13 +554,13 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
 
     int position = left;
 
-    // System.err.println("In bracketing trees left is " + left);
-    // System.err.println("  label is " + label() +
+    // log.info("In bracketing trees left is " + left);
+    // log.info("  label is " + label() +
     //                       "; num daughters: " + children().length);
     Tree[] kids = children();
     for (Tree kid : kids) {
       position = kid.constituents(constituentsSet, position, cf, charLevel, filter, maxDepth, depth + 1);
-      // System.err.println("  position went to " + position);
+      // log.info("  position went to " + position);
     }
 
     if ((filter == null || filter.test(this)) &&
@@ -564,7 +568,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       //Compute span of entire tree at the end of recursion
       constituentsSet.add(cf.newConstituent(left, position - 1, label(), score()));
     }
-    // System.err.println("  added " + label());
+    // log.info("  added " + label());
     return position;
   }
 
@@ -1040,7 +1044,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     if (head != null) {
       return head.headTerminal(hf, parent);
     }
-    System.err.println("Head is null: " + this);
+    log.info("Head is null: " + this);
     return null;
   }
 
@@ -1075,7 +1079,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       if (head != null) {
         return head.headPreTerminal(hf);
       }
-      System.err.println("Head preterminal is null: " + this);
+      log.info("Head preterminal is null: " + this);
       return null;
     }
   }
@@ -1186,7 +1190,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
         }
 
       } else {
-        System.err.println("Head is null: " + this);
+        log.info("Head is null: " + this);
       }
     }
   }
@@ -1312,10 +1316,10 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
         continue;
       }
       // Label l = node.label();
-      // System.err.println("doing kids of label: " + l);
+      // log.info("doing kids of label: " + l);
       //Tree hwt = node.headPreTerminal(hf);
       Tree hwt = node.headTerminal(hf);
-      // System.err.println("have hf, found head preterm: " + hwt);
+      // log.info("have hf, found head preterm: " + hwt);
       if (hwt == null) {
         throw new IllegalStateException("mapDependencies: HeadFinder failed!");
       }
@@ -1327,8 +1331,8 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
         if (dwt == null) {
           throw new IllegalStateException("mapDependencies: HeadFinder failed!");
         }
-        //System.err.println("kid is " + dl);
-         //System.err.println("transformed to " + dml.toString("value{map}"));
+        //log.info("kid is " + dl);
+         //log.info("transformed to " + dml.toString("value{map}"));
         if (dwt != hwt) {
           Dependency<Label, Label, Object> p = new UnnamedDependency(hwt.label(), dwt.label());
           if (f.test(p)) {

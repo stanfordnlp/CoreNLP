@@ -4,7 +4,8 @@
  * Copyright:    Copyright (c) Kristina Toutanova<p>
  * Company:      Stanford University<p>
  */
-package edu.stanford.nlp.tagger.maxent;
+package edu.stanford.nlp.tagger.maxent; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.io.DataInputStream;
@@ -15,7 +16,10 @@ import java.io.DataOutputStream;
  *  @author Kristina Toutanova
  *  @version 1.0
  */
-public class CountWrapper {
+public class CountWrapper  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CountWrapper.class);
 
   private String word;
   private int countPart;
@@ -107,7 +111,7 @@ public class CountWrapper {
     try {
       int len = rf.readInt();
       byte[] buff = new byte[len];
-      if (rf.read(buff) != len) { System.err.println("Error: rewrite CountWrapper.read"); }
+      if (rf.read(buff) != len) { log.info("Error: rewrite CountWrapper.read"); }
       word = new String(buff);
       assert(word != null);
       countPart = rf.readInt();

@@ -39,7 +39,10 @@ import edu.stanford.nlp.util.logging.Redwood;
  *
  * @author Angel Chang
  */
-public abstract class CorefMentionFinder {
+public abstract class CorefMentionFinder  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CorefMentionFinder.class);
 
   protected Locale lang;
 
@@ -173,48 +176,48 @@ public abstract class CorefMentionFinder {
       for (Mention m : mentions) {
         if (m.headWord.ner().matches("PERCENT|MONEY|QUANTITY|CARDINAL")) {
           remove.add(m);
-          if (VERBOSE) System.err.println("MENTION FILTERING number NER: " + m.spanToString());
+          if (VERBOSE) log.info("MENTION FILTERING number NER: " + m.spanToString());
         } else if (m.originalSpan.size()==1 && m.headWord.tag().equals("CD")) {
           remove.add(m);
-          if (VERBOSE) System.err.println("MENTION FILTERING number: " + m.spanToString());
+          if (VERBOSE) log.info("MENTION FILTERING number: " + m.spanToString());
         } else if (dict.removeWords.contains(m.spanToString())) {
           remove.add(m);
-          if (VERBOSE) System.err.println("MENTION FILTERING removeWord: " + m.spanToString());
+          if (VERBOSE) log.info("MENTION FILTERING removeWord: " + m.spanToString());
         } else if (mentionContainsRemoveChars(m, dict.removeChars)) {
           remove.add(m);
-          if (VERBOSE) System.err.println("MENTION FILTERING removeChars: " + m.spanToString());
+          if (VERBOSE) log.info("MENTION FILTERING removeChars: " + m.spanToString());
         } else if (m.headWord.tag().equals("PU")) {
           // punctuation-only mentions
           remove.add(m);
-          if (VERBOSE) System.err.println("MENTION FILTERING Punctuation only mention: " + m.spanToString());
+          if (VERBOSE) log.info("MENTION FILTERING Punctuation only mention: " + m.spanToString());
         } else if (mentionIsDemonym(m, dict.countries)) {
           // demonyms -- this seems to be a no-op on devset. Maybe not working?
           remove.add(m);
-          if (VERBOSE) System.err.println("MENTION FILTERING Removed demonym: " + m.spanToString());
+          if (VERBOSE) log.info("MENTION FILTERING Removed demonym: " + m.spanToString());
         } else if (m.spanToString().equals("问题") && m.startIndex > 0 &&
             sent.get(m.startIndex - 1).word().endsWith("没")) {
           // 没 问题 - this is maybe okay but having 问题 on removeWords was dangerous
           remove.add(m);
-          if (VERBOSE) System.err.println("MENTION FILTERING Removed meiyou: " + m.spanToString());
+          if (VERBOSE) log.info("MENTION FILTERING Removed meiyou: " + m.spanToString());
         } else if (mentionIsRangren(m, sent)) {
             remove.add(m);
-            if (VERBOSE) System.err.println("MENTION FILTERING Removed rangren: " + m.spanToString());
+            if (VERBOSE) log.info("MENTION FILTERING Removed rangren: " + m.spanToString());
         } else if (m.spanToString().equals("你") && m.startIndex < sent.size() - 1 &&
             sent.get(m.startIndex + 1).word().startsWith("知道")) {
           // 你 知道
           remove.add(m);
-          if (VERBOSE) System.err.println("MENTION FILTERING Removed nizhidao: " + m.spanToString());
+          if (VERBOSE) log.info("MENTION FILTERING Removed nizhidao: " + m.spanToString());
         // The words that used to be in this case are now handled more generallyin removeCharsZh
         // } else if (m.spanToString().contains("什么") || m.spanToString().contains("多少")) {
         //   remove.add(m);
-        //   if (VERBOSE) System.err.println("MENTION FILTERING Removed many/few mention ending: " + m.spanToString());
+        //   if (VERBOSE) log.info("MENTION FILTERING Removed many/few mention ending: " + m.spanToString());
         } else if (m.spanToString().endsWith("的")) {
           remove.add(m);
-          if (VERBOSE) System.err.println("MENTION FILTERING Removed de ending mention: " + m.spanToString());
+          if (VERBOSE) log.info("MENTION FILTERING Removed de ending mention: " + m.spanToString());
         // omit this case, it decreases performance. A few useful interrogative pronouns are now in the removeChars list
         // } else if (mentionIsInterrogativePronoun(m, dict.interrogativePronouns)) {
         //     remove.add(m);
-        //     if (VERBOSE) System.err.println("MENTION FILTERING Removed interrogative pronoun: " + m.spanToString());
+        //     if (VERBOSE) log.info("MENTION FILTERING Removed interrogative pronoun: " + m.spanToString());
         }
 
         // 的 handling
@@ -547,7 +550,7 @@ public abstract class CorefMentionFinder {
   }
 
   private static Tree funkyFindLeafWithApproximateSpan(Tree root, String token, int index, int approximateness) {
-    // System.err.println("Searching " + root + "\n  for " + token + " at position " + index + " (plus up to " + approximateness + ")");
+    // log.info("Searching " + root + "\n  for " + token + " at position " + index + " (plus up to " + approximateness + ")");
     List<Tree> leaves = root.getLeaves();
     for (Tree leaf : leaves) {
       CoreLabel label = CoreLabel.class.cast(leaf.label());
@@ -565,7 +568,7 @@ public abstract class CorefMentionFinder {
                        "token = |" + token + "|" + index + "|, approx=" + approximateness);
     for (Tree leaf : leaves) {
       if (token.equals(leaf.value())) {
-        // System.err.println("Found it at position " + ind + "; returning " + leaf);
+        // log.info("Found it at position " + ind + "; returning " + leaf);
         return leaf;
       }
     }

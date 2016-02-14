@@ -1,4 +1,5 @@
-package edu.stanford.nlp.util;
+package edu.stanford.nlp.util; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -63,14 +64,17 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  *         Properties props = StringUtils.argsToProperties(args);
  *         ArgumentParser.fillOptions(new Class[]{ Foo.class, ArgumentParser.class }, props);
  *
- *         System.err.println(INPUT);
+ *         log.info(INPUT);
  *       }
  *     }
  *   </code>
  * </pre>
  *
  */
-public class ArgumentParser {
+public class ArgumentParser  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ArgumentParser.class);
 
   @Documented
   @Retention(RetentionPolicy.RUNTIME)

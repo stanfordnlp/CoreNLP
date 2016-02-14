@@ -24,7 +24,8 @@
 //    java-nlp-support@lists.stanford.edu
 //    http://nlp.stanford.edu/software/
 
-package edu.stanford.nlp.stats;
+package edu.stanford.nlp.stats; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -81,7 +82,10 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
  * @author Christopher Manning
  * @author stefank (Optimized dot product)
  */
-public class Counters {
+public class Counters  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(Counters.class);
 
   private static final double LOG_E_2 = Math.log(2.0);
 
@@ -1673,7 +1677,7 @@ public class Counters {
       double noise = -Math.log(1.0 - random.nextDouble()); // inverse of CDF for
                                                            // exponential
                                                            // distribution
-      // System.err.println("noise=" + noise);
+      // log.info("noise=" + noise);
       double perturbedCount = count + noise * p;
       result.setCount(key, perturbedCount);
     }
