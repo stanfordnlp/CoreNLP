@@ -1,4 +1,5 @@
-package edu.stanford.nlp.fsm;
+package edu.stanford.nlp.fsm; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.util.DisjointSet;
 import edu.stanford.nlp.util.ErasureUtils;
@@ -15,7 +16,10 @@ import java.util.*;
  * @author Dan Klein
  * @version 12/14/2000
  */
-public final class DFSAMinimizer {
+public final class DFSAMinimizer  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(DFSAMinimizer.class);
 
   static boolean debug = false;
 
@@ -38,8 +42,8 @@ public final class DFSAMinimizer {
     long time = System.currentTimeMillis();
     if (debug) {
       time = System.currentTimeMillis();
-      System.err.println("\nStarting on " + dfsa.dfsaID);
-      System.err.println(" -- " + states.size() + " states.");
+      log.info("\nStarting on " + dfsa.dfsaID);
+      log.info(" -- " + states.size() + " states.");
     }
     int numStates = states.size();
     // assign ids
@@ -60,7 +64,7 @@ public final class DFSAMinimizer {
       }
     }
     if (debug) {
-      System.err.println("Initialized: " + (System.currentTimeMillis() - time));
+      log.info("Initialized: " + (System.currentTimeMillis() - time));
       time = System.currentTimeMillis();
     }
     // visit all non-distinct
@@ -127,7 +131,7 @@ public final class DFSAMinimizer {
       }
     }
     if (debug) {
-      System.err.println("All pairs marked: " + (System.currentTimeMillis() - time));
+      log.info("All pairs marked: " + (System.currentTimeMillis() - time));
       time = System.currentTimeMillis();
     }
     // decide what canonical state each state will map to...
@@ -147,7 +151,7 @@ public final class DFSAMinimizer {
       stateToRep.put(state1, rep);
     }
     if (debug) {
-      System.err.println("Canonical states chosen: " + (System.currentTimeMillis() - time));
+      log.info("Canonical states chosen: " + (System.currentTimeMillis() - time));
       time = System.currentTimeMillis();
     }
     // reduce the DFSA by replacing transition targets with their reps
@@ -163,7 +167,7 @@ public final class DFSAMinimizer {
     }
     dfsa.initialState = stateToRep.get(dfsa.initialState);
     if (debug) {
-      System.err.println("Done: " + (System.currentTimeMillis() - time));
+      log.info("Done: " + (System.currentTimeMillis() - time));
     }
     // done!
   }
@@ -180,8 +184,8 @@ public final class DFSAMinimizer {
     long time = System.currentTimeMillis();
     if (debug) {
       time = System.currentTimeMillis();
-      System.err.println("Starting on " + dfsa.dfsaID);
-      System.err.println(" -- " + states.size() + " states.");
+      log.info("Starting on " + dfsa.dfsaID);
+      log.info(" -- " + states.size() + " states.");
     }
     // initialize grid
     int numDone = 0;
@@ -204,7 +208,7 @@ public final class DFSAMinimizer {
           streak++;
         }
         if (state1.isAccepting() != state2.isAccepting()) {
-          //System.err.println(Utils.pad((String)state1.stateID, 20)+" "+state2.stateID);
+          //log.info(Utils.pad((String)state1.stateID, 20)+" "+state2.stateID);
           stateUPairToDistinguished.put(up, Boolean.TRUE);
         } else {
           stateUPairToDistinguished.put(up, Boolean.FALSE);
@@ -213,11 +217,11 @@ public final class DFSAMinimizer {
       }
       numDone++;
       if (numDone % 20 == 0) {
-        System.err.print("\r" + numDone + "  " + ((double) collisions / (double) entries));
+        log.info("\r" + numDone + "  " + ((double) collisions / (double) entries));
       }
     }
     if (debug) {
-      System.err.println("\nInitialized: " + (System.currentTimeMillis() - time));
+      log.info("\nInitialized: " + (System.currentTimeMillis() - time));
       time = System.currentTimeMillis();
     }
     // visit each undistinguished pair
@@ -281,7 +285,7 @@ public final class DFSAMinimizer {
       }
     }
     if (debug) {
-      System.err.println("All pairs marked: " + (System.currentTimeMillis() - time));
+      log.info("All pairs marked: " + (System.currentTimeMillis() - time));
       time = System.currentTimeMillis();
     }
     // decide what canonical state each state will map to...
@@ -299,7 +303,7 @@ public final class DFSAMinimizer {
       stateToRep.put(state, rep);
     }
     if (debug) {
-      System.err.println("Canonical states chosen: " + (System.currentTimeMillis() - time));
+      log.info("Canonical states chosen: " + (System.currentTimeMillis() - time));
       time = System.currentTimeMillis();
     }
     // reduce the DFSA by replacing transition targets with their reps
@@ -313,7 +317,7 @@ public final class DFSAMinimizer {
     }
     dfsa.initialState = stateClasses.find(dfsa.initialState);
     if (debug) {
-      System.err.println("Done: " + (System.currentTimeMillis() - time));
+      log.info("Done: " + (System.currentTimeMillis() - time));
     }
     // done!
   }

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.ie.machinereading.common;
+package edu.stanford.nlp.ie.machinereading.common; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.util.ArrayList;
@@ -8,7 +9,10 @@ import java.util.Set;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Generics;
 
-public class StringDictionary {
+public class StringDictionary  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(StringDictionary.class);
 
   public static class IndexAndCount {
 
@@ -141,7 +145,7 @@ public class StringDictionary {
     }
 
     os.close();
-    System.err.println("Saved " + index + "/" + mDict.size() + " entries for dictionary \"" + mName + "\".");
+    log.info("Saved " + index + "/" + mDict.size() + " entries for dictionary \"" + mName + "\".");
   }
 
   public void clear() {
@@ -176,7 +180,7 @@ public class StringDictionary {
     }
 
     is.close();
-    System.err.println("Loaded " + mDict.size() + " entries for dictionary \"" + mName + "\".");
+    log.info("Loaded " + mDict.size() + " entries for dictionary \"" + mName + "\".");
   }
 
   public java.util.Set<String> keys() {

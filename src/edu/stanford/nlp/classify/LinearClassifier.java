@@ -64,7 +64,10 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @param <L> The type of the labels in the Classifier
  * @param <F> The type of the features in the Classifier
  */
-public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RVFClassifier<L, F> {
+public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RVFClassifier<L, F>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(LinearClassifier.class);
 
   /** Classifier weights. First index is the featureIndex value and second
    *  index is the labelIndex value.
@@ -1323,7 +1326,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
    * Simple convenience wrapper for IOUtils.readFromString.
    */
   public static <L, F> LinearClassifier<L, F> readClassifier(String loadPath) {
-    System.err.print("Deserializing classifier from " + loadPath + "...");
+    log.info("Deserializing classifier from " + loadPath + "...");
 
     try {
       ObjectInputStream ois = IOUtils.readStreamFromString(loadPath);

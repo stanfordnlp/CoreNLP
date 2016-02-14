@@ -1,4 +1,5 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
@@ -19,7 +20,10 @@ import java.util.Set;
  *
  * @author Gabor Angeli
  */
-public class AnnotatorFactories {
+public class AnnotatorFactories  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(AnnotatorFactories.class);
 
   private AnnotatorFactories() {} // static factory class
 
@@ -202,7 +206,7 @@ public class AnnotatorFactories {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        // System.err.println(signature());
+        // log.info(signature());
         // todo: The above shows that signature is edu.stanford.nlp.pipeline.AnnotatorImplementations: and doesn't reflect what annotator it is! Should fix.
         boolean nlSplitting = Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
         if (nlSplitting) {

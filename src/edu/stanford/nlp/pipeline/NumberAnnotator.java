@@ -1,4 +1,5 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
@@ -22,7 +23,10 @@ import java.util.*;
  * @author Jenny Finkel
  */
 
-public class NumberAnnotator implements Annotator {
+public class NumberAnnotator implements Annotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(NumberAnnotator.class);
 
   private final AbstractSequenceClassifier<CoreLabel> nsc;
 
@@ -63,7 +67,7 @@ public class NumberAnnotator implements Annotator {
   @Override
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
-      System.err.print("Adding number annotation ... ");
+      log.info("Adding number annotation ... ");
     }
 
     if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
@@ -73,7 +77,7 @@ public class NumberAnnotator implements Annotator {
         doOneSentenceNew(tokens, annotation, sentence);
       }
       if (VERBOSE) {
-        System.err.println("done. Output: " + annotation.get(CoreAnnotations.SentencesAnnotation.class));
+        log.info("done. Output: " + annotation.get(CoreAnnotations.SentencesAnnotation.class));
       }
     } else if (annotation.containsKey(CoreAnnotations.TokensAnnotation.class)) {
       List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
@@ -93,11 +97,11 @@ public class NumberAnnotator implements Annotator {
       CoreLabel newWord = newFLIter.next();
       String before = origWord.ner();
       String newGuess = newWord.get(CoreAnnotations.AnswerAnnotation.class);
-      // System.err.println(origWord.word());
-      // System.err.println(origWord.ner());
+      // log.info(origWord.word());
+      // log.info(origWord.ner());
       if (VERBOSE)
-        System.err.println(newWord);
-      // System.err.println("-------------------------------------");
+        log.info(newWord);
+      // log.info("-------------------------------------");
       if ((before == null || before.equals(BACKGROUND_SYMBOL) || before.equals("MISC"))
           && !newGuess.equals(BACKGROUND_SYMBOL)) {
         origWord.setNER(newGuess);

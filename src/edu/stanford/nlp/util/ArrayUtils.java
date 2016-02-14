@@ -1,4 +1,5 @@
-package edu.stanford.nlp.util;
+package edu.stanford.nlp.util; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -15,7 +16,10 @@ import java.util.function.Predicate;
  * @author Huy Nguyen (htnguyen@cs.stanford.edu)
  * @author Michel Galley (mgalley@stanford.edu)
  */
-public class ArrayUtils {
+public class ArrayUtils  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ArrayUtils.class);
 
   /**
    * Should not be instantiated
@@ -362,7 +366,7 @@ public class ArrayUtils {
 //       int prevNum = 0;
 //       for (int f : orig) {
 //         StringBuilder bits1 = new StringBuilder();
-//               System.err.print(f+"\t");
+//               log.info(f+"\t");
 //               String n = Integer.toString(f-prevNum, 2);
 //               String n1 = Integer.toString(n.length(), 2);
 //               for (int ii = 0; ii < n1.length(); ii++) {
@@ -371,7 +375,7 @@ public class ArrayUtils {
 //               bits1.append("0");
 //               bits1.append(n1.substring(1));
 //               bits1.append(n.substring(1));
-//               System.err.print(bits1+"\t");
+//               log.info(bits1+"\t");
 //               bits.append(bits1);
 //               prevNum = f;
 //             }

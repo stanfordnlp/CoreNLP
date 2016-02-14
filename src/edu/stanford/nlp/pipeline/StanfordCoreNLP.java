@@ -85,7 +85,10 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  * @author Steven Bethard
  */
 
-public class StanfordCoreNLP extends AnnotationPipeline {
+public class StanfordCoreNLP extends AnnotationPipeline  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(StanfordCoreNLP.class);
 
   enum OutputFormat { TEXT, XML, JSON, CONLL, CONLLU, SERIALIZED }
 
@@ -814,10 +817,10 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   private static void shell(StanfordCoreNLP pipeline) throws IOException {
     String encoding = pipeline.getEncoding();
     BufferedReader r = new BufferedReader(IOUtils.encodedInputStreamReader(System.in, encoding));
-    System.err.println("Entering interactive shell. Type q RETURN or EOF to quit.");
+    log.info("Entering interactive shell. Type q RETURN or EOF to quit.");
     final OutputFormat outputFormat = OutputFormat.valueOf(pipeline.properties.getProperty("outputFormat", "text").toUpperCase());
     while (true) {
-      System.err.print("NLP> ");
+      log.info("NLP> ");
       String line = r.readLine();
       if (line == null || line.equalsIgnoreCase("q")) {
         break;

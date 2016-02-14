@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,7 +31,10 @@ import edu.stanford.nlp.util.Pair;
  * @author Spence Green
  *
  */
-public class FactoredLexicon extends BaseLexicon {
+public class FactoredLexicon extends BaseLexicon  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(FactoredLexicon.class);
 
   private static final long serialVersionUID = -744693222804176489L;
 
@@ -79,7 +83,7 @@ public class FactoredLexicon extends BaseLexicon {
       return rulesWithWord[word].iterator();
 
     } else {
-      if (DEBUG) System.err.println("UNKNOWN WORD");
+      if (DEBUG) log.info("UNKNOWN WORD");
       // Unknown word signatures
       Set<IntTaggedWord> lexRules = Generics.newHashSet(10);
       List<IntTaggedWord> uwRules = rulesWithWord[wordIndex.indexOf(UNKNOWN_WORD)];
@@ -305,7 +309,7 @@ public class FactoredLexicon extends BaseLexicon {
         System.err.printf("[%d]",treeId);
       }
       if (DEBUG && (treeId % 10000) == 0) {
-        System.err.println();
+        log.info();
       }
     }
   }
@@ -353,11 +357,11 @@ public class FactoredLexicon extends BaseLexicon {
       }
     }
 
-    System.err.print("The " + rulesWithWord[unkWord].size() + " open class tags are: [");
+    log.info("The " + rulesWithWord[unkWord].size() + " open class tags are: [");
     for (IntTaggedWord item : rulesWithWord[unkWord]) {
-      System.err.print(" " + tagIndex.get(item.tag()));
+      log.info(" " + tagIndex.get(item.tag()));
     }
-    System.err.println(" ] ");
+    log.info(" ] ");
 
     // Boundary symbol has one tagging
     rulesWithWord[boundaryWordId].add(new IntTaggedWord(boundaryWordId, boundaryTagId));
@@ -382,11 +386,11 @@ public class FactoredLexicon extends BaseLexicon {
         int wordId = lexicon.wordIndex.indexOf(word);
         // Two checks to see if we keep this example
         if (tagId < 0) {
-          System.err.println("Discarding training example: " + word + " " + tag);
+          log.info("Discarding training example: " + word + " " + tag);
           continue;
         }
 //        if (counts.probWordTag(wordId, tagId) == 0.0) {
-//          System.err.println("Discarding low counts <w,t> pair: " + word + " " + tag);
+//          log.info("Discarding low counts <w,t> pair: " + word + " " + tag);
 //          continue;
 //        }
 
@@ -519,7 +523,7 @@ public class FactoredLexicon extends BaseLexicon {
         noRules = false;
         IntTaggedWord iTW = itr.next();
         if (iTW.tag() == event.tagId()) {
-          System.err.print("GOLD-");
+          log.info("GOLD-");
           goldTagId = iTW.tag();
         }
         float tagScore = lexicon.score(iTW, event.getLoc(), event.word(), event.featureStr());
@@ -537,13 +541,13 @@ public class FactoredLexicon extends BaseLexicon {
           errors.incrementCount(goldTag);
         }
       }
-      System.err.println();
+      log.info();
     }
 
     // Output accuracy
     double acc = (double) nCorrect / (double) tuningSet.size();
     System.err.printf("%n%nACCURACY: %.2f%n%n", acc*100.0);
-    System.err.println("% of errors by type:");
+    log.info("% of errors by type:");
     List<String> biggestKeys = new ArrayList<>(errors.keySet());
     Collections.sort(biggestKeys, Counters.toComparator(errors, false, true));
     Counters.normalize(errors);

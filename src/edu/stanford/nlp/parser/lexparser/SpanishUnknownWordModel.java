@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.international.spanish.SpanishUnknownWordSignatures;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -6,7 +7,10 @@ import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.StringUtils;
 
 
-public class SpanishUnknownWordModel extends BaseUnknownWordModel {
+public class SpanishUnknownWordModel extends BaseUnknownWordModel  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(SpanishUnknownWordModel.class);
 
   protected final boolean smartMutation;
 

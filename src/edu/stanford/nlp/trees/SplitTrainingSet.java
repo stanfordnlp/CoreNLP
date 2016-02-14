@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 
+import edu.stanford.nlp.util.logging.Redwood;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +27,7 @@ import edu.stanford.nlp.util.StringUtils;
  * <code>java edu.stanford.nlp.trees.SplitTrainingSet -input foo.mrg -output bar.mrg -seed 1000</code>
  */
 public class SplitTrainingSet {
-  private static Logger logger = LoggerFactory.getLogger(SplitTrainingSet.class);
+  private static Redwood.RedwoodChannels logger = Redwood.channels(SplitTrainingSet.class);
 
   @ArgumentParser.Option(name="input", gloss="The file to use as input.", required=true)
   private static String INPUT = null;

@@ -24,7 +24,8 @@
 //    USA
 //
 
-package edu.stanford.nlp.dcoref;
+package edu.stanford.nlp.dcoref; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -87,7 +88,10 @@ import edu.stanford.nlp.util.logging.NewlineLogFormatter;
  * @author Heeyoung Lee
  * @author Sudarshan Rangarajan
  */
-public class SieveCoreferenceSystem {
+public class SieveCoreferenceSystem  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(SieveCoreferenceSystem.class);
 
   public static final Logger logger = Logger.getLogger(SieveCoreferenceSystem.class.getName());
 
@@ -362,10 +366,10 @@ public class SieveCoreferenceSystem {
       logger.setLevel(Level.FINE);
       fh.setFormatter(new NewlineLogFormatter());
     } catch (SecurityException e) {
-      System.err.println("ERROR: cannot initialize logger!");
+      log.error("cannot initialize logger!");
       throw e;
     } catch (IOException e) {
-      System.err.println("ERROR: cannot initialize logger!");
+      log.error("cannot initialize logger!");
       throw e;
     }
 

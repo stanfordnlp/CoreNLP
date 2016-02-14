@@ -24,7 +24,8 @@
 //    parser-support@lists.stanford.edu
 //    http://nlp.stanford.edu/software/lex-parser.shtml
 
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -54,7 +55,10 @@ import edu.stanford.nlp.util.DeltaIndex;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
 
 
-public class LexicalizedParserQuery implements ParserQuery {
+public class LexicalizedParserQuery implements ParserQuery  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(LexicalizedParserQuery.class);
 
   private final Options op;
   private final TreeTransformer debinarizer;
@@ -646,8 +650,8 @@ public class LexicalizedParserQuery implements ParserQuery {
       if (op.testOptions.maxLength != -0xDEADBEEF) {
         // this means they explicitly asked for a length they cannot handle.
         // Throw exception.  Avoid string concatenation before throw it.
-        System.err.print("NOT ENOUGH MEMORY TO PARSE SENTENCES OF LENGTH ");
-        System.err.println(op.testOptions.maxLength);
+        log.info("NOT ENOUGH MEMORY TO PARSE SENTENCES OF LENGTH ");
+        log.info(op.testOptions.maxLength);
         throw e;
       }
       if (pparser.hasParse() && fallbackToPCFG) {
@@ -772,7 +776,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     }
     // none found so add one.
     if (op.testOptions.verbose) {
-      System.err.println("Adding missing final punctuation to sentence.");
+      log.info("Adding missing final punctuation to sentence.");
     }
     String[] sfpWords = tlp.sentenceFinalPunctuationWords();
     if (sfpWords.length > 0) {

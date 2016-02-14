@@ -1,5 +1,6 @@
 
-package edu.stanford.nlp.util.logging;
+package edu.stanford.nlp.util.logging; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -39,7 +40,10 @@ import edu.stanford.nlp.util.*;
  * @author David McClosky
  */
 
-public class Redwood {
+public class Redwood  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(Redwood.class);
 
   /*
       ---------------------------------------------------------
@@ -1477,7 +1481,7 @@ public class Redwood {
     //--System Streams
     Redwood.captureSystemStreams(true, true);
     System.out.println("Hello World");
-    System.err.println("This is an error!");
+    log.info("This is an error!");
 
     //--Neat Exit
 //    RedwoodConfiguration.standard().collapseExact().apply();

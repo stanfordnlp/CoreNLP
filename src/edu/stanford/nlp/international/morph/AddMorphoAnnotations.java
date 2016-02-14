@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.morph;
+package edu.stanford.nlp.international.morph; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -27,7 +28,10 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Spence Green
  *
  */
-public final class AddMorphoAnnotations {
+public final class AddMorphoAnnotations  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(AddMorphoAnnotations.class);
   
   private static final int minArgs = 2;
   private static String usage() {
@@ -139,7 +143,7 @@ public final class AddMorphoAnnotations {
    */
   public static void main(String[] args) {
     if(args.length < minArgs) {
-      System.err.println(usage());
+      log.info(usage());
       System.exit(-1);
     }
     Properties options = StringUtils.argsToProperties(args, argSpec());
@@ -147,7 +151,7 @@ public final class AddMorphoAnnotations {
     boolean isMorphTreeFile = PropertiesUtils.getBool(options, "g", false);
     String[] parsedArgs = options.getProperty("").split("\\s+");
     if (parsedArgs.length != 2) {
-      System.err.println(usage());
+      log.info(usage());
       System.exit(-1);
     }
     

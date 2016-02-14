@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -49,7 +50,10 @@ import edu.stanford.nlp.parser.lexparser.ChineseCharacterBasedLexicon.Symbol;
  *
  * @author Galen Andrew
  */
-public class ChineseCharacterBasedLexiconTraining {
+public class ChineseCharacterBasedLexiconTraining  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseCharacterBasedLexiconTraining.class);
   protected static final NumberFormat formatter = new DecimalFormat("0.000");
 
   public static void printStats(Collection<Tree> trees, PrintWriter pw) {
@@ -130,14 +134,14 @@ public class ChineseCharacterBasedLexiconTraining {
       pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream((argMap.get("-out"))[0]), "GB18030"), true);
     }
 
-    System.err.println("ChineseCharacterBasedLexicon called with args:");
+    log.info("ChineseCharacterBasedLexicon called with args:");
 
     ChineseTreebankParserParams ctpp = new ChineseTreebankParserParams();
     for (int i = 0; i < args.length; i++) {
       ctpp.setOptionFlag(args, i);
-      System.err.print(" " + args[i]);
+      log.info(" " + args[i]);
     }
-    System.err.println();
+    log.info();
     Options op = new Options(ctpp);
 
     if (argMap.containsKey("-stats")) {
@@ -145,7 +149,7 @@ public class ChineseCharacterBasedLexiconTraining {
       MemoryTreebank rawTrainTreebank = op.tlpParams.memoryTreebank();
       FileFilter trainFilt = new NumberRangesFileFilter(statArgs[1], false);
       rawTrainTreebank.loadPath(new File(statArgs[0]), trainFilt);
-      System.err.println("Done reading trees.");
+      log.info("Done reading trees.");
       MemoryTreebank trainTreebank;
       if (argMap.containsKey("-annotate")) {
         trainTreebank = new MemoryTreebank();
@@ -153,7 +157,7 @@ public class ChineseCharacterBasedLexiconTraining {
         for (Tree tree : rawTrainTreebank) {
           trainTreebank.add(annotator.transformTree(tree));
         }
-        System.err.println("Done annotating trees.");
+        log.info("Done annotating trees.");
       } else {
         trainTreebank = rawTrainTreebank;
       }
@@ -187,12 +191,12 @@ public class ChineseCharacterBasedLexiconTraining {
         lp = LexicalizedParser.trainFromTreebank(parserArgs[0], trainFilt, op);
         if (parserArgs.length == 3) {
           String filename = parserArgs[2];
-          System.err.println("Writing parser in serialized format to file " + filename + " ");
+          log.info("Writing parser in serialized format to file " + filename + " ");
           System.err.flush();
           ObjectOutputStream out = IOUtils.writeStreamFromString(filename);
           out.writeObject(lp);
           out.close();
-          System.err.println("done.");
+          log.info("done.");
         }
       } else {
         String parserFile = parserArgs[0];
@@ -224,7 +228,7 @@ public class ChineseCharacterBasedLexiconTraining {
         MemoryTreebank rawTrainTreebank = op.tlpParams.memoryTreebank();
         FileFilter trainFilt = new NumberRangesFileFilter(lexArgs[1], false);
         rawTrainTreebank.loadPath(new File(lexArgs[0]), trainFilt);
-        System.err.println("Done reading trees.");
+        log.info("Done reading trees.");
         MemoryTreebank trainTreebank;
         if (argMap.containsKey("-annotate")) {
           trainTreebank = new MemoryTreebank();
@@ -233,26 +237,26 @@ public class ChineseCharacterBasedLexiconTraining {
             tree = annotator.transformTree(tree);
             trainTreebank.add(tree);
           }
-          System.err.println("Done annotating trees.");
+          log.info("Done annotating trees.");
         } else {
           trainTreebank = rawTrainTreebank;
         }
         lex.initializeTraining(trainTreebank.size());
         lex.train(trainTreebank);
         lex.finishTraining();
-        System.err.println("Done training lexicon.");
+        log.info("Done training lexicon.");
         if (lexArgs.length == 3) {
           String filename = lexArgs.length == 3 ? lexArgs[2] : "parsers/chineseCharLex.ser.gz";
-          System.err.println("Writing lexicon in serialized format to file " + filename + " ");
+          log.info("Writing lexicon in serialized format to file " + filename + " ");
           System.err.flush();
           ObjectOutputStream out = IOUtils.writeStreamFromString(filename);
           out.writeObject(lex);
           out.close();
-          System.err.println("done.");
+          log.info("done.");
         }
       } else {
         String lexFile = lexArgs.length == 1 ? lexArgs[0] : "parsers/chineseCharLex.ser.gz";
-        System.err.println("Reading Lexicon from file " + lexFile);
+        log.info("Reading Lexicon from file " + lexFile);
         ObjectInputStream in = IOUtils.readStreamFromString(lexFile);
         try {
           lex = (Lexicon) in.readObject();
@@ -303,15 +307,15 @@ public class ChineseCharacterBasedLexiconTraining {
       }
       TreeToBracketProcessor proc = new TreeToBracketProcessor(evalTypes);
 
-      System.err.println("Testing...");
+      log.info("Testing...");
       for (Tree goldTop : testTreebank) {
         Tree gold = goldTop.firstChild();
         List<HasWord> goldSentence = gold.yieldHasWord();
         if (goldSentence.size() > maxLength) {
-          System.err.println("Skipping sentence; too long: " + goldSentence.size());
+          log.info("Skipping sentence; too long: " + goldSentence.size());
           continue;
         } else {
-          System.err.println("Processing sentence; length: " + goldSentence.size());
+          log.info("Processing sentence; length: " + goldSentence.size());
         }
         List<HasWord> s;
         if (segmentWords) {

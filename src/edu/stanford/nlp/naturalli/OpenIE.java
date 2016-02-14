@@ -1,4 +1,5 @@
-package edu.stanford.nlp.naturalli;
+package edu.stanford.nlp.naturalli; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.hcoref.data.CorefChain;
 import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
@@ -73,7 +74,10 @@ import java.util.stream.Collectors;
 // TODO(gabor): handle things like "One example of chemical energy is that found in the food that we eat ."
 //
 @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
-public class OpenIE implements Annotator {
+public class OpenIE implements Annotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(OpenIE.class);
 
   private enum OutputFormat { REVERB, OLLIE, DEFAULT }
 
@@ -187,7 +191,7 @@ public class OpenIE implements Annotator {
         clauseSplitter = Optional.empty();
       } else {
         if (noModel) {
-          System.err.println("Not loading a splitter model");
+          log.info("Not loading a splitter model");
           clauseSplitter = Optional.of(ClauseSplitterSearchProblem::new);
         } else {
           clauseSplitter = Optional.of(ClauseSplitter.load(splitterModel));
@@ -658,7 +662,7 @@ public class OpenIE implements Annotator {
       }
     }
     if (empty) {
-      System.err.println("No extractions in: " + ("stdin".equals(docid) ? document : docid));
+      log.info("No extractions in: " + ("stdin".equals(docid) ? document : docid));
     }
   }
 
@@ -728,7 +732,7 @@ public class OpenIE implements Annotator {
     }
     // Some error checks on the arguments
     if (!props.getProperty("annotators").toLowerCase().contains("openie")) {
-      System.err.println("ERROR: If you specify custom annotators, you must at least include 'openie'");
+      log.error("If you specify custom annotators, you must at least include 'openie'");
       System.exit(1);
     }
     // Copy properties that are missing the 'openie' prefix
@@ -740,13 +744,13 @@ public class OpenIE implements Annotator {
     // Run OpenIE
     if (filesToProcess.length == 0) {
       // Running from stdin; one document per line.
-      System.err.println("Processing from stdin. Enter one sentence per line.");
+      log.info("Processing from stdin. Enter one sentence per line.");
       Scanner scanner = new Scanner(System.in);
       String line;
       try {
         line = scanner.nextLine();
       } catch (NoSuchElementException e) {
-        System.err.println("No lines found on standard in");
+        log.info("No lines found on standard in");
         return;
       }
       while (line != null) {
@@ -763,12 +767,12 @@ public class OpenIE implements Annotator {
       // This will prevent a nasty surprise 10 hours into a running job...
       for (String file : filesToProcess) {
         if (!new File(file).exists() || !new File(file).canRead()) {
-          System.err.println("ERROR: Cannot read file (or file does not exist: '" + file + "'");
+          log.error("Cannot read file (or file does not exist: '" + file + "'");
         }
       }
       // Actually process the files.
       for (String file : filesToProcess) {
-        System.err.println("Processing file: " + file);
+        log.info("Processing file: " + file);
         if (ArgumentParser.threads > 1) {
           // Multi-threaded: submit a job to run
           final String fileToSubmit = file;
@@ -789,9 +793,9 @@ public class OpenIE implements Annotator {
 
     // Exit
     exec.shutdown();
-    System.err.println("All files have been queued; awaiting termination...");
+    log.info("All files have been queued; awaiting termination...");
     exec.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
-    System.err.println("DONE processing files. " + exceptionCount.get() + " exceptions encountered.");
+    log.info("DONE processing files. " + exceptionCount.get() + " exceptions encountered.");
     System.exit(exceptionCount.get());
   }
 }

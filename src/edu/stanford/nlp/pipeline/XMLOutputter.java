@@ -1,4 +1,5 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -43,7 +44,10 @@ import nu.xom.*;
  * see {@link edu.stanford.nlp.pipeline.AnnotationSerializer}; e.g.,
  * {@link edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer}.
  */
-public class XMLOutputter extends AnnotationOutputter {
+public class XMLOutputter extends AnnotationOutputter  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(XMLOutputter.class);
   // the namespace is set in the XSLT file
   private static final String NAMESPACE_URI = null;
   private static final String STYLESHEET_NAME = "CoreNLP-to-HTML.xsl";
@@ -245,7 +249,7 @@ public class XMLOutputter extends AnnotationOutputter {
     StringWriter treeStrWriter = new StringWriter();
     constituentTreePrinter.printTree(tree, new PrintWriter(treeStrWriter, true));
     String temp = treeStrWriter.toString();
-    //System.err.println(temp);
+    //log.info(temp);
     treeInfo.appendChild(temp);
   }
 

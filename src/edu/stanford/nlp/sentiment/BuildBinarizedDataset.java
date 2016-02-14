@@ -1,4 +1,5 @@
-package edu.stanford.nlp.sentiment;
+package edu.stanford.nlp.sentiment; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.StringReader;
 import java.util.List;
@@ -21,7 +22,10 @@ import edu.stanford.nlp.util.Pair;
  * @author John Bauer
  * @author Richard Socher
  */
-public class BuildBinarizedDataset {
+public class BuildBinarizedDataset  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(BuildBinarizedDataset.class);
 
   private BuildBinarizedDataset() {} // static methods only
 
@@ -148,7 +152,7 @@ public class BuildBinarizedDataset {
         sentimentModelPath = args[argIndex + 1];
         argIndex += 2;
       } else {
-        System.err.println("Unknown argument " + args[argIndex]);
+        log.info("Unknown argument " + args[argIndex]);
         System.exit(2);
       }
     }
@@ -185,7 +189,7 @@ public class BuildBinarizedDataset {
       Integer mainLabel = new Integer(tokens.get(0).word());
       //System.out.print("Main Sentence Label: " + mainLabel.toString() + "; ");
       tokens = tokens.subList(1, tokens.size());
-      //System.err.println(tokens);
+      //log.info(tokens);
 
       Map<Pair<Integer, Integer>, String> spanToLabels = Generics.newHashMap();
       for (int i = 1; i < lines.length; ++i) {

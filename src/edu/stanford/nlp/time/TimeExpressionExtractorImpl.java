@@ -5,6 +5,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.*;
 import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -19,7 +20,8 @@ import java.util.logging.Logger;
 @SuppressWarnings("unchecked")
 public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
 
-  protected static final Logger logger = Logger.getLogger(TimeExpressionExtractorImpl.class.getName());
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels logger = Redwood.channels(TimeExpressionExtractorImpl.class);
 
   // Patterns for extracting time expressions
   TimeExpressionPatterns timexPatterns;
@@ -49,12 +51,6 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
   public void init(Options options)
   {
     this.options = options;
-    // TODO: does not allow for multiple loggers
-    if (options.verbose) {
-      logger.setLevel(Level.FINE);
-    } else {
-      logger.setLevel(Level.SEVERE);
-    }
     NumberNormalizer.setVerbose(options.verbose);
     if (options.grammarFilename == null) {
       options.grammarFilename = Options.DEFAULT_GRAMMAR_FILES;
@@ -62,7 +58,6 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
     }
     timexPatterns = new GenericTimeExpressionPatterns(options);
     this.expressionExtractor = timexPatterns.createExtractor();
-    this.expressionExtractor.setLogger(logger);
   }
 
   @Override

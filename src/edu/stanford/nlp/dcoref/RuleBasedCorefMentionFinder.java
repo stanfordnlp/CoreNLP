@@ -1,4 +1,5 @@
-package edu.stanford.nlp.dcoref;
+package edu.stanford.nlp.dcoref; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +31,10 @@ import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.*;
 
-public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
+public class RuleBasedCorefMentionFinder implements CorefMentionFinder  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(RuleBasedCorefMentionFinder.class);
 
   protected boolean assignIds = true;
 //  protected int maxID = -1;
@@ -393,7 +397,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
   }
 
   private static Tree funkyFindLeafWithApproximateSpan(Tree root, String token, int index, int approximateness) {
-    // System.err.println("Searching " + root + "\n  for " + token + " at position " + index + " (plus up to " + approximateness + ")");
+    // log.info("Searching " + root + "\n  for " + token + " at position " + index + " (plus up to " + approximateness + ")");
     List<Tree> leaves = root.getLeaves();
     for (Tree leaf : leaves) {
       CoreLabel label = CoreLabel.class.cast(leaf.label());
@@ -411,7 +415,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
                        "token = |" + token + "|" + index + "|, approx=" + approximateness);
     for (Tree leaf : leaves) {
       if (token.equals(leaf.value())) {
-        //System.err.println("Found something: returning " + leaf);
+        //log.info("Found something: returning " + leaf);
         return leaf;
       }
     }

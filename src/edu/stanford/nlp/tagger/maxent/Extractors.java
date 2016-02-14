@@ -6,7 +6,8 @@
  */
 
 
-package edu.stanford.nlp.tagger.maxent;
+package edu.stanford.nlp.tagger.maxent; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
@@ -21,7 +22,10 @@ import edu.stanford.nlp.util.Pair;
  *  @author Kristina Toutanova
  *  @version 1.0
  */
-public class Extractors implements Serializable {
+public class Extractors implements Serializable  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(Extractors.class);
 
   private final Extractor[] v;
 
@@ -68,7 +72,7 @@ public class Extractors implements Serializable {
       }
     }
     if(DEBUG) {
-      System.err.println("Extractors: "+this);
+      log.info("Extractors: "+this);
       System.err.printf("Local: %d extractors\n",local.size());
       System.err.printf("Local context: %d extractors\n",localContext.size());
       System.err.printf("Dynamic: %d extractors\n",dynamic.size());

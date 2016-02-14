@@ -1,4 +1,5 @@
-package edu.stanford.nlp.util;
+package edu.stanford.nlp.util; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -12,7 +13,10 @@ package edu.stanford.nlp.util;
  *
  * @author Bill MacCartney
  */
-public abstract class StringParsingTask<E> {
+public abstract class StringParsingTask<E>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(StringParsingTask.class);
   
   // This class represents a parser working on a specific string.  We
   // construct from a specific string in order 
@@ -55,7 +59,7 @@ public abstract class StringParsingTask<E> {
       ch = read();
     }
     unread();
-    // System.err.println("Read text: ["+sb+"]");
+    // log.info("Read text: ["+sb+"]");
     return sb.toString().intern();
   }
 
@@ -72,7 +76,7 @@ public abstract class StringParsingTask<E> {
       }
     }
     unread();
-    // System.err.println("Read text: ["+sb+"]");
+    // log.info("Read text: ["+sb+"]");
     return sb.toString().intern();
   }
 

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.dcoref;
+package edu.stanford.nlp.dcoref; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -44,7 +45,10 @@ import java.util.regex.Pattern;
  *
  * @author Angel Chang
  */
-public class CoNLL2011DocumentReader {
+public class CoNLL2011DocumentReader  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CoNLL2011DocumentReader.class);
 
   private static final int FIELD_LAST = -1;
 
@@ -689,7 +693,7 @@ public class CoNLL2011DocumentReader {
 
   public static void usage()
   {
-    System.err.println("java edu.stanford.nlp.dcoref.CoNLL2011DocumentReader [-ext <extension to match>] -i <inputpath> -o <outputfile>");
+    log.info("java edu.stanford.nlp.dcoref.CoNLL2011DocumentReader [-ext <extension to match>] -i <inputpath> -o <outputfile>");
   }
 
   public static Pair<Integer,Integer> getMention(Integer index, String corefG, List<CoreLabel> sentenceAnno) {

@@ -24,7 +24,8 @@
 //    Support/Questions: java-nlp-user@lists.stanford.edu
 //    Licensing: java-nlp-support@lists.stanford.edu
 
-package edu.stanford.nlp.ie.crf;
+package edu.stanford.nlp.ie.crf; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.math.ArrayMath;
@@ -41,7 +42,10 @@ import java.util.zip.GZIPInputStream;
 
  * @author Mengqiu Wang
  */
-public class CRFClassifierWithLOP<IN extends CoreMap> extends CRFClassifier<IN> {
+public class CRFClassifierWithLOP<IN extends CoreMap> extends CRFClassifier<IN>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CRFClassifierWithLOP.class);
 
   List<Set<Integer>> featureIndicesSetArray;
   List<List<Integer>> featureIndicesListArray;
@@ -129,7 +133,7 @@ public class CRFClassifierWithLOP<IN extends CoreMap> extends CRFClassifier<IN> 
 
     if (flags.initialLopWeights != null) {
       try {
-        System.err.println("Reading initial LOP weights from file " + flags.initialLopWeights + " ...");
+        log.info("Reading initial LOP weights from file " + flags.initialLopWeights + " ...");
         BufferedReader br = IOUtils.readerFromString(flags.initialLopWeights);
         List<double[]> listOfWeights = new ArrayList<>(numLopExpert);
         for (String line; (line = br.readLine()) != null; ) {
@@ -142,7 +146,7 @@ public class CRFClassifierWithLOP<IN extends CoreMap> extends CRFClassifier<IN> 
           listOfWeights.add(wArr);
         }
         assert(listOfWeights.size() == numLopExpert);
-        System.err.println("Done!");
+        log.info("Done!");
         for (int i = 0; i < numLopExpert; i++)
           lopExpertWeights[i] = listOfWeights.get(i);
         // DataInputStream dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(
@@ -199,7 +203,7 @@ public class CRFClassifierWithLOP<IN extends CoreMap> extends CRFClassifier<IN> 
       initialScales = func.initial();
     } else {
       try {
-        System.err.println("Reading initial LOP scales from file " + flags.initialLopScales);
+        log.info("Reading initial LOP scales from file " + flags.initialLopScales);
         DataInputStream dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(
             flags.initialLopScales))));
         initialScales = ConvertByteArray.readDoubleArr(dis);
@@ -211,9 +215,9 @@ public class CRFClassifierWithLOP<IN extends CoreMap> extends CRFClassifier<IN> 
     double[] learnedParams = minimizer.minimize(func, flags.tolerance, initialScales);
     double[] rawScales = func.separateLopScales(learnedParams);
     double[] lopScales = ArrayMath.softmax(rawScales);
-    System.err.println("After SoftMax Transformation, learned scales are:");
+    log.info("After SoftMax Transformation, learned scales are:");
     for (int lopIter = 0; lopIter < numLopExpert; lopIter++) {
-      System.err.println("lopScales[" + lopIter + "] = " + lopScales[lopIter]);
+      log.info("lopScales[" + lopIter + "] = " + lopScales[lopIter]);
     }
     double[][] learnedLopExpertWeights = lopExpertWeights;
     if (flags.backpropLopTraining) {

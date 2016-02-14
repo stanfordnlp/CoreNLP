@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
@@ -18,7 +19,10 @@ import java.util.Properties;
  *
  * @author Dan Klein
  */
-public class TestOptions implements Serializable {
+public class TestOptions implements Serializable  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TestOptions.class);
 
   static final String DEFAULT_PRE_TAGGER =
     "/u/nlp/data/pos-tagger/distrib/wsj-0-18-bidirectional-nodistsim.tagger";
@@ -294,7 +298,7 @@ public class TestOptions implements Serializable {
 
   public void display() {
     String str = toString();
-    System.err.println(str);
+    log.info(str);
   }
 
   @Override

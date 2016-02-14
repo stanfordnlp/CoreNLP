@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.french.scripts;
+package edu.stanford.nlp.international.french.scripts; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -41,7 +42,10 @@ import edu.stanford.nlp.util.Generics;
  * @author Spence Green
  *
  */
-public final class SplitCanditoTrees {
+public final class SplitCanditoTrees  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(SplitCanditoTrees.class);
 
   /**
    * true -- mwetoolkit experiments, factored lexicon experiments
@@ -252,7 +256,7 @@ public final class SplitCanditoTrees {
     int size = fSizeQueue.remove();
     String filename = fNameQueue.remove();
 
-    System.err.println("Outputing " + filename);
+    log.info("Outputing " + filename);
 
     PrintWriter writer =
       new PrintWriter(new BufferedWriter
@@ -262,7 +266,7 @@ public final class SplitCanditoTrees {
     int outputCount = 0;
     for (String id : ids) {
       if (!treeMap.containsKey(id)) {
-        System.err.println("Missing id: " + id);
+        log.info("Missing id: " + id);
         continue;
       }
 
@@ -270,7 +274,7 @@ public final class SplitCanditoTrees {
       TregexMatcher m = pBadTree.matcher(tree);
       TregexMatcher m2 = pBadTree2.matcher(tree);
       if(m.find() || m2.find()) {
-        System.err.println("Discarding tree: " + tree.toString());
+        log.info("Discarding tree: " + tree.toString());
         continue;
       }
       
@@ -279,8 +283,8 @@ public final class SplitCanditoTrees {
       tree = tt.transformTree(tree);
       if (tree.firstChild().children().length == 0) {
         // Some trees have only punctuation. Tregex will mangle these. Don't throw those away.
-        System.err.println("Saving tree: " + tree.toString());
-        System.err.println("Backup: " + backupCopy.toString());
+        log.info("Saving tree: " + tree.toString());
+        log.info("Backup: " + backupCopy.toString());
         tree = backupCopy;
       }
       
@@ -303,7 +307,7 @@ public final class SplitCanditoTrees {
         outputCount = 0;
         size = fSizeQueue.remove();
         filename = fNameQueue.remove();
-        System.err.println("Outputing " + filename);
+        log.info("Outputing " + filename);
         writer.close();
         writer =
           new PrintWriter(new BufferedWriter
@@ -355,21 +359,21 @@ public final class SplitCanditoTrees {
     // all subsequent args are .xml files with the trees in them
     List<String> ids = readIds(args[0]);
 
-    System.err.println("Read " + ids.size() + " ids");
+    log.info("Read " + ids.size() + " ids");
 
     String[] newArgs = new String[args.length - 1];
     for (int i = 1; i < args.length; ++i)
       newArgs[i - 1] = args[i];
 
     Map<String, Tree> treeMap = readTrees(newArgs);
-    System.err.println("Read " + treeMap.size() + " trees");
+    log.info("Read " + treeMap.size() + " trees");
 
     preprocessMWEs(treeMap);
 
     outputSplits(ids, treeMap);
     
     if (nTokens != 0) {
-      System.err.println("CORPUS STATISTICS");
+      log.info("CORPUS STATISTICS");
       System.err.printf("#tokens:\t%d%n", nTokens);
       System.err.printf("#with morph:\t%d%n", nMorphAnalyses);
     }

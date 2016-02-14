@@ -1,4 +1,5 @@
-package edu.stanford.nlp.tagger.util;
+package edu.stanford.nlp.tagger.util; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.ling.TaggedWord;
@@ -23,11 +24,14 @@ import java.util.Random;
  *
  * @author John Bauer
  */
-public class MakePrefixFile {
+public class MakePrefixFile  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(MakePrefixFile.class);
 
   public static void main(String[] args) {
     Properties config = StringUtils.argsToProperties(args);
-    System.err.println(config);
+    log.info(config);
 
     boolean fullSentence = PropertiesUtils.getBool(config, "fullSentence", false);
 

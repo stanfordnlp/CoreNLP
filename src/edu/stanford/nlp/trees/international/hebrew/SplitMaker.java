@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.international.hebrew;
+package edu.stanford.nlp.trees.international.hebrew; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 
@@ -14,7 +15,10 @@ import edu.stanford.nlp.trees.TreebankLanguagePack;
  * @author Spence Green
  *
  */
-public class SplitMaker {
+public class SplitMaker  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(SplitMaker.class);
 
   /**
    * @param args

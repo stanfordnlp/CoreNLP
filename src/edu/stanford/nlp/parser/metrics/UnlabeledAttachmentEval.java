@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.metrics;
+package edu.stanford.nlp.parser.metrics; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.PrintWriter;
 import java.util.Iterator;
@@ -31,7 +32,10 @@ import edu.stanford.nlp.util.StringUtils;
  *  @author Spence Green
  *
  */
-public class UnlabeledAttachmentEval extends AbstractEval {
+public class UnlabeledAttachmentEval extends AbstractEval  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(UnlabeledAttachmentEval.class);
 
   private final HeadFinder headFinder;
 
@@ -70,9 +74,9 @@ public class UnlabeledAttachmentEval extends AbstractEval {
       return;
 
     } else if (guess.yield().size() != gold.yield().size()) {
-      System.err.println("Warning: yield differs:");
-      System.err.println("Guess: " + SentenceUtils.listToString(guess.yield()));
-      System.err.println("Gold:  " + SentenceUtils.listToString(gold.yield()));
+      log.info("Warning: yield differs:");
+      log.info("Guess: " + SentenceUtils.listToString(guess.yield()));
+      log.info("Gold:  " + SentenceUtils.listToString(gold.yield()));
     }
 
     super.evaluate(guess, gold, pw);
@@ -85,7 +89,7 @@ public class UnlabeledAttachmentEval extends AbstractEval {
   @Override
   protected Set<?> makeObjects(Tree tree) {
     if (tree == null) {
-      System.err.println("Warning: null tree");
+      log.info("Warning: null tree");
       return Generics.newHashSet();
     }
     if (headFinder != null) {
@@ -147,14 +151,14 @@ public class UnlabeledAttachmentEval extends AbstractEval {
         encoding = opt.getValue()[0];
 
       } else {
-        System.err.println(usage.toString());
+        log.info(usage.toString());
         System.exit(-1);
       }
 
       //Non-option arguments located at key null
       String[] rest = argsMap.get(null);
       if(rest == null || rest.length < minArgs) {
-        System.err.println(usage.toString());
+        log.info(usage.toString());
         System.exit(-1);
       }
       goldFile = rest[0];

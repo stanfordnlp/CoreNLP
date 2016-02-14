@@ -1,5 +1,6 @@
 
-package edu.stanford.nlp.ie.machinereading.domains.ace.reader;
+package edu.stanford.nlp.ie.machinereading.domains.ace.reader; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Vector;
 
@@ -11,7 +12,10 @@ import edu.stanford.nlp.trees.Span;
  * @author David McClosky
  * @author Andrey Gusev
  */
-public class AceCharSeq {
+public class AceCharSeq  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(AceCharSeq.class);
 
   /** The exact text matched by this sequence */
   private String mText;
@@ -176,7 +180,7 @@ public class AceCharSeq {
    * AceToken phrase = new AceToken(word.toString(), lemma.toString(),
    * pos.toString(), chunk.toString(), nerc.toString(), null, null, -1);
    *
-   * //System.err.println("Constructed phrase: " + phrase.display()); return
+   * //log.info("Constructed phrase: " + phrase.display()); return
    * phrase; }
    */
 

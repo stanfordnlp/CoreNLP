@@ -20,7 +20,10 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author Sonal Gupta (sonalg@stanford.edu)
  *
  */
-public class ScorePhrasesAverageFeatures<E extends Pattern> extends PhraseScorer<E>{
+public class ScorePhrasesAverageFeatures<E extends Pattern> extends PhraseScorer<E> {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ScorePhrasesAverageFeatures.class);
 
   public ScorePhrasesAverageFeatures(ConstantsAndVariables constvar) {
     super(constvar);
@@ -73,7 +76,7 @@ public class ScorePhrasesAverageFeatures<E extends Pattern> extends PhraseScorer
           assert (Data.rawFreq.containsKey(gc));
           domainNgramNormScores.setCount(gc, getDomainNgramScore(g));
         }else
-          System.err.println("why is " + g + " not present in domainNgram");
+          log.info("why is " + g + " not present in domainNgram");
       }
 
       if (constVars.usePhraseEvalGoogleNgram)

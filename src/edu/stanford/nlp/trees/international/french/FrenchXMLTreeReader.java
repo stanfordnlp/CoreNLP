@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.international.french;
+package edu.stanford.nlp.trees.international.french; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -38,7 +39,10 @@ import edu.stanford.nlp.util.XMLUtils;
  * @author Spence Green
  *
  */
-public class FrenchXMLTreeReader implements TreeReader {
+public class FrenchXMLTreeReader implements TreeReader  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(FrenchXMLTreeReader.class);
 
   private InputStream stream;
   private final TreeNormalizer treeNormalizer;
@@ -224,7 +228,7 @@ public class FrenchXMLTreeReader implements TreeReader {
       if (lemmas != null && lemmas.size() != leafToks.size()) {
         // If this happens (and it does for a few poorly editted trees)
         // we assume something has gone wrong and ignore the lemmas.
-        System.err.println("Lemmas don't match tokens, ignoring lemmas: " +
+        log.info("Lemmas don't match tokens, ignoring lemmas: " +
                            "lemmas " + lemmas + ", tokens " + leafToks);
         lemmas = null;
       }
@@ -364,7 +368,7 @@ public class FrenchXMLTreeReader implements TreeReader {
 
 //wsg2011: Print out the observed morphological analyses
 //      for(String analysis : morphAnalyses)
-//        System.err.println(analysis);
+//        log.info(analysis);
 
       System.err.printf("%nRead %d trees%n",totalTrees);
 

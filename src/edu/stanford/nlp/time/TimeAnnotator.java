@@ -164,7 +164,10 @@ import java.util.Set;
  * </table>
  */
 
-public class TimeAnnotator implements Annotator {
+public class TimeAnnotator implements Annotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TimeAnnotator.class);
 
   private final TimeExpressionExtractorImpl timexExtractor;
   private final boolean quiet;
@@ -210,7 +213,7 @@ public class TimeAnnotator implements Annotator {
         // They may not align due to token normalizations, such as "(" to "-LRB-".
         CoreMap alignedSentence =  NumberSequenceClassifier.alignSentence(sentence);
         // uncomment the next line for verbose dumping of tokens....
-        // System.err.println("SENTENCE: " + ((ArrayCoreMap) sentence).toShorterString());
+        // log.info("SENTENCE: " + ((ArrayCoreMap) sentence).toShorterString());
         List<CoreMap> timeExpressions =
           timexExtractor.extractTimeExpressionCoreMaps(alignedSentence, docDate, timeIndex);
         if (timeExpressions != null) {

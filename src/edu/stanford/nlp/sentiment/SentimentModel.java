@@ -1,4 +1,5 @@
-package edu.stanford.nlp.sentiment;
+package edu.stanford.nlp.sentiment; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.Serializable;
 import java.io.IOException;
@@ -20,7 +21,10 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.TwoDimensionalMap;
 import edu.stanford.nlp.util.TwoDimensionalSet;
 
-public class SentimentModel implements Serializable {
+public class SentimentModel implements Serializable  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(SentimentModel.class);
   /**
    * Nx2N+1, where N is the size of the word vectors
    */
@@ -323,7 +327,7 @@ public class SentimentModel implements Serializable {
     numUnaryMatrices = unaryClassification.size();
     unaryClassificationSize = numClasses * (numHid + 1);
 
-    //System.err.println(this);
+    //log.info(this);
   }
 
   /**
@@ -636,7 +640,7 @@ public class SentimentModel implements Serializable {
     int curIndex = 0;
     for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : binaryTransform) {
       if (curIndex <= index && curIndex + entry.getValue().getNumElements() > index) {
-        System.err.println("Index " + index + " is element " + (index - curIndex) + " of binaryTransform \"" + entry.getFirstKey() + "," + entry.getSecondKey() + "\"");
+        log.info("Index " + index + " is element " + (index - curIndex) + " of binaryTransform \"" + entry.getFirstKey() + "," + entry.getSecondKey() + "\"");
         return;
       } else {
         curIndex += entry.getValue().getNumElements();
@@ -645,7 +649,7 @@ public class SentimentModel implements Serializable {
 
     for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : binaryClassification) {
       if (curIndex <= index && curIndex + entry.getValue().getNumElements() > index) {
-        System.err.println("Index " + index + " is element " + (index - curIndex) + " of binaryClassification \"" + entry.getFirstKey() + "," + entry.getSecondKey() + "\"");
+        log.info("Index " + index + " is element " + (index - curIndex) + " of binaryClassification \"" + entry.getFirstKey() + "," + entry.getSecondKey() + "\"");
         return;
       } else {
         curIndex += entry.getValue().getNumElements();
@@ -654,7 +658,7 @@ public class SentimentModel implements Serializable {
 
     for (TwoDimensionalMap.Entry<String, String, SimpleTensor> entry : binaryTensors) {
       if (curIndex <= index && curIndex + entry.getValue().getNumElements() > index) {
-        System.err.println("Index " + index + " is element " + (index - curIndex) + " of binaryTensor \"" + entry.getFirstKey() + "," + entry.getSecondKey() + "\"");
+        log.info("Index " + index + " is element " + (index - curIndex) + " of binaryTensor \"" + entry.getFirstKey() + "," + entry.getSecondKey() + "\"");
         return;
       } else {
         curIndex += entry.getValue().getNumElements();
@@ -663,7 +667,7 @@ public class SentimentModel implements Serializable {
 
     for (Map.Entry<String, SimpleMatrix> entry : unaryClassification.entrySet()) {
       if (curIndex <= index && curIndex + entry.getValue().getNumElements() > index) {
-        System.err.println("Index " + index + " is element " + (index - curIndex) + " of unaryClassification \"" + entry.getKey() + "\"");
+        log.info("Index " + index + " is element " + (index - curIndex) + " of unaryClassification \"" + entry.getKey() + "\"");
         return;
       } else {
         curIndex += entry.getValue().getNumElements();
@@ -672,14 +676,14 @@ public class SentimentModel implements Serializable {
 
     for (Map.Entry<String, SimpleMatrix> entry : wordVectors.entrySet()) {
       if (curIndex <= index && curIndex + entry.getValue().getNumElements() > index) {
-        System.err.println("Index " + index + " is element " + (index - curIndex) + " of wordVector \"" + entry.getKey() + "\"");
+        log.info("Index " + index + " is element " + (index - curIndex) + " of wordVector \"" + entry.getKey() + "\"");
         return;
       } else {
         curIndex += entry.getValue().getNumElements();
       }
     }
 
-    System.err.println("Index " + index + " is beyond the length of the parameters; total parameter space was " + totalParamSize());
+    log.info("Index " + index + " is beyond the length of the parameters; total parameter space was " + totalParamSize());
   }
 
   private static final long serialVersionUID = 1;

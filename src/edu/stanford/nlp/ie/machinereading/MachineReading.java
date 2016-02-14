@@ -1,4 +1,5 @@
-package edu.stanford.nlp.ie.machinereading;
+package edu.stanford.nlp.ie.machinereading; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +55,10 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Mihai
  * 
  */
-public class MachineReading {
+public class MachineReading  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(MachineReading.class);
   
   // Store command-line args so they can be passed to other classes
   private String[] args;
@@ -201,7 +205,7 @@ public class MachineReading {
     //TODO: 
     ArgumentParser.fillOptions(MachineReadingProperties.class, args);
     //Arguments.parse(args, mr);
-    System.err.println("PERCENTAGE OF TRAIN: " + MachineReadingProperties.percentageOfTrain);
+    log.info("PERCENTAGE OF TRAIN: " + MachineReadingProperties.percentageOfTrain);
     
     // convert args to properties
     Properties props = StringUtils.argsToProperties(args);
@@ -220,7 +224,7 @@ public class MachineReading {
     if (auxReader != null) {
       auxReader.setLoggerLevel(readerLogLevel);
     }
-    System.err.println("The reader log level is set to " + readerLogLevel);
+    log.info("The reader log level is set to " + readerLogLevel);
     //Execution.fillOptions(GenericDataSetReaderProps.class, args);
     //Arguments.parse(args, reader);
     
@@ -719,7 +723,7 @@ public class MachineReading {
   
   /** Keeps only the first percentage sentences from the given corpus */
   static Annotation keepPercentage(Annotation corpus, double percentage) {
-	  System.err.println("Using percentage of train: " + percentage);
+	  log.info("Using percentage of train: " + percentage);
 	  Annotation smaller = new Annotation(""); 
 	  List<CoreMap> sents = new ArrayList<>();
 	  List<CoreMap> fullSents = corpus.get(SentencesAnnotation.class);
@@ -727,7 +731,7 @@ public class MachineReading {
 	  for(int i = 0; i < smallSize; i ++){
 		  sents.add(fullSents.get(i));
 	  }
-	  System.err.println("TRAIN corpus size reduced from " + fullSents.size() + " to " + sents.size());
+	  log.info("TRAIN corpus size reduced from " + fullSents.size() + " to " + sents.size());
 	  smaller.set(SentencesAnnotation.class, sents);
 	  return smaller;
   }

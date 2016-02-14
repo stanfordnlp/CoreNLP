@@ -1,4 +1,5 @@
-package edu.stanford.nlp.optimization;
+package edu.stanford.nlp.optimization; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.math.ArrayMath;
 
@@ -14,7 +15,10 @@ import java.util.Random;
  * @author Alex Kleeman
  */
 
-public abstract class AbstractStochasticCachingDiffFunction extends AbstractCachingDiffFunction {
+public abstract class AbstractStochasticCachingDiffFunction extends AbstractCachingDiffFunction  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(AbstractStochasticCachingDiffFunction.class);
 
   public boolean hasNewVals = true;
   public boolean recalculatePrevBatch = false;
@@ -49,7 +53,7 @@ public abstract class AbstractStochasticCachingDiffFunction extends AbstractCach
   }
 
   public void incrementRandom(int numTimes) {
-    System.err.println("incrementing random "+numTimes+" times.");
+    log.info("incrementing random "+numTimes+" times.");
     for (int i = 0; i < numTimes; i++) {
       randGenerator.nextInt(this.dataDimension());
     }
@@ -178,7 +182,7 @@ public abstract class AbstractStochasticCachingDiffFunction extends AbstractCach
     } else if (sampleMethod == SamplingMethod.RandomWithReplacement) {
       for(int i = 0; i<batchSize;i++){
         thisBatch[i] = randGenerator.nextInt(this.dataDimension());        //Just generate a random index
-//        System.err.println("numCalls = "+(numCalls++));
+//        log.info("numCalls = "+(numCalls++));
       }
       //-----------------------------
       //ORDERED
@@ -228,27 +232,27 @@ public abstract class AbstractStochasticCachingDiffFunction extends AbstractCach
 
     if (lastXBatch == null) {
       lastXBatch = new double[domainDimension()];
-      System.err.println("Setting previous position (x).");
+      log.info("Setting previous position (x).");
     }
 
     if (lastVBatch == null) {
       lastVBatch = new double[domainDimension()];
-      System.err.println("Setting previous gain (v)");
+      log.info("Setting previous gain (v)");
     }
 
     if (derivative == null) {
       derivative = new double[domainDimension()];
-      System.err.println("Setting Derivative.");
+      log.info("Setting Derivative.");
     }
 
     if (HdotV == null) {
       HdotV = new double[domainDimension()];
-      System.err.println("Setting HdotV.");
+      log.info("Setting HdotV.");
     }
 
     if (lastBatch == null){
       lastBatch = new int[batchSize];
-      System.err.println("Setting last batch");
+      log.info("Setting last batch");
     }
     //If we want to recalculate using the previous batch
     if(recalculatePrevBatch && batchSize == lastBatch.length){
@@ -493,7 +497,7 @@ public abstract class AbstractStochasticCachingDiffFunction extends AbstractCach
   public double[] HdotVAt(double[] x, double[] v, int batchSize){
 
     if (method == StochasticCalculateMethods.ExternalFiniteDifference){
-      System.err.println("Attempt to use ExternalFiniteDifference without passing currentDerivative");
+      log.info("Attempt to use ExternalFiniteDifference without passing currentDerivative");
       throw new RuntimeException();
       /*
       if( extFiniteDiffDerivative == null )
@@ -529,7 +533,7 @@ public abstract class AbstractStochasticCachingDiffFunction extends AbstractCach
 
     if (method == StochasticCalculateMethods.ExternalFiniteDifference){
 
-      System.err.println("Attempt to use ExternalFiniteDifference without passing currentDerivative");
+      log.info("Attempt to use ExternalFiniteDifference without passing currentDerivative");
       throw new RuntimeException();
 
     }

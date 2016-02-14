@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.international.tuebadz;
+package edu.stanford.nlp.trees.international.tuebadz; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.regex.Pattern;
 
@@ -12,7 +13,10 @@ import edu.stanford.nlp.util.Generics;
  *
  *  @author Roger Levy (rog@csli.stanford.edu)
  */
-public class TueBaDZHeadFinder extends AbstractCollinsHeadFinder {
+public class TueBaDZHeadFinder extends AbstractCollinsHeadFinder  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TueBaDZHeadFinder.class);
 
   private static final long serialVersionUID = 1L;
 
@@ -98,7 +102,7 @@ public class TueBaDZHeadFinder extends AbstractCollinsHeadFinder {
      Tree[] kids = t.children();
      for (Tree kid : kids) {
        if (headMarkedPattern.matcher(kid.label().value()).find() || headMarkedPattern2.matcher(kid.label().value()).find()) {
-         //System.err.println("found manually-labeled head " + kids[i] + " for tree " + t);
+         //log.info("found manually-labeled head " + kids[i] + " for tree " + t);
          return kid;
        }
      }
@@ -160,7 +164,7 @@ public class TueBaDZHeadFinder extends AbstractCollinsHeadFinder {
      Tree theHead = null;
      String motherCat = basicCategory(t.label().value());
      if (DEBUG) {
-       System.err.println("Looking for head of " + t.label() +
+       log.info("Looking for head of " + t.label() +
                           "; value is |" + t.label().value() + "|, " +
                           " baseCat is |" + motherCat + "|");
      }
@@ -171,13 +175,13 @@ public class TueBaDZHeadFinder extends AbstractCollinsHeadFinder {
      String[][] how = nonTerminalInfo.get(motherCat);
      if (how == null) {
        if (DEBUG) {
-         System.err.println("Warning: No rule found for " + motherCat +
+         log.info("Warning: No rule found for " + motherCat +
                             " (first char: " + motherCat.charAt(0) + ")");
-         System.err.println("Known nonterms are: " + nonTerminalInfo.keySet());
+         log.info("Known nonterms are: " + nonTerminalInfo.keySet());
        }
        if (defaultRule != null) {
          if (DEBUG) {
-           System.err.println("  Using defaultRule");
+           log.info("  Using defaultRule");
          }
          return traverseLocate(t.children(), defaultRule, true);
        } else {
@@ -192,7 +196,7 @@ public class TueBaDZHeadFinder extends AbstractCollinsHeadFinder {
        }
      }
      if (DEBUG) {
-       System.err.println("  Chose " + theHead.label());
+       log.info("  Chose " + theHead.label());
      }
      return theHead;
    }

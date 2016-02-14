@@ -1,4 +1,5 @@
-package edu.stanford.nlp.util;
+package edu.stanford.nlp.util; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Arrays;
 
@@ -11,7 +12,10 @@ import java.util.Arrays;
  *  @author Dan Klein
  *  @author John Bauer - rewrote using DP instead of memorization
  */
-public class EditDistance {
+public class EditDistance  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(EditDistance.class);
   final boolean allowTranspose;
 
   protected double[][] score = null;
@@ -147,7 +151,7 @@ public class EditDistance {
       EditDistance d = new EditDistance();
       System.out.println(d.score(args[0], args[1]));
     } else {
-      System.err.println("usage: java EditDistance str1 str2");
+      log.info("usage: java EditDistance str1 str2");
     }
   }
 

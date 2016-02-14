@@ -1,4 +1,5 @@
-package edu.stanford.nlp.sequences;
+package edu.stanford.nlp.sequences; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -34,7 +35,10 @@ import java.util.regex.*;
  * @author Christopher Manning (new output options organization)
  * @author Sonal Gupta (made the class generic)
  */
-public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements DocumentReaderAndWriter<IN> {
+public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements DocumentReaderAndWriter<IN>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(PlainTextDocumentReaderAndWriter.class);
 
   private static final long serialVersionUID = -2420535144980273136L;
 
@@ -553,7 +557,7 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
  * prevTags.length() > 0) { w.set(PrevSGMLAnnotation.class, prevTags); } first =
  * false; lastWord = w; document.add(w); } documents.add(document); } else {
  * //String tag = ((Word) o).word(); IN word = (IN) o; String tag =
- * word.before() + word.current(); if (first) { System.err.println(word);
+ * word.before() + word.current(); if (first) { log.info(word);
  * prevTags = tag; } else { String t =
  * lastWord.getString(AfterSGMLAnnotation.class); tag = t + tag;
  * lastWord.set(AfterSGMLAnnotation.class, tag); } } }
@@ -564,7 +568,7 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
  * allWords.addAll(doc); }
  *
  * List<List<IN>> documentsFinal = wts.process(allWords);
- * System.err.println(documentsFinal.get(0).get(0)); System.exit(0);
+ * log.info(documentsFinal.get(0).get(0)); System.exit(0);
  *
  * return documentsFinal.iterator(); // return documents.iterator(); }
  *
