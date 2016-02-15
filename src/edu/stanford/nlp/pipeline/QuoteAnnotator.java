@@ -522,7 +522,7 @@ public class QuoteAnnotator implements Annotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.emptySet();
+    return Collections.EMPTY_SET;
   }
 
   @Override

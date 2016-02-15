@@ -415,7 +415,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
     // In these cases, take the longer quantifier match.
     List<OperatorSpec> quantifiers = new ArrayList<>();
     sentence.get(CoreAnnotations.TokensAnnotation.class).stream()
-        .filter(token -> token.has(OperatorAnnotation.class))
+        .filter(token -> token.containsKey(OperatorAnnotation.class))
         .forEach(token -> quantifiers.add(token.get(OperatorAnnotation.class)));
     quantifiers.sort( (x, y) -> y.quantifierLength() - x.quantifierLength());
     for (OperatorSpec quantifier : quantifiers) {
@@ -624,11 +624,16 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
     return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        CoreAnnotations.TextAnnotation.class,
         CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.IndexAnnotation.class,
         CoreAnnotations.SentencesAnnotation.class,
+        CoreAnnotations.SentenceIndexAnnotation.class,
         CoreAnnotations.PartOfSpeechAnnotation.class,
+        CoreAnnotations.LemmaAnnotation.class,
         SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class
+        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
+        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
     )));
   }
 }

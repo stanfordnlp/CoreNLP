@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 
 import edu.stanford.nlp.ling.AnnotationLookup.KeyLookup;
 import edu.stanford.nlp.util.ArrayCoreMap;
@@ -77,9 +78,12 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
   @SuppressWarnings({"unchecked"})
   public CoreLabel(CoreMap label) {
     super(label.size());
+    Consumer<Class<? extends Key<?>>> listener = ArrayCoreMap.listener;  // don't listen to the clone operation
+    ArrayCoreMap.listener = null;
     for (Class key : label.keySet()) {
       set(key, label.get(key));
     }
+    ArrayCoreMap.listener = listener;
   }
 
   /**

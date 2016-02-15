@@ -4,12 +4,9 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
 import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
 import edu.stanford.nlp.pipeline.CoreMapAggregator;
-import edu.stanford.nlp.util.Comparators;
-import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.*;
+
 import java.util.function.Function;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.Interval;
-import edu.stanford.nlp.util.IntervalTree;
 
 import java.util.*;
 
@@ -328,7 +325,7 @@ public class MatchedExpression {
     Map<Integer, Integer> tokenEndToListIndexMap = new HashMap<>();//Generics.newHashMap();
     for (int i = 0; i < list.size(); i++) {
       CoreMap cm = list.get(i);
-      if (cm.has(CoreAnnotations.TokenBeginAnnotation.class) && cm.has(CoreAnnotations.TokenEndAnnotation.class)) {
+      if (cm.containsKey(CoreAnnotations.TokenBeginAnnotation.class) && cm.containsKey(CoreAnnotations.TokenEndAnnotation.class)) {
         tokenBeginToListIndexMap.put(cm.get(CoreAnnotations.TokenBeginAnnotation.class), i);
         tokenEndToListIndexMap.put(cm.get(CoreAnnotations.TokenEndAnnotation.class), i+1);
       } else {

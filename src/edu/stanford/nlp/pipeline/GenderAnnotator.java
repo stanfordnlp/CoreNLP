@@ -58,8 +58,10 @@ public class GenderAnnotator implements Annotator {
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
     return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        CoreAnnotations.TextAnnotation.class,
         CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class
+        CoreAnnotations.SentencesAnnotation.class,
+        CoreAnnotations.NamedEntityTagAnnotation.class
     )));
   }
 

@@ -1,15 +1,13 @@
 package edu.stanford.nlp.pipeline;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.process.WordToSentenceProcessor;
+import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.ArrayUtils;
 import edu.stanford.nlp.util.CoreMap;
 
@@ -102,7 +100,7 @@ public class WordsToSentencesAnnotator implements Annotator {
     if (VERBOSE) {
       System.err.print("Sentence splitting ...");
     }
-    if ( ! annotation.has(CoreAnnotations.TokensAnnotation.class)) {
+    if ( !annotation.containsKey(CoreAnnotations.TokensAnnotation.class)) {
       throw new IllegalArgumentException("WordsToSentencesAnnotator: unable to find words/tokens in: " + annotation);
     }
 
@@ -200,12 +198,20 @@ public class WordsToSentencesAnnotator implements Annotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.singleton(CoreAnnotations.TokensAnnotation.class);
+    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        CoreAnnotations.TextAnnotation.class,
+        CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+        CoreAnnotations.CharacterOffsetEndAnnotation.class
+    )));
   }
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CoreAnnotations.SentencesAnnotation.class);
+    return new HashSet<>(Arrays.asList(
+        CoreAnnotations.SentencesAnnotation.class,
+        CoreAnnotations.SentenceIndexAnnotation.class
+    ));
   }
 
 }

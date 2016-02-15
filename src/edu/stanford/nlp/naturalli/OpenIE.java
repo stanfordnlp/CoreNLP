@@ -503,9 +503,9 @@ public class OpenIE implements Annotator {
   @Override
   public void annotate(Annotation annotation) {
     // Accumulate Coref data
-    Map<Integer, CorefChain> corefChains = annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class);
+    Map<Integer, CorefChain> corefChains;
     Map<CoreLabel, List<CoreLabel>> canonicalMentionMap = new IdentityHashMap<>();
-    if (corefChains != null && resolveCoref) {
+    if (resolveCoref && (corefChains = annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class)) != null) {
       for (CorefChain chain : corefChains.values()) {
         // Make sure it's a real chain and not a singleton
         if (chain.getMentionsInTextualOrder().size() < 2) {
@@ -565,13 +565,18 @@ public class OpenIE implements Annotator {
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
     Set<Class<? extends CoreAnnotation>> requirements = new HashSet<>(Arrays.asList(
+        CoreAnnotations.TextAnnotation.class,
         CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.IndexAnnotation.class,
         CoreAnnotations.SentencesAnnotation.class,
+        CoreAnnotations.SentenceIndexAnnotation.class,
         CoreAnnotations.PartOfSpeechAnnotation.class,
+        CoreAnnotations.LemmaAnnotation.class,
         NaturalLogicAnnotations.PolarityAnnotation.class,
-        SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
+        NaturalLogicAnnotations.OperatorAnnotation.class,
         SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class));
+        CoreAnnotations.OriginalTextAnnotation.class
+    ));
     if (resolveCoref) {
       requirements.add(edu.stanford.nlp.hcoref.CorefCoreAnnotations.CorefChainAnnotation.class);
     }

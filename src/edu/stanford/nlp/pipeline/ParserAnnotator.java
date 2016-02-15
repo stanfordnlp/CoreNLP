@@ -1,8 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -16,6 +14,7 @@ import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.*;
 
@@ -157,6 +156,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     this.extraDependencies = MetaClass.cast(props.getProperty(annotatorName + ".extradependencies", "NONE"), GrammaticalStructure.Extras.class);
   }
 
+  @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
   public static String signature(String annotatorName, Properties props) {
     StringBuilder os = new StringBuilder();
     os.append(annotatorName + ".model:" +
@@ -346,22 +346,75 @@ public class ParserAnnotator extends SentenceAnnotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    return parser.requiresTags() ? TOKENIZE_SSPLIT_POS : TOKENIZE_AND_SSPLIT;
+    if (parser.requiresTags()) {
+      return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+          CoreAnnotations.TextAnnotation.class,
+          CoreAnnotations.TokensAnnotation.class,
+          CoreAnnotations.ValueAnnotation.class,
+          CoreAnnotations.OriginalTextAnnotation.class,
+          CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+          CoreAnnotations.CharacterOffsetEndAnnotation.class,
+          CoreAnnotations.IndexAnnotation.class,
+          CoreAnnotations.SentencesAnnotation.class,
+          CoreAnnotations.SentenceIndexAnnotation.class,
+          CoreAnnotations.PartOfSpeechAnnotation.class
+      )));
+    } else {
+      return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+          CoreAnnotations.TextAnnotation.class,
+          CoreAnnotations.TokensAnnotation.class,
+          CoreAnnotations.ValueAnnotation.class,
+          CoreAnnotations.OriginalTextAnnotation.class,
+          CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+          CoreAnnotations.CharacterOffsetEndAnnotation.class,
+          CoreAnnotations.IndexAnnotation.class,
+          CoreAnnotations.SentencesAnnotation.class,
+          CoreAnnotations.SentenceIndexAnnotation.class
+      )));
+    }
   }
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     if (this.BUILD_GRAPHS) {
       if (this.saveBinaryTrees) {
-        return PARSE_TAG_DEPPARSE_BINARIZED_TREES;
+        return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+            CoreAnnotations.PartOfSpeechAnnotation.class,
+            TreeCoreAnnotations.TreeAnnotation.class,
+            TreeCoreAnnotations.BinarizedTreeAnnotation.class,
+            SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
+            SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
+            SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class,
+            CoreAnnotations.BeginIndexAnnotation.class,
+            CoreAnnotations.EndIndexAnnotation.class,
+            CoreAnnotations.CategoryAnnotation.class
+        )));
       } else {
-        return PARSE_TAG_DEPPARSE;
+        return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+            CoreAnnotations.PartOfSpeechAnnotation.class,
+            TreeCoreAnnotations.TreeAnnotation.class,
+            SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
+            SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
+            SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class,
+            CoreAnnotations.BeginIndexAnnotation.class,
+            CoreAnnotations.EndIndexAnnotation.class,
+            CoreAnnotations.CategoryAnnotation.class
+        )));
       }
     } else {
       if (this.saveBinaryTrees) {
-        return PARSE_TAG_BINARIZED_TREES;
+        return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+            CoreAnnotations.PartOfSpeechAnnotation.class,
+            TreeCoreAnnotations.TreeAnnotation.class,
+            TreeCoreAnnotations.BinarizedTreeAnnotation.class,
+            CoreAnnotations.CategoryAnnotation.class
+        )));
       } else {
-        return PARSE_AND_TAG;
+        return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+            CoreAnnotations.PartOfSpeechAnnotation.class,
+            TreeCoreAnnotations.TreeAnnotation.class,
+            CoreAnnotations.CategoryAnnotation.class
+        )));
       }
     }
   }

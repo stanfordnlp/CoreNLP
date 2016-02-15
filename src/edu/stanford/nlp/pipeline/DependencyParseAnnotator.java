@@ -91,8 +91,12 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
     return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        CoreAnnotations.TextAnnotation.class,
+        CoreAnnotations.IndexAnnotation.class,
+        CoreAnnotations.ValueAnnotation.class,
         CoreAnnotations.TokensAnnotation.class,
         CoreAnnotations.SentencesAnnotation.class,
+        CoreAnnotations.SentenceIndexAnnotation.class,
         CoreAnnotations.PartOfSpeechAnnotation.class
     )));
   }

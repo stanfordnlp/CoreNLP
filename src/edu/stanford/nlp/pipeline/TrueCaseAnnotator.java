@@ -144,10 +144,10 @@ public class TrueCaseAnnotator implements Annotator {
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
     return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        CoreAnnotations.TextAnnotation.class,
         CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class,
-        CoreAnnotations.PartOfSpeechAnnotation.class,
-        CoreAnnotations.LemmaAnnotation.class
+        CoreAnnotations.PositionAnnotation.class,
+        CoreAnnotations.SentencesAnnotation.class
     )));
   }
 
@@ -155,7 +155,9 @@ public class TrueCaseAnnotator implements Annotator {
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
         CoreAnnotations.TrueCaseTextAnnotation.class,
-        CoreAnnotations.TrueCaseAnnotation.class
+        CoreAnnotations.TrueCaseAnnotation.class,
+        CoreAnnotations.AnswerAnnotation.class,
+        CoreAnnotations.ShapeAnnotation.class
     )));
   }
 }

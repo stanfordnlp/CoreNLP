@@ -615,7 +615,8 @@ $(document).ready(function() {
     // Run query
     $.ajax({
       type: 'POST',
-      url: serverAddress + '?properties=' + encodeURIComponent('{"annotators": "' + annotators() + '", "openie.resolve_coref": "true"}'),
+      url: serverAddress + '?properties=' + encodeURIComponent(
+        '{"annotators": "' + annotators() + '", "openie.resolve_coref": "true", "coref.md.type": "dep", "coref.mode": "statistical"}'),
       data: currentQuery,
       contentType: "application/x-www-form-urlencoded;charset=UTF-8",
       success: function(data) {
