@@ -5,6 +5,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.logging.Redwood.Record;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.List;
 
@@ -19,7 +20,7 @@ public class VisibilityHandler extends LogRecordHandler {
   private static enum State { SHOW_ALL, HIDE_ALL }
 
   private VisibilityHandler.State defaultState = State.SHOW_ALL;
-  private final Set<Object> deltaPool = Generics.newHashSet();
+  private final Set<Object> deltaPool = new HashSet<>();  // replacing with Generics.newHashSet() makes classloader go haywire?
 
   public VisibilityHandler() { }
 
