@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.arabic;
+package edu.stanford.nlp.international.arabic; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -30,7 +31,10 @@ import java.util.function.Function;
  * @author Christopher Manning
  * @author Spence Green
  */
-public class IBMArabicEscaper implements Function<List<HasWord>, List<HasWord>> {
+public class IBMArabicEscaper implements Function<List<HasWord>, List<HasWord>>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(IBMArabicEscaper.class);
 
   private static final Pattern pEnt = Pattern.compile("\\$[a-z]+_\\((.*?)\\)");
   private boolean warnedEntityEscaping = false;
@@ -79,7 +83,7 @@ public class IBMArabicEscaper implements Function<List<HasWord>, List<HasWord>> 
     //    Matcher mAM = pAM.matcher(w);
     //    if (mAM.find()) {
     //      if ( ! warnedNormalization) {
-    //        System.err.println("IBMArabicEscaper Note: equivalence classing certain characters, such as Alef with madda/hamza, e.g., in: " + w);
+    //        log.info("IBMArabicEscaper Note: equivalence classing certain characters, such as Alef with madda/hamza, e.g., in: " + w);
     //        warnedNormalization = true;
     //      }
     //      // 'alif maqSuura mapped to yaa
@@ -88,7 +92,7 @@ public class IBMArabicEscaper implements Function<List<HasWord>, List<HasWord>> 
     //    Matcher mYH = pYaaHamza.matcher(w);
     //    if (mYH.find()) {
     //      if ( ! warnedNormalization) {
-    //        System.err.println("IBMArabicEscaper Note: equivalence classing certain characters, such as Alef with madda/hamza, e.g., in: " + w);
+    //        log.info("IBMArabicEscaper Note: equivalence classing certain characters, such as Alef with madda/hamza, e.g., in: " + w);
     //        warnedNormalization = true;
     //      }
     //      // replace yaa followed by hamza with hamza on kursi (yaa)

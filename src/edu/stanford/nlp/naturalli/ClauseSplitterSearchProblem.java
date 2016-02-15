@@ -1,4 +1,5 @@
-package edu.stanford.nlp.naturalli;
+package edu.stanford.nlp.naturalli; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.classify.*;
 import edu.stanford.nlp.international.Language;
@@ -45,7 +46,10 @@ import java.util.stream.Stream;
  *
  * @author Gabor Angeli
  */
-public class ClauseSplitterSearchProblem {
+public class ClauseSplitterSearchProblem  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ClauseSplitterSearchProblem.class);
 
   /**
    * A specification for clause splits we _always_ want to do. The format is a map from the edge label we are splitting, to
@@ -780,7 +784,7 @@ public class ClauseSplitterSearchProblem {
 
     while (!fringe.isEmpty()) {
       if (++ticks > maxTicks) {
-//        System.err.println("WARNING! Timed out on search with " + ticks + " ticks");
+//        log.info("WARNING! Timed out on search with " + ticks + " ticks");
         return;
       }
       // Useful variables
@@ -887,7 +891,7 @@ public class ClauseSplitterSearchProblem {
               }});
               // 2. Register the child state
               if (!seenWords.contains(childState.first.edge.getDependent())) {
-//            System.err.println("  pushing " + action.signature() + " with " + argmax.first.edge);
+//            log.info("  pushing " + action.signature() + " with " + argmax.first.edge);
                 fringe.add(childState, logProbability);
               }
             }
@@ -897,7 +901,7 @@ public class ClauseSplitterSearchProblem {
 
       seenWords.add(rootWord);
     }
-//    System.err.println("Search finished in " + ticks + " ticks and " + classifierEvals + " classifier evaluations.");
+//    log.info("Search finished in " + ticks + " ticks and " + classifierEvals + " classifier evaluations.");
   }
 
 

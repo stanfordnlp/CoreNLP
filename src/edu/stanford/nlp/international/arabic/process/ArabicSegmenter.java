@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.arabic.process;
+package edu.stanford.nlp.international.arabic.process; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -47,7 +48,10 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
  *
  * @author Spence Green
  */
-public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<String,String> /* Serializable */ {
+public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<String,String> /* Serializable */  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ArabicSegmenter.class);
 
   private static final long serialVersionUID = -4791848633597417788L;
 
@@ -192,7 +196,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
         tokFactory = ArabicTokenizer.factory();
         tokFactory.setOptions(tokenizerOptions);
       }
-      System.err.println("Loaded ArabicTokenizer with options: " + tokenizerOptions);
+      log.info("Loaded ArabicTokenizer with options: " + tokenizerOptions);
     }
     return tokFactory;
   }
@@ -290,7 +294,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
       classifier.makeObjectBankFromFile(flags.trainFile, docReader);
 
     classifier.train(lines, docReader);
-    System.err.println("Finished training.");
+    log.info("Finished training.");
   }
 
   /**
@@ -301,7 +305,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
    * @param pwOut
    */
   private void evaluate(PrintWriter pwOut) {
-    System.err.println("Starting evaluation...");
+    log.info("Starting evaluation...");
     boolean hasSegmentationMarkers = true;
     boolean hasTags = true;
     DocumentReaderAndWriter<CoreLabel> docReader = new ArabicDocumentReaderAndWriter(hasSegmentationMarkers,
@@ -353,17 +357,17 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
         tedEvalParseTree.printf("(root");
         int safeLength = inputTokens.length;
         if (inputTokens.length != goldTokens.length) {
-          System.err.println("In generating TEDEval files: Input and gold do not have the same number of tokens");
-          System.err.println("    (ignoring any extras)");
-          System.err.println("  input: " + Arrays.toString(inputTokens));
-          System.err.println("  gold: " + Arrays.toString(goldTokens));
+          log.info("In generating TEDEval files: Input and gold do not have the same number of tokens");
+          log.info("    (ignoring any extras)");
+          log.info("  input: " + Arrays.toString(inputTokens));
+          log.info("  gold: " + Arrays.toString(goldTokens));
           safeLength = Math.min(inputTokens.length, goldTokens.length);
         }
         if (inputTokens.length != parseTokens.length) {
-          System.err.println("In generating TEDEval files: Input and parse do not have the same number of tokens");
-          System.err.println("    (ignoring any extras)");
-          System.err.println("  input: " + Arrays.toString(inputTokens));
-          System.err.println("  parse: " + Arrays.toString(parseTokens));
+          log.info("In generating TEDEval files: Input and parse do not have the same number of tokens");
+          log.info("    (ignoring any extras)");
+          log.info("  input: " + Arrays.toString(inputTokens));
+          log.info("  parse: " + Arrays.toString(parseTokens));
           safeLength = Math.min(inputTokens.length, parseTokens.length);
         }
         for (int i = 0; i < safeLength; i++) {
@@ -497,7 +501,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
     // Strips off hyphens
     Properties options = StringUtils.argsToProperties(args, optionArgDefs());
     if (options.containsKey("help") || args.length == 0) {
-      System.err.println(usage());
+      log.info(usage());
       System.exit(-1);
     }
 
@@ -605,11 +609,11 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
 
       if(segmenter.flags.serializeTo != null) {
         segmenter.serializeSegmenter(segmenter.flags.serializeTo);
-        System.err.println("Serialized segmenter to: " + segmenter.flags.serializeTo);
+        log.info("Serialized segmenter to: " + segmenter.flags.serializeTo);
       }
     } else {
-      System.err.println("No training file or trained model specified!");
-      System.err.println(usage());
+      log.info("No training file or trained model specified!");
+      log.info(usage());
       System.exit(-1);
     }
     return segmenter;

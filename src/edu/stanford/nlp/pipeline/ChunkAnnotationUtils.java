@@ -1,4 +1,5 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.AnnotationLookup;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -20,7 +21,10 @@ import java.util.regex.Pattern;
  *
  * @author Angel Chang
  */
-public class ChunkAnnotationUtils {
+public class ChunkAnnotationUtils  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ChunkAnnotationUtils.class);
   private static final Logger logger = Logger.getLogger(ChunkAnnotationUtils.class.getName());
   private static CoreLabelTokenFactory tokenFactory = new CoreLabelTokenFactory(true);
 
@@ -410,7 +414,7 @@ public class ChunkAnnotationUtils {
           sentence = sentences.get(i);
         }
         if (extendedFixSentence) {
-          //System.err.println("Doing extended fixing of sentence:" + text.substring(offsetBegin,offsetEnd));
+          //log.info("Doing extended fixing of sentence:" + text.substring(offsetBegin,offsetEnd));
           if (i+1 < sentences.size()) {
             // Extended sentence fixing:
             // Check if entity is at the end of this sentence and if next sentence starts with uppercase

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.spanish;
+package edu.stanford.nlp.international.spanish; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Pair;
@@ -24,7 +25,10 @@ import java.util.regex.Pattern;
  * @author Jon Gauthier
  * @author Ishita Prasad
  */
-public final class SpanishVerbStripper implements Serializable {
+public final class SpanishVerbStripper implements Serializable  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(SpanishVerbStripper.class);
 
   // The following three classes of verb forms can carry attached
   // pronouns:
@@ -90,7 +94,7 @@ public final class SpanishVerbStripper implements Serializable {
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
     } catch (IOException e) {
-      System.err.println("Could not load Spanish data file " + dictPath);
+      log.info("Could not load Spanish data file " + dictPath);
     } finally {
       IOUtils.closeIgnoringExceptions(br);
     }

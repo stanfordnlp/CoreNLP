@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.international.negra;
+package edu.stanford.nlp.trees.international.negra; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.trees.AbstractCollinsHeadFinder;
 import edu.stanford.nlp.trees.HeadFinder;
@@ -13,7 +14,10 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author Roger Levy
  */
-public class NegraHeadFinder extends AbstractCollinsHeadFinder {
+public class NegraHeadFinder extends AbstractCollinsHeadFinder  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(NegraHeadFinder.class);
   /**
    * 
    */
@@ -109,7 +113,7 @@ public class NegraHeadFinder extends AbstractCollinsHeadFinder {
   protected Tree findMarkedHead(Tree[] kids) {
     for (Tree kid : kids) {
       if (kid.label() instanceof NegraLabel && ((NegraLabel) kid.label()).getEdge() != null && ((NegraLabel) kid.label()).getEdge().equals("HD")) {
-        //System.err.println("found manually-labeled head");
+        //log.info("found manually-labeled head");
         return kid;
       }
     }
@@ -176,7 +180,7 @@ public class NegraHeadFinder extends AbstractCollinsHeadFinder {
       motherCat = motherCat.substring(1);
     }
     if (DEBUG) {
-      System.err.println("Looking for head of " + t.label() +
+      log.info("Looking for head of " + t.label() +
                          "; value is |" + t.label().value() + "|, " +
                          " baseCat is |" + motherCat + "|");
     }
@@ -187,13 +191,13 @@ public class NegraHeadFinder extends AbstractCollinsHeadFinder {
     String[][] how = nonTerminalInfo.get(motherCat);
     if (how == null) {
       if (DEBUG) {
-        System.err.println("Warning: No rule found for " + motherCat +
+        log.info("Warning: No rule found for " + motherCat +
                            " (first char: " + motherCat.charAt(0) + ")");
-        System.err.println("Known nonterms are: " + nonTerminalInfo.keySet());
+        log.info("Known nonterms are: " + nonTerminalInfo.keySet());
       }
       if (defaultRule != null) {
         if (DEBUG) {
-          System.err.println("  Using defaultRule");
+          log.info("  Using defaultRule");
         }
         return traverseLocate(t.children(), defaultRule, true);
       } else {
@@ -208,7 +212,7 @@ public class NegraHeadFinder extends AbstractCollinsHeadFinder {
       }
     }
     if (DEBUG) {
-      System.err.println("  Chose " + theHead.label());
+      log.info("  Chose " + theHead.label());
     }
     return theHead;
   }

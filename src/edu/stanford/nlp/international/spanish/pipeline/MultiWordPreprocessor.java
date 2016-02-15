@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.spanish.pipeline;
+package edu.stanford.nlp.international.spanish.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -31,7 +32,10 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Jon Gauthier
  * @author Spence Green (original French version)
  */
-public final class MultiWordPreprocessor {
+public final class MultiWordPreprocessor  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(MultiWordPreprocessor.class);
 
   private static int nMissingPOS;
   private static int nMissingPhrasal;
@@ -363,7 +367,7 @@ public final class MultiWordPreprocessor {
         return "ncms000";
 
       // Now make an educated guess.
-      //System.err.println("No POS tag for " + word);
+      //log.info("No POS tag for " + word);
       return "np00000";
     }
   }
@@ -525,7 +529,7 @@ public final class MultiWordPreprocessor {
     for(Tree kid : t.children())
       sb.append(kid.value()).append(" ");
     String posSequence = sb.toString().trim();
-    System.err.println("No phrasal cat for: " + posSequence);
+    log.info("No phrasal cat for: " + posSequence);
 
     // Give up.
     return null;
@@ -599,7 +603,7 @@ public final class MultiWordPreprocessor {
   public static void main(String[] args) {
     Properties options = StringUtils.argsToProperties(args, argOptionDefs);
     if(!options.containsKey("") || options.containsKey("help")) {
-      System.err.println(usage());
+      log.info(usage());
       return;
     }
 

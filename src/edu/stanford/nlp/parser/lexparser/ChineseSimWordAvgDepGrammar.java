@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -23,7 +24,10 @@ import edu.stanford.nlp.util.Triple;
  * @author Pi-Chuan Chang
  */
 @SuppressWarnings("deprecation")
-public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar {
+public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseSimWordAvgDepGrammar.class);
 
   private static final long serialVersionUID = -1845503582705055342L;
 
@@ -56,7 +60,7 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar {
       while ((wordMapLine = wordMapBReader.readLine()) != null) {
         Matcher m = linePattern.matcher(wordMapLine);
         if (!m.matches()) {
-          System.err.println("Ill-formed line in similar word map file: " + wordMapLine);
+          log.info("Ill-formed line in similar word map file: " + wordMapLine);
           continue;
         }
 
@@ -97,8 +101,8 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar {
   @Override
   protected void finalize() throws Throwable {
     super.finalize();
-    System.err.println("SimWordAvg stats:");
-    System.err.println(statsCounter);
+    log.info("SimWordAvg stats:");
+    log.info(statsCounter);
   }
 
 
@@ -373,12 +377,12 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar {
       statsCounter.incrementCount("simProbZero");
     }
     if (regProb == 0) {
-      //      System.err.println("zero reg prob");
+      //      log.info("zero reg prob");
       statsCounter.incrementCount("regProbZero");
     }
     double smoothProb = (countHead * regProb + simSmooth * simProb) / (countHead + simSmooth);
     if (smoothProb == 0) {
-      //      System.err.println("zero smooth prob");
+      //      log.info("zero smooth prob");
       statsCounter.incrementCount("smoothProbZero");
     }
 

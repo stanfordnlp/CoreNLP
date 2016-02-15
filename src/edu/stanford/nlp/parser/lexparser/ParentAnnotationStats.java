@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.NumberRangeFileFilter;
 import edu.stanford.nlp.ling.StringLabelFactory;
@@ -18,7 +19,10 @@ import java.util.*;
  * @author Christopher Manning
  * @version 2003/01/04
  */
-public class ParentAnnotationStats implements TreeVisitor {
+public class ParentAnnotationStats implements TreeVisitor  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ParentAnnotationStats.class);
 
   private final TreebankLanguagePack tlp;
 
@@ -440,7 +444,7 @@ public class ParentAnnotationStats implements TreeVisitor {
           cutOff = Double.parseDouble(args[i + 1]);
           i += 2;
         } else {
-          System.err.println("Unknown option: " + args[i]);
+          log.info("Unknown option: " + args[i]);
           i++;
         }
       }

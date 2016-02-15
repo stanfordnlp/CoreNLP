@@ -1,4 +1,5 @@
-package edu.stanford.nlp.util;
+package edu.stanford.nlp.util; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -29,7 +30,10 @@ import edu.stanford.nlp.io.IOUtils;
  * @author Teg Grenager
  * @author Grace Muzny
  */
-public class XMLUtils {
+public class XMLUtils  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(XMLUtils.class);
 
   private XMLUtils() {} // only static methods
 
@@ -43,7 +47,7 @@ public class XMLUtils {
     try {
       sents = getTextContentFromTagsFromFileSAXException(f, tag);
     } catch (SAXException e) {
-      System.err.println(e);
+      log.info(e);
     }
     return sents;
   }
@@ -88,7 +92,7 @@ public class XMLUtils {
         sents.add(builtUp.toString());
       }
     } catch (IOException | ParserConfigurationException e) {
-      System.err.println(e);
+      log.info(e);
     }
     return sents;
   }
@@ -104,7 +108,7 @@ public class XMLUtils {
     try {
       sents = getTagElementsFromFileSAXException(f, tag);
     } catch (SAXException e) {
-      System.err.println(e);
+      log.info(e);
     }
     return sents;
   }
@@ -135,9 +139,9 @@ public class XMLUtils {
         sents.add(element);
       }
     } catch (IOException e) {
-      System.err.println(e);
+      log.info(e);
     } catch (ParserConfigurationException e) {
-      System.err.println(e);
+      log.info(e);
     }
     return sents;
   }
@@ -253,7 +257,7 @@ public class XMLUtils {
         //        System.out.println(position + " got tag: " + tag);
       } while (true);
     } catch (IOException e) {
-      System.err.println("Error reading string");
+      log.info("Error reading string");
       e.printStackTrace();
     }
     return result.toString();
@@ -297,7 +301,7 @@ public class XMLUtils {
     try {
       ret = new XMLTag(s);
     } catch (Exception e) {
-      System.err.println("Failed to handle |" + s + "|");
+      log.info("Failed to handle |" + s + "|");
     }
     return ret;
   }
@@ -925,7 +929,7 @@ public class XMLUtils {
         result.append(tag.toString());
       } while (true);
     } catch (IOException e) {
-      System.err.println("Error reading string");
+      log.info("Error reading string");
       e.printStackTrace();
     }
     return result.toString();
@@ -1117,11 +1121,11 @@ public class XMLUtils {
     }
 
     public void warning(SAXParseException exception) {
-      System.err.println(makeBetterErrorString("Warning", exception));
+      log.info(makeBetterErrorString("Warning", exception));
     }
 
     public void error(SAXParseException exception) {
-      System.err.println(makeBetterErrorString("Error", exception));
+      log.info(makeBetterErrorString("Error", exception));
     }
 
     public void fatalError(SAXParseException ex) throws SAXParseException {

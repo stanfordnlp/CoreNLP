@@ -1,4 +1,5 @@
-package edu.stanford.nlp.process;
+package edu.stanford.nlp.process; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 import java.io.*;
@@ -28,7 +29,10 @@ import edu.stanford.nlp.util.XMLUtils;
  * @author Bill MacCartney
  * @author Anna Rafferty (refactoring, making SAXInterface easy to extend elsewhere)
  */
-public class TransformXML<T> {
+public class TransformXML<T>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TransformXML.class);
 
   private final SAXParser saxParser;
 
@@ -107,7 +111,7 @@ public class TransformXML<T> {
     @Override
     public void startElement(String uri, String localName, String qName, 
                              Attributes attributes) throws SAXException {
-      //System.err.println("start element " + qName);
+      //log.info("start element " + qName);
       
       if (depth == 0) {
         outputTextAndTag(qName, attributes, false);
@@ -129,9 +133,9 @@ public class TransformXML<T> {
     public void endElement(String uri, String localName, String qName) 
       throws SAXException 
     {
-      //System.err.println("end element " + qName + "; function is " + function.getClass());
-      //System.err.println("elementsToBeTransformed is " + elementsToBeTransformed);
-      //System.err.println("textToBeTransformed is " + textToBeTransformed);
+      //log.info("end element " + qName + "; function is " + function.getClass());
+      //log.info("elementsToBeTransformed is " + elementsToBeTransformed);
+      //log.info("textToBeTransformed is " + textToBeTransformed);
       
       if (depth == 0) {
         outputTextAndTag(qName, null, true);
@@ -164,7 +168,7 @@ public class TransformXML<T> {
     // (SAX may call this after each line break)
     @Override
     public void characters(char[] buf, int offset, int len) throws SAXException {
-      // System.err.println("characters |" + new String(buf, offset, len) + "|");
+      // log.info("characters |" + new String(buf, offset, len) + "|");
       textToBeTransformed.append(buf, offset, len);
     }
   } // end static class SAXInterface
@@ -193,7 +197,7 @@ public class TransformXML<T> {
     try {
       saxParser = SAXParserFactory.newInstance().newSAXParser();
     } catch (Exception e) {
-      System.err.println("Error configuring XML parser: " + e);
+      log.info("Error configuring XML parser: " + e);
       throw new RuntimeException(e);
     }
   }
@@ -220,7 +224,7 @@ public class TransformXML<T> {
       ins = new BufferedInputStream(new FileInputStream(in));
       transformXML(tags, fn, ins, System.out);
     } catch (Exception e) {
-      System.err.println("Error reading file " + in + ": " + e);
+      log.info("Error reading file " + in + ": " + e);
       e.printStackTrace();
     } finally {
       IOUtils.closeIgnoringExceptions(ins);
@@ -250,7 +254,7 @@ public class TransformXML<T> {
       outs = new BufferedOutputStream(new FileOutputStream(out));
       transformXML(tags, fn, ins, outs);
     } catch (Exception e) {
-      System.err.println("Error reading file " + in + " or writing file " + out + ": " + e);
+      log.info("Error reading file " + in + " or writing file " + out + ": " + e);
       e.printStackTrace();
     } finally {
       IOUtils.closeIgnoringExceptions(ins);

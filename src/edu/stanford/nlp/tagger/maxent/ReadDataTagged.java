@@ -3,7 +3,8 @@
  * Description:  A Maximum Entropy Toolkit<p>
  * Copyright:    Copyright (c) Trustees of Leland Stanford Junior University<p>
  */
-package edu.stanford.nlp.tagger.maxent;
+package edu.stanford.nlp.tagger.maxent; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,7 +29,10 @@ import edu.stanford.nlp.util.Generics;
  * @author Kristina Toutanova
  * @version 1.0
  */
-public class ReadDataTagged {
+public class ReadDataTagged  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ReadDataTagged.class);
 
   private final ArrayList<DataWordTag> v = new ArrayList<>();
   private int numElements = 0;
@@ -70,7 +74,7 @@ public class ReadDataTagged {
   }
 
   private void loadFile(TaggedFileReader reader, Map<String, IntCounter<String>> wordTagCounts) {
-    System.err.println("Loading tagged words from " + reader.filename());
+    log.info("Loading tagged words from " + reader.filename());
 
     ArrayList<String> words = new ArrayList<>();
     ArrayList<String> tags = new ArrayList<>();
@@ -132,11 +136,11 @@ public class ReadDataTagged {
       numWords += sentence.size();
       words.clear();
       tags.clear();
-      if ((numSentences % 100000) == 0) System.err.println("Read " + numSentences + " sentences, min " + minLen + " words, max " + maxLen + " words ... [still reading]");
+      if ((numSentences % 100000) == 0) log.info("Read " + numSentences + " sentences, min " + minLen + " words, max " + maxLen + " words ... [still reading]");
     }
 
-    System.err.println("Read " + numWords + " words from " + reader.filename() + " [done].");
-    System.err.println("Read " + numSentences + " sentences, min " + minLen + " words, max " + maxLen + " words.");
+    log.info("Read " + numWords + " words from " + reader.filename() + " [done].");
+    log.info("Read " + numSentences + " sentences, min " + minLen + " words, max " + maxLen + " words.");
   }
 
 

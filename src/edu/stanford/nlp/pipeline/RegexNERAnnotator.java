@@ -1,4 +1,5 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 
@@ -18,7 +19,10 @@ import edu.stanford.nlp.util.PropertiesUtils;
  *
  * @author jtibs
  */
-public class RegexNERAnnotator implements Annotator {
+public class RegexNERAnnotator implements Annotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(RegexNERAnnotator.class);
 
   private final RegexNERSequenceClassifier classifier;
   private final boolean verbose;
@@ -61,7 +65,7 @@ public class RegexNERAnnotator implements Annotator {
   @Override
   public void annotate(Annotation annotation) {
     if (verbose) {
-      System.err.print("Adding RegexNER annotations ... ");
+      log.info("Adding RegexNER annotations ... ");
     }
 
     if (! annotation.containsKey(CoreAnnotations.SentencesAnnotation.class))
@@ -101,7 +105,7 @@ public class RegexNERAnnotator implements Annotator {
     }
 
     if (verbose)
-      System.err.println("done.");
+      log.info("done.");
   }
 
   private static int findEndOfAnswerAnnotation(List<CoreLabel> tokens, int start) {

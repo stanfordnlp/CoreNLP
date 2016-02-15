@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.tregex.gui;
+package edu.stanford.nlp.trees.tregex.gui; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Set;
 
@@ -18,7 +19,10 @@ import edu.stanford.nlp.trees.Tree;
  *
  * @author Anna Rafferty
  */
-public class TreeFromFile {
+public class TreeFromFile  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TreeFromFile.class);
 
   private final String treeString;
   private String filename;

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.naturalli;
+package edu.stanford.nlp.naturalli; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.util.Trilean;
 
@@ -443,7 +444,7 @@ public enum NaturalLogicRelation {
     if (rel != null) {
       return rel;
     } else {
-//      System.err.println("Unknown dependency arc for NaturalLogicRelation: " + dependencyLabel);
+//      log.info("Unknown dependency arc for NaturalLogicRelation: " + dependencyLabel);
       if (dependencyLabel.startsWith("nmod:")) {
         return NaturalLogicRelation.REVERSE_ENTAILMENT;
       } else if (dependencyLabel.startsWith("conj:")) {

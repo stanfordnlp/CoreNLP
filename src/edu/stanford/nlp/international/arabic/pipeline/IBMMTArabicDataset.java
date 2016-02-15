@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.arabic.pipeline;
+package edu.stanford.nlp.international.arabic.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -20,7 +21,10 @@ import edu.stanford.nlp.util.Generics;
  * @author Spence Green
  *
  */
-public class IBMMTArabicDataset implements Dataset {
+public class IBMMTArabicDataset implements Dataset  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(IBMMTArabicDataset.class);
 
   protected Mapper lexMapper = null;
   protected final List<File> pathsToData;

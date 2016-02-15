@@ -1,4 +1,5 @@
-package edu.stanford.nlp.misc;
+package edu.stanford.nlp.misc; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -15,7 +16,10 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author Jamie Nicolson (nicolson@cs.stanford.edu)
  */
-public class DependencyAnalyzer {
+public class DependencyAnalyzer  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(DependencyAnalyzer.class);
 
   /** Make true to record the dependencies as they are calculated. */
   private static final boolean VERBOSE = false;
@@ -107,7 +111,7 @@ public class DependencyAnalyzer {
           closure.add(id);
           matched[i] = true;
           if (VERBOSE) {
-            System.err.println("Starting class: " + id.name);
+            log.info("Starting class: " + id.name);
           }
           break;
         }
@@ -116,7 +120,7 @@ public class DependencyAnalyzer {
 
     for (int i = 0; i < startingClasses.size(); ++i) {
       if (!matched[i]) {
-        System.err.println("Warning: pattern " + startingClasses.get(i) +
+        log.info("Warning: pattern " + startingClasses.get(i) +
                            " matched nothing");
       }
     }
@@ -151,7 +155,7 @@ public class DependencyAnalyzer {
 
       for (Identifier outgoingDependency : id.outgoingDependencies) {
         if (outgoingDependency.isClass && !closure.contains(outgoingDependency)) {
-          if (VERBOSE) System.err.println("Added " + outgoingDependency + " due to " + id);
+          if (VERBOSE) log.info("Added " + outgoingDependency + " due to " + id);
           depQueue.addLast(outgoingDependency);
           closure.add(outgoingDependency);
         }
@@ -239,7 +243,7 @@ public class DependencyAnalyzer {
         name = matcher.group(1);
         curPackage = canonicalIdentifier(name);
         curClass = null;
-        //System.err.println("Found package " + curPackage.name);
+        //log.info("Found package " + curPackage.name);
       } else {
         matcher = classLine.matcher(line);
         if (matcher.matches()) {
@@ -247,12 +251,12 @@ public class DependencyAnalyzer {
           curClass = canonicalIdentifier(name);
           curClass.isClass = true;
           //curPackage.classes.add(curClass);
-          //System.err.println("Found class " + curClass.name);
+          //log.info("Found class " + curClass.name);
         } else {
           matcher = memberLine.matcher(line);
           if (matcher.matches()) {
             name = curClass.name + "." + matcher.group(1);
-            //System.err.println("Found member: " + name );
+            //log.info("Found member: " + name );
           } else {
             matcher = inDepLine.matcher(line);
             if (matcher.matches()) {
@@ -261,7 +265,7 @@ public class DependencyAnalyzer {
               if (curClass != null) {
                 curClass.ingoingDependencies.add(inDep);
               }
-              //System.err.println("Found ingoing depedency: " +
+              //log.info("Found ingoing depedency: " +
               //    name);
             } else {
               matcher = outDepLine.matcher(line);
@@ -271,7 +275,7 @@ public class DependencyAnalyzer {
                 if (curClass != null) {
                   curClass.outgoingDependencies.add(outDep);
                 }
-                //System.err.println("Found outgoing dependency: " +
+                //log.info("Found outgoing dependency: " +
                 //    name);
               } else {
                 matcher = bothDepLine.matcher(line);
@@ -283,7 +287,7 @@ public class DependencyAnalyzer {
                     curClass.outgoingDependencies.add(dep);
                   }
                 } else {
-                  System.err.println("Found unmatching line: " + line);
+                  log.info("Found unmatching line: " + line);
                 }
               }
             }

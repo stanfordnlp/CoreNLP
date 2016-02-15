@@ -1,4 +1,5 @@
-package edu.stanford.nlp.io;
+package edu.stanford.nlp.io; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -51,7 +52,10 @@ import java.util.*;
  * @version 1.0, August 2002
  * @see FileArrayList
  */
-public class FileSequentialCollection extends AbstractCollection<File> {
+public class FileSequentialCollection extends AbstractCollection<File>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(FileSequentialCollection.class);
 
   /**
    * Stores the input collection over which we work.  This is
@@ -258,7 +262,7 @@ public class FileSequentialCollection extends AbstractCollection<File> {
     private File next;
 
     public FileSequentialCollectionIterator() {
-      // System.err.println("Coll is " + coll);
+      // log.info("Coll is " + coll);
       roots = coll.toArray();
       rootsIndex = 0;
       fileArrayStack = new Stack<>();
@@ -303,10 +307,10 @@ public class FileSequentialCollection extends AbstractCollection<File> {
     private File primeNextFile() {
       while (rootsIndex < roots.length) {
         while (!fileArrayStack.empty()) {
-          // System.err.println("fileArrayStack: " + fileArrayStack);
+          // log.info("fileArrayStack: " + fileArrayStack);
           Object obj = fileArrayStack.peek();
           if (obj instanceof File[]) {
-            // System.err.println("Got a File[]");
+            // log.info("Got a File[]");
             File[] files = (File[]) obj;
             Integer index = fileArrayStackIndices.pop();
             int ind = index.intValue();
@@ -330,16 +334,16 @@ public class FileSequentialCollection extends AbstractCollection<File> {
             }
             File path = (File) obj;
             if (path.isDirectory()) {
-              // System.err.println("Got directory " + path);
+              // log.info("Got directory " + path);
               // if path is a directory, look into it
               File[] directoryListing = path.listFiles(filt);
               if (directoryListing == null) {
                 throw new IllegalArgumentException("Directory access problem for: " + path);
               }
-              // System.err.println("  with " +
+              // log.info("  with " +
               //	    directoryListing.length + " files in it.");
               if (includeDirs) {
-                // System.err.println("Include dir as answer");
+                // log.info("Include dir as answer");
                 if (directoryListing.length > 0) {
                   fileArrayStack.push(directoryListing);
                   fileArrayStackIndices.push(Integer.valueOf(0));
@@ -357,7 +361,7 @@ public class FileSequentialCollection extends AbstractCollection<File> {
               }
             } else {
               // it's just a fixed file
-              // System.err.println("Got a plain file " + path);
+              // log.info("Got a plain file " + path);
               if (!path.exists()) {
                 throw new IllegalArgumentException("File doesn't exist: " + path);
               }

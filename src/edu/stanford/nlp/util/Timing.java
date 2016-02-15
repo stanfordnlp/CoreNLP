@@ -1,4 +1,5 @@
 package edu.stanford.nlp.util;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -26,7 +27,10 @@ import java.text.DecimalFormat;
  *
  * @author Bill MacCartney
  */
-public class Timing {
+public class Timing  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(Timing.class);
 
   private static final long MILLISECONDS_TO_SECONDS = 1000L;
   private static final long SECOND_DIVISOR = 1000000000L;
@@ -60,19 +64,6 @@ public class Timing {
    */
   public void start() {
     start = System.nanoTime();
-  }
-
-  /**
-   * Start timer & print a message.
-   */
-  // Thang Mar14
-  public void start(String msg, PrintStream stream) {
-    start = System.nanoTime();
-    stream.println(msg);
-  }
-
-  public void start(String msg) {
-    start(msg, System.err);
   }
 
   // report =========================================================
@@ -211,7 +202,7 @@ public class Timing {
   // Thang Mar14
   public void end(String msg) {
     long elapsed = System.nanoTime() - start;
-    System.err.println(msg + " done [" + nf.format(((double) elapsed) / SECOND_DIVISOR) + " sec].");
+    log.info(msg + " done [" + nf.format(((double) elapsed) / SECOND_DIVISOR) + " sec].");
     this.start();
   }
 
@@ -312,9 +303,7 @@ public class Timing {
 
   /** Print the start of timing message to stderr and start the timer. */
   public void doing(String str) {
-    System.err.print(str);
-    System.err.print(" ... ");
-    System.err.flush();
+    log.info(str + " ... ");
     start();
   }
 
@@ -322,20 +311,18 @@ public class Timing {
    *  and elapsed time in x.y seconds.
    */
   public void done() {
-    System.err.println("done [" + toSecondsString() + " sec].");
+    log.info("done [" + toSecondsString() + " sec].");
   }
 
   /** Give a line saying that something is " done".
    */
   public void done(String msg) {
-    System.err.println(msg + " done [" + toSecondsString() + " sec].");
+    log.info(msg + " done [" + toSecondsString() + " sec].");
   }
 
   /** Print the start of timing message to stderr and start the timer. */
   public static void startDoing(String str) {
-    System.err.print(str);
-    System.err.print(" ... ");
-    System.err.flush();
+    log.info(str + " ... ");
     startTime();
   }
 
@@ -344,7 +331,7 @@ public class Timing {
    */
   public static void endDoing() {
     long elapsed = System.nanoTime() - startTime;
-    System.err.println("done [" + nf.format(((double) elapsed) / SECOND_DIVISOR) +
+    log.info("done [" + nf.format(((double) elapsed) / SECOND_DIVISOR) +
                        " sec].");
   }
 
@@ -353,7 +340,7 @@ public class Timing {
    */
   public static void endDoing(String msg) {
     long elapsed = System.nanoTime() - startTime;
-    System.err.println(msg + " done [" + nf.format(((double) elapsed) / SECOND_DIVISOR) +
+    log.info(msg + " done [" + nf.format(((double) elapsed) / SECOND_DIVISOR) +
                        " sec].");
   }
 

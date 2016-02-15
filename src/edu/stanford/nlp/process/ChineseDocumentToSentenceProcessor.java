@@ -1,4 +1,5 @@
-package edu.stanford.nlp.process;
+package edu.stanford.nlp.process; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 import static edu.stanford.nlp.trees.international.pennchinese.ChineseUtils.WHITEPLUS;
@@ -37,7 +38,10 @@ import edu.stanford.nlp.util.StringUtils;
  *
  * @author Pi-Chuan Chang
  */
-public class ChineseDocumentToSentenceProcessor implements Serializable {
+public class ChineseDocumentToSentenceProcessor implements Serializable  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseDocumentToSentenceProcessor.class);
 
   // todo: This class is a mess. We should try to get it out of core
 
@@ -74,7 +78,7 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
         if (pairMatcher.find()) {
           normalizationTable.add(new Pair<>(pairMatcher.group(1), pairMatcher.group(2)));
         } else {
-          System.err.println("Didn't match: "+line);
+          log.info("Didn't match: "+line);
         }
       }
     } else {
@@ -83,8 +87,8 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
   }
   /*
   public ChineseDocumentToSentenceProcessor(String normalizationTableFile, String encoding) {
-    System.err.println("WARNING: ChineseDocumentToSentenceProcessor ignores normalizationTableFile argument!");
-    System.err.println("WARNING: ChineseDocumentToSentenceProcessor ignores encoding argument!");
+    log.info("WARNING: ChineseDocumentToSentenceProcessor ignores normalizationTableFile argument!");
+    log.info("WARNING: ChineseDocumentToSentenceProcessor ignores encoding argument!");
     // encoding is never read locally
     this.encoding = encoding;
   }
@@ -95,10 +99,10 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
    *  ChineseUtils directly!  CDM June 2006.
    */
   public String normalization(String in) {
-    //System.err.println("BEFOR NORM: "+in);
+    //log.info("BEFOR NORM: "+in);
     String norm = ChineseUtils.normalize(in);
     String out = normalize(norm);
-    //System.err.println("AFTER NORM: "+out);
+    //log.info("AFTER NORM: "+out);
     return out;
   }
 
@@ -135,17 +139,17 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
   public static void main(String[] args) throws IOException {
     //String encoding = "GB18030";
     Properties props = StringUtils.argsToProperties(args);
-    // System.err.println("Here are the properties:");
+    // log.info("Here are the properties:");
     // props.list(System.err);
     boolean alwaysAddS = props.containsKey("alwaysAddS");
     ChineseDocumentToSentenceProcessor cp;
     if (! props.containsKey("file")) {
-      System.err.println("usage: java ChineseDocumentToSentenceProcessor [-segmentIBM] -file filename [-encoding encoding]");
+      log.info("usage: java ChineseDocumentToSentenceProcessor [-segmentIBM] -file filename [-encoding encoding]");
       return;
     }
     cp = new ChineseDocumentToSentenceProcessor();
     if (props.containsKey("encoding")) {
-      System.err.println("WARNING: for now the default encoding is "+cp.encoding+". It's not changeable for now");
+      log.info("WARNING: for now the default encoding is "+cp.encoding+". It's not changeable for now");
     }
     String input = IOUtils.slurpFileNoExceptions(props.getProperty("file"),
                                                      cp.encoding);
@@ -232,7 +236,7 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
       // empty remaining buffers
       pw.flush();
       pw.close();
-      System.err.println("Split " + splitItems + " segments, adding " +
+      log.info("Split " + splitItems + " segments, adding " +
                          numAdded + " sentences.");
     } else {
       List<String> sent = cp.fromHTML(input);
@@ -324,7 +328,7 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
           }
           sentenceString = removeWhitespace(sentenceString, segmented);
           if (sentenceString.length() > 0) {
-            //System.err.println("<<< "+sentenceString+" >>>");
+            //log.info("<<< "+sentenceString+" >>>");
             sentenceList.add(sentenceString);
           }
           sentenceString = "";
@@ -336,7 +340,7 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
 
     sentenceString = removeWhitespace(sentenceString, segmented);
     if (sentenceString.length() > 0) {
-      //System.err.println("<<< "+sentenceString+" >>>");
+      //log.info("<<< "+sentenceString+" >>>");
       sentenceList.add(sentenceString);
     }
     return sentenceList;
@@ -474,10 +478,10 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
       List<String> result = parser.parse(input);
       PrintWriter orig = new PrintWriter("file.orig");
       PrintWriter parsed = new PrintWriter("file.parsed");
-      System.err.println("output to file.orig");
+      log.info("output to file.orig");
       orig.println(input);
       for (String s : result) {
-        System.err.println("output to file.parsed");
+        log.info("output to file.parsed");
         parsed.println(s);
         parsed.println("-----------------------------------------");
       }

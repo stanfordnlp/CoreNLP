@@ -1,4 +1,5 @@
-package edu.stanford.nlp.tagger.maxent;
+package edu.stanford.nlp.tagger.maxent; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -20,7 +21,10 @@ import edu.stanford.nlp.util.StringUtils;
  *
  * @author Christopher Manning
  */
-public class MaxentTaggerServer {
+public class MaxentTaggerServer  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(MaxentTaggerServer.class);
 
   //// Variables
 
@@ -68,24 +72,24 @@ public class MaxentTaggerServer {
   @SuppressWarnings({"InfiniteLoopStatement", "ConstantConditions", "null"})
   public void run() {
     if (DEBUG) {
-      System.err.println("Starting server loop");
+      log.info("Starting server loop");
     }
     Socket client = null;
     while (true) {
       try {
         client = listener.accept();
         if (DEBUG) {
-          System.err.print("Accepted request from ");
-          System.err.println(client.getInetAddress().getHostName());
+          log.info("Accepted request from ");
+          log.info(client.getInetAddress().getHostName());
         }
         new Session(client);
       } catch (Exception e1) {
-        System.err.println("MaxentTaggerServer: couldn't accept");
+        log.info("MaxentTaggerServer: couldn't accept");
         e1.printStackTrace(System.err);
         try {
           client.close();
         } catch (Exception e2) {
-          System.err.println("MaxentTaggerServer: couldn't close client");
+          log.info("MaxentTaggerServer: couldn't close client");
           e2.printStackTrace(System.err);
         }
       }
@@ -138,7 +142,7 @@ public class MaxentTaggerServer {
      */
     @Override
     public void run() {
-      if (DEBUG) {System.err.println("Created new session");}
+      if (DEBUG) {log.info("Created new session");}
 
       try {
         String input = in.readLine();
@@ -155,10 +159,10 @@ public class MaxentTaggerServer {
         }
         close();
       } catch (IOException e) {
-        System.err.println("MaxentTaggerServer:Session: couldn't read input or error running POS tagger");
+        log.info("MaxentTaggerServer:Session: couldn't read input or error running POS tagger");
         e.printStackTrace(System.err);
       } catch (NullPointerException npe) {
-        System.err.println("MaxentTaggerServer:Session: connection closed by peer");
+        log.info("MaxentTaggerServer:Session: connection closed by peer");
         npe.printStackTrace(System.err);
       }
     }
@@ -172,7 +176,7 @@ public class MaxentTaggerServer {
         out.close();
         client.close();
       } catch (Exception e) {
-        System.err.println("MaxentTaggerServer:Session: can't close session");
+        log.info("MaxentTaggerServer:Session: can't close session");
         e.printStackTrace();
       }
     }
@@ -196,7 +200,7 @@ public class MaxentTaggerServer {
 
       BufferedReader stdIn = new BufferedReader(
               new InputStreamReader(System.in, charset));
-      System.err.println("Input some text and press RETURN to POS tag it, or just RETURN to finish.");
+      log.info("Input some text and press RETURN to POS tag it, or just RETURN to finish.");
 
       for (String userInput; (userInput = stdIn.readLine()) != null && ! userInput.matches("\\n?"); ) {
         try {
@@ -216,12 +220,12 @@ public class MaxentTaggerServer {
           in.close();
           socket.close();
         } catch (UnknownHostException e) {
-          System.err.print("Cannot find host: ");
-          System.err.println(host);
+          log.info("Cannot find host: ");
+          log.info(host);
           return;
         } catch (IOException e) {
-          System.err.print("I/O error in the connection to: ");
-          System.err.println(host);
+          log.info("I/O error in the connection to: ");
+          log.info(host);
           return;
         }
       }
@@ -247,7 +251,7 @@ public class MaxentTaggerServer {
   @SuppressWarnings({"StringEqualsEmptyString"})
   public static void main (String[] args) throws Exception {
     if (args.length == 0) {
-      System.err.println(USAGE);
+      log.info(USAGE);
       return;
     }
     // Use both Properties and TaggerConfig.  It's okay.
@@ -256,15 +260,15 @@ public class MaxentTaggerServer {
 
     String portStr = props.getProperty("port");
     if (portStr == null || portStr.equals("")) {
-      System.err.println(USAGE);
+      log.info(USAGE);
       return;
     }
     int port = 0;
     try {
       port = Integer.parseInt(portStr);
     } catch (NumberFormatException e) {
-      System.err.println("Non-numerical port");
-      System.err.println(USAGE);
+      log.info("Non-numerical port");
+      log.info(USAGE);
       System.exit(1);
     }
 

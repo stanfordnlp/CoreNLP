@@ -1,12 +1,17 @@
 package edu.stanford.nlp.parser.lexparser;
 
+import edu.stanford.nlp.util.logging.Redwood;
+
 import edu.stanford.nlp.international.spanish.SpanishUnknownWordSignatures;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.StringUtils;
 
 
-public class SpanishUnknownWordModel extends BaseUnknownWordModel {
+public class SpanishUnknownWordModel extends BaseUnknownWordModel  {
+
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels log = Redwood.channels(SpanishUnknownWordModel.class);
 
   protected final boolean smartMutation;
 
@@ -132,18 +137,20 @@ public class SpanishUnknownWordModel extends BaseUnknownWordModel {
         break;
 
       default:
-        System.err.printf("%s: Invalid unknown word signature! (%d)%n", this.getClass().getName(),unknownLevel);
+        log.error(String.format("%s: Invalid unknown word signature! (%d)%n", this.getClass().getName(),unknownLevel));
     }
 
     return sb.toString();
   }
 
-  private boolean isUpperCase(String s) {
+  private static boolean isUpperCase(String s) {
     for (int i = 0; i < s.length(); i++) {
       if (Character.isLowerCase(s.charAt(i)))
         return false;
     }
-
     return true;
   }
+
+  private static final long serialVersionUID = 5370429530690606644L;
+
 }

@@ -5,7 +5,8 @@
  * Company:      Stanford University<p>
  */
 
-package edu.stanford.nlp.tagger.maxent;
+package edu.stanford.nlp.tagger.maxent; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
@@ -94,7 +95,10 @@ class ListInstances {
 
 }
 
-public class TemplateHash {
+public class TemplateHash  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TemplateHash.class);
 
   // the positions of the feature extractors
   private final Map<Pair<Integer,String>,ListInstances> tempHash = Generics.newHashMap();
@@ -118,7 +122,7 @@ public class TemplateHash {
   //public void init() {
 //    cdm 2008: stringNums isn't used anywhere, so we now don't do any init.
 //    int num = maxentTagger.extractors.getSize() + maxentTagger.extractorsRare.getSize();
-//    //System.err.println("A total of "+num+" features in TemplateHash");
+//    //log.info("A total of "+num+" features in TemplateHash");
 //    stringNums = new String[num];
 //    for (int i = 0; i < num; i++) {
 //      stringNums[i] = String.valueOf(i);

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.FileSequentialCollection;
 import edu.stanford.nlp.io.IOUtils;
@@ -27,7 +28,10 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  * @author Gabor Angeli
  */
 @SuppressWarnings("FieldCanBeLocal")
-public class StanfordCoreNLPClient extends AnnotationPipeline {
+public class StanfordCoreNLPClient extends AnnotationPipeline  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(StanfordCoreNLPClient.class);
 
   /**
    * Information on how to connect to a backend.
@@ -303,7 +307,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
       lock.lock();
       annotationDone.await();  // Only wait for one callback to complete; only annotating one document
     } catch (InterruptedException e) {
-      System.err.println("Interrupt while waiting for annotation to return");
+      log.info("Interrupt while waiting for annotation to return");
     } finally {
       lock.unlock();
     }
@@ -372,7 +376,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
           }
           // 3. Fire off the request
           connection.getOutputStream().write(message);
-//          System.err.println("Wrote " + message.length + " bytes to " + backend.host + ":" + backend.port);
+//          log.info("Wrote " + message.length + " bytes to " + backend.host + ":" + backend.port);
           os.close();
 
           // 4. Await a response
@@ -417,7 +421,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
    * @throws IOException If IO problem with stdin
    */
   private static void shell(StanfordCoreNLPClient pipeline) throws IOException {
-    System.err.println("Entering interactive shell. Type q RETURN or EOF to quit.");
+    log.info("Entering interactive shell. Type q RETURN or EOF to quit.");
     final StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(pipeline.properties.getProperty("outputFormat", "text").toUpperCase());
     IOUtils.console("NLP> ", line -> {
       if (line.length() > 0) {
@@ -546,7 +550,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
     // extract all the properties from the command line
     // if cmd line is empty, set the properties to null. The processor will search for the properties file in the classpath
 //    if (args.length < 2) {
-//      System.err.println("Usage: " + StanfordCoreNLPClient.class.getSimpleName() + " -host <hostname> -port <port> ...");
+//      log.info("Usage: " + StanfordCoreNLPClient.class.getSimpleName() + " -host <hostname> -port <port> ...");
 //      System.exit(1);
 //    }
     Properties props = StringUtils.argsToProperties(args);

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.io;
+package edu.stanford.nlp.io; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 import java.io.*;
@@ -16,7 +17,10 @@ import java.io.*;
  *
  * @author Bill MacCartney
  */
-public class RecordIterator implements Iterator<List<String>> {
+public class RecordIterator implements Iterator<List<String>>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(RecordIterator.class);
 
   private static String WHITESPACE = "\\s+";
 
@@ -268,7 +272,7 @@ public class RecordIterator implements Iterator<List<String>> {
       it = new RecordIterator(args[0]);
     } else {
       it = new RecordIterator(System.in);
-      System.err.println("[Reading from stdin...]");
+      log.info("[Reading from stdin...]");
     }
     
     while (it != null && it.hasNext()) {

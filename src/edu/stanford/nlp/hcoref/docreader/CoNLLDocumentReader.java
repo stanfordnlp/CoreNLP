@@ -87,7 +87,10 @@ import edu.stanford.nlp.util.logging.Redwood;
  *
  * @author Angel Chang, Heeyoung Lee
  */
-public class CoNLLDocumentReader implements DocReader {
+public class CoNLLDocumentReader implements DocReader  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CoNLLDocumentReader.class);
 
   private static final int FIELD_LAST = -1;
 
@@ -747,7 +750,7 @@ public class CoNLLDocumentReader implements DocReader {
 
   public static void usage()
   {
-    System.err.println("java edu.stanford.nlp.dcoref.CoNLL2011DocumentReader [-ext <extension to match>] -i <inputpath> -o <outputfile>");
+    log.info("java edu.stanford.nlp.dcoref.CoNLL2011DocumentReader [-ext <extension to match>] -i <inputpath> -o <outputfile>");
   }
 
   public static Pair<Integer,Integer> getMention(Integer index, String corefG, List<CoreLabel> sentenceAnno) {

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.tagger.maxent;
+package edu.stanford.nlp.tagger.maxent; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,7 +21,10 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 // spread some functionality into TestSentence and some into MaxentTagger
 // TODO: at the very least, it doesn't seem to make sense to make it
 // an object with state, rather than just some static methods
-public class TestClassifier {
+public class TestClassifier  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TestClassifier.class);
 
   private final TaggedFileRecord fileRecord;
   private int numRight;
@@ -87,10 +91,10 @@ public class TestClassifier {
       numCorrectSentences++;
     }
     if (verboseResults) {
-      System.err.println("Sentence number: " + numSentences + "; length " + (testS.size-1) +
+      log.info("Sentence number: " + numSentences + "; length " + (testS.size-1) +
                          "; correct: " + testS.numRight + "; wrong: " + testS.numWrong +
                          "; unknown wrong: " + testS.numWrongUnknown);
-      System.err.println("  Total tags correct: " + numRight + "; wrong: " + numWrong +
+      log.info("  Total tags correct: " + numRight + "; wrong: " + numWrong +
                          "; unknown wrong: " + numWrongUnknown);
     }
   }
@@ -172,7 +176,7 @@ public class TestClassifier {
 
   void printModelAndAccuracy(MaxentTagger maxentTagger) {
     // print the output all at once so that multiple threads don't clobber each other's output
-    System.err.println(resultsString(maxentTagger));
+    log.info(resultsString(maxentTagger));
   }
 
 

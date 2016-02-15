@@ -24,7 +24,8 @@
 //    parser-support@lists.stanford.edu
 //    http://nlp.stanford.edu/software/lex-parser.shtml
 
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -46,7 +47,10 @@ import edu.stanford.nlp.util.Index;
  * @version 03/05/2003
  */
 
-public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
+public class EnglishTreebankParserParams extends AbstractTreebankParserParams  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(EnglishTreebankParserParams.class);
 
   protected class EnglishSubcategoryStripper implements TreeTransformer {
 
@@ -634,7 +638,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
 
     public void display() {
       String englishParams = "Using EnglishTreebankParserParams" + " splitIN=" + splitIN + " sPercent=" + splitPercent + " sNNP=" + splitNNP + " sQuotes=" + splitQuotes + " sSFP=" + splitSFP + " rbGPA=" + tagRBGPA + " j#=" + joinPound + " jJJ=" + joinJJ + " jNounTags=" + joinNounTags + " sPPJJ=" + splitPPJJ + " sTRJJ=" + splitTRJJ + " sJJCOMP=" + splitJJCOMP + " sMoreLess=" + splitMoreLess + " unaryDT=" + unaryDT + " unaryRB=" + unaryRB + " unaryPRP=" + unaryPRP + " reflPRP=" + markReflexivePRP + " unaryIN=" + unaryIN + " sCC=" + splitCC + " sNT=" + splitNOT + " sRB=" + splitRB + " sAux=" + splitAux + " vpSubCat=" + vpSubCat + " mDTV=" + markDitransV + " sVP=" + splitVP + " sVPNPAgr=" + splitVPNPAgr + " sSTag=" + splitSTag + " mVP=" + markContainedVP + " sNP%=" + splitNPpercent + " sNPPRP=" + splitNPPRP + " dominatesV=" + dominatesV + " dominatesI=" + dominatesI + " dominatesC=" + dominatesC + " mCC=" + markCC + " sSGapped=" + splitSGapped + " numNP=" + splitNumNP + " sPoss=" + splitPoss + " baseNP=" + splitBaseNP + " sNPNNP=" + splitNPNNP + " sTMP=" + splitTMP + " sNPADV=" + splitNPADV + " cTags=" + correctTags + " rightPhrasal=" + rightPhrasal + " gpaRootVP=" + gpaRootVP + " splitSbar=" + splitSbar + " mPPTOiIN=" + makePPTOintoIN + " cWh=" + collapseWhCategories;
-      System.err.println(englishParams);
+      log.info(englishParams);
     }
 
     private static final long serialVersionUID = 1831576434872643L;
@@ -1555,7 +1559,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
               cat = cat + "-" + baseTag;
               break;
             default:
-              System.err.println("XXXX Head of " + t + " is " + word + "/" + baseTag);
+              log.info("XXXX Head of " + t + " is " + word + "/" + baseTag);
               break;
           }
         } else if (englishTrain.splitVP == 3 || englishTrain.splitVP == 4) {
@@ -1679,7 +1683,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
             cat += "-PL";
           }
         } else {
-          System.err.println("XXXX Head of " + t + " is " + word + "/" + baseTag);
+          log.info("XXXX Head of " + t + " is " + word + "/" + baseTag);
         }
       }
       if (englishTrain.splitSTag > 0 &&
@@ -1709,7 +1713,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
               cat = cat + "-CC";
               break;
             } else {
-              // System.err.println("XXX Found non-marginal either/both/neither");
+              // log.info("XXX Found non-marginal either/both/neither");
             }
           } else if (englishTrain.markCC > 1 && cat2.startsWith("CONJP")) {
             cat = cat + "-CC";
@@ -1825,7 +1829,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
           // add POS dtr
           Tree last = oldKids.get(oldKids.size() - 1);
           if ( ! last.value().equals("POS^NP")) {
-            System.err.println("Unexpected POS value (!): " + last);
+            log.info("Unexpected POS value (!): " + last);
           }
           last.setValue("POS^POSSP");
           newerChildren.add(last);
@@ -2207,7 +2211,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
       try {
         headFinder = (HeadFinder) Class.forName(args[i + 1]).newInstance();
       } catch (Exception e) {
-        System.err.println("Error: Unable to load HeadFinder; default HeadFinder will be used.");
+        log.info("Error: Unable to load HeadFinder; default HeadFinder will be used.");
         e.printStackTrace();
       }
       i += 2;

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees;
+package edu.stanford.nlp.trees; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
 
@@ -25,7 +26,10 @@ import edu.stanford.nlp.stats.Counters;
  * @author danielcer
  *
  */
-public class DependencyScoring {
+public class DependencyScoring  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(DependencyScoring.class);
   public final static boolean VERBOSE = false;
 
   public final List<Set<TypedDependency>> goldDeps;
@@ -232,7 +236,7 @@ public class DependencyScoring {
        readDeps.add(deps);
     }
 
-    //System.err.println("last: "+readDeps.get(readDeps.size()-1));
+    //log.info("last: "+readDeps.get(readDeps.size()-1));
     breader.close();
     return readDeps;
   }
@@ -428,8 +432,8 @@ public class DependencyScoring {
     String goldFilename = props.getProperty("g");
     String systemFilename = props.getProperty("s");
     if (goldFilename == null || systemFilename == null) {
-      System.err.println("Usage:\n\tjava ...DependencyScoring [-v True/False] [-conllx True/False] [-jsonOutput True/False] [-ignorePunc True/False] -g goldFile -s systemFile\n");
-      System.err.println("\nOptions:\n\t-v verbose output");
+      log.info("Usage:\n\tjava ...DependencyScoring [-v True/False] [-conllx True/False] [-jsonOutput True/False] [-ignorePunc True/False] -g goldFile -s systemFile\n");
+      log.info("\nOptions:\n\t-v verbose output");
       System.exit(-1);
     }
 

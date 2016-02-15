@@ -46,7 +46,10 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @param <L> The type of the labels in the Dataset
  * @param <F> The type of the features in the Dataset
  */
-public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Iterable<RVFDatum<L, F>>, Serializable
+public class RVFDataset<L, F> extends GeneralDataset<L, F>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(RVFDataset.class); // implements Iterable<RVFDatum<L, F>>, Serializable
 
   private static final long serialVersionUID = -3841757837680266182L;
 
@@ -523,12 +526,12 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
   @Override
   public void summaryStatistics() {
     logger.info("numDatums: " + size);
-    System.err.print("numLabels: " + labelIndex.size() + " [");
+    log.info("numLabels: " + labelIndex.size() + " [");
     Iterator<L> iter = labelIndex.iterator();
     while (iter.hasNext()) {
-      System.err.print(iter.next());
+      log.info(iter.next());
       if (iter.hasNext()) {
-        System.err.print(", ");
+        log.info(", ");
       }
     }
     logger.info("]");

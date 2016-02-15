@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees;
+package edu.stanford.nlp.trees; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -25,18 +26,21 @@ import edu.stanford.nlp.util.ReflectionLoading;
  *
  *  @author Christopher Manning
  */
-public class Treebanks {
+public class Treebanks  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(Treebanks.class);
 
   private Treebanks() {} // static methods
 
   private static void printUsage() {
-    System.err.println("This main method will let you variously manipulate and view a treebank.");
-    System.err.println("Usage: java Treebanks [-flags]* treebankPath [fileRanges]");
-    System.err.println("Useful flags include:");
-    System.err.println("\t-maxLength n\t-suffix ext\t-treeReaderFactory class");
-    System.err.println("\t-pennPrint\t-encoding enc\t-tlp class\t-sentenceLengths");
-    System.err.println("\t-summary\t-decimate\t-yield\t-correct\t-punct");
-    System.err.println("\t-oneLine\t-words\t-taggedWords\t-annotate options");
+    log.info("This main method will let you variously manipulate and view a treebank.");
+    log.info("Usage: java Treebanks [-flags]* treebankPath [fileRanges]");
+    log.info("Useful flags include:");
+    log.info("\t-maxLength n\t-suffix ext\t-treeReaderFactory class");
+    log.info("\t-pennPrint\t-encoding enc\t-tlp class\t-sentenceLengths");
+    log.info("\t-summary\t-decimate\t-yield\t-correct\t-punct");
+    log.info("\t-oneLine\t-words\t-taggedWords\t-annotate options");
   }
 
   /**
@@ -104,7 +108,7 @@ public class Treebanks {
           tlp = (TreebankLanguagePack) o;
           trf = tlp.treeReaderFactory();
         } catch (Exception e) {
-          System.err.println("Couldn't instantiate as TreebankLanguagePack: " + args[i+1]);
+          log.info("Couldn't instantiate as TreebankLanguagePack: " + args[i+1]);
           return;
         }
         i += 2;
@@ -113,7 +117,7 @@ public class Treebanks {
           final Object o = Class.forName(args[i+1]).newInstance();
           trf = (TreeReaderFactory) o;
         } catch (Exception e) {
-          System.err.println("Couldn't instantiate as TreeReaderFactory: " + args[i+1]);
+          log.info("Couldn't instantiate as TreeReaderFactory: " + args[i+1]);
           return;
         }
         i += 2;
@@ -171,7 +175,7 @@ public class Treebanks {
         filters.add(filter);
         i += 2;
       } else {
-        System.err.println("Unknown option: " + args[i]);
+        log.info("Unknown option: " + args[i]);
         i++;
       }
     }
@@ -202,11 +206,11 @@ public class Treebanks {
       printUsage();
       return;
     }
-    // System.err.println("Loaded " + treebank.size() + " trees from " + args[i]);
+    // log.info("Loaded " + treebank.size() + " trees from " + args[i]);
 
     if (annotationOptions != null) {
       // todo Not yet implemented
-      System.err.println("annotationOptions not yet implemented");
+      log.info("annotationOptions not yet implemented");
     }
 
     if (summary) {
@@ -302,7 +306,7 @@ public class Treebanks {
 
   private static void printPunct(Treebank treebank, TreebankLanguagePack tlp, PrintWriter pw) {
     if (tlp == null) {
-      System.err.println("The -punct option requires you to specify -tlp");
+      log.info("The -punct option requires you to specify -tlp");
     } else {
       Predicate<String> punctTagFilter = tlp.punctuationTagAcceptFilter();
       for (Tree t : treebank) {
@@ -344,7 +348,7 @@ public class Treebanks {
       num += t.yield().size();
     }
     Timing.endTime("traversing corpus, counting words with iterator");
-    System.err.println("There were " + num + " words in the treebank.");
+    log.info("There were " + num + " words in the treebank.");
 
     treebank.apply(new TreeVisitor() {
         int num = 0;
@@ -353,13 +357,13 @@ public class Treebanks {
           num += t.yield().size();
         }
       });
-    System.err.println();
+    log.info();
     Timing.endTime("traversing corpus, counting words with TreeVisitor");
-    System.err.println("There were " + num + " words in the treebank.");
+    log.info("There were " + num + " words in the treebank.");
 
-    System.err.println();
+    log.info();
     Timing.startTime();
-    System.err.println("This treebank contains " + treebank.size() + " trees.");
+    log.info("This treebank contains " + treebank.size() + " trees.");
     Timing.endTime("size of corpus");
   }
 

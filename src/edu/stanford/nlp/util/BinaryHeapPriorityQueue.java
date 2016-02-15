@@ -1,4 +1,5 @@
-package edu.stanford.nlp.util;
+package edu.stanford.nlp.util; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 
@@ -11,7 +12,10 @@ import java.util.*;
  * @author Christopher Manning
  * @param <E> Type of elements in the priority queue
  */
-public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements PriorityQueue<E>, Iterator<E> {
+public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements PriorityQueue<E>, Iterator<E>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(BinaryHeapPriorityQueue.class);
 
   /**
    * An {@code Entry} stores an object in the queue along with
@@ -194,7 +198,7 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
         // this indexation now holds current, so it is unchanged
       }
     } while (bestEntry != entry);
-    // System.err.println("Done with heapify down");
+    // log.info("Done with heapify down");
     // verify();
   }
 
@@ -287,7 +291,7 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
   /** {@inheritDoc} */
   @Override
   public boolean add(E key, double priority) {
-//    System.err.println("Adding " + key + " with priority " + priority);
+//    log.info("Adding " + key + " with priority " + priority);
     if (add(key)) {
       relaxPriority(key, priority);
       return true;
@@ -453,13 +457,13 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
   //      if (i != 0) {
   //        // check ordering
   //        if (compare(getEntry(i), parent(getEntry(i))) < 0) {
-  //          System.err.println("Error in the ordering of the heap! ("+i+")");
+  //          log.info("Error in the ordering of the heap! ("+i+")");
   //          System.exit(0);
   //        }
   //      }
   //      // check placement
   //      if (i != ((Entry)indexToEntry.get(i)).index)
-  //        System.err.println("Error in placement in the heap!");
+  //        log.info("Error in placement in the heap!");
   //    }
   //  }
 

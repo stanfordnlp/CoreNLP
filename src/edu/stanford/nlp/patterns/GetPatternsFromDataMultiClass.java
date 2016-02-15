@@ -93,7 +93,10 @@ import org.joda.time.Period;
  * @author Sonal Gupta (sonal@cs.stanford.edu)
  */
 
-public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serializable {
+public class GetPatternsFromDataMultiClass<E extends Pattern> implements Serializable  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(GetPatternsFromDataMultiClass.class);
 
   private static final long serialVersionUID = 1L;
 
@@ -2891,7 +2894,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     }
 
     if (!assumedNeg.isEmpty())
-      System.err.println("\nGold entity list does not contain words " + assumedNeg + " for label " + label + ". *****Assuming them as negative.******");
+      log.info("\nGold entity list does not contain words " + assumedNeg + " for label " + label + ". *****Assuming them as negative.******");
 
     double precision = numcorrect / (double) (numcorrect + numincorrect);
     double recall = numcorrect / (double) (numgoldcorrect);
@@ -3272,7 +3275,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     }
 
     if (evalsents.size() == 0 && constVars.goldEntitiesEvalFiles == null)
-      System.err.println("No eval sentences or list of gold entities provided to evaluate! Make sure evalFileWithGoldLabels or goldEntitiesEvalFiles is set, or turn off the evaluate flag");
+      log.info("No eval sentences or list of gold entities provided to evaluate! Make sure evalFileWithGoldLabels or goldEntitiesEvalFiles is set, or turn off the evaluate flag");
 
   }
 

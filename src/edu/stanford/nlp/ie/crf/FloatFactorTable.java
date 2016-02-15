@@ -1,4 +1,5 @@
-package edu.stanford.nlp.ie.crf;
+package edu.stanford.nlp.ie.crf; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.math.SloppyMath;
@@ -14,7 +15,10 @@ import java.util.List;
  *  @author Jenny Finkel
  */
 
-public class FloatFactorTable {
+public class FloatFactorTable  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(FloatFactorTable.class);
 
   private final int numClasses;
   private final int windowSize;
@@ -178,7 +182,7 @@ public class FloatFactorTable {
   // given is at the begining, of is at the end
   public float conditionalLogProb(int[] given, int of) {
     if (given.length != windowSize - 1) {
-      System.err.println("error computing conditional log prob");
+      log.info("error computing conditional log prob");
       System.exit(0);
     }
     int[] label = indicesFront(given);
@@ -371,7 +375,7 @@ public class FloatFactorTable {
         float t = 0;
         for (int k = 0; k < 6; k++) {
           t += Math.exp(ft.conditionalLogProb(b, k));
-          System.err.println(k + "|" + i + "," + j + " : " + Math.exp(ft.conditionalLogProb(b, k)));
+          log.info(k + "|" + i + "," + j + " : " + Math.exp(ft.conditionalLogProb(b, k)));
         }
         System.out.println(t);
       }

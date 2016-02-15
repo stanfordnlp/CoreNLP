@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.arabic.parsesegment;
+package edu.stanford.nlp.international.arabic.parsesegment; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -17,7 +18,10 @@ import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Timing;
 
-public class JointParsingModel {
+public class JointParsingModel  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(JointParsingModel.class);
 
   private boolean VERBOSE = false;
 
@@ -68,7 +72,7 @@ public class JointParsingModel {
         }
       }
       if (op.testOptions.verbose) {
-        System.err.println("Removed from vertical splitters: " + deleted);
+        log.info("Removed from vertical splitters: " + deleted);
       }
     }
   }
@@ -77,9 +81,9 @@ public class JointParsingModel {
     TreebankLangParserParams tlpParams = op.tlpParams;
     TreebankLanguagePack tlp = tlpParams.treebankLanguagePack();
 
-    if (VERBOSE) System.err.println("\n\n" + trainTreebank.textualSummary(tlp));
+    if (VERBOSE) log.info("\n\n" + trainTreebank.textualSummary(tlp));
 
-    System.err.print("Binarizing trees...");
+    log.info("Binarizing trees...");
     TreeAnnotatorAndBinarizer binarizer = new TreeAnnotatorAndBinarizer(tlpParams, op.forceCNF, !op.trainOptions.outsideFactor(), true, op);
     Timing.tick("done.");
 
@@ -89,7 +93,7 @@ public class JointParsingModel {
       if (op.testOptions.verbose) {
         List<String> list = new ArrayList<>(op.trainOptions.splitters);
         Collections.sort(list);
-        System.err.println("Parent split categories: " + list);
+        log.info("Parent split categories: " + list);
       }
     }
     //		if (op.trainOptions.selectivePostSplit) {
@@ -98,7 +102,7 @@ public class JointParsingModel {
     //			Treebank annotatedTB = trainTreebank.transform(myTransformer);
     //			op.trainOptions.postSplitters = ParentAnnotationStats.getSplitCategories(annotatedTB, true, 0, op.trainOptions.selectivePostSplitCutOff, op.trainOptions.tagSelectivePostSplitCutOff, tlp);
     //			if (op.testOptions.verbose) {
-    //				System.err.println("Parent post annotation split categories: " + op.trainOptions.postSplitters);
+    //				log.info("Parent post annotation split categories: " + op.trainOptions.postSplitters);
     //			}
     //		}
     if (op.trainOptions.hSelSplit) {
@@ -136,13 +140,13 @@ public class JointParsingModel {
 
   public LexicalizedParser getParserDataFromTreebank(Treebank trainTreebank) {
 
-    System.err.print("Binarizing training trees...");
+    log.info("Binarizing training trees...");
     List<Tree> binaryTrainTrees = getAnnotatedBinaryTreebankFromTreebank(trainTreebank);
     Timing.tick("done.");
 
     Index<String> stateIndex = new HashIndex<>();
 
-    System.err.print("Extracting PCFG...");
+    log.info("Extracting PCFG...");
     Extractor<Pair<UnaryGrammar,BinaryGrammar>> bgExtractor = new BinaryGrammarExtractor(op, stateIndex);
     Pair<UnaryGrammar,BinaryGrammar> bgug = bgExtractor.extract(binaryTrainTrees);
 
@@ -153,7 +157,7 @@ public class JointParsingModel {
     ug.purgeRules();
     Timing.tick("done.");
 
-    System.err.print("Extracting Lexicon...");
+    log.info("Extracting Lexicon...");
     Index<String> wordIndex = new HashIndex<>();
     Index<String> tagIndex = new HashIndex<>();
     Lexicon lex = op.tlpParams.lex(op, wordIndex, tagIndex);
@@ -165,13 +169,13 @@ public class JointParsingModel {
     Extractor<DependencyGrammar> dgExtractor = op.tlpParams.dependencyGrammarExtractor(op, wordIndex, tagIndex);
     DependencyGrammar dg = null;
     if (op.doDep) {
-      System.err.print("Extracting Dependencies...");
+      log.info("Extracting Dependencies...");
       dg = dgExtractor.extract(binaryTrainTrees);
       dg.setLexicon(lex);
       Timing.tick("done.");
     }
 
-    System.err.println("Done extracting grammars and lexicon.");
+    log.info("Done extracting grammars and lexicon.");
 
     return new LexicalizedParser(lex, bg, ug, dg, stateIndex, wordIndex, tagIndex, op);
   }
@@ -257,14 +261,14 @@ public class JointParsingModel {
       latticeNum++;
     }
 
-    System.err.println("===================================================================");
-    System.err.println("===================================================================");
-    System.err.println("Post mortem:");
-    System.err.println("  Input:     " + latticeNum);
-    System.err.println("  Parseable: " + parseable);
-    System.err.println("  Parsed:    " + successes);
-    System.err.println("  f_Parsed:  " + fParseSucceeded);
-    System.err.println("  String %:  " + (int)((double) successes * 10000.0 / (double) parseable) / 100.0);
+    log.info("===================================================================");
+    log.info("===================================================================");
+    log.info("Post mortem:");
+    log.info("  Input:     " + latticeNum);
+    log.info("  Parseable: " + parseable);
+    log.info("  Parsed:    " + successes);
+    log.info("  f_Parsed:  " + fParseSucceeded);
+    log.info("  String %:  " + (int)((double) successes * 10000.0 / (double) parseable) / 100.0);
 
     return true;
   }
@@ -299,16 +303,16 @@ public class JointParsingModel {
     if (VERBOSE) {
       op.display();
       String lexNumRules = (pparser != null) ? Integer.toString(lp.lex.numRules()): "";
-      System.err.println("Grammar\tStates\tTags\tWords\tUnaryR\tBinaryR\tTaggings");
-      System.err.println("Grammar\t" +
+      log.info("Grammar\tStates\tTags\tWords\tUnaryR\tBinaryR\tTaggings");
+      log.info("Grammar\t" +
                          lp.stateIndex.size() + '\t' +
                          lp.tagIndex.size() + '\t' +
                          lp.wordIndex.size() + '\t' +
                          (pparser != null ? lp.ug.numRules(): "") + '\t' +
                          (pparser != null ? lp.bg.numRules(): "") + '\t' +
                          lexNumRules);
-      System.err.println("ParserPack is " + op.tlpParams.getClass().getName());
-      System.err.println("Lexicon is " + lp.lex.getClass().getName());
+      log.info("ParserPack is " + op.tlpParams.getClass().getName());
+      log.info("Lexicon is " + lp.lex.getClass().getName());
     }
 
     return parse(inputStream);

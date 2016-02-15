@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.tregex;
+package edu.stanford.nlp.trees.tregex; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.function.Function;
 import edu.stanford.nlp.trees.HeadFinder;
@@ -11,7 +12,10 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class DescriptionPattern extends TregexPattern {
+public class DescriptionPattern extends TregexPattern  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(DescriptionPattern.class);
 
   enum DescriptionMode {
     PATTERN, STRINGS, EXACT, ANYTHING
@@ -90,7 +94,7 @@ class DescriptionPattern extends TregexPattern {
         }
         exactMatch = matchedGroup;
         stringFilter = null;
-        //System.err.println("DescriptionPattern: converting " + desc + " to " + exactMatch);
+        //log.info("DescriptionPattern: converting " + desc + " to " + exactMatch);
       } else if (MULTI_WORD_PATTERN.matcher(desc).matches()) {
         Matcher matcher = MULTI_WORD_PATTERN.matcher(desc);
         matcher.matches();
@@ -107,13 +111,13 @@ class DescriptionPattern extends TregexPattern {
           descPattern = Pattern.compile(desc.substring(1, desc.length() - 1));
           exactMatch = null;
           stringFilter = null;
-          //System.err.println("DescriptionPattern: not converting " + desc);
+          //log.info("DescriptionPattern: not converting " + desc);
         } else {
           descriptionMode = DescriptionMode.STRINGS;
           descPattern = null;
           exactMatch = null;
           stringFilter = new ArrayStringFilter(ArrayStringFilter.Mode.EXACT, matchedGroup.split("[|]")); 
-          //System.err.println("DescriptionPattern: converting " + desc + " to " + stringFilter);
+          //log.info("DescriptionPattern: converting " + desc + " to " + stringFilter);
         }
       } else if (CASE_INSENSITIVE_PATTERN.matcher(desc).matches()) {
         Matcher matcher = CASE_INSENSITIVE_PATTERN.matcher(desc);
@@ -131,13 +135,13 @@ class DescriptionPattern extends TregexPattern {
           descPattern = Pattern.compile(desc.substring(1, desc.length() - 1));
           exactMatch = null;
           stringFilter = null;
-          //System.err.println("DescriptionPattern: not converting " + desc);
+          //log.info("DescriptionPattern: not converting " + desc);
         } else {
           descriptionMode = DescriptionMode.STRINGS;
           descPattern = null;
           exactMatch = null;
           stringFilter = new ArrayStringFilter(ArrayStringFilter.Mode.CASE_INSENSITIVE, matchedGroup.split("[|]")); 
-          //System.err.println("DescriptionPattern: converting " + desc + " to " + stringFilter);
+          //log.info("DescriptionPattern: converting " + desc + " to " + stringFilter);
         }
       } else if (PREFIX_PATTERN.matcher(desc).matches()) {
         Matcher matcher = PREFIX_PATTERN.matcher(desc);
@@ -154,13 +158,13 @@ class DescriptionPattern extends TregexPattern {
           descPattern = Pattern.compile(desc.substring(1, desc.length() - 1));
           exactMatch = null;
           stringFilter = null;
-          //System.err.println("DescriptionPattern: not converting " + desc);
+          //log.info("DescriptionPattern: not converting " + desc);
         } else {
           descriptionMode = DescriptionMode.STRINGS;
           descPattern = null;
           exactMatch = null;
           stringFilter = new ArrayStringFilter(ArrayStringFilter.Mode.PREFIX, matchedGroup.split("[|]")); 
-          //System.err.println("DescriptionPattern: converting " + desc + " to " + stringFilter);
+          //log.info("DescriptionPattern: converting " + desc + " to " + stringFilter);
         }
       } else if (desc.matches("/.*/")) {
         descriptionMode = DescriptionMode.PATTERN;

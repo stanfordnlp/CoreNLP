@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -43,7 +44,10 @@ import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 
-public class EvaluateTreebank {
+public class EvaluateTreebank  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(EvaluateTreebank.class);
 
   private final Options op;
   private final TreeTransformer debinarizer;
@@ -264,8 +268,8 @@ public class EvaluateTreebank {
       if (op.testOptions.preTag) {
         List<TaggedWord> s = tagger.apply(t.yieldWords());
         if(op.testOptions.verbose) {
-          System.err.println("Guess tags: "+Arrays.toString(s.toArray()));
-          System.err.println("Gold tags: "+t.labeledYield().toString());
+          log.info("Guess tags: "+Arrays.toString(s.toArray()));
+          log.info("Gold tags: "+t.labeledYield().toString());
         }
         return SentenceUtils.toCoreLabelList(s);
       } else if(op.testOptions.noFunctionalForcing) {
@@ -568,7 +572,7 @@ public class EvaluateTreebank {
    *          of the parser on the treebank.
    */
   public double testOnTreebank(Treebank testTreebank) {
-    System.err.println("Testing on treebank");
+    log.info("Testing on treebank");
     Timing treebankTotalTimer = new Timing();
     TreePrint treePrint = op.testOptions.treePrint(op.tlpParams);
     TreebankLangParserParams tlpParams = op.tlpParams;

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.trees.*;
@@ -19,7 +20,10 @@ import java.io.Reader;
  * @author Teg Grenager
  * @author Christopher Manning
  */
-public class TreeBinarizer implements TreeTransformer {
+public class TreeBinarizer implements TreeTransformer  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TreeBinarizer.class);
 
   private static final boolean DEBUG = false;
 
@@ -228,7 +232,7 @@ public class TreeBinarizer implements TreeTransformer {
       newChildren.add(children[right]);
     } else {
       // this shouldn't happen, should have been caught above
-      System.err.println("UHOH, bad parameters passed to markovInsideBinarizeLocalTree");
+      log.info("UHOH, bad parameters passed to markovInsideBinarizeLocalTree");
     }
     // newChildren should be set up now with two children
     // make our new label
@@ -379,7 +383,7 @@ public class TreeBinarizer implements TreeTransformer {
     StringBuilder sb = new StringBuilder(leng);
     sb.append("@").append(topCat).append("| ").append(headStr).append("_").append(middlePiece).append(finalPiece);
     String labelStr = sb.toString();
-    // System.err.println("makeSyntheticLabel2: " + labelStr);
+    // log.info("makeSyntheticLabel2: " + labelStr);
 
     String word = ((HasWord) t.label()).word();
     String tag = ((HasTag) t.label()).tag();
@@ -512,7 +516,7 @@ public class TreeBinarizer implements TreeTransformer {
     headChild.pennPrint();
     */
     if (headChild == null && ! t.label().value().startsWith(tlp.startSymbol())) {
-      System.err.println("### No head found for:");
+      log.info("### No head found for:");
       t.pennPrint();
     }
     int headNum = -1;
@@ -641,7 +645,7 @@ public class TreeBinarizer implements TreeTransformer {
 	try {
 	  tlp = (TreebankLanguagePack) Class.forName(args[i+1]).newInstance();
 	} catch (Exception e) {
-	  System.err.println("Couldn't instantiate: " + args[i+1]);
+	  log.info("Couldn't instantiate: " + args[i+1]);
           throw new RuntimeException(e);
 	}
 	i++;
@@ -649,7 +653,7 @@ public class TreeBinarizer implements TreeTransformer {
 	try {
 	  tlpp = (TreebankLangParserParams) Class.forName(args[i+1]).newInstance();
 	} catch (Exception e) {
-	  System.err.println("Couldn't instantiate: " + args[i+1]);
+	  log.info("Couldn't instantiate: " + args[i+1]);
           throw new RuntimeException(e);
 	}
 	i++;
@@ -663,12 +667,12 @@ public class TreeBinarizer implements TreeTransformer {
       } else if (args[i].equalsIgnoreCase("-noRebinarization")) {
         noRebinarization = true;
       } else {
-        System.err.println("Unknown option:" + args[i]);
+        log.info("Unknown option:" + args[i]);
       }
       i++;
     }
     if (i >= args.length) {
-      System.err.println("usage: java TreeBinarizer [-tlpp class|-markovOrder int|...] treebankPath");
+      log.info("usage: java TreeBinarizer [-tlpp class|-markovOrder int|...] treebankPath");
       System.exit(0);
     }
     Treebank treebank;

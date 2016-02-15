@@ -1,4 +1,5 @@
-package edu.stanford.nlp.ie.crf;
+package edu.stanford.nlp.ie.crf; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -41,7 +42,10 @@ import java.util.*;
  * @author Sonal Gupta (made the class generic)
  */
 
-public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
+public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CRFBiasedClassifier.class);
 
   private static final String BIAS = "@@@DECODING_CLASS_BIAS@@@";
   private boolean testTime = false;
@@ -143,17 +147,17 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
     CRFBiasedClassifierOptimizer optimizer = new CRFBiasedClassifierOptimizer(this, evalFunction);
     double optVal = ls.minimize(optimizer);
     int bi = featureIndex.indexOf(BIAS);
-    System.err.println("Class bias of "+weights[bi][0]+" reaches optimal value "+optVal);
+    log.info("Class bias of "+weights[bi][0]+" reaches optimal value "+optVal);
   }
 
   /** The main method, which is essentially the same as in CRFClassifier. See the class documentation. */
   public static void main(String[] args) throws Exception {
-    System.err.println("CRFBiasedClassifier invoked at " + new Date()
+    log.info("CRFBiasedClassifier invoked at " + new Date()
             + " with arguments:");
     for (String arg : args) {
-      System.err.print(" " + arg);
+      log.info(" " + arg);
     }
-    System.err.println();
+    log.info();
 
     Properties props = StringUtils.argsToProperties(args);
     CRFBiasedClassifier<CoreLabel> crf = new CRFBiasedClassifier<>(props);
@@ -174,7 +178,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
         String cname = bias.nextToken();
         double w = Double.parseDouble(bias.nextToken());
         crf.setBiasWeight(cname,w);
-        System.err.println("Setting bias for class "+cname+" to "+w);
+        log.info("Setting bias for class "+cname+" to "+w);
       }
     }
 

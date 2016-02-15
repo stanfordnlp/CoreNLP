@@ -1,4 +1,5 @@
-package edu.stanford.nlp.optimization;
+package edu.stanford.nlp.optimization; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -88,7 +89,10 @@ import edu.stanford.nlp.util.CallbackFunction;
  * @author akleeman
  */
 
-public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
+public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(QNMinimizer.class);
 
   private int fevals = 0; // the number of function evaluations
   private int maxFevals = -1;
@@ -1083,7 +1087,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
         System.arraycopy(newGrad, 0, grad, 0, newGrad.length);
 
         if (quiet) {
-          System.err.print(".");
+          log.info(".");
         }
         if (fevals > maxFevals) {
           throw new MaxEvaluationsExceeded(" Exceeded in minimize() loop ");
@@ -1108,7 +1112,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
           qn.y.remove(0);
           qn.rho.remove(0);
           qn.mem = qn.s.size();
-          System.err.println("Caught OutOfMemoryError, changing m = " + qn.mem);
+          log.info("Caught OutOfMemoryError, changing m = " + qn.mem);
         } else {
           throw oome;
         }
@@ -1127,7 +1131,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     //
     // Announce the reason minimization has terminated.
     //
-    System.err.println();
+    log.info();
     switch (state) {
     case TERMINATE_GRADNORM:
       System.err
@@ -1156,7 +1160,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
       x = rec.getBest();
       break;
     default:
-      System.err.println("QNMinimizer terminated without converging");
+      log.info("QNMinimizer terminated without converging");
       success = false;
       break;
     }
@@ -1180,19 +1184,19 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
 
   private void sayln() {
     if (!quiet) {
-      System.err.println();
+      log.info();
     }
   }
 
   private void sayln(String s) {
     if (!quiet) {
-      System.err.println(s);
+      log.info(s);
     }
   }
 
   private void say(String s) {
     if (!quiet) {
-      System.err.print(s);
+      log.info(s);
     }
   }
 
@@ -1892,7 +1896,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   // zoom() Function ");}
   //
   // if(newPoint[a] > aMax){
-  // System.err.println(" max stepsize reached. This is unusual. ");
+  // log.info(" max stepsize reached. This is unusual. ");
   // System.exit(1);
   // }
   //
@@ -1949,7 +1953,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
    * newAlpha = interpolateQuadratic2pt(pointList.get(0),pointList.get(1)); }
    *
    * }else { //not enough info to interpolate with!
-   * System.err.println("QNMinimizer:interpolate() attempt to interpolate with
+   * log.info("QNMinimizer:interpolate() attempt to interpolate with
    * only one point."); System.exit(1); }
    *
    * return newAlpha;
@@ -1960,7 +1964,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   // derivative g0 and passing through (a1,f1).
   // private double interpolateQuadratic2pt(double[] pt0, double[] pt1){
   // if( Double.isNaN(pt0[g]) ){
-  // System.err.println("QNMinimizer:interpolateQuadratic - Gradient at point
+  // log.info("QNMinimizer:interpolateQuadratic - Gradient at point
   // zero doesn't exist, interpolation failed");
   // System.exit(1);
   // }
@@ -1994,7 +1998,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   // double b = coefs[1];
   // double root = b*b-3*a*g0;
   // if( root < 0 ){
-  // System.err.println("QNminimizer:interpolateCubic - interpolate failed");
+  // log.info("QNminimizer:interpolateCubic - interpolate failed");
   // System.exit(1);
   // }
   // return (-b+Math.sqrt(root))/(3*a);
@@ -2290,7 +2294,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   //
   //
   // ////if( cnt > 25 || fevals > maxFevals){
-  // ////System.err.println("Max evaluations exceeded.");
+  // ////log.info("Max evaluations exceeded.");
   // ////System.exit(1);
   // ////return dfunc.valueAt((plusAndConstMult(x, dir, aMin , newX)));
   // ////}
@@ -2325,7 +2329,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   // //set dir = -grad
   // plusAndConstMult(new double[x.length],grad,-1,dir);
   // g0 = ArrayMath.innerProduct(grad,dir);
-  // System.err.println("Searching in direction of positive gradient.");
+  // log.info("Searching in direction of positive gradient.");
   // }
   // say("(" + nf.format(g0) + ")");
   //
@@ -2367,7 +2371,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   //
   // if( (bracketed && (newPt[a] <= stepMin || newPt[a] >= stepMax) )
   // || nFevals > maxEvals || (bracketed & (stepMax-stepMin) <= TOL*stepMax)){
-  // System.err.println("Linesearch for QN, Need to make srue that newX is set
+  // log.info("Linesearch for QN, Need to make srue that newX is set
   // before returning bestPt. -akleeman");
   // System.exit(1);
   // return bestPt[f];
@@ -2380,7 +2384,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   //
   // double fTest = f0 + newPt[a]*g0;
   //
-  // System.err.println("fTest " + fTest + " new" + newPt[a] + " newf" +
+  // log.info("fTest " + fTest + " new" + newPt[a] + " newf" +
   // newPt[f] + " newg" + newPt[g] );
   //
   // if( ( bracketed && (newPt[a] <= stepMin | newPt[a] >= stepMax )) || infoc
@@ -2548,7 +2552,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   // }
   // } else {
   // if (Math.abs(newPt[a]-stpc) > Math.abs(newPt[a]-stpq)){
-  // System.err.println("modified to take only quad");
+  // log.info("modified to take only quad");
   // stpf = stpq;
   // }else{
   // stpf = stpq;
@@ -2603,7 +2607,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   // }
   //
   // //newPt[f] =
-  // System.err.println("cstep " + nf.format(newPt[a]) + " info " + info);
+  // log.info("cstep " + nf.format(newPt[a]) + " info " + info);
   // return newPt[a];
   //
   // }

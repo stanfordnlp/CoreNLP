@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.tools;
+package edu.stanford.nlp.parser.tools; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -23,7 +24,10 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Spence Green
  *
  */
-public class CountTrees {
+public class CountTrees  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CountTrees.class);
 
   private static final int minArgs = 1;
   private static final String usage;
