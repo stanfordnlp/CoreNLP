@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.international.french.FrenchMorphoFeatureSpecification;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
@@ -43,10 +42,7 @@ import java.util.List;
  * @author Spence Green
  *
  */
-public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParams  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(FrenchTreebankParserParams.class);
+public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParams {
 
   private static final long serialVersionUID = -6976724734594763986L;
 
@@ -648,7 +644,7 @@ public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParam
 
   @Override
   public void display() {
-    log.info(optionsString.toString());
+    System.err.println(optionsString.toString());
   }
 
   @Override
@@ -668,8 +664,8 @@ public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParam
         optionsString.append("HeadFinder: " + args[i + 1] + "\n");
 
       } catch (Exception e) {
-        log.info(e);
-        log.info(this.getClass().getName() + ": Could not load head finder " + args[i + 1]);
+        System.err.println(e);
+        System.err.println(this.getClass().getName() + ": Could not load head finder " + args[i + 1]);
       }
       i += 2;
 

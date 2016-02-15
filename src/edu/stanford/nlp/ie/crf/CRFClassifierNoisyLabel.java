@@ -24,8 +24,7 @@
 //    Support/Questions: java-nlp-user@lists.stanford.edu
 //    Licensing: java-nlp-support@lists.stanford.edu
 
-package edu.stanford.nlp.ie.crf; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.sequences.*;
 import edu.stanford.nlp.util.*;
@@ -37,10 +36,7 @@ import java.io.*;
 
  * @author Mengqiu Wang
  */
-public class CRFClassifierNoisyLabel<IN extends CoreMap> extends CRFClassifier<IN>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CRFClassifierNoisyLabel.class);
+public class CRFClassifierNoisyLabel<IN extends CoreMap> extends CRFClassifier<IN> {
 
   protected double[][] errorMatrix;
 
@@ -69,8 +65,8 @@ public class CRFClassifierNoisyLabel<IN extends CoreMap> extends CRFClassifier<I
 
     double[][] matrix = parseMatrix(matrixLines, tagIndex, matrixSize, false, useLogProb);
 
-    log.info("Error Matrix P(Observed|Truth): ");
-    log.info(ArrayUtils.toString(matrix));
+    System.err.println("Error Matrix P(Observed|Truth): ");
+    System.err.println(ArrayUtils.toString(matrix));
 
     return matrix;
   }

@@ -9,7 +9,6 @@ import edu.stanford.nlp.ling.tokensregex.MatchedExpression;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,7 +26,7 @@ import java.util.regex.Pattern;
  * @author Angel Chang
  */
 public class QuantifiableEntityExtractor {
-
+  protected static final Logger logger = Logger.getLogger(QuantifiableEntityExtractor.class.getName());
   Env env;
   Options options;
   CoreMapExpressionExtractor extractor;
@@ -55,6 +54,13 @@ public class QuantifiableEntityExtractor {
     this.options = options;
     initEnv();
     extractor = createExtractor();
+
+    if (options.verbose) {
+      logger.setLevel(Level.FINE);
+    } else {
+      logger.setLevel(Level.SEVERE);
+    }
+    extractor.setLogger(logger);
   }
 
   public CoreMapExpressionExtractor createExtractor() {

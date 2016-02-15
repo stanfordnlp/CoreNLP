@@ -1,10 +1,8 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import java.util.*;
 
 import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
-import edu.stanford.nlp.hcoref.CorefProperties;
 import edu.stanford.nlp.hcoref.CorefSystem;
 import edu.stanford.nlp.hcoref.data.CorefChain;
 import edu.stanford.nlp.hcoref.data.CorefChain.CorefMention;
@@ -29,10 +27,7 @@ import edu.stanford.nlp.scoref.StatisticalCorefSystem;
  * @author Jason Bolton
  */
 
-public class CorefAnnotator extends TextAnnotationCreator implements Annotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CorefAnnotator.class);
+public class CorefAnnotator extends TextAnnotationCreator implements Annotator {
 
   private static final boolean VERBOSE = false;
 
@@ -47,8 +42,6 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
   private final String HYBRID_MODE = "hybrid";
   private final String STATISTICAL_MODE = "statistical";
 
-  private final Properties props;
-
   private static final Map<Pair<Dictionaries.MentionType, Dictionaries.MentionType>, Double> COREF_THRESHOLDS = new HashMap<>();
   static {
     COREF_THRESHOLDS.put(new Pair<>(Dictionaries.MentionType.PROPER, Dictionaries.MentionType.PROPER), 0.3);
@@ -60,7 +53,6 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
   }
 
   public CorefAnnotator(Properties props) {
-    this.props = props;
     try {
       COREF_MODE = props.getProperty("coref.mode", STATISTICAL_MODE);
       if (COREF_MODE.equals(HYBRID_MODE)) {
@@ -76,7 +68,7 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
       }
       OLD_FORMAT = Boolean.parseBoolean(props.getProperty("oldCorefFormat", "false"));
     } catch (Exception e) {
-      log.error("cannot create CorefAnnotator!");
+      System.err.println("ERROR: cannot create CorefAnnotator!");
       e.printStackTrace();
       throw new RuntimeException(e);
     }
@@ -86,7 +78,7 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
   public void annotate(Annotation annotation){
     try {
       if (!annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
-        log.error("this coreference resolution system requires SentencesAnnotation!");
+        System.err.println("ERROR: this coreference resolution system requires SentencesAnnotation!");
         return;
       }
 
@@ -104,7 +96,7 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
       } else if (COREF_MODE.equals(STATISTICAL_MODE)) {
         scorefSystem.annotate(annotation);
       } else {
-        log.error("invalid selection for coreference mode!");
+        System.err.println("ERROR: invalid selection for coreference mode!");
         throw new RuntimeException() ;
       }
     } catch (RuntimeException e) {
@@ -192,31 +184,29 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
     return false;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
     Set<Class<? extends CoreAnnotation>> requirements = new HashSet<>(Arrays.asList(
-        CoreAnnotations.TextAnnotation.class,
         CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-        CoreAnnotations.CharacterOffsetEndAnnotation.class,
-        CoreAnnotations.IndexAnnotation.class,
-        CoreAnnotations.ValueAnnotation.class,
         CoreAnnotations.SentencesAnnotation.class,
-        CoreAnnotations.SentenceIndexAnnotation.class,
-        CoreAnnotations.ParagraphAnnotation.class,
         CoreAnnotations.PartOfSpeechAnnotation.class,
         CoreAnnotations.LemmaAnnotation.class,
-        CoreAnnotations.NamedEntityTagAnnotation.class,
-        CorefCoreAnnotations.CorefMentionsAnnotation.class,
-        CoreAnnotations.UtteranceAnnotation.class,
-        CoreAnnotations.SpeakerAnnotation.class,
-        SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class
+        CoreAnnotations.NamedEntityTagAnnotation.class
         ));
-    if (CorefProperties.getMDType(this.props) != CorefProperties.MentionDetectionType.DEPENDENCY) {
-      requirements.add(TreeCoreAnnotations.TreeAnnotation.class);
-      requirements.add(CoreAnnotations.CategoryAnnotation.class);
+    switch (COREF_MODE) {
+      case HYBRID_MODE:
+        requirements.add(TreeCoreAnnotations.TreeAnnotation.class);
+        requirements.add(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+        requirements.add(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+        requirements.add(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
+        break;
+      case STATISTICAL_MODE:
+        requirements.add(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+        requirements.add(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+        requirements.add(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
+        break;
+      default:
+        break;
     }
     return Collections.unmodifiableSet(requirements);
   }

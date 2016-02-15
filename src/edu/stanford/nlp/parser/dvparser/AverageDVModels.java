@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.dvparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.dvparser;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,10 +24,7 @@ import edu.stanford.nlp.util.TwoDimensionalSet;
  *
  * @author John Bauer
  */
-public class AverageDVModels  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AverageDVModels.class);
+public class AverageDVModels {
   public static TwoDimensionalSet<String, String> getBinaryMatrixNames(List<TwoDimensionalMap<String, String, SimpleMatrix>> maps) {
     TwoDimensionalSet<String, String> matrixNames = new TwoDimensionalSet<>();
     for (TwoDimensionalMap<String, String, SimpleMatrix> map : maps) {
@@ -119,17 +115,17 @@ public class AverageDVModels  {
     }
 
     if (outputModelFilename == null) {
-      log.info("Need to specify output model name with -output");
+      System.err.println("Need to specify output model name with -output");
       System.exit(2);
     }
 
     if (inputModelFilenames.size() == 0) {
-      log.info("Need to specify input model names with -input");
+      System.err.println("Need to specify input model names with -input");
       System.exit(2);
     }
 
-    log.info("Averaging " + inputModelFilenames);
-    log.info("Outputting result to " + outputModelFilename);
+    System.err.println("Averaging " + inputModelFilenames);
+    System.err.println("Outputting result to " + outputModelFilename);
 
     LexicalizedParser lexparser = null;
     List<DVModel> models = Generics.newArrayList();

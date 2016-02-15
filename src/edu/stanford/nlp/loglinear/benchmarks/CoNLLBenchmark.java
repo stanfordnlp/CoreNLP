@@ -1,5 +1,4 @@
-package edu.stanford.nlp.loglinear.benchmarks; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.loglinear.benchmarks;
 
 import edu.stanford.nlp.loglinear.inference.CliqueTree;
 import edu.stanford.nlp.loglinear.learning.AbstractBatchOptimizer;
@@ -23,11 +22,7 @@ import java.util.zip.GZIPOutputStream;
  * is no need to specify the number of words in advance anywhere, and data structures will happily resize with a minimum
  * of GCC wastage.
  */
-public class CoNLLBenchmark   {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CoNLLBenchmark.class);
-
+public class CoNLLBenchmark {
   static final String DATA_PATH = "/u/nlp/data/ner/conll/";
 
   Map<String, double[]> embeddings = new HashMap<>();
@@ -53,7 +48,7 @@ public class CoNLLBenchmark   {
 
     embeddings = getEmbeddings(DATA_PATH + "google-300-trimmed.ser.gz", allData);
 
-    log.info("Making the training set...");
+    System.err.println("Making the training set...");
 
     ConcatVectorNamespace namespace = new ConcatVectorNamespace();
 
@@ -61,19 +56,19 @@ public class CoNLLBenchmark   {
     GraphicalModel[] trainingSet = new GraphicalModel[trainSize];
     for (int i = 0; i < trainSize; i++) {
       if (i % 10 == 0) {
-        log.info(i + "/" + trainSize);
+        System.err.println(i + "/" + trainSize);
       }
       trainingSet[i] = generateSentenceModel(namespace, train.get(i), tags);
     }
 
-    log.info("Training system...");
+    System.err.println("Training system...");
 
     AbstractBatchOptimizer opt = new BacktrackingAdaGradOptimizer();
 
     // This training call is basically what we want the benchmark for. It should take 99% of the wall clock time
     ConcatVector weights = opt.optimize(trainingSet, new LogLikelihoodDifferentiableFunction(), namespace.newWeightsVector(), 0.01, 1.0e-5, false);
 
-    log.info("Testing system...");
+    System.err.println("Testing system...");
 
     // Evaluation method lifted from the CoNLL 2004 perl script
 
@@ -99,18 +94,18 @@ public class CoNLLBenchmark   {
       }
     }
 
-    log.info("\nSystem results:\n");
+    System.err.println("\nSystem results:\n");
 
-    log.info("Accuracy: " + (correct / total) + "\n");
+    System.err.println("Accuracy: " + (correct / total) + "\n");
 
     for (String tag : tags) {
       double precision = foundGuessed.getOrDefault(tag, 0.0) == 0 ? 0.0 : correctChunk.getOrDefault(tag, 0.0) / foundGuessed.get(tag);
       double recall = foundCorrect.getOrDefault(tag, 0.0) == 0 ? 0.0 : correctChunk.getOrDefault(tag, 0.0) / foundCorrect.get(tag);
       double f1 = (precision + recall == 0.0) ? 0.0 : (precision * recall * 2) / (precision + recall);
-      log.info(tag + " (" + foundCorrect.getOrDefault(tag, 0.0).intValue() + ")");
-      log.info("\tP:" + precision + " (" + correctChunk.getOrDefault(tag, 0.0).intValue() + "/" + foundGuessed.getOrDefault(tag, 0.0).intValue() + ")");
-      log.info("\tR:" + recall + " (" + correctChunk.getOrDefault(tag, 0.0).intValue() + "/" + foundCorrect.getOrDefault(tag, 0.0).intValue() + ")");
-      log.info("\tF1:" + f1);
+      System.err.println(tag + " (" + foundCorrect.getOrDefault(tag, 0.0).intValue() + ")");
+      System.err.println("\tP:" + precision + " (" + correctChunk.getOrDefault(tag, 0.0).intValue() + "/" + foundGuessed.getOrDefault(tag, 0.0).intValue() + ")");
+      System.err.println("\tR:" + recall + " (" + correctChunk.getOrDefault(tag, 0.0).intValue() + "/" + foundCorrect.getOrDefault(tag, 0.0).intValue() + ")");
+      System.err.println("\tF1:" + f1);
     }
   }
 
@@ -217,7 +212,7 @@ public class CoNLLBenchmark   {
       trimmedSet = new HashMap<>();
 
       Map<String, double[]> massiveSet = loadEmbeddingsFromFile("../google-300.txt");
-      log.info("Got massive embedding set size " + massiveSet.size());
+      System.err.println("Got massive embedding set size " + massiveSet.size());
 
       for (CoNLLSentence sentence : sentences) {
         for (String token : sentence.token) {
@@ -226,14 +221,14 @@ public class CoNLLBenchmark   {
           }
         }
       }
-      log.info("Got trimmed embedding set size " + trimmedSet.size());
+      System.err.println("Got trimmed embedding set size " + trimmedSet.size());
 
       f.createNewFile();
       ObjectOutputStream oos = new ObjectOutputStream(new GZIPOutputStream(new FileOutputStream(cacheFilename)));
       oos.writeObject(trimmedSet);
       oos.close();
 
-      log.info("Wrote trimmed set to file");
+      System.err.println("Wrote trimmed set to file");
     } else {
       ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(new FileInputStream(cacheFilename)));
       trimmedSet = (Map<String, double[]>) ois.readObject();
@@ -264,7 +259,7 @@ public class CoNLLBenchmark   {
 
       readLines++;
       if (readLines % 10000 == 0) {
-        log.info("Read " + readLines + " lines");
+        System.err.println("Read " + readLines + " lines");
       }
     }
 

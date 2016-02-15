@@ -1,5 +1,4 @@
-package edu.stanford.nlp.optimization; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.optimization;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,10 +46,7 @@ import edu.stanford.nlp.util.Pair;
  * @version 1.0
  * @since 1.0
  */
-public class SQNMinimizer<T extends Function> extends StochasticMinimizer<T>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SQNMinimizer.class);
+public class SQNMinimizer<T extends Function> extends StochasticMinimizer<T> {
 
   private int M = 0;
   private double lambda = 1.0;
@@ -100,7 +96,7 @@ public class SQNMinimizer<T extends Function> extends StochasticMinimizer<T>  {
 
   @Override
   public Pair<Integer,Double> tune( edu.stanford.nlp.optimization.Function function,double[] initial, long msPerTest){
-    log.info("No tuning set yet");
+    System.err.println("No tuning set yet");
     return new Pair<>(bSize, gain);
   }
 

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie.machinereading; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.machinereading;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,10 +40,7 @@ import edu.stanford.nlp.util.ErasureUtils;
  * @author Mason Smith
  * @author David McClosky (mcclosky@stanford.edu)
  */
-public class BasicEntityExtractor implements Extractor  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(BasicEntityExtractor.class);
+public class BasicEntityExtractor implements Extractor {
 
   private static final long serialVersionUID = -4011478706866593869L;
 
@@ -121,7 +117,7 @@ public class BasicEntityExtractor implements Extractor  {
     if(SAVE_CONLL_2003){
       try {
         saveCoNLLFiles("test_output/", doc, useSubTypes, useBIO);
-        log.info("useBIO = " + useBIO);
+        System.err.println("useBIO = " + useBIO);
       } catch (IOException e) {
         e.printStackTrace();
         System.exit(1);
@@ -524,7 +520,7 @@ public class BasicEntityExtractor implements Extractor  {
     props.setProperty("featureFactory", "edu.stanford.nlp.ie.NERFeatureFactory");
     props.setProperty("saveFeatureIndexToDisk", "false");
     if (this.gazetteerLocation != null) {
-      log.info("Using gazetteer: " + this.gazetteerLocation);
+      System.err.println("Using gazetteer: " + this.gazetteerLocation);
       props.setProperty("gazette", this.gazetteerLocation);
       props.setProperty("sloppyGazette", "true");
     }

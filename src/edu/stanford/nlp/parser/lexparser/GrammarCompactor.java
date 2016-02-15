@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.fsm.TransducerGraph;
 import edu.stanford.nlp.fsm.TransducerGraph.Arc;
@@ -18,10 +17,7 @@ import java.util.Map.Entry;
 /**
  * @author Teg Grenager (grenager@cs.stanford.edu)
  */
-public abstract class GrammarCompactor  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(GrammarCompactor.class);
+public abstract class GrammarCompactor {
 
   // so that the grammar remembers its graphs after compacting them
   Set<TransducerGraph> compactedGraphs;
@@ -143,10 +139,10 @@ public abstract class GrammarCompactor  {
         w.flush();
         w.close();
       } catch (FileNotFoundException e) {
-        log.info("Failed to open file in writeToDOTfile: " + file);
+        System.err.println("Failed to open file in writeToDOTfile: " + file);
         return false;
       } catch (IOException e) {
-        log.info("Failed to open file in writeToDOTfile: " + file);
+        System.err.println("Failed to open file in writeToDOTfile: " + file);
         return false;
       }
       return true;

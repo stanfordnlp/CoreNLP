@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeTransformer;
@@ -17,10 +16,7 @@ import java.io.Serializable;
  * @author Dan Klein
  * @author Christopher Manning
  */
-public class TrainOptions implements Serializable  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TrainOptions.class);
+public class TrainOptions implements Serializable {
 
   public String trainTreeFile = null; // same for me -- Teg
 
@@ -449,7 +445,7 @@ public class TrainOptions implements Serializable  {
   public boolean markStrahler;
 
   public void display() {
-    log.info(toString());
+    System.err.println(toString());
   }
 
   @Override

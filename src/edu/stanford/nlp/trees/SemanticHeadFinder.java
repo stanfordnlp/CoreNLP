@@ -24,8 +24,7 @@
 //    parser-support@lists.stanford.edu
 //    http://nlp.stanford.edu/software/stanford-dependencies.shtml
 
-package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.HasCategory;
 import edu.stanford.nlp.ling.HasTag;
@@ -82,10 +81,7 @@ import java.util.Set;
  * @author Marie-Catherine de Marneffe
  * @author Anna Rafferty
  */
-public class SemanticHeadFinder extends ModCollinsHeadFinder  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SemanticHeadFinder.class);
+public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
   private static final boolean DEBUG = System.getProperty("SemanticHeadFinder", null) != null;
 
@@ -331,7 +327,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
     String motherCat = tlp.basicCategory(t.label().value());
 
     if (DEBUG) {
-      log.info("At " + motherCat + ", my parent is " + parent);
+      System.err.println("At " + motherCat + ", my parent is " + parent);
     }
 
     // Some conj expressions seem to make more sense with the "not" or
@@ -366,10 +362,10 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
       // try to find if there is an auxiliary verb
 
       if (DEBUG) {
-        log.info("Semantic head finder: at VP");
-        log.info("Class is " + t.getClass().getName());
+        System.err.println("Semantic head finder: at VP");
+        System.err.println("Class is " + t.getClass().getName());
         t.pennPrint(System.err);
-        //log.info("hasVerbalAuxiliary = " + hasVerbalAuxiliary(kids, verbalAuxiliaries));
+        //System.err.println("hasVerbalAuxiliary = " + hasVerbalAuxiliary(kids, verbalAuxiliaries));
       }
 
       // looks for auxiliaries
@@ -392,15 +388,15 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
         }
         Tree pti = traverseLocate(tmpFilteredChildren, how, false);
         if (DEBUG) {
-          log.info("Determined head (case 1) for " + t.value() + " is: " + pti);
+          System.err.println("Determined head (case 1) for " + t.value() + " is: " + pti);
         }
         if (pti != null) {
           return pti;
         // } else {
-          // log.info("------");
-          // log.info("SemanticHeadFinder failed to reassign head for");
+          // System.err.println("------");
+          // System.err.println("SemanticHeadFinder failed to reassign head for");
           // t.pennPrint(System.err);
-          // log.info("------");
+          // System.err.println("------");
         }
       }
 
@@ -434,16 +430,16 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
         }
 
         if (DEBUG) {
-          log.info("Determined head (case 2) for " + t.value() + " is: " + pti);
+          System.err.println("Determined head (case 2) for " + t.value() + " is: " + pti);
         }
         if (pti != null) {
           return pti;
         } else {
           if (DEBUG) {
-            log.info("------");
-            log.info("SemanticHeadFinder failed to reassign head for");
+            System.err.println("------");
+            System.err.println("SemanticHeadFinder failed to reassign head for");
             t.pennPrint(System.err);
-            log.info("------");
+            System.err.println("------");
           }
         }
       }
@@ -476,7 +472,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
     */
 
     if (DEBUG) {
-      log.info("Determined head (case 3) for " + t.value() + " is: " + hd);
+      System.err.println("Determined head (case 3) for " + t.value() + " is: " + hd);
     }
     return hd;
   }
@@ -489,7 +485,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
    */
   private boolean isExistential(Tree t, Tree parent) {
     if (DEBUG) {
-      log.info("isExistential: " + t + ' ' + parent);
+      System.err.println("isExistential: " + t + ' ' + parent);
     }
     boolean toReturn = false;
     String motherCat = tlp.basicCategory(t.label().value());
@@ -529,7 +525,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
     }
 
     if (DEBUG) {
-      log.info("decision " + toReturn);
+      System.err.println("decision " + toReturn);
     }
 
     return toReturn;
@@ -560,7 +556,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
     }
 
     if (DEBUG) {
-      log.info("in isWH, decision: " + toReturn + " for node " + t);
+      System.err.println("in isWH, decision: " + toReturn + " for node " + t);
     }
 
     return toReturn;
@@ -586,12 +582,12 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
       }
 
       if (DEBUG) {
-        log.info("Checking " + preterminal.value() + " head is " + word + '/' + tag);
+        System.err.println("Checking " + preterminal.value() + " head is " + word + '/' + tag);
       }
       String lcWord = word.toLowerCase();
       if (allowJustTagMatch && unambiguousAuxiliaryTags.contains(tag) || verbalTags.contains(tag) && verbalSet.contains(lcWord)) {
         if (DEBUG) {
-          log.info("isAuxiliary found desired type of aux");
+          System.err.println("isAuxiliary found desired type of aux");
         }
         return true;
       }
@@ -613,13 +609,13 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
   // now overly complex so it deals with coordinations.  Maybe change this class to use tregrex?f
   private boolean hasPassiveProgressiveAuxiliary(Tree[] kids) {
     if (DEBUG) {
-      log.info("Checking for passive/progressive auxiliary");
+      System.err.println("Checking for passive/progressive auxiliary");
     }
     boolean foundPassiveVP = false;
     boolean foundPassiveAux = false;
     for (Tree kid : kids) {
       if (DEBUG) {
-        log.info("  checking in " + kid);
+        System.err.println("  checking in " + kid);
       }
       if (isVerbalAuxiliary(kid, passiveAuxiliaries, false)) {
           foundPassiveAux = true;
@@ -636,13 +632,13 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
           continue;
         }
         if (DEBUG) {
-          log.info("hasPassiveProgressiveAuxiliary found VP");
+          System.err.println("hasPassiveProgressiveAuxiliary found VP");
         }
         Tree[] kidkids = kid.children();
         boolean foundParticipleInVp = false;
         for (Tree kidkid : kidkids) {
           if (DEBUG) {
-            log.info("  hasPassiveProgressiveAuxiliary examining " + kidkid);
+            System.err.println("  hasPassiveProgressiveAuxiliary examining " + kidkid);
           }
           if (kidkid.isPreTerminal()) {
             Label kidkidLabel = kidkid.label();
@@ -657,13 +653,13 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
             if ("VBN".equals(tag) || "VBG".equals(tag) || "VBD".equals(tag)) {
               foundPassiveVP = true;
               if (DEBUG) {
-                log.info("hasPassiveAuxiliary found VBN/VBG/VBD VP");
+                System.err.println("hasPassiveAuxiliary found VBN/VBG/VBD VP");
               }
               break;
             } else if ("CC".equals(tag) && foundParticipleInVp) {
               foundPassiveVP = true;
               if (DEBUG) {
-                log.info("hasPassiveAuxiliary [coordination] found (VP (VP[VBN/VBG/VBD] CC");
+                System.err.println("hasPassiveAuxiliary [coordination] found (VP (VP[VBN/VBG/VBD] CC");
               }
               break;
             }
@@ -677,13 +673,13 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
             }
             if ("VP".equals(catcat)) {
               if (DEBUG) {
-                log.info("hasPassiveAuxiliary found (VP (VP)), recursing");
+                System.err.println("hasPassiveAuxiliary found (VP (VP)), recursing");
               }
               foundParticipleInVp = vpContainsParticiple(kidkid);
             } else if (("CONJP".equals(catcat) || "PRN".equals(catcat)) && foundParticipleInVp) { // occasionally get PRN in CONJ-like structures
               foundPassiveVP = true;
               if (DEBUG) {
-                log.info("hasPassiveAuxiliary [coordination] found (VP (VP[VBN/VBG/VBD] CONJP");
+                System.err.println("hasPassiveAuxiliary [coordination] found (VP (VP[VBN/VBG/VBD] CONJP");
               }
               break;
             }
@@ -695,7 +691,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
       }
     } // end for (Tree kid : kids)
     if (DEBUG) {
-      log.info("hasPassiveProgressiveAuxiliary returns " + (foundPassiveAux && foundPassiveVP));
+      System.err.println("hasPassiveProgressiveAuxiliary returns " + (foundPassiveAux && foundPassiveVP));
     }
     return foundPassiveAux && foundPassiveVP;
   }
@@ -703,7 +699,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
   private static boolean vpContainsParticiple(Tree t) {
     for (Tree kid : t.children()) {
       if (DEBUG) {
-        log.info("vpContainsParticiple examining " + kid);
+        System.err.println("vpContainsParticiple examining " + kid);
       }
       if (kid.isPreTerminal()) {
         Label kidLabel = kid.label();
@@ -716,7 +712,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
         }
         if ("VBN".equals(tag) || "VBG".equals(tag) || "VBD".equals(tag)) {
           if (DEBUG) {
-            log.info("vpContainsParticiple found VBN/VBG/VBD VP");
+            System.err.println("vpContainsParticiple found VBN/VBG/VBD VP");
           }
           return true;
         }
@@ -740,18 +736,18 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder  {
    */
   private boolean hasVerbalAuxiliary(Tree[] kids, Set<String> verbalSet, boolean allowTagOnlyMatch) {
     if (DEBUG) {
-      log.info("Checking for verbal auxiliary");
+      System.err.println("Checking for verbal auxiliary");
     }
     for (Tree kid : kids) {
       if (DEBUG) {
-        log.info("  checking in " + kid);
+        System.err.println("  checking in " + kid);
       }
       if (isVerbalAuxiliary(kid, verbalSet, allowTagOnlyMatch)) {
         return true;
       }
     }
     if (DEBUG) {
-      log.info("hasVerbalAuxiliary returns false");
+      System.err.println("hasVerbalAuxiliary returns false");
     }
     return false;
   }

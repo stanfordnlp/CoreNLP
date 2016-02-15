@@ -1,5 +1,4 @@
-package edu.stanford.nlp.sequences; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sequences;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
@@ -46,10 +45,7 @@ import java.util.regex.Pattern;
  * @author Angel Chang
  * @author Sonal Gupta (made the class generic)
  */
-public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements DocumentReaderAndWriter<IN>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ColumnTabDocumentReaderWriter.class);
+public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements DocumentReaderAndWriter<IN> {
 
   private static final long serialVersionUID = 1;
 
@@ -266,10 +262,10 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
             i += tokenText.length();
             token.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, i);
             /*
-             * if (i > docText.length()) { log.info("index " + i +
+             * if (i > docText.length()) { System.err.println("index " + i +
              * " larger than docText length " + docText.length());
-             * log.info("Token: " + tokenText);
-             * log.info("DocText: " + docText); }
+             * System.err.println("Token: " + tokenText);
+             * System.err.println("DocText: " + docText); }
              */
             assert (i <= docText.length());
             i++; // Skip space
@@ -324,9 +320,9 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
 
     public Annotation getNext() {
       if (itemCnt > 0 && itemCnt % 1000 == 0) {
-        log.info("[" + itemCnt + "," + lineCnt + "]");
+        System.err.print("[" + itemCnt + "," + lineCnt + "]");
         if (itemCnt % 10000 == 9000) {
-          log.info();
+          System.err.println();
         }
       }
       try {
@@ -385,14 +381,14 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
           }
         }
         if (words == null) {
-          log.info("[" + itemCnt + "," + lineCnt + "]");
+          System.err.println("[" + itemCnt + "," + lineCnt + "]");
         }
         if (keepBoundaries) {
           markBoundary(words, boundaries);
         }
         return (words == null) ? null : createDoc(docId, words, boundaries, includeText);
       } catch (IOException ex) {
-        log.info("IOException: " + ex);
+        System.err.println("IOException: " + ex);
         throw new RuntimeException(ex);
       }
     }

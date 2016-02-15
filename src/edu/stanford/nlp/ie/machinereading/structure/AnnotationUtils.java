@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie.machinereading.structure; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.machinereading.structure;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,10 +24,7 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Mihai
  *
  */
-public class AnnotationUtils  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AnnotationUtils.class);
+public class AnnotationUtils {
   private AnnotationUtils() {} // only static methods
 
   /**
@@ -149,15 +145,15 @@ public class AnnotationUtils  {
 
     /*
     // Displaying the CoreLabels generated for this sentence
-    log.info("sentence to core labels:");
+    System.err.print("sentence to core labels:");
     for(CoreLabel l: labels){
-      log.info(" " + l.word() + "/" + l.getString(CoreAnnotations.PartOfSpeechAnnotation.class));
+      System.err.print(" " + l.word() + "/" + l.getString(CoreAnnotations.PartOfSpeechAnnotation.class));
       String tag = l.getString(CoreAnnotations.AnswerAnnotation.class);
       if(tag != null && ! tag.equals(SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL)){
-        log.info("/" + tag);
+        System.err.print("/" + tag);
       }
     }
-    log.info();
+    System.err.println();
     */
 
     return labels;

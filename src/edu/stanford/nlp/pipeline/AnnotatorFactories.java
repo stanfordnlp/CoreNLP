@@ -1,5 +1,4 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
@@ -20,10 +19,7 @@ import java.util.Set;
  *
  * @author Gabor Angeli
  */
-public class AnnotatorFactories  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AnnotatorFactories.class);
+public class AnnotatorFactories {
 
   private AnnotatorFactories() {} // static factory class
 
@@ -197,27 +193,28 @@ public class AnnotatorFactories  {
     };
   }
 
-  /** Sentence splitter: splits the above sequence of tokens into
-   *  sentences.  This is required when processing entire documents or
-   * text consisting of multiple sentences.
-   */
+  //
+  // Sentence splitter: splits the above sequence of tokens into
+  // sentences.  This is required when processing entire documents or
+  // text consisting of multiple sentences.
+  //
   public static AnnotatorFactory sentenceSplit(Properties properties, final AnnotatorImplementations annotatorImplementation) {
     return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        // log.info(signature());
+        // System.err.println(signature());
         // todo: The above shows that signature is edu.stanford.nlp.pipeline.AnnotatorImplementations: and doesn't reflect what annotator it is! Should fix.
         boolean nlSplitting = Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
         if (nlSplitting) {
           boolean whitespaceTokenization = Boolean.valueOf(properties.getProperty("tokenize.whitespace", "false"));
           if (whitespaceTokenization) {
-            if (System.lineSeparator().equals("\n")) {
+            if (System.getProperty("line.separator").equals("\n")) {
               return WordsToSentencesAnnotator.newlineSplitter(false, "\n");
             } else {
               // throw "\n" in just in case files use that instead of
               // the system separator
-              return WordsToSentencesAnnotator.newlineSplitter(false, System.lineSeparator(), "\n");
+              return WordsToSentencesAnnotator.newlineSplitter(false, System.getProperty("line.separator"), "\n");
             }
           } else {
             return WordsToSentencesAnnotator.newlineSplitter(false, PTBTokenizer.getNewlineToken());

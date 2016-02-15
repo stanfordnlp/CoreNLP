@@ -1,5 +1,4 @@
-package edu.stanford.nlp.process; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.process;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -61,10 +60,7 @@ import edu.stanford.nlp.util.Generics;
  *
  * @param <IN> The type of the tokens in the sentences
  */
-public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(WordToSentenceProcessor.class);
+public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> {
 
   // todo [cdm Aug 2012]: This should be unified with the PlainTextIterator
   // in DocumentPreprocessor, perhaps by making this one implement Iterator.
@@ -267,12 +263,12 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
       }
       if (sentenceRegionBeginPattern != null && ! insideRegion) {
         if (DEBUG) {
-          log.info("  outside region; deleted");
+          System.err.println("  outside region; deleted");
         }
         if (sentenceRegionBeginPattern.matcher(word).matches()) {
           insideRegion = true;
           if (DEBUG) {
-            log.info("  entering region");
+            System.err.println("  entering region");
           }
         }
         lastTokenWasNewline = false;
@@ -282,7 +278,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
       if (lastSentence != null && currentSentence.isEmpty() && sentenceBoundaryFollowers.contains(word)) {
         if (!discardToken) lastSentence.add(o);
         if (DEBUG) {
-          log.info(discardToken? "discarded":"  added to last sentence");
+          System.err.println(discardToken? "discarded":"  added to last sentence");
         }
         lastTokenWasNewline = false;
         continue;
@@ -293,12 +289,12 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
       if (inWaitForForcedEnd && !forcedEnd) {
         if (!discardToken) currentSentence.add(o);
         if (DEBUG) {
-          log.info("  is in wait for forced end; " + debugText);
+          System.err.println("  is in wait for forced end; " + debugText);
         }
       } else if (inMultiTokenExpr && !forcedEnd) {
         if (!discardToken) currentSentence.add(o);
         if (DEBUG) {
-          log.info("  is in multi token expr; " + debugText);
+          System.err.println("  is in multi token expr; " + debugText);
         }
       } else if (sentenceBoundaryToDiscard.contains(word)) {
         if (newlineIsSentenceBreak == NewlineIsSentenceBreak.ALWAYS) {
@@ -310,7 +306,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
         }
         lastTokenWasNewline = true;
         if (DEBUG) {
-          log.info("  discarded sentence boundary");
+          System.err.println("  discarded sentence boundary");
         }
       } else {
         lastTokenWasNewline = false;
@@ -318,7 +314,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
         if (xmlBreakElementsToDiscard != null && matchesXmlBreakElementToDiscard(word)) {
           newSent = true;
           if (DEBUG) {
-            log.info("  is XML break element; discarded");
+            System.err.println("  is XML break element; discarded");
           }
         } else if (sentenceRegionEndPattern != null && sentenceRegionEndPattern.matcher(word).matches()) {
           insideRegion = false;
@@ -327,13 +323,13 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
         } else if ((isSentenceBoundary != null) && ((isb = isSentenceBoundary.get(o)) != null) && isb) {
           if (!discardToken) currentSentence.add(o);
           if (DEBUG) {
-            log.info("  is sentence boundary (matched multi-token pattern); " + debugText);
+            System.err.println("  is sentence boundary (matched multi-token pattern); " + debugText);
           }
           newSent = true;
         } else if (sentenceBoundaryTokenPattern.matcher(word).matches()) {
           if (!discardToken) currentSentence.add(o);
           if (DEBUG) {
-            log.info("  is sentence boundary; " + debugText);
+            System.err.println("  is sentence boundary; " + debugText);
           }
           newSent = true;
         } else if (forcedEnd) {
@@ -341,19 +337,19 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
           inWaitForForcedEnd = false;
           newSent = true;
           if (DEBUG) {
-            log.info("  annotated to be the end of a sentence; " + debugText);
+            System.err.println("  annotated to be the end of a sentence; " + debugText);
           }
         } else {
           if (!discardToken) currentSentence.add(o);
           if (DEBUG) {
-            log.info("  " + debugText);
+            System.err.println("  " + debugText);
           }
         }
       }
 
       if (newSent && (!currentSentence.isEmpty() || allowEmptySentences)) {
         if (DEBUG) {
-          log.info("  beginning new sentence");
+          System.err.println("  beginning new sentence");
         }
         sentences.add(currentSentence);
         // adds this sentence now that it's complete
@@ -556,7 +552,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
       this.xmlBreakElementsToDiscard = new ArrayList<>(xmlBreakElementsToDiscard.size());
       for (String s: xmlBreakElementsToDiscard) {
         String regex = "<\\s*(?:/\\s*)?(?:" + s + ")(?:\\s+[^>]+?|\\s*(?:/\\s*)?)>";
-        // log.info("Regex is |" + regex + "|");
+        // System.err.println("Regex is |" + regex + "|");
         // todo: Historically case insensitive, but maybe better and more proper to make case sensitive?
         this.xmlBreakElementsToDiscard.add(Pattern.compile(regex, Pattern.CASE_INSENSITIVE));
       }

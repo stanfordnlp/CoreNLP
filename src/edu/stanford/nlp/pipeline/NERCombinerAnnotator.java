@@ -1,14 +1,10 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.tokensregex.types.Tags;
-import edu.stanford.nlp.time.TimeAnnotations;
-import edu.stanford.nlp.time.TimeExpression;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
@@ -30,10 +26,7 @@ import java.util.*;
  * @author Jenny Finkel
  * @author Mihai Surdeanu (modified it to work with the new NERClassifierCombiner)
  */
-public class NERCombinerAnnotator extends SentenceAnnotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(NERCombinerAnnotator.class);
+public class NERCombinerAnnotator extends SentenceAnnotator {
 
   private final NERClassifierCombiner ner;
 
@@ -95,14 +88,14 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   @Override
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
-      log.info("Adding NER Combiner annotation ... ");
+      System.err.print("Adding NER Combiner annotation ... ");
     }
 
     super.annotate(annotation);
     this.ner.finalizeAnnotation(annotation);
 
     if (VERBOSE) {
-      log.info("done.");
+      System.err.println("done.");
     }
   }
 
@@ -120,25 +113,25 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     }
     if (VERBOSE) {
       boolean first = true;
-      log.info("NERCombinerAnnotator direct output: [");
+      System.err.print("NERCombinerAnnotator direct output: [");
       for (CoreLabel w : output) {
-        if (first) { first = false; } else { log.info(", "); }
-        log.info(w.toString());
+        if (first) { first = false; } else { System.err.print(", "); }
+        System.err.print(w.toString());
       }
     }
     if (output != null) {
       if (VERBOSE) {
         boolean first = true;
-        log.info("NERCombinerAnnotator direct output: [");
+        System.err.print("NERCombinerAnnotator direct output: [");
         for (CoreLabel w : output) {
           if (first) {
             first = false;
           } else {
-            log.info(", ");
+            System.err.print(", ");
           }
-          log.info(w.toString());
+          System.err.print(w.toString());
         }
-        log.info(']');
+        System.err.println(']');
       }
 
       for (int i = 0; i < tokens.size(); ++i) {
@@ -152,16 +145,16 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
 
       if (VERBOSE) {
         boolean first = true;
-        log.info("NERCombinerAnnotator output: [");
+        System.err.print("NERCombinerAnnotator output: [");
         for (CoreLabel w : tokens) {
           if (first) {
             first = false;
           } else {
-            log.info(", ");
+            System.err.print(", ");
           }
-          log.info(w.toShorterString("Word", "NamedEntityTag", "NormalizedNamedEntityTag"));
+          System.err.print(w.toShorterString("Word", "NamedEntityTag", "NormalizedNamedEntityTag"));
         }
-        log.info(']');
+        System.err.println(']');
       }
     } else {
       for (CoreLabel token : tokens) {
@@ -186,60 +179,14 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
     // TODO: we could check the models to see which ones use lemmas
     // and which ones use pos tags
     if (ner.usesSUTime() || ner.appliesNumericClassifiers()) {
-      return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-          CoreAnnotations.TextAnnotation.class,
-          CoreAnnotations.TokensAnnotation.class,
-          CoreAnnotations.SentencesAnnotation.class,
-          CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-          CoreAnnotations.CharacterOffsetEndAnnotation.class,
-          CoreAnnotations.PartOfSpeechAnnotation.class,
-          CoreAnnotations.LemmaAnnotation.class,
-          CoreAnnotations.BeforeAnnotation.class,
-          CoreAnnotations.AfterAnnotation.class,
-          CoreAnnotations.TokenBeginAnnotation.class,
-          CoreAnnotations.TokenEndAnnotation.class,
-          CoreAnnotations.IndexAnnotation.class,
-          CoreAnnotations.OriginalTextAnnotation.class,
-          CoreAnnotations.SentenceIndexAnnotation.class
-      )));
+      return TOKENIZE_SSPLIT_POS_LEMMA;
     } else {
-      return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-          CoreAnnotations.TextAnnotation.class,
-          CoreAnnotations.TokensAnnotation.class,
-          CoreAnnotations.SentencesAnnotation.class,
-          CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-          CoreAnnotations.CharacterOffsetEndAnnotation.class,
-          CoreAnnotations.BeforeAnnotation.class,
-          CoreAnnotations.AfterAnnotation.class,
-          CoreAnnotations.TokenBeginAnnotation.class,
-          CoreAnnotations.TokenEndAnnotation.class,
-          CoreAnnotations.IndexAnnotation.class,
-          CoreAnnotations.OriginalTextAnnotation.class,
-          CoreAnnotations.SentenceIndexAnnotation.class
-      )));
+      return TOKENIZE_AND_SSPLIT;
     }
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return new HashSet<>(Arrays.asList(
-        CoreAnnotations.NamedEntityTagAnnotation.class,
-        CoreAnnotations.NormalizedNamedEntityTagAnnotation.class,
-        CoreAnnotations.ValueAnnotation.class,
-        TimeExpression.Annotation.class,
-        TimeExpression.TimeIndexAnnotation.class,
-        CoreAnnotations.DistSimAnnotation.class,
-        CoreAnnotations.NumericCompositeTypeAnnotation.class,
-        TimeAnnotations.TimexAnnotation.class,
-        CoreAnnotations.NumericValueAnnotation.class,
-        TimeExpression.ChildrenAnnotation.class,
-        CoreAnnotations.NumericTypeAnnotation.class,
-        CoreAnnotations.ShapeAnnotation.class,
-        Tags.TagsAnnotation.class,
-        CoreAnnotations.NumerizedTokensAnnotation.class,
-        CoreAnnotations.AnswerAnnotation.class,
-        CoreAnnotations.NumericCompositeValueAnnotation.class
-    ));
+    return Collections.singleton(CoreAnnotations.NamedEntityTagAnnotation.class);
   }
 }

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees.tregex.gui; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.tregex.gui;
 
 import java.awt.*;
 import java.awt.geom.Line2D;
@@ -25,10 +24,7 @@ import edu.stanford.nlp.util.IntPair;
  * @author Anna Rafferty
  */
 @SuppressWarnings("serial")
-public class ScrollableTreeJPanel extends TreeJPanel    {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ScrollableTreeJPanel.class);
+public class ScrollableTreeJPanel extends TreeJPanel   {
 
   private int fontSize = 12;
   private Color defaultColor = Color.BLACK;
@@ -202,7 +198,7 @@ public class ScrollableTreeJPanel extends TreeJPanel    {
         cWidth = paintTree(child, coord, g2, fM, matchedColor);
       } else {
         Color col = defaultColor;
-        if(((CoreLabel) child.label()).containsKey(CoreAnnotations.DoAnnotation.class))
+        if(((CoreLabel) child.label()).has(CoreAnnotations.DoAnnotation.class))
           col = (((CoreLabel) child.label()).get(CoreAnnotations.DoAnnotation.class)) ? tdiffColor : defaultColor;
         cWidth = paintTree(child, new Point2D.Double(childStartX, childStartY), g2, fM, col);
       }

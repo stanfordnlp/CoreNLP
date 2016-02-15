@@ -1,5 +1,4 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import java.util.Map;
 
@@ -16,10 +15,7 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author bethard
  */
-public class AnnotatorPool  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AnnotatorPool.class);
+public class AnnotatorPool {
 
   private final Map<String, Annotator> annotators;
   private final Map<String, AnnotatorFactory> factories;
@@ -52,7 +48,7 @@ public class AnnotatorPool  {
       if(! oldSig.equals(newSig)) {
         // the new annotator uses different properties so we need to update!
         // TODO: this printout should be logged instead of going to stderr. we need to standardize logging
-        // log.info("Replacing old annotator \"" + name + "\" with signature ["
+        // System.err.println("Replacing old annotator \"" + name + "\" with signature ["
         //         + oldSig + "] with new annotator with signature [" + newSig + "]");
         this.factories.put(name, factory);
         newAnnotator = true;

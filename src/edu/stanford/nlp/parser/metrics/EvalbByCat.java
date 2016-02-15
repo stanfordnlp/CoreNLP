@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.metrics; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.metrics;
 
 import java.io.PrintWriter;
 import java.util.Map;
@@ -21,10 +20,7 @@ import edu.stanford.nlp.util.Generics;
  * @author Roger Levy
  * @author Spence Green
  */
-public class EvalbByCat extends AbstractEval  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(EvalbByCat.class);
+public class EvalbByCat extends AbstractEval {
 
   private final Evalb evalb;
   
@@ -148,7 +144,7 @@ public class EvalbByCat extends AbstractEval  {
   @Override
   public void display(boolean verbose, PrintWriter pw) {
     if (precisions.keySet().size() != recalls.keySet().size()) {
-      log.error("Different counts for precisions and recalls!");
+      System.err.println("ERROR: Different counts for precisions and recalls!");
       return;
     }
     final Set<Label> cats = getEvalLabelSet(precisions.keySet());

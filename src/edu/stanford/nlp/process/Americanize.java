@@ -1,5 +1,4 @@
-package edu.stanford.nlp.process; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.process;
 
 
 import java.util.function.Function;
@@ -32,10 +31,7 @@ import java.util.regex.Pattern;
  *
  * @author Christopher Manning
  */
-public class Americanize implements Function<HasWord,HasWord>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Americanize.class);
+public class Americanize implements Function<HasWord,HasWord> {
 
   /** Whether to capitalize month and day names. The default is true. */
   private final boolean capitalizeTimex;
@@ -105,8 +101,8 @@ public class Americanize implements Function<HasWord,HasWord>  {
    * @return The American spelling of the word.
    */
   public static String americanize(String str, boolean capitalizeTimex) {
-    // log.info("str is |" + str + "|");
-    // log.info("timexMapping.contains is " +
+    // System.err.println("str is |" + str + "|");
+    // System.err.println("timexMapping.contains is " +
     //            timexMapping.containsKey(str));
     // No ver short words are changed, so short circuit them
     int length = str.length();
@@ -143,7 +139,7 @@ public class Americanize implements Function<HasWord,HasWord>  {
             continue;
           }
         }
-        // log.info("Replacing " + word + " with " +
+        // System.err.println("Replacing " + word + " with " +
         //             pats[i].matcher(word).replaceAll(reps[i]));
         return m.replaceAll(reps[i]);
       }
@@ -247,8 +243,8 @@ public class Americanize implements Function<HasWord,HasWord>  {
    * @param args Command line arguments: a list of words
    */
   public static void main(String[] args) throws IOException {
-    log.info(new Americanize());
-    log.info();
+    System.err.println(new Americanize());
+    System.err.println();
 
     if (args.length == 0) { // stdin -> stdout:
       BufferedReader buf = new BufferedReader(new InputStreamReader(System.in));

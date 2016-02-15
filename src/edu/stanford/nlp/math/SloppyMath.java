@@ -1,5 +1,4 @@
-package edu.stanford.nlp.math; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.math;
 
 import java.util.Collection;
 
@@ -15,10 +14,7 @@ import java.util.Collection;
  * @author Christopher Manning
  * @version 2003/01/02
  */
-public final class SloppyMath  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SloppyMath.class);
+public final class SloppyMath {
 
   private SloppyMath() {}  // this class is just static methods.
 
@@ -701,7 +697,7 @@ public final class SloppyMath  {
    */
   public static void main(String[] args) {
     if (args.length == 0) {
-      log.info("Usage: java edu.stanford.nlp.math.SloppyMath " + "[-logAdd|-fishers k n r m|-binomial r n p");
+      System.err.println("Usage: java edu.stanford.nlp.math.SloppyMath " + "[-logAdd|-fishers k n r m|-binomial r n p");
     } else if (args[0].equals("-logAdd")) {
       System.out.println("Log adds of neg infinity numbers, etc.");
       System.out.println("(logs) -Inf + -Inf = " + logAdd(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY));
@@ -744,7 +740,7 @@ public final class SloppyMath  {
       double ans = SloppyMath.exactBinomial(k, n, p);
       System.out.println("Binomial p(X >= " + k + "; " + n + ", " + p + ") = " + ans);
     } else {
-      log.info("Unknown option: " + args[0]);
+      System.err.println("Unknown option: " + args[0]);
     }
   }
 

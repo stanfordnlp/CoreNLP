@@ -1,5 +1,4 @@
-package edu.stanford.nlp.hcoref.md; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.hcoref.md;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,10 +30,7 @@ import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 
-public class DependencyCorefMentionFinder extends CorefMentionFinder  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(DependencyCorefMentionFinder.class);
+public class DependencyCorefMentionFinder extends CorefMentionFinder {
 
   public DependencyCorefMentionFinder(Properties props) throws ClassNotFoundException, IOException {
     this.lang = CorefProperties.getLanguage(props);
@@ -125,7 +121,7 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder  {
 //            HeadFinder headFinder = new SemanticHeadFinder();
 //            Tree head = headFinder.determineHead(p);
 //            if(head == t.parent(tree)) {
-//              log.info();
+//              System.err.println();
 //            }
 //            break;
 //          }

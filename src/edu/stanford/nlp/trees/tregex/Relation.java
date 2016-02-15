@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees.tregex; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.tregex;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -1924,7 +1923,7 @@ abstract class Relation implements Serializable {
             followingNode = null;
           }
           while (followingNode != null) {
-            //log.info("adding to stack node " + followingNode.toString());
+            //System.err.println("adding to stack node " + followingNode.toString());
             if (! nodesToSearch.contains(followingNode)) {
               stack.add(followingNode);
               nodesToSearch.add(followingNode);
@@ -2050,7 +2049,7 @@ abstract class Relation implements Serializable {
             precedingNode = null;
           }
           while (precedingNode != null) {
-            //log.info("adding to stack node " + precedingNode.toString());
+            //System.err.println("adding to stack node " + precedingNode.toString());
             if ( ! nodesToSearch.contains(precedingNode)) {
               stack.add(precedingNode);
               nodesToSearch.add(precedingNode);

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.semgraph.semgrex; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.semgraph.semgrex;
 
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.ling.*;
@@ -15,10 +14,7 @@ import java.util.*;
  *
  * @author Chloe Kiddon
  */
-public abstract class SemgrexMatcher  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SemgrexMatcher.class);
+public abstract class SemgrexMatcher {
 	
   SemanticGraph sg;
   Map<String, IndexedWord> namesToNodes;
@@ -134,7 +130,7 @@ public abstract class SemgrexMatcher  {
    * @return whether there is a match somewhere in the graph
    */
   public boolean find() {
-    // log.info("hyp: " + hyp);
+    // System.err.println("hyp: " + hyp);
     if (findIterator == null) {
       try {
         if (hyp) {
@@ -170,10 +166,10 @@ public abstract class SemgrexMatcher  {
     }
   //  System.out.println("first");
     if (findCurrent != null && matches()) {
-    //		log.info("find first: " + findCurrent.word());
+    //		System.err.println("find first: " + findCurrent.word());
       return true;
     }
-    //log.info("here");
+    //System.err.println("here");
     while (findIterator.hasNext()) {
       findCurrent = findIterator.next();
      // System.out.println("final: " + namesToNodes);
@@ -184,7 +180,7 @@ public abstract class SemgrexMatcher  {
       //namesToNodes.clear();
       //namesToRelations.clear();
       if (matches()) {
-    	//  log.info("find second: " + findCurrent.word());
+    	//  System.err.println("find second: " + findCurrent.word());
         return true;
       }
     }

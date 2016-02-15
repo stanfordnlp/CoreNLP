@@ -1,5 +1,4 @@
-package edu.stanford.nlp.util; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.util;
 
 import java.util.*;
 
@@ -19,10 +18,7 @@ import java.util.*;
  * @author Christopher Manning
  * @version 1.2, 07/31/02
  */
-public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ArrayHeap.class);
+public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E> {
 
   /**
    * A <code>HeapEntry</code> stores an object in the heap along with
@@ -166,7 +162,7 @@ public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E>  {
         // this indexation now holds current, so it is unchanged
       }
     } while (minEntry != entry);
-    // log.info("Done with heapify down");
+    // System.err.println("Done with heapify down");
     // verify();
   }
 
@@ -285,7 +281,7 @@ public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E>  {
 
   public void dump() {
     for (int j = 0; j < indexToEntry.size(); j++) {
-      log.info(" " + j + " " + ((Scored) indexToEntry.get(j).object).score());
+      System.err.println(" " + j + " " + ((Scored) indexToEntry.get(j).object).score());
     }
   }
 
@@ -294,14 +290,14 @@ public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E>  {
       if (i != 0) {
         // check ordering
         if (compare(indexToEntry.get(i), indexToEntry.get(parent(i))) < 0) {
-          log.info("Error in the ordering of the heap! (" + i + ")");
+          System.err.println("Error in the ordering of the heap! (" + i + ")");
           dump();
           System.exit(0);
         }
       }
       // check placement
       if (i != indexToEntry.get(i).index) {
-        log.info("Error in placement in the heap!");
+        System.err.println("Error in placement in the heap!");
       }
     }
   }

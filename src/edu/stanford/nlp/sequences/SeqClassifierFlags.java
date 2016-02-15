@@ -1,5 +1,4 @@
-package edu.stanford.nlp.sequences; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sequences;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.optimization.StochasticCalculateMethods;
@@ -129,10 +128,7 @@ import java.util.*;
  *
  * @author Jenny Finkel
  */
-public class SeqClassifierFlags implements Serializable  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SeqClassifierFlags.class);
+public class SeqClassifierFlags implements Serializable {
 
   private static final long serialVersionUID = -7076671761070232567L;
 
@@ -1107,7 +1103,7 @@ public class SeqClassifierFlags implements Serializable  {
       String val = props.getProperty(key);
       if (!(key.isEmpty() && val.isEmpty())) {
         if (printProps) {
-          log.info(key + '=' + val);
+          System.err.println(key + '=' + val);
         }
         sb.append(key).append('=').append(val).append('\n');
       }
@@ -1529,8 +1525,8 @@ public class SeqClassifierFlags implements Serializable  {
       } else if (key.equalsIgnoreCase("useMinimalAbbr1")) {
         useMinimalAbbr1 = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("documentReader")) {
-        log.info("You are using an outdated flag: -documentReader " + val);
-        log.info("Please use -readerAndWriter instead.");
+        System.err.println("You are using an outdated flag: -documentReader " + val);
+        System.err.println("Please use -readerAndWriter instead.");
       } else if (key.equalsIgnoreCase("deleteBlankLines")) {
         deleteBlankLines = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("answerFile")) {
@@ -1616,10 +1612,10 @@ public class SeqClassifierFlags implements Serializable  {
       } else if (key.equalsIgnoreCase("useFloat")) {
         useFloat = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("trainMap")) {
-        log.info("trainMap and testMap are no longer valid options - please use map instead.");
+        System.err.println("trainMap and testMap are no longer valid options - please use map instead.");
         throw new RuntimeException();
       } else if (key.equalsIgnoreCase("testMap")) {
-        log.info("trainMap and testMap are no longer valid options - please use map instead.");
+        System.err.println("trainMap and testMap are no longer valid options - please use map instead.");
         throw new RuntimeException();
       } else if (key.equalsIgnoreCase("map")) {
         map = val;
@@ -1686,8 +1682,8 @@ public class SeqClassifierFlags implements Serializable  {
       } else if (key.equalsIgnoreCase("timitDatum")) {
         timitDatum = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("splitDocuments")) {
-        log.info("You are using an outdated flag: -splitDocuments");
-        log.info("Please use -maxDocSize -1 instead.");
+        System.err.println("You are using an outdated flag: -splitDocuments");
+        System.err.println("Please use -maxDocSize -1 instead.");
         splitDocuments = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("featureWeightThreshold")) {
         featureWeightThreshold = Double.parseDouble(val);
@@ -1708,7 +1704,7 @@ public class SeqClassifierFlags implements Serializable  {
           featureFactoriesArgs.add(new Object[0]);
         }
       } else if (key.equalsIgnoreCase("printXML")) {
-        log.info("printXML is disused; perhaps try using the -outputFormat xml option.");
+        System.err.println("printXML is disused; perhaps try using the -outputFormat xml option.");
 
       } else if (key.equalsIgnoreCase("useSeenFeaturesOnly")) {
         useSeenFeaturesOnly = Boolean.parseBoolean(val);
@@ -1943,7 +1939,7 @@ public class SeqClassifierFlags implements Serializable  {
         if (val.equalsIgnoreCase("linear") || val.equalsIgnoreCase("exp") || val.equalsIgnoreCase("exponential")) {
           annealingType = val;
         } else {
-          log.info("unknown annealingType: " + val + ".  Please use linear|exp|exponential");
+          System.err.println("unknown annealingType: " + val + ".  Please use linear|exp|exponential");
         }
       } else if (key.equalsIgnoreCase("numSamples")) {
         numSamples = Integer.parseInt(val);
@@ -2554,7 +2550,7 @@ public class SeqClassifierFlags implements Serializable  {
       } else if (key.equalsIgnoreCase("useGEforSup")){
         useGEforSup = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useKnownLCWords")) {
-        log.info("useKnownLCWords is deprecated; see maxAdditionalKnownLCWords (true = -1, false = 0");
+        System.err.println("useKnownLCWords is deprecated; see maxAdditionalKnownLCWords (true = -1, false = 0");
         maxAdditionalKnownLCWords = Boolean.parseBoolean(val) ? -1: 0;
       } else if (key.equalsIgnoreCase("useNoisyLabel")) {
         useNoisyLabel = Boolean.parseBoolean(val);
@@ -2600,15 +2596,15 @@ public class SeqClassifierFlags implements Serializable  {
         nerModel = val;
         // ADD VALUE ABOVE HERE
       } else if ( ! key.isEmpty() && ! key.equals("prop")) {
-        log.info("Unknown property: |" + key + '|');
+        System.err.println("Unknown property: |" + key + '|');
       }
     }
     if (startFold > numFolds) {
-      log.info("startFold > numFolds -> setting startFold to 1");
+      System.err.println("startFold > numFolds -> setting startFold to 1");
       startFold = 1;
     }
     if (endFold > numFolds) {
-      log.info("endFold > numFolds -> setting to numFolds");
+      System.err.println("endFold > numFolds -> setting to numFolds");
       endFold = numFolds;
     }
 

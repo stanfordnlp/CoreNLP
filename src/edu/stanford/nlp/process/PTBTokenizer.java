@@ -1,5 +1,4 @@
-package edu.stanford.nlp.process; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.process;
 
 // Stanford English Tokenizer -- a deterministic, fast high-quality tokenizer
 // Copyright (c) 2002-2016 The Board of Trustees of
@@ -168,10 +167,7 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Jenny Finkel (integrating in invertible PTB tokenizer)
  * @author Christopher Manning (redid API, added many options, maintenance)
  */
-public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(PTBTokenizer.class);
+public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   // the underlying lexer
   private final PTBLexer lexer;
@@ -724,9 +720,9 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     boolean showHelp = PropertiesUtils.getBool(options, "help", false);
     showHelp = PropertiesUtils.getBool(options, "h", showHelp);
     if (showHelp) {
-      log.info("Usage: java edu.stanford.nlp.process.PTBTokenizer [options]* filename*");
-      log.info("  options: -h|-help|-options tokenizerOptions|-preserveLines|-lowerCase|-dump|-ioFileList");
-      log.info("           -encoding encoding|-parseInside regex|-untok");
+      System.err.println("Usage: java edu.stanford.nlp.process.PTBTokenizer [options]* filename*");
+      System.err.println("  options: -h|-help|-options tokenizerOptions|-preserveLines|-lowerCase|-dump|-ioFileList");
+      System.err.println("           -encoding encoding|-parseInside regex|-untok");
       return;
     }
 

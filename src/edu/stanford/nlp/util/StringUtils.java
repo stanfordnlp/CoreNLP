@@ -1,5 +1,4 @@
-package edu.stanford.nlp.util; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.util;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -48,10 +47,7 @@ import java.util.stream.Stream;
  * @author Chris Cox
  * @version 2006/02/03
  */
-public class StringUtils  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(StringUtils.class);
+public class StringUtils {
 
   /**
    * Don't let anyone instantiate this class.
@@ -560,7 +556,7 @@ public class StringUtils  {
         ret.add(vm.group());
         str = str.substring(vm.end());
         // String got = vm.group();
-        // log.info("vmatched " + got + "; now str is " + str);
+        // System.err.println("vmatched " + got + "; now str is " + str);
       } else {
         throw new IllegalArgumentException("valueSplit: " + valueRegex + " doesn't match " + str);
       }
@@ -569,7 +565,7 @@ public class StringUtils  {
         if (sm.lookingAt()) {
           str = str.substring(sm.end());
           // String got = sm.group();
-          // log.info("smatched " + got + "; now str is " + str);
+          // System.err.println("smatched " + got + "; now str is " + str);
         } else {
           throw new IllegalArgumentException("valueSplit: " + separatorRegex + " doesn't match " + str);
         }
@@ -1082,7 +1078,7 @@ public class StringUtils  {
         pw.print(message);
       }
     } catch (Exception e) {
-      log.info("Exception: in printToFile " + file.getAbsolutePath());
+      System.err.println("Exception: in printToFile " + file.getAbsolutePath());
       e.printStackTrace();
     } finally {
       if (pw != null) {
@@ -1104,7 +1100,7 @@ public class StringUtils  {
       pw = new PrintWriter(fw);
       pw.println(message);
     } catch (Exception e) {
-      log.info("Exception: in printToFileLn " + file.getAbsolutePath() + ' ' + message);
+      System.err.println("Exception: in printToFileLn " + file.getAbsolutePath() + ' ' + message);
       e.printStackTrace();
     } finally {
       if (pw != null) {
@@ -1125,7 +1121,7 @@ public class StringUtils  {
       pw = new PrintWriter(fw);
       pw.print(message);
     } catch (Exception e) {
-      log.info("Exception: in printToFile " + file.getAbsolutePath());
+      System.err.println("Exception: in printToFile " + file.getAbsolutePath());
       e.printStackTrace();
     } finally {
       if (pw != null) {
@@ -1385,18 +1381,18 @@ public class StringUtils  {
       // num chars needed to display longest num
       int numChars = (int) Math.ceil(Math.log(d[n][m]) / Math.log(10));
       for (i = 0; i < numChars + 3; i++) {
-        log.info(' ');
+        System.err.print(' ');
       }
       for (j = 0; j < m; j++) {
-        log.info(t.charAt(j) + " ");
+        System.err.print(t.charAt(j) + " ");
       }
-      log.info();
+      System.err.println();
       for (i = 0; i <= n; i++) {
-        log.info((i == 0 ? ' ' : s.charAt(i - 1)) + " ");
+        System.err.print((i == 0 ? ' ' : s.charAt(i - 1)) + " ");
         for (j = 0; j <= m; j++) {
-          log.info(d[i][j] + " ");
+          System.err.print(d[i][j] + " ");
         }
-        log.info();
+        System.err.println();
       }
     ---- */
     // Step 7
@@ -1437,7 +1433,7 @@ public class StringUtils  {
         }
       }
     }
-    // log.info("LCCS(" + s + "," + t + ") = " + max);
+    // System.err.println("LCCS(" + s + "," + t + ") = " + max);
     return max;
   }
 
@@ -1868,7 +1864,7 @@ public class StringUtils  {
 
 
   public static void printErrInvocationString(String cls, String[] args) {
-    log.info(toInvocationString(cls, args));
+    System.err.println(toInvocationString(cls, args));
   }
 
 

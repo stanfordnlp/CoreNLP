@@ -85,10 +85,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  * @author Steven Bethard
  */
 
-public class StanfordCoreNLP extends AnnotationPipeline  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(StanfordCoreNLP.class);
+public class StanfordCoreNLP extends AnnotationPipeline {
 
   enum OutputFormat { TEXT, XML, JSON, CONLL, CONLLU, SERIALIZED }
 
@@ -402,11 +399,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
         Set<Class<? extends CoreAnnotation>> allRequirements = an.requires();
         for (Class<? extends CoreAnnotation> requirement : allRequirements) {
           if (!requirementsSatisfied.contains(requirement)) {
-            String fmt = "annotator \"%s\" requires annotation \"%s\". The usual requirements for this annotator are: %s";
-            throw new IllegalArgumentException(
-                String.format(fmt, name, requirement.getSimpleName(),
-                    StringUtils.join(Annotator.DEFAULT_REQUIREMENTS.getOrDefault(name, Collections.singleton("unknown")), ",")
-                ));
+            String fmt = "annotator \"%s\" requires annotation \"%s\"";
+            throw new IllegalArgumentException(String.format(fmt, name, requirement));
           }
         }
         requirementsSatisfied.addAll(an.requirementsSatisfied());

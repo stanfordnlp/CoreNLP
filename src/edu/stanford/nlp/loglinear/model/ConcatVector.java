@@ -1,5 +1,4 @@
-package edu.stanford.nlp.loglinear.model; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.loglinear.model;
 
 import edu.stanford.nlp.loglinear.model.proto.ConcatVectorProto;
 
@@ -24,10 +23,7 @@ import java.util.function.Function;
  * if you need to expand a component during online learning, it's no problem. As an auxiliary benefit, you can specify
  * sparse and dense components, greatly speeding up dot product calculation when you have lots of sparse features.
  */
-public class ConcatVector  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ConcatVector.class);
+public class ConcatVector {
   double[][] pointers;
   boolean[] sparse;
   boolean[] copyOnWrite;
@@ -598,7 +594,7 @@ public class ConcatVector  {
             loadedNative = true;
         }
         catch (UnsatisfiedLinkError e) {
-            log.info("Couldn't find the native acceleration library for ConcatVector");
+            System.err.println("Couldn't find the native acceleration library for ConcatVector");
         }
     }
     */

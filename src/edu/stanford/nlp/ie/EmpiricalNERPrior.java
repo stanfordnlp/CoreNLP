@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie;
 
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Index;
@@ -13,10 +12,7 @@ import java.util.List;
  *  @author Jenny Finkel
  */
 
-public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstractSequencePrior<IN>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(EmpiricalNERPrior.class);
+public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstractSequencePrior<IN> {
 
   protected static final String ORG = "ORGANIZATION";
   protected static final String PER = "PERSON";
@@ -83,9 +79,9 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
     double p = 0.0;
     for (int i = 0; i < entities.length; i++) {
       Entity entity = entities[i];
-      //log.info(entity);
+      //System.err.println(entity);
       if ((i == 0 || entities[i-1] != entity) && entity != null) {
-        //log.info(1);
+        //System.err.println(1);
         int length = entity.words.size();
         String tag1 = classIndex.get(entity.type);
 
@@ -103,7 +99,7 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
             otherEntity = entities[k];
             if (otherEntity != null) {
 //               if (k > other[j]) {
-//                 log.info(entity.words+" "+otherEntity.words);
+//                 System.err.println(entity.words+" "+otherEntity.words);
 //               }
               break;
             }

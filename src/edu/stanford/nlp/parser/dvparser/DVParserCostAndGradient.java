@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.dvparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.dvparser;
 
 import java.util.ArrayList;
 import java.util.Formatter;
@@ -27,10 +26,7 @@ import edu.stanford.nlp.util.TwoDimensionalMap;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
-public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(DVParserCostAndGradient.class);
+public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
   List<Tree> trainingBatch;
   IdentityHashMap<Tree, List<Tree>> topParses;
   DVModel dvModel;
@@ -69,7 +65,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
   }
 
   public static void outputSpans(Tree tree) {
-    log.info(tree.getSpan() + " ");
+    System.err.print(tree.getSpan() + " ");
     for (Tree child : tree.children()) {
       outputSpans(child);
     }
@@ -85,14 +81,14 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
     try {
       forwardPropagateTree(tree, words, nodeVectors, scores);
     } catch (AssertionError e) {
-      log.info("Failed to correctly process tree " + tree);
+      System.err.println("Failed to correctly process tree " + tree);
       throw e;
     }
 
     double score = 0.0;
     for (Tree node : scores.keySet()) {
       score += scores.get(node);
-      //log.info(Double.toString(score));
+      //System.err.println(Double.toString(score));
     }
     return score;
   }
@@ -134,7 +130,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
     if (W == null) {
       String error = "Could not find W for tree " + tree;
       if (op.testOptions.verbose) {
-        log.info(error);
+        System.err.println(error);
       }
       throw new NoSuchParseException(error);
     }
@@ -146,14 +142,14 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
     if (scoreW == null) {
       String error = "Could not find scoreW for tree " + tree;
       if (op.testOptions.verbose) {
-        log.info(error);
+        System.err.println(error);
       }
       throw new NoSuchParseException(error);
     }
     double score = scoreW.dot(currentVector);
     //score = NeuralUtils.sigmoid(score);
     scores.put(tree, score);
-    //log.info(Double.toString(score)+" ");
+    //System.err.print(Double.toString(score)+" ");
   }
 
   public int domainDimension() {
@@ -290,7 +286,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction  {
       boolean isDone = (Math.abs(bestTree.getScore() - goldTree.getScore()) <= 0.00001 || goldTree.getScore() > bestTree.getScore());
       String done = isDone ? "done" : "";
       formatter.format("Tree %6d Highest tree: %12.4f Correct tree: %12.4f %s", treeNum, bestTree.getScore(), goldTree.getScore(), done);
-      log.info(treeDebugLine.toString());
+      System.err.println(treeDebugLine.toString());
       if (!isDone){
         // if the gold tree is better than the best hypothesis tree by
         // a large enough margin, then the score difference will be 0

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -61,10 +60,7 @@ import java.util.regex.Pattern;
  *
  * @author Grace Muzny
  */
-public class QuoteAnnotator implements Annotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(QuoteAnnotator.class);
+public class QuoteAnnotator implements Annotator {
 
   private final boolean VERBOSE;
   private final boolean DEBUG = false;
@@ -145,7 +141,7 @@ public class QuoteAnnotator implements Annotator  {
     Timing timer = null;
     if (VERBOSE) {
       timer = new Timing();
-      log.info("Preparing quote annotator...");
+      System.err.print("Preparing quote annotator...");
     }
 
     if (VERBOSE) {
@@ -441,7 +437,7 @@ public class QuoteAnnotator implements Annotator  {
       if (text.length() > 150) {
         warning = text.substring(0, 150) + "...";
       }
-      log.info("WARNING: unmatched quote of type " +
+      System.err.println("WARNING: unmatched quote of type " +
           quote + " found at index " + start + " in text segment: " + warning);
     }
 
@@ -526,7 +522,7 @@ public class QuoteAnnotator implements Annotator  {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.EMPTY_SET;
+    return Collections.emptySet();
   }
 
   @Override

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -7,10 +6,7 @@ import java.io.PrintWriter;
 
 import edu.stanford.nlp.trees.Tree;
 
-public class EvalbFormatWriter  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(EvalbFormatWriter.class);
+public class EvalbFormatWriter {
   public final static String DEFAULT_GOLD_FILENAME = "parses.gld";
   public final static String DEFAULT_TEST_FILENAME = "parses.tst";
   private PrintWriter goldWriter;
@@ -42,7 +38,7 @@ public class EvalbFormatWriter  {
   {
     testWriter.println((test == null) ? "(())" : test.toString());
     count++;
-//    log.info("Wrote EVALB lines.");
+//    System.err.println("Wrote EVALB lines.");
   }
 
   public void writeTrees(Tree gold, Tree test)
@@ -50,13 +46,13 @@ public class EvalbFormatWriter  {
     goldWriter.println((gold == null) ? "(())" : gold.toString());
     testWriter.println((test == null) ? "(())" : test.toString());
     count++;
-//    log.info("Wrote EVALB lines.");
+//    System.err.println("Wrote EVALB lines.");
   }
 
   public void closeFiles() {
     if (goldWriter != null) goldWriter.close();
     if (testWriter != null) testWriter.close();
-    log.info("Wrote " + count + " EVALB lines.");
+    System.err.println("Wrote " + count + " EVALB lines.");
   }
 
   public static void initEVALBfiles(TreebankLangParserParams tlpParams) {

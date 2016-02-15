@@ -1,5 +1,4 @@
-package edu.stanford.nlp.sentiment; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sentiment;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -27,10 +26,7 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author John Bauer
  */
-public class ReadSentimentDataset  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ReadSentimentDataset.class);
+public class ReadSentimentDataset {
   static final Function<Tree, String> TRANSFORM_TREE_TO_WORD = tree -> tree.label().value();
 
   static final Function<String, String> TRANSFORM_PARENS = word -> {
@@ -290,7 +286,7 @@ public class ReadSentimentDataset  {
         testFilename = args[argIndex + 1] + "/test.txt";
         argIndex += 2;
       } else {
-        log.info("Unknown argument " + args[argIndex]);
+        System.err.println("Unknown argument " + args[argIndex]);
         System.exit(2);
       }
     }

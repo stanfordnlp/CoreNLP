@@ -1,5 +1,4 @@
-package edu.stanford.nlp.util; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.util;
 
 import java.io.*;
 import java.util.LinkedHashMap;
@@ -12,10 +11,7 @@ import java.util.Map;
  * @author Ari Steinberg (ari.steinberg@stanford.edu)
  */
 
-public class CacheMap<K,V> extends LinkedHashMap<K,V> implements Map<K,V>, Cloneable, Serializable  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CacheMap.class);
+public class CacheMap<K,V> extends LinkedHashMap<K,V> implements Map<K,V>, Cloneable, Serializable {
 
   private static final long serialVersionUID = 1L;
   public String backingFile;
@@ -76,7 +72,7 @@ public class CacheMap<K,V> extends LinkedHashMap<K,V> implements Map<K,V>, Clone
     try {
       ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
       CacheMap<K, V> c = ErasureUtils.uncheckedCast(ois.readObject());
-      log.info("Read cache from " + file + ", contains " + c.size() + " entries.  Backing file is " + c.backingFile);
+      System.err.println("Read cache from " + file + ", contains " + c.size() + " entries.  Backing file is " + c.backingFile);
       if (!useFileParams) {
         c.backingFile = file;
         c.hits = c.misses = c.puts = 0;
@@ -85,10 +81,10 @@ public class CacheMap<K,V> extends LinkedHashMap<K,V> implements Map<K,V>, Clone
 
       return c;
     } catch (FileNotFoundException ex) {
-      log.info("Cache file " + file + " has not been created yet.  Making new one.");
+      System.err.println("Cache file " + file + " has not been created yet.  Making new one.");
       return new CacheMap<>(numEntries, loadFactor, accessOrder, file);
     } catch (Exception ex) {
-      log.info("Error reading cache file " + file + ".  Making a new cache and NOT backing to file.");
+      System.err.println("Error reading cache file " + file + ".  Making a new cache and NOT backing to file.");
       return new CacheMap<>(numEntries, loadFactor, accessOrder);
     }
   }
@@ -117,13 +113,13 @@ public class CacheMap<K,V> extends LinkedHashMap<K,V> implements Map<K,V>, Clone
     if (backingFile == null) return; 
 
     try {
-      log.info("Writing cache (size: " + size() + ") to " +
+      System.err.println("Writing cache (size: " + size() + ") to " +
                          backingFile);
       ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(backingFile));
       oos.writeObject(this);
     } catch (Exception ex) {
-      log.info("Error writing cache to file: " + backingFile + "!");
-      log.info(ex);
+      System.err.println("Error writing cache to file: " + backingFile + "!");
+      System.err.println(ex);
     }
   }
 

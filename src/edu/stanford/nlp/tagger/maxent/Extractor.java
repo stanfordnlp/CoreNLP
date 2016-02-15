@@ -5,8 +5,7 @@
  * Company:      Stanford University<p>
  */
 
-package edu.stanford.nlp.tagger.maxent; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.tagger.maxent;
 
 import java.io.Serializable;
 
@@ -50,10 +49,7 @@ import java.io.Serializable;
  * @author Kristina Toutanova
  * @version 1.0
  */
-public class Extractor implements Serializable  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Extractor.class);
+public class Extractor implements Serializable {
 
   private static final long serialVersionUID = -4694133872973560083L;
 
@@ -249,9 +245,9 @@ public class Extractor implements Serializable  {
     if (args.length <= num) {
       return null;
     }
-    // log.info("getParenthesizedArg split " + str + " into " + args.length + " pieces; returning number " + num);
+    // System.err.println("getParenthesizedArg split " + str + " into " + args.length + " pieces; returning number " + num);
     // for (int i = 0; i < args.length; i++) {
-    //   log.info("  " + args[i]);
+    //   System.err.println("  " + args[i]);
     // }
     return args[num];
   }

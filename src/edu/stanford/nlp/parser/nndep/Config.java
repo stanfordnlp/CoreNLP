@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.nndep; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.nndep;
 
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.HasWord;

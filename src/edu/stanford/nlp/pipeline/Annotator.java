@@ -95,29 +95,104 @@ public interface Annotator {
    */
   @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
   Map<String, Set<String>> DEFAULT_REQUIREMENTS = new HashMap<String, Set<String>>(){{
-    put(STANFORD_TOKENIZE,                 new LinkedHashSet<>(Arrays.asList()));
-    put(STANFORD_CLEAN_XML,                new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE)));
-    put(STANFORD_SSPLIT,                   new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE)));
-    put(STANFORD_POS,                      new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT)));
-    put(STANFORD_LEMMA,                    new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS)));
-    put(STANFORD_NER,                      new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA)));
-    put(STANFORD_REGEXNER,                 new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT)));
-    put(STANFORD_ENTITY_MENTIONS,          new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER)));
-    put(STANFORD_GENDER,                   new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER)));
-    put(STANFORD_TRUECASE,                 new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA)));
-    put(STANFORD_PARSE,                    new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT)));
-    put(STANFORD_DETERMINISTIC_COREF,      new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER, STANFORD_MENTION, STANFORD_PARSE)));
-    put(STANFORD_COREF,                    new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER, STANFORD_MENTION)));
-    put(STANFORD_MENTION,                  new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER, STANFORD_DEPENDENCIES)));
-    put(STANFORD_RELATION,                 new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER, STANFORD_PARSE, STANFORD_DEPENDENCIES)));
-    put(STANFORD_SENTIMENT,                new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_PARSE)));
-    put(STANFORD_COLUMN_DATA_CLASSIFIER,   new LinkedHashSet<>(Arrays.asList()));
-    put(STANFORD_DEPENDENCIES,             new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS)));
-    put(STANFORD_NATLOG,                   new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_DEPENDENCIES)));
-    put(STANFORD_OPENIE,                   new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_DEPENDENCIES, STANFORD_NATLOG, STANFORD_MENTION, STANFORD_COREF)));
-    put(STANFORD_QUOTE,                    new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT)));
-    put(STANFORD_UD_FEATURES,              new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_DEPENDENCIES)));
+    put(STANFORD_TOKENIZE,                 new HashSet<>(Arrays.asList()));
+    put(STANFORD_CLEAN_XML,                new HashSet<>(Arrays.asList(STANFORD_TOKENIZE)));
+    put(STANFORD_SSPLIT,                   new HashSet<>(Arrays.asList(STANFORD_TOKENIZE)));
+    put(STANFORD_POS,                      new HashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT)));
+    put(STANFORD_LEMMA,                    new HashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS)));
+    put(STANFORD_LEMMA,                    new HashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS)));
+    put(STANFORD_NER,                      new HashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA)));
+    put(STANFORD_REGEXNER,                 new HashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT)));
+    put(STANFORD_ENTITY_MENTIONS,          new HashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER)));
+    put(STANFORD_GENDER,                   new HashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT)));
+    put(STANFORD_TRUECASE,                 new HashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA)));
+    put(STANFORD_PARSE,                    new HashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT)));
+    put(STANFORD_DETERMINISTIC_COREF,      new HashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER, STANFORD_MENTION, STANFORD_PARSE)));
+    put(STANFORD_COREF,                    new HashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER, STANFORD_MENTION)));
+    put(STANFORD_MENTION,                  new HashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER, STANFORD_DEPENDENCIES)));
+    put(STANFORD_RELATION,                 new HashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_NER, STANFORD_PARSE, STANFORD_DEPENDENCIES)));
+    put(STANFORD_SENTIMENT,                new HashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_PARSE)));
+    put(STANFORD_COLUMN_DATA_CLASSIFIER,   new HashSet<>(Arrays.asList()));
+    put(STANFORD_DEPENDENCIES,             new HashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS)));
+    put(STANFORD_NATLOG,                   new HashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_DEPENDENCIES)));
+    put(STANFORD_OPENIE,                   new HashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_DEPENDENCIES, STANFORD_NATLOG, STANFORD_MENTION, STANFORD_COREF)));
+    put(STANFORD_QUOTE,                    new HashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT)));
+    put(STANFORD_UD_FEATURES,              new HashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_DEPENDENCIES)));
   }};
 
+
+  /*
+   * These are typical combinations of annotators which may be used as
+   * requirements by other annotators.
+   */
+  Set<Class<? extends CoreAnnotation>> TOKENIZE_AND_SSPLIT = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+      CoreAnnotations.TokensAnnotation.class,
+      CoreAnnotations.SentencesAnnotation.class
+  )));
+  Set<Class<? extends CoreAnnotation>> TOKENIZE_SSPLIT_POS = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+      CoreAnnotations.TokensAnnotation.class,
+      CoreAnnotations.SentencesAnnotation.class,
+      CoreAnnotations.PartOfSpeechAnnotation.class
+  )));
+  Set<Class<? extends CoreAnnotation>> TOKENIZE_SSPLIT_NER = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+      CoreAnnotations.TokensAnnotation.class,
+      CoreAnnotations.SentencesAnnotation.class,
+      CoreAnnotations.NamedEntityTagAnnotation.class
+  )));
+  Set<Class<? extends CoreAnnotation>> TOKENIZE_SSPLIT_PARSE = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+      CoreAnnotations.TokensAnnotation.class,
+      CoreAnnotations.SentencesAnnotation.class,
+      TreeCoreAnnotations.TreeAnnotation.class
+  )));
+  Set<Class<? extends CoreAnnotation>> TOKENIZE_SSPLIT_PARSE_NER = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+      CoreAnnotations.TokensAnnotation.class,
+      CoreAnnotations.SentencesAnnotation.class,
+      TreeCoreAnnotations.TreeAnnotation.class,
+      CoreAnnotations.NamedEntityTagAnnotation.class
+  )));
+  Set<Class<? extends CoreAnnotation>> TOKENIZE_SSPLIT_POS_LEMMA = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+      CoreAnnotations.TokensAnnotation.class,
+      CoreAnnotations.SentencesAnnotation.class,
+      CoreAnnotations.PartOfSpeechAnnotation.class,
+      CoreAnnotations.LemmaAnnotation.class
+  )));
+  Set<Class<? extends CoreAnnotation>> TOKENIZE_SSPLIT_POS_DEPPARSE = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+      CoreAnnotations.TokensAnnotation.class,
+      CoreAnnotations.SentencesAnnotation.class,
+      CoreAnnotations.PartOfSpeechAnnotation.class,
+      SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
+      SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
+      SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
+  )));
+
+
+
+  /*
+   * These are typically requirements satisfied by an annotator
+   */
+  Set<Class<? extends CoreAnnotation>> PARSE_AND_TAG = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+      CoreAnnotations.PartOfSpeechAnnotation.class,
+      TreeCoreAnnotations.TreeAnnotation.class
+  )));
+  Set<Class<? extends CoreAnnotation>> PARSE_TAG_BINARIZED_TREES = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+      CoreAnnotations.PartOfSpeechAnnotation.class,
+      TreeCoreAnnotations.TreeAnnotation.class,
+      TreeCoreAnnotations.BinarizedTreeAnnotation.class
+  )));
+  Set<Class<? extends CoreAnnotation>> PARSE_TAG_DEPPARSE_BINARIZED_TREES = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+      CoreAnnotations.PartOfSpeechAnnotation.class,
+      TreeCoreAnnotations.TreeAnnotation.class,
+      TreeCoreAnnotations.BinarizedTreeAnnotation.class,
+      SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
+      SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
+      SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
+  )));
+  Set<Class<? extends CoreAnnotation>> PARSE_TAG_DEPPARSE = Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+      CoreAnnotations.PartOfSpeechAnnotation.class,
+      TreeCoreAnnotations.TreeAnnotation.class,
+      SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
+      SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
+      SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
+  )));
 
 }

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ling; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ling;
 
 import java.util.Set;
 
@@ -30,10 +29,7 @@ import edu.stanford.nlp.util.TypesafeMap;
  * @author John Bauer
  * @author Sonal Gupta
  */
-public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(IndexedWord.class);
+public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
 
   private static final long serialVersionUID = 3739633991145239829L;
 
@@ -149,6 +145,11 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
   @Override
   public <VALUE> VALUE get(Class<? extends TypesafeMap.Key<VALUE>> key) {
     return label.get(key);
+  }
+
+  @Override
+  public <VALUE> boolean has(Class<? extends TypesafeMap.Key<VALUE>> key) {
+    return label.has(key);
   }
 
   @Override
@@ -428,16 +429,16 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
       result = get(CoreAnnotations.DocIDAnnotation.class).hashCode();
       sensible = true;
     }
-    if (containsKey(CoreAnnotations.SentenceIndexAnnotation.class)) {
+    if (has(CoreAnnotations.SentenceIndexAnnotation.class)) {
       result = 29 * result + get(CoreAnnotations.SentenceIndexAnnotation.class).hashCode();
       sensible = true;
     }
-    if (containsKey(CoreAnnotations.IndexAnnotation.class)) {
+    if (has(CoreAnnotations.IndexAnnotation.class)) {
       result = 29 * result + get(CoreAnnotations.IndexAnnotation.class).hashCode();
       sensible = true;
     }
     if ( ! sensible) {
-      log.info("WARNING!!!  You have hashed an IndexedWord with no docID, sentIndex or wordIndex. You will almost certainly lose");
+      System.err.println("WARNING!!!  You have hashed an IndexedWord with no docID, sentIndex or wordIndex. You will almost certainly lose");
     }
     cachedHashCode = result;
     return result;

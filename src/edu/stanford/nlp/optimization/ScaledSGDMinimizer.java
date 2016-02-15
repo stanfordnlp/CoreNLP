@@ -1,5 +1,4 @@
-package edu.stanford.nlp.optimization; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.optimization;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -23,10 +22,7 @@ import edu.stanford.nlp.util.Pair;
  * @version 1.0
  * @since 1.0
  */
-public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction> extends StochasticMinimizer<Q>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ScaledSGDMinimizer.class);
+public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction> extends StochasticMinimizer<Q> {
 
 
   private static int method = 1;  // 0=MinErr  1=Bradley
@@ -60,9 +56,9 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
 
     do{
       System.arraycopy(initial, 0, xtest, 0, initial.length);
-      log.info("");
+      System.err.println("");
       this.fixedGain = f;
-      log.info("Testing with batchsize: " + bSize + "    gain:  " + gain + "  fixedGain:  " + nf.format(fixedGain) );
+      System.err.println("Testing with batchsize: " + bSize + "    gain:  " + gain + "  fixedGain:  " + nf.format(fixedGain) );
       this.numPasses = 10000;
       this.minimize(function, 1e-100, xtest);
       double result = dfunction.valueAt(xtest);
@@ -84,9 +80,9 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
       }
 
       it += 1;
-      log.info("");
-      log.info("Final value is: " + nf.format(result));
-      log.info("Optimal so far is:  fixedgain: " + fOpt);
+      System.err.println("");
+      System.err.println("Final value is: " + nf.format(result));
+      System.err.println("Optimal so far is:  fixedgain: " + fOpt);
     } while(toContinue);
 
 
@@ -115,7 +111,7 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
       this.fixedGain = tuneDouble(function,initial,msPerTest,new setFixedGain(this),0.1,1.0);
       gain = tuneGain(function,initial,msPerTest,1e-7,1.0);
       bSize = tuneBatch(function,initial,msPerTest,1);
-      log.info("Results:  fixedGain: " + nf.format(this.fixedGain) + "  gain: " + nf.format(gain) + "  batch " + bSize );
+      System.err.println("Results:  fixedGain: " + nf.format(this.fixedGain) + "  gain: " + nf.format(gain) + "  batch " + bSize );
     }
 
     return new Pair<>(bSize, gain);
@@ -357,13 +353,13 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
 
   public static void serializeWeights(String serializePath,double[] weights,double[] diag) {
 
-    log.info("Serializing weights to " + serializePath + "...");
+    System.err.println("Serializing weights to " + serializePath + "...");
 
     try {
       Weights out = new Weights(weights,diag);
       IOUtils.writeObjectToFile(out, serializePath);
     } catch (Exception e) {
-      log.info("Error serializing to " + serializePath);
+      System.err.println("Error serializing to " + serializePath);
       e.printStackTrace();
     }
 
@@ -372,7 +368,7 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
 
   public static double[] getWeights(String loadPath) throws IOException, ClassCastException, ClassNotFoundException {
 
-    log.info("Loading weights from " + loadPath + "...");
+    System.err.println("Loading weights from " + loadPath + "...");
     double[] wt;
     Weights w;
 
@@ -385,7 +381,7 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
 
   public static double[] getDiag(String loadPath) throws IOException, ClassCastException, ClassNotFoundException {
 
-    log.info("Loading weights from " + loadPath + "...");
+    System.err.println("Loading weights from " + loadPath + "...");
     double[] diag;
     Weights w;
 

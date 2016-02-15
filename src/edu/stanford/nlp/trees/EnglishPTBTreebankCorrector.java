@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
@@ -15,10 +14,7 @@ import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.Pair;
 
 
-public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(EnglishPTBTreebankCorrector.class);
+public class EnglishPTBTreebankCorrector implements TreebankTransformer {
 
   private static final boolean DEBUG = false;
 
@@ -80,10 +76,10 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer  {
       for (String line; (line = br.readLine()) != null; ) {
         TregexPattern matchPattern = tpc.compile(line);
         tsp.clear();
-        if (DEBUG) log.info("Pattern is " + line + " [" + matchPattern + ']');
+        if (DEBUG) System.err.println("Pattern is " + line + " [" + matchPattern + ']');
         while (continuing(line = br.readLine())) {
           TsurgeonPattern p = Tsurgeon.parseOperation(line);
-          if (DEBUG) log.info("Operation is " + line + " [" + p + ']');
+          if (DEBUG) System.err.println("Operation is " + line + " [" + p + ']');
           tsp.add(p);
         }
         if ( ! tsp.isEmpty()) {

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -53,10 +52,7 @@ import edu.stanford.nlp.util.*;
  * @author Dan Klein
  * @author Sarah Spikes (sdspikes@cs.stanford.edu) - filled in types
  */
-public abstract class Tree extends AbstractCollection<Tree> implements Label, Labeled, Scored, Serializable  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Tree.class);
+public abstract class Tree extends AbstractCollection<Tree> implements Label, Labeled, Scored, Serializable {
 
   private static final long serialVersionUID = 5441849457648722744L;
 
@@ -426,7 +422,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return an IntPair: the SpanAnnotation of this node.
    */
   public IntPair getSpan() {
-    if(label() instanceof CoreMap && ((CoreMap) label()).containsKey(CoreAnnotations.SpanAnnotation.class))
+    if(label() instanceof CoreMap && ((CoreMap) label()).has(CoreAnnotations.SpanAnnotation.class))
       return ((CoreMap) label()).get(CoreAnnotations.SpanAnnotation.class);
     return null;
   }
@@ -554,13 +550,13 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
 
     int position = left;
 
-    // log.info("In bracketing trees left is " + left);
-    // log.info("  label is " + label() +
+    // System.err.println("In bracketing trees left is " + left);
+    // System.err.println("  label is " + label() +
     //                       "; num daughters: " + children().length);
     Tree[] kids = children();
     for (Tree kid : kids) {
       position = kid.constituents(constituentsSet, position, cf, charLevel, filter, maxDepth, depth + 1);
-      // log.info("  position went to " + position);
+      // System.err.println("  position went to " + position);
     }
 
     if ((filter == null || filter.test(this)) &&
@@ -568,7 +564,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       //Compute span of entire tree at the end of recursion
       constituentsSet.add(cf.newConstituent(left, position - 1, label(), score()));
     }
-    // log.info("  added " + label());
+    // System.err.println("  added " + label());
     return position;
   }
 
@@ -1044,7 +1040,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     if (head != null) {
       return head.headTerminal(hf, parent);
     }
-    log.info("Head is null: " + this);
+    System.err.println("Head is null: " + this);
     return null;
   }
 
@@ -1079,7 +1075,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       if (head != null) {
         return head.headPreTerminal(hf);
       }
-      log.info("Head preterminal is null: " + this);
+      System.err.println("Head preterminal is null: " + this);
       return null;
     }
   }
@@ -1190,7 +1186,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
         }
 
       } else {
-        log.info("Head is null: " + this);
+        System.err.println("Head is null: " + this);
       }
     }
   }
@@ -1316,10 +1312,10 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
         continue;
       }
       // Label l = node.label();
-      // log.info("doing kids of label: " + l);
+      // System.err.println("doing kids of label: " + l);
       //Tree hwt = node.headPreTerminal(hf);
       Tree hwt = node.headTerminal(hf);
-      // log.info("have hf, found head preterm: " + hwt);
+      // System.err.println("have hf, found head preterm: " + hwt);
       if (hwt == null) {
         throw new IllegalStateException("mapDependencies: HeadFinder failed!");
       }
@@ -1331,8 +1327,8 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
         if (dwt == null) {
           throw new IllegalStateException("mapDependencies: HeadFinder failed!");
         }
-        //log.info("kid is " + dl);
-         //log.info("transformed to " + dml.toString("value{map}"));
+        //System.err.println("kid is " + dl);
+         //System.err.println("transformed to " + dml.toString("value{map}"));
         if (dwt != hwt) {
           Dependency<Label, Label, Object> p = new UnnamedDependency(hwt.label(), dwt.label());
           if (f.test(p)) {

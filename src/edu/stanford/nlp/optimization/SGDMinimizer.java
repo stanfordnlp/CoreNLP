@@ -1,5 +1,4 @@
-package edu.stanford.nlp.optimization; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.optimization;
 
 import edu.stanford.nlp.classify.LogConditionalObjectiveFunction;
 import edu.stanford.nlp.classify.LogPrior;
@@ -25,10 +24,7 @@ import java.util.Random;
  *
  * @author Angel Chang
  */
-public class SGDMinimizer<T extends Function> implements Minimizer<T>, HasEvaluators  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SGDMinimizer.class);
+public class SGDMinimizer<T extends Function> implements Minimizer<T>, HasEvaluators {
 
   protected double xscale, xnorm;
   protected double[] x;
@@ -246,7 +242,7 @@ public class SGDMinimizer<T extends Function> implements Minimizer<T>, HasEvalua
     int totalSamples = function.dataDimension();
     int tuneSampleSize = Math.min(totalSamples, tuningSamples);
     if (tuneSampleSize < tuningSamples) {
-      log.info("WARNING: Total number of samples=" + totalSamples +
+      System.err.println("WARNING: Total number of samples=" + totalSamples +
               " is smaller than requested tuning sample size=" + tuningSamples + "!!!");
     }
     lambda = 1.0/(sigma*totalSamples);
@@ -316,7 +312,7 @@ public class SGDMinimizer<T extends Function> implements Minimizer<T>, HasEvalua
       try {
         ArrayMath.assertFinite(x,"x");
       } catch (ArrayMath.InvalidElementException e) {
-        log.info(e.toString());
+        System.err.println(e.toString());
         for(int i=0;i<x.length;i++){ x[i]=Double.NaN; }
         break;
       }
@@ -353,13 +349,13 @@ public class SGDMinimizer<T extends Function> implements Minimizer<T>, HasEvalua
 
   protected void sayln(String s) {
     if (!quiet) {
-      log.info(s);
+      System.err.println(s);
     }
   }
 
   protected void say(String s) {
     if (!quiet) {
-      log.info(s);
+      System.err.print(s);
     }
   }
 

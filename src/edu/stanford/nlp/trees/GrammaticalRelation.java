@@ -24,8 +24,7 @@
 //    parser-support@lists.stanford.edu
 //    http://nlp.stanford.edu/software/stanford-dependencies.shtml
 
-package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
@@ -114,10 +113,7 @@ import java.util.regex.Pattern;
  * @author Galen Andrew (refactoring English-specific stuff)
  * @author Ilya Sherman (refactoring annotation-relation pairing, which is now gone)
  */
-public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Serializable  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(GrammaticalRelation.class);
+public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Serializable {
 
   private static final long serialVersionUID = 892618003417550128L;
 
@@ -383,11 +379,11 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
         }
         nodeList.add(target);
         if (DEBUG) {
-          log.info("found " + this + "(" + t + "-" + t.headWordNode() + ", " + m.getNode("target") + "-" + ((TreeGraphNode) m.getNode("target")).headWordNode() + ") using pattern " + p);
+          System.err.println("found " + this + "(" + t + "-" + t.headWordNode() + ", " + m.getNode("target") + "-" + ((TreeGraphNode) m.getNode("target")).headWordNode() + ") using pattern " + p);
           for (String nodeName : m.getNodeNames()) {
             if (nodeName.equals("target"))
               continue;
-            log.info("  node " + nodeName + ": " + m.getNode(nodeName));
+            System.err.println("  node " + nodeName + ": " + m.getNode(nodeName));
           }
         }
       }
@@ -402,7 +398,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
    *  <code>Tree</code> node <code>t</code> and some other node.
    */
   public boolean isApplicable(Tree t) {
-    // log.info("Testing whether " + sourcePattern + " matches " + ((TreeGraphNode) t).toOneLineString());
+    // System.err.println("Testing whether " + sourcePattern + " matches " + ((TreeGraphNode) t).toOneLineString());
     return (sourcePattern != null) && (t.value() != null) &&
              sourcePattern.matcher(t.value()).matches();
   }

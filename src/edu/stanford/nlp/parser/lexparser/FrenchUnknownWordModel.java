@@ -1,15 +1,11 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.international.french.FrenchUnknownWordSignatures;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.util.Index;
 
 
-public class FrenchUnknownWordModel extends BaseUnknownWordModel  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(FrenchUnknownWordModel.class);
+public class FrenchUnknownWordModel extends BaseUnknownWordModel {
 
   private static final long serialVersionUID = -776564693549194424L;
 

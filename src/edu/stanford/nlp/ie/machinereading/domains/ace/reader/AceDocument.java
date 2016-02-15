@@ -1,6 +1,5 @@
 
-package edu.stanford.nlp.ie.machinereading.domains.ace.reader; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.machinereading.domains.ace.reader;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,10 +19,7 @@ import edu.stanford.nlp.util.Generics;
 /**
  * Stores the ACE elements annotated in this document
  */
-public class AceDocument extends AceElement  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AceDocument.class);
+public class AceDocument extends AceElement {
   /** Prefix of the files from where this doc was created */
   private String mPrefix;
 
@@ -103,7 +99,7 @@ public class AceDocument extends AceElement  {
     else if (p.indexOf("wl/") >= 0)
       mSource = "weblog";
     else {
-      log.info("WARNING: Unknown source for doc: " + p);
+      System.err.println("WARNING: Unknown source for doc: " + p);
       mSource = "none";
     }
   }
@@ -372,7 +368,7 @@ public class AceDocument extends AceElement  {
     //
     if (usePredictedBoundaries == false) {
       doc = AceDomReader.parseDocument(new File(prefix + XML_EXT));
-      // log.info("Parsed " + doc.getEntityMentions().size() +
+      // System.err.println("Parsed " + doc.getEntityMentions().size() +
       // " entities in document " + prefix);
     }
 
@@ -383,7 +379,7 @@ public class AceDocument extends AceElement  {
       int lastSlash = prefix.lastIndexOf(File.separator);
       assert (lastSlash > 0 && lastSlash < prefix.length() - 1);
       String id = prefix.substring(lastSlash + 1);
-      // log.info(id + ": " + prefix);
+      // System.err.println(id + ": " + prefix);
       doc = new AceDocument(id);
     }
     doc.setPrefix(prefix);
@@ -540,7 +536,7 @@ public class AceDocument extends AceElement  {
     //
     if (usePredictedBoundaries == false) {
       doc = AceDomReader.parseDocument(new File(prefix + XML_EXT));
-      // log.info("Parsed " + doc.getEntityMentions().size() +
+      // System.err.println("Parsed " + doc.getEntityMentions().size() +
       // " entities in document " + prefix);
     }
 
@@ -551,7 +547,7 @@ public class AceDocument extends AceElement  {
       int lastSlash = prefix.lastIndexOf(File.separator);
       assert (lastSlash > 0 && lastSlash < prefix.length() - 1);
       String id = prefix.substring(lastSlash + 1);
-      // log.info(id + ": " + prefix);
+      // System.err.println(id + ": " + prefix);
       doc = new AceDocument(id);
     }
     doc.setPrefix(prefix);

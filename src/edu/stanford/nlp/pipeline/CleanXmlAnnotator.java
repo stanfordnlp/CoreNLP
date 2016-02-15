@@ -238,7 +238,7 @@ public class CleanXmlAnnotator implements Annotator{
 
   @Override
   public void annotate(Annotation annotation) {
-    if (annotation.containsKey(CoreAnnotations.TokensAnnotation.class)) {
+    if (annotation.has(CoreAnnotations.TokensAnnotation.class)) {
       List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
       List<CoreLabel> newTokens = process(annotation, tokens);
       // We assume that if someone is using this annotator, they don't

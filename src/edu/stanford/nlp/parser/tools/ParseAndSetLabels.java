@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.stanford.nlp.util.logging.Redwood;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +42,7 @@ import edu.stanford.nlp.util.StringUtils;
  */
 
 public class ParseAndSetLabels {
-  private static Redwood.RedwoodChannels logger = Redwood.channels(ParseAndSetLabels.class);
+  private static Logger logger = LoggerFactory.getLogger(ParseAndSetLabels.class);
 
   public enum MissingLabels {
     FAIL, DEFAULT, KEEP_ORIGINAL

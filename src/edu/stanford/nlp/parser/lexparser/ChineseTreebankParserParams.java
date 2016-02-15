@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.io.NumberRangesFileFilter;
@@ -31,10 +30,7 @@ import java.util.*;
  * @author Galen Andrew
  */
 
-public class ChineseTreebankParserParams extends AbstractTreebankParserParams  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseTreebankParserParams.class);
+public class ChineseTreebankParserParams extends AbstractTreebankParserParams {
 
   /**
    * The variable ctlp stores the same thing as the tlp variable in
@@ -1150,8 +1146,8 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams  {
       try {
         headFinder = (HeadFinder) Class.forName(args[i + 1]).newInstance();
       } catch (Exception e) {
-        log.info(e);
-        log.info(this.getClass().getName() + ": Could not load head finder " + args[i + 1]);
+        System.err.println(e);
+        System.err.println(this.getClass().getName() + ": Could not load head finder " + args[i + 1]);
         throw new RuntimeException(e);
       }
       i+=2;

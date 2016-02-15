@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.util.Map;
 import java.util.Set;
@@ -14,10 +13,6 @@ import edu.stanford.nlp.util.Index;
 public class BaseUnknownWordModelTrainer
   extends AbstractUnknownWordModelTrainer
 {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(BaseUnknownWordModelTrainer.class);
-
   // Records the number of times word/tag pair was seen in training data.
   ClassicCounter<IntTaggedWord> seenCounter;
   // Counts of each tag (stored as a Label) on unknown words.
@@ -60,16 +55,16 @@ public class BaseUnknownWordModelTrainer
     useFirst = false;
 
     if (useFirst) {
-      log.info("Including first letter for unknown words.");
+      System.err.println("Including first letter for unknown words.");
     }
     if (useFirstCap) {
-      log.info("Including whether first letter is capitalized for unknown words");
+      System.err.println("Including whether first letter is capitalized for unknown words");
     }
     if (useEnd) {
-      log.info("Classing unknown word as the average of their equivalents by identity of last " + op.lexOptions.unknownSuffixSize + " letters.");
+      System.err.println("Classing unknown word as the average of their equivalents by identity of last " + op.lexOptions.unknownSuffixSize + " letters.");
     }
     if (useGT) {
-      log.info("Using Good-Turing smoothing for unknown words.");
+      System.err.println("Using Good-Turing smoothing for unknown words.");
     }
 
     this.indexToStartUnkCounting = (totalTrees * op.trainOptions.fractionBeforeUnseenCounting);

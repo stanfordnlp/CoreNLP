@@ -1,5 +1,4 @@
-package edu.stanford.nlp.stats; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.stats;
 
 import edu.stanford.nlp.classify.Classifier;
 import edu.stanford.nlp.classify.GeneralDataset;
@@ -25,10 +24,7 @@ import java.util.Properties;
  *        -ignoreProvidedTag - Discards the provided tag (i.e. if label is X-xxx, just use xxx for evaluation)
  * @author Angel Chang
  */
-public class MultiClassChunkEvalStats extends MultiClassPrecisionRecallExtendedStats.MultiClassStringLabelStats  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MultiClassChunkEvalStats.class);
+public class MultiClassChunkEvalStats extends MultiClassPrecisionRecallExtendedStats.MultiClassStringLabelStats {
   private boolean inCorrect = false;
   private LabeledChunkIdentifier.LabelTagType prevCorrect = null;
   private LabeledChunkIdentifier.LabelTagType prevGuess = null;
@@ -185,7 +181,7 @@ public class MultiClassChunkEvalStats extends MultiClassPrecisionRecallExtendedS
         System.out.println(stats.getDescription(6));        
       }
     } catch (IOException ex) {
-      log.info("Error processing file: " + ex.toString());
+      System.err.println("Error processing file: " + ex.toString());
       ex.printStackTrace(System.err);
     }
   }

@@ -90,10 +90,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author Galen Andrew (considerable refactoring)
  * @author John Bauer (made threadsafe)
  */
-public class LexicalizedParser extends ParserGrammar implements Serializable  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(LexicalizedParser.class);
+public class LexicalizedParser extends ParserGrammar implements Serializable {
 
   private static Redwood.RedwoodChannels logger = Redwood.channels(LexicalizedParser.class);
 
@@ -185,7 +182,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
    */
   public static LexicalizedParser loadModel(String parserFileOrUrl, Options op,
                                             String ... extraFlags) {
-    //    log.info("Loading parser from file " + parserFileOrUrl);
+    //    System.err.print("Loading parser from file " + parserFileOrUrl);
     LexicalizedParser parser = getParserFromFile(parserFileOrUrl, op);
     if (extraFlags.length > 0) {
       parser.setOptionFlags(extraFlags);
@@ -308,9 +305,9 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
         return bestparse;
       }
     } catch (Exception e) {
-      log.info("Following exception caught during parsing:");
+      System.err.println("Following exception caught during parsing:");
       e.printStackTrace();
-      log.info("Recovering using fall through strategy: will construct an (X ...) tree.");
+      System.err.println("Recovering using fall through strategy: will construct an (X ...) tree.");
     }
     // if can't parse or exception, fall through
     return ParserUtils.xTree(lst);
@@ -412,9 +409,9 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
   }
 
   private static Treebank makeTreebank(String treebankPath, Options op, FileFilter filt) {
-    log.info("Training a parser from treebank dir: " + treebankPath);
+    System.err.println("Training a parser from treebank dir: " + treebankPath);
     Treebank trainTreebank = op.tlpParams.diskTreebank();
-    log.info("Reading trees...");
+    System.err.print("Reading trees...");
     if (filt == null) {
       trainTreebank.loadPath(treebankPath);
     } else {
@@ -426,9 +423,9 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
   }
 
   private static DiskTreebank makeSecondaryTreebank(String treebankPath, Options op, FileFilter filt) {
-    log.info("Additionally training using secondary disk treebank: " + treebankPath + ' ' + filt);
+    System.err.println("Additionally training using secondary disk treebank: " + treebankPath + ' ' + filt);
     DiskTreebank trainTreebank = op.tlpParams.diskTreebank();
-    log.info("Reading trees...");
+    System.err.print("Reading trees...");
     if (filt == null) {
       trainTreebank.loadPath(treebankPath);
     } else {
@@ -448,11 +445,11 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
    */
   public void saveParserToSerialized(String filename) {
     try {
-      log.info("Writing parser in serialized format to file " + filename + ' ');
+      System.err.print("Writing parser in serialized format to file " + filename + ' ');
       ObjectOutputStream out = IOUtils.writeStreamFromString(filename);
       out.writeObject(this);
       out.close();
-      log.info("done.");
+      System.err.println("done.");
     } catch (IOException ioe) {
       throw new RuntimeIOException(ioe);
     }
@@ -468,7 +465,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
       throw new UnsupportedOperationException("Sorry, but parsers with rerankers cannot be saved to text file");
     }
     try {
-      log.info("Writing parser in text grammar format to file " + filename);
+      System.err.print("Writing parser in text grammar format to file " + filename);
       OutputStream os;
       if (filename.endsWith(".gz")) {
         // it's faster to do the buffering _outside_ the gzipping as here
@@ -482,52 +479,52 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
       out.println(prefix + "OPTIONS");
       op.writeData(out);
       out.println();
-      log.info(".");
+      System.err.print(".");
 
       out.println(prefix + "STATE_INDEX");
       stateIndex.saveToWriter(out);
       out.println();
-      log.info(".");
+      System.err.print(".");
 
       out.println(prefix + "WORD_INDEX");
       wordIndex.saveToWriter(out);
       out.println();
-      log.info(".");
+      System.err.print(".");
 
       out.println(prefix + "TAG_INDEX");
       tagIndex.saveToWriter(out);
       out.println();
-      log.info(".");
+      System.err.print(".");
 
       String uwmClazz = ((lex.getUnknownWordModel() == null) ? "null" :
                    lex.getUnknownWordModel().getClass().getCanonicalName());
       out.println(prefix + "LEXICON " + uwmClazz);
       lex.writeData(out);
       out.println();
-      log.info(".");
+      System.err.print(".");
 
       out.println(prefix + "UNARY_GRAMMAR");
       ug.writeData(out);
       out.println();
-      log.info(".");
+      System.err.print(".");
 
       out.println(prefix + "BINARY_GRAMMAR");
       bg.writeData(out);
       out.println();
-      log.info(".");
+      System.err.print(".");
 
       out.println(prefix + "DEPENDENCY_GRAMMAR");
       if (dg != null) {
         dg.writeData(out);
       }
       out.println();
-      log.info(".");
+      System.err.print(".");
 
       out.flush();
       out.close();
-      log.info("done.");
+      System.err.println("done.");
     } catch (IOException e) {
-      log.info("Trouble saving parser data to ASCII format.");
+      System.err.println("Trouble saving parser data to ASCII format.");
       throw new RuntimeIOException(e);
     }
   }
@@ -550,22 +547,22 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
       String line = in.readLine();
       confirmBeginBlock(textFileOrUrl, line);
       op.readData(in);
-      log.info(".");
+      System.err.print(".");
 
       line = in.readLine();
       confirmBeginBlock(textFileOrUrl, line);
       Index<String> stateIndex = HashIndex.loadFromReader(in);
-      log.info(".");
+      System.err.print(".");
 
       line = in.readLine();
       confirmBeginBlock(textFileOrUrl, line);
       Index<String> wordIndex = HashIndex.loadFromReader(in);
-      log.info(".");
+      System.err.print(".");
 
       line = in.readLine();
       confirmBeginBlock(textFileOrUrl, line);
       Index<String> tagIndex = HashIndex.loadFromReader(in);
-      log.info(".");
+      System.err.print(".");
 
       line = in.readLine();
       confirmBeginBlock(textFileOrUrl, line);
@@ -576,28 +573,28 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
         lex.setUnknownWordModel(model);
       }
       lex.readData(in);
-      log.info(".");
+      System.err.print(".");
 
       line = in.readLine();
       confirmBeginBlock(textFileOrUrl, line);
       UnaryGrammar ug = new UnaryGrammar(stateIndex);
       ug.readData(in);
-      log.info(".");
+      System.err.print(".");
 
       line = in.readLine();
       confirmBeginBlock(textFileOrUrl, line);
       BinaryGrammar bg = new BinaryGrammar(stateIndex);
       bg.readData(in);
-      log.info(".");
+      System.err.print(".");
 
       line = in.readLine();
       confirmBeginBlock(textFileOrUrl, line);
       DependencyGrammar dg = new MLEDependencyGrammar(op.tlpParams, op.directional, op.distance, op.coarseDistance, op.trainOptions.basicCategoryTagsInDependencyGrammar, op, wordIndex, tagIndex);
       dg.readData(in);
-      log.info(".");
+      System.err.print(".");
 
       in.close();
-      log.info(" done [" + tim.toSecondsString() + " sec].");
+      System.err.println(" done [" + tim.toSecondsString() + " sec].");
       return new LexicalizedParser(lex, bg, ug, dg, stateIndex, wordIndex, tagIndex, op);
     } catch (IOException e) {
       e.printStackTrace();
@@ -614,22 +611,22 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
       LexicalizedParser pd = loadModel(in);
 
       in.close();
-      log.info(" done [" + tim.toSecondsString() + " sec].");
+      System.err.println(" done [" + tim.toSecondsString() + " sec].");
       return pd;
     } catch (InvalidClassException ice) {
       // For this, it's not a good idea to continue and try it as a text file!
-      log.info();   // as in middle of line from above message
+      System.err.println();   // as in middle of line from above message
       throw new RuntimeException("Invalid class in file: " + serializedFileOrUrl, ice);
     } catch (FileNotFoundException fnfe) {
       // For this, it's not a good idea to continue and try it as a text file!
-      log.info();   // as in middle of line from above message
+      System.err.println();   // as in middle of line from above message
       throw new RuntimeException("File not found: " + serializedFileOrUrl, fnfe);
     } catch (StreamCorruptedException sce) {
       // suppress error message, on the assumption that we've really got
       // a text grammar, and that'll be tried next
-      log.info();
+      System.err.println();
     } catch (Exception e) {
-      log.info();   // as in middle of line from above message
+      System.err.println();   // as in middle of line from above message
       e.printStackTrace();
     }
     return null;
@@ -707,7 +704,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
       }
     }
 
-    log.info("Binarizing trees...");
+    System.err.print("Binarizing trees...");
 
     TreeAnnotatorAndBinarizer binarizer = buildTrainBinarizer(op);
     CompositeTreeTransformer trainTransformer = buildTrainTransformer(op, binarizer);
@@ -725,7 +722,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
       if (op.testOptions.verbose) {
         List<String> list = new ArrayList<>(op.trainOptions.splitters);
         Collections.sort(list);
-        log.info("Parent split categories: " + list);
+        System.err.println("Parent split categories: " + list);
       }
     }
 
@@ -735,7 +732,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
       wholeTreebank = wholeTreebank.transform(myTransformer);
       op.trainOptions.postSplitters = ParentAnnotationStats.getSplitCategories(wholeTreebank, true, 0, op.trainOptions.selectivePostSplitCutOff, op.trainOptions.tagSelectivePostSplitCutOff, tlp);
       if (op.testOptions.verbose) {
-        log.info("Parent post annotation split categories: " + op.trainOptions.postSplitters);
+        System.err.println("Parent post annotation split categories: " + op.trainOptions.postSplitters);
       }
     }
     if (op.trainOptions.hSelSplit) {
@@ -790,7 +787,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
         }
       }
       if (op.testOptions.verbose) {
-        log.info("Removed from vertical splitters: " + deleted);
+        System.err.println("Removed from vertical splitters: " + deleted);
       }
     }
   }
@@ -827,7 +824,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
                         Treebank tuneTreebank,
                         List<List<TaggedWord>> extraTaggedWords)
   {
-    // log.info("Currently " + new Date()); // now printed when command-line args are printed
+    // System.err.println("Currently " + new Date()); // now printed when command-line args are printed
     printOptions(true, op);
     Timing.startTime();
 
@@ -857,7 +854,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
 
     if (op.trainOptions.predictSplits) {
       SplittingGrammarExtractor extractor = new SplittingGrammarExtractor(op);
-      log.info("Extracting PCFG...");
+      System.err.print("Extracting PCFG...");
       // TODO: make use of the tagged text
       if (secondaryTrainTreebank == null) {
         extractor.extract(trainTreebank);
@@ -879,7 +876,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
       BinaryGrammarExtractor bgExtractor = new BinaryGrammarExtractor(op, stateIndex);
       // Extractor lexExtractor = new LexiconExtractor();
       //TreeExtractor uwmExtractor = new UnknownWordModelExtractor(trainTreebank.size());
-      log.info("Extracting PCFG...");
+      System.err.print("Extracting PCFG...");
       if (secondaryTrainTreebank == null) {
         bgug = bgExtractor.extract(trainTreebank);
       } else {
@@ -888,7 +885,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
       }
       Timing.tick("done.");
 
-      log.info("Extracting Lexicon...");
+      System.err.print("Extracting Lexicon...");
       lex = op.tlpParams.lex(op, wordIndex, tagIndex);
 
       double trainSize = trainTreebank.size();
@@ -920,14 +917,14 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
     //TODO: wsg2011 Not sure if this should come before or after
     //grammar compaction
     if (op.trainOptions.ruleSmoothing) {
-      log.info("Smoothing PCFG...");
+      System.err.print("Smoothing PCFG...");
       Function<Pair<UnaryGrammar,BinaryGrammar>,Pair<UnaryGrammar,BinaryGrammar>> smoother = new LinearGrammarSmoother(op.trainOptions, stateIndex, tagIndex);
       bgug = smoother.apply(bgug);
       Timing.tick("done.");
     }
 
     if (compactor != null) {
-      log.info("Compacting grammar...");
+      System.err.print("Compacting grammar...");
       Triple<Index<String>, UnaryGrammar, BinaryGrammar> compacted = compactor.compactGrammar(bgug, stateIndex);
       stateIndex = compacted.first();
       bgug.setFirst(compacted.second());
@@ -935,7 +932,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
       Timing.tick("done.");
     }
 
-    log.info("Compiling grammar...");
+    System.err.print("Compiling grammar...");
     BinaryGrammar bg = bgug.second;
     bg.splitRules();
     UnaryGrammar ug = bgug.first;
@@ -944,34 +941,34 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
 
     DependencyGrammar dg = null;
     if (op.doDep) {
-      log.info("Extracting Dependencies...");
+      System.err.print("Extracting Dependencies...");
       AbstractTreeExtractor<DependencyGrammar> dgExtractor = new MLEDependencyGrammarExtractor(op, wordIndex, tagIndex);
       if (secondaryTrainTreebank == null) {
         dg = dgExtractor.extract(trainTreebank);
       } else {
         dg = dgExtractor.extract(trainTreebank, 1.0, secondaryTrainTreebank, weight);
       }
-      //log.info("Extracting Unknown Word Model...");
+      //System.err.print("Extracting Unknown Word Model...");
       //UnknownWordModel uwm = (UnknownWordModel)uwmExtractor.extract(trainTreebank);
       //Timing.tick("done.");
       Timing.tick("done.");
       if (tuneTreebank != null) {
-        log.info("Tuning Dependency Model...");
+        System.err.print("Tuning Dependency Model...");
         dg.setLexicon(lex); // MG2008: needed if using PwGt model
         dg.tune(tuneTreebank);
         Timing.tick("done.");
       }
     }
 
-    log.info("Done training parser.");
+    System.err.println("Done training parser.");
     if (op.trainOptions.trainTreeFile!=null) {
       try {
-        log.info("Writing out binary trees to "+ op.trainOptions.trainTreeFile+"...");
+        System.err.print("Writing out binary trees to "+ op.trainOptions.trainTreeFile+"...");
         IOUtils.writeObjectToFile(trainTreebank, op.trainOptions.trainTreeFile);
         IOUtils.writeObjectToFile(secondaryTrainTreebank, op.trainOptions.trainTreeFile);
         Timing.tick("done.");
       } catch (Exception e) {
-        log.info("Problem writing out binary trees.");
+        System.err.println("Problem writing out binary trees.");
       }
     }
     return new LexicalizedParser(lex, bg, ug, dg, stateIndex, wordIndex, tagIndex, op);
@@ -1225,7 +1222,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
     String elementDelimiter = null;
     int argIndex = 0;
     if (args.length < 1) {
-      log.info("Basic usage (see Javadoc for more): java edu.stanford.nlp.parser.lexparser.LexicalizedParser parserFileOrUrl filename*");
+      System.err.println("Basic usage (see Javadoc for more): java edu.stanford.nlp.parser.lexparser.LexicalizedParser parserFileOrUrl filename*");
       return;
     }
 
@@ -1252,13 +1249,13 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
         try {
           op.tlpParams = (TreebankLangParserParams) Class.forName(args[argIndex + 1]).newInstance();
         } catch (ClassNotFoundException e) {
-          log.info("Class not found: " + args[argIndex + 1]);
+          System.err.println("Class not found: " + args[argIndex + 1]);
           throw new RuntimeException(e);
         } catch (InstantiationException e) {
-          log.info("Couldn't instantiate: " + args[argIndex + 1] + ": " + e.toString());
+          System.err.println("Couldn't instantiate: " + args[argIndex + 1] + ": " + e.toString());
           throw new RuntimeException(e);
         } catch (IllegalAccessException e) {
-          log.info("Illegal access" + e);
+          System.err.println("Illegal access" + e);
           throw new RuntimeException(e);
         }
         argIndex += 2;
@@ -1276,7 +1273,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
         try {
           escaper = ReflectionLoading.loadByReflection(args[argIndex + 1]);
         } catch (Exception e) {
-          log.info("Couldn't instantiate escaper " + args[argIndex + 1] + ": " + e);
+          System.err.println("Couldn't instantiate escaper " + args[argIndex + 1] + ": " + e);
         }
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-tokenizerOptions")) {
@@ -1314,7 +1311,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
       } else if (args[argIndex].equalsIgnoreCase("-saveToSerializedFile")) {
         saveToSerializedFile = true;
         if (ArgUtils.numSubArgs(args, argIndex) < 1) {
-          log.info("Missing path: -saveToSerialized filename");
+          System.err.println("Missing path: -saveToSerialized filename");
         } else {
           serializedOutputFileOrUrl = args[argIndex + 1];
         }
@@ -1355,7 +1352,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
         if (treebankPath == null) {
           throw new RuntimeException("No tune treebank path specified...");
         } else {
-          log.info("No tune treebank path specified.  Using train path: \"" + treebankPath + '\"');
+          System.err.println("No tune treebank path specified.  Using train path: \"" + treebankPath + '\"');
           tunePath = treebankPath;
         }
       }
@@ -1406,7 +1403,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
         argIndex++;
       }
       if (serializedInputFileOrUrl == null) {
-        log.info("No grammar specified, exiting...");
+        System.err.println("No grammar specified, exiting...");
         return;
       }
       String[] extraArgs = new String[optionArgs.size()];
@@ -1415,7 +1412,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
         lp = loadModel(serializedInputFileOrUrl, op, extraArgs);
         op = lp.op;
       } catch (IllegalArgumentException e) {
-        log.info("Error loading parser, exiting...");
+        System.err.println("Error loading parser, exiting...");
         throw e;
       }
     }
@@ -1440,7 +1437,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
           tokenizerFactory.setOptions(tokenizerOptions);
         }
       } catch (IllegalAccessException | InvocationTargetException | ClassNotFoundException | NoSuchMethodException e) {
-        log.info("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
         throw new RuntimeException(e);
       }
     }
@@ -1460,7 +1457,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
         if (treebankPath == null) {
           throw new RuntimeException("No test treebank path specified...");
         } else {
-          log.info("No test treebank path specified.  Using train path: \"" + treebankPath + '\"');
+          System.err.println("No test treebank path specified.  Using train path: \"" + treebankPath + '\"');
           testPath = treebankPath;
         }
       }
@@ -1480,7 +1477,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
       if (textOutputFileOrUrl != null) {
         lp.saveParserToTextFile(textOutputFileOrUrl);
       } else {
-        log.info("Usage: must specify a text grammar output path");
+        System.err.println("Usage: must specify a text grammar output path");
       }
     }
     if (saveToSerializedFile) {
@@ -1488,7 +1485,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
         lp.saveParserToSerialized(serializedOutputFileOrUrl);
       } else if (textOutputFileOrUrl == null && testTreebank == null) {
         // no saving/parsing request has been specified
-        log.info("usage: " + "java edu.stanford.nlp.parser.lexparser.LexicalizedParser " + "-train trainFilesPath [fileRange] -saveToSerializedFile serializedParserFilename");
+        System.err.println("usage: " + "java edu.stanford.nlp.parser.lexparser.LexicalizedParser " + "-train trainFilesPath [fileRange] -saveToSerializedFile serializedParserFilename");
       }
     }
 
@@ -1496,19 +1493,19 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
       // Tell the user a little or a lot about what we have made
       // get lexicon size separately as it may have its own prints in it....
       String lexNumRules = lp.lex != null ? Integer.toString(lp.lex.numRules()): "";
-      log.info("Grammar\tStates\tTags\tWords\tUnaryR\tBinaryR\tTaggings");
-      log.info("Grammar\t" +
+      System.err.println("Grammar\tStates\tTags\tWords\tUnaryR\tBinaryR\tTaggings");
+      System.err.println("Grammar\t" +
           lp.stateIndex.size() + '\t' +
           lp.tagIndex.size() + '\t' +
           lp.wordIndex.size() + '\t' +
           (lp.ug != null ? lp.ug.numRules(): "") + '\t' +
           (lp.bg != null ? lp.bg.numRules(): "") + '\t' +
           lexNumRules);
-      log.info("ParserPack is " + op.tlpParams.getClass().getName());
-      log.info("Lexicon is " + lp.lex.getClass().getName());
+      System.err.println("ParserPack is " + op.tlpParams.getClass().getName());
+      System.err.println("Lexicon is " + lp.lex.getClass().getName());
       if (op.testOptions.verbose) {
-        log.info("Tags are: " + lp.tagIndex);
-        // log.info("States are: " + lp.pd.stateIndex); // This is too verbose. It was already printed out by the below printOptions command if the flag -printStates is given (at training time)!
+        System.err.println("Tags are: " + lp.tagIndex);
+        // System.err.println("States are: " + lp.pd.stateIndex); // This is too verbose. It was already printed out by the below printOptions command if the flag -printStates is given (at training time)!
       }
       printOptions(false, op);
     }

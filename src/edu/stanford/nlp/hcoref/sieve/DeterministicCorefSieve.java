@@ -24,8 +24,7 @@
 //    USA
 //
 
-package edu.stanford.nlp.hcoref.sieve; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.hcoref.sieve;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,10 +57,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
  *  @author heeyoung
  *  @author mihais
  */
-public abstract class DeterministicCorefSieve extends Sieve  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(DeterministicCorefSieve.class);
+public abstract class DeterministicCorefSieve extends Sieve {
 
   public final DcorefSieveOptions flags;
 
@@ -98,7 +94,7 @@ public abstract class DeterministicCorefSieve extends Sieve  {
               l.get(i).sameSentence(l.get(j)) && j > i &&
               l.get(i).spanToString().length() > l.get(j).spanToString().length()) {
             l.set(j, l.set(i, l.get(j)));
-//              log.info("antecedent ordering changed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+//              System.err.println("antecedent ordering changed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
           }
         }
       }
@@ -485,7 +481,7 @@ public abstract class DeterministicCorefSieve extends Sieve  {
       if (mention2.headWord == ant.headWord && mention2.insideIn(ant)) {
         if(!document.isCoref(mention2, ant)) {
           // TODO: exclude conjunction
-          log.info("error in chinese head match: "+mention2.spanToString()+"\t"+ant.spanToString());
+          System.err.println("error in chinese head match: "+mention2.spanToString()+"\t"+ant.spanToString());
         }
         return true;
       }

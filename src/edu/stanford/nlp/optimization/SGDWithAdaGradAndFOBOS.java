@@ -1,5 +1,4 @@
-package edu.stanford.nlp.optimization; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.optimization;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.util.Timing;
@@ -16,10 +15,7 @@ import java.util.*;
  *
  * @author Mengqiu Wang
  */
-public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer<T>, HasEvaluators  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SGDWithAdaGradAndFOBOS.class);
+public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer<T>, HasEvaluators {
 
   protected double[] x;
   protected double initRate;  // Initial stochastic iteration count
@@ -290,13 +286,13 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
       func.sampleMethod = AbstractStochasticCachingDiffFunction.SamplingMethod.Shuffled;
       totalSamples = func.dataDimension();
       if (bSize > totalSamples) {
-        log.info("WARNING: Total number of samples=" + totalSamples +
+        System.err.println("WARNING: Total number of samples=" + totalSamples +
                 " is smaller than requested batch size=" + bSize + "!!!");
         bSize = totalSamples;
         sayln("Using batch size=" + bSize);
       }
       if (bSize <= 0) {
-        log.info("WARNING: Requested batch size=" + bSize + " <= 0 !!!");
+        System.err.println("WARNING: Requested batch size=" + bSize + " <= 0 !!!");
         bSize = totalSamples;
         sayln("Using batch size=" + bSize);
       }
@@ -388,7 +384,7 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
         iters++;
 
         //Get the next gradients
-        // log.info("getting gradients");
+        // System.err.println("getting gradients");
         double[] gradients = null;
         if (f instanceof AbstractStochasticCachingDiffUpdateFunction) {
           AbstractStochasticCachingDiffUpdateFunction func = (AbstractStochasticCachingDiffUpdateFunction) f;
@@ -409,7 +405,7 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
           gradients = func.derivativeAt(x);
         }
 
-        // log.info("applying regularization");
+        // System.err.println("applying regularization");
         if (prior == Prior.NONE || prior == Prior.GAUSSIAN) { // Gaussian prior is also handled in objective
           for (int index = 0; index < x.length; index++) {
             gValue = gradients[index];
@@ -466,9 +462,9 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
             }
           }
         } else {
-          // log.info("featureGroup.length: " + featureGrouping.length);
+          // System.err.println("featureGroup.length: " + featureGrouping.length);
           for (int[] gFeatureIndices : featureGrouping) {
-            // if (gIndex % 100 == 0) log.info(gIndex+" ");
+            // if (gIndex % 100 == 0) System.err.print(gIndex+" ");
             double testUpdateSquaredSum = 0;
             double testUpdateAbsSum = 0;
             double M = gFeatureIndices.length;
@@ -539,7 +535,7 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
               }
             }
           }
-          // log.info();
+          // System.err.println();
         }
 
         // update gradient and lastX
@@ -555,7 +551,7 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
       try {
         ArrayMath.assertFinite(x,"x");
       } catch (ArrayMath.InvalidElementException e) {
-        log.info(e.toString());
+        System.err.println(e.toString());
         for(int i=0;i<x.length;i++){ x[i]=Double.NaN; }
         break;
       }
@@ -594,13 +590,13 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
 
   protected void sayln(String s) {
     if (!quiet) {
-      log.info(s);
+      System.err.println(s);
     }
   }
 
   protected void say(String s) {
     if (!quiet) {
-      log.info(s);
+      System.err.print(s);
     }
   }
 

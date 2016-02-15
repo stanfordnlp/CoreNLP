@@ -49,10 +49,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
-public class CorefPrinter  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CorefPrinter.class);
+public class CorefPrinter {
 
   public static final DecimalFormat df = new DecimalFormat("#.####");
   
@@ -519,7 +516,7 @@ public class CorefPrinter  {
     System.out.println("LIST -------------------------------------------");
     Counters.printCounterSortedByKeys(list);
     
-    log.info();
+    System.err.println();
 
   }
   

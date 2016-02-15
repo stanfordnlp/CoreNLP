@@ -1,13 +1,14 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
 import edu.stanford.nlp.ie.regexp.RegexNERSequenceClassifier;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 
@@ -19,10 +20,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
  *
  * @author jtibs
  */
-public class RegexNERAnnotator implements Annotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(RegexNERAnnotator.class);
+public class RegexNERAnnotator implements Annotator {
 
   private final RegexNERSequenceClassifier classifier;
   private final boolean verbose;
@@ -65,7 +63,7 @@ public class RegexNERAnnotator implements Annotator  {
   @Override
   public void annotate(Annotation annotation) {
     if (verbose) {
-      log.info("Adding RegexNER annotations ... ");
+      System.err.print("Adding RegexNER annotations ... ");
     }
 
     if (! annotation.containsKey(CoreAnnotations.SentencesAnnotation.class))
@@ -105,7 +103,7 @@ public class RegexNERAnnotator implements Annotator  {
     }
 
     if (verbose)
-      log.info("done.");
+      System.err.println("done.");
   }
 
   private static int findEndOfAnswerAnnotation(List<CoreLabel> tokens, int start) {
@@ -132,14 +130,7 @@ public class RegexNERAnnotator implements Annotator  {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TextAnnotation.class,
-        CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-        CoreAnnotations.CharacterOffsetEndAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class,
-        CoreAnnotations.PartOfSpeechAnnotation.class
-    )));
+    return StanfordCoreNLP.TOKENIZE_SSPLIT_POS;
   }
 
   @Override

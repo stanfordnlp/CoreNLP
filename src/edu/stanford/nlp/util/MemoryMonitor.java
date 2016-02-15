@@ -1,5 +1,4 @@
-package edu.stanford.nlp.util; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,10 +10,7 @@ import java.util.ArrayList;
  * Utilities for monitoring memory use, including peak memory use.
  *
  */
-public class MemoryMonitor  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MemoryMonitor.class);
+public class MemoryMonitor {
 
   public static final int MAX_SWAPS = 50;
 
@@ -137,7 +133,7 @@ public class MemoryMonitor  {
       freeMem = Integer.parseInt(l.get(1));
       usedSwap = Integer.parseInt(l.get(2));
     } catch (Exception e) {
-      log.info(e);
+      System.err.println(e);
     } finally {
       if (p != null) {
         p.destroy();

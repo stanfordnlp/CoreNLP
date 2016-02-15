@@ -1,11 +1,13 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import java.util.*;
 
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.ArraySet;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
@@ -14,10 +16,7 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
  *
  * @author Anna Rafferty
  */
-public class POSTaggerAnnotator implements Annotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(POSTaggerAnnotator.class);
+public class POSTaggerAnnotator implements Annotator {
 
   private final MaxentTagger pos;
 
@@ -100,7 +99,7 @@ public class POSTaggerAnnotator implements Annotator  {
   @Override
   public void annotate(Annotation annotation) {
     // turn the annotation into a sentence
-    if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
+    if (annotation.has(CoreAnnotations.SentencesAnnotation.class)) {
       if (nThreads == 1) {
         for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
           doOneSentence(sentence);
@@ -142,7 +141,7 @@ public class POSTaggerAnnotator implements Annotator  {
       try {
         tagged = pos.tagSentence(tokens, this.reuseTags);
       } catch (OutOfMemoryError e) {
-        log.info("WARNING: Tagging of sentence ran out of memory. " +
+        System.err.println("WARNING: Tagging of sentence ran out of memory. " +
                            "Will ignore and continue: " +
                            SentenceUtils.listToString(tokens));
       }
@@ -163,10 +162,7 @@ public class POSTaggerAnnotator implements Annotator  {
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
     return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TextAnnotation.class,
         CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-        CoreAnnotations.CharacterOffsetEndAnnotation.class,
         CoreAnnotations.SentencesAnnotation.class
     )));
   }

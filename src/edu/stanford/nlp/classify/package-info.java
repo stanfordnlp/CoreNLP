@@ -67,7 +67,7 @@
  * (TODO) Saving Classifier out to file (from <code>LearningExperiment</code>)
  * <pre>
  * private static void saveClassifierToFile(LinearClassifier classifier, String serializePath) {
- * log.info("Serializing classifier to " + serializePath + "...");
+ * System.err.print("Serializing classifier to " + serializePath + "...");
  * try {
  * ObjectOutputStream oos;
  * if (serializePath.endsWith(".gz")) {
@@ -88,5 +88,4 @@
  * @author Dan Klein
  * @author Eric Yeh
  */
-package edu.stanford.nlp.classify; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.classify;

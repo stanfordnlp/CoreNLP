@@ -1,5 +1,4 @@
-package edu.stanford.nlp.process; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.process;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -23,10 +22,7 @@ import edu.stanford.nlp.util.Timing;
  * @author Christopher Manning
  * @author Dan Klein
  */
-public class WordShapeClassifier  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(WordShapeClassifier.class);
+public class WordShapeClassifier {
 
   public static final int NOWORDSHAPE = -1;
   public static final int WORDSHAPEDAN1 = 0;
@@ -283,7 +279,7 @@ public class WordShapeClassifier  {
         sb.append('k');
       }
     }
-    // log.info("wordShapeDan2: " + s + " became " + sb);
+    // System.err.println("wordShapeDan2: " + s + " became " + sb);
     return sb.toString();
   }
 
@@ -962,7 +958,7 @@ public class WordShapeClassifier  {
         classifierToUse = lookupShaper(args[1]);
         i += 2;
       } else {
-        log.info("Unknown flag: " + args[0]);
+        System.err.println("Unknown flag: " + args[0]);
         i++;
       }
     }

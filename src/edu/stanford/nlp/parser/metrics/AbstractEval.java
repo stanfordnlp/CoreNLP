@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.metrics; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.metrics;
 
 import java.util.*;
 import java.io.PrintWriter;
@@ -17,10 +16,7 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author Dan Klein
  */
-public abstract class AbstractEval implements Eval  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AbstractEval.class);
+public abstract class AbstractEval implements Eval {
 
   private static final boolean DEBUG = false;
 
@@ -103,14 +99,14 @@ public abstract class AbstractEval implements Eval  {
       }
       if (DEBUG) {
         if (s2.contains(o1)) {
-          log.info("Eval Found: "+o1);
+          System.err.println("Eval Found: "+o1);
         } else {
-          log.info("Eval Failed to find: "+o1);
+          System.err.println("Eval Failed to find: "+o1);
         }
       }
       n += 1.0;
     }
-    if (DEBUG) log.info("Matched " + p + " of " + n);
+    if (DEBUG) System.err.println("Matched " + p + " of " + n);
     return (n > 0.0 ? p / n : 0.0);
   }
 
@@ -130,9 +126,9 @@ public abstract class AbstractEval implements Eval  {
 
   public void evaluate(Tree guess, Tree gold, PrintWriter pw, double weight) {
     if (DEBUG) {
-      log.info("Evaluating gold tree:");
+      System.err.println("Evaluating gold tree:");
       gold.pennPrint(System.err);
-      log.info("and guess tree");
+      System.err.println("and guess tree");
       guess.pennPrint(System.err);
     }
     Set<?> dep1 = makeObjects(guess);

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees.international.pennchinese; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.international.pennchinese;
 
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.process.AbstractTokenizer;
@@ -15,10 +14,7 @@ import java.io.*;
  * @author Roger Levy
  * @version 01/17/2003
  */
-public class CHTBTokenizer extends AbstractTokenizer<String>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CHTBTokenizer.class);
+public class CHTBTokenizer extends AbstractTokenizer<String> {
 
   private final CHTBLexer lexer;
 
@@ -48,12 +44,12 @@ public class CHTBTokenizer extends AbstractTokenizer<String>  {
     try {
       int a;
       while ((a = lexer.yylex()) == CHTBLexer.IGNORE) {
-        // log.info("#ignored: " + lexer.match());
+        // System.err.println("#ignored: " + lexer.match());
       }
       if (a == CHTBLexer.YYEOF) {
         return null;
       } else {
-        //log.info("#matched: " + lexer.match());
+        //System.err.println("#matched: " + lexer.match());
         return lexer.match();
       }
     } catch (IOException ioe) {
