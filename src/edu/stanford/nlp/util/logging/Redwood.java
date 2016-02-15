@@ -1,5 +1,4 @@
-
-package edu.stanford.nlp.util.logging; 
+package edu.stanford.nlp.util.logging;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -19,7 +18,7 @@ import java.util.function.Supplier;
 import edu.stanford.nlp.util.*;
 
 /**
- * A hierarchical channel based logger. Log messages are arranged hierarchically by depth
+ * A hierarchical channel-based logger. Log messages are arranged hierarchically by depth
  * (e.g. main-&gt;tagging-&gt;sentence 2) using the startTrack() and endTrack() methods.
  * Furthermore, messages can be flagged with a number of channels, which allow filtering by channel.
  * Log levels are implemented as channels (ERROR, WARNING, etc).
@@ -42,7 +41,7 @@ import edu.stanford.nlp.util.*;
 public class Redwood  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Redwood.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(Redwood.class);
 
   /*
       ---------------------------------------------------------
@@ -90,7 +89,7 @@ public class Redwood  {
   /**
    * Queue of tasks to be run in various threads
    */
-  private static final Map<Long,Queue<Runnable>> threadedLogQueue = new HashMap<>();  // Don't replace with Generics.newHashMap()! Classloader goes haywire
+  private static final Map<Long,Queue<Runnable>> threadedLogQueue = Generics.newHashMap();
   /**
    * Thread id which currently has control of the Redwood
    */
@@ -605,6 +604,7 @@ public class Redwood  {
     RedwoodConfiguration config = RedwoodConfiguration.minimal();
     try {
       MetaClass.create("org.slf4j.LoggerFactory").createInstance();
+      System.err.println("FOUND SLF4J");
       config = RedwoodConfiguration.slf4j();
     } catch (Exception ignored) { }
     config.apply();
@@ -775,11 +775,11 @@ public class Redwood  {
       Iterator<RecordHandlerTree> iter = children();
       while(iter.hasNext()){       //for each child...
         RecordHandlerTree child = iter.next();
-        //(auxilliary records)
+        // (auxiliary records)
         for(Record r : toPassOn){  //for each record...
           child.process(r, MessageType.SIMPLE, newDepth, timestamp);
         }
-        //(special record)
+        // (special record)
         switch(type){
           case START_TRACK:
           case END_TRACK:
@@ -1112,9 +1112,10 @@ public class Redwood  {
     public static Iterable<Runnable> thread(Iterable<Runnable> runnables){ return thread("", runnables); }
 
     /**
-     * Thread a collection of runnables, and run them via a java Executor.
+     * Thread a collection of Runnables, and run them via a java Executor.
      * This is a utility function; the Redwood-specific changes happen in the
      * thread() method.
+     *
      * @param title A title for the group of threads being run
      * @param runnables The Runnables representing the tasks being run, without the Redwood overhead --
      *                  particularly, these should NOT have been passed to thread() yet.
@@ -1502,5 +1503,6 @@ public class Redwood  {
       throw new RuntimeInterruptedException(e);
     }
 		throw new IllegalArgumentException();
-  }
+  } // end main()
+
 }

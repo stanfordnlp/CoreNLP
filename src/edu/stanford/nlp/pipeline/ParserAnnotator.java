@@ -312,15 +312,9 @@ public class ParserAnnotator extends SentenceAnnotator  {
       // Use bestParse if kBest is set to 1.
       if (this.kBest == 1) {
         Tree t = pq.getBestParse();
-        if (t == null) {
-          System.err.println("WARNING: Parsing of sentence failed.  " +
-              "Will ignore and continue: " +
-              SentenceUtils.listToString(words));
-        } else {
-          double score = pq.getBestScore();
-          t.setScore(score % -10000.0);
-          trees.add(t);
-        }
+        double score = pq.getBestScore();
+        t.setScore(score % -10000.0);
+        trees.add(t);
       } else {
         List<ScoredObject<Tree>> scoredObjects = pq.getKBestParses(this.kBest);
         if (scoredObjects == null || scoredObjects.size() < 1) {
