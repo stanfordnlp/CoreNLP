@@ -1276,13 +1276,13 @@ public class Redwood  {
       PrettyLogger.log(this, description, obj);
     }
 
-    public void info(Object...objs){ log(Util.revConcat(objs)); }
-    public void warn(Object...objs){ log(Util.revConcat(objs, WARN)); }
-    public void warning(Object...objs){ log(Util.revConcat(objs, WARN)); }
-    public void debug(Object...objs){ log(Util.revConcat(objs, DBG)); }
-    public void err(Object...objs){ log(Util.revConcat(objs, ERR, FORCE)); }
-    public void error(Object...objs){ log(Util.revConcat(objs, ERR, FORCE)); }
-    public void fatal(Object...objs){ log(Util.revConcat(objs, ERR, FORCE)); System.exit(1); }
+    public void info(Object... objs) { log(Util.revConcat(objs)); }
+    public void warn(Object... objs) { log(Util.revConcat(objs, WARN)); }
+    public void warning(Object... objs) { log(Util.revConcat(objs, WARN)); }
+    public void debug(Object... objs) { log(Util.revConcat(objs, DBG)); }
+    public void err(Object... objs) { log(Util.revConcat(objs, ERR, FORCE)); }
+    public void error(Object... objs) { log(Util.revConcat(objs, ERR, FORCE)); }
+    public void fatal(Object... objs) { log(Util.revConcat(objs, ERR, FORCE)); System.exit(1); }
   }
 
    /**
