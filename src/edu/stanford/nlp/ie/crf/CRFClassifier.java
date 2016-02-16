@@ -24,7 +24,7 @@
 //    Support/Questions: java-nlp-user@lists.stanford.edu
 //    Licensing: java-nlp-support@lists.stanford.edu
 
-package edu.stanford.nlp.ie.crf; 
+package edu.stanford.nlp.ie.crf;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.*;
@@ -2136,7 +2136,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   protected static List<List<CRFDatum<Collection<String>, String>>> loadProcessedData(String filename) {
-    log.info("Loading processed data from serialized file...");
     ObjectInputStream ois = null;
     List<List<CRFDatum<Collection<String>, String>>> result = Collections.emptyList();
     try {
@@ -2147,7 +2146,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     } finally {
       IOUtils.closeIgnoringExceptions(ois);
     }
-    log.info("done. Got " + result.size() + " datums.");
+    log.info("Loading processed data from serialized file ... done. Got " + result.size() + " datums.");
     return result;
   }
 

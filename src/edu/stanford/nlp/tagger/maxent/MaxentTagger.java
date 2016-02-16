@@ -26,7 +26,7 @@
 // http://www-nlp.stanford.edu/software/tagger.shtml
 
 
-package edu.stanford.nlp.tagger.maxent; 
+package edu.stanford.nlp.tagger.maxent;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.IOUtils;
@@ -794,8 +794,8 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   protected void readModelAndInit(Properties config, DataInputStream rf, boolean printLoading) {
     try {
       Timing t = new Timing();
+      String source = null;
       if (printLoading) {
-        String source = null;
         if (config != null) {
           // TODO: "model"
           source = config.getProperty("model");
@@ -803,7 +803,6 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
         if (source == null) {
           source = "data stream";
         }
-        t.doing("Reading POS tagger model from " + source);
       }
       TaggerConfig taggerConfig = TaggerConfig.readConfig(rf);
       if (config != null) {
@@ -818,7 +817,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       dict.read(rf);
 
       if (VERBOSE) {
-        log.info(" dictionary read ");
+        log.info("Tagger dictionary read.");
       }
       tags.read(rf);
       readExtractors(rf);
@@ -861,14 +860,16 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       }
       if (VERBOSE) {
         for (int k = 0; k < numFA.length; k++) {
-          log.info(" Number of features of kind " + k + ' ' + numFA[k]);
+          log.info("Number of features of kind " + k + ' ' + numFA[k]);
         }
       }
       prob = new LambdaSolveTagger(rf);
       if (VERBOSE) {
-        log.info(" prob read ");
+        log.info("prob read ");
       }
-      if (printLoading) t.done();
+      if (printLoading) {
+        t.done(log, "Reading POS tagger model from " + source);
+      }
     } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeIOException("Error while loading a tagger model (probably missing model file)", e);
     }

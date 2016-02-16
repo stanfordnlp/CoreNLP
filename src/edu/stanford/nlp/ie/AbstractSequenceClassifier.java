@@ -25,7 +25,7 @@
 //    Licensing: java-nlp-support@lists.stanford.edu
 //    http://nlp.stanford.edu/downloads/crf-classifier.shtml
 
-package edu.stanford.nlp.ie; 
+package edu.stanford.nlp.ie;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.fsm.DFSA;
@@ -1486,10 +1486,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    */
   public void loadClassifier(String loadPath, Properties props) throws ClassCastException, IOException, ClassNotFoundException {
     InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(loadPath);
-    Timing.startDoing("Loading classifier from " + loadPath);
+    Timing t = new Timing();
     loadClassifier(is, props);
     is.close();
-    Timing.endDoing();
+    t.done(log, "Loading classifier from " + loadPath);
   }
 
   public void loadClassifierNoExceptions(String loadPath) {
@@ -1530,7 +1530,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    */
   public void loadClassifier(File file, Properties props) throws ClassCastException, IOException,
       ClassNotFoundException {
-    Timing.startDoing("Loading classifier from " + file.getAbsolutePath());
+    Timing t = new Timing();
     BufferedInputStream bis;
     if (file.getName().endsWith(".gz")) {
       bis = new BufferedInputStream(new GZIPInputStream(new FileInputStream(file)));
@@ -1539,7 +1539,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     }
     loadClassifier(bis, props);
     bis.close();
-    Timing.endDoing();
+    t.done(log, "Loading classifier from " + file.getAbsolutePath());
   }
 
   public void loadClassifierNoExceptions(File file) {
@@ -1571,7 +1571,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    */
   // todo [john bauer 2015]: This method may not be necessary.  Perhaps use the IOUtils equivalents
   public void loadJarClassifier(String modelName, Properties props) {
-    Timing.startDoing("Loading JAR-internal classifier " + modelName);
+    Timing t = new Timing();
     try {
       InputStream is = getClass().getResourceAsStream(modelName);
       if (modelName.endsWith(".gz")) {
@@ -1580,7 +1580,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       is = new BufferedInputStream(is);
       loadClassifier(is, props);
       is.close();
-      Timing.endDoing();
+      t.done(log, "Loading CLASSPATH classifier " + modelName);
     } catch (Exception e) {
       String msg = "Error loading classifier from jar file (most likely you are not running this code from a jar file or the named classifier is not stored in the jar file)";
       throw new RuntimeException(msg, e);
