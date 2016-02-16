@@ -167,7 +167,7 @@ import java.util.Set;
 public class TimeAnnotator implements Annotator  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TimeAnnotator.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(TimeAnnotator.class);
 
   private final TimeExpressionExtractorImpl timexExtractor;
   private final boolean quiet;
@@ -197,7 +197,7 @@ public class TimeAnnotator implements Annotator  {
     if (docDate == null) {
       Calendar cal = annotation.get(CoreAnnotations.CalendarAnnotation.class);
       if (cal == null) {
-        if (!quiet) { Redwood.log(Redwood.WARN, "No document date specified"); }
+        if ( ! quiet) { log.warn("No document date specified"); }
       } else {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
         docDate = dateFormat.format(cal.getTime());
