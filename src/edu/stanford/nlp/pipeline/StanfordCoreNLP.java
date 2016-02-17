@@ -481,11 +481,12 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     // if the pool already exists reuse!
     if (pool == null) {
       pool = new AnnotatorPool();
-
-      for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, AnnotatorFactory>> entry : getNamedAnnotators().entrySet()) {
-        pool.register(entry.getKey(), entry.getValue().apply(inputProps, annotatorImplementation));
-      }
     }
+
+    for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, AnnotatorFactory>> entry : getNamedAnnotators().entrySet()) {
+      pool.register(entry.getKey(), entry.getValue().apply(inputProps, annotatorImplementation));
+    }
+
 
     // add annotators loaded via reflection from class names specified
     // in the properties
