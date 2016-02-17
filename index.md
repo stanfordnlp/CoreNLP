@@ -63,7 +63,6 @@ and not-so-well-edited English.
 Stanford NLP models for  **Arabic** are
 also usable inside CoreNLP.
 
-<div style="text-align:center; margin-top: 3ex; margin-bottom:3ex;">
 | Annotator | ar | zh | en | fr | de | es |
 | --------------- |:---:|:---:|:---:|:---:|:---:|:---:|
 | Tokenize / Segment | ✔ | ✔  | ✔ | ✔  |     | ✔ |
@@ -77,7 +76,6 @@ also usable inside CoreNLP.
 | Mention Detection |    | ✔  | ✔ |  |  |     |
 | Coreference |    | ✔  | ✔ |  |  |     |
 | Open IE |    |   | ✔ |  |  |     |
-</div>
 
 ## Programming languages and operating systems
 
