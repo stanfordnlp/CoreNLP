@@ -1,5 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.classify.Classifier;
+import edu.stanford.nlp.classify.LinearClassifier;
 import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.hcoref.data.CorefChain;
 import edu.stanford.nlp.ie.KBPRelationExtractor;
@@ -63,21 +65,30 @@ public class KBPAnnotator implements Annotator {
     // Parse standard properties
     this.threads = Integer.parseInt(props.getProperty("threads", "1"));
 
+    // Load the extractor
     try {
-      // Load the extractor
-      this.extractor = IOUtils.readObjectFromURLOrClasspathOrFileSystem(
+      Object object = IOUtils.readObjectFromURLOrClasspathOrFileSystem(
           props.getProperty("kbp.model", DefaultPaths.DEFAULT_KBP_CLASSIFIER));
-      // Load TokensRegexNER
-      this.casedNER = new TokensRegexNERAnnotator(
-          props.getProperty("kbp.regexner.cased", DefaultPaths.DEFAULT_KBP_REGEXNER_CASED),
-          true);
-      this.caselessNER = new TokensRegexNERAnnotator(
-          props.getProperty("kbp.regexner.caseless", DefaultPaths.DEFAULT_KBP_REGEXNER_CASELESS),
-          false,
-          "^(NN|JJ).*");
+      if (object instanceof LinearClassifier) {
+        //noinspection unchecked
+        this.extractor = new KBPRelationExtractor((Classifier<String, String>) object);
+      } else if (object instanceof KBPRelationExtractor) {
+        this.extractor = (KBPRelationExtractor) object;
+      } else {
+        throw new ClassCastException(object.getClass() + " cannot be cast into a " + KBPRelationExtractor.class);
+      }
     } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeIOException(e);
     }
+
+    // Load TokensRegexNER
+    this.casedNER = new TokensRegexNERAnnotator(
+        props.getProperty("kbp.regexner.cased", DefaultPaths.DEFAULT_KBP_REGEXNER_CASED),
+        true);
+    this.caselessNER = new TokensRegexNERAnnotator(
+        props.getProperty("kbp.regexner.caseless", DefaultPaths.DEFAULT_KBP_REGEXNER_CASELESS),
+        false,
+        "^(NN|JJ).*");
   }
 
 
