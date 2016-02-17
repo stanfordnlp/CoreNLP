@@ -33,7 +33,8 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  * A relation extractor to work with Victor's new KBP data.
  */
 @SuppressWarnings("FieldCanBeLocal")
-public class KBPRelationExtractor {
+public class KBPRelationExtractor implements Serializable {
+  private static final long serialVersionUID = 1L;
 
   @ArgumentParser.Option(name="train", gloss="The dataset to train on")
   public static File TRAIN_FILE = new File("train.conll");
@@ -1019,6 +1020,30 @@ public class KBPRelationExtractor {
 
     // Return the classifier
     return classifier;
+  }
+
+
+  /**
+   * The implementing classifier of this extractor.
+   */
+  private final Classifier<String, String> classifier;
+
+  /**
+   * Create a new KBP relation extractor, from the given implementing classifier.
+   * @param classifier The implementing classifier.
+   */
+  public KBPRelationExtractor(Classifier<String, String> classifier) {
+    this.classifier = classifier;
+  }
+
+  /**
+   * Classify the given featurizer input into a relation, or {@link KBPRelationExtractor#NO_RELATION}.
+   * @param input The input to classify
+   * @return The relation the input was classified into.
+   */
+  public String classify(FeaturizerInput input) {
+    RVFDatum<String, String> datum = new RVFDatum<>(features(input));
+    return classifier.classOf(datum);
   }
 
 

@@ -85,6 +85,7 @@ public interface Annotator {
   String STANFORD_OPENIE = "openie";
   String STANFORD_QUOTE = "quote";
   String STANFORD_UD_FEATURES = "udfeats";
+  String STANFORD_KBP = "kbp";
 
 
   /**
@@ -117,6 +118,7 @@ public interface Annotator {
     put(STANFORD_OPENIE,                   new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_LEMMA, STANFORD_DEPENDENCIES, STANFORD_NATLOG, STANFORD_MENTION, STANFORD_COREF)));
     put(STANFORD_QUOTE,                    new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT)));
     put(STANFORD_UD_FEATURES,              new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_DEPENDENCIES)));
+    put(STANFORD_KBP,                      new LinkedHashSet<>(Arrays.asList(STANFORD_TOKENIZE, STANFORD_SSPLIT, STANFORD_POS, STANFORD_DEPENDENCIES, STANFORD_NER, STANFORD_MENTION, STANFORD_COREF)));
   }};
 
 
