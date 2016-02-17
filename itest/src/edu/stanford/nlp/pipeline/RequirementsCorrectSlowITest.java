@@ -86,14 +86,19 @@ public class RequirementsCorrectSlowITest {
     testAnnotatorSequence(Arrays.asList("quote"));
   }
 
-  @Test
-  public void testTrueCasePipeline() {
-    testAnnotatorSequence(Arrays.asList("tokenize","ssplit","pos","lemma","truecase"));
-  }
+//  @Test
+//  public void testTrueCasePipeline() {
+//    testAnnotatorSequence(Arrays.asList("tokenize","ssplit","pos","lemma","truecase"));
+//  }
 
   @Test
   public void testOpenIEPipeline() {
     testAnnotatorSequence(Arrays.asList("tokenize","ssplit","pos","lemma","depparse","natlog","openie"));
+  }
+
+  @Test
+  public void testMentionRegression() {
+    testAnnotatorSequence(Arrays.asList());
   }
 
 }

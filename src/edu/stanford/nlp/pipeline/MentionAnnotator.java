@@ -64,8 +64,6 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
           CoreAnnotations.PartOfSpeechAnnotation.class,
           CoreAnnotations.NamedEntityTagAnnotation.class,
           CoreAnnotations.IndexAnnotation.class,
-          CoreAnnotations.BeginIndexAnnotation.class,
-          CoreAnnotations.EndIndexAnnotation.class,
           CoreAnnotations.TextAnnotation.class,
           CoreAnnotations.ValueAnnotation.class,
           SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
@@ -130,11 +128,15 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
       case HYBRID:
         mdName = "hybrid";
         mentionAnnotatorRequirements.add(TreeCoreAnnotations.TreeAnnotation.class);
+        mentionAnnotatorRequirements.add(CoreAnnotations.BeginIndexAnnotation.class);
+        mentionAnnotatorRequirements.add(CoreAnnotations.EndIndexAnnotation.class);
         return new HybridCorefMentionFinder(headFinder, props);
 
       case RULE:
       default:
         mentionAnnotatorRequirements.add(TreeCoreAnnotations.TreeAnnotation.class);
+        mentionAnnotatorRequirements.add(CoreAnnotations.BeginIndexAnnotation.class);
+        mentionAnnotatorRequirements.add(CoreAnnotations.EndIndexAnnotation.class);
         mdName = "rule";
         return new RuleBasedCorefMentionFinder(headFinder, props);
     }
