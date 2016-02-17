@@ -65,18 +65,17 @@ also usable inside CoreNLP.
 
 | Annotator | ar | zh | en | fr | de | es |
 | --------------- |:---:|:---:|:---:|:---:|:---:|:---:|
-| Tokenize / Segment | &check; | &check;  | &check; | &check;  |     | &check; |
-| Sentence Split | &check; | &check;  | &check; | &check;  | &check; | &check; |
-| Part of Speech | &check; | &check;  | &check; | &check;  | &check; | &check; |
-| Lemma |   |   | &check; |   |   |    |
-| Named Entities |   | &check;  | &check; |    | &check; | &check; |
-| Constituency Parsing | &check; | &check;  | &check; | &check; | &check; | &check; |
-| Dependency Parsing |    | &check;  | &check; | &check; | &check; |     |
-| Sentiment Analysis |    |    | &check; |  |  |     |
-| Mention Detection |    | &check;  | &check; |  |  |     |
-| Coreference |    | &check;  | &check; |  |  |     |
-| Open IE |    |   | &check; |  |  |     |
-
+| Tokenize / Segment | ✔ | ✔  | ✔ | ✔  |     | ✔ |
+| Sentence Split | ✔ | ✔  | ✔ | ✔  | ✔ | ✔ |
+| Part of Speech | ✔ | ✔  | ✔ | ✔  | ✔ | ✔ |
+| Lemma |   |   | ✔ |   |   |    |
+| Named Entities |   | ✔  | ✔ |    | ✔ | ✔ |
+| Constituency Parsing | ✔ | ✔  | ✔ | ✔ | ✔ | ✔ |
+| Dependency Parsing |    | ✔  | ✔ | ✔ | ✔ |     |
+| Sentiment Analysis |    |    | ✔ |  |  |     |
+| Mention Detection |    | ✔  | ✔ |  |  |     |
+| Coreference |    | ✔  | ✔ |  |  |     |
+| Open IE |    |   | ✔ |  |  |     |
 
 ## Programming languages and operating systems
 
