@@ -42,6 +42,9 @@ public class KBPRelationExtractor implements Serializable {
   @ArgumentParser.Option(name="test", gloss="The dataset to test on")
   public static File TEST_FILE = new File("test.conll");
 
+  @ArgumentParser.Option(name="model", gloss="The dataset to test on")
+  public static String MODEL_FILE = "model.ser";
+
   private enum MinimizerType{ QN, SGD, HYBRID, L1 }
   @ArgumentParser.Option(name="minimizer", gloss="The minimizer to use for training the classifier")
   private static MinimizerType minimizer = MinimizerType.L1;
@@ -1086,6 +1089,9 @@ public class KBPRelationExtractor implements Serializable {
     log.info("Training classifier:");
     Classifier<String, String> classifier = trainMultinomialClassifier(dataset, FEATURE_THRESHOLD, SIGMA);
     dataset.clear();  // Free up some memory
+
+    // Save the classifier
+    IOUtils.writeObjectToFile(new KBPRelationExtractor(classifier), MODEL_FILE);
 
     // Evaluate the classifier
     forceTrack("Test accuracy");
