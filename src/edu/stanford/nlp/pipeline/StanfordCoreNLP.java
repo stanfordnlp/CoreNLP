@@ -218,14 +218,13 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     return loadProperties(name, Thread.currentThread().getContextClassLoader());
   }
 
-  private static Properties loadProperties(String name, ClassLoader loader){
+  private static Properties loadProperties(String name, ClassLoader loader) {
     if(name.endsWith (PROPS_SUFFIX)) name = name.substring(0, name.length () - PROPS_SUFFIX.length ());
     name = name.replace('.', '/');
     name += PROPS_SUFFIX;
     Properties result = null;
 
     // Returns null on lookup failures
-    logger.info("Searching for resource: " + name);
     InputStream in = loader.getResourceAsStream (name);
     try {
       if (in != null) {
@@ -237,6 +236,11 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       result = null;
     } finally {
       IOUtils.closeIgnoringExceptions(in);
+    }
+    if (result != null) {
+      logger.info("Searching for resource: " + name + " ... found.");
+    } else {
+      logger.info("Searching for resource: " + name + " ... not found.");
     }
 
     return result;
@@ -461,6 +465,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     pool.put(STANFORD_OPENIE, AnnotatorFactories::openie);
     pool.put(STANFORD_QUOTE, AnnotatorFactories::quote);
     pool.put(STANFORD_UD_FEATURES, AnnotatorFactories::udfeats);
+    pool.put(STANFORD_KBP, AnnotatorFactories::kbp);
     return pool;
   }
 

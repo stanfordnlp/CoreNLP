@@ -10,6 +10,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.logging.Redwood;
 
+/** @author Kevin Clark */
 public class SimpleLinearClassifier {
   private final Loss defaultLoss;
   private final LearningRateSchedule learningRateSchedule;
@@ -194,7 +195,7 @@ public class SimpleLinearClassifier {
 
       @Override
       public String toString() {
-        return String.format("risk");
+        return "risk";
       }
     };
   }
@@ -281,4 +282,5 @@ public class SimpleLinearClassifier {
       }
     };
   }
+
 }
