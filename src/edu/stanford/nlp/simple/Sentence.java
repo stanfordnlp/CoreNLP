@@ -847,6 +847,45 @@ public class Sentence {
         .collect(Collectors.toList());
   }
 
+
+  /**
+   * Get the KBP triples associated with this sentence.
+   * Note that this function may be slower than you would expect, as it has to
+   * convert the underlying Protobuf representation back into {@link CoreLabel}s.
+   *
+   * @param props The properties to use for the KBP annotator.
+   * @return A collection of {@link RelationTriple} objects representing the KBP triples in the sentence.
+   */
+  public Collection<RelationTriple> kbpTriples(Properties props) {
+    document.runKBP(props);
+    synchronized (impl) {
+      List<CoreLabel> tokens = asCoreLabels();
+      return impl.getKbpTripleList().stream().map(x -> ProtobufAnnotationSerializer.fromProto(x, tokens, document.docid().orElse(null))).collect(Collectors.toList());
+    }
+  }
+
+  /** @see Sentence@kbpTriples(Properties) */
+  public Collection<RelationTriple> kbpTriples() {
+    return kbpTriples(EMPTY_PROPS);
+  }
+
+  /**
+   * Get a list of KBP triples as flat (subject, relation, object, confidence) quadruples.
+   * This is substantially faster than returning {@link RelationTriple} objects, as it doesn't
+   * require converting the underlying representation into {@link CoreLabel}s; but, it also contains
+   * significantly less information about the sentence.
+   *
+   * @see Sentence@kbpTriples(Properties)
+   */
+  public Collection<Quadruple<String, String, String, Double>> kbp() {
+    document.runKBP(EMPTY_PROPS);
+    return impl.getKbpTripleList().stream()
+        .filter(proto -> proto.hasSubject() && proto.hasRelation() && proto.hasObject())
+        .map(proto -> Quadruple.makeQuadruple(proto.getSubject(), proto.getRelation(), proto.getObject(),
+            proto.hasConfidence() ? proto.getConfidence() : 1.0))
+        .collect(Collectors.toList());
+  }
+
   /**
    * Get the coreference chain for just this sentence.
    * Note that this method is actually fairly computationally expensive to call, as it constructs and prunes
@@ -998,9 +1037,20 @@ public class Sentence {
    *
    * @param triples The stream of relation triples to add to the sentence.
    */
-  protected void updateTriples(Stream<CoreNLPProtos.RelationTriple> triples) {
+  protected void updateOpenIE(Stream<CoreNLPProtos.RelationTriple> triples) {
     synchronized (this.impl) {
       triples.forEach(this.impl::addOpenieTriple);
+    }
+  }
+
+  /**
+   * Update the Open IE relation triples for this sentence.
+   *
+   * @param triples The stream of relation triples to add to the sentence.
+   */
+  protected void updateKBP(Stream<CoreNLPProtos.RelationTriple> triples) {
+    synchronized (this.impl) {
+      triples.forEach(this.impl::addKbpTriple);
     }
   }
 

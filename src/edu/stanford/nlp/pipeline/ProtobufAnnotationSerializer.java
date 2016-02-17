@@ -16,6 +16,7 @@ import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.naturalli.*;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -915,7 +916,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         .setObject(triple.objectGloss())
         .setConfidence(triple.confidence)
         .addAllSubjectTokens(triple.subject.stream().map(x -> x.index() - 1).collect(Collectors.toList()))
-        .addAllRelationTokens(triple.relation.stream().map(x -> x.index() - 1).collect(Collectors.toList()))
+        .addAllRelationTokens(
+            triple.relation.size() == 1 && triple.relation.get(0).get(IndexAnnotation.class) == null
+                ? Collections.emptyList()  // case: this is not a real relation token, but rather a placeholder relation
+                : triple.relation.stream().map(x -> x.index() - 1).collect(Collectors.toList()))
         .addAllObjectTokens(triple.object.stream().map(x -> x.index() - 1).collect(Collectors.toList()));
     Optional<SemanticGraph> treeOptional = triple.asDependencyTree();
     if (treeOptional.isPresent()) {
@@ -1588,7 +1592,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   public static RelationTriple fromProto(CoreNLPProtos.RelationTriple proto, List<CoreLabel> sentence, String docid) {
     // Get the spans for the extraction
     List<CoreLabel> subject = proto.getSubjectTokensList().stream().map(sentence::get).collect(Collectors.toList());
-    List<CoreLabel> relation = proto.getRelationTokensList().stream().map(sentence::get).collect(Collectors.toList());
+    List<CoreLabel> relation;
+    if (proto.getRelationTokensCount() == 0) {  // If we don't have a real span for the relation, make a dummy word
+      relation = Collections.singletonList(new CoreLabel(new Word(proto.getRelation())));
+    } else {
+      relation = proto.getRelationTokensList().stream().map(sentence::get).collect(Collectors.toList());
+    }
     List<CoreLabel> object = proto.getObjectTokensList().stream().map(sentence::get).collect(Collectors.toList());
 
     // Create the extraction
