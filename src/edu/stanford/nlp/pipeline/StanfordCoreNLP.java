@@ -479,17 +479,13 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    */
   public static synchronized AnnotatorPool getDefaultAnnotatorPool(final Properties inputProps, final AnnotatorImplementations annotatorImplementation) {
     // if the pool already exists reuse!
-    if (pool != null) {
-      return pool;
+    if (pool == null) {
+      pool = new AnnotatorPool();
+
+      for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, AnnotatorFactory>> entry : getNamedAnnotators().entrySet()) {
+        pool.register(entry.getKey(), entry.getValue().apply(inputProps, annotatorImplementation));
+      }
     }
-
-    pool = new AnnotatorPool();
-
-    for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, AnnotatorFactory>> entry : getNamedAnnotators().entrySet()) {
-      pool.register(entry.getKey(), entry.getValue().apply(inputProps, annotatorImplementation));
-    }
-
-    // Add more annotators here
 
     // add annotators loaded via reflection from class names specified
     // in the properties
@@ -520,9 +516,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       }
     }
 
-    //
-    // add more annotators here!
-    //
     return pool;
   }
 
