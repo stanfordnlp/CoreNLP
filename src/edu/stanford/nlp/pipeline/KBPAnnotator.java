@@ -282,11 +282,8 @@ public class KBPAnnotator implements Annotator {
       }
     }
     // (add missing mentions)
-    for (CoreMap mention : mentions) {
-      if (mentionToCanonicalMention.get(mention) == null) {
-        mentionToCanonicalMention.put(mention, mention);
-      }
-    }
+    mentions.stream().filter(mention -> mentionToCanonicalMention.get(mention) == null)
+        .forEach(mention -> mentionToCanonicalMention.put(mention, mention));
 
     // Cluster mentions by sentence
     @SuppressWarnings("unchecked") List<CoreMap>[] mentionsBySentence = new List[annotation.get(CoreAnnotations.SentencesAnnotation.class).size()];
