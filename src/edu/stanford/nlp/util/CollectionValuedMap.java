@@ -18,7 +18,7 @@ import java.util.Set;
  * used to create the Collections. Thus this class can be configured to act like
  * a "HashSetValuedMap" or a "ListValuedMap", or even a
  * "HashSetValuedIdentityHashMap". The possibilities are endless!
- *
+ * 
  * @param <K>
  *          Key type of map
  * @param <V>
@@ -29,7 +29,7 @@ import java.util.Set;
  */
 public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Serializable {
 
-  private static final long serialVersionUID = -9064664153962599076L;
+  private static final long serialVersionUID = -9064664153962599076l;
   private Map<K, Collection<V>> map;
   protected CollectionFactory<V> cf;
   private boolean treatCollectionsAsImmutable;
@@ -38,6 +38,7 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
   /**
    * Replaces current Collection mapped to key with the specified Collection.
    * Use carefully!
+   * 
    */
   public Collection<V> put(K key, Collection<V> collection) {
     return map.put(key, collection);
@@ -70,7 +71,7 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
 
   /**
    * Adds the value to the Collection mapped to by the key.
-   *
+   * 
    */
   public void add(K key, V value) {
     if (treatCollectionsAsImmutable) {
@@ -90,11 +91,11 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
       c.add(value); // modifying the old collection
     }
   }
-
+  
   /**
    * Adds the values to the Collection mapped to by the key.
    */
-
+  
   public void addAll(K key, Collection<V> values) {
     if (treatCollectionsAsImmutable) {
       Collection<V> newC = cf.newCollection();
@@ -126,7 +127,7 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
   /**
    * Adds all of the mappings in m to this CollectionValuedMap. If m is a
    * CollectionValuedMap, it will behave strangely. Use the constructor instead.
-   *
+   * 
    */
   public void addAll(Map<K, V> m) {
     if (m instanceof CollectionValuedMap<?, ?>) {
@@ -165,7 +166,7 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
 
   /**
    * Removes the mapping associated with this key from this Map.
-   *
+   * 
    * @return the Collection mapped to by this key.
    */
   public Collection<V> remove(Object key) {
@@ -185,7 +186,7 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
   /**
    * Removes the value from the Collection mapped to by this key, leaving the
    * rest of the collection intact.
-   *
+   * 
    * @param key
    *          the key to the Collection to remove the value from
    * @param value
@@ -239,7 +240,7 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
    * Each element of the Set is a Map.Entry object, where getKey() returns the
    * key of the mapping, and getValue() returns the Collection mapped to by the
    * key.
-   *
+   * 
    * @return a Set view of the mappings contained in this map.
    */
   public Set<Entry<K, Collection<V>>> entrySet() {
@@ -373,7 +374,7 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
 
   /**
    * Creates a new empty CollectionValuedMap.
-   *
+   * 
    * @param mf
    *          a MapFactory which will be used to generate the underlying Map
    * @param cf
@@ -425,7 +426,7 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
   /**
    * Creates a new empty CollectionValuedMap which uses a HashMap as the
    * underlying Map. Does not treat Collections as immutable.
-   *
+   * 
    * @param cf
    *          a CollectionFactory which will be used to generate the Collections
    *          in each mapping
@@ -436,7 +437,7 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
 
   /**
    * For testing only.
-   *
+   * 
    * @param args
    *          from command line
    */

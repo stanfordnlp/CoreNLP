@@ -288,10 +288,4 @@ public class AnnotatorImplementations  {
     return new UDFeatureAnnotator();
   }
 
-  /**
-   * Annotate for KBP relations
-   */
-  public Annotator kbp(Properties properties) {
-    return new KBPAnnotator(properties);
-  }
 }

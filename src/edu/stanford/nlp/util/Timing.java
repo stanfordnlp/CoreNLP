@@ -320,20 +320,6 @@ public class Timing  {
     log.info(msg + " done [" + toSecondsString() + " sec].");
   }
 
-  public void done(StringBuilder msg) {
-    msg.append(" done [").append(toSecondsString()).append(" sec].");
-    log.info(msg.toString());
-  }
-
-  public void done(Redwood.RedwoodChannels logger, StringBuilder msg) {
-    msg.append("... done [").append(toSecondsString()).append(" sec].");
-    logger.info(msg.toString());
-  }
-
-  public void done(Redwood.RedwoodChannels logger, String msg) {
-    logger.info(msg + " ... done [" + toSecondsString() + " sec].");
-  }
-
   /** Print the start of timing message to stderr and start the timer. */
   public static void startDoing(String str) {
     log.info(str + " ... ");

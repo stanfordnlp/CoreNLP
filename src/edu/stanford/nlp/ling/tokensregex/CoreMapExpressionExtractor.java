@@ -45,6 +45,8 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(CoreMapExpressionExtractor.class);
 
+  private static boolean verbose = false;
+
   // TODO: Remove templating of MatchedExpressions<?>  (keep for now until TimeExpression rules can be decoupled)
 
   private final Env env;
@@ -445,7 +447,9 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
       done = !extracted;
       iters++;
       if (maxIters > 0 && iters >= maxIters) {
-        log.warn("Aborting application of composite rules: Maximum iteration " + maxIters + " reached");
+        if (verbose) {
+          log.warn("Aborting application of composite rules: Maximum iteration " + maxIters + " reached");
+        }
         break;
       }
     }
@@ -573,6 +577,10 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
   public CoreMapExpressionExtractor keepTemporaryTags() {
     this.keepTags = true;
     return this;
+  }
+
+  public static void setVerbose(boolean v) {
+    verbose = v;
   }
 
 }

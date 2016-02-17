@@ -9,7 +9,8 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Extracts time expressions.
@@ -20,7 +21,7 @@ import java.util.*;
 public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels logger = Redwood.channels(TimeExpressionExtractorImpl.class);
+  private static Redwood.RedwoodChannels logger = Redwood.channels(TimeExpressionExtractorImpl.class);
 
   // Patterns for extracting time expressions
   TimeExpressionPatterns timexPatterns;
@@ -51,6 +52,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
   {
     this.options = options;
     NumberNormalizer.setVerbose(options.verbose);
+    CoreMapExpressionExtractor.setVerbose(options.verbose);
     if (options.grammarFilename == null) {
       options.grammarFilename = Options.DEFAULT_GRAMMAR_FILES;
       logger.warning("Time rules file is not specified: using default rules at " + options.grammarFilename);
@@ -69,10 +71,10 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
         docAnnotation.set(TimeExpression.TimeIndexAnnotation.class, timeIndex = new SUTime.TimeIndex());
       }
       docDate = docAnnotation.get(CoreAnnotations.DocDateAnnotation.class);
-      if (docDate == null) {
+      if(docDate == null){
         Calendar cal = docAnnotation.get(CoreAnnotations.CalendarAnnotation.class);
-        if (cal == null) {
-          logger.warning("No document date specified");
+        if(cal == null){
+          logger.log(Redwood.DBG, "WARNING: No document date specified");
         } else {
           SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
           docDate = dateFormat.format(cal.getTime());
@@ -141,14 +143,14 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
             }
           }
         } catch (Exception e) {
-          logger.warn("Failed to get attributes from " + text + ", timeIndex " + timeIndex, e);
+          logger.log(Level.WARNING, "Failed to get attributes from " + text + ", timeIndex " + timeIndex, e);
           continue;
         }
         Timex timex;
         try {
           timex = Timex.fromMap(text, timexAttributes);
         } catch (Exception e) {
-          logger.warn("Failed to process timex " + text + " with attributes " + timexAttributes, e);
+          logger.log(Level.WARNING, "Failed to process timex " + text + " with attributes " + timexAttributes, e);
           continue;
         }
         assert timex != null;  // Timex.fromMap never returns null and if it exceptions, we've already done a continue
@@ -272,7 +274,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
           te.setTemporal(grounded);
         }
       } catch (Exception ex) {
-        logger.warn("Error resolving " + temporal, ex);
+        logger.log(Level.WARNING, "Error resolving " + temporal, ex);
       }
     }
   }

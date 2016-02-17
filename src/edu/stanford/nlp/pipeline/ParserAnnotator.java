@@ -1,8 +1,7 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -19,8 +18,9 @@ import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.logging.Redwood;
 
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * This class will add parse information to an Annotation.
@@ -38,7 +38,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class ParserAnnotator extends SentenceAnnotator  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(ParserAnnotator.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(ParserAnnotator.class);
 
   private final boolean VERBOSE;
   private final boolean BUILD_GRAPHS;
@@ -312,15 +312,9 @@ public class ParserAnnotator extends SentenceAnnotator  {
       // Use bestParse if kBest is set to 1.
       if (this.kBest == 1) {
         Tree t = pq.getBestParse();
-        if (t == null) {
-          log.warn("Parsing of sentence failed.  " +
-              "Will ignore and continue: " +
-              SentenceUtils.listToString(words));
-        } else {
-          double score = pq.getBestScore();
-          t.setScore(score % -10000.0);
-          trees.add(t);
-        }
+        double score = pq.getBestScore();
+        t.setScore(score % -10000.0);
+        trees.add(t);
       } else {
         List<ScoredObject<Tree>> scoredObjects = pq.getKBestParses(this.kBest);
         if (scoredObjects == null || scoredObjects.size() < 1) {

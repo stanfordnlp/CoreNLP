@@ -181,8 +181,9 @@ public abstract class ParserGrammar implements Function<List<? extends HasWord>,
     ParserGrammar parser;
     try {
       Timing timing = new Timing();
+      logger.info("Loading parser from serialized file " + path + " ... ");
       parser = IOUtils.readObjectFromURLOrClasspathOrFileSystem(path);
-      timing.done(logger, "Loading parser from serialized file " + path);
+      timing.done();
     } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeIOException(e);
     }

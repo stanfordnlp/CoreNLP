@@ -33,17 +33,13 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  * A relation extractor to work with Victor's new KBP data.
  */
 @SuppressWarnings("FieldCanBeLocal")
-public class KBPRelationExtractor implements Serializable {
-  private static final long serialVersionUID = 1L;
+public class KBPRelationExtractor {
 
   @ArgumentParser.Option(name="train", gloss="The dataset to train on")
   public static File TRAIN_FILE = new File("train.conll");
 
   @ArgumentParser.Option(name="test", gloss="The dataset to test on")
   public static File TEST_FILE = new File("test.conll");
-
-  @ArgumentParser.Option(name="model", gloss="The dataset to test on")
-  public static String MODEL_FILE = "model.ser";
 
   private enum MinimizerType{ QN, SGD, HYBRID, L1 }
   @ArgumentParser.Option(name="minimizer", gloss="The minimizer to use for training the classifier")
@@ -1026,30 +1022,6 @@ public class KBPRelationExtractor implements Serializable {
   }
 
 
-  /**
-   * The implementing classifier of this extractor.
-   */
-  private final Classifier<String, String> classifier;
-
-  /**
-   * Create a new KBP relation extractor, from the given implementing classifier.
-   * @param classifier The implementing classifier.
-   */
-  public KBPRelationExtractor(Classifier<String, String> classifier) {
-    this.classifier = classifier;
-  }
-
-  /**
-   * Classify the given featurizer input into a relation, or {@link KBPRelationExtractor#NO_RELATION}.
-   * @param input The input to classify
-   * @return The relation the input was classified into.
-   */
-  public String classify(FeaturizerInput input) {
-    RVFDatum<String, String> datum = new RVFDatum<>(features(input));
-    return classifier.classOf(datum);
-  }
-
-
   public static void main(String[] args) throws IOException {
     RedwoodConfiguration.standard().apply();  // Disable SLF4J crap.
     ArgumentParser.fillOptions(KBPRelationExtractor.class, args);  // Fill command-line options
@@ -1089,9 +1061,6 @@ public class KBPRelationExtractor implements Serializable {
     log.info("Training classifier:");
     Classifier<String, String> classifier = trainMultinomialClassifier(dataset, FEATURE_THRESHOLD, SIGMA);
     dataset.clear();  // Free up some memory
-
-    // Save the classifier
-    IOUtils.writeObjectToFile(new KBPRelationExtractor(classifier), MODEL_FILE);
 
     // Evaluate the classifier
     forceTrack("Test accuracy");
