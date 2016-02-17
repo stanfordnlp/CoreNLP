@@ -149,6 +149,15 @@ public class TextOutputter extends AnnotationOutputter {
           }
         }
 
+        // display KBP triples
+        Collection<RelationTriple> kbpTriples = sentence.get(CoreAnnotations.KBPTriplesAnnotation.class);
+        if (kbpTriples != null && kbpTriples.size() > 0) {
+          pw.println("Extracted the following KBP triples:");
+          for (RelationTriple triple : kbpTriples) {
+            pw.println(triple.toString());
+          }
+        }
+
       }
     }
 

@@ -416,6 +416,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         builder.addOpenieTriple(toProto(triple));
       }
     }
+    if (keySet.contains(KBPTriplesAnnotation.class)) {
+      for (RelationTriple triple : getAndRegister(sentence, keysToSerialize, KBPTriplesAnnotation.class)) {
+        builder.addKbpTriple(toProto(triple));
+      }
+    }
     // Non-default annotators
     if (keySet.contains(EntityMentionsAnnotation.class)) {
       builder.setHasRelationAnnotations(true);
@@ -889,7 +894,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   }
 
   /**
-   * Return a Protobuf OpenIETriple from a RelationTriple.
+   * Return a Protobuf RelationTriple from a RelationTriple.
    */
   public static CoreNLPProtos.SentenceFragment toProto(SentenceFragment fragment) {
     return CoreNLPProtos.SentenceFragment.newBuilder()
@@ -901,10 +906,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   }
 
   /**
-   * Return a Protobuf OpenIETriple from a RelationTriple.
+   * Return a Protobuf RelationTriple from a RelationTriple.
    */
-  public static CoreNLPProtos.OpenIETriple toProto(RelationTriple triple) {
-    CoreNLPProtos.OpenIETriple.Builder builder = CoreNLPProtos.OpenIETriple.newBuilder()
+  public static CoreNLPProtos.RelationTriple toProto(RelationTriple triple) {
+    CoreNLPProtos.RelationTriple.Builder builder = CoreNLPProtos.RelationTriple.newBuilder()
         .setSubject(triple.subjectGloss())
         .setRelation(triple.relationGloss())
         .setObject(triple.objectGloss())
@@ -1057,6 +1062,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.getOpenieTripleCount() > 0) {
       List<RelationTriple> triples = proto.getOpenieTripleList().stream().map(triple -> fromProto(triple, tokens, null)).collect(Collectors.toList());
       lossySentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, triples);
+    }
+    if (proto.getKbpTripleCount() > 0) {
+      List<RelationTriple> triples = proto.getKbpTripleList().stream().map(triple -> fromProto(triple, tokens, null)).collect(Collectors.toList());
+      lossySentence.set(KBPTriplesAnnotation.class, triples);
     }
     // Add text -- missing by default as it's populated from the Document
     lossySentence.set(TextAnnotation.class, recoverOriginalText(tokens, proto));
@@ -1293,7 +1302,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       // Set relation triples
       if (sentence.getOpenieTripleCount() > 0) {
         List<RelationTriple> triples = new ArrayList<>();
-        for (CoreNLPProtos.OpenIETriple triple : sentence.getOpenieTripleList()) {
+        for (CoreNLPProtos.RelationTriple triple : sentence.getOpenieTripleList()) {
           triples.add(fromProto(triple, sentenceTokens, docid));
         }
         map.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, triples);
@@ -1576,7 +1585,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    *
    * @return A relation triple as a Java object, corresponding to the seriaized proto.
    */
-  public static RelationTriple fromProto(CoreNLPProtos.OpenIETriple proto, List<CoreLabel> sentence, String docid) {
+  public static RelationTriple fromProto(CoreNLPProtos.RelationTriple proto, List<CoreLabel> sentence, String docid) {
     // Get the spans for the extraction
     List<CoreLabel> subject = proto.getSubjectTokensList().stream().map(sentence::get).collect(Collectors.toList());
     List<CoreLabel> relation = proto.getRelationTokensList().stream().map(sentence::get).collect(Collectors.toList());

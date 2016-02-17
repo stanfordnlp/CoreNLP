@@ -1,5 +1,4 @@
 package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -46,8 +45,6 @@ import nu.xom.*;
  */
 public class XMLOutputter extends AnnotationOutputter  {
 
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(XMLOutputter.class);
   // the namespace is set in the XSLT file
   private static final String NAMESPACE_URI = null;
   private static final String STYLESHEET_NAME = "CoreNLP-to-HTML.xsl";
@@ -178,6 +175,14 @@ public class XMLOutputter extends AnnotationOutputter  {
           Element openieElem = new Element("openie", NAMESPACE_URI);
           addTriples(openieTriples, openieElem, NAMESPACE_URI);
           sentElem.appendChild(openieElem);
+        }
+
+        // add KBP triples
+        Collection<RelationTriple> kbpTriples = sentence.get(CoreAnnotations.KBPTriplesAnnotation.class);
+        if (kbpTriples != null) {
+          Element kbpElem = new Element("kbp", NAMESPACE_URI);
+          addTriples(kbpTriples, kbpElem, NAMESPACE_URI);
+          sentElem.appendChild(kbpElem);
         }
 
         // add the MR entities and relations

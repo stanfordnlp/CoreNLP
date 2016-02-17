@@ -26,7 +26,6 @@ import edu.stanford.nlp.util.Pointer;
 
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collection;
@@ -115,6 +114,18 @@ public class JSONOutputter extends AnnotationOutputter {
           Collection<RelationTriple> openIETriples = sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
           if (openIETriples != null) {
             l2.set("openie", openIETriples.stream().map(triple -> (Consumer<Writer>) (Writer tripleWriter) -> {
+              tripleWriter.set("subject", triple.subjectGloss());
+              tripleWriter.set("subjectSpan", Span.fromPair(triple.subjectTokenSpan()));
+              tripleWriter.set("relation", triple.relationGloss());
+              tripleWriter.set("relationSpan", Span.fromPair(triple.relationTokenSpan()));
+              tripleWriter.set("object", triple.objectGloss());
+              tripleWriter.set("objectSpan", Span.fromPair(triple.objectTokenSpan()));
+            }));
+          }
+          // (kbp)
+          Collection<RelationTriple> kbpTriples = sentence.get(CoreAnnotations.KBPTriplesAnnotation.class);
+          if (kbpTriples != null) {
+            l2.set("kbp", kbpTriples.stream().map(triple -> (Consumer<Writer>) (Writer tripleWriter) -> {
               tripleWriter.set("subject", triple.subjectGloss());
               tripleWriter.set("subjectSpan", Span.fromPair(triple.subjectTokenSpan()));
               tripleWriter.set("relation", triple.relationGloss());

@@ -73,7 +73,9 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
       if (docDate == null) {
         Calendar cal = docAnnotation.get(CoreAnnotations.CalendarAnnotation.class);
         if(cal == null){
-          logger.log(Redwood.DBG, "WARNING: No document date specified");
+          if (options.verbose) {
+            logger.warn("WARNING: No document date specified");
+          }
         } else {
           SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
           docDate = dateFormat.format(cal.getTime());
@@ -142,14 +144,20 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
             }
           }
         } catch (Exception e) {
-          logger.warn("Failed to get attributes from " + text + ", timeIndex " + timeIndex, e);
+          if (options.verbose) {
+            e.printStackTrace();
+            logger.warn("Failed to get attributes from " + text + ", timeIndex " + timeIndex);
+          }
           continue;
         }
         Timex timex;
         try {
           timex = Timex.fromMap(text, timexAttributes);
         } catch (Exception e) {
-          logger.warn("Failed to process timex " + text + " with attributes " + timexAttributes, e);
+          if (options.verbose) {
+            e.printStackTrace();
+            logger.warn("Failed to process timex " + text + " with attributes " + timexAttributes);
+          }
           continue;
         }
         assert timex != null;  // Timex.fromMap never returns null and if it exceptions, we've already done a continue
@@ -273,7 +281,10 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
           te.setTemporal(grounded);
         }
       } catch (Exception ex) {
-        logger.warn("Error resolving " + temporal, ex);
+        if (options.verbose) {
+          ex.printStackTrace();
+          logger.warn("Error resolving " + temporal, ex);
+        }
       }
     }
   }

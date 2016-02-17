@@ -998,7 +998,7 @@ public class Sentence {
    *
    * @param triples The stream of relation triples to add to the sentence.
    */
-  protected void updateTriples(Stream<CoreNLPProtos.OpenIETriple> triples) {
+  protected void updateTriples(Stream<CoreNLPProtos.RelationTriple> triples) {
     synchronized (this.impl) {
       triples.forEach(this.impl::addOpenieTriple);
     }

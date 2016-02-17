@@ -2924,24 +2924,24 @@ public final class CoreNLPProtos {
     edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraphOrBuilder getAlternativeDependenciesOrBuilder();
 
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+     * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
      *
      * <pre>
      * The OpenIE triples in the sentence
      * </pre>
      */
-    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple> 
+    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple> 
         getOpenieTripleList();
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+     * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
      *
      * <pre>
      * The OpenIE triples in the sentence
      * </pre>
      */
-    edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple getOpenieTriple(int index);
+    edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple getOpenieTriple(int index);
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+     * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
      *
      * <pre>
      * The OpenIE triples in the sentence
@@ -2949,22 +2949,66 @@ public final class CoreNLPProtos {
      */
     int getOpenieTripleCount();
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+     * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
      *
      * <pre>
      * The OpenIE triples in the sentence
      * </pre>
      */
-    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETripleOrBuilder> 
+    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder> 
         getOpenieTripleOrBuilderList();
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+     * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
      *
      * <pre>
      * The OpenIE triples in the sentence
      * </pre>
      */
-    edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETripleOrBuilder getOpenieTripleOrBuilder(
+    edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder getOpenieTripleOrBuilder(
+        int index);
+
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+     *
+     * <pre>
+     * The KBP triples in this sentence
+     * </pre>
+     */
+    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple> 
+        getKbpTripleList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+     *
+     * <pre>
+     * The KBP triples in this sentence
+     * </pre>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple getKbpTriple(int index);
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+     *
+     * <pre>
+     * The KBP triples in this sentence
+     * </pre>
+     */
+    int getKbpTripleCount();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+     *
+     * <pre>
+     * The KBP triples in this sentence
+     * </pre>
+     */
+    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder> 
+        getKbpTripleOrBuilderList();
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+     *
+     * <pre>
+     * The KBP triples in this sentence
+     * </pre>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder getKbpTripleOrBuilder(
         int index);
 
     /**
@@ -3371,18 +3415,26 @@ public final class CoreNLPProtos {
             }
             case 114: {
               if (!((mutable_bitField0_ & 0x00008000) == 0x00008000)) {
-                openieTriple_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple>();
+                openieTriple_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple>();
                 mutable_bitField0_ |= 0x00008000;
               }
-              openieTriple_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.PARSER, extensionRegistry));
+              openieTriple_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.PARSER, extensionRegistry));
               break;
             }
             case 122: {
-              if (!((mutable_bitField0_ & 0x00010000) == 0x00010000)) {
+              if (!((mutable_bitField0_ & 0x00020000) == 0x00020000)) {
                 entailedSentence_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment>();
-                mutable_bitField0_ |= 0x00010000;
+                mutable_bitField0_ |= 0x00020000;
               }
               entailedSentence_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment.PARSER, extensionRegistry));
+              break;
+            }
+            case 130: {
+              if (!((mutable_bitField0_ & 0x00010000) == 0x00010000)) {
+                kbpTriple_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple>();
+                mutable_bitField0_ |= 0x00010000;
+              }
+              kbpTriple_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.PARSER, extensionRegistry));
               break;
             }
             case 250: {
@@ -3431,17 +3483,17 @@ public final class CoreNLPProtos {
               break;
             }
             case 418: {
-              if (!((mutable_bitField0_ & 0x00100000) == 0x00100000)) {
+              if (!((mutable_bitField0_ & 0x00200000) == 0x00200000)) {
                 entity_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Entity>();
-                mutable_bitField0_ |= 0x00100000;
+                mutable_bitField0_ |= 0x00200000;
               }
               entity_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Entity.PARSER, extensionRegistry));
               break;
             }
             case 426: {
-              if (!((mutable_bitField0_ & 0x00200000) == 0x00200000)) {
+              if (!((mutable_bitField0_ & 0x00400000) == 0x00400000)) {
                 relation_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Relation>();
-                mutable_bitField0_ |= 0x00200000;
+                mutable_bitField0_ |= 0x00400000;
               }
               relation_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Relation.PARSER, extensionRegistry));
               break;
@@ -3452,17 +3504,17 @@ public final class CoreNLPProtos {
               break;
             }
             case 442: {
-              if (!((mutable_bitField0_ & 0x00800000) == 0x00800000)) {
+              if (!((mutable_bitField0_ & 0x01000000) == 0x01000000)) {
                 mentions_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention>();
-                mutable_bitField0_ |= 0x00800000;
+                mutable_bitField0_ |= 0x01000000;
               }
               mentions_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention.PARSER, extensionRegistry));
               break;
             }
             case 450: {
-              if (!((mutable_bitField0_ & 0x01000000) == 0x01000000)) {
+              if (!((mutable_bitField0_ & 0x02000000) == 0x02000000)) {
                 mentionsForCoref_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Mention>();
-                mutable_bitField0_ |= 0x01000000;
+                mutable_bitField0_ |= 0x02000000;
               }
               mentionsForCoref_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.Mention.PARSER, extensionRegistry));
               break;
@@ -3492,22 +3544,25 @@ public final class CoreNLPProtos {
         if (((mutable_bitField0_ & 0x00008000) == 0x00008000)) {
           openieTriple_ = java.util.Collections.unmodifiableList(openieTriple_);
         }
-        if (((mutable_bitField0_ & 0x00010000) == 0x00010000)) {
+        if (((mutable_bitField0_ & 0x00020000) == 0x00020000)) {
           entailedSentence_ = java.util.Collections.unmodifiableList(entailedSentence_);
+        }
+        if (((mutable_bitField0_ & 0x00010000) == 0x00010000)) {
+          kbpTriple_ = java.util.Collections.unmodifiableList(kbpTriple_);
         }
         if (((mutable_bitField0_ & 0x00000400) == 0x00000400)) {
           kBestParseTrees_ = java.util.Collections.unmodifiableList(kBestParseTrees_);
         }
-        if (((mutable_bitField0_ & 0x00100000) == 0x00100000)) {
+        if (((mutable_bitField0_ & 0x00200000) == 0x00200000)) {
           entity_ = java.util.Collections.unmodifiableList(entity_);
         }
-        if (((mutable_bitField0_ & 0x00200000) == 0x00200000)) {
+        if (((mutable_bitField0_ & 0x00400000) == 0x00400000)) {
           relation_ = java.util.Collections.unmodifiableList(relation_);
         }
-        if (((mutable_bitField0_ & 0x00800000) == 0x00800000)) {
+        if (((mutable_bitField0_ & 0x01000000) == 0x01000000)) {
           mentions_ = java.util.Collections.unmodifiableList(mentions_);
         }
-        if (((mutable_bitField0_ & 0x01000000) == 0x01000000)) {
+        if (((mutable_bitField0_ & 0x02000000) == 0x02000000)) {
           mentionsForCoref_ = java.util.Collections.unmodifiableList(mentionsForCoref_);
         }
         this.unknownFields = unknownFields.build();
@@ -3877,30 +3932,30 @@ public final class CoreNLPProtos {
     }
 
     public static final int OPENIETRIPLE_FIELD_NUMBER = 14;
-    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple> openieTriple_;
+    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple> openieTriple_;
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+     * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
      *
      * <pre>
      * The OpenIE triples in the sentence
      * </pre>
      */
-    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple> getOpenieTripleList() {
+    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple> getOpenieTripleList() {
       return openieTriple_;
     }
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+     * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
      *
      * <pre>
      * The OpenIE triples in the sentence
      * </pre>
      */
-    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETripleOrBuilder> 
+    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder> 
         getOpenieTripleOrBuilderList() {
       return openieTriple_;
     }
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+     * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
      *
      * <pre>
      * The OpenIE triples in the sentence
@@ -3910,25 +3965,80 @@ public final class CoreNLPProtos {
       return openieTriple_.size();
     }
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+     * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
      *
      * <pre>
      * The OpenIE triples in the sentence
      * </pre>
      */
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple getOpenieTriple(int index) {
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple getOpenieTriple(int index) {
       return openieTriple_.get(index);
     }
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+     * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
      *
      * <pre>
      * The OpenIE triples in the sentence
      * </pre>
      */
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETripleOrBuilder getOpenieTripleOrBuilder(
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder getOpenieTripleOrBuilder(
         int index) {
       return openieTriple_.get(index);
+    }
+
+    public static final int KBPTRIPLE_FIELD_NUMBER = 16;
+    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple> kbpTriple_;
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+     *
+     * <pre>
+     * The KBP triples in this sentence
+     * </pre>
+     */
+    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple> getKbpTripleList() {
+      return kbpTriple_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+     *
+     * <pre>
+     * The KBP triples in this sentence
+     * </pre>
+     */
+    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder> 
+        getKbpTripleOrBuilderList() {
+      return kbpTriple_;
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+     *
+     * <pre>
+     * The KBP triples in this sentence
+     * </pre>
+     */
+    public int getKbpTripleCount() {
+      return kbpTriple_.size();
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+     *
+     * <pre>
+     * The KBP triples in this sentence
+     * </pre>
+     */
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple getKbpTriple(int index) {
+      return kbpTriple_.get(index);
+    }
+    /**
+     * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+     *
+     * <pre>
+     * The KBP triples in this sentence
+     * </pre>
+     */
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder getKbpTripleOrBuilder(
+        int index) {
+      return kbpTriple_.get(index);
     }
 
     public static final int ENTAILEDSENTENCE_FIELD_NUMBER = 15;
@@ -4319,6 +4429,7 @@ public final class CoreNLPProtos {
       collapsedCCProcessedDependencies_ = edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance();
       alternativeDependencies_ = edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance();
       openieTriple_ = java.util.Collections.emptyList();
+      kbpTriple_ = java.util.Collections.emptyList();
       entailedSentence_ = java.util.Collections.emptyList();
       paragraph_ = 0;
       text_ = "";
@@ -4377,6 +4488,12 @@ public final class CoreNLPProtos {
       }
       for (int i = 0; i < getOpenieTripleCount(); i++) {
         if (!getOpenieTriple(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      for (int i = 0; i < getKbpTripleCount(); i++) {
+        if (!getKbpTriple(i).isInitialized()) {
           memoizedIsInitialized = 0;
           return false;
         }
@@ -4445,6 +4562,9 @@ public final class CoreNLPProtos {
       }
       for (int i = 0; i < entailedSentence_.size(); i++) {
         output.writeMessage(15, entailedSentence_.get(i));
+      }
+      for (int i = 0; i < kbpTriple_.size(); i++) {
+        output.writeMessage(16, kbpTriple_.get(i));
       }
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
         output.writeMessage(31, binarizedParseTree_);
@@ -4551,6 +4671,10 @@ public final class CoreNLPProtos {
       for (int i = 0; i < entailedSentence_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(15, entailedSentence_.get(i));
+      }
+      for (int i = 0; i < kbpTriple_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(16, kbpTriple_.get(i));
       }
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
         size += com.google.protobuf.CodedOutputStream
@@ -4725,6 +4849,7 @@ public final class CoreNLPProtos {
           getCollapsedCCProcessedDependenciesFieldBuilder();
           getAlternativeDependenciesFieldBuilder();
           getOpenieTripleFieldBuilder();
+          getKbpTripleFieldBuilder();
           getEntailedSentenceFieldBuilder();
           getEntityFieldBuilder();
           getRelationFieldBuilder();
@@ -4810,48 +4935,54 @@ public final class CoreNLPProtos {
         } else {
           openieTripleBuilder_.clear();
         }
+        if (kbpTripleBuilder_ == null) {
+          kbpTriple_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00010000);
+        } else {
+          kbpTripleBuilder_.clear();
+        }
         if (entailedSentenceBuilder_ == null) {
           entailedSentence_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00010000);
+          bitField0_ = (bitField0_ & ~0x00020000);
         } else {
           entailedSentenceBuilder_.clear();
         }
         paragraph_ = 0;
-        bitField0_ = (bitField0_ & ~0x00020000);
-        text_ = "";
         bitField0_ = (bitField0_ & ~0x00040000);
-        hasRelationAnnotations_ = false;
+        text_ = "";
         bitField0_ = (bitField0_ & ~0x00080000);
+        hasRelationAnnotations_ = false;
+        bitField0_ = (bitField0_ & ~0x00100000);
         if (entityBuilder_ == null) {
           entity_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00100000);
+          bitField0_ = (bitField0_ & ~0x00200000);
         } else {
           entityBuilder_.clear();
         }
         if (relationBuilder_ == null) {
           relation_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00200000);
+          bitField0_ = (bitField0_ & ~0x00400000);
         } else {
           relationBuilder_.clear();
         }
         hasNumerizedTokensAnnotation_ = false;
-        bitField0_ = (bitField0_ & ~0x00400000);
+        bitField0_ = (bitField0_ & ~0x00800000);
         if (mentionsBuilder_ == null) {
           mentions_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00800000);
+          bitField0_ = (bitField0_ & ~0x01000000);
         } else {
           mentionsBuilder_.clear();
         }
         if (mentionsForCorefBuilder_ == null) {
           mentionsForCoref_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x01000000);
+          bitField0_ = (bitField0_ & ~0x02000000);
         } else {
           mentionsForCorefBuilder_.clear();
         }
         hasCorefMentionsAnnotation_ = false;
-        bitField0_ = (bitField0_ & ~0x02000000);
-        sentenceID_ = "";
         bitField0_ = (bitField0_ & ~0x04000000);
+        sentenceID_ = "";
+        bitField0_ = (bitField0_ & ~0x08000000);
         return this;
       }
 
@@ -4987,72 +5118,81 @@ public final class CoreNLPProtos {
         } else {
           result.openieTriple_ = openieTripleBuilder_.build();
         }
-        if (entailedSentenceBuilder_ == null) {
+        if (kbpTripleBuilder_ == null) {
           if (((bitField0_ & 0x00010000) == 0x00010000)) {
-            entailedSentence_ = java.util.Collections.unmodifiableList(entailedSentence_);
+            kbpTriple_ = java.util.Collections.unmodifiableList(kbpTriple_);
             bitField0_ = (bitField0_ & ~0x00010000);
+          }
+          result.kbpTriple_ = kbpTriple_;
+        } else {
+          result.kbpTriple_ = kbpTripleBuilder_.build();
+        }
+        if (entailedSentenceBuilder_ == null) {
+          if (((bitField0_ & 0x00020000) == 0x00020000)) {
+            entailedSentence_ = java.util.Collections.unmodifiableList(entailedSentence_);
+            bitField0_ = (bitField0_ & ~0x00020000);
           }
           result.entailedSentence_ = entailedSentence_;
         } else {
           result.entailedSentence_ = entailedSentenceBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00020000) == 0x00020000)) {
+        if (((from_bitField0_ & 0x00040000) == 0x00040000)) {
           to_bitField0_ |= 0x00002000;
         }
         result.paragraph_ = paragraph_;
-        if (((from_bitField0_ & 0x00040000) == 0x00040000)) {
+        if (((from_bitField0_ & 0x00080000) == 0x00080000)) {
           to_bitField0_ |= 0x00004000;
         }
         result.text_ = text_;
-        if (((from_bitField0_ & 0x00080000) == 0x00080000)) {
+        if (((from_bitField0_ & 0x00100000) == 0x00100000)) {
           to_bitField0_ |= 0x00008000;
         }
         result.hasRelationAnnotations_ = hasRelationAnnotations_;
         if (entityBuilder_ == null) {
-          if (((bitField0_ & 0x00100000) == 0x00100000)) {
+          if (((bitField0_ & 0x00200000) == 0x00200000)) {
             entity_ = java.util.Collections.unmodifiableList(entity_);
-            bitField0_ = (bitField0_ & ~0x00100000);
+            bitField0_ = (bitField0_ & ~0x00200000);
           }
           result.entity_ = entity_;
         } else {
           result.entity_ = entityBuilder_.build();
         }
         if (relationBuilder_ == null) {
-          if (((bitField0_ & 0x00200000) == 0x00200000)) {
+          if (((bitField0_ & 0x00400000) == 0x00400000)) {
             relation_ = java.util.Collections.unmodifiableList(relation_);
-            bitField0_ = (bitField0_ & ~0x00200000);
+            bitField0_ = (bitField0_ & ~0x00400000);
           }
           result.relation_ = relation_;
         } else {
           result.relation_ = relationBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00400000) == 0x00400000)) {
+        if (((from_bitField0_ & 0x00800000) == 0x00800000)) {
           to_bitField0_ |= 0x00010000;
         }
         result.hasNumerizedTokensAnnotation_ = hasNumerizedTokensAnnotation_;
         if (mentionsBuilder_ == null) {
-          if (((bitField0_ & 0x00800000) == 0x00800000)) {
+          if (((bitField0_ & 0x01000000) == 0x01000000)) {
             mentions_ = java.util.Collections.unmodifiableList(mentions_);
-            bitField0_ = (bitField0_ & ~0x00800000);
+            bitField0_ = (bitField0_ & ~0x01000000);
           }
           result.mentions_ = mentions_;
         } else {
           result.mentions_ = mentionsBuilder_.build();
         }
         if (mentionsForCorefBuilder_ == null) {
-          if (((bitField0_ & 0x01000000) == 0x01000000)) {
+          if (((bitField0_ & 0x02000000) == 0x02000000)) {
             mentionsForCoref_ = java.util.Collections.unmodifiableList(mentionsForCoref_);
-            bitField0_ = (bitField0_ & ~0x01000000);
+            bitField0_ = (bitField0_ & ~0x02000000);
           }
           result.mentionsForCoref_ = mentionsForCoref_;
         } else {
           result.mentionsForCoref_ = mentionsForCorefBuilder_.build();
         }
-        if (((from_bitField0_ & 0x02000000) == 0x02000000)) {
+        if (((from_bitField0_ & 0x04000000) == 0x04000000)) {
           to_bitField0_ |= 0x00020000;
         }
         result.hasCorefMentionsAnnotation_ = hasCorefMentionsAnnotation_;
-        if (((from_bitField0_ & 0x04000000) == 0x04000000)) {
+        if (((from_bitField0_ & 0x08000000) == 0x08000000)) {
           to_bitField0_ |= 0x00040000;
         }
         result.sentenceID_ = sentenceID_;
@@ -5191,11 +5331,37 @@ public final class CoreNLPProtos {
             }
           }
         }
+        if (kbpTripleBuilder_ == null) {
+          if (!other.kbpTriple_.isEmpty()) {
+            if (kbpTriple_.isEmpty()) {
+              kbpTriple_ = other.kbpTriple_;
+              bitField0_ = (bitField0_ & ~0x00010000);
+            } else {
+              ensureKbpTripleIsMutable();
+              kbpTriple_.addAll(other.kbpTriple_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.kbpTriple_.isEmpty()) {
+            if (kbpTripleBuilder_.isEmpty()) {
+              kbpTripleBuilder_.dispose();
+              kbpTripleBuilder_ = null;
+              kbpTriple_ = other.kbpTriple_;
+              bitField0_ = (bitField0_ & ~0x00010000);
+              kbpTripleBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getKbpTripleFieldBuilder() : null;
+            } else {
+              kbpTripleBuilder_.addAllMessages(other.kbpTriple_);
+            }
+          }
+        }
         if (entailedSentenceBuilder_ == null) {
           if (!other.entailedSentence_.isEmpty()) {
             if (entailedSentence_.isEmpty()) {
               entailedSentence_ = other.entailedSentence_;
-              bitField0_ = (bitField0_ & ~0x00010000);
+              bitField0_ = (bitField0_ & ~0x00020000);
             } else {
               ensureEntailedSentenceIsMutable();
               entailedSentence_.addAll(other.entailedSentence_);
@@ -5208,7 +5374,7 @@ public final class CoreNLPProtos {
               entailedSentenceBuilder_.dispose();
               entailedSentenceBuilder_ = null;
               entailedSentence_ = other.entailedSentence_;
-              bitField0_ = (bitField0_ & ~0x00010000);
+              bitField0_ = (bitField0_ & ~0x00020000);
               entailedSentenceBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getEntailedSentenceFieldBuilder() : null;
@@ -5221,7 +5387,7 @@ public final class CoreNLPProtos {
           setParagraph(other.getParagraph());
         }
         if (other.hasText()) {
-          bitField0_ |= 0x00040000;
+          bitField0_ |= 0x00080000;
           text_ = other.text_;
           onChanged();
         }
@@ -5232,7 +5398,7 @@ public final class CoreNLPProtos {
           if (!other.entity_.isEmpty()) {
             if (entity_.isEmpty()) {
               entity_ = other.entity_;
-              bitField0_ = (bitField0_ & ~0x00100000);
+              bitField0_ = (bitField0_ & ~0x00200000);
             } else {
               ensureEntityIsMutable();
               entity_.addAll(other.entity_);
@@ -5245,7 +5411,7 @@ public final class CoreNLPProtos {
               entityBuilder_.dispose();
               entityBuilder_ = null;
               entity_ = other.entity_;
-              bitField0_ = (bitField0_ & ~0x00100000);
+              bitField0_ = (bitField0_ & ~0x00200000);
               entityBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getEntityFieldBuilder() : null;
@@ -5258,7 +5424,7 @@ public final class CoreNLPProtos {
           if (!other.relation_.isEmpty()) {
             if (relation_.isEmpty()) {
               relation_ = other.relation_;
-              bitField0_ = (bitField0_ & ~0x00200000);
+              bitField0_ = (bitField0_ & ~0x00400000);
             } else {
               ensureRelationIsMutable();
               relation_.addAll(other.relation_);
@@ -5271,7 +5437,7 @@ public final class CoreNLPProtos {
               relationBuilder_.dispose();
               relationBuilder_ = null;
               relation_ = other.relation_;
-              bitField0_ = (bitField0_ & ~0x00200000);
+              bitField0_ = (bitField0_ & ~0x00400000);
               relationBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getRelationFieldBuilder() : null;
@@ -5287,7 +5453,7 @@ public final class CoreNLPProtos {
           if (!other.mentions_.isEmpty()) {
             if (mentions_.isEmpty()) {
               mentions_ = other.mentions_;
-              bitField0_ = (bitField0_ & ~0x00800000);
+              bitField0_ = (bitField0_ & ~0x01000000);
             } else {
               ensureMentionsIsMutable();
               mentions_.addAll(other.mentions_);
@@ -5300,7 +5466,7 @@ public final class CoreNLPProtos {
               mentionsBuilder_.dispose();
               mentionsBuilder_ = null;
               mentions_ = other.mentions_;
-              bitField0_ = (bitField0_ & ~0x00800000);
+              bitField0_ = (bitField0_ & ~0x01000000);
               mentionsBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getMentionsFieldBuilder() : null;
@@ -5313,7 +5479,7 @@ public final class CoreNLPProtos {
           if (!other.mentionsForCoref_.isEmpty()) {
             if (mentionsForCoref_.isEmpty()) {
               mentionsForCoref_ = other.mentionsForCoref_;
-              bitField0_ = (bitField0_ & ~0x01000000);
+              bitField0_ = (bitField0_ & ~0x02000000);
             } else {
               ensureMentionsForCorefIsMutable();
               mentionsForCoref_.addAll(other.mentionsForCoref_);
@@ -5326,7 +5492,7 @@ public final class CoreNLPProtos {
               mentionsForCorefBuilder_.dispose();
               mentionsForCorefBuilder_ = null;
               mentionsForCoref_ = other.mentionsForCoref_;
-              bitField0_ = (bitField0_ & ~0x01000000);
+              bitField0_ = (bitField0_ & ~0x02000000);
               mentionsForCorefBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getMentionsForCorefFieldBuilder() : null;
@@ -5339,7 +5505,7 @@ public final class CoreNLPProtos {
           setHasCorefMentionsAnnotation(other.getHasCorefMentionsAnnotation());
         }
         if (other.hasSentenceID()) {
-          bitField0_ |= 0x04000000;
+          bitField0_ |= 0x08000000;
           sentenceID_ = other.sentenceID_;
           onChanged();
         }
@@ -5389,6 +5555,12 @@ public final class CoreNLPProtos {
         }
         for (int i = 0; i < getOpenieTripleCount(); i++) {
           if (!getOpenieTriple(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        for (int i = 0; i < getKbpTripleCount(); i++) {
+          if (!getKbpTriple(i).isInitialized()) {
             
             return false;
           }
@@ -6953,26 +7125,26 @@ public final class CoreNLPProtos {
         return alternativeDependenciesBuilder_;
       }
 
-      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple> openieTriple_ =
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple> openieTriple_ =
         java.util.Collections.emptyList();
       private void ensureOpenieTripleIsMutable() {
         if (!((bitField0_ & 0x00008000) == 0x00008000)) {
-          openieTriple_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple>(openieTriple_);
+          openieTriple_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple>(openieTriple_);
           bitField0_ |= 0x00008000;
          }
       }
 
       private com.google.protobuf.RepeatedFieldBuilder<
-          edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple, edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETripleOrBuilder> openieTripleBuilder_;
+          edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder> openieTripleBuilder_;
 
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
        *
        * <pre>
        * The OpenIE triples in the sentence
        * </pre>
        */
-      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple> getOpenieTripleList() {
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple> getOpenieTripleList() {
         if (openieTripleBuilder_ == null) {
           return java.util.Collections.unmodifiableList(openieTriple_);
         } else {
@@ -6980,7 +7152,7 @@ public final class CoreNLPProtos {
         }
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
        *
        * <pre>
        * The OpenIE triples in the sentence
@@ -6994,13 +7166,13 @@ public final class CoreNLPProtos {
         }
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
        *
        * <pre>
        * The OpenIE triples in the sentence
        * </pre>
        */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple getOpenieTriple(int index) {
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple getOpenieTriple(int index) {
         if (openieTripleBuilder_ == null) {
           return openieTriple_.get(index);
         } else {
@@ -7008,14 +7180,14 @@ public final class CoreNLPProtos {
         }
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
        *
        * <pre>
        * The OpenIE triples in the sentence
        * </pre>
        */
       public Builder setOpenieTriple(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple value) {
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple value) {
         if (openieTripleBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -7029,14 +7201,14 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
        *
        * <pre>
        * The OpenIE triples in the sentence
        * </pre>
        */
       public Builder setOpenieTriple(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.Builder builderForValue) {
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder builderForValue) {
         if (openieTripleBuilder_ == null) {
           ensureOpenieTripleIsMutable();
           openieTriple_.set(index, builderForValue.build());
@@ -7047,13 +7219,13 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
        *
        * <pre>
        * The OpenIE triples in the sentence
        * </pre>
        */
-      public Builder addOpenieTriple(edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple value) {
+      public Builder addOpenieTriple(edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple value) {
         if (openieTripleBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -7067,14 +7239,14 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
        *
        * <pre>
        * The OpenIE triples in the sentence
        * </pre>
        */
       public Builder addOpenieTriple(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple value) {
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple value) {
         if (openieTripleBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -7088,14 +7260,14 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
        *
        * <pre>
        * The OpenIE triples in the sentence
        * </pre>
        */
       public Builder addOpenieTriple(
-          edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.Builder builderForValue) {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder builderForValue) {
         if (openieTripleBuilder_ == null) {
           ensureOpenieTripleIsMutable();
           openieTriple_.add(builderForValue.build());
@@ -7106,14 +7278,14 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
        *
        * <pre>
        * The OpenIE triples in the sentence
        * </pre>
        */
       public Builder addOpenieTriple(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.Builder builderForValue) {
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder builderForValue) {
         if (openieTripleBuilder_ == null) {
           ensureOpenieTripleIsMutable();
           openieTriple_.add(index, builderForValue.build());
@@ -7124,14 +7296,14 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
        *
        * <pre>
        * The OpenIE triples in the sentence
        * </pre>
        */
       public Builder addAllOpenieTriple(
-          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple> values) {
+          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple> values) {
         if (openieTripleBuilder_ == null) {
           ensureOpenieTripleIsMutable();
           com.google.protobuf.AbstractMessageLite.Builder.addAll(
@@ -7143,7 +7315,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
        *
        * <pre>
        * The OpenIE triples in the sentence
@@ -7160,7 +7332,7 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
        *
        * <pre>
        * The OpenIE triples in the sentence
@@ -7177,24 +7349,24 @@ public final class CoreNLPProtos {
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
        *
        * <pre>
        * The OpenIE triples in the sentence
        * </pre>
        */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.Builder getOpenieTripleBuilder(
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder getOpenieTripleBuilder(
           int index) {
         return getOpenieTripleFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
        *
        * <pre>
        * The OpenIE triples in the sentence
        * </pre>
        */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETripleOrBuilder getOpenieTripleOrBuilder(
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder getOpenieTripleOrBuilder(
           int index) {
         if (openieTripleBuilder_ == null) {
           return openieTriple_.get(index);  } else {
@@ -7202,13 +7374,13 @@ public final class CoreNLPProtos {
         }
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
        *
        * <pre>
        * The OpenIE triples in the sentence
        * </pre>
        */
-      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETripleOrBuilder> 
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder> 
            getOpenieTripleOrBuilderList() {
         if (openieTripleBuilder_ != null) {
           return openieTripleBuilder_.getMessageOrBuilderList();
@@ -7217,45 +7389,45 @@ public final class CoreNLPProtos {
         }
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
        *
        * <pre>
        * The OpenIE triples in the sentence
        * </pre>
        */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.Builder addOpenieTripleBuilder() {
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder addOpenieTripleBuilder() {
         return getOpenieTripleFieldBuilder().addBuilder(
-            edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.getDefaultInstance());
+            edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.getDefaultInstance());
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
        *
        * <pre>
        * The OpenIE triples in the sentence
        * </pre>
        */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.Builder addOpenieTripleBuilder(
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder addOpenieTripleBuilder(
           int index) {
         return getOpenieTripleFieldBuilder().addBuilder(
-            index, edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.getDefaultInstance());
+            index, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.getDefaultInstance());
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.OpenIETriple openieTriple = 14;</code>
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple openieTriple = 14;</code>
        *
        * <pre>
        * The OpenIE triples in the sentence
        * </pre>
        */
-      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.Builder> 
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder> 
            getOpenieTripleBuilderList() {
         return getOpenieTripleFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilder<
-          edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple, edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETripleOrBuilder> 
+          edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder> 
           getOpenieTripleFieldBuilder() {
         if (openieTripleBuilder_ == null) {
           openieTripleBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple, edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETripleOrBuilder>(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder>(
                   openieTriple_,
                   ((bitField0_ & 0x00008000) == 0x00008000),
                   getParentForChildren(),
@@ -7265,12 +7437,324 @@ public final class CoreNLPProtos {
         return openieTripleBuilder_;
       }
 
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple> kbpTriple_ =
+        java.util.Collections.emptyList();
+      private void ensureKbpTripleIsMutable() {
+        if (!((bitField0_ & 0x00010000) == 0x00010000)) {
+          kbpTriple_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple>(kbpTriple_);
+          bitField0_ |= 0x00010000;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder> kbpTripleBuilder_;
+
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+       *
+       * <pre>
+       * The KBP triples in this sentence
+       * </pre>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple> getKbpTripleList() {
+        if (kbpTripleBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(kbpTriple_);
+        } else {
+          return kbpTripleBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+       *
+       * <pre>
+       * The KBP triples in this sentence
+       * </pre>
+       */
+      public int getKbpTripleCount() {
+        if (kbpTripleBuilder_ == null) {
+          return kbpTriple_.size();
+        } else {
+          return kbpTripleBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+       *
+       * <pre>
+       * The KBP triples in this sentence
+       * </pre>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple getKbpTriple(int index) {
+        if (kbpTripleBuilder_ == null) {
+          return kbpTriple_.get(index);
+        } else {
+          return kbpTripleBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+       *
+       * <pre>
+       * The KBP triples in this sentence
+       * </pre>
+       */
+      public Builder setKbpTriple(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple value) {
+        if (kbpTripleBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureKbpTripleIsMutable();
+          kbpTriple_.set(index, value);
+          onChanged();
+        } else {
+          kbpTripleBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+       *
+       * <pre>
+       * The KBP triples in this sentence
+       * </pre>
+       */
+      public Builder setKbpTriple(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder builderForValue) {
+        if (kbpTripleBuilder_ == null) {
+          ensureKbpTripleIsMutable();
+          kbpTriple_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          kbpTripleBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+       *
+       * <pre>
+       * The KBP triples in this sentence
+       * </pre>
+       */
+      public Builder addKbpTriple(edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple value) {
+        if (kbpTripleBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureKbpTripleIsMutable();
+          kbpTriple_.add(value);
+          onChanged();
+        } else {
+          kbpTripleBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+       *
+       * <pre>
+       * The KBP triples in this sentence
+       * </pre>
+       */
+      public Builder addKbpTriple(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple value) {
+        if (kbpTripleBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureKbpTripleIsMutable();
+          kbpTriple_.add(index, value);
+          onChanged();
+        } else {
+          kbpTripleBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+       *
+       * <pre>
+       * The KBP triples in this sentence
+       * </pre>
+       */
+      public Builder addKbpTriple(
+          edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder builderForValue) {
+        if (kbpTripleBuilder_ == null) {
+          ensureKbpTripleIsMutable();
+          kbpTriple_.add(builderForValue.build());
+          onChanged();
+        } else {
+          kbpTripleBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+       *
+       * <pre>
+       * The KBP triples in this sentence
+       * </pre>
+       */
+      public Builder addKbpTriple(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder builderForValue) {
+        if (kbpTripleBuilder_ == null) {
+          ensureKbpTripleIsMutable();
+          kbpTriple_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          kbpTripleBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+       *
+       * <pre>
+       * The KBP triples in this sentence
+       * </pre>
+       */
+      public Builder addAllKbpTriple(
+          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple> values) {
+        if (kbpTripleBuilder_ == null) {
+          ensureKbpTripleIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, kbpTriple_);
+          onChanged();
+        } else {
+          kbpTripleBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+       *
+       * <pre>
+       * The KBP triples in this sentence
+       * </pre>
+       */
+      public Builder clearKbpTriple() {
+        if (kbpTripleBuilder_ == null) {
+          kbpTriple_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00010000);
+          onChanged();
+        } else {
+          kbpTripleBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+       *
+       * <pre>
+       * The KBP triples in this sentence
+       * </pre>
+       */
+      public Builder removeKbpTriple(int index) {
+        if (kbpTripleBuilder_ == null) {
+          ensureKbpTripleIsMutable();
+          kbpTriple_.remove(index);
+          onChanged();
+        } else {
+          kbpTripleBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+       *
+       * <pre>
+       * The KBP triples in this sentence
+       * </pre>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder getKbpTripleBuilder(
+          int index) {
+        return getKbpTripleFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+       *
+       * <pre>
+       * The KBP triples in this sentence
+       * </pre>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder getKbpTripleOrBuilder(
+          int index) {
+        if (kbpTripleBuilder_ == null) {
+          return kbpTriple_.get(index);  } else {
+          return kbpTripleBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+       *
+       * <pre>
+       * The KBP triples in this sentence
+       * </pre>
+       */
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder> 
+           getKbpTripleOrBuilderList() {
+        if (kbpTripleBuilder_ != null) {
+          return kbpTripleBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(kbpTriple_);
+        }
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+       *
+       * <pre>
+       * The KBP triples in this sentence
+       * </pre>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder addKbpTripleBuilder() {
+        return getKbpTripleFieldBuilder().addBuilder(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+       *
+       * <pre>
+       * The KBP triples in this sentence
+       * </pre>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder addKbpTripleBuilder(
+          int index) {
+        return getKbpTripleFieldBuilder().addBuilder(
+            index, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.RelationTriple kbpTriple = 16;</code>
+       *
+       * <pre>
+       * The KBP triples in this sentence
+       * </pre>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder> 
+           getKbpTripleBuilderList() {
+        return getKbpTripleFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder> 
+          getKbpTripleFieldBuilder() {
+        if (kbpTripleBuilder_ == null) {
+          kbpTripleBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder>(
+                  kbpTriple_,
+                  ((bitField0_ & 0x00010000) == 0x00010000),
+                  getParentForChildren(),
+                  isClean());
+          kbpTriple_ = null;
+        }
+        return kbpTripleBuilder_;
+      }
+
       private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment> entailedSentence_ =
         java.util.Collections.emptyList();
       private void ensureEntailedSentenceIsMutable() {
-        if (!((bitField0_ & 0x00010000) == 0x00010000)) {
+        if (!((bitField0_ & 0x00020000) == 0x00020000)) {
           entailedSentence_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment>(entailedSentence_);
-          bitField0_ |= 0x00010000;
+          bitField0_ |= 0x00020000;
          }
       }
 
@@ -7464,7 +7948,7 @@ public final class CoreNLPProtos {
       public Builder clearEntailedSentence() {
         if (entailedSentenceBuilder_ == null) {
           entailedSentence_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00010000);
+          bitField0_ = (bitField0_ & ~0x00020000);
           onChanged();
         } else {
           entailedSentenceBuilder_.clear();
@@ -7569,7 +8053,7 @@ public final class CoreNLPProtos {
           entailedSentenceBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment, edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragment.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SentenceFragmentOrBuilder>(
                   entailedSentence_,
-                  ((bitField0_ & 0x00010000) == 0x00010000),
+                  ((bitField0_ & 0x00020000) == 0x00020000),
                   getParentForChildren(),
                   isClean());
           entailedSentence_ = null;
@@ -7582,7 +8066,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 paragraph = 11;</code>
        */
       public boolean hasParagraph() {
-        return ((bitField0_ & 0x00020000) == 0x00020000);
+        return ((bitField0_ & 0x00040000) == 0x00040000);
       }
       /**
        * <code>optional uint32 paragraph = 11;</code>
@@ -7594,7 +8078,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 paragraph = 11;</code>
        */
       public Builder setParagraph(int value) {
-        bitField0_ |= 0x00020000;
+        bitField0_ |= 0x00040000;
         paragraph_ = value;
         onChanged();
         return this;
@@ -7603,7 +8087,7 @@ public final class CoreNLPProtos {
        * <code>optional uint32 paragraph = 11;</code>
        */
       public Builder clearParagraph() {
-        bitField0_ = (bitField0_ & ~0x00020000);
+        bitField0_ = (bitField0_ & ~0x00040000);
         paragraph_ = 0;
         onChanged();
         return this;
@@ -7618,7 +8102,7 @@ public final class CoreNLPProtos {
        * </pre>
        */
       public boolean hasText() {
-        return ((bitField0_ & 0x00040000) == 0x00040000);
+        return ((bitField0_ & 0x00080000) == 0x00080000);
       }
       /**
        * <code>optional string text = 12;</code>
@@ -7673,7 +8157,7 @@ public final class CoreNLPProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00040000;
+  bitField0_ |= 0x00080000;
         text_ = value;
         onChanged();
         return this;
@@ -7686,7 +8170,7 @@ public final class CoreNLPProtos {
        * </pre>
        */
       public Builder clearText() {
-        bitField0_ = (bitField0_ & ~0x00040000);
+        bitField0_ = (bitField0_ & ~0x00080000);
         text_ = getDefaultInstance().getText();
         onChanged();
         return this;
@@ -7703,7 +8187,7 @@ public final class CoreNLPProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00040000;
+  bitField0_ |= 0x00080000;
         text_ = value;
         onChanged();
         return this;
@@ -7718,7 +8202,7 @@ public final class CoreNLPProtos {
        * </pre>
        */
       public boolean hasHasRelationAnnotations() {
-        return ((bitField0_ & 0x00080000) == 0x00080000);
+        return ((bitField0_ & 0x00100000) == 0x00100000);
       }
       /**
        * <code>optional bool hasRelationAnnotations = 51;</code>
@@ -7738,7 +8222,7 @@ public final class CoreNLPProtos {
        * </pre>
        */
       public Builder setHasRelationAnnotations(boolean value) {
-        bitField0_ |= 0x00080000;
+        bitField0_ |= 0x00100000;
         hasRelationAnnotations_ = value;
         onChanged();
         return this;
@@ -7751,7 +8235,7 @@ public final class CoreNLPProtos {
        * </pre>
        */
       public Builder clearHasRelationAnnotations() {
-        bitField0_ = (bitField0_ & ~0x00080000);
+        bitField0_ = (bitField0_ & ~0x00100000);
         hasRelationAnnotations_ = false;
         onChanged();
         return this;
@@ -7760,9 +8244,9 @@ public final class CoreNLPProtos {
       private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Entity> entity_ =
         java.util.Collections.emptyList();
       private void ensureEntityIsMutable() {
-        if (!((bitField0_ & 0x00100000) == 0x00100000)) {
+        if (!((bitField0_ & 0x00200000) == 0x00200000)) {
           entity_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Entity>(entity_);
-          bitField0_ |= 0x00100000;
+          bitField0_ |= 0x00200000;
          }
       }
 
@@ -7912,7 +8396,7 @@ public final class CoreNLPProtos {
       public Builder clearEntity() {
         if (entityBuilder_ == null) {
           entity_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00100000);
+          bitField0_ = (bitField0_ & ~0x00200000);
           onChanged();
         } else {
           entityBuilder_.clear();
@@ -7989,7 +8473,7 @@ public final class CoreNLPProtos {
           entityBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               edu.stanford.nlp.pipeline.CoreNLPProtos.Entity, edu.stanford.nlp.pipeline.CoreNLPProtos.Entity.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.EntityOrBuilder>(
                   entity_,
-                  ((bitField0_ & 0x00100000) == 0x00100000),
+                  ((bitField0_ & 0x00200000) == 0x00200000),
                   getParentForChildren(),
                   isClean());
           entity_ = null;
@@ -8000,9 +8484,9 @@ public final class CoreNLPProtos {
       private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Relation> relation_ =
         java.util.Collections.emptyList();
       private void ensureRelationIsMutable() {
-        if (!((bitField0_ & 0x00200000) == 0x00200000)) {
+        if (!((bitField0_ & 0x00400000) == 0x00400000)) {
           relation_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Relation>(relation_);
-          bitField0_ |= 0x00200000;
+          bitField0_ |= 0x00400000;
          }
       }
 
@@ -8152,7 +8636,7 @@ public final class CoreNLPProtos {
       public Builder clearRelation() {
         if (relationBuilder_ == null) {
           relation_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00200000);
+          bitField0_ = (bitField0_ & ~0x00400000);
           onChanged();
         } else {
           relationBuilder_.clear();
@@ -8229,7 +8713,7 @@ public final class CoreNLPProtos {
           relationBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               edu.stanford.nlp.pipeline.CoreNLPProtos.Relation, edu.stanford.nlp.pipeline.CoreNLPProtos.Relation.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationOrBuilder>(
                   relation_,
-                  ((bitField0_ & 0x00200000) == 0x00200000),
+                  ((bitField0_ & 0x00400000) == 0x00400000),
                   getParentForChildren(),
                   isClean());
           relation_ = null;
@@ -8242,7 +8726,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasNumerizedTokensAnnotation = 54;</code>
        */
       public boolean hasHasNumerizedTokensAnnotation() {
-        return ((bitField0_ & 0x00400000) == 0x00400000);
+        return ((bitField0_ & 0x00800000) == 0x00800000);
       }
       /**
        * <code>optional bool hasNumerizedTokensAnnotation = 54;</code>
@@ -8254,7 +8738,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasNumerizedTokensAnnotation = 54;</code>
        */
       public Builder setHasNumerizedTokensAnnotation(boolean value) {
-        bitField0_ |= 0x00400000;
+        bitField0_ |= 0x00800000;
         hasNumerizedTokensAnnotation_ = value;
         onChanged();
         return this;
@@ -8263,7 +8747,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasNumerizedTokensAnnotation = 54;</code>
        */
       public Builder clearHasNumerizedTokensAnnotation() {
-        bitField0_ = (bitField0_ & ~0x00400000);
+        bitField0_ = (bitField0_ & ~0x00800000);
         hasNumerizedTokensAnnotation_ = false;
         onChanged();
         return this;
@@ -8272,9 +8756,9 @@ public final class CoreNLPProtos {
       private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention> mentions_ =
         java.util.Collections.emptyList();
       private void ensureMentionsIsMutable() {
-        if (!((bitField0_ & 0x00800000) == 0x00800000)) {
+        if (!((bitField0_ & 0x01000000) == 0x01000000)) {
           mentions_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention>(mentions_);
-          bitField0_ |= 0x00800000;
+          bitField0_ |= 0x01000000;
          }
       }
 
@@ -8424,7 +8908,7 @@ public final class CoreNLPProtos {
       public Builder clearMentions() {
         if (mentionsBuilder_ == null) {
           mentions_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00800000);
+          bitField0_ = (bitField0_ & ~0x01000000);
           onChanged();
         } else {
           mentionsBuilder_.clear();
@@ -8501,7 +8985,7 @@ public final class CoreNLPProtos {
           mentionsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention, edu.stanford.nlp.pipeline.CoreNLPProtos.NERMention.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.NERMentionOrBuilder>(
                   mentions_,
-                  ((bitField0_ & 0x00800000) == 0x00800000),
+                  ((bitField0_ & 0x01000000) == 0x01000000),
                   getParentForChildren(),
                   isClean());
           mentions_ = null;
@@ -8512,9 +8996,9 @@ public final class CoreNLPProtos {
       private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.Mention> mentionsForCoref_ =
         java.util.Collections.emptyList();
       private void ensureMentionsForCorefIsMutable() {
-        if (!((bitField0_ & 0x01000000) == 0x01000000)) {
+        if (!((bitField0_ & 0x02000000) == 0x02000000)) {
           mentionsForCoref_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.Mention>(mentionsForCoref_);
-          bitField0_ |= 0x01000000;
+          bitField0_ |= 0x02000000;
          }
       }
 
@@ -8664,7 +9148,7 @@ public final class CoreNLPProtos {
       public Builder clearMentionsForCoref() {
         if (mentionsForCorefBuilder_ == null) {
           mentionsForCoref_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x01000000);
+          bitField0_ = (bitField0_ & ~0x02000000);
           onChanged();
         } else {
           mentionsForCorefBuilder_.clear();
@@ -8741,7 +9225,7 @@ public final class CoreNLPProtos {
           mentionsForCorefBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               edu.stanford.nlp.pipeline.CoreNLPProtos.Mention, edu.stanford.nlp.pipeline.CoreNLPProtos.Mention.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.MentionOrBuilder>(
                   mentionsForCoref_,
-                  ((bitField0_ & 0x01000000) == 0x01000000),
+                  ((bitField0_ & 0x02000000) == 0x02000000),
                   getParentForChildren(),
                   isClean());
           mentionsForCoref_ = null;
@@ -8754,7 +9238,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasCorefMentionsAnnotation = 57;</code>
        */
       public boolean hasHasCorefMentionsAnnotation() {
-        return ((bitField0_ & 0x02000000) == 0x02000000);
+        return ((bitField0_ & 0x04000000) == 0x04000000);
       }
       /**
        * <code>optional bool hasCorefMentionsAnnotation = 57;</code>
@@ -8766,7 +9250,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasCorefMentionsAnnotation = 57;</code>
        */
       public Builder setHasCorefMentionsAnnotation(boolean value) {
-        bitField0_ |= 0x02000000;
+        bitField0_ |= 0x04000000;
         hasCorefMentionsAnnotation_ = value;
         onChanged();
         return this;
@@ -8775,7 +9259,7 @@ public final class CoreNLPProtos {
        * <code>optional bool hasCorefMentionsAnnotation = 57;</code>
        */
       public Builder clearHasCorefMentionsAnnotation() {
-        bitField0_ = (bitField0_ & ~0x02000000);
+        bitField0_ = (bitField0_ & ~0x04000000);
         hasCorefMentionsAnnotation_ = false;
         onChanged();
         return this;
@@ -8790,7 +9274,7 @@ public final class CoreNLPProtos {
        * </pre>
        */
       public boolean hasSentenceID() {
-        return ((bitField0_ & 0x04000000) == 0x04000000);
+        return ((bitField0_ & 0x08000000) == 0x08000000);
       }
       /**
        * <code>optional string sentenceID = 58;</code>
@@ -8845,7 +9329,7 @@ public final class CoreNLPProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x04000000;
+  bitField0_ |= 0x08000000;
         sentenceID_ = value;
         onChanged();
         return this;
@@ -8858,7 +9342,7 @@ public final class CoreNLPProtos {
        * </pre>
        */
       public Builder clearSentenceID() {
-        bitField0_ = (bitField0_ & ~0x04000000);
+        bitField0_ = (bitField0_ & ~0x08000000);
         sentenceID_ = getDefaultInstance().getSentenceID();
         onChanged();
         return this;
@@ -8875,7 +9359,7 @@ public final class CoreNLPProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x04000000;
+  bitField0_ |= 0x08000000;
         sentenceID_ = value;
         onChanged();
         return this;
@@ -39598,8 +40082,8 @@ public final class CoreNLPProtos {
     // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.SentenceFragment)
   }
 
-  public interface OpenIETripleOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.OpenIETriple)
+  public interface RelationTripleOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.RelationTriple)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -39866,30 +40350,30 @@ public final class CoreNLPProtos {
     boolean getSuffixOf();
   }
   /**
-   * Protobuf type {@code edu.stanford.nlp.pipeline.OpenIETriple}
+   * Protobuf type {@code edu.stanford.nlp.pipeline.RelationTriple}
    *
    * <pre>
    * An OpenIE relation triple.
    * Created by the openie annotator.
    * </pre>
    */
-  public static final class OpenIETriple extends
+  public static final class RelationTriple extends
       com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.OpenIETriple)
-      OpenIETripleOrBuilder {
-    // Use OpenIETriple.newBuilder() to construct.
-    private OpenIETriple(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.RelationTriple)
+      RelationTripleOrBuilder {
+    // Use RelationTriple.newBuilder() to construct.
+    private RelationTriple(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
       this.unknownFields = builder.getUnknownFields();
     }
-    private OpenIETriple(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+    private RelationTriple(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
 
-    private static final OpenIETriple defaultInstance;
-    public static OpenIETriple getDefaultInstance() {
+    private static final RelationTriple defaultInstance;
+    public static RelationTriple getDefaultInstance() {
       return defaultInstance;
     }
 
-    public OpenIETriple getDefaultInstanceForType() {
+    public RelationTriple getDefaultInstanceForType() {
       return defaultInstance;
     }
 
@@ -39899,7 +40383,7 @@ public final class CoreNLPProtos {
         getUnknownFields() {
       return this.unknownFields;
     }
-    private OpenIETriple(
+    private RelationTriple(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -40064,28 +40548,28 @@ public final class CoreNLPProtos {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_OpenIETriple_descriptor;
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_RelationTriple_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_OpenIETriple_fieldAccessorTable
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_RelationTriple_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.class, edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.Builder.class);
+              edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.class, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder.class);
     }
 
-    public static com.google.protobuf.Parser<OpenIETriple> PARSER =
-        new com.google.protobuf.AbstractParser<OpenIETriple>() {
-      public OpenIETriple parsePartialFrom(
+    public static com.google.protobuf.Parser<RelationTriple> PARSER =
+        new com.google.protobuf.AbstractParser<RelationTriple>() {
+      public RelationTriple parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new OpenIETriple(input, extensionRegistry);
+        return new RelationTriple(input, extensionRegistry);
       }
     };
 
     @java.lang.Override
-    public com.google.protobuf.Parser<OpenIETriple> getParserForType() {
+    public com.google.protobuf.Parser<RelationTriple> getParserForType() {
       return PARSER;
     }
 
@@ -40655,53 +41139,53 @@ public final class CoreNLPProtos {
       return super.writeReplace();
     }
 
-    public static edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple parseFrom(
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple parseFrom(
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple parseFrom(byte[] data)
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple parseFrom(
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple parseFrom(java.io.InputStream input)
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple parseFrom(
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple parseDelimitedFrom(java.io.InputStream input)
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-    public static edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple parseDelimitedFrom(
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple parseFrom(
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple parseFrom(
+    public static edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -40710,7 +41194,7 @@ public final class CoreNLPProtos {
 
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple prototype) {
+    public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
@@ -40722,7 +41206,7 @@ public final class CoreNLPProtos {
       return builder;
     }
     /**
-     * Protobuf type {@code edu.stanford.nlp.pipeline.OpenIETriple}
+     * Protobuf type {@code edu.stanford.nlp.pipeline.RelationTriple}
      *
      * <pre>
      * An OpenIE relation triple.
@@ -40731,21 +41215,21 @@ public final class CoreNLPProtos {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.OpenIETriple)
-        edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETripleOrBuilder {
+        // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.RelationTriple)
+        edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTripleOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_OpenIETriple_descriptor;
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_RelationTriple_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_OpenIETriple_fieldAccessorTable
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_RelationTriple_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.class, edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.Builder.class);
+                edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.class, edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.Builder.class);
       }
 
-      // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.newBuilder()
+      // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -40803,23 +41287,23 @@ public final class CoreNLPProtos {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_OpenIETriple_descriptor;
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_RelationTriple_descriptor;
       }
 
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple getDefaultInstanceForType() {
-        return edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.getDefaultInstance();
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple getDefaultInstanceForType() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.getDefaultInstance();
       }
 
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple build() {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple result = buildPartial();
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple build() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple buildPartial() {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple result = new edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple(this);
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple buildPartial() {
+        edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple result = new edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -40883,16 +41367,16 @@ public final class CoreNLPProtos {
       }
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple) {
-          return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple)other);
+        if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple) {
+          return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple other) {
-        if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple.getDefaultInstance()) return this;
+      public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple other) {
+        if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple.getDefaultInstance()) return this;
         if (other.hasSubject()) {
           bitField0_ |= 0x00000001;
           subject_ = other.subject_;
@@ -40974,11 +41458,11 @@ public final class CoreNLPProtos {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple parsedMessage = null;
+        edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.OpenIETriple) e.getUnfinishedMessage();
+          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.RelationTriple) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -41963,15 +42447,15 @@ public final class CoreNLPProtos {
         return this;
       }
 
-      // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.OpenIETriple)
+      // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.RelationTriple)
     }
 
     static {
-      defaultInstance = new OpenIETriple(true);
+      defaultInstance = new RelationTriple(true);
       defaultInstance.initFields();
     }
 
-    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.OpenIETriple)
+    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.RelationTriple)
   }
 
   public interface MapStringStringOrBuilder extends
@@ -43436,10 +43920,10 @@ public final class CoreNLPProtos {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_edu_stanford_nlp_pipeline_SentenceFragment_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_edu_stanford_nlp_pipeline_OpenIETriple_descriptor;
+    internal_static_edu_stanford_nlp_pipeline_RelationTriple_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_edu_stanford_nlp_pipeline_OpenIETriple_fieldAccessorTable;
+      internal_static_edu_stanford_nlp_pipeline_RelationTriple_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_edu_stanford_nlp_pipeline_MapStringString_descriptor;
   private static
@@ -43466,7 +43950,7 @@ public final class CoreNLPProtos {
       "nlp.pipeline.CorefChain\022\r\n\005docID\030\004 \001(\t\022;" +
       "\n\021sentencelessToken\030\005 \003(\0132 .edu.stanford" +
       ".nlp.pipeline.Token\022/\n\005quote\030\006 \003(\0132 .edu" +
-      ".stanford.nlp.pipeline.Quote*\005\010d\020\200\002\"\217\n\n\010" +
+      ".stanford.nlp.pipeline.Quote*\005\010d\020\200\002\"\317\n\n\010" +
       "Sentence\022/\n\005token\030\001 \003(\0132 .edu.stanford.n" +
       "lp.pipeline.Token\022\030\n\020tokenOffsetBegin\030\002 ",
       "\002(\r\022\026\n\016tokenOffsetEnd\030\003 \002(\r\022\025\n\rsentenceI" +
@@ -43486,165 +43970,167 @@ public final class CoreNLPProtos {
       "s\030\n \001(\0132*.edu.stanford.nlp.pipeline.Depe" +
       "ndencyGraph\022K\n\027alternativeDependencies\030\r" +
       " \001(\0132*.edu.stanford.nlp.pipeline.Depende" +
-      "ncyGraph\022=\n\014openieTriple\030\016 \003(\0132\'.edu.sta" +
-      "nford.nlp.pipeline.OpenIETriple\022E\n\020entai" +
-      "ledSentence\030\017 \003(\0132+.edu.stanford.nlp.pip",
-      "eline.SentenceFragment\022\021\n\tparagraph\030\013 \001(" +
-      "\r\022\014\n\004text\030\014 \001(\t\022\036\n\026hasRelationAnnotation" +
-      "s\0303 \001(\010\0221\n\006entity\0304 \003(\0132!.edu.stanford.n" +
-      "lp.pipeline.Entity\0225\n\010relation\0305 \003(\0132#.e" +
-      "du.stanford.nlp.pipeline.Relation\022$\n\034has" +
-      "NumerizedTokensAnnotation\0306 \001(\010\0227\n\010menti" +
-      "ons\0307 \003(\0132%.edu.stanford.nlp.pipeline.NE" +
-      "RMention\022<\n\020mentionsForCoref\0308 \003(\0132\".edu" +
-      ".stanford.nlp.pipeline.Mention\022\"\n\032hasCor" +
-      "efMentionsAnnotation\0309 \001(\010\022\022\n\nsentenceID",
-      "\030: \001(\t*\005\010d\020\200\002\"\333\007\n\005Token\022\014\n\004word\030\001 \002(\t\022\013\n" +
-      "\003pos\030\002 \001(\t\022\r\n\005value\030\003 \001(\t\022\020\n\010category\030\004 " +
-      "\001(\t\022\016\n\006before\030\005 \001(\t\022\r\n\005after\030\006 \001(\t\022\024\n\014or" +
-      "iginalText\030\007 \001(\t\022\013\n\003ner\030\010 \001(\t\022\025\n\rnormali" +
-      "zedNER\030\t \001(\t\022\r\n\005lemma\030\n \001(\t\022\021\n\tbeginChar" +
-      "\030\013 \001(\r\022\017\n\007endChar\030\014 \001(\r\022\021\n\tutterance\030\r \001" +
-      "(\r\022\017\n\007speaker\030\016 \001(\t\022\022\n\nbeginIndex\030\017 \001(\r\022" +
-      "\020\n\010endIndex\030\020 \001(\r\022\027\n\017tokenBeginIndex\030\021 \001" +
-      "(\r\022\025\n\rtokenEndIndex\030\022 \001(\r\0224\n\ntimexValue\030" +
-      "\023 \001(\0132 .edu.stanford.nlp.pipeline.Timex\022",
-      "\025\n\rhasXmlContext\030\025 \001(\010\022\022\n\nxmlContext\030\026 \003" +
-      "(\t\022\026\n\016corefClusterID\030\027 \001(\r\022\016\n\006answer\030\030 \001" +
-      "(\t\022\025\n\rheadWordIndex\030\032 \001(\r\0225\n\010operator\030\033 " +
-      "\001(\0132#.edu.stanford.nlp.pipeline.Operator" +
-      "\0225\n\010polarity\030\034 \001(\0132#.edu.stanford.nlp.pi" +
-      "peline.Polarity\022-\n\004span\030\035 \001(\0132\037.edu.stan" +
-      "ford.nlp.pipeline.Span\022\021\n\tsentiment\030\036 \001(" +
-      "\t\022\026\n\016quotationIndex\030\037 \001(\005\022B\n\016conllUFeatu" +
-      "res\030  \001(\0132*.edu.stanford.nlp.pipeline.Ma" +
-      "pStringString\022\021\n\tcoarseTag\030! \001(\t\0228\n\017conl",
-      "lUTokenSpan\030\" \001(\0132\037.edu.stanford.nlp.pip" +
-      "eline.Span\022\022\n\nconllUMisc\030# \001(\t\022D\n\023conllU" +
-      "SecondaryDeps\030$ \001(\0132\'.edu.stanford.nlp.p" +
-      "ipeline.MapIntString\022\016\n\006gender\0303 \001(\t\022\020\n\010" +
-      "trueCase\0304 \001(\t\022\024\n\014trueCaseText\0305 \001(\t*\005\010d" +
-      "\020\200\002\"\241\001\n\005Quote\022\014\n\004text\030\001 \001(\t\022\r\n\005begin\030\002 \001" +
-      "(\r\022\013\n\003end\030\003 \001(\r\022\025\n\rsentenceBegin\030\005 \001(\r\022\023" +
-      "\n\013sentenceEnd\030\006 \001(\r\022\022\n\ntokenBegin\030\007 \001(\r\022" +
-      "\020\n\010tokenEnd\030\010 \001(\r\022\r\n\005docid\030\t \001(\t\022\r\n\005inde" +
-      "x\030\n \001(\r\"\307\001\n\tParseTree\0223\n\005child\030\001 \003(\0132$.e",
-      "du.stanford.nlp.pipeline.ParseTree\022\r\n\005va" +
-      "lue\030\002 \001(\t\022\027\n\017yieldBeginIndex\030\003 \001(\r\022\025\n\ryi" +
-      "eldEndIndex\030\004 \001(\r\022\r\n\005score\030\005 \001(\001\0227\n\tsent" +
-      "iment\030\006 \001(\0162$.edu.stanford.nlp.pipeline." +
-      "Sentiment\"\226\003\n\017DependencyGraph\022=\n\004node\030\001 " +
-      "\003(\0132/.edu.stanford.nlp.pipeline.Dependen" +
-      "cyGraph.Node\022=\n\004edge\030\002 \003(\0132/.edu.stanfor" +
-      "d.nlp.pipeline.DependencyGraph.Edge\022\020\n\004r" +
-      "oot\030\003 \003(\rB\002\020\001\032D\n\004Node\022\025\n\rsentenceIndex\030\001" +
-      " \002(\r\022\r\n\005index\030\002 \002(\r\022\026\n\016copyAnnotation\030\003 ",
-      "\001(\r\032\254\001\n\004Edge\022\016\n\006source\030\001 \002(\r\022\016\n\006target\030\002" +
-      " \002(\r\022\013\n\003dep\030\003 \001(\t\022\017\n\007isExtra\030\004 \001(\010\022\022\n\nso" +
-      "urceCopy\030\005 \001(\r\022\022\n\ntargetCopy\030\006 \001(\r\022>\n\010la" +
-      "nguage\030\007 \001(\0162#.edu.stanford.nlp.pipeline" +
-      ".Language:\007Unknown\"\306\002\n\nCorefChain\022\017\n\007cha" +
-      "inID\030\001 \002(\005\022C\n\007mention\030\002 \003(\01322.edu.stanfo" +
-      "rd.nlp.pipeline.CorefChain.CorefMention\022" +
-      "\026\n\016representative\030\003 \002(\r\032\311\001\n\014CorefMention" +
-      "\022\021\n\tmentionID\030\001 \001(\005\022\023\n\013mentionType\030\002 \001(\t" +
-      "\022\016\n\006number\030\003 \001(\t\022\016\n\006gender\030\004 \001(\t\022\017\n\007anim",
-      "acy\030\005 \001(\t\022\022\n\nbeginIndex\030\006 \001(\r\022\020\n\010endInde" +
-      "x\030\007 \001(\r\022\021\n\theadIndex\030\t \001(\r\022\025\n\rsentenceIn" +
-      "dex\030\n \001(\r\022\020\n\010position\030\013 \001(\r\"\360\010\n\007Mention\022" +
-      "\021\n\tmentionID\030\001 \001(\005\022\023\n\013mentionType\030\002 \001(\t\022" +
-      "\016\n\006number\030\003 \001(\t\022\016\n\006gender\030\004 \001(\t\022\017\n\007anima" +
-      "cy\030\005 \001(\t\022\016\n\006person\030\006 \001(\t\022\022\n\nstartIndex\030\007" +
-      " \001(\r\022\020\n\010endIndex\030\t \001(\r\022\021\n\theadIndex\030\n \001(" +
-      "\r\022\022\n\nheadString\030\013 \001(\t\022\021\n\tnerString\030\014 \001(\t" +
-      "\022\023\n\013originalRef\030\r \001(\r\022\032\n\022goldCorefCluste" +
-      "rID\030\016 \001(\005\022\026\n\016corefClusterID\030\017 \001(\005\022\022\n\nmen",
-      "tionNum\030\020 \001(\r\022\017\n\007sentNum\030\021 \001(\r\022\r\n\005utter\030" +
-      "\022 \001(\r\022\021\n\tparagraph\030\023 \001(\r\022\021\n\tisSubject\030\024 " +
-      "\001(\010\022\026\n\016isDirectObject\030\025 \001(\010\022\030\n\020isIndirec" +
-      "tObject\030\026 \001(\010\022\033\n\023isPrepositionObject\030\027 \001" +
-      "(\010\022\017\n\007hasTwin\030\030 \001(\010\022\017\n\007generic\030\031 \001(\010\022\023\n\013" +
-      "isSingleton\030\032 \001(\010\022\032\n\022hasBasicDependency\030" +
-      "\033 \001(\010\022\036\n\026hasCollapsedDependency\030\034 \001(\010\022\033\n" +
-      "\023hasContextParseTree\030\035 \001(\010\022?\n\017headIndexe" +
-      "dWord\030\036 \001(\0132&.edu.stanford.nlp.pipeline." +
-      "IndexedWord\022=\n\rdependingVerb\030\037 \001(\0132&.edu",
-      ".stanford.nlp.pipeline.IndexedWord\0228\n\010he" +
-      "adWord\030  \001(\0132&.edu.stanford.nlp.pipeline" +
-      ".IndexedWord\022;\n\013speakerInfo\030! \001(\0132&.edu." +
-      "stanford.nlp.pipeline.SpeakerInfo\022=\n\rsen" +
-      "tenceWords\0302 \003(\0132&.edu.stanford.nlp.pipe" +
-      "line.IndexedWord\022<\n\014originalSpan\0303 \003(\0132&" +
-      ".edu.stanford.nlp.pipeline.IndexedWord\022\022" +
-      "\n\ndependents\0304 \003(\t\022\031\n\021preprocessedTerms\030" +
-      "5 \003(\t\022\023\n\013appositions\0306 \003(\005\022\034\n\024predicateN" +
-      "ominatives\0307 \003(\005\022\030\n\020relativePronouns\0308 \003",
-      "(\005\022\023\n\013listMembers\0309 \003(\005\022\025\n\rbelongToLists" +
-      "\030: \003(\005\"X\n\013IndexedWord\022\023\n\013sentenceNum\030\001 \001" +
-      "(\r\022\022\n\ntokenIndex\030\002 \001(\r\022\r\n\005docID\030\003 \001(\r\022\021\n" +
-      "\tcopyCount\030\004 \001(\r\"4\n\013SpeakerInfo\022\023\n\013speak" +
-      "erName\030\001 \001(\t\022\020\n\010mentions\030\002 \003(\005\"\"\n\004Span\022\r" +
-      "\n\005begin\030\001 \002(\r\022\013\n\003end\030\002 \002(\r\"w\n\005Timex\022\r\n\005v" +
-      "alue\030\001 \001(\t\022\020\n\010altValue\030\002 \001(\t\022\014\n\004text\030\003 \001" +
-      "(\t\022\014\n\004type\030\004 \001(\t\022\013\n\003tid\030\005 \001(\t\022\022\n\nbeginPo" +
-      "int\030\006 \001(\r\022\020\n\010endPoint\030\007 \001(\r\"\333\001\n\006Entity\022\021" +
-      "\n\theadStart\030\006 \001(\r\022\017\n\007headEnd\030\007 \001(\r\022\023\n\013me",
-      "ntionType\030\010 \001(\t\022\026\n\016normalizedName\030\t \001(\t\022" +
-      "\026\n\016headTokenIndex\030\n \001(\r\022\017\n\007corefID\030\013 \001(\t" +
-      "\022\020\n\010objectID\030\001 \001(\t\022\023\n\013extentStart\030\002 \001(\r\022" +
-      "\021\n\textentEnd\030\003 \001(\r\022\014\n\004type\030\004 \001(\t\022\017\n\007subt" +
-      "ype\030\005 \001(\t\"\267\001\n\010Relation\022\017\n\007argName\030\006 \003(\t\022" +
-      ".\n\003arg\030\007 \003(\0132!.edu.stanford.nlp.pipeline" +
-      ".Entity\022\021\n\tsignature\030\010 \001(\t\022\020\n\010objectID\030\001" +
-      " \001(\t\022\023\n\013extentStart\030\002 \001(\r\022\021\n\textentEnd\030\003" +
-      " \001(\r\022\014\n\004type\030\004 \001(\t\022\017\n\007subtype\030\005 \001(\t\"\262\001\n\010" +
-      "Operator\022\014\n\004name\030\001 \002(\t\022\033\n\023quantifierSpan",
-      "Begin\030\002 \002(\005\022\031\n\021quantifierSpanEnd\030\003 \002(\005\022\030" +
-      "\n\020subjectSpanBegin\030\004 \002(\005\022\026\n\016subjectSpanE" +
-      "nd\030\005 \002(\005\022\027\n\017objectSpanBegin\030\006 \002(\005\022\025\n\robj" +
-      "ectSpanEnd\030\007 \002(\005\"\251\004\n\010Polarity\022K\n\022project" +
-      "Equivalence\030\001 \002(\0162/.edu.stanford.nlp.pip" +
-      "eline.NaturalLogicRelation\022Q\n\030projectFor" +
-      "wardEntailment\030\002 \002(\0162/.edu.stanford.nlp." +
-      "pipeline.NaturalLogicRelation\022Q\n\030project" +
-      "ReverseEntailment\030\003 \002(\0162/.edu.stanford.n" +
-      "lp.pipeline.NaturalLogicRelation\022H\n\017proj",
-      "ectNegation\030\004 \002(\0162/.edu.stanford.nlp.pip" +
-      "eline.NaturalLogicRelation\022K\n\022projectAlt" +
-      "ernation\030\005 \002(\0162/.edu.stanford.nlp.pipeli" +
-      "ne.NaturalLogicRelation\022E\n\014projectCover\030" +
-      "\006 \002(\0162/.edu.stanford.nlp.pipeline.Natura" +
-      "lLogicRelation\022L\n\023projectIndependence\030\007 " +
-      "\002(\0162/.edu.stanford.nlp.pipeline.NaturalL" +
-      "ogicRelation\"\330\001\n\nNERMention\022\025\n\rsentenceI" +
-      "ndex\030\001 \001(\r\022%\n\035tokenStartInSentenceInclus" +
-      "ive\030\002 \002(\r\022#\n\033tokenEndInSentenceExclusive",
-      "\030\003 \002(\r\022\013\n\003ner\030\004 \002(\t\022\025\n\rnormalizedNER\030\005 \001" +
-      "(\t\022\022\n\nentityType\030\006 \001(\t\022/\n\005timex\030\007 \001(\0132 ." +
-      "edu.stanford.nlp.pipeline.Timex\"Y\n\020Sente" +
-      "nceFragment\022\022\n\ntokenIndex\030\001 \003(\r\022\014\n\004root\030" +
-      "\002 \001(\r\022\024\n\014assumedTruth\030\003 \001(\010\022\r\n\005score\030\004 \001" +
-      "(\001\"\232\002\n\014OpenIETriple\022\017\n\007subject\030\001 \001(\t\022\020\n\010" +
-      "relation\030\002 \001(\t\022\016\n\006object\030\003 \001(\t\022\022\n\nconfid" +
-      "ence\030\004 \001(\001\022\025\n\rsubjectTokens\030\005 \003(\r\022\026\n\016rel" +
-      "ationTokens\030\006 \003(\r\022\024\n\014objectTokens\030\007 \003(\r\022" +
-      "8\n\004tree\030\010 \001(\0132*.edu.stanford.nlp.pipelin",
-      "e.DependencyGraph\022\016\n\006istmod\030\t \001(\010\022\020\n\010pre" +
-      "fixBe\030\n \001(\010\022\020\n\010suffixBe\030\013 \001(\010\022\020\n\010suffixO" +
-      "f\030\014 \001(\010\"-\n\017MapStringString\022\013\n\003key\030\001 \003(\t\022" +
-      "\r\n\005value\030\002 \003(\t\"*\n\014MapIntString\022\013\n\003key\030\001 " +
-      "\003(\r\022\r\n\005value\030\002 \003(\t*\215\001\n\010Language\022\013\n\007Unkno" +
-      "wn\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022\013" +
-      "\n\007English\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n\n\006H" +
-      "ebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020UniversalEnglish" +
-      "\020\t*h\n\tSentiment\022\023\n\017STRONG_NEGATIVE\020\000\022\021\n\r" +
-      "WEAK_NEGATIVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POS",
-      "ITIVE\020\003\022\023\n\017STRONG_POSITIVE\020\004*\223\001\n\024Natural" +
-      "LogicRelation\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORWAR" +
-      "D_ENTAILMENT\020\001\022\026\n\022REVERSE_ENTAILMENT\020\002\022\014" +
-      "\n\010NEGATION\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COVER\020\005" +
-      "\022\020\n\014INDEPENDENCE\020\006B*\n\031edu.stanford.nlp.p" +
-      "ipelineB\rCoreNLPProtos"
+      "ncyGraph\022?\n\014openieTriple\030\016 \003(\0132).edu.sta" +
+      "nford.nlp.pipeline.RelationTriple\022<\n\tkbp" +
+      "Triple\030\020 \003(\0132).edu.stanford.nlp.pipeline",
+      ".RelationTriple\022E\n\020entailedSentence\030\017 \003(" +
+      "\0132+.edu.stanford.nlp.pipeline.SentenceFr" +
+      "agment\022\021\n\tparagraph\030\013 \001(\r\022\014\n\004text\030\014 \001(\t\022" +
+      "\036\n\026hasRelationAnnotations\0303 \001(\010\0221\n\006entit" +
+      "y\0304 \003(\0132!.edu.stanford.nlp.pipeline.Enti" +
+      "ty\0225\n\010relation\0305 \003(\0132#.edu.stanford.nlp." +
+      "pipeline.Relation\022$\n\034hasNumerizedTokensA" +
+      "nnotation\0306 \001(\010\0227\n\010mentions\0307 \003(\0132%.edu." +
+      "stanford.nlp.pipeline.NERMention\022<\n\020ment" +
+      "ionsForCoref\0308 \003(\0132\".edu.stanford.nlp.pi",
+      "peline.Mention\022\"\n\032hasCorefMentionsAnnota" +
+      "tion\0309 \001(\010\022\022\n\nsentenceID\030: \001(\t*\005\010d\020\200\002\"\333\007" +
+      "\n\005Token\022\014\n\004word\030\001 \002(\t\022\013\n\003pos\030\002 \001(\t\022\r\n\005va" +
+      "lue\030\003 \001(\t\022\020\n\010category\030\004 \001(\t\022\016\n\006before\030\005 " +
+      "\001(\t\022\r\n\005after\030\006 \001(\t\022\024\n\014originalText\030\007 \001(\t" +
+      "\022\013\n\003ner\030\010 \001(\t\022\025\n\rnormalizedNER\030\t \001(\t\022\r\n\005" +
+      "lemma\030\n \001(\t\022\021\n\tbeginChar\030\013 \001(\r\022\017\n\007endCha" +
+      "r\030\014 \001(\r\022\021\n\tutterance\030\r \001(\r\022\017\n\007speaker\030\016 " +
+      "\001(\t\022\022\n\nbeginIndex\030\017 \001(\r\022\020\n\010endIndex\030\020 \001(" +
+      "\r\022\027\n\017tokenBeginIndex\030\021 \001(\r\022\025\n\rtokenEndIn",
+      "dex\030\022 \001(\r\0224\n\ntimexValue\030\023 \001(\0132 .edu.stan" +
+      "ford.nlp.pipeline.Timex\022\025\n\rhasXmlContext" +
+      "\030\025 \001(\010\022\022\n\nxmlContext\030\026 \003(\t\022\026\n\016corefClust" +
+      "erID\030\027 \001(\r\022\016\n\006answer\030\030 \001(\t\022\025\n\rheadWordIn" +
+      "dex\030\032 \001(\r\0225\n\010operator\030\033 \001(\0132#.edu.stanfo" +
+      "rd.nlp.pipeline.Operator\0225\n\010polarity\030\034 \001" +
+      "(\0132#.edu.stanford.nlp.pipeline.Polarity\022" +
+      "-\n\004span\030\035 \001(\0132\037.edu.stanford.nlp.pipelin" +
+      "e.Span\022\021\n\tsentiment\030\036 \001(\t\022\026\n\016quotationIn" +
+      "dex\030\037 \001(\005\022B\n\016conllUFeatures\030  \001(\0132*.edu.",
+      "stanford.nlp.pipeline.MapStringString\022\021\n" +
+      "\tcoarseTag\030! \001(\t\0228\n\017conllUTokenSpan\030\" \001(" +
+      "\0132\037.edu.stanford.nlp.pipeline.Span\022\022\n\nco" +
+      "nllUMisc\030# \001(\t\022D\n\023conllUSecondaryDeps\030$ " +
+      "\001(\0132\'.edu.stanford.nlp.pipeline.MapIntSt" +
+      "ring\022\016\n\006gender\0303 \001(\t\022\020\n\010trueCase\0304 \001(\t\022\024" +
+      "\n\014trueCaseText\0305 \001(\t*\005\010d\020\200\002\"\241\001\n\005Quote\022\014\n" +
+      "\004text\030\001 \001(\t\022\r\n\005begin\030\002 \001(\r\022\013\n\003end\030\003 \001(\r\022" +
+      "\025\n\rsentenceBegin\030\005 \001(\r\022\023\n\013sentenceEnd\030\006 " +
+      "\001(\r\022\022\n\ntokenBegin\030\007 \001(\r\022\020\n\010tokenEnd\030\010 \001(",
+      "\r\022\r\n\005docid\030\t \001(\t\022\r\n\005index\030\n \001(\r\"\307\001\n\tPars" +
+      "eTree\0223\n\005child\030\001 \003(\0132$.edu.stanford.nlp." +
+      "pipeline.ParseTree\022\r\n\005value\030\002 \001(\t\022\027\n\017yie" +
+      "ldBeginIndex\030\003 \001(\r\022\025\n\ryieldEndIndex\030\004 \001(" +
+      "\r\022\r\n\005score\030\005 \001(\001\0227\n\tsentiment\030\006 \001(\0162$.ed" +
+      "u.stanford.nlp.pipeline.Sentiment\"\226\003\n\017De" +
+      "pendencyGraph\022=\n\004node\030\001 \003(\0132/.edu.stanfo" +
+      "rd.nlp.pipeline.DependencyGraph.Node\022=\n\004" +
+      "edge\030\002 \003(\0132/.edu.stanford.nlp.pipeline.D" +
+      "ependencyGraph.Edge\022\020\n\004root\030\003 \003(\rB\002\020\001\032D\n",
+      "\004Node\022\025\n\rsentenceIndex\030\001 \002(\r\022\r\n\005index\030\002 " +
+      "\002(\r\022\026\n\016copyAnnotation\030\003 \001(\r\032\254\001\n\004Edge\022\016\n\006" +
+      "source\030\001 \002(\r\022\016\n\006target\030\002 \002(\r\022\013\n\003dep\030\003 \001(" +
+      "\t\022\017\n\007isExtra\030\004 \001(\010\022\022\n\nsourceCopy\030\005 \001(\r\022\022" +
+      "\n\ntargetCopy\030\006 \001(\r\022>\n\010language\030\007 \001(\0162#.e" +
+      "du.stanford.nlp.pipeline.Language:\007Unkno" +
+      "wn\"\306\002\n\nCorefChain\022\017\n\007chainID\030\001 \002(\005\022C\n\007me" +
+      "ntion\030\002 \003(\01322.edu.stanford.nlp.pipeline." +
+      "CorefChain.CorefMention\022\026\n\016representativ" +
+      "e\030\003 \002(\r\032\311\001\n\014CorefMention\022\021\n\tmentionID\030\001 ",
+      "\001(\005\022\023\n\013mentionType\030\002 \001(\t\022\016\n\006number\030\003 \001(\t" +
+      "\022\016\n\006gender\030\004 \001(\t\022\017\n\007animacy\030\005 \001(\t\022\022\n\nbeg" +
+      "inIndex\030\006 \001(\r\022\020\n\010endIndex\030\007 \001(\r\022\021\n\theadI" +
+      "ndex\030\t \001(\r\022\025\n\rsentenceIndex\030\n \001(\r\022\020\n\010pos" +
+      "ition\030\013 \001(\r\"\360\010\n\007Mention\022\021\n\tmentionID\030\001 \001" +
+      "(\005\022\023\n\013mentionType\030\002 \001(\t\022\016\n\006number\030\003 \001(\t\022" +
+      "\016\n\006gender\030\004 \001(\t\022\017\n\007animacy\030\005 \001(\t\022\016\n\006pers" +
+      "on\030\006 \001(\t\022\022\n\nstartIndex\030\007 \001(\r\022\020\n\010endIndex" +
+      "\030\t \001(\r\022\021\n\theadIndex\030\n \001(\r\022\022\n\nheadString\030" +
+      "\013 \001(\t\022\021\n\tnerString\030\014 \001(\t\022\023\n\013originalRef\030",
+      "\r \001(\r\022\032\n\022goldCorefClusterID\030\016 \001(\005\022\026\n\016cor" +
+      "efClusterID\030\017 \001(\005\022\022\n\nmentionNum\030\020 \001(\r\022\017\n" +
+      "\007sentNum\030\021 \001(\r\022\r\n\005utter\030\022 \001(\r\022\021\n\tparagra" +
+      "ph\030\023 \001(\r\022\021\n\tisSubject\030\024 \001(\010\022\026\n\016isDirectO" +
+      "bject\030\025 \001(\010\022\030\n\020isIndirectObject\030\026 \001(\010\022\033\n" +
+      "\023isPrepositionObject\030\027 \001(\010\022\017\n\007hasTwin\030\030 " +
+      "\001(\010\022\017\n\007generic\030\031 \001(\010\022\023\n\013isSingleton\030\032 \001(" +
+      "\010\022\032\n\022hasBasicDependency\030\033 \001(\010\022\036\n\026hasColl" +
+      "apsedDependency\030\034 \001(\010\022\033\n\023hasContextParse" +
+      "Tree\030\035 \001(\010\022?\n\017headIndexedWord\030\036 \001(\0132&.ed",
+      "u.stanford.nlp.pipeline.IndexedWord\022=\n\rd" +
+      "ependingVerb\030\037 \001(\0132&.edu.stanford.nlp.pi" +
+      "peline.IndexedWord\0228\n\010headWord\030  \001(\0132&.e" +
+      "du.stanford.nlp.pipeline.IndexedWord\022;\n\013" +
+      "speakerInfo\030! \001(\0132&.edu.stanford.nlp.pip" +
+      "eline.SpeakerInfo\022=\n\rsentenceWords\0302 \003(\013" +
+      "2&.edu.stanford.nlp.pipeline.IndexedWord" +
+      "\022<\n\014originalSpan\0303 \003(\0132&.edu.stanford.nl" +
+      "p.pipeline.IndexedWord\022\022\n\ndependents\0304 \003" +
+      "(\t\022\031\n\021preprocessedTerms\0305 \003(\t\022\023\n\013apposit",
+      "ions\0306 \003(\005\022\034\n\024predicateNominatives\0307 \003(\005" +
+      "\022\030\n\020relativePronouns\0308 \003(\005\022\023\n\013listMember" +
+      "s\0309 \003(\005\022\025\n\rbelongToLists\030: \003(\005\"X\n\013Indexe" +
+      "dWord\022\023\n\013sentenceNum\030\001 \001(\r\022\022\n\ntokenIndex" +
+      "\030\002 \001(\r\022\r\n\005docID\030\003 \001(\r\022\021\n\tcopyCount\030\004 \001(\r" +
+      "\"4\n\013SpeakerInfo\022\023\n\013speakerName\030\001 \001(\t\022\020\n\010" +
+      "mentions\030\002 \003(\005\"\"\n\004Span\022\r\n\005begin\030\001 \002(\r\022\013\n" +
+      "\003end\030\002 \002(\r\"w\n\005Timex\022\r\n\005value\030\001 \001(\t\022\020\n\010al" +
+      "tValue\030\002 \001(\t\022\014\n\004text\030\003 \001(\t\022\014\n\004type\030\004 \001(\t" +
+      "\022\013\n\003tid\030\005 \001(\t\022\022\n\nbeginPoint\030\006 \001(\r\022\020\n\010end",
+      "Point\030\007 \001(\r\"\333\001\n\006Entity\022\021\n\theadStart\030\006 \001(" +
+      "\r\022\017\n\007headEnd\030\007 \001(\r\022\023\n\013mentionType\030\010 \001(\t\022" +
+      "\026\n\016normalizedName\030\t \001(\t\022\026\n\016headTokenInde" +
+      "x\030\n \001(\r\022\017\n\007corefID\030\013 \001(\t\022\020\n\010objectID\030\001 \001" +
+      "(\t\022\023\n\013extentStart\030\002 \001(\r\022\021\n\textentEnd\030\003 \001" +
+      "(\r\022\014\n\004type\030\004 \001(\t\022\017\n\007subtype\030\005 \001(\t\"\267\001\n\010Re" +
+      "lation\022\017\n\007argName\030\006 \003(\t\022.\n\003arg\030\007 \003(\0132!.e" +
+      "du.stanford.nlp.pipeline.Entity\022\021\n\tsigna" +
+      "ture\030\010 \001(\t\022\020\n\010objectID\030\001 \001(\t\022\023\n\013extentSt" +
+      "art\030\002 \001(\r\022\021\n\textentEnd\030\003 \001(\r\022\014\n\004type\030\004 \001",
+      "(\t\022\017\n\007subtype\030\005 \001(\t\"\262\001\n\010Operator\022\014\n\004name" +
+      "\030\001 \002(\t\022\033\n\023quantifierSpanBegin\030\002 \002(\005\022\031\n\021q" +
+      "uantifierSpanEnd\030\003 \002(\005\022\030\n\020subjectSpanBeg" +
+      "in\030\004 \002(\005\022\026\n\016subjectSpanEnd\030\005 \002(\005\022\027\n\017obje" +
+      "ctSpanBegin\030\006 \002(\005\022\025\n\robjectSpanEnd\030\007 \002(\005" +
+      "\"\251\004\n\010Polarity\022K\n\022projectEquivalence\030\001 \002(" +
+      "\0162/.edu.stanford.nlp.pipeline.NaturalLog" +
+      "icRelation\022Q\n\030projectForwardEntailment\030\002" +
+      " \002(\0162/.edu.stanford.nlp.pipeline.Natural" +
+      "LogicRelation\022Q\n\030projectReverseEntailmen",
+      "t\030\003 \002(\0162/.edu.stanford.nlp.pipeline.Natu" +
+      "ralLogicRelation\022H\n\017projectNegation\030\004 \002(" +
+      "\0162/.edu.stanford.nlp.pipeline.NaturalLog" +
+      "icRelation\022K\n\022projectAlternation\030\005 \002(\0162/" +
+      ".edu.stanford.nlp.pipeline.NaturalLogicR" +
+      "elation\022E\n\014projectCover\030\006 \002(\0162/.edu.stan" +
+      "ford.nlp.pipeline.NaturalLogicRelation\022L" +
+      "\n\023projectIndependence\030\007 \002(\0162/.edu.stanfo" +
+      "rd.nlp.pipeline.NaturalLogicRelation\"\330\001\n" +
+      "\nNERMention\022\025\n\rsentenceIndex\030\001 \001(\r\022%\n\035to",
+      "kenStartInSentenceInclusive\030\002 \002(\r\022#\n\033tok" +
+      "enEndInSentenceExclusive\030\003 \002(\r\022\013\n\003ner\030\004 " +
+      "\002(\t\022\025\n\rnormalizedNER\030\005 \001(\t\022\022\n\nentityType" +
+      "\030\006 \001(\t\022/\n\005timex\030\007 \001(\0132 .edu.stanford.nlp" +
+      ".pipeline.Timex\"Y\n\020SentenceFragment\022\022\n\nt" +
+      "okenIndex\030\001 \003(\r\022\014\n\004root\030\002 \001(\r\022\024\n\014assumed" +
+      "Truth\030\003 \001(\010\022\r\n\005score\030\004 \001(\001\"\234\002\n\016RelationT" +
+      "riple\022\017\n\007subject\030\001 \001(\t\022\020\n\010relation\030\002 \001(\t" +
+      "\022\016\n\006object\030\003 \001(\t\022\022\n\nconfidence\030\004 \001(\001\022\025\n\r" +
+      "subjectTokens\030\005 \003(\r\022\026\n\016relationTokens\030\006 ",
+      "\003(\r\022\024\n\014objectTokens\030\007 \003(\r\0228\n\004tree\030\010 \001(\0132" +
+      "*.edu.stanford.nlp.pipeline.DependencyGr" +
+      "aph\022\016\n\006istmod\030\t \001(\010\022\020\n\010prefixBe\030\n \001(\010\022\020\n" +
+      "\010suffixBe\030\013 \001(\010\022\020\n\010suffixOf\030\014 \001(\010\"-\n\017Map" +
+      "StringString\022\013\n\003key\030\001 \003(\t\022\r\n\005value\030\002 \003(\t" +
+      "\"*\n\014MapIntString\022\013\n\003key\030\001 \003(\r\022\r\n\005value\030\002" +
+      " \003(\t*\215\001\n\010Language\022\013\n\007Unknown\020\000\022\007\n\003Any\020\001\022" +
+      "\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022\013\n\007English\020\004\022\n\n" +
+      "\006German\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013\n\007Spa" +
+      "nish\020\010\022\024\n\020UniversalEnglish\020\t*h\n\tSentimen",
+      "t\022\023\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020" +
+      "\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STR" +
+      "ONG_POSITIVE\020\004*\223\001\n\024NaturalLogicRelation\022" +
+      "\017\n\013EQUIVALENCE\020\000\022\026\n\022FORWARD_ENTAILMENT\020\001" +
+      "\022\026\n\022REVERSE_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003\022\017" +
+      "\n\013ALTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDEN" +
+      "CE\020\006B*\n\031edu.stanford.nlp.pipelineB\rCoreN" +
+      "LPProtos"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -43669,7 +44155,7 @@ public final class CoreNLPProtos {
     internal_static_edu_stanford_nlp_pipeline_Sentence_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_Sentence_descriptor,
-        new java.lang.String[] { "Token", "TokenOffsetBegin", "TokenOffsetEnd", "SentenceIndex", "CharacterOffsetBegin", "CharacterOffsetEnd", "ParseTree", "BinarizedParseTree", "AnnotatedParseTree", "Sentiment", "KBestParseTrees", "BasicDependencies", "CollapsedDependencies", "CollapsedCCProcessedDependencies", "AlternativeDependencies", "OpenieTriple", "EntailedSentence", "Paragraph", "Text", "HasRelationAnnotations", "Entity", "Relation", "HasNumerizedTokensAnnotation", "Mentions", "MentionsForCoref", "HasCorefMentionsAnnotation", "SentenceID", });
+        new java.lang.String[] { "Token", "TokenOffsetBegin", "TokenOffsetEnd", "SentenceIndex", "CharacterOffsetBegin", "CharacterOffsetEnd", "ParseTree", "BinarizedParseTree", "AnnotatedParseTree", "Sentiment", "KBestParseTrees", "BasicDependencies", "CollapsedDependencies", "CollapsedCCProcessedDependencies", "AlternativeDependencies", "OpenieTriple", "KbpTriple", "EntailedSentence", "Paragraph", "Text", "HasRelationAnnotations", "Entity", "Relation", "HasNumerizedTokensAnnotation", "Mentions", "MentionsForCoref", "HasCorefMentionsAnnotation", "SentenceID", });
     internal_static_edu_stanford_nlp_pipeline_Token_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_edu_stanford_nlp_pipeline_Token_fieldAccessorTable = new
@@ -43784,11 +44270,11 @@ public final class CoreNLPProtos {
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_SentenceFragment_descriptor,
         new java.lang.String[] { "TokenIndex", "Root", "AssumedTruth", "Score", });
-    internal_static_edu_stanford_nlp_pipeline_OpenIETriple_descriptor =
+    internal_static_edu_stanford_nlp_pipeline_RelationTriple_descriptor =
       getDescriptor().getMessageTypes().get(18);
-    internal_static_edu_stanford_nlp_pipeline_OpenIETriple_fieldAccessorTable = new
+    internal_static_edu_stanford_nlp_pipeline_RelationTriple_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_edu_stanford_nlp_pipeline_OpenIETriple_descriptor,
+        internal_static_edu_stanford_nlp_pipeline_RelationTriple_descriptor,
         new java.lang.String[] { "Subject", "Relation", "Object", "Confidence", "SubjectTokens", "RelationTokens", "ObjectTokens", "Tree", "Istmod", "PrefixBe", "SuffixBe", "SuffixOf", });
     internal_static_edu_stanford_nlp_pipeline_MapStringString_descriptor =
       getDescriptor().getMessageTypes().get(19);

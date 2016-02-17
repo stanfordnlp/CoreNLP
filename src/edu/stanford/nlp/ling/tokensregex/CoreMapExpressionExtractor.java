@@ -520,7 +520,10 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
             log.warn("Error extracting annotation from " + te /*+ ", " + te.getExtractErrorMessage() */);
           }
         } catch (Exception ex) {
-          log.warn("Error extracting annotation from " + te, ex);
+          if (verbose) {
+            log.warn("Error extracting annotation from " + te);
+            log.warn(ex);
+          }
         }
       }
     }
@@ -541,7 +544,10 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
           log.warn("Error extracting annotation from " + te /*+ ", " + te.getExtractErrorMessage() */);
         }
       } catch (Exception ex) {
-        log.warn("Error extracting annotation from " + te, ex);
+        if (verbose) {
+          log.warn("Error extracting annotation from " + te);
+          log.warn(ex);
+        }
       }
     }
     expressions.removeAll(toDiscard);
@@ -561,7 +567,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
 //        logger.warning("Filtering out " + expr.getText());
       }
     }
-    if (nfiltered > 0) {
+    if (nfiltered > 0 && verbose) {
       log.debug("Filtered " + nfiltered);
     }
     return kept;

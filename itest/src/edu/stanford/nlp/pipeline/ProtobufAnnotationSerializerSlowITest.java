@@ -19,7 +19,8 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.zip.GZIPOutputStream;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
+
 
 /**
  * Make sure serializing to Protocol Buffers works, and is lossless.

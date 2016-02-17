@@ -1691,7 +1691,7 @@ public class CoreAnnotations {
    *
    * @see edu.stanford.nlp.pipeline.KBPAnnotator
    */
-  public static class KBPRelationAnnotation implements CoreAnnotation<List<RelationTriple>>{
+  public static class KBPTriplesAnnotation implements CoreAnnotation<List<RelationTriple>>{
     public Class<List<RelationTriple>> getType() { return ErasureUtils.uncheckedCast(List.class); }
   }
 }
