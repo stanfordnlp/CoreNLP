@@ -1,4 +1,4 @@
-package edu.stanford.nlp.parser.nndep; 
+package edu.stanford.nlp.parser.nndep;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.util.CollectionUtils;
@@ -592,10 +592,12 @@ public class Classifier  {
       }
     }
 
-    for (int i = 0; i < E.length; ++i) {
-      for (int j = 0; j < E[i].length; ++j) {
-        eg2E[i][j] += gradE[i][j] * gradE[i][j];
-        E[i][j] -= adaAlpha * gradE[i][j] / Math.sqrt(eg2E[i][j] + adaEps);
+    if (config.doWordEmbeddingGradUpdate) {
+      for (int i = 0; i < E.length; ++i) {
+        for (int j = 0; j < E[i].length; ++j) {
+          eg2E[i][j] += gradE[i][j] * gradE[i][j];
+          E[i][j] -= adaAlpha * gradE[i][j] / Math.sqrt(eg2E[i][j] + adaEps);
+        }
       }
     }
   }
