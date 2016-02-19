@@ -121,6 +121,9 @@ public class NaturalLogicWeights {
         if (neighborRel.contains("prep")) {
           pp = Optional.of(neighborRel);
         }
+        if (neighborRel.contains("obj")) {
+          return 1.0;  // allow deleting second object
+        }
       }
     }
     String obj = edge.getDependent().originalText().toLowerCase();
