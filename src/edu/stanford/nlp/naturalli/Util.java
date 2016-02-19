@@ -15,10 +15,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.GrammaticalRelation;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.IterableIterator;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.*;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -174,9 +171,24 @@ public class Util {
 
     // Clean edges
     Iterator<SemanticGraphEdge> iter = tree.edgeIterable().iterator();
+    List<Triple<IndexedWord, IndexedWord, SemanticGraphEdge>> toAdd = new ArrayList<>();
+    toDelete.clear();
     while (iter.hasNext()) {
       SemanticGraphEdge edge = iter.next();
       if (edge.getDependent().index() == edge.getGovernor().index()) {
+        // Clean up copy-edges
+        if (edge.getDependent().isCopy(edge.getGovernor())) {
+          for (SemanticGraphEdge toCopy : tree.outgoingEdgeIterable(edge.getDependent())) {
+            toAdd.add(Triple.makeTriple(edge.getGovernor(), toCopy.getDependent(), toCopy));
+          }
+          toDelete.add(edge.getDependent());
+        }
+        if (edge.getGovernor().isCopy(edge.getDependent())) {
+          for (SemanticGraphEdge toCopy : tree.outgoingEdgeIterable(edge.getGovernor())) {
+            toAdd.add(Triple.makeTriple(edge.getDependent(), toCopy.getDependent(), toCopy));
+          }
+          toDelete.add(edge.getGovernor());
+        }
         // Clean self-edges
         iter.remove();
       } else if (edge.getRelation().toString().equals("punct")) {
@@ -185,6 +197,12 @@ public class Util {
           iter.remove();
         }
       }
+    }
+    // (add edges we wanted to add)
+    toDelete.forEach(tree::removeVertex);
+    for (Triple<IndexedWord, IndexedWord, SemanticGraphEdge> edge : toAdd) {
+      tree.addEdge(edge.first, edge.second,
+          edge.third.getRelation(), edge.third.getWeight(), edge.third.isExtra());
     }
 
     // Remove extra edges

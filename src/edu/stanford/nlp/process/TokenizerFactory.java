@@ -25,10 +25,10 @@ import java.io.Reader;
  */
 public interface TokenizerFactory<T> extends IteratorFromReaderFactory<T> {
 
-  Tokenizer<T> getTokenizer(Reader r);
+  public Tokenizer<T> getTokenizer(Reader r);
 
-  Tokenizer<T> getTokenizer(Reader r, String extraOptions);
+  public Tokenizer<T> getTokenizer(Reader r, String extraOptions);
 
-  void setOptions(String options);
+  public void setOptions(String options);
 
 }
