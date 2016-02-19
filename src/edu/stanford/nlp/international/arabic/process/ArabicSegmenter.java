@@ -1,8 +1,7 @@
-package edu.stanford.nlp.international.arabic.process; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.arabic.process;
+
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -17,6 +16,7 @@ import java.util.Properties;
 
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.SentenceUtils;
@@ -35,6 +35,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Arabic word segmentation model based on conditional random fields (CRF).
@@ -432,15 +433,10 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
   }
 
   public void loadSegmenter(String filename, Properties p) {
-    classifier = new CRFClassifier<>(p);
     try {
-      classifier.loadClassifier(new File(filename), p);
-    } catch (ClassCastException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    } catch (ClassNotFoundException e) {
-      e.printStackTrace();
+      classifier = CRFClassifier.getClassifier(filename, p);
+    } catch (ClassCastException | IOException | ClassNotFoundException e) {
+      throw new RuntimeIOException("Failed to load segmenter " + filename, e);
     }
   }
 
@@ -451,7 +447,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
 
 
   private static String usage() {
-    String nl = System.getProperty("line.separator");
+    String nl = System.lineSeparator();
     StringBuilder sb = new StringBuilder();
     sb.append("Usage: java ").append(ArabicSegmenter.class.getName()).append(" OPTS < file_to_segment").append(nl);
     sb.append(nl).append(" Options:").append(nl);
