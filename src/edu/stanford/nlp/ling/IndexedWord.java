@@ -1,6 +1,7 @@
-package edu.stanford.nlp.ling; 
+package edu.stanford.nlp.ling;
 import edu.stanford.nlp.util.logging.Redwood;
 
+import java.util.Objects;
 import java.util.Set;
 
 import edu.stanford.nlp.util.StringUtils;
@@ -45,9 +46,9 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
   private final CoreLabel label;
 
   private int copyCount; // = 0;
-  
+
   private int numCopies = 0;
-  
+
   private IndexedWord original = null;
 
   /**
@@ -117,7 +118,7 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
     copy.setCopyCount(count);
     return copy;
   }
-  
+
   public IndexedWord makeCopy() {
     return makeCopy(++numCopies);
   }
@@ -128,7 +129,7 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
     copy.original = this;
     return copy;
   }
-  
+
   public IndexedWord makeSoftCopy() {
     if (original != null) {
       return original.makeSoftCopy();
@@ -136,7 +137,7 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
       return makeSoftCopy(++numCopies);
     }
   }
-  
+
   public IndexedWord getOriginal() {
     return original;
   }
@@ -329,33 +330,26 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
   public String toPrimes() {
     return StringUtils.repeat('\'', copyCount);
   }
-  
+
   public boolean isCopy(IndexedWord otherWord) {
     Integer myInd = get(CoreAnnotations.IndexAnnotation.class);
     Integer otherInd = otherWord.get(CoreAnnotations.IndexAnnotation.class);
-    if (myInd == null) {
-      if (otherInd != null)
-      return false;
-    } else if ( ! myInd.equals(otherInd)) {
+    if ( ! Objects.equals(myInd, otherInd)) {
       return false;
     }
+
     Integer mySentInd = get(CoreAnnotations.SentenceIndexAnnotation.class);
     Integer otherSentInd = otherWord.get(CoreAnnotations.SentenceIndexAnnotation.class);
-    if (mySentInd == null) {
-      if (otherSentInd != null)
-      return false;
-    } else if ( ! mySentInd.equals(otherSentInd)) {
+    if ( ! Objects.equals(mySentInd, otherSentInd)) {
       return false;
     }
+
     String myDocID = getString(CoreAnnotations.DocIDAnnotation.class);
     String otherDocID = otherWord.getString(CoreAnnotations.DocIDAnnotation.class);
-    if (myDocID == null) {
-      if (otherDocID != null)
-      return false;
-    } else if ( ! myDocID.equals(otherDocID)) {
+    if ( ! Objects.equals(myDocID, otherDocID)) {
       return false;
     }
-    
+
     if (copyCount() == 0 || otherWord.copyCount() != 0) {
       return false;
     }
@@ -378,28 +372,22 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord>  
     final IndexedWord otherWord = (IndexedWord) o;
     Integer myInd = get(CoreAnnotations.IndexAnnotation.class);
     Integer otherInd = otherWord.get(CoreAnnotations.IndexAnnotation.class);
-    if (myInd == null) {
-      if (otherInd != null)
-      return false;
-    } else if ( ! myInd.equals(otherInd)) {
+    if ( ! Objects.equals(myInd, otherInd)) {
       return false;
     }
+
     Integer mySentInd = get(CoreAnnotations.SentenceIndexAnnotation.class);
     Integer otherSentInd = otherWord.get(CoreAnnotations.SentenceIndexAnnotation.class);
-    if (mySentInd == null) {
-      if (otherSentInd != null)
-      return false;
-    } else if ( ! mySentInd.equals(otherSentInd)) {
+    if ( ! Objects.equals(mySentInd, otherSentInd)) {
       return false;
     }
+
     String myDocID = getString(CoreAnnotations.DocIDAnnotation.class);
     String otherDocID = otherWord.getString(CoreAnnotations.DocIDAnnotation.class);
-    if (myDocID == null) {
-      if (otherDocID != null)
-      return false;
-    } else if ( ! myDocID.equals(otherDocID)) {
+    if ( ! Objects.equals(myDocID, otherDocID)) {
       return false;
     }
+
     if (copyCount() != otherWord.copyCount()) {
       return false;
     }
