@@ -239,7 +239,7 @@ public enum NaturalLogicRelation {
     put("neg", NaturalLogicRelation.NEGATION);  //
     put("nn", NaturalLogicRelation.INDEPENDENCE);  //
     put("npadvmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  // "9 months after his election, <main clause>"
-    put("nsubj", NaturalLogicRelation.INDEPENDENCE);  //
+    put("nsubj", NaturalLogicRelation.REVERSE_ENTAILMENT);  // Note[gabor]: Only true for _duplicate_ nsubj relations. @see NaturalLogicWeights.
     put("nsubjpass", NaturalLogicRelation.INDEPENDENCE);  //
     put("number", NaturalLogicRelation.INDEPENDENCE);  //
     put("num", NaturalLogicRelation.INDEPENDENCE);  // gets a bit too vague if we allow deleting this? "he served three terms" -?-> "he served terms"

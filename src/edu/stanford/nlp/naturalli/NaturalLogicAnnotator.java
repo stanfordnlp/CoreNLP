@@ -364,6 +364,9 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
         Optional<Triple<Operator,Integer,Integer>> quantifierInfo;
         if (namedEntityQuantifier) {
           // named entities have the "all" semantics by default.
+          if (!neQuantifiers) {
+            continue;
+          }
           quantifierInfo = Optional.of(Triple.makeTriple(Operator.IMPLICIT_NAMED_ENTITY, quantifier.index(), quantifier.index()));  // note: empty quantifier span given
         } else {
           // find the quantifier, and return some info about it.
@@ -563,7 +566,11 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
   /**
    * If false, don't annotate tokens for polarity but only find the operators and their scopes.
    */
-  public final boolean doPolarity;
+  @ArgumentParser.Option(name="doPolarity", gloss="Mark polarity in addition to quantifier scopes")
+  private boolean doPolarity = true;
+
+  @ArgumentParser.Option(name="neQuantifiers", gloss="If true, mark named entities as quantifiers.")
+  private boolean neQuantifiers = false;
 
   /**
    * Create a new annotator.
@@ -571,7 +578,15 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
    * @param props The properties to configure this annotator with.
    */
   public NaturalLogicAnnotator(String annotatorName, Properties props) {
+    ArgumentParser.fillOptions(this, props);
     this.doPolarity = Boolean.valueOf(props.getProperty(annotatorName + ".doPolarity", "true"));
+    Properties withoutPrefix = new Properties();
+    Enumeration<Object> keys = props.keys();
+    while (keys.hasMoreElements()) {
+      String key = keys.nextElement().toString();
+      withoutPrefix.setProperty(key.replace(annotatorName + ".", ""), props.getProperty(key));
+    }
+    ArgumentParser.fillOptions(this, withoutPrefix);
   }
 
   /**
