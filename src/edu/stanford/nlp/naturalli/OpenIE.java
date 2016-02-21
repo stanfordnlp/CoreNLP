@@ -576,7 +576,6 @@ public class OpenIE implements Annotator  {
         CoreAnnotations.PartOfSpeechAnnotation.class,
         CoreAnnotations.LemmaAnnotation.class,
         NaturalLogicAnnotations.PolarityAnnotation.class,
-        NaturalLogicAnnotations.OperatorAnnotation.class,
         SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class,
         CoreAnnotations.OriginalTextAnnotation.class
     ));

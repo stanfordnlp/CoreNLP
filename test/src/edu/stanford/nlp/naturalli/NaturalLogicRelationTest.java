@@ -50,7 +50,7 @@ public class NaturalLogicRelationTest {
 
   @Test
   public void someInsertionRelations() {
-//    assertEquals(NaturalLogicRelation.INDEPENDENCE, NaturalLogicRelation.forDependencyInsertion("nsubj"));
+    assertEquals(NaturalLogicRelation.INDEPENDENCE, NaturalLogicRelation.forDependencyInsertion("nsubj"));
     assertEquals(NaturalLogicRelation.FORWARD_ENTAILMENT, NaturalLogicRelation.forDependencyInsertion("quantmod"));
     assertEquals(NaturalLogicRelation.REVERSE_ENTAILMENT, NaturalLogicRelation.forDependencyInsertion("amod"));
   }
@@ -64,7 +64,7 @@ public class NaturalLogicRelationTest {
 
   @Test
   public void someDeletionRelations() {
-//    assertEquals(NaturalLogicRelation.INDEPENDENCE, NaturalLogicRelation.forDependencyDeletion("nsubj"));
+    assertEquals(NaturalLogicRelation.INDEPENDENCE, NaturalLogicRelation.forDependencyDeletion("nsubj"));
     assertEquals(NaturalLogicRelation.REVERSE_ENTAILMENT, NaturalLogicRelation.forDependencyDeletion("quantmod"));
     assertEquals(NaturalLogicRelation.FORWARD_ENTAILMENT, NaturalLogicRelation.forDependencyDeletion("amod"));
   }

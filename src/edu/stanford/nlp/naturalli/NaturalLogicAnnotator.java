@@ -579,7 +579,6 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
    */
   public NaturalLogicAnnotator(String annotatorName, Properties props) {
     ArgumentParser.fillOptions(this, props);
-    this.doPolarity = Boolean.valueOf(props.getProperty(annotatorName + ".doPolarity", "true"));
     Properties withoutPrefix = new Properties();
     Enumeration<Object> keys = props.keys();
     while (keys.hasMoreElements()) {
