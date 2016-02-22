@@ -84,10 +84,10 @@ public class KBPAnnotator implements Annotator {
     // Load TokensRegexNER
     this.casedNER = new TokensRegexNERAnnotator(
         props.getProperty("kbp.regexner.cased", DefaultPaths.DEFAULT_KBP_REGEXNER_CASED),
-        true);
+        false);
     this.caselessNER = new TokensRegexNERAnnotator(
         props.getProperty("kbp.regexner.caseless", DefaultPaths.DEFAULT_KBP_REGEXNER_CASELESS),
-        false,
+        true,
         "^(NN|JJ).*");
   }
 
