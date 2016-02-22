@@ -417,21 +417,32 @@ function render(data) {
     }
     console.log(data);
     if (typeof sentence.kbp != 'undefined') {
-      console.log("HERE");
-      console.log(data.kbp);
       // Register the entities + relations we'll need
-      addEntityType('KBP_ENTITY',  'Entity');
       addRelationType('subject');
       addRelationType('object');
       // Loop over triples
       for (var i = 0; i < sentence.kbp.length; ++i) {
         var subjectSpan = sentence.kbp[i].subjectSpan;
+        var subjectLink = 'Entity';
+        for (var k = subjectSpan[0]; k < subjectSpan[1]; ++k) {
+          if (subjectLink == 'Entity' && tokens[k].link != 'O') {
+            subjectLink = tokens[k].link
+          }
+        }
+        addEntityType('KBP_ENTITY',  subjectLink);
         var objectSpan = sentence.kbp[i].objectSpan;
+        var objectLink = 'Entity';
+        for (var k = objectSpan[0]; k < objectSpan[1]; ++k) {
+          if (objectLink == 'Entity' && tokens[k].link != 'O') {
+            objectLLink = tokens[k].link
+          }
+        }
+        addEntityType('KBP_ENTITY',  objectLink);
         var relation = sentence.kbp[i].relation;
         var begin = parseInt(token.characterOffsetBegin);
         // Add the entities
-        addKBPEntity(subjectSpan, 'Entity');
-        addKBPEntity(objectSpan, 'Entity');
+        addKBPEntity(subjectSpan, subjectLink);
+        addKBPEntity(objectSpan, objectLink);
         // Add the relations
         addKBPRelation(subjectSpan, objectSpan, relation);
       }
