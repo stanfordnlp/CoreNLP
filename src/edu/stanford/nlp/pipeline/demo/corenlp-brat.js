@@ -425,7 +425,10 @@ function render(data) {
         var subjectSpan = sentence.kbp[i].subjectSpan;
         var subjectLink = 'Entity';
         for (var k = subjectSpan[0]; k < subjectSpan[1]; ++k) {
-          if (subjectLink == 'Entity' && tokens[k].link != 'O') {
+          if (subjectLink == 'Entity' &&
+              typeof token[k] != 'undefined' &&
+              tokens[k].link != 'O' &&
+              typeof token[k].link != 'undefined') {
             subjectLink = tokens[k].link
           }
         }
@@ -433,7 +436,10 @@ function render(data) {
         var objectSpan = sentence.kbp[i].objectSpan;
         var objectLink = 'Entity';
         for (var k = objectSpan[0]; k < objectSpan[1]; ++k) {
-          if (objectLink == 'Entity' && tokens[k].link != 'O') {
+          if (objectLink == 'Entity' &&
+              typeof token[k] != 'undefined' &&
+              tokens[k].link != 'O' &&
+              typeof token[k].link != 'undefined') {
             objectLLink = tokens[k].link
           }
         }
@@ -441,6 +447,7 @@ function render(data) {
         var relation = sentence.kbp[i].relation;
         var begin = parseInt(token.characterOffsetBegin);
         // Add the entities
+        console.log("Adding entities of type " + subjectLink + " and " + objectLink);
         addKBPEntity(subjectSpan, subjectLink);
         addKBPEntity(objectSpan, objectLink);
         // Add the relations
