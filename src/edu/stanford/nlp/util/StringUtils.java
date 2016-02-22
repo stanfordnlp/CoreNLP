@@ -550,6 +550,9 @@ public class StringUtils  {
         lastSplit = i + 1;
       }
     }
+    if (outI < out.length) {
+      out[outI] = input.substring(lastSplit);
+    }
   }
 
   /** Split a string into tokens.  Because there is a tokenRegex as well as a

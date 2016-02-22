@@ -403,7 +403,7 @@ public class Dictionaries  {
       String[] countStr = new String[3];
       for (String line; (line = reader.readLine()) != null; ) {
         StringUtils.splitOnChar(split, line, '\t');
-        StringUtils.splitOnChar(countStr, split[1], '\t');
+        StringUtils.splitOnChar(countStr, split[1], ' ');
 
         int male = Integer.parseInt(countStr[0]);
         int female = Integer.parseInt(countStr[1]);
