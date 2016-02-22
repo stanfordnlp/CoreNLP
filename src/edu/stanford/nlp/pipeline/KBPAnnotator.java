@@ -277,6 +277,16 @@ public class KBPAnnotator implements Annotator {
       }
     }
 
+    // Propagate Entity Link
+    for (Map.Entry<CoreMap, Set<CoreMap>> entry : mentionsMap.entrySet()) {
+      String entityLink = entry.getKey().get(CoreAnnotations.WikipediaEntityAnnotation.class);
+      for (CoreMap mention : entry.getValue()) {
+        for (CoreLabel token : mention.get(CoreAnnotations.TokensAnnotation.class)) {
+          token.set(CoreAnnotations.WikipediaEntityAnnotation.class, entityLink);
+        }
+      }
+    }
+
     // Create a canonical mention map
     Map<CoreMap, CoreMap> mentionToCanonicalMention = new HashMap<>();
     for (Map.Entry<CoreMap, Set<CoreMap>> entry : mentionsMap.entrySet()) {
@@ -292,16 +302,6 @@ public class KBPAnnotator implements Annotator {
     mentions.stream().filter(mention -> mentionToCanonicalMention.get(mention) == null)
         .forEach(mention -> mentionToCanonicalMention.put(mention, mention));
 
-
-    // Propagate Entity Link
-    for (Map.Entry<CoreMap, Set<CoreMap>> entry : mentionsMap.entrySet()) {
-      String entityLink = entry.getKey().get(CoreAnnotations.WikipediaEntityAnnotation.class);
-      for (CoreMap mention : entry.getValue()) {
-        for (CoreLabel token : mention.get(CoreAnnotations.TokensAnnotation.class)) {
-          token.set(CoreAnnotations.WikipediaEntityAnnotation.class, entityLink);
-        }
-      }
-    }
 
     // Cluster mentions by sentence
     @SuppressWarnings("unchecked") List<CoreMap>[] mentionsBySentence = new List[annotation.get(CoreAnnotations.SentencesAnnotation.class).size()];
