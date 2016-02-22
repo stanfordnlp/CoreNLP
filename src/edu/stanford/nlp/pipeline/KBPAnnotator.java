@@ -235,7 +235,7 @@ public class KBPAnnotator implements Annotator {
       }
     }
     // (collect coreferent KBP mentions)
-    Map<CoreMap, Set<CoreMap>> mentionsMap = new HashMap<>();
+    Map<CoreMap, Set<CoreMap>> mentionsMap = new HashMap<>();  // map from canonical mention -> other mentions
     for (Map.Entry<Integer, CorefChain> chain : annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class).entrySet()) {
       CoreMap firstMention = null;
       for (CorefChain.CorefMention mention : chain.getValue().getMentionsInTextualOrder()) {
@@ -291,6 +291,17 @@ public class KBPAnnotator implements Annotator {
     // (add missing mentions)
     mentions.stream().filter(mention -> mentionToCanonicalMention.get(mention) == null)
         .forEach(mention -> mentionToCanonicalMention.put(mention, mention));
+
+
+    // Propagate Entity Link
+    for (Map.Entry<CoreMap, Set<CoreMap>> entry : mentionsMap.entrySet()) {
+      String entityLink = entry.getKey().get(CoreAnnotations.WikipediaEntityAnnotation.class);
+      for (CoreMap mention : entry.getValue()) {
+        for (CoreLabel token : mention.get(CoreAnnotations.TokensAnnotation.class)) {
+          token.set(CoreAnnotations.WikipediaEntityAnnotation.class, entityLink);
+        }
+      }
+    }
 
     // Cluster mentions by sentence
     @SuppressWarnings("unchecked") List<CoreMap>[] mentionsBySentence = new List[annotation.get(CoreAnnotations.SentencesAnnotation.class).size()];
