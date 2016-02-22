@@ -415,44 +415,37 @@ function render(data) {
                            [['governor',  kbpEntity(gov)],
                             ['dependent', kbpEntity(dep)]  ] ]);
     }
-    console.log(data);
     if (typeof sentence.kbp != 'undefined') {
       // Register the entities + relations we'll need
       addRelationType('subject');
       addRelationType('object');
       // Loop over triples
       for (var i = 0; i < sentence.kbp.length; ++i) {
-        console.log("-----");
         var subjectSpan = sentence.kbp[i].subjectSpan;
         var subjectLink = 'Entity';
         for (var k = subjectSpan[0]; k < subjectSpan[1]; ++k) {
-          console.log(tokens[k]);
           if (subjectLink == 'Entity' &&
               typeof tokens[k] != 'undefined' &&
               tokens[k].entitylink != 'O' &&
               typeof tokens[k].entitylink != 'undefined') {
             subjectLink = tokens[k].entitylink
-            console.log(subjectLink);
           }
         }
         addEntityType('KBP_ENTITY',  subjectLink);
         var objectSpan = sentence.kbp[i].objectSpan;
         var objectLink = 'Entity';
         for (var k = objectSpan[0]; k < objectSpan[1]; ++k) {
-          console.log(tokens[k]);
           if (objectLink == 'Entity' &&
               typeof tokens[k] != 'undefined' &&
               tokens[k].entitylink != 'O' &&
               typeof tokens[k].entitylink != 'undefined') {
             objectLink = tokens[k].entitylink
-            console.log(objectLink);
           }
         }
         addEntityType('KBP_ENTITY',  objectLink);
         var relation = sentence.kbp[i].relation;
         var begin = parseInt(token.characterOffsetBegin);
         // Add the entities
-        console.log("Adding entities of type " + subjectLink + " and " + objectLink);
         addKBPEntity(subjectSpan, subjectLink);
         addKBPEntity(objectSpan, objectLink);
         // Add the relations
