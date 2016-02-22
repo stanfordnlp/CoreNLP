@@ -56,6 +56,8 @@ public class DefaultPaths {
   public static final String DEFAULT_KBP_REGEXNER_CASED = "edu/stanford/nlp/models/kbp/regexner_cased.tab";
   public static final String DEFAULT_KBP_REGEXNER_CASELESS = "edu/stanford/nlp/models/kbp/regexner_caseless.tab";
 
+  public static final String DEFAULT_WIKIDICT_TSV = "edu/stanford/nlp/models/el/wikidict.tab.gz";
+
 
   private DefaultPaths() {
   }

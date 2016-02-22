@@ -532,6 +532,26 @@ public class StringUtils  {
     return fields;
   }
 
+
+  /**
+   * Split on a given character, filling out the fields in the output array.
+   * This is suitable for, e.g., splitting a TSV file of known column count.
+   * @param out The output array to fill
+   * @param input The input to split
+   * @param delimiter The delimiter to split on.
+   */
+  public static void splitOnChar(String[] out, String input, char delimiter) {
+    int lastSplit = 0;
+    int outI = 0;
+    for (int i = 0; i < input.length(); ++i) {
+      if (input.charAt(i) == delimiter) {
+        out[outI] = input.substring(lastSplit, i);
+        outI += 1;
+        lastSplit = i + 1;
+      }
+    }
+  }
+
   /** Split a string into tokens.  Because there is a tokenRegex as well as a
    *  separatorRegex (unlike for the conventional split), you can do things
    *  like correctly split quoted strings or parenthesized arguments.

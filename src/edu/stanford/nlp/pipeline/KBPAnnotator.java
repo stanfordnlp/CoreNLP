@@ -275,8 +275,9 @@ public class KBPAnnotator implements Annotator {
     Map<CoreMap, CoreMap> mentionToCanonicalMention = new HashMap<>();
     for (Map.Entry<CoreMap, Set<CoreMap>> entry : mentionsMap.entrySet()) {
       for (CoreMap mention : entry.getValue()) {
-        // (set the NER tag to be axiomatically that of the canonical mention)
+        // (set the NER tag + link to be axiomatically that of the canonical mention)
         mention.set(CoreAnnotations.NamedEntityTagAnnotation.class, entry.getKey().get(CoreAnnotations.NamedEntityTagAnnotation.class));
+        mention.set(CoreAnnotations.WikipediaEntityAnnotation.class, entry.getKey().get(CoreAnnotations.WikipediaEntityAnnotation.class));
         // (add the mention (note: this must come after we set the NER!)
         mentionToCanonicalMention.put(mention, entry.getKey());
       }
@@ -327,13 +328,17 @@ public class KBPAnnotator implements Annotator {
               //  -- END Classify
               // Handle the classifier output
               if (!KBPRelationExtractor.NO_RELATION.equals(prediction.first)) {
-                RelationTriple triple = new RelationTriple(
+                RelationTriple triple = new RelationTriple.WithLink(
                     subj.get(CoreAnnotations.TokensAnnotation.class),
                     mentionToCanonicalMention.get(subj).get(CoreAnnotations.TokensAnnotation.class),
                     Collections.singletonList(new CoreLabel(new Word(prediction.first))),
                     obj.get(CoreAnnotations.TokensAnnotation.class),
                     mentionToCanonicalMention.get(obj).get(CoreAnnotations.TokensAnnotation.class),
-                    prediction.second);
+                    prediction.second,
+                    sentences.get(sentenceI).get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class),
+                    subj.get(CoreAnnotations.WikipediaEntityAnnotation.class),
+                    obj.get(CoreAnnotations.WikipediaEntityAnnotation.class)
+                    );
                 triples.add(triple);
               }
             }
