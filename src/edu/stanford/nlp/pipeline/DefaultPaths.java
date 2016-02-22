@@ -55,9 +55,13 @@ public class DefaultPaths {
 //  public static final String DEFAULT_KBP_CLASSIFIER = "edu/stanford/nlp/models/kbp/supervised.ser.gz";
 //  public static final String DEFAULT_KBP_REGEXNER_CASED = "edu/stanford/nlp/models/kbp/regexner_cased.tab";
 //  public static final String DEFAULT_KBP_REGEXNER_CASELESS = "edu/stanford/nlp/models/kbp/regexner_caseless.tab";
+//  public static final String DEFAULT_KBP_SEMGREX_DIR = "edu/stanford/nlp/models/kbp/semgrex";
+//  public static final String DEFAULT_KBP_TOKENSREGEX_DIR = "edu/stanford/nlp/models/kbp/tokensregex";
   public static final String DEFAULT_KBP_CLASSIFIER = "/home/gabor/tmp/supervised.ser.gz";
   public static final String DEFAULT_KBP_REGEXNER_CASED = "/home/gabor/staging/regexner_cased.tab";
   public static final String DEFAULT_KBP_REGEXNER_CASELESS = "/home/gabor/staging/regexner_caseless.tab";
+  public static final String DEFAULT_KBP_SEMGREX_DIR = "/home/gabor/staging/semgrex";
+  public static final String DEFAULT_KBP_TOKENSREGEX_DIR = "/home/gabor/staging/tokensregex";
 
 //  public static final String DEFAULT_WIKIDICT_TSV = "edu/stanford/nlp/models/el/wikidict.tab.gz";
   public static final String DEFAULT_WIKIDICT_TSV = "/opt/corenlp/wikidict.tab.gz";

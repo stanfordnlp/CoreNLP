@@ -5,6 +5,9 @@ import edu.stanford.nlp.classify.LinearClassifier;
 import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.hcoref.data.CorefChain;
 import edu.stanford.nlp.ie.KBPRelationExtractor;
+import edu.stanford.nlp.ie.KBPSemgrexExtractor;
+import edu.stanford.nlp.ie.KBPStatisticalExtractor;
+import edu.stanford.nlp.ie.KBPTokensregexExtractor;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.IOUtils;
@@ -16,6 +19,7 @@ import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.simple.Document;
 import edu.stanford.nlp.util.AcronymMatcher;
+import edu.stanford.nlp.util.ArgumentParser;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 
@@ -28,17 +32,28 @@ import java.util.stream.Collectors;
  *
  * @author Gabor Angeli
  */
+@SuppressWarnings("FieldCanBeLocal")
 public class KBPAnnotator implements Annotator {
 
-  /**
-   * The number of threads to run on.
-   */
-  public final int threads;
+  @ArgumentParser.Option(name="model", gloss="The path to the model")
+  private String model = DefaultPaths.DEFAULT_KBP_CLASSIFIER;
+
+  @ArgumentParser.Option(name="semgrex", gloss="Semgrex patterns directory")
+  private String semgrexdir = DefaultPaths.DEFAULT_KBP_SEMGREX_DIR;
+
+  @ArgumentParser.Option(name="tokensregex", gloss="Tokensregex patterns directory")
+  private String tokensregexdir = DefaultPaths.DEFAULT_KBP_TOKENSREGEX_DIR;
+
+  @ArgumentParser.Option(name="regexner.cased", gloss="The tokensregexner cased path")
+  private String regexnerCasedPath = DefaultPaths.DEFAULT_KBP_REGEXNER_CASED;
+
+  @ArgumentParser.Option(name="regexner.caseless", gloss="The tokensregexner caseless path")
+  private String regexnerCaselessPath = DefaultPaths.DEFAULT_KBP_REGEXNER_CASELESS;
 
   /**
    * The extractor implementation.
    */
-  public final KBPRelationExtractor extractor;
+  public final List<KBPRelationExtractor> extractors;
 
   /**
    * A serializer to convert to the Simple CoreNLP representation.
@@ -63,35 +78,39 @@ public class KBPAnnotator implements Annotator {
    */
   public KBPAnnotator(String name, Properties props) {
     // Parse standard properties
-    this.threads = Integer.parseInt(props.getProperty("threads", "1"));
+    ArgumentParser.fillOptions(this, name, props);
 
     // Load the extractor
+    extractors = new ArrayList<>();
     try {
-      Object object = IOUtils.readObjectFromURLOrClasspathOrFileSystem(
-          props.getProperty("kbp.model", DefaultPaths.DEFAULT_KBP_CLASSIFIER));
+      Object object = IOUtils.readObjectFromURLOrClasspathOrFileSystem(model);
       if (object instanceof LinearClassifier) {
         //noinspection unchecked
-        this.extractor = new KBPRelationExtractor((Classifier<String, String>) object);
-      } else if (object instanceof KBPRelationExtractor) {
-        this.extractor = (KBPRelationExtractor) object;
+        extractors.add(new KBPStatisticalExtractor((Classifier<String, String>) object));
+      } else if (object instanceof KBPStatisticalExtractor) {
+        extractors.add( (KBPStatisticalExtractor) object );
       } else {
-        throw new ClassCastException(object.getClass() + " cannot be cast into a " + KBPRelationExtractor.class);
+        throw new ClassCastException(object.getClass() + " cannot be cast into a " + KBPStatisticalExtractor.class);
       }
+      extractors.add(new KBPTokensregexExtractor(tokensregexdir));
+      extractors.add(new KBPSemgrexExtractor(semgrexdir));
     } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeIOException(e);
     }
 
     // Load TokensRegexNER
     this.casedNER = new TokensRegexNERAnnotator(
-        props.getProperty("kbp.regexner.cased", DefaultPaths.DEFAULT_KBP_REGEXNER_CASED),
+        regexnerCasedPath,
         false);
     this.caselessNER = new TokensRegexNERAnnotator(
-        props.getProperty("kbp.regexner.caseless", DefaultPaths.DEFAULT_KBP_REGEXNER_CASELESS),
+        regexnerCaselessPath,
         true,
         "^(NN|JJ).*");
   }
 
 
+  /** @see KBPAnnotator#KBPAnnotator(String, Properties) */
+  @SuppressWarnings("unused")
   public KBPAnnotator(Properties properties) {
     this(STANFORD_KBP, properties);
 
@@ -333,7 +352,7 @@ public class KBPAnnotator implements Annotator {
 
             if (objNER.isPresent() &&
                 KBPRelationExtractor.RelationType.plausiblyHasRelation(subjNER.get(), objNER.get())) {  // type check
-              KBPRelationExtractor.FeaturizerInput input = new KBPRelationExtractor.FeaturizerInput(
+              KBPStatisticalExtractor.FeaturizerInput input = new KBPStatisticalExtractor.FeaturizerInput(
                   new Span(subjBegin, subjEnd),
                   new Span(objBegin, objEnd),
                   subjNER.get(),
@@ -341,10 +360,20 @@ public class KBPAnnotator implements Annotator {
                   doc.sentence(sentenceI)
               );
               //  -- BEGIN Classify
-              Pair<String, Double> prediction = extractor.classify(input);
+              Pair<String, Double> prediction = Pair.makePair(KBPRelationExtractor.NO_RELATION, 1.0);
+              for (KBPRelationExtractor extractor : extractors) {
+                Pair<String, Double> classifierPrediction = extractor.classify(input);
+                if (prediction.first.equals(KBPRelationExtractor.NO_RELATION) ||
+                    (!classifierPrediction.first.equals(KBPRelationExtractor.NO_RELATION) &&
+                        classifierPrediction.second > prediction.second)
+                    ){
+                  // The last prediction was NO_RELATION, or this is not NO_RELATION and has a higher score
+                  prediction = classifierPrediction;
+                }
+              }
               //  -- END Classify
               // Handle the classifier output
-              if (!KBPRelationExtractor.NO_RELATION.equals(prediction.first)) {
+              if (!KBPStatisticalExtractor.NO_RELATION.equals(prediction.first)) {
                 RelationTriple triple = new RelationTriple.WithLink(
                     subj.get(CoreAnnotations.TokensAnnotation.class),
                     mentionToCanonicalMention.get(subj).get(CoreAnnotations.TokensAnnotation.class),
