@@ -290,6 +290,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(NormalizedNamedEntityTagAnnotation.class)) { builder.setNormalizedNER(getAndRegister(coreLabel, keysToSerialize, NormalizedNamedEntityTagAnnotation.class)); }
     if (keySet.contains(TimexAnnotation.class)) { builder.setTimexValue(toProto(getAndRegister(coreLabel, keysToSerialize, TimexAnnotation.class))); }
     if (keySet.contains(AnswerAnnotation.class)) { builder.setAnswer(getAndRegister(coreLabel, keysToSerialize, AnswerAnnotation.class)); }
+    if (keySet.contains(WikipediaEntityAnnotation.class)) { builder.setWikipediaEntity(getAndRegister(coreLabel, keysToSerialize, WikipediaEntityAnnotation.class)); }
     if (keySet.contains(XmlContextAnnotation.class)) {
       builder.setHasXmlContext(true);
       builder.addAllXmlContext(getAndRegister(coreLabel, keysToSerialize, XmlContextAnnotation.class));
@@ -1021,6 +1022,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasCoarseTag()) { word.set(CoarseTagAnnotation.class, proto.getCoarseTag()); }
     if (proto.hasConllUTokenSpan()) { word.set(CoNLLUTokenSpanAnnotation.class, new IntPair(proto.getConllUTokenSpan().getBegin(), proto.getSpan().getEnd())); }
     if (proto.hasConllUSecondaryDeps()) { word.set(CoNLLUSecondaryDepsAnnotation.class, fromProto(proto.getConllUSecondaryDeps())); }
+    if (proto.hasWikipediaEntity()) { word.set(WikipediaEntityAnnotation.class, proto.getWikipediaEntity()); }
 
 
             // Non-default annotators

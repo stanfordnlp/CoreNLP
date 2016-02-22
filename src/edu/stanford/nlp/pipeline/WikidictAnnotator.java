@@ -13,6 +13,7 @@ import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.SystemUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -76,10 +77,16 @@ public class WikidictAnnotator extends SentenceAnnotator {
         i += 1;
       }
       log.info("Done reading Wikidict (" + dictionary.size() + " links read; " + Redwood.formatTimeDifference(System.currentTimeMillis() - startTime) + " elapsed)");
-    } catch (Throwable e) {
-      e.printStackTrace();
-      System.exit(1);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
+  }
+
+  /** @see WikidictAnnotator#WikidictAnnotator(String, Properties) */
+  @SuppressWarnings("unused")
+  public WikidictAnnotator(Properties properties) {
+    this(STANFORD_LINK, properties);
+
   }
 
   /**
@@ -159,6 +166,10 @@ public class WikidictAnnotator extends SentenceAnnotator {
   /** {@inheritDoc} */
   @Override
   protected void doOneSentence(Annotation annotation, CoreMap sentence) {
+    for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
+      token.set(CoreAnnotations.WikipediaEntityAnnotation.class, "O");
+    }
+
     for (CoreMap mention : sentence.get(CoreAnnotations.MentionsAnnotation.class)) {
       Optional<String> canonicalName = link(mention);
       if (canonicalName.isPresent()) {
@@ -194,4 +205,23 @@ public class WikidictAnnotator extends SentenceAnnotator {
     ));
     return Collections.unmodifiableSet(requirements);
   }
+
+
+  /**
+   * A debugging method to try entity linking sentences from the console.
+   * @throws IOException
+   */
+  public static void main(String[] args) throws IOException {
+    Properties props = StringUtils.argsToProperties(args);
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,entitymentions,entitylink");
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    IOUtils.console("sentence> ", line -> {
+      Annotation ann = new Annotation(line);
+      pipeline.annotate(ann);
+      List<CoreLabel> tokens = ann.get(CoreAnnotations.SentencesAnnotation.class).get(0).get(CoreAnnotations.TokensAnnotation.class);
+      System.err.println(StringUtils.join(tokens.stream().map(x -> x.get(CoreAnnotations.WikipediaEntityAnnotation.class)), "  "));
+    });
+  }
 }
+
+

@@ -456,6 +456,12 @@ public class XMLOutputter extends AnnotationOutputter  {
       wordInfo.appendChild(cur);
     }
 
+    if (token.containsKey(CoreAnnotations.WikipediaEntityAnnotation.class)) {
+      Element cur = new Element("entitylink", curNS);
+      cur.appendChild(token.get(CoreAnnotations.WikipediaEntityAnnotation.class));
+      wordInfo.appendChild(cur);
+    }
+
 //    IntTuple corefDest;
 //    if((corefDest = label.get(CorefDestAnnotation.class)) != null){
 //      Element cur = new Element("coref", curNS);

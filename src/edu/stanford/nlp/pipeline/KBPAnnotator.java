@@ -61,7 +61,7 @@ public class KBPAnnotator implements Annotator {
    *
    * @param props The properties to use when creating this extractor.
    */
-  public KBPAnnotator(Properties props) {
+  public KBPAnnotator(String name, Properties props) {
     // Parse standard properties
     this.threads = Integer.parseInt(props.getProperty("threads", "1"));
 
@@ -89,6 +89,12 @@ public class KBPAnnotator implements Annotator {
         props.getProperty("kbp.regexner.caseless", DefaultPaths.DEFAULT_KBP_REGEXNER_CASELESS),
         false,
         "^(NN|JJ).*");
+  }
+
+
+  public KBPAnnotator(Properties properties) {
+    this(STANFORD_KBP, properties);
+
   }
 
 

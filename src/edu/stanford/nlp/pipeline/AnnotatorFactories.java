@@ -712,4 +712,19 @@ public class AnnotatorFactories  {
     };
   }
 
+  public static AnnotatorFactory link(Properties properties, AnnotatorImplementations annotatorImplementations) {
+    return new AnnotatorFactory(properties, annotatorImplementations) {
+      private static final long serialVersionUID = 42l;
+
+      @Override
+      public Annotator create() {
+        return annotatorImplementations.link(properties);
+      }
+
+      @Override
+      protected String additionalSignature() {
+        return "";
+      }
+    };
+  }
 }

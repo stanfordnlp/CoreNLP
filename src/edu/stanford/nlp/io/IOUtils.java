@@ -2084,12 +2084,15 @@ public class IOUtils  {
     System.out.print(prompt);
     while ( (line = reader.readLine()) != null) {
       switch (line.toLowerCase()) {
+        case "":
+          break;
         case "exit":
         case "quit":
         case "q":
           return;
         default:
           callback.accept(line);
+          break;
       }
       System.out.print(prompt);
     }
