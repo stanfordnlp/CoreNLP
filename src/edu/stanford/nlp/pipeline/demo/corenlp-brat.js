@@ -156,13 +156,13 @@ function render(data) {
       color = '#FFE000';
     } else if (name == 'ENTITY') {
       color = posColor('NN');
-    } else if (name == 'KBP_ENTITY') {
-      color = posColor('NN');
     } else if (name == 'RELATION') {
       color = posColor('VB');
     } else if (name == 'LEMMA') {
       color = '#FFFFFF';
     } else if (name == 'LINK') {
+      color = '#FFFFFF';
+    } else if (name == 'KBP_ENTITY') {
       color = '#FFFFFF';
     }
     // Register the type
@@ -422,25 +422,30 @@ function render(data) {
       addRelationType('object');
       // Loop over triples
       for (var i = 0; i < sentence.kbp.length; ++i) {
+        console.log("-----");
         var subjectSpan = sentence.kbp[i].subjectSpan;
         var subjectLink = 'Entity';
         for (var k = subjectSpan[0]; k < subjectSpan[1]; ++k) {
+          console.log(tokens[k]);
           if (subjectLink == 'Entity' &&
-              typeof token[k] != 'undefined' &&
-              tokens[k].link != 'O' &&
-              typeof token[k].link != 'undefined') {
-            subjectLink = tokens[k].link
+              typeof tokens[k] != 'undefined' &&
+              tokens[k].entitylink != 'O' &&
+              typeof tokens[k].entitylink != 'undefined') {
+            subjectLink = tokens[k].entitylink
+            console.log(subjectLink);
           }
         }
         addEntityType('KBP_ENTITY',  subjectLink);
         var objectSpan = sentence.kbp[i].objectSpan;
         var objectLink = 'Entity';
         for (var k = objectSpan[0]; k < objectSpan[1]; ++k) {
+          console.log(tokens[k]);
           if (objectLink == 'Entity' &&
-              typeof token[k] != 'undefined' &&
-              tokens[k].link != 'O' &&
-              typeof token[k].link != 'undefined') {
-            objectLLink = tokens[k].link
+              typeof tokens[k] != 'undefined' &&
+              tokens[k].entitylink != 'O' &&
+              typeof tokens[k].entitylink != 'undefined') {
+            objectLink = tokens[k].entitylink
+            console.log(objectLink);
           }
         }
         addEntityType('KBP_ENTITY',  objectLink);
