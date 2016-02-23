@@ -1,5 +1,5 @@
 ---
-title: Other Languages - Using Stanford CoreNLP in other languages and packages
+title: Using Stanford CoreNLP within other programming languages and packages
 keywords: other languages
 permalink: '/other-languages.html'
 ---
