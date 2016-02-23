@@ -422,4 +422,5 @@ public class KBPAnnotator implements Annotator {
     ));
     return Collections.unmodifiableSet(requirements);
   }
+
 }

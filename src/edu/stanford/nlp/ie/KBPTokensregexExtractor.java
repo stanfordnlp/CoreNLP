@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 /**
  * A tokensregex extractor for KBP.
  *
+ * IMPORTANT: Don't rename this class without updating the rules defs file.
+ *
  * @author Gabor Angeli
  */
 public class KBPTokensregexExtractor implements KBPRelationExtractor {
@@ -27,11 +29,17 @@ public class KBPTokensregexExtractor implements KBPRelationExtractor {
 
   private final Map<RelationType, CoreMapExpressionExtractor> rules = new HashMap<>();
 
-  public static class KBPEntity implements CoreAnnotation<String> {
+  /**
+   * IMPORTANT: Don't rename this class without updating the rules defs file.
+   */
+  public static class Subject implements CoreAnnotation<String> {
     public Class<String> getType() { return String.class; }
   }
 
-  public static class KBPSlotFill implements CoreAnnotation<String> {
+  /**
+   * IMPORTANT: Don't rename this class without updating the rules defs file.
+   */
+  public static class Object implements CoreAnnotation<String> {
     public Class<String> getType() { return String.class; }
   }
 
@@ -65,7 +73,7 @@ public class KBPTokensregexExtractor implements KBPRelationExtractor {
     List<CoreLabel> tokens = sentenceAsMap.get(CoreAnnotations.TokensAnnotation.class);
     // Annotate where the subject is
     for (int i : input.subjectSpan) {
-      tokens.get(i).set(KBPEntity.class, "true");
+      tokens.get(i).set(Subject.class, "true");
       if ("O".equals(tokens.get(i).ner())) {
         tokens.get(i).setNER(input.subjectType.name);
       }
@@ -73,7 +81,7 @@ public class KBPTokensregexExtractor implements KBPRelationExtractor {
 
     // Annotate where the object is
     for (int i : input.objectSpan) {
-      tokens.get(i).set(KBPSlotFill.class, "true");
+      tokens.get(i).set(Object.class, "true");
       if ("O".equals(tokens.get(i).ner())) {
         tokens.get(i).setNER(input.objectType.name);
       }
@@ -91,8 +99,8 @@ public class KBPTokensregexExtractor implements KBPRelationExtractor {
           MatchedExpression best = MatchedExpression.getBestMatched(extractions, MatchedExpression.EXPR_WEIGHT_SCORER);
           // Un-Annotate Sentence
           for (CoreLabel token : tokens) {
-            token.remove(KBPEntity.class);
-            token.remove(KBPSlotFill.class);
+            token.remove(Subject.class);
+            token.remove(Object.class);
           }
           return Pair.makePair(rel.canonicalName, best.getWeight());
         }
@@ -101,8 +109,8 @@ public class KBPTokensregexExtractor implements KBPRelationExtractor {
 
     // Un-Annotate Sentence
     for (CoreLabel token : tokens) {
-      token.remove(KBPEntity.class);
-      token.remove(KBPSlotFill.class);
+      token.remove(Subject.class);
+      token.remove(Object.class);
     }
     return Pair.makePair(NO_RELATION, 1.0);
   }
