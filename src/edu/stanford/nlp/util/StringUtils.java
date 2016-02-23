@@ -543,9 +543,10 @@ public class StringUtils  {
   public static void splitOnChar(String[] out, String input, char delimiter) {
     int lastSplit = 0;
     int outI = 0;
-    for (int i = 0; i < input.length(); ++i) {
-      if (input.charAt(i) == delimiter) {
-        out[outI] = input.substring(lastSplit, i);
+    char[] chars = input.toCharArray();
+    for (int i = 0; i < chars.length; ++i) {
+      if (chars[i] == delimiter) {
+        out[outI] = new String(chars, lastSplit, i - lastSplit);
         outI += 1;
         lastSplit = i + 1;
       }

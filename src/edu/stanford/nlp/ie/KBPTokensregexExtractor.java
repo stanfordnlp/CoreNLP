@@ -89,7 +89,8 @@ public class KBPTokensregexExtractor implements KBPRelationExtractor {
 
     // Run Rules
     for (RelationType rel : RelationType.values()) {
-      if (rules.containsKey(rel) && rel.entityType == input.subjectType &&
+      if (rules.containsKey(rel) &&
+          rel.entityType == input.subjectType &&
           rel.validNamedEntityLabels.contains(input.objectType)) {
         CoreMapExpressionExtractor extractor = rules.get(rel);
 

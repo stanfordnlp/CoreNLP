@@ -1928,6 +1928,62 @@ public class Counters  {
     out.close();
   }
 
+  /**
+   * Serialize a counter into an efficient string TSV
+   * @param c The counter to serialize
+   * @param filename The file to serialize to
+   * @param minMagnitude Ignore values under this magnitude
+   * @throws IOException
+   *
+   * @see Counters#deserializeStringCounter(String)
+   */
+  public static void serializeStringCounter(Counter<String> c,
+                                            String filename,
+                                            double minMagnitude) throws IOException {
+    PrintWriter writer = IOUtils.getPrintWriter(filename);
+    for (Entry<String, Double> entry : c.entrySet()) {
+      if (Math.abs(entry.getValue()) < minMagnitude) { continue; }
+      Triple<Boolean, Long, Integer> parts = SloppyMath.segmentDouble(entry.getValue());
+      writer.println(
+          entry.getKey().replace('\t', 'ߝ') + "\t" +
+              (parts.first ? '-' : '+') + "\t" +
+              parts.second + "\t" +
+              parts.third
+      );
+    }
+    writer.close();
+  }
+
+  /** @see Counters#serializeStringCounter(Counter, String, double) */
+  public static void serializeStringCounter(Counter<String> c,
+                                            String filename) throws IOException {
+    serializeStringCounter(c, filename, 0.0);
+  }
+
+
+  /**
+   * Read a Counter from a serialized file
+   * @param filename The file to read from
+   *
+   * @see Counters#serializeStringCounter(Counter, String, double)
+   */
+  public static ClassicCounter<String> deserializeStringCounter(String filename) throws IOException {
+    String[] fields = new String[4];
+    BufferedReader reader = IOUtils.readerFromString(filename);
+    String line;
+    ClassicCounter<String> counts = new ClassicCounter<>(1000000);
+    while ( (line = reader.readLine()) != null) {
+      StringUtils.splitOnChar(fields, line, '\t');
+      long mantissa = SloppyMath.parseInt(fields[2]);
+      int exponent = (int) SloppyMath.parseInt(fields[3]);
+      double value = SloppyMath.parseDouble(fields[1].equals("-"), mantissa, exponent);
+      counts.setCount(fields[0], value);
+    }
+    return counts;
+  }
+
+
+
   public static <T> void serializeCounter(Counter<T> c, String filename) throws IOException {
     // serialize to file
     ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(filename)));

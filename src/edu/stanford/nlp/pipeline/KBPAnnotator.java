@@ -18,10 +18,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.simple.Document;
-import edu.stanford.nlp.util.AcronymMatcher;
-import edu.stanford.nlp.util.ArgumentParser;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -438,6 +435,23 @@ public class KBPAnnotator implements Annotator {
         CoreAnnotations.OriginalTextAnnotation.class
     ));
     return Collections.unmodifiableSet(requirements);
+  }
+
+  /**
+   * A debugging method to try relation extraction from the console.
+   * @throws IOException
+   */
+  public static void main(String[] args) throws IOException {
+    Properties props = StringUtils.argsToProperties(args);
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,mention,coref,kbp");
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    IOUtils.console("sentence> ", line -> {
+      Annotation ann = new Annotation(line);
+      pipeline.annotate(ann);
+      for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
+        sentence.get(CoreAnnotations.KBPTriplesAnnotation.class).forEach(System.err::println);
+      }
+    });
   }
 
 }
