@@ -41,7 +41,7 @@ entries:
           url: corenlp-server.html
 
         - title: From other languages/packages
-          url: other-languages.md
+          url: other-languages.html
 
 
     - title : Annotators
