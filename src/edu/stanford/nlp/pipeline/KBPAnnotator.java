@@ -229,16 +229,27 @@ public class KBPAnnotator implements Annotator {
    * @param annotation The document to annotate.
    */
   public void annotate(Annotation annotation) {
+    List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
+
     // Annotate with NER
     casedNER.annotate(annotation);
     caselessNER.annotate(annotation);
+    // (update mentions with new NER)
+    for (CoreMap sentence : sentences) {
+      for (CoreMap mention : sentence.get(CoreAnnotations.MentionsAnnotation.class)) {
+        for (CoreLabel token : mention.get(CoreAnnotations.TokensAnnotation.class)) {
+          if (!"O".equals(token.ner())) {
+            mention.set(CoreAnnotations.NamedEntityTagAnnotation.class, token.ner());
+          }
+        }
+      }
+    }
 
     // Create simple document
     Document doc = new Document(serializer.toProto(annotation));
 
     // Get the mentions in the document
     List<CoreMap> mentions = new ArrayList<>();
-    List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
     for (CoreMap sentence : sentences) {
       mentions.addAll(sentence.get(CoreAnnotations.MentionsAnnotation.class));
     }

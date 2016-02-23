@@ -710,6 +710,7 @@ $(document).ready(function() {
       url: serverAddress + '?properties=' + encodeURIComponent(
         '{"annotators": "' + annotators() + '", "coref.md.type": "dep", "coref.mode": "statistical"}'),
       data: currentQuery,
+      dataType: 'json',
       contentType: "application/x-www-form-urlencoded;charset=UTF-8",
       success: function(data) {
         $('#submit').prop('disabled', false);
@@ -763,6 +764,7 @@ $(document).ready(function() {
         }
       },
       error: function(data) {
+        DATA = data;
         var alertDiv = $('<div/>').addClass('alert').addClass('alert-danger').addClass('alert-dismissible').addClass('corenlp_error').attr('role', 'alert')
         var button = $('<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>');
         var message = $('<span/>').text(data.responseText);
