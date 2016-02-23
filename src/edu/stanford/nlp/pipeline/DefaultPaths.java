@@ -63,8 +63,8 @@ public class DefaultPaths {
 //  public static final String DEFAULT_KBP_SEMGREX_DIR = "/home/gabor/staging/semgrex";
 //  public static final String DEFAULT_KBP_TOKENSREGEX_DIR = "/home/gabor/staging/tokensregex";
 
-//  public static final String DEFAULT_WIKIDICT_TSV = "edu/stanford/nlp/models/el/wikidict.tab.gz";
-  public static final String DEFAULT_WIKIDICT_TSV = "/opt/corenlp/wikidict.tab.gz";
+  public static final String DEFAULT_WIKIDICT_TSV = "edu/stanford/nlp/models/kbp/wikidict.tab.gz";
+//  public static final String DEFAULT_WIKIDICT_TSV = "/opt/corenlp/wikidict.tab.gz";
 
 
   private DefaultPaths() {
