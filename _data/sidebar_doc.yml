@@ -40,6 +40,9 @@ entries:
         - title: CoreNLP server
           url: corenlp-server.html
 
+        - title: From other languages/packages
+          url: other-languages.md
+
 
     - title : Annotators
 
