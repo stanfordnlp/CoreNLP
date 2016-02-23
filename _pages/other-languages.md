@@ -1,5 +1,5 @@
 ---
-title: Other Languages: Using Stanford CoreNLP in other languages and packages
+title: Other Languages\: Using Stanford CoreNLP in other languages and packages
 keywords: other languages
 permalink: '/other-languages.html'
 ---
@@ -34,8 +34,7 @@ and our recommended way of using Stanford CoreNLP within UIMA.
 
 * [stanford-simple-nlp](https://npmjs.org/package/stanford-simple-nlp) is a node.js CoreNLP wrapper by xissy 
 ([github site](https://github.com/xissy/node-stanford-simple-nlp))
-* [stanford-corenlp](https://www.npmjs.org/package/stanford-corenlp),
-  a simple node.js wrapper by hiteshjoshi 
+* [stanford-corenlp](https://www.npmjs.org/package/stanford-corenlp), a simple node.js wrapper by hiteshjoshi 
 ([github site](https://github.com/hiteshjoshi/node-stanford-corenlp)) 
 * [stanford-corenlp-node](https://github.com/mhewett/stanford-corenlp-node) is a webservice interface to CoreNLP in node.js by Mike Hewett 
 ([github site](https://github.com/mhewett/stanford-corenlp-node))
