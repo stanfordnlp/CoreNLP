@@ -150,6 +150,17 @@ public class EntityMentionsAnnotator implements Annotator {
           if (timex != null) {
             mention.set(TimeAnnotations.TimexAnnotation.class, timex);
           }
+
+          // Set the entity link from the tokens
+          if (mention.get(CoreAnnotations.WikipediaEntityAnnotation.class) == null) {
+            for (CoreLabel token : mentionTokens) {
+              if ( (mention.get(CoreAnnotations.WikipediaEntityAnnotation.class) == null ||
+                    "O".equals(mention.get(CoreAnnotations.WikipediaEntityAnnotation.class))) &&
+                  !"O".equals(token.get(CoreAnnotations.WikipediaEntityAnnotation.class))) {
+                mention.set(CoreAnnotations.WikipediaEntityAnnotation.class, token.get(CoreAnnotations.WikipediaEntityAnnotation.class));
+              }
+            }
+          }
         }
       }
       if (mentions != null) {
