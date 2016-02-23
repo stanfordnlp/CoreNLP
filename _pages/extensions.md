@@ -1,5 +1,5 @@
 ---
-title: Extensions\: Packages and models by others extending Stanford CoreNLP
+title: Extensions - Packages and models by others extending Stanford CoreNLP
 keywords: extensions
 permalink: '/extensions.html'
 ---
