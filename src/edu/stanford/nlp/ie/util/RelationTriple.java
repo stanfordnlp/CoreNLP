@@ -280,7 +280,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
       // Return the longest chunk
       return Pair.makePair(
           relation.get(longestChunkStart).index() - 1,
-          relation.get(longestChunkStart + longestChunk - 1).index()
+          relation.get(longestChunkStart).index() - 1 + longestChunk
       );
     }
   }
