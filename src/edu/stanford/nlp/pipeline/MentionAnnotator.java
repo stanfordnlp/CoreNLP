@@ -1,4 +1,5 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.util.*;
@@ -11,12 +12,13 @@ import edu.stanford.nlp.hcoref.md.CorefMentionFinder;
 import edu.stanford.nlp.hcoref.md.DependencyCorefMentionFinder;
 import edu.stanford.nlp.hcoref.md.HybridCorefMentionFinder;
 import edu.stanford.nlp.hcoref.md.RuleBasedCorefMentionFinder;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.SemanticHeadFinder;
-import edu.stanford.nlp.trees.international.pennchinese.ChineseSemanticHeadFinder;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.trees.international.pennchinese.ChineseSemanticHeadFinder;
 import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
@@ -33,7 +35,10 @@ import edu.stanford.nlp.util.PropertiesUtils;
  * @author Jason Bolton
  */
 
-public class MentionAnnotator extends TextAnnotationCreator implements Annotator {
+public class MentionAnnotator extends TextAnnotationCreator implements Annotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(MentionAnnotator.class);
 
   HeadFinder headFinder;
   CorefMentionFinder md;
@@ -41,7 +46,7 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
   Dictionaries dictionaries;
   Properties corefProperties;
 
-  Set<Requirement> mentionAnnotatorRequirements;
+  Set<Class<? extends CoreAnnotation>> mentionAnnotatorRequirements = new HashSet<>();
 
   public MentionAnnotator(Properties props) {
     try {
@@ -52,10 +57,21 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
       headFinder = getHeadFinder(props);
       //System.out.println("got head finder");
       md = getMentionFinder(props, headFinder);
-      System.err.println("Using mention detector type: "+mdName);
-      mentionAnnotatorRequirements.addAll(Annotator.REQUIREMENTS.get(STANFORD_MENTION));
+      log.info("Using mention detector type: "+mdName);
+      mentionAnnotatorRequirements.addAll(Arrays.asList(
+          CoreAnnotations.TokensAnnotation.class,
+          CoreAnnotations.SentencesAnnotation.class,
+          CoreAnnotations.PartOfSpeechAnnotation.class,
+          CoreAnnotations.NamedEntityTagAnnotation.class,
+          CoreAnnotations.IndexAnnotation.class,
+          CoreAnnotations.TextAnnotation.class,
+          CoreAnnotations.ValueAnnotation.class,
+          SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
+          SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class
+
+      ));
     } catch (Exception e) {
-      System.err.println("Error with building coref mention annotator!");
+      log.info("Error with building coref mention annotator!");
     }
   }
 
@@ -106,29 +122,39 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
 
     switch (CorefProperties.getMDType(props)) {
       case DEPENDENCY:
-        mentionAnnotatorRequirements = new ArraySet<>(DEPENDENCY_REQUIREMENT);
         mdName = "dependency";
         return new DependencyCorefMentionFinder(props);
 
       case HYBRID:
         mdName = "hybrid";
-        mentionAnnotatorRequirements = new ArraySet<>(DEPENDENCY_REQUIREMENT, PARSE_REQUIREMENT);
+        mentionAnnotatorRequirements.add(TreeCoreAnnotations.TreeAnnotation.class);
+        mentionAnnotatorRequirements.add(CoreAnnotations.BeginIndexAnnotation.class);
+        mentionAnnotatorRequirements.add(CoreAnnotations.EndIndexAnnotation.class);
         return new HybridCorefMentionFinder(headFinder, props);
 
       case RULE:
-      default:  // default is dependency
+      default:
+        mentionAnnotatorRequirements.add(TreeCoreAnnotations.TreeAnnotation.class);
+        mentionAnnotatorRequirements.add(CoreAnnotations.BeginIndexAnnotation.class);
+        mentionAnnotatorRequirements.add(CoreAnnotations.EndIndexAnnotation.class);
         mdName = "rule";
-        mentionAnnotatorRequirements = new ArraySet<>(DEPENDENCY_REQUIREMENT, PARSE_REQUIREMENT);
-        return new RuleBasedCorefMentionFinder(headFinder,props);
+        return new RuleBasedCorefMentionFinder(headFinder, props);
     }
   }
 
   @Override
-  public Set<Requirement> requires() { return mentionAnnotatorRequirements; }
+  public Set<Class<? extends CoreAnnotation>> requires() {
+    return mentionAnnotatorRequirements;
+  }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
-    return Collections.singleton(MENTION_REQUIREMENT);
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        CorefCoreAnnotations.CorefMentionsAnnotation.class,
+        CoreAnnotations.ParagraphAnnotation.class,
+        CoreAnnotations.SpeakerAnnotation.class,
+        CoreAnnotations.UtteranceAnnotation.class
+    )));
   }
 
 }

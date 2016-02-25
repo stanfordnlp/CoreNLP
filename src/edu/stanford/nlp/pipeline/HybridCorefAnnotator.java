@@ -1,4 +1,5 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.util.*;
@@ -10,11 +11,16 @@ import edu.stanford.nlp.hcoref.data.CorefChain;
 import edu.stanford.nlp.hcoref.data.CorefChain.CorefMention;
 import edu.stanford.nlp.hcoref.data.Document;
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.util.*;
 
-public class HybridCorefAnnotator extends TextAnnotationCreator implements Annotator {
+public class HybridCorefAnnotator extends TextAnnotationCreator implements Annotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(HybridCorefAnnotator.class);
 
   private static final boolean VERBOSE = false;
 
@@ -40,7 +46,7 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
       corefSystem = new CorefSystem(corefProps);
       OLD_FORMAT = Boolean.parseBoolean(props.getProperty("oldCorefFormat", "false"));
     } catch (Exception e) {
-      System.err.println("ERROR: cannot create HybridCorefAnnotator!");
+      log.error("cannot create HybridCorefAnnotator!");
       e.printStackTrace();
       throw new RuntimeException(e);
     }
@@ -50,7 +56,7 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
   public void annotate(Annotation annotation){
     try {
       if (!annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
-        System.err.println("ERROR: this coreference resolution system requires SentencesAnnotation!");
+        log.error("this coreference resolution system requires SentencesAnnotation!");
         return;
       }
 
@@ -151,13 +157,20 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
   }
 
   @Override
-  public Set<Requirement> requires() {
-    return Annotator.REQUIREMENTS.get(STANFORD_COREF);
+  public Set<Class<? extends CoreAnnotation>> requires() {
+    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.SentencesAnnotation.class,
+        SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
+        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
+        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class,
+        CorefCoreAnnotations.CorefMentionsAnnotation.class
+    )));
   }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
-    return Collections.singleton(COREF_REQUIREMENT);
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+    return Collections.singleton(CorefChainAnnotation.class);
   }
 
   private static Annotation testEnglish() {
@@ -208,6 +221,6 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
 
     Annotation document = testChinese();
     System.out.println(document.get(CorefChainAnnotation.class));
-    System.err.println();
+    log.info();
   }
 }

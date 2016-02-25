@@ -1,4 +1,5 @@
-package edu.stanford.nlp.loglinear.learning;
+package edu.stanford.nlp.loglinear.learning; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.loglinear.model.ConcatVector;
 
@@ -8,7 +9,10 @@ import edu.stanford.nlp.loglinear.model.ConcatVector;
  * <p>
  * Handles optimizing an AbstractDifferentiableFunction through AdaGrad guarded by backtracking.
  */
-public class BacktrackingAdaGradOptimizer extends AbstractBatchOptimizer {
+public class BacktrackingAdaGradOptimizer extends AbstractBatchOptimizer  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(BacktrackingAdaGradOptimizer.class);
 
   // this magic number was arrived at with relation to the CoNLL benchmark, and tinkering
   final static double alpha = 0.1;
@@ -20,7 +24,7 @@ public class BacktrackingAdaGradOptimizer extends AbstractBatchOptimizer {
     double logLikelihoodChange = logLikelihood - s.lastLogLikelihood;
 
     if (logLikelihoodChange == 0) {
-      if (!quiet) System.err.println("\tlogLikelihood improvement = 0: quitting");
+      if (!quiet) log.info("\tlogLikelihood improvement = 0: quitting");
       return true;
     }
 
@@ -33,13 +37,13 @@ public class BacktrackingAdaGradOptimizer extends AbstractBatchOptimizer {
       s.lastDerivative.mapInPlace((d) -> d / 2);
       weights.addVectorInPlace(s.lastDerivative, -1.0);
 
-      if (!quiet) System.err.println("\tBACKTRACK...");
+      if (!quiet) log.info("\tBACKTRACK...");
 
       // if the lastDerivative norm falls below a threshold, it means we've converged
 
       if (s.lastDerivative.dotProduct(s.lastDerivative) < 1.0e-10) {
         if (!quiet)
-          System.err.println("\tBacktracking derivative norm " + s.lastDerivative.dotProduct(s.lastDerivative) + " < 1.0e-9: quitting");
+          log.info("\tBacktracking derivative norm " + s.lastDerivative.dotProduct(s.lastDerivative) + " < 1.0e-9: quitting");
         return true;
       }
     }
@@ -66,7 +70,7 @@ public class BacktrackingAdaGradOptimizer extends AbstractBatchOptimizer {
       s.lastDerivative = gradient;
       s.lastLogLikelihood = logLikelihood;
 
-      if (!quiet) System.err.println("\tLL: " + logLikelihood);
+      if (!quiet) log.info("\tLL: " + logLikelihood);
     }
 
     return false;

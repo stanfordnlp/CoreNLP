@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.fsm.*;
 import edu.stanford.nlp.io.NumberRangeFileFilter;
@@ -11,7 +12,10 @@ import java.util.*;
 /**
  * @author Teg Grenager (grenager@cs.stanford.edu)
  */
-public class GrammarCompactionTester {
+public class GrammarCompactionTester  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(GrammarCompactionTester.class);
 
   // for debugging
   //  public static MergeableGraph debugGraph = null;
@@ -221,7 +225,7 @@ public class GrammarCompactionTester {
         cArgs[12] = verboseString;
         compactor = (GrammarCompactor) Class.forName("fsm.LossyGrammarCompactor").getConstructor(argTypes).newInstance(cArgs);
       } catch (Exception e) {
-        System.err.println("Couldn't instantiate GrammarCompactor: " + e);
+        log.info("Couldn't instantiate GrammarCompactor: " + e);
         e.printStackTrace();
       }
     } else if (op.trainOptions.compactGrammar() == 5) {

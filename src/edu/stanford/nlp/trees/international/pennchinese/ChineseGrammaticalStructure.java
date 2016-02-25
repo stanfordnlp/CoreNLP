@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.international.pennchinese;
+package edu.stanford.nlp.trees.international.pennchinese; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -28,7 +29,10 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
  *                      (ultimately, both classes should probably use the same
  *                      abstract main method).
  */
-public class ChineseGrammaticalStructure extends GrammaticalStructure {
+public class ChineseGrammaticalStructure extends GrammaticalStructure  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseGrammaticalStructure.class);
 
   private static HeadFinder shf = new ChineseSemanticHeadFinder();
   //private static HeadFinder shf = new ChineseHeadFinder();
@@ -88,7 +92,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
       }
       map.get(typedDep.gov()).add(typedDep);
     }
-    //System.err.println("here's the map: " + map);
+    //log.info("here's the map: " + map);
 
     for (TypedDependency td1 : list) {
       if (td1.reln() != GrammaticalRelation.KILL) {
@@ -108,7 +112,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
                                                       td1Dep.value());
               }
               TypedDependency td3 = new TypedDependency(td3reln, td1.gov(), td2.dep());
-              //System.err.println("adding: " + td3);
+              //log.info("adding: " + td3);
               newTypedDeps.add(td3);
               td1.setReln(GrammaticalRelation.KILL);        // remember these are "used up"
               td2.setReln(GrammaticalRelation.KILL);        // remember these are "used up"
@@ -126,7 +130,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
           if (td1.reln().equals(GrammaticalRelation.KILL)) {
             for (TypedDependency td2 : possibles) {
               if (!td2.reln().equals(GrammaticalRelation.KILL)) {
-                //System.err.println("td1 & td2: " + td1 + " & " + td2);
+                //log.info("td1 & td2: " + td1 + " & " + td2);
                 td2.setGov(td1.gov());
               }
             }
@@ -219,7 +223,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
     try {
       if (hf != null) {
         shf = (HeadFinder)Class.forName(hf).newInstance();
-        System.err.println("Using "+hf);
+        log.info("Using "+hf);
       }
     } catch (Exception e) {
       throw new RuntimeException("Fail to use HeadFinder: "+hf);
@@ -228,11 +232,11 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
 
     if (args.length == 0) {
       System.err.printf("Usage:\n\t%s [optional flags] -treeFile treeFile\n\nOr:\n\t%s [optional flags] -sentFile sentFile\n", ChineseGrammaticalStructure.class.getName(), ChineseGrammaticalStructure.class.getName());
-      System.err.println("\nOptional flags:");
-      System.err.println("\t-parseTree  : print phrase-structure parse tree");
-      System.err.println("\t-basic : basic non-collapsed dependencies preserving a tree structure");
-      System.err.println("\t-collapsed : collapsed dependencies");
-      System.err.println("\t-conllx : conllx formatted dependencies, can be used with either basic\n\t or collaped dependencies, but basic is recommended");
+      log.info("\nOptional flags:");
+      log.info("\t-parseTree  : print phrase-structure parse tree");
+      log.info("\t-basic : basic non-collapsed dependencies preserving a tree structure");
+      log.info("\t-collapsed : collapsed dependencies");
+      log.info("\t-conllx : conllx formatted dependencies, can be used with either basic\n\t or collaped dependencies, but basic is recommended");
 
     } else {
       if (treeDirname != null && treeFileName != null) {
@@ -264,7 +268,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
         try {
           reader = new BufferedReader(new FileReader(sentFileName));
         } catch (FileNotFoundException e) {
-          System.err.println("Cannot find " + sentFileName);
+          log.info("Cannot find " + sentFileName);
           System.exit(1);
         }
         try {

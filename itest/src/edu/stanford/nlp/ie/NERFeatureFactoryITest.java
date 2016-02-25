@@ -1,10 +1,10 @@
 package edu.stanford.nlp.ie;
 
 
+import edu.stanford.nlp.ling.SentenceUtils;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.PaddedList;
 
@@ -30,7 +30,7 @@ public class NERFeatureFactoryITest extends TestCase {
   }
 
   public void testSloppyGazette() {
-    List<CoreLabel> sentence = Sentence.toCoreLabelList("For three years , John Bauer has worked at Stanford .".split(" +"));
+    List<CoreLabel> sentence = SentenceUtils.toCoreLabelList("For three years , John Bauer has worked at Stanford .".split(" +"));
     PaddedList<CoreLabel> paddedSentence = new PaddedList<CoreLabel>(sentence, new CoreLabel());
 
     Properties props = new Properties();

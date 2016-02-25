@@ -11,12 +11,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import edu.stanford.nlp.util.logging.Redwood;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
@@ -42,7 +43,7 @@ import edu.stanford.nlp.util.StringUtils;
  */
 
 public class ParseAndSetLabels {
-  private static Logger logger = LoggerFactory.getLogger(ParseAndSetLabels.class);
+  private static Redwood.RedwoodChannels logger = Redwood.channels(ParseAndSetLabels.class);
 
   public enum MissingLabels {
     FAIL, DEFAULT, KEEP_ORIGINAL
@@ -54,7 +55,7 @@ public class ParseAndSetLabels {
     if (tree.isLeaf()) {
       return;
     }
-    String text = Sentence.listToString(tree.yield());
+    String text = SentenceUtils.listToString(tree.yield());
     String label = labelMap.get(text);
     if (label != null) {
       tree.label().setValue(label);

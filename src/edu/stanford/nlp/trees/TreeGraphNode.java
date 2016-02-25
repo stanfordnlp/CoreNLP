@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees;
+package edu.stanford.nlp.trees; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.StringReader;
 import java.util.List;
@@ -22,7 +23,10 @@ import edu.stanford.nlp.ling.LabelFactory;
  *
  * @author Bill MacCartney
  */
-public class TreeGraphNode extends Tree implements HasParent {
+public class TreeGraphNode extends Tree implements HasParent  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TreeGraphNode.class);
 
   /**
    * Label for this node.
@@ -322,7 +326,7 @@ public class TreeGraphNode extends Tree implements HasParent {
           setHeadWordNode(hwn);
         }
       } else {
-        System.err.println("Head is null: " + this);
+        log.info("Head is null: " + this);
       }
     }
   }
@@ -517,7 +521,7 @@ public class TreeGraphNode extends Tree implements HasParent {
       tgn.percolateHeads(new SemanticHeadFinder());
       System.out.println(tgn.toPrettyString(0));
     } catch (Exception e) {
-      System.err.println("Horrible error: " + e);
+      log.info("Horrible error: " + e);
       e.printStackTrace();
     }
   }

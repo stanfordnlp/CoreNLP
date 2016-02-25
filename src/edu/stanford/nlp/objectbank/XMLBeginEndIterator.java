@@ -1,4 +1,5 @@
-package edu.stanford.nlp.objectbank;
+package edu.stanford.nlp.objectbank; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.function.Function;
 import edu.stanford.nlp.util.AbstractIterator;
@@ -33,7 +34,10 @@ import java.util.regex.Pattern;
  *
  * @author Teg Grenager (grenager@stanford.edu)
  */
-public class XMLBeginEndIterator<E> extends AbstractIterator<E> {
+public class XMLBeginEndIterator<E> extends AbstractIterator<E>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(XMLBeginEndIterator.class);
 
   private final Pattern tagNamePattern;
   private final BufferedReader inputReader;
@@ -243,7 +247,7 @@ public class XMLBeginEndIterator<E> extends AbstractIterator<E> {
 
   public static void main(String[] args) throws IOException {
     if (args.length < 3) {
-      System.err.println("usage: XMLBeginEndIterator file element keepInternalBoolean");
+      log.info("usage: XMLBeginEndIterator file element keepInternalBoolean");
       return;
     }
     Reader in = new FileReader(args[0]);

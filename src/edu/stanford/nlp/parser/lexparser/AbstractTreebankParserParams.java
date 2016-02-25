@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CategoryWordTag;
 import edu.stanford.nlp.ling.HasTag;
@@ -37,7 +38,10 @@ import java.util.List;
  *
  * @author Roger Levy
  */
-public abstract class AbstractTreebankParserParams implements TreebankLangParserParams {
+public abstract class AbstractTreebankParserParams implements TreebankLangParserParams  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(AbstractTreebankParserParams.class);
 
   /**
    * If true, then evaluation is over grammatical functions as well as the labels
@@ -258,20 +262,20 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
   public PrintWriter pw(OutputStream o) {
     String encoding = outputEncoding;
     if (!java.nio.charset.Charset.isSupported(encoding)) {
-      System.err.println("Warning: desired encoding " + encoding + " not accepted. ");
-      System.err.println("Using UTF-8 to construct PrintWriter");
+      log.info("Warning: desired encoding " + encoding + " not accepted. ");
+      log.info("Using UTF-8 to construct PrintWriter");
       encoding = "UTF-8";
     }
 
-    //System.err.println("TreebankParserParams.pw(): encoding is " + encoding);
+    //log.info("TreebankParserParams.pw(): encoding is " + encoding);
     try {
       return new PrintWriter(new OutputStreamWriter(o, encoding), true);
     } catch (UnsupportedEncodingException e) {
-      System.err.println("Warning: desired encoding " + outputEncoding + " not accepted. " + e);
+      log.info("Warning: desired encoding " + outputEncoding + " not accepted. " + e);
       try {
         return new PrintWriter(new OutputStreamWriter(o, "UTF-8"), true);
       } catch (UnsupportedEncodingException e1) {
-        System.err.println("Something is really wrong.  Your system doesn't even support UTF-8!" + e1);
+        log.info("Something is really wrong.  Your system doesn't even support UTF-8!" + e1);
         return new PrintWriter(o, true);
       }
     }

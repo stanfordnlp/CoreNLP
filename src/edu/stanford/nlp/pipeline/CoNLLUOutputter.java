@@ -2,9 +2,12 @@ package edu.stanford.nlp.pipeline;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
@@ -87,7 +90,7 @@ public class CoNLLUOutputter extends AnnotationOutputter {
 
   @Override
   public void print(Annotation doc, OutputStream target, Options options) throws IOException {
-    PrintWriter writer = new PrintWriter(target);
+    PrintWriter writer = new PrintWriter(IOUtils.encodedOutputStreamWriter(target, options.encoding));
 
     List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
     for (CoreMap sentence : sentences) {

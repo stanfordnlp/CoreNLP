@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.treebank;
+package edu.stanford.nlp.trees.treebank; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.List;
@@ -13,7 +14,10 @@ import edu.stanford.nlp.util.RuntimeInterruptedException;
  *
  * @author Spence Green
  */
-public class DistributionPackage {
+public class DistributionPackage  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(DistributionPackage.class);
 
   private final List<String> distFiles;
   private String lastCreatedDistribution = "UNKNOWN";

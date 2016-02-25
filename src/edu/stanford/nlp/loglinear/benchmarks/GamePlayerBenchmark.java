@@ -1,4 +1,5 @@
-package edu.stanford.nlp.loglinear.benchmarks;
+package edu.stanford.nlp.loglinear.benchmarks; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.loglinear.inference.CliqueTree;
 import edu.stanford.nlp.loglinear.model.ConcatVector;
@@ -21,7 +22,10 @@ import java.util.*;
  * The cache is designed to require a bit of L1 cache eviction to page through, so that we don't see artificial speed
  * gains during dot products b/c we already have both features and weights in L1 cache.
  */
-public class GamePlayerBenchmark {
+public class GamePlayerBenchmark  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(GamePlayerBenchmark.class);
   static final String DATA_PATH = "/u/nlp/data/ner/conll/";
 
   public static void main(String[] args) throws IOException, ClassNotFoundException {
@@ -48,7 +52,7 @@ public class GamePlayerBenchmark {
 
     coNLL.embeddings = coNLL.getEmbeddings(DATA_PATH + "google-300-trimmed.ser.gz", allData);
 
-    System.err.println("Making the training set...");
+    log.info("Making the training set...");
 
     ConcatVectorNamespace namespace = new ConcatVectorNamespace();
 
@@ -56,7 +60,7 @@ public class GamePlayerBenchmark {
     GraphicalModel[] trainingSet = new GraphicalModel[trainSize];
     for (int i = 0; i < trainSize; i++) {
       if (i % 10 == 0) {
-        System.err.println(i + "/" + trainSize);
+        log.info(i + "/" + trainSize);
       }
       trainingSet[i] = coNLL.generateSentenceModel(namespace, train.get(i), tags);
     }
@@ -95,23 +99,23 @@ public class GamePlayerBenchmark {
     // Actually perform gameplay-like random mutations
     //////////////////////////////////////////////////////////////
 
-    System.err.println("Warming up the JIT...");
+    log.info("Warming up the JIT...");
 
     for (int i = 0; i < 10; i++) {
-      System.err.println(i);
+      log.info(i);
       gameplay(r, trainingSet[i], weights, humanFeatureVectors);
     }
 
-    System.err.println("Timing actual run...");
+    log.info("Timing actual run...");
 
     long start = System.currentTimeMillis();
     for (int i = 0; i < 10; i++) {
-      System.err.println(i);
+      log.info(i);
       gameplay(r, trainingSet[i], weights, humanFeatureVectors);
     }
     long duration = System.currentTimeMillis() - start;
 
-    System.err.println("Duration: " + duration);
+    log.info("Duration: " + duration);
   }
 
   //////////////////////////////////////////////////////////////
@@ -146,13 +150,13 @@ public class GamePlayerBenchmark {
     long start = System.currentTimeMillis();
     long marginalsTime = 0;
     for (int i = 0; i < 1000; i++) {
-      System.err.println("\tTaking sample " + i);
+      log.info("\tTaking sample " + i);
       Stack<SampleState> stack = new Stack<>();
       SampleState state = selectOrCreateChildAtRandom(r, model, variables, variableSizes, childrenOfRoot, humanFeatureVectors);
       long localMarginalsTime = 0;
       // Each "sample" is 10 moves deep
       for (int j = 0; j < 10; j++) {
-        // System.err.println("\t\tFrame "+j);
+        // log.info("\t\tFrame "+j);
         state.push(model);
         assert (model.factors.size() == initialFactors + j + 1);
 
@@ -168,7 +172,7 @@ public class GamePlayerBenchmark {
         stack.push(state);
         state = selectOrCreateChildAtRandom(r, model, variables, variableSizes, state.children, humanFeatureVectors);
       }
-      System.err.println("\t\t" + localMarginalsTime + " ms");
+      log.info("\t\t" + localMarginalsTime + " ms");
       marginalsTime += localMarginalsTime;
 
       while (!stack.empty()) {
@@ -177,9 +181,9 @@ public class GamePlayerBenchmark {
       assert (model.factors.size() == initialFactors);
     }
 
-    System.err.println("Marginals time: " + marginalsTime + " ms");
-    System.err.println("Avg time per marginal: " + (marginalsTime / 200) + " ms");
-    System.err.println("Total time: " + (System.currentTimeMillis() - start));
+    log.info("Marginals time: " + marginalsTime + " ms");
+    log.info("Avg time per marginal: " + (marginalsTime / 200) + " ms");
+    log.info("Total time: " + (System.currentTimeMillis() - start));
   }
 
   private static SampleState selectOrCreateChildAtRandom(Random r,

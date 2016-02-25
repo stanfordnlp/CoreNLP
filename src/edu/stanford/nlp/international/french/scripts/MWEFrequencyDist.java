@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.french.scripts;
+package edu.stanford.nlp.international.french.scripts; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -28,7 +29,10 @@ import edu.stanford.nlp.util.Generics;
  * @author Spence Green
  *
  */
-public final class MWEFrequencyDist {
+public final class MWEFrequencyDist  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(MWEFrequencyDist.class);
 
   private MWEFrequencyDist() {};
   

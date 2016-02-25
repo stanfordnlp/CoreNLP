@@ -2,8 +2,8 @@ package edu.stanford.nlp.patterns.surface;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.patterns.Pattern;
-import edu.stanford.nlp.util.Execution;
-import edu.stanford.nlp.util.Execution.Option;
+import edu.stanford.nlp.util.ArgumentParser;
+import edu.stanford.nlp.util.ArgumentParser.Option;
 import edu.stanford.nlp.util.LuceneFieldType;
 import edu.stanford.nlp.util.logging.Redwood;
 import org.apache.lucene.analysis.Analyzer;
@@ -47,7 +47,7 @@ public class PatternsForEachTokenLucene<E extends Pattern> extends PatternsForEa
   boolean createPatLuceneIndex;
 
   public PatternsForEachTokenLucene(Properties props, Map<String, Map<Integer, Set<E>>> pats){
-    Execution.fillOptions(this, props);
+    ArgumentParser.fillOptions(this, props);
 
     if(allPatternsDir == null){
 

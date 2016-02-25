@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.dvparser;
+package edu.stanford.nlp.parser.dvparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedWriter;
 import java.io.FileFilter;
@@ -33,7 +34,10 @@ import edu.stanford.nlp.util.ScoredObject;
  *
  * @author John Bauer
  */
-public class FindNearestNeighbors {
+public class FindNearestNeighbors  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(FindNearestNeighbors.class);
   // TODO: parameter?
   static final int numNeighbors = 5;
   static final int maxLength = 8;
@@ -96,19 +100,19 @@ public class FindNearestNeighbors {
 
     Treebank testTreebank = null;
     if (testTreebankPath != null) {
-      System.err.println("Reading in trees from " + testTreebankPath);
+      log.info("Reading in trees from " + testTreebankPath);
       if (testTreebankFilter != null) {
-        System.err.println("Filtering on " + testTreebankFilter);
+        log.info("Filtering on " + testTreebankFilter);
       }
       testTreebank = lexparser.getOp().tlpParams.memoryTreebank();;
       testTreebank.loadPath(testTreebankPath, testTreebankFilter);
-      System.err.println("Read in " + testTreebank.size() + " trees for testing");
+      log.info("Read in " + testTreebank.size() + " trees for testing");
     }
 
     FileWriter out = new FileWriter(outputPath);
     BufferedWriter bout = new BufferedWriter(out);
 
-    System.err.println("Parsing " + testTreebank.size() + " trees");
+    log.info("Parsing " + testTreebank.size() + " trees");
     int count = 0;
     List<ParseRecord> records = Generics.newArrayList();
     for (Tree goldTree : testTreebank) {
@@ -144,12 +148,12 @@ public class FindNearestNeighbors {
       out.write("\n\n\n");
       count++;
       if (count % 10 == 0) {
-        System.err.print("  " + count);
+        log.info("  " + count);
       }
 
       records.add(new ParseRecord(tokens, goldTree, tree.getTree(), rootVector, tree.getVectors()));
     }
-    System.err.println("  done parsing");
+    log.info("  done parsing");
 
     List<Pair<Tree, SimpleMatrix>> subtrees = Generics.newArrayList();
     for (ParseRecord record : records) {
@@ -160,13 +164,13 @@ public class FindNearestNeighbors {
       }
     }
 
-    System.err.println("There are " + subtrees.size() + " subtrees in the set of trees");
+    log.info("There are " + subtrees.size() + " subtrees in the set of trees");
 
     PriorityQueue<ScoredObject<Pair<Tree, Tree>>> bestmatches = new PriorityQueue<>(101, ScoredComparator.DESCENDING_COMPARATOR);
 
     for (int i = 0; i < subtrees.size(); ++i) {
-      System.err.println(subtrees.get(i).first().yieldWords());
-      System.err.println(subtrees.get(i).first());
+      log.info(subtrees.get(i).first().yieldWords());
+      log.info(subtrees.get(i).first());
 
       for (int j = 0; j < subtrees.size(); ++j) {
         if (i == j) {
@@ -187,17 +191,17 @@ public class FindNearestNeighbors {
       }
       Collections.reverse(ordered);
       for (ScoredObject<Pair<Tree, Tree>> pair : ordered) {
-        System.err.println(" MATCHED " + pair.object().second.yieldWords() + " ... " + pair.object().second() + " with a score of " + pair.score());
+        log.info(" MATCHED " + pair.object().second.yieldWords() + " ... " + pair.object().second() + " with a score of " + pair.score());
       }
-      System.err.println();
-      System.err.println();
+      log.info();
+      log.info();
       bestmatches.clear();
     }
 
     /*
     for (int i = 0; i < records.size(); ++i) {
       if (i % 10 == 0) {
-        System.err.print("  " + i);
+        log.info("  " + i);
       }
       List<ScoredObject<ParseRecord>> scored = Generics.newArrayList();
       for (int j = 0; j < records.size(); ++j) {
@@ -232,7 +236,7 @@ public class FindNearestNeighbors {
       }
       out.write("\n\n");
     }
-    System.err.println();
+    log.info();
     */
 
     bout.flush();

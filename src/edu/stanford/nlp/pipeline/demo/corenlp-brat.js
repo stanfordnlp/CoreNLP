@@ -160,6 +160,10 @@ function render(data) {
       color = posColor('VB');
     } else if (name == 'LEMMA') {
       color = '#FFFFFF';
+    } else if (name == 'LINK') {
+      color = '#FFFFFF';
+    } else if (name == 'KBP_ENTITY') {
+      color = '#FFFFFF';
     }
     // Register the type
     entityTypes.push({
@@ -223,6 +227,8 @@ function render(data) {
   var lemmaEntities = [];
   // (ner)
   var nerEntities = [];
+  // (entitylinking)
+  var linkEntities = [];
   // (dependencies)
   var depsRelations = [];
   var deps2Relations = [];
@@ -231,6 +237,11 @@ function render(data) {
   var openieEntitiesSet = {};
   var openieRelations = [];
   var openieRelationsSet = {};
+  // (kbp)
+  var kbpEntities = [];
+  var kbpEntitiesSet = [];
+  var kbpRelations = [];
+  var kbpRelationsSet = [];
 
 
   //
@@ -313,6 +324,20 @@ function render(data) {
       }
     }
 
+    // Entity Links
+    // Carries the same assumption as NER
+    if (tokens.length > 0) {
+      for (var i = 0; i < tokens.length; i++) {
+        var link = tokens[i].entitylink;
+        if (link == 'O' || typeof link == 'undefined') continue;
+        var j = i;
+        while (j < tokens.length - 1 && tokens[j+1].entitylink == link) j++;
+        addEntityType('LINK', link);
+        linkEntities.push(['LINK_' + sentI + '_' + i, link, [[tokens[i].characterOffsetBegin, tokens[j].characterOffsetEnd]]]);
+        i = j;
+      }
+    }
+
     // Open IE
     // Helper Functions
     function openieID(span) {
@@ -362,7 +387,72 @@ function render(data) {
         addRelation(relationSpan, objectSpan, 'object');
       }
     }  // End OpenIE block
-  
+
+
+    //
+    // KBP
+    //
+    // Helper Functions
+    function kbpEntity(span) {
+      return 'KBPENTITY' + '_' + sentI + '_' + span[0] + '_' + span[1];
+    }
+    function addKBPEntity(span, role) {
+      // Don't add duplicate entities
+      if (kbpEntitiesSet[[sentI, span, role]]) return;
+      kbpEntitiesSet[[sentI, span, role]] = true;
+      // Add the entity
+      kbpEntities.push([kbpEntity(span), role,
+        [[tokens[span[0]].characterOffsetBegin,
+          tokens[span[1] - 1].characterOffsetEnd ]] ]);
+    }
+    function addKBPRelation(gov, dep, role) {
+      // Don't add duplicate relations
+      if (kbpRelationsSet[[sentI, gov, dep, role]]) return;
+      kbpRelationsSet[[sentI, gov, dep, role]] = true;
+      // Add the relation
+      kbpRelations.push(['KBPRELATION_' + sentI + '_' + gov[0] + '_' + gov[1] + '_' + dep[0] + '_' + dep[1],
+                           role,
+                           [['governor',  kbpEntity(gov)],
+                            ['dependent', kbpEntity(dep)]  ] ]);
+    }
+    if (typeof sentence.kbp != 'undefined') {
+      // Register the entities + relations we'll need
+      addRelationType('subject');
+      addRelationType('object');
+      // Loop over triples
+      for (var i = 0; i < sentence.kbp.length; ++i) {
+        var subjectSpan = sentence.kbp[i].subjectSpan;
+        var subjectLink = 'Entity';
+        for (var k = subjectSpan[0]; k < subjectSpan[1]; ++k) {
+          if (subjectLink == 'Entity' &&
+              typeof tokens[k] != 'undefined' &&
+              tokens[k].entitylink != 'O' &&
+              typeof tokens[k].entitylink != 'undefined') {
+            subjectLink = tokens[k].entitylink
+          }
+        }
+        addEntityType('KBP_ENTITY',  subjectLink);
+        var objectSpan = sentence.kbp[i].objectSpan;
+        var objectLink = 'Entity';
+        for (var k = objectSpan[0]; k < objectSpan[1]; ++k) {
+          if (objectLink == 'Entity' &&
+              typeof tokens[k] != 'undefined' &&
+              tokens[k].entitylink != 'O' &&
+              typeof tokens[k].entitylink != 'undefined') {
+            objectLink = tokens[k].entitylink
+          }
+        }
+        addEntityType('KBP_ENTITY',  objectLink);
+        var relation = sentence.kbp[i].relation;
+        var begin = parseInt(token.characterOffsetBegin);
+        // Add the entities
+        addKBPEntity(subjectSpan, subjectLink);
+        addKBPEntity(objectSpan, objectLink);
+        // Add the relations
+        addKBPRelation(subjectSpan, objectSpan, relation);
+      }
+    }  // End KBP block
+
   }  // End sentence loop
     
   //
@@ -418,10 +508,12 @@ function render(data) {
     embed('pos', posEntities);
     embed('lemma', lemmaEntities);
     embed('ner', nerEntities);
+    embed('entities', linkEntities);
     embed('deps', posEntities, depsRelations);
     embed('deps2', posEntities, deps2Relations);
     embed('coref', corefEntities, corefRelations);
     embed('openie', openieEntities, openieRelations);
+    embed('kbp',    kbpEntities, kbpRelations);
   });
 
 }  // End render function
@@ -615,8 +707,10 @@ $(document).ready(function() {
     // Run query
     $.ajax({
       type: 'POST',
-      url: serverAddress + '?properties=' + encodeURIComponent('{"annotators": "' + annotators() + '", "openie.resolve_coref": "true"}'),
+      url: serverAddress + '?properties=' + encodeURIComponent(
+        '{"annotators": "' + annotators() + '", "coref.md.type": "dep", "coref.mode": "statistical"}'),
       data: currentQuery,
+      dataType: 'json',
       contentType: "application/x-www-form-urlencoded;charset=UTF-8",
       success: function(data) {
         $('#submit').prop('disabled', false);
@@ -648,14 +742,16 @@ $(document).ready(function() {
             }
           }
           // (create the divs)
-          //                  div id    annotator   field_in_data                          label
-          createAnnotationDiv('pos',    'pos',      'pos',                                 'Part-of-Speech'          );
-          createAnnotationDiv('lemma',  'lemma',    'lemma',                               'Lemmas'                  );
-          createAnnotationDiv('ner',    'ner',      'ner',                                 'Named Entity Recognition');
-          createAnnotationDiv('deps',   'depparse', 'basic-dependencies',                  'Basic Dependencies'      );
-          createAnnotationDiv('deps2',  'depparse', 'collapsed-ccprocessed-dependencies',  'Enhanced Dependencies'   );
-          createAnnotationDiv('openie', 'openie',   'openie',                              'Open IE'                 );
-          createAnnotationDiv('coref',  'coref',    'corefs',                              'Coreference'             );
+          //                  div id      annotator     field_in_data                          label
+          createAnnotationDiv('pos',      'pos',        'pos',                                 'Part-of-Speech'          );
+          createAnnotationDiv('lemma',    'lemma',      'lemma',                               'Lemmas'                  );
+          createAnnotationDiv('ner',      'ner',        'ner',                                 'Named Entity Recognition');
+          createAnnotationDiv('deps',     'depparse',   'basic-dependencies',                  'Basic Dependencies'      );
+          createAnnotationDiv('deps2',    'depparse',   'collapsed-ccprocessed-dependencies',  'Enhanced Dependencies'   );
+          createAnnotationDiv('openie',   'openie',     'openie',                              'Open IE'                 );
+          createAnnotationDiv('coref',    'coref',      'corefs',                              'Coreference'             );
+          createAnnotationDiv('entities', 'entitylink', 'entitylink',                          'Wikidict Entities'       );
+          createAnnotationDiv('kbp',      'kbp',        'kbp',                                 'KBP Relations'           );
           // Update UI
           $('#loading').hide();
           $('.corenlp_error').remove();  // Clear error messages
@@ -668,6 +764,7 @@ $(document).ready(function() {
         }
       },
       error: function(data) {
+        DATA = data;
         var alertDiv = $('<div/>').addClass('alert').addClass('alert-danger').addClass('alert-dismissible').addClass('corenlp_error').attr('role', 'alert')
         var button = $('<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>');
         var message = $('<span/>').text(data.responseText);

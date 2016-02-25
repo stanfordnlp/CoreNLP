@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.metrics;
+package edu.stanford.nlp.parser.metrics; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
@@ -35,7 +36,10 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Spence Green
  *
  */
-public class TaggingEval extends AbstractEval {
+public class TaggingEval extends AbstractEval  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TaggingEval.class);
 
   private final Lexicon lex;
 
@@ -288,14 +292,14 @@ public class TaggingEval extends AbstractEval {
         encoding = opt.getValue()[0];
 
       } else {
-        System.err.println(usage.toString());
+        log.info(usage.toString());
         System.exit(-1);
       }
 
       //Non-option arguments located at key null
       String[] rest = argsMap.get(null);
       if(rest == null || rest.length < minArgs) {
-        System.err.println(usage.toString());
+        log.info(usage.toString());
         System.exit(-1);
       }
       goldFile = rest[0];

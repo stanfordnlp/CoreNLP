@@ -24,7 +24,8 @@
 //    java-nlp-support@lists.stanford.edu
 //    http://nlp.stanford.edu/software/
 
-package edu.stanford.nlp.stats;
+package edu.stanford.nlp.stats; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -81,7 +82,10 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
  * @author Christopher Manning
  * @author stefank (Optimized dot product)
  */
-public class Counters {
+public class Counters  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(Counters.class);
 
   private static final double LOG_E_2 = Math.log(2.0);
 
@@ -1287,29 +1291,25 @@ public class Counters {
    * @return The dot product of the two counter (as vectors)
    */
   public static <E> double optimizedDotProduct(Counter<E> c1, Counter<E> c2) {
-    double dotProd = 0.0;
     int size1 = c1.size();
     int size2 = c2.size();
     if (size1 < size2) {
-      for (E key : c1.keySet()) {
-        double count1 = c1.getCount(key);
-        if (count1 != 0.0) {
-          double count2 = c2.getCount(key);
-          if (count2 != 0.0)
-            dotProd += (count1 * count2);
-        }
-      }
+      return getDotProd(c1, c2);
     } else {
-      for (E key : c2.keySet()) {
+      return getDotProd(c2, c1);
+    }
+  }
+
+  private static <E> double getDotProd(Counter<E> c1, Counter<E> c2) {
+    double dotProd = 0.0;
+    for (E key : c1.keySet()) {
+      double count1 = c1.getCount(key);
+      if (count1 != 0.0) {
         double count2 = c2.getCount(key);
-        if (count2 != 0.0) {
-          double count1 = c1.getCount(key);
-          if (count1 != 0.0)
-            dotProd += (count1 * count2);
-        }
+        if (count2 != 0.0)
+          dotProd += (count1 * count2);
       }
     }
-
     return dotProd;
   }
 
@@ -1677,7 +1677,7 @@ public class Counters {
       double noise = -Math.log(1.0 - random.nextDouble()); // inverse of CDF for
                                                            // exponential
                                                            // distribution
-      // System.err.println("noise=" + noise);
+      // log.info("noise=" + noise);
       double perturbedCount = count + noise * p;
       result.setCount(key, perturbedCount);
     }
@@ -1927,6 +1927,62 @@ public class Counters {
     }
     out.close();
   }
+
+  /**
+   * Serialize a counter into an efficient string TSV
+   * @param c The counter to serialize
+   * @param filename The file to serialize to
+   * @param minMagnitude Ignore values under this magnitude
+   * @throws IOException
+   *
+   * @see Counters#deserializeStringCounter(String)
+   */
+  public static void serializeStringCounter(Counter<String> c,
+                                            String filename,
+                                            double minMagnitude) throws IOException {
+    PrintWriter writer = IOUtils.getPrintWriter(filename);
+    for (Entry<String, Double> entry : c.entrySet()) {
+      if (Math.abs(entry.getValue()) < minMagnitude) { continue; }
+      Triple<Boolean, Long, Integer> parts = SloppyMath.segmentDouble(entry.getValue());
+      writer.println(
+          entry.getKey().replace('\t', 'ߝ') + "\t" +
+              (parts.first ? '-' : '+') + "\t" +
+              parts.second + "\t" +
+              parts.third
+      );
+    }
+    writer.close();
+  }
+
+  /** @see Counters#serializeStringCounter(Counter, String, double) */
+  public static void serializeStringCounter(Counter<String> c,
+                                            String filename) throws IOException {
+    serializeStringCounter(c, filename, 0.0);
+  }
+
+
+  /**
+   * Read a Counter from a serialized file
+   * @param filename The file to read from
+   *
+   * @see Counters#serializeStringCounter(Counter, String, double)
+   */
+  public static ClassicCounter<String> deserializeStringCounter(String filename) throws IOException {
+    String[] fields = new String[4];
+    BufferedReader reader = IOUtils.readerFromString(filename);
+    String line;
+    ClassicCounter<String> counts = new ClassicCounter<>(1000000);
+    while ( (line = reader.readLine()) != null) {
+      StringUtils.splitOnChar(fields, line, '\t');
+      long mantissa = SloppyMath.parseInt(fields[2]);
+      int exponent = (int) SloppyMath.parseInt(fields[3]);
+      double value = SloppyMath.parseDouble(fields[1].equals("-"), mantissa, exponent);
+      counts.setCount(fields[0], value);
+    }
+    return counts;
+  }
+
+
 
   public static <T> void serializeCounter(Counter<T> c, String filename) throws IOException {
     // serialize to file

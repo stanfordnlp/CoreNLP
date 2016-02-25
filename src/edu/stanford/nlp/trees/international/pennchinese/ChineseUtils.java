@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.international.pennchinese;
+package edu.stanford.nlp.trees.international.pennchinese; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.util.StringUtils;
@@ -17,7 +18,10 @@ import java.util.regex.Pattern;
  *
  *  @author Christopher Manning
  */
-public class ChineseUtils {
+public class ChineseUtils  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseUtils.class);
 
   /** Whether to only support BMP character normalization.
    *  If set to true, this is more limited, but avoids bugs in JDK 1.5.
@@ -309,8 +313,8 @@ public class ChineseUtils {
    */
   public static void main(String[] args) throws IOException {
     if (args.length < 3) {
-      System.err.println("usage: ChineseUtils ascii space midDot word*");
-      System.err.println("  First 3 args are int flags; a filter or maps args as words; assumes UTF-8");
+      log.info("usage: ChineseUtils ascii space midDot word*");
+      log.info("  First 3 args are int flags; a filter or maps args as words; assumes UTF-8");
       return;
     }
     int i = Integer.parseInt(args[0]);

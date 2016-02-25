@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.arabic.pipeline;
+package edu.stanford.nlp.international.arabic.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,7 +20,10 @@ import edu.stanford.nlp.util.Generics;
  * @author Spence Green
  *
  */
-public class LDCPosMapper implements Mapper {
+public class LDCPosMapper implements Mapper  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(LDCPosMapper.class);
 
 	protected Pattern startOfTagMap = Pattern.compile("\\(tag-map");
 	protected Pattern endOfTagMap = Pattern.compile("^\\s*\\)\\s*$");

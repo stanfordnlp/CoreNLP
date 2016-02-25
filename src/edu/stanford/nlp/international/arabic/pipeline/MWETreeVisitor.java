@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.arabic.pipeline;
+package edu.stanford.nlp.international.arabic.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,7 +20,10 @@ import edu.stanford.nlp.util.Pair;
  * @author Spence Green
  *
  */
-public class MWETreeVisitor implements TreeVisitor {
+public class MWETreeVisitor implements TreeVisitor  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(MWETreeVisitor.class);
 
  private static final boolean DEBUG = false;
   
@@ -37,13 +41,13 @@ public class MWETreeVisitor implements TreeVisitor {
       BufferedReader br = new BufferedReader(new StringReader(editStr));
       List<TsurgeonPattern> tsp = new ArrayList<>();
       while ((line = br.readLine()) != null) {
-        if (DEBUG) System.err.print("Pattern is " + line);
+        if (DEBUG) log.info("Pattern is " + line);
         TregexPattern matchPattern = TregexPattern.compile(line);
-        if (DEBUG) System.err.println(" [" + matchPattern + "]");
+        if (DEBUG) log.info(" [" + matchPattern + "]");
         tsp.clear();
         while (continuing(line = br.readLine())) {
           TsurgeonPattern p = Tsurgeon.parseOperation(line);
-          if (DEBUG) System.err.println("Operation is " + line + " [" + p + "]");
+          if (DEBUG) log.info("Operation is " + line + " [" + p + "]");
           tsp.add(p);
         }
         if ( ! tsp.isEmpty()) {

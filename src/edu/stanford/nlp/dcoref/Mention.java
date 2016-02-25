@@ -55,10 +55,7 @@ import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
-import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.*;
 
 /**
  * One mention for the SieveCoreferenceSystem.
@@ -476,7 +473,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if (isListLike()) {
       mentionType = MentionType.LIST;
       SieveCoreferenceSystem.logger.finer("IS LIST: " + this);
-    } else if (headWord.has(CoreAnnotations.EntityTypeAnnotation.class)){    // ACE gold mention type
+    } else if (headWord.containsKey(CoreAnnotations.EntityTypeAnnotation.class)){    // ACE gold mention type
       if (headWord.get(CoreAnnotations.EntityTypeAnnotation.class).equals("PRO")) {
         mentionType = MentionType.PRONOMINAL;
       } else if (headWord.get(CoreAnnotations.EntityTypeAnnotation.class).equals("NAM")) {
@@ -485,7 +482,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
         mentionType = MentionType.NOMINAL;
       }
     } else {    // MUC
-      if(!headWord.has(CoreAnnotations.NamedEntityTagAnnotation.class)) {   // temporary fix
+      if(!headWord.containsKey(CoreAnnotations.NamedEntityTagAnnotation.class)) {   // temporary fix
         mentionType = MentionType.NOMINAL;
         SieveCoreferenceSystem.logger.finest("no NamedEntityTagAnnotation: "+headWord);
       } else if (headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class).startsWith("PRP")
@@ -700,8 +697,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   }
 
   private void setNERString() {
-    if(headWord.has(CoreAnnotations.EntityTypeAnnotation.class)){ // ACE
-      if(headWord.has(CoreAnnotations.NamedEntityTagAnnotation.class) &&
+    if(headWord.containsKey(CoreAnnotations.EntityTypeAnnotation.class)){ // ACE
+      if(headWord.containsKey(CoreAnnotations.NamedEntityTagAnnotation.class) &&
               headWord.get(CoreAnnotations.EntityTypeAnnotation.class).equals("NAM")){
         this.nerString = headWord.get(CoreAnnotations.NamedEntityTagAnnotation.class);
       } else {
@@ -709,7 +706,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       }
     }
     else{ // MUC
-      if (headWord.has(CoreAnnotations.NamedEntityTagAnnotation.class)) {
+      if (headWord.containsKey(CoreAnnotations.NamedEntityTagAnnotation.class)) {
         this.nerString = headWord.get(CoreAnnotations.NamedEntityTagAnnotation.class);
       } else {
         this.nerString = "O";

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.util;
+package edu.stanford.nlp.util; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 import java.util.function.Function;
@@ -897,7 +898,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
       if (addOk) {
         res.add(item);
       } else {
-        //        System.err.println("Discarding " + item);
+        //        log.info("Discarding " + item);
       }
     }
     return res;

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.ie.machinereading;
+package edu.stanford.nlp.ie.machinereading; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +29,7 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Execution;
+import edu.stanford.nlp.util.ArgumentParser;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -54,7 +55,10 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Mihai
  * 
  */
-public class MachineReading {
+public class MachineReading  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(MachineReading.class);
   
   // Store command-line args so they can be passed to other classes
   private String[] args;
@@ -199,9 +203,9 @@ public class MachineReading {
     // install global parameters
     MachineReading mr = new MachineReading(args);
     //TODO: 
-    Execution.fillOptions(MachineReadingProperties.class, args);
+    ArgumentParser.fillOptions(MachineReadingProperties.class, args);
     //Arguments.parse(args, mr);
-    System.err.println("PERCENTAGE OF TRAIN: " + MachineReadingProperties.percentageOfTrain);
+    log.info("PERCENTAGE OF TRAIN: " + MachineReadingProperties.percentageOfTrain);
     
     // convert args to properties
     Properties props = StringUtils.argsToProperties(args);
@@ -220,7 +224,7 @@ public class MachineReading {
     if (auxReader != null) {
       auxReader.setLoggerLevel(readerLogLevel);
     }
-    System.err.println("The reader log level is set to " + readerLogLevel);
+    log.info("The reader log level is set to " + readerLogLevel);
     //Execution.fillOptions(GenericDataSetReaderProps.class, args);
     //Arguments.parse(args, reader);
     
@@ -406,7 +410,7 @@ public class MachineReading {
         relationExtractor = BasicRelationExtractor.load(modelName);
       } else {
         RelationFeatureFactory rff = makeRelationFeatureFactory(MachineReadingProperties.relationFeatureFactoryClass, MachineReadingProperties.relationFeatures, MachineReadingProperties.doNotLexicalizeFirstArg);
-        Execution.fillOptions(rff, args);
+        ArgumentParser.fillOptions(rff, args);
 
         if (MachineReadingProperties.trainRelationsUsingPredictedEntities) {
       		// generate predicted entities
@@ -449,7 +453,7 @@ public class MachineReading {
       	//relationExtractor = new BasicRelationExtractor(rff, MachineReadingProperties.createUnrelatedRelations, makeRelationMentionFactory(MachineReadingProperties.relationMentionFactoryClass));
         relationExtractor = makeRelationExtractor(MachineReadingProperties.relationClassifier, rff, MachineReadingProperties.createUnrelatedRelations,
           makeRelationMentionFactory(MachineReadingProperties.relationMentionFactoryClass));
-        Execution.fillOptions(relationExtractor, args);
+        ArgumentParser.fillOptions(relationExtractor, args);
       	//Arguments.parse(args,relationExtractor);
         MachineReadingProperties.logger.info("Training relation extraction model...");
         relationExtractor.train(dataset);
@@ -719,7 +723,7 @@ public class MachineReading {
   
   /** Keeps only the first percentage sentences from the given corpus */
   static Annotation keepPercentage(Annotation corpus, double percentage) {
-	  System.err.println("Using percentage of train: " + percentage);
+	  log.info("Using percentage of train: " + percentage);
 	  Annotation smaller = new Annotation(""); 
 	  List<CoreMap> sents = new ArrayList<>();
 	  List<CoreMap> fullSents = corpus.get(SentencesAnnotation.class);
@@ -727,7 +731,7 @@ public class MachineReading {
 	  for(int i = 0; i < smallSize; i ++){
 		  sents.add(fullSents.get(i));
 	  }
-	  System.err.println("TRAIN corpus size reduced from " + fullSents.size() + " to " + sents.size());
+	  log.info("TRAIN corpus size reduced from " + fullSents.size() + " to " + sents.size());
 	  smaller.set(SentencesAnnotation.class, sents);
 	  return smaller;
   }

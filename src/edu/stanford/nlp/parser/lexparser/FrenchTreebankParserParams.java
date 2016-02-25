@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.international.french.FrenchMorphoFeatureSpecification;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
@@ -7,7 +8,7 @@ import edu.stanford.nlp.international.morph.MorphoFeatures;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.process.SerializableFunction;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.DiskTreebank;
@@ -42,7 +43,10 @@ import java.util.List;
  * @author Spence Green
  *
  */
-public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParams {
+public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParams  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(FrenchTreebankParserParams.class);
 
   private static final long serialVersionUID = -6976724734594763986L;
 
@@ -570,7 +574,7 @@ public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParam
 
   public List<HasWord> defaultTestSentence() {
     String[] sent = {"Ceci", "est", "seulement", "un", "test", "."};
-    return Sentence.toWordList(sent);
+    return SentenceUtils.toWordList(sent);
   }
 
   @Override
@@ -644,7 +648,7 @@ public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParam
 
   @Override
   public void display() {
-    System.err.println(optionsString.toString());
+    log.info(optionsString.toString());
   }
 
   @Override
@@ -664,8 +668,8 @@ public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParam
         optionsString.append("HeadFinder: " + args[i + 1] + "\n");
 
       } catch (Exception e) {
-        System.err.println(e);
-        System.err.println(this.getClass().getName() + ": Could not load head finder " + args[i + 1]);
+        log.info(e);
+        log.info(this.getClass().getName() + ": Could not load head finder " + args[i + 1]);
       }
       i += 2;
 

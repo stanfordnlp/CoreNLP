@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.international.negra;
+package edu.stanford.nlp.trees.international.negra; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 
@@ -15,7 +16,10 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author Roger Levy
  */
-public class NegraPennTreeNormalizer extends TreeNormalizer {
+public class NegraPennTreeNormalizer extends TreeNormalizer  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(NegraPennTreeNormalizer.class);
   /** How to clean up node labels: 0 = do nothing, 1 = keep category and
    *  function, 2 = just category
    */
@@ -156,7 +160,7 @@ public class NegraPennTreeNormalizer extends TreeNormalizer {
       String cat = t.value();
       if(cat == null || cat.equals("")) {
         if (t.numChildren() == 3 && t.firstChild().label().value().equals("NN") && t.getChild(1).label().value().equals("$.")) {
-          System.err.println("Correcting treebank error: giving phrase label DL to " + t);
+          log.info("Correcting treebank error: giving phrase label DL to " + t);
           t.label().setValue("DL");
         }
       }
@@ -192,7 +196,7 @@ public class NegraPennTreeNormalizer extends TreeNormalizer {
       } // j now indexes last dtr of new NP
 
       if (i > j) {
-        System.err.println("##### Warning -- no NP material here!");
+        log.info("##### Warning -- no NP material here!");
         return; // there is no NP material!
       }
 

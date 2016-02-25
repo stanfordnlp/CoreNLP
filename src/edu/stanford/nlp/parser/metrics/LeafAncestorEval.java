@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.metrics;
+package edu.stanford.nlp.parser.metrics; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -34,7 +35,10 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Spence Green
  *
  */
-public class LeafAncestorEval {
+public class LeafAncestorEval  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(LeafAncestorEval.class);
 
   private final String name;
 
@@ -165,7 +169,7 @@ public class LeafAncestorEval {
 
     } else {
       System.err.printf("%s: Number of guess (%d) gold (%d) don't match!%n",this.getClass().getName(),guessLineages.size(),goldLineages.size());
-      System.err.println("Cannot evaluate!");
+      log.info("Cannot evaluate!");
       System.err.printf("GUESS tree:%n%s%n", guess.toString());
       System.err.printf("GOLD tree:%n%s%n", gold.toString());
     }
@@ -314,7 +318,7 @@ public class LeafAncestorEval {
   public static void main(String[] args) {
 
     if(!validateCommandLine(args)) {
-      System.err.println(USAGE);
+      log.info(USAGE);
       System.exit(-1);
     }
 

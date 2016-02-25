@@ -45,8 +45,8 @@ import edu.stanford.nlp.util.*;
 
 import java.util.function.Function;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Builds various types of linear classifiers, with functionality for
@@ -66,7 +66,10 @@ import org.slf4j.LoggerFactory;
  * @author Ramesh Nallapati (nmramesh@cs.stanford.edu) {@link #trainSemiSupGE} methods
  */
 
-public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFactory<L, F> {
+public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFactory<L, F>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(LinearClassifierFactory.class);
 
   private static final long serialVersionUID = 7893768984379107397L;
   private double TOL;
@@ -90,7 +93,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   private int evalIters = -1;
   private Evaluator[] evaluators = null;
 
-  final static Logger logger = LoggerFactory.getLogger(LinearClassifierFactory.class);
+  final static Redwood.RedwoodChannels logger = Redwood.channels(LinearClassifierFactory.class);
 
   /** This is the {@code Factory<Minimizer<DiffFunction>>} that we use over and over again. */
   private static class Factory15 implements Factory<Minimizer<DiffFunction>> {
@@ -771,7 +774,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
           //sigma = sigmaToTry;
           setSigma(sigmaToTry);
           Double averageScore = crossValidator.computeAverage(scoreFn);
-          System.err.print("##sigma = "+getSigma()+" ");
+          log.info("##sigma = "+getSigma()+" ");
           logger.info("-> average Score: "+averageScore);
           return -averageScore;
         };
@@ -863,7 +866,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       double score = scorer.score(classifier, devSet);
       //System.out.println("score: "+score);
       //System.out.print(".");
-      System.err.print("##sigma = "+getSigma()+" ");
+      log.info("##sigma = "+getSigma()+" ");
       logger.info("-> average Score: " + score);
       logger.info("##time elapsed: " + timer.stop() + " milliseconds.");
       timer.restart();

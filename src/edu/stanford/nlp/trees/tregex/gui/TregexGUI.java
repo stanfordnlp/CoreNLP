@@ -28,7 +28,8 @@
 //    Licensing: parser-support@lists.stanford.edu
 //    http://www-nlp.stanford.edu/software/tregex.shtml
 
-package edu.stanford.nlp.trees.tregex.gui;
+package edu.stanford.nlp.trees.tregex.gui; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -74,7 +75,10 @@ import edu.stanford.nlp.util.ReflectionLoading;
  * @author Anna Rafferty
  */
 @SuppressWarnings("serial")
-public class TregexGUI extends JFrame implements ActionListener, MatchesPanelListener {
+public class TregexGUI extends JFrame implements ActionListener, MatchesPanelListener  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TregexGUI.class);
 
   private static TregexGUI instance; // = null;
 
@@ -384,13 +388,13 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
       } catch (NoClassDefFoundError e) {
         // This will be thrown first if the OSXAdapter is loaded on a system without the EAWT
         // because OSXAdapter extends ApplicationAdapter in its def
-        System.err.println("This version of Mac OS X does not support the Apple EAWT.  Application Menu handling has been disabled (" + e + ")");
+        log.info("This version of Mac OS X does not support the Apple EAWT.  Application Menu handling has been disabled (" + e + ")");
       } catch (ClassNotFoundException e) {
         // This shouldn't be reached; if there's a problem with the OSXAdapter we should get the
         // above NoClassDefFoundError first.
-        System.err.println("This version of Mac OS X does not support the Apple EAWT.  Application Menu handling has been disabled (" + e + ")");
+        log.info("This version of Mac OS X does not support the Apple EAWT.  Application Menu handling has been disabled (" + e + ")");
       } catch (Exception e) {
-        System.err.println("Exception while loading the OSXAdapter:");
+        log.info("Exception while loading the OSXAdapter:");
         e.printStackTrace();
       }
     }
@@ -708,7 +712,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
             out.flush();
             out.close();
           } catch(Exception e) {
-            System.err.println("Exception in save");
+            log.info("Exception in save");
             e.printStackTrace();
           }
         }
@@ -735,7 +739,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
             out.flush();
             out.close();
           } catch(Exception e) {
-            System.err.println("Exception in save");
+            log.info("Exception in save");
             e.printStackTrace();
           }
         }
@@ -763,7 +767,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
             out.flush();
             out.close();
           } catch(Exception e) {
-            System.err.println("Exception in save");
+            log.info("Exception in save");
             e.printStackTrace();
           }
         }

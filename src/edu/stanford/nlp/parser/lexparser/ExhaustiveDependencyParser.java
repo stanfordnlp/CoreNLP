@@ -24,7 +24,8 @@
 //    parser-support@lists.stanford.edu
 //    http://nlp.stanford.edu/downloads/lex-parser.shtml
 
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 
@@ -63,7 +64,10 @@ import edu.stanford.nlp.util.RuntimeInterruptedException;
  *
  * @author Dan Klein
  */
-public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
+public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ExhaustiveDependencyParser.class);
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_MORE = false;
@@ -186,12 +190,12 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
         }
         arraySize = length + 1;
         if (op.testOptions.verbose) {
-          System.err.println("Created dparser arrays of size " + arraySize);
+          log.info("Created dparser arrays of size " + arraySize);
         }
       }
     }
     if (op.testOptions.verbose) {
-      System.err.print("Initializing...");
+      log.info("Initializing...");
     }
 
     // map to words
@@ -264,7 +268,7 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
             iScoreHSum[start][dg.tagBin(tag)][start] = 0.0f;
             iScoreHSum[start][dg.tagBin(tag)][start+1] = 0.0f;
           }
-          if (DEBUG) System.err.println("DepParser accepted tagging: " + wordIndex.get(tagging.word)+"|"+tagIndex.get(tagging.tag) + ", got score " + score);
+          if (DEBUG) log.info("DepParser accepted tagging: " + wordIndex.get(tagging.word)+"|"+tagIndex.get(tagging.tag) + ", got score " + score);
         }
       }
     }
@@ -331,7 +335,7 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
               headScore[binDist][hWord][hTag][aWord][aTag] = (float) dg.scoreTB(words[hWord], hTag, words[aWord], aTag, leftHeaded, headDistance);
               //hit++;
               if (DEBUG) {
-                System.err.println("Dep score head -> dep: " + wordIndex.get(words[hWord]) + "/" + tagIndex.get(hTag) + "[" + hWord + "] -> " + wordIndex.get(words[aWord]) + "/" + tagIndex.get(aTag) + "[" + aWord + "] split [" + split + "] = " + headScore[binDist][hWord][hTag][aWord][aTag]);
+                log.info("Dep score head -> dep: " + wordIndex.get(words[hWord]) + "/" + tagIndex.get(hTag) + "[" + hWord + "] -> " + wordIndex.get(words[aWord]) + "/" + tagIndex.get(aTag) + "[" + aWord + "] split [" + split + "] = " + headScore[binDist][hWord][hTag][aWord][aTag]);
               }
               // skip other splits with same binDist
               while (split + 1 < end && binDistance[hWord][split + 1] == binDist) {
@@ -345,14 +349,14 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
     if (op.testOptions.verbose) {
       Timing.tick("done.");
       // displayHeadScores();
-      System.err.print("Starting insides...");
+      log.info("Starting insides...");
     }
     // do larger spans
     for (int diff = 2; diff <= length; diff++) {
       if (Thread.interrupted()) {
         throw new RuntimeInterruptedException();
       }
-      if (DEBUG_MORE) System.err.println("SPAN " + diff + ": score = headPrev + argLeft + argRight + dep + argLStop + argRStop");
+      if (DEBUG_MORE) log.info("SPAN " + diff + ": score = headPrev + argLeft + argRight + dep + argLStop + argRStop");
       for (int start = 0; start + diff <= length; start++) {
         int end = start + diff;
 
@@ -387,8 +391,8 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
                 }
                 float score = iScoreH[endHead][endTag][split] + argLeftScore + iScoreH[argHead][argTag][split] + depScore + stopLeftScore + headStop[argHead][argTag][split];
                 if (DEBUG_MORE) {
-                  System.err.println("Left extend " + wordIndex.get(words[endHead]) + "/" + tagIndex.get(endTag) + "[" + endHead + "] -> " + wordIndex.get(words[argHead]) + "/" + tagIndex.get(argTag) + "[" + argHead + "](" + start + "," + split + ")");
-                  System.err.println("  " + score + " = SUM " + iScoreH[endHead][endTag][split] + " " + argLeftScore + " " + iScoreH[argHead][argTag][split] + " " + depScore + " " + headStop[argHead][argTag][start] + " " + headStop[argHead][argTag][split]);
+                  log.info("Left extend " + wordIndex.get(words[endHead]) + "/" + tagIndex.get(endTag) + "[" + endHead + "] -> " + wordIndex.get(words[argHead]) + "/" + tagIndex.get(argTag) + "[" + argHead + "](" + start + "," + split + ")");
+                  log.info("  " + score + " = SUM " + iScoreH[endHead][endTag][split] + " " + argLeftScore + " " + iScoreH[argHead][argTag][split] + " " + depScore + " " + headStop[argHead][argTag][start] + " " + headStop[argHead][argTag][split]);
                 }
                 if (score > bestScore) {
                   bestScore = score;
@@ -442,8 +446,8 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
                 }
                 float score = iScoreH[startHead][startTag][split] + iScoreH[argHead][argTag][split] + argRightScore + depScore + stopRightScore + headStop[argHead][argTag][split];
                 if (DEBUG_MORE) {
-                  System.err.println("Right extend " + wordIndex.get(words[startHead]) + "/" + tagIndex.get(startTag) + "[" + startHead + "] -> " + wordIndex.get(words[argHead]) + "/" + tagIndex.get(argTag) + "[" + argHead + "](" + split + "," + end + ")");
-                  System.err.println("  " + score + " = SUM " + iScoreH[startHead][startTag][split] + " " + iScoreH[argHead][argTag][split] + " " + argRightScore + " " + depScore + " " + headStop[argHead][argTag][end] + " " + headStop[argHead][argTag][split]);
+                  log.info("Right extend " + wordIndex.get(words[startHead]) + "/" + tagIndex.get(startTag) + "[" + startHead + "] -> " + wordIndex.get(words[argHead]) + "/" + tagIndex.get(argTag) + "[" + argHead + "](" + split + "," + end + ")");
+                  log.info("  " + score + " = SUM " + iScoreH[startHead][startTag][split] + " " + iScoreH[argHead][argTag][split] + " " + argRightScore + " " + depScore + " " + headStop[argHead][argTag][end] + " " + headStop[argHead][argTag][split]);
                 }
                 if (score > bestScore) {
                   bestScore = score;
@@ -475,13 +479,13 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
     int goalTag = dg.tagBin(tagIndex.indexOf(Lexicon.BOUNDARY_TAG));
     if (op.testOptions.verbose) {
       Timing.tick("done.");
-      System.err.println("Dep  parsing " + length + " words (incl. stop): insideScore " + (iScoreH[length - 1][goalTag][0] + iScoreH[length - 1][goalTag][length]));
+      log.info("Dep  parsing " + length + " words (incl. stop): insideScore " + (iScoreH[length - 1][goalTag][0] + iScoreH[length - 1][goalTag][length]));
     }
     if ( ! op.doPCFG) {
       return hasParse();
     }
     if (op.testOptions.verbose) {
-      System.err.print("Starting outsides...");
+      log.info("Starting outsides...");
     }
     oScoreH[length - 1][goalTag][0] = 0.0f;
     oScoreH[length - 1][goalTag][length] = 0.0f;
@@ -553,7 +557,7 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
     }
     if (op.testOptions.verbose) {
       Timing.tick("done.");
-      System.err.print("Starting half-filters...");
+      log.info("Starting half-filters...");
     }
     for (int loc = 0; loc <= length; loc++) {
       for (int head = 0; head < length; head++) {
@@ -670,7 +674,7 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
    */
   private Tree extractBestParse(int start, int end, int hWord, int hTag) {
     if (DEBUG) {
-      System.err.println("Span "+start+" to "+end+" word "+wordIndex.get(words[hWord])+"/"+hWord+" tag "+tagIndex.get(hTag)+"/"+hTag+" score "+iScore(start, end, hWord, hTag));
+      log.info("Span "+start+" to "+end+" word "+wordIndex.get(words[hWord])+"/"+hWord+" tag "+tagIndex.get(hTag)+"/"+hTag+" score "+iScore(start, end, hWord, hTag));
     }
     String headWordStr = wordIndex.get(words[hWord]);
     String headTagStr = tagIndex.get(hTag);
@@ -694,7 +698,7 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
               if (DEBUG) {
                 String argWordStr = wordIndex.get(words[aWord]);
                 String argTagStr = tagIndex.get(aTag);
-                System.err.println(headWordStr+"|"+headTagStr+" -> "+argWordStr+"|"+argTagStr+" "+bestScore);
+                log.info(headWordStr+"|"+headTagStr+" -> "+argWordStr+"|"+argTagStr+" "+bestScore);
               }
               // build it
               children.add(extractBestParse(start, split, hWord, hTag));
@@ -710,7 +714,7 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
               if (DEBUG) {
                 String argWordStr = wordIndex.get(words[aWord]);
                 String argTagStr = tagIndex.get(aTag);
-                System.err.println(headWordStr+"|"+headTagStr+" -> "+argWordStr+"|"+argTagStr+" "+bestScore);
+                log.info(headWordStr+"|"+headTagStr+" -> "+argWordStr+"|"+argTagStr+" "+bestScore);
               }
               children.add(extractBestParse(start, split, aWord, aTag));
               children.add(extractBestParse(split, end, hWord, hTag));
@@ -721,7 +725,7 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
         }
       }
     }
-    System.err.println("Problem in ExhaustiveDependencyParser::extractBestParse");
+    log.info("Problem in ExhaustiveDependencyParser::extractBestParse");
     return null;
   }
 

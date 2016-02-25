@@ -1,4 +1,5 @@
-package edu.stanford.nlp.ie;
+package edu.stanford.nlp.ie; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +35,10 @@ import edu.stanford.nlp.util.StringUtils;
  *
  * @author Mihai Surdeanu
  */
-public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
+public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(NERClassifierCombiner.class);
 
   private final boolean applyNumericClassifiers;
   public static final boolean APPLY_NUMERIC_CLASSIFIERS_DEFAULT = true;
@@ -169,7 +173,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
       models  = modelNames.split(",");
     } else {
       // Allow for no real NER model - can just use numeric classifiers or SUTime
-      System.err.println("WARNING: no NER models specified");
+      log.info("WARNING: no NER models specified");
       models = StringUtils.EMPTY_STRING_ARRAY;
     }
     NERClassifierCombiner nerCombiner;
@@ -238,8 +242,8 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
       } catch (RuntimeInterruptedException e) {
         throw e;
       } catch (Exception e) {
-        System.err.println("Ignored an exception in NumberSequenceClassifier: (result is that some numbers were not classified)");
-        System.err.println("Tokens: " + StringUtils.joinWords(tokens, " "));
+        log.info("Ignored an exception in NumberSequenceClassifier: (result is that some numbers were not classified)");
+        log.info("Tokens: " + StringUtils.joinWords(tokens, " "));
         e.printStackTrace(System.err);
       }
 
@@ -251,12 +255,12 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
         // note: this uses and sets NamedEntityTagAnnotation!
         QuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(output, false, useSUTime);
       } catch (Exception e) {
-        System.err.println("Ignored an exception in QuantifiableEntityNormalizer: (result is that entities were not normalized)");
-        System.err.println("Tokens: " + StringUtils.joinWords(tokens, " "));
+        log.info("Ignored an exception in QuantifiableEntityNormalizer: (result is that entities were not normalized)");
+        log.info("Tokens: " + StringUtils.joinWords(tokens, " "));
         e.printStackTrace(System.err);
       } catch(AssertionError e) {
-        System.err.println("Ignored an assertion in QuantifiableEntityNormalizer: (result is that entities were not normalized)");
-        System.err.println("Tokens: " + StringUtils.joinWords(tokens, " "));
+        log.info("Ignored an assertion in QuantifiableEntityNormalizer: (result is that entities were not normalized)");
+        log.info("Tokens: " + StringUtils.joinWords(tokens, " "));
         e.printStackTrace(System.err);
       }
     } else {
@@ -278,7 +282,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
       CoreLabel origWord = words.get(i);
       CoreLabel newWord = newWords.get(i);
 
-      // System.err.println(newWord.word() + " => " + newWord.get(CoreAnnotations.AnswerAnnotation.class) + " " + origWord.ner());
+      // log.info(newWord.word() + " => " + newWord.get(CoreAnnotations.AnswerAnnotation.class) + " " + origWord.ner());
 
       String before = origWord.get(CoreAnnotations.AnswerAnnotation.class);
       String newGuess = newWord.get(CoreAnnotations.AnswerAnnotation.class);
@@ -327,12 +331,12 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
 
   // method for displaying info about an NERClassifierCombiner
   public static void showNCCInfo(NERClassifierCombiner ncc) {
-    System.err.println("");
-    System.err.println("info for this NERClassifierCombiner: ");
+    log.info("");
+    log.info("info for this NERClassifierCombiner: ");
     ClassifierCombiner.showCCInfo(ncc);
-    System.err.println("useSUTime: "+ncc.useSUTime);
-    System.err.println("applyNumericClassifier: "+ncc.applyNumericClassifiers);
-    System.err.println("");
+    log.info("useSUTime: "+ncc.useSUTime);
+    log.info("applyNumericClassifier: "+ncc.applyNumericClassifiers);
+    log.info("");
   }
 
   /** the main method **/

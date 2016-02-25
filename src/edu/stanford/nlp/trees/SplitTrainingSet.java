@@ -8,10 +8,11 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 
+import edu.stanford.nlp.util.logging.Redwood;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.stanford.nlp.util.Execution;
+import edu.stanford.nlp.util.ArgumentParser;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
@@ -26,21 +27,21 @@ import edu.stanford.nlp.util.StringUtils;
  * <code>java edu.stanford.nlp.trees.SplitTrainingSet -input foo.mrg -output bar.mrg -seed 1000</code>
  */
 public class SplitTrainingSet {
-  private static Logger logger = LoggerFactory.getLogger(SplitTrainingSet.class);
+  private static Redwood.RedwoodChannels logger = Redwood.channels(SplitTrainingSet.class);
 
-  @Execution.Option(name="input", gloss="The file to use as input.", required=true)
+  @ArgumentParser.Option(name="input", gloss="The file to use as input.", required=true)
   private static String INPUT = null;
 
-  @Execution.Option(name="output", gloss="Where to send the splits.", required=true)
+  @ArgumentParser.Option(name="output", gloss="Where to send the splits.", required=true)
   private static String OUTPUT = null;
 
-  @Execution.Option(name="split_names", gloss="Divisions to use for the output")
+  @ArgumentParser.Option(name="split_names", gloss="Divisions to use for the output")
   private static String[] SPLIT_NAMES = { "train", "dev", "test" };
 
-  @Execution.Option(name="split_weights", gloss="Portions to use for the divisions")
+  @ArgumentParser.Option(name="split_weights", gloss="Portions to use for the divisions")
   private static Double[] SPLIT_WEIGHTS = { 0.7, 0.15, 0.15 };
 
-  @Execution.Option(name="seed", gloss="Random seed to use")
+  @ArgumentParser.Option(name="seed", gloss="Random seed to use")
   private static long SEED = 0L;
 
   public static int weightedIndex(List<Double> weights, Random random) {
@@ -59,7 +60,7 @@ public class SplitTrainingSet {
   public static void main(String[] args) throws IOException {
     // Parse the arguments
     Properties props = StringUtils.argsToProperties(args);
-    Execution.fillOptions(new Class[]{ Execution.class, SplitTrainingSet.class }, props);
+    ArgumentParser.fillOptions(new Class[]{ArgumentParser.class, SplitTrainingSet.class}, props);
 
     if (SPLIT_NAMES.length != SPLIT_WEIGHTS.length) {
       throw new IllegalArgumentException("Name and weight arrays must be of the same length");

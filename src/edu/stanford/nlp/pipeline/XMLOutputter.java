@@ -1,4 +1,4 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -43,7 +43,8 @@ import nu.xom.*;
  * see {@link edu.stanford.nlp.pipeline.AnnotationSerializer}; e.g.,
  * {@link edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer}.
  */
-public class XMLOutputter extends AnnotationOutputter {
+public class XMLOutputter extends AnnotationOutputter  {
+
   // the namespace is set in the XSLT file
   private static final String NAMESPACE_URI = null;
   private static final String STYLESHEET_NAME = "CoreNLP-to-HTML.xsl";
@@ -176,6 +177,14 @@ public class XMLOutputter extends AnnotationOutputter {
           sentElem.appendChild(openieElem);
         }
 
+        // add KBP triples
+        Collection<RelationTriple> kbpTriples = sentence.get(CoreAnnotations.KBPTriplesAnnotation.class);
+        if (kbpTriples != null) {
+          Element kbpElem = new Element("kbp", NAMESPACE_URI);
+          addTriples(kbpTriples, kbpElem, NAMESPACE_URI);
+          sentElem.appendChild(kbpElem);
+        }
+
         // add the MR entities and relations
         List<EntityMention> entities = sentence.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
         List<RelationMention> relations = sentence.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
@@ -245,7 +254,7 @@ public class XMLOutputter extends AnnotationOutputter {
     StringWriter treeStrWriter = new StringWriter();
     constituentTreePrinter.printTree(tree, new PrintWriter(treeStrWriter, true));
     String temp = treeStrWriter.toString();
-    //System.err.println(temp);
+    //log.info(temp);
     treeInfo.appendChild(temp);
   }
 
@@ -444,6 +453,12 @@ public class XMLOutputter extends AnnotationOutputter {
     if (token.containsKey(SentimentCoreAnnotations.SentimentClass.class)) {
       Element cur = new Element("sentiment", curNS);
       cur.appendChild(token.get(SentimentCoreAnnotations.SentimentClass.class));
+      wordInfo.appendChild(cur);
+    }
+
+    if (token.containsKey(CoreAnnotations.WikipediaEntityAnnotation.class)) {
+      Element cur = new Element("entitylink", curNS);
+      cur.appendChild(token.get(CoreAnnotations.WikipediaEntityAnnotation.class));
       wordInfo.appendChild(cur);
     }
 

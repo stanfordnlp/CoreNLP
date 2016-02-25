@@ -1,4 +1,5 @@
-package edu.stanford.nlp.ie.crf;
+package edu.stanford.nlp.ie.crf; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.optimization.AbstractStochasticCachingDiffUpdateFunction;
@@ -14,7 +15,10 @@ import java.util.*;
  *         Mengqiu Wang
  */
 
-public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachingDiffUpdateFunction implements HasCliquePotentialFunction, HasFeatureGrouping {
+public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachingDiffUpdateFunction implements HasCliquePotentialFunction, HasFeatureGrouping  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CRFLogConditionalObjectiveFunction.class);
 
   public static final int NO_PRIOR = 0;
   public static final int QUADRATIC_PRIOR = 1;
@@ -174,7 +178,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
         System.arraycopy(windowLabels, window - 1 - j, cliqueLabel, 0, j + 1);
         CRFLabel crfLabel = new CRFLabel(cliqueLabel);
         int labelIndex = labelIndices.get(j).indexOf(crfLabel);
-        //System.err.println(crfLabel + " " + labelIndex);
+        //log.info(crfLabel + " " + labelIndex);
         for (int n = 0; n < docData[i][j].length; n++) {
           double fVal = 1.0;
           if (featureValArr != null && j == 0) // j == 0 because only node features gets feature values
@@ -277,7 +281,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
       int label = docLabels[i];
       double p = cliqueTree.condLogProbGivenPrevious(i, label, given);
       if (VERBOSE) {
-        System.err.println("P(" + label + "|" + ArrayMath.toString(given) + ")=" + p);
+        log.info("P(" + label + "|" + ArrayMath.toString(given) + ")=" + p);
       }
       prob += p;
       System.arraycopy(given, 1, given, 0, given.length - 1);
@@ -423,7 +427,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     // because we minimize -L(\theta)
     value = -prob;
     if (VERBOSE) {
-      System.err.println("value is " + Math.exp(-value));
+      log.info("value is " + Math.exp(-value));
     }
 
     // compute the partial derivative for each feature by comparing expected counts to empirical counts
@@ -433,7 +437,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
         // because we minimize -L(\theta)
         derivative[index] = (E[i][j] - Ehat[i][j]);
         if (VERBOSE) {
-          System.err.println("deriv(" + i + "," + j + ") = " + E[i][j] + " - " + Ehat[i][j] + " = " + derivative[index]);
+          log.info("deriv(" + i + "," + j + ") = " + E[i][j] + " - " + Ehat[i][j] + " = " + derivative[index]);
         }
         index++;
       }
@@ -441,7 +445,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
 
     applyPrior(x, 1.0);
 
-    // System.err.println("\nfuncVal: " + value);
+    // log.info("\nfuncVal: " + value);
   }
 
   @Override
@@ -481,7 +485,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
         // but since we minimize -L(\theta), the gradient is -(empirical-expected)
         derivative[index++] = (E[i][j] - batchScale*Ehat[i][j]);
         if (VERBOSE) {
-          System.err.println("deriv(" + i + "," + j + ") = " + E[i][j] + " - " + Ehat[i][j] + " = " + derivative[index - 1]);
+          log.info("deriv(" + i + "," + j + ") = " + E[i][j] + " - " + Ehat[i][j] + " = " + derivative[index - 1]);
         }
       }
     }
@@ -688,7 +692,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
         for (int l2 = 0; l2 < numClasses; l2++) {
           labelPair[1] = l2;
           double prob = cTree.logProb(i, labelPair);
-          // System.err.println(prob);
+          // log.info(prob);
           if (i-1 >= 0)
             nextGivenCurr[i-1][l1][l2] = prob;
           prevGivenCurr[i][l2][l1] = prob;
@@ -696,20 +700,20 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
       }
 
       if (DEBUG2) {
-        System.err.println("unnormalized conditionals:");
+        log.info("unnormalized conditionals:");
         if (i>0) {
-        System.err.println("nextGivenCurr[" + (i-1) + "]:");
+        log.info("nextGivenCurr[" + (i-1) + "]:");
         for (int a = 0; a < nextGivenCurr[i-1].length; a++) {
           for (int b = 0; b < nextGivenCurr[i-1][a].length; b++)
-            System.err.print((nextGivenCurr[i-1][a][b])+"\t");
-          System.err.println();
+            log.info((nextGivenCurr[i-1][a][b])+"\t");
+          log.info();
         }
         }
-        System.err.println("prevGivenCurr[" + (i) + "]:");
+        log.info("prevGivenCurr[" + (i) + "]:");
         for (int a = 0; a < prevGivenCurr[i].length; a++) {
           for (int b = 0; b < prevGivenCurr[i][a].length; b++)
-            System.err.print((prevGivenCurr[i][a][b])+"\t");
-          System.err.println();
+            log.info((prevGivenCurr[i][a][b])+"\t");
+          log.info();
         }
       }
 
@@ -727,20 +731,20 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
       }
 
       if (DEBUG2) {
-        System.err.println("normalized conditionals:");
+        log.info("normalized conditionals:");
         if (i>0) {
-        System.err.println("nextGivenCurr[" + (i-1) + "]:");
+        log.info("nextGivenCurr[" + (i-1) + "]:");
         for (int a = 0; a < nextGivenCurr[i-1].length; a++) {
           for (int b = 0; b < nextGivenCurr[i-1][a].length; b++)
-            System.err.print((nextGivenCurr[i-1][a][b])+"\t");
-          System.err.println();
+            log.info((nextGivenCurr[i-1][a][b])+"\t");
+          log.info();
         }
         }
-        System.err.println("prevGivenCurr[" + (i) + "]:");
+        log.info("prevGivenCurr[" + (i) + "]:");
         for (int a = 0; a < prevGivenCurr[i].length; a++) {
           for (int b = 0; b < prevGivenCurr[i][a].length; b++)
-            System.err.print((prevGivenCurr[i][a][b])+"\t");
-          System.err.println();
+            log.info((prevGivenCurr[i][a][b])+"\t");
+          log.info();
         }
       }
     }
@@ -802,8 +806,8 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
       try {
         System.arraycopy(weights, index, newWeights[i], 0, labelSize);
       } catch (Exception ex) {
-        System.err.println("weights: " + Arrays.toString(weights));
-        System.err.println("newWeights["+i+"]: " + Arrays.toString(newWeights[i]));
+        log.info("weights: " + Arrays.toString(weights));
+        log.info("newWeights["+i+"]: " + Arrays.toString(newWeights[i]));
         throw new RuntimeException(ex);
       }
       index += labelSize;
@@ -822,8 +826,8 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
       try {
         System.arraycopy(weights, index, newWeights[i], 0, labelSize);
       } catch (Exception ex) {
-        System.err.println("weights: " + Arrays.toString(weights));
-        System.err.println("newWeights["+i+"]: " + Arrays.toString(newWeights[i]));
+        log.info("weights: " + Arrays.toString(weights));
+        log.info("newWeights["+i+"]: " + Arrays.toString(newWeights[i]));
         throw new RuntimeException(ex);
       }
       index += labelSize;

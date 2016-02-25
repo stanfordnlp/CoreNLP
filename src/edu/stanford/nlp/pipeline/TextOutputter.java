@@ -100,7 +100,7 @@ public class TextOutputter extends AnnotationOutputter {
         String[] tokenAnnotations = {
                 "Text", "PartOfSpeech", "Lemma", "Answer", "NamedEntityTag",
                 "CharacterOffsetBegin", "CharacterOffsetEnd", "NormalizedNamedEntityTag",
-                "Timex", "TrueCase", "TrueCaseText", "SentimentClass" };
+                "Timex", "TrueCase", "TrueCaseText", "SentimentClass", "WikipediaEntity" };
         for (CoreLabel token: tokens) {
           pw.print(token.toShorterString(tokenAnnotations));
           pw.println();
@@ -146,6 +146,15 @@ public class TextOutputter extends AnnotationOutputter {
           pw.println("Extracted the following Open IE triples:");
           for (RelationTriple triple : openieTriples) {
             pw.println(OpenIE.tripleToString(triple, docId, sentence));
+          }
+        }
+
+        // display KBP triples
+        Collection<RelationTriple> kbpTriples = sentence.get(CoreAnnotations.KBPTriplesAnnotation.class);
+        if (kbpTriples != null && kbpTriples.size() > 0) {
+          pw.println("Extracted the following KBP triples:");
+          for (RelationTriple triple : kbpTriples) {
+            pw.println(triple.toString());
           }
         }
 

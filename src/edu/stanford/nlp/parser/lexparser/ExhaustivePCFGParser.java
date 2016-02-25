@@ -24,7 +24,8 @@
 //    parser-support@lists.stanford.edu
 //    http://nlp.stanford.edu/downloads/lex-parser.shtml
 
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -56,7 +57,10 @@ import java.util.regex.Matcher;
  *  @author Christopher Manning (I seem to maintain it....)
  *  @author Jenny Finkel (N-best and sampling code, former from Liang/Chiang)
  */
-public class ExhaustivePCFGParser implements Scorer, KBestViterbiParser {
+public class ExhaustivePCFGParser implements Scorer, KBestViterbiParser  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ExhaustivePCFGParser.class);
 
   // public static long insideTime = 0;  // for profiling
   // public static long outsideTime = 0;
@@ -316,7 +320,7 @@ public class ExhaustivePCFGParser implements Scorer, KBestViterbiParser {
     long time2 = System.currentTimeMillis();
     long diff = time2 - time;
     time = time2;
-    System.err.print("done.  " + diff + "\n" + str);
+    log.info("done.  " + diff + "\n" + str);
   }
 
   protected boolean floodTags = false;
@@ -351,8 +355,8 @@ public class ExhaustivePCFGParser implements Scorer, KBestViterbiParser {
     int goal = stateIndex.indexOf(goalStr);
     if (op.testOptions.verbose) {
       // System.out.println(numStates + " states, " + goal + " is the goal state.");
-      // System.err.println(new ArrayList(ug.coreRules.keySet()));
-      System.err.print("Initializing PCFG...");
+      // log.info(new ArrayList(ug.coreRules.keySet()));
+      log.info("Initializing PCFG...");
     }
     // map input words to words array (wordIndex ints)
     words = new int[length];
@@ -447,7 +451,7 @@ public class ExhaustivePCFGParser implements Scorer, KBestViterbiParser {
       Timing.tick("done.");
       unkWords.append(" ]");
       op.tlpParams.pw(System.err).println("Unknown words: " + unk + " " + unkWords);
-      System.err.print("Starting filters...");
+      log.info("Starting filters...");
     }
     if (Thread.interrupted()) {
       throw new RuntimeInterruptedException();
@@ -461,7 +465,7 @@ public class ExhaustivePCFGParser implements Scorer, KBestViterbiParser {
     // buildOFilter();
     if (op.testOptions.verbose) {
       Timing.tick("done.");
-      System.err.print("Starting insides...");
+      log.info("Starting insides...");
     }
     // do the inside probabilities
     doInsideScores();
@@ -475,14 +479,14 @@ public class ExhaustivePCFGParser implements Scorer, KBestViterbiParser {
     if (op.testOptions.doRecovery && !succeeded && !floodTags) {
       floodTags = true; // sentence will try to reparse
       // ms: disabled message. this is annoying and it doesn't really provide much information
-      //System.err.println("Trying recovery parse...");
+      //log.info("Trying recovery parse...");
       return parse(sentence);
     }
     if ( ! op.doDep || op.testOptions.useFastFactored) {
       return succeeded;
     }
     if (op.testOptions.verbose) {
-      System.err.print("Starting outsides...");
+      log.info("Starting outsides...");
     }
     // outside scores
     oScore[0][length][goal] = 0.0f;
@@ -549,13 +553,13 @@ public class ExhaustivePCFGParser implements Scorer, KBestViterbiParser {
 
     int goal = stateIndex.indexOf(goalStr);
 //    if (op.testOptions.verbose) {
-//      System.err.println("Unaries: " + ug.rules());
-//      System.err.println("Binaries: " + bg.rules());
-//      System.err.println("Initializing PCFG...");
-//      System.err.println("   " + numStates + " states, " + goal + " is the goal state.");
+//      log.info("Unaries: " + ug.rules());
+//      log.info("Binaries: " + bg.rules());
+//      log.info("Initializing PCFG...");
+//      log.info("   " + numStates + " states, " + goal + " is the goal state.");
 //    }
 
-//    System.err.println("Tagging states");
+//    log.info("Tagging states");
 //    for(int i = 0; i < numStates; i++) {
 //      if(isTag[i]) {
 //        int tagId = Numberer.translate(stateSpace, "tags", i);
@@ -605,7 +609,7 @@ public class ExhaustivePCFGParser implements Scorer, KBestViterbiParser {
 
     if (op.testOptions.verbose) {
       Timing.tick("done.");
-      System.err.println("PCFG " + length + " words (incl. stop) iScore " + bestScore);
+      log.info("PCFG " + length + " words (incl. stop) iScore " + bestScore);
     }
 
     boolean succeeded = hasParse();
@@ -948,7 +952,7 @@ oScore[split][end][br.rightChild] = totR;
               continue;
             }
             float tot = pS + lS + rS;
-            if (spillGuts) { System.err.println("Rule " + rule + " over [" + start + "," + end + ") has log score " + tot + " from L[" + stateIndex.get(leftState) + "=" + leftState + "] = "+ lS  + " R[" + stateIndex.get(rightChild) + "=" + rightChild + "] =  " + rS); }
+            if (spillGuts) { log.info("Rule " + rule + " over [" + start + "," + end + ") has log score " + tot + " from L[" + stateIndex.get(leftState) + "=" + leftState + "] = "+ lS  + " R[" + stateIndex.get(rightChild) + "=" + rightChild + "] =  " + rS); }
             if (tot > bestIScore) {
               bestIScore = tot;
             }
@@ -986,7 +990,7 @@ oScore[split][end][br.rightChild] = totR;
         if (foundBetter) { // this way of making "parentState" is better than previous
           iScore_start_end[parentState] = bestIScore;
 
-          if (spillGuts) System.err.println("Could build " + stateIndex.get(parentState) + " from " + start + " to " + end + " score " + bestIScore);
+          if (spillGuts) log.info("Could build " + stateIndex.get(parentState) + " from " + start + " to " + end + " score " + bestIScore);
           if (oldIScore == Float.NEGATIVE_INFINITY) {
             if (start > narrowLExtent_end[parentState]) {
               narrowLExtent_end[parentState] = wideLExtent_end[parentState] = start;
@@ -1116,7 +1120,7 @@ oScore[split][end][br.rightChild] = totR;
         } // end if lengthNormalization
         if (foundBetter) { // this way of making "parentState" is better than previous
           iScore_start_end[parentState] = bestIScore;
-          if (spillGuts) System.err.println("Could build " + stateIndex.get(parentState) + " from " + start + " to " + end + " with score " + bestIScore);
+          if (spillGuts) log.info("Could build " + stateIndex.get(parentState) + " from " + start + " to " + end + " with score " + bestIScore);
           if (oldIScore == Float.NEGATIVE_INFINITY) {
             if (start > narrowLExtent_end[parentState]) {
               narrowLExtent_end[parentState] = wideLExtent_end[parentState] = start;
@@ -1181,7 +1185,7 @@ oScore[split][end][br.rightChild] = totR;
           foundBetter = (tot > cur);
         }
         if (foundBetter) {
-          if (spillGuts) System.err.println("Could build " + stateIndex.get(parentState) + " from " + start + " to " + end + " with score " + tot);
+          if (spillGuts) log.info("Could build " + stateIndex.get(parentState) + " from " + start + " to " + end + " with score " + tot);
           iScore_start_end[parentState] = tot;
           if (cur == Float.NEGATIVE_INFINITY) {
             if (start > narrowLExtent_end[parentState]) {
@@ -1529,7 +1533,7 @@ oScore[split][end][br.rightChild] = totR;
     Tree internalTree = extractBestParse(goalStr, 0, length);
     //System.out.println("Got internal best parse...");
     if (internalTree == null) {
-      System.err.println("Warning: no parse found in ExhaustivePCFGParser.extractBestParse");
+      log.info("Warning: no parse found in ExhaustivePCFGParser.extractBestParse");
     } // else {
       // restoreUnaries(internalTree);
     // }
@@ -1638,7 +1642,7 @@ oScore[split][end][br.rightChild] = totR;
           children.add(rightChildTree);
           Tree result = tf.newTreeNode(goalStr, children);
           result.setScore(score);
-          // System.err.println("    Found Binary node: "+result);
+          // log.info("    Found Binary node: "+result);
           return result;
         }
       }
@@ -1651,7 +1655,7 @@ oScore[split][end][br.rightChild] = totR;
     // for (Iterator<UnaryRule> unaryI = ug.closedRuleIteratorByParent(goal); unaryI.hasNext(); ) {
     for (Iterator<UnaryRule> unaryI = ug.ruleIteratorByParent(goal); unaryI.hasNext(); ) {
       UnaryRule ur = unaryI.next();
-      // System.err.println("  Trying " + ur + " dtr score: " + iScore[start][end][ur.child]);
+      // log.info("  Trying " + ur + " dtr score: " + iScore[start][end][ur.child]);
       double score = ur.score + iScore[start][end][ur.child];
       boolean matches;
       if (op.testOptions.lengthNormalization) {
@@ -1664,12 +1668,12 @@ oScore[split][end][br.rightChild] = totR;
         // build unary
         Tree childTree = extractBestParse(ur.child, start, end);
         Tree result = tf.newTreeNode(goalStr, Collections.singletonList(childTree));
-        // System.err.println("    Matched!  Unary node: "+result);
+        // log.info("    Matched!  Unary node: "+result);
         result.setScore(score);
         return result;
       }
     }
-    System.err.println("Warning: no parse found in ExhaustivePCFGParser.extractBestParse: failing on: [" + start + ", " + end + "] looking for " + goalStr);
+    log.info("Warning: no parse found in ExhaustivePCFGParser.extractBestParse: failing on: [" + start + ", " + end + "] looking for " + goalStr);
     return null;
   }
 
@@ -1679,7 +1683,7 @@ oScore[split][end][br.rightChild] = totR;
   protected void restoreUnaries(Tree t) {
     //System.out.println("In restoreUnaries...");
     for (Tree node : t) {
-      System.err.println("Doing node: "+node.label());
+      log.info("Doing node: "+node.label());
       if (node.isLeaf() || node.isPreTerminal() || node.numChildren() != 1) {
         //System.out.println("Skipping node: "+node.label());
         continue;
@@ -1688,7 +1692,7 @@ oScore[split][end][br.rightChild] = totR;
       Tree parent = node;
       Tree child = node.children()[0];
       List path = ug.getBestPath(stateIndex.indexOf(parent.label().value()), stateIndex.indexOf(child.label().value()));
-      System.err.println("Got path: "+path);
+      log.info("Got path: "+path);
       int pos = 1;
       while (pos < path.size() - 1) {
         int interState = ((Integer) path.get(pos)).intValue();
@@ -1773,7 +1777,7 @@ oScore[split][end][br.rightChild] = totR;
       }
     }
     if (bestTrees.isEmpty()) {
-      System.err.println("Warning: no parse found in ExhaustivePCFGParser.extractBestParse: failing on: [" + start + ", " + end + "] looking for " + goalStr);
+      log.info("Warning: no parse found in ExhaustivePCFGParser.extractBestParse: failing on: [" + start + ", " + end + "] looking for " + goalStr);
     }
     return bestTrees;
   }
@@ -2198,7 +2202,7 @@ oScore[split][end][br.rightChild] = totR;
       }
       arraySize = length + 1;
       if (op.testOptions.verbose) {
-        System.err.println("Created PCFG parser arrays of size " + arraySize);
+        log.info("Created PCFG parser arrays of size " + arraySize);
       }
     }
   }

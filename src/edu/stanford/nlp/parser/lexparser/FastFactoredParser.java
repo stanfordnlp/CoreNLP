@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 
@@ -21,7 +22,10 @@ import edu.stanford.nlp.util.*;
  *
  *  @author Christopher Manning
  */
-public class FastFactoredParser implements KBestViterbiParser {
+public class FastFactoredParser implements KBestViterbiParser  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(FastFactoredParser.class);
 
   // TODO Regression tests
   // TODO Set dependency tuning and test whether useful
@@ -92,15 +96,15 @@ public class FastFactoredParser implements KBestViterbiParser {
    * @return The score for the tree according to the grammar
    */
   private double depScoreTree(Tree tr) {
-    // System.err.println("Here's our tree:");
+    // log.info("Here's our tree:");
     // tr.pennPrint();
-    // System.err.println(Trees.toDebugStructureString(tr));
+    // log.info(Trees.toDebugStructureString(tr));
     Tree cwtTree = tr.deepCopy(new LabeledScoredTreeFactory(), new CategoryWordTagFactory());
     cwtTree.percolateHeads(binHeadFinder);
-    // System.err.println("Here's what it went to:");
+    // log.info("Here's what it went to:");
     // cwtTree.pennPrint();
     List<IntDependency> deps = MLEDependencyGrammar.treeToDependencyList(cwtTree, wordIndex, tagIndex);
-    // System.err.println("Here's the deps:\n" + deps);
+    // log.info("Here's the deps:\n" + deps);
     return dg.scoreAll(deps);
   }
 

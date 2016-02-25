@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.international.arabic;
+package edu.stanford.nlp.trees.international.arabic; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.regex.Pattern;
 
@@ -24,7 +25,10 @@ import edu.stanford.nlp.util.Generics;
  * @author Mona Diab
  * @author Christopher Manning (added new stuff for ATBp3v3
  */
-public class ArabicHeadFinder extends AbstractCollinsHeadFinder {
+public class ArabicHeadFinder extends AbstractCollinsHeadFinder  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ArabicHeadFinder.class);
   private static final long serialVersionUID = 6203368998430280740L;
   protected TagSet tagSet;
 
@@ -102,7 +106,7 @@ public class ArabicHeadFinder extends AbstractCollinsHeadFinder {
   protected ArabicHeadFinder(TreebankLanguagePack tlp, TagSet tagSet) {
     super(tlp);
     this.tagSet = tagSet;
-    //System.err.println("##testing: noun tag is " + tagSet.noun());
+    //log.info("##testing: noun tag is " + tagSet.noun());
 
     nonTerminalInfo = Generics.newHashMap();
 

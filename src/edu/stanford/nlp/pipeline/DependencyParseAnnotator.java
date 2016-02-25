@@ -1,5 +1,8 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
+import edu.stanford.nlp.ling.CoreAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.parser.nndep.DependencyParser;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
@@ -20,7 +23,10 @@ import java.util.*;
  *
  * @author Jon Gauthier
  */
-public class DependencyParseAnnotator extends SentenceAnnotator {
+public class DependencyParseAnnotator extends SentenceAnnotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(DependencyParseAnnotator.class);
 
   private final DependencyParser parser;
 
@@ -83,17 +89,29 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
   @Override
   protected void doOneFailedSentence(Annotation annotation, CoreMap sentence) {
     // TODO
-    System.err.println("fail");
+    log.info("fail");
   }
 
   @Override
-  public Set<Requirement> requires() {
-    return Annotator.REQUIREMENTS.get(STANFORD_DEPENDENCIES);
+  public Set<Class<? extends CoreAnnotation>> requires() {
+    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        CoreAnnotations.TextAnnotation.class,
+        CoreAnnotations.IndexAnnotation.class,
+        CoreAnnotations.ValueAnnotation.class,
+        CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.SentencesAnnotation.class,
+        CoreAnnotations.SentenceIndexAnnotation.class,
+        CoreAnnotations.PartOfSpeechAnnotation.class
+    )));
   }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
-    return Collections.unmodifiableSet(new ArraySet<>(DEPENDENCY_REQUIREMENT));
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
+        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
+        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
+    )));
   }
 
   public static String signature(String annotatorName, Properties props) {

@@ -1,5 +1,6 @@
 
-package edu.stanford.nlp.ie.machinereading.common;
+package edu.stanford.nlp.ie.machinereading.common; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -7,7 +8,10 @@ import java.util.StringTokenizer;
 /**
  * Simple string tokenization
  */
-public class SimpleTokenize {
+public class SimpleTokenize  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(SimpleTokenize.class);
   /** Basic string tokenization, skipping over white spaces */
   public static ArrayList<String> tokenize(String line) {
     ArrayList<String> tokens = new ArrayList<>();
@@ -131,7 +135,7 @@ public class SimpleTokenize {
   /** Implements a simple test */
   public static void main(String[] argv) {
     String in = "T \"Athens \\\"the beautiful\\\"\" \"Athens\" \"\" \"Greece\"";
-    System.err.println("Input: " + in);
-    System.err.println(tokenizeWithQuotes(in));
+    log.info("Input: " + in);
+    log.info(tokenizeWithQuotes(in));
   }
 }

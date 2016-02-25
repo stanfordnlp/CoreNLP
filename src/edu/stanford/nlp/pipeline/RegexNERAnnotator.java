@@ -1,13 +1,13 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import edu.stanford.nlp.ie.regexp.RegexNERSequenceClassifier;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 
@@ -19,7 +19,10 @@ import edu.stanford.nlp.util.PropertiesUtils;
  *
  * @author jtibs
  */
-public class RegexNERAnnotator implements Annotator {
+public class RegexNERAnnotator implements Annotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(RegexNERAnnotator.class);
 
   private final RegexNERSequenceClassifier classifier;
   private final boolean verbose;
@@ -62,7 +65,7 @@ public class RegexNERAnnotator implements Annotator {
   @Override
   public void annotate(Annotation annotation) {
     if (verbose) {
-      System.err.print("Adding RegexNER annotations ... ");
+      log.info("Adding RegexNER annotations ... ");
     }
 
     if (! annotation.containsKey(CoreAnnotations.SentencesAnnotation.class))
@@ -102,7 +105,7 @@ public class RegexNERAnnotator implements Annotator {
     }
 
     if (verbose)
-      System.err.println("done.");
+      log.info("done.");
   }
 
   private static int findEndOfAnswerAnnotation(List<CoreLabel> tokens, int start) {
@@ -128,12 +131,19 @@ public class RegexNERAnnotator implements Annotator {
 
 
   @Override
-  public Set<Requirement> requires() {
-    return StanfordCoreNLP.TOKENIZE_SSPLIT_POS;
+  public Set<Class<? extends CoreAnnotation>> requires() {
+    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        CoreAnnotations.TextAnnotation.class,
+        CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+        CoreAnnotations.CharacterOffsetEndAnnotation.class,
+        CoreAnnotations.SentencesAnnotation.class,
+        CoreAnnotations.PartOfSpeechAnnotation.class
+    )));
   }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     // TODO: we might want to allow for different RegexNER annotators
     // to satisfy different requirements
     return Collections.emptySet();

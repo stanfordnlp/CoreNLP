@@ -2,6 +2,8 @@
 
 package edu.stanford.nlp.trees.international.pennchinese;
 
+import edu.stanford.nlp.util.logging.Redwood;
+
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -14,7 +16,10 @@ import java.io.UnsupportedEncodingException;
  */
 
 
-class CHTBLexer {
+public class CHTBLexer  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CHTBLexer.class);
 
   /** This character denotes the end of file */
   public static final int YYEOF = -1;

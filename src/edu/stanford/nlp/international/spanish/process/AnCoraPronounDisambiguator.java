@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.spanish.process;
+package edu.stanford.nlp.international.spanish.process; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.util.Pair;
 
@@ -31,7 +32,10 @@ import java.util.Set;
  * @author Jon Gauthier
  * @see edu.stanford.nlp.trees.international.spanish.SpanishTreeNormalizer
  */
-public class AnCoraPronounDisambiguator {
+public class AnCoraPronounDisambiguator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(AnCoraPronounDisambiguator.class);
 
   public static enum PersonalPronounType {OBJECT, REFLEXIVE, UNKNOWN}
 
@@ -268,7 +272,7 @@ public class AnCoraPronounDisambiguator {
       return bruteForceDecisions.get(bruteForceKey);
 
     // DEV
-    System.err.println("DISAMB " + splitVerb.first() + "\nDISAMB\t" + clauseYield);
+    log.info("DISAMB " + splitVerb.first() + "\nDISAMB\t" + clauseYield);
 
     return PersonalPronounType.UNKNOWN;
   }

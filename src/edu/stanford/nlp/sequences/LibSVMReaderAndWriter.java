@@ -1,4 +1,5 @@
-package edu.stanford.nlp.sequences;
+package edu.stanford.nlp.sequences; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -19,7 +20,10 @@ import java.util.function.Function;
  * @author Jenny Finkel
  */
 //TODO: repair this so it works with the feature label/coreLabel change
-public class LibSVMReaderAndWriter implements DocumentReaderAndWriter<CoreLabel> {
+public class LibSVMReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(LibSVMReaderAndWriter.class);
 
   /**
    * 
@@ -41,7 +45,7 @@ public class LibSVMReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>
   private class ColumnDocParser implements Function<String,List<CoreLabel>> {
     public List<CoreLabel> apply(String doc) {
 
-      if (num % 1000 == 0) { System.err.print("["+num+"]"); }
+      if (num % 1000 == 0) { log.info("["+num+"]"); }
       num++;
       
       List<CoreLabel> words = new ArrayList<>();
@@ -60,7 +64,7 @@ public class LibSVMReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>
           String[] bits = info[j].split(":");
           //wi.set(bits[0], bits[1]);
         }
-//        System.err.println(wi);
+//        log.info(wi);
         words.add(wi);
       }
       return words;

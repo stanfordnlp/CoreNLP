@@ -11,8 +11,8 @@ import edu.stanford.nlp.util.PriorityQueue;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Triple;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 /** A class to create recall-precision curves given scores
  *  used to fit the best monotonic function for logistic regression and SVMs.
@@ -28,7 +28,7 @@ public class PRCurve {
   int[] numpositive; // number positive in the i-th highest scores
   int[] numnegative; // number negative in the i-th lowest scores
 
-  final static Logger logger = LoggerFactory.getLogger(PRCurve.class);
+  final static Redwood.RedwoodChannels logger = Redwood.channels(PRCurve.class);
 
   /**
    * reads scores with classes from a file, sorts by score and creates the arrays

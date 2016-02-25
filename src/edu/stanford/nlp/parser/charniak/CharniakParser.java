@@ -2,7 +2,7 @@ package edu.stanford.nlp.parser.charniak;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.*;
 
@@ -143,7 +143,7 @@ public class CharniakParser {
       PrintWriter pw = IOUtils.getPrintWriter(filename);
       for (List<? extends HasWord> sentence:sentences) {
         pw.print("<s> ");   // Note: Use <s sentence-id > to identify sentences
-        String sentString = Sentence.listToString(sentence);
+        String sentString = SentenceUtils.listToString(sentence);
         if (sentence.size() > maxSentenceLength) {
           logger.warning("Sentence length=" + sentence.size() +
                   " is longer than maximum set length " + maxSentenceLength);

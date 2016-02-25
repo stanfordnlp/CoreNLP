@@ -1,4 +1,5 @@
-package edu.stanford.nlp.hcoref.md;
+package edu.stanford.nlp.hcoref.md; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -18,7 +19,10 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.Generics;
 
-public class MentionDetectionClassifier implements Serializable {
+public class MentionDetectionClassifier implements Serializable  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(MentionDetectionClassifier.class);
 
   private static final long serialVersionUID = -4100580709477023158L;
 
@@ -80,9 +84,9 @@ public class MentionDetectionClassifier implements Serializable {
   }
   
   public static MentionDetectionClassifier loadMentionDetectionClassifier(String filename) throws ClassNotFoundException, IOException {
-    System.err.print("loading MentionDetectionClassifier ...");
+    log.info("loading MentionDetectionClassifier ...");
     MentionDetectionClassifier mdc = IOUtils.readObjectFromURLOrClasspathOrFileSystem(filename);
-    System.err.println("done");
+    log.info("done");
     return mdc;
   }
   
