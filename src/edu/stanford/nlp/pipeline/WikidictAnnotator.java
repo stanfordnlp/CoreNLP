@@ -43,7 +43,7 @@ public class WikidictAnnotator extends SentenceAnnotator {
   /**
    * The actual Wikidict dictionary.
    */
-  private final Map<String, String> dictionary = new HashMap<>(21000000);  // it's gonna be large no matter what
+  private final Map<String, String> dictionary = new HashMap<>(1000000);  // it's gonna be large no matter what
 
   /**
    * Create a new WikiDict annotator, with the given name and properties.

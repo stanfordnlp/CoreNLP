@@ -253,16 +253,14 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
       // Variables to keep track of the longest chunk
       int longestChunk = 0;
       int longestChunkStart = 0;
+      int lastIndex = relation.get(0).index() - 1;
       int thisChunk = 1;
       int thisChunkStart = 0;
       // Find the longest chunk
       for (int i = 1; i < relation.size(); ++i) {
         CoreLabel token = relation.get(i);
-        CoreLabel lastToken = relation.get(i - 1);
-        if (lastToken.index() + 1 == token.index()) {
+        if (token.index() - 1 == lastIndex + 1) {
           thisChunk += 1;
-        } else if (lastToken.index() + 2 == token.index()) {
-          thisChunk += 2;  // a skip of one character is _usually_ punctuation
         } else {
           if (thisChunk > longestChunk) {
             longestChunk = thisChunk;
@@ -280,7 +278,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
       // Return the longest chunk
       return Pair.makePair(
           relation.get(longestChunkStart).index() - 1,
-          relation.get(longestChunkStart).index() - 1 + longestChunk
+          relation.get(longestChunkStart + longestChunk - 1).index()
       );
     }
   }
