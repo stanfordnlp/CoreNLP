@@ -13,8 +13,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-
-import edu.stanford.nlp.util.logging.Redwood;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is meant for training SVMs ({@link SVMLightClassifier}s).  It actually calls SVM Light, or
@@ -56,7 +56,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
   private boolean doEval = false;
   private boolean useSVMPerf = false;
 
-  final static Redwood.RedwoodChannels logger = Redwood.channels(SVMLightClassifierFactory.class);
+  final static Logger logger = LoggerFactory.getLogger(SVMLightClassifierFactory.class);
 
   /** @param svmLightLearn is the fullPathname of the training program of svmLight with default value "/u/nlp/packages/svm_light/svm_learn"
    * @param svmStructLearn is the fullPathname of the training program of svmMultiClass with default value "/u/nlp/packages/svm_multiclass/svm_multiclass_learn"

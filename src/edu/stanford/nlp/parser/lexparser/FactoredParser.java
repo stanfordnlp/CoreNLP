@@ -24,8 +24,7 @@
 //    parser-support@lists.stanford.edu
 //    http://nlp.stanford.edu/downloads/lex-parser.shtml
 
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -66,10 +65,7 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Galen Andrew (lattice parsing)
  * @author Philip Resnik and Dan Zeman (n good parses)
  */
-public class FactoredParser  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(FactoredParser.class);
+public class FactoredParser {
 
 /* some documentation for Roger's convenience
  * {pcfg,dep,combo}{PE,DE,TE} are precision/dep/tagging evals for the models
@@ -120,13 +116,13 @@ public class FactoredParser  {
         try {
           op.tlpParams = (TreebankLangParserParams) Class.forName(args[i + 1]).newInstance();
         } catch (ClassNotFoundException e) {
-          log.info("Class not found: " + args[i + 1]);
+          System.err.println("Class not found: " + args[i + 1]);
           throw new RuntimeException(e);
         } catch (InstantiationException e) {
-          log.info("Couldn't instantiate: " + args[i + 1] + ": " + e.toString());
+          System.err.println("Couldn't instantiate: " + args[i + 1] + ": " + e.toString());
           throw new RuntimeException(e);
         } catch (IllegalAccessException e) {
-          log.info("illegal access" + e);
+          System.err.println("illegal access" + e);
           throw new RuntimeException(e);
         }
         i += 2;
@@ -159,7 +155,7 @@ public class FactoredParser  {
     // blippTreebank.loadPath(blippPath, "", true);
 
     Timing.startTime();
-    log.info("Reading trees...");
+    System.err.print("Reading trees...");
     testTreebank.loadPath(path, new NumberRangeFileFilter(testLow, testHigh, true));
     if (op.testOptions.increasingLength) {
       Collections.sort(testTreebank, new TreeLengthComparator());
@@ -168,7 +164,7 @@ public class FactoredParser  {
     trainTreebank.loadPath(path, new NumberRangeFileFilter(trainLow, trainHigh, true));
     Timing.tick("done.");
 
-    log.info("Binarizing trees...");
+    System.err.print("Binarizing trees...");
     TreeAnnotatorAndBinarizer binarizer;
     if (!op.trainOptions.leftToRight) {
       binarizer = new TreeAnnotatorAndBinarizer(op.tlpParams, op.forceCNF, !op.trainOptions.outsideFactor(), true, op);
@@ -201,7 +197,7 @@ public class FactoredParser  {
             }
           }
         }
-        log.info("Removed from vertical splitters: " + deleted);
+        System.err.println("Removed from vertical splitters: " + deleted);
       }
     }
     if (op.trainOptions.selectivePostSplit) {
@@ -257,7 +253,7 @@ public class FactoredParser  {
     //Extractor dgExtractor = new DependencyMemGrammarExtractor();
 
     if (op.doPCFG) {
-      log.info("Extracting PCFG...");
+      System.err.print("Extracting PCFG...");
       Pair<UnaryGrammar, BinaryGrammar> bgug = null;
       if (op.trainOptions.cheatPCFG) {
         List<Tree> allTrees = new ArrayList<>(binaryTrainTrees);
@@ -272,7 +268,7 @@ public class FactoredParser  {
       ug.purgeRules();
       Timing.tick("done.");
     }
-    log.info("Extracting Lexicon...");
+    System.err.print("Extracting Lexicon...");
     Index<String> wordIndex = new HashIndex<>();
     Index<String> tagIndex = new HashIndex<>();
     lex = op.tlpParams.lex(op, wordIndex, tagIndex);
@@ -282,7 +278,7 @@ public class FactoredParser  {
     Timing.tick("done.");
 
     if (op.doDep) {
-      log.info("Extracting Dependencies...");
+      System.err.print("Extracting Dependencies...");
       binaryTrainTrees.clear();
       Extractor<DependencyGrammar> dgExtractor = new MLEDependencyGrammarExtractor(op, wordIndex, tagIndex);
       // dgBLIPP = (DependencyGrammar) dgExtractor.extract(new ConcatenationIterator(trainTreebank.iterator(),blippTreebank.iterator()),new TransformTreeDependency(tlpParams,true));
@@ -310,7 +306,7 @@ public class FactoredParser  {
 
     // serialization
     if (serializeFile != null) {
-      log.info("Serializing parser...");
+      System.err.print("Serializing parser...");
       LexicalizedParser parser = new LexicalizedParser(lex, bg, ug, dg, stateIndex, wordIndex, tagIndex, op);
       parser.saveParserToSerialized(serializeFile);
       Timing.tick("done.");
@@ -363,8 +359,8 @@ public class FactoredParser  {
         Object[] arguments = new Object[]{op.testOptions.taggerSerializedFile};
         tagger = (Function<List<? extends HasWord>,ArrayList<TaggedWord>>) Class.forName("edu.stanford.nlp.tagger.maxent.MaxentTagger").getConstructor(argsClass).newInstance(arguments);
       } catch (Exception e) {
-        log.info(e);
-        log.info("Warning: No pretagging of sentences will be done.");
+        System.err.println(e);
+        System.err.println("Warning: No pretagging of sentences will be done.");
       }
     }
 
@@ -391,7 +387,7 @@ public class FactoredParser  {
       long timeMil1 = System.currentTimeMillis();
       Timing.tick("Starting parse.");
       if (op.doPCFG) {
-        //log.info(op.testOptions.forceTags);
+        //System.err.println(op.testOptions.forceTags);
         if (op.testOptions.forceTags) {
           if (tagger != null) {
             //System.out.println("Using a tagger to set tags");
@@ -418,7 +414,7 @@ public class FactoredParser  {
       }
       long timeMil2 = System.currentTimeMillis();
       long elapsed = timeMil2 - timeMil1;
-      log.info("Time: " + ((int) (elapsed / 100)) / 10.00 + " sec.");
+      System.err.println("Time: " + ((int) (elapsed / 100)) / 10.00 + " sec.");
       //System.out.println("PCFG Best Parse:");
       Tree tree2b = null;
       Tree tree2 = null;
@@ -449,7 +445,7 @@ public class FactoredParser  {
             tree4 = tree2b;
           }
         } catch (NullPointerException e) {
-          log.info("Blocked, using PCFG parse!");
+          System.err.println("Blocked, using PCFG parse!");
           tree4 = tree2b;
         }
       }

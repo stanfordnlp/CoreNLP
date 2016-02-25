@@ -2,7 +2,7 @@ package edu.stanford.nlp.patterns.surface;
 
 import edu.stanford.nlp.patterns.Pattern;
 import edu.stanford.nlp.patterns.SQLConnection;
-import edu.stanford.nlp.util.ArgumentParser;
+import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
@@ -15,27 +15,27 @@ import java.util.*;
 public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachToken<E>{
 
 
-  @ArgumentParser.Option(name = "createTable")
+  @Execution.Option(name = "createTable")
   boolean createTable = false;
 
-  @ArgumentParser.Option(name = "deleteExisting")
+  @Execution.Option(name = "deleteExisting")
   boolean deleteExisting = false;
 
-  @ArgumentParser.Option(name = "tableName")
+  @Execution.Option(name = "tableName")
   String tableName = null;
 
-  @ArgumentParser.Option(name = "patternindicesTable")
+  @Execution.Option(name = "patternindicesTable")
   String patternindicesTable = "patternindices";
 
-  @ArgumentParser.Option(name="deleteDBResourcesOnExit")
+  @Execution.Option(name="deleteDBResourcesOnExit")
   boolean deleteDBResourcesOnExit = true;
 
   public PatternsForEachTokenDB(Properties props, Map<String, Map<Integer, Set<E>>> pats){
 
-    ArgumentParser.fillOptions(this, props);
+    Execution.fillOptions(this, props);
 
 
-      ArgumentParser.fillOptions(SQLConnection.class, props);
+      Execution.fillOptions(SQLConnection.class, props);
 
       assert tableName != null : "tableName property is null!";
       tableName = tableName.toLowerCase();

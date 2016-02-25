@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.arabic.process; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.arabic.process;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -39,10 +38,7 @@ import edu.stanford.nlp.util.StringUtils;
  * </p>
  * @author Spence Green
  */
-public class ArabicTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ArabicTokenizer.class);
+public class ArabicTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   // The underlying JFlex lexer
   private final ArabicLexer lexer;
@@ -176,8 +172,8 @@ public class ArabicTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     if (args.length > 0 && args[0].contains("help")) {
       System.err.printf("Usage: java %s [OPTIONS] < file%n", ArabicTokenizer.class.getName());
       System.err.printf("%nOptions:%n");
-      log.info("   -help : Print this message. See javadocs for all normalization options.");
-      log.info("   -atb  : Tokenization for the parsing experiments in Green and Manning (2010)");
+      System.err.println("   -help : Print this message. See javadocs for all normalization options.");
+      System.err.println("   -atb  : Tokenization for the parsing experiments in Green and Manning (2010)");
       System.exit(-1);
     }
 

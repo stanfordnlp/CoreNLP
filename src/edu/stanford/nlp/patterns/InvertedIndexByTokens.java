@@ -9,7 +9,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.patterns.surface.Token;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CollectionValuedMap;
-import edu.stanford.nlp.util.ArgumentParser;
+import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
@@ -19,10 +19,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author Sonal Gupta (sonalg@stanford.edu)
  *
  */
-public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> implements Serializable {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(InvertedIndexByTokens.class);
+public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> implements Serializable{
 
   private static final long serialVersionUID = 1L;
 
@@ -30,13 +27,13 @@ public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> i
 
   public InvertedIndexByTokens(Properties props, Set<String> stopWords, Function<CoreLabel, Map<String, String>> transformSentenceToString) {
     super(stopWords, transformSentenceToString);
-    ArgumentParser.fillOptions(this, props);
+    Execution.fillOptions(this, props);
     index = new HashMap<>();
   }
 
   public InvertedIndexByTokens(Properties props, Set<String> stopWords, Function<CoreLabel, Map<String, String>> transformSentenceToString, Map<String, Set<String>> index) {
     super(stopWords, transformSentenceToString);
-    ArgumentParser.fillOptions(this, props);
+    Execution.fillOptions(this, props);
     this.index = index;
   }
 
@@ -105,7 +102,7 @@ public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> i
           String w = combineKeyValue(en.getKey(), en2);
           Set<String> st = index.get(w);
           if (st == null){
-            //log.info("\n\nWARNING: INDEX HAS NO SENTENCES FOR " + w);
+            //System.err.println("\n\nWARNING: INDEX HAS NO SENTENCES FOR " + w);
             return Collections.emptySet();
             //throw new RuntimeException("How come the index does not have sentences for " + w);
           }

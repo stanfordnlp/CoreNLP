@@ -1,5 +1,4 @@
-package edu.stanford.nlp.semgraph.semgrex; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.semgraph.semgrex;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,10 +13,7 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
-public class NodePattern extends SemgrexPattern  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(NodePattern.class);
+public class NodePattern extends SemgrexPattern {
 
   private static final long serialVersionUID = -5981133879119233896L;
   private GraphRelation reln;
@@ -127,7 +123,7 @@ public class NodePattern extends SemgrexPattern  {
     if (isEmpty)
       return (negDesc ? !node.equals(IndexedWord.NO_WORD) : node.equals(IndexedWord.NO_WORD));
 
-    // log.info("Attributes are: " + attributes);
+    // System.err.println("Attributes are: " + attributes);
     for (Map.Entry<String, Pair<Object, Object>> attr : attributes.entrySet()) {
       String key = attr.getKey();
       // System.out.println(key);
@@ -273,7 +269,7 @@ public class NodePattern extends SemgrexPattern  {
                                 Map<String, String> namesToRelations,
                                 VariableStrings variableStrings,
                                 boolean ignoreCase) {
-    // log.info("making matcher: " +
+    // System.err.println("making matcher: " +
     // ((reln.equals(GraphRelation.ALIGNED_ROOT)) ? false : hyp));
     return new NodeMatcher(this, sg, alignment, sg_align,
                            (reln.equals(GraphRelation.ALIGNED_ROOT)) ? false : hyp,
@@ -372,7 +368,7 @@ public class NodePattern extends SemgrexPattern  {
         }
 
         nextMatch = nodeMatchCandidateIterator.next();
-        // log.info("going to next match: " + nextMatch.word() + " " +
+        // System.err.println("going to next match: " + nextMatch.word() + " " +
         // myNode.descString + " " + myNode.isLink);
         if (myNode.descString.equals("{}") && myNode.isLink) {
           IndexedWord otherNode = namesToNodes.get(myNode.name);
@@ -443,10 +439,10 @@ public class NodePattern extends SemgrexPattern  {
         if (myNode.name != null) {
           // note: have to fill in the map as we go for backreferencing
           if (!namesToNodes.containsKey(myNode.name)) {
-            // log.info("making namedFirst");
+            // System.err.println("making namedFirst");
             namedFirst = true;
           }
-          // log.info("adding named node: " + myNode.name + "=" +
+          // System.err.println("adding named node: " + myNode.name + "=" +
           // nextMatch.word());
           namesToNodes.put(myNode.name, nextMatch);
         }
@@ -536,7 +532,7 @@ public class NodePattern extends SemgrexPattern  {
     public boolean matches() {
       // System.out.println(toString());
       // System.out.println(namesToNodes);
-      // log.info("matches: " + myNode.reln);
+      // System.err.println("matches: " + myNode.reln);
       // this is necessary so that a negated/optional node matches only once
       if (finished) {
         // System.out.println(false);

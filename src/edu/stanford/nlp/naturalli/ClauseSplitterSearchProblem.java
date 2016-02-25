@@ -1,5 +1,4 @@
-package edu.stanford.nlp.naturalli; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.naturalli;
 
 import edu.stanford.nlp.classify.*;
 import edu.stanford.nlp.international.Language;
@@ -46,10 +45,7 @@ import java.util.stream.Stream;
  *
  * @author Gabor Angeli
  */
-public class ClauseSplitterSearchProblem  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ClauseSplitterSearchProblem.class);
+public class ClauseSplitterSearchProblem {
 
   /**
    * A specification for clause splits we _always_ want to do. The format is a map from the edge label we are splitting, to
@@ -221,20 +217,20 @@ public class ClauseSplitterSearchProblem  {
    * The options used for training the clause searcher.
    */
   public static class TrainingOptions {
-    @ArgumentParser.Option(name = "negativeSubsampleRatio", gloss = "The percent of negative datums to take")
+    @Execution.Option(name = "negativeSubsampleRatio", gloss = "The percent of negative datums to take")
     public double negativeSubsampleRatio = 1.00;
-    @ArgumentParser.Option(name = "positiveDatumWeight", gloss = "The weight to assign every positive datum.")
+    @Execution.Option(name = "positiveDatumWeight", gloss = "The weight to assign every positive datum.")
     public float positiveDatumWeight = 100.0f;
-    @ArgumentParser.Option(name = "unknownDatumWeight", gloss = "The weight to assign every unknown datum (everything extracted with an unconfirmed relation).")
+    @Execution.Option(name = "unknownDatumWeight", gloss = "The weight to assign every unknown datum (everything extracted with an unconfirmed relation).")
     public float unknownDatumWeight = 1.0f;
-    @ArgumentParser.Option(name = "clauseSplitWeight", gloss = "The weight to assign for clause splitting datums. Higher values push towards higher recall.")
+    @Execution.Option(name = "clauseSplitWeight", gloss = "The weight to assign for clause splitting datums. Higher values push towards higher recall.")
     public float clauseSplitWeight = 1.0f;
-    @ArgumentParser.Option(name = "clauseIntermWeight", gloss = "The weight to assign for intermediate splits. Higher values push towards higher recall.")
+    @Execution.Option(name = "clauseIntermWeight", gloss = "The weight to assign for intermediate splits. Higher values push towards higher recall.")
     public float clauseIntermWeight = 2.0f;
-    @ArgumentParser.Option(name = "seed", gloss = "The random seed to use")
+    @Execution.Option(name = "seed", gloss = "The random seed to use")
     public int seed = 42;
     @SuppressWarnings("unchecked")
-    @ArgumentParser.Option(name = "classifierFactory", gloss = "The class of the classifier factory to use for training the various classifiers")
+    @Execution.Option(name = "classifierFactory", gloss = "The class of the classifier factory to use for training the various classifiers")
     public Class<? extends ClassifierFactory<ClauseSplitter.ClauseClassifierLabel, String, Classifier<ClauseSplitter.ClauseClassifierLabel, String>>> classifierFactory = (Class<? extends ClassifierFactory<ClauseSplitter.ClauseClassifierLabel, String, Classifier<ClauseSplitter.ClauseClassifierLabel, String>>>) ((Object) LinearClassifierFactory.class);
   }
 
@@ -784,7 +780,7 @@ public class ClauseSplitterSearchProblem  {
 
     while (!fringe.isEmpty()) {
       if (++ticks > maxTicks) {
-//        log.info("WARNING! Timed out on search with " + ticks + " ticks");
+//        System.err.println("WARNING! Timed out on search with " + ticks + " ticks");
         return;
       }
       // Useful variables
@@ -891,7 +887,7 @@ public class ClauseSplitterSearchProblem  {
               }});
               // 2. Register the child state
               if (!seenWords.contains(childState.first.edge.getDependent())) {
-//            log.info("  pushing " + action.signature() + " with " + argmax.first.edge);
+//            System.err.println("  pushing " + action.signature() + " with " + argmax.first.edge);
                 fringe.add(childState, logProbability);
               }
             }
@@ -901,7 +897,7 @@ public class ClauseSplitterSearchProblem  {
 
       seenWords.add(rootWord);
     }
-//    log.info("Search finished in " + ticks + " ticks and " + classifierEvals + " classifier evaluations.");
+//    System.err.println("Search finished in " + ticks + " ticks and " + classifierEvals + " classifier evaluations.");
   }
 
 

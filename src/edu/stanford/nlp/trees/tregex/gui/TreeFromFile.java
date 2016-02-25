@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees.tregex.gui; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.tregex.gui;
 
 import java.util.Set;
 
@@ -8,7 +7,7 @@ import javax.swing.JTextField;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasIndex;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.trees.Constituent;
 import edu.stanford.nlp.trees.Tree;
 
@@ -19,10 +18,7 @@ import edu.stanford.nlp.trees.Tree;
  *
  * @author Anna Rafferty
  */
-public class TreeFromFile  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TreeFromFile.class);
+public class TreeFromFile {
 
   private final String treeString;
   private String filename;
@@ -36,7 +32,7 @@ public class TreeFromFile  {
 
   public TreeFromFile(Tree t) {
     this.treeString = t.toString();
-    sentence = SentenceUtils.listToString(t.yield());
+    sentence = Sentence.listToString(t.yield());
     if(t.label() instanceof HasIndex) {
       sentId = ((CoreLabel)t.label()).sentIndex();
       filename = ((CoreLabel)t.label()).docID();

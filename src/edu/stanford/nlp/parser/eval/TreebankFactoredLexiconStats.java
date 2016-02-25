@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.eval; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.eval;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,10 +28,7 @@ import edu.stanford.nlp.util.Pair;
  * @author Spence Green
  *
  */
-public class TreebankFactoredLexiconStats  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TreebankFactoredLexiconStats.class);
+public class TreebankFactoredLexiconStats {
 
 
 //  private static String stripTag(String tag) {

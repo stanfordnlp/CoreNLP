@@ -22,7 +22,7 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
   }
 
 
-  public static final String[] pennPunctTags = {"''", "``", "-LRB-", "-RRB-", ".", ":", ","};
+  private static final String[] pennPunctTags = {"''", "``", "-LRB-", "-RRB-", ".", ":", ","};
 
   private static final String[] pennSFPunctTags = {"."};
 

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.french.process; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.french.process;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -47,10 +46,7 @@ import edu.stanford.nlp.util.StringUtils;
  *
  * @author Spence Green
  */
-public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(FrenchTokenizer.class);
+public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   // The underlying JFlex lexer
   private final FrenchLexer lexer;
@@ -268,7 +264,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
   public static void main(String[] args) {
     final Properties options = StringUtils.argsToProperties(args, argOptionDefs());
     if (options.containsKey("help")) {
-      log.info(usage());
+      System.err.println(usage());
       return;
     }
 

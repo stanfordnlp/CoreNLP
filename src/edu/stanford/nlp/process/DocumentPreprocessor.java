@@ -1,5 +1,4 @@
-package edu.stanford.nlp.process; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.process;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -54,10 +53,7 @@ import edu.stanford.nlp.util.StringUtils;
  *
  * @author Spence Green
  */
-public class DocumentPreprocessor implements Iterable<List<HasWord>>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(DocumentPreprocessor.class);
+public class DocumentPreprocessor implements Iterable<List<HasWord>> {
 
   public enum DocType {Plain, XML}
 
@@ -496,7 +492,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>>  {
   public static void main(String[] args) throws IOException {
     final Properties options = StringUtils.argsToProperties(args, argOptionDefs());
     if (options.containsKey("help")) {
-      log.info(usage());
+      System.err.println(usage());
       return;
     }
 
@@ -520,8 +516,8 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>>  {
     boolean whitespaceTokenization = options.containsKey("whitespaceTokenization");
     if (whitespaceTokenization) numFactoryFlags += 1;
     if (numFactoryFlags > 1) {
-      log.info("Only one tokenizer flag allowed at a time: ");
-      log.info("  -suppressEscaping, -tokenizerOptions, -printOriginalText, -whitespaceTokenization");
+      System.err.println("Only one tokenizer flag allowed at a time: ");
+      System.err.println("  -suppressEscaping, -tokenizerOptions, -printOriginalText, -whitespaceTokenization");
       return;
     }
 

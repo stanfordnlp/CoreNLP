@@ -1,10 +1,12 @@
-package edu.stanford.nlp.classify; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.classify;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import edu.stanford.nlp.ling.Datum;
 import edu.stanford.nlp.math.ADMath;
@@ -12,9 +14,10 @@ import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.math.DoubleAD;
 import edu.stanford.nlp.optimization.AbstractStochasticCachingDiffUpdateFunction;
 import edu.stanford.nlp.optimization.StochasticCalculateMethods;
-import edu.stanford.nlp.util.ArgumentParser;
+import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
+import edu.stanford.nlp.util.SystemUtils;
 
 
 /**
@@ -29,10 +32,7 @@ import edu.stanford.nlp.util.RuntimeInterruptedException;
  * @author Keenon Werling added some multithreading to the batch evaluations
  */
 
-public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCachingDiffUpdateFunction  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(LogConditionalObjectiveFunction.class);
+public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCachingDiffUpdateFunction {
 
   protected final LogPrior prior;
 
@@ -72,7 +72,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
   protected boolean parallelGradientCalculation = true;
 
   /** Multithreading gradient calculations is a bit cheaper if you reuse the threads. */
-  protected int threads = ArgumentParser.threads;
+  protected int threads = Execution.threads;
 
   @Override
   public int domainDimension() {
@@ -665,14 +665,14 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
     if (parallelGradientCalculation && threads > 1) {
       int examplesPerProcessor = 50;
       if (batch.length <= Runtime.getRuntime().availableProcessors() * examplesPerProcessor) {
-        log.info("\n\n***************");
-        log.info("CONFIGURATION ERROR: YOUR BATCH SIZE DOESN'T MEET PARALLEL MINIMUM SIZE FOR PERFORMANCE");
-        log.info("Batch size: " + batch.length);
-        log.info("CPUS: " + Runtime.getRuntime().availableProcessors());
-        log.info("Minimum batch size per CPU: " + examplesPerProcessor);
-        log.info("MINIMIM BATCH SIZE ON THIS MACHINE: " + (Runtime.getRuntime().availableProcessors() * examplesPerProcessor));
-        log.info("TURNING OFF PARALLEL GRADIENT COMPUTATION");
-        log.info("***************\n");
+        System.err.println("\n\n***************");
+        System.err.println("CONFIGURATION ERROR: YOUR BATCH SIZE DOESN'T MEET PARALLEL MINIMUM SIZE FOR PERFORMANCE");
+        System.err.println("Batch size: " + batch.length);
+        System.err.println("CPUS: " + Runtime.getRuntime().availableProcessors());
+        System.err.println("Minimum batch size per CPU: " + examplesPerProcessor);
+        System.err.println("MINIMIM BATCH SIZE ON THIS MACHINE: " + (Runtime.getRuntime().availableProcessors() * examplesPerProcessor));
+        System.err.println("TURNING OFF PARALLEL GRADIENT COMPUTATION");
+        System.err.println("***************\n");
         parallelGradientCalculation = false;
       }
     }
@@ -802,7 +802,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
 
   protected void calculateStochasticAlgorithmicDifferentiation(double[] x, double[] v, int[] batch) {
 
-    log.info("*");
+    System.err.print("*");
 
     //Initialize
     value = 0.0;
@@ -836,7 +836,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       derivativeAD[i].set(0.0,0.0);
     }
 
-    //log.info(System.currentTimeMillis() - curTime + " - ");
+    //System.err.print(System.currentTimeMillis() - curTime + " - ");
     //curTime = System.currentTimeMillis();
 
     for (int d = 0; d <batch.length ; d++) {
@@ -886,7 +886,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // Need to modify the prior class to handle AD  -akleeman
 
-    //log.info(System.currentTimeMillis() - curTime + " - ");
+    //System.err.print(System.currentTimeMillis() - curTime + " - ");
     //curTime = System.currentTimeMillis();
 
     double[] tmp = new double[x.length];
@@ -898,8 +898,8 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
     }
     value += ((double) batch.length)/((double) data.length)*prior.compute(x, tmp);
 
-    //log.info(System.currentTimeMillis() - curTime + " - ");
-    //log.info("");
+    //System.err.print(System.currentTimeMillis() - curTime + " - ");
+    //System.err.println("");
   }
 
   private class RVFDerivativeCalculation implements Runnable {

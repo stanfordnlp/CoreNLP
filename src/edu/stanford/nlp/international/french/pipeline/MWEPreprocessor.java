@@ -1,12 +1,11 @@
-package edu.stanford.nlp.international.french.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.french.pipeline;
 
 import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.Tree;
@@ -24,10 +23,7 @@ import edu.stanford.nlp.util.Generics;
  * @author Spence Green
  *
  */
-public final class MWEPreprocessor  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MWEPreprocessor.class);
+public final class MWEPreprocessor {
 
   private static final boolean RESOLVE_DUMMY_TAGS = true;
 
@@ -74,7 +70,7 @@ public final class MWEPreprocessor  {
       else if(preps.contains(word))
         return "P";
 
-      log.info("No POS tag for " + word);
+      System.err.println("No POS tag for " + word);
       return "N";
     }
   }
@@ -195,8 +191,8 @@ public final class MWEPreprocessor  {
       if(RESOLVE_DUMMY_TAGS && label.equals(FrenchXMLTreeReader.MISSING_PHRASAL))
         continue;
 
-      String preterm = SentenceUtils.listToString(match.preTerminalYield());
-      String term = SentenceUtils.listToString(match.yield());
+      String preterm = Sentence.listToString(match.preTerminalYield());
+      String term = Sentence.listToString(match.yield());
 
       labelPreterm.incrementCount(label,preterm);
       pretermLabel.incrementCount(preterm,label);

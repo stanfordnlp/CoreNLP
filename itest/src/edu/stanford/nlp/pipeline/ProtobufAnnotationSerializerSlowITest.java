@@ -3,7 +3,6 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.ie.NumberNormalizer;
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
@@ -19,8 +18,7 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.zip.GZIPOutputStream;
 
-import static org.junit.Assert.*;
-
+import static junit.framework.Assert.*;
 
 /**
  * Make sure serializing to Protocol Buffers works, and is lossless.
@@ -69,7 +67,7 @@ public class ProtobufAnnotationSerializerSlowITest {
     if (doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       for (CoreMap sentence : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
         if (sentence.containsKey(CoreAnnotations.TokensAnnotation.class)) {
-          boolean hasTokenBeginAnnotation = sentence.size() > 0 && sentence.get(CoreAnnotations.TokensAnnotation.class).get(0).containsKey(CoreAnnotations.TokenBeginAnnotation.class);
+          boolean hasTokenBeginAnnotation = sentence.size() > 0 && sentence.get(CoreAnnotations.TokensAnnotation.class).get(0).has(CoreAnnotations.TokenBeginAnnotation.class);
           if (hasTokenBeginAnnotation) {
             sentence.set(CoreAnnotations.NumerizedTokensAnnotation.class, NumberNormalizer.findAndMergeNumbers(sentence));
           }
@@ -306,8 +304,8 @@ public class ProtobufAnnotationSerializerSlowITest {
     assertNotNull(compressedProto);
 
     // Check size
-    assertTrue("" + compressedProto.length, compressedProto.length < 380000);
-    assertTrue("" + uncompressedProto.length, uncompressedProto.length < 1800000);
+    assertTrue("" + compressedProto.length, compressedProto.length < 340000);
+    assertTrue("" + uncompressedProto.length, uncompressedProto.length < 1700000);
   }
 
   @Test
@@ -425,7 +423,7 @@ public class ProtobufAnnotationSerializerSlowITest {
 
   @Test
   public void testGender() {
-    testAnnotators("tokenize,ssplit,pos,lemma,ner,gender");
+    testAnnotators("tokenize,ssplit,pos,gender");
   }
 
   /**
@@ -455,7 +453,7 @@ public class ProtobufAnnotationSerializerSlowITest {
           String annotator = iter.next();
           boolean valid = true;
           try {
-            for (Class<? extends CoreAnnotation> requirement : StanfordCoreNLP.getExistingAnnotator(annotator).requires()) {
+            for (Annotator.Requirement requirement : StanfordCoreNLP.getExistingAnnotator(annotator).requires()) {
               if (!annotatorsAdded.contains(requirement.toString())) { valid = false; }
             }
           } catch (NullPointerException ignored) { }

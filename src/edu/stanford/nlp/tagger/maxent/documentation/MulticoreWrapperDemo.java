@@ -1,5 +1,4 @@
-package edu.stanford.nlp.tagger.maxent.documentation; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.tagger.maxent.documentation;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,10 +14,7 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
  *
  * @author Spence Green
  */
-public class MulticoreWrapperDemo  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MulticoreWrapperDemo.class);
+public class MulticoreWrapperDemo {
 
   private MulticoreWrapperDemo() {} // static main
 

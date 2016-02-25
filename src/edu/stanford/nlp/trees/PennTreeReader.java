@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -30,10 +29,7 @@ import edu.stanford.nlp.ling.HasWord;
  * @author Roger Levy
  * @author Spence Green
  */
-public class PennTreeReader implements TreeReader  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(PennTreeReader.class);
+public class PennTreeReader implements TreeReader {
 
   private final Reader reader;
   private final Tokenizer<String> tokenizer;
@@ -115,9 +111,9 @@ public class PennTreeReader implements TreeReader  {
 
     if (DEBUG) {
       System.err.printf("%s: Built from%n %s ", this.getClass().getName(), in.getClass().getName());
-      log.info(' ' + ((tf == null) ? "no tf" : tf.getClass().getName()));
-      log.info(' ' + ((tn == null) ? "no tn" : tn.getClass().getName()));
-      log.info(' ' + ((st == null) ? "no st" : st.getClass().getName()));
+      System.err.println(' ' + ((tf == null) ? "no tf" : tf.getClass().getName()));
+      System.err.println(' ' + ((tn == null) ? "no tn" : tn.getClass().getName()));
+      System.err.println(' ' + ((st == null) ? "no st" : st.getClass().getName()));
     }
   }
 
@@ -212,7 +208,7 @@ public class PennTreeReader implements TreeReader  {
         case rightParen:
           if (stack.isEmpty()) {
             // Warn that file has too many right parentheses
-            log.info("PennTreeReader: warning: file has extra non-matching right parenthesis [ignored]");
+            System.err.println("PennTreeReader: warning: file has extra non-matching right parenthesis [ignored]");
             break label;
           }
 
@@ -228,7 +224,7 @@ public class PennTreeReader implements TreeReader  {
             // A careful Reader should warn here, but it's kind of useful to
             // suppress this because then the TreeReader doesn't print a ton of
             // messages if there is a README file in a directory of Trees.
-            // log.info("PennTreeReader: warning: file has extra token not in a s-expression tree: " + token + " [ignored]");
+            // System.err.println("PennTreeReader: warning: file has extra token not in a s-expression tree: " + token + " [ignored]");
             break label;
           }
 
@@ -258,7 +254,7 @@ public class PennTreeReader implements TreeReader  {
 
     //Reject
     if (currentTree != null) {
-      log.info("PennTreeReader: warning: incomplete tree (extra left parentheses in input): " + currentTree);
+      System.err.println("PennTreeReader: warning: incomplete tree (extra left parentheses in input): " + currentTree);
     }
     return null;
   }

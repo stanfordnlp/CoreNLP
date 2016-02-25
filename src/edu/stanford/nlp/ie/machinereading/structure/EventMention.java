@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie.machinereading.structure; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.machinereading.structure;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,10 +16,7 @@ import edu.stanford.nlp.util.IdentityHashSet;
  * @author Mihai
  * 
  */
-public class EventMention extends RelationMention  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(EventMention.class);
+public class EventMention extends RelationMention {
 
   private static final long serialVersionUID = 1L;
 
@@ -97,21 +93,21 @@ public class EventMention extends RelationMention  {
   public ExtractionObject getSingleParent(CoreMap sentence) {
     if(getParents().size() > 1){
       Set<ExtractionObject> parents = getParents();
-      log.info("This event has multiple parents: " + this);
+      System.err.println("This event has multiple parents: " + this);
       int count = 1;
       for(ExtractionObject po: parents){
-        log.info("PARENT #" + count + ": " + po);
+        System.err.println("PARENT #" + count + ": " + po);
         count ++;
       }
-      log.info("DOC " + sentence.get(CoreAnnotations.DocIDAnnotation.class));
-      log.info("SENTENCE:");
+      System.err.println("DOC " + sentence.get(CoreAnnotations.DocIDAnnotation.class));
+      System.err.print("SENTENCE:");
       for(CoreLabel t: sentence.get(CoreAnnotations.TokensAnnotation.class)){
-        log.info(" " + t.word());
+        System.err.print(" " + t.word());
       }
-      log.info("EVENTS IN SENTENCE:");
+      System.err.println("EVENTS IN SENTENCE:");
       count = 1;
       for(EventMention e: sentence.get(MachineReadingAnnotations.EventMentionsAnnotation.class)){
-        log.info("EVENT #" + count + ": " + e);
+        System.err.println("EVENT #" + count + ": " + e);
         count ++;
       }
     }

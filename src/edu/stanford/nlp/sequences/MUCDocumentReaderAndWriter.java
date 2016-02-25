@@ -1,5 +1,4 @@
-package edu.stanford.nlp.sequences; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sequences;
 
 import java.io.BufferedReader;
 import java.io.PrintWriter;
@@ -23,10 +22,7 @@ import edu.stanford.nlp.process.PTBTokenizer;
  *
  * @author Jenny Finkel
  */
-public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MUCDocumentReaderAndWriter.class);
+public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel> {
 
   /**
    *
@@ -156,8 +152,8 @@ public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreL
         }
       }
 
-      //log.info(doc);
-      //log.info(edu.stanford.nlp.util.StringUtils.join(result, "\n"));
+      //System.err.println(doc);
+      //System.err.println(edu.stanford.nlp.util.StringUtils.join(result, "\n"));
       //System.exit(0);
 
       return result;
@@ -186,7 +182,7 @@ public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreL
                    word.get(CoreAnnotations.AnswerAnnotation.class).equalsIgnoreCase("MONEY")) {
           prevClass = "NUMEX";
         } else {
-          log.info("unknown type: "+word.get(CoreAnnotations.AnswerAnnotation.class));
+          System.err.println("unknown type: "+word.get(CoreAnnotations.AnswerAnnotation.class));
           System.exit(0);
         }
         pw.print("<"+prevClass+" TYPE=\""+word.get(CoreAnnotations.AnswerAnnotation.class)+"\">");

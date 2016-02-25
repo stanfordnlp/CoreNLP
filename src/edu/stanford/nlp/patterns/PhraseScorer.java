@@ -1,7 +1,9 @@
 package edu.stanford.nlp.patterns;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -10,14 +12,11 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
-import edu.stanford.nlp.util.ArgumentParser.Option;
+import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.GoogleNGramsSQLBacked;
 import edu.stanford.nlp.util.logging.Redwood;
 
-public abstract class PhraseScorer<E extends Pattern>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(PhraseScorer.class);
+public abstract class PhraseScorer<E extends Pattern> {
   ConstantsAndVariables constVars;
 
   //these get overwritten in ScorePhrasesLearnFeatWt class
@@ -117,7 +116,7 @@ public abstract class PhraseScorer<E extends Pattern>  {
     }else
     g = gnew;
     if(!Data.domainNGramRawFreq.containsKey(gnew)){
-      log.info("domain count 0 for " + g);
+      System.err.println("domain count 0 for " + g);
       return 0;
     } else g = gnew;
 

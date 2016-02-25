@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.arabic.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.arabic.pipeline;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -21,10 +20,7 @@ import edu.stanford.nlp.trees.international.arabic.ATBTreeUtils;
  * @author Spence Green
  *
  */
-public class TaggedArabicDataset extends ATBArabicDataset  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TaggedArabicDataset.class);
+public class TaggedArabicDataset extends ATBArabicDataset {
 
   private String wordTagDelim = "_";
 

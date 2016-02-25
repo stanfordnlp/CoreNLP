@@ -28,8 +28,8 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
 
-
-import edu.stanford.nlp.util.logging.Redwood;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -50,7 +50,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
 
   private static final long serialVersionUID = -3883164942879961091L;
 
-  final static Redwood.RedwoodChannels logger = Redwood.channels(Dataset.class);
+  final static Logger logger = LoggerFactory.getLogger(Dataset.class);
 
   public Dataset() {
     this(10);

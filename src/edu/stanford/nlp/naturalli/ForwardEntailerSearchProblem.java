@@ -1,5 +1,4 @@
-package edu.stanford.nlp.naturalli; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.naturalli;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -20,10 +19,7 @@ import java.util.stream.Collectors;
  *
  * @author Gabor Angeli
  */
-public class ForwardEntailerSearchProblem  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ForwardEntailerSearchProblem.class);
+public class ForwardEntailerSearchProblem {
 
   /**
    * The parse of this fragment. The vertices in the parse tree should be a subset
@@ -188,7 +184,7 @@ public class ForwardEntailerSearchProblem  {
         }
         numIters += 1;
         if (numIters > 100) {
-//          log.error("tree has apparent depth > 100");
+//          System.err.println("ERROR: tree has apparent depth > 100");
           return Collections.EMPTY_LIST;
         }
       }
@@ -220,7 +216,7 @@ public class ForwardEntailerSearchProblem  {
     try {
       topologicalVertices = parseTree.topologicalSort();
     } catch (IllegalStateException e) {
-//      log.info("Could not topologically sort the vertices! Using left-to-right traversal.");
+//      System.err.println("Could not topologically sort the vertices! Using left-to-right traversal.");
       topologicalVertices = parseTree.vertexListSorted();
     }
     if (topologicalVertices.isEmpty()) {
@@ -258,7 +254,7 @@ public class ForwardEntailerSearchProblem  {
         }
         numIters += 1;
         if (numIters > 10000) {
-//          log.error("logic error (apparent infinite loop); returning");
+//          System.err.println("ERROR: logic error (apparent infinite loop); returning");
           return results;
         }
       }
@@ -339,7 +335,7 @@ public class ForwardEntailerSearchProblem  {
             }
             numIters += 1;
             if (numIters > 10000) {
-//              log.error("logic error (apparent infinite loop); returning");
+//              System.err.println("ERROR: logic error (apparent infinite loop); returning");
               return results;
             }
           }

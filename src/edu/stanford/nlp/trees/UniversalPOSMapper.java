@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees;
 
 import java.io.IOException;
 import java.util.List;
@@ -17,10 +16,7 @@ import edu.stanford.nlp.util.Pair;
  * @author Sebastian Schuster
  */
 
-public class UniversalPOSMapper  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(UniversalPOSMapper.class);
+public class UniversalPOSMapper {
 
   public static final String DEFAULT_TSURGEON_FILE = "edu/stanford/nlp/models/upos/ENUniversalPOS.tsurgeon";
 

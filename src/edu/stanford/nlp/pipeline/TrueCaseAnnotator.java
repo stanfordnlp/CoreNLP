@@ -1,26 +1,25 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 import edu.stanford.nlp.ie.crf.CRFBiasedClassifier;
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.objectbank.ObjectBank;
-import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 
-public class TrueCaseAnnotator implements Annotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TrueCaseAnnotator.class);
+public class TrueCaseAnnotator implements Annotator {
 
   @SuppressWarnings("unchecked")
   private final CRFBiasedClassifier trueCaser;
@@ -68,7 +67,7 @@ public class TrueCaseAnnotator implements Annotator  {
         String cname = bias.nextToken();
         double w = Double.parseDouble(bias.nextToken());
         trueCaser.setBiasWeight(cname,w);
-        if(VERBOSE) log.info("Setting bias for class "+cname+" to "+w);
+        if(VERBOSE) System.err.println("Setting bias for class "+cname+" to "+w);
       }
     }
 
@@ -79,7 +78,7 @@ public class TrueCaseAnnotator implements Annotator  {
   @SuppressWarnings("unchecked")
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
-      log.info("Adding true-case annotation...");
+      System.err.print("Adding true-case annotation...");
     }
 
     if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
@@ -146,22 +145,12 @@ public class TrueCaseAnnotator implements Annotator  {
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TextAnnotation.class,
-        CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.PositionAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class
-    )));
+  public Set<Requirement> requires() {
+    return Annotator.REQUIREMENTS.get(STANFORD_TRUECASE);
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TrueCaseTextAnnotation.class,
-        CoreAnnotations.TrueCaseAnnotation.class,
-        CoreAnnotations.AnswerAnnotation.class,
-        CoreAnnotations.ShapeAnnotation.class
-    )));
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(TRUECASE_REQUIREMENT);
   }
 }

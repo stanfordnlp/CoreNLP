@@ -1,6 +1,5 @@
 
-package edu.stanford.nlp.ie.machinereading.domains.ace.reader; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.machinereading.domains.ace.reader;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,10 +20,7 @@ import edu.stanford.nlp.ie.machinereading.common.DomReader;
  *
  * @author David McClosky
  */
-public class AceDomReader extends DomReader  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AceDomReader.class);
+public class AceDomReader extends DomReader {
 
   private static AceCharSeq parseCharSeq(Node node) {
     Node child = getChildByName(node, "charseq");
@@ -159,7 +155,7 @@ public class AceDomReader extends DomReader  {
 
       entityCount++;
     }
-    //log.info("Parsed " + entityCount + " XML entities.");
+    //System.err.println("Parsed " + entityCount + " XML entities.");
 
     //
     // read all relations
@@ -234,7 +230,7 @@ public class AceDomReader extends DomReader  {
 
   public static void main(String [] argv) throws Exception {
     if (argv.length != 1) {
-      log.info("Usage: java AceDomReader <APF file>");
+      System.err.println("Usage: java AceDomReader <APF file>");
       System.exit(1);
     }
 

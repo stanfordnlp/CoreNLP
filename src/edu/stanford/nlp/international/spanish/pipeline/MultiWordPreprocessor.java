@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.spanish.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.spanish.pipeline;
 
 import java.io.*;
 import java.util.*;
@@ -8,6 +7,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.international.spanish.SpanishVerbStripper;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
@@ -18,6 +18,9 @@ import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreeReaderFactory;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreeNormalizer;
+import edu.stanford.nlp.trees.tregex.ParseException;
+import edu.stanford.nlp.trees.tregex.TregexMatcher;
+import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
@@ -32,10 +35,7 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Jon Gauthier
  * @author Spence Green (original French version)
  */
-public final class MultiWordPreprocessor  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MultiWordPreprocessor.class);
+public final class MultiWordPreprocessor {
 
   private static int nMissingPOS;
   private static int nMissingPhrasal;
@@ -367,7 +367,7 @@ public final class MultiWordPreprocessor  {
         return "ncms000";
 
       // Now make an educated guess.
-      //log.info("No POS tag for " + word);
+      //System.err.println("No POS tag for " + word);
       return "np00000";
     }
   }
@@ -529,7 +529,7 @@ public final class MultiWordPreprocessor  {
     for(Tree kid : t.children())
       sb.append(kid.value()).append(" ");
     String posSequence = sb.toString().trim();
-    log.info("No phrasal cat for: " + posSequence);
+    System.err.println("No phrasal cat for: " + posSequence);
 
     // Give up.
     return null;
@@ -603,7 +603,7 @@ public final class MultiWordPreprocessor  {
   public static void main(String[] args) {
     Properties options = StringUtils.argsToProperties(args, argOptionDefs);
     if(!options.containsKey("") || options.containsKey("help")) {
-      log.info(usage());
+      System.err.println(usage());
       return;
     }
 

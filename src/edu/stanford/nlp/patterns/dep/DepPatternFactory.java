@@ -1,5 +1,6 @@
 package edu.stanford.nlp.patterns.dep;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.patterns.CandidatePhrase;
@@ -8,8 +9,10 @@ import edu.stanford.nlp.patterns.PatternFactory;
 import edu.stanford.nlp.patterns.PatternsAnnotations;
 import edu.stanford.nlp.patterns.surface.Token;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
+import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.trees.GrammaticalRelation;
-import edu.stanford.nlp.util.ArgumentParser;
+import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Pair;
 
 import java.util.*;
@@ -20,13 +23,13 @@ import java.util.regex.Pattern;
  */
 public class DepPatternFactory extends PatternFactory{
 
-  @ArgumentParser.Option(name="ignoreRels")
+  @Execution.Option(name="ignoreRels")
   static String ignoreRels = "";
 
-  @ArgumentParser.Option(name="upDepth")
+  @Execution.Option(name="upDepth")
   static int upDepth = 2;
 
-  @ArgumentParser.Option(name="allowedTagsForTrigger")
+  @Execution.Option(name="allowedTagsForTrigger")
   static String allowedTagsForTrigger = ".*";
 
 
@@ -34,8 +37,8 @@ public class DepPatternFactory extends PatternFactory{
   static Set<GrammaticalRelation> ignoreRelsSet = new HashSet<>();
 
   static public void setUp(Properties props){
-    ArgumentParser.fillOptions(DepPatternFactory.class, props);
-    ArgumentParser.fillOptions(PatternFactory.class, props);
+    Execution.fillOptions(DepPatternFactory.class, props);
+    Execution.fillOptions(PatternFactory.class, props);
     for(String s: ignoreRels.split("[,;]")){
       ignoreRelsSet.add(GrammaticalRelation.valueOf(s));
     }

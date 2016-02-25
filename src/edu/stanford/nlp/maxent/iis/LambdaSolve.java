@@ -1,5 +1,4 @@
-package edu.stanford.nlp.maxent.iis; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.maxent.iis;
 
 import edu.stanford.nlp.io.*;
 import edu.stanford.nlp.math.ArrayMath;
@@ -21,10 +20,7 @@ import java.io.ObjectOutputStream;
  * @author Kristina Toutanova
  * @version 1.0
  */
-public class LambdaSolve  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(LambdaSolve.class);
+public class LambdaSolve {
 
   /**
    * These are the model parameters that have to be learned.
@@ -92,7 +88,7 @@ public class LambdaSolve  {
     // newtonerr = nerr1;
     // lambda = new double[p.fSize];
     probConds = new double[p.data.xSize][];
-    log.info("xSize is " + p.data.xSize);
+    System.err.println("xSize is " + p.data.xSize);
 
     for (int i = 0; i < p.data.xSize; i++) {
       probConds[i] = new double[p.data.numY(i)];
@@ -230,7 +226,7 @@ public class LambdaSolve  {
       }
     }//x
     if (VERBOSE) {
-      log.info(" pcond, zlamda, ftildeArr " + (fixedFnumXY ? "(fixed sum) " : "") + "initialized ");
+      System.err.println(" pcond, zlamda, ftildeArr " + (fixedFnumXY ? "(fixed sum) " : "") + "initialized ");
     }
   }
 
@@ -246,7 +242,7 @@ public class LambdaSolve  {
     int numNConverged = p.fSize;
     do {
       if (VERBOSE) {
-        log.info(iterations);
+        System.err.println(iterations);
       }
       flag = false;
       iterations++;
@@ -300,23 +296,23 @@ public class LambdaSolve  {
         double lNew=logLikelihood();
         double gain=(lNew-lOld);
         if(gain<0) {
-        log.info(" Likelihood decreased by "+ (-gain));
+        System.err.println(" Likelihood decreased by "+ (-gain));
         System.exit(1);
         }
         if(Math.abs(gain)<eps){
-        log.info("Converged");
+        System.err.println("Converged");
         break;
         }
 
         if(VERBOSE)
-        log.info("Likelihood "+lNew+" "+" gain "+gain);
+        System.err.println("Likelihood "+lNew+" "+" gain "+gain);
         lOld=lNew;
       */
 
       if (iterations % 100 == 0) {
         save_lambdas(iterations + ".lam");
       }
-      log.info(iterations);
+      System.err.println(iterations);
     } while (iterations < iters);
   }
 
@@ -329,7 +325,7 @@ public class LambdaSolve  {
   boolean iterate(int index, double err, MutableDouble ret) {
     double deltaL = 0.0;
     deltaL = newton(deltaL, index, err);
-    //log.info("delta is "+deltaL+" feature "+index+" expectation "+ftildeArr[index]);
+    //System.err.println("delta is "+deltaL+" feature "+index+" expectation "+ftildeArr[index]);
 
     if (Math.abs(deltaL + lambda[index]) > 200) {
       if ((deltaL + lambda[index]) > 200) {
@@ -338,11 +334,11 @@ public class LambdaSolve  {
         deltaL = -lambda[index] - 200;
       }
 
-      log.info("set delta to smth " + deltaL);
+      System.err.println("set delta to smth " + deltaL);
     }
     lambda[index] = lambda[index] + deltaL;
     if (Double.isNaN(deltaL)) {
-      log.info(" NaN " + index + ' ' + deltaL);
+      System.err.println(" NaN " + index + ' ' + deltaL);
     }
     ret.set(deltaL);
     return (Math.abs(deltaL) >= eps);
@@ -366,7 +362,7 @@ public class LambdaSolve  {
       double lambdaP = lambdaN;
       double gPrimeVal = gprime(lambdaP, index);
       if (Double.isNaN(gPrimeVal)) {
-        log.info("gPrime of " + lambdaP + " " + index + " is NaN " + gPrimeVal);
+        System.err.println("gPrime of " + lambdaP + " " + index + " is NaN " + gPrimeVal);
         //lambda_converged[index]=true;
         //   System.exit(1);
       }
@@ -376,7 +372,7 @@ public class LambdaSolve  {
       }
       lambdaN = lambdaP - gVal / gPrimeVal;
       if (Double.isNaN(lambdaN)) {
-        log.info("the division of " + gVal + " " + gPrimeVal + " " + index + " is NaN " + lambdaN);
+        System.err.println("the division of " + gVal + " " + gPrimeVal + " " + index + " is NaN " + lambdaN);
         //lambda_converged[index]=true;
         return 0;
       }
@@ -416,7 +412,7 @@ public class LambdaSolve  {
       s = s + probConds[x][y];
       zlambda[x] = zlambdaX;
       if (Math.abs(s - 1) > 0.001) {
-        //log.info(x+" index "+i+" deltaL " +deltaL+" tag "+yTag+" zlambda "+zlambda[x]);
+        //System.err.println(x+" index "+i+" deltaL " +deltaL+" tag "+yTag+" zlambda "+zlambda[x]);
       }
     }
   }
@@ -483,11 +479,11 @@ public class LambdaSolve  {
     boolean flag = true;
     for (int f = 0; f < lambda.length; f++) {
       if (Math.abs(lambda[f]) > 100) {
-        log.info("lambda " + f + " too big " + lambda[f]);
-        log.info("empirical " + ftildeArr[f] + " expected " + fExpected(p.functions.get(f)));
+        System.err.println("lambda " + f + " too big " + lambda[f]);
+        System.err.println("empirical " + ftildeArr[f] + " expected " + fExpected(p.functions.get(f)));
       }
     }
-    log.info(" x size" + p.data.xSize + " " + " ysize " + p.data.ySize);
+    System.err.println(" x size" + p.data.xSize + " " + " ysize " + p.data.ySize);
     double summAllExp = 0;
     for (int i = 0; i < ftildeArr.length; i++) {
       double exp = Math.abs(ftildeArr[i] - fExpected(p.functions.get(i)));
@@ -496,11 +492,11 @@ public class LambdaSolve  {
       //if(true)
       {
         flag = false;
-        log.info("Constraint not satisfied  " + i + " " + fExpected(p.functions.get(i)) + " " + ftildeArr[i] + " lambda " + lambda[i]);
+        System.err.println("Constraint not satisfied  " + i + " " + fExpected(p.functions.get(i)) + " " + ftildeArr[i] + " lambda " + lambda[i]);
       }
     }
 
-    log.info(" The sum of all empirical expectations is " + summAllExp);
+    System.err.println(" The sum of all empirical expectations is " + summAllExp);
     for (int x = 0; x < p.data.xSize; x++) {
       double s = 0.0;
       for (int y = 0; y < probConds[x].length; y++) {
@@ -508,9 +504,9 @@ public class LambdaSolve  {
       }
       if (Math.abs(s - 1) > 0.0001) {
         for (int y = 0; y < probConds[x].length; y++)
-            //log.info(y+" : "+ probConds[x][y]);
+            //System.err.println(y+" : "+ probConds[x][y]);
         {
-          log.info("probabilities do not sum to one " + x + " " + (float) s);
+          System.err.println("probabilities do not sum to one " + x + " " + (float) s);
         }
       }
     }
@@ -717,7 +713,7 @@ public class LambdaSolve  {
    */
   public static double[] read_lambdas(DataInputStream rf) {
     if (VERBOSE) {
-      log.info("Entering read_lambdas");
+      System.err.println("Entering read_lambdas");
     }
     try {
       ObjectInputStream ois = new ObjectInputStream(rf);
@@ -884,7 +880,7 @@ public class LambdaSolve  {
       s -= sum * fLambda;
 
       if (Math.abs(fLambda) > 200) {   // was 50
-        log.info("lambda " + fNo + " too big: " + fLambda);
+        System.err.println("lambda " + fNo + " too big: " + fLambda);
       }
 
       for (int i = 0, length = f.len(); i < length; i++) {
@@ -903,12 +899,12 @@ public class LambdaSolve  {
     for (int x = 0; x < probConds.length; x++) {
       //again
       zlambda[x] = ArrayMath.logSum(probConds[x]); // cpu samples #4,#15: 4.5%
-      //log.info("zlambda "+x+" "+zlambda[x]);
+      //System.err.println("zlambda "+x+" "+zlambda[x]);
       s += zlambda[x] * p.data.ptildeX(x) * p.data.getNumber();
 
       for (int y = 0; y < probConds[x].length; y++) {
         probConds[x][y] = divide(probConds[x][y], zlambda[x]); // cpu samples #13: 1.6%
-        //log.info("prob "+x+" "+y+" "+probConds[x][y]);
+        //System.err.println("prob "+x+" "+y+" "+probConds[x][y]);
       } //y
 
     }//x
@@ -952,7 +948,7 @@ public class LambdaSolve  {
       s -= sum * fLambda;
 
       if (Math.abs(fLambda) > 200) {   // was 50
-        log.info("lambda " + fNo + " too big: " + fLambda);
+        System.err.println("lambda " + fNo + " too big: " + fLambda);
       }
 
       for (int i = 0, length = f.len(); i < length; i++) {
@@ -971,12 +967,12 @@ public class LambdaSolve  {
     for (int x = 0; x < probConds.length; x++) {
       //again
       zlambda[x] = ArrayMath.logSum(probConds[x]); // cpu samples #4,#15: 4.5%
-      //log.info("zlambda "+x+" "+zlambda[x]);
+      //System.err.println("zlambda "+x+" "+zlambda[x]);
       s += zlambda[x] * exp.ptildeX(x) * exp.getNumber();
 
       for (int y = 0; y < probConds[x].length; y++) {
         probConds[x][y] = divide(probConds[x][y], zlambda[x]); // cpu samples #13: 1.6%
-        //log.info("prob "+x+" "+y+" "+probConds[x][y]);
+        //System.err.println("prob "+x+" "+y+" "+probConds[x][y]);
       } //y
 
     }//x
@@ -1075,7 +1071,7 @@ public class LambdaSolve  {
 
 
       if (Math.abs(fLambda) > 200) {   // was 50
-        log.info("lambda " + fNo + " too big: " + fLambda);
+        System.err.println("lambda " + fNo + " too big: " + fLambda);
       }
 
       for (int i = 0, length = f.len(); i < length; i++) {
@@ -1095,12 +1091,12 @@ public class LambdaSolve  {
     for (int x = 0; x < probConds.length; x++) {
       //again
       zlambda[x] = ArrayMath.logSum(probConds[x]); // cpu samples #4,#15: 4.5%
-      //log.info("zlambda "+x+" "+zlambda[x]);
+      //System.err.println("zlambda "+x+" "+zlambda[x]);
 
 
       for (int y = 0; y < probConds[x].length; y++) {
         probConds[x][y] = divide(probConds[x][y], zlambda[x]); // cpu samples #13: 1.6%
-        //log.info("prob "+x+" "+y+" "+probConds[x][y]);
+        //System.err.println("prob "+x+" "+y+" "+probConds[x][y]);
 
         s -= exp.values[x][y] * probConds[x][y] * exp.ptildeX(x) * exp.getNumber();
         aux[x] += exp.values[x][y] * probConds[x][y];
@@ -1167,7 +1163,7 @@ public class LambdaSolve  {
       //if(sum==0){continue;}
 
       if (Math.abs(fLambda) > 200) {   // was 50
-        log.info("lambda " + fNo + " too big: " + fLambda);
+        System.err.println("lambda " + fNo + " too big: " + fLambda);
       }
 
       for (int i = 0, length = f.len(); i < length; i++) {
@@ -1236,7 +1232,7 @@ public class LambdaSolve  {
         }
       }
 
-      log.info(" for x " + x + " number graphs " + zlambda[x]);
+      System.err.println(" for x " + x + " number graphs " + zlambda[x]);
 
       if (zlambda[x] > 0) {
         localloss /= zlambda[x];

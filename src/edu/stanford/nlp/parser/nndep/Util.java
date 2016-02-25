@@ -6,8 +6,7 @@
 * 	@Last Modified:  2014-10-05
 */
 
-package edu.stanford.nlp.parser.nndep; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.nndep;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -30,10 +29,7 @@ import java.io.*;
  *  @author Jon Gauthier
  */
 
-public class Util  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Util.class);
+class Util {
 
   private Util() {} // static methods
 
@@ -226,7 +222,7 @@ public class Util  {
 
   public static void printTreeStats(String str, List<DependencyTree> trees)
   {
-    log.info(Config.SEPARATOR + " " + str);
+    System.err.println(Config.SEPARATOR + " " + str);
     int nTrees = trees.size();
     int nonTree = 0;
     int multiRoot = 0;

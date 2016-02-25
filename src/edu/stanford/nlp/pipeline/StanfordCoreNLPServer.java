@@ -57,7 +57,7 @@ public class StanfordCoreNLPServer implements Runnable {
   /**
    * The thread pool for the HTTP server.
    */
-  private final ExecutorService serverExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
+  private final ExecutorService serverExecutor = Executors.newFixedThreadPool(Execution.threads);
   /**
    * To prevent grossly wasteful over-creation of pipeline objects, cache the last
    * few we created, until the garbage collector decides we can kill them.
@@ -66,7 +66,7 @@ public class StanfordCoreNLPServer implements Runnable {
   /**
    * An executor to time out CoreNLP execution with.
    */
-  private final ExecutorService corenlpExecutor = Executors.newFixedThreadPool(ArgumentParser.threads);
+  private final ExecutorService corenlpExecutor = Executors.newFixedThreadPool(Execution.threads);
 
 
   /**
@@ -172,9 +172,7 @@ public class StanfordCoreNLPServer implements Runnable {
         }
 
         // Read the annotation
-        return new Annotation(
-            IOUtils.slurpInputStream(httpExchange.getRequestBody(), encoding)
-              .replace('\u0000', ' '));
+        return new Annotation(IOUtils.slurpInputStream(httpExchange.getRequestBody(), encoding));
       case "serialized":
         String inputSerializerName = props.getProperty("inputSerializer", ProtobufAnnotationSerializer.class.getName());
         AnnotationSerializer serializer = MetaClass.create(inputSerializerName).createInstance();
@@ -212,7 +210,7 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown if the HttpExchange cannot communicate the error.
    */
   private static void respondError(String response, HttpExchange httpExchange) throws IOException {
-    httpExchange.getResponseHeaders().add("Content-type", "text/plain");
+    httpExchange.getResponseHeaders().add("Content-Type", "text/plain");
     httpExchange.sendResponseHeaders(HTTP_ERR, response.length());
     httpExchange.getResponseBody().write(response.getBytes());
     httpExchange.close();
@@ -228,7 +226,7 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown if the HttpExchange cannot communicate the error.
    */
   private static void respondBadInput(String response, HttpExchange httpExchange) throws IOException {
-    httpExchange.getResponseHeaders().add("Content-type", "text/plain");
+    httpExchange.getResponseHeaders().add("Content-Type", "text/plain");
     httpExchange.sendResponseHeaders(HTTP_BAD_INPUT, response.length());
     httpExchange.getResponseBody().write(response.getBytes());
     httpExchange.close();
@@ -242,7 +240,7 @@ public class StanfordCoreNLPServer implements Runnable {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
       // Return a simple text message that says pong.
-      httpExchange.getResponseHeaders().set("Content-type", "text/plain");
+      httpExchange.getResponseHeaders().set("Content-Type", "text/plain");
       String response = "pong\n";
       httpExchange.sendResponseHeaders(HTTP_OK, response.getBytes().length);
       httpExchange.getResponseBody().write(response.getBytes());
@@ -259,7 +257,7 @@ public class StanfordCoreNLPServer implements Runnable {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
       Map<String, String> urlParams = getURLParams(httpExchange.getRequestURI());
-      httpExchange.getResponseHeaders().set("Content-type", "text/plain");
+      httpExchange.getResponseHeaders().set("Content-Type", "text/plain");
       boolean doExit = false;
       String response = "Invalid shutdown key\n";
       if (urlParams.containsKey("key") && urlParams.get("key").equals(shutdownKey)) {
@@ -285,7 +283,7 @@ public class StanfordCoreNLPServer implements Runnable {
     }
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      httpExchange.getResponseHeaders().set("Content-type", "text/html");
+      httpExchange.getResponseHeaders().set("Content-Type", "text/html");
       httpExchange.sendResponseHeaders(HTTP_OK, content.getBytes().length);
       httpExchange.getResponseBody().write(content.getBytes());
       httpExchange.close();
@@ -321,7 +319,7 @@ public class StanfordCoreNLPServer implements Runnable {
     public String getContentType(Properties props, StanfordCoreNLP.OutputFormat of) {
       switch(of) {
         case JSON:
-          return "application/json";
+          return "text/json";
         case TEXT:
         case CONLL:
           return "text/plain";
@@ -405,17 +403,12 @@ public class StanfordCoreNLPServer implements Runnable {
 
         // Get output
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        AnnotationOutputter.Options options = AnnotationOutputter.getOptions(pipeline);
-        StanfordCoreNLP.createOutputter(props, options).accept(completedAnnotation, os);
+        StanfordCoreNLP.createOutputter(props, AnnotationOutputter.getOptions(pipeline)).accept(completedAnnotation, os);
         os.close();
         byte[] response = os.toByteArray();
 
-        String contentType = getContentType(props, of);
-        if (contentType.equals("application/json") || contentType.startsWith("text/")) {
-          contentType += ";charset=" + options.encoding;
-        }
-        httpExchange.getResponseHeaders().add("Content-type", contentType);
-        httpExchange.getResponseHeaders().add("Content-length", Integer.toString(response.length));
+        httpExchange.getResponseHeaders().add("Content-Type", getContentType(props, of));
+        httpExchange.getResponseHeaders().add("Content-Length", Integer.toString(response.length));
         httpExchange.sendResponseHeaders(HTTP_OK, response.length);
         httpExchange.getResponseBody().write(response);
         httpExchange.close();
@@ -469,15 +462,11 @@ public class StanfordCoreNLPServer implements Runnable {
         urlProperties = StringUtils.decodeMap(URLDecoder.decode(urlParams.get("props"), "UTF-8"));
       }
       // (tweak the default properties a bit)
-      if (!props.containsKey("coref.md.type")) {
-        // Set coref head to use dependencies
-        props.setProperty("coref.md.type", "dep");
-        if (urlProperties.containsKey("annotators") && urlProperties.get("annotators") != null &&
-            ArrayUtils.contains(urlProperties.get("annotators").split(","), "parse")) {
-          // (case: the properties have a parse annotator --
-          //        we don't have to use the dependency mention finder)
-          props.remove("coref.md.type");
-        }
+      if (urlProperties.containsKey("annotators") && urlProperties.get("annotators") != null &&
+          ArrayUtils.contains(urlProperties.get("annotators").split(","), "parse")) {
+        // (case: the properties have a parse annotator --
+        //        we don't have to use the dependency mention finder)
+        props.remove("coref.md.type");
       }
       // (add new properties on top of the default properties)
       urlProperties.entrySet()
@@ -684,8 +673,8 @@ public class StanfordCoreNLPServer implements Runnable {
 
   private static void sendAndGetResponse(HttpExchange httpExchange, byte[] response) throws IOException {
     if (response.length > 0) {
-      httpExchange.getResponseHeaders().add("Content-type", "application/json");
-      httpExchange.getResponseHeaders().add("Content-length", Integer.toString(response.length));
+      httpExchange.getResponseHeaders().add("Content-Type", "text/json");
+      httpExchange.getResponseHeaders().add("Content-Length", Integer.toString(response.length));
       httpExchange.sendResponseHeaders(HTTP_OK, response.length);
       httpExchange.getResponseBody().write(response);
       httpExchange.close();

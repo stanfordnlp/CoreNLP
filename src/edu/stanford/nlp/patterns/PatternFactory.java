@@ -2,7 +2,7 @@ package edu.stanford.nlp.patterns;
 
 import edu.stanford.nlp.patterns.dep.DepPatternFactory;
 import edu.stanford.nlp.patterns.surface.SurfacePatternFactory;
-import edu.stanford.nlp.util.ArgumentParser;
+import edu.stanford.nlp.util.Execution;
 
 import java.util.*;
 
@@ -14,24 +14,24 @@ public class PatternFactory {
    * allow to match stop words before a target term. This is to match something
    * like "I am on some X" if the pattern is "I am on X"
    */
-  @ArgumentParser.Option(name = "useStopWordsBeforeTerm")
+  @Execution.Option(name = "useStopWordsBeforeTerm")
   public static boolean useStopWordsBeforeTerm = false;
 
   /**
    * Add NER restriction to the target phrase in the patterns
    */
-  @ArgumentParser.Option(name = "useTargetNERRestriction")
+  @Execution.Option(name = "useTargetNERRestriction")
   public static boolean useTargetNERRestriction = false;
 
   /**
    *
    */
-  @ArgumentParser.Option(name="useNER")
+  @Execution.Option(name="useNER")
   public static boolean useNER = true;
   /**
    * Can just write a number (if same for all labels) or "Label1,2;Label2,3;...."
    */
-  @ArgumentParser.Option(name = "numWordsCompound")
+  @Execution.Option(name = "numWordsCompound")
   public static String numWordsCompound = "2";
 
   public static Map<String, Integer> numWordsCompoundMapped = new HashMap<>();
@@ -40,7 +40,7 @@ public class PatternFactory {
   /**
    * Use lemma instead of words for the context tokens
    */
-  @ArgumentParser.Option(name = "useLemmaContextTokens")
+  @Execution.Option(name = "useLemmaContextTokens")
   public static boolean useLemmaContextTokens = true;
 
 
@@ -55,7 +55,7 @@ public class PatternFactory {
   public static java.util.regex.Pattern ignoreWordRegex = java.util.regex.Pattern.compile("a^");
 
   public static void setUp(Properties props, PatternType patternType, Set<String> labels) {
-    ArgumentParser.fillOptions(PatternFactory.class, props);
+    Execution.fillOptions(PatternFactory.class, props);
     numWordsCompoundMax = 0;
     if (numWordsCompound.contains(",") || numWordsCompound.contains(";")) {
       String[] toks = numWordsCompound.split(";");

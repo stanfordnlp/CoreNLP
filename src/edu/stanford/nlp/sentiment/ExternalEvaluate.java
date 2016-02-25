@@ -3,8 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.stanford.nlp.sentiment; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sentiment;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
@@ -17,10 +16,7 @@ import java.util.List;
  *
  * @author Michael Haas <haas@cl.uni-heidelberg.de>
  */
-public class ExternalEvaluate extends AbstractEvaluate  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ExternalEvaluate.class);
+public class ExternalEvaluate extends AbstractEvaluate {
 
     List<Tree> predicted;
 
@@ -84,12 +80,12 @@ public class ExternalEvaluate extends AbstractEvaluate  {
             }
         }
         if (goldPath == null) {
-            log.info("goldPath not set. Exit.");
+            System.err.println("goldPath not set. Exit.");
             System.exit(-1);
 
         }
         if (predictedPath == null) {
-            log.info("predictedPath not set. Exit.");
+            System.err.println("predictedPath not set. Exit.");
             System.exit(-1);
         }
         // filterUnknown not supported because I'd need to know which sentences

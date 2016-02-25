@@ -106,19 +106,6 @@ public class NaturalLogicWeights {
       return 1.0;
     }
   }
-  public double subjDeletionProbability(SemanticGraphEdge edge, Iterable<SemanticGraphEdge> neighbors) {
-    // Get information about the neighbors
-    // (in a totally not-creepy-stalker sort of way)
-    for (SemanticGraphEdge neighbor : neighbors) {
-      if (neighbor != edge) {
-        String neighborRel = neighbor.getRelation().toString();
-        if (neighborRel.contains("subj")) {
-          return 1.0;
-        }
-      }
-    }
-    return 0.0;
-  }
 
   public double objDeletionProbability(SemanticGraphEdge edge, Iterable<SemanticGraphEdge> neighbors) {
     // Get information about the neighbors
@@ -133,9 +120,6 @@ public class NaturalLogicWeights {
         }
         if (neighborRel.contains("prep")) {
           pp = Optional.of(neighborRel);
-        }
-        if (neighborRel.contains("obj")) {
-          return 1.0;  // allow deleting second object
         }
       }
     }
@@ -216,8 +200,6 @@ public class NaturalLogicWeights {
       return ppDeletionProbability(edge, neighbors);
     } else if (edgeRel.contains("obj")) {
       return objDeletionProbability(edge, neighbors);
-    } else if (edgeRel.contains("subj")) {
-      return subjDeletionProbability(edge, neighbors);
     } else if (edgeRel.equals("amod")) {
       String word = (edge.getDependent().lemma() != null ? edge.getDependent().lemma() : edge.getDependent().word()).toLowerCase();
       if (Util.PRIVATIVE_ADJECTIVES.contains(word)) {

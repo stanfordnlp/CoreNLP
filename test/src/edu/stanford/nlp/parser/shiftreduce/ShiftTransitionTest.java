@@ -1,8 +1,8 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
-import edu.stanford.nlp.ling.SentenceUtils;
 import junit.framework.TestCase;
 
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 
 import java.util.Arrays;
@@ -20,7 +20,7 @@ public class ShiftTransitionTest extends TestCase {
     String[] words = { "This", "is", "a", "short", "test", "." };
     String[] tags = { "DT", "VBZ", "DT", "JJ", "NN", "." };
     assertEquals(words.length, tags.length);
-    List<TaggedWord> sentence = SentenceUtils.toTaggedList(Arrays.asList(words), Arrays.asList(tags));
+    List<TaggedWord> sentence = Sentence.toTaggedList(Arrays.asList(words), Arrays.asList(tags));
     State state = ShiftReduceParser.initialStateFromTaggedSentence(sentence);
 
     ShiftTransition shift = new ShiftTransition();

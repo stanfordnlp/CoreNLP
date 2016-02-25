@@ -1,13 +1,13 @@
 package edu.stanford.nlp.wordseg;
 
-
-import edu.stanford.nlp.util.logging.Redwood;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 
 class TagAffixDetector {
 
-  private static Redwood.RedwoodChannels logger = Redwood.channels(TagAffixDetector.class);
+  private static Logger logger = LoggerFactory.getLogger(TagAffixDetector.class);
 
   private CorpusChar cc;
   private affDict aD;

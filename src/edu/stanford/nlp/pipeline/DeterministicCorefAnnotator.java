@@ -1,7 +1,11 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 import edu.stanford.nlp.dcoref.Constants;
 import edu.stanford.nlp.dcoref.CorefChain;
@@ -11,10 +15,11 @@ import edu.stanford.nlp.dcoref.Mention;
 import edu.stanford.nlp.dcoref.MentionExtractor;
 import edu.stanford.nlp.dcoref.RuleBasedCorefMentionFinder;
 import edu.stanford.nlp.dcoref.SieveCoreferenceSystem;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.hcoref.*;
+import edu.stanford.nlp.hcoref.data.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
@@ -22,7 +27,12 @@ import edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.GrammaticalStructure.Extras;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.ArraySet;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.IntTuple;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
  * Implements the Annotator for the new deterministic coreference resolution system.
@@ -31,10 +41,7 @@ import edu.stanford.nlp.util.*;
  * @author Mihai Surdeanu, based on the CorefAnnotator written by Marie-Catherine de Marneffe
  */
 
-public class DeterministicCorefAnnotator implements Annotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(DeterministicCorefAnnotator.class);
+public class DeterministicCorefAnnotator implements Annotator {
 
   private static final boolean VERBOSE = false;
 
@@ -54,7 +61,7 @@ public class DeterministicCorefAnnotator implements Annotator  {
       OLD_FORMAT = Boolean.parseBoolean(props.getProperty("oldCorefFormat", "false"));
       allowReparsing = PropertiesUtils.getBool(props, Constants.ALLOW_REPARSING_PROP, Constants.ALLOW_REPARSING);
     } catch (Exception e) {
-      log.error("cannot create DeterministicCorefAnnotator!");
+      System.err.println("ERROR: cannot create DeterministicCorefAnnotator!");
       e.printStackTrace();
       throw new RuntimeException(e);
     }
@@ -97,7 +104,7 @@ public class DeterministicCorefAnnotator implements Annotator  {
           MentionExtractor.initializeUtterance(tokens);
         }
       } else {
-        log.error("this coreference resolution system requires SentencesAnnotation!");
+        System.err.println("ERROR: this coreference resolution system requires SentencesAnnotation!");
         return;
       }
       if (hasSpeakerAnnotations) {
@@ -116,7 +123,7 @@ public class DeterministicCorefAnnotator implements Annotator  {
         for(int i = 0; i < orderedMentions.size(); i ++){
           System.err.printf("Mentions in sentence #%d:%n", i);
           for(int j = 0; j < orderedMentions.get(i).size(); j ++){
-            log.info("\tMention #" + j + ": " + orderedMentions.get(i).get(j).spanToString());
+            System.err.println("\tMention #" + j + ": " + orderedMentions.get(i).get(j).spanToString());
           }
         }
       }
@@ -201,21 +208,13 @@ public class DeterministicCorefAnnotator implements Annotator  {
 
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TextAnnotation.class,
-        CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-        CoreAnnotations.CharacterOffsetEndAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class,
-        TreeCoreAnnotations.TreeAnnotation.class,
-        CoreAnnotations.NamedEntityTagAnnotation.class
-    )));
+  public Set<Requirement> requires() {
+    return Annotator.REQUIREMENTS.get(STANFORD_DETERMINISTIC_COREF);
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CorefCoreAnnotations.CorefChainAnnotation.class);
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(DETERMINISTIC_COREF_REQUIREMENT);
   }
 
 }

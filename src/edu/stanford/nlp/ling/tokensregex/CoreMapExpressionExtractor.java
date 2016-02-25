@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ling.tokensregex; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ling.tokensregex;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -40,15 +39,11 @@ import java.util.logging.Logger;
  * @author Angel Chang
  * @see SequenceMatchRules
  */
-public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CoreMapExpressionExtractor.class);
-
-  private static boolean verbose = false;
+public class CoreMapExpressionExtractor<T extends MatchedExpression> {
 
   // TODO: Remove templating of MatchedExpressions<?>  (keep for now until TimeExpression rules can be decoupled)
 
+  private Logger logger = Logger.getLogger(CoreMapExpressionExtractor.class.getName());
   private final Env env;
   /* Keeps temporary tags created by extractor */
   private boolean keepTags = false;
@@ -160,11 +155,11 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
    */
   public void appendRules(List<SequenceMatchRules.Rule> rules)
   {
-    log.info("Read " + rules.size() + " rules");
+    logger.log(Level.INFO, "Read " + rules.size() + " rules");
     // Put rules into stages
     if (collapseExtractionRules) {
       rules = collapse(rules);
-      log.info("Collapsing into " + rules.size() + " rules");
+      logger.log(Level.INFO, "Collapsing into " + rules.size() + " rules");
     }
     for (SequenceMatchRules.Rule r:rules) {
       if (r instanceof SequenceMatchRules.AssignmentRule) {
@@ -198,7 +193,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
             }
           }
         } else {
-          log.debug("Ignoring inactive rule: " + aer.name); // used to be INFO but annoyed Chris/users
+          logger.log(Level.FINE, "Ignoring inactive rule: " + aer.name); // used to be INFO but annoyed Chris/users
         }
       }
     }
@@ -252,6 +247,10 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
     return env;
   }
 
+  public void setLogger(Logger logger) {
+    this.logger = logger;
+  }
+
   public void setExtractRules(SequenceMatchRules.ExtractRule<CoreMap, T> basicExtractRule,
                               SequenceMatchRules.ExtractRule<List<? extends CoreMap>, T> compositeExtractRule,
                               Predicate<T> filterRule)
@@ -284,7 +283,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
     CoreMapExpressionExtractor extractor = new CoreMapExpressionExtractor(env);
     for (String filename:filenames) {
       try {
-        log.info("Reading TokensRegex rules from " + filename);
+        System.err.println("Reading TokensRegex rules from " + filename);
         BufferedReader br = IOUtils.readerFromString(filename);
         TokenSequenceParser parser = new TokenSequenceParser();
         parser.updateExpressionExtractor(extractor, br);
@@ -447,9 +446,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
       done = !extracted;
       iters++;
       if (maxIters > 0 && iters >= maxIters) {
-        if (verbose) {
-          log.warn("Aborting application of composite rules: Maximum iteration " + maxIters + " reached");
-        }
+        logger.warning("Aborting application of composite rules: Maximum iteration " + maxIters + " reached");
         break;
       }
     }
@@ -517,13 +514,10 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
           if (!extrackOkay) {
             // Things didn't turn out so well
             toDiscard.add(te);
-            log.warn("Error extracting annotation from " + te /*+ ", " + te.getExtractErrorMessage() */);
+            logger.log(Level.WARNING, "Error extracting annotation from " + te /*+ ", " + te.getExtractErrorMessage() */);
           }
         } catch (Exception ex) {
-          if (verbose) {
-            log.warn("Error extracting annotation from " + te);
-            log.warn(ex);
-          }
+          logger.log(Level.WARNING, "Error extracting annotation from " + te, ex);
         }
       }
     }
@@ -541,13 +535,10 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
         if (!extractOkay) {
           // Things didn't turn out so well
           toDiscard.add(te);
-          log.warn("Error extracting annotation from " + te /*+ ", " + te.getExtractErrorMessage() */);
+          logger.log(Level.WARNING, "Error extracting annotation from " + te /*+ ", " + te.getExtractErrorMessage() */);
         }
       } catch (Exception ex) {
-        if (verbose) {
-          log.warn("Error extracting annotation from " + te);
-          log.warn(ex);
-        }
+        logger.log(Level.WARNING, "Error extracting annotation from " + te, ex);
       }
     }
     expressions.removeAll(toDiscard);
@@ -567,8 +558,8 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
 //        logger.warning("Filtering out " + expr.getText());
       }
     }
-    if (nfiltered > 0 && verbose) {
-      log.debug("Filtered " + nfiltered);
+    if (nfiltered > 0) {
+      logger.finest("Filtered " + nfiltered);
     }
     return kept;
   }
@@ -583,10 +574,6 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
   public CoreMapExpressionExtractor keepTemporaryTags() {
     this.keepTags = true;
     return this;
-  }
-
-  public static void setVerbose(boolean v) {
-    verbose = v;
   }
 
 }

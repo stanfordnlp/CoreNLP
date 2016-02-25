@@ -4,8 +4,8 @@ import java.io.*;
 
 import edu.stanford.nlp.io.IOUtils;
 
-
-import edu.stanford.nlp.util.logging.Redwood;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /** This class converts the MNIST data set from Yann LeCun's distributed binary
@@ -24,7 +24,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  */
 public class MnistConverter {
 
-  final static Redwood.RedwoodChannels logger = Redwood.channels(MnistConverter.class);
+  final static Logger logger = LoggerFactory.getLogger(MnistConverter.class);
 
   private MnistConverter() {}
 

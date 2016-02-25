@@ -1,8 +1,5 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.ling.CoreAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.parser.nndep.DependencyParser;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
@@ -23,10 +20,7 @@ import java.util.*;
  *
  * @author Jon Gauthier
  */
-public class DependencyParseAnnotator extends SentenceAnnotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(DependencyParseAnnotator.class);
+public class DependencyParseAnnotator extends SentenceAnnotator {
 
   private final DependencyParser parser;
 
@@ -89,29 +83,17 @@ public class DependencyParseAnnotator extends SentenceAnnotator  {
   @Override
   protected void doOneFailedSentence(Annotation annotation, CoreMap sentence) {
     // TODO
-    log.info("fail");
+    System.err.println("fail");
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TextAnnotation.class,
-        CoreAnnotations.IndexAnnotation.class,
-        CoreAnnotations.ValueAnnotation.class,
-        CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class,
-        CoreAnnotations.SentenceIndexAnnotation.class,
-        CoreAnnotations.PartOfSpeechAnnotation.class
-    )));
+  public Set<Requirement> requires() {
+    return Annotator.REQUIREMENTS.get(STANFORD_DEPENDENCIES);
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
-    )));
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.unmodifiableSet(new ArraySet<>(DEPENDENCY_REQUIREMENT));
   }
 
   public static String signature(String annotatorName, Properties props) {

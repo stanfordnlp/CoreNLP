@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie.machinereading; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.machinereading;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,10 +34,7 @@ import edu.stanford.nlp.util.CoreMap;
  * @author Mihai
  *
  */
-public class GenericDataSetReader  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(GenericDataSetReader.class);
+public class GenericDataSetReader {
   protected Logger logger;
 
   /** Finds the syntactic head of a syntactic constituent */
@@ -423,7 +419,7 @@ public class GenericDataSetReader  {
       CoreLabel kidLabel = (CoreLabel) kid.label();
       int kidStart = kidLabel.get(CoreAnnotations.BeginIndexAnnotation.class);
       int kidEnd = kidLabel.get(CoreAnnotations.EndIndexAnnotation.class);
-      // log.info("findPartialSpan: Examining " + kidLabel.value() + " from " + kidStart + " to " + kidEnd);
+      // System.err.println("findPartialSpan: Examining " + kidLabel.value() + " from " + kidStart + " to " + kidEnd);
       if (kidStart <= start && kidEnd > start) {
         return findPartialSpan(kid, start);
       }
@@ -437,7 +433,7 @@ public class GenericDataSetReader  {
     for (Tree leaf : leaves) {
       CoreLabel label = CoreLabel.class.cast(leaf.label());
       int ind = label.get(CoreAnnotations.BeginIndexAnnotation.class);
-      // log.info("Token #" + ind + ": " + leaf.value());
+      // System.err.println("Token #" + ind + ": " + leaf.value());
       if (token.equals(leaf.value()) && ind >= index && ind <= index + approximateness) {
         return leaf;
       }
@@ -544,7 +540,7 @@ public class GenericDataSetReader  {
    */
   private static Tree findTreeWithSpan(Tree tree, int start, int end) {
     CoreLabel l = (CoreLabel) tree.label();
-    if (l != null && l.containsKey(CoreAnnotations.BeginIndexAnnotation.class) && l.containsKey(CoreAnnotations.EndIndexAnnotation.class)) {
+    if (l != null && l.has(CoreAnnotations.BeginIndexAnnotation.class) && l.has(CoreAnnotations.EndIndexAnnotation.class)) {
       int myStart = l.get(CoreAnnotations.BeginIndexAnnotation.class);
       int myEnd = l.get(CoreAnnotations.EndIndexAnnotation.class);
       if (start == myStart && end == myEnd){

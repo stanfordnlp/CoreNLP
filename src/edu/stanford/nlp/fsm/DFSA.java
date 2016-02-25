@@ -1,5 +1,4 @@
-package edu.stanford.nlp.fsm; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.fsm;
 
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Scored;
@@ -16,10 +15,7 @@ import java.util.*;
  * @author Michel Galley (AT&amp;T FSM library format printing)
  * @author Sarah Spikes (sdspikes@cs.stanford.edu) - cleanup and filling in types
  */
-public final class DFSA<T,S> implements Scored  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(DFSA.class);
+public final class DFSA<T,S> implements Scored {
 
   Object dfsaID;
   DFSAState<T,S> initialState;
@@ -98,7 +94,7 @@ public final class DFSA<T,S> implements Scored  {
   }
 
   public static <T, S> void printTrieDFSA(DFSA<T, S> dfsa) {
-    log.info("DFSA: " + dfsa.dfsaID);
+    System.err.println("DFSA: " + dfsa.dfsaID);
     printTrieDFSAHelper(dfsa.initialState(), 2);
   }
 

@@ -1,6 +1,6 @@
-package edu.stanford.nlp.util; 
-import edu.stanford.nlp.pipeline.Annotator;
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.util;
+
+import edu.stanford.nlp.util.logging.StanfordRedwoodConfiguration;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -13,7 +13,6 @@ import java.net.InetAddress;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.stream.Collectors;
 
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
@@ -23,7 +22,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  *
  * <pre>
  *   <code>
- *     import edu.stanford.nlp.util.ArgumentParser.Option
+ *     import edu.stanford.nlp.util.Execution.Option
  *
  *     class Props {
  *       &#64;Option(name="anIntOption", required=false, gloss="This is an int")
@@ -35,13 +34,13 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  * </pre>
  *
  * <p>
- *   You can then set options with {@link ArgumentParser#fillOptions(String[])},
- *   or with {@link ArgumentParser#fillOptions(java.util.Properties)}.
+ *   You can then set options with {@link Execution#exec(Runnable, String[])},
+ *   or with {@link Execution#fillOptions(java.util.Properties)}.
  * </p>
  *
  * <p>
  *   If your default classpath has many classes in it, you can select a subset of them
- *   by using {@link ArgumentParser#fillOptions(Class[], java.util.Properties)}, or some variant.
+ *   by using {@link Execution#fillOptions(Class[], java.util.Properties)}, or some variant.
  * </p>
  *
  * <p>
@@ -52,30 +51,27 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  *   <code>
  *     import java.util.Properties;
  *
- *     import edu.stanford.nlp.util.ArgumentParser;
+ *     import edu.stanford.nlp.util.Execution;
  *     import edu.stanford.nlp.util.StringUtils;
  *
  *     public class Foo {
  *
- *       &#64;ArgumentParser.Option(name="bar", gloss="This is a string option.", required=true)
+ *       &#64;Execution.Option(name="bar", gloss="This is a string option.", required=true)
  *       private static String BAR = null;
  *
  *       public static void main(String[] args) {
  *         // Parse the arguments
  *         Properties props = StringUtils.argsToProperties(args);
- *         ArgumentParser.fillOptions(new Class[]{ Foo.class, ArgumentParser.class }, props);
+ *         Execution.fillOptions(new Class[]{ Foo.class, Execution.class }, props);
  *
- *         log.info(INPUT);
+ *         System.err.println(INPUT);
  *       }
  *     }
  *   </code>
  * </pre>
  *
  */
-public class ArgumentParser  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ArgumentParser.class);
+public class Execution {
 
   @Documented
   @Retention(RetentionPolicy.RUNTIME)
@@ -94,7 +90,7 @@ public class ArgumentParser  {
   private static final String[] IGNORED_JARS = {
   };
   private static final Class[] BOOTSTRAP_CLASSES = {
-      ArgumentParser.class,
+      Execution.class,
   };
 
   @Option(name = "option_classes", gloss = "Fill options from these classes")
@@ -295,7 +291,7 @@ public class ArgumentParser  {
     return false;
   }
 
-  private static Class<?>[] getVisibleClasses() {
+  public static Class<?>[] getVisibleClasses() {
     //--Variables
     List<Class<?>> classes = new ArrayList<>();
     // (get classpath)
@@ -373,28 +369,6 @@ public class ArgumentParser  {
     return fields.toArray(new Field[fields.size()]);
   }
 
-  private static String threadRootClass() {
-    StackTraceElement[] trace = Thread.currentThread().getStackTrace();
-    int i = trace.length - 1;
-    while(i > 0 &&
-        (trace[i].getClassName().startsWith("com.intellij") ||
-         trace[i].getClassName().startsWith("java.") ||
-         trace[i].getClassName().startsWith("sun.")
-        ) ) {
-      i -= 1;
-    }
-    StackTraceElement elem = trace[i];
-    return elem.getClassName();
-  }
-
-  private static String bufferString(String raw, int minLength) {
-    StringBuilder b = new StringBuilder(raw);
-    for (int i = raw.length(); i < minLength; ++i) {
-      b.append(" ");
-    }
-    return b.toString();
-  }
-
 
   @SuppressWarnings("rawtypes")
   protected static Map<String, Field> fillOptionsImpl(
@@ -402,14 +376,6 @@ public class ArgumentParser  {
       Class<?>[] classes,
       Properties options,
       boolean ensureAllOptions) {
-
-    // Print usage, if applicable
-    if ("true".equalsIgnoreCase(options.getProperty("usage", "false")) ||
-        "true".equalsIgnoreCase(options.getProperty("help", "false"))
-        ) {
-      log(usage(classes));
-      System.exit(0);
-    }
 
     //--Create Class->Object Mapping
     Map<Class, Object> class2object = new HashMap<>();
@@ -577,102 +543,14 @@ public class ArgumentParser  {
 	 * ----------
 	 */
 
-  /**
-   * Populate all static options in the given set of classes, as defined by the given
-   * properties.
-   *
-   * @param classes The classes to populate static {@link Option}-tagged fields in.
-   * @param options The properties to use to fill these fields.
-   */
   public static void fillOptions(Class<?>[] classes, Properties options) {
     fillOptionsImpl(null, classes, options);
   }
 
-
-  /**
-   * Populate with the given properties all static {@link Option}-tagged fields in
-   * the given classes.
-   * Then, populate remaining fields with the given command-line arguments.
-   *
-   * @param optionClasses The classes to populate static {@link Option}-tagged fields in.
-   * @param props The properties to use to fill these fields.
-   * @param args The command-line arguments to use to fill in additional properties.
-   */
-  @SuppressWarnings("UnusedDeclaration")
-  public static void fillOptions(Class<?>[] optionClasses, Properties props, String[] args) {
-    ArgumentParser.optionClasses = optionClasses;
-    fillOptions(props, args);
-
-  }
-
-  /**
-   * Populate with the given command-line arguments all static {@link Option}-tagged fields in
-   * the given classes.
-   *
-   * @param classes The classes to populate static {@link Option}-tagged fields in.
-   * @param args The command-line arguments to use to fill in additional properties.
-   */
-  public static void fillOptions(Class<?>[] classes,
-                                 String[] args) {
-    Properties options = StringUtils.argsToProperties(args); //get options
-    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
-    fillOptionsImpl(null, classes, options);
-  }
-
-  /**
-   * Populate all static options in the given class, as defined by the given
-   * properties.
-   *
-   * @param clazz The class to populate static {@link Option}-tagged fields in.
-   * @param options The properties to use to fill these fields.
-   */
   public static void fillOptions(Class<?> clazz, Properties options) {
     fillOptionsImpl(null, new Class[]{ clazz }, options);
   }
 
-  /**
-   * Populate all static options in the given class, as defined by the given
-   * command-line arguments.
-   *
-   * @param clazz The class to populate static {@link Option}-tagged fields in.
-   * @param args The command-line arguments to use to fill these fields.
-   */
-  public static void fillOptions(Class<?> clazz,
-                                 String[] args) {
-    Class<?>[] classes = new Class<?>[1];
-    classes[0] = clazz;
-    fillOptions(classes, args);
-  }
-
-  /**
-   * Populate with the given properties all static options in all classes in the current classpath.
-   * Note that this may take a while if the classpath is large.
-   *
-   * @param props The properties to use to fill fields in the various classes.
-   */
-  public static void fillOptions(Properties props) {
-    fillOptions(props, new String[0]);
-  }
-
-  /**
-   * Populate with the given command-line arguments all static options in all
-   * classes in the current classpath.
-   * Note that this may take a while if the classpath is large.
-   *
-   * @param props The command-line arguments to use to fill options.
-   */
-  public static void fillOptions(String[] props) {
-    fillOptions(StringUtils.argsToProperties(props), new String[0]);
-  }
-
-  /**
-   * Populate with the given properties all static options in all classes in the current classpath.
-   * Then, fill in additional properties from the given command-line arguments.
-   * Note that this may take a while if the classpath is large.
-   *
-   * @param props The properties to use to fill fields in the various classes.
-   * @param args The command-line arguments to use to fill in additional properties.
-   */
   public static void fillOptions(Properties props, String[] args) {
     //(convert to map)
     Properties options = StringUtils.argsToProperties(args);
@@ -681,35 +559,50 @@ public class ArgumentParser  {
     }
     //(bootstrap)
     Map<String, Field> bootstrapMap = fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
-    bootstrapMap.keySet().forEach(options::remove);
+    for (String key : bootstrapMap.keySet()) {
+      options.remove(key);
+    }
     //(fill options)
     Class<?>[] visibleClasses = optionClasses;
     if (visibleClasses == null) visibleClasses = getVisibleClasses(); //get classes
     fillOptionsImpl(null, visibleClasses, options);//fill
   }
 
+  @SuppressWarnings("UnusedDeclaration")
+  public static void fillOptions(Class<?>[] optionClasses, Properties props, String[] args) {
+    Execution.optionClasses = optionClasses;
+    fillOptions(props, args);
 
-  /**
-   * Fill all non-static {@link Option}-tagged fields in the given set of objects with the given
-   * properties.
-   *
-   * @param instances The object instances containing {@link Option}-tagged fields which we should fill.
-   * @param options The properties to use to fill these fields.
-   */
+  }
+
+  public static void fillOptions(Properties props) {
+    fillOptions(props, new String[0]);
+  }
+
+  public static void fillOptions(Class<?>[] classes,
+                                  String[] args) {
+    Properties options = StringUtils.argsToProperties(args); //get options
+    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
+    fillOptionsImpl(null, classes, options);
+  }
+
+  public static void fillOptions(Class<?> clazz,
+                                 String[] args) {
+    Class<?>[] classes = new Class<?>[1];
+    classes[0] = clazz;
+    fillOptions(classes, args);
+  }
+
   public static void fillOptions(Object[] instances, Properties options) {
     Class[] classes = new Class[instances.length];
     for (int i = 0; i < classes.length; ++i) { classes[i] = instances[i].getClass(); }
     fillOptionsImpl(instances, classes, options);
   }
 
+  public static void fillOptions(Object instance, Properties options) {
+    fillOptions(new Object[]{ instance }, options);
+  }
 
-  /**
-   * Fill all non-static {@link Option}-tagged fields in the given set of objects with the given
-   * command-line arguments.
-   *
-   * @param instances The object instances containing {@link Option}-tagged fields which we should fill.
-   * @param args The command-line arguments to use to fill these fields.
-   */
   public static void fillOptions(Object[] instances,
                                  String[] args) {
     Properties options = StringUtils.argsToProperties(args); //get options
@@ -719,139 +612,111 @@ public class ArgumentParser  {
     fillOptionsImpl(instances, classes, options);
   }
 
-  /**
-   * Fill all non-static {@link Option}-tagged fields in the given object with the given
-   * properties.
-   *
-   * @param instance The object instance containing {@link Option}-tagged fields which we should fill.
-   * @param options The properties to use to fill these fields.
-   */
-  public static void fillOptions(Object instance, Properties options) {
-    fillOptions(new Object[]{ instance }, options);
-  }
-
-
-  /**
-   * Fill all non-static {@link Option}-tagged fields in the given object with the given
-   * command-line arguments.
-   *
-   * @param instance The object instance containing {@link Option}-tagged fields which we should fill.
-   * @param args The command-line arguments to use to fill these fields.
-   */
   public static void fillOptions(Object instance,
                                  String[] args) {
     fillOptions(new Object[]{ instance }, args);
   }
 
-
-  /**
-   * Fill all the options for a given CoreNLP annotator.
-   * @param annotator The annotator to fill options for.
-   * @param annotatorName The name of the annotator, for parsing properties.
-   * @param props The properties to fill the options in the annotator with.
-   */
-  public static void fillOptions(Annotator annotator, String annotatorName, Properties props) {
-    ArgumentParser.fillOptions(annotator, props);
-    Properties withoutPrefix = new Properties();
-    Enumeration<Object> keys = props.keys();
-    while (keys.hasMoreElements()) {
-      String key = keys.nextElement().toString();
-      withoutPrefix.setProperty(key.replace(annotatorName + ".", ""), props.getProperty(key));
-    }
-    ArgumentParser.fillOptions(annotator, withoutPrefix);
+  public static void exec(Runnable toRun) {
+    exec(toRun, new String[0]);
   }
 
+  public static void exec(Runnable toRun, Class[] optionClasses) {
+    Execution.optionClasses = optionClasses;
+    exec(toRun, new String[0]);
+  }
 
-  /**
-   * Return a string describing the usage of the program this method is called from, given the
-   * options declared in the given set of classes.
-   * This will print both the static options, and the non-static options.
-   *
-   * @param optionsClasses The classes defining the options being used by this program.
-   * @return A String describing the usage of the class.
-   */
-  public static String usage(Class[] optionsClasses) {
-    String mainClass = threadRootClass();
+  public static void exec(Runnable toRun, String[] args) {
+    exec(toRun, args, false);
+  }
+
+  public static void exec(Runnable toRun, String[] args, Class... optionClasses) {
+    Execution.optionClasses = optionClasses;
+    exec(toRun, args, false);
+  }
+
+  public static void exec(Runnable toRun, String[] args, Class[] optionClasses, boolean exit) {
+    Execution.optionClasses = optionClasses;
+    exec(toRun, StringUtils.argsToProperties(args), exit);
+  }
+
+  public static void exec(Runnable toRun, String[] args, boolean exit) {
+    exec(toRun, StringUtils.argsToProperties(args), exit);
+  }
+
+  public static void exec(Runnable toRun, Properties options) {
+    exec(toRun, options, false);
+  }
+
+  public static void exec(Runnable toRun, Properties options, boolean exit) {
+    //--Init
+    //(bootstrap)
+    Map<String, Field> bootstrapMap = fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
+    for (String key : bootstrapMap.keySet()) {
+      options.remove(key);
+    }
+    startTrack("init");
+    //(fill options)
+    Class<?>[] visibleClasses = optionClasses;
+    if (visibleClasses == null) visibleClasses = getVisibleClasses(); //get classes
+    fillOptionsImpl(null, visibleClasses, options);//fill
+    endTrack("init");
+    // -- Setup Logging
+    StanfordRedwoodConfiguration.apply(options);
+    //--Run Program
+    int exitCode = 0;
+    startTrack("main");
+    try {
+      toRun.run();
+    } catch (Throwable t) {
+      log(FORCE, t);
+      exitCode = 1;
+    }
+    endTracksTo("main");  // end main
+    if (exit) {
+      throw new RuntimeException("not able to parse properties!!!");
+      //System.exit(exitCode);
+    }
+  }
+
+  private static String threadRootClass() {
+    StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+    StackTraceElement elem = trace[trace.length - 1];
+    return elem.getClassName();
+  }
+
+  @SuppressWarnings("UnusedDeclaration")
+  public static void usageAndExit(String[] expectedArgs) {
+    String clazz = threadRootClass();
     StringBuilder b = new StringBuilder();
-    b.append("Usage: ").append(mainClass).append(" ");
-
-    List<Pair<Option, Field>> options = new ArrayList<>();
-    for (Class clazz : optionsClasses) {
-      try {
-        options.addAll(Arrays.stream(scrapeFields(clazz))
-        .map(field -> {
-          Annotation[] annotations = field.getAnnotationsByType(Option.class);
-          if (annotations.length > 0) {
-            return Pair.makePair((Option) annotations[0], field);
-          } else {
-            return null;
-          }
-        })
-        .filter(x -> x != null)
-        .collect(Collectors.toList()));
-      } catch (Exception e) {
-        return b.append("<unknown>").toString();
-      }
+    b.append("USAGE: ").append(clazz).append(" ");
+    for (String arg : expectedArgs) {
+      b.append(arg).append(" ");
     }
-
-    int longestOptionName = options.stream().map(x -> x.first.name().length()).max(Comparator.comparingInt(x -> x)).orElse(10);
-    int longestOptionType = options.stream().map(x -> x.second.getType().getSimpleName().length()).max(Comparator.comparingInt(x -> x)).orElse(10) + 1;
-
-    options.stream().filter(x -> x.first.required()).forEach(optionPair -> {
-      Option option = optionPair.first;
-      Field  field  = optionPair.second;
-      b.append("\n\t-").append(bufferString(option.name(), longestOptionName))
-          .append("   <").append(bufferString(field.getType().getSimpleName() + ">", longestOptionType))
-          .append("   [required] ")
-          .append(option.gloss());
-    });
-    options.stream().filter(x -> !x.first.required()).forEach(optionPair -> {
-      Option option = optionPair.first;
-      Field field = optionPair.second;
-      b.append("\n\t-").append(bufferString(option.name(), longestOptionName))
-          .append("   <").append(bufferString(field.getType().getSimpleName() + ">", longestOptionType))
-          .append("   ")
-          .append(option.gloss());
-    });
-
-    return b.toString();
+    System.out.println(b.toString());
+    System.exit(0);
   }
 
-
-  /**
-   * Return a string describing the usage of the program this method is called from, given the
-   * options declared in the given set of objects.
-   * This will print both the static options, and the non-static options.
-   *
-   * @param optionsClasses The objects defining the options being used by this program.
-   * @return A String describing the usage of the class.
-   */
-  public static String usage(Object[] optionsClasses) {
-    return usage(Arrays.stream(optionsClasses).map(Object::getClass).toArray(Class[]::new));
+  @SuppressWarnings("UnusedDeclaration")
+  public static void usageAndExit(Map<String, String[]> argToFlagsMap) {
+    String clazz = threadRootClass();
+    StringBuilder b = new StringBuilder();
+    b.append("USAGE: ").append(clazz).append("\n\t");
+    for (String arg : argToFlagsMap.keySet()) {
+      String[] flags = argToFlagsMap.get(arg);
+      if (flags == null || flags.length == 0) {
+        throw new IllegalArgumentException(
+            "No flags registered for arg: " + arg);
+      }
+      b.append("{");
+      for (int i = 0; i < flags.length - 1; i++) {
+        b.append(flags[i]).append(",");
+      }
+      b.append(flags[flags.length - 1]).append("}");
+    }
+    System.out.println(b.toString());
+    System.exit(0);
   }
 
-  /**
-   * Return a string describing the usage of the program this method is called from, given the
-   * options declared in the given class.
-   * This will print both the static options, and the non-static options.
-   *
-   * @param optionsClass The class defining the options being used by this program.
-   * @return A String describing the usage of the class.
-   */
-  public static String usage(Class<?> optionsClass) {
-    return usage(new Class[]{ optionsClass });
-  }
-
-  /**
-   * Return a string describing the usage of the program this method is called from, given the
-   * options declared in the given object.
-   * This will print both the static options, and the non-static options.
-   *
-   * @param optionsClass The object defining the options being used by this program.
-   * @return A String describing the usage of the class.
-   */
-  public static String usage(Object optionsClass) {
-    return usage(new Class[]{ optionsClass.getClass() });
-  }
 
 }

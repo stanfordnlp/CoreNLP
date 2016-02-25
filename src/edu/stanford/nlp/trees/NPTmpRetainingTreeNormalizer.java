@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.LabelFactory;
@@ -32,10 +31,7 @@ import java.util.*;
  * @author Christopher Manning
  * @author Dan Klein
  */
-public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(NPTmpRetainingTreeNormalizer.class);
+public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer {
 
   private static final long serialVersionUID = 7548777133196579107L;
 
@@ -409,7 +405,7 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer  {
         // also allow chain to start with PP or ADVP
         String lab = t.value();
         if (NPTmpPattern.matcher(lab).matches() || PPTmpPattern.matcher(lab).matches() || ADVPTmpPattern.matcher(lab).matches()) {
-          // log.info("TMP: Annotating " + t);
+          // System.err.println("TMP: Annotating " + t);
           addTMP9(t);
         }
       } else if (temporalAnnotation == TEMPORAL_ACL03PCFG) {
@@ -501,7 +497,7 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer  {
         ht.value().startsWith("PP") || ht.value().startsWith("ADVP")) {
       if (!TmpPattern.matcher(ht.value()).matches()) {
         LabelFactory lf = ht.labelFactory();
-        // log.info("TMP: Changing " + ht.value() + " to " +
+        // System.err.println("TMP: Changing " + ht.value() + " to " +
         //                   ht.value() + "-TMP");
         ht.setLabel(lf.newLabel(ht.value() + "-TMP"));
       }
@@ -516,7 +512,7 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer  {
       ht = kidlet;
       LabelFactory lf;
       if (tree.isPrePreTerminal() && !TmpPattern.matcher(ht.value()).matches()) {
-        // log.info("TMP: Changing " + ht.value() + " to " +
+        // System.err.println("TMP: Changing " + ht.value() + " to " +
         //                   ht.value() + "-TMP");
         lf = ht.labelFactory();
         // Note: this next bit changes the tree label, rather
@@ -526,7 +522,7 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer  {
         // don't add -TMP twice!
         if (!TmpPattern.matcher(ht.value()).matches()) {
           lf = ht.labelFactory();
-          // log.info("TMP: Changing " + ht.value() + " to " +
+          // System.err.println("TMP: Changing " + ht.value() + " to " +
           //                   ht.value() + "-TMP");
           // Note: this next bit changes the tree label, rather
           // than creating a new tree node.  Beware!

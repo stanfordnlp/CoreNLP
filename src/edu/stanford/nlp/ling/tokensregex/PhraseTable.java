@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ling.tokensregex; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ling.tokensregex;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -42,10 +41,6 @@ import java.util.regex.Pattern;
  */
 public class PhraseTable implements Serializable
 {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(PhraseTable.class);
-
   private static final String PHRASE_END = "";
   private static final long serialVersionUID = 1L;
   Map<String,Object> rootTree;
@@ -449,7 +444,7 @@ public class PhraseTable implements Serializable
     }
     if (!phraseAdded) {
       if (wordList.size() == 0) {
-        log.warn(phraseText + " not added");
+        System.err.println("WARNING: " + phraseText + " not added");
       } else {
         Phrase oldphrase = (Phrase) tree.get(PHRASE_END);
         if (oldphrase != null) {

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.util.Map;
 import java.util.Set;
@@ -24,10 +23,7 @@ import edu.stanford.nlp.util.Index;
  *
  * @author Roger Levy
  */
-public class ChineseUnknownWordModel extends BaseUnknownWordModel  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseUnknownWordModel.class);
+public class ChineseUnknownWordModel extends BaseUnknownWordModel {
 
   private static final String encoding = "GB18030"; // used only for debugging
 
@@ -122,7 +118,7 @@ public class ChineseUnknownWordModel extends BaseUnknownWordModel  {
         if (tag.equals("PU-LPAREN") || tag.equals("PU-PAREN") ||
             tag.equals("PU-LQUOTE") || tag.equals("PU-QUOTE") ||
             tag.equals("PU")) {
-          // if (VERBOSE) log.info("ChineseUWM: unknown L Punc");
+          // if (VERBOSE) System.err.println("ChineseUWM: unknown L Punc");
           logProb = 0.0f;
         } else {
           logProb = Float.NEGATIVE_INFINITY;
@@ -131,7 +127,7 @@ public class ChineseUnknownWordModel extends BaseUnknownWordModel  {
         if (tag.equals("PU-RPAREN") || tag.equals("PU-PAREN") ||
             tag.equals("PU-RQUOTE") || tag.equals("PU-QUOTE") ||
             tag.equals("PU")) {
-          // if (VERBOSE) log.info("ChineseUWM: unknown R Punc");
+          // if (VERBOSE) System.err.println("ChineseUWM: unknown R Punc");
           logProb = 0.0f;
         } else {
           logProb = Float.NEGATIVE_INFINITY;
@@ -139,7 +135,7 @@ public class ChineseUnknownWordModel extends BaseUnknownWordModel  {
       } else {
         if (tag.equals("PU-OTHER") || tag.equals("PU-ENDSENT") ||
             tag.equals("PU")) {
-          // if (VERBOSE) log.info("ChineseUWM: unknown O Punc");
+          // if (VERBOSE) System.err.println("ChineseUWM: unknown O Punc");
           logProb = 0.0f;
         } else {
           logProb = Float.NEGATIVE_INFINITY;
@@ -173,7 +169,7 @@ public class ChineseUnknownWordModel extends BaseUnknownWordModel  {
           /* if the proposed tag has never been seen before, issue a
              warning and return probability 0. */
           if (wordProbs == null) {
-            if (VERBOSE) log.info("Warning: proposed tag is unseen in training data!");
+            if (VERBOSE) System.err.println("Warning: proposed tag is unseen in training data!");
             logProb = Float.NEGATIVE_INFINITY;
           } else if (wordProbs.containsKey(first)) {
             logProb = (float) wordProbs.getCount(first);
@@ -183,7 +179,7 @@ public class ChineseUnknownWordModel extends BaseUnknownWordModel  {
         } else if (useGT) {
           logProb = scoreGT(tag);
         } else {
-          if (VERBOSE) log.info("Warning: no unknown word model in place!\nGiving the combination " + word + " " + tag + " zero probability.");
+          if (VERBOSE) System.err.println("Warning: no unknown word model in place!\nGiving the combination " + word + " " + tag + " zero probability.");
           logProb = Float.NEGATIVE_INFINITY; // should never get this!
         }
     }

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.sequences; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sequences;
 
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -23,10 +22,7 @@ import edu.stanford.nlp.util.StringUtils;
  * 
  * @author Michel Galley
  */
-public class MalletReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MalletReaderAndWriter.class);
+public class MalletReaderAndWriter implements DocumentReaderAndWriter<CoreLabel> {
 
   private static final long serialVersionUID = 3806263423691913704L;
 
@@ -49,7 +45,7 @@ public class MalletReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>
     private static final long serialVersionUID = -6211332661459630572L;
     public List<CoreLabel> apply(String doc) {
 
-      if (num % 1000 == 0) { log.info("["+num+"]"); }
+      if (num % 1000 == 0) { System.err.print("["+num+"]"); }
       num++;
       
       List<CoreLabel> words = new ArrayList<>();

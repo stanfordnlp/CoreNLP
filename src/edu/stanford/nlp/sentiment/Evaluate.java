@@ -1,5 +1,4 @@
-package edu.stanford.nlp.sentiment; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sentiment;
 
 import java.util.List;
 
@@ -7,10 +6,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 
 /** @author John Bauer */
-public class Evaluate extends AbstractEvaluate  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Evaluate.class);
+public class Evaluate extends AbstractEvaluate {
 
   final SentimentCostAndGradient cag;
   final SentimentModel model;
@@ -76,7 +72,7 @@ public class Evaluate extends AbstractEvaluate  {
     for (int argIndex = 0; argIndex < newArgs.length;) {
       int newIndex = model.op.setOption(newArgs, argIndex);
       if (argIndex == newIndex) {
-        log.info("Unknown argument " + newArgs[argIndex]);
+        System.err.println("Unknown argument " + newArgs[argIndex]);
         throw new IllegalArgumentException("Unknown argument " + newArgs[argIndex]);
       }
       argIndex = newIndex;

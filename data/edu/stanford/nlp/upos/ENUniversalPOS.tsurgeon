@@ -124,27 +124,12 @@ RB=target <... {/.*/}
 relabel target ADV
 
 % DT -> PRON (pronominal this/that/these/those)
-@NP <: (DT=target < /^(?i:th(is|at|ose|ese))$/)
+@NP <: (DT=target < /^[Tt]h(is|at|ose|ese)$/)
 
 relabel target PRON
 
 %DT -> DET
 DT=target < __
-
-relabel target DET
-
-% WDT -> PRON (pronominal that/which)
-@WHNP|NP <: (WDT=target < /^(?i:(that|which))$/)
-
-relabel target PRON
-
-% WDT->SCONJ (incorrectly tagged subordinating conjunctions)
-@SBAR < (WDT=target < /^(?i:(that|which))$/)
-
-relabel target SCONJ
-
-% WDT -> DET
-WDT=target <... {/.*/}
 
 relabel target DET
 
@@ -241,6 +226,11 @@ relabel target ADP
 UH=target <... {/.*/}
 
 relabel target INTJ
+
+% WDT -> DET
+WDT=target <... {/.*/}
+
+relabel target DET
 
 % WP -> PRON
 WP=target <... {/.*/}

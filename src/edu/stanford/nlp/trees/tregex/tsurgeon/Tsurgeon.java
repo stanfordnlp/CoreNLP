@@ -26,8 +26,7 @@
 //    Licensing: parser-support@lists.stanford.edu
 //    http://www-nlp.stanford.edu/software/tregex.shtml
 
-package edu.stanford.nlp.trees.tregex.tsurgeon; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.tregex.tsurgeon;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.trees.*;
@@ -109,10 +108,7 @@ import java.util.stream.Collectors;
  *
  * @author Roger Levy
  */
-public class Tsurgeon  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Tsurgeon.class);
+public class Tsurgeon {
 
   private static final boolean DEBUG = false;
   static boolean verbose; // = false;
@@ -318,7 +314,7 @@ public class Tsurgeon  {
     String encoding = "UTF-8";
     String encodingOption = "-encoding";
     if(args.length==0) {
-      log.info("Usage: java edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon [-s] -treeFile <file-with-trees> [-po <matching-pattern> <operation>] <operation-file-1> <operation-file-2> ... <operation-file-n>");
+      System.err.println("Usage: java edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon [-s] -treeFile <file-with-trees> [-po <matching-pattern> <operation>] <operation-file-1> <operation-file-2> ... <operation-file-n>");
       System.exit(0);
     }
     String treePrintFormats;
@@ -364,7 +360,7 @@ public class Tsurgeon  {
       trees.loadPath(argsMap.get(treeFileOption)[0]);
     }
     if (trees.isEmpty()) {
-      log.info("Warning: No trees specified to operate on.  Use -treeFile path option.");
+      System.err.println("Warning: No trees specified to operate on.  Use -treeFile path option.");
     }
 
     TregexPatternCompiler compiler;
@@ -391,7 +387,7 @@ public class Tsurgeon  {
         List<Pair<TregexPattern,TsurgeonPattern>> pairs = getOperationsFromFile(arg, encoding, compiler);
         for (Pair<TregexPattern,TsurgeonPattern> pair : pairs) {
           if (verbose) {
-            log.info(pair.second());
+            System.err.println(pair.second());
           }
           ops.add(pair);
         }
@@ -429,7 +425,7 @@ public class Tsurgeon  {
    */
   public static Pair<TregexPattern, TsurgeonPattern> getOperationFromReader(BufferedReader reader, TregexPatternCompiler compiler) throws IOException {
     String patternString = getTregexPatternFromReader(reader);
-    // log.info("Read tregex pattern: " + patternString);
+    // System.err.println("Read tregex pattern: " + patternString);
     if (patternString != null && patternString.isEmpty()) {
       return null;
     }
@@ -477,7 +473,7 @@ public class Tsurgeon  {
       if (emptyLinePattern.matcher(thisLine).matches()) {
         continue;
       }
-      // log.info("Read tsurgeon op: " + thisLine);
+      // System.err.println("Read tsurgeon op: " + thisLine);
       operations.add(parseOperation(thisLine));
     }
 
@@ -596,7 +592,7 @@ public class Tsurgeon  {
     for (Pair<TregexPattern,TsurgeonPattern> op : ops) {
       try {
         if (DEBUG) {
-          log.info("Running pattern " + op.first());
+          System.err.println("Running pattern " + op.first());
         }
         TregexMatcher m = op.first().matcher(t);
         TsurgeonMatcher tsm = op.second().matcher();

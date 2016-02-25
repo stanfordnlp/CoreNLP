@@ -1,5 +1,5 @@
 
-package edu.stanford.nlp.util.logging; 
+package edu.stanford.nlp.util.logging;
 
 import java.io.File;
 import java.io.OutputStream;
@@ -18,7 +18,7 @@ import edu.stanford.nlp.util.MetaClass;
  * calls.
  * @author Gabor Angeli (angeli at cs.stanford)
  */
-public class RedwoodConfiguration  {
+public class RedwoodConfiguration {
 
   /**
    * A list of tasks to run when the configuration is applied
@@ -47,7 +47,6 @@ public class RedwoodConfiguration  {
    * @return this
    */
   public RedwoodConfiguration capture(final OutputStream stream) {
-    // Capture the stream
     if (stream == System.out) {
       tasks.add(() -> Redwood.captureSystemStreams(true, Redwood.realSysErr == System.err));
     } else if (stream == System.err) {
@@ -117,8 +116,8 @@ public class RedwoodConfiguration  {
 
 
 
-  public interface Thunk {
-    void apply(RedwoodConfiguration config, Redwood.RecordHandlerTree root);
+  public static interface Thunk {
+    public void apply(RedwoodConfiguration config, Redwood.RecordHandlerTree root);
   }
 
   @SuppressWarnings("UnusedDeclaration")
@@ -199,7 +198,7 @@ public class RedwoodConfiguration  {
         handler.leftMargin = config.channelWidth;
         root.addChild(handler);
       } catch (Exception e) {
-        throw new IllegalStateException("Could not find java.util.logging in your classpath", e);
+        throw new IllegalStateException("Could not find SLF4J in your classpath", e);
       }
     };
 
@@ -220,6 +219,18 @@ public class RedwoodConfiguration  {
      */
     public static final LogRecordHandler hideDebug = new VisibilityHandler() {{
       alsoHide(Redwood.DBG);
+    }};
+    /**
+     * Hide the error channel only.
+     */
+    public static final LogRecordHandler hideError = new VisibilityHandler() {{
+      alsoHide(Redwood.ERR);
+    }};
+    /**
+     * Hide the warning channel only.
+     */
+    public static final LogRecordHandler hideWarn = new VisibilityHandler() {{
+      alsoHide(Redwood.WARN);
     }};
     /**
      * Show only errors (e.g., to send them to an error file)
@@ -276,9 +287,12 @@ public class RedwoodConfiguration  {
      * @param destinations The destinations for log messages coming into this node.
      */
     public static Thunk branch(final Thunk... destinations) {
-      return (config, root) -> {
-        for (Thunk destination : destinations) {
-          destination.apply(config, root);
+      return new Thunk() {
+        @Override
+        public void apply(RedwoodConfiguration config, Redwood.RecordHandlerTree root) {
+          for (Thunk destination : destinations) {
+            destination.apply(config, root);
+          }
         }
       };
     }
@@ -380,8 +394,7 @@ public class RedwoodConfiguration  {
    * @return  A basic Redwood Configuration.
    */
   public static RedwoodConfiguration standard(){
-    return new RedwoodConfiguration().clear().handlers(
-        Handlers.chain(Handlers.hideDebug, Handlers.stderr));
+    return new RedwoodConfiguration().clear().handlers(Handlers.stderr);
   }
 
   /**
@@ -391,7 +404,7 @@ public class RedwoodConfiguration  {
    */
   public static RedwoodConfiguration minimal(){
     return new RedwoodConfiguration().clear().handlers(
-        Handlers.chain(Handlers.hideChannels(), Handlers.hideDebug, Handlers.stderr)
+        Handlers.chain(Handlers.hideChannels(), Handlers.stderr)
     );
   }
 
@@ -409,7 +422,6 @@ public class RedwoodConfiguration  {
    * Run Redwood with java.util.logging
    * @return A redwood configuration. Remember to call {@link RedwoodConfiguration#apply()}.
    */
-  @SuppressWarnings("unused")
   public static RedwoodConfiguration javaUtilLogging(){
     return new RedwoodConfiguration().clear().handlers(
         Handlers.chain(Handlers.hideChannels(), Handlers.javaUtil)
@@ -546,7 +558,7 @@ public class RedwoodConfiguration  {
     Redwood.log("foo");
     Redwood.log(Redwood.DBG, "debug");
     System.out.println("Bar");
-    log.info("Baz");
+    System.err.println("Baz");
   }
   */
 }

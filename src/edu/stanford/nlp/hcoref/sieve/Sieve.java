@@ -1,5 +1,4 @@
-package edu.stanford.nlp.hcoref.sieve; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.hcoref.sieve;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,10 +23,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 
-public abstract class Sieve implements Serializable  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Sieve.class);
+public abstract class Sieve implements Serializable {
   
   private static final long serialVersionUID = 3986463332365306868L;
   
@@ -106,7 +102,7 @@ public abstract class Sieve implements Serializable  {
   
   // load sieve (from file or make a deterministic sieve)
   public static Sieve loadSieve(Properties props, String sievename) throws Exception {
-    // log.info("Loading sieve: "+sievename+" ...");
+    // System.err.println("Loading sieve: "+sievename+" ...");
     switch(CorefProperties.getClassifierType(props, sievename)) {
       case RULE:
         DeterministicCorefSieve sieve = (DeterministicCorefSieve) Class.forName("edu.stanford.nlp.hcoref.sieve."+sievename).getConstructor().newInstance();
@@ -115,10 +111,10 @@ public abstract class Sieve implements Serializable  {
         return sieve;
         
       case RF:
-        log.info("Loading sieve: " + sievename + " from " + CorefProperties.getPathModel(props, sievename) + " ... ");
+        System.err.print("Loading sieve: " + sievename + " from " + CorefProperties.getPathModel(props, sievename) + " ... ");
         RFSieve rfsieve = IOUtils.readObjectFromURLOrClasspathOrFileSystem(CorefProperties.getPathModel(props, sievename));
         rfsieve.thresMerge = CorefProperties.getMergeThreshold(props, sievename);
-        log.info("done. Merging threshold: " + rfsieve.thresMerge);
+        System.err.println("done. Merging threshold: " + rfsieve.thresMerge);
         return rfsieve;
         
       case ORACLE:

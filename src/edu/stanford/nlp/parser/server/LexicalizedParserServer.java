@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.server; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.server;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -28,10 +27,7 @@ import edu.stanford.nlp.util.Filters;
  * See processRequest for a description of the query formats that are
  * handled.
  */
-public class LexicalizedParserServer  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(LexicalizedParserServer.class);
+public class LexicalizedParserServer {
   final int port;
 
   final ServerSocket serverSocket;
@@ -89,14 +85,14 @@ public class LexicalizedParserServer  {
       Socket clientSocket = null;
       try {
         clientSocket = serverSocket.accept();
-        log.info("Got a connection");
+        System.err.println("Got a connection");
         processRequest(clientSocket);
-        log.info("Goodbye!");
-        log.info();
+        System.err.println("Goodbye!");
+        System.err.println();
       } catch (IOException e) {
         // accidental multiple closes don't seem to have any bad effect
         clientSocket.close();
-        log.info(e);
+        System.err.println(e);
         continue;
       }
     }
@@ -118,7 +114,7 @@ public class LexicalizedParserServer  {
     BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(), "utf-8"));
     String line = reader.readLine();
 
-    log.info(line);
+    System.err.println(line);
     if (line == null)
       return;
     line = line.trim();
@@ -133,9 +129,9 @@ public class LexicalizedParserServer  {
     if (pieces.length > 1) {
       arg = pieces[1];
     }
-    log.info("Got the command " + command);
+    System.err.println("Got the command " + command);
     if (arg != null) {
-      log.info(" ... with argument " + arg);
+      System.err.println(" ... with argument " + arg);
     }
     switch (command) {
     case "quit":
@@ -158,7 +154,7 @@ public class LexicalizedParserServer  {
       break;
     }
 
-    log.info("Handled request");
+    System.err.println("Handled request");
 
     clientSocket.close();
   }
@@ -246,7 +242,7 @@ public class LexicalizedParserServer  {
     if (tree == null) {
       return;
     }
-    log.info(tree);
+    System.err.println(tree);
     if (tree != null) {
       ObjectOutputStream oos = new ObjectOutputStream(outStream);
       oos.writeObject(tree);
@@ -264,7 +260,7 @@ public class LexicalizedParserServer  {
     if (tree == null) {
       return;
     }
-    log.info(tree);
+    System.err.println(tree);
     if (tree != null) {
       OutputStreamWriter osw = new OutputStreamWriter(outStream, "utf-8");
       osw.write(tree.toString());
@@ -285,10 +281,10 @@ public class LexicalizedParserServer  {
   }
 
   private static void help() {
-    log.info("-help:   display this message");
-    log.info("-model:  load this parser (default englishPCFG.ser.gz)");
-    log.info("-tagger: pretag with this tagger model");
-    log.info("-port:   run on this port (default 4466)");
+    System.err.println("-help:   display this message");
+    System.err.println("-model:  load this parser (default englishPCFG.ser.gz)");
+    System.err.println("-tagger: pretag with this tagger model");
+    System.err.println("-port:   run on this port (default 4466)");
   }
 
   static final int DEFAULT_PORT = 4466;
@@ -306,7 +302,7 @@ public class LexicalizedParserServer  {
     // TODO: rewrite this a bit to allow for passing flags to the parser
     for (int i = 0; i < args.length; i += 2) {
       if (i + 1 >= args.length) {
-        log.info("Unspecified argument " + args[i]);
+        System.err.println("Unspecified argument " + args[i]);
         System.exit(2);
       }
       String arg = args[i];
@@ -328,7 +324,7 @@ public class LexicalizedParserServer  {
     }
     
     LexicalizedParserServer server = new LexicalizedParserServer(port, model, tagger);
-    log.info("Server ready!");
+    System.err.println("Server ready!");
     server.listen();
   }
   

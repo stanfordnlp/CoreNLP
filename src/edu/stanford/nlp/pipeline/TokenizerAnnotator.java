@@ -2,9 +2,12 @@ package edu.stanford.nlp.pipeline;
 
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Properties;
 
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.TokenizerFactory;
@@ -16,8 +19,8 @@ import edu.stanford.nlp.international.spanish.process.SpanishTokenizer;
 import edu.stanford.nlp.international.french.process.FrenchTokenizer;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
-
-import edu.stanford.nlp.util.logging.Redwood;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -31,12 +34,9 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author Christopher Manning
  * @author Ishita Prasad
  */
-public class TokenizerAnnotator implements Annotator  {
+public class TokenizerAnnotator implements Annotator {
 
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TokenizerAnnotator.class);
-
-  private static Redwood.RedwoodChannels logger = Redwood.channels(TokenizerAnnotator.class);
+  private static Logger logger = LoggerFactory.getLogger(TokenizerAnnotator.class);
 
   /**
    * Enum to identify the different TokenizerTypes. To add a new
@@ -253,10 +253,10 @@ public class TokenizerAnnotator implements Annotator  {
   @Override
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
-      log.info("Tokenizing ... ");
+      System.err.print("Tokenizing ... ");
     }
 
-    if (annotation.containsKey(CoreAnnotations.TextAnnotation.class)) {
+    if (annotation.has(CoreAnnotations.TextAnnotation.class)) {
       String text = annotation.get(CoreAnnotations.TextAnnotation.class);
       Reader r = new StringReader(text);
       // don't wrap in BufferedReader.  It gives you nothing for in-memory String unless you need the readLine() method!
@@ -269,8 +269,8 @@ public class TokenizerAnnotator implements Annotator  {
 
       annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
       if (VERBOSE) {
-        log.info("done.");
-        log.info("Tokens: " + annotation.get(CoreAnnotations.TokensAnnotation.class));
+        System.err.println("done.");
+        System.err.println("Tokens: " + annotation.get(CoreAnnotations.TokensAnnotation.class));
       }
     } else {
       throw new RuntimeException("Tokenizer unable to find text in annotation: " + annotation);
@@ -278,26 +278,13 @@ public class TokenizerAnnotator implements Annotator  {
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requires() {
+  public Set<Requirement> requires() {
     return Collections.emptySet();
   }
 
   @Override
-  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return new HashSet<>(Arrays.asList(
-        CoreAnnotations.TextAnnotation.class,
-        CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-        CoreAnnotations.CharacterOffsetEndAnnotation.class,
-        CoreAnnotations.BeforeAnnotation.class,
-        CoreAnnotations.AfterAnnotation.class,
-        CoreAnnotations.TokenBeginAnnotation.class,
-        CoreAnnotations.TokenEndAnnotation.class,
-        CoreAnnotations.PositionAnnotation.class,
-        CoreAnnotations.IndexAnnotation.class,
-        CoreAnnotations.OriginalTextAnnotation.class,
-        CoreAnnotations.ValueAnnotation.class
-    ));
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(TOKENIZE_REQUIREMENT);
   }
 
 }

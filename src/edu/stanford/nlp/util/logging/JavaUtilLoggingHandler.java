@@ -4,25 +4,43 @@ package edu.stanford.nlp.util.logging;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import edu.stanford.nlp.util.Pair;
-
 /**
  * An outputter that writes to Java Util Logging logs.
  *
  * @author Gabor Angeli
  */
 public class JavaUtilLoggingHandler extends OutputHandler {
-
   @Override
   public void print(Object[] channel, String line) {
     // Parse the channels
-    Pair<String, Redwood.Flag> pair = getSourceStringAndLevel(channel);
+    Class source = null;  // The class the message is coming from
+    Object backupSource = null;  // Another identifier for the message
+    Redwood.Flag flag = Redwood.Flag.STDOUT;
+    for (Object c : channel) {
+      if (c instanceof Class) {
+        source = (Class) c;  // This is a class the message is coming from
+      } else if (c instanceof Redwood.Flag) {
+        if (c != Redwood.Flag.FORCE) {  // This is a Redwood flag
+          flag = (Redwood.Flag) c;
+        }
+      } else {
+        backupSource = c;  // This is another "source" for the log message
+      }
+    }
 
     // Get the logger
-    Logger impl = Logger.getLogger(pair.first());
+    Logger impl = null;
+    if (source != null) {
+      impl = Logger.getLogger(source.getName());
+    } else if (backupSource != null) {
+      impl = Logger.getLogger(backupSource.toString());
+    } else {
+      impl = Logger.getLogger("CoreNLP");
+
+    }
 
     // Route the signal
-    switch (pair.second()) {
+    switch (flag) {
       case ERROR:
         impl.log(Level.SEVERE, line);
         break;
@@ -38,10 +56,9 @@ public class JavaUtilLoggingHandler extends OutputHandler {
         break;
       case FORCE:
         throw new IllegalStateException("Should not reach this switch case");
-      // Not possible as now enum
-      // default:
-      //   throw new IllegalStateException("Unknown Redwood flag for j.u.l integration: " + flag);
+      default:
+        throw new IllegalStateException("Unknown Redwood flag for slf4j integration: " + flag);
     }
-  }
 
+  }
 }

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.optimization; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.optimization;
 
 import java.io.Serializable;
 
@@ -18,10 +17,7 @@ import java.io.Serializable;
  * @version 1.0
  * @since 1.0
  */
-public class SGDToQNMinimizer implements Minimizer<DiffFunction>, Serializable   {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SGDToQNMinimizer.class);
+public class SGDToQNMinimizer implements Minimizer<DiffFunction>, Serializable  {
 
   private static final long serialVersionUID = -7551807670291500396L;
 
@@ -97,23 +93,23 @@ public class SGDToQNMinimizer implements Minimizer<DiffFunction>, Serializable  
 
     qn.minimize(dfunction, functionTolerance, x, this.QNPasses, qnInfo);
 
-    log.info("");
-    log.info("Minimization complete.");
-    log.info("");
-    log.info("Exiting for Debug");
+    System.err.println("");
+    System.err.println("Minimization complete.");
+    System.err.println("");
+    System.err.println("Exiting for Debug");
     return x;
   }
 
 
   private void sayln(String s) {
     if (!quiet) {
-      log.info(s);
+      System.err.println(s);
     }
   }
 
   private void say(String s) {
     if (!quiet) {
-      log.info(s);
+      System.err.print(s);
     }
   }
 

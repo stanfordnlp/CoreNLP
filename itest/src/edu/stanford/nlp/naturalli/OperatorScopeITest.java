@@ -27,12 +27,15 @@ import static org.junit.Assert.*;
 public class OperatorScopeITest {
 
   private static final StanfordCoreNLP pipeline = new StanfordCoreNLP(new Properties(){{
-    setProperty("annotators", "tokenize,ssplit,pos,lemma,parse,natlog");
+    setProperty("annotators", "tokenize,ssplit,pos,lemma,parse");
     setProperty("ssplit.isOneSentence", "true");
     setProperty("tokenize.class", "PTBTokenizer");
     setProperty("tokenize.language", "en");
-    setProperty("natlog.neQuantifiers", "true");
   }});
+
+  static {
+    pipeline.addAnnotator(new NaturalLogicAnnotator());
+  }
 
   @SuppressWarnings("unchecked")
   private Optional<OperatorSpec>[] annotate(String text) {

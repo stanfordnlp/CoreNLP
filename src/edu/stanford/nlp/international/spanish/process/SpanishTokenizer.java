@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.spanish.process; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.spanish.process;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -48,10 +47,7 @@ import edu.stanford.nlp.international.spanish.SpanishVerbStripper;
  *
  * @author Ishita Prasad
  */
-public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SpanishTokenizer.class);
+public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   // The underlying JFlex lexer
   private final SpanishLexer lexer;
@@ -410,7 +406,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
   public static void main(String[] args) {
     final Properties options = StringUtils.argsToProperties(args, argOptionDefs());
     if (options.containsKey("help")) {
-      log.info(usage());
+      System.err.println(usage());
       return;
     }
 

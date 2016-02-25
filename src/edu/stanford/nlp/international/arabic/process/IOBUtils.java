@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.arabic.process; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.arabic.process;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +13,7 @@ import edu.stanford.nlp.international.morph.MorphoFeatureSpecification.MorphoFea
 import edu.stanford.nlp.international.morph.MorphoFeatures;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
@@ -27,10 +26,7 @@ import edu.stanford.nlp.util.Pair;
  * @author Spence Green
  * @author Will Monroe
  */
-public class IOBUtils  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(IOBUtils.class);
+public class IOBUtils {
 
   // Training token types.
   private enum TokenType { BeginMarker, EndMarker, BothMarker, NoMarker }
@@ -220,18 +216,18 @@ public class IOBUtils  {
           features.getValue(MorphoFeatureType.DEF).equals("D")) {
         if (rawToken.startsWith("-ال")) {
           if (!token.startsWith("ا"))
-            log.info("Bad REWAL: " + rawToken + " / " + token);
+            System.err.println("Bad REWAL: " + rawToken + " / " + token);
           token = token.substring(1);
           rewritten = rewritten.substring(1);
           if (!stripRewrites)
             firstLabel = RewriteSymbol;
         } else if (rawToken.startsWith("-ل")) {
           if (!token.startsWith("ل"))
-            log.info("Bad REWAL: " + rawToken + " / " + token);
+            System.err.println("Bad REWAL: " + rawToken + " / " + token);
           if (!stripRewrites)
             firstLabel = RewriteSymbol;
         } else {
-          log.info("Ignoring REWAL: " + rawToken + " / " + token);
+          System.err.println("Ignoring REWAL: " + rawToken + " / " + token);
         }
       }
       
@@ -255,7 +251,7 @@ public class IOBUtils  {
 
     // Create datums and add to iobList
     if (token.isEmpty())
-      log.info("Rewriting resulted in empty token: " + tokenLabel.word());
+      System.err.println("Rewriting resulted in empty token: " + tokenLabel.word());
     String firstChar = String.valueOf(token.charAt(0));
     iobList.add(createDatum(cl, firstChar, firstLabel));
     final int numChars = token.length();
@@ -345,7 +341,7 @@ public class IOBUtils  {
 
   public static List<CoreLabel> StringToIOB(String str, Character segMarker) {
     // Whitespace tokenization
-    List<CoreLabel> toks = SentenceUtils.toCoreLabelList(str.trim().split("\\s+"));
+    List<CoreLabel> toks = Sentence.toCoreLabelList(str.trim().split("\\s+"));
     return StringToIOB(toks, segMarker, false);
   }
 

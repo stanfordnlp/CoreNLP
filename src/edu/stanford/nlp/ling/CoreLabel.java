@@ -1,11 +1,9 @@
-package edu.stanford.nlp.ling; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ling;
 
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.Consumer;
 
 import edu.stanford.nlp.ling.AnnotationLookup.KeyLookup;
 import edu.stanford.nlp.util.ArrayCoreMap;
@@ -31,10 +29,7 @@ import edu.stanford.nlp.util.Generics;
  * @author dramage
  * @author rafferty
  */
-public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCategory, HasContext  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CoreLabel.class);
+public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCategory, HasContext {
 
   private static final long serialVersionUID = 2L;
 
@@ -82,12 +77,9 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
   @SuppressWarnings({"unchecked"})
   public CoreLabel(CoreMap label) {
     super(label.size());
-    Consumer<Class<? extends Key<?>>> listener = ArrayCoreMap.listener;  // don't listen to the clone operation
-    ArrayCoreMap.listener = null;
     for (Class key : label.keySet()) {
       set(key, label.get(key));
     }
-    ArrayCoreMap.listener = listener;
   }
 
   /**
@@ -190,7 +182,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
         //}
         // unknown key; ignore
         //if (VERBOSE) {
-        //  log.info("CORE: CoreLabel.fromAbstractMapLabel: " +
+        //  System.err.println("CORE: CoreLabel.fromAbstractMapLabel: " +
         //      "Unknown key "+key);
         //}
       } else {

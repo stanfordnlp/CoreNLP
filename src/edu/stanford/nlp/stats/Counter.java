@@ -26,7 +26,6 @@
 
 package edu.stanford.nlp.stats;
 
-import java.io.*;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -57,7 +56,7 @@ public interface Counter<E> extends PrettyLoggable {
    *
    * @return A factory that can create new instances of this kind of Counter.
    */
-  Factory<Counter<E>> getFactory();
+  public Factory<Counter<E>> getFactory();
 
   /**
    * Sets the default return value. This value is returned when you get
@@ -67,14 +66,14 @@ public interface Counter<E> extends PrettyLoggable {
    *
    * @param rv The default value
    */
-  void setDefaultReturnValue(double rv) ;
+  public void setDefaultReturnValue(double rv) ;
 
   /**
    * Returns the default return value.
    *
    * @return The default return value.
    */
-  double defaultReturnValue() ;
+  public double defaultReturnValue() ;
 
   /**
    * Returns the count for this key as a double. This is the
@@ -84,7 +83,7 @@ public interface Counter<E> extends PrettyLoggable {
    * @param key The key
    * @return The count
    */
-  double getCount(Object key);
+  public double getCount(Object key);
 
   /**
    * Sets the count for the given key to be the given value.
@@ -95,7 +94,7 @@ public interface Counter<E> extends PrettyLoggable {
    * @param key The key
    * @param value The count
    */
-  void setCount(E key, double value);
+  public void setCount(E key, double value);
 
   /**
    * Increments the count for the given key by the given value. If the key
@@ -112,7 +111,7 @@ public interface Counter<E> extends PrettyLoggable {
    * @param value The amount to increment it by
    * @return The value associated with they key, post-increment.
    */
-  double incrementCount(E key, double value);
+  public double incrementCount(E key, double value);
 
   /**
    * Increments the count for this key by 1.0. If the key hasn't been seen
@@ -127,7 +126,7 @@ public interface Counter<E> extends PrettyLoggable {
    * @param key The key to increment by 1.0
    * @return The value associated with they key, post-increment.
    */
-  double incrementCount(E key);
+  public double incrementCount(E key);
 
   /**
    * Decrements the count for this key by the given value.
@@ -144,7 +143,7 @@ public interface Counter<E> extends PrettyLoggable {
    * @param value The amount to decrement it by
    * @return The value associated with they key, post-decrement.
    */
-  double decrementCount(E key, double value);
+  public double decrementCount(E key, double value);
 
   /**
    * Decrements the count for this key by 1.0.
@@ -159,7 +158,7 @@ public interface Counter<E> extends PrettyLoggable {
    * @param key The key to decrement by 1.0
    * @return The value of associated with they key, post-decrement.
    */
-  double decrementCount(E key);
+  public double decrementCount(E key);
 
   /**
    * Increments the count stored in log space for this key by the given
@@ -179,7 +178,7 @@ public interface Counter<E> extends PrettyLoggable {
    * @param value The amount to increment it by, in log space
    * @return The value associated with they key, post-increment, in log space
    */
-  double logIncrementCount(E key, double value);
+  public double logIncrementCount(E key, double value);
 
   /**
    * Adds the counts in the given Counter to the counts in this Counter.
@@ -190,7 +189,7 @@ public interface Counter<E> extends PrettyLoggable {
    *   <code>counter.getCount(key)</code>. Otherwise, it will have value
    *   <code>this.getCount(key) + counter.getCount(key)</code>.
    */
-  void addAll(Counter<E> counter);
+  public void addAll(Counter<E> counter);
 
   /**
    * Removes the given key and its associated value from this Counter.
@@ -206,21 +205,21 @@ public interface Counter<E> extends PrettyLoggable {
    * @return The value removed from the map or the default value if no
    *   count was associated with that key.
    */
-  double remove(E key);
+  public double remove(E key);
 
   /** Returns whether a Counter contains a key.
    *
    *  @param key The key
    *  @return true iff key is a key in this Counter.
    */
-  boolean containsKey(E key);
+  public boolean containsKey(E key);
 
   /**
    * Returns the Set of keys in this counter.
    *
    * @return The Set of keys in this counter.
    */
-  Set<E> keySet();
+  public Set<E> keySet();
 
   /**
    * Returns a copy of the values currently in this counter.
@@ -230,7 +229,7 @@ public interface Counter<E> extends PrettyLoggable {
    *
    * @return A copy of the values currently in this counter.
    */
-  Collection<Double> values();
+  public Collection<Double> values();
 
   /**
    * Returns a view of the entries in this counter.  The values
@@ -238,18 +237,18 @@ public interface Counter<E> extends PrettyLoggable {
    *
    * @return A view of the entries in this counter
    */
-  Set<Map.Entry<E,Double>> entrySet();
+  public Set<Map.Entry<E,Double>> entrySet();
 
   /**
    * Removes all entries from the counter.
    */
-  void clear();
+  public void clear();
 
   /**
    * Returns the number of entries stored in this counter.
    * @return The number of entries in this counter.
    */
-  int size();
+  public int size();
 
   /**
    * Computes the total of all counts in this counter, and returns it
@@ -258,6 +257,6 @@ public interface Counter<E> extends PrettyLoggable {
    *
    * @return The total (arithmetic sum) of all counts in this counter.
    */
-  double totalCount();
+  public double totalCount();
 
 }

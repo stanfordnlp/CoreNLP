@@ -1,5 +1,4 @@
-package edu.stanford.nlp.tagger.maxent.documentation; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.tagger.maxent.documentation;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -8,7 +7,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.List;
 
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -24,16 +23,13 @@ import edu.stanford.nlp.tagger.maxent.MaxentTagger;
  *
  *  @author Christopher Manning
  */
-public class TaggerDemo2  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TaggerDemo2.class);
+class TaggerDemo2 {
 
   private TaggerDemo2() {}
 
   public static void main(String[] args) throws Exception {
     if (args.length != 2) {
-      log.info("usage: java TaggerDemo2 modelFile fileToTag");
+      System.err.println("usage: java TaggerDemo2 modelFile fileToTag");
       return;
     }
     MaxentTagger tagger = new MaxentTagger(args[0]);
@@ -45,11 +41,11 @@ public class TaggerDemo2  {
     documentPreprocessor.setTokenizerFactory(ptbTokenizerFactory);
     for (List<HasWord> sentence : documentPreprocessor) {
       List<TaggedWord> tSentence = tagger.tagSentence(sentence);
-      pw.println(SentenceUtils.listToString(tSentence, false));
+      pw.println(Sentence.listToString(tSentence, false));
     }
 
     // print the adjectives in one more sentence. This shows how to get at words and tags in a tagged sentence.
-    List<HasWord> sent = SentenceUtils.toWordList("The", "slimy", "slug", "crawled", "over", "the", "long", ",", "green", "grass", ".");
+    List<HasWord> sent = Sentence.toWordList("The", "slimy", "slug", "crawled", "over", "the", "long", ",", "green", "grass", ".");
     List<TaggedWord> taggedSent = tagger.tagSentence(sent);
     for (TaggedWord tw : taggedSent) {
       if (tw.tag().startsWith("JJ")) {

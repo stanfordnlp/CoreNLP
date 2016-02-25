@@ -1,6 +1,5 @@
 package edu.stanford.nlp.scoref;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.SortedMap;
@@ -9,15 +8,9 @@ import java.util.TreeMap;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.stats.Counters;
-import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.logging.Redwood;
 
-/** @author Kevin Clark */
 public class SimpleLinearClassifier {
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SimpleLinearClassifier.class);
-
   private final Loss defaultLoss;
   private final LearningRateSchedule learningRateSchedule;
   private final double regularizationStrength;
@@ -34,13 +27,7 @@ public class SimpleLinearClassifier {
       double regularizationStrength, String modelFile) {
     if (modelFile != null) {
       try {
-        if (modelFile.endsWith(".tab.gz")) {
-          Timing.startDoing("Reading " + modelFile);
-          this.weights = Counters.deserializeStringCounter(modelFile);
-          Timing.endDoing("Reading " + modelFile);
-        } else {
-          this.weights = IOUtils.readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(log, "Loading coref model", modelFile);
-        }
+        this.weights = IOUtils.readObjectFromURLOrClasspathOrFileSystem(modelFile);
       } catch (Exception e) {
         throw new RuntimeException("Error leading weights from " + modelFile, e);
       }
@@ -207,7 +194,7 @@ public class SimpleLinearClassifier {
 
       @Override
       public String toString() {
-        return "risk";
+        return String.format("risk");
       }
     };
   }
@@ -294,5 +281,4 @@ public class SimpleLinearClassifier {
       }
     };
   }
-
 }

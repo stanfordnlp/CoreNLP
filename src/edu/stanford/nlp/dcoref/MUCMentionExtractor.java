@@ -24,8 +24,7 @@
 //    USA
 //
 
-package edu.stanford.nlp.dcoref; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.dcoref;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -57,10 +56,7 @@ import edu.stanford.nlp.util.Generics;
  * @author Mihai Surdeanu
  * @author Karthik Raghunathan
  */
-public class MUCMentionExtractor extends MentionExtractor  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MUCMentionExtractor.class);
+public class MUCMentionExtractor extends MentionExtractor {
 
   private final TokenizerFactory<CoreLabel> tokenizerFactory;
   private final String fileContents;

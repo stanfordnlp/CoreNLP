@@ -4,7 +4,7 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.util.ArgumentParser;
+import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.TypesafeMap;
@@ -12,6 +12,7 @@ import edu.stanford.nlp.patterns.surface.*;
 
 import javax.json.*;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
@@ -125,7 +126,7 @@ public class TextAnnotationPatterns {
 
 
     GetPatternsFromDataMultiClass<SurfacePattern> model = new GetPatternsFromDataMultiClass<>(runProps, Data.sents, seedWords, true, humanLabelClasses);
-    ArgumentParser.fillOptions(model, runProps);
+    Execution.fillOptions(model, runProps);
 
     GetPatternsFromDataMultiClass.loadFromSavedPatternsWordsDir(model , runProps);
 

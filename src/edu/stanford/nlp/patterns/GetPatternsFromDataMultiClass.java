@@ -4,6 +4,9 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -12,6 +15,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 
@@ -93,10 +97,7 @@ import org.joda.time.Period;
  * @author Sonal Gupta (sonal@cs.stanford.edu)
  */
 
-public class GetPatternsFromDataMultiClass<E extends Pattern> implements Serializable  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(GetPatternsFromDataMultiClass.class);
+public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
@@ -281,8 +282,8 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException, ExecutionException, ClassNotFoundException {
 
     Data.sents = sents;
-    ArgumentParser.fillOptions(Data.class, props);
-    ArgumentParser.fillOptions(ConstantsAndVariables.class, props);
+    Execution.fillOptions(Data.class, props);
+    Execution.fillOptions(ConstantsAndVariables.class, props);
     PatternFactory.setUp(props, PatternFactory.PatternType.valueOf(props.getProperty(Flags.patternType)), seedSets.keySet());
 
     constVars = new ConstantsAndVariables(props, seedSets, answerClass, generalizeClasses, ignoreClasses);
@@ -458,7 +459,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
         if (!f.exists()) {
           Redwood.log(Redwood.DBG, "externalweightsfile for the label " + label + " does not exist: learning weights!");
           LearnImportantFeatures lmf = new LearnImportantFeatures();
-          ArgumentParser.fillOptions(lmf, props);
+          Execution.fillOptions(lmf, props);
           lmf.answerClass = answerClass.get(label);
           lmf.answerLabel = label;
           lmf.setUp();
@@ -2894,7 +2895,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     }
 
     if (!assumedNeg.isEmpty())
-      log.info("\nGold entity list does not contain words " + assumedNeg + " for label " + label + ". *****Assuming them as negative.******");
+      System.err.println("\nGold entity list does not contain words " + assumedNeg + " for label " + label + ". *****Assuming them as negative.******");
 
     double precision = numcorrect / (double) (numcorrect + numincorrect);
     double recall = numcorrect / (double) (numgoldcorrect);
@@ -3275,7 +3276,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     }
 
     if (evalsents.size() == 0 && constVars.goldEntitiesEvalFiles == null)
-      log.info("No eval sentences or list of gold entities provided to evaluate! Make sure evalFileWithGoldLabels or goldEntitiesEvalFiles is set, or turn off the evaluate flag");
+      System.err.println("No eval sentences or list of gold entities provided to evaluate! Make sure evalFileWithGoldLabels or goldEntitiesEvalFiles is set, or turn off the evaluate flag");
 
   }
 
@@ -3311,7 +3312,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
 
   static<E extends Pattern> GetPatternsFromDataMultiClass<E> runNineYards(GetPatternsFromDataMultiClass<E> model, Properties props, Map<String, DataInstance> evalsents) throws IOException, ClassNotFoundException {
 
-    ArgumentParser.fillOptions(model, props);
+    Execution.fillOptions(model, props);
 
     // If you want to reuse patterns and words learned previously (may be on another dataset etc)
     boolean loadSavedPatternsWordsDir = Boolean.parseBoolean(props.getProperty("loadSavedPatternsWordsDir"));
