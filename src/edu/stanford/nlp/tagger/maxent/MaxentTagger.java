@@ -829,7 +829,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       for (int i = 0; i < extractors.size() + extractorsRare.size(); ++i) {
         fAssociations.add(Generics.<String, int[]>newHashMap());
       }
-      if (VERBOSE) System.err.printf("Reading %d feature keys...%n",sizeAssoc);
+      if (VERBOSE) log.info("Reading %d feature keys...%n",sizeAssoc);
       PrintFile pfVP = null;
       if (VERBOSE) {
         pfVP = new PrintFile("pairs.txt");

@@ -18,10 +18,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.simple.Document;
-import edu.stanford.nlp.util.AcronymMatcher;
-import edu.stanford.nlp.util.ArgumentParser;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -60,11 +57,16 @@ public class KBPAnnotator implements Annotator {
    */
   private final ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer(false);
 
+  /**
+   * An entity mention annotator to run after KBP-specific NER.
+   */
+  private final EntityMentionsAnnotator entityMentionAnnotator;
 
   /**
    * A TokensRegexNER annotator for the special KBP NER types (case-sensitive).
    */
   private final TokensRegexNERAnnotator casedNER;
+
   /**
    * A TokensRegexNER annotator for the special KBP NER types (case insensitive).
    */
@@ -106,6 +108,12 @@ public class KBPAnnotator implements Annotator {
         regexnerCaselessPath,
         true,
         "^(NN|JJ).*");
+
+    // Create entity mention annotator
+    this.entityMentionAnnotator = new EntityMentionsAnnotator("kbp.entitymention", new Properties() {{
+      setProperty("kbp.entitymention.acronyms", "true");
+      setProperty("acronyms", "true");
+    }});
   }
 
 
@@ -234,16 +242,8 @@ public class KBPAnnotator implements Annotator {
     // Annotate with NER
     casedNER.annotate(annotation);
     caselessNER.annotate(annotation);
-    // (update mentions with new NER)
-    for (CoreMap sentence : sentences) {
-      for (CoreMap mention : sentence.get(CoreAnnotations.MentionsAnnotation.class)) {
-        for (CoreLabel token : mention.get(CoreAnnotations.TokensAnnotation.class)) {
-          if (!"O".equals(token.ner())) {
-            mention.set(CoreAnnotations.NamedEntityTagAnnotation.class, token.ner());
-          }
-        }
-      }
-    }
+    // Annotate with Mentions
+    entityMentionAnnotator.annotate(annotation);
 
     // Create simple document
     Document doc = new Document(serializer.toProto(annotation));
@@ -411,7 +411,11 @@ public class KBPAnnotator implements Annotator {
   /** {@inheritDoc} */
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CoreAnnotations.KBPTriplesAnnotation.class);
+    Set<Class<? extends CoreAnnotation>> requirements = new HashSet<>(Arrays.asList(
+        CoreAnnotations.MentionsAnnotation.class,
+        CoreAnnotations.KBPTriplesAnnotation.class
+    ));
+    return Collections.unmodifiableSet(requirements);
   }
 
   /** {@inheritDoc} */
@@ -428,10 +432,26 @@ public class KBPAnnotator implements Annotator {
         SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
         SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
         SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class,
-        CoreAnnotations.OriginalTextAnnotation.class,
-        CoreAnnotations.MentionsAnnotation.class
+        CoreAnnotations.OriginalTextAnnotation.class
     ));
     return Collections.unmodifiableSet(requirements);
+  }
+
+  /**
+   * A debugging method to try relation extraction from the console.
+   * @throws IOException
+   */
+  public static void main(String[] args) throws IOException {
+    Properties props = StringUtils.argsToProperties(args);
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,mention,coref,kbp");
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    IOUtils.console("sentence> ", line -> {
+      Annotation ann = new Annotation(line);
+      pipeline.annotate(ann);
+      for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
+        sentence.get(CoreAnnotations.KBPTriplesAnnotation.class).forEach(System.err::println);
+      }
+    });
   }
 
 }
