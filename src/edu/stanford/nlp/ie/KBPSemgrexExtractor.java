@@ -48,7 +48,8 @@ public class KBPSemgrexExtractor implements KBPRelationExtractor {
   public Pair<String, Double> classify(KBPStatisticalExtractor.FeaturizerInput input) {
     for (RelationType rel : RelationType.values()) {
 
-      if (rules.containsKey(rel) && rel.entityType == input.subjectType &&
+      if (rules.containsKey(rel) &&
+          rel.entityType == input.subjectType &&
           rel.validNamedEntityLabels.contains(input.objectType)) {
         Collection<SemgrexPattern> rulesForRel = rules.get(rel);
         CoreMap sentence = input.sentence.asCoreMap(Sentence::nerTags, Sentence::dependencyGraph);

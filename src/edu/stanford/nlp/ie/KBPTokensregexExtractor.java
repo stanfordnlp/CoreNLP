@@ -1,5 +1,6 @@
 package edu.stanford.nlp.ie;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -13,9 +14,7 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * A tokensregex extractor for KBP.
@@ -47,18 +46,15 @@ public class KBPTokensregexExtractor implements KBPRelationExtractor {
     logger.log("Creating TokensRegexExtractor");
     // Create extractors
     for (RelationType rel : RelationType.values()) {
-      FilenameFilter filter = (dir, name) -> name.matches(rel.canonicalName.replaceAll("/", "SLASH") + ".*.rules");
-
-      File[] ruleFiles = new File(tokensregexDir).listFiles(filter);
-
-      if(ruleFiles != null && ruleFiles.length > 0){
-        List<String> listfiles = new ArrayList<>();
-        listfiles.add(tokensregexDir + File.separator + "defs.rules");
-        listfiles.addAll(Arrays.asList(ruleFiles).stream().map(File::getAbsolutePath).collect(Collectors.toList()));
-        logger.log("Rule files for relation " + rel + " are " + listfiles);
+      String path = tokensregexDir + File.separator + rel.canonicalName.replaceAll("/", "SLASH") + ".rules";
+      if (IOUtils.existsInClasspathOrFileSystem(path)) {
+        List<String> listFiles = new ArrayList<>();
+        listFiles.add(tokensregexDir + File.separator + "defs.rules");
+        listFiles.add(path);
+        logger.log("Rule files for relation " + rel + " is " + path);
         Env env = TokenSequencePattern.getNewEnv();
         env.bind("collapseExtractionRules", true);
-        CoreMapExpressionExtractor extr = CoreMapExpressionExtractor.createExtractorFromFiles(env, listfiles).keepTemporaryTags();
+        CoreMapExpressionExtractor extr = CoreMapExpressionExtractor.createExtractorFromFiles(env, listFiles).keepTemporaryTags();
         rules.put(rel, extr);
       }
     }
@@ -89,7 +85,8 @@ public class KBPTokensregexExtractor implements KBPRelationExtractor {
 
     // Run Rules
     for (RelationType rel : RelationType.values()) {
-      if (rules.containsKey(rel) && rel.entityType == input.subjectType &&
+      if (rules.containsKey(rel) &&
+          rel.entityType == input.subjectType &&
           rel.validNamedEntityLabels.contains(input.objectType)) {
         CoreMapExpressionExtractor extractor = rules.get(rel);
 
