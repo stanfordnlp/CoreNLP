@@ -1,4 +1,4 @@
-package edu.stanford.nlp.optimization;
+package edu.stanford.nlp.optimization; 
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.math.ArrayMath;
@@ -509,7 +509,7 @@ public abstract class StochasticMinimizer<T extends Function> implements Minimiz
 
 
   public interface PropertySetter <T1> {
-    void set(T1 in);
+    public void set(T1 in);
   }
 
   protected void sayln(String s) {

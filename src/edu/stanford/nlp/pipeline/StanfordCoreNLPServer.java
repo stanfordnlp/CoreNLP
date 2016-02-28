@@ -27,10 +27,6 @@ import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static java.net.HttpURLConnection.HTTP_OK; // 200;
-import static java.net.HttpURLConnection.HTTP_BAD_REQUEST; // = 400;
-import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR; // = 500
-
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
 /**
@@ -41,8 +37,8 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  */
 public class StanfordCoreNLPServer implements Runnable {
 
-  protected static final int DEFAULT_PORT = 9000;
-  protected static final int DEFAULT_TIMEOUT = 5000;
+  protected static int DEFAULT_PORT = 9000;
+  protected static int DEFAULT_TIMEOUT = 5000;
 
   protected HttpServer server;
   protected final int serverPort;
@@ -52,6 +48,9 @@ public class StanfordCoreNLPServer implements Runnable {
   protected final FileHandler staticPageHandle;
   protected final String shutdownKey;
 
+  public static int HTTP_OK = 200;
+  public static int HTTP_BAD_INPUT = 400;
+  public static int HTTP_ERR = 500;
   public static int MAX_CHAR_LENGTH = 100000;
   public final Properties defaultProps;
 
@@ -173,7 +172,6 @@ public class StanfordCoreNLPServer implements Runnable {
         }
 
         // Read the annotation
-        // note [2016]: We're not quite sure why, but the server is getting null characters in the input, and they kill the processing
         return new Annotation(
             IOUtils.slurpInputStream(httpExchange.getRequestBody(), encoding)
               .replace('\u0000', ' '));
@@ -215,7 +213,7 @@ public class StanfordCoreNLPServer implements Runnable {
    */
   private static void respondError(String response, HttpExchange httpExchange) throws IOException {
     httpExchange.getResponseHeaders().add("Content-type", "text/plain");
-    httpExchange.sendResponseHeaders(HTTP_INTERNAL_ERROR, response.length());
+    httpExchange.sendResponseHeaders(HTTP_ERR, response.length());
     httpExchange.getResponseBody().write(response.getBytes());
     httpExchange.close();
   }
@@ -231,7 +229,7 @@ public class StanfordCoreNLPServer implements Runnable {
    */
   private static void respondBadInput(String response, HttpExchange httpExchange) throws IOException {
     httpExchange.getResponseHeaders().add("Content-type", "text/plain");
-    httpExchange.sendResponseHeaders(HTTP_BAD_REQUEST, response.length());
+    httpExchange.sendResponseHeaders(HTTP_BAD_INPUT, response.length());
     httpExchange.getResponseBody().write(response.getBytes());
     httpExchange.close();
   }

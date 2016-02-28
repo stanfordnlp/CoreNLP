@@ -821,7 +821,7 @@ public class Document {
    */
   public Annotation asAnnotation() {
     synchronized (annotationPool) {
-      Annotation candidate = annotationPool.get(this).get();
+      Annotation candidate = annotationPool.getOrDefault(this, new SoftReference<>(null)).get();
       if (candidate == null) {
         // Redo cache
         synchronized (serializer) {

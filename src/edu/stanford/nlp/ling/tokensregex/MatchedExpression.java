@@ -357,7 +357,8 @@ public class MatchedExpression {
     return merged;
   }
 
-  public static <T extends MatchedExpression> List<T> removeNullValues(List<T> chunks) {
+  public static <T extends MatchedExpression> List<T> removeNullValues(List<T> chunks)
+  {
     List<T> okayChunks = new ArrayList<>(chunks.size());
     for (T chunk : chunks) {
       Value v = chunk.value;
@@ -370,9 +371,10 @@ public class MatchedExpression {
     return okayChunks;
   }
 
-  public static <T extends MatchedExpression> List<T> removeNested(List<T> chunks) {
+  public static <T extends MatchedExpression> List<T> removeNested(List<T> chunks)
+  {
     if (chunks.size() > 1) {
-      for (int i = 0, sz = chunks.size(); i < sz; i++) {
+      for (int i = 0; i < chunks.size(); i++) {
         chunks.get(i).order = i;
       }
       return IntervalTree.getNonNested(chunks, EXPR_TO_TOKEN_OFFSETS_INTERVAL_FUNC, EXPR_LENGTH_PRIORITY_COMPARATOR);
@@ -381,9 +383,10 @@ public class MatchedExpression {
     }
   }
 
-  public static <T extends MatchedExpression> List<T> removeOverlapping(List<T> chunks) {
+  public static <T extends MatchedExpression> List<T> removeOverlapping(List<T> chunks)
+  {
     if (chunks.size() > 1) {
-      for (int i = 0, sz = chunks.size(); i < sz; i++) {
+      for (int i = 0; i < chunks.size(); i++) {
         chunks.get(i).order = i;
       }
       return IntervalTree.getNonOverlapping(chunks, EXPR_TO_TOKEN_OFFSETS_INTERVAL_FUNC, EXPR_PRIORITY_LENGTH_COMPARATOR);

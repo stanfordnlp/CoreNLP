@@ -24,7 +24,8 @@
 //    java-nlp-support@lists.stanford.edu
 //    http://nlp.stanford.edu/software/
 
-package edu.stanford.nlp.stats;
+package edu.stanford.nlp.stats; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -54,14 +55,15 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.math.SloppyMath;
 import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.logging.Redwood;
+
+import java.util.function.Function;
+
 import edu.stanford.nlp.util.logging.PrettyLogger;
 import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
 
@@ -2571,7 +2573,7 @@ public class Counters  {
         PrettyLogger.log(channels, description, asMap(this));
       }
     };
-  } // end unmodifiableCounter()
+  }
 
   /**
    * Returns a counter whose keys are the elements in this priority queue, and
@@ -2860,7 +2862,7 @@ public class Counters  {
         PrettyLogger.log(channels, description, map);
       }
     };
-  } // end fromMap()
+  }
 
   /**
    * Returns a map view of the given counter.

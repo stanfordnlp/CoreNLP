@@ -1,6 +1,6 @@
 // Stanford Classifier - a multiclass maxent classifier
 // LinearClassifierFactory
-// Copyright (c) 2003-2016 The Board of Trustees of
+// Copyright (c) 2003-2007 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -31,7 +31,6 @@ package edu.stanford.nlp.classify;
 import java.io.BufferedReader;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.Datum;
@@ -43,8 +42,11 @@ import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.MultiClassAccuracyStats;
 import edu.stanford.nlp.stats.Scorer;
 import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.logging.Redwood;
 
+import java.util.function.Function;
+
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Builds various types of linear classifiers, with functionality for
@@ -66,6 +68,9 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFactory<L, F>  {
 
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(LinearClassifierFactory.class);
+
   private static final long serialVersionUID = 7893768984379107397L;
   private double TOL;
   //public double sigma;
@@ -80,85 +85,96 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   private boolean tuneSigmaCV = false;
   //private boolean resetWeight = true;
   private int folds;
-  // range of values to tune sigma across
   private double min = 0.1;
   private double max = 10.0;
   private boolean retrainFromScratchAfterSigmaTuning = false;
 
   private Factory<Minimizer<DiffFunction>> minimizerCreator = null;
   private int evalIters = -1;
-  private Evaluator[] evaluators; // = null;
+  private Evaluator[] evaluators = null;
 
-  /** A logger for this class */
-  private final static Redwood.RedwoodChannels logger = Redwood.channels(LinearClassifierFactory.class);
+  final static Redwood.RedwoodChannels logger = Redwood.channels(LinearClassifierFactory.class);
 
   /** This is the {@code Factory<Minimizer<DiffFunction>>} that we use over and over again. */
-  private class QNFactory implements Factory<Minimizer<DiffFunction>> {
+  private static class Factory15 implements Factory<Minimizer<DiffFunction>> {
 
-    private static final long serialVersionUID = 9028306475652690036L;
+    private static final long serialVersionUID = 6215752553371189173L;
 
     @Override
     public Minimizer<DiffFunction> create() {
-      QNMinimizer qnMinimizer = new QNMinimizer(LinearClassifierFactory.this.mem);
-      if (! verbose) {
-        qnMinimizer.shutUp();
-      }
-      return qnMinimizer;
+      return new QNMinimizer(15);
     }
 
-  } // end class QNFactory
+  } // end class Factory15
 
 
   public LinearClassifierFactory() {
-    this((Factory<Minimizer<DiffFunction>>) null);
+    this(new Factory15());
+    this.mem = 15;
+    this.useQuasiNewton();
   }
 
   /** NOTE: Constructors that take in a Minimizer create a LinearClassifierFactory that will reuse the minimizer
-   *  and will not be threadsafe (unless the Minimizer itself is ThreadSafe, which is probably not the case).
+   *  and will not be threadsafe (unless the Minimizer itself is ThreadSafe which is probably not the case).
    */
   public LinearClassifierFactory(Minimizer<DiffFunction> min) {
-    this(min, 1e-4, false);
+    this(min, false);
   }
 
   public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min) {
-    this(min, 1e-4, false);
+    this(min, false);
   }
 
+  public LinearClassifierFactory(boolean useSum) {
+    this(new Factory15(), useSum);
+    this.mem = 15;
+    this.useQuasiNewton();
+  }
+
+  public LinearClassifierFactory(double tol) {
+    this(new Factory15(), tol, false);
+    this.mem = 15;
+    this.useQuasiNewton();
+  }
+  public LinearClassifierFactory(Minimizer<DiffFunction> min, boolean useSum) {
+    this(min, 1e-4, useSum);
+  }
+  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, boolean useSum) {
+    this(min, 1e-4, useSum);
+  }
   public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum) {
     this(min, tol, useSum, 1.0);
   }
-
   public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, double tol, boolean useSum) {
     this(min, tol, useSum, 1.0);
   }
-
   public LinearClassifierFactory(double tol, boolean useSum, double sigma) {
-    this((Factory<Minimizer<DiffFunction>>) null, tol, useSum, sigma);
+    this(new Factory15(), tol, useSum, sigma);
+    this.mem = 15;
+    this.useQuasiNewton();
   }
-
   public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum, double sigma) {
     this(min, tol, useSum, LogPrior.LogPriorType.QUADRATIC.ordinal(), sigma);
   }
-
   public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, double tol, boolean useSum, double sigma) {
     this(min, tol, useSum, LogPrior.LogPriorType.QUADRATIC.ordinal(), sigma);
   }
-
   public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum, int prior, double sigma) {
     this(min, tol, useSum, prior, sigma, 0.0);
   }
-
   public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, double tol, boolean useSum, int prior, double sigma) {
     this(min, tol, useSum, prior, sigma, 0.0);
   }
 
   public LinearClassifierFactory(double tol, boolean useSum, int prior, double sigma, double epsilon) {
-    this((Factory<Minimizer<DiffFunction>>) null, tol, useSum, new LogPrior(prior, sigma, epsilon));
+    this(new Factory15(), tol, useSum, new LogPrior(prior, sigma, epsilon));
+    this.mem = 15;
+    this.useQuasiNewton();
   }
 
   public LinearClassifierFactory(double tol, boolean useSum, int prior, double sigma, double epsilon, final int mem) {
-    this((Factory<Minimizer<DiffFunction>>) null, tol, useSum, new LogPrior(prior, sigma, epsilon));
-    this.mem = mem;
+    this(new Factory15(), tol, useSum, new LogPrior(prior, sigma, epsilon));
+    this.useQuasiNewton();
   }
 
   /**
@@ -179,7 +195,6 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum, int prior, double sigma, double epsilon) {
     this(min, tol, useSum, new LogPrior(prior, sigma, epsilon));
   }
-
   public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, double tol, boolean useSum, int prior, double sigma, double epsilon) {
     this(min, tol, useSum, new LogPrior(prior, sigma, epsilon));
   }
@@ -198,24 +213,8 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     this.logPrior = logPrior;
   }
 
-  /**
-   * Create a factory that builds linear classifiers from training data. This is the recommended constructor to
-   * bottom out with. Use of a minimizerCreator makes the classifier threadsafe.
-   *
-   * @param minimizerCreator A Factory for creating minimizers. If this is null, a standard quasi-Newton minimizer
-   *                         factory will be used.
-   * @param tol     The convergence threshold for the minimization (default: 1e-4)
-   * @param useSum  Asks to the optimizer to minimize the sum of the
-   *                likelihoods of individual data items rather than their product (Klein and Manning 2001 WSD.)
-   *                NOTE: this is currently ignored!!! At some point support for this option was deleted
-   * @param logPrior What kind of prior to use, this class specifies its type and hyperparameters.
-   */
   public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> minimizerCreator, double tol, boolean useSum, LogPrior logPrior) {
-    if (minimizerCreator == null) {
-      this.minimizerCreator = new QNFactory();
-    } else {
-      this.minimizerCreator = minimizerCreator;
-    }
+    this.minimizerCreator = minimizerCreator;
     this.TOL = tol;
     //this.useSum = useSum;
     this.logPrior = logPrior;
@@ -273,7 +272,17 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    * Sets the minimizer to QuasiNewton. {@link QNMinimizer} is the default.
    */
   public void useQuasiNewton() {
-    this.minimizerCreator = new QNFactory();
+    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
+      private static final long serialVersionUID = 9028306475652690036L;
+      @Override
+      public Minimizer<DiffFunction> create() {
+          QNMinimizer qnMinimizer = new QNMinimizer(LinearClassifierFactory.this.mem);
+          if (!verbose) {
+              qnMinimizer.shutUp();
+          }
+          return qnMinimizer;
+      }
+    };
   }
 
   public void useQuasiNewton(final boolean useRobust) {
@@ -506,7 +515,11 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   }
 
   public double[][] trainWeights(GeneralDataset<L, F> dataset, double[] initial, boolean bypassTuneSigma) {
-    Minimizer<DiffFunction> minimizer = getMinimizer();
+    return trainWeights(dataset, initial, bypassTuneSigma, null);
+  }
+
+  public double[][] trainWeights(GeneralDataset<L, F> dataset, double[] initial, boolean bypassTuneSigma, Minimizer<DiffFunction> minimizer) {
+    if (minimizer == null) minimizer = getMinimizer();
     if(dataset instanceof RVFDataset)
       ((RVFDataset<L,F>)dataset).ensureRealValues();
     double[] interimWeights = null;
@@ -764,7 +777,8 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
           //sigma = sigmaToTry;
           setSigma(sigmaToTry);
           Double averageScore = crossValidator.computeAverage(scoreFn);
-          logger.info("##sigma = "+getSigma() + " -> average Score: " + averageScore);
+          log.info("##sigma = "+getSigma()+" ");
+          logger.info("-> average Score: "+averageScore);
           return -averageScore;
         };
 
@@ -798,14 +812,15 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   public double[] heldOutSetSigma(GeneralDataset<L, F> train, GeneralDataset<L, F> dev, final Scorer<L> scorer) {
     return heldOutSetSigma(train, dev, scorer, new GoldenSectionLineSearch(true, 1e-2, min, max));
   }
-
-  public double[] heldOutSetSigma(GeneralDataset<L, F> train, GeneralDataset<L, F> dev, LineSearcher minimizer) {
+  public double[]  heldOutSetSigma(GeneralDataset<L, F> train, GeneralDataset<L, F> dev, LineSearcher minimizer) {
     return heldOutSetSigma(train, dev, new MultiClassAccuracyStats<>(MultiClassAccuracyStats.USE_LOGLIKELIHOOD), minimizer);
   }
 
   /**
-   * Sets the sigma parameter to a value that optimizes the held-out score given by {@code scorer}.  Search for an
-   * optimal value is carried out by {@code minimizer} dataset the data set to optimize sigma on. kfold
+   * Sets the sigma parameter to a value that optimizes the held-out score given by <code>scorer</code>.  Search for an optimal value
+   * is carried out by <code>minimizer</code>
+   * dataset the data set to optimize sigma on.
+   * kfold
    *
    * @return an interim set of optimal weights: the weights
    */
@@ -854,7 +869,8 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       double score = scorer.score(classifier, devSet);
       //System.out.println("score: "+score);
       //System.out.print(".");
-      logger.info("##sigma = " + getSigma() + " -> average Score: " + score);
+      log.info("##sigma = "+getSigma()+" ");
+      logger.info("-> average Score: " + score);
       logger.info("##time elapsed: " + timer.stop() + " milliseconds.");
       timer.restart();
       return -score;
@@ -909,12 +925,10 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   public LinearClassifier<L, F> trainClassifier(GeneralDataset<L, F> dataset) {
     return trainClassifier(dataset, null);
   }
-
   public LinearClassifier<L, F> trainClassifier(GeneralDataset<L, F> dataset, double[] initial) {
     // Sanity check
-    if (dataset instanceof RVFDataset) {
-      ((RVFDataset<L, F>) dataset).ensureRealValues();
-    }
+    if(dataset instanceof RVFDataset)
+      ((RVFDataset<L,F>)dataset).ensureRealValues();
     if (initial != null) {
       for (double weight : initial) {
         if (Double.isNaN(weight) || Double.isInfinite(weight)) {
@@ -927,12 +941,10 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     LinearClassifier<L, F> classifier = new LinearClassifier<>(weights, dataset.featureIndex(), dataset.labelIndex());
     return classifier;
   }
-
   public LinearClassifier<L, F> trainClassifierWithInitialWeights(GeneralDataset<L, F> dataset, double[][] initialWeights2D) {
     double[] initialWeights = (initialWeights2D != null)? ArrayUtils.flatten(initialWeights2D):null;
     return trainClassifier(dataset, initialWeights);
   }
-
   public LinearClassifier<L, F> trainClassifierWithInitialWeights(GeneralDataset<L, F> dataset, LinearClassifier<L,F> initialClassifier) {
     double[][] initialWeights2D = (initialClassifier != null)? initialClassifier.weights():null;
     return trainClassifierWithInitialWeights(dataset, initialWeights2D);
@@ -987,7 +999,8 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     }
   }
 
-  public void setEvaluators(int iters, Evaluator[] evaluators) {
+  public void setEvaluators(int iters, Evaluator[] evaluators)
+  {
     this.evalIters = iters;
     this.evaluators = evaluators;
   }

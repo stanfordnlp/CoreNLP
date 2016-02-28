@@ -1,4 +1,4 @@
-package edu.stanford.nlp.semgraph;
+package edu.stanford.nlp.semgraph; 
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.graph.DirectedMultiGraph;
@@ -1210,15 +1210,15 @@ public class SemanticGraph implements Serializable  {
   // ============================================================================
   // String display
   // ============================================================================
-
   /**
    * Recursive depth first traversal. Returns a structured representation of the
    * dependency graph.
    *
    * Example:
+   * <p/>
    *
    * <pre>
-   *  -> need-3 (root)
+   *  /-> need-3 (root)
    *    -> We-0 (nsubj)
    *    -> do-1 (aux)
    *    -> n't-2 (neg)
@@ -1226,9 +1226,6 @@ public class SemanticGraph implements Serializable  {
    *      -> no-4 (det)
    *      -> stinking-5 (amod)
    * </pre>
-   *
-   * This is a quite ugly way to print a SemanticGraph.
-   * You might instead want to try {@link #toString(OutputFormat)}.
    */
   @Override
   public String toString() {
@@ -1363,9 +1360,12 @@ public class SemanticGraph implements Serializable  {
    * Inserts the given specific portion of an uncollapsed relation back into the
    * targetList
    *
-   * @param specific Specific relation to put in.
-   * @param relnTgtNode Node governed by the uncollapsed relation
-   * @param tgtList Target List of words
+   * @param specific
+   *          Specific relation to put in.
+   * @param relnTgtNode
+   *          Node governed by the uncollapsed relation
+   * @param tgtList
+   *          Target List of words
    */
   private void insertSpecificIntoList(String specific, IndexedWord relnTgtNode, List<IndexedWord> tgtList) {
     int currIndex = tgtList.indexOf(relnTgtNode);
@@ -1435,9 +1435,10 @@ public class SemanticGraph implements Serializable  {
    *
    * </dl>
    *
-   * @param format A {@code String} specifying the desired format
-   * @return A {@code String} representation of the typed dependencies in
-   *         this {@code GrammaticalStructure}
+   * @param format
+   *          a <code>String</code> specifying the desired format
+   * @return a <code>String</code> representation of the typed dependencies in
+   *         this <code>GrammaticalStructure</code>
    */
   public String toString(OutputFormat format) {
     switch(format) {
