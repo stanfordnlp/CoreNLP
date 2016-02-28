@@ -2643,4 +2643,24 @@ public class StringUtils  {
     return expandEnvironmentVariables(raw, System.getenv());
   }
 
+
+  /**
+   * Logs the command line arguments to Redwood on the given channels.
+   * The logger should be a RedwoodChannels of a single channel: the main class.
+   *
+   * @param log The redwood logger to log to.
+   * @param args The command-line arguments to log.
+   */
+  public static void logInvocationString(Redwood.RedwoodChannels log, String[] args) {
+    if (log.channelNames.length > 0) {
+      if (log.channelNames[0] instanceof Class) {
+        log.info(toInvocationString(((Class) log.channelNames[0]).getSimpleName(), args));
+      } else {
+        log.info(toInvocationString(log.channelNames[0].toString(), args));
+
+      }
+    } else {
+      log.info(toInvocationString("CoreNLP", args));
+    }
+  }
 }

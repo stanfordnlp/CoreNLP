@@ -25,6 +25,7 @@
 //    Licensing: java-nlp-support@lists.stanford.edu
 
 package edu.stanford.nlp.ie.crf;
+
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.*;
@@ -50,7 +51,6 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.regex.*;
 import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -132,7 +132,7 @@ import java.util.zip.GZIPOutputStream;
 public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifier<IN>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CRFClassifier.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CRFClassifier.class);
 
   // TODO(mengqiu) need to move the embedding lookup and capitalization features into a FeatureFactory
 
@@ -1898,8 +1898,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     } else {
       try {
         log.info("Reading initial weights from file " + flags.initialWeights);
-        DataInputStream dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(
-            flags.initialWeights))));
+        DataInputStream dis = IOUtils.getDataInputStream(flags.initialWeights);
         initialWeights = ConvertByteArray.readDoubleArr(dis);
       } catch (IOException e) {
         throw new RuntimeException("Could not read from double initial weight file " + flags.initialWeights);
@@ -2136,15 +2135,12 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   protected static List<List<CRFDatum<Collection<String>, String>>> loadProcessedData(String filename) {
-    ObjectInputStream ois = null;
-    List<List<CRFDatum<Collection<String>, String>>> result = Collections.emptyList();
+    List<List<CRFDatum<Collection<String>, String>>> result;
     try {
-      ois = new ObjectInputStream(new FileInputStream(filename));
-      result = (List<List<CRFDatum<Collection<String>, String>>>) ois.readObject();
+      result = IOUtils.readObjectFromURLOrClasspathOrFileSystem(filename);
     } catch (Exception e) {
       e.printStackTrace();
-    } finally {
-      IOUtils.closeIgnoringExceptions(ois);
+      result = Collections.emptyList();
     }
     log.info("Loading processed data from serialized file ... done. Got " + result.size() + " datums.");
     return result;
@@ -2995,7 +2991,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
   /** The main method. See the class documentation. */
   public static void main(String[] args) throws Exception {
-    StringUtils.printErrInvocationString("CRFClassifier", args);
+    StringUtils.logInvocationString(log, args);
 
     Properties props = StringUtils.argsToProperties(args);
     SeqClassifierFlags flags = new SeqClassifierFlags(props);

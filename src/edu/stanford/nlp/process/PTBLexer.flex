@@ -679,9 +679,9 @@ EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0{}]*@([^ \t\n\f\r\"<>|(){}.\
 
 /* Technically, names should be capped at 15 characters.  However, then
    you get into weirdness with what happens to the rest of the characters. */
-TWITTER_NAME = @[a-zA-Z_][a-zA-Z_0-9]*
-TWITTER_CATEGORY = #{LETTER}+
-TWITTER = {TWITTER_NAME}|{TWITTER_CATEGORY}
+TWITTER_NAME = [@\uFF20][a-zA-Z_][a-zA-Z_0-9]*
+TWITTER_HASHTAG = [#\uFF03]{LETTER}({LETTER}|{DIGIT}|_)*({LETTER}|{DIGIT})
+TWITTER = {TWITTER_NAME}|{TWITTER_HASHTAG}
 
 ISO8601DATETIME = [0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[x0-9]{2}:[0-9]{2}Z?
 DEGREES = °[CF]
