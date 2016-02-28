@@ -101,9 +101,12 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     private static final long serialVersionUID = 6215752553371189173L;
 
     @Override
-    public Minimizer<DiffFunction> create() { return new QNMinimizer(15); }
+    public Minimizer<DiffFunction> create() {
+      return new QNMinimizer(15);
+    }
 
-  }
+  } // end class Factory15
+
 
   public LinearClassifierFactory() {
     this(new Factory15());

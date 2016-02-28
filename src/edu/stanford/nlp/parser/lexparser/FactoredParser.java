@@ -24,8 +24,7 @@
 //    parser-support@lists.stanford.edu
 //    http://nlp.stanford.edu/downloads/lex-parser.shtml
 
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -56,6 +55,7 @@ import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -69,7 +69,7 @@ import edu.stanford.nlp.util.StringUtils;
 public class FactoredParser  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(FactoredParser.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(FactoredParser.class);
 
 /* some documentation for Roger's convenience
  * {pcfg,dep,combo}{PE,DE,TE} are precision/dep/tagging evals for the models
@@ -94,7 +94,7 @@ public class FactoredParser  {
     // op.tlpParams may be changed to something else later, so don't use it till
     // after options are parsed.
 
-    System.out.println(StringUtils.toInvocationString("FactoredParser", args));
+    StringUtils.logInvocationString(log, args);
 
     String path = "/u/nlp/stuff/corpora/Treebank3/parsed/mrg/wsj";
     int trainLow = 200, trainHigh = 2199, testLow = 2200, testHigh = 2219;
