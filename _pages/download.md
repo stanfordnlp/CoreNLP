@@ -8,7 +8,7 @@ Stanford CoreNLP can be downloaded via the link below. This will download a larg
 
 <div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-09.zip">Download CoreNLP 3.6.0</a> </div>
 
-**Other languages:** For working with another language, you need additional model files. We have model files for several other languages. And we have more
+**Other languages:** For working with another (human) language, you need additional model files. We have model files for several other languages. And we have more
 model files for English, including for dealing with uncased English (that is, English which is not conventionally capitalized, whether texting or telegrams).
 You can find these for the current version on [the release history page](history.html).
 
@@ -41,7 +41,7 @@ but [the JRE](http://java.com/) will do if you are only going to be a user.
 </dependencies>
 ```
 
-NEW: If you want to get a language models jar off of Maven for Chinese, Spanish, or German, add this to your `pom.xml`:
+If you want to get a language models jar off of Maven for Chinese, Spanish, or German, add this to your `pom.xml`:
 
 ``` xml
 <dependency>
