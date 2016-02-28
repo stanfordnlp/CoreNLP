@@ -1,4 +1,4 @@
-package edu.stanford.nlp.optimization; 
+package edu.stanford.nlp.optimization;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
@@ -26,7 +26,7 @@ import edu.stanford.nlp.util.Pair;
 public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction> extends StochasticMinimizer<Q>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ScaledSGDMinimizer.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ScaledSGDMinimizer.class);
 
 
   private static int method = 1;  // 0=MinErr  1=Bradley
@@ -35,7 +35,6 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
   public double[] diag;
 
   private double fixedGain = 0.99;
-  private double[] s,y;
   private static int pairMem = 20;
   private double aMax = 1e6;
 
@@ -173,6 +172,8 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
 
     //Get a new pair...
     say(" A ");
+    double[] s;
+    double[] y;
     if (pairMem > 0 && sList.size() == pairMem || sList.size() == pairMem) {
       s = sList.remove(0);
       y = yList.remove(0);
@@ -183,14 +184,14 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
 
     s = ArrayMath.pairwiseSubtract(newX, x);
     dfunction.recalculatePrevBatch = true;
-    System.arraycopy(dfunction.derivativeAt(newX,bSize),0,y,0,grad.length);
+    System.arraycopy(dfunction.derivativeAt(newX,bSize),0, y,0,grad.length);
 
     ArrayMath.pairwiseSubtractInPlace(y,newGrad);  // newY = newY-newGrad
     double[] comp = new double[x.length];
 
     sList.add(s);
     yList.add(y);
-    updateDiag(diag,s,y);
+    updateDiag(diag, s, y);
   }
 
 
@@ -305,12 +306,11 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
 
 
   static class lagrange implements Function<Double,Double>  {
-    double[] s;
-    double[] y;
-    double[] d;
-    double a;
-    double tmp;
 
+    private final double[] s;
+    private final double[] y;
+    private final double[] d;
+    private final double a;
 
     public lagrange(double[] s, double[] y, double[] d, double a){
       this.s = s;
@@ -323,16 +323,15 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
     public Double apply(Double lam) {
       double val = 0.0;
       for(int i=0;i<s.length;i++){
-        tmp = (y[i]*s[i] + 2*lam*d[i])/(s[i]*s[i] + 2*lam) - d[i];
+        double tmp = (y[i]*s[i] + 2*lam*d[i])/(s[i]*s[i] + 2*lam) - d[i];
         val += tmp*tmp;
       }
 
       val -= a*a;
-
       return val;
     }
 
-  }
+  } // end static class lagrange
 
   public static class Weights implements Serializable {
     public double [] w;
