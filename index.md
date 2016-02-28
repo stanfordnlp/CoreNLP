@@ -26,7 +26,7 @@ Choose Stanford CoreNLP if you need:
 
 Stanford CoreNLP is an integrated framework. Its goal is to
 make it very easy to apply a bunch of linguistic analysis tools to a piece
-of text. Starting from plain text, you can run all the tools on it with
+of text. A CoreNLP tool pipeline can be run on a piece of plain text with
 just two lines of code. It is designed to be highly
 flexible and extensible.  With a single option you can change which
 tools should be enabled and which should be disabled. 
@@ -35,8 +35,11 @@ including [the part-of-speech (POS) tagger](http://nlp.stanford.edu/software/tag
 [the named entity recognizer (NER)](http://nlp.stanford.edu/software/CRF-NER.html),
 [the parser](http://nlp.stanford.edu/software/lex-parser.html),
 [the coreference resolution system](http://nlp.stanford.edu/software/dcoref.html),
-[sentiment analysis](http://nlp.stanford.edu/sentiment/), and
-[the bootstrapped pattern learning](http://nlp.stanford.edu/software/patternslearning.html) tools.
+[sentiment analysis](http://nlp.stanford.edu/sentiment/),
+[bootstrapped pattern learning](http://nlp.stanford.edu/software/patternslearning.html),
+and the
+[open information extraction](http://nlp.stanford.edu/software/openie.html)
+tools.
 Its analyses provide the foundational building blocks for
 higher-level and domain-specific text understanding applications.
 
@@ -49,8 +52,8 @@ Stanford CoreNLP can be downloaded via the link below. This will download a larg
 
 <div style="text-align:center; margin-top: 5ex; margin-bottom:5ex;"> <a class="downloadbutton" href="http://nlp.stanford.edu/software/stanford-corenlp-full-2015-12-09.zip">Download CoreNLP 3.6.0</a> </div>
 
-Alternatively, Stanford CoreNLP is [available on Maven Central](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22stanford-corenlp%22).
-Source is [available on GitHub](https://github.com/stanfordnlp/CoreNLP).
+Alternatively, Stanford CoreNLP is [available on **Maven Central**](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22stanford-corenlp%22).
+Source is [available on **GitHub**](https://github.com/stanfordnlp/CoreNLP).
 For more information on obtaining CoreNLP, see the [download page](download.html).
 
 
@@ -83,7 +86,8 @@ also usable inside CoreNLP.
 Stanford CoreNLP is written in **Java**; current releases  require **Java 1.8+**. 
 
 You can use Stanford CoreNLP from the command-line, via its Java
-programmatic API, via third party APIs for most major modern programming languages, or via a service.
+programmatic API, via [third party APIs](other-languages.html) for most major modern
+programming languages, or via a [service](corenlp-server.html).
 It works on Linux, OS X, and Windows.
 
 ## License
@@ -112,7 +116,12 @@ demo paper:
 If you&rsquo;re dealing in depth with particular annotators,
 you&rsquo;re also encouraged to cite the papers that cover individual
 components:
-[POS tagging](http://nlp.stanford.edu/software/tagger.shtml), [NER](http://nlp.stanford.edu/software/CRF-NER.shtml), [parsing (with parse annotator)](http://nlp.stanford.edu/software/lex-parser.shtml), [dependency parsing (with depparse annotator)](http://nlp.stanford.edu/software/nndep.shtml), [coreference resolution](http://nlp.stanford.edu/software/dcoref.shtml), or [sentiment](http://nlp.stanford.edu/sentiment/).
+[POS tagging](http://nlp.stanford.edu/software/tagger.shtml),
+[NER](http://nlp.stanford.edu/software/CRF-NER.shtml),
+[parsing (with parse annotator)](http://nlp.stanford.edu/software/lex-parser.shtml),
+[dependency parsing (with depparse annotator)](http://nlp.stanford.edu/software/nndep.shtml),
+[coreference resolution](http://nlp.stanford.edu/software/dcoref.shtml),
+[sentiment](http://nlp.stanford.edu/sentiment/), or [Open IE](http://nlp.stanford.edu/software/openie.html).
 You can find more information on the Stanford NLP
 [software pages](http://nlp.stanford.edu/software/) and/or
 [publications page](http://nlp.stanford.edu/pubs/).
