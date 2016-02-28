@@ -390,8 +390,7 @@ public class PTBTokenizerTest {
     "{1}block name={2}",
     "1202-03-04 5:32:56 2004-03-04T18:32:56",
     "20°C is 68°F because 0℃ is 32℉",
-    "a.jpg a-b.jpg a.b.jpg a-b.jpg a_b.jpg a-b-c.jpg 0-1-2.jpg a-b/c-d_e.jpg a-b/c-9a9_9a.jpg\n",
-    "#hashtag #Azərbaycanca #mûǁae #Čeština #日本語ハッシュタグ #1 #23 #Trump2016 @3 @acl_2016",
+    "a.jpg a-b.jpg a.b.jpg a-b.jpg a_b.jpg a-b-c.jpg 0-1-2.jpg a-b/c-d_e.jpg a-b/c-9a9_9a.jpg\n"
   };
 
   private final String[][] mtGold = {
@@ -401,8 +400,7 @@ public class PTBTokenizerTest {
     { "-LCB-", "1", "-RCB-", "block", "name", "=", "-LCB-", "2", "-RCB-" },
     { "1202-03-04", "5:32:56", "2004-03-04T18:32:56" },
     { "20", "°C", "is", "68", "°F", "because", "0", "℃", "is", "32", "℉" },
-    { "a.jpg", "a-b.jpg", "a.b.jpg", "a-b.jpg", "a_b.jpg", "a-b-c.jpg", "0-1-2.jpg", "a-b/c-d_e.jpg", "a-b/c-9a9_9a.jpg"},
-    { "#hashtag", "#Azərbaycanca", "#mûǁae", "#Čeština", "#日本語ハッシュタグ", "#", "1", "#", "23", "#Trump2016", "@", "3", "@acl_2016" },
+    { "a.jpg", "a-b.jpg", "a.b.jpg", "a-b.jpg", "a_b.jpg", "a-b-c.jpg", "0-1-2.jpg", "a-b/c-d_e.jpg", "a-b/c-9a9_9a.jpg"}
   };
 
   @Test

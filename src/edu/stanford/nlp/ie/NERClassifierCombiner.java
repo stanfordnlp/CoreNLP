@@ -1,4 +1,5 @@
-package edu.stanford.nlp.ie;
+package edu.stanford.nlp.ie; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +26,6 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Subclass of ClassifierCombiner that behaves like a NER, by copying
@@ -38,7 +38,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(NERClassifierCombiner.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(NERClassifierCombiner.class);
 
   private final boolean applyNumericClassifiers;
   public static final boolean APPLY_NUMERIC_CLASSIFIERS_DEFAULT = true;
@@ -341,7 +341,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
 
   /** the main method **/
   public static void main(String[] args) throws Exception {
-    StringUtils.logInvocationString(log, args);
+    StringUtils.printErrInvocationString("NERClassifierCombiner", args);
     Properties props = StringUtils.argsToProperties(args);
     SeqClassifierFlags flags = new SeqClassifierFlags(props);
 
@@ -389,13 +389,13 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
       if (crfToExamine == null) {
         // in this case there is no crfToExamine
         if (testFile != null) {
-          ncc.classifyAndWriteAnswers(testFile, readerAndWriter, true);
+          ncc.classifyAndWriteAnswers(testFile,readerAndWriter,true);
         } else {
           List<File> files = Arrays.asList(testFiles.split(",")).stream().map(File::new).collect(Collectors.toList());
           ncc.classifyFilesAndWriteAnswers(files, ncc.defaultReaderAndWriter(), true);
         }
       } else {
-        ClassifierCombiner.examineCRF(ncc, crfToExamine, flags, testFile, testFiles, readerAndWriter);
+        ClassifierCombiner.examineCRF(ncc,crfToExamine,flags,testFile,testFiles,readerAndWriter);
       }
     }
 

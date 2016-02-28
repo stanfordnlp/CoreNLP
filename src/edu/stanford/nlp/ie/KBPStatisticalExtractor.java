@@ -186,6 +186,23 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
       }
     }
 
+    public double accuracy(String relation) {
+      return correctCount.getCount(relation) / totalCount.getCount(relation);
+    }
+
+    public double accuracyMicro() {
+      return correctCount.totalCount() / totalCount.totalCount();
+    }
+
+    public double accuracyMacro() {
+      double sumAccuracy = 0.0;
+      for (String rel : totalCount.keySet()) {
+        sumAccuracy += accuracy(rel);
+      }
+      return sumAccuracy / ((double) totalCount.size());
+    }
+
+
     public double precision(String relation) {
       if (predictedCount.getCount(relation) == 0) {
         return 1.0;
@@ -259,10 +276,12 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
 
     public void toString(PrintStream out) {
       out.println();
+      out.println("ACCURACY  (micro average): " + new DecimalFormat("0.000%").format(accuracyMicro()));
       out.println("PRECISION (micro average): " + new DecimalFormat("0.000%").format(precisionMicro()));
       out.println("RECALL    (micro average): " + new DecimalFormat("0.000%").format(recallMicro()));
       out.println("F1        (micro average): " + new DecimalFormat("0.000%").format(f1Micro()));
       out.println();
+      out.println("ACCURACY  (macro average): " + new DecimalFormat("0.000%").format(accuracyMacro()));
       out.println("PRECISION (macro average): " + new DecimalFormat("0.000%").format(precisionMacro()));
       out.println("RECALL    (macro average): " + new DecimalFormat("0.000%").format(recallMacro()));
       out.println("F1        (macro average): " + new DecimalFormat("0.000%").format(f1Macro()));
@@ -1004,62 +1023,50 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
   }
 
 
-  public static void main(String[] args) throws IOException, ClassNotFoundException {
+  public static void main(String[] args) throws IOException {
     RedwoodConfiguration.standard().apply();  // Disable SLF4J crap.
     ArgumentParser.fillOptions(KBPStatisticalExtractor.class, args);  // Fill command-line options
 
-    // Load the test (or dev) data
+    // Load the data
+    forceTrack("Loading training data");
+    forceTrack("Training data");
+    List<Pair<FeaturizerInput, String>> trainExamples = readDataset(TRAIN_FILE);
+    log.info("Read " + trainExamples.size() + " examples");
+    log.info("" + trainExamples.stream().map(Pair::second).filter(NO_RELATION::equals).count() + " are " + NO_RELATION);
+    endTrack("Training data");
     forceTrack("Test data");
     List<Pair<FeaturizerInput, String>> testExamples = readDataset(TEST_FILE);
     log.info("Read " + testExamples.size() + " examples");
     endTrack("Test data");
+    endTrack("Loading training data");
 
-    // If we can't find an existing model, train one
-    if (!IOUtils.existsInClasspathOrFileSystem(MODEL_FILE)) {
-      forceTrack("Training data");
-      List<Pair<FeaturizerInput, String>> trainExamples = readDataset(TRAIN_FILE);
-      log.info("Read " + trainExamples.size() + " examples");
-      log.info("" + trainExamples.stream().map(Pair::second).filter(NO_RELATION::equals).count() + " are " + NO_RELATION);
-      endTrack("Training data");
+    // Featurize + create the dataset
+    forceTrack("Creating dataset");
+    RVFDataset<String, String> dataset = new RVFDataset<>();
+    final AtomicInteger i = new AtomicInteger(0);
+    long beginTime = System.currentTimeMillis();
+    trainExamples.stream().parallel().forEach(example -> {
+      if (i.incrementAndGet() % 1000 == 0) {
+        log.info("[" + Redwood.formatTimeDifference(System.currentTimeMillis() - beginTime) +
+            "] Featurized " + i.get() + " / " + trainExamples.size() + " examples");
+      }
+      Counter<String> features = features(example.first);  // This takes a while per example
+      synchronized (dataset) {
+        dataset.add(new RVFDatum<>(features, example.second));
+      }
+    });
+    trainExamples.clear();  // Free up some memory
+    endTrack("Creating dataset");
 
-      // Featurize + create the dataset
-      forceTrack("Creating dataset");
-      RVFDataset<String, String> dataset = new RVFDataset<>();
-      final AtomicInteger i = new AtomicInteger(0);
-      long beginTime = System.currentTimeMillis();
-      trainExamples.stream().parallel().forEach(example -> {
-        if (i.incrementAndGet() % 1000 == 0) {
-          log.info("[" + Redwood.formatTimeDifference(System.currentTimeMillis() - beginTime) +
-              "] Featurized " + i.get() + " / " + trainExamples.size() + " examples");
-        }
-        Counter<String> features = features(example.first);  // This takes a while per example
-        synchronized (dataset) {
-          dataset.add(new RVFDatum<>(features, example.second));
-        }
-      });
-      trainExamples.clear();  // Free up some memory
-      endTrack("Creating dataset");
+    // Train the classifier
+    log.info("Training classifier:");
+    Classifier<String, String> classifier = trainMultinomialClassifier(dataset, FEATURE_THRESHOLD, SIGMA);
+    dataset.clear();  // Free up some memory
 
-      // Train the classifier
-      log.info("Training classifier:");
-      Classifier<String, String> classifier = trainMultinomialClassifier(dataset, FEATURE_THRESHOLD, SIGMA);
-      dataset.clear();  // Free up some memory
+    // Save the classifier
+    IOUtils.writeObjectToFile(new KBPStatisticalExtractor(classifier), MODEL_FILE);
 
-      // Save the classifier
-      IOUtils.writeObjectToFile(new KBPStatisticalExtractor(classifier), MODEL_FILE);
-    }
-
-    // Read either a newly-trained or pre-trained model
-    Object model = IOUtils.readObjectFromURLOrClasspathOrFileSystem(MODEL_FILE);
-    Classifier<String, String> classifier;
-    if (model instanceof Classifier) {
-      //noinspection unchecked
-      classifier = (Classifier<String, String>) model;
-    } else {
-      classifier = ((KBPStatisticalExtractor) model).classifier;
-    }
-
-    // Evaluate the model
+    // Evaluate the classifier
     forceTrack("Test accuracy");
     Accuracy accuracy = new Accuracy();
     forceTrack("Featurizing");

@@ -20,7 +20,6 @@ import edu.stanford.nlp.util.IntTuple;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.ref.SoftReference;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -256,7 +255,16 @@ public class Document {
    * There is an attempt to mitigate this in {@link edu.stanford.nlp.simple.Document#finalize()}}, but one
    * should never rely on the finalize method.
    */
-  private static final IdentityHashMap<Document, SoftReference<Annotation>> annotationPool = new IdentityHashMap<>();
+  private static final IdentityHashMap<Document, Annotation> annotationPool = new IdentityHashMap<>();
+  /**
+   * The keys for documents we've annotated, to determine which elements of the cache to delete first.
+   */
+  private static final LinkedList<Document> annotationPoolKeys = new LinkedList<>();
+  /**
+   * The maximum number of Annotation objects to keep in the cache in {@link Document#annotationPool}.
+   */
+  private static final int MAX_ANNOTATION_POOL_SIZE = 64;
+
 
   /** The protocol buffer representing this document */
   private final CoreNLPProtos.Document.Builder impl;
@@ -513,6 +521,9 @@ public class Document {
     // Re-computing the sentences invalidates the cached Annotation
     synchronized (annotationPool) {
       annotationPool.remove(this);
+    }
+    synchronized (annotationPoolKeys) {
+      annotationPoolKeys.remove(this);
     }
 
     return sentences;
@@ -821,23 +832,19 @@ public class Document {
    */
   public Annotation asAnnotation() {
     synchronized (annotationPool) {
-      Annotation candidate = annotationPool.get(this).get();
+      Annotation candidate = annotationPool.get(this);
       if (candidate == null) {
         // Redo cache
         synchronized (serializer) {
           candidate = serializer.fromProto(serialize());
         }
-        annotationPool.put(this, new SoftReference<>(candidate));
-        // Clean up garbage collected annotations
-        if (annotationPool.size() > 64) {
-          new HashSet<>(annotationPool.keySet()).stream()
-              .filter(key -> annotationPool.get(key).get() == null)
-              .forEach(annotationPool::remove);
-        }
-        // Limit the size of the pool in general, if still too large
-        // This shouldn't happen often...
-        while (annotationPool.size() > 64) {
-          annotationPool.remove(annotationPool.keySet().iterator().next());
+        annotationPool.put(this, candidate);
+        synchronized (annotationPoolKeys) {
+          annotationPoolKeys.addLast(this);
+          // Manage the cache's size
+          while (annotationPoolKeys.size() > MAX_ANNOTATION_POOL_SIZE) {
+            annotationPool.remove(annotationPoolKeys.removeFirst());
+          }
         }
       }
       return candidate;
@@ -932,6 +939,9 @@ public class Document {
     super.finalize();
     synchronized (annotationPool) {
       annotationPool.remove(this);
+    }
+    synchronized (annotationPoolKeys) {
+      annotationPoolKeys.remove(this);
     }
   }
 
