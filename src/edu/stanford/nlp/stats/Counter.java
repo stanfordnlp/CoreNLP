@@ -26,7 +26,6 @@
 
 package edu.stanford.nlp.stats;
 
-import java.io.*;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
