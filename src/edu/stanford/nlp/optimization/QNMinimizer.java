@@ -1,5 +1,4 @@
-package edu.stanford.nlp.optimization; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.optimization;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -14,6 +13,8 @@ import java.util.Set;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.util.CallbackFunction;
+import edu.stanford.nlp.util.logging.Redwood;
+
 
 /**
  *
@@ -40,7 +41,7 @@ import edu.stanford.nlp.util.CallbackFunction;
  * This routine finds a point satisfying the Wolfe conditions, which state that
  * a point must have a sufficiently smaller function value, and a gradient of
  * smaller magnitude. This provides enough to prove theoretically quadratic
- * convergence. In order to find such a point the linesearch first finds an
+ * convergence. In order to find such a point the line search first finds an
  * interval which must contain a satisfying point, and then progressively
  * reduces that interval all using cubic or quadratic interpolation.
  *
@@ -92,12 +93,12 @@ import edu.stanford.nlp.util.CallbackFunction;
 public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(QNMinimizer.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(QNMinimizer.class);
 
   private int fevals = 0; // the number of function evaluations
   private int maxFevals = -1;
   private int mem = 10; // the number of s,y pairs to retain for BFGS
-  private int its = 0; // the number of iterations through the main do-while loop of L-BFGS's minimize()
+  private int its; // = 0; // the number of iterations through the main do-while loop of L-BFGS's minimize()
   private final Function monitor;
   private boolean quiet;
   private static final NumberFormat nf = new DecimalFormat("0.000E0");
@@ -151,7 +152,6 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
 
   private eLineSearch lsOpt = eLineSearch.MINPACK;
   private eScaling scaleOpt = eScaling.DIAGONAL;
-  private eState state = eState.CONTINUE;
 
 
   public QNMinimizer() {
@@ -303,7 +303,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
    *
    * @author akleeman
    */
-  public class Record {
+  class Record {
     // convergence options.
     // have average difference like before
     // zero gradient.
@@ -311,7 +311,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     // for convergence test
     private final List<Double> evals = new ArrayList<>();
     private final List<Double> values = new ArrayList<>();
-    List<Double> gNorms = new ArrayList<>();
+    private List<Double> gNorms = new ArrayList<>();
     // List<Double> xNorms = new ArrayList<Double>();
     private final List<Integer> funcEvals = new ArrayList<>();
     private final List<Double> time = new ArrayList<>();
@@ -327,7 +327,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     private double gNormLast; // This is used for convergence.
     private double[] xLast;
     private int maxSize = 100; // This will control the number of func values /
-                                // gradients to retain.
+    // gradients to retain.
     private Function mon = null;
     private boolean quiet = false;
     private boolean memoryConscious = true;
@@ -336,52 +336,35 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     // private int noImproveItrCount = 0;
     private double[] xBest;
 
-    public Record(boolean beQuiet, Function monitor, double tolerance) {
-      this.quiet = beQuiet;
-      this.mon = monitor;
-      this.TOL = tolerance;
-    }
-
-    public Record(boolean beQuiet, Function monitor, double tolerance,
-        PrintWriter output) {
-      this.quiet = beQuiet;
+    Record(Function monitor, double tolerance, PrintWriter output) {
       this.mon = monitor;
       this.TOL = tolerance;
       this.outputFile = output;
     }
 
-    public Record(boolean beQuiet, Function monitor, double tolerance,
-        double eps) {
-      this.quiet = beQuiet;
+    Record(Function monitor, double tolerance, double eps) {
       this.mon = monitor;
       this.TOL = tolerance;
       this.EPS = eps;
     }
 
-    public void setEPS(double eps) {
+    void setEPS(double eps) {
       EPS = eps;
     }
 
-    public void setTOL(double tolerance) {
+    void setTOL(double tolerance) {
       TOL = tolerance;
     }
 
-    public void start(double val, double[] grad) {
+    void start(double val, double[] grad) {
       start(val, grad, null);
-    }
-
-    /*
-     * Stops output to stdout.
-     */
-    public void shutUp() {
-      this.quiet = true;
     }
 
     /*
      * Initialize the class, this starts the timer, and initiates the gradient
      * norm for use with convergence.
      */
-    public void start(double val, double[] grad, double[] x) {
+    void start(double val, double[] grad, double[] x) {
       startTime = System.currentTimeMillis();
       gNormInit = ArrayMath.norm(grad);
       xLast = x;
@@ -393,13 +376,13 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     }
 
     private void writeToFile(double fevals, double val, double gNorm,
-        double time) {
+                             double time) {
       if (outputFile != null) {
-        outputFile.println(fevals + "," + val + "," + gNorm + "," + time);
+        outputFile.println(fevals + "," + val + ',' + gNorm + ',' + time);
       }
     }
 
-    public void add(double val, double[] grad, double[] x, int fevals, double evalScore) {
+    private void add(double val, double[] grad, double[] x, int fevals, double evalScore, StringBuilder sb) {
 
       if (!memoryConscious) {
         if (gNorms.size() > maxSize) {
@@ -430,13 +413,13 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
 
       writeToFile(fevals, val, gNormLast, howLong());
 
-      say(nf.format(val) + " " + nfsec.format(howLong()) + "s");
+      sb.append(nf.format(val)).append(' ').append(nfsec.format(howLong())).append('s');
 
       xLast = x;
       monitorX(x);
     }
 
-    public void monitorX(double[] x) {
+    void monitorX(double[] x) {
       if (this.mon != null) {
         this.mon.valueAt(x);
       }
@@ -447,11 +430,11 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
      * order optimality,  numerical convergence (i.e., zero numerical
      * gradient), and also by checking the average improvement.
      *
-     * @return A value of the enumeration type <p>eState</p> which tells the
+     * @return A value of the enumeration type <b>eState</b> which tells the
      *   state of the optimization routine indicating whether the routine should
      *   terminate, and if so why.
      */
-    public eState toContinue() {
+    private eState toContinue(StringBuilder sb) {
 
       double relNorm = gNormLast / gNormInit;
       int size = values.size();
@@ -504,16 +487,16 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
           if (gNormLast < EPS * Math.max(1.0, ArrayMath.norm(xLast))) {
             // |g| < max(1,|x|)
             // Now actually compare with the two norm if we have to.
-            System.err
-                .println("Gradient is numerically zero, stopped on machine epsilon.");
+            log.warn("Gradient is numerically zero, stopped on machine epsilon.");
             return eState.TERMINATE_GRADNORM;
           }
         }
         // give user information about the norms.
       }
 
-      say(" |" + nf.format(gNormLast) + "| {" + nf.format(relNorm) + "} "
-            + nf.format(Math.abs(averageImprovement / newestVal)) + " " + (evalsSize > 0 ? evals.get(evalsSize-1).toString() : "-") + " ");
+      sb.append(" |").append(nf.format(gNormLast)).append("| {").append(nf.format(relNorm)).append("} ");
+      sb.append(nf.format(Math.abs(averageImprovement / newestVal))).append(' ');
+      sb.append(evalsSize > 0 ? evals.get(evalsSize - 1).toString() : "-").append(' ');
       return eState.CONTINUE;
     }
 
@@ -521,11 +504,11 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
      *  Return the time in seconds since this class was created.
      *  @return The time in seconds since this class was created.
      */
-    public double howLong() {
-      return ((System.currentTimeMillis() - startTime)) / 1000.0;
+    double howLong() {
+      return (System.currentTimeMillis() - startTime) / 1000.0;
     }
 
-    public double[] getBest() {
+    double[] getBest() {
       return xBest;
     }
 
@@ -536,9 +519,9 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
    * update. it holds all the s,y pairs, updates the diagonal and scales
    * everything as needed.
    */
-  public class QNInfo {
+  class QNInfo {
     // Diagonal Options
-    // Linesearch Options
+    // Line search Options
     // Memory stuff
     private List<double[]> s = null;
     private List<double[]> y = null;
@@ -549,7 +532,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     private int maxMem = 20;
     public eScaling scaleOpt = eScaling.SCALAR;
 
-    public QNInfo(int size) {
+    QNInfo(int size) {
       s = new ArrayList<>();
       y = new ArrayList<>();
       rho = new ArrayList<>();
@@ -557,15 +540,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       mem = size;
     }
 
-    public QNInfo() {
-      s = new ArrayList<>();
-      y = new ArrayList<>();
-      rho = new ArrayList<>();
-      gamma = 1;
-      mem = maxMem;
-    }
-
-    public QNInfo(List<double[]> sList, List<double[]> yList) {
+    QNInfo(List<double[]> sList, List<double[]> yList) {
       s = new ArrayList<>();
       y = new ArrayList<>();
       rho = new ArrayList<>();
@@ -573,55 +548,54 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       setHistory(sList, yList);
     }
 
-    public int size() {
+    int size() {
       return s.size();
     }
 
-    public double getRho(int ind) {
+    double getRho(int ind) {
       return rho.get(ind);
     }
 
-    public double[] getS(int ind) {
+    double[] getS(int ind) {
       return s.get(ind);
     }
 
-    public double[] getY(int ind) {
+    double[] getY(int ind) {
       return y.get(ind);
     }
 
-    public void useDiagonalScaling() {
+    void useDiagonalScaling() {
       this.scaleOpt = eScaling.DIAGONAL;
     }
 
-    public void useScalarScaling() {
+    void useScalarScaling() {
       this.scaleOpt = eScaling.SCALAR;
     }
 
     /*
      * Free up that memory.
      */
-    public void free() {
+    void free() {
       s = null;
       y = null;
       rho = null;
       d = null;
     }
 
-    public void clear() {
+    void clear() {
       s.clear();
       y.clear();
       rho.clear();
       d = null;
     }
 
-    /*
-     * applyInitialHessian(double[] x)
-     *
-     * This function takes the vector x, and applies the best guess at the
+    /**
+     * This function {@code applyInitialHessian(double[] x)}
+     * takes the vector {@code x}, and applies the best guess at the
      * initial hessian to this vector, based off available information from
      * previous updates.
      */
-    public void setHistory(List<double[]> sList, List<double[]> yList) {
+    void setHistory(List<double[]> sList, List<double[]> yList) {
       int size = sList.size();
 
       for (int i = 0; i < size; i++) {
@@ -631,15 +605,14 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       }
     }
 
-    public double[] applyInitialHessian(double[] x) {
-
+    double[] applyInitialHessian(double[] x, StringBuilder sb) {
       switch (scaleOpt) {
       case SCALAR:
-        say("I");
+        sb.append('I');
         ArrayMath.multiplyInPlace(x, gamma);
         break;
       case DIAGONAL:
-        say("D");
+        sb.append('D');
         if (d != null) {
           // Check sizes
           if (x.length != d.length) {
@@ -654,7 +627,6 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       }
 
       return x;
-
     }
 
     /*
@@ -667,9 +639,8 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
      *
      * Things can go wrong, if any non convex behavior is detected (s^T y &lt; 0)
      * or numerical errors are likely the update is skipped.
-     *
      */
-    public int update(double[] newX, double[] x, double[] newGrad,
+    int update(double[] newX, double[] x, double[] newGrad,
         double[] grad, double step) throws SurpriseConvergence {
       // todo: add OutOfMemory error.
       double[] newS, newY;
@@ -704,9 +675,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     }
 
     private class NegativeCurvature extends Throwable {
-      /**
-       *
-       */
+
       private static final long serialVersionUID = 4676562552506850519L;
 
       public NegativeCurvature() {
@@ -714,16 +683,14 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     }
 
     private class ZeroGradient extends Throwable {
-      /**
-       *
-       */
+
       private static final long serialVersionUID = -4001834044987928521L;
 
       public ZeroGradient() {
       }
     }
 
-    public int update(double[] newS, double[] newY, double yy, double sy,
+    int update(double[] newS, double[] newY, double yy, double sy,
         double sg, double step) {
 
       // Initialize diagonal to the identity
@@ -779,8 +746,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
 
           // If things have gone bad, just fill with the SCALAR approx.
           if (minD <= 0 || Double.isInfinite(maxD) || maxD / minD > 1e12) {
-            System.err
-                .println("QNInfo:update() : PROBLEM WITH DIAGONAL UPDATE");
+            log.warn("QNInfo:update() : PROBLEM WITH DIAGONAL UPDATE");
             double fill = yy / sy;
             for (int i = 0; i < d.length; i++) {
               d[i] = fill;
@@ -806,9 +772,9 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
         // NOTE: if applying QNMinimizer to a non convex problem, we would still
         // like to update the matrix
         // or we could get stuck in a series of skipped updates.
-        say(" Negative curvature detected, update skipped ");
+        sayln(" Negative curvature detected, update skipped ");
       } catch (ZeroGradient zg) {
-        say(" Either convergence, or floating point errors combined with extremely linear region ");
+        sayln(" Either convergence, or floating point errors combined with extremely linear region ");
       }
 
       return s.size();
@@ -820,16 +786,14 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     presetInfo = new QNInfo(s, y);
   }
 
-  /*
+  /**
    * computeDir()
    *
    * This function will calculate an approximation of the inverse hessian based
    * off the seen s,y vector pairs. This particular approximation uses the BFGS
    * update.
-   *
    */
-
-  private void computeDir(double[] dir, double[] fg, double[] x, QNInfo qn, Function func)
+  private void computeDir(double[] dir, double[] fg, double[] x, QNInfo qn, Function func, StringBuilder sb)
       throws SurpriseConvergence {
     System.arraycopy(fg, 0, dir, 0, fg.length);
 
@@ -842,7 +806,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     }
 
     // multiply by hessian approximation
-    qn.applyInitialHessian(dir);
+    qn.applyInitialHessian(dir, sb);
 
     for (int i = 0; i < mmm; i++) {
       double b = qn.getRho(i) * ArrayMath.innerProduct(qn.getY(i), dir);
@@ -871,7 +835,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     double score = 0;
     for (Evaluator eval:evaluators) {
       if (!suppressTestPrompt)
-        say("  Evaluating: " + eval.toString());
+        sayln("  Evaluating: " + eval.toString());
       score = eval.evaluate(x);
     }
     return score;
@@ -898,12 +862,12 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
   public double[] minimize(DiffFunction dFunction, double functionTolerance,
       double[] initial, int maxFunctionEvaluations, QNInfo qn) {
 
-    say("QNMinimizer called on double function of "
-        + dFunction.domainDimension() + " variables,");
     if (mem > 0) {
-      sayln(" using M = " + mem + '.');
+      sayln("QNMinimizer called on double function of "
+              + dFunction.domainDimension() + " variables, using M = " + mem + '.');
     } else {
-      sayln(" using dynamic setting of M.");
+      sayln("QNMinimizer called on double function of "
+              + dFunction.domainDimension() + " variables, using dynamic setting of M.");
     }
 
     if (qn == null && presetInfo == null) {
@@ -916,8 +880,6 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       noHistory = false;
     }
 
-    double[] x, newX, rawGrad, grad, newGrad, dir;
-    double value;
     its = 0;
     fevals = 0;
     success = false;
@@ -925,17 +887,18 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     qn.scaleOpt = scaleOpt;
 
     // initialize weights
-    x = initial;
+    double[] x = initial;
 
     // initialize gradient
-    rawGrad = new double[x.length];
-    newGrad = new double[x.length];
-    newX = new double[x.length];
-    dir = new double[x.length];
+    double[] rawGrad = new double[x.length];
+    double[] newGrad = new double[x.length];
+    double[] newX = new double[x.length];
+    double[] dir = new double[x.length];
 
     // initialize function value and gradient (gradient is stored in grad inside
     // evaluateFunction)
-    value = evaluateFunction(dFunction, x, rawGrad);
+    double value = evaluateFunction(dFunction, x, rawGrad);
+    double[] grad;
     if (useOWLQN) {
       double norm = l1NormOWL(x, dFunction);
       value += norm * lambdaOWL;
@@ -950,7 +913,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
 
     if (outputToFile) {
       try {
-        String baseName = "QN_m" + mem + "_" + lsOpt.toString() + "_"
+        String baseName = "QN_m" + mem + '_' + lsOpt.toString() + '_'
             + scaleOpt.toString();
         outFile = new PrintWriter(new FileOutputStream(baseName + ".output"),
             true);
@@ -963,7 +926,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       }
     }
 
-    Record rec = new Record(quiet, monitor, functionTolerance, outFile);
+    Record rec = new Record(monitor, functionTolerance, outFile);
     // sets the original gradient and x. Also stores the monitor.
     rec.start(value, rawGrad, x);
 
@@ -991,19 +954,25 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     sayln();
     sayln("Iter ## evals ## <SCALING> [LINESEARCH] VALUE TIME |GNORM| {RELNORM} AVEIMPROVE EVALSCORE");
 
+    StringBuilder sb = new StringBuilder();
+    eState state = eState.CONTINUE;
+
     // Beginning of the loop.
     do {
       try {
-        sayln();
+        if ( ! quiet) {
+          sayln(sb.toString());
+        }
+        sb = new StringBuilder();
         boolean doEval = (its >= 0 && its >= startEvaluateIters && evaluateIters > 0 && its % evaluateIters == 0);
         its += 1;
         double newValue;
-        say("Iter " + its + " evals " + fevals + ' ');
+        sb.append("Iter ").append(its).append(" evals ").append(fevals).append(' ');
 
         // Compute the search direction
-        say("<");
-        computeDir(dir, grad, x, qn, dFunction);
-        say("> ");
+        sb.append('<');
+        computeDir(dir, grad, x, qn, dFunction, sb);
+        sb.append("> ");
 
         // sanity check dir
         boolean hasNaNDir = false;
@@ -1013,33 +982,33 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
           if (grad[i] != grad[i]) hasNaNGrad = true;
         }
         if (hasNaNDir && !hasNaNGrad) {
-          say("(NaN dir likely due to Hessian approx - resetting) ");
+          sayln("(NaN dir likely due to Hessian approx - resetting) ");
           qn.clear();
           // re-compute the search direction
-          say("<");
-          computeDir(dir, grad, x, qn, dFunction);
-          say("> ");
+          sb.append('<');
+          computeDir(dir, grad, x, qn, dFunction, sb);
+          sb.append("> ");
         }
 
         // perform line search
-        say("[");
+        sb.append('[');
 
         double[] newPoint; // initialized in if/else/switch below
         if (useOWLQN) {
           // only linear search is allowed for OWL-QN
-          newPoint = lineSearchBacktrackOWL(dFunction, dir, x, newX, grad, value);
-          say("B");
+          newPoint = lineSearchBacktrackOWL(dFunction, dir, x, newX, grad, value, sb);
+          sb.append('B');
         } else {
           // switch between line search options.
           switch (lsOpt) {
           case BACKTRACK:
-            newPoint = lineSearchBacktrack(dFunction, dir, x, newX, grad, value);
-            say("B");
+            newPoint = lineSearchBacktrack(dFunction, dir, x, newX, grad, value, sb);
+            sb.append('B');
             break;
           case MINPACK:
             newPoint = lineSearchMinPack(dFunction, dir, x, newX, grad, value,
-                functionTolerance);
-            say("M");
+                functionTolerance, sb);
+            sb.append('M');
             break;
           default:
             throw new IllegalArgumentException("Invalid line search option for QNMinimizer.");
@@ -1047,9 +1016,9 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
         }
 
         newValue = newPoint[f];
-        say(" ");
-        say(nf.format(newPoint[a]));
-        say("] ");
+        sb.append(' ');
+        sb.append(nf.format(newPoint[a]));
+        sb.append("] ");
 
         // This shouldn't actually evaluate anything since that should have been
         // done in the lineSearch.
@@ -1071,7 +1040,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
 
         // Add the current value and gradient to the records, this also monitors
         // X and writes to output
-        rec.add(newValue, newGrad, newX, fevals, evalScore);
+        rec.add(newValue, newGrad, newX, fevals, evalScore, sb);
 
         // If you want to call a function and do whatever with the information ...
         if (iterCallbackFunction != null) {
@@ -1086,19 +1055,13 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
         System.arraycopy(newX, 0, x, 0, x.length);
         System.arraycopy(newGrad, 0, grad, 0, newGrad.length);
 
-        if (quiet) {
-          log.info(".");
-        }
         if (fevals > maxFevals) {
-          throw new MaxEvaluationsExceeded(" Exceeded in minimize() loop ");
+          throw new MaxEvaluationsExceeded("Exceeded in minimize() loop.");
         }
-
       } catch (SurpriseConvergence s) {
-        sayln();
         sayln("QNMinimizer aborted due to surprise convergence");
         break;
       } catch (MaxEvaluationsExceeded m) {
-        sayln();
         sayln("QNMinimizer aborted due to maximum number of function evaluations");
         sayln(m.toString());
         sayln("** This is not an acceptable termination of QNMinimizer, consider");
@@ -1106,19 +1069,17 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
         sayln("** program by checking the QNMinimizer.wasSuccessful() method.");
         break;
       } catch (OutOfMemoryError oome) {
-        sayln();
         if ( ! qn.s.isEmpty()) {
           qn.s.remove(0);
           qn.y.remove(0);
           qn.rho.remove(0);
+          sb.append("{Caught OutOfMemory, changing m from ").append(qn.mem).append(" to ").append(qn.s.size()).append("}]");
           qn.mem = qn.s.size();
-          log.info("Caught OutOfMemoryError, changing m = " + qn.mem);
         } else {
           throw oome;
         }
       }
-
-    } while ((state = rec.toContinue()) == eState.CONTINUE); // end do while
+    } while ((state = rec.toContinue(sb)) == eState.CONTINUE); // end do while
 
     if (evaluateIters > 0) {
       // do final evaluation
@@ -1131,42 +1092,36 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     //
     // Announce the reason minimization has terminated.
     //
-    log.info();
     switch (state) {
     case TERMINATE_GRADNORM:
-      System.err
-          .println("QNMinimizer terminated due to numerically zero gradient: |g| < EPS  max(1,|x|) ");
+      sayln("QNMinimizer terminated due to numerically zero gradient: |g| < EPS  max(1,|x|) ");
       success = true;
       break;
     case TERMINATE_RELATIVENORM:
-      System.err
-          .println("QNMinimizer terminated due to sufficient decrease in gradient norms: |g|/|g0| < TOL ");
+      sayln("QNMinimizer terminated due to sufficient decrease in gradient norms: |g|/|g0| < TOL ");
       success = true;
       break;
     case TERMINATE_AVERAGEIMPROVE:
-      System.err
-          .println("QNMinimizer terminated due to average improvement: | newest_val - previous_val | / |newestVal| < TOL ");
+      sayln("QNMinimizer terminated due to average improvement: | newest_val - previous_val | / |newestVal| < TOL ");
       success = true;
       break;
     case TERMINATE_MAXITR:
-      System.err
-          .println("QNMinimizer terminated due to reached max iteration " + maxItr );
+      sayln("QNMinimizer terminated due to reached max iteration " + maxItr );
       success = true;
       break;
     case TERMINATE_EVALIMPROVE:
-      System.err
-          .println("QNMinimizer terminated due to no improvement on eval ");
+      sayln("QNMinimizer terminated due to no improvement on eval ");
       success = true;
       x = rec.getBest();
       break;
     default:
-      log.info("QNMinimizer terminated without converging");
+      log.warn("QNMinimizer terminated without converging");
       success = false;
       break;
     }
 
     double completionTime = rec.howLong();
-    sayln("Total time spent in optimization: " + nfsec.format(completionTime) + "s");
+    sayln("Total time spent in optimization: " + nfsec.format(completionTime) + 's');
 
     if (outputToFile) {
       infoFile.println(completionTime + "; Total Time ");
@@ -1184,17 +1139,11 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
 
   private void sayln() {
     if (!quiet) {
-      log.info();
+      log.info(" ");  // no argument seems to cause Redwoods to act weird (in 2016)
     }
   }
 
   private void sayln(String s) {
-    if (!quiet) {
-      log.info(s);
-    }
-  }
-
-  private void say(String s) {
     if (!quiet) {
       log.info(s);
     }
@@ -1302,12 +1251,12 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
   }
 
 
-  /*
+  /**
    * lineSearchBacktrackOWL is the linesearch used for L1 regularization.
    * it only satisfies sufficient descent not the Wolfe conditions.
    */
   private double[] lineSearchBacktrackOWL(Function func, double[] dir, double[] x,
-      double[] newX, double[] grad, double lastValue)
+      double[] newX, double[] grad, double lastValue, StringBuilder sb)
       throws MaxEvaluationsExceeded {
 
     /* Choose the orthant for the new point. */
@@ -1361,9 +1310,9 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       else {
         if (newPoint[f] < lastValue) {
           // an improvement, but not good enough... suspicious!
-          say("!");
+          sb.append('!');
         } else {
-          say(".");
+          sb.append('.');
         }
       }
 
@@ -1373,8 +1322,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     newPoint[a] = step;
     fevals += 1;
     if (fevals > maxFevals) {
-      throw new MaxEvaluationsExceeded(
-          " Exceeded during linesearch() Function ");
+      throw new MaxEvaluationsExceeded("Exceeded during linesearch() Function.");
     }
 
     return newPoint;
@@ -1382,18 +1330,18 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
 
 
   /*
-   * lineSearchBacktrack is the original linesearch used for the first version
-   * of QNMinimizer. it only satisfies sufficient descent not the Wolfe
+   * lineSearchBacktrack is the original line search used for the first version
+   * of QNMinimizer. It only satisfies sufficient descent not the Wolfe
    * conditions.
    */
   private double[] lineSearchBacktrack(Function func, double[] dir, double[] x,
-      double[] newX, double[] grad, double lastValue)
+      double[] newX, double[] grad, double lastValue, StringBuilder sb)
       throws MaxEvaluationsExceeded {
 
     double normGradInDir = ArrayMath.innerProduct(dir, grad);
-    say("(" + nf.format(normGradInDir) + ")");
+    sb.append('(').append(nf.format(normGradInDir)).append(')');
     if (normGradInDir > 0) {
-      say("{WARNING--- direction of positive gradient chosen!}");
+      sayln("{WARNING--- direction of positive gradient chosen!}");
     }
 
     // c1 can be anything between 0 and 1, exclusive (usu. 1/10 - 1/2)
@@ -1423,9 +1371,9 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       fevals += 1;
       if (newPoint[f] < lastValue) {
         // an improvement, but not good enough... suspicious!
-        say("!");
+        sb.append('!');
       } else {
-        say(".");
+        sb.append('.');
       }
       step = c1 * step;
     }
@@ -1433,15 +1381,14 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     newPoint[a] = step;
     fevals += 1;
     if (fevals > maxFevals) {
-      throw new MaxEvaluationsExceeded(
-          " Exceeded during lineSearch() Function ");
+      throw new MaxEvaluationsExceeded("Exceeded during lineSearch() Function.");
     }
 
     return newPoint;
   }
 
   private double[] lineSearchMinPack(DiffFunction dfunc, double[] dir,
-      double[] x, double[] newX, double[] grad, double f0, double tol)
+      double[] x, double[] newX, double[] grad, double f0, double tol, StringBuilder sb)
       throws MaxEvaluationsExceeded {
     double xtrapf = 4.0;
     int info = 0;
@@ -1520,24 +1467,23 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       if ((bracketed && (newPt[a] <= stpMin || newPt[a] >= stpMax))
           || infoc == 0) {
         info = 6;
-        say(" line search failure: bracketed but no feasible found ");
+        sayln(" line search failure: bracketed but no feasible found ");
       }
       if (newPt[a] == aMax && newPt[f] <= fTest && newPt[g] <= gTest) {
         info = 5;
-        say(" line search failure: sufficient decrease, but gradient is more negative ");
+        sayln(" line search failure: sufficient decrease, but gradient is more negative ");
       }
       if (newPt[a] == aMin && (newPt[f] > fTest || newPt[g] >= gTest)) {
         info = 4;
-        say(" line search failure: minimum step length reached ");
+        sayln(" line search failure: minimum step length reached ");
       }
       if (fevals >= maxFevals) {
-        info = 3;
-        throw new MaxEvaluationsExceeded(
-            " Exceeded during lineSearchMinPack() Function ");
+        // info = 3;
+        throw new MaxEvaluationsExceeded("Exceeded during lineSearchMinPack() Function.");
       }
       if (bracketed && stpMax - stpMin <= tol * stpMax) {
         info = 2;
-        say(" line search failure: interval is too small ");
+        sayln(" line search failure: interval is too small ");
       }
       if (newPt[f] <= fTest && Math.abs(newPt[g]) <= -gtol * g0) {
         info = 1;
@@ -1570,7 +1516,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
         endPt[g] = endPt[g] - gTest;
 
         infoc = getStep(/* x, dir, newX, f0, g0, */
-                        newPt, bestPt, endPt, stpMin, stpMax);
+                        newPt, bestPt, endPt, stpMin, stpMax, sb);
 
         bestPt[f] = bestPt[f] + bestPt[a] * gTest;
         endPt[f] = endPt[f] + endPt[a] * gTest;
@@ -1579,7 +1525,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
         endPt[g] = endPt[g] + gTest;
       } else {
         infoc = getStep(/* x, dir, newX, f0, g0, */
-                        newPt, bestPt, endPt, stpMin, stpMax);
+                        newPt, bestPt, endPt, stpMin, stpMax, sb);
       }
 
       if (bracketed) {
@@ -1611,7 +1557,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
         /* double[] x, double[] dir, double[] newX, double f0,
         double g0, // None of these were used */
         double[] newPt, double[] bestPt, double[] endPt,
-        double stpMin, double stpMax) throws MaxEvaluationsExceeded {
+        double stpMin, double stpMax, StringBuilder sb) throws MaxEvaluationsExceeded {
 
     // Should check for input errors.
     int info; // = 0; always set in the if below
@@ -1782,7 +1728,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       copy(newPt, bestPt);
     }
 
-    say(String.valueOf(info));
+    sb.append(String.valueOf(info));
 
     //
     // Compute the new step and safeguard it.
