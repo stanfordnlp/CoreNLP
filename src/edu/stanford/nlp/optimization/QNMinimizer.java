@@ -100,7 +100,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
   private int mem = 10; // the number of s,y pairs to retain for BFGS
   private int its; // = 0; // the number of iterations through the main do-while loop of L-BFGS's minimize()
   private final Function monitor;
-  private boolean quiet;
+  private boolean quiet; // = false
   private static final NumberFormat nf = new DecimalFormat("0.000E0");
   private static final NumberFormat nfsec = new DecimalFormat("0.00"); // for times
   private static final double ftol = 1e-4; // Linesearch parameters
@@ -272,7 +272,6 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
   public void shutUp() {
     this.quiet = true;
   }
-
   public void setM(int m) {
     mem = m;
   }

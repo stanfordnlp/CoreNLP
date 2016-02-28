@@ -1464,7 +1464,6 @@ public class ColumnDataClassifier  {
         lcf  = new LinearClassifierFactory<>(globalFlags.tolerance, globalFlags.useSum, globalFlags.prior, globalFlags.sigma, globalFlags.epsilon, globalFlags.QNsize);
       }
       lcf.setVerbose(globalFlags.verboseOptimization);
-      lcf.useQuasiNewton(); // redundantly specify default a second time so verbose is read. todo: fix architecture of lcf
       if ( ! globalFlags.useQN) {
         lcf.useConjugateGradientAscent();
       }
