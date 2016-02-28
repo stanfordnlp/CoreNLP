@@ -52,7 +52,6 @@ import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -64,6 +63,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * This class provides the top-level API and command-line interface to a set
@@ -93,7 +93,9 @@ import java.lang.reflect.Method;
 public class LexicalizedParser extends ParserGrammar implements Serializable  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(LexicalizedParser.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(LexicalizedParser.class);
+
+  private static Redwood.RedwoodChannels logger = Redwood.channels(LexicalizedParser.class);
 
   public Lexicon lex;
   public BinaryGrammar bg;
@@ -541,24 +543,29 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
   protected static LexicalizedParser getParserFromTextFile(String textFileOrUrl, Options op) {
     try {
       Timing tim = new Timing();
+      logger.info("Loading parser from text file " + textFileOrUrl + ' ');
       BufferedReader in = IOUtils.readerFromString(textFileOrUrl);
       Timing.startTime();
 
       String line = in.readLine();
       confirmBeginBlock(textFileOrUrl, line);
       op.readData(in);
+      log.info(".");
 
       line = in.readLine();
       confirmBeginBlock(textFileOrUrl, line);
       Index<String> stateIndex = HashIndex.loadFromReader(in);
+      log.info(".");
 
       line = in.readLine();
       confirmBeginBlock(textFileOrUrl, line);
       Index<String> wordIndex = HashIndex.loadFromReader(in);
+      log.info(".");
 
       line = in.readLine();
       confirmBeginBlock(textFileOrUrl, line);
       Index<String> tagIndex = HashIndex.loadFromReader(in);
+      log.info(".");
 
       line = in.readLine();
       confirmBeginBlock(textFileOrUrl, line);
@@ -569,24 +576,28 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
         lex.setUnknownWordModel(model);
       }
       lex.readData(in);
+      log.info(".");
 
       line = in.readLine();
       confirmBeginBlock(textFileOrUrl, line);
       UnaryGrammar ug = new UnaryGrammar(stateIndex);
       ug.readData(in);
+      log.info(".");
 
       line = in.readLine();
       confirmBeginBlock(textFileOrUrl, line);
       BinaryGrammar bg = new BinaryGrammar(stateIndex);
       bg.readData(in);
+      log.info(".");
 
       line = in.readLine();
       confirmBeginBlock(textFileOrUrl, line);
       DependencyGrammar dg = new MLEDependencyGrammar(op.tlpParams, op.directional, op.distance, op.coarseDistance, op.trainOptions.basicCategoryTagsInDependencyGrammar, op, wordIndex, tagIndex);
       dg.readData(in);
+      log.info(".");
 
       in.close();
-      log.info("Loading parser from text file " + textFileOrUrl + " ... done [" + tim.toSecondsString() + " sec].");
+      log.info(" done [" + tim.toSecondsString() + " sec].");
       return new LexicalizedParser(lex, bg, ug, dg, stateIndex, wordIndex, tagIndex, op);
     } catch (IOException e) {
       e.printStackTrace();
@@ -598,22 +609,27 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
   public static LexicalizedParser getParserFromSerializedFile(String serializedFileOrUrl) {
     try {
       Timing tim = new Timing();
+      logger.info("Loading parser from serialized file " + serializedFileOrUrl + " ... ");
       ObjectInputStream in = IOUtils.readStreamFromString(serializedFileOrUrl);
       LexicalizedParser pd = loadModel(in);
 
       in.close();
-      log.info("Loading parser from serialized file " + serializedFileOrUrl + " ... done [" + tim.toSecondsString() + " sec].");
+      log.info(" done [" + tim.toSecondsString() + " sec].");
       return pd;
     } catch (InvalidClassException ice) {
       // For this, it's not a good idea to continue and try it as a text file!
+      log.info();   // as in middle of line from above message
       throw new RuntimeException("Invalid class in file: " + serializedFileOrUrl, ice);
     } catch (FileNotFoundException fnfe) {
       // For this, it's not a good idea to continue and try it as a text file!
+      log.info();   // as in middle of line from above message
       throw new RuntimeException("File not found: " + serializedFileOrUrl, fnfe);
     } catch (StreamCorruptedException sce) {
       // suppress error message, on the assumption that we've really got
       // a text grammar, and that'll be tried next
+      log.info();
     } catch (Exception e) {
+      log.info();   // as in middle of line from above message
       e.printStackTrace();
     }
     return null;
@@ -1348,11 +1364,11 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
     }
 
     if (!train && op.testOptions.verbose) {
-      StringUtils.logInvocationString(log, args);
+      StringUtils.printErrInvocationString("LexicalizedParser", args);
     }
     LexicalizedParser lp; // always initialized in next if-then-else block
     if (train) {
-      StringUtils.logInvocationString(log, args);
+      StringUtils.printErrInvocationString("LexicalizedParser", args);
 
       // so we train a parser using the treebank
       GrammarCompactor compactor = null;

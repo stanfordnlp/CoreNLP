@@ -19,7 +19,7 @@ public interface KBPRelationExtractor {
   /**
    * The special tag for no relation.
    */
-  public static final String NO_RELATION = "no_relation";
+  String NO_RELATION = "no_relation";
 
   /**
    * A list of valid KBP NER tags.
