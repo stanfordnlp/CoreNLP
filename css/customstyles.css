@@ -822,9 +822,6 @@ a.accordion-toggle {
     border: 1px solid #a12727;
     border-radius: 8px;
     background: #941414;
-    background: -webkit-gradient(linear, left top, left bottom, from(#941414), to(#941414));
-    background: -moz-linear-gradient(top, #941414, #941414);
-    background: linear-gradient(to bottom, #941414, #941414);
     text-shadow: #591717 1px 1px 1px;
     font: normal normal bold 20px arial;
     color: #ffffff;
@@ -833,9 +830,6 @@ a.accordion-toggle {
 .downloadbutton:hover,
 .downloadbutton:focus {
     background: ##941414;
-    background: -webkit-gradient(linear, left top, left bottom, from(#ff5959), to(#9c0000));
-    background: -moz-linear-gradient(top, #ff5959, #9c0000);
-    background: linear-gradient(to bottom, #ff5959, #9c0000);
     color: #ffffff;
     text-decoration: none;
 }
