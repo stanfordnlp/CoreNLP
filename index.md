@@ -56,6 +56,7 @@ Alternatively, Stanford CoreNLP is [available on **Maven Central**](http://searc
 Source is [available on **GitHub**](https://github.com/stanfordnlp/CoreNLP).
 For more information on obtaining CoreNLP, see the [download page](download.html).
 
+You can find the jars containing the models for each language we support in the table below.
 
 | Language | model jar | version |
 | :------- | :-------- | | :----- |
