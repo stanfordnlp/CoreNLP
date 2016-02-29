@@ -12,6 +12,14 @@ Stanford CoreNLP can be downloaded via the link below. This will download a larg
 model files for English, including for dealing with uncased English (that is, English which is not conventionally capitalized, whether texting or telegrams).
 You can find these for the current version on [the release history page](history.html).
 
+| Language | model jar |
+| :------- | :-------- |
+| Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-01-19-models.jar) |
+| English | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-01-10-models.jar) |
+| French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-2016-01-14-models.jar) |
+| German | [download](http://nlp.stanford.edu/software/stanford-german-2016-01-19-models.jar) |
+| Spanish | [download](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2015-10-14-models.jar) |
+
 If you want to change the source code and recompile the files, see [these instructions](files/basic-compiling.txt).
 Previous releases can be found on [the release history page](history.html).
 
