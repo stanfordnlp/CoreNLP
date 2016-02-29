@@ -10,15 +10,15 @@ Stanford CoreNLP can be downloaded via the link below. This will download a larg
 
 **Other languages:** For working with another (human) language, you need additional model files. We have model files for several other languages. And we have more
 model files for English, including for dealing with uncased English (that is, English which is not conventionally capitalized, whether texting or telegrams).
-You can find these for the current version on [the release history page](history.html).
+You can find the latest models in the table below.  Versions for earlier releases are available on [the release history page](history.html).
 
-| Language | model jar |
-| :------- | :-------- |
-| Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-01-19-models.jar) |
-| English | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-01-10-models.jar) |
-| French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-2016-01-14-models.jar) |
-| German | [download](http://nlp.stanford.edu/software/stanford-german-2016-01-19-models.jar) |
-| Spanish | [download](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2015-10-14-models.jar) |
+| Language | model jar | version |
+| :------- | :-------- | | :----- |
+| Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-01-19-models.jar) | 3.6.0 |
+| English | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-01-10-models.jar) | 3.6.0 |
+| French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-2016-01-14-models.jar) | 3.6.0 |
+| German | [download](http://nlp.stanford.edu/software/stanford-german-2016-01-19-models.jar) | 3.6.0 |
+| Spanish | [download](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2015-10-14-models.jar) | 3.6.0 |
 
 If you want to change the source code and recompile the files, see [these instructions](files/basic-compiling.txt).
 Previous releases can be found on [the release history page](history.html).
