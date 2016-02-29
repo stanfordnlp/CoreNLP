@@ -821,7 +821,7 @@ a.accordion-toggle {
     padding: 12px 24px;
     border: 1px solid #a12727;
     border-radius: 8px;
-    background: ##941414;
+    background: #941414;
     background: -webkit-gradient(linear, left top, left bottom, from(#941414), to(#941414));
     background: -moz-linear-gradient(top, #941414, #941414);
     background: linear-gradient(to bottom, #941414, #941414);
