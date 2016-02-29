@@ -821,6 +821,7 @@ a.accordion-toggle {
     padding: 12px 24px;
     border: 1px solid #a12727;
     background: #941414;
+    border-radius: 4px;
     text-shadow: #591717 1px 1px 1px;
     font: normal normal bold 20px arial;
     color: #ffffff;
