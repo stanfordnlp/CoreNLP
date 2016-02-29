@@ -57,7 +57,7 @@ Source is [available on **GitHub**](https://github.com/stanfordnlp/CoreNLP).
 For more information on obtaining CoreNLP, see the [download page](download.html).
 
 | Language | model jar |
-| :------------ | :------- |
+| :------- | :-------- |
 | Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-01-19-models.jar) |
 | English | [download](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-01-10-models.jar) |
 | French | [download](http://nlp.stanford.edu/software/stanford-french-corenlp-2016-01-14-models.jar) |
