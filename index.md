@@ -56,6 +56,7 @@ Alternatively, Stanford CoreNLP is [available on **Maven Central**](http://searc
 Source is [available on **GitHub**](https://github.com/stanfordnlp/CoreNLP).
 For more information on obtaining CoreNLP, see the [download page](download.html).
 
+
 | Language | model jar |
 | :------- | :-------- |
 | Chinese | [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-01-19-models.jar) |
