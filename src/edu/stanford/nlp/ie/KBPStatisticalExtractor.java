@@ -22,7 +22,6 @@ import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.logging.RedwoodConfiguration;
 
 import java.io.*;
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -59,224 +58,6 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
 
   private static final Redwood.RedwoodChannels log = Redwood.channels(KBPStatisticalExtractor.class);
 
-  @SuppressWarnings("unused")
-  public static class FeaturizerInput {
-
-    public final Span subjectSpan;
-    public final Span objectSpan;
-    public final KBPRelationExtractor.NERTag subjectType;
-    public final KBPRelationExtractor.NERTag objectType;
-    public final Sentence sentence;
-
-    public FeaturizerInput(Span subjectSpan, Span objectSpan,
-                           KBPRelationExtractor.NERTag subjectType, KBPRelationExtractor.NERTag objectType,
-                           Sentence sentence) {
-      this.subjectSpan = subjectSpan;
-      this.objectSpan = objectSpan;
-      this.subjectType = subjectType;
-      this.objectType = objectType;
-      this.sentence = sentence;
-    }
-
-    public Sentence getSentence() {
-      return sentence;
-    }
-
-    public Span getSubjectSpan() {
-      return subjectSpan;
-    }
-
-    public String getSubjectText() {
-      return StringUtils.join(sentence.originalTexts().subList(subjectSpan.start(), subjectSpan.end()).stream(), " ");
-    }
-
-    public Span getObjectSpan() {
-      return objectSpan;
-    }
-
-    public String getObjectText() {
-      return StringUtils.join(sentence.originalTexts().subList(objectSpan.start(), objectSpan.end()).stream(), " ");
-    }
-
-    @Override
-    public String toString() {
-      return "FeaturizerInput{" +
-          ", subjectSpan=" + subjectSpan +
-          ", objectSpan=" + objectSpan +
-          ", sentence=" + sentence +
-          '}';
-    }
-  }
-
-
-  /** A class to compute the accuracy of a relation extractor. */
-  @SuppressWarnings("unused")
-  public static class Accuracy {
-
-    private class PerRelationStat implements  Comparable<PerRelationStat> {
-      public final String name;
-      public final double precision;
-      public final double recall;
-      public final int predictedCount;
-      public final int goldCount;
-      public PerRelationStat(String name, double precision, double recall, int predictedCount, int goldCount) {
-        this.name = name;
-        this.precision = precision;
-        this.recall = recall;
-        this.predictedCount = predictedCount;
-        this.goldCount = goldCount;
-      }
-      public double f1() {
-        if (precision == 0.0 && recall == 0.0) {
-          return 0.0;
-        } else {
-          return 2.0 * precision * recall / (precision + recall);
-        }
-      }
-      @SuppressWarnings("NullableProblems")
-      @Override
-      public int compareTo(PerRelationStat o) {
-        if (this.precision < o.precision) {
-          return -1;
-        } else if (this.precision > o.precision) {
-          return 1;
-        } else {
-          return 0;
-        }
-      }
-      @Override
-      public String toString() {
-        DecimalFormat df = new DecimalFormat("0.00%");
-        return "[" + name + "]  pred/gold: " + predictedCount + "/" + goldCount + "  P: " + df.format(precision) + "  R: " + df.format(recall) + "  F1: " + df.format(f1());
-      }
-    }
-
-    private Counter<String> correctCount   = new ClassicCounter<>();
-    private Counter<String> predictedCount = new ClassicCounter<>();
-    private Counter<String> goldCount      = new ClassicCounter<>();
-    private Counter<String> totalCount     = new ClassicCounter<>();
-    public final ConfusionMatrix<String> confusion = new ConfusionMatrix<>();
-
-
-    public void predict(Set<String> predictedRelationsRaw, Set<String> goldRelationsRaw) {
-      Set<String> predictedRelations = new HashSet<>(predictedRelationsRaw);
-      predictedRelations.remove(NO_RELATION);
-      Set<String> goldRelations = new HashSet<>(goldRelationsRaw);
-      goldRelations.remove(NO_RELATION);
-      // Register the prediction
-      for (String pred : predictedRelations) {
-        if (goldRelations.contains(pred)) {
-          correctCount.incrementCount(pred);
-        }
-        predictedCount.incrementCount(pred);
-      }
-      goldRelations.forEach(goldCount::incrementCount);
-      HashSet<String> allRelations = new HashSet<String>(){{ addAll(predictedRelations); addAll(goldRelations); }};
-      allRelations.forEach(totalCount::incrementCount);
-
-      // Register the confusion matrix
-      if (predictedRelations.size() == 1 && goldRelations.size() == 1) {
-        confusion.add(predictedRelations.iterator().next(), goldRelations.iterator().next());
-      }
-      if (predictedRelations.size() == 1 && goldRelations.size() == 0) {
-        confusion.add(predictedRelations.iterator().next(), "NR");
-      }
-      if (predictedRelations.size() == 0 && goldRelations.size() == 1) {
-        confusion.add("NR", goldRelations.iterator().next());
-      }
-    }
-
-    public double precision(String relation) {
-      if (predictedCount.getCount(relation) == 0) {
-        return 1.0;
-      }
-      return correctCount.getCount(relation) / predictedCount.getCount(relation);
-    }
-
-    public double precisionMicro() {
-      if (predictedCount.totalCount() == 0) {
-        return 1.0;
-      }
-      return correctCount.totalCount() / predictedCount.totalCount();
-    }
-
-    public double precisionMacro() {
-      double sumPrecision = 0.0;
-      for (String rel : totalCount.keySet()) {
-        sumPrecision += precision(rel);
-      }
-      return sumPrecision / ((double) totalCount.size());
-    }
-
-
-    public double recall(String relation) {
-      if (goldCount.getCount(relation) == 0) {
-        return 0.0;
-      }
-      return correctCount.getCount(relation) / goldCount.getCount(relation);
-    }
-
-    public double recallMicro() {
-      if (goldCount.totalCount() == 0) {
-        return 0.0;
-      }
-      return correctCount.totalCount() / goldCount.totalCount();
-    }
-
-    public double recallMacro() {
-      double sumRecall = 0.0;
-      for (String rel : totalCount.keySet()) {
-        sumRecall += recall(rel);
-      }
-      return sumRecall / ((double) totalCount.size());
-    }
-
-    public double f1(String relation) {
-      return 2.0 * precision(relation) * recall(relation) / (precision(relation) + recall(relation));
-    }
-
-    public double f1Micro() {
-      return 2.0 * precisionMicro() * recallMicro() / (precisionMicro() + recallMicro());
-    }
-
-    public double f1Macro() {
-      return 2.0 * precisionMacro() * recallMacro() / (precisionMacro() + recallMacro());
-    }
-
-    public void dumpPerRelationStats(PrintStream out) {
-      List<PerRelationStat> stats = goldCount.keySet().stream().map(relation -> new PerRelationStat(relation, precision(relation), recall(relation), (int) predictedCount.getCount(relation), (int) goldCount.getCount(relation))).collect(Collectors.toList());
-      Collections.sort(stats);
-      out.println("Per-relation Accuracy");
-      for (PerRelationStat stat : stats) {
-        out.println(stat.toString());
-      }
-    }
-
-    public void dumpPerRelationStats() {
-      dumpPerRelationStats(System.out);
-
-    }
-
-    public void toString(PrintStream out) {
-      out.println();
-      out.println("PRECISION (micro average): " + new DecimalFormat("0.000%").format(precisionMicro()));
-      out.println("RECALL    (micro average): " + new DecimalFormat("0.000%").format(recallMicro()));
-      out.println("F1        (micro average): " + new DecimalFormat("0.000%").format(f1Micro()));
-      out.println();
-      out.println("PRECISION (macro average): " + new DecimalFormat("0.000%").format(precisionMacro()));
-      out.println("RECALL    (macro average): " + new DecimalFormat("0.000%").format(recallMacro()));
-      out.println("F1        (macro average): " + new DecimalFormat("0.000%").format(f1Macro()));
-      out.println();
-    }
-
-    public String toString() {
-      ByteArrayOutputStream bs = new ByteArrayOutputStream();
-      PrintStream out = new PrintStream(bs);
-      toString(out);
-      return bs.toString();
-    }
-
-  }
 
   /**
    * A list of triggers for top employees.
@@ -406,7 +187,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
    * @return A list of elements between the two mentions.
    */
   @SuppressWarnings("unchecked")
-  private  static <E> List<E> spanBetweenMentions(FeaturizerInput input, Function<CoreLabel, E> selector) {
+  private  static <E> List<E> spanBetweenMentions(KBPInput input, Function<CoreLabel, E> selector) {
     List<CoreLabel> sentence = input.sentence.asCoreLabels(Sentence::nerTags);
     Span subjSpan = input.subjectSpan;
     Span objSpan = input.objectSpan;
@@ -453,7 +234,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
    *
    * @return The augmented feature.
    */
-  private static String withMentionsPositioned(FeaturizerInput input, String feature) {
+  private static String withMentionsPositioned(KBPInput input, String feature) {
     if (input.subjectSpan.isBefore(input.objectSpan)) {
       return "+__SUBJ__ " + feature + " __OBJ__";
     } else {
@@ -462,7 +243,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
   }
 
   @SuppressWarnings("UnusedParameters")
-  private static void denseFeatures(FeaturizerInput input, Document doc, Sentence sentence, ClassicCounter<String> feats) {
+  private static void denseFeatures(KBPInput input, Document doc, Sentence sentence, ClassicCounter<String> feats) {
     boolean subjBeforeObj = input.subjectSpan.isBefore(input.objectSpan);
 
     // Type signature
@@ -473,7 +254,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
   }
 
   @SuppressWarnings("UnusedParameters")
-  private static void surfaceFeatures(FeaturizerInput input, Document doc, Sentence simpleSentence, ClassicCounter<String> feats) {
+  private static void surfaceFeatures(KBPInput input, Document doc, Sentence simpleSentence, ClassicCounter<String> feats) {
     List<String> lemmaSpan = spanBetweenMentions(input, CoreLabel::lemma);
     List<String> nerSpan = spanBetweenMentions(input, CoreLabel::ner);
     List<String> posSpan = spanBetweenMentions(input, CoreLabel::tag);
@@ -579,7 +360,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
   }
 
 
-  private static void dependencyFeatures(FeaturizerInput input, Document doc, Sentence sentence, ClassicCounter<String> feats) {
+  private static void dependencyFeatures(KBPInput input, Document doc, Sentence sentence, ClassicCounter<String> feats) {
     int subjectHead = sentence.algorithms().headOfSpan(input.subjectSpan);
     int objectHead = sentence.algorithms().headOfSpan(input.objectSpan);
 
@@ -658,7 +439,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
 
 
   @SuppressWarnings("UnusedParameters")
-  private static void relationSpecificFeatures(FeaturizerInput input, Document doc, Sentence sentence, ClassicCounter<String> feats) {
+  private static void relationSpecificFeatures(KBPInput input, Document doc, Sentence sentence, ClassicCounter<String> feats) {
     if (input.objectType.equals(KBPRelationExtractor.NERTag.NUMBER)) {
       // Bucket the object value if it is a number
       // This is to prevent things like "age:9000" and to soft penalize "age:one"
@@ -761,7 +542,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
     }
   }
 
-  public static Counter<String> features(FeaturizerInput input) {
+  public static Counter<String> features(KBPInput input) {
     // Serialize the document to a protocol buffer.
     // This is faster than calling the ProtobufAnnotationSerializer methods implicitly called
     // in the Simple CoreNLP constructors, since we know exactly what should go into these protos.
@@ -813,74 +594,6 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
     relationSpecificFeatures(input, doc, sentence, feats);
 
     return feats;
-  }
-
-  /**
-   * Read a dataset from a CoNLL formatted input file
-   * @param conllInputFile The input file, formatted as a TSV
-   * @return A list of examples.
-   */
-  @SuppressWarnings("StatementWithEmptyBody")
-  public static List<Pair<FeaturizerInput, String>> readDataset(File conllInputFile) throws IOException {
-    BufferedReader reader = IOUtils.readerFromFile(conllInputFile);
-    List<Pair<FeaturizerInput, String>> examples = new ArrayList<>();
-
-    int i = 0;
-    String relation = null;
-    List<String> tokens = new ArrayList<>();
-    Span subject = new Span(Integer.MAX_VALUE, Integer.MIN_VALUE);
-    KBPRelationExtractor.NERTag subjectNER = null;
-    Span object = new Span(Integer.MAX_VALUE, Integer.MIN_VALUE);
-    KBPRelationExtractor.NERTag objectNER = null;
-
-    String line;
-    while ( (line = reader.readLine()) != null ) {
-      if (line.startsWith("#")) {
-        continue;
-      }
-      line = line.replace("\\#", "#");
-      String[] fields = line.split("\t");
-      if (relation == null) {
-        // Case: read the relation
-        assert fields.length == 1;
-        relation = fields[0];
-      } else if (fields.length == 3) {
-        // Case: read a token
-        tokens.add(fields[0]);
-        if ("SUBJECT".equals(fields[1])) {
-          subject = new Span(Math.min(subject.start(), i), Math.max(subject.end(), i + 1));
-          subjectNER = KBPRelationExtractor.NERTag.valueOf(fields[2].toUpperCase());
-        } else if ("OBJECT".equals(fields[1])) {
-          object = new Span(Math.min(object.start(), i), Math.max(object.end(), i + 1));
-          objectNER = KBPRelationExtractor.NERTag.valueOf(fields[2].toUpperCase());
-        } else if ("-".equals(fields[1])) {
-          // do nothing
-        } else {
-          throw new IllegalStateException("Could not parse CoNLL file");
-        }
-        i += 1;
-      } else if ("".equals(line.trim())) {
-        // Case: commit a sentence
-        examples.add(Pair.makePair(new FeaturizerInput(
-            subject,
-            object,
-            subjectNER,
-            objectNER,
-            new Sentence(tokens)
-        ), relation));
-
-        // (clear the variables)
-        i = 0;
-        relation = null;
-        tokens = new ArrayList<>();
-        subject = new Span(Integer.MAX_VALUE, Integer.MIN_VALUE);
-        object = new Span(Integer.MAX_VALUE, Integer.MIN_VALUE);
-      } else {
-        throw new IllegalStateException("Could not parse CoNLL file");
-      }
-    }
-
-    return examples;
   }
 
 
@@ -985,7 +698,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
    * @param input The input to classify.
    * @return A pair with the relation we classified into, along with its confidence.
    */
-  public Pair<String,Double> classify(FeaturizerInput input) {
+  public Pair<String,Double> classify(KBPInput input) {
     RVFDatum<String, String> datum = new RVFDatum<>(features(input));
     Counter<String> scores =  classifier.scoresOf(datum);
     Counters.expInPlace(scores);
@@ -1010,14 +723,14 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
 
     // Load the test (or dev) data
     forceTrack("Test data");
-    List<Pair<FeaturizerInput, String>> testExamples = readDataset(TEST_FILE);
+    List<Pair<KBPInput, String>> testExamples = KBPRelationExtractor.readDataset(TEST_FILE);
     log.info("Read " + testExamples.size() + " examples");
     endTrack("Test data");
 
     // If we can't find an existing model, train one
     if (!IOUtils.existsInClasspathOrFileSystem(MODEL_FILE)) {
       forceTrack("Training data");
-      List<Pair<FeaturizerInput, String>> trainExamples = readDataset(TRAIN_FILE);
+      List<Pair<KBPInput, String>> trainExamples = KBPRelationExtractor.readDataset(TRAIN_FILE);
       log.info("Read " + trainExamples.size() + " examples");
       log.info("" + trainExamples.stream().map(Pair::second).filter(NO_RELATION::equals).count() + " are " + NO_RELATION);
       endTrack("Training data");
@@ -1051,23 +764,26 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
 
     // Read either a newly-trained or pre-trained model
     Object model = IOUtils.readObjectFromURLOrClasspathOrFileSystem(MODEL_FILE);
-    Classifier<String, String> classifier;
+    KBPStatisticalExtractor classifier;
     if (model instanceof Classifier) {
       //noinspection unchecked
-      classifier = (Classifier<String, String>) model;
+      classifier = new KBPStatisticalExtractor((Classifier<String, String>) model);
     } else {
-      classifier = ((KBPStatisticalExtractor) model).classifier;
+      classifier = ((KBPStatisticalExtractor) model);
     }
 
     // Evaluate the model
     forceTrack("Test accuracy");
     Accuracy accuracy = new Accuracy();
+    AtomicInteger testI = new AtomicInteger(0);
     forceTrack("Featurizing");
     testExamples.stream().parallel().forEach( example -> {
-      RVFDatum<String, String> datum = new RVFDatum<>(features(example.first));
-      String predicted = classifier.classOf(datum);
+      Pair<String, Double> predicted = classifier.classify(example.first);
       synchronized (accuracy) {
-        accuracy.predict(Collections.singleton(predicted), Collections.singleton(example.second));
+        accuracy.predict(Collections.singleton(predicted.first), Collections.singleton(example.second));
+      }
+      if (testI.incrementAndGet() % 1000 == 0) {
+        log("[" + testI.get() + " / " + testExamples.size() + "]  " + accuracy.toOneLineString());
       }
     });
     endTrack("Featurizing");
