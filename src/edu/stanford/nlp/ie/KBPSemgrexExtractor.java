@@ -15,6 +15,7 @@ import edu.stanford.nlp.util.ArgumentParser;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
+import edu.stanford.nlp.util.logging.RedwoodConfiguration;
 
 import java.io.File;
 import java.io.IOException;
