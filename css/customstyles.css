@@ -834,20 +834,4 @@ a.accordion-toggle {
 }
 .downloadbutton:active {
     background: #982727;
-    background: -webkit-gradient(linear, left top, left bottom, from(#982727), to(#820000));
-    background: -moz-linear-gradient(top, #982727, #820000);
-    background: linear-gradient(to bottom, #982727, #820000);
-}
-.downloadbutton:before{
-    content:  "\0000a0";
-    display: inline-block;
-    height: 24px;
-    width: 24px;
-    line-height: 24px;
-    margin: 0 4px -6px -4px;
-    position: relative;
-    top: 0px;
-    left: 0px;
-    background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAA2ElEQVRIie2VsQ3CMBBFHzEFQzACE1BAFqCkRaKmyAaWwhbZgiWyBxIKDQOEJoEiLox1doIhXb5k5fLvfM+SYwdG1mxgnfb4538BXrHzk4GAaE2ACTABwoCC7gT7TjFWvoiBL4DSauIbpamN0hKoAs0rU/OT1kAtNK9NLihlnilwALZ0N+TVqrkBD2DnzD0BF8dLgSOwcftoa2W5sJCEz00vkD+Q3O0zF4oawWuBDFiZ98x4vZIASvAAnsDeiiU1biwBQrr35JUbSwCN/x/8tca8KpqxAQrgDdWLOlrOo+lWAAAAAElFTkSuQmCC") no-repeat left center transparent;
-    background-size: 100% 100%;
 }
