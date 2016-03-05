@@ -279,7 +279,9 @@ public class RelationTripleSegmenter {
           }
           List<IndexedWord> prepChunk = Collections.EMPTY_LIST;
           if (prepWord != null && !expected.equals("tmod")) {
-            prepChunk = getValidChunk(parse, prepWord, Collections.singleton("mwe"), Optional.empty(), true).get();
+            Optional<List<IndexedWord>> optionalPrepChunk = getValidChunk(parse, prepWord, Collections.singleton("mwe"), Optional.empty(), true);
+            if (!optionalPrepChunk.isPresent()) { continue; }
+            prepChunk = optionalPrepChunk.get();
             Collections.sort(prepChunk, (a, b) -> {
               double val = a.pseudoPosition() - b.pseudoPosition();
               if (val < 0) { return -1; }
