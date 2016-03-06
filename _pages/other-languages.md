@@ -17,14 +17,10 @@ by Nils Gruenwald. Incomplete. Currently only wraps tagger and TokensRegex.
 
 #### Java
 
-* [dkpro-core-gpl](https://code.google.com/p/dkpro-core-gpl/)
-is a collection of GPL NLP components, principally Stanford CoreNLP,
-wrapped as **UIMA** components, based on work at the Ubiquitous Knowledge
-Processing Lab (UKP) at the Technische Universitaet Darmstadt.  It is
-part of the [DKPro](http://www.ukp.tu-darmstadt.de/research/current-projects/dkpro/) project. See also the [DKPro Core wiki](http://code.google.com/p/dkpro-core-asl/wiki/WikiEntryPage)
-and [a tutorial on the Stanford CoreNLP components](https://code.google.com/p/dkpro-core-asl/wiki/StanfordCoreComponents). It is up-to-date, well-maintained,
-and our recommended way of using Stanford CoreNLP within UIMA.
-* [cleartk-stanford-corenlp](http://cleartk.googlecode.com/git/cleartk-stanford-corenlp/) is a **UIMA** wrapper for Stanford CoreNLP built by Steven Bethard in the context of the [ClearTK](http://code.google.com/p/cleartk/) toolkit.
+* [DKPro Core](https://dkpro.github.io/dkpro-core/) is a collection of NLP components, wrapped as **UIMA** components.
+It includes the various Stanford CoreNLP components, and there is a [tutorial](https://dkpro.github.io/dkpro-core/java/recipes/stanfordnlp/) on how to use them.
+DKPro Core is part of the [DKPro community](https://dkpro.github.io). See also the [DKPro Core documentation](https://dkpro.github.io/dkpro-core/documentation/). It is well-maintained and our recommended way of using Stanford CoreNLP within UIMA. DKPro Core was principally developed by Richard Eckart de Castilho at the Ubiquitous Processing Lab (UKP) at the Technische Universitaet Darmstadt.
+* [cleartk-stanford-corenlp](https://github.com/ClearTK/cleartk/tree/master/cleartk-stanford-corenlp) is a **UIMA** wrapper for Stanford CoreNLP built by Steven Bethard in the context of the [ClearTK](http://cleartk.github.io/cleartk/) toolkit.
 * A [**Vert.x** module for acccessing Stanford CoreNLP](https://github.com/jonnywray/mod-stanford-corenlp) by Jonny Wray.
 * [Wrapper for each of Stanford's Chinese tools](https://github.com/guokr/stan-cn-nlp) by Mingli Yuan.
 * [RESTful API for integrating between Stanford CoreNLP](https://github.com/westei/stanbol-stanfordnlp) and [Apache Stanbol](https://stanbol.apache.org/) by
