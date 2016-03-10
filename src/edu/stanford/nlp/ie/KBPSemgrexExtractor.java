@@ -4,19 +4,27 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.pipeline.DefaultPaths;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexBatchParser;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.simple.Sentence;
+import edu.stanford.nlp.util.ArgumentParser;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
+import edu.stanford.nlp.util.logging.RedwoodConfiguration;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static edu.stanford.nlp.util.logging.Redwood.Util.endTrack;
+import static edu.stanford.nlp.util.logging.Redwood.Util.forceTrack;
+import static edu.stanford.nlp.util.logging.Redwood.Util.log;
 
 /**
  * A tokensregex extractor for KBP.
@@ -25,6 +33,12 @@ import java.util.*;
  */
 public class KBPSemgrexExtractor implements KBPRelationExtractor {
   protected final Redwood.RedwoodChannels logger = Redwood.channels(KBPSemgrexExtractor.class);
+
+  @ArgumentParser.Option(name="dir", gloss="The tokensregex directory")
+  public static String DIR = DefaultPaths.DEFAULT_KBP_SEMGREX_DIR;
+
+  @ArgumentParser.Option(name="test", gloss="The dataset to test on")
+  public static File TEST_FILE = new File("test.conll");
 
   private final Map<RelationType, Collection<SemgrexPattern> > rules = new HashMap<>();
 
@@ -45,7 +59,7 @@ public class KBPSemgrexExtractor implements KBPRelationExtractor {
 
 
   @Override
-  public Pair<String, Double> classify(KBPStatisticalExtractor.FeaturizerInput input) {
+  public Pair<String, Double> classify(KBPInput input) {
     for (RelationType rel : RelationType.values()) {
 
       if (rules.containsKey(rel) &&
@@ -73,7 +87,7 @@ public class KBPSemgrexExtractor implements KBPRelationExtractor {
    * Returns whether any of the given patterns match this tree.
    */
   private boolean matches(CoreMap sentence, Collection<SemgrexPattern> rulesForRel,
-                          KBPStatisticalExtractor.FeaturizerInput input, SemanticGraph graph) {
+                          KBPInput input, SemanticGraph graph) {
     if (graph == null || graph.isEmpty()) {
       return false;
     }
@@ -110,6 +124,31 @@ public class KBPSemgrexExtractor implements KBPRelationExtractor {
       }
     }
     return false;
+  }
+
+
+  public static void main(String[] args) throws IOException {
+    RedwoodConfiguration.standard().apply();  // Disable SLF4J crap.
+    ArgumentParser.fillOptions(KBPSemgrexExtractor.class, args);
+
+    KBPSemgrexExtractor extractor = new KBPSemgrexExtractor(DIR);
+
+    List<Pair<KBPInput, String>> testExamples = KBPRelationExtractor.readDataset(TEST_FILE);
+    Accuracy accuracy = new Accuracy();
+    AtomicInteger testI = new AtomicInteger(0);
+    forceTrack("Test accuracy");
+    testExamples.stream().parallel().forEach( example -> {
+      Pair<String, Double> prediction = extractor.classify(example.first);
+      synchronized (accuracy) {
+        accuracy.predict(Collections.singleton(prediction.first), Collections.singleton(example.second));
+      }
+      if (testI.incrementAndGet() % 1000 == 0) {
+        log("[" + testI.get() + " / " + testExamples.size() + "]  " + accuracy.toOneLineString());
+      }
+    });
+    log(accuracy.toString());
+    endTrack("Test accuracy");
+
   }
 
 }

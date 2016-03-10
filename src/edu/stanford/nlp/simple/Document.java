@@ -12,15 +12,11 @@ import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.IntPair;
-import edu.stanford.nlp.util.IntTuple;
+import edu.stanford.nlp.util.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.ref.SoftReference;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -248,15 +244,6 @@ public class Document {
     }
     return rtn;
   }
-
-  /**
-   * A collection of cached Annotation objects, in case we want to further annotate them.
-   * Note that this awkwardly bypasses garbage collection -- if a document gets garbage collected, the
-   * associated annotation will continue to live here and take up memory for a while.
-   * There is an attempt to mitigate this in {@link edu.stanford.nlp.simple.Document#finalize()}}, but one
-   * should never rely on the finalize method.
-   */
-  private static final IdentityHashMap<Document, SoftReference<Annotation>> annotationPool = new IdentityHashMap<>();
 
   /** The protocol buffer representing this document */
   private final CoreNLPProtos.Document.Builder impl;
@@ -508,11 +495,6 @@ public class Document {
         this.sentences.add(sent);
         this.impl.addSentence(sent.serialize());
       }
-    }
-
-    // Re-computing the sentences invalidates the cached Annotation
-    synchronized (annotationPool) {
-      annotationPool.remove(this);
     }
 
     return sentences;
@@ -820,28 +802,7 @@ public class Document {
    * <p>Therefore, this method is generally NOT recommended.</p>
    */
   public Annotation asAnnotation() {
-    synchronized (annotationPool) {
-      Annotation candidate = annotationPool.get(this).get();
-      if (candidate == null) {
-        // Redo cache
-        synchronized (serializer) {
-          candidate = serializer.fromProto(serialize());
-        }
-        annotationPool.put(this, new SoftReference<>(candidate));
-        // Clean up garbage collected annotations
-        if (annotationPool.size() > 64) {
-          new HashSet<>(annotationPool.keySet()).stream()
-              .filter(key -> annotationPool.get(key).get() == null)
-              .forEach(annotationPool::remove);
-        }
-        // Limit the size of the pool in general, if still too large
-        // This shouldn't happen often...
-        while (annotationPool.size() > 64) {
-          annotationPool.remove(annotationPool.keySet().iterator().next());
-        }
-      }
-      return candidate;
-    }
+    return serializer.fromProto(serialize());
   }
 
   /**
@@ -923,16 +884,5 @@ public class Document {
     return impl.getText();
   }
 
-  /**
-   * Overwritten to clean up some memory from {@link Document#annotationPool}.
-   * As always, don't actually rely on this being called ever.
-   */
-  @Override
-  protected void finalize() throws Throwable {
-    super.finalize();
-    synchronized (annotationPool) {
-      annotationPool.remove(this);
-    }
-  }
 
 }

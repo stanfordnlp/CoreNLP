@@ -58,10 +58,15 @@ public class TableFactor extends NDArrayDoubles {
   }
 
   /**
-   * Fast approximation of the exp() function
+   * Fast approximation of the exp() function.
+   * This approximation was suggested in the paper
+   * A Fast, Compact Approximation of the Exponential Function
+   * http://nic.schraudolph.org/pubs/Schraudolph99.pdf
+   * by Nicol N. Schraudolph. However, it does not seem accurate
+   * enough to be a good default for CRFs.
    *
-   * @param val the value to be exponentiated
-   * @return the value we want
+   * @param val The value to be exponentiated
+   * @return The exponentiated value
    */
   public static double exp(double val) {
     final long tmp = (long) (1512775 * val + 1072632447);
@@ -664,7 +669,7 @@ public class TableFactor extends NDArrayDoubles {
    *
    * @param arr the array to normalize
    */
-  private void normalizeLogArr(double[] arr) {
+  private static void normalizeLogArr(double[] arr) {
     // Find the log-scale normalization value
     double max = Double.NEGATIVE_INFINITY;
     for (double d : arr) {

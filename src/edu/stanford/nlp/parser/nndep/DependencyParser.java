@@ -1,4 +1,4 @@
-package edu.stanford.nlp.parser.nndep; 
+package edu.stanford.nlp.parser.nndep;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.international.Language;
@@ -592,7 +592,7 @@ public class DependencyParser  {
 
     // initialize the loaded parser
     initialize(verbose);
-    t.done("Initializing dependency parser");
+    t.done(log, "Initializing dependency parser");
   }
 
   // TODO this should be a function which returns the embeddings array + embedID

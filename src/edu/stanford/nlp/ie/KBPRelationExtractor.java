@@ -1,8 +1,18 @@
 package edu.stanford.nlp.ie;
 
+import edu.stanford.nlp.ie.machinereading.structure.Span;
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.simple.Sentence;
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.util.ConfusionMatrix;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.StringUtils;
 
+import java.io.*;
+import java.text.DecimalFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static edu.stanford.nlp.ie.KBPRelationExtractor.NERTag.*;
 
@@ -13,7 +23,11 @@ import static edu.stanford.nlp.ie.KBPRelationExtractor.NERTag.*;
  */
 public interface KBPRelationExtractor {
 
-  Pair<String,Double> classify(KBPStatisticalExtractor.FeaturizerInput input);
+  /**
+   * Classify the given sentence into the relation it expresses, with the associated
+   * confidence.
+   */
+  Pair<String,Double> classify(KBPInput input);
 
 
   /**
@@ -271,5 +285,301 @@ public interface KBPRelationExtractor {
       }
       return false;
     }
+  }
+
+  @SuppressWarnings("unused")
+  class KBPInput {
+
+    public final Span subjectSpan;
+    public final Span objectSpan;
+    public final NERTag subjectType;
+    public final NERTag objectType;
+    public final Sentence sentence;
+
+    public KBPInput(Span subjectSpan, Span objectSpan,
+                    NERTag subjectType, NERTag objectType,
+                    Sentence sentence) {
+      this.subjectSpan = subjectSpan;
+      this.objectSpan = objectSpan;
+      this.subjectType = subjectType;
+      this.objectType = objectType;
+      this.sentence = sentence;
+    }
+
+    public Sentence getSentence() {
+      return sentence;
+    }
+
+    public Span getSubjectSpan() {
+      return subjectSpan;
+    }
+
+    public String getSubjectText() {
+      return StringUtils.join(sentence.originalTexts().subList(subjectSpan.start(), subjectSpan.end()).stream(), " ");
+    }
+
+    public Span getObjectSpan() {
+      return objectSpan;
+    }
+
+    public String getObjectText() {
+      return StringUtils.join(sentence.originalTexts().subList(objectSpan.start(), objectSpan.end()).stream(), " ");
+    }
+
+    @Override
+    public String toString() {
+      return "KBPInput{" +
+          ", subjectSpan=" + subjectSpan +
+          ", objectSpan=" + objectSpan +
+          ", sentence=" + sentence +
+          '}';
+    }
+  }
+
+  /**
+   * Read a dataset from a CoNLL formatted input file
+   * @param conllInputFile The input file, formatted as a TSV
+   * @return A list of examples.
+   */
+  @SuppressWarnings("StatementWithEmptyBody")
+  static List<Pair<KBPInput, String>> readDataset(File conllInputFile) throws IOException {
+    BufferedReader reader = IOUtils.readerFromFile(conllInputFile);
+    List<Pair<KBPInput, String>> examples = new ArrayList<>();
+
+    int i = 0;
+    String relation = null;
+    List<String> tokens = new ArrayList<>();
+    Span subject = new Span(Integer.MAX_VALUE, Integer.MIN_VALUE);
+    NERTag subjectNER = null;
+    Span object = new Span(Integer.MAX_VALUE, Integer.MIN_VALUE);
+    NERTag objectNER = null;
+
+    String line;
+    while ( (line = reader.readLine()) != null ) {
+      if (line.startsWith("#")) {
+        continue;
+      }
+      line = line.replace("\\#", "#");
+      String[] fields = line.split("\t");
+      if (relation == null) {
+        // Case: read the relation
+        assert fields.length == 1;
+        relation = fields[0];
+      } else if (fields.length == 3) {
+        // Case: read a token
+        tokens.add(fields[0]);
+        if ("SUBJECT".equals(fields[1])) {
+          subject = new Span(Math.min(subject.start(), i), Math.max(subject.end(), i + 1));
+          subjectNER = valueOf(fields[2].toUpperCase());
+        } else if ("OBJECT".equals(fields[1])) {
+          object = new Span(Math.min(object.start(), i), Math.max(object.end(), i + 1));
+          objectNER = valueOf(fields[2].toUpperCase());
+        } else if ("-".equals(fields[1])) {
+          // do nothing
+        } else {
+          throw new IllegalStateException("Could not parse CoNLL file");
+        }
+        i += 1;
+      } else if ("".equals(line.trim())) {
+        // Case: commit a sentence
+        examples.add(Pair.makePair(new KBPInput(
+            subject,
+            object,
+            subjectNER,
+            objectNER,
+            new Sentence(tokens)
+        ), relation));
+
+        // (clear the variables)
+        i = 0;
+        relation = null;
+        tokens = new ArrayList<>();
+        subject = new Span(Integer.MAX_VALUE, Integer.MIN_VALUE);
+        object = new Span(Integer.MAX_VALUE, Integer.MIN_VALUE);
+      } else {
+        throw new IllegalStateException("Could not parse CoNLL file");
+      }
+    }
+
+    return examples;
+  }
+
+  /** A class to compute the accuracy of a relation extractor. */
+  @SuppressWarnings("unused")
+  class Accuracy {
+
+    private class PerRelationStat implements  Comparable<PerRelationStat> {
+      public final String name;
+      public final double precision;
+      public final double recall;
+      public final int predictedCount;
+      public final int goldCount;
+      public PerRelationStat(String name, double precision, double recall, int predictedCount, int goldCount) {
+        this.name = name;
+        this.precision = precision;
+        this.recall = recall;
+        this.predictedCount = predictedCount;
+        this.goldCount = goldCount;
+      }
+      public double f1() {
+        if (precision == 0.0 && recall == 0.0) {
+          return 0.0;
+        } else {
+          return 2.0 * precision * recall / (precision + recall);
+        }
+      }
+      @SuppressWarnings("NullableProblems")
+      @Override
+      public int compareTo(PerRelationStat o) {
+        if (this.precision < o.precision) {
+          return -1;
+        } else if (this.precision > o.precision) {
+          return 1;
+        } else {
+          return 0;
+        }
+      }
+      @Override
+      public String toString() {
+        DecimalFormat df = new DecimalFormat("0.00%");
+        return "[" + name + "]  pred/gold: " + predictedCount + "/" + goldCount + "  P: " + df.format(precision) + "  R: " + df.format(recall) + "  F1: " + df.format(f1());
+      }
+    }
+
+    private Counter<String> correctCount   = new ClassicCounter<>();
+    private Counter<String> predictedCount = new ClassicCounter<>();
+    private Counter<String> goldCount      = new ClassicCounter<>();
+    private Counter<String> totalCount     = new ClassicCounter<>();
+    public final ConfusionMatrix<String> confusion = new ConfusionMatrix<>();
+
+
+    public void predict(Set<String> predictedRelationsRaw, Set<String> goldRelationsRaw) {
+      Set<String> predictedRelations = new HashSet<>(predictedRelationsRaw);
+      predictedRelations.remove(NO_RELATION);
+      Set<String> goldRelations = new HashSet<>(goldRelationsRaw);
+      goldRelations.remove(NO_RELATION);
+      // Register the prediction
+      for (String pred : predictedRelations) {
+        if (goldRelations.contains(pred)) {
+          correctCount.incrementCount(pred);
+        }
+        predictedCount.incrementCount(pred);
+      }
+      goldRelations.forEach(goldCount::incrementCount);
+      HashSet<String> allRelations = new HashSet<String>(){{ addAll(predictedRelations); addAll(goldRelations); }};
+      allRelations.forEach(totalCount::incrementCount);
+
+      // Register the confusion matrix
+      if (predictedRelations.size() == 1 && goldRelations.size() == 1) {
+        confusion.add(predictedRelations.iterator().next(), goldRelations.iterator().next());
+      }
+      if (predictedRelations.size() == 1 && goldRelations.size() == 0) {
+        confusion.add(predictedRelations.iterator().next(), "NR");
+      }
+      if (predictedRelations.size() == 0 && goldRelations.size() == 1) {
+        confusion.add("NR", goldRelations.iterator().next());
+      }
+    }
+
+    public double precision(String relation) {
+      if (predictedCount.getCount(relation) == 0) {
+        return 1.0;
+      }
+      return correctCount.getCount(relation) / predictedCount.getCount(relation);
+    }
+
+    public double precisionMicro() {
+      if (predictedCount.totalCount() == 0) {
+        return 1.0;
+      }
+      return correctCount.totalCount() / predictedCount.totalCount();
+    }
+
+    public double precisionMacro() {
+      double sumPrecision = 0.0;
+      for (String rel : totalCount.keySet()) {
+        sumPrecision += precision(rel);
+      }
+      return sumPrecision / ((double) totalCount.size());
+    }
+
+
+    public double recall(String relation) {
+      if (goldCount.getCount(relation) == 0) {
+        return 0.0;
+      }
+      return correctCount.getCount(relation) / goldCount.getCount(relation);
+    }
+
+    public double recallMicro() {
+      if (goldCount.totalCount() == 0) {
+        return 0.0;
+      }
+      return correctCount.totalCount() / goldCount.totalCount();
+    }
+
+    public double recallMacro() {
+      double sumRecall = 0.0;
+      for (String rel : totalCount.keySet()) {
+        sumRecall += recall(rel);
+      }
+      return sumRecall / ((double) totalCount.size());
+    }
+
+    public double f1(String relation) {
+      return 2.0 * precision(relation) * recall(relation) / (precision(relation) + recall(relation));
+    }
+
+    public double f1Micro() {
+      return 2.0 * precisionMicro() * recallMicro() / (precisionMicro() + recallMicro());
+    }
+
+    public double f1Macro() {
+      return 2.0 * precisionMacro() * recallMacro() / (precisionMacro() + recallMacro());
+    }
+
+    public void dumpPerRelationStats(PrintStream out) {
+      List<PerRelationStat> stats = goldCount.keySet().stream().map(relation -> new PerRelationStat(relation, precision(relation), recall(relation), (int) predictedCount.getCount(relation), (int) goldCount.getCount(relation))).collect(Collectors.toList());
+      Collections.sort(stats);
+      out.println("Per-relation Accuracy");
+      for (PerRelationStat stat : stats) {
+        out.println(stat.toString());
+      }
+    }
+
+    public void dumpPerRelationStats() {
+      dumpPerRelationStats(System.out);
+
+    }
+
+    public void toString(PrintStream out) {
+      out.println();
+      out.println("PRECISION (micro average): " + new DecimalFormat("0.000%").format(precisionMicro()));
+      out.println("RECALL    (micro average): " + new DecimalFormat("0.000%").format(recallMicro()));
+      out.println("F1        (micro average): " + new DecimalFormat("0.000%").format(f1Micro()));
+      out.println();
+      out.println("PRECISION (macro average): " + new DecimalFormat("0.000%").format(precisionMacro()));
+      out.println("RECALL    (macro average): " + new DecimalFormat("0.000%").format(recallMacro()));
+      out.println("F1        (macro average): " + new DecimalFormat("0.000%").format(f1Macro()));
+      out.println();
+    }
+
+    public String toString() {
+      ByteArrayOutputStream bs = new ByteArrayOutputStream();
+      PrintStream out = new PrintStream(bs);
+      toString(out);
+      return bs.toString();
+    }
+
+    /**
+     * A short, single line summary of the micro-precision/recall/f1.
+     */
+    public String toOneLineString() {
+      return
+          "P: " + new DecimalFormat("0.000%").format(precisionMicro()) + "  " +
+          "R: " + new DecimalFormat("0.000%").format(recallMicro()) + "  " +
+          "F1: " + new DecimalFormat("0.000%").format(f1Micro());
+    }
+
   }
 }

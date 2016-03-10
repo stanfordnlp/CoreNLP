@@ -363,7 +363,7 @@ public class KBPAnnotator implements Annotator {
 
             if (objNER.isPresent() &&
                 KBPRelationExtractor.RelationType.plausiblyHasRelation(subjNER.get(), objNER.get())) {  // type check
-              KBPStatisticalExtractor.FeaturizerInput input = new KBPStatisticalExtractor.FeaturizerInput(
+              KBPRelationExtractor.KBPInput input = new KBPRelationExtractor.KBPInput(
                   new Span(subjBegin, subjEnd),
                   new Span(objBegin, objEnd),
                   subjNER.get(),

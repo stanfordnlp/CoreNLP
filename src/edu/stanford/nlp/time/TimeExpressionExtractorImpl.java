@@ -274,7 +274,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
         //int flags = 0;
         SUTime.Temporal grounded = temporal.resolve(docDate, flags);
         if (grounded == null) {
-          logger.warning("Error resolving " + temporal + ", using docDate=" + docDate);
+          logger.debug("Error resolving " + temporal + ", using docDate=" + docDate);
         }
         if (grounded != temporal) {
           te.origTemporal = temporal;
