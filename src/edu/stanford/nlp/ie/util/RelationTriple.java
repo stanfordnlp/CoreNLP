@@ -22,10 +22,6 @@ import java.util.function.Function;
 public class RelationTriple implements Comparable<RelationTriple>, Iterable<CoreLabel> {
   /** The subject (first argument) of this triple */
   public final List<CoreLabel> subject;
-
-  /** The subject (first argument) of this triple, in its canonical mention (i.e., coref resolved) */
-  public final List<CoreLabel> canonicalSubject;
-
   /**
    * The relation (second argument) of this triple.
    * Note that this is only the part of the relation that can be grounded in the sentence itself.
@@ -35,13 +31,8 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
    * {@link RelationTriple#relationGloss} or {@link RelationTriple#relationLemmaGloss}.
    */
   public final List<CoreLabel> relation;
-
   /** The object (third argument) of this triple */
   public final List<CoreLabel> object;
-
-  /** The object (third argument) of this triple, in its canonical mention (i.e., coref resolved). */
-  public final List<CoreLabel> canonicalObject;
-
   /** A marker for the relation expressing a tmod not grounded in a word in the sentence. */
   private boolean istmod = false;
   /** A marker for the relation expressing a prefix "be" not grounded in a word in the sentence. */
@@ -63,10 +54,8 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
   public RelationTriple(List<CoreLabel> subject, List<CoreLabel> relation, List<CoreLabel> object,
                         double confidence) {
     this.subject = subject;
-    this.canonicalSubject = subject;
     this.relation = relation;
     this.object = object;
-    this.canonicalObject = object;
     this.confidence = confidence;
   }
 
@@ -78,51 +67,19 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
   }
 
   /**
-   * Create a new triple with known values for the subject, relation, and object.
-   * For example, "(cats, play with, yarn)"
-   * @param subject The subject of this triple; e.g., "cats".
-   * @param relation The relation of this triple; e.g., "play with".
-   * @param object The object of this triple; e.g., "yarn".
-   */
-  public RelationTriple(List<CoreLabel> subject,
-                        List<CoreLabel> canonicalSubject,
-                        List<CoreLabel> relation,
-                        List<CoreLabel> object,
-                        List<CoreLabel> canonicalObject,
-                        double confidence) {
-    this.subject = subject;
-    this.canonicalSubject = canonicalSubject;
-    this.relation = relation;
-    this.object = object;
-    this.canonicalObject = canonicalObject;
-    this.confidence = confidence;
-  }
-
-  /**
-   * @see edu.stanford.nlp.ie.util.RelationTriple#RelationTriple(java.util.List, java.util.List, java.util.List, double)
-   */
-  public RelationTriple(List<CoreLabel> subject,
-                        List<CoreLabel> canonicalSubject,
-                        List<CoreLabel> relation,
-                        List<CoreLabel> canonicalObject,
-                        List<CoreLabel> object) {
-    this(subject, canonicalSubject, relation, object, canonicalObject, 1.0);
-  }
-
-  /**
    * Returns all the tokens in the extraction, in the order subject then relation then object.
    */
   public List<CoreLabel> allTokens() {
     List<CoreLabel> allTokens = new ArrayList<>();
-    allTokens.addAll(canonicalSubject);
+    allTokens.addAll(subject);
     allTokens.addAll(relation);
-    allTokens.addAll(canonicalObject);
+    allTokens.addAll(object);
     return allTokens;
   }
 
   /** The subject of this relation triple, as a String */
   public String subjectGloss() {
-    return StringUtils.join(canonicalSubject.stream().map(CoreLabel::word), " ");
+    return StringUtils.join(subject.stream().map(CoreLabel::word), " ");
   }
 
   /** The head of the subject of this relation triple. */
@@ -130,22 +87,17 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     return subject.get(subject.size() - 1);
   }
 
-  /** The entity link of the subject */
-  public String subjectLink() {
-    return subjectLemmaGloss();
-  }
-
   /**
    * The subject of this relation triple, as a String of the subject's lemmas.
    * This method will additionally strip out punctuation as well.
    */
    public String subjectLemmaGloss() {
-    return StringUtils.join(canonicalSubject.stream().filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]")).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ");
+    return StringUtils.join(subject.stream().filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]")).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ");
   }
 
   /** The object of this relation triple, as a String */
   public String objectGloss() {
-    return StringUtils.join(canonicalObject.stream().map(CoreLabel::word), " ");
+    return StringUtils.join(object.stream().map(CoreLabel::word), " ");
   }
 
   /** The head of the object of this relation triple. */
@@ -153,17 +105,12 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     return object.get(object.size() - 1);
   }
 
-  /** The entity link of the subject */
-  public String objectLink() {
-    return objectLemmaGloss();
-  }
-
   /**
    * The object of this relation triple, as a String of the object's lemmas.
    * This method will additionally strip out punctuation as well.
    */
   public String objectLemmaGloss() {
-    return StringUtils.join(canonicalObject.stream().filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]")).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ");
+    return StringUtils.join(object.stream().filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]")).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ");
   }
 
   /**
@@ -194,10 +141,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     String relationGloss = (
         (prefixBe ? "be " : "")
         + StringUtils.join(relation.stream()
-            .filter(x -> x.tag() == null || (!x.tag().matches("[\\.\\?,:;'\"!]") && (x.lemma() == null || !x.lemma().matches("[\\.,;'\"\\?!]"))))
-            .map(x -> x.lemma() == null ? x.word() : x.lemma()),
-          " ")
-          .toLowerCase()
+          .filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]") && (x.lemma() == null || !x.lemma().matches("[\\.,;'\"\\?!]"))).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ").toLowerCase()
         + (suffixBe ? " be" : "")
         + (suffixOf ? " of" : "")
         + (istmod ? " at_time" : "")
@@ -225,9 +169,6 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     return Pair.makePair(min, max);
   }
 
-  /**
-   * Gets the span of the NON-CANONICAL subject.
-   */
   public Pair<Integer, Integer> subjectTokenSpan() {
     return getSpan(subject, x -> x.index() - 1, x -> x.index() - 1);
   }
@@ -253,16 +194,14 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
       // Variables to keep track of the longest chunk
       int longestChunk = 0;
       int longestChunkStart = 0;
+      int lastIndex = relation.get(0).index() - 1;
       int thisChunk = 1;
       int thisChunkStart = 0;
       // Find the longest chunk
       for (int i = 1; i < relation.size(); ++i) {
         CoreLabel token = relation.get(i);
-        CoreLabel lastToken = relation.get(i - 1);
-        if (lastToken.index() + 1 == token.index()) {
+        if (token.index() - 1 == lastIndex + 1) {
           thisChunk += 1;
-        } else if (lastToken.index() + 2 == token.index()) {
-          thisChunk += 2;  // a skip of one character is _usually_ punctuation
         } else {
           if (thisChunk > longestChunk) {
             longestChunk = thisChunk;
@@ -280,14 +219,11 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
       // Return the longest chunk
       return Pair.makePair(
           relation.get(longestChunkStart).index() - 1,
-          relation.get(longestChunkStart).index() - 1 + longestChunk
+          relation.get(longestChunkStart + longestChunk - 1).index()
       );
     }
   }
 
-  /**
-   * Gets the span of the NON-CANONICAL object.
-   */
   public Pair<Integer, Integer> objectTokenSpan() {
     return getSpan(object, x -> x.index() - 1, x -> x.index() - 1);
   }
@@ -491,22 +427,6 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
       this.sourceTree = new SemanticGraph(tree);
     }
 
-    /**
-     * Create a new triple with known values for the subject, relation, and object,
-     * along with their canonical spans (i.e., resolving coreference)
-     * For example, "(cats, play with, yarn)"
-     */
-    public WithTree(List<CoreLabel> subject,
-                          List<CoreLabel> canonicalSubject,
-                          List<CoreLabel> relation,
-                          List<CoreLabel> object,
-                          List<CoreLabel> canonicalObject,
-                          double confidence,
-                    SemanticGraph tree) {
-      super(subject, canonicalSubject, relation, object, canonicalObject, confidence);
-      this.sourceTree = tree;
-    }
-
     /** The head of the subject of this relation triple. */
     public CoreLabel subjectHead() {
       if (subject.size() == 1) { return subject.get(0); }
@@ -541,48 +461,4 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
       return Optional.of(sourceTree);
     }
   }
-
-
-  /**
-   * A {@link edu.stanford.nlp.ie.util.RelationTriple}, but with both the tree and the entity
-   * links saved as well.
-   */
-  public static class WithLink extends WithTree {
-    /** The canonical entity link of the subject */
-    public final Optional<String> subjectLink;
-    /** The canonical entity link of the object */
-    public final Optional<String> objectLink;
-
-    /** Create a new relation triple */
-    public WithLink(List<CoreLabel> subject, List<CoreLabel> canonicalSubject, List<CoreLabel> relation, List<CoreLabel> object, List<CoreLabel> canonicalObject, double confidence,
-                    SemanticGraph tree,
-                    String subjectLink,
-                    String objectLink
-                    ) {
-      super(subject, canonicalSubject, relation, object, canonicalObject, confidence, tree);
-      this.subjectLink = Optional.ofNullable(subjectLink);
-      this.objectLink = Optional.ofNullable(objectLink);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public String subjectLink() {
-      if (subjectLink.isPresent()) {
-        return subjectLink.get();
-      } else {
-        return super.subjectLink();
-      }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public String objectLink() {
-      if (objectLink.isPresent()) {
-        return objectLink.get();
-      } else {
-        return super.objectLink();
-      }
-    }
-  }
-
 }

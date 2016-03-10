@@ -1,11 +1,14 @@
 package edu.stanford.nlp.ling;
 
-import edu.stanford.nlp.simple.Sentence;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.util.CoreMap;
 import junit.framework.TestCase;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /** 
  *  Tests the static methods that turn sentences (lists of Labels)
@@ -51,13 +54,13 @@ public class SentenceTest extends TestCase {
       clValueTags.add(cl);
     }
 
-    assertEquals(expectedValueOnly, SentenceUtils.listToString(clWords, true));
-    assertEquals(expectedValueOnly, SentenceUtils.listToString(clValues, true));
+    assertEquals(expectedValueOnly, Sentence.listToString(clWords, true));
+    assertEquals(expectedValueOnly, Sentence.listToString(clValues, true));
 
     assertEquals(expectedTagged, 
-                 SentenceUtils.listToString(clWordTags, false, separator));
+                 Sentence.listToString(clWordTags, false, separator));
     assertEquals(expectedTagged, 
-                 SentenceUtils.listToString(clValueTags, false, separator));
+                 Sentence.listToString(clValueTags, false, separator));
   }
 
   public void testTaggedWordListToString() {
@@ -65,20 +68,9 @@ public class SentenceTest extends TestCase {
     for (int i = 0; i < words.length; ++i) {
       tagged.add(new TaggedWord(words[i], tags[i]));
     }
-    assertEquals(expectedValueOnly, SentenceUtils.listToString(tagged, true));
+    assertEquals(expectedValueOnly, Sentence.listToString(tagged, true));
     assertEquals(expectedTagged, 
-                 SentenceUtils.listToString(tagged, false, separator));
-  }
-
-  /**
-   * Serializing a raw sentence shouldn't make it an order of magnitude larger than
-   * the raw text.
-   */
-  public void testTokenizedSentenceSize() {
-    String text = "one two three four five";
-    byte[] sentenceArray = new Sentence(text).serialize().toByteArray();
-    byte[] textArray = text.getBytes();
-    assertTrue(sentenceArray.length < textArray.length * 10);
+                 Sentence.listToString(tagged, false, separator));
   }
 }
 

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie.machinereading.domains.ace; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.machinereading.domains.ace;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,10 +49,7 @@ import edu.stanford.nlp.util.StringUtils;
  * @author David McClosky
  *
  */
-public class AceReader extends GenericDataSetReader  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AceReader.class);
+public class AceReader extends GenericDataSetReader {
 
   private final Counter<String> entityCounts;
   private final Counter<String> adjacentEntityMentions;
@@ -425,9 +421,9 @@ public class AceReader extends GenericDataSetReader  {
    * @return entity as an {@link EntityMention}
    */
   private EntityMention convertAceEntityMention(AceEntityMention entityMention, String docId, CoreMap sentence, int tokenOffset) {
-    //log.info("TYPE is " + entityMention.getParent().getType());
-    //log.info("SUBTYPE is " + entityMention.getParent().getSubtype());
-    //log.info("LDCTYPE is " + entityMention.getLdctype());
+    //System.err.println("TYPE is " + entityMention.getParent().getType());
+    //System.err.println("SUBTYPE is " + entityMention.getParent().getSubtype());
+    //System.err.println("LDCTYPE is " + entityMention.getLdctype());
 
     AceCharSeq ext = entityMention.getExtent();
     AceCharSeq head = entityMention.getHead();
@@ -496,7 +492,7 @@ public class AceReader extends GenericDataSetReader  {
     r.parse("/scr/nlp/data/ACE2005/");
     // Annotation a = r.parse("/user/mengqiu/scr/twitter/nlp/corpus_prep/standalone/ar/data");
     // BasicEntityExtractor.saveCoNLLFiles("/tmp/conll", a, false, false);
-    log.info("done");
+    System.err.println("done");
   }
 
 }

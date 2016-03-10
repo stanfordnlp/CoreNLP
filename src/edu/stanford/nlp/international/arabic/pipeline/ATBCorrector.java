@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.arabic.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.arabic.pipeline;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -25,10 +24,7 @@ import edu.stanford.nlp.util.Pair;
  * @author Spence Green
  *
  */
-public class ATBCorrector implements TreeTransformer  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ATBCorrector.class);
+public class ATBCorrector implements TreeTransformer {
 
   private static final boolean DEBUG = false;
   
@@ -46,13 +42,13 @@ public class ATBCorrector implements TreeTransformer  {
       BufferedReader br = new BufferedReader(new StringReader(editStr));
       List<TsurgeonPattern> tsp = new ArrayList<>();
       while ((line = br.readLine()) != null) {
-        if (DEBUG) log.info("Pattern is " + line);
+        if (DEBUG) System.err.print("Pattern is " + line);
         TregexPattern matchPattern = TregexPattern.compile(line);
-        if (DEBUG) log.info(" [" + matchPattern + "]");
+        if (DEBUG) System.err.println(" [" + matchPattern + "]");
         tsp.clear();
         while (continuing(line = br.readLine())) {
           TsurgeonPattern p = Tsurgeon.parseOperation(line);
-          if (DEBUG) log.info("Operation is " + line + " [" + p + "]");
+          if (DEBUG) System.err.println("Operation is " + line + " [" + p + "]");
           tsp.add(p);
         }
         if ( ! tsp.isEmpty()) {
@@ -127,7 +123,7 @@ public class ATBCorrector implements TreeTransformer  {
    */
   public static void main(String[] args) {
     if(args.length != 1) {
-      log.info("Usage: java " + ATBCorrector.class.getName() + " filename\n");
+      System.err.println("Usage: java " + ATBCorrector.class.getName() + " filename\n");
       System.exit(-1);
     }
     

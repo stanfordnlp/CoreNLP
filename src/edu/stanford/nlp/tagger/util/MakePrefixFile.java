@@ -1,7 +1,6 @@
-package edu.stanford.nlp.tagger.util; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.tagger.util;
 
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.tagger.maxent.TaggerConfig;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;
@@ -24,14 +23,11 @@ import java.util.Random;
  *
  * @author John Bauer
  */
-public class MakePrefixFile  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MakePrefixFile.class);
+public class MakePrefixFile {
 
   public static void main(String[] args) {
     Properties config = StringUtils.argsToProperties(args);
-    log.info(config);
+    System.err.println(config);
 
     boolean fullSentence = PropertiesUtils.getBool(config, "fullSentence", false);
 
@@ -41,9 +37,9 @@ public class MakePrefixFile  {
     TaggedFileRecord record = TaggedFileRecord.createRecord(config, config.getProperty("input"));
     for (List<TaggedWord> sentence : record.reader()) {
       int len = random.nextInt(sentence.size()) + 1;
-      System.out.println(SentenceUtils.listToString(sentence.subList(0, len), false, tagSeparator));
+      System.out.println(Sentence.listToString(sentence.subList(0, len), false, tagSeparator));
       if (fullSentence) {
-        System.out.println(SentenceUtils.listToString(sentence, false, tagSeparator));
+        System.out.println(Sentence.listToString(sentence, false, tagSeparator));        
       }
     }
   }

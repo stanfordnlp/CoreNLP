@@ -6,13 +6,12 @@ import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
 import junit.framework.TestCase;
-import org.junit.Assert;
+import junit.framework.Assert;
 
 /**
  * Makes sure that the pool creates new Annotators when the signature properties change
  */
 public class AnnotatorPoolTest extends TestCase {
-
   static class SampleAnnotatorFactory extends AnnotatorFactory {
     private static final long serialVersionUID = 1L;
     public SampleAnnotatorFactory(Properties props) {
@@ -42,7 +41,9 @@ public class AnnotatorPoolTest extends TestCase {
     @Override
     public String signature() {
       // keep track of all relevant properties for this annotator here!
-      return "sample.prop = " + properties.getProperty("sample.prop", "");
+      StringBuilder os = new StringBuilder();
+      os.append("sample.prop = " + properties.getProperty("sample.prop", ""));
+      return os.toString();
     }
 
     @Override
@@ -69,5 +70,4 @@ public class AnnotatorPoolTest extends TestCase {
     System.out.println("Third annotator: " + a3);
     Assert.assertTrue(a1 != a3);
   }
-
 }

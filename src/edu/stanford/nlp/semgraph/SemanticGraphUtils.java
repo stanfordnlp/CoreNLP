@@ -1,5 +1,4 @@
-package edu.stanford.nlp.semgraph; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.semgraph;
 
 import edu.stanford.nlp.ling.AnnotationLookup;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -33,10 +32,7 @@ import java.util.regex.Pattern;
  * @author Eric Yeh
  *
  */
-public class SemanticGraphUtils  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SemanticGraphUtils.class);
+public class SemanticGraphUtils {
 
   private SemanticGraphUtils() {}
 
@@ -450,7 +446,7 @@ public class SemanticGraphUtils  {
           sg.addEdge(gov, dep, newReln, weight, isExtra);
         } else {
           if (verbose)
-            log.info("Warning, could not find matching GrammaticalRelation for reln="+edge.getRelation());
+            System.err.println("Warning, could not find matching GrammaticalRelation for reln="+edge.getRelation());
         }
       }
     }
@@ -507,7 +503,7 @@ public class SemanticGraphUtils  {
         sg.addEdge(depEdge.getGovernor(), newNode, depEdge.getRelation(), depEdge.getWeight(), depEdge.isExtra());
       }
     } else {
-      log.info("SemanticGraphUtils.replaceNode: previous node does not exist");
+      System.err.println("SemanticGraphUtils.replaceNode: previous node does not exist");
     }
   }
 

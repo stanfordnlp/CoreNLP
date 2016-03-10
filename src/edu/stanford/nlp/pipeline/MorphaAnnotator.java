@@ -1,5 +1,4 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -24,10 +23,7 @@ import java.util.Set;
  *
  * @author Jenny Finkel
  */
-public class MorphaAnnotator implements Annotator {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MorphaAnnotator.class);
+public class MorphaAnnotator implements Annotator{
 
   private boolean VERBOSE = false;
 
@@ -45,13 +41,13 @@ public class MorphaAnnotator implements Annotator {
 
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
-      log.info("Finding lemmas ...");
+      System.err.print("Finding lemmas ...");
     }
     Morphology morphology = new Morphology();
-    if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
+    if (annotation.has(CoreAnnotations.SentencesAnnotation.class)) {
       for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-        //log.info("Lemmatizing sentence: " + tokens);
+        //System.err.println("Lemmatizing sentence: " + tokens);
         for (CoreLabel token : tokens) {
           String text = token.get(CoreAnnotations.TextAnnotation.class);
           String posTag = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
@@ -108,7 +104,6 @@ public class MorphaAnnotator implements Annotator {
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
     return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TextAnnotation.class,
         CoreAnnotations.TokensAnnotation.class,
         CoreAnnotations.SentencesAnnotation.class,
         CoreAnnotations.PartOfSpeechAnnotation.class

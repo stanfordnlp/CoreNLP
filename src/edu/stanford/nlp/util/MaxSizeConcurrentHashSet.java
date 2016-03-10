@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,21 +28,16 @@ public class MaxSizeConcurrentHashSet<E> implements Set<E>, Serializable {
   private transient Set<E> s; // the keySet of the Map
   private int maxSize;
 
-  /** Create a ConcurrentHashSet with no maximum size. */
   public MaxSizeConcurrentHashSet() {
     this(-1);
   }
 
-  /** Create a ConcurrentHashSet with the maximum size given. */
   public MaxSizeConcurrentHashSet(int maxSize) {
     this.m = new ConcurrentHashMap<>();
     this.maxSize = maxSize;
     init();
   }
 
-  /** Create a ConcurrentHashSet with the elements in s.
-   *  This set has no maximum size.
-   */
   public MaxSizeConcurrentHashSet(Set<? extends E> s) {
     this.m = new ConcurrentHashMap<>(Math.max(s.size(), 16));
     init();

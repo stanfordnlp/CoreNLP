@@ -1,5 +1,4 @@
-package edu.stanford.nlp.util; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.util;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.ArgumentParser.Option;
@@ -15,10 +14,7 @@ import java.util.zip.GZIPInputStream;
  * Created by Sonal Gupta
  */
 
-public class GoogleNGramsSQLBacked  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(GoogleNGramsSQLBacked.class);
+public class GoogleNGramsSQLBacked {
 
   @Option(name="populateTables")
   static boolean populateTables = false;
@@ -105,7 +101,7 @@ public class GoogleNGramsSQLBacked  {
     }else
       return -1;
     }catch(SQLException e){
-      log.info("Error getting count for " + str+ ". The query was " + query);
+      System.err.println("Error getting count for " + str+ ". The query was " + query);
       e.printStackTrace();
       throw new RuntimeException(e);
     }
@@ -220,7 +216,7 @@ public class GoogleNGramsSQLBacked  {
       }else
         return -1;
     }catch(SQLException e){
-      log.info("Error getting count for " + str+ ". The query was " + query);
+      System.err.println("Error getting count for " + str+ ". The query was " + query);
       e.printStackTrace();
       throw new RuntimeException(e);
     }

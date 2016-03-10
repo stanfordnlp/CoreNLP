@@ -7,7 +7,6 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasOffset;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.math.SloppyMath;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -48,10 +47,7 @@ import java.util.stream.Stream;
  * @author Chris Cox
  * @version 2006/02/03
  */
-public class StringUtils  {
-
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(StringUtils.class);
+public class StringUtils {
 
   /**
    * Don't let anyone instantiate this class.
@@ -532,30 +528,6 @@ public class StringUtils  {
     return fields;
   }
 
-
-  /**
-   * Split on a given character, filling out the fields in the output array.
-   * This is suitable for, e.g., splitting a TSV file of known column count.
-   * @param out The output array to fill
-   * @param input The input to split
-   * @param delimiter The delimiter to split on.
-   */
-  public static void splitOnChar(String[] out, String input, char delimiter) {
-    int lastSplit = 0;
-    int outI = 0;
-    char[] chars = input.toCharArray();
-    for (int i = 0; i < chars.length; ++i) {
-      if (chars[i] == delimiter) {
-        out[outI] = new String(chars, lastSplit, i - lastSplit);
-        outI += 1;
-        lastSplit = i + 1;
-      }
-    }
-    if (outI < out.length) {
-      out[outI] = input.substring(lastSplit);
-    }
-  }
-
   /** Split a string into tokens.  Because there is a tokenRegex as well as a
    *  separatorRegex (unlike for the conventional split), you can do things
    *  like correctly split quoted strings or parenthesized arguments.
@@ -584,7 +556,7 @@ public class StringUtils  {
         ret.add(vm.group());
         str = str.substring(vm.end());
         // String got = vm.group();
-        // log.info("vmatched " + got + "; now str is " + str);
+        // System.err.println("vmatched " + got + "; now str is " + str);
       } else {
         throw new IllegalArgumentException("valueSplit: " + valueRegex + " doesn't match " + str);
       }
@@ -593,7 +565,7 @@ public class StringUtils  {
         if (sm.lookingAt()) {
           str = str.substring(sm.end());
           // String got = sm.group();
-          // log.info("smatched " + got + "; now str is " + str);
+          // System.err.println("smatched " + got + "; now str is " + str);
         } else {
           throw new IllegalArgumentException("valueSplit: " + separatorRegex + " doesn't match " + str);
         }
@@ -1086,7 +1058,7 @@ public class StringUtils  {
 
   /**
    * Prints to a file.  If the file already exists, appends if
-   * {@code append=true}, and overwrites if {@code append=false}.
+   * <code>append=true</code>, and overwrites if <code>append=false</code>.
    */
   public static void printToFile(File file, String message, boolean append,
                                  boolean printLn, String encoding) {
@@ -1106,7 +1078,7 @@ public class StringUtils  {
         pw.print(message);
       }
     } catch (Exception e) {
-      log.info("Exception: in printToFile " + file.getAbsolutePath());
+      System.err.println("Exception: in printToFile " + file.getAbsolutePath());
       e.printStackTrace();
     } finally {
       if (pw != null) {
@@ -1119,7 +1091,7 @@ public class StringUtils  {
 
   /**
    * Prints to a file.  If the file already exists, appends if
-   * {@code append=true}, and overwrites if {@code append=false}.
+   * <code>append=true</code>, and overwrites if <code>append=false</code>.
    */
   public static void printToFileLn(File file, String message, boolean append) {
     PrintWriter pw = null;
@@ -1128,7 +1100,7 @@ public class StringUtils  {
       pw = new PrintWriter(fw);
       pw.println(message);
     } catch (Exception e) {
-      log.info("Exception: in printToFileLn " + file.getAbsolutePath() + ' ' + message);
+      System.err.println("Exception: in printToFileLn " + file.getAbsolutePath() + ' ' + message);
       e.printStackTrace();
     } finally {
       if (pw != null) {
@@ -1140,7 +1112,7 @@ public class StringUtils  {
 
   /**
    * Prints to a file.  If the file already exists, appends if
-   * {@code append=true}, and overwrites if {@code append=false}.
+   * <code>append=true</code>, and overwrites if <code>append=false</code>.
    */
   public static void printToFile(File file, String message, boolean append) {
     PrintWriter pw = null;
@@ -1149,9 +1121,13 @@ public class StringUtils  {
       pw = new PrintWriter(fw);
       pw.print(message);
     } catch (Exception e) {
-      throw new RuntimeIOException("Exception in printToFile " + file.getAbsolutePath(), e);
+      System.err.println("Exception: in printToFile " + file.getAbsolutePath());
+      e.printStackTrace();
     } finally {
-      IOUtils.closeIgnoringExceptions(pw);
+      if (pw != null) {
+        pw.flush();
+        pw.close();
+      }
     }
   }
 
@@ -1166,7 +1142,7 @@ public class StringUtils  {
 
   /**
    * Prints to a file.  If the file already exists, appends if
-   * {@code append=true}, and overwrites if {@code append=false}.
+   * <code>append=true</code>, and overwrites if <code>append=false</code>
    */
   public static void printToFile(String filename, String message, boolean append) {
     printToFile(new File(filename), message, append);
@@ -1174,7 +1150,7 @@ public class StringUtils  {
 
   /**
    * Prints to a file.  If the file already exists, appends if
-   * {@code append=true}, and overwrites if {@code append=false}.
+   * <code>append=true</code>, and overwrites if <code>append=false</code>
    */
   public static void printToFileLn(String filename, String message, boolean append) {
     printToFileLn(new File(filename), message, append);
@@ -1405,18 +1381,18 @@ public class StringUtils  {
       // num chars needed to display longest num
       int numChars = (int) Math.ceil(Math.log(d[n][m]) / Math.log(10));
       for (i = 0; i < numChars + 3; i++) {
-        log.info(' ');
+        System.err.print(' ');
       }
       for (j = 0; j < m; j++) {
-        log.info(t.charAt(j) + " ");
+        System.err.print(t.charAt(j) + " ");
       }
-      log.info();
+      System.err.println();
       for (i = 0; i <= n; i++) {
-        log.info((i == 0 ? ' ' : s.charAt(i - 1)) + " ");
+        System.err.print((i == 0 ? ' ' : s.charAt(i - 1)) + " ");
         for (j = 0; j <= m; j++) {
-          log.info(d[i][j] + " ");
+          System.err.print(d[i][j] + " ");
         }
-        log.info();
+        System.err.println();
       }
     ---- */
     // Step 7
@@ -1457,7 +1433,7 @@ public class StringUtils  {
         }
       }
     }
-    // log.info("LCCS(" + s + "," + t + ") = " + max);
+    // System.err.println("LCCS(" + s + "," + t + ") = " + max);
     return max;
   }
 
@@ -1887,10 +1863,25 @@ public class StringUtils  {
   }
 
 
+  public static void printErrInvocationString(String cls, String[] args) {
+    System.err.println(toInvocationString(cls, args));
+  }
+
+
+  public static String toInvocationString(String cls, String[] args) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(cls).append(" invoked on ").append(new Date());
+    sb.append(" with arguments:\n  ");
+    for (String arg : args) {
+      sb.append(' ').append(arg);
+    }
+    return sb.toString();
+  }
+
   /**
    * Strip directory from filename.  Like Unix 'basename'. <p/>
    *
-   * Example: {@code getBaseName("/u/wcmac/foo.txt") ==> "foo.txt"}
+   * Example: <code>getBaseName("/u/wcmac/foo.txt") ==> "foo.txt"</code>
    */
   public static String getBaseName(String fileName) {
     return getBaseName(fileName, "");
@@ -2622,24 +2613,6 @@ public class StringUtils  {
    */
   public static String expandEnvironmentVariables(String raw) {
     return expandEnvironmentVariables(raw, System.getenv());
-  }
-
-
-  /**
-   * Logs the command line arguments to Redwood on the given channels.
-   * The logger should be a RedwoodChannels of a single channel: the main class.
-   *
-   * @param logger The redwood logger to log to.
-   * @param args The command-line arguments to log.
-   */
-  public static void logInvocationString(Redwood.RedwoodChannels logger, String[] args) {
-    StringBuilder sb = new StringBuilder("Invoked on ");
-    sb.append(new Date());
-    sb.append(" with arguments:");
-    for (String arg : args) {
-      sb.append(' ').append(arg);
-    }
-    logger.info(sb.toString());
   }
 
 }

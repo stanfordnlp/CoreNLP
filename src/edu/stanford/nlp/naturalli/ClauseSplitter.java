@@ -32,10 +32,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  *
  * @author Gabor Angeli
  */
-public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, ClauseSplitterSearchProblem>  {
-
-  /** A logger for this class */
-  Redwood.RedwoodChannels log = Redwood.channels(ClauseSplitter.class);
+public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, ClauseSplitterSearchProblem> {
 
   enum ClauseClassifierLabel {
     CLAUSE_SPLIT(2),
@@ -82,6 +79,7 @@ public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, Claus
    *
    * @return A factory for creating searchers from a given dependency tree.
    */
+  @SuppressWarnings("unchecked")
   static ClauseSplitter train(
       Stream<Pair<CoreMap, Collection<Pair<Span, Span>>>> trainingData,
       Optional<File> modelPath,
@@ -91,10 +89,10 @@ public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, Claus
     // Parse options
     LinearClassifierFactory<ClauseClassifierLabel, String> factory = new LinearClassifierFactory<>();
     // Generally useful objects
-    OpenIE openie = new OpenIE(PropertiesUtils.asProperties(
-        "splitter.nomodel", "true",
-        "optimizefor", "GENERAL"
-    ));
+    OpenIE openie = new OpenIE(new Properties() {{
+      setProperty("splitter.nomodel", "true");
+      setProperty("optimizefor", "GENERAL");
+    }});
     WeightedDataset<ClauseClassifierLabel, String> dataset = new WeightedDataset<>();
     AtomicInteger numExamplesProcessed = new AtomicInteger(0);
     final Optional<PrintWriter> datasetDumpWriter = trainingDataDump.map(file -> {
@@ -200,15 +198,16 @@ public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, Claus
             datum.setLabel(decision.second);
             // (dump datum to debug log)
             if (datasetDumpWriter.isPresent()) {
-              datasetDumpWriter.get().println(decision.second + "\t" +
-                  StringUtils.join(decision.first.entrySet().stream().map(entry -> entry.getKey() + "->" + entry.getValue()), ";"));
+              datasetDumpWriter.get().println("" +
+                  decision.second + "\t" +
+                  StringUtils.join(decision.first.entrySet().stream().map(entry -> "" + entry.getKey() + "->" + entry.getValue()), ";"));
             }
             // (add datum to dataset)
             dataset.add(datum);
           }
         }
         return true;
-      }, new LinearClassifier<>(new ClassicCounter<>()), Collections.emptyMap(), featurizer, 10000);
+      }, new LinearClassifier<>(new ClassicCounter<>()), Collections.EMPTY_MAP, featurizer, 10000);
 
       // Debug info
       if (numExamplesProcessed.incrementAndGet() % 100 == 0) {
@@ -239,12 +238,12 @@ public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, Claus
 
     // Step 3: Check accuracy of classifier
     forceTrack("Training accuracy");
-    dataset.randomize(42L);
+    dataset.randomize(42l);
     Util.dumpAccuracy(fullClassifier, dataset);
     endTrack("Training accuracy");
 
     int numFolds = 5;
-    forceTrack(numFolds + " fold cross-validation");
+    forceTrack("" + numFolds + " fold cross-validation");
     for (int fold = 0; fold < numFolds; ++fold) {
       forceTrack("Fold " + (fold + 1));
       forceTrack("Training");
@@ -256,7 +255,7 @@ public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, Claus
       endTrack("Test");
       endTrack("Fold " + (fold + 1));
     }
-    endTrack(numFolds + " fold cross-validation");
+    endTrack("" + numFolds + " fold cross-validation");
 
 
     // Step 5: return factory
@@ -280,10 +279,10 @@ public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, Claus
   static ClauseSplitter load(String serializedModel) throws IOException {
     try {
       long start = System.currentTimeMillis();
+      System.err.print("Loading clause searcher from " + serializedModel + "...");
       Pair<Classifier<ClauseClassifierLabel,String>, Featurizer> data = IOUtils.readObjectFromURLOrClasspathOrFileSystem(serializedModel);
       ClauseSplitter rtn =  (tree, truth) -> new ClauseSplitterSearchProblem(tree, truth, Optional.of(data.first), Optional.of(data.second));
-      log.info("Loading clause splitter from " + serializedModel + " ... done [" +
-              Redwood.formatTimeDifference(System.currentTimeMillis() - start) + "]");
+      System.err.println("done [" + Redwood.formatTimeDifference(System.currentTimeMillis() - start) + "]");
       return rtn;
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException("Invalid model at path: " + serializedModel, e);

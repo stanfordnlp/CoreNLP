@@ -173,7 +173,7 @@
   <target name="slowitest" depends="classpath,compile"
           description="Run really slow integration tests">
     <echo message="${ant.project.name}" />
-    <junit fork="yes" maxmemory="12g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
+    <junit fork="yes" maxmemory="8g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
       <classpath refid="classpath"/>
       <classpath path="${build.path}"/>
       <classpath path="${data.path}"/>

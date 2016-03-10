@@ -1,5 +1,4 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import java.io.IOException;
 import java.util.*;
@@ -17,10 +16,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.util.*;
 
-public class HybridCorefAnnotator extends TextAnnotationCreator implements Annotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(HybridCorefAnnotator.class);
+public class HybridCorefAnnotator extends TextAnnotationCreator implements Annotator {
 
   private static final boolean VERBOSE = false;
 
@@ -46,7 +42,7 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
       corefSystem = new CorefSystem(corefProps);
       OLD_FORMAT = Boolean.parseBoolean(props.getProperty("oldCorefFormat", "false"));
     } catch (Exception e) {
-      log.error("cannot create HybridCorefAnnotator!");
+      System.err.println("ERROR: cannot create HybridCorefAnnotator!");
       e.printStackTrace();
       throw new RuntimeException(e);
     }
@@ -56,7 +52,7 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
   public void annotate(Annotation annotation){
     try {
       if (!annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
-        log.error("this coreference resolution system requires SentencesAnnotation!");
+        System.err.println("ERROR: this coreference resolution system requires SentencesAnnotation!");
         return;
       }
 
@@ -221,6 +217,6 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
 
     Annotation document = testChinese();
     System.out.println(document.get(CorefChainAnnotation.class));
-    log.info();
+    System.err.println();
   }
 }

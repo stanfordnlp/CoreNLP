@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.trees.PennTreebankLanguagePack;
 import edu.stanford.nlp.fsm.TransducerGraph;
@@ -12,10 +11,7 @@ import java.util.List;
 /**
  * @author Teg Grenager (grenager@cs.stanford.edu)
  */
-public class ExactGrammarCompactor extends GrammarCompactor  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ExactGrammarCompactor.class);
+public class ExactGrammarCompactor extends GrammarCompactor {
 
   TransducerGraph.GraphProcessor quasiDeterminizer = new QuasiDeterminizer();
   AutomatonMinimizer minimizer = new FastExactAutomatonMinimizer();
@@ -49,7 +45,7 @@ public class ExactGrammarCompactor extends GrammarCompactor  {
       writeFile(result, "exactminimized", (String) result.getEndNodes().iterator().next());
     }
     // for debugging do comparison of the paths accepted by graph and result
-    //log.info(TransducerGraph.testGraphPaths(graph, result, 100));
+    //System.err.println(TransducerGraph.testGraphPaths(graph, result, 100));
     return result;
   }
 

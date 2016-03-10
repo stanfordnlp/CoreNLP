@@ -1,10 +1,10 @@
 
 package edu.stanford.nlp.util.logging;
 
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.logging.Redwood.Record;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.List;
 
@@ -16,18 +16,19 @@ import java.util.List;
  * @author Gabor Angeli (angeli at cs.stanford)
  */
 public class VisibilityHandler extends LogRecordHandler {
-
-  private enum State { SHOW_ALL, HIDE_ALL }
+  private static enum State { SHOW_ALL, HIDE_ALL }
 
   private VisibilityHandler.State defaultState = State.SHOW_ALL;
-  private final Set<Object> deltaPool = new HashSet<>();  // replacing with Generics.newHashSet() makes classloader go haywire?
+  private final Set<Object> deltaPool = Generics.newHashSet();
 
   public VisibilityHandler() { }
 
   public VisibilityHandler(Object[] channels) {
     if (channels.length > 0) {
       defaultState = State.HIDE_ALL;
-      Collections.addAll(deltaPool, channels);
+      for (Object channel : channels) {
+        deltaPool.add(channel);
+      }
     }
   }
 
@@ -136,5 +137,4 @@ public class VisibilityHandler extends LogRecordHandler {
   public List<Record> signalEndTrack(int newDepth, long timeOfEnd) {
     return EMPTY;
   }
-
 }

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.arabic.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.arabic.pipeline;
 
 import java.io.*;
 import java.util.List;
@@ -21,10 +20,7 @@ import edu.stanford.nlp.util.Generics;
  * @author Spence Green
  *
  */
-public class UniversalPOSMapper extends LDCPosMapper  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(UniversalPOSMapper.class);
+public class UniversalPOSMapper extends LDCPosMapper {
 
   private final Map<String,String> universalMap;
   private final MorphoFeatureSpecification morphoSpec;

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.optimization; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.optimization;
 
 import edu.stanford.nlp.util.CallbackFunction;
 
@@ -27,10 +26,7 @@ import java.util.Arrays;
  * @version 1.0
  * @since 1.0
  */
-public class CGMinimizer implements Minimizer<DiffFunction>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CGMinimizer.class);
+public class CGMinimizer implements Minimizer<DiffFunction> {
 
   private static NumberFormat nf = new DecimalFormat("0.000E0");
 
@@ -153,8 +149,8 @@ public class CGMinimizer implements Minimizer<DiffFunction>  {
       for (int j = 0; j < initial.length; j++) {
         tempVector[j] = initial[j] + x * direction[j];
       }
-      //log.info("Tmp "+arrayToString(tempVector,10));
-      //log.info("Dir "+arrayToString(direction,10));
+      //System.err.println("Tmp "+arrayToString(tempVector,10));
+      //System.err.println("Dir "+arrayToString(direction,10));
       return tempVector;
     }
 
@@ -221,13 +217,13 @@ public class CGMinimizer implements Minimizer<DiffFunction>  {
           //Ax = new Double(bx);
           //Bx = new Double(u);
           //Cx = new Double(cx);
-          //log.info("\nReturning3: a="+bx+" ("+fb+") b="+u+"("+fu+") c="+cx+" ("+fc+")");
+          //System.err.println("\nReturning3: a="+bx+" ("+fb+") b="+u+"("+fu+") c="+cx+" ("+fc+")");
           return new Triple(bx, u, cx);
         } else if (fu > fb) {
           //Cx = new Double(u);
           //Ax = new Double(ax);
           //Bx = new Double(bx);
-          //log.info("\nReturning2: a="+ax+" ("+fa+") b="+bx+"("+fb+") c="+u+" ("+fu+")");
+          //System.err.println("\nReturning2: a="+ax+" ("+fa+") b="+bx+"("+fb+") c="+u+" ("+fu+")");
           return new Triple(ax, bx, u);
         }
         u = cx + GOLD * (cx - bx);
@@ -256,7 +252,7 @@ public class CGMinimizer implements Minimizer<DiffFunction>  {
       fb = fc;
       fc = fu;
     }
-    //log.info("\nReturning: a="+ax+" ("+fa+") b="+bx+"("+fb+") c="+cx+" ("+fc+")");
+    //System.err.println("\nReturning: a="+ax+" ("+fa+") b="+bx+"("+fb+") c="+cx+" ("+fc+")");
     return new Triple(ax, bx, cx);
   }
 
@@ -280,13 +276,13 @@ public class CGMinimizer implements Minimizer<DiffFunction>  {
     double dv = dx;
     double dw = dx;
     for (int iteration = 0; iteration < ITMAX; iteration++) {
-      //log.info("dbrent "+iteration+" x "+x+" fx "+fx);
+      //System.err.println("dbrent "+iteration+" x "+x+" fx "+fx);
       double xm = 0.5 * (a + b);
       double tol1 = TOL * fabs(x);
       double tol2 = 2.0 * tol1;
       if (fabs(x - xm) <= (tol2 - 0.5 * (b - a))) {
         if (dbVerbose) {
-          log.info("dbrent returning because min is cornered " + a + " (" + function.valueAt(a) + ") ~ " + x + " (" + fx + ") " + b + " (" + function.valueAt(b) + ')');
+          System.err.println("dbrent returning because min is cornered " + a + " (" + function.valueAt(a) + ") ~ " + x + " (" + fx + ") " + b + " (" + function.valueAt(b) + ')');
         }
         return x;
       }
@@ -340,7 +336,7 @@ public class CGMinimizer implements Minimizer<DiffFunction>  {
         fu = function.valueAt(u);
         if (fu > fx) {
           if (dbVerbose) {
-            log.info("dbrent returning because derivative is broken");
+            System.err.println("dbrent returning because derivative is broken");
           }
           return x;
         }
@@ -386,7 +382,7 @@ public class CGMinimizer implements Minimizer<DiffFunction>  {
       return x;
     }
     if (dbVerbose) {
-      log.info("Warning: exiting dbrent because ITMAX exceeded!");
+      System.err.println("Warning: exiting dbrent because ITMAX exceeded!");
     }
     return 0.0;
   }
@@ -415,13 +411,13 @@ public class CGMinimizer implements Minimizer<DiffFunction>  {
     //Double Bx = new Double(0.0);
     // bracket the extreme pt
     double guess = 0.01;
-    //log.info("Current "+oneDim.valueAt(0)+" nudge "+(oneDim.smallestZeroPositiveLocation()*1e-2)+" "+oneDim.valueAt(oneDim.smallestZeroPositiveLocation()*1e-5));
+    //System.err.println("Current "+oneDim.valueAt(0)+" nudge "+(oneDim.smallestZeroPositiveLocation()*1e-2)+" "+oneDim.valueAt(oneDim.smallestZeroPositiveLocation()*1e-5));
     if (!silent) {
-      log.info("[");
+      System.err.print("[");
     }
     Triple bracketing = mnbrak(new Triple(0, guess, 0), oneDim);
     if (!silent) {
-      log.info("]");
+      System.err.print("]");
     }
     double ax = bracketing.a;
     double xx = bracketing.b;
@@ -429,23 +425,23 @@ public class CGMinimizer implements Minimizer<DiffFunction>  {
     //lastXx = xx;
     // CHECK FOR END OF WORLD
     if (!(ax <= xx && xx <= bx) && !(bx <= xx && xx <= ax)) {
-      log.info("Bad bracket order!");
+      System.err.println("Bad bracket order!");
     }
     if (verbose) {
-      log.info("Bracketing found: " + ax + ' ' + xx + ' ' + bx);
-      log.info("Bracketing found: " + oneDim.valueAt(ax) + ' ' + oneDim.valueAt(xx) + ' ' + oneDim.valueAt(bx));
-      //log.info("Bracketing found: "+arrayToString(oneDim.vectorOf(ax),3)+" "+arrayToString(oneDim.vectorOf(xx),3)+" "+arrayToString(oneDim.vectorOf(bx),3));
+      System.err.println("Bracketing found: " + ax + ' ' + xx + ' ' + bx);
+      System.err.println("Bracketing found: " + oneDim.valueAt(ax) + ' ' + oneDim.valueAt(xx) + ' ' + oneDim.valueAt(bx));
+      //System.err.println("Bracketing found: "+arrayToString(oneDim.vectorOf(ax),3)+" "+arrayToString(oneDim.vectorOf(xx),3)+" "+arrayToString(oneDim.vectorOf(bx),3));
     }
     // find the extreme pt
     if (!silent) {
-      log.info("<");
+      System.err.print("<");
     }
     double xmin = dbrent(oneDim, ax, xx, bx);
     if (!silent) {
-      log.info(">");
+      System.err.print(">");
     }
     // return the full vector
-    //log.info("Went "+xmin+" during lineMinimize");
+    //System.err.println("Went "+xmin+" during lineMinimize");
     return oneDim.vectorOf(xmin);
   }
 
@@ -464,12 +460,12 @@ public class CGMinimizer implements Minimizer<DiffFunction>  {
     // evaluate function
     double fp = dFunction.valueAt(initial);
     if (verbose) {
-      log.info("Initial: " + fp);
+      System.err.println("Initial: " + fp);
     }
     double[] xi = copyArray(dFunction.derivativeAt(initial));
     if (verbose) {
-      log.info("Initial at: " + arrayToString(initial, numToPrint));
-      log.info("Initial deriv: " + arrayToString(xi, numToPrint));
+      System.err.println("Initial at: " + arrayToString(initial, numToPrint));
+      System.err.println("Initial deriv: " + arrayToString(xi, numToPrint));
     }
 
     // make some vectors
@@ -488,23 +484,23 @@ public class CGMinimizer implements Minimizer<DiffFunction>  {
     for (int iterations = 1; iterations < maxIterations; iterations++) {
 
       if (!silent) {
-        log.info("Iter " + iterations + ' ');
+        System.err.print("Iter " + iterations + ' ');
       }
       // do a line min along descent direction
-      //log.info("Minimizing from ("+p[0]+","+p[1]+") along ("+xi[0]+","+xi[1]+")\n");
+      //System.err.println("Minimizing from ("+p[0]+","+p[1]+") along ("+xi[0]+","+xi[1]+")\n");
       if (verbose) {
-        log.info("Minimizing along " + arrayToString(xi, numToPrint));
+        System.err.println("Minimizing along " + arrayToString(xi, numToPrint));
       }
-      //log.info("Current is "+fp);
+      //System.err.println("Current is "+fp);
       double[] p2 = lineMinimize(dFunction, p, xi);
       double fp2 = dFunction.valueAt(p2);
-      //log.info("Result is "+fp2+" (from "+fp+") at ("+p2[0]+","+p2[1]+")\n");
+      //System.err.println("Result is "+fp2+" (from "+fp+") at ("+p2[0]+","+p2[1]+")\n");
       if (verbose) {
-        log.info("Result is " + fp2 + " after " + iterations);
-        log.info("Result at " + arrayToString(p2, numToPrint));
+        System.err.println("Result is " + fp2 + " after " + iterations);
+        System.err.println("Result at " + arrayToString(p2, numToPrint));
       }
 
-      //log.info(fp2+"|"+(int)(Math.log((fabs(fp2-fp)+1e-100)/(fabs(fp)+fabs(fp2)+1e-100))/Math.log(10)));
+      //System.err.print(fp2+"|"+(int)(Math.log((fabs(fp2-fp)+1e-100)/(fabs(fp)+fabs(fp2)+1e-100))/Math.log(10)));
       if (!silent) {
         System.err.printf(" %s (delta: %s)\n",
           nf.format(fp2), nf.format(fp-fp2));
@@ -522,10 +518,10 @@ public class CGMinimizer implements Minimizer<DiffFunction>  {
           return p2;
         }
         simpleGDStep = true;
-        //log.info("Switched to GD for a step.");
+        //System.err.println("Switched to GD for a step.");
       } else {
         //if (!simpleGD)
-        //log.info("Switching to CGD.");
+        //System.err.println("Switching to CGD.");
         simpleGDStep = false;
       }
       // shift variables
@@ -541,7 +537,7 @@ public class CGMinimizer implements Minimizer<DiffFunction>  {
         iterationCallbackFunction.callback(p2, iterations, fp2, xi);
       }
 
-      //log.info("mx "+arrayMax(xi)+" mn "+arrayMin(xi));
+      //System.err.print("mx "+arrayMax(xi)+" mn "+arrayMin(xi));
 
       if (!simpleGDStep && !simpleGD && (iterations % resetFrequency != 0)) {
         // do the magic -- part i
@@ -590,7 +586,7 @@ public class CGMinimizer implements Minimizer<DiffFunction>  {
     }
 
     // too many iterations
-    log.info("Warning: exiting minimize because ITER exceeded!");
+    System.err.println("Warning: exiting minimize because ITER exceeded!");
     return p;
 
   }

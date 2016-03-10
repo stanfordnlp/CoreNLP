@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.Tokenizer;
@@ -16,10 +15,7 @@ import java.util.Iterator;
  *  @author Roger Levy (rog@stanford.edu)
  *  @author javanlp
  */
-public class TreeTokenizerFactory implements TokenizerFactory<Tree>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TreeTokenizerFactory.class);
+public class TreeTokenizerFactory implements TokenizerFactory<Tree> {
 
   /** Create a TreeTokenizerFactory from a TreeReaderFactory. */
   public TreeTokenizerFactory(TreeReaderFactory trf) {
@@ -38,7 +34,7 @@ public class TreeTokenizerFactory implements TokenizerFactory<Tree>  {
           return tr.readTree();
         }
         catch(IOException e) {
-          log.info("Error in reading tree.");
+          System.err.println("Error in reading tree.");
           return null;
         }
       }

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.sequences; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sequences;
 
 import edu.stanford.nlp.util.Beam;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
@@ -16,10 +15,7 @@ import java.util.NoSuchElementException;
  * @author Dan Klein
  * @author Teg Grenager (grenager@stanford.edu)
  */
-public class BeamBestSequenceFinder implements BestSequenceFinder  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(BeamBestSequenceFinder.class);
+public class BeamBestSequenceFinder implements BestSequenceFinder {
 
   // todo [CDM 2013]: AFAICS, this class doesn't actually work correctly AND gives nondeterministic answers. See the commented out test in BestSequenceFinderTest
 
@@ -181,7 +177,7 @@ public class BeamBestSequenceFinder implements BestSequenceFinder  {
       int[] seq = bestSeq.tags();
       return seq;
     } catch (NoSuchElementException e) {
-      log.info("Beam empty -- no best sequence.");
+      System.err.println("Beam empty -- no best sequence.");
       return null;
     }
 
@@ -238,9 +234,9 @@ public class BeamBestSequenceFinder implements BestSequenceFinder  {
     // Do forward Viterbi algorithm
 
     // loop over the classification spot
-    //log.info();
+    //System.err.println();
     for (int pos=leftWindow; pos<length+leftWindow; pos++) {
-      //log.info(".");
+      //System.err.print(".");
       // loop over window product types
       for (int product=0; product<productSizes[pos]; product++) {
 	// check for initial spot
@@ -346,9 +342,9 @@ public class BeamBestSequenceFinder implements BestSequenceFinder  {
     // Do forward Viterbi algorithm
 
     // loop over the classification spot
-    //log.info();
+    //System.err.println();
     for (int pos=leftWindow; pos<length+leftWindow; pos++) {
-      //log.info(".");
+      //System.err.print(".");
       // loop over window product types
       for (int product=0; product<productSizes[pos]; product++) {
 	// check for initial spot

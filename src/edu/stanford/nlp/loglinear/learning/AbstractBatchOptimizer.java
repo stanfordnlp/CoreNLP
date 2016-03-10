@@ -1,5 +1,4 @@
-package edu.stanford.nlp.loglinear.learning; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.loglinear.learning;
 
 import edu.stanford.nlp.loglinear.model.ConcatVector;
 import edu.stanford.nlp.loglinear.model.GraphicalModel;
@@ -21,10 +20,7 @@ import java.util.Random;
  * and to share certain basic bits of functionality useful for batch optimizers, like intelligent multi-thread management
  * and user interrupt handling.
  */
-public abstract class AbstractBatchOptimizer  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AbstractBatchOptimizer.class);
+public abstract class AbstractBatchOptimizer {
   public <T> ConcatVector optimize(T[] dataset, AbstractDifferentiableFunction<T> fn) {
     return optimize(dataset, fn, new ConcatVector(0), 0.0, 1.0e-5, false);
   }
@@ -35,8 +31,8 @@ public abstract class AbstractBatchOptimizer  {
                                    double l2regularization,
                                    double convergenceDerivativeNorm,
                                    boolean quiet) {
-    if (!quiet) log.info("\n**************\nBeginning training\n");
-    else log.info("[Beginning quiet training]");
+    if (!quiet) System.err.println("\n**************\nBeginning training\n");
+    else System.err.println("[Beginning quiet training]");
 
     TrainingWorker<T> mainWorker = new TrainingWorker<>(dataset, fn, initialWeights, l2regularization, convergenceDerivativeNorm, quiet);
     new Thread(mainWorker).start();
@@ -44,19 +40,19 @@ public abstract class AbstractBatchOptimizer  {
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
     if (!quiet) {
-      log.info("NOTE: you can press any key (and maybe ENTER afterwards to jog stdin) to terminate learning early.");
-      log.info("The convergence criteria are quite aggressive if left uninterrupted, and will run for a while");
-      log.info("if left to their own devices.\n");
+      System.err.println("NOTE: you can press any key (and maybe ENTER afterwards to jog stdin) to terminate learning early.");
+      System.err.println("The convergence criteria are quite aggressive if left uninterrupted, and will run for a while");
+      System.err.println("if left to their own devices.\n");
 
       while (true) {
         if (mainWorker.isFinished) {
-          log.info("training completed without interruption");
+          System.err.println("training completed without interruption");
           return mainWorker.weights;
         }
         try {
           if (br.ready()) {
-            log.info("received quit command: quitting");
-            log.info("training completed by interruption");
+            System.err.println("received quit command: quitting");
+            System.err.println("training completed by interruption");
             mainWorker.isFinished = true;
             return mainWorker.weights;
           }
@@ -74,7 +70,7 @@ public abstract class AbstractBatchOptimizer  {
           }
         }
       }
-      log.info("[Quiet training complete]");
+      System.err.println("[Quiet training complete]");
       return mainWorker.weights;
     }
   }
@@ -393,14 +389,14 @@ public abstract class AbstractBatchOptimizer  {
         double derivativeNorm = derivative.dotProduct(derivative);
         if (derivativeNorm < convergenceDerivativeNorm) {
           if (!quiet)
-            log.info("Derivative norm " + derivativeNorm + " < " + convergenceDerivativeNorm + ": quitting");
+            System.err.println("Derivative norm " + derivativeNorm + " < " + convergenceDerivativeNorm + ": quitting");
           break;
         }
 
         // Do the actual computation
 
         if (!quiet) {
-          log.info("[" + gradientComputationTime + " ms, threads waiting " + threadWaiting + " ms]");
+          System.err.println("[" + gradientComputationTime + " ms, threads waiting " + threadWaiting + " ms]");
         }
         boolean converged = updateWeights(weights, derivative, logLikelihood, optimizationState, quiet);
 

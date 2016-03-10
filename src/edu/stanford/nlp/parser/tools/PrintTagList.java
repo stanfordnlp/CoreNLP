@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.tools; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.tools;
 
 import java.util.Set;
 
@@ -12,10 +11,7 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author John Bauer
  */
-public class PrintTagList  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(PrintTagList.class);
+public class PrintTagList {
   public static void main(String[] args) {
     String parserFile = null;
     for (int argIndex = 0; argIndex < args.length; ) {
@@ -24,12 +20,12 @@ public class PrintTagList  {
         argIndex += 2;
       } else {
         String error = "Unknown argument " + args[argIndex];
-        log.info(error);
+        System.err.println(error);
         throw new RuntimeException(error);
       }
     }
     if (parserFile == null) {
-      log.info("Must specify a model file with -model");
+      System.err.println("Must specify a model file with -model");
       System.exit(2);
     }
 

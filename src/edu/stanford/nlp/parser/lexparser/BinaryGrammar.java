@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
@@ -13,10 +12,7 @@ import java.util.*;
  * @author Dan Klein
  * @author Christopher Manning (generified and optimized storage)
  */
-public class BinaryGrammar implements Serializable, Iterable<BinaryRule>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(BinaryGrammar.class);
+public class BinaryGrammar implements Serializable, Iterable<BinaryRule> {
 
   // private static final BinaryRule[] EMPTY_BINARY_RULE_ARRAY = new BinaryRule[0];
 
@@ -254,7 +250,7 @@ public class BinaryGrammar implements Serializable, Iterable<BinaryRule>  {
    * @throws IOException If format is bung
    */
   public void readData(BufferedReader in) throws IOException {
-    //if (Test.verbose) log.info(">> readData");
+    //if (Test.verbose) System.err.println(">> readData");
     String line;
     int lineNum = 1;
     line = in.readLine();

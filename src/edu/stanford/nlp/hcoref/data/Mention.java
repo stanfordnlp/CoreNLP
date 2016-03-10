@@ -55,7 +55,11 @@ import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * One mention for the SieveCoreferenceSystem.
@@ -484,7 +488,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
         || (this.mentionSubTree==null && isListLikeByDependency()) ) {
       mentionType = MentionType.LIST;
       //Redwood.log("debug-mention", "IS LIST: " + this);
-    } else if (headWord.containsKey(CoreAnnotations.EntityTypeAnnotation.class)){    // ACE gold mention type
+    } else if (headWord.has(CoreAnnotations.EntityTypeAnnotation.class)){    // ACE gold mention type
       if (headWord.get(CoreAnnotations.EntityTypeAnnotation.class).equals("PRO")) {
         mentionType = MentionType.PRONOMINAL;
       } else if (headWord.get(CoreAnnotations.EntityTypeAnnotation.class).equals("NAM")) {
@@ -493,7 +497,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
         mentionType = MentionType.NOMINAL;
       }
     } else {    // MUC
-      if(!headWord.containsKey(CoreAnnotations.NamedEntityTagAnnotation.class)) {   // temporary fix
+      if(!headWord.has(CoreAnnotations.NamedEntityTagAnnotation.class)) {   // temporary fix
         mentionType = MentionType.NOMINAL;
         //Redwood.log("debug-mention", "no NamedEntityTagAnnotation: "+headWord);
       } else if (headWord.tag().startsWith("PRP") || headWord.tag().startsWith("PN")
@@ -700,8 +704,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   }
 
   private void setNERString() {
-    if(headWord.containsKey(CoreAnnotations.EntityTypeAnnotation.class)){ // ACE
-      if(headWord.containsKey(CoreAnnotations.NamedEntityTagAnnotation.class) &&
+    if(headWord.has(CoreAnnotations.EntityTypeAnnotation.class)){ // ACE
+      if(headWord.has(CoreAnnotations.NamedEntityTagAnnotation.class) &&
               headWord.get(CoreAnnotations.EntityTypeAnnotation.class).equals("NAM")){
         this.nerString = headWord.get(CoreAnnotations.NamedEntityTagAnnotation.class);
       } else {
@@ -709,7 +713,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       }
     }
     else{ // MUC
-      if (headWord.containsKey(CoreAnnotations.NamedEntityTagAnnotation.class)) {
+      if (headWord.has(CoreAnnotations.NamedEntityTagAnnotation.class)) {
         this.nerString = headWord.get(CoreAnnotations.NamedEntityTagAnnotation.class);
       } else {
         this.nerString = "O";

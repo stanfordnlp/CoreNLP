@@ -25,7 +25,6 @@
 //
 
 package edu.stanford.nlp.dcoref;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -63,6 +62,7 @@ import edu.stanford.nlp.dcoref.Dictionaries.MentionType;
 import edu.stanford.nlp.dcoref.ScorerBCubed.BCubedType;
 import edu.stanford.nlp.dcoref.sievepasses.DeterministicCorefSieve;
 import edu.stanford.nlp.dcoref.sievepasses.ExactStringMatch;
+import edu.stanford.nlp.hcoref.data.*;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.io.StringOutputStream;
@@ -88,10 +88,7 @@ import edu.stanford.nlp.util.logging.NewlineLogFormatter;
  * @author Heeyoung Lee
  * @author Sudarshan Rangarajan
  */
-public class SieveCoreferenceSystem  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SieveCoreferenceSystem.class);
+public class SieveCoreferenceSystem {
 
   public static final Logger logger = Logger.getLogger(SieveCoreferenceSystem.class.getName());
 
@@ -164,7 +161,7 @@ public class SieveCoreferenceSystem  {
   /** Current sieve index */
   private int currentSieve;
 
-  /** counter for links in passes ({@code Pair<correct links, total links>})  */
+  /** counter for links in passes (Pair<correct links, total links>)  */
   private List<Pair<Integer, Integer>> linksCountInPass;
 
   /** Scores for each pass */
@@ -366,10 +363,10 @@ public class SieveCoreferenceSystem  {
       logger.setLevel(Level.FINE);
       fh.setFormatter(new NewlineLogFormatter());
     } catch (SecurityException e) {
-      log.error("cannot initialize logger!");
+      System.err.println("ERROR: cannot initialize logger!");
       throw e;
     } catch (IOException e) {
-      log.error("cannot initialize logger!");
+      System.err.println("ERROR: cannot initialize logger!");
       throw e;
     }
 
@@ -381,8 +378,8 @@ public class SieveCoreferenceSystem  {
     SieveCoreferenceSystem corefSystem = new SieveCoreferenceSystem(props);
 
     // MentionExtractor extracts MUC, ACE, or CoNLL documents
-    MentionExtractor mentionExtractor;
-    if (props.containsKey(Constants.MUC_PROP)){
+    MentionExtractor mentionExtractor = null;
+    if(props.containsKey(Constants.MUC_PROP)){
       mentionExtractor = new MUCMentionExtractor(corefSystem.dictionaries, props,
           corefSystem.semantics, corefSystem.singletonPredictor);
     } else if(props.containsKey(Constants.ACE2004_PROP) || props.containsKey(Constants.ACE2005_PROP)) {
@@ -391,10 +388,10 @@ public class SieveCoreferenceSystem  {
     } else if (props.containsKey(Constants.CONLL2011_PROP)) {
       mentionExtractor = new CoNLLMentionExtractor(corefSystem.dictionaries, props,
           corefSystem.semantics, corefSystem.singletonPredictor);
-    } else {
+    }
+    if(mentionExtractor == null){
       throw new RuntimeException("No input file specified!");
     }
-
     if (!Constants.USE_GOLD_MENTIONS) {
       // Set mention finder
       String mentionFinderClass = props.getProperty(Constants.MENTION_FINDER_PROP);

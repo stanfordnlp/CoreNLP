@@ -10,12 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Test cases for TSV sentence iterator.
- *
- * @author chaganty
- * @version 11/20/15
+ * Test cases for TSV sentence iterator
+ * Created by chaganty on 11/20/15.
  */
-public class TSVSentenceIteratorITest {
+public class TSVSentenceIteratorTest {
 
   /**
    * TODO(chaganty): Support creation of sentences with TSV iterator without any tokens annotations.

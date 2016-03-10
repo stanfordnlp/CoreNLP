@@ -12,7 +12,10 @@ import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.IntPair;
+import edu.stanford.nlp.util.IntTuple;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +29,6 @@ import java.util.function.Supplier;
  *
  * @author Gabor Angeli
  */
-@SuppressWarnings("unused")
 public class Document {
 
   /**
@@ -146,37 +148,6 @@ public class Document {
   };
 
   /**
-   * The default {@link EntityMentionsAnnotator} implementation
-   */
-  private static Supplier<Annotator> defaultEntityMentions = new Supplier<Annotator>() {
-    Annotator impl = null;
-
-    @Override
-    public synchronized Annotator get() {
-      if (impl == null) {
-        impl = AnnotatorFactories.entityMentions(EMPTY_PROPS, backend).create();
-      }
-      return impl;
-    }
-  };
-
-  /**
-   * The default {@link KBPAnnotator} implementation
-   */
-  private static Supplier<Annotator> defaultKBP = new Supplier<Annotator>() {
-    Annotator impl = null;
-
-    @Override
-    public synchronized Annotator get() {
-      if (impl == null) {
-        impl = AnnotatorFactories.kbp(EMPTY_PROPS, backend).create();
-      }
-      return impl;
-    }
-  };
-
-
-  /**
    * The default {@link edu.stanford.nlp.naturalli.OpenIE} implementation
    */
   private static Supplier<Annotator> defaultOpenie = new Supplier<Annotator>() {
@@ -245,6 +216,24 @@ public class Document {
     return rtn;
   }
 
+  /**
+   * A collection of cached Annotation objects, in case we want to further annotate them.
+   * Note that this awkwardly bypasses garbage collection -- if a document gets garbage collected, the
+   * associated annotation will continue to live here and take up memory for a while.
+   * There is an attempt to mitigate this in {@link edu.stanford.nlp.simple.Document#finalize()}}, but one
+   * should never rely on the finalize method.
+   */
+  private static final IdentityHashMap<Document, Annotation> annotationPool = new IdentityHashMap<>();
+  /**
+   * The keys for documents we've annotated, to determine which elements of the cache to delete first.
+   */
+  private static final LinkedList<Document> annotationPoolKeys = new LinkedList<>();
+  /**
+   * The maximum number of Annotation objects to keep in the cache in {@link Document#annotationPool}.
+   */
+  private static final int MAX_ANNOTATION_POOL_SIZE = 64;
+
+
   /** The protocol buffer representing this document */
   private final CoreNLPProtos.Document.Builder impl;
 
@@ -270,7 +259,6 @@ public class Document {
    * @param text The text of the document.
    */
   public Document(String text) {
-    StanfordCoreNLP.getDefaultAnnotatorPool(EMPTY_PROPS, new AnnotatorImplementations());  // cache the annotator pool
     this.impl = CoreNLPProtos.Document.newBuilder().setText(text);
   }
 
@@ -280,7 +268,6 @@ public class Document {
    */
   @SuppressWarnings("Convert2streamapi")
   public Document(Annotation ann) {
-    StanfordCoreNLP.getDefaultAnnotatorPool(EMPTY_PROPS, new AnnotatorImplementations());  // cache the annotator pool
     this.impl = new ProtobufAnnotationSerializer(false).toProtoBuilder(ann);
     List<CoreMap> sentences = ann.get(CoreAnnotations.SentencesAnnotation.class);
     this.sentences = new ArrayList<>(sentences.size());
@@ -296,7 +283,6 @@ public class Document {
    */
   @SuppressWarnings("Convert2streamapi")
   public Document(CoreNLPProtos.Document proto) {
-    StanfordCoreNLP.getDefaultAnnotatorPool(EMPTY_PROPS, new AnnotatorImplementations());  // cache the annotator pool
     this.impl = proto.toBuilder();
     if (proto.getSentenceCount() > 0) {
       this.sentences = new ArrayList<>(proto.getSentenceCount());
@@ -393,7 +379,7 @@ public class Document {
    *
    * @param functions The (possibly empty) list of annotations to populate on the document before dumping it
    *                  to JSON.
-   * @return The JSON String for this document, without unnecessary whitespace.
+   * @return The JSON String for this document, without unecessary whitespace.
    *
    */
   @SafeVarargs
@@ -497,6 +483,14 @@ public class Document {
       }
     }
 
+    // Re-computing the sentences invalidates the cached Annotation
+    synchronized (annotationPool) {
+      annotationPool.remove(this);
+    }
+    synchronized (annotationPoolKeys) {
+      annotationPoolKeys.remove(this);
+    }
+
     return sentences;
   }
 
@@ -533,9 +527,9 @@ public class Document {
         // Run prerequisites
         this.runLemma(props).runNER(props).runParse(props);  // default is rule mention annotator
         // Run mention
-        Annotator mention = props == EMPTY_PROPS ? defaultMention.get() : getOrCreate(AnnotatorFactories.mention(props, backend));
+        Annotator mention = props == EMPTY_PROPS ? defaultMention.get() : AnnotatorFactories.mention(props, backend).create();
         // Run coref
-        Annotator coref = props == EMPTY_PROPS ? defaultCoref.get() : getOrCreate(AnnotatorFactories.coref(props, backend));
+        Annotator coref = props == EMPTY_PROPS ? defaultCoref.get() : AnnotatorFactories.coref(props, backend).create();
         Annotation ann = asAnnotation();
         mention.annotate(ann);
         coref.annotate(ann);
@@ -678,7 +672,7 @@ public class Document {
     }
     // Run annotator
     Annotator parse = props == EMPTY_PROPS ? defaultParse.get() : getOrCreate(AnnotatorFactories.parse(props, backend));
-    if (parse.requires().contains(CoreAnnotations.PartOfSpeechAnnotation.class)) {
+    if (parse.requires().contains(Annotator.POS_REQUIREMENT)) {
       runPOS(props);
     } else {
       sentences();
@@ -760,33 +754,7 @@ public class Document {
       for (int i = 0; i < sentences.size(); ++i) {
         CoreMap sentence = ann.get(CoreAnnotations.SentencesAnnotation.class).get(i);
         Collection<RelationTriple> triples = sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
-        sentences.get(i).updateOpenIE(triples.stream().map(ProtobufAnnotationSerializer::toProto));
-      }
-    }
-    // Return
-    haveRunOpenie = true;
-    return this;
-  }
-
-
-  protected Document runKBP(Properties props) {
-    if (haveRunOpenie) {
-      return this;
-    }
-    // Run prerequisites
-    coref(props);
-    Annotator entityMention = props == EMPTY_PROPS ? defaultEntityMentions.get() : getOrCreate(AnnotatorFactories.entityMentions(props, backend));
-    Annotation ann = asAnnotation();
-    entityMention.annotate(ann);
-    // Run annotator
-    Annotator kbp = props == EMPTY_PROPS ? defaultKBP.get() : getOrCreate(AnnotatorFactories.kbp(props, backend));
-    kbp.annotate(ann);
-    // Update data
-    synchronized (serializer) {
-      for (int i = 0; i < sentences.size(); ++i) {
-        CoreMap sentence = ann.get(CoreAnnotations.SentencesAnnotation.class).get(i);
-        Collection<RelationTriple> triples = sentence.get(CoreAnnotations.KBPTriplesAnnotation.class);
-        sentences.get(i).updateKBP(triples.stream().map(ProtobufAnnotationSerializer::toProto));
+        sentences.get(i).updateTriples(triples.stream().map(ProtobufAnnotationSerializer::toProto));
       }
     }
     // Return
@@ -802,7 +770,24 @@ public class Document {
    * <p>Therefore, this method is generally NOT recommended.</p>
    */
   public Annotation asAnnotation() {
-    return serializer.fromProto(serialize());
+    synchronized (annotationPool) {
+      Annotation candidate = annotationPool.get(this);
+      if (candidate == null) {
+        // Redo cache
+        synchronized (serializer) {
+          candidate = serializer.fromProto(serialize());
+        }
+        annotationPool.put(this, candidate);
+        synchronized (annotationPoolKeys) {
+          annotationPoolKeys.addLast(this);
+          // Manage the cache's size
+          while (annotationPoolKeys.size() > MAX_ANNOTATION_POOL_SIZE) {
+            annotationPool.remove(annotationPoolKeys.removeFirst());
+          }
+        }
+      }
+      return candidate;
+    }
   }
 
   /**
@@ -884,5 +869,19 @@ public class Document {
     return impl.getText();
   }
 
+  /**
+   * Overwritten to clean up some memory from {@link Document#annotationPool}.
+   * As always, don't actually rely on this being called ever.
+   */
+  @Override
+  protected void finalize() throws Throwable {
+    super.finalize();
+    synchronized (annotationPool) {
+      annotationPool.remove(this);
+    }
+    synchronized (annotationPoolKeys) {
+      annotationPoolKeys.remove(this);
+    }
+  }
 
 }

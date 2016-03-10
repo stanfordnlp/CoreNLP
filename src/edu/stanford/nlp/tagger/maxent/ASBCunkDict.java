@@ -1,5 +1,4 @@
-package edu.stanford.nlp.tagger.maxent; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.tagger.maxent;
 
 import java.io.*;
 import java.util.Map;
@@ -7,10 +6,7 @@ import java.util.Set;
 
 import edu.stanford.nlp.util.Generics;
 
-public class ASBCunkDict   {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ASBCunkDict.class);
+public class ASBCunkDict {
 
   private static final String defaultFilename = "/u/nlp/data/pos-tagger/asbc_amb.fixed.gb18030";
   private static ASBCunkDict ASBCunkDictSingleton = null;
@@ -51,10 +47,10 @@ public class ASBCunkDict   {
         words.add(fields[0]);
       }
     } catch (FileNotFoundException e) {
-      log.info("ASBCunk not found:");
+      System.err.println("ASBCunk not found:");
       System.exit(-1);
     } catch (IOException e) {
-      log.info("ASBCunk");
+      System.err.println("ASBCunk");
       System.exit(-1);
     }
   }

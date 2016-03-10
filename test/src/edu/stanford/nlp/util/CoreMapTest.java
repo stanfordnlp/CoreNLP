@@ -35,10 +35,10 @@ public class CoreMapTest extends TestCase {
   public void testCoreMap() {
     CoreMap object = new ArrayCoreMap(0);
 
-    assertFalse(object.containsKey(StringA.class));
+    assertFalse(object.has(StringA.class));
     object.set(StringA.class, "stem");
 
-    assertTrue(object.containsKey(StringA.class));
+    assertTrue(object.has(StringA.class));
     assertEquals("stem", object.get(StringA.class));
 
     object.set(StringA.class, "hi");

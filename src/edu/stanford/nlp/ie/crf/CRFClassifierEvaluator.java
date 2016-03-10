@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie.crf; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -23,10 +22,7 @@ import java.util.List;
  *          child process is initially forked.
  * @author Angel Chang
  */
-public class CRFClassifierEvaluator<IN extends CoreMap> extends CmdEvaluator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CRFClassifierEvaluator.class);
+public class CRFClassifierEvaluator<IN extends CoreMap> extends CmdEvaluator {
 
   private CRFClassifier<IN> classifier;
   // NOTE: Default uses -r, specify without -r if IOB
@@ -76,7 +72,7 @@ public class CRFClassifierEvaluator<IN extends CoreMap> extends CmdEvaluator  {
    */
   public void setEvalCmd(String evalCmd)
   {
-    log.info("setEvalCmd to " + evalCmd);
+    System.err.println("setEvalCmd to " + evalCmd);
     this.cmdStr = evalCmd;
     if (cmdStr != null) {
       cmdStr = cmdStr.trim();
@@ -108,7 +104,7 @@ public class CRFClassifierEvaluator<IN extends CoreMap> extends CmdEvaluator  {
     if (fScoreIndex < parts.length)
       return Double.parseDouble(parts[fScoreIndex]);
     else {
-      log.error("in CRFClassifierEvaluator.interpretCmdOutput(), cannot find FB1 score in output:\n"+output);
+      System.err.println("ERROR in CRFClassifierEvaluator.interpretCmdOutput(), cannot find FB1 score in output:\n"+output);
       return -1;
     }
   }
@@ -145,7 +141,7 @@ public class CRFClassifierEvaluator<IN extends CoreMap> extends CmdEvaluator  {
         BufferedReader br = new BufferedReader(new FileReader(f));
         MultiClassChunkEvalStats stats = new MultiClassChunkEvalStats("O");
         score = stats.score(br, "\t");
-        log.info(stats.getConllEvalString());
+        System.err.println(stats.getConllEvalString());
         f.delete();
       } catch (Exception ex) {
         throw new RuntimeException(ex);

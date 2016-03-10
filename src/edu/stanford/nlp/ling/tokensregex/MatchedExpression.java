@@ -4,9 +4,12 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
 import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
 import edu.stanford.nlp.pipeline.CoreMapAggregator;
-import edu.stanford.nlp.util.*;
-
+import edu.stanford.nlp.util.Comparators;
+import edu.stanford.nlp.util.CoreMap;
 import java.util.function.Function;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Interval;
+import edu.stanford.nlp.util.IntervalTree;
 
 import java.util.*;
 
@@ -325,7 +328,7 @@ public class MatchedExpression {
     Map<Integer, Integer> tokenEndToListIndexMap = new HashMap<>();//Generics.newHashMap();
     for (int i = 0; i < list.size(); i++) {
       CoreMap cm = list.get(i);
-      if (cm.containsKey(CoreAnnotations.TokenBeginAnnotation.class) && cm.containsKey(CoreAnnotations.TokenEndAnnotation.class)) {
+      if (cm.has(CoreAnnotations.TokenBeginAnnotation.class) && cm.has(CoreAnnotations.TokenEndAnnotation.class)) {
         tokenBeginToListIndexMap.put(cm.get(CoreAnnotations.TokenBeginAnnotation.class), i);
         tokenEndToListIndexMap.put(cm.get(CoreAnnotations.TokenEndAnnotation.class), i+1);
       } else {
@@ -357,7 +360,8 @@ public class MatchedExpression {
     return merged;
   }
 
-  public static <T extends MatchedExpression> List<T> removeNullValues(List<T> chunks) {
+  public static <T extends MatchedExpression> List<T> removeNullValues(List<T> chunks)
+  {
     List<T> okayChunks = new ArrayList<>(chunks.size());
     for (T chunk : chunks) {
       Value v = chunk.value;
@@ -370,9 +374,10 @@ public class MatchedExpression {
     return okayChunks;
   }
 
-  public static <T extends MatchedExpression> List<T> removeNested(List<T> chunks) {
+  public static <T extends MatchedExpression> List<T> removeNested(List<T> chunks)
+  {
     if (chunks.size() > 1) {
-      for (int i = 0, sz = chunks.size(); i < sz; i++) {
+      for (int i = 0; i < chunks.size(); i++) {
         chunks.get(i).order = i;
       }
       return IntervalTree.getNonNested(chunks, EXPR_TO_TOKEN_OFFSETS_INTERVAL_FUNC, EXPR_LENGTH_PRIORITY_COMPARATOR);
@@ -381,9 +386,10 @@ public class MatchedExpression {
     }
   }
 
-  public static <T extends MatchedExpression> List<T> removeOverlapping(List<T> chunks) {
+  public static <T extends MatchedExpression> List<T> removeOverlapping(List<T> chunks)
+  {
     if (chunks.size() > 1) {
-      for (int i = 0, sz = chunks.size(); i < sz; i++) {
+      for (int i = 0; i < chunks.size(); i++) {
         chunks.get(i).order = i;
       }
       return IntervalTree.getNonOverlapping(chunks, EXPR_TO_TOKEN_OFFSETS_INTERVAL_FUNC, EXPR_PRIORITY_LENGTH_COMPARATOR);

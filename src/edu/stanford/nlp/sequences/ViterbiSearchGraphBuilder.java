@@ -1,5 +1,4 @@
-package edu.stanford.nlp.sequences; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sequences;
 
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.fsm.*;
@@ -10,10 +9,7 @@ import java.util.Arrays;
  * @author Michel Galley
  * @author Sarah Spikes (sdspikes@cs.stanford.edu) - cleanup and filling in types
  */
-public class ViterbiSearchGraphBuilder  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ViterbiSearchGraphBuilder.class);
+public class ViterbiSearchGraphBuilder {
 
   public static DFSA<String, Integer> getGraph(SequenceModel ts, Index<String> classIndex) {
 
@@ -120,8 +116,8 @@ public class ViterbiSearchGraphBuilder  {
             int predProduct = newTagNum * factor + sharedProduct;
             int predTag = tags[pos-1][predProduct % tagNum[pos-1]];
             int curTag = tags[pos][product % tagNum[pos]];
-            //log.info("pos: "+pos);
-            //log.info("product: "+product);
+            //System.err.println("pos: "+pos);
+            //System.err.println("product: "+product);
             //System.err.printf("pos=%d-%d, product=%d-%d, tag=%d-%d score=%.3f\n",pos-1,pos,predProduct,product,predTag,curTag,
             //  windowScore[pos][product]);
             DFSAState<String, Integer> sourceState = graphStates[pos-leftWindow][predTag];

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees.ud; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.ud;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,10 +38,7 @@ import edu.stanford.nlp.trees.tregex.TregexPattern;
  *
  */
 
-public class UniversalDependenciesFeatureAnnotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(UniversalDependenciesFeatureAnnotator.class);
+public class UniversalDependenciesFeatureAnnotator {
 
 
   private static final String FEATURE_MAP_FILE = "edu/stanford/nlp/models/ud/feature_map.txt";
@@ -442,10 +438,10 @@ public class UniversalDependenciesFeatureAnnotator  {
   public static void main(String args[]) throws IOException {
 
     if (args.length < 2) {
-      log.info("Usage: ");
-      log.info("java ");
-      log.info(UniversalDependenciesFeatureAnnotator.class.getCanonicalName());
-      log.info(" CoNLL-U_file tree_file [-addUPOS -escapeParenthesis]");
+      System.err.print("Usage: ");
+      System.err.print("java ");
+      System.err.print(UniversalDependenciesFeatureAnnotator.class.getCanonicalName());
+      System.err.println(" CoNLL-U_file tree_file [-addUPOS -escapeParenthesis]");
       return;
     }
 

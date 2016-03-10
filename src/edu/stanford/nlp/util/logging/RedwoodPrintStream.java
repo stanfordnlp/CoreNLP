@@ -42,13 +42,13 @@ public class RedwoodPrintStream extends PrintStream {
 
   private synchronized void logB(Object message){
     char[] str = message.toString().toCharArray();
-    for (char c : str) {
+    for(char c : str){
       if(c == '\n'){
         String msg = buffer.toString();
-        if (tag != null) { Redwood.log(tag, msg); } else { Redwood.log(msg); }
+        if(tag != null){ Redwood.log(tag, msg); } else { Redwood.log(msg); }
         buffer = new StringBuilder();
       } else {
-        buffer.append(String.valueOf(c));
+        buffer.append(""+c);
       }
     }
 

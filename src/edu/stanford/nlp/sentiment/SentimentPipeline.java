@@ -1,5 +1,4 @@
-package edu.stanford.nlp.sentiment; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sentiment;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,13 +11,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
-import edu.stanford.nlp.ling.SentenceUtils;
 import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
@@ -31,7 +30,7 @@ import edu.stanford.nlp.util.Generics;
 /**
  * A wrapper class which creates a suitable pipeline for the sentiment
  * model and processes raw text.
- *
+ *<br>
  * The main program has the following options: <br>
  * <code>-parserModel</code> Which parser model to use, defaults to englishPCFG.ser.gz <br>
  * <code>-sentimentModel</code> Which sentiment model to use, defaults to sentiment.ser.gz <br>
@@ -39,23 +38,20 @@ import edu.stanford.nlp.util.Generics;
  * <code>-fileList</code> A comma separated list of files to process. <br>
  * <code>-stdin</code> Read one line at a time from stdin. <br>
  * <code>-output</code> pennTrees: Output trees with scores at each binarized node.  vectors: Number tree nodes and print out the vectors.  probabilities: Output the scores for different labels for each node. Defaults to printing just the root. <br>
- * <code>-filterUnknown</code> Remove unknown trees from the input.  Only applies to TREES input, in which case the trees must be binarized with sentiment labels <br>
+ * <code>-filterUnknown</code> remove unknown trees from the input.  Only applies to TREES input, in which case the trees must be binarized with sentiment labels <br>
  * <code>-help</code> Print out help <br>
  *
  * @author John Bauer
  */
-public class SentimentPipeline  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SentimentPipeline.class);
+public class SentimentPipeline {
 
   private static final NumberFormat NF = new DecimalFormat("0.0000");
 
-  enum Output {
+  static enum Output {
     PENNTREES, VECTORS, ROOT, PROBABILITIES
   }
 
-  enum Input {
+  static enum Input {
     TEXT, TREES
   }
 
@@ -183,17 +179,17 @@ public class SentimentPipeline  {
 
   static final String DEFAULT_TLPP_CLASS = "edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams";
 
-  static void help() {
-    log.info("Known command line arguments:");
-    log.info("  -sentimentModel <model>: Which model to use");
-    log.info("  -parserModel <model>: Which parser to use");
-    log.info("  -file <filename>: Which file to process");
-    log.info("  -fileList <file>,<file>,...: Comma separated list of files to process.  Output goes to file.out");
-    log.info("  -stdin: Process stdin instead of a file");
-    log.info("  -input <format>: Which format to input, TEXT or TREES.  Will not process stdin as trees.  If trees are not already binarized, they will be binarized with -tlppClass's headfinder, which means they must have labels in that treebank's tagset.");
-    log.info("  -output <format>: Which format to output, PENNTREES, VECTORS, PROBABILITIES, or ROOT.  Multiple formats can be specified as a comma separated list.");
-    log.info("  -filterUnknown: remove unknown trees from the input.  Only applies to TREES input, in which case the trees must be binarized with sentiment labels");
-    log.info("  -tlppClass: a class to use for building the binarizer if using non-binarized TREES as input.  Defaults to " + DEFAULT_TLPP_CLASS);
+  public static void help() {
+    System.err.println("Known command line arguments:");
+    System.err.println("  -sentimentModel <model>: Which model to use");
+    System.err.println("  -parserModel <model>: Which parser to use");
+    System.err.println("  -file <filename>: Which file to process");
+    System.err.println("  -fileList <file>,<file>,...: Comma separated list of files to process.  Output goes to file.out");
+    System.err.println("  -stdin: Process stdin instead of a file");
+    System.err.println("  -input <format>: Which format to input, TEXT or TREES.  Will not process stdin as trees.  If trees are not already binarized, they will be binarized with -tlppClass's headfinder, which means they must have labels in that treebank's tagset.");
+    System.err.println("  -output <format>: Which format to output, PENNTREES, VECTORS, PROBABILITIES, or ROOT.  Multiple formats can be specified as a comma separated list.");
+    System.err.println("  -filterUnknown: remove unknown trees from the input.  Only applies to TREES input, in which case the trees must be binarized with sentiment labels");
+    System.err.println("  -tlppClass: a class to use for building the binarizer if using non-binarized TREES as input.  Defaults to " + DEFAULT_TLPP_CLASS);
   }
 
   /**
@@ -229,7 +225,7 @@ public class SentimentPipeline  {
 
       List<Annotation> annotations = Generics.newArrayList();
       for (Tree tree : trees) {
-        CoreMap sentence = new Annotation(SentenceUtils.listToString(tree.yield()));
+        CoreMap sentence = new Annotation(Sentence.listToString(tree.yield()));
         sentence.set(TreeCoreAnnotations.TreeAnnotation.class, tree);
         List<CoreMap> sentences = Collections.singletonList(sentence);
         Annotation annotation = new Annotation("");
@@ -243,7 +239,6 @@ public class SentimentPipeline  {
     }
   }
 
-  /** Runs the tree-based sentiment model on some text. */
   public static void main(String[] args) throws IOException {
     String parserModel = null;
     String sentimentModel = null;
@@ -295,7 +290,7 @@ public class SentimentPipeline  {
         help();
         System.exit(0);
       } else {
-        log.info("Unknown argument " + args[argIndex + 1]);
+        System.err.println("Unknown argument " + args[argIndex + 1]);
         help();
         throw new IllegalArgumentException("Unknown argument " + args[argIndex + 1]);
       }
@@ -325,7 +320,7 @@ public class SentimentPipeline  {
     }
 
     if (stdin && tokenizerProps != null) {
-      tokenizerProps.setProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "true");
+      tokenizerProps.setProperty("ssplit.eolonly", "true");
     }
 
     int count = 0;
@@ -377,14 +372,14 @@ public class SentimentPipeline  {
       }
     } else {
       // Process stdin.  Each line will be treated as a single sentence.
-      log.info("Reading in text from stdin.");
-      log.info("Please enter one sentence per line.");
-      log.info("Processing will end when EOF is reached.");
+      System.err.println("Reading in text from stdin.");
+      System.err.println("Please enter one sentence per line.");
+      System.err.println("Processing will end when EOF is reached.");
       BufferedReader reader = IOUtils.readerFromStdin("utf-8");
 
       for (String line; (line = reader.readLine()) != null; ) {
         line = line.trim();
-        if ( ! line.isEmpty()) {
+        if (line.length() > 0) {
           Annotation annotation = tokenizer.process(line);
           pipeline.annotate(annotation);
           for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
@@ -393,7 +388,7 @@ public class SentimentPipeline  {
         } else {
           // Output blank lines for blank lines so the tool can be
           // used for line-by-line text processing
-          System.out.println();
+          System.out.println("");
         }
       }
 

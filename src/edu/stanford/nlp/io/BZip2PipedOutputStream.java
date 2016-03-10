@@ -1,5 +1,4 @@
-package edu.stanford.nlp.io; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.io;
 
 import edu.stanford.nlp.util.ByteStreamGobbler;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
@@ -28,7 +27,7 @@ public class BZip2PipedOutputStream extends OutputStream
   public BZip2PipedOutputStream(String filename, OutputStream err) throws IOException {
     String bzip2 = System.getProperty("bzip2", "bzip2");
     String cmd = bzip2; // + " > " + filename;
-    //log.info("getBZip2PipedOutputStream: Running command: "+cmd);
+    //System.err.println("getBZip2PipedOutputStream: Running command: "+cmd);
     ProcessBuilder pb = new ProcessBuilder();
     pb.command(cmd);
     this.process = pb.start();
@@ -63,6 +62,6 @@ public class BZip2PipedOutputStream extends OutputStream
     } catch (InterruptedException ex) {
       throw new RuntimeInterruptedException(ex);
     }
-    //log.info("getBZip2PipedOutputStream: Closed. ");
+    //System.err.println("getBZip2PipedOutputStream: Closed. ");
   }
 }

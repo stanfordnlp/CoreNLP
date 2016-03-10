@@ -8,7 +8,11 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.ArrayCoreMap;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.DataFilePaths;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.SystemUtils;
 import org.w3c.dom.*;
 
 import java.io.File;
@@ -76,8 +80,8 @@ public class GUTimeAnnotator implements Annotator {
    // new XMLOutputter().output(inputXML, inputWriter);
     inputWriter.close();
 
-    boolean useFirstDate =
-      (!document.containsKey(CoreAnnotations.CalendarAnnotation.class) && !document.containsKey(CoreAnnotations.DocDateAnnotation.class));
+    boolean useFirstDate = 
+      (!document.has(CoreAnnotations.CalendarAnnotation.class) && !document.has(CoreAnnotations.DocDateAnnotation.class));
     
     ArrayList<String> args = new ArrayList<>();
     args.add("perl");
@@ -329,13 +333,7 @@ public class GUTimeAnnotator implements Annotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TextAnnotation.class,
-        CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.CharacterOffsetBeginAnnotation.class,
-        CoreAnnotations.CharacterOffsetEndAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class
-    )));
+    return TOKENIZE_AND_SSPLIT;
   }
 
   @Override

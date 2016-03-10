@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
@@ -30,10 +29,7 @@ import java.util.Map;
  *
  * @author Galen Andrew
  */
-public abstract class AbstractDependencyGrammar implements DependencyGrammar  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AbstractDependencyGrammar.class);
+public abstract class AbstractDependencyGrammar implements DependencyGrammar {
 
   protected TagProjection tagProjection;
   protected final Index<String> tagIndex;
@@ -161,8 +157,8 @@ public abstract class AbstractDependencyGrammar implements DependencyGrammar  {
   protected void initTagBins() {
     Index<String> tagBinIndex = new HashIndex<>();
     if (DEBUG) {
-      log.info();
-      log.info("There are " + tagIndex.size() + " tags.");
+      System.err.println();
+      System.err.println("There are " + tagIndex.size() + " tags.");
     }
     tagBin = new int[tagIndex.size()];
     for (int t = 0; t < tagBin.length; t++) {
@@ -175,15 +171,15 @@ public abstract class AbstractDependencyGrammar implements DependencyGrammar  {
       }
       tagBin[t] = tagBinIndex.addToIndex(binStr);
       if (DEBUG) {
-        log.info("initTagBins: Mapped " + tagStr + " (" + t +
+        System.err.println("initTagBins: Mapped " + tagStr + " (" + t +
                            ") to " + binStr + " (" + tagBin[t] + ")");
       }
     }
     numTagBins = tagBinIndex.size();
     if (DEBUG) {
-      log.info("initTagBins: tags " + tagBin.length + " bins " +
+      System.err.println("initTagBins: tags " + tagBin.length + " bins " +
                          numTagBins);
-      log.info("tagBins: " + tagBinIndex);
+      System.err.println("tagBins: " + tagBinIndex);
     }
   }
 

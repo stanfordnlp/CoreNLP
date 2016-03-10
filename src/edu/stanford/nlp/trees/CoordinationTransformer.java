@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees;
 
 
 import edu.stanford.nlp.ling.LabelFactory;
@@ -41,10 +40,7 @@ import java.util.Properties;
  * @author John Bauer
  * @author Sebastian Schuster
  */
-public class CoordinationTransformer implements TreeTransformer  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CoordinationTransformer.class);
+public class CoordinationTransformer implements TreeTransformer {
 
   private static final boolean VERBOSE = System.getProperty("CoordinationTransformer", null) != null;
   private final TreeTransformer tn = new DependencyTreeTransformer(); //to get rid of unwanted nodes and tag
@@ -82,11 +78,11 @@ public class CoordinationTransformer implements TreeTransformer  {
   @Override
   public Tree transformTree(Tree t) {
     if (VERBOSE) {
-      log.info("Input to CoordinationTransformer: " + t);
+      System.err.println("Input to CoordinationTransformer: " + t);
     }
     t = tn.transformTree(t);
     if (VERBOSE) {
-      log.info("After DependencyTreeTransformer:  " + t);
+      System.err.println("After DependencyTreeTransformer:  " + t);
     }
     if (t == null) {
       return t;
@@ -95,54 +91,54 @@ public class CoordinationTransformer implements TreeTransformer  {
     if (performMWETransformation) {
       t = MWETransform(t);
       if (VERBOSE) {
-        log.info("After MWETransform:               " + t);
+        System.err.println("After MWETransform:               " + t);
       }
 
       t = prepCCTransform(t);
       if (VERBOSE) {
-        log.info("After prepCCTransform:               " + t);
+        System.err.println("After prepCCTransform:               " + t);
       }
     }
 
     t = UCPtransform(t);
     if (VERBOSE) {
-      log.info("After UCPTransformer:             " + t);
+      System.err.println("After UCPTransformer:             " + t);
     }
     t = CCtransform(t);
     if (VERBOSE) {
-      log.info("After CCTransformer:              " + t);
+      System.err.println("After CCTransformer:              " + t);
     }
     t = qp.transformTree(t);
     if (VERBOSE) {
-      log.info("After QPTreeTransformer:          " + t);
+      System.err.println("After QPTreeTransformer:          " + t);
     }
     t = SQflatten(t);
     if (VERBOSE) {
-      log.info("After SQ flattening:              " + t);
+      System.err.println("After SQ flattening:              " + t);
     }
     t = dates.transformTree(t);
     if (VERBOSE) {
-      log.info("After DateTreeTransformer:        " + t);
+      System.err.println("After DateTreeTransformer:        " + t);
     }
     t = removeXOverX(t);
     if (VERBOSE) {
-      log.info("After removeXoverX:               " + t);
+      System.err.println("After removeXoverX:               " + t);
     }
     t = combineConjp(t);
     if (VERBOSE) {
-      log.info("After combineConjp:               " + t);
+      System.err.println("After combineConjp:               " + t);
     }
     t = moveRB(t);
     if (VERBOSE) {
-      log.info("After moveRB:                     " + t);
+      System.err.println("After moveRB:                     " + t);
     }
     t = changeSbarToPP(t);
     if (VERBOSE) {
-      log.info("After changeSbarToPP:             " + t);
+      System.err.println("After changeSbarToPP:             " + t);
     }
     t = rearrangeNowThat(t);
     if (VERBOSE) {
-      log.info("After rearrangeNowThat:           " + t);
+      System.err.println("After rearrangeNowThat:           " + t);
     }
 
     return t;
@@ -351,7 +347,7 @@ public class CoordinationTransformer implements TreeTransformer  {
    */
   private static Tree transformCC(Tree t, int ccIndex) {
     if (VERBOSE) {
-      log.info("transformCC in:  " + t);
+      System.err.println("transformCC in:  " + t);
     }
     //System.out.println(ccIndex);
     // use the factories of t to create new nodes
@@ -396,12 +392,12 @@ public class CoordinationTransformer implements TreeTransformer  {
       if (!ccPositions.isEmpty()) {
         boolean comma = false;
         int index = ccPositions.get(0);
-        if (VERBOSE) {log.info("more CC index " +  index);}
+        if (VERBOSE) {System.err.println("more CC index " +  index);}
         if (ccSiblings[index - 1].value().equals(",")) {//to handle the case of a comma ("soya and maize oil, and vegetables")
           index = index - 1;
           comma = true;
         }
-        if (VERBOSE) {log.info("more CC index " +  index);}
+        if (VERBOSE) {System.err.println("more CC index " +  index);}
         String head = getHeadTag(ccSiblings[index - 1]);
 
         if (ccIndex + 2 < index) {
@@ -600,7 +596,7 @@ public class CoordinationTransformer implements TreeTransformer  {
     }
 
     if (VERBOSE) {
-      log.info("transformCC out: " + t);
+      System.err.println("transformCC out: " + t);
     }
     return t;
   }
@@ -632,7 +628,7 @@ public class CoordinationTransformer implements TreeTransformer  {
           if (children.size() > ccIndex + 2 && notNP(children, ccIndex) && ccIndex != 0 && (ccIndex == children.size() - 1 || !children.get(ccIndex+1).value().startsWith("CC"))) {
             transformCC(parent, ccIndex);
             if (VERBOSE) {
-              log.info("After transformCC:             " + root);
+              System.err.println("After transformCC:             " + root);
             }
             return root;
           }

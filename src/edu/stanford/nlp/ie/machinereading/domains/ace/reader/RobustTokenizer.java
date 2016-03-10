@@ -5,8 +5,7 @@
  * @author Mihai
  */
 
-package edu.stanford.nlp.ie.machinereading.domains.ace.reader; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.machinereading.domains.ace.reader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,10 +21,7 @@ import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.AbstractTokenizer;
 import edu.stanford.nlp.util.Generics;
 
-public class RobustTokenizer<T extends Word> extends AbstractTokenizer<Word>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(RobustTokenizer.class);
+public class RobustTokenizer<T extends Word> extends AbstractTokenizer<Word> {
   
   /** Buffer to tokenize */
   String buffer;
@@ -456,7 +452,7 @@ public class RobustTokenizer<T extends Word> extends AbstractTokenizer<Word>  {
     	if(c > 31 && c < 127) buffer.append((char) c);
 
     	else{
-    		log.info("Control character at position " + i + ": " + c);
+    		System.err.println("Control character at position " + i + ": " + c);
 
     		//
     		// DOS new line counts as two characters
@@ -1125,7 +1121,7 @@ public class RobustTokenizer<T extends Word> extends AbstractTokenizer<Word>  {
 
   public static void main(String argv[]) throws Exception {
     if(argv.length != 1){
-      log.info("Usage: java edu.stanford.nlp.ie.machinereading.common.RobustTokenizer <file to tokenize>");
+      System.err.println("Usage: java edu.stanford.nlp.ie.machinereading.common.RobustTokenizer <file to tokenize>");
       System.exit(1);
     }
 

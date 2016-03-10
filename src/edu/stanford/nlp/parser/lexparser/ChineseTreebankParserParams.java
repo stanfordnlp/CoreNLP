@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.io.NumberRangesFileFilter;
@@ -7,7 +6,7 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CategoryWordTag;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.WordSegmenter;
 import edu.stanford.nlp.process.WordSegmentingTokenizer;
@@ -31,10 +30,7 @@ import java.util.*;
  * @author Galen Andrew
  */
 
-public class ChineseTreebankParserParams extends AbstractTreebankParserParams  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseTreebankParserParams.class);
+public class ChineseTreebankParserParams extends AbstractTreebankParserParams {
 
   /**
    * The variable ctlp stores the same thing as the tlp variable in
@@ -1150,8 +1146,8 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams  {
       try {
         headFinder = (HeadFinder) Class.forName(args[i + 1]).newInstance();
       } catch (Exception e) {
-        log.info(e);
-        log.info(this.getClass().getName() + ": Could not load head finder " + args[i + 1]);
+        System.err.println(e);
+        System.err.println(this.getClass().getName() + ": Could not load head finder " + args[i + 1]);
         throw new RuntimeException(e);
       }
       i+=2;
@@ -1211,7 +1207,7 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams  {
    */
   @Override
   public ArrayList<Word> defaultTestSentence() {
-    return SentenceUtils.toUntaggedList("\u951f\u65a4\u62f7", "\u951f\u65a4\u62f7", "\u5b66\u6821", "\u951f\u65a4\u62f7", "\u5b66\u4e60", "\u951f\u65a4\u62f7");
+    return Sentence.toUntaggedList("\u951f\u65a4\u62f7", "\u951f\u65a4\u62f7", "\u5b66\u6821", "\u951f\u65a4\u62f7", "\u5b66\u4e60", "\u951f\u65a4\u62f7");
   }
 
 

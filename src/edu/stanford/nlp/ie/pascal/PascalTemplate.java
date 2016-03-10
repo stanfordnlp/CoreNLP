@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie.pascal; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.pascal;
 
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Index;
@@ -17,10 +16,7 @@ import java.util.regex.Pattern;
  */
 
 
-public class PascalTemplate  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(PascalTemplate.class);
+public class PascalTemplate {
 
   public static final String[] fields = {
     //dates
@@ -84,10 +80,10 @@ public class PascalTemplate  {
    *
    */
   public static boolean acronymMatch(String s1, String s2, HashMap stemmedAcronymIndex) {
-    log.info("Testing match:" + s1 + " : " + s2);
+    System.err.println("Testing match:" + s1 + " : " + s2);
     String stem1 = (String) stemmedAcronymIndex.get(s1);
     String stem2 = (String) stemmedAcronymIndex.get(s2);
-    log.info("Got stems:" + s1 + " : " + s2);
+    System.err.println("Got stems:" + s1 + " : " + s2);
     return stem1.equals(stem2);
   }
   /**
@@ -99,7 +95,7 @@ public class PascalTemplate  {
     }
     Matcher matcher = acronymPattern.matcher(s);
     if (!matcher.matches() || s.equalsIgnoreCase("www")) {
-      log.info("Not a valid acronym: " + s);
+      System.err.println("Not a valid acronym: " + s);
       return "null";
     }
 
@@ -109,7 +105,7 @@ public class PascalTemplate  {
     }
 
     ct.stemmedAcronymIndex.put(s, stemmed);
-    log.info("Stemmed: " + s + " to: " + stemmed);
+    System.err.println("Stemmed: " + s + " to: " + stemmed);
     if (ct.inverseAcronymMap.containsKey(stemmed)) {
       HashSet set = (HashSet) ct.inverseAcronymMap.get(stemmed);
       set.add(s);
@@ -264,8 +260,8 @@ public class PascalTemplate  {
   }
 
   public void print() {
-    log.info("PascalTemplate: ");
-    log.info(this.toString());
+    System.err.println("PascalTemplate: ");
+    System.err.println(this.toString());
   }
 
   @Override

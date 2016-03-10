@@ -4,8 +4,7 @@
  * Copyright:    Copyright (c) Kristina Toutanova<p>
  * Company:      Stanford University<p>
  */
-package edu.stanford.nlp.tagger.maxent; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.stats.IntCounter;
@@ -22,10 +21,7 @@ import java.util.Map;
  *  @author Kristina Toutanova
  *  @version 1.0
  */
-public class Dictionary  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Dictionary.class);
+public class Dictionary {
 
   private final Map<String,TagCount> dict = Generics.newHashMap();
   private final Map<Integer,CountWrapper> partTakingVerbs = Generics.newHashMap();
@@ -182,7 +178,7 @@ public class Dictionary  {
     String[] arr = dict.keySet().toArray(new String[dict.keySet().size()]);
     try {
       file.writeInt(arr.length);
-      log.info("Saving dictionary of " + arr.length + " words ...");
+      System.err.println("Saving dictionary of " + arr.length + " words ...");
       for (String word : arr) {
         TagCount count = get(word);
         file.writeUTF(word);
@@ -206,7 +202,7 @@ public class Dictionary  {
     int maxNumTags = 0;
     int len = rf.readInt();
     if (VERBOSE) {
-      log.info("Reading Dictionary of " + len + " words from " + filename + '.');
+      System.err.println("Reading Dictionary of " + len + " words from " + filename + '.');
     }
 
     for (int i = 0; i < len; i++) {
@@ -218,11 +214,11 @@ public class Dictionary  {
       }
       this.dict.put(word, count);
       if (VERBOSE) {
-        log.info("  " + word + " [idx=" + i + "]: " + count);
+        System.err.println("  " + word + " [idx=" + i + "]: " + count);
       }
     }
     if (VERBOSE) {
-      log.info("Read dictionary of " + len + " words; max tags for word was " + maxNumTags + '.');
+      System.err.println("Read dictionary of " + len + " words; max tags for word was " + maxNumTags + '.');
     }
   }
 
@@ -232,7 +228,7 @@ public class Dictionary  {
     int maxNumTags = 0;
     int len = rf.readInt();
     if (VERBOSE) {
-      log.info("Reading Dictionary of " + len + " words.");
+      System.err.println("Reading Dictionary of " + len + " words.");
     }
 
     for (int i = 0; i < len; i++) {
@@ -244,11 +240,11 @@ public class Dictionary  {
       }
       this.dict.put(word, count);
       if (VERBOSE) {
-        log.info("  " + word + " [idx=" + i + "]: " + count);
+        System.err.println("  " + word + " [idx=" + i + "]: " + count);
       }
     }
     if (VERBOSE) {
-      log.info("Read dictionary of " + len + " words; max tags for word was " + maxNumTags + '.');
+      System.err.println("Read dictionary of " + len + " words; max tags for word was " + maxNumTags + '.');
     }
   }
 

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -57,10 +56,7 @@ import java.util.Map;
  * @author Christopher Manning
  * @author Galen Andrew
  */
-public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Serializable */, CopulaHeadFinder  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AbstractCollinsHeadFinder.class);
+public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Serializable */, CopulaHeadFinder {
 
   private static final boolean DEBUG = System.getProperty("HeadFinder", null) != null;
   protected final TreebankLanguagePack tlp;
@@ -164,7 +160,7 @@ public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Seriali
       throw new IllegalArgumentException("Can't return head of null or leaf Tree.");
     }
     if (DEBUG) {
-      log.info("determineHead for " + t.value());
+      System.err.println("determineHead for " + t.value());
     }
 
     Tree[] kids = t.children();
@@ -173,7 +169,7 @@ public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Seriali
     // first check if subclass found explicitly marked head
     if ((theHead = findMarkedHead(t)) != null) {
       if (DEBUG) {
-        log.info("Find marked head method returned " +
+        System.err.println("Find marked head method returned " +
                            theHead.label() + " as head of " + t.label());
       }
       return theHead;
@@ -184,7 +180,7 @@ public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Seriali
     // but that seemed bad (especially hardcoding string "ROOT")
     if (kids.length == 1) {
       if (DEBUG) {
-        log.info("Only one child determines " +
+        System.err.println("Only one child determines " +
                            kids[0].label() + " as head of " + t.label());
       }
       return kids[0];
@@ -207,7 +203,7 @@ public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Seriali
       motherCat = motherCat.substring(1);
     }
     if (DEBUG) {
-      log.info("Looking for head of " + t.label() +
+      System.err.println("Looking for head of " + t.label() +
                          "; value is |" + t.label().value() + "|, " +
                          " baseCat is |" + motherCat + '|');
     }
@@ -226,13 +222,13 @@ public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Seriali
     Tree[] kids = t.children();
     if (how == null) {
       if (DEBUG) {
-        log.info("Warning: No rule found for " + motherCat +
+        System.err.println("Warning: No rule found for " + motherCat +
                            " (first char: " + motherCat.charAt(0) + ')');
-        log.info("Known nonterms are: " + nonTerminalInfo.keySet());
+        System.err.println("Known nonterms are: " + nonTerminalInfo.keySet());
       }
       if (defaultRule != null) {
         if (DEBUG) {
-          log.info("  Using defaultRule");
+          System.err.println("  Using defaultRule");
         }
         return traverseLocate(kids, defaultRule, true);
       } else {
@@ -254,7 +250,7 @@ public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Seriali
       }
     }
     if (DEBUG) {
-      log.info("  Chose " + theHead.label());
+      System.err.println("  Chose " + theHead.label());
     }
     return theHead;
   }

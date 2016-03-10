@@ -28,8 +28,7 @@
 //    Licensing: parser-support@lists.stanford.edu
 //http://www-nlp.stanford.edu/software/tregex.shtml
 
-package edu.stanford.nlp.trees.tregex.gui; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.tregex.gui;
 
 import java.awt.Color;
 import java.awt.ComponentOrientation;
@@ -69,10 +68,7 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author Anna Rafferty
  */
-public class InputPanel extends JPanel implements ActionListener, ChangeListener  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(InputPanel.class);
+public class InputPanel extends JPanel implements ActionListener, ChangeListener {
 
   private static final long serialVersionUID = -8219840036914495876L;
 
@@ -648,7 +644,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
             returnToValidState(text, visitor, new ArrayList<>());
             return;
           }
-          //log.info("Running Script with matches: " + visitor.getMatches());
+          //System.err.println("Running Script with matches: " + visitor.getMatches());
           List<TreeFromFile> trees = visitor.getMatches();
           final List<TreeFromFile> modifiedTrees = new ArrayList<>();
           for (TreeFromFile tff : trees) {

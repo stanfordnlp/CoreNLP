@@ -2,6 +2,7 @@
 package edu.stanford.nlp.util.logging;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -277,5 +278,4 @@ public class PrettyLogger {
     }
     Redwood.endTrack(description);
   }
-
 }

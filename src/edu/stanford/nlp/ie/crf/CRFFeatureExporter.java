@@ -5,7 +5,6 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -26,12 +25,9 @@ import java.util.Properties;
  *
  * @author Angel Chang
  */
-public class CRFFeatureExporter<IN extends CoreMap>  {
-
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(CRFFeatureExporter.class);
+public class CRFFeatureExporter<IN extends CoreMap> {
   private char delimiter = '\t';
-  private static final String eol = System.lineSeparator();
+  private static final String eol = System.getProperty("line.separator");
   private CRFClassifier<IN> classifier;
 
   public CRFFeatureExporter(CRFClassifier<IN> classifier)
@@ -163,17 +159,17 @@ public class CRFFeatureExporter<IN extends CoreMap>  {
   }
 
   public static void main(String[] args) throws Exception {
-    StringUtils.logInvocationString(log, args);
+    StringUtils.printErrInvocationString("CRFFeatureExporter", args);
     Properties props = StringUtils.argsToProperties(args);
     CRFClassifier<CoreLabel> crf = new CRFClassifier<>(props);
     String inputFile = crf.flags.trainFile;
     if (inputFile == null) {
-      log.info("Please provide input file using -trainFile");
+      System.err.println("Please provide input file using -trainFile");
       System.exit(-1);
     }
     String outputFile = crf.flags.exportFeatures;
     if (outputFile == null) {
-      log.info("Please provide output file using -exportFeatures");
+      System.err.println("Please provide output file using -exportFeatures");
       System.exit(-1);
     }
     CRFFeatureExporter<CoreLabel> featureExporter = new CRFFeatureExporter<>(crf);
@@ -182,5 +178,4 @@ public class CRFFeatureExporter<IN extends CoreMap>  {
     crf.makeAnswerArraysAndTagIndex(docs);
     featureExporter.printFeatures(outputFile, docs);
   }
-
 }

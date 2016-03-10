@@ -1,5 +1,4 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import java.util.List;
 
@@ -16,10 +15,7 @@ import edu.stanford.nlp.util.CoreMap;
 
 
 /** @author David McClosky */
-public class ParserAnnotatorUtils  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ParserAnnotatorUtils.class);
+public class ParserAnnotatorUtils {
 
   private ParserAnnotatorUtils() {} // static methods
 
@@ -49,7 +45,7 @@ public class ParserAnnotatorUtils  {
       if (first) {
         sentence.set(TreeCoreAnnotations.TreeAnnotation.class, tree);
         if (verbose) {
-          log.info("Tree is:");
+          System.err.println("Tree is:");
           tree.pennPrint(System.err);
         }
 
@@ -65,8 +61,8 @@ public class ParserAnnotatorUtils  {
           SemanticGraph ccDeps = SemanticGraphFactory.generateCCProcessedDependencies(gsf.newGrammaticalStructure(tree), extras);
 
           if (verbose) {
-            log.info("SDs:");
-            log.info(deps.toString(SemanticGraph.OutputFormat.LIST));
+            System.err.println("SDs:");
+            System.err.println(deps.toString(SemanticGraph.OutputFormat.LIST));
           }
           sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, deps);
           sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, uncollapsedDeps);

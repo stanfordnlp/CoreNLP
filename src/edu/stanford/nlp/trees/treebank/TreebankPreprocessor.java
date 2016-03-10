@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees.treebank; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.treebank;
 
 import java.util.Date;
 import java.util.Map;
@@ -43,10 +42,7 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Spence Green
  *
  */
-public final class TreebankPreprocessor  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TreebankPreprocessor.class);
+public final class TreebankPreprocessor {
 
   private TreebankPreprocessor() {}
 
@@ -140,7 +136,7 @@ public final class TreebankPreprocessor  {
   public static void main(String[] args) {
 
     if(!validateCommandLine(args)) {
-      log.info(usage());
+      System.err.println(usage());
       System.exit(-1);
     }
 

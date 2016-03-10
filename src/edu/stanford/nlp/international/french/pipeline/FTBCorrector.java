@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.french.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.french.pipeline;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -28,10 +27,7 @@ import edu.stanford.nlp.util.Pair;
  * @author Spence Green
  *
  */
-public class FTBCorrector implements TreeTransformer  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(FTBCorrector.class);
+public class FTBCorrector implements TreeTransformer {
 
   private static final boolean DEBUG = false;
   
@@ -49,13 +45,13 @@ public class FTBCorrector implements TreeTransformer  {
       BufferedReader br = new BufferedReader(new StringReader(editStr));
       List<TsurgeonPattern> tsp = new ArrayList<>();
       while ((line = br.readLine()) != null) {
-        if (DEBUG) log.info("Pattern is " + line);
+        if (DEBUG) System.err.print("Pattern is " + line);
         TregexPattern matchPattern = TregexPattern.compile(line);
-        if (DEBUG) log.info(" [" + matchPattern + "]");
+        if (DEBUG) System.err.println(" [" + matchPattern + "]");
         tsp.clear();
         while (continuing(line = br.readLine())) {
           TsurgeonPattern p = Tsurgeon.parseOperation(line);
-          if (DEBUG) log.info("Operation is " + line + " [" + p + "]");
+          if (DEBUG) System.err.println("Operation is " + line + " [" + p + "]");
           tsp.add(p);
         }
         if ( ! tsp.isEmpty()) {
@@ -145,7 +141,7 @@ public class FTBCorrector implements TreeTransformer  {
    */
   public static void main(String[] args) {
     if(args.length != 1) {
-      log.info("Usage: java " + FTBCorrector.class.getName() + " filename\n");
+      System.err.println("Usage: java " + FTBCorrector.class.getName() + " filename\n");
       System.exit(-1);
     }
     
@@ -168,7 +164,7 @@ public class FTBCorrector implements TreeTransformer  {
         TregexMatcher m = pBadTree.matcher(t);
         TregexMatcher m2 = pBadTree2.matcher(t);
         if(m.find() || m2.find()) {
-          log.info("Discarding tree: " + t.toString());
+          System.err.println("Discarding tree: " + t.toString());
         } else {
           Tree fixedT = tt.transformTree(t);
           System.out.println(fixedT.toString());

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees.international.spanish; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.international.spanish;
 
 import java.io.*;
 import java.util.*;
@@ -20,14 +19,20 @@ import org.xml.sax.SAXException;
 import edu.stanford.nlp.io.ReaderInputStream;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.HasCategory;
+import edu.stanford.nlp.ling.HasContext;
+import edu.stanford.nlp.ling.HasIndex;
 import edu.stanford.nlp.ling.HasLemma;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.TreeReader;
+import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 
 /**
@@ -40,10 +45,7 @@ import edu.stanford.nlp.trees.TreebankLanguagePack;
  * @author Spence Green (original French XML reader)
  *
  */
-public class SpanishXMLTreeReader implements TreeReader  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SpanishXMLTreeReader.class);
+public class SpanishXMLTreeReader implements TreeReader {
 
   private InputStream stream;
   private final TreeNormalizer treeNormalizer;
@@ -114,7 +116,7 @@ public class SpanishXMLTreeReader implements TreeReader  {
       sentIdx = 0;
 
     } catch (SAXException e) {
-      log.info("Parse exception while reading " + filename);
+      System.err.println("Parse exception while reading " + filename);
       e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
@@ -469,7 +471,7 @@ public class SpanishXMLTreeReader implements TreeReader  {
   public static void main(String[] args) {
     final Properties options = StringUtils.argsToProperties(args, argOptionDefs());
     if(args.length < 1 || options.containsKey("help")) {
-      log.info(usage());
+      System.err.println(usage());
       return;
     }
 

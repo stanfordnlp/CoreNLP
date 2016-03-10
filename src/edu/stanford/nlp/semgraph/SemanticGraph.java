@@ -1,5 +1,4 @@
 package edu.stanford.nlp.semgraph;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.graph.DirectedMultiGraph;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -54,10 +53,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
  * @see SemanticGraphEdge
  * @see IndexedWord
  */
-public class SemanticGraph implements Serializable  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SemanticGraph.class);
+public class SemanticGraph implements Serializable {
 
   public static final boolean addSRLArcs = false;
 
@@ -1106,7 +1102,7 @@ public class SemanticGraph implements Serializable  {
 
     boolean result = relns.contains(EnglishGrammaticalRelations.AUX_MODIFIER)
         || relns.contains(EnglishGrammaticalRelations.AUX_PASSIVE_MODIFIER);
-    // log.info("I say " + vertex + (result ? " is" : " is not") +
+    // System.err.println("I say " + vertex + (result ? " is" : " is not") +
     // " an aux");
     return result;
   }
@@ -1210,15 +1206,15 @@ public class SemanticGraph implements Serializable  {
   // ============================================================================
   // String display
   // ============================================================================
-
   /**
    * Recursive depth first traversal. Returns a structured representation of the
    * dependency graph.
    *
    * Example:
+   * <p/>
    *
    * <pre>
-   *  -> need-3 (root)
+   *  /-> need-3 (root)
    *    -> We-0 (nsubj)
    *    -> do-1 (aux)
    *    -> n't-2 (neg)
@@ -1226,9 +1222,6 @@ public class SemanticGraph implements Serializable  {
    *      -> no-4 (det)
    *      -> stinking-5 (amod)
    * </pre>
-   *
-   * This is a quite ugly way to print a SemanticGraph.
-   * You might instead want to try {@link #toString(OutputFormat)}.
    */
   @Override
   public String toString() {
@@ -1363,9 +1356,12 @@ public class SemanticGraph implements Serializable  {
    * Inserts the given specific portion of an uncollapsed relation back into the
    * targetList
    *
-   * @param specific Specific relation to put in.
-   * @param relnTgtNode Node governed by the uncollapsed relation
-   * @param tgtList Target List of words
+   * @param specific
+   *          Specific relation to put in.
+   * @param relnTgtNode
+   *          Node governed by the uncollapsed relation
+   * @param tgtList
+   *          Target List of words
    */
   private void insertSpecificIntoList(String specific, IndexedWord relnTgtNode, List<IndexedWord> tgtList) {
     int currIndex = tgtList.indexOf(relnTgtNode);
@@ -1435,9 +1431,10 @@ public class SemanticGraph implements Serializable  {
    *
    * </dl>
    *
-   * @param format A {@code String} specifying the desired format
-   * @return A {@code String} representation of the typed dependencies in
-   *         this {@code GrammaticalStructure}
+   * @param format
+   *          a <code>String</code> specifying the desired format
+   * @return a <code>String</code> representation of the typed dependencies in
+   *         this <code>GrammaticalStructure</code>
    */
   public String toString(OutputFormat format) {
     switch(format) {
@@ -1577,7 +1574,7 @@ public class SemanticGraph implements Serializable  {
         sb.append("]");
       }
     } catch (IllegalArgumentException e) {
-      log.info("WHOA!  SemanticGraph.toCompactStringHelper() ran into problems at node " + node);
+      System.err.println("WHOA!  SemanticGraph.toCompactStringHelper() ran into problems at node " + node);
       throw new IllegalArgumentException(e);
     }
   }
@@ -1827,7 +1824,7 @@ public class SemanticGraph implements Serializable  {
         readDep(null, null);
         return sg;
       } catch (ParserException e) {
-        log.info("SemanticGraphParser warning: " + e.getMessage());
+        System.err.println("SemanticGraphParser warning: " + e.getMessage());
         return null;
       }
     }
@@ -1877,9 +1874,9 @@ public class SemanticGraph implements Serializable  {
       // could occur if some words in the string representation being parsed
       // come with index markers and some do not.
       IndexedWord ifl = new IndexedWord(null, 0, index);
-      // log.info("SemanticGraphParsingTask>>> word = " + word);
-      // log.info("SemanticGraphParsingTask>>> index = " + index);
-      // log.info("SemanticGraphParsingTask>>> indexesUsed = " +
+      // System.err.println("SemanticGraphParsingTask>>> word = " + word);
+      // System.err.println("SemanticGraphParsingTask>>> index = " + index);
+      // System.err.println("SemanticGraphParsingTask>>> indexesUsed = " +
       // indexesUsed);
       String[] wordAndTag = word.split("/");
       ifl.set(CoreAnnotations.TextAnnotation.class, wordAndTag[0]);

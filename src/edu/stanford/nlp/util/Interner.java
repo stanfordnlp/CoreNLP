@@ -1,5 +1,4 @@
-package edu.stanford.nlp.util; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.util;
 
 import java.lang.ref.WeakReference;
 import java.util.Map;
@@ -28,10 +27,7 @@ import java.util.Set;
  *
  * @author Dan Klein
  */
-public class Interner<T>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(Interner.class);
+public class Interner<T> {
 
   protected static Interner<Object> interner = Generics.newInterner();
 
@@ -80,7 +76,7 @@ public class Interner<T>  {
       map.put(o, ref);
     }
 //    else {
-//      log.info("Found dup for " + o);
+//      System.err.println("Found dup for " + o);
 //    }
     return ref.get();
   }

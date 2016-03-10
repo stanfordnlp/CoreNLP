@@ -1,5 +1,4 @@
-package edu.stanford.nlp.semgraph; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.semgraph;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -26,10 +25,7 @@ import edu.stanford.nlp.util.StringUtils;
  * SemanticGraph so that packages don't need to include the
  * LexicalizedParser in order to include SemanticGraph.
  */
-public class SemanticGraphPrinter  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SemanticGraphPrinter.class);
+public class SemanticGraphPrinter {
   private SemanticGraphPrinter() {} // main method only
 
   public static void main(String[] args) {
@@ -46,12 +42,12 @@ public class SemanticGraphPrinter  {
     String save = props.getProperty("save");
 
     if (load != null) {
-      log.info("Load not implemented!");
+      System.err.println("Load not implemented!");
       return;
     }
 
     if (sentFileName == null && treeFileName == null) {
-      log.info("Usage: java SemanticGraph [-sentFile file|-treeFile file] [-testGraph]");
+      System.err.println("Usage: java SemanticGraph [-sentFile file|-treeFile file] [-testGraph]");
       Tree t = Tree.valueOf("(ROOT (S (NP (NP (DT An) (NN attempt)) (PP (IN on) (NP (NP (NNP Andres) (NNP Pastrana) (POS 's)) (NN life)))) (VP (VBD was) (VP (VBN carried) (PP (IN out) (S (VP (VBG using) (NP (DT a) (JJ powerful) (NN bomb))))))) (. .)))");
       tb.add(t);
     } else if (treeFileName != null) {
@@ -106,7 +102,7 @@ public class SemanticGraphPrinter  {
     }
 
     if (save != null) {
-      log.info("Save not implemented!");
+      System.err.println("Save not implemented!");
     }
   } // end main
 

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.naturalli; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.naturalli;
 
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreAnnotation;
@@ -32,10 +31,7 @@ import java.util.stream.Collectors;
  * @author Gabor Angeli
  */
 @SuppressWarnings("unchecked")
-public class NaturalLogicAnnotator extends SentenceAnnotator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(NaturalLogicAnnotator.class);
+public class NaturalLogicAnnotator extends SentenceAnnotator {
 
   /**
    * A regex for arcs that act as determiners.
@@ -364,9 +360,6 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
         Optional<Triple<Operator,Integer,Integer>> quantifierInfo;
         if (namedEntityQuantifier) {
           // named entities have the "all" semantics by default.
-          if (!neQuantifiers) {
-            continue;
-          }
           quantifierInfo = Optional.of(Triple.makeTriple(Operator.IMPLICIT_NAMED_ENTITY, quantifier.index(), quantifier.index()));  // note: empty quantifier span given
         } else {
           // find the quantifier, and return some info about it.
@@ -422,7 +415,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
     // In these cases, take the longer quantifier match.
     List<OperatorSpec> quantifiers = new ArrayList<>();
     sentence.get(CoreAnnotations.TokensAnnotation.class).stream()
-        .filter(token -> token.containsKey(OperatorAnnotation.class))
+        .filter(token -> token.has(OperatorAnnotation.class))
         .forEach(token -> quantifiers.add(token.get(OperatorAnnotation.class)));
     quantifiers.sort( (x, y) -> y.quantifierLength() - x.quantifierLength());
     for (OperatorSpec quantifier : quantifiers) {
@@ -566,11 +559,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
   /**
    * If false, don't annotate tokens for polarity but only find the operators and their scopes.
    */
-  @ArgumentParser.Option(name="doPolarity", gloss="Mark polarity in addition to quantifier scopes")
-  private boolean doPolarity = true;
-
-  @ArgumentParser.Option(name="neQuantifiers", gloss="If true, mark named entities as quantifiers.")
-  private boolean neQuantifiers = false;
+  public final boolean doPolarity;
 
   /**
    * Create a new annotator.
@@ -578,7 +567,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
    * @param props The properties to configure this annotator with.
    */
   public NaturalLogicAnnotator(String annotatorName, Properties props) {
-    ArgumentParser.fillOptions(this, annotatorName, props);
+    this.doPolarity = Boolean.valueOf(props.getProperty(annotatorName + ".doPolarity", "true"));
   }
 
   /**
@@ -619,7 +608,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
   /** {@inheritDoc} */
   @Override
   protected void doOneFailedSentence(Annotation annotation, CoreMap sentence) {
-    log.info("Failed to annotate: " + sentence.get(CoreAnnotations.TextAnnotation.class));
+    System.err.println("Failed to annotate: " + sentence.get(CoreAnnotations.TextAnnotation.class));
   }
 
   /** {@inheritDoc} */
@@ -635,16 +624,11 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
     return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
-        CoreAnnotations.TextAnnotation.class,
         CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.IndexAnnotation.class,
         CoreAnnotations.SentencesAnnotation.class,
-        CoreAnnotations.SentenceIndexAnnotation.class,
         CoreAnnotations.PartOfSpeechAnnotation.class,
-        CoreAnnotations.LemmaAnnotation.class,
         SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
+        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class
     )));
   }
 }

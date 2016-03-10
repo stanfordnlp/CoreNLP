@@ -189,7 +189,7 @@ public class RepeatedRecordHandler extends LogRecordHandler {
   }
 
 
-  private enum PendingType { NONE, PRINTING, SEEN }
+  private static enum PendingType { NONE, PRINTING, SEEN }
 
 
   private static class RepeatedRecordInfo {
@@ -206,11 +206,11 @@ public class RepeatedRecordHandler extends LogRecordHandler {
   /**
    * Determines the semantics of what constitutes a repeated record
    */
-  public interface RepeatSemantics {
-    boolean equals(Record lastRecord, Record newRecord);
-    long maxWaitTimeInMillis();
-    int numToForcePrint();
-    String message(int linesOmitted);
+  public static interface RepeatSemantics {
+    public boolean equals(Record lastRecord, Record newRecord);
+    public long maxWaitTimeInMillis();
+    public int numToForcePrint();
+    public String message(int linesOmitted);
   }
 
 

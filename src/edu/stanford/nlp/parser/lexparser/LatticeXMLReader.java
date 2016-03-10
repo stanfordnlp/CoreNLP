@@ -1,5 +1,4 @@
-package edu.stanford.nlp.parser.lexparser; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.io.*;
 import java.util.*;
@@ -15,10 +14,7 @@ import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.XMLUtils;
 
-public class LatticeXMLReader implements Iterable<Lattice>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(LatticeXMLReader.class);
+public class LatticeXMLReader implements Iterable<Lattice> {
 
 //	private static final String ROOT = "sentences";
   public static final String SENTENCE = "sentence";

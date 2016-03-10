@@ -7,7 +7,8 @@ import java.util.Map;
 import java.util.PriorityQueue;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 
@@ -133,7 +134,7 @@ public class TopNGramRecord {
         result.append("  Len " + entry.getKey() + "\n");
         for (int i = trees.size() - 1; i >= 0; i--) {
           Tree tree = trees.get(i);
-          result.append("    " + SentenceUtils.listToString(tree.yield()) + "  [" + RNNCoreAnnotations.getPredictions(tree).get(prediction) + "]\n");
+          result.append("    " + Sentence.listToString(tree.yield()) + "  [" + RNNCoreAnnotations.getPredictions(tree).get(prediction) + "]\n");
         }
       }
     }

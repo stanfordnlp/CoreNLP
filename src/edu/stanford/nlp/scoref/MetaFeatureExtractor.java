@@ -13,8 +13,7 @@ import edu.stanford.nlp.stats.Counter;
 
 
 public class MetaFeatureExtractor {
-
-  public enum PairConjunction {FIRST, LAST, BOTH}
+  public enum PairConjunction {FIRST, LAST, BOTH};
   public enum SingleConjunction {INDEX, INDEX_CURRENT, INDEX_OTHER, INDEX_BOTH, INDEX_LAST}
 
   private final boolean neTypeConjuntion;

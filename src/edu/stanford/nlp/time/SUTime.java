@@ -1,17 +1,9 @@
 package edu.stanford.nlp.time;
 
 import edu.stanford.nlp.ling.tokensregex.types.Expressions;
-import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.FuzzyInterval;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.HasInterval;
-import edu.stanford.nlp.util.HashIndex;
-import edu.stanford.nlp.util.Index;
-import edu.stanford.nlp.util.Interval;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
-//import edu.stanford.nlp.util.logging.Redwood;
+import edu.stanford.nlp.util.*;
 
+import edu.stanford.nlp.util.Interval;
 import org.joda.time.*;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -26,7 +18,7 @@ import java.util.regex.Pattern;
  * SUTime is a collection of data structures to represent various temporal
  * concepts and operations between them.
  *
- * Different types of time expressions:
+ * Different types of time expressions
  * <ul>
  * <li>Time - A time point on a time scale  In most cases, we only know partial information
  *        (with a certain granularity) about a point in time (8:00pm)</li>
@@ -40,10 +32,7 @@ import java.util.regex.Pattern;
  *
  * @author Angel Chang
  */
-public class SUTime  {
-
-  /** A logger for this class */
-  // private static Redwood.RedwoodChannels log = Redwood.channels(SUTime.class);
+public class SUTime {
 
   // TODO:
   // 1. Decrease dependency on JodaTime...
@@ -79,7 +68,7 @@ public class SUTime  {
   // - intersect, mid, resolving
   // - specify clear start/end for range (sonal)
   // 10. Clean up formatting
-  // 11. ISO/Timex3/Custom
+  // ISO/Timex3/Custom
   // 12. Keep modifiers
   // 13. Handle mid- (token not separated)
   // 14. future, plurals
@@ -187,7 +176,6 @@ public class SUTime  {
     public int getNumberOfTemporalFuncs() { return temporalFuncIndex.size(); }
 
     private static final Pattern ID_PATTERN = Pattern.compile("([a-zA-Z]*)(\\d+)");
-
     public TimeExpression getTemporalExpr(String s) {
       Matcher m = ID_PATTERN.matcher(s);
       if (m.matches()) {
@@ -534,18 +522,21 @@ public class SUTime  {
     private static final long serialVersionUID = 1;
   }
 
-  public static <T extends Temporal> T createTemporal(StandardTemporalType timeType, T temporal) {
+  public static <T extends Temporal> T createTemporal(StandardTemporalType timeType, T temporal)
+  {
     temporal.standardTemporalType = timeType;
     return temporal;
   }
 
-  public static <T extends Temporal> T createTemporal(StandardTemporalType timeType, String label, T temporal) {
+  public static <T extends Temporal> T createTemporal(StandardTemporalType timeType, String label, T temporal)
+  {
     temporal.standardTemporalType = timeType;
     temporal.timeLabel = label;
     return temporal;
   }
 
-  public static <T extends Temporal> T createTemporal(StandardTemporalType timeType, String label, String mod, T temporal) {
+  public static <T extends Temporal> T createTemporal(StandardTemporalType timeType, String label, String mod, T temporal)
+  {
     temporal.standardTemporalType = timeType;
     temporal.timeLabel = label;
     temporal.mod = mod;
@@ -560,7 +551,6 @@ public class SUTime  {
     }
     private static final long serialVersionUID = 1;
   };
-
   public static final Duration DAY = new DurationWithFields(Period.days(1)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
@@ -568,7 +558,6 @@ public class SUTime  {
     }
     private static final long serialVersionUID = 1;
   };
-
   public static final Duration WEEK = new DurationWithFields(Period.weeks(1)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
@@ -576,9 +565,7 @@ public class SUTime  {
     }
     private static final long serialVersionUID = 1;
   };
-
   public static final Duration FORTNIGHT = new DurationWithFields(Period.weeks(2));
-
   public static final Duration MONTH = new DurationWithFields(Period.months(1)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
@@ -586,7 +573,6 @@ public class SUTime  {
     }
     private static final long serialVersionUID = 1;
   };
-
   // public static final Duration QUARTER = new DurationWithFields(new
   // Period(JodaTimeUtils.Quarters)) {
   public static final Duration QUARTER = new DurationWithFields(Period.months(3)) {
@@ -596,7 +582,6 @@ public class SUTime  {
     }
     private static final long serialVersionUID = 1;
   };
-
   public static final Duration HALFYEAR = new DurationWithFields(Period.months(6)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
@@ -604,7 +589,6 @@ public class SUTime  {
     }
     private static final long serialVersionUID = 1;
   };
-
   public static final Duration MILLIS = new DurationWithFields(Period.millis(1)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
@@ -612,7 +596,6 @@ public class SUTime  {
     }
     private static final long serialVersionUID = 1;
   };
-
   public static final Duration SECOND = new DurationWithFields(Period.seconds(1)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
@@ -620,7 +603,6 @@ public class SUTime  {
     }
     private static final long serialVersionUID = 1;
   };
-
   public static final Duration MINUTE = new DurationWithFields(Period.minutes(1)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
@@ -628,7 +610,6 @@ public class SUTime  {
     }
     private static final long serialVersionUID = 1;
   };
-
   public static final Duration HOUR = new DurationWithFields(Period.hours(1)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
@@ -636,11 +617,8 @@ public class SUTime  {
     }
     private static final long serialVersionUID = 1;
   };
-
   public static final Duration HALFHOUR = new DurationWithFields(Period.minutes(30));
-
   public static final Duration QUARTERHOUR = new DurationWithFields(Period.minutes(15));
-
   public static final Duration DECADE = new DurationWithFields(Period.years(10)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
@@ -648,7 +626,6 @@ public class SUTime  {
     }
     private static final long serialVersionUID = 1;
   };
-
   public static final Duration CENTURY = new DurationWithFields(Period.years(100)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
@@ -656,7 +633,6 @@ public class SUTime  {
     }
     private static final long serialVersionUID = 1;
   };
-
   public static final Duration MILLENNIUM = new DurationWithFields(Period.years(1000));
 
   public static final Time TIME_REF = new RefTime("REF") {
@@ -917,7 +893,8 @@ public class SUTime  {
       return t;
     }
 
-    public static Temporal create(Expressions.CompositeValue compositeValue) {
+    public Temporal create(Expressions.CompositeValue compositeValue)
+    {
       StandardTemporalType temporalType = compositeValue.get("type");
       String label = compositeValue.get("label");
       String modifier = compositeValue.get("modifier");
@@ -2001,10 +1978,9 @@ public class SUTime  {
     private static final long serialVersionUID = 1;
   }
 
-  /** The nth temporal.
-   *  Example: The tenth week (of something, don't know yet)
-   * The second friday
-   */
+  // The nth temporal
+  // Example: The tenth week (of something, don't know yet)
+  // The second friday
   public static class OrdinalTime extends Time {
     Temporal base;
     int n;
@@ -2052,7 +2028,6 @@ public class SUTime  {
         return new RelativeTime(t, TemporalOp.INTERSECT, this);
       }
     }
-
     @Override
     public Temporal resolve(Time t, int flags) {
       if (t == null) return this; // No resolving to be done?
@@ -2071,9 +2046,7 @@ public class SUTime  {
     }
 
     private static final long serialVersionUID = 1;
-
-  } // end static class OrdinalTim
-
+  }
 
   // Time with a range (most times have a range...)
   public static class TimeWithRange extends Time {
@@ -2342,13 +2315,12 @@ public class SUTime  {
     private static final long serialVersionUID = 1;
   }
 
-  /** Relative Time (something not quite resolved). */
+  // Relative Time (something not quite resolved)
   public static class RelativeTime extends Time {
-
-    private Time base = TIME_REF;
-    private TemporalOp tempOp;
-    private Temporal tempArg;
-    private int opFlags;
+    Time base = TIME_REF;
+    TemporalOp tempOp;
+    Temporal tempArg;
+    int opFlags;
 
     public RelativeTime(Time base, TemporalOp tempOp, Temporal tempArg, int flags) {
       super(base);
@@ -2389,20 +2361,7 @@ public class SUTime  {
       this.base = base;
     }
 
-    public Time getBase() {
-      return base;
-    }
-
-    public TemporalOp getTemporalOp() {
-      return tempOp;
-    }
-
-    public Temporal getTemporalArg() {
-      return tempArg;
-    }
-
-    public int getOpFlags() {
-      return opFlags;
+    public RelativeTime() {
     }
 
     @Override
@@ -2567,10 +2526,8 @@ public class SUTime  {
       }
       return new RelativeTime(this, TemporalOp.INTERSECT, t);
     }
-
     private static final long serialVersionUID = 1;
-
-  } // end static class RelativeTime
+  }
 
   // Partial time with Joda Time fields
   public static class PartialTime extends Time {
@@ -2955,13 +2912,13 @@ public class SUTime  {
         resolved = this;
       } else {
         resolved = new PartialTime(this, p);
-        // log.info("Resolved " + this + " to " + resolved + ", ref=" + ref);
+        // System.err.println("Resolved " + this + " to " + resolved + ", ref=" + ref);
       }
 
       Duration resolvedGranularity = resolved.getGranularity();
       Duration refGranularity = ref.getGranularity();
-      // log.info("refGranularity is " + refGranularity);
-      // log.info("resolvedGranularity is " + resolvedGranularity);
+      // System.err.println("refGranularity is " + refGranularity);
+      // System.err.println("resolvedGranularity is " + resolvedGranularity);
       if (resolvedGranularity != null && refGranularity != null && resolvedGranularity.compareTo(refGranularity) >= 0) {
         if ((flags & RESOLVE_TO_PAST) != 0) {
           if (resolved.compareTo(ref) > 0) {
@@ -2970,7 +2927,7 @@ public class SUTime  {
               resolved = (Time) t.resolve(ref, 0);
             }
           }
-          // log.info("Resolved " + this + " to past " + resolved + ", ref=" + ref);
+          // System.err.println("Resolved " + this + " to past " + resolved + ", ref=" + ref);
         } else if ((flags & RESOLVE_TO_FUTURE) != 0) {
           if (resolved.compareTo(ref) < 0) {
             Time t = (Time) this.next();
@@ -2978,7 +2935,7 @@ public class SUTime  {
               resolved = (Time) t.resolve(ref, 0);
             }
           }
-          // log.info("Resolved " + this + " to future " + resolved + ", ref=" + ref);
+          // System.err.println("Resolved " + this + " to future " + resolved + ", ref=" + ref);
         } else if ((flags & RESOLVE_TO_CLOSEST) != 0) {
           if (resolved.compareTo(ref) > 0) {
             Time t = (Time) this.prev();
@@ -2993,7 +2950,7 @@ public class SUTime  {
               resolved = Time.closest(ref, resolved, resolved2);
             }
           }
-          // log.info("Resolved " + this + " to closest " + resolved + ", ref=" + ref);
+          // System.err.println("Resolved " + this + " to closest " + resolved + ", ref=" + ref);
         }
       }
 

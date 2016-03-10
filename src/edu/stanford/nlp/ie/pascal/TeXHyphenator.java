@@ -1,5 +1,4 @@
-package edu.stanford.nlp.ie.pascal; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.pascal;
 
 import java.io.*;
 import java.util.*;
@@ -9,10 +8,7 @@ import edu.stanford.nlp.util.StringUtils;
  * Hyphenates words according to the TeX algorithm.
  * @author Jamie Nicolson (nicolson@cs.stanford.edu)
  */
-public class TeXHyphenator  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TeXHyphenator.class);
+public class TeXHyphenator {
 
   private static class Node {
     HashMap children = new HashMap();
@@ -43,7 +39,7 @@ public class TeXHyphenator  {
     while( (line=input.readLine()) != null ) {
       if( StringUtils.matches(line, "\\s*(%.*)?") ) {
         // comment or blank line
-        log.info("Skipping: " + line);
+        System.err.println("Skipping: " + line);
         continue;
       }
       char [] linechars = line.toCharArray();

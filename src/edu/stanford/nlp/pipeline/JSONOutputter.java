@@ -5,11 +5,10 @@ import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
 
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ie.util.RelationTriple;
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.StringOutputStream;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -65,8 +64,7 @@ public class JSONOutputter extends AnnotationOutputter {
   @SuppressWarnings("RedundantCast")  // It's lying; we need the "redundant" casts (as of 2014-09-08)
   @Override
   public void print(Annotation doc, OutputStream target, Options options) throws IOException {
-    PrintWriter writer = new PrintWriter(IOUtils.encodedOutputStreamWriter(target, options.encoding));
-    JSONWriter l0 = new JSONWriter(writer, options);
+    JSONWriter l0 = new JSONWriter(new PrintWriter(target), options);
 
     l0.object(l1 -> {
 
@@ -122,18 +120,6 @@ public class JSONOutputter extends AnnotationOutputter {
               tripleWriter.set("objectSpan", Span.fromPair(triple.objectTokenSpan()));
             }));
           }
-          // (kbp)
-          Collection<RelationTriple> kbpTriples = sentence.get(CoreAnnotations.KBPTriplesAnnotation.class);
-          if (kbpTriples != null) {
-            l2.set("kbp", kbpTriples.stream().map(triple -> (Consumer<Writer>) (Writer tripleWriter) -> {
-              tripleWriter.set("subject", triple.subjectGloss());
-              tripleWriter.set("subjectSpan", Span.fromPair(triple.subjectTokenSpan()));
-              tripleWriter.set("relation", triple.relationGloss());
-              tripleWriter.set("relationSpan", Span.fromPair(triple.relationTokenSpan()));
-              tripleWriter.set("object", triple.objectGloss());
-              tripleWriter.set("objectSpan", Span.fromPair(triple.objectTokenSpan()));
-            }));
-          }
 
           // (add tokens)
           if (sentence.get(CoreAnnotations.TokensAnnotation.class) != null) {
@@ -153,7 +139,6 @@ public class JSONOutputter extends AnnotationOutputter {
               l3.set("truecaseText", token.get(CoreAnnotations.TrueCaseTextAnnotation.class));
               l3.set("before", token.get(CoreAnnotations.BeforeAnnotation.class));
               l3.set("after", token.get(CoreAnnotations.AfterAnnotation.class));
-              l3.set("entitylink", token.get(CoreAnnotations.WikipediaEntityAnnotation.class));
               // Timex
               Timex time = token.get(TimeAnnotations.TimexAnnotation.class);
               if (time != null) {
@@ -179,7 +164,7 @@ public class JSONOutputter extends AnnotationOutputter {
               CorefChain.CorefMention representative = chain.getRepresentativeMention();
               chainWriter.set(Integer.toString(chain.getChainID()), chain.getMentionsInTextualOrder().stream().map(mention -> (Consumer<Writer>) (Writer mentionWriter) -> {
                 mentionWriter.set("id", mention.mentionID);
-                mentionWriter.set("text", SentenceUtils.listToOriginalTextString(doc.get(CoreAnnotations.SentencesAnnotation.class).get(mention.sentNum - 1).get(CoreAnnotations.TokensAnnotation.class).subList(mention.startIndex - 1, mention.endIndex - 1)).trim());
+                mentionWriter.set("text", Sentence.listToOriginalTextString(doc.get(CoreAnnotations.SentencesAnnotation.class).get(mention.sentNum - 1).get(CoreAnnotations.TokensAnnotation.class).subList(mention.startIndex - 1, mention.endIndex - 1)).trim());
                 mentionWriter.set("type", mention.mentionType);
                 mentionWriter.set("number", mention.number);
                 mentionWriter.set("gender", mention.gender);

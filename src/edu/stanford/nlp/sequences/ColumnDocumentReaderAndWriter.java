@@ -1,5 +1,4 @@
-package edu.stanford.nlp.sequences; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.sequences;
 
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -22,10 +21,7 @@ import edu.stanford.nlp.util.StringUtils;
  *
  * @author Jenny Finkel
  */
-public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ColumnDocumentReaderAndWriter.class);
+public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel> {
 
   private static final long serialVersionUID = 3806263423697973704L;
 
@@ -70,7 +66,7 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
 
     @Override
     public List<CoreLabel> apply(String doc) {
-      if (num > 0 && num % 1000 == 0) { log.info("["+num+"]"); }
+      if (num > 0 && num % 1000 == 0) { System.err.print("["+num+"]"); }
       num++;
 
       List<CoreLabel> words = new ArrayList<>();
@@ -92,7 +88,7 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
             wi.set(CoreAnnotations.GoldAnswerAnnotation.class, wi.get(CoreAnnotations.AnswerAnnotation.class));
           }
         } catch (RuntimeException e) {
-          log.info("Error on line " + lineCount + ": " + line);
+          System.err.println("Error on line " + lineCount + ": " + line);
           throw e;
         }
         words.add(wi);

@@ -46,7 +46,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @param <L> The type of the labels in the Dataset
  * @param <F> The type of the features in the Dataset
  */
-public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Iterable<RVFDatum<L, F>>, Serializable
+public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Iterable<RVFDatum<L, F>>, Serializable
 
   private static final long serialVersionUID = -3841757837680266182L;
 
@@ -58,8 +58,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
   double[] means;
   double[] stdevs; // means and stdevs of features, used for
 
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels logger = Redwood.channels(RVFDataset.class);
+  final static Redwood.RedwoodChannels logger = Redwood.channels(RVFDataset.class);
 
   /*
    * Store source and id of each datum; optional, and not fully supported.
@@ -519,22 +518,20 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F>  {  // implements Ite
   }
 
   /**
-   * Prints some summary statistics to the logger for the Dataset.
+   * Prints some summary statistics to stderr for the Dataset.
    */
   @Override
   public void summaryStatistics() {
     logger.info("numDatums: " + size);
-    StringBuilder sb = new StringBuilder("numLabels: ");
-    sb.append(labelIndex.size()).append(" [");
+    System.err.print("numLabels: " + labelIndex.size() + " [");
     Iterator<L> iter = labelIndex.iterator();
     while (iter.hasNext()) {
-      sb.append(iter.next());
+      System.err.print(iter.next());
       if (iter.hasNext()) {
-        sb.append(", ");
+        System.err.print(", ");
       }
     }
-    sb.append(']');
-    logger.info(sb.toString());
+    logger.info("]");
     logger.info("numFeatures (Phi(X) types): " + featureIndex.size());
     /*for(int i = 0; i < data.length; i++) {
       for(int j = 0; j < data[i].length; j++) {

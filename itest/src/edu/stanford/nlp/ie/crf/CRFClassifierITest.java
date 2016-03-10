@@ -6,7 +6,7 @@ import java.util.List;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.sequences.ExactBestSequenceFinder;
 import edu.stanford.nlp.sequences.KBestSequenceFinder;
 import edu.stanford.nlp.sequences.ObjectBankWrapper;
@@ -25,7 +25,6 @@ import junit.framework.TestCase;
 public class CRFClassifierITest extends TestCase {
 
   private static final String nerPath = "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz";
-  private static final String caselessPath = "/u/nlp/data/ner/classifiers-2014-08-31/english.all.3class.caseless.distsim.crf.ser.gz";
 
   /* The extra spaces and tab (after fate) are there to test space preservation.
    * Each item of the top level array is an array of 7 Strings:
@@ -251,17 +250,8 @@ public class CRFClassifierITest extends TestCase {
                   },
           };
 
-  private static final String[][] caselessTests = {
-          { "AISLINN JEWEL Y. CAPAROSO AND REV. CARMELO B. CAPAROSS ARE UPPERCASE NAMES.",
-            "AISLINN/PERSON JEWEL/PERSON Y./PERSON CAPAROSO/PERSON AND/O REV./O CARMELO/PERSON B./PERSON CAPAROSS/PERSON ARE/O UPPERCASE/O NAMES/O ./O \n" },
-          { "Aislinn Jewel Y. Caparoso and Rev. Carmelo B. Capaross are names.",
-            "Aislinn/PERSON Jewel/PERSON Y./PERSON Caparoso/PERSON and/O Rev./O Carmelo/PERSON B./PERSON Capaross/PERSON are/O names/O ./O \n" },
-          { "aislinn jewel y. caparoso and rev. carmelo b. capaross are lowercase names.",
-            "aislinn/PERSON jewel/PERSON y./PERSON caparoso/PERSON and/O rev./O carmelo/PERSON b./PERSON capaross/PERSON are/O lowercase/O names/O ./O \n" },
-  };
-
-  /** Each of these array entries corresponds to one of the inputs in testTexts,
-   *  and gives the entity output as entity type and character offset triples.
+  /* Each of these array entries corresponds to one of the inputs in testTexts,
+   * and gives the entity output as entity type and character offset triples.
    */
   @SuppressWarnings({"unchecked"})
   private static final Triple[][] testTrip =
@@ -295,34 +285,13 @@ public class CRFClassifierITest extends TestCase {
     crf = CRFClassifier.getDefaultClassifier();
     runCRFTest(crf);
 
-    final boolean isStoredAnswer = Boolean.valueOf(System.getProperty("ner.useStoredAnswer", "false"));
     String txt1 = "Jenny Finkel works for Mixpanel in San Francisco .";
-    if (isStoredAnswer) {
-      crf = CRFClassifier.getClassifierNoExceptions(nerPath2);
-    }
-    runKBestTest(crf, txt1, isStoredAnswer);
-
-    CRFClassifier<CoreLabel> crfCaseless = CRFClassifier.getClassifierNoExceptions(
-        System.getProperty("ner.caseless.model", caselessPath));
-    runSimpleCRFTest(crfCaseless, caselessTests);
+    runKBestTest(crf, txt1, false);
   }
 
 
-  private static void runSimpleCRFTest(CRFClassifier<CoreLabel> crf, String[][] testTexts) {
-    for (int i = 0; i < testTexts.length; i++) {
-      String[] testText = testTexts[i];
-      assertEquals(i + ": Wrong array size in test", 2, testText.length);
-
-      String out = crf.classifyToString(testText[0], "slashTags", false).replaceAll("\r", "");
-      // System.out.println("Gold:  |" + testText[5] + "|");
-      // System.out.println("Guess: |" + out + "|");
-      assertEquals(i + ": CRF buggy on classifyToString(slashTags, false)", testText[1], out);
-
-    }
-  }
-
-
-  private static void runCRFTest(CRFClassifier<CoreLabel> crf) {
+  @SuppressWarnings({"AssertEqualsBetweenInconvertibleTypes"})
+  public static void runCRFTest(CRFClassifier<CoreLabel> crf) {
     for (int i = 0; i < testTexts.length; i++) {
       String[] testText = testTexts[i];
 
@@ -377,9 +346,7 @@ public class CRFClassifierITest extends TestCase {
     }
   }
 
-  /** adapt changes from {@code Counter<int[]>} to an ordered {@code List<Pair<CRFLabel, Double>>} to make comparisons
-   *  easier for the asserts.
-   */
+  /** adapt changes from Counter<int[]> to an ordered List<Pair<CRFLabel, Double>> to make comparisons easier for the asserts. */
   private static List<Pair<CRFLabel, Double>> adapt(Counter<int[]> in) {
     List<Pair<int[], Double>> mid = Counters.toSortedListWithCounts(in);
     List<Pair<CRFLabel, Double>> ret = new ArrayList<>();
@@ -389,9 +356,7 @@ public class CRFClassifierITest extends TestCase {
     return ret;
   }
 
-  /** adapt2 changes from {@code Pair<List<CoreLabel>, Double>} to {@code Pair<List<String>, Double>} to make printout
-   *  better.
-   */
+  /** adapt2 changes from Pair<List<CoreLabel>, Double> to Pair<List<String>, Double> to make printout better. */
   private static List<Pair<List<String>, Double>> adapt2(List<Pair<List<CoreLabel>, Double>> in) {
     List<Pair<List<String>, Double>> ret = new ArrayList<>();
     for (Pair<List<CoreLabel>, Double> pair : in) {
@@ -433,7 +398,7 @@ public class CRFClassifierITest extends TestCase {
   private static void runKBestTest(CRFClassifier<CoreLabel> crf, String str, boolean isStoredAnswer) {
     final int K_BEST = 12;
     String[] txt = str.split(" ");
-    List<CoreLabel> input = SentenceUtils.toCoreLabelList(txt);
+    List<CoreLabel> input = Sentence.toCoreLabelList(txt);
 
     // do the ugliness that the CRFClassifier routines do to augment the input
     ObjectBankWrapper<CoreLabel> obw = new ObjectBankWrapper<>(crf.flags, null, crf.getKnownLCWords());

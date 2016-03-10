@@ -1,5 +1,4 @@
-package edu.stanford.nlp.international.french.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.international.french.pipeline;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -40,10 +39,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
  * @author Spence Green
  *
  */
-public class FTBDataset extends AbstractDataset  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(FTBDataset.class);
+public class FTBDataset extends AbstractDataset {
 
   private boolean CC_TAGSET = false;
 
@@ -119,7 +115,7 @@ public class FTBDataset extends AbstractDataset  {
           if(skipTree) break;
         }
         if(skipTree) {
-          log.info("Discarding tree: " + t.toString());
+          System.err.println("Discarding tree: " + t.toString());
           continue;
         }
 
