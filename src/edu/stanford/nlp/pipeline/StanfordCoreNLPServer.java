@@ -172,7 +172,9 @@ public class StanfordCoreNLPServer implements Runnable {
         }
 
         // Read the annotation
-        return new Annotation(IOUtils.slurpInputStream(httpExchange.getRequestBody(), encoding));
+        return new Annotation(
+            IOUtils.slurpInputStream(httpExchange.getRequestBody(), encoding)
+              .replace('\u0000', ' '));
       case "serialized":
         String inputSerializerName = props.getProperty("inputSerializer", ProtobufAnnotationSerializer.class.getName());
         AnnotationSerializer serializer = MetaClass.create(inputSerializerName).createInstance();
@@ -403,13 +405,14 @@ public class StanfordCoreNLPServer implements Runnable {
 
         // Get output
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        StanfordCoreNLP.createOutputter(props, AnnotationOutputter.getOptions(pipeline)).accept(completedAnnotation, os);
+        AnnotationOutputter.Options options = AnnotationOutputter.getOptions(pipeline);
+        StanfordCoreNLP.createOutputter(props, options).accept(completedAnnotation, os);
         os.close();
         byte[] response = os.toByteArray();
 
         String contentType = getContentType(props, of);
         if (contentType.equals("application/json") || contentType.startsWith("text/")) {
-          contentType += ";charset=utf-8";
+          contentType += ";charset=" + options.encoding;
         }
         httpExchange.getResponseHeaders().add("Content-type", contentType);
         httpExchange.getResponseHeaders().add("Content-length", Integer.toString(response.length));

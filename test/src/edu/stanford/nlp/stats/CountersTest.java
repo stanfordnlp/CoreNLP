@@ -1,9 +1,6 @@
 package edu.stanford.nlp.stats;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.*;
 
 import edu.stanford.nlp.util.Pair;
@@ -437,6 +434,29 @@ public class CountersTest extends TestCase {
     Counter<String> flat = Counters.flatten(h);
     assertEquals(6, flat.size());
     assertEquals(2.0, flat.getCount("b"));
+  }
+
+  public void testSerializeStringCounter() throws IOException {
+    Counter<String> counts = new ClassicCounter<>();
+    for (int base = -10; base < 10; ++base) {
+      if (base == 0) { continue; }
+      for (int exponent = -100; exponent < 100; ++exponent) {
+        double number = Math.pow(Math.PI * base, exponent);
+        counts.setCount(Double.toString(number), number);
+      }
+    }
+
+    File tmp = File.createTempFile("counts", ".tab.gz");
+    tmp.deleteOnExit();
+
+    Counters.serializeStringCounter(counts, tmp.getPath());
+
+    Counter<String> reread = Counters.deserializeStringCounter(tmp.getPath());
+    for (Map.Entry<String, Double> entry : reread.entrySet()) {
+      double old = counts.getCount(entry.getKey());
+      assertEquals(old, entry.getValue(), Math.abs(old) / 1e5 );
+    }
+
   }
 
 }

@@ -5,6 +5,9 @@ import edu.stanford.nlp.classify.LinearClassifier;
 import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.hcoref.data.CorefChain;
 import edu.stanford.nlp.ie.KBPRelationExtractor;
+import edu.stanford.nlp.ie.KBPSemgrexExtractor;
+import edu.stanford.nlp.ie.KBPStatisticalExtractor;
+import edu.stanford.nlp.ie.KBPTokensregexExtractor;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.IOUtils;
@@ -15,9 +18,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.simple.Document;
-import edu.stanford.nlp.util.AcronymMatcher;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -28,28 +29,44 @@ import java.util.stream.Collectors;
  *
  * @author Gabor Angeli
  */
+@SuppressWarnings("FieldCanBeLocal")
 public class KBPAnnotator implements Annotator {
 
-  /**
-   * The number of threads to run on.
-   */
-  public final int threads;
+  @ArgumentParser.Option(name="model", gloss="The path to the model")
+  private String model = DefaultPaths.DEFAULT_KBP_CLASSIFIER;
+
+  @ArgumentParser.Option(name="semgrex", gloss="Semgrex patterns directory")
+  private String semgrexdir = DefaultPaths.DEFAULT_KBP_SEMGREX_DIR;
+
+  @ArgumentParser.Option(name="tokensregex", gloss="Tokensregex patterns directory")
+  private String tokensregexdir = DefaultPaths.DEFAULT_KBP_TOKENSREGEX_DIR;
+
+  @ArgumentParser.Option(name="regexner.cased", gloss="The tokensregexner cased path")
+  private String regexnerCasedPath = DefaultPaths.DEFAULT_KBP_REGEXNER_CASED;
+
+  @ArgumentParser.Option(name="regexner.caseless", gloss="The tokensregexner caseless path")
+  private String regexnerCaselessPath = DefaultPaths.DEFAULT_KBP_REGEXNER_CASELESS;
 
   /**
    * The extractor implementation.
    */
-  public final KBPRelationExtractor extractor;
+  public final List<KBPRelationExtractor> extractors;
 
   /**
    * A serializer to convert to the Simple CoreNLP representation.
    */
   private final ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer(false);
 
+  /**
+   * An entity mention annotator to run after KBP-specific NER.
+   */
+  private final EntityMentionsAnnotator entityMentionAnnotator;
 
   /**
    * A TokensRegexNER annotator for the special KBP NER types (case-sensitive).
    */
   private final TokensRegexNERAnnotator casedNER;
+
   /**
    * A TokensRegexNER annotator for the special KBP NER types (case insensitive).
    */
@@ -61,34 +78,50 @@ public class KBPAnnotator implements Annotator {
    *
    * @param props The properties to use when creating this extractor.
    */
-  public KBPAnnotator(Properties props) {
+  public KBPAnnotator(String name, Properties props) {
     // Parse standard properties
-    this.threads = Integer.parseInt(props.getProperty("threads", "1"));
+    ArgumentParser.fillOptions(this, name, props);
 
     // Load the extractor
+    extractors = new ArrayList<>();
     try {
-      Object object = IOUtils.readObjectFromURLOrClasspathOrFileSystem(
-          props.getProperty("kbp.model", DefaultPaths.DEFAULT_KBP_CLASSIFIER));
+      Object object = IOUtils.readObjectFromURLOrClasspathOrFileSystem(model);
       if (object instanceof LinearClassifier) {
         //noinspection unchecked
-        this.extractor = new KBPRelationExtractor((Classifier<String, String>) object);
-      } else if (object instanceof KBPRelationExtractor) {
-        this.extractor = (KBPRelationExtractor) object;
+        extractors.add(new KBPStatisticalExtractor((Classifier<String, String>) object));
+      } else if (object instanceof KBPStatisticalExtractor) {
+        extractors.add( (KBPStatisticalExtractor) object );
       } else {
-        throw new ClassCastException(object.getClass() + " cannot be cast into a " + KBPRelationExtractor.class);
+        throw new ClassCastException(object.getClass() + " cannot be cast into a " + KBPStatisticalExtractor.class);
       }
+      extractors.add(new KBPTokensregexExtractor(tokensregexdir));
+      extractors.add(new KBPSemgrexExtractor(semgrexdir));
     } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeIOException(e);
     }
 
     // Load TokensRegexNER
     this.casedNER = new TokensRegexNERAnnotator(
-        props.getProperty("kbp.regexner.cased", DefaultPaths.DEFAULT_KBP_REGEXNER_CASED),
-        true);
+        regexnerCasedPath,
+        false);
     this.caselessNER = new TokensRegexNERAnnotator(
-        props.getProperty("kbp.regexner.caseless", DefaultPaths.DEFAULT_KBP_REGEXNER_CASELESS),
-        false,
+        regexnerCaselessPath,
+        true,
         "^(NN|JJ).*");
+
+    // Create entity mention annotator
+    this.entityMentionAnnotator = new EntityMentionsAnnotator("kbp.entitymention", new Properties() {{
+      setProperty("kbp.entitymention.acronyms", "true");
+      setProperty("acronyms", "true");
+    }});
+  }
+
+
+  /** @see KBPAnnotator#KBPAnnotator(String, Properties) */
+  @SuppressWarnings("unused")
+  public KBPAnnotator(Properties properties) {
+    this(STANFORD_KBP, properties);
+
   }
 
 
@@ -204,16 +237,19 @@ public class KBPAnnotator implements Annotator {
    * @param annotation The document to annotate.
    */
   public void annotate(Annotation annotation) {
+    List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
+
     // Annotate with NER
     casedNER.annotate(annotation);
     caselessNER.annotate(annotation);
+    // Annotate with Mentions
+    entityMentionAnnotator.annotate(annotation);
 
     // Create simple document
     Document doc = new Document(serializer.toProto(annotation));
 
     // Get the mentions in the document
     List<CoreMap> mentions = new ArrayList<>();
-    List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
     for (CoreMap sentence : sentences) {
       mentions.addAll(sentence.get(CoreAnnotations.MentionsAnnotation.class));
     }
@@ -229,7 +265,7 @@ public class KBPAnnotator implements Annotator {
       }
     }
     // (collect coreferent KBP mentions)
-    Map<CoreMap, Set<CoreMap>> mentionsMap = new HashMap<>();
+    Map<CoreMap, Set<CoreMap>> mentionsMap = new HashMap<>();  // map from canonical mention -> other mentions
     for (Map.Entry<Integer, CorefChain> chain : annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class).entrySet()) {
       CoreMap firstMention = null;
       for (CorefChain.CorefMention mention : chain.getValue().getMentionsInTextualOrder()) {
@@ -271,12 +307,23 @@ public class KBPAnnotator implements Annotator {
       }
     }
 
+    // Propagate Entity Link
+    for (Map.Entry<CoreMap, Set<CoreMap>> entry : mentionsMap.entrySet()) {
+      String entityLink = entry.getKey().get(CoreAnnotations.WikipediaEntityAnnotation.class);
+      for (CoreMap mention : entry.getValue()) {
+        for (CoreLabel token : mention.get(CoreAnnotations.TokensAnnotation.class)) {
+          token.set(CoreAnnotations.WikipediaEntityAnnotation.class, entityLink);
+        }
+      }
+    }
+
     // Create a canonical mention map
     Map<CoreMap, CoreMap> mentionToCanonicalMention = new HashMap<>();
     for (Map.Entry<CoreMap, Set<CoreMap>> entry : mentionsMap.entrySet()) {
       for (CoreMap mention : entry.getValue()) {
-        // (set the NER tag to be axiomatically that of the canonical mention)
+        // (set the NER tag + link to be axiomatically that of the canonical mention)
         mention.set(CoreAnnotations.NamedEntityTagAnnotation.class, entry.getKey().get(CoreAnnotations.NamedEntityTagAnnotation.class));
+        mention.set(CoreAnnotations.WikipediaEntityAnnotation.class, entry.getKey().get(CoreAnnotations.WikipediaEntityAnnotation.class));
         // (add the mention (note: this must come after we set the NER!)
         mentionToCanonicalMention.put(mention, entry.getKey());
       }
@@ -284,6 +331,7 @@ public class KBPAnnotator implements Annotator {
     // (add missing mentions)
     mentions.stream().filter(mention -> mentionToCanonicalMention.get(mention) == null)
         .forEach(mention -> mentionToCanonicalMention.put(mention, mention));
+
 
     // Cluster mentions by sentence
     @SuppressWarnings("unchecked") List<CoreMap>[] mentionsBySentence = new List[annotation.get(CoreAnnotations.SentencesAnnotation.class).size()];
@@ -315,7 +363,7 @@ public class KBPAnnotator implements Annotator {
 
             if (objNER.isPresent() &&
                 KBPRelationExtractor.RelationType.plausiblyHasRelation(subjNER.get(), objNER.get())) {  // type check
-              KBPRelationExtractor.FeaturizerInput input = new KBPRelationExtractor.FeaturizerInput(
+              KBPStatisticalExtractor.FeaturizerInput input = new KBPStatisticalExtractor.FeaturizerInput(
                   new Span(subjBegin, subjEnd),
                   new Span(objBegin, objEnd),
                   subjNER.get(),
@@ -323,17 +371,31 @@ public class KBPAnnotator implements Annotator {
                   doc.sentence(sentenceI)
               );
               //  -- BEGIN Classify
-              Pair<String, Double> prediction = extractor.classify(input);
+              Pair<String, Double> prediction = Pair.makePair(KBPRelationExtractor.NO_RELATION, 1.0);
+              for (KBPRelationExtractor extractor : extractors) {
+                Pair<String, Double> classifierPrediction = extractor.classify(input);
+                if (prediction.first.equals(KBPRelationExtractor.NO_RELATION) ||
+                    (!classifierPrediction.first.equals(KBPRelationExtractor.NO_RELATION) &&
+                        classifierPrediction.second > prediction.second)
+                    ){
+                  // The last prediction was NO_RELATION, or this is not NO_RELATION and has a higher score
+                  prediction = classifierPrediction;
+                }
+              }
               //  -- END Classify
               // Handle the classifier output
-              if (!KBPRelationExtractor.NO_RELATION.equals(prediction.first)) {
-                RelationTriple triple = new RelationTriple(
+              if (!KBPStatisticalExtractor.NO_RELATION.equals(prediction.first)) {
+                RelationTriple triple = new RelationTriple.WithLink(
                     subj.get(CoreAnnotations.TokensAnnotation.class),
                     mentionToCanonicalMention.get(subj).get(CoreAnnotations.TokensAnnotation.class),
                     Collections.singletonList(new CoreLabel(new Word(prediction.first))),
                     obj.get(CoreAnnotations.TokensAnnotation.class),
                     mentionToCanonicalMention.get(obj).get(CoreAnnotations.TokensAnnotation.class),
-                    prediction.second);
+                    prediction.second,
+                    sentences.get(sentenceI).get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class),
+                    subj.get(CoreAnnotations.WikipediaEntityAnnotation.class),
+                    obj.get(CoreAnnotations.WikipediaEntityAnnotation.class)
+                    );
                 triples.add(triple);
               }
             }
@@ -349,7 +411,11 @@ public class KBPAnnotator implements Annotator {
   /** {@inheritDoc} */
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CoreAnnotations.KBPTriplesAnnotation.class);
+    Set<Class<? extends CoreAnnotation>> requirements = new HashSet<>(Arrays.asList(
+        CoreAnnotations.MentionsAnnotation.class,
+        CoreAnnotations.KBPTriplesAnnotation.class
+    ));
+    return Collections.unmodifiableSet(requirements);
   }
 
   /** {@inheritDoc} */
@@ -366,9 +432,26 @@ public class KBPAnnotator implements Annotator {
         SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
         SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
         SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class,
-        CoreAnnotations.OriginalTextAnnotation.class,
-        CoreAnnotations.MentionsAnnotation.class
+        CoreAnnotations.OriginalTextAnnotation.class
     ));
     return Collections.unmodifiableSet(requirements);
   }
+
+  /**
+   * A debugging method to try relation extraction from the console.
+   * @throws IOException
+   */
+  public static void main(String[] args) throws IOException {
+    Properties props = StringUtils.argsToProperties(args);
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,mention,coref,kbp");
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    IOUtils.console("sentence> ", line -> {
+      Annotation ann = new Annotation(line);
+      pipeline.annotate(ann);
+      for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
+        sentence.get(CoreAnnotations.KBPTriplesAnnotation.class).forEach(System.err::println);
+      }
+    });
+  }
+
 }

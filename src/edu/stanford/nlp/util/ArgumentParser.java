@@ -1,4 +1,5 @@
 package edu.stanford.nlp.util; 
+import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
@@ -740,6 +741,24 @@ public class ArgumentParser  {
   public static void fillOptions(Object instance,
                                  String[] args) {
     fillOptions(new Object[]{ instance }, args);
+  }
+
+
+  /**
+   * Fill all the options for a given CoreNLP annotator.
+   * @param annotator The annotator to fill options for.
+   * @param annotatorName The name of the annotator, for parsing properties.
+   * @param props The properties to fill the options in the annotator with.
+   */
+  public static void fillOptions(Annotator annotator, String annotatorName, Properties props) {
+    ArgumentParser.fillOptions(annotator, props);
+    Properties withoutPrefix = new Properties();
+    Enumeration<Object> keys = props.keys();
+    while (keys.hasMoreElements()) {
+      String key = keys.nextElement().toString();
+      withoutPrefix.setProperty(key.replace(annotatorName + ".", ""), props.getProperty(key));
+    }
+    ArgumentParser.fillOptions(annotator, withoutPrefix);
   }
 
 

@@ -28,6 +28,7 @@ public class PolarityITest {
     setProperty("tokenize.class", "PTBTokenizer");
     setProperty("tokenize.language", "en");
     setProperty("enforceRequirements", "false");
+    setProperty("natlog.neQuantifiers", "true");
   }});
 
   @SuppressWarnings("unchecked")

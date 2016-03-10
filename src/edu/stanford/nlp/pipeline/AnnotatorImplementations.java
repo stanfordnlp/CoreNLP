@@ -292,6 +292,10 @@ public class AnnotatorImplementations  {
    * Annotate for KBP relations
    */
   public Annotator kbp(Properties properties) {
-    return new KBPAnnotator(properties);
+    return new KBPAnnotator(Annotator.STANFORD_KBP, properties);
+  }
+
+  public Annotator link(Properties properties) {
+    return new WikidictAnnotator(Annotator.STANFORD_LINK, properties);
   }
 }

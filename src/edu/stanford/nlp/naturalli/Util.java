@@ -205,12 +205,30 @@ public class Util {
           edge.third.getRelation(), edge.third.getWeight(), edge.third.isExtra());
     }
 
-    // Remove extra edges
+    // Handle extra edges.
+    // Two cases:
+    // (1) the extra edge is a subj/obj edge and the main edge is a conj:.*
+    //     in this case, keep the extra
+    // (2) otherwise, delete the extra
     List<SemanticGraphEdge> extraEdges = new ArrayList<>();
     for (SemanticGraphEdge edge : tree.edgeIterable()) {
       if (edge.isExtra()) {
-        if (tree.incomingEdgeList(edge.getDependent()).size() > 1) {
-          extraEdges.add(edge);
+        List<SemanticGraphEdge> incomingEdges = tree.incomingEdgeList(edge.getDependent());
+        SemanticGraphEdge toKeep = null;
+        for (SemanticGraphEdge candidate : incomingEdges) {
+          if (toKeep == null) {
+            toKeep = candidate;
+          } else if (toKeep.getRelation().toString().startsWith("conj") && candidate.getRelation().toString().matches(".subj.*|.obj.*")) {
+            toKeep = candidate;
+          } else if (!candidate.isExtra() &&
+                     !(candidate.getRelation().toString().startsWith("conj") && toKeep.getRelation().toString().matches(".subj.*|.obj.*"))) {
+            toKeep = candidate;
+          }
+        }
+        for (SemanticGraphEdge candidate : incomingEdges) {
+          if (candidate != toKeep) {
+            extraEdges.add(candidate);
+          }
         }
       }
     }

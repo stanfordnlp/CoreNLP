@@ -532,6 +532,30 @@ public class StringUtils  {
     return fields;
   }
 
+
+  /**
+   * Split on a given character, filling out the fields in the output array.
+   * This is suitable for, e.g., splitting a TSV file of known column count.
+   * @param out The output array to fill
+   * @param input The input to split
+   * @param delimiter The delimiter to split on.
+   */
+  public static void splitOnChar(String[] out, String input, char delimiter) {
+    int lastSplit = 0;
+    int outI = 0;
+    char[] chars = input.toCharArray();
+    for (int i = 0; i < chars.length; ++i) {
+      if (chars[i] == delimiter) {
+        out[outI] = new String(chars, lastSplit, i - lastSplit);
+        outI += 1;
+        lastSplit = i + 1;
+      }
+    }
+    if (outI < out.length) {
+      out[outI] = input.substring(lastSplit);
+    }
+  }
+
   /** Split a string into tokens.  Because there is a tokenRegex as well as a
    *  separatorRegex (unlike for the conventional split), you can do things
    *  like correctly split quoted strings or parenthesized arguments.
@@ -2619,4 +2643,24 @@ public class StringUtils  {
     return expandEnvironmentVariables(raw, System.getenv());
   }
 
+
+  /**
+   * Logs the command line arguments to Redwood on the given channels.
+   * The logger should be a RedwoodChannels of a single channel: the main class.
+   *
+   * @param log The redwood logger to log to.
+   * @param args The command-line arguments to log.
+   */
+  public static void logInvocationString(Redwood.RedwoodChannels log, String[] args) {
+    if (log.channelNames.length > 0) {
+      if (log.channelNames[0] instanceof Class) {
+        log.info(toInvocationString(((Class) log.channelNames[0]).getSimpleName(), args));
+      } else {
+        log.info(toInvocationString(log.channelNames[0].toString(), args));
+
+      }
+    } else {
+      log.info(toInvocationString("CoreNLP", args));
+    }
+  }
 }

@@ -130,6 +130,11 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     return subject.get(subject.size() - 1);
   }
 
+  /** The entity link of the subject */
+  public String subjectLink() {
+    return subjectLemmaGloss();
+  }
+
   /**
    * The subject of this relation triple, as a String of the subject's lemmas.
    * This method will additionally strip out punctuation as well.
@@ -146,6 +151,11 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
   /** The head of the object of this relation triple. */
   public CoreLabel objectHead() {
     return object.get(object.size() - 1);
+  }
+
+  /** The entity link of the subject */
+  public String objectLink() {
+    return objectLemmaGloss();
   }
 
   /**
@@ -243,14 +253,16 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
       // Variables to keep track of the longest chunk
       int longestChunk = 0;
       int longestChunkStart = 0;
-      int lastIndex = relation.get(0).index() - 1;
       int thisChunk = 1;
       int thisChunkStart = 0;
       // Find the longest chunk
       for (int i = 1; i < relation.size(); ++i) {
         CoreLabel token = relation.get(i);
-        if (token.index() - 1 == lastIndex + 1) {
+        CoreLabel lastToken = relation.get(i - 1);
+        if (lastToken.index() + 1 == token.index()) {
           thisChunk += 1;
+        } else if (lastToken.index() + 2 == token.index()) {
+          thisChunk += 2;  // a skip of one character is _usually_ punctuation
         } else {
           if (thisChunk > longestChunk) {
             longestChunk = thisChunk;
@@ -268,7 +280,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
       // Return the longest chunk
       return Pair.makePair(
           relation.get(longestChunkStart).index() - 1,
-          relation.get(longestChunkStart + longestChunk - 1).index()
+          relation.get(longestChunkStart).index() - 1 + longestChunk
       );
     }
   }
@@ -479,6 +491,22 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
       this.sourceTree = new SemanticGraph(tree);
     }
 
+    /**
+     * Create a new triple with known values for the subject, relation, and object,
+     * along with their canonical spans (i.e., resolving coreference)
+     * For example, "(cats, play with, yarn)"
+     */
+    public WithTree(List<CoreLabel> subject,
+                          List<CoreLabel> canonicalSubject,
+                          List<CoreLabel> relation,
+                          List<CoreLabel> object,
+                          List<CoreLabel> canonicalObject,
+                          double confidence,
+                    SemanticGraph tree) {
+      super(subject, canonicalSubject, relation, object, canonicalObject, confidence);
+      this.sourceTree = tree;
+    }
+
     /** The head of the subject of this relation triple. */
     public CoreLabel subjectHead() {
       if (subject.size() == 1) { return subject.get(0); }
@@ -513,4 +541,48 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
       return Optional.of(sourceTree);
     }
   }
+
+
+  /**
+   * A {@link edu.stanford.nlp.ie.util.RelationTriple}, but with both the tree and the entity
+   * links saved as well.
+   */
+  public static class WithLink extends WithTree {
+    /** The canonical entity link of the subject */
+    public final Optional<String> subjectLink;
+    /** The canonical entity link of the object */
+    public final Optional<String> objectLink;
+
+    /** Create a new relation triple */
+    public WithLink(List<CoreLabel> subject, List<CoreLabel> canonicalSubject, List<CoreLabel> relation, List<CoreLabel> object, List<CoreLabel> canonicalObject, double confidence,
+                    SemanticGraph tree,
+                    String subjectLink,
+                    String objectLink
+                    ) {
+      super(subject, canonicalSubject, relation, object, canonicalObject, confidence, tree);
+      this.subjectLink = Optional.ofNullable(subjectLink);
+      this.objectLink = Optional.ofNullable(objectLink);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String subjectLink() {
+      if (subjectLink.isPresent()) {
+        return subjectLink.get();
+      } else {
+        return super.subjectLink();
+      }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String objectLink() {
+      if (objectLink.isPresent()) {
+        return objectLink.get();
+      } else {
+        return super.objectLink();
+      }
+    }
+  }
+
 }

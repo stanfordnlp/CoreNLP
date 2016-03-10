@@ -1,5 +1,5 @@
 // MaxentTagger -- StanfordMaxEnt, A Maximum Entropy Toolkit
-// Copyright (c) 2002-2015 Leland Stanford Junior University
+// Copyright (c) 2002-2016 Leland Stanford Junior University
 
 
 // This program is free software; you can redistribute it and/or
@@ -25,9 +25,7 @@
 // Licensing: java-nlp-support@lists.stanford.edu
 // http://www-nlp.stanford.edu/software/tagger.shtml
 
-
 package edu.stanford.nlp.tagger.maxent;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.PrintFile;
@@ -50,7 +48,6 @@ import edu.stanford.nlp.sequences.PlainTextDocumentReaderAndWriter.OutputStyle;
 import edu.stanford.nlp.tagger.common.Tagger;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;
 import edu.stanford.nlp.util.DataFilePaths;
-import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.Timing;
@@ -58,9 +55,11 @@ import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.XMLUtils;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.lang.reflect.Method;
 import java.text.NumberFormat;
@@ -223,7 +222,7 @@ import java.text.DecimalFormat;
 public class MaxentTagger extends Tagger implements ListProcessor<List<? extends HasWord>,List<TaggedWord>>, Serializable  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(MaxentTagger.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(MaxentTagger.class);
 
   /**
    * The directory from which to get taggers when using
@@ -829,7 +828,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       for (int i = 0; i < extractors.size() + extractorsRare.size(); ++i) {
         fAssociations.add(Generics.<String, int[]>newHashMap());
       }
-      if (VERBOSE) System.err.printf("Reading %d feature keys...%n",sizeAssoc);
+      if (VERBOSE) log.info("Reading %d feature keys...%n",sizeAssoc);
       PrintFile pfVP = null;
       if (VERBOSE) {
         pfVP = new PrintFile("pairs.txt");

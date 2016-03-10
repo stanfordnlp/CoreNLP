@@ -1195,7 +1195,7 @@ public class Redwood  {
    */
   @SuppressWarnings("unused")
   public static class RedwoodChannels {
-    private final Object[] channelNames;
+    public final Object[] channelNames;
 
     public RedwoodChannels(Object... channelNames) {
       this.channelNames = channelNames;
