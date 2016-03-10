@@ -19,7 +19,8 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.zip.GZIPOutputStream;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
+
 
 /**
  * Make sure serializing to Protocol Buffers works, and is lossless.
@@ -68,7 +69,7 @@ public class ProtobufAnnotationSerializerSlowITest {
     if (doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       for (CoreMap sentence : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
         if (sentence.containsKey(CoreAnnotations.TokensAnnotation.class)) {
-          boolean hasTokenBeginAnnotation = sentence.size() > 0 && sentence.get(CoreAnnotations.TokensAnnotation.class).get(0).has(CoreAnnotations.TokenBeginAnnotation.class);
+          boolean hasTokenBeginAnnotation = sentence.size() > 0 && sentence.get(CoreAnnotations.TokensAnnotation.class).get(0).containsKey(CoreAnnotations.TokenBeginAnnotation.class);
           if (hasTokenBeginAnnotation) {
             sentence.set(CoreAnnotations.NumerizedTokensAnnotation.class, NumberNormalizer.findAndMergeNumbers(sentence));
           }
@@ -305,8 +306,8 @@ public class ProtobufAnnotationSerializerSlowITest {
     assertNotNull(compressedProto);
 
     // Check size
-    assertTrue("" + compressedProto.length, compressedProto.length < 340000);
-    assertTrue("" + uncompressedProto.length, uncompressedProto.length < 1700000);
+    assertTrue("" + compressedProto.length, compressedProto.length < 380000);
+    assertTrue("" + uncompressedProto.length, uncompressedProto.length < 1800000);
   }
 
   @Test
@@ -424,7 +425,7 @@ public class ProtobufAnnotationSerializerSlowITest {
 
   @Test
   public void testGender() {
-    testAnnotators("tokenize,ssplit,pos,gender");
+    testAnnotators("tokenize,ssplit,pos,lemma,ner,gender");
   }
 
   /**

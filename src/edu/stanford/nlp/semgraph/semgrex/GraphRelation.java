@@ -1,4 +1,5 @@
-package edu.stanford.nlp.semgraph.semgrex;
+package edu.stanford.nlp.semgraph.semgrex; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -104,7 +105,7 @@ abstract class GraphRelation implements Serializable {
     void setAlignment(Alignment alignment, boolean hypToText, SearchNodeIterator itr) {
       this.alignment = alignment;
       this.hypToText = hypToText;
-      //System.err.println("setting alignment");
+      //log.info("setting alignment");
       itr.advance();
     }
 
@@ -135,17 +136,17 @@ abstract class GraphRelation implements Serializable {
           public void advance() {
             if (alignment == null) return;
             if (node.equals(IndexedWord.NO_WORD)) next = null;
-            //System.err.println("node: " + node.word());
+            //log.info("node: " + node.word());
             if (hypToText) {
               if (!foundOnce) {
                 next = alignment.getMap().get(node);
                 foundOnce = true;
-              //  if (next == null) System.err.println("no alignment"); else
-               // System.err.println("other graph: " + next.word());
+              //  if (next == null) log.info("no alignment"); else
+               // log.info("other graph: " + next.word());
               }
               else {
                 next = null;
-                //System.err.println("next: null");
+                //log.info("next: null");
               }
             } else {
 
@@ -155,13 +156,13 @@ abstract class GraphRelation implements Serializable {
                   if (nextNum == num) {
                     next = pair.getKey();
                     nextNum++;
-                    //System.err.println("next: " + next.word());
+                    //log.info("next: " + next.word());
                     return;
                   }
                   num++;
                 }
               }
-              //System.err.println("backwards, next: null");
+              //log.info("backwards, next: null");
               next = null;
             }
           }

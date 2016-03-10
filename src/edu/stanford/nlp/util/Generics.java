@@ -1,4 +1,5 @@
-package edu.stanford.nlp.util;
+package edu.stanford.nlp.util; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
@@ -45,7 +46,10 @@ import edu.stanford.nlp.util.concurrent.SynchronizedInterner;
  *
  * @author Ilya Sherman
  */
-public class Generics {
+public class Generics  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(Generics.class);
 
   private Generics() {} // static class
 
@@ -113,7 +117,7 @@ public class Generics {
     try {
       return HASH_SET_CLASS.getConstructor(Integer.TYPE);
     } catch (Exception e) {
-      System.err.println("Warning: could not find a constructor for objects of " + HASH_SET_CLASS + " which takes an integer argument.  Will use the no argument constructor instead.");
+      log.info("Warning: could not find a constructor for objects of " + HASH_SET_CLASS + " which takes an integer argument.  Will use the no argument constructor instead.");
     }
     return null;
   }
@@ -177,7 +181,7 @@ public class Generics {
     try {
       return HASH_MAP_CLASS.getConstructor(Integer.TYPE);
     } catch (Exception e) {
-      System.err.println("Warning: could not find a constructor for objects of " + HASH_MAP_CLASS + " which takes an integer argument.  Will use the no argument constructor instead.");
+      log.info("Warning: could not find a constructor for objects of " + HASH_MAP_CLASS + " which takes an integer argument.  Will use the no argument constructor instead.");
     }
     return null;
   }

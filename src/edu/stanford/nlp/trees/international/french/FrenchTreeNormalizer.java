@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.international.french;
+package edu.stanford.nlp.trees.international.french; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -19,7 +20,10 @@ import java.util.function.Predicate;
  * @author Spence Green
  *
  */
-public class FrenchTreeNormalizer extends BobChrisTreeNormalizer {
+public class FrenchTreeNormalizer extends BobChrisTreeNormalizer  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(FrenchTreeNormalizer.class);
 
   private static final long serialVersionUID = 7868735300308066991L;
 

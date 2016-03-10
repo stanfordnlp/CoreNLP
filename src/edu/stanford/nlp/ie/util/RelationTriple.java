@@ -22,6 +22,10 @@ import java.util.function.Function;
 public class RelationTriple implements Comparable<RelationTriple>, Iterable<CoreLabel> {
   /** The subject (first argument) of this triple */
   public final List<CoreLabel> subject;
+
+  /** The subject (first argument) of this triple, in its canonical mention (i.e., coref resolved) */
+  public final List<CoreLabel> canonicalSubject;
+
   /**
    * The relation (second argument) of this triple.
    * Note that this is only the part of the relation that can be grounded in the sentence itself.
@@ -31,8 +35,13 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
    * {@link RelationTriple#relationGloss} or {@link RelationTriple#relationLemmaGloss}.
    */
   public final List<CoreLabel> relation;
+
   /** The object (third argument) of this triple */
   public final List<CoreLabel> object;
+
+  /** The object (third argument) of this triple, in its canonical mention (i.e., coref resolved). */
+  public final List<CoreLabel> canonicalObject;
+
   /** A marker for the relation expressing a tmod not grounded in a word in the sentence. */
   private boolean istmod = false;
   /** A marker for the relation expressing a prefix "be" not grounded in a word in the sentence. */
@@ -54,8 +63,10 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
   public RelationTriple(List<CoreLabel> subject, List<CoreLabel> relation, List<CoreLabel> object,
                         double confidence) {
     this.subject = subject;
+    this.canonicalSubject = subject;
     this.relation = relation;
     this.object = object;
+    this.canonicalObject = object;
     this.confidence = confidence;
   }
 
@@ -67,19 +78,51 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
   }
 
   /**
+   * Create a new triple with known values for the subject, relation, and object.
+   * For example, "(cats, play with, yarn)"
+   * @param subject The subject of this triple; e.g., "cats".
+   * @param relation The relation of this triple; e.g., "play with".
+   * @param object The object of this triple; e.g., "yarn".
+   */
+  public RelationTriple(List<CoreLabel> subject,
+                        List<CoreLabel> canonicalSubject,
+                        List<CoreLabel> relation,
+                        List<CoreLabel> object,
+                        List<CoreLabel> canonicalObject,
+                        double confidence) {
+    this.subject = subject;
+    this.canonicalSubject = canonicalSubject;
+    this.relation = relation;
+    this.object = object;
+    this.canonicalObject = canonicalObject;
+    this.confidence = confidence;
+  }
+
+  /**
+   * @see edu.stanford.nlp.ie.util.RelationTriple#RelationTriple(java.util.List, java.util.List, java.util.List, double)
+   */
+  public RelationTriple(List<CoreLabel> subject,
+                        List<CoreLabel> canonicalSubject,
+                        List<CoreLabel> relation,
+                        List<CoreLabel> canonicalObject,
+                        List<CoreLabel> object) {
+    this(subject, canonicalSubject, relation, object, canonicalObject, 1.0);
+  }
+
+  /**
    * Returns all the tokens in the extraction, in the order subject then relation then object.
    */
   public List<CoreLabel> allTokens() {
     List<CoreLabel> allTokens = new ArrayList<>();
-    allTokens.addAll(subject);
+    allTokens.addAll(canonicalSubject);
     allTokens.addAll(relation);
-    allTokens.addAll(object);
+    allTokens.addAll(canonicalObject);
     return allTokens;
   }
 
   /** The subject of this relation triple, as a String */
   public String subjectGloss() {
-    return StringUtils.join(subject.stream().map(CoreLabel::word), " ");
+    return StringUtils.join(canonicalSubject.stream().map(CoreLabel::word), " ");
   }
 
   /** The head of the subject of this relation triple. */
@@ -92,12 +135,12 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
    * This method will additionally strip out punctuation as well.
    */
    public String subjectLemmaGloss() {
-    return StringUtils.join(subject.stream().filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]")).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ");
+    return StringUtils.join(canonicalSubject.stream().filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]")).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ");
   }
 
   /** The object of this relation triple, as a String */
   public String objectGloss() {
-    return StringUtils.join(object.stream().map(CoreLabel::word), " ");
+    return StringUtils.join(canonicalObject.stream().map(CoreLabel::word), " ");
   }
 
   /** The head of the object of this relation triple. */
@@ -110,7 +153,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
    * This method will additionally strip out punctuation as well.
    */
   public String objectLemmaGloss() {
-    return StringUtils.join(object.stream().filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]")).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ");
+    return StringUtils.join(canonicalObject.stream().filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]")).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ");
   }
 
   /**
@@ -141,7 +184,10 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     String relationGloss = (
         (prefixBe ? "be " : "")
         + StringUtils.join(relation.stream()
-          .filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]") && (x.lemma() == null || !x.lemma().matches("[\\.,;'\"\\?!]"))).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ").toLowerCase()
+            .filter(x -> x.tag() == null || (!x.tag().matches("[\\.\\?,:;'\"!]") && (x.lemma() == null || !x.lemma().matches("[\\.,;'\"\\?!]"))))
+            .map(x -> x.lemma() == null ? x.word() : x.lemma()),
+          " ")
+          .toLowerCase()
         + (suffixBe ? " be" : "")
         + (suffixOf ? " of" : "")
         + (istmod ? " at_time" : "")
@@ -169,6 +215,9 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     return Pair.makePair(min, max);
   }
 
+  /**
+   * Gets the span of the NON-CANONICAL subject.
+   */
   public Pair<Integer, Integer> subjectTokenSpan() {
     return getSpan(subject, x -> x.index() - 1, x -> x.index() - 1);
   }
@@ -224,6 +273,9 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     }
   }
 
+  /**
+   * Gets the span of the NON-CANONICAL object.
+   */
   public Pair<Integer, Integer> objectTokenSpan() {
     return getSpan(object, x -> x.index() - 1, x -> x.index() - 1);
   }

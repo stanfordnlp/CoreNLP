@@ -1,4 +1,5 @@
-package edu.stanford.nlp.naturalli;
+package edu.stanford.nlp.naturalli; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreAnnotation;
@@ -31,7 +32,10 @@ import java.util.stream.Collectors;
  * @author Gabor Angeli
  */
 @SuppressWarnings("unchecked")
-public class NaturalLogicAnnotator extends SentenceAnnotator {
+public class NaturalLogicAnnotator extends SentenceAnnotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(NaturalLogicAnnotator.class);
 
   /**
    * A regex for arcs that act as determiners.
@@ -415,7 +419,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
     // In these cases, take the longer quantifier match.
     List<OperatorSpec> quantifiers = new ArrayList<>();
     sentence.get(CoreAnnotations.TokensAnnotation.class).stream()
-        .filter(token -> token.has(OperatorAnnotation.class))
+        .filter(token -> token.containsKey(OperatorAnnotation.class))
         .forEach(token -> quantifiers.add(token.get(OperatorAnnotation.class)));
     quantifiers.sort( (x, y) -> y.quantifierLength() - x.quantifierLength());
     for (OperatorSpec quantifier : quantifiers) {
@@ -608,7 +612,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
   /** {@inheritDoc} */
   @Override
   protected void doOneFailedSentence(Annotation annotation, CoreMap sentence) {
-    System.err.println("Failed to annotate: " + sentence.get(CoreAnnotations.TextAnnotation.class));
+    log.info("Failed to annotate: " + sentence.get(CoreAnnotations.TextAnnotation.class));
   }
 
   /** {@inheritDoc} */
@@ -624,11 +628,16 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
     return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        CoreAnnotations.TextAnnotation.class,
         CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.IndexAnnotation.class,
         CoreAnnotations.SentencesAnnotation.class,
+        CoreAnnotations.SentenceIndexAnnotation.class,
         CoreAnnotations.PartOfSpeechAnnotation.class,
+        CoreAnnotations.LemmaAnnotation.class,
         SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class
+        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
+        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
     )));
   }
 }

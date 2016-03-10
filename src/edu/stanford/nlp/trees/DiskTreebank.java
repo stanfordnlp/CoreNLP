@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees;
+package edu.stanford.nlp.trees; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -21,7 +22,10 @@ import edu.stanford.nlp.ling.HasIndex;
  * @author Christopher Manning
  * @author Spence Green
  */
-public final class DiskTreebank extends Treebank {
+public final class DiskTreebank extends Treebank  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(DiskTreebank.class);
 
   private static boolean PRINT_FILENAMES = false;
 
@@ -211,7 +215,7 @@ public final class DiskTreebank extends Treebank {
         if(curPathIter.hasNext() || (primeNextPath() && curPathIter.hasNext())) {
           currentFile = curPathIter.next();
           currentFilename = currentFile.getAbsolutePath();
-          if(PRINT_FILENAMES) System.err.println(currentFile);
+          if(PRINT_FILENAMES) log.info(currentFile);
 
           if (tr != null) { tr.close(); }
           tr = treeReaderFactory().newTreeReader(IOUtils.readerFromFile(currentFile, encoding()));

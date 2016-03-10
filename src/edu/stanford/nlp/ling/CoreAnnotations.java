@@ -1,5 +1,6 @@
 package edu.stanford.nlp.ling;
 
+import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.util.*;
 
 import java.util.Calendar;
@@ -1683,5 +1684,14 @@ public class CoreAnnotations {
 
   public static class LabelIDAnnotation implements CoreAnnotation<Integer>{
     public Class<Integer> getType() { return Integer.class; }
+  }
+
+  /**
+   * An annotation for a sentence tagged with its KBP relation.
+   *
+   * @see edu.stanford.nlp.pipeline.KBPAnnotator
+   */
+  public static class KBPTriplesAnnotation implements CoreAnnotation<List<RelationTriple>>{
+    public Class<List<RelationTriple>> getType() { return ErasureUtils.uncheckedCast(List.class); }
   }
 }

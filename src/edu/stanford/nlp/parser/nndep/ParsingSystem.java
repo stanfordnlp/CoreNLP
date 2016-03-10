@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.nndep;
+package edu.stanford.nlp.parser.nndep; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -20,7 +21,10 @@ import java.util.Set;
  *
  * @author Danqi Chen
  */
-public abstract class ParsingSystem {
+public abstract class ParsingSystem  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ParsingSystem.class);
 
   /**
    * Defines language-specific settings for this parsing instance.
@@ -109,10 +113,10 @@ public abstract class ParsingSystem {
     makeTransitions();
 
     if (verbose) {
-      System.err.println(Config.SEPARATOR);
-      System.err.println("#Transitions: " + numTransitions());
-      System.err.println("#Labels: " + labels.size());
-      System.err.println("ROOTLABEL: " + rootLabel);
+      log.info(Config.SEPARATOR);
+      log.info("#Transitions: " + numTransitions());
+      log.info("#Labels: " + labels.size());
+      log.info("ROOTLABEL: " + rootLabel);
     }
   }
 
@@ -148,7 +152,7 @@ public abstract class ParsingSystem {
     Set<String> punctuationTags = getPunctuationTags();
 
     if (trees.size() != goldTrees.size()) {
-      System.err.println("ERROR: Incorrect number of trees.");
+      log.error("Incorrect number of trees.");
       return null;
     }
 
@@ -168,11 +172,11 @@ public abstract class ParsingSystem {
       List<CoreLabel> tokens = sentences.get(i).get(CoreAnnotations.TokensAnnotation.class);
 
       if (trees.get(i).n != goldTrees.get(i).n) {
-        System.err.println("ERROR: Tree " + (i + 1) + ": incorrect number of nodes.");
+        log.error("Tree " + (i + 1) + ": incorrect number of nodes.");
         return null;
       }
       if (!trees.get(i).isTree()) {
-        System.err.println("ERROR: Tree " + (i + 1) + ": illegal.");
+        log.error("Tree " + (i + 1) + ": illegal.");
         return null;
       }
 

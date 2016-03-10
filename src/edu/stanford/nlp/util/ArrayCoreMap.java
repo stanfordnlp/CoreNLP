@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import edu.stanford.nlp.util.logging.PrettyLogger;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -37,6 +38,12 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
  * @author rafferty
  */
 public class ArrayCoreMap implements CoreMap /*, Serializable */ {
+
+  /**
+   * A listener for when a key is retrieved by the CoreMap.
+   * This should only be used for testing.
+   */
+  public static Consumer<Class<? extends Key<?>>> listener = null;
 
   /** Initial capacity of the array */
   private static final int INITIAL_CAPACITY = 4;
@@ -108,27 +115,15 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
   public <VALUE> VALUE get(Class<? extends Key<VALUE>> key) {
     for (int i = 0; i < size; i++) {
       if (key == keys[i]) {
+        if (listener != null) {
+          listener.accept(key);  // For tracking which entities were returned by the CoreMap
+        }
         return (VALUE)values[i];
       }
     }
     return null;
   }
 
-
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public <VALUE> boolean has(Class<? extends Key<VALUE>> key) {
-    for (int i = 0; i < size; i++) {
-      if (keys[i] == key) {
-        return true;
-      }
-    }
-
-    return false;
-  }
 
   /**
    * {@inheritDoc}
@@ -511,7 +506,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
       return false;
     }
     for (Class key : this.keySet()) {
-      if (!other.has(key)) {
+      if (!other.containsKey(key)) {
         return false;
       }
       Object thisV = this.get(key), otherV = other.get(key);

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.metrics;
+package edu.stanford.nlp.parser.metrics; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
@@ -16,7 +17,7 @@ import java.util.Set;
 
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.trees.Constituent;
 import edu.stanford.nlp.trees.ConstituentFactory;
@@ -47,7 +48,10 @@ import edu.stanford.nlp.util.Triple;
  * @author Dan Klein
  * @author Spence Green
  */
-public class Evalb extends AbstractEval {
+public class Evalb extends AbstractEval  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(Evalb.class);
 
   private final ConstituentFactory cf;
 
@@ -74,9 +78,9 @@ public class Evalb extends AbstractEval {
       return;
 
     } else if (guess.yield().size() != gold.yield().size()) {
-      System.err.println("Warning: yield differs:");
-      System.err.println("Guess: " + Sentence.listToString(guess.yield()));
-      System.err.println("Gold:  " + Sentence.listToString(gold.yield()));
+      log.info("Warning: yield differs:");
+      log.info("Guess: " + SentenceUtils.listToString(guess.yield()));
+      log.info("Gold:  " + SentenceUtils.listToString(gold.yield()));
     }
 
     super.evaluate(guess, gold, pw);
@@ -160,7 +164,7 @@ public class Evalb extends AbstractEval {
    */
   public static void main(String[] args) {
     if (args.length < minArgs) {
-      System.err.println(usage());
+      log.info(usage());
       System.exit(-1);
     }
     Properties options = StringUtils.argsToProperties(args, optionArgDefs());
@@ -177,7 +181,7 @@ public class Evalb extends AbstractEval {
 
     String[] parsedArgs = options.getProperty("","").split("\\s+");
     if (parsedArgs.length != minArgs) {
-      System.err.println(usage());
+      log.info(usage());
       System.exit(-1);
     }
     String goldFile = parsedArgs[0];
@@ -264,7 +268,7 @@ public class Evalb extends AbstractEval {
   private static void emitSortedTrees(PriorityQueue<Triple<Double, Tree, Tree>> queue, int worstKTreesToEmit,
       String filePrefix) {
 
-    if(queue == null) System.err.println("Queue was not initialized properly");
+    if(queue == null) log.info("Queue was not initialized properly");
 
     try {
       final PrintWriter guessPw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePrefix + ".kworst.guess"),"UTF-8")));

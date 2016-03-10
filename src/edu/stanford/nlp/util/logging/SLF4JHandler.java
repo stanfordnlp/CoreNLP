@@ -14,36 +14,11 @@ import java.util.List;
 @SuppressWarnings("unused")  // Called via reflection from RedwoodConfiguration
 public class SLF4JHandler extends OutputHandler {
 
-
-  private Pair<Logger, Redwood.Flag> getLoggerAndLevel(Object[] channel) {
-    // Parse the channels
-    Class source = null;  // The class the message is coming from
-    Object backupSource = null;  // Another identifier for the message
-    Redwood.Flag flag = Redwood.Flag.STDOUT;
-    for (Object c : ((channel == null) ? new Object[0] : channel)) {
-      if (c instanceof Class) {
-        source = (Class) c;  // This is a class the message is coming from
-      } else if (c instanceof Redwood.Flag) {
-        if (c != Redwood.Flag.FORCE) {  // This is a Redwood flag
-          flag = (Redwood.Flag) c;
-        }
-      } else {
-        backupSource = c;  // This is another "source" for the log message
-      }
-    }
-
-    // Get the logger
-    Logger impl;
-    if (source != null) {
-      impl = LoggerFactory.getLogger(source);
-    } else if (backupSource != null) {
-      impl = LoggerFactory.getLogger(backupSource.toString());
-    } else {
-      impl = LoggerFactory.getLogger("CoreNLP");
-    }
-
-    return Pair.makePair(impl, flag);
-
+  private static Pair<Logger, Redwood.Flag> getLoggerAndLevel(Object[] channel) {
+    Pair<String, Redwood.Flag> pair = getSourceStringAndLevel(channel);
+    // Get the logger for slf4j
+    Logger impl = LoggerFactory.getLogger(pair.first());
+    return Pair.makePair(impl, pair.second());
   }
 
   /**
@@ -65,22 +40,22 @@ public class SLF4JHandler extends OutputHandler {
         break;  // Always pass it on if explicitly forced
       case ERROR:
         if (!loggerAndLevel.first.isErrorEnabled()) {
-          return Collections.EMPTY_LIST;
+          return Collections.emptyList();
         }
         break;
       case WARN:
         if (!loggerAndLevel.first.isWarnEnabled()) {
-          return Collections.EMPTY_LIST;
+          return Collections.emptyList();
         }
         break;
       case DEBUG:
         if (!loggerAndLevel.first.isDebugEnabled()) {
-          return Collections.EMPTY_LIST;
+          return Collections.emptyList();
         }
         break;
       default:
         if (!loggerAndLevel.first.isInfoEnabled()) {
-          return Collections.EMPTY_LIST;
+          return Collections.emptyList();
         }
         break;
     }
@@ -118,4 +93,5 @@ public class SLF4JHandler extends OutputHandler {
         throw new IllegalStateException("Unknown Redwood flag for slf4j integration: " + loggerAndLevel.second);
     }
   }
+
 }

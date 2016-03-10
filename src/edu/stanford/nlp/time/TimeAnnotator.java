@@ -164,7 +164,10 @@ import java.util.Set;
  * </table>
  */
 
-public class TimeAnnotator implements Annotator {
+public class TimeAnnotator implements Annotator  {
+
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels log = Redwood.channels(TimeAnnotator.class);
 
   private final TimeExpressionExtractorImpl timexExtractor;
   private final boolean quiet;
@@ -194,7 +197,7 @@ public class TimeAnnotator implements Annotator {
     if (docDate == null) {
       Calendar cal = annotation.get(CoreAnnotations.CalendarAnnotation.class);
       if (cal == null) {
-        if (!quiet) { Redwood.log(Redwood.WARN, "No document date specified"); }
+        if ( ! quiet) { log.warn("No document date specified"); }
       } else {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
         docDate = dateFormat.format(cal.getTime());
@@ -210,7 +213,7 @@ public class TimeAnnotator implements Annotator {
         // They may not align due to token normalizations, such as "(" to "-LRB-".
         CoreMap alignedSentence =  NumberSequenceClassifier.alignSentence(sentence);
         // uncomment the next line for verbose dumping of tokens....
-        // System.err.println("SENTENCE: " + ((ArrayCoreMap) sentence).toShorterString());
+        // log.info("SENTENCE: " + ((ArrayCoreMap) sentence).toShorterString());
         List<CoreMap> timeExpressions =
           timexExtractor.extractTimeExpressionCoreMaps(alignedSentence, docDate, timeIndex);
         if (timeExpressions != null) {
@@ -235,11 +238,12 @@ public class TimeAnnotator implements Annotator {
 
   /**
    * Helper method for people not working from a complete Annotation.
-   * @return a list of CoreMap.  Each CoreMap represents a detected temporal expression.
+   *
+   * @return A list of CoreMap.  Each CoreMap represents a detected temporal expression.
    */
   public List<CoreMap> annotateSingleSentence(CoreMap sentence, String docDate, SUTime.TimeIndex timeIndex) {
     CoreMap annotationCopy = NumberSequenceClassifier.alignSentence(sentence);
-    if (docDate.isEmpty()) {
+    if (docDate != null && docDate.isEmpty()) {
       docDate = null;
     }
     return timexExtractor.extractTimeExpressionCoreMaps(annotationCopy, docDate, timeIndex);

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.classify.LinearClassifier;
 import edu.stanford.nlp.classify.LinearClassifierFactory;
@@ -27,7 +28,10 @@ import java.util.regex.Pattern;
  *
  * @author Galen Andrew
  */
-public class ChineseMaxentLexicon implements Lexicon {
+public class ChineseMaxentLexicon implements Lexicon  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseMaxentLexicon.class);
 
   private static final long serialVersionUID = 238834703409896852L;
   private static final boolean verbose = true;
@@ -176,7 +180,7 @@ public class ChineseMaxentLexicon implements Lexicon {
 
   private void verbose(String s) {
     if (verbose) {
-      System.err.println(s);
+      log.info(s);
     }
   }
 
@@ -348,19 +352,19 @@ public class ChineseMaxentLexicon implements Lexicon {
     Options op = new Options(tlpParams);
     TreeAnnotator ta = new TreeAnnotator(tlpParams.headFinder(), tlpParams, op);
 
-    System.err.println("Reading Trees...");
+    log.info("Reading Trees...");
     FileFilter trainFilter = new NumberRangesFileFilter(args[1], true);
     Treebank trainTreebank = tlpParams.memoryTreebank();
     trainTreebank.loadPath(args[0], trainFilter);
 
-    System.err.println("Annotating trees...");
+    log.info("Annotating trees...");
     Collection<Tree> trainTrees = new ArrayList<>();
     for (Tree tree : trainTreebank) {
       trainTrees.add(ta.transformTree(tree));
     }
     trainTreebank = null; // saves memory
 
-    System.err.println("Training lexicon...");
+    log.info("Training lexicon...");
 
     Index<String> wordIndex = new HashIndex<>();
     Index<String> tagIndex = new HashIndex<>();
@@ -373,7 +377,7 @@ public class ChineseMaxentLexicon implements Lexicon {
     lex.train(trainTrees);
     lex.finishTraining();
 
-    System.err.print("Testing");
+    log.info("Testing");
 
     FileFilter testFilter = new NumberRangesFileFilter(args[2], true);
     Treebank testTreebank = tlpParams.memoryTreebank();
@@ -387,7 +391,7 @@ public class ChineseMaxentLexicon implements Lexicon {
     }
     int[] totalAndCorrect = lex.testOnTreebank(testWords);
 
-    System.err.println("done.");
+    log.info("done.");
     System.out.println(totalAndCorrect[1] + " correct out of " + totalAndCorrect[0] + " -- ACC: " + ((double) totalAndCorrect[1]) / totalAndCorrect[0]);
   }
 

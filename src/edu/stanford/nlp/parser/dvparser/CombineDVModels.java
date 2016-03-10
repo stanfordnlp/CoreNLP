@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.dvparser;
+package edu.stanford.nlp.parser.dvparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.FileFilter;
 import java.io.IOException;
@@ -20,7 +21,10 @@ import edu.stanford.nlp.util.Pair;
  *
  * @author John Bauer
  */
-public class CombineDVModels {
+public class CombineDVModels  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CombineDVModels.class);
 
   public static void main(String[] args)
     throws IOException, ClassNotFoundException
@@ -64,7 +68,7 @@ public class CombineDVModels {
     if (baseModelPaths != null) {
       List<DVModel> dvparsers = new ArrayList<>();
       for (String baseModelPath : baseModelPaths) {
-        System.err.println("Loading serialized DVParser from " + baseModelPath);
+        log.info("Loading serialized DVParser from " + baseModelPath);
         LexicalizedParser dvparser = LexicalizedParser.loadModel(baseModelPath);
         Reranker reranker = dvparser.reranker;
         if (!(reranker instanceof DVModelReranker)) {
@@ -77,7 +81,7 @@ public class CombineDVModels {
           // TODO: other parser's options?
           options.setOptions(newArgs);
         }
-        System.err.println("... done");
+        log.info("... done");
       }
       combinedParser = LexicalizedParser.copyLexicalizedParser(underlyingParser);
       CombinedDVModelReranker reranker = new CombinedDVModelReranker(options, dvparsers);
@@ -89,13 +93,13 @@ public class CombineDVModels {
 
     Treebank testTreebank = null;
     if (testTreebankPath != null) {
-      System.err.println("Reading in trees from " + testTreebankPath);
+      log.info("Reading in trees from " + testTreebankPath);
       if (testTreebankFilter != null) {
-        System.err.println("Filtering on " + testTreebankFilter);
+        log.info("Filtering on " + testTreebankFilter);
       }
       testTreebank = combinedParser.getOp().tlpParams.memoryTreebank();;
       testTreebank.loadPath(testTreebankPath, testTreebankFilter);
-      System.err.println("Read in " + testTreebank.size() + " trees for testing");
+      log.info("Read in " + testTreebank.size() + " trees for testing");
 
       EvaluateTreebank evaluator = new EvaluateTreebank(combinedParser.getOp(), null, combinedParser);
       evaluator.testOnTreebank(testTreebank);

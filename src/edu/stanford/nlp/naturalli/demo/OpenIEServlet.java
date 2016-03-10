@@ -1,4 +1,5 @@
-package edu.stanford.nlp.naturalli.demo;
+package edu.stanford.nlp.naturalli.demo; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.IOUtils;
@@ -26,7 +27,10 @@ import java.util.*;
  *
  * @author Gabor Angeli
  */
-public class OpenIEServlet extends HttpServlet {
+public class OpenIEServlet extends HttpServlet  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(OpenIEServlet.class);
   StanfordCoreNLP pipeline = null;
   StanfordCoreNLP backoff = null;
 
@@ -57,7 +61,7 @@ public class OpenIEServlet extends HttpServlet {
       commonProps.setProperty("openie.splitter.model", dataDir + "/clauseSplitterModel.ser.gz");
       commonProps.setProperty("openie.affinity_models", dataDir);
     } catch (NullPointerException e) {
-      System.err.println("Could not load servlet context. Are you on the command line?");
+      log.info("Could not load servlet context. Are you on the command line?");
     }
     if (this.pipeline == null) {
       Properties fullProps = new Properties(commonProps);

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.international.arabic;
+package edu.stanford.nlp.trees.international.arabic; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.util.Generics;
@@ -19,7 +20,10 @@ import java.util.Map.Entry;
  *
  * @author Alex Kleeman
  */
-public class ArabicUtils {
+public class ArabicUtils  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ArabicUtils.class);
 
 
   public static Map<String,String> presToLogicalMap(){
@@ -145,7 +149,7 @@ public class ArabicUtils {
       rules.put("[\\u0093\\u0094\\u201C\\u201D]","\"");
 
     }catch(Exception e){
-      System.err.println("Caught exception creating Arabic normalizer map: " + e.toString() );
+      log.info("Caught exception creating Arabic normalizer map: " + e.toString() );
     }
 
     return rules;

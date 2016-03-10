@@ -30,7 +30,10 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.logging.RedwoodConfiguration;
 
-public class CorefSystem {
+public class CorefSystem  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CorefSystem.class);
 
   public Properties props;
   public List<Sieve> sieves;
@@ -80,7 +83,7 @@ public class CorefSystem {
       Redwood.log("Starting coref log");
     }
 
-    System.err.println(props.toString());
+    log.info(props.toString());
 
     if(CorefProperties.checkMemory(props)) checkMemoryUsage();
 
@@ -186,9 +189,9 @@ public class CorefSystem {
       writerBeforeCoref.print(output[1]);
       writerAfterCoref.print(output[2]);
       if (output[3].length() > 0) {
-        System.err.println(output[3]);
+        log.info(output[3]);
       }
-      if ((++docCnt) % 10 == 0) System.err.println(docCnt + " document(s) processed");
+      if ((++docCnt) % 10 == 0) log.info(docCnt + " document(s) processed");
     }
     return docCnt;
   }
@@ -296,7 +299,7 @@ public class CorefSystem {
     Runtime runtime = Runtime.getRuntime();
     runtime.gc();
     long memory = runtime.totalMemory() - runtime.freeMemory();
-    System.err.println("USED MEMORY (bytes): " + memory);
+    log.info("USED MEMORY (bytes): " + memory);
   }
   /** Remove singleton clusters */
   public static List<List<Mention>> filterMentionsWithSingletonClusters(Document document, List<List<Mention>> mentions)

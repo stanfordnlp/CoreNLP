@@ -242,7 +242,10 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author Anna Rafferty
  * @author Angel Chang (added options for using l1reg)
  */
-public class ColumnDataClassifier {
+public class ColumnDataClassifier  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ColumnDataClassifier.class);
 
   private static final double DEFAULT_VALUE = 1.0; // default value for setting categorical, boolean features
   private static final String DEFAULT_IGNORE_REGEXP = "\\s+";
@@ -522,7 +525,7 @@ public class ColumnDataClassifier {
       double cor = (int) contingency.getCount("Ranking|Correct");
       double err = (int) contingency.getCount("Ranking|Error");
       double rankacc = (cor + err == 0) ? 0 : cor / (cor + err);
-      System.err.print("Ranking accuracy: " + nf.format(rankacc));
+      log.info("Ranking accuracy: " + nf.format(rankacc));
       double cov = (int) contingency.getCount("Ranking|Covered");
       double coverr = (int) contingency.getCount("Ranking|Uncovered");
       double covacc = (cov + coverr == 0) ? 0 : cov / (cov + coverr);
@@ -1232,7 +1235,7 @@ public class ColumnDataClassifier {
     }
     if (flags.partialNGramRegexp != null) {
       Matcher m = flags.partialNGramPattern.matcher(toNGrams);
-      // System.err.print("Matching |" + flags.partialNGramRegexp +
+      // log.info("Matching |" + flags.partialNGramRegexp +
       //                "| against |" + toNGrams + "|");
       if (m.find()) {
         if (m.groupCount() > 0) {
@@ -1240,7 +1243,7 @@ public class ColumnDataClassifier {
         } else {
           toNGrams = m.group();
         }
-        // System.err.print(" Matched |" + toNGrams + "|");
+        // log.info(" Matched |" + toNGrams + "|");
       }
       // logger.info();
     }

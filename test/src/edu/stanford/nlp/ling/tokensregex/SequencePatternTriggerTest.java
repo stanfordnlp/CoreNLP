@@ -1,6 +1,6 @@
 package edu.stanford.nlp.ling.tokensregex;
 
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.util.CoreMap;
 import junit.framework.TestCase;
 
@@ -23,13 +23,13 @@ public class SequencePatternTriggerTest extends TestCase {
         new MultiPatternMatcher.BasicSequencePatternTrigger<CoreMap>(
           new CoreMapNodePatternTrigger(patterns));
 
-    Collection<SequencePattern<CoreMap>> triggered = trigger.apply(Sentence.toCoreLabelList("one", "two", "three"));
+    Collection<SequencePattern<CoreMap>> triggered = trigger.apply(SentenceUtils.toCoreLabelList("one", "two", "three"));
     assertEquals(0, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("which"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("which"));
     assertEquals(0, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("which", "word", "should", "be", "matched"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("which", "word", "should", "be", "matched"));
     assertEquals(1, triggered.size());
   }
 
@@ -41,25 +41,25 @@ public class SequencePatternTriggerTest extends TestCase {
         new MultiPatternMatcher.BasicSequencePatternTrigger<CoreMap>(
             new CoreMapNodePatternTrigger(patterns));
 
-    Collection<SequencePattern<CoreMap>> triggered = trigger.apply(Sentence.toCoreLabelList("one", "two", "three"));
+    Collection<SequencePattern<CoreMap>> triggered = trigger.apply(SentenceUtils.toCoreLabelList("one", "two", "three"));
     assertEquals(0, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("which"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("which"));
     assertEquals(0, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("matched"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("matched"));
     assertEquals(1, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("should"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("should"));
     assertEquals(0, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("which", "word", "be"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("which", "word", "be"));
     assertEquals(0, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("which", "word", "be", "matched"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("which", "word", "be", "matched"));
     assertEquals(1, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("which", "word", "should", "be", "matched"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("which", "word", "should", "be", "matched"));
     assertEquals(1, triggered.size());
   }
 
@@ -71,22 +71,22 @@ public class SequencePatternTriggerTest extends TestCase {
       new MultiPatternMatcher.BasicSequencePatternTrigger<CoreMap>(
         new CoreMapNodePatternTrigger(patterns));
 
-    Collection<SequencePattern<CoreMap>> triggered = trigger.apply(Sentence.toCoreLabelList("one", "two", "three"));
+    Collection<SequencePattern<CoreMap>> triggered = trigger.apply(SentenceUtils.toCoreLabelList("one", "two", "three"));
     assertEquals(0, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("which"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("which"));
     assertEquals(1, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("matched"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("matched"));
     assertEquals(0, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("should"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("should"));
     assertEquals(0, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("which", "word", "be"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("which", "word", "be"));
     assertEquals(1, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("which", "word", "should", "be", "matched"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("which", "word", "should", "be", "matched"));
     assertEquals(1, triggered.size());
   }
 
@@ -98,22 +98,22 @@ public class SequencePatternTriggerTest extends TestCase {
       new MultiPatternMatcher.BasicSequencePatternTrigger<CoreMap>(
         new CoreMapNodePatternTrigger(patterns));
 
-    Collection<SequencePattern<CoreMap>> triggered = trigger.apply(Sentence.toCoreLabelList("one", "two", "three"));
+    Collection<SequencePattern<CoreMap>> triggered = trigger.apply(SentenceUtils.toCoreLabelList("one", "two", "three"));
     assertEquals(0, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("which"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("which"));
     assertEquals(1, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("matched"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("matched"));
     assertEquals(0, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("should"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("should"));
     assertEquals(0, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("which", "word", "be"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("which", "word", "be"));
     assertEquals(1, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("which", "word", "should", "be", "matched"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("which", "word", "should", "be", "matched"));
     assertEquals(1, triggered.size());
   }
 
@@ -125,25 +125,25 @@ public class SequencePatternTriggerTest extends TestCase {
       new MultiPatternMatcher.BasicSequencePatternTrigger<CoreMap>(
         new CoreMapNodePatternTrigger(patterns));
 
-    Collection<SequencePattern<CoreMap>> triggered = trigger.apply(Sentence.toCoreLabelList("one", "two", "three"));
+    Collection<SequencePattern<CoreMap>> triggered = trigger.apply(SentenceUtils.toCoreLabelList("one", "two", "three"));
     assertEquals(0, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("which"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("which"));
     assertEquals(0, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("matched"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("matched"));
     assertEquals(1, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("should"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("should"));
     assertEquals(0, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("which", "word", "be"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("which", "word", "be"));
     assertEquals(0, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("which", "word", "be", "matched"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("which", "word", "be", "matched"));
     assertEquals(1, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("which", "word", "should", "be", "matched"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("which", "word", "should", "be", "matched"));
     assertEquals(1, triggered.size());
   }
 
@@ -155,25 +155,25 @@ public class SequencePatternTriggerTest extends TestCase {
       new MultiPatternMatcher.BasicSequencePatternTrigger<CoreMap>(
         new CoreMapNodePatternTrigger(patterns));
 
-    Collection<SequencePattern<CoreMap>> triggered = trigger.apply(Sentence.toCoreLabelList("one", "two", "three"));
+    Collection<SequencePattern<CoreMap>> triggered = trigger.apply(SentenceUtils.toCoreLabelList("one", "two", "three"));
     assertEquals(0, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("which"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("which"));
     assertEquals(1, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("matched"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("matched"));
     assertEquals(0, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("should"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("should"));
     assertEquals(0, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("which", "word", "be"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("which", "word", "be"));
     assertEquals(1, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("which", "word", "be", "matched"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("which", "word", "be", "matched"));
     assertEquals(1, triggered.size());
 
-    triggered = trigger.apply(Sentence.toCoreLabelList("which", "word", "should", "be", "matched"));
+    triggered = trigger.apply(SentenceUtils.toCoreLabelList("which", "word", "should", "be", "matched"));
     assertEquals(1, triggered.size());
   }
 

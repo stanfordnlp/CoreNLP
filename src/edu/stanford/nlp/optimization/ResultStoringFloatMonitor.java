@@ -1,4 +1,5 @@
-package edu.stanford.nlp.optimization;
+package edu.stanford.nlp.optimization; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.util.ConvertByteArray;
 
@@ -11,7 +12,10 @@ import java.util.zip.GZIPOutputStream;
 /**
  * @author Galen Andrew
  */
-public class ResultStoringFloatMonitor implements FloatFunction {
+public class ResultStoringFloatMonitor implements FloatFunction  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ResultStoringFloatMonitor.class);
   int i = 0;
   final int outputFreq;
   final String filename;
@@ -27,16 +31,16 @@ public class ResultStoringFloatMonitor implements FloatFunction {
 
   public float valueAt(float[] x) {
     if (++i % outputFreq == 0) {
-      System.err.print("Storing interim (float) weights to " + filename + " ... ");
+      log.info("Storing interim (float) weights to " + filename + " ... ");
       try {
         DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(filename))));
         ConvertByteArray.saveFloatArr(dos, x);
         dos.close();
       } catch (IOException e) {
-        System.err.println("ERROR!");
+        log.error("!");
         return 1;
       }
-      System.err.println("DONE.");
+      log.info("DONE.");
     }
     return 0;
   }

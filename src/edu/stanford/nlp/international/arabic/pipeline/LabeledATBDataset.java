@@ -1,11 +1,15 @@
-package edu.stanford.nlp.international.arabic.pipeline;
+package edu.stanford.nlp.international.arabic.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.regex.*;
 
 import edu.stanford.nlp.trees.Tree;
 
-public class LabeledATBDataset extends ATBArabicDataset {
+public class LabeledATBDataset extends ATBArabicDataset  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(LabeledATBDataset.class);
 
   @Override
   public void build() {

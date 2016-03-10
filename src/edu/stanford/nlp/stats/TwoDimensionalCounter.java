@@ -21,7 +21,7 @@ import edu.stanford.nlp.util.StringUtils;
 /**
  * A class representing a mapping between pairs of typed objects and double
  * values.
- * 
+ *
  * @author Teg Grenager
  */
 public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInterface<K1,K2>, Serializable {
@@ -42,10 +42,12 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
 
   private double defaultValue = 0.0;
 
+  @Override
   public void defaultReturnValue(double rv) {
     defaultValue = rv;
   }
 
+  @Override
   public double defaultReturnValue() {
     return defaultValue;
   }
@@ -68,6 +70,7 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
   /**
    * @return the inner Counter associated with key o
    */
+  @Override
   public ClassicCounter<K2> getCounter(K1 o) {
     ClassicCounter<K2> c = map.get(o);
     if (c == null) {
@@ -85,6 +88,7 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
   /**
    * @return total number of entries (key pairs)
    */
+  @Override
   public int size() {
     int result = 0;
     for (K1 o : firstKeySet()) {
@@ -93,7 +97,7 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
     }
     return result;
   }
-  
+
   /**
    * @return size of the outer map
    */
@@ -101,28 +105,28 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
     return map.size();
   }
 
+  @Override
   public boolean containsKey(K1 o1, K2 o2) {
     if (!map.containsKey(o1))
       return false;
     ClassicCounter<K2> c = map.get(o1);
     return c.containsKey(o2);
   }
-  
+
   public boolean containsFirstKey(K1 o1) {
-    if (!map.containsKey(o1))
-      return false;
-    else
-      return true;
+    return map.containsKey(o1);
   }
 
   /**
    */
+  @Override
   public void incrementCount(K1 o1, K2 o2) {
     incrementCount(o1, o2, 1.0);
   }
 
   /**
    */
+  @Override
   public void incrementCount(K1 o1, K2 o2, double count) {
     ClassicCounter<K2> c = getCounter(o1);
     c.incrementCount(o2, count);
@@ -131,18 +135,21 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
 
   /**
    */
+  @Override
   public void decrementCount(K1 o1, K2 o2) {
     incrementCount(o1, o2, -1.0);
   }
 
   /**
    */
+  @Override
   public void decrementCount(K1 o1, K2 o2, double count) {
     incrementCount(o1, o2, -count);
   }
 
   /**
    */
+  @Override
   public void setCount(K1 o1, K2 o2, double count) {
     ClassicCounter<K2> c = getCounter(o1);
     double oldCount = getCount(o1, o2);
@@ -151,6 +158,7 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
     total += count;
   }
 
+  @Override
   public double remove(K1 o1, K2 o2) {
     ClassicCounter<K2> c = getCounter(o1);
     double oldCount = getCount(o1, o2);
@@ -164,6 +172,7 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
 
   /**
    */
+  @Override
   public double getCount(K1 o1, K2 o2) {
     ClassicCounter<K2> c = getCounter(o1);
     if (c.totalCount() == 0.0 && !c.keySet().contains(o2)) {
@@ -174,19 +183,22 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
 
   /**
    * Takes linear time.
-   * 
+   *
    */
+  @Override
   public double totalCount() {
     return total;
   }
 
   /**
    */
+  @Override
   public double totalCount(K1 k1) {
     ClassicCounter<K2> c = getCounter(k1);
     return c.totalCount();
   }
 
+  @Override
   public Set<K1> firstKeySet() {
     return map.keySet();
   }
@@ -208,7 +220,7 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
 
   /**
    * Produces a new ConditionalCounter.
-   * 
+   *
    * @return a new ConditionalCounter, where order of indices is reversed
    */
   @SuppressWarnings( { "unchecked" })
@@ -241,27 +253,34 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
       ClassicCounter<K2> c = getCounter(key1);
       for (K2 key2 : c.keySet()) {
         double score = c.getCount(key2);
-        buff.append(key1).append("\t").append(key2).append("\t").append(score).append("\n");
+        buff.append(key1).append('\t').append(key2).append('\t').append(score).append('\n');
       }
     }
     return buff.toString();
   }
 
+  @Override
   @SuppressWarnings( { "unchecked" })
   public String toMatrixString(int cellSize) {
+    return toMatrixString(cellSize, new DecimalFormat());
+  }
+
+  @SuppressWarnings( { "unchecked" })
+  public String toMatrixString(int cellSize, NumberFormat nf) {
     List<K1> firstKeys = new ArrayList<>(firstKeySet());
     List<K2> secondKeys = new ArrayList<>(secondKeySet());
     Collections.sort((List<? extends Comparable>) firstKeys);
     Collections.sort((List<? extends Comparable>) secondKeys);
     double[][] counts = toMatrix(firstKeys, secondKeys);
-    return ArrayMath.toString(counts, cellSize, firstKeys.toArray(), secondKeys.toArray(), new DecimalFormat(), true);
+    return ArrayMath.toString(counts, cellSize, firstKeys.toArray(), secondKeys.toArray(), nf, true);
   }
 
   /**
    * Given an ordering of the first (row) and second (column) keys, will produce
    * a double matrix.
-   * 
+   *
    */
+  @Override
   public double[][] toMatrix(List<K1> firstKeys, List<K2> secondKeys) {
     double[][] counts = new double[firstKeys.size()][secondKeys.size()];
     for (int i = 0; i < firstKeys.size(); i++) {
@@ -272,6 +291,7 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
     return counts;
   }
 
+  @Override
   @SuppressWarnings( { "unchecked" })
   public String toCSVString(NumberFormat nf) {
     List<K1> firstKeys = new ArrayList<>(firstKeySet());
@@ -284,7 +304,7 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
     for (int j = 0; j < secondKeys.size(); j++) {
       headerRow[j + 1] = secondKeys.get(j).toString();
     }
-    b.append(StringUtils.toCSVString(headerRow)).append("\n");
+    b.append(StringUtils.toCSVString(headerRow)).append('\n');
     for (K1 rowLabel : firstKeys) {
       String[] row = new String[secondKeys.size() + 1];
       row[0] = rowLabel.toString();
@@ -292,11 +312,12 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
         K2 colLabel = secondKeys.get(j);
         row[j + 1] = nf.format(getCount(rowLabel, colLabel));
       }
-      b.append(StringUtils.toCSVString(row)).append("\n");
+      b.append(StringUtils.toCSVString(row)).append('\n');
     }
     return b.toString();
   }
 
+  @Override
   public Set<K2> secondKeySet() {
     Set<K2> result = Generics.newHashSet();
     for (K1 k1 : firstKeySet()) {
@@ -307,6 +328,7 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
     return result;
   }
 
+  @Override
   public boolean isEmpty() {
     return map.isEmpty();
   }
@@ -379,6 +401,7 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
     }
   }
 
+  @Override
   public void remove(K1 key) {
     ClassicCounter<K2> counter = map.get(key);
     if (counter != null) {
@@ -389,7 +412,7 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
 
   /**
    * clears the map, total and default value
-   */       
+   */
   public void clear(){
     map.clear();
     total = 0;
@@ -441,7 +464,7 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
       total += c.getValue().totalCount();
     }
   }
-  
+
   public static void main(String[] args) {
     TwoDimensionalCounter<String, String> cc = new TwoDimensionalCounter<>();
     cc.setCount("a", "c", 1.0);

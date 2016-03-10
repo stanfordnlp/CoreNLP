@@ -1,10 +1,7 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
@@ -26,7 +23,10 @@ import edu.stanford.nlp.util.PropertiesUtils;
  *
  * @author Pi-Chuan Chang
  */
-public class ChineseSegmenterAnnotator implements Annotator {
+public class ChineseSegmenterAnnotator implements Annotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseSegmenterAnnotator.class);
 
   private AbstractSequenceClassifier<?> segmenter;
   private final boolean VERBOSE;
@@ -87,7 +87,7 @@ public class ChineseSegmenterAnnotator implements Annotator {
   private void loadModel(String segLoc) {
     // don't write very much, because the CRFClassifier already reports loading
     if (VERBOSE) {
-      System.err.print("Loading segmentation model ... ");
+      log.info("Loading segmentation model ... ");
     }
     segmenter = CRFClassifier.getClassifierNoExceptions(segLoc);
   }
@@ -95,7 +95,7 @@ public class ChineseSegmenterAnnotator implements Annotator {
   private void loadModel(String segLoc, Properties props) {
     // don't write very much, because the CRFClassifier already reports loading
     if (VERBOSE) {
-      System.err.print("Loading Segmentation Model ... ");
+      log.info("Loading Segmentation Model ... ");
     }
     try {
       segmenter = CRFClassifier.getClassifier(segLoc, props);
@@ -109,7 +109,7 @@ public class ChineseSegmenterAnnotator implements Annotator {
   @Override
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
-      System.err.print("Adding Segmentation annotation ... ");
+      log.info("Adding Segmentation annotation ... ");
     }
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
     if (sentences != null) {
@@ -172,9 +172,9 @@ public class ChineseSegmenterAnnotator implements Annotator {
 
     List<String> words = segmenter.segmentString(text);
     if (VERBOSE) {
-      System.err.println(text);
-      System.err.println("--->");
-      System.err.println(words);
+      log.info(text);
+      log.info("--->");
+      log.info(words);
     }
 
     int pos = 0;
@@ -202,7 +202,20 @@ public class ChineseSegmenterAnnotator implements Annotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
-    return Collections.singleton(CoreAnnotations.TokensAnnotation.class);
+    return new HashSet<>(Arrays.asList(
+        CoreAnnotations.TextAnnotation.class,
+        CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+        CoreAnnotations.CharacterOffsetEndAnnotation.class,
+        CoreAnnotations.BeforeAnnotation.class,
+        CoreAnnotations.AfterAnnotation.class,
+        CoreAnnotations.TokenBeginAnnotation.class,
+        CoreAnnotations.TokenEndAnnotation.class,
+        CoreAnnotations.PositionAnnotation.class,
+        CoreAnnotations.IndexAnnotation.class,
+        CoreAnnotations.OriginalTextAnnotation.class,
+        CoreAnnotations.ValueAnnotation.class
+    ));
   }
 
 }

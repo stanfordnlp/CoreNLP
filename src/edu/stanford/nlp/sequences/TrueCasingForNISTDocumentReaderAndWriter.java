@@ -1,4 +1,5 @@
-package edu.stanford.nlp.sequences;
+package edu.stanford.nlp.sequences; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -24,7 +25,10 @@ import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
  *
  *  @author Pi-Chuan Chang
  */
-public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel> {
+public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TrueCasingForNISTDocumentReaderAndWriter.class);
 
   public static final String THREE_CLASSES_PROPERTY = "3class";
   public static final boolean THREE_CLASSES = Boolean.parseBoolean(System.getProperty(THREE_CLASSES_PROPERTY, "false"));
@@ -117,7 +121,7 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
       int pos = 0;
 
       //line = line.replaceAll(" +"," ");
-      //System.err.println("pichuan: processing line = "+line);
+      //log.info("pichuan: processing line = "+line);
 
       String[] toks = line.split(" ");
       for (String word : toks) {

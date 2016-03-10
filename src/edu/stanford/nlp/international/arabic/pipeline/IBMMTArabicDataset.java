@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.arabic.pipeline;
+package edu.stanford.nlp.international.arabic.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -20,7 +21,10 @@ import edu.stanford.nlp.util.Generics;
  * @author Spence Green
  *
  */
-public class IBMMTArabicDataset implements Dataset {
+public class IBMMTArabicDataset implements Dataset  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(IBMMTArabicDataset.class);
 
   protected Mapper lexMapper = null;
   protected final List<File> pathsToData;
@@ -60,7 +64,7 @@ public class IBMMTArabicDataset implements Dataset {
         currentInfile = path.getPath();
 
         while(infile.ready()) {
-          ArrayList<Word> sent = Sentence.toUntaggedList(infile.readLine().split("\\s+"));
+          ArrayList<Word> sent = SentenceUtils.toUntaggedList(infile.readLine().split("\\s+"));
 
           for(Word token : sent) {
             Matcher hasArabic = utf8ArabicChart.matcher(token.word());
@@ -70,7 +74,7 @@ public class IBMMTArabicDataset implements Dataset {
             }
           }
 
-          outfile.println(Sentence.listToString(sent));
+          outfile.println(SentenceUtils.listToString(sent));
         }
 
         toStringBuffer.append(String.format(" Read %d input lines from %s",infile.getLineNumber(),path.getPath()));

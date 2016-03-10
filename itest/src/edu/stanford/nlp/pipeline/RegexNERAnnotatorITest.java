@@ -1,6 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ public class RegexNERAnnotatorITest extends TestCase {
     "and is a practicing Christian .";
     String[] split = str.split(" ");
 
-    List<CoreLabel> tokens = Sentence.toCoreLabelList(split);
+    List<CoreLabel> tokens = SentenceUtils.toCoreLabelList(split);
     tokens.get(1).set(CoreAnnotations.NamedEntityTagAnnotation.class, "PERSON");
     tokens.get(2).set(CoreAnnotations.NamedEntityTagAnnotation.class, "PERSON");
     tokens.get(5).set(CoreAnnotations.NamedEntityTagAnnotation.class, "LOCATION");
@@ -72,7 +72,7 @@ public class RegexNERAnnotatorITest extends TestCase {
     String str = "I like Ontario Place , and I like the Native American Church , too .";
     String[] split = str.split(" ");
 
-    List<CoreLabel> tokens = Sentence.toCoreLabelList(split);
+    List<CoreLabel> tokens = SentenceUtils.toCoreLabelList(split);
     tokens.get(2).set(CoreAnnotations.NamedEntityTagAnnotation.class, "LOCATION");
     tokens.get(3).set(CoreAnnotations.NamedEntityTagAnnotation.class, "LOCATION");
     tokens.get(9).set(CoreAnnotations.NamedEntityTagAnnotation.class, "ORGANIZATION");
@@ -103,7 +103,7 @@ public class RegexNERAnnotatorITest extends TestCase {
     String str = "Christianity is of higher regex priority than Early Christianity . ";
     String[] split = str.split(" ");
 
-    List<CoreLabel> tokens = Sentence.toCoreLabelList(split);
+    List<CoreLabel> tokens = SentenceUtils.toCoreLabelList(split);
 
     CoreMap sentence = new ArrayCoreMap();
     sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);

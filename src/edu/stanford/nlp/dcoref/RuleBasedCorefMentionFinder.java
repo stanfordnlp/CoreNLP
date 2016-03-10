@@ -1,4 +1,5 @@
-package edu.stanford.nlp.dcoref;
+package edu.stanford.nlp.dcoref; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,12 +29,12 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.IntPair;
-import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.*;
 
-public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
+public class RuleBasedCorefMentionFinder implements CorefMentionFinder  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(RuleBasedCorefMentionFinder.class);
 
   protected boolean assignIds = true;
 //  protected int maxID = -1;
@@ -396,7 +397,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
   }
 
   private static Tree funkyFindLeafWithApproximateSpan(Tree root, String token, int index, int approximateness) {
-    // System.err.println("Searching " + root + "\n  for " + token + " at position " + index + " (plus up to " + approximateness + ")");
+    // log.info("Searching " + root + "\n  for " + token + " at position " + index + " (plus up to " + approximateness + ")");
     List<Tree> leaves = root.getLeaves();
     for (Tree leaf : leaves) {
       CoreLabel label = CoreLabel.class.cast(leaf.label());
@@ -414,7 +415,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
                        "token = |" + token + "|" + index + "|, approx=" + approximateness);
     for (Tree leaf : leaves) {
       if (token.equals(leaf.value())) {
-        //System.err.println("Found something: returning " + leaf);
+        //log.info("Found something: returning " + leaf);
         return leaf;
       }
     }
@@ -455,7 +456,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
         // TODO: these assertions rule out the possibility of alternately named parse/pos annotators
         throw new AssertionError("Failed to get parser - this should not be possible");
       }
-      if (parser.requires().contains(Annotator.POS_REQUIREMENT)) {
+      if (parser.requires().contains(CoreAnnotations.PartOfSpeechAnnotation.class)) {
         Annotator tagger = StanfordCoreNLP.getExistingAnnotator("pos");
         if (tagger == null) {
           throw new AssertionError("Parser required tagger, but failed to find the pos annotator");
@@ -527,7 +528,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
 
   private static Tree findTreeWithSpan(Tree tree, int start, int end) {
     CoreLabel l = (CoreLabel) tree.label();
-    if (l != null && l.has(CoreAnnotations.BeginIndexAnnotation.class) && l.has(CoreAnnotations.EndIndexAnnotation.class)) {
+    if (l != null && l.containsKey(CoreAnnotations.BeginIndexAnnotation.class) && l.containsKey(CoreAnnotations.EndIndexAnnotation.class)) {
       int myStart = l.get(CoreAnnotations.BeginIndexAnnotation.class);
       int myEnd = l.get(CoreAnnotations.EndIndexAnnotation.class);
       if (start == myStart && end == myEnd){

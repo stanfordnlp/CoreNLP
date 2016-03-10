@@ -4,11 +4,8 @@ import edu.stanford.nlp.fsm.DFSA;
 import edu.stanford.nlp.fsm.DFSAState;
 import edu.stanford.nlp.fsm.DFSATransition;
 import edu.stanford.nlp.io.EncodingPrintWriter;
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.Sentence;
-import edu.stanford.nlp.ling.TaggedWord;
-import edu.stanford.nlp.ling.Word;
+import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.process.WordSegmenter;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.trees.Tree;
@@ -93,9 +90,9 @@ public class MaxMatchSegmenter implements WordSegmenter {
   public List<HasWord> segment(String s) {
     buildSegmentationLattice(s);
     ArrayList<Word> sent = maxMatchSegmentation();
-    printlnErr("raw output: "+Sentence.listToString(sent));
+    printlnErr("raw output: "+ SentenceUtils.listToString(sent));
     ArrayList<Word> postProcessedSent = postProcessSentence(sent);
-    printlnErr("processed output: "+Sentence.listToString(postProcessedSent));
+    printlnErr("processed output: "+ SentenceUtils.listToString(postProcessedSent));
     String postSentString = ChineseStringUtils.postProcessingAnswerCTB(postProcessedSent.toString(),false,false);
     printlnErr("Sighan2005 output: "+postSentString);
     String[] postSentArray = postSentString.split("\\s+");
@@ -321,13 +318,13 @@ public class MaxMatchSegmenter implements WordSegmenter {
         String outputLine = null;
         if(props.getProperty("greedy") != null) {
           ArrayList<Word> sentence = seg.greedilySegmentWords(line);
-          outputLine = Sentence.listToString(sentence);
+          outputLine = SentenceUtils.listToString(sentence);
         } else if(props.getProperty("maxwords") != null) {
           seg.buildSegmentationLattice(line);
-          outputLine = Sentence.listToString(seg.segmentWords(MatchHeuristic.MAXWORDS));
+          outputLine = SentenceUtils.listToString(seg.segmentWords(MatchHeuristic.MAXWORDS));
         } else {
           seg.buildSegmentationLattice(line);
-          outputLine = Sentence.listToString(seg.maxMatchSegmentation());
+          outputLine = SentenceUtils.listToString(seg.maxMatchSegmentation());
         }
         StringReader strR = new StringReader(outputLine);
         Iterator<List<CoreLabel>> itr = sighanRW.getIterator(strR);

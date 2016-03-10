@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.dvparser;
+package edu.stanford.nlp.parser.dvparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.FileSystem;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
@@ -23,13 +24,16 @@ import java.util.Map;
  *
  * @author John Bauer
  */
-public class DumpMatrices {
+public class DumpMatrices  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(DumpMatrices.class);
   /**
    * Output some help and exit
    */
   public static void help() {
-    System.err.println("-model : DVModel to load");
-    System.err.println("-output : where to dump the matrices");
+    log.info("-model : DVModel to load");
+    log.info("-output : where to dump the matrices");
     System.exit(2);
   }
 
@@ -58,7 +62,7 @@ public class DumpMatrices {
         outputDir = args[argIndex + 1];
         argIndex += 2;
       } else {
-        System.err.println("Unknown argument " + args[argIndex]);
+        log.info("Unknown argument " + args[argIndex]);
         help();
       }
     }

@@ -5,11 +5,11 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.*;
 import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 /**
  * Extracts time expressions.
@@ -19,7 +19,8 @@ import java.util.logging.Logger;
 @SuppressWarnings("unchecked")
 public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
 
-  protected static final Logger logger = Logger.getLogger(TimeExpressionExtractorImpl.class.getName());
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(TimeExpressionExtractorImpl.class);
 
   // Patterns for extracting time expressions
   TimeExpressionPatterns timexPatterns;
@@ -49,20 +50,14 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
   public void init(Options options)
   {
     this.options = options;
-    // TODO: does not allow for multiple loggers
-    if (options.verbose) {
-      logger.setLevel(Level.FINE);
-    } else {
-      logger.setLevel(Level.SEVERE);
-    }
     NumberNormalizer.setVerbose(options.verbose);
+    CoreMapExpressionExtractor.setVerbose(options.verbose);
     if (options.grammarFilename == null) {
       options.grammarFilename = Options.DEFAULT_GRAMMAR_FILES;
       logger.warning("Time rules file is not specified: using default rules at " + options.grammarFilename);
     }
     timexPatterns = new GenericTimeExpressionPatterns(options);
     this.expressionExtractor = timexPatterns.createExtractor();
-    this.expressionExtractor.setLogger(logger);
   }
 
   @Override
@@ -75,10 +70,12 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
         docAnnotation.set(TimeExpression.TimeIndexAnnotation.class, timeIndex = new SUTime.TimeIndex());
       }
       docDate = docAnnotation.get(CoreAnnotations.DocDateAnnotation.class);
-      if(docDate == null){
+      if (docDate == null) {
         Calendar cal = docAnnotation.get(CoreAnnotations.CalendarAnnotation.class);
         if(cal == null){
-          logger.log(Level.WARNING, "No document date specified");
+          if (options.verbose) {
+            logger.warn("WARNING: No document date specified");
+          }
         } else {
           SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
           docDate = dateFormat.format(cal.getTime());
@@ -147,14 +144,20 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
             }
           }
         } catch (Exception e) {
-          logger.log(Level.WARNING, "Failed to get attributes from " + text + ", timeIndex " + timeIndex, e);
+          if (options.verbose) {
+            e.printStackTrace();
+            logger.warn("Failed to get attributes from " + text + ", timeIndex " + timeIndex);
+          }
           continue;
         }
         Timex timex;
         try {
           timex = Timex.fromMap(text, timexAttributes);
         } catch (Exception e) {
-          logger.log(Level.WARNING, "Failed to process timex " + text + " with attributes " + timexAttributes, e);
+          if (options.verbose) {
+            e.printStackTrace();
+            logger.warn("Failed to process timex " + text + " with attributes " + timexAttributes);
+          }
           continue;
         }
         assert timex != null;  // Timex.fromMap never returns null and if it exceptions, we've already done a continue
@@ -278,7 +281,10 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
           te.setTemporal(grounded);
         }
       } catch (Exception ex) {
-        logger.log(Level.WARNING, "Error resolving " + temporal, ex);
+        if (options.verbose) {
+          ex.printStackTrace();
+          logger.warn("Error resolving " + temporal, ex);
+        }
       }
     }
   }

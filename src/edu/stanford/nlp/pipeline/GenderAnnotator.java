@@ -1,4 +1,5 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,7 +22,10 @@ import edu.stanford.nlp.util.CoreMap;
  * @author jtibs
  */
 
-public class GenderAnnotator implements Annotator {
+public class GenderAnnotator implements Annotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(GenderAnnotator.class);
 
   private final RegexNERSequenceClassifier classifier;
   private final boolean verbose;
@@ -37,7 +41,7 @@ public class GenderAnnotator implements Annotator {
 
   public void annotate(Annotation annotation) {
     if (verbose) {
-      System.err.print("Adding gender annotation...");
+      log.info("Adding gender annotation...");
     }
 
     if (! annotation.containsKey(CoreAnnotations.SentencesAnnotation.class))
@@ -58,8 +62,10 @@ public class GenderAnnotator implements Annotator {
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
     return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        CoreAnnotations.TextAnnotation.class,
         CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class
+        CoreAnnotations.SentencesAnnotation.class,
+        CoreAnnotations.NamedEntityTagAnnotation.class
     )));
   }
 

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.tregex.tsurgeon;
+package edu.stanford.nlp.trees.tregex.tsurgeon; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.LabelFactory;
@@ -14,7 +15,10 @@ import java.util.regex.Matcher;
 /**
  * @author Roger Levy (rog@nlp.stanford.edu)
  */
-class AuxiliaryTree {
+public class AuxiliaryTree  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(AuxiliaryTree.class);
 
   private final String originalTreeString;
   final Tree tree;
@@ -68,7 +72,7 @@ class AuxiliaryTree {
     Map<String,Tree> newNamesToNodes = Generics.newHashMap();
     Pair<Tree,Tree> result = copyHelper(tree, newNamesToNodes, treeFactory, labelFactory);
     //if(! result.first().dominates(result.second()))
-      //System.err.println("Error -- aux tree copy doesn't dominate foot copy.");
+      //log.info("Error -- aux tree copy doesn't dominate foot copy.");
     matcher.newNodeNames.putAll(newNamesToNodes);
     return new AuxiliaryTree(result.first(), result.second(), newNamesToNodes, originalTreeString);
   }
@@ -91,7 +95,7 @@ class AuxiliaryTree {
         newChildren.add(newChild.first());
         if (newChild.second() != null) {
           if (newFoot != null) {
-            System.err.println("Error -- two feet found when copying auxiliary tree " + tree.toString() + "; using last foot found.");
+            log.info("Error -- two feet found when copying auxiliary tree " + tree.toString() + "; using last foot found.");
           }
           newFoot = newChild.second();
         }

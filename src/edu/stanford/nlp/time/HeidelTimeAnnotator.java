@@ -7,11 +7,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
-import edu.stanford.nlp.util.ArrayCoreMap;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.DataFilePaths;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.SystemUtils;
+import edu.stanford.nlp.util.*;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -88,7 +84,7 @@ public class HeidelTimeAnnotator implements Annotator {
 
     //--Get Date
     //(error checks)
-    if(!document.has(CoreAnnotations.CalendarAnnotation.class) && !document.has(CoreAnnotations.DocDateAnnotation.class)){
+    if(!document.containsKey(CoreAnnotations.CalendarAnnotation.class) && !document.containsKey(CoreAnnotations.DocDateAnnotation.class)){
       throw new IllegalArgumentException("CoreMap must have either a Calendar or DocDate annotation"); //not strictly necessary, technically...
     }
     //(variables)
@@ -258,7 +254,13 @@ public class HeidelTimeAnnotator implements Annotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    return TOKENIZE_AND_SSPLIT;
+    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        CoreAnnotations.TextAnnotation.class,
+        CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+        CoreAnnotations.CharacterOffsetEndAnnotation.class,
+        CoreAnnotations.SentencesAnnotation.class
+    )));
   }
 
   @Override

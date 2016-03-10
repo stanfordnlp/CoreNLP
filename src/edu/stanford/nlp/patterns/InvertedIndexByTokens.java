@@ -19,7 +19,10 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author Sonal Gupta (sonalg@stanford.edu)
  *
  */
-public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> implements Serializable{
+public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> implements Serializable {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(InvertedIndexByTokens.class);
 
   private static final long serialVersionUID = 1L;
 
@@ -102,7 +105,7 @@ public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> i
           String w = combineKeyValue(en.getKey(), en2);
           Set<String> st = index.get(w);
           if (st == null){
-            //System.err.println("\n\nWARNING: INDEX HAS NO SENTENCES FOR " + w);
+            //log.info("\n\nWARNING: INDEX HAS NO SENTENCES FOR " + w);
             return Collections.emptySet();
             //throw new RuntimeException("How come the index does not have sentences for " + w);
           }

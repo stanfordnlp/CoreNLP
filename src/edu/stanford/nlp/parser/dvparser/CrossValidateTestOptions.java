@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.dvparser;
+package edu.stanford.nlp.parser.dvparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.FileFilter;
 import java.io.IOException;
@@ -11,7 +12,10 @@ import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.util.Pair;
 
-public class CrossValidateTestOptions {
+public class CrossValidateTestOptions  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CrossValidateTestOptions.class);
   public static final double[] weights = { 0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 1.0 };
 
   public static void main(String[] args) throws IOException, ClassNotFoundException {
@@ -35,20 +39,20 @@ public class CrossValidateTestOptions {
       }
     }
 
-    System.err.println("Loading lexparser from: " + lexparserFile);
+    log.info("Loading lexparser from: " + lexparserFile);
     String[] newArgs = unusedArgs.toArray(new String[unusedArgs.size()]);
     LexicalizedParser lexparser = LexicalizedParser.loadModel(lexparserFile, newArgs);
-    System.err.println("... done");
+    log.info("... done");
 
     Treebank testTreebank = null;
     if (testTreebankPath != null) {
-      System.err.println("Reading in trees from " + testTreebankPath);
+      log.info("Reading in trees from " + testTreebankPath);
       if (testTreebankFilter != null) {
-        System.err.println("Filtering on " + testTreebankFilter);
+        log.info("Filtering on " + testTreebankFilter);
       }
       testTreebank = lexparser.getOp().tlpParams.memoryTreebank();;
       testTreebank.loadPath(testTreebankPath, testTreebankFilter);
-      System.err.println("Read in " + testTreebank.size() + " trees for testing");
+      log.info("Read in " + testTreebank.size() + " trees for testing");
     }
 
     double[] labelResults = new double[weights.length];
@@ -63,7 +67,7 @@ public class CrossValidateTestOptions {
     }
 
     for (int i = 0; i < weights.length; ++i) {
-      System.err.println("LexicalizedParser weight " + weights[i] + ": labeled " + labelResults[i] + " tag " + tagResults[i]);
+      log.info("LexicalizedParser weight " + weights[i] + ": labeled " + labelResults[i] + " tag " + tagResults[i]);
     }
   }
 }

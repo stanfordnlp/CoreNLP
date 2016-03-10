@@ -1,4 +1,5 @@
-package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
+package edu.stanford.nlp.semgraph.semgrex.ssurgeon; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -37,7 +38,8 @@ import edu.stanford.nlp.util.Generics;
  * @author Eric Yeh
  *
  */
-public class Ssurgeon {
+public class Ssurgeon  {
+
   private static final boolean VERBOSE = false;
 
   // singleton, to ensure all use the same resources
@@ -383,7 +385,7 @@ public class Ssurgeon {
         log.warning("Was not able to create XML document for pattern list.");
       }
     } catch (Exception e) {
-      System.err.println("Error in writeToString, could not process pattern="+pattern);
+      log.info("Error in writeToString, could not process pattern="+pattern);
       e.printStackTrace();
       return null;
     }

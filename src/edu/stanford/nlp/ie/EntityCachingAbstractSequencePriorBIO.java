@@ -1,4 +1,5 @@
-package edu.stanford.nlp.ie;
+package edu.stanford.nlp.ie; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.sequences.ListeningSequenceModel;
 import edu.stanford.nlp.util.CoreMap;
@@ -19,7 +20,10 @@ import java.util.Arrays;
  *
  * @author Mengqiu Wang
  **/
-public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap> implements ListeningSequenceModel {
+public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap> implements ListeningSequenceModel  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(EntityCachingAbstractSequencePriorBIO.class);
 
   protected int[] sequence;
   protected final int backgroundSymbol;
@@ -213,7 +217,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
     if (sequence[position] == oldVal)
       return;
 
-    if (VERBOSE) System.err.println("changing position "+position+" from " +classIndex.get(oldVal)+" to "+classIndex.get(sequence[position]));
+    if (VERBOSE) log.info("changing position "+position+" from " +classIndex.get(oldVal)+" to "+classIndex.get(sequence[position]));
 
     if (sequence[position] == backgroundSymbol) { // new tag is O
       String oldRawTag = classIndex.get(oldVal);
@@ -228,7 +232,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
         }
       } else { // old tag was a I, check previous one
         if (entities[position] != null) { // this was part of an entity, shortened
-          if (VERBOSE) System.err.println("splitting off prev entity");
+          if (VERBOSE) log.info("splitting off prev entity");
           EntityBIO oldEntity = entities[position];
           int oldLen = oldEntity.words.size();
           int offset = position - oldEntity.startPosition;
@@ -243,7 +247,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
             entities[position+i] = null;
           }
           if (VERBOSE && position > 0)
-            System.err.println("position:" + position +", entities[position-1] = " + entities[position-1].toString(tagIndex));
+            log.info("position:" + position +", entities[position-1] = " + entities[position-1].toString(tagIndex));
         } // otherwise, non-entity part I-xxx -> O, no enitty affected
       }
     } else {
@@ -308,7 +312,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
               if (entities[position-1] != null) {
                 String oldTag = tagIndex.get(entities[position-1].type);
                 if (VERBOSE)
-                  System.err.println("position:" + position +", entities[position-1] = " + entities[position-1].toString(tagIndex));
+                  log.info("position:" + position +", entities[position-1] = " + entities[position-1].toString(tagIndex));
                 EntityBIO entity = extractEntity(sequence, position-1-entities[position-1].words.size()+1, oldTag);
                 addEntityToEntitiesArray(entity);
               }

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,7 +17,10 @@ import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 
-public class TrueCaseAnnotator implements Annotator {
+public class TrueCaseAnnotator implements Annotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TrueCaseAnnotator.class);
 
   @SuppressWarnings("unchecked")
   private final CRFBiasedClassifier trueCaser;
@@ -64,7 +68,7 @@ public class TrueCaseAnnotator implements Annotator {
         String cname = bias.nextToken();
         double w = Double.parseDouble(bias.nextToken());
         trueCaser.setBiasWeight(cname,w);
-        if(VERBOSE) System.err.println("Setting bias for class "+cname+" to "+w);
+        if(VERBOSE) log.info("Setting bias for class "+cname+" to "+w);
       }
     }
 
@@ -75,7 +79,7 @@ public class TrueCaseAnnotator implements Annotator {
   @SuppressWarnings("unchecked")
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
-      System.err.print("Adding true-case annotation...");
+      log.info("Adding true-case annotation...");
     }
 
     if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
@@ -144,10 +148,10 @@ public class TrueCaseAnnotator implements Annotator {
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
     return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        CoreAnnotations.TextAnnotation.class,
         CoreAnnotations.TokensAnnotation.class,
-        CoreAnnotations.SentencesAnnotation.class,
-        CoreAnnotations.PartOfSpeechAnnotation.class,
-        CoreAnnotations.LemmaAnnotation.class
+        CoreAnnotations.PositionAnnotation.class,
+        CoreAnnotations.SentencesAnnotation.class
     )));
   }
 
@@ -155,7 +159,9 @@ public class TrueCaseAnnotator implements Annotator {
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
         CoreAnnotations.TrueCaseTextAnnotation.class,
-        CoreAnnotations.TrueCaseAnnotation.class
+        CoreAnnotations.TrueCaseAnnotation.class,
+        CoreAnnotations.AnswerAnnotation.class,
+        CoreAnnotations.ShapeAnnotation.class
     )));
   }
 }

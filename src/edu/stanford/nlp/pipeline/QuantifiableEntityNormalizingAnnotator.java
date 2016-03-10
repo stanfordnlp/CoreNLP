@@ -1,10 +1,12 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.QuantifiableEntityNormalizer;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.Timing;
@@ -22,7 +24,10 @@ import java.util.*;
  * @author Chris Cox (original version)
  */
 
-public class QuantifiableEntityNormalizingAnnotator implements Annotator {
+public class QuantifiableEntityNormalizingAnnotator implements Annotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(QuantifiableEntityNormalizingAnnotator.class);
 
   private Timing timer = new Timing();
   private final boolean VERBOSE;
@@ -48,7 +53,7 @@ public class QuantifiableEntityNormalizingAnnotator implements Annotator {
     property = name + "." + COLLAPSE_PROPERTY;
     collapse = PropertiesUtils.getBool(props, property, false);
     if (this.collapse) {
-      System.err.println("WARNING: QuantifiableEntityNormalizingAnnotator does not work well with collapse=true");
+      log.info("WARNING: QuantifiableEntityNormalizingAnnotator does not work well with collapse=true");
     }
     VERBOSE = false;
   }
@@ -85,14 +90,14 @@ public class QuantifiableEntityNormalizingAnnotator implements Annotator {
     VERBOSE = verbose;
     this.collapse = collapse;
     if (this.collapse) {
-      System.err.println("WARNING: QuantifiableEntityNormalizingAnnotator does not work well with collapse=true");
+      log.info("WARNING: QuantifiableEntityNormalizingAnnotator does not work well with collapse=true");
     }
   }
 
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
       timer.start();
-      System.err.print("Normalizing quantifiable entities...");
+      log.info("Normalizing quantifiable entities...");
     }
     if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
@@ -102,7 +107,7 @@ public class QuantifiableEntityNormalizingAnnotator implements Annotator {
       }
       if (VERBOSE) {
         timer.stop("done.");
-        System.err.println("output: " + sentences + '\n');
+        log.info("output: " + sentences + '\n');
       }
     } else if (annotation.containsKey(CoreAnnotations.TokensAnnotation.class)) {
       List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
@@ -144,7 +149,13 @@ public class QuantifiableEntityNormalizingAnnotator implements Annotator {
 
   @Override
   public Set<Class<? extends CoreAnnotation>> requires() {
-    return TOKENIZE_AND_SSPLIT;
+    return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
+        CoreAnnotations.TextAnnotation.class,
+        CoreAnnotations.TokensAnnotation.class,
+        CoreAnnotations.CharacterOffsetBeginAnnotation.class,
+        CoreAnnotations.CharacterOffsetEndAnnotation.class,
+        CoreAnnotations.SentencesAnnotation.class
+    )));
   }
 
   @Override

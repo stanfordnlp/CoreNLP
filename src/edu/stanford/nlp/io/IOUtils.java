@@ -22,8 +22,6 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 
-import edu.stanford.nlp.util.logging.Redwood;
-
 /**
  * Helper Class for various I/O related things.
  *
@@ -32,11 +30,14 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author Christopher Manning
  */
 
-public class IOUtils {
+public class IOUtils  {
+
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels log = Redwood.channels(IOUtils.class);
 
   private static final int SLURP_BUFFER_SIZE = 16384;
 
-  public static final String eolChar = System.getProperty("line.separator");
+  public static final String eolChar = System.lineSeparator();  // todo: Inline
   public static final String defaultEncoding = "utf-8";
 
   private static Redwood.RedwoodChannels logger = Redwood.channels(IOUtils.class);
@@ -326,13 +327,12 @@ public class IOUtils {
     return ErasureUtils.uncheckedCast(o);
   }
 
-  public static <T> T readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(String msg, String path) {
+  public static <T> T readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(Redwood.RedwoodChannels log, String msg, String path) {
     T obj;
     try {
       Timing timing = new Timing();
-      logger.error(msg + ' ' + path + " ... ");
       obj = IOUtils.readObjectFromURLOrClasspathOrFileSystem(path);
-      timing.done();
+      log.info(msg + ' ' + path + " ... done [" + timing.toSecondsString() + " sec].");
     } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeIOException(e);
     }
@@ -493,7 +493,7 @@ public class IOUtils {
       try {
         in = new GZIPInputStream(in);
       } catch (IOException e) {
-        System.err.println("Resource or file looks like a gzip file, but is not: " + textFileOrUrl);
+        log.error("Resource or file looks like a gzip file, but is not: " + textFileOrUrl);
       }
     }
 
@@ -1579,7 +1579,7 @@ public class IOUtils {
     String bzcat = System.getProperty("bzcat", "bzcat");
     Runtime rt = Runtime.getRuntime();
     String cmd = bzcat + " " + filename;
-    //System.err.println("getBZip2PipedInputStream: Running command: "+cmd);
+    //log.info("getBZip2PipedInputStream: Running command: "+cmd);
     Process p = rt.exec(cmd);
     Writer errWriter = new BufferedWriter(new OutputStreamWriter(System.err));
     StreamGobbler errGobbler = new StreamGobbler(p.getErrorStream(), errWriter);
@@ -1673,6 +1673,7 @@ public class IOUtils {
    * empty, if the file is empty.  If there is an IOException, it is caught
    * and null is returned.  Encoding can also be specified.
    */
+  // todo: This is same as slurpFile (!)
   public static String stringFromFile(String filename, String encoding) {
     try {
       StringBuilder sb = new StringBuilder();
@@ -1729,26 +1730,6 @@ public class IOUtils {
       e.printStackTrace();
       return null;
     }
-  }
-
-  public static String backupName(String filename) {
-    return backupFile(new File(filename)).toString();
-  }
-
-  public static File backupFile(File file) {
-    int max = 1000;
-    String filename = file.toString();
-    File backup = new File(filename + "~");
-    if (!backup.exists()) { return backup; }
-    for (int i = 1; i <= max; i++) {
-      backup = new File(filename + ".~" + i + ".~");
-      if (!backup.exists()) { return backup; }
-    }
-    return null;
-  }
-
-  public static boolean renameToBackupName(File file) {
-    return file.renameTo(backupFile(file));
   }
 
 

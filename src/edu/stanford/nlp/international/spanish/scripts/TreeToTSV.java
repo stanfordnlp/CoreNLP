@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.spanish.scripts;
+package edu.stanford.nlp.international.spanish.scripts; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.Tree;
@@ -20,7 +21,10 @@ import java.util.regex.Pattern;
  * with tab-seperated word-class pairs, one word per file. These can be used with
  * the CRFClassifier for training or testing. 
  */
-public class TreeToTSV {
+public class TreeToTSV  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TreeToTSV.class);
 
   public static void main(String[] args) {
     if(args.length < 1) {

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
@@ -21,7 +22,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-public class MLEDependencyGrammar extends AbstractDependencyGrammar {
+public class MLEDependencyGrammar extends AbstractDependencyGrammar  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(MLEDependencyGrammar.class);
 
   final boolean useSmoothTagProjection;
   final boolean useUnigramWordSmoothing;
@@ -227,7 +231,7 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar {
     double bestSmooth_aT_hTWd = 0.0;
     double bestInterp = 0.0;
 
-    System.err.println("Tuning smooth_stop...");
+    log.info("Tuning smooth_stop...");
     for (smooth_stop = 1.0/100.0; smooth_stop < 100.0; smooth_stop *= 1.25) {
       double totalScore = 0.0;
       for (IntDependency dep : deps) {
@@ -247,7 +251,7 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar {
       }
     }
     smooth_stop = bestSmooth_stop;
-    System.err.println("Tuning selected smooth_stop: " + smooth_stop);
+    log.info("Tuning selected smooth_stop: " + smooth_stop);
 
     for (Iterator<IntDependency> iter = deps.iterator(); iter.hasNext(); ) {
       IntDependency dep = iter.next();
@@ -256,12 +260,12 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar {
       }
     }
 
-    System.err.println("Tuning other parameters...");
+    log.info("Tuning other parameters...");
 
     if ( ! useSmoothTagProjection) {
       bestScore = Double.NEGATIVE_INFINITY;
       for (smooth_aTW_hTWd = 0.5; smooth_aTW_hTWd < 100.0; smooth_aTW_hTWd *= 1.25) {
-        System.err.print(".");
+        log.info(".");
         for (smooth_aT_hTWd = 0.5; smooth_aT_hTWd < 100.0; smooth_aT_hTWd *= 1.25) {
           for (interp = 0.02; interp < 1.0; interp += 0.02) {
             double totalScore = 0.0;
@@ -276,7 +280,7 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar {
               bestInterp = interp;
               bestSmooth_aTW_hTWd = smooth_aTW_hTWd;
               bestSmooth_aT_hTWd = smooth_aT_hTWd;
-              System.err.println("Current best interp: " + interp + " with score " + totalScore);
+              log.info("Current best interp: " + interp + " with score " + totalScore);
             }
           }
         }
@@ -292,11 +296,11 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar {
 
       bestScore = Double.NEGATIVE_INFINITY;
       for (smooth_aTW_hTWd = 1.125; smooth_aTW_hTWd < 100.0; smooth_aTW_hTWd *= 1.5) {
-        System.err.print("#");
+        log.info("#");
         for (smooth_aT_hTWd = 1.125; smooth_aT_hTWd < 100.0; smooth_aT_hTWd *= 1.5) {
-          System.err.print(":");
+          log.info(":");
           for (smooth_aTW_aT = 1.125; smooth_aTW_aT < 200.0; smooth_aTW_aT *= 1.5) {
-            System.err.print(".");
+            log.info(".");
             for (smooth_aTW_hTd = 1.125; smooth_aTW_hTd < 100.0; smooth_aTW_hTd *= 1.5) {
               for (smooth_aT_hTd = 1.125; smooth_aT_hTd < 100.0; smooth_aT_hTd *= 1.5) {
                 for (interp = 0.2; interp <= 0.8; interp += 0.02) {
@@ -315,14 +319,14 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar {
                     bestSmooth_aTW_aT = smooth_aTW_aT;
                     bestSmooth_aTW_hTd = smooth_aTW_hTd;
                     bestSmooth_aT_hTd = smooth_aT_hTd;
-                    System.err.println("Current best interp: " + interp + " with score " + totalScore);
+                    log.info("Current best interp: " + interp + " with score " + totalScore);
                   }
                 }
               }
             }
           }
         }
-        System.err.println();
+        log.info();
       }
       smooth_aTW_hTWd = bestSmooth_aTW_hTWd;
       smooth_aT_hTWd = bestSmooth_aT_hTWd;
@@ -332,7 +336,7 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar {
       interp = bestInterp;
     }
 
-    System.err.println("\nTuning selected smooth_aTW_hTWd: " + smooth_aTW_hTWd + " smooth_aT_hTWd: " + smooth_aT_hTWd + " interp: " + interp + " smooth_aTW_aT: " + smooth_aTW_aT + " smooth_aTW_hTd: " + smooth_aTW_hTd + " smooth_aT_hTd: " + smooth_aT_hTd);
+    log.info("\nTuning selected smooth_aTW_hTWd: " + smooth_aTW_hTWd + " smooth_aT_hTWd: " + smooth_aT_hTWd + " interp: " + interp + " smooth_aTW_aT: " + smooth_aTW_aT + " smooth_aTW_hTd: " + smooth_aTW_hTd + " smooth_aT_hTd: " + smooth_aT_hTd);
   }
 
 
@@ -344,7 +348,7 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar {
     if ( ! directional) {
       dependency = new IntDependency(dependency.head, dependency.arg, false, dependency.distance);
     }
-    if (verbose) System.err.println("Adding dep " + dependency);
+    if (verbose) log.info("Adding dep " + dependency);
     //    coreDependencies.incrementCount(dependency, count);
     /*new IntDependency(dependency.head.word,
                                         dependency.head.tag,
@@ -354,8 +358,8 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar {
                                         dependency.distance), count);
     */
     expandDependency(dependency, count);
-    // System.err.println("stopCounter: " + stopCounter);
-    // System.err.println("argCounter: " + argCounter);
+    // log.info("stopCounter: " + stopCounter);
+    // log.info("argCounter: " + argCounter);
   }
 
   /** The indices of this list are in the tag binned space. */
@@ -514,7 +518,7 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar {
   protected double probTB(IntDependency dependency) {
     if (verbose) {
       // System.out.println("tagIndex: " + tagIndex);
-      System.err.println("Generating " + dependency);
+      log.info("Generating " + dependency);
     }
 
     boolean leftHeaded = dependency.leftHeaded && directional;
@@ -645,7 +649,7 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar {
         p_aTW_aT = dependency.leftHeaded ? Math.exp(lex.score(dependency.arg, 1, wordIndex.get(dependency.arg.word), null)): Math.exp(lex.score(dependency.arg, -1, wordIndex.get(dependency.arg.word), null));
         // double oldScore = c_aTW > 0.0 ? (c_aTW / c_aT) : 1.0;
         // if (oldScore == 1.0) {
-        //  System.err.println("#### arg=" + dependency.arg + " score=" + p_aTW_aT +
+        //  log.info("#### arg=" + dependency.arg + " score=" + p_aTW_aT +
         //                      " oldScore=" + oldScore + " c_aTW=" + c_aTW + " c_aW=" + c_aW);
         // }
       } else {
@@ -665,26 +669,26 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar {
       nf.setMaximumFractionDigits(2);
       if (useSmoothTagProjection) {
         if (useUnigramWordSmoothing) {
-          System.err.println("  c_aW=" + c_aW + ", numWordTokens=" + numWordTokens + ", p(aW)=" + nf.format(p_aW));
+          log.info("  c_aW=" + c_aW + ", numWordTokens=" + numWordTokens + ", p(aW)=" + nf.format(p_aW));
         }
-        System.err.println("  c_aPTW_aPT=" + c_aPTW_aPT + ", c_aPT=" + c_aPT + ", smooth_aPTW_aPT=" + smooth_aPTW_aPT + ", p(aPTW|aPT)=" + nf.format(p_aPTW_aPT));
+        log.info("  c_aPTW_aPT=" + c_aPTW_aPT + ", c_aPT=" + c_aPT + ", smooth_aPTW_aPT=" + smooth_aPTW_aPT + ", p(aPTW|aPT)=" + nf.format(p_aPTW_aPT));
       }
-      System.err.println("  c_aTW=" + c_aTW + ", c_aT=" + c_aT + ", smooth_aTW_aT=" + smooth_aTW_aT +", ## p(aTW|aT)=" + nf.format(p_aTW_aT));
+      log.info("  c_aTW=" + c_aTW + ", c_aT=" + c_aT + ", smooth_aTW_aT=" + smooth_aTW_aT +", ## p(aTW|aT)=" + nf.format(p_aTW_aT));
 
       if (useSmoothTagProjection) {
-        System.err.println("  c_aPTW_hPTd=" + c_aPTW_hPTd + ", c_hPTd=" + c_hPTd + ", p(aPTW|hPTd)=" + nf.format(p_aPTW_hPTd));
+        log.info("  c_aPTW_hPTd=" + c_aPTW_hPTd + ", c_hPTd=" + c_hPTd + ", p(aPTW|hPTd)=" + nf.format(p_aPTW_hPTd));
       }
-      System.err.println("  c_aTW_hTd=" + c_aTW_hTd + ", c_hTd=" + c_hTd + ", smooth_aTW_hTd=" + smooth_aTW_hTd +", p(aTW|hTd)=" + nf.format(p_aTW_hTd));
+      log.info("  c_aTW_hTd=" + c_aTW_hTd + ", c_hTd=" + c_hTd + ", smooth_aTW_hTd=" + smooth_aTW_hTd +", p(aTW|hTd)=" + nf.format(p_aTW_hTd));
 
       if (useSmoothTagProjection) {
-        System.err.println("  c_aPT_hPTd=" + c_aPT_hPTd + ", c_hPTd=" + c_hPTd + ", p(aPT|hPTd)=" + nf.format(p_aPT_hPTd));
+        log.info("  c_aPT_hPTd=" + c_aPT_hPTd + ", c_hPTd=" + c_hPTd + ", p(aPT|hPTd)=" + nf.format(p_aPT_hPTd));
       }
-      System.err.println("  c_aT_hTd=" + c_aT_hTd + ", c_hTd=" + c_hTd + ", smooth_aT_hTd=" + smooth_aT_hTd +", p(aT|hTd)=" + nf.format(p_aT_hTd));
+      log.info("  c_aT_hTd=" + c_aT_hTd + ", c_hTd=" + c_hTd + ", smooth_aT_hTd=" + smooth_aT_hTd +", p(aT|hTd)=" + nf.format(p_aT_hTd));
 
-      System.err.println("  c_aTW_hTWd=" + c_aTW_hTWd + ", c_hTWd=" + c_hTWd + ", smooth_aTW_hTWd=" + smooth_aTW_hTWd +", ## p(aTW|hTWd)=" + nf.format(pb_aTW_hTWd));
-      System.err.println("  c_aT_hTWd=" + c_aT_hTWd + ", c_hTWd=" + c_hTWd + ", smooth_aT_hTWd=" + smooth_aT_hTWd +", ## p(aT|hTWd)=" + nf.format(pb_aT_hTWd));
+      log.info("  c_aTW_hTWd=" + c_aTW_hTWd + ", c_hTWd=" + c_hTWd + ", smooth_aTW_hTWd=" + smooth_aTW_hTWd +", ## p(aTW|hTWd)=" + nf.format(pb_aTW_hTWd));
+      log.info("  c_aT_hTWd=" + c_aT_hTWd + ", c_hTWd=" + c_hTWd + ", smooth_aT_hTWd=" + smooth_aT_hTWd +", ## p(aT|hTWd)=" + nf.format(pb_aT_hTWd));
 
-      System.err.println("  interp=" + interp + ", prescore=" + nf.format(interp * pb_aTW_hTWd + (1.0 - interp) * p_aTW_aT * pb_aT_hTWd) +
+      log.info("  interp=" + interp + ", prescore=" + nf.format(interp * pb_aTW_hTWd + (1.0 - interp) * p_aTW_aT * pb_aT_hTWd) +
                          ", P(go|hTWds)=" + nf.format(pb_go_hTWds) + ", score=" + nf.format(score));
     }
 
@@ -740,9 +744,9 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar {
 
   private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
     stream.defaultReadObject();
-//    System.err.println("Before decompression:");
-//    System.err.println("arg size: " + argCounter.size() + "  total: " + argCounter.totalCount());
-//    System.err.println("stop size: " + stopCounter.size() + "  total: " + stopCounter.totalCount());
+//    log.info("Before decompression:");
+//    log.info("arg size: " + argCounter.size() + "  total: " + argCounter.totalCount());
+//    log.info("stop size: " + stopCounter.size() + "  total: " + stopCounter.totalCount());
 
     ClassicCounter<IntDependency> compressedArgC = argCounter;
     argCounter = new ClassicCounter<>();
@@ -758,17 +762,17 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar {
       expandStop(d, d.distance, count, false);
     }
 
-//    System.err.println("After decompression:");
-//    System.err.println("arg size: " + argCounter.size() + "  total: " + argCounter.totalCount());
-//    System.err.println("stop size: " + stopCounter.size() + "  total: " + stopCounter.totalCount());
+//    log.info("After decompression:");
+//    log.info("arg size: " + argCounter.size() + "  total: " + argCounter.totalCount());
+//    log.info("stop size: " + stopCounter.size() + "  total: " + stopCounter.totalCount());
 
     expandDependencyMap = null;
   }
 
   private void writeObject(ObjectOutputStream stream) throws IOException {
-//    System.err.println("\nBefore compression:");
-//    System.err.println("arg size: " + argCounter.size() + "  total: " + argCounter.totalCount());
-//    System.err.println("stop size: " + stopCounter.size() + "  total: " + stopCounter.totalCount());
+//    log.info("\nBefore compression:");
+//    log.info("arg size: " + argCounter.size() + "  total: " + argCounter.totalCount());
+//    log.info("stop size: " + stopCounter.size() + "  total: " + stopCounter.totalCount());
 
     ClassicCounter<IntDependency> fullArgCounter = argCounter;
     argCounter = new ClassicCounter<>();
@@ -787,9 +791,9 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar {
       }
     }
 
-//    System.err.println("After compression:");
-//    System.err.println("arg size: " + argCounter.size() + "  total: " + argCounter.totalCount());
-//    System.err.println("stop size: " + stopCounter.size() + "  total: " + stopCounter.totalCount());
+//    log.info("After compression:");
+//    log.info("arg size: " + argCounter.size() + "  total: " + argCounter.totalCount());
+//    log.info("stop size: " + stopCounter.size() + "  total: " + stopCounter.totalCount());
 
     stream.defaultWriteObject();
 
