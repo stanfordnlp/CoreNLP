@@ -192,9 +192,12 @@ public class XMLUtils  {
         prev += prevNode.getTextContent();
 
         Node nextNode = nodeList.item(i).getNextSibling();
-        String next = nextNode.getTextContent();
-        if (nextNode.getNextSibling() != null) {
-          next += nextNode.getNextSibling().getTextContent();
+        String next = "";
+        if (nextNode != null) {
+          next = nextNode.getTextContent();
+          if (nextNode.getNextSibling() != null) {
+            next += nextNode.getNextSibling().getTextContent();
+          }
         }
         Element element = (Element)nodeList.item(i);
         Triple t = new Triple(prev, element, next);
