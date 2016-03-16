@@ -12,9 +12,14 @@ import edu.stanford.nlp.util.StringUtils;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static edu.stanford.nlp.ie.KBPRelationExtractor.NERTag.*;
+import static edu.stanford.nlp.util.logging.Redwood.Util.endTrack;
+import static edu.stanford.nlp.util.logging.Redwood.Util.forceTrack;
+import static edu.stanford.nlp.util.logging.Redwood.log;
 
 /**
  * An interface for a KBP-style relation extractor
@@ -356,10 +361,6 @@ public interface KBPRelationExtractor {
 
     String line;
     while ( (line = reader.readLine()) != null ) {
-      if (line.startsWith("#")) {
-        continue;
-      }
-      line = line.replace("\\#", "#");
       String[] fields = line.split("\t");
       if (relation == null) {
         // Case: read the relation
@@ -580,6 +581,30 @@ public interface KBPRelationExtractor {
           "R: " + new DecimalFormat("0.000%").format(recallMicro()) + "  " +
           "F1: " + new DecimalFormat("0.000%").format(f1Micro());
     }
+  }
 
+  default Accuracy computeAccuracy(Stream<Pair<KBPInput, String>> examples,
+                                   Optional<PrintStream> predictOut) {
+    forceTrack("Accuracy");
+    Accuracy accuracy = new Accuracy();
+    AtomicInteger testI = new AtomicInteger(0);
+    DecimalFormat confidenceFormat = new DecimalFormat("0.0000");
+    forceTrack("Featurizing");
+    examples.parallel().forEach( example -> {
+      Pair<String, Double> predicted = this.classify(example.first);
+      if (predictOut.isPresent()) {
+        predictOut.get().println(predicted.first + "\t" + confidenceFormat.format(predicted.second));
+      }
+      synchronized (accuracy) {
+        accuracy.predict(Collections.singleton(predicted.first), Collections.singleton(example.second));
+      }
+      if (testI.incrementAndGet() % 1000 == 0) {
+        log(KBPRelationExtractor.class, "[" + testI.get() + "]  " + accuracy.toOneLineString());
+      }
+    });
+    endTrack("Featurizing");
+    log(accuracy.toString());
+    endTrack("Accuracy");
+    return accuracy;
   }
 }

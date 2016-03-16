@@ -4,6 +4,7 @@ package edu.stanford.nlp.ie;
 import edu.stanford.nlp.classify.*;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Datum;
@@ -44,6 +45,9 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
 
   @ArgumentParser.Option(name="model", gloss="The dataset to test on")
   public static String MODEL_FILE = "model.ser";
+
+  @ArgumentParser.Option(name="predictions", gloss="Dump model predictions to this file")
+  public static Optional<String> PREDICTIONS = Optional.empty();
 
   private enum MinimizerType{ QN, SGD, HYBRID, L1 }
   @ArgumentParser.Option(name="minimizer", gloss="The minimizer to use for training the classifier")
@@ -773,22 +777,13 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
     }
 
     // Evaluate the model
-    forceTrack("Test accuracy");
-    Accuracy accuracy = new Accuracy();
-    AtomicInteger testI = new AtomicInteger(0);
-    forceTrack("Featurizing");
-    testExamples.stream().parallel().forEach( example -> {
-      Pair<String, Double> predicted = classifier.classify(example.first);
-      synchronized (accuracy) {
-        accuracy.predict(Collections.singleton(predicted.first), Collections.singleton(example.second));
+    classifier.computeAccuracy(testExamples.stream(), PREDICTIONS.map(x -> {
+      try {
+        return "stdout".equalsIgnoreCase(x) ? System.out : new PrintStream(new FileOutputStream(x));
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
       }
-      if (testI.incrementAndGet() % 1000 == 0) {
-        log("[" + testI.get() + " / " + testExamples.size() + "]  " + accuracy.toOneLineString());
-      }
-    });
-    endTrack("Featurizing");
-    log(accuracy.toString());
-    endTrack("Test accuracy");
+    }));
   }
 
 }
