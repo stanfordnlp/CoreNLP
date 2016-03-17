@@ -16,6 +16,7 @@ import edu.stanford.nlp.international.spanish.process.SpanishTokenizer;
 import edu.stanford.nlp.international.french.process.FrenchTokenizer;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
+
 import edu.stanford.nlp.util.logging.Redwood;
 
 
@@ -33,7 +34,9 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class TokenizerAnnotator implements Annotator  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(TokenizerAnnotator.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(TokenizerAnnotator.class);
+
+  private static Redwood.RedwoodChannels logger = Redwood.channels(TokenizerAnnotator.class);
 
   /**
    * Enum to identify the different TokenizerTypes. To add a new
@@ -122,7 +125,6 @@ public class TokenizerAnnotator implements Annotator  {
     }
   } // end enum TokenizerType
 
-
   public static final String EOL_PROPERTY = "tokenize.keepeol";
 
   private final boolean VERBOSE;
@@ -130,9 +132,9 @@ public class TokenizerAnnotator implements Annotator  {
 
   // CONSTRUCTORS
 
-  /** Gives a non-verbose, English tokenizer. */
+  /** Gives a verbose, English tokenizer. Probably no one wants that! */
   public TokenizerAnnotator() {
-    this(false);
+    this(true);
   }
 
   public TokenizerAnnotator(boolean verbose) {
@@ -225,7 +227,7 @@ public class TokenizerAnnotator implements Annotator  {
       break;
 
     case Unspecified:
-      log.info("No tokenizer type provided. Defaulting to PTBTokenizer.");
+      logger.info("TokenizerAnnotator: No tokenizer type provided. Defaulting to PTBTokenizer.");
       factory = PTBTokenizer.factory(new CoreLabelTokenFactory(), options);
       break;
 
