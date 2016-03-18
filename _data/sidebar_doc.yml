@@ -61,6 +61,9 @@ entries:
 
         - title: Lemmatization
           url: lemma.html
+          
+        - title: Parts of Speech
+          url: pos.html
 
         - title: Named Entity Recognition
           url: ner.html
