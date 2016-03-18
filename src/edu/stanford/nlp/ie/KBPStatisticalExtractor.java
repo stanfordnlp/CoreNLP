@@ -644,7 +644,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
   /**
    * The implementing classifier of this extractor.
    */
-  private final Classifier<String, String> classifier;
+  public final Classifier<String, String> classifier;
 
   /**
    * Create a new KBP relation extractor, from the given implementing classifier.
