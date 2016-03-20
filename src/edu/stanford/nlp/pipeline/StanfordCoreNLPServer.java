@@ -491,10 +491,10 @@ public class StanfordCoreNLPServer implements Runnable {
       // Tweak the properties to play nicer with the server
       // (set the parser max length to 60)
       if (!"-1".equals(props.getProperty("parse.maxlen", "60"))) {
-        props.put("parse.maxlen", "60");
+        props.setProperty("parse.maxlen", "60");
       }
       if (!"-1".equals(props.getProperty("pos.maxlen", "500"))) {
-        props.put("pos.maxlen", "500");
+        props.setProperty("pos.maxlen", "500");
       }
 
       // Make sure the properties compile
@@ -738,7 +738,7 @@ public class StanfordCoreNLPServer implements Runnable {
   public static void main(String[] args) throws IOException {
     int port = DEFAULT_PORT;
     int timeout = DEFAULT_TIMEOUT;
-    boolean strict = false;
+    // boolean strict = false;
 
     Properties props = new Properties();
     if (args.length > 0) {
@@ -757,11 +757,11 @@ public class StanfordCoreNLPServer implements Runnable {
     if(props.containsKey("timeout")) {
       timeout = Integer.parseInt(props.getProperty("timeout"));
     }
-    if(props.containsKey("strict")) {
-      if (props.get("strict") != null && !"".equals(props.get("strict"))) {
-        strict = Boolean.parseBoolean(props.getProperty("strict"));
-      }
-    }
+    // if(props.containsKey("strict")) { // cdm: unneeded: Treats null and "" as false
+    //   if (props.getProperty("strict") != null && ! props.getProperty("strict").isEmpty()) {
+    boolean strict = Boolean.parseBoolean(props.getProperty("strict"));
+    //   }
+    // }
     log("Starting server on port " + port + " with timeout of " + timeout + " milliseconds.");
 
     // Run the server
