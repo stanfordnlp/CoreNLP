@@ -42,7 +42,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 public class StanfordCoreNLPServer implements Runnable {
 
   protected static final int DEFAULT_PORT = 9000;
-  protected static final int DEFAULT_TIMEOUT = 5000;
+  protected static final int DEFAULT_TIMEOUT = 10000;
 
   protected HttpServer server;
   protected final int serverPort;

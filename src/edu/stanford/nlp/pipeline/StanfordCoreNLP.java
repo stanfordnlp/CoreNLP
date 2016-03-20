@@ -284,7 +284,10 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    */
   public static String ensurePrerequisiteAnnotators(String[] annotators) {
     // Get an unordered set of annotators
-    Set<String> unorderedAnnotators = new HashSet<>();
+    Set<String> unorderedAnnotators = new LinkedHashSet<>();  // linked to preserve order
+    for (String annotator : annotators) {
+      unorderedAnnotators.add(annotator);
+    }
     for (String annotator : annotators) {
       // Add the annotator
       if (!getNamedAnnotators().containsKey(annotator.toLowerCase())) {
