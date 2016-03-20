@@ -66,9 +66,9 @@ DKPro Core is part of the [DKPro community](https://dkpro.github.io). It is well
 
 * [Apache Thrift server for Stanford CoreNLP](https://github.com/EducationalTestingService/stanford-thrift) by Diane Napolitano. (Written in Java, but usable from many languages.)
 
-#### ZeroMQ/脴MQ servers
+#### ZeroMQ/ØMQ servers
 
-* [stanford-0mq](https://github.com/dmnapolitano/stanford-0mq) by Diane Napolitano. An implementation of a server for Stanford's CoreNLP suite using 脴mq and a basic client/server/JSON requests configuration. Last commit: Oct 2015.
+* [stanford-0mq](https://github.com/dmnapolitano/stanford-0mq) by Diane Napolitano. An implementation of a server for Stanford's CoreNLP suite using Ømq and a basic client/server/JSON requests configuration. Last commit: Oct 2015.
 * [stanford-corenlp-zeromq](https://github.com/URXtech/stanford-corenlp-zeromq) by URXtech. Basic JSON wrapper around CoreNLP.
 * [corenlp-zmq](https://github.com/twneale/corenlp-zmq) by Thom Neale. A Dockerfile and Ansible provisioning script to build and run a Stanford CoreNLP server process with a single ZMQ broker font-end that proxies incoming requests to one or more back-end Scala workers. Last commit: 2015.
 * [corenlp-server](https://github.com/kowey/corenlp-server) by Eric Kow. Simple Java server communicating with clients via XML through ZeroMQ. Example Python client included. Last commit: 2014.

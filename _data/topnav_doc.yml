@@ -54,8 +54,8 @@ topnav_dropdowns:
           version: all
           output: web
 
-        - title: Other packages
-          url: extensions.html
+        - title: Other languages/packages
+          url: other-languages.html
           audience: writers, designers
           platform: all
           product: all

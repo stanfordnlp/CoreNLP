@@ -4,34 +4,38 @@ keywords: server
 permalink: '/corenlp-server.html'
 ---
 
-
-This page describes setting up the CoreNLP server included in the release. This provides both a convenient graphical way to interface with your version of CoreNLP, and provides an API to call CoreNLP using any programming languages.
+CoreNLP includes a simple web API server for servicing your human language understanding needs (starting with version 3.6.0). This page describes how to set it up.  CoreNLP server provides both a convenient graphical way to interface with your installation of CoreNLP and an API with which to call CoreNLP using any programming language.
 
 ## Getting Started
-Stanford CoreNLP ships with a built-in server, and requires only the CoreNLP dependencies. To run this server, simply run:
+
+Stanford CoreNLP ships with a built-in server, which requires only the CoreNLP dependencies. To run this server, simply run:
 
 ```bash
-# Set up your classpath. For example, to add all jars in the current directory tree:
-export CLASSPATH="`find . -name '*.jar'`"
-
-# Run the server
-java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer [port?]
+# Run the server using all jars in the current directory (e.g., the CoreNLP home directory)
+java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer [port]
 ```
 
 If no value for `port` is provided, port 9000 will be used by default. You can then test your server by visiting
 
     http://localhost:9000/
 
-You should see a website similar to [corenlp.run](http://corenlp.run/), with an input box for text and a list of annotators you can run. From this interface, you can test out each of the annotators by adding/removing them from this list. You can test out the API by sending a `POST` request to the server with the appropriate properties. An easy way to do this is with [wget](https://www.gnu.org/software/wget/). The following will annotate the sentence "*the quick brown fox jumped over the lazy dog*" with part of speech tags (and tokenizing on whitespace -- recall, you can pass in any property recognized by CoreNLP):
+You should see a website similar to [corenlp.run](http://corenlp.run/), with an input box for text and a list of annotators you can run. From this interface, you can test out each of the annotators by adding/removing them from this list. (Note: The first use will be slow while models are loaded, but after that the server should run quite quickly.) You can test out the API by sending a `POST` request to the server with the appropriate properties. An easy way to do this is with [wget](https://www.gnu.org/software/wget/). The following will annotate the sentence "*the quick brown fox jumped over the lazy dog*" with part of speech tags (and tokenizing on whitespace -- recall, you can pass in any property recognized by CoreNLP):
 
 ```bash
-wget --post-data 'the quick brown fox jumped over the lazy dog' 'localhost:9000/?properties={"tokenize.whitespace": "true", "annotators": "tokenize,ssplit,pos", "outputFormat": "json"}' -O -
+wget --post-data 'The quick brown fox jumped over the lazy dog.' 'localhost:9000/?properties={"tokenize.whitespace":"true","annotators":"tokenize,ssplit,pos","outputFormat":"json"}' -O -
 ```
 
-The rest of this document describes the API in more detail, describes a Java client to the API as a drop-in replacement for the `StanfordCoreNLP` annotator pipeline, and talks about administering the server.
+Or if you only have or prefer [curl](https://curl.haxx.se/):
+
+```bash
+curl --data 'The quick brown fox jumped over the lazy dog.' 'http://localhost:9000/?properties={%22tokenize.whitespace%22%3A%22true%22%2C%22annotators%22%3A%22tokenize%2Cssplit%2Cpos%22%2C%22outputFormat%22%3A%22json%22}' -o -
+```
+
+The rest of this document: describes the API in more detail, describes a Java client to the API as a drop-in replacement for the `StanfordCoreNLP` annotator pipeline, and talks about administering the server.
 
 
 ## API Documentation
+
 The greatest strength of the server is the ability to make API calls against it. 
 
 > **NOTE**: Please do **not** make API calls against [corenlp.run](http://corenlp.run). It is not set up to handle a large volume of requests. Instructions for setting up your own server can be found in the [Dedicated Server](#dedicated-server) section.
@@ -43,7 +47,8 @@ There are three endpoints provided by the server, which we'll describe in more d
 * `/semgrex` Similar to `/tokensregex` above, this endpoint matches text against semgrex patterns.
 
 ### Annotate with CoreNLP: `/`
-This endpoint takes as input a JSON-formatted properties string under the key `properties=<properties>`, and as `POST`data text to annotate. The properties should mirror the properties file passed into the CoreNLP command line. For example, the following will tokenize the input text, run part of speech tagging, and output it as JSON to standard out:
+
+This endpoint takes as input a JSON-formatted properties string under the key `properties=<properties>`, and as `POST`data text to annotate. The properties should mirror the properties file passed into the CoreNLP command line, except formatted as a JSON object. For example, the following will tokenize the input text, run part of speech tagging, and output it as JSON to standard out:
 
 ```bash
 wget --post-data 'the quick brown fox jumped over the lazy dog' 'localhost:9000/?properties={"annotators": "tokenize,ssplit,pos", "outputFormat": "json"}' -O -
@@ -51,8 +56,8 @@ wget --post-data 'the quick brown fox jumped over the lazy dog' 'localhost:9000/
 
 A common property to set is the output format of the API. The server supports all output formats provided by CoreNLP. These are listed below, along with their relevant properties:
 
-* **JSON**: Print the annotations in JSON format. This corresponds to the properties: `{"outputFormat": "json"}`.
-* **XML**: Print the annotations in XML format. This corresponds to the properties: `{"outputFormat": "xml"}`.
+* **JSON**: Print the annotations in JSON format. This corresponds to the property: `{"outputFormat": "json"}`.
+* **XML**: Print the annotations in XML format. This corresponds to the property: `{"outputFormat": "xml"}`.
 * **Text**: Print the annotations in a human-readable text format. This is the default format for the CoreNLP command-line interface. This corresponds to the property: `{"outputFormat": "text"}`.  
 * **Serialized**: Print the annotations in a losslessly serialized format. This is the recommended option when calling the API programmatically from a language that supports one of the serialized formats. In addition to setting the output format flag, you must also provide a valid serializer class. For example, for protocol buffers, this would be: 
   ```
@@ -64,20 +69,21 @@ A common property to set is the output format of the API. The server supports al
   -  `edu.stanford.nlp.pipeline.GenericAnnotationSerializer` Writes the output to a Java serialized object. This is only suitable for transferring data between Java programs. This also produces relatively large serialized objects.
   - `edu.stanford.nlp.pipeline.CustomAnnotationSerializer` Writes the output to a (lossy!) textual representation, which is much smaller than the `GenericAnnotationSerializer` but does not include all the relevant information.
 
-From the other side, the server accepts input in a variety of formats. By default, it takes input as raw text sent as `POST` data to the server. However, it can also be configured to read the `POST` data using one of the CoreNLP serializers. This can be set up by setting the properties `inputFormat` and `inputSerializer`. For example, to read the data as a protocol buffer (useful if, e.g., it is already partially annotated), simply include the following in your `GET` parameters:
+The server also accepts input in a variety of formats. By default, it takes input as raw text sent as `POST` data to the server. However, it can also be configured to read the `POST` data using one of the CoreNLP serializers. This can be set up by setting the properties `inputFormat` and `inputSerializer`. For example, to read the data as a protocol buffer (useful if, e.g., it is already partially annotated), simply include the following in your `GET` parameters:
 
 ```json
 {"inputFormat": "serialized",
  "inputSerializer": "edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer"}
 ```
 
-A complete call to the server, taking as input a protobuf serialized document at path `/path/to/file.proto` and returning as a response the document annotated for part of speech and named entity tags (to the file `/path/to/annotated_file.proto` could be:
+A complete call to the server, taking as input a protobuf serialized document at path `/path/to/file.proto` and returning as a response a protobuf for the document annotated for part of speech and named entity tags (to the file `/path/to/annotated_file.proto` could be:
 
 ```bash
 wget --post-file /path/to/file.proto 'localhost:9000/?properties={"inputFormat": "serialized", "inputSerializer", "edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer", "annotators": "tokenize,ssplit,pos,lemma,ner", "outputFormat": "serialized", "serializer", "edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer"}' -O /path/to/annotated_file.proto
 ```
 
 ### Query TokensRegex: `/tokensregex`
+
 Similar to the CoreNLP target, `/tokensregex` takes a block of data (e.g., text) as `POST` data, and a series of `GET` parameters. Currently, only plain-text `POST` data is supported. The two relevant `GET` parameters are:
 
 * `pattern`: The TokensRegex pattern to annotate.
@@ -102,6 +108,7 @@ The response is always in JSON, formatted as follows:
 ```
 
 ### Query Semgrex: `/semgrex`
+
 Similar to the CoreNLP target, and nearly identical to TokensRegex, `/semgrex` takes a block of data (e.g., text) as `POST` data, and a series of `GET` parameters. Currently, only plain-text `POST` data is supported. The two relevant `GET` parameters are:
 
 * `pattern`: The Semgrex pattern to annotate.
@@ -127,10 +134,11 @@ The response is always in JSON, formatted identically to the tokensregex output,
 
 
 ## Java Client
-CoreNLP includes a Java client to the server -- `StanfordCoreNLPClient` -- which mirrors the interface of the annotation pipeline (`StanfordCoreNLP.java`) as closely as possible. The primary motivating use-cases for using this class and not the local pipeline are:
+
+CoreNLP includes a Java client to the server -- `StanfordCoreNLPClient` -- which mirrors the interface of the annotation pipeline (`StanfordCoreNLP.java`) as closely as possible. The primary motivating use cases for using this class and not the local pipeline are:
 
 * The models are not re-loaded every time your program runs. This is useful when debugging a block of code which runs CoreNLP annotations, as the CoreNLP models often take on the order of minutes to load from disk.
-* The machine running the server often has more compute and more memory than your local machine. Never again must gmail and CoreNLP compete for the same memory.
+* The machine running the server has more compute and more memory than your local machine. Never again must Chrome and CoreNLP compete for the same memory.
 
 The constructors to `StanfordCoreNLPClient` take the following 3 required arguments, and a fourth optional argument:
 
@@ -139,7 +147,7 @@ The constructors to `StanfordCoreNLPClient` take the following 3 required argume
 3. `int port`: The port that the server is running on.
 4. `int threads`: Optionally, the number of threads to hit the server with. If, for example, the server is running on an 8 core machine, you can specify this to be 8, and the client will allow you to make 8 simultaneous requests to the server. Note that there is nothing that ensures that you have these threads reserved on the server: two clients can both hit the server with 8 threads, and the server will just respond half as fast.
 
-An example programmatic usage of the client, hitting a server at localhost:9000 with up to 2 threads, could be as follows. Note that this exactly mirrors the usage of the conventional pipeline.
+An example programmatic usage of the client, hitting a server at localhost:9000 with up to 2 threads, is as follows. Note that this exactly mirrors the usage of the conventional pipeline.
 
 ```java
 // creates a StanfordCoreNLP object, with POS tagging, lemmatization, NER, parsing, and coreference resolution 
@@ -165,10 +173,20 @@ java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLPClient -annotators 
 
 > **NOTE**: Again, please do **not** make API calls against `http://corenlp.run`. It is not set up to handle a large volume of requests. Instructions for setting up your own server can be found in the [Dedicated Server](#dedicated-server) section.
 
-## Administration
+Once you have your own server(s) set up, you can run against them with a command like this:
+
+```bash
+java edu.stanford.nlp.pipeline.StanfordCoreNLPClient -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file input.txt  -backends localhost:9000
+```
+
+You specify one or more back-end servers in a comma-separated list as the arguments of the `-backends` option. Each is specified as `host:port`.
+
+## Server Administration
+
 This section describes how to administer the server, including starting and stopping the server, as well as setting it up as a startup task 
 
 ### Starting the Server
+
 The server is started directly though calling it with `java`. For example, the following will start the server in the background on port 1337, assuming your classpath is set properly:
 
 ```bash
@@ -178,6 +196,7 @@ nohup java -mx4g edu.stanford.nlp.pipeline.StanfordCoreNLPServer 1337 &
 The classpath must include all of the CoreNLP dependencies. The memory requirements of the server are the same as that of CoreNLP, though it will grow as you load more models (e.g., memory increases if you load both the PCFG and Shift-Reduce constituency parser models). A safe minimum is 4gb; 8gb is recommended if you can spare it.
 
 ### Stopping the Server
+
 The server can be stopped programmatically by making a call to the `/shutdown` endpoint with an appropriate shutdown key. This key is saved to the file `/tmp/corenlp.shutdown` when the server starts. An example command to shut down the server would be:
 
 ```bash
@@ -185,9 +204,10 @@ wget "localhost:9000/shutdown?key=`cat /tmp/corenlp.shutdown`" -O -
 ```
 
 ### Dedicated Server
-This section describes how to set up a dedicated CoreNLP server on a fresh Linux install. As always, make sure you understand the command being run below, as they largely require root permissions:
 
-1. Place all of the CoreNLP jars (code, models, and library dependencies) in a directory `/opt/corenlp`. The code will be in a jar named `stanford-corenlp-version.jar`. The models will be in a jar named `stanford-corenlp-models.jar`; caseless and shift-reduce models can also be added here. The minimal library dependencies, included in the CoreNLP release, are:
+This section describes how to set up a dedicated CoreNLP server on a fresh Linux install. As always, make sure you understand the commands being run below, as they largely require root permissions:
+
+1. Place all of the CoreNLP jars (code, models, and library dependencies) in a directory `/opt/corenlp`. The code will be in a jar named `stanford-corenlp-<version>.jar`. The models will be in a jar named `stanford-corenlp-<version>-models.jar`; other language, caseless or shift-reduce models can also be added here. The minimal library dependencies, included in the CoreNLP release, are:
 	* `joda-time.jar`
 	* `jollyday-<version>.jar`
 	* `protobuf.jar`
@@ -224,9 +244,11 @@ sudo service corenlp [start|stop|restart]
 This section documents some of the subtle quirks of the server, and the motivations behind them.
 
 ### Character Encoding
-The official HTTP specification [recommends ISO-8859-1](https://www.w3.org/International/O-HTTP-charset) as the encoding of a request, unless a different `encoding` is explicitly set otherwise by the `Content-Type` header. However, for most NLP applications this is an unintuitive default, and so the server instead defaults to UTF-8. To enable the ISO-8859-1 default, pass in the `-strict` flag to the server at startup.
+
+The official HTTP 1.1 specification [recommends ISO-8859-1](https://www.w3.org/International/O-HTTP-charset) as the encoding of a request, unless a different `encoding` is explicitly set by using the `Content-Type` header. However, for most NLP applications this is an unintuitive default, and so the server instead defaults to UTF-8. To enable the ISO-8859-1 default, pass in the `-strict` flag to the server at startup.
 
 ### Default Properties
+
 The server has different default properties than the regular CoreNLP pipeline. These are:
 
   * The default output format is `json` rather than `text` (`-outputFormat json`). This is more natural for most cases when you would be making API calls against a server.
@@ -235,9 +257,9 @@ The server has different default properties than the regular CoreNLP pipeline. T
   * As a necessary consequence of not having the `parse` annotator, the default coref mention detector is changed to use dependency parsers: `-coref.md.type dep`.
 
 ### Undocumented Features
+
 Well, I guess they're documented now:
 
   * Hitting `Shift+Enter` on any input field in the web demo (e.g., the main text input) is equivalent to clicking the `Submit` (or `Match`) button. Furthermore, if the input is empty, it will fill itself with a default input. Useful if -- to take a purely hypothetical example -- you're developing the web server and don't want to re-type the same sentence everytime you re-load the website.
-
 
 
