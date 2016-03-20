@@ -16,7 +16,6 @@ import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.simple.Document;
 import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.util.*;
@@ -29,8 +28,6 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("FieldCanBeLocal")
 public class KBPAnnotator implements Annotator {
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(KBPAnnotator.class);
 
   @ArgumentParser.Option(name="model", gloss="The path to the model")
   private String model = DefaultPaths.DEFAULT_KBP_CLASSIFIER;
@@ -84,7 +81,6 @@ public class KBPAnnotator implements Annotator {
 
     // Load the extractor
     try {
-      log.info("Loading KBP classifier from " + model);
       Object object = IOUtils.readObjectFromURLOrClasspathOrFileSystem(model);
       KBPRelationExtractor statisticalExtractor;
       if (object instanceof LinearClassifier) {
@@ -270,26 +266,24 @@ public class KBPAnnotator implements Annotator {
     }
     // (collect coreferent KBP mentions)
     Map<CoreMap, Set<CoreMap>> mentionsMap = new HashMap<>();  // map from canonical mention -> other mentions
-    if (annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class) != null) {
-      for (Map.Entry<Integer, CorefChain> chain : annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class).entrySet()) {
-        CoreMap firstMention = null;
-        for (CorefChain.CorefMention mention : chain.getValue().getMentionsInTextualOrder()) {
-          CoreMap kbpMention = null;
-          for (int i = mention.startIndex; i < mention.endIndex; ++i) {
-            if (mentionByStartIndex.containsKey(Pair.makePair(mention.sentNum - 1, i))) {
-              kbpMention = mentionByStartIndex.get(Pair.makePair(mention.sentNum - 1, i));
-              break;
-            }
+    for (Map.Entry<Integer, CorefChain> chain : annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class).entrySet()) {
+      CoreMap firstMention = null;
+      for (CorefChain.CorefMention mention : chain.getValue().getMentionsInTextualOrder()) {
+        CoreMap kbpMention = null;
+        for (int i = mention.startIndex; i < mention.endIndex; ++i) {
+          if (mentionByStartIndex.containsKey(Pair.makePair(mention.sentNum - 1, i))) {
+            kbpMention = mentionByStartIndex.get(Pair.makePair(mention.sentNum - 1, i));
+            break;
           }
-          if (firstMention == null) {
-            firstMention = kbpMention;
+        }
+        if (firstMention == null) {
+          firstMention = kbpMention;
+        }
+        if (kbpMention != null) {
+          if (!mentionsMap.containsKey(firstMention)) {
+            mentionsMap.put(firstMention, new LinkedHashSet<>());
           }
-          if (kbpMention != null) {
-            if (!mentionsMap.containsKey(firstMention)) {
-              mentionsMap.put(firstMention, new LinkedHashSet<>());
-            }
-            mentionsMap.get(firstMention).add(kbpMention);
-          }
+          mentionsMap.get(firstMention).add(kbpMention);
         }
       }
     }
