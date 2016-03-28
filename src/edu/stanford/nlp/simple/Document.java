@@ -32,10 +32,27 @@ public class Document {
   /**
    * The empty {@link java.util.Properties} object, for use with creating default annotators.
    */
-  protected static final Properties EMPTY_PROPS = new Properties() {{
+  static final Properties EMPTY_PROPS = new Properties() {{
     setProperty("annotators", "");
     setProperty("tokenize.class", "PTBTokenizer");
     setProperty("tokenize.language", "en");
+  }};
+
+  /**
+   * The caseless {@link java.util.Properties} object.
+   *
+   * @see Document#caseless()
+   * @see Sentence#caseless()
+   */
+  static final Properties CASELESS_PROPS = new Properties() {{
+    setProperty("annotators", "");
+    setProperty("tokenize.class", "PTBTokenizer");
+    setProperty("tokenize.language", "en");
+    setProperty("pos.model", "edu/stanford/nlp/models/pos-tagger/wsj-0-18-caseless-left3words-distsim.tagger");
+    setProperty("parse.model", "edu/stanford/nlp/models/lexparser/englishPCFG.caseless.ser.gz");
+    setProperty("ner.model", "edu/stanford/nlp/models/ner/english.muc.7class.caseless.distsim.crf.ser.gz," +
+                             "edu/stanford/nlp/models/ner/english.conll.4class.caseless.distsim.crf.ser.gz," +
+                             "edu/stanford/nlp/models/ner/english.all.3class.caseless.distsim.crf.ser.gz");
   }};
 
   /**
@@ -265,6 +282,9 @@ public class Document {
    */
   private boolean haveRunOpenie = false;
 
+  /** The default properties to use for annotating things (e.g., coref for the document level) */
+  private Properties defaultProps = EMPTY_PROPS;
+
   /**
    * Create a new document from the passed in text.
    * @param text The text of the document.
@@ -285,7 +305,7 @@ public class Document {
     List<CoreMap> sentences = ann.get(CoreAnnotations.SentencesAnnotation.class);
     this.sentences = new ArrayList<>(sentences.size());
     for (CoreMap sentence : sentences) {
-      this.sentences.add(new Sentence(this, this.serializer.toProtoBuilder(sentence), sentence.get(CoreAnnotations.TextAnnotation.class)));
+      this.sentences.add(new Sentence(this, this.serializer.toProtoBuilder(sentence), sentence.get(CoreAnnotations.TextAnnotation.class), defaultProps));
     }
   }
 
@@ -301,9 +321,33 @@ public class Document {
     if (proto.getSentenceCount() > 0) {
       this.sentences = new ArrayList<>(proto.getSentenceCount());
       for (CoreNLPProtos.Sentence sentence : proto.getSentenceList()) {
-        this.sentences.add(new Sentence(this, sentence.toBuilder()));
+        this.sentences.add(new Sentence(this, sentence.toBuilder(), defaultProps));
       }
     }
+  }
+
+
+  /**
+   * Make this document caseless. That is, from now on, run the caseless models
+   * on the document by default rather than the standard CoreNLP models.
+   *
+   * @return This same document, but with the default properties swapped out.
+   */
+  public Document caseless() {
+    this.defaultProps = CASELESS_PROPS;
+    return this;
+  }
+
+  /**
+   * Make this document case sensitive.
+   * A document is case sensitive by default; this only has an effect if you have previously
+   * called {@link Sentence#caseless()}.
+   *
+   * @return This same document, but with the default properties swapped out.
+   */
+  public Document cased() {
+    this.defaultProps = EMPTY_PROPS;
+    return this;
   }
 
   /**
@@ -491,7 +535,7 @@ public class Document {
       this.sentences = new ArrayList<>(sentences.size());
       for (CoreMap sentence : sentences) {
         //Sentence sent = new Sentence(this, sentence);
-        Sentence sent = new Sentence(this, this.serializer.toProtoBuilder(sentence), sentence.get(CoreAnnotations.TextAnnotation.class));
+        Sentence sent = new Sentence(this, this.serializer.toProtoBuilder(sentence), sentence.get(CoreAnnotations.TextAnnotation.class), defaultProps);
         this.sentences.add(sent);
         this.impl.addSentence(sent.serialize());
       }
@@ -556,7 +600,7 @@ public class Document {
 
   /** @see Document#coref(java.util.Properties) */
   public Map<Integer, CorefChain> coref() {
-    return coref(EMPTY_PROPS);
+    return coref(defaultProps);
   }
 
   /** Returns the document id of the document, if one was found */
@@ -589,7 +633,7 @@ public class Document {
    *
    * @param sentences The sentences to force for the sentence list of this document.
    */
-  protected void forceSentences(List<Sentence> sentences) {
+  void forceSentences(List<Sentence> sentences) {
     this.sentences = sentences;
     synchronized (impl) {
       this.impl.clearSentence();
@@ -605,7 +649,7 @@ public class Document {
   // Begin helpers
   //
 
-  protected Document runPOS(Properties props) {
+  Document runPOS(Properties props) {
     // Cached result
     if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasPos()) {
       return this;
@@ -623,7 +667,7 @@ public class Document {
     return this;
   }
 
-  protected Document runLemma(Properties props) {
+  Document runLemma(Properties props) {
     // Cached result
     if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasLemma()) {
       return this;
@@ -641,7 +685,7 @@ public class Document {
     return this;
   }
 
-  protected Document runNER(Properties props) {
+  Document runNER(Properties props) {
     if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasNer()) {
       return this;
     }
@@ -658,7 +702,7 @@ public class Document {
     return this;
   }
 
-  protected Document runRegexner(Properties props) {
+  Document runRegexner(Properties props) {
     // Run prerequisites
     runNER(props);
     // Run annotator
@@ -672,7 +716,7 @@ public class Document {
     return this;
   }
 
-  protected Document runParse(Properties props) {
+  Document runParse(Properties props) {
     if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawSentence().hasParseTree()) {
       return this;
     }
@@ -700,7 +744,7 @@ public class Document {
     return this;
   }
 
-  protected Document runDepparse(Properties props) {
+  Document runDepparse(Properties props) {
     if (this.sentences != null && this.sentences.size() > 0 &&
         this.sentences.get(0).rawSentence().hasBasicDependencies()) {
       return this;
@@ -724,7 +768,7 @@ public class Document {
     return this;
   }
 
-  protected Document runNatlog(Properties props) {
+  Document runNatlog(Properties props) {
     if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawToken(0).hasPolarity()) {
       return this;
     }
@@ -745,7 +789,7 @@ public class Document {
     return this;
   }
 
-  protected Document runOpenie(Properties props) {
+  Document runOpenie(Properties props) {
     if (haveRunOpenie) {
       return this;
     }
@@ -769,7 +813,7 @@ public class Document {
   }
 
 
-  protected Document runKBP(Properties props) {
+  Document runKBP(Properties props) {
     if (haveRunOpenie) {
       return this;
     }
