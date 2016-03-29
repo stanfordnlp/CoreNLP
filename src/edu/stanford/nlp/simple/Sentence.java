@@ -38,7 +38,7 @@ import static edu.stanford.nlp.simple.Document.EMPTY_PROPS;
 @SuppressWarnings({"UnusedDeclaration", "WeakerAccess"})
 public class Sentence {
   /** A properties object for creating a document from a single sentence. Used in the constructor {@link Sentence#Sentence(String)} */
-  private static Properties SINGLE_SENTENCE_DOCUMENT = new Properties() {{
+  static Properties SINGLE_SENTENCE_DOCUMENT = new Properties() {{
     setProperty("ssplit.isOneSentence", "true");
     setProperty("tokenize.class", "PTBTokenizer");
     setProperty("tokenize.language", "en");
@@ -75,8 +75,6 @@ public class Sentence {
    * @param props The properties to use for tokenizing the sentence.
    */
   public Sentence(String text, Properties props) {
-    // Set the default properties
-    this.defaultProps = props;
     // Set document
     this.document = new Document(text);
     // Set sentence
@@ -92,6 +90,12 @@ public class Sentence {
     // Asserts
     assert (this.document.sentence(0).impl == this.impl);
     assert (this.document.sentence(0).tokensBuilders == this.tokensBuilders);
+    // Set the default properties
+    if (props == SINGLE_SENTENCE_TOKENIZED_DOCUMENT) {
+      this.defaultProps = SINGLE_SENTENCE_DOCUMENT;  // no longer care about tokenization
+    } else {
+      this.defaultProps = props;
+    }
   }
 
   /**
