@@ -498,7 +498,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
             property.substring(CUSTOM_ANNOTATOR_PREFIX.length());
         final String customClassName = inputProps.getProperty(property);
         logger.info("Registering annotator " + customName + " with class " + customClassName);
-        pool.register(customName, new AnnotatorFactory(customClassName, inputProps) {
+        pool.register(customName, new AnnotatorFactory(inputProps, annotatorImplementation) {
           private static final long serialVersionUID = 1L;
           @Override
           public Annotator create() {

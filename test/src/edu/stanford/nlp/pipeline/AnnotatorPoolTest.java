@@ -16,7 +16,7 @@ public class AnnotatorPoolTest extends TestCase {
   static class SampleAnnotatorFactory extends AnnotatorFactory {
     private static final long serialVersionUID = 1L;
     public SampleAnnotatorFactory(Properties props) {
-      super("foo", props);
+      super(props, new AnnotatorImplementations());
     }
     @Override
     public Annotator create() {

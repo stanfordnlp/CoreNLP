@@ -1333,8 +1333,25 @@ public class IOUtils  {
    * @param input The input stream to read from
    * @return The String representation of that input stream
    */
-  public static String slurpInputStream(InputStream input, String encoding) throws IOException {
-    return slurpReader(encodedInputStreamReader(input, encoding));
+  public static String slurpInputStream(InputStream input, String encoding) throws CharacterCodingException {
+    StringBuilder buff = new StringBuilder();
+    CharsetDecoder decoder = Charset.forName(encoding).newDecoder();
+    try {
+      byte[] chars = new byte[SLURP_BUFFER_SIZE];
+      while (true) {
+        int amountRead = input.read(chars, 0, SLURP_BUFFER_SIZE);
+        if (amountRead < 0) {
+          break;
+        }
+        CharBuffer chunk = decoder.decode(ByteBuffer.wrap(chars));
+        buff.append(chunk.array(), 0, amountRead);
+      }
+      input.close();
+    } catch (IOException e) {
+      throw new RuntimeIOException("slurpReader IO problem", e);
+    }
+    return buff.toString();
+
   }
 
   /**

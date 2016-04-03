@@ -42,7 +42,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 public class StanfordCoreNLPServer implements Runnable {
 
   protected static final int DEFAULT_PORT = 9000;
-  protected static final int DEFAULT_TIMEOUT = 15000;
+  protected static final int DEFAULT_TIMEOUT = 10000;
 
   protected HttpServer server;
   protected final int serverPort;
@@ -173,8 +173,10 @@ public class StanfordCoreNLPServer implements Runnable {
         }
 
         // Read the annotation
+        // note [2016]: We're not quite sure why, but the server is getting null characters in the input, and they kill the processing
         return new Annotation(
-            IOUtils.slurpReader(IOUtils.encodedInputStreamReader(httpExchange.getRequestBody(), encoding)));
+            IOUtils.slurpInputStream(httpExchange.getRequestBody(), encoding)
+              .replace('\u0000', ' '));
       case "serialized":
         String inputSerializerName = props.getProperty("inputSerializer", ProtobufAnnotationSerializer.class.getName());
         AnnotationSerializer serializer = MetaClass.create(inputSerializerName).createInstance();
@@ -387,14 +389,14 @@ public class StanfordCoreNLPServer implements Runnable {
           int timeoutMilliseconds = Integer.parseInt(props.getProperty("timeout",
                                                      Integer.toString(StanfordCoreNLPServer.this.timeoutMilliseconds)));
           // Check for too long a timeout from an unauthorized source
-          if (timeoutMilliseconds > 15000) {
+          if (timeoutMilliseconds > 10000) {
             // If two conditions:
             //   (1) The server is running on corenlp.run (i.e., corenlp.stanford.edu)
             //   (2) The request is not coming from a *.stanford.edu" email address
-            // Then force the timeout to be 15 seconds
+            // Then force the timeout to be 10 seconds
             if ("corenlp.stanford.edu".equals(InetAddress.getLocalHost().getHostName()) &&
                 !httpExchange.getRemoteAddress().getHostName().toLowerCase().endsWith("stanford.edu")) {
-              timeoutMilliseconds = 15000;
+              timeoutMilliseconds = 10000;
             }
           }
           completedAnnotation = completedAnnotationFuture.get(timeoutMilliseconds, TimeUnit.MILLISECONDS);
