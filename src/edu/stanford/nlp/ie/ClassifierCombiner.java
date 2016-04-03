@@ -1,4 +1,4 @@
-package edu.stanford.nlp.ie; 
+package edu.stanford.nlp.ie;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
@@ -554,7 +554,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   // this does not currently support drill down on CMM's
   public static void examineCRF(ClassifierCombiner cc, String crfNameOrIndex, SeqClassifierFlags flags,
                                 String testFile, String testFiles,
-                                DocumentReaderAndWriter readerAndWriter) throws Exception {
+                                DocumentReaderAndWriter<CoreLabel> readerAndWriter) throws Exception {
     CRFClassifier<CoreLabel> crf;
     // potential index into baseClassifiers
     int ci;
