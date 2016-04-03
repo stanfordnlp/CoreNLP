@@ -141,6 +141,16 @@ The following properties are associated with output :
   * "conllu": [CoNLL-U](https://universaldependencies.github.io/docs/format.html) output format, another tab-separated values (TSV) format.  Output extension is `.conllu`. This representation may give only a partial view of an `Annotation`.
   * "serialized": Produces some serialized version of each `Annotation`. May or may not be lossy. What you actually get depends on the `outputSerializer` property, which you should also set. The default is the `GenericAnnotationSerializer`, which uses the built-in Java object serialization and writes a file with extension `.ser.gz`.
 
-## Character Encoding
+## Output serializer
+
+The value of the `outputSerializer` property is the name of a class which extends `edu.stanford.nlp.pipeline.AnnotationSerializer`. Valid choices include:
+`edu.stanford.nlp.pipeline.GenericAnnotationSerializer`,
+`edu.stanford.nlp.pipeline.CustomAnnotationSerializer`,
+`edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer`;
+`edu.stanford.nlp.kbp.common.KBPProtobufAnnotationSerializer`,
+`edu.stanford.nlp.kbp.slotfilling.ir.index.KryoAnnotationSerializer`.
+
+
+## Character encoding
 
 The default encoding is Unicode's UTF-8. You can change the encoding used by supplying the program with the command line flag -encoding FOO (or including the corresponding property in a properties file that you are using).

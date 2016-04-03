@@ -38,7 +38,7 @@ a[data-toggle="tooltip"] {
 }
 
 .navbar-inverse .navbar-nav > .open > a, .navbar-inverse .navbar-nav > .open > a:hover, .navbar-inverse .navbar-nav > .open > a:focus {
-    background-color: #F5EEC6;
+    background-color: #ddcf99;
     color: #ffffff;
 }
 
@@ -49,8 +49,8 @@ a[data-toggle="tooltip"] {
 
 .btn-primary {
     color: #ffffff;
-    background-color: #F5EEC6;
-    border-color: #F5EEC6;
+    background-color: #ddcf99;
+    border-color: #ddcf99;
 }
 
 .btn-primary:hover,
@@ -59,14 +59,14 @@ a[data-toggle="tooltip"] {
 .btn-primary.active,
 .open .dropdown-toggle.btn-primary {
     background-color: #8C1515;
-    border-color: #F5EEC6;
+    border-color: #ddcf99;
 }
 
 .printTitle {
     color: #F5EEC6 !important;
 }
 
-body.print h1 {color: #F5EEC6 !important; font-size:28px;}
+body.print h1 {color: #ddcf99 !important; font-size:28px;}
 body.print h2 {color: #595959 !important; font-size:24px;}
 body.print h3 {color: #E50E51 !important; font-size:14px;}
 body.print h4 {color: #679DCE !important; font-size:14px; font-style: italic;}

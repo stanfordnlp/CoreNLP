@@ -150,17 +150,14 @@ The constructors to `StanfordCoreNLPClient` take the following 3 required argume
 An example programmatic usage of the client, hitting a server at localhost:9000 with up to 2 threads, is as follows. Note that this exactly mirrors the usage of the conventional pipeline.
 
 ```java
-// creates a StanfordCoreNLP object, with POS tagging, lemmatization, NER, parsing, and coreference resolution 
+// creates a StanfordCoreNLP object with POS tagging, lemmatization, NER, parsing, and coreference resolution
 Properties props = new Properties();
 props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
 StanfordCoreNLPClient pipeline = new StanfordCoreNLPClient(props, "localhost", 9000, 2);
-
 // read some text in the text variable
 String text = ... // Add your text here!
-
 // create an empty Annotation just with the given text
 Annotation document = new Annotation(text);
-
 // run all Annotators on this text
 pipeline.annotate(document);
 ```
@@ -176,10 +173,19 @@ java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLPClient -annotators 
 Once you have your own server(s) set up, you can run against them with a command like this:
 
 ```bash
-java edu.stanford.nlp.pipeline.StanfordCoreNLPClient -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file input.txt  -backends localhost:9000
+java edu.stanford.nlp.pipeline.StanfordCoreNLPClient -cp "*" -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file input.txt  -backends localhost:9000
 ```
 
 You specify one or more back-end servers in a comma-separated list as the arguments of the `-backends` option. Each is specified as `host:port`.
+
+Providing that the server has foreign language models available on its
+classpath, you can ask for it to work with texts in other languages.
+If you have the French properties file and a file called `french.txt`
+in your current directory, then you should be able to successfully give a command like this:
+
+```bash
+java -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPClient -props StanfordCoreNLP-french.properties -annotators tokenize,ssplit,pos,depparse ile french.txt -outputFormat conllu -backends localhost:9000
+```
 
 ## Server Administration
 
