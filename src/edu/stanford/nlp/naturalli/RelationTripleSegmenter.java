@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
  *
  * @author Gabor Angeli
  */
-@SuppressWarnings("WeakerAccess")
 public class RelationTripleSegmenter {
 
   private final boolean allowNominalsWithoutNER;
@@ -395,8 +394,7 @@ public class RelationTripleSegmenter {
 
   /** A set of valid arcs denoting an adverbial modifier we are interested in */
   public final Set<String> VALID_ADVERB_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
-    add("amod"); add("advmod"); add("conj"); add("cc"); add("conj:and"); add("conj:or");
-    add("auxpass"); add("compound:*");
+    add("amod"); add("advmod"); add("conj"); add("cc"); add("conj:and"); add("conj:or"); add("auxpass");
   }});
 
   /**
@@ -580,9 +578,7 @@ public class RelationTripleSegmenter {
         // Case: a standard extraction with a main verb
         IndexedWord relObj = m.getNode("relObj");
         for (SemanticGraphEdge edge : parse.outgoingEdgeIterable(verb)) {
-          if ("advmod".equals(edge.getRelation().toString()) ||
-              "amod".equals(edge.getRelation().toString()) ||
-              "compound:*".equals(edge.getRelation().toString().replaceAll(":.*", ":*"))) {
+          if ("advmod".equals(edge.getRelation().toString()) || "amod".equals(edge.getRelation().toString())) {
             // Add adverb modifiers
             String tag = edge.getDependent().backingLabel().tag();
             if (tag == null ||

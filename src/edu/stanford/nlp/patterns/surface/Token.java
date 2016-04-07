@@ -1,22 +1,21 @@
 package edu.stanford.nlp.patterns.surface;
 
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.ling.tokensregex.Env;
+import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
+import edu.stanford.nlp.patterns.ConstantsAndVariables;
+import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass;
+import edu.stanford.nlp.patterns.PatternFactory;
+import edu.stanford.nlp.util.StringUtils;
+
 import java.io.File;
 import java.io.Serializable;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.patterns.ConstantsAndVariables;
-import edu.stanford.nlp.patterns.PatternFactory;
-
-/** Currently can handle only ORs.
- *
- *  @author sonalg
- *  @version 10/16/14
+/** Currently can handle only ORs
+ * Created by sonalg on 10/16/14.
  */
 public class Token implements Serializable {
 
@@ -31,7 +30,7 @@ public class Token implements Serializable {
   //TODO: may be change this to map to true values?
   String envBindBooleanRestriction;
 
-  private final Pattern alphaNumeric = Pattern.compile("^[\\p{Alnum}\\s]+$");
+  final Pattern alphaNumeric = Pattern.compile("^[\\p{Alnum}\\s]+$");
 
   int numMinOcc = 1;
   int numMaxOcc = 1;
@@ -52,9 +51,22 @@ public class Token implements Serializable {
       return null;
     Map<String, String> str = new HashMap<>();
     for(Map.Entry<Class, String> en: classORrestrictions.entrySet()){
-       str.put(class2KeyMapping.get(en.getKey()), en.getValue());
+       str.put(class2KeyMapping.get(en.getKey()), en.getValue().toString());
     }
     return str;
+  }
+
+
+
+  String[] trim(String[] p) {
+
+    if (p == null)
+      return null;
+
+    for (int i = 0; i < p.length; i++) {
+      p[i] = p[i].trim();
+    }
+    return p;
   }
 
   @Override
@@ -174,7 +186,10 @@ public class Token implements Serializable {
   }
 
   public boolean isEmpty() {
-    return (this.envBindBooleanRestriction == null || this.envBindBooleanRestriction.isEmpty()) && (this.classORrestrictions == null || this.classORrestrictions.isEmpty());
+    if((this.envBindBooleanRestriction == null || this.envBindBooleanRestriction.isEmpty()) &&  (this.classORrestrictions == null || this.classORrestrictions.isEmpty()))
+      return true;
+    else
+      return false;
   }
 
   public static String getKeyForClass(Class classR) {
@@ -205,7 +220,7 @@ public class Token implements Serializable {
   }
 
   public static String toStringClass2KeyMapping(){
-    StringBuilder str = new StringBuilder();
+    StringBuffer str = new StringBuffer();
     for(Map.Entry<Class, String> en: class2KeyMapping.entrySet()){
       if(str.length() > 0)
         str.append("\n");

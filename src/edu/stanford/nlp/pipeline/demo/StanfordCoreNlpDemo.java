@@ -3,8 +3,8 @@ package edu.stanford.nlp.pipeline.demo;
 import java.io.*;
 import java.util.*;
 
-import edu.stanford.nlp.dcoref.CorefChain;
-import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.hcoref.data.CorefChain;
+import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.io.*;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.pipeline.*;
@@ -42,7 +42,7 @@ public class StanfordCoreNlpDemo {
 
     // Add in sentiment
     Properties props = new Properties();
-    props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref, sentiment");
+    props.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref, sentiment");
 
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 

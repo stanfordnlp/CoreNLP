@@ -14,11 +14,11 @@ import edu.stanford.nlp.util.PropertiesUtils;
 
 
 public class CorefProperties {
-
-  public enum CorefInputType { RAW, CONLL, ACE, MUC }
-  public enum MentionDetectionType { RULE, HYBRID, DEPENDENCY }
-
-  // general
+  
+  public enum CorefInputType { RAW, CONLL, ACE, MUC };
+  public enum MentionDetectionType { RULE, HYBRID, DEPENDENCY };
+  
+  // general 
   public static final String LANG_PROP = "coref.language";
   public static final String SIEVES_PROP = "coref.sieves";
   public static final String ALLOW_REPARSING_PROP = "coref.allowReparsing";
@@ -40,7 +40,7 @@ public class CorefProperties {
   public static final String USE_GOLD_POS_PROP = "coref.useGoldPOS";
   private static final String REMOVE_NESTED = "removeNested";
   private static final String ADD_MISSING_ANNOTATIONS = "coref.addMissingAnnotations";
-
+  
   // logging & system check & analysis
   public static final String DEBUG_PROP = "coref.debug";
   public static final String LOG_PROP = "coref.logFile";
@@ -51,7 +51,7 @@ public class CorefProperties {
   public static final String DO_ANALYSIS_PROP = "coref.analysis.doAnalysis";
   public static final String ANALYSIS_SKIP_MTYPE_PROP = "coref.analysis.skip.mType";
   public static final String ANALYSIS_SKIP_ATYPE_PROP = "coref.analysis.skip.aType";
-
+  
   // data & io
   public static final String STATES_PROP = "coref.states";
   public static final String DEMONYM_PROP = "coref.demonym";
@@ -86,9 +86,9 @@ public class CorefProperties {
   public static final String PATH_SINGLETON_PREDICTOR_PROP = "coref.path.singletonPredictor";
   public static final String PATH_MODEL_PROP = "coref.SIEVENAME.model";
   public static final String MENTION_DETECTION_MODEL_PROP = "coref.mentionDetectionModel";
-
-
-
+  
+  
+  
   // sieve option
   public static final String CLASSIFIER_TYPE_PROP = "coref.SIEVENAME.classifierType";
   public static final String NUM_TREE_PROP = "coref.SIEVENAME.numTrees";
@@ -103,7 +103,7 @@ public class CorefProperties {
   public static final String THRES_MERGE_PROP = "coref.SIEVENAME.merge.thres";
   public static final String THRES_FEATURE_SELECTION_PROP = "coref.SIEVENAME.pmi.thres";
   public static final String DEFAULT_PRONOUN_AGREEMENT_PROP = "coref.defaultPronounAgreement";
-
+  
   // features
   public static final String USE_BASIC_FEATURES_PROP = "coref.SIEVENAME.useBasicFeatures";
   public static final String COMBINE_OBJECTROLE_PROP = "coref.SIEVENAME.combineObjectRole";
@@ -115,7 +115,7 @@ public class CorefProperties {
 
   public static final Locale LANGUAGE_DEFAULT = Locale.ENGLISH;
   public static final int MONITOR_DIST_CMD_FINISHED_WAIT_MILLIS = 60000;
-
+  
   /** if true, use truecase annotator */
   public static final boolean USE_TRUECASE = false;
 
@@ -130,8 +130,8 @@ public class CorefProperties {
           "ExactStringMatch", "RelaxedExactStringMatch", "PreciseConstructs", "StrictHeadMatch1",
           "StrictHeadMatch2", "StrictHeadMatch3", "StrictHeadMatch4", "RelaxedHeadMatch", "PronounMatch", "SpeakerMatch",
           "ChineseHeadMatch"));
-
-
+  
+  
   public static boolean doScore(Properties props) {
     return PropertiesUtils.getBool(props, SCORE_PROP, false);
   }
@@ -144,8 +144,8 @@ public class CorefProperties {
   public static boolean useConstituencyTree(Properties props) {
     return PropertiesUtils.getBool(props, PARSER_PROP, false);
   }
-
-  /** Input data for CorefDocMaker. It is traindata for training, or testdata for evaluation */
+  
+  /** Input data for CorefDocMaker. It is traindata for training, or testdata for evaluation */ 
   public static String getPathInput(Properties props) {
     return PropertiesUtils.getString(props, PATH_INPUT_PROP, null);
   }
@@ -180,7 +180,7 @@ public class CorefProperties {
   public static boolean doPostProcessing(Properties props) {
     return PropertiesUtils.getBool(props, POSTPROCESSING_PROP, false);
   }
-
+  
   /** if true, use conll auto files, else use conll gold files */
   public static boolean useCoNLLAuto(Properties props) {
     return PropertiesUtils.getBool(props, CONLL_AUTO_PROP, true);
@@ -214,7 +214,7 @@ public class CorefProperties {
   public static boolean debug(Properties props) {
     return PropertiesUtils.getBool(props, DEBUG_PROP, false);
   }
-
+  
   public static ClassifierType getClassifierType(Properties props, String sievename) {
     if(dcorefSieveNames.contains(sievename)) return ClassifierType.RULE;
     if(sievename.toLowerCase().endsWith("-rf")) return ClassifierType.RF;
@@ -230,7 +230,7 @@ public class CorefProperties {
     String key = THRES_MERGE_PROP.replace("SIEVENAME", sievename);
     props.setProperty(key, String.valueOf(value));
   }
-
+  
   public static int getNumTrees(Properties props, String sievename) {
     return PropertiesUtils.getInt(props, NUM_TREE_PROP.replace("SIEVENAME", sievename), 100);
   }
@@ -246,7 +246,7 @@ public class CorefProperties {
   public static boolean calculateFeatureImportance(Properties props) {
     return PropertiesUtils.getBool(props, CALCULATE_IMPORTANCE_PROP, false);
   }
-
+  
   public static int getMaxSentDistForSieve(Properties props, String sievename) {
     return PropertiesUtils.getInt(props, MAX_SENT_DIST_PROP.replace("SIEVENAME", sievename), 1000);
   }
@@ -262,7 +262,7 @@ public class CorefProperties {
   public static Set<MentionType> getAntecedentType(Properties props, String sievename) {
     return getMentionTypes(props, ATYPE_PROP.replace("SIEVENAME", sievename));
   }
-
+  
   private static Set<MentionType> getMentionTypes(Properties props, String propKey) {
     if(!props.containsKey(propKey) || props.getProperty(propKey).equalsIgnoreCase("all")){
       return new HashSet<>(Arrays.asList(MentionType.values()));
@@ -302,7 +302,7 @@ public class CorefProperties {
   public static boolean useWordEmbedding(Properties props, String sievename) {
     return PropertiesUtils.getBool(props, USE_WORD_EMBEDDING_FEATURES_PROP.replace("SIEVENAME", sievename), true);
   }
-
+  
   private static Set<String> getMentionTypeStr(Properties props, String sievename, String whichMention) {
     Set<String> strs = Generics.newHashSet();
     String propKey = whichMention;
@@ -366,11 +366,11 @@ public class CorefProperties {
   public static boolean storeTrainData(Properties props) {
     return PropertiesUtils.getBool(props, STORE_TRAINDATA_PROP, false);
   }
-
+  
   public static boolean allowReparsing(Properties props) {
     return PropertiesUtils.getBool(props, ALLOW_REPARSING_PROP, true);
   }
-
+  
   public static boolean useGoldNE(Properties props) {
     return PropertiesUtils.getBool(props, USE_GOLD_NE_PROP, true);
   }
@@ -389,7 +389,7 @@ public class CorefProperties {
   public static boolean removeNested(Properties props){
     return PropertiesUtils.getBool(props, CorefProperties.REMOVE_NESTED, true);
   }
-
+  
   public static boolean useDefaultPronounAgreement(Properties props){
     return PropertiesUtils.getBool(props, CorefProperties.DEFAULT_PRONOUN_AGREEMENT_PROP,false);
   }
@@ -397,5 +397,5 @@ public class CorefProperties {
   public static boolean addMissingAnnotations(Properties props) {
     return PropertiesUtils.getBool(props, ADD_MISSING_ANNOTATIONS, false);
   }
-
+  
 }

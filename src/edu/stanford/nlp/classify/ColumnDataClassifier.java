@@ -246,7 +246,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class ColumnDataClassifier  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(ColumnDataClassifier.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(ColumnDataClassifier.class);
 
   private static final double DEFAULT_VALUE = 1.0; // default value for setting categorical, boolean features
   private static final String DEFAULT_IGNORE_REGEXP = "\\s+";
