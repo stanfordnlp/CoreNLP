@@ -631,9 +631,8 @@ public class DependencyParser  {
       } finally {
         IOUtils.closeIgnoringExceptions(input);
       }
+      embeddings = Util.scaling(embeddings, 0, 1.0);
     }
-
-    embeddings = Util.scaling(embeddings, 0, 1.0);
     return embeddings;
   }
 
