@@ -36,6 +36,7 @@ DKPro Core is part of the [DKPro community](https://dkpro.github.io). It is well
 ([github site](https://github.com/mhewett/stanford-corenlp-node))
 * [corenlp-js-interface](https://www.npmjs.com/package/corenlp-js-interface) is the simplest interface with CoreNLP server in node.js
 ([github site](https://github.com/noahDess/corenlp-js-interface)) 
+* [corenlp-js-prefab](https://www.npmjs.com/package/corenlp-js-prefab) a simple interface to the CoreNLP server with a prefab function so you only have to send text no extra parameters with each call. By Noah Dessauer.
 
 ### Lua
 
