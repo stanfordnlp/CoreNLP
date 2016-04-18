@@ -6,3 +6,8 @@
 *.so
 .DS_Store
 .settings/**
+
+# IntelliJ
+.idea/
+*.iml
+javanlp-core.jar
