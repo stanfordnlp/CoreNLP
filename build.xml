@@ -133,6 +133,11 @@
         <exclude name="**/*.java"/>
       </fileset>
     </copy>
+    <copy todir="${build.path}/edu/stanford/nlp/pipeline">
+      <fileset dir="${source.path}/edu/stanford/nlp/pipeline">
+        <exclude name="**/*.java"/>
+      </fileset>
+    </copy>
   </target>
 
   <target name="test" depends="classpath,compile"

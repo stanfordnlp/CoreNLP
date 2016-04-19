@@ -2,10 +2,10 @@
 // and uses brat to render everything.
 
 //var serverAddress = 'http://localhost:9000/'
-var serverAddress = ''
+var serverAddress = 'http://corenlp.run'
 
 // Load Brat libraries
-var bratLocation = 'http://nlp.stanford.edu/js/brat';
+var bratLocation = 'https://storage.googleapis.com/corenlp/js/brat';
 head.js(
   // External libraries
   bratLocation + '/client/lib/jquery.svg.min.js',
