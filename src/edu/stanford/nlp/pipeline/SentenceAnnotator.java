@@ -116,7 +116,11 @@ public abstract class SentenceAnnotator implements Annotator {
   /**
    * Fills in empty annotations for trees, tags, etc if the annotator
    * failed or timed out.  Not supposed to do major processing.
+   *
+   * @param annotation The whole Annotation object, in case it is needed for context.
+   * @param sentence The particular sentence to process
    */
   protected abstract void doOneFailedSentence(Annotation annotation, CoreMap sentence);
+
 }
 
