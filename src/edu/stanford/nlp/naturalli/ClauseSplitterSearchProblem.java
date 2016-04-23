@@ -30,7 +30,7 @@ import java.util.stream.Stream;
  * <p>
  *   For usage at test time, load a model from
  *   {@link ClauseSplitter#load(String)}, and then take the top clauses of a given tree
- *   with {@link ClauseSplitterSearchProblem#topClauses(double)}, yielding a list of
+ *   with {@link ClauseSplitterSearchProblem#topClauses(double, int)}, yielding a list of
  *   {@link edu.stanford.nlp.naturalli.SentenceFragment}s.
  * </p>
  * <pre>
@@ -485,10 +485,13 @@ public class ClauseSplitterSearchProblem  {
   /**
    * Get the top few clauses from this searcher, cutting off at the given minimum
    * probability.
+   *
    * @param thresholdProbability The threshold under which to stop returning clauses. This should be between 0 and 1.
+   * @param maxClauses A hard limit on the number of clauses to return.
+   *
    * @return The resulting {@link edu.stanford.nlp.naturalli.SentenceFragment} objects, representing the top clauses of the sentence.
    */
-  public List<SentenceFragment> topClauses(double thresholdProbability) {
+  public List<SentenceFragment> topClauses(double thresholdProbability, int maxClauses) {
     List<SentenceFragment> results = new ArrayList<>();
     search(triple -> {
       assert triple.first <= 0.0;
@@ -510,7 +513,7 @@ public class ClauseSplitterSearchProblem  {
 
   /**
    * Search, using the default weights / featurizer. This is the most common entry method for the raw search,
-   * though {@link ClauseSplitterSearchProblem#topClauses(double)} may be a more convenient method for
+   * though {@link ClauseSplitterSearchProblem#topClauses(double, int)} may be a more convenient method for
    * an end user.
    *
    * @param candidateFragments The callback function for results. The return value defines whether to continue searching.

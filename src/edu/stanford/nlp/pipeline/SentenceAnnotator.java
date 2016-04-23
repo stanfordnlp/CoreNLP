@@ -5,6 +5,7 @@ import java.util.concurrent.RejectedExecutionException;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.concurrent.InterruptibleMulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
@@ -95,6 +96,9 @@ public abstract class SentenceAnnotator implements Annotator {
         }
       } else {
         for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+          if (Thread.interrupted()) {
+            throw new RuntimeInterruptedException();
+          }
           doOneSentence(annotation, sentence);
         }
       }
