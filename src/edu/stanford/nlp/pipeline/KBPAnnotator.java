@@ -362,9 +362,6 @@ public class KBPAnnotator implements Annotator {
             if (subjI == objI) {
               continue;
             }
-            if (Thread.interrupted()) {
-              throw new RuntimeInterruptedException();
-            }
             CoreMap obj = candidates.get(objI);
             int objBegin = obj.get(CoreAnnotations.TokensAnnotation.class).get(0).index() - 1;
             int objEnd = obj.get(CoreAnnotations.TokensAnnotation.class).get(obj.get(CoreAnnotations.TokensAnnotation.class).size() - 1).index();
