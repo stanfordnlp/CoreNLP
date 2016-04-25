@@ -12,7 +12,7 @@ Stanford CoreNLP ships with a built-in server, which requires only the CoreNLP d
 
 ```bash
 # Run the server using all jars in the current directory (e.g., the CoreNLP home directory)
-java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer [port]
+java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer [port] [timeout]
 ```
 
 If no value for `port` is provided, port 9000 will be used by default. You can then test your server by visiting
