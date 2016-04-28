@@ -903,11 +903,7 @@ public class ChunkAnnotationUtils  {
       T token = factory.makeToken();
       Integer cmCharStart = cm.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
       if (cmCharStart == null) cmCharStart = 0;
-      String tokenText = text.substring(start, end);
-      token.set(CoreAnnotations.TextAnnotation.class, tokenText);
-      if (token instanceof CoreLabel) {
-        token.set(CoreAnnotations.ValueAnnotation.class, tokenText);
-      }
+      token.set(CoreAnnotations.TextAnnotation.class, text.substring(start, end));
       token.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, cmCharStart + start);
       token.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, cmCharStart + end);
       return token;
