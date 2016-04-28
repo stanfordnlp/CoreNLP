@@ -5,11 +5,11 @@ Stanford CoreNLP provides a set of natural language analysis tools written in Ja
 
 The Stanford CoreNLP code is written in Java and licensed under the GNU General Public License (v3 or later). Note that this is the full GPL, which allows many free uses, but not its use in proprietary software that you distribute to others.
 
-To compile:
+### How To Compile:
 
 1. cd CoreNLP ; ant
 
-To create a jar:
+### How To Create A Jar:
 
 1. compile the code
 2. cd CoreNLP/classes ; jar -cf ../stanford-corenlp.jar edu
