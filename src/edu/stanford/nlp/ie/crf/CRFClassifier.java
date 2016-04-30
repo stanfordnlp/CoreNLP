@@ -68,7 +68,7 @@ import java.util.zip.GZIPOutputStream;
  * {@link PlainTextDocumentReaderAndWriter}.  The class used to read
  * the text can be changed with -plainTextDocumentReaderAndWriter.
  * Extra options can be supplied to the tokenizer using the
- * -tokenizeOptions flag.
+ * -tokenizerOptions flag.
  * </p><p>
  * To read from stdin, use the flag -readStdin.  The same
  * reader/writer will be used as for -textFile.
