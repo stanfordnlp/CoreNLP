@@ -17,7 +17,6 @@ import edu.stanford.nlp.util.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.ref.SoftReference;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -853,34 +852,8 @@ public class Document {
    * <p>Therefore, this method is generally NOT recommended.</p>
    */
   public Annotation asAnnotation() {
-    return asAnnotation(false);
+    return serializer.fromProto(serialize());
   }
-
-
-  /**
-   * A cached version of this document as an Annotation.
-   * This will get garbage collected when necessary.
-   */
-  private SoftReference<Annotation> cachedAnnotation = null;
-
-  /**
-   * Return this Document as an Annotation object.
-   * Note that, importantly, only the fields which have already been called will be populated in
-   * the Annotation!
-   *
-   * <p>Therefore, this method is generally NOT recommended.</p>
-   *
-   * @param cache If true, allow retrieving this object from the cache.
-   */
-  Annotation asAnnotation(boolean cache) {
-    Annotation ann;
-    if (!cache || cachedAnnotation == null || (ann = cachedAnnotation.get()) == null) {
-      ann = serializer.fromProto(serialize());
-    }
-    cachedAnnotation = new SoftReference<>(ann);
-    return ann;
-  }
-
 
   /**
    * Read a CorefChain from its serialized representation.
