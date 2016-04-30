@@ -21,13 +21,13 @@ LAST UPDATE: 2015/10/5
 LAST UPDATE BY: Keenon Werling
 
 -----------------------------------------------------------------------
-hamcrest-core.jar
+java-hamcrest.jar
 
-ORIGINAL JAR NAME: hamcrest-core-1.3.jar
+ORIGINAL JAR NAME: java-hamcrest-2.0.0.0.jar
 
-VERSION: 1.3
+VERSION: 2.0.0.0
 
-RELEASE DATE: Jul, 2010
+RELEASE DATE: January 2015
 
 SOURCE AVAILABLE: Maven Central
 
@@ -38,9 +38,9 @@ URL: http://www.hamcrest.org
 USED BY:
 The JUnit library
 
-LAST UPDATE: 2015/10/5
+LAST UPDATE: 2016-04-30
 
-LAST UPDATE BY: Keenon Werling
+LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
 javaruntype.jar
