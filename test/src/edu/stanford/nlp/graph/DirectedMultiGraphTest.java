@@ -1067,12 +1067,16 @@ public class DirectedMultiGraphTest extends TestCase {
       assertEquals(originalSize - 1, gold.getAllEdges().size());
       // Use iter.remove()
       Iterator<String> iter = guess.edgeIterator();
+      int iterations = 0;
       while (iter.hasNext()) {
+        ++iterations;
         if (iter.next().equals(edge)) {
           iter.remove();
-          checkGraphConsistency(g);
+          checkGraphConsistency(guess);
         }
       }
+      assertEquals(9, iterations);
+      checkGraphConsistency(guess);
       // Assert that they're the same
       assertEquals(gold, guess);
     }
