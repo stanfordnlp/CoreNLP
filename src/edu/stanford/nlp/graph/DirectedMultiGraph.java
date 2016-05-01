@@ -2,7 +2,6 @@ package edu.stanford.nlp.graph;
 
 import java.util.*;
 
-import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MapFactory;
@@ -41,8 +40,9 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   }
 
   /**
-   * Creates a copy of the given graph. This will copy the entire data structure (this may be slow!), but will not copy
-   * any of the edge or vertex objects.
+   * Creates a copy of the given graph. This will copy the entire data
+   * structure (this may be slow!), but will not copy any of the edge
+   * or vertex objects.
    *
    * @param graph The graph to copy into this object.
    */
@@ -477,39 +477,38 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   /**
    * Deletes all duplicate edges.
    */
-  
- public void deleteDuplicateEdges() {
-   for (V vertex : getAllVertices()) {
-     for (V vertex2 : outgoingEdges.get(vertex).keySet()) {
-       List<E> data = outgoingEdges.get(vertex).get(vertex2);
-       Set<E> deduplicatedData = new TreeSet<>(data);
-       data.clear();
-       data.addAll(deduplicatedData);
-     }
-     for (V vertex2 : incomingEdges.get(vertex).keySet()) {
-       List<E> data = incomingEdges.get(vertex).get(vertex2);
-       Set<E> deduplicatedData = new TreeSet<>(data);
-       data.clear();
-       data.addAll(deduplicatedData);
-     }
-   }
-}
+  public void deleteDuplicateEdges() {
+    for (V vertex : getAllVertices()) {
+      for (V vertex2 : outgoingEdges.get(vertex).keySet()) {
+        List<E> data = outgoingEdges.get(vertex).get(vertex2);
+        Set<E> deduplicatedData = new TreeSet<>(data);
+        data.clear();
+        data.addAll(deduplicatedData);
+      }
+      for (V vertex2 : incomingEdges.get(vertex).keySet()) {
+        List<E> data = incomingEdges.get(vertex).get(vertex2);
+        Set<E> deduplicatedData = new TreeSet<>(data);
+        data.clear();
+        data.addAll(deduplicatedData);
+      }
+    }
+  }
 
   
   public Iterator<E> incomingEdgeIterator(final V vertex) {
-    return new EdgeIterator<>(incomingEdges, vertex);
+    return new EdgeIterator<>(vertex, incomingEdges, outgoingEdges);
   }
 
   public Iterable<E> incomingEdgeIterable(final V vertex) {
-    return () -> new EdgeIterator<>(incomingEdges, vertex);
+    return () -> new EdgeIterator<>(vertex, incomingEdges, outgoingEdges);
   }
 
   public Iterator<E> outgoingEdgeIterator(final V vertex) {
-    return new EdgeIterator<>(outgoingEdges, vertex);
+    return new EdgeIterator<>(vertex, outgoingEdges, incomingEdges);
   }
 
   public Iterable<E> outgoingEdgeIterable(final V vertex) {
-    return () -> new EdgeIterator<>(outgoingEdges, vertex);
+    return () -> new EdgeIterator<>(vertex, outgoingEdges, incomingEdges);
   }
 
   public Iterator<E> edgeIterator() {
@@ -520,28 +519,40 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     return () -> new EdgeIterator<>(DirectedMultiGraph.this);
   }
   
- 
+
+  /**
+   * This class handles either iterating over a single vertex's
+   * connections or over all connections in a graph.
+   */
   static class EdgeIterator<V, E> implements Iterator<E> {
-    private final Map<V, Map<V, List<E>>> incomingEdges;
-    private Iterator<Map<V, List<E>>> vertexIterator;
-    private Iterator<List<E>> connectionIterator;
+    private final Map<V, Map<V, List<E>>> reverseEdges;
+    /** when iterating over the whole graph, this iterates over nodes */
+    private Iterator<Map.Entry<V, Map<V, List<E>>>> vertexIterator;
+    /** for a given node, this iterates over its neighbors */
+    private Iterator<Map.Entry<V, List<E>>> connectionIterator;
+    /** given the neighbor of a node, this iterates over all its connections */
     private Iterator<E> edgeIterator;
-    private E lastRemoved = null;
+
+    private V currentSource = null;
+    private V currentTarget = null;
+    private E currentEdge = null;
     private boolean hasNext = true;
 
 
     public EdgeIterator(DirectedMultiGraph<V, E> graph) {
-      vertexIterator = graph.outgoingEdges.values().iterator();
-      incomingEdges = graph.incomingEdges;
+      vertexIterator = graph.outgoingEdges.entrySet().iterator();
+      reverseEdges = graph.incomingEdges;
     }
 
-    public EdgeIterator(Map<V, Map<V, List<E>>> source, V startVertex) {
+    public EdgeIterator(V startVertex, Map<V, Map<V, List<E>>> source,
+                        Map<V, Map<V, List<E>>> reverseEdges) {
+      currentSource = startVertex;
       Map<V, List<E>> neighbors = source.get(startVertex);
       if (neighbors != null) {
         vertexIterator = null;
-        connectionIterator = neighbors.values().iterator();
+        connectionIterator = neighbors.entrySet().iterator();
       }
-      incomingEdges = null;
+      this.reverseEdges = reverseEdges;
     }
 
     @Override
@@ -555,18 +566,22 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
       if (!hasNext()) {
         throw new NoSuchElementException("Graph edge iterator exhausted.");
       }
-      lastRemoved = edgeIterator.next();
-      return lastRemoved;
+      currentEdge = edgeIterator.next();
+      return currentEdge;
     }
 
     private void primeIterator() {
       if (edgeIterator != null && edgeIterator.hasNext()) {
         hasNext = true;  // technically, we shouldn't need to put this here, but let's be safe
       } else if (connectionIterator != null && connectionIterator.hasNext()) {
-        edgeIterator = connectionIterator.next().iterator();
+        Map.Entry<V, List<E>> nextConnection = connectionIterator.next();
+        edgeIterator = nextConnection.getValue().iterator();
+        currentTarget = nextConnection.getKey();
         primeIterator();
       } else if (vertexIterator != null && vertexIterator.hasNext()) {
-        connectionIterator = vertexIterator.next().values().iterator();
+        Map.Entry<V, Map<V, List<E>>> nextVertex = vertexIterator.next();
+        connectionIterator = nextVertex.getValue().entrySet().iterator();
+        currentSource = nextVertex.getKey();
         primeIterator();
       } else {
         hasNext = false;
@@ -575,19 +590,16 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
 
     @Override
     public void remove() {
-      if (incomingEdges == null) {
-        throw new UnsupportedOperationException("remove() is only valid if iterating over entire graph (Gabor was too lazy to implement the general case...sorry!)");
-      }
-      if (lastRemoved != null) {
-        if (lastRemoved instanceof SemanticGraphEdge) {
-          SemanticGraphEdge edge = (SemanticGraphEdge) lastRemoved;
-          //noinspection unchecked
-          incomingEdges.get((V) edge.getDependent()).get((V) edge.getGovernor()).remove((E) edge);
-          edgeIterator.remove();
-        } else {
-          // TODO(from gabor): This passes the tests, but actually leaves the graph in an inconsistent state.
-          edgeIterator.remove();
-//          throw new UnsupportedOperationException("remove() is only valid if iterating over semantic graph edges (Gabor was too lazy to implement the general case...sorry!)");
+      if (currentEdge != null) {
+        reverseEdges.get(currentTarget).get(currentSource).remove(currentEdge);
+        edgeIterator.remove();
+
+        if (reverseEdges.get(currentTarget).get(currentSource) != null &&
+            reverseEdges.get(currentTarget).get(currentSource).size() == 0) {
+          connectionIterator.remove();
+          reverseEdges.get(currentTarget).remove(currentSource);
+          // TODO: may not be necessary to set this to null
+          edgeIterator = null;
         }
       }
     }
