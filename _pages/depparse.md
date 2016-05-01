@@ -16,7 +16,7 @@ Provides a fast syntactic dependency parser. We generate three dependency-based 
 
 | Option name | Type | Default | Description |
 | --- | --- | --- | --- |
-depparse.model | file, classpath, or URL | edu/stanford/nlp/models/parser/nndep/english\_UD.gz | Dependency parsing model to use. There is no need to explicitly set this option, unless you want to use a different parsing model than the default. By default, this is set to the UD parsing model included in the stanford-corenlp-models JAR file. |
+| depparse.model | file, classpath, or URL | edu/stanford/nlp/models/parser/nndep/english\_UD.gz | Dependency parsing model to use. There is no need to explicitly set this option, unless you want to use a different parsing model than the default. By default, this is set to the UD parsing model included in the stanford-corenlp-models JAR file. |
 | depparse.extradependencies | enum | NONE | Whether to include extra (enhanced) dependencies in the output. The default is NONE (basic dependencies) and this can have other values of the GrammaticalStructure.Extras enum, such as SUBJ_ONLY or MAXIMAL (all extra dependencies). |
 
 
