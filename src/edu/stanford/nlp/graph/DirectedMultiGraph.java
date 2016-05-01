@@ -606,6 +606,47 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   }
 
   /**
+   * Topological sort of the graph.
+   * <br>
+   * This method uses the depth-first search implementation of
+   * topological sort.
+   * Topological sorting only works if the graph is acyclic.
+   *
+   * @return A sorted list of the vertices
+   * @throws IllegalStateException if this graph is not a DAG
+   */
+  public List<V> topologicalSort() {
+    List<V> result = Generics.newArrayList();
+    Set<V> temporary = outerMapFactory.newSet();
+    Set<V> permanent = outerMapFactory.newSet();
+    for (V vertex : getAllVertices()) {
+      if (!temporary.contains(vertex)) {
+        topologicalSortHelper(vertex, temporary, permanent, result);
+      }
+    }
+    Collections.reverse(result);
+    return result;
+  }
+
+  private void topologicalSortHelper(V vertex, Set<V> temporary, Set<V> permanent, List<V> result) {
+    temporary.add(vertex);
+    Map<V, List<E>> neighborMap = outgoingEdges.get(vertex);
+    if (neighborMap != null) {
+      for (V neighbor : neighborMap.keySet()) {
+        if (permanent.contains(neighbor)) {
+          continue;
+        }
+        if (temporary.contains(neighbor)) {
+          throw new IllegalStateException("This graph has cycles. Topological sort not possible: " + this.toString());
+        }
+        topologicalSortHelper(neighbor, temporary, permanent, result);
+      }
+    }
+    result.add(vertex);
+    permanent.add(vertex);
+  }
+
+  /**
    * Cast this multi-graph as a map from vertices, to the outgoing data along edges out of those vertices.
    *
    * @return A map representation of the graph.
