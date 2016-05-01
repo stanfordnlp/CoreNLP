@@ -1,7 +1,7 @@
 // Takes Stanford CoreNLP JSON output (var data = ... in data.js)
 // and uses brat to render everything.
 
-//var serverAddress = 'http://localhost:9000/'
+//var serverAddress = 'http://localhost:9000'
 var serverAddress = 'http://corenlp.run'
 
 // Load Brat libraries
@@ -120,7 +120,7 @@ function nerColor(nerTag) {
  */
 function annotators() {
   var annotators = "tokenize,ssplit"
-  $('#annotators option:selected').each(function () {
+  $('#annotators').find('option:selected').each(function () {
     annotators += "," + $(this).val();
   });
   return annotators;
@@ -668,7 +668,7 @@ function renderSemgrex(data) {
  */
 $(document).ready(function() {
   // Some initial styling
-  $(".chosen-select").chosen();
+  $('.chosen-select').chosen();
   $('.chosen-container').css('width', '100%');
 
   // Submit on shift-enter
@@ -794,7 +794,7 @@ $(document).ready(function() {
     // Make ajax call
     $.ajax({
       type: 'POST',
-      url: serverAddress + 'tokensregex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
+      url: serverAddress + '/tokensregex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
       data: currentQuery,
       success: function(data) {
         $('.tokensregex_error').remove();  // Clear error messages
@@ -826,7 +826,7 @@ $(document).ready(function() {
     // Make ajax call
     $.ajax({
       type: 'POST',
-      url: serverAddress + 'semgrex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
+      url: serverAddress + '/semgrex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
       data: currentQuery,
       success: function(data) {
         $('.semgrex_error').remove();  // Clear error messages
