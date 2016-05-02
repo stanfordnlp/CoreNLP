@@ -179,7 +179,7 @@ public class EntityMentionsAnnotator implements Annotator {
   }
 
 
-  private void addAcronyms(Annotation ann, List<CoreMap> mentions) {
+  private static void addAcronyms(Annotation ann, List<CoreMap> mentions) {
     // Find all the organizations in a document
     List<List<CoreLabel>> organizations = new ArrayList<>();
     for (CoreMap mention : mentions) {

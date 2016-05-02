@@ -1,4 +1,4 @@
-package edu.stanford.nlp.pipeline; 
+package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
@@ -98,7 +98,7 @@ public class AnnotatorImplementations  {
                     NumberSequenceClassifier.USE_SUTIME_PROPERTY,
                     NumberSequenceClassifier.USE_SUTIME_DEFAULT);
 
-    boolean verbose = false;
+    boolean verbose = PropertiesUtils.getBool(properties, "ner." + "verbose", false);
 
     String[] loadPaths = models.toArray(new String[models.size()]);
 
