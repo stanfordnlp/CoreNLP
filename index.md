@@ -109,10 +109,14 @@ which allows many free uses, but not its use in
 [proprietary software](http://www.gnu.org/licenses/gpl-faq.html#GPLInProprietarySystem) 
 which is distributed to others.
 For distributors of
-<a href="http://www.gnu.org/licenses/gpl-faq.html#GPLInProprietarySystem">proprietary software</a>,
-<a href="http://techfinder.stanford.edu/technology_detail.php?ID=29724">commercial licensing</a>
+[proprietary software](http://www.gnu.org/licenses/gpl-faq.html#GPLInProprietarySystem),
+[commercial licensing](http://techfinder.stanford.edu/technology_detail.php?ID=29724)
 is available from Stanford. You can contact us at 
 [java-nlp-support@lists.stanford.edu](mailto:java-nlp-support@lists.stanford.edu).
+If you don't need a commercial license, but would like to support
+maintenance of these tools, we welcome gift funding:
+use [this form](http://giving.stanford.edu/goto/writeingift)
+and write "Stanford NLP Group open source software" in the Special Instructions.
 
 
 ## Citing Stanford CoreNLP in papers
