@@ -415,7 +415,7 @@ public class Document {
    * </p>
    *
    * <pre>{@code
-   *   String json = new Document("Lucy in the sky with diamonds").json(Document::parse, Document::ner);
+   *   String json = new Document("Lucy in the sky with diamonds").json(Sentence::parse, Sentence::ner);
    * }</pre>
    *
    * <p>
