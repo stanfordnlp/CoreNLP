@@ -223,12 +223,12 @@ This section describes how to set up a dedicated CoreNLP server on a fresh Linux
 
 3. Create a user `nlp` with permissions to read the directory `/opt/corenlp`. Allow the user to bind to port 80:
     
-```bash
-sudo mkdir -p /etc/authbind/byport/
-sudo touch /etc/authbind/byport/80
-sudo chown nlp:nlp /etc/authbind/byport/80
-sudo chmod 600 /etc/authbind/byport/80
-```
+    ```bash
+	sudo mkdir -p /etc/authbind/byport/
+	sudo touch /etc/authbind/byport/80
+	sudo chown nlp:nlp /etc/authbind/byport/80
+	sudo chmod 600 /etc/authbind/byport/80
+    ```
 
 4. Copy the startup script from the source jar at path `edu/stanford/nlp/pipeline/demo/corenlp` to `/etc/init.d/corenlp`. An easy way to get this is:
 
@@ -236,7 +236,9 @@ sudo chmod 600 /etc/authbind/byport/80
 	sudo wget https://raw.githubusercontent.com/stanfordnlp/CoreNLP/master/src/edu/stanford/nlp/pipeline/demo/corenlp -O /etc/init.d/corenlp
     ```
 
-5. Link the script to `/etc/rc.d/`:  ```ln -s /etc/init.d/corenlp /etc/rc.d/rc2.d/S75corenlp```
+5. Give executable permissions to startup script:  ```sudo chmod a+x /etc/init.d/corenlp```
+
+6. Link the script to `/etc/rc.d/`:  ```ln -s /etc/init.d/corenlp /etc/rc.d/rc2.d/S75corenlp```
 
 The CoreNLP server will now start on startup, running on port 80 under the user `nlp`. To manually start/stop/restart the server, you can use:
 
