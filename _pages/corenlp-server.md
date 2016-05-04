@@ -223,12 +223,12 @@ This section describes how to set up a dedicated CoreNLP server on a fresh Linux
 
 3. Create a user `nlp` with permissions to read the directory `/opt/corenlp`. Allow the user to bind to port 80:
     
-```bash
-sudo mkdir -p /etc/authbind/byport/
-sudo touch /etc/authbind/byport/80
-sudo chown nlp:nlp /etc/authbind/byport/80
-sudo chmod 600 /etc/authbind/byport/80
-```
+    ```bash
+	sudo mkdir -p /etc/authbind/byport/
+	sudo touch /etc/authbind/byport/80
+	sudo chown nlp:nlp /etc/authbind/byport/80
+	sudo chmod 600 /etc/authbind/byport/80
+    ```
 
 4. Copy the startup script from the source jar at path `edu/stanford/nlp/pipeline/demo/corenlp` to `/etc/init.d/corenlp`. An easy way to get this is:
 
