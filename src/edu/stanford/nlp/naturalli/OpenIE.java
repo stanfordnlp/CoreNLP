@@ -225,7 +225,7 @@ public class OpenIE implements Annotator  {
   @SuppressWarnings("unchecked")
   public List<SentenceFragment> clausesInSentence(SemanticGraph tree, boolean assumedTruth) {
     if (clauseSplitter.isPresent()) {
-      return clauseSplitter.get().apply(tree, assumedTruth).topClauses(splitterThreshold, 32);
+      return clauseSplitter.get().apply(tree, assumedTruth).topClauses(splitterThreshold);
     } else {
       return Collections.emptyList();
     }

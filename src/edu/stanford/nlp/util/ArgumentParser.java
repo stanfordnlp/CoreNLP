@@ -74,6 +74,9 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  */
 public class ArgumentParser  {
 
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ArgumentParser.class);
+
   @Documented
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.FIELD)
@@ -398,24 +401,14 @@ public class ArgumentParser  {
       Object[] instances,
       Class<?>[] classes,
       Properties options,
-      boolean ensureAllOptions,
-      boolean isBootstrap) {
+      boolean ensureAllOptions) {
 
     // Print usage, if applicable
-    if (!isBootstrap) {
-      if ("true".equalsIgnoreCase(options.getProperty("usage", "false")) ||
-          "true".equalsIgnoreCase(options.getProperty("help", "false"))
-          ) {
-        Set<Class<?>> allClasses = new HashSet<>();
-        Collections.addAll(allClasses, classes);
-        if (instances != null) {
-          for (Object o : instances) {
-            allClasses.add(o.getClass());
-          }
-        }
-        System.err.println(usage(allClasses.stream().toArray(Class[]::new)));
-        System.exit(0);
-      }
+    if ("true".equalsIgnoreCase(options.getProperty("usage", "false")) ||
+        "true".equalsIgnoreCase(options.getProperty("help", "false"))
+        ) {
+      log(usage(classes));
+      System.exit(0);
     }
 
     //--Create Class->Object Mapping
@@ -574,7 +567,7 @@ public class ArgumentParser  {
       Object[] instances,
       Class<?>[] classes,
       Properties options) {
-    return fillOptionsImpl(instances, classes, options, strict, false);
+    return fillOptionsImpl(instances, classes, options, strict);
   }
 
 
@@ -622,7 +615,7 @@ public class ArgumentParser  {
   public static void fillOptions(Class<?>[] classes,
                                  String[] args) {
     Properties options = StringUtils.argsToProperties(args); //get options
-    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false, true); //bootstrap
+    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
     fillOptionsImpl(null, classes, options);
   }
 
@@ -687,7 +680,7 @@ public class ArgumentParser  {
       options.setProperty(key, props.getProperty(key));
     }
     //(bootstrap)
-    Map<String, Field> bootstrapMap = fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false, true); //bootstrap
+    Map<String, Field> bootstrapMap = fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
     bootstrapMap.keySet().forEach(options::remove);
     //(fill options)
     Class<?>[] visibleClasses = optionClasses;
@@ -720,7 +713,7 @@ public class ArgumentParser  {
   public static void fillOptions(Object[] instances,
                                  String[] args) {
     Properties options = StringUtils.argsToProperties(args); //get options
-    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false, true); //bootstrap
+    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
     Class[] classes = new Class[instances.length];
     for (int i = 0; i < classes.length; ++i) { classes[i] = instances[i].getClass(); }
     fillOptionsImpl(instances, classes, options);

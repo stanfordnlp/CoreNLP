@@ -40,17 +40,13 @@ import static java.net.HttpURLConnection.*;
  */
 public class StanfordCoreNLPServer implements Runnable {
 
+  protected static final int DEFAULT_PORT = 9000;
+  protected static final int DEFAULT_TIMEOUT = 15000;
+
   protected HttpServer server;
-  @ArgumentParser.Option(name="port", gloss="The port to run the server on")
-  protected int serverPort = 9000;
-  @ArgumentParser.Option(name="timeout", gloss="The default timeout, in milliseconds")
-  protected int timeoutMilliseconds = 15000;
-  @ArgumentParser.Option(name="strict", gloss="If true, obey strict HTTP standards (e.g., with encoding)")
-  protected boolean strict = false;
-  @ArgumentParser.Option(name="quiet", gloss="If true, don't print to stdout")
-  protected boolean quiet = false;
-  @ArgumentParser.Option(name="ssl", gloss="If true, start the server with an [insecure!] SSL connection")
-  protected boolean ssl = false;
+  protected final int serverPort;
+  protected final int timeoutMilliseconds;
+  protected final boolean strict;
 
   protected final String shutdownKey;
 
@@ -80,17 +76,10 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown from the underlying socket implementation.
    */
   public StanfordCoreNLPServer(int port, int timeout, boolean strict) throws IOException {
-    this();
     this.serverPort = port;
     this.timeoutMilliseconds = timeout;
     this.strict = strict;
-  }
 
-  /**
-   * Create a new Stanford CoreNLP Server, with the default parameters
-   * @throws IOException
-   */
-  public StanfordCoreNLPServer() throws IOException {
     defaultProps = PropertiesUtils.asProperties(
             "annotators", "tokenize, ssplit, pos, lemma, ner, depparse, coref, natlog, openie",
             "coref.md.type", "dep",
@@ -431,9 +420,7 @@ public class StanfordCoreNLPServer implements Runnable {
           ann = getDocument(props, httpExchange);
           of = StanfordCoreNLP.OutputFormat.valueOf(props.getProperty("outputFormat", "json").toUpperCase());
           String text = ann.get(CoreAnnotations.TextAnnotation.class).replace('\n', ' ');
-          if (!quiet) {
-            System.out.println(text);
-          }
+          System.out.println(text);
           if (text.length() > MAX_CHAR_LENGTH) {
             respondBadInput("Request is too long to be handled by server: " + text.length() + " characters. Max length is " + MAX_CHAR_LENGTH + " characters.", httpExchange);
             return;
@@ -567,15 +554,6 @@ public class StanfordCoreNLPServer implements Runnable {
       // Get the annotators
       String annotators = StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+"));
 
-      // Tweak the properties to play nicer with the server
-      // (set the parser max length to 60)
-      if (!"-1".equals(props.getProperty("parse.maxlen", "60"))) {
-        props.setProperty("parse.maxlen", "60");
-      }
-      if (!"-1".equals(props.getProperty("pos.maxlen", "500"))) {
-        props.setProperty("pos.maxlen", "500");
-      }
-
       // Make sure the properties compile
       props.setProperty("annotators", annotators);
 
@@ -621,7 +599,7 @@ public class StanfordCoreNLPServer implements Runnable {
       }
       Map<String, String> params = getURLParams(httpExchange.getRequestURI());
 
-      Future<Pair<String, Annotation>> future = corenlpExecutor.submit(() -> {
+      Future<Pair<String, Annotation>> future = corenlpExecutor.submit((Callable<Pair<String, Annotation>>) () -> {
         try {
           // Get the document
           Annotation doc = getDocument(props, httpExchange);
@@ -835,12 +813,11 @@ public class StanfordCoreNLPServer implements Runnable {
 
 
   private HttpsServer addSSLContext(HttpsServer server) {
-    log("Adding SSL context to server");
     try {
       KeyStore ks = KeyStore.getInstance("JKS");
-      ks.load(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem("edu/stanford/nlp/pipeline/corenlp.jks"), "corenlp".toCharArray());
+      ks.load(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem("edu/stanford/nlp/pipeline/corenlp.jks"), "password".toCharArray());
       KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-      kmf.init(ks, "corenlp".toCharArray());
+      kmf.init(ks, "password".toCharArray());
       SSLContext sslContext = SSLContext.getInstance("TLS");
       sslContext.init(kmf.getKeyManagers(), null, null);
 
@@ -911,6 +888,15 @@ public class StanfordCoreNLPServer implements Runnable {
   }
 
   /**
+   * Help output
+   */
+  protected static void printHelp(PrintStream os) {
+    os.println("Usage: StanfordCoreNLPServer [port=9000] [timeout=5]");
+    os.println("port\t\t\t\t Which port to use");
+    os.println("timeout\t\t\t\t How long to wait before timing out");
+  }
+
+  /**
    * The main method.
    * Read the command line arguments and run the server.
    *
@@ -919,6 +905,37 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown if we could not start / run the server.
    */
   public static void main(String[] args) throws IOException {
+    int port = DEFAULT_PORT;
+    int timeout = DEFAULT_TIMEOUT;
+    boolean ssl = false;
+    // boolean strict = false;
+
+    Properties props = new Properties();
+    if (args.length > 0) {
+      props = StringUtils.argsToProperties(args);
+      boolean hasH = props.containsKey("h");
+      boolean hasHelp = props.containsKey("help");
+      if (hasH || hasHelp) {
+        printHelp(System.err);
+        return;
+      }
+    }
+    props.list(System.err);
+    if(props.containsKey("port")) {
+      port = Integer.parseInt(props.getProperty("port"));
+    }
+    if(props.containsKey("timeout")) {
+      timeout = Integer.parseInt(props.getProperty("timeout"));
+    }
+    if(props.containsKey("ssl")) {
+      ssl = Boolean.parseBoolean(props.getProperty("ssl"));
+    }
+    // if(props.containsKey("strict")) { // cdm: unneeded: Treats null and "" as false
+    //   if (props.getProperty("strict") != null && ! props.getProperty("strict").isEmpty()) {
+    boolean strict = Boolean.parseBoolean(props.getProperty("strict"));
+    //   }
+    // }
+    log("Starting server on port " + port + " with timeout of " + timeout + " milliseconds; ssl=" + ssl + ".");
 
     // Create the homepage
     FileHandler homepage;
@@ -929,10 +946,8 @@ public class StanfordCoreNLPServer implements Runnable {
     }
 
     // Run the server
-    log("Starting server...");
-    StanfordCoreNLPServer server = new StanfordCoreNLPServer();
-    ArgumentParser.fillOptions(server, args);
-    if (server.ssl) {
+    StanfordCoreNLPServer server = new StanfordCoreNLPServer(port, timeout, strict);
+    if (ssl) {
       server.run(req -> true, res -> {}, homepage, true);
     } else {
       server.run(req -> true, res -> {}, homepage, false);

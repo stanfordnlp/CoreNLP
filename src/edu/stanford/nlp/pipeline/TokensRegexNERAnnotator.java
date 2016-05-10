@@ -207,9 +207,8 @@ public class TokensRegexNERAnnotator implements Annotator  {
     return props;
   }
 
-  private static final Pattern FILE_DELIMITERS_PATTERN = Pattern.compile("\\s*[,;]\\s*");
-  private static final Pattern COMMA_DELIMITERS_PATTERN = Pattern.compile("\\s*,\\s*");
-
+  private static Pattern FILE_DELIMITERS_PATTERN = Pattern.compile("\\s*[,;]\\s*");
+  private static Pattern COMMA_DELIMITERS_PATTERN = Pattern.compile("\\s*,\\s*");
   public TokensRegexNERAnnotator(String name, Properties properties) {
     String prefix = (name != null && !name.isEmpty())? name + ".":"";
     String backgroundSymbol = properties.getProperty(prefix + "backgroundSymbol", DEFAULT_BACKGROUND_SYMBOL);

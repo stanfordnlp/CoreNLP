@@ -1,4 +1,4 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.FileSequentialCollection;
@@ -31,7 +31,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 public class StanfordCoreNLPClient extends AnnotationPipeline  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(StanfordCoreNLPClient.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(StanfordCoreNLPClient.class);
 
   /**
    * Information on how to connect to a backend.
