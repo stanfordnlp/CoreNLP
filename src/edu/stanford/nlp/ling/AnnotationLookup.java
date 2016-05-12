@@ -70,6 +70,7 @@ public class AnnotationLookup {
     SECTION_KEY(CoreAnnotations.SectionAnnotation.class,"section"),
     SECTIONID_KEY(CoreAnnotations.SectionIDAnnotation.class,"sectionID"),
     SECTIONDATE_KEY(CoreAnnotations.SectionDateAnnotation.class,"sectionDate"),
+    STACKED_NER_KEY(CoreAnnotations.StackedNamedEntityTagAnnotation.class, "stackedNer"),
 
     // Thang Sep13: for Genia NER
     HEAD_KEY(CoreAnnotations.HeadWordStringAnnotation.class, "head"),
