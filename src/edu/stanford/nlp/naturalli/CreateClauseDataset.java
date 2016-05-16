@@ -1,4 +1,5 @@
-package edu.stanford.nlp.naturalli;
+package edu.stanford.nlp.naturalli; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.io.IOUtils;
@@ -35,9 +36,12 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  *
  * @author Gabor Angeli
  */
-public class CreateClauseDataset implements TSVSentenceProcessor {
+public class CreateClauseDataset implements TSVSentenceProcessor  {
 
-  @Execution.Option(name="in", gloss="The input to read from")
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CreateClauseDataset.class);
+
+  @ArgumentParser.Option(name="in", gloss="The input to read from")
   private static InputStream in = System.in;
 
   public CreateClauseDataset() {
@@ -60,7 +64,7 @@ public class CreateClauseDataset implements TSVSentenceProcessor {
   public void process(long id, Annotation doc) {
     CoreMap sentence = doc.get(CoreAnnotations.SentencesAnnotation.class).get(0);
     SemanticGraph depparse = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
-    System.err.println("| " + sentence.get(CoreAnnotations.TextAnnotation.class));
+    log.info("| " + sentence.get(CoreAnnotations.TextAnnotation.class));
 
     // Get all valid subject spans
     BitSet consumedAsSubjects = new BitSet();

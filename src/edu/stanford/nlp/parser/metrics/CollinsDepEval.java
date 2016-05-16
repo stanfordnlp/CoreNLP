@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.metrics;
+package edu.stanford.nlp.parser.metrics; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -31,7 +32,10 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Spence Green
  *
  */
-public class CollinsDepEval extends AbstractEval {
+public class CollinsDepEval extends AbstractEval  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CollinsDepEval.class);
 
   private static final boolean DEBUG = false;
 
@@ -65,7 +69,7 @@ public class CollinsDepEval extends AbstractEval {
 
   @Override
   protected Set<?> makeObjects(Tree tree) {
-    System.err.println(this.getClass().getName() + ": Function makeObjects() not implemented");
+    log.info(this.getClass().getName() + ": Function makeObjects() not implemented");
     return null;
   }
 
@@ -207,7 +211,7 @@ public class CollinsDepEval extends AbstractEval {
    */
   public static void main(String[] args) {
     if(args.length < MIN_ARGS) {
-      System.err.println(usage());
+      log.info(usage());
       System.exit(-1);
     }
     Properties options = StringUtils.argsToProperties(args, optionArgDefs());
@@ -219,7 +223,7 @@ public class CollinsDepEval extends AbstractEval {
     
     String[] parsedArgs = options.getProperty("","").split("\\s+");
     if (parsedArgs.length != MIN_ARGS) {
-      System.err.println(usage());
+      log.info(usage());
       System.exit(-1);
     }
     File goldFile = new File(parsedArgs[0]);

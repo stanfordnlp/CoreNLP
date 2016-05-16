@@ -26,6 +26,7 @@
 //    http://nlp.stanford.edu/downloads/crf-classifier.shtml
 
 package edu.stanford.nlp.ie;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.fsm.DFSA;
 import edu.stanford.nlp.io.IOUtils;
@@ -53,7 +54,6 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -82,7 +82,10 @@ import java.util.zip.GZIPInputStream;
  * @author Dan Cer
  * @author sonalg (made the class generic)
  */
-public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements Function<String, String> {
+public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements Function<String, String>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(AbstractSequenceClassifier.class);
 
   public SeqClassifierFlags flags;
   public Index<String> classIndex; // = null;
@@ -262,7 +265,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *         field.
    */
   public List<IN> classifySentence(List<? extends HasWord> sentence) {
-    // System.err.println("knownLCWords.size is " + knownLCWords.size() + "; knownLCWords.maxSize is " + knownLCWords.getMaxSize() + 
+    // log.info("knownLCWords.size is " + knownLCWords.size() + "; knownLCWords.maxSize is " + knownLCWords.getMaxSize() +
     //                   ", prior to NER for " + getClass().toString());
     List<IN> document = new ArrayList<>();
     int i = 0;
@@ -289,7 +292,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     wrapper.processDocument(document);
 
     classify(document);
-    // System.err.println("Size of knownLCWords is " + knownLCWords.size() + ", after NER for " + getClass().toString());
+    // log.info("Size of knownLCWords is " + knownLCWords.size() + ", after NER for " + getClass().toString());
 
     return document;
   }
@@ -482,13 +485,13 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     List<List<IN>> result = new ArrayList<>();
 
     for (List<IN> document : documents) {
-      // System.err.println(document);
+      // log.info(document);
       classify(document);
 
       List<IN> sentence = new ArrayList<>();
       for (IN wi : document) {
         sentence.add(wi);
-        // System.err.println(wi);
+        // log.info(wi);
       }
       result.add(sentence);
     }
@@ -824,12 +827,12 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
                              DocumentReaderAndWriter<IN> readerAndWriter)
   {
     if (flags.announceObjectBankEntries) {
-      System.err.print("Reading data using " + readerAndWriter.getClass());
+      log.info("Reading data using " + readerAndWriter.getClass());
 
       if (flags.inputEncoding == null) {
-        System.err.println("Getting data from " + string + " (default encoding)");
+        log.info("Getting data from " + string + " (default encoding)");
       } else {
-        System.err.println("Getting data from " + string + " (" + flags.inputEncoding + " encoding)");
+        log.info("Getting data from " + string + " (" + flags.inputEncoding + " encoding)");
       }
     }
     // return new ObjectBank<List<IN>>(new
@@ -878,7 +881,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     for (File file : origFiles) {
       if (file.isFile()) {
         if (flags.announceObjectBankEntries) {
-          System.err.println("Getting data from " + file + " (" + flags.inputEncoding + " encoding)");
+          log.info("Getting data from " + file + " (" + flags.inputEncoding + " encoding)");
         }
         files.add(file);
       }
@@ -925,7 +928,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public ObjectBank<List<IN>> makeObjectBankFromReader(BufferedReader in,
                                                        DocumentReaderAndWriter<IN> readerAndWriter) {
     if (flags.announceObjectBankEntries) {
-      System.err.println("Reading data using " + readerAndWriter.getClass());
+      log.info("Reading data using " + readerAndWriter.getClass());
     }
     // TODO get rid of ObjectBankWrapper
     // return new ObjectBank<List<IN>>(new ResettableReaderIteratorFactory(in),
@@ -1148,7 +1151,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
         doc = classify(doc);
 
         int completedNo = threadCompletionCounter.incrementAndGet();
-        if (flags.verboseMode) System.err.println(completedNo + " examples completed");
+        if (flags.verboseMode) log.info(completedNo + " examples completed");
         return doc;
       }
       @Override
@@ -1190,7 +1193,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     long millis = timer.stop();
     double wordspersec = numWords / (((double) millis) / 1000);
     NumberFormat nf = new DecimalFormat("0.00"); // easier way!
-    System.err.println(StringUtils.getShortClassName(this) +
+    log.info(StringUtils.getShortClassName(this) +
                        " tagged " + numWords + " words in " + numDocs +
                        " documents at " + nf.format(wordspersec) +
                        " words per second.");
@@ -1248,7 +1251,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     long millis = timer.stop();
     double wordspersec = numWords / (((double) millis) / 1000);
     NumberFormat nf = new DecimalFormat("0.00"); // easier way!
-    System.err.println(this.getClass().getName() + " tagged " + numWords + " words in " + numSentences
+    log.info(this.getClass().getName() + " tagged " + numWords + " words in " + numSentences
         + " documents at " + nf.format(wordspersec) + " words per second.");
   }
 
@@ -1282,7 +1285,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     long millis = timer.stop();
     double wordspersec = numWords / (((double) millis) / 1000);
     NumberFormat nf = new DecimalFormat("0.00"); // easier way!
-    System.err.println(this.getClass().getName() + " tagged " + numWords + " words in " + numSentences
+    log.info(this.getClass().getName() + " tagged " + numWords + " words in " + numSentences
         + " documents at " + nf.format(wordspersec) + " words per second.");
   }
 
@@ -1388,7 +1391,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     double f1 = ((precision == 0.0 || recall == 0.0) ?
                  0.0 : 2.0 / (1.0 / precision + 1.0 / recall));
     if (!printedHeader) {
-      System.err.println("         Entity\tP\tR\tF1\tTP\tFP\tFN");
+      log.info("         Entity\tP\tR\tF1\tTP\tFP\tFN");
       printedHeader = true;
     }
     System.err.format("%15s\t%.4f\t%.4f\t%.4f\t%.0f\t%.0f\t%.0f%n",
@@ -1469,22 +1472,6 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public abstract void loadClassifier(ObjectInputStream in, Properties props) throws IOException, ClassCastException,
       ClassNotFoundException;
 
-  // todo [cdm 2015]: Replace this method with use of the method in IOUtils.
-  private InputStream loadStreamFromClasspath(String path) {
-    InputStream is = getClass().getClassLoader().getResourceAsStream(path);
-    if (is == null)
-      return null;
-    try {
-      if (path.endsWith(".gz"))
-        is = new GZIPInputStream(new BufferedInputStream(is));
-      else
-        is = new BufferedInputStream(is);
-    } catch (IOException e) {
-      System.err.println("CLASSPATH resource " + path + " is not a GZIP stream!");
-    }
-    return is;
-  }
-
   /**
    * Loads a classifier from the file specified by loadPath. If loadPath ends in
    * .gz, uses a GZIPInputStream, else uses a regular FileInputStream.
@@ -1494,21 +1481,15 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   }
 
   /**
-   * Loads a classifier from the file specified by loadPath. If loadPath ends in
-   * .gz, uses a GZIPInputStream, else uses a regular FileInputStream.
+   * Loads a classifier from the file, classpath resource, or URL specified by loadPath. If loadPath ends in
+   * .gz, uses a GZIPInputStream.
    */
   public void loadClassifier(String loadPath, Properties props) throws ClassCastException, IOException, ClassNotFoundException {
-    InputStream is;
-    // ms, 10-04-2010: check first is this path exists in our CLASSPATH. This
-    // takes priority over the file system.
-    if ((is = loadStreamFromClasspath(loadPath)) != null) {
-      Timing.startDoing("Loading classifier from " + loadPath);
-      loadClassifier(is, props);
-      is.close();
-      Timing.endDoing();
-    } else {
-      loadClassifier(new File(loadPath), props);
-    }
+    InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(loadPath);
+    Timing t = new Timing();
+    loadClassifier(is, props);
+    is.close();
+    t.done(log, "Loading classifier from " + loadPath);
   }
 
   public void loadClassifierNoExceptions(String loadPath) {
@@ -1516,16 +1497,12 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   }
 
   public void loadClassifierNoExceptions(String loadPath, Properties props) {
-    InputStream is;
-    // ms, 10-04-2010: check first is this path exists in our CLASSPATH. This
-    // takes priority over the file system. todo [cdm 2014]: change this to use IOUtils stuff that much code now uses
-    if ((is = loadStreamFromClasspath(loadPath)) != null) {
-      Timing.startDoing("Loading classifier from " + loadPath);
-      loadClassifierNoExceptions(is, props);
-      IOUtils.closeIgnoringExceptions(is);
-      Timing.endDoing();
-    } else {
-      loadClassifierNoExceptions(new File(loadPath), props);
+    try {
+      loadClassifier(loadPath, props);
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    } catch (ClassCastException|ClassNotFoundException e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -1538,22 +1515,17 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * uses a GZIPInputStream, else uses a regular FileInputStream. This method
    * closes the File when done.
    *
-   * @param file
-   *          Loads a classifier from this file.
-   * @param props
-   *          Properties in this object will be used to overwrite those
+   * @param file Loads a classifier from this file.
+   * @param props Properties in this object will be used to overwrite those
    *          specified in the serialized classifier
    *
-   * @throws IOException
-   *           If there are problems accessing the input stream
-   * @throws ClassCastException
-   *           If there are problems interpreting the serialized data
-   * @throws ClassNotFoundException
-   *           If there are problems interpreting the serialized data
+   * @throws IOException If there are problems accessing the input stream
+   * @throws ClassCastException If there are problems interpreting the serialized data
+   * @throws ClassNotFoundException If there are problems interpreting the serialized data
    */
   public void loadClassifier(File file, Properties props) throws ClassCastException, IOException,
       ClassNotFoundException {
-    Timing.startDoing("Loading classifier from " + file.getAbsolutePath());
+    Timing t = new Timing();
     BufferedInputStream bis;
     if (file.getName().endsWith(".gz")) {
       bis = new BufferedInputStream(new GZIPInputStream(new FileInputStream(file)));
@@ -1562,7 +1534,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     }
     loadClassifier(bis, props);
     bis.close();
-    Timing.endDoing();
+    t.done(log, "Loading classifier from " + file.getAbsolutePath());
   }
 
   public void loadClassifierNoExceptions(File file) {
@@ -1573,7 +1545,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     try {
       loadClassifier(file, props);
     } catch (Exception e) {
-      System.err.println("Error deserializing " + file.getAbsolutePath());
+      log.info("Error deserializing " + file.getAbsolutePath());
       throw new RuntimeException(e);
     }
   }
@@ -1592,9 +1564,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *          serialized file, such as the DocumentReaderAndWriter. You can pass
    *          in <code>null</code> to override nothing.
    */
-  // todo [cdm 2014]: This method overlaps functionality in loadStreamFromClasspath
+  // todo [john bauer 2015]: This method may not be necessary.  Perhaps use the IOUtils equivalents
   public void loadJarClassifier(String modelName, Properties props) {
-    Timing.startDoing("Loading JAR-internal classifier " + modelName);
+    Timing t = new Timing();
     try {
       InputStream is = getClass().getResourceAsStream(modelName);
       if (modelName.endsWith(".gz")) {
@@ -1603,7 +1575,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       is = new BufferedInputStream(is);
       loadClassifier(is, props);
       is.close();
-      Timing.endDoing();
+      t.done(log, "Loading CLASSPATH classifier " + modelName);
     } catch (Exception e) {
       String msg = "Error loading classifier from jar file (most likely you are not running this code from a jar file or the named classifier is not stored in the jar file)";
       throw new RuntimeException(msg, e);

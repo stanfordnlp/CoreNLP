@@ -24,7 +24,8 @@
 //    parser-support@lists.stanford.edu
 //    http://nlp.stanford.edu/software/lex-parser.shtml
 
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.process.DistSimClassifier;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -43,7 +44,10 @@ import edu.stanford.nlp.util.Index;
  * @author Christopher Manning
  * @author Anna Rafferty
  */
-public class EnglishUnknownWordModel extends BaseUnknownWordModel {
+public class EnglishUnknownWordModel extends BaseUnknownWordModel  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(EnglishUnknownWordModel.class);
 
   private static final long serialVersionUID = 4825624957364628770L;
 
@@ -93,12 +97,12 @@ public class EnglishUnknownWordModel extends BaseUnknownWordModel {
 
     if (pb_W_T > -100.0) {
       if (DEBUG_UWM) {
-        System.err.println(iTW + " tagging has probability " + pb_W_T);
+        log.info(iTW + " tagging has probability " + pb_W_T);
       }
       return (float) pb_W_T;
     }
     if (DEBUG_UWM) {
-      System.err.println(iTW + " tagging is impossible.");
+      log.info(iTW + " tagging is impossible.");
     }
     return Float.NEGATIVE_INFINITY;
   } // end score()
@@ -140,7 +144,7 @@ public class EnglishUnknownWordModel extends BaseUnknownWordModel {
     String uwSig = getSignature(word, sentencePosition);
     int sig = wordIndex.addToIndex(uwSig);
     if (DEBUG_UWM) {
-      System.err.println("Signature (" + unknownLevel + "): mapped " + word +
+      log.info("Signature (" + unknownLevel + "): mapped " + word +
                          " (" + index + ") to " + uwSig + " (" + sig + ")");
     }
     return sig;
@@ -193,7 +197,7 @@ public class EnglishUnknownWordModel extends BaseUnknownWordModel {
       default:
         // 0 = do nothing so it just stays as "UNK"
     } // end switch (unknownLevel)
-    // System.err.println("Summarized " + word + " to " + sb.toString());
+    // log.info("Summarized " + word + " to " + sb.toString());
     return sb.toString();
   } // end getSignature()
 

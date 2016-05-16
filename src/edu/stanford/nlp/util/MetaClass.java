@@ -550,7 +550,7 @@ public class MetaClass {
       return (E) Lazy.of(() -> MetaClass.castWithoutKnowingType(v) );
     }else if(Optional.class.isAssignableFrom(clazz)) {
       //(case: Optional)
-      return (E) ((value == null || "null".equals(value.toLowerCase()) || "empty".equals(value.toLowerCase()) || "none".equals(value.toLowerCase())) ? Optional.empty() : Optional.of(castWithoutKnowingType(value)));
+      return (E) ((value == null || "null".equals(value.toLowerCase()) || "empty".equals(value.toLowerCase()) || "none".equals(value.toLowerCase())) ? Optional.empty() : Optional.of(value));
     }else if(java.util.Date.class.isAssignableFrom(clazz)){
       //(case: date)
       try {
@@ -652,8 +652,8 @@ public class MetaClass {
       }
     } else if (PrintWriter.class.isAssignableFrom(clazz)) {
       // (case: input stream)
-      if (value.equalsIgnoreCase("stdout") || value.equalsIgnoreCase("out")) { return (E) System.out; }
-      if (value.equalsIgnoreCase("stderr") || value.equalsIgnoreCase("err")) { return (E) System.err; }
+      if (value.equalsIgnoreCase("stdout") || value.equalsIgnoreCase("out")) { return (E) new PrintWriter(System.out); }
+      if (value.equalsIgnoreCase("stderr") || value.equalsIgnoreCase("err")) { return (E) new PrintWriter(System.err); }
       try {
         return (E) IOUtils.getPrintWriter(value);
       } catch (IOException e) {

@@ -1,21 +1,19 @@
 package edu.stanford.nlp.stats;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.*;
 
-import java.util.function.Function;
 import edu.stanford.nlp.util.Pair;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import junit.framework.TestCase;
 
 public class CountersTest extends TestCase {
 
   private Counter<String> c1;
   private Counter<String> c2;
+  private Counter<String> c8;
+  private Counter<String> c9;
 
   private static final double TOLERANCE = 0.001;
 
@@ -23,16 +21,21 @@ public class CountersTest extends TestCase {
   protected void setUp() {
     Locale.setDefault(Locale.US);
 
-    c1 = new ClassicCounter<String>();
+    c1 = new ClassicCounter<>();
     c1.setCount("p", 1.0);
     c1.setCount("q", 2.0);
     c1.setCount("r", 3.0);
     c1.setCount("s", 4.0);
-    c2 = new ClassicCounter<String>();
+    c2 = new ClassicCounter<>();
     c2.setCount("p", 5.0);
     c2.setCount("q", 6.0);
     c2.setCount("r", 7.0);
     c2.setCount("t", 8.0);
+    c8 = new ClassicCounter<>();
+    c8.setCount("r", 2.0);
+    c8.setCount("z", 4.0);
+    c9 = new ClassicCounter<>();
+    c9.setCount("z", 4.0);
   }
 
   public void testUnion() {
@@ -63,9 +66,17 @@ public class CountersTest extends TestCase {
 
   public void testDotProduct() {
     double d1 = Counters.dotProduct(c1, c2);
-    assertEquals(d1, 38.0);
+    assertEquals(38.0, d1);
     double d2 = Counters.dotProduct(c1, c1);
-    assertEquals(d2, 30.0);
+    assertEquals(30.0, d2);
+    double d3 = Counters.optimizedDotProduct(c1, c2);
+    assertEquals(38.0, d3);
+    double d4 = Counters.optimizedDotProduct(c1, c1);
+    assertEquals(30.0, d4);
+    assertEquals(14.0, Counters.optimizedDotProduct(c2, c8));
+    assertEquals(14.0, Counters.optimizedDotProduct(c8, c2));
+    assertEquals(0.0, Counters.optimizedDotProduct(c2, c9));
+    assertEquals(0.0, Counters.optimizedDotProduct(c9, c2));
   }
 
   public void testAbsoluteDifference() {
@@ -110,7 +121,7 @@ public class CountersTest extends TestCase {
   }
 
   public void testL2Norm() {
-    ClassicCounter<String> c = new ClassicCounter<String>();
+    ClassicCounter<String> c = new ClassicCounter<>();
     c.incrementCount("a", 3);
     c.incrementCount("b", 4);
     assertEquals(5.0, Counters.L2Norm(c), TOLERANCE);
@@ -122,7 +133,7 @@ public class CountersTest extends TestCase {
 
   @SuppressWarnings({ "ConstantMathCall" })
   public void testLogNormalize() {
-    ClassicCounter<String> c = new ClassicCounter<String>();
+    ClassicCounter<String> c = new ClassicCounter<>();
     c.incrementCount("a", Math.log(4.0));
     c.incrementCount("b", Math.log(2.0));
     c.incrementCount("c", Math.log(1.0));
@@ -136,7 +147,7 @@ public class CountersTest extends TestCase {
   }
 
   public void testL2Normalize() {
-    ClassicCounter<String> c = new ClassicCounter<String>();
+    ClassicCounter<String> c = new ClassicCounter<>();
     c.incrementCount("a", 4.0);
     c.incrementCount("b", 2.0);
     c.incrementCount("c", 1.0);
@@ -149,13 +160,13 @@ public class CountersTest extends TestCase {
   }
 
   public void testRetainAbove() {
-    c1 = new ClassicCounter<String>();
+    c1 = new ClassicCounter<>();
     c1.incrementCount("a", 1.1);
     c1.incrementCount("b", 1.0);
     c1.incrementCount("c", 0.9);
     c1.incrementCount("d", 0);
     Set<String> removed = Counters.retainAbove(c1, 1.0);
-    Set<String> expected = new HashSet<String>();
+    Set<String> expected = new HashSet<>();
     expected.add("c");
     expected.add("d");
     assertEquals(expected, removed);
@@ -168,7 +179,7 @@ public class CountersTest extends TestCase {
   private final String[] ascending = { "e", "d", "a", "b", "c" };
 
   public void testToSortedList() {
-    c1 = new ClassicCounter<String>();
+    c1 = new ClassicCounter<>();
     c1.incrementCount("a", 0.9);
     c1.incrementCount("b", 1.0);
     c1.incrementCount("c", 1.5);
@@ -183,7 +194,7 @@ public class CountersTest extends TestCase {
   }
 
   public void testRetainTop() {
-    c1 = new ClassicCounter<String>();
+    c1 = new ClassicCounter<>();
     c1.incrementCount("a", 0.9);
     c1.incrementCount("b", 1.0);
     c1.incrementCount("c", 1.5);
@@ -200,45 +211,45 @@ public class CountersTest extends TestCase {
   }
 
   public void testPointwiseMutualInformation() {
-    Counter<String> x = new ClassicCounter<String>();
+    Counter<String> x = new ClassicCounter<>();
     x.incrementCount("0", 0.8);
     x.incrementCount("1", 0.2);
 
-    Counter<Integer> y = new ClassicCounter<Integer>();
+    Counter<Integer> y = new ClassicCounter<>();
     y.incrementCount(0, 0.25);
     y.incrementCount(1, 0.75);
 
     Counter<Pair<String, Integer>> joint;
-    joint = new ClassicCounter<Pair<String, Integer>>();
-    joint.incrementCount(new Pair<String, Integer>("0", 0), 0.1);
-    joint.incrementCount(new Pair<String, Integer>("0", 1), 0.7);
-    joint.incrementCount(new Pair<String, Integer>("1", 0), 0.15);
-    joint.incrementCount(new Pair<String, Integer>("1", 1), 0.05);
+    joint = new ClassicCounter<>();
+    joint.incrementCount(new Pair<>("0", 0), 0.1);
+    joint.incrementCount(new Pair<>("0", 1), 0.7);
+    joint.incrementCount(new Pair<>("1", 0), 0.15);
+    joint.incrementCount(new Pair<>("1", 1), 0.05);
 
     // Check that correct PMI values are calculated, using tables from
     // http://en.wikipedia.org/wiki/Pointwise_mutual_information
     double pmi;
     Pair<String, Integer> pair;
 
-    pair = new Pair<String, Integer>("0", 0);
+    pair = new Pair<>("0", 0);
     pmi = Counters.pointwiseMutualInformation(x, y, joint, pair);
     assertEquals(-1, pmi, 10e-5);
 
-    pair = new Pair<String, Integer>("0", 1);
+    pair = new Pair<>("0", 1);
     pmi = Counters.pointwiseMutualInformation(x, y, joint, pair);
     assertEquals(0.222392421, pmi, 10e-5);
 
-    pair = new Pair<String, Integer>("1", 0);
+    pair = new Pair<>("1", 0);
     pmi = Counters.pointwiseMutualInformation(x, y, joint, pair);
     assertEquals(1.584962501, pmi, 10e-5);
 
-    pair = new Pair<String, Integer>("1", 1);
+    pair = new Pair<>("1", 1);
     pmi = Counters.pointwiseMutualInformation(x, y, joint, pair);
     assertEquals(-1.584962501, pmi, 10e-5);
   }
 
   public void testToSortedString() {
-    Counter<String> c = new ClassicCounter<String>();
+    Counter<String> c = new ClassicCounter<>();
     c.setCount("b", 0.25);
     c.setCount("a", 0.5);
     c.setCount("c", 1.0);
@@ -266,7 +277,7 @@ public class CountersTest extends TestCase {
 
   public void testHIndex() {
     // empty counter
-    Counter<String> c = new ClassicCounter<String>();
+    Counter<String> c = new ClassicCounter<>();
     assertEquals(0, Counters.hIndex(c));
 
     // two items with 2 or more citations
@@ -289,7 +300,7 @@ public class CountersTest extends TestCase {
   public void testAddInPlaceCollection() {
     // initialize counter
     setUp();
-    List<String> collection = new ArrayList<String>();
+    List<String> collection = new ArrayList<>();
     collection.add("p");
     collection.add("p");
     collection.add("s");
@@ -301,7 +312,7 @@ public class CountersTest extends TestCase {
 
   public void testRemoveKeys() {
     setUp();
-    Collection<String> c = new ArrayList<String>();
+    Collection<String> c = new ArrayList<>();
     c.add("p");
     c.add("r");
     c.add("s");
@@ -321,7 +332,7 @@ public class CountersTest extends TestCase {
   }
 
   public void testDivideInPlace() {
-    TwoDimensionalCounter<String, String> a = new TwoDimensionalCounter<String, String>();
+    TwoDimensionalCounter<String, String> a = new TwoDimensionalCounter<>();
     a.setCount("a", "b", 1);
     a.setCount("a", "c", 1);
     a.setCount("c", "a", 1);
@@ -351,12 +362,7 @@ public class CountersTest extends TestCase {
     setUp();
     c1.setCount("P",2.0);
     System.out.println(c1);
-    c1 = Counters.transformWithValuesAdd(c1, new Function<String, String>() {
-      @Override
-      public String apply(String in) {
-        return in.toLowerCase();
-      }
-    });
+    c1 = Counters.transformWithValuesAdd(c1, String::toLowerCase);
     System.out.println(c1);
 
   }
@@ -403,13 +409,13 @@ public class CountersTest extends TestCase {
 
     assertEquals(0.46514844544032313, Counters.jensenShannonDivergence(a, b), 1e-5);
 
-    Counter<String> c = new ClassicCounter<>(Arrays.asList("A"));
+    Counter<String> c = new ClassicCounter<>(Collections.singletonList("A"));
     Counter<String> d = new ClassicCounter<>(Arrays.asList("B", "C"));
     assertEquals(1.0, Counters.jensenShannonDivergence(c, d), 1e-5);
   }
 
   public void testFlatten() {
-    Map<String, Counter<String>> h = new HashMap<String, Counter<String>>();
+    Map<String, Counter<String>> h = new HashMap<>();
     Counter<String> a = new ClassicCounter<>();
     a.setCount("a", 1.0);
     a.setCount("b", 1.0);
@@ -430,5 +436,27 @@ public class CountersTest extends TestCase {
     assertEquals(2.0, flat.getCount("b"));
   }
 
+  public void testSerializeStringCounter() throws IOException {
+    Counter<String> counts = new ClassicCounter<>();
+    for (int base = -10; base < 10; ++base) {
+      if (base == 0) { continue; }
+      for (int exponent = -100; exponent < 100; ++exponent) {
+        double number = Math.pow(Math.PI * base, exponent);
+        counts.setCount(Double.toString(number), number);
+      }
+    }
+
+    File tmp = File.createTempFile("counts", ".tab.gz");
+    tmp.deleteOnExit();
+
+    Counters.serializeStringCounter(counts, tmp.getPath());
+
+    Counter<String> reread = Counters.deserializeStringCounter(tmp.getPath());
+    for (Map.Entry<String, Double> entry : reread.entrySet()) {
+      double old = counts.getCount(entry.getKey());
+      assertEquals(old, entry.getValue(), Math.abs(old) / 1e5 );
+    }
+
+  }
 
 }

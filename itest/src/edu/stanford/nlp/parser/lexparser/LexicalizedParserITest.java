@@ -29,10 +29,10 @@
 package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.SentenceUtils;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.parser.common.ParserAnnotations;
 import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.parser.common.ParserQuery;
@@ -182,11 +182,11 @@ public class LexicalizedParserITest extends TestCase {
 
   public void testParseMultiple() {
     List<List<CoreLabel>> sentences = new ArrayList<List<CoreLabel>>();
-    sentences.add(Sentence.toCoreLabelList("The", "Flyers", "lost", "again", "last", "night", "."));
-    sentences.add(Sentence.toCoreLabelList("If", "this", "continues", ",", "they", "will", "miss", "the", "playoffs", "."));
-    sentences.add(Sentence.toCoreLabelList("Hopefully", "they", "can", "turn", "it", "around", "."));
-    sentences.add(Sentence.toCoreLabelList("Winning", "on", "Wednesday", "would", "be", "a", "good", "first", "step", "."));
-    sentences.add(Sentence.toCoreLabelList("Their", "next", "opponent", "is", "quite", "bad", "."));
+    sentences.add(SentenceUtils.toCoreLabelList("The", "Flyers", "lost", "again", "last", "night", "."));
+    sentences.add(SentenceUtils.toCoreLabelList("If", "this", "continues", ",", "they", "will", "miss", "the", "playoffs", "."));
+    sentences.add(SentenceUtils.toCoreLabelList("Hopefully", "they", "can", "turn", "it", "around", "."));
+    sentences.add(SentenceUtils.toCoreLabelList("Winning", "on", "Wednesday", "would", "be", "a", "good", "first", "step", "."));
+    sentences.add(SentenceUtils.toCoreLabelList("Their", "next", "opponent", "is", "quite", "bad", "."));
 
     List<Tree> results1 = englishParser.parseMultiple(sentences);
     List<Tree> results2 = englishParser.parseMultiple(sentences, 3);
@@ -250,7 +250,7 @@ public class LexicalizedParserITest extends TestCase {
   }
 
   public void testAlreadyTagged() {
-    List<CoreLabel> words = Sentence.toCoreLabelList("foo", "bar", "baz");
+    List<CoreLabel> words = SentenceUtils.toCoreLabelList("foo", "bar", "baz");
     words.get(1).setTag("JJ");
     Tree tree = englishParser.parse(words);
     assertEquals("JJ", tree.taggedYield().get(1).tag());
@@ -261,7 +261,7 @@ public class LexicalizedParserITest extends TestCase {
   }
 
   public void testTagRegex() {
-    List<CoreLabel> words = Sentence.toCoreLabelList("foo", "bar", "baz");
+    List<CoreLabel> words = SentenceUtils.toCoreLabelList("foo", "bar", "baz");
     words.get(1).set(ParserAnnotations.CandidatePartOfSpeechAnnotation.class, "JJ");
     Tree tree = englishParser.parse(words);
     assertEquals("JJ", tree.taggedYield().get(1).tag());

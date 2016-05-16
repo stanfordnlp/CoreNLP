@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.trees.Tree;
@@ -10,7 +11,10 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class HTKLatticeReader {
+public class HTKLatticeReader  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(HTKLatticeReader.class);
 
   public final boolean DEBUG;
   public final boolean PRETTYPRINT;
@@ -66,7 +70,7 @@ public class HTKLatticeReader {
 
       LatticeWord lw = new LatticeWord(word, startNode, endNode, lm, am, pronunciation, mergeType);
       if (DEBUG) {
-        System.err.println(lw);
+        log.info(lw);
       }
       latticeWords.add(lw);
 
@@ -77,7 +81,7 @@ public class HTKLatticeReader {
     // GET NUMBER OF NODES
     numStates = Integer.parseInt(line.trim());
     if (DEBUG) {
-      System.err.println(numStates);
+      log.info(numStates);
     }
 
     // READ NODE TIMES
@@ -90,7 +94,7 @@ public class HTKLatticeReader {
       nodeTimeMatcher = nodeTimePattern.matcher(in.readLine());
 
       if (!nodeTimeMatcher.matches()) {
-        System.err.println("Input File Error");
+        log.info("Input File Error");
         System.exit(1);
       }
 
@@ -99,7 +103,7 @@ public class HTKLatticeReader {
       nodeTimes[i] = Integer.parseInt(nodeTimeMatcher.group(2));
 
       if (DEBUG) {
-        System.err.println(i + "\tt=" + nodeTimes[i]);
+        log.info(i + "\tt=" + nodeTimes[i]);
       }
     }
   }
@@ -112,19 +116,19 @@ public class HTKLatticeReader {
     int prevNode = 0;
     int prevTime = nodeTimes[0];
     if (DEBUG) {
-      System.err.println(0 + " (" + nodeTimes[0] + ")" + "-->" + 0 + " (" + nodeTimes[0] + ") ++");
+      log.info(0 + " (" + nodeTimes[0] + ")" + "-->" + 0 + " (" + nodeTimes[0] + ") ++");
     }
     for (int i = 1; i < nodeTimes.length; i++) {
       if (prevTime == nodeTimes[i]) {
         indexMap[i] = prevNode;
         if (DEBUG) {
-          System.err.println(i + " (" + nodeTimes[i] + ")" + "-->" + prevNode + " (" + nodeTimes[prevNode] + ") **");
+          log.info(i + " (" + nodeTimes[i] + ")" + "-->" + prevNode + " (" + nodeTimes[prevNode] + ") **");
         }
       } else {
         indexMap[i] = prevNode = i;
         prevTime = nodeTimes[i];
         if (DEBUG) {
-          System.err.println(i + " (" + nodeTimes[i] + ")" + "-->" + prevNode + " (" + nodeTimes[prevNode] + ") ++");
+          log.info(i + " (" + nodeTimes[i] + ")" + "-->" + prevNode + " (" + nodeTimes[prevNode] + ") ++");
         }
       }
     }
@@ -133,7 +137,7 @@ public class HTKLatticeReader {
       lw.startNode = indexMap[lw.startNode];
       lw.endNode = indexMap[lw.endNode];
       if (DEBUG) {
-        System.err.println(lw);
+        log.info(lw);
       }
     }
   }
@@ -238,7 +242,7 @@ public class HTKLatticeReader {
             if (w1.word.equalsIgnoreCase(w2.word)) {
               if (removeRedundentPair(w1, w2)) {
                 //int numMerged = mergeDuplicates();
-                //if (DEBUG) { System.err.println("merged " + numMerged + " identical entries."); }
+                //if (DEBUG) { log.info("merged " + numMerged + " identical entries."); }
                 changed = true;
                 //printWords();
                 //j--;
@@ -255,9 +259,9 @@ public class HTKLatticeReader {
   private boolean removeRedundentPair(LatticeWord w1, LatticeWord w2) {
 
     if (DEBUG) {
-      System.err.println("trying to remove:");
-      System.err.println(w1);
-      System.err.println(w2);
+      log.info("trying to remove:");
+      log.info(w1);
+      log.info(w2);
     }
 
     int w1Start = w1.startNode;
@@ -288,7 +292,7 @@ public class HTKLatticeReader {
     for (LatticeWord lw : wordsStartAt[oldStart]) {
       if (lw.endNode < newStart || ((lw.endNode == newStart) && (lw.endNode != lw.startNode))) {
         if (DEBUG) {
-          System.err.println("failed");
+          log.info("failed");
         }
         return false;
       }
@@ -296,7 +300,7 @@ public class HTKLatticeReader {
     for (LatticeWord lw : wordsEndAt[oldEnd]) {
       if (lw.startNode > newEnd || ((lw.startNode == newEnd) && (lw.endNode != lw.startNode))) {
         if (DEBUG) {
-          System.err.println("failed");
+          log.info("failed");
         }
         return false;
       }
@@ -311,7 +315,7 @@ public class HTKLatticeReader {
     changeEndTimes(wordsEndAt[oldEnd], newEnd);
 
     if (DEBUG) {
-      System.err.println("succeeded");
+      log.info("succeeded");
     }
     return true;
   }
@@ -326,7 +330,7 @@ public class HTKLatticeReader {
 
       if (latticeWords.contains(lw)) {
         if (DEBUG) {
-          System.err.println("duplicate found");
+          log.info("duplicate found");
         }
         LatticeWord twin = latticeWords.get(latticeWords.indexOf(lw));
         // assert (twin != lw) ;
@@ -368,7 +372,7 @@ public class HTKLatticeReader {
 
       if (latticeWords.contains(lw)) {
         if (DEBUG) {
-          System.err.println("duplicate found");
+          log.info("duplicate found");
         }
         LatticeWord twin = latticeWords.get(latticeWords.indexOf(lw));
         // assert (twin != lw) ;
@@ -441,7 +445,7 @@ public class HTKLatticeReader {
         LatticeWord second = latticeWords.get(j);
         if (first.equals(second)) {
           if (DEBUG) {
-            System.err.println("removed duplicate");
+            log.info("removed duplicate");
           }
           first.merge(second);
           latticeWords.remove(j);
@@ -475,17 +479,17 @@ public class HTKLatticeReader {
   //     }
 
   public void processLattice() {
-    // System.err.println(1);
+    // log.info(1);
     buildWordTimeArrays();
-    //System.err.println(2);
+    //log.info(2);
     removeSilence();
-    //System.err.println(3);
+    //log.info(3);
     mergeDuplicates();
-    //System.err.println(4);
+    //log.info(4);
     removeRedundency();
-    //System.err.println(5);
+    //log.info(5);
     removeEmptyNodes();
-    //System.err.println(6);
+    //log.info(6);
     if (PRETTYPRINT) {
       printWords();
     }
@@ -507,9 +511,9 @@ public class HTKLatticeReader {
     this.mergeType = mergeType;
 
     BufferedReader in = IOUtils.readerFromString(filename);
-    //System.err.println(-1);
+    //log.info(-1);
     readInput(in);
-    //System.err.println(0);
+    //log.info(0);
     if (PRETTYPRINT) {
       printWords();
     }
@@ -556,8 +560,8 @@ public class HTKLatticeReader {
       } else if (args[i].equalsIgnoreCase("-parser")) {
         parseGram = args[++i];
       } else {
-        System.err.println("unrecognized flag: " + args[i]);
-        System.err.println("usage: java LatticeReader <file> [ -debug ] [ -useMax ] [ -useSum ] [ -noPrettyPrint ] [ -parser parserFile ]");
+        log.info("unrecognized flag: " + args[i]);
+        log.info("usage: java LatticeReader <file> [ -debug ] [ -useMax ] [ -useSum ] [ -noPrettyPrint ] [ -parser parserFile ]");
         System.exit(0);
       }
     }

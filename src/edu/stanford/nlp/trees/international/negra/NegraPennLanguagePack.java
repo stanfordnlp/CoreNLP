@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.international.negra;
+package edu.stanford.nlp.trees.international.negra; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.TokenizerFactory;
@@ -14,7 +15,10 @@ import edu.stanford.nlp.trees.HeadFinder;
  * @author Roger Levy
  * @author Spence Green
  */
-public class NegraPennLanguagePack extends AbstractTreebankLanguagePack {
+public class NegraPennLanguagePack extends AbstractTreebankLanguagePack  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(NegraPennLanguagePack.class);
 
   private static final long serialVersionUID = 9081305982861675328L;
 
@@ -127,7 +131,7 @@ public class NegraPennLanguagePack extends AbstractTreebankLanguagePack {
     } else {
       basicCat = super.basicCategory(category);
     }
-    // System.err.println("NPLP stripping " + category + " with leaveGF = " + leaveGF + " gives " + basicCat);
+    // log.info("NPLP stripping " + category + " with leaveGF = " + leaveGF + " gives " + basicCat);
     return basicCat;
   }
 

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.util;
+package edu.stanford.nlp.util; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -21,7 +22,10 @@ import edu.stanford.nlp.stats.Counters;
  *
  * @author Joseph Smarr (jsmarr@stanford.edu)
  */
-public class CollectionUtils {
+public class CollectionUtils  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CollectionUtils.class);
 
   /**
    * Private constructor to prevent direct instantiation.
@@ -188,7 +192,7 @@ public class CollectionUtils {
         T o = m.newInstance(line);
         result.add(o);
       } catch (Exception e) {
-        System.err.println("Couldn't build object from line: " + line);
+        log.info("Couldn't build object from line: " + line);
         e.printStackTrace();
       }
       line = in.readLine();
@@ -242,7 +246,7 @@ public class CollectionUtils {
     Map<K, V> m = mapFactory.newMap();
     // populate m
     for (int i = 0; i < fields.length; i++) {
-      // System.err.println("Parsing " + fields[i]);
+      // log.info("Parsing " + fields[i]);
       fields[i] = fields[i].substring(0, fields[i].length() - 1); // get rid of
       // following
       // comma or

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.time;
+package edu.stanford.nlp.time; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.ReaderInputStream;
@@ -148,7 +149,10 @@ import java.util.regex.Pattern;
  * </pre>
  * @author Angel Chang
  */
-public class SUTimeMain {
+public class SUTimeMain  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(SUTimeMain.class);
   protected static String PYTHON = null;
 
   private SUTimeMain() {} // static class
@@ -825,7 +829,7 @@ public class SUTimeMain {
           //System.out.println(inputFilename + " => " + outputFilename);
           processTempEval3File(pipeline, inputFilename, outputFilename);
         } else {
-          System.err.println("ABORTING: Input file and output is the same - " + inputFilename);
+          log.info("ABORTING: Input file and output is the same - " + inputFilename);
           System.exit(-1);
         }
       }

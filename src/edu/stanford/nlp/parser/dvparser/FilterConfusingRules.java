@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.dvparser;
+package edu.stanford.nlp.parser.dvparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -28,7 +29,10 @@ import edu.stanford.nlp.util.TwoDimensionalSet;
  * most of this kind of tree is to make sure the parser is trained
  * with <code>-compactGrammar 0</code>.
  */
-public class FilterConfusingRules implements Predicate<Tree>, Serializable {
+public class FilterConfusingRules implements Predicate<Tree>, Serializable  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(FilterConfusingRules.class);
   final Set<String> unaryRules = new HashSet<>();
   final TwoDimensionalSet<String, String> binaryRules = new TwoDimensionalSet<>();
   
@@ -61,17 +65,17 @@ public class FilterConfusingRules implements Predicate<Tree>, Serializable {
     }
 
     if (DEBUG) {
-      System.err.println("UNARY RULES");
+      log.info("UNARY RULES");
       for (String rule : unaryRules) {
-        System.err.println("  " + rule);
+        log.info("  " + rule);
       }
-      System.err.println();
-      System.err.println("BINARY RULES");
+      log.info();
+      log.info("BINARY RULES");
       for (Pair<String, String> rule : binaryRules) {
-        System.err.println("  " + rule);
+        log.info("  " + rule);
       }
-      System.err.println();
-      System.err.println();
+      log.info();
+      log.info();
     }
   }
 
@@ -85,14 +89,14 @@ public class FilterConfusingRules implements Predicate<Tree>, Serializable {
     if (tree.children().length == 1) {
       if (!unaryRules.contains(tree.children()[0].label().value())) {
         if (DEBUG) {
-          System.err.println("Filtered tree because of unary rule: " + tree.children()[0].label().value());
+          log.info("Filtered tree because of unary rule: " + tree.children()[0].label().value());
         }
         return false;
       }
     } else {
       if (!binaryRules.contains(tree.children()[0].label().value(), tree.children()[1].label().value())) {
         if (DEBUG) {
-          System.err.println("Filtered tree because of binary rule: " + tree.children()[0].label().value() + "," + tree.children()[1].label().value());
+          log.info("Filtered tree because of binary rule: " + tree.children()[0].label().value() + "," + tree.children()[1].label().value());
         }
         return false;
       }

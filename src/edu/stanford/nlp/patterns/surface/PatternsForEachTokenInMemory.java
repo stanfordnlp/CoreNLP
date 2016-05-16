@@ -2,7 +2,7 @@ package edu.stanford.nlp.patterns.surface;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.patterns.Pattern;
-import edu.stanford.nlp.util.Execution;
+import edu.stanford.nlp.util.ArgumentParser;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
@@ -17,7 +17,7 @@ public class PatternsForEachTokenInMemory<E extends Pattern> extends PatternsFor
   public static ConcurrentHashMap<String, Map<Integer, Set<? extends Pattern>>> patternsForEachToken = null;
 
   public PatternsForEachTokenInMemory(Properties props, Map<String, Map<Integer, Set<E>>> pats) {
-    Execution.fillOptions(this, props);
+    ArgumentParser.fillOptions(this, props);
 
 
     //TODO: make this atomic

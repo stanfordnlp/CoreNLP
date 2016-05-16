@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.international.pennchinese;
+package edu.stanford.nlp.trees.international.pennchinese; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.StringLabel;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
@@ -22,7 +23,10 @@ import java.util.List;
  * @author Roger Levy
  * @author Christopher Manning
  */
-public class ChineseCollinizer implements TreeTransformer {
+public class ChineseCollinizer implements TreeTransformer  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseCollinizer.class);
 
   private final static boolean VERBOSE = false;
 
@@ -49,7 +53,7 @@ public class ChineseCollinizer implements TreeTransformer {
   private Tree transformTree(Tree tree, boolean isRoot) {
     String label = tree.label().value();
 
-    // System.err.println("ChineseCollinizer: Node label is " + label);
+    // log.info("ChineseCollinizer: Node label is " + label);
 
     if (tree.isLeaf()) {
       if (deletePunct && ctlp.isPunctuationWord(label)) {
@@ -88,7 +92,7 @@ public class ChineseCollinizer implements TreeTransformer {
     // Chinese treebank that only have punctuation in them!!!
     if (children.isEmpty() && ! isRoot) {
       if (VERBOSE) {
-        System.err.println("ChineseCollinizer: all children of " + label +
+        log.info("ChineseCollinizer: all children of " + label +
                            " deleted; returning null");
       }
       return null;

@@ -10,11 +10,12 @@ import java.util.Stack;
 import java.util.function.Supplier;
 
 import edu.stanford.nlp.math.SloppyMath;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood.Record;
 import edu.stanford.nlp.util.Generics;
 
 /**
- * An abstract handler incorporating the logic of outputing a log message,
+ * An abstract handler incorporating the logic of outputting a log message,
  * to some source. This class is responsible for printing channel information,
  * formatting tracks, and writing the actual log messages.
  *
@@ -23,7 +24,8 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author Gabor Angeli (angeli at cs.stanford)
  */
-public abstract class OutputHandler extends LogRecordHandler{
+public abstract class OutputHandler extends LogRecordHandler {
+
   /**
    * A list of tracks which have been started but not yet printed as no
    * log messages are in them yet.
@@ -73,6 +75,37 @@ public abstract class OutputHandler extends LogRecordHandler{
    */
   protected Style trackStyle = Style.NONE;
   protected Map<String,Style> channelStyles = null;
+
+  static Pair<String,Redwood.Flag> getSourceStringAndLevel(Object[] channel) {
+    // Parse the channels
+    Class source = null;  // The class the message is coming from
+    Object backupSource = null;  // Another identifier for the message
+    Redwood.Flag flag = Redwood.Flag.STDOUT;
+    if (channel != null) {
+      for (Object c : channel) {
+        if (c instanceof Class) {
+          source = (Class) c;  // This is a class the message is coming from
+        } else if (c instanceof Redwood.Flag) {
+          if (c != Redwood.Flag.FORCE) {  // This is a Redwood flag
+            flag = (Redwood.Flag) c;
+          }
+        } else {
+          backupSource = c;  // This is another "source" for the log message
+        }
+      }
+    }
+
+    // Get the sourceString. Do at end because there is then an imposed priority ordering
+    String sourceString;
+    if (source != null) {
+      sourceString = source.getName();
+    } else if (backupSource != null) {
+      sourceString = backupSource.toString();
+    } else {
+      sourceString = "CoreNLP";
+    }
+    return new Pair<>(sourceString, flag);
+  }
 
   /**
    * Print a string to an output without the trailing newline.
@@ -240,13 +273,11 @@ public abstract class OutputHandler extends LogRecordHandler{
     if (record.content instanceof Throwable) {
       //(vars)
       List<String> lines = new ArrayList<>();
-      StackTraceElement[] trace = null;
-      StackTraceElement topTraceElement= null;
       //(root message)
       Throwable exception = (Throwable) record.content;
       lines.add(record.content.toString());
-      trace = exception.getStackTrace();
-      topTraceElement = trace.length > 0 ? trace[0] : null;
+      StackTraceElement[] trace = exception.getStackTrace();
+      StackTraceElement topTraceElement = trace.length > 0 ? trace[0] : null;
       for(StackTraceElement e : exception.getStackTrace()){
         lines.add(tab + e.toString());
       }
@@ -451,4 +482,5 @@ public abstract class OutputHandler extends LogRecordHandler{
     }
 
   }
+
 }

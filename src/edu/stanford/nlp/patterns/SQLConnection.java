@@ -1,6 +1,6 @@
 package edu.stanford.nlp.patterns;
 
-import edu.stanford.nlp.util.Execution.Option;
+import edu.stanford.nlp.util.ArgumentParser.Option;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

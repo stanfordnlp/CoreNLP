@@ -56,6 +56,7 @@ import edu.stanford.nlp.trees.international.pennchinese.RadicalMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
 import edu.stanford.nlp.util.Timing;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -194,7 +195,7 @@ import edu.stanford.nlp.util.Timing;
  * <tr><td> useGenericFeatures</td><td>boolean</td><td>false</td><td>If true, any features you include in the map will be incorporated into the model with values equal to those given in the file; values are treated as strings unless you use the "realValued" option (described below)</td></tr>
  * <tr><td> justify</td><td>boolean</td><td>false</td><td>Print out all
  * feature/class pairs and their weight, and then for each input data
- * point, print justification (weights) for active features</td></tr>
+ * point, print justification (weights) for active features. Only implemented for CMMClassifier.</td></tr>
  * <tr><td> normalize</td><td>boolean</td><td>false</td><td>For the CMMClassifier (only) if this is true then the Scorer normalizes scores as probabilities.</td></tr>
  * <tr><td> useHuber</td><td>boolean</td><td>false</td><td>Use a Huber loss prior rather than the default quadratic loss.</td></tr>
  * <tr><td> useQuartic</td><td>boolean</td><td>false</td><td>Use a Quartic prior rather than the default quadratic loss.</td></tr>
@@ -367,7 +368,10 @@ import edu.stanford.nlp.util.Timing;
  * @author Huy Nguyen
  * @author Mengqiu Wang
  */
-public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> {
+public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN>  {
+
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels log = Redwood.channels(NERFeatureFactory.class);
 
   private static final long serialVersionUID = -2329726064739185544L;
 
@@ -396,7 +400,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     String domain = cInfo.get(0).get(CoreAnnotations.DomainAnnotation.class);
     final boolean doFE = domain != null;
 
-//    System.err.println(doFE+"\t"+domain);
+//    log.info(doFE+"\t"+domain);
 
     // there are two special cases below, because 2 cliques have 2 names
     Collection<String> c;
@@ -450,7 +454,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       addAllInterningAndSuffixing(features, c, domain + '-' + suffix);
     }
 
-    // System.err.println(StringUtils.join(features,"\n")+"\n");
+    // log.info(StringUtils.join(features,"\n")+"\n");
     return features;
   }
 
@@ -469,7 +473,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     if (lexicon != null) {
       return;
     }
-    Timing.startDoing("Loading distsim lexicon from " + flags.distSimLexicon);
+    Timing timing = new Timing();
     lexicon = Generics.newHashMap();
     boolean terryKoo = "terryKoo".equals(flags.distSimFileFormat);
     for (String line : ObjectBank.getLineIterator(flags.distSimLexicon,
@@ -497,13 +501,20 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       }
       lexicon.put(word, wordClass);
     }
-    Timing.endDoing();
+    timing.done(log, "Loading distsim lexicon from " + flags.distSimLexicon);
   }
 
+  public String describeDistsimLexicon() {
+    if (lexicon == null) {
+      return "No distsim lexicon";
+    } else {
+      return "Distsim lexicon of size " + lexicon.size();
+    }
+  }
 
   private void distSimAnnotate(PaddedList<IN> info) {
     for (CoreLabel fl : info) {
-      if (fl.has(CoreAnnotations.DistSimAnnotation.class)) { return; }
+      if (fl.containsKey(CoreAnnotations.DistSimAnnotation.class)) { return; }
       String word = getWord(fl);
       if ( ! flags.casedDistSim) {
         word = word.toLowerCase();
@@ -997,10 +1008,10 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         if (isOrdinal(cInfo, loc)) {
           featuresC.add("C_ORDINAL");
           if (isOrdinal(cInfo, loc-1)) {
-            //System.err.print(getWord(p) + " ");
+            //log.info(getWord(p) + " ");
             featuresC.add("PC_ORDINAL");
           }
-          //System.err.println(cWord);
+          //log.info(cWord);
         }
         if (isOrdinal(cInfo, loc-1)) {
           featuresC.add("P_ORDINAL");
@@ -1553,7 +1564,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         int val = Integer.parseInt(cWord);
         if(val > 0) featuresC.add("POSITIVE_INTEGER");
         else if(val < 0) featuresC.add("NEGATIVE_INTEGER");
-        // System.err.println("FOUND INTEGER");
+        // log.info("FOUND INTEGER");
       } catch(NumberFormatException e){
         // not an integer value, nothing to do
       }
@@ -1567,7 +1578,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       }
       //now look through the cached keys
       for (Class key : genericAnnotationKeys) {
-        //System.err.println("Adding feature: " + CoreLabel.genericValues.get(key) + " with value " + c.get(key));
+        //log.info("Adding feature: " + CoreLabel.genericValues.get(key) + " with value " + c.get(key));
         if (c.get(key) != null && c.get(key) instanceof Collection) {
           for (Object ob: (Collection)c.get(key)) {
             featuresC.add(ob + "-" + CoreLabel.genericValues.get(key));
@@ -2191,11 +2202,11 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     String nWord = getWord(cInfo.get(loc + reverse(1)));
     CoreLabel p = cInfo.get(loc - reverse(1));
     String pWord = getWord(p);
-    // System.err.println(word+" "+nWord);
+    // log.info(word+" "+nWord);
     if (!(isNameCase(word) && noUpperCase(nWord) && hasLetter(nWord) && hasLetter(pWord) && p != cInfo.getPad())) {
       return Collections.singletonList("NO-OCCURRENCE-PATTERN");
     }
-    // System.err.println("LOOKING");
+    // log.info("LOOKING");
     Set<String> l = Generics.newHashSet();
     if (cInfo.get(loc - reverse(1)).getString(CoreAnnotations.PartOfSpeechAnnotation.class) != null && isNameCase(pWord) && cInfo.get(loc - reverse(1)).getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNP")) {
       for (int jump = 3; jump < 150; jump++) {
@@ -2221,9 +2232,9 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         if (getWord(cInfo.get(loc + reverse(jump))).equals(word)) {
           if (isNameCase(getWord(cInfo.get(loc + reverse(jump - 1)))) && (cInfo.get(loc + reverse(jump - 1))).getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNP")) {
             l.add("X-NEXT-OCCURRENCE-YX");
-            // System.err.println(getWord(cInfo.get(loc+reverse(jump-1))));
+            // log.info(getWord(cInfo.get(loc+reverse(jump-1))));
           } else if (isNameCase(getWord(cInfo.get(loc + reverse(jump + 1)))) && (cInfo.get(loc + reverse(jump + 1))).getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNP")) {
-            // System.err.println(getWord(cInfo.get(loc+reverse(jump+1))));
+            // log.info(getWord(cInfo.get(loc+reverse(jump+1))));
             l.add("X-NEXT-OCCURRENCE-XY");
           } else {
             l.add("X-NEXT-OCCURRENCE-X");
@@ -2234,10 +2245,10 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         if (getWord(cInfo.get(loc + jump)) != null && getWord(cInfo.get(loc + jump)).equals(word)) {
           if (isNameCase(getWord(cInfo.get(loc + reverse(jump + 1)))) && (cInfo.get(loc + reverse(jump + 1))).getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNP")) {
             l.add("X-PREV-OCCURRENCE-YX");
-            // System.err.println(getWord(cInfo.get(loc+reverse(jump+1))));
+            // log.info(getWord(cInfo.get(loc+reverse(jump+1))));
           } else if (isNameCase(getWord(cInfo.get(loc + reverse(jump - 1)))) && cInfo.get(loc + reverse(jump - 1)).getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNP")) {
             l.add("X-PREV-OCCURRENCE-XY");
-            // System.err.println(getWord(cInfo.get(loc+reverse(jump-1))));
+            // log.info(getWord(cInfo.get(loc+reverse(jump-1))));
           } else {
             l.add("X-PREV-OCCURRENCE-X");
           }
@@ -2246,7 +2257,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     }
     /*
     if (!l.isEmpty()) {
-      System.err.println(pWord+" "+word+" "+nWord+" "+l);
+      log.info(pWord+" "+word+" "+nWord+" "+l);
     }
     */
     return l;

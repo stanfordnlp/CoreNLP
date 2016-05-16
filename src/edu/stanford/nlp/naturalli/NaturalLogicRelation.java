@@ -1,4 +1,5 @@
-package edu.stanford.nlp.naturalli;
+package edu.stanford.nlp.naturalli; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.util.Trilean;
 
@@ -238,7 +239,7 @@ public enum NaturalLogicRelation {
     put("neg", NaturalLogicRelation.NEGATION);  //
     put("nn", NaturalLogicRelation.INDEPENDENCE);  //
     put("npadvmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  // "9 months after his election, <main clause>"
-    put("nsubj", NaturalLogicRelation.INDEPENDENCE);  //
+    put("nsubj", NaturalLogicRelation.REVERSE_ENTAILMENT);  // Note[gabor]: Only true for _duplicate_ nsubj relations. @see NaturalLogicWeights.
     put("nsubjpass", NaturalLogicRelation.INDEPENDENCE);  //
     put("number", NaturalLogicRelation.INDEPENDENCE);  //
     put("num", NaturalLogicRelation.INDEPENDENCE);  // gets a bit too vague if we allow deleting this? "he served three terms" -?-> "he served terms"
@@ -443,7 +444,7 @@ public enum NaturalLogicRelation {
     if (rel != null) {
       return rel;
     } else {
-//      System.err.println("Unknown dependency arc for NaturalLogicRelation: " + dependencyLabel);
+//      log.info("Unknown dependency arc for NaturalLogicRelation: " + dependencyLabel);
       if (dependencyLabel.startsWith("nmod:")) {
         return NaturalLogicRelation.REVERSE_ENTAILMENT;
       } else if (dependencyLabel.startsWith("conj:")) {

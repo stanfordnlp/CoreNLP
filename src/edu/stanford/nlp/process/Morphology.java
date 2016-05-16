@@ -1,4 +1,5 @@
-package edu.stanford.nlp.process;
+package edu.stanford.nlp.process; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 import java.io.FileReader;
@@ -51,7 +52,10 @@ import java.util.function.Function;
  * @author Kristina Toutanova (kristina@cs.stanford.edu)
  * @author Christopher Manning
  */
-public class Morphology implements Function {
+public class Morphology implements Function  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(Morphology.class);
 
   private static final Logger LOGGER = Logger.getLogger(Morphology.class.getName());
 
@@ -148,7 +152,7 @@ public class Morphology implements Function {
       quotedWord = quotedWord.replaceAll("\n", "\u1CF2");
     }
     String wordtag = quotedWord + '_' + tag;
-    if (DEBUG) System.err.println("Trying to normalize |" + wordtag + "|");
+    if (DEBUG) log.info("Trying to normalize |" + wordtag + "|");
     try {
       lexer.setOption(1, lowercase);
       lexer.yyreset(new StringReader(wordtag));
@@ -156,7 +160,7 @@ public class Morphology implements Function {
       String wordRes = lexer.next();
       lexer.next(); // go past tag
       if (wordHasForbiddenChar) {
-        if (DEBUG) System.err.println("Restoring forbidden chars");
+        if (DEBUG) log.info("Restoring forbidden chars");
         wordRes = wordRes.replaceAll("\u1CF0", "_");
         wordRes = wordRes.replaceAll("\u1CF1", " ");
         wordRes = wordRes.replaceAll("\u1CF2", "\n");
@@ -244,7 +248,7 @@ public class Morphology implements Function {
    */
   public static void main(String[] args) throws IOException {
     if (args.length == 0) {
-      System.err.println("java Morphology [-rebuildVerbTable file|-stem word+|file+]");
+      log.info("java Morphology [-rebuildVerbTable file|-stem word+|file+]");
     } else if (args.length == 2 && args[0].equals("-rebuildVerbTable")) {
       String verbs = IOUtils.slurpFile(args[1]);
       String[] words = verbs.split("\\s+");
@@ -271,7 +275,7 @@ public class Morphology implements Function {
           try {
             flags = Integer.parseInt(arg.substring(1));
           } catch (NumberFormatException nfe) {
-            System.err.println("Couldn't handle flag: " + arg + "\n");
+            log.info("Couldn't handle flag: " + arg + "\n");
             // ignore flag
           }
         } else {

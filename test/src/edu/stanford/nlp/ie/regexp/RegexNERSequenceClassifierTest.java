@@ -6,7 +6,7 @@ import java.io.*;
 import java.util.*;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
@@ -150,7 +150,7 @@ public class RegexNERSequenceClassifierTest extends TestCase {
   }
 
   private static void compareAnswers(String[] expected, List<CoreLabel> sentence) {
-    assertEquals("Lengths different for " + StringUtils.join(expected) + " and " + Sentence.listToString(sentence), expected.length, sentence.size());
+    assertEquals("Lengths different for " + StringUtils.join(expected) + " and " + SentenceUtils.listToString(sentence), expected.length, sentence.size());
     String str = "Comparing " + Arrays.toString(expected) + " and " + listToString(sentence);
     for (int i = 0; i < expected.length; ++i) {
       if (expected[i].equals("-")) {

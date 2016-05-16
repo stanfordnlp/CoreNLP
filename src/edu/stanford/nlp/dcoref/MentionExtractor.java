@@ -181,7 +181,7 @@ public class MentionExtractor {
         mention.contextParseTree = tree;
         mention.sentenceWords = sentence;
         mention.originalSpan = new ArrayList<>(mention.sentenceWords.subList(mention.startIndex, mention.endIndex));
-        if(!((CoreLabel)tree.label()).has(CoreAnnotations.BeginIndexAnnotation.class)) tree.indexSpans(0);
+        if(!((CoreLabel) tree.label()).containsKey(CoreAnnotations.BeginIndexAnnotation.class)) tree.indexSpans(0);
         if(mention.headWord==null) {
           Tree headTree = ((RuleBasedCorefMentionFinder) mentionFinder).findSyntacticHead(mention, tree, sentence);
           mention.headWord = (CoreLabel)headTree.label();

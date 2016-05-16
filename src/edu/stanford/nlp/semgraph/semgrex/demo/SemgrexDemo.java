@@ -1,4 +1,5 @@
-package edu.stanford.nlp.semgraph.semgrex.demo;
+package edu.stanford.nlp.semgraph.semgrex.demo; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams;
@@ -16,7 +17,10 @@ import edu.stanford.nlp.trees.Tree;
  *
  * @author John Bauer
  */
-public class SemgrexDemo {
+public class SemgrexDemo  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(SemgrexDemo.class);
   public static void main(String[] args) {
     String treeString = "(ROOT  (S (NP (PRP$ My) (NN dog)) (ADVP (RB also)) (VP (VBZ likes) (S (VP (VBG eating) (NP (NN sausage))))) (. .)))";
     // Typically the tree is constructed by parsing or reading a
@@ -36,14 +40,14 @@ public class SemgrexDemo {
 
     GrammaticalStructure gs = gsf.newGrammaticalStructure(tree);
 
-    System.err.println(graph);
+    log.info(graph);
 
     SemgrexPattern semgrex = SemgrexPattern.compile("{}=A <<nsubj {}=B");
     SemgrexMatcher matcher = semgrex.matcher(graph);
     // This will produce two results on the given tree: "likes" is an
     // ancestor of both "dog" and "my" via the nsubj relation
     while (matcher.find()) {
-      System.err.println(matcher.getNode("A") + " <<nsubj " + matcher.getNode("B"));
+      log.info(matcher.getNode("A") + " <<nsubj " + matcher.getNode("B"));
     }
   }
 }

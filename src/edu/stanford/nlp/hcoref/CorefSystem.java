@@ -19,26 +19,31 @@ import edu.stanford.nlp.hcoref.data.Document;
 import edu.stanford.nlp.hcoref.data.Mention;
 import edu.stanford.nlp.hcoref.sieve.Sieve;
 import edu.stanford.nlp.hcoref.sieve.Sieve.ClassifierType;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.logging.RedwoodConfiguration;
 
-public class CorefSystem {
-  
+public class CorefSystem  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CorefSystem.class);
+
   public Properties props;
   public List<Sieve> sieves;
   public Dictionaries dictionaries;
   public CorefDocMaker docMaker = null;
-  
+
   public CorefSystem(Properties props) throws Exception {
     this.props = props;
     sieves = Sieve.loadSieves(props);
-    
+
     // set semantics loading
     for(Sieve sieve : sieves) {
       if(sieve.classifierType == ClassifierType.RULE) continue;
@@ -50,7 +55,7 @@ public class CorefSystem {
 
     docMaker = new CorefDocMaker(props, dictionaries);
   }
-  
+
   public Dictionaries dictionaries() { return dictionaries; }
 
 
@@ -59,17 +64,17 @@ public class CorefSystem {
         "debug-cluster", "debug-mention", "debug-preprocessor", "debug-docreader", "debug-mergethres",
         "debug-featureselection", "debug-md"
         );
-    
+
     /*
        property, environment setting
     */
     Properties props = StringUtils.argsToProperties(args);
-    int nThreads = CorefProperties.getThreadCounts(props); 
+    int nThreads = CorefProperties.getThreadCounts(props);
     String timeStamp = Calendar.getInstance().getTime().toString().replaceAll("\\s", "-").replaceAll(":", "-");
     props.put(CorefProperties.PATH_INPUT_PROP, CorefProperties.getPathEvalData(props));
-    
+
     Logger logger = Logger.getLogger(CorefSystem.class.getName());
-    
+
     // set log file path
     if(props.containsKey(CorefProperties.LOG_PROP)){
       File logFile = new File(props.getProperty(CorefProperties.LOG_PROP));
@@ -77,9 +82,9 @@ public class CorefSystem {
       RedwoodConfiguration.Handlers.file(logFile)).apply();
       Redwood.log("Starting coref log");
     }
-    
-    System.err.println(props.toString());
-    
+
+    log.info(props.toString());
+
     if(CorefProperties.checkMemory(props)) checkMemoryUsage();
 
     CorefSystem cs = new CorefSystem(props);
@@ -94,7 +99,7 @@ public class CorefSystem {
     PrintWriter writerGold = null;
     PrintWriter writerBeforeCoref = null;
     PrintWriter writerAfterCoref = null;
-    if(CorefProperties.doScore(props)) {
+    if (CorefProperties.doScore(props)) {
       String pathOutput = CorefProperties.getPathOutput(props);
       (new File(pathOutput)).mkdir();
       goldOutput = pathOutput + "output-" + timeStamp + ".gold.txt";
@@ -104,11 +109,8 @@ public class CorefSystem {
       writerBeforeCoref = new PrintWriter(new FileOutputStream(beforeCorefOutput));
       writerAfterCoref = new PrintWriter(new FileOutputStream(afterCorefOutput));
     }
-    
-    
-    /*
-       run coref
-    */
+
+    // run coref
     MulticoreWrapper<Pair<Document, CorefSystem>, StringBuilder[]> wrapper = new MulticoreWrapper<>(
             nThreads, new ThreadsafeProcessor<Pair<Document, CorefSystem>, StringBuilder[]>() {
       @Override
@@ -133,13 +135,13 @@ public class CorefSystem {
         return this;
       }
     });
-    
+
     Date startTime = null;
     if(CorefProperties.checkTime(props)) {
       startTime = new Date();
       System.err.printf("END-TO-END COREF Start time: %s\n", startTime);
     }
-    
+
     // run processes
     int docCnt = 0;
     while (true) {
@@ -148,57 +150,55 @@ public class CorefSystem {
       wrapper.put(Pair.makePair(document, cs));
       docCnt = logOutput(wrapper, writerGold, writerBeforeCoref, writerAfterCoref, docCnt);
     }
-    
+
     // Finished reading the input. Wait for jobs to finish
     wrapper.join();
     docCnt = logOutput(wrapper, writerGold, writerBeforeCoref, writerAfterCoref, docCnt);
-    writerGold.close();
-    writerBeforeCoref.close();
-    writerAfterCoref.close();
-    
+    IOUtils.closeIgnoringExceptions(writerGold);
+    IOUtils.closeIgnoringExceptions(writerBeforeCoref);
+    IOUtils.closeIgnoringExceptions(writerAfterCoref);
+
     if(CorefProperties.checkTime(props)) {
       System.err.printf("END-TO-END COREF Elapsed time: %.3f seconds\n", (((new Date()).getTime() - startTime.getTime()) / 1000F));
 //      System.err.printf("CORENLP PROCESS TIME TOTAL: %.3f seconds\n", cs.mentionExtractor.corenlpProcessTime);
     }
     if(CorefProperties.checkMemory(props)) checkMemoryUsage();
-    
-    
-    /*
-       scoring
-    */
-    if(CorefProperties.doScore(props)) {
+
+    // scoring
+    if (CorefProperties.doScore(props)) {
       String summary = Scorer.getEvalSummary(CorefProperties.getPathScorer(props), goldOutput, beforeCorefOutput);
       CorefPrinter.printScoreSummary(summary, logger, false);
-      
+
       summary = Scorer.getEvalSummary(CorefProperties.getPathScorer(props), goldOutput, afterCorefOutput);
       CorefPrinter.printScoreSummary(summary, logger, true);
       CorefPrinter.printFinalConllScore(summary);
     }
   }
-  
+
   /**
-   *  write output of coref system in conll format, and log. 
+   *  Write output of coref system in conll format, and log.
    */
-  private static int logOutput(
-      MulticoreWrapper<Pair<Document, CorefSystem>, StringBuilder[]> wrapper,
-      PrintWriter writerGold, 
-      PrintWriter writerBeforeCoref,
-      PrintWriter writerAfterCoref, 
-      int docCnt) {
+  private static int logOutput(MulticoreWrapper<Pair<Document, CorefSystem>, StringBuilder[]> wrapper,
+                               PrintWriter writerGold,
+                               PrintWriter writerBeforeCoref,
+                               PrintWriter writerAfterCoref,
+                               int docCnt) {
     while (wrapper.peek()) {
       StringBuilder[] output = wrapper.poll();
       writerGold.print(output[0]);
       writerBeforeCoref.print(output[1]);
       writerAfterCoref.print(output[2]);
-      System.err.println(output[3]);
-      if ((docCnt++) % 10 == 0) System.err.println(docCnt + " document(s) processed");
+      if (output[3].length() > 0) {
+        log.info(output[3]);
+      }
+      if ((++docCnt) % 10 == 0) log.info(docCnt + " document(s) processed");
     }
     return docCnt;
   }
 
-  /** 
+  /**
    * main entry of coreference system.
-   * 
+   *
    * @param document Input document for coref format (Annotation and optional information)
    * @param output For output of coref system (conll format and log. list size should be 4.)
    * @return Map of coref chain ID and corresponding chain
@@ -209,14 +209,17 @@ public class CorefSystem {
     if(CorefProperties.printMDLog(props)) {
       Redwood.log(CorefPrinter.printMentionDetectionLog(document));
     }
-    
+
     if(CorefProperties.doScore(props)) {
       output[0] = (new StringBuilder()).append(CorefPrinter.printConllOutput(document, true));  // gold
       output[1] = (new StringBuilder()).append(CorefPrinter.printConllOutput(document, false)); // before coref
     }
     output[3] = new StringBuilder();  // log from sieves
-    
+
     for(Sieve sieve : sieves){
+      if (Thread.interrupted()) {  // Allow interrupting
+        throw new RuntimeInterruptedException();
+      }
       output[3].append(sieve.resolveMention(document, dictionaries, props));
     }
 
@@ -226,13 +229,13 @@ public class CorefSystem {
     if(CorefProperties.doScore(props)) {
       output[2] = (new StringBuilder()).append(CorefPrinter.printConllOutput(document, false, true)); // after coref
     }
-    
+
     return makeCorefOutput(document);
   }
-  
-  /** 
+
+  /**
    * main entry of coreference system.
-   * 
+   *
    * @param document Input document for coref format (Annotation and optional information)
    * @return Map of coref chain ID and corresponding chain
    * @throws Exception
@@ -241,9 +244,9 @@ public class CorefSystem {
     return coref(document, new StringBuilder[4]);
   }
 
-  /** 
+  /**
    * main entry of coreference system.
-   * 
+   *
    * @param anno Input annotation.
    * @return Map of coref chain ID and corresponding chain
    * @throws Exception
@@ -251,9 +254,9 @@ public class CorefSystem {
   public Map<Integer, CorefChain> coref(Annotation anno) throws Exception {
     return coref(docMaker.makeDocument(anno));
   }
-  
-  /** extract final coreference output from coreference document format */
-  public Map<Integer, CorefChain> makeCorefOutput(Document document) {
+
+  /** Extract final coreference output from coreference document format. */
+  private static Map<Integer, CorefChain> makeCorefOutput(Document document) {
     Map<Integer, CorefChain> result = Generics.newHashMap();
     for(CorefCluster c : document.corefClusters.values()) {
       result.put(c.clusterID, new CorefChain(c, document.positions));
@@ -261,8 +264,8 @@ public class CorefSystem {
     return result;
   }
 
-  /** Remove singletons, appositive, predicate nominatives, relative pronouns */
-  public void postProcessing(Document document) {
+  /** Remove singletons, appositive, predicate nominatives, relative pronouns. */
+  private static void postProcessing(Document document) {
     Set<Mention> removeSet = Generics.newHashSet();
     Set<Integer> removeClusterSet = Generics.newHashSet();
 
@@ -278,7 +281,7 @@ public class CorefSystem {
           m.corefClusterID = m.mentionID;
         }
       }
-      
+
       c.corefMentions.removeAll(removeMentions);
       if(CorefProperties.REMOVE_SINGLETONS && c.getCorefMentions().size()==1) {
         removeClusterSet.add(c.clusterID);
@@ -296,7 +299,7 @@ public class CorefSystem {
     Runtime runtime = Runtime.getRuntime();
     runtime.gc();
     long memory = runtime.totalMemory() - runtime.freeMemory();
-    System.err.println("USED MEMORY (bytes): " + memory);
+    log.info("USED MEMORY (bytes): " + memory);
   }
   /** Remove singleton clusters */
   public static List<List<Mention>> filterMentionsWithSingletonClusters(Document document, List<List<Mention>> mentions)

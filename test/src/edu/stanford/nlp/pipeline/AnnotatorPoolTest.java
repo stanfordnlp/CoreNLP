@@ -3,17 +3,20 @@ package edu.stanford.nlp.pipeline;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.Set;
+
+import edu.stanford.nlp.ling.CoreAnnotation;
 import junit.framework.TestCase;
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
  * Makes sure that the pool creates new Annotators when the signature properties change
  */
 public class AnnotatorPoolTest extends TestCase {
+
   static class SampleAnnotatorFactory extends AnnotatorFactory {
     private static final long serialVersionUID = 1L;
     public SampleAnnotatorFactory(Properties props) {
-      super(props, new AnnotatorImplementations());
+      super("foo", props);
     }
     @Override
     public Annotator create() {
@@ -24,13 +27,13 @@ public class AnnotatorPoolTest extends TestCase {
         }
 
         @Override
-        public Set<Requirement> requirementsSatisfied() {
+        public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
           // empty body; we don't actually use it here
           return Collections.emptySet();
         }
 
         @Override
-        public Set<Requirement> requires() {
+        public Set<Class<? extends CoreAnnotation>> requires() {
           // empty body; we don't actually use it here
           return Collections.emptySet();
         }
@@ -39,9 +42,7 @@ public class AnnotatorPoolTest extends TestCase {
     @Override
     public String signature() {
       // keep track of all relevant properties for this annotator here!
-      StringBuilder os = new StringBuilder();
-      os.append("sample.prop = " + properties.getProperty("sample.prop", ""));
-      return os.toString();
+      return "sample.prop = " + properties.getProperty("sample.prop", "");
     }
 
     @Override
@@ -68,4 +69,5 @@ public class AnnotatorPoolTest extends TestCase {
     System.out.println("Third annotator: " + a3);
     Assert.assertTrue(a1 != a3);
   }
+
 }

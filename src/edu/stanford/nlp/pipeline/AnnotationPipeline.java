@@ -1,5 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.*;
@@ -22,7 +23,10 @@ import java.util.function.Consumer;
  * @author Jenny Finkel
  */
 
-public class AnnotationPipeline implements Annotator {
+public class AnnotationPipeline implements Annotator  {
+
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels log = Redwood.channels(AnnotationPipeline.class);
 
   protected static final boolean TIME = true;
 
@@ -41,7 +45,7 @@ public class AnnotationPipeline implements Annotator {
   }
 
   public AnnotationPipeline() {
-    this(new ArrayList<>());
+    this(new ArrayList<>()); // It can't be a singletonList() since it isn't copied but is mutated.
   }
 
   public void addAnnotator(Annotator annotator) {
@@ -62,6 +66,9 @@ public class AnnotationPipeline implements Annotator {
     Iterator<MutableLong> it = accumulatedTime.iterator();
     Timing t = new Timing();
     for (Annotator annotator : annotators) {
+      if (Thread.interrupted()) {  // Allow interrupting
+        throw new RuntimeInterruptedException();
+      }
       if (TIME) {
         t.start();
       }
@@ -197,8 +204,8 @@ public class AnnotationPipeline implements Annotator {
   }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
-    Set<Requirement> satisfied = Generics.newHashSet();
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+    Set<Class<? extends CoreAnnotation>> satisfied = Generics.newHashSet();
     for (Annotator annotator : annotators) {
       satisfied.addAll(annotator.requirementsSatisfied());
     }
@@ -206,7 +213,7 @@ public class AnnotationPipeline implements Annotator {
   }
 
   @Override
-  public Set<Requirement> requires() {
+  public Set<Class<? extends CoreAnnotation>> requires() {
     if (annotators.isEmpty()) {
       return Collections.emptySet();
     }
@@ -217,7 +224,7 @@ public class AnnotationPipeline implements Annotator {
   public static void main(String[] args) throws IOException, ClassNotFoundException {
     Timing tim = new Timing();
     AnnotationPipeline ap = new AnnotationPipeline();
-    boolean verbose = false;
+    final boolean verbose = false;
     ap.addAnnotator(new TokenizerAnnotator(verbose, "en"));
     ap.addAnnotator(new WordsToSentencesAnnotator(verbose));
     // ap.addAnnotator(new NERCombinerAnnotator(verbose));
@@ -243,7 +250,7 @@ public class AnnotationPipeline implements Annotator {
 
     if (TIME) {
       System.out.println(ap.timingInformation());
-      System.err.println("Total time for AnnotationPipeline: " +
+      log.info("Total time for AnnotationPipeline: " +
                          tim.toSecondsString() + " sec.");
     }
   }

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.spanish.pipeline;
+package edu.stanford.nlp.international.spanish.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.stats.Counters;
@@ -48,7 +49,10 @@ import java.util.function.Predicate;
  *
  * @author Jon Gauthier
  */
-public class AnCoraProcessor {
+public class AnCoraProcessor  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(AnCoraProcessor.class);
 
   private final List<File> inputFiles;
   private final Properties options;
@@ -436,7 +440,7 @@ public class AnCoraProcessor {
   public static void main(String[] args)
     throws InterruptedException, IOException, ExecutionException, ClassNotFoundException {
     if (args.length < 1)
-      System.err.println(usage);
+      log.info(usage);
 
     Properties options = StringUtils.argsToProperties(args, argOptionDefs);
     String[] remainingArgs = options.getProperty("").split(" ");

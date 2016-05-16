@@ -64,7 +64,8 @@ message Sentence {
   optional DependencyGraph  collapsedDependencies               = 9;
   optional DependencyGraph  collapsedCCProcessedDependencies    = 10;
   optional DependencyGraph  alternativeDependencies             = 13;
-  repeated OpenIETriple     openieTriple                        = 14;   // The OpenIE triples in the sentence
+  repeated RelationTriple   openieTriple                        = 14;   // The OpenIE triples in the sentence
+  repeated RelationTriple   kbpTriple                           = 16;   // The KBP triples in this sentence
   repeated SentenceFragment entailedSentence                    = 15;   // The entailed sentences, by natural logic
   optional uint32           paragraph                           = 11;
 
@@ -125,6 +126,7 @@ message Token {
   optional Span conllUTokenSpan     = 34;
   optional string conllUMisc        = 35;
   optional MapIntString conllUSecondaryDeps = 36;
+  optional string   wikipediaEntity = 37;
 
 
   // Fields set by other annotators in CoreNLP
@@ -426,7 +428,7 @@ message SentenceFragment {
 // An OpenIE relation triple.
 // Created by the openie annotator.
 //
-message OpenIETriple {
+message RelationTriple {
   optional string          subject        = 1;   // The surface form of the subject
   optional string          relation       = 2;   // The surface form of the relation (required)
   optional string          object         = 3;   // The surface form of the object

@@ -29,7 +29,8 @@
 //    Support/Questions: java-nlp-user@lists.stanford.edu
 //    Licensing: java-nlp-support@lists.stanford.edu
 
-package edu.stanford.nlp.trees.international.pennchinese;
+package edu.stanford.nlp.trees.international.pennchinese; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.util.Generics;
@@ -45,7 +46,10 @@ import java.util.regex.Pattern;
  *
  * @author Galen Andrew
  */
-public class ChineseEnglishWordMap implements Serializable {
+public class ChineseEnglishWordMap implements Serializable  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseEnglishWordMap.class);
 
   /**
    * 
@@ -142,8 +146,8 @@ public class ChineseEnglishWordMap implements Serializable {
     }
     t = t.trim();
     if (DEBUG && !origT.equals(t)) {
-      System.err.println("orig="+origT);
-      System.err.println("norm="+t);
+      log.info("orig="+origT);
+      log.info("norm="+t);
     }
     return t;
   }
@@ -338,7 +342,7 @@ public class ChineseEnglishWordMap implements Serializable {
     Map<String, String[]> argMap = StringUtils.argsToMap(args, flagsToNumArgs);
     String[] otherArgs = argMap.get(null);
     if (otherArgs.length < 1) {
-      System.err.println("usage: ChineseEnglishWordMap [-all] [-dictPath path] [-encoding enc_string] inputFile");
+      log.info("usage: ChineseEnglishWordMap [-all] [-dictPath path] [-encoding enc_string] inputFile");
       System.exit(1);
     }
     String filename = otherArgs[0];
@@ -385,7 +389,7 @@ public class ChineseEnglishWordMap implements Serializable {
       pw.println();
     }
     r.close();
-    System.err.print("Finished translating " + totalWords + " words (");
-    System.err.println(coveredWords + " were in dictionary).");
+    log.info("Finished translating " + totalWords + " words (");
+    log.info(coveredWords + " were in dictionary).");
   }
 }

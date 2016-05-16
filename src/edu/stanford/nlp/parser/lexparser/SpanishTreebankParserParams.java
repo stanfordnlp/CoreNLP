@@ -1,7 +1,8 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.lexparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.process.SerializableFunction;
 import edu.stanford.nlp.trees.DiskTreebank;
 import edu.stanford.nlp.trees.HeadFinder;
@@ -29,7 +30,10 @@ import java.util.List;
  * @author Jon Gauthier
  *
  */
-public class SpanishTreebankParserParams extends TregexPoweredTreebankParserParams {
+public class SpanishTreebankParserParams extends TregexPoweredTreebankParserParams  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(SpanishTreebankParserParams.class);
 
   private static final long serialVersionUID = -8734165273482119424L;
 
@@ -298,8 +302,8 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
 
         optionsString.append("HeadFinder: " + args[i + 1] + "\n");
       } catch (Exception e) {
-        System.err.println(e);
-        System.err.println(this.getClass().getName() + ": Could not load head finder " + args[i + 1]);
+        log.info(e);
+        log.info(this.getClass().getName() + ": Could not load head finder " + args[i + 1]);
       }
       i += 2;
     }
@@ -313,12 +317,12 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
 
   public List<HasWord> defaultTestSentence() {
     String[] sent = {"Ésto", "es", "sólo", "una", "prueba", "."};
-    return Sentence.toWordList(sent);
+    return SentenceUtils.toWordList(sent);
   }
 
   @Override
   public void display() {
-    System.err.println(optionsString.toString());
+    log.info(optionsString.toString());
     super.display();
   }
 

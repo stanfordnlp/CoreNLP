@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.dvparser;
+package edu.stanford.nlp.parser.dvparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.ObjectInputStream;
 import java.io.IOException;
@@ -31,7 +32,10 @@ import edu.stanford.nlp.util.TwoDimensionalMap;
 import edu.stanford.nlp.util.TwoDimensionalSet;
 
 
-public class DVModel implements Serializable {
+public class DVModel implements Serializable  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(DVModel.class);
   // Maps from basic category to the matrix transformation matrices for
   // binary nodes and unary nodes.
   // The indices are the children categories.  For binaryTransform, for
@@ -542,7 +546,7 @@ public class DVModel implements Serializable {
     }
 
     if (op.trainOptions.unknownChineseYearVector) {
-      System.err.println("Matched " + chineseYearCount + " chinese year vectors");
+      log.info("Matched " + chineseYearCount + " chinese year vectors");
       if (chineseYearCount > 0) {
         unknownChineseYearVector = unknownChineseYearVector.divide(chineseYearCount);
       } else {
@@ -552,7 +556,7 @@ public class DVModel implements Serializable {
     }
 
     if (op.trainOptions.unknownChineseNumberVector) {
-      System.err.println("Matched " + chineseNumberCount + " chinese number vectors");
+      log.info("Matched " + chineseNumberCount + " chinese number vectors");
       if (chineseNumberCount > 0) {
         unknownChineseNumberVector = unknownChineseNumberVector.divide(chineseNumberCount);
       } else {
@@ -562,7 +566,7 @@ public class DVModel implements Serializable {
     }
 
     if (op.trainOptions.unknownChinesePercentVector) {
-      System.err.println("Matched " + chinesePercentCount + " chinese percent vectors");
+      log.info("Matched " + chinesePercentCount + " chinese percent vectors");
       if (chinesePercentCount > 0) {
         unknownChinesePercentVector = unknownChinesePercentVector.divide(chinesePercentCount);
       } else {
@@ -688,7 +692,7 @@ public class DVModel implements Serializable {
     if (wordVectors.containsKey(word)) {
       return word;
     }
-    //System.err.println("Unknown word: [" + word + "]");
+    //log.info("Unknown word: [" + word + "]");
     if (op.trainOptions.unknownNumberVector && NUMBER_PATTERN.matcher(word).matches()) {
       return UNKNOWN_NUMBER;
     }
@@ -733,7 +737,7 @@ public class DVModel implements Serializable {
   }
 
   public void printMatrixStats(PrintStream out) {
-    System.err.println("Model loaded with " + numUnaryMatrices + " unary and " + numBinaryMatrices + " binary");
+    log.info("Model loaded with " + numUnaryMatrices + " unary and " + numBinaryMatrices + " binary");
     for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> binary : binaryTransform) {
       out.println("Binary transform " + binary.getFirstKey() + ":" + binary.getSecondKey());
       double normf = binary.getValue().normF();

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.tagger.maxent;
+package edu.stanford.nlp.tagger.maxent; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.maxent.Feature;
 import edu.stanford.nlp.maxent.Problem;
@@ -15,7 +16,10 @@ import java.io.DataInputStream;
  * @author Kristina Toutanova
  * @version 1.0
  */
-public class LambdaSolveTagger extends LambdaSolve {
+public class LambdaSolveTagger extends LambdaSolve  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(LambdaSolveTagger.class);
 
   /**
    * Suppress extraneous printouts
@@ -96,20 +100,20 @@ public class LambdaSolveTagger extends LambdaSolve {
         probConds[x][y] = 1.0 / p.data.ySize;
       }
     }
-    System.err.println(" pcond initialized ");
+    log.info(" pcond initialized ");
     // init zlambda
     for (int x = 0; x < p.data.xSize; x++) {
       zlambda[x] = p.data.ySize;
     }
-    System.err.println(" zlambda initialized ");
+    log.info(" zlambda initialized ");
     // init ftildeArr
     for (int i = 0; i < p.fSize; i++) {
       ftildeArr[i] = p.functions.get(i).ftilde();
       if (ftildeArr[i] == 0) {
-        System.err.println(" Empirical expectation 0 for feature " + i);
+        log.info(" Empirical expectation 0 for feature " + i);
       }
     }
-    System.err.println(" ftildeArr initialized ");
+    log.info(" ftildeArr initialized ");
   }
 
 
@@ -124,7 +128,7 @@ public class LambdaSolveTagger extends LambdaSolve {
     deltaL = newton(deltaL, index, err);
     lambda[index] = lambda[index] + deltaL;
     if (!(deltaL == deltaL)) {
-      System.err.println(" NaN " + index + ' ' + deltaL);
+      log.info(" NaN " + index + ' ' + deltaL);
     }
     ret.set(deltaL);
     return (Math.abs(deltaL) >= eps);
@@ -145,7 +149,7 @@ public class LambdaSolveTagger extends LambdaSolve {
       double lambdaP = lambdaN;
       double gPrimeVal = gprime(lambdaP, index);
       if (!(gPrimeVal == gPrimeVal)) {
-        System.err.println("gPrime of " + lambdaP + ' ' + index + " is NaN " + gPrimeVal);
+        log.info("gPrime of " + lambdaP + ' ' + index + " is NaN " + gPrimeVal);
       }
       double gVal = g(lambdaP, index);
       if (gPrimeVal == 0.0) {
@@ -153,7 +157,7 @@ public class LambdaSolveTagger extends LambdaSolve {
       }
       lambdaN = lambdaP - gVal / gPrimeVal;
       if (!(lambdaN == lambdaN)) {
-        System.err.println("the division of " + gVal + ' ' + gPrimeVal + ' ' + index + " is NaN " + lambdaN);
+        log.info("the division of " + gVal + ' ' + gPrimeVal + ' ' + index + " is NaN " + lambdaN);
         return 0;
       }
       if (Math.abs(lambdaN - lambdaP) < err) {
@@ -266,15 +270,15 @@ public class LambdaSolveTagger extends LambdaSolve {
    */
   @Override
   public boolean checkCorrectness() {
-    System.err.println("Checking model correctness; x size " + p.data.xSize + ' ' + ", ysize " + p.data.ySize);
+    log.info("Checking model correctness; x size " + p.data.xSize + ' ' + ", ysize " + p.data.ySize);
 
     NumberFormat nf = NumberFormat.getNumberInstance();
     nf.setMaximumFractionDigits(4);
     boolean flag = true;
     for (int f = 0; f < lambda.length; f++) {
       if (Math.abs(lambda[f]) > 100) {
-        System.err.println(" Lambda too big " + lambda[f]);
-        System.err.println(" empirical " + ftildeArr[f] + " expected " + fExpected(p.functions.get(f)));
+        log.info(" Lambda too big " + lambda[f]);
+        log.info(" empirical " + ftildeArr[f] + " expected " + fExpected(p.functions.get(f)));
       }
     }
 
@@ -282,7 +286,7 @@ public class LambdaSolveTagger extends LambdaSolve {
       double exp = Math.abs(ftildeArr[i] - fExpected(p.functions.get(i)));
       if (exp > 0.001) {
         flag = false;
-        System.err.println("Constraint " + i + " not satisfied emp " + nf.format(ftildeArr[i]) + " exp " + nf.format(fExpected(p.functions.get(i))) + " diff " + nf.format(exp) + " lambda " + nf.format(lambda[i]));
+        log.info("Constraint " + i + " not satisfied emp " + nf.format(ftildeArr[i]) + " exp " + nf.format(fExpected(p.functions.get(i))) + " diff " + nf.format(exp) + " lambda " + nf.format(lambda[i]));
       }
     }
     for (int x = 0; x < p.data.xSize; x++) {
@@ -292,9 +296,9 @@ public class LambdaSolveTagger extends LambdaSolve {
       }
       if (Math.abs(s - 1) > 0.0001) {
         for (int y = 0; y < p.data.ySize; y++) {
-          System.err.println(y + " : " + probConds[x][y]);
+          log.info(y + " : " + probConds[x][y]);
         }
-        System.err.println("probabilities do not sum to one " + x + ' ' + (float) s);
+        log.info("probabilities do not sum to one " + x + ' ' + (float) s);
       }
     }
     return flag;
@@ -313,14 +317,14 @@ public class LambdaSolveTagger extends LambdaSolve {
   /* ---
   private static double[] read_lambdas(String modelFilename) {
     if (VERBOSE) {
-      System.err.println(" entering read");
+      log.info(" entering read");
     }
     try {
       double[] lambdaold;
 //      InDataStreamFile rf=new InDataStreamFile(modelFilename+".holder.prob");
 //      int xSize=rf.readInt();
 //      int ySize=rf.readInt();
-//      if (VERBOSE) System.err.println("x y "+xSize+" "+ySize);
+//      if (VERBOSE) log.info("x y "+xSize+" "+ySize);
 //      //rf.seek(rf.getFilePointer()+xSize*ySize*8);
 //      int funsize=rf.readInt();
 //      lambdaold=new double[funsize];
@@ -332,11 +336,11 @@ public class LambdaSolveTagger extends LambdaSolve {
       int xSize = dis.readInt();
       int ySize = dis.readInt();
       if (VERBOSE) {
-        System.err.println("x y " + xSize + ' ' + ySize);
+        log.info("x y " + xSize + ' ' + ySize);
       }
       int funsize = dis.readInt();
       byte[] b = new byte[funsize * 8];
-      if (dis.read(b) != funsize * 8) { System.err.println("Rewrite read_lambdas!"); }
+      if (dis.read(b) != funsize * 8) { log.info("Rewrite read_lambdas!"); }
       lambdaold = Convert.byteArrToDoubleArr(b);
       dis.close();
       return lambdaold;

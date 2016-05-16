@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.treebank;
+package edu.stanford.nlp.trees.treebank; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -21,7 +22,10 @@ import edu.stanford.nlp.util.Pair;
  * @author Spence Green
  *
  */
-public class ConfigParser implements Iterable<Properties> {
+public class ConfigParser implements Iterable<Properties>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ConfigParser.class);
 
   //The parameter names and delimiter
   private static final String DELIM = "=";

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.hcoref.sieve;
+package edu.stanford.nlp.hcoref.sieve; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.List;
 import java.util.Properties;
@@ -8,7 +9,10 @@ import edu.stanford.nlp.hcoref.data.Document;
 import edu.stanford.nlp.hcoref.data.Mention;
 import edu.stanford.nlp.hcoref.data.Dictionaries.MentionType;
 
-public class OracleSieve extends Sieve {
+public class OracleSieve extends Sieve  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(OracleSieve.class);
 
   private static final long serialVersionUID = 3510248899162246138L;
 
@@ -30,7 +34,7 @@ public class OracleSieve extends Sieve {
 
         if(Sieve.isReallyCoref(document, m.mentionID, candidate.mentionID)) {
           if(m.mentionType==MentionType.LIST) {
-            System.err.println("LIST MATCHING MENTION : "+m.spanToString()+"\tANT: "+candidate.spanToString());
+            log.info("LIST MATCHING MENTION : "+m.spanToString()+"\tANT: "+candidate.spanToString());
           }
           Sieve.merge(document, m.mentionID, candidate.mentionID);
           return;

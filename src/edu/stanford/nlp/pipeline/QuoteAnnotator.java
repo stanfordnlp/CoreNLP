@@ -1,5 +1,7 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
 
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
@@ -8,6 +10,7 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Timing;
 
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -23,6 +26,10 @@ import java.util.regex.Pattern;
  * Considers regular ascii ("", '', ``'', and `') as well as "smart" and
  * international quotation marks as follows:
  * “”,‘’, «», ‹›, 「」, 『』, „”, and ‚’.
+ *
+ * Note: extracts everything within these pairs as a whole quote segment, which may or may
+ * not be the desired behaviour for texts that use different formatting styles than
+ * standard english ones.
  *
  * There are a number of options that can be passed to the quote annotator to
  * customize its' behaviour:
@@ -55,7 +62,10 @@ import java.util.regex.Pattern;
  *
  * @author Grace Muzny
  */
-public class QuoteAnnotator implements Annotator {
+public class QuoteAnnotator implements Annotator  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(QuoteAnnotator.class);
 
   private final boolean VERBOSE;
   private final boolean DEBUG = false;
@@ -136,7 +146,7 @@ public class QuoteAnnotator implements Annotator {
     Timing timer = null;
     if (VERBOSE) {
       timer = new Timing();
-      System.err.print("Preparing quote annotator...");
+      log.info("Preparing quote annotator...");
     }
 
     if (VERBOSE) {
@@ -432,7 +442,7 @@ public class QuoteAnnotator implements Annotator {
       if (text.length() > 150) {
         warning = text.substring(0, 150) + "...";
       }
-      System.err.println("WARNING: unmatched quote of type " +
+      log.info("WARNING: unmatched quote of type " +
           quote + " found at index " + start + " in text segment: " + warning);
     }
 
@@ -508,7 +518,9 @@ public class QuoteAnnotator implements Annotator {
   }
 
   public static boolean isWhitespaceOrPunct(String c) {
-    return c.matches("[\\s\\p{Punct}]");
+    Pattern punctOrWhite = Pattern.compile("[\\s\\p{Punct}]", Pattern.UNICODE_CHARACTER_CLASS);
+    Matcher m = punctOrWhite.matcher(c);
+    return m.matches();
   }
 
   public static boolean isSingleQuote(String c) {
@@ -516,13 +528,13 @@ public class QuoteAnnotator implements Annotator {
   }
 
   @Override
-  public Set<Requirement> requires() {
-    return Collections.emptySet();
+  public Set<Class<? extends CoreAnnotation>> requires() {
+    return Collections.EMPTY_SET;
   }
 
   @Override
-  public Set<Requirement> requirementsSatisfied() {
-    return Collections.singleton(QUOTE_REQUIREMENT);
+  public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
+    return Collections.singleton(CoreAnnotations.QuotationsAnnotation.class);
   }
 
 }

@@ -1,4 +1,5 @@
-package edu.stanford.nlp.ie.machinereading;
+package edu.stanford.nlp.ie.machinereading; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
@@ -43,7 +44,10 @@ import edu.stanford.nlp.util.StringUtils;
  *  @author Mason Smith
  *  @author Mihai Surdeanu
  */
-public class BasicRelationFeatureFactory extends RelationFeatureFactory implements Serializable {
+public class BasicRelationFeatureFactory extends RelationFeatureFactory implements Serializable  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(BasicRelationFeatureFactory.class);
   private static final long serialVersionUID = -7376668998622546620L;
 
   private static final Logger logger = Logger.getLogger(BasicRelationFeatureFactory.class.getName());
@@ -146,15 +150,15 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
     CoreMap arg0Sentence = arg0.getSentence();
     CoreMap arg1Sentence = arg1.getSentence();
     if(arg0Sentence != relSentence){
-      System.err.println("WARNING: Found relation with arg0 in a different sentence: " + rel);
-      System.err.println("Relation sentence: " + relSentence.get(TextAnnotation.class));
-      System.err.println("Arg0 sentence: " + arg0Sentence.get(TextAnnotation.class));
+      log.info("WARNING: Found relation with arg0 in a different sentence: " + rel);
+      log.info("Relation sentence: " + relSentence.get(TextAnnotation.class));
+      log.info("Arg0 sentence: " + arg0Sentence.get(TextAnnotation.class));
       return false;
     }
     if(arg1Sentence != relSentence){
-      System.err.println("WARNING: Found relation with arg1 in a different sentence: " + rel);
-      System.err.println("Relation sentence: " + relSentence.get(TextAnnotation.class));
-      System.err.println("Arg1 sentence: " + arg1Sentence.get(TextAnnotation.class));
+      log.info("WARNING: Found relation with arg1 in a different sentence: " + rel);
+      log.info("Relation sentence: " + relSentence.get(TextAnnotation.class));
+      log.info("Arg1 sentence: " + arg1Sentence.get(TextAnnotation.class));
       return false;
     }
 
@@ -186,10 +190,10 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
     // full_tree_path: Path from one arg to the other in the phrase structure tree,
     // e.g., NNP -> PP -> NN <- NNP
     if (usingFeature(types, checklist, "full_tree_path")) {
-      //System.err.println("ARG0: " + arg0);
-      //System.err.println("ARG0 HEAD: " + arg0.getSyntacticHeadTokenPosition());
-      //System.err.println("TREE: " + tree);
-      //System.err.println("SENTENCE: " + sentToString(arg0.getSentence()));
+      //log.info("ARG0: " + arg0);
+      //log.info("ARG0 HEAD: " + arg0.getSyntacticHeadTokenPosition());
+      //log.info("TREE: " + tree);
+      //log.info("SENTENCE: " + sentToString(arg0.getSentence()));
       if(arg0.getSyntacticHeadTokenPosition() < leaves.size() && arg1.getSyntacticHeadTokenPosition() < leaves.size()){
         Tree arg0preterm = leaves.get(arg0.getSyntacticHeadTokenPosition()).parent(tree);
         Tree arg1preterm = leaves.get(arg1.getSyntacticHeadTokenPosition()).parent(tree);
@@ -210,14 +214,14 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
         if(logger != null && ! rel.getType().equals(RelationMention.UNRELATED)) logger.info("full_tree_path: " + pathString);
         features.setCount("treepath:"+pathString, 1.0);
       } else {
-        System.err.println("WARNING: found weird argument offsets. Most likely because arguments appear in different sentences than the relation:");
-        System.err.println("ARG0: " + arg0);
-        System.err.println("ARG0 HEAD: " + arg0.getSyntacticHeadTokenPosition());
-        System.err.println("ARG0 SENTENCE: " + sentToString(arg0.getSentence()));
-        System.err.println("ARG1: " + arg1);
-        System.err.println("ARG1 HEAD: " + arg1.getSyntacticHeadTokenPosition());
-        System.err.println("ARG1 SENTENCE: " + sentToString(arg1.getSentence()));
-        System.err.println("RELATION TREE: " + tree);
+        log.info("WARNING: found weird argument offsets. Most likely because arguments appear in different sentences than the relation:");
+        log.info("ARG0: " + arg0);
+        log.info("ARG0 HEAD: " + arg0.getSyntacticHeadTokenPosition());
+        log.info("ARG0 SENTENCE: " + sentToString(arg0.getSentence()));
+        log.info("ARG1: " + arg1);
+        log.info("ARG1 HEAD: " + arg1.getSyntacticHeadTokenPosition());
+        log.info("ARG1 SENTENCE: " + sentToString(arg1.getSentence()));
+        log.info("RELATION TREE: " + tree);
       }
     }
 
@@ -595,16 +599,16 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
     if (graph == null) {
       Tree tree = rel.getSentence().get(TreeAnnotation.class);
       if(tree == null){
-        System.err.println("WARNING: found sentence without TreeAnnotation. Skipped dependency-path features.");
+        log.info("WARNING: found sentence without TreeAnnotation. Skipped dependency-path features.");
         return;
       }
       try {
         graph = SemanticGraphFactory.makeFromTree(tree, Mode.COLLAPSED, GrammaticalStructure.Extras.NONE, true, null, true);
 
       } catch(Exception e){
-        System.err.println("WARNING: failed to generate dependencies from tree " + tree.toString());
+        log.info("WARNING: failed to generate dependencies from tree " + tree.toString());
         e.printStackTrace();
-        System.err.println("Skipped dependency-path features.");
+        log.info("Skipped dependency-path features.");
         return;
       }
     }

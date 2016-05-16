@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees.international.arabic;
+package edu.stanford.nlp.trees.international.arabic; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -39,7 +40,10 @@ import edu.stanford.nlp.util.Pair;
  * @author Anna Rafferty
  * @author Spence Green
  */
-public class ArabicTreeNormalizer extends BobChrisTreeNormalizer {
+public class ArabicTreeNormalizer extends BobChrisTreeNormalizer  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ArabicTreeNormalizer.class);
 
   private final boolean retainNPTmp;
   private final boolean retainNPSbj;

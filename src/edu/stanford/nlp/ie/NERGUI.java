@@ -1,4 +1,5 @@
-package edu.stanford.nlp.ie;
+package edu.stanford.nlp.ie; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ie.ner.CMMClassifier;
@@ -23,7 +24,10 @@ import java.util.regex.Pattern;
  * @author Jenny Finkel
  */
 
-public class NERGUI {
+public class NERGUI  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(NERGUI.class);
 
   private AbstractSequenceClassifier<?> classifier;
 
@@ -249,7 +253,7 @@ public class NERGUI {
           saveFile(getFile(false), taggedContents);
           break;
         default:
-          System.err.println("Unknown Action: " + e);
+          log.info("Unknown Action: " + e);
           break;
       }
     }
@@ -415,7 +419,7 @@ public class NERGUI {
 
   private void extract() {
 
-    System.err.println("content type: "+editorPane.getContentType());
+    log.info("content type: "+editorPane.getContentType());
     if (!editorPane.getContentType().equals("text/html")) {
 
       DefaultStyledDocument doc = (DefaultStyledDocument)editorPane.getDocument();
@@ -459,7 +463,7 @@ public class NERGUI {
           } catch (Exception ex) {
             throw new RuntimeException(ex);
           }
-          System.err.println(tag+": "+ finalText.substring(start, end));
+          log.info(tag+": "+ finalText.substring(start, end));
         } else {
           // print error message
         }
@@ -495,7 +499,7 @@ public class NERGUI {
         Matcher m1 = endPattern.matcher(finalText);
         m1.find(m.end());
         String entity = finalText.substring(start, m1.start());
-        System.err.println(tag+": "+ entity);
+        log.info(tag+": "+ entity);
         finalText = m1.replaceFirst("</span>");
         m = startPattern.matcher(finalText);
       }
@@ -504,7 +508,7 @@ public class NERGUI {
       editorPane.revalidate();
       editorPane.repaint();
 
-      System.err.println(finalText);
+      log.info(finalText);
     }
     saveTaggedAs.setEnabled(true);
   }
@@ -523,7 +527,7 @@ public class NERGUI {
     editorPane.setDocument(doc);
     //    defaultAttrSet = ((StyledEditorKit)editorPane.getEditorKit()).getInputAttributes();
     //    StyleConstants.setFontFamily(defaultAttrSet, "Lucinda Sans Unicode");
-    System.err.println("attr: "+defaultAttrSet);
+    log.info("attr: "+defaultAttrSet);
 
     try {
       doc.insertString(0, " ", defaultAttrSet);

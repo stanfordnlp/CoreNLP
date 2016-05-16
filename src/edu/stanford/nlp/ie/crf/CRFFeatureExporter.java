@@ -5,6 +5,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -25,9 +26,12 @@ import java.util.Properties;
  *
  * @author Angel Chang
  */
-public class CRFFeatureExporter<IN extends CoreMap> {
+public class CRFFeatureExporter<IN extends CoreMap>  {
+
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CRFFeatureExporter.class);
   private char delimiter = '\t';
-  private static final String eol = System.getProperty("line.separator");
+  private static final String eol = System.lineSeparator();
   private CRFClassifier<IN> classifier;
 
   public CRFFeatureExporter(CRFClassifier<IN> classifier)
@@ -159,17 +163,17 @@ public class CRFFeatureExporter<IN extends CoreMap> {
   }
 
   public static void main(String[] args) throws Exception {
-    StringUtils.printErrInvocationString("CRFFeatureExporter", args);
+    StringUtils.logInvocationString(log, args);
     Properties props = StringUtils.argsToProperties(args);
     CRFClassifier<CoreLabel> crf = new CRFClassifier<>(props);
     String inputFile = crf.flags.trainFile;
     if (inputFile == null) {
-      System.err.println("Please provide input file using -trainFile");
+      log.info("Please provide input file using -trainFile");
       System.exit(-1);
     }
     String outputFile = crf.flags.exportFeatures;
     if (outputFile == null) {
-      System.err.println("Please provide output file using -exportFeatures");
+      log.info("Please provide output file using -exportFeatures");
       System.exit(-1);
     }
     CRFFeatureExporter<CoreLabel> featureExporter = new CRFFeatureExporter<>(crf);
@@ -178,4 +182,5 @@ public class CRFFeatureExporter<IN extends CoreMap> {
     crf.makeAnswerArraysAndTagIndex(docs);
     featureExporter.printFeatures(outputFile, docs);
   }
+
 }

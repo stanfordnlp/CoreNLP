@@ -55,11 +55,7 @@ import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
-import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.logging.Redwood;
+import edu.stanford.nlp.util.*;
 
 /**
  * One mention for the SieveCoreferenceSystem.
@@ -487,8 +483,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if ((this.mentionSubTree!=null && isListLike())
         || (this.mentionSubTree==null && isListLikeByDependency()) ) {
       mentionType = MentionType.LIST;
-      Redwood.log("debug-mention", "IS LIST: " + this);
-    } else if (headWord.has(CoreAnnotations.EntityTypeAnnotation.class)){    // ACE gold mention type
+      //Redwood.log("debug-mention", "IS LIST: " + this);
+    } else if (headWord.containsKey(CoreAnnotations.EntityTypeAnnotation.class)){    // ACE gold mention type
       if (headWord.get(CoreAnnotations.EntityTypeAnnotation.class).equals("PRO")) {
         mentionType = MentionType.PRONOMINAL;
       } else if (headWord.get(CoreAnnotations.EntityTypeAnnotation.class).equals("NAM")) {
@@ -497,9 +493,9 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
         mentionType = MentionType.NOMINAL;
       }
     } else {    // MUC
-      if(!headWord.has(CoreAnnotations.NamedEntityTagAnnotation.class)) {   // temporary fix
+      if(!headWord.containsKey(CoreAnnotations.NamedEntityTagAnnotation.class)) {   // temporary fix
         mentionType = MentionType.NOMINAL;
-        Redwood.log("debug-mention", "no NamedEntityTagAnnotation: "+headWord);
+        //Redwood.log("debug-mention", "no NamedEntityTagAnnotation: "+headWord);
       } else if (headWord.tag().startsWith("PRP") || headWord.tag().startsWith("PN")
           || (originalSpan.size() == 1 && headWord.get(CoreAnnotations.NamedEntityTagAnnotation.class).equals("O")
               && (dict.allPronouns.contains(headString) || dict.relativePronouns.contains(headString) ))) {
@@ -704,8 +700,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   }
 
   private void setNERString() {
-    if(headWord.has(CoreAnnotations.EntityTypeAnnotation.class)){ // ACE
-      if(headWord.has(CoreAnnotations.NamedEntityTagAnnotation.class) &&
+    if(headWord.containsKey(CoreAnnotations.EntityTypeAnnotation.class)){ // ACE
+      if(headWord.containsKey(CoreAnnotations.NamedEntityTagAnnotation.class) &&
               headWord.get(CoreAnnotations.EntityTypeAnnotation.class).equals("NAM")){
         this.nerString = headWord.get(CoreAnnotations.NamedEntityTagAnnotation.class);
       } else {
@@ -713,7 +709,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       }
     }
     else{ // MUC
-      if (headWord.has(CoreAnnotations.NamedEntityTagAnnotation.class)) {
+      if (headWord.containsKey(CoreAnnotations.NamedEntityTagAnnotation.class)) {
         this.nerString = headWord.get(CoreAnnotations.NamedEntityTagAnnotation.class);
       } else {
         this.nerString = "O";
@@ -1070,6 +1066,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     return new Pair<>();
   }
 
+  /** Returns true if this mention is contained inside m. That is, it is a subspan of the same sentence. */
   public boolean insideIn(Mention m){
     return this.sentNum == m.sentNum
             && m.startIndex <= this.startIndex
@@ -1586,7 +1583,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if (obj.getClass() != getClass()) { return false; }
 
     Mention rhs = (Mention) obj;
-    
+
     if (!Objects.equals(mentionType, rhs.mentionType)) { return false; }
     if (!Objects.equals(number, rhs.number)) { return false; }
     if (!Objects.equals(gender, rhs.gender)) { return false; }
@@ -1633,5 +1630,21 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
     return true;
   }
-  
+
+  @Override
+  public int hashCode() {
+
+    int result = 49;
+    int c = 0;
+
+    c += startIndex;
+    c += endIndex;
+
+    result = (37 * result) + c;
+
+    return result;
+
+  }
+
+
 }

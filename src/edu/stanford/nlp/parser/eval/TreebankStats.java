@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.eval;
+package edu.stanford.nlp.parser.eval; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -32,7 +33,10 @@ import edu.stanford.nlp.util.StringUtils;
  *
  * @author Spence Green
  */
-public class TreebankStats {
+public class TreebankStats  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(TreebankStats.class);
 
   private final Language languageName;
   private final TreebankLangParserParams tlpp;
@@ -429,7 +433,7 @@ public class TreebankStats {
    */
   public static void main(String[] args) {
     if(args.length < MIN_ARGS) {
-      System.err.println(usage());
+      log.info(usage());
       System.exit(-1);
     }
 
@@ -441,7 +445,7 @@ public class TreebankStats {
 
     String[] parsedArgs = options.getProperty("","").split("\\s+");
     if (parsedArgs.length != MIN_ARGS) {
-      System.err.println(usage());
+      log.info(usage());
       System.exit(-1);
     }
 
@@ -454,7 +458,7 @@ public class TreebankStats {
     TreebankLangParserParams tlpp = language.params;
     TreebankStats cs = new TreebankStats(language,corpusPaths,tlpp);
     if(splitPrefix != null) {
-      if(!cs.useSplit(splitPrefix)) System.err.println("Could not load split!");
+      if(!cs.useSplit(splitPrefix)) log.info("Could not load split!");
     }
     cs.run(pathsAreFiles, SHOW_WORDS, SHOW_OOV);
   }

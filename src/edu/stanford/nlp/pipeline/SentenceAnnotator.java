@@ -5,6 +5,7 @@ import java.util.concurrent.RejectedExecutionException;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.concurrent.InterruptibleMulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
@@ -61,8 +62,10 @@ public abstract class SentenceAnnotator implements Annotator {
               // If we time out, for now, we just throw away all jobs which were running at the time.
               // Note that in order for this to be useful, the underlying job needs to handle Thread.interrupted()
               List<CoreMap> failedSentences = wrapper.joinWithTimeout();
-              for (CoreMap failed : failedSentences) {
-                doOneFailedSentence(annotation, failed);
+              if (failedSentences != null) {
+                for (CoreMap failed : failedSentences) {
+                  doOneFailedSentence(annotation, failed);
+                }
               }
               // We don't wait for termination here, and perhaps this
               // is a mistake.  If the processor used does not respect
@@ -93,6 +96,9 @@ public abstract class SentenceAnnotator implements Annotator {
         }
       } else {
         for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+          if (Thread.interrupted()) {
+            throw new RuntimeInterruptedException();
+          }
           doOneSentence(annotation, sentence);
         }
       }
@@ -114,7 +120,11 @@ public abstract class SentenceAnnotator implements Annotator {
   /**
    * Fills in empty annotations for trees, tags, etc if the annotator
    * failed or timed out.  Not supposed to do major processing.
+   *
+   * @param annotation The whole Annotation object, in case it is needed for context.
+   * @param sentence The particular sentence to process
    */
   protected abstract void doOneFailedSentence(Annotation annotation, CoreMap sentence);
+
 }
 

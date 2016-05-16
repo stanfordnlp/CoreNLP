@@ -23,7 +23,7 @@ import edu.stanford.nlp.patterns.dep.ExtractedPhrase;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.stats.*;
 import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.Execution.Option;
+import edu.stanford.nlp.util.ArgumentParser.Option;
 import edu.stanford.nlp.util.concurrent.AtomicDouble;
 import edu.stanford.nlp.util.concurrent.ConcurrentHashCounter;
 import edu.stanford.nlp.util.logging.Redwood;

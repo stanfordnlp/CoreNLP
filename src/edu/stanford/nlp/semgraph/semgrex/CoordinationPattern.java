@@ -1,4 +1,5 @@
-package edu.stanford.nlp.semgraph.semgrex;
+package edu.stanford.nlp.semgraph.semgrex; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 
@@ -6,7 +7,10 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 
 /** @author Chloe Kiddon */
-public class CoordinationPattern extends SemgrexPattern {
+public class CoordinationPattern extends SemgrexPattern  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CoordinationPattern.class);
 
   /**
    * 
@@ -174,8 +178,8 @@ public class CoordinationPattern extends SemgrexPattern {
     @Override
     public boolean matches() {  // also known as "FUN WITH LOGIC"
 
-      //System.err.println(myNode.toString());
-      //System.err.println("consider all: " + considerAll);
+      //log.info(myNode.toString());
+      //log.info("consider all: " + considerAll);
       if (considerAll) {
         // these are the cases where all children must be considered to match
         if (currChild < 0) {

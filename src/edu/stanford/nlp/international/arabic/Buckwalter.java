@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.arabic;
+package edu.stanford.nlp.international.arabic; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -41,7 +42,10 @@ import edu.stanford.nlp.process.SerializableFunction;
  *  @author Christopher Manning
  *  @author Spence Green
  */
-public class Buckwalter implements SerializableFunction<String,String> {
+public class Buckwalter implements SerializableFunction<String,String>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(Buckwalter.class);
 
   private static final long serialVersionUID = 4351710914246859336L;
 
@@ -272,10 +276,10 @@ public class Buckwalter implements SerializableFunction<String,String> {
                 (unicodeToBuck ? "UTF-8 to Buckwalter" : "Buckwalter to UTF-8"));
 
       } catch (UnsupportedEncodingException e) {
-        System.err.println("ERROR: File system does not support UTF-8 encoding.");
+        log.error("File system does not support UTF-8 encoding.");
 
       } catch (FileNotFoundException e) {
-        System.err.println("ERROR: File does not exist: " + inputFile.getPath());
+        log.error("File does not exist: " + inputFile.getPath());
 
       } catch (IOException e) {
         System.err.printf("ERROR: IO exception while reading file (line %d).\n",numLines);

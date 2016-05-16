@@ -7,6 +7,7 @@ import java.io.Serializable;
  *
  * @author dramage
  */
+@FunctionalInterface
 public interface Factory<T> extends Serializable {
 
   /**
@@ -14,6 +15,6 @@ public interface Factory<T> extends Serializable {
    *
    * @return A new instance of the type T
    */
-  public T create();
+  T create();
 
 }

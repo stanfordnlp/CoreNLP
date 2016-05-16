@@ -44,8 +44,7 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.function.Function;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -65,7 +64,10 @@ import org.slf4j.LoggerFactory;
  * @param <L> The type of the labels in the Classifier
  * @param <F> The type of the features in the Classifier
  */
-public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RVFClassifier<L, F> {
+public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RVFClassifier<L, F>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(LinearClassifier.class);
 
   /** Classifier weights. First index is the featureIndex value and second
    *  index is the labelIndex value.
@@ -74,7 +76,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
   private Index<L> labelIndex;
   private Index<F> featureIndex;
   public boolean intern = false;   // variable should be deleted when breaking serialization anyway....
-  private double[] thresholds = null;
+  private double[] thresholds; // = null;
 
   private static final long serialVersionUID = 8499574525453275255L;
 
@@ -82,7 +84,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
 
   public static final String TEXT_SERIALIZATION_DELIMITER = "\t";
 
-  final static Logger logger = LoggerFactory.getLogger(LinearClassifier.class);
+  static final Redwood.RedwoodChannels logger = Redwood.channels(LinearClassifier.class);
 
   @Override
   public Collection<L> labels() {
@@ -125,7 +127,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
   /* --- obsolete method from before this class was rewritten using arrays
   public Counter scoresOf(Datum example) {
     Counter scores = new Counter();
-    for (Object l : labels()) {
+    for (L l : labels()) {
       scores.setCount(l, scoreOf(example, l));
     }
     return scores;
@@ -145,7 +147,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
       int index = featureIndex.indexOf(f);
       if (index >= 0) {
         features[i++] = index;
-      } else {
+      // } else {
         //logger.info("FEATURE LESS THAN ZERO: " + f);
       }
     }
@@ -175,7 +177,9 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
    *  Ignores the true label of the Datum.
    */
   public double scoreOf(Datum<L, F> example, L label) {
-    if(example instanceof RVFDatum<?, ?>)return scoreOfRVFDatum((RVFDatum<L,F>)example, label);
+    if (example instanceof RVFDatum<?, ?>) {
+      return scoreOfRVFDatum((RVFDatum<L,F>)example, label);
+    }
     int iLabel = labelIndex.indexOf(label);
     double score = 0.0;
     for (F f : example.asFeatures()) {
@@ -193,7 +197,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
   public Counter<L> scoresOf(RVFDatum<L, F> example) {
     Counter<L> scores = new ClassicCounter<>();
     for (L l : labels()) {
-      scores.setCount(l, scoreOf(example, l));
+      scores.setCount(l, scoreOfRVFDatum(example, l));
     }
     //System.out.println("Scores are: " + scores + "   (gold: " + example.label() + ")");
     return scores;
@@ -221,20 +225,10 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
 
   /** Returns the score of the RVFDatum for the specified label.
    *  Ignores the true label of the RVFDatum.
-   */
-  @Deprecated
-  public double scoreOf(RVFDatum<L, F> example, L label) {
-    int iLabel = labelIndex.indexOf(label);
-    double score = 0.0;
-    Counter<F> features = example.asFeaturesCounter();
-    for (F f : features.keySet()) {
-      score += weight(f, iLabel) * features.getCount(f);
-    }
-    return score + thresholds[iLabel];
-  }
-
-  /** Returns the score of the RVFDatum for the specified label.
-   *  Ignores the true label of the RVFDatum.
+   *
+   *  @param example Used to get the observed x value. Its label is ignored.
+   *  @param label The label y that the observed value is scored with.
+   *  @return A linear classifier score
    */
   private double scoreOfRVFDatum(RVFDatum<L, F> example, L label) {
     int iLabel = labelIndex.indexOf(label);
@@ -617,7 +611,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
   public String toBiggestWeightFeaturesString(boolean useMagnitude,
       int numFeatures,
       boolean printDescending) {
-    // this used to try to use a treeset, but that was WRONG....
+    // this used to try to use a TreeSet, but that was WRONG....
     edu.stanford.nlp.util.PriorityQueue<Pair<Integer,Integer>> biggestKeys =
             new FixedPrioritiesPriorityQueue<>();
 
@@ -821,7 +815,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
    * @throws IllegalArgumentException if the style name is unrecognized
    */
   public String toString(String style, int param) {
-    if (style == null || "".equals(style)) {
+    if (style == null || style.isEmpty()) {
       return "LinearClassifier with " + featureIndex.size() + " features, " +
               labelIndex.size() + " classes, and " +
               labelIndex.size() * featureIndex.size() + " parameters.\n";
@@ -865,15 +859,15 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
   private static void printHistCounts(int ind, String title, PrintWriter pw, double[][] hist, Object[][] histEg) {
     pw.println(title);
     for (int i = 0; i < 200; i++) {
-      int intpart, fracpart;
+      int intPart, fracPart;
       if (i < 100) {
-        intpart = 10 - ((i + 9) / 10);
-        fracpart = (10 - (i % 10)) % 10;
+        intPart = 10 - ((i + 9) / 10);
+        fracPart = (10 - (i % 10)) % 10;
       } else {
-        intpart = (i / 10) - 10;
-        fracpart = i % 10;
+        intPart = (i / 10) - 10;
+        fracPart = i % 10;
       }
-      pw.print("[" + ((i < 100) ? "-" : "") + intpart + "." + fracpart + ", " + ((i < 100) ? "-" : "") + intpart + "." + fracpart + "+0.1): " + hist[ind][i]);
+      pw.print("[" + ((i < 100) ? "-" : "") + intPart + "." + fracPart + ", " + ((i < 100) ? "-" : "") + intPart + "." + fracPart + "+0.1): " + hist[ind][i]);
       if (histEg[ind][i] != null) {
         pw.print("  [" + histEg[ind][i] + ((hist[ind][i] > 1) ? ", ..." : "") + "]");
       }
@@ -895,25 +889,31 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
 
   /**
    * Print all features in the classifier and the weight that they assign
-   * to each class.
+   * to each class. Print to stderr.
    */
   public void dump() {
     Datum<L, F> allFeatures = new BasicDatum<>(features(), (L) null);
     justificationOf(allFeatures);
   }
 
+  /**
+   * Print all features in the classifier and the weight that they assign
+   * to each class. Print to the given PrintWriter.
+   */
   public void dump(PrintWriter pw) {
     Datum<L, F> allFeatures = new BasicDatum<>(features(), (L) null);
     justificationOf(allFeatures, pw);
   }
 
-
-
-  @Deprecated
-  public void justificationOf(RVFDatum<L, F> example) {
-    PrintWriter pw = new PrintWriter(System.err, true);
-    justificationOf(example, pw);
+  /**
+   * Print all features in the classifier and the weight that they assign
+   * to each class. The feature names are printed in sorted order.
+   */
+  public void dumpSorted() {
+    Datum<L, F> allFeatures = new BasicDatum<>(features(), (L) null);
+    justificationOf(allFeatures, new PrintWriter(System.err, true), true);
   }
+
 
   /**
    * Print all features active for a particular datum and the weight that
@@ -938,11 +938,11 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
     // don't make it ridiculously wide
     featureLength = Math.min(featureLength, MAX_FEATURE_ALIGN_WIDTH);
 
-    for (Object l : labels()) {
+    for (L l : labels()) {
       labelLength = Math.max(labelLength, l.toString().length());
     }
 
-    StringBuilder header = new StringBuilder("");
+    StringBuilder header = new StringBuilder();
     for (int s = 0; s < featureLength; s++) {
       header.append(' ');
     }
@@ -1000,96 +1000,29 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
   }
 
 
-  /**
-   * Print all features active for a particular datum and the weight that
-   * the classifier assigns to each class for those features.
-   */
-  @Deprecated
-  public void justificationOf(RVFDatum<L, F> example, PrintWriter pw) {
-    int featureLength = 0;
-    int labelLength = 6;
-    NumberFormat nf = NumberFormat.getNumberInstance();
-    nf.setMinimumFractionDigits(2);
-    nf.setMaximumFractionDigits(2);
-    if (nf instanceof DecimalFormat) {
-      ((DecimalFormat) nf).setPositivePrefix(" ");
-    }
-    Counter<F> features = example.asFeaturesCounter();
-    for (F f : features.keySet()) {
-      featureLength = Math.max(featureLength, f.toString().length() + 2 +
-          nf.format(features.getCount(f)).length());
-    }
-    // make as wide as total printout
-    featureLength = Math.max(featureLength, "Total:".length());
-    // don't make it ridiculously wide
-    featureLength = Math.min(featureLength, MAX_FEATURE_ALIGN_WIDTH);
-
-    for (Object l : labels()) {
-      labelLength = Math.max(labelLength, l.toString().length());
-    }
-
-    StringBuilder header = new StringBuilder("");
-    for (int s = 0; s < featureLength; s++) {
-      header.append(' ');
-    }
-    for (L l : labels()) {
-      header.append(' ');
-      header.append(StringUtils.pad(l, labelLength));
-    }
-    pw.println(header);
-    for (F f : features.keySet()) {
-      String fStr = f.toString();
-      StringBuilder line = new StringBuilder(fStr);
-      line.append("[").append(nf.format(features.getCount(f))).append("]");
-      fStr = line.toString();
-      for (int s = fStr.length(); s < featureLength; s++) {
-        line.append(' ');
-      }
-      for (L l : labels()) {
-        String lStr = nf.format(weight(f, l));
-        line.append(' ');
-        line.append(lStr);
-        for (int s = lStr.length(); s < labelLength; s++) {
-          line.append(' ');
-        }
-      }
-      pw.println(line);
-    }
-    Counter<L> scores = scoresOf(example);
-    StringBuilder footer = new StringBuilder("Total:");
-    for (int s = footer.length(); s < featureLength; s++) {
-      footer.append(' ');
-    }
-    for (L l : labels()) {
-      footer.append(' ');
-      String str = nf.format(scores.getCount(l));
-      footer.append(str);
-      for (int s = str.length(); s < labelLength; s++) {
-        footer.append(' ');
-      }
-    }
-    pw.println(footer);
-    Distribution<L> distr = Distribution.distributionFromLogisticCounter(scores);
-    footer = new StringBuilder("Prob:");
-    for (int s = footer.length(); s < featureLength; s++) {
-      footer.append(' ');
-    }
-    for (L l : labels()) {
-      footer.append(' ');
-      String str = nf.format(distr.getCount(l));
-      footer.append(str);
-      for (int s = str.length(); s < labelLength; s++) {
-        footer.append(' ');
-      }
-    }
-    pw.println(footer);
-  }
-
-
   public void justificationOf(Datum<L, F> example) {
     PrintWriter pw = new PrintWriter(System.err, true);
     justificationOf(example, pw);
   }
+
+  /**
+   * Print all features active for a particular datum and the weight that
+   * the classifier assigns to each class for those features.
+   */
+  public void justificationOf(Datum<L, F> example, PrintWriter pw) {
+    justificationOf(example, pw, null);
+  }
+
+  /**
+   * Print all features active for a particular datum and the weight that
+   * the classifier assigns to each class for those features. Sorts by feature
+   * name if 'sorted' is true.
+   */
+  public void justificationOf(Datum<L, F> example, PrintWriter pw, boolean sorted) {
+    if(example instanceof RVFDatum<?, ?>)
+    justificationOf(example, pw, null, sorted);
+  }
+
 
   public <T> void justificationOf(Datum<L, F> example, PrintWriter pw, Function<F, T> printer) {
     justificationOf(example, pw, printer, false);
@@ -1111,6 +1044,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
       justificationOfRVFDatum((RVFDatum<L,F>)example,pw);
       return;
     }
+
     NumberFormat nf = NumberFormat.getNumberInstance();
     nf.setMinimumFractionDigits(2);
     nf.setMaximumFractionDigits(2);
@@ -1225,34 +1159,6 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
       }
     }
     return mapOfCounters;
-  }
-
-  /**
-   * Print all features active for a particular datum and the weight that
-   * the classifier assigns to each class for those features.
-   */
-  public void justificationOf(Datum<L, F> example, PrintWriter pw) {
-    justificationOf(example, pw, null);
-  }
-
-
-  /**
-   * Print all features in the classifier and the weight that they assign
-   * to each class. The feature names are printed in sorted order.
-   */
-  public void dumpSorted() {
-    Datum<L, F> allFeatures = new BasicDatum<>(features(), (L) null);
-    justificationOf(allFeatures, new PrintWriter(System.err, true), true);
-  }
-
-  /**
-   * Print all features active for a particular datum and the weight that
-   * the classifier assigns to each class for those features. Sorts by feature
-   * name if 'sorted' is true.
-   */
-  public void justificationOf(Datum<L, F> example, PrintWriter pw, boolean sorted) {
-    if(example instanceof RVFDatum<?, ?>)
-    justificationOf(example, pw, null, sorted);
   }
 
 
@@ -1420,7 +1326,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
    * Simple convenience wrapper for IOUtils.readFromString.
    */
   public static <L, F> LinearClassifier<L, F> readClassifier(String loadPath) {
-    System.err.print("Deserializing classifier from " + loadPath + "...");
+    log.info("Deserializing classifier from " + loadPath + "...");
 
     try {
       ObjectInputStream ois = IOUtils.readStreamFromString(loadPath);

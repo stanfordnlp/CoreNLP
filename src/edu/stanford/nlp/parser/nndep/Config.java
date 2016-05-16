@@ -1,4 +1,5 @@
 package edu.stanford.nlp.parser.nndep;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.HasWord;
@@ -169,7 +170,13 @@ public class Config
   */
   public boolean noPunc = true;
 
-  /** 
+  /**
+  *  Update word embeddings when performing gradient descent.
+  *  Set to false if you provide embeddings and do not want to finetune.
+  */
+  public boolean doWordEmbeddingGradUpdate = true;
+
+  /**
    * Describes language-specific properties necessary for training and
    * testing. By default,
    * {@link edu.stanford.nlp.trees.PennTreebankLanguagePack} will be
@@ -225,6 +232,7 @@ public class Config
     unlabeled = PropertiesUtils.getBool(props, "unlabeled", unlabeled);
     cPOS = PropertiesUtils.getBool(props, "cPOS", cPOS);
     noPunc = PropertiesUtils.getBool(props, "noPunc", noPunc);
+    doWordEmbeddingGradUpdate = PropertiesUtils.getBool(props, "doWordEmbeddingGradUpdate", doWordEmbeddingGradUpdate);
 
     // Runtime parsing options
     sentenceDelimiter = PropertiesUtils.getString(props, "sentenceDelimiter", sentenceDelimiter);
@@ -275,5 +283,6 @@ public class Config
     System.err.printf("unlabeled = %b%n", unlabeled);
     System.err.printf("cPOS = %b%n", cPOS);
     System.err.printf("noPunc = %b%n", noPunc);
+    System.err.printf("doWordEmbeddingGradUpdate = %b%n", doWordEmbeddingGradUpdate);
   }
 }

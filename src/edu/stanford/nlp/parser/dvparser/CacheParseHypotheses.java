@@ -1,4 +1,5 @@
-package edu.stanford.nlp.parser.dvparser;
+package edu.stanford.nlp.parser.dvparser; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -29,7 +30,10 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
-public class CacheParseHypotheses {
+public class CacheParseHypotheses  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CacheParseHypotheses.class);
 
   static final TreeReaderFactory trf = new LabeledScoredTreeReaderFactory(CoreLabel.factory(), new TreeNormalizer());
 
@@ -148,9 +152,9 @@ public class CacheParseHypotheses {
       List<Tree> simplified = CollectionUtils.transformAsList(topParses, cacher.treeBasicCategories);
       simplified = CollectionUtils.filterAsList(simplified, cacher.treeFilter);
       if (simplified.size() != topParses.size()) {
-        System.err.println("Filtered " + (topParses.size() - simplified.size()) + " trees");
+        log.info("Filtered " + (topParses.size() - simplified.size()) + " trees");
         if (simplified.size() == 0) {
-          System.err.println(" WARNING: filtered all trees for " + tree);
+          log.info(" WARNING: filtered all trees for " + tree);
         }
       }
       if (!simplified.equals(converted)) {
@@ -234,16 +238,16 @@ public class CacheParseHypotheses {
       throw new IllegalArgumentException("Need to supply a treebank with -treebank");
     }
 
-    System.err.println("Writing output to " + output);
-    System.err.println("Loading parser model " + parserModel);
-    System.err.println("Writing " + dvKBest + " hypothesis trees for each tree");
+    log.info("Writing output to " + output);
+    log.info("Loading parser model " + parserModel);
+    log.info("Writing " + dvKBest + " hypothesis trees for each tree");
 
     LexicalizedParser parser = LexicalizedParser.loadModel(parserModel, "-dvKBest", Integer.toString(dvKBest));
     CacheParseHypotheses cacher = new CacheParseHypotheses(parser);
     TreeTransformer transformer = DVParser.buildTrainTransformer(parser.getOp());
     List<Tree> sentences = new ArrayList<>();
     for (Pair<String, FileFilter> description : treebanks) {
-      System.err.println("Reading trees from " + description.first);
+      log.info("Reading trees from " + description.first);
       Treebank treebank = parser.getOp().tlpParams.memoryTreebank();
       treebank.loadPath(description.first, description.second);
 
@@ -251,7 +255,7 @@ public class CacheParseHypotheses {
       sentences.addAll(treebank);
     }
 
-    System.err.println("Processing " + sentences.size() + " trees");
+    log.info("Processing " + sentences.size() + " trees");
 
     List<Pair<Tree, byte[]>> cache = Generics.newArrayList();
     transformer = new SynchronizedTreeTransformer(transformer);

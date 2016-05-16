@@ -5,8 +5,8 @@ import edu.stanford.nlp.optimization.GoldenSectionLineSearch;
 
 import java.util.function.Function;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Provides a medium-weight implementation of Bernoulli (or binary)
@@ -28,7 +28,10 @@ import org.slf4j.LoggerFactory;
  * @param <L> The type of the labels in the Classifier
  * @param <F> The type of the features in the Classifier
  */
-public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFactory<L, F> {
+public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFactory<L, F>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(NBLinearClassifierFactory.class);
 
   private static final boolean VERBOSE = false;
 
@@ -38,7 +41,7 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
   private boolean tuneSigma = false;
   private int folds;
 
-  final static Logger logger = LoggerFactory.getLogger(NBLinearClassifierFactory.class);
+  final static Redwood.RedwoodChannels logger = Redwood.channels(NBLinearClassifierFactory.class);
 
 
   @Override
@@ -60,9 +63,9 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
     if (VERBOSE) {
       logger.info("NB CF: " + data.length + " data items ");
       for (int i = 0; i < data.length; i++) {
-        System.err.print("Datum " + i + ": " + labels[i] + ":");
+        log.info("Datum " + i + ": " + labels[i] + ":");
         for (int j = 0; j < data[i].length; j++) {
-          System.err.print(" " + data[i][j]);
+          log.info(" " + data[i][j]);
         }
         logger.info("");
       }

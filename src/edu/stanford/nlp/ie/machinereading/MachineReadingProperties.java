@@ -3,7 +3,7 @@ package edu.stanford.nlp.ie.machinereading;
 import java.util.logging.Logger;
 
 import edu.stanford.nlp.ie.machinereading.structure.RelationMentionFactory;
-import edu.stanford.nlp.util.Execution.Option;
+import edu.stanford.nlp.util.ArgumentParser.Option;
 
 public class MachineReadingProperties {
   @Option(name="logger", gloss="Static logger for this entire class")

@@ -15,7 +15,7 @@ import java.util.function.Function;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.common.ParsingThreadsafeProcessor;
@@ -190,7 +190,7 @@ public class ParseFiles {
           numSents++;
           int len = sentence.size();
           numWords += len;
-          pwErr.println("Parsing [sent. " + num + " len. " + len + "]: " + Sentence.listToString(sentence, true));
+          pwErr.println("Parsing [sent. " + num + " len. " + len + "]: " + SentenceUtils.listToString(sentence, true));
 
           wrapper.put(sentence);
           while (wrapper.peek()) {
@@ -211,7 +211,7 @@ public class ParseFiles {
           numSents++;
           int len = sentence.size();
           numWords += len;
-          pwErr.println("Parsing [sent. " + num + " len. " + len + "]: " + Sentence.listToString(sentence, true));
+          pwErr.println("Parsing [sent. " + num + " len. " + len + "]: " + SentenceUtils.listToString(sentence, true));
           pq.parseAndReport(sentence, pwErr);
           processResults(pq, numProcessed++, pwo);
         }

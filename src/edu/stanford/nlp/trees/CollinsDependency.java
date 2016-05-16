@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees;
+package edu.stanford.nlp.trees; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.*;
 
@@ -14,7 +15,10 @@ import edu.stanford.nlp.util.Generics;
  * @author Spence Green
  *
  */
-public class CollinsDependency implements Dependency<CoreLabel, CoreLabel, String> {
+public class CollinsDependency implements Dependency<CoreLabel, CoreLabel, String>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(CollinsDependency.class);
 
 	private static final long serialVersionUID = -4236496863919294754L;
 
@@ -95,7 +99,7 @@ public class CollinsDependency implements Dependency<CoreLabel, CoreLabel, Strin
 			final Tree head = node.headTerminal(hf);
 
 			if(headDaughter == null || head == null) {
-				System.err.println("WARNING: CollinsDependency.extractFromTree() could not find root for:\n" + node.pennString());
+				log.info("WARNING: CollinsDependency.extractFromTree() could not find root for:\n" + node.pennString());
 
 			} else { //Make dependencies
 				if(mustProcessRoot) {
@@ -129,11 +133,11 @@ public class CollinsDependency implements Dependency<CoreLabel, CoreLabel, Strin
 		//TODO Combine the indexing procedure above with yield here so that two searches aren't performed.
 		if(t.yield().size() != deps.size()) {
 			System.err.printf("WARNING: Number of extracted dependencies (%d) does not match yield (%d):\n", deps.size(), t.yield().size());
-			System.err.println(t.pennString());
-			System.err.println();
+			log.info(t.pennString());
+			log.info();
 			int num = 0;
 			for(CollinsDependency dep : deps)
-				System.err.println(num++ + ": " + dep.toString());
+				log.info(num++ + ": " + dep.toString());
 		}
 
 		return deps;

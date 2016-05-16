@@ -1,4 +1,5 @@
-package edu.stanford.nlp.tagger.maxent;
+package edu.stanford.nlp.tagger.maxent; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.regex.Pattern;
 
@@ -11,7 +12,10 @@ import java.util.regex.Pattern;
  *
  * @author Christopher Manning
  */
-public class ExtractorVerbalVBNZero extends DictionaryExtractor {
+public class ExtractorVerbalVBNZero extends DictionaryExtractor  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(ExtractorVerbalVBNZero.class);
 
   private static final String vbnTag = "VBN";
   private static final String vbdTag = "VBD";
@@ -33,7 +37,7 @@ public class ExtractorVerbalVBNZero extends DictionaryExtractor {
 
   @Override
   public boolean precondition(String tag) {
-    System.err.println("VBN: Testing precondition on " + tag + ": " + (tag.equals(vbnTag) || tag.equals(vbdTag) || tag.equals(jjTag)));
+    log.info("VBN: Testing precondition on " + tag + ": " + (tag.equals(vbnTag) || tag.equals(vbdTag) || tag.equals(jjTag)));
     return tag.equals(vbnTag) || tag.equals(vbdTag) || tag.equals(jjTag);
   }
 
@@ -72,7 +76,7 @@ public class ExtractorVerbalVBNZero extends DictionaryExtractor {
     }
 
     if ( ! lastverb.equals(naWord)) {
-      System.err.println("VBN: For " + cword + ", found preceding VBN cue " + lastverb);
+      log.info("VBN: For " + cword + ", found preceding VBN cue " + lastverb);
       return oneSt;
     }
 

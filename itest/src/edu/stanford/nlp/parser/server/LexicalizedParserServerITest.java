@@ -2,6 +2,7 @@ package edu.stanford.nlp.parser.server;
 
 import java.io.IOException;
 
+import edu.stanford.nlp.util.Lazy;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.net.Ports;
@@ -15,7 +16,7 @@ import edu.stanford.nlp.trees.Tree;
 // Alternatively, the server should catch exceptions and do something productive with them
 public class LexicalizedParserServerITest extends TestCase {
   private static LexicalizedParser lexparser = null;
-  private static ShiftReduceParser srparser = null;
+  private static Lazy<ShiftReduceParser> srparser = null;
 
   static final String lexmodel = LexicalizedParser.DEFAULT_PARSER_LOC;
 
@@ -50,7 +51,7 @@ public class LexicalizedParserServerITest extends TestCase {
           lexparser = LexicalizedParser.loadModel(lexmodel);
         }
         if (srparser == null) {
-          srparser = ShiftReduceParser.loadModel(srmodel, "-preTag", "-taggerSerializedFile", tagger);
+          srparser = Lazy.of( () -> ShiftReduceParser.loadModel(srmodel, "-preTag", "-taggerSerializedFile", tagger));
         }
       }
     }
@@ -213,7 +214,7 @@ public class LexicalizedParserServerITest extends TestCase {
   {
     int port = Ports.findAvailable(2000, 10000);
     System.err.println("testGetShiftReduceText: starting on port " + port);
-    startLPServer(port, true, srparser);
+    startLPServer(port, true, srparser.get());
 
     LexicalizedParserClient client = 
       new LexicalizedParserClient("localhost", port);

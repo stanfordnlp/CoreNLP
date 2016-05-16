@@ -1,12 +1,12 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
+import edu.stanford.nlp.ling.SentenceUtils;
 import junit.framework.TestCase;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.parser.lexparser.BinaryHeadFinder;
 import edu.stanford.nlp.parser.lexparser.Options;
@@ -88,7 +88,7 @@ public class ShiftReduceParserTest extends TestCase {
     String[] words = { "This", "is", "a", "short", "test", "." };
     String[] tags = { "DT", "VBZ", "DT", "JJ", "NN", "." };
     assertEquals(words.length, tags.length);
-    List<TaggedWord> sentence = Sentence.toTaggedList(Arrays.asList(words), Arrays.asList(tags));
+    List<TaggedWord> sentence = SentenceUtils.toTaggedList(Arrays.asList(words), Arrays.asList(tags));
     State state = ShiftReduceParser.initialStateFromTaggedSentence(sentence);
     for (int i = 0; i < words.length; ++i) {
       assertEquals(tags[i], state.sentence.get(i).value());

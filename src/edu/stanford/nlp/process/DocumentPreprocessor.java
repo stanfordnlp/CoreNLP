@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.IOUtils;
@@ -25,12 +26,10 @@ import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.objectbank.XMLBeginEndIterator;
-
-import java.util.function.Function;
-
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Produces a list of sentences from either a plain text or XML document.
@@ -39,7 +38,7 @@ import edu.stanford.nlp.util.StringUtils;
  * multiple times, then you need to create a second DocumentProcessor.
  * <p>
  * Tokenization: The default tokenizer is {@link PTBTokenizer}. If null is passed
- * to <code>setTokenizerFactory</code>, then whitespace tokenization is assumed.
+ * to {@code setTokenizerFactory}, then whitespace tokenization is assumed.
  * <p>
  * Adding a new document type requires two steps:
  * <ol>
@@ -53,7 +52,10 @@ import edu.stanford.nlp.util.StringUtils;
  *
  * @author Spence Green
  */
-public class DocumentPreprocessor implements Iterable<List<HasWord>> {
+public class DocumentPreprocessor implements Iterable<List<HasWord>>  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(DocumentPreprocessor.class);
 
   public enum DocType {Plain, XML}
 
@@ -233,7 +235,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
     private final Tokenizer<? extends HasWord> tokenizer;
     private final Set<String> sentDelims;
     private final Set<String> delimFollowers;
-    private Function<String, String[]> splitTag;
+    private final Function<String, String[]> splitTag;
     private List<HasWord> nextSent; // = null;
     private final List<HasWord> nextSentCarryover = Generics.newArrayList();
 
@@ -271,7 +273,9 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
       // If tokens are tagged, then we must split them
       // Note that if the token contains two or more instances of the delimiter, then the last
       // instance is regarded as the split point.
-      if (tagDelimiter != null) {
+      if (tagDelimiter == null) {
+        splitTag = null;
+      } else {
         splitTag = new Function<String,String[]>() {
           private final String splitRegex = String.format("%s(?!.*%s)", tagDelimiter, tagDelimiter);
           @Override
@@ -301,7 +305,10 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
       if (!tokenizer.hasNext()) {
         IOUtils.closeIgnoringExceptions(inputReader);
         inputReader = null;
-        nextSent = null;
+        // nextSent = null; // WRONG: There may be something in it from the nextSentCarryover
+        if (nextSent.isEmpty()) {
+          nextSent = null;
+        }
         return;
       }
 
@@ -383,6 +390,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
 
     @Override
     public void remove() { throw new UnsupportedOperationException(); }
+
   }
 
 
@@ -441,18 +449,20 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
 
     @Override
     public void remove() { throw new UnsupportedOperationException(); }
+
   } // end class XMLIterator
 
 
   private static String usage() {
     StringBuilder sb = new StringBuilder();
-    String nl = System.getProperty("line.separator");
+    String nl = System.lineSeparator();
     sb.append(String.format("Usage: java %s [OPTIONS] [file] [< file]%n%n", DocumentPreprocessor.class.getName()));
     sb.append("Options:").append(nl);
     sb.append("-xml delim              : XML input with associated delimiter.").append(nl);
     sb.append("-encoding type          : Input encoding (default: UTF-8).").append(nl);
     sb.append("-printSentenceLengths   : ").append(nl);
     sb.append("-noTokenization         : Split on newline delimiters only.").append(nl);
+    sb.append("-printOriginalText      : Print the original, not normalized form of tokens.").append(nl);
     sb.append("-suppressEscaping       : Suppress PTB escaping.").append(nl);
     sb.append("-tokenizerOptions opts  : Specify custom tokenizer options.").append(nl);
     sb.append("-tag delim              : Input tokens are tagged. Split tags.").append(nl);
@@ -484,7 +494,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
   public static void main(String[] args) throws IOException {
     final Properties options = StringUtils.argsToProperties(args, argOptionDefs());
     if (options.containsKey("help")) {
-      System.err.println(usage());
+      log.info(usage());
       return;
     }
 
@@ -508,8 +518,8 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
     boolean whitespaceTokenization = options.containsKey("whitespaceTokenization");
     if (whitespaceTokenization) numFactoryFlags += 1;
     if (numFactoryFlags > 1) {
-      System.err.println("Only one tokenizer flag allowed at a time: ");
-      System.err.println("  -suppressEscaping, -tokenizerOptions, -printOriginalText, -whitespaceTokenization");
+      log.info("Only one tokenizer flag allowed at a time: ");
+      log.info("  -suppressEscaping, -tokenizerOptions, -printOriginalText, -whitespaceTokenization");
       return;
     }
 
@@ -582,4 +592,5 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
     pw.close();
     System.err.printf("Read in %d sentences.%n", numSents);
   }
+
 }

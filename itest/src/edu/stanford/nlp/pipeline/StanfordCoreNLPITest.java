@@ -2,7 +2,6 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
 import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -11,7 +10,8 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
-import junit.framework.Assert;
+
+import org.junit.Assert;
 import junit.framework.TestCase;
 
 import java.io.*;
@@ -27,6 +27,22 @@ public class StanfordCoreNLPITest extends TestCase {
     try {
       // Put the lemma before pos and you have a problem
       props.setProperty("annotators", "tokenize,ssplit,lemma,pos,ner,parse");
+      new StanfordCoreNLP(props);
+      throw new RuntimeException("Should have thrown an exception");
+    } catch (IllegalArgumentException e) {
+      // yay
+    }
+
+    // This should be okay: parse can take the place of pos
+    props.setProperty("annotators", "tokenize,ssplit,parse,lemma,ner");
+    new StanfordCoreNLP(props);
+  }
+
+  public void testRequiresForCoref() throws Exception {
+    Properties props = new Properties();
+    try {
+      // Put the lemma before pos and you have a problem
+      props.setProperty("annotators", "tokenize,ssplit,lemma,pos,ner,coref");
       new StanfordCoreNLP(props);
       throw new RuntimeException("Should have thrown an exception");
     } catch (IllegalArgumentException e) {
@@ -351,7 +367,7 @@ public class StanfordCoreNLPITest extends TestCase {
     Assert.assertEquals("Wrong number of sentTokens: " + sentTokens, 11, sentTokens.size());
   }
 
-  private void checkSUTimeAnnotation(String message,
+  private static void checkSUTimeAnnotation(String message,
                                      StanfordCoreNLP pipeline, String text,
                                      int nExpectedSentences, int nExpectedTokens,
                                      Map<Integer,String> expectedNormalizedNER) {
@@ -381,7 +397,7 @@ public class StanfordCoreNLPITest extends TestCase {
 
     // CoreNLP without properties
     StanfordCoreNLP pipeline1 = new StanfordCoreNLP();
-    Map<Integer,String> expectedValues1 = new HashMap<Integer,String>();
+    Map<Integer,String> expectedValues1 = new HashMap<>();
     expectedValues1.put(3, "2001-10-02");
     expectedValues1.put(9, "OFFSET P1D");
     checkSUTimeAnnotation("Default properties", pipeline1, text, nExpectedSentences, nExpectedTokens, expectedValues1);
@@ -391,9 +407,10 @@ public class StanfordCoreNLPITest extends TestCase {
     props.setProperty("sutime.searchForDocDate", "true");
 
     StanfordCoreNLP pipeline2 = new StanfordCoreNLP(props);
-    Map<Integer,String> expectedValues2 = new HashMap<Integer,String>();
+    Map<Integer,String> expectedValues2 = new HashMap<>();
     expectedValues2.put(3, "2001-10-02");
     expectedValues2.put(9, "2001-10-03");
     checkSUTimeAnnotation("With searchForDocDate", pipeline2, text, nExpectedSentences, nExpectedTokens, expectedValues2);
   }
+
 }

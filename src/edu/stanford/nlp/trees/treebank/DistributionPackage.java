@@ -1,10 +1,12 @@
-package edu.stanford.nlp.trees.treebank;
+package edu.stanford.nlp.trees.treebank; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.List;
 import java.util.ArrayList;
 
 import edu.stanford.nlp.io.FileSystem;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
 
 /**
  * Adds data files to a tar'd / gzip'd distribution package. Data sets marked with the DISTRIB parameter
@@ -12,7 +14,10 @@ import edu.stanford.nlp.io.FileSystem;
  *
  * @author Spence Green
  */
-public class DistributionPackage {
+public class DistributionPackage  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(DistributionPackage.class);
 
   private final List<String> distFiles;
   private String lastCreatedDistribution = "UNKNOWN";
@@ -73,6 +78,7 @@ public class DistributionPackage {
         System.err.printf("%s: Unable to add file %s to distribution %s\n", this.getClass().getName(),currentFile,distribName);
       } catch (InterruptedException e) {
         System.err.printf("%s: tar did not return from building %s.tar\n", this.getClass().getName(),distribName);
+        throw new RuntimeInterruptedException(e);
       }
     } else {
       System.err.printf("%s: Unable to create temp directory %s\n", this.getClass().getName(), distribName);

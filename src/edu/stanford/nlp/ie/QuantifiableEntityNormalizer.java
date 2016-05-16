@@ -1,4 +1,5 @@
-package edu.stanford.nlp.ie;
+package edu.stanford.nlp.ie; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.pascal.ISODateInstance;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
@@ -39,7 +40,10 @@ import java.util.regex.Pattern;
  * @author Christopher Manning (extended for RTE)
  * @author Anna Rafferty
  */
-public class QuantifiableEntityNormalizer {
+public class QuantifiableEntityNormalizer  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(QuantifiableEntityNormalizer.class);
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG2 = false;  // String normlz functions
@@ -273,7 +277,7 @@ public class QuantifiableEntityNormalizer {
   public static List<CoreLabel> collapseNERLabels(List<CoreLabel> l){
     if(DEBUG) {
       for (CoreLabel w: l) {
-        System.err.println("<<"+w.get(CoreAnnotations.TextAnnotation.class)+"::"+w.get(CoreAnnotations.PartOfSpeechAnnotation.class)+"::"+w.get(CoreAnnotations.NamedEntityTagAnnotation.class)+">>");
+        log.info("<<"+w.get(CoreAnnotations.TextAnnotation.class)+"::"+w.get(CoreAnnotations.PartOfSpeechAnnotation.class)+"::"+w.get(CoreAnnotations.NamedEntityTagAnnotation.class)+">>");
       }
     }
 
@@ -325,7 +329,7 @@ public class QuantifiableEntityNormalizer {
       s.add(nextWord);
     }
     for (CoreLabel w : s) {
-      System.err.println("<<"+w.get(CoreAnnotations.TextAnnotation.class)+"::"+w.get(CoreAnnotations.PartOfSpeechAnnotation.class)+"::"+w.get(CoreAnnotations.NamedEntityTagAnnotation.class)+">>");
+      log.info("<<"+w.get(CoreAnnotations.TextAnnotation.class)+"::"+w.get(CoreAnnotations.PartOfSpeechAnnotation.class)+"::"+w.get(CoreAnnotations.NamedEntityTagAnnotation.class)+">>");
     }
     return s;
   }
@@ -388,7 +392,7 @@ public class QuantifiableEntityNormalizer {
       //one possibility: it's a two digit year with an apostrophe: '90
       if(wordString.length() == 3  && wordString.startsWith("'")) {
         if (DEBUG) {
-          System.err.println("Found potential two digit year: " + wordString);
+          log.info("Found potential two digit year: " + wordString);
         }
         wordString = wordString.substring(1);
         try {
@@ -550,16 +554,16 @@ public class QuantifiableEntityNormalizer {
                 rangeString = firstDate.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) + '-' + next2.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
               }
               if (DEBUG) {
-                System.err.println("#1: Changing normalized NER from " + firstDate.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) + " to " + rangeString + " at index " + beforeIndex);
+                log.info("#1: Changing normalized NER from " + firstDate.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) + " to " + rangeString + " at index " + beforeIndex);
               }
               firstDate.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, rangeString);
               if (DEBUG) {
-                System.err.println("#2: Changing normalized NER from " + next2.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) + " to " + rangeString + " at index " + afterIndex);
+                log.info("#2: Changing normalized NER from " + next2.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) + " to " + rangeString + " at index " + afterIndex);
               }
               next2.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, rangeString);
               next.set(CoreAnnotations.NamedEntityTagAnnotation.class, nerNext2);
               if (DEBUG) {
-                System.err.println("#3: Changing normalized NER from " + next.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) + " to " + rangeString + " at index " + (afterIndex + 1));
+                log.info("#3: Changing normalized NER from " + next.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) + " to " + rangeString + " at index " + (afterIndex + 1));
               }
               next.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, rangeString);
               if (concatenate) {
@@ -973,7 +977,7 @@ public class QuantifiableEntityNormalizer {
         String entityType, String compModifier, String nextWord) {
     assert(quantifiable.contains(entityType));
     if (DEBUG) {
-      System.err.println("Quantifiable.processEntity: " + l);
+      log.info("Quantifiable.processEntity: " + l);
     }
     String s;
     if (entityType.equals("TIME")) {
@@ -985,7 +989,7 @@ public class QuantifiableEntityNormalizer {
     Number numberFromSUTime = fetchNumberFromSUTime(l);
     Timex timexFromSUTime = fetchTimexFromSUTime(l);
 
-    if (DEBUG) System.err.println("Quantifiable: working on " + s);
+    if (DEBUG) log.info("Quantifiable: working on " + s);
     String p = null;
     switch (entityType) {
       case "NUMBER": {
@@ -1059,7 +1063,7 @@ public class QuantifiableEntityNormalizer {
     for (E wi : l) {
       if (p != null) {
         if (DEBUG) {
-          System.err.println("#4: Changing normalized NER from " + wi.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) + " to " + p + " at index " + i);
+          log.info("#4: Changing normalized NER from " + wi.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) + " to " + p + " at index " + i);
         }
         wi.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, p);
       }
@@ -1085,7 +1089,7 @@ public class QuantifiableEntityNormalizer {
         return w.get(CoreAnnotations.TextAnnotation.class);
     }
     if (DEBUG) {
-      System.err.println("default: " + l.get(size-1).get(CoreAnnotations.TextAnnotation.class));
+      log.info("default: " + l.get(size-1).get(CoreAnnotations.TextAnnotation.class));
     }
     return l.get(size-1).get(CoreAnnotations.TextAnnotation.class);
   }
@@ -1337,7 +1341,7 @@ public class QuantifiableEntityNormalizer {
       String nextWord = "";
       if (i < list.size()) {
         wi = list.get(i);
-        if (DEBUG) { System.err.println("addNormalizedQuantitiesToEntities: wi is " + wi + "; collector is " + collector); }
+        if (DEBUG) { log.info("addNormalizedQuantitiesToEntities: wi is " + wi + "; collector is " + collector); }
         if ((i+1) < sz) {
           nextWord = list.get(i+1).get(CoreAnnotations.TextAnnotation.class);
           if(nextWord == null) nextWord = "";
@@ -1432,7 +1436,7 @@ public class QuantifiableEntityNormalizer {
       String curWord = (wi.get(CoreAnnotations.TextAnnotation.class) != null ? wi.get(CoreAnnotations.TextAnnotation.class) : "");
       String currNerTag = wi.get(CoreAnnotations.NamedEntityTagAnnotation.class);
 
-      if (DEBUG) { System.err.println("fixupNerBeforeNormalization: wi is " + wi); }
+      if (DEBUG) { log.info("fixupNerBeforeNormalization: wi is " + wi); }
       // Attempts repairs to NER tags only if not marked by SUTime already
       if (timex == null && numericType == null) {
         // repairs commas in between dates...  String constant first in equals() in case key has null value....
@@ -1465,7 +1469,7 @@ public class QuantifiableEntityNormalizer {
                 wi.set(CoreAnnotations.NamedEntityTagAnnotation.class, "DATE");
                 String dateStr = new ISODateInstance(new ISODateInstance(sides[0]), new ISODateInstance(sides[1])).getDateString();
                 if (DEBUG) {
-                  System.err.println("#5: Changing normalized NER from " +
+                  log.info("#5: Changing normalized NER from " +
                           wi.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) + " to " + dateStr + " at index " + i);
                 }
                 wi.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, dateStr);
@@ -1537,7 +1541,7 @@ public class QuantifiableEntityNormalizer {
       CoreLabel nscAnswer = copyL.get(i);
       if (before.get(CoreAnnotations.NamedEntityTagAnnotation.class) == null && before.get(CoreAnnotations.NamedEntityTagAnnotation.class).equals(BACKGROUND_SYMBOL) &&
           (nscAnswer.get(CoreAnnotations.AnswerAnnotation.class) != null && !nscAnswer.get(CoreAnnotations.AnswerAnnotation.class).equals(BACKGROUND_SYMBOL))) {
-        System.err.println("Quantifiable: updating class for " +
+        log.info("Quantifiable: updating class for " +
             before.get(CoreAnnotations.TextAnnotation.class) + '/' +
             before.get(CoreAnnotations.NamedEntityTagAnnotation.class) + " to " + nscAnswer.get(CoreAnnotations.AnswerAnnotation.class));
         before.set(CoreAnnotations.NamedEntityTagAnnotation.class, nscAnswer.get(CoreAnnotations.AnswerAnnotation.class));

@@ -56,8 +56,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -205,6 +205,7 @@ import org.slf4j.LoggerFactory;
  * <tr><td> printClassifierParam</td><td>int</td><td>100</td><td>A parameter to the printing style, which may give, for example the number of parameters to print (for HighWeight or HighMagnitude).</td></tr>
  * <tr><td> justify</td><td>boolean</td><td>false</td><td>For each test data item, print justification (weights) for active features used in classification.</td></tr>
  * <tr><td> exitAfterTrainingFeaturization</td><td>boolean</td><td>false</td><td>If true, the program exits after reading the training data (trainFile) and before building a classifier.  This is useful in conjunction with printFeatures, if one only wants to convert data to features for use with another classifier.</td></tr>
+ * <tr><td> verboseOptimization</td><td>boolean</td><td>false</td><td>If true, print much more detail about classifier optimization.</td></tr>
  * <tr></tr>
  * <tr><td> intern</td><td>boolean</td><td>false</td><td>If true, (String) intern all of the (final) feature names.  Recommended (this saves memory, but slows down feature generation in training).</td></tr>
  * <tr><td> cacheNGrams</td><td>boolean</td><td>false</td><td>If true, record the NGram features that correspond to a String (under the current option settings and reuse rather than recalculating if the String is seen again.  <b>Disrecommended (speeds training but can require enormous amounts of memory).</b></td></tr>
@@ -242,7 +243,10 @@ import org.slf4j.LoggerFactory;
  * @author Anna Rafferty
  * @author Angel Chang (added options for using l1reg)
  */
-public class ColumnDataClassifier {
+public class ColumnDataClassifier  {
+
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ColumnDataClassifier.class);
 
   private static final double DEFAULT_VALUE = 1.0; // default value for setting categorical, boolean features
   private static final String DEFAULT_IGNORE_REGEXP = "\\s+";
@@ -254,7 +258,7 @@ public class ColumnDataClassifier {
 
   enum InputFormat { PLAIN, COMMENTS, HEADER }
 
-  final static Logger logger = LoggerFactory.getLogger(ColumnDataClassifier.class);
+  final static Redwood.RedwoodChannels logger = Redwood.channels(ColumnDataClassifier.class);
 
   /**
    * Entry point for taking a String (formatted as a line of a TSV file) and
@@ -399,7 +403,6 @@ public class ColumnDataClassifier {
   @SuppressWarnings("NonThreadSafeLazyInitialization")
   private Pair<GeneralDataset<String,String>, List<String[]>> readDataset(String filename, boolean inTestPhase) {
     Timing tim = new Timing();
-    logger.info("Reading dataset from " + filename + " ... ");
     GeneralDataset<String,String> dataset;
     List<String[]> lineInfos = null;
     if ((inTestPhase && Flags.testFromSVMLight) || (!inTestPhase && Flags.trainFromSVMLight)) {
@@ -462,7 +465,6 @@ public class ColumnDataClassifier {
           dataset.add(makeDatumFromStrings(strings));
         }
         if (lineNo > 0 && minColumns != maxColumns) {
-          logger.info("");
           logger.info("WARNING: Number of tab-separated columns in " +
                   filename + " varies between " + minColumns + " and " + maxColumns);
         }
@@ -470,8 +472,7 @@ public class ColumnDataClassifier {
         throw new RuntimeException("Dataset could not be loaded", e);
       }
     }
-
-    logger.info("done [" + tim.toSecondsString() + "s, " + dataset.size() + " items].");
+    logger.info("Reading dataset from " + filename + " ... done [" + tim.toSecondsString() + "s, " + dataset.size() + " items].");
     return new Pair<>(dataset, lineInfos);
   }
 
@@ -522,7 +523,7 @@ public class ColumnDataClassifier {
       double cor = (int) contingency.getCount("Ranking|Correct");
       double err = (int) contingency.getCount("Ranking|Error");
       double rankacc = (cor + err == 0) ? 0 : cor / (cor + err);
-      System.err.print("Ranking accuracy: " + nf.format(rankacc));
+      log.info("Ranking accuracy: " + nf.format(rankacc));
       double cov = (int) contingency.getCount("Ranking|Covered");
       double coverr = (int) contingency.getCount("Ranking|Uncovered");
       double covacc = (cov + coverr == 0) ? 0 : cov / (cov + coverr);
@@ -651,9 +652,8 @@ public class ColumnDataClassifier {
 
   private void finishRanking(Counter<String> contingency, double sim) {
     if (numInGroup > 0) {
-      String message = "";
       if (globalFlags.justify) {
-        message += "Previous group of " + numInGroup + ": ";
+        String message = "Previous group of " + numInGroup + ": ";
         if (!foundAnswerInGroup) {
           message += "no correct answer; ";
         }
@@ -1232,7 +1232,7 @@ public class ColumnDataClassifier {
     }
     if (flags.partialNGramRegexp != null) {
       Matcher m = flags.partialNGramPattern.matcher(toNGrams);
-      // System.err.print("Matching |" + flags.partialNGramRegexp +
+      // log.info("Matching |" + flags.partialNGramRegexp +
       //                "| against |" + toNGrams + "|");
       if (m.find()) {
         if (m.groupCount() > 0) {
@@ -1240,7 +1240,7 @@ public class ColumnDataClassifier {
         } else {
           toNGrams = m.group();
         }
-        // System.err.print(" Matched |" + toNGrams + "|");
+        // log.info(" Matched |" + toNGrams + "|");
       }
       // logger.info();
     }
@@ -1463,9 +1463,11 @@ public class ColumnDataClassifier {
       } else {
         lcf  = new LinearClassifierFactory<>(globalFlags.tolerance, globalFlags.useSum, globalFlags.prior, globalFlags.sigma, globalFlags.epsilon, globalFlags.QNsize);
       }
-      if (!globalFlags.useQN) {
+      lcf.setVerbose(globalFlags.verboseOptimization);
+      if ( ! globalFlags.useQN) {
         lcf.useConjugateGradientAscent();
       }
+
       lc = lcf.trainClassifier(train);
     }
     return lc;
@@ -1855,6 +1857,8 @@ public class ColumnDataClassifier {
         myFlags[col].significantColumnId = Boolean.parseBoolean(val);
       } else if (key.equals("justify")) {
         myFlags[col].justify = Boolean.parseBoolean(val);
+      } else if (key.equals("verboseOptimization")) {
+        myFlags[col].verboseOptimization = Boolean.parseBoolean(val);
       }  else if (key.equals("realValued")) {
         myFlags[col].isRealValued = Boolean.parseBoolean(val);
         myUsesRealValues = myUsesRealValues || myFlags[col].isRealValued;
@@ -1953,7 +1957,7 @@ public class ColumnDataClassifier {
    * @throws IOException If IO problems
    */
   public static void main(String[] args) throws IOException {
-    logger.info(StringUtils.toInvocationString("ColumnDataClassifier", args));
+    StringUtils.logInvocationString(logger, args);
     // the constructor will load a classifier if one is specified with loadClassifier
     ColumnDataClassifier cdc = new ColumnDataClassifier(StringUtils.argsToProperties(args));
     String testFile = cdc.globalFlags.testFile;
@@ -2282,6 +2286,8 @@ public class ColumnDataClassifier {
 
     static String csvOutput = null;
     boolean printCrossValidationDecisions = false;
+
+    boolean verboseOptimization = false;
 
     @Override
     public String toString() {

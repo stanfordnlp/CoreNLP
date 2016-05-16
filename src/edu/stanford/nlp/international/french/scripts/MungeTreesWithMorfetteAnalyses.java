@@ -1,4 +1,5 @@
-package edu.stanford.nlp.international.french.scripts;
+package edu.stanford.nlp.international.french.scripts; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -25,7 +26,10 @@ import edu.stanford.nlp.trees.international.french.FrenchTreeReaderFactory;
  * @author Spence Green
  *
  */
-public final class MungeTreesWithMorfetteAnalyses {
+public final class MungeTreesWithMorfetteAnalyses  {
+
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(MungeTreesWithMorfetteAnalyses.class);
 
   private static class MorfetteFileIterator implements Iterator<List<CoreLabel>> {
 
@@ -55,9 +59,9 @@ public final class MungeTreesWithMorfetteAnalyses {
           }
           String[] toks = line.split("\\s+");
           if (toks.length != 3) {
-            System.err.println(toks.length);
-            System.err.println(line);
-            System.err.println(lineId);
+            log.info(toks.length);
+            log.info(line);
+            log.info(lineId);
             throw new RuntimeException(String.format("line %d: Morfette format is |word lemma tag|: |%s|", lineId, line));
           }
           CoreLabel cl = new CoreLabel();
@@ -141,7 +145,7 @@ public final class MungeTreesWithMorfetteAnalyses {
       }
 
       if (tr.readTree() != null || morfetteItr.hasNext()) {
-        System.err.println("WARNING: Uneven input files!");
+        log.info("WARNING: Uneven input files!");
       }
 
       tr.close();

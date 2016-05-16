@@ -1,4 +1,5 @@
 package edu.stanford.nlp.pipeline;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.FileSequentialCollection;
 import edu.stanford.nlp.io.IOUtils;
@@ -27,7 +28,10 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  * @author Gabor Angeli
  */
 @SuppressWarnings("FieldCanBeLocal")
-public class StanfordCoreNLPClient extends AnnotationPipeline {
+public class StanfordCoreNLPClient extends AnnotationPipeline  {
+
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels log = Redwood.channels(StanfordCoreNLPClient.class);
 
   /**
    * Information on how to connect to a backend.
@@ -42,12 +46,13 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
    */
   private static class Backend {
     /** The protocol to connect to the server with. */
-    public final String protocol = "http";
+    public final String protocol;
     /** The hostname of the server running the CoreNLP annotators */
     public final String host;
     /** The port of the server running the CoreNLP annotators */
     public final int port;
-    public Backend(String host, int port) {
+    public Backend(String protocol, String host, int port) {
+      this.protocol = protocol;
       this.host = host;
       this.port = port;
     }
@@ -264,7 +269,10 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
    */
   @SuppressWarnings("unused")
   public StanfordCoreNLPClient(Properties properties, String host, int port) {
-    this(properties, Collections.singletonList(new Backend(host, port)));
+    this(properties, Collections.singletonList(
+        new Backend(host.startsWith("https://") ? "https" : "http",
+            host.startsWith("http://") ? host.substring("http://".length()) : (host.startsWith("https://") ? host.substring("https://".length()) : host),
+            port)));
   }
 
   /**
@@ -276,7 +284,9 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
   public StanfordCoreNLPClient(Properties properties, String host, int port, int threads) {
     this(properties, new ArrayList<Backend>() {{
       for (int i = 0; i < threads; ++i) {
-        add(new Backend(host, port));
+        add(new Backend(host.startsWith("https://") ? "https" : "http",
+            host.startsWith("http://") ? host.substring("http://".length()) : (host.startsWith("https://") ? host.substring("https://".length()) : host),
+            port));
       }
     }});
   }
@@ -303,7 +313,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
       lock.lock();
       annotationDone.await();  // Only wait for one callback to complete; only annotating one document
     } catch (InterruptedException e) {
-      System.err.println("Interrupt while waiting for annotation to return");
+      log.info("Interrupt while waiting for annotation to return");
     } finally {
       lock.unlock();
     }
@@ -365,6 +375,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
           // 2.3 Set some protocol-dependent properties
           switch (backend.protocol) {
             case "http":
+            case "https":
               ((HttpURLConnection) connection).setRequestMethod("POST");
               break;
             default:
@@ -372,7 +383,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
           }
           // 3. Fire off the request
           connection.getOutputStream().write(message);
-//          System.err.println("Wrote " + message.length + " bytes to " + backend.host + ":" + backend.port);
+//          log.info("Wrote " + message.length + " bytes to " + backend.host + ":" + backend.port);
           os.close();
 
           // 4. Await a response
@@ -389,10 +400,9 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
 
           // 6. Call the callback
           callback.accept(annotation);
-        } catch (IOException e) {
-          throw new RuntimeIOException("Could not connect to server: " + backend.host + ":" + backend.port, e);
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
           e.printStackTrace();
+          callback.accept(null);
         }
       }
     }.start());
@@ -417,7 +427,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
    * @throws IOException If IO problem with stdin
    */
   private static void shell(StanfordCoreNLPClient pipeline) throws IOException {
-    System.err.println("Entering interactive shell. Type q RETURN or EOF to quit.");
+    log.info("Entering interactive shell. Type q RETURN or EOF to quit.");
     final StanfordCoreNLP.OutputFormat outputFormat = StanfordCoreNLP.OutputFormat.valueOf(pipeline.properties.getProperty("outputFormat", "text").toUpperCase());
     IOUtils.console("NLP> ", line -> {
       if (line.length() > 0) {
@@ -546,7 +556,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
     // extract all the properties from the command line
     // if cmd line is empty, set the properties to null. The processor will search for the properties file in the classpath
 //    if (args.length < 2) {
-//      System.err.println("Usage: " + StanfordCoreNLPClient.class.getSimpleName() + " -host <hostname> -port <port> ...");
+//      log.info("Usage: " + StanfordCoreNLPClient.class.getSimpleName() + " -host <hostname> -port <port> ...");
 //      System.exit(1);
 //    }
     Properties props = StringUtils.argsToProperties(args);
@@ -564,9 +574,11 @@ public class StanfordCoreNLPClient extends AnnotationPipeline {
       if (spec.contains(":")) {
         String host = spec.substring(0, spec.indexOf(":"));
         int port = Integer.parseInt(spec.substring(spec.indexOf(":") + 1));
-        backends.add(new Backend(host, port));
+        backends.add(new Backend(host.startsWith("https://") ? "https" : "http",
+            host.startsWith("http://") ? host.substring("http://".length()) : (host.startsWith("https://") ? host.substring("https://".length()) : host),
+            port));
       } else {
-        backends.add(new Backend(spec, 80));
+        backends.add(new Backend("http", spec, 80));
       }
     }
 
