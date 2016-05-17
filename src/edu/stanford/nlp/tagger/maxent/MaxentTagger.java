@@ -267,6 +267,20 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   }
 
   /**
+   * Constructor for a tagger, loading a model stored in a particular file,
+   * classpath resource, or URL.
+   * The tagger data is loaded when the constructor is called (this can be
+   * slow). This constructor first constructs a TaggerConfig object, which
+   * loads the tagger options from the modelFile.
+   *
+   * @param modelStream The InputStream from which to read the model
+   * @throws RuntimeIOException if I/O errors or serialization errors
+   */
+  public MaxentTagger(InputStream modelStream) {
+    this(modelStream, new Properties(), true);
+  }
+
+  /**
    * Constructor for a tagger using a model stored in a particular file,
    * with options taken from the supplied TaggerConfig.
    * The tagger data is loaded when the
@@ -301,6 +315,17 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
     readModelAndInit(config, modelFile, printLoading);
   }
 
+  /**
+   * Initializer that loads the tagger.
+   *
+   * @param modelStream An InputStream for reading the model file
+   * @param config TaggerConfig based on command-line arguments
+   * @param printLoading Whether to print a message saying what model file is being loaded and how long it took when finished.
+   * @throws RuntimeIOException if I/O errors or serialization errors
+   */
+  public MaxentTagger(InputStream modelStream, Properties config, boolean printLoading) {
+    readModelAndInit(config, modelStream, printLoading);
+  }
 
   final Dictionary dict = new Dictionary();
   TTags tags;
@@ -764,8 +789,32 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
    */
   protected void readModelAndInit(Properties config, String modelFileOrUrl, boolean printLoading) {
     try {
+      readModelAndInit(config, IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(modelFileOrUrl), printLoading);
+    } catch (IOException e) {
+      throw new RuntimeIOException("Error while loading a tagger model (probably missing model file)", e);
+    }
+
+  }
+
+  /** This reads the complete tagger from a single model provided as an InputStream,
+   *  and initializes the tagger using a
+   *  combination of the properties passed in and parameters from the file.
+   *  <p>
+   *  <i>Note for the future:</i> This assumes that the TaggerConfig in the file
+   *  has already been read and used.  This work is done inside the
+   *  constructor of TaggerConfig.  It might be better to refactor
+   *  things so that is all done inside this method, but for the moment
+   *  it seemed better to leave working code alone [cdm 2008].
+   *
+   *  @param config The tagger config
+   *  @param modelStream The model provided as an InputStream
+   *  @param printLoading Whether to print a message saying what model file is being loaded and how long it took when finished.
+   *  @throws RuntimeIOException if I/O errors or serialization errors
+   */
+  protected void readModelAndInit(Properties config, InputStream modelStream, boolean printLoading) {
+    try {
       // first check can open file ... or else leave with exception
-      DataInputStream rf = new DataInputStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(modelFileOrUrl));
+      DataInputStream rf = new DataInputStream(modelStream);
 
       readModelAndInit(config, rf, printLoading);
       rf.close();
@@ -773,7 +822,6 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       throw new RuntimeIOException("Error while loading a tagger model (probably missing model file)", e);
     }
   }
-
 
 
   /** This reads the complete tagger from a single model file, and inits
