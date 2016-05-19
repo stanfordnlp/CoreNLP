@@ -13,6 +13,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.util.*;
+import org.hamcrest.beans.PropertyUtil;
 
 import javax.net.ssl.*;
 import java.io.*;
@@ -565,7 +566,10 @@ public class StanfordCoreNLPServer implements Runnable {
           .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
 
       // Get the annotators
-      String annotators = StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+"));
+      String annotators = props.getProperty("annotators");
+      if (PropertiesUtils.getBool(props, "enforceRequirements", true)) {
+        annotators = StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+"));
+      }
 
       // Make sure the properties compile
       props.setProperty("annotators", annotators);
