@@ -706,7 +706,9 @@ public class MachineReading  {
 				}
         
         // for learning curve experiments
-        // partitionTrain = keepPercentage(partitionTrain, percentageOfTrain);        
+        // partitionTrain = keepPercentage(partitionTrain, percentageOfTrain);   
+        partitionTrain = keepPercentage(partitionTrain, MachineReadingProperties.percentageOfTrain);        
+        
         
 				if (auxDataset != null) {
 					for (int ind = 0; ind < AnnotationUtils.sentenceCount(auxDataset); ind++) {
