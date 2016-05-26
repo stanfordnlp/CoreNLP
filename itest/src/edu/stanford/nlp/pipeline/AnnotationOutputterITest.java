@@ -93,6 +93,38 @@ public class AnnotationOutputterITest extends TestCase {
             "          \"dependentGloss\": \"Bad\"\n" +
             "        }\n" +
             "      ],\n" +
+            "      \"enhanced-dependencies\": [\n" +
+            "        {\n" +
+            "          \"dep\": \"ROOT\",\n" +
+            "          \"governor\": 0,\n" +
+            "          \"governorGloss\": \"ROOT\",\n" +
+            "          \"dependent\": 2,\n" +
+            "          \"dependentGloss\": \"wolf\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "          \"dep\": \"amod\",\n" +
+            "          \"governor\": 2,\n" +
+            "          \"governorGloss\": \"wolf\",\n" +
+            "          \"dependent\": 1,\n" +
+            "          \"dependentGloss\": \"Bad\"\n" +
+            "        }\n" +
+            "      ],\n" +
+            "      \"enhanced-plus-plus-dependencies\": [\n" +
+            "        {\n" +
+            "          \"dep\": \"ROOT\",\n" +
+            "          \"governor\": 0,\n" +
+            "          \"governorGloss\": \"ROOT\",\n" +
+            "          \"dependent\": 2,\n" +
+            "          \"dependentGloss\": \"wolf\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "          \"dep\": \"amod\",\n" +
+            "          \"governor\": 2,\n" +
+            "          \"governorGloss\": \"wolf\",\n" +
+            "          \"dependent\": 1,\n" +
+            "          \"dependentGloss\": \"Bad\"\n" +
+            "        }\n" +
+            "      ],\n" +
             "      \"tokens\": [\n" +
             "        {\n" +
             "          \"index\": 1,\n" +
