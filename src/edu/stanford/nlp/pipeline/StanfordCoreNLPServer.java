@@ -567,15 +567,6 @@ public class StanfordCoreNLPServer implements Runnable {
       // Get the annotators
       String annotators = StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+"));
 
-      // Tweak the properties to play nicer with the server
-      // (set the parser max length to 60)
-      if (!"-1".equals(props.getProperty("parse.maxlen", "60"))) {
-        props.setProperty("parse.maxlen", "60");
-      }
-      if (!"-1".equals(props.getProperty("pos.maxlen", "500"))) {
-        props.setProperty("pos.maxlen", "500");
-      }
-
       // Make sure the properties compile
       props.setProperty("annotators", annotators);
 
