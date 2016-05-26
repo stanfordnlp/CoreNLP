@@ -18,7 +18,11 @@ public class SemanticGraphCoreAnnotations {
    * These are collapsed dependencies!
    *
    * This key is typically set on sentence annotations.
+   *
+   * @deprecated In the future, we will only provide basic, enhanced, and
+   * enhanced++ dependencies.
    */
+  @Deprecated
   public static class CollapsedDependenciesAnnotation implements CoreAnnotation<SemanticGraph> {
     @Override
     public Class<SemanticGraph> getType() {
@@ -33,8 +37,6 @@ public class SemanticGraphCoreAnnotations {
    *
    * This key is typically set on sentence annotations.
    *
-   * @deprecated In the future, we will only provide basic, enhanced, and
-   * enhanced++ dependencies.
    */
   public static class BasicDependenciesAnnotation implements CoreAnnotation<SemanticGraph> {
     @Override
