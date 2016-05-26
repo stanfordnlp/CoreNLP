@@ -1,5 +1,6 @@
 package edu.stanford.nlp.trees; 
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
+import edu.stanford.nlp.trees.ud.EnhancementOptions;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
@@ -918,15 +919,16 @@ public abstract class GrammaticalStructure implements Serializable  {
     return typedDependenciesCCprocessed(includeExtras ? Extras.MAXIMAL : Extras.NONE);
   }
 
+
   public List<TypedDependency> typedDependenciesEnhanced() {
     List<TypedDependency> tdl = typedDependencies(Extras.NONE);
-    enhanceDependencies(tdl);
+    addEnhancements(tdl, UniversalEnglishGrammaticalStructure.ENHANCED_OPTIONS);
     return tdl;
   }
 
   public List<TypedDependency> typedDependenciesEnhancedPlusPlus() {
     List<TypedDependency> tdl = typedDependencies(Extras.NONE);
-    enhancePlusPlusDependencies(tdl);
+    addEnhancements(tdl, UniversalEnglishGrammaticalStructure.ENHANCED_PLUS_PLUS_OPTIONS);
     return tdl;
   }
 
@@ -961,11 +963,16 @@ public abstract class GrammaticalStructure implements Serializable  {
   }
 
 
-  protected void enhanceDependencies(List<TypedDependency> list) {
-    // do nothing as default operation
-  }
-
-  protected void enhancePlusPlusDependencies(List<TypedDependency> list) {
+  /**
+   *
+   * Destructively applies different enhancements to the dependency graph.
+   * <p/>
+   * Default is no-op; to be over-ridden in subclasses.
+   *
+   * @param list A list of dependencies
+   * @param options Options that determine which enhancements are applied to the dependency graph.
+   */
+  protected void addEnhancements(List<TypedDependency> list, EnhancementOptions options) {
     // do nothing as default operation
   }
 

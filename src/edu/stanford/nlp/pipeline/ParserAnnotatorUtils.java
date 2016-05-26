@@ -63,6 +63,9 @@ public class ParserAnnotatorUtils  {
           SemanticGraph deps = SemanticGraphFactory.generateCollapsedDependencies(gsf.newGrammaticalStructure(tree), extras);
           SemanticGraph uncollapsedDeps = SemanticGraphFactory.generateUncollapsedDependencies(gsf.newGrammaticalStructure(tree), extras);
           SemanticGraph ccDeps = SemanticGraphFactory.generateCCProcessedDependencies(gsf.newGrammaticalStructure(tree), extras);
+          SemanticGraph enhancedDeps = SemanticGraphFactory.generateEnhancedDependencies(gsf.newGrammaticalStructure(tree));
+          SemanticGraph enhancedPlusPlusDeps = SemanticGraphFactory.generateEnhancedPlusPlusDependencies(gsf.newGrammaticalStructure(tree));
+
 
           if (verbose) {
             log.info("SDs:");
@@ -71,6 +74,8 @@ public class ParserAnnotatorUtils  {
           sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, deps);
           sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, uncollapsedDeps);
           sentence.set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, ccDeps);
+          sentence.set(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class, enhancedDeps);
+          sentence.set(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class, enhancedPlusPlusDeps);
         }
 
         first = false;

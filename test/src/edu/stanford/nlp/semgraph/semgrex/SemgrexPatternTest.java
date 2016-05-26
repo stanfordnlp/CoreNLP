@@ -49,7 +49,7 @@ public class SemgrexPatternTest extends TestCase {
     String s =
         "(ROOT\n(S\n(NP (DT The) (NN chimney) (NNS sweeps))\n(VP (VBP do) (RB not)\n(VP (VB like)\n(S\n(VP (VBG working)\n(PP (IN on)\n(NP (DT an) (JJ empty) (NN stomach)))))))\n(. .)))";
     Tree tree = Tree.valueOf(s);
-    SemanticGraph sg = SemanticGraphFactory.allTypedDependencies(tree, true);
+    SemanticGraph sg = SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.COLLAPSED, GrammaticalStructure.Extras.MAXIMAL, null);
     SemgrexPattern pat = SemgrexPattern.compile("{}=gov ![>det {}] & > {word:/^(?!not).*$/}=dep");
     sg.prettyPrint();
     // SemgrexPattern pat =

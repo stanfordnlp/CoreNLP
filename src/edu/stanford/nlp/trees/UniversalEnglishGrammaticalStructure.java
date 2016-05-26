@@ -1,4 +1,5 @@
 package edu.stanford.nlp.trees; 
+import edu.stanford.nlp.trees.ud.EnhancementOptions;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
@@ -40,18 +41,57 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   private static final boolean DEBUG = System.getProperty("UniversalEnglishGrammaticalStructure", null) != null;
 
 
+  /*
+   * Options for "Enhanced" representation:
+   *
+   * - Process multi-word prepositions: No
+   * - Add prepositions to relation labels: Yes
+   * - Add coordinating conjunctions to relation labels: Yes
+   * - Propagate dependents: Yes
+   * - Add "referent" relations: Yes
+   * - Add copy nodes for conjoined Ps and PPs: No
+   * - Turn quantificational modifiers into flat MWEs: No
+   * - Add relations between controlling subject and controlled verbs: Yes
+   *
+   */
+  public static final EnhancementOptions ENHANCED_OPTIONS = new EnhancementOptions(false, true, true, true, true,
+      false, false, true);
 
-  public class DependencyOptions {
+  /*
+   * Options for "Enhanced++" representation:
+   *
+   * - Process multi-word prepositions: Yes
+   * - Add prepositions to relation labels: Yes
+   * - Add coordinating conjunctions to relation labels: Yes
+   * - Propagate dependents: Yes
+   * - Add "referent" relations: Yes
+   * - Add copy nodes for conjoined Ps and PPs: Yes
+   * - Turn quantificational modifiers into flat MWEs: Yes
+   * - Add relations between controlling subject and controlled verbs: Yes
+   *
+   */
+  public static final EnhancementOptions ENHANCED_PLUS_PLUS_OPTIONS = new EnhancementOptions(true, true, true, true, true,
+      true, true, true);
 
-    boolean processMultiWordPrepositions;
-    boolean enhancePrepositionalModifiers;
-    boolean enhanceConjuncts;
-    boolean propagateDependents;
-    boolean addReferent;
-    boolean addCopyNodes;
-    boolean demoteQuantMod;
+  /*
+   * Options for "Collapsed" representation.
+   * This represenation is similar to the "collapsed" SD representation
+   * without any "Extra" relations.
+   *
+   * - Process multi-word prepositions: Yes
+   * - Add prepositions to relation labels: Yes
+   * - Add coordinating conjunctions to relation labels: Yes
+   * - Propagate dependents: No
+   * - Add "referent" relations: No
+   * - Add copy nodes for conjoined Ps and PPs: Yes
+   * - Turn quantificational modifiers into flat MWEs: No
+   * - Add relations between controlling subject and controlled verbs: No
+   *
+   */
+  @Deprecated
+  public static final EnhancementOptions COLLAPSED_OPTIONS = new EnhancementOptions(true, true, true, false, false,
+      true, false, false);
 
-  }
 
   /**
    * Construct a new {@code EnglishGrammaticalStructure} from an existing parse
@@ -791,49 +831,86 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   }
 
   @Override
-  public void enhanceDependencies(List<TypedDependency> list) {
-    SemanticGraph sg = new SemanticGraph(list);
-    correctDependencies(sg);
-
-    addCaseMarkerInformation(sg);
-
-    addConjInformation(sg);
-
-    treatCC(sg);
-
-    addExtraNSubj(sg);
-
-    correctSubjPass(sg);
-
-
-    list.clear();
-    list.addAll(sg.typedDependencies());
-
-    Collections.sort(list);
-
-  }
-
-  @Override
-  public void enhancePlusPlusDependencies(List<TypedDependency> list) {
+  public void addEnhancements(List<TypedDependency> list, EnhancementOptions options) {
 
     SemanticGraph sg = new SemanticGraph(list);
+
+    if (DEBUG) {
+      printListSorted("addEnhancements: before correctDependencies()", sg.typedDependencies());
+    }
+
     correctDependencies(sg);
 
-    processMultiwordPreps(sg);
-    demoteQuantificationalModifiers(sg);
-    expandPPConjunctions(sg);
-    expandPrepConjunctions(sg);
-    addCaseMarkerInformation(sg);
-    addConjInformation(sg);
-    addRef(sg);
-    collapseReferent(sg);
-    treatCC(sg);
-    addExtraNSubj(sg);
+    if (DEBUG) {
+      printListSorted("addEnhancements: after correctDependencies()", sg.typedDependencies());
+    }
+
+    /* Turn multi-word prepositions into flat mwe. */
+    if (options.processMultiWordPrepositions) {
+      processMultiwordPreps(sg);
+      if (DEBUG) {
+        printListSorted("addEnhancements: after processMultiwordPreps()", sg.typedDependencies());
+      }
+    }
+    /* Turn quantificational modifiers into flat mwe. */
+    if (options.demoteQuantMod) {
+      demoteQuantificationalModifiers(sg);
+      if (DEBUG) {
+        printListSorted("addEnhancements: after demoteQuantificationalModifiers()", sg.typedDependencies());
+      }
+    }
+    /* Add copy nodes for conjoined Ps and PPs. */
+    if (options.addCopyNodes) {
+      expandPPConjunctions(sg);
+      if (DEBUG) {
+        printListSorted("addEnhancements: after expandPPConjunctions()", sg.typedDependencies());
+      }
+      expandPrepConjunctions(sg);
+      if (DEBUG) {
+        printListSorted("addEnhancements: after expandPrepConjunctions()", sg.typedDependencies());
+      }
+    }
+    /* Add propositions to relation names. */
+    if (options.enhancePrepositionalModifiers) {
+      addCaseMarkerInformation(sg);
+      if (DEBUG) {
+        printListSorted("addEnhancements: after addCaseMarkerInformation()", sg.typedDependencies());
+      }
+    }
+    /* Add coordinating conjunctions to relation names. */
+    if (options.enhanceConjuncts) {
+      addConjInformation(sg);
+      if (DEBUG) {
+        printListSorted("addEnhancements: after addConjInformation()", sg.typedDependencies());
+      }
+    }
+    /* Add "referent" relations. */
+    if (options.addReferent) {
+      addRef(sg);
+      if (DEBUG) {
+        printListSorted("addEnhancements: after addRef()", sg.typedDependencies());
+      }
+      collapseReferent(sg);
+      if (DEBUG) {
+        printListSorted("addEnhancements: after collapseReferent()", sg.typedDependencies());
+      }
+    }
+    /* Propagate dependents. */
+    if (options.propagateDependents) {
+      treatCC(sg);
+      if (DEBUG) {
+        printListSorted("addEnhancements: after treatCC()", sg.typedDependencies());
+      }
+    }
+    /* Add relations between controlling subjects and controlled verbs. */
+    if (options.addXSubj) {
+      addExtraNSubj(sg);
+      if (DEBUG) {
+        printListSorted("addEnhancements: after addExtraNSubj()", sg.typedDependencies());
+      }
+    }
+
     correctSubjPass(sg);
-
-
-
-
     list.clear();
     list.addAll(sg.typedDependencies());
 
@@ -876,85 +953,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    */
   @Override
   protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess, Extras includeExtras) {
-    SemanticGraph sg = new SemanticGraph(list);
-
-    if (DEBUG) {
-      printListSorted("collapseDependencies: CCproc: " + CCprocess + " includeExtras: " + includeExtras, sg.typedDependencies());
-    }
-
-
-    correctDependencies(sg);
-    if (DEBUG) {
-      printListSorted("After correctDependencies:", sg.typedDependencies());
-    }
-
-    processMultiwordPreps(sg);
-    if (DEBUG) {
-      printListSorted("After processMultiwordPreps:", sg.typedDependencies());
-    }
-
-
-    expandPPConjunctions(sg);
-    if (DEBUG) {
-      printListSorted("After expandPPConjunctions:", sg.typedDependencies());
-    }
-
-    expandPrepConjunctions(sg);
-    if (DEBUG) {
-      printListSorted("After expandPrepConjunctions:", sg.typedDependencies());
-    }
-
-    addCaseMarkerInformation(sg);
-    if (DEBUG) {
-      printListSorted("After addCaseMarkerInformation:", sg.typedDependencies());
-    }
-
-    addConjInformation(sg);
-    if (DEBUG) {
-      printListSorted("After addConjInformation:", sg.typedDependencies());
-    }
-
-    if (includeExtras.doRef) {
-      addRef(sg);
-      if (DEBUG) {
-        printListSorted("After adding ref:", sg.typedDependencies());
-      }
-
-      if (includeExtras.collapseRef) {
-        collapseReferent(sg);
-        if (DEBUG) {
-          printListSorted("After collapse referent:",  sg.typedDependencies());
-        }
-      }
-    }
-
-    if (CCprocess) {
-      treatCC(sg);
-      if (DEBUG) {
-        printListSorted("After treatCC:", sg.typedDependencies());
-      }
-    }
-
-    if (includeExtras.doSubj) {
-      addExtraNSubj(sg);
-
-      if (DEBUG) {
-        printListSorted("After adding extra nsubj:", sg.typedDependencies());
-      }
-      correctSubjPass(sg);
-
-      if (DEBUG) {
-        printListSorted("After correctSubjPass:", sg.typedDependencies());
-      }
-    }
-
-    list.clear();
-    list.addAll(sg.typedDependencies());
-
-    Collections.sort(list);
-    if (DEBUG) {
-      printListSorted("After all collapse:", list);
-    }
+    addEnhancements(list, COLLAPSED_OPTIONS);
   }
 
   @Override
