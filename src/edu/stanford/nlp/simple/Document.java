@@ -61,7 +61,7 @@ public class Document {
   /**
    * The backend to use for constructing {@link edu.stanford.nlp.pipeline.AnnotatorFactory}s.
    */
-  private static final AnnotatorImplementations backend = new AnnotatorImplementations();
+  private static AnnotatorImplementations backend = new AnnotatorImplementations();
 
   /**
    * The default {@link edu.stanford.nlp.pipeline.TokenizerAnnotator} implementation
@@ -291,6 +291,32 @@ public class Document {
 
   /** The default properties to use for annotating things (e.g., coref for the document level) */
   private Properties defaultProps = EMPTY_PROPS;
+
+
+  /**
+   * Set the backend implementations for our CoreNLP pipeline.
+   * For example, to a {@link ServerAnnotatorImplementations}.
+   *
+   * @param backend The backend to use from now on for annotating
+   *                documents.
+   */
+  public static void setBackend(AnnotatorImplementations backend) {
+    Document.backend = backend;
+  }
+
+
+  /**
+   * Use the CoreNLP Server ({@link StanfordCoreNLPServer}) for the
+   * heavyweight backend annotation job.
+   *
+   * @param host The hostname of the server.
+   * @param port The port the server is running on.
+   */
+  public static void useServer(String host, int port) {
+    backend = new ServerAnnotatorImplementations(host, port);
+  }
+
+
 
   /**
    * Create a new document from the passed in text.
