@@ -403,6 +403,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(CollapsedDependenciesAnnotation.class)) { builder.setCollapsedDependencies(toProto(getAndRegister(sentence, keysToSerialize, CollapsedDependenciesAnnotation.class))); }
     if (keySet.contains(CollapsedCCProcessedDependenciesAnnotation.class)) { builder.setCollapsedCCProcessedDependencies(toProto(getAndRegister(sentence, keysToSerialize, CollapsedCCProcessedDependenciesAnnotation.class))); }
     if (keySet.contains(AlternativeDependenciesAnnotation.class)) { builder.setAlternativeDependencies(toProto(getAndRegister(sentence, keysToSerialize, AlternativeDependenciesAnnotation.class))); }
+    if (keySet.contains(EnhancedDependenciesAnnotation.class)) { builder.setEnhancedDependencies(toProto(getAndRegister(sentence, keysToSerialize, EnhancedDependenciesAnnotation.class))); }
+    if (keySet.contains(EnhancedPlusPlusDependenciesAnnotation.class)) { builder.setEnhancedPlusPlusDependencies(toProto(getAndRegister(sentence, keysToSerialize, EnhancedPlusPlusDependenciesAnnotation.class))); }
     if (keySet.contains(TokensAnnotation.class) && getAndRegister(sentence, keysToSerialize, TokensAnnotation.class).size() > 0 &&
         getAndRegister(sentence, keysToSerialize, TokensAnnotation.class).get(0).containsKey(ParagraphAnnotation.class)) {
       builder.setParagraph(getAndRegister(sentence, keysToSerialize, TokensAnnotation.class).get(0).get(ParagraphAnnotation.class));
@@ -1065,6 +1067,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasAlternativeDependencies()) {
       lossySentence.set(AlternativeDependenciesAnnotation.class, fromProto(proto.getAlternativeDependencies(), tokens, null));
     }
+    if (proto.hasEnhancedDependencies()) {
+      lossySentence.set(EnhancedDependenciesAnnotation.class, fromProto(proto.getEnhancedDependencies(), tokens, null));
+    }
+    if (proto.hasEnhancedPlusPlusDependencies()) {
+      lossySentence.set(EnhancedPlusPlusDependenciesAnnotation.class, fromProto(proto.getEnhancedPlusPlusDependencies(), tokens, null));
+    }
     // Add entailed sentences
     if (proto.getEntailedSentenceCount() > 0) {
       List<SentenceFragment> entailedSentences = proto.getEntailedSentenceList().stream().map(frag -> fromProto(frag, lossySentence.get(CollapsedDependenciesAnnotation.class))).collect(Collectors.toList());
@@ -1311,6 +1319,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
       if (sentence.hasAlternativeDependencies()) {
         map.set(AlternativeDependenciesAnnotation.class, fromProto(sentence.getAlternativeDependencies(), sentenceTokens, docid));
+      }
+      if (sentence.hasEnhancedDependencies()) {
+        map.set(EnhancedDependenciesAnnotation.class, fromProto(sentence.getEnhancedDependencies(), sentenceTokens, docid));
+      }
+      if (sentence.hasEnhancedPlusPlusDependencies()) {
+        map.set(EnhancedPlusPlusDependenciesAnnotation.class, fromProto(sentence.getEnhancedPlusPlusDependencies(), sentenceTokens, docid));
       }
       // Set entailed sentences
       if (sentence.getEntailedSentenceCount() > 0) {

@@ -953,7 +953,19 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    */
   @Override
   protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess, Extras includeExtras) {
-    addEnhancements(list, COLLAPSED_OPTIONS);
+    EnhancementOptions options = new EnhancementOptions(COLLAPSED_OPTIONS);
+    if (includeExtras.doRef) {
+      options.addReferent = true;
+    }
+
+    if (includeExtras.doSubj) {
+      options.addXSubj = true;
+    }
+
+    if (CCprocess) {
+      options.propagateDependents = true;
+    }
+    addEnhancements(list, options);
   }
 
   @Override

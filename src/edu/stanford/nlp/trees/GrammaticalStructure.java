@@ -921,13 +921,13 @@ public abstract class GrammaticalStructure implements Serializable  {
 
 
   public List<TypedDependency> typedDependenciesEnhanced() {
-    List<TypedDependency> tdl = typedDependencies(Extras.NONE);
+    List<TypedDependency> tdl = typedDependencies(Extras.MAXIMAL);
     addEnhancements(tdl, UniversalEnglishGrammaticalStructure.ENHANCED_OPTIONS);
     return tdl;
   }
 
   public List<TypedDependency> typedDependenciesEnhancedPlusPlus() {
-    List<TypedDependency> tdl = typedDependencies(Extras.NONE);
+    List<TypedDependency> tdl = typedDependencies(Extras.MAXIMAL);
     addEnhancements(tdl, UniversalEnglishGrammaticalStructure.ENHANCED_PLUS_PLUS_OPTIONS);
     return tdl;
   }
