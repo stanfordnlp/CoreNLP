@@ -25,10 +25,8 @@
 //    Licensing: java-nlp-support@lists.stanford.edu
 
 package edu.stanford.nlp.ie.crf;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.*;
-import java.io.ObjectOutputStream;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -42,6 +40,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -50,7 +49,6 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.regex.*;
 import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -70,7 +68,7 @@ import java.util.zip.GZIPOutputStream;
  * {@link PlainTextDocumentReaderAndWriter}.  The class used to read
  * the text can be changed with -plainTextDocumentReaderAndWriter.
  * Extra options can be supplied to the tokenizer using the
- * -tokenizeOptions flag.
+ * -tokenizerOptions flag.
  * </p><p>
  * To read from stdin, use the flag -readStdin.  The same
  * reader/writer will be used as for -textFile.
@@ -132,7 +130,7 @@ import java.util.zip.GZIPOutputStream;
 public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifier<IN>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CRFClassifier.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CRFClassifier.class);
 
   // TODO(mengqiu) need to move the embedding lookup and capitalization features into a FeatureFactory
 
@@ -393,8 +391,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     long elapsedMs = timer.stop();
     log.info("numFeatures: orig1=" + oldNumFeatures1 + ", orig2=" + oldNumFeatures2 + ", combined="
         + numFeatures);
-    System.err
-        .println("numWeights: orig1=" + oldNumWeights1 + ", orig2=" + oldNumWeights2 + ", combined=" + numWeights);
+    log.info("numWeights: orig1=" + oldNumWeights1 + ", orig2=" + oldNumWeights2 + ", combined=" + numWeights);
     log.info("Time to combine CRFClassifier: " + Timing.toSecondsString(elapsedMs) + " seconds");
   }
 
@@ -1118,7 +1115,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   public void dumpFeatures(Collection<List<IN>> docs) {
     if (flags.exportFeatures != null) {
       Timing timer = new Timing();
-      timer.start();
       CRFFeatureExporter<IN> featureExporter = new CRFFeatureExporter<>(this);
       featureExporter.printFeatures(flags.exportFeatures, docs);
       long elapsedMs = timer.stop();
@@ -1532,8 +1528,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * Takes a {@link List} of something that extends {@link CoreMap} and prints
    * the likelihood of each possible label at each point.
    *
-   * @param document
-   *          A {@link List} of something that extends {@link CoreMap}.
+   * @param document A {@link List} of something that extends {@link CoreMap}.
    */
   public void printFirstOrderProbsDocument(List<IN> document) {
 
@@ -1586,7 +1581,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   @Override
   public void train(Collection<List<IN>> objectBankWrapper, DocumentReaderAndWriter<IN> readerAndWriter) {
     Timing timer = new Timing();
-    timer.start();
 
     Collection<List<IN>> docs = new ArrayList<>();
     for (List<IN> doc : objectBankWrapper) {
@@ -1820,6 +1814,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     cliquePotentialFunctionHelper = func;
 
     // create feature grouping
+    // todo [cdm 2016]: Use a CollectionValuedMap
     Map<String, Set<Integer>> featureSets = null;
     if (flags.groupByOutputClass) {
       featureSets = new HashMap<>();
@@ -1898,8 +1893,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     } else {
       try {
         log.info("Reading initial weights from file " + flags.initialWeights);
-        DataInputStream dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(
-            flags.initialWeights))));
+        DataInputStream dis = IOUtils.getDataInputStream(flags.initialWeights);
         initialWeights = ConvertByteArray.readDoubleArr(dis);
       } catch (IOException e) {
         throw new RuntimeException("Could not read from double initial weight file " + flags.initialWeights);
@@ -2136,15 +2130,12 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   protected static List<List<CRFDatum<Collection<String>, String>>> loadProcessedData(String filename) {
-    ObjectInputStream ois = null;
-    List<List<CRFDatum<Collection<String>, String>>> result = Collections.emptyList();
+    List<List<CRFDatum<Collection<String>, String>>> result;
     try {
-      ois = new ObjectInputStream(new FileInputStream(filename));
-      result = (List<List<CRFDatum<Collection<String>, String>>>) ois.readObject();
+      result = IOUtils.readObjectFromURLOrClasspathOrFileSystem(filename);
     } catch (Exception e) {
       e.printStackTrace();
-    } finally {
-      IOUtils.closeIgnoringExceptions(ois);
+      result = Collections.emptyList();
     }
     log.info("Loading processed data from serialized file ... done. Got " + result.size() + " datums.");
     return result;
@@ -2567,6 +2558,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * (Since the classifier is a processor, we don't want to serialize the
    * whole classifier but just the data that represents a classifier model.)
    */
+  @Override
   public void serializeClassifier(ObjectOutputStream oos) {
     try {
       oos.writeObject(labelIndices);
@@ -2629,11 +2621,17 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     Object featureFactory = ois.readObject();
     if (featureFactory instanceof List) {
       featureFactories = ErasureUtils.uncheckedCast(featureFactories);
+//      int i = 0;
+//      for (FeatureFactory ff : featureFactories) { // XXXX
+//        System.err.println("List FF #" + i + ": " + ((NERFeatureFactory) ff).describeDistsimLexicon()); // XXXX
+//        i++;
+//      }
     } else if (featureFactory instanceof FeatureFactory) {
       featureFactories = Generics.newArrayList();
       featureFactories.add((FeatureFactory) featureFactory);
+//      System.err.println(((NERFeatureFactory) featureFactory).describeDistsimLexicon()); // XXXX
     } else if (featureFactory instanceof Integer) {
-      // this is the current format (2014) since writing list didn't work (see note in save).
+      // this is the current format (2014) since writing list didn't work (see note in serializeClassifier).
       int size = (Integer) featureFactory;
       featureFactories = Generics.newArrayList(size);
       for (int i = 0; i < size; ++i) {
@@ -2641,6 +2639,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         if (!(featureFactory instanceof FeatureFactory)) {
           throw new RuntimeIOException("Should have FeatureFactory but got " + featureFactory.getClass());
         }
+//        System.err.println("FF #" + i + ": " + ((NERFeatureFactory) featureFactory).describeDistsimLexicon()); // XXXX
         featureFactories.add((FeatureFactory) featureFactory);
       }
     }
@@ -2995,7 +2994,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
   /** The main method. See the class documentation. */
   public static void main(String[] args) throws Exception {
-    StringUtils.printErrInvocationString("CRFClassifier", args);
+    StringUtils.logInvocationString(log, args);
 
     Properties props = StringUtils.argsToProperties(args);
     SeqClassifierFlags flags = new SeqClassifierFlags(props);
@@ -3037,7 +3036,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       crf.knownLCWords.setMaxSize(-1);
       crf.train();
       crf.knownLCWords.setMaxSize(knownLCWordsLimit);
-      timing.done("CRFClassifier training");
+      timing.done(log, "CRFClassifier training");
     } else {
       crf.loadDefaultClassifier();
     }

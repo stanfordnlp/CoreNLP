@@ -1,5 +1,4 @@
-package edu.stanford.nlp.util; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.util;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -8,6 +7,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasOffset;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.math.SloppyMath;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -51,7 +51,7 @@ import java.util.stream.Stream;
 public class StringUtils  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(StringUtils.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(StringUtils.class);
 
   /**
    * Don't let anyone instantiate this class.
@@ -530,6 +530,30 @@ public class StringUtils  {
       fields.add(currentField);
     }
     return fields;
+  }
+
+
+  /**
+   * Split on a given character, filling out the fields in the output array.
+   * This is suitable for, e.g., splitting a TSV file of known column count.
+   * @param out The output array to fill
+   * @param input The input to split
+   * @param delimiter The delimiter to split on.
+   */
+  public static void splitOnChar(String[] out, String input, char delimiter) {
+    int lastSplit = 0;
+    int outI = 0;
+    char[] chars = input.toCharArray();
+    for (int i = 0; i < chars.length; ++i) {
+      if (chars[i] == delimiter) {
+        out[outI] = new String(chars, lastSplit, i - lastSplit);
+        outI += 1;
+        lastSplit = i + 1;
+      }
+    }
+    if (outI < out.length) {
+      out[outI] = input.substring(lastSplit);
+    }
   }
 
   /** Split a string into tokens.  Because there is a tokenRegex as well as a
@@ -1062,7 +1086,7 @@ public class StringUtils  {
 
   /**
    * Prints to a file.  If the file already exists, appends if
-   * <code>append=true</code>, and overwrites if <code>append=false</code>.
+   * {@code append=true}, and overwrites if {@code append=false}.
    */
   public static void printToFile(File file, String message, boolean append,
                                  boolean printLn, String encoding) {
@@ -1095,7 +1119,7 @@ public class StringUtils  {
 
   /**
    * Prints to a file.  If the file already exists, appends if
-   * <code>append=true</code>, and overwrites if <code>append=false</code>.
+   * {@code append=true}, and overwrites if {@code append=false}.
    */
   public static void printToFileLn(File file, String message, boolean append) {
     PrintWriter pw = null;
@@ -1116,7 +1140,7 @@ public class StringUtils  {
 
   /**
    * Prints to a file.  If the file already exists, appends if
-   * <code>append=true</code>, and overwrites if <code>append=false</code>.
+   * {@code append=true}, and overwrites if {@code append=false}.
    */
   public static void printToFile(File file, String message, boolean append) {
     PrintWriter pw = null;
@@ -1125,13 +1149,9 @@ public class StringUtils  {
       pw = new PrintWriter(fw);
       pw.print(message);
     } catch (Exception e) {
-      log.info("Exception: in printToFile " + file.getAbsolutePath());
-      e.printStackTrace();
+      throw new RuntimeIOException("Exception in printToFile " + file.getAbsolutePath(), e);
     } finally {
-      if (pw != null) {
-        pw.flush();
-        pw.close();
-      }
+      IOUtils.closeIgnoringExceptions(pw);
     }
   }
 
@@ -1146,7 +1166,7 @@ public class StringUtils  {
 
   /**
    * Prints to a file.  If the file already exists, appends if
-   * <code>append=true</code>, and overwrites if <code>append=false</code>
+   * {@code append=true}, and overwrites if {@code append=false}.
    */
   public static void printToFile(String filename, String message, boolean append) {
     printToFile(new File(filename), message, append);
@@ -1154,7 +1174,7 @@ public class StringUtils  {
 
   /**
    * Prints to a file.  If the file already exists, appends if
-   * <code>append=true</code>, and overwrites if <code>append=false</code>
+   * {@code append=true}, and overwrites if {@code append=false}.
    */
   public static void printToFileLn(String filename, String message, boolean append) {
     printToFileLn(new File(filename), message, append);
@@ -1867,25 +1887,10 @@ public class StringUtils  {
   }
 
 
-  public static void printErrInvocationString(String cls, String[] args) {
-    log.info(toInvocationString(cls, args));
-  }
-
-
-  public static String toInvocationString(String cls, String[] args) {
-    StringBuilder sb = new StringBuilder();
-    sb.append(cls).append(" invoked on ").append(new Date());
-    sb.append(" with arguments:\n  ");
-    for (String arg : args) {
-      sb.append(' ').append(arg);
-    }
-    return sb.toString();
-  }
-
   /**
    * Strip directory from filename.  Like Unix 'basename'. <p/>
    *
-   * Example: <code>getBaseName("/u/wcmac/foo.txt") ==> "foo.txt"</code>
+   * Example: {@code getBaseName("/u/wcmac/foo.txt") ==> "foo.txt"}
    */
   public static String getBaseName(String fileName) {
     return getBaseName(fileName, "");
@@ -2617,6 +2622,24 @@ public class StringUtils  {
    */
   public static String expandEnvironmentVariables(String raw) {
     return expandEnvironmentVariables(raw, System.getenv());
+  }
+
+
+  /**
+   * Logs the command line arguments to Redwood on the given channels.
+   * The logger should be a RedwoodChannels of a single channel: the main class.
+   *
+   * @param logger The redwood logger to log to.
+   * @param args The command-line arguments to log.
+   */
+  public static void logInvocationString(Redwood.RedwoodChannels logger, String[] args) {
+    StringBuilder sb = new StringBuilder("Invoked on ");
+    sb.append(new Date());
+    sb.append(" with arguments:");
+    for (String arg : args) {
+      sb.append(' ').append(arg);
+    }
+    logger.info(sb.toString());
   }
 
 }

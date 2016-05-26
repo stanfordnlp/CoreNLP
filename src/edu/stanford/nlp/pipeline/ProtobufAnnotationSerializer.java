@@ -290,6 +290,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(NormalizedNamedEntityTagAnnotation.class)) { builder.setNormalizedNER(getAndRegister(coreLabel, keysToSerialize, NormalizedNamedEntityTagAnnotation.class)); }
     if (keySet.contains(TimexAnnotation.class)) { builder.setTimexValue(toProto(getAndRegister(coreLabel, keysToSerialize, TimexAnnotation.class))); }
     if (keySet.contains(AnswerAnnotation.class)) { builder.setAnswer(getAndRegister(coreLabel, keysToSerialize, AnswerAnnotation.class)); }
+    if (keySet.contains(WikipediaEntityAnnotation.class)) { builder.setWikipediaEntity(getAndRegister(coreLabel, keysToSerialize, WikipediaEntityAnnotation.class)); }
     if (keySet.contains(XmlContextAnnotation.class)) {
       builder.setHasXmlContext(true);
       builder.addAllXmlContext(getAndRegister(coreLabel, keysToSerialize, XmlContextAnnotation.class));
@@ -986,6 +987,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @return A CoreLabel, missing the fields that are not stored in the CoreLabel protobuf.
    */
   public CoreLabel fromProto(CoreNLPProtos.Token proto) {
+    if (Thread.interrupted()) {
+      throw new RuntimeInterruptedException();
+    }
     CoreLabel word = new CoreLabel();
     // Required fields
     word.setWord(proto.getWord());
@@ -1021,6 +1025,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasCoarseTag()) { word.set(CoarseTagAnnotation.class, proto.getCoarseTag()); }
     if (proto.hasConllUTokenSpan()) { word.set(CoNLLUTokenSpanAnnotation.class, new IntPair(proto.getConllUTokenSpan().getBegin(), proto.getSpan().getEnd())); }
     if (proto.hasConllUSecondaryDeps()) { word.set(CoNLLUSecondaryDepsAnnotation.class, fromProto(proto.getConllUSecondaryDeps())); }
+    if (proto.hasWikipediaEntity()) { word.set(WikipediaEntityAnnotation.class, proto.getWikipediaEntity()); }
 
 
             // Non-default annotators
@@ -1040,6 +1045,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @return A CoreMap representing the sentence.
    */
   public CoreMap fromProto(CoreNLPProtos.Sentence proto) {
+    if (Thread.interrupted()) {
+      throw new RuntimeInterruptedException();
+    }
     CoreMap lossySentence = fromProtoNoTokens(proto);
     // Add tokens -- missing by default as they're populated as sublists of the document tokens
     List<CoreLabel> tokens = proto.getTokenList().stream().map(this::fromProto).collect(Collectors.toList());
@@ -1086,6 +1094,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @return A CoreMap, representing a sentence as stored in the protocol buffer (and therefore missing some fields)
    */
   protected CoreMap fromProtoNoTokens(CoreNLPProtos.Sentence proto) {
+    if (Thread.interrupted()) {
+      throw new RuntimeInterruptedException();
+    }
     CoreMap sentence = new ArrayCoreMap();
     // Required fields
     sentence.set(TokenBeginAnnotation.class, proto.getTokenOffsetBegin());
@@ -1180,6 +1191,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @return An Annotation corresponding to the read protobuf.
    */
   public Annotation fromProto(CoreNLPProtos.Document proto) {
+    if (Thread.interrupted()) {
+      throw new RuntimeInterruptedException();
+    }
     // Set text
     Annotation ann = new Annotation(proto.getText());
 
@@ -1408,6 +1422,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @return A Tree object corresponding to the saved tree. This will always be a {@link LabeledScoredTreeNode}.
    */
   public Tree fromProto(CoreNLPProtos.ParseTree proto) {
+    if (Thread.interrupted()) {
+      throw new RuntimeInterruptedException();
+    }
     LabeledScoredTreeNode node = new LabeledScoredTreeNode();
     // Set label
     if (proto.hasValue()) {
@@ -1590,6 +1607,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @return A relation triple as a Java object, corresponding to the seriaized proto.
    */
   public static RelationTriple fromProto(CoreNLPProtos.RelationTriple proto, List<CoreLabel> sentence, String docid) {
+    if (Thread.interrupted()) {
+      throw new RuntimeInterruptedException();
+    }
     // Get the spans for the extraction
     List<CoreLabel> subject = proto.getSubjectTokensList().stream().map(sentence::get).collect(Collectors.toList());
     List<CoreLabel> relation;
@@ -1629,6 +1649,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @return A {@link SentenceFragment} object corresponding to the saved proto.
    */
   public static SentenceFragment fromProto(CoreNLPProtos.SentenceFragment fragment, SemanticGraph tree) {
+    if (Thread.interrupted()) {
+      throw new RuntimeInterruptedException();
+    }
     SemanticGraph fragmentTree = new SemanticGraph(tree);
     // Set the new root
     if (fragment.hasRoot()) {
@@ -1706,6 +1729,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     Map<IntPair, Set<CorefChain.CorefMention>> mentions = new HashMap<>();
     CorefChain.CorefMention representative = null;
     for (int i = 0; i < proto.getMentionCount(); ++i) {
+      if (Thread.interrupted()) {
+        throw new RuntimeInterruptedException();
+      }
       CoreNLPProtos.CorefChain.CorefMention mentionProto = proto.getMention(i);
       // Create mention
       StringBuilder mentionSpan = new StringBuilder();

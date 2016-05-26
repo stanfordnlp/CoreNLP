@@ -1,4 +1,5 @@
 package edu.stanford.nlp.hcoref.data; 
+import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
@@ -398,10 +399,12 @@ public class Dictionaries  {
     try {
       getWordsFromFile(neutralWordsFile, neutralWords, false);
       BufferedReader reader = IOUtils.readerFromString(file);
+      String[] split = new String[2];
+      String[] countStr = new String[3];
       for (String line; (line = reader.readLine()) != null; ) {
-        String[] split = line.split("\t");
-        String[] countStr = split[1].split(" ");
-        
+        StringUtils.splitOnChar(split, line, '\t');
+        StringUtils.splitOnChar(countStr, split[1], ' ');
+
         int male = Integer.parseInt(countStr[0]);
         int female = Integer.parseInt(countStr[1]);
         int neutral = Integer.parseInt(countStr[2]);
@@ -430,10 +433,11 @@ public class Dictionaries  {
     }
   }
   public void loadChineseGenderNumberAnimacy(String file) {
+    String[] split = new String[8];
     for (String line : IOUtils.readLines(file)) {
       if(line.startsWith("#WORD")) continue;    // ignore first row
-      String[] split = line.split("\t");
-      
+      StringUtils.splitOnChar(split, line, '\t');
+
       String word = split[0];
       int animate = Integer.parseInt(split[1]);
       int inanimate = Integer.parseInt(split[2]);

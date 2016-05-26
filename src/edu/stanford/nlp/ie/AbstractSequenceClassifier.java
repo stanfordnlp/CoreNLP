@@ -1481,8 +1481,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   }
 
   /**
-   * Loads a classifier from the file specified by loadPath. If loadPath ends in
-   * .gz, uses a GZIPInputStream, else uses a regular FileInputStream.
+   * Loads a classifier from the file, classpath resource, or URL specified by loadPath. If loadPath ends in
+   * .gz, uses a GZIPInputStream.
    */
   public void loadClassifier(String loadPath, Properties props) throws ClassCastException, IOException, ClassNotFoundException {
     InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(loadPath);
@@ -1515,18 +1515,13 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * uses a GZIPInputStream, else uses a regular FileInputStream. This method
    * closes the File when done.
    *
-   * @param file
-   *          Loads a classifier from this file.
-   * @param props
-   *          Properties in this object will be used to overwrite those
+   * @param file Loads a classifier from this file.
+   * @param props Properties in this object will be used to overwrite those
    *          specified in the serialized classifier
    *
-   * @throws IOException
-   *           If there are problems accessing the input stream
-   * @throws ClassCastException
-   *           If there are problems interpreting the serialized data
-   * @throws ClassNotFoundException
-   *           If there are problems interpreting the serialized data
+   * @throws IOException If there are problems accessing the input stream
+   * @throws ClassCastException If there are problems interpreting the serialized data
+   * @throws ClassNotFoundException If there are problems interpreting the serialized data
    */
   public void loadClassifier(File file, Properties props) throws ClassCastException, IOException,
       ClassNotFoundException {

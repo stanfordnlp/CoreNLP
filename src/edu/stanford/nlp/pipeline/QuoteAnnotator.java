@@ -10,6 +10,7 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Timing;
 
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -517,7 +518,9 @@ public class QuoteAnnotator implements Annotator  {
   }
 
   public static boolean isWhitespaceOrPunct(String c) {
-    return c.matches("[\\s\\p{Punct}]");
+    Pattern punctOrWhite = Pattern.compile("[\\s\\p{Punct}]", Pattern.UNICODE_CHARACTER_CLASS);
+    Matcher m = punctOrWhite.matcher(c);
+    return m.matches();
   }
 
   public static boolean isSingleQuote(String c) {

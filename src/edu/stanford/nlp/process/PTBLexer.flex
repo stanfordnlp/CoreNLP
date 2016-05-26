@@ -28,7 +28,6 @@ package edu.stanford.nlp.process;
 
 
 import java.io.Reader;
-import java.util.logging.Logger;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -37,6 +36,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /** Provides a tokenizer or lexer that does a pretty good job at
@@ -251,7 +251,8 @@ import edu.stanford.nlp.util.StringUtils;
   }
 
 
-  private static final Logger LOGGER = Logger.getLogger(PTBLexer.class.getName());
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(PTBLexer.class);
 
   private LexedTokenFactory<?> tokenFactory;
   private CoreLabel prevWord;
@@ -679,9 +680,9 @@ EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0{}]*@([^ \t\n\f\r\"<>|(){}.\
 
 /* Technically, names should be capped at 15 characters.  However, then
    you get into weirdness with what happens to the rest of the characters. */
-TWITTER_NAME = @[a-zA-Z_][a-zA-Z_0-9]*
-TWITTER_CATEGORY = #{LETTER}+
-TWITTER = {TWITTER_NAME}|{TWITTER_CATEGORY}
+TWITTER_NAME = [@\uFF20][a-zA-Z_][a-zA-Z_0-9]*
+TWITTER_HASHTAG = [#\uFF03]{LETTER}({LETTER}|{DIGIT}|_)*({LETTER}|{DIGIT})
+TWITTER = {TWITTER_NAME}|{TWITTER_HASHTAG}
 
 ISO8601DATETIME = [0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[x0-9]{2}:[0-9]{2}Z?
 DEGREES = °[CF]
@@ -1134,7 +1135,7 @@ nno/[^A-Za-z0-9]
                 prevWordAfter.append(str);
               }
               if ( ! this.seenUntokenizableCharacter) {
-                LOGGER.warning(msg);
+                logger.warning(msg);
                 this.seenUntokenizableCharacter = true;
               }
               break;
@@ -1142,19 +1143,19 @@ nno/[^A-Za-z0-9]
               if (invertible) {
                 prevWordAfter.append(str);
               }
-              LOGGER.warning(msg);
+              logger.warning(msg);
               this.seenUntokenizableCharacter = true;
               break;
             case NONE_KEEP:
               return getNext();
             case FIRST_KEEP:
               if ( ! this.seenUntokenizableCharacter) {
-                LOGGER.warning(msg);
+                logger.warning(msg);
                 this.seenUntokenizableCharacter = true;
               }
               return getNext();
             case ALL_KEEP:
-              LOGGER.warning(msg);
+              logger.warning(msg);
               this.seenUntokenizableCharacter = true;
               return getNext();
           }

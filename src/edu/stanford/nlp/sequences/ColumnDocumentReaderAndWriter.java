@@ -1,4 +1,4 @@
-package edu.stanford.nlp.sequences; 
+package edu.stanford.nlp.sequences;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.PrintWriter;
@@ -74,12 +74,11 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
       num++;
 
       List<CoreLabel> words = new ArrayList<>();
-
       String[] lines = doc.split("\n");
 
       for (String line : lines) {
         ++lineCount;
-        if (line.trim().length() == 0) {
+        if (line.trim().isEmpty()) {
           continue;
         }
         String[] info = whitePattern.split(line);

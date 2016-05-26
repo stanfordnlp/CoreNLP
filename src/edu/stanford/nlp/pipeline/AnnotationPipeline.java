@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 public class AnnotationPipeline implements Annotator  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AnnotationPipeline.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(AnnotationPipeline.class);
 
   protected static final boolean TIME = true;
 
@@ -45,7 +45,7 @@ public class AnnotationPipeline implements Annotator  {
   }
 
   public AnnotationPipeline() {
-    this(new ArrayList<>());
+    this(new ArrayList<>()); // It can't be a singletonList() since it isn't copied but is mutated.
   }
 
   public void addAnnotator(Annotator annotator) {
@@ -224,7 +224,7 @@ public class AnnotationPipeline implements Annotator  {
   public static void main(String[] args) throws IOException, ClassNotFoundException {
     Timing tim = new Timing();
     AnnotationPipeline ap = new AnnotationPipeline();
-    boolean verbose = false;
+    final boolean verbose = false;
     ap.addAnnotator(new TokenizerAnnotator(verbose, "en"));
     ap.addAnnotator(new WordsToSentencesAnnotator(verbose));
     // ap.addAnnotator(new NERCombinerAnnotator(verbose));

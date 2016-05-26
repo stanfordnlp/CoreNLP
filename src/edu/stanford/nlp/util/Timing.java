@@ -325,6 +325,12 @@ public class Timing  {
     log.info(msg.toString());
   }
 
+  /** This method allows you to show the results of timing according to another class' logger.
+   *  E.g., {@code timing.done(logger, "Loading lexicon")}.
+   *
+   *  @param logger Logger to log a timed operation with
+   *  @param msg Message to report.
+   */
   public void done(Redwood.RedwoodChannels logger, StringBuilder msg) {
     msg.append("... done [").append(toSecondsString()).append(" sec].");
     logger.info(msg.toString());

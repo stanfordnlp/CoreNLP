@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.logging.Logger;
 
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.logging.Redwood;
 
 %%
 
@@ -20,7 +20,8 @@ import edu.stanford.nlp.util.Generics;
 
 %{
 
-  private static final Logger LOGGER = Logger.getLogger(Morphology.class.getName());
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(Morphology.class);
 
   /** These are constants for the position of options in array.
    *  If this option is set, print the word affix after a + character.
@@ -2077,8 +2078,7 @@ SKIP = [ \t\r\n\u2028\u2029\u000B\u000C\u0085]
 <scan,verb,noun,any>_{G}+       { yybegin(scan); if (option(tag_output)) return yytext(); }
 <scan,verb,noun,any>{SKIP}      { return yytext(); }
 <scan,verb,noun,any>.		{ String str = yytext();
-                            int first = str.charAt(0);
-	                          String msg = String.format("Untokenizable: %s (U+%s, decimal: %s) - this may be because your text isn't using _ as a tag delimiter", yytext(), Integer.toHexString(first).toUpperCase(), Integer.toString(first));
-                  LOGGER.warning(msg);
+                          int first = str.charAt(0);
+	                        logger.warning(String.format("Untokenizable: %s (U+%X, decimal: %d) - this may be because your text isn't using _ as a tag delimiter", yytext(), first, first));
 		}
 <<EOF>> { return null; }

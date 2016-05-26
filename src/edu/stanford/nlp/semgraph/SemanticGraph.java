@@ -1,4 +1,4 @@
-package edu.stanford.nlp.semgraph; 
+package edu.stanford.nlp.semgraph;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.graph.DirectedMultiGraph;
@@ -875,34 +875,8 @@ public class SemanticGraph implements Serializable  {
    * @throws IllegalStateException if this graph is not a DAG
    */
   public List<IndexedWord> topologicalSort() {
-    List<IndexedWord> result = Generics.newArrayList();
-    Set<IndexedWord> temporary = wordMapFactory.newSet();
-    Set<IndexedWord> permanent = wordMapFactory.newSet();
-    for (IndexedWord vertex : vertexSet()) {
-      if (!temporary.contains(vertex)) {
-        topologicalSortHelper(vertex, temporary, permanent, result);
-      }
-    }
-    Collections.reverse(result);
-    return result;
+    return graph.topologicalSort();
   }
-
-  private void topologicalSortHelper(IndexedWord vertex, Set<IndexedWord> temporary, Set<IndexedWord> permanent, List<IndexedWord> result) {
-    temporary.add(vertex);
-    for (SemanticGraphEdge edge : outgoingEdgeIterable(vertex)) {
-      IndexedWord target = edge.getTarget();
-      if (permanent.contains(target)) {
-        continue;
-      }
-      if (temporary.contains(target)) {
-        throw new IllegalStateException("This graph has cycles. Topological sort not possible: " + this.toString());
-      }
-      topologicalSortHelper(target, temporary, permanent, result);
-    }
-    result.add(vertex);
-    permanent.add(vertex);
-  }
-
 
   /**
    * Does the given <code>vertex</code> have at least one child with the given {@code reln} and the lemma <code>childLemma</code>?
@@ -1210,15 +1184,15 @@ public class SemanticGraph implements Serializable  {
   // ============================================================================
   // String display
   // ============================================================================
+
   /**
    * Recursive depth first traversal. Returns a structured representation of the
    * dependency graph.
    *
    * Example:
-   * <p/>
    *
    * <pre>
-   *  /-> need-3 (root)
+   *  -> need-3 (root)
    *    -> We-0 (nsubj)
    *    -> do-1 (aux)
    *    -> n't-2 (neg)
@@ -1226,6 +1200,9 @@ public class SemanticGraph implements Serializable  {
    *      -> no-4 (det)
    *      -> stinking-5 (amod)
    * </pre>
+   *
+   * This is a quite ugly way to print a SemanticGraph.
+   * You might instead want to try {@link #toString(OutputFormat)}.
    */
   @Override
   public String toString() {
@@ -1360,12 +1337,9 @@ public class SemanticGraph implements Serializable  {
    * Inserts the given specific portion of an uncollapsed relation back into the
    * targetList
    *
-   * @param specific
-   *          Specific relation to put in.
-   * @param relnTgtNode
-   *          Node governed by the uncollapsed relation
-   * @param tgtList
-   *          Target List of words
+   * @param specific Specific relation to put in.
+   * @param relnTgtNode Node governed by the uncollapsed relation
+   * @param tgtList Target List of words
    */
   private void insertSpecificIntoList(String specific, IndexedWord relnTgtNode, List<IndexedWord> tgtList) {
     int currIndex = tgtList.indexOf(relnTgtNode);
@@ -1435,10 +1409,9 @@ public class SemanticGraph implements Serializable  {
    *
    * </dl>
    *
-   * @param format
-   *          a <code>String</code> specifying the desired format
-   * @return a <code>String</code> representation of the typed dependencies in
-   *         this <code>GrammaticalStructure</code>
+   * @param format A {@code String} specifying the desired format
+   * @return A {@code String} representation of the typed dependencies in
+   *         this {@code GrammaticalStructure}
    */
   public String toString(OutputFormat format) {
     switch(format) {

@@ -578,14 +578,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
    * @param props The properties to configure this annotator with.
    */
   public NaturalLogicAnnotator(String annotatorName, Properties props) {
-    ArgumentParser.fillOptions(this, props);
-    Properties withoutPrefix = new Properties();
-    Enumeration<Object> keys = props.keys();
-    while (keys.hasMoreElements()) {
-      String key = keys.nextElement().toString();
-      withoutPrefix.setProperty(key.replace(annotatorName + ".", ""), props.getProperty(key));
-    }
-    ArgumentParser.fillOptions(this, withoutPrefix);
+    ArgumentParser.fillOptions(this, annotatorName, props);
   }
 
   /**

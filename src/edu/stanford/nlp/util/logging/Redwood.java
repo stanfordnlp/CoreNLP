@@ -955,6 +955,10 @@ public class Redwood  {
     private Util() {} // static methods
 
     private static Object[] revConcat(Object[] B, Object... A) {
+      // A is empty whenever do info level logging; B is only empty for blank logging line
+      if (A.length == 0) {
+        return B;
+      }
       Object[] C = new Object[A.length+B.length];
       System.arraycopy(A, 0, C, 0, A.length);
       System.arraycopy(B, 0, C, A.length, B.length);

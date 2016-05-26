@@ -24,7 +24,7 @@
 //    USA
 //
 
-package edu.stanford.nlp.dcoref; 
+package edu.stanford.nlp.dcoref;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedWriter;
@@ -164,7 +164,7 @@ public class SieveCoreferenceSystem  {
   /** Current sieve index */
   private int currentSieve;
 
-  /** counter for links in passes (Pair<correct links, total links>)  */
+  /** counter for links in passes ({@code Pair<correct links, total links>})  */
   private List<Pair<Integer, Integer>> linksCountInPass;
 
   /** Scores for each pass */

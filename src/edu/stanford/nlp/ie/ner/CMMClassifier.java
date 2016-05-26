@@ -24,8 +24,7 @@
 //    Support/Questions: java-nlp-user@lists.stanford.edu
 //    Licensing: java-nlp-support@lists.stanford.edu
 
-package edu.stanford.nlp.ie.ner; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.ie.ner;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -74,6 +73,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -126,7 +126,7 @@ import edu.stanford.nlp.util.*;
 public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassifier<IN>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CMMClassifier.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CMMClassifier.class);
 
   private ProbabilisticClassifier<String, String> classifier;
 
@@ -1621,7 +1621,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
    *  for more information on supported flags.
    */
   public static void main(String[] args) throws Exception {
-    StringUtils.printErrInvocationString("CMMClassifier", args);
+    StringUtils.logInvocationString(log, args);
 
     Properties props = StringUtils.argsToProperties(args);
     CMMClassifier<CoreLabel> cmm = new CMMClassifier<>(props);

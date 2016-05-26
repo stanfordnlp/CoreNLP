@@ -1,4 +1,5 @@
 package edu.stanford.nlp.util; 
+import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
@@ -72,9 +73,6 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  *
  */
 public class ArgumentParser  {
-
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ArgumentParser.class);
 
   @Documented
   @Retention(RetentionPolicy.RUNTIME)
@@ -400,14 +398,24 @@ public class ArgumentParser  {
       Object[] instances,
       Class<?>[] classes,
       Properties options,
-      boolean ensureAllOptions) {
+      boolean ensureAllOptions,
+      boolean isBootstrap) {
 
     // Print usage, if applicable
-    if ("true".equalsIgnoreCase(options.getProperty("usage", "false")) ||
-        "true".equalsIgnoreCase(options.getProperty("help", "false"))
-        ) {
-      log(usage(classes));
-      System.exit(0);
+    if (!isBootstrap) {
+      if ("true".equalsIgnoreCase(options.getProperty("usage", "false")) ||
+          "true".equalsIgnoreCase(options.getProperty("help", "false"))
+          ) {
+        Set<Class<?>> allClasses = new HashSet<>();
+        Collections.addAll(allClasses, classes);
+        if (instances != null) {
+          for (Object o : instances) {
+            allClasses.add(o.getClass());
+          }
+        }
+        System.err.println(usage(allClasses.stream().toArray(Class[]::new)));
+        System.exit(0);
+      }
     }
 
     //--Create Class->Object Mapping
@@ -566,7 +574,7 @@ public class ArgumentParser  {
       Object[] instances,
       Class<?>[] classes,
       Properties options) {
-    return fillOptionsImpl(instances, classes, options, strict);
+    return fillOptionsImpl(instances, classes, options, strict, false);
   }
 
 
@@ -614,7 +622,7 @@ public class ArgumentParser  {
   public static void fillOptions(Class<?>[] classes,
                                  String[] args) {
     Properties options = StringUtils.argsToProperties(args); //get options
-    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
+    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false, true); //bootstrap
     fillOptionsImpl(null, classes, options);
   }
 
@@ -679,7 +687,7 @@ public class ArgumentParser  {
       options.setProperty(key, props.getProperty(key));
     }
     //(bootstrap)
-    Map<String, Field> bootstrapMap = fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
+    Map<String, Field> bootstrapMap = fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false, true); //bootstrap
     bootstrapMap.keySet().forEach(options::remove);
     //(fill options)
     Class<?>[] visibleClasses = optionClasses;
@@ -712,7 +720,7 @@ public class ArgumentParser  {
   public static void fillOptions(Object[] instances,
                                  String[] args) {
     Properties options = StringUtils.argsToProperties(args); //get options
-    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
+    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false, true); //bootstrap
     Class[] classes = new Class[instances.length];
     for (int i = 0; i < classes.length; ++i) { classes[i] = instances[i].getClass(); }
     fillOptionsImpl(instances, classes, options);
@@ -740,6 +748,24 @@ public class ArgumentParser  {
   public static void fillOptions(Object instance,
                                  String[] args) {
     fillOptions(new Object[]{ instance }, args);
+  }
+
+
+  /**
+   * Fill all the options for a given CoreNLP annotator.
+   * @param annotator The annotator to fill options for.
+   * @param annotatorName The name of the annotator, for parsing properties.
+   * @param props The properties to fill the options in the annotator with.
+   */
+  public static void fillOptions(Annotator annotator, String annotatorName, Properties props) {
+    ArgumentParser.fillOptions(annotator, props);
+    Properties withoutPrefix = new Properties();
+    Enumeration<Object> keys = props.keys();
+    while (keys.hasMoreElements()) {
+      String key = keys.nextElement().toString();
+      withoutPrefix.setProperty(key.replace(annotatorName + ".", ""), props.getProperty(key));
+    }
+    ArgumentParser.fillOptions(annotator, withoutPrefix);
   }
 
 

@@ -153,6 +153,7 @@ public class JSONOutputter extends AnnotationOutputter {
               l3.set("truecaseText", token.get(CoreAnnotations.TrueCaseTextAnnotation.class));
               l3.set("before", token.get(CoreAnnotations.BeforeAnnotation.class));
               l3.set("after", token.get(CoreAnnotations.AfterAnnotation.class));
+              l3.set("entitylink", token.get(CoreAnnotations.WikipediaEntityAnnotation.class));
               // Timex
               Timex time = token.get(TimeAnnotations.TimexAnnotation.class);
               if (time != null) {
