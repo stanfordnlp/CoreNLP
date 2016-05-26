@@ -1428,6 +1428,76 @@ public class UniversalEnglishGrammaticalRelations {
           UniversalEnglishGrammaticalRelations.DETERMINER);
 
 
+  /** The "controlling nominal subject" relation. Used in the enhanced and enhanced++
+   * representations between a controlled verb and its nominal controller.
+   *
+   * <p/>
+   * Example: <br/>
+   * "Sue wants to buy a hat." &rarr;
+   * {@code nsubj}(Sue, wants)<br/>
+   * {@code nsubj:xsubj}(Sue, wants)<br/>
+   * {@code mark}(to, buy)<br/>
+   * {@code xcomp}(buy, wants)<br/>
+   * {@code det}(a, hat)<br/>
+   * {@code dobj}(hat, buy)<br/>
+   */
+  public static final GrammaticalRelation CONTROLLING_NOMINAL_SUBJECT =
+      new GrammaticalRelation(Language.UniversalEnglish, "nsubj:xsubj", "controlling nominal subject",
+          UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT);
+
+
+  /** The "controlling nominal passive subject" relation.
+   * Used in the enhanced and enhanced++ representations between
+   * a controlled verb and its nominal controller, if the controlled
+   * verb is in passive voice.
+   *
+   * <p/>
+   * Example: <br/>
+   * "The hat seemed to have been bought." &rarr;
+   * {@code nsubj}(hat, seemed)<br/>
+   * {@code nsubjpass:xsubj}(hat, bought)<br/>
+   * {@code mark}(to, bought)<br/>
+   * {@code aux}(have, bought)<br/>
+   * {@code auxpass}(been, bought)<br/>
+   *
+   */
+  public static final GrammaticalRelation CONTROLLING_NOMINAL_PASSIVE_SUBJECT =
+      new GrammaticalRelation(Language.UniversalEnglish, "nsubjpass:xsubj", "controlling nominal passive subject",
+          UniversalEnglishGrammaticalRelations.NOMINAL_PASSIVE_SUBJECT);
+
+
+
+  /** The "controlling clausal subject" relation. Used in the enhanced and enhanced++
+   * representations between a controlled verb and its nominal controller.
+   *
+   * <p/>
+   * Example: <br/>
+   * "That they bought the company " &rarr;
+   * {@code nsubj}(hat, seemed)<br/>
+   * {@code nsubjpass:xsubj}(hat, bought)<br/>
+   * {@code mark}(to, bought)<br/>
+   * {@code aux}(have, bought)<br/>
+   * {@code auxpass}(been, bought)<br/>
+   *
+   */
+  public static final GrammaticalRelation CONTROLLING_CLAUSAL_SUBJECT =
+      new GrammaticalRelation(Language.UniversalEnglish, "csubj:xsubj", "controlling clausal subject",
+          UniversalEnglishGrammaticalRelations.NOMINAL_PASSIVE_SUBJECT);
+
+
+
+  /** The "controlling clausal passive subject" relation. Used in the enhanced and enhanced++
+   * representations between a controlled verb and its nominal controller, if the controlled verb is in passive voice.
+   *
+   * TODO: Is this a possible relation?
+   *
+   */
+  public static final GrammaticalRelation CONTROLLING_CLAUSAL_PASSIVE_SUBJECT =
+      new GrammaticalRelation(Language.UniversalEnglish, "csubjpass:xsubj", "controlling clausal passive subject",
+          UniversalEnglishGrammaticalRelations.NOMINAL_PASSIVE_SUBJECT);
+
+
+
   /**
    * The "semantic dependent" grammatical relation has been
    * introduced as a supertype for the controlling subject relation.
@@ -1515,7 +1585,11 @@ public class UniversalEnglishGrammaticalRelations {
             GOES_WITH,
             LIST,
             PREPOSITION,
-            QMOD
+            QMOD,
+            CONTROLLING_NOMINAL_SUBJECT,
+            CONTROLLING_NOMINAL_PASSIVE_SUBJECT,
+            CONTROLLING_CLAUSAL_SUBJECT,
+            CONTROLLING_CLAUSAL_PASSIVE_SUBJECT
     }));
   // Cache frequently used views of the values list
   private static final List<GrammaticalRelation> synchronizedValues =

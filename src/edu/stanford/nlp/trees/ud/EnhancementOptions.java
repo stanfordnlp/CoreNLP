@@ -15,6 +15,7 @@ public class EnhancementOptions {
   public boolean addCopyNodes;
   public boolean demoteQuantMod;
   public boolean addXSubj;
+  public boolean enhanceOnlyNmods;
 
 
   /**
@@ -22,6 +23,7 @@ public class EnhancementOptions {
    *
    * @param processMultiWordPrepositions Turn multi-word prepositions into flat MWE.
    * @param enhancePrepositionalModifiers Add prepositions to relation labels.
+   * @param enhanceOnlyNmods Add prepositions only to nmod labels (and not to acl or advcl).
    * @param enhanceConjuncts Add coordinating conjunctions to relation labels.
    * @param propagateDependents Propagate dependents.
    * @param addReferent Add "referent" relation in relative clauses.
@@ -30,10 +32,11 @@ public class EnhancementOptions {
    * @param addXSubj Add relation between controlling subject and controlled verb.
    */
   public EnhancementOptions(boolean processMultiWordPrepositions, boolean enhancePrepositionalModifiers,
-                            boolean enhanceConjuncts, boolean propagateDependents, boolean addReferent,
-                            boolean addCopyNodes, boolean demoteQuantMod, boolean addXSubj) {
+                            boolean enhanceOnlyNmods, boolean enhanceConjuncts, boolean propagateDependents,
+                            boolean addReferent, boolean addCopyNodes, boolean demoteQuantMod, boolean addXSubj) {
     this.processMultiWordPrepositions = processMultiWordPrepositions;
     this.enhancePrepositionalModifiers = enhancePrepositionalModifiers;
+    this.enhanceOnlyNmods = enhanceOnlyNmods;
     this.enhanceConjuncts = enhanceConjuncts;
     this.propagateDependents = propagateDependents;
     this.addReferent = addReferent;
@@ -51,6 +54,7 @@ public class EnhancementOptions {
     this.addCopyNodes = options.addCopyNodes;
     this.demoteQuantMod = options.demoteQuantMod;
     this.addXSubj = options.addXSubj;
+    this.enhanceOnlyNmods = options.enhanceOnlyNmods;
   }
 
 

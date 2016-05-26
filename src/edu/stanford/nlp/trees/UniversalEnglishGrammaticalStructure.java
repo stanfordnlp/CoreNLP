@@ -46,6 +46,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    *
    * - Process multi-word prepositions: No
    * - Add prepositions to relation labels: Yes
+   * - Add prepositions only to nmod relations: No
    * - Add coordinating conjunctions to relation labels: Yes
    * - Propagate dependents: Yes
    * - Add "referent" relations: Yes
@@ -54,7 +55,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    * - Add relations between controlling subject and controlled verbs: Yes
    *
    */
-  public static final EnhancementOptions ENHANCED_OPTIONS = new EnhancementOptions(false, true, true, true, true,
+  public static final EnhancementOptions ENHANCED_OPTIONS = new EnhancementOptions(false, true, false, true, true, true,
       false, false, true);
 
   /*
@@ -62,6 +63,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    *
    * - Process multi-word prepositions: Yes
    * - Add prepositions to relation labels: Yes
+   * - Add prepositions only to nmod relations: No
    * - Add coordinating conjunctions to relation labels: Yes
    * - Propagate dependents: Yes
    * - Add "referent" relations: Yes
@@ -70,7 +72,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    * - Add relations between controlling subject and controlled verbs: Yes
    *
    */
-  public static final EnhancementOptions ENHANCED_PLUS_PLUS_OPTIONS = new EnhancementOptions(true, true, true, true, true,
+  public static final EnhancementOptions ENHANCED_PLUS_PLUS_OPTIONS = new EnhancementOptions(true, true, false, true, true, true,
       true, true, true);
 
   /*
@@ -80,6 +82,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    *
    * - Process multi-word prepositions: Yes
    * - Add prepositions to relation labels: Yes
+   * - Add prepositions only to nmod relations: Yes
    * - Add coordinating conjunctions to relation labels: Yes
    * - Propagate dependents: No
    * - Add "referent" relations: No
@@ -89,7 +92,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    *
    */
   @Deprecated
-  public static final EnhancementOptions COLLAPSED_OPTIONS = new EnhancementOptions(true, true, true, false, false,
+  public static final EnhancementOptions COLLAPSED_OPTIONS = new EnhancementOptions(true, true, true, true, false, false,
       true, false, false);
 
 
@@ -283,9 +286,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    * Adds the case marker(s) to all nmod, acl and advcl relations that are
    * modified by one or more case markers(s).
    *
+   * @param enhanceOnlyNmods If this is set to true, then prepositons will only be appended to nmod
+   *                         relations (and not to acl or advcl) relations.
+   *
    * @see UniversalEnglishGrammaticalStructure#addCaseMarkersToReln
    */
-  private static void addCaseMarkerInformation(SemanticGraph sg) {
+  private static void addCaseMarkerInformation(SemanticGraph sg, boolean enhanceOnlyNmods) {
 
     /* Semgrexes require a graph with a root. */
     if (sg.getRoots().isEmpty())
@@ -309,6 +315,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
       sgCopy = sg.makeSoftCopy();
       matcher = p.matcher(sgCopy);
       while (matcher.find()) {
+        if (enhanceOnlyNmods && ! matcher.getRelnString("reln").equals("nmod")) {
+          continue;
+        }
+
         List<IndexedWord> caseMarkers = Generics.newArrayList(3);
         caseMarkers.add(matcher.getNode("c1"));
         caseMarkers.add(matcher.getNode("c2"));
@@ -336,6 +346,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
       sgCopy = sg.makeSoftCopy();
       matcher = p.matcher(sgCopy);
       while (matcher.find()) {
+        if (enhanceOnlyNmods && ! matcher.getRelnString("reln").equals("nmod")) {
+          continue;
+        }
+
         List<IndexedWord> caseMarkers = Generics.newArrayList(2);
         caseMarkers.add(matcher.getNode("c1"));
         caseMarkers.add(matcher.getNode("c2"));
@@ -358,6 +372,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
       sgCopy = sg.makeSoftCopy();
       matcher = p.matcher(sgCopy);
       while (matcher.find()) {
+        if (enhanceOnlyNmods && ! matcher.getRelnString("reln").equals("nmod")) {
+          continue;
+        }
+
         List<IndexedWord> caseMarkers = Generics.newArrayList(1);
         caseMarkers.add(matcher.getNode("c1"));
 
@@ -872,7 +890,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
     }
     /* Add propositions to relation names. */
     if (options.enhancePrepositionalModifiers) {
-      addCaseMarkerInformation(sg);
+      addCaseMarkerInformation(sg, options.enhanceOnlyNmods);
       if (DEBUG) {
         printListSorted("addEnhancements: after addCaseMarkerInformation()", sg.typedDependencies());
       }
@@ -1343,18 +1361,18 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
       if (objects.size() > 0) {
         for (IndexedWord object : objects) {
           if ( ! sg.containsEdge(modifier, object))
-            sg.addEdge(modifier, object, NOMINAL_SUBJECT, Double.NEGATIVE_INFINITY, true);
+            sg.addEdge(modifier, object, CONTROLLING_NOMINAL_SUBJECT, Double.NEGATIVE_INFINITY, true);
         }
       } else {
         for (IndexedWord subject : subjects) {
           if ( ! sg.containsEdge(modifier, subject))
-            sg.addEdge(modifier, subject, NOMINAL_SUBJECT, Double.NEGATIVE_INFINITY, true);
+            sg.addEdge(modifier, subject, CONTROLLING_NOMINAL_SUBJECT, Double.NEGATIVE_INFINITY, true);
         }
       }
     }
   }
 
-  private static SemgrexPattern CORRECT_SUBJPASS_PATTERN = SemgrexPattern.compile("{}=gov >auxpass {} >/^(nsubj|csubj)$/ {}=subj");
+  private static SemgrexPattern CORRECT_SUBJPASS_PATTERN = SemgrexPattern.compile("{}=gov >auxpass {} >/^(nsubj|csubj).*$/ {}=subj");
 
   /**
    * This method corrects subjects of verbs for which we identified an auxpass,
@@ -1383,6 +1401,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
         reln = NOMINAL_PASSIVE_SUBJECT;
       } else if (edge.getRelation() == CLAUSAL_SUBJECT) {
         reln = CLAUSAL_PASSIVE_SUBJECT;
+      } else if (edge.getRelation() == CONTROLLING_NOMINAL_SUBJECT) {
+        reln = CONTROLLING_NOMINAL_PASSIVE_SUBJECT;
+      } else if (edge.getRelation() == CONTROLLING_CLAUSAL_SUBJECT) {
+        reln = CONTROLLING_CLAUSAL_PASSIVE_SUBJECT;
       }
 
       if (reln != null) {
@@ -1698,7 +1720,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
 
   /* A lot of, an assortment of, ... */
-  public static final SemgrexPattern QUANT_MOD_3W_PATTERN = SemgrexPattern.compile("{word:/(?i:lot|assortment|number|couple|bunch|handful|litany|sheaf|slew|dozen|series|variety|multitude|wad|clutch|wave|mountain|array|spate|string|ton|range|plethora|heap|sort|form|kind|type|version|bit|pair|triple|total)/}=w2 >det {word:/(?i:an?)/}=w1 >nmod ({tag:/(NN.*|PRP.*)/}=gov >case {word:/(?i:of)/}=w3) . {}=w3");
+  public static final SemgrexPattern QUANT_MOD_3W_PATTERN = SemgrexPattern.compile("{word:/(?i:lot|assortment|number|couple|bunch|handful|litany|sheaf|slew|dozen|series|variety|multitude|wad|clutch|wave|mountain|array|spate|string|ton|range|plethora|heap|sort|form|kind|type|version|bit|pair|triple|total)/}=w2 >det {word:/(?i:an?)/}=w1 !>amod {} >nmod ({tag:/(NN.*|PRP.*)/}=gov >case {word:/(?i:of)/}=w3) . {}=w3");
 
   public static final SemgrexPattern[] QUANT_MOD_2W_PATTERNS = {
       /* Lots of, dozens of, heaps of ... */
