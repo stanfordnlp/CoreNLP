@@ -1,4 +1,5 @@
-package edu.stanford.nlp.ie.crf;
+package edu.stanford.nlp.ie.crf; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.optimization.AbstractStochasticCachingDiffUpdateFunction;
@@ -6,13 +7,8 @@ import edu.stanford.nlp.optimization.HasFeatureGrouping;
 import edu.stanford.nlp.util.concurrent.*;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.logging.Redwood;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /**
  * @author Jenny Finkel
@@ -22,7 +18,7 @@ import java.util.Random;
 public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachingDiffUpdateFunction implements HasCliquePotentialFunction, HasFeatureGrouping  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(CRFLogConditionalObjectiveFunction.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(CRFLogConditionalObjectiveFunction.class);
 
   public static final int NO_PRIOR = 0;
   public static final int QUADRATIC_PRIOR = 1;

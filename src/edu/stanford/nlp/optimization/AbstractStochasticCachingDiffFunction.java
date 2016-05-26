@@ -1,7 +1,7 @@
-package edu.stanford.nlp.optimization;
+package edu.stanford.nlp.optimization; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.math.ArrayMath;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,10 +14,11 @@ import java.util.Random;
  *
  * @author Alex Kleeman
  */
+
 public abstract class AbstractStochasticCachingDiffFunction extends AbstractCachingDiffFunction  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(AbstractStochasticCachingDiffFunction.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(AbstractStochasticCachingDiffFunction.class);
 
   public boolean hasNewVals = true;
   public boolean recalculatePrevBatch = false;
@@ -101,11 +102,11 @@ public abstract class AbstractStochasticCachingDiffFunction extends AbstractCach
   public abstract int dataDimension();
 
   /**
-   * Clears the cache in a way that doesn't require reallocation :-).
+   * Clears the cache in a way that doesn't require reallocation :-)
    */
   @Override
   protected void clearCache() {
-    super.clearCache();
+    if (lastX != null) lastX[0] = Double.NaN;
     if (lastXBatch != null) lastXBatch[0] = Double.NaN;
     if (lastVBatch != null) lastVBatch[0] = Double.NaN;
   }

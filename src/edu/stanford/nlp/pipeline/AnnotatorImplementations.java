@@ -1,4 +1,4 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
@@ -98,7 +98,7 @@ public class AnnotatorImplementations  {
                     NumberSequenceClassifier.USE_SUTIME_PROPERTY,
                     NumberSequenceClassifier.USE_SUTIME_DEFAULT);
 
-    boolean verbose = PropertiesUtils.getBool(properties, "ner." + "verbose", false);
+    boolean verbose = false;
 
     String[] loadPaths = models.toArray(new String[models.size()]);
 
@@ -292,10 +292,6 @@ public class AnnotatorImplementations  {
    * Annotate for KBP relations
    */
   public Annotator kbp(Properties properties) {
-    return new KBPAnnotator(Annotator.STANFORD_KBP, properties);
-  }
-
-  public Annotator link(Properties properties) {
-    return new WikidictAnnotator(Annotator.STANFORD_LINK, properties);
+    return new KBPAnnotator(properties);
   }
 }

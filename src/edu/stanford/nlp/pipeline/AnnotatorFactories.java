@@ -1,21 +1,18 @@
-package edu.stanford.nlp.pipeline;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
+
+import edu.stanford.nlp.ie.NERClassifierCombiner;
+import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
+import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.process.PTBTokenizer;
+import edu.stanford.nlp.process.WordToSentenceProcessor;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.Set;
-
-import edu.stanford.nlp.ie.NERClassifierCombiner;
-import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
-import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.naturalli.NaturalLogicAnnotator;
-import edu.stanford.nlp.naturalli.OpenIE;
-import edu.stanford.nlp.process.PTBTokenizer;
-import edu.stanford.nlp.process.WordToSentenceProcessor;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.PropertiesUtils;
-// import edu.stanford.nlp.util.logging.Redwood;
-
 
 /**
  * A companion to {@link AnnotatorFactory} defining the common annotators.
@@ -25,13 +22,13 @@ import edu.stanford.nlp.util.PropertiesUtils;
  */
 public class AnnotatorFactories  {
 
-  // /** A logger for this class */
-  // private static final Redwood.RedwoodChannels log = Redwood.channels(AnnotatorFactories.class);
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(AnnotatorFactories.class);
 
   private AnnotatorFactories() {} // static factory class
 
   public static AnnotatorFactory tokenize(Properties properties, final AnnotatorImplementations annotatorImplementation) {
-    return new AnnotatorFactory(TokenizerAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
@@ -93,7 +90,7 @@ public class AnnotatorFactories  {
 
 
   public static AnnotatorFactory cleanXML(Properties properties, final AnnotatorImplementations annotatorImplementation) {
-    return new AnnotatorFactory(CleanXmlAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
@@ -205,12 +202,12 @@ public class AnnotatorFactories  {
    * text consisting of multiple sentences.
    */
   public static AnnotatorFactory sentenceSplit(Properties properties, final AnnotatorImplementations annotatorImplementation) {
-    return new AnnotatorFactory(WordsToSentencesAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
         // log.info(signature());
-        // todo: The above shows that signature is edu.stanford.nlp.pipeline.AnnotatorImplementations: and doesn't reflect what annotator it is! Should fix. Maybe is fixed now [2016]. Test!
+        // todo: The above shows that signature is edu.stanford.nlp.pipeline.AnnotatorImplementations: and doesn't reflect what annotator it is! Should fix.
         boolean nlSplitting = Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
         if (nlSplitting) {
           boolean whitespaceTokenization = Boolean.valueOf(properties.getProperty("tokenize.whitespace", "false"));
@@ -288,7 +285,7 @@ public class AnnotatorFactories  {
   // POS tagger
   //
   public static AnnotatorFactory posTag(Properties properties, final AnnotatorImplementations annotatorImplementation) {
-    return new AnnotatorFactory(POSTaggerAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
@@ -311,7 +308,7 @@ public class AnnotatorFactories  {
   // Lemmatizer
   //
   public static AnnotatorFactory lemma(Properties properties, final AnnotatorImplementations annotatorImplementation) {
-    return new AnnotatorFactory(MorphaAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
@@ -331,7 +328,7 @@ public class AnnotatorFactories  {
   // NER
   //
   public static AnnotatorFactory nerTag(Properties properties, final AnnotatorImplementations annotatorImplementation) {
-    return new AnnotatorFactory(NERCombinerAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
@@ -371,7 +368,7 @@ public class AnnotatorFactories  {
   // Regex NER
   //
   public static AnnotatorFactory regexNER(Properties properties, final AnnotatorImplementations annotatorImplementation) {
-    return new AnnotatorFactory(RegexNERAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
@@ -390,7 +387,7 @@ public class AnnotatorFactories  {
   // Mentions annotator
   //
   public static AnnotatorFactory entityMentions(Properties properties, final AnnotatorImplementations annotatorImplementation) {
-    return new AnnotatorFactory(EntityMentionsAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
@@ -409,7 +406,7 @@ public class AnnotatorFactories  {
   // Gender Annotator
   //
   public static AnnotatorFactory gender(Properties properties, final AnnotatorImplementations annotatorImplementation) {
-    return new AnnotatorFactory(GenderAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
@@ -431,7 +428,7 @@ public class AnnotatorFactories  {
   // True caser
   //
   public static AnnotatorFactory truecase(Properties properties, final AnnotatorImplementations annotatorImplementation) {
-    return new AnnotatorFactory(TrueCaseAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
@@ -461,7 +458,7 @@ public class AnnotatorFactories  {
   // Parser
   //
   public static AnnotatorFactory parse(final Properties properties, final AnnotatorImplementations annotatorImplementation) {
-    return new AnnotatorFactory(ParserAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
 
       @Override
@@ -495,7 +492,7 @@ public class AnnotatorFactories  {
   //
 
   public static AnnotatorFactory mention(Properties properties, final AnnotatorImplementations annotatorImplementation) {
-    return new AnnotatorFactory(MentionAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
 
       @Override
@@ -513,7 +510,7 @@ public class AnnotatorFactories  {
   // Coreference resolution
   //
   public static AnnotatorFactory coref(Properties properties, final AnnotatorImplementations annotatorImplementation) {
-    return new AnnotatorFactory(CorefAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
 
       @Override
@@ -530,7 +527,7 @@ public class AnnotatorFactories  {
   }
 
   public static AnnotatorFactory dcoref(Properties properties, final AnnotatorImplementations annotatorImplementation) {
-    return new AnnotatorFactory(DeterministicCorefAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
 
       @Override
@@ -548,7 +545,7 @@ public class AnnotatorFactories  {
 
 
   public static AnnotatorFactory relation(Properties properties, final AnnotatorImplementations annotatorImplementation) {
-    return new AnnotatorFactory(RelationExtractorAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
 
       @Override
@@ -569,7 +566,7 @@ public class AnnotatorFactories  {
   }
 
   public static AnnotatorFactory sentiment(Properties properties, final AnnotatorImplementations annotatorImplementation) {
-    return new AnnotatorFactory(SentimentAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
 
       @Override
@@ -579,28 +576,24 @@ public class AnnotatorFactories  {
 
       @Override
       public String additionalSignature() {
-        return "sentiment.model=" + properties.getProperty("sentiment.model");
+        return "sentiment.model=" + properties.get("sentiment.model");
       }
     };
   }
 
   public static AnnotatorFactory columnDataClassifier(Properties properties, final AnnotatorImplementations annotatorImpls) {
-    return new AnnotatorFactory(ColumnDataClassifierAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImpls) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        if (properties.containsKey("classify.loadClassifier")) {
-          properties.setProperty("loadClassifier", properties.getProperty("classify.loadClassifier"));
-        }
-        if (!properties.containsKey("loadClassifier")) {
+        if(!properties.containsKey("loadClassifier"))
           throw new RuntimeException("Must load a classifier when creating a column data classifier annotator");
-        }
         return new ColumnDataClassifierAnnotator(properties);
       }
 
       @Override
       protected String additionalSignature() {
-        return "classifier="+ properties.getProperty("loadClassifier=" + properties.getProperty("loadClassifier"));
+        return "classifier="+properties.get("loadClassifier="+properties.get("loadClassifier"));
       }
     };
   }
@@ -609,7 +602,7 @@ public class AnnotatorFactories  {
   // Dependency parsing
   //
   public static AnnotatorFactory dependencies(Properties properties, final AnnotatorImplementations annotatorImpl) {
-    return new AnnotatorFactory(DependencyParseAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImpl) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
@@ -627,7 +620,7 @@ public class AnnotatorFactories  {
   // Monotonicity and Polarity
   //
   public static AnnotatorFactory natlog(Properties properties, final AnnotatorImplementations annotatorImpl) {
-    return new AnnotatorFactory(NaturalLogicAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImpl) {
       private static final long serialVersionUID = 4825870963088507811L;
 
       @Override
@@ -646,7 +639,7 @@ public class AnnotatorFactories  {
   // RelationTriples
   //
   public static AnnotatorFactory openie(Properties properties, final AnnotatorImplementations annotatorImpl) {
-    return new AnnotatorFactory(OpenIE.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImpl) {
       private static final long serialVersionUID = -2525567112379296672L;
 
       @Override
@@ -665,7 +658,7 @@ public class AnnotatorFactories  {
   // Quote Extractor
   //
   public static AnnotatorFactory quote(Properties properties, final AnnotatorImplementations annotatorImpl) {
-    return new AnnotatorFactory(QuoteAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImpl) {
       private static final long serialVersionUID = -2525567112379296672L;
 
       @Override
@@ -685,7 +678,7 @@ public class AnnotatorFactories  {
   // UD Features Extractor
   //
   public static AnnotatorFactory udfeats(Properties properties, final AnnotatorImplementations annotatorImpl) {
-    return new AnnotatorFactory(UDFeatureAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImpl) {
       private static final long serialVersionUID = -2525567112379296672L;
 
       @Override
@@ -704,29 +697,12 @@ public class AnnotatorFactories  {
   // UD Features Extractor
   //
   public static AnnotatorFactory kbp(Properties properties, final AnnotatorImplementations annotatorImpl) {
-    return new AnnotatorFactory(KBPAnnotator.class, properties) {
+    return new AnnotatorFactory(properties, annotatorImpl) {
       private static final long serialVersionUID = -2525567112379296672L;
 
       @Override
       public Annotator create() {
         return annotatorImpl.kbp(properties);
-      }
-
-      @Override
-      protected String additionalSignature() {
-        return "";
-      }
-    };
-  }
-
-  public static AnnotatorFactory link(Properties properties, AnnotatorImplementations annotatorImplementations) {
-
-    return new AnnotatorFactory(WikidictAnnotator.class, properties) {
-      private static final long serialVersionUID = 42L;
-
-      @Override
-      public Annotator create() {
-        return annotatorImplementations.link(properties);
       }
 
       @Override

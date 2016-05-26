@@ -1,5 +1,4 @@
-package edu.stanford.nlp.optimization;
-
+package edu.stanford.nlp.optimization; 
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Arrays;
@@ -14,16 +13,17 @@ import java.util.Set;
  *
  *  @author Dan Klein
  */
+
 public abstract class AbstractCachingDiffFunction implements DiffFunction, HasInitial  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(AbstractCachingDiffFunction.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(AbstractCachingDiffFunction.class);
 
-  private double[] lastX; // = null;
-  private int fEvaluations; // = 0;
+  double[] lastX; // = null;
+  int fEvaluations; // = 0;
   protected double[] derivative; // = null;
   protected double value; // = 0.0;
-  private final Random generator = new Random(2147483647L);
+  protected Random generator = new Random(2147483647L);
 
   public boolean gradientCheck() {
     return gradientCheck(100, 50, initial());

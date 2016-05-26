@@ -100,7 +100,7 @@ public class TextOutputter extends AnnotationOutputter {
         String[] tokenAnnotations = {
                 "Text", "PartOfSpeech", "Lemma", "Answer", "NamedEntityTag",
                 "CharacterOffsetBegin", "CharacterOffsetEnd", "NormalizedNamedEntityTag",
-                "Timex", "TrueCase", "TrueCaseText", "SentimentClass", "WikipediaEntity" };
+                "Timex", "TrueCase", "TrueCaseText", "SentimentClass" };
         for (CoreLabel token: tokens) {
           pw.print(token.toShorterString(tokenAnnotations));
           pw.println();

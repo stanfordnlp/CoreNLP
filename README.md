@@ -5,23 +5,11 @@ Stanford CoreNLP provides a set of natural language analysis tools written in Ja
 
 The Stanford CoreNLP code is written in Java and licensed under the GNU General Public License (v3 or later). Note that this is the full GPL, which allows many free uses, but not its use in proprietary software that you distribute to others.
 
-#### How To Compile (with ant)
-
-1. cd CoreNLP ; ant
-
-#### How To Create A Jar 
-
-1. compile the code
-2. cd CoreNLP/classes ; jar -cf ../stanford-corenlp.jar edu
-
 You can find releases of Stanford CoreNLP on [Maven Central](http://search.maven.org/#browse%7C11864822).
 
 You can find more explanation and documentation on [the Stanford CoreNLP homepage](http://nlp.stanford.edu/software/corenlp.shtml#Demo).
 
 The most recent models associated with the code in the HEAD of this repository can be found [here](http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar).
-
-Some of the larger (English) models -- like the shift-reduce parser and WikiDict -- are not distributed with our default models jar. 
-The most recent version of these models can be found [here](http://nlp.stanford.edu/software/stanford-english-corenlp-models-current.jar).
 
 For information about making contributions to Stanford CoreNLP, see the file [CONTRIBUTING.md](CONTRIBUTING.md).
 

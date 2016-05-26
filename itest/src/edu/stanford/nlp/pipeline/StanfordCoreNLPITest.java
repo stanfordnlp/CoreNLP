@@ -2,6 +2,7 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
 import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -10,8 +11,7 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
-
-import org.junit.Assert;
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import java.io.*;
@@ -367,7 +367,7 @@ public class StanfordCoreNLPITest extends TestCase {
     Assert.assertEquals("Wrong number of sentTokens: " + sentTokens, 11, sentTokens.size());
   }
 
-  private static void checkSUTimeAnnotation(String message,
+  private void checkSUTimeAnnotation(String message,
                                      StanfordCoreNLP pipeline, String text,
                                      int nExpectedSentences, int nExpectedTokens,
                                      Map<Integer,String> expectedNormalizedNER) {
@@ -397,7 +397,7 @@ public class StanfordCoreNLPITest extends TestCase {
 
     // CoreNLP without properties
     StanfordCoreNLP pipeline1 = new StanfordCoreNLP();
-    Map<Integer,String> expectedValues1 = new HashMap<>();
+    Map<Integer,String> expectedValues1 = new HashMap<Integer,String>();
     expectedValues1.put(3, "2001-10-02");
     expectedValues1.put(9, "OFFSET P1D");
     checkSUTimeAnnotation("Default properties", pipeline1, text, nExpectedSentences, nExpectedTokens, expectedValues1);
@@ -407,10 +407,9 @@ public class StanfordCoreNLPITest extends TestCase {
     props.setProperty("sutime.searchForDocDate", "true");
 
     StanfordCoreNLP pipeline2 = new StanfordCoreNLP(props);
-    Map<Integer,String> expectedValues2 = new HashMap<>();
+    Map<Integer,String> expectedValues2 = new HashMap<Integer,String>();
     expectedValues2.put(3, "2001-10-02");
     expectedValues2.put(9, "2001-10-03");
     checkSUTimeAnnotation("With searchForDocDate", pipeline2, text, nExpectedSentences, nExpectedTokens, expectedValues2);
   }
-
 }

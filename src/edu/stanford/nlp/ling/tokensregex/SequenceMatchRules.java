@@ -698,7 +698,7 @@ public class SequenceMatchRules {
       this.action = action;
       this.result = result;
     }
-
+    
     public StringMatchResultExtractor(Env env, Expression result) {
       this.env = env;
       this.result = result;
@@ -745,15 +745,12 @@ public class SequenceMatchRules {
   }
 
   /**
-   * Interface for a rule that extracts a list of matched items from an input.
-   *
+   * Interface for a rule that extracts a list of matched items from a input
    * @param <I> input type
    * @param <O> output type
    */
-  public interface ExtractRule<I,O> {
-
-    boolean extract(I in, List<O> out);
-
+  public static interface ExtractRule<I,O> {
+    public boolean extract(I in, List<O> out);
   }
 
   /**
@@ -761,8 +758,8 @@ public class SequenceMatchRules {
    * @param <I> input type
    * @param <O> output type
    */
-  public static class FilterExtractRule<I,O> implements ExtractRule<I,O> {
-
+  public static class FilterExtractRule<I,O> implements ExtractRule<I,O>
+  {
     Predicate<I> filter;
     ExtractRule<I,O> rule;
 
@@ -771,13 +768,11 @@ public class SequenceMatchRules {
       this.rule = rule;
     }
 
-    @SafeVarargs
     public FilterExtractRule(Predicate<I> filter, ExtractRule<I,O>... rules) {
       this.filter = filter;
       this.rule = new ListExtractRule<>(rules);
     }
 
-    @Override
     public boolean extract(I in, List<O> out) {
       if (filter.test(in)) {
         return rule.extract(in,out);
@@ -789,13 +784,12 @@ public class SequenceMatchRules {
 
   /**
    * Extraction rule that applies a list of rules in sequence and aggregates
-   * all matches found.
-   *
+   *   all matches found
    * @param <I> input type
    * @param <O> output type
    */
-  public static class ListExtractRule<I,O> implements ExtractRule<I,O> {
-
+  public static class ListExtractRule<I,O> implements ExtractRule<I,O>
+  {
     List<ExtractRule<I,O>> rules;
 
     public ListExtractRule(Collection<ExtractRule<I,O>> rules)
@@ -803,13 +797,14 @@ public class SequenceMatchRules {
       this.rules = new ArrayList<>(rules);
     }
 
-    @SafeVarargs
-    public ListExtractRule(ExtractRule<I,O>... rules) {
+    public ListExtractRule(ExtractRule<I,O>... rules)
+    {
       this.rules = new ArrayList<>(rules.length);
-      Collections.addAll(this.rules, rules);
+      for (ExtractRule<I,O> rule:rules) {
+        this.rules.add(rule);
+      }
     }
 
-    @Override
     public boolean extract(I in, List<O> out) {
       boolean extracted = false;
       for (ExtractRule<I,O> rule:rules) {
@@ -820,28 +815,17 @@ public class SequenceMatchRules {
       return extracted;
     }
 
-    @SafeVarargs
-    public final void addRules(ExtractRule<I, O>... rules) {
-      Collections.addAll(this.rules, rules);
+    public void addRules(ExtractRule<I,O>... rules)
+    {
+      for (ExtractRule<I,O> rule:rules) {
+        this.rules.add(rule);
+      }
     }
 
     public void addRules(Collection<ExtractRule<I,O>> rules)
     {
       this.rules.addAll(rules);
     }
-
-    public String ruleList() {
-      List<String> names = new ArrayList<>();
-      for (ExtractRule rule: rules) {
-        if (rule instanceof AnnotationExtractRule) {
-          names.add(((AnnotationExtractRule) rule).name);
-        } else {
-          names.add(rule.getClass().getName());
-        }
-      }
-      return names.toString();
-    }
-
   }
 
   /**

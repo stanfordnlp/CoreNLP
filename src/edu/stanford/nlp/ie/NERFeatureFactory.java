@@ -26,7 +26,8 @@
 //    Licensing: java-nlp-support@lists.stanford.edu
 //    http://nlp.stanford.edu/downloads/crf-classifier.shtml
 
-package edu.stanford.nlp.ie;
+package edu.stanford.nlp.ie; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -56,7 +57,6 @@ import edu.stanford.nlp.trees.international.pennchinese.RadicalMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
 import edu.stanford.nlp.util.Timing;
-import edu.stanford.nlp.util.logging.Redwood;
 
 
 /**
@@ -195,7 +195,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <tr><td> useGenericFeatures</td><td>boolean</td><td>false</td><td>If true, any features you include in the map will be incorporated into the model with values equal to those given in the file; values are treated as strings unless you use the "realValued" option (described below)</td></tr>
  * <tr><td> justify</td><td>boolean</td><td>false</td><td>Print out all
  * feature/class pairs and their weight, and then for each input data
- * point, print justification (weights) for active features. Only implemented for CMMClassifier.</td></tr>
+ * point, print justification (weights) for active features</td></tr>
  * <tr><td> normalize</td><td>boolean</td><td>false</td><td>For the CMMClassifier (only) if this is true then the Scorer normalizes scores as probabilities.</td></tr>
  * <tr><td> useHuber</td><td>boolean</td><td>false</td><td>Use a Huber loss prior rather than the default quadratic loss.</td></tr>
  * <tr><td> useQuartic</td><td>boolean</td><td>false</td><td>Use a Quartic prior rather than the default quadratic loss.</td></tr>
@@ -371,7 +371,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN>  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(NERFeatureFactory.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(NERFeatureFactory.class);
 
   private static final long serialVersionUID = -2329726064739185544L;
 
@@ -473,7 +473,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     if (lexicon != null) {
       return;
     }
-    Timing timing = new Timing();
+    Timing.startDoing("Loading distsim lexicon from " + flags.distSimLexicon);
     lexicon = Generics.newHashMap();
     boolean terryKoo = "terryKoo".equals(flags.distSimFileFormat);
     for (String line : ObjectBank.getLineIterator(flags.distSimLexicon,
@@ -501,16 +501,9 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       }
       lexicon.put(word, wordClass);
     }
-    timing.done(log, "Loading distsim lexicon from " + flags.distSimLexicon);
+    Timing.endDoing();
   }
 
-  public String describeDistsimLexicon() {
-    if (lexicon == null) {
-      return "No distsim lexicon";
-    } else {
-      return "Distsim lexicon of size " + lexicon.size();
-    }
-  }
 
   private void distSimAnnotate(PaddedList<IN> info) {
     for (CoreLabel fl : info) {

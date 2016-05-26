@@ -126,7 +126,6 @@ message Token {
   optional Span conllUTokenSpan     = 34;
   optional string conllUMisc        = 35;
   optional MapIntString conllUSecondaryDeps = 36;
-  optional string   wikipediaEntity = 37;
 
 
   // Fields set by other annotators in CoreNLP

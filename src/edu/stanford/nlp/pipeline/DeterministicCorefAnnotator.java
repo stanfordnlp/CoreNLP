@@ -124,6 +124,9 @@ public class DeterministicCorefAnnotator implements Annotator  {
 
       Map<Integer, edu.stanford.nlp.hcoref.data.CorefChain> result = corefSystem.corefReturnHybridOutput(document);
       annotation.set(edu.stanford.nlp.hcoref.CorefCoreAnnotations.CorefChainAnnotation.class, result);
+      //Map<Integer, CorefChain> result = corefSystem.coref(document);
+      //annotation.set(CorefCoreAnnotations.CorefChainAnnotation.class, result);
+
 
       if(OLD_FORMAT) {
         Map<Integer, CorefChain> oldResult = corefSystem.coref(document);

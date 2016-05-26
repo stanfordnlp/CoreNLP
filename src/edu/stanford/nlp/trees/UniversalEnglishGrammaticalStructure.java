@@ -39,6 +39,20 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
   private static final boolean DEBUG = System.getProperty("UniversalEnglishGrammaticalStructure", null) != null;
 
+
+
+  public class DependencyOptions {
+
+    boolean processMultiWordPrepositions;
+    boolean enhancePrepositionalModifiers;
+    boolean enhanceConjuncts;
+    boolean propagateDependents;
+    boolean addReferent;
+    boolean addCopyNodes;
+    boolean demoteQuantMod;
+
+  }
+
   /**
    * Construct a new {@code EnglishGrammaticalStructure} from an existing parse
    * tree. The new {@code GrammaticalStructure} has the same tree structure
@@ -171,6 +185,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   @Override
   protected void postProcessDependencies(List<TypedDependency> list) {
     SemanticGraph sg = new SemanticGraph(list);
+    postProcessDependencies(sg);
+    list.clear();
+    list.addAll(sg.typedDependencies());
+  }
+
+  protected void postProcessDependencies(SemanticGraph sg) {
     if (DEBUG) {
       printListSorted("At postProcessDependencies:", sg.typedDependencies());
     }
@@ -182,8 +202,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
     if (DEBUG) {
       printListSorted("After converting rel:", sg.typedDependencies());
     }
-    list.clear();
-    list.addAll(sg.typedDependencies());
   }
 
   @Override
@@ -206,10 +224,20 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
   /* Semgrex patterns for prepositional phrases. */
   private static SemgrexPattern PASSIVE_AGENT_PATTERN = SemgrexPattern.compile("{}=gov >nmod=reln ({}=mod >case {word:/^(?i:by)$/}=c1) >auxpass {}");
-  private static SemgrexPattern PREP_MW3_PATTERN = SemgrexPattern.compile("{}=gov   [>/^(nmod|advcl|acl)$/=reln ({}=mod >case ({}=c1 >mwe {}=c2 >mwe ({}=c3 !== {}=c2) ))]");
-  private static SemgrexPattern PREP_MW2_PATTERN = SemgrexPattern.compile("{}=gov >/^(nmod|advcl|acl)$/=reln ({}=mod >case ({}=c1 >mwe {}=c2))");
-  private static SemgrexPattern PREP_PATTERN = SemgrexPattern.compile("{}=gov   >/^(nmod|advcl|acl)$/=reln ({}=mod >case {}=c1)");
+  private static SemgrexPattern[] PREP_MW3_PATTERNS = {
+      SemgrexPattern.compile("{}=gov   [>/^nmod$/=reln ({}=mod >case ({}=c1 >mwe {}=c2 >mwe ({}=c3 !== {}=c2) ))]"),
+      SemgrexPattern.compile("{}=gov   [>/^(advcl|acl)$/=reln ({}=mod >/^(mark|case)$/ ({}=c1 >mwe {}=c2 >mwe ({}=c3 !== {}=c2) ))]")
 
+  };
+  private static SemgrexPattern[] PREP_MW2_PATTERNS = {
+      SemgrexPattern.compile("{}=gov >/^nmod$/=reln ({}=mod >case ({}=c1 >mwe {}=c2))"),
+    SemgrexPattern.compile("{}=gov >/^(advcl|acl)$/=reln ({}=mod >/^(mark|case)$/ ({}=c1 >mwe {}=c2))")
+
+  };
+  private static SemgrexPattern[] PREP_PATTERNS = {
+      SemgrexPattern.compile("{}=gov   >/^nmod$/=reln ({}=mod >case {}=c1)"),
+      SemgrexPattern.compile("{}=gov   >/^(advcl|acl)$/=reln ({}=mod >/^(mark|case)$/ {}=c1)")
+  };
 
   /**
    * Adds the case marker(s) to all nmod, acl and advcl relations that are
@@ -237,65 +265,71 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
 
     /* 3-word prepositions */
-    sgCopy = sg.makeSoftCopy();
-    matcher = PREP_MW3_PATTERN.matcher(sgCopy);
-    while (matcher.find()) {
-      List<IndexedWord> caseMarkers = Generics.newArrayList(3);
-      caseMarkers.add(matcher.getNode("c1"));
-      caseMarkers.add(matcher.getNode("c2"));
-      caseMarkers.add(matcher.getNode("c3"));
+    for (SemgrexPattern p: PREP_MW3_PATTERNS) {
+      sgCopy = sg.makeSoftCopy();
+      matcher = p.matcher(sgCopy);
+      while (matcher.find()) {
+        List<IndexedWord> caseMarkers = Generics.newArrayList(3);
+        caseMarkers.add(matcher.getNode("c1"));
+        caseMarkers.add(matcher.getNode("c2"));
+        caseMarkers.add(matcher.getNode("c3"));
 
-      Collections.sort(caseMarkers);
+        Collections.sort(caseMarkers);
 
       /* We only want to match every case marker once. */
-      if (caseMarkers.equals(oldCaseMarkers))
-        continue;
+        if (caseMarkers.equals(oldCaseMarkers))
+          continue;
 
 
-      IndexedWord gov = matcher.getNode("gov");
-      IndexedWord mod = matcher.getNode("mod");
+        IndexedWord gov = matcher.getNode("gov");
+        IndexedWord mod = matcher.getNode("mod");
 
-      addCaseMarkersToReln(sg, gov, mod, caseMarkers);
+        addCaseMarkersToReln(sg, gov, mod, caseMarkers);
 
-      oldCaseMarkers = caseMarkers;
+        oldCaseMarkers = caseMarkers;
+      }
     }
 
 
     /* 2-word prepositions */
-    sgCopy = sg.makeSoftCopy();
-    matcher = PREP_MW2_PATTERN.matcher(sgCopy);
-    while (matcher.find()) {
-      List<IndexedWord> caseMarkers = Generics.newArrayList(2);
-      caseMarkers.add(matcher.getNode("c1"));
-      caseMarkers.add(matcher.getNode("c2"));
-      Collections.sort(caseMarkers);
+    for (SemgrexPattern p: PREP_MW2_PATTERNS) {
+      sgCopy = sg.makeSoftCopy();
+      matcher = p.matcher(sgCopy);
+      while (matcher.find()) {
+        List<IndexedWord> caseMarkers = Generics.newArrayList(2);
+        caseMarkers.add(matcher.getNode("c1"));
+        caseMarkers.add(matcher.getNode("c2"));
+        Collections.sort(caseMarkers);
 
       /* We only want to match every case marker once. */
-      if (caseMarkers.equals(oldCaseMarkers))
-        continue;
+        if (caseMarkers.equals(oldCaseMarkers))
+          continue;
 
-      IndexedWord gov = matcher.getNode("gov");
-      IndexedWord mod = matcher.getNode("mod");
-      addCaseMarkersToReln(sg, gov, mod, caseMarkers);
+        IndexedWord gov = matcher.getNode("gov");
+        IndexedWord mod = matcher.getNode("mod");
+        addCaseMarkersToReln(sg, gov, mod, caseMarkers);
 
-      oldCaseMarkers = caseMarkers;
+        oldCaseMarkers = caseMarkers;
+      }
     }
 
     /* Single-word prepositions */
-    sgCopy = sg.makeSoftCopy();
-    matcher = PREP_PATTERN.matcher(sgCopy);
-    while (matcher.find()) {
-      List<IndexedWord> caseMarkers = Generics.newArrayList(1);
-      caseMarkers.add(matcher.getNode("c1"));
+    for (SemgrexPattern p: PREP_PATTERNS) {
+      sgCopy = sg.makeSoftCopy();
+      matcher = p.matcher(sgCopy);
+      while (matcher.find()) {
+        List<IndexedWord> caseMarkers = Generics.newArrayList(1);
+        caseMarkers.add(matcher.getNode("c1"));
 
-      if (caseMarkers.equals(oldCaseMarkers))
-        continue;
+        if (caseMarkers.equals(oldCaseMarkers))
+          continue;
 
-      IndexedWord gov = matcher.getNode("gov");
-      IndexedWord mod = matcher.getNode("mod");
-      addCaseMarkersToReln(sg, gov, mod, caseMarkers);
+        IndexedWord gov = matcher.getNode("gov");
+        IndexedWord mod = matcher.getNode("mod");
+        addCaseMarkersToReln(sg, gov, mod, caseMarkers);
 
-      oldCaseMarkers = caseMarkers;
+        oldCaseMarkers = caseMarkers;
+      }
     }
 
   }
@@ -755,6 +789,55 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
       edge.setRelation(DIRECT_OBJECT);
     }
   }
+
+  @Override
+  public void enhanceDependencies(List<TypedDependency> list) {
+    SemanticGraph sg = new SemanticGraph(list);
+    correctDependencies(sg);
+
+    addCaseMarkerInformation(sg);
+
+    addConjInformation(sg);
+
+    treatCC(sg);
+
+    addExtraNSubj(sg);
+
+    correctSubjPass(sg);
+
+
+    list.clear();
+    list.addAll(sg.typedDependencies());
+
+    Collections.sort(list);
+
+  }
+
+  @Override
+  public void enhancePlusPlusDependencies(List<TypedDependency> list) {
+
+    SemanticGraph sg = new SemanticGraph(list);
+    correctDependencies(sg);
+
+    processMultiwordPreps(sg);
+    expandPPConjunctions(sg);
+    expandPrepConjunctions(sg);
+    addCaseMarkerInformation(sg);
+    addConjInformation(sg);
+    addRef(sg);
+    collapseReferent(sg);
+    treatCC(sg);
+    addExtraNSubj(sg);
+
+
+
+
+    list.clear();
+    list.addAll(sg.typedDependencies());
+
+    Collections.sort(list);
+  }
+
 
   /**
    * Destructively modifies this {@code Collection<TypedDependency>}

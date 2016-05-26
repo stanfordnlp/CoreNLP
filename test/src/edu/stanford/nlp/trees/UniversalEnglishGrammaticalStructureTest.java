@@ -1946,7 +1946,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "nmod:in(engaged-5, fighting-8)\n" +
                "mark(launched-11, after-9)\n" +
                "nsubj(launched-11, insurgents-10)\n" +
-               "advcl(engaged-5, launched-11)\n" +
+               "advcl:after(engaged-5, launched-11)\n" +
                "amod(attacks-13, simultaneous-12)\n" +
                "dobj(launched-11, attacks-13)\n"},
              {TestType.COLLAPSED,
@@ -1989,7 +1989,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "mark(secure-9, in-6)\n" +
                "mwe(in-6, order-7)\n" +
                "mark(secure-9, to-8)\n" +
-               "advcl(talked-2, secure-9)\n" +
+               "advcl:in_order(talked-2, secure-9)\n" +
                "det(account-11, the-10)\n" +
                "dobj(secure-9, account-11)\n"},
              {TestType.COLLAPSED,
