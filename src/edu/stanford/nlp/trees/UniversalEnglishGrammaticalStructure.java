@@ -820,6 +820,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
     correctDependencies(sg);
 
     processMultiwordPreps(sg);
+    demoteQuantificationalModifiers(sg);
     expandPPConjunctions(sg);
     expandPrepConjunctions(sg);
     addCaseMarkerInformation(sg);
@@ -828,6 +829,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
     collapseReferent(sg);
     treatCC(sg);
     addExtraNSubj(sg);
+    correctSubjPass(sg);
 
 
 
@@ -1681,6 +1683,93 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
         sg.addEdge(mweHead, word, MULTI_WORD_EXPRESSION, Double.NEGATIVE_INFINITY, false);
       }
     }
+  }
+
+
+  /* A lot of, an assortment of, ... */
+  public static final SemgrexPattern QUANT_MOD_3W_PATTERN = SemgrexPattern.compile("{word:/(?i:lot|assortment|number|couple|bunch|handful|litany|sheaf|slew|dozen|series|variety|multitude|wad|clutch|wave|mountain|array|spate|string|ton|range|plethora|heap|sort|form|kind|type|version|bit|pair|triple|total)/}=w2 >det {word:/(?i:an?)/}=w1 >nmod ({tag:/(NN.*|PRP.*)/}=gov >case {word:/(?i:of)/}=w3) . {}=w3");
+
+  public static final SemgrexPattern[] QUANT_MOD_2W_PATTERNS = {
+      /* Lots of, dozens of, heaps of ... */
+      SemgrexPattern.compile("{word:/(?i:lots|many|several|plenty|tons|dozens|multitudes|mountains|loads|pairs|tens|hundreds|thousands|millions|billions|trillions|[0-9]+s)/}=w1 >nmod ({tag:/(NN.*|PRP.*)/}=gov >case {word:/(?i:of)/}=w2) . {}=w2"),
+
+      /* Some of the ..., all of them, ... */
+      SemgrexPattern.compile("{word:/(?i:some|all|both|neither|everyone|nobody|one|two|three|four|five|six|seven|eight|nine|ten|hundred|thousand|million|billion|trillion|[0-9]+)/}=w1 [>nmod ({tag:/(NN.*)/}=gov >case ({word:/(?i:of)/}=w2 $+ {}=det) >det {}=det) |  >nmod ({tag:/(PRP.*)/}=gov >case {word:/(?i:of)/}=w2)] . {}=w2")
+  };
+
+
+  private void demoteQuantificationalModifiers(SemanticGraph sg) {
+    SemanticGraph sgCopy = sg.makeSoftCopy();
+    SemgrexMatcher matcher = QUANT_MOD_3W_PATTERN.matcher(sgCopy);
+
+    while (matcher.findNextMatchingNode()) {
+      IndexedWord w1 = matcher.getNode("w1");
+      IndexedWord w2 = matcher.getNode("w2");
+      IndexedWord w3 = matcher.getNode("w3");
+      IndexedWord gov = matcher.getNode("gov");
+
+      demoteQmodParentHelper(sg, gov, w2);
+
+      List<IndexedWord> otherDeps = Generics.newLinkedList();
+
+      otherDeps.add(w1);
+      otherDeps.add(w2);
+      otherDeps.add(w3);
+
+      demoteQmodMWEHelper(sg, otherDeps, gov, w2);
+    }
+
+    for (SemgrexPattern p : QUANT_MOD_2W_PATTERNS) {
+      sgCopy = sg.makeSoftCopy();
+      matcher = p.matcher(sgCopy);
+      while (matcher.findNextMatchingNode()) {
+        IndexedWord w1 = matcher.getNode("w1");
+        IndexedWord w2 = matcher.getNode("w2");
+        IndexedWord gov = matcher.getNode("gov");
+
+        demoteQmodParentHelper(sg, gov, w1);
+
+        List<IndexedWord> otherDeps = Generics.newLinkedList();
+        otherDeps.add(w1);
+        otherDeps.add(w2);
+
+        demoteQmodMWEHelper(sg, otherDeps, gov, w1);
+      }
+    }
+
+
+  }
+
+  private void demoteQmodMWEHelper(SemanticGraph sg, List<IndexedWord> otherDeps, IndexedWord gov, IndexedWord oldHead) {
+    /* Look for amod children left to the light noun, e.g.
+     * "whole" in "a whole bunch of"
+     */
+    sg.getChildrenWithReln(oldHead, UniversalEnglishGrammaticalRelations.ADJECTIVAL_MODIFIER)
+        .stream()
+        .filter(x -> x.index() < oldHead.index())
+        .forEach(x -> otherDeps.add(x));
+
+    Collections.sort(otherDeps);
+    createMultiWordExpression(sg, gov, QMOD, otherDeps.toArray(new IndexedWord[otherDeps.size()]));
+  }
+
+
+  private void demoteQmodParentHelper(SemanticGraph sg, IndexedWord gov, IndexedWord oldHead) {
+    if (!sg.getRoots().contains(oldHead)) {
+      IndexedWord parent = sg.getParent(oldHead);
+      if (parent == null) {
+        return;
+      }
+      SemanticGraphEdge edge = sg.getEdge(parent, oldHead);
+      sg.removeEdge(edge);
+      sg.addEdge(parent, gov, edge.getRelation(), edge.getWeight(), edge.isExtra());
+    } else {
+      sg.getRoots().remove(oldHead);
+      sg.addRoot(gov);
+    }
+
+    sg.removeEdge(sg.getEdge(oldHead, gov));
+
   }
 
   /**

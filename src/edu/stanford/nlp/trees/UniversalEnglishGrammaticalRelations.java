@@ -1409,6 +1409,25 @@ public class UniversalEnglishGrammaticalRelations {
           "FRAG < (NP $+ (/,/ $+ (NP=target $+ (/,/ $+ NP))) !$++ CC|CONJP|MWE)",
           "FRAG < (NP $+ (/,/ $+ (NP $++ (/,/ $+ NP=target))) !$++ CC|CONJP|MWE)");
 
+
+  /**
+   * The quantificational modifier relation. Used in the enhanced++
+   * representation for the quanfiticational determiner in
+   * partitive and light noun constructions.
+   *
+   * <p/>
+   * Example: <br/>
+   * "Both of the planes" &rarr;
+   * {@code det:qmod}(planes, both)<br/>
+   * {@code mwe}(both, of)<br/>
+   * {@code mwe}(both, the)<br/>
+   *
+   */
+  public static final GrammaticalRelation QMOD =
+      new GrammaticalRelation(Language.UniversalEnglish, "det:qmod", "quantificational modifier",
+          UniversalEnglishGrammaticalRelations.DETERMINER);
+
+
   /**
    * The "semantic dependent" grammatical relation has been
    * introduced as a supertype for the controlling subject relation.
@@ -1496,6 +1515,7 @@ public class UniversalEnglishGrammaticalRelations {
             GOES_WITH,
             LIST,
             PREPOSITION,
+            QMOD
     }));
   // Cache frequently used views of the values list
   private static final List<GrammaticalRelation> synchronizedValues =
