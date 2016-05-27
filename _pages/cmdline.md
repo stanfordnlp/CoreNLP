@@ -22,14 +22,15 @@ If this command is run from the distribution directory, it processes the include
 
 ## Classpath
 
-Your command line has to load the code, library, and model jars that CoreNLP uses. The easiest way to do that is with a command line this, where `/Users/me/corenlp/` should be changed to the path where you put CoreNLP:
+Your command line has to load the code, libraries, and model jars that CoreNLP uses. These are all contained in JAR files (compressed archives with extension ".jar") which come in the CoreNLP download or which can be downloaded on demand from Maven Central. The easiest way to do that is with a command line this, where `/Users/me/corenlp/` should be changed to the path where you put CoreNLP:
 
 ```sh
 java -cp "/Users/me/corenlp/*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -file inputFile
 ```
 
-Alternatively, you can add this path to your CLASSPATH, so these libraries are always available.
+Alternatively, you can add this path to your CLASSPATH environment variable, so these libraries are always available.  
 
+The "*" (which must be enclosed in quotes) says to add all JAR files in the given directory to the classpath. 
 You can also individually specify the needed jar files. Use the following sort of command line, adjusting the JAR file date extensions `VV` to your downloaded release.
 
 ```sh
