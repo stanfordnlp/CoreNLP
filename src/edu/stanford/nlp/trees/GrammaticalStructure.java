@@ -1716,7 +1716,7 @@ public abstract class GrammaticalStructure implements Serializable  {
     if (sentFileName == null && (altDepReaderName == null || altDepReaderFilename == null) && treeFileName == null && conllXFileName == null && filter == null) {
       try {
         log.info("Usage: java GrammaticalStructure [options]* [-sentFile|-treeFile|-conllxFile file] [-testGraph]");
-        log.info("  options: -basic, -collapsed, -CCprocessed [the default], -collapsedTree, -parseTree, -test, -parserFile file, -conllx, -keepPunct, -altprinter -altreader -altreaderfile -originalDependencies");
+        log.info("  options: -basic, -enhanced, -enhanced++ [the default], -collapsed, -CCprocessed, -collapsedTree, -parseTree, -test, -parserFile file, -conllx, -keepPunct, -altprinter -altreader -altreaderfile -originalDependencies");
         TreeReader tr = new PennTreeReader(new StringReader("((S (NP (NNP Sam)) (VP (VBD died) (NP-TMP (NN today)))))"));
         tb.add(tr.readTree());
       } catch (Exception e) {
@@ -1963,10 +1963,15 @@ public abstract class GrammaticalStructure implements Serializable  {
           printDependencies(gs, gs.typedDependenciesEnhancedPlusPlus(), tree, conllx, false);
         }
 
-        // default use: CCprocessed (to parallel what happens within the parser)
+        // default use: enhanced++ for UD, CCprocessed for SD (to parallel what happens within the parser)
         if (!basic && !collapsed && !CCprocessed && !collapsedTree && !nonCollapsed && !enhanced && !enhancedPlusPlus) {
           // System.out.println("----------- CCprocessed dependencies -----------");
-          printDependencies(gs, gs.typedDependenciesCCprocessed(Extras.MAXIMAL), tree, conllx, false);
+
+          if (generateOriginalDependencies) {
+            printDependencies(gs, gs.typedDependenciesCCprocessed(Extras.MAXIMAL), tree, conllx, false);
+          } else {
+            printDependencies(gs, gs.typedDependenciesEnhancedPlusPlus(), tree, conllx, false);
+          }
         }
       }
 
