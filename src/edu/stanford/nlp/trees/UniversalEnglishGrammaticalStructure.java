@@ -1774,15 +1774,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   }
 
   private void demoteQmodMWEHelper(SemanticGraph sg, List<IndexedWord> otherDeps, IndexedWord gov, IndexedWord oldHead) {
-    /* Look for amod children left to the light noun, e.g.
-     * "whole" in "a whole bunch of"
-     */
-    sg.getChildrenWithReln(oldHead, UniversalEnglishGrammaticalRelations.ADJECTIVAL_MODIFIER)
-        .stream()
-        .filter(x -> x.index() < oldHead.index())
-        .forEach(x -> otherDeps.add(x));
-
-    Collections.sort(otherDeps);
     createMultiWordExpression(sg, gov, QMOD, otherDeps.toArray(new IndexedWord[otherDeps.size()]));
   }
 
@@ -1794,15 +1785,16 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
         return;
       }
       SemanticGraphEdge edge = sg.getEdge(parent, oldHead);
-      sg.removeEdge(edge);
       sg.addEdge(parent, gov, edge.getRelation(), edge.getWeight(), edge.isExtra());
+      sg.removeEdge(edge);
     } else {
       sg.getRoots().remove(oldHead);
       sg.addRoot(gov);
     }
 
+    //temporary relation to keep the graph connected
+    sg.addEdge(gov, oldHead, DEPENDENT, Double.NEGATIVE_INFINITY, false);
     sg.removeEdge(sg.getEdge(oldHead, gov));
-
   }
 
   /**
