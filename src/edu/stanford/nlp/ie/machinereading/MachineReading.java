@@ -42,7 +42,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * Minimally, for each domain you need to define a reader class that extends the GenericDataSetReader class
  * and overrides the public Annotation read(String path) method.
  *
- * How to run: java edu.stanford.nlp.ie.machinereading.MachineReading --arguments propertiesfile
+ * How to run: java edu.stanford.nlp.ie.machinereading.MachineReading -arguments propertiesFile
  *
  * This method creates an Annotation with additional objects per sentence: EntityMentions and RelationMentions.
  * Using these objects, the classifiers that get called from MachineReading train entity and relation extractors.
@@ -59,25 +59,25 @@ public class MachineReading  {
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(MachineReading.class);
 
-  // Store command-line args so they can be passed to other classes
-  private String[] args;
+  /** Store command-line args so they can be passed to other classes */
+  private final String[] args;
 
   /*
    * class attributes
    */
-  public GenericDataSetReader reader;
-  public GenericDataSetReader auxReader;
+  private GenericDataSetReader reader;
+  private GenericDataSetReader auxReader;
 
 
-  public Extractor entityExtractor;
+  private Extractor entityExtractor;
   // TODO could add an entityExtractorPostProcessor if we need one
-  public Extractor relationExtractor;
-  public Extractor relationExtractionPostProcessor;
-  public Extractor eventExtractor;
-  public Extractor consistencyChecker;
+  private Extractor relationExtractor;
+  private Extractor relationExtractionPostProcessor;
+  private Extractor eventExtractor;
+  private Extractor consistencyChecker;
 
-  protected boolean forceRetraining;
-  public boolean forceParseSentences;
+  private boolean forceRetraining;
+  private boolean forceParseSentences;
 
 
   /**
@@ -101,9 +101,10 @@ public class MachineReading  {
   @SuppressWarnings("unused")
   private Set<ResultsPrinter> eventResultsPrinterSet;
 
-  public static final int ENTITY_LEVEL = 0;
-  public static final int RELATION_LEVEL = 1;
-  public static final int EVENT_LEVEL = 2;
+  private static final int ENTITY_LEVEL = 0;
+  private static final int RELATION_LEVEL = 1;
+  private static final int EVENT_LEVEL = 2;
+
 
   public static void main(String[] args) throws Exception {
     MachineReading mr = makeMachineReading(args);
@@ -146,8 +147,9 @@ public class MachineReading  {
   private MachineReading(String [] args) {
     this.args = args;
   }
+
   protected MachineReading() {
-    this.args = new String[0];
+    this.args = StringUtils.EMPTY_STRING_ARRAY;
   }
 
   /**
@@ -249,7 +251,7 @@ public class MachineReading  {
    * returns results string, can be compared in a utest
    */
   public List<String> run() throws Exception {
-    this.forceRetraining= !MachineReadingProperties.loadModel;
+    this.forceRetraining = ! MachineReadingProperties.loadModel;
 
     if (MachineReadingProperties.trainOnly) {
       this.forceRetraining= true;
@@ -520,7 +522,7 @@ public class MachineReading  {
    * Removes any relations with relation types in relationsToSkip from a dataset.  Dataset is modified in place.
    */
   private static void removeSkippableRelations(Annotation dataset, Set<String> relationsToSkip) {
-    if (relationsToSkip == null || relationsToSkip.size() == 0) {
+    if (relationsToSkip == null || relationsToSkip.isEmpty()) {
       return;
     }
     for (CoreMap sent : dataset.get(CoreAnnotations.SentencesAnnotation.class)) {
@@ -770,7 +772,7 @@ public class MachineReading  {
     String[] printerClassNames = classes.trim().split(",\\s*");
     HashSet<ResultsPrinter> printers = new HashSet<>();
     for (String printerClassName : printerClassNames) {
-      if(printerClassName.length() == 0) continue;
+      if(printerClassName.isEmpty()) continue;
       ResultsPrinter rp;
       try {
         rp = (ResultsPrinter) Class.forName(printerClassName).getConstructor().newInstance();
@@ -896,7 +898,7 @@ public class MachineReading  {
     // and and save the serialized file to disk
     if (MachineReadingProperties.serializeCorpora && serializedSentences.exists() && !forceParseSentences) {
       MachineReadingProperties.logger.info("Loaded serialized sentences from " + serializedSentences.getAbsolutePath() + "...");
-      corpusSentences = (Annotation) IOUtils.readObjectFromFile(serializedSentences);
+      corpusSentences = IOUtils.readObjectFromFile(serializedSentences);
       MachineReadingProperties.logger.info("Done. Loaded " + corpusSentences.get(CoreAnnotations.SentencesAnnotation.class).size() + " sentences.");
     } else {
       // read the corpus
