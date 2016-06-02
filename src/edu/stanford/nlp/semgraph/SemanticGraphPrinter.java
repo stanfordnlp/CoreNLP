@@ -81,12 +81,12 @@ public class SemanticGraphPrinter  {
     }
 
     for (Tree t : tb) {
-      SemanticGraph sg = SemanticGraphFactory.makeFromTree(t, false);
+      SemanticGraph sg = SemanticGraphFactory.generateUncollapsedDependencies(t);
       System.out.println(sg.toString());
       System.out.println(sg.toCompactString());
 
       if (testGraph.equals("true")) {
-        SemanticGraph g1 = SemanticGraphFactory.makeFromTree(t);
+        SemanticGraph g1 = SemanticGraphFactory.generateCollapsedDependencies(t);
         System.out.println("TEST SEMANTIC GRAPH - graph ----------------------------");
         System.out.println(g1.toString());
         System.out.println("readable ----------------------------");

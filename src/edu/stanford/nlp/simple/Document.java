@@ -17,6 +17,7 @@ import edu.stanford.nlp.util.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ref.SoftReference;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -60,7 +61,7 @@ public class Document {
   /**
    * The backend to use for constructing {@link edu.stanford.nlp.pipeline.AnnotatorFactory}s.
    */
-  private static final AnnotatorImplementations backend = new AnnotatorImplementations();
+  private static AnnotatorImplementations backend = new AnnotatorImplementations();
 
   /**
    * The default {@link edu.stanford.nlp.pipeline.TokenizerAnnotator} implementation
@@ -291,6 +292,32 @@ public class Document {
   /** The default properties to use for annotating things (e.g., coref for the document level) */
   private Properties defaultProps = EMPTY_PROPS;
 
+
+  /**
+   * Set the backend implementations for our CoreNLP pipeline.
+   * For example, to a {@link ServerAnnotatorImplementations}.
+   *
+   * @param backend The backend to use from now on for annotating
+   *                documents.
+   */
+  public static void setBackend(AnnotatorImplementations backend) {
+    Document.backend = backend;
+  }
+
+
+  /**
+   * Use the CoreNLP Server ({@link StanfordCoreNLPServer}) for the
+   * heavyweight backend annotation job.
+   *
+   * @param host The hostname of the server.
+   * @param port The port the server is running on.
+   */
+  public static void useServer(String host, int port) {
+    backend = new ServerAnnotatorImplementations(host, port);
+  }
+
+
+
   /**
    * Create a new document from the passed in text.
    * @param text The text of the document.
@@ -414,7 +441,7 @@ public class Document {
    * </p>
    *
    * <pre>{@code
-   *   String json = new Document("Lucy in the sky with diamonds").json(Document::parse, Document::ner);
+   *   String json = new Document("Lucy in the sky with diamonds").json(Sentence::parse, Sentence::ner);
    * }</pre>
    *
    * <p>
@@ -852,8 +879,34 @@ public class Document {
    * <p>Therefore, this method is generally NOT recommended.</p>
    */
   public Annotation asAnnotation() {
-    return serializer.fromProto(serialize());
+    return asAnnotation(false);
   }
+
+
+  /**
+   * A cached version of this document as an Annotation.
+   * This will get garbage collected when necessary.
+   */
+  private SoftReference<Annotation> cachedAnnotation = null;
+
+  /**
+   * Return this Document as an Annotation object.
+   * Note that, importantly, only the fields which have already been called will be populated in
+   * the Annotation!
+   *
+   * <p>Therefore, this method is generally NOT recommended.</p>
+   *
+   * @param cache If true, allow retrieving this object from the cache.
+   */
+  Annotation asAnnotation(boolean cache) {
+    Annotation ann;
+    if (!cache || cachedAnnotation == null || (ann = cachedAnnotation.get()) == null) {
+      ann = serializer.fromProto(serialize());
+    }
+    cachedAnnotation = new SoftReference<>(ann);
+    return ann;
+  }
+
 
   /**
    * Read a CorefChain from its serialized representation.

@@ -1,4 +1,6 @@
 package edu.stanford.nlp.trees; 
+import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
+import edu.stanford.nlp.trees.ud.EnhancementOptions;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
@@ -918,6 +920,19 @@ public abstract class GrammaticalStructure implements Serializable  {
   }
 
 
+  public List<TypedDependency> typedDependenciesEnhanced() {
+    List<TypedDependency> tdl = typedDependencies(Extras.MAXIMAL);
+    addEnhancements(tdl, UniversalEnglishGrammaticalStructure.ENHANCED_OPTIONS);
+    return tdl;
+  }
+
+  public List<TypedDependency> typedDependenciesEnhancedPlusPlus() {
+    List<TypedDependency> tdl = typedDependencies(Extras.MAXIMAL);
+    addEnhancements(tdl, UniversalEnglishGrammaticalStructure.ENHANCED_PLUS_PLUS_OPTIONS);
+    return tdl;
+  }
+
+
   /**
    * Get a list of the typed dependencies, including extras like control
    * dependencies, collapsing them and distributing relations across
@@ -944,6 +959,20 @@ public abstract class GrammaticalStructure implements Serializable  {
    * @param CCprocess apply CC process?
    */
   protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess, Extras includeExtras) {
+    // do nothing as default operation
+  }
+
+
+  /**
+   *
+   * Destructively applies different enhancements to the dependency graph.
+   * <p/>
+   * Default is no-op; to be over-ridden in subclasses.
+   *
+   * @param list A list of dependencies
+   * @param options Options that determine which enhancements are applied to the dependency graph.
+   */
+  protected void addEnhancements(List<TypedDependency> list, EnhancementOptions options) {
     // do nothing as default operation
   }
 
@@ -1026,7 +1055,7 @@ public abstract class GrammaticalStructure implements Serializable  {
   }
 
 
-  public static final String DEFAULT_PARSER_FILE = "/u/nlp/data/lexparser/englishPCFG.ser.gz";
+  public static final String DEFAULT_PARSER_FILE = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
 
   /**
    * Print typed dependencies in either the Stanford dependency representation
@@ -1687,7 +1716,7 @@ public abstract class GrammaticalStructure implements Serializable  {
     if (sentFileName == null && (altDepReaderName == null || altDepReaderFilename == null) && treeFileName == null && conllXFileName == null && filter == null) {
       try {
         log.info("Usage: java GrammaticalStructure [options]* [-sentFile|-treeFile|-conllxFile file] [-testGraph]");
-        log.info("  options: -basic, -collapsed, -CCprocessed [the default], -collapsedTree, -parseTree, -test, -parserFile file, -conllx, -keepPunct, -altprinter -altreader -altreaderfile -originalDependencies");
+        log.info("  options: -basic, -enhanced, -enhanced++ [the default], -collapsed, -CCprocessed, -collapsedTree, -parseTree, -test, -parserFile file, -conllx, -keepPunct, -altprinter -altreader -altreaderfile -originalDependencies");
         TreeReader tr = new PennTreeReader(new StringReader("((S (NP (NNP Sam)) (VP (VBD died) (NP-TMP (NN today)))))"));
         tb.add(tr.readTree());
       } catch (Exception e) {
@@ -1745,6 +1774,9 @@ public abstract class GrammaticalStructure implements Serializable  {
     // todo: Support checkConnected on more options (including basic)
     boolean checkConnected = props.getProperty("checkConnected") != null;
     boolean portray = props.getProperty("portray") != null;
+    boolean enhanced = props.getProperty("enhanced") != null;
+    boolean enhancedPlusPlus = props.getProperty("enhanced++") != null;
+
 
     // enforce keepPunct if conllx is turned on
     if(conllx) {
@@ -1871,7 +1903,7 @@ public abstract class GrammaticalStructure implements Serializable  {
         }
 
         if (basic) {
-          if (collapsed || CCprocessed || collapsedTree || nonCollapsed) {
+          if (collapsed || CCprocessed || collapsedTree || nonCollapsed || enhanced || enhancedPlusPlus) {
             System.out.println("------------- basic dependencies ---------------");
           }
           if (altDepPrinter == null) {
@@ -1917,10 +1949,29 @@ public abstract class GrammaticalStructure implements Serializable  {
           printDependencies(gs, gs.typedDependenciesCollapsedTree(), tree, conllx, false);
         }
 
-        // default use: CCprocessed (to parallel what happens within the parser)
-        if (!basic && !collapsed && !CCprocessed && !collapsedTree && !nonCollapsed) {
+        if (enhanced) {
+          if (basic || enhancedPlusPlus) {
+            System.out.println("----------- enhanced dependencies tree -----------");
+          }
+          printDependencies(gs, gs.typedDependenciesEnhanced(), tree, conllx, false);
+        }
+
+        if (enhancedPlusPlus) {
+          if (basic || enhanced) {
+            System.out.println("----------- enhanced++ dependencies tree -----------");
+          }
+          printDependencies(gs, gs.typedDependenciesEnhancedPlusPlus(), tree, conllx, false);
+        }
+
+        // default use: enhanced++ for UD, CCprocessed for SD (to parallel what happens within the parser)
+        if (!basic && !collapsed && !CCprocessed && !collapsedTree && !nonCollapsed && !enhanced && !enhancedPlusPlus) {
           // System.out.println("----------- CCprocessed dependencies -----------");
-          printDependencies(gs, gs.typedDependenciesCCprocessed(Extras.MAXIMAL), tree, conllx, false);
+
+          if (generateOriginalDependencies) {
+            printDependencies(gs, gs.typedDependenciesCCprocessed(Extras.MAXIMAL), tree, conllx, false);
+          } else {
+            printDependencies(gs, gs.typedDependenciesEnhancedPlusPlus(), tree, conllx, false);
+          }
         }
       }
 

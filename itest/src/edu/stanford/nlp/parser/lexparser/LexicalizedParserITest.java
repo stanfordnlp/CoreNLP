@@ -165,7 +165,7 @@ public class LexicalizedParserITest extends TestCase {
                   "My/PRP$ dog/NN likes/VBZ to/TO eat/VB yoghurt/NN ./.",
                   "(ROOT (S (NP (PRP$ My) (NN dog)) (VP (VBZ likes) (S (VP (TO to) (VP (VB eat) (NP (NN yoghurt)))))) (. .)))",
                   "nmod:poss(dog-2, My-1) nsubj(likes-3, dog-2) root(ROOT-0, likes-3) mark(eat-5, to-4) xcomp(likes-3, eat-5) dobj(eat-5, yoghurt-6)",
-                  "nmod:poss(dog-2, My-1) nsubj(likes-3, dog-2) nsubj(eat-5, dog-2) root(ROOT-0, likes-3) mark(eat-5, to-4) xcomp(likes-3, eat-5) dobj(eat-5, yoghurt-6)");
+                  "nmod:poss(dog-2, My-1) nsubj(likes-3, dog-2) nsubj:xsubj(eat-5, dog-2) root(ROOT-0, likes-3) mark(eat-5, to-4) xcomp(likes-3, eat-5) dobj(eat-5, yoghurt-6)");
   }
 
   /**

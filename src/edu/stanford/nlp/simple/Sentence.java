@@ -976,7 +976,7 @@ public class Sentence {
     for (Function<Sentence, Object> function : functions) {
       function.apply(this);
     }
-    return this.document.asAnnotation().get(CoreAnnotations.SentencesAnnotation.class).get(this.sentenceIndex());
+    return this.document.asAnnotation(true).get(CoreAnnotations.SentencesAnnotation.class).get(this.sentenceIndex());
   }
 
   /**
