@@ -4,8 +4,6 @@ import edu.stanford.nlp.hcoref.data.CorefChain;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
-import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.naturalli.OperatorSpec;
 import edu.stanford.nlp.naturalli.Polarity;
 import edu.stanford.nlp.naturalli.SentenceFragment;
@@ -16,8 +14,6 @@ import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.*;
 
@@ -43,6 +39,7 @@ import static edu.stanford.nlp.simple.Document.EMPTY_PROPS;
 public class Sentence {
   /** A properties object for creating a document from a single sentence. Used in the constructor {@link Sentence#Sentence(String)} */
   static Properties SINGLE_SENTENCE_DOCUMENT = new Properties() {{
+    setProperty("language", "english");
     setProperty("ssplit.isOneSentence", "true");
     setProperty("tokenize.class", "PTBTokenizer");
     setProperty("tokenize.language", "en");
@@ -50,6 +47,7 @@ public class Sentence {
 
   /** A properties object for creating a document from a single tokenized sentence. */
   private static Properties SINGLE_SENTENCE_TOKENIZED_DOCUMENT = new Properties() {{
+    setProperty("language", "english");
     setProperty("ssplit.isOneSentence", "true");
     setProperty("tokenize.class", "WhitespaceTokenizer");
     setProperty("tokenize.language", "en");
@@ -110,15 +108,10 @@ public class Sentence {
     this(text, SINGLE_SENTENCE_DOCUMENT);
   }
 
-  /**
-   * Create a new sentence from the given tokenized text, assuming the entire text is just one sentence.
-   * WARNING: This method may in rare cases (mostly when tokens themselves have whitespace in them)
-   *          produce strange results; it's a bit of a hack around the default tokenizer.
-   *
-   * @param tokens The text of the sentence.
-   */
-  public Sentence(List<String> tokens) {
-    this(StringUtils.join(tokens.stream().map(x -> x.replace(' ', 'ߝ' /* some random character */)), " "), SINGLE_SENTENCE_TOKENIZED_DOCUMENT);
+
+  /** The actual implementation of a tokenized sentence constructor */
+  protected Sentence(List<String> tokens, Properties props) {
+    this(StringUtils.join(tokens.stream().map(x -> x.replace(' ', 'ߝ' /* some random character */)), " "), props);
     // Clean up whitespace
     for (int i = 0; i < impl.getTokenCount(); ++i) {
       this.impl.getTokenBuilder(i).setWord(this.impl.getTokenBuilder(i).getWord().replace('ߝ', ' '));
@@ -129,10 +122,22 @@ public class Sentence {
     // Set the default properties
   }
 
+
+  /**
+   * Create a new sentence from the given tokenized text, assuming the entire text is just one sentence.
+   * WARNING: This method may in rare cases (mostly when tokens themselves have whitespace in them)
+   *          produce strange results; it's a bit of a hack around the default tokenizer.
+   *
+   * @param tokens The text of the sentence.
+   */
+  public Sentence(List<String> tokens) {
+    this(tokens, SINGLE_SENTENCE_TOKENIZED_DOCUMENT);
+  }
+
   /**
    * Create a sentence from a saved protocol buffer.
    */
-  public Sentence(CoreNLPProtos.Sentence proto) {
+  protected Sentence(CoreNLPProtos.Sentence proto, Properties props) {
     this.impl = proto.toBuilder();
     // Set tokens
     tokensBuilders = new ArrayList<>(this.impl.getTokenCount());
@@ -140,11 +145,19 @@ public class Sentence {
       tokensBuilders.add(this.impl.getToken(i).toBuilder());
     }
     // Initialize document
-    this.document = new Document(proto.getText());
+    this.document = new Document(props, proto.getText());
     this.document.forceSentences(Collections.singletonList(this));
     // Asserts
     assert (this.document.sentence(0).impl == this.impl);
     assert (this.document.sentence(0).tokensBuilders == this.tokensBuilders);
+  }
+
+  /**
+   * Create a sentence from a saved protocol buffer.
+   */
+  public Sentence(CoreNLPProtos.Sentence proto) {
+    this(proto, SINGLE_SENTENCE_DOCUMENT);
+
   }
 
   /** Helper for creating a sentence from a document at a given index */
@@ -1137,20 +1150,6 @@ public class Sentence {
     return impl.getText();
   }
 
-  /**
-   * @param start - inclusive
-   * @param end - exclusive
-   * @return - the text for the provided token span.
-   */
-  public String substring(int start, int end) {
-    StringBuilder sb = new StringBuilder();
-    for(CoreLabel word : asCoreLabels().subList(start, end)) {
-      sb.append(word.word());
-      sb.append(word.after());
-    }
-    return sb.toString();
-  }
-
 
   private static <E> List<E> lazyList(final List<CoreNLPProtos.Token.Builder> tokens, final Function<CoreNLPProtos.Token.Builder,E> fn) {
     return new AbstractList<E>() {
@@ -1174,64 +1173,5 @@ public class Sentence {
         return Optional.empty();
       }
     }
-  }
-
-  /**
-   * Apply a tokensregex pattern to the sentence
-   * @param pattern
-   * @return the matcher.
-   */
-  public boolean matches(TokenSequencePattern pattern) {
-    return pattern.getMatcher(asCoreLabels()).matches();
-  }
-
-  /**
-   * Apply a tokensregex pattern
-   * @param pattern
-   * @return
-   */
-  public boolean matches(String pattern) {
-    return matches(TokenSequencePattern.compile(pattern));
-  }
-
-  /**
-   * Apply a tokensregex pattern to the sentence
-   * @param pattern
-   * @return the matcher.
-   */
-  public <T> List<T> find(TokenSequencePattern pattern, Function<TokenSequenceMatcher, T> fn) {
-    TokenSequenceMatcher matcher = pattern.matcher(asCoreLabels());
-    List<T> lst = new ArrayList<T>();
-    while(matcher.find()) {
-      lst.add(fn.apply(matcher));
-    }
-    return lst;
-  }
-
-  public <T> List<T>  find(String pattern, Function<TokenSequenceMatcher, T> fn) {
-    return find(TokenSequencePattern.compile(pattern), fn);
-  }
-
-  /**
-   * Apply a semgrex pattern to the sentence
-   * @param pattern
-   * @return the matcher.
-   */
-  public <T> List<T> semgrex(SemgrexPattern pattern, Function<SemgrexMatcher, T> fn) {
-    SemgrexMatcher matcher = pattern.matcher(dependencyGraph());
-    List<T> lst = new ArrayList<T>();
-    while(matcher.findNextMatchingNode()) {
-      lst.add(fn.apply(matcher));
-    }
-    return lst;
-  }
-
-  /**
-   * Apply a semgrex pattern to the sentence
-   * @param pattern
-   * @return the matcher.
-   */
-  public <T> List<T> semgrex(String pattern, Function<SemgrexMatcher, T> fn) {
-    return semgrex(SemgrexPattern.compile(pattern), fn);
   }
 }

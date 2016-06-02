@@ -36,6 +36,7 @@ public class Document {
    * The empty {@link java.util.Properties} object, for use with creating default annotators.
    */
   static final Properties EMPTY_PROPS = new Properties() {{
+    setProperty("language", "english");
     setProperty("annotators", "");
     setProperty("tokenize.class", "PTBTokenizer");
     setProperty("tokenize.language", "en");
@@ -48,6 +49,7 @@ public class Document {
    * @see Sentence#caseless()
    */
   static final Properties CASELESS_PROPS = new Properties() {{
+    setProperty("language", "english");
     setProperty("annotators", "");
     setProperty("tokenize.class", "PTBTokenizer");
     setProperty("tokenize.language", "en");
@@ -67,6 +69,10 @@ public class Document {
    * The default {@link edu.stanford.nlp.pipeline.TokenizerAnnotator} implementation
    */
   private static final Annotator defaultTokenize = AnnotatorFactories.tokenize(EMPTY_PROPS, backend).create();
+  /**
+   * The default {@link ChineseSegmenterAnnotator} implementation
+   */
+  private static final Annotator chineseSegmenter = new ChineseSegmenterAnnotator(false);
   /**
    * The default {@link edu.stanford.nlp.pipeline.WordsToSentencesAnnotator} implementation
    */
@@ -317,14 +323,22 @@ public class Document {
   }
 
 
+  /**
+   * Create a new document from the passed in text and the given propertiesj.
+   * @param text The text of the document.
+   */
+  public Document(Properties props, String text) {
+    StanfordCoreNLP.getDefaultAnnotatorPool(props, new AnnotatorImplementations());  // cache the annotator pool
+    this.impl = CoreNLPProtos.Document.newBuilder().setText(text);
+  }
+
 
   /**
    * Create a new document from the passed in text.
    * @param text The text of the document.
    */
   public Document(String text) {
-    StanfordCoreNLP.getDefaultAnnotatorPool(EMPTY_PROPS, new AnnotatorImplementations());  // cache the annotator pool
-    this.impl = CoreNLPProtos.Document.newBuilder().setText(text);
+    this(EMPTY_PROPS, text);
   }
 
   /**
@@ -332,8 +346,8 @@ public class Document {
    * @param ann The CoreNLP Annotation object.
    */
   @SuppressWarnings("Convert2streamapi")
-  public Document(Annotation ann) {
-    StanfordCoreNLP.getDefaultAnnotatorPool(EMPTY_PROPS, new AnnotatorImplementations());  // cache the annotator pool
+  public Document(Properties props, Annotation ann) {
+    StanfordCoreNLP.getDefaultAnnotatorPool(props, new AnnotatorImplementations());  // cache the annotator pool
     this.impl = new ProtobufAnnotationSerializer(false).toProtoBuilder(ann);
     List<CoreMap> sentences = ann.get(CoreAnnotations.SentencesAnnotation.class);
     this.sentences = new ArrayList<>(sentences.size());
@@ -342,14 +356,20 @@ public class Document {
     }
   }
 
+
+  /** @see Document#Document(Properties, Annotation) */
+  public Document(Annotation ann) {
+    this(Document.EMPTY_PROPS, ann);
+  }
+
   /**
    * Create a Document object from a read Protocol Buffer.
    * @see edu.stanford.nlp.simple.Document#serialize()
    * @param proto The protocol buffer representing this document.
    */
   @SuppressWarnings("Convert2streamapi")
-  public Document(CoreNLPProtos.Document proto) {
-    StanfordCoreNLP.getDefaultAnnotatorPool(EMPTY_PROPS, new AnnotatorImplementations());  // cache the annotator pool
+  public Document(Properties props, CoreNLPProtos.Document proto) {
+    StanfordCoreNLP.getDefaultAnnotatorPool(props, new AnnotatorImplementations());  // cache the annotator pool
     this.impl = proto.toBuilder();
     if (proto.getSentenceCount() > 0) {
       this.sentences = new ArrayList<>(proto.getSentenceCount());
@@ -357,6 +377,12 @@ public class Document {
         this.sentences.add(new Sentence(this, sentence.toBuilder(), defaultProps));
       }
     }
+  }
+
+
+  /** @see Document#Document(Properties, CoreNLPProtos.Document)  */
+  public Document(CoreNLPProtos.Document proto) {
+    this(Document.EMPTY_PROPS, proto);
   }
 
 
@@ -552,7 +578,12 @@ public class Document {
   public List<Sentence> sentences(Properties props) {
     if (sentences == null) {
       // Get annotators
-      Annotator tokenizer = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultTokenize : AnnotatorFactories.tokenize(props, backend).create();
+      Annotator tokenizer;
+      if ("chinese".equals(props.getProperty("language"))) {
+        tokenizer = chineseSegmenter;
+      } else {
+        tokenizer = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultTokenize : AnnotatorFactories.tokenize(props, backend).create();
+      }
       Annotator ssplit = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultSSplit : AnnotatorFactories.sentenceSplit(props, backend).create();
       // Annotate
       Annotation ann = new Annotation(this.impl.getText());

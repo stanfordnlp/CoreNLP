@@ -13,7 +13,6 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.util.*;
-import org.hamcrest.beans.PropertyUtil;
 
 import javax.net.ssl.*;
 import java.io.*;
@@ -179,11 +178,9 @@ public class StanfordCoreNLPServer implements Runnable {
           encoding = defaultEncoding;
         }
 
-        String text = IOUtils.slurpReader(IOUtils.encodedInputStreamReader(httpExchange.getRequestBody(), encoding));
-        text = URLDecoder.decode(text, encoding).trim();
-        // TODO(chaganty): URLdecode string.
         // Read the annotation
-        return new Annotation(text);
+        return new Annotation(
+            IOUtils.slurpReader(IOUtils.encodedInputStreamReader(httpExchange.getRequestBody(), encoding)));
       case "serialized":
         String inputSerializerName = props.getProperty("inputSerializer", ProtobufAnnotationSerializer.class.getName());
         AnnotationSerializer serializer = MetaClass.create(inputSerializerName).createInstance();
