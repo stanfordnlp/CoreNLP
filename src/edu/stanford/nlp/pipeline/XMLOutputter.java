@@ -167,16 +167,6 @@ public class XMLOutputter extends AnnotationOutputter  {
           if (depInfo != null) {
             sentElem.appendChild(depInfo);
           }
-
-          depInfo = buildDependencyTreeInfo("enhanced-dependencies", sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class), tokens, NAMESPACE_URI);
-          if (depInfo != null) {
-            sentElem.appendChild(depInfo);
-          }
-
-          depInfo = buildDependencyTreeInfo("enhanced-plus-plus-dependencies", sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class), tokens, NAMESPACE_URI);
-          if (depInfo != null) {
-            sentElem.appendChild(depInfo);
-          }
         }
 
         // add Open IE triples

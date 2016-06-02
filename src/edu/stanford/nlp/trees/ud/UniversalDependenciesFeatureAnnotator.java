@@ -1,4 +1,4 @@
-package edu.stanford.nlp.trees.ud;
+package edu.stanford.nlp.trees.ud; 
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
@@ -99,9 +99,9 @@ public class UniversalDependenciesFeatureAnnotator  {
     return features;
   }
 
-  private static final String ORDINAL_EXPRESSION = "^(first|second|third|fourth|fifth|sixth|seventh|eigth|ninth|tenth|([0-9,.]+(th|st|nd|rd)))$";
+  private static String ORDINAL_EXPRESSION = "^(first|second|third|fourth|fifth|sixth|seventh|eigth|ninth|tenth|([0-9,.]+(th|st|nd|rd)))$";
 
-  private static final String MULTIPLICATIVE_EXPRESSION = "^(once|twice)$";
+  private static String MULTIPLICATIVE_EXPRESSION = "^(once|twice)$";
 
   private static boolean isOrdinal(String word, String pos) {
 
@@ -120,7 +120,7 @@ public class UniversalDependenciesFeatureAnnotator  {
 
   private static String SELF_REGEX = EnglishPatterns.selfRegex.replace("/", "");
 
-  private static HashMap<String, String> getGraphFeatures(SemanticGraph sg, IndexedWord word) {
+  private HashMap<String, String> getGraphFeatures(SemanticGraph sg, IndexedWord word) {
     HashMap<String, String> features = new HashMap<>();
 
     /* Determine the case of "you". */
@@ -178,7 +178,7 @@ public class UniversalDependenciesFeatureAnnotator  {
   /**
    * Determine the case of the pronoun "you" or "it".
    */
-  private static String pronounCase(SemanticGraph sg, IndexedWord word) {
+  private String pronounCase(SemanticGraph sg, IndexedWord word) {
 
     word = sg.getNodeByIndex(word.index());
 
@@ -205,7 +205,7 @@ public class UniversalDependenciesFeatureAnnotator  {
   /**
    * Determine the person of "was".
    */
-  private static String wasPerson(SemanticGraph sg, IndexedWord word) {
+  private String wasPerson(SemanticGraph sg, IndexedWord word) {
     IndexedWord subj = sg.getChildWithReln(word, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT);
 
     if (subj == null) {
@@ -246,7 +246,7 @@ public class UniversalDependenciesFeatureAnnotator  {
   /**
    * Extracts features from relative and interrogative pronouns.
    */
-  private static HashMap<String, String> getRelAndIntPronFeatures(SemanticGraph sg, IndexedWord word) {
+  private HashMap<String, String> getRelAndIntPronFeatures(SemanticGraph sg, IndexedWord word) {
     HashMap<String, String> features = new HashMap<>();
 
     if (word.tag().startsWith("W")) {
@@ -277,7 +277,9 @@ public class UniversalDependenciesFeatureAnnotator  {
   }
 
 
+
   private static Iterator<Tree> treebankIterator(String path) {
+
     /* Remove empty nodes and strip indices from internal nodes but keep
        functional tags. */
     Treebank tb = new MemoryTreebank(new NPTmpRetainingTreeNormalizer(0, false, 1, false));
@@ -292,7 +294,7 @@ public class UniversalDependenciesFeatureAnnotator  {
    * tree t.
    *
    */
-  private static Set<Integer> getImperatives(Tree t) {
+  private Set<Integer> getImperatives(Tree t) {
     Set<Integer> imps = new HashSet<>();
 
     TregexMatcher matcher = IMPERATIVE_PATTERN.matcher(t);
@@ -308,12 +310,14 @@ public class UniversalDependenciesFeatureAnnotator  {
   }
 
 
+
+
   /**
    * Returns true if <code>word</code> has an auxiliary verb attached to it.
    *
    */
   @SuppressWarnings("unused")
-  private static boolean hasAux(SemanticGraph sg, IndexedWord word) {
+  private boolean hasAux(SemanticGraph sg, IndexedWord word) {
    if (sg.hasChildWithReln(word, UniversalEnglishGrammaticalRelations.AUX_MODIFIER)) {
      return true;
    }
@@ -336,7 +340,7 @@ public class UniversalDependenciesFeatureAnnotator  {
    * Returns true if <code>word</code> has an infinitival "to" attached to it.
    */
   @SuppressWarnings("unused")
-  private static boolean hasTo(SemanticGraph sg, IndexedWord word) {
+  private boolean hasTo(SemanticGraph sg, IndexedWord word) {
     /* Check for infinitival to. */
     if (sg.hasChildWithReln(word, UniversalEnglishGrammaticalRelations.MARKER)) {
       for (IndexedWord marker : sg.getChildrenWithReln(word, UniversalEnglishGrammaticalRelations.MARKER)) {
@@ -354,7 +358,7 @@ public class UniversalDependenciesFeatureAnnotator  {
   /**
    * Returns true if <code>word</code> has an inflection of "be" as an auxiliary.
    */
-  private static boolean hasBeAux(SemanticGraph sg, IndexedWord word) {
+  private boolean hasBeAux(SemanticGraph sg, IndexedWord word) {
 
     for (IndexedWord aux : sg.getChildrenWithReln(word, UniversalEnglishGrammaticalRelations.AUX_MODIFIER)) {
       if (aux.value().matches(BE_REGEX)) {
@@ -375,6 +379,7 @@ public class UniversalDependenciesFeatureAnnotator  {
   }
 
   public void addFeatures(SemanticGraph sg, Tree t, boolean addLemma, boolean addUPOS) {
+
 
     Set<Integer> imperatives = t != null ? getImperatives(t) : new HashSet<>();
 
@@ -434,7 +439,7 @@ public class UniversalDependenciesFeatureAnnotator  {
   }
 
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String args[]) throws IOException {
 
     if (args.length < 2) {
       log.info("Usage: ");
@@ -473,7 +478,7 @@ public class UniversalDependenciesFeatureAnnotator  {
 
       if (t == null || t.yield().size() != sg.size()) {
 
-        StringBuilder sentenceSb = new StringBuilder();
+        StringBuffer sentenceSb = new StringBuffer();
         for (IndexedWord word : sg.vertexListSorted()) {
           sentenceSb.append(word.get(CoreAnnotations.TextAnnotation.class));
           sentenceSb.append(" ");
@@ -490,6 +495,5 @@ public class UniversalDependenciesFeatureAnnotator  {
 
     }
   }
-
 }
 

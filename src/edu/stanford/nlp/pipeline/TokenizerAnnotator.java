@@ -152,7 +152,13 @@ public class TokenizerAnnotator implements Annotator  {
   }
 
   public TokenizerAnnotator(boolean verbose, String lang, String options) {
-    this(verbose, lang == null ? null : PropertiesUtils.asProperties("tokenize.language", lang), options);
+    Properties props = new Properties();
+    if (lang != null) {
+      props.setProperty("tokenize.language", lang);
+    }
+    VERBOSE = PropertiesUtils.getBool(props, "tokenize.verbose", verbose);
+    TokenizerType type = TokenizerType.getTokenizerType(props);
+    factory = initFactory(type, props, options);
   }
 
   public TokenizerAnnotator(boolean verbose, Properties props) {

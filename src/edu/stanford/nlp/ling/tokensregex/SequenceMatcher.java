@@ -487,7 +487,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   {
     boolean matchAll = true;
     MatchedStates<T> cStates = getStartStates();
-    cStates.matchLongest = matchAllTokens;
     // Save cStates for FIND_ALL ....
     curMatchStates = cStates;
     for(int i = start; i < regionEnd; i++){
@@ -513,7 +512,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     boolean matchAll = true;
     Stack<MatchedStates> todo = new Stack<>();
     MatchedStates cStates = getStartStates();
-    cStates.matchLongest = matchAllTokens;
     cStates.curPosition = start-1;
     todo.push(cStates);
     while (!todo.empty()) {
@@ -1340,8 +1338,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     List<State> states;
     // Current position to match
     int curPosition = -1;
-    // Favor matching longest
-    boolean matchLongest;
 
     protected MatchedStates(SequenceMatcher<T> matcher, SequencePattern.State state)
     {
@@ -1517,34 +1513,18 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     {
       int best = -1;
       int bestbid = -1;
-      MatchedGroup bestMatched = null;
-      int bestMatchedLength = -1;
       for (int i = 0; i < states.size(); i++) {
         State state = states.get(i);
         if (state.tstate.equals(SequencePattern.MATCH_STATE)) {
           if (best < 0) {
             best = i;
             bestbid = state.bid;
-            bestMatched = branchStates.getMatchedGroup(bestbid, 0);
-            bestMatchedLength = (bestMatched != null)? bestMatched.matchLength() : -1;
           } else {
             // Compare if this match is better?
             int bid = state.bid;
-            MatchedGroup mg = branchStates.getMatchedGroup(bid, 0);
-            int matchLength = (mg != null)? mg.matchLength() : -1;
-            // Select the branch that matched the most
-            // TODO: Do we need to roll the matchedLength to bestMatchedLength check into the compareMatches?
-            boolean better;
-            if (matchLongest) {
-              better = (matchLength > bestMatchedLength || (matchLength == bestMatchedLength && compareMatches(bestbid, bid) > 0));
-            } else {
-              better = compareMatches(bestbid, bid) > 0;
-            }
-            if (better) {
+            if (compareMatches(bestbid, bid) > 0) {
               bestbid = bid;
               best = i;
-              bestMatched = branchStates.getMatchedGroup(bestbid, 0);
-              bestMatchedLength = (bestMatched != null)? bestMatched.matchLength() : -1;
             }
           }
         }
