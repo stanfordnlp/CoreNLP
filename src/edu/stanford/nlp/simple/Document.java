@@ -72,7 +72,12 @@ public class Document {
   /**
    * The default {@link ChineseSegmenterAnnotator} implementation
    */
-  private static final Annotator chineseSegmenter = new ChineseSegmenterAnnotator(false);
+  private static final Annotator chineseSegmenter = new ChineseSegmenterAnnotator("segment", new Properties() {{
+    setProperty("segment.model", "edu/stanford/nlp/models/segmenter/chinese/ctb.gz");
+    setProperty("segment.sighanCorporaDict", "edu/stanford/nlp/models/segmenter/chinese");
+    setProperty("segment.serDictionary", "edu/stanford/nlp/models/segmenter/chinese/dict-chris6.ser.gz");
+    setProperty("segment.sighanPostProcessing", "true");
+  }});
   /**
    * The default {@link edu.stanford.nlp.pipeline.WordsToSentencesAnnotator} implementation
    */
