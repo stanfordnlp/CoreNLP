@@ -2,12 +2,14 @@ package edu.stanford.nlp.sentiment;
 
 
 import edu.stanford.nlp.classify.*;
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.RVFDatum;
+import edu.stanford.nlp.optimization.OWLQNMinimizer;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.simple.SentimentClass;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.CoreMap;
@@ -16,18 +18,17 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.logging.RedwoodConfiguration;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-import static edu.stanford.nlp.util.logging.Redwood.Util.endTrack;
-import static edu.stanford.nlp.util.logging.Redwood.Util.startTrack;
+import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
 /**
  * A simple sentiment classifier, inspired by Sida's Naive Bayes SVM
@@ -100,6 +101,7 @@ public class SimpleSentiment {
     ClassicCounter<String> features = new ClassicCounter<>();
     String lastLemma = "^";
     for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
+      features.incrementCount(token.lemma());
       String lemma = token.lemma();
       if (alpha.matcher(lemma).matches()) {
         features.incrementCount(lastLemma + "__" + lemma);
@@ -167,7 +169,7 @@ public class SimpleSentiment {
       Stream<SentimentDatum> data,
       Optional<OutputStream> modelLocation) {
     // Featurize the data
-    startTrack("Featurizing");
+    forceTrack("Featurizing");
     RVFDataset<String, String> dataset = new RVFDataset<>();
     data.parallel().unordered()
         .map(datum -> new RVFDatum<>(featurize(datum.asCoreMap()), datum.sentiment))
@@ -176,9 +178,13 @@ public class SimpleSentiment {
     endTrack("Featurizing");
 
     // Train the classifier
-    startTrack("Training");
+    forceTrack("Training");
+    double sigma = 1.0;
+//    dataset.applyFeatureCountThreshold(5);
     LinearClassifierFactory<String, String> factory = new LinearClassifierFactory<>();
-    factory.setSigma(1.0);
+    factory.setVerbose(true);
+    factory.setMinimizerCreator(() -> new OWLQNMinimizer(sigma));
+    factory.setSigma(sigma);
     LinearClassifier<String, String> classifier = factory.trainClassifier(dataset);
 
     // Optionally save the model
@@ -194,7 +200,8 @@ public class SimpleSentiment {
     endTrack("Training");
 
     // Evaluate the model
-    startTrack("Evaluating");
+    forceTrack("Evaluating");
+    factory.setVerbose(false);
     double sumAccuracy = 0.0;
     int numFolds = 10;
     for (int fold = 0; fold < numFolds; ++fold) {
@@ -212,24 +219,38 @@ public class SimpleSentiment {
   }
 
 
+
+  private static Stream<SentimentDatum> imdb(String path, String label) {
+    return StreamSupport.stream(
+        IOUtils.iterFilesRecursive(new File(path)).spliterator(), true)
+        .map(x -> {
+          try {
+            return new SentimentDatum(IOUtils.slurpFile(x), label);
+          } catch (IOException e) {
+            throw new RuntimeIOException(e);
+          }
+        });
+  }
+
+
   public static void main(String[] args) {
     RedwoodConfiguration.standard().apply();
-    List<SentimentDatum> data = new ArrayList<SentimentDatum>(){{
-      add(new SentimentDatum("This movie was awful!",      SentimentClass.NEGATIVE.name()));
-      add(new SentimentDatum("This movie was great!",      SentimentClass.POSITIVE.name()));
-      add(new SentimentDatum("The car ran fine.",          SentimentClass.POSITIVE.name()));
-      add(new SentimentDatum("The car is still broken.",   SentimentClass.NEGATIVE.name()));
-      add(new SentimentDatum("I like turtles",             SentimentClass.NEUTRAL.name()));
-      add(new SentimentDatum("I liked the movie",          SentimentClass.POSITIVE.name()));
-      add(new SentimentDatum("the sky is blue",            SentimentClass.NEUTRAL.name()));
-      add(new SentimentDatum("cats have tails",            SentimentClass.NEUTRAL.name()));
-      add(new SentimentDatum("I hate everything",          SentimentClass.NEGATIVE.name()));
-      add(new SentimentDatum("the service was wonderful!", SentimentClass.POSITIVE.name()));
-      add(new SentimentDatum("I went to a restaurant.",    SentimentClass.NEUTRAL.name()));
-    }};
+    startTrack("main");
 
-    SimpleSentiment classifier = SimpleSentiment.train(data.stream(), Optional.empty());
+    Stream<SentimentDatum> data = Stream.concat(
+        Stream.concat(
+            imdb("/users/gabor/tmp/aclImdb/train/pos", "POSITIVE"),
+            imdb("/users/gabor/tmp/aclImdb/train/neg", "NEGATIVE")),
+        Stream.concat(
+            imdb("/users/gabor/tmp/aclImdb/test/pos", "POSITIVE"),
+            imdb("/users/gabor/tmp/aclImdb/test/neg", "NEGATIVE")
+        ));
+
+    SimpleSentiment classifier = SimpleSentiment.train(data, Optional.empty());
     log.info(classifier.classify("I think life is great"));
+    endTrack("main");
+
+    // 85.8
   }
 
 }

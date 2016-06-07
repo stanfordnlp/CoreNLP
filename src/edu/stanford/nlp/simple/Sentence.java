@@ -1123,8 +1123,8 @@ public class Sentence {
                                     CoreNLPProtos.DependencyGraph enhancedPlusPlus) {
     synchronized (this.impl) {
       this.impl.setBasicDependencies(basic);
-      this.impl.setCollapsedDependencies(enhanced);
-      this.impl.setCollapsedCCProcessedDependencies(enhanced);
+      this.impl.setEnhancedDependencies(enhanced);
+      this.impl.setEnhancedPlusPlusDependencies(enhanced);
     }
   }
 
