@@ -1,9 +1,8 @@
 // Takes Stanford CoreNLP JSON output (var data = ... in data.js)
 // and uses brat to render everything.
 
-//var serverAddress = 'http://localhost:9000';
-//var serverAddress = 'http://corenlp.run';
-var serverAddress = '';
+var serverAddress = 'http://localhost:9000';
+// var serverAddress = '';
 
 // Load Brat libraries
 var bratLocation = 'https://storage.googleapis.com/corenlp/js/brat';
@@ -116,6 +115,24 @@ function nerColor(nerTag) {
   }
 }
 
+
+/**
+ * A mapping from sentiment value to the associated
+ * visualization color
+ */
+function sentimentColor(sentiment) {
+  if (type == "POSITIVE") {
+    return '#00FF00';
+  } else if (type == "NEGATIVE") {
+    return '#FF0000';
+  } else if (type == "NEUTRAL") {
+    return '#FFFFFF';
+  } else {
+    return '#E3E3E3';
+  }
+}
+
+
 /**
  * Get a list of annotators, from the annotator option input.
  */
@@ -161,6 +178,8 @@ function render(data) {
       color = posColor('VB');
     } else if (name == 'LEMMA') {
       color = '#FFFFFF';
+    } else if (name == 'SENTIMENT') {
+      color = sentimentColor(type);
     } else if (name == 'LINK') {
       color = '#FFFFFF';
     } else if (name == 'KBP_ENTITY') {
@@ -228,6 +247,8 @@ function render(data) {
   var lemmaEntities = [];
   // (ner)
   var nerEntities = [];
+  // (sentiment)
+  var sentimentEntities = [];
   // (entitylinking)
   var linkEntities = [];
   // (dependencies)
@@ -323,6 +344,14 @@ function render(data) {
         nerEntities.push(['NER_' + sentI + '_' + i, ner, [[tokens[i].characterOffsetBegin, tokens[j].characterOffsetEnd]]]);
         i = j;
       }
+    }
+    
+    // Sentiment
+    if (typeof sentence.sentiment != "undefined") {
+      var sentiment = sentence.sentiment;
+      addEntityType('SENTIMENT', sentiment);
+      sentimentEntities.push(['SENTIMENT_' + sentI, sentiment,
+        [[tokens[0].characterOffsetBegin, tokens[tokens.length - 1].characterOffsetEnd]]]);
     }
 
     // Entity Links
@@ -515,6 +544,7 @@ function render(data) {
     embed('coref', corefEntities, corefRelations);
     embed('openie', openieEntities, openieRelations);
     embed('kbp',    kbpEntities, kbpRelations);
+    embed('sentiment', sentimentEntities);
   });
 
 }  // End render function
@@ -753,6 +783,7 @@ $(document).ready(function() {
           createAnnotationDiv('coref',    'coref',      'corefs',                              'Coreference'             );
           createAnnotationDiv('entities', 'entitylink', 'entitylink',                          'Wikidict Entities'       );
           createAnnotationDiv('kbp',      'kbp',        'kbp',                                 'KBP Relations'           );
+          createAnnotationDiv('sentiment','sentiment',  'sentiment',                                 'KBP Relations'           );
           // Update UI
           $('#loading').hide();
           $('.corenlp_error').remove();  // Clear error messages
