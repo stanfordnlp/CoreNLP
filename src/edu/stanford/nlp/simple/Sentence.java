@@ -963,10 +963,14 @@ public class Sentence {
   public SentimentClass sentiment(Properties props) {
     document.runSentiment(props);
     switch (impl.getSentiment().toLowerCase()) {
+      case "verypositive":
+        return SentimentClass.VERY_POSITIVE;
       case "positive":
         return SentimentClass.POSITIVE;
       case "negative":
         return SentimentClass.NEGATIVE;
+      case "verynegative":
+        return SentimentClass.VERY_NEGATIVE;
       case "neutral":
         return SentimentClass.NEUTRAL;
       default:

@@ -1,8 +1,8 @@
 // Takes Stanford CoreNLP JSON output (var data = ... in data.js)
 // and uses brat to render everything.
 
-var serverAddress = 'http://localhost:9000';
-// var serverAddress = '';
+// var serverAddress = 'http://localhost:9000';
+var serverAddress = '';
 
 // Load Brat libraries
 var bratLocation = 'https://storage.googleapis.com/corenlp/js/brat';
@@ -121,12 +121,16 @@ function nerColor(nerTag) {
  * visualization color
  */
 function sentimentColor(sentiment) {
-  if (type == "POSITIVE") {
+  if (sentiment == "VERY POSITIVE") {
     return '#00FF00';
-  } else if (type == "NEGATIVE") {
+  } else if (sentiment == "POSITIVE") {
+    return '#7FFF00';
+  } else if (sentiment == "NEUTRAL") {
+    return '#FFFF00';
+  } else if (sentiment == "NEGATIVE") {
+    return '#FF7F00';
+  } else if (sentiment == "VERY NEGATIVE") {
     return '#FF0000';
-  } else if (type == "NEUTRAL") {
-    return '#FFFFFF';
   } else {
     return '#E3E3E3';
   }
@@ -348,7 +352,7 @@ function render(data) {
     
     // Sentiment
     if (typeof sentence.sentiment != "undefined") {
-      var sentiment = sentence.sentiment;
+      var sentiment = sentence.sentiment.toUpperCase().replace("VERY", "VERY ");
       addEntityType('SENTIMENT', sentiment);
       sentimentEntities.push(['SENTIMENT_' + sentI, sentiment,
         [[tokens[0].characterOffsetBegin, tokens[tokens.length - 1].characterOffsetEnd]]]);
@@ -783,7 +787,7 @@ $(document).ready(function() {
           createAnnotationDiv('coref',    'coref',      'corefs',                              'Coreference'             );
           createAnnotationDiv('entities', 'entitylink', 'entitylink',                          'Wikidict Entities'       );
           createAnnotationDiv('kbp',      'kbp',        'kbp',                                 'KBP Relations'           );
-          createAnnotationDiv('sentiment','sentiment',  'sentiment',                                 'KBP Relations'           );
+          createAnnotationDiv('sentiment','sentiment',  'sentiment',                           'Sentiment'               );
           // Update UI
           $('#loading').hide();
           $('.corenlp_error').remove();  // Clear error messages
