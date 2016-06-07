@@ -177,6 +177,9 @@ public class ACEMentionExtractor extends MentionExtractor {
       for(EntityMention e : treeForSortGoldMentions){
         Mention men = new Mention();
         men.dependency = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+        if (men.dependency == null) {
+          men.dependency = s.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+        }
         men.startIndex = e.getExtentTokenStart();
         men.endIndex = e.getExtentTokenEnd();
 
