@@ -7,13 +7,13 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.RVFDatum;
-import edu.stanford.nlp.optimization.OWLQNMinimizer;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Lazy;
+import edu.stanford.nlp.util.MetaClass;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.logging.RedwoodConfiguration;
@@ -183,7 +183,9 @@ public class SimpleSentiment {
 //    dataset.applyFeatureCountThreshold(5);
     LinearClassifierFactory<String, String> factory = new LinearClassifierFactory<>();
     factory.setVerbose(true);
-    factory.setMinimizerCreator(() -> new OWLQNMinimizer(sigma));
+    try {
+      factory.setMinimizerCreator(() -> MetaClass.create("edu.stanford.nlp.optimization.OWLQNMinimizer").createInstance(sigma));
+    } catch (Exception ignored) {}
     factory.setSigma(sigma);
     LinearClassifier<String, String> classifier = factory.trainClassifier(dataset);
 
