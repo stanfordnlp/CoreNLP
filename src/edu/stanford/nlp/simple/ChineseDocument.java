@@ -2,14 +2,13 @@ package edu.stanford.nlp.simple;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.pipeline.AnnotatorImplementations;
-import edu.stanford.nlp.pipeline.CoreNLPProtos;
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.pipeline.*;
+import edu.stanford.nlp.util.Lazy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -22,6 +21,16 @@ public class ChineseDocument extends Document {
    * An SLF4J Logger for this class.
    */
   private static final Logger log = LoggerFactory.getLogger(ChineseDocument.class);
+
+  /**
+   * The default {@link ChineseSegmenterAnnotator} implementation
+   */
+  private static final Lazy<Annotator> chineseSegmenter = Lazy.of(() -> new ChineseSegmenterAnnotator("segment", new Properties() {{
+    setProperty("segment.model", "edu/stanford/nlp/models/segmenter/chinese/ctb.gz");
+    setProperty("segment.sighanCorporaDict", "edu/stanford/nlp/models/segmenter/chinese");
+    setProperty("segment.serDictionary", "edu/stanford/nlp/models/segmenter/chinese/dict-chris6.ser.gz");
+    setProperty("segment.sighanPostProcessing", "true");
+  }}));
 
   /**
    * The empty {@link java.util.Properties} object, for use with creating default annotators.
@@ -61,6 +70,13 @@ public class ChineseDocument extends Document {
    */
   public ChineseDocument(CoreNLPProtos.Document proto) {
     super(ChineseDocument.EMPTY_PROPS, proto);
+  }
+
+
+  /** {@inheritDoc} */
+  @Override
+  public List<Sentence> sentences(Properties props) {
+    return this.sentences(props, chineseSegmenter.get());
   }
 
 }

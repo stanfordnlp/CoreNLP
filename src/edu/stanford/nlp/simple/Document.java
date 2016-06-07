@@ -70,15 +70,6 @@ public class Document {
    */
   private static final Annotator defaultTokenize = AnnotatorFactories.tokenize(EMPTY_PROPS, backend).create();
   /**
-   * The default {@link ChineseSegmenterAnnotator} implementation
-   */
-  private static final Annotator chineseSegmenter = new ChineseSegmenterAnnotator("segment", new Properties() {{
-    setProperty("segment.model", "edu/stanford/nlp/models/segmenter/chinese/ctb.gz");
-    setProperty("segment.sighanCorporaDict", "edu/stanford/nlp/models/segmenter/chinese");
-    setProperty("segment.serDictionary", "edu/stanford/nlp/models/segmenter/chinese/dict-chris6.ser.gz");
-    setProperty("segment.sighanPostProcessing", "true");
-  }});
-  /**
    * The default {@link edu.stanford.nlp.pipeline.WordsToSentencesAnnotator} implementation
    */
   private static final Annotator defaultSSplit = AnnotatorFactories.sentenceSplit(EMPTY_PROPS, backend).create();
@@ -581,14 +572,17 @@ public class Document {
    * @return A list of Sentence objects representing the sentences in the document.
    */
   public List<Sentence> sentences(Properties props) {
+    return this.sentences(props,
+        (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultTokenize : AnnotatorFactories.tokenize(props, backend).create());
+  }
+
+  /**
+   * Get the sentences in this document, as a list.
+   * @param props The properties to use in the {@link edu.stanford.nlp.pipeline.WordsToSentencesAnnotator}.
+   * @return A list of Sentence objects representing the sentences in the document.
+   */
+  protected List<Sentence> sentences(Properties props, Annotator tokenizer) {
     if (sentences == null) {
-      // Get annotators
-      Annotator tokenizer;
-      if ("chinese".equals(props.getProperty("language"))) {
-        tokenizer = chineseSegmenter;
-      } else {
-        tokenizer = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultTokenize : AnnotatorFactories.tokenize(props, backend).create();
-      }
       Annotator ssplit = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultSSplit : AnnotatorFactories.sentenceSplit(props, backend).create();
       // Annotate
       Annotation ann = new Annotation(this.impl.getText());
