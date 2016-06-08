@@ -43,6 +43,7 @@ public class ChineseDocument extends Document {
     }
     setProperty("language", "chinese");
     setProperty("annotators", "");
+    setProperty("parse.binaryTrees", "true");
   }};
 
   /**
@@ -87,4 +88,13 @@ public class ChineseDocument extends Document {
     return this.sentences(props, chineseSegmenter.get());
   }
 
+
+  /**
+   * The Neural Dependency Parser doesn't support Chinese yet, so back off to running the
+   * constituency parser instead.
+   */
+  @Override  // TODO(danqi; from Gabor): remove this method when we have a trained NNDep model
+  Document runDepparse(Properties props) {
+    return runParse(props);
+  }
 }

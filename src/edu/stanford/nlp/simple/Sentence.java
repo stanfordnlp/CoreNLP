@@ -1124,7 +1124,9 @@ public class Sentence {
       CoreNLPProtos.ParseTree binary) {
     synchronized (this.impl) {
       this.impl.setParseTree(parse);
-      this.impl.setBinarizedParseTree(binary);
+      if (binary != null) {
+        this.impl.setBinarizedParseTree(binary);
+      }
     }
   }
 

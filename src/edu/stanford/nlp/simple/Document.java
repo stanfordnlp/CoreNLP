@@ -829,7 +829,7 @@ public class Document {
         Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
         Tree binaryTree = sentence.get(TreeCoreAnnotations.BinarizedTreeAnnotation.class);
         sentences.get(i).updateParse(serializer.toProto(tree),
-                                     serializer.toProto(binaryTree));
+                                     binaryTree == null ? null : serializer.toProto(binaryTree));
         sentences.get(i).updateDependencies(
             ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)),
             ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class)),
@@ -935,8 +935,13 @@ public class Document {
 
 
   Document runSentiment(Properties props) {
-    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawSentence().hasSentiment()) {
-      return this;
+    if (this.sentences != null && this.sentences.size() > 0) {
+      if (this.sentences.get(0).rawSentence().hasSentiment()) {
+        return this;
+      }
+      if (!this.sentences.get(0).rawSentence().hasBinarizedParseTree()) {
+        throw new IllegalStateException("No binarized parse tree (perhaps it's not supported in this language?)");
+      }
     }
     // Run prerequisites
     runParse(props);
