@@ -839,30 +839,6 @@ public class Document {
     return this;
   }
 
-  Document runSentiment(Properties props) {
-    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawSentence().hasSentiment()) {
-      return this;
-    }
-    // Run annotator
-    Annotator annotator = ((props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultSentiment : getOrCreate(AnnotatorFactories.sentiment(props, backend))).get();
-    if (annotator.requires().contains(TreeCoreAnnotations.TreeAnnotation.class)) {
-      runParse(props);
-    } else {
-      sentences();
-    }
-    Annotation ann = asAnnotation();
-    annotator.annotate(ann);
-    // Update data
-    synchronized (serializer) {
-      for (int i = 0; i < sentences.size(); ++i) {
-        CoreMap sentence = ann.get(CoreAnnotations.SentencesAnnotation.class).get(i);
-        String sentiment = sentence.get(SentimentCoreAnnotations.SentimentClass.class);
-        sentences.get(i).updateSentiment(sentiment);
-      }
-    }
-    return this;
-  }
-
   Document runDepparse(Properties props) {
     if (this.sentences != null && this.sentences.size() > 0 &&
         this.sentences.get(0).rawSentence().hasBasicDependencies()) {

@@ -603,21 +603,6 @@ public class Sentence {
     return parse(this.defaultProps);
   }
 
-  /**
-   * The sentiment annotation for the sentence.
-   * @param props The properties to use for the {@link edu.stanford.nlp.pipeline.SentimentAnnotator}.
-   * @return A sentiment tag.
-   */
-  public String sentiment(Properties props) {
-    document.runSentiment(props);
-    synchronized (impl) {
-      return impl.getSentiment();
-    }
-  }
-
-  public String sentiment() {
-    return sentiment(this.defaultProps);
-  }
 
   /** An internal helper to get the dependency tree of the given type. */
   private CoreNLPProtos.DependencyGraph dependencies(SemanticGraphFactory.Mode mode) {
