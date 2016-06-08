@@ -18,7 +18,7 @@ import java.util.Properties;
  */
 public class ChineseDocument extends Document {
   /**
-   * An SLF4J Logger for this class.
+   * A Logger for this class.
    */
   private static final Logger log = LoggerFactory.getLogger(ChineseDocument.class);
 
@@ -76,7 +76,7 @@ public class ChineseDocument extends Document {
    * Create a new chinese document from the passed in text and the given properties.
    * @param text The text of the document.
    */
-  public ChineseDocument(Properties props, String text) {
+  protected ChineseDocument(Properties props, String text) {
     super(props, text);
   }
 
