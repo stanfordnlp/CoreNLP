@@ -7,13 +7,13 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.RVFDatum;
+import edu.stanford.nlp.optimization.QNMinimizer;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Lazy;
-import edu.stanford.nlp.util.MetaClass;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.logging.RedwoodConfiguration;
@@ -164,10 +164,16 @@ public class SimpleSentiment {
    *
    * @return A sentiment classifier, ready to use.
    */
-  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+  @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "ConstantConditions"})
   public static SimpleSentiment train(
       Stream<SentimentDatum> data,
       Optional<OutputStream> modelLocation) {
+
+    // Some useful variables configuring how we train
+    boolean useL1 = true;
+    double sigma = 1.0;
+    int featureCountThreshold = 0;
+
     // Featurize the data
     forceTrack("Featurizing");
     RVFDataset<String, String> dataset = new RVFDataset<>();
@@ -179,12 +185,21 @@ public class SimpleSentiment {
 
     // Train the classifier
     forceTrack("Training");
-    double sigma = 1.0;
-//    dataset.applyFeatureCountThreshold(5);
+    if (featureCountThreshold > 1) {
+      dataset.applyFeatureCountThreshold(featureCountThreshold);
+    }
     LinearClassifierFactory<String, String> factory = new LinearClassifierFactory<>();
     factory.setVerbose(true);
     try {
-      factory.setMinimizerCreator(() -> MetaClass.create("edu.stanford.nlp.optimization.OWLQNMinimizer").createInstance(sigma));
+      factory.setMinimizerCreator(() -> {
+        QNMinimizer minimizer =  new QNMinimizer();
+        if (useL1) {
+          minimizer.useOWLQN(true, 1 / (sigma * sigma));
+        } else {
+          factory.setSigma(sigma);
+        }
+        return minimizer;
+      });
     } catch (Exception ignored) {}
     factory.setSigma(sigma);
     LinearClassifier<String, String> classifier = factory.trainClassifier(dataset);
