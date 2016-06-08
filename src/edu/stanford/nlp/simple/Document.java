@@ -5,11 +5,13 @@ import edu.stanford.nlp.hcoref.data.CorefChain;
 import edu.stanford.nlp.hcoref.data.Dictionaries;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.*;
@@ -235,6 +237,21 @@ public class Document {
     public synchronized Annotator get() {
       if (impl == null) {
         impl = AnnotatorFactories.coref(EMPTY_PROPS, backend).create();
+      }
+      return impl;
+    }
+  };
+
+  /**
+   * The default {@link edu.stanford.nlp.pipeline.SentimentAnnotator} implementation
+   */
+  private static Supplier<Annotator> defaultSentiment = new Supplier<Annotator>() {
+    Annotator impl = null;
+
+    @Override
+    public synchronized Annotator get() {
+      if (impl == null) {
+        impl = AnnotatorFactories.sentiment(EMPTY_PROPS, backend).create();
       }
       return impl;
     }
@@ -745,6 +762,30 @@ public class Document {
             ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)),
             ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class)),
             ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class)));
+      }
+    }
+    return this;
+  }
+
+  Document runSentiment(Properties props) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawSentence().hasSentiment()) {
+      return this;
+    }
+    // Run annotator
+    Annotator annotator = ((props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultSentiment : getOrCreate(AnnotatorFactories.sentiment(props, backend))).get();
+    if (annotator.requires().contains(TreeCoreAnnotations.TreeAnnotation.class)) {
+      runParse(props);
+    } else {
+      sentences();
+    }
+    Annotation ann = asAnnotation();
+    annotator.annotate(ann);
+    // Update data
+    synchronized (serializer) {
+      for (int i = 0; i < sentences.size(); ++i) {
+        CoreMap sentence = ann.get(CoreAnnotations.SentencesAnnotation.class).get(i);
+        String sentiment = sentence.get(SentimentCoreAnnotations.SentimentClass.class);
+        sentences.get(i).updateSentiment(sentiment);
       }
     }
     return this;
