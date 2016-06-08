@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Implementation-Version: 3.7.0
+Built-Date: 2016-04-27
+Created-By: Stanford JavaNLP
+Main-class: edu.stanford.nlp.pipeline.StanfordCoreNLP
+

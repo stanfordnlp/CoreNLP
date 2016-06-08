@@ -1004,8 +1004,8 @@ public class SUTimeITest extends TestCase {
             "It happened late this afternoon.\n" +
             "It happened at 1800 hours.\n" +
             "The early nineteen fifties.\n" +
-            "The story broke in the last week of October.\n";
-//            "It was 7pm and then 7:20pm.";                 // TODO: re-enable me
+            "The story broke in the last week of October.\n" +
+            "It was 7pm and then 7:20pm.";
 
     // set up expected results
     Iterator<Timex> expectedTimexes =
@@ -1021,9 +1021,9 @@ public class SUTimeITest extends TestCase {
                     Timex.fromXml("<TIMEX3 tid=\"t12\" alt_value=\"THIS AF\" type=\"DATE\" mod=\"LATE\" temporalFunction=\"true\" valueFromFunction=\"tf2\" anchorTimeID=\"t0\">late this afternoon</TIMEX3>"),    // TODO: time
                     Timex.fromXml("<TIMEX3 tid=\"t13\" value=\"T18:00\" type=\"TIME\">1800 hours</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t14\" value=\"195X\" type=\"DATE\" mod=\"EARLY\">The early nineteen fifties</TIMEX3>"),
-                    Timex.fromXml("<TIMEX3 tid=\"t15\" alt_value=\"PREV_IMMEDIATE P1W INTERSECT XXXX-10\" type=\"DATE\" temporalFunction=\"true\" valueFromFunction=\"tf3\" anchorTimeID=\"t16\">the last week of October</TIMEX3>")
-//                    Timex.fromXml("<TIMEX3 tid=\"t17\" value=\"T19:00\" type=\"TIME\">7pm</TIMEX3>"),
-//                    Timex.fromXml("<TIMEX3 tid=\"t18\" value=\"T19:20\" type=\"TIME\">7:20pm.</TIMEX3>") // TODO: the period should be dropped
+                    Timex.fromXml("<TIMEX3 tid=\"t15\" alt_value=\"PREV_IMMEDIATE P1W INTERSECT XXXX-10\" type=\"DATE\" temporalFunction=\"true\" valueFromFunction=\"tf3\" anchorTimeID=\"t16\">the last week of October</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t17\" value=\"T19:00\" type=\"TIME\">7pm</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t18\" value=\"T19:20\" type=\"TIME\">7:20pm.</TIMEX3>") // TODO: the period should be dropped
       ).iterator();
 
     Iterator<Timex> expectedTimexesResolved =
@@ -1039,9 +1039,9 @@ public class SUTimeITest extends TestCase {
                     Timex.fromXml("<TIMEX3 tid=\"t10\" value=\"2005-08-12TAF\" type=\"TIME\" mod=\"LATE\">late this afternoon</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t11\" value=\"2005-08-12T18:00\" type=\"TIME\">1800 hours</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t12\" value=\"195X\" type=\"DATE\" mod=\"EARLY\">The early nineteen fifties</TIMEX3>"),
-                    Timex.fromXml("<TIMEX3 tid=\"t13\" alt_value=\"PREV_IMMEDIATE P1W INTERSECT XXXX-10\" type=\"DATE\" temporalFunction=\"true\" valueFromFunction=\"tf0\" anchorTimeID=\"t14\">the last week of October</TIMEX3>")    // TODO: Resolve
-//                    Timex.fromXml("<TIMEX3 tid=\"t15\" value=\"2005-08-12T19:00\" type=\"TIME\">7pm</TIMEX3>"),
-//                    Timex.fromXml("<TIMEX3 tid=\"t16\" value=\"2005-08-12T19:20\" type=\"TIME\">7:20pm.</TIMEX3>") // TODO: the period should be dropped
+                    Timex.fromXml("<TIMEX3 tid=\"t13\" alt_value=\"PREV_IMMEDIATE P1W INTERSECT XXXX-10\" type=\"DATE\" temporalFunction=\"true\" valueFromFunction=\"tf0\" anchorTimeID=\"t14\">the last week of October</TIMEX3>"),    // TODO: Resolve
+                    Timex.fromXml("<TIMEX3 tid=\"t15\" value=\"2005-08-12T19:00\" type=\"TIME\">7pm</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t16\" value=\"2005-08-12T19:20\" type=\"TIME\">7:20pm.</TIMEX3>") // TODO: the period should be dropped
       ).iterator();
 
     // create document
@@ -1069,7 +1069,7 @@ public class SUTimeITest extends TestCase {
   }
 
   // TODO: Re-enable me
-  public void _testSUTimeDateTime2() throws IOException {
+  public void testSUTimeDateTime2() throws IOException {
     // Set up test text
     String testText = "The meeting is scheduled for 09/18/05 or 18 Sep '05.\n" +
                       "1 year ago tomorrow.\n" +

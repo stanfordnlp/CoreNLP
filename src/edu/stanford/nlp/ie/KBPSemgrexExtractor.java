@@ -67,7 +67,7 @@ public class KBPSemgrexExtractor implements KBPRelationExtractor {
         CoreMap sentence = input.sentence.asCoreMap(Sentence::nerTags, Sentence::dependencyGraph);
         boolean matches
             = matches(sentence, rulesForRel, input,
-            sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class)) ||
+            sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class)) ||
             matches(sentence, rulesForRel, input,
                 sentence.get(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class));
         if (matches) {

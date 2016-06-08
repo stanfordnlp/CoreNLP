@@ -332,8 +332,9 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
   }
 
   /**
-   * Create an interval with the specified endpoints in the specified order,
-   * Returns null if a does not come before b (invalid interval)
+   * Create an interval with the specified endpoints in the specified order.
+   * Returns null if a does not come before b (invalid interval).
+   *
    * @param a start endpoints
    * @param b end endpoint
    * @param <E> type of the interval endpoints
@@ -346,7 +347,8 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
   /**
    * Create an interval with the specified endpoints in the specified order,
    * using the specified flags.  Returns null if a does not come before b
-   *  (invalid interval)
+   *  (invalid interval).
+   *
    * @param a start endpoints
    * @param b end endpoint
    * @param flags flags characterizing the interval
@@ -418,25 +420,23 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     return second;
   }
 
-  protected static <E extends Comparable<E>> E max(E a, E b)
-  {
+  protected static <E extends Comparable<E>> E max(E a, E b) {
     int comp = a.compareTo(b);
     return (comp > 0)? a:b;
   }
 
-  protected static <E extends Comparable<E>> E min(E a, E b)
-  {
+  protected static <E extends Comparable<E>> E min(E a, E b) {
     int comp = a.compareTo(b);
-    return (comp < 0)? a:b;
+    return (comp < 0)? a: b;
   }
 
   /**
-   * Checks whether the point p is contained inside this interval
+   * Checks whether the point p is contained inside this interval.
+   *
    * @param p point to check
    * @return True if the point p is contained withing the interval, false otherwise
    */
-  public boolean contains(E p)
-  {
+  public boolean contains(E p) {
     // Check that the start point is before p
     boolean check1 = (includesBegin())? (first.compareTo(p) <= 0):(first.compareTo(p) < 0);
     // Check that the end point is after p
@@ -444,8 +444,7 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     return (check1 && check2);
   }
 
-  public boolean containsOpen(E p)
-  {
+  public boolean containsOpen(E p) {
     // Check that the start point is before p
     boolean check1 = first.compareTo(p) <= 0;
     // Check that the end point is after p
@@ -453,8 +452,7 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     return (check1 && check2);
   }
 
-  public boolean contains(Interval<E> other)
-  {
+  public boolean contains(Interval<E> other) {
     boolean containsOtherBegin = (other.includesBegin())? contains(other.getBegin()): containsOpen(other.getBegin());
     boolean containsOtherEnd = (other.includesEnd())? contains(other.getEnd()): containsOpen(other.getEnd());
     return (containsOtherBegin && containsOtherEnd);
@@ -465,8 +463,7 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     * @param other - Other interval to include
     * @return Smallest interval that contains both this and the other interval
     */
-  public Interval expand(Interval<E> other)
-  {
+  public Interval expand(Interval<E> other) {
     if (other == null) return this;
     E a = min(this.first, other.first);
     E b = max(this.second, other.second);
@@ -479,8 +476,7 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
    * @param other interval with which to intersect
    * @return interval that is the intersection of this and the other interval
    */
-  public Interval intersect(Interval<E> other)
-  {
+  public Interval intersect(Interval<E> other) {
     if (other == null) return null;
     E a = max(this.first, other.first);
     E b = min(this.second, other.second);
@@ -488,13 +484,13 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
   }
 
   /**
-   * Check whether this interval overlaps with the other interval
-   * (i.e. the intersect would not be null)
+   * Check whether this interval overlaps with the other interval.
+   * (I.e. the intersect would not be null.)
+   *
    * @param other interval to compare with
    * @return true if this interval overlaps the other interval
    */
-  public boolean overlaps(Interval<E> other)
-  {
+  public boolean overlaps(Interval<E> other) {
     if (other == null) return false;
     int comp12 = this.first.compareTo(other.second());
     int comp21 = this.second.compareTo(other.first());
@@ -907,4 +903,5 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
   };
 
   private static final long serialVersionUID = 1;
+
 }

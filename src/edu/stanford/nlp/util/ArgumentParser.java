@@ -1,6 +1,4 @@
-package edu.stanford.nlp.util; 
-import edu.stanford.nlp.pipeline.Annotator;
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.util;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -15,14 +13,15 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
+import edu.stanford.nlp.pipeline.Annotator;
+
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
 /**
  * A class to set command line options. To use, create a static class into which you'd like
  * to put your properties. Then, for each field, set the annotation:
  *
- * <pre>
- *   <code>
+ * <pre><code>
  *     import edu.stanford.nlp.util.ArgumentParser.Option
  *
  *     class Props {
@@ -31,11 +30,10 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  *       &#64;Option(name="anotherOption", required=false)
  *       public static File aCastableOption = new File("/foo");
  *     }
- *   </code>
- * </pre>
+ * </code></pre>
  *
  * <p>
- *   You can then set options with {@link ArgumentParser#fillOptions(String[])},
+ *   You can then set options with {@link ArgumentParser#fillOptions(String...)},
  *   or with {@link ArgumentParser#fillOptions(java.util.Properties)}.
  * </p>
  *
@@ -48,8 +46,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  *   A complete toy example looks like this:
  * </p>
  *
- * <pre>
- *   <code>
+ * <pre><code>
  *     import java.util.Properties;
  *
  *     import edu.stanford.nlp.util.ArgumentParser;
@@ -68,14 +65,14 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  *         log.info(INPUT);
  *       }
  *     }
- *   </code>
- * </pre>
+ * </code></pre>
  *
+ * @author Gabor Angeli
  */
+@SuppressWarnings("HtmlTagCanBeJavadocTag")
 public class ArgumentParser  {
 
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ArgumentParser.class);
+  private ArgumentParser() {} // static class
 
   @Documented
   @Retention(RetentionPolicy.RUNTIME)
@@ -179,7 +176,9 @@ public class ArgumentParser  {
 
     @Override
     public File next() {
-      if (toReturn >= dir.length || toReturn < 0) throw new IllegalStateException("No more elements!");
+      if (toReturn >= dir.length || toReturn < 0) {
+        throw new NoSuchElementException("No more elements!");
+      }
       File rtn = dir[toReturn];
       enqueue();
       return rtn;
@@ -193,12 +192,11 @@ public class ArgumentParser  {
   }
 
 
-
-	/*
+  /*
    * ----------
-	 * OPTIONS
-	 * ----------
-	 */
+   * OPTIONS
+   * ----------
+   */
 
   private static void fillField(Object instance, Field f, String value) {
     //--Verbose
@@ -397,18 +395,28 @@ public class ArgumentParser  {
 
 
   @SuppressWarnings("rawtypes")
-  protected static Map<String, Field> fillOptionsImpl(
-      Object[] instances,
-      Class<?>[] classes,
-      Properties options,
-      boolean ensureAllOptions) {
+  private static Map<String, Field> fillOptionsImpl(
+          Object[] instances,
+          Class<?>[] classes,
+          Properties options,
+          boolean ensureAllOptions,
+          boolean isBootstrap) {
 
     // Print usage, if applicable
-    if ("true".equalsIgnoreCase(options.getProperty("usage", "false")) ||
-        "true".equalsIgnoreCase(options.getProperty("help", "false"))
-        ) {
-      log(usage(classes));
-      System.exit(0);
+    if (!isBootstrap) {
+      if ("true".equalsIgnoreCase(options.getProperty("usage", "false")) ||
+          "true".equalsIgnoreCase(options.getProperty("help", "false"))
+          ) {
+        Set<Class<?>> allClasses = new HashSet<>();
+        Collections.addAll(allClasses, classes);
+        if (instances != null) {
+          for (Object o : instances) {
+            allClasses.add(o.getClass());
+          }
+        }
+        System.err.println(usage(allClasses.stream().toArray(Class[]::new)));
+        System.exit(0);
+      }
     }
 
     //--Create Class->Object Mapping
@@ -493,11 +501,11 @@ public class ArgumentParser  {
     }
 
     //--Fill Options
-    for (Object rawKey : options.keySet()) {
-      String rawKeyStr = rawKey.toString();
-      String key = rawKey.toString().toLowerCase();
+    for (Map.Entry<Object, Object> entry : options.entrySet()) {
+      String rawKeyStr = entry.getKey().toString();
+      String key = rawKeyStr.toLowerCase();
       // (get values)
-      String value = options.get(rawKey).toString();
+      String value = entry.getValue().toString();
       assert value != null;
       Field target = canFill.get(key);
       // (mark required option as fulfilled)
@@ -525,20 +533,20 @@ public class ArgumentParser  {
           try {
             clazz = ClassLoader.getSystemClassLoader().loadClass(className);
           } catch (Exception e) {
-            err("Could not set option: " + rawKey + "; either the option is mistyped, not defined, or the class " + className + " does not exist.");
+            err("Could not set option: " + entry.getKey() + "; either the option is mistyped, not defined, or the class " + className + " does not exist.");
           }
           // get the field
           if (clazz != null) {
             try {
               target = clazz.getField(fieldName);
             } catch (Exception e) {
-              err("Could not set option: " + rawKey + "; no such field: " + fieldName + " in class: " + className);
+              err("Could not set option: " + entry.getKey() + "; no such field: " + fieldName + " in class: " + className);
             }
             if (target != null) {
               log("option overrides " + target + " to '" + value + "'");
               fillField(class2object.get(target.getDeclaringClass()), target, value);
             } else {
-              err("Could not set option: " + rawKey + "; no such field: " + fieldName + " in class: " + className);
+              err("Could not set option: " + entry.getKey() + "; no such field: " + fieldName + " in class: " + className);
             }
           }
         }
@@ -547,35 +555,36 @@ public class ArgumentParser  {
 
     //--Ensure Required
     boolean good = true;
-    for (String key : required.keySet()) {
-      Pair<Boolean, Boolean> mark = required.get(key);
+    for (Map.Entry<String, Pair<Boolean, Boolean>> entry : required.entrySet()) {
+      String key = entry.getKey();
+      Pair<Boolean, Boolean> mark = entry.getValue();
       if (mark.first && !mark.second) {
         err("Missing required option: " + interner.get(key) + "   <in class: " + canFill.get(key).getDeclaringClass() + ">");
         required.put(key, Pair.makePair(true, true));  //don't duplicate error messages
         good = false;
       }
     }
-    if (!good) {
-      throw new RuntimeException("not able to parse properties!!!!");
+    if ( ! good) {
+      throw new RuntimeException("Not able to parse properties!!!");
       //System.exit(1);
     }
 
     return canFill;
   }
 
-  protected static Map<String, Field> fillOptionsImpl(
-      Object[] instances,
-      Class<?>[] classes,
-      Properties options) {
-    return fillOptionsImpl(instances, classes, options, strict);
+  private static Map<String, Field> fillOptionsImpl(
+          Object[] instances,
+          Class<?>[] classes,
+          Properties options) {
+    return fillOptionsImpl(instances, classes, options, strict, false);
   }
 
 
-	/*
-	 * ----------
-	 * EXECUTION
-	 * ----------
-	 */
+  /*
+   * ----------
+   * EXECUTION
+   * ----------
+   */
 
   /**
    * Populate all static options in the given set of classes, as defined by the given
@@ -599,7 +608,7 @@ public class ArgumentParser  {
    * @param args The command-line arguments to use to fill in additional properties.
    */
   @SuppressWarnings("UnusedDeclaration")
-  public static void fillOptions(Class<?>[] optionClasses, Properties props, String[] args) {
+  public static void fillOptions(Class<?>[] optionClasses, Properties props, String... args) {
     ArgumentParser.optionClasses = optionClasses;
     fillOptions(props, args);
 
@@ -613,9 +622,9 @@ public class ArgumentParser  {
    * @param args The command-line arguments to use to fill in additional properties.
    */
   public static void fillOptions(Class<?>[] classes,
-                                 String[] args) {
+                                 String... args) {
     Properties options = StringUtils.argsToProperties(args); //get options
-    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
+    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false, true); //bootstrap
     fillOptionsImpl(null, classes, options);
   }
 
@@ -638,7 +647,7 @@ public class ArgumentParser  {
    * @param args The command-line arguments to use to fill these fields.
    */
   public static void fillOptions(Class<?> clazz,
-                                 String[] args) {
+                                 String... args) {
     Class<?>[] classes = new Class<?>[1];
     classes[0] = clazz;
     fillOptions(classes, args);
@@ -651,7 +660,7 @@ public class ArgumentParser  {
    * @param props The properties to use to fill fields in the various classes.
    */
   public static void fillOptions(Properties props) {
-    fillOptions(props, new String[0]);
+    fillOptions(props, StringUtils.EMPTY_STRING_ARRAY);
   }
 
   /**
@@ -659,10 +668,10 @@ public class ArgumentParser  {
    * classes in the current classpath.
    * Note that this may take a while if the classpath is large.
    *
-   * @param props The command-line arguments to use to fill options.
+   * @param args The command-line arguments to use to fill options.
    */
-  public static void fillOptions(String[] props) {
-    fillOptions(StringUtils.argsToProperties(props), new String[0]);
+  public static void fillOptions(String... args) {
+    fillOptions(StringUtils.argsToProperties(args), StringUtils.EMPTY_STRING_ARRAY);
   }
 
   /**
@@ -673,14 +682,15 @@ public class ArgumentParser  {
    * @param props The properties to use to fill fields in the various classes.
    * @param args The command-line arguments to use to fill in additional properties.
    */
-  public static void fillOptions(Properties props, String[] args) {
+  public static void fillOptions(Properties props, String... args) {
+    // todo [cdm 2016]: Isn't this the wrong way round and properties overwrite commandline options? Should be the opposite!
     //(convert to map)
     Properties options = StringUtils.argsToProperties(args);
     for (String key : props.stringPropertyNames()) {
       options.setProperty(key, props.getProperty(key));
     }
     //(bootstrap)
-    Map<String, Field> bootstrapMap = fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
+    Map<String, Field> bootstrapMap = fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false, true); //bootstrap
     bootstrapMap.keySet().forEach(options::remove);
     //(fill options)
     Class<?>[] visibleClasses = optionClasses;
@@ -713,7 +723,7 @@ public class ArgumentParser  {
   public static void fillOptions(Object[] instances,
                                  String[] args) {
     Properties options = StringUtils.argsToProperties(args); //get options
-    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
+    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false, true); //bootstrap
     Class[] classes = new Class[instances.length];
     for (int i = 0; i < classes.length; ++i) { classes[i] = instances[i].getClass(); }
     fillOptionsImpl(instances, classes, options);
@@ -746,6 +756,9 @@ public class ArgumentParser  {
 
   /**
    * Fill all the options for a given CoreNLP annotator.
+   * This assumes that the annotator takes properties with a prefix, so that, for example,
+   * if the annotator is {@code parse} then it takes a property {@code parse.maxlen} for instance.
+   *
    * @param annotator The annotator to fill options for.
    * @param annotatorName The name of the annotator, for parsing properties.
    * @param props The properties to fill the options in the annotator with.
@@ -753,10 +766,10 @@ public class ArgumentParser  {
   public static void fillOptions(Annotator annotator, String annotatorName, Properties props) {
     ArgumentParser.fillOptions(annotator, props);
     Properties withoutPrefix = new Properties();
-    Enumeration<Object> keys = props.keys();
-    while (keys.hasMoreElements()) {
-      String key = keys.nextElement().toString();
-      withoutPrefix.setProperty(key.replace(annotatorName + ".", ""), props.getProperty(key));
+    String prefixString = annotatorName + '.';
+    for (Map.Entry entry : props.entrySet()) {
+      String key = entry.getKey().toString();
+      withoutPrefix.setProperty(key.replace(prefixString, ""), entry.getValue().toString());
     }
     ArgumentParser.fillOptions(annotator, withoutPrefix);
   }
@@ -773,7 +786,7 @@ public class ArgumentParser  {
   public static String usage(Class[] optionsClasses) {
     String mainClass = threadRootClass();
     StringBuilder b = new StringBuilder();
-    b.append("Usage: ").append(mainClass).append(" ");
+    b.append("Usage: ").append(mainClass).append(' ');
 
     List<Pair<Option, Field>> options = new ArrayList<>();
     for (Class clazz : optionsClasses) {

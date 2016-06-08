@@ -1128,8 +1128,8 @@ public class CoNLLDocumentReader implements DocReader  {
             threadSafe,
             null);
       } else {
-        deps = SemanticGraphFactory.makeFromTree(tree, true);
-        basicDeps = SemanticGraphFactory.makeFromTree(tree, false);
+        deps = SemanticGraphFactory.generateCollapsedDependencies(tree);
+        basicDeps = SemanticGraphFactory.generateUncollapsedDependencies(tree);
       }
       
       sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, basicDeps);

@@ -875,34 +875,8 @@ public class SemanticGraph implements Serializable  {
    * @throws IllegalStateException if this graph is not a DAG
    */
   public List<IndexedWord> topologicalSort() {
-    List<IndexedWord> result = Generics.newArrayList();
-    Set<IndexedWord> temporary = wordMapFactory.newSet();
-    Set<IndexedWord> permanent = wordMapFactory.newSet();
-    for (IndexedWord vertex : vertexSet()) {
-      if (!temporary.contains(vertex)) {
-        topologicalSortHelper(vertex, temporary, permanent, result);
-      }
-    }
-    Collections.reverse(result);
-    return result;
+    return graph.topologicalSort();
   }
-
-  private void topologicalSortHelper(IndexedWord vertex, Set<IndexedWord> temporary, Set<IndexedWord> permanent, List<IndexedWord> result) {
-    temporary.add(vertex);
-    for (SemanticGraphEdge edge : outgoingEdgeIterable(vertex)) {
-      IndexedWord target = edge.getTarget();
-      if (permanent.contains(target)) {
-        continue;
-      }
-      if (temporary.contains(target)) {
-        throw new IllegalStateException("This graph has cycles. Topological sort not possible: " + this.toString());
-      }
-      topologicalSortHelper(target, temporary, permanent, result);
-    }
-    result.add(vertex);
-    permanent.add(vertex);
-  }
-
 
   /**
    * Does the given <code>vertex</code> have at least one child with the given {@code reln} and the lemma <code>childLemma</code>?

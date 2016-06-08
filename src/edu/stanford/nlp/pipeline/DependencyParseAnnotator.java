@@ -7,6 +7,7 @@ import edu.stanford.nlp.parser.nndep.DependencyParser;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
+import edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode;
 import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
@@ -74,16 +75,18 @@ public class DependencyParseAnnotator extends SentenceAnnotator  {
   protected void doOneSentence(Annotation annotation, CoreMap sentence) {
     GrammaticalStructure gs = parser.predict(sentence);
 
-    SemanticGraph deps = SemanticGraphFactory.makeFromTree(gs, SemanticGraphFactory.Mode.COLLAPSED, extraDependencies, true, null),
-                  uncollapsedDeps = SemanticGraphFactory.makeFromTree(gs, SemanticGraphFactory.Mode.BASIC, extraDependencies, true, null),
-                  ccDeps = SemanticGraphFactory.makeFromTree(gs, SemanticGraphFactory.Mode.CCPROCESSED, extraDependencies, true, null);
+    SemanticGraph deps = SemanticGraphFactory.makeFromTree(gs, Mode.COLLAPSED, extraDependencies, true, null),
+                  uncollapsedDeps = SemanticGraphFactory.makeFromTree(gs, Mode.BASIC, extraDependencies, true, null),
+                  ccDeps = SemanticGraphFactory.makeFromTree(gs, Mode.CCPROCESSED, extraDependencies, true, null),
+                  enhancedDeps = SemanticGraphFactory.makeFromTree(gs, Mode.ENHANCED, extraDependencies, true, null),
+                  enhancedPlusPlusDeps = SemanticGraphFactory.makeFromTree(gs, Mode.ENHANCED_PLUS_PLUS, extraDependencies, true, null);
+
 
     sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, deps);
     sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, uncollapsedDeps);
     sentence.set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, ccDeps);
-
-
-
+    sentence.set(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class, enhancedDeps);
+    sentence.set(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class, enhancedPlusPlusDeps);
   }
 
   @Override
@@ -110,7 +113,9 @@ public class DependencyParseAnnotator extends SentenceAnnotator  {
     return Collections.unmodifiableSet(new ArraySet<>(Arrays.asList(
         SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
         SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
+        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class,
+        SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class,
+        SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class
     )));
   }
 

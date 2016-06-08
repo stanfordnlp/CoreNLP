@@ -1,16 +1,16 @@
 <head>
   <!-- JQuery -->
-  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
   <!-- Bootstrap -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css"/>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css"/>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css"/>
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
   <!-- Chosen Dropdown Library -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.4.2/chosen.css"/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.4.2/chosen.jquery.min.js"></script>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/chosen/1.4.2/chosen.css"/>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/chosen/1.4.2/chosen.jquery.min.js"></script>
   <!-- Brat -->
-  <link rel="stylesheet" type="text/css" href="http://nlp.stanford.edu/js/brat/style-vis.css"/>
-  <script type="text/javascript" src="http://nlp.stanford.edu/js/brat/client/lib/head.load.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="//storage.googleapis.com/corenlp/style-vis.css"/>
+  <script type="text/javascript" src="//storage.googleapis.com/corenlp/js/brat/client/lib/head.load.min.js"></script>
   <!-- CoreNLP -->
   <link rel="stylesheet" type="text/css" href="corenlp-brat.css"/>
   <script type="text/javascript" src="corenlp-brat.js"></script>
@@ -34,7 +34,7 @@
 <nav class="navbar navbar-default navbar-static-top">
   <div class="container">
     <div class="navbar-header">
-      <a class="navbar-brand" href="http://nlp.stanford.edu/software/corenlp.shtml">Stanford CoreNLP</a>
+      <a class="navbar-brand" href="//nlp.stanford.edu/software/corenlp.shtml">Stanford CoreNLP</a>
     </div>
   </div>
 </nav>
@@ -54,14 +54,15 @@
     <div class="col-sm-10">
       <select id="annotators" data-placeholder="CoreNLP annotators" 
               multiple class="chosen-select">
-        <option value="pos"            selected > parts-of-speech  </option>
-        <option value="lemma"                   > lemmas           </option>
-        <option value="ner"            selected > named entities   </option>
-        <option value="depparse"       selected > dependency parse </option>
-        <option value="openie"         selected > openie           </option>
-        <option value="coref"                   > coreference      </option>
-        <option value="entitylink"              > wikipedia entities         </option>
-        <option value="kbp"                     > relations        </option>
+        <option value="pos"            selected > parts-of-speech    </option>
+        <option value="lemma"                   > lemmas             </option>
+        <option value="ner"            selected > named entities     </option>
+        <option value="depparse"       selected > dependency parse   </option>
+        <option value="openie"         selected > openie             </option>
+        <option value="coref"                   > coreference        </option>
+        <option value="entitylink"              > wikipedia entities </option>
+        <option value="kbp"                     > relations          </option>
+        <option value="sentiment"               > sentiment          </option>
       </select>
     </div>
 
@@ -81,7 +82,7 @@
 
     <!-- Loading gif -->
     <div id="loading" class="row" style="display:none">
-      <img src="http://nlp.stanford.edu/img/loading.gif" height="100px" style="margin-left: 100px"/>
+      <img src="//storage.googleapis.com/corenlp/loading.gif" height="100px" style="margin-left: 100px"/>
     </div>
 
     <!-- Annotation population area -->

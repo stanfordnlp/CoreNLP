@@ -116,8 +116,8 @@ public class TextOutputter extends AnnotationOutputter {
         // case we don't want to recreate them using the dependency
         // printer.  This might be relevant if using CoreNLP for a
         // language which doesn't have dependencies, for example.
-        if (sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class) != null) {
-          pw.print(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class).toList());
+        if (sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class) != null) {
+          pw.print(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class).toList());
           pw.println();
         }
 
