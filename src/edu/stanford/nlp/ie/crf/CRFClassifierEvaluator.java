@@ -1,4 +1,5 @@
-package edu.stanford.nlp.ie.crf;
+package edu.stanford.nlp.ie.crf; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -6,28 +7,26 @@ import edu.stanford.nlp.optimization.CmdEvaluator;
 import edu.stanford.nlp.stats.MultiClassChunkEvalStats;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Triple;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.Collection;
 import java.util.List;
 
 /**
- * Evaluates CRFClassifier on a set of data.
- * This can be called by QNMinimizer periodically.
- * If evalCmd is set, it runs command line specified by evalCmd
- * otherwise it does evaluation internally.
- * NOTE: when running conlleval with exec on Linux, linux will first
- *          fork process by duplicating memory of current process.  So if the
+ * Evaluates CRFClassifier on a set of data
+ * - called by QNMinimizer periodically
+ * - If evalCmd is set, runs command line specified by evalCmd
+ *                      otherwise does evaluation internally
+ *   NOTE: when running conlleval with exec on Linux, linux will first
+ *          fork process by duplicating memory of current process.  So if
  *          JVM has lots of memory, it will all be duplicated when
- *          child process is initially forked, which can be unfortunate.
- *
+ *          child process is initially forked.
  * @author Angel Chang
  */
 public class CRFClassifierEvaluator<IN extends CoreMap> extends CmdEvaluator  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(CRFClassifierEvaluator.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(CRFClassifierEvaluator.class);
 
   private CRFClassifier<IN> classifier;
   // NOTE: Default uses -r, specify without -r if IOB
@@ -75,7 +74,8 @@ public class CRFClassifierEvaluator<IN extends CoreMap> extends CmdEvaluator  {
    * Set the evaluation command (set to null to skip evaluation using command line)
    * @param evalCmd
    */
-  public void setEvalCmd(String evalCmd) {
+  public void setEvalCmd(String evalCmd)
+  {
     log.info("setEvalCmd to " + evalCmd);
     this.cmdStr = evalCmd;
     if (cmdStr != null) {

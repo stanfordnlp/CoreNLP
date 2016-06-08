@@ -457,7 +457,7 @@ public class CoreAnnotations {
       return ErasureUtils.<Class<IntPair>> uncheckedCast(Pair.class);
     }
   }
-
+  
   /**
    * CoNLL-U dep parsing - List of secondary dependencies
    */
@@ -466,7 +466,7 @@ public class CoreAnnotations {
       return ErasureUtils.<Class<HashMap<Integer,String>>> uncheckedCast(Pair.class);
     }
   }
-
+  
   /**
    * CoNLL-U dep parsing - List of morphological features
    */
@@ -475,7 +475,7 @@ public class CoreAnnotations {
       return ErasureUtils.uncheckedCast(HashMap.class);
     }
   }
-
+  
   /**
    * CoNLL-U dep parsing - Any other annotation
    */
@@ -741,14 +741,12 @@ public class CoreAnnotations {
     }
   }
 
-  /** For Chinese: the segmentation info existing in the original text. */
   public static class ChineseOrigSegAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
     }
   }
 
-  /** For Chinese: the segmentation information from the segmenter. */
   public static class ChineseSegAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;

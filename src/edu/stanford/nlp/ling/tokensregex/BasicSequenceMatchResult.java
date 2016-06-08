@@ -361,14 +361,6 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     {
       return "(" + matchBegin + ',' + matchEnd + ')';
     }
-
-    public int matchLength() {
-      if (matchBegin >= 0 && matchEnd >= 0) {
-        return matchEnd - matchBegin;
-      } else {
-        return -1;
-      }
-    }
   }
 
 }

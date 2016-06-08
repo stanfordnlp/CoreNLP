@@ -113,7 +113,7 @@ public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, Claus
       CoreMap sentence = rawExample.first;
       Collection<Pair<Span, Span>> spans = rawExample.second;
       List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-      SemanticGraph tree = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+      SemanticGraph tree = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
       // Create raw clause searcher (no classifier)
       ClauseSplitterSearchProblem problem = new ClauseSplitterSearchProblem(tree, true);
 

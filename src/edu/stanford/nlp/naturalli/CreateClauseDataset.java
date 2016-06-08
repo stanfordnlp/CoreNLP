@@ -325,8 +325,8 @@ public class CreateClauseDataset implements TSVSentenceProcessor  {
           CoreMap sentence = new ArrayCoreMap(4) {{
             set(CoreAnnotations.TokensAnnotation.class, tokens);
             set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, graph);
-            set(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class, graph);
-            set(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class, graph);
+            set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, graph);
+            set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, graph);
           }};
           natlog.doOneSentence(null, sentence);
 

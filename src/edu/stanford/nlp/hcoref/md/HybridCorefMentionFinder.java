@@ -80,9 +80,6 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     SemanticGraph basicDependency = s.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
     SemanticGraph collapsedDependency = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
-    if (collapsedDependency == null) {
-      collapsedDependency = s.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
-    }
     String preNE = "O";
     int beginIndex = -1;
     for(CoreLabel w : sent) {
@@ -165,9 +162,6 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
     tree.indexLeaves();
     SemanticGraph basicDependency = s.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
     SemanticGraph collapsedDependency = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
-    if (collapsedDependency == null) {
-      collapsedDependency = s.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
-    }
 
     TregexPattern tgrepPattern = npOrPrpMentionPattern;
     TregexMatcher matcher = tgrepPattern.matcher(tree);

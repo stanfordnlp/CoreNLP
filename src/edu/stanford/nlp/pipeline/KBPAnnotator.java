@@ -65,12 +65,12 @@ public class KBPAnnotator implements Annotator {
   /**
    * A TokensRegexNER annotator for the special KBP NER types (case-sensitive).
    */
-  //private final TokensRegexNERAnnotator casedNER;
+  private final TokensRegexNERAnnotator casedNER;
 
   /**
    * A TokensRegexNER annotator for the special KBP NER types (case insensitive).
    */
-  //private final TokensRegexNERAnnotator caselessNER;
+  private final TokensRegexNERAnnotator caselessNER;
 
 
   /**
@@ -105,13 +105,13 @@ public class KBPAnnotator implements Annotator {
     }
 
     // Load TokensRegexNER
-    /*this.casedNER = new TokensRegexNERAnnotator(
+    this.casedNER = new TokensRegexNERAnnotator(
         regexnerCasedPath,
         false);
     this.caselessNER = new TokensRegexNERAnnotator(
         regexnerCaselessPath,
         true,
-        "^(NN|JJ).*");*/
+        "^(NN|JJ).*");
 
     // Create entity mention annotator
     this.entityMentionAnnotator = new EntityMentionsAnnotator("kbp.entitymention", new Properties() {{
@@ -244,8 +244,8 @@ public class KBPAnnotator implements Annotator {
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
 
     // Annotate with NER
-    //casedNER.annotate(annotation);
-    //caselessNER.annotate(annotation);
+    casedNER.annotate(annotation);
+    caselessNER.annotate(annotation);
     // Annotate with Mentions
     entityMentionAnnotator.annotate(annotation);
 
@@ -362,9 +362,6 @@ public class KBPAnnotator implements Annotator {
             if (subjI == objI) {
               continue;
             }
-            if (Thread.interrupted()) {
-              throw new RuntimeInterruptedException();
-            }
             CoreMap obj = candidates.get(objI);
             int objBegin = obj.get(CoreAnnotations.TokensAnnotation.class).get(0).index() - 1;
             int objEnd = obj.get(CoreAnnotations.TokensAnnotation.class).get(obj.get(CoreAnnotations.TokensAnnotation.class).size() - 1).index();
@@ -444,9 +441,7 @@ public class KBPAnnotator implements Annotator {
    */
   public static void main(String[] args) throws IOException {
     Properties props = StringUtils.argsToProperties(args);
-    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,regexner,parse,mention,coref,kbp");
-    props.setProperty("regexner.mapping", "ignorecase=true,validpospattern=^(NN|JJ).*,edu/stanford/nlp/models/kbp/regexner_caseless.tab;edu/stanford/nlp/models/kbp/regexner_cased.tab");
-
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,mention,coref,kbp");
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     IOUtils.console("sentence> ", line -> {
       Annotation ann = new Annotation(line);
