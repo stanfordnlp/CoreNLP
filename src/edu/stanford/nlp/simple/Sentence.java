@@ -25,12 +25,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static edu.stanford.nlp.simple.Document.EMPTY_PROPS;
 
 /**
  * A representation of a single Sentence.
@@ -73,16 +72,18 @@ public class Sentence {
   /** The document this sentence is derived from */
   public final Document document;
   /** The default properties to use for annotators. */
-  private Properties defaultProps = EMPTY_PROPS;
+  private final Properties defaultProps;
+  /** The function to use to create a new document. This is used for the cased() and caseless() functions. */
+  private final BiFunction<Properties, String, Document> docFn;
 
   /**
    * Create a new sentence, using the specified properties as the default properties.
-   * @param text The text of the sentence.
+   * @param doc The document to link this sentence to.
    * @param props The properties to use for tokenizing the sentence.
    */
-  public Sentence(String text, Properties props) {
+  protected Sentence(Document doc, Properties props) {
     // Set document
-    this.document = new Document(text);
+    this.document = doc;
     // Set sentence
     if (props.containsKey("ssplit.isOneSentence")) {
       this.impl = this.document.sentence(0, props).impl;
@@ -102,6 +103,16 @@ public class Sentence {
     } else {
       this.defaultProps = props;
     }
+    this.docFn = Document::new;
+  }
+
+  /**
+   * Create a new sentence from some text, and some properties.
+   * @param text The text of the sentence.
+   * @param props The properties to use for the annotators.
+   */
+  public Sentence(String text, Properties props) {
+    this(new Document(text), props);
   }
 
   /**
@@ -114,8 +125,8 @@ public class Sentence {
 
 
   /** The actual implementation of a tokenized sentence constructor */
-  protected Sentence(List<String> tokens, Properties props) {
-    this(StringUtils.join(tokens.stream().map(x -> x.replace(' ', 'ߝ' /* some random character */)), " "), props);
+  protected Sentence(Function<String, Document> doc, List<String> tokens, Properties props) {
+    this(doc.apply(StringUtils.join(tokens.stream().map(x -> x.replace(' ', 'ߝ' /* some random character */)), " ")), props);
     // Clean up whitespace
     for (int i = 0; i < impl.getTokenCount(); ++i) {
       this.impl.getTokenBuilder(i).setWord(this.impl.getTokenBuilder(i).getWord().replace('ߝ', ' '));
@@ -123,7 +134,6 @@ public class Sentence {
       this.tokensBuilders.get(i).setWord(this.tokensBuilders.get(i).getWord().replace('ߝ', ' '));
       this.tokensBuilders.get(i).setValue(this.tokensBuilders.get(i).getValue().replace('ߝ', ' '));
     }
-    // Set the default properties
   }
 
 
@@ -135,13 +145,13 @@ public class Sentence {
    * @param tokens The text of the sentence.
    */
   public Sentence(List<String> tokens) {
-    this(tokens, SINGLE_SENTENCE_TOKENIZED_DOCUMENT);
+    this(Document::new, tokens, SINGLE_SENTENCE_TOKENIZED_DOCUMENT);
   }
 
   /**
    * Create a sentence from a saved protocol buffer.
    */
-  protected Sentence(CoreNLPProtos.Sentence proto, Properties props) {
+  protected Sentence(BiFunction<Properties, String, Document> docFn, CoreNLPProtos.Sentence proto, Properties props) {
     this.impl = proto.toBuilder();
     // Set tokens
     tokensBuilders = new ArrayList<>(this.impl.getTokenCount());
@@ -149,18 +159,21 @@ public class Sentence {
       tokensBuilders.add(this.impl.getToken(i).toBuilder());
     }
     // Initialize document
-    this.document = new Document(props, proto.getText());
+    this.document = docFn.apply(props, proto.getText());
     this.document.forceSentences(Collections.singletonList(this));
     // Asserts
     assert (this.document.sentence(0).impl == this.impl);
     assert (this.document.sentence(0).tokensBuilders == this.tokensBuilders);
+    // Set default props
+    this.defaultProps = props;
+    this.docFn = docFn;
   }
 
   /**
    * Create a sentence from a saved protocol buffer.
    */
   public Sentence(CoreNLPProtos.Sentence proto) {
-    this(proto, SINGLE_SENTENCE_DOCUMENT);
+    this(Document::new, proto, SINGLE_SENTENCE_DOCUMENT);
 
   }
 
@@ -173,6 +186,9 @@ public class Sentence {
     // Asserts
     assert (this.document.sentence(sentenceIndex).impl == this.impl);
     assert (this.document.sentence(sentenceIndex).tokensBuilders == this.tokensBuilders);
+    // Set default props
+    this.defaultProps = Document.EMPTY_PROPS;
+    this.docFn = doc.sentence(sentenceIndex).docFn;
   }
 
   /**
@@ -190,6 +206,7 @@ public class Sentence {
     for (int i = 0; i < this.impl.getTokenCount(); ++i) {
       tokensBuilders.add(this.impl.getToken(i).toBuilder());
     }
+    this.docFn = (props, text) -> MetaClass.create(doc.getClass().getName()).createInstance(props, text);
   }
 
   /**
@@ -211,6 +228,8 @@ public class Sentence {
     assert doc.sentences().size() > 0;
     this.impl = doc.sentence(0).impl;
     this.tokensBuilders = doc.sentence(0).tokensBuilders;
+    this.defaultProps = Document.EMPTY_PROPS;
+    this.docFn = (props, text) -> MetaClass.create(doc.getClass().getName()).createInstance(props, text);
   }
 
   /**
@@ -260,11 +279,10 @@ public class Sentence {
    * Make this sentence caseless. That is, from now on, run the caseless models
    * on the sentence by default rather than the standard CoreNLP models.
    *
-   * @return This same sentence, but with the default properties swapped out.
+   * @return A new sentence with the default properties swapped out.
    */
   public Sentence caseless() {
-    this.defaultProps = Document.CASELESS_PROPS;
-    return this;
+    return new Sentence(this.docFn, impl.build(), Document.CASELESS_PROPS);
   }
 
   /**
@@ -272,11 +290,10 @@ public class Sentence {
    * A sentence is case sensitive by default; this only has an effect if you have previously
    * called {@link Sentence#caseless()}.
    *
-   * @return This same sentence, but with the default properties swapped out.
+   * @return A new sentence with the default properties swapped out.
    */
   public Sentence cased() {
-    this.defaultProps = Document.EMPTY_PROPS;
-    return this;
+    return new Sentence(this.docFn, impl.build(), Document.EMPTY_PROPS);
   }
 
 
@@ -1124,7 +1141,7 @@ public class Sentence {
     synchronized (this.impl) {
       this.impl.setBasicDependencies(basic);
       this.impl.setEnhancedDependencies(enhanced);
-      this.impl.setEnhancedPlusPlusDependencies(enhanced);
+      this.impl.setEnhancedPlusPlusDependencies(enhancedPlusPlus);
     }
   }
 

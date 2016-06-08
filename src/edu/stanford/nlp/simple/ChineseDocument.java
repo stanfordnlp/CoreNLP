@@ -72,6 +72,14 @@ public class ChineseDocument extends Document {
     super(ChineseDocument.EMPTY_PROPS, proto);
   }
 
+  /**
+   * Create a new chinese document from the passed in text and the given properties.
+   * @param text The text of the document.
+   */
+  public ChineseDocument(Properties props, String text) {
+    super(props, text);
+  }
+
 
   /** {@inheritDoc} */
   @Override

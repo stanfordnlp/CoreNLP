@@ -350,7 +350,7 @@ public class Document {
 
 
   /**
-   * Create a new document from the passed in text and the given propertiesj.
+   * Create a new document from the passed in text and the given properties.
    * @param text The text of the document.
    */
   public Document(Properties props, String text) {

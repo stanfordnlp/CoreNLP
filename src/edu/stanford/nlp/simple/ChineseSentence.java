@@ -16,10 +16,6 @@ import java.util.Properties;
  * @author <a href="mailto:gabor@eloquent.ai">Gabor Angeli</a>
  */
 public class ChineseSentence extends Sentence {
-  /**
-   * An SLF4J Logger for this class.
-   */
-  private static final Logger log = LoggerFactory.getLogger(ChineseSentence.class);
 
   /** A properties object for creating a document from a single sentence. Used in the constructor {@link Sentence#Sentence(String)} */
   static Properties SINGLE_SENTENCE_DOCUMENT = new Properties() {{
@@ -51,14 +47,14 @@ public class ChineseSentence extends Sentence {
   }};
 
   public ChineseSentence(String text) {
-    super(text, SINGLE_SENTENCE_DOCUMENT);
+    super(new ChineseDocument(text), SINGLE_SENTENCE_DOCUMENT);
   }
 
   public ChineseSentence(List<String> tokens) {
-    super(tokens, SINGLE_SENTENCE_TOKENIZED_DOCUMENT);
+    super(ChineseDocument::new, tokens, SINGLE_SENTENCE_TOKENIZED_DOCUMENT);
   }
 
   public ChineseSentence(CoreNLPProtos.Sentence proto) {
-    super(proto, SINGLE_SENTENCE_DOCUMENT);
+    super(ChineseDocument::new, proto, SINGLE_SENTENCE_DOCUMENT);
   }
 }
