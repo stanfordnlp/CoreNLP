@@ -5,7 +5,6 @@ import edu.stanford.nlp.hcoref.data.CorefChain;
 import edu.stanford.nlp.hcoref.data.Dictionaries;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
@@ -935,16 +934,14 @@ public class Document {
 
 
   Document runSentiment(Properties props) {
-    if (this.sentences != null && this.sentences.size() > 0) {
-      if (this.sentences.get(0).rawSentence().hasSentiment()) {
+    if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawSentence().hasSentiment()) {
         return this;
-      }
-      if (!this.sentences.get(0).rawSentence().hasBinarizedParseTree()) {
-        throw new IllegalStateException("No binarized parse tree (perhaps it's not supported in this language?)");
-      }
     }
     // Run prerequisites
     runParse(props);
+    if (this.sentences != null && this.sentences.size() > 0 && !this.sentences.get(0).rawSentence().hasBinarizedParseTree()) {
+      throw new IllegalStateException("No binarized parse tree (perhaps it's not supported in this language?)");
+    }
     // Run annotator
     Annotation ann = asAnnotation();
     Supplier<Annotator> sentiment = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultSentiment : getOrCreate(AnnotatorFactories.sentiment(props, backend));
