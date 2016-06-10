@@ -4591,10 +4591,34 @@ public class SUTime  {
       }
       return null;
     }
-
+    
+    /**
+     * Checks if the provided range r is within the current range
+     * Note that equal ranges also returns true
+     * 
+     * @param r range 
+     * @return true if range r is contained in r
+     */
     public boolean contains(Range r) {
+
+    	if( (this.beginTime().getJodaTimeInstant().isBefore(r.beginTime().getJodaTimeInstant()) || this.beginTime().getJodaTimeInstant().isEqual(r.beginTime().getJodaTimeInstant())) 
+    		  && (this.endTime().getJodaTimeInstant().isAfter(r.endTime().getJodaTimeInstant()) || this.endTime().getJodaTimeInstant().isEqual(r.endTime().getJodaTimeInstant()))
+    		){
+    		return true;
+    	}    	
       return false;
     }
+       
+    
+    /**
+     * Checks if the provided time is within the current range
+     * @param t
+     * @return
+     */
+    public boolean contains(Time t) {
+    	return this.getJodaTimeInterval().contains(t.getJodaTimeInstant());
+    }
+    
 
     private static final long serialVersionUID = 1;
   }
