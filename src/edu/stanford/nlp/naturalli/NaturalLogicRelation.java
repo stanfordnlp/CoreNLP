@@ -1,4 +1,5 @@
 package edu.stanford.nlp.naturalli; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.util.Trilean;
 
@@ -447,8 +448,6 @@ public enum NaturalLogicRelation {
       if (dependencyLabel.startsWith("nmod:")) {
         return NaturalLogicRelation.REVERSE_ENTAILMENT;
       } else if (dependencyLabel.startsWith("conj:")) {
-        return NaturalLogicRelation.REVERSE_ENTAILMENT;
-      } else if (dependencyLabel.startsWith("advcl:")) {
         return NaturalLogicRelation.REVERSE_ENTAILMENT;
       } else {
         return NaturalLogicRelation.INDEPENDENCE;

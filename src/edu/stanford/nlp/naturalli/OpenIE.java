@@ -242,7 +242,7 @@ public class OpenIE implements Annotator  {
    * @return A set of clauses extracted from the sentence. This includes the original sentence.
    */
   public List<SentenceFragment> clausesInSentence(CoreMap sentence) {
-    return clausesInSentence(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class), true);
+    return clausesInSentence(sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class), true);
   }
 
   /**
@@ -461,7 +461,7 @@ public class OpenIE implements Annotator  {
     } else {
 
       // Get the dependency tree
-      SemanticGraph parse = sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class);
+      SemanticGraph parse = sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
       if (parse == null) {
         parse = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
       }
@@ -576,7 +576,7 @@ public class OpenIE implements Annotator  {
         CoreAnnotations.PartOfSpeechAnnotation.class,
         CoreAnnotations.LemmaAnnotation.class,
         NaturalLogicAnnotations.PolarityAnnotation.class,
-        SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class,
+        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class,
         CoreAnnotations.OriginalTextAnnotation.class
     ));
     if (resolveCoref) {

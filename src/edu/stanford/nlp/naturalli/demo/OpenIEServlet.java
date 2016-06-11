@@ -93,8 +93,8 @@ public class OpenIEServlet extends HttpServlet  {
         sentence.remove(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
         sentence.remove(NaturalLogicAnnotations.EntailedSentencesAnnotation.class);
         sentence.remove(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
-        sentence.remove(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
-        sentence.remove(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class);
+        sentence.remove(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+        sentence.remove(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
         pipeline.annotate(ann);
       }
     }

@@ -80,10 +80,6 @@ public class ClauseSplitterSearchProblem  {
       add("clone_nsubj");
       add("simple");
     }});
-    put("advcl:*", new ArrayList<String>() {{
-      add("clone_nsubj");
-      add("simple");
-    }});
     put("conj:*", new ArrayList<String>() {{
       add("clone_nsubj");
       add("clone_dobj");
