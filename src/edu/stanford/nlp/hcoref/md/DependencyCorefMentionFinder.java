@@ -142,7 +142,10 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder  {
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     SemanticGraph basic = s.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
     SemanticGraph collapsed = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
-    
+    if (collapsed == null) {
+      collapsed = s.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+    }
+
     // pronoun
     if(headword.tag().startsWith("PRP")) {
       extractPronounForHeadword(headword, dep, s, mentions, mentionSpanSet, namedEntitySpanSet);
@@ -260,6 +263,9 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder  {
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     SemanticGraph basic = s.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
     SemanticGraph collapsed = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+    if (collapsed == null) {
+      collapsed = s.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+    }
     int beginIdx = headword.index()-1;
     int endIdx = headword.index();
     

@@ -25,12 +25,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static edu.stanford.nlp.simple.Document.EMPTY_PROPS;
 
 /**
  * A representation of a single Sentence.
@@ -73,16 +72,18 @@ public class Sentence {
   /** The document this sentence is derived from */
   public final Document document;
   /** The default properties to use for annotators. */
-  private Properties defaultProps = EMPTY_PROPS;
+  private final Properties defaultProps;
+  /** The function to use to create a new document. This is used for the cased() and caseless() functions. */
+  private final BiFunction<Properties, String, Document> docFn;
 
   /**
    * Create a new sentence, using the specified properties as the default properties.
-   * @param text The text of the sentence.
+   * @param doc The document to link this sentence to.
    * @param props The properties to use for tokenizing the sentence.
    */
-  public Sentence(String text, Properties props) {
+  protected Sentence(Document doc, Properties props) {
     // Set document
-    this.document = new Document(text);
+    this.document = doc;
     // Set sentence
     if (props.containsKey("ssplit.isOneSentence")) {
       this.impl = this.document.sentence(0, props).impl;
@@ -102,6 +103,16 @@ public class Sentence {
     } else {
       this.defaultProps = props;
     }
+    this.docFn = Document::new;
+  }
+
+  /**
+   * Create a new sentence from some text, and some properties.
+   * @param text The text of the sentence.
+   * @param props The properties to use for the annotators.
+   */
+  public Sentence(String text, Properties props) {
+    this(new Document(text), props);
   }
 
   /**
@@ -114,8 +125,8 @@ public class Sentence {
 
 
   /** The actual implementation of a tokenized sentence constructor */
-  protected Sentence(List<String> tokens, Properties props) {
-    this(StringUtils.join(tokens.stream().map(x -> x.replace(' ', 'ߝ' /* some random character */)), " "), props);
+  protected Sentence(Function<String, Document> doc, List<String> tokens, Properties props) {
+    this(doc.apply(StringUtils.join(tokens.stream().map(x -> x.replace(' ', 'ߝ' /* some random character */)), " ")), props);
     // Clean up whitespace
     for (int i = 0; i < impl.getTokenCount(); ++i) {
       this.impl.getTokenBuilder(i).setWord(this.impl.getTokenBuilder(i).getWord().replace('ߝ', ' '));
@@ -123,7 +134,6 @@ public class Sentence {
       this.tokensBuilders.get(i).setWord(this.tokensBuilders.get(i).getWord().replace('ߝ', ' '));
       this.tokensBuilders.get(i).setValue(this.tokensBuilders.get(i).getValue().replace('ߝ', ' '));
     }
-    // Set the default properties
   }
 
 
@@ -135,13 +145,13 @@ public class Sentence {
    * @param tokens The text of the sentence.
    */
   public Sentence(List<String> tokens) {
-    this(tokens, SINGLE_SENTENCE_TOKENIZED_DOCUMENT);
+    this(Document::new, tokens, SINGLE_SENTENCE_TOKENIZED_DOCUMENT);
   }
 
   /**
    * Create a sentence from a saved protocol buffer.
    */
-  protected Sentence(CoreNLPProtos.Sentence proto, Properties props) {
+  protected Sentence(BiFunction<Properties, String, Document> docFn, CoreNLPProtos.Sentence proto, Properties props) {
     this.impl = proto.toBuilder();
     // Set tokens
     tokensBuilders = new ArrayList<>(this.impl.getTokenCount());
@@ -149,18 +159,21 @@ public class Sentence {
       tokensBuilders.add(this.impl.getToken(i).toBuilder());
     }
     // Initialize document
-    this.document = new Document(props, proto.getText());
+    this.document = docFn.apply(props, proto.getText());
     this.document.forceSentences(Collections.singletonList(this));
     // Asserts
     assert (this.document.sentence(0).impl == this.impl);
     assert (this.document.sentence(0).tokensBuilders == this.tokensBuilders);
+    // Set default props
+    this.defaultProps = props;
+    this.docFn = docFn;
   }
 
   /**
    * Create a sentence from a saved protocol buffer.
    */
   public Sentence(CoreNLPProtos.Sentence proto) {
-    this(proto, SINGLE_SENTENCE_DOCUMENT);
+    this(Document::new, proto, SINGLE_SENTENCE_DOCUMENT);
 
   }
 
@@ -173,6 +186,9 @@ public class Sentence {
     // Asserts
     assert (this.document.sentence(sentenceIndex).impl == this.impl);
     assert (this.document.sentence(sentenceIndex).tokensBuilders == this.tokensBuilders);
+    // Set default props
+    this.defaultProps = Document.EMPTY_PROPS;
+    this.docFn = doc.sentence(sentenceIndex).docFn;
   }
 
   /**
@@ -190,6 +206,7 @@ public class Sentence {
     for (int i = 0; i < this.impl.getTokenCount(); ++i) {
       tokensBuilders.add(this.impl.getToken(i).toBuilder());
     }
+    this.docFn = (props, text) -> MetaClass.create(doc.getClass().getName()).createInstance(props, text);
   }
 
   /**
@@ -211,6 +228,8 @@ public class Sentence {
     assert doc.sentences().size() > 0;
     this.impl = doc.sentence(0).impl;
     this.tokensBuilders = doc.sentence(0).tokensBuilders;
+    this.defaultProps = Document.EMPTY_PROPS;
+    this.docFn = (props, text) -> MetaClass.create(doc.getClass().getName()).createInstance(props, text);
   }
 
   /**
@@ -250,8 +269,8 @@ public class Sentence {
         set(CoreAnnotations.TokenEndAnnotation.class, sentence.words.get(sentence.words.size() - 1).get(CoreAnnotations.IndexAnnotation.class) + 1);
       }
       set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, sentence.parseTree);
-      set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, sentence.parseTree);
-      set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, sentence.parseTree);
+      set(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class, sentence.parseTree);
+      set(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class, sentence.parseTree);
     }});
   }
 
@@ -260,11 +279,10 @@ public class Sentence {
    * Make this sentence caseless. That is, from now on, run the caseless models
    * on the sentence by default rather than the standard CoreNLP models.
    *
-   * @return This same sentence, but with the default properties swapped out.
+   * @return A new sentence with the default properties swapped out.
    */
   public Sentence caseless() {
-    this.defaultProps = Document.CASELESS_PROPS;
-    return this;
+    return new Sentence(this.docFn, impl.build(), Document.CASELESS_PROPS);
   }
 
   /**
@@ -272,11 +290,10 @@ public class Sentence {
    * A sentence is case sensitive by default; this only has an effect if you have previously
    * called {@link Sentence#caseless()}.
    *
-   * @return This same sentence, but with the default properties swapped out.
+   * @return A new sentence with the default properties swapped out.
    */
   public Sentence cased() {
-    this.defaultProps = Document.EMPTY_PROPS;
-    return this;
+    return new Sentence(this.docFn, impl.build(), Document.EMPTY_PROPS);
   }
 
 
@@ -586,19 +603,18 @@ public class Sentence {
     return parse(this.defaultProps);
   }
 
+
   /** An internal helper to get the dependency tree of the given type. */
   private CoreNLPProtos.DependencyGraph dependencies(SemanticGraphFactory.Mode mode) {
     switch (mode) {
-      case COLLAPSED_TREE:
-        return impl.getCollapsedDependencies();
-      case COLLAPSED:
-        return impl.getCollapsedDependencies();
-      case CCPROCESSED:
-        return impl.getCollapsedCCProcessedDependencies();
       case BASIC:
         return impl.getBasicDependencies();
+      case ENHANCED:
+        return impl.getEnhancedDependencies();
+      case ENHANCED_PLUS_PLUS:
+        return impl.getEnhancedPlusPlusDependencies();
       default:
-        throw new IllegalArgumentException("Unknown dependency type: " + mode);
+        throw new IllegalArgumentException("Unsupported dependency type: " + mode);
     }
   }
 
@@ -627,7 +643,7 @@ public class Sentence {
 
   /** @see Sentence#governor(java.util.Properties, int, SemanticGraphFactory.Mode) */
   public Optional<Integer> governor(Properties props, int index) {
-    return governor(props, index, SemanticGraphFactory.Mode.COLLAPSED_TREE);
+    return governor(props, index, SemanticGraphFactory.Mode.ENHANCED);
   }
 
   /** @see Sentence#governor(java.util.Properties, int, SemanticGraphFactory.Mode) */
@@ -665,7 +681,7 @@ public class Sentence {
 
   /** @see Sentence#governors(java.util.Properties, SemanticGraphFactory.Mode) */
   public List<Optional<Integer>> governors(Properties props) {
-    return governors(props, SemanticGraphFactory.Mode.COLLAPSED_TREE);
+    return governors(props, SemanticGraphFactory.Mode.ENHANCED);
   }
 
   /** @see Sentence#governors(java.util.Properties, SemanticGraphFactory.Mode) */
@@ -675,7 +691,7 @@ public class Sentence {
 
   /** @see Sentence#governors(java.util.Properties, SemanticGraphFactory.Mode) */
   public List<Optional<Integer>> governors() {
-    return governors(this.defaultProps, SemanticGraphFactory.Mode.COLLAPSED_TREE);
+    return governors(this.defaultProps, SemanticGraphFactory.Mode.ENHANCED);
   }
 
   /**
@@ -702,7 +718,7 @@ public class Sentence {
 
   /** @see Sentence#incomingDependencyLabel(java.util.Properties, int, SemanticGraphFactory.Mode) */
   public Optional<String> incomingDependencyLabel(Properties props, int index) {
-    return incomingDependencyLabel(props, index, SemanticGraphFactory.Mode.COLLAPSED_TREE);
+    return incomingDependencyLabel(props, index, SemanticGraphFactory.Mode.ENHANCED);
   }
 
   /** @see Sentence#incomingDependencyLabel(java.util.Properties, int, SemanticGraphFactory.Mode) */
@@ -736,12 +752,12 @@ public class Sentence {
 
   /** @see Sentence#incomingDependencyLabels(java.util.Properties, SemanticGraphFactory.Mode) */
   public List<Optional<String>> incomingDependencyLabels(Properties props) {
-    return incomingDependencyLabels(props, SemanticGraphFactory.Mode.COLLAPSED_TREE);
+    return incomingDependencyLabels(props, SemanticGraphFactory.Mode.ENHANCED);
   }
 
   /** @see Sentence#incomingDependencyLabels(java.util.Properties, SemanticGraphFactory.Mode) */
   public List<Optional<String>> incomingDependencyLabels() {
-    return incomingDependencyLabels(this.defaultProps, SemanticGraphFactory.Mode.COLLAPSED_TREE);
+    return incomingDependencyLabels(this.defaultProps, SemanticGraphFactory.Mode.ENHANCED);
   }
 
 
@@ -762,12 +778,12 @@ public class Sentence {
 
   /** @see Sentence#dependencyGraph(Properties, SemanticGraphFactory.Mode) */
   public SemanticGraph dependencyGraph(Properties props) {
-    return dependencyGraph(props, SemanticGraphFactory.Mode.COLLAPSED_TREE);
+    return dependencyGraph(props, SemanticGraphFactory.Mode.ENHANCED);
   }
 
   /** @see Sentence#dependencyGraph(Properties, SemanticGraphFactory.Mode) */
   public SemanticGraph dependencyGraph() {
-    return dependencyGraph(this.defaultProps, SemanticGraphFactory.Mode.COLLAPSED_TREE);
+    return dependencyGraph(this.defaultProps, SemanticGraphFactory.Mode.ENHANCED);
   }
 
   /** @see Sentence#dependencyGraph(Properties, SemanticGraphFactory.Mode) */
@@ -944,6 +960,42 @@ public class Sentence {
         .collect(Collectors.toList());
   }
 
+
+  /**
+   * The sentiment of this sentence (e.g., positive / negative).
+   *
+   * @return The {@link SentimentClass} of this sentence, as an enum value.
+   */
+  public SentimentClass sentiment() {
+    return sentiment(this.defaultProps);
+  }
+
+
+  /**
+   * The sentiment of this sentence (e.g., positive / negative).
+   *
+   * @param props The properties to pass to the sentiment classifier.
+   *
+   * @return The {@link SentimentClass} of this sentence, as an enum value.
+   */
+  public SentimentClass sentiment(Properties props) {
+    document.runSentiment(props);
+    switch (impl.getSentiment().toLowerCase()) {
+      case "verypositive":
+        return SentimentClass.VERY_POSITIVE;
+      case "positive":
+        return SentimentClass.POSITIVE;
+      case "negative":
+        return SentimentClass.NEGATIVE;
+      case "verynegative":
+        return SentimentClass.VERY_NEGATIVE;
+      case "neutral":
+        return SentimentClass.NEUTRAL;
+      default:
+        throw new IllegalStateException("Unknown sentiment class: " + impl.getSentiment());
+    }
+  }
+
   /**
    * Get the coreference chain for just this sentence.
    * Note that this method is actually fairly computationally expensive to call, as it constructs and prunes
@@ -1066,10 +1118,16 @@ public class Sentence {
   /**
    * Update the parse tree for this sentence.
    * @param parse The parse tree to update.
+   * @param binary The binary parse tree to update.
    */
-  protected void updateParse(CoreNLPProtos.ParseTree parse) {
+  protected void updateParse(
+      CoreNLPProtos.ParseTree parse,
+      CoreNLPProtos.ParseTree binary) {
     synchronized (this.impl) {
       this.impl.setParseTree(parse);
+      if (binary != null) {
+        this.impl.setBinarizedParseTree(binary);
+      }
     }
   }
 
@@ -1077,16 +1135,16 @@ public class Sentence {
    * Update the dependencies of the sentence.
    *
    * @param basic The basic dependencies to update.
-   * @param collapsed The collapsed dependencies to update.
-   * @param ccProcessed The CC processed dependencies to update.
+   * @param enhanced The enhanced dependencies to update.
+   * @param enhancedPlusPlus The enhanced plus plus dependencies to update.
    */
   protected void updateDependencies(CoreNLPProtos.DependencyGraph basic,
-                                    CoreNLPProtos.DependencyGraph collapsed,
-                                    CoreNLPProtos.DependencyGraph ccProcessed) {
+                                    CoreNLPProtos.DependencyGraph enhanced,
+                                    CoreNLPProtos.DependencyGraph enhancedPlusPlus) {
     synchronized (this.impl) {
       this.impl.setBasicDependencies(basic);
-      this.impl.setCollapsedDependencies(collapsed);
-      this.impl.setCollapsedCCProcessedDependencies(ccProcessed);
+      this.impl.setEnhancedDependencies(enhanced);
+      this.impl.setEnhancedPlusPlusDependencies(enhancedPlusPlus);
     }
   }
 
@@ -1109,6 +1167,17 @@ public class Sentence {
   protected void updateKBP(Stream<CoreNLPProtos.RelationTriple> triples) {
     synchronized (this.impl) {
       triples.forEach(this.impl::addKbpTriple);
+    }
+  }
+
+  /**
+   * Update the Sentiment class for this sentence.
+   *
+   * @param sentiment The sentiment of the sentence.
+   */
+  protected void updateSentiment(String sentiment) {
+    synchronized (this.impl) {
+      this.impl.setSentiment(sentiment);
     }
   }
 
@@ -1195,7 +1264,7 @@ public class Sentence {
 
   /**
    * Apply a tokensregex pattern to the sentence
-   * @param pattern
+   * @param pattern The TokensRegex pattern to match against.
    * @return the matcher.
    */
   public boolean matches(TokenSequencePattern pattern) {
@@ -1204,8 +1273,8 @@ public class Sentence {
 
   /**
    * Apply a tokensregex pattern
-   * @param pattern
-   * @return
+   * @param pattern The TokensRegex pattern to match against.
+   * @return True if the tokensregex pattern matches.
    */
   public boolean matches(String pattern) {
     return matches(TokenSequencePattern.compile(pattern));
@@ -1213,12 +1282,13 @@ public class Sentence {
 
   /**
    * Apply a tokensregex pattern to the sentence
-   * @param pattern
-   * @return the matcher.
+   * @param pattern The TokensRegex pattern to match against.
+   * @param fn The action to do on each match.
+   * @return the list of matches, after run through the function.
    */
   public <T> List<T> find(TokenSequencePattern pattern, Function<TokenSequenceMatcher, T> fn) {
     TokenSequenceMatcher matcher = pattern.matcher(asCoreLabels());
-    List<T> lst = new ArrayList<T>();
+    List<T> lst = new ArrayList<>();
     while(matcher.find()) {
       lst.add(fn.apply(matcher));
     }
@@ -1231,12 +1301,13 @@ public class Sentence {
 
   /**
    * Apply a semgrex pattern to the sentence
-   * @param pattern
-   * @return the matcher.
+   * @param pattern The Semgrex pattern to match against.
+   * @param fn The action to do on each match.
+   * @return the list of matches, after run through the function.
    */
   public <T> List<T> semgrex(SemgrexPattern pattern, Function<SemgrexMatcher, T> fn) {
     SemgrexMatcher matcher = pattern.matcher(dependencyGraph());
-    List<T> lst = new ArrayList<T>();
+    List<T> lst = new ArrayList<>();
     while(matcher.findNextMatchingNode()) {
       lst.add(fn.apply(matcher));
     }
@@ -1245,8 +1316,9 @@ public class Sentence {
 
   /**
    * Apply a semgrex pattern to the sentence
-   * @param pattern
-   * @return the matcher.
+   * @param pattern The Semgrex pattern to match against.
+   * @param fn The action to do on each match.
+   * @return the list of matches, after run through the function.
    */
   public <T> List<T> semgrex(String pattern, Function<SemgrexMatcher, T> fn) {
     return semgrex(SemgrexPattern.compile(pattern), fn);

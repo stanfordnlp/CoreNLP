@@ -546,17 +546,6 @@ public class RelationTripleSegmenter {
         if ("nmod:poss".equals(m.getRelnString("prepEdge"))) {
           continue PATTERN_LOOP;   // nmod:poss is not a preposition!
         }
-        // some JIT on the pattern ordering
-        // note[Gabor]: This actually helps quite a bit; 72->86 sentences per second for the entire OpenIE pipeline.
-//        VERB_PATTERN_HITS.incrementCount(pattern);
-//        if (((int) VERB_PATTERN_HITS.totalCount()) % 1000 == 0) {
-//          ArrayList<SemgrexPattern> newPatterns = new ArrayList<>(VERB_PATTERNS);
-//          Collections.sort(newPatterns, (x, y) ->
-//                  (int) (VERB_PATTERN_HITS.getCount(y) - VERB_PATTERN_HITS.getCount(x))
-//          );
-//          VERB_PATTERNS = newPatterns;
-//        }
-        // Main code
         int numKnownDependents = 2;  // subject and object, at minimum
         boolean istmod = false;      // this is a tmod relation
 
@@ -618,8 +607,6 @@ public class RelationTripleSegmenter {
           for (IndexedWord word : chunk.get()) {
             verbChunk.add(word, Integer.MIN_VALUE / 2 - word.pseudoPosition());
           }
-          // (register the edge)
-//          numKnownDependents += 1;  // TODO(gabor) do we need this?
         }
         // (handle special prepositions)
         if (prepEdge != null) {

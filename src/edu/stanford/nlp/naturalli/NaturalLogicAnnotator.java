@@ -341,7 +341,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
     SemanticGraph tree = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
     if (tree == null) {
-      tree = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+      tree = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
     }
     for (SemgrexPattern pattern : PATTERNS) {
       SemgrexMatcher matcher = pattern.matcher(tree);
@@ -442,7 +442,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
     // Get tree and tokens
     SemanticGraph tree = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
     if (tree == null) {
-      tree = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+      tree = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
     }
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
 
@@ -527,13 +527,13 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
         token.set(PolarityAnnotation.class, Polarity.DEFAULT);
       }
     }
-    if (sentence.containsKey(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class)) {
-      for (IndexedWord token : sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class).vertexSet()) {
+    if (sentence.containsKey(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class)) {
+      for (IndexedWord token : sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class).vertexSet()) {
         token.set(PolarityAnnotation.class, Polarity.DEFAULT);
       }
     }
-    if (sentence.containsKey(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class)) {
-      for (IndexedWord token : sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class).vertexSet()) {
+    if (sentence.containsKey(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class)) {
+      for (IndexedWord token : sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class).vertexSet()) {
         token.set(PolarityAnnotation.class, Polarity.DEFAULT);
       }
     }
@@ -643,8 +643,8 @@ public class NaturalLogicAnnotator extends SentenceAnnotator  {
         CoreAnnotations.PartOfSpeechAnnotation.class,
         CoreAnnotations.LemmaAnnotation.class,
         SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class
+        SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class,
+        SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class
     )));
   }
 
