@@ -9,12 +9,7 @@ import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -459,12 +454,13 @@ public class IOUtils  {
    * @param textFileOrUrl The String specifying the URL/resource/file to load
    * @return An InputStream for loading a resource
    * @throws IOException On any IO error
+   * @throws NullPointerException Input parameter is null
    */
   public static InputStream getInputStreamFromURLOrClasspathOrFileSystem(String textFileOrUrl)
-          throws IOException {
+          throws IOException, NullPointerException {
     InputStream in;
     if (textFileOrUrl == null) {
-      throw new IOException("Attempt to open file with null name");
+      throw new NullPointerException("Attempt to open file with null name");
     } else if (textFileOrUrl.matches("https?://.*")) {
       URL u = new URL(textFileOrUrl);
       URLConnection uc = u.openConnection();
@@ -1556,8 +1552,7 @@ public class IOUtils  {
     return new PrintWriter(new BufferedWriter(new OutputStreamWriter(out, encoding)), true);
   }
 
-  public static InputStream getBZip2PipedInputStream(String filename) throws IOException
-  {
+  public static InputStream getBZip2PipedInputStream(String filename) throws IOException {
     String bzcat = System.getProperty("bzcat", "bzcat");
     Runtime rt = Runtime.getRuntime();
     String cmd = bzcat + " " + filename;
@@ -1569,8 +1564,7 @@ public class IOUtils  {
     return p.getInputStream();
   }
 
-  public static OutputStream getBZip2PipedOutputStream(String filename) throws IOException
-  {
+  public static OutputStream getBZip2PipedOutputStream(String filename) throws IOException {
     return new BZip2PipedOutputStream(filename);
   }
 
@@ -1582,8 +1576,7 @@ public class IOUtils  {
    * @return a set of the entries in column field
    * @throws IOException
    */
-  public static Set<String> readColumnSet(String infile, int field) throws IOException
-  {
+  public static Set<String> readColumnSet(String infile, int field) throws IOException {
     BufferedReader br = IOUtils.getBufferedFileReader(infile);
 
     Set<String> set = Generics.newHashSet();
