@@ -1,4 +1,5 @@
 package edu.stanford.nlp.parser.nndep;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.HasWord;
@@ -20,11 +21,11 @@ import java.util.function.Function;
  * @author Danqi Chen
  * @author Jon Gauthier
  */
-public class Config {
-
+public class Config
+{
   /**
-   *   Out-of-vocabulary token string.
-   */
+  *   Out-of-vocabulary token string.
+  */
   public static final String UNKNOWN = "-UNKNOWN-";
 
    /**
@@ -254,7 +255,7 @@ public class Config {
    * @return A {@link edu.stanford.nlp.international.Language}
    *         or {@code null} if no instance matches the given string.
    */
-  private static Language getLanguage(String languageStr) {
+  private Language getLanguage(String languageStr) {
     for (Language l : Language.values()) {
       if (l.name().equalsIgnoreCase(languageStr))
         return l;
@@ -284,5 +285,4 @@ public class Config {
     System.err.printf("noPunc = %b%n", noPunc);
     System.err.printf("doWordEmbeddingGradUpdate = %b%n", doWordEmbeddingGradUpdate);
   }
-
 }

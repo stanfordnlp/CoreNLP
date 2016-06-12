@@ -4,8 +4,6 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.util.Lazy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -14,13 +12,9 @@ import java.util.Properties;
 /**
  * A sentence running with the Chinese models.
  *
- * @author <a href="mailto:gabor@eloquent.ai">Gabor Angeli</a>
+ * @author <a href="mailto:angeli@cs.stanford.edu">Gabor Angeli</a>
  */
 public class ChineseDocument extends Document {
-  /**
-   * A Logger for this class.
-   */
-  private static final Logger log = LoggerFactory.getLogger(ChineseDocument.class);
 
   /**
    * The default {@link ChineseSegmenterAnnotator} implementation
@@ -43,7 +37,6 @@ public class ChineseDocument extends Document {
     }
     setProperty("language", "chinese");
     setProperty("annotators", "");
-    setProperty("parse.binaryTrees", "true");
   }};
 
   /**
@@ -90,11 +83,24 @@ public class ChineseDocument extends Document {
 
 
   /**
-   * The Neural Dependency Parser doesn't support Chinese yet, so back off to running the
-   * constituency parser instead.
+   * No lemma annotator for Chinese -- set the lemma to be the word.
+   *
+   * @see Document#runLemma(Properties)
    */
-  @Override  // TODO(danqi; from Gabor): remove this method when we have a trained NNDep model
-  Document runDepparse(Properties props) {
-    return runParse(props);
+  @Override
+  protected Document runLemma(Properties props) {
+    return mockLemma(props);
   }
+
+
+  /**
+   * No sentiment analysis implemented for Chinese.
+   *
+   * @see Document#runSentiment(Properties)
+   */
+  @Override
+  protected Document runSentiment(Properties props) {
+    throw new IllegalArgumentException("Sentiment analysis is not implemented for Chinese");
+  }
+
 }

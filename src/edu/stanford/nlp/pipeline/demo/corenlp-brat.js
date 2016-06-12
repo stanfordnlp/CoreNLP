@@ -279,7 +279,7 @@ function render(data) {
     var index = sentence.index;
     var tokens = sentence.tokens;
     var deps = sentence['basic-dependencies'];
-    var deps2 = sentence['collapsed-ccprocessed-dependencies'];
+    var deps2 = sentence['enhanced-plus-plus-dependencies'];
   
     // POS tags
     /**
@@ -782,7 +782,7 @@ $(document).ready(function() {
           createAnnotationDiv('lemma',    'lemma',      'lemma',                               'Lemmas'                  );
           createAnnotationDiv('ner',      'ner',        'ner',                                 'Named Entity Recognition');
           createAnnotationDiv('deps',     'depparse',   'basic-dependencies',                  'Basic Dependencies'      );
-          createAnnotationDiv('deps2',    'depparse',   'collapsed-ccprocessed-dependencies',  'Enhanced Dependencies'   );
+          createAnnotationDiv('deps2',    'depparse',   'enhanced-plus-plus-dependencies',     'Enhanced++ Dependencies' );
           createAnnotationDiv('openie',   'openie',     'openie',                              'Open IE'                 );
           createAnnotationDiv('coref',    'coref',      'corefs',                              'Coreference'             );
           createAnnotationDiv('entities', 'entitylink', 'entitylink',                          'Wikidict Entities'       );

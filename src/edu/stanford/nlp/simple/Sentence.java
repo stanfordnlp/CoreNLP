@@ -603,7 +603,6 @@ public class Sentence {
     return parse(this.defaultProps);
   }
 
-
   /** An internal helper to get the dependency tree of the given type. */
   private CoreNLPProtos.DependencyGraph dependencies(SemanticGraphFactory.Mode mode) {
     switch (mode) {
@@ -1125,9 +1124,7 @@ public class Sentence {
       CoreNLPProtos.ParseTree binary) {
     synchronized (this.impl) {
       this.impl.setParseTree(parse);
-      if (binary != null) {
-        this.impl.setBinarizedParseTree(binary);
-      }
+      this.impl.setBinarizedParseTree(binary);
     }
   }
 
@@ -1169,6 +1166,7 @@ public class Sentence {
       triples.forEach(this.impl::addKbpTriple);
     }
   }
+
 
   /**
    * Update the Sentiment class for this sentence.

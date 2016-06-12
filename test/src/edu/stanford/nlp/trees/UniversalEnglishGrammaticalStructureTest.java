@@ -29,13 +29,15 @@ package edu.stanford.nlp.trees;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.GrammaticalStructure.Extras;
+import junit.framework.Assert;
+import junit.framework.TestCase;
 
 
 /** Test cases for Universal Dependencies English typed dependencies (Stanford dependencies).
@@ -55,7 +57,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
   private TestType type;
 
 
-  private enum TestType {
+  enum TestType {
     BASIC, //Basic conversion, no extra dependencies or collapsing
     COPULA_HEAD, //Basic conversion with copula being the head
     NON_COLLAPSED, //Basic conversion + extra dependencies

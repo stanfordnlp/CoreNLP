@@ -69,7 +69,9 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(LinearClassifier.class);
 
-  /** Classifier weights. First index is the featureIndex value and second index is the labelIndex value. */
+  /** Classifier weights. First index is the featureIndex value and second
+   *  index is the labelIndex value.
+   */
   private double[][] weights;
   private Index<L> labelIndex;
   private Index<F> featureIndex;

@@ -1,4 +1,7 @@
-package edu.stanford.nlp.trees;
+package edu.stanford.nlp.trees; 
+import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
+import edu.stanford.nlp.trees.ud.EnhancementOptions;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -22,34 +25,31 @@ import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
-import edu.stanford.nlp.trees.ud.EnhancementOptions;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Filters;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.ReflectionLoading;
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.logging.Redwood;
-
+import edu.stanford.nlp.util.*;
 import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
 import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
 
 
 /**
  * A {@code GrammaticalStructure} stores dependency relations between
- * nodes in a tree.  A new {@code GrammaticalStructure} is constructed
+ * nodes in a tree.  A new <code>GrammaticalStructure</code> is constructed
  * from an existing parse tree with the help of {@link
- * GrammaticalRelation {@code GrammaticalRelation}}, which
+ * GrammaticalRelation <code>GrammaticalRelation</code>}, which
  * defines a hierarchy of grammatical relations, along with
  * patterns for identifying them in parse trees.  The constructor for
- * {@code GrammaticalStructure} uses these definitions to
- * populate the new {@code GrammaticalStructure} with as many
+ * <code>GrammaticalStructure</code> uses these definitions to
+ * populate the new <code>GrammaticalStructure</code> with as many
  * labeled grammatical relations as it can.  Once constructed, the new
- * {@code GrammaticalStructure} can be printed in various
+ * <code>GrammaticalStructure</code> can be printed in various
  * formats, or interrogated using the interface methods in this
  * class. Internally, this uses a representation via a {@code TreeGraphNode},
  * that is, a tree with additional labeled
  * arcs between nodes, for representing the grammatical relations in a
  * parse tree.
+ * <p/>
+ * <b>Caveat emptor!</b> This is a work in progress.
+ * Nothing in here should be relied upon to function perfectly.
+ * Feedback welcome.
  *
  * @author Bill MacCartney
  * @author Galen Andrew (refactoring English-specific stuff)
@@ -75,7 +75,7 @@ public abstract class GrammaticalStructure implements Serializable  {
      * <p> Don't include any additional edges. </p>
      * <p>
      *   Note: In older code (2014 and before) including extras was a boolean flag. This option is the equivalent of
-     *   the {@code false} flag.
+     *   the <code>false</code> flag.
      * </p>
      */
     NONE(false, false, false),

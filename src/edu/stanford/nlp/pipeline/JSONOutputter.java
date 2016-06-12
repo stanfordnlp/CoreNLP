@@ -100,8 +100,6 @@ public class JSONOutputter extends AnnotationOutputter {
           l2.set("parse", treeStrWriter.toString().trim());  // strip the trailing newline
           // (dependency trees)
           l2.set("basic-dependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)));
-          l2.set("collapsed-dependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class)));
-          l2.set("collapsed-ccprocessed-dependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class)));
           l2.set("enhanced-dependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class)));
           l2.set("enhanced-plus-plus-dependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class)));
           // (sentiment)

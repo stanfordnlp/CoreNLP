@@ -13,9 +13,9 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Evaluates a CRFClassifier on a set of data.
+ * Evaluates CRFClassifier on a set of data.
  * This can be called by QNMinimizer periodically.
- * If evalCmd is set, it runs the command line specified by evalCmd,
+ * If evalCmd is set, it runs command line specified by evalCmd
  * otherwise it does evaluation internally.
  * NOTE: when running conlleval with exec on Linux, linux will first
  *          fork process by duplicating memory of current process.  So if the
@@ -29,8 +29,8 @@ public class CRFClassifierEvaluator<IN extends CoreMap> extends CmdEvaluator  {
   /** A logger for this class */
   private static final Redwood.RedwoodChannels log = Redwood.channels(CRFClassifierEvaluator.class);
 
-  private final CRFClassifier<IN> classifier;
-  /** NOTE: Default uses -r, specify without -r if IOB. */
+  private CRFClassifier<IN> classifier;
+  // NOTE: Default uses -r, specify without -r if IOB
   private String cmdStr = "/u/nlp/bin/conlleval -r";
   private String[] cmd;
 
@@ -44,7 +44,8 @@ public class CRFClassifierEvaluator<IN extends CoreMap> extends CmdEvaluator  {
   public CRFClassifierEvaluator(String description,
                                 CRFClassifier<IN> classifier,
                                 Collection<List<IN>> data,
-                                List<Triple<int[][][], int[], double[][][]>> featurizedData) {
+                                List<Triple<int[][][], int[], double[][][]>> featurizedData)
+  {
     this.description = description;
     this.classifier = classifier;
     this.data = data;
@@ -54,7 +55,8 @@ public class CRFClassifierEvaluator<IN extends CoreMap> extends CmdEvaluator  {
   }
 
   public CRFClassifierEvaluator(String description,
-                                CRFClassifier<IN> classifier) {
+                                CRFClassifier<IN> classifier)
+  {
     this.description = description;
     this.classifier = classifier;
     saveOutput = true;
@@ -63,7 +65,8 @@ public class CRFClassifierEvaluator<IN extends CoreMap> extends CmdEvaluator  {
   /**
    * Set the data to test on
    */
-  public void setTestData(Collection<List<IN>> data, List<Triple<int[][][], int[], double[][][]>> featurizedData) {
+  public void setTestData(Collection<List<IN>> data, List<Triple<int[][][], int[], double[][][]>> featurizedData)
+  {
     this.data = data;
     this.featurizedData = featurizedData;
   }
