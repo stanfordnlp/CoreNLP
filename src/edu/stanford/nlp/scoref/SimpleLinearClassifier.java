@@ -1,6 +1,5 @@
 package edu.stanford.nlp.scoref;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.SortedMap;

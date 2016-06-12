@@ -261,7 +261,6 @@ public class Document {
     }
   };
 
-
   /**
    * Cache the most recently used custom annotators.
    */
@@ -845,7 +844,7 @@ public class Document {
         Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
         Tree binaryTree = sentence.get(TreeCoreAnnotations.BinarizedTreeAnnotation.class);
         sentences.get(i).updateParse(serializer.toProto(tree),
-                                     serializer.toProto(binaryTree));
+                                     binaryTree == null ? null : serializer.toProto(binaryTree));
         sentences.get(i).updateDependencies(
             ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)),
             ProtobufAnnotationSerializer.toProto(sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class)),
@@ -952,10 +951,13 @@ public class Document {
 
   Document runSentiment(Properties props) {
     if (this.sentences != null && this.sentences.size() > 0 && this.sentences.get(0).rawSentence().hasSentiment()) {
-      return this;
+        return this;
     }
     // Run prerequisites
     runParse(props);
+    if (this.sentences != null && this.sentences.size() > 0 && !this.sentences.get(0).rawSentence().hasBinarizedParseTree()) {
+      throw new IllegalStateException("No binarized parse tree (perhaps it's not supported in this language?)");
+    }
     // Run annotator
     Annotation ann = asAnnotation();
     Supplier<Annotator> sentiment = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultSentiment : getOrCreate(AnnotatorFactories.sentiment(props, backend));

@@ -186,6 +186,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       }
       CoreLabel token = new CoreLabel();
       token.setWord(w);
+      token.setValue(w);
       token.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, fl.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
       pos += w.length();
       fl = sentChars.get(pos - 1);

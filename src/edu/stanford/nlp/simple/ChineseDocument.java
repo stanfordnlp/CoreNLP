@@ -37,6 +37,7 @@ public class ChineseDocument extends Document {
     }
     setProperty("language", "chinese");
     setProperty("annotators", "");
+    setProperty("parse.binaryTrees", "true");
   }};
 
   /**
@@ -83,6 +84,7 @@ public class ChineseDocument extends Document {
 
 
   /**
+<<<<<<< HEAD
    * No lemma annotator for Chinese -- set the lemma to be the word.
    *
    * @see Document#runLemma(Properties)
@@ -103,4 +105,12 @@ public class ChineseDocument extends Document {
     throw new IllegalArgumentException("Sentiment analysis is not implemented for Chinese");
   }
 
+  /**
+   * The Neural Dependency Parser doesn't support Chinese yet, so back off to running the
+   * constituency parser instead.
+   */
+  @Override  // TODO(danqi; from Gabor): remove this method when we have a trained NNDep model
+  Document runDepparse(Properties props) {
+    return runParse(props);
+  }
 }

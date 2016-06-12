@@ -2,40 +2,39 @@ package edu.stanford.nlp.ling;
 
 import edu.stanford.nlp.simple.Sentence;
 import junit.framework.TestCase;
-import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/** 
+/**
  *  Tests the static methods that turn sentences (lists of Labels)
  *  into strings.
  *
  *  @author John Bauer
  */
 public class SentenceTest extends TestCase {
-  String words[] = {"This", "is", "a", "test", "."};
-  String tags[] = {"A", "B", "C", "D", "E"};
-  String expectedValueOnly = "This is a test .";
-  String expectedTagged = "This_A is_B a_C test_D ._E";
-  String separator = "_";
+
+  private String[] words = {"This", "is", "a", "test", "."};
+  private String[] tags = {"A", "B", "C", "D", "E"};
+  private String expectedValueOnly = "This is a test .";
+  private String expectedTagged = "This_A is_B a_C test_D ._E";
+  private String separator = "_";
 
   @Override
   public void setUp() {
     assertEquals(words.length, tags.length);
   }
 
-  @Test
   public void testCoreLabelListToString() {
-    List<CoreLabel> clWords = new ArrayList<CoreLabel>();
-    List<CoreLabel> clValues = new ArrayList<CoreLabel>();
-    List<CoreLabel> clWordTags = new ArrayList<CoreLabel>();
-    List<CoreLabel> clValueTags = new ArrayList<CoreLabel>();
+    List<CoreLabel> clWords = new ArrayList<>();
+    List<CoreLabel> clValues = new ArrayList<>();
+    List<CoreLabel> clWordTags = new ArrayList<>();
+    List<CoreLabel> clValueTags = new ArrayList<>();
     for (int i = 0; i < words.length; ++i) {
       CoreLabel cl = new CoreLabel();
       cl.setWord(words[i]);
       clWords.add(cl);
-      
+
       cl = new CoreLabel();
       cl.setValue(words[i]);
       clValues.add(cl);
@@ -44,7 +43,7 @@ public class SentenceTest extends TestCase {
       cl.setWord(words[i]);
       cl.setTag(tags[i]);
       clWordTags.add(cl);
-      
+
       cl = new CoreLabel();
       cl.setValue(words[i]);
       cl.setTag(tags[i]);
@@ -54,19 +53,19 @@ public class SentenceTest extends TestCase {
     assertEquals(expectedValueOnly, SentenceUtils.listToString(clWords, true));
     assertEquals(expectedValueOnly, SentenceUtils.listToString(clValues, true));
 
-    assertEquals(expectedTagged, 
+    assertEquals(expectedTagged,
                  SentenceUtils.listToString(clWordTags, false, separator));
-    assertEquals(expectedTagged, 
+    assertEquals(expectedTagged,
                  SentenceUtils.listToString(clValueTags, false, separator));
   }
 
   public void testTaggedWordListToString() {
-    List<TaggedWord> tagged = new ArrayList<TaggedWord>();
+    List<TaggedWord> tagged = new ArrayList<>();
     for (int i = 0; i < words.length; ++i) {
       tagged.add(new TaggedWord(words[i], tags[i]));
     }
     assertEquals(expectedValueOnly, SentenceUtils.listToString(tagged, true));
-    assertEquals(expectedTagged, 
+    assertEquals(expectedTagged,
                  SentenceUtils.listToString(tagged, false, separator));
   }
 
@@ -80,6 +79,7 @@ public class SentenceTest extends TestCase {
     byte[] textArray = text.getBytes();
     assertTrue(sentenceArray.length < textArray.length * 10);
   }
+
 }
 
 
