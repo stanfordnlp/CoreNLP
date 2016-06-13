@@ -1,4 +1,4 @@
-package edu.stanford.nlp.time;
+package edu.stanford.nlp.time; 
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.IOUtils;
@@ -20,12 +20,13 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Function;
 import java.util.logging.LogManager;
 import java.util.regex.Pattern;
 
 
 /**
- * Main program for testing SUTime.
+ * Main program for testing SUTime
  * <br>
  * Processing a text string:
  * <pre>
@@ -151,9 +152,8 @@ import java.util.regex.Pattern;
 public class SUTimeMain  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(SUTimeMain.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(SUTimeMain.class);
   protected static String PYTHON = null;
-
 
   private SUTimeMain() {} // static class
 
@@ -331,7 +331,8 @@ public class SUTimeMain  {
 
 
   // Process CSV file with just timebank sentences with time expressions
-  public static void processTimebankCsv(AnnotationPipeline pipeline, String in, String out, String eval) throws IOException {
+  public static void processTimebankCsv(AnnotationPipeline pipeline, String in, String out, String eval) throws IOException
+  {
     BufferedReader br = IOUtils.getBufferedFileReader(in);
     PrintWriter pw = (out != null)? IOUtils.getPrintWriter(out):new PrintWriter(System.out);
     String line;
@@ -379,14 +380,15 @@ public class SUTimeMain  {
     System.out.println("Value: " + evalStats.valPrStats.toString(2));
   }
 
-  private static String joinWordTags(List<? extends CoreMap> l, String glue, int start, int end) {
-    return StringUtils.join(l, glue, in -> in.get(CoreAnnotations.TextAnnotation.class) + '/' + in.get(CoreAnnotations.PartOfSpeechAnnotation.class), start, end);
+  public static String joinWordTags(List<? extends CoreMap> l, String glue, int start, int end) {
+    return StringUtils.join(l, glue, in -> in.get(CoreAnnotations.TextAnnotation.class) + "/" + in.get(CoreAnnotations.PartOfSpeechAnnotation.class), start, end);
   }
 
   private static void processTempEval2Doc(AnnotationPipeline pipeline, Annotation docAnnotation,
                                           Map<String, List<TimexAttributes>> timexMap,
                                           PrintWriter extPw, PrintWriter attrPw, PrintWriter debugPw,
-                                          PrintWriter attrDebugPwGold, PrintWriter attrDebugPw) {
+                                          PrintWriter attrDebugPwGold, PrintWriter attrDebugPw)
+  {
     pipeline.annotate(docAnnotation);
     String docId = docAnnotation.get(CoreAnnotations.DocIDAnnotation.class);
     String docDate = docAnnotation.get(CoreAnnotations.DocDateAnnotation.class);
@@ -524,7 +526,8 @@ public class SUTimeMain  {
 
   private static CoreLabelTokenFactory tokenFactory = new CoreLabelTokenFactory();
 
-  private static CoreMap wordsToSentence(List<String> sentWords) {
+  private static CoreMap wordsToSentence(List<String> sentWords)
+  {
     String sentText = StringUtils.join(sentWords, " ");
     Annotation sentence = new Annotation(sentText);
     List<CoreLabel> tokens = new ArrayList<>(sentWords.size());
@@ -537,7 +540,8 @@ public class SUTimeMain  {
     return sentence;
   }
 
-  public static Annotation sentencesToDocument(String documentID, String docDate, List<CoreMap> sentences) {
+  public static Annotation sentencesToDocument(String documentID, String docDate, List<CoreMap> sentences)
+  {
     String docText = ChunkAnnotationUtils.getTokenText(sentences, CoreAnnotations.TextAnnotation.class);
     Annotation document = new Annotation(docText);
     document.set(CoreAnnotations.DocIDAnnotation.class, documentID);
@@ -599,7 +603,8 @@ public class SUTimeMain  {
     }
   }
 
-  private static TimexAttributes findTimex(Map<String,List<TimexAttributes>> timexMap, String docId, String tid) {
+  private static TimexAttributes findTimex(Map<String,List<TimexAttributes>> timexMap, String docId, String tid)
+  {
     // Find entry
     List<TimexAttributes> list = timexMap.get(docId);
     for (TimexAttributes timex:list) {
@@ -610,7 +615,8 @@ public class SUTimeMain  {
     return null;
   }
 
-  private static List<TimexAttributes> updateTimexText(Map<String,List<TimexAttributes>> timexMap, Annotation docAnnotation) {
+  private static List<TimexAttributes> updateTimexText(Map<String,List<TimexAttributes>> timexMap, Annotation docAnnotation)
+  {
     // Find entry
     String docId = docAnnotation.get(CoreAnnotations.DocIDAnnotation.class);
     List<CoreMap> sents = docAnnotation.get(CoreAnnotations.SentencesAnnotation.class);
@@ -645,14 +651,15 @@ public class SUTimeMain  {
     return null;
   }
 
-  private static Map<String,List<TimexAttributes>> readTimexAttrExts(String extentsFile, String attrsFile) throws IOException {
+  private static Map<String,List<TimexAttributes>> readTimexAttrExts(String extentsFile, String attrsFile) throws IOException
+  {
     Map<String,List<TimexAttributes>> timexMap = Generics.newHashMap();
     BufferedReader extBr = IOUtils.getBufferedFileReader(extentsFile);
     String line;
     String lastDocId = null;
     TimexAttributes lastTimex = null;
     while ((line = extBr.readLine()) != null) {
-      if (line.trim().isEmpty()) continue;
+      if (line.trim().length() == 0) continue;
       // Simple tab delimited file
       String[] fields = line.split("\t");
       String docName = fields[0];
@@ -779,9 +786,9 @@ public class SUTimeMain  {
       // convert from yyyyMMdd to requiredDocDateFormat
       DateFormat defaultFormatter = new SimpleDateFormat("yyyyMMdd");
       DateFormat requiredFormatter = new SimpleDateFormat(requiredDocDateFormat);
-      for (Map.Entry<String, String> docDateEntry : docDates.entrySet()) {
-        Date date = defaultFormatter.parse(docDateEntry.getValue());
-        docDates.put(docDateEntry.getKey(), requiredFormatter.format(date));
+      for (String docId:docDates.keySet()) {
+        Date date = defaultFormatter.parse(docDates.get(docId));
+        docDates.put(docId, requiredFormatter.format(date));
       }
     }
     processTempEval2Tab(pipeline, in, out, docDates);
@@ -836,7 +843,8 @@ public class SUTimeMain  {
     }
   }
 
-  public static void processTempEval3File(AnnotationPipeline pipeline, String in, String out) throws Exception {
+  public static void processTempEval3File(AnnotationPipeline pipeline, String in, String out) throws Exception
+  {
     // Process one tempeval file
     Document doc = edu.stanford.nlp.util.XMLUtils.readDocumentFromFile(in);
     Node timemlNode = XMLUtils.getNode(doc, "TimeML");
@@ -876,7 +884,8 @@ public class SUTimeMain  {
   private static String requiredDocDateFormat;
   private static boolean useGUTime = false;
 
-  public static AnnotationPipeline getPipeline(Properties props, boolean tokenize) throws Exception {
+  public static AnnotationPipeline getPipeline(Properties props, boolean tokenize) throws Exception
+  {
 //    useGUTime = Boolean.parseBoolean(props.getProperty("gutime", "false"));
     AnnotationPipeline pipeline = new AnnotationPipeline();
     if (tokenize) {
@@ -907,7 +916,7 @@ public class SUTimeMain  {
 
   enum InputType { TEXTFILE, TEXT, TIMEBANK_CSV, TEMPEVAL2, TEMPEVAL3 }
 
-  private static void configLogger(String out) throws IOException {
+  public static void configLogger(String out) throws IOException {
     File outDir = new File(out);
     if (!outDir.exists()) {
       outDir.mkdirs();
@@ -978,7 +987,8 @@ public class SUTimeMain  {
     return nodes;
   }
 
-  public static void processTextFile(AnnotationPipeline pipeline, String in, String out, String date) throws IOException {
+  public static void processTextFile(AnnotationPipeline pipeline, String in, String out, String date) throws IOException
+  {
     String text = IOUtils.slurpFile(in);
     PrintWriter pw = (out != null)? IOUtils.getPrintWriter(out):new PrintWriter(System.out);
     String string = textToAnnotatedXml(pipeline, text, date);
@@ -987,7 +997,8 @@ public class SUTimeMain  {
     if (out != null) pw.close();
   }
 
-  public static void processText(AnnotationPipeline pipeline, String text, String out, String date) throws IOException {
+  public static void processText(AnnotationPipeline pipeline, String text, String out, String date) throws IOException
+  {
     PrintWriter pw = (out != null)? IOUtils.getPrintWriter(out):new PrintWriter(System.out);
     String string = textToAnnotatedXml(pipeline, text, date);
     pw.println(string);
@@ -1014,7 +1025,8 @@ public class SUTimeMain  {
     return textElem;
   }
 
-  public static Document annotationToXmlDocument(Annotation annotation) {
+  public static Document annotationToXmlDocument(Annotation annotation)
+  {
     Element dateElem = XMLUtils.createElement("DATE");
     dateElem.setTextContent(annotation.get(CoreAnnotations.DocDateAnnotation.class));
     Element textElem = annotationToTmlTextElement(annotation);
@@ -1029,7 +1041,8 @@ public class SUTimeMain  {
     return doc;
   }
 
-  public static Annotation textToAnnotation(AnnotationPipeline pipeline, String text, String date) {
+  public static Annotation textToAnnotation(AnnotationPipeline pipeline, String text, String date)
+  {
     Annotation annotation = new Annotation(text);
     annotation.set(CoreAnnotations.DocDateAnnotation.class, date);
     pipeline.annotate(annotation);

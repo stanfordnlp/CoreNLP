@@ -23,14 +23,15 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
   private static final Redwood.RedwoodChannels logger = Redwood.channels(TimeExpressionExtractorImpl.class);
 
   // Patterns for extracting time expressions
-  private TimeExpressionPatterns timexPatterns;
+  TimeExpressionPatterns timexPatterns;
 
-  private CoreMapExpressionExtractor expressionExtractor;
+  CoreMapExpressionExtractor expressionExtractor;
 
   // Options
-  private Options options;
+  Options options;
 
-  public TimeExpressionExtractorImpl() {
+  public TimeExpressionExtractorImpl()
+  {
     init(new Options());
   }
 
@@ -46,7 +47,8 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
   }
 
   @Override
-  public void init(Options options) {
+  public void init(Options options)
+  {
     this.options = options;
     NumberNormalizer.setVerbose(options.verbose);
     CoreMapExpressionExtractor.setVerbose(options.verbose);
@@ -70,7 +72,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
       docDate = docAnnotation.get(CoreAnnotations.DocDateAnnotation.class);
       if (docDate == null) {
         Calendar cal = docAnnotation.get(CoreAnnotations.CalendarAnnotation.class);
-        if (cal == null) {
+        if(cal == null){
           if (options.verbose) {
             logger.warn("WARNING: No document date specified");
           }
@@ -100,12 +102,14 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
   }
 
   @Override
-  public List<CoreMap> extractTimeExpressionCoreMaps(CoreMap annotation, String docDate) {
+  public List<CoreMap> extractTimeExpressionCoreMaps(CoreMap annotation, String docDate)
+  {
     SUTime.TimeIndex timeIndex = new SUTime.TimeIndex();
     return extractTimeExpressionCoreMaps(annotation, docDate, timeIndex);
   }
 
-  public List<CoreMap> extractTimeExpressionCoreMaps(CoreMap annotation, String docDate, SUTime.TimeIndex timeIndex) {
+  public List<CoreMap> extractTimeExpressionCoreMaps(CoreMap annotation, String docDate, SUTime.TimeIndex timeIndex)
+  {
     List<TimeExpression> timeExpressions = extractTimeExpressions(annotation, docDate, timeIndex);
     return toCoreMaps(annotation, timeExpressions, timeIndex);
   }
