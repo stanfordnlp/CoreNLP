@@ -596,7 +596,7 @@ public class Redwood  {
     supportsAnsi = Boolean.getBoolean("Ansi") || isUnix;
   }
 
-  /**
+  /*
    * Set up the default logger.
    * If SLF4J is in the code's classpath
    */
@@ -1505,7 +1505,7 @@ public class Redwood  {
     } catch (InterruptedException e) {
       throw new RuntimeInterruptedException(e);
     }
-		throw new IllegalArgumentException();
+    throw new IllegalArgumentException();
   } // end main()
 
 }
