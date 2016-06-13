@@ -36,7 +36,8 @@ import java.util.regex.Pattern;
  * </ul>
  *
  * <p>
- * Use {@link TimeAnnotator} to annotate.
+ * Use {@link TimeAnnotator} to annotate documents within an Annotation pipeline such as CoreNLP.
+ * Use {@link SUTimeMain} for standalone testing.
  *
  * @author Angel Chang
  */
