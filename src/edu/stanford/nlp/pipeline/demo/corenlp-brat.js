@@ -744,7 +744,7 @@ $(document).ready(function() {
       type: 'POST',
       url: serverAddress + '?properties=' + encodeURIComponent(
         '{"annotators": "' + annotators() + '", "coref.md.type": "dep", "coref.mode": "statistical"}'),
-      data: currentQuery,
+      data: encodeURIComponent(currentQuery), //jQuery does'nt automatically URI encode strings
       dataType: 'json',
       contentType: "application/x-www-form-urlencoded;charset=UTF-8",
       success: function(data) {
@@ -831,7 +831,7 @@ $(document).ready(function() {
     $.ajax({
       type: 'POST',
       url: serverAddress + '/tokensregex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
-      data: currentQuery,
+      data: encodeURIComponent(currentQuery),
       success: function(data) {
         $('.tokensregex_error').remove();  // Clear error messages
         $('<div id="tokensregex" class="pattern_brat"/>').appendTo($('#div_tokensregex'));
@@ -863,7 +863,7 @@ $(document).ready(function() {
     $.ajax({
       type: 'POST',
       url: serverAddress + '/semgrex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
-      data: currentQuery,
+      data: encodeURIComponent(currentQuery),
       success: function(data) {
         $('.semgrex_error').remove();  // Clear error messages
         $('<div id="semgrex" class="pattern_brat"/>').appendTo($('#div_semgrex'));
