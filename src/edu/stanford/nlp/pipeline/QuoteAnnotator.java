@@ -432,8 +432,15 @@ public class QuoteAnnotator implements Annotator  {
 
       if (DIRECTED_QUOTES.containsKey(quote) &&
           DIRECTED_QUOTES.get(quote).equals(c)) {
+        if (c.equals("’")) {
+          if ((i == text.length() - 1 || isSingleQuoteEnd(text, i))) {
+            // check to make sure that this isn't an apostrophe..
+            directed--;
+          }
+        } else {
           // closing
           directed--;
+        }
       }
 
       // opening
