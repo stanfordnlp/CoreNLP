@@ -956,4 +956,18 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertTrue(matches);
   }
 
+
+  public void testThrowAway() {
+    String conll =
+        "1\tI\t2\tnsubj\tPRP\n" +
+        "2\tthrow\t0\troot\tVB\n" +
+        "3\taway\t2\tcompound:ptr\tRP\n" +
+        "4\tmy\t5\tnmod:poss\tPRP$\n" +
+        "5\tlaptop\t2\tdobj\tNN\n";
+    // Positive case
+    Optional<RelationTriple> extraction = mkExtraction(conll, true);
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tI\tthrow away\tmy laptop", extraction.get().toString());
+  }
+
 }

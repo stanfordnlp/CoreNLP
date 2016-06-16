@@ -135,8 +135,15 @@ public class ForwardEntailerSearchProblem  {
     assert Util.isTree(parseTree);
     // (remove common determiners)
     List<String> determinerRemovals = new ArrayList<>();
-    parseTree.getLeafVertices().stream().filter(vertex -> "the".equalsIgnoreCase(vertex.word()) || "a".equalsIgnoreCase(vertex.word()) ||
-        "an".equalsIgnoreCase(vertex.word())).forEach(vertex -> {
+    parseTree.getLeafVertices().stream().filter(vertex ->
+        "the".equalsIgnoreCase(vertex.word()) ||
+            "a".equalsIgnoreCase(vertex.word()) ||
+            "an".equalsIgnoreCase(vertex.word()) ||
+            "this".equalsIgnoreCase(vertex.word()) ||
+            "that".equalsIgnoreCase(vertex.word()) ||
+            "those".equalsIgnoreCase(vertex.word()) ||
+            "these".equalsIgnoreCase(vertex.word())
+    ).forEach(vertex -> {
       parseTree.removeVertex(vertex);
       assert Util.isTree(parseTree);
       determinerRemovals.add("det");

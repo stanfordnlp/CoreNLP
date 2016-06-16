@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 public class WikidictAnnotator extends SentenceAnnotator {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(WikidictAnnotator.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(WikidictAnnotator.class);
 
   /** A pattern for simple numbers */
   private static final Pattern NUMBER_PATTERN = Pattern.compile("[0-9\\.]+");

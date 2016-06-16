@@ -1,20 +1,21 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.naturalli.NaturalLogicAnnotator;
-import edu.stanford.nlp.naturalli.OpenIE;
-import edu.stanford.nlp.util.logging.Redwood;
-
-import edu.stanford.nlp.ie.NERClassifierCombiner;
-import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
-import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.process.PTBTokenizer;
-import edu.stanford.nlp.process.WordToSentenceProcessor;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.PropertiesUtils;
+package edu.stanford.nlp.pipeline;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.Set;
+
+import edu.stanford.nlp.ie.NERClassifierCombiner;
+import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
+import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.naturalli.NaturalLogicAnnotator;
+import edu.stanford.nlp.naturalli.OpenIE;
+import edu.stanford.nlp.process.PTBTokenizer;
+import edu.stanford.nlp.process.WordToSentenceProcessor;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.PropertiesUtils;
+// import edu.stanford.nlp.util.logging.Redwood;
+
 
 /**
  * A companion to {@link AnnotatorFactory} defining the common annotators.
@@ -24,8 +25,8 @@ import java.util.Set;
  */
 public class AnnotatorFactories  {
 
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(AnnotatorFactories.class);
+  // /** A logger for this class */
+  // private static final Redwood.RedwoodChannels log = Redwood.channels(AnnotatorFactories.class);
 
   private AnnotatorFactories() {} // static factory class
 
@@ -578,7 +579,7 @@ public class AnnotatorFactories  {
 
       @Override
       public String additionalSignature() {
-        return "sentiment.model=" + properties.get("sentiment.model");
+        return "sentiment.model=" + properties.getProperty("sentiment.model");
       }
     };
   }
@@ -588,14 +589,18 @@ public class AnnotatorFactories  {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        if(!properties.containsKey("loadClassifier"))
+        if (properties.containsKey("classify.loadClassifier")) {
+          properties.setProperty("loadClassifier", properties.getProperty("classify.loadClassifier"));
+        }
+        if (!properties.containsKey("loadClassifier")) {
           throw new RuntimeException("Must load a classifier when creating a column data classifier annotator");
+        }
         return new ColumnDataClassifierAnnotator(properties);
       }
 
       @Override
       protected String additionalSignature() {
-        return "classifier="+properties.get("loadClassifier="+properties.get("loadClassifier"));
+        return "classifier="+ properties.getProperty("loadClassifier=" + properties.getProperty("loadClassifier"));
       }
     };
   }
@@ -715,8 +720,9 @@ public class AnnotatorFactories  {
   }
 
   public static AnnotatorFactory link(Properties properties, AnnotatorImplementations annotatorImplementations) {
+
     return new AnnotatorFactory(WikidictAnnotator.class, properties) {
-      private static final long serialVersionUID = 42l;
+      private static final long serialVersionUID = 42L;
 
       @Override
       public Annotator create() {
@@ -729,4 +735,5 @@ public class AnnotatorFactories  {
       }
     };
   }
+
 }

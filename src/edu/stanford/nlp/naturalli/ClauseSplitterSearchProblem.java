@@ -88,6 +88,9 @@ public class ClauseSplitterSearchProblem  {
     put("acl:relcl", new ArrayList<String>() {{  // no doubt (-> that cats have tails <-)
       add("simple");
     }});
+    put("parataxis", new ArrayList<String>() {{  // no doubt (-> that cats have tails <-)
+      add("simple");
+    }});
   }});
 
   /**

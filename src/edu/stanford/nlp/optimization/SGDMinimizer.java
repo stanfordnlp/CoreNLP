@@ -1,11 +1,9 @@
-package edu.stanford.nlp.optimization; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.optimization;
 
-import edu.stanford.nlp.classify.LogConditionalObjectiveFunction;
 import edu.stanford.nlp.classify.LogPrior;
 import edu.stanford.nlp.math.ArrayMath;
-import edu.stanford.nlp.util.SystemUtils;
 import edu.stanford.nlp.util.Timing;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -28,7 +26,7 @@ import java.util.Random;
 public class SGDMinimizer<T extends Function> implements Minimizer<T>, HasEvaluators  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(SGDMinimizer.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(SGDMinimizer.class);
 
   protected double xscale, xnorm;
   protected double[] x;
@@ -59,8 +57,7 @@ public class SGDMinimizer<T extends Function> implements Minimizer<T>, HasEvalua
     this(sigma, numPasses, tuningSamples, 1);
   }
 
-  public SGDMinimizer(double sigma, int numPasses, int tuningSamples, int batchSize)
-  {
+  public SGDMinimizer(double sigma, int numPasses, int tuningSamples, int batchSize) {
     this.bSize = batchSize;
     this.sigma = sigma;
     if (numPasses >= 0) {
@@ -77,8 +74,7 @@ public class SGDMinimizer<T extends Function> implements Minimizer<T>, HasEvalua
     }
   }
 
-  public SGDMinimizer(LogPrior prior, int numPasses, int batchSize, int tuningSamples)
-  {
+  public SGDMinimizer(LogPrior prior, int numPasses, int batchSize, int tuningSamples) {
     if (LogPrior.LogPriorType.QUADRATIC == prior.getType()) {
       sigma = prior.getSigma();
     } else {
@@ -99,6 +95,7 @@ public class SGDMinimizer<T extends Function> implements Minimizer<T>, HasEvalua
     }
   }
 
+
   public void shutUp() {
     this.quiet = true;
   }
@@ -110,27 +107,24 @@ public class SGDMinimizer<T extends Function> implements Minimizer<T>, HasEvalua
   }
 
   @Override
-  public void setEvaluators(int iters, Evaluator[] evaluators)
-  {
+  public void setEvaluators(int iters, Evaluator[] evaluators) {
     this.evaluateIters = iters;
     this.evaluators = evaluators;
   }
 
 
   //This can be filled if an extending class needs to initialize things.
-  protected void init(AbstractStochasticCachingDiffUpdateFunction func) {
-  }
+  @SuppressWarnings("UnusedParameters")
+  protected void init(AbstractStochasticCachingDiffUpdateFunction func) { }
 
-  public double getObjective(AbstractStochasticCachingDiffUpdateFunction function, double[] w, double wscale, int[] sample)
-  {
+  public double getObjective(AbstractStochasticCachingDiffUpdateFunction function, double[] w, double wscale, int[] sample) {
     double wnorm = getNorm(w) * wscale*wscale;
     double obj = function.valueAt(w, wscale, sample);
     // Calculate objective with L2 regularization
     return obj + 0.5*sample.length*lambda*wnorm;
   }
 
-  public double tryEta(AbstractStochasticCachingDiffUpdateFunction function, double[] initial, int[] sample, double eta)
-  {
+  public double tryEta(AbstractStochasticCachingDiffUpdateFunction function, double[] initial, int[] sample, double eta) {
     int numBatches =  sample.length / bSize;
     double[] w = new double[initial.length];
     double wscale = 1;
@@ -158,8 +152,7 @@ public class SGDMinimizer<T extends Function> implements Minimizer<T>, HasEvalua
    * @param sampleSize
    * @param seta
    */
-  public double tune(AbstractStochasticCachingDiffUpdateFunction function, double[] initial, int sampleSize, double seta)
-  {
+  public double tune(AbstractStochasticCachingDiffUpdateFunction function, double[] initial, int sampleSize, double seta) {
     Timing timer = new Timing();
     int[] sample = function.getSample(sampleSize);
     double sobj = getObjective(function, initial, 1, sample);
@@ -284,9 +277,7 @@ public class SGDMinimizer<T extends Function> implements Minimizer<T>, HasEvalua
 
     Timing total = new Timing();
     Timing current = new Timing();
-    total.start();
-    current.start();
-    int t=t0;
+    int t = t0;
     int iters = 0;
     for (int pass = 0; pass < numPasses; pass++)  {
       boolean doEval = (pass > 0 && evaluateIters > 0 && pass % evaluateIters == 0);
@@ -297,7 +288,6 @@ public class SGDMinimizer<T extends Function> implements Minimizer<T>, HasEvalua
 
       double totalValue = 0;
       double lastValue = 0;
-      say("Iter: " + iters + " pass " + pass + " batch 1 ... ");
       for (int batch = 0; batch < numBatches; batch++) {
         iters++;
 
@@ -323,10 +313,10 @@ public class SGDMinimizer<T extends Function> implements Minimizer<T>, HasEvalua
       xnorm = getNorm(x)*xscale*xscale;
       // Calculate loss based on L2 regularization
       double loss = totalValue + 0.5 * xnorm * lambda * totalSamples;
-      say(String.valueOf(numBatches));
-      say("[" + ( total.report() )/1000.0 + " s " );
-      say("{" + (current.restart()/1000.0) + " s}] ");
-      sayln(" "+lastValue + " " + totalValue + " " + loss);
+      sayln("Iter: " + iters + " pass " + pass + " batch 1 ... " + String.valueOf(numBatches) +
+              " [" + ( total.report() )/1000.0 + " s " +
+              " {" + (current.restart()/1000.0) + " s}] " +
+              lastValue + " " + totalValue + " " + loss);
 
       if (iters >= maxIterations) {
         sayln("Stochastic Optimization complete.  Stopped after max iterations");
@@ -352,12 +342,6 @@ public class SGDMinimizer<T extends Function> implements Minimizer<T>, HasEvalua
   }
 
   protected void sayln(String s) {
-    if (!quiet) {
-      log.info(s);
-    }
-  }
-
-  protected void say(String s) {
     if (!quiet) {
       log.info(s);
     }
