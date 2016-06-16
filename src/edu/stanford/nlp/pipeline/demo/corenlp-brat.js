@@ -164,7 +164,10 @@ function render(data) {
    */
   var entityTypesSet = {};
   var entityTypes = [];
-  function addEntityType(name, type) {
+  function addEntityType(name, type, coarseType) {
+    if (typeof coarseType == "undefined") {
+      coarseType = type;
+    }
     // Don't add duplicates
     if (entityTypesSet[type]) return;
     entityTypesSet[type] = true;
@@ -173,7 +176,7 @@ function render(data) {
     if (name == 'POS') {
       color = posColor(type);
     } else if (name == 'NER') {
-      color = nerColor(type);
+      color = nerColor(coarseType);
     } else if (name == 'COREF') {
       color = '#FFE000';
     } else if (name == 'ENTITY') {
@@ -341,11 +344,15 @@ function render(data) {
     if (tokens.length > 0 && typeof tokens[0].ner != 'undefined') {
       for (var i = 0; i < tokens.length; i++) {
         var ner = tokens[i].ner;
+        var normalizedNER = tokens[i].normalizedNER;
+        if (typeof normalizedNER == "undefined") {
+          normalizedNER = ner;
+        }
         if (ner == 'O') continue;
         var j = i;
         while (j < tokens.length - 1 && tokens[j+1].ner == ner) j++;
-        addEntityType('NER', ner);
-        nerEntities.push(['NER_' + sentI + '_' + i, ner, [[tokens[i].characterOffsetBegin, tokens[j].characterOffsetEnd]]]);
+        addEntityType('NER', normalizedNER, ner);
+        nerEntities.push(['NER_' + sentI + '_' + i, normalizedNER, [[tokens[i].characterOffsetBegin, tokens[j].characterOffsetEnd]]]);
         i = j;
       }
     }
