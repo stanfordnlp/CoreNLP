@@ -6,20 +6,19 @@ import edu.stanford.nlp.util.CoreMap;
 /**
  * Interface for rules/patterns for transforming
  * time related natural language expressions
- * into temporal representations.
+ * into temporal representations
  *
- * Patterns use the TokensRegex language.
+ * Patterns are based on the TokensRegex
  *
  * @author Angel Chang
  */
 public interface TimeExpressionPatterns {
-
   /**
    * Creates a CoreMapExpressionExtractor that knows how
    * to extract time related expressions from text into CoreMaps
    * @return CoreMapExpressionExtractor
    */
-  CoreMapExpressionExtractor createExtractor();
+  public CoreMapExpressionExtractor createExtractor();
 
   /**
    * Determine how date/times should be resolved for the given temporal
@@ -28,6 +27,6 @@ public interface TimeExpressionPatterns {
    * @param te Temporal expression
    * @return flag indicating what resolution scheme to use
    */
-  int determineRelFlags(CoreMap annotation, TimeExpression te);
+  public int determineRelFlags(CoreMap annotation, TimeExpression te);
 
 }

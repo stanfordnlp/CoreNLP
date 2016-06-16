@@ -1,4 +1,5 @@
-package edu.stanford.nlp.ling.tokensregex;
+package edu.stanford.nlp.ling.tokensregex; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -9,14 +10,14 @@ import edu.stanford.nlp.ling.tokensregex.types.Expression;
 import edu.stanford.nlp.ling.tokensregex.types.Tags;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
 import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
 import java.util.function.Predicate;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * <p>Represents a list of assignment and extraction rules over sequence patterns.
@@ -154,8 +155,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
   }
 
   /**
-   * Add specified rules to this extractor.
-   *
+   * Add specified rules to this extractor
    * @param rules
    */
   public void appendRules(List<SequenceMatchRules.Rule> rules)

@@ -28,6 +28,7 @@ package edu.stanford.nlp.process;
 
 
 import java.io.Reader;
+import java.util.logging.Logger;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -36,7 +37,6 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.logging.Redwood;
 
 
 /** Provides a tokenizer or lexer that does a pretty good job at
@@ -251,8 +251,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   }
 
 
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels logger = Redwood.channels(PTBLexer.class);
+  private static final Logger LOGGER = Logger.getLogger(PTBLexer.class.getName());
 
   private LexedTokenFactory<?> tokenFactory;
   private CoreLabel prevWord;
@@ -1135,7 +1134,7 @@ nno/[^A-Za-z0-9]
                 prevWordAfter.append(str);
               }
               if ( ! this.seenUntokenizableCharacter) {
-                logger.warning(msg);
+                LOGGER.warning(msg);
                 this.seenUntokenizableCharacter = true;
               }
               break;
@@ -1143,19 +1142,19 @@ nno/[^A-Za-z0-9]
               if (invertible) {
                 prevWordAfter.append(str);
               }
-              logger.warning(msg);
+              LOGGER.warning(msg);
               this.seenUntokenizableCharacter = true;
               break;
             case NONE_KEEP:
               return getNext();
             case FIRST_KEEP:
               if ( ! this.seenUntokenizableCharacter) {
-                logger.warning(msg);
+                LOGGER.warning(msg);
                 this.seenUntokenizableCharacter = true;
               }
               return getNext();
             case ALL_KEEP:
-              logger.warning(msg);
+              LOGGER.warning(msg);
               this.seenUntokenizableCharacter = true;
               return getNext();
           }

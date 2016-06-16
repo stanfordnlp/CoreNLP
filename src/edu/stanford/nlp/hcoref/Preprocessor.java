@@ -302,9 +302,6 @@ public class Preprocessor  {
 //        m.sentenceWords = sentence.get(TokensAnnotation.class);
         m.basicDependency = sentence.get(BasicDependenciesAnnotation.class);
         m.collapsedDependency = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
-        if (m.collapsedDependency == null) {
-          m.collapsedDependency = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
-        }
 
         // mentionSubTree (highest NP that has the same head) if constituency tree available
         if (m.contextParseTree != null) {
@@ -709,9 +706,6 @@ public class Preprocessor  {
       if(dict.reportVerb.contains(lemma) && cl.tag().startsWith("V")) {
         // find subject
         SemanticGraph dependency = sentences.get(sentNum).get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
-        if (dependency == null) {
-          dependency = sentences.get(sentNum).get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
-        }
         IndexedWord w = dependency.getNodeByWordPattern(word);
 
         if (w != null) {
@@ -826,9 +820,6 @@ public class Preprocessor  {
       if(w.get(CoreAnnotations.LemmaAnnotation.class).equals("report") || w.get(CoreAnnotations.LemmaAnnotation.class).equals("say")) {
         String word = w.get(CoreAnnotations.TextAnnotation.class);
         SemanticGraph dependency = lastSent.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
-        if (dependency == null) {
-          dependency = lastSent.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
-        }
         IndexedWord t = dependency.getNodeByWordPattern(word);
 
         for(Pair<GrammaticalRelation,IndexedWord> child : dependency.childPairs(t)){

@@ -20,7 +20,6 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
 
 public class BestFirstCorefSystem extends StatisticalCorefSystem {
-
   private final Map<Pair<Boolean, Boolean>, Double> thresholds;
   private final FeatureExtractor extractor;
   private final PairwiseModel classifier;
@@ -52,6 +51,8 @@ public class BestFirstCorefSystem extends StatisticalCorefSystem {
     thresholdsMap.put(new Pair<>(false, false), thresholds[3]);
     return thresholdsMap;
   }
+
+  public static int i = 0;
 
   @Override
   public void runCoref(Document document) {
@@ -140,5 +141,4 @@ public class BestFirstCorefSystem extends StatisticalCorefSystem {
     }
     return words;
   }
-
 }

@@ -389,8 +389,6 @@ public class ParserAnnotator extends SentenceAnnotator  {
             SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
             SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
             SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class,
-            SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class,
-            SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class,
             CoreAnnotations.BeginIndexAnnotation.class,
             CoreAnnotations.EndIndexAnnotation.class,
             CoreAnnotations.CategoryAnnotation.class
@@ -402,8 +400,6 @@ public class ParserAnnotator extends SentenceAnnotator  {
             SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
             SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class,
             SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class,
-            SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class,
-            SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class,
             CoreAnnotations.BeginIndexAnnotation.class,
             CoreAnnotations.EndIndexAnnotation.class,
             CoreAnnotations.CategoryAnnotation.class

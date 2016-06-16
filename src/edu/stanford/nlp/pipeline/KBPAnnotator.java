@@ -4,7 +4,10 @@ import edu.stanford.nlp.classify.Classifier;
 import edu.stanford.nlp.classify.LinearClassifier;
 import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.hcoref.data.CorefChain;
-import edu.stanford.nlp.ie.*;
+import edu.stanford.nlp.ie.KBPRelationExtractor;
+import edu.stanford.nlp.ie.KBPSemgrexExtractor;
+import edu.stanford.nlp.ie.KBPStatisticalExtractor;
+import edu.stanford.nlp.ie.KBPTokensregexExtractor;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.IOUtils;
@@ -16,7 +19,6 @@ import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.simple.Document;
 import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.util.*;
@@ -29,8 +31,6 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("FieldCanBeLocal")
 public class KBPAnnotator implements Annotator {
-  /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(KBPAnnotator.class);
 
   @ArgumentParser.Option(name="model", gloss="The path to the model")
   private String model = DefaultPaths.DEFAULT_KBP_CLASSIFIER;
@@ -50,7 +50,7 @@ public class KBPAnnotator implements Annotator {
   /**
    * The extractor implementation.
    */
-  public final KBPRelationExtractor extractor;
+  public final List<KBPRelationExtractor> extractors;
 
   /**
    * A serializer to convert to the Simple CoreNLP representation.
@@ -65,12 +65,12 @@ public class KBPAnnotator implements Annotator {
   /**
    * A TokensRegexNER annotator for the special KBP NER types (case-sensitive).
    */
-  //private final TokensRegexNERAnnotator casedNER;
+  private final TokensRegexNERAnnotator casedNER;
 
   /**
    * A TokensRegexNER annotator for the special KBP NER types (case insensitive).
    */
-  //private final TokensRegexNERAnnotator caselessNER;
+  private final TokensRegexNERAnnotator caselessNER;
 
 
   /**
@@ -83,35 +83,31 @@ public class KBPAnnotator implements Annotator {
     ArgumentParser.fillOptions(this, name, props);
 
     // Load the extractor
+    extractors = new ArrayList<>();
     try {
-      log.info("Loading KBP classifier from " + model);
       Object object = IOUtils.readObjectFromURLOrClasspathOrFileSystem(model);
-      KBPRelationExtractor statisticalExtractor;
       if (object instanceof LinearClassifier) {
         //noinspection unchecked
-        statisticalExtractor = new KBPStatisticalExtractor((Classifier<String, String>) object);
+        extractors.add(new KBPStatisticalExtractor((Classifier<String, String>) object));
       } else if (object instanceof KBPStatisticalExtractor) {
-        statisticalExtractor = (KBPStatisticalExtractor) object;
+        extractors.add( (KBPStatisticalExtractor) object );
       } else {
         throw new ClassCastException(object.getClass() + " cannot be cast into a " + KBPStatisticalExtractor.class);
       }
-      this.extractor = new KBPEnsembleExtractor(
-          new KBPTokensregexExtractor(tokensregexdir),
-          new KBPSemgrexExtractor(semgrexdir),
-          statisticalExtractor
-      );
+      extractors.add(new KBPTokensregexExtractor(tokensregexdir));
+      extractors.add(new KBPSemgrexExtractor(semgrexdir));
     } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeIOException(e);
     }
 
     // Load TokensRegexNER
-    /*this.casedNER = new TokensRegexNERAnnotator(
+    this.casedNER = new TokensRegexNERAnnotator(
         regexnerCasedPath,
         false);
     this.caselessNER = new TokensRegexNERAnnotator(
         regexnerCaselessPath,
         true,
-        "^(NN|JJ).*");*/
+        "^(NN|JJ).*");
 
     // Create entity mention annotator
     this.entityMentionAnnotator = new EntityMentionsAnnotator("kbp.entitymention", new Properties() {{
@@ -244,8 +240,8 @@ public class KBPAnnotator implements Annotator {
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
 
     // Annotate with NER
-    //casedNER.annotate(annotation);
-    //caselessNER.annotate(annotation);
+    casedNER.annotate(annotation);
+    caselessNER.annotate(annotation);
     // Annotate with Mentions
     entityMentionAnnotator.annotate(annotation);
 
@@ -270,26 +266,24 @@ public class KBPAnnotator implements Annotator {
     }
     // (collect coreferent KBP mentions)
     Map<CoreMap, Set<CoreMap>> mentionsMap = new HashMap<>();  // map from canonical mention -> other mentions
-    if (annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class) != null) {
-      for (Map.Entry<Integer, CorefChain> chain : annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class).entrySet()) {
-        CoreMap firstMention = null;
-        for (CorefChain.CorefMention mention : chain.getValue().getMentionsInTextualOrder()) {
-          CoreMap kbpMention = null;
-          for (int i = mention.startIndex; i < mention.endIndex; ++i) {
-            if (mentionByStartIndex.containsKey(Pair.makePair(mention.sentNum - 1, i))) {
-              kbpMention = mentionByStartIndex.get(Pair.makePair(mention.sentNum - 1, i));
-              break;
-            }
+    for (Map.Entry<Integer, CorefChain> chain : annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class).entrySet()) {
+      CoreMap firstMention = null;
+      for (CorefChain.CorefMention mention : chain.getValue().getMentionsInTextualOrder()) {
+        CoreMap kbpMention = null;
+        for (int i = mention.startIndex; i < mention.endIndex; ++i) {
+          if (mentionByStartIndex.containsKey(Pair.makePair(mention.sentNum - 1, i))) {
+            kbpMention = mentionByStartIndex.get(Pair.makePair(mention.sentNum - 1, i));
+            break;
           }
-          if (firstMention == null) {
-            firstMention = kbpMention;
+        }
+        if (firstMention == null) {
+          firstMention = kbpMention;
+        }
+        if (kbpMention != null) {
+          if (!mentionsMap.containsKey(firstMention)) {
+            mentionsMap.put(firstMention, new LinkedHashSet<>());
           }
-          if (kbpMention != null) {
-            if (!mentionsMap.containsKey(firstMention)) {
-              mentionsMap.put(firstMention, new LinkedHashSet<>());
-            }
-            mentionsMap.get(firstMention).add(kbpMention);
-          }
+          mentionsMap.get(firstMention).add(kbpMention);
         }
       }
     }
@@ -362,9 +356,6 @@ public class KBPAnnotator implements Annotator {
             if (subjI == objI) {
               continue;
             }
-            if (Thread.interrupted()) {
-              throw new RuntimeInterruptedException();
-            }
             CoreMap obj = candidates.get(objI);
             int objBegin = obj.get(CoreAnnotations.TokensAnnotation.class).get(0).index() - 1;
             int objEnd = obj.get(CoreAnnotations.TokensAnnotation.class).get(obj.get(CoreAnnotations.TokensAnnotation.class).size() - 1).index();
@@ -379,11 +370,19 @@ public class KBPAnnotator implements Annotator {
                   objNER.get(),
                   doc.sentence(sentenceI)
               );
-
               //  -- BEGIN Classify
-              Pair<String, Double> prediction = extractor.classify(input);
+              Pair<String, Double> prediction = Pair.makePair(KBPRelationExtractor.NO_RELATION, 1.0);
+              for (KBPRelationExtractor extractor : extractors) {
+                Pair<String, Double> classifierPrediction = extractor.classify(input);
+                if (prediction.first.equals(KBPRelationExtractor.NO_RELATION) ||
+                    (!classifierPrediction.first.equals(KBPRelationExtractor.NO_RELATION) &&
+                        classifierPrediction.second > prediction.second)
+                    ){
+                  // The last prediction was NO_RELATION, or this is not NO_RELATION and has a higher score
+                  prediction = classifierPrediction;
+                }
+              }
               //  -- END Classify
-
               // Handle the classifier output
               if (!KBPStatisticalExtractor.NO_RELATION.equals(prediction.first)) {
                 RelationTriple triple = new RelationTriple.WithLink(
@@ -444,9 +443,7 @@ public class KBPAnnotator implements Annotator {
    */
   public static void main(String[] args) throws IOException {
     Properties props = StringUtils.argsToProperties(args);
-    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,regexner,parse,mention,coref,kbp");
-    props.setProperty("regexner.mapping", "ignorecase=true,validpospattern=^(NN|JJ).*,edu/stanford/nlp/models/kbp/regexner_caseless.tab;edu/stanford/nlp/models/kbp/regexner_cased.tab");
-
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,mention,coref,kbp");
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     IOUtils.console("sentence> ", line -> {
       Annotation ann = new Annotation(line);

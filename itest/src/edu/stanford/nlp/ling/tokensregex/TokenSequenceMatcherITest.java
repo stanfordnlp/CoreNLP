@@ -1342,61 +1342,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     }
   }
 
-  public void _testTokenSequenceFindsWildcard() throws IOException {
-    CoreMap doc = createDocument("word1 word2");
 
-    // Test sequence with groups
-    TokenSequencePattern p = TokenSequencePattern.compile( "[]{2}|[]");
-    TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    boolean match = m.find();
-    assertTrue(match);
-    assertEquals(0, m.groupCount());
-    assertEquals("word1 word2", m.group());
-    match = m.find();
-    assertFalse(match);
-
-    // Reverse order
-    p = TokenSequencePattern.compile( "[]|[]{2}");
-    m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    match = m.find();
-    assertTrue(match);
-    assertEquals(0, m.groupCount());
-    assertEquals("word1 word2", m.group());
-    match = m.find();
-    assertFalse(match);
-
-    // Using {1,2}
-    p = TokenSequencePattern.compile( "[]{2}");
-    m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    match = m.find();
-    assertTrue(match);
-    assertEquals(0, m.groupCount());
-    assertEquals("word1 word2", m.group());
-    match = m.find();
-    assertFalse(match);
-  }
-
-  public void testTokenSequenceMatchesWildcard() throws IOException {
-    CoreMap doc = createDocument("word1 word2");
-
-    // Test sequence with groups
-    TokenSequencePattern p = TokenSequencePattern.compile( "[]{2}|[]");
-    TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    boolean matches = m.matches();
-    assertTrue(matches);
-
-    // Reverse order
-    p = TokenSequencePattern.compile( "[]|[]{2}");
-    m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    matches = m.matches();
-    assertTrue(matches);
-
-    // Using {1,2}
-    p = TokenSequencePattern.compile( "[]{1,2}");
-    m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    matches = m.matches();
-    assertTrue(matches);
-  }
 
   public void testTokenSequenceMatcherABs() throws IOException {
     CoreMap doc = createDocument("A A A A A A A B A A B A C A E A A A A A A A A A A A B A A A");

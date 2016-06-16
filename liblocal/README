@@ -13,20 +13,21 @@ DESCRIPTION: ANTLR runtime, for compiled software
 
 URL: http://www.antlr.com
 
-USED BY: The Quickcheck library (not directly used in Stanford NLP code)
+USED BY:
+The Quickcheck library
 
 LAST UPDATE: 2015/10/5
 
 LAST UPDATE BY: Keenon Werling
 
 -----------------------------------------------------------------------
-java-hamcrest.jar
+hamcrest-core.jar
 
-ORIGINAL JAR NAME: java-hamcrest-2.0.0.0.jar
+ORIGINAL JAR NAME: hamcrest-core-1.3.jar
 
-VERSION: 2.0.0.0
+VERSION: 1.3
 
-RELEASE DATE: January 2015
+RELEASE DATE: Jul, 2010
 
 SOURCE AVAILABLE: Maven Central
 
@@ -34,11 +35,12 @@ DESCRIPTION: Hamcrest shennanigans, for JUnit
 
 URL: http://www.hamcrest.org
 
-USED BY: The JUnit library (not directly used in Stanford NLP code)
+USED BY:
+The JUnit library
 
-LAST UPDATE: 2016-04-30
+LAST UPDATE: 2015/10/5
 
-LAST UPDATE BY: John Bauer
+LAST UPDATE BY: Keenon Werling
 
 -----------------------------------------------------------------------
 javaruntype.jar
@@ -55,7 +57,8 @@ DESCRIPTION: Something for Quickcheck
 
 URL: http://www.javaruntype.org
 
-USED BY: The Quickcheck library (not directly used in Stanford NLP code)
+USED BY:
+The Quickcheck library
 
 LAST UPDATE: 2015/10/5
 
@@ -76,7 +79,8 @@ DESCRIPTION: Quickcheck, runs random inputs and validates outputs
 
 URL: https://github.com/pholser/junit-quickcheck
 
-USED BY: loglinear package tests
+USED BY:
+The Quickcheck library
 
 LAST UPDATE: 2015/10/5
 
@@ -93,7 +97,7 @@ RELEASE DATE: Nov, 2013
 
 SOURCE AVAILABLE: Maven Central
 
-DESCRIPTION: loglinear package tests
+DESCRIPTION: Quickcheck, runs random inputs and validates outputs
 
 URL: https://github.com/pholser/junit-quickcheck
 
@@ -119,7 +123,8 @@ DESCRIPTION: JUnit theories run JUnit against a number of inputs
 
 URL: junit.org
 
-USED BY: loglinear package tests
+USED BY:
+The Quickcheck library
 
 LAST UPDATE: 2015/10/5
 
@@ -140,7 +145,8 @@ DESCRIPTION: Object graph navigation library, used by Quickcheck
 
 URL: https://commons.apache.org/proper/commons-ognl/
 
-USED BY: The Quickcheck library (not directly used in Stanford NLP code)
+USED BY:
+The Quickcheck library
 
 LAST UPDATE: 2015/10/5
 

@@ -61,7 +61,7 @@ public class AnnotationOutputterITest extends TestCase {
             "          \"dependentGloss\": \"Bad\"\n" +
             "        }\n" +
             "      ],\n" +
-            "      \"enhanced-dependencies\": [\n" +
+            "      \"collapsed-dependencies\": [\n" +
             "        {\n" +
             "          \"dep\": \"ROOT\",\n" +
             "          \"governor\": 0,\n" +
@@ -77,7 +77,7 @@ public class AnnotationOutputterITest extends TestCase {
             "          \"dependentGloss\": \"Bad\"\n" +
             "        }\n" +
             "      ],\n" +
-            "      \"enhanced-plus-plus-dependencies\": [\n" +
+            "      \"collapsed-ccprocessed-dependencies\": [\n" +
             "        {\n" +
             "          \"dep\": \"ROOT\",\n" +
             "          \"governor\": 0,\n" +

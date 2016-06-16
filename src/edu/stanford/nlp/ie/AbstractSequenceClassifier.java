@@ -26,6 +26,7 @@
 //    http://nlp.stanford.edu/downloads/crf-classifier.shtml
 
 package edu.stanford.nlp.ie;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.fsm.DFSA;
 import edu.stanford.nlp.io.IOUtils;
@@ -47,7 +48,6 @@ import edu.stanford.nlp.stats.Sampler;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.concurrent.*;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.text.DecimalFormat;
@@ -418,7 +418,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   /**
    * Classify the tokens in a String. Each sentence becomes a separate document.
    *
-   * @param str A String with tokens in one or more sentences of text to be
+   * @param str
+   *          A String with tokens in one or more sentences of text to be
    *          classified.
    * @return {@link List} of classified sentences (each a List of something that
    *         extends {@link CoreMap}).
@@ -426,8 +427,22 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public List<List<IN>> classify(String str) {
     ObjectBank<List<IN>> documents =
       makeObjectBankFromString(str, plainTextReaderAndWriter);
-    return classifyObjectBank(documents);
+    List<List<IN>> result = new ArrayList<>();
+
+    for (List<IN> document : documents) {
+      classify(document);
+
+      List<IN> sentence = new ArrayList<>();
+      for (IN wi : document) {
+        // TaggedWord word = new TaggedWord(wi.word(), wi.answer());
+        // sentence.add(word);
+        sentence.add(wi);
+      }
+      result.add(sentence);
+    }
+    return result;
   }
+
   /**
    * Classify the tokens in a String. Each sentence becomes a separate document.
    * Doesn't override default readerAndWriter.
@@ -441,30 +456,6 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
                                     DocumentReaderAndWriter<IN> readerAndWriter) {
     ObjectBank<List<IN>> documents =
       makeObjectBankFromString(str, readerAndWriter);
-    return classifyObjectBank(documents);
-  }
-
-  /**
-   * Classify the contents of a file.
-   *
-   * @param filename Contains the sentence(s) to be classified.
-   * @return {@link List} of classified List of IN.
-   */
-  public List<List<IN>> classifyFile(String filename) {
-    ObjectBank<List<IN>> documents =
-      makeObjectBankFromFile(filename, plainTextReaderAndWriter);
-    return classifyObjectBank(documents);
-  }
-
-
-  /**
-   * Classify the tokens in an ObjectBank.
-   *
-   * @param documents The documents in an ObjectBank to classify.
-   * @return {@link List} of classified sentences (each a List of something that
-   *         extends {@link CoreMap}).
-   */
-  private List<List<IN>> classifyObjectBank(ObjectBank<List<IN>> documents) {
     List<List<IN>> result = new ArrayList<>();
 
     for (List<IN> document : documents) {
@@ -475,6 +466,32 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
         // TaggedWord word = new TaggedWord(wi.word(), wi.answer());
         // sentence.add(word);
         sentence.add(wi);
+      }
+      result.add(sentence);
+    }
+    return result;
+  }
+
+  /**
+   * Classify the contents of a file.
+   *
+   * @param filename
+   *          Contains the sentence(s) to be classified.
+   * @return {@link List} of classified List of IN.
+   */
+  public List<List<IN>> classifyFile(String filename) {
+    ObjectBank<List<IN>> documents =
+      makeObjectBankFromFile(filename, plainTextReaderAndWriter);
+    List<List<IN>> result = new ArrayList<>();
+
+    for (List<IN> document : documents) {
+      // log.info(document);
+      classify(document);
+
+      List<IN> sentence = new ArrayList<>();
+      for (IN wi : document) {
+        sentence.add(wi);
+        // log.info(wi);
       }
       result.add(sentence);
     }
@@ -1038,7 +1055,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * @param testFile The file to test on.
    */
   public void classifyAndWriteAnswers(String testFile)
-          throws IOException {
+    throws IOException
+  {
     classifyAndWriteAnswers(testFile, plainTextReaderAndWriter, false);
   }
 
@@ -1346,17 +1364,17 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     entities.addAll(entityTP.keySet());
     entities.addAll(entityFP.keySet());
     entities.addAll(entityFN.keySet());
-    log.info("         Entity\tP\tR\tF1\tTP\tFP\tFN");
+    boolean printedHeader = false;
     for (String entity : entities) {
       double tp = entityTP.getCount(entity);
       double fp = entityFP.getCount(entity);
       double fn = entityFN.getCount(entity);
-      printPRLine(entity, tp, fp, fn);
+      printedHeader = printPRLine(entity, tp, fp, fn, printedHeader);
     }
     double tp = entityTP.totalCount();
     double fp = entityFP.totalCount();
     double fn = entityFN.totalCount();
-    printPRLine("Totals", tp, fp, fn);
+    printPRLine("Totals", tp, fp, fn, printedHeader);
   }
 
   /**
@@ -1364,13 +1382,22 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * possibly printing a header if it hasn't already been printed.
    * Returns whether or not the header has ever been printed.
    */
-  private static void printPRLine(String entity, double tp, double fp, double fn) {
-    double precision = (tp == 0.0 && fp == 0.0) ? 0.0 : tp / (tp + fp);
-    double recall = (tp == 0.0 && fn == 0.0) ? 1.0 : tp / (tp + fn);
+  private static boolean printPRLine(String entity, double tp, double fp, double fn,
+                             boolean printedHeader) {
+    if (tp == 0.0 && (fp == 0.0 || fn == 0.0))
+      return printedHeader;
+    double precision = tp / (tp + fp);
+    double recall = tp / (tp + fn);
     double f1 = ((precision == 0.0 || recall == 0.0) ?
                  0.0 : 2.0 / (1.0 / precision + 1.0 / recall));
-    log.info(String.format("%15s\t%.4f\t%.4f\t%.4f\t%.0f\t%.0f\t%.0f%n",
-                      entity, precision, recall, f1, tp, fp, fn));
+    if (!printedHeader) {
+      log.info("         Entity\tP\tR\tF1\tTP\tFP\tFN");
+      printedHeader = true;
+    }
+    System.err.format("%15s\t%.4f\t%.4f\t%.4f\t%.0f\t%.0f\t%.0f%n",
+                      entity, precision, recall, f1,
+                      tp, fp, fn);
+    return printedHeader;
   }
 
   /**

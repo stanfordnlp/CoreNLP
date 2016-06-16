@@ -550,7 +550,7 @@ public class MetaClass {
       return (E) Lazy.of(() -> MetaClass.castWithoutKnowingType(v) );
     }else if(Optional.class.isAssignableFrom(clazz)) {
       //(case: Optional)
-      return (E) ((value == null || "null".equals(value.toLowerCase()) || "empty".equals(value.toLowerCase()) || "none".equals(value.toLowerCase())) ? Optional.empty() : Optional.of(value));
+      return (E) ((value == null || "null".equals(value.toLowerCase()) || "empty".equals(value.toLowerCase()) || "none".equals(value.toLowerCase())) ? Optional.empty() : Optional.of(castWithoutKnowingType(value)));
     }else if(java.util.Date.class.isAssignableFrom(clazz)){
       //(case: date)
       try {

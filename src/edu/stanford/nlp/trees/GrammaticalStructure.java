@@ -1,4 +1,5 @@
-package edu.stanford.nlp.trees;
+package edu.stanford.nlp.trees; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -22,34 +23,31 @@ import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
-import edu.stanford.nlp.trees.ud.EnhancementOptions;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Filters;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.ReflectionLoading;
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.logging.Redwood;
-
+import edu.stanford.nlp.util.*;
 import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
 import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
 
 
 /**
  * A {@code GrammaticalStructure} stores dependency relations between
- * nodes in a tree.  A new {@code GrammaticalStructure} is constructed
+ * nodes in a tree.  A new <code>GrammaticalStructure</code> is constructed
  * from an existing parse tree with the help of {@link
- * GrammaticalRelation {@code GrammaticalRelation}}, which
+ * GrammaticalRelation <code>GrammaticalRelation</code>}, which
  * defines a hierarchy of grammatical relations, along with
  * patterns for identifying them in parse trees.  The constructor for
- * {@code GrammaticalStructure} uses these definitions to
- * populate the new {@code GrammaticalStructure} with as many
+ * <code>GrammaticalStructure</code> uses these definitions to
+ * populate the new <code>GrammaticalStructure</code> with as many
  * labeled grammatical relations as it can.  Once constructed, the new
- * {@code GrammaticalStructure} can be printed in various
+ * <code>GrammaticalStructure</code> can be printed in various
  * formats, or interrogated using the interface methods in this
  * class. Internally, this uses a representation via a {@code TreeGraphNode},
  * that is, a tree with additional labeled
  * arcs between nodes, for representing the grammatical relations in a
  * parse tree.
+ * <p/>
+ * <b>Caveat emptor!</b> This is a work in progress.
+ * Nothing in here should be relied upon to function perfectly.
+ * Feedback welcome.
  *
  * @author Bill MacCartney
  * @author Galen Andrew (refactoring English-specific stuff)
@@ -75,7 +73,7 @@ public abstract class GrammaticalStructure implements Serializable  {
      * <p> Don't include any additional edges. </p>
      * <p>
      *   Note: In older code (2014 and before) including extras was a boolean flag. This option is the equivalent of
-     *   the {@code false} flag.
+     *   the <code>false</code> flag.
      * </p>
      */
     NONE(false, false, false),
@@ -920,19 +918,6 @@ public abstract class GrammaticalStructure implements Serializable  {
   }
 
 
-  public List<TypedDependency> typedDependenciesEnhanced() {
-    List<TypedDependency> tdl = typedDependencies(Extras.MAXIMAL);
-    addEnhancements(tdl, UniversalEnglishGrammaticalStructure.ENHANCED_OPTIONS);
-    return tdl;
-  }
-
-  public List<TypedDependency> typedDependenciesEnhancedPlusPlus() {
-    List<TypedDependency> tdl = typedDependencies(Extras.MAXIMAL);
-    addEnhancements(tdl, UniversalEnglishGrammaticalStructure.ENHANCED_PLUS_PLUS_OPTIONS);
-    return tdl;
-  }
-
-
   /**
    * Get a list of the typed dependencies, including extras like control
    * dependencies, collapsing them and distributing relations across
@@ -959,20 +944,6 @@ public abstract class GrammaticalStructure implements Serializable  {
    * @param CCprocess apply CC process?
    */
   protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess, Extras includeExtras) {
-    // do nothing as default operation
-  }
-
-
-  /**
-   *
-   * Destructively applies different enhancements to the dependency graph.
-   * <p/>
-   * Default is no-op; to be over-ridden in subclasses.
-   *
-   * @param list A list of dependencies
-   * @param options Options that determine which enhancements are applied to the dependency graph.
-   */
-  protected void addEnhancements(List<TypedDependency> list, EnhancementOptions options) {
     // do nothing as default operation
   }
 
@@ -1055,7 +1026,7 @@ public abstract class GrammaticalStructure implements Serializable  {
   }
 
 
-  public static final String DEFAULT_PARSER_FILE = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
+  public static final String DEFAULT_PARSER_FILE = "/u/nlp/data/lexparser/englishPCFG.ser.gz";
 
   /**
    * Print typed dependencies in either the Stanford dependency representation
@@ -1716,7 +1687,7 @@ public abstract class GrammaticalStructure implements Serializable  {
     if (sentFileName == null && (altDepReaderName == null || altDepReaderFilename == null) && treeFileName == null && conllXFileName == null && filter == null) {
       try {
         log.info("Usage: java GrammaticalStructure [options]* [-sentFile|-treeFile|-conllxFile file] [-testGraph]");
-        log.info("  options: -basic, -enhanced, -enhanced++ [the default], -collapsed, -CCprocessed, -collapsedTree, -parseTree, -test, -parserFile file, -conllx, -keepPunct, -altprinter -altreader -altreaderfile -originalDependencies");
+        log.info("  options: -basic, -collapsed, -CCprocessed [the default], -collapsedTree, -parseTree, -test, -parserFile file, -conllx, -keepPunct, -altprinter -altreader -altreaderfile -originalDependencies");
         TreeReader tr = new PennTreeReader(new StringReader("((S (NP (NNP Sam)) (VP (VBD died) (NP-TMP (NN today)))))"));
         tb.add(tr.readTree());
       } catch (Exception e) {
@@ -1774,9 +1745,6 @@ public abstract class GrammaticalStructure implements Serializable  {
     // todo: Support checkConnected on more options (including basic)
     boolean checkConnected = props.getProperty("checkConnected") != null;
     boolean portray = props.getProperty("portray") != null;
-    boolean enhanced = props.getProperty("enhanced") != null;
-    boolean enhancedPlusPlus = props.getProperty("enhanced++") != null;
-
 
     // enforce keepPunct if conllx is turned on
     if(conllx) {
@@ -1903,7 +1871,7 @@ public abstract class GrammaticalStructure implements Serializable  {
         }
 
         if (basic) {
-          if (collapsed || CCprocessed || collapsedTree || nonCollapsed || enhanced || enhancedPlusPlus) {
+          if (collapsed || CCprocessed || collapsedTree || nonCollapsed) {
             System.out.println("------------- basic dependencies ---------------");
           }
           if (altDepPrinter == null) {
@@ -1949,29 +1917,10 @@ public abstract class GrammaticalStructure implements Serializable  {
           printDependencies(gs, gs.typedDependenciesCollapsedTree(), tree, conllx, false);
         }
 
-        if (enhanced) {
-          if (basic || enhancedPlusPlus) {
-            System.out.println("----------- enhanced dependencies tree -----------");
-          }
-          printDependencies(gs, gs.typedDependenciesEnhanced(), tree, conllx, false);
-        }
-
-        if (enhancedPlusPlus) {
-          if (basic || enhanced) {
-            System.out.println("----------- enhanced++ dependencies tree -----------");
-          }
-          printDependencies(gs, gs.typedDependenciesEnhancedPlusPlus(), tree, conllx, false);
-        }
-
-        // default use: enhanced++ for UD, CCprocessed for SD (to parallel what happens within the parser)
-        if (!basic && !collapsed && !CCprocessed && !collapsedTree && !nonCollapsed && !enhanced && !enhancedPlusPlus) {
+        // default use: CCprocessed (to parallel what happens within the parser)
+        if (!basic && !collapsed && !CCprocessed && !collapsedTree && !nonCollapsed) {
           // System.out.println("----------- CCprocessed dependencies -----------");
-
-          if (generateOriginalDependencies) {
-            printDependencies(gs, gs.typedDependenciesCCprocessed(Extras.MAXIMAL), tree, conllx, false);
-          } else {
-            printDependencies(gs, gs.typedDependenciesEnhancedPlusPlus(), tree, conllx, false);
-          }
+          printDependencies(gs, gs.typedDependenciesCCprocessed(Extras.MAXIMAL), tree, conllx, false);
         }
       }
 

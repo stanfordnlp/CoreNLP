@@ -37,15 +37,6 @@ import edu.stanford.nlp.util.StringUtils;
  * There are a few options for how to handle missing labels: 
  * FAIL, DEFAULT, KEEP_ORIGINAL
  * <br>
- * The argument for providing the labels is <code>-labels</code>
- * <br>
- * The argument for providing the sentences is <code>-sentences</code>
- * <br>
- * Alternatively, one can provide the flag <code>-useLabelKeys</code>
- * to specify that the keys in the labels file should be treated as
- * the sentences.  Exactly one of <code>-useLabelKeys</code> or
- * <code>-sentences</code> must be used.
- * <br>
  * Example command line:
  * <br>
  * java edu.stanford.nlp.parser.tools.ParseAndSetLabels -output foo.txt -sentences "C:\Users\JohnBauer\Documents\alphasense\dataset\sentences10.txt" -labels "C:\Users\JohnBauer\Documents\alphasense\dataset\phrases10.tsv" -parser edu/stanford/nlp/models/srparser/englishSR.ser.gz -tagger edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger -remapLabels 0=1,1=2,2=2,3=0,4=0
@@ -187,7 +178,6 @@ public class ParseAndSetLabels {
     String remapLabels = null;
     int argIndex = 0;
     boolean binarize = true;
-    boolean useLabelKeys = false;
     while (argIndex < args.length) {
       if (args[argIndex].equalsIgnoreCase("-output")) {
         outputFile = args[argIndex + 1];
@@ -225,12 +215,6 @@ public class ParseAndSetLabels {
       } else if (args[argIndex].equalsIgnoreCase("-nobinarize")) {
         binarize = false;
         argIndex += 1;
-      } else if (args[argIndex].equalsIgnoreCase("-useLabelKeys")) {
-        useLabelKeys = true;
-        argIndex += 1;
-      } else if (args[argIndex].equalsIgnoreCase("-nouseLabelKeys")) {
-        useLabelKeys = false;
-        argIndex += 1;
       } else {
         throw new IllegalArgumentException("Unknown argument " + args[argIndex]);
       }
@@ -239,11 +223,8 @@ public class ParseAndSetLabels {
     if (outputFile == null) {
       throw new IllegalArgumentException("-output is required");
     }
-    if (sentencesFile == null && !useLabelKeys) {
-      throw new IllegalArgumentException("-sentences or -useLabelKeys is required");
-    }
-    if (sentencesFile != null && useLabelKeys) {
-      throw new IllegalArgumentException("Use only one of -sentences or -useLabelKeys");
+    if (sentencesFile == null) {
+      throw new IllegalArgumentException("-sentences is required");
     }
     if (labelsFile == null) {
       throw new IllegalArgumentException("-labels is required");
@@ -258,12 +239,7 @@ public class ParseAndSetLabels {
 
     Map<String, String> labelMap = readLabelMap(labelsFile, separator, remapLabels);
 
-    List<String> sentences;
-    if (sentencesFile == null) {
-      sentences = readSentences(sentencesFile);
-    } else {
-      sentences = new ArrayList<String>(labelMap.keySet());
-    }
+    List<String> sentences = readSentences(sentencesFile);
 
     List<Tree> trees = parseSentences(sentences, parser, binarizer);
 

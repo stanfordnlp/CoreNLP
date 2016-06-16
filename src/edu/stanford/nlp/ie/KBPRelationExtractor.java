@@ -12,14 +12,9 @@ import edu.stanford.nlp.util.StringUtils;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static edu.stanford.nlp.ie.KBPRelationExtractor.NERTag.*;
-import static edu.stanford.nlp.util.logging.Redwood.Util.endTrack;
-import static edu.stanford.nlp.util.logging.Redwood.Util.forceTrack;
-import static edu.stanford.nlp.util.logging.Redwood.log;
 
 /**
  * An interface for a KBP-style relation extractor
@@ -359,26 +354,27 @@ public interface KBPRelationExtractor {
     Span object = new Span(Integer.MAX_VALUE, Integer.MIN_VALUE);
     NERTag objectNER = null;
 
-    String line = reader.readLine();
-    if (!line.startsWith("#")) {
-      throw new IllegalArgumentException("First line of input file should be header definition");
-    }
+    String line;
     while ( (line = reader.readLine()) != null ) {
+      if (line.startsWith("#")) {
+        continue;
+      }
+      line = line.replace("\\#", "#");
       String[] fields = line.split("\t");
       if (relation == null) {
         // Case: read the relation
         assert fields.length == 1;
         relation = fields[0];
-      } else if (fields.length == 9) {
+      } else if (fields.length == 3) {
         // Case: read a token
         tokens.add(fields[0]);
         if ("SUBJECT".equals(fields[1])) {
           subject = new Span(Math.min(subject.start(), i), Math.max(subject.end(), i + 1));
           subjectNER = valueOf(fields[2].toUpperCase());
-        } else if ("OBJECT".equals(fields[3])) {
+        } else if ("OBJECT".equals(fields[1])) {
           object = new Span(Math.min(object.start(), i), Math.max(object.end(), i + 1));
-          objectNER = valueOf(fields[4].toUpperCase());
-        } else if ("-".equals(fields[1]) && "-".equals(fields[3])) {
+          objectNER = valueOf(fields[2].toUpperCase());
+        } else if ("-".equals(fields[1])) {
           // do nothing
         } else {
           throw new IllegalStateException("Could not parse CoNLL file");
@@ -584,33 +580,6 @@ public interface KBPRelationExtractor {
           "R: " + new DecimalFormat("0.000%").format(recallMicro()) + "  " +
           "F1: " + new DecimalFormat("0.000%").format(f1Micro());
     }
-  }
 
-  default Accuracy computeAccuracy(Stream<Pair<KBPInput, String>> examples,
-                                   Optional<PrintStream> predictOut) {
-    forceTrack("Accuracy");
-    Accuracy accuracy = new Accuracy();
-    AtomicInteger testI = new AtomicInteger(0);
-    DecimalFormat confidenceFormat = new DecimalFormat("0.0000");
-    forceTrack("Featurizing");
-    examples.parallel().map(example -> {
-      Pair<String, Double> predicted = this.classify(example.first);
-      synchronized (accuracy) {
-        accuracy.predict(Collections.singleton(predicted.first), Collections.singleton(example.second));
-      }
-      if (testI.incrementAndGet() % 1000 == 0) {
-        log(KBPRelationExtractor.class, "[" + testI.get() + "]  " + accuracy.toOneLineString());
-      }
-      return predicted.first + "\t" + confidenceFormat.format(predicted.second);
-    })
-      .forEachOrdered(line -> {
-        if (predictOut.isPresent()) {
-          predictOut.get().println(line);
-        }
-      });
-    endTrack("Featurizing");
-    log(accuracy.toString());
-    endTrack("Accuracy");
-    return accuracy;
   }
 }

@@ -66,9 +66,6 @@ public abstract class CorefMentionFinder  {
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     SemanticGraph basicDependency = s.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
     SemanticGraph collapsedDependency = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
-    if (collapsedDependency == null) {
-      collapsedDependency = s.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
-    }
     int beginIndex = -1;
     for (CoreLabel w : sent) {
       MultiTokenTag t = w.get(CoreAnnotations.MentionTokenAnnotation.class);
@@ -107,9 +104,6 @@ public abstract class CorefMentionFinder  {
     Tree tree = s.get(TreeCoreAnnotations.TreeAnnotation.class);
     SemanticGraph basicDependency = s.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
     SemanticGraph collapsedDependency = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
-    if (collapsedDependency == null) {
-      collapsedDependency = s.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
-    }
 
     TregexPattern tgrepPattern = enumerationsMentionPattern;
     TregexMatcher matcher = tgrepPattern.matcher(tree);
@@ -352,9 +346,7 @@ public abstract class CorefMentionFinder  {
             int dummyMentionId = -1;
             Mention m = new Mention(dummyMentionId, beginIndex, endIndex, tokens,
                 sent.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class),
-                sent.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class) != null
-                    ? sent.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class)
-                    : sent.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class),
+                sent.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class),
                     new ArrayList<>(tokens.subList(beginIndex, endIndex)));
             mentions.add(m);
             mentionSpanSet.add(span);
@@ -397,9 +389,7 @@ public abstract class CorefMentionFinder  {
           int dummyMentionId = -1;
           Mention m = new Mention(dummyMentionId, g.startIndex, g.endIndex, tokens,
               sent.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class),
-              sent.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class) != null
-                 ? sent.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class)
-                 : sent.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class),
+              sent.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class),
                   new ArrayList<>(tokens.subList(g.startIndex, g.endIndex)));
           mentions.add(m);
           mentionSpanSet.add(pair);

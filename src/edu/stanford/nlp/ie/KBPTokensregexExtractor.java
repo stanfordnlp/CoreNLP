@@ -1,7 +1,6 @@
 package edu.stanford.nlp.ie;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -17,8 +16,14 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.logging.RedwoodConfiguration;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static edu.stanford.nlp.util.logging.Redwood.Util.endTrack;
+import static edu.stanford.nlp.util.logging.Redwood.Util.forceTrack;
+import static edu.stanford.nlp.util.logging.Redwood.Util.log;
 
 /**
  * A tokensregex extractor for KBP.
@@ -28,16 +33,13 @@ import java.util.*;
  * @author Gabor Angeli
  */
 public class KBPTokensregexExtractor implements KBPRelationExtractor {
-  protected static final Redwood.RedwoodChannels logger = Redwood.channels(KBPTokensregexExtractor.class);
+  protected final Redwood.RedwoodChannels logger = Redwood.channels(KBPTokensregexExtractor.class);
 
   @ArgumentParser.Option(name="dir", gloss="The tokensregex directory")
   public static String DIR = DefaultPaths.DEFAULT_KBP_TOKENSREGEX_DIR;
 
   @ArgumentParser.Option(name="test", gloss="The dataset to test on")
   public static File TEST_FILE = new File("test.conll");
-
-  @ArgumentParser.Option(name="predictions", gloss="Dump model predictions to this file")
-  public static Optional<String> PREDICTIONS = Optional.empty();
 
   private final Map<RelationType, CoreMapExpressionExtractor> rules = new HashMap<>();
 
@@ -129,16 +131,24 @@ public class KBPTokensregexExtractor implements KBPRelationExtractor {
   public static void main(String[] args) throws IOException {
     RedwoodConfiguration.standard().apply();  // Disable SLF4J crap.
     ArgumentParser.fillOptions(KBPTokensregexExtractor.class, args);
-    KBPTokensregexExtractor extractor = new KBPTokensregexExtractor(DIR);
-    List<Pair<KBPInput, String>> testExamples = KBPRelationExtractor.readDataset(TEST_FILE);
 
-    extractor.computeAccuracy(testExamples.stream(), PREDICTIONS.map(x -> {
-      try {
-        return "stdout".equalsIgnoreCase(x) ? System.out : new PrintStream(new FileOutputStream(x));
-      } catch (IOException e) {
-        throw new RuntimeIOException(e);
+    KBPTokensregexExtractor extractor = new KBPTokensregexExtractor(DIR);
+
+    List<Pair<KBPInput, String>> testExamples = KBPRelationExtractor.readDataset(TEST_FILE);
+    Accuracy accuracy = new Accuracy();
+    AtomicInteger testI = new AtomicInteger(0);
+    forceTrack("Test accuracy");
+    testExamples.stream().parallel().forEach( example -> {
+      Pair<String, Double> prediction = extractor.classify(example.first);
+      synchronized (accuracy) {
+        accuracy.predict(Collections.singleton(prediction.first), Collections.singleton(example.second));
       }
-    }));
+      if (testI.incrementAndGet() % 1000 == 0) {
+        log("[" + testI.get() + " / " + testExamples.size() + "]  " + accuracy.toOneLineString());
+      }
+    });
+    log(accuracy.toString());
+    endTrack("Test accuracy");
 
   }
 

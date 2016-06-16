@@ -35,9 +35,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.logging.StanfordRedwoodConfiguration;
-// import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -50,7 +48,9 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 
+import edu.stanford.nlp.util.logging.Redwood;
 
+import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
 /**
  * This is a pipeline that takes in a string and returns various analyzed
@@ -87,6 +87,9 @@ import java.util.regex.Pattern;
 
 public class StanfordCoreNLP extends AnnotationPipeline  {
 
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(StanfordCoreNLP.class);
+
   enum OutputFormat { TEXT, XML, JSON, CONLL, CONLLU, SERIALIZED }
 
   // other constants
@@ -98,7 +101,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
 
   public static final String DEFAULT_OUTPUT_FORMAT = isXMLOutputPresent() ? "xml" : "text";
 
-  /** A logger for this class */
   private static final Redwood.RedwoodChannels logger = Redwood.channels(StanfordCoreNLP.class);
 
   /** Formats the constituent parse trees for display. */
@@ -284,8 +286,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    */
   public static String ensurePrerequisiteAnnotators(String[] annotators) {
     // Get an unordered set of annotators
-    Set<String> unorderedAnnotators = new LinkedHashSet<>();  // linked to preserve order
-    Collections.addAll(unorderedAnnotators, annotators);
+    Set<String> unorderedAnnotators = new HashSet<>();
     for (String annotator : annotators) {
       // Add the annotator
       if (!getNamedAnnotators().containsKey(annotator.toLowerCase())) {
@@ -347,7 +348,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   /**
    * Check if we can construct an XML outputter.
    */
-  private static boolean isXMLOutputPresent() {
+  public static boolean isXMLOutputPresent() {
     try {
       Class.forName("edu.stanford.nlp.pipeline.XMLOutputter");
     } catch (ClassNotFoundException ex) {
@@ -475,7 +476,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    * since the last
    * @param inputProps
    * @param annotatorImplementation
-   * @return A populated AnnotatorPool
+   * @return
    */
   public static synchronized AnnotatorPool getDefaultAnnotatorPool(final Properties inputProps, final AnnotatorImplementations annotatorImplementation) {
     // if the pool already exists reuse!
@@ -496,7 +497,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
             property.substring(CUSTOM_ANNOTATOR_PREFIX.length());
         final String customClassName = inputProps.getProperty(property);
         logger.info("Registering annotator " + customName + " with class " + customClassName);
-        pool.register(customName, new AnnotatorFactory(customClassName, inputProps) {
+        pool.register(customName, new AnnotatorFactory(inputProps, annotatorImplementation) {
           private static final long serialVersionUID = 1L;
           @Override
           public Annotator create() {
@@ -1006,7 +1007,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       nFiles++;
       // Determine if there is anything to be done....
       if (excludeFiles.contains(file.getName())) {
-        logger.err("Skipping excluded file " + file.getName());
+        err("Skipping excluded file " + file.getName());
         totalSkipped.incValue(1);
         continue;
       }
@@ -1040,12 +1041,12 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       // TODO this could fail if there are softlinks, etc. -- need some sort of sameFile tester
       //      Java 7 will have a Files.isSymbolicLink(file) method
       if (outputFilename.equals(file.getCanonicalPath())) {
-        logger.err("Skipping " + file.getName() + ": output file " + outputFilename + " has the same filename as the input file -- assuming you don't actually want to do this.");
+        err("Skipping " + file.getName() + ": output file " + outputFilename + " has the same filename as the input file -- assuming you don't actually want to do this.");
         totalSkipped.incValue(1);
         continue;
       }
       if (noClobber && new File(outputFilename).exists()) {
-        logger.err("Skipping " + file.getName() + ": output file " + outputFilename + " as it already exists.  Don't use the noClobber option to override this.");
+        err("Skipping " + file.getName() + ": output file " + outputFilename + " as it already exists.  Don't use the noClobber option to override this.");
         totalSkipped.incValue(1);
         continue;
       }
@@ -1057,14 +1058,14 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       try {
         // Check whether this file should be skipped again
         if (noClobber && new File(finalOutputFilename).exists()) {
-          logger.err("Skipping " + file.getName() + ": output file " + finalOutputFilename + " as it already exists.  Don't use the noClobber option to override this.");
+          err("Skipping " + file.getName() + ": output file " + finalOutputFilename + " as it already exists.  Don't use the noClobber option to override this.");
           synchronized (totalSkipped) {
             totalSkipped.incValue(1);
           }
           return;
         }
 
-        logger.info("Processing file " + file.getAbsolutePath() + " ... writing to " + finalOutputFilename);
+        log("Processing file " + file.getAbsolutePath() + " ... writing to " + finalOutputFilename);
 
         //--Process File
         Annotation annotation = null;
@@ -1100,9 +1101,9 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
           annotation = new Annotation(text);
         }
 
-        Timing timing = new Timing();
+        log("Annotating file " + file.getAbsoluteFile());
         annotate.accept(annotation, finishedAnnotation -> {
-          timing.done(logger, "Annotating file " + file.getAbsoluteFile());
+          log("done.");
           Throwable ex = finishedAnnotation.get(CoreAnnotations.ExceptionAnnotation.class);
           if (ex == null) {
             //--Output File
@@ -1117,13 +1118,13 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
             synchronized (totalProcessed) {
               totalProcessed.incValue(1);
               if (totalProcessed.intValue() % 1000 == 0) {
-                logger.info("Processed " + totalProcessed + " documents");
+                log("Processed " + totalProcessed + " documents");
               }
             }
           } else if (continueOnAnnotateError) {
             // Error annotating but still wanna continue
             // (maybe in the middle of long job and maybe next one will be okay)
-            logger.err("Error annotating " + file.getAbsoluteFile() + ": " + ex);
+            err("Error annotating " + file.getAbsoluteFile() + ": " + ex);
             synchronized (totalErrorAnnotating) {
               totalErrorAnnotating.incValue(1);
             }
@@ -1175,11 +1176,11 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
         numThreads = Integer.parseInt(numThreadsString);
       }
     } catch(NumberFormatException e) {
-      logger.err("-threads [number]: was not given a valid number: " + numThreadsString);
+      err("-threads [number]: was not given a valid number: " + numThreadsString);
     }
 
     // blank line after all the loading statements to make output more readable
-    logger.info("");
+    log("");
 
     //
     // Process one file or a directory of files
@@ -1218,11 +1219,11 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     }
 
     if (TIME) {
-      logger.info(""); // puts blank line in logging output
-      logger.info(this.timingInformation());
-      logger.info("Pipeline setup: " +
+      log();
+      log(this.timingInformation());
+      log("Pipeline setup: " +
           Timing.toSecondsString(pipelineSetupTime) + " sec.");
-      logger.info("Total time for StanfordCoreNLP pipeline: " +
+      log("Total time for StanfordCoreNLP pipeline: " +
           Timing.toSecondsString(pipelineSetupTime + tim.report()) + " sec.");
     }
 

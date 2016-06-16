@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.SentenceUtils;
@@ -17,6 +15,7 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
+import junit.framework.TestCase;
 
 
 /** Test some of the methods of CRFClassifier.
@@ -312,12 +311,12 @@ public class CRFClassifierITest extends TestCase {
   private static void runSimpleCRFTest(CRFClassifier<CoreLabel> crf, String[][] testTexts) {
     for (int i = 0; i < testTexts.length; i++) {
       String[] testText = testTexts[i];
-      assertEquals("Wrong array size in test", 2, testText.length);
+      assertEquals(i + ": Wrong array size in test", 2, testText.length);
 
       String out = crf.classifyToString(testText[0], "slashTags", false).replaceAll("\r", "");
       // System.out.println("Gold:  |" + testText[5] + "|");
       // System.out.println("Guess: |" + out + "|");
-      assertEquals("CRF buggy on classifyToString(slashTags, false)", testText[1], out);
+      assertEquals(i + ": CRF buggy on classifyToString(slashTags, false)", testText[1], out);
 
     }
   }

@@ -25,23 +25,6 @@ public class DirectedMultiGraphTest extends TestCase {
     graph.add(9, 10, "9->10");
   }
 
-  /**
-   * Check that the graph's incoming and outgoing edges are consistent.
-   */
-  public <V, E> void checkGraphConsistency(DirectedMultiGraph<V, E> graph) {
-    Map<V, Map<V, List<E>>> incoming = graph.incomingEdges;
-    Map<V, Map<V, List<E>>> outgoing = graph.outgoingEdges;
-
-    for (V source : incoming.keySet()) {
-      for (V target : incoming.get(source).keySet()) {
-        assertTrue(outgoing.containsKey(target));
-        assertTrue(outgoing.get(target).containsKey(source));
-        assertEquals(incoming.get(source).get(target),
-                     outgoing.get(target).get(source));
-      }
-    }
-  }
-
   public void testForm() {
     System.out.println("Graph is \n" + graph.toString());
     assertEquals(graph.getNumVertices(), 10);
@@ -1055,8 +1038,6 @@ public class DirectedMultiGraphTest extends TestCase {
     g.add(3, 1, "3-1a");
     g.add(3, 1, "3-1b");
 
-    checkGraphConsistency(g);
-
     for (String edge : g.getAllEdges()) {
       // Create copy and remove edge from copy manually
       int originalSize = g.getNumEdges();
@@ -1067,16 +1048,11 @@ public class DirectedMultiGraphTest extends TestCase {
       assertEquals(originalSize - 1, gold.getAllEdges().size());
       // Use iter.remove()
       Iterator<String> iter = guess.edgeIterator();
-      int iterations = 0;
       while (iter.hasNext()) {
-        ++iterations;
         if (iter.next().equals(edge)) {
           iter.remove();
-          checkGraphConsistency(guess);
         }
       }
-      assertEquals(9, iterations);
-      checkGraphConsistency(guess);
       // Assert that they're the same
       assertEquals(gold, guess);
     }
