@@ -173,7 +173,6 @@ public class QuoteAnnotator implements Annotator  {
       // we're just going to try a bunch of different things and pick
       // whichever results in the most total quotes
 
-      boolean prev = USE_SINGLE;
       // try unicode
       List<Pair<Integer, Integer>> overall = getQuotes(quotesFrom);
       String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
@@ -222,6 +221,8 @@ public class QuoteAnnotator implements Annotator  {
       // add quotes to document
       annotation.set(CoreAnnotations.QuotationsAnnotation.class, cmQuotes);
     }
+
+    
 
   }
 
