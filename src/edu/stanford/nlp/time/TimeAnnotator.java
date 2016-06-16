@@ -21,7 +21,7 @@ import java.util.Set;
  * The expressions recognized by SUTime are loosely based on GUTIME.
  *
  * After annotation, the {@link TimeAnnotations.TimexAnnotations} annotation
- * will be populated with a <code>List&lt;CoreMap&gt;</code>, each of which
+ * will be populated with a {@code List&lt;CoreMap&gt;}, each of which
  * will represent one temporal expression.
  *
  * If a reference time is set (via {@link edu.stanford.nlp.ling.CoreAnnotations.DocDateAnnotation}),
@@ -40,7 +40,7 @@ import java.util.Set;
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.DocDateAnnotation}</td>
- *     <td><code>String</code></td>
+ *     <td>{@code String}</td>
  *     <td>If present, then the string is interpreted as a date/time and
  *         used as the reference document date with respect to which other
  *         temporal expressions are resolved</td>
@@ -48,53 +48,53 @@ import java.util.Set;
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation}</td>
- *     <td><code>List&lt;CoreMap&gt;</code></td>
+ *     <td>{@code List&lt;CoreMap&gt;}</td>
  *     <td>If present, time expressions will be extracted from each sentence
  *         and each sentence will be annotated individually.</td>
  *     <td>Optional (good to have)</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation}</td>
- *     <td><code>List&lt;CoreLabel&gt;</code></td>
+ *     <td>{@code List&lt;CoreLabel&gt;}</td>
  *     <td>Tokens (for each sentence or for entire annotation if no sentences)</td>
  *     <td>Required</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation}</td>
- *     <td><code>String</code></td>
+ *     <td>{@code String}</td>
  *     <td>Text (for each sentence or for entire annotation if no sentences)</td>
  *     <td>Optional</td>
  *   </tr>
  *   <tr><td colspan="4"><center><b>Per token annotations</b></center></td></tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation}</td>
- *     <td><code>String</code></td>
+ *     <td>{@code String}</td>
  *     <td>Token text (normalized)</td>
  *     <td>Required</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation}</td>
- *     <td><code>String</code></td>
+ *     <td>{@code String}</td>
  *     <td>Token text (original)</td>
  *     <td>Required</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetBeginAnnotation}</td>
- *     <td><code>Integer</code></td>
+ *     <td>{@code Integer}</td>
  *     <td>The index of the first character of this token
  *        (0-based wrt to TextAnnotation of the annotation containing the TokensAnnotation).</td>
  *     <td>Required</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetEndAnnotation}</td>
- *     <td><code>Integer</code></td>
+ *     <td>{@code Integer}</td>
  *     <td>The index of the first character after this token
  *        (0-based wrt to TextAnnotation of the annotation containing the TokensAnnotation).</td>
  *     <td>Required</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation}</td>
- *     <td><code>String</code></td>
+ *     <td>{@code String}</td>
  *     <td>Token part of speech</td>
  *     <td>Optional</td>
  *   </tr>
@@ -111,7 +111,7 @@ import java.util.Set;
  *   </tr>
  *   <tr>
  *     <td>{@link TimeAnnotations.TimexAnnotations}</td>
- *     <td><code>List&lt;CoreMap&gt;</code></td>
+ *     <td>{@code List&lt;CoreMap&gt;}</td>
  *     <td>List of temporal expressions (on the entire annotation and also for each sentence)</td>
  *   </tr>
  *   <tr><td colspan="3"><center><b>Per each temporal expression</b></center></td></tr>
@@ -123,42 +123,42 @@ import java.util.Set;
  *   <tr>
  *     <td>{@link TimeExpression.Annotation}</td>
  *     <td>{@link TimeExpression}</td>
- *     <td>TimeExpression object.  Use <code>getTemporal()</code> to get internal temporal representation.</td>
+ *     <td>TimeExpression object.  Use {@code getTemporal()} to get internal temporal representation.</td>
  *   </tr>
  *   <tr>
  *     <td>{@link TimeExpression.ChildrenAnnotation}</td>
- *     <td><code>List&lt;CoreMap&gt;</code></td>
+ *     <td>{@code List&lt;CoreMap&gt;}</td>
  *     <td>List of chunks forming this time expression (inner chunks can be tokens, nested time expressions,
  *         numeric expressions, etc)</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation}</td>
- *     <td><code>String</code></td>
+ *     <td>{@code String}</td>
  *     <td>Text of this time expression</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation}</td>
- *     <td><code>List&lt;CoreLabel&gt;</code></td>
+ *     <td>{@code List&lt;CoreLabel&gt;}</td>
  *     <td>Tokens that make up this time expression</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetBeginAnnotation}</td>
- *     <td><code>Integer</code></td>
+ *     <td>{@code Integer}</td>
  *     <td>The index of the first character of this token (0-based).</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetEndAnnotation}</td>
- *     <td><code>Integer</code></td>
+ *     <td>{@code Integer}</td>
  *     <td>The index of the first character after this token (0-based).</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.TokenBeginAnnotation}</td>
- *     <td><code>Integer</code></td>
+ *     <td>{@code Integer}</td>
  *     <td>The index of the first token of this time expression (0-based).</td>
  *   </tr>
  *   <tr>
  *     <td>{@link edu.stanford.nlp.ling.CoreAnnotations.TokenEndAnnotation}</td>
- *     <td><code>Integer</code></td>
+ *     <td>{@code Integer}</td>
  *     <td>The index of the first token after this time expression (0-based).</td>
  *   </tr>
  * </table>

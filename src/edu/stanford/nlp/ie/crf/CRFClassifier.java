@@ -68,7 +68,7 @@ import java.util.zip.GZIPOutputStream;
  * {@link PlainTextDocumentReaderAndWriter}.  The class used to read
  * the text can be changed with -plainTextDocumentReaderAndWriter.
  * Extra options can be supplied to the tokenizer using the
- * -tokenizeOptions flag.
+ * -tokenizerOptions flag.
  * </p><p>
  * To read from stdin, use the flag -readStdin.  The same
  * reader/writer will be used as for -textFile.
@@ -1181,7 +1181,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     if (!flags.suppressTestDebug)
       log.info(StringUtils.getShortClassName(this) + " tagged " + numWords + " words in " + numDocs
         + " documents at " + nf.format(wordspersec) + " words per second.");
-    if (resultsCounted && !flags.suppressTestDebug) {
+    if (resultsCounted && ! flags.suppressTestDebug) {
       printResults(entityTP, entityFP, entityFN);
     }
   }
@@ -1659,8 +1659,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         if (flags.testFiles != null) {
           String[] testFiles = flags.testFiles.split(",");
           for (String testFile : testFiles) {
-            CRFClassifierEvaluator<IN> crfEvaluator = new CRFClassifierEvaluator<>("Test set ("
-                    + testFile + ")", this);
+            CRFClassifierEvaluator<IN> crfEvaluator = new CRFClassifierEvaluator<>("Test set (" + testFile + ')', this);
             ObjectBank<List<IN>> testObjBank = makeObjectBankFromFile(testFile, readerAndWriter);
             List<Triple<int[][][], int[], double[][][]>> testDataAndLabels = documentsToDataAndLabelsList(testObjBank);
             crfEvaluator.setTestData(testObjBank, testDataAndLabels);

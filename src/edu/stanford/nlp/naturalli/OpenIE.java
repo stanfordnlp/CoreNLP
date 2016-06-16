@@ -225,7 +225,7 @@ public class OpenIE implements Annotator  {
   @SuppressWarnings("unchecked")
   public List<SentenceFragment> clausesInSentence(SemanticGraph tree, boolean assumedTruth) {
     if (clauseSplitter.isPresent()) {
-      return clauseSplitter.get().apply(tree, assumedTruth).topClauses(splitterThreshold);
+      return clauseSplitter.get().apply(tree, assumedTruth).topClauses(splitterThreshold, 32);
     } else {
       return Collections.emptyList();
     }
@@ -242,7 +242,7 @@ public class OpenIE implements Annotator  {
    * @return A set of clauses extracted from the sentence. This includes the original sentence.
    */
   public List<SentenceFragment> clausesInSentence(CoreMap sentence) {
-    return clausesInSentence(sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class), true);
+    return clausesInSentence(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class), true);
   }
 
   /**
@@ -461,7 +461,7 @@ public class OpenIE implements Annotator  {
     } else {
 
       // Get the dependency tree
-      SemanticGraph parse = sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
+      SemanticGraph parse = sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class);
       if (parse == null) {
         parse = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
       }
@@ -576,7 +576,7 @@ public class OpenIE implements Annotator  {
         CoreAnnotations.PartOfSpeechAnnotation.class,
         CoreAnnotations.LemmaAnnotation.class,
         NaturalLogicAnnotations.PolarityAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class,
+        SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class,
         CoreAnnotations.OriginalTextAnnotation.class
     ));
     if (resolveCoref) {

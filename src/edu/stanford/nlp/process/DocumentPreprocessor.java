@@ -1,5 +1,4 @@
-package edu.stanford.nlp.process; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.process;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,6 +15,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.IOUtils;
@@ -26,12 +26,10 @@ import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.objectbank.XMLBeginEndIterator;
-
-import java.util.function.Function;
-
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Produces a list of sentences from either a plain text or XML document.
@@ -40,7 +38,7 @@ import edu.stanford.nlp.util.StringUtils;
  * multiple times, then you need to create a second DocumentProcessor.
  * <p>
  * Tokenization: The default tokenizer is {@link PTBTokenizer}. If null is passed
- * to <code>setTokenizerFactory</code>, then whitespace tokenization is assumed.
+ * to {@code setTokenizerFactory}, then whitespace tokenization is assumed.
  * <p>
  * Adding a new document type requires two steps:
  * <ol>

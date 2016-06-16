@@ -1,6 +1,6 @@
-package edu.stanford.nlp.loglinear.inference; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.loglinear.inference;
 
+import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.loglinear.model.ConcatVector;
 import edu.stanford.nlp.loglinear.model.GraphicalModel;
 
@@ -17,9 +17,9 @@ import java.util.*;
 public class CliqueTree  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CliqueTree.class);
-  GraphicalModel model;
-  ConcatVector weights;
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CliqueTree.class);
+  private GraphicalModel model;
+  private ConcatVector weights;
 
   // This is the metadata key for the model to store an observed value for a variable, as an int
   public static final String VARIABLE_OBSERVED_VALUE = "inference.CliqueTree.VARIABLE_OBSERVED_VALUE";
@@ -323,12 +323,13 @@ public class CliqueTree  {
 
     int forceRootForCachedMessagePassing = -1;
     int[] cachedCliquesBackPointers = null;
-    // Sometimes we'll have cached versions of the factors, but they're from inference steps a long time ago, so we
-    // don't get consistent backpointers to our cache of factors. This is a flag to indicate if this happens.
-    boolean backPointersConsistent = true;
 
     if (CACHE_MESSAGES && (numFactorsCached == cliques.length - 1) && (numFactorsCached > 0)) {
       cachedCliquesBackPointers = new int[cliques.length];
+
+      // Sometimes we'll have cached versions of the factors, but they're from inference steps a long time ago, so we
+      // don't get consistent backpointers to our cache of factors. This is a flag to indicate if this happens.
+      boolean backPointersConsistent = true;
 
       // Calculate the correspondence between the old cliques list and the new cliques list
 
@@ -775,7 +776,7 @@ public class CliqueTree  {
    * @param marginalize whether to use sum of max marginalization, for marginal or MAP inference
    * @return the marginalized message
    */
-  private TableFactor marginalizeMessage(TableFactor message, int[] relevant, MarginalizationMethod marginalize) {
+  private static TableFactor marginalizeMessage(TableFactor message, int[] relevant, MarginalizationMethod marginalize) {
     TableFactor result = message;
 
     for (int i : message.neighborIndices) {
@@ -809,7 +810,7 @@ public class CliqueTree  {
    * @param f2 second factor to compare
    * @return whether their domains overlap
    */
-  private boolean domainsOverlap(TableFactor f1, TableFactor f2) {
+  private static boolean domainsOverlap(TableFactor f1, TableFactor f2) {
     for (int n1 : f1.neighborIndices) {
       for (int n2 : f2.neighborIndices) {
         if (n1 == n2) return true;
@@ -818,8 +819,8 @@ public class CliqueTree  {
     return false;
   }
 
-  @SuppressWarnings("*")
-  private boolean assertsEnabled() {
+  @SuppressWarnings({"*", "AssertWithSideEffects", "ConstantConditions", "UnusedAssignment"})
+  private static boolean assertsEnabled() {
     boolean assertsEnabled = false;
     assert (assertsEnabled = true); // intentional side effect
     return assertsEnabled;

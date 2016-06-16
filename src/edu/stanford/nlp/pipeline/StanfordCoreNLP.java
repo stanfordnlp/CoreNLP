@@ -285,9 +285,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   public static String ensurePrerequisiteAnnotators(String[] annotators) {
     // Get an unordered set of annotators
     Set<String> unorderedAnnotators = new LinkedHashSet<>();  // linked to preserve order
-    for (String annotator : annotators) {
-      unorderedAnnotators.add(annotator);
-    }
+    Collections.addAll(unorderedAnnotators, annotators);
     for (String annotator : annotators) {
       // Add the annotator
       if (!getNamedAnnotators().containsKey(annotator.toLowerCase())) {
@@ -349,7 +347,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   /**
    * Check if we can construct an XML outputter.
    */
-  public static boolean isXMLOutputPresent() {
+  private static boolean isXMLOutputPresent() {
     try {
       Class.forName("edu.stanford.nlp.pipeline.XMLOutputter");
     } catch (ClassNotFoundException ex) {

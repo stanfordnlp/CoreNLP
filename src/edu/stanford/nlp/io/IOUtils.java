@@ -9,12 +9,7 @@ import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -32,14 +27,13 @@ import java.util.zip.GZIPOutputStream;
 
 public class IOUtils  {
 
-  /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(IOUtils.class);
 
   private static final int SLURP_BUFFER_SIZE = 16384;
 
   public static final String eolChar = System.lineSeparator();  // todo: Inline
   public static final String defaultEncoding = "utf-8";
 
+  /** A logger for this class */
   private static Redwood.RedwoodChannels logger = Redwood.channels(IOUtils.class);
 
   // A class of static methods
@@ -110,7 +104,7 @@ public class IOUtils  {
       oos.writeObject(o);
       oos.close();
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.err(throwableToStackTrace(e));
     } finally {
       closeIgnoringExceptions(oos);
     }
@@ -145,7 +139,7 @@ public class IOUtils  {
       return writeObjectToTempFile(o, filename);
     } catch (Exception e) {
       logger.error("Error writing object to file " + filename);
-      e.printStackTrace();
+      logger.err(throwableToStackTrace(e));
       return null;
     }
   }
@@ -199,7 +193,7 @@ public class IOUtils  {
       }
       writer.write(contents.getBytes(encoding));
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.err(throwableToStackTrace(e));
     } finally {
       closeIgnoringExceptions(writer);
     }
@@ -257,7 +251,7 @@ public class IOUtils  {
       }
       writer.write(contents.getBytes(encoding));
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.err(throwableToStackTrace(e));
     } finally {
       closeIgnoringExceptions(writer);
     }
@@ -372,7 +366,7 @@ public class IOUtils  {
       o = ois.readObject();
       ois.close();
     } catch (IOException | ClassNotFoundException e) {
-      e.printStackTrace();
+      logger.err(throwableToStackTrace(e));
     }
     return ErasureUtils.uncheckedCast(o);
   }
@@ -460,11 +454,14 @@ public class IOUtils  {
    * @param textFileOrUrl The String specifying the URL/resource/file to load
    * @return An InputStream for loading a resource
    * @throws IOException On any IO error
+   * @throws NullPointerException Input parameter is null
    */
   public static InputStream getInputStreamFromURLOrClasspathOrFileSystem(String textFileOrUrl)
-    throws IOException {
+          throws IOException, NullPointerException {
     InputStream in;
-    if (textFileOrUrl.matches("https?://.*")) {
+    if (textFileOrUrl == null) {
+      throw new NullPointerException("Attempt to open file with null name");
+    } else if (textFileOrUrl.matches("https?://.*")) {
       URL u = new URL(textFileOrUrl);
       URLConnection uc = u.openConnection();
       in = uc.getInputStream();
@@ -1177,7 +1174,7 @@ public class IOUtils  {
     try {
       return IOUtils.slurpURL(u, encoding);
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.err(throwableToStackTrace(e));
       return null;
     }
   }
@@ -1193,8 +1190,8 @@ public class IOUtils  {
     try {
       is = uc.getInputStream();
     } catch (SocketTimeoutException e) {
-      // e.printStackTrace();
       logger.error("Socket time out; returning empty string.");
+      logger.err(throwableToStackTrace(e));
       return "";
     }
     BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
@@ -1247,7 +1244,7 @@ public class IOUtils  {
     try {
       return slurpURL(u);
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.err(throwableToStackTrace(e));
       return null;
     }
   }
@@ -1262,13 +1259,13 @@ public class IOUtils  {
   /**
    * Returns all the text at the given URL. If the file cannot be read
    * (non-existent, etc.), then and only then the method returns
-   * <code>null</code>.
+   * {@code null}.
    */
   public static String slurpURLNoExceptions(String path) {
     try {
       return slurpURL(path);
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.err(throwableToStackTrace(e));
       return null;
     }
   }
@@ -1555,8 +1552,7 @@ public class IOUtils  {
     return new PrintWriter(new BufferedWriter(new OutputStreamWriter(out, encoding)), true);
   }
 
-  public static InputStream getBZip2PipedInputStream(String filename) throws IOException
-  {
+  public static InputStream getBZip2PipedInputStream(String filename) throws IOException {
     String bzcat = System.getProperty("bzcat", "bzcat");
     Runtime rt = Runtime.getRuntime();
     String cmd = bzcat + " " + filename;
@@ -1568,8 +1564,7 @@ public class IOUtils  {
     return p.getInputStream();
   }
 
-  public static OutputStream getBZip2PipedOutputStream(String filename) throws IOException
-  {
+  public static OutputStream getBZip2PipedOutputStream(String filename) throws IOException {
     return new BZip2PipedOutputStream(filename);
   }
 
@@ -1581,8 +1576,7 @@ public class IOUtils  {
    * @return a set of the entries in column field
    * @throws IOException
    */
-  public static Set<String> readColumnSet(String infile, int field) throws IOException
-  {
+  public static Set<String> readColumnSet(String infile, int field) throws IOException {
     BufferedReader br = IOUtils.getBufferedFileReader(infile);
 
     Set<String> set = Generics.newHashSet();
@@ -1666,7 +1660,7 @@ public class IOUtils  {
       return sb.toString();
     }
     catch (IOException e) {
-      e.printStackTrace();
+      logger.err(throwableToStackTrace(e));
       return null;
     }
   }
@@ -1706,7 +1700,7 @@ public class IOUtils  {
       return lines;
     }
     catch (IOException e) {
-      e.printStackTrace();
+      logger.err(throwableToStackTrace(e));
       return null;
     }
   }
@@ -2091,6 +2085,16 @@ public class IOUtils  {
   /** @see IOUtils#console(String, Consumer) */
   public static void console(Consumer<String> callback) throws IOException {
     console("> ", callback);
+  }
+
+  public static String throwableToStackTrace(Throwable t) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(t).append(eolChar);
+
+    for (StackTraceElement e : t.getStackTrace()) {
+        sb.append("\t at ").append(e).append(eolChar);
+    }
+    return sb.toString();
   }
 
 }
