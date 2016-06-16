@@ -4,15 +4,12 @@ package edu.stanford.nlp.ie;
 import edu.stanford.nlp.classify.*;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Datum;
 import edu.stanford.nlp.ling.RVFDatum;
 import edu.stanford.nlp.optimization.*;
-import edu.stanford.nlp.pipeline.CoreNLPProtos;
-import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.simple.Document;
+import edu.stanford.nlp.pipeline.DefaultPaths;
 import edu.stanford.nlp.simple.Sentence;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -43,7 +40,10 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
   public static File TEST_FILE = new File("test.conll");
 
   @ArgumentParser.Option(name="model", gloss="The dataset to test on")
-  public static String MODEL_FILE = "model.ser";
+  public static String MODEL_FILE = DefaultPaths.DEFAULT_KBP_CLASSIFIER;
+
+  @ArgumentParser.Option(name="predictions", gloss="Dump model predictions to this file")
+  public static Optional<String> PREDICTIONS = Optional.empty();
 
   private enum MinimizerType{ QN, SGD, HYBRID, L1 }
   @ArgumentParser.Option(name="minimizer", gloss="The minimizer to use for training the classifier")
@@ -188,7 +188,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
    */
   @SuppressWarnings("unchecked")
   private  static <E> List<E> spanBetweenMentions(KBPInput input, Function<CoreLabel, E> selector) {
-    List<CoreLabel> sentence = input.sentence.asCoreLabels(Sentence::nerTags);
+    List<CoreLabel> sentence = input.sentence.asCoreLabels(Sentence::lemmas, Sentence::nerTags);
     Span subjSpan = input.subjectSpan;
     Span objSpan = input.objectSpan;
 
@@ -243,7 +243,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
   }
 
   @SuppressWarnings("UnusedParameters")
-  private static void denseFeatures(KBPInput input, Document doc, Sentence sentence, ClassicCounter<String> feats) {
+  private static void denseFeatures(KBPInput input, Sentence sentence, ClassicCounter<String> feats) {
     boolean subjBeforeObj = input.subjectSpan.isBefore(input.objectSpan);
 
     // Type signature
@@ -254,13 +254,13 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
   }
 
   @SuppressWarnings("UnusedParameters")
-  private static void surfaceFeatures(KBPInput input, Document doc, Sentence simpleSentence, ClassicCounter<String> feats) {
+  private static void surfaceFeatures(KBPInput input, Sentence simpleSentence, ClassicCounter<String> feats) {
     List<String> lemmaSpan = spanBetweenMentions(input, CoreLabel::lemma);
     List<String> nerSpan = spanBetweenMentions(input, CoreLabel::ner);
     List<String> posSpan = spanBetweenMentions(input, CoreLabel::tag);
 
     // Unigram features of the sentence
-    List<CoreLabel> tokens = input.sentence.asCoreLabels(Sentence::nerTags);
+    List<CoreLabel> tokens = input.sentence.asCoreLabels(Sentence::lemmas, Sentence::nerTags);
     for (CoreLabel token : tokens) {
       indicator(feats, "sentence_unigram", token.lemma());
     }
@@ -360,7 +360,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
   }
 
 
-  private static void dependencyFeatures(KBPInput input, Document doc, Sentence sentence, ClassicCounter<String> feats) {
+  private static void dependencyFeatures(KBPInput input, Sentence sentence, ClassicCounter<String> feats) {
     int subjectHead = sentence.algorithms().headOfSpan(input.subjectSpan);
     int objectHead = sentence.algorithms().headOfSpan(input.objectSpan);
 
@@ -371,7 +371,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
     }
 
     // Get the dependency path
-    List<String> depparsePath = doc.sentence(0).algorithms().dependencyPathBetween(subjectHead, objectHead, Sentence::lemmas);
+    List<String> depparsePath = sentence.algorithms().dependencyPathBetween(subjectHead, objectHead, Sentence::lemmas);
 
     // Chop out appos edges
     if (depparsePath.size() > 3) {
@@ -439,7 +439,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
 
 
   @SuppressWarnings("UnusedParameters")
-  private static void relationSpecificFeatures(KBPInput input, Document doc, Sentence sentence, ClassicCounter<String> feats) {
+  private static void relationSpecificFeatures(KBPInput input, Sentence sentence, ClassicCounter<String> feats) {
     if (input.objectType.equals(KBPRelationExtractor.NERTag.NUMBER)) {
       // Bucket the object value if it is a number
       // This is to prevent things like "age:9000" and to soft penalize "age:one"
@@ -543,55 +543,21 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
   }
 
   public static Counter<String> features(KBPInput input) {
-    // Serialize the document to a protocol buffer.
-    // This is faster than calling the ProtobufAnnotationSerializer methods implicitly called
-    // in the Simple CoreNLP constructors, since we know exactly what should go into these protos.
-    // This whole block is just an efficiency improvement.
-    CoreMap sentenceMap = input.sentence.asCoreMap(Sentence::nerTags, Sentence::lemmas, Sentence::dependencyGraph);
-    List<CoreLabel> tokens = sentenceMap.get(CoreAnnotations.TokensAnnotation.class);
-    List<CoreNLPProtos.Token> tokensProto = new ArrayList<>();
-    for (CoreLabel token : tokens) {
-      CoreNLPProtos.Token tokenProto = CoreNLPProtos.Token.newBuilder()
-          .setWord(token.word())
-          .setLemma(token.lemma())
-          .setPos(token.tag())
-          .setNer(token.ner())
-          .setBeginChar(token.beginPosition())
-          .setEndChar(token.endPosition())
-          .setBeginIndex(token.index())
-          .setEndIndex(token.index() + 1)
-          .build();
-      tokensProto.add(tokenProto);
-    }
-    CoreNLPProtos.DependencyGraph tree = ProtobufAnnotationSerializer.toProto(sentenceMap.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class));
-    CoreNLPProtos.Sentence sentenceProto = CoreNLPProtos.Sentence.newBuilder()
-        .addAllToken(tokensProto)
-        .setBasicDependencies(tree)
-        .setCollapsedDependencies(tree)
-        .setCollapsedCCProcessedDependencies(tree)
-        .setText(sentenceMap.get(CoreAnnotations.TextAnnotation.class))
-        .setSentenceIndex(sentenceMap.get(CoreAnnotations.SentenceIndexAnnotation.class))
-        .setTokenOffsetBegin(0)
-        .setTokenOffsetEnd(tokens.size())
-        .build();
-    CoreNLPProtos.Document docProto = CoreNLPProtos.Document.newBuilder()
-        .addAllSentence(Collections.singletonList(sentenceProto))
-        .setText(sentenceMap.get(CoreAnnotations.TextAnnotation.class))
-        .build();
+    // Ensure RegexNER Tags!
+    input.sentence.regexner(DefaultPaths.DEFAULT_KBP_REGEXNER_CASED, false);
+    input.sentence.regexner(DefaultPaths.DEFAULT_KBP_REGEXNER_CASELESS, true);
 
     // Get useful variables
     ClassicCounter<String> feats = new ClassicCounter<>();
     if (Span.overlaps(input.subjectSpan, input.objectSpan) || input.subjectSpan.size() == 0 || input.objectSpan.size() == 0) {
       return new ClassicCounter<>();
     }
-    Document doc = new Document(docProto);
-    Sentence sentence = doc.sentence(0);
 
     // Actually featurize
-    denseFeatures(input, doc, sentence, feats);
-    surfaceFeatures(input, doc, sentence, feats);
-    dependencyFeatures(input, doc, sentence, feats);
-    relationSpecificFeatures(input, doc, sentence, feats);
+    denseFeatures(input, input.sentence, feats);
+    surfaceFeatures(input, input.sentence, feats);
+    dependencyFeatures(input, input.sentence, feats);
+    relationSpecificFeatures(input, input.sentence, feats);
 
     return feats;
   }
@@ -678,7 +644,7 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
   /**
    * The implementing classifier of this extractor.
    */
-  private final Classifier<String, String> classifier;
+  public final Classifier<String, String> classifier;
 
   /**
    * Create a new KBP relation extractor, from the given implementing classifier.
@@ -773,22 +739,13 @@ public class KBPStatisticalExtractor implements KBPRelationExtractor, Serializab
     }
 
     // Evaluate the model
-    forceTrack("Test accuracy");
-    Accuracy accuracy = new Accuracy();
-    AtomicInteger testI = new AtomicInteger(0);
-    forceTrack("Featurizing");
-    testExamples.stream().parallel().forEach( example -> {
-      Pair<String, Double> predicted = classifier.classify(example.first);
-      synchronized (accuracy) {
-        accuracy.predict(Collections.singleton(predicted.first), Collections.singleton(example.second));
+    classifier.computeAccuracy(testExamples.stream(), PREDICTIONS.map(x -> {
+      try {
+        return "stdout".equalsIgnoreCase(x) ? System.out : new PrintStream(new FileOutputStream(x));
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
       }
-      if (testI.incrementAndGet() % 1000 == 0) {
-        log("[" + testI.get() + " / " + testExamples.size() + "]  " + accuracy.toOneLineString());
-      }
-    });
-    endTrack("Featurizing");
-    log(accuracy.toString());
-    endTrack("Test accuracy");
+    }));
   }
 
 }

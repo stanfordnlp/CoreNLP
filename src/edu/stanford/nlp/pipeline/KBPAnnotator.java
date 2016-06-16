@@ -4,10 +4,7 @@ import edu.stanford.nlp.classify.Classifier;
 import edu.stanford.nlp.classify.LinearClassifier;
 import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.hcoref.data.CorefChain;
-import edu.stanford.nlp.ie.KBPRelationExtractor;
-import edu.stanford.nlp.ie.KBPSemgrexExtractor;
-import edu.stanford.nlp.ie.KBPStatisticalExtractor;
-import edu.stanford.nlp.ie.KBPTokensregexExtractor;
+import edu.stanford.nlp.ie.*;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.IOUtils;
@@ -19,6 +16,7 @@ import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.simple.Document;
 import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.util.*;
@@ -31,6 +29,8 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("FieldCanBeLocal")
 public class KBPAnnotator implements Annotator {
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(KBPAnnotator.class);
 
   @ArgumentParser.Option(name="model", gloss="The path to the model")
   private String model = DefaultPaths.DEFAULT_KBP_CLASSIFIER;
@@ -50,7 +50,7 @@ public class KBPAnnotator implements Annotator {
   /**
    * The extractor implementation.
    */
-  public final List<KBPRelationExtractor> extractors;
+  public final KBPRelationExtractor extractor;
 
   /**
    * A serializer to convert to the Simple CoreNLP representation.
@@ -83,19 +83,23 @@ public class KBPAnnotator implements Annotator {
     ArgumentParser.fillOptions(this, name, props);
 
     // Load the extractor
-    extractors = new ArrayList<>();
     try {
+      log.info("Loading KBP classifier from " + model);
       Object object = IOUtils.readObjectFromURLOrClasspathOrFileSystem(model);
+      KBPRelationExtractor statisticalExtractor;
       if (object instanceof LinearClassifier) {
         //noinspection unchecked
-        extractors.add(new KBPStatisticalExtractor((Classifier<String, String>) object));
+        statisticalExtractor = new KBPStatisticalExtractor((Classifier<String, String>) object);
       } else if (object instanceof KBPStatisticalExtractor) {
-        extractors.add( (KBPStatisticalExtractor) object );
+        statisticalExtractor = (KBPStatisticalExtractor) object;
       } else {
         throw new ClassCastException(object.getClass() + " cannot be cast into a " + KBPStatisticalExtractor.class);
       }
-      extractors.add(new KBPTokensregexExtractor(tokensregexdir));
-      extractors.add(new KBPSemgrexExtractor(semgrexdir));
+      this.extractor = new KBPEnsembleExtractor(
+          new KBPTokensregexExtractor(tokensregexdir),
+          new KBPSemgrexExtractor(semgrexdir),
+          statisticalExtractor
+      );
     } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeIOException(e);
     }
@@ -266,24 +270,26 @@ public class KBPAnnotator implements Annotator {
     }
     // (collect coreferent KBP mentions)
     Map<CoreMap, Set<CoreMap>> mentionsMap = new HashMap<>();  // map from canonical mention -> other mentions
-    for (Map.Entry<Integer, CorefChain> chain : annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class).entrySet()) {
-      CoreMap firstMention = null;
-      for (CorefChain.CorefMention mention : chain.getValue().getMentionsInTextualOrder()) {
-        CoreMap kbpMention = null;
-        for (int i = mention.startIndex; i < mention.endIndex; ++i) {
-          if (mentionByStartIndex.containsKey(Pair.makePair(mention.sentNum - 1, i))) {
-            kbpMention = mentionByStartIndex.get(Pair.makePair(mention.sentNum - 1, i));
-            break;
+    if (annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class) != null) {
+      for (Map.Entry<Integer, CorefChain> chain : annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class).entrySet()) {
+        CoreMap firstMention = null;
+        for (CorefChain.CorefMention mention : chain.getValue().getMentionsInTextualOrder()) {
+          CoreMap kbpMention = null;
+          for (int i = mention.startIndex; i < mention.endIndex; ++i) {
+            if (mentionByStartIndex.containsKey(Pair.makePair(mention.sentNum - 1, i))) {
+              kbpMention = mentionByStartIndex.get(Pair.makePair(mention.sentNum - 1, i));
+              break;
+            }
           }
-        }
-        if (firstMention == null) {
-          firstMention = kbpMention;
-        }
-        if (kbpMention != null) {
-          if (!mentionsMap.containsKey(firstMention)) {
-            mentionsMap.put(firstMention, new LinkedHashSet<>());
+          if (firstMention == null) {
+            firstMention = kbpMention;
           }
-          mentionsMap.get(firstMention).add(kbpMention);
+          if (kbpMention != null) {
+            if (!mentionsMap.containsKey(firstMention)) {
+              mentionsMap.put(firstMention, new LinkedHashSet<>());
+            }
+            mentionsMap.get(firstMention).add(kbpMention);
+          }
         }
       }
     }
@@ -370,19 +376,11 @@ public class KBPAnnotator implements Annotator {
                   objNER.get(),
                   doc.sentence(sentenceI)
               );
+
               //  -- BEGIN Classify
-              Pair<String, Double> prediction = Pair.makePair(KBPRelationExtractor.NO_RELATION, 1.0);
-              for (KBPRelationExtractor extractor : extractors) {
-                Pair<String, Double> classifierPrediction = extractor.classify(input);
-                if (prediction.first.equals(KBPRelationExtractor.NO_RELATION) ||
-                    (!classifierPrediction.first.equals(KBPRelationExtractor.NO_RELATION) &&
-                        classifierPrediction.second > prediction.second)
-                    ){
-                  // The last prediction was NO_RELATION, or this is not NO_RELATION and has a higher score
-                  prediction = classifierPrediction;
-                }
-              }
+              Pair<String, Double> prediction = extractor.classify(input);
               //  -- END Classify
+
               // Handle the classifier output
               if (!KBPStatisticalExtractor.NO_RELATION.equals(prediction.first)) {
                 RelationTriple triple = new RelationTriple.WithLink(
