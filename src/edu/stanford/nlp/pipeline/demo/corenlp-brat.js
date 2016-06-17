@@ -148,6 +148,23 @@ function annotators() {
   return annotators;
 }
 
+/**
+ * Get the input date
+ */
+function date() {
+  function f(n) {
+    return n < 10 ? '0' + n : n;
+  }
+  var date = new Date();
+  var M = date.getMonth() + 1;
+  var D = date.getDate();
+  var Y = date.getFullYear();
+  var h = date.getHours();
+  var m = date.getMinutes();
+  var s = date.getSeconds();
+  return "" + Y + "-" + f(M) + "-" + f(D) + "T" + f(h) + ':' + f(m) + ':' + f(s);
+}
+
 // ----------------------------------------------------------------------------
 // RENDER
 // ----------------------------------------------------------------------------
@@ -750,7 +767,8 @@ $(document).ready(function() {
     $.ajax({
       type: 'POST',
       url: serverAddress + '?properties=' + encodeURIComponent(
-        '{"annotators": "' + annotators() + '", "coref.md.type": "dep", "coref.mode": "statistical"}'),
+        '{"annotators": "' + annotators() + '", "date": "' + date() + '"' +
+        ', "coref.md.type": "dep", "coref.mode": "statistical"}'),
       data: encodeURIComponent(currentQuery), //jQuery does'nt automatically URI encode strings
       dataType: 'json',
       contentType: "application/x-www-form-urlencoded;charset=UTF-8",
@@ -768,7 +786,7 @@ $(document).ready(function() {
               return; 
             }
             // (make sure the data contains that element)
-            ok = false
+            ok = false;
             if (typeof data[selector] != 'undefined') {
               ok = true;
             } else if (typeof data.sentences != 'undefined' && data.sentences.length > 0) {

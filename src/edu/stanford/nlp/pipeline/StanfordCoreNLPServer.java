@@ -156,6 +156,7 @@ public class StanfordCoreNLPServer implements Runnable {
    */
   private Annotation getDocument(Properties props, HttpExchange httpExchange) throws IOException, ClassNotFoundException {
     String inputFormat = props.getProperty("inputFormat", "text");
+    String date = props.getProperty("date");
     switch (inputFormat) {
       case "text":
         // The default encoding by the HTTP standard is ISO-8859-1, but most
@@ -182,7 +183,12 @@ public class StanfordCoreNLPServer implements Runnable {
         text = URLDecoder.decode(text, encoding).trim();
         // TODO(chaganty): URLdecode string.
         // Read the annotation
-        return new Annotation(text);
+        Annotation annotation = new Annotation(text);
+        // Set the date (if provided)
+        if (date != null) {
+          annotation.set(CoreAnnotations.DocDateAnnotation.class, date);
+        }
+        return annotation;
       case "serialized":
         String inputSerializerName = props.getProperty("inputSerializer", ProtobufAnnotationSerializer.class.getName());
         AnnotationSerializer serializer = MetaClass.create(inputSerializerName).createInstance();
