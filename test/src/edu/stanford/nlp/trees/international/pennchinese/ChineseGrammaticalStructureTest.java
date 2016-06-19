@@ -38,7 +38,7 @@ import edu.stanford.nlp.util.Pair;
  *
  * @author Percy Liang
  */
-public class UniversalChineseGrammaticalStructureTest extends TestCase {
+public class ChineseGrammaticalStructureTest extends TestCase {
 
   // Return a string which is the concatenation of |items|, with a new line after each line.
   // "a", "b" => "a\nb\n"
@@ -157,7 +157,7 @@ public class UniversalChineseGrammaticalStructureTest extends TestCase {
   }
 
   public static void main(String[] args) {
-    new UniversalChineseGrammaticalStructureTest().testBasicRelations();
+    new ChineseGrammaticalStructureTest().testBasicRelations();
   }
 
 }

@@ -32,13 +32,14 @@ import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Pair;
 
 /**
- * Test cases for conversion of Chinese TreeBank to Universal Stanford
+ * Test cases for conversion of Chinese TreeBank to Universal
  * Dependencies with Chinese characteristics.
  * This code is adapted from EnglishGrammaticalStructureTest.java
  *
  * @author Percy Liang
  */
-public class ChineseGrammaticalStructureTest extends TestCase {
+public class UniversalChineseGrammaticalStructureTest extends TestCase {
+
   // Return a string which is the concatenation of |items|, with a new line after each line.
   // "a", "b" => "a\nb\n"
   private static String C(String... items) {
@@ -133,7 +134,7 @@ public class ChineseGrammaticalStructureTest extends TestCase {
       for (String item : ex.second.split("\n"))
         testedRelations.add(item.substring(0, item.indexOf('(')));
     }
-    for (String relation : ChineseGrammaticalRelations.shortNameToGRel.keySet()) {
+    for (String relation : UniversalChineseGrammaticalRelations.shortNameToGRel.keySet()) {
       // TODO(pliang): don't warn for abstract relations like 'subj'
       if (!testedRelations.contains(relation))
         System.out.println("WARNING: relation '" + relation + "' not tested");
@@ -147,16 +148,16 @@ public class ChineseGrammaticalStructureTest extends TestCase {
       // specifying our own TreeReaderFactory is vital so that functional
       // categories - that is -TMP and -ADV in particular - are not stripped off
       Tree tree = Tree.valueOf(testTree, trf);
-      GrammaticalStructure gs = new ChineseGrammaticalStructure(tree);
+      GrammaticalStructure gs = new UniversalChineseGrammaticalStructure(tree);
 
       assertEquals("Unexpected CC processed dependencies for tree "+testTree,
           testAnswer,
-          ChineseGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCCprocessed(GrammaticalStructure.Extras.MAXIMAL), tree, false, false));
+          UniversalChineseGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCCprocessed(GrammaticalStructure.Extras.MAXIMAL), tree, false, false));
     }
   }
 
   public static void main(String[] args) {
-    new ChineseGrammaticalStructureTest().testBasicRelations();
+    new UniversalChineseGrammaticalStructureTest().testBasicRelations();
   }
 
 }
