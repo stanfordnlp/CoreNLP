@@ -97,14 +97,14 @@ public class LexicalizedParserITest extends TestCase {
 
   /**
    * Compares one view of the result tree to the expected results.
-   * <br>
+   *
    * Setting outputResults to true makes it print out the results.
    * This is useful because assertEquals sometimes abbreviates the
    * strings on failure, which makes it hard to diagnose.
    */
-  public static void compareSingleOutput(Tree results, boolean outputResults,
-                                         TreePrint printer,
-                                         String expectedOutput) {
+  private static void compareSingleOutput(Tree results, boolean outputResults,
+                                          TreePrint printer,
+                                          String expectedOutput) {
     StringWriter sw = new StringWriter();
     printer.printTree(results, (new PrintWriter(sw)));
     if (expectedOutput != null) {
@@ -129,30 +129,23 @@ public class LexicalizedParserITest extends TestCase {
    * better ways of testing the trees, ie by comparing the tree
    * directly instead of printing it out, but printing it also makes
    * the output very easy to inspect visually.
-   * <br>
+   *
    * Setting outputResults to true makes it print out the results.
    */
-  public static void compareOutput(Tree results, boolean outputResults,
-                                   String expectedTags,
-                                   String expectedPenn,
-                                   String expectedDep,
-                                   String expectedDepCol) {
+  private static void compareOutput(Tree results, boolean outputResults,
+                                    String expectedTags,
+                                    String expectedPenn,
+                                    String expectedDep,
+                                    String expectedDepCol) {
     compareSingleOutput(results, outputResults, tagPrint, expectedTags);
     compareSingleOutput(results, outputResults, pennPrint, expectedPenn);
     compareSingleOutput(results, outputResults, typDepPrint, expectedDep);
     compareSingleOutput(results, outputResults, typDepColPrint, expectedDepCol);
   }
 
-  public static List<CoreLabel> sampleSausage() {
+  private static List<CoreLabel> sampleSausage() {
     String[] words = {"My", "dog", "also", "likes", "eating", "sausage", "."};
-    List<CoreLabel> sentence = new ArrayList<CoreLabel>();
-    for (String word : words) {
-      CoreLabel label = new CoreLabel();
-      label.setWord(word);
-      label.setValue(word);
-      sentence.add(label);
-    }
-    return sentence;
+    return SentenceUtils.toCoreLabelList(words);
   }
 
   /**
@@ -181,7 +174,7 @@ public class LexicalizedParserITest extends TestCase {
   }
 
   public void testParseMultiple() {
-    List<List<CoreLabel>> sentences = new ArrayList<List<CoreLabel>>();
+    List<List<CoreLabel>> sentences = new ArrayList<>();
     sentences.add(SentenceUtils.toCoreLabelList("The", "Flyers", "lost", "again", "last", "night", "."));
     sentences.add(SentenceUtils.toCoreLabelList("If", "this", "continues", ",", "they", "will", "miss", "the", "playoffs", "."));
     sentences.add(SentenceUtils.toCoreLabelList("Hopefully", "they", "can", "turn", "it", "around", "."));
@@ -204,7 +197,7 @@ public class LexicalizedParserITest extends TestCase {
 
     ParserConstraint constraint =
       new ParserConstraint(0, 2, "SBAR|SBAR[^a-zA-Z].*");
-    List<ParserConstraint> constraints = new ArrayList<ParserConstraint>();
+    List<ParserConstraint> constraints = new ArrayList<>();
     constraints.add(constraint);
     pq.setConstraints(constraints);
 
@@ -239,14 +232,17 @@ public class LexicalizedParserITest extends TestCase {
 
   private static final String chineseTest2 = "这里 是 新闻 之 夜 ．";
   private static final String expectedChineseTree2 = "(ROOT (IP (NP (PN 这里)) (VP (VC 是) (NP (DNP (NP (NN 新闻)) (DEG 之)) (NP (NN 夜)))) (PU ．)))";
+  /** This is the right answer for Chinese UD. */
   private static final String expectedChineseDeps2 = "nsubj(夜-5, 这里-1) cop(夜-5, 是-2) assmod(夜-5, 新闻-3) case(新闻-3, 之-4) root(ROOT-0, 夜-5)";
+  /** This is the right answer for old-style Chinese SD. */
+  private static final String expectedChineseDeps2sd = "top(是-2, 这里-1) root(ROOT-0, 是-2) assmod(夜-5, 新闻-3) assm(新闻-3, 之-4) attr(是-2, 夜-5)";
 
   public void testChineseDependenciesSemanticHead() {
     Tree tree = chineseParser.parse(chineseTest2);
     compareSingleOutput(tree, false, chinesePennPrint, expectedChineseTree2);
-    compareSingleOutput(tree, false, chineseTypDepPrint, expectedChineseDeps2);
+    compareSingleOutput(tree, false, chineseTypDepPrint, expectedChineseDeps2sd);
     TreePrint paramsTreePrint = new TreePrint("typedDependencies", "basicDependencies", chineseParser.treebankLanguagePack(), chineseParser.getTLPParams().headFinder(), chineseParser.getTLPParams().typedDependencyHeadFinder());
-    compareSingleOutput(tree, false, paramsTreePrint, expectedChineseDeps2);
+    compareSingleOutput(tree, false, paramsTreePrint, expectedChineseDeps2sd);
   }
 
   public void testAlreadyTagged() {
@@ -277,7 +273,6 @@ public class LexicalizedParserITest extends TestCase {
     String[] tokens = { "You", "can", "eat", "fruits", "such", "as", "apples", "and", "oranges", "." };
     int[] begins = { 2, 6, 11, 15, 24, 29, 32, 39, 45, 52 };
     int[] ends = { 5, 9, 14, 21, 28, 31, 38, 42, 52, 53 };
-
 
     Tree tree = englishParser.parse(text);
 
