@@ -108,7 +108,7 @@ public class UniversalChineseGrammaticalStructure extends GrammaticalStructure  
             if (td1.reln() == DEPENDENT && td2.reln() == DEPENDENT && td1DepPOS.equals("P")) {
               GrammaticalRelation td3reln = UniversalChineseGrammaticalRelations.valueOf(td1Dep.value());
               if (td3reln == null) {
-                td3reln = GrammaticalRelation.valueOf(Language.Chinese,
+                td3reln = GrammaticalRelation.valueOf(Language.UniversalChinese,
                                                       td1Dep.value());
               }
               TypedDependency td3 = new TypedDependency(td3reln, td1.gov(), td2.dep());
