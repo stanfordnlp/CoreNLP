@@ -4,25 +4,24 @@ import edu.stanford.nlp.trees.TreebankLanguagePack;
 
 
 /**
- * Implements a 'semantic head' variant of the the HeadFinder found in Chinese Head Finder
- * 
+ * Implements a 'semantic head' variant of the the HeadFinder found in Chinese Head Finder.
  *
  * @author Pi-Chuan Chang
  * @author Huihsin Tseng
  * @author Percy Liang
  */
-public class ChineseSemanticHeadFinder extends ChineseHeadFinder {
+public class UniversalChineseSemanticHeadFinder extends ChineseHeadFinder {
 
-  public ChineseSemanticHeadFinder() {
+  public UniversalChineseSemanticHeadFinder() {
     this(new ChineseTreebankLanguagePack());
   }
 
-  public ChineseSemanticHeadFinder(TreebankLanguagePack tlp) {
+  public UniversalChineseSemanticHeadFinder(TreebankLanguagePack tlp) {
     super(tlp);
     ruleChanges();
   }
 
-  //makes modifications of head finder rules to better fit with semantic notions of heads
+  /** Makes modifications of head finder rules to better fit with semantic notions of heads. */
   private void ruleChanges() {
     // Note: removed VC and added NP; copula should not be the head.
     nonTerminalInfo.put("VP", new String[][]{{"left", "VP", "VCD", "VPT", "VV", "VCP", "VA", "VE", "IP", "VSB", "VCP", "VRD", "VNV", "NP"}, leftExceptPunct});

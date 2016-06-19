@@ -32,9 +32,9 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
 public class UniversalChineseGrammaticalStructure extends GrammaticalStructure  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseGrammaticalStructure.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(UniversalChineseGrammaticalStructure.class);
 
-  private static HeadFinder shf = new ChineseSemanticHeadFinder();
+  private static HeadFinder shf = new UniversalChineseSemanticHeadFinder();
   //private static HeadFinder shf = new ChineseHeadFinder();
 
 
@@ -63,7 +63,7 @@ public class UniversalChineseGrammaticalStructure extends GrammaticalStructure  
   }
 
   public UniversalChineseGrammaticalStructure(Tree t, Predicate<String> puncFilter, HeadFinder hf) {
-    super(t, ChineseGrammaticalRelations.values(), ChineseGrammaticalRelations.valuesLock(), null, hf, puncFilter, Filters.acceptFilter());
+    super(t, UniversalChineseGrammaticalRelations.values(), UniversalChineseGrammaticalRelations.valuesLock(), null, hf, puncFilter, Filters.acceptFilter());
   }
 
   /** Used for postprocessing CoNLL X dependencies */
@@ -106,7 +106,7 @@ public class UniversalChineseGrammaticalStructure extends GrammaticalStructure  
             // TreeGraphNode td2Dep = td2.dep();
             // String td2DepPOS = td2Dep.parent().value();
             if (td1.reln() == DEPENDENT && td2.reln() == DEPENDENT && td1DepPOS.equals("P")) {
-              GrammaticalRelation td3reln = ChineseGrammaticalRelations.valueOf(td1Dep.value());
+              GrammaticalRelation td3reln = UniversalChineseGrammaticalRelations.valueOf(td1Dep.value());
               if (td3reln == null) {
                 td3reln = GrammaticalRelation.valueOf(Language.Chinese,
                                                       td1Dep.value());
@@ -174,8 +174,8 @@ public class UniversalChineseGrammaticalStructure extends GrammaticalStructure  
    * GrammaticalStructure#main.
    *
    * Usage: <br> <code>
-   * java edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure -treeFile [treeFile] <br>
-   * java edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure -sentFile [sentenceFile] </code>
+   * java edu.stanford.nlp.trees.international.pennchinese.UniversalChineseGrammaticalStructure -treeFile [treeFile] <br>
+   * java edu.stanford.nlp.trees.international.pennchinese.UniversalChineseGrammaticalStructure -sentFile [sentenceFile] </code>
    *
    * @param args Command line args as above
    */
@@ -231,7 +231,7 @@ public class UniversalChineseGrammaticalStructure extends GrammaticalStructure  
 
 
     if (args.length == 0) {
-      System.err.printf("Usage:\n\t%s [optional flags] -treeFile treeFile\n\nOr:\n\t%s [optional flags] -sentFile sentFile\n", ChineseGrammaticalStructure.class.getName(), ChineseGrammaticalStructure.class.getName());
+      System.err.printf("Usage:\n\t%s [optional flags] -treeFile treeFile\n\nOr:\n\t%s [optional flags] -sentFile sentFile\n", UniversalChineseGrammaticalStructure.class.getName(), UniversalChineseGrammaticalStructure.class.getName());
       log.info("\nOptional flags:");
       log.info("\t-parseTree  : print phrase-structure parse tree");
       log.info("\t-basic : basic non-collapsed dependencies preserving a tree structure");
@@ -298,7 +298,7 @@ public class UniversalChineseGrammaticalStructure extends GrammaticalStructure  
         puncFilter = new ChineseTreebankLanguagePack().punctuationWordRejectFilter();
       }
 
-      GrammaticalStructure gs = new ChineseGrammaticalStructure(t, puncFilter);
+      GrammaticalStructure gs = new UniversalChineseGrammaticalStructure(t, puncFilter);
 
       if (parseTree) {
         System.out.println("============= parse tree =======================");
@@ -338,18 +338,18 @@ public class UniversalChineseGrammaticalStructure extends GrammaticalStructure  
 
 
   public static List<GrammaticalStructure> readCoNLLXGrammaticalStructureCollection(String fileName) throws IOException {
-    return readCoNLLXGrammaticalStructureCollection(fileName, ChineseGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
+    return readCoNLLXGrammaticalStructureCollection(fileName, UniversalChineseGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
   }
 
-  public static ChineseGrammaticalStructure buildCoNLLXGrammaticalStructure(List<List<String>> tokenFields) {
-    return (ChineseGrammaticalStructure) buildCoNLLXGrammaticalStructure(tokenFields, ChineseGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
+  public static UniversalChineseGrammaticalStructure buildCoNLLXGrammaticalStructure(List<List<String>> tokenFields) {
+    return (UniversalChineseGrammaticalStructure) buildCoNLLXGrammaticalStructure(tokenFields, UniversalChineseGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
   }
 
   public static class FromDependenciesFactory
     implements GrammaticalStructureFromDependenciesFactory
   {
-    public ChineseGrammaticalStructure build(List<TypedDependency> tdeps, TreeGraphNode root) {
-      return new ChineseGrammaticalStructure(tdeps, root);
+    public UniversalChineseGrammaticalStructure build(List<TypedDependency> tdeps, TreeGraphNode root) {
+      return new UniversalChineseGrammaticalStructure(tdeps, root);
     }
   }
 
