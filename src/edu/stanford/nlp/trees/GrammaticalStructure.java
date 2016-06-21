@@ -820,6 +820,7 @@ public abstract class GrammaticalStructure implements Serializable  {
         deps.add(new TypedDependency(dep));
       }
     }
+    //TODO (sebschu): prevent correctDependencies from getting called multiple times
     correctDependencies(deps);
     return deps;
   }
