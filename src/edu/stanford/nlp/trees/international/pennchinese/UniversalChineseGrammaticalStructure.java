@@ -231,12 +231,12 @@ public class UniversalChineseGrammaticalStructure extends GrammaticalStructure  
 
 
     if (args.length == 0) {
-      System.err.printf("Usage:\n\t%s [optional flags] -treeFile treeFile\n\nOr:\n\t%s [optional flags] -sentFile sentFile\n", UniversalChineseGrammaticalStructure.class.getName(), UniversalChineseGrammaticalStructure.class.getName());
-      log.info("\nOptional flags:");
+      log.info(String.format("Usage:\n\t%s [optional flags] -treeFile treeFile\n\tor:\n\t%s [optional flags] -sentFile sentFile\n", UniversalChineseGrammaticalStructure.class.getName(), UniversalChineseGrammaticalStructure.class.getName()));
+      log.info("Optional flags:");
       log.info("\t-parseTree  : print phrase-structure parse tree");
       log.info("\t-basic : basic non-collapsed dependencies preserving a tree structure");
       log.info("\t-collapsed : collapsed dependencies");
-      log.info("\t-conllx : conllx formatted dependencies, can be used with either basic\n\t or collaped dependencies, but basic is recommended");
+      log.info("\t-conllx : conllx formatted dependencies, can be used with either basic\n\t or collapsed dependencies, but basic is recommended");
 
     } else {
       if (treeDirname != null && treeFileName != null) {
