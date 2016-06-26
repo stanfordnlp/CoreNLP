@@ -383,28 +383,10 @@ public class StringUtils  {
     return sb.toString();
   }
 
-// Omitted; I'm pretty sure this are redundant with the above
-//  /**
-//   * Joins each elem in the List with the given glue. For example, given a
-//   * list
-//   * of Integers, you can create a comma-separated list by calling
-//   * <tt>join(numbers, ", ")</tt>.
-//   */
-//  public static String join(List l, String glue) {
-//    StringBuilder sb = new StringBuilder();
-//    for (int i = 0, sz = l.size(); i < sz; i++) {
-//      if (i > 0) {
-//        sb.append(glue);
-//      }
-//      sb.append(l.get(i).toString());
-//    }
-//    return sb.toString();
-//  }
-
   /**
    * Joins each elem in the array with the given glue. For example, given a
    * list of ints, you can create a comma-separated list by calling
-   * <code>join(numbers, ", ")</code>.
+   * {@code join(numbers, ", ")}.
    */
   public static String join(Object[] elements, String glue) {
     return (join(Arrays.asList(elements), glue));
@@ -431,6 +413,16 @@ public class StringUtils  {
     }
     return b.toString();
   }
+
+  /**
+   * Joins each element in the given array with the given glue. For example,
+   * given an array of Integers, you can create a comma-separated list by calling
+   * {@code join(numbers, ", ")}.
+   */
+  public static String join(String[] items, String glue) {
+    return join(Arrays.asList(items), glue);
+  }
+
 
   /**
    * Joins elems with a space.
