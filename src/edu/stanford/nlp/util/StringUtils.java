@@ -32,7 +32,7 @@ import java.util.stream.Stream;
  * table columns: {@link #padLeft(int, int)}, {@link #pad(String, int)}.
  *
  * <p>Example: print a comma-separated list of numbers:</p>
- * <p><code>System.out.println(StringUtils.pad(nums, &quot;, &quot;));</code></p>
+ * <p>{@code System.out.println(StringUtils.pad(nums, &quot;, &quot;));}</p>
  * <p>Example: print a 2D array of numbers with 8-char cells:</p>
  * <p><code>for(int i = 0; i &lt; nums.length; i++) {<br>
  * &nbsp;&nbsp;&nbsp; for(int j = 0; j &lt; nums[i].length; j++) {<br>
@@ -252,15 +252,10 @@ public class StringUtils  {
   }
 
   public static String joinWords(List<? extends HasWord> l, String glue, int start, int end) {
-    return join(l, glue, in -> in.word(), start, end);
+    return join(l, glue, HasWord::word, start, end);
   }
 
-  public static final Function<Object,String> DEFAULT_TOSTRING = new Function<Object, String>() {
-    @Override
-    public String apply(Object in) {
-      return in.toString();
-    }
-  };
+  private static final Function<Object,String> DEFAULT_TOSTRING = Object::toString;
 
   public static String joinFields(List<? extends CoreMap> l, final Class field, final String defaultFieldValue,
                                   String glue, int start, int end, final Function<Object,String> toStringFunc) {
@@ -288,6 +283,7 @@ public class StringUtils  {
   public static String joinMultipleFields(List<? extends CoreMap> l, final Class[] fields, final String defaultFieldValue,
                                           final String fieldGlue, String glue, int start, int end, final Function<Object,String> toStringFunc) {
     return join(l, glue, new Function<CoreMap, String>() {
+      @Override
       public String apply(CoreMap in) {
         StringBuilder sb = new StringBuilder();
         for (Class field: fields) {
@@ -505,13 +501,13 @@ public class StringUtils  {
   }
 
   /**
-   * Splits a string into whitespace tokenized fields based on a delimiter. For example,
-   * "aa bb | bb cc | ccc ddd" would be split into "[aa,bb],[bb,cc],[ccc,ddd]" based on
+   * Splits a string into whitespace tokenized fields based on a delimiter and then whitespace.
+   * For example, "aa bb | bb cc | ccc ddd" would be split into "[aa,bb],[bb,cc],[ccc,ddd]" based on
    * the delimiter "|". This method uses the old StringTokenizer class, which is up to
    * 3x faster than the regex-based "split()" methods.
    *
-   * @param delimiter
-   * @return
+   * @param delimiter String to split on
+   * @return List of lists of strings.
    */
   public static List<List<String>> splitFieldsFast(String str, String delimiter) {
     List<List<String>> fields = Generics.newArrayList();
@@ -610,13 +606,23 @@ public class StringUtils  {
    * than totalChars, it is returned unchanged.
    */
   public static String pad(String str, int totalChars) {
+    return pad(str, totalChars, ' ');
+  }
+
+  /**
+   * Return a String of length a minimum of totalChars characters by
+   * padding the input String str at the right end with spaces.
+   * If str is already longer
+   * than totalChars, it is returned unchanged.
+   */
+  public static String pad(String str, int totalChars, char pad) {
     if (str == null) {
       str = "null";
     }
     int slen = str.length();
     StringBuilder sb = new StringBuilder(str);
     for (int i = 0; i < totalChars - slen; i++) {
-      sb.append(' ');
+      sb.append(pad);
     }
     return sb.toString();
   }
@@ -687,7 +693,7 @@ public class StringUtils  {
 
 
   /**
-   * Pads the given String to the left with the given character to ensure that
+   * Pads the given String to the left with the given character ch to ensure that
    * it's at least totalChars long.
    */
   public static String padLeft(String str, int totalChars, char ch) {
@@ -731,12 +737,22 @@ public class StringUtils  {
     if (s.length() <= maxWidth) {
       return (s);
     }
-    return (s.substring(0, maxWidth));
+    return s.substring(0, maxWidth);
   }
 
   public static String trim(Object obj, int maxWidth) {
     return trim(obj.toString(), maxWidth);
   }
+
+  public static String trimWithEllipsis(String s, int width) {
+    if (s.length() > width) s = s.substring(0, width - 3) + "...";
+    return s;
+  }
+
+  public static String trimWithEllipsis(Object o, int width) {
+    return trimWithEllipsis(o.toString(), width);
+  }
+
 
   public static String repeat(String s, int times) {
     if (times == 0) {
@@ -823,15 +839,15 @@ public class StringUtils  {
   /**
    * Parses command line arguments into a Map. Arguments of the form
    * <p/>
-   * -flag1 arg1a arg1b ... arg1m -flag2 -flag3 arg3a ... arg3n
+   * {@code -flag1 arg1a arg1b ... arg1m -flag2 -flag3 arg3a ... arg3n}
    * <p/>
    * will be parsed so that the flag is a key in the Map (including
    * the hyphen) and its value will be a {@link String}[] containing
    * the optional arguments (if present).  The non-flag values not
    * captured as flag arguments are collected into a String[] array
-   * and returned as the value of <code>null</code> in the Map.  In
+   * and returned as the value of {@code null} in the Map.  In
    * this invocation, flags cannot take arguments, so all the {@link
-   * String} array values other than the value for <code>null</code>
+   * String} array values other than the value for {@code null}
    * will be zero-length.
    *
    * @param args A command-line arguments array
@@ -845,16 +861,16 @@ public class StringUtils  {
   /**
    * Parses command line arguments into a Map. Arguments of the form
    * <p/>
-   * -flag1 arg1a arg1b ... arg1m -flag2 -flag3 arg3a ... arg3n
+   * {@code -flag1 arg1a arg1b ... arg1m -flag2 -flag3 arg3a ... arg3n}
    * <p/>
    * will be parsed so that the flag is a key in the Map (including
    * the hyphen) and its value will be a {@link String}[] containing
    * the optional arguments (if present).  The non-flag values not
    * captured as flag arguments are collected into a String[] array
-   * and returned as the value of <code>null</code> in the Map.  In
+   * and returned as the value of {@code null} in the Map.  In
    * this invocation, the maximum number of arguments for each flag
    * can be specified as an {@link Integer} value of the appropriate
-   * flag key in the <code>flagsToNumArgs</code> {@link Map}
+   * flag key in the {@code flagsToNumArgs} {@link Map}
    * argument. (By default, flags cannot take arguments.)
    * <p/>
    * Example of usage:
@@ -1866,21 +1882,28 @@ public class StringUtils  {
   }
 
   /**
-   * Returns the supplied string with any trailing '\n' removed.
+   * Returns the supplied string with any trailing '\n' or '\r\n' removed.
    */
   public static String chomp(String s) {
-    if(s.length() == 0)
-      return s;
-    int l_1 = s.length() - 1;
-    if (s.charAt(l_1) == '\n') {
-      return s.substring(0, l_1);
+    if (s == null) {
+      return null;
     }
-    return s;
+    int l_1 = s.length() - 1;
+    if (l_1 >= 0 && s.charAt(l_1) == '\n') {
+      int l_2 = l_1 - 1;
+      if (l_2 >= 0 && s.charAt(l_2) == '\r') {
+        return s.substring(0, l_2);
+      } else {
+        return s.substring(0, l_1);
+      }
+    } else {
+      return s;
+    }
   }
 
   /**
    * Returns the result of calling toString() on the supplied Object, but with
-   * any trailing '\n' removed.
+   * any trailing '\n' or '\r\n' removed.
    */
   public static String chomp(Object o) {
     return chomp(o.toString());
@@ -2428,12 +2451,13 @@ public class StringUtils  {
 
   /**
    * Decode an array encoded as a String. This entails a comma separated value enclosed in brackets
-   * or parentheses
+   * or parentheses.
+   *
    * @param encoded The String encoded array
    * @return A String array corresponding to the encoded array
    */
   public static String[] decodeArray(String encoded){
-    if (encoded.length() == 0) return new String[]{};
+    if (encoded.isEmpty()) return EMPTY_STRING_ARRAY;
     char[] chars = encoded.trim().toCharArray();
 
     //--Parse the String
@@ -2580,7 +2604,7 @@ public class StringUtils  {
     }
 
     //--Return
-    if(current.toString().trim().length() > 0 && !onKey) {
+    if (current.toString().trim().length() > 0 && !onKey) {
       map.put(key.trim(), current.toString().trim());
     }
     return map;
