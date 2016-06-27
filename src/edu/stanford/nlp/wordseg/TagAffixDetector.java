@@ -1,16 +1,16 @@
 package edu.stanford.nlp.wordseg;
 
-
+import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.logging.Redwood;
 
-import edu.stanford.nlp.sequences.SeqClassifierFlags;
-
+/** @author Huihsin Tseng */
 class TagAffixDetector {
 
   private static final Redwood.RedwoodChannels logger = Redwood.channels(TagAffixDetector.class);
+  private static final boolean VERBOSE = false;
 
   private final CorpusChar cc;
-  private final affDict aD;
+  private final AffixDictionary aD;
   // String sighanCorporaDict = "/u/nlp/data/chinese-segmenter/";
   private static final String DEFAULT_CORPORA_DICT = "/u/nlp/data/gale/segtool/stanford-seg/data";
 
@@ -46,14 +46,16 @@ class TagAffixDetector {
       ccPath = corporaDict+"dict/pos_close/char.ctb.list";
       adPath = corporaDict+"dict/in.ctb";
     }
-    logger.info("TagAffixDetector: useChPos=" + flags.useChPos +
-            " | useCTBChar2=" + flags.useCTBChar2 + " | usePKChar2=" + flags.usePKChar2);
-    logger.info("TagAffixDetector: building TagAffixDetector from " + ccPath + " and " + adPath);
+    if (VERBOSE) {
+      logger.info("TagAffixDetector: useChPos=" + flags.useChPos +
+              " | useCTBChar2=" + flags.useCTBChar2 + " | usePKChar2=" + flags.usePKChar2);
+      logger.info("TagAffixDetector: building TagAffixDetector from " + ccPath + " and " + adPath);
+    }
     cc = new CorpusChar(ccPath);
-    aD = new affDict(adPath);
+    aD = new AffixDictionary(adPath);
   }
 
-  String checkDic(String t2, String c2 ){
+  String checkDic(String t2, String c2 ) {
     if(cc.getTag(t2, c2).equals("1"))
       return "1";
     return "0";

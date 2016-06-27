@@ -3,12 +3,10 @@ package edu.stanford.nlp.wordseg;
 import java.util.*;
 import java.io.*;
 
-
-import edu.stanford.nlp.util.logging.Redwood;
-
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Check tag of each character from 5 different corpora. (4 official training corpora of Sighan bakeoff 2005, plus CTB)
@@ -16,55 +14,48 @@ import edu.stanford.nlp.util.Generics;
  * @author Huihsin Tseng
  * @author Pichuan Chang
  */
-
- 
 public class CorpusChar {
-  private static Redwood.RedwoodChannels logger = Redwood.channels(CorpusChar.class);
+
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(CorpusChar.class);
 
   private Map <String, Set <String>> charMap;
 
   public CorpusChar(String charlistFilename)  {
-    charMap=readDict(charlistFilename); 
+    charMap=readDict(charlistFilename);
   }
 
-  Map<String, Set<String>> getCharMap() {
+  private Map<String, Set<String>> getCharMap() {
     return charMap;
   }
-  
-  
-  private Map<String, Set <String>> char_dict;
 
-  private Map<String, Set<String>> readDict(String filename)  {
 
-    logger.info("Loading character dictionary file from " + filename);
+  private static Map<String, Set<String>> readDict(String filename)  {
 
+    Map<String, Set<String>> char_dict;
     try {
-      InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(filename);      
-      BufferedReader DetectorReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-      String DetectorLine;
+      BufferedReader detectorReader = IOUtils.readerFromString(filename, "UTF-8");
 
       char_dict = Generics.newHashMap();
       //logger.debug("DEBUG: in CorpusChar readDict");
-      while ((DetectorLine = DetectorReader.readLine()) != null) {
-        
-        String[] fields = DetectorLine.split("	");
+      for (String detectorLine; (detectorLine = detectorReader.readLine()) != null; ) {
+
+        String[] fields = detectorLine.split("	");
         String tag=fields[0];
 
-        Set<String> chars=char_dict.get(tag);
-	 
+        Set<String> chars= char_dict.get(tag);
+
         if(chars==null){
           chars = Generics.newHashSet();
           char_dict.put(tag,chars);
-        } 
+        }
         //logger.debug("DEBUG: CorpusChar: "+filename+" "+fields[1]);
         chars.add(fields[1]);
-    
-    
       }
-      is.close();
+      detectorReader.close();
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
+    logger.info("Loading character dictionary file from " + filename + " [done].");
     return char_dict;
   }
 
@@ -72,45 +63,45 @@ public class CorpusChar {
     Map<String, Set<String>> h1=getCharMap();
     Set<String> h2=h1.get(a1);
     if (h2 == null) return "0";
-    if (h2.contains(a2)) 
+    if (h2.contains(a2))
       return "1";
-    return "0"; 
+    return "0";
   }
   /*
   public String getCtbTag(String a1, String a2) {
     HashMap h1=dict.getctb();
     Set h2=(Set)h1.get(a1);
     if (h2 == null) return "0";
-    if (h2.contains(a2)) 
+    if (h2.contains(a2))
       return "1";
-    return "0"; 
+    return "0";
   }
 
   public String getAsbcTag(String a1, String a2) {
     HashMap h1=dict.getasbc();
     Set h2=(Set)h1.get(a1);
     if (h2 == null) return "0";
-    if (h2.contains(a2)) 
+    if (h2.contains(a2))
       return "1";
-    return "0"; 
+    return "0";
   }
-  
+
   public String getPkuTag(String a1, String a2) {
     HashMap h1=dict.getpku();
     Set h2=(Set)h1.get(a1);
     if (h2 == null) return "0";
-    if (h2.contains(a2)) 
+    if (h2.contains(a2))
       return "1";
-    return "0"; 
+    return "0";
   }
 
   public String getHkTag(String a1, String a2) {
     HashMap h1=dict.gethk();
     Set h2=(Set)h1.get(a1);
     if (h2 == null) return "0";
-    if (h2.contains(a2)) 
+    if (h2.contains(a2))
       return "1";
-    return "0"; 
+    return "0";
   }
 
 
@@ -118,9 +109,9 @@ public class CorpusChar {
     HashMap h1=dict.getmsr();
     Set h2=(Set)h1.get(a1);
     if (h2 == null) return "0";
-    if (h2.contains(a2)) 
+    if (h2.contains(a2))
       return "1";
-    return "0"; 
+    return "0";
     }*/
 
 }//end of class
