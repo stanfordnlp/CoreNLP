@@ -847,7 +847,7 @@ public class StringUtils  {
    *         String} arrays.
    */
   public static Map<String, String[]> argsToMap(String[] args) {
-    return argsToMap(args, Collections.<String,Integer>emptyMap());
+    return argsToMap(args, Collections.emptyMap());
   }
 
   /**
@@ -924,7 +924,7 @@ public class StringUtils  {
    * @return A Properties object representing the arguments.
    */
   public static Properties argsToProperties(String... args) {
-    return argsToProperties(args, Collections.<String,Integer>emptyMap());
+    return argsToProperties(args, Collections.emptyMap());
   }
 
   /**
@@ -934,13 +934,16 @@ public class StringUtils  {
    * <li> Since Properties objects are String to String mappings, the default number of arguments to a flag is
    * assumed to be 1 and not 0. </li>
    * <li> Furthermore, the list of arguments not bound to a flag is mapped to the "" property, not null </li>
-   * <li> The special flags "-prop", "-props", or "-properties" will load the property file specified by its argument. </li>
+   * <li> The special flags "-prop", "-props", "-properties", "-args", or "-arguments" will load the property file
+   *      specified by its argument. </li>
    * <li> The value for flags without arguments is set to "true" </li>
    * <li> If a flag has multiple arguments, the value of the property is all
-   * of the arguments joined together with a space (" ") character between
-   * them.</li>
-   * <li> The value strings are trimmed so trailing spaces do not stop you from loading a file</li>
+   * of the arguments joined together with a space (" ") character between them.</li>
+   * <li> The value strings are trimmed so trailing spaces do not stop you from loading a file.</li>
    * </ul>
+   * Properties are read from left to right, and later properties will override earlier ones with the same name.
+   * Properties loaded from a Properties file with the special args are defaults that can be overriden by command line
+   * flags (or earlier Properties files if there is nested usage of the special args.
    *
    * @param args Command line arguments
    * @param flagsToNumArgs Map of how many arguments flags should have. The keys are without the minus signs.
@@ -951,11 +954,12 @@ public class StringUtils  {
     List<String> remainingArgs = new ArrayList<>();
     for (int i = 0; i < args.length; i++) {
       String key = args[i];
-      if (key.length() > 0 && key.charAt(0) == '-') { // found a flag
-        if (key.length() > 1 && key.charAt(1) == '-')
+      if ( ! key.isEmpty() && key.charAt(0) == '-') { // found a flag
+        if (key.length() > 1 && key.charAt(1) == '-') {
           key = key.substring(2); // strip off 2 hyphens
-        else
+        } else {
           key = key.substring(1); // strip off the hyphen
+        }
 
         Integer maxFlagArgs = flagsToNumArgs.get(key);
         int max = maxFlagArgs == null ? 1 : maxFlagArgs;
@@ -969,40 +973,46 @@ public class StringUtils  {
         for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].isEmpty() || args[i + 1].charAt(0) != '-'); i++, j++) {
           flagArgs.add(args[i + 1]);
         }
+        String value;
         if (flagArgs.isEmpty()) {
-          result.setProperty(key, "true");
+          value = "true";
         } else {
-          result.setProperty(key, join(flagArgs, " "));
-          if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
-            try {
-              BufferedReader reader = IOUtils.readerFromString(result.getProperty(key));
-              result.remove(key); // location of this line is critical
-              result.load(reader);
-              // trim all values
-              for (String propKey : result.stringPropertyNames()){
-                String newVal = result.getProperty(propKey);
-                result.setProperty(propKey, newVal.trim());
-              }
-              reader.close();
-            } catch (IOException e) {
-              String msg = "argsToProperties could not read properties file: " + result.getProperty(key);
-              result.remove(key);
-              throw new RuntimeIOException(msg, e);
-            }
-          }
+          value = join(flagArgs, " ");
+        }
+        if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
+          result.setProperty(PROPERTIES, value);
+        } else {
+          result.setProperty(key, value);
         }
       } else {
         remainingArgs.add(args[i]);
       }
     }
-    if (!remainingArgs.isEmpty()) {
+    if ( ! remainingArgs.isEmpty()) {
       result.setProperty("", join(remainingArgs, " "));
     }
 
-    if (result.containsKey(PROP)) {
-      String file = result.getProperty(PROP);
-      result.remove(PROP);
-      Properties toAdd = argsToProperties("-prop", file);
+    /* Processing in reverse order, add properties that aren't present only. Thus, later ones override earlier ones. */
+    while (result.containsKey(PROPERTIES)) {
+      String file = result.getProperty(PROPERTIES);
+      result.remove(PROPERTIES);
+      Properties toAdd = new Properties();
+      BufferedReader reader = null;
+      try {
+        reader = IOUtils.readerFromString(file);
+        toAdd.load(reader);
+        // trim all values
+        for (String propKey : toAdd.stringPropertyNames()) {
+          String newVal = toAdd.getProperty(propKey);
+          toAdd.setProperty(propKey, newVal.trim());
+        }
+      } catch (IOException e) {
+        String msg = "argsToProperties could not read properties file: " + file;
+        throw new RuntimeIOException(msg, e);
+      } finally {
+        IOUtils.closeIgnoringExceptions(reader);
+      }
+
       for (String key : toAdd.stringPropertyNames()) {
         String val = toAdd.getProperty(key);
         if ( ! result.containsKey(key)) {
@@ -1017,8 +1027,8 @@ public class StringUtils  {
 
   /**
    * This method reads in properties listed in a file in the format prop=value, one property per line.
-   * Although <code>Properties.load(InputStream)</code> exists, I implemented this method to trim the lines,
-   * something not implemented in the <code>load()</code> method.
+   * Although {@code Properties.load(InputStream)} exists, I implemented this method to trim the lines,
+   * something not implemented in the {@code load()} method.
    *
    * @param filename A properties file to read
    * @return The corresponding Properties object
@@ -1912,14 +1922,25 @@ public class StringUtils  {
   }
 
   /**
-   * Strip directory and suffix from filename.  Like Unix 'basename'. <p/>
+   * Strip directory and suffix from filename.  Like Unix 'basename'.
    *
-   * Example: <code>getBaseName("/u/wcmac/foo.txt", "") ==> "foo.txt"</code><br/>
-   * Example: <code>getBaseName("/u/wcmac/foo.txt", ".txt") ==> "foo"</code><br/>
-   * Example: <code>getBaseName("/u/wcmac/foo.txt", ".pdf") ==> "foo.txt"</code><br/>
+   * Example: {@code getBaseName("/u/wcmac/foo.txt", "") ==> "foo.txt"}<br/>
+   * Example: {@code getBaseName("/u/wcmac/foo.txt", ".txt") ==> "foo"}<br/>
+   * Example: {@code getBaseName("/u/wcmac/foo.txt", ".pdf") ==> "foo.txt"}<br/>
    */
   public static String getBaseName(String fileName, String suffix) {
-    String[] elts = fileName.split("/");
+    return getBaseName(fileName, suffix, "/");
+  }
+
+  /**
+   * Strip directory and suffix from the given name.  Like Unix 'basename'.
+   *
+   * Example: {@code getBaseName("/tmp/foo/bar/foo", "", "/") ==> "foo"}<br/>
+   * Example: {@code getBaseName("edu.stanford.nlp", "", "\\.") ==> "nlp"}<br/>
+   */
+  public static String getBaseName(String fileName, String suffix, String sep) {
+    String[] elts = fileName.split(sep);
+    if (elts.length == 0) return "";
     String lastElt = elts[elts.length - 1];
     if (lastElt.endsWith(suffix)) {
       lastElt = lastElt.substring(0, lastElt.length() - suffix.length());
@@ -2085,8 +2106,7 @@ public class StringUtils  {
    */
   public static LinkedHashMap<String, String> propFileToLinkedHashMap(String filename, Map<String, String> existingArgs) {
 
-    LinkedHashMap<String, String> result = new LinkedHashMap<>();
-    result.putAll(existingArgs);
+    LinkedHashMap<String, String> result = new LinkedHashMap<>(existingArgs);
     for (String l : IOUtils.readLines(filename)) {
       l = l.trim();
       if (l.isEmpty() || l.startsWith("#"))
@@ -2514,7 +2534,7 @@ public class StringUtils  {
    * @return A String map corresponding to the encoded map
    */
   public static Map<String, String> decodeMap(String encoded){
-    if (encoded.length() == 0) return new HashMap<>();
+    if (encoded.isEmpty()) return new HashMap<>();
     char[] chars = encoded.trim().toCharArray();
 
     //--Parse the String
