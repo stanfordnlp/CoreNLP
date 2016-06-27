@@ -14,8 +14,13 @@ This annotator removes XML tags from an input document.
 Stanford CoreNLP also has the ability to remove most XML from a
 document before processing it. This functionality is provided by a
 finite automaton. It works fine for typical XML, but complex
-constructions and CDATA sections will not be correctly handled. Many
-more complex options are also available: You can choose to only delete
+constructions and CDATA sections will not be correctly handled. 
+If you want full and correct handling of XML, then you should run XML
+documents through an XML parser (such as the one included standard in
+Java) before passing appropriate text nodes to Stanford CoreNLP.
+
+The cleanxml annotator supports many complex processing options: 
+You can choose to only delete
 some XML tags, to treat certain XML tags as sentence ending, as
 marking the speaker in a dialog, etc.
 

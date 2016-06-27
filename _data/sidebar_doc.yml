@@ -40,8 +40,8 @@ entries:
         - title: CoreNLP server
           url: corenlp-server.html
 
-	- title: For other human languages
-	  url: human-languages.html
+        - title: On other human languages
+          url: human-languages.html
 
         - title: From other languages/packages
           url: other-languages.html
