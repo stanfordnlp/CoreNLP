@@ -36,9 +36,12 @@ entries:
 
         - title: Simple CoreNLP API
           url: simple.html
-          
+
         - title: CoreNLP server
           url: corenlp-server.html
+
+	- title: For other human languages
+	  url: human-languages.html
 
         - title: From other languages/packages
           url: other-languages.html
