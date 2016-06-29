@@ -42,9 +42,8 @@ In code, an example would look something like this:
 ```java
 String text = "克林顿说，华盛顿将逐步落实对韩国的经济援助。"
         + "金大中对克林顿的讲话报以掌声：克林顿总统在会谈中重申，他坚定地支持韩国摆脱经济危机。";
-Properties props = PropertiesUtils.asProperties("-props",
-		"edu/stanford/nlp/hcoref/properties/zh-dcoref-default.properties”);
 Annotation document = new Annotation(text);
+Properties props = PropertiesUtils.asProperties("props", "StanfordCoreNLP-chinese.properties”);
 StanfordCoreNLP corenlp = new StanfordCoreNLP(props);
 corenlp.annotate(document);
 ```
