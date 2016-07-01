@@ -79,6 +79,9 @@ public class UniversalChineseGrammaticalRelations {
   // dependency tregexes
   private static final TregexPatternCompiler tregexCompiler = new TregexPatternCompiler((HeadFinder) null);
 
+
+  private static final String COMMA_PATTERN = "/^,|，$/";
+
   /** Return an unmodifiable list of grammatical relations.
    *  Note: the list can still be modified by others, so you
    *  should still get a lock with {@code valuesLock()} before
@@ -141,11 +144,12 @@ public class UniversalChineseGrammaticalRelations {
    */
   public static final GrammaticalRelation NOMINAL_SUBJECT =
     new GrammaticalRelation(Language.UniversalChinese, "nsubj", "nominal subject",
-        SUBJECT, "IP|VP", tregexCompiler,
-            "IP <( ( NP|QP=target!< NT ) $++ ( /^VP|VCD|IP/  !< VE !<VC !<SB !<LB  ))",
+        SUBJECT, "IP|NP", tregexCompiler,
+            "IP <( ( NP|QP=target!< NT ) $+ ( /^VP|VCD|IP/  !< VE !<VC !<SB !<LB  ))",
+            // Handle the case where the subject and object is separated by a comma
+            "IP <( ( NP|QP=target!< NT ) $+ (PU (<: " + COMMA_PATTERN + " $+ ( /^VP|VCD|IP/  !< VE !<VC !<SB !<LB  ))))",
             // There are a number of cases of NP-SBJ not under IP, and we should try to get some of them as this
             // pattern does. There are others under CP, especially CP-CND
-            // todo [2016]: At the moment this pattern doesn't find anything as "NP" not in sourcePattern
             "NP !$+ VP < ( (  NP|DP|QP=target !< NT ) $+ ( /^VP|VCD/ !<VE !< VC !<SB !<LB))",
             "IP < (/^NP/=target $+ (VP < VC))" // Go over copula
     );
