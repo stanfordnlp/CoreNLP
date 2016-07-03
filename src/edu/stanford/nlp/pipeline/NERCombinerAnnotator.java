@@ -79,7 +79,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
             PropertiesUtils.getBool(properties, name + ".verbose", false),
             PropertiesUtils.getInt(properties, name + ".nthreads", PropertiesUtils.getInt(properties, "nthreads", 1)),
             PropertiesUtils.getLong(properties, name + ".maxtime", -1),
-            PropertiesUtils.getInt(properties, name + ".maxLength", Integer.MAX_VALUE));
+            PropertiesUtils.getInt(properties, name + ".maxlen", Integer.MAX_VALUE));
   }
 
   @Override
