@@ -1,4 +1,4 @@
-package edu.stanford.nlp.pipeline; 
+package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
@@ -17,10 +17,9 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * This class will add NER information to an
- * Annotation using a combination of NER models.
- * It assumes that the Annotation
- * already contains the tokenized words as a
+ * This class will add NER information to an Annotation using a combination of NER models.
+ * It assumes that the Annotation already contains the tokenized words in sentences
+ * under CoreAnnotations.SentencesAnnotation.class.
  * List&lt;? extends CoreLabel&gt; or a
  * List&lt;List&lt;? extends CoreLabel&gt;&gt; under Annotation.WORDS_KEY
  * and adds NER information to each CoreLabel,
@@ -33,7 +32,7 @@ import java.util.*;
 public class NERCombinerAnnotator extends SentenceAnnotator  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(NERCombinerAnnotator.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(NERCombinerAnnotator.class);
 
   private final NERClassifierCombiner ner;
 
@@ -76,9 +75,10 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   }
 
   public NERCombinerAnnotator(String name, Properties properties) {
-    this(NERClassifierCombiner.createNERClassifierCombiner(name, properties), false,
-         PropertiesUtils.getInt(properties, name + ".nthreads", PropertiesUtils.getInt(properties, "nthreads", 1)),
-         PropertiesUtils.getLong(properties, name + ".maxtime", -1),
+    this(NERClassifierCombiner.createNERClassifierCombiner(name, properties),
+            PropertiesUtils.getBool(properties, name + ".verbose", false),
+            PropertiesUtils.getInt(properties, name + ".nthreads", PropertiesUtils.getInt(properties, "nthreads", 1)),
+            PropertiesUtils.getLong(properties, name + ".maxtime", -1),
             PropertiesUtils.getInt(properties, name + ".maxlength", Integer.MAX_VALUE));
   }
 
@@ -109,39 +109,18 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   @Override
   public void doOneSentence(Annotation annotation, CoreMap sentence) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    List<CoreLabel> output; // only used if try assignment works.
+    List<CoreLabel> output = null; // only used if try assignment works.
     try {
       output = this.ner.classifySentenceWithGlobalInformation(tokens, annotation, sentence);
     } catch (RuntimeInterruptedException e) {
       // If we get interrupted, set the NER labels to the background
       // symbol if they are not already set, then exit.
+      output = null;
+    }
+    if (output == null) {
       doOneFailedSentence(annotation, sentence);
-      return;
-    }
-    if (VERBOSE) {
-      boolean first = true;
-      log.info("NERCombinerAnnotator direct output: [");
-      for (CoreLabel w : output) {
-        if (first) { first = false; } else { log.info(", "); }
-        log.info(w.toString());
-      }
-    }
-    if (output != null) {
-      if (VERBOSE) {
-        boolean first = true;
-        log.info("NERCombinerAnnotator direct output: [");
-        for (CoreLabel w : output) {
-          if (first) {
-            first = false;
-          } else {
-            log.info(", ");
-          }
-          log.info(w.toString());
-        }
-        log.info(']');
-      }
-
-      for (int i = 0; i < tokens.size(); ++i) {
+    } else {
+      for (int i = 0, sz = tokens.size(); i < sz; ++i) {
         // add the named entity tag to each token
         String neTag = output.get(i).get(CoreAnnotations.NamedEntityTagAnnotation.class);
         String normNeTag = output.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
@@ -152,29 +131,27 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
 
       if (VERBOSE) {
         boolean first = true;
-        log.info("NERCombinerAnnotator output: [");
+        StringBuilder sb = new StringBuilder("NERCombinerAnnotator output: [");
         for (CoreLabel w : tokens) {
           if (first) {
             first = false;
           } else {
-            log.info(", ");
+            sb.append(", ");
           }
-          log.info(w.toShorterString("Word", "NamedEntityTag", "NormalizedNamedEntityTag"));
+          sb.append(w.toShorterString("Text", "NamedEntityTag", "NormalizedNamedEntityTag"));
         }
-        log.info(']');
-      }
-    } else {
-      for (CoreLabel token : tokens) {
-        // add the dummy named entity tag to each token
-        token.setNER(this.ner.backgroundSymbol());
+        sb.append(']');
+        log.info(sb);
       }
     }
   }
 
+  /** {@inheritDoc} */
   @Override
   public void doOneFailedSentence(Annotation annotation, CoreMap sentence) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
     for (CoreLabel token : tokens) {
+      // add the background named entity tag to each token if it doesn't have an NER tag.
       if (token.ner() == null) {
         token.setNER(this.ner.backgroundSymbol());
       }
@@ -242,4 +219,5 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
         CoreAnnotations.NumericCompositeValueAnnotation.class
     ));
   }
+
 }
