@@ -45,10 +45,10 @@ are others that can only be found in the source code….
 
 | Option name | Type | Default | Description |
 | --- | --- | --- | --- |
-| clean.xmltags | regex | ".*" | edu/stanford/nlp/models/parser/nndep/english\_UD.gz | Discard xml tag tokens that match this regular expression.  For example, the default `.*` will discard all xml tags. |
-| clean.sentenceendingtags | regex | "" | Treat tags that match this regular expression as the end of a sentence, or none if an empty string.  For example, p will treat &lt;p&gt; as the end of a sentence. |
+| clean.xmltags | regex | `".*"` | Discard xml tag tokens that match this regular expression.  For example, the default `.*` will discard all xml tags. |
+| clean.sentenceendingtags | regex | `""` | Treat tags that match this regular expression as the end of a sentence, or none if an empty string.  For example, p will treat &lt;p&gt; as the end of a sentence. |
 | clean.allowflawedxml | boolean | false | If this is true, allow errors such as unclosed tags.  Otherwise, such xml will cause an exception. |
-| clean.datetags | regex | "datetime|date" | A regular expression that specifies which tags to treat as the reference date of a document. |
-| clean.docIdtags | regex | "docid" | A regular expression that specifies which tags to treat as the document id of a document. |
-| clean.docTypetags | regex| "doctype" | A regular expression that specifies which tags to treat as the document type of a document. |
+| clean.datetags | regex | `"datetime\|date"` | A regular expression that specifies which tags to treat as the reference date of a document. |
+| clean.docIdtags | regex | `"docid"` | A regular expression that specifies which tags to treat as the document id of a document. |
+| clean.docTypetags | regex| `"doctype`" | A regular expression that specifies which tags to treat as the document type of a document. |
 
