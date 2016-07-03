@@ -4,7 +4,7 @@ keywords: server
 permalink: '/corenlp-server.html'
 ---
 
-CoreNLP includes a simple web API server for servicing your human language understanding needs (starting with version 3.6.0). This page describes how to set it up.  CoreNLP server provides both a convenient graphical way to interface with your installation of CoreNLP and an API with which to call CoreNLP using any programming language.
+CoreNLP includes a simple web API server for servicing your human language understanding needs (starting with version 3.6.0). This page describes how to set it up.  CoreNLP server provides both a convenient graphical way to interface with your installation of CoreNLP and an API with which to call CoreNLP using any programming language. If you're writing a new wrapper of CoreNLP for using it in another language, you're advised to do it using the CoreNLP Server.
 
 ## Getting Started
 
@@ -19,7 +19,7 @@ If no value for `port` is provided, port 9000 will be used by default. You can t
 
     http://localhost:9000/
 
-You should see a website similar to [corenlp.run](http://corenlp.run/), with an input box for text and a list of annotators you can run. From this interface, you can test out each of the annotators by adding/removing them from this list. (Note: The first use will be slow while models are loaded, but after that the server should run quite quickly.) You can test out the API by sending a `POST` request to the server with the appropriate properties. An easy way to do this is with [wget](https://www.gnu.org/software/wget/). The following will annotate the sentence "*the quick brown fox jumped over the lazy dog*" with part of speech tags (and tokenizing on whitespace -- recall, you can pass in any property recognized by CoreNLP):
+You should see a website similar to [corenlp.run](http://corenlp.run/), with an input box for text and a list of annotators you can run. From this interface, you can test out each of the annotators by adding/removing them from this list. (Note: *The first use will be slow*  to respond while models are loaded – it might take 30 seconds or so, but after that the server should run quite quickly.) You can test out the API by sending a `POST` request to the server with the appropriate properties. An easy way to do this is with [wget](https://www.gnu.org/software/wget/). The following will annotate the sentence "*the quick brown fox jumped over the lazy dog*" with part of speech tags (and tokenizing on whitespace – recall, you can pass in any property recognized by CoreNLP):
 
 ```bash
 wget --post-data 'The quick brown fox jumped over the lazy dog.' 'localhost:9000/?properties={"tokenize.whitespace":"true","annotators":"tokenize,ssplit,pos","outputFormat":"json"}' -O -
@@ -135,7 +135,7 @@ The response is always in JSON, formatted identically to the tokensregex output,
 
 ## Java Client
 
-CoreNLP includes a Java client to the server -- `StanfordCoreNLPClient` -- which mirrors the interface of the annotation pipeline (`StanfordCoreNLP.java`) as closely as possible. The primary motivating use cases for using this class and not the local pipeline are:
+CoreNLP includes a Java client to the server – `StanfordCoreNLPClient` – which mirrors the interface of the annotation pipeline (`StanfordCoreNLP.java`) as closely as possible. The primary motivating use cases for using this class and not the local pipeline are:
 
 * The models are not re-loaded every time your program runs. This is useful when debugging a block of code which runs CoreNLP annotations, as the CoreNLP models often take on the order of minutes to load from disk.
 * The machine running the server has more compute and more memory than your local machine. Never again must Chrome and CoreNLP compete for the same memory.
@@ -268,6 +268,6 @@ The server has different default properties than the regular CoreNLP pipeline. T
 
 Well, I guess they're documented now:
 
-  * Hitting `Shift+Enter` on any input field in the web demo (e.g., the main text input) is equivalent to clicking the `Submit` (or `Match`) button. Furthermore, if the input is empty, it will fill itself with a default input. Useful if -- to take a purely hypothetical example -- you're developing the web server and don't want to re-type the same sentence everytime you re-load the website.
+  * Hitting `Shift+Enter` on any input field in the web demo (e.g., the main text input) is equivalent to clicking the `Submit` (or `Match`) button. Furthermore, if the input is empty, it will fill itself with a default input. Useful if – to take a purely hypothetical example – you're developing the web server and don't want to re-type the same sentence everytime you re-load the website.
 
 
