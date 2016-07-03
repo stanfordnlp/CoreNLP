@@ -19,11 +19,11 @@ import java.util.*;
 /**
  * This class will add NER information to an Annotation using a combination of NER models.
  * It assumes that the Annotation already contains the tokenized words in sentences
- * under CoreAnnotations.SentencesAnnotation.class.
- * List&lt;? extends CoreLabel&gt; or a
- * List&lt;List&lt;? extends CoreLabel&gt;&gt; under Annotation.WORDS_KEY
+ * under {@code CoreAnnotations.SentencesAnnotation.class} as
+ * {@code List<? extends CoreLabel>}} or a
+ * {@code List<List<? extends CoreLabel>>} under {@code Annotation.WORDS_KEY}
  * and adds NER information to each CoreLabel,
- * in the CoreLabel.NER_KEY field.  It uses
+ * in the {@code CoreLabel.NER_KEY} field.  It uses
  * the NERClassifierCombiner class in the ie package.
  *
  * @author Jenny Finkel
@@ -79,7 +79,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
             PropertiesUtils.getBool(properties, name + ".verbose", false),
             PropertiesUtils.getInt(properties, name + ".nthreads", PropertiesUtils.getInt(properties, "nthreads", 1)),
             PropertiesUtils.getLong(properties, name + ".maxtime", -1),
-            PropertiesUtils.getInt(properties, name + ".maxlength", Integer.MAX_VALUE));
+            PropertiesUtils.getInt(properties, name + ".maxLength", Integer.MAX_VALUE));
   }
 
   @Override
@@ -109,7 +109,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator  {
   @Override
   public void doOneSentence(Annotation annotation, CoreMap sentence) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    List<CoreLabel> output = null; // only used if try assignment works.
+    List<CoreLabel> output; // only used if try assignment works.
     try {
       output = this.ner.classifySentenceWithGlobalInformation(tokens, annotation, sentence);
     } catch (RuntimeInterruptedException e) {
