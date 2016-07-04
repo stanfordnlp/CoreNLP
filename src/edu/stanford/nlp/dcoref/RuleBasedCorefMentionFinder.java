@@ -127,7 +127,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder  {
 
   protected static void extractPremarkedEntityMentions(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
-    SemanticGraph dependency = s.get(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class);
+    SemanticGraph dependency = s.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
     int beginIndex = -1;
     for(CoreLabel w : sent) {
       MultiTokenTag t = w.get(CoreAnnotations.MentionTokenAnnotation.class);
@@ -159,7 +159,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder  {
 
   protected static void extractNamedEntityMentions(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
-    SemanticGraph dependency = s.get(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class);
+    SemanticGraph dependency = s.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
     String preNE = "O";
     int beginIndex = -1;
     for(CoreLabel w : sent) {
@@ -203,7 +203,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder  {
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     Tree tree = s.get(TreeCoreAnnotations.TreeAnnotation.class);
     tree.indexLeaves();
-    SemanticGraph dependency = s.get(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class);
+    SemanticGraph dependency = s.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
 
     TregexPattern tgrepPattern = npOrPrpMentionPattern;
     TregexMatcher matcher = tgrepPattern.matcher(tree);
@@ -228,7 +228,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder  {
   protected static void extractEnumerations(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     Tree tree = s.get(TreeCoreAnnotations.TreeAnnotation.class);
-    SemanticGraph dependency = s.get(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class);
+    SemanticGraph dependency = s.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
 
     TregexPattern tgrepPattern = enumerationsMentionPattern;
     TregexMatcher matcher = tgrepPattern.matcher(tree);

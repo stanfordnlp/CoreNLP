@@ -705,7 +705,7 @@ public class Document implements Serializable {
       String word = sent.get(i).get(CoreAnnotations.TextAnnotation.class);
       if(dict.reportVerb.contains(lemma)) {
         // find subject
-        SemanticGraph dependency = sentences.get(sentNum).get(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class);
+        SemanticGraph dependency = sentences.get(sentNum).get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
         IndexedWord w = dependency.getNodeByWordPattern(word);
 
         if (w != null) {
@@ -802,7 +802,7 @@ public class Document implements Serializable {
     for(CoreLabel w : lastSent.get(CoreAnnotations.TokensAnnotation.class)) {
       if(w.get(CoreAnnotations.LemmaAnnotation.class).equals("report") || w.get(CoreAnnotations.LemmaAnnotation.class).equals("say")) {
         String word = w.get(CoreAnnotations.TextAnnotation.class);
-        SemanticGraph dependency = lastSent.get(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class);
+        SemanticGraph dependency = lastSent.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
         IndexedWord t = dependency.getNodeByWordPattern(word);
 
         for(Pair<GrammaticalRelation,IndexedWord> child : dependency.childPairs(t)){
