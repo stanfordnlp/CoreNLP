@@ -88,7 +88,7 @@ public class SingletonPredictor  {
           // Ignore verbal mentions
           if(mention.headWord.tag().startsWith("V")) continue;
 
-          IndexedWord head = mention.collapsedDependency.
+          IndexedWord head = mention.enhancedDependency.
               getNodeByIndexSafe(mention.headWord.index());
           if(head == null) continue;          
           ArrayList<String> feats = mention.getSingletonFeatures(dict);
@@ -103,7 +103,7 @@ public class SingletonPredictor  {
         gold_heads.add(gold_men.headWord);
       }      
       for(Mention predicted_men : document.predictedMentionsByID.values()){
-        SemanticGraph dep = predicted_men.collapsedDependency;
+        SemanticGraph dep = predicted_men.enhancedDependency;
         IndexedWord head = dep.getNodeByIndexSafe(predicted_men.headWord.index());
         if(head == null || !dep.vertexSet().contains(head)) continue;
 

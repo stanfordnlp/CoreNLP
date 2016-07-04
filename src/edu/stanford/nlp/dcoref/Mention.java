@@ -1124,7 +1124,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       if(child.second().index() < headWord.index()
           && !child.second.tag().equals("DT") && !child.second.tag().equals("WRB")
           && !function.endsWith("det") && !function.equals("nummod")
-          && !function.startsWith("acl") && !function.equals("advcl")
+          && !function.startsWith("acl") && !function.startsWith("advcl")
           && !function.equals("punct")){
         ArrayList<IndexedWord> phrase = new ArrayList<>(dependency.descendants(child.second()));
         Collections.sort(phrase);
