@@ -328,7 +328,10 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       isDirectObject = true;
     } else if(dep.equals("iobj")){
       isIndirectObject = true;
-    } else if(dep.startsWith("nmod")){
+    } else if(dep.startsWith("nmod")
+        && ! dep.equals("nmod:npmod")
+        && ! dep.equals("nmod:tmod")
+        && ! dep.equals("nmod:poss")){
       isPrepositionObject = true;
     }
   }
@@ -1410,17 +1413,18 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     for(Pair<GrammaticalRelation, IndexedWord> childPair : childPairs) {
       GrammaticalRelation gr = childPair.first;
       IndexedWord word = childPair.second;
-      if(gr == UniversalEnglishGrammaticalRelations.ADJECTIVAL_MODIFIER || gr == UniversalEnglishGrammaticalRelations.RELATIVE_CLAUSE_MODIFIER
-          || gr.toString().startsWith("nmod:") || gr.toString().startsWith("acl:") || gr.toString().startsWith("advcl:")) {
+
+      //adjectival modifiers, prepositional modifiers, relative clauses, and possessives if they are not a determiner
+      if((gr == UniversalEnglishGrammaticalRelations.ADJECTIVAL_MODIFIER
+          || gr == UniversalEnglishGrammaticalRelations.RELATIVE_CLAUSE_MODIFIER
+          || gr.toString().startsWith("nmod:")
+          || gr.toString().startsWith("acl:")
+          || gr.toString().startsWith("advcl:"))
+          && !dict.determiners.contains(word.lemma())) {
         count++;
       }
       // add noun modifier when the mention isn't a NER
       if(nerString.equals("O") && gr == UniversalEnglishGrammaticalRelations.COMPOUND_MODIFIER) {
-        count++;
-      }
-
-      // add possessive if not a personal determiner
-      if(gr == UniversalEnglishGrammaticalRelations.POSSESSION_MODIFIER && !dict.determiners.contains(word.lemma())) {
         count++;
       }
     }
@@ -1467,7 +1471,9 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
     // or has a sibling
     for(IndexedWord sibling : dependency.getSiblings(headIndexedWord)) {
-      if(dict.negations.contains(sibling.lemma()) && !dependency.hasParentWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT)) return 1;
+      if(dict.negations.contains(sibling.lemma())
+          && !dependency.hasParentWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT))
+        return 1;
     }
     // check the parent
     List<Pair<GrammaticalRelation,IndexedWord>> parentPairs = dependency.parentPairs(headIndexedWord);
@@ -1496,7 +1502,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       if(dict.modals.contains(parent.lemma())) return 1;
       // check the children of the parent (that is needed for modal auxiliaries)
       IndexedWord child = dependency.getChildWithReln(parent, UniversalEnglishGrammaticalRelations.AUX_MODIFIER);
-      if(!dependency.hasParentWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT) && child != null && dict.modals.contains(child.lemma())) return 1;
+      if(!dependency.hasParentWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT)
+          && child != null && dict.modals.contains(child.lemma())) return 1;
     }
 
     // look at the path to root
