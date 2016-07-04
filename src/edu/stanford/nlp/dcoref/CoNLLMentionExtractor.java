@@ -84,7 +84,6 @@ public class CoNLLMentionExtractor extends MentionExtractor {
     singletonPredictor = singletonModel;
   }
 
-  //private static final boolean includeExtras = false;
   private static final boolean LEMMATIZE = true;
   private static final boolean threadSafe = true;
 
@@ -120,13 +119,8 @@ public class CoNLLMentionExtractor extends MentionExtractor {
         try {
           SemanticGraph deps = SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.ENHANCED, GrammaticalStructure.Extras.NONE, threadSafe);
           SemanticGraph basicDeps = SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.BASIC, GrammaticalStructure.Extras.NONE, threadSafe);
-          //SemanticGraph deps = SemanticGraphFactory.makeFromTree(tree,
-          //    SemanticGraphFactory.Mode.COLLAPSED, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, threadSafe, null, true);
-          //SemanticGraph basicDeps = SemanticGraphFactory.makeFromTree(tree,
-          //    SemanticGraphFactory.Mode.BASIC, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, threadSafe, null, true);
           sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, basicDeps);
           sentence.set(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class, deps);
-          //sentence.set(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class, deps);
         } catch(Exception e) {
           logger.log(Level.WARNING, "Exception caught during extraction of Stanford dependencies. Will ignore and continue...", e);
         }
@@ -269,7 +263,7 @@ public class CoNLLMentionExtractor extends MentionExtractor {
         // will be set by arrange
         mention.originalSpan = m.get(CoreAnnotations.TokensAnnotation.class);
 
-        // Mention dependency is collapsed dependency for sentence
+        // Mention dependency graph is the enhanced dependency graph of the sentence
         mention.dependency = sentences.get(sentIndex).get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
 
         allGoldMentions.get(sentIndex).add(mention);

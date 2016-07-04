@@ -1142,10 +1142,12 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     for(Pair<GrammaticalRelation,IndexedWord> child : dependency.childPairs(headIndexedWord)){
       String function = child.first().getShortName();
       if(child.second().index() > headWord.index() &&
-          !function.endsWith("det") && !function.equals("nummod")
-          && !function.startsWith("acl") && !function.startsWith("advcl")
-          && !function.equals("punct") && !(function.equals("possessive")
-          && dependency.descendants(child.second()).size() == 1)){
+          ! function.endsWith("det") && ! function.equals("nummod")
+          && ! function.startsWith("acl") && ! function.startsWith("advcl")
+          && ! function.equals("punct") &&
+          //possessive clitic 
+          ! (function.equals("case") && dependency.descendants(child.second()).size() == 1
+              && child.second.tag().equals("POS"))){
         ArrayList<IndexedWord> phrase = new ArrayList<>(dependency.descendants(child.second()));
         Collections.sort(phrase);
         postmod.add(phrase);
