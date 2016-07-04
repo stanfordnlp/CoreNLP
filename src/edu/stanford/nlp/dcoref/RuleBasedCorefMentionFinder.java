@@ -1,4 +1,5 @@
 package edu.stanford.nlp.dcoref; 
+import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
@@ -12,7 +13,6 @@ import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.MultiTokenTag;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.parser.common.ParserAnnotations;
@@ -21,10 +21,6 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.AnnotationPipeline;
 import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.trees.HeadFinder;
-import edu.stanford.nlp.trees.SemanticHeadFinder;
-import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
@@ -49,7 +45,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder  {
 
   public RuleBasedCorefMentionFinder(boolean allowReparsing) {
     SieveCoreferenceSystem.logger.fine("Using SEMANTIC HEAD FINDER!!!!!!!!!!!!!!!!!!!");
-    this.headFinder = new SemanticHeadFinder();
+    this.headFinder = new UniversalSemanticHeadFinder();
     this.allowReparsing = allowReparsing;
   }
 
