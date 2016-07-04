@@ -38,8 +38,8 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.trees.HeadFinder;
+import edu.stanford.nlp.trees.SemanticHeadFinder;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.UniversalSemanticHeadFinder;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.CoreMap;
@@ -74,7 +74,7 @@ public class MentionExtractor {
   public static final boolean VERBOSE = false;
 
   public MentionExtractor(Dictionaries dict, Semantics semantics) {
-    this.headFinder = new UniversalSemanticHeadFinder();
+    this.headFinder = new SemanticHeadFinder();
     this.dictionaries = dict;
     this.semantics = semantics;
     this.mentionFinder = new RuleBasedCorefMentionFinder();  // Default

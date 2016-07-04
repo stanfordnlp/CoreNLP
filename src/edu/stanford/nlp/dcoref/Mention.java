@@ -331,7 +331,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     } else if(dep.startsWith("nmod")
         && ! dep.equals("nmod:npmod")
         && ! dep.equals("nmod:tmod")
-        && ! dep.equals("nmod:poss")){
+        && ! dep.equals("nmod:poss")
+        && ! dep.equals("nmod:agent")){
       isPrepositionObject = true;
     }
   }
@@ -1145,7 +1146,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
           ! function.endsWith("det") && ! function.equals("nummod")
           && ! function.startsWith("acl") && ! function.startsWith("advcl")
           && ! function.equals("punct") &&
-          //possessive clitic 
+          //possessive clitic
           ! (function.equals("case") && dependency.descendants(child.second()).size() == 1
               && child.second.tag().equals("POS"))){
         ArrayList<IndexedWord> phrase = new ArrayList<>(dependency.descendants(child.second()));
@@ -1419,9 +1420,9 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       //adjectival modifiers, prepositional modifiers, relative clauses, and possessives if they are not a determiner
       if((gr == UniversalEnglishGrammaticalRelations.ADJECTIVAL_MODIFIER
           || gr == UniversalEnglishGrammaticalRelations.RELATIVE_CLAUSE_MODIFIER
-          || gr.toString().startsWith("nmod:")
-          || gr.toString().startsWith("acl:")
-          || gr.toString().startsWith("advcl:"))
+          || gr.toString().startsWith("nmod")
+          || gr.toString().startsWith("acl")
+          || gr.toString().startsWith("advcl"))
           && !dict.determiners.contains(word.lemma())) {
         count++;
       }
