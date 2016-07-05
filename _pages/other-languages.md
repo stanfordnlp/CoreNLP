@@ -69,7 +69,10 @@ DKPro Core is part of the [DKPro community](https://dkpro.github.io). It is well
 
 ### Scala
 
+* [CoreNLP wrapper for Spark v0.1](https://github.com/databricks/spark-corenlp) by Xiangrui Meng of Databricks.
+
 * [Scala API for CoreNLP](https://github.com/sistanlp/processors) by Mihai Surdeanu, one of the original developers of the CoreNLP package.
+
 
 ### Thrift server
 
