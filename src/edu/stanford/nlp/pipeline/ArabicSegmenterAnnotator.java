@@ -1,16 +1,17 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import java.util.*;
 
-import edu.stanford.nlp.ie.AbstractSequenceClassifier;
-import edu.stanford.nlp.ie.crf.CRFClassifier;
-import edu.stanford.nlp.ling.CoreAnnotation;
-import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.international.arabic.process.ArabicSegmenter;
 import edu.stanford.nlp.ling.SegmenterCoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.process.WordSegmenter;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * This class will add segmentation information to an Annotation.
@@ -21,46 +22,36 @@ import edu.stanford.nlp.util.PropertiesUtils;
  * and a TokensAnnotation.class key with value of a List of CoreLabel
  * after segmentation.
  *
- * @author Pi-Chuan Chang
+ * Based on the ChineseSegmenterAnnotator by Pi-Chuan Chang.
+ *
+ * @author Will Monroe
  */
-public class ChineseSegmenterAnnotator implements Annotator  {
+public class ArabicSegmenterAnnotator implements Annotator  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseSegmenterAnnotator.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(ArabicSegmenterAnnotator.class);
 
-  private AbstractSequenceClassifier<?> segmenter;
+  private WordSegmenter segmenter;
   private final boolean VERBOSE;
 
   private static final String DEFAULT_SEG_LOC =
-    "/u/nlp/data/gale/segtool/stanford-seg/classifiers-2010/05202008-ctb6.processed-chris6.lex.gz";
+    "/u/nlp/data/arabic-segmenter/arabic-segmenter-atb+bn+arztrain.ser.gz";
 
-  private static final String DEFAULT_SER_DICTIONARY =
-    "/u/nlp/data/gale/segtool/stanford-seg/classifiers/dict-chris6.ser.gz";
-
-  private static final String DEFAULT_SIGHAN_CORPORA_DICT =
-    "/u/nlp/data/gale/segtool/stanford-seg/releasedata";
-
-  public ChineseSegmenterAnnotator() {
+  public ArabicSegmenterAnnotator() {
     this(DEFAULT_SEG_LOC, false);
   }
 
-  public ChineseSegmenterAnnotator(boolean verbose) {
+  public ArabicSegmenterAnnotator(boolean verbose) {
     this(DEFAULT_SEG_LOC, verbose);
   }
 
-  public ChineseSegmenterAnnotator(String segLoc, boolean verbose) {
-    this(segLoc, verbose, DEFAULT_SER_DICTIONARY, DEFAULT_SIGHAN_CORPORA_DICT);
-  }
-
-  public ChineseSegmenterAnnotator(String segLoc, boolean verbose, String serDictionary, String sighanCorporaDict) {
+  public ArabicSegmenterAnnotator(String segLoc, boolean verbose) {
     VERBOSE = verbose;
     Properties props = new Properties();
-    props.setProperty("serDictionary", serDictionary);
-    props.setProperty("sighanCorporaDict", sighanCorporaDict);
     loadModel(segLoc, props);
   }
 
-  public ChineseSegmenterAnnotator(String name, Properties props) {
+  public ArabicSegmenterAnnotator(String name, Properties props) {
     String model = null;
     // Keep only the properties that apply to this annotator
     Properties modelProps = new Properties();
@@ -89,7 +80,9 @@ public class ChineseSegmenterAnnotator implements Annotator  {
     if (VERBOSE) {
       log.info("Loading segmentation model ... ");
     }
-    segmenter = CRFClassifier.getClassifierNoExceptions(segLoc);
+    Properties modelProps = new Properties();
+    modelProps.setProperty("model", segLoc);
+    segmenter = ArabicSegmenter.getSegmenter(modelProps);
   }
 
   private void loadModel(String segLoc, Properties props) {
@@ -97,8 +90,11 @@ public class ChineseSegmenterAnnotator implements Annotator  {
     if (VERBOSE) {
       log.info("Loading Segmentation Model ... ");
     }
+    Properties modelProps = new Properties();
+    modelProps.setProperty("model", segLoc);
+    modelProps.putAll(props);
     try {
-      segmenter = CRFClassifier.getClassifier(segLoc, props);
+      segmenter = ArabicSegmenter.getSegmenter(modelProps);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -142,11 +138,11 @@ public class ChineseSegmenterAnnotator implements Annotator  {
         seg = true;
       } else {
         // if this word is a word, put it as a feature label and set seg to false for next word
-        wi.set(CoreAnnotations.ChineseCharAnnotation.class, wordString);
+        wi.set(CoreAnnotations.ArabicCharAnnotation.class, wordString);
         if (seg) {
-          wi.set(CoreAnnotations.ChineseSegAnnotation.class, "1");
+          wi.set(CoreAnnotations.ArabicSegAnnotation.class, "1");
         } else {
-          wi.set(CoreAnnotations.ChineseSegAnnotation.class, "0");
+          wi.set(CoreAnnotations.ArabicSegAnnotation.class, "0");
         }
         wi.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, i);
         wi.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, (i + 1));
@@ -170,7 +166,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
     List<CoreLabel> tokens = new ArrayList<>();
     annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
 
-    List<String> words = segmenter.segmentString(text);
+    List<HasWord> words = segmenter.segment(text);
     if (VERBOSE) {
       log.info(text);
       log.info("--->");
@@ -178,17 +174,18 @@ public class ChineseSegmenterAnnotator implements Annotator  {
     }
 
     int pos = 0;
-    for (String w : words) {
+    for (HasWord w : words) {
+      String word = w.word();
       CoreLabel fl = sentChars.get(pos);
-      fl.set(CoreAnnotations.ChineseSegAnnotation.class, "1");
-      if (w.isEmpty()) {
+      fl.set(CoreAnnotations.ArabicSegAnnotation.class, "1");
+      if (word.isEmpty()) {
         continue;
       }
       CoreLabel token = new CoreLabel();
-      token.setWord(w);
-      token.setValue(w);
+      token.setWord(word);
+      token.setValue(word);
       token.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, fl.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
-      pos += w.length();
+      pos += word.length();
       fl = sentChars.get(pos - 1);
       token.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, fl.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
       tokens.add(token);

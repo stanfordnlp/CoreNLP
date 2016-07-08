@@ -51,6 +51,12 @@ public class StanfordCoreNLPServer implements Runnable {
   protected boolean quiet = false;
   @ArgumentParser.Option(name="ssl", gloss="If true, start the server with an [insecure!] SSL connection")
   protected boolean ssl = false;
+  @ArgumentParser.Option(name="username", gloss="The username component of a username/password basic auth credential")
+  protected String username = null;
+  @ArgumentParser.Option(name="password", gloss="The password component of a username/password basic auth credential")
+  protected String password = null;
+  @ArgumentParser.Option(name="lazy", gloss="If true, don't precompute the models on loading the server")
+  protected boolean lazy = true;
 
   protected final String shutdownKey;
 
@@ -568,6 +574,14 @@ public class StanfordCoreNLPServer implements Runnable {
           props.remove("coref.md.type");
         }
       }
+      if (!props.containsKey("parse.model") && IOUtils.existsInClasspathOrFileSystem("edu/stanford/nlp/models/srparser/englishSR.ser.gz")) {
+        // Set the default parser to be the shift-reduce parser
+        props.setProperty("parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz");
+      }
+      if (!props.containsKey("entitylink.wikidict")) {
+        // Set the default Wikidict location
+        props.setProperty("entitylink.wikidict", "wikidict.tab.gz");
+      }
       // (add new properties on top of the default properties)
       urlProperties.entrySet()
           .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
@@ -772,12 +786,12 @@ public class StanfordCoreNLPServer implements Runnable {
             if (filter) {
               // Case: just filter sentences
               docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence ->
-                      regex.matcher(sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class)).matches()
+                      regex.matcher(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class)).matches()
               ).collect(Collectors.toList()));
             } else {
               // Case: find matches
               docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer sentWriter) -> {
-                SemgrexMatcher matcher = regex.matcher(sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class));
+                SemgrexMatcher matcher = regex.matcher(sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class));
                 int i = 0;
                 while (matcher.find()) {
                   sentWriter.set(Integer.toString(i), (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer matchWriter) -> {
@@ -874,36 +888,55 @@ public class StanfordCoreNLPServer implements Runnable {
   }
 
 
-  /** @see StanfordCoreNLPServer#run(Predicate, Consumer, StanfordCoreNLPServer.FileHandler, boolean) */
+  /** @see StanfordCoreNLPServer#run(Optional, Predicate, Consumer, StanfordCoreNLPServer.FileHandler, boolean) */
   @Override
   public void run() {
     // Set the static page handler
     try {
       FileHandler homepage = new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.html");
-      run(req -> true, obj -> {}, homepage, false);
+      run(Optional.empty(), req -> true, obj -> {}, homepage, false);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
   }
 
+
+  /**
+   * Enable authentication for this endpoint
+   *
+   * @param context The context to enable authentication for.
+   * @param credentials The optional credentials to enforce. This is a (key,value) pair
+   */
+  private void withAuth(HttpContext context, Optional<Pair<String,String>> credentials) {
+    credentials.ifPresent(c -> {
+      context.setAuthenticator(new BasicAuthenticator("corenlp") {
+        @Override
+        public boolean checkCredentials(String user, String pwd) {
+          return user.equals(c.first) && pwd.equals(c.second);
+        }
+      });
+    });
+  }
+
+
   /**
    * Run the server.
    * This method registers the handlers, and initializes the HTTP server.
    */
-  public void run(Predicate<Properties> authenticator, Consumer<FinishedRequest> callback, FileHandler homepage, boolean https) {
+  public void run(Optional<Pair<String,String>> basicAuth, Predicate<Properties> authenticator, Consumer<FinishedRequest> callback, FileHandler homepage, boolean https) {
     try {
       if (https) {
         server = addSSLContext(HttpsServer.create(new InetSocketAddress(serverPort), 0)); // 0 is the default 'backlog'
       } else {
         server = HttpServer.create(new InetSocketAddress(serverPort), 0); // 0 is the default 'backlog'
       }
-      server.createContext("/", new CoreNLPHandler(defaultProps, authenticator, callback, homepage));
-      server.createContext("/tokensregex", new TokensRegexHandler(authenticator, callback));
-      server.createContext("/semgrex", new SemgrexHandler(authenticator, callback));
-      server.createContext("/corenlp-brat.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.js"));
-      server.createContext("/corenlp-brat.cs", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.css"));
-      server.createContext("/ping", new PingHandler());
-      server.createContext("/shutdown", new ShutdownHandler());
+      withAuth(server.createContext("/", new CoreNLPHandler(defaultProps, authenticator, callback, homepage)), basicAuth);
+      withAuth(server.createContext("/tokensregex", new TokensRegexHandler(authenticator, callback)), basicAuth);
+      withAuth(server.createContext("/semgrex", new SemgrexHandler(authenticator, callback)), basicAuth);
+      withAuth(server.createContext("/corenlp-brat.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.js")), basicAuth);
+      withAuth(server.createContext("/corenlp-brat.cs", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.css")), basicAuth);
+      withAuth(server.createContext("/ping", new PingHandler()), basicAuth);
+      withAuth(server.createContext("/shutdown", new ShutdownHandler()), basicAuth);
       server.setExecutor(serverExecutor);
       server.start();
       log("StanfordCoreNLPServer listening at " + server.getAddress());
@@ -921,6 +954,8 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown if we could not start / run the server.
    */
   public static void main(String[] args) throws IOException {
+    StanfordCoreNLPServer server = new StanfordCoreNLPServer();
+    ArgumentParser.fillOptions(server, args);
 
     // Create the homepage
     FileHandler homepage;
@@ -930,14 +965,36 @@ public class StanfordCoreNLPServer implements Runnable {
       throw new RuntimeIOException(e);
     }
 
+    // Pre-load the models
+    if (!server.lazy) {
+      Properties props = new Properties();
+      props.setProperty("annotators", "tokenize,ssplit,pos,parse,depparse,lemma,ner,natlog,openie,mention,coref,entitylink,kbp");
+      try {
+        props.setProperty("entitylink.wikidict", "wikidict.tab.gz");
+        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+      } catch (Throwable ignored) {
+        err("Could not initialize annotators");
+      }
+      try {
+        props.setProperty("parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz");
+        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+      } catch (Throwable ignored) {
+        err("Could not initialize shift reduce parser");
+      }
+    }
+
+    // Credentials
+    Optional<Pair<String, String>> credentials = Optional.empty();
+    if (server.username != null && server.password != null) {
+      credentials = Optional.of(Pair.makePair(server.username, server.password));
+    }
+
     // Run the server
     log("Starting server...");
-    StanfordCoreNLPServer server = new StanfordCoreNLPServer();
-    ArgumentParser.fillOptions(server, args);
     if (server.ssl) {
-      server.run(req -> true, res -> {}, homepage, true);
+      server.run(credentials, req -> true, res -> {}, homepage, true);
     } else {
-      server.run(req -> true, res -> {}, homepage, false);
+      server.run(credentials, req -> true, res -> {}, homepage, false);
 
     }
   }
