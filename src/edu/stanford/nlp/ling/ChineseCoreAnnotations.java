@@ -3,9 +3,9 @@ package edu.stanford.nlp.ling;
 import java.util.List;
 import edu.stanford.nlp.util.ErasureUtils;
 
-public class SegmenterCoreAnnotations {
+public class ChineseCoreAnnotations {
 
-  private SegmenterCoreAnnotations() { } // only static members
+  private ChineseCoreAnnotations() { } // only static members
 
   public static class CharactersAnnotation 
     implements CoreAnnotation<List<CoreLabel>> 
