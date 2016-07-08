@@ -671,10 +671,9 @@ HTHING = [A-Za-z0-9][A-Za-z0-9.,\u00AD]*(-([A-Za-z0-9\u00AD]+|{ACRO2}\.))+
 /* from the CLEAR (biomedical?) treebank documentation */
 /* we're going to split on most hypens except a few */
 /* From Supplementary Guidelines for ETTB 2.0 (Justin Mott, Colin Warner, Ann Bies; Ann Taylor) */
-//TODO: ADD ENDINGS
 HTHINGEXCEPTIONPREFIXED = (e|a|u|x|agro|ante|anti|arch|be|bi|bio|co|counter|cross|cyber|de|eco|ex|extra|inter|intra|macro|mega|micro|mid|mini|multi|neo|non|over|pan|para|peri|post|pre|pro|pseudo|quasi|re|semi|sub|super|tri|ultra|un|uni|vice)(-([A-Za-z0-9\u00AD]+|{ACRO2}\.))+
-HTHINGEXCEPTIONSUFFIXED = ([A-Za-z0-9\u00AD]+|{ACRO2}\.)*(-)(esque|ette|fest|fold|gate|itis|less|most|o-torium|rama|wise)
-HTHINGEXCEPTIONWHOLE = (mm-hm|mm-mm|o-kay|uh-huh|uh-oh)
+HTHINGEXCEPTIONSUFFIXED = ([A-Za-z0-9][A-Za-z0-9.,\u00AD]*)(-)(esque|ette|fest|fold|gate|itis|less|most|o-torium|rama|wise)(s|es|d|ed)?
+HTHINGEXCEPTIONWHOLE = (mm-hm|mm-mm|o-kay|uh-huh|uh-oh)(s|es|d|ed)?
 
 /* things like 'll and 'm */
 REDAUX = {APOS}([msdMSD]|re|ve|ll)
@@ -1107,12 +1106,12 @@ nno/[^A-Za-z0-9]
                 }
 /* {HTHING}/[^a-zA-Z0-9.+]    { return getNext(removeSoftHyphens(yytext()),
                                                yytext()); } */
+{HTHINGEXCEPTIONWHOLE}  {return getNext(removeSoftHyphens(yytext()), yytext());}
+{HTHINGEXCEPTIONWHOLE}\./{INSENTP}  {return getNext(removeSoftHyphens(yytext()), yytext());}
 {HTHINGEXCEPTIONPREFIXED}  {return getNext(removeSoftHyphens(yytext()), yytext());}
 {HTHINGEXCEPTIONPREFIXED}\./{INSENTP}  {return getNext(removeSoftHyphens(yytext()), yytext());}
 {HTHINGEXCEPTIONSUFFIXED}  {return getNext(removeSoftHyphens(yytext()), yytext());}
 {HTHINGEXCEPTIONSUFFIXED}\./{INSENTP}  {return getNext(removeSoftHyphens(yytext()), yytext());}
-{HTHINGEXCEPTIONWHOLE}  {return getNext(removeSoftHyphens(yytext()), yytext());}
-{HTHINGEXCEPTIONWHOLE}\./{INSENTP}  {return getNext(removeSoftHyphens(yytext()), yytext());}
 {HTHING}        {  breakByHyphens(yytext());
                     return getNext(removeSoftHyphens(yytext()), yytext()); }
 {HTHING}\./{INSENTP}         {  breakByHyphens(yytext());
