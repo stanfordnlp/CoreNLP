@@ -198,6 +198,8 @@ import edu.stanford.nlp.util.logging.Redwood;
         }
       } else if ("splitAssimilations".equals(key)) {
         splitAssimilations = val;
+      } else if ("splitHyphenated".equals(key)) {
+        splitHyphenated = val;
       } else if ("ptb3Ellipsis".equals(key)) {
         ptb3Ellipsis = val;
       } else if ("unicodeEllipsis".equals(key)) {
