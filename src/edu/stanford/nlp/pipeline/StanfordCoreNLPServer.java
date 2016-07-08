@@ -938,11 +938,15 @@ public class StanfordCoreNLPServer implements Runnable {
     try {
       props.setProperty("entitylink.wikidict", "wikidict.tab.gz");
       StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-    } catch (Throwable ignored) {}
+    } catch (Throwable ignored) {
+      err("Could not initialize annotators");
+    }
     try {
       props.setProperty("parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz");
       StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-    } catch (Throwable ignored) {}
+    } catch (Throwable ignored) {
+      err("Could not initialize shift reduce parser");
+    }
 
     // Run the server
     log("Starting server...");
