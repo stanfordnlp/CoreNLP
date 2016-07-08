@@ -60,7 +60,7 @@ public class PTBTokenizerTest {
       "School-aged parents should be aware of the unique problems that they face."
   };
 
-  private final String[][] ptbGoldNonSplitHypens = {
+  private final String[][] ptbGold = {
     { "This", "is", "a", "sentence", "." },
     { "U.S.", "insurance", ":", "Conseco", "acquires", "Kemper", "Corp.", ".",
       "</HEADLINE>", "<P>", "U.S", "insurance" },
@@ -112,7 +112,7 @@ public class PTBTokenizerTest {
       {"School-aged", "parents", "should", "be", "aware", "of", "the", "unique", "problems", "that", "they", "face","."},
   };
 
-  private final String[][] ptbGold = {
+  private final String[][] ptbGoldSplitHyphenated = {
       { "This", "is", "a", "sentence", "." },
       { "U.S.", "insurance", ":", "Conseco", "acquires", "Kemper", "Corp.", ".",
           "</HEADLINE>", "<P>", "U.S", "insurance" },
@@ -391,9 +391,9 @@ public class PTBTokenizerTest {
   }
 
   @Test
-  public void testPTBTokenizerTokenizeNonSplitHyphens() {
-    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("splitHyphenated=false");
-    runOnTwoArrays(tokFactory, ptbInputs, ptbGoldNonSplitHypens);
+  public void testPTBTokenizerTokenizeSplitHyphens() {
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("splitHyphenated=true");
+    runOnTwoArrays(tokFactory, ptbInputs, ptbGoldSplitHyphenated);
   }
 
 
@@ -433,7 +433,7 @@ public class PTBTokenizerTest {
     String[] sample = { "Das TV-Duell von Kanzlerin Merkel und SPD-Herausforderer Steinbrück war eher lahm - können es die Spitzenleute der kleinen Parteien besser? ",
             "Die erquickende Sicherheit und Festigkeit in der Bewegung, den Vorrat von Kraft, kann ja die Versammlung nicht fühlen, hören will sie sie nicht, also muß sie sie sehen; und die sehe man einmal in einem Paar spitzen Schultern, zylindrischen Schenkeln, oder leeren Ärmeln, oder lattenförmigen Beinen." };
     String[][] tokenized = {
-            { "Das", "TV", "-", "Duell", "von", "Kanzlerin", "Merkel", "und", "SPD", "-", "Herausforderer", "Steinbrück", "war", "eher",
+            { "Das", "TV-Duell", "von", "Kanzlerin", "Merkel", "und", "SPD-Herausforderer", "Steinbrück", "war", "eher",
               "lahm", "-", "können", "es", "die", "Spitzenleute", "der", "kleinen", "Parteien", "besser", "?", },
             {"Die", "erquickende", "Sicherheit", "und", "Festigkeit", "in", "der", "Bewegung", ",", "den", "Vorrat", "von",
                     "Kraft", ",", "kann", "ja", "die", "Versammlung", "nicht", "fühlen", ",", "hören", "will", "sie", "sie",

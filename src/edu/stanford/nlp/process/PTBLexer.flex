@@ -283,7 +283,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   private boolean escapeForwardSlashAsterisk = false;
   private boolean strictTreebank3 = false;
   private boolean splitAssimilations = true;
-  private boolean splitHyphenated = true;
+  private boolean splitHyphenated = false;
   /*
    * This has now been extended to cover the main Windows CP1252 characters,
    * at either their correct Unicode codepoints, or in their invalid

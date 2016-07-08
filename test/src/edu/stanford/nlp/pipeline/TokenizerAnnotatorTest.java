@@ -93,16 +93,16 @@ public class TokenizerAnnotatorTest extends TestCase {
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     pipeline.annotate(ann);
     List<CoreLabel> toks = ann.get(CoreAnnotations.TokensAnnotation.class);
-    assertEquals(27, toks.size());
+    assertEquals(21, toks.size());
 
     Properties props2 = new Properties();
     props2.setProperty("annotators", "tokenize");
-    props2.setProperty("tokenize.options", "splitHyphenated=false");
+    props2.setProperty("tokenize.options", "splitHyphenated=true");
     Annotation ann2 = new Annotation(test);
     StanfordCoreNLP pipeline2 = new StanfordCoreNLP(props2);
     pipeline2.annotate(ann2);
     List<CoreLabel> toks2 = ann2.get(CoreAnnotations.TokensAnnotation.class);
-    assertEquals(21, toks2.size());
+    assertEquals(27, toks2.size());
   }
 
 }
