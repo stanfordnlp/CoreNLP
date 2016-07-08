@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 
 import java.util.List;
 
-import edu.stanford.nlp.ling.ChineseCoreAnnotations.CharactersAnnotation;
+import edu.stanford.nlp.ling.SegmenterCoreAnnotations.CharactersAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.ChineseCharAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.ChineseSegAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;

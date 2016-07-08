@@ -591,7 +591,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
    * @param options
    * @return the trained or loaded model
    */
-  private static ArabicSegmenter getSegmenter(Properties options) {
+  public static ArabicSegmenter getSegmenter(Properties options) {
     ArabicSegmenter segmenter = new ArabicSegmenter(options);
     if (segmenter.flags.inputEncoding == null) {
       segmenter.flags.inputEncoding = System.getProperty("file.encoding");
