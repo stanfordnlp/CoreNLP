@@ -568,14 +568,6 @@ public class StanfordCoreNLPServer implements Runnable {
           props.remove("coref.md.type");
         }
       }
-      if (!props.containsKey("parse.model") && IOUtils.existsInClasspathOrFileSystem("edu/stanford/nlp/models/srparser/englishSR.ser.gz")) {
-        // Set the default parser to be the shift-reduce parser
-        props.setProperty("parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz");
-      }
-      if (!props.containsKey("entitylink.wikidict")) {
-        // Set the default Wikidict location
-        props.setProperty("entitylink.wikidict", "wikidict.tab.gz");
-      }
       // (add new properties on top of the default properties)
       urlProperties.entrySet()
           .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
@@ -780,12 +772,12 @@ public class StanfordCoreNLPServer implements Runnable {
             if (filter) {
               // Case: just filter sentences
               docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence ->
-                      regex.matcher(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class)).matches()
+                      regex.matcher(sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class)).matches()
               ).collect(Collectors.toList()));
             } else {
               // Case: find matches
               docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer sentWriter) -> {
-                SemgrexMatcher matcher = regex.matcher(sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class));
+                SemgrexMatcher matcher = regex.matcher(sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class));
                 int i = 0;
                 while (matcher.find()) {
                   sentWriter.set(Integer.toString(i), (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer matchWriter) -> {
@@ -936,22 +928,6 @@ public class StanfordCoreNLPServer implements Runnable {
       homepage = new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.html");
     } catch (IOException e) {
       throw new RuntimeIOException(e);
-    }
-
-    // Pre-load the models
-    Properties props = new Properties();
-    props.setProperty("annotators", "tokenize,ssplit,pos,parse,depparse,lemma,ner,natlog,openie,mention,coref,entitylink,kbp");
-    try {
-      props.setProperty("entitylink.wikidict", "wikidict.tab.gz");
-      StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-    } catch (Throwable ignored) {
-      err("Could not initialize annotators");
-    }
-    try {
-      props.setProperty("parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz");
-      StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-    } catch (Throwable ignored) {
-      err("Could not initialize shift reduce parser");
     }
 
     // Run the server
