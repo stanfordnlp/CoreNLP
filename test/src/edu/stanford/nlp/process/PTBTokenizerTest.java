@@ -55,9 +55,12 @@ public class PTBTokenizerTest {
     "Download from svn+ssh://user@location.edu/path/to/magic/unicorns",
     "We traveled from No. Korea to So. Calif. yesterday.",
     "I dunno.",
+      "The o-kay was received by the anti-acquisition front on its foolishness-filled fish market.",
+      "We ran the pre-tests through the post-scripted centrifuge.",
+      "School-aged parents should be aware of the unique problems that they face."
   };
 
-  private final String[][] ptbGold = {
+  private final String[][] ptbGoldNonSplitHypens = {
     { "This", "is", "a", "sentence", "." },
     { "U.S.", "insurance", ":", "Conseco", "acquires", "Kemper", "Corp.", ".",
       "</HEADLINE>", "<P>", "U.S", "insurance" },
@@ -103,7 +106,62 @@ public class PTBTokenizerTest {
     {"Download", "from", "svn://user@location.edu/path/to/magic/unicorns"},
     {"Download", "from", "svn+ssh://user@location.edu/path/to/magic/unicorns"},
     { "We", "traveled", "from", "No.", "Korea", "to", "So.", "Calif.", "yesterday", "." },
-    { "I", "du", "n", "no", "." }
+    { "I", "du", "n", "no", "." },
+      {"The", "o-kay", "was", "received", "by", "the", "anti-acquisition", "front", "on", "its", "foolishness-filled", "fish", "market", "."},
+      {"We", "ran", "the", "pre-tests", "through", "the", "post-scripted", "centrifuge", "."},
+      {"School-aged", "parents", "should", "be", "aware", "of", "the", "unique", "problems", "that", "they", "face","."},
+  };
+
+  private final String[][] ptbGold = {
+      { "This", "is", "a", "sentence", "." },
+      { "U.S.", "insurance", ":", "Conseco", "acquires", "Kemper", "Corp.", ".",
+          "</HEADLINE>", "<P>", "U.S", "insurance" },
+      { "Based", "in", "Eugene", ",", "Ore.", ",", "PakTech", "needs", "a", "new",
+          "distributor", "after", "Sydney", "-", "based", "Creative", "Pack", "Pty.", "Ltd.",
+          "went", "into", "voluntary", "administration", "." },
+      { "The", "Iron", "Age", "-LRB-", "ca.", "1300", "--", "ca.", "300", "BC", "-RRB-", "." },
+      { "Indonesian", "shipping", "-" },
+      { "Gim", "me", "a", "phone", ",", "I", "'m", "gon", "na", "call", "."},
+      { "``", "John", "&", "Mary", "'s", "dog", ",", "''", "Jane", "thought", "-LRB-", "to", "herself", "-RRB-",
+          ".", "``", "What", "a", "#", "$", "%", "!", "a", "-", "``", "I", "like", "AT&T", "''", ".", "''" },
+      { "I", "said", "at", "4:45", "pm", "."},
+      { "I", "ca", "n't", "believe", "they", "wan", "na", "keep", "40", "%", "of", "that", ".", "''",
+          "``", "Whatcha", "think", "?", "''", "``", "I", "do", "n't", "--", "think", "so", "...", ",", "''" },
+      // We don't yet split "Whatcha" but probably should following model of "Whaddya" --> What d ya. Maybe What cha
+      { "You", "`", "paid", "'", "US$", "170,000", "?!", "You", "should", "'ve", "paid", "only", "$", "16.75", "." },
+      { "1", ".", "Buy", "a", "new", "Chevrolet",
+          "-LRB-", "37", "%", "-", "owned", "in", "the", "U.S.", ".", "-RRB-", ".", "15", "%" },
+      // Unclear if 37%-owned is right or wrong under old PTB....  Maybe should be 37 %-owned even though sort of crazy
+      { "I", "like", "you", ";--RRB-", "but", "do", "you", "care",  ":-LRB-", ".",
+          "I", "'m", "happy", "^_^", "but", "shy", "-LRB-x.x-RRB-", "!" },
+      { "Diamond", "-LRB-", "``", "Not", "even",  "the", "chair", "''", "-RRB-", "lives", "near", "Udaipur", "-LRB-", "84km", "-RRB-", ".",
+          "-LCB-", "1", ".", "A", "potential", "Palmer", "trade", ":", "-RCB-"},
+      { "No", ".", "I", "like", "No.", "24", "and", "no.", "47", "." },
+      { "You", "can", "get", "a", "B.S.", "or", "a", "B.", "A.", "or", "a", "Ph.D", "-LRB-", "sometimes", "a", "Ph.", "D", "-RRB-", "from", "Stanford", "." },
+      { "@Harry_Styles", "did", "n`t", "like", "Mu`ammar", "al", "-", "Qaddafi" },
+      { "Kenneth", "liked", "Windows", "3.1", ",", "Windows", "3.x", ",", "and", "Mesa", "A.B", "as", "I", "remember", "things", ".", },
+      { "I", "like", "programming", "in", "F#", "more", "than", "C#", "." },
+      { "NBC", "Live", "will", "be", "available", "free", "through", "the", "Yahoo!", "Chat", "Web", "site", ".",
+          "E!", "Entertainment", "said", "``", "Jeopardy!", "''", "is", "a", "game", "show", "." },
+      { "I", "lived", "in", "O'Malley", "and", "read", "OK!", "Magazine", "." },
+      { "I", "lived", "in", "O'Malley", "and", "read", "OK!", "Magazine", "." },
+      { "I", "like", ":", "\u2022", "wine", ",", "\u2022", "cheese", ",", "\u2023", "salami",
+          ",", "&", "\u2043", "speck", "." },
+      { "I", "do", "n't", "give", "a", "f**k", "about", "your", "sh*tty", "life", "." },
+      { "First", "sentence", "...", ".", "Second", "sentence", "." },
+      { "First", "sentence", "...", ".", "Second", "sentence", "." },
+      { "I", "was", "n't", "really", "...", "well", ",", "what", "I", "mean", "...", "see", "...", "what", "I", "'m", "saying",
+          ",", "the", "thing", "is", "...", "I", "did", "n't", "mean", "it", "." },
+      {"This", "is", "a", "url", "test", ".", "Here", "is", "one", ":", "http://google.com", "."},
+      {"This", "is", "a", "url", "test", ".", "Here", "is", "one", ":", "htvp", ":", "/", "/", "google.com", "."},
+      {"Download", "from", "ftp://myname@host.dom/%2Fetc/motd"},
+      {"Download", "from", "svn://user@location.edu/path/to/magic/unicorns"},
+      {"Download", "from", "svn+ssh://user@location.edu/path/to/magic/unicorns"},
+      { "We", "traveled", "from", "No.", "Korea", "to", "So.", "Calif.", "yesterday", "." },
+      { "I", "du", "n", "no", "." },
+      {"The", "o-kay", "was", "received", "by", "the", "anti-acquisition", "front", "on", "its", "foolishness", "-", "filled", "fish", "market", "."},
+      {"We", "ran", "the", "pre-tests", "through", "the", "post-scripted", "centrifuge", "."},
+      {"School", "-", "aged", "parents", "should", "be", "aware", "of", "the", "unique", "problems", "that", "they", "face","."},
   };
 
   @Test
@@ -332,6 +390,12 @@ public class PTBTokenizerTest {
     runOnTwoArrays(tokFactory, sgmlInputs, sgmlPerLineGold);
   }
 
+  @Test
+  public void testPTBTokenizerTokenizeNonSplitHyphens() {
+    TokenizerFactory<CoreLabel> tokFactory = PTBTokenizer.coreLabelFactory("splitHyphenated=false");
+    runOnTwoArrays(tokFactory, ptbInputs, ptbGoldNonSplitHypens);
+  }
+
 
   @Test
   public void testFractions() {
@@ -369,7 +433,7 @@ public class PTBTokenizerTest {
     String[] sample = { "Das TV-Duell von Kanzlerin Merkel und SPD-Herausforderer Steinbrück war eher lahm - können es die Spitzenleute der kleinen Parteien besser? ",
             "Die erquickende Sicherheit und Festigkeit in der Bewegung, den Vorrat von Kraft, kann ja die Versammlung nicht fühlen, hören will sie sie nicht, also muß sie sie sehen; und die sehe man einmal in einem Paar spitzen Schultern, zylindrischen Schenkeln, oder leeren Ärmeln, oder lattenförmigen Beinen." };
     String[][] tokenized = {
-            { "Das", "TV-Duell", "von", "Kanzlerin", "Merkel", "und", "SPD-Herausforderer", "Steinbrück", "war", "eher",
+            { "Das", "TV", "-", "Duell", "von", "Kanzlerin", "Merkel", "und", "SPD", "-", "Herausforderer", "Steinbrück", "war", "eher",
               "lahm", "-", "können", "es", "die", "Spitzenleute", "der", "kleinen", "Parteien", "besser", "?", },
             {"Die", "erquickende", "Sicherheit", "und", "Festigkeit", "in", "der", "Bewegung", ",", "den", "Vorrat", "von",
                     "Kraft", ",", "kann", "ja", "die", "Versammlung", "nicht", "fühlen", ",", "hören", "will", "sie", "sie",
