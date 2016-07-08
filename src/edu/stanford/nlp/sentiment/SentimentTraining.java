@@ -76,7 +76,7 @@ public class SentimentTraining  {
         // the list
         int startTree = batch * model.op.trainOptions.batchSize;
         int endTree = (batch + 1) * model.op.trainOptions.batchSize;
-        if (endTree + model.op.trainOptions.batchSize > shuffledSentences.size()) {
+        if (endTree > shuffledSentences.size()) {
           endTree = shuffledSentences.size();
         }
 

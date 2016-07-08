@@ -90,7 +90,7 @@ public abstract class MapFactory<K,V> implements Serializable {
     return TREE_MAP_FACTORY;
   }
 
-  /** 
+  /**
    * Return a MapFactory that returns a TreeMap with the given Comparator.
    */
   public static <K,V> MapFactory<K,V> treeMapFactory(Comparator<? super K> comparator) {
@@ -435,12 +435,12 @@ public abstract class MapFactory<K,V> implements Serializable {
   public abstract Map<K,V> newMap(int initCapacity);
 
   /**
-   * A set with the same <code>K</code> parameterization of the Maps.
+   * A set with the same {@code K} parameterization of the Maps.
    */
   public abstract Set<K> newSet();
 
   /**
-   * A set with the same <code>K</code> parameterization, but initialized to the given collection.
+   * A set with the same {@code K} parameterization, but initialized to the given collection.
    */
   public abstract Set<K> newSet(Collection<K> init);
 

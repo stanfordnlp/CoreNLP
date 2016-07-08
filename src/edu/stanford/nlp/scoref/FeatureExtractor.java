@@ -535,7 +535,7 @@ public class FeatureExtractor {
   }
 
   private static SemanticGraphEdge getDependencyParent(Mention m, IndexedWord w) {
-    Iterator<SemanticGraphEdge> iterator = m.collapsedDependency.incomingEdgeIterator(w);
+    Iterator<SemanticGraphEdge> iterator = m.enhancedDependency.incomingEdgeIterator(w);
     if (iterator.hasNext()) {
       return iterator.next();
     }

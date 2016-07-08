@@ -29,6 +29,7 @@ package edu.stanford.nlp.trees.international.pennchinese;
 import java.util.*;
 
 import edu.stanford.nlp.util.ErasureUtils;
+import edu.stanford.nlp.util.Filters;
 import junit.framework.TestCase;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Pair;
@@ -40,7 +41,7 @@ import edu.stanford.nlp.util.Pair;
  *
  * @author Percy Liang
  */
-public class ChineseGrammaticalStructureTest extends TestCase {
+public class UniversalChineseGrammaticalStructureTest extends TestCase {
 
   // Return a string which is the concatenation of |items|, with a new line after each line.
   // "a", "b" => "a\nb\n"
@@ -55,7 +56,7 @@ public class ChineseGrammaticalStructureTest extends TestCase {
 
   // Create a new example
   private static Pair<String, String> T(String tree, String ans) {
-    return new Pair<>(tree, ans);
+    return new Pair<String, String>(tree, ans);
   }
 
 
@@ -70,7 +71,7 @@ public class ChineseGrammaticalStructureTest extends TestCase {
     Pair<String, String>[] examples = ErasureUtils.uncheckedCast(new Pair[] {
       // Gloss: Shanghai Pudong de orderly advance
       T("(NP (DNP (NP (NP (NR 浦东)) (NP (NN 开发))) (DEG 的)) (ADJP (JJ 有序)) (NP (NN 进行)))",
-        C("nn(开发-2, 浦东-1)", "assmod(进行-5, 开发-2)", "assm(开发-2, 的-3)", "amod(进行-5, 有序-4)", "root(ROOT-0, 进行-5)")),
+        C("nn(开发-2, 浦东-1)", "assmod(进行-5, 开发-2)", "case(开发-2, 的-3)", "amod(进行-5, 有序-4)", "root(ROOT-0, 进行-5)")),
 
       // Gloss: Shanghai Pudong expand and legal-system synchronous
       T("(ROOT (IP (NP (NP (NR 上海) (NR 浦东)) (NP (NN 开发) (CC 与) (NN 法制) (NN 建设))) (VP (VV 同步))))",
@@ -78,31 +79,33 @@ public class ChineseGrammaticalStructureTest extends TestCase {
 
       // Gloss: this-year
       T("(LCP (NP (NT 近年)) (LC 来))",
-        C("lobj(来-2, 近年-1)", "root(ROOT-0, 来-2)")),
+        C("root(ROOT-0, 近年-1)", "case(近年-1, 来-2)")),
 
       // Gloss: according country and Shanghai de relevant law
       T("(PP (P 根据) (NP (DNP (NP (NP (NN 国家)) (CC 和) (NP (NR 上海市))) (DEG 的)) (ADJP (JJ 有关)) (NP (NN 规定))))",
-        C("root(ROOT-0, 根据-1)", "conj(上海市-4, 国家-2)", "cc(上海市-4, 和-3)", "assmod(规定-7, 上海市-4)", "assm(上海市-4, 的-5)", "amod(规定-7, 有关-6)", "pobj(根据-1, 规定-7)")),
+        C("case(规定-7, 根据-1)", "conj(上海市-4, 国家-2)", "cc(上海市-4, 和-3)", "assmod(规定-7, 上海市-4)", "case(上海市-4, 的-5)", "amod(规定-7, 有关-6)", "root(ROOT-0, 规定-7)")),
 
       // Gloss: building is expand Shanghai de primary economic activity
       T("(IP (NP (NN 建筑)) (VP (VC 是) (NP (CP (IP (VP (VV 开发) (NP (NR 浦东)))) (DEC 的)) (QP (CD 一) (CLP (M 项))) (ADJP (JJ 主要)) (NP (NN 经济) (NN 活动)))))",
-        C("top(是-2, 建筑-1)", "root(ROOT-0, 是-2)", "rcmod(活动-10, 开发-3)", "dobj(开发-3, 浦东-4)", "cpm(开发-3, 的-5)", "nummod(项-7, 一-6)", "clf(活动-10, 项-7)", "amod(活动-10, 主要-8)", "nn(活动-10, 经济-9)", "attr(是-2, 活动-10)")),
+        C("nsubj(活动-10, 建筑-1)", "cop(活动-10, 是-2)", "relcl(活动-10, 开发-3)", "dobj(开发-3, 浦东-4)", "mark(开发-3, 的-5)", "nummod(项-7, 一-6)", "clf(活动-10, 项-7)", "amod(活动-10, 主要-8)", "nn(活动-10, 经济-9)", "root(ROOT-0, 活动-10)")),
 
       // Gloss: nickel has-been named modern industry de vitamins
       T("(IP (NP (NN 镍)) (VP (SB 被) (VP (VV 称作) (NP (PU “) (DNP (NP (ADJP (JJ 现代)) (NP (NN 工业))) (DEG 的)) (NP (NN 维生素)) (PU ”)))))",
-        C("nsubjpass(称作-3, 镍-1)", "pass(称作-3, 被-2)", "root(ROOT-0, 称作-3)", "amod(工业-6, 现代-5)", "assmod(维生素-8, 工业-6)", "assm(工业-6, 的-7)", "dobj(称作-3, 维生素-8)")),
+        C("nsubjpass(称作-3, 镍-1)", "auxpass(称作-3, 被-2)", "root(ROOT-0, 称作-3)", "punct(维生素-8, “-4)", "amod(工业-6, 现代-5)", "assmod(维生素-8, 工业-6)", "case(工业-6, 的-7)", "dobj(称作-3, 维生素-8)", "punct(维生素-8, ”-9)")),
 
       // Gloss: once revealed then was included legal-system path
       T("(IP (VP (VP (ADVP (AD 一)) (VP (VV 出现))) (VP (ADVP (AD 就)) (VP (SB 被) (VP (VV 纳入) (NP (NN 法制) (NN 轨道)))))))))))",
-        C("advmod(出现-2, 一-1)", "root(ROOT-0, 出现-2)", "advmod(纳入-5, 就-3)", "pass(纳入-5, 被-4)", "dep(出现-2, 纳入-5)", "nn(轨道-7, 法制-6)", "dobj(纳入-5, 轨道-7)")),
+        C("advmod(出现-2, 一-1)", "root(ROOT-0, 出现-2)", "advmod(纳入-5, 就-3)", "auxpass(纳入-5, 被-4)", "dep(出现-2, 纳入-5)", "nn(轨道-7, 法制-6)", "dobj(纳入-5, 轨道-7)")),
 
       T("(IP (NP (NP (NR 格林柯尔)) (NP (NN 制冷剂)) (PRN (PU （) (NP (NR 中国)) (PU ）)) (ADJP (JJ 有限)) (NP (NN 公司))) (VP (VC 是) (NP (CP (CP (IP (NP (NP (NR 格林柯尔) (NN 集团) (NR 北美) (NN 公司)) (CC 与) (NP (NP (NR 中国) (NR 天津)) (NP (NN 开发区)) (ADJP (JJ 总)) (NP (NN 公司))) (CC 和) (NP (NP (NR 中国)) (NP (NR 南方)) (NP (NN 证券)) (ADJP (JJ 有限)) (NP (NN 公司)))) (VP (VV 合建))) (DEC 的))) (ADJP (JJ 合资)) (NP (NN 企业)))) (PU 。))",
         C("nn(公司-7, 格林柯尔-1)",
                 "nn(公司-7, 制冷剂-2)",
+                "punct(中国-4, （-3)",
                 "prnmod(公司-7, 中国-4)",
+                "punct(中国-4, ）-5)",
                 "amod(公司-7, 有限-6)",
-                "top(是-8, 公司-7)",
-                "root(ROOT-0, 是-8)",
+                "nsubj(企业-28, 公司-7)",
+                "cop(企业-28, 是-8)",
                 "nn(公司-12, 格林柯尔-9)",
                 "nn(公司-12, 集团-10)",
                 "nn(公司-12, 北美-11)",
@@ -119,28 +122,45 @@ public class ChineseGrammaticalStructureTest extends TestCase {
                 "nn(公司-24, 证券-22)",
                 "amod(公司-24, 有限-23)",
                 "nsubj(合建-25, 公司-24)",
-                "rcmod(企业-28, 合建-25)",
-                "cpm(合建-25, 的-26)",
+                "relcl(企业-28, 合建-25)",
+                "mark(合建-25, 的-26)",
                 "amod(企业-28, 合资-27)",
-                "attr(是-8, 企业-28)")),
+                "root(ROOT-0, 企业-28)",
+                "punct(企业-28, 。-29)")),
 
-            // Gloss: relevant department first send these regulatory document
-           T("(IP (NP (ADJP (JJ 有关)) (NP (NN 部门))) (VP (ADVP (AD 先)) (VP (VV 送上) (NP (DP (DT 这些)) (NP (NN 法规性) (NN 文件))))) (PU 。))",
-             C("amod(部门-2, 有关-1)", "nsubj(送上-4, 部门-2)", "advmod(送上-4, 先-3)", "root(ROOT-0, 送上-4)", "det(文件-7, 这些-5)", "nn(文件-7, 法规性-6)", "dobj(送上-4, 文件-7)")),
+       T("(IP (NP (NR 汕头) (NN 机场)) (VP (VV 开通) (NP (NN 国际) (NN 国内) (NN 航线)) (QP (CD 四十四) (CLP (M 条)))) (PU 。))",
+               C("nn(机场-2, 汕头-1)",
+                 "nsubj(开通-3, 机场-2)",
+                 "root(ROOT-0, 开通-3)",
+                 "nn(航线-6, 国际-4)",
+                 "nn(航线-6, 国内-5)",
+                 "dobj(开通-3, 航线-6)",
+                 "nummod(条-8, 四十四-7)",
+                 "range(开通-3, 条-8)",
+                 "punct(开通-3, 。-9)")),
+
+        T("(VP (NP (NT 以前)) (ADVP (AD 不)) (ADVP (AD 曾)) (VP (VV 遇到) (AS 过))))",
+                    C("tmod(遇到-4, 以前-1)",
+                      "neg(遇到-4, 不-2)",
+                      "advmod(遇到-4, 曾-3)",
+                      "root(ROOT-0, 遇到-4)",
+                      "asp(遇到-4, 过-5)")),
 
       // TODO(pliang): add more test cases for all the relations not covered (see WARNING below)
     });
 
+    Set<String> ignoreRelations = new HashSet<>(Arrays.asList("subj", "obj", "mod"));
     // Make sure all the relations are tested for
-    Set<String> testedRelations = new HashSet<>();
+    Set<String> testedRelations = new HashSet<String>();
     for (Pair<String, String> ex : examples) {
       for (String item : ex.second.split("\n"))
         testedRelations.add(item.substring(0, item.indexOf('(')));
     }
-    for (String relation : ChineseGrammaticalRelations.shortNameToGRel.keySet()) {
-      // TODO(pliang): don't warn for abstract relations like 'subj'
+    for (String relation : UniversalChineseGrammaticalRelations.shortNameToGRel.keySet()) {
       if (!testedRelations.contains(relation))
-        System.out.println("WARNING: relation '" + relation + "' not tested");
+        if ( ! ignoreRelations.contains(relation)) {
+          System.err.println("WARNING: relation '" + relation + "' not tested");
+        }
     }
 
     TreeReaderFactory trf = new PennTreeReaderFactory();
@@ -151,16 +171,12 @@ public class ChineseGrammaticalStructureTest extends TestCase {
       // specifying our own TreeReaderFactory is vital so that functional
       // categories - that is -TMP and -ADV in particular - are not stripped off
       Tree tree = Tree.valueOf(testTree, trf);
-      GrammaticalStructure gs = new ChineseGrammaticalStructure(tree);
+      GrammaticalStructure gs = new UniversalChineseGrammaticalStructure(tree, Filters.acceptFilter()); // include punct
 
       assertEquals("Unexpected CC processed dependencies for tree "+testTree,
           testAnswer,
-          ChineseGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCCprocessed(GrammaticalStructure.Extras.MAXIMAL), tree, false, false));
+          UniversalChineseGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCCprocessed(GrammaticalStructure.Extras.MAXIMAL), tree, false, false));
     }
-  }
-
-  public static void main(String[] args) {
-    new ChineseGrammaticalStructureTest().testBasicRelations();
   }
 
 }

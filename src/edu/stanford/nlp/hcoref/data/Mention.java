@@ -69,22 +69,22 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   public Mention() {
   }
 
-  public Mention(int mentionID, int startIndex, int endIndex, List<CoreLabel> sentenceWords, SemanticGraph basicDependency, SemanticGraph collapsedDependency){
+  public Mention(int mentionID, int startIndex, int endIndex, List<CoreLabel> sentenceWords, SemanticGraph basicDependency, SemanticGraph enhancedDependency){
     this.mentionID = mentionID;
     this.startIndex = startIndex;
     this.endIndex = endIndex;
     this.sentenceWords = sentenceWords;
     this.basicDependency = basicDependency;
-    this.collapsedDependency = collapsedDependency;
+    this.enhancedDependency = enhancedDependency;
   }
 
-  public Mention(int mentionID, int startIndex, int endIndex, List<CoreLabel> sentenceWords, SemanticGraph basicDependency, SemanticGraph collapsedDependency, List<CoreLabel> mentionSpan){
-    this(mentionID, startIndex, endIndex, sentenceWords, basicDependency, collapsedDependency);
+  public Mention(int mentionID, int startIndex, int endIndex, List<CoreLabel> sentenceWords, SemanticGraph basicDependency, SemanticGraph enhancedDependency, List<CoreLabel> mentionSpan){
+    this(mentionID, startIndex, endIndex, sentenceWords, basicDependency, enhancedDependency);
     this.originalSpan = mentionSpan;
   }
 
-  public Mention(int mentionID, int startIndex, int endIndex, List<CoreLabel> sentenceWords, SemanticGraph basicDependency, SemanticGraph collapsedDependency, List<CoreLabel> mentionSpan, Tree mentionTree){
-    this(mentionID, startIndex, endIndex, sentenceWords, basicDependency, collapsedDependency, mentionSpan);
+  public Mention(int mentionID, int startIndex, int endIndex, List<CoreLabel> sentenceWords, SemanticGraph basicDependency, SemanticGraph enhancedDependency, List<CoreLabel> mentionSpan, Tree mentionTree){
+    this(mentionID, startIndex, endIndex, sentenceWords, basicDependency, enhancedDependency, mentionSpan);
     this.mentionSubTree = mentionTree;
   }
 
@@ -125,7 +125,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   public Tree contextParseTree;
   public CoreLabel headWord;
   public SemanticGraph basicDependency;
-  public SemanticGraph collapsedDependency;
+  public SemanticGraph enhancedDependency;
 
   public Set<String> dependents = Generics.newHashSet();
   public List<String> preprocessedTerms;
@@ -330,7 +330,11 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       isDirectObject = true;
     } else if(dep.equals("iobj")){
       isIndirectObject = true;
-    } else if(dep.equals("pobj")){
+    } else if(dep.startsWith("nmod")
+        && ! dep.equals("nmod:npmod")
+        && ! dep.equals("nmod:tmod")
+        && ! dep.equals("nmod:poss")
+        && ! dep.equals("nmod:agent")) {
       isPrepositionObject = true;
     }
   }
@@ -1053,13 +1057,13 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   }
 
   private static Pair<IndexedWord, String> findDependentVerb(Mention m) {
-    if (m.collapsedDependency.getRoots().size() == 0) {
+    if (m.enhancedDependency.getRoots().size() == 0) {
       return new Pair<>();
     }
     // would be nice to condense this pattern, but sadly =reln
     // always uses the last relation in the sequence, not the first
     SemgrexPattern pattern = SemgrexPattern.compile("{idx:" + (m.headIndex+1) + "} [ <=reln {tag:/^V.*/}=verb | <=reln ({} << {tag:/^V.*/}=verb) ]");
-    SemgrexMatcher matcher = pattern.matcher(m.collapsedDependency);
+    SemgrexMatcher matcher = pattern.matcher(m.enhancedDependency);
     while (matcher.find()) {
       return Pair.makePair(matcher.getNode("verb"), matcher.getRelnString("reln"));
     }
@@ -1116,14 +1120,14 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     ArrayList<ArrayList<IndexedWord>> premod = new ArrayList<>();
 
     if(headIndexedWord == null) return premod;
-    for(Pair<GrammaticalRelation,IndexedWord> child : collapsedDependency.childPairs(headIndexedWord)){
+    for(Pair<GrammaticalRelation,IndexedWord> child : enhancedDependency.childPairs(headIndexedWord)){
       String function = child.first().getShortName();
       if(child.second().index() < headWord.index()
           && !child.second.tag().equals("DT") && !child.second.tag().equals("WRB")
-          && !function.endsWith("det") && !function.equals("num")
-          && !function.equals("rcmod") && !function.equals("infmod")
-          && !function.equals("partmod") && !function.equals("punct")){
-        ArrayList<IndexedWord> phrase = new ArrayList<>(collapsedDependency.descendants(child.second()));
+          && !function.endsWith("det") && !function.equals("nummod")
+          && !function.startsWith("acl") && !function.startsWith("advcl")
+          && !function.equals("punct")){
+        ArrayList<IndexedWord> phrase = new ArrayList<>(enhancedDependency.descendants(child.second()));
         Collections.sort(phrase);
         premod.add(phrase);
       }
@@ -1137,14 +1141,16 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     ArrayList<ArrayList<IndexedWord>> postmod = new ArrayList<>();
 
     if(headIndexedWord == null) return postmod;
-    for(Pair<GrammaticalRelation,IndexedWord> child : collapsedDependency.childPairs(headIndexedWord)){
+    for(Pair<GrammaticalRelation,IndexedWord> child : enhancedDependency.childPairs(headIndexedWord)){
       String function = child.first().getShortName();
       if(child.second().index() > headWord.index() &&
-          !function.endsWith("det") && !function.equals("num")
-          && !function.equals("rcmod") && !function.equals("infmod")
-          && !function.equals("partmod") && !function.equals("punct")
-          && !(function.equals("possessive") && collapsedDependency.descendants(child.second()).size() == 1)){
-        ArrayList<IndexedWord> phrase = new ArrayList<>(collapsedDependency.descendants(child.second()));
+          ! function.endsWith("det") && ! function.equals("nummod")
+          && ! function.startsWith("acl") && ! function.startsWith("advcl")
+          && ! function.equals("punct") &&
+          //possessive clitic
+          ! (function.equals("case") && enhancedDependency.descendants(child.second()).size() == 1
+              && child.second.tag().equals("POS"))){
+        ArrayList<IndexedWord> phrase = new ArrayList<>(enhancedDependency.descendants(child.second()));
         Collections.sort(phrase);
         postmod.add(phrase);
       }
@@ -1236,7 +1242,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   public boolean isCoordinated(){
     if(headIndexedWord == null) return false;
-    for(Pair<GrammaticalRelation,IndexedWord> child : collapsedDependency.childPairs(headIndexedWord)){
+    for(Pair<GrammaticalRelation,IndexedWord> child : enhancedDependency.childPairs(headIndexedWord)){
       if(child.first().getShortName().equals("cc")) return true;
     }
     return false;
@@ -1357,35 +1363,35 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   private IndexedWord headParent;
   private IndexedWord getHeadParent() {
     return headParent == null ?
-        (headParent = collapsedDependency.getParent(headIndexedWord)) : headParent;
+        (headParent = enhancedDependency.getParent(headIndexedWord)) : headParent;
   }
 
   private Collection<IndexedWord> headChildren;
   private Collection<IndexedWord> getHeadChildren() {
     return headChildren == null ?
-        (headChildren = collapsedDependency.getChildList(headIndexedWord)) : headChildren;
+        (headChildren = enhancedDependency.getChildList(headIndexedWord)) : headChildren;
   }
 
   private Collection<IndexedWord> headSiblings;
   private Collection<IndexedWord> getHeadSiblings() {
     return headSiblings == null ?
-        (headSiblings = collapsedDependency.getSiblings(headIndexedWord)): headSiblings;
+        (headSiblings = enhancedDependency.getSiblings(headIndexedWord)): headSiblings;
   }
 
   private List<IndexedWord> headPathToRoot;
   private List<IndexedWord> getHeadPathToRoot() {
     return headPathToRoot == null ?
-        (headPathToRoot = collapsedDependency.getPathToRoot(headIndexedWord)) : headPathToRoot;
+        (headPathToRoot = enhancedDependency.getPathToRoot(headIndexedWord)) : headPathToRoot;
   }
 
   public String getRelation() {
     if(headIndexedWord == null) return null;
 
-    if(collapsedDependency.getRoots().isEmpty()) return null;
+    if(enhancedDependency.getRoots().isEmpty()) return null;
     // root relation
-    if(collapsedDependency.getFirstRoot().equals(headIndexedWord)) return "root";
-    if(!collapsedDependency.containsVertex(getHeadParent())) return null;
-    GrammaticalRelation relation = collapsedDependency.reln(getHeadParent(), headIndexedWord);
+    if(enhancedDependency.getFirstRoot().equals(headIndexedWord)) return "root";
+    if(!enhancedDependency.containsVertex(getHeadParent())) return null;
+    GrammaticalRelation relation = enhancedDependency.reln(getHeadParent(), headIndexedWord);
 
     // adjunct relations
     if ((relation.toString().startsWith("nmod")
@@ -1424,7 +1430,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if(headIndexedWord == null) return 0;
 
     int count = 0;
-    List<Pair<GrammaticalRelation, IndexedWord>> childPairs = collapsedDependency.childPairs(headIndexedWord);
+    List<Pair<GrammaticalRelation, IndexedWord>> childPairs = enhancedDependency.childPairs(headIndexedWord);
     for(Pair<GrammaticalRelation, IndexedWord> childPair : childPairs) {
       GrammaticalRelation gr = childPair.first;
       IndexedWord word = childPair.second;
@@ -1448,8 +1454,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
     if(!nerString.equals("O")) return "definite";
 
-    Set<IndexedWord> quant = collapsedDependency.getChildrenWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.DETERMINER);
-    Set<IndexedWord> poss = collapsedDependency.getChildrenWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.POSSESSION_MODIFIER);
+    Set<IndexedWord> quant = enhancedDependency.getChildrenWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.DETERMINER);
+    Set<IndexedWord> poss = enhancedDependency.getChildrenWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.POSSESSION_MODIFIER);
     if (!quant.isEmpty()) {
       for (IndexedWord word : quant) {
         String det = word.lemma();
@@ -1462,7 +1468,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     } else if (!poss.isEmpty()) {
       return "definite";
     } else {
-      quant = collapsedDependency.getChildrenWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.NUMERIC_MODIFIER);
+      quant = enhancedDependency.getChildrenWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.NUMERIC_MODIFIER);
       if (!quant.isEmpty()) {
         return "quantified";
       }
@@ -1475,17 +1481,17 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if(headIndexedWord == null) return 0;
 
     // direct negation in a child
-    Collection<IndexedWord> children = collapsedDependency.getChildren(headIndexedWord);
+    Collection<IndexedWord> children = enhancedDependency.getChildren(headIndexedWord);
     for(IndexedWord child : children) {
       if(dict.negations.contains(child.lemma())) return 1;
     }
 
     // or has a sibling
     for(IndexedWord sibling : getHeadSiblings()) {
-      if(dict.negations.contains(sibling.lemma()) && !collapsedDependency.hasParentWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT)) return 1;
+      if(dict.negations.contains(sibling.lemma()) && !enhancedDependency.hasParentWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT)) return 1;
     }
     // check the parent
-    List<Pair<GrammaticalRelation,IndexedWord>> parentPairs = collapsedDependency.parentPairs(headIndexedWord);
+    List<Pair<GrammaticalRelation,IndexedWord>> parentPairs = enhancedDependency.parentPairs(headIndexedWord);
     if (!parentPairs.isEmpty()) {
       Pair<GrammaticalRelation,IndexedWord> parentPair = parentPairs.get(0);
       GrammaticalRelation gr = parentPair.first;
@@ -1500,7 +1506,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if(headIndexedWord == null) return 0;
 
     // direct modal in a child
-    Collection<IndexedWord> children = collapsedDependency.getChildren(headIndexedWord);
+    Collection<IndexedWord> children = enhancedDependency.getChildren(headIndexedWord);
     for(IndexedWord child : children) {
       if(dict.modals.contains(child.lemma())) return 1;
     }
@@ -1510,8 +1516,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if (parent != null) {
       if(dict.modals.contains(parent.lemma())) return 1;
       // check the children of the parent (that is needed for modal auxiliaries)
-      IndexedWord child = collapsedDependency.getChildWithReln(parent,UniversalEnglishGrammaticalRelations.AUX_MODIFIER);
-      if(!collapsedDependency.hasParentWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT) && child != null && dict.modals.contains(child.lemma())) return 1;
+      IndexedWord child = enhancedDependency.getChildWithReln(parent,UniversalEnglishGrammaticalRelations.AUX_MODIFIER);
+      if(!enhancedDependency.hasParentWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT) && child != null && dict.modals.contains(child.lemma())) return 1;
     }
 
     // look at the path to root
@@ -1529,8 +1535,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
     // check adverbial clause with marker "as"
     for(IndexedWord sibling : getHeadSiblings()) {
-      if(dict.reportVerb.contains(sibling.lemma()) && collapsedDependency.hasParentWithReln(sibling,UniversalEnglishGrammaticalRelations.ADV_CLAUSE_MODIFIER)) {
-        IndexedWord marker = collapsedDependency.getChildWithReln(sibling,UniversalEnglishGrammaticalRelations.MARKER);
+      if(dict.reportVerb.contains(sibling.lemma()) && enhancedDependency.hasParentWithReln(sibling,UniversalEnglishGrammaticalRelations.ADV_CLAUSE_MODIFIER)) {
+        IndexedWord marker = enhancedDependency.getChildWithReln(sibling,UniversalEnglishGrammaticalRelations.MARKER);
         if (marker != null && marker.lemma().equals("as")) {
           return 1;
         }
@@ -1543,14 +1549,14 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     boolean isSubject = false;
 
     // if the node itself is a subject, we will not take into account its parent in the path
-    if(collapsedDependency.hasParentWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT)) isSubject = true;
+    if(enhancedDependency.hasParentWithReln(headIndexedWord, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT)) isSubject = true;
 
     for (IndexedWord word : path) {
       if(!isSubject && (dict.reportVerb.contains(word.lemma()) || dict.reportNoun.contains(word.lemma()))) {
         return 1;
       }
       // check how to put isSubject
-      isSubject = collapsedDependency.hasParentWithReln(word, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT);
+      isSubject = enhancedDependency.hasParentWithReln(word, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT);
     }
     return 0;
   }
@@ -1559,16 +1565,16 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
     if(headIndexedWord == null) return 0;
 
-    Set<GrammaticalRelation> relations = collapsedDependency.childRelns(headIndexedWord);
+    Set<GrammaticalRelation> relations = enhancedDependency.childRelns(headIndexedWord);
     for (GrammaticalRelation rel : relations) {
-      if(rel.toString().startsWith("conj_")) {
+      if(rel.toString().startsWith("conj:")) {
         return 1;
       }
     }
 
-    Set<GrammaticalRelation> parent_relations = collapsedDependency.relns(headIndexedWord);
+    Set<GrammaticalRelation> parent_relations = enhancedDependency.relns(headIndexedWord);
     for (GrammaticalRelation rel : parent_relations) {
-      if(rel.toString().startsWith("conj_")) {
+      if(rel.toString().startsWith("conj:")) {
         return 1;
       }
     }
@@ -1622,7 +1628,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if (!Objects.equals(sentenceWords, rhs.sentenceWords))  { return false; }
 
     if (!Objects.equals(basicDependency, rhs.basicDependency)) { return false; }
-    if (!Objects.equals(collapsedDependency, rhs.collapsedDependency)) { return false; }
+    if (!Objects.equals(enhancedDependency, rhs.enhancedDependency)) { return false; }
     if (!Objects.equals(contextParseTree, rhs.contextParseTree)) { return false; }
 
     if (!Objects.equals(dependents, rhs.dependents)) { return false; }

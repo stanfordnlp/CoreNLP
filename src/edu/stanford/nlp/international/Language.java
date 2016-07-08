@@ -20,6 +20,7 @@ public enum Language {
   French(           new FrenchTreebankParserParams()),
   Hebrew(           new HebrewTreebankParserParams()),
   Spanish(          new SpanishTreebankParserParams()),
+  UniversalChinese( new ChineseTreebankParserParams()),
   UniversalEnglish( new EnglishTreebankParserParams()),
   Unknown(          new EnglishTreebankParserParams());
 
