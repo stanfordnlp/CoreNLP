@@ -310,10 +310,7 @@
   { ruleType: "filter",
 	over: NIL,
     pattern: ( [ { temporal::IS_TIMEX_DATE } & {{ tokens[0].tag =~ /NN.*S/ }} ] ),
-    result: MakePeriodicTemporalSet($0[0].temporal.value),
-    // Change to TRUE to turn anything that is labeled a date but marked as plural to be a set
-    // (Tuesdays, Wednesdays, etc)
-    active: FALSE
+    result: MakePeriodicTemporalSet($0[0].temporal.value)
   }
 
   ########################################################################################################################

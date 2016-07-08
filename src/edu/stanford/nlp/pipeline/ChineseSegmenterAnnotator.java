@@ -7,7 +7,7 @@ import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.SegmenterCoreAnnotations;
+import edu.stanford.nlp.ling.ChineseCoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
@@ -155,7 +155,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       }
     }
 
-    annotation.set(SegmenterCoreAnnotations.CharactersAnnotation.class, words);
+    annotation.set(ChineseCoreAnnotations.CharactersAnnotation.class, words);
   }
 
   private void runSegmentation(CoreMap annotation) {
@@ -166,7 +166,7 @@ public class ChineseSegmenterAnnotator implements Annotator  {
     // 0, 0+1 ,
 
     String text = annotation.get(CoreAnnotations.TextAnnotation.class);
-    List<CoreLabel> sentChars = annotation.get(SegmenterCoreAnnotations.CharactersAnnotation.class);
+    List<CoreLabel> sentChars = annotation.get(ChineseCoreAnnotations.CharactersAnnotation.class);
     List<CoreLabel> tokens = new ArrayList<>();
     annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
 

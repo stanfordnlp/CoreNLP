@@ -281,7 +281,7 @@ import edu.stanford.nlp.util.logging.Redwood;
   private boolean escapeForwardSlashAsterisk = false;
   private boolean strictTreebank3 = false;
   private boolean splitAssimilations = true;
-
+  private boolean splitHyphenated = true;
   /*
    * This has now been extended to cover the main Windows CP1252 characters,
    * at either their correct Unicode codepoints, or in their invalid
@@ -371,6 +371,13 @@ import edu.stanford.nlp.util.logging.Redwood;
     //  System.err.println("normalizeFractions="+normalizeFractions+", escapeForwardSlashAsterisk="+escapeForwardSlashAsterisk);
     //  System.err.println("Mapped |"+in+"| to |" + out + "|.");
     return getNext(out, in);
+  }
+
+  private void breakByHyphens(String in) {
+    if (splitHyphenated) {
+      int firstHyphen = in.indexOf('-');
+      yypushback(in.length() - firstHyphen);
+    }
   }
 
   private static String removeSoftHyphens(String in) {
@@ -659,6 +666,15 @@ APOS = ['\u0092\u2019]|&apos;  /* ASCII straight quote, single right curly quote
 /* Includes extra ones that may appear inside a word, rightly or wrongly */
 APOSETCETERA = {APOS}|[`\u0091\u2018\u201B]
 HTHING = [A-Za-z0-9][A-Za-z0-9.,\u00AD]*(-([A-Za-z0-9\u00AD]+|{ACRO2}\.))+
+/* from the CLEAR (biomedical?) treebank documentation */
+/* we're going to split on most hypens except a few */
+/* From Supplementary Guidelines for ETTB 2.0 (Justin Mott, Colin Warner, Ann Bies; Ann Taylor) */
+//TODO: ADD ENDINGS
+HTHINGEXCEPTIONPREFIXED = (e|a|u|x|agro|ante|anti|arch|be|bi|bio|co|counter|cross|cyber|de|eco|ex|extra|inter|intra|macro|mega|micro|mid|mini|multi|neo|non|over|pan|para|peri|post|pre|pro|pseudo|quasi|re|semi|sub|super|tri|ultra|un|uni|vice)(-([A-Za-z0-9\u00AD]+|{ACRO2}\.))+
+HTHINGEXCEPTIONSUFFIXED = ([A-Za-z0-9\u00AD]+|{ACRO2}\.)*(-)(esque|ette|fest|fold|gate|itis|less|most|o-torium|rama|wise)
+HTHINGEXCEPTIONWHOLE = (mm-hm|mm-mm|o-kay|uh-huh|uh-oh)
+
+/* things like 'll and 'm */
 REDAUX = {APOS}([msdMSD]|re|ve|ll)
 /* For things that will have n't on the end. They can't end in 'n' */
 /* \u00AD is soft hyphen */
@@ -1089,9 +1105,16 @@ nno/[^A-Za-z0-9]
                 }
 /* {HTHING}/[^a-zA-Z0-9.+]    { return getNext(removeSoftHyphens(yytext()),
                                                yytext()); } */
-{HTHING}\./{INSENTP}          { return getNext(removeSoftHyphens(yytext()),
-                                               yytext()); }
-{HTHING}        { return getNext(removeSoftHyphens(yytext()), yytext()); }
+{HTHINGEXCEPTIONPREFIXED}  {return getNext(removeSoftHyphens(yytext()), yytext());}
+{HTHINGEXCEPTIONPREFIXED}\./{INSENTP}  {return getNext(removeSoftHyphens(yytext()), yytext());}
+{HTHINGEXCEPTIONSUFFIXED}  {return getNext(removeSoftHyphens(yytext()), yytext());}
+{HTHINGEXCEPTIONSUFFIXED}\./{INSENTP}  {return getNext(removeSoftHyphens(yytext()), yytext());}
+{HTHINGEXCEPTIONWHOLE}  {return getNext(removeSoftHyphens(yytext()), yytext());}
+{HTHINGEXCEPTIONWHOLE}\./{INSENTP}  {return getNext(removeSoftHyphens(yytext()), yytext());}
+{HTHING}        {  breakByHyphens(yytext());
+                    return getNext(removeSoftHyphens(yytext()), yytext()); }
+{HTHING}\./{INSENTP}         {  breakByHyphens(yytext());
+                    return getNext(removeSoftHyphens(yytext()), yytext()); }
 {THING}\./{INSENTP}          { return handleQuotes(yytext(), false); }  /* A THING can contain quote like O'Malley */
 {THING}         { return handleQuotes(yytext(), false); }
 {THINGA}\./{INSENTP}    { return getNormalizedAmpNext(); }
