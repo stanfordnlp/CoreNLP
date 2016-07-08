@@ -3,7 +3,7 @@ package edu.stanford.nlp.pipeline;
 import java.util.*;
 
 import edu.stanford.nlp.international.arabic.process.ArabicSegmenter;
-import edu.stanford.nlp.ling.ChineseCoreAnnotations;
+import edu.stanford.nlp.ling.SegmenterCoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -138,11 +138,11 @@ public class ArabicSegmenterAnnotator implements Annotator  {
         seg = true;
       } else {
         // if this word is a word, put it as a feature label and set seg to false for next word
-        wi.set(CoreAnnotations.ChineseCharAnnotation.class, wordString);
+        wi.set(CoreAnnotations.ArabicCharAnnotation.class, wordString);
         if (seg) {
-          wi.set(CoreAnnotations.ChineseSegAnnotation.class, "1");
+          wi.set(CoreAnnotations.ArabicSegAnnotation.class, "1");
         } else {
-          wi.set(CoreAnnotations.ChineseSegAnnotation.class, "0");
+          wi.set(CoreAnnotations.ArabicSegAnnotation.class, "0");
         }
         wi.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, i);
         wi.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, (i + 1));
@@ -151,7 +151,7 @@ public class ArabicSegmenterAnnotator implements Annotator  {
       }
     }
 
-    annotation.set(ChineseCoreAnnotations.CharactersAnnotation.class, words);
+    annotation.set(SegmenterCoreAnnotations.CharactersAnnotation.class, words);
   }
 
   private void runSegmentation(CoreMap annotation) {
@@ -162,7 +162,7 @@ public class ArabicSegmenterAnnotator implements Annotator  {
     // 0, 0+1 ,
 
     String text = annotation.get(CoreAnnotations.TextAnnotation.class);
-    List<CoreLabel> sentChars = annotation.get(ChineseCoreAnnotations.CharactersAnnotation.class);
+    List<CoreLabel> sentChars = annotation.get(SegmenterCoreAnnotations.CharactersAnnotation.class);
     List<CoreLabel> tokens = new ArrayList<>();
     annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
 
@@ -177,7 +177,7 @@ public class ArabicSegmenterAnnotator implements Annotator  {
     for (HasWord w : words) {
       String word = w.word();
       CoreLabel fl = sentChars.get(pos);
-      fl.set(CoreAnnotations.ChineseSegAnnotation.class, "1");
+      fl.set(CoreAnnotations.ArabicSegAnnotation.class, "1");
       if (word.isEmpty()) {
         continue;
       }

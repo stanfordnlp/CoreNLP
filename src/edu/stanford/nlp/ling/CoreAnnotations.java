@@ -766,6 +766,22 @@ public class CoreAnnotations {
   }
 
   /**
+   * for Arabic: character level information, segmentation
+   */
+  public static class ArabicCharAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  /** For Arabic: the segmentation information from the segmenter. */
+  public static class ArabicSegAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  /**
    * The CoreMap key identifying the offset of the first character of an
    * annotation. The character with index 0 is the first character in the
    * document.
