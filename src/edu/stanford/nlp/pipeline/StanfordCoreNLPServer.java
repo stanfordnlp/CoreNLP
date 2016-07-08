@@ -935,10 +935,14 @@ public class StanfordCoreNLPServer implements Runnable {
     // Pre-load the models
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,parse,depparse,lemma,ner,natlog,openie,mention,coref,entitylink,kbp");
-    props.setProperty("entitylink.wikidict", "wikidict.tab.gz");
-    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-    props.setProperty("parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz");
-    pipeline = new StanfordCoreNLP(props);
+    try {
+      props.setProperty("entitylink.wikidict", "wikidict.tab.gz");
+      StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    } catch (Throwable ignored) {}
+    try {
+      props.setProperty("parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz");
+      StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    } catch (Throwable ignored) {}
 
     // Run the server
     log("Starting server...");
