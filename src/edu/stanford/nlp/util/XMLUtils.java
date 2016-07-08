@@ -186,12 +186,10 @@ public class XMLUtils  {
         // Get element
         Node prevNode = nodeList.item(i).getPreviousSibling();
         String prev = "";
-        if (prevNode != null) {
-          if (prevNode.getPreviousSibling() != null) {
-            prev += prevNode.getPreviousSibling().getTextContent();
-          }
-          prev += prevNode.getTextContent();
+        if (prevNode.getPreviousSibling() != null) {
+          prev += prevNode.getPreviousSibling().getTextContent();
         }
+        prev += prevNode.getTextContent();
 
         Node nextNode = nodeList.item(i).getNextSibling();
         String next = "";

@@ -301,9 +301,9 @@ public class Preprocessor  {
         m.contextParseTree = sentence.get(TreeAnnotation.class);
 //        m.sentenceWords = sentence.get(TokensAnnotation.class);
         m.basicDependency = sentence.get(BasicDependenciesAnnotation.class);
-        m.enhancedDependency = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
-        if (m.enhancedDependency == null) {
-          m.enhancedDependency = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+        m.collapsedDependency = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+        if (m.collapsedDependency == null) {
+          m.collapsedDependency = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
         }
 
         // mentionSubTree (highest NP that has the same head) if constituency tree available
@@ -345,7 +345,7 @@ public class Preprocessor  {
   private static void findSyntacticRelationsFromDependency(List<Mention> orderedMentions) {
     if(orderedMentions.size()==0) return;
     markListMemberRelation(orderedMentions);
-    SemanticGraph dependency = orderedMentions.get(0).enhancedDependency;
+    SemanticGraph dependency = orderedMentions.get(0).collapsedDependency;
 
     // apposition
     Set<Pair<Integer, Integer>> appos = Generics.newHashSet();
@@ -708,9 +708,9 @@ public class Preprocessor  {
       String word = cl.word();
       if(dict.reportVerb.contains(lemma) && cl.tag().startsWith("V")) {
         // find subject
-        SemanticGraph dependency = sentences.get(sentNum).get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+        SemanticGraph dependency = sentences.get(sentNum).get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
         if (dependency == null) {
-          dependency = sentences.get(sentNum).get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+          dependency = sentences.get(sentNum).get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
         }
         IndexedWord w = dependency.getNodeByWordPattern(word);
 
@@ -825,9 +825,9 @@ public class Preprocessor  {
     for(CoreLabel w : lastSent.get(CoreAnnotations.TokensAnnotation.class)) {
       if(w.get(CoreAnnotations.LemmaAnnotation.class).equals("report") || w.get(CoreAnnotations.LemmaAnnotation.class).equals("say")) {
         String word = w.get(CoreAnnotations.TextAnnotation.class);
-        SemanticGraph dependency = lastSent.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+        SemanticGraph dependency = lastSent.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
         if (dependency == null) {
-          dependency = lastSent.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+          dependency = lastSent.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
         }
         IndexedWord t = dependency.getNodeByWordPattern(word);
 
@@ -861,10 +861,10 @@ public class Preprocessor  {
     }
     if(countQuotationMark!=1) return false;
 
-    IndexedWord w = m.enhancedDependency.getNodeByWordPattern(m.sentenceWords.get(m.headIndex).get(CoreAnnotations.TextAnnotation.class));
+    IndexedWord w = m.collapsedDependency.getNodeByWordPattern(m.sentenceWords.get(m.headIndex).get(CoreAnnotations.TextAnnotation.class));
     if(w== null) return false;
 
-    for(Pair<GrammaticalRelation,IndexedWord> parent : m.enhancedDependency.parentPairs(w)){
+    for(Pair<GrammaticalRelation,IndexedWord> parent : m.collapsedDependency.parentPairs(w)){
       if(parent.first().getShortName().equals("nsubj")
           && dict.reportVerb.contains(parent.second().get(CoreAnnotations.LemmaAnnotation.class))) {
         return true;

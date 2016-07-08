@@ -110,7 +110,7 @@ public abstract class GrammaticalStructure implements Serializable  {
      * </p>
      * <p>
      *   Note: In older code (2014 and before) including extras was a boolean flag. This option is the equivalent of
-     *   the {@code true} flag.
+     *   the <code>true</code> flag.
      * </p>
      */
     MAXIMAL(true, true, true);
@@ -227,7 +227,7 @@ public abstract class GrammaticalStructure implements Serializable  {
   /**
    * Assign sequential integer indices (starting with 1) to all
    * nodes of the subtree rooted at this
-   * {@code Tree}.  The leaves are indexed first,
+   * <code>Tree</code>.  The leaves are indexed first,
    * from left to right.  Then the internal nodes are indexed,
    * using a pre-order tree traversal.
    */
@@ -237,8 +237,8 @@ public abstract class GrammaticalStructure implements Serializable  {
 
   /**
    * Assign sequential integer indices to the leaves of the subtree
-   * rooted at this {@code TreeGraphNode}, beginning with
-   * {@code startIndex}, and traversing the leaves from left
+   * rooted at this <code>TreeGraphNode</code>, beginning with
+   * <code>startIndex</code>, and traversing the leaves from left
    * to right. If node is already indexed, then it uses the existing index.
    *
    * @param startIndex index for this node
@@ -264,8 +264,8 @@ public abstract class GrammaticalStructure implements Serializable  {
 
   /**
    * Assign sequential integer indices to all nodes of the subtree
-   * rooted at this {@code TreeGraphNode}, beginning with
-   * {@code startIndex}, and doing a pre-order tree traversal.
+   * rooted at this <code>TreeGraphNode</code>, beginning with
+   * <code>startIndex</code>, and doing a pre-order tree traversal.
    * Any node which already has an index will not be re-indexed
    * &mdash; this is so that we can index the leaves first, and
    * then index the rest.
@@ -290,10 +290,10 @@ public abstract class GrammaticalStructure implements Serializable  {
    * Store a mapping from an arbitrary integer index to a node in
    * this treegraph.  Normally a client shouldn't need to use this,
    * as the nodes are automatically indexed by the
-   * {@code TreeGraph} constructor.
+   * <code>TreeGraph</code> constructor.
    *
    * @param index the arbitrary integer index
-   * @param node  the {@code TreeGraphNode} to be indexed
+   * @param node  the <code>TreeGraphNode</code> to be indexed
    */
   private void addNodeToIndexMap(int index, TreeGraphNode node) {
     indexMap.put(Integer.valueOf(index), node);
@@ -305,8 +305,8 @@ public abstract class GrammaticalStructure implements Serializable  {
    * specified integer index.
    *
    * @param index the integer index of the node you want
-   * @return the {@code TreeGraphNode} having the specified
-   *         index (or {@code null} if such does not exist)
+   * @return the <code>TreeGraphNode</code> having the specified
+   *         index (or <code>null</code> if such does not exist)
    */
   private TreeGraphNode getNodeByIndex(int index) {
     return indexMap.get(Integer.valueOf(index));
@@ -820,7 +820,6 @@ public abstract class GrammaticalStructure implements Serializable  {
         deps.add(new TypedDependency(dep));
       }
     }
-    //TODO (sebschu): prevent correctDependencies from getting called multiple times
     correctDependencies(deps);
     return deps;
   }
@@ -951,7 +950,7 @@ public abstract class GrammaticalStructure implements Serializable  {
 
 
   /**
-   * Destructively modify the {@code Collection&lt;TypedDependency&gt;} to collapse
+   * Destructively modify the <code>Collection&lt;TypedDependency&gt;</code> to collapse
    * language-dependent transitive dependencies.
    * <p/>
    * Default is no-op; to be over-ridden in subclasses.
@@ -978,7 +977,7 @@ public abstract class GrammaticalStructure implements Serializable  {
   }
 
   /**
-   * Destructively modify the {@code Collection&lt;TypedDependency&gt;} to collapse
+   * Destructively modify the <code>Collection&lt;TypedDependency&gt;</code> to collapse
    * language-dependent transitive dependencies but keeping a tree structure.
    * <p/>
    * Default is no-op; to be over-ridden in subclasses.
@@ -992,7 +991,7 @@ public abstract class GrammaticalStructure implements Serializable  {
 
 
   /**
-   * Destructively modify the {@code TypedDependencyGraph} to correct
+   * Destructively modify the <code>TypedDependencyGraph</code> to correct
    * language-dependent dependencies. (e.g., nsubjpass in a relative clause)
    * <p/>
    * Default is no-op; to be over-ridden in subclasses.

@@ -11,19 +11,18 @@ import java.util.function.Predicate;
 /**
  * Implementation of CollectionValuedMap that appears to store an "original"
  * map and changes to that map. No one currently uses it. See {@link DeltaMap}.
- *
+ * 
  * @author Teg Grenager (grenager@cs.stanford.edu)
- * @version Jan 14, 2004
+ * Date: Jan 14, 2004
+ * Time: 10:40:57 AM
  */
 public class DeltaCollectionValuedMap<K, V> extends CollectionValuedMap<K, V> {
 
   private static final long serialVersionUID = 1L;
-
-  private final CollectionValuedMap<K, V> originalMap;
-  @SuppressWarnings("serial")
-  private final Map<K, Collection<V>> deltaMap;
-
-  private static final Object removedValue = new Object();
+  private CollectionValuedMap<K, V> originalMap;
+  private Map<K, Collection<V>> deltaMap;
+  private static Object removedValue = new Object();
+//  private CollectionFactory<V> cf; //this was just hiding a field in CollectionValuedMap
 
   static class SimpleEntry<K, V> implements Map.Entry<K, V> {
     K key;
@@ -39,17 +38,14 @@ public class DeltaCollectionValuedMap<K, V> extends CollectionValuedMap<K, V> {
       this.value = e.getValue();
     }
 
-    @Override
     public K getKey() {
       return key;
     }
 
-    @Override
     public V getValue() {
       return value;
     }
 
-    @Override
     public V setValue(V value) {
       V oldValue = this.value;
       this.value = value;
@@ -138,7 +134,7 @@ public class DeltaCollectionValuedMap<K, V> extends CollectionValuedMap<K, V> {
   @Override
   public Collection<V> remove(Object key) {
     Collection<V> result = get(key);
-    deltaMap.put(ErasureUtils.uncheckedCast(key), ErasureUtils.uncheckedCast(removedValue));
+    deltaMap.put(ErasureUtils.<K>uncheckedCast(key), ErasureUtils.<Collection<V>>uncheckedCast(removedValue));
     return result;
   }
 
@@ -158,7 +154,6 @@ public class DeltaCollectionValuedMap<K, V> extends CollectionValuedMap<K, V> {
     }
   }
 
-  @SuppressWarnings("SuspiciousMethodCalls")
   @Override
   public boolean containsKey(Object key) {
     // key could be not in original or in deltaMap
@@ -169,7 +164,10 @@ public class DeltaCollectionValuedMap<K, V> extends CollectionValuedMap<K, V> {
     if (value == null) {
       return originalMap.containsKey(key);
     }
-    return value != removedValue;
+    if (value == removedValue) {
+      return false;
+    }
+    return true;
   }
 
   @Override
@@ -186,7 +184,7 @@ public class DeltaCollectionValuedMap<K, V> extends CollectionValuedMap<K, V> {
   public void clear() {
     // iterate over all keys in originalMap and set them to null in deltaMap
     for (K key : originalMap.keySet()) {
-      deltaMap.put(key, ErasureUtils.uncheckedCast(removedValue));
+      deltaMap.put(key, ErasureUtils.<Collection<V>>uncheckedCast(removedValue));
     }
   }
 
@@ -210,18 +208,40 @@ public class DeltaCollectionValuedMap<K, V> extends CollectionValuedMap<K, V> {
   /**
    * This is cheap.
    *
-   * @return A set view of the mappings contained in this map.
+   * @return a set view of the mappings contained in this map.
    */
   @Override
   public Set<Entry<K, Collection<V>>> entrySet() {
     return new AbstractSet<Entry<K, Collection<V>>>() {
       @Override
       public Iterator<Map.Entry<K, Collection<V>>> iterator() {
-        Predicate<Entry<K, Collection<V>>> filter1 = e -> ! deltaMap.containsKey(e.getKey());
+        Predicate<Entry<K, Collection<V>>> filter1 = new Predicate<Entry<K, Collection<V>>>() {
+          private static final long serialVersionUID = -3257173354412718639L;
+
+          // only accepts stuff not overwritten by deltaMap
+          public boolean test(Map.Entry<K, Collection<V>> e) {
+            K key = e.getKey();
+            if (deltaMap.containsKey(key)) {
+              return false;
+            }
+            return true;
+          }
+        };
 
         Iterator<Map.Entry<K, Collection<V>>> iter1 = new FilteredIterator<>(originalMap.entrySet().iterator(), filter1);
 
-        Predicate<Entry<K, Collection<V>>> filter2 = e -> e.getValue() != removedValue;
+        Predicate<Entry<K, Collection<V>>> filter2 = new Predicate<Entry<K, Collection<V>>>() {
+          private static final long serialVersionUID = 1L;
+
+          // only accepts stuff not overwritten by deltaMap
+          public boolean test(Map.Entry<K, Collection<V>> e) {
+            if (e.getValue() == removedValue) {
+              return false;
+            }
+            return true;
+          }
+        };
+
 
         Iterator<Map.Entry<K, Collection<V>>> iter2 = new FilteredIterator<>(deltaMap.entrySet().iterator(), filter2);
 
@@ -231,7 +251,9 @@ public class DeltaCollectionValuedMap<K, V> extends CollectionValuedMap<K, V> {
       @Override
       public int size() {
         int size = 0;
-        for (@SuppressWarnings("unused") Entry<K, Collection<V>> ignored : this) {
+        for (// @SuppressWarnings("unused")  // this makes javac v1.5 barf!!
+             Entry<K, Collection<V>> entry : this) {
+          ErasureUtils.noop(entry);
           size++;
         }
         return size;
@@ -240,9 +262,9 @@ public class DeltaCollectionValuedMap<K, V> extends CollectionValuedMap<K, V> {
   }
 
   public DeltaCollectionValuedMap(CollectionValuedMap<K, V> originalMap) {
-    super(originalMap.mf, originalMap.cf, originalMap.treatCollectionsAsImmutable);
     this.originalMap = originalMap;
+    this.cf = originalMap.cf;
+    this.mf = originalMap.mf;
     this.deltaMap = mf.newMap();
   }
-
 }

@@ -27,13 +27,14 @@ import java.util.zip.GZIPOutputStream;
 
 public class IOUtils  {
 
+
   private static final int SLURP_BUFFER_SIZE = 16384;
 
   public static final String eolChar = System.lineSeparator();  // todo: Inline
   public static final String defaultEncoding = "utf-8";
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels logger = Redwood.channels(IOUtils.class);
+  private static Redwood.RedwoodChannels logger = Redwood.channels(IOUtils.class);
 
   // A class of static methods
   private IOUtils() { }
@@ -1097,7 +1098,6 @@ public class IOUtils  {
 
   /**
    * Returns all the text in the given File as a single String.
-   * If the file's name ends in .gz, it is assumed to be gzipped and is silently uncompressed.
    */
   public static String slurpFile(File file) throws IOException {
     return slurpFile(file, null);
@@ -1105,7 +1105,6 @@ public class IOUtils  {
 
   /**
    * Returns all the text in the given File as a single String.
-   * If the file's name ends in .gz, it is assumed to be gzipped and is silently uncompressed.
    *
    * @param file The file to read from
    * @param encoding The character encoding to assume.  This may be null, and
@@ -1113,7 +1112,7 @@ public class IOUtils  {
    */
   public static String slurpFile(File file, String encoding) throws IOException {
     return IOUtils.slurpReader(IOUtils.encodedInputStreamReader(
-            inputStreamFromFile(file), encoding));
+            new FileInputStream(file), encoding));
   }
 
   /**

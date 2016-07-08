@@ -148,23 +148,6 @@ function annotators() {
   return annotators;
 }
 
-/**
- * Get the input date
- */
-function date() {
-  function f(n) {
-    return n < 10 ? '0' + n : n;
-  }
-  var date = new Date();
-  var M = date.getMonth() + 1;
-  var D = date.getDate();
-  var Y = date.getFullYear();
-  var h = date.getHours();
-  var m = date.getMinutes();
-  var s = date.getSeconds();
-  return "" + Y + "-" + f(M) + "-" + f(D) + "T" + f(h) + ':' + f(m) + ':' + f(s);
-}
-
 // ----------------------------------------------------------------------------
 // RENDER
 // ----------------------------------------------------------------------------
@@ -181,10 +164,7 @@ function render(data) {
    */
   var entityTypesSet = {};
   var entityTypes = [];
-  function addEntityType(name, type, coarseType) {
-    if (typeof coarseType == "undefined") {
-      coarseType = type;
-    }
+  function addEntityType(name, type) {
     // Don't add duplicates
     if (entityTypesSet[type]) return;
     entityTypesSet[type] = true;
@@ -193,7 +173,7 @@ function render(data) {
     if (name == 'POS') {
       color = posColor(type);
     } else if (name == 'NER') {
-      color = nerColor(coarseType);
+      color = nerColor(type);
     } else if (name == 'COREF') {
       color = '#FFE000';
     } else if (name == 'ENTITY') {
@@ -361,15 +341,11 @@ function render(data) {
     if (tokens.length > 0 && typeof tokens[0].ner != 'undefined') {
       for (var i = 0; i < tokens.length; i++) {
         var ner = tokens[i].ner;
-        var normalizedNER = tokens[i].normalizedNER;
-        if (typeof normalizedNER == "undefined") {
-          normalizedNER = ner;
-        }
         if (ner == 'O') continue;
         var j = i;
         while (j < tokens.length - 1 && tokens[j+1].ner == ner) j++;
-        addEntityType('NER', normalizedNER, ner);
-        nerEntities.push(['NER_' + sentI + '_' + i, normalizedNER, [[tokens[i].characterOffsetBegin, tokens[j].characterOffsetEnd]]]);
+        addEntityType('NER', ner);
+        nerEntities.push(['NER_' + sentI + '_' + i, ner, [[tokens[i].characterOffsetBegin, tokens[j].characterOffsetEnd]]]);
         i = j;
       }
     }
@@ -767,9 +743,8 @@ $(document).ready(function() {
     $.ajax({
       type: 'POST',
       url: serverAddress + '?properties=' + encodeURIComponent(
-        '{"annotators": "' + annotators() + '", "date": "' + date() + '"' +
-        ', "coref.md.type": "dep", "coref.mode": "statistical"}'),
-      data: encodeURIComponent(currentQuery), //jQuery does'nt automatically URI encode strings
+        '{"annotators": "' + annotators() + '", "coref.md.type": "dep", "coref.mode": "statistical"}'),
+      data: currentQuery,
       dataType: 'json',
       contentType: "application/x-www-form-urlencoded;charset=UTF-8",
       success: function(data) {
@@ -786,7 +761,7 @@ $(document).ready(function() {
               return; 
             }
             // (make sure the data contains that element)
-            ok = false;
+            ok = false
             if (typeof data[selector] != 'undefined') {
               ok = true;
             } else if (typeof data.sentences != 'undefined' && data.sentences.length > 0) {
@@ -856,7 +831,7 @@ $(document).ready(function() {
     $.ajax({
       type: 'POST',
       url: serverAddress + '/tokensregex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
-      data: encodeURIComponent(currentQuery),
+      data: currentQuery,
       success: function(data) {
         $('.tokensregex_error').remove();  // Clear error messages
         $('<div id="tokensregex" class="pattern_brat"/>').appendTo($('#div_tokensregex'));
@@ -888,7 +863,7 @@ $(document).ready(function() {
     $.ajax({
       type: 'POST',
       url: serverAddress + '/semgrex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
-      data: encodeURIComponent(currentQuery),
+      data: currentQuery,
       success: function(data) {
         $('.semgrex_error').remove();  // Clear error messages
         $('<div id="semgrex" class="pattern_brat"/>').appendTo($('#div_semgrex'));

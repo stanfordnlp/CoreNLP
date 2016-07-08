@@ -1,4 +1,4 @@
-package edu.stanford.nlp.trees;
+package edu.stanford.nlp.trees; 
 import edu.stanford.nlp.trees.ud.EnhancementOptions;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -849,7 +849,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   }
 
   @Override
-  protected void addEnhancements(List<TypedDependency> list, EnhancementOptions options) {
+  public void addEnhancements(List<TypedDependency> list, EnhancementOptions options) {
 
     SemanticGraph sg = new SemanticGraph(list);
 
@@ -1294,7 +1294,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
         newDep = leftChildEdge.getDependent();
       }
       if (newDep != null && ! sg.containsEdge(head, newDep)) {
-        sg.addEdge(head, newDep, REFERENT, Double.NEGATIVE_INFINITY, false);
+        sg.addEdge(head, newDep, REFERENT, Double.NEGATIVE_INFINITY, true);
       }
     }
   }
@@ -1466,7 +1466,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
     int numWords = vertexList.size();
 
     for (int i = 1; i < numWords; i++) {
-      String bigram = vertexList.get(i-1).value().toLowerCase() + '_' + vertexList.get(i).value().toLowerCase();
+      String bigram = vertexList.get(i-1).value().toLowerCase() + "_" + vertexList.get(i).value().toLowerCase();
 
       if (bigrams.get(bigram) == null) {
         bigrams.put(bigram, new HashSet<>());
@@ -1719,10 +1719,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   }
 
 
-  /** A lot of, an assortment of, ... */
-  private static final SemgrexPattern QUANT_MOD_3W_PATTERN = SemgrexPattern.compile("{word:/(?i:lot|assortment|number|couple|bunch|handful|litany|sheaf|slew|dozen|series|variety|multitude|wad|clutch|wave|mountain|array|spate|string|ton|range|plethora|heap|sort|form|kind|type|version|bit|pair|triple|total)/}=w2 >det {word:/(?i:an?)/}=w1 !>amod {} >nmod ({tag:/(NN.*|PRP.*)/}=gov >case {word:/(?i:of)/}=w3) . {}=w3");
+  /* A lot of, an assortment of, ... */
+  public static final SemgrexPattern QUANT_MOD_3W_PATTERN = SemgrexPattern.compile("{word:/(?i:lot|assortment|number|couple|bunch|handful|litany|sheaf|slew|dozen|series|variety|multitude|wad|clutch|wave|mountain|array|spate|string|ton|range|plethora|heap|sort|form|kind|type|version|bit|pair|triple|total)/}=w2 >det {word:/(?i:an?)/}=w1 !>amod {} >nmod ({tag:/(NN.*|PRP.*)/}=gov >case {word:/(?i:of)/}=w3) . {}=w3");
 
-  private static final SemgrexPattern[] QUANT_MOD_2W_PATTERNS = {
+  public static final SemgrexPattern[] QUANT_MOD_2W_PATTERNS = {
       /* Lots of, dozens of, heaps of ... */
       SemgrexPattern.compile("{word:/(?i:lots|many|several|plenty|tons|dozens|multitudes|mountains|loads|pairs|tens|hundreds|thousands|millions|billions|trillions|[0-9]+s)/}=w1 >nmod ({tag:/(NN.*|PRP.*)/}=gov >case {word:/(?i:of)/}=w2) . {}=w2"),
 
@@ -1731,7 +1731,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   };
 
 
-  private static void demoteQuantificationalModifiers(SemanticGraph sg) {
+  private void demoteQuantificationalModifiers(SemanticGraph sg) {
     SemanticGraph sgCopy = sg.makeSoftCopy();
     SemgrexMatcher matcher = QUANT_MOD_3W_PATTERN.matcher(sgCopy);
 
@@ -1773,12 +1773,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
   }
 
-  private static void demoteQmodMWEHelper(SemanticGraph sg, List<IndexedWord> otherDeps, IndexedWord gov, IndexedWord oldHead) {
+  private void demoteQmodMWEHelper(SemanticGraph sg, List<IndexedWord> otherDeps, IndexedWord gov, IndexedWord oldHead) {
     createMultiWordExpression(sg, gov, QMOD, otherDeps.toArray(new IndexedWord[otherDeps.size()]));
   }
 
 
-  private static void demoteQmodParentHelper(SemanticGraph sg, IndexedWord gov, IndexedWord oldHead) {
+  private void demoteQmodParentHelper(SemanticGraph sg, IndexedWord gov, IndexedWord oldHead) {
     if (!sg.getRoots().contains(oldHead)) {
       IndexedWord parent = sg.getParent(oldHead);
       if (parent == null) {

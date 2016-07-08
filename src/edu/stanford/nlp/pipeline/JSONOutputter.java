@@ -135,42 +135,6 @@ public class JSONOutputter extends AnnotationOutputter {
             }));
           }
 
-          // (entity mentions)
-          if (sentence.get(CoreAnnotations.MentionsAnnotation.class) != null) {
-            Integer sentTokenBegin = sentence.get(CoreAnnotations.TokenBeginAnnotation.class);
-            l2.set("entitymentions", sentence.get(CoreAnnotations.MentionsAnnotation.class).stream().map(m -> (Consumer<Writer>) (Writer l3) -> {
-              Integer tokenBegin = m.get(CoreAnnotations.TokenBeginAnnotation.class);
-              Integer tokenEnd = m.get(CoreAnnotations.TokenEndAnnotation.class);
-              l3.set("docTokenBegin", tokenBegin);
-              l3.set("docTokenEnd", tokenEnd);
-              if (tokenBegin != null && sentTokenBegin != null) {
-                l3.set("tokenBegin", tokenBegin - sentTokenBegin);
-              }
-              if (tokenEnd != null && sentTokenBegin != null) {
-                l3.set("tokenEnd", tokenEnd - sentTokenBegin);
-              }
-              l3.set("word", m.get(CoreAnnotations.TextAnnotation.class));
-              //l3.set("originalText", m.get(CoreAnnotations.OriginalTextAnnotation.class));
-              //l3.set("lemma", m.get(CoreAnnotations.LemmaAnnotation.class));
-              l3.set("characterOffsetBegin", m.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
-              l3.set("characterOffsetEnd", m.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
-              //l3.set("pos", m.get(CoreAnnotations.PartOfSpeechAnnotation.class));
-              l3.set("ner", m.get(CoreAnnotations.NamedEntityTagAnnotation.class));
-              l3.set("normalizedNER", m.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class));
-              l3.set("entitylink", m.get(CoreAnnotations.WikipediaEntityAnnotation.class));
-              // Timex
-              Timex time = m.get(TimeAnnotations.TimexAnnotation.class);
-              if (time != null) {
-                l3.set("timex", (Consumer<Writer>) l4 -> {
-                  l4.set("tid", time.tid());
-                  l4.set("type", time.timexType());
-                  l4.set("value", time.value());
-                  l4.set("altValue", time.altVal());
-                });
-              }
-            }));
-          }
-
           // (add tokens)
           if (sentence.get(CoreAnnotations.TokensAnnotation.class) != null) {
             l2.set("tokens", sentence.get(CoreAnnotations.TokensAnnotation.class).stream().map(token -> (Consumer<Writer>) (Writer l3) -> {

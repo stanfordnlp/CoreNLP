@@ -20,7 +20,6 @@ public class UniversalEnglishGrammaticalStructureFactory implements GrammaticalS
     this.hf = hf;
   }
 
-  @Override
   public UniversalEnglishGrammaticalStructure newGrammaticalStructure(Tree t) {
     if (puncFilter == null && hf == null) {
       return new UniversalEnglishGrammaticalStructure(t);
@@ -30,5 +29,5 @@ public class UniversalEnglishGrammaticalStructureFactory implements GrammaticalS
       return new UniversalEnglishGrammaticalStructure(t, puncFilter, hf);
     }
   }
-
+  
 }

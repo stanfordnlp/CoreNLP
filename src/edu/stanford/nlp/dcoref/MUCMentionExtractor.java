@@ -272,7 +272,7 @@ public class MUCMentionExtractor extends MentionExtractor  {
       List<CoreLabel> unannotatedSent = allWords.get(i);
       List<Mention> mentionInSent = allGoldMentions.get(i);
       for (Mention m : mentionInSent){
-        m.dependency = allSentences.get(i).get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+        m.dependency = allSentences.get(i).get(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class);
       }
       if(annotatedSent.size() != unannotatedSent.size()){
         throw new IllegalStateException("annotatedSent != unannotatedSent");

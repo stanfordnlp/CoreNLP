@@ -1246,7 +1246,7 @@ public class CoreAnnotations {
     }
   }
 
-  /*
+  /**
    * Used in parser.discrim
    */
 

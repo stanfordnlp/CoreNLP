@@ -79,9 +79,9 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
   protected static void extractNamedEntityMentions(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     SemanticGraph basicDependency = s.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
-    SemanticGraph enhancedDependency = s.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
-    if (enhancedDependency == null) {
-      enhancedDependency = s.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+    SemanticGraph collapsedDependency = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+    if (collapsedDependency == null) {
+      collapsedDependency = s.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
     }
     String preNE = "O";
     int beginIndex = -1;
@@ -99,7 +99,7 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
           // attached to the previous NER by the earlier heuristic
           if(beginIndex < endIndex && !mentionSpanSet.contains(mSpan)) {
             int dummyMentionId = -1;
-            Mention m = new Mention(dummyMentionId, beginIndex, endIndex, sent, basicDependency, enhancedDependency, new ArrayList<>(sent.subList(beginIndex, endIndex)));
+            Mention m = new Mention(dummyMentionId, beginIndex, endIndex, sent, basicDependency, collapsedDependency, new ArrayList<>(sent.subList(beginIndex, endIndex)));
             mentions.add(m);
             mentionSpanSet.add(mSpan);
             namedEntitySpanSet.add(mSpan);
@@ -114,7 +114,7 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
       IntPair mSpan = new IntPair(beginIndex, sent.size());
       if(!mentionSpanSet.contains(mSpan)) {
         int dummyMentionId = -1;
-        Mention m = new Mention(dummyMentionId, beginIndex, sent.size(), sent, basicDependency, enhancedDependency, new ArrayList<>(sent.subList(beginIndex, sent.size())));
+        Mention m = new Mention(dummyMentionId, beginIndex, sent.size(), sent, basicDependency, collapsedDependency, new ArrayList<>(sent.subList(beginIndex, sent.size())));
         mentions.add(m);
         mentionSpanSet.add(mSpan);
         namedEntitySpanSet.add(mSpan);
@@ -164,9 +164,9 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
     Tree tree = s.get(TreeCoreAnnotations.TreeAnnotation.class);
     tree.indexLeaves();
     SemanticGraph basicDependency = s.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
-    SemanticGraph enhancedDependency = s.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
-    if (enhancedDependency == null) {
-      enhancedDependency = s.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+    SemanticGraph collapsedDependency = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+    if (collapsedDependency == null) {
+      collapsedDependency = s.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
     }
 
     TregexPattern tgrepPattern = npOrPrpMentionPattern;
@@ -181,7 +181,7 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
 //      if(!mentionSpanSet.contains(mSpan) && (!insideNE(mSpan, namedEntitySpanSet)) ) {
       if(!mentionSpanSet.contains(mSpan) && (!insideNE(mSpan, namedEntitySpanSet) || t.value().startsWith("PRP")) ) {
         int dummyMentionId = -1;
-        Mention m = new Mention(dummyMentionId, beginIdx, endIdx, sent, basicDependency, enhancedDependency, new ArrayList<>(sent.subList(beginIdx, endIdx)), t);
+        Mention m = new Mention(dummyMentionId, beginIdx, endIdx, sent, basicDependency, collapsedDependency, new ArrayList<>(sent.subList(beginIdx, endIdx)), t);
         mentions.add(m);
         mentionSpanSet.add(mSpan);
 

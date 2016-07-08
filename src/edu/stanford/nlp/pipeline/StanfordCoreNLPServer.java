@@ -156,7 +156,6 @@ public class StanfordCoreNLPServer implements Runnable {
    */
   private Annotation getDocument(Properties props, HttpExchange httpExchange) throws IOException, ClassNotFoundException {
     String inputFormat = props.getProperty("inputFormat", "text");
-    String date = props.getProperty("date");
     switch (inputFormat) {
       case "text":
         // The default encoding by the HTTP standard is ISO-8859-1, but most
@@ -183,12 +182,7 @@ public class StanfordCoreNLPServer implements Runnable {
         text = URLDecoder.decode(text, encoding).trim();
         // TODO(chaganty): URLdecode string.
         // Read the annotation
-        Annotation annotation = new Annotation(text);
-        // Set the date (if provided)
-        if (date != null) {
-          annotation.set(CoreAnnotations.DocDateAnnotation.class, date);
-        }
-        return annotation;
+        return new Annotation(text);
       case "serialized":
         String inputSerializerName = props.getProperty("inputSerializer", ProtobufAnnotationSerializer.class.getName());
         AnnotationSerializer serializer = MetaClass.create(inputSerializerName).createInstance();
@@ -568,6 +562,14 @@ public class StanfordCoreNLPServer implements Runnable {
           props.remove("coref.md.type");
         }
       }
+      if (!props.containsKey("parse.model") && IOUtils.existsInClasspathOrFileSystem("edu/stanford/nlp/models/srparser/englishSR.ser.gz")) {
+        // Set the default parser to be the shift-reduce parser
+        props.setProperty("parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz");
+      }
+      if (!props.containsKey("entitylink.wikidict")) {
+        // Set the default Wikidict location
+        props.setProperty("entitylink.wikidict", "wikidict.tab.gz");
+      }
       // (add new properties on top of the default properties)
       urlProperties.entrySet()
           .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
@@ -772,12 +774,12 @@ public class StanfordCoreNLPServer implements Runnable {
             if (filter) {
               // Case: just filter sentences
               docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence ->
-                      regex.matcher(sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class)).matches()
+                      regex.matcher(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class)).matches()
               ).collect(Collectors.toList()));
             } else {
               // Case: find matches
               docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer sentWriter) -> {
-                SemgrexMatcher matcher = regex.matcher(sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class));
+                SemgrexMatcher matcher = regex.matcher(sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class));
                 int i = 0;
                 while (matcher.find()) {
                   sentWriter.set(Integer.toString(i), (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer matchWriter) -> {
@@ -929,6 +931,14 @@ public class StanfordCoreNLPServer implements Runnable {
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
+
+    // Pre-load the models
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize,ssplit,pos,parse,depparse,lemma,ner,natlog,openie,mention,coref,entitylink,kbp");
+    props.setProperty("entitylink.wikidict", "wikidict.tab.gz");
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    props.setProperty("parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz");
+    pipeline = new StanfordCoreNLP(props);
 
     // Run the server
     log("Starting server...");

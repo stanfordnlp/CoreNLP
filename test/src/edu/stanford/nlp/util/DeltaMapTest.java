@@ -10,11 +10,10 @@ import java.util.Random;
  * @author Sebastian Riedel
  */
 public class DeltaMapTest extends TestCase {
-
-    private Map<Integer,Integer> originalMap;
-    private Map<Integer,Integer> originalCopyMap;
-    private Map<Integer,Integer> deltaCopyMap;
-    private Map<Integer,Integer> deltaMap;
+    protected Map<Integer,Integer> originalMap;
+    protected Map<Integer,Integer> originalCopyMap;
+    protected Map<Integer,Integer> deltaCopyMap;
+    protected Map<Integer,Integer> deltaMap;
     private static final int BOUND3 = 100;
     private static final int BOUND2 = 90;
     private static final int BOUND4 = 110;
@@ -23,13 +22,13 @@ public class DeltaMapTest extends TestCase {
     @Override
     @SuppressWarnings("unchecked")
     protected void setUp(){
-        originalMap = new HashMap<>();
+        originalMap = new HashMap<Integer,Integer>();
         Random r = new Random();
         for (int i = 0; i < BOUND3; i++) {
           originalMap.put(i, r.nextInt(BOUND3));
         }
-        originalCopyMap = new HashMap<>(originalMap);
-        deltaCopyMap = new HashMap<>(originalMap);
+        originalCopyMap = new HashMap<Integer,Integer>(originalMap);
+        deltaCopyMap = new HashMap<Integer,Integer>(originalMap);
         deltaMap = new DeltaMap(originalMap);
         // now make a lot of changes to deltaMap;
         // add and change some stuff
@@ -54,12 +53,12 @@ public class DeltaMapTest extends TestCase {
 
     }
 
-    public void testOriginalPreserved(){
+    public void testOriginalPreserverd(){
         assertEquals(originalCopyMap,originalMap);
     }
-
     public void testDeltaAccurate(){
         assertEquals(deltaCopyMap, deltaMap);
     }
 
+    
 }

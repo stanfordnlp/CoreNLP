@@ -3,35 +3,42 @@ package edu.stanford.nlp.wordseg;
 import java.util.*;
 import java.io.*;
 
+
+import edu.stanford.nlp.util.logging.Redwood;
+
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.logging.Redwood;
-
 
 /**
- * Affixation information.
- *
+ * affixation information
  * @author Huihsin Tseng
  * @author Pichuan Chang
  */
-public class AffixDictionary {
 
-  private static final Redwood.RedwoodChannels logger = Redwood.channels(AffixDictionary.class);
+ 
+  @SuppressWarnings("unused")
+public class affDict {
+  private String affixFilename;
 
+  private static Redwood.RedwoodChannels logger = Redwood.channels(affDict.class);
+  
   //public Set ctbIns, asbcIns, hkIns, pkIns, msrIns;
   public Set<String> ins;
 
-  public AffixDictionary(String affixFilename)  {
-    ins = readDict(affixFilename);
+  public affDict(String affixFilename)  {
+    ins=readDict(affixFilename);
   }
+  
+  Set<String> getInDict() {return ins;}
 
-  private Set<String> getInDict() {return ins;}
 
-
-  private static Set<String> readDict(String filename)  {
+  
+  private Set<String> readDict(String filename)  {
     Set<String> a = Generics.newHashSet();
-
+   
+    //logger.info("XM:::readDict(filename: " + filename + ")");
+    logger.info("Loading affix dictionary from " + filename);
     try {
       /*
       if(filename.endsWith("in.as") ||filename.endsWith("in.city") ){
@@ -39,19 +46,20 @@ public class AffixDictionary {
       }else{ aDetectorReader = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "GB18030"));
       }
       */
-      BufferedReader aDetectorReader = IOUtils.readerFromString(filename, "UTF-8");
+      InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(filename);
+      BufferedReader aDetectorReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 
+      String aDetectorLine;
+   
       //logger.debug("DEBUG: in affDict readDict");
-      for (String aDetectorLine; (aDetectorLine = aDetectorReader.readLine()) != null; ) {
+      while ((aDetectorLine = aDetectorReader.readLine()) != null) {
         //logger.debug("DEBUG: affDict: "+filename+" "+aDetectorLine);
         a.add(aDetectorLine);
       }
-      aDetectorReader.close();
+      is.close();
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
-    //logger.info("XM:::readDict(filename: " + filename + ")");
-    logger.info("Loading affix dictionary from " + filename + " [done].");
     return a;
   }
 
@@ -61,5 +69,4 @@ public class AffixDictionary {
       return "1";
     return "0";
   }
-
 }//end of class
