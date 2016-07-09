@@ -584,10 +584,6 @@ public class StanfordCoreNLPServer implements Runnable {
         // Strip entailed sentences from OpenIE model by default
         props.setProperty("openie.strip_entailments", "true");
       }
-      if (!props.containsKey("entitylink.wikidict")) {
-        // Set the default Wikidict location
-        props.setProperty("entitylink.wikidict", "wikidict.tab.gz");
-      }
       // (add new properties on top of the default properties)
       urlProperties.entrySet()
           .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
