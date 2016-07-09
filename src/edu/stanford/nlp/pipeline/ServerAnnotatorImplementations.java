@@ -29,6 +29,18 @@ public class ServerAnnotatorImplementations extends AnnotatorImplementations {
    * The port to hit on the server
    */
   public final int port;
+  /**
+   * The key to use as the username to authenticate with the server, or null.
+   */
+  public final String key;
+  /**
+   * The secret key to use as the username to authenticate with the server, or null.
+   */
+  public final String secret;
+  /**
+   * If false, run many common annotations when we hit the server the first time.
+   */
+  public final boolean lazy;
 
 
   /**
@@ -37,21 +49,38 @@ public class ServerAnnotatorImplementations extends AnnotatorImplementations {
    * @param host The hostname of the server.
    * @param port The port of the server.
    */
-  public ServerAnnotatorImplementations(String host, int port) {
+  public ServerAnnotatorImplementations(String host, int port,
+                                        String key, String secret, boolean lazy) {
     this.host = host;
     this.port = port;
+    this.key = key;
+    this.secret = secret;
+    this.lazy = lazy;
   }
+
+  /**
+   * Create a new annotator implementation backed by {@link StanfordCoreNLPServer}.
+   *
+   * @param host The hostname of the server.
+   * @param port The port of the server.
+   */
+  public ServerAnnotatorImplementations(String host, int port) {
+    this(host, port, null, null, false);
+  }
+
 
   /**
    *
    */
-  private static class SingletonAnnotator implements Annotator {
+  private class SingletonAnnotator implements Annotator {
 
     private final StanfordCoreNLPClient client;
+    private final String annotator;
 
     public SingletonAnnotator(String host, int port,
                               Properties properties,
                               String annotator) {
+      this.annotator = annotator;
       Properties forClient = new Properties();
       for (Object o : properties.keySet()) {
         String key = o.toString();
@@ -59,13 +88,22 @@ public class ServerAnnotatorImplementations extends AnnotatorImplementations {
         forClient.setProperty(key, value);
         forClient.setProperty(annotator + '.' + key, value);
       }
-      forClient.setProperty("annotators", annotator);
-      forClient.setProperty("enforceRequirements", "false");
-      this.client = new StanfordCoreNLPClient(forClient, host, port);
+      if (lazy) {
+        forClient.setProperty("annotators", annotator);
+        forClient.setProperty("enforceRequirements", "false");
+      } else {
+        String annotators = "tokenize,ssplit,pos,lemma,ner,parse,mention,coref,natlog,openie,sentiment";
+        if (!annotators.contains(annotator)) {
+          annotators += "," + annotator;
+        }
+        forClient.setProperty("annotators", annotators);
+      }
+      this.client = new StanfordCoreNLPClient(forClient, host, port, key, secret);
     }
 
     @Override
     public void annotate(Annotation annotation) {
+      System.err.println("CALLING SERVER: " + annotator);
       client.annotate(annotation);
     }
 
