@@ -58,7 +58,7 @@ public class StanfordCoreNLPServer implements Runnable {
   @ArgumentParser.Option(name="lazy", gloss="If true, don't precompute the models on loading the server")
   protected boolean lazy = true;
   @ArgumentParser.Option(name="annotators", gloss="The default annotators to run over a given sentence.")
-  protected String defaultAnnotators = "tokenize, ssplit, pos, lemma, ner, depparse, coref, natlog, openie";
+  protected static String defaultAnnotators = "tokenize, ssplit, pos, lemma, ner, depparse, coref, natlog, openie";
 
   protected final String shutdownKey;
 
@@ -104,7 +104,9 @@ public class StanfordCoreNLPServer implements Runnable {
             "coref.md.type", "dep",
             "inputFormat", "text",
             "outputFormat", "json",
-            "prettyPrint", "false");
+            "prettyPrint", "false",
+            "parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz",
+            "openie.strip_entailments", "true");
 
     // Generate and write a shutdown key
     String tmpDir = System.getProperty("java.io.tmpdir");
@@ -576,14 +578,6 @@ public class StanfordCoreNLPServer implements Runnable {
           props.remove("coref.md.type");
         }
       }
-      if (!props.containsKey("parse.model") && IOUtils.existsInClasspathOrFileSystem("edu/stanford/nlp/models/srparser/englishSR.ser.gz")) {
-        // Set the default parser to be the shift-reduce parser
-        props.setProperty("parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz");
-      }
-      if (!props.containsKey("openie.strip_entailments")) {
-        // Strip entailed sentences from OpenIE model by default
-        props.setProperty("openie.strip_entailments", "true");
-      }
       // (add new properties on top of the default properties)
       urlProperties.entrySet()
           .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
@@ -956,6 +950,7 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown if we could not start / run the server.
    */
   public static void main(String[] args) throws IOException {
+    ArgumentParser.fillOptions(StanfordCoreNLPServer.class, args);
     StanfordCoreNLPServer server = new StanfordCoreNLPServer();
     ArgumentParser.fillOptions(server, args);
 
