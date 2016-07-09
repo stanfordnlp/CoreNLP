@@ -88,12 +88,7 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams  {
 
   @Override
   public HeadFinder typedDependencyHeadFinder() {
-    if (this.generateOriginalDependencies()) {
-      return new ChineseSemanticHeadFinder();
-    } else {
-      return new UniversalChineseSemanticHeadFinder();
-    }
-
+    return new ChineseSemanticHeadFinder();
   }
 
   /**
@@ -1228,13 +1223,8 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams  {
     readGrammaticalStructureFromFile(String filename)
   {
     try {
-      if (this.generateOriginalDependencies()) {
-        return ChineseGrammaticalStructure.
-            readCoNLLXGrammaticalStructureCollection(filename);
-      } else {
-        return UniversalChineseGrammaticalStructure.
-            readCoNLLXGrammaticalStructureCollection(filename);
-      }
+      return ChineseGrammaticalStructure.
+              readCoNLLXGrammaticalStructureCollection(filename);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
@@ -1244,11 +1234,7 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams  {
   public GrammaticalStructure getGrammaticalStructure(Tree t,
                                                       Predicate<String> filter,
                                                       HeadFinder hf) {
-    if (this.generateOriginalDependencies()) {
-      return new ChineseGrammaticalStructure(t, filter, hf);
-    } else {
-      return new UniversalChineseGrammaticalStructure(t, filter, hf);
-    }
+    return new ChineseGrammaticalStructure(t, filter, hf);
   }
 
   @Override

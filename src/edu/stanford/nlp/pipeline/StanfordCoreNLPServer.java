@@ -57,6 +57,8 @@ public class StanfordCoreNLPServer implements Runnable {
   protected String password = null;
   @ArgumentParser.Option(name="lazy", gloss="If true, don't precompute the models on loading the server")
   protected boolean lazy = true;
+  @ArgumentParser.Option(name="annotators", gloss="The default annotators to run over a given sentence.")
+  protected String defaultAnnotators = "tokenize, ssplit, pos, lemma, ner, depparse, coref, natlog, openie";
 
   protected final String shutdownKey;
 
@@ -98,7 +100,7 @@ public class StanfordCoreNLPServer implements Runnable {
    */
   public StanfordCoreNLPServer() throws IOException {
     defaultProps = PropertiesUtils.asProperties(
-            "annotators", "tokenize, ssplit, pos, lemma, ner, depparse, coref, natlog, openie",
+            "annotators", defaultAnnotators,
             "coref.md.type", "dep",
             "inputFormat", "text",
             "outputFormat", "json",
@@ -968,7 +970,7 @@ public class StanfordCoreNLPServer implements Runnable {
     // Pre-load the models
     if (!server.lazy) {
       Properties props = new Properties();
-      props.setProperty("annotators", "tokenize,ssplit,pos,parse,depparse,lemma,ner,natlog,openie,mention,coref,entitylink,kbp");
+      props.setProperty("annotators", "tokenize,ssplit,pos,parse,depparse,lemma,ner,natlog,openie,mention,coref,entitylink,kbp,sentiment");
       try {
         props.setProperty("entitylink.wikidict", "wikidict.tab.gz");
         StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
