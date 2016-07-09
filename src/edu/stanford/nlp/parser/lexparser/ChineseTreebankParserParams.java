@@ -1256,6 +1256,12 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams  {
     return true;
   }
 
+  @Override
+  public boolean generateOriginalDependencies() {
+    //TODO[sebschu]: delete this method once Chinese UD becomes the default.
+    return !generateOriginalDependencies;
+  }
+
   /**
    * For testing: loads a treebank and prints the trees.
    */

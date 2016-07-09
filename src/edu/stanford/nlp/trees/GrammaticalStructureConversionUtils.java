@@ -452,14 +452,16 @@ public class GrammaticalStructureConversionUtils {
    * and add a clause in getTokenizerType to identify it.
    */
   public enum ConverterOptions {
+    //TODO[sebschu]: the "stanfordDependencies" parameter is flipped for Chinese at the moment.
+    //  Update once UD becomes the default representation for Chinese.
     UniversalEnglish("en", new NPTmpRetainingTreeNormalizer(0, false, 1, false),
         "edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams", false, true),
     UniversalChinese("zh", new CTBErrorCorrectingTreeNormalizer(false, false, false, false),
-        "edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams", false, false),
+        "edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams", true, false),
     English("en-sd", new NPTmpRetainingTreeNormalizer(0, false, 1, false),
         "edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams", true, true),
     Chinese("zh-sd", new CTBErrorCorrectingTreeNormalizer(false, false, false, false),
-        "edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams", true, false);
+        "edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams", false, false);
 
     public final String abbreviation;
     public final TreeNormalizer treeNormalizer;
@@ -616,9 +618,8 @@ public class GrammaticalStructureConversionUtils {
     // instead of ever loading it from this way
     String tLPP = props.getProperty("tLPP", opts.tlPPClassName);
     TreebankLangParserParams params = ReflectionLoading.loadByReflection(tLPP);
-    if (generateOriginalDependencies) {
-      params.setGenerateOriginalDependencies(true);
-    }
+    params.setGenerateOriginalDependencies(generateOriginalDependencies);
+
     if (makeCopulaHead) {
       // TODO: generalize and allow for more options
       String[] options = { "-makeCopulaHead" };
@@ -688,9 +689,7 @@ public class GrammaticalStructureConversionUtils {
       try {
         Method method = lp.getClass().getMethod("getTLPParams");
         params = (TreebankLangParserParams) method.invoke(lp);
-        if (generateOriginalDependencies) {
-          params.setGenerateOriginalDependencies(true);
-        }
+        params.setGenerateOriginalDependencies(generateOriginalDependencies);
       } catch (Exception cnfe) {
         throw new RuntimeException(cnfe);
       }
