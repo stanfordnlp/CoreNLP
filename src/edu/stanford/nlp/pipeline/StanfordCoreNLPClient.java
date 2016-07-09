@@ -305,6 +305,18 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     this(properties, host, port, 1, apiKey, apiSecret);
   }
 
+
+  /**
+   * Run on a single backend, with authentication
+   *
+   * @see StanfordCoreNLPClient (Properties, List)
+   */
+  @SuppressWarnings("unused")
+  public StanfordCoreNLPClient(Properties properties, String host,
+                               String apiKey, String apiSecret) {
+    this(properties, host, host.startsWith("http://") ? 80 : 443, 1, apiKey, apiSecret);
+  }
+
   /**
    * Run on a single backend, but with k threads on each backend.
    *

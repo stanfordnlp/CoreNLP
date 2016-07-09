@@ -729,7 +729,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     // flag if this Mention should get basicDependency, collapsedDependency, and contextParseTree or not
     builder.setHasBasicDependency((mention.basicDependency != null));
-    builder.setHasEnhancedDepenedncy((mention.enhancedDependency != null));
+    builder.setHasCollapsedDependency((mention.enhancedDependency != null));
     builder.setHasContextParseTree((mention.contextParseTree != null));
 
     // handle the sets of Mentions, just store mentionID
@@ -1384,8 +1384,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         if (protoMention.getHasBasicDependency()) {
           mentionToUpdate.basicDependency = map.get(BasicDependenciesAnnotation.class);
         }
-        if (protoMention.getHasEnhancedDepenedncy()) {
-          mentionToUpdate.enhancedDependency = map.get(EnhancedDependenciesAnnotation.class);
+        if (protoMention.getHasCollapsedDependency()) {
+          mentionToUpdate.enhancedDependency = map.get(CollapsedDependenciesAnnotation.class);
         }
         if (protoMention.getHasContextParseTree()) {
           mentionToUpdate.contextParseTree = map.get(TreeAnnotation.class);
