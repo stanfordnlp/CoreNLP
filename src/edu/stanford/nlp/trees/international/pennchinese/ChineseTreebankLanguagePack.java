@@ -298,17 +298,29 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   @Override
   public GrammaticalStructureFactory grammaticalStructureFactory() {
-    return new ChineseGrammaticalStructureFactory();
+    if (this.generateOriginalDependencies()) {
+      return new ChineseGrammaticalStructureFactory();
+    } else {
+      return new UniversalChineseGrammaticalStructureFactory();
+    }
   }
 
   @Override
   public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilt) {
-    return new ChineseGrammaticalStructureFactory(puncFilt);
+    if (this.generateOriginalDependencies()) {
+      return new ChineseGrammaticalStructureFactory(puncFilt);
+    } else {
+      return new UniversalChineseGrammaticalStructureFactory(puncFilt);
+    }
   }
 
   @Override
   public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilt, HeadFinder hf) {
-    return new ChineseGrammaticalStructureFactory(puncFilt, hf);
+    if (this.generateOriginalDependencies()) {
+      return new ChineseGrammaticalStructureFactory(puncFilt, hf);
+    } else {
+      return new UniversalChineseGrammaticalStructureFactory(puncFilt, hf);
+    }
   }
 
   @Override
@@ -331,15 +343,11 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
   /** {@inheritDoc} */
   @Override
   public HeadFinder typedDependencyHeadFinder() {
-    return new ChineseSemanticHeadFinder(this);
-  }
- 
-  /** Chinese does not support Universal Dependencies yet,
-   *  so always return true.
-   */
-  @Override
-  public boolean generateOriginalDependencies() {
-    return true;
+    if (this.generateOriginalDependencies()) {
+      return new ChineseSemanticHeadFinder(this);
+    } else {
+      return new UniversalChineseSemanticHeadFinder(this);
+    }
   }
 
 }

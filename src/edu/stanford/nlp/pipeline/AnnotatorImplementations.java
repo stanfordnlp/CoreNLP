@@ -196,8 +196,11 @@ public class AnnotatorImplementations  {
   /**
    * Infer the original casing of tokens
    */
-  public Annotator trueCase(Properties properties) {
-    return new TrueCaseAnnotator(properties);
+  public Annotator trueCase(Properties properties, String modelLoc,
+                               String classBias,
+                               String mixedCaseFileName,
+                               boolean verbose) {
+    return new TrueCaseAnnotator(modelLoc, classBias, mixedCaseFileName, verbose);
   }
 
   /**
