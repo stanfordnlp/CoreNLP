@@ -349,6 +349,40 @@ public class Document {
 
 
   /**
+   * Use the CoreNLP Server ({@link StanfordCoreNLPServer}) for the
+   * heavyweight backend annotation job, authenticating with the given
+   * credentials.
+   *
+   * @param host The hostname of the server.
+   * @param port The port the server is running on.
+   * @param apiKey The api key to use as the username for authentication
+   * @param apiSecret The api secrete to use as the password for authentication
+   * @param lazy Only run the annotations that are required at this time. If this is
+   *             false, we will also run a bunch of standard annotations, to cut down on
+   *             expected number of round-trips.
+   */
+  public static void useServer(String host, int port,
+                               String apiKey, String apiSecret,
+                               boolean lazy) {
+    backend = new ServerAnnotatorImplementations(host, port, apiKey, apiSecret, lazy);
+  }
+
+
+  /** @see Document#useServer(String, int, String, String, boolean) */
+  public static void useServer(String host,
+                               String apiKey, String apiSecret,
+                               boolean lazy) {
+    useServer(host, host.startsWith("http://") ? 80 : 443, apiKey, apiSecret, lazy);
+  }
+
+  /** @see Document#useServer(String, int, String, String, boolean) */
+  public static void useServer(String host,
+                               String apiKey, String apiSecret) {
+    useServer(host, host.startsWith("http://") ? 80 : 443, apiKey, apiSecret, false);
+  }
+
+
+  /**
    * Create a new document from the passed in text and the given properties.
    * @param text The text of the document.
    */
