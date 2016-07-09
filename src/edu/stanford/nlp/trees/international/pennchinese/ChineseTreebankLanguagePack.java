@@ -346,14 +346,8 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
     if (this.generateOriginalDependencies()) {
       return new ChineseSemanticHeadFinder(this);
     } else {
-      return new UniversalChineseSemanticHeadFinder();
+      return new UniversalChineseSemanticHeadFinder(this);
     }
-  }
-
-  @Override
-  public boolean generateOriginalDependencies() {
-    //TODO[sebschu]: delete this method once Chinese UD becomes the default.
-    return !generateOriginalDependencies;
   }
 
 }

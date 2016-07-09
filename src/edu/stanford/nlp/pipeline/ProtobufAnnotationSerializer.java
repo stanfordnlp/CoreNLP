@@ -158,7 +158,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * This is guaranteed to either be a lossless compression, or throw an exception at
    * serialization time.
    */
-  public ProtobufAnnotationSerializer() { this(false); }
+  public ProtobufAnnotationSerializer() { this(true); }
 
   /**
    * Create a new Annotation serializer outputting to a protocol buffer format.
@@ -268,6 +268,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Remove items which were never supposed to be there in the first place
     keysToSerialize.remove(ForcedSentenceUntilEndAnnotation.class);
     keysToSerialize.remove(ForcedSentenceEndAnnotation.class);
+    keysToSerialize.remove(HeadWordLabelAnnotation.class);
+    keysToSerialize.remove(HeadTagLabelAnnotation.class);
     // Required fields
     builder.setWord(coreLabel.word());
     // Optional fields
@@ -319,7 +321,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(GenderAnnotation.class)) { builder.setGender(getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class)); }
     if (keySet.contains(TrueCaseAnnotation.class)) { builder.setTrueCase(getAndRegister(coreLabel, keysToSerialize, TrueCaseAnnotation.class)); }
     if (keySet.contains(TrueCaseTextAnnotation.class)) { builder.setTrueCaseText(getAndRegister(coreLabel, keysToSerialize, TrueCaseTextAnnotation.class)); }
-    // TODO(gabor) serialize {@link HeadWordLabelAnnotation}
     // Return
     return builder;
   }

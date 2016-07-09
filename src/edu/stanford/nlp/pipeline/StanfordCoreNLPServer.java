@@ -580,6 +580,10 @@ public class StanfordCoreNLPServer implements Runnable {
         // Set the default parser to be the shift-reduce parser
         props.setProperty("parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz");
       }
+      if (!props.containsKey("openie.strip_entailments")) {
+        // Strip entailed sentences from OpenIE model by default
+        props.setProperty("openie.strip_entailments", "true");
+      }
       if (!props.containsKey("entitylink.wikidict")) {
         // Set the default Wikidict location
         props.setProperty("entitylink.wikidict", "wikidict.tab.gz");
