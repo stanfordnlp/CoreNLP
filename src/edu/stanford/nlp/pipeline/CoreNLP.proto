@@ -130,7 +130,6 @@ message Token {
   optional string conllUMisc        = 35;
   optional MapIntString conllUSecondaryDeps = 36;
   optional string   wikipediaEntity = 37;
-  optional string   headWordLabel   = 38;
 
 
   // Fields set by other annotators in CoreNLP

@@ -158,7 +158,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * This is guaranteed to either be a lossless compression, or throw an exception at
    * serialization time.
    */
-  public ProtobufAnnotationSerializer() { this(false); }
+  public ProtobufAnnotationSerializer() { this(true); }
 
   /**
    * Create a new Annotation serializer outputting to a protocol buffer format.
@@ -319,7 +319,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (keySet.contains(GenderAnnotation.class)) { builder.setGender(getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class)); }
     if (keySet.contains(TrueCaseAnnotation.class)) { builder.setTrueCase(getAndRegister(coreLabel, keysToSerialize, TrueCaseAnnotation.class)); }
     if (keySet.contains(TrueCaseTextAnnotation.class)) { builder.setTrueCaseText(getAndRegister(coreLabel, keysToSerialize, TrueCaseTextAnnotation.class)); }
-    // TODO(gabor) serialize {@link HeadWordLabelAnnotation}
     // Return
     return builder;
   }
@@ -1329,7 +1328,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
       // Set entailed sentences
       if (sentence.getEntailedSentenceCount() > 0) {
-        Set<SentenceFragment> entailedSentences = sentence.getEntailedSentenceList().stream().map(frag -> fromProto(frag, map.get(EnhancedPlusPlusDependenciesAnnotation.class))).collect(Collectors.toSet());
+        Set<SentenceFragment> entailedSentences = sentence.getEntailedSentenceList().stream().map(frag -> fromProto(frag, map.get(CollapsedDependenciesAnnotation.class))).collect(Collectors.toSet());
         map.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, entailedSentences);
       }
       // Set relation triples
