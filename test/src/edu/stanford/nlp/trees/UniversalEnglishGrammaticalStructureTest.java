@@ -2634,7 +2634,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
     GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
     assertEquals("Unexpected basic dependencies for tree " + testTree,
-          testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(), tree, false, false));
+          testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependencies(), tree, false, false, false));
 
   }
 
@@ -2657,7 +2657,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
 
 
       assertEquals("Unexpected basic dependencies with copula as head for tree "+ testTree,
-          testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(), tree, false, false));
+          testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependencies(), tree, false, false, false));
   }
 
    /**
@@ -2673,7 +2673,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
     GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
     assertEquals("Unexpected non-collapsed dependencies for tree "+ testTree,
-        testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, false));
+        testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, false, false));
   }
 
 
@@ -2690,7 +2690,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
     GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
     assertEquals("Unexpected basic dependencies for tree "+testTree,
-      testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, true));
+      testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, true, false));
 
   }
 
@@ -2708,7 +2708,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
     Tree tree = Tree.valueOf(testTree, trf);
     GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
-    String depString = UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCollapsed(Extras.MAXIMAL), tree, false, false);
+    String depString = GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependenciesCollapsed(Extras.MAXIMAL), tree, false, false, false);
     assertEquals("Unexpected collapsed dependencies for tree " + testTree,
           testAnswer, depString);
   }
@@ -2728,7 +2728,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
     GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
     assertEquals("Unexpected CC processed dependencies for tree "+testTree,
-          testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCCprocessed(Extras.MAXIMAL), tree, false, false));
+          testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependenciesCCprocessed(Extras.MAXIMAL), tree, false, false, false));
   }
 
 }

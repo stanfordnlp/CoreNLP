@@ -657,20 +657,21 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   }
 
   /**
-   * ONLY USE IF LOADED A CHINESE WORD SEGMENTER!!!!!
+   * Have a word segmenter segment a String into a list of words.
+   * ONLY USE IF YOU LOADED A CHINESE WORD SEGMENTER!!!!!
    *
-   * @param sentence
-   *          The string to be classified
+   * @param sentence The string to be classified
    * @return List of words
    */
+  // This method is currently [2016] only called in a very small number of places:
+  // the parser's jsp webapp, ChineseSegmenterAnnotator, and SegDemo.
+  // Maybe we could eliminate it?
   public List<String> segmentString(String sentence) {
     return segmentString(sentence, defaultReaderAndWriter);
   }
 
-  public List<String> segmentString(String sentence,
-                                    DocumentReaderAndWriter<IN> readerAndWriter) {
-    ObjectBank<List<IN>> docs = makeObjectBankFromString(sentence,
-                                                         readerAndWriter);
+  public List<String> segmentString(String sentence, DocumentReaderAndWriter<IN> readerAndWriter) {
+    ObjectBank<List<IN>> docs = makeObjectBankFromString(sentence, readerAndWriter);
 
     StringWriter stringWriter = new StringWriter();
     PrintWriter stringPrintWriter = new PrintWriter(stringWriter);
@@ -685,7 +686,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     return Arrays.asList(segmented.split("\\s"));
   }
 
-  /**
+  /*
    * Classify the contents of {@link SeqClassifierFlags scf.testFile}. The file
    * should be in the format expected based on {@link SeqClassifierFlags
    * scf.documentReader}.
@@ -707,7 +708,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * @return The same {@link List}, but with the elements annotated with their
    *         answers (stored under the
    *         {@link edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation}
-   *         key).
+   *         key). The answers will be the class labels defined by the CRF
+   *         Classifier. They might be things like entity labels (in BIO
+   *         notation or not) or something like "1" vs. "0" on whether to
+   *         begin a new token here or not (in word segmentation).
    */
   public abstract List<IN> classify(List<IN> document);
 

@@ -1,4 +1,5 @@
 package edu.stanford.nlp.trees;
+import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
@@ -2220,6 +2221,10 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure  {
     public EnglishGrammaticalStructure build(List<TypedDependency> tdeps, TreeGraphNode root) {
       return new EnglishGrammaticalStructure(tdeps, root);
     }
+  }
+
+  public static void main(String args[]) {
+    GrammaticalStructureConversionUtils.convertTrees(args, "en-sd");
   }
 
 } // end class EnglishGrammaticalStructure

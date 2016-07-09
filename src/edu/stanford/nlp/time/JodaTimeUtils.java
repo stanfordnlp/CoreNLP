@@ -25,8 +25,8 @@ public class JodaTimeUtils {
   private JodaTimeUtils() {} // static methods only
 
   // Standard ISO fields
-  private static final Chronology isoUTCChronology = ISOChronology.getInstanceUTC();
-  private static final DateTimeFieldType[] standardISOFields = {
+  protected static final Chronology isoUTCChronology = ISOChronology.getInstanceUTC();
+  protected static final DateTimeFieldType[] standardISOFields = {
           DateTimeFieldType.year(),
           DateTimeFieldType.monthOfYear(),
           DateTimeFieldType.dayOfMonth(),
@@ -35,8 +35,8 @@ public class JodaTimeUtils {
           DateTimeFieldType.secondOfMinute(),
           DateTimeFieldType.millisOfSecond()
   };
-  private static final DateTimeFieldType[] standardISOWeekFields = {
-          DateTimeFieldType.year(),
+  protected static final DateTimeFieldType[] standardISOWeekFields = {
+          DateTimeFieldType.year(),  // should this be weekyear()?
           DateTimeFieldType.weekOfWeekyear(),
           DateTimeFieldType.dayOfWeek(),
           DateTimeFieldType.hourOfDay(),
@@ -44,12 +44,12 @@ public class JodaTimeUtils {
           DateTimeFieldType.secondOfMinute(),
           DateTimeFieldType.millisOfSecond()
   };
-  private static final DateTimeFieldType[] standardISODateFields = {
+  protected static final DateTimeFieldType[] standardISODateFields = {
           DateTimeFieldType.year(),
           DateTimeFieldType.monthOfYear(),
           DateTimeFieldType.dayOfMonth(),
   };
-  private static final DateTimeFieldType[] standardISOTimeFields = {
+  protected static final DateTimeFieldType[] standardISOTimeFields = {
           DateTimeFieldType.hourOfDay(),
           DateTimeFieldType.minuteOfHour(),
           DateTimeFieldType.secondOfMinute(),
@@ -610,14 +610,31 @@ public class JodaTimeUtils {
     }
     return p1;
   }
+
+  public static Partial withWeekYear(Partial p)
+  {
+    Partial res = new Partial();
+    for (int i = 0; i < p.size(); i++) {
+      DateTimeFieldType fieldType = p.getFieldType(i);
+      if (fieldType == DateTimeFieldType.year()) {
+        res = res.with(DateTimeFieldType.weekyear(), p.getValue(i));
+      } else {
+        res = res.with(fieldType, p.getValue(i));
+      }
+    }
+    return res;
+  }
+
   // Resolve dow for p1
   public static Partial resolveDowToDay(Partial p)
   {
     if (p.isSupported(DateTimeFieldType.dayOfWeek())) {
       if (!p.isSupported(DateTimeFieldType.dayOfMonth())) {
-        if (p.isSupported(DateTimeFieldType.weekOfWeekyear()) && p.isSupported(DateTimeFieldType.year())) {
-          Instant t2 = getInstant(p);
-          DateTime t1 = p.toDateTime(t2);
+        if (p.isSupported(DateTimeFieldType.weekOfWeekyear()) && (p.isSupported(DateTimeFieldType.year()))) {
+          // Convert from year to weekyear (to avoid weirdness when the weekyear and year don't match at the beginning of the year)
+          Partial pwy = withWeekYear(p);
+          Instant t2 = getInstant(pwy);
+          DateTime t1 = pwy.toDateTime(t2);
           Partial res = getPartial(t1.toInstant(), EMPTY_ISO_PARTIAL);
           DateTimeFieldType mostSpecific = getMostSpecific(p);
           res = discardMoreSpecificFields(res, mostSpecific.getDurationType());
@@ -627,6 +644,7 @@ public class JodaTimeUtils {
     }
     return p;
   }
+
   // Uses p2 to resolve week for p1
   public static Partial resolveWeek(Partial p1, Partial p2)
   {

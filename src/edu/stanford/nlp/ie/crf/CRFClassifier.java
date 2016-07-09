@@ -960,7 +960,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * Makes a CRFDatum by producing features and a label from input data at a
    * specific position, using the provided factory.
    *
-   * @param info The input data
+   * @param info The input data. Particular feature factories might look for arbitrary keys in the IN items.
    * @param loc The position to build a datum at
    * @param featureFactories The FeatureFactories to use to extract features
    * @return The constructed CRFDatum
