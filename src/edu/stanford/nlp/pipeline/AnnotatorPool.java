@@ -1,9 +1,6 @@
 package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.logging.Redwood;
 
-import java.lang.ref.SoftReference;
-import java.util.Iterator;
 import java.util.Map;
 
 import edu.stanford.nlp.util.Generics;
@@ -24,24 +21,8 @@ public class AnnotatorPool  {
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(AnnotatorPool.class);
 
-
-  /** The last timestamp when we checked the cache for stale SoftReference objects */
-  private static long lastSweepMillis = 0L;
-  /**
-   * A cache of annotators ever created in this Java runtime.
-   * This serves to ensure that different pools don't re-create the exact same annotator,
-   * while also being stored as {@link SoftReference}s so that we don't explode memory
-   * unnecessarily.
-   * The key of this cache is the pair (annotator_name, factory_signature); the value
-   * is a softreference to the annotator.
-   * {@link AnnotatorPool#lastSweepMillis} keeps track of the last time we cleaned out stale
-   * soft references from the cache.
-   */
-  private static final Map<Pair<String, String>, SoftReference<Annotator>> cache = Generics.newHashMap();
-
   private final Map<String, Annotator> annotators;
   private final Map<String, AnnotatorFactory> factories;
-
 
   /**
    * Create an empty AnnotatorPool.
@@ -101,51 +82,12 @@ public class AnnotatorPool  {
    */
   public synchronized Annotator get(String name) {
     if (!this.annotators.containsKey(name)) {
-      // Get the factory
       AnnotatorFactory factory = this.factories.get(name);
       if (factory == null) {
         throw new IllegalArgumentException("No annotator named " + name);
       }
-      Annotator annotator;
-      // Check the cache
-      Pair<String, String> key = Pair.makePair(name, factory.signature());
-      SoftReference<Annotator> value;
-      synchronized (cache) {
-        if ((value = cache.get(key)) != null) {
-          annotator = value.get();
-          if (annotator == null) {
-            annotator = factory.create();
-            cache.put(key, new SoftReference<>(annotator));
-          }
-        } else {
-          annotator = factory.create();
-          cache.put(key, new SoftReference<>(annotator));
-        }
-      }
-      // Register the annotator
-      assert annotator != null;
-      this.annotators.put(name, annotator);
+      this.annotators.put(name, factory.create());
     }
-
-    // Clean garbage collected annotators from the cache
-    if (lastSweepMillis < System.currentTimeMillis() - (1000 * 60 * 15)) {  // 15 minutes
-      synchronized (cache) {
-        int numRemoved = 0;
-        Iterator<Map.Entry<Pair<String, String>, SoftReference<Annotator>>> iter = cache.entrySet().iterator();
-        while (iter.hasNext()) {
-          if (iter.next().getValue().get() == null) {
-            iter.remove();
-            numRemoved += 1;
-          }
-        }
-        if (numRemoved > 0) {
-          log.info("Removed " + numRemoved + " evicted annotators from the AnnotatorPool cache");
-        }
-      }
-      lastSweepMillis = System.currentTimeMillis();
-    }
-
-    // Return
     return this.annotators.get(name);
   }
 

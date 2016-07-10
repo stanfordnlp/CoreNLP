@@ -138,22 +138,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     this(props, (props == null || PropertiesUtils.getBool(props, "enforceRequirements", true)));
   }
 
-
-  /**
-   * Construct a CoreNLP with a custom Annotator Pool.
-   */
-  public StanfordCoreNLP(Properties props, AnnotatorPool annotatorPool)  {
-    this(props, (props == null || PropertiesUtils.getBool(props, "enforceRequirements", true)), annotatorPool);
-  }
-
-
   public StanfordCoreNLP(Properties props, boolean enforceRequirements)  {
-    AnnotatorImplementations impl = getAnnotatorImplementations();
-    construct(props, enforceRequirements, impl, getDefaultAnnotatorPool(props, impl));
-  }
-
-  public StanfordCoreNLP(Properties props, boolean enforceRequirements, AnnotatorPool annotatorPool)  {
-    construct(props, enforceRequirements, getAnnotatorImplementations(), annotatorPool);
+    construct(props, enforceRequirements, getAnnotatorImplementations());
   }
 
   /**
@@ -169,8 +155,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     if (props == null) {
       throw new RuntimeIOException("ERROR: cannot find properties file \"" + propsFileNamePrefix + "\" in the classpath!");
     }
-    AnnotatorImplementations impl = getAnnotatorImplementations();
-    construct(props, enforceRequirements, impl, getDefaultAnnotatorPool(props, impl));
+    construct(props, enforceRequirements, getAnnotatorImplementations());
   }
 
   //
@@ -377,7 +362,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   // AnnotatorPool construction support
   //
 
-  private void construct(Properties props, boolean enforceRequirements, AnnotatorImplementations annotatorImplementations, AnnotatorPool pool) {
+  private void construct(Properties props, boolean enforceRequirements, AnnotatorImplementations annotatorImplementations) {
     Timing tim = new Timing();
     this.numWords = 0;
     this.constituentTreePrinter = new TreePrint("penn");
@@ -394,6 +379,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       props = fromClassPath;
     }
     this.properties = props;
+    AnnotatorPool pool = getDefaultAnnotatorPool(props, annotatorImplementations);
 
     // Set threading
     if (this.properties.containsKey("threads")) {
@@ -485,30 +471,18 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
 
 
   /**
-   * Construct the default annotator pool, and save it as the static annotator pool
-   * for CoreNLP.
-   *
-   * @see StanfordCoreNLP#constructAnnotatorPool(Properties, AnnotatorImplementations)
-   */
-  public static synchronized AnnotatorPool getDefaultAnnotatorPool(final Properties inputProps, final AnnotatorImplementations annotatorImplementation) {
-    // if the pool already exists reuse!
-    if (pool == null) {
-      pool = constructAnnotatorPool(inputProps, annotatorImplementation);
-    }
-    return pool;
-  }
-
-
-
-  /**
    * Construct the default annotator pool from the passed properties, and overwriting annotations which have changed
    * since the last
    * @param inputProps
    * @param annotatorImplementation
    * @return A populated AnnotatorPool
    */
-  public static AnnotatorPool constructAnnotatorPool(final Properties inputProps, final AnnotatorImplementations annotatorImplementation) {
-    AnnotatorPool pool = new AnnotatorPool();
+  public static synchronized AnnotatorPool getDefaultAnnotatorPool(final Properties inputProps, final AnnotatorImplementations annotatorImplementation) {
+    // if the pool already exists reuse!
+    if (pool == null) {
+      pool = new AnnotatorPool();
+    }
+
     for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, AnnotatorFactory>> entry : getNamedAnnotators().entrySet()) {
       pool.register(entry.getKey(), entry.getValue().apply(inputProps, annotatorImplementation));
     }
