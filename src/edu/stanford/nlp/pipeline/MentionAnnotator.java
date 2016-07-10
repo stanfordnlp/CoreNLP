@@ -67,7 +67,7 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
           CoreAnnotations.TextAnnotation.class,
           CoreAnnotations.ValueAnnotation.class,
           SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
-          SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class
+          SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class
 
       ));
     } catch (Exception e) {
