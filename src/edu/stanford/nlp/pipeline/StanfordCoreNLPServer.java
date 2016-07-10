@@ -220,7 +220,8 @@ public class StanfordCoreNLPServer implements Runnable {
     synchronized (pipelineCache) {
       impl = pipelineCache.get(props);
       if (impl == null) {
-        impl = new StanfordCoreNLP(props);
+        AnnotatorPool pool = StanfordCoreNLP.constructAnnotatorPool(props, new AnnotatorImplementations());
+        impl = new StanfordCoreNLP(props, pool);
         pipelineCache.put(props, impl);
       }
     }
