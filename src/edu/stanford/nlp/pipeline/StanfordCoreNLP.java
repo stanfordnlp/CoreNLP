@@ -507,25 +507,19 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     if (pool == null) {
       pool = constructAnnotatorPool(inputProps, annotatorImplementation);
     }
+    registerCustomAnnotators(pool, annotatorImplementation, inputProps);
     return pool;
   }
 
 
-
   /**
-   * Construct the default annotator pool from the passed properties, and overwriting annotations which have changed
-   * since the last
-   * @param inputProps
-   * @param annotatorImplementation
-   * @return A populated AnnotatorPool
+   * register any custom annotators defined in the input properties, and add them to the pool.
+   *
+   * @param pool The annotator pool to add the new custom annotators to.
+   * @param annotatorImplementation The implementation thunk to use to create any new annotators.
+   * @param inputProps The properties to read new annotator definitions from.
    */
-  public static AnnotatorPool constructAnnotatorPool(final Properties inputProps, final AnnotatorImplementations annotatorImplementation) {
-    AnnotatorPool pool = new AnnotatorPool();
-    for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, AnnotatorFactory>> entry : getNamedAnnotators().entrySet()) {
-      pool.register(entry.getKey(), entry.getValue().apply(inputProps, annotatorImplementation));
-    }
-
-
+  private static void registerCustomAnnotators(AnnotatorPool pool, AnnotatorImplementations annotatorImplementation, Properties inputProps) {
     // add annotators loaded via reflection from class names specified
     // in the properties
     for (String property : inputProps.stringPropertyNames()) {
@@ -554,9 +548,27 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
         });
       }
     }
+  }
 
+
+
+  /**
+   * Construct the default annotator pool from the passed properties, and overwriting annotations which have changed
+   * since the last
+   * @param inputProps
+   * @param annotatorImplementation
+   * @return A populated AnnotatorPool
+   */
+  public static AnnotatorPool constructAnnotatorPool(final Properties inputProps, final AnnotatorImplementations annotatorImplementation) {
+    AnnotatorPool pool = new AnnotatorPool();
+    for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, AnnotatorFactory>> entry : getNamedAnnotators().entrySet()) {
+      pool.register(entry.getKey(), entry.getValue().apply(inputProps, annotatorImplementation));
+    }
+    registerCustomAnnotators(pool, annotatorImplementation, inputProps);
     return pool;
   }
+
+
 
   public static synchronized Annotator getExistingAnnotator(String name) {
     if(pool == null){
