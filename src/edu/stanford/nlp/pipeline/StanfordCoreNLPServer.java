@@ -586,7 +586,7 @@ public class StanfordCoreNLPServer implements Runnable {
       // Get the annotators
       String annotators = props.getProperty("annotators");
       if (PropertiesUtils.getBool(props, "enforceRequirements", true)) {
-        annotators = StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+"));
+        annotators = StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+"), props);
       }
 
       // Make sure the properties compile

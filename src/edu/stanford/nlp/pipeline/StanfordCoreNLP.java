@@ -297,7 +297,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    * @param annotators The annotators the user has requested.
    * @return A sanitized annotators string with all prerequisites met.
    */
-  public static String ensurePrerequisiteAnnotators(String[] annotators) {
+  public static String ensurePrerequisiteAnnotators(String[] annotators, Properties props) {
     // Get an unordered set of annotators
     Set<String> unorderedAnnotators = new LinkedHashSet<>();  // linked to preserve order
     Collections.addAll(unorderedAnnotators, annotators);
@@ -352,6 +352,18 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       if (!somethingAdded) {
         throw new IllegalArgumentException("Unsatisfiable annotator list: " + StringUtils.join(annotators, ","));
       }
+    }
+
+    // Remove depparse + parse -- these are redundant
+    if (orderedAnnotators.contains(STANFORD_PARSE) && !ArrayUtils.contains(annotators, STANFORD_DEPENDENCIES)) {
+      orderedAnnotators.remove(STANFORD_DEPENDENCIES);
+    }
+
+    // Tweak the properties, if necessary
+    // (set the mention annotator to use dependency trees, if appropriate)
+    if (orderedAnnotators.contains(Annotator.STANFORD_MENTION) && !orderedAnnotators.contains(Annotator.STANFORD_PARSE) &&
+        !props.containsKey("coref.md.type")) {
+      props.setProperty("coref.md.type", "dep");
     }
 
     // Return
