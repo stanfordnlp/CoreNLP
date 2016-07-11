@@ -531,22 +531,11 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
             property.substring(CUSTOM_ANNOTATOR_PREFIX.length());
         final String customClassName = inputProps.getProperty(property);
         logger.info("Registering annotator " + customName + " with class " + customClassName);
-        pool.register(customName, new AnnotatorFactory(customClassName, inputProps) {
+        pool.register(customName, new AnnotatorFactory(customName, customClassName, inputProps) {
           private static final long serialVersionUID = 1L;
           @Override
           public Annotator create() {
             return annotatorImplementation.custom(properties, property);
-          }
-          @Override
-          public String additionalSignature() {
-            // keep track of all relevant properties for this annotator here!
-            // since we don't know what props they need, let's copy all
-            // TODO: can we do better here? maybe signature() should be a method in the Annotator?
-            StringBuilder os = new StringBuilder();
-            for (String skey : properties.stringPropertyNames()) {
-              os.append(skey).append(':').append(properties.getProperty(skey));
-            }
-            return os.toString();
           }
         });
       }

@@ -397,7 +397,7 @@ public class PropertiesUtils {
     String prefix = (name != null && !name.isEmpty())? name + '.' : "";
     // keep track of all relevant properties for this annotator here!
     StringBuilder sb = new StringBuilder();
-    for (String str:properties.stringPropertyNames()) {
+    for (String str : properties.stringPropertyNames()) {
       if (str.startsWith(prefix)) {
         String pname = str;
         String pvalue = properties.getProperty(pname);
