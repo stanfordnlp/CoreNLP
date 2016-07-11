@@ -373,8 +373,8 @@ public class AnnotatorFactories  {
       @Override
       public String additionalSignature() {
           // TODO: implement this properly
-          return "md:" + properties.getProperty("coref.md.type", "rule") + ";" +
-              "lang:" + properties.getProperty("coref.language", "en");
+          return "coref.md:" + properties.getProperty("coref.md.type", "rule") + ";" +
+              "coref.language:" + properties.getProperty("coref.language", "en");
       }
     };
   }

@@ -59,8 +59,8 @@ public abstract class AnnotatorFactory implements Factory<Annotator> {
    * the same annotator type but with different parameters.
    */
   public String signature() {
-    return this.type + ':' +
-        PropertiesUtils.getSignature(this.name, this.properties) + ":" +
+    return this.type + '#' +
+        PropertiesUtils.getSignature(this.name, this.properties) + "#" +
         this.additionalSignature();
   }
 
