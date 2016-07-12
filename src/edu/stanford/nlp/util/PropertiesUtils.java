@@ -388,7 +388,7 @@ public class PropertiesUtils {
     for (Property p:supportedProperties) {
       String pname = prefix + p.name();
       String pvalue = properties.getProperty(pname, p.defaultValue());
-      sb.append(pname).append(':').append(pvalue);
+      sb.append(pname).append(':').append(pvalue).append(";");
     }
     return sb.toString();
   }
@@ -397,11 +397,11 @@ public class PropertiesUtils {
     String prefix = (name != null && !name.isEmpty())? name + '.' : "";
     // keep track of all relevant properties for this annotator here!
     StringBuilder sb = new StringBuilder();
-    for (String str:properties.stringPropertyNames()) {
+    for (String str : properties.stringPropertyNames()) {
       if (str.startsWith(prefix)) {
         String pname = str;
         String pvalue = properties.getProperty(pname);
-        sb.append(pname).append(':').append(pvalue);
+        sb.append(pname).append(':').append(pvalue).append(";");
       }
     }
     return sb.toString();

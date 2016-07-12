@@ -212,7 +212,7 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
         CoreAnnotations.UtteranceAnnotation.class,
         CoreAnnotations.SpeakerAnnotation.class,
         SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
-        SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class
+        SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class
         ));
     if (CorefProperties.getMDType(this.props) != CorefProperties.MentionDetectionType.DEPENDENCY) {
       requirements.add(TreeCoreAnnotations.TreeAnnotation.class);

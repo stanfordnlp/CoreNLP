@@ -57,6 +57,8 @@ public class StanfordCoreNLPServer implements Runnable {
   protected String password = null;
   @ArgumentParser.Option(name="lazy", gloss="If true, don't precompute the models on loading the server")
   protected boolean lazy = true;
+  @ArgumentParser.Option(name="annotators", gloss="The default annotators to run over a given sentence.")
+  protected static String defaultAnnotators = "tokenize,ssplit,pos,lemma,ner,parse,depparse,mention,coref,natlog,openie,kbp";
 
   protected final String shutdownKey;
 
@@ -98,11 +100,16 @@ public class StanfordCoreNLPServer implements Runnable {
    */
   public StanfordCoreNLPServer() throws IOException {
     defaultProps = PropertiesUtils.asProperties(
-            "annotators", "tokenize, ssplit, pos, lemma, ner, depparse, coref, natlog, openie",
-            "coref.md.type", "dep",
-            "inputFormat", "text",
-            "outputFormat", "json",
-            "prettyPrint", "false");
+        "annotators", defaultAnnotators,  // Run these annotators by default
+        "coref.md.type", "dep",  // Use dependency trees with coref by default
+        "coref.mode",  "statistical",  // Use the new coref
+        "coref.language",  "en",  // We're English by default
+        "inputFormat", "text",   // By default, treat the POST data like text
+        "outputFormat", "json",  // By default, return in JSON -- this is a server, after all.
+        "prettyPrint", "false",  // Don't bother pretty-printing
+        "parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz",  // SR scales linearly with sentence length. Good for a server!
+        "parse.binaryTrees", "true",  // needed for the Sentiment annotator
+        "openie.strip_entailments", "true");  // these are large to serialize, so ignore them
 
     // Generate and write a shutdown key
     String tmpDir = System.getProperty("java.io.tmpdir");
@@ -216,7 +223,8 @@ public class StanfordCoreNLPServer implements Runnable {
     synchronized (pipelineCache) {
       impl = pipelineCache.get(props);
       if (impl == null) {
-        impl = new StanfordCoreNLP(props);
+        AnnotatorPool pool = StanfordCoreNLP.constructAnnotatorPool(props, new AnnotatorImplementations());
+        impl = new StanfordCoreNLP(props, pool);
         pipelineCache.put(props, impl);
       }
     }
@@ -574,14 +582,6 @@ public class StanfordCoreNLPServer implements Runnable {
           props.remove("coref.md.type");
         }
       }
-      if (!props.containsKey("parse.model") && IOUtils.existsInClasspathOrFileSystem("edu/stanford/nlp/models/srparser/englishSR.ser.gz")) {
-        // Set the default parser to be the shift-reduce parser
-        props.setProperty("parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz");
-      }
-      if (!props.containsKey("entitylink.wikidict")) {
-        // Set the default Wikidict location
-        props.setProperty("entitylink.wikidict", "wikidict.tab.gz");
-      }
       // (add new properties on top of the default properties)
       urlProperties.entrySet()
           .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
@@ -589,7 +589,7 @@ public class StanfordCoreNLPServer implements Runnable {
       // Get the annotators
       String annotators = props.getProperty("annotators");
       if (PropertiesUtils.getBool(props, "enforceRequirements", true)) {
-        annotators = StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+"));
+        annotators = StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+"), props);
       }
 
       // Make sure the properties compile
@@ -908,14 +908,12 @@ public class StanfordCoreNLPServer implements Runnable {
    * @param credentials The optional credentials to enforce. This is a (key,value) pair
    */
   private void withAuth(HttpContext context, Optional<Pair<String,String>> credentials) {
-    credentials.ifPresent(c -> {
-      context.setAuthenticator(new BasicAuthenticator("corenlp") {
-        @Override
-        public boolean checkCredentials(String user, String pwd) {
-          return user.equals(c.first) && pwd.equals(c.second);
-        }
-      });
-    });
+    credentials.ifPresent(c -> context.setAuthenticator(new BasicAuthenticator("corenlp") {
+      @Override
+      public boolean checkCredentials(String user, String pwd) {
+        return user.equals(c.first) && pwd.equals(c.second);
+      }
+    }));
   }
 
 
@@ -954,6 +952,7 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown if we could not start / run the server.
    */
   public static void main(String[] args) throws IOException {
+    ArgumentParser.fillOptions(StanfordCoreNLPServer.class, args);
     StanfordCoreNLPServer server = new StanfordCoreNLPServer();
     ArgumentParser.fillOptions(server, args);
 
@@ -967,19 +966,12 @@ public class StanfordCoreNLPServer implements Runnable {
 
     // Pre-load the models
     if (!server.lazy) {
-      Properties props = new Properties();
-      props.setProperty("annotators", "tokenize,ssplit,pos,parse,depparse,lemma,ner,natlog,openie,mention,coref,entitylink,kbp");
+      Properties props = server.defaultProps;
       try {
-        props.setProperty("entitylink.wikidict", "wikidict.tab.gz");
-        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+        new StanfordCoreNLP(props);
       } catch (Throwable ignored) {
-        err("Could not initialize annotators");
-      }
-      try {
-        props.setProperty("parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz");
-        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-      } catch (Throwable ignored) {
-        err("Could not initialize shift reduce parser");
+        err("Could not pre-cache annotators in server; encountered exception:");
+        ignored.printStackTrace();
       }
     }
 

@@ -60,10 +60,6 @@ public class DeterministicCorefAnnotator implements Annotator  {
     }
   }
 
-  public static String signature(Properties props) {
-    return SieveCoreferenceSystem.signature(props);
-  }
-
   @Override
   public void annotate(Annotation annotation) {
     try {
