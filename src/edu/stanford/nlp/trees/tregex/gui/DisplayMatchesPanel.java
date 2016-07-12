@@ -1,5 +1,5 @@
-//Copyright (c) 2007-2008 The Board of Trustees of
 //Tregex/Tsurgeon, DisplayMatchesPanel - a GUI for tree search and modification
+//Copyright (c) 2007-2008 The Board of Trustees of
 //The Leland Stanford Junior University. All Rights Reserved.
 
 //This program is free software; you can redistribute it and/or
@@ -55,10 +55,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import edu.stanford.nlp.trees.EnglishGrammaticalStructure;
-import edu.stanford.nlp.trees.GrammaticalStructureConversionUtils;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.UniversalEnglishGrammaticalStructure;
 import edu.stanford.nlp.util.Pair;
 
 /**
@@ -327,21 +324,6 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
     }
   }
 
-  // BEGIN - sebschu
-  private void showDependencies() {
-    EnglishGrammaticalStructure gs = new EnglishGrammaticalStructure(tjp.getTree());
-    JOptionPane.showMessageDialog(this, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependencies(false), tjp.getTree(), false, false, false), "Dependencies", JOptionPane.INFORMATION_MESSAGE, null);
-    
-  }
-  
-  private void showUniversalDependencies() {
-    UniversalEnglishGrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tjp.getTree());
-    JOptionPane.showMessageDialog(this, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependencies(false), tjp.getTree(), false, false, false), "Universal dependencies", JOptionPane.INFORMATION_MESSAGE, null);
-    
-  }
-  
-  // END - sebschu
-  
 
   private ScrollableTreeJPanel getTreeJPanel(Tree t, List<Tree> matchedParts) {
     final ScrollableTreeJPanel treeJP = new ScrollableTreeJPanel(SwingConstants.CENTER,SwingConstants.TOP);
@@ -372,31 +354,6 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
       });
     treePopup.add(exportTree);
 
-    //BEGIN - sebschu
-    
-    JMenuItem showDependencies = new JMenuItem("Show dependencies");
-    showDependencies.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        showDependencies();
-      }
-    });
-    
-    
-    treePopup.add(showDependencies);
-    
-    
-    JMenuItem showUniversalDependencies = new JMenuItem("Show universal dependencies");
-    showUniversalDependencies.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        showUniversalDependencies();
-      }
-    });
-    
-    
-    treePopup.add(showUniversalDependencies);
-    
-    //END - sebschu
-    
     treeJP.addMouseListener(new MouseAdapter() {
         @Override
         public void mouseClicked(MouseEvent e) {

@@ -298,29 +298,17 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   @Override
   public GrammaticalStructureFactory grammaticalStructureFactory() {
-    if (this.generateOriginalDependencies()) {
-      return new ChineseGrammaticalStructureFactory();
-    } else {
-      return new UniversalChineseGrammaticalStructureFactory();
-    }
+    return new ChineseGrammaticalStructureFactory();
   }
 
   @Override
   public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilt) {
-    if (this.generateOriginalDependencies()) {
-      return new ChineseGrammaticalStructureFactory(puncFilt);
-    } else {
-      return new UniversalChineseGrammaticalStructureFactory(puncFilt);
-    }
+    return new ChineseGrammaticalStructureFactory(puncFilt);
   }
 
   @Override
   public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilt, HeadFinder hf) {
-    if (this.generateOriginalDependencies()) {
-      return new ChineseGrammaticalStructureFactory(puncFilt, hf);
-    } else {
-      return new UniversalChineseGrammaticalStructureFactory(puncFilt, hf);
-    }
+    return new ChineseGrammaticalStructureFactory(puncFilt, hf);
   }
 
   @Override
@@ -343,17 +331,15 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
   /** {@inheritDoc} */
   @Override
   public HeadFinder typedDependencyHeadFinder() {
-    if (this.generateOriginalDependencies()) {
-      return new ChineseSemanticHeadFinder(this);
-    } else {
-      return new UniversalChineseSemanticHeadFinder();
-    }
+    return new ChineseSemanticHeadFinder(this);
   }
-
+ 
+  /** Chinese does not support Universal Dependencies yet,
+   *  so always return true.
+   */
   @Override
   public boolean generateOriginalDependencies() {
-    //TODO[sebschu]: delete this method once Chinese UD becomes the default.
-    return !generateOriginalDependencies;
+    return true;
   }
 
 }
