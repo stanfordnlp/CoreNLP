@@ -373,7 +373,9 @@ public class UniversalChineseGrammaticalRelations {
    * The "appositional modifier" (appos) grammatical relation (abstract).
    */
   public static final GrammaticalRelation APPOSITIONAL_MODIFIER =
-    new GrammaticalRelation(Language.UniversalChinese, "appos", "appositional modifier", MODIFIER);
+    new GrammaticalRelation(Language.UniversalChinese, "appos", "appositional modifier", MODIFIER,
+            "NP", tregexCompiler,
+            "NP < (/^NP(-APP)?$/=target $+ (NP <: NR)) !$- P|LC !$+ P|LC");
 
   public static final GrammaticalRelation PARATAXIS =
           new GrammaticalRelation(Language.UniversalChinese, "parataxis", "parataxis", DEPENDENT);
@@ -387,12 +389,13 @@ public class UniversalChineseGrammaticalRelations {
             "NP < PRN=target ");
 
   /**
-   * The "noun modifier" grammatical relation (abstract).
+   * The "noun modifier" grammatical relation.
    */
   public static final GrammaticalRelation NOUN_MODIFIER =
           new GrammaticalRelation(Language.UniversalChinese, "nmod", "noun modifier", MODIFIER,
                   "NP", tregexCompiler,
-                  "NP < (NP=target < NR !$+ PU|CC $++ NP|PRN)");
+                  "NP < (NP=target < NR !$+ PU|CC|NP|NN $++ NP|PRN)",
+                  "NP < (NP=target $+ (NP <: NR)) [$- P|LC | $+ P|LC]");
 
   public static final GrammaticalRelation POSSESSIVE_MODIFIER =
           new GrammaticalRelation(Language.UniversalChinese, "nmod:poss", "possessive modifier", NOUN_MODIFIER,
@@ -502,7 +505,8 @@ public class UniversalChineseGrammaticalRelations {
       MODIFIER, "NP|CLP|QP", tregexCompiler,
             "NP|CLP|QP < (ADJP=target $++ NP|CLP|QP ) ",
             "NP  $++ (CP=target << VA !<< VV) > NP ",
-            "NP  < ( CP=target $++ NP << VA !<< VV)");
+            "NP  < ( CP=target $++ NP << VA !<< VV)",
+            "NP|QP < ( DNP=target <: JJ $++ NP|QP )");
 
   /**
    * The "ordinal modifier" (ordmod) grammatical relation.
@@ -768,7 +772,8 @@ public class UniversalChineseGrammaticalRelations {
       COMPOUND, "^NP", tregexCompiler,
             "NP < (NN|NR|NT=target $+ NN|NT)",
             "NP < (NN|NR|NT $+ FW=target)",
-            "NP < (NP=target !< NR !$+ PU|CC $++ NP|PRN)");
+            "NP < (NP=target !< NR !$+ PU|CC $++ (NP|PRN !< NR))",
+            "NP < (NP=target < NN|NR|NT $+ (NP < NN|NT))");
 
   /**
    * The "name" grammatical relation.
@@ -953,7 +958,7 @@ public class UniversalChineseGrammaticalRelations {
           new GrammaticalRelation(Language.UniversalChinese,
                   "nmod:assmod", "associative modifier (examples: 上海市/Shanghai[modifier] 的 规定/law[head])",
                   NOUN_MODIFIER, "NP|QP", tregexCompiler,
-                  "NP|QP < ( DNP =target $++ NP|QP ) ");
+                  "NP|QP < ( DNP =target !<: JJ $++ NP|QP ) ");
 
   ////////////////////////////////////////////////////////////
   // Other stuff: pliang: not sure exactly where they should go.
