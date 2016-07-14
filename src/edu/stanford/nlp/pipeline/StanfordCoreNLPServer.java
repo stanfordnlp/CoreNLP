@@ -51,14 +51,6 @@ public class StanfordCoreNLPServer implements Runnable {
   protected boolean quiet = false;
   @ArgumentParser.Option(name="ssl", gloss="If true, start the server with an [insecure!] SSL connection")
   protected boolean ssl = false;
-  @ArgumentParser.Option(name="username", gloss="The username component of a username/password basic auth credential")
-  protected String username = null;
-  @ArgumentParser.Option(name="password", gloss="The password component of a username/password basic auth credential")
-  protected String password = null;
-  @ArgumentParser.Option(name="lazy", gloss="If true, don't precompute the models on loading the server")
-  protected boolean lazy = true;
-  @ArgumentParser.Option(name="annotators", gloss="The default annotators to run over a given sentence.")
-  protected static String defaultAnnotators = "tokenize,ssplit,pos,lemma,ner,parse,depparse,mention,coref,natlog,openie,kbp";
 
   protected final String shutdownKey;
 
@@ -100,16 +92,11 @@ public class StanfordCoreNLPServer implements Runnable {
    */
   public StanfordCoreNLPServer() throws IOException {
     defaultProps = PropertiesUtils.asProperties(
-        "annotators", defaultAnnotators,  // Run these annotators by default
-        "coref.md.type", "dep",  // Use dependency trees with coref by default
-        "coref.mode",  "statistical",  // Use the new coref
-        "coref.language",  "en",  // We're English by default
-        "inputFormat", "text",   // By default, treat the POST data like text
-        "outputFormat", "json",  // By default, return in JSON -- this is a server, after all.
-        "prettyPrint", "false",  // Don't bother pretty-printing
-        "parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz",  // SR scales linearly with sentence length. Good for a server!
-        "parse.binaryTrees", "true",  // needed for the Sentiment annotator
-        "openie.strip_entailments", "true");  // these are large to serialize, so ignore them
+            "annotators", "tokenize, ssplit, pos, lemma, ner, depparse, coref, natlog, openie",
+            "coref.md.type", "dep",
+            "inputFormat", "text",
+            "outputFormat", "json",
+            "prettyPrint", "false");
 
     // Generate and write a shutdown key
     String tmpDir = System.getProperty("java.io.tmpdir");
@@ -223,8 +210,7 @@ public class StanfordCoreNLPServer implements Runnable {
     synchronized (pipelineCache) {
       impl = pipelineCache.get(props);
       if (impl == null) {
-        AnnotatorPool pool = StanfordCoreNLP.constructAnnotatorPool(props, new AnnotatorImplementations());
-        impl = new StanfordCoreNLP(props, pool);
+        impl = new StanfordCoreNLP(props);
         pipelineCache.put(props, impl);
       }
     }
@@ -571,6 +557,7 @@ public class StanfordCoreNLPServer implements Runnable {
       } else if (urlParams.containsKey("props")) {
         urlProperties = StringUtils.decodeMap(URLDecoder.decode(urlParams.get("props"), "UTF-8"));
       }
+      System.out.println(urlProperties);
       // (tweak the default properties a bit)
       if (!props.containsKey("coref.md.type")) {
         // Set coref head to use dependencies
@@ -586,10 +573,41 @@ public class StanfordCoreNLPServer implements Runnable {
       urlProperties.entrySet()
           .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
 
+      // if a language is specified, load the properties for that language, don't overwrite other properties
+      if (props.containsKey("pipelineLanguage")) {
+        Properties languageProps = new Properties();
+        String pipelineLanguageFile = LanguageInfo.getLanguagePropertiesFile(props.getProperty("pipelineLanguage"));
+        if (pipelineLanguageFile == null) {
+          String clientResponse = "specified language is not supported: "+props.getProperty("pipelineLanguage")
+                  +" ; defaulting to English";
+          try {
+            respondError(clientResponse, httpExchange);
+          } catch (IOException e) {
+            err("failed to send client response: \""+clientResponse+"\"");
+          }
+        }
+        try {
+          languageProps.load(StanfordCoreNLPServer.class.getResourceAsStream(pipelineLanguageFile));
+          PropertiesUtils.noClobberWriteProperties(props, languageProps);
+        } catch (IOException e) {
+          // server side log missing resource for requested language
+          String errorMessage = "missing properties file: "
+                  +pipelineLanguageFile+" ; this file is required on server CLASSPATH to process language: "
+                  +props.getProperty("pipelineLanguage");
+          err(errorMessage);
+          // client side log missing resource for requested language
+          try {
+            respondError(errorMessage, httpExchange);
+          } catch (IOException ioe) {
+            err("failed to send client response: \""+errorMessage+"\"");
+          }
+        }
+      }
+
       // Get the annotators
       String annotators = props.getProperty("annotators");
       if (PropertiesUtils.getBool(props, "enforceRequirements", true)) {
-        annotators = StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+"), props);
+        annotators = StanfordCoreNLP.ensurePrerequisiteAnnotators(props.getProperty("annotators").split("[, \t]+"));
       }
 
       // Make sure the properties compile
@@ -786,12 +804,12 @@ public class StanfordCoreNLPServer implements Runnable {
             if (filter) {
               // Case: just filter sentences
               docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence ->
-                      regex.matcher(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class)).matches()
+                      regex.matcher(sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class)).matches()
               ).collect(Collectors.toList()));
             } else {
               // Case: find matches
               docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer sentWriter) -> {
-                SemgrexMatcher matcher = regex.matcher(sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class));
+                SemgrexMatcher matcher = regex.matcher(sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class));
                 int i = 0;
                 while (matcher.find()) {
                   sentWriter.set(Integer.toString(i), (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer matchWriter) -> {
@@ -888,53 +906,36 @@ public class StanfordCoreNLPServer implements Runnable {
   }
 
 
-  /** @see StanfordCoreNLPServer#run(Optional, Predicate, Consumer, StanfordCoreNLPServer.FileHandler, boolean) */
+  /** @see StanfordCoreNLPServer#run(Predicate, Consumer, StanfordCoreNLPServer.FileHandler, boolean) */
   @Override
   public void run() {
     // Set the static page handler
     try {
       FileHandler homepage = new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.html");
-      run(Optional.empty(), req -> true, obj -> {}, homepage, false);
+      run(req -> true, obj -> {}, homepage, false);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
   }
 
-
-  /**
-   * Enable authentication for this endpoint
-   *
-   * @param context The context to enable authentication for.
-   * @param credentials The optional credentials to enforce. This is a (key,value) pair
-   */
-  private void withAuth(HttpContext context, Optional<Pair<String,String>> credentials) {
-    credentials.ifPresent(c -> context.setAuthenticator(new BasicAuthenticator("corenlp") {
-      @Override
-      public boolean checkCredentials(String user, String pwd) {
-        return user.equals(c.first) && pwd.equals(c.second);
-      }
-    }));
-  }
-
-
   /**
    * Run the server.
    * This method registers the handlers, and initializes the HTTP server.
    */
-  public void run(Optional<Pair<String,String>> basicAuth, Predicate<Properties> authenticator, Consumer<FinishedRequest> callback, FileHandler homepage, boolean https) {
+  public void run(Predicate<Properties> authenticator, Consumer<FinishedRequest> callback, FileHandler homepage, boolean https) {
     try {
       if (https) {
         server = addSSLContext(HttpsServer.create(new InetSocketAddress(serverPort), 0)); // 0 is the default 'backlog'
       } else {
         server = HttpServer.create(new InetSocketAddress(serverPort), 0); // 0 is the default 'backlog'
       }
-      withAuth(server.createContext("/", new CoreNLPHandler(defaultProps, authenticator, callback, homepage)), basicAuth);
-      withAuth(server.createContext("/tokensregex", new TokensRegexHandler(authenticator, callback)), basicAuth);
-      withAuth(server.createContext("/semgrex", new SemgrexHandler(authenticator, callback)), basicAuth);
-      withAuth(server.createContext("/corenlp-brat.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.js")), basicAuth);
-      withAuth(server.createContext("/corenlp-brat.cs", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.css")), basicAuth);
-      withAuth(server.createContext("/ping", new PingHandler()), basicAuth);
-      withAuth(server.createContext("/shutdown", new ShutdownHandler()), basicAuth);
+      server.createContext("/", new CoreNLPHandler(defaultProps, authenticator, callback, homepage));
+      server.createContext("/tokensregex", new TokensRegexHandler(authenticator, callback));
+      server.createContext("/semgrex", new SemgrexHandler(authenticator, callback));
+      server.createContext("/corenlp-brat.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.js"));
+      server.createContext("/corenlp-brat.cs", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.css"));
+      server.createContext("/ping", new PingHandler());
+      server.createContext("/shutdown", new ShutdownHandler());
       server.setExecutor(serverExecutor);
       server.start();
       log("StanfordCoreNLPServer listening at " + server.getAddress());
@@ -952,9 +953,6 @@ public class StanfordCoreNLPServer implements Runnable {
    * @throws IOException Thrown if we could not start / run the server.
    */
   public static void main(String[] args) throws IOException {
-    ArgumentParser.fillOptions(StanfordCoreNLPServer.class, args);
-    StanfordCoreNLPServer server = new StanfordCoreNLPServer();
-    ArgumentParser.fillOptions(server, args);
 
     // Create the homepage
     FileHandler homepage;
@@ -964,29 +962,14 @@ public class StanfordCoreNLPServer implements Runnable {
       throw new RuntimeIOException(e);
     }
 
-    // Pre-load the models
-    if (!server.lazy) {
-      Properties props = server.defaultProps;
-      try {
-        new StanfordCoreNLP(props);
-      } catch (Throwable ignored) {
-        err("Could not pre-cache annotators in server; encountered exception:");
-        ignored.printStackTrace();
-      }
-    }
-
-    // Credentials
-    Optional<Pair<String, String>> credentials = Optional.empty();
-    if (server.username != null && server.password != null) {
-      credentials = Optional.of(Pair.makePair(server.username, server.password));
-    }
-
     // Run the server
     log("Starting server...");
+    StanfordCoreNLPServer server = new StanfordCoreNLPServer();
+    ArgumentParser.fillOptions(server, args);
     if (server.ssl) {
-      server.run(credentials, req -> true, res -> {}, homepage, true);
+      server.run(req -> true, res -> {}, homepage, true);
     } else {
-      server.run(credentials, req -> true, res -> {}, homepage, false);
+      server.run(req -> true, res -> {}, homepage, false);
 
     }
   }

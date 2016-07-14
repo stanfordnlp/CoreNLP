@@ -288,6 +288,36 @@ public class SieveCoreferenceSystem  {
     }
   }
 
+  public static String signature(Properties props) {
+    StringBuilder os = new StringBuilder();
+    os.append(Constants.SIEVES_PROP + ":" +
+            props.getProperty(Constants.SIEVES_PROP,
+                    Constants.SIEVEPASSES));
+    os.append(Constants.SINGLETON_PROP + ":" +
+        props.getProperty(Constants.SINGLETON_PROP,
+                "false"));
+    os.append(Constants.SINGLETON_MODEL_PROP + ":" +
+        props.getProperty(Constants.SINGLETON_MODEL_PROP,
+                DefaultPaths.DEFAULT_DCOREF_SINGLETON_MODEL));
+    os.append(Constants.SCORE_PROP + ":" +
+            props.getProperty(Constants.SCORE_PROP,
+                    "false"));
+    os.append(Constants.POSTPROCESSING_PROP + ":" +
+            props.getProperty(Constants.POSTPROCESSING_PROP,
+                    "false"));
+    os.append(Constants.MAXDIST_PROP + ":" +
+            props.getProperty(Constants.MAXDIST_PROP,
+                    "-1"));
+    os.append(Constants.REPLICATECONLL_PROP + ":" +
+            props.getProperty(Constants.REPLICATECONLL_PROP,
+                    "false"));
+    os.append(Constants.CONLL_SCORER + ":" +
+            props.getProperty(Constants.CONLL_SCORER,
+                    Constants.conllMentionEvalScript));
+    os.append(Dictionaries.signature(props));
+    return os.toString();
+  }
+
   public void initScorers() {
     linksCountInPass = new ArrayList<>();
     scorePairwise = new ArrayList<>();

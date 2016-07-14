@@ -1,7 +1,6 @@
 package edu.stanford.nlp.ling.tokensregex;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.parser.ParseException;
 import edu.stanford.nlp.ling.tokensregex.parser.TokenSequenceParseException;
@@ -21,7 +20,7 @@ import java.util.function.Predicate;
 
 /**
  * <p>Represents a list of assignment and extraction rules over sequence patterns.
- *    See {@link SequenceMatchRules} for the syntax of rules.
+ *    See {@link SequenceMatchRules} for syntax of rules.
  * </p>
  *
  * <p>Assignment rules are used to assign a value to a variable for later use in
@@ -29,7 +28,7 @@ import java.util.function.Predicate;
  * <p>Extraction rules are used to extract text/tokens matching regular expressions.
  * Extraction rules are grouped into stages, with each stage consisting of the following:
  * <ol>
- *   <li>Matching of rules over <b>text</b> and <b>tokens</b>.  These rules are applied directly on the <b>text</b> and <b>tokens</b> fields of the {@code CoreMap}.</li>
+ *   <li>Matching of rules over <b>text</b> and <b>tokens</b>.  These rules are applied directly on the <b>text</b> and <b>tokens</b> fields of the <code>CoreMap</code>.</li>
  *   <li>Matching of <b>composite</b> rules.  Matched expression are merged, and composite rules
  *       are applied recursively until no more changes to the matched expressions are detected.</li>
  *   <li><b>Filtering</b> of an invalid expression.  In the final phase, a final filtering stage filters out invalid expressions.</li>
@@ -43,7 +42,7 @@ import java.util.function.Predicate;
 public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(CoreMapExpressionExtractor.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(CoreMapExpressionExtractor.class);
 
   private static boolean verbose = false;
 
@@ -54,7 +53,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
   private boolean keepTags = false;
   /* Collapses extraction rules - use with care */
   private boolean collapseExtractionRules = false;
-  private final Class<CoreAnnotation<List<? extends CoreMap>>> tokensAnnotationKey;
+  private final Class tokensAnnotationKey;
   private final Map<Integer, Stage<T>> stages;
 
   /**
@@ -81,7 +80,8 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
     Predicate<T> filterRule;
 
     private static <I,O> SequenceMatchRules.ExtractRule<I,O> addRule(SequenceMatchRules.ExtractRule<I, O> origRule,
-                                                                     SequenceMatchRules.ExtractRule<I, O> rule) {
+                                                                     SequenceMatchRules.ExtractRule<I, O> rule)
+    {
       SequenceMatchRules.ListExtractRule<I,O> r;
       if (origRule instanceof SequenceMatchRules.ListExtractRule) {
         r = (SequenceMatchRules.ListExtractRule<I,O>) origRule;
@@ -94,15 +94,18 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
       return r;
     }
 
-    private void addCompositeRule(SequenceMatchRules.ExtractRule<List<? extends CoreMap>, T> rule) {
+    private void addCompositeRule(SequenceMatchRules.ExtractRule<List<? extends CoreMap>, T> rule)
+    {
       compositeExtractRule = addRule(compositeExtractRule, rule);
     }
 
-    private void addBasicRule(SequenceMatchRules.ExtractRule<CoreMap, T> rule) {
+    private void addBasicRule(SequenceMatchRules.ExtractRule<CoreMap, T> rule)
+    {
       basicExtractRule = addRule(basicExtractRule, rule);
     }
 
-    private void addFilterRule(Predicate<T> rule) {
+    private void addFilterRule(Predicate<T> rule)
+    {
       Filters.DisjFilter<T> r;
       if (filterRule instanceof Filters.DisjFilter) {
         r = (Filters.DisjFilter<T>) filterRule;
@@ -262,12 +265,12 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
   }
 
   /**
-   * Creates an extractor using the specified environment, and reading the rules from the given filenames.
+   * Creates an extractor using the specified environment, and reading the rules from the given filenames
    * @param env
    * @param filenames
    * @throws RuntimeException
    */
-  public static <M extends MatchedExpression> CoreMapExpressionExtractor<M> createExtractorFromFiles(Env env, String... filenames) throws RuntimeException {
+  public static CoreMapExpressionExtractor createExtractorFromFiles(Env env, String... filenames) throws RuntimeException {
     return createExtractorFromFiles(env, Arrays.asList(filenames));
   }
 
@@ -277,8 +280,8 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
    * @param filenames
    * @throws RuntimeException
    */
-  public static <M extends MatchedExpression> CoreMapExpressionExtractor<M> createExtractorFromFiles(Env env, List<String> filenames) throws RuntimeException {
-    CoreMapExpressionExtractor<M> extractor = new CoreMapExpressionExtractor<>(env);
+  public static CoreMapExpressionExtractor createExtractorFromFiles(Env env, List<String> filenames) throws RuntimeException {
+    CoreMapExpressionExtractor extractor = new CoreMapExpressionExtractor(env);
     for (String filename:filenames) {
       try {
         log.info("Reading TokensRegex rules from " + filename);
@@ -325,30 +328,31 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
     }
   }
 
-  private List<CoreMap> extractCoreMapsToList(List<CoreMap> res, CoreMap annotation) {
+  public List<CoreMap> extractCoreMapsToList(List<CoreMap> res, CoreMap annotation)
+  {
     List<T> exprs = extractExpressions(annotation);
-    for (T expr : exprs) {
+    for (T expr:exprs) {
       res.add(expr.getAnnotation());
     }
     return res;
   }
 
   /**
-   * Returns list of coremaps that matches the specified rules.
-   *
+   * Returns list of coremaps that matches the specified rules
    * @param annotation
    */
-  public List<CoreMap> extractCoreMaps(CoreMap annotation) {
+  public List<CoreMap> extractCoreMaps(CoreMap annotation)
+  {
     List<CoreMap> res = new ArrayList<>();
     return extractCoreMapsToList(res, annotation);
   }
 
   /**
-   * Returns list of merged tokens and original tokens.
-   *
+   * Returns list of merged tokens and original tokens
    * @param annotation
    */
-  public List<CoreMap> extractCoreMapsMergedWithTokens(CoreMap annotation) {
+  public List<CoreMap> extractCoreMapsMergedWithTokens(CoreMap annotation)
+  {
     List<CoreMap> res = extractCoreMaps(annotation);
     Integer startTokenOffset = annotation.get(CoreAnnotations.TokenBeginAnnotation.class);
     if (startTokenOffset == null) {
@@ -356,7 +360,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
     }
     final Integer startTokenOffsetFinal = startTokenOffset;
     List<CoreMap> merged = CollectionUtils.mergeListWithSortedMatchedPreAggregated(
-            annotation.get(tokensAnnotationKey), res, in -> Interval.toInterval(in.get(CoreAnnotations.TokenBeginAnnotation.class) - startTokenOffsetFinal,
+            (List<CoreMap>) annotation.get(tokensAnnotationKey), res, in -> Interval.toInterval(in.get(CoreAnnotations.TokenBeginAnnotation.class) - startTokenOffsetFinal,
                     in.get(CoreAnnotations.TokenEndAnnotation.class) - startTokenOffsetFinal)
     );
     return merged;
@@ -366,9 +370,9 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
     return flatten(cms, tokensAnnotationKey);
   }
 
-  private static List<CoreMap> flatten(List<CoreMap> cms, Class key) {
+  static List<CoreMap> flatten(List<CoreMap> cms, Class key) {
     List<CoreMap> res = new ArrayList<>();
-    for (CoreMap cm : cms) {
+    for (CoreMap cm:cms) {
       if (cm.get(key) != null) {
         res.addAll( (List<CoreMap>) cm.get(key));
       } else {
@@ -412,23 +416,23 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
     }
   }
 
-  private Pair<List<? extends CoreMap>, List<T>> applyCompositeRule(
+  public Pair<List<? extends CoreMap>, List<T>> applyCompositeRule(
           SequenceMatchRules.ExtractRule<List<? extends CoreMap>, T> compositeExtractRule,
           List<? extends CoreMap> merged,
-          List<T> matchedExpressions, int limit) {
+          List<T> matchedExpressions, int limit)
+  {
     // Apply higher order rules
     boolean done = false;
     // Limit of number of times rules are applied just in case
     int maxIters = limit;
     int iters = 0;
-    while (! done) {
+    while (!done) {
       List<T> newExprs = new ArrayList<>();
       boolean extracted = compositeExtractRule.extract(merged, newExprs);
-      if (verbose && extracted) log.info("applyCompositeRule() extracting with " + compositeExtractRule + " from " + merged + " gives " + newExprs);
       if (extracted) {
         annotateExpressions(merged, newExprs);
         newExprs = MatchedExpression.removeNullValues(newExprs);
-        if ( ! newExprs.isEmpty()) {
+        if (newExprs.size() > 0) {
           newExprs = MatchedExpression.removeNested(newExprs);
           newExprs = MatchedExpression.removeOverlapping(newExprs);
           merged = MatchedExpression.replaceMerged(merged, newExprs);
@@ -440,7 +444,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
           extracted = false;
         }
       }
-      done = ! extracted;
+      done = !extracted;
       iters++;
       if (maxIters > 0 && iters >= maxIters) {
         if (verbose) {
@@ -464,12 +468,13 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
     }
   }
 
-  public List<T> extractExpressions(CoreMap annotation) {
+  public List<T> extractExpressions(CoreMap annotation)
+  {
     // Extract potential expressions
     List<T> matchedExpressions = new ArrayList<>();
     List<Integer> stageIds = new ArrayList<>(stages.keySet());
     Collections.sort(stageIds);
-    for (int stageId : stageIds) {
+    for (int stageId:stageIds) {
       Stage<T> stage = stages.get(stageId);
       SequenceMatchRules.ExtractRule<CoreMap, T> basicExtractRule = stage.basicExtractRule;
       if (stage.clearMatched) {
@@ -477,16 +482,13 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
       }
       if (basicExtractRule != null) {
         basicExtractRule.extract(annotation, matchedExpressions);
-        if (verbose && matchedExpressions != null) {
-          log.info("extractExpressions() extracting with " + basicExtractRule + " from " + annotation + " gives " + matchedExpressions);
-        }
         annotateExpressions(annotation, matchedExpressions);
         matchedExpressions = MatchedExpression.removeNullValues(matchedExpressions);
         matchedExpressions = MatchedExpression.removeNested(matchedExpressions);
         matchedExpressions = MatchedExpression.removeOverlapping(matchedExpressions);
       }
 
-      List<? extends CoreMap> merged = MatchedExpression.replaceMergedUsingTokenOffsets(annotation.get(tokensAnnotationKey), matchedExpressions);
+      List<? extends CoreMap> merged = MatchedExpression.replaceMergedUsingTokenOffsets((List<? extends CoreMap>) annotation.get(tokensAnnotationKey), matchedExpressions);
       SequenceMatchRules.ExtractRule<List<? extends CoreMap>, T> compositeExtractRule = stage.compositeExtractRule;
       if (compositeExtractRule != null) {
         Pair<List<? extends CoreMap>, List<T>> p = applyCompositeRule(
@@ -503,18 +505,16 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
     return matchedExpressions;
   }
 
-  private void annotateExpressions(CoreMap annotation, List<T> expressions) {
+  private void annotateExpressions(CoreMap annotation, List<T> expressions)
+  {
     // TODO: Logging can be excessive
-    List<T> toDiscard = new ArrayList<>();
-    for (T te : expressions) {
+    List<MatchedExpression> toDiscard = new ArrayList<>();
+    for (MatchedExpression te:expressions) {
       // Add attributes and all
       if (te.annotation == null) {
         try {
-          boolean extractOkay = te.extractAnnotation(env, annotation);
-          if (verbose && extractOkay) {
-            log.info("annotateExpressions() matched " + te + " from " + annotation);
-          }
-          if (!extractOkay) {
+          boolean extrackOkay = te.extractAnnotation(env, annotation);
+          if (!extrackOkay) {
             // Things didn't turn out so well
             toDiscard.add(te);
             log.warn("Error extracting annotation from " + te /*+ ", " + te.getExtractErrorMessage() */);
@@ -530,16 +530,14 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
     expressions.removeAll(toDiscard);
   }
 
-  private void annotateExpressions(List<? extends CoreMap> chunks, List<T> expressions) {
+  private void annotateExpressions(List<? extends CoreMap> chunks, List<T> expressions)
+  {
     // TODO: Logging can be excessive
-    List<T> toDiscard = new ArrayList<>();
-    for (T te : expressions) {
+    List<MatchedExpression> toDiscard = new ArrayList<>();
+    for (MatchedExpression te:expressions) {
       // Add attributes and all
       try {
         boolean extractOkay = te.extractAnnotation(env, chunks);
-        if (verbose && extractOkay) {
-          log.info("annotateExpressions() matched " + te + " from " + chunks);
-        }
         if (!extractOkay) {
           // Things didn't turn out so well
           toDiscard.add(te);
@@ -555,9 +553,10 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
     expressions.removeAll(toDiscard);
   }
 
-  private List<T> filterInvalidExpressions(Predicate<T> filterRule, List<T> expressions) {
+  private List<T> filterInvalidExpressions(Predicate<T> filterRule, List<T> expressions)
+  {
     if (filterRule == null) return expressions;
-    if (expressions.isEmpty()) return expressions;
+    if (expressions.size() == 0) return expressions;
     int nfiltered = 0;
     List<T> kept = new ArrayList<>(expressions.size());   // Approximate size
     for (T expr : expressions) {

@@ -15,7 +15,7 @@ import java.util.SortedSet;
  * defined here are typesafe keys for getting and setting annotation
  * values. These classes need not be instantiated outside of this
  * class. e.g {@link TextAnnotation}.class serves as the key and a
- * {@code String} serves as the value containing the
+ * <code>String</code> serves as the value containing the
  * corresponding word.
  * </p>
  *
@@ -42,7 +42,8 @@ import java.util.SortedSet;
  */
 public class CoreAnnotations {
 
-  private CoreAnnotations() { } // only static members
+  private CoreAnnotations() {
+  } // only static members
 
   /**
    * The CoreMap key identifying the annotation's text.
@@ -51,7 +52,6 @@ public class CoreAnnotations {
    * annotations - documents, sentences and tokens all have their own text.
    */
   public static class TextAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -66,7 +66,6 @@ public class CoreAnnotations {
    * TODO: merge with StemAnnotation?
    */
   public static class LemmaAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -78,7 +77,6 @@ public class CoreAnnotations {
    * This key is typically set on token annotations.
    */
   public static class PartOfSpeechAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -91,7 +89,6 @@ public class CoreAnnotations {
    * This key is typically set on token annotations.
    */
   public static class NamedEntityTagAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -107,7 +104,6 @@ public class CoreAnnotations {
    * This key is typically set on token annotations.
    */
   public static class StackedNamedEntityTagAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -120,7 +116,6 @@ public class CoreAnnotations {
    * This key is typically set on token annotations.
    */
   public static class TrueCaseAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -133,7 +128,6 @@ public class CoreAnnotations {
    * annotations - documents, sentences and tokens all have their own text.
    */
   public static class TrueCaseTextAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -146,9 +140,8 @@ public class CoreAnnotations {
    * done without much memory overhead using List.subList.
    */
   public static class TokensAnnotation implements CoreAnnotation<List<CoreLabel>> {
-    @Override
     public Class<List<CoreLabel>> getType() {
-      return ErasureUtils.uncheckedCast(List.class);
+      return ErasureUtils.<Class<List<CoreLabel>>> uncheckedCast(List.class);
     }
   }
 
@@ -159,9 +152,8 @@ public class CoreAnnotations {
    * done without much memory overhead using List.subList.
    */
   public static class GenericTokensAnnotation implements CoreAnnotation<List<CoreMap>> {
-    @Override
     public Class<List<CoreMap>> getType() {
-      return ErasureUtils.uncheckedCast(List.class);
+      return ErasureUtils.<Class<List<CoreMap>>> uncheckedCast(List.class);
     }
   }
 
@@ -171,7 +163,6 @@ public class CoreAnnotations {
    * This key is typically set only on document annotations.
    */
   public static class SentencesAnnotation implements CoreAnnotation<List<CoreMap>> {
-    @Override
     public Class<List<CoreMap>> getType() {
       return ErasureUtils.uncheckedCast(List.class);
     }
@@ -183,7 +174,6 @@ public class CoreAnnotations {
    * This key is typically set only on document annotations.
    */
   public static class QuotationsAnnotation implements CoreAnnotation<List<CoreMap>> {
-    @Override
     public Class<List<CoreMap>> getType() {
       return ErasureUtils.uncheckedCast(List.class);
     }
@@ -193,7 +183,6 @@ public class CoreAnnotations {
    * Unique identifier within a document for a given quotation.
    */
   public static class QuotationIndexAnnotation implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -203,7 +192,6 @@ public class CoreAnnotations {
    * The index of the sentence that this annotation begins in.
    */
   public static class SentenceBeginAnnotation implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -213,7 +201,6 @@ public class CoreAnnotations {
    * The index of the sentence that this annotation begins in.
    */
   public static class SentenceEndAnnotation implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -226,7 +213,6 @@ public class CoreAnnotations {
    * This key is typically set only on document annotations.
    */
   public static class ParagraphsAnnotation implements CoreAnnotation<List<CoreMap>> {
-    @Override
     public Class<List<CoreMap>> getType() {
       return ErasureUtils.uncheckedCast(List.class);
     }
@@ -239,7 +225,6 @@ public class CoreAnnotations {
    * This key should be set for any annotation that contains tokens.
    */
   public static class TokenBeginAnnotation implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -252,7 +237,6 @@ public class CoreAnnotations {
    * This key should be set for any annotation that contains tokens.
    */
   public static class TokenEndAnnotation implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -265,22 +249,19 @@ public class CoreAnnotations {
    * This key is typically set on document annotations.
    */
   public static class CalendarAnnotation implements CoreAnnotation<Calendar> {
-    @Override
     public Class<Calendar> getType() {
       return Calendar.class;
     }
   }
 
-  /*
+  /**
    * These are the keys hashed on by IndexedWord
    */
-
   /**
    * This refers to the unique identifier for a "document", where document may
    * vary based on your application.
    */
   public static class DocIDAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -296,7 +277,6 @@ public class CoreAnnotations {
    * unique identifier for differentiating objects.
    */
   public static class IndexAnnotation implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -312,7 +292,6 @@ public class CoreAnnotations {
    * dependency output.
    */
   public static class BeginIndexAnnotation implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -326,7 +305,6 @@ public class CoreAnnotations {
    * IndexAnnotation of the last word in the span.
    */
   public static class EndIndexAnnotation implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -340,7 +318,6 @@ public class CoreAnnotations {
    */
   public static class ForcedSentenceUntilEndAnnotation
           implements CoreAnnotation<Boolean> {
-    @Override
     public Class<Boolean> getType() {
       return Boolean.class;
     }
@@ -353,7 +330,6 @@ public class CoreAnnotations {
    */
   public static class ForcedSentenceEndAnnotation
   implements CoreAnnotation<Boolean> {
-    @Override
     public Class<Boolean> getType() {
       return Boolean.class;
     }
@@ -363,7 +339,6 @@ public class CoreAnnotations {
    * Unique identifier within a document for a given sentence.
    */
   public static class SentenceIndexAnnotation implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -375,7 +350,6 @@ public class CoreAnnotations {
    * lines not represented as sentences.  Indexed from 1 rather than 0.
    */
   public static class LineNumberAnnotation implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -385,14 +359,12 @@ public class CoreAnnotations {
    * Contains the "value" - an ill-defined string used widely in MapLabel.
    */
   public static class ValueAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class CategoryAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -404,7 +376,6 @@ public class CoreAnnotations {
    * match what appears in the PTB, but this key will hold the original characters.
    */
   public static class OriginalTextAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -416,7 +387,6 @@ public class CoreAnnotations {
    * reconstructed.
    */
   public static class BeforeAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -428,7 +398,6 @@ public class CoreAnnotations {
    * reconstructed.
    */
   public static class AfterAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -438,7 +407,6 @@ public class CoreAnnotations {
    * CoNLL dep parsing - coarser POS tags.
    */
   public static class CoarseTagAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -448,7 +416,6 @@ public class CoreAnnotations {
    * CoNLL dep parsing - the dependency type
    */
   public static class CoNLLDepAnnotation implements CoreAnnotation<CoreMap> {
-    @Override
     public Class<CoreMap> getType() {
       return CoreMap.class;
     }
@@ -458,7 +425,6 @@ public class CoreAnnotations {
    * CoNLL SRL/dep parsing - whether the word is a predicate
    */
   public static class CoNLLPredicateAnnotation implements CoreAnnotation<Boolean> {
-    @Override
     public Class<Boolean> getType() {
       return Boolean.class;
     }
@@ -469,9 +435,8 @@ public class CoreAnnotations {
    * specific role for each predicate
    */
   public static class CoNLLSRLAnnotation implements CoreAnnotation<Map<Integer,String>> {
-    @Override
     public Class<Map<Integer,String>> getType() {
-      return ErasureUtils.uncheckedCast(Map.class);
+      return ErasureUtils.<Class<Map<Integer,String>>> uncheckedCast(Map.class);
     }
   }
 
@@ -479,7 +444,6 @@ public class CoreAnnotations {
    * CoNLL dep parsing - the dependency type
    */
   public static class CoNLLDepTypeAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -489,9 +453,8 @@ public class CoreAnnotations {
    * CoNLL-U dep parsing - span of multiword tokens
    */
   public static class CoNLLUTokenSpanAnnotation implements CoreAnnotation<IntPair> {
-    @Override
     public Class<IntPair> getType() {
-      return ErasureUtils.uncheckedCast(Pair.class);
+      return ErasureUtils.<Class<IntPair>> uncheckedCast(Pair.class);
     }
   }
 
@@ -499,9 +462,8 @@ public class CoreAnnotations {
    * CoNLL-U dep parsing - List of secondary dependencies
    */
   public static class CoNLLUSecondaryDepsAnnotation implements CoreAnnotation<HashMap<Integer,String>> {
-    @Override
     public Class<HashMap<Integer,String>> getType() {
-      return ErasureUtils.uncheckedCast(Pair.class);
+      return ErasureUtils.<Class<HashMap<Integer,String>>> uncheckedCast(Pair.class);
     }
   }
 
@@ -509,7 +471,6 @@ public class CoreAnnotations {
    * CoNLL-U dep parsing - List of morphological features
    */
   public static class CoNLLUFeats implements CoreAnnotation<HashMap<String,String>> {
-    @Override
     public Class<HashMap<String,String>> getType() {
       return ErasureUtils.uncheckedCast(HashMap.class);
     }
@@ -519,7 +480,6 @@ public class CoreAnnotations {
    * CoNLL-U dep parsing - Any other annotation
    */
   public static class CoNLLUMisc implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -530,7 +490,6 @@ public class CoreAnnotations {
    * in the dependency tree
    */
   public static class CoNLLDepParentIndexAnnotation implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -540,7 +499,6 @@ public class CoreAnnotations {
    * Inverse document frequency of the word this label represents
    */
   public static class IDFAnnotation implements CoreAnnotation<Double> {
-    @Override
     public Class<Double> getType() {
       return Double.class;
     }
@@ -550,7 +508,6 @@ public class CoreAnnotations {
    * The standard key for a propbank label which is of type Argument
    */
   public static class ArgumentAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -561,7 +518,6 @@ public class CoreAnnotations {
    * nodes
    */
   public static class MarkingAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -571,7 +527,6 @@ public class CoreAnnotations {
    * The standard key for Semantic Head Word which is a String
    */
   public static class SemanticHeadWordAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -581,7 +536,6 @@ public class CoreAnnotations {
    * The standard key for Semantic Head Word POS which is a String
    */
   public static class SemanticHeadTagAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -592,7 +546,6 @@ public class CoreAnnotations {
    * only be in the verbnode
    */
   public static class VerbSenseAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -602,7 +555,6 @@ public class CoreAnnotations {
    * The standard key for storing category with functional tags.
    */
   public static class CategoryFunctionalTagAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -613,7 +565,6 @@ public class CoreAnnotations {
    * for you...)
    */
   public static class NERIDAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -623,7 +574,6 @@ public class CoreAnnotations {
    * The key for the normalized value of numeric named entities.
    */
   public static class NormalizedNamedEntityTagAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -638,7 +588,6 @@ public class CoreAnnotations {
    * you use this key)
    */
   public static class SRLIDAnnotation implements CoreAnnotation<SRL_ID> {
-    @Override
     public Class<SRL_ID> getType() {
       return SRL_ID.class;
     }
@@ -651,7 +600,6 @@ public class CoreAnnotations {
    * making shape strings.
    */
   public static class ShapeAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -662,7 +610,6 @@ public class CoreAnnotations {
    * of the tree of the leftmost terminal dominated by the current node
    */
   public static class LeftTermAnnotation implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -672,14 +619,12 @@ public class CoreAnnotations {
    * The standard key for the parent which is a String
    */
   public static class ParentAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class INAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -689,7 +634,6 @@ public class CoreAnnotations {
    * The standard key for span which is an IntPair
    */
   public static class SpanAnnotation implements CoreAnnotation<IntPair> {
-    @Override
     public Class<IntPair> getType() {
       return IntPair.class;
     }
@@ -699,7 +643,6 @@ public class CoreAnnotations {
    * The standard key for the answer which is a String
    */
   public static class AnswerAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -709,7 +652,6 @@ public class CoreAnnotations {
    * The standard key for gold answer which is a String
    */
   public static class GoldAnswerAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -719,7 +661,6 @@ public class CoreAnnotations {
    * The standard key for the features which is a Collection
    */
   public static class FeaturesAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -729,7 +670,6 @@ public class CoreAnnotations {
    * The standard key for the semantic interpretation
    */
   public static class InterpretationAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -739,7 +679,6 @@ public class CoreAnnotations {
    * The standard key for the semantic role label of a phrase.
    */
   public static class RoleAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -749,7 +688,6 @@ public class CoreAnnotations {
    * The standard key for the gazetteer information
    */
   public static class GazetteerAnnotation implements CoreAnnotation<List<String>> {
-    @Override
     public Class<List<String>> getType() {
       return ErasureUtils.uncheckedCast(List.class);
     }
@@ -759,53 +697,45 @@ public class CoreAnnotations {
    * Morphological stem of the word this label represents
    */
   public static class StemAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class PolarityAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class MorphoNumAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class MorphoPersAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class MorphoGenAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class MorphoCaseAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   /**
-   * For Chinese: character level information, segmentation. Used for representing
-   * a single character as a token.
+   * for Chinese: character level information, segmentation
    */
   public static class ChineseCharAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -813,17 +743,13 @@ public class CoreAnnotations {
 
   /** For Chinese: the segmentation info existing in the original text. */
   public static class ChineseOrigSegAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
-  /** For Chinese: the segmentation information from the segmenter.
-   *  Either a "1" for a new word starting at this position or a "0".
-   */
+  /** For Chinese: the segmentation information from the segmenter. */
   public static class ChineseSegAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -834,25 +760,8 @@ public class CoreAnnotations {
    * ChineseSegAnnotation and seems to indicate if the text is segmented
    */
   public static class ChineseIsSegmentedAnnotation implements CoreAnnotation<Boolean> {
-    @Override
     public Class<Boolean> getType() {
       return Boolean.class;
-    }
-  }
-
-  /**
-   * for Arabic: character level information, segmentation
-   */
-  public static class ArabicCharAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  /** For Arabic: the segmentation information from the segmenter. */
-  public static class ArabicSegAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
     }
   }
 
@@ -864,7 +773,6 @@ public class CoreAnnotations {
    * This key should be set for any annotation that represents a span of text.
    */
   public static class CharacterOffsetBeginAnnotation implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -878,7 +786,6 @@ public class CoreAnnotations {
    * This key should be set for any annotation that represents a span of text.
    */
   public static class CharacterOffsetEndAnnotation implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -888,21 +795,18 @@ public class CoreAnnotations {
    * Key for relative value of a word - used in RTE
    */
   public static class CostMagnificationAnnotation implements CoreAnnotation<Double> {
-    @Override
     public Class<Double> getType() {
       return Double.class;
     }
   }
 
   public static class WordSenseAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class SRLInstancesAnnotation implements CoreAnnotation<List<List<Pair<String, Pair>>>> {
-    @Override
     public Class<List<List<Pair<String, Pair>>>> getType() {
       return ErasureUtils.uncheckedCast(List.class);
     }
@@ -913,7 +817,6 @@ public class CoreAnnotations {
    * sentences begin.
    */
   public static class NumTxtSentencesAnnotation implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -923,7 +826,6 @@ public class CoreAnnotations {
    * Used in Trees
    */
   public static class TagLabelAnnotation implements CoreAnnotation<Label> {
-    @Override
     public Class<Label> getType() {
       return Label.class;
     }
@@ -935,146 +837,124 @@ public class CoreAnnotations {
    * may be "CharacterAnnotation" - not sure
    */
   public static class DomainAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class PositionAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class CharAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
-  /** Note: this is not a catchall "unknown" annotation but seems to have a
-   *  specific meaning for sequence classifiers
-   */
+  // note: this is not a catchall "unknown" annotation but seems to have a
+  // specific meaning for sequence classifiers
   public static class UnknownAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class IDAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
-  /** Possibly this should be grouped with gazetteer annotation - original key
-   *  was "gaz".
-   */
+  // possibly this should be grouped with gazetteer annotation - original key
+  // was "gaz"
   public static class GazAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class PossibleAnswersAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class DistSimAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class AbbrAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class ChunkAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class GovernorAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class AbgeneAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class GeniaAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class AbstrAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class FreqAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class DictAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class WebAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class FemaleGazAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class MaleGazAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class LastGazAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1084,28 +964,24 @@ public class CoreAnnotations {
    * it really seems like this should have a different name or else be a boolean
    */
   public static class IsURLAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class LinkAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class MentionsAnnotation implements CoreAnnotation<List<CoreMap>> {
-    @Override
     public Class<List<CoreMap>> getType() {
       return ErasureUtils.uncheckedCast(List.class);
     }
   }
 
   public static class EntityTypeAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1115,14 +991,12 @@ public class CoreAnnotations {
    * it really seems like this should have a different name or else be a boolean
    */
   public static class IsDateRangeAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class PredictedAnswerAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1130,21 +1004,18 @@ public class CoreAnnotations {
 
   /** Seems like this could be consolidated with something else... */
   public static class OriginalCharAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class UTypeAnnotation implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
   }
 
   public static class EntityRuleAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1154,7 +1025,6 @@ public class CoreAnnotations {
    * Section of a document
    */
   public static class SectionAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1164,7 +1034,6 @@ public class CoreAnnotations {
    * Date for a section of a document
    */
   public static class SectionDateAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1174,7 +1043,6 @@ public class CoreAnnotations {
    * Id for a section of a document
    */
   public static class SectionIDAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1185,7 +1053,6 @@ public class CoreAnnotations {
    *   that should go into that section
    */
   public static class SectionStartAnnotation implements CoreAnnotation<CoreMap> {
-    @Override
     public Class<CoreMap> getType() {
       return CoreMap.class;
     }
@@ -1195,28 +1062,24 @@ public class CoreAnnotations {
    * Indicates that the token end a section and the label of the section
    */
   public static class SectionEndAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class WordPositionAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class ParaPositionAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class SentencePositionAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1226,21 +1089,18 @@ public class CoreAnnotations {
   // class
   // uses both so here they remain for now...
   public static class SentenceIDAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class EntityClassAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class AnswerObjectAnnotation implements CoreAnnotation<Object> {
-    @Override
     public Class<Object> getType() {
       return Object.class;
     }
@@ -1250,21 +1110,18 @@ public class CoreAnnotations {
    * Used in Task3 Pascal system
    */
   public static class BestCliquesAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class BestFullAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class LastTaggedAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1274,21 +1131,18 @@ public class CoreAnnotations {
    * Used in wsd.supwsd package
    */
   public static class LabelAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class NeighborsAnnotation implements CoreAnnotation<List<Pair<WordLemmaTag, String>>> {
-    @Override
     public Class<List<Pair<WordLemmaTag, String>>> getType() {
       return ErasureUtils.uncheckedCast(List.class);
     }
   }
 
   public static class ContextsAnnotation implements CoreAnnotation<List<Pair<String, String>>> {
-    @Override
     public Class<List<Pair<String, String>>> getType() {
       return ErasureUtils.uncheckedCast(List.class);
     }
@@ -1296,35 +1150,30 @@ public class CoreAnnotations {
 
   public static class DependentsAnnotation implements
   CoreAnnotation<List<Pair<Triple<String, String, String>, String>>> {
-    @Override
     public Class<List<Pair<Triple<String, String, String>, String>>> getType() {
       return ErasureUtils.uncheckedCast(List.class);
     }
   }
 
   public static class WordFormAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class TrueTagAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class SubcategorizationAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class BagOfWordsAnnotation implements CoreAnnotation<List<Pair<String, String>>> {
-    @Override
     public Class<List<Pair<String, String>>> getType() {
       return ErasureUtils.uncheckedCast(List.class);
     }
@@ -1334,14 +1183,12 @@ public class CoreAnnotations {
    * Used in srl.unsup
    */
   public static class HeightAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class LengthAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1351,49 +1198,42 @@ public class CoreAnnotations {
    * Used in Gale2007ChineseSegmenter
    */
   public static class LBeginAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class LMiddleAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class LEndAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class D2_LBeginAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class D2_LMiddleAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class D2_LEndAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class UBlockAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1401,7 +1241,6 @@ public class CoreAnnotations {
 
   /** Used in Chinese segmenters for whether there was space before a character. */
   public static class SpaceBeforeAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1415,7 +1254,6 @@ public class CoreAnnotations {
    * The base version of the parser state, like NP or VBZ or ...
    */
   public static class StateAnnotation implements CoreAnnotation<CoreLabel> {
-    @Override
     public Class<CoreLabel> getType() {
       return CoreLabel.class;
     }
@@ -1425,7 +1263,6 @@ public class CoreAnnotations {
    * used in binarized trees to say the name of the most recent child
    */
   public static class PrevChildAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1436,7 +1273,6 @@ public class CoreAnnotations {
    * this node is the parent
    */
   public static class FirstChildAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1446,7 +1282,6 @@ public class CoreAnnotations {
    * whether the node is the parent in a unary rule
    */
   public static class UnaryAnnotation implements CoreAnnotation<Boolean> {
-    @Override
     public Class<Boolean> getType() {
       return Boolean.class;
     }
@@ -1456,7 +1291,6 @@ public class CoreAnnotations {
    * annotation stolen from the lex parser
    */
   public static class DoAnnotation implements CoreAnnotation<Boolean> {
-    @Override
     public Class<Boolean> getType() {
       return Boolean.class;
     }
@@ -1466,7 +1300,6 @@ public class CoreAnnotations {
    * annotation stolen from the lex parser
    */
   public static class HaveAnnotation implements CoreAnnotation<Boolean> {
-    @Override
     public Class<Boolean> getType() {
       return Boolean.class;
     }
@@ -1476,7 +1309,6 @@ public class CoreAnnotations {
    * annotation stolen from the lex parser
    */
   public static class BeAnnotation implements CoreAnnotation<Boolean> {
-    @Override
     public Class<Boolean> getType() {
       return Boolean.class;
     }
@@ -1486,7 +1318,6 @@ public class CoreAnnotations {
    * annotation stolen from the lex parser
    */
   public static class NotAnnotation implements CoreAnnotation<Boolean> {
-    @Override
     public Class<Boolean> getType() {
       return Boolean.class;
     }
@@ -1496,7 +1327,6 @@ public class CoreAnnotations {
    * annotation stolen from the lex parser
    */
   public static class PercentAnnotation implements CoreAnnotation<Boolean> {
-    @Override
     public Class<Boolean> getType() {
       return Boolean.class;
     }
@@ -1506,7 +1336,6 @@ public class CoreAnnotations {
    * specifies the base state of the parent of this node in the parse tree
    */
   public static class GrandparentAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1517,7 +1346,6 @@ public class CoreAnnotations {
    * TreeCoreAnnotations.HeadWordAnnotation)
    */
   public static class HeadWordStringAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1527,21 +1355,18 @@ public class CoreAnnotations {
    * Used in nlp.coref
    */
   public static class MonthAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class DayAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class YearAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1551,28 +1376,24 @@ public class CoreAnnotations {
    * Used in propbank.srl
    */
   public static class PriorAnnotation implements CoreAnnotation<Map<String, Double>> {
-    @Override
     public Class<Map<String, Double>> getType() {
       return ErasureUtils.uncheckedCast(Map.class);
     }
   }
 
   public static class SemanticWordAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class SemanticTagAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class CovertIDAnnotation implements CoreAnnotation<List<IntPair>> {
-    @Override
     public Class<List<IntPair>> getType() {
       return ErasureUtils.uncheckedCast(List.class);
     }
@@ -1580,7 +1401,6 @@ public class CoreAnnotations {
 
   public static class ArgDescendentAnnotation implements CoreAnnotation<Pair<String, Double>> {
 
-    @Override
     public Class<Pair<String, Double>> getType() {
       return ErasureUtils.uncheckedCast(Pair.class);
     }
@@ -1591,7 +1411,6 @@ public class CoreAnnotations {
    * innermost element in which this token was contained.
    */
   public static class XmlElementAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1603,7 +1422,6 @@ public class CoreAnnotations {
    */
   public static class XmlContextAnnotation implements CoreAnnotation<List<String>> {
 
-    @Override
     public Class<List<String>> getType() {
       return ErasureUtils.uncheckedCast(List.class);
     }
@@ -1616,7 +1434,6 @@ public class CoreAnnotations {
    *
    */
   public static class TopicAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1624,7 +1441,6 @@ public class CoreAnnotations {
 
   // gets the synonymn of a word in the Wordnet (use a bit differently in sonalg's code)
   public static class WordnetSynAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1632,7 +1448,6 @@ public class CoreAnnotations {
 
   //to get words of the phrase
   public static class PhraseWordsTagAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1640,7 +1455,6 @@ public class CoreAnnotations {
 
   //to get pos tag of the phrase i.e. root of the phrase tree in the parse tree
   public static class PhraseWordsAnnotation implements CoreAnnotation<List<String>> {
-    @Override
     public Class<List<String>> getType() {
       return ErasureUtils.uncheckedCast(List.class);
     }
@@ -1648,7 +1462,6 @@ public class CoreAnnotations {
 
   //to get prototype feature, see Haghighi Exemplar driven learning
   public static class ProtoAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1656,7 +1469,6 @@ public class CoreAnnotations {
 
   //which common words list does this word belong to
   public static class CommonWordsAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1665,7 +1477,6 @@ public class CoreAnnotations {
   // Document date
   // Needed by SUTime
   public static class DocDateAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1676,7 +1487,6 @@ public class CoreAnnotations {
    * What kind of document is it: story, multi-part article, listing, email, etc
    */
   public static class DocTypeAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1687,7 +1497,6 @@ public class CoreAnnotations {
    * What kind of place did the document come from: newswire, discussion forum, web...
    */
   public static class DocSourceTypeAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1698,7 +1507,6 @@ public class CoreAnnotations {
    * What is the document title
    */
   public static class DocTitleAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1708,7 +1516,6 @@ public class CoreAnnotations {
    * Reference location for the document
    */
   public static class LocationAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1719,7 +1526,6 @@ public class CoreAnnotations {
    * (really should be a set of authors, but just have single string for simplicity)
    */
   public static class AuthorAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1730,7 +1536,6 @@ public class CoreAnnotations {
   // Per token annotation indicating whether the token represents a NUMBER or ORDINAL
   // (twenty first => NUMBER ORDINAL)
   public static class NumericTypeAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1739,7 +1544,6 @@ public class CoreAnnotations {
   // Per token annotation indicating the numeric value of the token
   // (twenty first => 20 1)
   public static class NumericValueAnnotation implements CoreAnnotation<Number> {
-    @Override
     public Class<Number> getType() {
       return Number.class;
     }
@@ -1747,7 +1551,6 @@ public class CoreAnnotations {
 
   // Per token annotation indicating the numeric object associated with an annotation
   public static class NumericObjectAnnotation implements CoreAnnotation<Object> {
-    @Override
     public Class<Object> getType() {
       return Object.class;
     }
@@ -1756,7 +1559,6 @@ public class CoreAnnotations {
   // Annotation indicating whether the numeric phrase the token is part of
   // represents a NUMBER or ORDINAL (twenty first => ORDINAL ORDINAL)
   public static class NumericCompositeValueAnnotation implements CoreAnnotation<Number> {
-    @Override
     public Class<Number> getType() {
       return Number.class;
     }
@@ -1765,24 +1567,21 @@ public class CoreAnnotations {
   // Annotation indicating the numeric value of the phrase the token is part of
   // (twenty first => 21 21 )
   public static class NumericCompositeTypeAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
-  /** Annotation indicating the numeric object associated with an annotation. */
+  // Annotation indicating the numeric object associated with an annotation
   public static class NumericCompositeObjectAnnotation implements CoreAnnotation<Object> {
-    @Override
     public Class<Object> getType() {
       return Object.class;
     }
   }
 
   public static class NumerizedTokensAnnotation implements CoreAnnotation<List<CoreMap>> {
-    @Override
     public Class<List<CoreMap>> getType() {
-      return ErasureUtils.uncheckedCast(List.class);
+      return ErasureUtils.<Class<List<CoreMap>>> uncheckedCast(List.class);
     }
   }
 
@@ -1791,7 +1590,6 @@ public class CoreAnnotations {
    * to indicate that the it should use the discourse information annotated in the document
    */
   public static class UseMarkedDiscourseAnnotation implements CoreAnnotation<Boolean> {
-    @Override
     public Class<Boolean> getType() {
       return Boolean.class;
     }
@@ -1799,10 +1597,9 @@ public class CoreAnnotations {
 
   /**
    * used in dcoref.
-   * to store discourse information. (marking {@code <TURN>} or quotation)
+   * to store discourse information. (marking <TURN> or quotation)
    */
   public static class UtteranceAnnotation implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -1813,7 +1610,6 @@ public class CoreAnnotations {
    * to store speaker information.
    */
   public static class SpeakerAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -1824,7 +1620,6 @@ public class CoreAnnotations {
    * to store paragraph information.
    */
   public static class ParagraphAnnotation implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -1835,7 +1630,6 @@ public class CoreAnnotations {
    * to store premarked entity mentions.
    */
   public static class MentionTokenAnnotation implements CoreAnnotation<MultiTokenTag> {
-    @Override
     public Class<MultiTokenTag> getType() {
       return MultiTokenTag.class;
     }
@@ -1845,7 +1639,6 @@ public class CoreAnnotations {
    * used in incremental DAG parser
    */
   public static class LeftChildrenNodeAnnotation implements CoreAnnotation<SortedSet<Pair<CoreLabel, String>>> {
-    @Override
     public Class<SortedSet<Pair<CoreLabel, String>>> getType() {
       return ErasureUtils.uncheckedCast(SortedSet.class);
     }
@@ -1855,7 +1648,6 @@ public class CoreAnnotations {
    * Stores an exception associated with processing this document
    */
   public static class ExceptionAnnotation implements CoreAnnotation<Throwable> {
-    @Override
     public Class<Throwable> getType() {
       return ErasureUtils.uncheckedCast(Throwable.class);
     }
@@ -1877,26 +1669,22 @@ public class CoreAnnotations {
    * Generally, you want to use the usual coref graph annotations
    */
   public static class AntecedentAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() {
       return String.class;
     }
   }
 
   public static class LabelWeightAnnotation implements CoreAnnotation<Double>{
-   @Override
    public Class<Double> getType(){
      return Double.class;
    }
   }
 
   public static class ColumnDataClassifierAnnotation implements CoreAnnotation<String> {
-    @Override
     public Class<String> getType() { return String.class; }
   }
 
   public static class LabelIDAnnotation implements CoreAnnotation<Integer>{
-    @Override
     public Class<Integer> getType() { return Integer.class; }
   }
 
@@ -1907,7 +1695,6 @@ public class CoreAnnotations {
    * @see edu.stanford.nlp.pipeline.KBPAnnotator
    */
   public static class KBPTriplesAnnotation implements CoreAnnotation<List<RelationTriple>>{
-    @Override
     public Class<List<RelationTriple>> getType() { return ErasureUtils.uncheckedCast(List.class); }
   }
 
@@ -1920,7 +1707,6 @@ public class CoreAnnotations {
    * @see edu.stanford.nlp.pipeline.WikidictAnnotator
    */
   public static class WikipediaEntityAnnotation implements CoreAnnotation<String>{
-    @Override
     public Class<String> getType() { return ErasureUtils.uncheckedCast(String.class); }
   }
 }

@@ -153,10 +153,6 @@ import edu.stanford.nlp.util.logging.Redwood;
  *      (Exception: for only "U.S." the treebank does have the two tokens
  *      "U.S." and "." like our default; strictTreebank3 now does that too.)
  *      The default is false.
- *  <li>splitHyphenated: whether or not to tokenize segments of hyphenated words
- *      separately ("school" "-" "aged", "frog" "-" "lipped"), keeping the exceptions
- *      in Supplementary Guidelines for ETTB 2.0 by Justin Mott, Colin Warner, Ann Bies,
- *      Ann Taylor. Default is false, which maintains old treebank tokenizer behavior.
  * </ol>
  * <p>
  * A single instance of a PTBTokenizer is not thread safe, as it uses
