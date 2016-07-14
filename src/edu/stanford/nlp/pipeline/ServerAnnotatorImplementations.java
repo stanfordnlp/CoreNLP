@@ -1,8 +1,8 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
@@ -14,10 +14,11 @@ import java.util.*;
  * @author <a href="mailto:gabor@eloquent.ai">Gabor Angeli</a>
  */
 public class ServerAnnotatorImplementations extends AnnotatorImplementations {
-  /**
+
+  /*
    * An SLF4J Logger for this class.
    */
-  private static final Logger log = LoggerFactory.getLogger(ServerAnnotatorImplementations.class);
+  // private static final Logger log = LoggerFactory.getLogger(ServerAnnotatorImplementations.class);
 
 
   /**
@@ -52,12 +53,11 @@ public class ServerAnnotatorImplementations extends AnnotatorImplementations {
                               Properties properties,
                               String annotator) {
       Properties forClient = new Properties();
-      Enumeration<Object> keys = properties.keys();
-      while (keys.hasMoreElements()) {
-        String key = keys.nextElement().toString();
+      for (Object o : properties.keySet()) {
+        String key = o.toString();
         String value = properties.getProperty(key);
         forClient.setProperty(key, value);
-        forClient.setProperty(annotator + "." + key, value);
+        forClient.setProperty(annotator + '.' + key, value);
       }
       forClient.setProperty("annotators", annotator);
       forClient.setProperty("enforceRequirements", "false");
@@ -118,10 +118,7 @@ public class ServerAnnotatorImplementations extends AnnotatorImplementations {
 
   /** {@inheritDoc} */
   @Override
-  public Annotator trueCase(Properties properties, String modelLoc,
-                            String classBias,
-                            String mixedCaseFileName,
-                            boolean verbose) {
+  public Annotator trueCase(Properties properties) {
     return new SingletonAnnotator(host, port, properties, Annotator.STANFORD_TRUECASE);
   }
 
@@ -187,4 +184,5 @@ public class ServerAnnotatorImplementations extends AnnotatorImplementations {
   public Annotator link(Properties properties) {
     return new SingletonAnnotator(host, port, properties, Annotator.STANFORD_LINK);
   }
+
 }
