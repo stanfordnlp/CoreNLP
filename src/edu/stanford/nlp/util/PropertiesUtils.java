@@ -361,6 +361,16 @@ public class PropertiesUtils {
     return bp;
   }
 
+  //  add ovp's key values to bp, don't overwrite if there is already a value
+  public static Properties noClobberWriteProperties(Properties bp, Properties ovp) {
+    for (String propertyName : ovp.stringPropertyNames()) {
+      if (bp.containsKey(propertyName))
+        continue;
+      bp.setProperty(propertyName,ovp.getProperty(propertyName));
+    }
+    return bp;
+  }
+
 
   public static class Property {
 
