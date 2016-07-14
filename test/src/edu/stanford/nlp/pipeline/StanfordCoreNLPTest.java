@@ -2,6 +2,8 @@ package edu.stanford.nlp.pipeline;
 
 import org.junit.Test;
 
+import java.util.Properties;
+
 import static org.junit.Assert.*;
 
 /**
@@ -14,34 +16,43 @@ public class StanfordCoreNLPTest {
   @Test
   public void testPrereqAnnotatorsBasic() {
     assertEquals("tokenize,ssplit,parse",
-        StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"parse"}));
+        StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"parse"}, new Properties()));
     assertEquals("tokenize,ssplit,pos,depparse",
-        StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"depparse"}));
+        StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"depparse"}, new Properties()));
     assertEquals("tokenize,ssplit,pos,depparse",
-        StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"depparse", "tokenize"}));
+        StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"depparse", "tokenize"}, new Properties()));
     assertEquals("tokenize,ssplit,pos,lemma,depparse,natlog",
-        StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"natlog", "tokenize"}));
+        StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"natlog", "tokenize"}, new Properties()));
   }
 
   @Test
   public void testPrereqAnnotatorsOrderPreserving() {
     assertEquals("tokenize,ssplit,pos,lemma,depparse,natlog",
-        StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"lemma", "depparse", "natlog"}));
+        StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"lemma", "depparse", "natlog"}, new Properties()));
     assertEquals("tokenize,ssplit,pos,depparse,lemma,natlog",
-        StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"depparse", "lemma", "natlog"}));
+        StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"depparse", "lemma", "natlog"}, new Properties()));
     assertEquals("tokenize,ssplit,pos,lemma,ner,regexner",
-        StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"ner", "regexner"}));
+        StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"ner", "regexner"}, new Properties()));
     assertEquals("tokenize,ssplit,pos,lemma,regexner,ner",
-        StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"regexner", "ner"}));
+        StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"regexner", "ner"}, new Properties()));
   }
 
 
   @Test
   public void testPrereqAnnotatorsCoref() {
+    Properties props = new Properties();
     assertEquals("tokenize,ssplit,pos,lemma,ner,depparse,mention,coref",
-        StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"coref"}));
-//    assertEquals("tokenize,ssplit,pos,lemma,ner,parse,mention,coref",
-//        StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"parse", "coref"}));
+        StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"coref"}, props));
+    assertEquals("dep", props.getProperty("coref.md.type", ""));
+  }
+
+
+  @Test
+  public void testPrereqAnnotatorsCorefWithParse() {
+    Properties props = new Properties();
+    assertEquals("tokenize,ssplit,pos,lemma,ner,parse,mention,coref",
+        StanfordCoreNLP.ensurePrerequisiteAnnotators(new String[]{"parse","coref"}, props));
+    assertEquals("__empty__", props.getProperty("coref.md.type", "__empty__"));
   }
 
 }

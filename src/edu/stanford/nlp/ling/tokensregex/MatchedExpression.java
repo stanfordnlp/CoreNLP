@@ -1,21 +1,21 @@
 package edu.stanford.nlp.ling.tokensregex;
 
+import java.util.*;
+import java.util.function.Function;
+
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
 import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
 import edu.stanford.nlp.pipeline.CoreMapAggregator;
 import edu.stanford.nlp.util.*;
 
-import java.util.function.Function;
-
-import java.util.*;
-
 /**
- * Matched Expression represents a chunk of text that was matched from an original segment of text).
+ * Matched Expression represents a chunk of text that was matched from an original segment of text.
  *
  * @author Angel Chang
  */
 public class MatchedExpression {
+
   /** Text representing the matched expression */
   protected String text;
 
@@ -48,7 +48,7 @@ public class MatchedExpression {
   int order;
 
   /**
-   * Function that takes a CoreMap, applies a extraction function to it, to get a value
+   * Function that takes a CoreMap, applies an extraction function to it, to get a value.
    * Also contains information on how to construct a final annotation.
    */
   public static class SingleAnnotationExtractor implements Function<CoreMap,Value> {
@@ -144,15 +144,14 @@ public class MatchedExpression {
       }
     }
 
-    public MatchedExpression createMatchedExpression(Interval<Integer> charOffsets, Interval<Integer> tokenOffsets)
-    {
-      MatchedExpression me = new MatchedExpression(charOffsets, tokenOffsets, this, priority, weight);
-      return me;
+    public MatchedExpression createMatchedExpression(Interval<Integer> charOffsets, Interval<Integer> tokenOffsets) {
+      return new MatchedExpression(charOffsets, tokenOffsets, this, priority, weight);
     }
-  }
 
-  public MatchedExpression(MatchedExpression me)
-  {
+  } // end static class SingleAnnotationExtractor
+
+
+  public MatchedExpression(MatchedExpression me) {
     this.annotation = me.annotation;
     this.extractFunc = me.extractFunc;
     this.text = me.text;
@@ -167,8 +166,7 @@ public class MatchedExpression {
   }
 
   public MatchedExpression(Interval<Integer> charOffsets, Interval<Integer> tokenOffsets,
-                           SingleAnnotationExtractor extractFunc, double priority, double weight)
-  {
+                           SingleAnnotationExtractor extractFunc, double priority, double weight) {
     this.charOffsets = charOffsets;
     this.tokenOffsets = tokenOffsets;
     this.chunkOffsets = tokenOffsets;
@@ -177,15 +175,13 @@ public class MatchedExpression {
     this.weight = weight;
   }
 
-  public boolean extractAnnotation(Env env, CoreMap sourceAnnotation)
-  {
+  public boolean extractAnnotation(Env env, CoreMap sourceAnnotation) {
     return extractAnnotation(sourceAnnotation, extractFunc.tokensAggregator);
   }
 
   private boolean extractAnnotation(CoreMap sourceAnnotation,
-                                    CoreMapAggregator aggregator)
-  {
-    Class tokensAnnotationKey = extractFunc.tokensAnnotationField;
+                                    CoreMapAggregator aggregator) {
+    Class<TypesafeMap.Key<List<? extends CoreMap>>> tokensAnnotationKey = extractFunc.tokensAnnotationField;
     if (chunkOffsets != null) {
       annotation = aggregator.merge((List<? extends CoreMap>) sourceAnnotation.get(tokensAnnotationKey),
               chunkOffsets.getBegin(), chunkOffsets.getEnd());
@@ -225,13 +221,11 @@ public class MatchedExpression {
     return true;
   }
 
-  public boolean extractAnnotation(Env env, List<? extends CoreMap> source)
-  {
+  public boolean extractAnnotation(Env env, List<? extends CoreMap> source) {
     return extractAnnotation(source, CoreMapAggregator.getDefaultAggregator());
   }
 
-  protected boolean extractAnnotation(List<? extends CoreMap> source, CoreMapAggregator aggregator)
-  {
+  protected boolean extractAnnotation(List<? extends CoreMap> source, CoreMapAggregator aggregator) {
     annotation = aggregator.merge(source, chunkOffsets.getBegin(), chunkOffsets.getEnd());
     charOffsets = Interval.toInterval(annotation.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
             annotation.get(CoreAnnotations.CharacterOffsetEndAnnotation.class), Interval.INTERVAL_OPEN_END);
@@ -294,8 +288,7 @@ public class MatchedExpression {
   }
 
   public static List<? extends CoreMap> replaceMerged(List<? extends CoreMap> list,
-                                                      List<? extends MatchedExpression> matchedExprs)
-  {
+                                                      List<? extends MatchedExpression> matchedExprs) {
     if (matchedExprs == null) return list;
     Collections.sort(matchedExprs, EXPR_TOKEN_OFFSET_COMPARATOR);
     List<CoreMap> merged = new ArrayList<>(list.size());   // Approximate size
@@ -318,8 +311,7 @@ public class MatchedExpression {
   }
 
   public static List<? extends CoreMap> replaceMergedUsingTokenOffsets(List<? extends CoreMap> list,
-                                                      List<? extends MatchedExpression> matchedExprs)
-  {
+                                                      List<? extends MatchedExpression> matchedExprs) {
     if (matchedExprs == null) return list;
     Map<Integer, Integer> tokenBeginToListIndexMap = new HashMap<>();//Generics.newHashMap();
     Map<Integer, Integer> tokenEndToListIndexMap = new HashMap<>();//Generics.newHashMap();
@@ -511,10 +503,11 @@ public class MatchedExpression {
           Comparators.chain(EXPR_LENGTH_COMPARATOR, EXPR_PRIORITY_COMPARATOR,
                   EXPR_ORDER_COMPARATOR, EXPR_TOKEN_OFFSET_COMPARATOR);
 
-  public final static Function<MatchedExpression, Double> EXPR_WEIGHT_SCORER = new Function<MatchedExpression, Double>() {
+  public static final Function<MatchedExpression, Double> EXPR_WEIGHT_SCORER = new Function<MatchedExpression, Double>() {
     @Override
     public Double apply(MatchedExpression in) {
       return in.weight;
     }
   };
+
 }

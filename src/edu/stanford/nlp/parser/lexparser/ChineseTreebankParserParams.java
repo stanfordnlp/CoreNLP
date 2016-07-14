@@ -88,7 +88,12 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams  {
 
   @Override
   public HeadFinder typedDependencyHeadFinder() {
-    return new ChineseSemanticHeadFinder();
+    if (this.generateOriginalDependencies()) {
+      return new ChineseSemanticHeadFinder();
+    } else {
+      return new UniversalChineseSemanticHeadFinder();
+    }
+
   }
 
   /**
@@ -1223,8 +1228,13 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams  {
     readGrammaticalStructureFromFile(String filename)
   {
     try {
-      return ChineseGrammaticalStructure.
-              readCoNLLXGrammaticalStructureCollection(filename);
+      if (this.generateOriginalDependencies()) {
+        return ChineseGrammaticalStructure.
+            readCoNLLXGrammaticalStructureCollection(filename);
+      } else {
+        return UniversalChineseGrammaticalStructure.
+            readCoNLLXGrammaticalStructureCollection(filename);
+      }
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
@@ -1234,12 +1244,22 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams  {
   public GrammaticalStructure getGrammaticalStructure(Tree t,
                                                       Predicate<String> filter,
                                                       HeadFinder hf) {
-    return new ChineseGrammaticalStructure(t, filter, hf);
+    if (this.generateOriginalDependencies()) {
+      return new ChineseGrammaticalStructure(t, filter, hf);
+    } else {
+      return new UniversalChineseGrammaticalStructure(t, filter, hf);
+    }
   }
 
   @Override
   public boolean supportsBasicDependencies() {
     return true;
+  }
+
+  @Override
+  public boolean generateOriginalDependencies() {
+    //TODO[sebschu]: delete this method once Chinese UD becomes the default.
+    return !generateOriginalDependencies;
   }
 
   /**

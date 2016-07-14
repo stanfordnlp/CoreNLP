@@ -1,4 +1,4 @@
-package edu.stanford.nlp.ling.tokensregex.types; 
+package edu.stanford.nlp.ling.tokensregex.types;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.tokensregex.Env;
@@ -1038,7 +1038,7 @@ public class Expressions  {
   public static class MethodCallExpression extends Expressions.TypedExpression {
 
     String function;
-    Expression object;
+    private final Expression object;
     List<Expression> params;
 
     public MethodCallExpression(String function, Expression object, List<Expression> params, String... tags) {

@@ -530,7 +530,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected basic dependencies for tree " + testTree,
-          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.NONE), tree, false, false));
+          testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.NONE), tree, false, false, false));
     }
 
   }
@@ -688,7 +688,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected basic dependencies for tree " + testTree,
-          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.NONE), tree, false, false));
+          testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.NONE), tree, false, false, false));
     }
   }
 
@@ -1207,9 +1207,9 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected basic dependencies for tree " + testTree,
-          basicAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.NONE), tree, false, false));
+          basicAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.NONE), tree, false, false, false));
       assertEquals("Unexpected noncollapsed dependencies for tree " + testTree,
-          noncollapsedAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.MAXIMAL), tree, false, false));
+          noncollapsedAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.MAXIMAL), tree, false, false, false));
     }
   }
 
@@ -1312,7 +1312,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
               new SemanticHeadFinder(false));
 
       assertEquals("Unexpected basic dependencies for tree "+testTree,
-          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.NONE), tree, false, false));
+          testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.NONE), tree, false, false, false));
     }
   }
 
@@ -1368,7 +1368,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected basic dependencies for tree "+testTree,
-          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, false));
+          testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, false, false));
     }
   }
 
@@ -1402,7 +1402,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected basic dependencies for tree "+testTree,
-        testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, true));
+        testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, true, false));
     }
 
   }
@@ -1515,7 +1515,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       Tree tree = Tree.valueOf(testTree, trf);
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
 
-      String depString = EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCollapsed(GrammaticalStructure.Extras.MAXIMAL), tree, false, false);
+      String depString = GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependenciesCollapsed(GrammaticalStructure.Extras.MAXIMAL), tree, false, false, false);
       assertEquals("Unexpected collapsed dependencies for tree "+testTree,
           testAnswer, depString);
     }
@@ -1772,7 +1772,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected CC processed dependencies for tree "+testTree,
-          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCCprocessed(GrammaticalStructure.Extras.MAXIMAL), tree, false, false));
+          testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependenciesCCprocessed(GrammaticalStructure.Extras.MAXIMAL), tree, false, false, false));
     }
   }
 
@@ -1805,7 +1805,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected basic dependencies for tree "+testTree,
-          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCollapsed(GrammaticalStructure.Extras.MAXIMAL), tree, false, false));
+          testAnswer, GrammaticalStructureConversionUtils.dependenciesToString(gs, gs.typedDependenciesCollapsed(GrammaticalStructure.Extras.MAXIMAL), tree, false, false, false));
     }
   }
 

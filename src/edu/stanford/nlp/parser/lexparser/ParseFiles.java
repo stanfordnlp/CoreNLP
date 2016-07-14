@@ -119,7 +119,7 @@ public class ParseFiles {
     }
 
     final Timing timer = new Timing();
-    timer.start();
+    // timer.start(); // constructor already starts it.
 
     //Loop over the files
     for (int i = argIndex; i < args.length; i++) {
@@ -161,7 +161,7 @@ public class ParseFiles {
 
         String ext = (op.testOptions.outputFilesExtension == null) ? "stp" : op.testOptions.outputFilesExtension;
         String fname = normalizedName + '.' + ext;
-        if (op.testOptions.outputFilesDirectory != null && !op.testOptions.outputFilesDirectory.equals("")) {
+        if (op.testOptions.outputFilesDirectory != null && ! op.testOptions.outputFilesDirectory.isEmpty()) {
           String fseparator = System.getProperty("file.separator");
           if (fseparator == null || fseparator.isEmpty()) {
             fseparator = "/";
@@ -173,7 +173,7 @@ public class ParseFiles {
         try {
           pwo = op.tlpParams.pw(new FileOutputStream(fname));
         } catch (IOException ioe) {
-          ioe.printStackTrace();
+          throw new RuntimeIOException(ioe);
         }
       }
       treePrint.printHeader(pwo, op.tlpParams.getOutputEncoding());
@@ -287,14 +287,14 @@ public class ParseFiles {
       treePrint.printTree(ansTree, Integer.toString(num), pwo);
     } catch (RuntimeException re) {
       pwErr.println("TreePrint.printTree skipped: out of memory (or other error)");
-      re.printStackTrace();
+      re.printStackTrace(pwErr);
       numNoMemory++;
       try {
         treePrint.printTree(null, Integer.toString(num), pwo);
       } catch (Exception e) {
         pwErr.println("Sentence skipped: out of memory or error calling TreePrint.");
         pwo.println("(())");
-        e.printStackTrace();
+        e.printStackTrace(pwErr);
       }
     }
     // crude addition of k-best tree printing
