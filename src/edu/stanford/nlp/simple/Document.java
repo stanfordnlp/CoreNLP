@@ -410,7 +410,7 @@ public class Document {
       } else {
         port = Integer.parseInt(portStr);
       }
-      boolean lazy = false;
+      boolean lazy = true;
       if (lazystr != null) {
         lazy = Boolean.parseBoolean(lazystr);
       }
