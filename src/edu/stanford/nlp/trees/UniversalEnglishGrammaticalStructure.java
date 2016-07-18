@@ -1895,6 +1895,9 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
 
     IndexedWord gov = sg.getParent(oldHead);
+    if (gov == null && ! sg.getRoots().contains(oldHead)) {
+      return;
+    }
     IndexedWord newHead = nameParts.get(0);
     Set<IndexedWord> children = new HashSet<>(sg.getChildren(oldHead));
 
@@ -1902,12 +1905,16 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
     for (IndexedWord child : children) {
       if (child == newHead) {
         // make the leftmost word the new head
-        SemanticGraphEdge oldEdge = sg.getEdge(gov, oldHead);
-        sg.addEdge(gov, newHead, oldEdge.getRelation(), oldEdge.getWeight(), oldEdge.isExtra());
-        sg.removeEdge(oldEdge);
-
+        if (gov == null) {
+          sg.getRoots().add(newHead);
+          sg.getRoots().remove(oldHead);
+        } else {
+          SemanticGraphEdge oldEdge = sg.getEdge(gov, oldHead);
+          sg.addEdge(gov, newHead, oldEdge.getRelation(), oldEdge.getWeight(), oldEdge.isExtra());
+          sg.removeEdge(oldEdge);
+        }
         // swap direction of relation between old head and new head and change it to name relation.
-        oldEdge = sg.getEdge(oldHead, newHead);
+        SemanticGraphEdge oldEdge = sg.getEdge(oldHead, newHead);
         sg.addEdge(newHead, oldHead, UniversalEnglishGrammaticalRelations.NAME_MODIFIER, oldEdge.getWeight(), oldEdge.isExtra());
         sg.removeEdge(oldEdge);
       } else  if (nameParts.contains(child)) {
