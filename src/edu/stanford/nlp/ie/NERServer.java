@@ -40,12 +40,27 @@ public class NERServer  {
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(NERServer.class);
 
+  /** environment variable when set turns on the debug messages */
+  private static final String ENV_DEBUG_KEY = "NERSERVER_DEBUG";
+  private static final boolean ENV_DEBUG;
+
+  /** set the ENV_DEBUG variable based on the current environment */
+  static {
+      String debugStr = System.getenv(ENV_DEBUG_KEY);
+      boolean showDebugMessages = false;
+      if (debugStr != null) {
+          showDebugMessages = debugStr.toLowerCase().trim().equals("true");
+      }
+      ENV_DEBUG = showDebugMessages;
+  }
+
   //// Variables
+
 
   /**
    * Debugging toggle.
    */
-  private boolean DEBUG = false;
+  private boolean DEBUG = ENV_DEBUG;
 
   private final String charset;
 
@@ -178,10 +193,15 @@ public class NERServer  {
           out.print(output);
           out.flush();
         }
-      } catch (RuntimeException e) {
-        // ah well, guess they won't be hearing back from us after all
+      } catch (RuntimeException | OutOfMemoryError e) {
+          if (DEBUG) {
+              log.error("NERServer:Session: error classifying string");
+              log.error(e);
+          }
       }
-      close();
+      finally {
+        close();
+      }
     }
 
     /**
@@ -191,6 +211,10 @@ public class NERServer  {
       try {
         in.close();
         out.close();
+        if (DEBUG) {
+          log.info("Closing connection to client ");
+          log.info(client.getInetAddress().getHostName());
+        }
         client.close();
       } catch (Exception e) {
         log.info("NERServer:Session: can't close session");
