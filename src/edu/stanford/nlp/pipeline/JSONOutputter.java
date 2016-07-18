@@ -99,7 +99,7 @@ public class JSONOutputter extends AnnotationOutputter {
           treePrinter.printTree(sentence.get(TreeCoreAnnotations.TreeAnnotation.class), new PrintWriter(treeStrWriter, true));
           String treeStr = treeStrWriter.toString().trim();  // strip the trailing newline
           if (!"SENTENCE_SKIPPED_OR_UNPARSABLE".equals(treeStr)) {
-            l2.set("parse", treeStrWriter.toString());
+            l2.set("parse", treeStr);
           }
           // (dependency trees)
           l2.set("basicDependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)));
@@ -440,7 +440,7 @@ public class JSONOutputter extends AnnotationOutputter {
       callback.accept((key, value) -> {
         if (key != null && value != null) {
           // First call overhead
-          if (!firstCall.dereference().get()) {
+          if (!firstCall.dereference().orElse(false)) {
             writer.write(",");
           }
           firstCall.set(false);

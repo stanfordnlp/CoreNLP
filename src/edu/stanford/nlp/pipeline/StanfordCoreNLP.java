@@ -369,6 +369,20 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       int nerIndex = orderedAnnotators.indexOf(Annotator.STANFORD_NER);
       orderedAnnotators.add(nerIndex + 1, STANFORD_REGEXNER);
     }
+    // (ensure coref is before openie)
+    if (orderedAnnotators.contains(Annotator.STANFORD_COREF) && orderedAnnotators.contains(STANFORD_OPENIE)) {
+      int maxIndex = Math.max(
+          orderedAnnotators.indexOf(STANFORD_OPENIE),
+          orderedAnnotators.indexOf(STANFORD_COREF)
+          );
+      if (Objects.equals(orderedAnnotators.get(maxIndex), STANFORD_OPENIE)) {
+        orderedAnnotators.add(maxIndex, STANFORD_COREF);
+        orderedAnnotators.remove(STANFORD_COREF);
+      } else {
+        orderedAnnotators.add(maxIndex + 1, STANFORD_OPENIE);
+        orderedAnnotators.remove(STANFORD_OPENIE);
+      }
+    }
 
     // Return
     return StringUtils.join(orderedAnnotators, ",");
