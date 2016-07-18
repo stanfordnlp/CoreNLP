@@ -41,6 +41,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
   private static final boolean DEBUG = System.getProperty("UniversalEnglishGrammaticalStructure", null) != null;
 
+  private static final boolean USE_NAME = System.getProperty("UDUseNameRelation") != null;
 
   /*
    * Options for "Enhanced" representation:
@@ -1804,8 +1805,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
 
   private static final SemgrexPattern[] NAME_PATTERNS = {
-    SemgrexPattern.compile("{ner:PERSON}=w1 >compound {ner:PERSON}=w2"),
-    SemgrexPattern.compile("{ner:LOCATION}=w1 >compound {ner:LOCATION}=w2")
+    SemgrexPattern.compile("{ner:PERSON}=w1 >compound {}=w2"),
+    SemgrexPattern.compile("{ner:LOCATION}=w1 >compound {}=w2")
   };
   private static final Predicate<String> PUNCT_TAG_FILTER = new PennTreebankLanguagePack().punctuationWordRejectFilter();
 
@@ -1821,6 +1822,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    * @param sg A semantic graph.
    */
   private static void processNames(SemanticGraph sg) {
+
+    if ( ! USE_NAME) {
+      return;
+    }
 
     // check whether NER tags are available
     IndexedWord rootToken = sg.getFirstRoot();
@@ -1843,7 +1848,9 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
           }
           head = w1;
         }
-        nameParts.add(w2);
+        if (w2.ner().equals(w1.ner())) {
+          nameParts.add(w2);
+        }
       }
       if (head != null) {
         processNamesHelper(sg, head, nameParts);
@@ -1856,6 +1863,18 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   private static void processNamesHelper(SemanticGraph sg, IndexedWord oldHead, List<IndexedWord> nameParts) {
 
     if (nameParts.size() < 1) {
+      // if the named entity only spans one token, change compound relations
+      // to nmod relations to get the right structure for NPs with additional modifiers
+      // such as "Mrs. Clinton".
+      Set<IndexedWord> children = new HashSet<>(sg.getChildren(oldHead));
+      for (IndexedWord child : children) {
+        SemanticGraphEdge oldEdge = sg.getEdge(oldHead, child);
+        if (oldEdge.getRelation() == UniversalEnglishGrammaticalRelations.COMPOUND_MODIFIER) {
+          sg.addEdge(oldHead, child, UniversalEnglishGrammaticalRelations.NOMINAL_MODIFIER,
+              oldEdge.getWeight(), oldEdge.isExtra());
+          sg.removeEdge(oldEdge);
+        }
+      }
       return;
     }
 
@@ -1900,14 +1919,13 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
       } else {
         // attach word to new head
         SemanticGraphEdge oldEdge = sg.getEdge(oldHead, child);
-        sg.addEdge(newHead, child, oldEdge.getRelation(), oldEdge.getWeight(), oldEdge.isExtra());
+        //if not the entire compound is part of a named entity, attach the other tokens via an nmod relation
+        GrammaticalRelation reln = oldEdge.getRelation() == UniversalEnglishGrammaticalRelations.COMPOUND_MODIFIER ?
+            UniversalEnglishGrammaticalRelations.NOMINAL_MODIFIER : oldEdge.getRelation();
+        sg.addEdge(newHead, child, reln, oldEdge.getWeight(), oldEdge.isExtra());
         sg.removeEdge(oldEdge);
       }
     }
-
-    //TODO[sebschu]: Do something about honorific titles in front of names.
-
-
   }
 
   /**
