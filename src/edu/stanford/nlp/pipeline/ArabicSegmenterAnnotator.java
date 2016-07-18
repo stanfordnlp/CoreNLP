@@ -8,6 +8,7 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.process.WordSegmenter;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -30,7 +31,7 @@ public class ArabicSegmenterAnnotator implements Annotator  {
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(ArabicSegmenterAnnotator.class);
 
-  private ArabicSegmenter segmenter;
+  private WordSegmenter segmenter;
   private final boolean VERBOSE;
 
   private static final String DEFAULT_SEG_LOC =
@@ -117,10 +118,78 @@ public class ArabicSegmenterAnnotator implements Annotator  {
   }
 
   private void doOneSentence(CoreMap annotation) {
+    splitCharacters(annotation);
+    runSegmentation(annotation);
+  }
+
+  private static void splitCharacters(CoreMap annotation) {
+    String origText = annotation.get(CoreAnnotations.TextAnnotation.class);
+
+    boolean seg = true;
+    List<CoreLabel> words = new ArrayList<>();
+
+    for (int i = 0; i < origText.length(); i++) {
+      CoreLabel wi = new CoreLabel();
+      char[] ca = {origText.charAt(i)};
+      String wordString = new String(ca);
+
+      // if this word is a whitespace or a control character, set 'seg' to true for next word, and break
+      if (Character.isWhitespace(origText.charAt(i)) || Character.isISOControl(origText.charAt(i))) {
+        seg = true;
+      } else {
+        // if this word is a word, put it as a feature label and set seg to false for next word
+        wi.set(CoreAnnotations.ArabicCharAnnotation.class, wordString);
+        if (seg) {
+          wi.set(CoreAnnotations.ArabicSegAnnotation.class, "1");
+        } else {
+          wi.set(CoreAnnotations.ArabicSegAnnotation.class, "0");
+        }
+        wi.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, i);
+        wi.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, (i + 1));
+        words.add(wi);
+        seg = false;
+      }
+    }
+
+    annotation.set(SegmenterCoreAnnotations.CharactersAnnotation.class, words);
+  }
+
+  private void runSegmentation(CoreMap annotation) {
+    //0 2
+    // A BC D E
+    // 1 10 1 1
+    // 0 12 3 4
+    // 0, 0+1 ,
+
     String text = annotation.get(CoreAnnotations.TextAnnotation.class);
     List<CoreLabel> sentChars = annotation.get(SegmenterCoreAnnotations.CharactersAnnotation.class);
-    List<CoreLabel> tokens = segmenter.segmentStringToTokenList(text);
+    List<CoreLabel> tokens = new ArrayList<>();
     annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
+
+    List<HasWord> words = segmenter.segment(text);
+    if (VERBOSE) {
+      log.info(text);
+      log.info("--->");
+      log.info(words);
+    }
+
+    int pos = 0;
+    for (HasWord w : words) {
+      String word = w.word();
+      CoreLabel fl = sentChars.get(pos);
+      fl.set(CoreAnnotations.ArabicSegAnnotation.class, "1");
+      if (word.isEmpty()) {
+        continue;
+      }
+      CoreLabel token = new CoreLabel();
+      token.setWord(word);
+      token.setValue(word);
+      token.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, fl.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+      pos += word.length();
+      fl = sentChars.get(pos - 1);
+      token.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, fl.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+      tokens.add(token);
+    }
   }
 
 

@@ -58,7 +58,7 @@ public class StanfordCoreNLPServer implements Runnable {
   @ArgumentParser.Option(name="lazy", gloss="If true, don't precompute the models on loading the server")
   protected boolean lazy = true;
   @ArgumentParser.Option(name="annotators", gloss="The default annotators to run over a given sentence.")
-  protected static String defaultAnnotators = "tokenize,ssplit,pos,lemma,ner,parse,depparse,mention,coref,natlog,openie,kbp";
+  protected static String defaultAnnotators = "tokenize,ssplit,pos,lemma,ner,parse,depparse,mention,coref,natlog,openie,regexner,kbp";
 
   protected final String shutdownKey;
 
@@ -571,7 +571,6 @@ public class StanfordCoreNLPServer implements Runnable {
       } else if (urlParams.containsKey("props")) {
         urlProperties = StringUtils.decodeMap(URLDecoder.decode(urlParams.get("props"), "UTF-8"));
       }
-      System.out.println(urlProperties);
       // (tweak the default properties a bit)
       if (!props.containsKey("coref.md.type")) {
         // Set coref head to use dependencies
@@ -586,37 +585,6 @@ public class StanfordCoreNLPServer implements Runnable {
       // (add new properties on top of the default properties)
       urlProperties.entrySet()
           .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
-
-      // if a language is specified, load the properties for that language, don't overwrite other properties
-      if (props.containsKey("pipelineLanguage")) {
-        Properties languageProps = new Properties();
-        String pipelineLanguageFile = LanguageInfo.getLanguagePropertiesFile(props.getProperty("pipelineLanguage"));
-        if (pipelineLanguageFile == null) {
-          String clientResponse = "specified language is not supported: "+props.getProperty("pipelineLanguage")
-                  +" ; defaulting to English";
-          try {
-            respondError(clientResponse, httpExchange);
-          } catch (IOException e) {
-            err("failed to send client response: \""+clientResponse+"\"");
-          }
-        }
-        try {
-          languageProps.load(StanfordCoreNLPServer.class.getResourceAsStream(pipelineLanguageFile));
-          PropertiesUtils.noClobberWriteProperties(props, languageProps);
-        } catch (IOException e) {
-          // server side log missing resource for requested language
-          String errorMessage = "missing properties file: "
-                  +pipelineLanguageFile+" ; this file is required on server CLASSPATH to process language: "
-                  +props.getProperty("pipelineLanguage");
-          err(errorMessage);
-          // client side log missing resource for requested language
-          try {
-            respondError(errorMessage, httpExchange);
-          } catch (IOException ioe) {
-            err("failed to send client response: \""+errorMessage+"\"");
-          }
-        }
-      }
 
       // Get the annotators
       String annotators = props.getProperty("annotators");
