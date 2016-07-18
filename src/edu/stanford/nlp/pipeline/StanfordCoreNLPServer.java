@@ -58,7 +58,7 @@ public class StanfordCoreNLPServer implements Runnable {
   @ArgumentParser.Option(name="lazy", gloss="If true, don't precompute the models on loading the server")
   protected boolean lazy = true;
   @ArgumentParser.Option(name="annotators", gloss="The default annotators to run over a given sentence.")
-  protected static String defaultAnnotators = "tokenize,ssplit,pos,lemma,ner,parse,depparse,mention,coref,natlog,openie,kbp";
+  protected static String defaultAnnotators = "tokenize,ssplit,pos,lemma,ner,parse,depparse,mention,coref,natlog,openie,regexner,kbp";
 
   protected final String shutdownKey;
 
