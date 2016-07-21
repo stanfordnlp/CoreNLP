@@ -828,9 +828,8 @@ public class SUTimeITest extends TestCase {
             "They watched a movie over the weekend.\n" +
             // TODO: semi-annual
             "But publicity-shy Gabriel Garcia Marquez , who turned 80 this month, did finally appear Monday at the semi-annual meeting of the Inter American Press Association as it ended with a luncheon\n" +
-            "The event happens tomorrow night, not Wednesday afternoon.\n" + "";
-/*            "What is last week, or last month, or even the last 3 months, or just last 3 months?"; */
-//            "last 3 months";
+            "The event happens tomorrow night, not Wednesday afternoon.\n" +
+            "What is last week, or last month, or even the last 3 months, or just last 3 months?";
 
 
     Iterator<Timex> expectedTimexes =
@@ -845,12 +844,11 @@ public class SUTimeITest extends TestCase {
                     Timex.fromXml("<TIMEX3 tid=\"t9\" value=\"XXXX-WXX-1\" type=\"DATE\" range=\"(XXXX-WXX-1,XXXX-WXX-1,P1D)\">Monday</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t10\" value=\"P6M\" type=\"SET\" quant=\"EVERY\" freq=\"P1X\" periodicity=\"P6M\">semi-annual</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 alt_value=\"OFFSET P1D INTERSECT NI\" anchorTimeID=\"t12\" range=\"(OFFSET P1D INTERSECT NI,OFFSET P1D INTERSECT NI,)\" temporalFunction=\"true\" tid=\"t11\" type=\"DATE\" valueFromFunction=\"tf3\">tomorrow night</TIMEX3>"),
-                    Timex.fromXml("<TIMEX3 range=\"(XXXX-WXX-3T12:00:00.000,XXXX-WXX-3T18,PT6H)\" tid=\"t13\" type=\"TIME\" value=\"XXXX-WXX-3TAF\">Wednesday afternoon</TIMEX3>")
-//                    Timex.fromXml("<TIMEX3 tid=\"t14\" alt_value=\"THIS P1W OFFSET P-1W\" type=\"DATE\" temporalFunction=\"true\" valueFromFunction=\"tf4\" anchorTimeID=\"t15\" range=\"(THIS P1W OFFSET P-1W,THIS P1W OFFSET P-1W,)\">last week</TIMEX3>"),
-//                    Timex.fromXml("<TIMEX3 tid=\"t16\" alt_value=\"THIS P1M OFFSET P-1M\" type=\"DATE\" temporalFunction=\"true\" valueFromFunction=\"tf5\" anchorTimeID=\"t17\" range=\"(THIS P1M OFFSET P-1M,THIS P1M OFFSET P-1M,)\">last month</TIMEX3>"),
-//                    Timex.fromXml("<TIMEX3 beginPoint=\"t18\" endPoint=\"t0\" range=\"(UNKNOWN,REF,P3M)\" tid=\"t19\" type=\"DURATION\" value=\"P3M\">the last 3 months</TIMEX3>"), // TODO: Fix this treatment of "the xxx" as duration (but that's what tempeval wants)
-//                    Timex.fromXml("<TIMEX3 alt_value=\"THIS P3M OFFSET P-3M\" anchorTimeID=\"t21\" range=\"(THIS P3M OFFSET P-3M,THIS P3M OFFSET P-3M,)\" temporalFunction=\"true\" tid=\"t20\" type=\"DATE\" valueFromFunction=\"tf6\">last 3 months</TIMEX3>")
-//        Timex.fromXml("<TIMEX3 alt_value=\"THIS P3M OFFSET P-3M\" anchorTimeID=\"t2\" range=\"(THIS P3M OFFSET P-3M,THIS P3M OFFSET P-3M,)\" temporalFunction=\"true\" tid=\"t1\" type=\"DATE\" valueFromFunction=\"tf0\">last 3 months</TIMEX3>")
+                    Timex.fromXml("<TIMEX3 range=\"(XXXX-WXX-3T12:00:00.000,XXXX-WXX-3T18,PT6H)\" tid=\"t13\" type=\"TIME\" value=\"XXXX-WXX-3TAF\">Wednesday afternoon</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t14\" alt_value=\"THIS P1W OFFSET P-1W\" type=\"DATE\" temporalFunction=\"true\" valueFromFunction=\"tf4\" anchorTimeID=\"t15\" range=\"(THIS P1W OFFSET P-1W,THIS P1W OFFSET P-1W,)\">last week</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t16\" alt_value=\"THIS P1M OFFSET P-1M\" type=\"DATE\" temporalFunction=\"true\" valueFromFunction=\"tf5\" anchorTimeID=\"t17\" range=\"(THIS P1M OFFSET P-1M,THIS P1M OFFSET P-1M,)\">last month</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 beginPoint=\"t18\" endPoint=\"t0\" range=\"(UNKNOWN,REF,P3M)\" tid=\"t19\" type=\"DURATION\" value=\"P3M\">the last 3 months</TIMEX3>"), // TODO: Fix this treatment of "the xxx" as duration (but that's what tempeval wants)
+                    Timex.fromXml("<TIMEX3 alt_value=\"THIS P3M OFFSET P-3M\" anchorTimeID=\"t21\" range=\"(THIS P3M OFFSET P-3M,THIS P3M OFFSET P-3M,)\" temporalFunction=\"true\" tid=\"t20\" type=\"DATE\" valueFromFunction=\"tf6\">last 3 months</TIMEX3>")
       ).iterator();
     Iterator<Timex> expectedTimexesResolved =
       Arrays.asList(Timex.fromXml("<TIMEX3 tid=\"t1\" value=\"2003-01-31TMO\" type=\"TIME\" range=\"(2003-01-31T06:00:00.000,2003-01-31T12:00,PT6H)\">The morning of January 31</TIMEX3>"),
@@ -864,12 +862,11 @@ public class SUTimeITest extends TestCase {
                     Timex.fromXml("<TIMEX3 tid=\"t9\" value=\"2003-04-14\" type=\"DATE\" range=\"(2003-04-14-WXX-1,2003-04-14-WXX-1,P1D)\">Monday</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t10\" value=\"P6M\" type=\"SET\" quant=\"EVERY\" freq=\"P1X\" periodicity=\"P6M\">semi-annual</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 range=\"(2003-04-15T19:00:00.000,2003-04-16T05:00:00.000,PT10H)\" tid=\"t11\" type=\"TIME\" value=\"2003-04-15TNI\">tomorrow night</TIMEX3>"),
-                    Timex.fromXml("<TIMEX3 range=\"(2003-04-16-WXX-3T12:00:00.000,2003-04-16-WXX-3T18,PT6H)\" tid=\"t12\" type=\"TIME\" value=\"2003-04-16TAF\">Wednesday afternoon</TIMEX3>")
-//                    Timex.fromXml("<TIMEX3 range=\"(2003-04-07,2003-04-13,P1W)\" tid=\"t13\" type=\"DATE\" value=\"2003-W15\">last week</TIMEX3>"),
-//                    Timex.fromXml("<TIMEX3 range=\"(2003-03-01,2003-03-31,P1M)\" tid=\"t14\" type=\"DATE\" value=\"2003-03\">last month</TIMEX3>"),
-//                    Timex.fromXml("<TIMEX3 beginPoint=\"t15\" endPoint=\"t0\" range=\"(UNKNOWN,REF,P3M)\" tid=\"t16\" type=\"DURATION\" value=\"P3M\">the last 3 months</TIMEX3>"), // TODO: Fix this
-//                    Timex.fromXml("<TIMEX3 range=\"(2003-03-01,2003-03-31,P1M)\" tid=\"t14\" type=\"DATE\" value=\"2003-03\">last 3 months</TIMEX3>")
-//        Timex.fromXml("<TIMEX3 range=\"(2003-03-01,2003-03-31,P1M)\" tid=\"t0\" type=\"DATE\" value=\"2003-03\">last 3 months</TIMEX3>")
+                    Timex.fromXml("<TIMEX3 range=\"(2003-04-16-WXX-3T12:00:00.000,2003-04-16-WXX-3T18,PT6H)\" tid=\"t12\" type=\"TIME\" value=\"2003-04-16TAF\">Wednesday afternoon</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 range=\"(2003-04-07,2003-04-13,P1W)\" tid=\"t13\" type=\"DATE\" value=\"2003-W15\">last week</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 range=\"(2003-03-01,2003-03-31,P1M)\" tid=\"t14\" type=\"DATE\" value=\"2003-03\">last month</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 beginPoint=\"t15\" endPoint=\"t0\" range=\"(UNKNOWN,REF,P3M)\" tid=\"t16\" type=\"DURATION\" value=\"P3M\">the last 3 months</TIMEX3>"), // TODO: Fix this
+                    Timex.fromXml("<TIMEX3 range=\"(2003-01-14,2003-04-14,P3M)\" tid=\"t17\" type=\"DATE\" value=\"2003-01-14/2003-04-14\">last 3 months</TIMEX3>")
       ).iterator();
 
     // create document
