@@ -237,7 +237,7 @@ public class Timex implements Serializable {
         rangeStr = rangeStr.substring(1, rangeStr.length()-1);
       }
       String[] parts = rangeStr.split(",");
-      this.range = new Range(parts[0], parts[1], parts[2]);
+      this.range = new Range(parts.length > 0? parts[0]:"", parts.length > 1? parts[1]:"", parts.length > 2? parts[2]:"");
     }
   }
 
