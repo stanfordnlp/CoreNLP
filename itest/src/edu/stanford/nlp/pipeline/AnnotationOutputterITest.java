@@ -45,7 +45,7 @@ public class AnnotationOutputterITest extends TestCase {
             "    {\n" +
             "      \"index\": 0,\n" +
             "      \"parse\": \"(ROOT (NP (JJ Bad) (NN wolf)))\",\n" +
-            "      \"basicDependencies\": [\n" +
+            "      \"basic-dependencies\": [\n" +
             "        {\n" +
             "          \"dep\": \"ROOT\",\n" +
             "          \"governor\": 0,\n" +
@@ -61,7 +61,7 @@ public class AnnotationOutputterITest extends TestCase {
             "          \"dependentGloss\": \"Bad\"\n" +
             "        }\n" +
             "      ],\n" +
-            "      \"enhancedDependencies\": [\n" +
+            "      \"enhanced-dependencies\": [\n" +
             "        {\n" +
             "          \"dep\": \"ROOT\",\n" +
             "          \"governor\": 0,\n" +
@@ -77,7 +77,7 @@ public class AnnotationOutputterITest extends TestCase {
             "          \"dependentGloss\": \"Bad\"\n" +
             "        }\n" +
             "      ],\n" +
-            "      \"enhancedPlusPlusDependencies\": [\n" +
+            "      \"enhanced-plus-plus-dependencies\": [\n" +
             "        {\n" +
             "          \"dep\": \"ROOT\",\n" +
             "          \"governor\": 0,\n" +
