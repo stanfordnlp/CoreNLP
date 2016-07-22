@@ -18,8 +18,8 @@ import java.util.regex.Pattern;
  * The type is
  * Example:  Bill   works for  Bank   of     America
  * IO:       I-PER  O     O    I-ORG  I-ORG  I-ORG
- * IOB1:     B-PER  O     O    B-ORG  I-ORG  I-ORG
- * IOB2:     I-PER  O     O    B-ORG  I-ORG  I-ORG
+ * IOB1:     I-PER  O     O    I-ORG  I-ORG  I-ORG
+ * IOB2:     B-PER  O     O    B-ORG  I-ORG  I-ORG
  * IOE1:     E-PER  O     O    I-ORG  I-ORG  E-ORG
  * IOE2:     I-PER  O     O    I-ORG  I-ORG  E-ORG
  * BILOU:    U-PER  O     O    B-ORG  I-ORG  L-ORG
