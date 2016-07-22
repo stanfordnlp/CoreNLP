@@ -693,6 +693,7 @@ public class DependencyParser  {
 
     for (int iter = 0; iter < config.maxIter; ++iter) {
       if (forceStop.get()) {
+        forceStop.set(false);
         break;
       }
       log.info("##### Iteration " + iter);
