@@ -1,7 +1,9 @@
 package edu.stanford.nlp.trees.ud;
 
+import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.*;
@@ -11,6 +13,7 @@ import edu.stanford.nlp.util.StringUtils;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -23,6 +26,9 @@ import java.util.Properties;
  * @author Sebastian Schuster
  */
 public class UniversalDependenciesConverter {
+
+
+  private static final boolean USE_NAME = System.getProperty("UDUseNameRelation") != null;
 
 
   private static GrammaticalStructure semanticGraphToGrammaticalStructure(SemanticGraph sg) {
@@ -57,8 +63,16 @@ public class UniversalDependenciesConverter {
   }
 
   private static SemanticGraph convertTreeToBasic(Tree tree) {
+    addLemmata(tree);
+    addNERTags(tree);
     SemanticGraph sg = SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.BASIC,
         GrammaticalStructure.Extras.NONE, false, null, false, true);
+
+    addLemmata(sg);
+
+    if (USE_NAME) {
+      addNERTags(sg);
+    }
     return sg;
   }
 
@@ -90,6 +104,56 @@ public class UniversalDependenciesConverter {
 
   }
 
+
+  private static Morphology MORPH = null;
+
+  private static void addLemmata(SemanticGraph sg) {
+    if (MORPH == null) {
+      MORPH = new Morphology();
+    }
+
+    sg.vertexListSorted().forEach(w -> {
+      if(w.lemma() == null) {
+        w.setLemma(MORPH.lemma(w.word(), w.tag()));
+      }
+    });
+  }
+
+  private static void addLemmata(Tree tree) {
+    if (MORPH == null) {
+      MORPH = new Morphology();
+    }
+
+    tree.yield().forEach(l-> {
+      CoreLabel w = (CoreLabel) l;
+      if(w.lemma() == null) {
+        w.setLemma(MORPH.lemma(w.word(), w.tag()));
+      }
+    });
+  }
+
+
+
+  private static NERClassifierCombiner NER_TAGGER = null;
+
+
+  private static void addNERTags(SemanticGraph sg) {
+    if (NER_TAGGER == null) {
+      NER_TAGGER = NERClassifierCombiner.createNERClassifierCombiner(null, new Properties());
+    }
+
+    List<CoreLabel> labels = sg.vertexListSorted().stream().map(w -> w.backingLabel()).collect(Collectors.toList());
+    NER_TAGGER.classify(labels);
+  }
+
+  private static void addNERTags(Tree tree) {
+    if (NER_TAGGER == null) {
+      NER_TAGGER = NERClassifierCombiner.createNERClassifierCombiner(null, new Properties());
+    }
+
+    List<CoreLabel> labels = tree.yield().stream().map(w -> (CoreLabel) w).collect(Collectors.toList());
+    NER_TAGGER.classify(labels);
+  }
 
   /**
    *
@@ -139,6 +203,7 @@ public class UniversalDependenciesConverter {
     while (sgIterator.hasNext()) {
       SemanticGraph sg = sgIterator.next();
 
+
       if (treeFileName != null) {
         //add UPOS tags
         Tree tree = ((TreeToSemanticGraphIterator) sgIterator).getCurrentTree();
@@ -149,14 +214,22 @@ public class UniversalDependenciesConverter {
           String uposTag = uposLabels.get(idx).value();
           token.set(CoreAnnotations.CoarseTagAnnotation.class, uposTag);
         }
+      } else {
+        addLemmata(sg);
+        if (USE_NAME) {
+          addNERTags(sg);
+        }
       }
+
+
+
 
      if (outputRepresentation.equalsIgnoreCase("enhanced")) {
         sg = convertBasicToEnhanced(sg);
       } else if (outputRepresentation.equalsIgnoreCase("enhanced++")) {
         sg = convertBasicToEnhancedPlusPlus(sg);
       }
-      System.out.println(writer.printSemanticGraph(sg));
+      System.out.print(writer.printSemanticGraph(sg));
 
     }
 

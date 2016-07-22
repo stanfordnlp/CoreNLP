@@ -308,12 +308,11 @@
   { (/dec\.?/) => DECEMBER }
 
   { ruleType: "filter",
-	over: NIL,
-    pattern: ( [ { temporal::IS_TIMEX_DATE } & {{ tokens[0].tag =~ /NN.*S/ }} ] ),
+  	over: NIL,
+    pattern: ( [ { temporal::IS_TIMEX_DATE } & {{ tokens[0].tag =~ /NN.*S/ }} & {{ tokens[0].word =~ /.*s/ }} ] ),
     result: MakePeriodicTemporalSet($0[0].temporal.value),
     // Change to TRUE to turn anything that is labeled a date but marked as plural to be a set
-    // (Tuesdays, Wednesdays, etc)
-    active: FALSE
+    active: TRUE
   }
 
   ########################################################################################################################

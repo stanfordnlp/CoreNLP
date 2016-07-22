@@ -356,6 +356,15 @@ public class AnnotatorFactories  {
       public Annotator create() {
         return annotatorImplementation.parse(properties);
       }
+
+      @Override
+      public String additionalSignature() {
+        if (StanfordCoreNLP.usesBinaryTrees(properties) ||
+            PropertiesUtils.getBool(properties, Annotator.STANFORD_PARSE + ".binaryTrees", false)) {
+          return "parse.binaryTrees=true";
+        }
+        return "";
+      };
     };
   }
 
