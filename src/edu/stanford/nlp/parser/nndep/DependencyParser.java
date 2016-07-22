@@ -121,7 +121,7 @@ public class DependencyParser  {
   private double timeSpentMillis;
   private double bestUAS;
 
-  private AtomicBoolean forceStop = new AtomicBoolean(false);
+  private AtomicBoolean forceStopTraining = new AtomicBoolean(false);
 
   DependencyParser() {
     this(new Properties());
@@ -692,8 +692,8 @@ public class DependencyParser  {
     this.bestUAS = 0;
 
     for (int iter = 0; iter < config.maxIter; ++iter) {
-      if (forceStop.get()) {
-        forceStop.set(false);
+      if (forceStopTraining.get()) {
+        forceStopTraining.set(false);
         break;
       }
       log.info("##### Iteration " + iter);
@@ -1302,21 +1302,21 @@ public class DependencyParser  {
     }
   }
 
-  public void forceStop() {
-    this.forceStop.set(true);
+  public void forceStopTraining() {
+    this.forceStopTraining.set(true);
   }
 
-  public void updateProgress(final ParserProgressListener listener) {
+  public void updateProgress(final TrainingProgressListener listener) {
     new Thread(() -> {
       listener.progressUpdated(
-              new ParserProgress(cost, percentCorrect, timeSpentMillis, bestUAS)
+              new TrainingProgress(cost, percentCorrect, timeSpentMillis, bestUAS)
       );
     }).start();
   }
 
-  static abstract class ParserProgressListener {
+  static abstract class TrainingProgressListener {
 
-    public abstract void progressUpdated(ParserProgress parserProgress);
+    public abstract void progressUpdated(TrainingProgress trainingProgress);
 
   }
 
