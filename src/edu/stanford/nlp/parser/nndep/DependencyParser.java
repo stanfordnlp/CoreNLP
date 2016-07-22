@@ -1,4 +1,5 @@
 package edu.stanford.nlp.parser.nndep;
+import edu.stanford.nlp.util.concurrent.AtomicDouble;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.international.Language;
@@ -114,6 +115,11 @@ public class DependencyParser  {
    * {@link edu.stanford.nlp.trees.GrammaticalRelation} instances.
    */
   private final Language language;
+
+  private AtomicDouble cost = new AtomicDouble();
+  private AtomicDouble percentCorrect = new AtomicDouble();
+  private AtomicDouble timeSpent = new AtomicDouble();
+  private AtomicDouble bestUAS = new AtomicDouble();
 
   DependencyParser() {
     this(new Properties());
@@ -688,9 +694,14 @@ public class DependencyParser  {
 
       Classifier.Cost cost = classifier.computeCostFunction(config.batchSize, config.regParameter, config.dropProb);
       log.info("Cost = " + cost.getCost() + ", Correct(%) = " + cost.getPercentCorrect());
+      this.cost.set(cost.getCost());
+      this.percentCorrect.set(cost.getPercentCorrect());
+
       classifier.takeAdaGradientStep(cost, config.adaAlpha, config.adaEps);
 
-      log.info("Elapsed Time: " + (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
+      final double timeSpent = (System.currentTimeMillis() - startTime);
+      this.timeSpent.set(timeSpent);
+      log.info("Elapsed Time: " + timeSpent / 1000.0 + " (s)");
 
       // UAS evaluation
       if (devFile != null && iter % config.evalPerIter == 0) {
@@ -707,7 +718,9 @@ public class DependencyParser  {
         if (config.saveIntermediate && uas > bestUAS) {
           System.err.printf("Exceeds best previous UAS of %f. Saving model file..%n", bestUAS);
 
+
           bestUAS = uas;
+          this.bestUAS.set(bestUAS);
           writeModelFile(modelFile);
         }
       }
@@ -1283,6 +1296,20 @@ public class DependencyParser  {
 
       parser.parseTextFile(input, output);
     }
+  }
+
+  public void updateProgress(final ParserProgressListener listener) {
+    new Thread(() -> {
+      listener.progressUpdated(
+              new ParserProgress(cost.get(), percentCorrect.get(), timeSpent.get(), bestUAS.get())
+      );
+    }).start();
+  }
+
+  static abstract class ParserProgressListener {
+
+    public abstract void progressUpdated(ParserProgress parserProgress);
+
   }
 
 }
