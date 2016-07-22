@@ -923,7 +923,7 @@ public class UniversalEnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "I have four thousand sheep" &rarr;
-   * {@code compound}(thousand, four) <p/>
+   * {@code compound}(thousand, four), <p/>
    *
    */
   public static final GrammaticalRelation COMPOUND_MODIFIER =
@@ -935,29 +935,6 @@ public class UniversalEnglishGrammaticalRelations {
             // in vitro, in vivo, etc., in Genia
             // matches against "etc etc"
             "ADJP|ADVP < (FW [ $- (FW=target !< /^(?i:etc)$/) | $- (IN=target < in|In) ] )");
-
-
-  /**
-   * The "name" relation. This relation is used for proper
-   * nouns constituted of multiple nominal elements.  Words joined by name should all be part of a
-   * minimal noun phrase; otherwise regular syntactic relations should be used.
-   * In general, names are annotated in a flat, head-initial structure, in which all words in the name
-   * modify the first one using the {@code name} label.
-   * <p/>
-   *
-   * The distinction between {@code compound} and {@code name} can only be made on the basis of NER tags.
-   * For this reason, we use the {@code compound} relation for all flat NPs and replace it with the {@code name}
-   * relation during post-processing.
-   * <p/>
-   * See also {@link UniversalEnglishGrammaticalStructure#processNames(SemanticGraph)}.
-   * <p/>
-   * Example: <br/>
-   * "Hillary Rodham Clinton" &rarr;
-   * {@code name}(Hillary, Rodham),
-   * {@code name}(Hillary, Clinton)<p/>
-   */
-  public static final GrammaticalRelation NAME_MODIFIER =
-      new GrammaticalRelation(Language.UniversalEnglish, "name", "name", MODIFIER);
 
   /*
    * There used to be a relation "abbrev" for when abbreviations were defined in brackets after a noun
@@ -1589,7 +1566,6 @@ public class UniversalEnglishGrammaticalRelations {
             NUMERIC_MODIFIER,
             ADJECTIVAL_MODIFIER,
             COMPOUND_MODIFIER,
-            NAME_MODIFIER,
             APPOSITIONAL_MODIFIER,
             CLAUSAL_MODIFIER,
             ADVERBIAL_MODIFIER,
