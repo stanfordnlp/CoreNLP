@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.stream.Collectors.toList;
 
@@ -114,6 +115,13 @@ public class DependencyParser  {
    * {@link edu.stanford.nlp.trees.GrammaticalRelation} instances.
    */
   private final Language language;
+
+  private double cost;
+  private double percentCorrect;
+  private double timeSpentMillis;
+  private double bestUAS;
+
+  private AtomicBoolean forceStopTraining = new AtomicBoolean(false);
 
   DependencyParser() {
     this(new Properties());
@@ -681,16 +689,24 @@ public class DependencyParser  {
     /**
      * Track the best UAS performance we've seen.
      */
-    double bestUAS = 0;
+    this.bestUAS = 0;
 
     for (int iter = 0; iter < config.maxIter; ++iter) {
+      if (forceStopTraining.get()) {
+        forceStopTraining.set(false);
+        break;
+      }
       log.info("##### Iteration " + iter);
 
       Classifier.Cost cost = classifier.computeCostFunction(config.batchSize, config.regParameter, config.dropProb);
-      log.info("Cost = " + cost.getCost() + ", Correct(%) = " + cost.getPercentCorrect());
+      this.cost = cost.getCost();
+      this.percentCorrect = cost.getPercentCorrect();
+      log.info("Cost = " + cost + ", Correct(%) = " + percentCorrect);
+
       classifier.takeAdaGradientStep(cost, config.adaAlpha, config.adaEps);
 
-      log.info("Elapsed Time: " + (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
+      this.timeSpentMillis = (System.currentTimeMillis() - startTime);
+      log.info("Elapsed Time: " + timeSpentMillis / 1000.0 + " (s)");
 
       // UAS evaluation
       if (devFile != null && iter % config.evalPerIter == 0) {
@@ -707,7 +723,8 @@ public class DependencyParser  {
         if (config.saveIntermediate && uas > bestUAS) {
           System.err.printf("Exceeds best previous UAS of %f. Saving model file..%n", bestUAS);
 
-          bestUAS = uas;
+
+          this.bestUAS = uas;
           writeModelFile(modelFile);
         }
       }
@@ -1283,6 +1300,24 @@ public class DependencyParser  {
 
       parser.parseTextFile(input, output);
     }
+  }
+
+  public void forceStopTraining() {
+    this.forceStopTraining.set(true);
+  }
+
+  public void updateProgress(final TrainingProgressListener listener) {
+    new Thread(() -> {
+      listener.progressUpdated(
+              new TrainingProgress(cost, percentCorrect, timeSpentMillis, bestUAS)
+      );
+    }).start();
+  }
+
+  static abstract class TrainingProgressListener {
+
+    public abstract void progressUpdated(TrainingProgress trainingProgress);
+
   }
 
 }
