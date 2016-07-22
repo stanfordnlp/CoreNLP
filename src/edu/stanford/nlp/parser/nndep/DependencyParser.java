@@ -1,5 +1,4 @@
 package edu.stanford.nlp.parser.nndep;
-import edu.stanford.nlp.util.concurrent.AtomicDouble;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.international.Language;
@@ -43,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.stream.Collectors.toList;
 
@@ -116,10 +116,12 @@ public class DependencyParser  {
    */
   private final Language language;
 
-  private AtomicDouble cost = new AtomicDouble();
-  private AtomicDouble percentCorrect = new AtomicDouble();
-  private AtomicDouble timeSpent = new AtomicDouble();
-  private AtomicDouble bestUAS = new AtomicDouble();
+  private double cost;
+  private double percentCorrect;
+  private double timeSpentMillis;
+  private double bestUAS;
+
+  private AtomicBoolean forceStop = new AtomicBoolean(false);
 
   DependencyParser() {
     this(new Properties());
@@ -687,21 +689,23 @@ public class DependencyParser  {
     /**
      * Track the best UAS performance we've seen.
      */
-    double bestUAS = 0;
+    this.bestUAS = 0;
 
     for (int iter = 0; iter < config.maxIter; ++iter) {
+      if (forceStop.get()) {
+        break;
+      }
       log.info("##### Iteration " + iter);
 
       Classifier.Cost cost = classifier.computeCostFunction(config.batchSize, config.regParameter, config.dropProb);
-      log.info("Cost = " + cost.getCost() + ", Correct(%) = " + cost.getPercentCorrect());
-      this.cost.set(cost.getCost());
-      this.percentCorrect.set(cost.getPercentCorrect());
+      this.cost = cost.getCost();
+      this.percentCorrect = cost.getPercentCorrect();
+      log.info("Cost = " + cost + ", Correct(%) = " + percentCorrect);
 
       classifier.takeAdaGradientStep(cost, config.adaAlpha, config.adaEps);
 
-      final double timeSpent = (System.currentTimeMillis() - startTime);
-      this.timeSpent.set(timeSpent);
-      log.info("Elapsed Time: " + timeSpent / 1000.0 + " (s)");
+      this.timeSpentMillis = (System.currentTimeMillis() - startTime);
+      log.info("Elapsed Time: " + timeSpentMillis / 1000.0 + " (s)");
 
       // UAS evaluation
       if (devFile != null && iter % config.evalPerIter == 0) {
@@ -719,8 +723,7 @@ public class DependencyParser  {
           System.err.printf("Exceeds best previous UAS of %f. Saving model file..%n", bestUAS);
 
 
-          bestUAS = uas;
-          this.bestUAS.set(bestUAS);
+          this.bestUAS = uas;
           writeModelFile(modelFile);
         }
       }
@@ -1298,10 +1301,14 @@ public class DependencyParser  {
     }
   }
 
+  public void forceStop() {
+    this.forceStop.set(true);
+  }
+
   public void updateProgress(final ParserProgressListener listener) {
     new Thread(() -> {
       listener.progressUpdated(
-              new ParserProgress(cost.get(), percentCorrect.get(), timeSpent.get(), bestUAS.get())
+              new ParserProgress(cost, percentCorrect, timeSpentMillis, bestUAS)
       );
     }).start();
   }
