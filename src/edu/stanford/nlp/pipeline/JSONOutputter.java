@@ -237,6 +237,7 @@ public class JSONOutputter extends AnnotationOutputter {
                 mentionWriter.set("animacy", mention.animacy);
                 mentionWriter.set("startIndex", mention.startIndex);
                 mentionWriter.set("endIndex", mention.endIndex);
+                mentionWriter.set("headIndex", mention.headIndex);
                 mentionWriter.set("sentNum", mention.sentNum);
                 mentionWriter.set("position", Arrays.stream(mention.position.elems()).boxed().collect(Collectors.toList()));
                 mentionWriter.set("isRepresentativeMention", mention == representative);
