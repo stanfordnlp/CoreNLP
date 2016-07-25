@@ -26,10 +26,10 @@ public class ArabicSegmenterAnnotatorITest extends TestCase {
   }
 
   public void testPipeline() {
-    String query = "وما هي كلمتك المفضلة؟";
-    String[] expectedWords = {"و", "ما", "هي", "كلمة", "ك", "المفضلة", "?"};
-    int[] expectedStartPositions = {0, 1, 4, 7, 11, 13, 20};
-    int[] expectedEndPositions = {1, 3, 6, 11, 12, 20, 21};
+    String query = "وما هي كلمتُك المفضلة للدراسة؟";
+    String[] expectedWords = {"و", "ما", "هي", "كلمة", "ك", "المفضلة", "ل", "الدراسة", "?"};
+    int[] expectedStartPositions = {0, 1, 4, 7, 12, 14, 22, 23, 29};
+    int[] expectedEndPositions = {1, 3, 6, 11, 13, 21, 23, 29, 30};
     Annotation annotation = new Annotation(query);
     pipeline.annotate(annotation);
 

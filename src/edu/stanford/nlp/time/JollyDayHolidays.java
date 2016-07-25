@@ -200,23 +200,47 @@ public class JollyDayHolidays implements Env.Binder {
       }
     }
 
+    private SUTime.Time resolveWithYear(int year) {
+      // TODO: If we knew location of article, can use that information to resolve holidays better
+      Set<de.jollyday.Holiday> holidays = holidayManager.getHolidays(year);
+      // Try to find this holiday
+      for (de.jollyday.Holiday h : holidays) {
+        if (h.getPropertiesKey().equals(base.getDescriptionPropertiesKey())) {
+          return new SUTime.PartialTime(this, new Partial(h.getDate()));
+        }
+      }
+      return null;
+    }
+
     @Override
     public SUTime.Time resolve(SUTime.Time t, int flags) {
       Partial p = (t != null)? t.getJodaTimePartial():null;
       if (p != null) {
         if (JodaTimeUtils.hasField(p, DateTimeFieldType.year())) {
           int year = p.get(DateTimeFieldType.year());
-          // TODO: If we knew location of article, can use that information to resolve holidays better
-          Set<de.jollyday.Holiday> holidays = holidayManager.getHolidays(year);
-          // Try to find this holiday
-          for (de.jollyday.Holiday h : holidays) {
-            if (h.getPropertiesKey().equals(base.getDescriptionPropertiesKey())) {
-              return new SUTime.PartialTime(this, new Partial(h.getDate()));
-            }
+          SUTime.Time resolved = resolveWithYear(year);
+          if (resolved != null) {
+            return resolved;
           }
         }
       }
       return this;
+    }
+
+    @Override
+    public SUTime.Temporal next() {
+      // TODO: Handle holidays that are not yearly
+      return new SUTime.RelativeTime(
+        new SUTime.RelativeTime(SUTime.TemporalOp.NEXT, SUTime.YEAR, SUTime.RESOLVE_TO_FUTURE),
+        SUTime.TemporalOp.INTERSECT, this);
+    }
+
+    @Override
+    public SUTime.Temporal prev() {
+      // TODO: Handle holidays that are not yearly
+      return new SUTime.RelativeTime(
+        new SUTime.RelativeTime(SUTime.TemporalOp.PREV, SUTime.YEAR, SUTime.RESOLVE_TO_PAST),
+          SUTime.TemporalOp.INTERSECT, this);
     }
 
     @Override
