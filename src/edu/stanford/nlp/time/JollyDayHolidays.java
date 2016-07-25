@@ -4,7 +4,8 @@ import de.jollyday.HolidayManager;
 import de.jollyday.config.Configuration;
 import de.jollyday.config.Holidays;
 // import de.jollyday.configuration.ConfigurationProvider;
-import de.jollyday.impl.XMLManager;
+import de.jollyday.impl.DefaultHolidayManager;
+import de.jollyday.parameter.UrlManagerParameter;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.Generics;
@@ -52,7 +53,8 @@ public class JollyDayHolidays implements Env.Binder {
       } else {
         throw new IllegalArgumentException("Unsupported " + prefix + "pathtype = " + xmlPathType);
       }
-      holidayManager = HolidayManager.getInstance(holidayXmlUrl, managerProps);
+      UrlManagerParameter ump = new UrlManagerParameter(holidayXmlUrl, managerProps);
+      holidayManager = HolidayManager.getInstance(ump);
     } catch (java.net.MalformedURLException e) {
       throw new RuntimeException(e);
     }
@@ -143,7 +145,7 @@ public class JollyDayHolidays implements Env.Binder {
             && !void.class.equals(method.getReturnType());
   }
 
-  public static class MyXMLManager extends XMLManager {
+  public static class MyXMLManager extends DefaultHolidayManager {
     public Configuration getConfiguration() {
       return configuration;
     }
