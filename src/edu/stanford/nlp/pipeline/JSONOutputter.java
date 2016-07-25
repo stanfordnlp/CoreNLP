@@ -97,14 +97,11 @@ public class JSONOutputter extends AnnotationOutputter {
             treePrinter = new TreePrint("oneline");
           }
           treePrinter.printTree(sentence.get(TreeCoreAnnotations.TreeAnnotation.class), new PrintWriter(treeStrWriter, true));
-          String treeStr = treeStrWriter.toString().trim();  // strip the trailing newline
-          if (!"SENTENCE_SKIPPED_OR_UNPARSABLE".equals(treeStr)) {
-            l2.set("parse", treeStr);
-          }
+          l2.set("parse", treeStrWriter.toString().trim());  // strip the trailing newline
           // (dependency trees)
-          l2.set("basicDependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)));
-          l2.set("enhancedDependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class)));
-          l2.set("enhancedPlusPlusDependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class)));
+          l2.set("basic-dependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)));
+          l2.set("enhanced-dependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class)));
+          l2.set("enhanced-plus-plus-dependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class)));
           // (sentiment)
           Tree sentimentTree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
           if (sentimentTree != null) {
@@ -152,7 +149,7 @@ public class JSONOutputter extends AnnotationOutputter {
               if (tokenEnd != null && sentTokenBegin != null) {
                 l3.set("tokenEnd", tokenEnd - sentTokenBegin);
               }
-              l3.set("text", m.get(CoreAnnotations.TextAnnotation.class));
+              l3.set("word", m.get(CoreAnnotations.TextAnnotation.class));
               //l3.set("originalText", m.get(CoreAnnotations.OriginalTextAnnotation.class));
               //l3.set("lemma", m.get(CoreAnnotations.LemmaAnnotation.class));
               l3.set("characterOffsetBegin", m.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
@@ -164,17 +161,11 @@ public class JSONOutputter extends AnnotationOutputter {
               // Timex
               Timex time = m.get(TimeAnnotations.TimexAnnotation.class);
               if (time != null) {
-                Timex.Range range = time.range();
                 l3.set("timex", (Consumer<Writer>) l4 -> {
                   l4.set("tid", time.tid());
                   l4.set("type", time.timexType());
                   l4.set("value", time.value());
                   l4.set("altValue", time.altVal());
-                  l4.set("range", (range != null)? (Consumer<Writer>) l5 -> {
-                    l5.set("begin", range.begin);
-                    l5.set("end", range.end);
-                    l5.set("duration", range.duration);
-                  } : null);
                 });
               }
             }));
@@ -202,17 +193,11 @@ public class JSONOutputter extends AnnotationOutputter {
               // Timex
               Timex time = token.get(TimeAnnotations.TimexAnnotation.class);
               if (time != null) {
-                Timex.Range range = time.range();
                 l3.set("timex", (Consumer<Writer>) l4 -> {
                   l4.set("tid", time.tid());
                   l4.set("type", time.timexType());
                   l4.set("value", time.value());
                   l4.set("altValue", time.altVal());
-                  l4.set("range", (range != null)? (Consumer<Writer>) l5 -> {
-                    l5.set("begin", range.begin);
-                    l5.set("end", range.end);
-                    l5.set("duration", range.duration);
-                  } : null);
                 });
               }
             }));
@@ -237,7 +222,6 @@ public class JSONOutputter extends AnnotationOutputter {
                 mentionWriter.set("animacy", mention.animacy);
                 mentionWriter.set("startIndex", mention.startIndex);
                 mentionWriter.set("endIndex", mention.endIndex);
-                mentionWriter.set("headIndex", mention.headIndex);
                 mentionWriter.set("sentNum", mention.sentNum);
                 mentionWriter.set("position", Arrays.stream(mention.position.elems()).boxed().collect(Collectors.toList()));
                 mentionWriter.set("isRepresentativeMention", mention == representative);
@@ -453,7 +437,7 @@ public class JSONOutputter extends AnnotationOutputter {
       callback.accept((key, value) -> {
         if (key != null && value != null) {
           // First call overhead
-          if (!firstCall.dereference().orElse(false)) {
+          if (!firstCall.dereference().get()) {
             writer.write(",");
           }
           firstCall.set(false);

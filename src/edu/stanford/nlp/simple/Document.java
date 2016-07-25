@@ -378,48 +378,7 @@ public class Document {
   /** @see Document#useServer(String, int, String, String, boolean) */
   public static void useServer(String host,
                                String apiKey, String apiSecret) {
-    useServer(host, host.startsWith("http://") ? 80 : 443, apiKey, apiSecret, true);
-  }
-
-
-  /**
-   * A static block that'll automatically fault in the CoreNLP server, if the appropriate environment
-   * variables are set.
-   * These are:
-   *
-   * <ul>
-   *     <li>CORENLP_HOST</li> -- this is already sufficient to trigger creating a server
-   *     <li>CORENLP_PORT</li>
-   *     <li>CORENLP_KEY</li>
-   *     <li>CORENLP_SECRET</li>
-   *     <li>CORENLP_LAZY</li>  (if true, do as much annotation on a single round-trip as possible)
-   * </ul>
-   */
-  static {
-    String host    = System.getenv("CORENLP_HOST");
-    String portStr = System.getenv("CORENLP_PORT");
-    String key     = System.getenv("CORENLP_KEY");
-    String secret  = System.getenv("CORENLP_SECRET");
-    String lazystr = System.getenv("CORENLP_LAZY");
-    if (host != null) {
-      int port = 443;
-      if (portStr == null) {
-        if (host.startsWith("http://")) {
-          port = 80;
-        }
-      } else {
-        port = Integer.parseInt(portStr);
-      }
-      boolean lazy = true;
-      if (lazystr != null) {
-        lazy = Boolean.parseBoolean(lazystr);
-      }
-      if (key != null && secret != null) {
-        useServer(host, port, key, secret, lazy);
-      } else {
-        useServer(host, port);
-      }
-    }
+    useServer(host, host.startsWith("http://") ? 80 : 443, apiKey, apiSecret, false);
   }
 
 
@@ -428,6 +387,7 @@ public class Document {
    * @param text The text of the document.
    */
   public Document(Properties props, String text) {
+    StanfordCoreNLP.getDefaultAnnotatorPool(props, new AnnotatorImplementations());  // cache the annotator pool
     this.impl = CoreNLPProtos.Document.newBuilder().setText(text);
   }
 
@@ -676,7 +636,7 @@ public class Document {
    */
   public List<Sentence> sentences(Properties props) {
     return this.sentences(props,
-        props == EMPTY_PROPS ? defaultTokenize : AnnotatorFactories.tokenize(props, backend).create());
+        (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultTokenize : AnnotatorFactories.tokenize(props, backend).create());
   }
 
   /**
@@ -686,7 +646,7 @@ public class Document {
    */
   protected List<Sentence> sentences(Properties props, Annotator tokenizer) {
     if (sentences == null) {
-      Annotator ssplit = props == EMPTY_PROPS ? defaultSSplit : AnnotatorFactories.sentenceSplit(props, backend).create();
+      Annotator ssplit = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultSSplit : AnnotatorFactories.sentenceSplit(props, backend).create();
       // Annotate
       Annotation ann = new Annotation(this.impl.getText());
       tokenizer.annotate(ann);
