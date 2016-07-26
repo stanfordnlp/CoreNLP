@@ -1,20 +1,17 @@
 package edu.stanford.nlp.time;
 
-import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Pair;
+import junit.framework.TestCase;
 import org.joda.time.Partial;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * Tests basic SUTime operations
  *
  * @author Angel Chang
  */
-public class SUTimeTest {
-
-  private static void resolveAndCheckRange(String message, SUTime.Temporal t, SUTime.Time anchor, String expected) {
+public class SUTimeTest extends TestCase {
+  void resolveAndCheckRange(String message, SUTime.Temporal t, SUTime.Time anchor, String expected) {
     SUTime.Temporal res = t.resolve(anchor);
     SUTime.Range range = res.getRange();
     assertEquals(message, expected, range.toISOString());
@@ -33,7 +30,7 @@ public class SUTimeTest {
   public void testNext() {
     SUTime.Time anchorTime = new SUTime.IsoDate(2016, 6, 19); // Sunday
 
-    Pair<SUTime.Temporal, String>[] testPairs = ErasureUtils.uncheckedCast(new Pair[]{
+    Pair<SUTime.Temporal, String>[] testPairs = new Pair[]{
       Pair.makePair(SUTime.MONDAY, "2016-06-20/2016-06-20"),
       Pair.makePair(SUTime.TUESDAY, "2016-06-21/2016-06-21"),
       Pair.makePair(SUTime.WEDNESDAY, "2016-06-22/2016-06-22"),
@@ -58,12 +55,12 @@ public class SUTimeTest {
       Pair.makePair(SUTime.SPRING, "2017-03-01/2017-06"),
       Pair.makePair(SUTime.SUMMER, "2017-06-01/2017-09"),
       Pair.makePair(SUTime.FALL, "2017-09-01/2017-12"),
-    });
+    };
 
     for (int i = 0; i < testPairs.length; i++) {
       Pair<SUTime.Temporal, String> p = testPairs[i];
-      SUTime.RelativeTime rel1 = new SUTime.RelativeTime(SUTime.TIME_REF, SUTime.TemporalOp.NEXT, p.first());
-      resolveAndCheckRange("Next for " + p.first() + " (" + i + ')', rel1, anchorTime, p.second());
+      SUTime.RelativeTime rel1 = new SUTime.RelativeTime(SUTime.TIME_REF, SUTime.TemporalOp.NEXT, p.first);
+      resolveAndCheckRange("Next for " + p.first.toString() + " (" + i + ")", rel1, anchorTime, p.second);
     }
   }
 
@@ -71,7 +68,7 @@ public class SUTimeTest {
   public void testThis() {
     SUTime.Time anchorTime = new SUTime.IsoDate(2016, 6, 19); // Sunday
 
-    Pair<SUTime.Temporal, String>[] testPairs = ErasureUtils.uncheckedCast(new Pair[]{
+    Pair<SUTime.Temporal, String>[] testPairs = new Pair[]{
       Pair.makePair(SUTime.MONDAY, "2016-06-13/2016-06-13"),  // TODO: is this section right, should this be interpreted to be in the past?
       Pair.makePair(SUTime.TUESDAY, "2016-06-14/2016-06-14"),
       Pair.makePair(SUTime.WEDNESDAY, "2016-06-15/2016-06-15"),
@@ -96,13 +93,12 @@ public class SUTimeTest {
       Pair.makePair(SUTime.SPRING, "2016-03-01/2016-06"),
       Pair.makePair(SUTime.SUMMER, "2016-06-01/2016-09"),
       Pair.makePair(SUTime.FALL, "2016-09-01/2016-12"),
-    });
+    };
 
     for (int i = 0; i < testPairs.length; i++) {
       Pair<SUTime.Temporal, String> p = testPairs[i];
-      SUTime.RelativeTime rel1 = new SUTime.RelativeTime(SUTime.TIME_REF, SUTime.TemporalOp.THIS, p.first());
-      resolveAndCheckRange("This for " + p.first() + " (" + i + ')', rel1, anchorTime, p.second());
+      SUTime.RelativeTime rel1 = new SUTime.RelativeTime(SUTime.TIME_REF, SUTime.TemporalOp.THIS, p.first);
+      resolveAndCheckRange("This for " + p.first.toString() + " (" + i + ")", rel1, anchorTime, p.second);
     }
   }
-
 }

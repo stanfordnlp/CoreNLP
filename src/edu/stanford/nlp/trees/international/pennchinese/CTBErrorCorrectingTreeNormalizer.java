@@ -38,7 +38,7 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
   private static final Pattern PPTmpPattern = Pattern.compile("PP.*-TMP.*");
   private static final Pattern TmpPattern = Pattern.compile(".*-TMP.*");
 
-  private static final boolean DEBUG = System.getProperty("CTBErrorCorrectingTreeNormalizer") != null;
+  private static final boolean DEBUG = System.getProperty("CTBErrorCorrectingTreeNormalizer", null) != null;
 
   @SuppressWarnings({"NonSerializableFieldInSerializableClass"})
   private final TreeTransformer tagExtender;
@@ -110,7 +110,6 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
     private static final long serialVersionUID = 8914098359495987617L;
 
     /** Doesn't accept nodes that only cover an empty. */
-    @Override
     public boolean test(Tree t) {
       Tree[] kids = t.children();
       Label l = t.label();
@@ -128,56 +127,20 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
 
   }
 
-  @SuppressWarnings({"NonSerializableFieldInSerializableClass"})
   private final Predicate<Tree> chineseEmptyFilter = new ChineseEmptyFilter();
 
-  private static final TregexPattern[] fixupTregex = {
-          TregexPattern.compile("PU=punc < 她｛"),
-          TregexPattern.compile("@NP <1 (@NP <1 NR <2 (PU=bad < /^＜$/)) <2 (FLR=dest <2 (NT < /Ｅｎｇｌｉｓｈ/))"),
-          TregexPattern.compile("@IP < (FLR=dest <: (PU < /^〈$/) $. (__=bad1 $. (PU=bad2 < /^〉$/)))"),
-          TregexPattern.compile("@DFL|FLR|IMG|SKIP=junk <<, (PU < /^[〈｛{＜\\[［]$/) <<- (PU < /^[〉｝}＞\\]］]$/)  <3 __"),
-          TregexPattern.compile("WHPP=bad"),
+  private static final TregexPattern[] splitPuncTregex = {
+    TregexPattern.compile("PU=punc < 她｛")
   };
-  private static final TsurgeonPattern[] fixupTsurgeon = {
-          Tsurgeon.parseOperation("replace punc (PN 她) (PU ｛)"),
-          Tsurgeon.parseOperation("move bad >1 dest"),
-          Tsurgeon.parseOperation("[move bad1 >-1 dest] [move bad2 >-1 dest]"),
-          Tsurgeon.parseOperation("delete junk"),
-          Tsurgeon.parseOperation("relabel bad PP"),
+  private static final TsurgeonPattern[] splitPuncTsurgeon = {
+    Tsurgeon.parseOperation("replace punc (PN 她) (PU ｛)")
   };
 
   static {
-    if (fixupTregex.length != fixupTsurgeon.length) {
-      throw new AssertionError("fixupTregex and fixupTsurgeon have different lengths in CTBErrorCorrectingTreeNormalizer.");
+    if (splitPuncTregex.length != splitPuncTsurgeon.length) {
+      throw new AssertionError("splitPuncTregex and splitPuncTsurgeon have different lengths in CTBErrorCorrectingTreeNormalizer.java");
     }
   }
-
-  // We delete the most egregious non-speech DFL, FLR, IMG, and SKIP constituents, according to the Tregex
-  // expression above. Maybe more should be deleted really. I don't understand this very well, and there is no documentation.
-
-  // New phrasal categories in CTB 7 and later:
-  // DFL = Disfluency. Generally keep but delete for ones that are things like (FLR (PU <) (VV turn) (PU >)).
-  // EMO = Emoticon. For emoticons. Fine to keep.
-  // FLR = Filler.  Generally keep but delete for ones that are things like (FLR (PU <) (VV turn) (PU >)).
-  // IMG = ?Image?. Appear to all be of form (IMG (PU [) (NN 图片) (PU ])). Delete all those.
-  // INC = Incomplete (more incomplete than a FRAG which is only syntactically incomplete). Just keep.
-  // INTJ = Interjection. Fine to keep.
-  // META = Just one of these in chtb_5200.df. Delete whole tree. Should have been turned into XML metadata
-  // OTH = ??. Weird but just leave.
-  // SKIP = ??. Always has NOI under it. Omit or keep?
-  // TYPO = seems like should mainly go, but sometimes a branching node??
-  // WHPP = ??. Just one of these. Over a -NONE- so will go if empties are deleted. But should just be PP.
-  //
-  // There is a tree in chtb_2856.bn which has IP -> ... PU (FLR (PU <)) (VV turn) (PU >)
-  // which just seems an error - should all be under FLR.
-  //
-  // POS tags are now 38. Original 33 plus these:
-  // EM = Emoticon. Often but not always under EMO.
-  // IC = Incomplete word rendered in pinyin, usually under DFL.
-  // NOI =
-  // URL = URL.
-  // X = In practice currently used only for "x" in constructions like "30 x 25 cm". Shouldn't exist!
-
 
   @Override
   public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
@@ -200,24 +163,18 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
       EncodingPrintWriter.err.println("Possible error: non-unary initial rewrite: " +
                              newTree.localTree(), ChineseTreebankLanguagePack.ENCODING);
       // }
-    } else if (kids.length > 0) { // ROOT has 1 child - the normal case
-      Tree child = kids[0];
-      if ( ! child.isPhrasal()) {
-        if (DEBUG) {
-          EncodingPrintWriter.err.println("Correcting error: treebank tree is not phrasal; wrapping in FRAG: " + child, ChineseTreebankLanguagePack.ENCODING);
-        }
-        Tree added = tf.newTreeNode("FRAG", Arrays.asList(kids));
-        newTree.setChild(0, added);
-      } else if (child.label().value().equals("META")) {
-        // Delete the one bogus META tree in CTB 9
-        EncodingPrintWriter.err.println("Deleting META tree that should be XML metadata in chtb_5200.df: " + child, ChineseTreebankLanguagePack.ENCODING);
-        return null;
-      }
-
     } else {
-      EncodingPrintWriter.err.println("Error: tree with no children: " + tree, ChineseTreebankLanguagePack.ENCODING);
+      if (kids.length > 0) {
+        Tree child = kids[0];
+        if ( ! child.isPhrasal()) {
+          EncodingPrintWriter.err.println("Correcting error: treebank tree is not phrasal; wrapping in FRAG: " + child, ChineseTreebankLanguagePack.ENCODING);
+          Tree added = tf.newTreeNode("FRAG", Arrays.asList(kids));
+          newTree.setChild(0, added);
+        }
+      } else {
+        EncodingPrintWriter.err.println("Error: tree with no children: " + tree, ChineseTreebankLanguagePack.ENCODING);
+      }
     }
-
     // note that there's also at least 1 tree that is an IP with no surrounding ROOT node
 
     // there are also several places where "NP" is used as a preterminal tag
@@ -228,15 +185,14 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
         Tree subsubtree = subtree.firstChild();
         if (subsubtree.value().equals("ROOT")) {
           if (subsubtree.firstChild().isLeaf() && "CP".equals(subsubtree.firstChild().value())) {
-            EncodingPrintWriter.err.println("Correcting error: seriously messed up tree in CTB6 (chtb_3095.bn): " + newTree, ChineseTreebankLanguagePack.ENCODING);
+            EncodingPrintWriter.err.println("Correcting error: seriously messed up tree in CTB6: " + newTree, ChineseTreebankLanguagePack.ENCODING);
             List<Tree> children = subsubtree.getChildrenAsList();
             children = children.subList(1,children.size());
             subtree.setChildren(children);
-            EncodingPrintWriter.err.println("  Corrected as:                                                    " + newTree, ChineseTreebankLanguagePack.ENCODING); // spaced to align with above
+            EncodingPrintWriter.err.println("  Corrected as:                                     " + newTree, ChineseTreebankLanguagePack.ENCODING); // spaced to align with above
           }
         }
       }
-      // All the stuff below here seems to have been fixed in CTB 9. Maybe reporting errors sometimes does help.
       if (subtree.isPreTerminal()) {
         if (subtree.value().matches("NP")) {
           if (ChineseTreebankLanguagePack.chineseDouHaoAcceptFilter().test(subtree.firstChild().value())) {
@@ -258,9 +214,9 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
             subtree.setValue("NN");
           }
         } else if (subtree.value().matches("PU")) {
-          if (subtree.firstChild().value().matches("他")) {
+          if (subtree.firstChild().value().matches("\u4ed6")) {
             if (DEBUG) {
-              EncodingPrintWriter.err.println("Correcting error: \"他\" under PU tag; tag changed to PN: " + subtree, ChineseTreebankLanguagePack.ENCODING);
+              EncodingPrintWriter.err.println("Correcting error: \"\u4ed6\" under PU tag; tag changed to PN: " + subtree, ChineseTreebankLanguagePack.ENCODING);
             }
             subtree.setValue("PN");
           } else if (subtree.firstChild().value().equals("里")) {
@@ -273,7 +229,7 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
               EncodingPrintWriter.err.println("Correcting error: \"" + subtree.firstChild().value() + "\" under PU tag; tag changed to VC: " + subtree, ChineseTreebankLanguagePack.ENCODING);
             }
             subtree.setValue("VC");
-          } else if (subtree.firstChild().value().matches("tw|半穴式")) {
+          } else if (subtree.firstChild().value().matches("tw|\u534A\u7A74\u5F0F")) {
             if (DEBUG) {
               EncodingPrintWriter.err.println("Correcting error: \"" + subtree.firstChild().value() + "\" under PU tag; tag changed to NN: " + subtree, ChineseTreebankLanguagePack.ENCODING);
             }
@@ -298,27 +254,18 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
       }
     }
 
-    for (int i = 0; i < fixupTregex.length; ++i) {
+    for (int i = 0; i < splitPuncTregex.length; ++i) {
       if (DEBUG) {
         Tree preProcessed = newTree.deepCopy();
-        newTree = Tsurgeon.processPattern(fixupTregex[i], fixupTsurgeon[i], newTree);
+        newTree = Tsurgeon.processPattern(splitPuncTregex[i], splitPuncTsurgeon[i], newTree);
         if (!preProcessed.equals(newTree)) {
-          EncodingPrintWriter.err.println("Correcting error: Updated tree using tregex " + fixupTregex[i] + " and tsurgeon " + fixupTsurgeon[i], ChineseTreebankLanguagePack.ENCODING);
-          EncodingPrintWriter.err.println("  from: " + preProcessed, ChineseTreebankLanguagePack.ENCODING);
-          EncodingPrintWriter.err.println("    to: " + newTree, ChineseTreebankLanguagePack.ENCODING);
+          EncodingPrintWriter.err.println("Correcting error: Updated tree using tregex " + splitPuncTregex[i] + " and tsurgeon " + splitPuncTsurgeon[i], ChineseTreebankLanguagePack.ENCODING);
         }
       } else {
-        newTree = Tsurgeon.processPattern(fixupTregex[i], fixupTsurgeon[i], newTree);
+        newTree = Tsurgeon.processPattern(splitPuncTregex[i], splitPuncTsurgeon[i], newTree);
       }
     }
 
-    // at least once we just end up deleting everything under ROOT. In which case, we should just get rid of the tree.
-    if (newTree.numChildren() == 0) {
-      if (DEBUG) {
-        EncodingPrintWriter.err.println("Deleting tree that now has no contents: " + newTree, ChineseTreebankLanguagePack.ENCODING);
-      }
-      return null;
-    }
 
     if (tagExtender != null) {
       newTree = tagExtender.transformTree(newTree);
