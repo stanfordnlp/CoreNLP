@@ -4,8 +4,7 @@ import de.jollyday.HolidayManager;
 import de.jollyday.config.Configuration;
 import de.jollyday.config.Holidays;
 // import de.jollyday.configuration.ConfigurationProvider;
-import de.jollyday.impl.DefaultHolidayManager;
-import de.jollyday.parameter.UrlManagerParameter;
+import de.jollyday.impl.XMLManager;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.Generics;
@@ -53,8 +52,7 @@ public class JollyDayHolidays implements Env.Binder {
       } else {
         throw new IllegalArgumentException("Unsupported " + prefix + "pathtype = " + xmlPathType);
       }
-      UrlManagerParameter ump = new UrlManagerParameter(holidayXmlUrl, managerProps);
-      holidayManager = HolidayManager.getInstance(ump);
+      holidayManager = HolidayManager.getInstance(holidayXmlUrl, managerProps);
     } catch (java.net.MalformedURLException e) {
       throw new RuntimeException(e);
     }
@@ -145,7 +143,7 @@ public class JollyDayHolidays implements Env.Binder {
             && !void.class.equals(method.getReturnType());
   }
 
-  public static class MyXMLManager extends DefaultHolidayManager {
+  public static class MyXMLManager extends XMLManager {
     public Configuration getConfiguration() {
       return configuration;
     }
@@ -202,47 +200,23 @@ public class JollyDayHolidays implements Env.Binder {
       }
     }
 
-    private SUTime.Time resolveWithYear(int year) {
-      // TODO: If we knew location of article, can use that information to resolve holidays better
-      Set<de.jollyday.Holiday> holidays = holidayManager.getHolidays(year);
-      // Try to find this holiday
-      for (de.jollyday.Holiday h : holidays) {
-        if (h.getPropertiesKey().equals(base.getDescriptionPropertiesKey())) {
-          return new SUTime.PartialTime(this, new Partial(h.getDate()));
-        }
-      }
-      return null;
-    }
-
     @Override
     public SUTime.Time resolve(SUTime.Time t, int flags) {
       Partial p = (t != null)? t.getJodaTimePartial():null;
       if (p != null) {
         if (JodaTimeUtils.hasField(p, DateTimeFieldType.year())) {
           int year = p.get(DateTimeFieldType.year());
-          SUTime.Time resolved = resolveWithYear(year);
-          if (resolved != null) {
-            return resolved;
+          // TODO: If we knew location of article, can use that information to resolve holidays better
+          Set<de.jollyday.Holiday> holidays = holidayManager.getHolidays(year);
+          // Try to find this holiday
+          for (de.jollyday.Holiday h : holidays) {
+            if (h.getPropertiesKey().equals(base.getDescriptionPropertiesKey())) {
+              return new SUTime.PartialTime(this, new Partial(h.getDate()));
+            }
           }
         }
       }
       return this;
-    }
-
-    @Override
-    public SUTime.Temporal next() {
-      // TODO: Handle holidays that are not yearly
-      return new SUTime.RelativeTime(
-        new SUTime.RelativeTime(SUTime.TemporalOp.NEXT, SUTime.YEAR, SUTime.RESOLVE_TO_FUTURE),
-        SUTime.TemporalOp.INTERSECT, this);
-    }
-
-    @Override
-    public SUTime.Temporal prev() {
-      // TODO: Handle holidays that are not yearly
-      return new SUTime.RelativeTime(
-        new SUTime.RelativeTime(SUTime.TemporalOp.PREV, SUTime.YEAR, SUTime.RESOLVE_TO_PAST),
-          SUTime.TemporalOp.INTERSECT, this);
     }
 
     @Override

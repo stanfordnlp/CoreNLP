@@ -93,15 +93,6 @@ public class ChineseHeadFinder extends AbstractCollinsHeadFinder {
 
     // new for ctb6.
     nonTerminalInfo.put("FLR", new String[][]{rightExceptPunct});
-
-    // new for CTB9
-    nonTerminalInfo.put("DFL", new String[][]{rightExceptPunct});
-    nonTerminalInfo.put("EMO", new String[][]{leftExceptPunct}); // left/right doesn't matter
-    nonTerminalInfo.put("INC", new String[][]{leftExceptPunct}); 
-    nonTerminalInfo.put("INTJ", new String[][]{leftExceptPunct}); 
-    nonTerminalInfo.put("OTH", new String[][]{leftExceptPunct}); 
-    nonTerminalInfo.put("SKIP", new String[][]{leftExceptPunct}); 
-
   }
 
   private static final long serialVersionUID = 6143632784691159283L;

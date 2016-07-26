@@ -148,7 +148,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
 
 
   public StanfordCoreNLP(Properties props, boolean enforceRequirements)  {
-    this(props, enforceRequirements, null);
+    AnnotatorImplementations impl = getAnnotatorImplementations();
+    construct(props, enforceRequirements, impl, getDefaultAnnotatorPool(props, impl));
   }
 
   public StanfordCoreNLP(Properties props, boolean enforceRequirements, AnnotatorPool annotatorPool)  {
@@ -168,7 +169,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     if (props == null) {
       throw new RuntimeIOException("ERROR: cannot find properties file \"" + propsFileNamePrefix + "\" in the classpath!");
     }
-    construct(props, enforceRequirements, getAnnotatorImplementations(), null);
+    AnnotatorImplementations impl = getAnnotatorImplementations();
+    construct(props, enforceRequirements, impl, getDefaultAnnotatorPool(props, impl));
   }
 
   //
@@ -363,26 +365,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
         !props.containsKey("coref.md.type")) {
       props.setProperty("coref.md.type", "dep");
     }
-    // (ensure regexner is after ner)
-    if (orderedAnnotators.contains(Annotator.STANFORD_NER) && orderedAnnotators.contains(STANFORD_REGEXNER)) {
-      orderedAnnotators.remove(STANFORD_REGEXNER);
-      int nerIndex = orderedAnnotators.indexOf(Annotator.STANFORD_NER);
-      orderedAnnotators.add(nerIndex + 1, STANFORD_REGEXNER);
-    }
-    // (ensure coref is before openie)
-    if (orderedAnnotators.contains(Annotator.STANFORD_COREF) && orderedAnnotators.contains(STANFORD_OPENIE)) {
-      int maxIndex = Math.max(
-          orderedAnnotators.indexOf(STANFORD_OPENIE),
-          orderedAnnotators.indexOf(STANFORD_COREF)
-          );
-      if (Objects.equals(orderedAnnotators.get(maxIndex), STANFORD_OPENIE)) {
-        orderedAnnotators.add(maxIndex, STANFORD_COREF);
-        orderedAnnotators.remove(STANFORD_COREF);
-      } else {
-        orderedAnnotators.add(maxIndex + 1, STANFORD_OPENIE);
-        orderedAnnotators.remove(STANFORD_OPENIE);
-      }
-    }
 
     // Return
     return StringUtils.join(orderedAnnotators, ",");
@@ -413,8 +395,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     this.constituentTreePrinter = new TreePrint("penn");
     this.dependencyTreePrinter = new TreePrint("typedDependenciesCollapsed");
 
-
-
     if (props == null) {
       // if undefined, find the properties file in the classpath
       props = loadPropertiesFromClasspath();
@@ -426,11 +406,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       props = fromClassPath;
     }
     this.properties = props;
-
-    if (pool == null) {
-      // if undefined, load the default annotator pool
-      pool = getDefaultAnnotatorPool(props, annotatorImplementations);
-    }
 
     // Set threading
     if (this.properties.containsKey("threads")) {
@@ -593,7 +568,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       return null;
     }
     try {
-      return pool.get(name);
+      Annotator a =  pool.get(name);
+      return a;
     } catch(IllegalArgumentException e) {
       logger.error("Attempted to fetch annotator \"" + name +
         "\" but the annotator pool does not store any such type!");

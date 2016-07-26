@@ -257,9 +257,9 @@ LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
 joda-time.jar
-ORIGINAL JAR NAME: joda-time-2.9.4.jar
-VERSION: 2.9.4
-RELEASE DATE: 2016-05-27
+ORIGINAL JAR NAME: joda-time-2.9.jar
+VERSION: 2.9
+RELEASE DATE: 2015-10-24
 SOURCE AVAILABLE: yes
 DESCRIPTION: Extended date/time API that handles partial dates/times
 URL: http://joda-time.sourceforge.net/index.html
@@ -267,14 +267,14 @@ URL: http://joda-time.sourceforge.net/index.html
 USED BY: edu.stanford.nlp.time
 Needed by CoreNLP distributions.
 
-LAST UPDATE: 2016-07-08
+LAST UPDATE: 2015-11-10
 LAST UPDATE BY: Angel Chang
 
 -----------------------------------------------------------------------
-jollyday-0.4.9.jar
-ORIGINAL JAR NAME: jollyday-0.4.9.jar
-VERSION: 0.4.9
-RELEASE DATE: 2015-05-06
+jollyday-0.4.7.jar
+ORIGINAL JAR NAME: jollyday-0.4.7.jar
+VERSION: 0.4.7
+RELEASE DATE: 2012-11-05
 SOURCE AVAILABLE: yes
 DESCRIPTION: API for holidays (using jodatime)
 URL: http://jollyday.sourceforge.net
@@ -282,8 +282,8 @@ URL: http://jollyday.sourceforge.net
 USED BY: edu.stanford.nlp.time
 Needed by CoreNLP distributions.
 
-LAST UPDATE: 2016-07-24
-LAST UPDATE BY: Christopher Manning
+LAST UPDATE: 2012-11-05
+LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
 ejml-0.23.jar

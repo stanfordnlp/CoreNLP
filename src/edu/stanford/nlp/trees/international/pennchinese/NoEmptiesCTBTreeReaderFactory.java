@@ -1,9 +1,7 @@
 package edu.stanford.nlp.trees.international.pennchinese;
 
 
-/** A CTB TreeReaderFactory that deletes empty nodes, and makes some corrections
- *  to trees while reading them in.
- *
+/** A CTB TreeReaderFactory that deletes empty nodes.
  *  @author Christopher Manning
  */
 public class NoEmptiesCTBTreeReaderFactory extends CTBTreeReaderFactory {
