@@ -38,7 +38,7 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
   private static final Pattern PPTmpPattern = Pattern.compile("PP.*-TMP.*");
   private static final Pattern TmpPattern = Pattern.compile(".*-TMP.*");
 
-  private static final boolean DEBUG = System.getProperty("CTBErrorCorrectingTreeNormalizer", "true") != null;
+  private static final boolean DEBUG = System.getProperty("CTBErrorCorrectingTreeNormalizer") != null;
 
   @SuppressWarnings({"NonSerializableFieldInSerializableClass"})
   private final TreeTransformer tagExtender;
@@ -203,7 +203,9 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
     } else if (kids.length > 0) { // ROOT has 1 child - the normal case
       Tree child = kids[0];
       if ( ! child.isPhrasal()) {
-        EncodingPrintWriter.err.println("Correcting error: treebank tree is not phrasal; wrapping in FRAG: " + child, ChineseTreebankLanguagePack.ENCODING);
+        if (DEBUG) {
+          EncodingPrintWriter.err.println("Correcting error: treebank tree is not phrasal; wrapping in FRAG: " + child, ChineseTreebankLanguagePack.ENCODING);
+        }
         Tree added = tf.newTreeNode("FRAG", Arrays.asList(kids));
         newTree.setChild(0, added);
       } else if (child.label().value().equals("META")) {
@@ -310,6 +312,13 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
       }
     }
 
+    // at least once we just end up deleting everything under ROOT. In which case, we should just get rid of the tree.
+    if (newTree.numChildren() == 0) {
+      if (DEBUG) {
+        EncodingPrintWriter.err.println("Deleting tree that now has no contents: " + newTree, ChineseTreebankLanguagePack.ENCODING);
+      }
+      return null;
+    }
 
     if (tagExtender != null) {
       newTree = tagExtender.transformTree(newTree);

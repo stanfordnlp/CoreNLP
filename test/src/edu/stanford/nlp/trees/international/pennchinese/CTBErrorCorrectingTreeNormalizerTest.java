@@ -41,11 +41,20 @@ public class CTBErrorCorrectingTreeNormalizerTest extends TestCase {
     runTest(input, output);
   }
 
+  public void testNothingLeftTree() {
+    String input = "( (FLR (PU ＜) (VA ｆｏｒｅｉｇｎ) (PU ＞) (PU （) (PU （) (PU ）) (PU ）) (PU ＜) (PU ／) (VA ｆｏｒｅｉｇｎ) (PU ＞)))";
+    runTest(input, null);
+  }
+
   private static void runTest(String input, String output) {
     Tree inputTree = Tree.valueOf(input);
     TreeTransformer tt = new CTBErrorCorrectingTreeNormalizer(false, false, false, false);
     Tree outputTree = tt.apply(inputTree);
-    assertEquals(output, outputTree.toString());
+    if (output == null) {
+      assertNull(outputTree);
+    } else {
+      assertEquals(output, outputTree.toString());
+    }
   }
 
 }
