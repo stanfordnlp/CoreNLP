@@ -63,7 +63,6 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
  * @author Huihsin Tseng
  * @author Marie-Catherine de Marneffe
  * @author Percy Liang
- * @author Peng Qi
  * @see edu.stanford.nlp.trees.GrammaticalStructure
  * @see GrammaticalRelation
  * @see UniversalChineseGrammaticalStructure
@@ -373,7 +372,6 @@ public class UniversalChineseGrammaticalRelations {
   /**
    * The "appositional modifier" (appos) grammatical relation (abstract).
    */
-  // todo [cdm 2016]: It isn't really possible to distinguish this from compound with the -APP functional tag. The second NP should also not need to be 1 word NR.
   public static final GrammaticalRelation APPOSITIONAL_MODIFIER =
     new GrammaticalRelation(Language.UniversalChinese, "appos", "appositional modifier", MODIFIER,
             "NP", tregexCompiler,
@@ -386,7 +384,7 @@ public class UniversalChineseGrammaticalRelations {
    * The "parenthetical modifier" (prnmod) grammatical relation (Chinese-specific).
    */
   public static final GrammaticalRelation PARENTHETICAL_MODIFIER =
-    new GrammaticalRelation(Language.UniversalChinese, "appos:prnmod", "parenthetical modifier",
+    new GrammaticalRelation(Language.UniversalChinese, "parataxis:prnmod", "parenthetical modifier",
                             PARATAXIS, "NP", tregexCompiler,
             "NP < PRN=target ");
 
@@ -773,7 +771,6 @@ public class UniversalChineseGrammaticalRelations {
       "compound:nn", "noun compound",
       COMPOUND, "^NP", tregexCompiler,
             "NP < (NN|NR|NT=target $+ NN|NT)",
-            "NP < (NN=target $+ NR)",
             "NP < (NN|NR|NT $+ FW=target)",
             "NP < (NP=target !< NR !$+ PU|CC $++ (NP|PRN !< NR))",
             "NP < (NP=target < NN|NR|NT $+ (NP < NN|NT))");

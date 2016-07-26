@@ -193,12 +193,8 @@ public class StanfordCoreNLPServer implements Runnable {
         }
 
         String text = IOUtils.slurpReader(IOUtils.encodedInputStreamReader(httpExchange.getRequestBody(), encoding));
-
-
-        // Remove the \ and + characters that mess up the URL decoding.
-        text = text.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
-        text = text.replaceAll("\\+", "%2B");
         text = URLDecoder.decode(text, encoding).trim();
+        // TODO(chaganty): URLdecode string.
         // Read the annotation
         Annotation annotation = new Annotation(text);
         // Set the date (if provided)
