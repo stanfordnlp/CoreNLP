@@ -203,7 +203,9 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
     } else if (kids.length > 0) { // ROOT has 1 child - the normal case
       Tree child = kids[0];
       if ( ! child.isPhrasal()) {
-        EncodingPrintWriter.err.println("Correcting error: treebank tree is not phrasal; wrapping in FRAG: " + child, ChineseTreebankLanguagePack.ENCODING);
+        if (DEBUG) {
+          EncodingPrintWriter.err.println("Correcting error: treebank tree is not phrasal; wrapping in FRAG: " + child, ChineseTreebankLanguagePack.ENCODING);
+        }
         Tree added = tf.newTreeNode("FRAG", Arrays.asList(kids));
         newTree.setChild(0, added);
       } else if (child.label().value().equals("META")) {
