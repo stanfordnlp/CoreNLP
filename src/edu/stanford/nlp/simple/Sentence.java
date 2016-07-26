@@ -112,7 +112,7 @@ public class Sentence {
    * @param props The properties to use for the annotators.
    */
   public Sentence(String text, Properties props) {
-    this(new Document(text), props);
+    this(new Document(props, text), props);
   }
 
   /**

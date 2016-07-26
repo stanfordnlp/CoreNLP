@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
  *  <b>Warning:</b> The code contains a version that uses codePoint methods
  *  to handle full Unicode.  But it seems to tickle some bugs in
  *  Sun's JDK 1.5.  It works correctly with JDK 1.6+.  By default it is
- *  disabled and a version that only handles BMP characters is used.  The
+ *  enabled. The version that only handles BMP characters can be used by editing the code.  The
  *  latter prints a warning message if it sees a high-surrogate character.
  *
  *  @author Christopher Manning
@@ -68,6 +68,7 @@ public class ChineseUtils  {
   public static String normalize(String in, int ascii, int spaceChar) {
     return normalize(in, ascii, spaceChar, LEAVE);
   }
+
   /** This will normalize a Unicode String in various ways.  This routine
    *  correctly handles characters outside the basic multilingual plane.
    *
@@ -81,7 +82,7 @@ public class ChineseUtils  {
    *      if this is ChineseUtils.LEAVE, then do nothing,
    *      if it is ASCII then map them to the space character U+0020, and
    *      if it is FULLWIDTH then map them to U+3000.
-   *  @param midDot For characters that satisfy Character.isSpaceChar(),
+   *  @param midDot For a set of 7 characters that are roughly middle dot characters,
    *      if this is ChineseUtils.LEAVE, then do nothing,
    *      if it is NORMALIZE then map them to the extended Latin character U+00B7, and
    *      if it is FULLWIDTH then map them to U+30FB.
@@ -174,23 +175,17 @@ public class ChineseUtils  {
         case LEAVE:
           break;
         case NORMALIZE:
-          if (cp == '\u00B7' || cp == '\u0387' || cp == '\u2022' ||
-              cp == '\u2024' || cp == '\u2027' || cp == '\u2219' ||
-              cp == '\u22C5' || cp == '\u30FB') {
+          if (isMidDot(cp)) {
             cp = '\u00B7';
           }
           break;
         case FULLWIDTH:
-          if (cp == '\u00B7' || cp == '\u0387' || cp == '\u2022' ||
-              cp == '\u2024' || cp == '\u2027' || cp == '\u2219' ||
-              cp == '\u22C5' || cp == '\u30FB') {
+          if (isMidDot(cp)) {
             cp = '\u30FB';
           }
           break;
         case DELETE:
-          if (cp == '\u00B7' || cp == '\u0387' || cp == '\u2022' ||
-              cp == '\u2024' || cp == '\u2027' || cp == '\u2219' ||
-              cp == '\u22C5' || cp == '\u30FB') {
+          if (isMidDot(cp)) {
             delete = true;
           }
           break;
@@ -203,14 +198,16 @@ public class ChineseUtils  {
     } // end for
     return out.toString();
   }
+
   private static String normalizeUnicode(String in, int ascii, int spaceChar, int midDot) {
     StringBuilder out = new StringBuilder();
     int len = in.length();
     // Do it properly with codepoints, for non-BMP Unicode as well
-    int numCP = in.codePointCount(0, len);
-    for (int i = 0; i < numCP; i++) {
-      int offset = in.offsetByCodePoints(0, i);
-      int cp = in.codePointAt(offset);
+    // int numCP = in.codePointCount(0, len);
+    int cpp = 0; // previous codepoint
+    for (int offset = 0, cp; offset < len; offset += Character.charCount(cp)) {
+      // int offset = in.offsetByCodePoints(0, offset);
+      cp = in.codePointAt(offset);
       Character.UnicodeBlock cub = Character.UnicodeBlock.of(cp);
       if (cub == Character.UnicodeBlock.PRIVATE_USE_AREA ||
               cub == Character.UnicodeBlock.SUPPLEMENTARY_PRIVATE_USE_AREA_A ||
@@ -253,10 +250,11 @@ public class ChineseUtils  {
           }
           break;
         case DELETE_EXCEPT_BETWEEN_ASCII:
-          int cpp = 0;
-          if (i > 0) { cpp = in.codePointAt(i - 1); }
+          int nextOffset = offset + Character.charCount(cp);
           int cpn = 0;
-          if (i < (numCP - 1)) { cpn = in.codePointAt(i + 1); }
+          if (nextOffset < len) {
+            cpn = in.codePointAt(nextOffset);
+          }
           if (Character.isSpaceChar(cp) && ! (isAsciiLowHigh(cpp) && isAsciiLowHigh(cpn))) {
             delete = true;
           }
@@ -265,23 +263,17 @@ public class ChineseUtils  {
         case LEAVE:
           break;
         case NORMALIZE:
-          if (cp == '\u00B7' || cp == '\u0387' || cp == '\u2022' ||
-              cp == '\u2024' || cp == '\u2027' || cp == '\u2219' ||
-              cp == '\u22C5' || cp == '\u30FB') {
+          if (isMidDot(cp)) {
             cp = '\u00B7';
           }
           break;
         case FULLWIDTH:
-          if (cp == '\u00B7' || cp == '\u0387' || cp == '\u2022' ||
-              cp == '\u2024' || cp == '\u2027' || cp == '\u2219' ||
-              cp == '\u22C5' || cp == '\u30FB') {
+          if (isMidDot(cp)) {
             cp = '\u30FB';
           }
           break;
         case DELETE:
-          if (cp == '\u00B7' || cp == '\u0387' || cp == '\u2022' ||
-              cp == '\u2024' || cp == '\u2027' || cp == '\u2219' ||
-              cp == '\u22C5' || cp == '\u30FB') {
+          if (isMidDot(cp)) {
             delete = true;
           }
           break;
@@ -291,8 +283,15 @@ public class ChineseUtils  {
       if ( ! delete) {
         out.appendCodePoint(cp);
       }
+      cpp = cp;
     } // end for
     return out.toString();
+  }
+
+  private static boolean isMidDot(int cp) {
+    return cp == '\u00B7' || cp == '\u0387' || cp == '\u2022' ||
+            cp == '\u2024' || cp == '\u2027' || cp == '\u2219' ||
+            cp == '\u22C5' || cp == '\u30FB';
   }
 
   private static boolean isAsciiLowHigh(int cp) {
