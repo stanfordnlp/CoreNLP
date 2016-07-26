@@ -2,7 +2,7 @@ package edu.stanford.nlp.pipeline;
 
 import java.util.List;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -33,25 +33,25 @@ public class PipelineITest extends TestCase {
     Annotation document = new Annotation(text);
     Assert.assertEquals(text, document.toString());
     Assert.assertEquals(text, document.get(CoreAnnotations.TextAnnotation.class));
-    
+
     // annotate text with pipeline
     pipeline.annotate(document);
-    
+
     // demonstrate typical usage
     for (CoreMap sentence: document.get(CoreAnnotations.SentencesAnnotation.class)) {
-      
+
       // get the tree for the sentence
       Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
 
       // get the tokens for the sentence and iterate over them
       for (CoreLabel token: sentence.get(CoreAnnotations.TokensAnnotation.class)) {
-        
+
         // get token attributes
         String tokenText = token.get(CoreAnnotations.TextAnnotation.class);
         String tokenPOS = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
         String tokenLemma = token.get(CoreAnnotations.LemmaAnnotation.class);
         String tokenNE = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
-        
+
         // text, pos, lemma and name entity tag should be defined
         Assert.assertNotNull(tokenText);
         Assert.assertNotNull(tokenPOS);
@@ -83,7 +83,7 @@ public class PipelineITest extends TestCase {
     List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
     Assert.assertNotNull(sentences);
     Assert.assertEquals(2, sentences.size());
-    
+
     // sentence 1
     String text1 = "Dan Ramage is working for\nMicrosoft.";
     CoreMap sentence1 = sentences.get(0);
@@ -93,12 +93,12 @@ public class PipelineITest extends TestCase {
     Assert.assertEquals(36, (int)sentence1.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
     Assert.assertEquals(0, (int)sentence1.get(CoreAnnotations.TokenBeginAnnotation.class));
     Assert.assertEquals(7, (int)sentence1.get(CoreAnnotations.TokenEndAnnotation.class));
-    
+
     // sentence 1 tree
     Tree tree1 = Tree.valueOf("(ROOT (S (NP (NNP Dan) (NNP Ramage)) (VP (VBZ is) " +
         "(VP (VBG working) (PP (IN for) (NP (NNP Microsoft))))) (. .)))");
     Assert.assertEquals(tree1, sentence1.get(TreeCoreAnnotations.TreeAnnotation.class));
-    
+
     // sentence 1 tokens
     String tokenText1 = "Dan Ramage is working for Microsoft .";
     List<CoreLabel> tokens1 = sentence1.get(CoreAnnotations.TokensAnnotation.class);
@@ -112,7 +112,7 @@ public class PipelineITest extends TestCase {
     Assert.assertEquals("work", tokens1.get(3).get(CoreAnnotations.LemmaAnnotation.class));
     Assert.assertEquals(".", tokens1.get(6).get(CoreAnnotations.LemmaAnnotation.class));
     Assert.assertEquals("ORGANIZATION", tokens1.get(5).get(CoreAnnotations.NamedEntityTagAnnotation.class));
-    
+
     // sentence 2
     String text2 = "He's in Seattle!";
     CoreMap sentence2 = sentences.get(1);
@@ -127,7 +127,7 @@ public class PipelineITest extends TestCase {
     Tree tree2 = Tree.valueOf("(ROOT (S (NP (PRP He)) (VP (VBZ 's) (PP (IN in) " +
         "(NP (NNP Seattle)))) (. !)))");
     Assert.assertEquals(tree2, sentence2.get(TreeCoreAnnotations.TreeAnnotation.class));
-    
+
     // sentence 2 tokens
     String tokenText2 = "He 's in Seattle !";
     List<CoreLabel> tokens2 = sentence2.get(CoreAnnotations.TokensAnnotation.class);
@@ -140,7 +140,7 @@ public class PipelineITest extends TestCase {
     Assert.assertEquals("be", tokens2.get(1).get(CoreAnnotations.LemmaAnnotation.class));
     Assert.assertEquals("LOCATION", tokens2.get(3).get(CoreAnnotations.NamedEntityTagAnnotation.class));
   }
-  
+
   private static String join(List<CoreLabel> tokens) {
     return StringUtils.join(Iterables.transform(tokens, new Function<CoreLabel, String>() {
       public String apply(CoreLabel token) {

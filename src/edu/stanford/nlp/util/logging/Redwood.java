@@ -574,7 +574,7 @@ public class Redwood  {
       b.append(min).append(":");
     }
     if(min > 0 && sec < 10){ b.append("0"); }
-    b.append(sec).append(".").append(mili);
+    b.append(sec).append(".").append(String.format("%04d", mili));
     if(min > 0) b.append(" minutes");
     else b.append(" seconds");
   }

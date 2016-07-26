@@ -164,11 +164,17 @@ public class JSONOutputter extends AnnotationOutputter {
               // Timex
               Timex time = m.get(TimeAnnotations.TimexAnnotation.class);
               if (time != null) {
+                Timex.Range range = time.range();
                 l3.set("timex", (Consumer<Writer>) l4 -> {
                   l4.set("tid", time.tid());
                   l4.set("type", time.timexType());
                   l4.set("value", time.value());
                   l4.set("altValue", time.altVal());
+                  l4.set("range", (range != null)? (Consumer<Writer>) l5 -> {
+                    l5.set("begin", range.begin);
+                    l5.set("end", range.end);
+                    l5.set("duration", range.duration);
+                  } : null);
                 });
               }
             }));
@@ -196,11 +202,17 @@ public class JSONOutputter extends AnnotationOutputter {
               // Timex
               Timex time = token.get(TimeAnnotations.TimexAnnotation.class);
               if (time != null) {
+                Timex.Range range = time.range();
                 l3.set("timex", (Consumer<Writer>) l4 -> {
                   l4.set("tid", time.tid());
                   l4.set("type", time.timexType());
                   l4.set("value", time.value());
                   l4.set("altValue", time.altVal());
+                  l4.set("range", (range != null)? (Consumer<Writer>) l5 -> {
+                    l5.set("begin", range.begin);
+                    l5.set("end", range.end);
+                    l5.set("duration", range.duration);
+                  } : null);
                 });
               }
             }));
@@ -225,6 +237,7 @@ public class JSONOutputter extends AnnotationOutputter {
                 mentionWriter.set("animacy", mention.animacy);
                 mentionWriter.set("startIndex", mention.startIndex);
                 mentionWriter.set("endIndex", mention.endIndex);
+                mentionWriter.set("headIndex", mention.headIndex);
                 mentionWriter.set("sentNum", mention.sentNum);
                 mentionWriter.set("position", Arrays.stream(mention.position.elems()).boxed().collect(Collectors.toList()));
                 mentionWriter.set("isRepresentativeMention", mention == representative);
