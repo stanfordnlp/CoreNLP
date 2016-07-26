@@ -9,44 +9,41 @@ import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
 /**
- * Demo illustrating how to use CoreMapExtractor
+ * Demo illustrating how to use CoreMapExtractor.
  */
 public class TokensRegexDemo {
 
   public static void main(String[] args) throws IOException {
-    PrintWriter out;
-
     String rules;
     if (args.length > 0) {
       rules = args[0];
     } else {
       rules = "edu/stanford/nlp/ling/tokensregex/demo/rules/expr.rules.txt";
     }
+    PrintWriter out;
     if (args.length > 2) {
       out = new PrintWriter(args[2]);
     } else {
       out = new PrintWriter(System.out);
     }
 
-    CoreMapExpressionExtractor extractor = CoreMapExpressionExtractor
-      .createExtractorFromFiles(
-        TokenSequencePattern.getNewEnv(),
-        rules);
+    CoreMapExpressionExtractor<MatchedExpression> extractor = CoreMapExpressionExtractor
+            .createExtractorFromFiles(TokenSequencePattern.getNewEnv(), rules);
 
-    StanfordCoreNLP pipeline = new StanfordCoreNLP();
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(
+            PropertiesUtils.asProperties("annotators", "tokenize,ssplit,pos,lemma,ner"));
     Annotation annotation;
     if (args.length > 1) {
       annotation = new Annotation(IOUtils.slurpFileNoExceptions(args[1]));
     } else {
-//      annotation = new Annotation("I know Fred has acne.  And Wilma has breast cancer.");
       annotation = new Annotation("( ( five plus three plus four ) * 2 ) divided by three");
-
     }
 
     pipeline.annotate(annotation);
@@ -60,11 +57,10 @@ public class TokensRegexDemo {
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
 
     for (CoreMap sentence : sentences) {
-      List<MatchedExpression> matchedExpressions = extractor
-        .extractExpressions(sentence);
+      List<MatchedExpression> matchedExpressions = extractor.extractExpressions(sentence);
       for (MatchedExpression matched:matchedExpressions) {
         // Print out matched text and value
-        out.println("matched: " + matched.getText() + " with value " + matched.getValue());
+        out.println("Matched expression: " + matched.getText() + " with value " + matched.getValue());
         // Print out token information
         CoreMap cm = matched.getAnnotation();
         for (CoreLabel token : cm.get(CoreAnnotations.TokensAnnotation.class)) {
@@ -72,7 +68,7 @@ public class TokensRegexDemo {
           String lemma = token.get(CoreAnnotations.LemmaAnnotation.class);
           String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
           String ne = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
-          out.println("matched token: " + "word="+word + ", lemma="+lemma + ", pos=" + pos + ", ne=" + ne);
+          out.println("  Matched token: " + "word="+word + ", lemma="+lemma + ", pos=" + pos + ", ne=" + ne);
         }
       }
     }
