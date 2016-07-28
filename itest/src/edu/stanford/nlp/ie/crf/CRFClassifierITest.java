@@ -29,7 +29,10 @@ import edu.stanford.nlp.util.Triple;
 public class CRFClassifierITest extends TestCase {
 
   private static final String nerPath = "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz";
-  private static final String caselessPath = "edu/stanford/nlp/models/ner/english.all.3class.caseless.distsim.crf.ser.gz";
+  // todo [cdm 2016]: Should change to classpath model path after all jars are updated....
+  // private static final String caselessPath = "edu/stanford/nlp/models/ner/english.all.3class.caseless.distsim.crf.ser.gz";
+  // private static final String caselessPath = "/u/nlp/data/ner/goodClassifiers/english.all.3class.caseless.distsim.crf.ser.gz"; // not good enough!
+  private static final String caselessPath = "/u/nlp/data/ner/classifiers-2014-08-31/english.all.3class.caseless.distsim.crf.ser.gz";
 
   /* The extra spaces and tab (after fate) are there to test space preservation.
    * Each item of the top level array is an array of 7 Strings:
@@ -309,18 +312,20 @@ public class CRFClassifierITest extends TestCase {
     CRFClassifier<CoreLabel> crfCaseless = CRFClassifier.getClassifierNoExceptions(
         System.getProperty("ner.caseless.model", caselessPath));
     runSimpleCRFTest(crfCaseless, caselessTests);
+    /*
     try {
-      Triple<Double, Double, Double> prf = crfCaseless.classifyAndWriteAnswers("", true);
-      Counter<String> results = new ClassicCounter<String>();
+      Triple<Double, Double, Double> prf = crfCaseless.classifyAndWriteAnswers("/u/nlp/data/ner/column_data/ritter.3class.test", true);
+      Counter<String> results = new ClassicCounter<>();
       results.setCount("NER F1", prf.third());
-      Counter<String> lowResults = new ClassicCounter<String>();
+      Counter<String> lowResults = new ClassicCounter<>();
       lowResults.setCount("NER F1", 53.0);
-      Counter<String> highResults = new ClassicCounter<String>();
+      Counter<String> highResults = new ClassicCounter<>();
       highResults.setCount("NER F1", 54.0);
       BenchmarkingHelper.benchmarkResults(results, lowResults, highResults, null);
     } catch (IOException ioe) {
       fail("IOError on CRF test file");
     }
+    */
   }
 
 

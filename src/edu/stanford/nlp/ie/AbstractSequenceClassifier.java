@@ -1206,7 +1206,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
                        " tagged " + numWords + " words in " + numDocs +
                        " documents at " + nf.format(wordspersec) +
                        " words per second.");
-    if (resultsCounted) {
+    if (outputScores) {
       return printResults(entityTP, entityFP, entityFN);
     } else {
       return null;
