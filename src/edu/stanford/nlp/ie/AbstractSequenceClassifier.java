@@ -1034,6 +1034,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     throw new UnsupportedOperationException("Not implemented for this class.");
   }
 
+  /** Does nothing by default.  Subclasses can override if necessary. */
+  public void dumpFeatures(Collection<List<IN>> documents) {}
+
   /**
    * Load a test file, run the classifier on it, and then print the answers to
    * stdout (with timing to stderr). This uses the value of flags.documentReader
@@ -1043,10 +1046,23 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    */
   public void classifyAndWriteAnswers(String testFile)
           throws IOException {
-    classifyAndWriteAnswers(testFile, plainTextReaderAndWriter, false);
+    classifyAndWriteAnswers(testFile, false);
   }
 
-  // todo [cdm 2014]: Change these methods to return some statistics of P/R/F1/Acc so you can use them in cross-validation loop
+  /**
+     * Load a test file, run the classifier on it, and then print the answers to
+     * stdout (with timing to stderr). This uses the value of flags.documentReader
+     * to determine testFile format.
+     *
+     * @param testFile The file to test on.
+     * @param outputScores Whether to calculate and then log performance scores (P/R/F1)
+     * @return A Triple of P/R/F1 if outputScores is true, else null
+     */
+    public Triple<Double,Double,Double> classifyAndWriteAnswers(String testFile, boolean outputScores)
+            throws IOException {
+      return classifyAndWriteAnswers(testFile, plainTextReaderAndWriter, outputScores);
+    }
+
   /**
    * Load a test file, run the classifier on it, and then print the answers to
    * stdout (with timing to stderr). This uses the value of flags.documentReader
@@ -1054,35 +1070,36 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *
    * @param testFile The file to test on.
    * @param readerWriter A reader and writer to use for the output
+   * @param outputScores Whether to calculate and then log performance scores (P/R/F1)
+   * @return A Triple of P/R/F1 if outputScores is true, else null
    */
-  public void classifyAndWriteAnswers(String testFile,
-                                      DocumentReaderAndWriter<IN> readerWriter,
-                                      boolean outputScores)
-    throws IOException
-  {
+  public Triple<Double,Double,Double> classifyAndWriteAnswers(String testFile,
+                                                              DocumentReaderAndWriter<IN> readerWriter,
+                                                              boolean outputScores)
+          throws IOException {
     ObjectBank<List<IN>> documents =
-      makeObjectBankFromFile(testFile, readerWriter);
-    classifyAndWriteAnswers(documents, readerWriter, outputScores);
+            makeObjectBankFromFile(testFile, readerWriter);
+    return classifyAndWriteAnswers(documents, readerWriter, outputScores);
   }
 
   /** If the flag
    *  {@code outputEncoding} is defined, the output is written in that
    *  character encoding, otherwise in the system default character encoding.
    */
-  public void classifyAndWriteAnswers(String testFile, OutputStream outStream,
+  public Triple<Double,Double,Double> classifyAndWriteAnswers(String testFile, OutputStream outStream,
                                       DocumentReaderAndWriter<IN> readerWriter, boolean outputScores)
           throws IOException {
     ObjectBank<List<IN>> documents = makeObjectBankFromFile(testFile, readerWriter);
     PrintWriter pw = IOUtils.encodedOutputStreamPrintWriter(outStream, flags.outputEncoding, true);
-    classifyAndWriteAnswers(documents, pw, readerWriter, outputScores);
+    return classifyAndWriteAnswers(documents, pw, readerWriter, outputScores);
   }
 
-  public void classifyAndWriteAnswers(String baseDir, String filePattern,
+  public Triple<Double,Double,Double> classifyAndWriteAnswers(String baseDir, String filePattern,
                                       DocumentReaderAndWriter<IN> readerWriter,
                                       boolean outputScores)
           throws IOException {
     ObjectBank<List<IN>> documents = makeObjectBankFromFiles(baseDir, filePattern, readerWriter);
-    classifyAndWriteAnswers(documents, readerWriter, outputScores);
+    return classifyAndWriteAnswers(documents, readerWriter, outputScores);
   }
 
   public void classifyFilesAndWriteAnswers(Collection<File> testFiles)
@@ -1098,22 +1115,28 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     classifyAndWriteAnswers(documents, readerWriter, outputScores);
   }
 
-  public void classifyAndWriteAnswers(Collection<List<IN>> documents,
-                                       DocumentReaderAndWriter<IN> readerWriter,
-                                       boolean outputScores)
+  public Triple<Double,Double,Double> classifyAndWriteAnswers(Collection<List<IN>> documents,
+                                                              DocumentReaderAndWriter<IN> readerWriter,
+                                                              boolean outputScores)
           throws IOException {
-    classifyAndWriteAnswers(documents,
-                            IOUtils.encodedOutputStreamPrintWriter(System.out, flags.outputEncoding, true),
-                            readerWriter, outputScores);
+    return classifyAndWriteAnswers(documents,
+                                   IOUtils.encodedOutputStreamPrintWriter(System.out, flags.outputEncoding, true),
+                                   readerWriter, outputScores);
   }
 
-  /** Does nothing by default.  Children classes can override if necessary */
-  public void dumpFeatures(Collection<List<IN>> documents) {}
-
-  public void classifyAndWriteAnswers(Collection<List<IN>> documents,
-                                      PrintWriter printWriter,
-                                      DocumentReaderAndWriter<IN> readerWriter,
-                                      boolean outputScores)
+  /**
+   *
+   * @param documents
+   * @param printWriter
+   * @param readerWriter
+   * @param outputScores Whether to calculate and output the performance scores (P/R/F1) of the classifier
+   * @return A Triple of overall P/R/F1, if outputScores is true, else {@code null}
+   * @throws IOException
+   */
+  public Triple<Double,Double,Double> classifyAndWriteAnswers(Collection<List<IN>> documents,
+                                                              PrintWriter printWriter,
+                                                              DocumentReaderAndWriter<IN> readerWriter,
+                                                              boolean outputScores)
           throws IOException {
     if (flags.exportFeatures != null) {
       dumpFeatures(documents);
@@ -1184,7 +1207,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
                        " documents at " + nf.format(wordspersec) +
                        " words per second.");
     if (resultsCounted) {
-      printResults(entityTP, entityFP, entityFN);
+      return printResults(entityTP, entityFP, entityFN);
+    } else {
+      return null;
     }
   }
 
@@ -1344,7 +1369,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * Given counters of true positives, false positives, and false
    * negatives, prints out precision, recall, and f1 for each key.
    */
-  public static void printResults(Counter<String> entityTP, Counter<String> entityFP,
+  public static Triple<Double,Double,Double> printResults(Counter<String> entityTP, Counter<String> entityFP,
                            Counter<String> entityFN) {
     Set<String> entities = new TreeSet<>();
     entities.addAll(entityTP.keySet());
@@ -1360,7 +1385,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     double tp = entityTP.totalCount();
     double fp = entityFP.totalCount();
     double fn = entityFN.totalCount();
-    printPRLine("Totals", tp, fp, fn);
+    return printPRLine("Totals", tp, fp, fn);
   }
 
   /**
@@ -1368,13 +1393,14 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * possibly printing a header if it hasn't already been printed.
    * Returns whether or not the header has ever been printed.
    */
-  private static void printPRLine(String entity, double tp, double fp, double fn) {
+  private static Triple<Double,Double,Double> printPRLine(String entity, double tp, double fp, double fn) {
     double precision = (tp == 0.0 && fp == 0.0) ? 0.0 : tp / (tp + fp);
     double recall = (tp == 0.0 && fn == 0.0) ? 1.0 : tp / (tp + fn);
     double f1 = ((precision == 0.0 || recall == 0.0) ?
                  0.0 : 2.0 / (1.0 / precision + 1.0 / recall));
     log.info(String.format("%15s\t%.4f\t%.4f\t%.4f\t%.0f\t%.0f\t%.0f%n",
                       entity, precision, recall, f1, tp, fp, fn));
+    return new Triple<>(precision, recall, f1);
   }
 
   /**
