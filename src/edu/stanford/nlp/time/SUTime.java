@@ -3743,7 +3743,7 @@ public class SUTime  {
 
   // Duration classes
   /**
-   * A Duration represents a period of time (without endpoints)
+   * A Duration represents a period of time (without endpoints).
    * <br>
    * We have 3 types of durations:
    * <ol>
