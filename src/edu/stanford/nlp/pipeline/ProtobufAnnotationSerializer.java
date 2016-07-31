@@ -450,6 +450,13 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
       keysToSerialize.remove(CorefMentionsAnnotation.class);
     }
+    // Entity mentions
+    if (keySet.contains(MentionsAnnotation.class)) {
+      for (CoreMap mention : sentence.get(MentionsAnnotation.class)) {
+        builder.addMentions(toProtoMention(mention));
+      }
+      keysToSerialize.remove(MentionsAnnotation.class);
+    }
     // add a sentence id if it exists
     if (keySet.contains(SentenceIDAnnotation.class)) builder.setSentenceID(getAndRegister(sentence, keysToSerialize, SentenceIDAnnotation.class));
     // Return
@@ -531,12 +538,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         builder.addQuote(toProtoQuote(quote));
       }
       keysToSerialize.remove(QuotationsAnnotation.class);
-    }
-    if (doc.containsKey(MentionsAnnotation.class)) {
-      for (CoreMap mention : doc.get(MentionsAnnotation.class)) {
-        builder.addMentions(toProtoMention(mention));
-      }
-      keysToSerialize.remove(MentionsAnnotation.class);
     }
     // Return
     return builder;
