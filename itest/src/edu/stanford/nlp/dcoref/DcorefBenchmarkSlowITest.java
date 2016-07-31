@@ -7,7 +7,6 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.util.BenchmarkingHelper;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.io.IOUtils;
@@ -27,7 +26,7 @@ import edu.stanford.nlp.util.StringUtils;
  */
 public class DcorefBenchmarkSlowITest extends TestCase {
 
-  private static String runCorefTest(boolean deleteOnExit) throws Exception {
+  public static String runCorefTest(boolean deleteOnExit) throws Exception {
     final File WORK_DIR_FILE = File.createTempFile("DcorefBenchmarkTest", "");
     if ( ! (WORK_DIR_FILE.delete() && WORK_DIR_FILE.mkdir())) {
       throw new RuntimeIOException("Couldn't create temp directory " + WORK_DIR_FILE);
@@ -173,7 +172,22 @@ public class DcorefBenchmarkSlowITest extends TestCase {
       }
     }
 
-    BenchmarkingHelper.benchmarkResults(results, lowResults, highResults, expectedResults);
+    for (String key : results.keySet()) {
+      double val = results.getCount(key);
+      double high = highResults.getCount(key);
+      double low = lowResults.getCount(key);
+      double expected = expectedResults.getCount(key);
+      assertTrue("Value for " + key + " = " + val + " is lower than expected minimum " + low, val >= low);
+      assertTrue("Value for " + key + " = " + val + " is higher than expected maximum " + high +
+          " [not a bug, but a breakthrough!]", val <= high);
+      if (val < (expected - 1e-4)) {
+        System.err.println("Value for " + key + " = " + val + " is fractionally lower than expected " + expected);
+      } else if (val > (expected + 1e-4)) {
+          System.err.println("Value for " + key + " = " + val + " is fractionally higher than expected " + expected);
+      } else {
+        System.err.println("Value for " + key + " = " + val + " is as expected");
+      }
+    }
   }
 
   public static void main(String[] args) throws Exception {

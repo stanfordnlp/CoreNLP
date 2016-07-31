@@ -12,28 +12,36 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import junit.framework.TestCase;
-
-import edu.stanford.nlp.util.PropertiesUtils;
-
+import edu.stanford.nlp.util.StringUtils;
 
 public class DcorefSlowITest extends TestCase {
 
-  private static void makePropsFile(String path, String workDir) throws IOException {
-    PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(path)));
+  static void makePropsFile(String path, String workDir) throws IOException {
+    FileWriter fout = new FileWriter(path);
+    BufferedWriter bout = new BufferedWriter(fout);
 
-    pw.println("annotators = pos, lemma, ner, parse");
+    bout.write("annotators = pos, lemma, ner, parse");
+    bout.newLine();
     // WordNet is moved to more
-    pw.println("dcoref.sievePasses = MarkRole, DiscourseMatch, ExactStringMatch, RelaxedExactStringMatch, PreciseConstructs, StrictHeadMatch1, StrictHeadMatch2, StrictHeadMatch3, StrictHeadMatch4, RelaxedHeadMatch, PronounMatch");
-    // pw.println("dcoref.sievePasses = MarkRole, DiscourseMatch, ExactStringMatch, RelaxedExactStringMatch, PreciseConstructs, StrictHeadMatch1, StrictHeadMatch2, StrictHeadMatch3, StrictHeadMatch4, AliasMatch, RelaxedHeadMatch, LexicalChainMatch, PronounMatch");
-    pw.println("dcoref.sievePasses = MarkRole, DiscourseMatch, ExactStringMatch, RelaxedExactStringMatch, PreciseConstructs, StrictHeadMatch1, StrictHeadMatch2, StrictHeadMatch3, StrictHeadMatch4, AliasMatch, RelaxedHeadMatch, LexicalChainMatch, PronounMatch");
-    pw.println("dcoref.score = true");
-    pw.println("dcoref.postprocessing = true");
-    pw.println("dcoref.maxdist = -1");
-    pw.println("dcoref.replicate.conll = true");
-    pw.println("dcoref.conll.scorer = /scr/nlp/data/conll-2011/scorer/v4/scorer.pl");
-    pw.println("dcoref.conll2011 = /scr/nlp/data/conll-2011/v2/data/dev/data/english/annotations");
-    pw.println("dcoref.logFile = "+workDir + File.separator + "log.txt");
-    pw.close();
+    bout.write("dcoref.sievePasses = MarkRole, DiscourseMatch, ExactStringMatch, RelaxedExactStringMatch, PreciseConstructs, StrictHeadMatch1, StrictHeadMatch2, StrictHeadMatch3, StrictHeadMatch4, RelaxedHeadMatch, PronounMatch");
+    //bout.write("dcoref.sievePasses = MarkRole, DiscourseMatch, ExactStringMatch, RelaxedExactStringMatch, PreciseConstructs, StrictHeadMatch1, StrictHeadMatch2, StrictHeadMatch3, StrictHeadMatch4, AliasMatch, RelaxedHeadMatch, LexicalChainMatch, PronounMatch");
+    bout.newLine();
+    bout.write("dcoref.score = true");
+    bout.newLine();
+    bout.write("dcoref.postprocessing = true");
+    bout.newLine();
+    bout.write("dcoref.maxdist = -1");
+    bout.newLine();
+    bout.write("dcoref.replicate.conll = true");
+    bout.newLine();
+    bout.write("dcoref.conll.scorer = /scr/nlp/data/conll-2011/scorer/v4/scorer.pl");
+    bout.newLine();
+    bout.write("dcoref.conll2011 = /scr/nlp/data/conll-2011/v2/data/dev/data/english/annotations");
+    bout.newLine();
+    bout.write("dcoref.logFile = "+workDir + File.separator + "log.txt");
+    bout.newLine();
+    bout.flush();
+    fout.close();
   }
 
   public void testDcorefCoNLLResult() throws Exception {
@@ -50,7 +58,7 @@ public class DcorefSlowITest extends TestCase {
     makePropsFile(PROPS_PATH, WORK_DIR);
     System.out.println("Made props file " + PROPS_PATH);
 
-    Properties props = PropertiesUtils.asProperties("-props", PROPS_PATH);
+    Properties props = StringUtils.argsToProperties(new String[]{"-props", PROPS_PATH});
     SieveCoreferenceSystem corefSystem = new SieveCoreferenceSystem(props);
 
     String returnMsg = runCorefSystem(corefSystem, props, WORK_DIR);
@@ -62,7 +70,7 @@ public class DcorefSlowITest extends TestCase {
     assertEquals(59.2, finalScore, 1.0);
   }
 
-  protected static String runCorefSystem(SieveCoreferenceSystem corefSystem, Properties props, String WORK_DIR) throws Exception {
+  private static String runCorefSystem(SieveCoreferenceSystem corefSystem, Properties props, String WORK_DIR) throws Exception {
 
     String conllOutputMentionGoldFile = WORK_DIR + File.separator+"conlloutput.gold.txt";
     String conllOutputMentionCorefPredictedFile = WORK_DIR + File.separator+ "conlloutput.coref.predicted.txt";
@@ -88,7 +96,7 @@ public class DcorefSlowITest extends TestCase {
   }
 
   /** get the average score: (MUC + B^3 + CEAF_E)/3 */
-  protected static double getFinalScore(String summary) {
+  private static double getFinalScore(String summary) {
     Pattern f1 = Pattern.compile("Coreference:.*F1: (.*)%");
     Matcher f1Matcher = f1.matcher(summary);
     double[] F1s = new double[5];
@@ -98,5 +106,4 @@ public class DcorefSlowITest extends TestCase {
     }
     return (F1s[0]+F1s[1]+F1s[3])/3;
   }
-
 }
