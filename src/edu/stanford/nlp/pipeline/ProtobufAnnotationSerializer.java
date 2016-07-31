@@ -539,6 +539,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
       keysToSerialize.remove(QuotationsAnnotation.class);
     }
+    if (doc.containsKey(MentionsAnnotation.class)) {
+      for (CoreMap mention : doc.get(MentionsAnnotation.class)) {
+        builder.addMentions(toProtoMention(mention));
+      }
+      keysToSerialize.remove(MentionsAnnotation.class);
+    }
     // Return
     return builder;
   }
