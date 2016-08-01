@@ -35,7 +35,7 @@ method which will take a list of Strings that are alternately keys and
 values and build a Properties object:
 
 ``` java
-//Build pipeline
+// build pipeline
 StanfordCoreNLP pipeline = new StanfordCoreNLP(
 	PropertiesUtils.asProperties(
 		"annotators", "tokenize,ssplit,pos,lemma,parse,natlog",

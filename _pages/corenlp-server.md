@@ -28,7 +28,7 @@ wget --post-data 'The quick brown fox jumped over the lazy dog.' 'localhost:9000
 Or if you only have or prefer [curl](https://curl.haxx.se/):
 
 ```bash
-curl --data 'The quick brown fox jumped over the lazy dog.' 'http://localhost:9000/?properties=%7B%22tokenize.whitespace%22%3A%22true%22%2C%22annotators%22%3A%22tokenize%2Cssplit%2Cpos%22%2C%22outputFormat%22%3A%22json%22}' -o -
+curl --data 'The quick brown fox jumped over the lazy dog.' 'http://localhost:9000/?properties={{ "{%" }}22tokenize.whitespace%22%3A%22true%22%2C%22annotators%22%3A%22tokenize%2Cssplit%2Cpos%22%2C%22outputFormat%22%3A%22json%22}' -o -
 ```
 
 The rest of this document: describes the API in more detail, describes a Java client to the API as a drop-in replacement for the `StanfordCoreNLP` annotator pipeline, and talks about administering the server.
