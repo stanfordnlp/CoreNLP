@@ -1060,7 +1060,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
      */
     public Triple<Double,Double,Double> classifyAndWriteAnswers(String testFile, boolean outputScores)
             throws IOException {
-      return classifyAndWriteAnswers(testFile, plainTextReaderAndWriter, outputScores);
+      return classifyAndWriteAnswers(testFile, defaultReaderAndWriter(), outputScores);
     }
 
   /**
@@ -1130,7 +1130,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * @param printWriter
    * @param readerWriter
    * @param outputScores Whether to calculate and output the performance scores (P/R/F1) of the classifier
-   * @return A Triple of overall P/R/F1, if outputScores is true, else {@code null}
+   * @return A Triple of overall P/R/F1, if outputScores is true, else {@code null}. The scores are done
+   *         on a 0-100 scale like percentages.
    * @throws IOException
    */
   public Triple<Double,Double,Double> classifyAndWriteAnswers(Collection<List<IN>> documents,
@@ -1389,9 +1390,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   }
 
   /**
-   * Print a line of precision, recall, and f1 scores, titled by entity,
-   * possibly printing a header if it hasn't already been printed.
-   * Returns whether or not the header has ever been printed.
+   * Print a line of precision, recall, and f1 scores, titled by entity.
+   *
+   * @return A Triple of the P/R/F, done on a 0-100 scale like percentages
    */
   private static Triple<Double,Double,Double> printPRLine(String entity, double tp, double fp, double fn) {
     double precision = (tp == 0.0 && fp == 0.0) ? 0.0 : tp / (tp + fp);
@@ -1400,7 +1401,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
                  0.0 : 2.0 / (1.0 / precision + 1.0 / recall));
     log.info(String.format("%15s\t%.4f\t%.4f\t%.4f\t%.0f\t%.0f\t%.0f%n",
                       entity, precision, recall, f1, tp, fp, fn));
-    return new Triple<>(precision, recall, f1);
+    return new Triple<>(precision * 100, recall * 100, f1 * 100);
   }
 
   /**
