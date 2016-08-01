@@ -28,6 +28,29 @@ Annotation document = new Annotation(text);
 pipeline.annotate(document);
 ```
 
+You can give other properties to CoreNLP by build a Properties object
+with more stuff in it. If you want to do that, you might find it
+conventient to use our `PropertiesUtils.asProperties(String ...)`
+method which will take a list of Strings that are alternately keys and
+values and build a Properties object:
+
+``` java
+//Build pipeline
+StanfordCoreNLP pipeline = new StanfordCoreNLP(
+	PropertiesUtils.asProperties(
+		"annotators", "tokenize,ssplit,pos,lemma,parse,natlog",
+		"ssplit.isOneSentence", "true",
+		"parse.model", "edu/stanford/nlp/models/srparser/englishSR.ser.gz",
+		"tokenize.language", "en"));
+
+// read some text in the text variable
+String text = ... // Add your text here!
+Annotation document = new Annotation(text);
+
+// run all Annotators on this text
+pipeline.annotate(document);
+```
+
 If you do not anticipate requiring extensive customization, consider using the [Simple CoreNLP](simple.html) API.
 
 ## Interpreting the output
