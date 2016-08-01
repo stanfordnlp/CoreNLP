@@ -32,15 +32,15 @@ public class BenchmarkingHelper {
       assertTrue("Value for " + key + " = " + val + " is higher than expected maximum " + high +
           " [not a bug, but a breakthrough!]", val <= high);
       if (expectedResults == null) {
-        System.err.println("Value for " + key + " = " + val + " is within the expected range.");
+        System.err.printf("Value for %s = %.4f is within the expected range [%.4f, %.4f]%n", key, val, low, high);
       } else {
         double expected = expectedResults.getCount(key);
         if (val < (expected - 1e-4)) {
-          System.err.println("Value for " + key + " = " + val + " is slightly lower than expected " + expected);
+          System.err.printf("Value for %s = %.4f is slightly lower than expected %.4f%n", key, val, expected);
         } else if (val > (expected + 1e-4)) {
-          System.err.println("Value for " + key + " = " + val + " is slightly higher than expected " + expected);
+          System.err.printf("Value for %s = %.4f is slightly higher than expected %.4f%n", key, val, expected);
         } else {
-          System.err.println("Value for " + key + " = " + val + " is as expected");
+          System.err.printf("Value for %s  = %.4f is as expected%n");
         }
       }
     }
