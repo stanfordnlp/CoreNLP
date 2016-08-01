@@ -1,10 +1,5 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.hcoref.CorefCoreAnnotations.*;
-import edu.stanford.nlp.hcoref.data.CorefChain;
-import edu.stanford.nlp.hcoref.data.Dictionaries;
-import edu.stanford.nlp.hcoref.data.Mention;
-import edu.stanford.nlp.hcoref.data.SpeakerInfo;
 import edu.stanford.nlp.ie.NumberNormalizer;
 import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
 import edu.stanford.nlp.ie.machinereading.structure.ExtractionObject;
@@ -35,6 +30,13 @@ import edu.stanford.nlp.time.TimeAnnotations.*;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import edu.stanford.nlp.coref.CorefCoreAnnotations.*;
+
+import edu.stanford.nlp.coref.data.CorefChain;
+import edu.stanford.nlp.coref.data.Dictionaries;
+import edu.stanford.nlp.coref.data.Mention;
+import edu.stanford.nlp.coref.data.SpeakerInfo;
 
 /**
  * <p>

@@ -1,12 +1,11 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.logging.Redwood;
-
+package edu.stanford.nlp.pipeline;
 import java.lang.ref.SoftReference;
 import java.util.Iterator;
 import java.util.Map;
 
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * An object for keeping track of Annotators. Typical use is to allow multiple

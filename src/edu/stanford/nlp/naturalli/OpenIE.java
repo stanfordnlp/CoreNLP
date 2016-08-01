@@ -1,8 +1,5 @@
 package edu.stanford.nlp.naturalli; 
 import edu.stanford.nlp.util.logging.Redwood;
-
-import edu.stanford.nlp.hcoref.data.CorefChain;
-import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.IOUtils;
@@ -33,6 +30,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
+
+import edu.stanford.nlp.coref.data.CorefChain;
 
 /**
  * <p>
@@ -587,7 +588,7 @@ public class OpenIE implements Annotator  {
         CoreAnnotations.OriginalTextAnnotation.class
     ));
     if (resolveCoref) {
-      requirements.add(edu.stanford.nlp.hcoref.CorefCoreAnnotations.CorefChainAnnotation.class);
+      requirements.add(edu.stanford.nlp.coref.CorefCoreAnnotations.CorefChainAnnotation.class);
     }
     return Collections.unmodifiableSet(requirements);
   }
