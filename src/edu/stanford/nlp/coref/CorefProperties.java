@@ -111,7 +111,7 @@ public class CorefProperties {
 
   public static String getDevDataPath(Properties props) {
     return props.getProperty("coref.devData",
-        getDataPath(props) + "v4/data/dev/data/" + getLanguageStr(props) + "/annotations/");
+        getDataPath(props) + "v4/data/development/data/" + getLanguageStr(props) + "/annotations/");
   }
 
   public static String getTestDataPath(Properties props) {

@@ -646,7 +646,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       featureValArr = featureVal.toArray(new double[data.size()][][][]);
 
 
-    return new Triple<>(
+    return new Triple<int[][][][], int[][], double[][][][]>(
             data.toArray(new int[data.size()][][][]),
             labels.toArray(new int[labels.size()][]),
             featureValArr);

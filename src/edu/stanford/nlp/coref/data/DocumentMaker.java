@@ -55,8 +55,8 @@ public class DocumentMaker {
 
   private static HeadFinder getHeadFinder(Properties props) {
     Locale lang = CorefProperties.getLanguage(props);
-    if(lang == Locale.ENGLISH) return new SemanticHeadFinder();
-    else if(lang == Locale.CHINESE) return new ChineseSemanticHeadFinder();
+    if (lang == Locale.ENGLISH) return new SemanticHeadFinder();
+    else if (lang == Locale.CHINESE) return new ChineseSemanticHeadFinder();
     else {
       throw new RuntimeException("Invalid language setting: cannot load HeadFinder");
     }
