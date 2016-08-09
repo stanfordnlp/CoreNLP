@@ -827,7 +827,7 @@ public class SieveCoreferenceSystem  {
     return result;
   }
 
-  public Map<Integer, edu.stanford.nlp.hcoref.data.CorefChain> corefReturnHybridOutput(Document document) throws Exception {
+  public Map<Integer, edu.stanford.nlp.coref.data.CorefChain> corefReturnHybridOutput(Document document) throws Exception {
 
     // Multi-pass sieve coreference resolution
     for (int i = 0; i < sieves.length ; i++){
@@ -841,32 +841,32 @@ public class SieveCoreferenceSystem  {
     if((!Constants.USE_GOLD_MENTIONS && doPostProcessing) || replicateCoNLL) postProcessing(document);
 
     // coref system output: edu.stanford.nlp.hcoref.data.CorefChain
-    Map<Integer, edu.stanford.nlp.hcoref.data.CorefChain> result = Generics.newHashMap();
+    Map<Integer, edu.stanford.nlp.coref.data.CorefChain> result = Generics.newHashMap();
 
     for(CorefCluster c : document.corefClusters.values()) {
       // build mentionsMap and represents
-      Map<IntPair, Set<edu.stanford.nlp.hcoref.data.CorefChain.CorefMention>> mentionsMap = Generics.newHashMap();
+      Map<IntPair, Set<edu.stanford.nlp.coref.data.CorefChain.CorefMention>> mentionsMap = Generics.newHashMap();
       IntPair keyPair = new IntPair(0,0);
       mentionsMap.put(keyPair, new HashSet<>());
       Mention represents = null;
-      edu.stanford.nlp.hcoref.data.CorefChain.CorefMention representsHybridVersion = null;
+      edu.stanford.nlp.coref.data.CorefChain.CorefMention representsHybridVersion = null;
       for (Mention mention : c.getCorefMentions()) {
         // convert dcoref CorefMention to hcoref CorefMention
         //IntPair mentionPosition = new IntPair(mention.sentNum, mention.headIndex);
         IntTuple mentionPosition = document.positions.get(mention);
         CorefMention dcorefMention = new CorefMention(mention, mentionPosition);
         // tokens need the hcoref version of CorefClusterIdAnnotation
-        mention.headWord.set(edu.stanford.nlp.hcoref.CorefCoreAnnotations.CorefClusterIdAnnotation.class,
+        mention.headWord.set(edu.stanford.nlp.coref.CorefCoreAnnotations.CorefClusterIdAnnotation.class,
                 mention.corefClusterID);
         // drop the dcoref version of CorefClusterIdAnnotation
         mention.headWord.remove(CorefCoreAnnotations.CorefClusterIdAnnotation.class);
         // make the hcoref mention
-        edu.stanford.nlp.hcoref.data.CorefChain.CorefMention hcorefMention =
-                new edu.stanford.nlp.hcoref.data.CorefChain.CorefMention(
-                        edu.stanford.nlp.hcoref.data.Dictionaries.MentionType.valueOf(dcorefMention.mentionType.name()),
-                        edu.stanford.nlp.hcoref.data.Dictionaries.Number.valueOf(dcorefMention.number.name()),
-                        edu.stanford.nlp.hcoref.data.Dictionaries.Gender.valueOf(dcorefMention.gender.name()),
-                        edu.stanford.nlp.hcoref.data.Dictionaries.Animacy.valueOf(dcorefMention.animacy.name()),
+        edu.stanford.nlp.coref.data.CorefChain.CorefMention hcorefMention =
+                new edu.stanford.nlp.coref.data.CorefChain.CorefMention(
+                        edu.stanford.nlp.coref.data.Dictionaries.MentionType.valueOf(dcorefMention.mentionType.name()),
+                        edu.stanford.nlp.coref.data.Dictionaries.Number.valueOf(dcorefMention.number.name()),
+                        edu.stanford.nlp.coref.data.Dictionaries.Gender.valueOf(dcorefMention.gender.name()),
+                        edu.stanford.nlp.coref.data.Dictionaries.Animacy.valueOf(dcorefMention.animacy.name()),
                         dcorefMention.startIndex,
                         dcorefMention.endIndex,
                         dcorefMention.headIndex,
@@ -881,8 +881,8 @@ public class SieveCoreferenceSystem  {
           representsHybridVersion = hcorefMention;
         }
       }
-      edu.stanford.nlp.hcoref.data.CorefChain hybridCorefChain =
-              new edu.stanford.nlp.hcoref.data.CorefChain(c.clusterID, mentionsMap, representsHybridVersion);
+      edu.stanford.nlp.coref.data.CorefChain hybridCorefChain =
+              new edu.stanford.nlp.coref.data.CorefChain(c.clusterID, mentionsMap, representsHybridVersion);
       result.put(c.clusterID, hybridCorefChain);
     }
 
