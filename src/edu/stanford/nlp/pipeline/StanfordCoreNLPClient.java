@@ -9,7 +9,10 @@ import edu.stanford.nlp.util.logging.StanfordRedwoodConfiguration;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
-import java.net.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -440,26 +443,16 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
             default:
               throw new IllegalStateException("Haven't implemented protocol: " + backend.protocol);
           }
-
-          // 3. Annotate
-          Annotation response;
-          try {
-            // 3.1. Fire off the request
-            connection.connect();
-            connection.getOutputStream().write(message);
+          // 3. Fire off the request
+          connection.connect();
+          connection.getOutputStream().write(message);
 //          log.info("Wrote " + message.length + " bytes to " + backend.host + ":" + backend.port);
-            os.close();
+          os.close();
 
-            // 3.2 Await a response
-            // -- It might be possible to send more than one message, but we are not going to do that.
-            response = serializer.read(connection.getInputStream()).first;
-          } catch (UnknownHostException e) {
-            // 3.2. We don't have internet (or website is down) -- try to annotate locally
-            log.warn("No internet! Trying to annotate locally...");
-            StanfordCoreNLP corenlp = new StanfordCoreNLP(properties);
-            corenlp.annotate(annotation);
-            response = annotation;
-          }
+          // 4. Await a response
+          // 4.1 Read the response
+          // -- It might be possible to send more than one message, but we are not going to do that.
+          Annotation response = serializer.read(connection.getInputStream()).first;
           // 4.2 Release the backend
           isFinishedCallback.accept(backend);
 
@@ -470,11 +463,12 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
 
           // 6. Call the callback
           callback.accept(annotation);
+        } catch (IOException | ClassNotFoundException e) {
+          e.printStackTrace();
+          callback.accept(null);
         } catch (Throwable t) {
-          log.warn("Could not annotate via server! Trying to annotate locally...", t);
-          StanfordCoreNLP corenlp = new StanfordCoreNLP(properties);
-          corenlp.annotate(annotation);
-          callback.accept(annotation);
+          t.printStackTrace();
+          callback.accept(null);
         }
       }
     }.start());

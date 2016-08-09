@@ -8,11 +8,10 @@ import junit.framework.TestCase;
  * @author John Bauer
  */
 public class QPTreeTransformerTest extends TestCase {
-
   public void testMoney() {
     String input = "(ROOT (S (NP (DT This)) (VP (VBZ costs) (NP (QP ($ $) (CD 1) (CD million)))) (. .)))";
     String output = "(ROOT (S (NP (DT This)) (VP (VBZ costs) (NP (QP ($ $) (QP (CD 1) (CD million))))) (. .)))";
-    runTest(input, output);
+    runTest(input, output);    
   }
 
   public void testMoneyOrMore() {
@@ -32,8 +31,8 @@ public class QPTreeTransformerTest extends TestCase {
     runTest(input, output);
   }
 
-  @SuppressWarnings("unused")
-  private static void outputResults(String input, String output) {
+
+  public void outputResults(String input, String output) {
     Tree inputTree = Tree.valueOf(input);
     System.err.println(inputTree);
     QPTreeTransformer qp = new QPTreeTransformer();
@@ -42,11 +41,10 @@ public class QPTreeTransformerTest extends TestCase {
     System.err.println(output);
   }
 
-  private static void runTest(String input, String output) {
+  public void runTest(String input, String output) {
     Tree inputTree = Tree.valueOf(input);
     QPTreeTransformer qp = new QPTreeTransformer();
     Tree outputTree = qp.QPtransform(inputTree);
     assertEquals(output, outputTree.toString());
   }
-
 }
