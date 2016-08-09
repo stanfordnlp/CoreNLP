@@ -271,10 +271,10 @@ LAST UPDATE: 2016-07-08
 LAST UPDATE BY: Angel Chang
 
 -----------------------------------------------------------------------
-jollyday-0.4.7.jar
-ORIGINAL JAR NAME: jollyday-0.4.7.jar
-VERSION: 0.4.7
-RELEASE DATE: 2012-11-05
+jollyday-0.4.9.jar
+ORIGINAL JAR NAME: jollyday-0.4.9.jar
+VERSION: 0.4.9
+RELEASE DATE: 2015-05-06
 SOURCE AVAILABLE: yes
 DESCRIPTION: API for holidays (using jodatime)
 URL: http://jollyday.sourceforge.net
@@ -282,8 +282,8 @@ URL: http://jollyday.sourceforge.net
 USED BY: edu.stanford.nlp.time
 Needed by CoreNLP distributions.
 
-LAST UPDATE: 2012-11-05
-LAST UPDATE BY: John Bauer
+LAST UPDATE: 2016-07-24
+LAST UPDATE BY: Christopher Manning
 
 -----------------------------------------------------------------------
 ejml-0.23.jar

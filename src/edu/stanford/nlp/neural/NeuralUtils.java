@@ -3,14 +3,14 @@ package edu.stanford.nlp.neural;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-
 import java.util.function.Predicate;
-import org.ejml.simple.SimpleMatrix;
 import org.ejml.ops.MatrixIO;
+import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.CollectionUtils;
@@ -24,6 +24,7 @@ import edu.stanford.nlp.util.CollectionUtils;
  * @author John Bauer
  * @author Richard Socher
  * @author Thang Luong
+ * @author Kevin Clark
  */
 public class NeuralUtils {
   private NeuralUtils() {} // static methods only
@@ -50,12 +51,25 @@ public class NeuralUtils {
     return convertTextMatrix(IOUtils.slurpFileNoExceptions(file));
   }
 
+  /**
+   * Convert a file into a list of matrices. The expected format is one row
+   * per line, one entry per column for each matrix, with each matrix separated
+   * by an empty line.
+   */
+  public static List<SimpleMatrix> loadTextMatrices(String path) {
+    List<SimpleMatrix> matrices = new ArrayList<>();
+    for (String mString : IOUtils.stringFromFile(path).trim().split("\n\n")) {
+      matrices.add(NeuralUtils.convertTextMatrix(mString).transpose());
+    }
+    return matrices;
+  }
+
   public static SimpleMatrix convertTextMatrix(String text) {
     List<String> lines = CollectionUtils.filterAsList(Arrays.asList(text.split("\n")), new Predicate<String>() {
+        @Override
         public boolean test(String s) {
           return s.trim().length() > 0;
         }
-        private static final long serialVersionUID = 1;
       });
     int numRows = lines.size();
     int numCols = lines.get(0).trim().split("\\s+").length;
@@ -205,6 +219,19 @@ public class NeuralUtils {
   }
 
   /**
+   * Applies ReLU to each of the entries in the matrix.  Returns a new matrix.
+   */
+  public static SimpleMatrix elementwiseApplyReLU(SimpleMatrix input) {
+    SimpleMatrix output = new SimpleMatrix(input);
+    for (int i = 0; i < output.numRows(); ++i) {
+      for (int j = 0; j < output.numCols(); ++j) {
+        output.set(i, j, Math.max(0, output.get(i, j)));
+      }
+    }
+    return output;
+  }
+
+  /**
    * Applies log to each of the entries in the matrix.  Returns a new matrix.
    */
   public static SimpleMatrix elementwiseApplyLog(SimpleMatrix input) {
@@ -291,6 +318,12 @@ public class NeuralUtils {
       }
     }
     return result;
+  }
+
+  public static SimpleMatrix oneHot(int index, int size) {
+    SimpleMatrix m = new SimpleMatrix(size, 1);
+    m.set(index, 1);
+    return m;
   }
 
   /**

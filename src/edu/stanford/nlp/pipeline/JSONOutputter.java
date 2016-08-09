@@ -1,8 +1,5 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.hcoref.data.CorefChain;
-import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
-
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.IOUtils;
@@ -24,7 +21,6 @@ import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Pointer;
 
-
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.Arrays;
@@ -35,6 +31,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.ArrayList;
 import java.util.Map;
+
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
+
+import edu.stanford.nlp.coref.data.CorefChain;
 
 /**
  * Output an Annotation to human readable JSON.
@@ -237,6 +237,7 @@ public class JSONOutputter extends AnnotationOutputter {
                 mentionWriter.set("animacy", mention.animacy);
                 mentionWriter.set("startIndex", mention.startIndex);
                 mentionWriter.set("endIndex", mention.endIndex);
+                mentionWriter.set("headIndex", mention.headIndex);
                 mentionWriter.set("sentNum", mention.sentNum);
                 mentionWriter.set("position", Arrays.stream(mention.position.elems()).boxed().collect(Collectors.toList()));
                 mentionWriter.set("isRepresentativeMention", mention == representative);

@@ -43,6 +43,10 @@ message Document {
   repeated Token      sentencelessToken = 5;
 
   repeated Quote      quote = 6;
+  /**
+   * This field is for entity mentions across the document.
+   */
+  repeated NERMention mentions = 9;
 
   extensions 100 to 255;
 }
@@ -416,6 +420,7 @@ message NERMention {
   optional string normalizedNER                 = 5;
   optional string entityType                    = 6;
   optional Timex  timex                         = 7;
+  optional string wikipediaEntity               = 8;
 }
 
 //

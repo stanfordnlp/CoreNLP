@@ -1,9 +1,10 @@
-package edu.stanford.nlp.trees.international.pennchinese; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.international.pennchinese;
 
 import edu.stanford.nlp.io.EncodingPrintWriter;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.process.AbstractTokenizer;
 import edu.stanford.nlp.process.Tokenizer;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 
@@ -18,7 +19,7 @@ import java.io.*;
 public class CHTBTokenizer extends AbstractTokenizer<String>  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(CHTBTokenizer.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(CHTBTokenizer.class);
 
   private final CHTBLexer lexer;
 
@@ -27,9 +28,9 @@ public class CHTBTokenizer extends AbstractTokenizer<String>  {
    * Constructs a new tokenizer from a Reader.  Note that getting
    * the bytes going into the Reader into Java-internal Unicode is
    * not the tokenizer's job.  This can be done by converting the
-   * file with <code>ConvertEncodingThread</code>, or by specifying
+   * file with {@code ConvertEncodingThread}, or by specifying
    * the files encoding explicitly in the Reader with
-   * java.io.<code>InputStreamReader</code>.
+   * java.io.{@code InputStreamReader}.
    *
    * @param r Reader
    */
@@ -41,10 +42,10 @@ public class CHTBTokenizer extends AbstractTokenizer<String>  {
   /**
    * Internally fetches the next token.
    *
-   * @return the next token in the token stream, or null if none exists.
+   * @return The next token in the token stream, or null if none exists.
    */
   @Override
-  public String getNext() {
+  protected String getNext() {
     try {
       int a;
       while ((a = lexer.yylex()) == CHTBLexer.IGNORE) {
@@ -69,13 +70,13 @@ public class CHTBTokenizer extends AbstractTokenizer<String>  {
    * Its arguments are (Infile, Encoding).
    */
   public static void main(String[] args) throws IOException {
-
+    if (args.length < 2) {
+      log.error("Usage: CHTBTokenizer inputFile encoding");
+    }
     String encoding = args[1];
-    Reader in = new BufferedReader(new InputStreamReader(new FileInputStream(args[0]), encoding));
+    Reader in = IOUtils.readerFromString(args[0], encoding);
 
-    Tokenizer<String> st = new CHTBTokenizer(in);
-
-    while (st.hasNext()) {
+    for (Tokenizer<String> st = new CHTBTokenizer(in); st.hasNext(); ) {
       String s = st.next();
       EncodingPrintWriter.out.println(s, encoding);
       // EncodingPrintWriter.out.println("|" + s + "| (" + s.length() + ")",
