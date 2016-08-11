@@ -446,9 +446,9 @@ public enum NaturalLogicRelation {
 //      log.info("Unknown dependency arc for NaturalLogicRelation: " + dependencyLabel);
       if (dependencyLabel.startsWith("nmod:")) {
         return NaturalLogicRelation.REVERSE_ENTAILMENT;
-      } else if (dependencyLabel.startsWith("conj")) {
+      } else if (dependencyLabel.startsWith("conj:")) {
         return NaturalLogicRelation.REVERSE_ENTAILMENT;
-      } else if (dependencyLabel.startsWith("advcl")) {
+      } else if (dependencyLabel.startsWith("advcl:")) {
         return NaturalLogicRelation.REVERSE_ENTAILMENT;
       } else {
         return NaturalLogicRelation.INDEPENDENCE;

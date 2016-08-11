@@ -7,9 +7,11 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.StanfordRedwoodConfiguration;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
-import java.net.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -210,11 +212,6 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
   /** The Properties file to send to the server, serialized as JSON. */
   private final String propsAsJSON;
 
-  /** The API key to authenticate with, or null */
-  private final String apiKey;
-  /** The API secret to authenticate with, or null */
-  private final String apiSecret;
-
   /** The scheduler to use when running on multiple backends at a time */
   private final BackendScheduler scheduler;
 
@@ -230,11 +227,8 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
    *
    * @param properties The properties file, as would be passed to {@link StanfordCoreNLP}.
    * @param backends The backends to run on.
-   * @param apiKey The key to authenticate with as a username
-   * @param apiSecret The key to authenticate with as a password
    */
-  private StanfordCoreNLPClient(Properties properties, List<Backend> backends,
-                                String apiKey, String apiSecret) {
+  private StanfordCoreNLPClient(Properties properties, List<Backend> backends) {
     // Save the constructor variables
     this.properties = properties;
     Properties serverProperties = new Properties();
@@ -245,8 +239,6 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     }
     Collections.shuffle(backends, new Random(System.currentTimeMillis()));
     this.scheduler = new BackendScheduler(backends);
-    this.apiKey = apiKey;
-    this.apiSecret = apiSecret;
 
     // Set required serverProperties
     serverProperties.setProperty("inputFormat", "serialized");
@@ -270,17 +262,6 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     this.scheduler.start();
   }
 
-
-  /**
-   * The main constructor without credentials.
-   *
-   * @see StanfordCoreNLPClient#StanfordCoreNLPClient(Properties, List, String, String)
-   */
-  private StanfordCoreNLPClient(Properties properties, List<Backend> backends) {
-    this(properties, backends, null, null);
-  }
-
-
   /**
    * Run on a single backend.
    *
@@ -288,30 +269,10 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
    */
   @SuppressWarnings("unused")
   public StanfordCoreNLPClient(Properties properties, String host, int port) {
-    this(properties, host, port, 1);
-  }
-
-  /**
-   * Run on a single backend, with authentication
-   *
-   * @see StanfordCoreNLPClient (Properties, List)
-   */
-  @SuppressWarnings("unused")
-  public StanfordCoreNLPClient(Properties properties, String host, int port,
-                               String apiKey, String apiSecret) {
-    this(properties, host, port, 1, apiKey, apiSecret);
-  }
-
-
-  /**
-   * Run on a single backend, with authentication
-   *
-   * @see StanfordCoreNLPClient (Properties, List)
-   */
-  @SuppressWarnings("unused")
-  public StanfordCoreNLPClient(Properties properties, String host,
-                               String apiKey, String apiSecret) {
-    this(properties, host, host.startsWith("http://") ? 80 : 443, 1, apiKey, apiSecret);
+    this(properties, Collections.singletonList(
+        new Backend(host.startsWith("https://") ? "https" : "http",
+            host.startsWith("http://") ? host.substring("http://".length()) : (host.startsWith("https://") ? host.substring("https://".length()) : host),
+            port)));
   }
 
   /**
@@ -321,25 +282,13 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
    */
   @SuppressWarnings("unused")
   public StanfordCoreNLPClient(Properties properties, String host, int port, int threads) {
-    this(properties, host, port, threads, null, null);
-  }
-
-
-  /**
-   * Run on a single backend, but with k threads on each backend, and with authentication
-   *
-   * @see StanfordCoreNLPClient (Properties, List)
-   */
-  public StanfordCoreNLPClient(Properties properties, String host, int port, int threads,
-                               String apiKey, String apiSecret) {
     this(properties, new ArrayList<Backend>() {{
       for (int i = 0; i < threads; ++i) {
-        add(new Backend(host.startsWith("http://") ? "http" : "https",
+        add(new Backend(host.startsWith("https://") ? "https" : "http",
             host.startsWith("http://") ? host.substring("http://".length()) : (host.startsWith("https://") ? host.substring("https://".length()) : host),
             port));
       }
-    }},
-    apiKey, apiSecret);
+    }});
   }
 
   /**
@@ -417,12 +366,6 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
               backend.port,
               StanfordCoreNLPClient.this.path + "?" + queryParams);
           URLConnection connection = serverURL.openConnection();
-          // 2.2 Set authentication
-          if (apiKey != null && apiSecret != null) {
-            String userpass = apiKey + ":" + apiSecret;
-            String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()));
-            connection.setRequestProperty ("Authorization", basicAuth);
-          }
           // 2.2 Set some protocol-independent properties
           connection.setDoOutput(true);
           connection.setRequestProperty("Content-Type", "application/x-protobuf");
@@ -431,35 +374,22 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
           connection.setRequestProperty("User-Agent", StanfordCoreNLPClient.class.getName());
           // 2.3 Set some protocol-dependent properties
           switch (backend.protocol) {
-            case "https":
-              ((HttpsURLConnection) connection).setRequestMethod("POST");
-              break;
             case "http":
+            case "https":
               ((HttpURLConnection) connection).setRequestMethod("POST");
               break;
             default:
               throw new IllegalStateException("Haven't implemented protocol: " + backend.protocol);
           }
-
-          // 3. Annotate
-          Annotation response;
-          try {
-            // 3.1. Fire off the request
-            connection.connect();
-            connection.getOutputStream().write(message);
+          // 3. Fire off the request
+          connection.getOutputStream().write(message);
 //          log.info("Wrote " + message.length + " bytes to " + backend.host + ":" + backend.port);
-            os.close();
+          os.close();
 
-            // 3.2 Await a response
-            // -- It might be possible to send more than one message, but we are not going to do that.
-            response = serializer.read(connection.getInputStream()).first;
-          } catch (UnknownHostException e) {
-            // 3.2. We don't have internet (or website is down) -- try to annotate locally
-            log.warn("No internet! Trying to annotate locally...");
-            StanfordCoreNLP corenlp = new StanfordCoreNLP(properties);
-            corenlp.annotate(annotation);
-            response = annotation;
-          }
+          // 4. Await a response
+          // 4.1 Read the response
+          // -- It might be possible to send more than one message, but we are not going to do that.
+          Annotation response = serializer.read(connection.getInputStream()).first;
           // 4.2 Release the backend
           isFinishedCallback.accept(backend);
 
@@ -470,11 +400,9 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
 
           // 6. Call the callback
           callback.accept(annotation);
-        } catch (Throwable t) {
-          log.warn("Could not annotate via server! Trying to annotate locally...", t);
-          StanfordCoreNLP corenlp = new StanfordCoreNLP(properties);
-          corenlp.annotate(annotation);
-          callback.accept(annotation);
+        } catch (IOException | ClassNotFoundException e) {
+          e.printStackTrace();
+          callback.accept(null);
         }
       }
     }.start());
@@ -646,7 +574,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
       if (spec.contains(":")) {
         String host = spec.substring(0, spec.indexOf(":"));
         int port = Integer.parseInt(spec.substring(spec.indexOf(":") + 1));
-        backends.add(new Backend(host.startsWith("http://") ? "http" : "https",
+        backends.add(new Backend(host.startsWith("https://") ? "https" : "http",
             host.startsWith("http://") ? host.substring("http://".length()) : (host.startsWith("https://") ? host.substring("https://".length()) : host),
             port));
       } else {

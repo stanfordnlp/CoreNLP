@@ -5,7 +5,7 @@ import edu.stanford.nlp.util.CoreMap;
 import java.util.List;
 
 /**
- * Token Sequence Matcher for regular expressions over sequences of tokens.
+ * Token Sequence Matcher for regular expressions for sequences over tokens
  *
  * @author Angel Chang
  */

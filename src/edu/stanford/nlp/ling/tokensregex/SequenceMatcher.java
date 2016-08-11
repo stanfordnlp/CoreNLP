@@ -2,7 +2,6 @@ package edu.stanford.nlp.ling.tokensregex;
 
 import edu.stanford.nlp.util.*;
 
-import java.nio.BufferOverflowException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -93,7 +92,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   Set<String> prevMatchedSignatures = new HashSet<>();
 
   // Branching limit for searching with back tracking. Higher value makes the search faster but uses more memory.
-  int branchLimit = 32;
+  int branchLimit = 2;
 
   protected SequenceMatcher(SequencePattern<T> pattern, List<? extends T> elements)
   {
@@ -898,7 +897,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     // (the branch index is with respect to parent, from 1 to number of branches the parent has)
     // TODO: This index can grow rather large, use index that allows for shrinkage
     //       (has remove function and generate new id every time)
-    HashIndex<Pair<Integer,Integer>> bidIndex = new HashIndex<>(512);
+    HashIndex<Pair<Integer,Integer>> bidIndex = new HashIndex<>(4);
     // Map of branch id to branch state
     Map<Integer,BranchState> branchStates = new HashMap<>();//Generics.newHashMap();
     // The activeMatchedStates is only kept to determine what branch states are still needed
@@ -1004,8 +1003,13 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       */
     }
 
-    /** A safe version of {@link SequenceMatcher.BranchStates#getParents(int, Integer[])} */
-    private List<Integer> getParents(int bid) {
+    /**
+     * Given a branch id, return a list of parent branches
+     * @param bid  branch id
+     * @return list of parent branch ids
+     */
+    private List<Integer> getParents(int bid)
+    {
       List<Integer> pids = new ArrayList<>();
       Pair<Integer,Integer> p = bidIndex.get(bid);
       while (p != null && p.first() >= 0) {
@@ -1017,28 +1021,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     }
 
     /**
-     * Given a branch id, return a list of parent branches
-     * @param bid  branch id
-     * @return list of parent branch ids
-     */
-    private List<Integer> getParents(int bid, Integer[] buffer)
-    {
-      int index = buffer.length - 1;
-      buffer[index] = bid;
-      index -= 1;
-      Pair<Integer,Integer> p = bidIndex.get(bid);
-      while (p != null && p.first() >= 0) {
-        buffer[index] = p.first;
-        index -= 1;
-        if (index < 0) {
-          return getParents(bid);  // optimization failed -- back off to the old version
-        }
-        p = bidIndex.get(p.first());
-      }
-      return Arrays.asList(buffer).subList(index + 1, buffer.length);
-    }
-
-    /**
      * Returns the branch state for a given branch id
      * (the appropriate ancestor branch state is returned if
      *  there is no branch state associated with the given branch id)
@@ -1047,13 +1029,12 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
      */
     protected BranchState getBranchState(int bid)
     {
-
       BranchState bs = branchStates.get(bid);
       if (bs == null) {
         BranchState pbs = null;
         int id = bid;
         while (pbs == null && id >= 0) {
-          Pair<Integer, Integer> p = bidIndex.get(id);
+          Pair<Integer,Integer> p = bidIndex.get(id);
           id = p.first;
           pbs = branchStates.get(id);
         }
@@ -1482,16 +1463,13 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       return matched;
     }
 
-
-    private final Integer[] p1Buffer = new Integer[128];
-    private final Integer[] p2Buffer = new Integer[128];
     protected int compareMatches(int bid1, int bid2)
     {
       if (bid1 == bid2) return 0;
-      List<Integer> p1 = branchStates.getParents(bid1, p1Buffer);
-//      p1.add(bid1);
-      List<Integer> p2 = branchStates.getParents(bid2, p2Buffer);
-//      p2.add(bid2);
+      List<Integer> p1 = branchStates.getParents(bid1);
+      p1.add(bid1);
+      List<Integer> p2 = branchStates.getParents(bid2);
+      p2.add(bid2);
       int n = Math.min(p1.size(), p2.size());
       for (int i = 0; i < n; i++) {
         if (p1.get(i) < p2.get(i)) return -1;

@@ -947,10 +947,6 @@ public class SUTime  {
     // PREV: on Thursday, last week = week starting on the monday one week
     // before this monday
     // ??? on Thursday, last week = one week going back starting from now
-    // NEXT: on June 19, next month = July 1 to July 31
-    // ???:  on June 19, next month = July 19 to August 19
-    //
-    //
     // For partial dates: two kind of next
     // next tuesday, next winter, next january
     // NEXT (PARENT UNIT, FAVOR): Example: on monday, next tuesday = tuesday of
@@ -3743,7 +3739,7 @@ public class SUTime  {
 
   // Duration classes
   /**
-   * A Duration represents a period of time (without endpoints).
+   * A Duration represents a period of time (without endpoints)
    * <br>
    * We have 3 types of durations:
    * <ol>
@@ -3860,12 +3856,11 @@ public class SUTime  {
         Duration halfDuration = this.divideBy(2);
         likelyRange = new Range(refTime.subtract(halfDuration), refTime.add(halfDuration), this);
       }
-      return new TimeWithRange(likelyRange);
-//      if ((flags & (RESOLVE_TO_FUTURE | RESOLVE_TO_PAST)) != 0) {
-//        return new TimeWithRange(likelyRange);
-//      }
-//      Range r = new Range(minTime, maxTime, this.multiplyBy(2));
-//      return new InexactTime(new TimeWithRange(likelyRange), this, r);
+      if ((flags & (RESOLVE_TO_FUTURE | RESOLVE_TO_PAST)) != 0) {
+        return new TimeWithRange(likelyRange);
+      }
+      Range r = new Range(minTime, maxTime, this.multiplyBy(2));
+      return new InexactTime(new TimeWithRange(likelyRange), this, r);
     }
 
     @Override

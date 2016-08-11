@@ -33,17 +33,14 @@ public class DeltaMap<K,V> extends AbstractMap<K,V> {
       this.value = e.getValue();
     }
 
-    @Override
     public K getKey() {
       return key;
     }
 
-    @Override
     public V getValue() {
       return value;
     }
 
-    @Override
     public V setValue(V value) {
       V oldValue = this.value;
       this.value = value;
@@ -83,7 +80,6 @@ public class DeltaMap<K,V> extends AbstractMap<K,V> {
    * @return <tt>true</tt> if this map contains a mapping for the specified
    *         key.
    */
-  @SuppressWarnings("SuspiciousMethodCalls")
   @Override
   public boolean containsKey(Object key) {
     // key could be not in original or in deltaMap
@@ -94,7 +90,10 @@ public class DeltaMap<K,V> extends AbstractMap<K,V> {
     if (value == null) {
       return originalMap.containsKey(key);
     }
-    return value != removedValue;
+    if (value == removedValue) {
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -102,7 +101,7 @@ public class DeltaMap<K,V> extends AbstractMap<K,V> {
    *
    * @param key key whose associated value is to be returned.
    * @return the value to which this map maps the specified key, or
-   *         {@code null} if the map contains no mapping for this key.
+   *         <tt>null</tt> if the map contains no mapping for this key.
    */
   @Override
   public V get(Object key) {
@@ -199,27 +198,43 @@ public class DeltaMap<K,V> extends AbstractMap<K,V> {
     return new AbstractSet<Map.Entry<K,V>>() {
       @Override
       public Iterator<Map.Entry<K,V>> iterator() {
-        Predicate<Entry<K,V>> filter1 = e -> ! deltaMap.containsKey(e.getKey());
+        Predicate<Entry<K,V>> filter1 = new Predicate<Entry<K,V>>() {
+          private static final long serialVersionUID = 1L;
+
+          // only accepts stuff not overwritten by deltaMap
+          public boolean test(Map.Entry<K, V> e) {
+            K key = e.getKey();
+            return ! deltaMap.containsKey(key);
+          }
+        };
 
         Iterator<Map.Entry<K, V>> iter1 = new FilteredIterator<>(originalMap.entrySet().iterator(), filter1);
 
-        Predicate<Entry<K,V>> filter2 = e -> e.getValue() != removedValue;
+        Predicate<Entry<K,V>> filter2 = new Predicate<Entry<K,V>>() {
+          private static final long serialVersionUID = 1L;
+          // only accepts stuff not overwritten by deltaMap
+          public boolean test(Map.Entry<K, V> e) {
+            Object value = e.getValue();
+            if (value == removedValue) {
+              return false;
+            }
+            return true;
+          }
+        };
 
-        class NullingIterator<KK, VV> implements Iterator<Map.Entry<KK,VV>> {
-          private Iterator<Map.Entry<KK, VV>> i;
+        class NullingIterator<K, V> implements Iterator<Map.Entry<K,V>> {
+          private Iterator<Map.Entry<K, V>> i;
 
-          private NullingIterator(Iterator<Map.Entry<KK, VV>> i) {
+          public NullingIterator(Iterator<Map.Entry<K, V>> i) {
             this.i = i;
           }
 
-          @Override
           public boolean hasNext() {
             return i.hasNext();
           }
 
-          @Override
-          public Map.Entry<KK, VV> next() {
-            Map.Entry<KK,VV> e = i.next();
+          public Map.Entry<K, V> next() {
+            Map.Entry<K,V> e = i.next();
             Object o = e.getValue();
             if (o == nullValue) {
               return new SimpleEntry<>(e.getKey(), null);
@@ -227,12 +242,10 @@ public class DeltaMap<K,V> extends AbstractMap<K,V> {
             return e;
           }
 
-          @Override
           public void remove() {
             throw new UnsupportedOperationException();
           }
-
-        } // end class NullingIterator
+        }
 
         Iterator<Entry<K, V>> iter2 = new FilteredIterator<>(new NullingIterator<>(deltaMap.entrySet().iterator()), filter2);
 
@@ -264,7 +277,44 @@ public class DeltaMap<K,V> extends AbstractMap<K,V> {
 
   @SuppressWarnings("unchecked")
   public DeltaMap(Map<K,V> originalMap) {
-    this(originalMap, MapFactory.hashMapFactory());
+    this(originalMap, MapFactory.HASH_MAP_FACTORY);
   }
 
+  /**
+   * For testing only.
+   *
+   * @param args from command line
+   */
+  public static void main(String[] args) {
+    Map<Integer,Integer> originalMap = Generics.newHashMap();
+    Random r = new Random();
+    for (int i = 0; i < 1000; i++) {
+      originalMap.put(Integer.valueOf(i), Integer.valueOf(r.nextInt(1000)));
+    }
+    Map<Integer,Integer> originalCopyMap = Generics.newHashMap(originalMap);
+    Map<Integer,Integer> deltaCopyMap = Generics.newHashMap(originalMap);
+    Map<Integer,Integer> deltaMap = new DeltaMap<>(originalMap);
+    // now make a lot of changes to deltaMap;
+    // add and change some stuff
+    for (int i = 900; i < 1100; i++) {
+      Integer rInt = Integer.valueOf(r.nextInt(1000));
+      deltaMap.put(Integer.valueOf(i), rInt);
+      deltaCopyMap.put(Integer.valueOf(i), rInt);
+    }
+    // remove some stuff
+    for (int i = 0; i < 100; i++) {
+      Integer rInt = Integer.valueOf(r.nextInt(1100));
+      deltaMap.remove(rInt);
+      deltaCopyMap.remove(rInt);
+    }
+    // set some stuff to null
+    for (int i = 0; i < 100; i++) {
+      Integer rInt = Integer.valueOf(r.nextInt(1100));
+      deltaMap.put(rInt, null);
+      deltaCopyMap.put(rInt, null);
+    }
+
+    System.out.println("Original preserved? " + originalCopyMap.equals(originalMap));
+    System.out.println("Delta accurate? " + deltaMap.equals(deltaCopyMap));
+  }
 }

@@ -11,7 +11,6 @@ import edu.stanford.nlp.trees.PennTreeReaderFactory;
 import edu.stanford.nlp.trees.SemanticHeadFinder;
 import edu.stanford.nlp.trees.StringLabeledScoredTreeReaderFactory;
 import edu.stanford.nlp.trees.TreeReaderFactory;
-import edu.stanford.nlp.trees.UniversalSemanticHeadFinder;
 import edu.stanford.nlp.trees.international.arabic.ArabicHeadFinder;
 import edu.stanford.nlp.trees.international.arabic.ArabicTreeReaderFactory;
 import edu.stanford.nlp.trees.international.french.DybroFrenchHeadFinder;
@@ -127,8 +126,6 @@ public class Preferences {
       return new SunJurafskyChineseHeadFinder();
     } else if(headfinderName.equalsIgnoreCase("TueBaDZHeadFinder")) {
       return new TueBaDZHeadFinder();
-    } else if (headfinderName.equalsIgnoreCase("UniversalSemanticHeadFinder")) {
-      return new UniversalSemanticHeadFinder();
     } else {//try to find the class
       try {
         Class<?> headfinder = Class.forName(headfinderName);
@@ -173,7 +170,7 @@ public class Preferences {
         TreeReaderFactory trf = (TreeReaderFactory) trfClass.newInstance();
         return trf;
       } catch (Exception e) {
-        return new PennTreeReaderFactory();
+        return null;
       }
     }
   }

@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees;
-import edu.stanford.nlp.ling.CoreAnnotations;
+package edu.stanford.nlp.trees; 
 import edu.stanford.nlp.trees.ud.EnhancementOptions;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -41,7 +40,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
   private static final boolean DEBUG = System.getProperty("UniversalEnglishGrammaticalStructure", null) != null;
 
-  private static final boolean USE_NAME = System.getProperty("UDUseNameRelation") != null;
 
   /*
    * Options for "Enhanced" representation:
@@ -211,10 +209,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
     correctSubjPass(sg);
     if (DEBUG) {
       printListSorted("After correctSubjPass:", sg.typedDependencies());
-    }
-    processNames(sg);
-    if (DEBUG) {
-      printListSorted("After processNames:", sg.typedDependencies());
     }
     removeExactDuplicates(sg);
     if (DEBUG) {
@@ -855,7 +849,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   }
 
   @Override
-  protected void addEnhancements(List<TypedDependency> list, EnhancementOptions options) {
+  public void addEnhancements(List<TypedDependency> list, EnhancementOptions options) {
 
     SemanticGraph sg = new SemanticGraph(list);
 
@@ -1300,7 +1294,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
         newDep = leftChildEdge.getDependent();
       }
       if (newDep != null && ! sg.containsEdge(head, newDep)) {
-        sg.addEdge(head, newDep, REFERENT, Double.NEGATIVE_INFINITY, false);
+        sg.addEdge(head, newDep, REFERENT, Double.NEGATIVE_INFINITY, true);
       }
     }
   }
@@ -1472,7 +1466,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
     int numWords = vertexList.size();
 
     for (int i = 1; i < numWords; i++) {
-      String bigram = vertexList.get(i-1).value().toLowerCase() + '_' + vertexList.get(i).value().toLowerCase();
+      String bigram = vertexList.get(i-1).value().toLowerCase() + "_" + vertexList.get(i).value().toLowerCase();
 
       if (bigrams.get(bigram) == null) {
         bigrams.put(bigram, new HashSet<>());
@@ -1725,10 +1719,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   }
 
 
-  /** A lot of, an assortment of, ... */
-  private static final SemgrexPattern QUANT_MOD_3W_PATTERN = SemgrexPattern.compile("{word:/(?i:lot|assortment|number|couple|bunch|handful|litany|sheaf|slew|dozen|series|variety|multitude|wad|clutch|wave|mountain|array|spate|string|ton|range|plethora|heap|sort|form|kind|type|version|bit|pair|triple|total)/}=w2 >det {word:/(?i:an?)/}=w1 !>amod {} >nmod ({tag:/(NN.*|PRP.*)/}=gov >case {word:/(?i:of)/}=w3) . {}=w3");
+  /* A lot of, an assortment of, ... */
+  public static final SemgrexPattern QUANT_MOD_3W_PATTERN = SemgrexPattern.compile("{word:/(?i:lot|assortment|number|couple|bunch|handful|litany|sheaf|slew|dozen|series|variety|multitude|wad|clutch|wave|mountain|array|spate|string|ton|range|plethora|heap|sort|form|kind|type|version|bit|pair|triple|total)/}=w2 >det {word:/(?i:an?)/}=w1 !>amod {} >nmod ({tag:/(NN.*|PRP.*)/}=gov >case {word:/(?i:of)/}=w3) . {}=w3");
 
-  private static final SemgrexPattern[] QUANT_MOD_2W_PATTERNS = {
+  public static final SemgrexPattern[] QUANT_MOD_2W_PATTERNS = {
       /* Lots of, dozens of, heaps of ... */
       SemgrexPattern.compile("{word:/(?i:lots|many|several|plenty|tons|dozens|multitudes|mountains|loads|pairs|tens|hundreds|thousands|millions|billions|trillions|[0-9]+s)/}=w1 >nmod ({tag:/(NN.*|PRP.*)/}=gov >case {word:/(?i:of)/}=w2) . {}=w2"),
 
@@ -1737,7 +1731,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   };
 
 
-  private static void demoteQuantificationalModifiers(SemanticGraph sg) {
+  private void demoteQuantificationalModifiers(SemanticGraph sg) {
     SemanticGraph sgCopy = sg.makeSoftCopy();
     SemgrexMatcher matcher = QUANT_MOD_3W_PATTERN.matcher(sgCopy);
 
@@ -1779,12 +1773,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
   }
 
-  private static void demoteQmodMWEHelper(SemanticGraph sg, List<IndexedWord> otherDeps, IndexedWord gov, IndexedWord oldHead) {
+  private void demoteQmodMWEHelper(SemanticGraph sg, List<IndexedWord> otherDeps, IndexedWord gov, IndexedWord oldHead) {
     createMultiWordExpression(sg, gov, QMOD, otherDeps.toArray(new IndexedWord[otherDeps.size()]));
   }
 
 
-  private static void demoteQmodParentHelper(SemanticGraph sg, IndexedWord gov, IndexedWord oldHead) {
+  private void demoteQmodParentHelper(SemanticGraph sg, IndexedWord gov, IndexedWord oldHead) {
     if (!sg.getRoots().contains(oldHead)) {
       IndexedWord parent = sg.getParent(oldHead);
       if (parent == null) {
@@ -1801,138 +1795,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
     //temporary relation to keep the graph connected
     sg.addEdge(gov, oldHead, DEPENDENT, Double.NEGATIVE_INFINITY, false);
     sg.removeEdge(sg.getEdge(oldHead, gov));
-  }
-
-
-  private static final SemgrexPattern[] NAME_PATTERNS = {
-    SemgrexPattern.compile("{ner:PERSON}=w1 >compound {}=w2"),
-    SemgrexPattern.compile("{ner:LOCATION}=w1 >compound {}=w2")
-  };
-  private static final Predicate<String> PUNCT_TAG_FILTER = new PennTreebankLanguagePack().punctuationWordRejectFilter();
-
-
-  /**
-   *
-   * Looks for NPs that should have the {@code name} relation and
-   * a) changes the structure such that the leftmost token becomes the head
-   * b) changes the relation from {@code compound} to {@code name}.
-   *
-   * Requires NER tags.
-   *
-   * @param sg A semantic graph.
-   */
-  private static void processNames(SemanticGraph sg) {
-
-    if ( ! USE_NAME) {
-      return;
-    }
-
-    // check whether NER tags are available
-    IndexedWord rootToken = sg.getFirstRoot();
-    if (rootToken == null || !rootToken.containsKey(CoreAnnotations.NamedEntityTagAnnotation.class)) {
-      return;
-    }
-
-    SemanticGraph sgCopy = sg.makeSoftCopy();
-    for (SemgrexPattern pattern : NAME_PATTERNS) {
-      SemgrexMatcher matcher = pattern.matcher(sgCopy);
-      List<IndexedWord> nameParts = new ArrayList<>();
-      IndexedWord head = null;
-      while (matcher.find()) {
-        IndexedWord w1 = matcher.getNode("w1");
-        IndexedWord w2 = matcher.getNode("w2");
-        if (head != w1) {
-          if (head != null) {
-            processNamesHelper(sg, head, nameParts);
-            nameParts = new ArrayList<>();
-          }
-          head = w1;
-        }
-        if (w2.ner().equals(w1.ner())) {
-          nameParts.add(w2);
-        }
-      }
-      if (head != null) {
-        processNamesHelper(sg, head, nameParts);
-        sgCopy = sg.makeSoftCopy();
-      }
-    }
-  }
-
-
-  private static void processNamesHelper(SemanticGraph sg, IndexedWord oldHead, List<IndexedWord> nameParts) {
-
-    if (nameParts.size() < 1) {
-      // if the named entity only spans one token, change compound relations
-      // to nmod relations to get the right structure for NPs with additional modifiers
-      // such as "Mrs. Clinton".
-      Set<IndexedWord> children = new HashSet<>(sg.getChildren(oldHead));
-      for (IndexedWord child : children) {
-        SemanticGraphEdge oldEdge = sg.getEdge(oldHead, child);
-        if (oldEdge.getRelation() == UniversalEnglishGrammaticalRelations.COMPOUND_MODIFIER) {
-          sg.addEdge(oldHead, child, UniversalEnglishGrammaticalRelations.NOMINAL_MODIFIER,
-              oldEdge.getWeight(), oldEdge.isExtra());
-          sg.removeEdge(oldEdge);
-        }
-      }
-      return;
-    }
-
-    // sort nameParts
-    Collections.sort(nameParts);
-
-    // check whether {nameParts[0], ..., nameParts[n], oldHead} are a contiguous NP
-    for (int i = nameParts.get(0).index(), end = oldHead.index(); i < end; i++) {
-      IndexedWord node = sg.getNodeByIndexSafe(i);
-      if (node == null) {
-        return;
-      }
-      if ( ! nameParts.contains(node) && PUNCT_TAG_FILTER.test(node.tag())) {
-        // not in nameParts and not a punctuation mark => not a contiguous NP
-        return;
-      }
-    }
-
-
-    IndexedWord gov = sg.getParent(oldHead);
-    if (gov == null && ! sg.getRoots().contains(oldHead)) {
-      return;
-    }
-    IndexedWord newHead = nameParts.get(0);
-    Set<IndexedWord> children = new HashSet<>(sg.getChildren(oldHead));
-
-    //change structure and relations
-    for (IndexedWord child : children) {
-      if (child == newHead) {
-        // make the leftmost word the new head
-        if (gov == null) {
-          sg.getRoots().add(newHead);
-          sg.getRoots().remove(oldHead);
-        } else {
-          SemanticGraphEdge oldEdge = sg.getEdge(gov, oldHead);
-          sg.addEdge(gov, newHead, oldEdge.getRelation(), oldEdge.getWeight(), oldEdge.isExtra());
-          sg.removeEdge(oldEdge);
-        }
-        // swap direction of relation between old head and new head and change it to name relation.
-        SemanticGraphEdge oldEdge = sg.getEdge(oldHead, newHead);
-        sg.addEdge(newHead, oldHead, UniversalEnglishGrammaticalRelations.NAME_MODIFIER, oldEdge.getWeight(), oldEdge.isExtra());
-        sg.removeEdge(oldEdge);
-      } else  if (nameParts.contains(child)) {
-        // remove relation between the old head and part of the name
-        // and introduce new relation between new head and part of the name
-        SemanticGraphEdge oldEdge = sg.getEdge(oldHead, child);
-        sg.addEdge(newHead, child, UniversalEnglishGrammaticalRelations.NAME_MODIFIER, oldEdge.getWeight(), oldEdge.isExtra());
-        sg.removeEdge(oldEdge);
-      } else {
-        // attach word to new head
-        SemanticGraphEdge oldEdge = sg.getEdge(oldHead, child);
-        //if not the entire compound is part of a named entity, attach the other tokens via an nmod relation
-        GrammaticalRelation reln = oldEdge.getRelation() == UniversalEnglishGrammaticalRelations.COMPOUND_MODIFIER ?
-            UniversalEnglishGrammaticalRelations.NOMINAL_MODIFIER : oldEdge.getRelation();
-        sg.addEdge(newHead, child, reln, oldEdge.getWeight(), oldEdge.isExtra());
-        sg.removeEdge(oldEdge);
-      }
-    }
   }
 
   /**

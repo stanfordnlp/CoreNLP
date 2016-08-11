@@ -1,5 +1,10 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.hcoref.CorefCoreAnnotations.*;
+import edu.stanford.nlp.hcoref.data.CorefChain;
+import edu.stanford.nlp.hcoref.data.Dictionaries;
+import edu.stanford.nlp.hcoref.data.Mention;
+import edu.stanford.nlp.hcoref.data.SpeakerInfo;
 import edu.stanford.nlp.ie.NumberNormalizer;
 import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
 import edu.stanford.nlp.ie.machinereading.structure.ExtractionObject;
@@ -30,13 +35,6 @@ import edu.stanford.nlp.time.TimeAnnotations.*;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import edu.stanford.nlp.coref.CorefCoreAnnotations.*;
-
-import edu.stanford.nlp.coref.data.CorefChain;
-import edu.stanford.nlp.coref.data.Dictionaries;
-import edu.stanford.nlp.coref.data.Mention;
-import edu.stanford.nlp.coref.data.SpeakerInfo;
 
 /**
  * <p>
@@ -270,8 +268,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Remove items which were never supposed to be there in the first place
     keysToSerialize.remove(ForcedSentenceUntilEndAnnotation.class);
     keysToSerialize.remove(ForcedSentenceEndAnnotation.class);
-    keysToSerialize.remove(HeadWordLabelAnnotation.class);
-    keysToSerialize.remove(HeadTagLabelAnnotation.class);
     // Required fields
     builder.setWord(coreLabel.word());
     // Optional fields
@@ -452,13 +448,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
       keysToSerialize.remove(CorefMentionsAnnotation.class);
     }
-    // Entity mentions
-    if (keySet.contains(MentionsAnnotation.class)) {
-      for (CoreMap mention : sentence.get(MentionsAnnotation.class)) {
-        builder.addMentions(toProtoMention(mention));
-      }
-      keysToSerialize.remove(MentionsAnnotation.class);
-    }
     // add a sentence id if it exists
     if (keySet.contains(SentenceIDAnnotation.class)) builder.setSentenceID(getAndRegister(sentence, keysToSerialize, SentenceIDAnnotation.class));
     // Return
@@ -521,14 +510,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       builder.setDocID(doc.get(DocIDAnnotation.class));
       keysToSerialize.remove(DocIDAnnotation.class);
     }
-    if (doc.containsKey(DocDateAnnotation.class)) {
-      builder.setDocDate(doc.get(DocDateAnnotation.class));
-      keysToSerialize.remove(DocDateAnnotation.class);
-    }
-    if (doc.containsKey(CalendarAnnotation.class)) {
-      builder.setCalendar(doc.get(CalendarAnnotation.class).toInstant().toEpochMilli());
-      keysToSerialize.remove(CalendarAnnotation.class);
-    }
     if (doc.containsKey(CorefChainAnnotation.class)) {
       for (Map.Entry<Integer, CorefChain> chain : doc.get(CorefChainAnnotation.class).entrySet()) {
        builder.addCorefChain(toProto(chain.getValue()));
@@ -540,12 +521,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         builder.addQuote(toProtoQuote(quote));
       }
       keysToSerialize.remove(QuotationsAnnotation.class);
-    }
-    if (doc.containsKey(MentionsAnnotation.class)) {
-      for (CoreMap mention : doc.get(MentionsAnnotation.class)) {
-        builder.addMentions(toProtoMention(mention));
-      }
-      keysToSerialize.remove(MentionsAnnotation.class);
     }
     // Return
     return builder;
@@ -752,7 +727,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     // flag if this Mention should get basicDependency, collapsedDependency, and contextParseTree or not
     builder.setHasBasicDependency((mention.basicDependency != null));
-    builder.setHasEnhancedDepenedncy((mention.enhancedDependency != null));
+    builder.setHasCollapsedDependency((mention.collapsedDependency != null));
     builder.setHasContextParseTree((mention.contextParseTree != null));
 
     // handle the sets of Mentions, just store mentionID
@@ -1007,23 +982,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   }
 
   /**
-   * Convert a mention object to a protocol buffer.
-   */
-  public CoreNLPProtos.NERMention toProtoMention(CoreMap mention) {
-    CoreNLPProtos.NERMention.Builder builder = CoreNLPProtos.NERMention.newBuilder();
-    if (mention.get(SentenceIndexAnnotation.class) != null) { builder.setSentenceIndex(mention.get(SentenceIndexAnnotation.class)); }
-    if (mention.get(TokenBeginAnnotation.class) != null) { builder.setTokenStartInSentenceInclusive(mention.get(TokenBeginAnnotation.class)); }
-    if (mention.get(TokenEndAnnotation.class) != null) { builder.setTokenEndInSentenceExclusive(mention.get(TokenEndAnnotation.class)); }
-    if (mention.get(NamedEntityTagAnnotation.class) != null) { builder.setNer(mention.get(NamedEntityTagAnnotation.class)); }
-    if (mention.get(NormalizedNamedEntityTagAnnotation.class) != null) { builder.setNormalizedNER(mention.get(NormalizedNamedEntityTagAnnotation.class)); }
-    if (mention.get(EntityTypeAnnotation.class) != null) { builder.setEntityType(mention.get(EntityTypeAnnotation.class)); }
-    if (mention.get(TimexAnnotation.class) != null) { builder.setTimex(toProto(mention.get(TimexAnnotation.class))); }
-    if (mention.get(WikipediaEntityAnnotation.class) != null) { builder.setWikipediaEntity(mention.get(WikipediaEntityAnnotation.class)); }
-
-    return builder.build();
-  }
-
-  /**
    * Create a CoreLabel from its serialized counterpart.
    * Note that this is, by itself, a lossy operation. Fields like the docid (sentence index, etc.) are only known
    * from the enclosing document, and are not tracked in the protobuf.
@@ -1183,10 +1141,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   protected void loadSentenceMentions(CoreNLPProtos.Sentence proto, CoreMap sentence) {
     // add all Mentions for this sentence
     if (proto.getHasCorefMentionsAnnotation()) {
-      sentence.set(CorefMentionsAnnotation.class, new ArrayList<>());
+      sentence.set(CorefMentionsAnnotation.class, new ArrayList<Mention>());
     }
     if (proto.getMentionsForCorefList().size() != 0) {
-      HashMap<Integer, Mention> idToMention = new HashMap<>();
+      HashMap<Integer, Mention> idToMention = new HashMap<Integer,Mention>();
       List<Mention> sentenceMentions = sentence.get(CorefMentionsAnnotation.class);
       // initial set up of all mentions
       for (CoreNLPProtos.Mention protoMention : proto.getMentionsForCorefList()) {
@@ -1198,31 +1156,31 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       for (CoreNLPProtos.Mention protoMention : proto.getMentionsForCorefList()) {
         Mention m = idToMention.get(protoMention.getMentionID());
         if (protoMention.getAppositionsList().size() != 0) {
-          m.appositions = new HashSet<>();
+          m.appositions = new HashSet<Mention>();
           for (int mentID : protoMention.getAppositionsList()) {
             m.appositions.add(idToMention.get(mentID));
           }
         }
         if (protoMention.getPredicateNominativesList().size() != 0) {
-          m.predicateNominatives = new HashSet<>();
+          m.predicateNominatives = new HashSet<Mention>();
           for (int mentID : protoMention.getPredicateNominativesList()) {
             m.predicateNominatives.add(idToMention.get(mentID));
           }
         }
         if (protoMention.getRelativePronounsList().size() != 0) {
-          m.relativePronouns = new HashSet<>();
+          m.relativePronouns = new HashSet<Mention>();
           for (int mentID : protoMention.getRelativePronounsList()) {
             m.relativePronouns.add(idToMention.get(mentID));
           }
         }
         if (protoMention.getListMembersList().size() != 0) {
-          m.listMembers = new HashSet<>();
+          m.listMembers = new HashSet<Mention>();
           for (int mentID : protoMention.getListMembersList()) {
             m.listMembers.add(idToMention.get(mentID));
           }
         }
         if (protoMention.getBelongToListsList().size() != 0) {
-          m.belongToLists = new HashSet<>();
+          m.belongToLists = new HashSet<Mention>();
           for (int mentID : protoMention.getBelongToListsList()) {
             m.belongToLists.add(idToMention.get(mentID));
           }
@@ -1329,15 +1287,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       docid = proto.getDocID();
       ann.set(DocIDAnnotation.class, docid);
     }
-    // Set reference time
-    if (proto.hasDocDate()) {
-      ann.set(DocDateAnnotation.class, proto.getDocDate());
-    }
-    if (proto.hasCalendar()) {
-      GregorianCalendar calendar = new GregorianCalendar();
-      calendar.setTimeInMillis(proto.getCalendar());
-      ann.set(CalendarAnnotation.class, calendar);
-    }
 
     // Set coref chain
     Map<Integer, CorefChain> corefChains = new HashMap<>();
@@ -1379,7 +1328,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
       // Set entailed sentences
       if (sentence.getEntailedSentenceCount() > 0) {
-        Set<SentenceFragment> entailedSentences = sentence.getEntailedSentenceList().stream().map(frag -> fromProto(frag, map.get(EnhancedPlusPlusDependenciesAnnotation.class))).collect(Collectors.toSet());
+        Set<SentenceFragment> entailedSentences = sentence.getEntailedSentenceList().stream().map(frag -> fromProto(frag, map.get(CollapsedDependenciesAnnotation.class))).collect(Collectors.toSet());
         map.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, entailedSentences);
       }
       // Set relation triples
@@ -1420,12 +1369,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         if (headWordIndex >= 0) {
           mentionToUpdate.headWord = sentenceTokens.get(protoMention.getHeadWord().getTokenIndex());
         }
-        mentionToUpdate.sentenceWords = new ArrayList<>();
+        mentionToUpdate.sentenceWords = new ArrayList<CoreLabel>();
         for (CoreNLPProtos.IndexedWord clp : protoMention.getSentenceWordsList()) {
           int ti = clp.getTokenIndex();
           mentionToUpdate.sentenceWords.add(sentenceTokens.get(ti));
         }
-        mentionToUpdate.originalSpan = new ArrayList<>();
+        mentionToUpdate.originalSpan = new ArrayList<CoreLabel>();
         for (CoreNLPProtos.IndexedWord clp : protoMention.getOriginalSpanList()) {
           int ti = clp.getTokenIndex();
           mentionToUpdate.originalSpan.add(sentenceTokens.get(ti));
@@ -1433,8 +1382,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         if (protoMention.getHasBasicDependency()) {
           mentionToUpdate.basicDependency = map.get(BasicDependenciesAnnotation.class);
         }
-        if (protoMention.getHasEnhancedDepenedncy()) {
-          mentionToUpdate.enhancedDependency = map.get(EnhancedDependenciesAnnotation.class);
+        if (protoMention.getHasCollapsedDependency()) {
+          mentionToUpdate.collapsedDependency = map.get(CollapsedDependenciesAnnotation.class);
         }
         if (protoMention.getHasContextParseTree()) {
           mentionToUpdate.contextParseTree = map.get(TreeAnnotation.class);
@@ -1449,12 +1398,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     List<CoreMap> quotes = proto.getQuoteList().stream().map(quote -> fromProto(quote, tokens)).collect(Collectors.toList());
     if (!quotes.isEmpty()) {
       ann.set(QuotationsAnnotation.class, quotes);
-    }
-
-    // Set NERmention
-    List<CoreMap> mentions = proto.getMentionsList().stream().map(mention -> fromProto(mention)).collect(Collectors.toList());
-    if (!mentions.isEmpty()) {
-      ann.set(MentionsAnnotation.class, mentions);
     }
 
     // add SpeakerInfo stuff to Mentions, this requires knowing all mentions in the document
@@ -1887,14 +1830,14 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     // handle the sets of Strings
     if (protoMention.getDependentsCount() != 0) {
-      returnMention.dependents = new HashSet<>();
+      returnMention.dependents = new HashSet<String>();
       for (String dependent : protoMention.getDependentsList()) {
         returnMention.dependents.add(dependent);
       }
     }
 
     if (protoMention.getPreprocessedTermsCount() != 0) {
-      returnMention.preprocessedTerms = new ArrayList<>();
+      returnMention.preprocessedTerms = new ArrayList<String>();
       for (String preprocessed : protoMention.getPreprocessedTermsList()) {
         returnMention.preprocessedTerms.add(preprocessed);
       }
@@ -1994,24 +1937,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (quote.hasTokenBegin()) { ann.set(TokenBeginAnnotation.class, quote.getTokenBegin()); }
     if (quote.hasTokenEnd()) { ann.set(TokenEndAnnotation.class, quote.getTokenEnd()); }
     return ann;
-  }
-
-  /**
-   * Convert a quote object to a protocol buffer.
-   */
-  @SuppressWarnings("UnusedParameters")
-  private CoreMap fromProto(CoreNLPProtos.NERMention mention) {
-    CoreMap map = new ArrayCoreMap();
-    if (mention.hasSentenceIndex()) map.set(SentenceIndexAnnotation.class, mention.getSentenceIndex());
-    if (mention.hasTokenStartInSentenceInclusive()) map.set(TokenBeginAnnotation.class, mention.getTokenStartInSentenceInclusive());
-    if (mention.hasTokenEndInSentenceExclusive()) map.set(TokenEndAnnotation.class, mention.getTokenEndInSentenceExclusive());
-    if (mention.hasNer()) map.set(NamedEntityTagAnnotation.class, mention.getNer());
-    if (mention.hasNormalizedNER()) map.set(NormalizedNamedEntityTagAnnotation.class, mention.getNormalizedNER());
-    if (mention.hasEntityType()) map.set(EntityTypeAnnotation.class, mention.getEntityType());
-    if (mention.hasTimex()) map.set(TimexAnnotation.class, fromProto(mention.getTimex()));
-    if (mention.hasWikipediaEntity()) map.set(WikipediaEntityAnnotation.class, mention.getWikipediaEntity());
-
-    return map;
   }
 
   /**

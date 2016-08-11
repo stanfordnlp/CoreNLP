@@ -1,5 +1,4 @@
-package edu.stanford.nlp.trees;
-import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
+package edu.stanford.nlp.trees; 
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
@@ -43,8 +42,8 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure  {
    * tree. The new {@code GrammaticalStructure} has the same tree structure
    * and label values as the given tree (but no shared storage). As part of
    * construction, the parse tree is analyzed using definitions from
-   * {@link GrammaticalRelation {@code GrammaticalRelation}} to populate
-   * the new {@code GrammaticalStructure} with as many labeled grammatical
+   * {@link GrammaticalRelation <code>GrammaticalRelation</code>} to populate
+   * the new <code>GrammaticalStructure</code> with as many labeled grammatical
    * relations as it can.
    *
    * @param t Parse tree to make grammatical structure from
@@ -68,7 +67,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure  {
    * tree. The new {@code GrammaticalStructure} has the same tree structure
    * and label values as the given tree (but no shared storage). As part of
    * construction, the parse tree is analyzed using definitions from
-   * {@link GrammaticalRelation {@code GrammaticalRelation}} to populate
+   * {@link GrammaticalRelation <code>GrammaticalRelation</code>} to populate
    * the new {@code GrammaticalStructure} with as many labeled grammatical
    * relations as it can.
    *
@@ -2221,10 +2220,6 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure  {
     public EnglishGrammaticalStructure build(List<TypedDependency> tdeps, TreeGraphNode root) {
       return new EnglishGrammaticalStructure(tdeps, root);
     }
-  }
-
-  public static void main(String args[]) {
-    GrammaticalStructureConversionUtils.convertTrees(args, "en-sd");
   }
 
 } // end class EnglishGrammaticalStructure

@@ -313,7 +313,7 @@
         <include name="commons-lang3-3.1.jar"/>
         <include name="xom-1.2.10.jar"/>
         <include name="joda-time.jar"/>
-        <include name="jollyday-0.4.9.jar"/>
+        <include name="jollyday-0.4.7.jar"/>
       </lib>
       <zipfileset prefix="WEB-INF/data"
                   file="/u/nlp/data/pos-tagger/distrib/english-left3words-distsim.tagger"/>
@@ -446,7 +446,7 @@
         <include name="xom-1.2.10.jar"/>
         <include name="xml-apis.jar"/>
         <include name="joda-time.jar"/>
-        <include name="jollyday-0.4.9.jar"/>
+        <include name="jollyday-0.4.7.jar"/>
       </lib>
       <!-- note for John: c:/Users/John Bauer/nlp/stanford-releases -->
       <lib dir="/u/nlp/data/StanfordCoreNLPModels">

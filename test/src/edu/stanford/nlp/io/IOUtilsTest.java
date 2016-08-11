@@ -11,13 +11,13 @@ import java.util.zip.GZIPOutputStream;
 
 import edu.stanford.nlp.util.StringUtils;
 
-import org.junit.Assert;
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
 public class IOUtilsTest extends TestCase {
 
-  private String dirPath;
-  private File dir;
+  String dirPath;
+  File dir;
 
   @Override
   protected void setUp() throws Exception {
@@ -162,7 +162,7 @@ public class IOUtilsTest extends TestCase {
     writer.close();
   }
 
-  private static <E> Set<E> toSet(Iterable<E> iter) {
+  public static <E> Set<E> toSet(Iterable<E> iter) {
     Set<E> set = new HashSet<E>();
     for (E item: iter) {
       set.add(item);

@@ -6,15 +6,15 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import org.junit.Assert;
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.patterns.PatternsAnnotations;
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.patterns.PatternsAnnotations;
+import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
-import edu.stanford.nlp.trees.*;
 
 /**
  * @author Chloe Kiddon

@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * SentenceUtils holds a couple utility methods for lists that are sentences.
- * Those include a method that nicely prints a list of words and methods that
+ * SentenceUtils holds a couple utility methods for lists.
+ * Those include a method that nicely prints a list and methods that
  * construct lists of words from lists of strings.
  *
  * @author Dan Klein
@@ -19,13 +19,13 @@ public class SentenceUtils {
   private SentenceUtils() {} // static methods
 
   /**
-   * Create an ArrayList as a list of {@code TaggedWord} from two
-   * lists of {@code String}, one for the words, and the second for
+   * Create an ArrayList as a list of <code>TaggedWord</code> from two
+   * lists of <code>String</code>, one for the words, and the second for
    * the tags.
    *
-   * @param lex  a list whose items are of type {@code String} and
+   * @param lex  a list whose items are of type <code>String</code> and
    *             are the words
-   * @param tags a list whose items are of type {@code String} and
+   * @param tags a list whose items are of type <code>String</code> and
    *             are the tags
    * @return The Sentence
    */
@@ -43,10 +43,10 @@ public class SentenceUtils {
   }
 
   /**
-   * Create an ArrayList as a list of {@code Word} from a
-   * list of {@code String}.
+   * Create an ArrayList as a list of <code>Word</code> from a
+   * list of <code>String</code>.
    *
-   * @param lex  a list whose items are of type {@code String} and
+   * @param lex  a list whose items are of type <code>String</code> and
    *             are the words
    * @return The Sentence
    */
@@ -60,7 +60,7 @@ public class SentenceUtils {
   }
 
   /**
-   * Create a Sentence as a list of {@code Word} objects from
+   * Create a Sentence as a list of <code>Word</code> objects from
    * an array of String objects.
    *
    * @param words  The words to make it from
@@ -87,7 +87,7 @@ public class SentenceUtils {
   }
 
   /**
-   * Create a sentence as a List of {@code CoreLabel} objects from
+   * Create a sentence as a List of <code>CoreLabel</code> objects from
    * an array (or varargs) of String objects.
    *
    * @param words The words to make it from
@@ -105,7 +105,7 @@ public class SentenceUtils {
   }
 
   /**
-   * Create a sentence as a List of {@code CoreLabel} objects from
+   * Create a sentence as a List of <code>CoreLabel</code> objects from
    * a List of other label objects.
    *
    * @param words The words to make it from
@@ -158,11 +158,11 @@ public class SentenceUtils {
    * separators, such as TaggedWord.
    *
    * @param list The tokenized sentence to print out
-   * @param justValue If {@code true} and the elements are of type
-   *                  {@code Label}, return just the
-   *                  {@code value()} of the {@code Label} of each word;
+   * @param justValue If <code>true</code> and the elements are of type
+   *                  <code>Label</code>, return just the
+   *                  <code>value()</code> of the <code>Label</code> of each word;
    *                  otherwise,
-   *                  call the {@code toString()} method on each item.
+   *                  call the <code>toString()</code> method on each item.
    * @return The sentence in String form
    */
   public static <T> String listToString(List<T> list, final boolean justValue) {
@@ -243,7 +243,7 @@ public class SentenceUtils {
       if (cl.get(CoreAnnotations.AfterAnnotation.class) != null) {
         s.append(cl.get(CoreAnnotations.AfterAnnotation.class));
       } else {
-        s.append(' ');
+        s.append(" ");
       }
     }
     return s.toString();
@@ -302,15 +302,15 @@ public class SentenceUtils {
    *
    * @param start Leftmost index of the substring
    * @param end Rightmost index of the ngram
-   * @return The ngram as a String. Currently returns null if one of the indices is out of bounds.
-   *         But maybe it should exception instead.
+   * @return The ngram as a String
    */
   public static <T> String extractNgram(List<T> list, int start, int end) {
     if (start < 0 || end > list.size() || start >= end) return null;
     final StringBuilder sb = new StringBuilder();
+    // TODO: iterator
     for (int i = start; i < end; i++) {
       T o = list.get(i);
-      if (sb.length() != 0) sb.append(' ');
+      if (sb.length() != 0) sb.append(" ");
       sb.append((o instanceof HasWord) ? ((HasWord) o).word() : o.toString());
     }
     return sb.toString();

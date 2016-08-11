@@ -1,10 +1,9 @@
 package edu.stanford.nlp.simple;
 
+import edu.stanford.nlp.hcoref.data.CorefChain;
 import org.junit.Test;
 
 import java.util.Map;
-
-import edu.stanford.nlp.coref.data.CorefChain;
 
 import static org.junit.Assert.*;
 
