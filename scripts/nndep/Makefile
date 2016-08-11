@@ -11,9 +11,13 @@ PTB_CONLL_TRAIN=${DATA_DIR}/PTB/CoNLL/train.conll
 PTB_CONLL_DEV=${DATA_DIR}/PTB/CoNLL/dev.conll
 PTB_CONLL_TEST=${DATA_DIR}/PTB/CoNLL/test.conll
 
-CTB_CONLL_TRAIN=${DATA_DIR}/CTB/train.gold.conll
-CTB_CONLL_DEV=${DATA_DIR}/CTB/dev.gold.conll
-CTB_CONLL_TEST=${DATA_DIR}/CTB/test.gold.conll
+CTB5_CONLL_TRAIN=${DATA_DIR}/CTB/ctb5.1/train.gold.conll
+CTB5_CONLL_DEV=${DATA_DIR}/CTB/ctb5.1/dev.gold.conll
+CTB5_CONLL_TEST=${DATA_DIR}/CTB/ctb5.1/test.gold.conll
+
+CTB9_CONLL_TRAIN=${DATA_DIR}/CTB/ctb9.0/chtb.train.conll
+CTB9_CONLL_DEV=${DATA_DIR}/CTB/ctb9.0/chtb.dev.conll
+CTB9_CONLL_TEST=${DATA_DIR}/CTB/ctb9.0/chtb.test.conll
 
 UD_GERMAN_TRAIN=${DATA_DIR}/UD/1.1/de/de-ud-train-clean.conllu
 UD_GERMAN_DEV=${DATA_DIR}/UD/1.1/de/de-ud-dev-clean.conllu
@@ -37,10 +41,16 @@ PTB_CoNLL:
 	java edu.stanford.nlp.parser.nndep.DependencyParser -testFile $(PTB_CONLL_DEV) -model $@.txt.gz -outFile $@.out.dev >> $@.log 2>&1
 	java edu.stanford.nlp.parser.nndep.DependencyParser -testFile $(PTB_CONLL_TEST) -model $@.txt.gz -outFile $@.out.test >> $@.log 2>&1
 
-CTB_CoNLL:
-	java edu.stanford.nlp.parser.nndep.DependencyParser -props nndep.properties -trainFile $(CTB_CONLL_TRAIN) -language Chinese -devFile $(CTB_CONLL_DEV) -embedFile $(CHINESE_EMBEDDINGS) -model $@.txt.gz >> $@.log 2>&1
-	java edu.stanford.nlp.parser.nndep.DependencyParser -testFile $(CTB_CONLL_DEV) -language Chinese -model $@.txt.gz -outFile $@.out.dev >> $@.log 2>&1
-	java edu.stanford.nlp.parser.nndep.DependencyParser -testFile $(CTB_CONLL_TEST) -language Chinese -model $@.txt.gz -outFile $@.out.test >> $@.log 2>&1
+CTB5_CoNLL:
+	java edu.stanford.nlp.parser.nndep.DependencyParser -props nndep.properties -trainFile $(CTB5_CONLL_TRAIN) -language Chinese -devFile $(CTB5_CONLL_DEV) -embedFile $(CHINESE_EMBEDDINGS) -model $@.txt.gz >> $@.log 2>&1
+	java edu.stanford.nlp.parser.nndep.DependencyParser -testFile $(CTB5_CONLL_DEV) -language Chinese -model $@.txt.gz -outFile $@.out.dev >> $@.log 2>&1
+	java edu.stanford.nlp.parser.nndep.DependencyParser -testFile $(CTB5_CONLL_TEST) -language Chinese -model $@.txt.gz -outFile $@.out.test >> $@.log 2>&1
+
+CTB9_CoNLL:
+	java edu.stanford.nlp.parser.nndep.DependencyParser -props nndep.properties -trainFile $(CTB9_CONLL_TRAIN) -language Chinese -devFile $(CTB9_CONLL_DEV) -embedFile $(CHINESE_EMBEDDINGS) -model $@.txt.gz >> $@.log 2>&1
+	java edu.stanford.nlp.parser.nndep.DependencyParser -testFile $(CTB9_CONLL_DEV) -language Chinese -model $@.txt.gz -outFile $@.out.dev >> $@.log 2>&1
+	java edu.stanford.nlp.parser.nndep.DependencyParser -testFile $(CTB9_CONLL_TEST) -language Chinese -model $@.txt.gz -outFile $@.out.test >> $@.log 2>&1
+
 
 UD_GERMAN:
 	java edu.stanford.nlp.parser.nndep.DependencyParser -props nndep.properties -trainFile $(UD_GERMAN_TRAIN) -language German -devFile $(UD_GERMAN_DEV) -model $@.txt.gz >> $@.log 2>&1

@@ -138,8 +138,21 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     this(props, (props == null || PropertiesUtils.getBool(props, "enforceRequirements", true)));
   }
 
+
+  /**
+   * Construct a CoreNLP with a custom Annotator Pool.
+   */
+  public StanfordCoreNLP(Properties props, AnnotatorPool annotatorPool)  {
+    this(props, (props == null || PropertiesUtils.getBool(props, "enforceRequirements", true)), annotatorPool);
+  }
+
+
   public StanfordCoreNLP(Properties props, boolean enforceRequirements)  {
-    construct(props, enforceRequirements, getAnnotatorImplementations());
+    this(props, enforceRequirements, null);
+  }
+
+  public StanfordCoreNLP(Properties props, boolean enforceRequirements, AnnotatorPool annotatorPool)  {
+    construct(props, enforceRequirements, getAnnotatorImplementations(), annotatorPool);
   }
 
   /**
@@ -155,7 +168,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     if (props == null) {
       throw new RuntimeIOException("ERROR: cannot find properties file \"" + propsFileNamePrefix + "\" in the classpath!");
     }
-    construct(props, enforceRequirements, getAnnotatorImplementations());
+    construct(props, enforceRequirements, getAnnotatorImplementations(), null);
   }
 
   //
@@ -282,7 +295,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
    * @param annotators The annotators the user has requested.
    * @return A sanitized annotators string with all prerequisites met.
    */
-  public static String ensurePrerequisiteAnnotators(String[] annotators) {
+  public static String ensurePrerequisiteAnnotators(String[] annotators, Properties props) {
     // Get an unordered set of annotators
     Set<String> unorderedAnnotators = new LinkedHashSet<>();  // linked to preserve order
     Collections.addAll(unorderedAnnotators, annotators);
@@ -339,6 +352,38 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       }
     }
 
+    // Remove depparse + parse -- these are redundant
+    if (orderedAnnotators.contains(STANFORD_PARSE) && !ArrayUtils.contains(annotators, STANFORD_DEPENDENCIES)) {
+      orderedAnnotators.remove(STANFORD_DEPENDENCIES);
+    }
+
+    // Tweak the properties, if necessary
+    // (set the mention annotator to use dependency trees, if appropriate)
+    if (orderedAnnotators.contains(Annotator.STANFORD_MENTION) && !orderedAnnotators.contains(Annotator.STANFORD_PARSE) &&
+        !props.containsKey("coref.md.type")) {
+      props.setProperty("coref.md.type", "dep");
+    }
+    // (ensure regexner is after ner)
+    if (orderedAnnotators.contains(Annotator.STANFORD_NER) && orderedAnnotators.contains(STANFORD_REGEXNER)) {
+      orderedAnnotators.remove(STANFORD_REGEXNER);
+      int nerIndex = orderedAnnotators.indexOf(Annotator.STANFORD_NER);
+      orderedAnnotators.add(nerIndex + 1, STANFORD_REGEXNER);
+    }
+    // (ensure coref is before openie)
+    if (orderedAnnotators.contains(Annotator.STANFORD_COREF) && orderedAnnotators.contains(STANFORD_OPENIE)) {
+      int maxIndex = Math.max(
+          orderedAnnotators.indexOf(STANFORD_OPENIE),
+          orderedAnnotators.indexOf(STANFORD_COREF)
+          );
+      if (Objects.equals(orderedAnnotators.get(maxIndex), STANFORD_OPENIE)) {
+        orderedAnnotators.add(maxIndex, STANFORD_COREF);
+        orderedAnnotators.remove(STANFORD_COREF);
+      } else {
+        orderedAnnotators.add(maxIndex + 1, STANFORD_OPENIE);
+        orderedAnnotators.remove(STANFORD_OPENIE);
+      }
+    }
+
     // Return
     return StringUtils.join(orderedAnnotators, ",");
   }
@@ -362,11 +407,13 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
   // AnnotatorPool construction support
   //
 
-  private void construct(Properties props, boolean enforceRequirements, AnnotatorImplementations annotatorImplementations) {
+  private void construct(Properties props, boolean enforceRequirements, AnnotatorImplementations annotatorImplementations, AnnotatorPool pool) {
     Timing tim = new Timing();
     this.numWords = 0;
     this.constituentTreePrinter = new TreePrint("penn");
     this.dependencyTreePrinter = new TreePrint("typedDependenciesCollapsed");
+
+
 
     if (props == null) {
       // if undefined, find the properties file in the classpath
@@ -379,7 +426,11 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       props = fromClassPath;
     }
     this.properties = props;
-    AnnotatorPool pool = getDefaultAnnotatorPool(props, annotatorImplementations);
+
+    if (pool == null) {
+      // if undefined, load the default annotator pool
+      pool = getDefaultAnnotatorPool(props, annotatorImplementations);
+    }
 
     // Set threading
     if (this.properties.containsKey("threads")) {
@@ -471,23 +522,32 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
 
 
   /**
-   * Construct the default annotator pool from the passed properties, and overwriting annotations which have changed
-   * since the last
-   * @param inputProps
-   * @param annotatorImplementation
-   * @return A populated AnnotatorPool
+   * Construct the default annotator pool, and save it as the static annotator pool
+   * for CoreNLP.
+   *
+   * @see StanfordCoreNLP#constructAnnotatorPool(Properties, AnnotatorImplementations)
    */
   public static synchronized AnnotatorPool getDefaultAnnotatorPool(final Properties inputProps, final AnnotatorImplementations annotatorImplementation) {
     // if the pool already exists reuse!
     if (pool == null) {
       pool = new AnnotatorPool();
     }
-
     for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, AnnotatorFactory>> entry : getNamedAnnotators().entrySet()) {
       pool.register(entry.getKey(), entry.getValue().apply(inputProps, annotatorImplementation));
     }
+    registerCustomAnnotators(pool, annotatorImplementation, inputProps);
+    return pool;
+  }
 
 
+  /**
+   * register any custom annotators defined in the input properties, and add them to the pool.
+   *
+   * @param pool The annotator pool to add the new custom annotators to.
+   * @param annotatorImplementation The implementation thunk to use to create any new annotators.
+   * @param inputProps The properties to read new annotator definitions from.
+   */
+  private static void registerCustomAnnotators(AnnotatorPool pool, AnnotatorImplementations annotatorImplementation, Properties inputProps) {
     // add annotators loaded via reflection from class names specified
     // in the properties
     for (String property : inputProps.stringPropertyNames()) {
@@ -496,29 +556,36 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
             property.substring(CUSTOM_ANNOTATOR_PREFIX.length());
         final String customClassName = inputProps.getProperty(property);
         logger.info("Registering annotator " + customName + " with class " + customClassName);
-        pool.register(customName, new AnnotatorFactory(customClassName, inputProps) {
+        pool.register(customName, new AnnotatorFactory(customName, customClassName, inputProps) {
           private static final long serialVersionUID = 1L;
           @Override
           public Annotator create() {
             return annotatorImplementation.custom(properties, property);
           }
-          @Override
-          public String additionalSignature() {
-            // keep track of all relevant properties for this annotator here!
-            // since we don't know what props they need, let's copy all
-            // TODO: can we do better here? maybe signature() should be a method in the Annotator?
-            StringBuilder os = new StringBuilder();
-            for (String skey : properties.stringPropertyNames()) {
-              os.append(skey).append(':').append(properties.getProperty(skey));
-            }
-            return os.toString();
-          }
         });
       }
     }
+  }
 
+
+
+  /**
+   * Construct the default annotator pool from the passed properties, and overwriting annotations which have changed
+   * since the last
+   * @param inputProps
+   * @param annotatorImplementation
+   * @return A populated AnnotatorPool
+   */
+  public static AnnotatorPool constructAnnotatorPool(final Properties inputProps, final AnnotatorImplementations annotatorImplementation) {
+    AnnotatorPool pool = new AnnotatorPool();
+    for (Map.Entry<String, BiFunction<Properties, AnnotatorImplementations, AnnotatorFactory>> entry : getNamedAnnotators().entrySet()) {
+      pool.register(entry.getKey(), entry.getValue().apply(inputProps, annotatorImplementation));
+    }
+    registerCustomAnnotators(pool, annotatorImplementation, inputProps);
     return pool;
   }
+
+
 
   public static synchronized Annotator getExistingAnnotator(String name) {
     if(pool == null){
@@ -526,8 +593,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       return null;
     }
     try {
-      Annotator a =  pool.get(name);
-      return a;
+      return pool.get(name);
     } catch(IllegalArgumentException e) {
       logger.error("Attempted to fetch annotator \"" + name +
         "\" but the annotator pool does not store any such type!");

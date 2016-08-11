@@ -33,6 +33,8 @@ message Document {
   repeated Sentence   sentence    = 2;
   repeated CorefChain corefChain  = 3;
   optional string     docID       = 4;
+  optional string     docDate     = 7;
+  optional uint64     calendar    = 8;
 
   /**
    * A peculiar field, for the corner case when a Document is
@@ -41,6 +43,10 @@ message Document {
   repeated Token      sentencelessToken = 5;
 
   repeated Quote      quote = 6;
+  /**
+   * This field is for entity mentions across the document.
+   */
+  repeated NERMention mentions = 9;
 
   extensions 100 to 255;
 }
@@ -264,7 +270,7 @@ message Mention {
   optional bool generic                = 25;
   optional bool isSingleton            = 26;
   optional bool hasBasicDependency     = 27;
-  optional bool hasCollapsedDependency = 28;
+  optional bool hasEnhancedDepenedncy  = 28;
   optional bool hasContextParseTree    = 29;
   optional IndexedWord headIndexedWord = 30;
   optional IndexedWord   dependingVerb = 31;
@@ -414,6 +420,7 @@ message NERMention {
   optional string normalizedNER                 = 5;
   optional string entityType                    = 6;
   optional Timex  timex                         = 7;
+  optional string wikipediaEntity               = 8;
 }
 
 //

@@ -1,4 +1,4 @@
-package edu.stanford.nlp.trees; 
+package edu.stanford.nlp.trees;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
@@ -1383,7 +1383,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return a <code>List</code> of the data in the tree's leaves.
    */
   public ArrayList<Label> yield() {
-    return yield(new ArrayList<>());
+    return yield(new ArrayList<Label>());
   }
 
   /**

@@ -7,6 +7,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.stanford.nlp.util.BenchmarkingHelper;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.io.IOUtils;
@@ -26,7 +27,7 @@ import edu.stanford.nlp.util.StringUtils;
  */
 public class DcorefBenchmarkSlowITest extends TestCase {
 
-  public static String runCorefTest(boolean deleteOnExit) throws Exception {
+  private static String runCorefTest(boolean deleteOnExit) throws Exception {
     final File WORK_DIR_FILE = File.createTempFile("DcorefBenchmarkTest", "");
     if ( ! (WORK_DIR_FILE.delete() && WORK_DIR_FILE.mkdir())) {
       throw new RuntimeIOException("Couldn't create temp directory " + WORK_DIR_FILE);
@@ -98,40 +99,40 @@ public class DcorefBenchmarkSlowITest extends TestCase {
     expectedResults.setCount(MENTION_F1, 50.42);
     highResults.setCount(MENTION_F1, 50.45);
 
-    lowResults.setCount(MUC_TP, 6250);
-    expectedResults.setCount(MUC_TP, 6253);
-    highResults.setCount(MUC_TP, 6260);
+    lowResults.setCount(MUC_TP, 6245);
+    expectedResults.setCount(MUC_TP, 6250);
+    highResults.setCount(MUC_TP, 6255);
     lowResults.setCount(MUC_F1, 60.65);
-    expectedResults.setCount(MUC_F1, 60.67);
+    expectedResults.setCount(MUC_F1, 60.66);
     highResults.setCount(MUC_F1, 60.7);
 
-    lowResults.setCount(BCUBED_TP, 12450);
-    expectedResults.setCount(BCUBED_TP, 12457.63);
-    highResults.setCount(BCUBED_TP, 12460);
-    lowResults.setCount(BCUBED_F1, 70.8);
-    expectedResults.setCount(BCUBED_F1, 70.81);
+    lowResults.setCount(BCUBED_TP, 12440);
+    expectedResults.setCount(BCUBED_TP, 12445.8);
+    highResults.setCount(BCUBED_TP, 12450);
+    lowResults.setCount(BCUBED_F1, 70.75);
+    expectedResults.setCount(BCUBED_F1, 70.80);
     highResults.setCount(BCUBED_F1, 70.85);
 
-    lowResults.setCount(CEAFM_TP, 10920);
-    expectedResults.setCount(CEAFM_TP, 10927);
+    lowResults.setCount(CEAFM_TP, 10915);
+    expectedResults.setCount(CEAFM_TP, 10920);
     highResults.setCount(CEAFM_TP, 10930);
     lowResults.setCount(CEAFM_F1, 59.4);
-    expectedResults.setCount(CEAFM_F1, 59.44);
+    expectedResults.setCount(CEAFM_F1, 59.42);
     highResults.setCount(CEAFM_F1, 59.5);
 
     lowResults.setCount(CEAFE_TP, 3830);
-    expectedResults.setCount(CEAFE_TP, 3833.81);
+    expectedResults.setCount(CEAFE_TP, 3831.36);
     highResults.setCount(CEAFE_TP, 3840);
     lowResults.setCount(CEAFE_F1, 47.4);
-    expectedResults.setCount(CEAFE_F1, 47.46);
+    expectedResults.setCount(CEAFE_F1, 47.45);
     highResults.setCount(CEAFE_F1, 47.5);
 
     lowResults.setCount(BLANC_F1, 75.35);
-    expectedResults.setCount(BLANC_F1, 75.39);
+    expectedResults.setCount(BLANC_F1, 75.38);
     highResults.setCount(BLANC_F1, 75.42);
 
     lowResults.setCount(CONLL_SCORE, 59.6);
-    expectedResults.setCount(CONLL_SCORE, 59.65);
+    expectedResults.setCount(CONLL_SCORE, 59.64);
     highResults.setCount(CONLL_SCORE, 59.7);
 
     Counter<String> results = new ClassicCounter<String>();
@@ -172,22 +173,7 @@ public class DcorefBenchmarkSlowITest extends TestCase {
       }
     }
 
-    for (String key : results.keySet()) {
-      double val = results.getCount(key);
-      double high = highResults.getCount(key);
-      double low = lowResults.getCount(key);
-      double expected = expectedResults.getCount(key);
-      assertTrue("Value for " + key + " = " + val + " is lower than expected minimum " + low, val >= low);
-      assertTrue("Value for " + key + " = " + val + " is higher than expected maximum " + high +
-          " [not a bug, but a breakthrough!]", val <= high);
-      if (val < (expected - 1e-4)) {
-        System.err.println("Value for " + key + " = " + val + " is fractionally lower than expected " + expected);
-      } else if (val > (expected + 1e-4)) {
-          System.err.println("Value for " + key + " = " + val + " is fractionally higher than expected " + expected);
-      } else {
-        System.err.println("Value for " + key + " = " + val + " is as expected");
-      }
-    }
+    BenchmarkingHelper.benchmarkResults(results, lowResults, highResults, expectedResults);
   }
 
   public static void main(String[] args) throws Exception {

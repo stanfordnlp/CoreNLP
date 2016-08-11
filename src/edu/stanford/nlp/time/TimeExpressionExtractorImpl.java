@@ -34,14 +34,12 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
     init(new Options());
   }
 
-  public TimeExpressionExtractorImpl(String name, Properties props)
-  {
+  public TimeExpressionExtractorImpl(String name, Properties props) {
     init(name, props);
   }
 
   @Override
-  public void init(String name, Properties props)
-  {
+  public void init(String name, Properties props) {
     init(new Options(name, props));
   }
 

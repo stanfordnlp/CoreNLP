@@ -1,8 +1,8 @@
 package edu.stanford.nlp.simple;
 
-import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
-import edu.stanford.nlp.hcoref.data.CorefChain;
-import edu.stanford.nlp.hcoref.data.Dictionaries;
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
+import edu.stanford.nlp.coref.data.CorefChain;
+import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -349,11 +349,85 @@ public class Document {
 
 
   /**
+   * Use the CoreNLP Server ({@link StanfordCoreNLPServer}) for the
+   * heavyweight backend annotation job, authenticating with the given
+   * credentials.
+   *
+   * @param host The hostname of the server.
+   * @param port The port the server is running on.
+   * @param apiKey The api key to use as the username for authentication
+   * @param apiSecret The api secrete to use as the password for authentication
+   * @param lazy Only run the annotations that are required at this time. If this is
+   *             false, we will also run a bunch of standard annotations, to cut down on
+   *             expected number of round-trips.
+   */
+  public static void useServer(String host, int port,
+                               String apiKey, String apiSecret,
+                               boolean lazy) {
+    backend = new ServerAnnotatorImplementations(host, port, apiKey, apiSecret, lazy);
+  }
+
+
+  /** @see Document#useServer(String, int, String, String, boolean) */
+  public static void useServer(String host,
+                               String apiKey, String apiSecret,
+                               boolean lazy) {
+    useServer(host, host.startsWith("http://") ? 80 : 443, apiKey, apiSecret, lazy);
+  }
+
+  /** @see Document#useServer(String, int, String, String, boolean) */
+  public static void useServer(String host,
+                               String apiKey, String apiSecret) {
+    useServer(host, host.startsWith("http://") ? 80 : 443, apiKey, apiSecret, true);
+  }
+
+
+  /**
+   * A static block that'll automatically fault in the CoreNLP server, if the appropriate environment
+   * variables are set.
+   * These are:
+   *
+   * <ul>
+   *     <li>CORENLP_HOST</li> -- this is already sufficient to trigger creating a server
+   *     <li>CORENLP_PORT</li>
+   *     <li>CORENLP_KEY</li>
+   *     <li>CORENLP_SECRET</li>
+   *     <li>CORENLP_LAZY</li>  (if true, do as much annotation on a single round-trip as possible)
+   * </ul>
+   */
+  static {
+    String host    = System.getenv("CORENLP_HOST");
+    String portStr = System.getenv("CORENLP_PORT");
+    String key     = System.getenv("CORENLP_KEY");
+    String secret  = System.getenv("CORENLP_SECRET");
+    String lazystr = System.getenv("CORENLP_LAZY");
+    if (host != null) {
+      int port = 443;
+      if (portStr == null) {
+        if (host.startsWith("http://")) {
+          port = 80;
+        }
+      } else {
+        port = Integer.parseInt(portStr);
+      }
+      boolean lazy = true;
+      if (lazystr != null) {
+        lazy = Boolean.parseBoolean(lazystr);
+      }
+      if (key != null && secret != null) {
+        useServer(host, port, key, secret, lazy);
+      } else {
+        useServer(host, port);
+      }
+    }
+  }
+
+
+  /**
    * Create a new document from the passed in text and the given properties.
    * @param text The text of the document.
    */
   public Document(Properties props, String text) {
-    StanfordCoreNLP.getDefaultAnnotatorPool(props, new AnnotatorImplementations());  // cache the annotator pool
     this.impl = CoreNLPProtos.Document.newBuilder().setText(text);
   }
 
@@ -602,7 +676,7 @@ public class Document {
    */
   public List<Sentence> sentences(Properties props) {
     return this.sentences(props,
-        (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultTokenize : AnnotatorFactories.tokenize(props, backend).create());
+        props == EMPTY_PROPS ? defaultTokenize : AnnotatorFactories.tokenize(props, backend).create());
   }
 
   /**
@@ -612,7 +686,7 @@ public class Document {
    */
   protected List<Sentence> sentences(Properties props, Annotator tokenizer) {
     if (sentences == null) {
-      Annotator ssplit = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultSSplit : AnnotatorFactories.sentenceSplit(props, backend).create();
+      Annotator ssplit = props == EMPTY_PROPS ? defaultSSplit : AnnotatorFactories.sentenceSplit(props, backend).create();
       // Annotate
       Annotation ann = new Annotation(this.impl.getText());
       tokenizer.annotate(ann);

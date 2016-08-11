@@ -1,17 +1,21 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
-
+package edu.stanford.nlp.pipeline;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.Set;
 
-import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
-import edu.stanford.nlp.hcoref.CorefProperties;
-import edu.stanford.nlp.hcoref.data.Dictionaries;
-import edu.stanford.nlp.hcoref.data.Mention;
-import edu.stanford.nlp.hcoref.md.CorefMentionFinder;
-import edu.stanford.nlp.hcoref.md.DependencyCorefMentionFinder;
-import edu.stanford.nlp.hcoref.md.HybridCorefMentionFinder;
-import edu.stanford.nlp.hcoref.md.RuleBasedCorefMentionFinder;
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
+import edu.stanford.nlp.coref.CorefProperties;
+import edu.stanford.nlp.coref.data.Dictionaries;
+import edu.stanford.nlp.coref.data.Mention;
+import edu.stanford.nlp.coref.md.CorefMentionFinder;
+import edu.stanford.nlp.coref.md.DependencyCorefMentionFinder;
+import edu.stanford.nlp.coref.md.HybridCorefMentionFinder;
+import edu.stanford.nlp.coref.md.RuleBasedCorefMentionFinder;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
@@ -22,6 +26,7 @@ import edu.stanford.nlp.trees.international.pennchinese.ChineseSemanticHeadFinde
 import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * This class adds mention information to an Annotation.
@@ -29,7 +34,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
  * After annotation each sentence will have a List<Mention> representing the Mentions in the sentence
  *
  * the List<Mention> containing the Mentions will be put under the annotation
- * {@link edu.stanford.nlp.hcoref.CorefCoreAnnotations.CorefMentionsAnnotation}.
+ * {@link edu.stanford.nlp.coref.CorefCoreAnnotations.CorefMentionsAnnotation}.
  *
  * @author heeyoung
  * @author Jason Bolton
@@ -67,7 +72,7 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
           CoreAnnotations.TextAnnotation.class,
           CoreAnnotations.ValueAnnotation.class,
           SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
-          SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class
+          SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class
 
       ));
     } catch (Exception e) {
@@ -88,9 +93,9 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
     if (docID.contains("nw") && corefProperties.getProperty("coref.input.type", "raw").equals("conll") &&
             corefProperties.getProperty("coref.language", "en").equals("zh") &&
             PropertiesUtils.getBool(corefProperties,"coref.specialCaseNewswire")) {
-      CorefProperties.setRemoveNested(corefProperties, false);
+      CorefProperties.setRemoveNestedMentions(corefProperties, false);
     } else {
-      CorefProperties.setRemoveNested(corefProperties, true);
+      CorefProperties.setRemoveNestedMentions(corefProperties, true);
     }
     List<List<Mention>> mentions = md.findMentions(annotation, dictionaries, corefProperties);
     int mentionIndex = 0;
@@ -120,7 +125,7 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
   private CorefMentionFinder getMentionFinder(Properties props, HeadFinder headFinder)
           throws ClassNotFoundException, IOException {
 
-    switch (CorefProperties.getMDType(props)) {
+    switch (CorefProperties.mdType(props)) {
       case DEPENDENCY:
         mdName = "dependency";
         return new DependencyCorefMentionFinder(props);

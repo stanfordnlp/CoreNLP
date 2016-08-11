@@ -148,6 +148,23 @@ function annotators() {
   return annotators;
 }
 
+/**
+ * Get the input date
+ */
+function date() {
+  function f(n) {
+    return n < 10 ? '0' + n : n;
+  }
+  var date = new Date();
+  var M = date.getMonth() + 1;
+  var D = date.getDate();
+  var Y = date.getFullYear();
+  var h = date.getHours();
+  var m = date.getMinutes();
+  var s = date.getSeconds();
+  return "" + Y + "-" + f(M) + "-" + f(D) + "T" + f(h) + ':' + f(m) + ':' + f(s);
+}
+
 // ----------------------------------------------------------------------------
 // RENDER
 // ----------------------------------------------------------------------------
@@ -281,8 +298,8 @@ function render(data) {
     var sentence = data.sentences[sentI];
     var index = sentence.index;
     var tokens = sentence.tokens;
-    var deps = sentence['basic-dependencies'];
-    var deps2 = sentence['enhanced-plus-plus-dependencies'];
+    var deps = sentence['basicDependencies'];
+    var deps2 = sentence['enhancedPlusPlusDependencies'];
   
     // POS tags
     /**
@@ -750,7 +767,8 @@ $(document).ready(function() {
     $.ajax({
       type: 'POST',
       url: serverAddress + '?properties=' + encodeURIComponent(
-        '{"annotators": "' + annotators() + '", "coref.md.type": "dep", "coref.mode": "statistical"}'),
+        '{"annotators": "' + annotators() + '", "date": "' + date() + '"' +
+        ', "coref.md.type": "dep", "coref.mode": "statistical"}'),
       data: encodeURIComponent(currentQuery), //jQuery does'nt automatically URI encode strings
       dataType: 'json',
       contentType: "application/x-www-form-urlencoded;charset=UTF-8",
@@ -768,7 +786,7 @@ $(document).ready(function() {
               return; 
             }
             // (make sure the data contains that element)
-            ok = false
+            ok = false;
             if (typeof data[selector] != 'undefined') {
               ok = true;
             } else if (typeof data.sentences != 'undefined' && data.sentences.length > 0) {
@@ -788,8 +806,8 @@ $(document).ready(function() {
           createAnnotationDiv('pos',      'pos',        'pos',                                 'Part-of-Speech'          );
           createAnnotationDiv('lemma',    'lemma',      'lemma',                               'Lemmas'                  );
           createAnnotationDiv('ner',      'ner',        'ner',                                 'Named Entity Recognition');
-          createAnnotationDiv('deps',     'depparse',   'basic-dependencies',                  'Basic Dependencies'      );
-          createAnnotationDiv('deps2',    'depparse',   'enhanced-plus-plus-dependencies',     'Enhanced++ Dependencies' );
+          createAnnotationDiv('deps',     'depparse',   'basicDependencies',                   'Basic Dependencies'      );
+          createAnnotationDiv('deps2',    'depparse',   'enhancedPlusPlusDependencies',        'Enhanced++ Dependencies' );
           createAnnotationDiv('openie',   'openie',     'openie',                              'Open IE'                 );
           createAnnotationDiv('coref',    'coref',      'corefs',                              'Coreference'             );
           createAnnotationDiv('entities', 'entitylink', 'entitylink',                          'Wikidict Entities'       );

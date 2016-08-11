@@ -6,20 +6,20 @@ import java.io.Serializable;
  * A class for tree normalization.  The default one does no normalization.
  * Other tree normalizers will change various node labels, or perhaps the
  * whole tree geometry (by doing such things as deleting functional tags or
- * empty elements).  Another operation that a <code>TreeNormalizer</code>
- * may wish to perform is interning the <code>String</code>s passed to
+ * empty elements).  Another operation that a {@code TreeNormalizer}
+ * may wish to perform is interning the {@code String}s passed to
  * it.  Can be reused as a Singleton.  Designed to be extended.
  * <p/>
- * The <code>TreeNormalizer</code> methods are in two groups.
+ * The {@code TreeNormalizer} methods are in two groups.
  * The contract for this class is that first normalizeTerminal or
- * normalizeNonterminal will be called on each <code>String</code> that will
- * be put into a <code>Tree</code>, when they are read from files or
- * otherwise created.  Then <code>normalizeWholeTree</code> will
- * be called on the <code>Tree</code>.  It normally walks the
- * <code>Tree</code> making whatever modifications it wishes to. A
- * <code>TreeNormalizer</code> need not make a deep copy of a
- * <code>Tree</code>.  It is assumed to be able to work destructively,
- * because afterwards we will only use the normalized <code>Tree</code>.
+ * normalizeNonterminal will be called on each {@code String} that will
+ * be put into a {@code Tree}, when they are read from files or
+ * otherwise created.  Then {@code normalizeWholeTree} will
+ * be called on the {@code Tree}.  It normally walks the
+ * {@code Tree} making whatever modifications it wishes to. A
+ * {@code TreeNormalizer} need not make a deep copy of a
+ * {@code Tree}.  It is assumed to be able to work destructively,
+ * because afterwards we will only use the normalized {@code Tree}.
  * <p/>
  * <i>Implementation note:</i> This is a very old legacy class used in conjunction
  * with PennTreeReader.  It seems now that it would be better to move the
@@ -55,16 +55,17 @@ public class TreeNormalizer implements Serializable {
 
   /**
    * Normalize a whole tree -- this method assumes that the argument
-   * that it is passed is the root of a complete <code>Tree</code>.
-   * It is normally implemented as a Tree-walking routine. <p>
-   * This method may return <code>null</code>. This is interpreted to
+   * that it is passed is the root of a complete {@code Tree}.
+   * It is normally implemented as a Tree-walking routine.
+   * <p>
+   * This method may return {@code null}. This is interpreted to
    * mean that this is a tree that should not be included in further
    * processing.  PennTreeReader recognizes this return value, and
    * asks for another Tree from the input Reader.
    *
    * @param tree The tree to be normalized
    * @param tf   the TreeFactory to create new nodes (if needed)
-   * @return Tree the normalized tree
+   * @return The normalized tree. May be null which means to not use this tree at all.
    */
   public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
     return tree;

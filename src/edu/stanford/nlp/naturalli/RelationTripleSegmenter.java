@@ -42,6 +42,8 @@ public class RelationTripleSegmenter {
     add(SemgrexPattern.compile("{$}=verb ?>/aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/[di]obj|xcomp/ ( {}=object ?>appos {}=appos )"));
     // { Tom and Jerry were fighting }
     add(SemgrexPattern.compile("{$}=verb >/nsubj(pass)?/ ( {}=subject >/conj:and/=subjIgnored {}=object )"));
+    // { mass of iron is 55amu }
+    add(SemgrexPattern.compile("{pos:/NNS?/}=object >cop {}=relappend1 >/nsubj(pass)?/ ( {}=verb >/nmod:of/ ( {pos:/NNS?/}=subject >case {}=relappend0 ) )"));
   }});
 
   /**
@@ -642,6 +644,13 @@ public class RelationTripleSegmenter {
           continue PATTERN_LOOP;  // Too many outgoing edges; we didn't consume them all.
         }
         List<IndexedWord> relation = verbChunk.toSortedList();
+        int appendI = 0;
+        IndexedWord relAppend = m.getNode("relappend" + appendI);
+        while (relAppend != null) {
+          relation.add(relAppend);
+          appendI += 1;
+          relAppend = m.getNode("relappend" + appendI);
+        }
 
         // Last chance to register ignored edges
         if (!subjNoopArc.isPresent()) {
