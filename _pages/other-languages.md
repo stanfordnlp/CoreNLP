@@ -48,6 +48,7 @@ DKPro Core is part of the [DKPro community](https://dkpro.github.io). It is well
 
 ### Python
 * [A Python wrapper for Stanford CoreNLP](https://github.com/smilli/py-corenlp) by Smitha Milli that uses the new CoreNLP v3.6.0 server. Available on [PyPI](https://pypi.python.org/pypi/pycorenlp/).
+* [corenlp-pywrap](https://github.com/hhsecond/corenlp_pywrap) also uses the new CoreNLP v3.6.0 server. Python 3.x (only). Also: [PyPI page](https://pypi.python.org/pypi/corenlp_pywrap). By Sherin Thomas.
 * [Brendan O'Connor's Python wrapper](https://github.com/brendano/stanford-corepywrapper) or maybe [John Beieler's fork](https://github.com/johnb30/stanford-corepywrapper). At CoreNLP v3.5.0, last we checked.
 * [An up-to-date fork of Smith (below) by Hiroyoshi Komatsu and Johannes Castner](https://bitbucket.org/torotoki/corenlp-python) (see also: [PyPI page](https://pypi.python.org/pypi/corenlp-python)). At CoreNLP v3.4.1, last we checked.
 * [Original Python wrapper including JSON-RPC server](https://github.com/dasmith/stanford-corenlp-python) by Dustin Smith. At CoreNLP v3.4.1, last we checked.
