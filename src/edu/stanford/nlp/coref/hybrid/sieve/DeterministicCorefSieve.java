@@ -484,7 +484,7 @@ public abstract class DeterministicCorefSieve extends Sieve  {
       if (mention2.headWord == ant.headWord && mention2.insideIn(ant)) {
         if(!document.isCoref(mention2, ant)) {
           // TODO: exclude conjunction
-          log.info("error in chinese head match: "+mention2.spanToString()+"\t"+ant.spanToString());
+          // log.info("error in chinese head match: "+mention2.spanToString()+"\t"+ant.spanToString());
         }
         return true;
       }

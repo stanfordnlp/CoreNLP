@@ -9,12 +9,13 @@ import java.util.logging.Logger;
 
 import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.coref.data.CorefCluster;
-import edu.stanford.nlp.coref.data.DocumentMaker;
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.coref.data.Document;
+import edu.stanford.nlp.coref.data.DocumentMaker;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Class for running coreference algorithms
@@ -23,12 +24,14 @@ import edu.stanford.nlp.util.StringUtils;
 public class CorefSystem {
   private final DocumentMaker docMaker;
   private final CorefAlgorithm corefAlgorithm;
+  private final boolean verbose;
 
   public CorefSystem(Properties props) {
     try {
       Dictionaries dictionaries = new Dictionaries(props);
       docMaker = new DocumentMaker(props, dictionaries);
       corefAlgorithm = CorefAlgorithm.fromProps(props, dictionaries);
+      verbose = CorefProperties.verbose(props);
     } catch (Exception e) {
       throw new RuntimeException("Error initializing coref system", e);
     }
@@ -75,7 +78,12 @@ public class CorefSystem {
       public void process(int id, Document document) {
         writerGold.print(CorefPrinter.printConllOutput(document, true));
         writerBeforeCoref.print(CorefPrinter.printConllOutput(document, false));
+        long time = System.currentTimeMillis();
         corefAlgorithm.runCoref(document);
+        if (verbose) {
+          Redwood.log(getName(), "Coref took "
+              + (System.currentTimeMillis() - time) / 1000.0 + "s");
+        }
         CorefUtils.removeSingletonClusters(document);
         writerAfterCoref.print(CorefPrinter.printConllOutput(document, false, true));
       }
