@@ -1,11 +1,12 @@
-
 package edu.stanford.nlp.ie.machinereading.domains.ace.reader;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Implements the ACE <entity_mention> construct
+ * Implements the ACE {@code <entity_mention>} construct.
+ *
+ * @author David McClosky
  */
 public class AceEntityMention extends AceMention {
   @Override
@@ -31,7 +32,7 @@ public class AceEntityMention extends AceMention {
 
   /** The set of event mentions that contain this entity mention */
   private List<AceEventMention> mEventMentions;
-  
+
   public AceEntityMention(String id,
 			  String type,
 			  String ldctype,
@@ -68,7 +69,7 @@ public class AceEntityMention extends AceMention {
   public List<AceRelationMention> getRelationMentions() {
     return mRelationMentions;
   }
-  
+
   public void addEventMention(AceEventMention rm) {
     mEventMentions.add(rm);
   }
@@ -81,7 +82,7 @@ public class AceEntityMention extends AceMention {
     String mentionType = mType;
 
     appendOffset(buffer, offset);
-    buffer.append("<entity_mention ID=\"" + getId() + "\" TYPE =\"" + 
+    buffer.append("<entity_mention ID=\"" + getId() + "\" TYPE =\"" +
 		  mentionType +
 		  "\" LDCTYPE=\"" + mLdctype + "\">\n");
 
@@ -98,7 +99,7 @@ public class AceEntityMention extends AceMention {
       buffer.append("\n");
       appendOffset(buffer, offset);
       buffer.append("<entity_attributes>\n");
-      
+
       appendOffset(buffer, offset + 2);
       buffer.append("<name NAME=\"" + mHead.getText() + "\">\n");
       buffer.append(mHead.toXml(offset + 4) + "\n");
@@ -111,7 +112,7 @@ public class AceEntityMention extends AceMention {
 
     return buffer.toString();
   }
-  
+
   private static boolean contains(ArrayList<Integer> set,
 				  int elem) {
     for (Integer aSet : set) {
@@ -133,7 +134,7 @@ public class AceEntityMention extends AceMention {
 
     for(int i = mHead.getTokenStart(); i <= mHead.getTokenEnd(); i ++){
       // found a prep
-      if(contains(preps, doc.getToken(i).getPos()) && 
+      if(contains(preps, doc.getToken(i).getPos()) &&
 	 i > mHead.getTokenStart()){
 	mHeadTokenPosition = i - 1;
 	return;
