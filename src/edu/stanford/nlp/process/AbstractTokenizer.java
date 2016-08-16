@@ -1,11 +1,10 @@
-package edu.stanford.nlp.process;
+package edu.stanford.nlp.process; 
+import edu.stanford.nlp.util.logging.Redwood;
+
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-
-// import edu.stanford.nlp.util.logging.Redwood;
-
 
 /**
  * An abstract tokenizer.  Tokenizers extending AbstractTokenizer need only
@@ -19,8 +18,8 @@ import java.util.NoSuchElementException;
 
 public abstract class AbstractTokenizer<T> implements Tokenizer<T>  {
 
-  // /** A logger for this class */
-  // private static final Redwood.RedwoodChannels log = Redwood.channels(AbstractTokenizer.class);
+  /** A logger for this class */
+  private static Redwood.RedwoodChannels log = Redwood.channels(AbstractTokenizer.class);
 
   protected T nextToken; // = null;
 

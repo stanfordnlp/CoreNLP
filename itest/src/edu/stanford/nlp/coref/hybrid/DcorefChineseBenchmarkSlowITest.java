@@ -49,8 +49,14 @@ public class DcorefChineseBenchmarkSlowITest extends TestCase {
     System.err.println("Current dir using System:" +currentDir);
 
     String[] corefArgs = { "-props", "edu/stanford/nlp/coref/hybrid/properties/zh-coref-default.properties",
-            '-' + HybridCorefProperties.LOG_PROP, baseLogFile,
-            '-' + CorefProperties.OUTPUT_PATH_PROP, WORK_DIR_FILE + File.separator };
+                           '-' + HybridCorefProperties.LOG_PROP, baseLogFile,
+                           '-' + CorefProperties.OUTPUT_PATH_PROP, WORK_DIR_FILE + File.separator,
+                           '-' + "coref.doScore", "true",
+                           '-' + "coref.scorer", "/scr/nlp/data/conll-2012/scorer/v8.01/scorer.pl",
+                           '-' + "coref.data", "/scr/nlp/data/conll-2012/",
+                           '-' + "parse.model", "edu/stanford/nlp/models/srparser/chineseSR.ser.gz",
+                           '-' + "coref.useConstituencyTree", "true"
+    };
 
     Properties props = StringUtils.argsToProperties(corefArgs);
     System.err.println("Running hcoref with arguments:");

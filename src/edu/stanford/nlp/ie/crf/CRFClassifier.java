@@ -3060,7 +3060,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       // todo: Change testFile to call testFiles with a singleton list
       DocumentReaderAndWriter<CoreLabel> readerAndWriter = crf.defaultReaderAndWriter();
       if (crf.flags.searchGraphPrefix != null) {
-        crf.classifyAndWriteViterbiSearchGraph(testFile, crf.flags.searchGraphPrefix, readerAndWriter);
+        crf.classifyAndWriteViterbiSearchGraph(testFile, crf.flags.searchGraphPrefix, crf.makeReaderAndWriter());
       } else if (crf.flags.printFirstOrderProbs) {
         crf.printFirstOrderProbs(testFile, readerAndWriter);
       } else if (crf.flags.printFactorTable) {
@@ -3087,11 +3087,14 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
 
     if (textFile != null) {
-      crf.classifyAndWriteAnswers(textFile, crf.plainTextReaderAndWriter(), false);
+      crf.classifyAndWriteAnswers(textFile);
     }
 
     if (textFiles != null) {
-      List<File> files = Arrays.stream(textFiles.split(",")).map(File::new).collect(Collectors.toList());
+      List<File> files = new ArrayList<>();
+      for (String filename : textFiles.split(",")) {
+        files.add(new File(filename));
+      }
       crf.classifyFilesAndWriteAnswers(files);
     }
 
