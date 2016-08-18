@@ -1,15 +1,15 @@
-package edu.stanford.nlp.sequences;
+package edu.stanford.nlp.sequences; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.optimization.StochasticCalculateMethods;
 import edu.stanford.nlp.process.WordShapeClassifier;
+import java.util.function.Function;
 import edu.stanford.nlp.util.ReflectionLoading;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * Flags for sequence classifiers. Documentation for general flags and
@@ -782,7 +782,7 @@ public class SeqClassifierFlags implements Serializable  {
   public String unknownWordDistSimClass = "null";
 
   /**
-   * Use prefixes and suffixes from the previous and current word in edge clique.
+   * Use prefixes and suffixes from the previous and next word.
    */
   public boolean useNeighborNGrams = false;
 
@@ -1062,17 +1062,12 @@ public class SeqClassifierFlags implements Serializable  {
   public String combinationMode;
   public String nerModel;
 
-  /**
-   * Use prefixes and suffixes from the previous and next word in node clique.
-   */
-  public boolean useMoreNeighborNGrams = false;
-
-
   // "ADD VARIABLES ABOVE HERE"
-
 
   public transient List<String> phraseGazettes = null;
   public transient Properties props = null;
+
+
 
   /**
    * Create a new SeqClassifierFlags object initialized with default values.
@@ -1293,8 +1288,6 @@ public class SeqClassifierFlags implements Serializable  {
         useNGrams = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useNeighborNGrams")) {
         useNeighborNGrams = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useMoreNeighborNGrams")) {
-        useMoreNeighborNGrams = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("wordFunction")) {
         wordFunction = ReflectionLoading.loadByReflection(val);
       } else if (key.equalsIgnoreCase("conjoinShapeNGrams")) {

@@ -1,11 +1,14 @@
 package edu.stanford.nlp.coref.hybrid;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.StringReader;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import edu.stanford.nlp.dcoref.DcorefBenchmarkSlowITest;
 import edu.stanford.nlp.util.BenchmarkingHelper;
 import junit.framework.TestCase;
 
@@ -16,12 +19,8 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.StringUtils;
 
-import static edu.stanford.nlp.dcoref.DcorefBenchmarkSlowITest.*;
-import static edu.stanford.nlp.util.BenchmarkingHelper.setLowHighExpected;
-
-
 /**
- * Run the Chinese dcoref system using the exact properties we distribute as
+ * Run the dcoref system using the exact properties we distribute as
  * an example.  Check that the output does not change markedly from expected.
  * If performance numbers change, we'll notice and be able to verify
  * that it's intended.
@@ -48,15 +47,9 @@ public class DcorefChineseBenchmarkSlowITest extends TestCase {
     String currentDir = System.getProperty("user.dir");
     System.err.println("Current dir using System:" +currentDir);
 
-    String[] corefArgs = { "-props", "edu/stanford/nlp/coref/hybrid/properties/zh-coref-default.properties",
-                           '-' + HybridCorefProperties.LOG_PROP, baseLogFile,
-                           '-' + CorefProperties.OUTPUT_PATH_PROP, WORK_DIR_FILE + File.separator,
-                           '-' + "coref.doScore", "true",
-                           '-' + "coref.scorer", "/scr/nlp/data/conll-2012/scorer/v8.01/scorer.pl",
-                           '-' + "coref.data", "/scr/nlp/data/conll-2012/",
-                           '-' + "parse.model", "edu/stanford/nlp/models/srparser/chineseSR.ser.gz",
-                           '-' + "coref.useConstituencyTree", "true"
-    };
+    String[] corefArgs = { "-props", "edu/stanford/nlp/hcoref/properties/zh-dcoref-conll-no-output.properties",
+            '-' + HybridCorefProperties.LOG_PROP, baseLogFile,
+            '-' + CorefProperties.OUTPUT_PATH_PROP, WORK_DIR_FILE.toString()+File.separator };
 
     Properties props = StringUtils.argsToProperties(corefArgs);
     System.err.println("Running hcoref with arguments:");
@@ -64,20 +57,55 @@ public class DcorefChineseBenchmarkSlowITest extends TestCase {
 
     HybridCorefSystem.runCoref(corefArgs);
 
+
     String actualResults = IOUtils.slurpFile(baseLogFile);
     return actualResults;
   }
 
+  private static final String MENTION_TP = "Mention TP";
+  private static final String MENTION_F1 = "Mention F1";
+  private static final String MUC_TP = "MUC TP";
+  private static final String MUC_F1 = "MUC F1";
+  private static final String BCUBED_TP = "Bcubed TP";
+  private static final String BCUBED_F1 = "Bcubed F1";
+  private static final String CEAFM_TP = "CEAFm TP";
+  private static final String CEAFM_F1 = "CEAFm F1";
+  private static final String CEAFE_TP = "CEAFe TP";
+  private static final String CEAFE_F1 = "CEAFe F1";
+  private static final String BLANC_F1 = "BLANC F1";
+  private static final String CONLL_SCORE = "CoNLL score";
+
+  private static final Pattern MENTION_PATTERN =
+          Pattern.compile("Identification of Mentions: Recall: \\(((?:\\d|\\.)+).*F1: ((?:\\d|\\.)+)%.*");
+  private static final Pattern MUC_PATTERN =
+          Pattern.compile("METRIC muc:Coreference: Recall: \\(((?:\\d|\\.)+).*F1: ((?:\\d|\\.)+)%.*");
+  private static final Pattern BCUBED_PATTERN =
+          Pattern.compile("METRIC bcub:Coreference: Recall: \\(((?:\\d|\\.)+).*F1: ((?:\\d|\\.)+)%.*");
+  private static final Pattern CEAFM_PATTERN =
+          Pattern.compile("METRIC ceafm:Coreference: Recall: \\(((?:\\d|\\.)+).*F1: ((?:\\d|\\.)+)%.*");
+  private static final Pattern CEAFE_PATTERN =
+          Pattern.compile("METRIC ceafe:Coreference: Recall: \\(((?:\\d|\\.)+).*F1: ((?:\\d|\\.)+)%.*");
+  private static final Pattern BLANC_PATTERN =
+          Pattern.compile("BLANC: .*F1: ((?:\\d|\\.)+)%.*");
+  private static final Pattern CONLL_PATTERN =
+          Pattern.compile("Final conll score .* = ((?:\\d|\\.)+).*");
+
+  private static void setLowHighExpected(Counter<String> lowRes, Counter<String> highRes, Counter<String> expRes, String key,
+                                         double lowVal, double highVal, double expVal) {
+    lowRes.setCount(key, lowVal);
+    highRes.setCount(key, highVal);
+    expRes.setCount(key, expVal);
+  }
 
   public void testChineseDcoref() throws Exception {
-    Counter<String> results = DcorefBenchmarkSlowITest.getCorefResults(runCorefTest(true));
+    Counter<String> results = getCorefResults(runCorefTest(true));
 
     // So we can see them all at once to speed updating
     printResultsTSV(results, System.err);
 
-    Counter<String> lowResults = new ClassicCounter<>();
-    Counter<String> highResults = new ClassicCounter<>();
-    Counter<String> expectedResults = new ClassicCounter<>();
+    Counter<String> lowResults = new ClassicCounter<String>();
+    Counter<String> highResults = new ClassicCounter<String>();
+    Counter<String> expectedResults = new ClassicCounter<String>();
 
     setLowHighExpected(lowResults, highResults, expectedResults, MENTION_TP, 12550, 12700, 12600); // In 2015 was: 12370
     setLowHighExpected(lowResults, highResults, expectedResults, MENTION_F1, 55.7, 56.0, 55.88); // In 2015 was: 55.59
@@ -101,6 +129,47 @@ public class DcorefChineseBenchmarkSlowITest extends TestCase {
     BenchmarkingHelper.benchmarkResults(results, lowResults, highResults, expectedResults);
   }
 
+  private static Counter<String> getCorefResults(String resultsString) throws IOException {
+    Counter<String> results = new ClassicCounter<String>();
+    BufferedReader r = new BufferedReader(new StringReader(resultsString));
+    for (String line; (line = r.readLine()) != null; ) {
+      Matcher m1 = MENTION_PATTERN.matcher(line);
+      if (m1.matches()) {
+        results.setCount(MENTION_TP, Double.parseDouble(m1.group(1)));
+        results.setCount(MENTION_F1, Double.parseDouble(m1.group(2)));
+      }
+      Matcher m2 = MUC_PATTERN.matcher(line);
+      if (m2.matches()) {
+        results.setCount(MUC_TP, Double.parseDouble(m2.group(1)));
+        results.setCount(MUC_F1, Double.parseDouble(m2.group(2)));
+      }
+      Matcher m3 = BCUBED_PATTERN.matcher(line);
+      if (m3.matches()) {
+        results.setCount(BCUBED_TP, Double.parseDouble(m3.group(1)));
+        results.setCount(BCUBED_F1, Double.parseDouble(m3.group(2)));
+      }
+      Matcher m4 = CEAFM_PATTERN.matcher(line);
+      if (m4.matches()) {
+        results.setCount(CEAFM_TP, Double.parseDouble(m4.group(1)));
+        results.setCount(CEAFM_F1, Double.parseDouble(m4.group(2)));
+      }
+      Matcher m5 = CEAFE_PATTERN.matcher(line);
+      if (m5.matches()) {
+        results.setCount(CEAFE_TP, Double.parseDouble(m5.group(1)));
+        results.setCount(CEAFE_F1, Double.parseDouble(m5.group(2)));
+      }
+      Matcher m6 = BLANC_PATTERN.matcher(line);
+      if (m6.matches()) {
+        results.setCount(BLANC_F1, Double.parseDouble(m6.group(1)));
+      }
+      Matcher m7 = CONLL_PATTERN.matcher(line);
+      if (m7.matches()) {
+        results.setCount(CONLL_SCORE, Double.parseDouble(m7.group(1)));
+      }
+    }
+
+    return results;
+  }
 
   private static void printResultsTSV(Counter<String> results, PrintStream where) {
     where.printf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s%n" +
@@ -112,10 +181,9 @@ public class DcorefChineseBenchmarkSlowITest extends TestCase {
             results.getCount(CEAFE_TP), results.getCount(CEAFE_F1), results.getCount(BLANC_F1), results.getCount(CONLL_SCORE));
   }
 
-
   public static void main(String[] args) throws IOException {
     String actualResults = IOUtils.slurpFile(args[0]);
-    Counter<String> results = DcorefBenchmarkSlowITest.getCorefResults(actualResults);
+    Counter<String> results = getCorefResults(actualResults);
     printResultsTSV(results, System.out);
   }
 

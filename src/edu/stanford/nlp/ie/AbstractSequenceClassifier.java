@@ -103,27 +103,11 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   protected MaxSizeConcurrentHashSet<String> knownLCWords; // = null;
 
   private DocumentReaderAndWriter<IN> defaultReaderAndWriter;
-
-  /** This is the DocumentReaderAndWriter used for reading training and testing files.
-   *  It is the DocumentReaderAndWriter specified by the readerAndWriter flag and
-   *  defaults to {@code edu.stanford.nlp.sequences.ColumnDocumentReaderAndWriter} which
-   *  is suitable for reading CoNLL-style TSV files.
-   *
-   *  @return The default DocumentReaderAndWriter
-   */
   public DocumentReaderAndWriter<IN> defaultReaderAndWriter() {
     return defaultReaderAndWriter;
   }
 
   private DocumentReaderAndWriter<IN> plainTextReaderAndWriter;
-
-  /** This is the default DocumentReaderAndWriter used for reading text files for runtime
-   *  classification. It is the DocumentReaderAndWriter specified by the plainTextDocumentReaderAndWriter
-   *  flag and defaults to {@code edu.stanford.nlp.sequences.PlainTextDocumentReaderAndWriter} which
-   *  is suitable for reading plain text files, in languages with a Tokenizer available.
-   *
-   *  @return The default plain text DocumentReaderAndWriter
-   */
   public DocumentReaderAndWriter<IN> plainTextReaderAndWriter() {
     return plainTextReaderAndWriter;
   }
@@ -1027,11 +1011,15 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     pw.println("----------------------------------------");
   }
 
-  public void classifyStdin() throws IOException {
+  public void classifyStdin()
+    throws IOException
+  {
     classifyStdin(plainTextReaderAndWriter);
   }
 
-  public void classifyStdin(DocumentReaderAndWriter<IN> readerWriter) throws IOException {
+  public void classifyStdin(DocumentReaderAndWriter<IN> readerWriter)
+    throws IOException
+  {
     BufferedReader is = IOUtils.readerFromStdin(flags.inputEncoding);
     for (String line; (line = is.readLine()) != null; ) {
       Collection<List<IN>> documents = makeObjectBankFromString(line, readerWriter);
@@ -1051,9 +1039,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
   /**
    * Load a test file, run the classifier on it, and then print the answers to
-   * stdout (with timing to stderr). This uses the value of flags.readerAndWriter
-   * to determine testFile format. <i>Note:</i> This means that it works right for
-   * a testFile and not a plain textFile.
+   * stdout (with timing to stderr). This uses the value of flags.documentReader
+   * to determine testFile format.
    *
    * @param testFile The file to test on.
    */
@@ -1078,7 +1065,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
   /**
    * Load a test file, run the classifier on it, and then print the answers to
-   * stdout (with timing to stderr).
+   * stdout (with timing to stderr). This uses the value of flags.documentReader
+   * to determine testFile format.
    *
    * @param testFile The file to test on.
    * @param readerWriter A reader and writer to use for the output
@@ -1114,15 +1102,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     return classifyAndWriteAnswers(documents, readerWriter, outputScores);
   }
 
-  /** Run the classifier on a collection of text files.
-   *  Uses the plainTextReaderAndWriter to process them.
-   *
-   *  @param textFiles A File Collection to process.
-   *  @throws IOException For any IO error
-   */
-  public void classifyFilesAndWriteAnswers(Collection<File> textFiles)
+  public void classifyFilesAndWriteAnswers(Collection<File> testFiles)
           throws IOException {
-    classifyFilesAndWriteAnswers(textFiles, plainTextReaderAndWriter, false);
+    classifyFilesAndWriteAnswers(testFiles, plainTextReaderAndWriter, false);
   }
 
   public void classifyFilesAndWriteAnswers(Collection<File> testFiles,
@@ -1293,7 +1275,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    */
   public void classifyAndWriteViterbiSearchGraph(String testFile, String searchGraphPrefix, DocumentReaderAndWriter<IN> readerAndWriter) throws IOException {
     Timing timer = new Timing();
-    ObjectBank<List<IN>> documents = makeObjectBankFromFile(testFile, readerAndWriter);
+    ObjectBank<List<IN>> documents =
+      makeObjectBankFromFile(testFile, readerAndWriter);
     int numWords = 0;
     int numSentences = 0;
 
@@ -1303,9 +1286,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       PrintWriter latticeWriter = new PrintWriter(new FileOutputStream(searchGraphPrefix + '.' + numSentences
           + ".wlattice"));
       PrintWriter vsgWriter = new PrintWriter(new FileOutputStream(searchGraphPrefix + '.' + numSentences + ".lattice"));
-      if (readerAndWriter instanceof LatticeWriter) {
+      if (readerAndWriter instanceof LatticeWriter)
         ((LatticeWriter<IN, String, Integer>) readerAndWriter).printLattice(tagLattice, doc, latticeWriter);
-      }
       tagLattice.printAttFsmFormat(vsgWriter);
       latticeWriter.close();
       vsgWriter.close();

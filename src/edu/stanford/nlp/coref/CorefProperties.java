@@ -38,10 +38,6 @@ public class CorefProperties {
         algorithm(props) != CorefAlgorithmType.STATISTICAL || conll(props));
   }
 
-  public static boolean verbose(Properties props) {
-    return PropertiesUtils.getBool(props, "coref.verbose", false);
-  }
-
   // ---------- Heuristic Mention Filtering ----------
 
   public static int maxMentionDistance(Properties props) {
@@ -115,7 +111,7 @@ public class CorefProperties {
 
   public static String getDevDataPath(Properties props) {
     return props.getProperty("coref.devData",
-        getDataPath(props) + "v4/data/development/data/" + getLanguageStr(props) + "/annotations/");
+        getDataPath(props) + "v4/data/dev/data/" + getLanguageStr(props) + "/annotations/");
   }
 
   public static String getTestDataPath(Properties props) {
