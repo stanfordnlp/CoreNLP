@@ -1,9 +1,9 @@
 /**
  *
  */
-package edu.stanford.nlp.neural;
-import java.io.IOException;
-import java.io.Serializable;
+package edu.stanford.nlp.neural; 
+import edu.stanford.nlp.util.logging.Redwood;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -15,16 +15,14 @@ import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * @author Minh-Thang Luong <lmthang@stanford.edu>
  * @author John Bauer
  * @author Richard Socher
- * @author Kevin Clark
  */
-public class Embedding implements Serializable  {
-  private static final long serialVersionUID = 4925779982530239054L;
+public class Embedding  {
+
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(Embedding.class);
   private Map<String, SimpleMatrix> wordVectors;
@@ -201,9 +199,6 @@ public class Embedding implements Serializable  {
     log.info("  num words = " + numWords);
   }
 
-  public void writeToFile(String filename) throws IOException {
-    IOUtils.writeObjectToFile(wordVectors, filename);
-  }
 
   /*** Getters & Setters ***/
   public int size(){
@@ -230,10 +225,6 @@ public class Embedding implements Serializable  {
     }
   }
 
-  public boolean containsWord(String word) {
-    return wordVectors.containsKey(word);
-  }
-
   public SimpleMatrix getStartWordVector() {
     return wordVectors.get(START_WORD);
   }
@@ -253,6 +244,7 @@ public class Embedding implements Serializable  {
   public int getEmbeddingSize() {
     return embeddingSize;
   }
+
 
   public void setWordVectors(Map<String, SimpleMatrix> wordVectors) {
     this.wordVectors = wordVectors;
@@ -279,4 +271,5 @@ public class Embedding implements Serializable  {
 
     return wordVectors.get(UNKNOWN_WORD).getNumElements();
   }
+
 }

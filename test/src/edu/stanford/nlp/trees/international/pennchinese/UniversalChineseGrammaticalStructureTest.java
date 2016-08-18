@@ -95,14 +95,13 @@ public class UniversalChineseGrammaticalStructureTest extends TestCase {
 
       // Gloss: once revealed then was included legal-system path
       T("(IP (VP (VP (ADVP (AD 一)) (VP (VV 出现))) (VP (ADVP (AD 就)) (VP (SB 被) (VP (VV 纳入) (NP (NN 法制) (NN 轨道)))))))))))",
-        C("advmod(出现-2, 一-1)", "root(ROOT-0, 出现-2)", "advmod(纳入-5, 就-3)", "auxpass(纳入-5, 被-4)", "conj(出现-2, 纳入-5)", // todo: was dep
-                "compound:nn(轨道-7, 法制-6)", "dobj(纳入-5, 轨道-7)")),
+        C("advmod(出现-2, 一-1)", "root(ROOT-0, 出现-2)", "advmod(纳入-5, 就-3)", "auxpass(纳入-5, 被-4)", "dep(出现-2, 纳入-5)", "compound:nn(轨道-7, 法制-6)", "dobj(纳入-5, 轨道-7)")),
 
       T("(IP (NP (NP (NR 格林柯尔)) (NP (NN 制冷剂)) (PRN (PU （) (NP (NR 中国)) (PU ）)) (ADJP (JJ 有限)) (NP (NN 公司))) (VP (VC 是) (NP (CP (CP (IP (NP (NP (NR 格林柯尔) (NN 集团) (NR 北美) (NN 公司)) (CC 与) (NP (NP (NR 中国) (NR 天津)) (NP (NN 开发区)) (ADJP (JJ 总)) (NP (NN 公司))) (CC 和) (NP (NP (NR 中国)) (NP (NR 南方)) (NP (NN 证券)) (ADJP (JJ 有限)) (NP (NN 公司)))) (VP (VV 合建))) (DEC 的))) (ADJP (JJ 合资)) (NP (NN 企业)))) (PU 。))",
         C("compound:nn(公司-7, 格林柯尔-1)",
                 "compound:nn(公司-7, 制冷剂-2)",
                 "punct(中国-4, （-3)",
-                "parataxis:prnmod(公司-7, 中国-4)",   // todo: was appos:prnmod
+                "appos:prnmod(公司-7, 中国-4)",
                 "punct(中国-4, ）-5)",
                 "amod(公司-7, 有限-6)",
                 "nsubj(企业-28, 公司-7)",
@@ -118,7 +117,7 @@ public class UniversalChineseGrammaticalStructureTest extends TestCase {
                 "amod(公司-18, 总-17)",
                 "conj(公司-24, 公司-18)",
                 "cc(公司-24, 和-19)",
-                "compound:nn(公司-24, 中国-20)",
+                "appos(公司-24, 中国-20)", // todo: should really be compound:nn but can't distinguish without functional tag
                 "compound:nn(公司-24, 南方-21)",
                 "compound:nn(公司-24, 证券-22)",
                 "amod(公司-24, 有限-23)",

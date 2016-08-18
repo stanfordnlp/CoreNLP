@@ -14,13 +14,6 @@ public class BenchmarkingHelper {
 
   private BenchmarkingHelper() {} // static methods
 
-  public static void setLowHighExpected(Counter<String> lowRes, Counter<String> highRes, Counter<String> expRes, String key,
-                                         double lowVal, double highVal, double expVal) {
-    lowRes.setCount(key, lowVal);
-    highRes.setCount(key, highVal);
-    expRes.setCount(key, expVal);
-  }
-
   public static void benchmarkResults(Counter<String> results,
                                Counter<String> lowResults,
                                Counter<String> highResults,
@@ -39,15 +32,15 @@ public class BenchmarkingHelper {
       assertTrue("Value for " + key + " = " + val + " is higher than expected maximum " + high +
           " [not a bug, but a breakthrough!]", val <= high);
       if (expectedResults == null) {
-        System.err.printf("Value for %s = %.4f is within the expected range [%.4f, %.4f]%n", key, val, low, high);
+        System.err.println("Value for " + key + " = " + val + " is within the expected range.");
       } else {
         double expected = expectedResults.getCount(key);
         if (val < (expected - 1e-4)) {
-          System.err.printf("Value for %s = %.4f is slightly lower than expected %.4f%n", key, val, expected);
+          System.err.println("Value for " + key + " = " + val + " is slightly lower than expected " + expected);
         } else if (val > (expected + 1e-4)) {
-          System.err.printf("Value for %s = %.4f is slightly higher than expected %.4f%n", key, val, expected);
+          System.err.println("Value for " + key + " = " + val + " is slightly higher than expected " + expected);
         } else {
-          System.err.printf("Value for %s  = %.4f is as expected%n", key, val);
+          System.err.println("Value for " + key + " = " + val + " is as expected");
         }
       }
     }

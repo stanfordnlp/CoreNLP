@@ -104,7 +104,8 @@ public class DependencyParserITest extends TestCase {
     Collection<TypedDependency> dependencies = ccProcessed.typedDependencies();
 
     GrammaticalRelation expected = UniversalEnglishGrammaticalRelations.getConj("and");
-    assertTrue(dependencies.stream().map(TypedDependency::reln).collect(toList()).contains(expected));
+    assertThat(dependencies.stream().map(TypedDependency::reln).collect(toList()),
+            hasItem(expected));
   }
 
   /**
