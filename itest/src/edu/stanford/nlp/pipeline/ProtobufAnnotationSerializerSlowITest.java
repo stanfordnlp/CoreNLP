@@ -1,6 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
 import edu.stanford.nlp.ie.NumberNormalizer;
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotation;

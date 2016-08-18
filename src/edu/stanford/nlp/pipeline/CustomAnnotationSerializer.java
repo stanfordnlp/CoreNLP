@@ -6,9 +6,10 @@ import java.util.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import edu.stanford.nlp.hcoref.data.CorefChain;
-import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
-import edu.stanford.nlp.hcoref.data.Dictionaries;
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
+
+import edu.stanford.nlp.coref.data.CorefChain;
+import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;

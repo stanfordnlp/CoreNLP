@@ -1,6 +1,6 @@
 package edu.stanford.nlp.simple;
 
-import edu.stanford.nlp.hcoref.data.CorefChain;
+import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -30,6 +30,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 
 /**
  * A representation of a single Sentence.
