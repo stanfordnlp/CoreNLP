@@ -249,9 +249,9 @@ public class UniversalChineseGrammaticalRelations {
     new GrammaticalRelation(Language.UniversalChinese,
       "dobj", "direct object",
       OBJECT, "CP|VP", tregexCompiler,
-            "VP < ( /^V*/ $+ NP|DP|QP=target ) !< VC ",
+            "VP < ( /^V*/ $+ NP|DP=target ) !< VC ",
             // 进入/VV 了/AS 夏季/NN
-            "VP < ( /^V*/ $+ (AS $+ NP|DP|QP=target) ) !< VC ",
+            "VP < ( /^V*/ $+ (AS $+ NP|DP=target) ) !< VC ",
             " VP < ( /^V*/ $+ NP|DP=target ! $+ NP|DP) !< VC ",
             "CP < (IP $++ NP=target ) !<< VC");
 
@@ -774,9 +774,10 @@ public class UniversalChineseGrammaticalRelations {
     new GrammaticalRelation(Language.UniversalChinese,
       "compound:nn", "noun compound",
       COMPOUND, "^NP", tregexCompiler,
-            "NP < (NN|NT=target $+ NN|NT)",
+            "NP < (NN|NR|NT=target $+ NN|NT)",
+            "NP < (NN|NT=target !$+ PU|CC|DNP $++ NN|NT)",
             "NP < (NN|NR|NT $+ FW=target)",
-            "NP < (NP=target !< NR !$+ PU|CC|DNP $++ (NP|PRN !< NR|QP))",
+            "NP < (NP=target !$+ PU|CC|DNP $++ (NP|PRN !< NR|QP))",
             "NP < (NP=target < NN|NT $+ (NP < NN|NT))");
 
   /**
@@ -966,9 +967,9 @@ public class UniversalChineseGrammaticalRelations {
                   "nmod:assmod", "associative modifier (examples: 上海市/Shanghai[modifier] 的 规定/law[head])",
                   NOUN_MODIFIER, "NP|QP|DNP", tregexCompiler,
                   "NP|QP < ( DNP =target < (NP !< NT) $++ NP|QP ) ",
-                  "NP|DNP < (/^NP(-PN)?$/=target <: NR $+ (NP !< NR))",
-                  // fixme: This rule captures compounds sometimes, e.g. (NP (NR b292) (NN 电台))
-                  "NP < (NR=target $+ NN)",
+                  // the following rules are merged into compound:nn
+                  //"NP|DNP < (/^NP(-PN)?$/=target < NR !< NN $+ (NP !< NR))",
+                  //"NP < (NR=target $+ NN)",
                   "NP < (NP=target !< NR !$+ PU|CC $++ (NP|PRN < QP))");
 
   /**
