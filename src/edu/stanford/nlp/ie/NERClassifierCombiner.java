@@ -395,7 +395,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   private static Map<String, String> readRegexnerGazette(String mappingFile) {
     Map<String, String> mapping = new HashMap<>();
     try {
-      for (String line : IOUtils.slurpReader(IOUtils.readerFromString(mappingFile)).split("\n")) {
+      for (String line : IOUtils.slurpReader(IOUtils.readerFromString(mappingFile.trim())).split("\n")) {
         String[] fields = line.split("\t");
         String key = fields[0];
         String target = fields[1];

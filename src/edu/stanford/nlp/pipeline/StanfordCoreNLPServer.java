@@ -621,6 +621,10 @@ public class StanfordCoreNLPServer implements Runnable {
           }
         }
       }
+      // Use gazettes
+      if (!props.containsKey("ner.regex")) {
+        props.put("ner.regex", "true");
+      }
 
       // Get the annotators
       String annotators = props.getProperty("annotators");
