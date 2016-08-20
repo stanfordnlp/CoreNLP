@@ -679,9 +679,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * @param sentence The string to be classified
    * @return List of words
    */
-  // This method is currently [2016] only called in a very small number of places:
+  // todo: This method is currently [2016] only called in a very small number of places:
   // the parser's jsp webapp, ChineseSegmenterAnnotator, and SegDemo.
   // Maybe we could eliminate it?
+  // It also seems like it should be using the plainTextReaderAndWriter, not default?
   public List<String> segmentString(String sentence) {
     return segmentString(sentence, defaultReaderAndWriter);
   }
