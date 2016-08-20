@@ -376,7 +376,7 @@ public class TokensRegexNERAnnotator implements Annotator  {
     return TokenSequencePattern.getMultiPatternMatcher(patterns);
   }
 
-  private void annotateMatched(List<CoreLabel> tokens) {
+  public void annotateMatched(List<CoreLabel> tokens) {
     List<SequenceMatchResult<CoreMap>> matched = multiPatternMatcher.findNonOverlapping(tokens);
     for (SequenceMatchResult<CoreMap> m:matched) {
       Entry entry = patternToEntry.get(m.pattern());
