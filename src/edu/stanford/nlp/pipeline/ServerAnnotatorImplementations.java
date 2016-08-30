@@ -75,10 +75,12 @@ public class ServerAnnotatorImplementations extends AnnotatorImplementations {
   private class SingletonAnnotator implements Annotator {
 
     private final StanfordCoreNLPClient client;
+    private final String annotator;
 
     public SingletonAnnotator(String host, int port,
                               Properties properties,
                               String annotator) {
+      this.annotator = annotator;
       Properties forClient = new Properties();
       for (Object o : properties.keySet()) {
         String key = o.toString();

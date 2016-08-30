@@ -1,5 +1,6 @@
 package edu.stanford.nlp.pipeline;
 import java.lang.ref.SoftReference;
+import java.time.Duration;
 import java.util.*;
 
 import edu.stanford.nlp.util.Generics;
@@ -23,73 +24,39 @@ public class AnnotatorPool  {
   private static Redwood.RedwoodChannels log = Redwood.channels(AnnotatorPool.class);
 
   /**
-   * The cache of Annotators already created at some point.
-   * This is keyed on a pair: (annotator_name, signature), and returns a soft reference to an annotator.
+   * A cache of annotators ever created in this Java runtime.
+   * This serves to ensure that different pools don't re-create the exact same annotator,
+   * while also being stored as {@link SoftReference}s so that we don't explode memory
+   * unnecessarily.
+   * The key of this cache is the pair (annotator_name, factory_signature); the value
+   * is a softreference to the annotator.
    */
   private static final Map<Pair<String, String>, SoftReference<Annotator>> cache = Generics.newHashMap();
 
   /**
-   * A set of annotators that we want to keep hard references to.
-   * These are cleaned up in {@link AnnotatorPool#gc}'s timer task.
+   * The set of named annotators we know about.
+   * This is distinct from {@link AnnotatorPool#cache} in that this stores the named annotators,
+   * whereas {@link AnnotatorPool#cache} stores all annotators ever created (e.g., annotators
+   * created with different properties).
    */
-  @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")  // Updated with Iterator#remove()
-  private static final IdentityHashMap<Annotator, Long> annotatorsForcedAlive = new IdentityHashMap<>();
-
-
-  /** A timer for cleaning up old annotators */
-  @SuppressWarnings("unused")  // Unused, but still runs
-  private static final Timer gc = new Timer() {{
-    scheduleAtFixedRate(new TimerTask() {
-      @Override
-      public void run() {
-        int actionsTaken = 0;
-        long initialMemory = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024);
-        // 1. Allow cleaning up any annotator that hasn't been called in the last 10 minutes
-        synchronized (annotatorsForcedAlive) {
-          Iterator<Map.Entry<Annotator, Long>> iter = annotatorsForcedAlive.entrySet().iterator();
-          while (iter.hasNext()) {
-            if (iter.next().getValue() < (System.currentTimeMillis() - 1000 * 60 * 10)) {  // older than 10 minutes old
-              actionsTaken += 1;
-              iter.remove();
-            }
-          }
-        }
-        // 2. Clean up stale keys in the cache
-        synchronized (cache) {
-          Iterator<Map.Entry<Pair<String, String>, SoftReference<Annotator>>> iter = cache.entrySet().iterator();
-          while (iter.hasNext()) {
-            Map.Entry<Pair<String, String>, SoftReference<Annotator>> entry = iter.next();
-            if (entry.getValue().get() == null) {  // this reference has been garbage collected
-              actionsTaken += 1;
-              iter.remove();
-            }
-          }
-        }
-        // 3. Print stats
-        long finalMemory = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024);
-        if (actionsTaken > 0) {
-          Runtime.getRuntime().gc();
-          log.info("Annotator GC run. References cleaned=" + actionsTaken + "; Memory: " + initialMemory + " MB  ->  " + finalMemory + " MB");
-          synchronized (cache) {
-            log.info("Annotators in cache: " + cache.size());
-          }
-          synchronized (annotatorsForcedAlive) {
-            log.info("Annotators forced alive: " + annotatorsForcedAlive.size());
-          }
-        }
-      }
-    }, 0, 30000);
-  }};
-
-
+  private final Map<String, SoftReference<Annotator>> annotators;
   /** The set of factories we know about defining how we should create new annotators of each name */
   private final Map<String, AnnotatorFactory> factories;
+  /**
+   * A set of annotators that we want to keep hard references to.
+   * When an annotator is removed from this list, it is allowed to be collected from
+   * {@link AnnotatorPool#annotators} and from {@link AnnotatorPool#cache}.
+   */
+  private final IdentityHashMap<Annotator, Long> annotatorsForcedAlive = new IdentityHashMap<>();
+  /** A timer for cleaning up old annotators */
+  private final Timer timer = new Timer();
 
 
   /**
    * Create an empty AnnotatorPool.
    */
   public AnnotatorPool() {
+    this.annotators = Generics.newHashMap();
     this.factories = Generics.newHashMap();
   }
 
@@ -106,22 +73,27 @@ public class AnnotatorPool  {
    */
   public boolean register(String name, AnnotatorFactory factory) {
     boolean newAnnotator = false;
-    synchronized (this.factories) {
-      if (this.factories.containsKey(name)) {
-        AnnotatorFactory oldFactory = this.factories.get(name);
-        String oldSig = oldFactory.signature();
-        String newSig = factory.signature();
-        if (!oldSig.equals(newSig)) {
-          // the new annotator uses different properties so we need to update!
-          log.info("Replacing old annotator \"" + name + "\" with signature ["
-              + oldSig + "] with new annotator with signature [" + newSig + "]");
-          this.factories.put(name, factory);
-          newAnnotator = true;
-        }
-        // nothing to do if an annotator with same name and signature already exists
-      } else {
+    if (this.factories.containsKey(name)) {
+      AnnotatorFactory oldFactory = this.factories.get(name);
+      String oldSig = oldFactory.signature();
+      String newSig = factory.signature();
+      if(! oldSig.equals(newSig)) {
+        // the new annotator uses different properties so we need to update!
+        log.info("Replacing old annotator \"" + name + "\" with signature ["
+               + oldSig + "] with new annotator with signature [" + newSig + "]");
         this.factories.put(name, factory);
+        newAnnotator = true;
+
+        // delete the existing annotator; we'll create one with the new props on demand
+        // removing the annotator like this will not affect any
+        // existing pipelines which use the old annotator, but if
+        // those are all gone, then the old annotator will be garbage
+        // collected and memory will be freed up
+        annotators.remove(name);
       }
+      // nothing to do if an annotator with same name and signature already exists
+    } else {
+      this.factories.put(name, factory);
     }
     return newAnnotator;
   }
@@ -136,31 +108,54 @@ public class AnnotatorPool  {
    * @throws IllegalArgumentException If the annotator cannot be created
    */
   public synchronized Annotator get(String name) {
-    AnnotatorFactory factory;
-    synchronized (factories) {
-      factory = this.factories.get(name);
-    }
-    if (factory == null) {
-      throw new IllegalArgumentException("No annotator named " + name);
-    }
-    Pair<String, String> key = Pair.makePair(name, factory.signature());
-    Optional<Annotator> annotator;
-    synchronized (cache) {
-      annotator = Optional.ofNullable(cache.get(key)).flatMap(x -> Optional.ofNullable(x.get()));
-    }
-    if (!annotator.isPresent()) {
-      annotator = Optional.of(factory.create());
-    }
-    synchronized (cache) {
-      cache.put(key, new SoftReference<>(annotator.orElse(null)));  // will never be null though
+    Annotator annotator = Optional.ofNullable(this.annotators.get(name)).map(SoftReference::get).orElse(null);
+    if (annotator == null) {
+      // Get the factory
+      AnnotatorFactory factory = this.factories.get(name);
+      if (factory == null) {
+        throw new IllegalArgumentException("No annotator named " + name);
+      }
+      // Check the cache
+      Pair<String, String> key = Pair.makePair(name, factory.signature());
+      SoftReference<Annotator> value;
+      synchronized (cache) {
+        if ((value = cache.get(key)) != null) {
+          annotator = value.get();
+          if (annotator == null) {
+            annotator = factory.create();
+            cache.put(key, new SoftReference<>(annotator));
+          }
+        } else {
+          annotator = factory.create();
+          cache.put(key, new SoftReference<>(annotator));
+        }
+      }
+      // Register the annotator
+      assert annotator != null;
+      this.annotators.put(name, new SoftReference<>(annotator));
     }
 
-    // Return
-    if (annotator.isPresent()) {
-      return annotator.get();
-    } else {
-      throw new IllegalStateException("Logic error in AnnotatorPool#get()");  // should be impossible
+    // Force the annotator to stay alive for a while
+    synchronized (annotatorsForcedAlive) {
+      annotatorsForcedAlive.put(annotator, System.currentTimeMillis());
     }
+    final Annotator finalAnnotator = annotator;
+    timer.schedule(new TimerTask() {
+      @Override
+      public void run() {
+        synchronized (annotatorsForcedAlive) {
+          long annotatorLastAccessed = annotatorsForcedAlive.get(finalAnnotator);
+          if (annotatorLastAccessed + Duration.ofHours(1).toMillis() - 1000 < System.currentTimeMillis()) {
+            // We haven't seen this annotator in an hour. Allow the garbage collector to clean it
+            // up for us if it needs to.
+            annotatorsForcedAlive.remove(finalAnnotator);
+          }
+        }
+      }
+    }, Duration.ofHours(1).toMillis());
+
+    // Return
+    return annotator;
   }
 
 }

@@ -1090,17 +1090,6 @@ public class SeqClassifierFlags implements Serializable  {
   }
 
   /**
-   * Create a new SeqClassifierFlags object and initialize it using values in
-   * the Properties object. The properties are printed to stderr as it works.
-   *
-   * @param props The properties object used for initialization
-   * @param printProps Whether to print the properties on construction
-   */
-  public SeqClassifierFlags(Properties props, boolean printProps) {
-    setProperties(props, printProps);
-  }
-
-  /**
    * Initialize this object using values in Properties object. The properties
    * are printed to stderr as it works.
    *

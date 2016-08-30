@@ -385,8 +385,6 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     }
   }
 
-
-
   /**
    * The canonical entry point of the client annotator.
    * Create an HTTP request, send this annotation to the server, and await a response.
@@ -395,6 +393,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
    * @param callback Called when the server has returned an annotated document.
    *                 The input to this callback is the same as the passed Annotation object.
    */
+  @SuppressWarnings("unchecked")
   public void annotate(final Annotation annotation, final Consumer<Annotation> callback){
     scheduler.schedule((Backend backend, Consumer<Backend> isFinishedCallback) -> new Thread() {
       @Override
@@ -413,91 +412,73 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
               URLEncoder.encode(StanfordCoreNLPClient.this.propsAsJSON, "utf-8"));
 
           // 2. Create a connection
+          // 2.1 Open a connection
           URL serverURL = new URL(backend.protocol, backend.host,
               backend.port,
               StanfordCoreNLPClient.this.path + "?" + queryParams);
+          URLConnection connection = serverURL.openConnection();
+          // 2.2 Set authentication
+          if (apiKey != null && apiSecret != null) {
+            String userpass = apiKey + ":" + apiSecret;
+            String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()));
+            connection.setRequestProperty ("Authorization", basicAuth);
+          }
+          // 2.2 Set some protocol-independent properties
+          connection.setDoOutput(true);
+          connection.setRequestProperty("Content-Type", "application/x-protobuf");
+          connection.setRequestProperty("Content-Length", Integer.toString(message.length));
+          connection.setRequestProperty("Accept-Charset", "utf-8");
+          connection.setRequestProperty("User-Agent", StanfordCoreNLPClient.class.getName());
+          // 2.3 Set some protocol-dependent properties
+          switch (backend.protocol) {
+            case "https":
+              ((HttpsURLConnection) connection).setRequestMethod("POST");
+              break;
+            case "http":
+              ((HttpURLConnection) connection).setRequestMethod("POST");
+              break;
+            default:
+              throw new IllegalStateException("Haven't implemented protocol: " + backend.protocol);
+          }
 
-          // 3. Do the annotation
-          //    This method has two contracts:
-          //    1. It should call the two relevant callbacks
-          //    2. It must not throw an exception
-          doAnnotation(annotation, backend, serverURL, message, 0);
+          // 3. Annotate
+          Annotation response;
+          try {
+            // 3.1. Fire off the request
+            connection.connect();
+            connection.getOutputStream().write(message);
+//          log.info("Wrote " + message.length + " bytes to " + backend.host + ":" + backend.port);
+            os.close();
+
+            // 3.2 Await a response
+            // -- It might be possible to send more than one message, but we are not going to do that.
+            response = serializer.read(connection.getInputStream()).first;
+          } catch (UnknownHostException e) {
+            // 3.2. We don't have internet (or website is down) -- try to annotate locally
+            log.warn("No internet! Trying to annotate locally...");
+            StanfordCoreNLP corenlp = new StanfordCoreNLP(properties);
+            corenlp.annotate(annotation);
+            response = annotation;
+          }
+          // 4.2 Release the backend
+          isFinishedCallback.accept(backend);
+
+          // 5. Copy response over to original annotation
+          for (Class key : response.keySet()) {
+            annotation.set(key, response.get(key));
+          }
+
+          // 6. Call the callback
+          callback.accept(annotation);
         } catch (Throwable t) {
           log.warn("Could not annotate via server! Trying to annotate locally...", t);
           StanfordCoreNLP corenlp = new StanfordCoreNLP(properties);
           corenlp.annotate(annotation);
-        } finally {
           callback.accept(annotation);
-          isFinishedCallback.accept(backend);
         }
       }
     }.start());
   }
-
-
-  /**
-   * Actually try to perform the annotation on the server side.
-   * This is factored out so that we can retry up to 3 times.
-   *
-   * @param annotation The annotation we need to fill.
-   * @param backend The backend we are querying against.
-   * @param serverURL The URL of the server we are hitting.
-   * @param message The message we are sending the server (don't need to recompute each retry).
-   * @param tries The number of times we've tried already.
-   */
-  @SuppressWarnings("unchecked")
-  private void doAnnotation(Annotation annotation, Backend backend, URL serverURL, byte[] message, int tries) {
-    try {
-      // 1. Set up the connection
-      URLConnection connection = serverURL.openConnection();
-      // 1.1 Set authentication
-      if (apiKey != null && apiSecret != null) {
-        String userpass = apiKey + ":" + apiSecret;
-        String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()));
-        connection.setRequestProperty("Authorization", basicAuth);
-      }
-      // 1.2 Set some protocol-independent properties
-      connection.setDoOutput(true);
-      connection.setRequestProperty("Content-Type", "application/x-protobuf");
-      connection.setRequestProperty("Content-Length", Integer.toString(message.length));
-      connection.setRequestProperty("Accept-Charset", "utf-8");
-      connection.setRequestProperty("User-Agent", StanfordCoreNLPClient.class.getName());
-      // 1.3 Set some protocol-dependent properties
-      switch (backend.protocol) {
-        case "https":
-          ((HttpsURLConnection) connection).setRequestMethod("POST");
-          break;
-        case "http":
-          ((HttpURLConnection) connection).setRequestMethod("POST");
-          break;
-        default:
-          throw new IllegalStateException("Haven't implemented protocol: " + backend.protocol);
-      }
-
-      // 2. Annotate
-      // 2.1. Fire off the request
-      connection.connect();
-      connection.getOutputStream().write(message);
-      connection.getOutputStream().flush();
-      // 2.2 Await a response
-      // -- It might be possible to send more than one message, but we are not going to do that.
-      Annotation response = serializer.read(connection.getInputStream()).first;
-      // 2.3. Copy response over to original annotation
-      for (Class key : response.keySet()) {
-        annotation.set(key, response.get(key));
-      }
-
-    } catch (Throwable t) {
-      // 3. We encountered an error -- retry
-      if (tries < 3) {
-        log.warn(t);
-        doAnnotation(annotation, backend, serverURL, message, tries + 1);
-      } else {
-        throw new RuntimeException(t);
-      }
-    }
-  }
-
 
   /**
    * Runs the entire pipeline on the content of the given text passed in.

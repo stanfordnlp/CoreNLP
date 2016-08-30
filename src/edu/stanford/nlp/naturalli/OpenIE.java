@@ -475,7 +475,6 @@ public class OpenIE implements Annotator  {
         throw new IllegalStateException("Cannot run OpenIE without a parse tree!");
       }
       // Clean the tree
-      parse = new SemanticGraph(parse);
       Util.cleanTree(parse);
 
       // Resolve Coreference
@@ -496,10 +495,9 @@ public class OpenIE implements Annotator  {
 
       // Set the annotations
       sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);
-      sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class,
-          new ArrayList<>(new HashSet<>(extractions)));  // uniq the extractions
-      if (stripEntailments) {
-        sentence.remove(NaturalLogicAnnotations.EntailedSentencesAnnotation.class);
+      if (!stripEntailments) {
+        sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class,
+            new ArrayList<>(new HashSet<>(extractions)));  // uniq the extractions
       }
     }
   }
