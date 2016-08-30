@@ -35,7 +35,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   private final boolean applyNumericClassifiers;
   public static final boolean APPLY_NUMERIC_CLASSIFIERS_DEFAULT = true;
   public static final String APPLY_NUMERIC_CLASSIFIERS_PROPERTY = "ner.applyNumericClassifiers";
-  public static final String APPLY_NUMERIC_CLASSIFIERS_PROPERTY_BASE = "applyNumericClassifiers";
+  private static final String APPLY_NUMERIC_CLASSIFIERS_PROPERTY_BASE = "applyNumericClassifiers";
   public static final String APPLY_GAZETTE_PROPERTY = "ner.regex";
   public static final boolean APPLY_GAZETTE_DEFAULT = false;
 
@@ -300,9 +300,10 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     }
 
     // Apply RegexNER annotations
-    for (int i = 1; i < tokens.size(); ++i) {  // skip first token
-      CoreLabel token = tokens.get(i);
-      if (token.tag().charAt(0) == 'N' && "O".equals(token.ner()) || "MISC".equals(token.ner())) {
+    // cdm 2016: Used to say and do "// skip first token" but I couldn't understand why, so I removed that.
+    for (CoreLabel token : tokens) {
+      // System.out.println(token.toShorterString());
+      if ((token.tag() == null || token.tag().charAt(0) == 'N') && "O".equals(token.ner()) || "MISC".equals(token.ner())) {
         String target = gazetteMapping.get(token.originalText());
         if (target != null) {
           token.setNER(target);
@@ -358,7 +359,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     }
   }
 
-  // static method for getting an NERClassifierCombiner from a string path
+  /** Static method for getting an NERClassifierCombiner from a string path. */
   public static NERClassifierCombiner getClassifier(String loadPath, Properties props) throws IOException,
           ClassNotFoundException, ClassCastException {
     ObjectInputStream ois = IOUtils.readStreamFromString(loadPath);
@@ -373,7 +374,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     return new NERClassifierCombiner(ois, props);
   }
 
-  // method for displaying info about an NERClassifierCombiner
+  /** Method for displaying info about an NERClassifierCombiner. */
   public static void showNCCInfo(NERClassifierCombiner ncc) {
     log.info("");
     log.info("info for this NERClassifierCombiner: ");
@@ -409,11 +410,11 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
 
 
 
-  /** the main method **/
+  /** The main method. */
   public static void main(String[] args) throws Exception {
     StringUtils.logInvocationString(log, args);
     Properties props = StringUtils.argsToProperties(args);
-    SeqClassifierFlags flags = new SeqClassifierFlags(props);
+    SeqClassifierFlags flags = new SeqClassifierFlags(props, false); // false for print probs as printed in next code block
 
     String loadPath = props.getProperty("loadClassifier");
     NERClassifierCombiner ncc;
