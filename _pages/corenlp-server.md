@@ -40,7 +40,7 @@ The greatest strength of the server is the ability to make API calls against it.
 
 > **NOTE**: Please do **not** make API calls against [corenlp.run](http://corenlp.run). It is not set up to handle a large volume of requests. Instructions for setting up your own server can be found in the [Dedicated Server](#dedicated-server) section.
 
-There are three endpoints provided by the server, which we'll describe in more detail below. Each of them takes as input a series of `GET` parameters, as well as `POST` data consisting of the serialized document or raw text to be annotated. The endpoints are:
+There are three endpoints provided by the server, which we'll describe in more detail below. Each of them takes as input a series of url parameters, as well as `POST` data consisting of the serialized document or raw text to be annotated. The endpoints are:
 
 *  `/` Provides an interface to annotate documents with CoreNLP.
 * `/tokensregex` Provides an interface for querying text for TokensRegex patterns, once it has been annotated with CoreNLP (using the enpoint above).
@@ -69,7 +69,7 @@ A common property to set is the output format of the API. The server supports al
   -  `edu.stanford.nlp.pipeline.GenericAnnotationSerializer` Writes the output to a Java serialized object. This is only suitable for transferring data between Java programs. This also produces relatively large serialized objects.
   - `edu.stanford.nlp.pipeline.CustomAnnotationSerializer` Writes the output to a (lossy!) textual representation, which is much smaller than the `GenericAnnotationSerializer` but does not include all the relevant information.
 
-The server also accepts input in a variety of formats. By default, it takes input as raw text sent as `POST` data to the server. However, it can also be configured to read the `POST` data using one of the CoreNLP serializers. This can be set up by setting the properties `inputFormat` and `inputSerializer`. For example, to read the data as a protocol buffer (useful if, e.g., it is already partially annotated), simply include the following in your `GET` parameters:
+The server also accepts input in a variety of formats. By default, it takes input as raw text sent as `POST` data to the server. However, it can also be configured to read the `POST` data using one of the CoreNLP serializers. This can be set up by setting the properties `inputFormat` and `inputSerializer`. For example, to read the data as a protocol buffer (useful if, e.g., it is already partially annotated), simply include the following in your url parameter `properties={...}`:
 
 ```json
 {"inputFormat": "serialized",
@@ -84,7 +84,7 @@ wget --post-file /path/to/file.proto 'localhost:9000/?properties={"inputFormat":
 
 ### Query TokensRegex: `/tokensregex`
 
-Similar to the CoreNLP target, `/tokensregex` takes a block of data (e.g., text) as `POST` data, and a series of `GET` parameters. Currently, only plain-text `POST` data is supported. The two relevant `GET` parameters are:
+Similar to the CoreNLP target, `/tokensregex` takes a block of data (e.g., text) as `POST` data, and a series of url parameters. Currently, only plain-text `POST` data is supported. The two relevant url parameters are:
 
 * `pattern`: The TokensRegex pattern to annotate.
 * `filter`: If true, entire sentences must match the pattern, rather than the API finding matching sections.
@@ -109,7 +109,7 @@ The response is always in JSON, formatted as follows:
 
 ### Query Semgrex: `/semgrex`
 
-Similar to the CoreNLP target, and nearly identical to TokensRegex, `/semgrex` takes a block of data (e.g., text) as `POST` data, and a series of `GET` parameters. Currently, only plain-text `POST` data is supported. The two relevant `GET` parameters are:
+Similar to the CoreNLP target, and nearly identical to TokensRegex, `/semgrex` takes a block of data (e.g., text) as `POST` data, and a series of url parameters. Currently, only plain-text `POST` data is supported. The two relevant url parameters are:
 
 * `pattern`: The Semgrex pattern to annotate.
 * `filter`: If true, entire sentences must match the pattern, rather than the API finding matching sections.
