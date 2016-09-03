@@ -704,8 +704,8 @@ ol.series li {
 .siteTagline {
     font-size: 300%;
     font-weight: bold;
-    color: silver;
-    font-family: monospace;
+    /*color: silver;*/
+    /*font-family: monospace;*/
     text-align: center;
     line-height: 10px;
 }
@@ -835,14 +835,4 @@ a.accordion-toggle {
 }
 .downloadbutton:active {
     background: #982727;
-}
-
-.siteTagline {
-   color: black;
-   font: bold 40px arial;
-}
-
-.versionTagline {
-   color: black;
-   font: bold 20px arial;
 }
