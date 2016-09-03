@@ -713,8 +713,8 @@ ol.series li {
 .versionTagline {
     text-align: center;
     margin-bottom: 20px;
-    font-family: monospace;
-    font-color: silver;
+    /*font-family: monospace;*/
+    /*font-color: silver;*/
     color: #444;
 }
 
