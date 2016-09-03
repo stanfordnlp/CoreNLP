@@ -703,7 +703,7 @@ ol.series li {
 
 .siteTagline {
     font-size: 300%;
-    /*font-weight: bold;*/
+    font-weight: bold;
     /*color: silver;*/
     /*font-family: monospace;*/
     text-align: center;
