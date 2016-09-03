@@ -703,7 +703,7 @@ ol.series li {
 
 .siteTagline {
     font-size: 300%;
-    font-weight: 600;
+    font-weight: 500;
     /*color: silver;*/
     /*font-family: monospace;*/
     text-align: center;
@@ -713,7 +713,7 @@ ol.series li {
 .versionTagline {
     text-align: center;
     margin-bottom: 20px;
-    font-weight: 600;
+    font-weight: 500;
     /*font-family: monospace;*/
     /*font-color: silver;*/
     color: #444;
