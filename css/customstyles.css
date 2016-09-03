@@ -839,5 +839,10 @@ a.accordion-toggle {
 
 .siteTagline {
    color: black;
-   font: 20px arial;
+   font: 40px arial;
+}
+
+.versionTagline {
+   color: black;
+   font: 30px arial;
 }
