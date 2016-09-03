@@ -836,3 +836,7 @@ a.accordion-toggle {
 .downloadbutton:active {
     background: #982727;
 }
+
+.siteTagline {
+   color: black;
+}
