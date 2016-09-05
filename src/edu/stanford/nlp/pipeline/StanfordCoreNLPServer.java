@@ -12,6 +12,13 @@ import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
+import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TreeReader;
+import edu.stanford.nlp.trees.PennTreeReader;
+import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
+import edu.stanford.nlp.trees.tregex.TregexPattern;
+import edu.stanford.nlp.trees.tregex.TregexMatcher;
+import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.*;
 
 import javax.net.ssl.*;
@@ -875,6 +882,108 @@ public class StanfordCoreNLPServer implements Runnable {
     }
   }
 
+  /**
+   * A handler for matching tregrex patterns against dependency trees.
+   */
+  protected class TregexHandler implements HttpHandler {
+
+    /**
+     * A callback to call when an annotation job has finished.
+     */
+    private final Consumer<FinishedRequest> callback;
+
+    /**
+     * An authenticator to determine if we can perform this API request.
+     */
+    private final Predicate<Properties> authenticator;
+
+    /**
+     * Create a new Tregrex Handler.
+     * @param callback The callback to call when annotation has finished.
+     */
+    public TregexHandler(Predicate<Properties> authenticator, Consumer<FinishedRequest> callback) {
+      this.callback = callback;
+      this.authenticator = authenticator;
+    }
+
+    @Override
+    public void handle(HttpExchange httpExchange) throws IOException {
+
+      // Set common response headers
+      httpExchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+
+      // Some common properties
+      Properties props = PropertiesUtils.asProperties("annotators", "tokenize,ssplit,parse");
+      if (authenticator != null && !authenticator.test(props)) {
+        respondUnauthorized(httpExchange);
+        return;
+      }
+      Map<String, String> params = getURLParams(httpExchange.getRequestURI());
+
+      Future<Pair<String, Annotation>> response = corenlpExecutor.submit(() -> {
+        try {
+          // Get the document
+          Annotation doc = getDocument(props, httpExchange);
+          if (!doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
+            StanfordCoreNLP pipeline = mkStanfordCoreNLP(props);
+            pipeline.annotate(doc);
+          }
+
+          // Construct the matcher
+          // (get the pattern)
+          if (!params.containsKey("pattern")) {
+            respondBadInput("Missing required parameter 'pattern'", httpExchange);
+            return Pair.makePair("", null);
+          }
+          String pattern = params.get("pattern");
+
+          // (create the matcher)
+          TregexPattern p = TregexPattern.compile(pattern);
+
+          // Run TokensRegex
+          return Pair.makePair(JSONOutputter.JSONWriter.objectToJSON((docWriter) -> {
+            docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer sentWriter) -> {
+                Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+                //sentWriter.set("tree", tree.pennString());
+                TregexMatcher matcher = p.matcher(tree);
+
+                int i=0;
+                while (matcher.find()) {
+                  sentWriter.set(Integer.toString(i++), (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer matchWriter) -> {
+                    matchWriter.set("match", matcher.getMatch().pennString());
+                    matchWriter.set("namedNodes", matcher.getNodeNames().stream().map(nodeName -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer namedNodeWriter) -> {
+                      namedNodeWriter.set(nodeName, matcher.getNode(nodeName).pennString());
+                    }));
+                  });
+
+                }
+            }));
+          }), doc);
+        } catch (Exception e) {
+          e.printStackTrace();
+          try {
+            respondError(e.getClass().getName() + ": " + e.getMessage(), httpExchange);
+          } catch (IOException ignored) {
+          }
+        }
+        return Pair.makePair("", null);
+      });
+
+      // Send response
+      try {
+        Pair<String, Annotation> pair = response.get(5, TimeUnit.SECONDS);
+        Annotation completedAnnotation = pair.second;
+        byte[] content = pair.first.getBytes();
+        sendAndGetResponse(httpExchange, content);
+        if (completedAnnotation != null && props.getProperty("annotators") != null && !"".equals(props.getProperty("annotators"))) {
+          callback.accept(new FinishedRequest(props, completedAnnotation, params.get("pattern"), null));
+        }
+      } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        respondError("Timeout when executing Semgrex query", httpExchange);
+      }
+    }
+  }
+
   private static void sendAndGetResponse(HttpExchange httpExchange, byte[] response) throws IOException {
     if (response.length > 0) {
       httpExchange.getResponseHeaders().add("Content-type", "application/json");
@@ -967,6 +1076,7 @@ public class StanfordCoreNLPServer implements Runnable {
       withAuth(server.createContext("/", new CoreNLPHandler(defaultProps, authenticator, callback, homepage)), basicAuth);
       withAuth(server.createContext("/tokensregex", new TokensRegexHandler(authenticator, callback)), basicAuth);
       withAuth(server.createContext("/semgrex", new SemgrexHandler(authenticator, callback)), basicAuth);
+      withAuth(server.createContext("/tregex", new TregexHandler(authenticator, callback)), basicAuth);
       withAuth(server.createContext("/corenlp-brat.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.js")), basicAuth);
       withAuth(server.createContext("/corenlp-brat.cs", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.css")), basicAuth);
       withAuth(server.createContext("/ping", new PingHandler()), basicAuth);
