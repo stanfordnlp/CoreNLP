@@ -52,7 +52,7 @@
 
     <!-- Annotators select -->
     <div class="col-sm-10">
-      <select id="annotators" data-placeholder="CoreNLP annotators" 
+      <select id="annotators" data-placeholder="CoreNLP annotators"
               multiple class="chosen-select">
         <option value="pos"            selected > parts-of-speech    </option>
         <option value="lemma"                   > lemmas             </option>
@@ -97,6 +97,7 @@
     <ul class="nav nav-tabs" role="tablist">
       <li class="active"><a href="#div_tokensregex" role="tab" data-toggle="tab">TokensRegex</a></li>
       <li               ><a href="#div_semgrex"     role="tab" data-toggle="tab">Semgrex</a></li>
+      <li               ><a href="#div_tregex"      role="tab" data-toggle="tab">Tregex</a></li>
     </ul>
 
     <!-- Tab panes -->
@@ -125,6 +126,20 @@
           <input id="semgrex_search" type="text" class="form-control" placeholder='e.g., {pos:/VB.*/} >nsubj {}=subject >/nmod:.*/ {}=prep_phrase'/>
         <span class="input-group-btn">
           <input id="button_semgrex" class="btn btn-default" type="submit" value="Match"/>
+        </span>
+        </div>
+        </form>
+      </div>
+
+      <!-- Tregex -->
+      <div class="tab-pane pattern_tab" id="div_tregex">
+        <form id="form_tregex" accept-charset="UTF-8">
+        <label for="tregex_search">Enter a <a href="http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/trees/tregex/TregexPattern.html">Tregex</a>
+          expression to run against the above sentence:</label>
+        <div class="input-group">
+          <input id="tregex_search" type="text" class="form-control" placeholder='e.g., NP < NN=animal'/>
+        <span class="input-group-btn">
+          <input id="button_tregex" class="btn btn-default" type="submit" value="Match"/>
         </span>
         </div>
         </form>
