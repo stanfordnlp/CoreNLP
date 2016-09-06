@@ -49,8 +49,8 @@ public abstract class TregexMatcher {
   final VariableStrings variableStrings;
 
   // these things are used by "find"
-  Iterator<Tree> findIterator;
-  Tree findCurrent;
+  private Iterator<Tree> findIterator;
+  private Tree findCurrent;
 
   final HeadFinder headFinder;
 
@@ -102,7 +102,7 @@ public abstract class TregexMatcher {
    */
   public abstract boolean matches();
 
-  /** Rests the matcher and tests if it matches on the tree when rooted at <code>node</code>.
+  /** Rests the matcher and tests if it matches on the tree when rooted at {@code node}.
    *
    *  @param node The node where the match is checked
    *  @return whether the matcher matches at node
@@ -122,7 +122,7 @@ public abstract class TregexMatcher {
 
 
   /**
-   * Find the next match of the pattern on the tree
+   * Find the next match of the pattern on the tree.
    *
    * @return whether there is a match somewhere in the tree
    */
@@ -185,7 +185,7 @@ public abstract class TregexMatcher {
   }
 
   /**
-   * Returns the node labeled with <code>name</code> in the pattern.
+   * Returns the node labeled with {@code name} in the pattern.
    *
    * @param name the name of the node, specified in the pattern.
    * @return node labeled by the name
@@ -205,7 +205,7 @@ public abstract class TregexMatcher {
     if (nodesToParents == null) {
       nodesToParents = new IdentityHashMap<>();
     }
-    if (nodesToParents.size() == 0) {
+    if (nodesToParents.isEmpty()) {
       fillNodesToParents(root, null);
     }
     return nodesToParents.get(node);
@@ -230,4 +230,5 @@ public abstract class TregexMatcher {
   public String getVariableString(String var) {
     return variableStrings.getString(var);
   }
+
 }
