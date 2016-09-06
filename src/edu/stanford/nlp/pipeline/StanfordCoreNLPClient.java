@@ -1,10 +1,10 @@
 package edu.stanford.nlp.pipeline;
-import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.io.FileSequentialCollection;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.logging.StanfordRedwoodConfiguration;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -238,9 +238,7 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     // Save the constructor variables
     this.properties = properties;
     Properties serverProperties = new Properties();
-    Enumeration<?> keys = properties.propertyNames();
-    while (keys.hasMoreElements()) {
-      String key = keys.nextElement().toString();
+    for (String key : properties.stringPropertyNames()) {
       serverProperties.setProperty(key, properties.getProperty(key));
     }
     Collections.shuffle(backends, new Random(System.currentTimeMillis()));
@@ -256,12 +254,9 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
 
     // Create a list of all the properties, as JSON map elements
     List<String> jsonProperties = new ArrayList<>();
-    keys = serverProperties.propertyNames();
-    while (keys.hasMoreElements()) {
-      Object key = keys.nextElement();
-      jsonProperties.add(
-          "\"" + JSONOutputter.cleanJSON(key.toString()) + "\": \"" +
-              JSONOutputter.cleanJSON(serverProperties.getProperty(key.toString())) + "\"");
+    for (String key : serverProperties.stringPropertyNames()) {
+      jsonProperties.add("\"" + JSONOutputter.cleanJSON(key) + "\": \"" +
+              JSONOutputter.cleanJSON(serverProperties.getProperty(key)) + "\"");
     }
     // Create the JSON object
     this.propsAsJSON = "{ " + StringUtils.join(jsonProperties, ", ") + " }";
@@ -580,9 +575,9 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     //
     else if (properties.containsKey("filelist")){
       String fileName = properties.getProperty("filelist");
-      Collection<File> inputfiles = StanfordCoreNLP.readFileList(fileName);
-      Collection<File> files = new ArrayList<>(inputfiles.size());
-      for (File file:inputfiles) {
+      Collection<File> inputFiles = StanfordCoreNLP.readFileList(fileName);
+      Collection<File> files = new ArrayList<>(inputFiles.size());
+      for (File file : inputFiles) {
         if (file.isDirectory()) {
           files.addAll(new FileSequentialCollection(new File(fileName), properties.getProperty("extension"), true));
         } else {
@@ -663,8 +658,8 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     List<Backend> backends = new ArrayList<>();
     for (String spec : props.getProperty("backends", "corenlp.run").split(",")) {
       if (spec.contains(":")) {
-        String host = spec.substring(0, spec.indexOf(":"));
-        int port = Integer.parseInt(spec.substring(spec.indexOf(":") + 1));
+        String host = spec.substring(0, spec.indexOf(':'));
+        int port = Integer.parseInt(spec.substring(spec.indexOf(':') + 1));
         backends.add(new Backend(host.startsWith("http://") ? "http" : "https",
             host.startsWith("http://") ? host.substring("http://".length()) : (host.startsWith("https://") ? host.substring("https://".length()) : host),
             port));
@@ -679,5 +674,6 @@ public class StanfordCoreNLPClient extends AnnotationPipeline  {
     try {
       client.shutdown();  // In case anything is pending on the server
     } catch (InterruptedException ignored) { }
-  }
+  } // end main()
+
 }
