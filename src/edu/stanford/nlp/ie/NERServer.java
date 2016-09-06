@@ -45,9 +45,11 @@ public class NERServer  {
   /**
    * Debugging toggle.
    */
-  private boolean DEBUG = ((System.getenv("NERSERVER_DEBUG") != null) ?
-                           Boolean.parseBoolean(System.getenv("NERSERVER_DEBUG")) :
-                           false);
+  private static final boolean ENV_DEBUG = ((System.getenv("NERSERVER_DEBUG") != null) ?
+                                            Boolean.parseBoolean(System.getenv("NERSERVER_DEBUG")) :
+                                            false);
+
+  private boolean DEBUG = ENV_DEBUG;
 
   private final String charset;
 
