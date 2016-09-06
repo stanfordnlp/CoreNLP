@@ -603,6 +603,11 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   private static final Pattern pQuoted = Pattern.compile("\"(.+)\"");
 
   /**
+   * Strings of punctuation which should remain a single token.
+   */
+  private static final Pattern pPunct = Pattern.compile("[.,!?:/'=()-]+");
+
+  /**
    * Characters which may separate words in a single token.
    */
   private static final String WORD_SEPARATORS = ",-_¡!¿?()/%";
@@ -649,6 +654,10 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
    */
   private String[] getMultiWords(String token) {
     token = prepareForMultiWordExtraction(token);
+
+    Matcher punctMatcher = pPunct.matcher(token);
+    if (punctMatcher.matches())
+      return new String[] {token};
 
     Matcher quoteMatcher = pQuoted.matcher(token);
     if (quoteMatcher.matches()) {
