@@ -13,9 +13,6 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeReader;
-import edu.stanford.nlp.trees.PennTreeReader;
-import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.*;
@@ -186,7 +183,7 @@ public class StanfordCoreNLPServer implements Runnable {
         Headers h = httpExchange.getRequestHeaders();
         String encoding;
         if (h.containsKey("Content-type")) {
-          String[] charsetPair = Arrays.asList(h.getFirst("Content-type").split(";")).stream()
+          String[] charsetPair = Arrays.stream(h.getFirst("Content-type").split(";"))
               .map(x -> x.split("="))
               .filter(x -> x.length > 0 && "charset".equals(x[0]))
               .findFirst().orElse(new String[]{"charset", defaultEncoding});
@@ -564,8 +561,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
       // Load the default properties
       Properties props = new Properties();
-      defaultProps.entrySet().stream()
-          .forEach(entry -> props.setProperty(entry.getKey().toString(), entry.getValue().toString()));
+      defaultProps.entrySet().forEach(entry -> props.setProperty(entry.getKey().toString(), entry.getValue().toString()));
 
       // Add GET parameters as properties
       urlParams.entrySet().stream()
@@ -600,7 +596,6 @@ public class StanfordCoreNLPServer implements Runnable {
 
       // if a language is specified, load the properties for that language, don't overwrite other properties
       if (props.containsKey("pipelineLanguage")) {
-        Properties languageProps = new Properties();
         String pipelineLanguageFile = LanguageInfo.getLanguagePropertiesFile(props.getProperty("pipelineLanguage"));
         if (pipelineLanguageFile == null) {
           String clientResponse = "specified language is not supported: "+props.getProperty("pipelineLanguage")
@@ -612,6 +607,7 @@ public class StanfordCoreNLPServer implements Runnable {
           }
         }
         try {
+          Properties languageProps = new Properties();
           languageProps.load(StanfordCoreNLPServer.class.getResourceAsStream(pipelineLanguageFile));
           PropertiesUtils.noClobberWriteProperties(props, languageProps);
         } catch (IOException e) {
@@ -898,7 +894,7 @@ public class StanfordCoreNLPServer implements Runnable {
     private final Predicate<Properties> authenticator;
 
     /**
-     * Create a new Tregrex Handler.
+     * Create a new Tregex Handler.
      * @param callback The callback to call when annotation has finished.
      */
     public TregexHandler(Predicate<Properties> authenticator, Consumer<FinishedRequest> callback) {
@@ -914,7 +910,7 @@ public class StanfordCoreNLPServer implements Runnable {
 
       // Some common properties
       Properties props = PropertiesUtils.asProperties("annotators", "tokenize,ssplit,parse");
-      if (authenticator != null && !authenticator.test(props)) {
+      if (authenticator != null && ! authenticator.test(props)) {
         respondUnauthorized(httpExchange);
         return;
       }
@@ -924,14 +920,14 @@ public class StanfordCoreNLPServer implements Runnable {
         try {
           // Get the document
           Annotation doc = getDocument(props, httpExchange);
-          if (!doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
+          if ( ! doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
             StanfordCoreNLP pipeline = mkStanfordCoreNLP(props);
             pipeline.annotate(doc);
           }
 
           // Construct the matcher
           // (get the pattern)
-          if (!params.containsKey("pattern")) {
+          if ( ! params.containsKey("pattern")) {
             respondBadInput("Missing required parameter 'pattern'", httpExchange);
             return Pair.makePair("", null);
           }
@@ -940,7 +936,7 @@ public class StanfordCoreNLPServer implements Runnable {
           // (create the matcher)
           TregexPattern p = TregexPattern.compile(pattern);
 
-          // Run TokensRegex
+          // Run Tregex
           return Pair.makePair(JSONOutputter.JSONWriter.objectToJSON((docWriter) -> {
             docWriter.set("sentences", doc.get(CoreAnnotations.SentencesAnnotation.class).stream().map(sentence -> (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer sentWriter) -> {
                 Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
@@ -975,11 +971,11 @@ public class StanfordCoreNLPServer implements Runnable {
         Annotation completedAnnotation = pair.second;
         byte[] content = pair.first.getBytes();
         sendAndGetResponse(httpExchange, content);
-        if (completedAnnotation != null && props.getProperty("annotators") != null && !"".equals(props.getProperty("annotators"))) {
+        if (completedAnnotation != null && ! StringUtils.isNullOrEmpty(props.getProperty("annotators"))) {
           callback.accept(new FinishedRequest(props, completedAnnotation, params.get("pattern"), null));
         }
       } catch (InterruptedException | ExecutionException | TimeoutException e) {
-        respondError("Timeout when executing Semgrex query", httpExchange);
+        respondError("Timeout when executing Tregex query", httpExchange);
       }
     }
   }
@@ -995,7 +991,7 @@ public class StanfordCoreNLPServer implements Runnable {
   }
 
 
-  private HttpsServer addSSLContext(HttpsServer server) {
+  private static HttpsServer addSSLContext(HttpsServer server) {
     log("Adding SSL context to server");
     try {
       KeyStore ks = KeyStore.getInstance("JKS");
