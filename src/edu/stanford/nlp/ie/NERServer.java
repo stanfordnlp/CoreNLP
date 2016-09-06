@@ -182,10 +182,15 @@ public class NERServer  {
           out.print(output);
           out.flush();
         }
-      } catch (RuntimeException e) {
+      } catch (RuntimeException | OutOfMemoryError e) {
         // ah well, guess they won't be hearing back from us after all
+        if (DEBUG) {
+          log.error("NERServer.Session: error classifying string.");
+          log.error(e);
+        }
+      } finally {
+        close();
       }
-      close();
     }
 
     /**
@@ -195,6 +200,10 @@ public class NERServer  {
       try {
         in.close();
         out.close();
+        if (DEBUG) {
+          log.info("Closing connection to client");
+          log.info(client.getInetAddress().getHostName());
+        }
         client.close();
       } catch (Exception e) {
         log.info("NERServer:Session: can't close session");
