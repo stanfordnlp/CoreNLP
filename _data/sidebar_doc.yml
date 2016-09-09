@@ -40,6 +40,9 @@ entries:
         - title: CoreNLP server
           url: corenlp-server.html
 
+        - title: Caseless operation
+          url: caseless.html
+          
         - title: On other human languages
           url: human-languages.html
 

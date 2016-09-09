@@ -52,19 +52,13 @@ although note that when processing an xml document, the cleanxml
 annotator will overwrite the `DocDateAnnotation` if
 "datetime" or "date" are specified in the document.
 
-## Caseless model
 
-It is possible to run StanfordCoreNLP with an NER
-model that ignores capitalization.  In order to do this, download the
-[caseless models](http://nlp.stanford.edu/software/stanford-corenlp-caseless-2015-04-20-models.jar) package.  Be sure to include the path to the case
-insensitive models jar in the `-cp` classpath flag as well.
+## Caseless models
 
-```
--ner.model edu/stanford/nlp/models/ner/english.all.3class.caseless.distsim.crf.ser.gz
-   edu/stanford/nlp/models/ner/english.muc.7class.caseless.distsim.crf.ser.gz
-   edu/stanford/nlp/models/ner/english.conll.4class.caseless.distsim.crf.ser.gz
-```
-
+It is possible to run StanfordCoreNLP with NER
+models that ignore capitalization. We have trained models like this
+for English. You can find details on the
+[Caseless models](caseless.html) page.
 
 
 ## More information 

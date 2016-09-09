@@ -21,16 +21,13 @@ Provides full syntactic analysis, using both the constituent and the dependency 
 * parse.originalDependencies: Generate original Stanford Dependencies grammatical relations instead of Universal Dependencies. Note, however, that some annotators that use dependencies such as natlog might not function properly if you use this option.  If you are using the [Neural Network dependency parser](http://nlp.stanford.edu/software/nndep.shtml) and want to get the original SD relations, see the [CoreNLP FAQ](faq.html#how-can-i-get-original-stanford-dependencies-instead-of-universal-dependencies) on how to use a model trained on Stanford Dependencies.
 * parse.kbest Store the k-best parses in `KBestTreesAnnotation`. Note that this option only has an effect if you parse sentences with a PCFG model.
 
-## Caseless model
+
+## Caseless models
 
 It is possible to run StanfordCoreNLP with a parser
-model that ignores capitalization. In order to do this, download the
-[caseless models](http://nlp.stanford.edu/software/stanford-corenlp-caseless-2015-04-20-models.jar) package.  Be sure to include the path to the case
-insensitive models jar in the `-cp` classpath flag as well.
-
-```
--parse.model edu/stanford/nlp/models/lexparser/englishPCFG.caseless.ser.gz
-```
+model that ignores capitalization. We have trained models like this
+for English. You can find details on the
+[Caseless models](caseless.html) page.
 
 
 ## Shift-reduce parser
