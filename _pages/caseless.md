@@ -14,10 +14,10 @@ models. Prior to version 3.6, caseless models were packaged separately as
 their own jar file (approximately treating "caseless English" like a
 separate language). Starting with version 3.6, caseless models for
 English were included in the new comprehensive english jar file. You
-can find these jar files on the [Release history](history.md) page.
+can find these jar files on the [Release history](history.html) page.
 
-Be sure to include the path to the case
-insensitive models jar in the `-cp` classpath flag and then you can
+Be sure to include the path to the case-insensitive models jar in the
+`-cp` classpath flag and then you can 
 ask for these models to be used like this:
 
 ```
@@ -33,7 +33,11 @@ ask for these models to be used like this:
   you should either run with caseless models from a 3.5.x series
   release (all of which are compatible with version 3.6.0) or download
   the new fixed model in the HEAD jar, which is available from
-  [our GitHub page](https://github.com/stanfordnlp/CoreNLP).
+  [our GitHub page](https://github.com/stanfordnlp/CoreNLP). Since the
+  version 3.5.x releases have a separate caseless jar, it is easy to
+  also specify it as a dependency; you just have to make sure that it
+  appears on your classpath *before* other jars which contain models
+  with the same name.
 
 To train your own caseless models, you need one additional property,
 which asks for a function to be called before a token is processed
