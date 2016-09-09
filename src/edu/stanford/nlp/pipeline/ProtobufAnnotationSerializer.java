@@ -370,6 +370,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   protected CoreNLPProtos.Sentence.Builder toProtoBuilder(CoreMap sentence, Set<Class<?>> keysToSerialize) {
     // Error checks
     if (sentence instanceof CoreLabel) { throw new IllegalArgumentException("CoreMap is actually a CoreLabel"); }
+    List<CoreLabel> tokens = sentence.get(TokensAnnotation.class);
     CoreNLPProtos.Sentence.Builder builder = CoreNLPProtos.Sentence.newBuilder();
     // Remove items serialized elsewhere from the required list
     keysToSerialize.remove(TextAnnotation.class);
@@ -421,12 +422,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     if (keySet.contains(NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
       for (RelationTriple triple : getAndRegister(sentence, keysToSerialize, NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
-        builder.addOpenieTriple(toProto(triple));
+        builder.addOpenieTriple(toProto(triple, tokens));
       }
     }
     if (keySet.contains(KBPTriplesAnnotation.class)) {
       for (RelationTriple triple : getAndRegister(sentence, keysToSerialize, KBPTriplesAnnotation.class)) {
-        builder.addKbpTriple(toProto(triple));
+        builder.addKbpTriple(toProto(triple, tokens));
       }
     }
     // Non-default annotators
@@ -934,21 +935,40 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         .build();
   }
 
+
+  /**
+   * Get the index of an element in a list, by strict (reference) equality.
+   *
+   * @param list The list of objects.
+   * @param searchedObject The object which must be in the list, by == rather than .equals().
+   * @param <E> The type of the list.
+   *
+   * @return The index of the object, or -1 if not found.
+   */
+  private static <E> int indexOfById(List<E> list, E searchedObject) {
+    int i = 0;
+    for (Object o : list) {
+      if (o == searchedObject) return i;
+      i++;
+    }
+    return -1;
+  }
+
   /**
    * Return a Protobuf RelationTriple from a RelationTriple.
    */
-  public static CoreNLPProtos.RelationTriple toProto(RelationTriple triple) {
+  public static CoreNLPProtos.RelationTriple toProto(RelationTriple triple, List<CoreLabel> tokens) {
     CoreNLPProtos.RelationTriple.Builder builder = CoreNLPProtos.RelationTriple.newBuilder()
         .setSubject(triple.subjectGloss())
         .setRelation(triple.relationGloss())
         .setObject(triple.objectGloss())
         .setConfidence(triple.confidence)
-        .addAllSubjectTokens(triple.subject.stream().map(x -> x.index() - 1).collect(Collectors.toList()))
+        .addAllSubjectTokens(triple.subject.stream().map(x -> indexOfById(tokens, x)).filter(x -> x >= 0 && x < tokens.size()).collect(Collectors.toList()))
         .addAllRelationTokens(
             triple.relation.size() == 1 && triple.relation.get(0).get(IndexAnnotation.class) == null
                 ? Collections.emptyList()  // case: this is not a real relation token, but rather a placeholder relation
-                : triple.relation.stream().map(x -> x.index() - 1).collect(Collectors.toList()))
-        .addAllObjectTokens(triple.object.stream().map(x -> x.index() - 1).collect(Collectors.toList()));
+                : triple.relation.stream().map(x -> indexOfById(tokens, x)).filter(x -> x >= 0 && x < tokens.size()).collect(Collectors.toList()))
+        .addAllObjectTokens(triple.object.stream().map(x -> indexOfById(tokens, x)).filter(x -> x >= 0 && x < tokens.size()).collect(Collectors.toList()));
     Optional<SemanticGraph> treeOptional = triple.asDependencyTree();
     if (treeOptional.isPresent()) {
       builder.setTree(toProto(treeOptional.get()));

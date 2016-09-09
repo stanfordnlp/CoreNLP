@@ -987,8 +987,9 @@ public class Document {
     synchronized (serializer) {
       for (int i = 0; i < sentences.size(); ++i) {
         CoreMap sentence = ann.get(CoreAnnotations.SentencesAnnotation.class).get(i);
+        List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
         Collection<RelationTriple> triples = sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
-        sentences.get(i).updateOpenIE(triples.stream().map(ProtobufAnnotationSerializer::toProto));
+        sentences.get(i).updateOpenIE(triples.stream().map(x -> serializer.toProto(x, tokens)));
       }
     }
     // Return
@@ -1013,8 +1014,9 @@ public class Document {
     synchronized (serializer) {
       for (int i = 0; i < sentences.size(); ++i) {
         CoreMap sentence = ann.get(CoreAnnotations.SentencesAnnotation.class).get(i);
+        List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
         Collection<RelationTriple> triples = sentence.get(CoreAnnotations.KBPTriplesAnnotation.class);
-        sentences.get(i).updateKBP(triples.stream().map(ProtobufAnnotationSerializer::toProto));
+        sentences.get(i).updateKBP(triples.stream().map((RelationTriple x) -> serializer.toProto(x, tokens)));
       }
     }
     // Return
