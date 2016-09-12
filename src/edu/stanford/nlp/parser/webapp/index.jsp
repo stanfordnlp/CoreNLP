@@ -32,8 +32,8 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Collections" %>
 <%@ page import="java.util.Properties" %>
-<%@ page import="java.util.Locale" %>
 <%@ page import="java.util.Date" %>
+<%@ page import="edu.stanford.nlp.ling.CoreLabel" %>
 
 <%!
 private static final int MAXWORDS = 70;
@@ -45,16 +45,17 @@ private static final String BASE_LOG_FILENAME = "/logs/parser.sentences";
 private static final String LOG_FILENAME = BASE_DIR + BASE_LOG_FILENAME;
 
 private static class ParserPack {
-  CRFClassifier segmenter;
+  CRFClassifier<CoreLabel> segmenter;
   LexicalizedParser parser;
   TreebankLanguagePack tLP;
   TreePrint tagPrint, pennPrint, typDepPrint, typDepColPrint;
   Function<List<HasWord>, List<HasWord>> escaper;
+  String modelName;
 }
 
 private static ParserPack loadParserPack(String parser, ServletContext application)
    throws Exception {
-  String SerializedParserPath =
+  String serializedParserPath =
      application.getRealPath("/WEB-INF/data") + File.separator +
      nameToParserSer.get(parser);
 
@@ -62,10 +63,11 @@ private static ParserPack loadParserPack(String parser, ServletContext applicati
   ParserPack pp = new ParserPack();
   pp.escaper = (Function<List<HasWord>, List<HasWord>>)
      Class.forName(nameToEscaper.get(parser)).newInstance();
-  pp.parser = LexicalizedParser.loadModel(SerializedParserPath);
+  pp.parser = LexicalizedParser.loadModel(serializedParserPath);
   pp.tLP = pp.parser.getOp().tlpParams.treebankLanguagePack();
   pp.tagPrint = new TreePrint("wordsAndTags", pp.tLP);
   pp.pennPrint = new TreePrint("penn", pp.tLP);
+  pp.modelName = serializedParserPath;
 
   // Enable typed dependencies if supported
   if (!(parser.equals("Arabic") || parser.equals("Spanish"))) {
@@ -78,7 +80,7 @@ private static ParserPack loadParserPack(String parser, ServletContext applicati
     Properties props = new Properties();
     String dataDir = application.
       getRealPath("/WEB-INF/data/chinesesegmenter");
-    CRFClassifier classifier = new CRFClassifier(props);
+    CRFClassifier<CoreLabel> classifier = new CRFClassifier<>(props);
     BufferedInputStream bis = new BufferedInputStream(new GZIPInputStream(
       new FileInputStream(dataDir + File.separator + "05202008-ctb6.processed-chris6.lex.gz")));
     classifier.loadClassifier(bis,null); bis.close();
@@ -101,7 +103,7 @@ private static ParserPack loadParserPack(String parser, ServletContext applicati
   } else {
     defaultQueryPieces = Arrays.asList(defaultQuery.get(parser).split("\\s+"));
   }
-  List<HasWord> defaultQueryWords = new ArrayList<HasWord>();
+  List<HasWord> defaultQueryWords = new ArrayList<>();
   for (String s : defaultQueryPieces) {
     defaultQueryWords.add(new Word(s));
   }
@@ -109,24 +111,26 @@ private static ParserPack loadParserPack(String parser, ServletContext applicati
   return pp;
 }
 
-private static final Map<String, String> nameToParserSer = new HashMap<String, String>();
-private static final Map<String, String> nameToEscaper = new HashMap<String, String>();
-static final Map<String, ParserPack> parsers = new HashMap<String, ParserPack>();
-private static final Map<String, String> defaultQuery = new HashMap<String, String>();
+private static final Map<String, String> nameToParserSer = new HashMap<>();
+private static final Map<String, String> nameToEscaper = new HashMap<>();
+static final Map<String, ParserPack> parsers = new HashMap<>();
+private static final Map<String, String> defaultQuery = new HashMap<>();
 
 static {
   nameToParserSer.put("English", "englishPCFG.ser.gz");
-  nameToParserSer.put("Chinese", "xinhuaFactored.ser.gz");
   nameToParserSer.put("Arabic",  "arabicFactored.ser.gz");
+  nameToParserSer.put("Chinese", "chineseFactored.ser.gz");
+  nameToParserSer.put("French", "frenchFactored.ser.gz");
   nameToParserSer.put("Spanish", "spanishPCFG.ser.gz");
   nameToEscaper.put("English", "edu.stanford.nlp.process.PTBEscapingProcessor");
-  nameToEscaper.put("Chinese",
-     "edu.stanford.nlp.trees.international.pennchinese.ChineseEscaper");
   nameToEscaper.put("Arabic", "edu.stanford.nlp.process.PTBEscapingProcessor");
+  nameToEscaper.put("Chinese", "edu.stanford.nlp.trees.international.pennchinese.ChineseEscaper");
+  nameToEscaper.put("French", "edu.stanford.nlp.process.PTBEscapingProcessor");
   nameToEscaper.put("Spanish", "edu.stanford.nlp.process.PTBEscapingProcessor");
   defaultQuery.put("English", "My dog also likes eating sausage.");
-  defaultQuery.put("Chinese", "猴子喜欢吃香蕉。");
   defaultQuery.put("Arabic", "هذا الرجل هو سعيد.");
+  defaultQuery.put("Chinese", "猴子喜欢吃香蕉。");
+  defaultQuery.put("French", "Au fond, les choses sont assez simples.");
   defaultQuery.put("Spanish", "El reino canta muy bien.");
 }
 
@@ -162,21 +166,20 @@ if (pp == null) {
     <title>Stanford Parser</title>
     <style type="text/css">
        div.parserOutput { padding-left: 3em;
-                          padding-top: 1em; padding-bottom: 0px;
-                          margin: 0px; }
+                          padding-top: 1em; padding-bottom: 0;
+                          margin: 0; }
        div.parserOutputMonospace {
-                          padding-top: 1em; padding-bottom: 1em; margin: 0px;
+                          padding-top: 1em; padding-bottom: 1em; margin: 0;
                           font-family: monospace; padding-left: 3em; }
-       .spacingFree { padding: 0px; margin: 0px; }
+       .spacingFree { padding: 0; margin: 0; }
     </style>
 
     <link href="http://nlp.stanford.edu/nlp.css" rel="stylesheet"
           type="text/css" />
 
     <script type="text/javascript">
-    <!--//--><![CDATA[
-    <% ArrayList<String> langs =
-         new ArrayList<String>(nameToParserSer.keySet());
+    //<![CDATA[
+    <% ArrayList<String> langs = new ArrayList<>(nameToParserSer.keySet());
        Collections.sort(langs);  %>
 
     function showSample() {
@@ -201,7 +204,7 @@ if (pp == null) {
          parseButton.value = "Parse";
       }
     }
-    <!--//-->]]>
+    //]]>
     </script>
 
     <link rel="icon" type="image/x-icon" href="/parser/favicon.ico" />
@@ -285,7 +288,6 @@ if (pp == null) {
         String toParse = null;
         long time = -System.currentTimeMillis();
         long tokens = 0;
-        List<List<HasWord>> sentences = new ArrayList<List<HasWord>>();
         List<Tree> trees = new ArrayList<Tree>();
 
         try {
@@ -300,11 +302,12 @@ if (pp == null) {
             toParse = query;
           }
           toParse = toParse.replaceAll("\t", " ");
-          StringReader reader = new StringReader(toParse);
+          // StringReader reader = new StringReader(toParse);
           // TODO: different preprocessor for Chinese and maybe Arabic
           DocumentPreprocessor dp = new DocumentPreprocessor(new StringReader(toParse));
           dp.setTokenizerFactory(pp.tLP.getTokenizerFactory());
-          for (List<HasWord> sentence : dp) {
+      List<List<HasWord>> sentences = new ArrayList<List<HasWord>>();
+      for (List<HasWord> sentence : dp) {
             if (sentence.size() > MAXWORDS) {
               %>
                 <p>
@@ -423,6 +426,7 @@ if (pp == null) {
           <h3>Statistics</h3>
 
           <br />Tokens: <%= tokens %> <br /> Time: <%= String.format("%.3f s", time/1000.0) %> <br />
+          Parser: <%= pp.modelName %> <br />
 
         <% } else {
           sentenceLog.printf("FAILURE%n"); %>
