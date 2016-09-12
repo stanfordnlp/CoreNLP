@@ -34,6 +34,8 @@
 <%@ page import="java.util.Properties" %>
 <%@ page import="java.util.Date" %>
 <%@ page import="edu.stanford.nlp.ling.CoreLabel" %>
+<%@ page import="edu.stanford.nlp.util.XMLUtils" %>
+<%@ page import="edu.stanford.nlp.util.StringUtils" %>
 
 <%!
 private static final int MAXWORDS = 70;
@@ -192,9 +194,12 @@ if (pp == null) {
     function handleOnChangeParserSelect() {
       query = document.getElementById("query");
       parserSelect = document.getElementById("parserSelect");
-      for (var i = 0; i < <%= langs.size() %> ; i++) {
-         defaultQuery = document.getElementById("defaultQuery."+ i);
-         if (query.value == defaultQuery.value) { showSample(); break; }
+      for (var i = 0; i < <%= langs.size() %>; i++) {
+        defaultQuery = document.getElementById("defaultQuery." + i);
+        if (query.value == defaultQuery.value) {
+          showSample();
+          break;
+        }
       }
       parseButton = document.getElementById("parseButton");
       chineseParseButton = document.getElementById("chineseParseButton");
@@ -215,15 +220,17 @@ if (pp == null) {
 
   <body>
     <%
-       String query = request.getParameter("query");
-       if (query == null) query = "";
-       query = query.replaceAll("^\\s*", "").replaceAll("\\s*$", "");
+        String query = request.getParameter("query");
+        if (query == null) { query = ""; }
+        query = query.replaceAll("^\\s*", "").replaceAll("\\s*$", "");
+        // Deal with XSS stuff here
+        query = XMLUtils.escapeXML(query);
 
-       if (query.length() == 0) query = defaultQuery.get(parserSelect);
+        if (query.isEmpty()) { query = defaultQuery.get(parserSelect); }
 
-       PrintWriter sentenceLog = new PrintWriter(new BufferedWriter(
+        PrintWriter sentenceLog = new PrintWriter(new BufferedWriter(
                                    new FileWriter(LOG_FILENAME, true)));
-       sentenceLog.printf("%s:%s: [%s] - ", new Date(), parserSelect, query);
+        sentenceLog.printf("%s:%s: [%s] - ", new Date(), parserSelect, query);
     %>
 
     <h1>Stanford Parser</h1>
@@ -274,7 +281,7 @@ if (pp == null) {
     </div>
 
     <div style="clear: left; margin-top: 3em">
-    <% if (query != null && query.length() > 0) {
+    <% if ( ! StringUtils.isNullOrEmpty(query)) {
          String[] queryWords = query.split("\\s+");
          application.log("Parser query from " + request.getRemoteAddr()
            + ": " + query); %>
