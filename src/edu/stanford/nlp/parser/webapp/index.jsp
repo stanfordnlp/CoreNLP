@@ -13,12 +13,10 @@
 
 <%@ page session="false" %>
 <%@ page import="edu.stanford.nlp.ie.crf.CRFClassifier" %>
-<%@ page import="edu.stanford.nlp.ie.AbstractSequenceClassifier" %>
 <%@ page import="edu.stanford.nlp.ling.HasWord" %>
 <%@ page import="edu.stanford.nlp.ling.SentenceUtils" %>
 <%@ page import="edu.stanford.nlp.ling.Word" %>
 <%@ page import="edu.stanford.nlp.parser.lexparser.LexicalizedParser" %>
-<%@ page import="edu.stanford.nlp.parser.lexparser.Options" %>
 <%@ page import="edu.stanford.nlp.process.DocumentPreprocessor" %>
 <%@ page import="edu.stanford.nlp.sequences.SeqClassifierFlags" %>
 <%@ page import="edu.stanford.nlp.trees.Tree" %>
@@ -38,15 +36,15 @@
 <%@ page import="java.util.Date" %>
 
 <%!
-static final int MAXWORDS = 70;
-static final String DEFAULT_LANG = "English";
+private static final int MAXWORDS = 70;
+private static final String DEFAULT_LANG = "English";
 static final boolean DEBUG = false;
 // WARNING: this is tomcat specific
-static final String BASE_DIR = System.getProperty("catalina.base");
-static final String BASE_LOG_FILENAME = "/logs/parser.sentences";
-static final String LOG_FILENAME = BASE_DIR + BASE_LOG_FILENAME;
+private static final String BASE_DIR = System.getProperty("catalina.base");
+private static final String BASE_LOG_FILENAME = "/logs/parser.sentences";
+private static final String LOG_FILENAME = BASE_DIR + BASE_LOG_FILENAME;
 
-class ParserPack {
+private static class ParserPack {
   CRFClassifier segmenter;
   LexicalizedParser parser;
   TreebankLanguagePack tLP;
@@ -54,7 +52,7 @@ class ParserPack {
   Function<List<HasWord>, List<HasWord>> escaper;
 }
 
-ParserPack loadParserPack(String parser, ServletContext application)
+private static ParserPack loadParserPack(String parser, ServletContext application)
    throws Exception {
   String SerializedParserPath =
      application.getRealPath("/WEB-INF/data") + File.separator +
@@ -111,10 +109,10 @@ ParserPack loadParserPack(String parser, ServletContext application)
   return pp;
 }
 
-static Map<String, String> nameToParserSer = new HashMap<String, String>();
-static Map<String, String> nameToEscaper = new HashMap<String, String>();
-static Map<String, ParserPack> parsers = new HashMap<String, ParserPack>();
-static Map<String, String> defaultQuery = new HashMap<String, String>();
+private static final Map<String, String> nameToParserSer = new HashMap<String, String>();
+private static final Map<String, String> nameToEscaper = new HashMap<String, String>();
+static final Map<String, ParserPack> parsers = new HashMap<String, ParserPack>();
+private static final Map<String, String> defaultQuery = new HashMap<String, String>();
 
 static {
   nameToParserSer.put("English", "englishPCFG.ser.gz");
@@ -149,7 +147,7 @@ if (parserSelect == null) { parserSelect = DEFAULT_LANG; }
 
 ParserPack pp = parsers.get(parserSelect);
 if (pp == null) {
-  synchronized(parsers) {
+  synchronized (parsers) {
     pp = parsers.get(parserSelect);
     if (pp == null) {
       pp = loadParserPack(parserSelect, application);
@@ -444,7 +442,7 @@ if (pp == null) {
 
   <p style="text-align: right">
     <a href="http://validator.w3.org/check?uri=referer"><img
-        style="border: 0px"
+        style="border: 0"
         src="http://www.w3.org/Icons/valid-xhtml10"
         alt="Valid XHTML 1.0 Strict" height="31" width="88" /></a>
   </p>
