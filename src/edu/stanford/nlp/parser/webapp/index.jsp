@@ -223,7 +223,7 @@ if (pp == null) {
         if (query == null) { query = ""; }
         query = query.replaceAll("^\\s*", "").replaceAll("\\s*$", "");
         // Deal with XSS stuff here - we just delete all angle brackets!
-        query = query.replaceAll("[<>]", "");
+        query = query.replaceAll("[<>\uC0BC]", "");
 
         if (query.isEmpty()) { query = defaultQuery.get(parserSelect); }
 
@@ -447,7 +447,7 @@ if (pp == null) {
   <p>
     <em><a href="http://nlp.stanford.edu/software/lex-parser.shtml">Back to parser home</a></em>
     <br/>
-    <em>Last updated 2015-05-18</em>
+    <em>Last updated 2016-09-12</em>
   </p>
 
   <p style="text-align: right">
