@@ -34,7 +34,6 @@
 <%@ page import="java.util.Properties" %>
 <%@ page import="java.util.Date" %>
 <%@ page import="edu.stanford.nlp.ling.CoreLabel" %>
-<%@ page import="edu.stanford.nlp.util.XMLUtils" %>
 <%@ page import="edu.stanford.nlp.util.StringUtils" %>
 
 <%!
@@ -69,10 +68,10 @@ private static ParserPack loadParserPack(String parser, ServletContext applicati
   pp.tLP = pp.parser.getOp().tlpParams.treebankLanguagePack();
   pp.tagPrint = new TreePrint("wordsAndTags", pp.tLP);
   pp.pennPrint = new TreePrint("penn", pp.tLP);
-  pp.modelName = serializedParserPath;
+  pp.modelName = nameToParserSer.get(parser);
 
   // Enable typed dependencies if supported
-  if (!(parser.equals("Arabic") || parser.equals("Spanish"))) {
+  if (pp.tLP.supportsGrammaticalStructures()) {
      pp.typDepPrint = new TreePrint("typedDependencies", "basicDependencies", pp.tLP);
      pp.typDepColPrint = new TreePrint("typedDependencies", pp.tLP);  // default is now CCprocessed
   }
@@ -223,8 +222,8 @@ if (pp == null) {
         String query = request.getParameter("query");
         if (query == null) { query = ""; }
         query = query.replaceAll("^\\s*", "").replaceAll("\\s*$", "");
-        // Deal with XSS stuff here
-        query = XMLUtils.escapeXML(query);
+        // Deal with XSS stuff here - we just delete all angle brackets!
+        query = query.replaceAll("[<>]", "");
 
         if (query.isEmpty()) { query = defaultQuery.get(parserSelect); }
 
@@ -399,7 +398,7 @@ if (pp == null) {
           %></pre>
           </div>
 
-	        <% if (!(parserSelect.equals("Arabic") || parserSelect.equals("Spanish"))) { %>
+          <% if (pp.tLP.supportsGrammaticalStructures()) { %>
 
           <h3>Universal dependencies</h3>
           <div class="parserOutput">
