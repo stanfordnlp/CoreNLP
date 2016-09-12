@@ -18,15 +18,15 @@ import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.util.CoreMap;
 
+import edu.stanford.nlp.util.StringUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 
-public class SUTimeServlet extends HttpServlet
-{
-  SUTimePipeline pipeline = null;
+public class SUTimeServlet extends HttpServlet {
 
-  public void init() 
-    throws ServletException 
-  {
+  private SUTimePipeline pipeline; // = null;
+
+  @Override
+  public void init() throws ServletException {
     String dataDir = getServletContext().getRealPath("/WEB-INF/data");
     String taggerFilename = dataDir + "/english-left3words-distsim.tagger";
     Properties pipelineProps = new Properties();
@@ -37,18 +37,17 @@ public class SUTimeServlet extends HttpServlet
   }
 
   public static boolean parseBoolean(String value) {
-    if (value == null || value.equals("")) {
+    if (StringUtils.isNullOrEmpty(value)) {
       return false;
     }
     if (value.equalsIgnoreCase("on")) {
       return true;
     }
-    return Boolean.valueOf(value);
+    return Boolean.parseBoolean(value);
   }
 
   public void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException 
-  {
+    throws ServletException, IOException {
     if (request.getCharacterEncoding() == null) {
       request.setCharacterEncoding("utf-8");
     }
@@ -61,9 +60,9 @@ public class SUTimeServlet extends HttpServlet
       include(request, response);
   }
 
+  @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException 
-  {
+    throws ServletException, IOException {
     doGet(request, response);
   }
 
@@ -79,8 +78,7 @@ public class SUTimeServlet extends HttpServlet
     return sb.toString();
   }
 
-  private Properties getTimeAnnotatorProperties(HttpServletRequest request)
-  {
+  private Properties getTimeAnnotatorProperties(HttpServletRequest request) {
     // Parses request and set up properties for time annotators
     boolean markTimeRanges =
             parseBoolean(request.getParameter("markTimeRanges"));
@@ -93,9 +91,8 @@ public class SUTimeServlet extends HttpServlet
     String heuristicLevel = request.getParameter("relativeHeuristicLevel");
     Options.RelativeHeuristicLevel relativeHeuristicLevel =
             Options.RelativeHeuristicLevel.NONE;
-    if (heuristicLevel != null && !heuristicLevel.equals("")) {
-      relativeHeuristicLevel =
-              Options.RelativeHeuristicLevel.valueOf(heuristicLevel);
+    if ( ! StringUtils.isNullOrEmpty(heuristicLevel)) {
+      relativeHeuristicLevel = Options.RelativeHeuristicLevel.valueOf(heuristicLevel);
     }
     String ruleFile = null;
     if (readRules) {
@@ -132,7 +129,7 @@ public class SUTimeServlet extends HttpServlet
     return props;
   }
 
-  private void displayAnnotation(PrintWriter out, String query, Annotation anno, boolean includeOffsets) {
+  private static void displayAnnotation(PrintWriter out, String query, Annotation anno, boolean includeOffsets) {
     List<CoreMap> timexAnns = anno.get(TimeAnnotations.TimexAnnotations.class);
     List<String> pieces = new ArrayList<>();
     List<Boolean> tagged = new ArrayList<>();
@@ -214,24 +211,23 @@ public class SUTimeServlet extends HttpServlet
 
   private void addResults(HttpServletRequest request,
                           HttpServletResponse response)
-    throws IOException
-  {
+    throws IOException {
     // if we can't handle UTF-8, need to do something like this...
     //String originalQuery = request.getParameter("q");
     //String query = WebappUtil.convertString(originalQuery);
-    
+
     String query = request.getParameter("q");
     String dateString = request.getParameter("d");
     // TODO: this always returns true...
-    boolean dateError = !pipeline.isDateOkay(dateString);
+    boolean dateError = ! pipeline.isDateOkay(dateString);
     boolean includeOffsets = parseBoolean(request.getParameter("includeOffsets"));
     PrintWriter out = response.getWriter();
     if (dateError) {
-      out.println("<br><br>Warning: unparseable date " + 
+      out.println("<br><br>Warning: unparseable date " +
                   StringEscapeUtils.escapeHtml4(dateString));
     }
 
-    if (query != null && !query.equals("")) {
+    if ( ! StringUtils.isNullOrEmpty(query)) {
       Properties props = getTimeAnnotatorProperties(request);
       String annotatorType = request.getParameter("annotator");
       if (annotatorType == null) {
@@ -243,7 +239,7 @@ public class SUTimeServlet extends HttpServlet
         out.println("<h3>Annotated Text</h3> <em>(tagged using " + annotatorType + "</em>)");
         displayAnnotation(out, query, anno, includeOffsets);
       } else {
-        out.println("<br><br>Error creating annotator for " + annotatorType);
+        out.println("<br><br>Error creating annotator for " + StringEscapeUtils.escapeHtml4(annotatorType));
       }
 
 
@@ -252,4 +248,5 @@ public class SUTimeServlet extends HttpServlet
   }
 
   private static final long serialVersionUID = 1L;
+
 }
