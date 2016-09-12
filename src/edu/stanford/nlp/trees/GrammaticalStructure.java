@@ -1060,7 +1060,7 @@ public abstract class GrammaticalStructure implements Serializable  {
   // Note that these field constants are 0-based whereas much documentation is 1-based
 
   public static final int CoNLLX_WordField = 1;
-  public static final int CoNLLX_POSField = 3;
+  public static final int CoNLLX_POSField = 4;
   public static final int CoNLLX_GovField = 6;
   public static final int CoNLLX_RelnField = 7;
 
