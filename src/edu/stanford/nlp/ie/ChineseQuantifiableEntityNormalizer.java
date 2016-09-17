@@ -173,9 +173,11 @@ public class ChineseQuantifiableEntityNormalizer {
    * @param list A list of {@link CoreMap}s representing a single document.
    *             Note: We assume the NERs has been labelled and the labels
    *             will be updated in place.
+   * @param document
+   * @param sentence
    * @param <E>
    */
-  public static <E extends CoreMap> void addNormalizedQuantitiesToEntities(List<E> list) {
+  public static <E extends CoreMap> void addNormalizedQuantitiesToEntities(List<E> list, CoreMap document, CoreMap sentence) {
 
     // Fix the NER sequence if necessay
     fixupNerBeforeNormalization(list);
@@ -216,7 +218,6 @@ public class ChineseQuantifiableEntityNormalizer {
             // TODO [pengqi]: add TIME
             break;
           case DATE_TAG:
-            // TODO: add DATE
             processEntity(collector, prevNerTag, modifier, nextWord);
             break;
           default:
