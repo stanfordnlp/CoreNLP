@@ -98,6 +98,10 @@ public class AnnotatorImplementations  {
                     NumberSequenceClassifier.USE_SUTIME_PROPERTY,
                     NumberSequenceClassifier.USE_SUTIME_DEFAULT);
 
+    String nerLanguage = PropertiesUtils.getString(properties,
+                    NERClassifierCombiner.NER_LANGUAGE_PROPERTY,
+                    NERClassifierCombiner.NER_LANGUAGE_DEFAULT);
+
     boolean verbose = PropertiesUtils.getBool(properties, "ner." + "verbose", false);
 
     String[] loadPaths = models.toArray(new String[models.size()]);
@@ -109,7 +113,7 @@ public class AnnotatorImplementations  {
       Properties sutimeProps = PropertiesUtils.extractPrefixedProperties(properties, NumberSequenceClassifier.SUTIME_PROPERTY  + ".", true);
       PropertiesUtils.overWriteProperties(combinerProperties, sutimeProps);
     }
-    NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers,
+    NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers, nerLanguage,
             useSUTime, combinerProperties, loadPaths);
 
     int nThreads = PropertiesUtils.getInt(properties, "ner.nthreads", PropertiesUtils.getInt(properties, "nthreads", 1));

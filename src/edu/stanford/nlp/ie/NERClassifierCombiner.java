@@ -11,6 +11,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import edu.stanford.nlp.ie.regexp.ChineseNumberSequenceClassifier;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -45,6 +46,11 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   public static final String APPLY_NUMERIC_CLASSIFIERS_PROPERTY = "ner.applyNumericClassifiers";
   public static final String APPLY_NUMERIC_CLASSIFIERS_PROPERTY_BASE = "applyNumericClassifiers";
 
+  private final String nerLanguage;
+  public static final String NER_LANGUAGE_DEFAULT = "english";
+  public static final String NER_LANGUAGE_PROPERTY = "ner.language";
+  public static final String NER_LANGUAGE_PROPERTY_BASE = "language";
+
   private final boolean useSUTime;
 
   // todo [cdm 2015]: Could avoid constructing this if applyNumericClassifiers is false
@@ -55,8 +61,9 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   {
     super(props);
     applyNumericClassifiers = PropertiesUtils.getBool(props, APPLY_NUMERIC_CLASSIFIERS_PROPERTY, APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
+    nerLanguage = PropertiesUtils.getString(props, NER_LANGUAGE_PROPERTY, NER_LANGUAGE_DEFAULT);
     useSUTime = PropertiesUtils.getBool(props, NumberSequenceClassifier.USE_SUTIME_PROPERTY, NumberSequenceClassifier.USE_SUTIME_DEFAULT);
-    nsc = new NumberSequenceClassifier(new Properties(), useSUTime, props);
+    nsc = getNumberSequenceClassifier(new Properties(), props);
   }
 
   public NERClassifierCombiner(String... loadPaths)
@@ -72,11 +79,13 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   {
     super(loadPaths);
     this.applyNumericClassifiers = applyNumericClassifiers;
+    this.nerLanguage = NER_LANGUAGE_DEFAULT;
     this.useSUTime = useSUTime;
-    this.nsc = new NumberSequenceClassifier(useSUTime);
+    this.nsc = getNumberSequenceClassifier(null, null);
   }
 
   public NERClassifierCombiner(boolean applyNumericClassifiers,
+                               String nerLanguage,
                                boolean useSUTime,
                                Properties nscProps,
                                String... loadPaths)
@@ -85,8 +94,9 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     // NOTE: nscProps may contains sutime props which will not be recognized by the SeqClassifierFlags
     super(nscProps, ClassifierCombiner.extractCombinationModeSafe(nscProps), loadPaths);
     this.applyNumericClassifiers = applyNumericClassifiers;
+    this.nerLanguage = nerLanguage;
     this.useSUTime = useSUTime;
-    this.nsc = new NumberSequenceClassifier(new Properties(), useSUTime, nscProps);
+    this.nsc = getNumberSequenceClassifier(new Properties(), nscProps);
   }
 
   @SafeVarargs
@@ -104,8 +114,9 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   {
     super(classifiers);
     this.applyNumericClassifiers = applyNumericClassifiers;
+    this.nerLanguage = NER_LANGUAGE_DEFAULT;
     this.useSUTime = useSUTime;
-    this.nsc = new NumberSequenceClassifier(useSUTime);
+    this.nsc = getNumberSequenceClassifier(null, null);
   }
 
   // constructor which builds an NERClassifierCombiner from an ObjectInputStream
@@ -125,8 +136,28 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     } else {
       this.applyNumericClassifiers = diskApplyNumericClassifiers;
     }
+    this.nerLanguage = NER_LANGUAGE_DEFAULT;
     // build the nsc, note that initProps should be set by ClassifierCombiner
-    this.nsc = new NumberSequenceClassifier(new Properties(), useSUTime, props);
+    this.nsc = getNumberSequenceClassifier(new Properties(), props);
+  }
+
+  private AbstractSequenceClassifier<CoreLabel> getNumberSequenceClassifier(Properties props, Properties sutimeProps) {
+    // TODO: String should never be used to compare a property. Use ENUM instead.
+    log.info("NER language is: " + this.nerLanguage);
+    if(this.nerLanguage.equals("english")) {
+      if(props == null && sutimeProps == null) {
+        return new NumberSequenceClassifier(this.useSUTime);
+      }
+      return new NumberSequenceClassifier(props, this.useSUTime, sutimeProps);
+    } else if (this.nerLanguage.equals("chinese")) {
+      if(props == null && sutimeProps == null) {
+        return new ChineseNumberSequenceClassifier(this.useSUTime);
+      }
+      return new ChineseNumberSequenceClassifier(props, this.useSUTime, sutimeProps);
+    } else {
+      log.fatal("Property ner.language not recognized: " + nerLanguage);
+    }
+    return null;
   }
 
   public static final Set<String> DEFAULT_PASS_DOWN_PROPERTIES =
@@ -186,6 +217,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
               PropertiesUtils.getBool(properties,
                       prefix + NumberSequenceClassifier.USE_SUTIME_PROPERTY_BASE,
                       NumberSequenceClassifier.USE_SUTIME_DEFAULT);
+      String nerLanguage = PropertiesUtils.getString(properties, NER_LANGUAGE_PROPERTY, NER_LANGUAGE_DEFAULT);
       Properties combinerProperties;
       if (passDownProperties != null) {
         combinerProperties = PropertiesUtils.extractSelectedProperties(properties, passDownProperties);
@@ -199,7 +231,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
         combinerProperties = properties;
       }
       //Properties combinerProperties = PropertiesUtils.extractSelectedProperties(properties, passDownProperties);
-      nerCombiner = new NERClassifierCombiner(applyNumericClassifiers,
+      nerCombiner = new NERClassifierCombiner(applyNumericClassifiers, nerLanguage,
               useSUTime, combinerProperties, models);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
