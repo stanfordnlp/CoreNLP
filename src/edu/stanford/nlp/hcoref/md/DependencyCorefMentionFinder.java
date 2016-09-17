@@ -21,15 +21,14 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.BasicDependenciesAnnotation;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.SemanticGraphUtils;
-import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
+import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.PropertiesUtils;
 
 public class DependencyCorefMentionFinder extends CorefMentionFinder  {
 
@@ -116,7 +115,7 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder  {
       }
 
       // TODO: what to remove? remove more?
-      if(shortname.matches("det|nn")) {
+      if(shortname.matches("det|compound")) {
         
 //        // for debug  ---------------
 //        Tree t = tree.getLeaves().get(w.index()-1);
@@ -141,9 +140,9 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder  {
   private void extractMentionForHeadword(IndexedWord headword, SemanticGraph dep, CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     SemanticGraph basic = s.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
-    SemanticGraph collapsed = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
-    if (collapsed == null) {
-      collapsed = s.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+    SemanticGraph enhanced = s.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+    if (enhanced == null) {
+      enhanced = s.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
     }
 
     // pronoun
@@ -158,16 +157,16 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder  {
     int endIdx = npSpan.get(1)+1;
     if (",".equals(sent.get(endIdx-1).word())) { endIdx--; } // try not to have span that ends with ,
     if ("IN".equals(sent.get(beginIdx).tag())) { beginIdx++; }  // try to remove first IN.
-    addMention(beginIdx, endIdx, headword, mentions, mentionSpanSet, namedEntitySpanSet, sent, basic, collapsed);
+    addMention(beginIdx, endIdx, headword, mentions, mentionSpanSet, namedEntitySpanSet, sent, basic, enhanced);
       
     //
     // extract the first element in conjunction (A and B -> extract A here "A and B", "B" will be extracted above)
     //
     
     // to make sure we find the first conjunction
-    Set<IndexedWord> conjChildren = dep.getChildrenWithReln(headword, EnglishGrammaticalRelations.CONJUNCT);
+    Set<IndexedWord> conjChildren = dep.getChildrenWithReln(headword, UniversalEnglishGrammaticalRelations.CONJUNCT);
     if(conjChildren.size() > 0) {
-      IndexedWord conjChild = dep.getChildWithReln(headword, EnglishGrammaticalRelations.CONJUNCT);
+      IndexedWord conjChild = dep.getChildWithReln(headword, UniversalEnglishGrammaticalRelations.CONJUNCT);
       for(IndexedWord c : conjChildren) {
         if(c.index() < conjChild.index()) conjChild = c;
       }
@@ -175,7 +174,7 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder  {
       for(int endIdxFirstElement = left.index()-1 ; endIdxFirstElement > beginIdx ; endIdxFirstElement--) {
         if(!sent.get(endIdxFirstElement-1).tag().matches("CC|,")) {
           if(headword.index()-1 < endIdxFirstElement) {
-            addMention(beginIdx, endIdxFirstElement, headword, mentions, mentionSpanSet, namedEntitySpanSet, sent, basic, collapsed);
+            addMention(beginIdx, endIdxFirstElement, headword, mentions, mentionSpanSet, namedEntitySpanSet, sent, basic, enhanced);
           }
           break;
         }
@@ -194,7 +193,7 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder  {
 //    if(children.size()==0) return new IntPair(headwordIdx, headwordIdx);    // the headword is the only word
     
     // check if we have copula relation
-    IndexedWord cop = dep.getChildWithReln(headword, EnglishGrammaticalRelations.COPULA);
+    IndexedWord cop = dep.getChildWithReln(headword, UniversalEnglishGrammaticalRelations.COPULA);
     int startIdx = (cop==null)? 0 : children.indexOf(cop)+1;
     
     // children which will be inside of NP
@@ -223,7 +222,7 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder  {
   }
   
   private IntPair getNPSpanOld(IndexedWord headword, SemanticGraph dep, List<CoreLabel> sent) {
-    IndexedWord cop = dep.getChildWithReln(headword, EnglishGrammaticalRelations.COPULA);
+    IndexedWord cop = dep.getChildWithReln(headword, UniversalEnglishGrammaticalRelations.COPULA);
     Pair<IndexedWord, IndexedWord> leftRight = SemanticGraphUtils.leftRightMostChildVertices(headword, dep);
     
     // headword can be first or last word 
@@ -246,11 +245,11 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder  {
     return new IntPair(beginIdx, endIdx);
   }
 
-  private void addMention(int beginIdx, int endIdx, IndexedWord headword, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet, List<CoreLabel> sent, SemanticGraph basic, SemanticGraph collapsed) {
+  private void addMention(int beginIdx, int endIdx, IndexedWord headword, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet, List<CoreLabel> sent, SemanticGraph basic, SemanticGraph enhanced) {
     IntPair mSpan = new IntPair(beginIdx, endIdx);
     if(!mentionSpanSet.contains(mSpan) && (!insideNE(mSpan, namedEntitySpanSet)) ) {
       int dummyMentionId = -1;
-      Mention m = new Mention(dummyMentionId, beginIdx, endIdx, sent, basic, collapsed, new ArrayList<>(sent.subList(beginIdx, endIdx)));
+      Mention m = new Mention(dummyMentionId, beginIdx, endIdx, sent, basic, enhanced, new ArrayList<>(sent.subList(beginIdx, endIdx)));
       m.headIndex = headword.index()-1;
       m.headWord = sent.get(m.headIndex);
       m.headString = m.headWord.word().toLowerCase(Locale.ENGLISH);
@@ -262,9 +261,9 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder  {
   private void extractPronounForHeadword(IndexedWord headword, SemanticGraph dep, CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     SemanticGraph basic = s.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
-    SemanticGraph collapsed = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
-    if (collapsed == null) {
-      collapsed = s.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+    SemanticGraph enhanced = s.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+    if (enhanced == null) {
+      enhanced = s.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
     }
     int beginIdx = headword.index()-1;
     int endIdx = headword.index();
@@ -279,7 +278,7 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder  {
     IntPair mSpan = new IntPair(beginIdx, endIdx);
     if(!mentionSpanSet.contains(mSpan) && (!insideNE(mSpan, namedEntitySpanSet)) ) {
       int dummyMentionId = -1;
-      Mention m = new Mention(dummyMentionId, beginIdx, endIdx, sent, basic, collapsed, new ArrayList<>(sent.subList(beginIdx, endIdx)));
+      Mention m = new Mention(dummyMentionId, beginIdx, endIdx, sent, basic, enhanced, new ArrayList<>(sent.subList(beginIdx, endIdx)));
       m.headIndex = headword.index()-1;
       m.headWord = sent.get(m.headIndex);
       m.headString = m.headWord.word().toLowerCase(Locale.ENGLISH);
@@ -288,13 +287,13 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder  {
     }
     
     // when pronoun is a part of conjunction (e.g., you and I)
-    Set<IndexedWord> conjChildren = dep.getChildrenWithReln(headword, EnglishGrammaticalRelations.CONJUNCT);
+    Set<IndexedWord> conjChildren = dep.getChildrenWithReln(headword, UniversalEnglishGrammaticalRelations.CONJUNCT);
     if(conjChildren.size() > 0) {
       IntPair npSpan = getNPSpan(headword, dep, sent);
       beginIdx = npSpan.get(0);
       endIdx = npSpan.get(1)+1;
       if (",".equals(sent.get(endIdx-1).word())) { endIdx--; } // try not to have span that ends with ,
-      addMention(beginIdx, endIdx, headword, mentions, mentionSpanSet, namedEntitySpanSet, sent, basic, collapsed);
+      addMention(beginIdx, endIdx, headword, mentions, mentionSpanSet, namedEntitySpanSet, sent, basic, enhanced);
     }
   }
   public static void findHeadInDependency(CoreMap s, List<Mention> mentions) {

@@ -264,7 +264,7 @@ message Mention {
   optional bool generic                = 25;
   optional bool isSingleton            = 26;
   optional bool hasBasicDependency     = 27;
-  optional bool hasCollapsedDependency = 28;
+  optional bool hasEnhancedDepenedncy  = 28;
   optional bool hasContextParseTree    = 29;
   optional IndexedWord headIndexedWord = 30;
   optional IndexedWord   dependingVerb = 31;

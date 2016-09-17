@@ -134,6 +134,9 @@ public class OpenIE implements Annotator  {
   @ArgumentParser.Option(name="resolve_coref", gloss="If true, resolve pronouns to their canonical mention")
   private boolean resolveCoref = false;
 
+  @ArgumentParser.Option(name="strip_entailments", gloss="If true, don't keep the entailed sentences annotations around.")
+  private boolean stripEntailments = false;
+
   /**
    * The natural logic weights loaded from the models file.
    * This is primarily the prepositional attachment statistics.
@@ -456,7 +459,9 @@ public class OpenIE implements Annotator  {
 
       // Short sentence. Skip annotating it.
       sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.emptyList());
-      sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.emptySet());
+      if (!stripEntailments) {
+        sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.emptySet());
+      }
 
     } else {
 
@@ -489,8 +494,10 @@ public class OpenIE implements Annotator  {
 
       // Set the annotations
       sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);
-      sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class,
-          new ArrayList<>(new HashSet<>(extractions)));  // uniq the extractions
+      if (!stripEntailments) {
+        sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class,
+            new ArrayList<>(new HashSet<>(extractions)));  // uniq the extractions
+      }
     }
   }
 

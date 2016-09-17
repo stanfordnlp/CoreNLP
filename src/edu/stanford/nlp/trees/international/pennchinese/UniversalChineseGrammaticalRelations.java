@@ -90,7 +90,7 @@ public class UniversalChineseGrammaticalRelations {
     return Collections.unmodifiableList(values);
   }
 
-  public static final ReadWriteLock valuesLock = new ReentrantReadWriteLock();
+  private static final ReadWriteLock valuesLock = new ReentrantReadWriteLock();
 
   public static Lock valuesLock() {
     return valuesLock.readLock();
@@ -143,6 +143,9 @@ public class UniversalChineseGrammaticalRelations {
     new GrammaticalRelation(Language.UniversalChinese, "nsubj", "nominal subject",
         SUBJECT, "IP|VP", tregexCompiler,
             "IP <( ( NP|QP=target!< NT ) $++ ( /^VP|VCD|IP/  !< VE !<VC !<SB !<LB  ))",
+            // There are a number of cases of NP-SBJ not under IP, and we should try to get some of them as this
+            // pattern does. There are others under CP, especially CP-CND
+            // todo [2016]: At the moment this pattern doesn't find anything as "NP" not in sourcePattern
             "NP !$+ VP < ( (  NP|DP|QP=target !< NT ) $+ ( /^VP|VCD/ !<VE !< VC !<SB !<LB))",
             "IP < (/^NP/=target $+ (VP < VC))" // Go over copula
     );
@@ -188,6 +191,9 @@ public class UniversalChineseGrammaticalRelations {
    * </code>
    * <p />
    * Note: This one might not exist in Chinese, or very rare.
+   * cdm 2016: There are a few CP-SBJ in the CTB like this one:
+   * 我 估计 [CP-SBJ 他 欺负 别人 的 ] 多
+   * but it doesn't seem like there would be any way to detect them without using -SBJ
    */
   /*public static final GrammaticalRelation CLAUSAL_SUBJECT =
     new GrammaticalRelation(Language.UniversalChinese,
@@ -268,6 +274,7 @@ public class UniversalChineseGrammaticalRelations {
    * </pre>
    * </code>
    */
+  // todo [cdm 2016]: Need to get rid of this somehow....
   public static final GrammaticalRelation RANGE =
     new GrammaticalRelation(Language.UniversalChinese,
       "range", "range",
@@ -359,7 +366,7 @@ public class UniversalChineseGrammaticalRelations {
    * The "ordinal modifier" (ordmod) grammatical relation.
    */
   public static final GrammaticalRelation ORDINAL_MODIFIER =
-    new GrammaticalRelation(Language.UniversalChinese, "ordmod", "ordinal numeric modifier",
+    new GrammaticalRelation(Language.UniversalChinese, "nummod:ordmod", "ordinal numeric modifier",
                             NUMERIC_MODIFIER,
                             "NP|QP", tregexCompiler,
             "NP < QP=target < ( OD !$+ CLP )",
@@ -409,7 +416,7 @@ public class UniversalChineseGrammaticalRelations {
    *       (LC 来))
    *     (VP
    *       (VCD (VV 颁布) (VV 实行))
-   * <code> tmod </code> (遇到, 以前)
+   * {@code tmod } (遇到, 以前)
    */
   public static final GrammaticalRelation TEMPORAL_MODIFIER =
     new GrammaticalRelation(Language.UniversalChinese,

@@ -1,8 +1,8 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
@@ -14,10 +14,11 @@ import java.util.*;
  * @author <a href="mailto:gabor@eloquent.ai">Gabor Angeli</a>
  */
 public class ServerAnnotatorImplementations extends AnnotatorImplementations {
-  /**
+
+  /*
    * An SLF4J Logger for this class.
    */
-  private static final Logger log = LoggerFactory.getLogger(ServerAnnotatorImplementations.class);
+  // private static final Logger log = LoggerFactory.getLogger(ServerAnnotatorImplementations.class);
 
 
   /**
@@ -28,6 +29,18 @@ public class ServerAnnotatorImplementations extends AnnotatorImplementations {
    * The port to hit on the server
    */
   public final int port;
+  /**
+   * The key to use as the username to authenticate with the server, or null.
+   */
+  public final String key;
+  /**
+   * The secret key to use as the username to authenticate with the server, or null.
+   */
+  public final String secret;
+  /**
+   * If false, run many common annotations when we hit the server the first time.
+   */
+  public final boolean lazy;
 
 
   /**
@@ -36,36 +49,61 @@ public class ServerAnnotatorImplementations extends AnnotatorImplementations {
    * @param host The hostname of the server.
    * @param port The port of the server.
    */
-  public ServerAnnotatorImplementations(String host, int port) {
+  public ServerAnnotatorImplementations(String host, int port,
+                                        String key, String secret, boolean lazy) {
     this.host = host;
     this.port = port;
+    this.key = key;
+    this.secret = secret;
+    this.lazy = lazy;
   }
+
+  /**
+   * Create a new annotator implementation backed by {@link StanfordCoreNLPServer}.
+   *
+   * @param host The hostname of the server.
+   * @param port The port of the server.
+   */
+  public ServerAnnotatorImplementations(String host, int port) {
+    this(host, port, null, null, false);
+  }
+
 
   /**
    *
    */
-  private static class SingletonAnnotator implements Annotator {
+  private class SingletonAnnotator implements Annotator {
 
     private final StanfordCoreNLPClient client;
+    private final String annotator;
 
     public SingletonAnnotator(String host, int port,
                               Properties properties,
                               String annotator) {
+      this.annotator = annotator;
       Properties forClient = new Properties();
-      Enumeration<Object> keys = properties.keys();
-      while (keys.hasMoreElements()) {
-        String key = keys.nextElement().toString();
+      for (Object o : properties.keySet()) {
+        String key = o.toString();
         String value = properties.getProperty(key);
         forClient.setProperty(key, value);
-        forClient.setProperty(annotator + "." + key, value);
+        forClient.setProperty(annotator + '.' + key, value);
       }
-      forClient.setProperty("annotators", annotator);
-      forClient.setProperty("enforceRequirements", "false");
-      this.client = new StanfordCoreNLPClient(forClient, host, port);
+      if (lazy) {
+        forClient.setProperty("annotators", annotator);
+        forClient.setProperty("enforceRequirements", "false");
+      } else {
+        String annotators = "tokenize,ssplit,pos,lemma,ner,parse,mention,coref,natlog,openie,sentiment";
+        if (!annotators.contains(annotator)) {
+          annotators += "," + annotator;
+        }
+        forClient.setProperty("annotators", annotators);
+      }
+      this.client = new StanfordCoreNLPClient(forClient, host, port, key, secret);
     }
 
     @Override
     public void annotate(Annotation annotation) {
+      System.err.println("CALLING SERVER: " + annotator);
       client.annotate(annotation);
     }
 
@@ -118,10 +156,7 @@ public class ServerAnnotatorImplementations extends AnnotatorImplementations {
 
   /** {@inheritDoc} */
   @Override
-  public Annotator trueCase(Properties properties, String modelLoc,
-                            String classBias,
-                            String mixedCaseFileName,
-                            boolean verbose) {
+  public Annotator trueCase(Properties properties) {
     return new SingletonAnnotator(host, port, properties, Annotator.STANFORD_TRUECASE);
   }
 
@@ -187,4 +222,5 @@ public class ServerAnnotatorImplementations extends AnnotatorImplementations {
   public Annotator link(Properties properties) {
     return new SingletonAnnotator(host, port, properties, Annotator.STANFORD_LINK);
   }
+
 }

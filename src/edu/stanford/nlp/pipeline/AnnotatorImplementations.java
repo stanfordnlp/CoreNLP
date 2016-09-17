@@ -114,7 +114,7 @@ public class AnnotatorImplementations  {
 
     int nThreads = PropertiesUtils.getInt(properties, "ner.nthreads", PropertiesUtils.getInt(properties, "nthreads", 1));
     long maxTime = PropertiesUtils.getLong(properties, "ner.maxtime", 0);
-    int maxSentenceLength = PropertiesUtils.getInt(properties, "ner.maxlength", Integer.MAX_VALUE);
+    int maxSentenceLength = PropertiesUtils.getInt(properties, "ner.maxlen", Integer.MAX_VALUE);
 
     return new NERCombinerAnnotator(nerCombiner, verbose, nThreads, maxTime, maxSentenceLength);
   }
@@ -196,11 +196,8 @@ public class AnnotatorImplementations  {
   /**
    * Infer the original casing of tokens
    */
-  public Annotator trueCase(Properties properties, String modelLoc,
-                               String classBias,
-                               String mixedCaseFileName,
-                               boolean verbose) {
-    return new TrueCaseAnnotator(modelLoc, classBias, mixedCaseFileName, verbose);
+  public Annotator trueCase(Properties properties) {
+    return new TrueCaseAnnotator(properties);
   }
 
   /**

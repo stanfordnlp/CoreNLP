@@ -1,14 +1,12 @@
-package edu.stanford.nlp.pipeline; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.pipeline;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.*;
 
 import edu.stanford.nlp.ie.crf.CRFBiasedClassifier;
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -16,20 +14,25 @@ import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.logging.Redwood;
+
 
 public class TrueCaseAnnotator implements Annotator  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TrueCaseAnnotator.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(TrueCaseAnnotator.class);
 
   @SuppressWarnings("unchecked")
-  private final CRFBiasedClassifier trueCaser;
+  private final CRFBiasedClassifier<CoreLabel> trueCaser;
 
   private Map<String,String> mixedCaseMap = Generics.newHashMap();
 
-  private boolean VERBOSE = true;
+  private final boolean verbose;
 
   public static final String DEFAULT_MODEL_BIAS = "INIT_UPPER:-0.7,UPPER:-0.7,O:0";
+  private static final String DEFAULT_VERBOSE = "false";
+
 
   public TrueCaseAnnotator() {
     this(true);
@@ -42,18 +45,24 @@ public class TrueCaseAnnotator implements Annotator  {
         verbose);
   }
 
-  @SuppressWarnings("unchecked")
-  public TrueCaseAnnotator(String modelLoc,
-      String classBias,
-      String mixedCaseFileName,
-      boolean verbose){
-    this.VERBOSE = verbose;
+  public TrueCaseAnnotator(Properties properties) {
+    this(properties.getProperty("truecase.model", DefaultPaths.DEFAULT_TRUECASE_MODEL),
+            properties.getProperty("truecase.bias", TrueCaseAnnotator.DEFAULT_MODEL_BIAS),
+            properties.getProperty("truecase.mixedcasefile", DefaultPaths.DEFAULT_TRUECASE_DISAMBIGUATION_LIST),
+            Boolean.parseBoolean(properties.getProperty("truecase.verbose", TrueCaseAnnotator.DEFAULT_VERBOSE)));
+  }
 
-    Properties props = new Properties();
-    props.setProperty("loadClassifier", modelLoc);
-    props.setProperty("mixedCaseMapFile", mixedCaseFileName);
-    props.setProperty("classBias", classBias);
-    trueCaser = new CRFBiasedClassifier(props);
+  public TrueCaseAnnotator(String modelLoc,
+                           String classBias,
+                           String mixedCaseFileName,
+                           boolean verbose) {
+    this.verbose = verbose;
+
+    Properties props = PropertiesUtils.asProperties(
+            "loadClassifier", modelLoc,
+            "mixedCaseMapFile", mixedCaseFileName,
+            "classBias", classBias);
+    trueCaser = new CRFBiasedClassifier<>(props);
 
     if (modelLoc != null) {
       trueCaser.loadClassifierNoExceptions(modelLoc, props);
@@ -61,14 +70,14 @@ public class TrueCaseAnnotator implements Annotator  {
       throw new RuntimeException("Model location not specified for true-case classifier!");
     }
 
-    if(classBias != null) {
+    if (classBias != null) {
       StringTokenizer biases = new java.util.StringTokenizer(classBias,",");
       while (biases.hasMoreTokens()) {
         StringTokenizer bias = new java.util.StringTokenizer(biases.nextToken(),":");
         String cname = bias.nextToken();
         double w = Double.parseDouble(bias.nextToken());
         trueCaser.setBiasWeight(cname,w);
-        if(VERBOSE) log.info("Setting bias for class "+cname+" to "+w);
+        if (this.verbose) log.info("Setting bias for class " + cname + " to " + w);
       }
     }
 
@@ -76,9 +85,9 @@ public class TrueCaseAnnotator implements Annotator  {
     mixedCaseMap = loadMixedCaseMap(mixedCaseFileName);
   }
 
-  @SuppressWarnings("unchecked")
+  @Override
   public void annotate(Annotation annotation) {
-    if (VERBOSE) {
+    if (verbose) {
       log.info("Adding true-case annotation...");
     }
 
@@ -125,22 +134,21 @@ public class TrueCaseAnnotator implements Annotator  {
     l.set(CoreAnnotations.TrueCaseTextAnnotation.class, trueCaseText);
   }
 
-  public static Map<String,String> loadMixedCaseMap(String mapFile) {
+  private static Map<String,String> loadMixedCaseMap(String mapFile) {
     Map<String,String> map = Generics.newHashMap();
     try {
-      InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(mapFile);
-      BufferedReader br = new BufferedReader(new InputStreamReader(is));
-      for(String line : ObjectBank.getLineIterator(br)) {
+      BufferedReader br = IOUtils.readerFromString(mapFile);
+      for (String line : ObjectBank.getLineIterator(br)) {
         line = line.trim();
         String[] els = line.split("\\s+");
-        if(els.length != 2)
-          throw new RuntimeException("Wrong format: "+mapFile);
+        if (els.length != 2) {
+          throw new RuntimeException("Wrong format: " + mapFile);
+        }
         map.put(els[0],els[1]);
       }
       br.close();
-      is.close();
-    } catch(IOException e){
-      throw new RuntimeException(e);
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
     }
     return map;
   }
@@ -164,4 +172,5 @@ public class TrueCaseAnnotator implements Annotator  {
         CoreAnnotations.ShapeAnnotation.class
     )));
   }
+
 }

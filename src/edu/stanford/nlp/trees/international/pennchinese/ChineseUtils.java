@@ -1,8 +1,9 @@
-package edu.stanford.nlp.trees.international.pennchinese; 
-import edu.stanford.nlp.util.logging.Redwood;
+package edu.stanford.nlp.trees.international.pennchinese;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.regex.Pattern;
@@ -21,7 +22,7 @@ import java.util.regex.Pattern;
 public class ChineseUtils  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(ChineseUtils.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(ChineseUtils.class);
 
   /** Whether to only support BMP character normalization.
    *  If set to true, this is more limited, but avoids bugs in JDK 1.5.
@@ -109,12 +110,11 @@ public class ChineseUtils  {
       char cp = in.charAt(i);
       if (Character.isHighSurrogate(cp)) {
         if (i + 1 < len) {
-          EncodingPrintWriter.err.println("ChineseUtils.normalize warning: non-BMP codepoint U+" +
+          log.warn("ChineseUtils.normalize warning: non-BMP codepoint U+" +
                   Integer.toHexString(Character.codePointAt(in, i)) + " in " + in);
         } else {
-          EncodingPrintWriter.err.println("ChineseUtils.normalize warning: unmatched high surrogate character U+" +
+          log.warn("ChineseUtils.normalize warning: unmatched high surrogate character U+" +
                   Integer.toHexString(Character.codePointAt(in, i)) + " in " + in);
-
         }
       }
       Character.UnicodeBlock cub = Character.UnicodeBlock.of(cp);
@@ -301,8 +301,8 @@ public class ChineseUtils  {
   }
 
   /** Mainly for testing.  Usage:
-   *  <code>ChineseUtils ascii spaceChar word*</code>
-   *  <p>
+   *  {@code ChineseUtils ascii spaceChar word*}
+   *
    *  ascii and spaceChar are integers: 0 = leave, 1 = ascii, 2 = fullwidth.
    *  The words listed are then normalized and sent to stdout.
    *  If no words are given, the program reads from and normalizes stdin.
@@ -325,10 +325,8 @@ public class ChineseUtils  {
         EncodingPrintWriter.out.println(normalize(args[k], i, j, midDot));
       }
     } else {
-      BufferedReader r =
-        new BufferedReader(new InputStreamReader(System.in, "UTF-8"));
-      String line;
-      while ((line = r.readLine()) != null) {
+      BufferedReader r = IOUtils.readerFromStdin("UTF-8");
+      for (String line; (line = r.readLine()) != null; ) {
         EncodingPrintWriter.out.println(normalize(line, i, j, midDot));
       }
     }

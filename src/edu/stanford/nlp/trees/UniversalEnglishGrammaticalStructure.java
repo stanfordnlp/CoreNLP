@@ -849,7 +849,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   }
 
   @Override
-  public void addEnhancements(List<TypedDependency> list, EnhancementOptions options) {
+  protected void addEnhancements(List<TypedDependency> list, EnhancementOptions options) {
 
     SemanticGraph sg = new SemanticGraph(list);
 
@@ -1294,7 +1294,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
         newDep = leftChildEdge.getDependent();
       }
       if (newDep != null && ! sg.containsEdge(head, newDep)) {
-        sg.addEdge(head, newDep, REFERENT, Double.NEGATIVE_INFINITY, true);
+        sg.addEdge(head, newDep, REFERENT, Double.NEGATIVE_INFINITY, false);
       }
     }
   }

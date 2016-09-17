@@ -268,6 +268,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Remove items which were never supposed to be there in the first place
     keysToSerialize.remove(ForcedSentenceUntilEndAnnotation.class);
     keysToSerialize.remove(ForcedSentenceEndAnnotation.class);
+    keysToSerialize.remove(HeadWordLabelAnnotation.class);
+    keysToSerialize.remove(HeadTagLabelAnnotation.class);
     // Required fields
     builder.setWord(coreLabel.word());
     // Optional fields
@@ -727,7 +729,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     // flag if this Mention should get basicDependency, collapsedDependency, and contextParseTree or not
     builder.setHasBasicDependency((mention.basicDependency != null));
-    builder.setHasCollapsedDependency((mention.collapsedDependency != null));
+    builder.setHasEnhancedDepenedncy((mention.enhancedDependency != null));
     builder.setHasContextParseTree((mention.contextParseTree != null));
 
     // handle the sets of Mentions, just store mentionID
@@ -1328,7 +1330,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
       // Set entailed sentences
       if (sentence.getEntailedSentenceCount() > 0) {
-        Set<SentenceFragment> entailedSentences = sentence.getEntailedSentenceList().stream().map(frag -> fromProto(frag, map.get(CollapsedDependenciesAnnotation.class))).collect(Collectors.toSet());
+        Set<SentenceFragment> entailedSentences = sentence.getEntailedSentenceList().stream().map(frag -> fromProto(frag, map.get(EnhancedPlusPlusDependenciesAnnotation.class))).collect(Collectors.toSet());
         map.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, entailedSentences);
       }
       // Set relation triples
@@ -1382,8 +1384,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         if (protoMention.getHasBasicDependency()) {
           mentionToUpdate.basicDependency = map.get(BasicDependenciesAnnotation.class);
         }
-        if (protoMention.getHasCollapsedDependency()) {
-          mentionToUpdate.collapsedDependency = map.get(CollapsedDependenciesAnnotation.class);
+        if (protoMention.getHasEnhancedDepenedncy()) {
+          mentionToUpdate.enhancedDependency = map.get(EnhancedDependenciesAnnotation.class);
         }
         if (protoMention.getHasContextParseTree()) {
           mentionToUpdate.contextParseTree = map.get(TreeAnnotation.class);

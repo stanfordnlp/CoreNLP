@@ -163,7 +163,18 @@ public class SemanticGraphFactory  {
     return makeFromTree(gs, Mode.CCPROCESSED, extras, true, null);
   }
 
-
+  /**
+   * @see edu.stanford.nlp.semgraph.SemanticGraphFactory#makeFromTree(edu.stanford.nlp.trees.Tree, edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode, edu.stanford.nlp.trees.GrammaticalStructure.Extras, boolean, java.util.function.Predicate, boolean, boolean)
+   */
+  public static SemanticGraph makeFromTree(Tree tree,
+                                           Mode mode,
+                                           GrammaticalStructure.Extras includeExtras,
+                                           boolean threadSafe,
+                                           Predicate<TypedDependency> filter,
+                                           boolean originalDependencies) {
+    return makeFromTree(tree, mode, includeExtras, threadSafe, filter,
+        originalDependencies, INCLUDE_PUNCTUATION_DEPENDENCIES);
+  }
 
   /**
    * Returns a new <code>SemanticGraph</code> constructed from a given {@link
@@ -193,11 +204,12 @@ public class SemanticGraphFactory  {
                                            GrammaticalStructure.Extras includeExtras,
                                            boolean threadSafe,
                                            Predicate<TypedDependency> filter,
-                                           boolean originalDependencies) {
+                                           boolean originalDependencies,
+                                           boolean includePunctuationDependencies) {
     GrammaticalStructure gs;
     if (originalDependencies) {
       Predicate<String> wordFilt;
-      if (INCLUDE_PUNCTUATION_DEPENDENCIES) {
+      if (includePunctuationDependencies) {
         wordFilt = Filters.acceptFilter();
       } else {
         wordFilt = new PennTreebankLanguagePack().punctuationWordRejectFilter();
@@ -208,7 +220,7 @@ public class SemanticGraphFactory  {
 
     } else {
       Predicate<String> tagFilt;
-      if (INCLUDE_PUNCTUATION_DEPENDENCIES) {
+      if (includePunctuationDependencies) {
         tagFilt = Filters.acceptFilter();
       } else {
         tagFilt = new PennTreebankLanguagePack().punctuationTagRejectFilter();
@@ -224,7 +236,7 @@ public class SemanticGraphFactory  {
   }
 
   /**
-   * @see edu.stanford.nlp.semgraph.SemanticGraphFactory#makeFromTree(edu.stanford.nlp.trees.Tree, edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode, edu.stanford.nlp.trees.GrammaticalStructure.Extras, boolean, java.util.function.Predicate, boolean)
+   * @see edu.stanford.nlp.semgraph.SemanticGraphFactory#makeFromTree(edu.stanford.nlp.trees.Tree, edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode, edu.stanford.nlp.trees.GrammaticalStructure.Extras, boolean, java.util.function.Predicate, boolean, boolean)
    */
   @Deprecated
   public static SemanticGraph makeFromTree(Tree tree,
