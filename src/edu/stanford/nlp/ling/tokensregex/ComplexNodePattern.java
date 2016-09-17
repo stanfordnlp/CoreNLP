@@ -40,8 +40,9 @@ public class ComplexNodePattern<M,K> extends NodePattern<M> {
     return Collections.unmodifiableList(annotationPatterns);
   }
 
-  // TODO: make this a pattern of non special characters: [,],?,.,\,^,$,(,),*,+ ... what else?
-  private static final Pattern LITERAL_PATTERN = Pattern.compile("[A-Za-z0-9_\\-']*");
+  // TODO: make this a pattern of non special characters: [,],?,.,\,^,$,(,),*,+,{,},| ... what else?
+  private static final Pattern LITERAL_PATTERN = Pattern.compile("[^\\[\\]?.\\\\^$()*+{}|]*");
+  //private static final Pattern LITERAL_PATTERN = Pattern.compile("[A-Za-z0-9_\\-']*");
   public static NodePattern<String> newStringRegexPattern(String regex, int flags) {
     boolean isLiteral = ((flags & Pattern.LITERAL) != 0) || LITERAL_PATTERN.matcher(regex).matches();
     if (isLiteral) {
