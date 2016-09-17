@@ -148,7 +148,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
 
 
   public StanfordCoreNLP(Properties props, boolean enforceRequirements)  {
-    this(props, enforceRequirements, null);
+    AnnotatorImplementations impl = getAnnotatorImplementations();
+    construct(props, enforceRequirements, impl, getDefaultAnnotatorPool(props, impl));
   }
 
   public StanfordCoreNLP(Properties props, boolean enforceRequirements, AnnotatorPool annotatorPool)  {
@@ -168,7 +169,8 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     if (props == null) {
       throw new RuntimeIOException("ERROR: cannot find properties file \"" + propsFileNamePrefix + "\" in the classpath!");
     }
-    construct(props, enforceRequirements, getAnnotatorImplementations(), null);
+    AnnotatorImplementations impl = getAnnotatorImplementations();
+    construct(props, enforceRequirements, impl, getDefaultAnnotatorPool(props, impl));
   }
 
   //
@@ -393,8 +395,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
     this.constituentTreePrinter = new TreePrint("penn");
     this.dependencyTreePrinter = new TreePrint("typedDependenciesCollapsed");
 
-
-
     if (props == null) {
       // if undefined, find the properties file in the classpath
       props = loadPropertiesFromClasspath();
@@ -406,11 +406,6 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       props = fromClassPath;
     }
     this.properties = props;
-
-    if (pool == null) {
-      // if undefined, load the default annotator pool
-      pool = getDefaultAnnotatorPool(props, annotatorImplementations);
-    }
 
     // Set threading
     if (this.properties.containsKey("threads")) {
