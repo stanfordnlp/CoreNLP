@@ -81,6 +81,7 @@ public class UniversalChineseGrammaticalRelations {
 
 
   private static final String COMMA_PATTERN = "/^,|，$/";
+  private static final String MODAL_PATTERN = "/^(可(以|能)?)|能够?|应该?|将要?|必须|会$/";
 
   /** Return an unmodifiable list of grammatical relations.
    *  Note: the list can still be modified by others, so you
@@ -389,7 +390,14 @@ public class UniversalChineseGrammaticalRelations {
    * The "noun modifier" grammatical relation (abstract).
    */
   public static final GrammaticalRelation NOUN_MODIFIER =
-    new GrammaticalRelation(Language.UniversalChinese, "nmod", "noun modifier", MODIFIER);
+          new GrammaticalRelation(Language.UniversalChinese, "nmod", "noun modifier", MODIFIER,
+                  "NP", tregexCompiler,
+                  "NP < (NP=target < NR !$+ PU|CC $++ NP|PRN)");
+
+  public static final GrammaticalRelation POSSESSIVE_MODIFIER =
+          new GrammaticalRelation(Language.UniversalChinese, "nmod:poss", "possessive modifier", NOUN_MODIFIER,
+                  "NP", tregexCompiler,
+                  "NP < (PN=target $+ NN)");
 
   /**
    * The "temporal modifier" grammatical relation.
@@ -411,7 +419,7 @@ public class UniversalChineseGrammaticalRelations {
     new GrammaticalRelation(Language.UniversalChinese,
       "nmod:tmod", "temporal modifier",
       NOUN_MODIFIER, "VP|IP", tregexCompiler,
-            "VP|IP < (NP=target < NT !.. /^VC$/ $++  VP)");
+            "VP|IP < (NP=target < NT $++ VP)");
 
   /* This rule actually matches nothing.
      There's another tmod rule. This is removed for now.
@@ -617,8 +625,10 @@ public class UniversalChineseGrammaticalRelations {
   public static final GrammaticalRelation MODAL_VERB =
     new GrammaticalRelation(Language.UniversalChinese, "aux:modal", "modal verb",
                             AUX_MODIFIER, "VP", tregexCompiler,
-            // todo[pengqi]: The SemanticHeadFinder will still mark the modal as the head, need to fix that
-            "VP < ( VV=target !< /^没有$/ $+ VP|VRD )");
+            // todo [pengqi]: using MODAL_PATTERN would render many cases of VV $+ VP
+            //    as dep, need to assign a type to that structure. Also in that case
+            //    need to clarify which verb is the head
+            "VP < ( VV=target < " + MODAL_PATTERN + " !< /^没有$/ $+ VP|VRD )");
 
   /**
    * The "aspect marker" grammatical relation.
@@ -758,7 +768,7 @@ public class UniversalChineseGrammaticalRelations {
       COMPOUND, "^NP", tregexCompiler,
             "NP < (NN|NT=target $+ NN|NR|NT)",
             "NP < (NN|NR|NT $+ FW=target)",
-            "NP < (NP=target !$+ PU|CC $++ NP|PRN)");
+            "NP < (NP=target !< NR !$+ PU|CC $++ NP|PRN)");
 
   /**
    * The "noun compound" (nn) grammatical relation.
@@ -951,8 +961,8 @@ public class UniversalChineseGrammaticalRelations {
    */
   public static final GrammaticalRelation ASSOCIATIVE_MODIFIER =
           new GrammaticalRelation(Language.UniversalChinese,
-                  "case:assmod", "associative modifier (examples: 上海市/Shanghai[modifier] 的 规定/law[head])",
-                  CASE, "NP|QP", tregexCompiler,
+                  "nmod:assmod", "associative modifier (examples: 上海市/Shanghai[modifier] 的 规定/law[head])",
+                  NOUN_MODIFIER, "NP|QP", tregexCompiler,
                   "NP|QP < ( DNP =target $++ NP|QP ) ");
 
   ////////////////////////////////////////////////////////////
@@ -1186,6 +1196,7 @@ public class UniversalChineseGrammaticalRelations {
       NOUN_MODIFIER,
         ASSOCIATIVE_MODIFIER, chineseOnly,
         TEMPORAL_MODIFIER, chineseOnly,
+        POSSESSIVE_MODIFIER,
       // Nominal heads, predicate dependents
       RELATIVE_CLAUSE_MODIFIER,
       NONFINITE_CLAUSE_MODIFIER,
