@@ -78,19 +78,23 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
   // TODO(yuhao): Need to add support for 块 钱, 毛 钱, 角 钱, 角, 五 块 二
   public static final Pattern PERCENT_WORD_PATTERN1 = Pattern.compile("(?:百分之|千分之).+");
   public static final Pattern PERCENT_WORD_PATTERN2 = Pattern.compile(".+%");
-  public static final Pattern DATE_PATTERN1 = Pattern.compile(".+(?:年|月|日)");
-  public static final Pattern DATE_PATTERN2 = Pattern.compile("(?:星期|周).+");
-  public static final Pattern TIME_PATTERN1 = Pattern.compile("[0-2]?[0-9](?::|点|时)[0-5][0-9]分?");
-  public static final Pattern TIME_PATTERN2 = Pattern.compile(".+点.+分?"); // This only works when POS = NT
+  public static final Pattern DATE_PATTERN1 = Pattern.compile(".+(?:年代?|月份?|日|号|世纪)");
+  public static final Pattern DATE_PATTERN2 = Pattern.compile("(?:星期|周|礼拜).+");
+  public static final Pattern DATE_PATTERN3 = Pattern.compile("[0-9一二三四五六七八九零〇十]{2,4}");
+  public static final Pattern DATE_PATTERN4 = Pattern.compile("(?:[0-9]{2,4}[/\\-\\.][0-9]+[/\\-\\.][0-9]+|[0-9]+[/\\-\\.][0-9]+[/\\-\\.][0-9]{2,4}|[0-9]+[/\\-\\.]?[0-9]+)");
+  public static final Pattern TIME_PATTERN1 = Pattern.compile(".+(?::|点|时)(?:过|欠|差)?(?:.+(?::|分)?|整?|钟?|.+刻)?(?:.+秒?)"); // This only works when POS = NT
 
   // order it by number of characters DESC for handy one-by-one matching of string suffix
   public static final String[] CURRENCY_WORDS_VALUES = new String[] {"越南盾", "美元", "欧元", "澳元", "加元", "日元", "韩元",
       "英镑", "法郎", "卢比", "卢布", "马克", "先令", "克朗", "泰铢", "盾", "铢", "刀", "镑", "元"};
 
-  public static final String[] DATE_WORDS_VALUES = new String[] {"明天", "后天", "昨天", "前天", "明年", "后年", "去年", "前年"};
+  public static final String[] DATE_WORDS_VALUES = new String[] {"明天", "后天", "昨天", "前天", "明年", "后年", "去年", "前年",
+      "昨日", "明日", "来年", "上月", "本月", "目前", "今后", "未来", "日前", "最近", "当时", "后来", "那时", "这时", "今", "今天",
+      "当今", "如今", "之后", "当代", "以前", "现在", "将来", "此时", "此前", "元旦"};
   public static final HashSet<String> DATE_WORDS = new HashSet<>(Arrays.asList(DATE_WORDS_VALUES));
 
-  public static final String[] TIME_WORDS_VALUES = new String[] {"早晨", "清晨", "凌晨", "上午", "中午", "下午", "傍晚", "晚上", "夜间"};
+  public static final String[] TIME_WORDS_VALUES = new String[] {"早晨", "清晨", "凌晨", "上午", "中午", "下午", "傍晚", "晚上",
+      "夜间", "晨间", "晚间", "午前", "午后", "早", "晚"};
   public static final HashSet<String> TIME_WORDS = new HashSet<>(Arrays.asList(TIME_WORDS_VALUES));
 
   /**
@@ -134,13 +138,12 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
         // If current word is a NT (temporal noun)
         if(DATE_PATTERN1.matcher(me.word()).matches() ||
             DATE_PATTERN2.matcher(me.word()).matches() ||
+            DATE_PATTERN3.matcher(me.word()).matches() ||
+            DATE_PATTERN4.matcher(me.word()).matches() ||
             DATE_WORDS.contains(me.word())) {
-          // TODO: need to add more DATE words
           me.set(CoreAnnotations.AnswerAnnotation.class, DATE_TAG);
         } else if(TIME_PATTERN1.matcher(me.word()).matches() ||
-            TIME_PATTERN2.matcher(me.word()).matches() ||
             TIME_WORDS.contains(me.word())) {
-          // TODO: need to add more TIME words
           me.set(CoreAnnotations.AnswerAnnotation.class, TIME_TAG);
         } else {
           // TIME may have more variants (really?) so always add as TIME by default
@@ -219,5 +222,7 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
       pipeline.prettyPrint(sentenceAnnotation, out);
       pipeline.prettyPrint(sentenceAnnotation, System.out);
     }
+
+    out.close();
   }
 }
