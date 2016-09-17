@@ -1,4 +1,4 @@
-package edu.stanford.nlp.sequences; 
+package edu.stanford.nlp.sequences;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -32,13 +32,13 @@ import java.util.regex.Pattern;
  * Accepts the following properties
  * <table>
  *   <tr><th>Field</th><th>Type</th><th>Default</th><th>Description</th></tr>
- *   <tr><td><code>columns</code></td><td>String</td><td><code></code></td><td>Comma separated list of mapping between annotation (see {@link edu.stanford.nlp.ling.AnnotationLookup.KeyLookup}) and column index (starting from 0).  Example: <code>word=0,tag=1</code></td></tr>
- *   <tr><td><code>delimiter</code></td><td>String</td><td><code>\t</code></td><td>Regular expression for delimiter</td></tr>
- *   <tr><td><code>replaceWhitespace</code></td><td>Boolean</td><td><code>true</code></td><td>Replace whitespaces with "_"</td></tr>
- *   <tr><td><code>tokens</code></td><td>Class</td>
+ *   <tr><td>{@code columns}</td><td>String</td><td>{@code}</td><td>Comma separated list of mapping between annotation (see {@link edu.stanford.nlp.ling.AnnotationLookup}) and column index (starting from 0).  Example: {@code word=0,tag=1}</td></tr>
+ *   <tr><td>{@code delimiter}</td><td>String</td><td>{@code \t}</td><td>Regular expression for delimiter</td></tr>
+ *   <tr><td>{@code replaceWhitespace}</td><td>Boolean</td><td>{@code true}</td><td>Replace whitespaces with "_"</td></tr>
+ *   <tr><td>{@code tokens}</td><td>Class</td>
  *       <td>{@link edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation edu.stanford.nlp.ling.CoreAnnotations$TokensAnnotation}</td>
  *       <td>Annotation field for tokens</td></tr>
- *   <tr><td><code>tokenFactory</code></td><td>Class</td>
+ *   <tr><td>{@code tokenFactory}</td><td>Class</td>
  *       <td>{@link CoreLabelTokenFactory edu.stanford.nlp.process.CoreLabelTokenFactory}</td>
  *       <td>Factory for creating tokens</td></tr>
  * </table>
@@ -64,6 +64,7 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
    * reads the tokenFactory and tokensAnnotationClassName from
    * {@link SeqClassifierFlags}
    */
+  @Override
   public void init(SeqClassifierFlags flags) {
     if (flags.tokensAnnotationClassName != null) {
       this.tokensAnnotationClassName = flags.tokensAnnotationClassName;
@@ -158,8 +159,8 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
     return new BufferedReaderIterator<>(new ColumnDocBufferedGetNext(br, false, includeText));
   }
 
-  private static interface GetNextFunction<E> {
-    public E getNext();
+  private interface GetNextFunction<E> {
+    E getNext();
   }
 
   private static class BufferedReaderIterator<E> extends AbstractIterator<E> {
@@ -192,6 +193,7 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
       docGetNext = new ColumnDocBufferedGetNext(br, true);
     }
 
+    @Override
     public List<IN> getNext() {
       try {
         CoreMap m = docGetNext.getNext();
@@ -322,6 +324,7 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
       }
     }
 
+    @Override
     public Annotation getNext() {
       if (itemCnt > 0 && itemCnt % 1000 == 0) {
         log.info("[" + itemCnt + "," + lineCnt + "]");
@@ -399,6 +402,7 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
 
   } // end class ColumnDocParser
 
+  @Override
   public void printAnswers(List<IN> doc, PrintWriter out) {
     for (IN wi : doc) {
       String answer = wi.get(CoreAnnotations.AnswerAnnotation.class);

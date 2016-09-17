@@ -95,7 +95,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   public NERClassifierCombiner(String... loadPaths)
     throws IOException
   {
-    this(APPLY_NUMERIC_CLASSIFIERS_DEFAULT, NumberSequenceClassifier.USE_SUTIME_DEFAULT, NERClassifierCombiner.APPLY_GAZETTE_DEFAULT, loadPaths);
+    this(APPLY_NUMERIC_CLASSIFIERS_DEFAULT, NERClassifierCombiner.APPLY_GAZETTE_DEFAULT, NumberSequenceClassifier.USE_SUTIME_DEFAULT, loadPaths);
   }
 
   public NERClassifierCombiner(boolean applyNumericClassifiers,
