@@ -9,10 +9,9 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.System.err;
@@ -25,6 +24,7 @@ import static java.lang.System.err;
  * supports minimal functionalities. This needs to be completed in the future.
  *
  * @author Yuhao Zhang
+ * @author Peng Qi
  */
 public class ChineseQuantifiableEntityNormalizer {
 
@@ -58,6 +58,15 @@ public class ChineseQuantifiableEntityNormalizer {
   private static final String greaterThanOneWord = "(?:大|多|高)于|(?:超|高|多)过";;
   private static final String lessThanOneWord = "(?:小|少|低)于|不(?:到|够|足)";
   private static final String approxOneWord = "大(?:约|概|致)|接?近|差不多|几乎|左右|上下|约(?:为|略)";
+
+  private static final String CHINESE_AND_ARABIC_NUMERALS_PATTERN = "[一二三四五六七八九零十〇\\d]";
+  private static final String BASIC_DD_PATTERN = "("
+          + CHINESE_AND_ARABIC_NUMERALS_PATTERN + "+)(?:(?:日|号)?|\\-|/|\\.)";
+  private static final String BASIC_MMDD_PATTERN = "(" + CHINESE_AND_ARABIC_NUMERALS_PATTERN + "+)(?:月|\\-|/|\\.)(?:"
+          + BASIC_DD_PATTERN + ")?";
+  private static final String BASIC_YYYYMMDD_PATTERN = "(" + CHINESE_AND_ARABIC_NUMERALS_PATTERN + "{2,4})(?:年|\\-|/|\\.)"
+          + "(?:" + BASIC_MMDD_PATTERN + ")?";
+  private static final String ENGLISH_MMDDYYYY_PATTERN = "(\\d{1,2})[/\\-\\.](\\d{1,2})(?:[/\\-\\.](\\d{4}))?";
 
 
   // All the tags we need
@@ -169,10 +178,11 @@ public class ChineseQuantifiableEntityNormalizer {
         // Need different handling for different tags
         switch (prevNerTag) {
           case TIME_TAG:
-            // TODO: add TIME
+            // TODO [pengqi]: add TIME
             break;
           case DATE_TAG:
             // TODO: add DATE
+            processEntity(collector, prevNerTag, modifier, nextWord);
             break;
           default:
             if(prevNerTag.equals(NUMBER_TAG) || prevNerTag.equals(PERCENT_TAG) ||
@@ -303,6 +313,10 @@ public class ChineseQuantifiableEntityNormalizer {
         }
         break;
       case DATE_TAG:
+        if (s.matches(BASIC_YYYYMMDD_PATTERN) || s.matches(BASIC_MMDD_PATTERN)
+                || s.matches(ENGLISH_MMDDYYYY_PATTERN) || s.matches(BASIC_DD_PATTERN)) {
+          p = normalizeDateString(s, new Date());   // FIXME [pengqi]: Should be using real docdate here
+        }
         break;
       case TIME_TAG:
         break;
@@ -605,6 +619,113 @@ public class ChineseQuantifiableEntityNormalizer {
       decimalValue += v * base;
     }
     return Double.valueOf(decimalValue);
+  }
+
+  private static String normalizeMonthOrDay(String s) {
+    if (s == null) {
+      return "XX";
+    } else {
+      String candidate;
+      if (CHINESE_LITERAL_DECIMAL_PATTERN.matcher(s).find())
+        candidate = prettyNumber(String.format("%f", normalizeLiteralDecimalString(s)));
+      else
+        candidate = s;
+
+      if (candidate.length() < 2)
+        candidate = "0" + candidate;
+
+      return candidate;
+    }
+  }
+
+  /**
+   * Normalizes date strings.
+   * @param s Input date string
+   * @return Normalized Timex expression of the input date string
+     */
+  public static String normalizeDateString(String s, Date docdate) {
+    // TODO [pengqi]: still need to handle relative dates ("去年") and temporal references ("当时")
+    // TODO [pengqi]: need to handle irregular years ("81年")
+    Pattern p = Pattern.compile(BASIC_YYYYMMDD_PATTERN);
+    Matcher m = p.matcher(s);
+
+    if (m.find() && m.groupCount() == 3) {
+      StringBuilder res = new StringBuilder();
+      String year = m.group(1);
+      for (int i = 0; i < year.length(); i++) {
+        String t = "" + year.charAt(i);
+        if (CHINESE_LITERAL_DECIMAL_PATTERN.matcher(t).matches()) {
+          if (wordsToValues.containsKey(t))
+            res.append((int)wordsToValues.getCount(t));
+          else
+            // something unexpected happened
+            return null;
+        } else
+          res.append(t);
+      }
+
+      res.append("-");
+      res.append(normalizeMonthOrDay(m.group(2)));
+      res.append("-");
+      res.append(normalizeMonthOrDay(m.group(3)));
+
+      return res.toString();
+    }
+
+    p = Pattern.compile(BASIC_MMDD_PATTERN);
+    m = p.matcher(s);
+
+    if (m.find() && m.groupCount() == 2) {
+      StringBuilder res = new StringBuilder();
+      String year = new SimpleDateFormat("yyyy").format(docdate);
+
+      res.append(year);
+      res.append("-");
+      res.append(normalizeMonthOrDay(m.group(1)));
+      res.append("-");
+      res.append(normalizeMonthOrDay(m.group(2)));
+
+      return res.toString();
+    }
+
+    p = Pattern.compile(BASIC_DD_PATTERN);
+    m = p.matcher(s);
+
+    if (m.find() && m.groupCount() == 1) {
+      StringBuilder res = new StringBuilder();
+      String year = new SimpleDateFormat("yyyy").format(docdate);
+      String month = new SimpleDateFormat("MM").format(docdate);
+
+      res.append(year);
+      res.append("-");
+      res.append(month);
+      res.append("-");
+      res.append(normalizeMonthOrDay(m.group(1)));
+
+      return res.toString();
+    }
+
+    p = Pattern.compile(ENGLISH_MMDDYYYY_PATTERN);
+    m = p.matcher(s);
+
+    if (m.find() && m.groupCount() == 3) {
+      StringBuilder res = new StringBuilder();
+
+      String year = new SimpleDateFormat("yyyy").format(docdate);
+
+      if (m.group(3) == null)
+        res.append(year);
+      else
+        res.append(m.group(3));
+      res.append("-");
+      res.append(normalizeMonthOrDay(m.group(1)));
+      res.append("-");
+      res.append(normalizeMonthOrDay(m.group(2)));
+
+      return res.toString();
+    }
+
+    return s;
   }
 
   /**

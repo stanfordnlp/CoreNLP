@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
  * TODO: Ideally a Chinese version of SUTime needs to be used to provide more flexibility and accuracy.
  *
  * @author Yuhao Zhang
+ * @author Peng Qi
  */
 public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<CoreLabel> {
 
