@@ -47,7 +47,7 @@ public class ChineseQuantifiableEntityNormalizer {
   private static final String lessEqualThreeWords = "(?:小|少|低)于或者?等于";
 
   private static final String greaterEqualTwoWords = "(?:大|多)于等于|不(?:少|小|低)于";
-  private static final String lessEqualTwoWords = "(小|少)于等于|不(?:大|少|高)于|不超过";
+  private static final String lessEqualTwoWords = "(?:小|少)于等于|不(?:大|少|高)于|不超过";
   private static final String greaterThanTwoWords = "";
   private static final String lessThanTwoWords = "";
   private static final String approxTwoWords = "大(?:概|约|致)(?:是|为)|大概其";

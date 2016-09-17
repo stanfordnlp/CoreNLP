@@ -71,13 +71,13 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
   public static final String PERCENT_TAG = "PERCENT";
 
   // Patterns we need
-  public static final Pattern CURRENCY_WORD_PATTERN = Pattern.compile("(元|刀|(美|欧|澳|加|日|韩)元|英?镑|法郎|卢比|卢布|马克|先令|克朗|泰?铢|(越南)?盾)");
+  public static final Pattern CURRENCY_WORD_PATTERN = Pattern.compile("元|刀|(?:美|欧|澳|加|日|韩)元|英?镑|法郎|卢比|卢布|马克|先令|克朗|泰?铢|(?:越南)?盾");
   // TODO(yuhao): Need to add support for 美分,块钱,毛钱,角,便士
-  public static final Pattern PERCENT_WORD_PATTERN1 = Pattern.compile("(百分之|千分之).+");
+  public static final Pattern PERCENT_WORD_PATTERN1 = Pattern.compile("(?:百分之|千分之).+");
   public static final Pattern PERCENT_WORD_PATTERN2 = Pattern.compile(".+%");
-  public static final Pattern DATE_PATTERN1 = Pattern.compile(".+(年|月|日)");
-  public static final Pattern DATE_PATTERN2 = Pattern.compile("(星期|周).+");
-  public static final Pattern TIME_PATTERN1 = Pattern.compile("[0-2]?[0-9](:|点|时)[0-5][0-9]分?");
+  public static final Pattern DATE_PATTERN1 = Pattern.compile(".+(?:年|月|日)");
+  public static final Pattern DATE_PATTERN2 = Pattern.compile("(?:星期|周).+");
+  public static final Pattern TIME_PATTERN1 = Pattern.compile("[0-2]?[0-9](?::|点|时)[0-5][0-9]分?");
   public static final Pattern TIME_PATTERN2 = Pattern.compile(".+点.+分?"); // This only works when POS = NT
 
   // order it by number of characters DESC for handy one-by-one matching of string suffix
