@@ -103,7 +103,6 @@ public class ServerAnnotatorImplementations extends AnnotatorImplementations {
 
     @Override
     public void annotate(Annotation annotation) {
-      System.err.println("CALLING SERVER: " + annotator);
       client.annotate(annotation);
     }
 
