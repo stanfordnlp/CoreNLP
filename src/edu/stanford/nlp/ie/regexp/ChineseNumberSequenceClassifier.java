@@ -84,7 +84,6 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
   public static final Pattern DATE_PATTERN2 = Pattern.compile("(?:星期|周|礼拜).+");
   public static final Pattern DATE_PATTERN3 = Pattern.compile("[0-9一二三四五六七八九零〇十]{2,4}");
   public static final Pattern DATE_PATTERN4 = Pattern.compile("(?:[0-9]{2,4}[/\\-\\.][0-9]+[/\\-\\.][0-9]+|[0-9]+[/\\-\\.][0-9]+[/\\-\\.][0-9]{2,4}|[0-9]+[/\\-\\.]?[0-9]+)");
-  public static final Pattern DATE_PATTERN5 = Pattern.compile("[昨今明][天晨晚夜早]");
   public static final Pattern TIME_PATTERN1 = Pattern.compile(".+(?::|点|时)(?:过|欠|差)?(?:.+(?::|分)?|整?|钟?|.+刻)?(?:.+秒?)"); // This only works when POS = NT
 
   private static final Pattern CHINESE_AND_ARABIC_NUMERALS_PATTERN = Pattern.compile("[一二三四五六七八九零十〇\\d]+");
@@ -151,7 +150,6 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
             DATE_PATTERN2.matcher(me.word()).matches() ||
             DATE_PATTERN3.matcher(me.word()).matches() ||
             DATE_PATTERN4.matcher(me.word()).matches() ||
-            DATE_PATTERN5.matcher(me.word()).matches() ||
             DATE_WORDS.contains(me.word())) {
           me.set(CoreAnnotations.AnswerAnnotation.class, DATE_TAG);
         } else if(TIME_PATTERN1.matcher(me.word()).matches() ||

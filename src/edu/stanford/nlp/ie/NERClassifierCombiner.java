@@ -308,9 +308,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
         // note: this uses and sets NamedEntityTagAnnotation!
         if(nerLanguage == Language.CHINESE) {
           // For chinese there is no support for SUTime by default
-          // We need to hand in document and sentence for Chinese to handle DocDate; however, since English normalization
-          // is handled by SUTime, and the information is passed in recognizeNumberSequences(), English only need output.
-          ChineseQuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(output, document, sentence);
+          ChineseQuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(output);
         } else {
           QuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(output, false, useSUTime);
         }

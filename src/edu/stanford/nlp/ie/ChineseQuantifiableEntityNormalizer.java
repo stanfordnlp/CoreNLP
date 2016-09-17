@@ -1,7 +1,6 @@
 package edu.stanford.nlp.ie;
 
 import edu.stanford.nlp.ie.regexp.ChineseNumberSequenceClassifier;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -163,9 +162,6 @@ public class ChineseQuantifiableEntityNormalizer {
           + YEAR_MODIFIER_PATTERN + ")(?:年[份度]?|\\-|/|\\.)?" + "(?:" + BASIC_MMDD_PATTERN + ")?";
   private static final String ENGLISH_MMDDYYYY_PATTERN = "(\\d{1,2})[/\\-\\.](\\d{1,2})(?:[/\\-\\.](\\d{4}))?";
 
-  private static final String RELATIVE_TIME_PATTERN = "([昨今明])[天晨晚夜早]";
-  private static final String BIRTH_DECADE_PATTERN = "(" + CHINESE_AND_ARABIC_NUMERALS_PATTERN + "[0零〇5五])后";
-
   /**
    * Identifies contiguous MONEY, TIME, DATE, or PERCENT entities
    * and tags each of their constituents with a "normalizedQuantity"
@@ -177,11 +173,9 @@ public class ChineseQuantifiableEntityNormalizer {
    * @param list A list of {@link CoreMap}s representing a single document.
    *             Note: We assume the NERs has been labelled and the labels
    *             will be updated in place.
-   * @param document
-   * @param sentence
    * @param <E>
    */
-  public static <E extends CoreMap> void addNormalizedQuantitiesToEntities(List<E> list, CoreMap document, CoreMap sentence) {
+  public static <E extends CoreMap> void addNormalizedQuantitiesToEntities(List<E> list) {
 
     // Fix the NER sequence if necessay
     fixupNerBeforeNormalization(list);
@@ -219,10 +213,11 @@ public class ChineseQuantifiableEntityNormalizer {
         // Need different handling for different tags
         switch (prevNerTag) {
           case TIME_TAG:
-            // TODO: add TIME
+            // TODO [pengqi]: add TIME
             break;
           case DATE_TAG:
-            processEntity(collector, prevNerTag, modifier, nextWord, document);
+            // TODO: add DATE
+            processEntity(collector, prevNerTag, modifier, nextWord);
             break;
           default:
             if(prevNerTag.equals(NUMBER_TAG) || prevNerTag.equals(PERCENT_TAG) ||
@@ -297,11 +292,6 @@ public class ChineseQuantifiableEntityNormalizer {
     return null;
   }
 
-  private static <E extends CoreMap> List<E> processEntity(List<E> l,
-           String entityType, String compModifier, String nextWord) {
-    return processEntity(l, entityType, compModifier, nextWord, null);
-  }
-
   /**
    * Process an entity given the NER tag, extracted modifier and the next word in the document.
    * The normalized quantity will be written in place.
@@ -311,12 +301,11 @@ public class ChineseQuantifiableEntityNormalizer {
    * @param compModifier The extracted modifier around the entity of interest. Different NER tags should
    *                    have different extraction rules.
    * @param nextWord Next word in the document.
-   * @param document Reference to the document.
    * @param <E>
    * @return
    */
   private static <E extends CoreMap> List<E> processEntity(List<E> l,
-            String entityType, String compModifier, String nextWord, CoreMap document) {
+            String entityType, String compModifier, String nextWord) {
     if(DEBUG) {
       log.info("ChineseQuantifiableEntityNormalizer.processEntity: " + l);
     }
@@ -360,10 +349,8 @@ public class ChineseQuantifiableEntityNormalizer {
         break;
       case DATE_TAG:
         if (s.matches(BASIC_YYYYMMDD_PATTERN) || s.matches(BASIC_MMDD_PATTERN)
-                || s.matches(ENGLISH_MMDDYYYY_PATTERN) || s.matches(BASIC_DD_PATTERN)
-                || s.matches(RELATIVE_TIME_PATTERN) || s.matches(BIRTH_DECADE_PATTERN)) {
-          String docdate = document.get(CoreAnnotations.DocDateAnnotation.class);
-          p = normalizeDateString(s, docdate);
+                || s.matches(ENGLISH_MMDDYYYY_PATTERN) || s.matches(BASIC_DD_PATTERN)) {
+          p = normalizeDateString(s, new Date());   // FIXME [pengqi]: Should be using real docdate here
         }
         break;
       case TIME_TAG:
@@ -628,17 +615,8 @@ public class ChineseQuantifiableEntityNormalizer {
     }
     int idx = s.indexOf(unit);
     if(idx != -1) {
-      Double first = Double.valueOf(1.0);
-      // Here we need special handling for 十 and 百 when they occur as the first char
-      // As in Chinese 十二 is very common, 百二十 is sometimes valid as well.
-      if(("十".equals(unit) || "百".equals(unit)) && idx == 0) {
-        // do nothing
-      } else {
-        // otherwise we try to parse the value before the unit
-        first = recurNormalizeLiteralIntegerString(s.substring(0,idx));
-      }
+      Double first = recurNormalizeLiteralIntegerString(s.substring(0,idx));
       Double second = recurNormalizeLiteralIntegerString(s.substring(idx+1));
-
       if(first != null && second != null) {
         return Double.valueOf(first.doubleValue() * quantityUnitToValues.getCount(unit) + second.doubleValue());
       }
@@ -679,16 +657,12 @@ public class ChineseQuantifiableEntityNormalizer {
   }
 
   private static String normalizeMonthOrDay(String s, String context) {
-    int ctx = -1;
-    if (!context.equals("XX"))
-      ctx = Integer.valueOf(context);
+    log.info("NORMALIZING MONTH/DAY: " + s);
+    int ctx = Integer.valueOf(context);
 
     if (monthDayModifiers.containsKey(s)) {
-      if (ctx >= 0)
-        // todo: this is unsafe as it's not bound-checked for validity
-        return String.format("%02d", ctx + monthDayModifiers.get(s));
-      else
-        return "XX";
+      // todo: this is unsafe as it's not bound-checked for validity
+      return String.format("%02d", ctx + monthDayModifiers.get(s));
     } else {
       String candidate;
 
@@ -710,19 +684,12 @@ public class ChineseQuantifiableEntityNormalizer {
   }
 
   private static String normalizeYear(String s, String contextYear) {
-    return normalizeYear(s, contextYear, false);
-  }
+    log.info("NORMALIZING YEAR: " + s);
+    int ctx = Integer.valueOf(contextYear);
 
-  private static String normalizeYear(String s, String contextYear, boolean strict) {
-    int ctx = -1;
-    if (!contextYear.equals("XXXX"))
-      ctx = Integer.valueOf(contextYear);
 
     if (yearModifiers.containsKey(s)) {
-      if (ctx >= 0)
-        return String.format("%d", ctx + yearModifiers.get(s));
-      else
-        return "XXXX";
+      return String.format("%d", ctx + yearModifiers.get(s));
     } else {
       String candidate;
       StringBuilder yearcandidate = new StringBuilder();
@@ -743,17 +710,13 @@ public class ChineseQuantifiableEntityNormalizer {
         return candidate;
       }
 
-      if (ctx < 0) {
-        // use the current year as reference point for two digit year normalization by default
-        ctx = Integer.valueOf(new SimpleDateFormat("yyyy").format(new Date()));
-      }
-
       // note: this is a very crude heuristic for determining actual year from two digit expressions
       int cand = Integer.valueOf(candidate);
 
-      if ((strict && cand >= (ctx % 100)) || cand > (ctx % 100 + 10)) {
+      if (cand > (ctx % 100 + 10)) {
         // referring to the previous century
         cand += (ctx / 100 - 1) * 100;
+
       } else {
         // referring to the same century
         cand += (ctx / 100) * 100;
@@ -769,56 +732,16 @@ public class ChineseQuantifiableEntityNormalizer {
    * @param ctxdate Context date (usually doc_date)
    * @return Normalized Timex expression of the input date string
      */
-  public static String normalizeDateString(String s, String ctxdate) {
+  public static String normalizeDateString(String s, Date ctxdate) {
     // TODO [pengqi]: need to handle basic localization ("在七月二日到[八日]间")
     // TODO [pengqi]: need to handle literal numeral dates (usually used in events, e.g. "三一五" for 03-15)
     // TODO [pengqi]: might need to add a pattern for centuries ("上世纪90年代")?
+    String ctxyear = new SimpleDateFormat("yyyy").format(ctxdate);
+    String ctxmonth = new SimpleDateFormat("MM").format(ctxdate);
+    String ctxday = new SimpleDateFormat("dd").format(ctxdate);
 
-    Pattern p;
-    Matcher m;
-    String ctxyear = "XXXX", ctxmonth = "XX", ctxday = "XX";
-
-    // set up context date
-    if (ctxdate != null) {
-      p = Pattern.compile("^" + BASIC_YYYYMMDD_PATTERN + "$");
-      m = p.matcher(ctxdate);
-
-      if (m.find() && m.groupCount() == 3) {
-        ctxyear = m.group(1);
-        ctxmonth = m.group(2);
-        ctxday = m.group(3);
-      }
-    }
-
-    p = Pattern.compile("^" + BIRTH_DECADE_PATTERN + "$");
-    m = p.matcher(s);
-
-    if (m.find() && m.groupCount() == 1) {
-      StringBuilder res = new StringBuilder();
-
-      res.append(normalizeYear(m.group(1), ctxyear, true).substring(0, 3) + "X");
-      res.append("-XX-XX");
-
-      return res.toString();
-    }
-
-    p = Pattern.compile("^" + RELATIVE_TIME_PATTERN + "$");
-    m = p.matcher(s);
-
-    if (m.find() && m.groupCount() == 1) {
-      StringBuilder res = new StringBuilder();
-
-      res.append(ctxyear);
-      res.append("-");
-      res.append(ctxmonth);
-      res.append("-");
-      res.append(normalizeMonthOrDay(m.group(1), ctxday));
-
-      return res.toString();
-    }
-
-    p = Pattern.compile("^" + BASIC_YYYYMMDD_PATTERN + "$");
-    m = p.matcher(s);
+    Pattern p = Pattern.compile("^" + BASIC_YYYYMMDD_PATTERN + "$");
+    Matcher m = p.matcher(s);
 
     if (m.find() && m.groupCount() == 3) {
       StringBuilder res = new StringBuilder();

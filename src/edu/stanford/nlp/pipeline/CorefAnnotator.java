@@ -46,7 +46,6 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
   private String COREF_MODE;
   private final String HYBRID_MODE = "hybrid";
   private final String STATISTICAL_MODE = "statistical";
-  private long COREF_MAX_DOC_SIZE;
 
   private final Properties props;
 
@@ -64,8 +63,6 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
     this.props = props;
     try {
       COREF_MODE = props.getProperty("coref.mode", STATISTICAL_MODE);
-      String LONG_MAX_VALUE = "9223372036854775807";
-      COREF_MAX_DOC_SIZE = Long.parseLong(props.getProperty("coref.maxDocSize", LONG_MAX_VALUE));
       if (COREF_MODE.equals(HYBRID_MODE)) {
         hcorefSystem = new CorefSystem(props);
         scorefSystem = null;
@@ -95,16 +92,6 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
 
       if (hasSpeakerAnnotations(annotation)) {
         annotation.set(CoreAnnotations.UseMarkedDiscourseAnnotation.class, true);
-      }
-
-      // check if doc is too large for co-ref , if so just set to empty map
-      String documentText = annotation.get(CoreAnnotations.TextAnnotation.class);
-      long docByteSize = documentText.getBytes("UTF-8").length;
-      if (docByteSize > COREF_MAX_DOC_SIZE) {
-        log.error("WARNING: document exceeds max size, not performing coref!");
-        HashMap<Integer, CorefChain> emptyCorefMap = new HashMap<Integer, CorefChain>();
-        annotation.set(CorefCoreAnnotations.CorefChainAnnotation.class, emptyCorefMap);
-        return;
       }
 
       // choose between hybrid mode or statistical mode
