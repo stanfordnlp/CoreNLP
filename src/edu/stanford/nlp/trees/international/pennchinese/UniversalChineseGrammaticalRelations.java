@@ -339,8 +339,7 @@ public class UniversalChineseGrammaticalRelations {
     new GrammaticalRelation(Language.UniversalChinese, "nummod", "numeric modifier",
                             MODIFIER,
                             "QP|NP|DP", tregexCompiler,
-            "NP|QP < ( QP  =target << M $++ NN|NP|QP)",
-            "NP|QP < ( DNP=target < (QP < CD !< OD) !< JJ|ADJP $++ NP|QP )"
+            "NP|QP < ( QP  =target << M $++ NN|NP|QP)"
             // the following rule is merged into mark:clf
             //"DP < ( DT $+ CLP=target )"
             );
@@ -516,7 +515,7 @@ public class UniversalChineseGrammaticalRelations {
             "NP|CLP|QP < (ADJP=target $++ NP|CLP|QP ) ",
             "NP  $++ (CP=target << VA !<< VV) > NP ",
             "NP  < ( CP=target $++ NP << VA !<< VV)",
-            "NP|QP < ( DNP=target < JJ|ADJP !< NP|QP $++ NP|QP )");
+            "NP|QP < ( DNP=target < JJ|ADJP|QP !< NP $++ NP|QP )");
 
   /**
    * The "ordinal modifier" (ordmod) grammatical relation.
@@ -525,8 +524,7 @@ public class UniversalChineseGrammaticalRelations {
           new GrammaticalRelation(Language.UniversalChinese, "amod:ordmod", "ordinal numeric modifier",
                   ADJECTIVAL_MODIFIER,
                   "NP|QP", tregexCompiler,
-                  "NP < (QP=target < OD !< CLP)",
-                  "NP|QP < ( DNP=target < (QP < OD !< CD) !< JJ|ADJP $++ NP|QP )"
+                  "NP < (QP=target < OD !< CLP)"
                   // the following rule is merged into mark:clf
                   //"QP < (OD=target $+ CLP)"
                   );
