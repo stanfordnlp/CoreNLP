@@ -42,6 +42,21 @@ public class ChineseQuantifiableEntityNormalizer {
   private static final Pattern ARABIC_NUMBERS_PATTERN = Pattern.compile("[\\d\\.]+");
   private static final Pattern CHINESE_LITERAL_DECIMAL_PATTERN = Pattern.compile("[一二三四五六七八九零〇]+");
 
+  // Used by quantity modifiers
+  private static final String greaterEqualThreeWords = "(?:大|多|高)于或者?等于";
+  private static final String lessEqualThreeWords = "(?:小|少|低)于或者?等于";
+
+  private static final String greaterEqualTwoWords = "(?:大|多)于等于|不(?:少|小|低)于";
+  private static final String lessEqualTwoWords = "(小|少)于等于|不(?:大|少|高)于|不超过";
+  private static final String greaterThanTwoWords = "";
+  private static final String lessThanTwoWords = "";
+  private static final String approxTwoWords = "大(?:概|约|致)(?:是|为)|大概其";
+
+  private static final String greaterThanOneWord = "(?:大|多|高)于|(?:超|高|多)过";;
+  private static final String lessThanOneWord = "(?:小|少|低)于|不(?:到|够|足)";
+  private static final String approxOneWord = "大(?:约|概|致)|接?近|差不多|几乎|左右|上下|约(?:为|略)";
+
+
   // All the tags we need
   private static final String NUMBER_TAG = "NUMBER";
   private static final String DATE_TAG = "DATE";
@@ -104,6 +119,7 @@ public class ChineseQuantifiableEntityNormalizer {
 
     // Now that NER tags has been fixed up, we do another pass to add the normalization
     String prevNerTag = BACKGROUND_SYMBOL;
+    int beforeIndex = -1;
     ArrayList<E> collector = new ArrayList<>();
     for (int i = 0, sz = list.size(); i <= sz; i++) {
       // we should always keep list.size() unchanged inside the loop
@@ -142,7 +158,8 @@ public class ChineseQuantifiableEntityNormalizer {
           default:
             if(prevNerTag.equals(NUMBER_TAG) || prevNerTag.equals(PERCENT_TAG) ||
                 prevNerTag.equals(MONEY_TAG)) {
-              // TODO: look for modifiers like "大约", "多于"
+              // we are doing for prev tag so afterIndex should really be i
+              modifier = detectQuantityModifier(list, beforeIndex, i);
             }
             processEntity(collector, prevNerTag, modifier, nextWord);
             break;
@@ -152,11 +169,65 @@ public class ChineseQuantifiableEntityNormalizer {
 
       // If currNerTag is quantifiable, we add it into collector
       if(quantifiable.contains(currNerTag)) {
+        if(collector.isEmpty()) {
+          beforeIndex = i - 1;
+        }
         collector.add(wi);
       }
       // move on and update prev pointer
       prevNerTag = currNerTag;
     }
+  }
+
+  /**
+   * Detect the quantity modifiers ahead of a numeric string. This method will look at three words ahead
+   * and one word afterwards at most. Examples of modifiers are "大约", "多于".
+   *
+   * @param list
+   * @param beforeIndex
+   * @param afterIndex
+   * @param <E>
+   * @return
+   */
+  private static <E extends CoreMap> String detectQuantityModifier(List<E> list, int beforeIndex, int afterIndex) {
+    String prev = (beforeIndex >= 0) ? list.get(beforeIndex).get(CoreAnnotations.TextAnnotation.class).toLowerCase(): "";
+    String prev2 = (beforeIndex - 1 >= 0) ? list.get(beforeIndex - 1).get(CoreAnnotations.TextAnnotation.class).toLowerCase(): "";
+    String prev3 = (beforeIndex - 2 >= 0) ? list.get(beforeIndex - 2).get(CoreAnnotations.TextAnnotation.class).toLowerCase(): "";
+    int sz = list.size();
+    String next = (afterIndex < sz) ? list.get(afterIndex).get(CoreAnnotations.TextAnnotation.class).toLowerCase(): "";
+
+    if (DEBUG) {
+      // output space for clarity
+      err.println("Quantifiable modifiers: previous: " + prev3 + ' ' + prev2+ ' ' + prev);
+      err.println("Quantifiable modifiers: next: " + next);
+    }
+
+    // Actually spaces won't be used for Chinese
+    String longPrev = prev3 + prev2 + prev;
+    if (longPrev.matches(lessEqualThreeWords)) { return "<="; }
+    if (longPrev.matches(greaterEqualThreeWords)) { return ">="; }
+
+    longPrev = prev2 + prev;
+    if (longPrev.matches(greaterEqualTwoWords)) { return ">="; }
+    if (longPrev.matches(greaterThanTwoWords)) { return ">"; }
+    if (longPrev.matches(lessEqualTwoWords)) { return "<="; }
+    if (longPrev.matches(lessThanTwoWords)) { return "<"; }
+    if (longPrev.matches(approxTwoWords)) { return "~"; }
+
+    if (prev.matches(greaterThanOneWord)) { return ">"; }
+    if (prev.matches(lessThanOneWord)) { return "<"; }
+    if (prev.matches(approxOneWord)) { return "~"; }
+
+    if (next.matches(approxOneWord)) { return "~"; }
+
+    // As backup, we also check whether prev matches a two-word pattern, just in case the segmenter fails
+    // This happens to <= or >= patterns sometime as observed.
+    if (prev.matches(greaterEqualTwoWords)) { return ">="; }
+    if (prev.matches(lessEqualTwoWords)) { return "<="; }
+
+    // otherwise, not modifier detected and return null
+    if (DEBUG) { err.println("Quantifiable: not a quantity modifier"); }
+    return null;
   }
 
   /**
@@ -203,6 +274,16 @@ public class ChineseQuantifiableEntityNormalizer {
         p = normalizedPercentString(s, nextWord);
         break;
       case MONEY_TAG:
+        p = "";
+        if (compModifier != null) {
+          p = compModifier;
+        }
+        q = normalizedMoneyString(s, nextWord);
+        if (q != null) {
+          p = p.concat(q);
+        } else {
+          p = null;
+        }
         break;
       case DATE_TAG:
         break;
@@ -223,6 +304,17 @@ public class ChineseQuantifiableEntityNormalizer {
     }
     // This return value is not necessarily useful as the labelling is done in place.
     return l;
+  }
+
+  /**
+   * Normalize a money string. A currency symbol will be added accordingly.
+   *
+   * @param s
+   * @param nextWord
+   * @return
+   */
+  private static String normalizedMoneyString(String s, String nextWord) {
+    return null;
   }
 
   /**

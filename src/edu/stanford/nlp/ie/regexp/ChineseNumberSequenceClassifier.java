@@ -57,7 +57,7 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
     this.useSUTime = useSUTime;
     if(this.useSUTime) {
       // TODO: Need a Chinese version of SUTime
-      log.fatal("ChineseNumberSequenceClassifier does not have SUTime implementation.");
+      log.warn("SUTime currently does not support Chinese. Ignore property ner.useSUTime.");
     }
     this.timexExtractor = null;
   }
@@ -72,6 +72,7 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
 
   // Patterns we need
   public static final Pattern CURRENCY_WORD_PATTERN = Pattern.compile("(元|刀|(美|欧|澳|加|日|韩)元|英?镑|法郎|卢比|卢布|马克|先令|克朗|泰?铢|(越南)?盾)");
+  // TODO(yuhao): Need to add support for 美分,块钱,毛钱,角,便士
   public static final Pattern PERCENT_WORD_PATTERN1 = Pattern.compile("(百分之|千分之).+");
   public static final Pattern PERCENT_WORD_PATTERN2 = Pattern.compile(".+%");
   public static final Pattern DATE_PATTERN1 = Pattern.compile(".+(年|月|日)");
@@ -113,6 +114,7 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
         // If current word is currency word and prev word is a CD
         me.set(CoreAnnotations.AnswerAnnotation.class, MONEY_TAG);
       } else if(me.getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("CD")) {
+        // TODO(yuhao): Need to support Chinese captial numbers like 叁拾 (This won't be POS-tagged as CD).
         // If current word is a CD
         if(PERCENT_WORD_PATTERN1.matcher(me.word()).matches() ||
             PERCENT_WORD_PATTERN2.matcher(me.word()).matches()) {
@@ -200,11 +202,11 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
 
   public static void main(String[] args) throws IOException {
     Properties props = StringUtils.argsToProperties("-props", "/Users/yuhao/Research/tmp/ChineseNumberClassifierProps.properties");
-    props.setProperty("annotators", "segment,ssplit,pos,lemma,ner");
-    props.setProperty("ner.language", "chinese");
+//    Properties props = StringUtils.argsToProperties("-props", "/Users/yuhao/Research/tmp/EnglishNumberClassifierProps.properties");
     props.setProperty("ssplit.boundaryTokenRegex", "\\n"); // one sentence per line
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     String docFileName = "/Users/yuhao/Research/tmp/chinese_number_examples.txt";
+//    String docFileName = "/Users/yuhao/Research/tmp/english_number_examples.txt";
     List<String> docLines = IOUtils.linesFromFile(docFileName);
     for (String docLine : docLines) {
       Annotation sentenceAnnotation = new Annotation(docLine);
