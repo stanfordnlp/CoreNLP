@@ -144,12 +144,12 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   private AbstractSequenceClassifier<CoreLabel> getNumberSequenceClassifier(Properties props, Properties sutimeProps) {
     // TODO: String should never be used to compare a property. Use ENUM instead.
     log.info("NER language is: " + this.nerLanguage);
-    if(this.nerLanguage.equals("english")) {
+    if(this.nerLanguage.toLowerCase().equals("english")) {
       if(props == null && sutimeProps == null) {
         return new NumberSequenceClassifier(this.useSUTime);
       }
       return new NumberSequenceClassifier(props, this.useSUTime, sutimeProps);
-    } else if (this.nerLanguage.equals("chinese")) {
+    } else if (this.nerLanguage.toLowerCase().equals("chinese")) {
       if(props == null && sutimeProps == null) {
         return new ChineseNumberSequenceClassifier(this.useSUTime);
       }
@@ -285,7 +285,12 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
       try {
         // normalizes numeric entities such as MONEY, TIME, DATE, or PERCENT
         // note: this uses and sets NamedEntityTagAnnotation!
-        QuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(output, false, useSUTime);
+        if(nerLanguage.toLowerCase().equals("chinese")) {
+          // For chinese there is no support for SUTime by default
+          ChineseQuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(output);
+        } else {
+          QuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(output, false, useSUTime);
+        }
       } catch (Exception e) {
         log.info("Ignored an exception in QuantifiableEntityNormalizer: (result is that entities were not normalized)");
         log.info("Tokens: " + StringUtils.joinWords(tokens, " "));
