@@ -16,6 +16,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -71,8 +72,10 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
   public static final String PERCENT_TAG = "PERCENT";
 
   // Patterns we need
-  public static final Pattern CURRENCY_WORD_PATTERN = Pattern.compile("元|刀|(?:美|欧|澳|加|日|韩)元|英?镑|法郎|卢比|卢布|马克|先令|克朗|泰?铢|(?:越南)?盾");
-  // TODO(yuhao): Need to add support for 美分,块钱,毛钱,角,便士
+  public static final Pattern CURRENCY_WORD_PATTERN =
+      Pattern.compile("元|刀|(?:美|欧|澳|加|日|韩)元|英?镑|法郎|卢比|卢布|马克|先令|克朗|泰?铢|(?:越南)?盾|美分|便士|块钱|毛钱|角钱");
+  // In theory 块 钱 should be separated by segmenter, but just in case segmenter fails
+  // TODO(yuhao): Need to add support for 块 钱, 毛 钱, 角 钱, 角, 五 块 二
   public static final Pattern PERCENT_WORD_PATTERN1 = Pattern.compile("(?:百分之|千分之).+");
   public static final Pattern PERCENT_WORD_PATTERN2 = Pattern.compile(".+%");
   public static final Pattern DATE_PATTERN1 = Pattern.compile(".+(?:年|月|日)");
@@ -203,14 +206,17 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
   public static void main(String[] args) throws IOException {
     Properties props = StringUtils.argsToProperties("-props", "/Users/yuhao/Research/tmp/ChineseNumberClassifierProps.properties");
 //    Properties props = StringUtils.argsToProperties("-props", "/Users/yuhao/Research/tmp/EnglishNumberClassifierProps.properties");
+    props.setProperty("outputFormat", "text");
     props.setProperty("ssplit.boundaryTokenRegex", "\\n"); // one sentence per line
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     String docFileName = "/Users/yuhao/Research/tmp/chinese_number_examples.txt";
 //    String docFileName = "/Users/yuhao/Research/tmp/english_number_examples.txt";
     List<String> docLines = IOUtils.linesFromFile(docFileName);
+    PrintStream out = new PrintStream(docFileName + ".out");
     for (String docLine : docLines) {
       Annotation sentenceAnnotation = new Annotation(docLine);
       pipeline.annotate(sentenceAnnotation);
+      pipeline.prettyPrint(sentenceAnnotation, out);
       pipeline.prettyPrint(sentenceAnnotation, System.out);
     }
   }

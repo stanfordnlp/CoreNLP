@@ -1,14 +1,17 @@
 package edu.stanford.nlp.ie;
 
+import edu.stanford.nlp.ie.regexp.ChineseNumberSequenceClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -27,13 +30,15 @@ public class ChineseQuantifiableEntityNormalizer {
 
   private static Redwood.RedwoodChannels log = Redwood.channels(ChineseQuantifiableEntityNormalizer.class);
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   public static String BACKGROUND_SYMBOL = SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL;
 
   private static final Set<String> quantifiable;  //Entity types that are quantifiable
   private static final ClassicCounter<String> wordsToValues;
   private static final ClassicCounter<String> quantityUnitToValues;
+  private static final Map<String, Character> multiCharCurrencyWords; // used by money
+  private static final Map<String, Character> oneCharCurrencyWords; // used by money
 
   private static final String LITERAL_DECIMAL_POINT = "点";
 
@@ -48,8 +53,6 @@ public class ChineseQuantifiableEntityNormalizer {
 
   private static final String greaterEqualTwoWords = "(?:大|多)于等于|不(?:少|小|低)于";
   private static final String lessEqualTwoWords = "(?:小|少)于等于|不(?:大|少|高)于|不超过";
-  private static final String greaterThanTwoWords = "";
-  private static final String lessThanTwoWords = "";
   private static final String approxTwoWords = "大(?:概|约|致)(?:是|为)|大概其";
 
   private static final String greaterThanOneWord = "(?:大|多|高)于|(?:超|高|多)过";;
@@ -96,6 +99,22 @@ public class ChineseQuantifiableEntityNormalizer {
     wordsToValues.setCount("八", 8.0);
     wordsToValues.setCount("九", 9.0);
     wordsToValues.addAll(quantityUnitToValues); // all units are also quantifiable individually
+
+    multiCharCurrencyWords = Generics.newHashMap();
+    multiCharCurrencyWords.put("美元", '$');
+    multiCharCurrencyWords.put("美分", '$');
+    multiCharCurrencyWords.put("英镑", '£');
+    multiCharCurrencyWords.put("先令", '£');
+    multiCharCurrencyWords.put("便士", '£');
+    multiCharCurrencyWords.put("欧元", '€');
+    multiCharCurrencyWords.put("日元", '¥');
+    multiCharCurrencyWords.put("韩元", '₩');
+
+    oneCharCurrencyWords = Generics.newHashMap();
+    oneCharCurrencyWords.put("刀", '$');
+    oneCharCurrencyWords.put("镑", '£');
+    oneCharCurrencyWords.put("元", '元');   // We follow the tradition in English to use 元 instead of ¥ for RMB
+    // For all other currency, we use default currency symbol $
 
   }
 
@@ -209,9 +228,7 @@ public class ChineseQuantifiableEntityNormalizer {
 
     longPrev = prev2 + prev;
     if (longPrev.matches(greaterEqualTwoWords)) { return ">="; }
-    if (longPrev.matches(greaterThanTwoWords)) { return ">"; }
     if (longPrev.matches(lessEqualTwoWords)) { return "<="; }
-    if (longPrev.matches(lessThanTwoWords)) { return "<"; }
     if (longPrev.matches(approxTwoWords)) { return "~"; }
 
     if (prev.matches(greaterThanOneWord)) { return ">"; }
@@ -259,7 +276,7 @@ public class ChineseQuantifiableEntityNormalizer {
         if (compModifier != null) {
           p = compModifier;
         }
-        String q = normalizedNumberString(s, nextWord);
+        String q = normalizedNumberString(s, nextWord, 1.0);
         if (q != null) {
           p = p.concat(q);
         } else {
@@ -308,13 +325,68 @@ public class ChineseQuantifiableEntityNormalizer {
 
   /**
    * Normalize a money string. A currency symbol will be added accordingly.
+   * The assumption is that the money string will be clean enough: either lead by a currency sign (like $),
+   * or trailed by a currency word. Otherwise we give up normalization.
    *
    * @param s
    * @param nextWord
    * @return
    */
   private static String normalizedMoneyString(String s, String nextWord) {
-    return null;
+    if (DEBUG) {
+      log.info("normalizedMoneyString: Normalizing " + s);
+    }
+    // default multiplier is 1
+    double multiplier = 1.0;
+
+    char currencySign = '$'; // by default we use $, following English
+    boolean notMatched = true;
+    // We check multiCharCurrencyWords first
+    for (String currencyWord : multiCharCurrencyWords.keySet()) {
+      if(notMatched && StringUtils.find(s, currencyWord)) {
+        if(currencyWord.equals("美分")) {
+          multiplier = 0.01;
+        } else if(currencyWord.equals("先令")) {
+          multiplier = 0.05;
+        } else if(currencyWord.equals("便士")) {
+          multiplier = 1.0/240;
+        }
+        s = s.replaceAll(currencyWord, "");
+        currencySign = multiCharCurrencyWords.get(currencyWord);
+        notMatched = false;
+      }
+    }
+    // Then we check oneCharCurrencyWords
+    if(notMatched) {
+      for(String currencyWord : oneCharCurrencyWords.keySet()) {
+        if(notMatched && StringUtils.find(s, currencyWord)) {
+          // TODO: change multiplier
+          s = s.replaceAll(currencyWord, "");
+          currencySign = oneCharCurrencyWords.get(currencyWord);
+          notMatched = false;
+        }
+      }
+    }
+    // We check all other currency cases if we miss both dictionaries above
+    if(notMatched) {
+      for(String currencyWord : ChineseNumberSequenceClassifier.CURRENCY_WORDS_VALUES) {
+        if(notMatched && StringUtils.find(s, currencyWord)) {
+          s = s.replaceAll(currencyWord, "");
+          break;
+        }
+      }
+    }
+
+    // Now we assert the string should be all numbers
+    String value = normalizedNumberString(s, nextWord, multiplier);
+    if(value == null) {
+      if(DEBUG) {
+        log.info("normalizedMoneyString: Failed to parse number " + s);
+      }
+      return null;
+    } else {
+      return currencySign + value;
+    }
   }
 
   /**
@@ -327,27 +399,27 @@ public class ChineseQuantifiableEntityNormalizer {
   private static String normalizedPercentString(String s, String nextWord) {
     String ns = "";
     if(s.startsWith("百分之")) {
-      ns = normalizedNumberString(s.substring(3), nextWord);
+      ns = normalizedNumberString(s.substring(3), nextWord, 1.0);
       if(ns != null) {
         ns += "%";
       }
     } else if (s.startsWith("千分之")) {
-      ns = normalizedNumberString(s.substring(3), nextWord);
+      ns = normalizedNumberString(s.substring(3), nextWord, 1.0);
       if(ns != null) {
         ns += "‰";
       }
     } else if (s.endsWith("%")) {
       // we also handle the case where the percent ends with a % character
-      ns = normalizedNumberString(s.substring(0, s.length()-1), nextWord);
+      ns = normalizedNumberString(s.substring(0, s.length()-1), nextWord, 1.0);
       if(ns != null) {
         ns += "%";
       }
     } else if (s.endsWith("‰")) {
-      ns = normalizedNumberString(s.substring(0, s.length()-1), nextWord);
+      ns = normalizedNumberString(s.substring(0, s.length()-1), nextWord, 1.0);
       ns += "‰";
     } else {
       // otherwise we assume the entire percent is a number
-      ns = normalizedNumberString(s, nextWord);
+      ns = normalizedNumberString(s, nextWord, 1.0);
       if(ns != null) {
         ns += "%";
       }
@@ -366,9 +438,9 @@ public class ChineseQuantifiableEntityNormalizer {
    */
   private static String normalizedOrdinalString(String s, String nextWord) {
     if(s.startsWith("第")) {
-      return normalizedNumberString(s.substring(1), nextWord);
+      return normalizedNumberString(s.substring(1), nextWord, 1.0);
     } else {
-      return normalizedNumberString(s, nextWord);
+      return normalizedNumberString(s, nextWord, 1.0);
     }
   }
 
@@ -381,15 +453,16 @@ public class ChineseQuantifiableEntityNormalizer {
    *
    * @param s The string input.
    * @param nextWord The next word in sequence. This is likely to be useless for Chinese.
+   * @param multiplier A multiplier to make things simple for callers
    * @return
    */
-  private static String normalizedNumberString(String s, String nextWord) {
+  private static String normalizedNumberString(String s, String nextWord, double multiplier) {
     // First remove unnecessary characters in the string
-    s = s.trim().replaceAll(" ", "");
-    s = s.replaceAll(",", ""); // remove
+    s = s.trim();
+    s = s.replaceAll("[ \t\n\0\f\r,]", ""); // remove all unnecessary characters
     // In case of pure arabic numbers, return the straight value of it
     if(ARABIC_NUMBERS_PATTERN.matcher(s).matches()) {
-      return prettyNumber(String.format("%f", Double.valueOf(s)));
+      return prettyNumber(String.format("%f", multiplier * Double.valueOf(s)));
     }
     // If this is not all arabic, we assume it to be either Chinese literal or mix of Chinese literal and arabic
     // We handle decimal point first
@@ -417,7 +490,7 @@ public class ChineseQuantifiableEntityNormalizer {
     }
     // both decimal and integer part are parsable, we combine them to form the final result
     // the formatting of numbers in Java is really annoying
-    return prettyNumber(String.format("%f", Double.valueOf(integerValue.doubleValue() + decimalValue.doubleValue())));
+    return prettyNumber(String.format("%f", multiplier * Double.valueOf(integerValue.doubleValue() + decimalValue.doubleValue())));
   }
 
   /**
