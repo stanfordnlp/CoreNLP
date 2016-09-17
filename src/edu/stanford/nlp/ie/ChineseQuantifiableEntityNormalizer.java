@@ -40,9 +40,6 @@ public class ChineseQuantifiableEntityNormalizer {
   private static final Map<String, Character> multiCharCurrencyWords; // used by money
   private static final Map<String, Character> oneCharCurrencyWords; // used by money
 
-  private static final Map<String, Integer> yearModifiers;
-  private static final Map<String, Integer> monthDayModifiers;
-
   private static final String LITERAL_DECIMAL_POINT = "点";
 
   // Patterns we need
@@ -64,6 +61,18 @@ public class ChineseQuantifiableEntityNormalizer {
   private static final String greaterThanOneWord = "(?:大|多|高)于|(?:超|高|多)过";;
   private static final String lessThanOneWord = "(?:小|少|低)于|不(?:到|够|足)";
   private static final String approxOneWord = "大(?:约|概|致)|接?近|差不多|几乎|左右|上下|约(?:为|略)";
+
+  // Patterns used by DATE and TIME
+  private static final String CHINESE_DATE_NUMERALS_PATTERN = "[一二三四五六七八九零十〇]";
+  private static final String CHINESE_AND_ARABIC_NUMERALS_PATTERN = "[一二三四五六七八九零十〇\\d]";
+  private static final String BASIC_DD_PATTERN = "("
+          + CHINESE_AND_ARABIC_NUMERALS_PATTERN + "+)(?:(?:日|号)?|\\-|/|\\.)";
+  private static final String BASIC_MMDD_PATTERN = "(" + CHINESE_AND_ARABIC_NUMERALS_PATTERN + "+)(?:月|\\-|/|\\.)(?:"
+          + BASIC_DD_PATTERN + ")?";
+  private static final String BASIC_YYYYMMDD_PATTERN = "(" + CHINESE_AND_ARABIC_NUMERALS_PATTERN + "{2,4})(?:年|\\-|/|\\.)"
+          + "(?:" + BASIC_MMDD_PATTERN + ")?";
+  private static final String ENGLISH_MMDDYYYY_PATTERN = "(\\d{1,2})[/\\-\\.](\\d{1,2})(?:[/\\-\\.](\\d{4}))?";
+
 
   // All the tags we need
   private static final String NUMBER_TAG = "NUMBER";
@@ -121,46 +130,7 @@ public class ChineseQuantifiableEntityNormalizer {
     oneCharCurrencyWords.put("元", '元');   // We follow the tradition in English to use 元 instead of ¥ for RMB
     // For all other currency, we use default currency symbol $
 
-    yearModifiers = Generics.newHashMap();
-    yearModifiers.put("前", -2);
-    yearModifiers.put("去", -1);
-    yearModifiers.put("上", -1);
-    yearModifiers.put("今", 0);
-    yearModifiers.put("同", 0);
-    yearModifiers.put("此", 0);
-    yearModifiers.put("该", 0);
-    yearModifiers.put("本", 0);
-    yearModifiers.put("明", 1);
-    yearModifiers.put("来", 1);
-    yearModifiers.put("下", 1);
-    yearModifiers.put("后", 2);
-
-    monthDayModifiers = Generics.newHashMap();
-    monthDayModifiers.put("昨", -1);
-    monthDayModifiers.put("上", -1);
-    monthDayModifiers.put("今", 0);
-    monthDayModifiers.put("同", 0);
-    monthDayModifiers.put("此", 0);
-    monthDayModifiers.put("该", 0);
-    monthDayModifiers.put("本", 0);
-    monthDayModifiers.put("来", 1);
-    monthDayModifiers.put("明", 1);
-    monthDayModifiers.put("下", 1);
   }
-
-  // Patterns used by DATE and TIME (must be after the static initializers to make use of the modifiers)
-  private static final String CHINESE_DATE_NUMERALS_PATTERN = "[一二三四五六七八九零十〇]";
-  private static final String CHINESE_AND_ARABIC_NUMERALS_PATTERN = "[一二三四五六七八九零十〇\\d]";
-  private static final String YEAR_MODIFIER_PATTERN = "[" + String.join("", yearModifiers.keySet()) + "]";
-  private static final String MONTH_DAY_MODIFIER_PATTERN = "[" + String.join("", monthDayModifiers.keySet()) + "]";
-
-  private static final String BASIC_DD_PATTERN = "("
-          + CHINESE_AND_ARABIC_NUMERALS_PATTERN + "{1,3}|" + MONTH_DAY_MODIFIER_PATTERN + ")[日号&&[^年月]]?";
-  private static final String BASIC_MMDD_PATTERN = "(" + CHINESE_AND_ARABIC_NUMERALS_PATTERN + "{1,2}|"
-          + MONTH_DAY_MODIFIER_PATTERN + ")(?:月份?|\\-|/|\\.)(?:" + BASIC_DD_PATTERN + ")?";
-  private static final String BASIC_YYYYMMDD_PATTERN = "(" + CHINESE_AND_ARABIC_NUMERALS_PATTERN + "{2,4}|"
-          + YEAR_MODIFIER_PATTERN + ")(?:年[份度]?|\\-|/|\\.)?" + "(?:" + BASIC_MMDD_PATTERN + ")?";
-  private static final String ENGLISH_MMDDYYYY_PATTERN = "(\\d{1,2})[/\\-\\.](\\d{1,2})(?:[/\\-\\.](\\d{4}))?";
 
   /**
    * Identifies contiguous MONEY, TIME, DATE, or PERCENT entities
@@ -656,25 +626,15 @@ public class ChineseQuantifiableEntityNormalizer {
     return Double.valueOf(decimalValue);
   }
 
-  private static String normalizeMonthOrDay(String s, String context) {
-    log.info("NORMALIZING MONTH/DAY: " + s);
-    int ctx = Integer.valueOf(context);
-
-    if (monthDayModifiers.containsKey(s)) {
-      // todo: this is unsafe as it's not bound-checked for validity
-      return String.format("%02d", ctx + monthDayModifiers.get(s));
+  private static String normalizeMonthOrDay(String s) {
+    if (s == null) {
+      return "XX";
     } else {
       String candidate;
-
-      if (s == null) {
-        return "XX";
-      } else {
-
-        if (s.matches(CHINESE_DATE_NUMERALS_PATTERN + "+"))
-          candidate = prettyNumber(String.format("%f", recurNormalizeLiteralIntegerString(s)));
-        else
-          candidate = s;
-      }
+      if (s.matches(CHINESE_DATE_NUMERALS_PATTERN + "+"))
+        candidate = prettyNumber(String.format("%f", recurNormalizeLiteralIntegerString(s)));
+      else
+        candidate = s;
 
       if (candidate.length() < 2)
         candidate = "0" + candidate;
@@ -683,122 +643,91 @@ public class ChineseQuantifiableEntityNormalizer {
     }
   }
 
-  private static String normalizeYear(String s, String contextYear) {
-    log.info("NORMALIZING YEAR: " + s);
-    int ctx = Integer.valueOf(contextYear);
-
-
-    if (yearModifiers.containsKey(s)) {
-      return String.format("%d", ctx + yearModifiers.get(s));
-    } else {
-      String candidate;
-      StringBuilder yearcandidate = new StringBuilder();
-      for (int i = 0; i < s.length(); i++) {
-        String t = "" + s.charAt(i);
-        if (CHINESE_LITERAL_DECIMAL_PATTERN.matcher(t).matches()) {
-          if (wordsToValues.containsKey(t))
-            yearcandidate.append((int) wordsToValues.getCount(t));
-          else
-            // something unexpected happened
-            return null;
-        } else
-          yearcandidate.append(t);
-      }
-
-      candidate = yearcandidate.toString();
-      if (candidate.length() != 2) {
-        return candidate;
-      }
-
-      // note: this is a very crude heuristic for determining actual year from two digit expressions
-      int cand = Integer.valueOf(candidate);
-
-      if (cand > (ctx % 100 + 10)) {
-        // referring to the previous century
-        cand += (ctx / 100 - 1) * 100;
-
-      } else {
-        // referring to the same century
-        cand += (ctx / 100) * 100;
-      }
-
-      return String.format("%d", cand);
-    }
-  }
-
   /**
    * Normalizes date strings.
    * @param s Input date string
-   * @param ctxdate Context date (usually doc_date)
+   * @param docdate The document date
    * @return Normalized Timex expression of the input date string
      */
-  public static String normalizeDateString(String s, Date ctxdate) {
+  public static String normalizeDateString(String s, Date docdate) {
+    // TODO [pengqi]: still need to handle relative dates ("去年") and temporal references ("当时")
+    // TODO [pengqi]: need to handle irregular years ("81年")
     // TODO [pengqi]: need to handle basic localization ("在七月二日到[八日]间")
-    // TODO [pengqi]: need to handle literal numeral dates (usually used in events, e.g. "三一五" for 03-15)
-    // TODO [pengqi]: might need to add a pattern for centuries ("上世纪90年代")?
-    String ctxyear = new SimpleDateFormat("yyyy").format(ctxdate);
-    String ctxmonth = new SimpleDateFormat("MM").format(ctxdate);
-    String ctxday = new SimpleDateFormat("dd").format(ctxdate);
-
-    Pattern p = Pattern.compile("^" + BASIC_YYYYMMDD_PATTERN + "$");
+    Pattern p = Pattern.compile(BASIC_YYYYMMDD_PATTERN);
     Matcher m = p.matcher(s);
 
     if (m.find() && m.groupCount() == 3) {
       StringBuilder res = new StringBuilder();
+      String year = m.group(1);
+      for (int i = 0; i < year.length(); i++) {
+        String t = "" + year.charAt(i);
+        if (CHINESE_LITERAL_DECIMAL_PATTERN.matcher(t).matches()) {
+          if (wordsToValues.containsKey(t))
+            res.append((int)wordsToValues.getCount(t));
+          else
+            // something unexpected happened
+            return null;
+        } else
+          res.append(t);
+      }
 
-      res.append(normalizeYear(m.group(1), ctxyear));
       res.append("-");
-      res.append(normalizeMonthOrDay(m.group(2), ctxmonth));
+      res.append(normalizeMonthOrDay(m.group(2)));
       res.append("-");
-      res.append(normalizeMonthOrDay(m.group(3), ctxday));
+      res.append(normalizeMonthOrDay(m.group(3)));
 
       return res.toString();
     }
 
-    p = Pattern.compile("^" + BASIC_MMDD_PATTERN + "$");
+    p = Pattern.compile(BASIC_MMDD_PATTERN);
     m = p.matcher(s);
 
     if (m.find() && m.groupCount() == 2) {
       StringBuilder res = new StringBuilder();
+      String year = new SimpleDateFormat("yyyy").format(docdate);
 
-      res.append(ctxyear);
+      res.append(year);
       res.append("-");
-      res.append(normalizeMonthOrDay(m.group(1), ctxmonth));
+      res.append(normalizeMonthOrDay(m.group(1)));
       res.append("-");
-      res.append(normalizeMonthOrDay(m.group(2), ctxday));
+      res.append(normalizeMonthOrDay(m.group(2)));
 
       return res.toString();
     }
 
-    p = Pattern.compile("^" + BASIC_DD_PATTERN + "$");
+    p = Pattern.compile(BASIC_DD_PATTERN);
     m = p.matcher(s);
 
     if (m.find() && m.groupCount() == 1) {
       StringBuilder res = new StringBuilder();
+      String year = new SimpleDateFormat("yyyy").format(docdate);
+      String month = new SimpleDateFormat("MM").format(docdate);
 
-      res.append(ctxyear);
+      res.append(year);
       res.append("-");
-      res.append(ctxmonth);
+      res.append(month);
       res.append("-");
-      res.append(normalizeMonthOrDay(m.group(1), ctxday));
+      res.append(normalizeMonthOrDay(m.group(1)));
 
       return res.toString();
     }
 
-    p = Pattern.compile("^" + ENGLISH_MMDDYYYY_PATTERN + "$");
+    p = Pattern.compile(ENGLISH_MMDDYYYY_PATTERN);
     m = p.matcher(s);
 
     if (m.find() && m.groupCount() == 3) {
       StringBuilder res = new StringBuilder();
 
+      String year = new SimpleDateFormat("yyyy").format(docdate);
+
       if (m.group(3) == null)
-        res.append(ctxyear);
+        res.append(year);
       else
-        res.append(normalizeYear(m.group(3), ctxyear));
+        res.append(m.group(3));
       res.append("-");
-      res.append(normalizeMonthOrDay(m.group(1), ctxmonth));
+      res.append(normalizeMonthOrDay(m.group(1)));
       res.append("-");
-      res.append(normalizeMonthOrDay(m.group(2), ctxday));
+      res.append(normalizeMonthOrDay(m.group(2)));
 
       return res.toString();
     }

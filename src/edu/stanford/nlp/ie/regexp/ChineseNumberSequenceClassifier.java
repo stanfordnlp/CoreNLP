@@ -2,6 +2,7 @@ package edu.stanford.nlp.ie.regexp;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
@@ -85,6 +86,10 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
   public static final Pattern DATE_PATTERN4 = Pattern.compile("(?:[0-9]{2,4}[/\\-\\.][0-9]+[/\\-\\.][0-9]+|[0-9]+[/\\-\\.][0-9]+[/\\-\\.][0-9]{2,4}|[0-9]+[/\\-\\.]?[0-9]+)");
   public static final Pattern TIME_PATTERN1 = Pattern.compile(".+(?::|点|时)(?:过|欠|差)?(?:.+(?::|分)?|整?|钟?|.+刻)?(?:.+秒?)"); // This only works when POS = NT
 
+  private static final Pattern CHINESE_AND_ARABIC_NUMERALS_PATTERN = Pattern.compile("[一二三四五六七八九零十〇\\d]+");
+  // This is used to capture a special case of date in Chinese: 70 后 or 七零 后
+  private static final String DATE_AGE_LOCALIZER = "后";
+
   // order it by number of characters DESC for handy one-by-one matching of string suffix
   public static final String[] CURRENCY_WORDS_VALUES = new String[] {"越南盾", "美元", "欧元", "澳元", "加元", "日元", "韩元",
       "英镑", "法郎", "卢比", "卢布", "马克", "先令", "克朗", "泰铢", "盾", "铢", "刀", "镑", "元"};
@@ -131,6 +136,10 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
         } else if(rightScanFindsMoneyWord(pl, i)) {
           // If one the right finds a currency word
           me.set(CoreAnnotations.AnswerAnnotation.class, MONEY_TAG);
+        } else if(me.word().length() == 2 && CHINESE_AND_ARABIC_NUMERALS_PATTERN.matcher(me.word()).matches() &&
+            DATE_AGE_LOCALIZER.equals(next.word())) {
+          // This is to extract a special case of DATE: 70 后 or 七零 后
+          me.set(CoreAnnotations.AnswerAnnotation.class, DATE_TAG);
         } else {
           // Otherwise we should safely label it as NUMBER
           me.set(CoreAnnotations.AnswerAnnotation.class, NUMBER_TAG);
@@ -150,6 +159,10 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
           // TIME may have more variants (really?) so always add as TIME by default
           me.set(CoreAnnotations.AnswerAnnotation.class, TIME_TAG);
         }
+      } else if(DATE_AGE_LOCALIZER.equals(me.word()) && prev.word().length() == 2 &&
+          CHINESE_AND_ARABIC_NUMERALS_PATTERN.matcher(prev.word()).matches()) {
+        // Label 后 as DATE if the sequence is 70 后 or 七零 后
+        me.set(CoreAnnotations.AnswerAnnotation.class, DATE_TAG);
       }
     }
     return document;
