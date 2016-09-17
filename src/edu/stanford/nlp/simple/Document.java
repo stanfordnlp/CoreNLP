@@ -383,6 +383,47 @@ public class Document {
 
 
   /**
+   * A static block that'll automatically fault in the CoreNLP server, if the appropriate environment
+   * variables are set.
+   * These are:
+   *
+   * <ul>
+   *     <li>CORENLP_HOST</li> -- this is already sufficient to trigger creating a server
+   *     <li>CORENLP_PORT</li>
+   *     <li>CORENLP_KEY</li>
+   *     <li>CORENLP_SECRET</li>
+   *     <li>CORENLP_LAZY</li>  (if true, do as much annotation on a single round-trip as possible)
+   * </ul>
+   */
+  static {
+    String host    = System.getenv("CORENLP_HOST");
+    String portStr = System.getenv("CORENLP_PORT");
+    String key     = System.getenv("CORENLP_KEY");
+    String secret  = System.getenv("CORENLP_SECRET");
+    String lazystr = System.getenv("CORENLP_LAZY");
+    if (host != null) {
+      int port = 443;
+      if (portStr == null) {
+        if (host.startsWith("http://")) {
+          port = 80;
+        }
+      } else {
+        port = Integer.parseInt(portStr);
+      }
+      boolean lazy = true;
+      if (lazystr != null) {
+        lazy = Boolean.parseBoolean(lazystr);
+      }
+      if (key != null && secret != null) {
+        useServer(host, port, key, secret, lazy);
+      } else {
+        useServer(host, port);
+      }
+    }
+  }
+
+
+  /**
    * Create a new document from the passed in text and the given properties.
    * @param text The text of the document.
    */
