@@ -512,14 +512,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       builder.setDocID(doc.get(DocIDAnnotation.class));
       keysToSerialize.remove(DocIDAnnotation.class);
     }
-    if (doc.containsKey(DocDateAnnotation.class)) {
-      builder.setDocDate(doc.get(DocDateAnnotation.class));
-      keysToSerialize.remove(DocDateAnnotation.class);
-    }
-    if (doc.containsKey(CalendarAnnotation.class)) {
-      builder.setCalendar(doc.get(CalendarAnnotation.class).toInstant().toEpochMilli());
-      keysToSerialize.remove(CalendarAnnotation.class);
-    }
     if (doc.containsKey(CorefChainAnnotation.class)) {
       for (Map.Entry<Integer, CorefChain> chain : doc.get(CorefChainAnnotation.class).entrySet()) {
        builder.addCorefChain(toProto(chain.getValue()));
@@ -1184,13 +1176,13 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           }
         }
         if (protoMention.getListMembersList().size() != 0) {
-          m.listMembers = new HashSet<>();
+          m.listMembers = new HashSet<Mention>();
           for (int mentID : protoMention.getListMembersList()) {
             m.listMembers.add(idToMention.get(mentID));
           }
         }
         if (protoMention.getBelongToListsList().size() != 0) {
-          m.belongToLists = new HashSet<>();
+          m.belongToLists = new HashSet<Mention>();
           for (int mentID : protoMention.getBelongToListsList()) {
             m.belongToLists.add(idToMention.get(mentID));
           }
@@ -1296,15 +1288,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasDocID()) {
       docid = proto.getDocID();
       ann.set(DocIDAnnotation.class, docid);
-    }
-    // Set reference time
-    if (proto.hasDocDate()) {
-      ann.set(DocDateAnnotation.class, proto.getDocDate());
-    }
-    if (proto.hasCalendar()) {
-      GregorianCalendar calendar = new GregorianCalendar();
-      calendar.setTimeInMillis(proto.getCalendar());
-      ann.set(CalendarAnnotation.class, calendar);
     }
 
     // Set coref chain
