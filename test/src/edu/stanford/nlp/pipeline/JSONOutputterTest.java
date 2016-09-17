@@ -92,6 +92,7 @@ public class JSONOutputterTest extends TestCase {
         "\t\"sentences\": [\n" +
         "\t\t{\n" +
         "\t\t\t\"index\": 0,\n" +
+        "\t\t\t\"parse\": \"SENTENCE_SKIPPED_OR_UNPARSABLE\",\n" +
         "\t\t\t\"tokens\": [\n" +
         "\t\t\t\t{\n" +
         "\t\t\t\t\t\"index\": 1,\n" +
@@ -133,6 +134,7 @@ public class JSONOutputterTest extends TestCase {
         "\t\t},\n" +
         "\t\t{\n" +
         "\t\t\t\"index\": 1,\n" +
+        "\t\t\t\"parse\": \"SENTENCE_SKIPPED_OR_UNPARSABLE\",\n" +
         "\t\t\t\"tokens\": [\n" +
         "\t\t\t\t{\n" +
         "\t\t\t\t\t\"index\": 1,\n" +
