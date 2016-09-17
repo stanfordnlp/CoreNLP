@@ -453,7 +453,24 @@ public class TokensRegexNERAnnotator implements Annotator  {
     return true;
   }
 
+  private static boolean isLocationOrGpe(CoreLabel token) {
+    return "LOCATION".equals(token.ner()) || "GPE".equals(token.ner());
+  }
+
   private boolean checkOrigNerTags(Entry entry, List<CoreLabel> tokens, int start, int end) {
+    // cdm Aug 2016: Add in a special hack for Chinese KBP 2016 -- always allow a sequence of GPE or LOCATION to overwrite
+    boolean specialCasePass = true;
+    for (int i = start; i < end; i++) {
+      if ( ! isLocationOrGpe(tokens.get(i))) {
+        specialCasePass = false;
+        break;
+      }
+    }
+    if (specialCasePass) {
+      return true;
+    }
+    // end special Chinese KBP 2016 code
+
     int prevNerEndIndex = start-1;
     int nextNerStartIndex = end;
 

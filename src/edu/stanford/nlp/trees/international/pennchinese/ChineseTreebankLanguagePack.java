@@ -352,8 +352,7 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   @Override
   public boolean generateOriginalDependencies() {
-    //TODO[sebschu]: delete this method once Chinese UD becomes the default.
-    return !generateOriginalDependencies;
+    return generateOriginalDependencies;
   }
 
 }
