@@ -71,7 +71,7 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
   public static final String PERCENT_TAG = "PERCENT";
 
   // Patterns we need
-  public static final Pattern CURRENCY_WORD_PATTERN = Pattern.compile("(元|刀|(美|欧|澳|加|日|韩)元|英?镑|法郎|卢比|卢布|马克|先令|克朗|泰?铢|(越南)?盾|)");
+  public static final Pattern CURRENCY_WORD_PATTERN = Pattern.compile("(元|刀|(美|欧|澳|加|日|韩)元|英?镑|法郎|卢比|卢布|马克|先令|克朗|泰?铢|(越南)?盾)");
   public static final Pattern PERCENT_WORD_PATTERN1 = Pattern.compile("(百分之|千分之).+");
   public static final Pattern PERCENT_WORD_PATTERN2 = Pattern.compile(".+%");
   public static final Pattern DATE_PATTERN1 = Pattern.compile(".+(年|月|日)");
