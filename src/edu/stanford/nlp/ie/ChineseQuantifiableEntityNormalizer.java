@@ -41,6 +41,8 @@ public class ChineseQuantifiableEntityNormalizer {
   private static final Map<String, Character> multiCharCurrencyWords; // used by money
   private static final Map<String, Character> oneCharCurrencyWords; // used by money
 
+  private static final Map<String, String> fullDigitToHalfDigit;
+
   private static final Map<String, Integer> yearModifiers;
   private static final Map<String, Integer> monthDayModifiers;
 
@@ -147,6 +149,18 @@ public class ChineseQuantifiableEntityNormalizer {
     monthDayModifiers.put("来", 1);
     monthDayModifiers.put("明", 1);
     monthDayModifiers.put("下", 1);
+
+    fullDigitToHalfDigit = Generics.newHashMap();
+    fullDigitToHalfDigit.put("１", "1");
+    fullDigitToHalfDigit.put("２", "2");
+    fullDigitToHalfDigit.put("３", "3");
+    fullDigitToHalfDigit.put("４", "4");
+    fullDigitToHalfDigit.put("５", "5");
+    fullDigitToHalfDigit.put("６", "6");
+    fullDigitToHalfDigit.put("７", "7");
+    fullDigitToHalfDigit.put("８", "8");
+    fullDigitToHalfDigit.put("９", "9");
+    fullDigitToHalfDigit.put("０", "0");
   }
 
   // Patterns used by DATE and TIME (must be after the static initializers to make use of the modifiers)
@@ -322,6 +336,16 @@ public class ChineseQuantifiableEntityNormalizer {
     }
     // convert the entity annotations into a string
     String s = singleEntityToString(l);
+    StringBuilder sb = new StringBuilder();
+    // convert all full digits to half digits
+    for (int i = 0, sz = s.length(); i < sz; i++) {
+      String ch = s.substring(i, i+1);
+      if (fullDigitToHalfDigit.containsKey(ch)) {
+        ch = fullDigitToHalfDigit.get(ch);
+      }
+      sb.append(ch);
+    }
+    s = sb.toString();
     if(DEBUG) {
       log.info("Quantifiable: Processing entity string " + s);
     }
