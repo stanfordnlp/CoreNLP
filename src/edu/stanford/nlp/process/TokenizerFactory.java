@@ -5,8 +5,10 @@ import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
 import java.io.Reader;
 
 /**
- * A TokenizerFactory is a factory that can build a Tokenizer (an extension of Iterator)
- * from a java.io.Reader.
+ * A TokenizerFactory is used to convert a java.io.Reader into a Tokenizer
+ * (an extension of Iterator) over objects of type T represented by the text
+ * in the java.io.Reader.  It's mainly a convenience, since you could cast
+ * down anyway.
  *
  * <i>IMPORTANT NOTE:</i><br/>
  *

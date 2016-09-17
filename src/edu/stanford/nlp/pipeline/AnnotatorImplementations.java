@@ -93,12 +93,6 @@ public class AnnotatorImplementations  {
             PropertiesUtils.getBool(properties,
                     NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY,
                     NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
-
-    boolean applyRegexner =
-        PropertiesUtils.getBool(properties,
-            NERClassifierCombiner.APPLY_GAZETTE_PROPERTY,
-            NERClassifierCombiner.APPLY_GAZETTE_DEFAULT);
-
     boolean useSUTime =
             PropertiesUtils.getBool(properties,
                     NumberSequenceClassifier.USE_SUTIME_PROPERTY,
@@ -116,11 +110,11 @@ public class AnnotatorImplementations  {
       PropertiesUtils.overWriteProperties(combinerProperties, sutimeProps);
     }
     NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers,
-            useSUTime, applyRegexner, combinerProperties, loadPaths);
+            useSUTime, combinerProperties, loadPaths);
 
     int nThreads = PropertiesUtils.getInt(properties, "ner.nthreads", PropertiesUtils.getInt(properties, "nthreads", 1));
     long maxTime = PropertiesUtils.getLong(properties, "ner.maxtime", 0);
-    int maxSentenceLength = PropertiesUtils.getInt(properties, "ner.maxlen", Integer.MAX_VALUE);
+    int maxSentenceLength = PropertiesUtils.getInt(properties, "ner.maxlength", Integer.MAX_VALUE);
 
     return new NERCombinerAnnotator(nerCombiner, verbose, nThreads, maxTime, maxSentenceLength);
   }
@@ -202,8 +196,11 @@ public class AnnotatorImplementations  {
   /**
    * Infer the original casing of tokens
    */
-  public Annotator trueCase(Properties properties) {
-    return new TrueCaseAnnotator(properties);
+  public Annotator trueCase(Properties properties, String modelLoc,
+                               String classBias,
+                               String mixedCaseFileName,
+                               boolean verbose) {
+    return new TrueCaseAnnotator(modelLoc, classBias, mixedCaseFileName, verbose);
   }
 
   /**

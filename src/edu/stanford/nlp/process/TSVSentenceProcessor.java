@@ -8,7 +8,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -43,23 +43,24 @@ public interface TSVSentenceProcessor {
   }
 
   /** The list of fields actually in the sentence table being passed as a query to ForEachSentence */
-  List<SentenceField> DEFAULT_SENTENCE_TABLE = Collections.unmodifiableList(Arrays.asList(
-          SentenceField.ID,
-          SentenceField.DEPENDENCIES_STANFORD,
-          SentenceField.DEPENDENCIES_EXTRAS,
-          SentenceField.DEPENDENCIES_MALT,
-          SentenceField.DEPENDENCIES_MALT_ALT1,
-          SentenceField.DEPENDENCIES_MALT_ALT2,
-          SentenceField.WORDS,
-          SentenceField.LEMMAS,
-          SentenceField.POS_TAGS,
-          SentenceField.NER_TAGS,
-          SentenceField.DOC_ID,
-          SentenceField.SENTENCE_INDEX,
-          SentenceField.CORPUS_ID,
-          SentenceField.DOC_CHAR_BEGIN,
-          SentenceField.DOC_CHAR_END,
-          SentenceField.GLOSS));
+  List<SentenceField> DEFAULT_SENTENCE_TABLE = Collections.unmodifiableList(new ArrayList<SentenceField>() {{
+    add(SentenceField.ID);
+    add(SentenceField.DEPENDENCIES_STANFORD);
+    add(SentenceField.DEPENDENCIES_EXTRAS);
+    add(SentenceField.DEPENDENCIES_MALT);
+    add(SentenceField.DEPENDENCIES_MALT_ALT1);
+    add(SentenceField.DEPENDENCIES_MALT_ALT2);
+    add(SentenceField.WORDS);
+    add(SentenceField.LEMMAS);
+    add(SentenceField.POS_TAGS);
+    add(SentenceField.NER_TAGS);
+    add(SentenceField.DOC_ID);
+    add(SentenceField.SENTENCE_INDEX);
+    add(SentenceField.CORPUS_ID);
+    add(SentenceField.DOC_CHAR_BEGIN);
+    add(SentenceField.DOC_CHAR_END);
+    add(SentenceField.GLOSS);
+  }});
 
   /**
    * Process a given sentence.
@@ -95,10 +96,11 @@ public interface TSVSentenceProcessor {
 
     try {
       BufferedReader stdin = new BufferedReader(new InputStreamReader(in));
+      String line;
       int linesProcessed = 0;
       long startTime = System.currentTimeMillis();
 
-      for (String line; (line = stdin.readLine()) != null; ) {
+      while ((line = stdin.readLine()) != null) {
         long id = -1;
         try {
           // Parse line
@@ -129,7 +131,7 @@ public interface TSVSentenceProcessor {
             long sentPerSec = linesProcessed / ( (currTime - startTime)  / 1000 );
             debugStream.println("[" + Redwood.formatTimeDifference(currTime - startTime) + "] Processed " + linesProcessed + " sentences {" + sentPerSec + " sentences / second}... ");
           }
-        } catch (Exception t) {
+        } catch (Throwable t) {
           debugStream.println("CAUGHT EXCEPTION ON SENTENCE ID: " + id + " (-1 if not known)");
           t.printStackTrace(debugStream);
           exceptions += 1;
@@ -138,7 +140,7 @@ public interface TSVSentenceProcessor {
 
       // DONE
       debugStream.println("[" + Redwood.formatTimeDifference(System.currentTimeMillis() - startTime) + "] DONE");
-    } catch (Exception t) {
+    } catch (Throwable t) {
       debugStream.println("FATAL EXCEPTION!");
       t.printStackTrace(debugStream);
       exceptions += 1;

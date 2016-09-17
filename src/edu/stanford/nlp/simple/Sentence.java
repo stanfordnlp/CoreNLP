@@ -1,6 +1,6 @@
 package edu.stanford.nlp.simple;
 
-import edu.stanford.nlp.coref.data.CorefChain;
+import edu.stanford.nlp.hcoref.data.CorefChain;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -30,7 +30,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 
 /**
  * A representation of a single Sentence.
@@ -113,7 +112,7 @@ public class Sentence {
    * @param props The properties to use for the annotators.
    */
   public Sentence(String text, Properties props) {
-    this(new Document(props, text), props);
+    this(new Document(text), props);
   }
 
   /**
@@ -896,8 +895,7 @@ public class Sentence {
     document.runOpenie(props);
     synchronized (impl) {
       List<CoreLabel> tokens = asCoreLabels();
-      Annotation doc = document.asAnnotation();
-      return impl.getOpenieTripleList().stream().map(x -> ProtobufAnnotationSerializer.fromProto(x, doc, this.sentenceIndex())).collect(Collectors.toList());
+      return impl.getOpenieTripleList().stream().map(x -> ProtobufAnnotationSerializer.fromProto(x, tokens, document.docid().orElse(null))).collect(Collectors.toList());
     }
   }
 
@@ -936,8 +934,7 @@ public class Sentence {
     document.runKBP(props);
     synchronized (impl) {
       List<CoreLabel> tokens = asCoreLabels();
-      Annotation doc = document.asAnnotation();
-      return impl.getKbpTripleList().stream().map(x -> ProtobufAnnotationSerializer.fromProto(x, doc, this.sentenceIndex())).collect(Collectors.toList());
+      return impl.getKbpTripleList().stream().map(x -> ProtobufAnnotationSerializer.fromProto(x, tokens, document.docid().orElse(null))).collect(Collectors.toList());
     }
   }
 
@@ -1013,13 +1010,19 @@ public class Sentence {
     for (Integer clusterID : allCorefs.keySet()) {
       CorefChain chain = allCorefs.get(clusterID);
       ArrayList<CorefChain.CorefMention> mentions = new ArrayList<>(chain.getMentionsInTextualOrder());
-      mentions.stream().filter(m -> m.sentNum != this.sentenceIndex() + 1).forEach(chain::deleteMention);
+      for (CorefChain.CorefMention m : mentions) {
+        if (m.sentNum != this.sentenceIndex() + 1) {
+          chain.deleteMention(m);
+        }
+      }
       if (chain.getMentionsInTextualOrder().isEmpty()) {
         toDeleteEntirely.add(clusterID);
       }
     }
     // Clean up dangling empty chains
-    toDeleteEntirely.forEach(allCorefs::remove);
+    for (Integer danglingChain : toDeleteEntirely) {
+      allCorefs.remove(danglingChain);
+    }
     // Return
     return allCorefs;
   }

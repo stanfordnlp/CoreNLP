@@ -23,8 +23,7 @@ import edu.stanford.nlp.util.*;
  * @author John Bauer
  * @author Angel Chang
  */
-public class CleanXmlAnnotator implements Annotator {
-
+public class CleanXmlAnnotator implements Annotator{
   /**
    * A regular expression telling us where to look for tokens
    * we care about
@@ -374,7 +373,8 @@ public class CleanXmlAnnotator implements Annotator {
 
     // Keeps track of what we still need to doc level annotations
     // we still need to look for
-    Set<Class> toAnnotate = new HashSet<>(docAnnotationPatterns.keySet());
+    Set<Class> toAnnotate = new HashSet<>();
+    toAnnotate.addAll(docAnnotationPatterns.keySet());
 
     int utteranceIndex = 0;
     boolean inUtterance = false;

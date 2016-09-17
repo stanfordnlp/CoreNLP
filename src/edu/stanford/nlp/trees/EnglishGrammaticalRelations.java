@@ -42,10 +42,10 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.*;
 
 
 /**
- * {@code EnglishGrammaticalRelations} is a
+ * <code>EnglishGrammaticalRelations</code> is a
  * set of {@link GrammaticalRelation} objects for the English language.
  * These relations are commonly called Stanford Dependencies (SD).
- *
+ * <p/>
  * Grammatical relations can either be shown in their basic form, where each
  * input token receives a relation, or "collapsed" which does certain normalizations
  * which group words or turns them into relations. See
@@ -72,8 +72,8 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.*;
  * <p/>
  * <p/>
  * If using LexicalizedParser, it should be run with the
- * {@code -retainTmpSubcategories} option and one of the
- * {@code -splitTMP} options (e.g., {@code -splitTMP 1}) in order to
+ * <code>-retainTmpSubcategories</code> option and one of the
+ * <code>-splitTMP</code> options (e.g., <code>-splitTMP 1</code>) in order to
  * get the temporal NP dependencies maximally right!
  * <p/>
  * <i>Implementation notes: </i> Don't change the set of GRs without discussing it
@@ -84,7 +84,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.*;
  * ModCollinsHeadFinder, both in the trees package. That's what will be used to
  * match here.</li>
  * <li> Create and define the GrammaticalRelation similarly to the others.</li>
- * <li> Add it to the {@code values} array at the end of the file.</li>
+ * <li> Add it to the <code>values</code> array at the end of the file.</li>
  * </ul>
  * The patterns in this code assume that an NP may be followed by either a
  * -ADV or -TMP functional tag but there are no other functional tags represented.
@@ -121,7 +121,7 @@ public class EnglishGrammaticalRelations {
    * belongs.<p>
    * <p/>
    * Example: <br/>
-   * "Reagan died" &rarr; {@code pred}(Reagan, died)
+   * "Reagan died" &rarr; <code>pred</code>(Reagan, died)
    */
   public static final GrammaticalRelation PREDICATE =
     new GrammaticalRelation(Language.English, "pred", "predicate",
@@ -134,7 +134,7 @@ public class EnglishGrammaticalRelations {
    * non-main verb of the clause.<p>
    * <p/>
    * Example: <br/>
-   * "Reagan has died" &rarr; {@code aux}(died, has)
+   * "Reagan has died" &rarr; <code>aux</code>(died, has)
    */
   public static final GrammaticalRelation AUX_MODIFIER =
     new GrammaticalRelation(Language.English, "aux", "auxiliary",
@@ -152,7 +152,7 @@ public class EnglishGrammaticalRelations {
     * non-main verb of the clause which contains the passive information.
     * <p/>
     * Example: <br/>
-    * "Kennedy has been killed" &rarr; {@code auxpass}(killed, been)
+    * "Kennedy has been killed" &rarr; <code>auxpass</code>(killed, been)
     */
   public static final GrammaticalRelation AUX_PASSIVE_MODIFIER =
      new GrammaticalRelation(Language.English, "auxpass", "passive auxiliary",
@@ -168,8 +168,8 @@ public class EnglishGrammaticalRelations {
    * the complement of a copular verb and the copular verb.<p>
    * <p/>
    * Examples: <br/>
-   * "Bill is big" &rarr; {@code cop}(big, is) <br/>
-   * "Bill is an honest man" &rarr; {@code cop}(man, is)
+   * "Bill is big" &rarr; <code>cop</code>(big, is) <br/>
+   * "Bill is an honest man" &rarr; <code>cop</code>(man, is)
    */
   public static final GrammaticalRelation COPULA =
     new GrammaticalRelation(Language.English, "cop", "copula",
@@ -202,7 +202,7 @@ public class EnglishGrammaticalRelations {
    * conjunctions depend on it via the <i>conj</i> relation.<p>
    * <p/>
    * Example: <br/>
-   * "Bill is big and honest" &rarr; {@code conj}(big, honest)
+   * "Bill is big and honest" &rarr; <code>conj</code>(big, honest)
    * <p/>
    * <i>Note:</i>Modified in 2010 to exclude the case of a CC/CONJP first in its phrase: it has to conjoin things.
    */
@@ -250,7 +250,7 @@ public class EnglishGrammaticalRelations {
    * between an element and a conjunction.
    * <p/>
    * Example: <br/>
-   * "Bill is big and honest." &rarr; {@code cc}(big, and)
+   * "Bill is big and honest." &rarr; <code>cc</code>(big, and)
    */
   public static final GrammaticalRelation COORDINATION =
     new GrammaticalRelation(Language.English, "cc", "coordination",
@@ -264,7 +264,7 @@ public class EnglishGrammaticalRelations {
    * typed dependencies.
    * <p/>
    * Example: <br/>
-   * "Go home!" &rarr; {@code punct}(Go, !)
+   * "Go home!" &rarr; <code>punct</code>(Go, !)
    * <p/>
    * The condition for NFP to appear hear is that it does not match the emoticon patterns under discourse.
    */
@@ -282,7 +282,7 @@ public class EnglishGrammaticalRelations {
    * clause.<p>
    * <p/>
    * Example: <br/>
-   * "Clinton defeated Dole" &rarr; {@code arg}(defeated, Clinton), {@code arg}(defeated, Dole)
+   * "Clinton defeated Dole" &rarr; <code>arg</code>(defeated, Clinton), <code>arg</code>(defeated, Dole)
    */
   public static final GrammaticalRelation ARGUMENT =
     new GrammaticalRelation(Language.English, "arg", "argument", DEPENDENT);
@@ -295,8 +295,8 @@ public class EnglishGrammaticalRelations {
    * predicate of that clause.<p>
    * <p/>
    * Examples: <br/>
-   * "Clinton defeated Dole" &rarr; {@code subj}(defeated, Clinton) <br/>
-   * "What she said is untrue" &rarr; {@code subj}(is, What she said)
+   * "Clinton defeated Dole" &rarr; <code>subj</code>(defeated, Clinton) <br/>
+   * "What she said is untrue" &rarr; <code>subj</code>(is, What she said)
    */
   public static final GrammaticalRelation SUBJECT =
     new GrammaticalRelation(Language.English, "subj", "subject", ARGUMENT);
@@ -304,10 +304,10 @@ public class EnglishGrammaticalRelations {
 
   /**
    * The "nominal subject" grammatical relation.  A nominal subject is
-   * a subject which is an noun phrase.
-   *
+   * a subject which is an noun phrase.<p>
+   * <p/>
    * Example: <br/>
-   * "Clinton defeated Dole" &rarr; {@code nsubj}(defeated, Clinton)
+   * "Clinton defeated Dole" &rarr; <code>nsubj</code>(defeated, Clinton)
    */
   public static final GrammaticalRelation NOMINAL_SUBJECT =
     new GrammaticalRelation(Language.English, "nsubj", "nominal subject",
@@ -352,10 +352,10 @@ public class EnglishGrammaticalRelations {
 
   /**
    * The "nominal passive subject" grammatical relation.  A nominal passive
-   * subject is a subject of a passive which is an noun phrase.
-   *
+   * subject is a subject of a passive which is an noun phrase.<p>
+   * <p/>
    * Example: <br/>
-   * "Dole was defeated by Clinton" &rarr; {@code nsubjpass}(defeated, Dole)
+   * "Dole was defeated by Clinton" &rarr; <code>nsubjpass</code>(defeated, Dole)
    * <p>
    * This pattern recognizes basic (non-coordinated) examples.  The coordinated
    * examples are currently handled by correctDependencies() in
@@ -373,8 +373,8 @@ public class EnglishGrammaticalRelations {
    * a subject which is a clause.<p>
    * <p/>
    * Examples: (subject is "what she said" in both examples) <br/>
-   * "What she said makes sense" &rarr; {@code csubj}(makes, said) <br/>
-   * "What she said is untrue" &rarr; {@code csubj}(untrue, said)
+   * "What she said makes sense" &rarr; <code>csubj</code>(makes, said) <br/>
+   * "What she said is untrue" &rarr; <code>csubj</code>(untrue, said)
    */
   public static final GrammaticalRelation CLAUSAL_SUBJECT =
     new GrammaticalRelation(Language.English, "csubj", "clausal subject",
@@ -388,7 +388,7 @@ public class EnglishGrammaticalRelations {
    * a subject of a passive verb which is a clause.<p>
    * <p/>
    * Example: (subject is "that she lied") <br/>
-   * "That she lied was suspected by everyone" &rarr; {@code csubjpass}(suspected, lied)
+   * "That she lied was suspected by everyone" &rarr; <code>csubjpass</code>(suspected, lied)
    */
   public static final GrammaticalRelation CLAUSAL_PASSIVE_SUBJECT =
     new GrammaticalRelation(Language.English, "csubjpass", "clausal passive subject",
@@ -407,10 +407,10 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Examples: <br/>
    * "She gave me a raise" &rarr;
-   * {@code comp}(gave, me),
-   * {@code comp}(gave, a raise) <br/>
+   * <code>comp</code>(gave, me),
+   * <code>comp</code>(gave, a raise) <br/>
    * "I like to swim" &rarr;
-   * {@code comp}(like, to swim)
+   * <code>comp</code>(like, to swim)
    */
   public static final GrammaticalRelation COMPLEMENT =
     new GrammaticalRelation(Language.English, "comp", "complement", ARGUMENT);
@@ -424,8 +424,8 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Examples: <br/>
    * "She gave me a raise" &rarr;
-   * {@code obj}(gave, me),
-   * {@code obj}(gave, raise)
+   * <code>obj</code>(gave, me),
+   * <code>obj</code>(gave, raise)
    */
   public static final GrammaticalRelation OBJECT =
     new GrammaticalRelation(Language.English, "obj", "object", COMPLEMENT);
@@ -435,11 +435,11 @@ public class EnglishGrammaticalRelations {
    * The "direct object" grammatical relation.  The direct object
    * of a verb is the noun phrase which is the (accusative) object of
    * the verb; the direct object of a clause or VP is the direct object of
-   * the head predicate of that clause.
-   *
+   * the head predicate of that clause.<p>
+   * <p/>
    * Example: <br/>
    * "She gave me a raise" &rarr;
-   * {@code dobj}(gave, raise) <p/>
+   * <code>dobj</code>(gave, raise) <p/>
    * Note that dobj can also be assigned by the conversion of rel in the postprocessing.
    */
   public static final GrammaticalRelation DIRECT_OBJECT =
@@ -514,7 +514,7 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Example:  <br/>
    * "She gave me a raise" &rarr;
-   * {@code iobj}(gave, me)
+   * <code>iobj</code>(gave, me)
    */
   public static final GrammaticalRelation INDIRECT_OBJECT =
     new GrammaticalRelation(Language.English, "iobj", "indirect object",
@@ -536,7 +536,7 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "I sat on the chair" &rarr;
-   * {@code pobj}(on, chair)
+   * <code>pobj</code>(on, chair)
    * <p/>
    * (The preposition can be called a FW for pace, versus, etc.  It can also
    * be called a CC - but we don't currently handle that and would need to
@@ -577,11 +577,11 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Examples: <br/>
    * "We have no useful information on whether users are at risk" &arr;
-   * {@code pcomp}(on, are) <br/>
+   * <code>pcomp</code>(on, are) <br/>
    * "They heard about you missing classes." &arr;
-   * {@code pcomp}(about, missing) <br/>
+   * <code>pcomp</code>(about, missing) <br/>
    * It is warmer in Greece than in Italy &arr;
-   * {@code pcomp}(than, in)
+   * <code>pcomp</code>(than, in)
    */
   public static final GrammaticalRelation PREPOSITIONAL_COMPLEMENT =
     new GrammaticalRelation(Language.English, "pcomp", "prepositional complement",
@@ -627,11 +627,11 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "He says that you like to swim" &rarr;
-   * {@code ccomp}(says, like) <br/>
+   * <code>ccomp</code>(says, like) <br/>
    * "I am certain that he did it" &rarr;
-   * {@code ccomp}(certain, did) <br/>
+   * <code>ccomp</code>(certain, did) <br/>
    * "I admire the fact that you are honest" &rarr;
-   * {@code ccomp}(fact, honest)
+   * <code>ccomp</code>(fact, honest)
    */
   public static final GrammaticalRelation CLAUSAL_COMPLEMENT =
     new GrammaticalRelation(Language.English, "ccomp", "clausal complement",
@@ -682,9 +682,9 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Examples: <br/>
    * "I like to swim" &rarr;
-   * {@code xcomp}(like, swim) <br/>
+   * <code>xcomp</code>(like, swim) <br/>
    * "I am ready to leave" &rarr;
-   * {@code xcomp}(ready, leave)
+   * <code>xcomp</code>(ready, leave)
    */
   public static final GrammaticalRelation XCLAUSAL_COMPLEMENT =
     new GrammaticalRelation(Language.English, "xcomp", "xclausal complement",
@@ -735,9 +735,9 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "I saw the book which you bought" &rarr;
-   * {@code ref}(book, which) <br/>
+   * <code>ref</code>(book, which) <br/>
    * "I saw the book the cover of which you designed" &rarr;
-   * {@code ref}(book, which)
+   * <code>ref</code>(book, which)
    */
   public static final GrammaticalRelation REFERENT =
     new GrammaticalRelation(Language.English, "ref", "referent", DEPENDENT);
@@ -751,7 +751,7 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "There is a statue in the corner" &rarr;
-   * {@code expl}(is, there)
+   * <code>expl</code>(is, there)
    */
   public static final GrammaticalRelation EXPLETIVE =
     new GrammaticalRelation(Language.English, "expl", "expletive",
@@ -768,7 +768,7 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "She looks very beautiful" &rarr;
-   * {@code acomp}(looks, beautiful)
+   * <code>acomp</code>(looks, beautiful)
    */
   public static final GrammaticalRelation ADJECTIVAL_COMPLEMENT =
     new GrammaticalRelation(Language.English, "acomp", "adjectival complement",
@@ -781,14 +781,14 @@ public class EnglishGrammaticalRelations {
   /**
    * The "modifier" grammatical relation.  A modifier of a VP is
    * any constituent that serves to modify the meaning of the VP
-   * (but is not an {@code ARGUMENT} of that
+   * (but is not an <code>ARGUMENT</code> of that
    * VP); a modifier of a clause is an modifier of the VP which is
    * the predicate of that clause.<p>
    * <p/>
    * Examples: <br/>
    * "Last night, I swam in the pool" &rarr;
-   * {@code mod}(swam, in the pool),
-   * {@code mod}(swam, last night)
+   * <code>mod</code>(swam, in the pool),
+   * <code>mod</code>(swam, last night)
    */
   public static final GrammaticalRelation MODIFIER =
     new GrammaticalRelation(Language.English, "mod", "modifier", DEPENDENT);
@@ -801,9 +801,9 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Examples: <br/>
    * "The accident happened as the night was falling" &rarr;
-   * {@code advcl}(happened, falling) <br/>
+   * <code>advcl</code>(happened, falling) <br/>
    * "If you know who did it, you should tell the teacher" &rarr;
-   * {@code advcl}(tell, know)
+   * <code>advcl</code>(tell, know)
    */
   public static final GrammaticalRelation ADV_CLAUSE_MODIFIER =
     new GrammaticalRelation(Language.English, "advcl", "adverbial clause modifier",
@@ -855,7 +855,7 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "He talked to the president in order to secure the account" &rarr;
-   * {@code purpcl}(talked, secure)
+   * <code>purpcl</code>(talked, secure)
    */
 
 
@@ -868,9 +868,9 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Examples: <br/>
    * "I saw the man you love" &rarr;
-   * {@code rcmod}(man, love)  <br/>
+   * <code>rcmod</code>(man, love)  <br/>
    * "I saw the book which you bought" &rarr;
-   * {@code rcmod}(book, bought)
+   * <code>rcmod</code>(book, bought)
    */
   public static final GrammaticalRelation RELATIVE_CLAUSE_MODIFIER =
     new GrammaticalRelation(Language.English, "rcmod", "relative clause modifier",
@@ -893,7 +893,7 @@ public class EnglishGrammaticalRelations {
   * <p/>
   * Example: <br/>
   * "He says that you like to swim" &rarr;
-  * {@code complm}(like, that)
+  * <code>complm</code>(like, that)
   */
 
 
@@ -904,7 +904,7 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "U.S. forces have been engaged in intense fighting after insurgents launched simultaneous attacks" &rarr;
-   * {@code mark}(launched, after)
+   * <code>mark</code>(launched, after)
    */
   public static final GrammaticalRelation MARKER =
     new GrammaticalRelation(Language.English, "mark", "marker",
@@ -920,14 +920,14 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "Sam eats red meat" &rarr;
-   * {@code amod}(meat, red) <p/>
+   * <code>amod</code>(meat, red) <p/>
    * The relation amod is also used for multiword country adjectives, despite their
    * questionable treebank representation.
    * <p/>
    * Example: <br/>
    * "the West German economy" &rarr;
-   * {@code amod}(German, West),
-   * {@code amod}(economy, German)
+   * <code>amod</code>(German, West),
+   * <code>amod</code>(economy, German)
    */
   public static final GrammaticalRelation ADJECTIVAL_MODIFIER =
     new GrammaticalRelation(Language.English, "amod", "adjectival modifier",
@@ -946,7 +946,7 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "Sam eats 3 sheep" &rarr;
-   * {@code num}(sheep, 3)
+   * <code>num</code>(sheep, 3)
    */
   public static final GrammaticalRelation NUMERIC_MODIFIER =
     new GrammaticalRelation(Language.English, "num", "numeric modifier",
@@ -968,7 +968,7 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "I lost $ 3.2 billion" &rarr;
-   * {@code number}($, billion)
+   * <code>number</code>($, billion)
    */
   public static final GrammaticalRelation NUMBER_MODIFIER =
     new GrammaticalRelation(Language.English, "number", "compound number modifier",
@@ -982,7 +982,7 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "About 200 people came to the party" &rarr;
-   * {@code quantmod}(200, About)
+   * <code>quantmod</code>(200, About)
    */
   public static final GrammaticalRelation QUANTIFIER_MODIFIER =
     new GrammaticalRelation(Language.English, "quantmod", "quantifier modifier",
@@ -1006,8 +1006,8 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "Oil price futures" &rarr;
-   * {@code nn}(futures, oil),
-   * {@code nn}(futures, price) <p/>
+   * <code>nn</code>(futures, oil),
+   * <code>nn</code>(futures, price) <p/>
    */
   public static final GrammaticalRelation NOUN_COMPOUND_MODIFIER =
     new GrammaticalRelation(Language.English, "nn", "nn modifier",
@@ -1031,11 +1031,11 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Examples: <br/>
    * "Sam, my brother, eats red meat" &rarr;
-   * {@code appos}(Sam, brother) <br/>
-   * "Bill (John's cousin)" &rarr; {@code appos}(Bill, cousin).
+   * <code>appos</code>(Sam, brother) <br/>
+   * "Bill (John's cousin)" &rarr; <code>appos</code>(Bill, cousin).
    *
    * "The Australian Broadcasting Corporation (ABC)" &rarr;
-   *  {@code appos}(Corporation, ABC)
+   *  <code>appos</code>(Corporation, ABC)
    */
   public static final GrammaticalRelation APPOSITIONAL_MODIFIER =
     new GrammaticalRelation(Language.English, "appos", "appositional modifier",
@@ -1079,13 +1079,13 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Examples: <br/>
    * "truffles picked during the spring are tasty" &rarr;
-   * {@code vmod}(truffles, picked) <br>
+   * <code>vmod</code>(truffles, picked) <br>
    * "Bill picked Fred for the team demonstrating his incompetence" &rarr;
-   * {@code vmod}(picked, demonstrating) <br>
+   * <code>vmod</code>(picked, demonstrating) <br>
    * "points to establish are ..." &rarr;
-   * {@code vmod}(points, establish) <br>
+   * <code>vmod</code>(points, establish) <br>
    * "who am i to judge" &rarr;
-   * {@code vmod}(who, judge) <br>
+   * <code>vmod</code>(who, judge) <br>
    */
   public static final GrammaticalRelation VERBAL_MODIFIER =
     new GrammaticalRelation(Language.English, "vmod", "verb modifier",
@@ -1117,9 +1117,9 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Examples: <br/>
    * "genetically modified food" &rarr;
-   * {@code advmod}(modified, genetically) <br/>
+   * <code>advmod</code>(modified, genetically) <br/>
    * "less often" &rarr;
-   * {@code advmod}(often, less)
+   * <code>advmod</code>(often, less)
    */
   public static final GrammaticalRelation ADVERBIAL_MODIFIER =
     new GrammaticalRelation(Language.English, "advmod", "adverbial modifier",
@@ -1146,9 +1146,9 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Examples: <br/>
    * "Bill is not a scientist" &rarr;
-   * {@code neg}(scientist, not) <br/>
+   * <code>neg</code>(scientist, not) <br/>
    * "Bill doesn't drive" &rarr;
-   * {@code neg}(drive, n't)
+   * <code>neg</code>(drive, n't)
    */
   public static final GrammaticalRelation NEGATION_MODIFIER =
     new GrammaticalRelation(Language.English, "neg", "negation modifier",
@@ -1175,32 +1175,32 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "The director is 65 years old" &rarr;
-   * {@code npadvmod}(old, years)
+   * <code>npadvmod</code>(old, years)
    * </li>
    * <li> Noun phrases giving extent inside a VP which are not objects
    * <p/>
    * Example: <br/>
    * "Shares eased a fraction" &rarr;
-   * {@code npadvmod}(eased, fraction)
+   * <code>npadvmod</code>(eased, fraction)
    * </li>
    * <li> Financial constructions involving an adverbial or PP-like NP, notably
    * the following construction where the NP means "per share"
    * <p/>
    * Example: <br/>
    * "IBM earned $ 5 a share" &rarr;
-   * {@code npadvmod}($, share)
+   * <code>npadvmod</code>($, share)
    * </li>
    * <li>Reflexives
    * <p/>
    * Example: <br/>
    * "The silence is itself significant" &rarr;
-   * {@code npadvmod}(significant, itself)
+   * <code>npadvmod</code>(significant, itself)
    * </li>
    * <li>Certain other absolutive NP constructions.
    * <p/>
    * Example: <br/>
    * "90% of Australians like him, the most of any country" &rarr;
-   * {@code npadvmod}(like, most)
+   * <code>npadvmod</code>(like, most)
    * </ul>
    * A temporal modifier (tmod) is a subclass of npadvmod which is distinguished
    * as a separate relation.
@@ -1256,10 +1256,10 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Examples: <br/>
    * "dogs as well as cats" &rarr;
-   * {@code mwe}(well, as)<br/>
-   * {@code mwe}(well, as)<p/>
+   * <code>mwe</code>(well, as)<br/>
+   * <code>mwe</code>(well, as)<p/>
    * "fewer than 700 bottles" &rarr;
-   * {@code mwe}(than, fewer)
+   * <code>mwe</code>(than, fewer)
    */
   public static final GrammaticalRelation MULTI_WORD_EXPRESSION =
     new GrammaticalRelation(Language.English, "mwe", "multi-word expression",
@@ -1282,7 +1282,7 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "The director is 65 years old" &rarr;
-   * {@code measure}(old, years)
+   * <code>measure</code>(old, years)
    *
   public static final GrammaticalRelation MEASURE_PHRASE =
     new GrammaticalRelation(Language.English, "measure", "measure-phrase",
@@ -1295,10 +1295,10 @@ public class EnglishGrammaticalRelations {
 
   /**
    * The "determiner" grammatical relation.
-   *
+   * <p> <p/>
    * Examples: <br/>
-   * "The man is here" &rarr; {@code det}(man,the) <br/>
-   * "Which man do you prefer?" &rarr; {@code det}(man,which) <br>
+   * "The man is here" &rarr; <code>det</code>(man,the) <br/>
+   * "Which man do you prefer?" &rarr; <code>det</code>(man,which) <br>
    * (The ADVP match is because sometimes "a little" or "every time" is tagged
    * as an AVDVP with POS tags straight under it.)
    */
@@ -1323,7 +1323,7 @@ public class EnglishGrammaticalRelations {
    * The "predeterminer" grammatical relation.
    * <p> <p/>
    * Example: <br/>
-   * "All the boys are here" &rarr; {@code predet}(boys,all)
+   * "All the boys are here" &rarr; <code>predet</code>(boys,all)
    */
   public static final GrammaticalRelation PREDETERMINER =
     new GrammaticalRelation(Language.English, "predet", "predeterminer",
@@ -1337,7 +1337,7 @@ public class EnglishGrammaticalRelations {
    * The "preconjunct" grammatical relation.
    * <p/>
    * Example: <br/>
-   * "Both the boys and the girls are here" &rarr; {@code preconj}(boys,both)
+   * "Both the boys and the girls are here" &rarr; <code>preconj</code>(boys,both)
    */
   public static final GrammaticalRelation PRECONJUNCT =
     new GrammaticalRelation(Language.English, "preconj", "preconjunct",
@@ -1378,7 +1378,7 @@ public class EnglishGrammaticalRelations {
    * </p>
    * Example: <br/>
    * "John's book" &rarr;
-   * {@code possessive}(John, 's)
+   * <code>possessive</code>(John, 's)
    */
   public static final GrammaticalRelation POSSESSIVE_MODIFIER =
     new GrammaticalRelation(Language.English, "possessive", "possessive modifier",
@@ -1396,11 +1396,11 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Examples: <br/>
    * "I saw a cat in a hat" &rarr;
-   * {@code prep}(cat, in) <br/>
+   * <code>prep</code>(cat, in) <br/>
    * "I saw a cat with a telescope" &rarr;
-   * {@code prep}(saw, with) <br/>
+   * <code>prep</code>(saw, with) <br/>
    * "He is responsible for meals" &rarr;
-   * {@code prep}(responsible, for)
+   * <code>prep</code>(responsible, for)
    */
   public static final GrammaticalRelation PREPOSITIONAL_MODIFIER =
     new GrammaticalRelation(Language.English, "prep", "prepositional modifier",
@@ -1420,7 +1420,7 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "They shut down the station." &rarr;
-   * {@code prt}(shut, down)
+   * <code>prt</code>(shut, down)
    */
   public static final GrammaticalRelation PHRASAL_VERB_PARTICLE =
     new GrammaticalRelation(Language.English, "prt", "phrasal verb particle",
@@ -1435,7 +1435,7 @@ public class EnglishGrammaticalRelations {
    * sentences are juxtaposed next to each other without any coordinator or subordinator, etc.
    * <p> <p/>
    * Examples: <br/>
-   * "The guy, John said, left early in the morning." &rarr; {@code parataxis}(left,said) <br/>
+   * "The guy, John said, left early in the morning." &rarr; <code>parataxis</code>(left,said) <br/>
    * "
    */
   public static final GrammaticalRelation PARATAXIS =
@@ -1462,7 +1462,7 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "They come here with out legal permission." &rarr;
-   * {@code goeswith}(out, with)
+   * <code>goeswith</code>(out, with)
    */
   public static final GrammaticalRelation GOES_WITH =
     new GrammaticalRelation(Language.English, "goeswith", "goes with",
@@ -1485,7 +1485,7 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "The man has been killed by the police" &rarr;
-   * {@code agent}(killed, police)
+   * <code>agent</code>(killed, police)
    */
   public static final GrammaticalRelation AGENT =
     new GrammaticalRelation(Language.English, "agent", "agent", DEPENDENT);
@@ -1772,7 +1772,7 @@ public class EnglishGrammaticalRelations {
 
   /**
    * Prints out the English grammatical relations hierarchy.
-   * See {@code EnglishGrammaticalStructure} for a main method that
+   * See <code>EnglishGrammaticalStructure</code> for a main method that
    * will print the grammatical relations of a sentence or tree.
    *
    * @param args Args are ignored.

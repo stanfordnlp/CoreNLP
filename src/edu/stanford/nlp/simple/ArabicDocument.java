@@ -1,6 +1,6 @@
 package edu.stanford.nlp.simple;
 
-import edu.stanford.nlp.coref.data.CorefChain;
+import edu.stanford.nlp.hcoref.data.CorefChain;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.pipeline.Annotation;

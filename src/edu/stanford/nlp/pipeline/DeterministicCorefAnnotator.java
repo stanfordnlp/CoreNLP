@@ -1,16 +1,11 @@
-package edu.stanford.nlp.pipeline;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+package edu.stanford.nlp.pipeline; 
+import edu.stanford.nlp.util.logging.Redwood;
+
+import java.util.*;
 
 import edu.stanford.nlp.dcoref.Constants;
 import edu.stanford.nlp.dcoref.CorefChain;
 import edu.stanford.nlp.dcoref.CorefChain.CorefMention;
-import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.dcoref.Document;
 import edu.stanford.nlp.dcoref.Mention;
 import edu.stanford.nlp.dcoref.MentionExtractor;
@@ -19,20 +14,15 @@ import edu.stanford.nlp.dcoref.SieveCoreferenceSystem;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode;
-import edu.stanford.nlp.trees.GrammaticalStructure.Extras;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
-import edu.stanford.nlp.util.ArraySet;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.IntTuple;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.PropertiesUtils;
-import edu.stanford.nlp.util.logging.Redwood;
+import edu.stanford.nlp.trees.GrammaticalStructure.Extras;
+import edu.stanford.nlp.util.*;
 
 /**
  * Implements the Annotator for the new deterministic coreference resolution system.
@@ -68,6 +58,10 @@ public class DeterministicCorefAnnotator implements Annotator  {
       e.printStackTrace();
       throw new RuntimeException(e);
     }
+  }
+
+  public static String signature(Properties props) {
+    return SieveCoreferenceSystem.signature(props);
   }
 
   @Override
@@ -128,8 +122,8 @@ public class DeterministicCorefAnnotator implements Annotator  {
       }
 
 
-      Map<Integer, edu.stanford.nlp.coref.data.CorefChain> result = corefSystem.corefReturnHybridOutput(document);
-      annotation.set(edu.stanford.nlp.coref.CorefCoreAnnotations.CorefChainAnnotation.class, result);
+      Map<Integer, edu.stanford.nlp.hcoref.data.CorefChain> result = corefSystem.corefReturnHybridOutput(document);
+      annotation.set(edu.stanford.nlp.hcoref.CorefCoreAnnotations.CorefChainAnnotation.class, result);
 
       if(OLD_FORMAT) {
         Map<Integer, CorefChain> oldResult = corefSystem.coref(document);

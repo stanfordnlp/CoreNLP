@@ -1,5 +1,10 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.hcoref.CorefCoreAnnotations.*;
+import edu.stanford.nlp.hcoref.data.CorefChain;
+import edu.stanford.nlp.hcoref.data.Dictionaries;
+import edu.stanford.nlp.hcoref.data.Mention;
+import edu.stanford.nlp.hcoref.data.SpeakerInfo;
 import edu.stanford.nlp.ie.NumberNormalizer;
 import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
 import edu.stanford.nlp.ie.machinereading.structure.ExtractionObject;
@@ -30,13 +35,6 @@ import edu.stanford.nlp.time.TimeAnnotations.*;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import edu.stanford.nlp.coref.CorefCoreAnnotations.*;
-
-import edu.stanford.nlp.coref.data.CorefChain;
-import edu.stanford.nlp.coref.data.Dictionaries;
-import edu.stanford.nlp.coref.data.Mention;
-import edu.stanford.nlp.coref.data.SpeakerInfo;
 
 /**
  * <p>
@@ -198,7 +196,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @return A parsed Annotation.
    * @throws IOException In case the stream cannot be read from.
    */
-  @SuppressWarnings({"UnusedDeclaration", "ThrowFromFinallyBlock"})
+  @SuppressWarnings("UnusedDeclaration")
   public Annotation readUndelimited(File in) throws IOException {
     FileInputStream undelimited = new FileInputStream(in);
     CoreNLPProtos.Document doc;
@@ -270,8 +268,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Remove items which were never supposed to be there in the first place
     keysToSerialize.remove(ForcedSentenceUntilEndAnnotation.class);
     keysToSerialize.remove(ForcedSentenceEndAnnotation.class);
-    keysToSerialize.remove(HeadWordLabelAnnotation.class);
-    keysToSerialize.remove(HeadTagLabelAnnotation.class);
     // Required fields
     builder.setWord(coreLabel.word());
     // Optional fields
@@ -367,7 +363,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param keysToSerialize A set tracking which keys have been saved. It's important to remove any keys added to the proto
    *                        from this set, as the code tracks annotations to ensure lossless serialization.
    */
-  @SuppressWarnings("deprecation")
   protected CoreNLPProtos.Sentence.Builder toProtoBuilder(CoreMap sentence, Set<Class<?>> keysToSerialize) {
     // Error checks
     if (sentence instanceof CoreLabel) { throw new IllegalArgumentException("CoreMap is actually a CoreLabel"); }
@@ -453,13 +448,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
       keysToSerialize.remove(CorefMentionsAnnotation.class);
     }
-    // Entity mentions
-    if (keySet.contains(MentionsAnnotation.class)) {
-      for (CoreMap mention : sentence.get(MentionsAnnotation.class)) {
-        builder.addMentions(toProtoMention(mention));
-      }
-      keysToSerialize.remove(MentionsAnnotation.class);
-    }
     // add a sentence id if it exists
     if (keySet.contains(SentenceIDAnnotation.class)) builder.setSentenceID(getAndRegister(sentence, keysToSerialize, SentenceIDAnnotation.class));
     // Return
@@ -522,14 +510,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       builder.setDocID(doc.get(DocIDAnnotation.class));
       keysToSerialize.remove(DocIDAnnotation.class);
     }
-    if (doc.containsKey(DocDateAnnotation.class)) {
-      builder.setDocDate(doc.get(DocDateAnnotation.class));
-      keysToSerialize.remove(DocDateAnnotation.class);
-    }
-    if (doc.containsKey(CalendarAnnotation.class)) {
-      builder.setCalendar(doc.get(CalendarAnnotation.class).toInstant().toEpochMilli());
-      keysToSerialize.remove(CalendarAnnotation.class);
-    }
     if (doc.containsKey(CorefChainAnnotation.class)) {
       for (Map.Entry<Integer, CorefChain> chain : doc.get(CorefChainAnnotation.class).entrySet()) {
        builder.addCorefChain(toProto(chain.getValue()));
@@ -541,12 +521,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         builder.addQuote(toProtoQuote(quote));
       }
       keysToSerialize.remove(QuotationsAnnotation.class);
-    }
-    if (doc.containsKey(MentionsAnnotation.class)) {
-      for (CoreMap mention : doc.get(MentionsAnnotation.class)) {
-        builder.addMentions(toProtoMention(mention));
-      }
-      keysToSerialize.remove(MentionsAnnotation.class);
     }
     // Return
     return builder;
@@ -720,11 +694,15 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     // handle the two sets of Strings
     if (mention.dependents != null) {
-      mention.dependents.forEach(builder::addDependents);
+      for (String dependent : mention.dependents) {
+        builder.addDependents(dependent);
+      }
     }
 
     if (mention.preprocessedTerms != null) {
-      mention.preprocessedTerms.forEach(builder::addPreprocessedTerms);
+      for (String preprocessed : mention.preprocessedTerms) {
+        builder.addPreprocessedTerms(preprocessed);
+      }
     }
 
     // set IndexedWords by storing (sentence number, token index) pairs
@@ -749,7 +727,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     // flag if this Mention should get basicDependency, collapsedDependency, and contextParseTree or not
     builder.setHasBasicDependency((mention.basicDependency != null));
-    builder.setHasEnhancedDepenedncy((mention.enhancedDependency != null));
+    builder.setHasCollapsedDependency((mention.collapsedDependency != null));
     builder.setHasContextParseTree((mention.contextParseTree != null));
 
     // handle the sets of Mentions, just store mentionID
@@ -931,7 +909,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         .build();
   }
 
-
   /**
    * Return a Protobuf RelationTriple from a RelationTriple.
    */
@@ -941,27 +918,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         .setRelation(triple.relationGloss())
         .setObject(triple.objectGloss())
         .setConfidence(triple.confidence)
-        .addAllSubjectTokens(triple.subject.stream().map(token ->
-            CoreNLPProtos.TokenLocation.newBuilder()
-                .setSentenceIndex(token.sentIndex())
-                .setTokenIndex(token.index() - 1)
-                .build())
-            .collect(Collectors.toList()))
+        .addAllSubjectTokens(triple.subject.stream().map(x -> x.index() - 1).collect(Collectors.toList()))
         .addAllRelationTokens(
             triple.relation.size() == 1 && triple.relation.get(0).get(IndexAnnotation.class) == null
                 ? Collections.emptyList()  // case: this is not a real relation token, but rather a placeholder relation
-                : triple.relation.stream().map(token ->
-                CoreNLPProtos.TokenLocation.newBuilder()
-                    .setSentenceIndex(token.sentIndex())
-                    .setTokenIndex(token.index() - 1)
-                    .build())
-                .collect(Collectors.toList()))
-        .addAllObjectTokens(triple.object.stream().map(token ->
-            CoreNLPProtos.TokenLocation.newBuilder()
-                .setSentenceIndex(token.sentIndex())
-                .setTokenIndex(token.index() - 1)
-                .build())
-            .collect(Collectors.toList()));
+                : triple.relation.stream().map(x -> x.index() - 1).collect(Collectors.toList()))
+        .addAllObjectTokens(triple.object.stream().map(x -> x.index() - 1).collect(Collectors.toList()));
     Optional<SemanticGraph> treeOptional = triple.asDependencyTree();
     if (treeOptional.isPresent()) {
       builder.setTree(toProto(treeOptional.get()));
@@ -1016,23 +978,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (quote.get(TokenBeginAnnotation.class) != null) { builder.setTokenBegin(quote.get(TokenBeginAnnotation.class)); }
     if (quote.get(TokenEndAnnotation.class) != null) { builder.setTokenEnd(quote.get(TokenEndAnnotation.class)); }
     if (quote.get(QuotationIndexAnnotation.class) != null) { builder.setIndex(quote.get(QuotationIndexAnnotation.class)); }
-    return builder.build();
-  }
-
-  /**
-   * Convert a mention object to a protocol buffer.
-   */
-  public CoreNLPProtos.NERMention toProtoMention(CoreMap mention) {
-    CoreNLPProtos.NERMention.Builder builder = CoreNLPProtos.NERMention.newBuilder();
-    if (mention.get(SentenceIndexAnnotation.class) != null) { builder.setSentenceIndex(mention.get(SentenceIndexAnnotation.class)); }
-    if (mention.get(TokenBeginAnnotation.class) != null) { builder.setTokenStartInSentenceInclusive(mention.get(TokenBeginAnnotation.class)); }
-    if (mention.get(TokenEndAnnotation.class) != null) { builder.setTokenEndInSentenceExclusive(mention.get(TokenEndAnnotation.class)); }
-    if (mention.get(NamedEntityTagAnnotation.class) != null) { builder.setNer(mention.get(NamedEntityTagAnnotation.class)); }
-    if (mention.get(NormalizedNamedEntityTagAnnotation.class) != null) { builder.setNormalizedNER(mention.get(NormalizedNamedEntityTagAnnotation.class)); }
-    if (mention.get(EntityTypeAnnotation.class) != null) { builder.setEntityType(mention.get(EntityTypeAnnotation.class)); }
-    if (mention.get(TimexAnnotation.class) != null) { builder.setTimex(toProto(mention.get(TimexAnnotation.class))); }
-    if (mention.get(WikipediaEntityAnnotation.class) != null) { builder.setWikipediaEntity(mention.get(WikipediaEntityAnnotation.class)); }
-
     return builder.build();
   }
 
@@ -1101,8 +1046,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param proto The protocol buffer to read from.
    * @return A CoreMap representing the sentence.
    */
-  @SuppressWarnings("deprecation")
-  @Deprecated
   public CoreMap fromProto(CoreNLPProtos.Sentence proto) {
     if (Thread.interrupted()) {
       throw new RuntimeInterruptedException();
@@ -1137,10 +1080,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     // Add relation triples
     if (proto.getOpenieTripleCount() > 0) {
-      throw new IllegalStateException("Cannot deserialize OpenIE triples with this method!");
+      List<RelationTriple> triples = proto.getOpenieTripleList().stream().map(triple -> fromProto(triple, tokens, null)).collect(Collectors.toList());
+      lossySentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, triples);
     }
     if (proto.getKbpTripleCount() > 0) {
-      throw new IllegalStateException("Cannot deserialize KBP triples with this method!");
+      List<RelationTriple> triples = proto.getKbpTripleList().stream().map(triple -> fromProto(triple, tokens, null)).collect(Collectors.toList());
+      lossySentence.set(KBPTriplesAnnotation.class, triples);
     }
     // Add text -- missing by default as it's populated from the Document
     lossySentence.set(TextAnnotation.class, recoverOriginalText(tokens, proto));
@@ -1193,14 +1138,13 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     return sentence;
   }
 
-
   protected void loadSentenceMentions(CoreNLPProtos.Sentence proto, CoreMap sentence) {
     // add all Mentions for this sentence
     if (proto.getHasCorefMentionsAnnotation()) {
-      sentence.set(CorefMentionsAnnotation.class, new ArrayList<>());
+      sentence.set(CorefMentionsAnnotation.class, new ArrayList<Mention>());
     }
     if (proto.getMentionsForCorefList().size() != 0) {
-      HashMap<Integer, Mention> idToMention = new HashMap<>();
+      HashMap<Integer, Mention> idToMention = new HashMap<Integer,Mention>();
       List<Mention> sentenceMentions = sentence.get(CorefMentionsAnnotation.class);
       // initial set up of all mentions
       for (CoreNLPProtos.Mention protoMention : proto.getMentionsForCorefList()) {
@@ -1212,34 +1156,34 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       for (CoreNLPProtos.Mention protoMention : proto.getMentionsForCorefList()) {
         Mention m = idToMention.get(protoMention.getMentionID());
         if (protoMention.getAppositionsList().size() != 0) {
-          m.appositions = new HashSet<>();
-          m.appositions.addAll(protoMention.getAppositionsList().stream()
-              .map(idToMention::get)
-              .collect(Collectors.toList()));
+          m.appositions = new HashSet<Mention>();
+          for (int mentID : protoMention.getAppositionsList()) {
+            m.appositions.add(idToMention.get(mentID));
+          }
         }
         if (protoMention.getPredicateNominativesList().size() != 0) {
-          m.predicateNominatives = new HashSet<>();
-          m.predicateNominatives.addAll(protoMention.getPredicateNominativesList().stream()
-              .map(idToMention::get)
-              .collect(Collectors.toList()));
+          m.predicateNominatives = new HashSet<Mention>();
+          for (int mentID : protoMention.getPredicateNominativesList()) {
+            m.predicateNominatives.add(idToMention.get(mentID));
+          }
         }
         if (protoMention.getRelativePronounsList().size() != 0) {
-          m.relativePronouns = new HashSet<>();
-          m.relativePronouns.addAll(protoMention.getRelativePronounsList().stream()
-              .map(idToMention::get)
-              .collect(Collectors.toList()));
+          m.relativePronouns = new HashSet<Mention>();
+          for (int mentID : protoMention.getRelativePronounsList()) {
+            m.relativePronouns.add(idToMention.get(mentID));
+          }
         }
         if (protoMention.getListMembersList().size() != 0) {
-          m.listMembers = new HashSet<>();
-          m.listMembers.addAll(protoMention.getListMembersList().stream()
-              .map(idToMention::get)
-              .collect(Collectors.toList()));
+          m.listMembers = new HashSet<Mention>();
+          for (int mentID : protoMention.getListMembersList()) {
+            m.listMembers.add(idToMention.get(mentID));
+          }
         }
         if (protoMention.getBelongToListsList().size() != 0) {
-          m.belongToLists = new HashSet<>();
-          m.belongToLists.addAll(protoMention.getBelongToListsList().stream()
-              .map(idToMention::get)
-              .collect(Collectors.toList()));
+          m.belongToLists = new HashSet<Mention>();
+          for (int mentID : protoMention.getBelongToListsList()) {
+            m.belongToLists.add(idToMention.get(mentID));
+          }
         }
       }
     }
@@ -1254,7 +1198,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param proto The protocol buffer to read the document from.
    * @return An Annotation corresponding to the read protobuf.
    */
-  @SuppressWarnings("deprecation")
   public Annotation fromProto(CoreNLPProtos.Document proto) {
     if (Thread.interrupted()) {
       throw new RuntimeInterruptedException();
@@ -1344,15 +1287,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       docid = proto.getDocID();
       ann.set(DocIDAnnotation.class, docid);
     }
-    // Set reference time
-    if (proto.hasDocDate()) {
-      ann.set(DocDateAnnotation.class, proto.getDocDate());
-    }
-    if (proto.hasCalendar()) {
-      GregorianCalendar calendar = new GregorianCalendar();
-      calendar.setTimeInMillis(proto.getCalendar());
-      ann.set(CalendarAnnotation.class, calendar);
-    }
 
     // Set coref chain
     Map<Integer, CorefChain> corefChains = new HashMap<>();
@@ -1369,9 +1303,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     HashMap<Integer, CoreNLPProtos.Mention> idToProtoMention = new HashMap<>();
 
     // Set things in the sentence that need a document context.
-    for (int sentenceIndex = 0; sentenceIndex < proto.getSentenceCount(); ++sentenceIndex) {
-      CoreNLPProtos.Sentence sentence = proto.getSentenceList().get(sentenceIndex);
-      CoreMap map = sentences.get(sentenceIndex);
+    for (int i = 0; i < proto.getSentenceCount(); ++i) {
+      CoreNLPProtos.Sentence sentence = proto.getSentenceList().get(i);
+      CoreMap map = sentences.get(i);
       List<CoreLabel> sentenceTokens = map.get(TokensAnnotation.class);
       // Set dependency graphs
       if (sentence.hasBasicDependencies()) {
@@ -1394,14 +1328,14 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
       // Set entailed sentences
       if (sentence.getEntailedSentenceCount() > 0) {
-        Set<SentenceFragment> entailedSentences = sentence.getEntailedSentenceList().stream().map(frag -> fromProto(frag, map.get(EnhancedPlusPlusDependenciesAnnotation.class))).collect(Collectors.toSet());
+        Set<SentenceFragment> entailedSentences = sentence.getEntailedSentenceList().stream().map(frag -> fromProto(frag, map.get(CollapsedDependenciesAnnotation.class))).collect(Collectors.toSet());
         map.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, entailedSentences);
       }
       // Set relation triples
       if (sentence.getOpenieTripleCount() > 0) {
         List<RelationTriple> triples = new ArrayList<>();
         for (CoreNLPProtos.RelationTriple triple : sentence.getOpenieTripleList()) {
-          triples.add(fromProto(triple, ann, sentenceIndex));
+          triples.add(fromProto(triple, sentenceTokens, docid));
         }
         map.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, triples);
       }
@@ -1435,12 +1369,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         if (headWordIndex >= 0) {
           mentionToUpdate.headWord = sentenceTokens.get(protoMention.getHeadWord().getTokenIndex());
         }
-        mentionToUpdate.sentenceWords = new ArrayList<>();
+        mentionToUpdate.sentenceWords = new ArrayList<CoreLabel>();
         for (CoreNLPProtos.IndexedWord clp : protoMention.getSentenceWordsList()) {
           int ti = clp.getTokenIndex();
           mentionToUpdate.sentenceWords.add(sentenceTokens.get(ti));
         }
-        mentionToUpdate.originalSpan = new ArrayList<>();
+        mentionToUpdate.originalSpan = new ArrayList<CoreLabel>();
         for (CoreNLPProtos.IndexedWord clp : protoMention.getOriginalSpanList()) {
           int ti = clp.getTokenIndex();
           mentionToUpdate.originalSpan.add(sentenceTokens.get(ti));
@@ -1448,8 +1382,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         if (protoMention.getHasBasicDependency()) {
           mentionToUpdate.basicDependency = map.get(BasicDependenciesAnnotation.class);
         }
-        if (protoMention.getHasEnhancedDepenedncy()) {
-          mentionToUpdate.enhancedDependency = map.get(EnhancedDependenciesAnnotation.class);
+        if (protoMention.getHasCollapsedDependency()) {
+          mentionToUpdate.collapsedDependency = map.get(CollapsedDependenciesAnnotation.class);
         }
         if (protoMention.getHasContextParseTree()) {
           mentionToUpdate.contextParseTree = map.get(TreeAnnotation.class);
@@ -1464,12 +1398,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     List<CoreMap> quotes = proto.getQuoteList().stream().map(quote -> fromProto(quote, tokens)).collect(Collectors.toList());
     if (!quotes.isEmpty()) {
       ann.set(QuotationsAnnotation.class, quotes);
-    }
-
-    // Set NERmention
-    List<CoreMap> mentions = proto.getMentionsList().stream().map(this::fromProto).collect(Collectors.toList());
-    if (!mentions.isEmpty()) {
-      ann.set(MentionsAnnotation.class, mentions);
     }
 
     // add SpeakerInfo stuff to Mentions, this requires knowing all mentions in the document
@@ -1602,14 +1530,18 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     return new Polarity(projectionFn);
   }
 
-
   /**
-   * Deserialize a dependency tree, allowing for cross-sentence arcs.
-   * This is primarily here for deserializing OpenIE triples.
+   * Voodoo magic to convert a serialized dependency graph into a {@link SemanticGraph}.
+   * This method is intended to be called only from the {@link ProtobufAnnotationSerializer#fromProto(CoreNLPProtos.Document)}
+   * method.
    *
-   * @see ProtobufAnnotationSerializer#fromProto(CoreNLPProtos.DependencyGraph, List, String)
+   * @param proto The serialized representation of the graph. This relies heavily on indexing into the original document.
+   * @param sentence The raw sentence that this graph was saved from must be provided, as it is not saved in the serialized
+   *                 representation.
+   * @param docid A docid must be supplied, as it is not saved by the serialized representation.
+   * @return A semantic graph corresponding to the saved object, on the provided sentence.
    */
-  private static SemanticGraph fromProto(CoreNLPProtos.DependencyGraph proto, List<CoreLabel> sentence, String docid, Optional<Annotation> document) {
+  public static SemanticGraph fromProto(CoreNLPProtos.DependencyGraph proto, List<CoreLabel> sentence, String docid) {
     SemanticGraph graph = new SemanticGraph();
 
     // first construct the actual nodes; keep them indexed by their index
@@ -1623,12 +1555,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     TwoDimensionalMap<Integer, Integer, IndexedWord> nodes = TwoDimensionalMap.hashMap();
     for(CoreNLPProtos.DependencyGraph.Node in: proto.getNodeList()){
-      CoreLabel token;
-      if (document.isPresent()) {
-        token = document.get().get(SentencesAnnotation.class).get(in.getSentenceIndex()).get(TokensAnnotation.class).get(in.getIndex() - 1); // token index starts at 1!
-      } else {
-        token = sentence.get(in.getIndex() - 1); // index starts at 1!
-      }
+      CoreLabel token = sentence.get(in.getIndex() - 1); // index starts at 1!
       IndexedWord word;
       if (in.hasCopyAnnotation() && in.getCopyAnnotation() > 0) {
         // TODO: if we make a copy wrapper CoreLabel, use it here instead
@@ -1680,68 +1607,38 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
     }
     return graph;
-
-  }
-
-
-  /**
-   * Voodoo magic to convert a serialized dependency graph into a {@link SemanticGraph}.
-   * This method is intended to be called only from the {@link ProtobufAnnotationSerializer#fromProto(CoreNLPProtos.Document)}
-   * method.
-   *
-   * @param proto The serialized representation of the graph. This relies heavily on indexing into the original document.
-   * @param sentence The raw sentence that this graph was saved from must be provided, as it is not saved in the serialized
-   *                 representation.
-   * @param docid A docid must be supplied, as it is not saved by the serialized representation.
-   * @return A semantic graph corresponding to the saved object, on the provided sentence.
-   */
-  public static SemanticGraph fromProto(CoreNLPProtos.DependencyGraph proto, List<CoreLabel> sentence, String docid) {
-    return fromProto(proto, sentence, docid, Optional.empty());
   }
 
 
   /**
    * Return a  {@link RelationTriple} object from the serialized representation.
-   * This requires a sentence and a document so that
-   * (1) we have a docid for the dependency tree can be accurately rebuilt,
-   * and (2) we have references to the tokens to include in the relation triple.
+   * This requires a sentence and a docid so that the dependency tree can be accurately rebuilt.
    *
    * @param proto The serialized relation triples.
-   * @param doc The document we are deserializing. This document should already
-   *            have a docid annotation set, if there is one.
-   * @param sentenceIndex The index of the sentence this extraction should be attached to.
+   * @param sentence The sentence the triples were extracted from.
+   * @param docid The id of the document we are de-serializing.
    *
    * @return A relation triple as a Java object, corresponding to the seriaized proto.
    */
-  public static RelationTriple fromProto(CoreNLPProtos.RelationTriple proto, Annotation doc, int sentenceIndex) {
+  public static RelationTriple fromProto(CoreNLPProtos.RelationTriple proto, List<CoreLabel> sentence, String docid) {
     if (Thread.interrupted()) {
       throw new RuntimeInterruptedException();
     }
     // Get the spans for the extraction
-    List<CoreLabel> subject = proto.getSubjectTokensList().stream().map(loc ->
-        doc.get(SentencesAnnotation.class).get(loc.getSentenceIndex()).get(TokensAnnotation.class).get(loc.getTokenIndex())
-        ).collect(Collectors.toList());
+    List<CoreLabel> subject = proto.getSubjectTokensList().stream().map(sentence::get).collect(Collectors.toList());
     List<CoreLabel> relation;
     if (proto.getRelationTokensCount() == 0) {  // If we don't have a real span for the relation, make a dummy word
       relation = Collections.singletonList(new CoreLabel(new Word(proto.getRelation())));
     } else {
-      relation = proto.getRelationTokensList().stream().map(loc ->
-          doc.get(SentencesAnnotation.class).get(loc.getSentenceIndex()).get(TokensAnnotation.class).get(loc.getTokenIndex())
-      ).collect(Collectors.toList());
+      relation = proto.getRelationTokensList().stream().map(sentence::get).collect(Collectors.toList());
     }
-    List<CoreLabel> object = proto.getObjectTokensList().stream().map(loc ->
-        doc.get(SentencesAnnotation.class).get(loc.getSentenceIndex()).get(TokensAnnotation.class).get(loc.getTokenIndex())
-    ).collect(Collectors.toList());
+    List<CoreLabel> object = proto.getObjectTokensList().stream().map(sentence::get).collect(Collectors.toList());
 
     // Create the extraction
     RelationTriple extraction;
     double confidence = proto.getConfidence();
     if (proto.hasTree()) {
-      SemanticGraph tree = fromProto(
-          proto.getTree(),
-          doc.get(SentencesAnnotation.class).get(sentenceIndex).get(TokensAnnotation.class),
-          doc.get(DocIDAnnotation.class),
-          Optional.of(doc));
+      SemanticGraph tree = fromProto(proto.getTree(), sentence, docid);
       extraction =  new RelationTriple.WithTree(subject, relation, object, tree, confidence);
     } else {
       extraction = new RelationTriple(subject, relation, object, confidence);
@@ -1933,13 +1830,17 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     // handle the sets of Strings
     if (protoMention.getDependentsCount() != 0) {
-      returnMention.dependents = new HashSet<>();
-      returnMention.dependents.addAll(protoMention.getDependentsList());
+      returnMention.dependents = new HashSet<String>();
+      for (String dependent : protoMention.getDependentsList()) {
+        returnMention.dependents.add(dependent);
+      }
     }
 
     if (protoMention.getPreprocessedTermsCount() != 0) {
-      returnMention.preprocessedTerms = new ArrayList<>();
-      returnMention.preprocessedTerms.addAll(protoMention.getPreprocessedTermsList());
+      returnMention.preprocessedTerms = new ArrayList<String>();
+      for (String preprocessed : protoMention.getPreprocessedTermsList()) {
+        returnMention.preprocessedTerms.add(preprocessed);
+      }
     }
 
     return returnMention;
@@ -1947,7 +1848,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
   private SpeakerInfo fromProto(CoreNLPProtos.SpeakerInfo speakerInfo) {
     String speakerName = speakerInfo.getSpeakerName();
-    return new SpeakerInfo(speakerName);
+    SpeakerInfo returnSpeakerInfo = new SpeakerInfo(speakerName);
+    return returnSpeakerInfo;
   }
 
   /**
@@ -2035,24 +1937,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (quote.hasTokenBegin()) { ann.set(TokenBeginAnnotation.class, quote.getTokenBegin()); }
     if (quote.hasTokenEnd()) { ann.set(TokenEndAnnotation.class, quote.getTokenEnd()); }
     return ann;
-  }
-
-  /**
-   * Convert a quote object to a protocol buffer.
-   */
-  @SuppressWarnings("UnusedParameters")
-  private CoreMap fromProto(CoreNLPProtos.NERMention mention) {
-    CoreMap map = new ArrayCoreMap();
-    if (mention.hasSentenceIndex()) map.set(SentenceIndexAnnotation.class, mention.getSentenceIndex());
-    if (mention.hasTokenStartInSentenceInclusive()) map.set(TokenBeginAnnotation.class, mention.getTokenStartInSentenceInclusive());
-    if (mention.hasTokenEndInSentenceExclusive()) map.set(TokenEndAnnotation.class, mention.getTokenEndInSentenceExclusive());
-    if (mention.hasNer()) map.set(NamedEntityTagAnnotation.class, mention.getNer());
-    if (mention.hasNormalizedNER()) map.set(NormalizedNamedEntityTagAnnotation.class, mention.getNormalizedNER());
-    if (mention.hasEntityType()) map.set(EntityTypeAnnotation.class, mention.getEntityType());
-    if (mention.hasTimex()) map.set(TimexAnnotation.class, fromProto(mention.getTimex()));
-    if (mention.hasWikipediaEntity()) map.set(WikipediaEntityAnnotation.class, mention.getWikipediaEntity());
-
-    return map;
   }
 
   /**

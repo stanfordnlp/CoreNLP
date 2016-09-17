@@ -30,9 +30,7 @@ import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
@@ -245,44 +243,18 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
     return SentenceUtils.toWordList(segmentedString.split("\\s+"));
   }
 
-  private List<CoreLabel> segmentStringToIOB(String line) {
+  public String segmentString(String line) {
     List<CoreLabel> tokenList;
     if (tf == null) {
       // Whitespace tokenization.
       tokenList = IOBUtils.StringToIOB(line);
     } else {
       List<CoreLabel> tokens = tf.getTokenizer(new StringReader(line)).tokenize();
-      tokenList = IOBUtils.StringToIOB(tokens, null, false, tf, line);
+      tokenList = IOBUtils.StringToIOB(tokens, null, false);
     }
     IOBUtils.labelDomain(tokenList, domain);
     tokenList = classifier.classify(tokenList);
-    return tokenList;
-  }
-
-  public List<CoreLabel> segmentStringToTokenList(String line) {
-    List<CoreLabel> tokenList = CollectionUtils.makeList();
-    List<CoreLabel> labeledSequence = segmentStringToIOB(line);
-    for (IntPair span : IOBUtils.TokenSpansForIOB(labeledSequence)) {
-      CoreLabel token = new CoreLabel();
-      String text = IOBUtils.IOBToString(labeledSequence, prefixMarker, suffixMarker,
-          span.getSource(), span.getTarget());
-      token.setWord(text);
-      token.setValue(text);
-      token.set(CoreAnnotations.TextAnnotation.class, text);
-      token.set(CoreAnnotations.ArabicSegAnnotation.class, "1");
-      int start = labeledSequence.get(span.getSource()).beginPosition();
-      int end = labeledSequence.get(span.getTarget() - 1).endPosition();
-      token.setOriginalText(line.substring(start, end));
-      token.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, start);
-      token.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, end);
-      tokenList.add(token);
-    }
-    return tokenList;
-  }
-
-  public String segmentString(String line) {
-    List<CoreLabel> labeledSequence = segmentStringToIOB(line);
-    String segmentedString = IOBUtils.IOBToString(labeledSequence, prefixMarker, suffixMarker);
+    String segmentedString = IOBUtils.IOBToString(tokenList, prefixMarker, suffixMarker);
     return segmentedString;
   }
 
@@ -619,7 +591,7 @@ public class ArabicSegmenter implements WordSegmenter, ThreadsafeProcessor<Strin
    * @param options
    * @return the trained or loaded model
    */
-  public static ArabicSegmenter getSegmenter(Properties options) {
+  private static ArabicSegmenter getSegmenter(Properties options) {
     ArabicSegmenter segmenter = new ArabicSegmenter(options);
     if (segmenter.flags.inputEncoding == null) {
       segmenter.flags.inputEncoding = System.getProperty("file.encoding");

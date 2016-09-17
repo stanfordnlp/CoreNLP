@@ -81,7 +81,7 @@ public class DependencyParserITest extends TestCase {
     Properties props = StringUtils.stringToProperties("language=Chinese");
     DependencyParser parser = new DependencyParser(props);
     parser.loadModelFile("/u/nlp/data/depparser/nn/distrib-2014-10-26/CTB_CoNLL_params.txt.gz");
-    double las = parser.testCoNLL("/u/nlp/data/depparser/nn/data/dependency_treebanks/CTB/ctb5.1/dev.gold.conll", null);
+    double las = parser.testCoNLL("/u/nlp/data/depparser/nn/data/dependency_treebanks/CTB/dev.gold.conll", null);
     assertEquals(String.format("Chinese CoNLLX gold tags LAS should be %.2f but was %.2f",
             ChineseConllxGoldTagsLas, las), ChineseConllxGoldTagsLas, las, 1e-4);
   }
@@ -104,7 +104,8 @@ public class DependencyParserITest extends TestCase {
     Collection<TypedDependency> dependencies = ccProcessed.typedDependencies();
 
     GrammaticalRelation expected = UniversalEnglishGrammaticalRelations.getConj("and");
-    assertTrue(dependencies.stream().map(TypedDependency::reln).collect(toList()).contains(expected));
+    assertThat(dependencies.stream().map(TypedDependency::reln).collect(toList()),
+            hasItem(expected));
   }
 
   /**

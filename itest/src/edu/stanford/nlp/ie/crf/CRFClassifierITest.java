@@ -1,12 +1,9 @@
 package edu.stanford.nlp.ie.crf;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.util.BenchmarkingHelper;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -29,10 +26,7 @@ import edu.stanford.nlp.util.Triple;
 public class CRFClassifierITest extends TestCase {
 
   private static final String nerPath = "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz";
-
-  private static final String caselessPath = "edu/stanford/nlp/models/ner/english.all.3class.caseless.distsim.crf.ser.gz";
-  // private static final String caselessPath = "/u/nlp/data/ner/goodClassifiers/english.all.3class.caseless.distsim.crf.ser.gz"; // now works!
-  // private static final String caselessPath = "/u/nlp/data/ner/classifiers-2014-08-31/english.all.3class.caseless.distsim.crf.ser.gz";
+  private static final String caselessPath = "/u/nlp/data/ner/classifiers-2014-08-31/english.all.3class.caseless.distsim.crf.ser.gz";
 
   /* The extra spaces and tab (after fate) are there to test space preservation.
    * Each item of the top level array is an array of 7 Strings:
@@ -258,7 +252,6 @@ public class CRFClassifierITest extends TestCase {
                   },
           };
 
-  /* --- old test, doesn't work any more
   private static final String[][] caselessTests = {
           { "AISLINN JEWEL Y. CAPAROSO AND REV. CARMELO B. CAPAROSS ARE UPPERCASE NAMES.",
             "AISLINN/PERSON JEWEL/PERSON Y./PERSON CAPAROSO/PERSON AND/O REV./O CARMELO/PERSON B./PERSON CAPAROSS/PERSON ARE/O UPPERCASE/O NAMES/O ./O \n" },
@@ -266,16 +259,6 @@ public class CRFClassifierITest extends TestCase {
             "Aislinn/PERSON Jewel/PERSON Y./PERSON Caparoso/PERSON and/O Rev./O Carmelo/PERSON B./PERSON Capaross/PERSON are/O names/O ./O \n" },
           { "aislinn jewel y. caparoso and rev. carmelo b. capaross are lowercase names.",
             "aislinn/PERSON jewel/PERSON y./PERSON caparoso/PERSON and/O rev./O carmelo/PERSON b./PERSON capaross/PERSON are/O lowercase/O names/O ./O \n" },
-  };
-  */
-
-  private static final String[][] caselessTests = {
-    { "ABC'S GILLIAN FINDLAY REPORTS TONIGHT FROM PALESTINIAN GAZA.",
-      "ABC/ORGANIZATION 'S/O GILLIAN/PERSON FINDLAY/PERSON REPORTS/O TONIGHT/O FROM/O PALESTINIAN/O GAZA/LOCATION ./O \n" },
-    { "ABC's Gillian Findlay Reports Tonight from Palestinian Gaza.",
-      "ABC/ORGANIZATION 's/O Gillian/PERSON Findlay/PERSON Reports/O Tonight/O from/O Palestinian/O Gaza/LOCATION ./O \n" },
-    { "abc's gillian findlay reports tonight from palestinian gaza.",
-      "abc/ORGANIZATION 's/O gillian/PERSON findlay/PERSON reports/O tonight/O from/O palestinian/O gaza/LOCATION ./O \n" },
   };
 
   /** Each of these array entries corresponds to one of the inputs in testTexts,
@@ -320,30 +303,15 @@ public class CRFClassifierITest extends TestCase {
     }
     runKBestTest(crf, txt1, isStoredAnswer);
 
-    /* --- Test caseless NER models --- */
-
     CRFClassifier<CoreLabel> crfCaseless = CRFClassifier.getClassifierNoExceptions(
         System.getProperty("ner.caseless.model", caselessPath));
-
-    try {
-      Triple<Double, Double, Double> prf = crfCaseless.classifyAndWriteAnswers("/u/nlp/data/ner/column_data/ritter.3class.test", true);
-      Counter<String> results = new ClassicCounter<>();
-      results.setCount("NER F1", prf.third());
-      Counter<String> lowResults = new ClassicCounter<>();
-      lowResults.setCount("NER F1", 53.0);
-      Counter<String> highResults = new ClassicCounter<>();
-      highResults.setCount("NER F1", 53.5);
-      BenchmarkingHelper.benchmarkResults(results, lowResults, highResults, null);
-    } catch (IOException ioe) {
-      fail("IOError on CRF test file");
-    }
-
     runSimpleCRFTest(crfCaseless, caselessTests);
   }
 
 
   private static void runSimpleCRFTest(CRFClassifier<CoreLabel> crf, String[][] testTexts) {
-    for (String[] testText : testTexts) {
+    for (int i = 0; i < testTexts.length; i++) {
+      String[] testText = testTexts[i];
       assertEquals("Wrong array size in test", 2, testText.length);
 
       String out = crf.classifyToString(testText[0], "slashTags", false).replaceAll("\r", "");

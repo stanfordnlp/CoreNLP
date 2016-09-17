@@ -119,4 +119,9 @@ public class DependencyParseAnnotator extends SentenceAnnotator  {
     )));
   }
 
+  public static String signature(String annotatorName, Properties props) {
+    return annotatorName +
+            ".extradependencies:" + props.getProperty(annotatorName + ".extradependencies", "NONE").toLowerCase();
+  }
+
 }

@@ -2,6 +2,8 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.classify.Classifier;
 import edu.stanford.nlp.classify.LinearClassifier;
+import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.hcoref.data.CorefChain;
 import edu.stanford.nlp.ie.*;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ie.util.RelationTriple;
@@ -19,10 +21,6 @@ import edu.stanford.nlp.util.logging.Redwood;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import edu.stanford.nlp.coref.CorefCoreAnnotations;
-
-import edu.stanford.nlp.coref.data.CorefChain;
 
 /**
  * An annotator which takes as input sentences, and produces KBP relation annotations.

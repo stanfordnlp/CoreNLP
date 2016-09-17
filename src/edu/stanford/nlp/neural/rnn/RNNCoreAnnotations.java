@@ -7,20 +7,14 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.trees.Tree;
 
-/** Annotations used by Tree Recursive Neural Networks.
- *
- *  @author John Bauer
- */
 public class RNNCoreAnnotations {
 
   private RNNCoreAnnotations() {} // only static members
 
   /**
    * Used to denote the vector (distributed representation) at a particular node.
-   * This stores a real vector that represents the semantics of a word or phrase.
    */
   public static class NodeVector implements CoreAnnotation<SimpleMatrix> {
-    @Override
     public Class<SimpleMatrix> getType() {
       return SimpleMatrix.class;
     }
@@ -41,12 +35,9 @@ public class RNNCoreAnnotations {
   }
 
   /**
-   * Used to denote a vector of predictions at a particular node.
-   * This is a vector of real values, typically the output of a softmax classification layer,
-   * which gives the probabilities of each output value.
+   * Used to denote a vector of predictions at a particular node
    */
   public static class Predictions implements CoreAnnotation<SimpleMatrix> {
-    @Override
     public Class<SimpleMatrix> getType() {
       return SimpleMatrix.class;
     }
@@ -61,14 +52,13 @@ public class RNNCoreAnnotations {
   }
 
   /**
-   * Get the argmax of the class predicteions.
+   * Get the argmax of the predicted class.
    * The predicted classes can be an arbitrary set of non-negative integer classes,
    * but in our current sentiment models, the values used are on a 5-point
    * scale of 0 = very negative, 1 = negative, 2 = neutral, 3 = positive,
    * and 4 = very positive.
    */
   public static class PredictedClass implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -89,10 +79,9 @@ public class RNNCoreAnnotations {
   }
 
   /**
-   * The index of the correct class.
+   * The index of the correct class
    */
   public static class GoldClass implements CoreAnnotation<Integer> {
-    @Override
     public Class<Integer> getType() {
       return Integer.class;
     }
@@ -115,7 +104,6 @@ public class RNNCoreAnnotations {
   }
 
   public static class PredictionError implements CoreAnnotation<Double> {
-    @Override
     public Class<Double> getType() {
       return Double.class;
     }
@@ -136,5 +124,4 @@ public class RNNCoreAnnotations {
     }
     ((CoreLabel) label).set(PredictionError.class, error);
   }
-
 }

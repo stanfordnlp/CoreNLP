@@ -4,8 +4,6 @@ import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.parser.metrics.AbstractEval;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.ling.*;
-
-import java.util.Properties;
 import java.util.function.Predicate;
 import edu.stanford.nlp.util.Index;
 

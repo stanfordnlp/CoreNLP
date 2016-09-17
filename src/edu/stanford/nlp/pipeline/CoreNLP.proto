@@ -33,8 +33,6 @@ message Document {
   repeated Sentence   sentence    = 2;
   repeated CorefChain corefChain  = 3;
   optional string     docID       = 4;
-  optional string     docDate     = 7;
-  optional uint64     calendar    = 8;
 
   /**
    * A peculiar field, for the corner case when a Document is
@@ -43,10 +41,6 @@ message Document {
   repeated Token      sentencelessToken = 5;
 
   repeated Quote      quote = 6;
-  /**
-   * This field is for entity mentions across the document.
-   */
-  repeated NERMention mentions = 9;
 
   extensions 100 to 255;
 }
@@ -270,7 +264,7 @@ message Mention {
   optional bool generic                = 25;
   optional bool isSingleton            = 26;
   optional bool hasBasicDependency     = 27;
-  optional bool hasEnhancedDepenedncy  = 28;
+  optional bool hasCollapsedDependency = 28;
   optional bool hasContextParseTree    = 29;
   optional IndexedWord headIndexedWord = 30;
   optional IndexedWord   dependingVerb = 31;
@@ -420,7 +414,6 @@ message NERMention {
   optional string normalizedNER                 = 5;
   optional string entityType                    = 6;
   optional Timex  timex                         = 7;
-  optional string wikipediaEntity               = 8;
 }
 
 //
@@ -434,18 +427,6 @@ message SentenceFragment {
   optional double score          = 4;
 }
 
-
-//
-// The index of a token in a document, including the sentence
-// index and the offset.
-//
-message TokenLocation {
- optional uint32 sentenceIndex = 1;
- optional uint32 tokenIndex    = 2;
-
-}
-
-
 //
 // An OpenIE relation triple.
 // Created by the openie annotator.
@@ -455,9 +436,9 @@ message RelationTriple {
   optional string          relation       = 2;   // The surface form of the relation (required)
   optional string          object         = 3;   // The surface form of the object
   optional double          confidence     = 4;   // The [optional] confidence of the extraction
-  repeated TokenLocation   subjectTokens  = 13; // The tokens comprising the subject of the triple
-  repeated TokenLocation   relationTokens = 14; // The tokens comprising the relation of the triple
-  repeated TokenLocation   objectTokens   = 15; // The tokens comprising the object of the triple
+  repeated uint32          subjectTokens  = 5;   // The tokens comprising the subject of the triple
+  repeated uint32          relationTokens = 6;   // The tokens comprising the relation of the triple
+  repeated uint32          objectTokens   = 7;   // The tokens comprising the object of the triple
   optional DependencyGraph tree           = 8;   // The dependency graph fragment for this triple
   optional bool            istmod         = 9;   // If true, this expresses an implicit tmod relation
   optional bool            prefixBe       = 10;  // If true, this relation string is missing a 'be' prefix

@@ -1,5 +1,8 @@
 package edu.stanford.nlp.naturalli; 
 import edu.stanford.nlp.util.logging.Redwood;
+
+import edu.stanford.nlp.hcoref.data.CorefChain;
+import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.IOUtils;
@@ -30,10 +33,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import edu.stanford.nlp.coref.CorefCoreAnnotations;
-
-import edu.stanford.nlp.coref.data.CorefChain;
 
 /**
  * <p>
@@ -134,9 +133,6 @@ public class OpenIE implements Annotator  {
 
   @ArgumentParser.Option(name="resolve_coref", gloss="If true, resolve pronouns to their canonical mention")
   private boolean resolveCoref = false;
-
-  @ArgumentParser.Option(name="strip_entailments", gloss="If true, don't keep the entailed sentences annotations around.")
-  private boolean stripEntailments = false;
 
   /**
    * The natural logic weights loaded from the models file.
@@ -460,9 +456,7 @@ public class OpenIE implements Annotator  {
 
       // Short sentence. Skip annotating it.
       sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.emptyList());
-      if (!stripEntailments) {
-        sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.emptySet());
-      }
+      sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.emptySet());
 
     } else {
 
@@ -475,7 +469,6 @@ public class OpenIE implements Annotator  {
         throw new IllegalStateException("Cannot run OpenIE without a parse tree!");
       }
       // Clean the tree
-      parse = new SemanticGraph(parse);
       Util.cleanTree(parse);
 
       // Resolve Coreference
@@ -498,9 +491,6 @@ public class OpenIE implements Annotator  {
       sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);
       sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class,
           new ArrayList<>(new HashSet<>(extractions)));  // uniq the extractions
-      if (stripEntailments) {
-        sentence.remove(NaturalLogicAnnotations.EntailedSentencesAnnotation.class);
-      }
     }
   }
 
@@ -590,7 +580,7 @@ public class OpenIE implements Annotator  {
         CoreAnnotations.OriginalTextAnnotation.class
     ));
     if (resolveCoref) {
-      requirements.add(edu.stanford.nlp.coref.CorefCoreAnnotations.CorefChainAnnotation.class);
+      requirements.add(edu.stanford.nlp.hcoref.CorefCoreAnnotations.CorefChainAnnotation.class);
     }
     return Collections.unmodifiableSet(requirements);
   }
