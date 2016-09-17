@@ -10,8 +10,8 @@ import edu.stanford.nlp.ling.HasWord;
 
 
 /**
- * Language pack for the UPenn/Colorado Chinese treebank.
- * The native character set for the Chinese Treebank is GB18030.
+ * Language pack for the UPenn/Colorado/Brandeis Chinese treebank.
+ * The native character set for the Chinese Treebank was GB18030, but later became UTF-8.
  * This file (like the rest of JavaNLP) is in UTF-8.
  *
  * @author Roger Levy
@@ -200,8 +200,8 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
   private static final String[] parenthesis = {"（", "）", "［", "］", "｛", "｝", "-LRB-", "-RRB-", "【", "】",
           "〔", "〖", "〘", "〚", "｟", "〕", "〗", "〙", "〛", "｠" };  // ( and ) still must be escaped
   private static final String[] colon = {"：", "；", "∶", ":"};
-  private static final String[] dash = {"…", "―", "——", "———", "————", "—", "——", "———", 
-          "－", "--", "---", "－－", "－－－", "－－－－", "－－－－－", "－－－－－－", 
+  private static final String[] dash = {"…", "―", "——", "———", "————", "—", "——", "———",
+          "－", "--", "---", "－－", "－－－", "－－－－", "－－－－－", "－－－－－－",
           "──", "━", "━━", "—－", "-", "----", "~", "~~", "~~~", "~~~~", "~~~~~", "……", "～",
           "．．．" /* 3 full width dots as ellipsis */ };
   private static final String[] other = {"·", "／", "／", "＊", "＆", "/", "//", "*", "※", "■", "●", "｜" };  // slashes are used in urls

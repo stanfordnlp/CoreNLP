@@ -2015,6 +2015,17 @@ public class StringUtils  {
       return s;
   }
 
+  /** Returns whether a String is either null or empty.
+   *  (Copies the Guava method for this.)
+   *
+   *  @param str The String to test
+   *  @return Whether the String is either null or empty
+   */
+  public static boolean isNullOrEmpty(String str) {
+    return str == null || str.equals("");
+  }
+
+
   /**
    * Resolve variable. If it is the props file, then substitute that variable with
    * the value mentioned in the props file, otherwise look for the variable in the environment variables.

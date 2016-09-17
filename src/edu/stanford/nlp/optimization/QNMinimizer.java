@@ -276,7 +276,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     mem = m;
   }
 
-  public static class SurpriseConvergence extends Throwable {
+  public static class SurpriseConvergence extends Exception {
 
     private static final long serialVersionUID = 4290178321643529559L;
 
@@ -285,7 +285,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
     }
   }
 
-  private static class MaxEvaluationsExceeded extends Throwable {
+  private static class MaxEvaluationsExceeded extends Exception {
 
     private static final long serialVersionUID = 8044806163343218660L;
 
@@ -673,7 +673,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       return update(newS, newY, yy, sy, sg, step);
     }
 
-    private class NegativeCurvature extends Throwable {
+    private class NegativeCurvature extends Exception {
 
       private static final long serialVersionUID = 4676562552506850519L;
 
@@ -681,7 +681,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators  {
       }
     }
 
-    private class ZeroGradient extends Throwable {
+    private class ZeroGradient extends Exception {
 
       private static final long serialVersionUID = -4001834044987928521L;
 

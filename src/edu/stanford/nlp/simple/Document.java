@@ -1,8 +1,8 @@
 package edu.stanford.nlp.simple;
 
-import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
-import edu.stanford.nlp.hcoref.data.CorefChain;
-import edu.stanford.nlp.hcoref.data.Dictionaries;
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
+import edu.stanford.nlp.coref.data.CorefChain;
+import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -378,7 +378,7 @@ public class Document {
   /** @see Document#useServer(String, int, String, String, boolean) */
   public static void useServer(String host,
                                String apiKey, String apiSecret) {
-    useServer(host, host.startsWith("http://") ? 80 : 443, apiKey, apiSecret, false);
+    useServer(host, host.startsWith("http://") ? 80 : 443, apiKey, apiSecret, true);
   }
 
 
@@ -428,7 +428,6 @@ public class Document {
    * @param text The text of the document.
    */
   public Document(Properties props, String text) {
-    StanfordCoreNLP.getDefaultAnnotatorPool(props, new AnnotatorImplementations());  // cache the annotator pool
     this.impl = CoreNLPProtos.Document.newBuilder().setText(text);
   }
 
@@ -677,7 +676,7 @@ public class Document {
    */
   public List<Sentence> sentences(Properties props) {
     return this.sentences(props,
-        (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultTokenize : AnnotatorFactories.tokenize(props, backend).create());
+        props == EMPTY_PROPS ? defaultTokenize : AnnotatorFactories.tokenize(props, backend).create());
   }
 
   /**
@@ -687,7 +686,7 @@ public class Document {
    */
   protected List<Sentence> sentences(Properties props, Annotator tokenizer) {
     if (sentences == null) {
-      Annotator ssplit = (props == EMPTY_PROPS || props == SINGLE_SENTENCE_DOCUMENT) ? defaultSSplit : AnnotatorFactories.sentenceSplit(props, backend).create();
+      Annotator ssplit = props == EMPTY_PROPS ? defaultSSplit : AnnotatorFactories.sentenceSplit(props, backend).create();
       // Annotate
       Annotation ann = new Annotation(this.impl.getText());
       tokenizer.annotate(ann);

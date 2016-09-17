@@ -567,6 +567,15 @@ public class JodaTimeUtils {
       DateTimeFieldType fieldType = p2.getFieldType(i);
       if (msf == null || isMoreSpecific(fieldType, msf, p.getChronology())) {
         if (!p.isSupported(fieldType)) {
+          if (fieldType == DateTimeFieldType.monthOfYear()) {
+            if (p.isSupported(QuarterOfYear)) {
+              p = p.with(DateTimeFieldType.monthOfYear(), (p.get(QuarterOfYear)-1)*3+1);
+              continue;
+            } else if (p.isSupported(HalfYearOfYear)) {
+              p = p.with(DateTimeFieldType.monthOfYear(), (p.get(HalfYearOfYear)-1)*6+1);
+              continue;
+            }
+          }
           p = p.with(fieldType, p2.getValue(i));
         }
       }
@@ -906,7 +915,7 @@ public class JodaTimeUtils {
       if(monthTerminal && monthDiff == 6 && (begin.getMonthOfYear()-1) % 6 == 0){
         //(case: half of year)
         value.append("H").append(( begin.getMonthOfYear()-1) / 6 + 1);
-       }else  if(monthTerminal && monthDiff == 3 && (begin.getMonthOfYear()-1) % 3 == 0){
+      } else if(monthTerminal && monthDiff == 3 && (begin.getMonthOfYear()-1) % 3 == 0){
         //(case: quarter of year)
         value.append("Q").append(( begin.getMonthOfYear()-1) / 3 + 1);
       } else if(monthTerminal && monthDiff == 3 && begin.getMonthOfYear() % 3 == 0){

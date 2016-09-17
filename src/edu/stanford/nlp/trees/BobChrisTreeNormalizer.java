@@ -18,7 +18,7 @@ import java.util.function.Predicate;
  * 17 Apr 2001: This was fixed to work with different kinds of labels,
  * by making proper use of the Label interface, after it was moved into
  * the trees module.
- * <p/>
+ * <p>
  * The normalizations of the original (Prolog) BobChrisNormalize were:
  * 1. Remap the root node to be called 'ROOT'
  * 2. Truncate all nonterminal labels before characters introducing
@@ -32,7 +32,7 @@ import java.util.function.Predicate;
  * 8. Remove backslashes from lexical items
  * (the Treebank inserts them to escape slashes (/) and stars (*)).
  * 4 is deliberately omitted, and a few things are purely aesthetic.
- * <p/>
+ * <p>
  * 14 June 2002: It now deletes unary A over A if both nodes' labels are equal
  * (7), and (6) was always part of the Tree.prune() functionality...
  * 30 June 2005: Also splice out an EDITED node, just in case you're parsing
@@ -79,7 +79,7 @@ public class BobChrisTreeNormalizer extends TreeNormalizer implements TreeTransf
   /**
    * Remove things like hyphened functional tags and equals from the
    * end of a node label.  This version always just returns the phrase
-   * structure category, or "ROOT" if the label was <code>null</code>.
+   * structure category, or "ROOT" if the label was {@code null}.
    *
    * @param label The label from the treebank
    * @return The cleaned up label (phrase structure category)
@@ -117,8 +117,10 @@ public class BobChrisTreeNormalizer extends TreeNormalizer implements TreeTransf
   }
 
 
+  @SuppressWarnings("serial")
   protected Predicate<Tree> emptyFilter = new EmptyFilter();
 
+  @SuppressWarnings("serial")
   protected Predicate<Tree> aOverAFilter = new AOverAFilter();
 
   private static final long serialVersionUID = -1005188028979810143L;
@@ -137,8 +139,6 @@ public class BobChrisTreeNormalizer extends TreeNormalizer implements TreeTransf
       return ! ((l != null) && "-NONE-".equals(l.value()) && !t.isLeaf() && kids.length == 1 && kids[0].isLeaf());
     }
 
-      //    private static final long serialVersionUID = 1L;
-
   } // end class EmptyFilter
 
 
@@ -147,6 +147,7 @@ public class BobChrisTreeNormalizer extends TreeNormalizer implements TreeTransf
     /** Doesn't accept nodes that are A over A nodes (perhaps due to
      *  empty removal or are EDITED nodes).
      */
+    @SuppressWarnings("SimplifiableIfStatement")
     @Override
     public boolean test(Tree t) {
       if (t.isLeaf() || t.isPreTerminal()) {

@@ -448,7 +448,7 @@ public class UniversalChineseGrammaticalRelations {
                   "NP  < ( CP=target $++ NP << VV)",
                   "NP < IP=target ");
 
-  /*
+  /**
    * The "relative clause modifier" (relcl) grammatical relation.
    * <p>
    * <pre>

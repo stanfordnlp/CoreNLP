@@ -4,11 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import edu.stanford.nlp.ie.regexp.ChineseNumberSequenceClassifier;
@@ -21,11 +17,7 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.DefaultPaths;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
-import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.PropertiesUtils;
-import edu.stanford.nlp.util.RuntimeInterruptedException;
-import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
@@ -44,7 +36,9 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   private final boolean applyNumericClassifiers;
   public static final boolean APPLY_NUMERIC_CLASSIFIERS_DEFAULT = true;
   public static final String APPLY_NUMERIC_CLASSIFIERS_PROPERTY = "ner.applyNumericClassifiers";
-  public static final String APPLY_NUMERIC_CLASSIFIERS_PROPERTY_BASE = "applyNumericClassifiers";
+  private static final String APPLY_NUMERIC_CLASSIFIERS_PROPERTY_BASE = "applyNumericClassifiers";
+  public static final String APPLY_GAZETTE_PROPERTY = "ner.regex";
+  public static final boolean APPLY_GAZETTE_DEFAULT = false;
 
   private final Language nerLanguage;
   public static final Language NER_LANGUAGE_DEFAULT = Language.ENGLISH;
@@ -78,6 +72,11 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   // todo [cdm 2015]: Could avoid constructing this if applyNumericClassifiers is false
   private final AbstractSequenceClassifier<CoreLabel> nsc;
 
+  /**
+   * A mapping from single words to the NER tag that they should be.
+   */
+  private final Map<String, String> gazetteMapping;
+
   public NERClassifierCombiner(Properties props)
     throws IOException
   {
@@ -85,16 +84,22 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     applyNumericClassifiers = PropertiesUtils.getBool(props, APPLY_NUMERIC_CLASSIFIERS_PROPERTY, APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
     nerLanguage = Language.fromString(PropertiesUtils.getString(props, NER_LANGUAGE_PROPERTY, null), NER_LANGUAGE_DEFAULT);
     useSUTime = PropertiesUtils.getBool(props, NumberSequenceClassifier.USE_SUTIME_PROPERTY, NumberSequenceClassifier.USE_SUTIME_DEFAULT);
-    nsc = getNumberSequenceClassifier(new Properties(), props);
+    nsc = new NumberSequenceClassifier(new Properties(), useSUTime, props);
+    if (PropertiesUtils.getBool(props, NERClassifierCombiner.APPLY_GAZETTE_PROPERTY, NERClassifierCombiner.APPLY_GAZETTE_DEFAULT) ) {
+      this.gazetteMapping = readRegexnerGazette(DefaultPaths.DEFAULT_NER_GAZETTE_MAPPING);
+    } else {
+      this.gazetteMapping = Collections.emptyMap();
+    }
   }
 
   public NERClassifierCombiner(String... loadPaths)
     throws IOException
   {
-    this(APPLY_NUMERIC_CLASSIFIERS_DEFAULT, NumberSequenceClassifier.USE_SUTIME_DEFAULT, loadPaths);
+    this(APPLY_NUMERIC_CLASSIFIERS_DEFAULT, NumberSequenceClassifier.USE_SUTIME_DEFAULT, NERClassifierCombiner.APPLY_GAZETTE_DEFAULT, loadPaths);
   }
 
   public NERClassifierCombiner(boolean applyNumericClassifiers,
+                               boolean augmentRegexNER,
                                boolean useSUTime,
                                String... loadPaths)
     throws IOException
@@ -103,12 +108,18 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     this.applyNumericClassifiers = applyNumericClassifiers;
     this.nerLanguage = NER_LANGUAGE_DEFAULT;
     this.useSUTime = useSUTime;
-    this.nsc = getNumberSequenceClassifier(null, null);
+    this.nsc = new NumberSequenceClassifier(useSUTime);
+    if (augmentRegexNER) {
+      this.gazetteMapping = readRegexnerGazette(DefaultPaths.DEFAULT_NER_GAZETTE_MAPPING);
+    } else {
+      this.gazetteMapping = Collections.emptyMap();
+    }
   }
 
   public NERClassifierCombiner(boolean applyNumericClassifiers,
                                Language nerLanguage,
                                boolean useSUTime,
+                               boolean augmentRegexNER,
                                Properties nscProps,
                                String... loadPaths)
     throws IOException
@@ -118,19 +129,25 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     this.applyNumericClassifiers = applyNumericClassifiers;
     this.nerLanguage = nerLanguage;
     this.useSUTime = useSUTime;
-    this.nsc = getNumberSequenceClassifier(new Properties(), nscProps);
+    this.nsc = new NumberSequenceClassifier(new Properties(), useSUTime, nscProps);
+    if (augmentRegexNER) {
+      this.gazetteMapping = readRegexnerGazette(DefaultPaths.DEFAULT_NER_GAZETTE_MAPPING);
+    } else {
+      this.gazetteMapping = Collections.emptyMap();
+    }
   }
 
   @SafeVarargs
   public NERClassifierCombiner(AbstractSequenceClassifier<CoreLabel>... classifiers)
     throws IOException
   {
-    this(APPLY_NUMERIC_CLASSIFIERS_DEFAULT, NumberSequenceClassifier.USE_SUTIME_DEFAULT, classifiers);
+    this(APPLY_NUMERIC_CLASSIFIERS_DEFAULT, NumberSequenceClassifier.USE_SUTIME_DEFAULT, NERClassifierCombiner.APPLY_GAZETTE_DEFAULT, classifiers);
   }
 
   @SafeVarargs
   public NERClassifierCombiner(boolean applyNumericClassifiers,
                                boolean useSUTime,
+                               boolean augmentRegexNER,
                                AbstractSequenceClassifier<CoreLabel>... classifiers)
     throws IOException
   {
@@ -138,7 +155,12 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     this.applyNumericClassifiers = applyNumericClassifiers;
     this.nerLanguage = NER_LANGUAGE_DEFAULT;
     this.useSUTime = useSUTime;
-    this.nsc = getNumberSequenceClassifier(null, null);
+    this.nsc = new NumberSequenceClassifier(useSUTime);
+    if (augmentRegexNER) {
+      this.gazetteMapping = readRegexnerGazette(DefaultPaths.DEFAULT_NER_GAZETTE_MAPPING);
+    } else {
+      this.gazetteMapping = Collections.emptyMap();
+    }
   }
 
   // constructor which builds an NERClassifierCombiner from an ObjectInputStream
@@ -160,25 +182,13 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     }
     this.nerLanguage = NER_LANGUAGE_DEFAULT;
     // build the nsc, note that initProps should be set by ClassifierCombiner
-    this.nsc = getNumberSequenceClassifier(new Properties(), props);
-  }
-
-  private AbstractSequenceClassifier<CoreLabel> getNumberSequenceClassifier(Properties props, Properties sutimeProps) {
-    log.info("NER language is: " + this.nerLanguage);
-    if(this.nerLanguage == Language.ENGLISH) {
-      if(props == null && sutimeProps == null) {
-        return new NumberSequenceClassifier(this.useSUTime);
-      }
-      return new NumberSequenceClassifier(props, this.useSUTime, sutimeProps);
-    } else if (this.nerLanguage == Language.CHINESE) {
-      if(props == null && sutimeProps == null) {
-        return new ChineseNumberSequenceClassifier(this.useSUTime);
-      }
-      return new ChineseNumberSequenceClassifier(props, this.useSUTime, sutimeProps);
+    this.nsc = new NumberSequenceClassifier(new Properties(), useSUTime, props);
+    if (PropertiesUtils.getBool(props, NERClassifierCombiner.APPLY_GAZETTE_PROPERTY, NERClassifierCombiner.APPLY_GAZETTE_DEFAULT) ) {
+      this.gazetteMapping = readRegexnerGazette(DefaultPaths.DEFAULT_NER_GAZETTE_MAPPING);
     } else {
+      this.gazetteMapping = Collections.emptyMap();
       log.fatal("Property ner.language not recognized: " + nerLanguage);
     }
-    return null;
   }
 
   public static final Set<String> DEFAULT_PASS_DOWN_PROPERTIES =
@@ -238,7 +248,10 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
               PropertiesUtils.getBool(properties,
                       prefix + NumberSequenceClassifier.USE_SUTIME_PROPERTY_BASE,
                       NumberSequenceClassifier.USE_SUTIME_DEFAULT);
-      Language nerLanguage = Language.fromString(PropertiesUtils.getString(properties, NER_LANGUAGE_PROPERTY, null), NER_LANGUAGE_DEFAULT);
+      boolean applyRegexner =
+          PropertiesUtils.getBool(properties,
+              NERClassifierCombiner.APPLY_GAZETTE_PROPERTY,
+              NERClassifierCombiner.APPLY_GAZETTE_DEFAULT);
       Properties combinerProperties;
       if (passDownProperties != null) {
         combinerProperties = PropertiesUtils.extractSelectedProperties(properties, passDownProperties);
@@ -252,8 +265,8 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
         combinerProperties = properties;
       }
       //Properties combinerProperties = PropertiesUtils.extractSelectedProperties(properties, passDownProperties);
-      nerCombiner = new NERClassifierCombiner(applyNumericClassifiers, nerLanguage,
-              useSUTime, combinerProperties, models);
+      nerCombiner = new NERClassifierCombiner(applyNumericClassifiers, NERClassifierCombiner.NER_LANGUAGE_DEFAULT,
+              useSUTime, applyRegexner, combinerProperties, models);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
@@ -327,6 +340,20 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
       // AnswerAnnotation -> NERAnnotation
       copyAnswerFieldsToNERField(output);
     }
+
+    // Apply RegexNER annotations
+    // cdm 2016: Used to say and do "// skip first token" but I couldn't understand why, so I removed that.
+    for (CoreLabel token : tokens) {
+      // System.out.println(token.toShorterString());
+      if ((token.tag() == null || token.tag().charAt(0) == 'N') && "O".equals(token.ner()) || "MISC".equals(token.ner())) {
+        String target = gazetteMapping.get(token.originalText());
+        if (target != null) {
+          token.setNER(target);
+        }
+      }
+    }
+
+    // Return
     return output;
   }
 
@@ -374,7 +401,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     }
   }
 
-  // static method for getting an NERClassifierCombiner from a string path
+  /** Static method for getting an NERClassifierCombiner from a string path. */
   public static NERClassifierCombiner getClassifier(String loadPath, Properties props) throws IOException,
           ClassNotFoundException, ClassCastException {
     ObjectInputStream ois = IOUtils.readStreamFromString(loadPath);
@@ -389,7 +416,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     return new NERClassifierCombiner(ois, props);
   }
 
-  // method for displaying info about an NERClassifierCombiner
+  /** Method for displaying info about an NERClassifierCombiner. */
   public static void showNCCInfo(NERClassifierCombiner ncc) {
     log.info("");
     log.info("info for this NERClassifierCombiner: ");
@@ -399,11 +426,37 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     log.info("");
   }
 
-  /** the main method **/
+
+  /**
+   * Read a gazette mapping in TokensRegex format from the given path
+   * The format is: 'case_sensitive_word \t target_ner_class' (additional info is ignored).
+   *
+   * @param mappingFile The mapping file to read from, as a path either on the filesystem or in your classpath.
+   *
+   * @return The mapping from word to NER tag.
+   */
+  private static Map<String, String> readRegexnerGazette(String mappingFile) {
+    Map<String, String> mapping = new HashMap<>();
+    try {
+      for (String line : IOUtils.slurpReader(IOUtils.readerFromString(mappingFile.trim())).split("\n")) {
+        String[] fields = line.split("\t");
+        String key = fields[0];
+        String target = fields[1];
+        mapping.put(key, target);
+      }
+    } catch (IOException e) {
+      log.warn("Could not read Regex mapping: " + mappingFile);
+    }
+    return Collections.unmodifiableMap(mapping);
+  }
+
+
+
+  /** The main method. */
   public static void main(String[] args) throws Exception {
     StringUtils.logInvocationString(log, args);
     Properties props = StringUtils.argsToProperties(args);
-    SeqClassifierFlags flags = new SeqClassifierFlags(props);
+    SeqClassifierFlags flags = new SeqClassifierFlags(props, false); // false for print probs as printed in next code block
 
     String loadPath = props.getProperty("loadClassifier");
     NERClassifierCombiner ncc;
