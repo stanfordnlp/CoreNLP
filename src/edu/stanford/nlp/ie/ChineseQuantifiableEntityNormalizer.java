@@ -63,6 +63,7 @@ public class ChineseQuantifiableEntityNormalizer {
   private static final String approxOneWord = "大(?:约|概|致)|接?近|差不多|几乎|左右|上下|约(?:为|略)";
 
   // Patterns used by DATE and TIME
+  private static final String CHINESE_DATE_NUMERALS_PATTERN = "[一二三四五六七八九零十〇]";
   private static final String CHINESE_AND_ARABIC_NUMERALS_PATTERN = "[一二三四五六七八九零十〇\\d]";
   private static final String BASIC_DD_PATTERN = "("
           + CHINESE_AND_ARABIC_NUMERALS_PATTERN + "+)(?:(?:日|号)?|\\-|/|\\.)";
@@ -630,7 +631,7 @@ public class ChineseQuantifiableEntityNormalizer {
       return "XX";
     } else {
       String candidate;
-      if (CHINESE_LITERAL_DECIMAL_PATTERN.matcher(s).find())
+      if (s.matches(CHINESE_DATE_NUMERALS_PATTERN + "+"))
         candidate = prettyNumber(String.format("%f", recurNormalizeLiteralIntegerString(s)));
       else
         candidate = s;
@@ -645,11 +646,13 @@ public class ChineseQuantifiableEntityNormalizer {
   /**
    * Normalizes date strings.
    * @param s Input date string
+   * @param docdate The document date
    * @return Normalized Timex expression of the input date string
      */
   public static String normalizeDateString(String s, Date docdate) {
     // TODO [pengqi]: still need to handle relative dates ("去年") and temporal references ("当时")
     // TODO [pengqi]: need to handle irregular years ("81年")
+    // TODO [pengqi]: need to handle basic localization ("在七月二日到[八日]间")
     Pattern p = Pattern.compile(BASIC_YYYYMMDD_PATTERN);
     Matcher m = p.matcher(s);
 
