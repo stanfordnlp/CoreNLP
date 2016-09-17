@@ -98,9 +98,8 @@ public class AnnotatorImplementations  {
                     NumberSequenceClassifier.USE_SUTIME_PROPERTY,
                     NumberSequenceClassifier.USE_SUTIME_DEFAULT);
 
-    String nerLanguage = PropertiesUtils.getString(properties,
-                    NERClassifierCombiner.NER_LANGUAGE_PROPERTY,
-                    NERClassifierCombiner.NER_LANGUAGE_DEFAULT);
+    NERClassifierCombiner.Language nerLanguage = NERClassifierCombiner.Language.fromString(PropertiesUtils.getString(properties,
+        NERClassifierCombiner.NER_LANGUAGE_PROPERTY, null), NERClassifierCombiner.NER_LANGUAGE_DEFAULT);
 
     boolean verbose = PropertiesUtils.getBool(properties, "ner." + "verbose", false);
 

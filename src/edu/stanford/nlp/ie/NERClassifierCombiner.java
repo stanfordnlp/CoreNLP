@@ -46,12 +46,34 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   public static final String APPLY_NUMERIC_CLASSIFIERS_PROPERTY = "ner.applyNumericClassifiers";
   public static final String APPLY_NUMERIC_CLASSIFIERS_PROPERTY_BASE = "applyNumericClassifiers";
 
-  private final String nerLanguage;
-  public static final String NER_LANGUAGE_DEFAULT = "english";
+  private final Language nerLanguage;
+  public static final Language NER_LANGUAGE_DEFAULT = Language.ENGLISH;
   public static final String NER_LANGUAGE_PROPERTY = "ner.language";
   public static final String NER_LANGUAGE_PROPERTY_BASE = "language";
 
   private final boolean useSUTime;
+
+  public enum Language {
+    ENGLISH("English"),
+    CHINESE("Chinese");
+
+    public String languageName;
+
+    Language(String name) {
+      this.languageName = name;
+    }
+
+    public static Language fromString(String name, Language defaultValue) {
+      if(name != null) {
+        for(Language l : Language.values()) {
+          if(name.equalsIgnoreCase(l.languageName)) {
+            return l;
+          }
+        }
+      }
+      return defaultValue;
+    }
+  }
 
   // todo [cdm 2015]: Could avoid constructing this if applyNumericClassifiers is false
   private final AbstractSequenceClassifier<CoreLabel> nsc;
@@ -61,7 +83,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   {
     super(props);
     applyNumericClassifiers = PropertiesUtils.getBool(props, APPLY_NUMERIC_CLASSIFIERS_PROPERTY, APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
-    nerLanguage = PropertiesUtils.getString(props, NER_LANGUAGE_PROPERTY, NER_LANGUAGE_DEFAULT);
+    nerLanguage = Language.fromString(PropertiesUtils.getString(props, NER_LANGUAGE_PROPERTY, null), NER_LANGUAGE_DEFAULT);
     useSUTime = PropertiesUtils.getBool(props, NumberSequenceClassifier.USE_SUTIME_PROPERTY, NumberSequenceClassifier.USE_SUTIME_DEFAULT);
     nsc = getNumberSequenceClassifier(new Properties(), props);
   }
@@ -85,7 +107,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   }
 
   public NERClassifierCombiner(boolean applyNumericClassifiers,
-                               String nerLanguage,
+                               Language nerLanguage,
                                boolean useSUTime,
                                Properties nscProps,
                                String... loadPaths)
@@ -142,14 +164,13 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   }
 
   private AbstractSequenceClassifier<CoreLabel> getNumberSequenceClassifier(Properties props, Properties sutimeProps) {
-    // TODO: String should never be used to compare a property. Use ENUM instead.
     log.info("NER language is: " + this.nerLanguage);
-    if(this.nerLanguage.toLowerCase().equals("english")) {
+    if(this.nerLanguage == Language.ENGLISH) {
       if(props == null && sutimeProps == null) {
         return new NumberSequenceClassifier(this.useSUTime);
       }
       return new NumberSequenceClassifier(props, this.useSUTime, sutimeProps);
-    } else if (this.nerLanguage.toLowerCase().equals("chinese")) {
+    } else if (this.nerLanguage == Language.CHINESE) {
       if(props == null && sutimeProps == null) {
         return new ChineseNumberSequenceClassifier(this.useSUTime);
       }
@@ -217,7 +238,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
               PropertiesUtils.getBool(properties,
                       prefix + NumberSequenceClassifier.USE_SUTIME_PROPERTY_BASE,
                       NumberSequenceClassifier.USE_SUTIME_DEFAULT);
-      String nerLanguage = PropertiesUtils.getString(properties, NER_LANGUAGE_PROPERTY, NER_LANGUAGE_DEFAULT);
+      Language nerLanguage = Language.fromString(PropertiesUtils.getString(properties, NER_LANGUAGE_PROPERTY, null), NER_LANGUAGE_DEFAULT);
       Properties combinerProperties;
       if (passDownProperties != null) {
         combinerProperties = PropertiesUtils.extractSelectedProperties(properties, passDownProperties);
@@ -285,7 +306,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
       try {
         // normalizes numeric entities such as MONEY, TIME, DATE, or PERCENT
         // note: this uses and sets NamedEntityTagAnnotation!
-        if(nerLanguage.toLowerCase().equals("chinese")) {
+        if(nerLanguage == Language.CHINESE) {
           // For chinese there is no support for SUTime by default
           ChineseQuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(output);
         } else {
