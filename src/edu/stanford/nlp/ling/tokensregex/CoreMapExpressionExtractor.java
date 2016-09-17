@@ -356,7 +356,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression>  {
     }
     final Integer startTokenOffsetFinal = startTokenOffset;
     List<CoreMap> merged = CollectionUtils.mergeListWithSortedMatchedPreAggregated(
-            annotation.get(tokensAnnotationKey), res, (CoreMap in) -> Interval.toInterval(in.get(CoreAnnotations.TokenBeginAnnotation.class) - startTokenOffsetFinal,
+            annotation.get(tokensAnnotationKey), res, in -> Interval.toInterval(in.get(CoreAnnotations.TokenBeginAnnotation.class) - startTokenOffsetFinal,
                     in.get(CoreAnnotations.TokenEndAnnotation.class) - startTokenOffsetFinal)
     );
     return merged;

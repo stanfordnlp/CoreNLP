@@ -298,8 +298,8 @@ function render(data) {
     var sentence = data.sentences[sentI];
     var index = sentence.index;
     var tokens = sentence.tokens;
-    var deps = sentence['basic-dependencies'];
-    var deps2 = sentence['enhanced-plus-plus-dependencies'];
+    var deps = sentence['basicDependencies'];
+    var deps2 = sentence['enhancedPlusPlusDependencies'];
   
     // POS tags
     /**
@@ -806,8 +806,8 @@ $(document).ready(function() {
           createAnnotationDiv('pos',      'pos',        'pos',                                 'Part-of-Speech'          );
           createAnnotationDiv('lemma',    'lemma',      'lemma',                               'Lemmas'                  );
           createAnnotationDiv('ner',      'ner',        'ner',                                 'Named Entity Recognition');
-          createAnnotationDiv('deps',     'depparse',   'basic-dependencies',                  'Basic Dependencies'      );
-          createAnnotationDiv('deps2',    'depparse',   'enhanced-plus-plus-dependencies',     'Enhanced++ Dependencies' );
+          createAnnotationDiv('deps',     'depparse',   'basicDependencies',                   'Basic Dependencies'      );
+          createAnnotationDiv('deps2',    'depparse',   'enhancedPlusPlusDependencies',        'Enhanced++ Dependencies' );
           createAnnotationDiv('openie',   'openie',     'openie',                              'Open IE'                 );
           createAnnotationDiv('coref',    'coref',      'corefs',                              'Coreference'             );
           createAnnotationDiv('entities', 'entitylink', 'entitylink',                          'Wikidict Entities'       );
