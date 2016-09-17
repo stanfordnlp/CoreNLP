@@ -760,28 +760,18 @@ public class UniversalChineseGrammaticalRelations {
    *         (CC 与)
    *         (NN 法制) (NN 建设)))
    *     (VP (VV 同步))))
-   * <code> nn </code> (浦东, 上海)
+   * <code> compound:nn </code> (浦东, 上海)
    */
   public static final GrammaticalRelation NOUN_COMPOUND =
     new GrammaticalRelation(Language.UniversalChinese,
       "compound:nn", "noun compound",
       COMPOUND, "^NP", tregexCompiler,
-            "NP < (NN|NT=target $+ NN|NR|NT)",
+            "NP < (NN|NR|NT=target $+ NN|NT)",
             "NP < (NN|NR|NT $+ FW=target)",
             "NP < (NP=target !< NR !$+ PU|CC $++ NP|PRN)");
 
   /**
-   * The "noun compound" (nn) grammatical relation.
-   * Example:
-   * (ROOT
-   *   (IP
-   *     (NP
-   *       (NP (NR 上海) (NR 浦东))
-   *       (NP (NN 开发)
-   *         (CC 与)
-   *         (NN 法制) (NN 建设)))
-   *     (VP (VV 同步))))
-   * <code> nn </code> (浦东, 上海)
+   * The "name" grammatical relation.
    */
   public static final GrammaticalRelation NAME =
     new GrammaticalRelation(Language.UniversalChinese,
