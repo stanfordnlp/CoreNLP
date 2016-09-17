@@ -27,7 +27,7 @@ public class ChineseQuantifiableEntityNormalizer {
 
   private static Redwood.RedwoodChannels log = Redwood.channels(ChineseQuantifiableEntityNormalizer.class);
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   public static String BACKGROUND_SYMBOL = SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL;
 

@@ -33,7 +33,7 @@ public class ChineseNumberSequenceClassifier extends AbstractSequenceClassifier<
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(ChineseNumberSequenceClassifier.class);
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   private final boolean useSUTime;
 
