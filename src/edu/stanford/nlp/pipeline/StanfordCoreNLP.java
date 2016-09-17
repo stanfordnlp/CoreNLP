@@ -363,6 +363,26 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
         !props.containsKey("coref.md.type")) {
       props.setProperty("coref.md.type", "dep");
     }
+    // (ensure regexner is after ner)
+    if (orderedAnnotators.contains(Annotator.STANFORD_NER) && orderedAnnotators.contains(STANFORD_REGEXNER)) {
+      orderedAnnotators.remove(STANFORD_REGEXNER);
+      int nerIndex = orderedAnnotators.indexOf(Annotator.STANFORD_NER);
+      orderedAnnotators.add(nerIndex + 1, STANFORD_REGEXNER);
+    }
+    // (ensure coref is before openie)
+    if (orderedAnnotators.contains(Annotator.STANFORD_COREF) && orderedAnnotators.contains(STANFORD_OPENIE)) {
+      int maxIndex = Math.max(
+          orderedAnnotators.indexOf(STANFORD_OPENIE),
+          orderedAnnotators.indexOf(STANFORD_COREF)
+          );
+      if (Objects.equals(orderedAnnotators.get(maxIndex), STANFORD_OPENIE)) {
+        orderedAnnotators.add(maxIndex, STANFORD_COREF);
+        orderedAnnotators.remove(STANFORD_COREF);
+      } else {
+        orderedAnnotators.add(maxIndex + 1, STANFORD_OPENIE);
+        orderedAnnotators.remove(STANFORD_OPENIE);
+      }
+    }
 
     // Return
     return StringUtils.join(orderedAnnotators, ",");
@@ -573,8 +593,7 @@ public class StanfordCoreNLP extends AnnotationPipeline  {
       return null;
     }
     try {
-      Annotator a =  pool.get(name);
-      return a;
+      return pool.get(name);
     } catch(IllegalArgumentException e) {
       logger.error("Attempted to fetch annotator \"" + name +
         "\" but the annotator pool does not store any such type!");

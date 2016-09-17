@@ -197,7 +197,6 @@ public class ProtobufAnnotationSerializerSlowITest {
             }
           }
         }
-      } else {
         assertTrue("Annotations don't match (don't know why?)", false);
       }
     }
@@ -434,6 +433,26 @@ public class ProtobufAnnotationSerializerSlowITest {
   @Test
   public void testGender() {
     testAnnotators("tokenize,ssplit,pos,lemma,ner,gender");
+  }
+
+
+  @Test
+  public void testDocDate() {
+    Annotation ann = new Annotation("hello world");
+    ann.set(CoreAnnotations.DocDateAnnotation.class, "2016-05-05");
+    ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+    Annotation reread = serializer.fromProto(serializer.toProto(ann));
+    sameAsRead(ann, reread);
+  }
+
+
+  @Test
+  public void testCalendar() {
+    Annotation ann = new Annotation("hello world");
+    ann.set(CoreAnnotations.CalendarAnnotation.class, new GregorianCalendar());
+    ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+    Annotation reread = serializer.fromProto(serializer.toProto(ann));
+    sameAsRead(ann, reread);
   }
 
 
