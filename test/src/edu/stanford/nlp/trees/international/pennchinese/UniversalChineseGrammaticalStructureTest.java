@@ -71,11 +71,11 @@ public class UniversalChineseGrammaticalStructureTest extends TestCase {
     Pair<String, String>[] examples = ErasureUtils.uncheckedCast(new Pair[] {
       // Gloss: Shanghai Pudong de orderly advance
       T("(NP (DNP (NP (NP (NR 浦东)) (NP (NN 开发))) (DEG 的)) (ADJP (JJ 有序)) (NP (NN 进行)))",
-        C("nn(开发-2, 浦东-1)", "assmod(进行-5, 开发-2)", "case(开发-2, 的-3)", "amod(进行-5, 有序-4)", "root(ROOT-0, 进行-5)")),
+        C("compound:nn(开发-2, 浦东-1)", "nmod:assmod(进行-5, 开发-2)", "case(开发-2, 的-3)", "amod(进行-5, 有序-4)", "root(ROOT-0, 进行-5)")),
 
-      // Gloss: Shanghai Pudong expand and legal-system synchronous
+      // Gloss: Shanghai Pudong expansion and legal-system synchronizing
       T("(ROOT (IP (NP (NP (NR 上海) (NR 浦东)) (NP (NN 开发) (CC 与) (NN 法制) (NN 建设))) (VP (VV 同步))))",
-        C("nn(浦东-2, 上海-1)", "nn(建设-6, 浦东-2)", "conj(建设-6, 开发-3)", "cc(建设-6, 与-4)", "nn(建设-6, 法制-5)", "nsubj(同步-7, 建设-6)", "root(ROOT-0, 同步-7)")),
+        C("name(浦东-2, 上海-1)", "compound:nn(建设-6, 浦东-2)", "conj(建设-6, 开发-3)", "cc(建设-6, 与-4)", "compound:nn(建设-6, 法制-5)", "nsubj(同步-7, 建设-6)", "root(ROOT-0, 同步-7)")),
 
       // Gloss: this-year
       T("(LCP (NP (NT 近年)) (LC 来))",
@@ -83,68 +83,69 @@ public class UniversalChineseGrammaticalStructureTest extends TestCase {
 
       // Gloss: according country and Shanghai de relevant law
       T("(PP (P 根据) (NP (DNP (NP (NP (NN 国家)) (CC 和) (NP (NR 上海市))) (DEG 的)) (ADJP (JJ 有关)) (NP (NN 规定))))",
-        C("case(规定-7, 根据-1)", "conj(上海市-4, 国家-2)", "cc(上海市-4, 和-3)", "assmod(规定-7, 上海市-4)", "case(上海市-4, 的-5)", "amod(规定-7, 有关-6)", "root(ROOT-0, 规定-7)")),
+        C("case(规定-7, 根据-1)", "conj(上海市-4, 国家-2)", "cc(上海市-4, 和-3)", "nmod:assmod(规定-7, 上海市-4)", "case(上海市-4, 的-5)", "amod(规定-7, 有关-6)", "root(ROOT-0, 规定-7)")),
 
       // Gloss: building is expand Shanghai de primary economic activity
       T("(IP (NP (NN 建筑)) (VP (VC 是) (NP (CP (IP (VP (VV 开发) (NP (NR 浦东)))) (DEC 的)) (QP (CD 一) (CLP (M 项))) (ADJP (JJ 主要)) (NP (NN 经济) (NN 活动)))))",
-        C("nsubj(活动-10, 建筑-1)", "cop(活动-10, 是-2)", "relcl(活动-10, 开发-3)", "dobj(开发-3, 浦东-4)", "mark(开发-3, 的-5)", "nummod(项-7, 一-6)", "clf(活动-10, 项-7)", "amod(活动-10, 主要-8)", "nn(活动-10, 经济-9)", "root(ROOT-0, 活动-10)")),
+        C("nsubj(活动-10, 建筑-1)", "cop(活动-10, 是-2)", "acl:relcl(活动-10, 开发-3)", "dobj(开发-3, 浦东-4)", "mark(开发-3, 的-5)", "nummod(项-7, 一-6)", "clf(活动-10, 项-7)", "amod(活动-10, 主要-8)", "compound:nn(活动-10, 经济-9)", "root(ROOT-0, 活动-10)")),
 
       // Gloss: nickel has-been named modern industry de vitamins
       T("(IP (NP (NN 镍)) (VP (SB 被) (VP (VV 称作) (NP (PU “) (DNP (NP (ADJP (JJ 现代)) (NP (NN 工业))) (DEG 的)) (NP (NN 维生素)) (PU ”)))))",
-        C("nsubjpass(称作-3, 镍-1)", "auxpass(称作-3, 被-2)", "root(ROOT-0, 称作-3)", "punct(维生素-8, “-4)", "amod(工业-6, 现代-5)", "assmod(维生素-8, 工业-6)", "case(工业-6, 的-7)", "dobj(称作-3, 维生素-8)", "punct(维生素-8, ”-9)")),
+        C("nsubjpass(称作-3, 镍-1)", "auxpass(称作-3, 被-2)", "root(ROOT-0, 称作-3)", "punct(维生素-8, “-4)", "amod(工业-6, 现代-5)", "nmod:assmod(维生素-8, 工业-6)", "case(工业-6, 的-7)", "dobj(称作-3, 维生素-8)", "punct(维生素-8, ”-9)")),
 
       // Gloss: once revealed then was included legal-system path
       T("(IP (VP (VP (ADVP (AD 一)) (VP (VV 出现))) (VP (ADVP (AD 就)) (VP (SB 被) (VP (VV 纳入) (NP (NN 法制) (NN 轨道)))))))))))",
-        C("advmod(出现-2, 一-1)", "root(ROOT-0, 出现-2)", "advmod(纳入-5, 就-3)", "auxpass(纳入-5, 被-4)", "dep(出现-2, 纳入-5)", "nn(轨道-7, 法制-6)", "dobj(纳入-5, 轨道-7)")),
+        C("advmod(出现-2, 一-1)", "root(ROOT-0, 出现-2)", "advmod(纳入-5, 就-3)", "auxpass(纳入-5, 被-4)", "conj(出现-2, 纳入-5)", // todo: was dep
+                "compound:nn(轨道-7, 法制-6)", "dobj(纳入-5, 轨道-7)")),
 
       T("(IP (NP (NP (NR 格林柯尔)) (NP (NN 制冷剂)) (PRN (PU （) (NP (NR 中国)) (PU ）)) (ADJP (JJ 有限)) (NP (NN 公司))) (VP (VC 是) (NP (CP (CP (IP (NP (NP (NR 格林柯尔) (NN 集团) (NR 北美) (NN 公司)) (CC 与) (NP (NP (NR 中国) (NR 天津)) (NP (NN 开发区)) (ADJP (JJ 总)) (NP (NN 公司))) (CC 和) (NP (NP (NR 中国)) (NP (NR 南方)) (NP (NN 证券)) (ADJP (JJ 有限)) (NP (NN 公司)))) (VP (VV 合建))) (DEC 的))) (ADJP (JJ 合资)) (NP (NN 企业)))) (PU 。))",
-        C("nn(公司-7, 格林柯尔-1)",
-                "nn(公司-7, 制冷剂-2)",
+        C("compound:nn(公司-7, 格林柯尔-1)",
+                "compound:nn(公司-7, 制冷剂-2)",
                 "punct(中国-4, （-3)",
-                "prnmod(公司-7, 中国-4)",
+                "parataxis:prnmod(公司-7, 中国-4)",   // todo: was appos:prnmod
                 "punct(中国-4, ）-5)",
                 "amod(公司-7, 有限-6)",
                 "nsubj(企业-28, 公司-7)",
                 "cop(企业-28, 是-8)",
-                "nn(公司-12, 格林柯尔-9)",
-                "nn(公司-12, 集团-10)",
-                "nn(公司-12, 北美-11)",
+                "compound:nn(公司-12, 格林柯尔-9)",
+                "compound:nn(公司-12, 集团-10)",
+                "compound:nn(公司-12, 北美-11)",
                 "conj(公司-24, 公司-12)",
                 "cc(公司-24, 与-13)",
-                "nn(天津-15, 中国-14)",
-                "nn(公司-18, 天津-15)",
-                "nn(公司-18, 开发区-16)",
+                "name(天津-15, 中国-14)",
+                "compound:nn(公司-18, 天津-15)",
+                "compound:nn(公司-18, 开发区-16)",
                 "amod(公司-18, 总-17)",
                 "conj(公司-24, 公司-18)",
                 "cc(公司-24, 和-19)",
-                "nn(公司-24, 中国-20)",
-                "nn(公司-24, 南方-21)",
-                "nn(公司-24, 证券-22)",
+                "compound:nn(公司-24, 中国-20)",
+                "compound:nn(公司-24, 南方-21)",
+                "compound:nn(公司-24, 证券-22)",
                 "amod(公司-24, 有限-23)",
                 "nsubj(合建-25, 公司-24)",
-                "relcl(企业-28, 合建-25)",
+                "acl:relcl(企业-28, 合建-25)",
                 "mark(合建-25, 的-26)",
                 "amod(企业-28, 合资-27)",
                 "root(ROOT-0, 企业-28)",
                 "punct(企业-28, 。-29)")),
 
        T("(IP (NP (NR 汕头) (NN 机场)) (VP (VV 开通) (NP (NN 国际) (NN 国内) (NN 航线)) (QP (CD 四十四) (CLP (M 条)))) (PU 。))",
-               C("nn(机场-2, 汕头-1)",
+               C("compound:nn(机场-2, 汕头-1)",
                  "nsubj(开通-3, 机场-2)",
                  "root(ROOT-0, 开通-3)",
-                 "nn(航线-6, 国际-4)",
-                 "nn(航线-6, 国内-5)",
+                 "compound:nn(航线-6, 国际-4)",
+                 "compound:nn(航线-6, 国内-5)",
                  "dobj(开通-3, 航线-6)",
                  "nummod(条-8, 四十四-7)",
                  "range(开通-3, 条-8)",
                  "punct(开通-3, 。-9)")),
 
         T("(VP (NP (NT 以前)) (ADVP (AD 不)) (ADVP (AD 曾)) (VP (VV 遇到) (AS 过))))",
-                    C("tmod(遇到-4, 以前-1)",
+                    C("nmod:tmod(遇到-4, 以前-1)",
                       "neg(遇到-4, 不-2)",
                       "advmod(遇到-4, 曾-3)",
                       "root(ROOT-0, 遇到-4)",
-                      "asp(遇到-4, 过-5)")),
+                      "aux:asp(遇到-4, 过-5)")),
 
       // TODO(pliang): add more test cases for all the relations not covered (see WARNING below)
     });
