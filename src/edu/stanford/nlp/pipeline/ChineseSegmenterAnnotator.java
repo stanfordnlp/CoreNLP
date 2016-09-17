@@ -138,7 +138,8 @@ public class ChineseSegmenterAnnotator implements Annotator  {
       String wordString = new String(ca);
 
       // if this word is a whitespace or a control character, set 'seg' to true for next word, and break
-      if (Character.isSpaceChar(origText.charAt(i)) || Character.isISOControl(origText.charAt(i))) {
+      if (Character.isSpaceChar(origText.charAt(i)) || Character.isISOControl(origText.charAt(i))
+              || Character.isWhitespace(origText.charAt(i))) {
         seg = true;
       } else {
         // if this word is a word, put it as a feature label and set seg to false for next word
