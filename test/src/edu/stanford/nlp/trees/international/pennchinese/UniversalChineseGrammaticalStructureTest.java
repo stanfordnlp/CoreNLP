@@ -71,11 +71,11 @@ public class UniversalChineseGrammaticalStructureTest extends TestCase {
     Pair<String, String>[] examples = ErasureUtils.uncheckedCast(new Pair[] {
       // Gloss: Shanghai Pudong de orderly advance
       T("(NP (DNP (NP (NP (NR 浦东)) (NP (NN 开发))) (DEG 的)) (ADJP (JJ 有序)) (NP (NN 进行)))",
-        C("compound:nn(开发-2, 浦东-1)", "nmod:assmod(进行-5, 开发-2)", "case(开发-2, 的-3)", "amod(进行-5, 有序-4)", "root(ROOT-0, 进行-5)")),
+        C("nmod:assmod(开发-2, 浦东-1)", "nmod:assmod(进行-5, 开发-2)", "case(开发-2, 的-3)", "amod(进行-5, 有序-4)", "root(ROOT-0, 进行-5)")),
 
       // Gloss: Shanghai Pudong expansion and legal-system synchronizing
       T("(ROOT (IP (NP (NP (NR 上海) (NR 浦东)) (NP (NN 开发) (CC 与) (NN 法制) (NN 建设))) (VP (VV 同步))))",
-        C("name(浦东-2, 上海-1)", "compound:nn(建设-6, 浦东-2)", "conj(建设-6, 开发-3)", "cc(建设-6, 与-4)", "compound:nn(建设-6, 法制-5)", "nsubj(同步-7, 建设-6)", "root(ROOT-0, 同步-7)")),
+        C("name(浦东-2, 上海-1)", "nmod:assmod(建设-6, 浦东-2)", "conj(建设-6, 开发-3)", "cc(建设-6, 与-4)", "compound:nn(建设-6, 法制-5)", "nsubj(同步-7, 建设-6)", "root(ROOT-0, 同步-7)")),
 
       // Gloss: this-year
       T("(LCP (NP (NT 近年)) (LC 来))",
@@ -87,7 +87,7 @@ public class UniversalChineseGrammaticalStructureTest extends TestCase {
 
       // Gloss: building is expand Shanghai de primary economic activity
       T("(IP (NP (NN 建筑)) (VP (VC 是) (NP (CP (IP (VP (VV 开发) (NP (NR 浦东)))) (DEC 的)) (QP (CD 一) (CLP (M 项))) (ADJP (JJ 主要)) (NP (NN 经济) (NN 活动)))))",
-        C("nsubj(活动-10, 建筑-1)", "cop(活动-10, 是-2)", "acl:relcl(活动-10, 开发-3)", "dobj(开发-3, 浦东-4)", "mark(开发-3, 的-5)", "nummod(项-7, 一-6)", "clf(活动-10, 项-7)", "amod(活动-10, 主要-8)", "compound:nn(活动-10, 经济-9)", "root(ROOT-0, 活动-10)")),
+        C("nsubj(活动-10, 建筑-1)", "cop(活动-10, 是-2)", "acl(活动-10, 开发-3)", "dobj(开发-3, 浦东-4)", "mark(开发-3, 的-5)", "nummod(活动-10, 一-6)", "mark:clf(一-6, 项-7)", "amod(活动-10, 主要-8)", "compound:nn(活动-10, 经济-9)", "root(ROOT-0, 活动-10)")),
 
       // Gloss: nickel has-been named modern industry de vitamins
       T("(IP (NP (NN 镍)) (VP (SB 被) (VP (VV 称作) (NP (PU “) (DNP (NP (ADJP (JJ 现代)) (NP (NN 工业))) (DEG 的)) (NP (NN 维生素)) (PU ”)))))",
@@ -102,7 +102,7 @@ public class UniversalChineseGrammaticalStructureTest extends TestCase {
         C("compound:nn(公司-7, 格林柯尔-1)",
                 "compound:nn(公司-7, 制冷剂-2)",
                 "punct(中国-4, （-3)",
-                "parataxis:prnmod(公司-7, 中国-4)",   // todo: was appos:prnmod
+                "parataxis:prnmod(公司-7, 中国-4)",
                 "punct(中国-4, ）-5)",
                 "amod(公司-7, 有限-6)",
                 "nsubj(企业-28, 公司-7)",
@@ -123,7 +123,7 @@ public class UniversalChineseGrammaticalStructureTest extends TestCase {
                 "compound:nn(公司-24, 证券-22)",
                 "amod(公司-24, 有限-23)",
                 "nsubj(合建-25, 公司-24)",
-                "acl:relcl(企业-28, 合建-25)",
+                "acl(企业-28, 合建-25)",
                 "mark(合建-25, 的-26)",
                 "amod(企业-28, 合资-27)",
                 "root(ROOT-0, 企业-28)",
@@ -136,8 +136,8 @@ public class UniversalChineseGrammaticalStructureTest extends TestCase {
                  "compound:nn(航线-6, 国际-4)",
                  "compound:nn(航线-6, 国内-5)",
                  "dobj(开通-3, 航线-6)",
-                 "nummod(条-8, 四十四-7)",
-                 "range(开通-3, 条-8)",
+                 "nmod:range(开通-3, 四十四-7)",
+                 "mark:clf(四十四-7, 条-8)",
                  "punct(开通-3, 。-9)")),
 
         T("(VP (NP (NT 以前)) (ADVP (AD 不)) (ADVP (AD 曾)) (VP (VV 遇到) (AS 过))))",
