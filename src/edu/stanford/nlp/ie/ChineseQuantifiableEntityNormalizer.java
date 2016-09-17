@@ -615,8 +615,17 @@ public class ChineseQuantifiableEntityNormalizer {
     }
     int idx = s.indexOf(unit);
     if(idx != -1) {
-      Double first = recurNormalizeLiteralIntegerString(s.substring(0,idx));
+      Double first = Double.valueOf(1.0);
+      // Here we need special handling for 十 and 百 when they occur as the first char
+      // As in Chinese 十二 is very common, 百二十 is sometimes valid as well.
+      if(("十".equals(unit) || "百".equals(unit)) && idx == 0) {
+        // do nothing
+      } else {
+        // otherwise we try to parse the value before the unit
+        first = recurNormalizeLiteralIntegerString(s.substring(0,idx));
+      }
       Double second = recurNormalizeLiteralIntegerString(s.substring(idx+1));
+
       if(first != null && second != null) {
         return Double.valueOf(first.doubleValue() * quantityUnitToValues.getCount(unit) + second.doubleValue());
       }
