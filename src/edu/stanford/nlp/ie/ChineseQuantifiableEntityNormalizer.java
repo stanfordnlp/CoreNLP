@@ -30,7 +30,7 @@ public class ChineseQuantifiableEntityNormalizer {
 
   private static Redwood.RedwoodChannels log = Redwood.channels(ChineseQuantifiableEntityNormalizer.class);
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   public static String BACKGROUND_SYMBOL = SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL;
 
@@ -43,9 +43,12 @@ public class ChineseQuantifiableEntityNormalizer {
   private static final String LITERAL_DECIMAL_POINT = "点";
 
   // Patterns we need
-  // TODO: here we are not considering 1) negative numbers, 2) Chinese traditional characters
+  // TODO (yuhao): here we are not considering 1) negative numbers, 2) Chinese traditional characters
   private static final Pattern ARABIC_NUMBERS_PATTERN = Pattern.compile("[\\d\\.]+");
-  private static final Pattern CHINESE_LITERAL_DECIMAL_PATTERN = Pattern.compile("[一二三四五六七八九零〇]+");
+  // This is the all-literal-number-characters sequence, excluding unit characters like 十 or 万
+  private static final Pattern CHINESE_LITERAL_NUMBER_SEQUENCE_PATTERN = Pattern.compile("[一二三四五六七八九零〇]+");
+  // The decimal part of a float number should be exactly literal number sequence without units
+  private static final Pattern CHINESE_LITERAL_DECIMAL_PATTERN = CHINESE_LITERAL_NUMBER_SEQUENCE_PATTERN;
 
   // Used by quantity modifiers
   private static final String greaterEqualThreeWords = "(?:大|多|高)于或者?等于";
@@ -59,6 +62,7 @@ public class ChineseQuantifiableEntityNormalizer {
   private static final String lessThanOneWord = "(?:小|少|低)于|不(?:到|够|足)";
   private static final String approxOneWord = "大(?:约|概|致)|接?近|差不多|几乎|左右|上下|约(?:为|略)";
 
+  // Patterns used by DATE and TIME
   private static final String CHINESE_AND_ARABIC_NUMERALS_PATTERN = "[一二三四五六七八九零十〇\\d]";
   private static final String BASIC_DD_PATTERN = "("
           + CHINESE_AND_ARABIC_NUMERALS_PATTERN + "+)(?:(?:日|号)?|\\-|/|\\.)";
@@ -227,8 +231,8 @@ public class ChineseQuantifiableEntityNormalizer {
 
     if (DEBUG) {
       // output space for clarity
-      err.println("Quantifiable modifiers: previous: " + prev3 + ' ' + prev2+ ' ' + prev);
-      err.println("Quantifiable modifiers: next: " + next);
+      log.info("Quantifiable modifiers: previous: " + prev3 + ' ' + prev2+ ' ' + prev);
+      log.info("Quantifiable modifiers: next: " + next);
     }
 
     // Actually spaces won't be used for Chinese
@@ -627,7 +631,7 @@ public class ChineseQuantifiableEntityNormalizer {
     } else {
       String candidate;
       if (CHINESE_LITERAL_DECIMAL_PATTERN.matcher(s).find())
-        candidate = prettyNumber(String.format("%f", normalizeLiteralDecimalString(s)));
+        candidate = prettyNumber(String.format("%f", recurNormalizeLiteralIntegerString(s)));
       else
         candidate = s;
 
