@@ -10,11 +10,11 @@ import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
 import edu.stanford.nlp.pipeline.CoreMapAggregator;
 import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
 import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.logging.Redwood;
+import edu.stanford.nlp.util.logging.RedwoodConfiguration;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,14 +56,16 @@ public class NumberNormalizer {
 
   private NumberNormalizer() {} // static class
 
-  private static final Logger logger = Logger.getLogger(NumberNormalizer.class.getName());
-  // TODO: make this not static, let different NumberNormalizers use
-  // different loggers
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels logger = Redwood.channels(NumberNormalizer.class);
+
+
+  // TODO: make this not static, let different NumberNormalizers use different loggers
   public static void setVerbose(boolean verbose) {
     if (verbose) {
-      logger.setLevel(Level.FINE);
+      RedwoodConfiguration.debugLevel().apply();
     } else {
-      logger.setLevel(Level.SEVERE);
+      RedwoodConfiguration.errorLevel().apply();
     }
   }
 
@@ -87,7 +89,7 @@ public class NumberNormalizer {
 
   // Converts numbers in words to numeric form
   // works through trillions
-  protected static final Pattern digitsPattern = Pattern.compile("\\d+");
+  private static final Pattern digitsPattern = Pattern.compile("\\d+");
   private static final Pattern numPattern = Pattern.compile("[-+]?(?:\\d+(?:,\\d\\d\\d)*(?:\\.\\d*)?|\\.\\d+)");
   private static final Pattern numRangePattern = Pattern.compile("(" + numPattern.pattern() + ")-(" + numPattern.pattern() + ")");
   // private static final Pattern[] endUnitWordsPattern = new Pattern[endUnitWords.length];
@@ -639,7 +641,7 @@ public class NumberNormalizer {
           t.set(CoreAnnotations.NumericCompositeTypeAnnotation.class, label);
         }
       } catch (NumberFormatException ex) {
-        logger.log(Level.WARNING, "Invalid number for: \"" + exp + "\"", ex);
+        logger.warning("Invalid number for: \"" + exp + "\"", ex);
       }
     }
     return numbers;
