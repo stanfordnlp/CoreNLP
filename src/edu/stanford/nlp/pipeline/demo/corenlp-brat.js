@@ -34,7 +34,7 @@ var currentText = '';
 /**
  * Add the startsWith function to the String class
  */
-if (typeof String.prototype.startsWith != 'function') {
+if (typeof String.prototype.startsWith !== 'function') {
   // see below for better implementation!
   String.prototype.startsWith = function (str){
     return this.indexOf(str) === 0;
@@ -74,7 +74,7 @@ function posColor(posTag) {
     return '#FFE8BE';
   } else if (posTag.startsWith('R') || posTag.startsWith('W')) {
     return '#FFFDA8';
-  } else if (posTag.startsWith('D') || posTag == 'CD') {
+  } else if (posTag.startsWith('D') || posTag === 'CD') {
     return '#CCADF6';
   } else if (posTag.startsWith('J')) {
     return '#FFFDA8';
@@ -84,7 +84,7 @@ function posColor(posTag) {
     return '#E4CBF6';
   } else if (posTag.startsWith('CC')) {
     return '#FFFFFF';
-  } else if (posTag == 'LS' || posTag == 'FW') {
+  } else if (posTag === 'LS' || posTag === 'FW') {
     return '#FFFFFF';
   } else {
     return '#E3E3E3';
@@ -96,19 +96,19 @@ function posColor(posTag) {
  * visualization color
  */
 function nerColor(nerTag) {
-  if (nerTag == 'PERSON') {
+  if (nerTag === 'PERSON') {
     return '#FFCCAA'
-  } else if (nerTag == 'ORGANIZATION') {
+  } else if (nerTag === 'ORGANIZATION') {
     return '#8FB2FF'
-  } else if (nerTag == 'MISC') {
+  } else if (nerTag === 'MISC') {
     return '#F1F447'
-  } else if (nerTag == 'LOCATION') {
+  } else if (nerTag === 'LOCATION') {
     return '#95DFFF'
-  } else if (nerTag == 'DATE' || nerTag == 'TIME' || nerTag == 'SET') {
+  } else if (nerTag === 'DATE' || nerTag === 'TIME' || nerTag === 'SET') {
     return '#9AFFE6'
-  } else if (nerTag == 'MONEY') {
+  } else if (nerTag === 'MONEY') {
     return '#FFFFFF'
-  } else if (nerTag == 'PERCENT') {
+  } else if (nerTag === 'PERCENT') {
     return '#FFA22B'
   } else {
     return '#E3E3E3'
@@ -121,15 +121,15 @@ function nerColor(nerTag) {
  * visualization color
  */
 function sentimentColor(sentiment) {
-  if (sentiment == "VERY POSITIVE") {
+  if (sentiment === "VERY POSITIVE") {
     return '#00FF00';
-  } else if (sentiment == "POSITIVE") {
+  } else if (sentiment === "POSITIVE") {
     return '#7FFF00';
-  } else if (sentiment == "NEUTRAL") {
+  } else if (sentiment === "NEUTRAL") {
     return '#FFFF00';
-  } else if (sentiment == "NEGATIVE") {
+  } else if (sentiment === "NEGATIVE") {
     return '#FF7F00';
-  } else if (sentiment == "VERY NEGATIVE") {
+  } else if (sentiment === "VERY NEGATIVE") {
     return '#FF0000';
   } else {
     return '#E3E3E3';
@@ -174,7 +174,7 @@ function date() {
  */
 function render(data) {
   // Error checks
-  if (typeof data.sentences == 'undefined') { return; }
+  if (typeof data.sentences === 'undefined') { return; }
 
   /**
    * Register an entity type (a tag) for Brat
@@ -182,7 +182,7 @@ function render(data) {
   var entityTypesSet = {};
   var entityTypes = [];
   function addEntityType(name, type, coarseType) {
-    if (typeof coarseType == "undefined") {
+    if (typeof coarseType === "undefined") {
       coarseType = type;
     }
     // Don't add duplicates
@@ -190,23 +190,23 @@ function render(data) {
     entityTypesSet[type] = true;
     // Get the color of the entity type
     color = '#ffccaa';
-    if (name == 'POS') {
+    if (name === 'POS') {
       color = posColor(type);
-    } else if (name == 'NER') {
+    } else if (name === 'NER') {
       color = nerColor(coarseType);
-    } else if (name == 'COREF') {
+    } else if (name === 'COREF') {
       color = '#FFE000';
-    } else if (name == 'ENTITY') {
+    } else if (name === 'ENTITY') {
       color = posColor('NN');
-    } else if (name == 'RELATION') {
+    } else if (name === 'RELATION') {
       color = posColor('VB');
-    } else if (name == 'LEMMA') {
+    } else if (name === 'LEMMA') {
       color = '#FFFFFF';
-    } else if (name == 'SENTIMENT') {
+    } else if (name === 'SENTIMENT') {
       color = sentimentColor(type);
-    } else if (name == 'LINK') {
+    } else if (name === 'LINK') {
       color = '#FFFFFF';
-    } else if (name == 'KBP_ENTITY') {
+    } else if (name === 'KBP_ENTITY') {
       color = '#FFFFFF';
     }
     // Register the type
@@ -228,7 +228,7 @@ function render(data) {
     if (relationTypesSet[type]) return;
     relationTypesSet[type] = true;
     // Default arguments
-    if (typeof symmetricEdge == 'undefined') { symmetricEdge = false; }
+    if (typeof symmetricEdge === 'undefined') { symmetricEdge = false; }
     // Add the type
     relationTypes.push({
       type: type,
@@ -247,7 +247,7 @@ function render(data) {
     for (var i = 0; i < sentence.tokens.length; ++i) {
       var token = sentence.tokens[i];
       var word = token.word;
-      if (!(typeof tokensMap[word] == "undefined")) {
+      if (!(typeof tokensMap[word] === "undefined")) {
         word = tokensMap[word];
       }
       if (i > 0) { currentText.push(' '); }
@@ -308,7 +308,7 @@ function render(data) {
     function posID(i) {
       return 'POS_' + sentI + '_' + i;
     }
-    if (tokens.length > 0 && typeof tokens[0].pos != 'undefined') {
+    if (tokens.length > 0 && typeof tokens[0].pos !== 'undefined') {
       for (var i = 0; i < tokens.length; i++) {
         var token = tokens[i];
         var pos = token.pos;
@@ -330,22 +330,22 @@ function render(data) {
         var dep = deps[i];
         var governor = dep.governor - 1;
         var dependent = dep.dependent - 1;
-        if (governor == -1) continue;
+        if (governor === -1) continue;
         addRelationType(dep.dep);
         relations.push([name + '_' + sentI + '_' + i, dep.dep, [['governor', posID(governor)], ['dependent', posID(dependent)]]]);
       }
       return relations;
     }
     // Actually add the dependencies
-    if (typeof deps != 'undefined') {
+    if (typeof deps !== 'undefined') {
       depsRelations = depsRelations.concat(processDeps('dep', deps));
     }
-    if (typeof deps2 != 'undefined') {
+    if (typeof deps2 !== 'undefined') {
       deps2Relations = deps2Relations.concat(processDeps('dep2', deps2));
     }
 
     // Lemmas
-    if (tokens.length > 0 && typeof tokens[0].lemma != 'undefined') {
+    if (tokens.length > 0 && typeof tokens[0].lemma !== 'undefined') {
       for (var i = 0; i < tokens.length; i++) {
         var token = tokens[i];
         var lemma = token.lemma;
@@ -358,16 +358,16 @@ function render(data) {
 
     // NER tags
     // Assumption: contiguous occurrence of one non-O is a single entity
-    if (tokens.length > 0 && typeof tokens[0].ner != 'undefined') {
+    if (tokens.length > 0 && typeof tokens[0].ner !== 'undefined') {
       for (var i = 0; i < tokens.length; i++) {
         var ner = tokens[i].ner;
         var normalizedNER = tokens[i].normalizedNER;
-        if (typeof normalizedNER == "undefined") {
+        if (typeof normalizedNER === "undefined") {
           normalizedNER = ner;
         }
-        if (ner == 'O') continue;
+        if (ner === 'O') continue;
         var j = i;
-        while (j < tokens.length - 1 && tokens[j+1].ner == ner) j++;
+        while (j < tokens.length - 1 && tokens[j+1].ner === ner) j++;
         addEntityType('NER', normalizedNER, ner);
         nerEntities.push(['NER_' + sentI + '_' + i, normalizedNER, [[tokens[i].characterOffsetBegin, tokens[j].characterOffsetEnd]]]);
         i = j;
@@ -375,7 +375,7 @@ function render(data) {
     }
 
     // Sentiment
-    if (typeof sentence.sentiment != "undefined") {
+    if (typeof sentence.sentiment !== "undefined") {
       var sentiment = sentence.sentiment.toUpperCase().replace("VERY", "VERY ");
       addEntityType('SENTIMENT', sentiment);
       sentimentEntities.push(['SENTIMENT_' + sentI, sentiment,
@@ -387,9 +387,9 @@ function render(data) {
     if (tokens.length > 0) {
       for (var i = 0; i < tokens.length; i++) {
         var link = tokens[i].entitylink;
-        if (link == 'O' || typeof link == 'undefined') continue;
+        if (link === 'O' || typeof link === 'undefined') continue;
         var j = i;
-        while (j < tokens.length - 1 && tokens[j+1].entitylink == link) j++;
+        while (j < tokens.length - 1 && tokens[j+1].entitylink === link) j++;
         addEntityType('LINK', link);
         linkEntities.push(['LINK_' + sentI + '_' + i, link, [[tokens[i].characterOffsetBegin, tokens[j].characterOffsetEnd]]]);
         i = j;
@@ -421,7 +421,7 @@ function render(data) {
                             ['dependent', openieID(dep)]  ] ]);
     }
     // Render OpenIE
-    if (typeof sentence.openie != 'undefined') {
+    if (typeof sentence.openie !== 'undefined') {
       // Register the entities + relations we'll need
       addEntityType('ENTITY',  'Entity');
       addEntityType('RELATION', 'Relation');
@@ -473,7 +473,7 @@ function render(data) {
                            [['governor',  kbpEntity(gov)],
                             ['dependent', kbpEntity(dep)]  ] ]);
     }
-    if (typeof sentence.kbp != 'undefined') {
+    if (typeof sentence.kbp !== 'undefined') {
       // Register the entities + relations we'll need
       addRelationType('subject');
       addRelationType('object');
@@ -482,10 +482,10 @@ function render(data) {
         var subjectSpan = sentence.kbp[i].subjectSpan;
         var subjectLink = 'Entity';
         for (var k = subjectSpan[0]; k < subjectSpan[1]; ++k) {
-          if (subjectLink == 'Entity' &&
-              typeof tokens[k] != 'undefined' &&
-              tokens[k].entitylink != 'O' &&
-              typeof tokens[k].entitylink != 'undefined') {
+          if (subjectLink === 'Entity' &&
+              typeof tokens[k] !== 'undefined' &&
+              tokens[k].entitylink !== 'O' &&
+              typeof tokens[k].entitylink !== 'undefined') {
             subjectLink = tokens[k].entitylink
           }
         }
@@ -493,10 +493,10 @@ function render(data) {
         var objectSpan = sentence.kbp[i].objectSpan;
         var objectLink = 'Entity';
         for (var k = objectSpan[0]; k < objectSpan[1]; ++k) {
-          if (objectLink == 'Entity' &&
-              typeof tokens[k] != 'undefined' &&
-              tokens[k].entitylink != 'O' &&
-              typeof tokens[k].entitylink != 'undefined') {
+          if (objectLink === 'Entity' &&
+              typeof tokens[k] !== 'undefined' &&
+              tokens[k].entitylink !== 'O' &&
+              typeof tokens[k].entitylink !== 'undefined') {
             objectLink = tokens[k].entitylink
           }
         }
@@ -518,7 +518,7 @@ function render(data) {
   //
   var corefEntities = [];
   var corefRelations = [];
-  if (typeof data.corefs != 'undefined') {
+  if (typeof data.corefs !== 'undefined') {
     addRelationType('coref', true);
     addEntityType('COREF', 'Mention');
     var clusters = Object.keys(data.corefs);
@@ -592,7 +592,7 @@ function renderTokensregex(data) {
     if (entityTypesSet[type]) return;
     entityTypesSet[type] = true;
     // Set the color
-    if (typeof color == 'undefined') {
+    if (typeof color === 'undefined') {
       color = '#ADF6A2';
     }
     // Register the type
@@ -651,7 +651,7 @@ function renderSemgrex(data) {
     if (entityTypesSet[type]) return;
     entityTypesSet[type] = true;
     // Set the color
-    if (typeof color == 'undefined') {
+    if (typeof color === 'undefined') {
       color = '#ADF6A2';
     }
     // Register the type
@@ -739,7 +739,7 @@ $(document).ready(function() {
 
   // Submit on shift-enter
   $('#text').keydown(function (event) {
-    if (event.keyCode == 13) {
+    if (event.keyCode === 13) {
       if(event.shiftKey){
         event.preventDefault();  // don't register the enter key when pressed
         return false;
@@ -747,7 +747,7 @@ $(document).ready(function() {
     }
   });
   $('#text').keyup(function (event) {
-    if (event.keyCode == 13) {
+    if (event.keyCode === 13) {
       if(event.shiftKey){
         $('#submit').click();  // submit the form when the enter key is released
         event.stopPropagation();
@@ -760,7 +760,7 @@ $(document).ready(function() {
   $('#submit').click(function() {
     // Get the text to annotate
     currentQuery = $('#text').val();
-    if (currentQuery.trim() == '') {
+    if (currentQuery.trim() === '') {
       currentQuery = 'The quick brown fox jumped over the lazy dog.';
       $('#text').val(currentQuery);
     }
@@ -781,7 +781,7 @@ $(document).ready(function() {
       contentType: "application/x-www-form-urlencoded;charset=UTF-8",
       success: function(data) {
         $('#submit').prop('disabled', false);
-        if (typeof data == 'undefined' || data.sentences == undefined) {
+        if (typeof data === 'undefined' || data.sentences === undefined) {
           alert("Failed to reach server!");
         } else {
           // Empty divs
@@ -794,13 +794,13 @@ $(document).ready(function() {
             }
             // (make sure the data contains that element)
             ok = false;
-            if (typeof data[selector] != 'undefined') {
+            if (typeof data[selector] !== 'undefined') {
               ok = true;
-            } else if (typeof data.sentences != 'undefined' && data.sentences.length > 0) {
-              if (typeof data.sentences[0][selector] != 'undefined') {
+            } else if (typeof data.sentences !== 'undefined' && data.sentences.length > 0) {
+              if (typeof data.sentences[0][selector] !== 'undefined') {
                 ok = true;
-              } else if (typeof data.sentences[0].tokens != 'undefined' && data.sentences[0].tokens.length > 0) {
-                ok = (typeof data.sentences[0].tokens[0][selector] != 'undefined');
+              } else if (typeof data.sentences[0].tokens !== 'undefined' && data.sentences[0].tokens.length > 0) {
+                ok = (typeof data.sentences[0].tokens[0][selector] !== 'undefined');
               }
             }
             // (render the element)
@@ -853,7 +853,7 @@ $(document).ready(function() {
     // Don't actually submit the form
     e.preventDefault();
     // Get text
-    if ($('#tokensregex_search').val().trim() == '') {
+    if ($('#tokensregex_search').val().trim() === '') {
       $('#tokensregex_search').val('(?$foxtype [{pos:JJ}]+ ) fox');
     }
     var pattern = $('#tokensregex_search').val();
@@ -885,7 +885,7 @@ $(document).ready(function() {
     // Don't actually submit the form
     e.preventDefault();
     // Get text
-    if ($('#semgrex_search').val().trim() == '') {
+    if ($('#semgrex_search').val().trim() === '') {
       $('#semgrex_search').val('{pos:/VB.*/} >nsubj {}=subject >/nmod:.*/ {}=prep_phrase');
     }
     var pattern = $('#semgrex_search').val();
@@ -916,7 +916,7 @@ $(document).ready(function() {
     // Don't actually submit the form
     e.preventDefault();
     // Get text
-    if ($('#tregex_search').val().trim() == '') {
+    if ($('#tregex_search').val().trim() === '') {
       $('#tregex_search').val('NP < NN=animal');
     }
     var pattern = $('#tregex_search').val();
