@@ -43,7 +43,7 @@
     <!-- Annotators select -->
     <div class="col-sm-10">
       <select id="annotators" data-placeholder="CoreNLP annotators"
-              multiple class="chosen-select">
+              multiple class="chosen-select" title="Select CoreNLP annotators">
         <option value="pos"            selected > parts-of-speech    </option>
         <option value="lemma"                   > lemmas             </option>
         <option value="ner"            selected > named entities     </option>
@@ -57,10 +57,8 @@
     </div>
 
     <!-- Submit button -->
-    <div class="col-sm-2">
-      <center>
+    <div class="col-sm-2" style="text-align: center;">
         <button id="submit" class="btn btn-block">Submit</button>
-      </center>
     </div>
     </form>
 
