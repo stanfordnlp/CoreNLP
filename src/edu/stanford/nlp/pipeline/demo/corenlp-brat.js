@@ -781,7 +781,7 @@ $(document).ready(function() {
       contentType: "application/x-www-form-urlencoded;charset=UTF-8",
       success: function(data) {
         $('#submit').prop('disabled', false);
-        if (typeof data == undefined || data.sentences == undefined) {
+        if (typeof data == 'undefined' || data.sentences == undefined) {
           alert("Failed to reach server!");
         } else {
           // Empty divs
