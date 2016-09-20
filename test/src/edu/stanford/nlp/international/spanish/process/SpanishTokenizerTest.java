@@ -37,6 +37,11 @@ public class SpanishTokenizerTest extends TestCase {
         testOffset("tengo que decirte algo", new int[] {0, 6, 10, 15, 18}, new int[] {5, 9, 15, 17, 22});
     }
 
+    public void testIr() {
+        // "ir" is a special case -- it is a verb ending without a stem!
+        testOffset("tengo que irme ahora", new int[] {0, 6, 10, 12, 15}, new int[] {5, 9, 12, 14, 20});
+    }
+
     public void testContractionOffsets() {
         // y de el y
         testOffset("y del y", new int[] {0, 2, 3, 6}, new int[] {1, 3, 5, 7});

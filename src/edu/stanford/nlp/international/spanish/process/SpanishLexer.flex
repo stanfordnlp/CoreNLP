@@ -473,7 +473,7 @@ COMPOUND = {WORD}({HYPHEN}{WORD})+
 OS = os(l[oa]s?)?
 ATTACHED_PRON = ((me|te|se|nos|les?)(l[oa]s?)?)|l[oa]s?
 VB_IRREG = d[ií]|h[aá]z|v[eé]|p[oó]n|s[aá]l|sé|t[eé]n|v[eé]n
-VB_REG = {WORD}([aeiáéí]r|[áé]ndo|[aeáé]n?|[aeáé]mos?)
+VB_REG = ir|{WORD}([aeiáéí]r|[áé]ndo|[aeáé]n?|[aeáé]mos?)
 VB_PREF = {VB_IRREG}|({VB_REG})
 
 /* Handles second person plural imperatives:
