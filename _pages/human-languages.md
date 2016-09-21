@@ -1,12 +1,26 @@
 ---
-title: Using Stanford CoreNLP on different human languages
+title: Using Stanford CoreNLP on other human languages
 keywords: human languages
 permalink: '/human-languages.html'
 ---
 
 ¡Hola! − 您好！
 
-Out-of-the-box, Stanford CoreNLP expects and processes English language text. But, Stanford CoreNLP was designed from the start to work with multiple human languages and is careful about things like different character encodings.
+Out-of-the-box, Stanford CoreNLP expects and processes English language text. But, Stanford CoreNLP was designed from the start to work with multiple human languages and it is careful about things like different character encodings. We have developed components for several major languages, and make language packs (jar files) available for some of them. The table below summarizes our current first party foreign language support. Other people have developed [models for other languages](#models-for-other-languages).
+
+| Annotator | ar | zh | en | fr | de | es |
+| --------------- |:---:|:---:|:---:|:---:|:---:|:---:|
+| Tokenize / Segment | ✔ | ✔  | ✔ | ✔  |     | ✔ |
+| Sentence Split | ✔ | ✔  | ✔ | ✔  | ✔ | ✔ |
+| Part of Speech | ✔ | ✔  | ✔ | ✔  | ✔ | ✔ |
+| Lemma |   |   | ✔ |   |   |    |
+| Named Entities |   | ✔  | ✔ |    | ✔ | ✔ |
+| Constituency Parsing | ✔ | ✔  | ✔ | ✔ | ✔ | ✔ |
+| Dependency Parsing |    | ✔  | ✔ | ✔ | ✔ |     |
+| Sentiment Analysis |    |    | ✔ |  |  |     |
+| Mention Detection |    | ✔  | ✔ |  |  |     |
+| Coreference |    | ✔  | ✔ |  |  |     |
+| Open IE |    |   | ✔ |  |  |     |
 
 To get CoreNLP to work with another human language, you need a language pack of appropriate models for that language. You can find them on Maven Central or on [the download page](download.html). You could then manually specify to use all those resources, but that is impractical. You also want to have a properties file appropriate for the language that you are processing. A default one is included with the models jar for each language.  You can override individual properties on the command-line, as usual, or make a customized language-specific properties file appropriate to your processing needs.
 
@@ -55,3 +69,11 @@ The pattern for other languages is much the same, except that you substitute the
 ```sh
 java -mx3g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -props StanfordCoreNLP-spanish.properties -file spanish.txt -outputFormat json
 ```
+
+### [Models for other languages created by other people](#models-for-other-languages)
+
+Other people have developed models using or compatible with CoreNLP for several further languages. They may or may not be compatible with the most recent release of CoreNLP that we provide.
+
+* **Italian:** [Tint](http://tint.fbk.eu/) by Aessio Aprosio and Giovanni Moretti (Fondazione Bruno Kessler) largely builds on CoreNLP, but adds some other components, to provide a quite complete processing pipeline for Italian.
+* **Portuguese (European):** [LX parser](http://lxcenter.di.fc.ul.pt/tools/en/LXParserEN.html) by Patricia Gonçalves and João Silva (University of Lisbon)  provides a constituency parser. It was built with a now quite old version of Stanford NLP.
+* **Swedish:** Andreas Klintberg has built an [NER model](https://medium.com/@klintcho/training-a-swedish-ner-model-for-stanford-corenlp-part-2-20a0cfd801dd#.vnow3swam) and a [POS tagger](https://medium.com/@klintcho/training-a-swedish-pos-tagger-for-stanford-corenlp-546e954a8ee7#.ms2ym1he3).

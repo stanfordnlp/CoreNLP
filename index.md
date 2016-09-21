@@ -72,23 +72,17 @@ The basic distribution provides model files for the analysis of well-edited **En
 but the engine is compatible with models for other languages. We provide
 packaged models for [Chinese](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-01-19-models.jar), [French](http://nlp.stanford.edu/software/stanford-french-corenlp-2016-01-14-models.jar), 
 [German](http://nlp.stanford.edu/software/stanford-german-2016-01-19-models.jar), and [Spanish](http://nlp.stanford.edu/software/stanford-spanish-corenlp-2015-10-14-models.jar).
-We also provide a jar that contains all of our [English](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-01-10-models.jar) models.
+We also provide a jar that contains all of our
+[English](http://nlp.stanford.edu/software/stanford-english-corenlp-2016-01-10-models.jar)
+models, which includes various variant models, and in particular has
+one optimized for working with uncased English (e.g., mostly or all
+either uppercase or lowercase).
 Stanford NLP models for  **Arabic** are
-also usable inside CoreNLP.
+also usable inside CoreNLP, and other people have built models for
+some other languages.  You can find out more about using CoreNLP with
+various human languages on the
+[other human languages](human-languages.html) page.
 
-| Annotator | ar | zh | en | fr | de | es |
-| --------------- |:---:|:---:|:---:|:---:|:---:|:---:|
-| Tokenize / Segment | ✔ | ✔  | ✔ | ✔  |     | ✔ |
-| Sentence Split | ✔ | ✔  | ✔ | ✔  | ✔ | ✔ |
-| Part of Speech | ✔ | ✔  | ✔ | ✔  | ✔ | ✔ |
-| Lemma |   |   | ✔ |   |   |    |
-| Named Entities |   | ✔  | ✔ |    | ✔ | ✔ |
-| Constituency Parsing | ✔ | ✔  | ✔ | ✔ | ✔ | ✔ |
-| Dependency Parsing |    | ✔  | ✔ | ✔ | ✔ |     |
-| Sentiment Analysis |    |    | ✔ |  |  |     |
-| Mention Detection |    | ✔  | ✔ |  |  |     |
-| Coreference |    | ✔  | ✔ |  |  |     |
-| Open IE |    |   | ✔ |  |  |     |
 
 ## Programming languages and operating systems
 
