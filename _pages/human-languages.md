@@ -74,6 +74,6 @@ java -mx3g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLP -props StanfordCore
 
 Other people have developed models using or compatible with CoreNLP for several further languages. They may or may not be compatible with the most recent release of CoreNLP that we provide.
 
-* **Italian:** [Tint](http://tint.fbk.eu/) by Aessio Aprosio and Giovanni Moretti (Fondazione Bruno Kessler) largely builds on CoreNLP, but adds some other components, to provide a quite complete processing pipeline for Italian.
+* **Italian:** [Tint](http://tint.fbk.eu/) by Alessio Palmero Aprosio and Giovanni Moretti (Fondazione Bruno Kessler) largely builds on CoreNLP, but adds some other components, to provide a quite complete processing pipeline for Italian.
 * **Portuguese (European):** [LX parser](http://lxcenter.di.fc.ul.pt/tools/en/LXParserEN.html) by Patricia Gonçalves and João Silva (University of Lisbon)  provides a constituency parser. It was built with a now quite old version of Stanford NLP.
 * **Swedish:** Andreas Klintberg has built an [NER model](https://medium.com/@klintcho/training-a-swedish-ner-model-for-stanford-corenlp-part-2-20a0cfd801dd#.vnow3swam) and a [POS tagger](https://medium.com/@klintcho/training-a-swedish-pos-tagger-for-stanford-corenlp-546e954a8ee7#.ms2ym1he3).
