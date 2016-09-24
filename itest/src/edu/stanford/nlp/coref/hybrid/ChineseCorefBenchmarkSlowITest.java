@@ -10,6 +10,7 @@ import edu.stanford.nlp.util.BenchmarkingHelper;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.coref.CorefProperties;
+import edu.stanford.nlp.coref.hybrid.HybridCorefSystem;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -29,7 +30,7 @@ import static edu.stanford.nlp.util.BenchmarkingHelper.setLowHighExpected;
  * @author John Bauer
  * @author Christopher Manning
  */
-public class DcorefChineseBenchmarkSlowITest extends TestCase {
+public class ChineseCorefBenchmarkSlowITest extends TestCase {
 
   private static String runCorefTest(boolean deleteOnExit) throws Exception {
     final File WORK_DIR_FILE = File.createTempFile("DcorefChineseBenchmarkTest", "");
@@ -49,7 +50,7 @@ public class DcorefChineseBenchmarkSlowITest extends TestCase {
     System.err.println("Current dir using System:" +currentDir);
 
     String[] corefArgs = { "-props", "edu/stanford/nlp/coref/hybrid/properties/zh-coref-default.properties",
-                           '-' + HybridCorefProperties.LOG_PROP, baseLogFile,
+                           '-' + CorefProperties.LOG_PROP, baseLogFile,
                            '-' + CorefProperties.OUTPUT_PATH_PROP, WORK_DIR_FILE + File.separator,
                            '-' + "coref.doScore", "true",
                            '-' + "coref.scorer", "/scr/nlp/data/conll-2012/scorer/v8.01/scorer.pl",
