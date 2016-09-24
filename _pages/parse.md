@@ -6,11 +6,11 @@ permalink: '/parse.html'
 
 ## Description
 
-Provides full syntactic analysis, using both the constituent and the dependency representations. The constituent-based output is saved in TreeAnnotation. We generate three dependency-based outputs, as follows: basic, uncollapsed dependencies, saved in BasicDependenciesAnnotation; collapsed dependencies saved in CollapsedDependenciesAnnotation; and collapsed dependencies with processed coordinations, in CollapsedCCProcessedDependenciesAnnotation. Most users of our parser will prefer the latter representation.
+Provides full syntactic analysis, using both the constituent and the dependency representations. The constituent-based output is saved in TreeAnnotation. We generate three dependency-based outputs, as follows: basic, uncollapsed dependencies, saved in BasicDependenciesAnnotation; enhanced dependencies saved in EnhancedDependenciesAnnotation; and enhanced++ dependencies in EnhancedPlusPlusDependenciesAnnotation. Most users of our parser will prefer the latter representation.
 
 | Property name | Annotator class name | Generated Annotation |
 | --- | --- | --- |
-| parse | ParserAnnotator | TreeAnnotation, BasicDependenciesAnnotation, CollapsedDependenciesAnnotation, CollapsedCCProcessedDependenciesAnnotation |
+| parse | ParserAnnotator | TreeAnnotation, EnhancedDependenciesAnnotation, EnhancedPlusPlusDependenciesAnnotation, CollapsedCCProcessedDependenciesAnnotation |
 
 ## Options
 
