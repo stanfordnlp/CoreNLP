@@ -10,7 +10,7 @@ Provides full syntactic analysis, using both the constituent and the dependency 
 
 | Property name | Annotator class name | Generated Annotation |
 | --- | --- | --- |
-| parse | ParserAnnotator | TreeAnnotation, EnhancedDependenciesAnnotation, EnhancedPlusPlusDependenciesAnnotation, CollapsedCCProcessedDependenciesAnnotation |
+| parse | ParserAnnotator | TreeAnnotation, BasicDependenciesAnnotation, EnhancedDependenciesAnnotation, EnhancedPlusPlusDependenciesAnnotation |
 
 ## Options
 
