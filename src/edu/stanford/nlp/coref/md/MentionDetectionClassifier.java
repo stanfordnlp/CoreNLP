@@ -8,10 +8,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import edu.stanford.nlp.coref.hybrid.rf.RandomForest;
-
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.coref.data.Mention;
+import edu.stanford.nlp.coref.rf.RandomForest;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.RVFDatum;
@@ -20,7 +19,7 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.Generics;
 
-public class MentionDetectionClassifier implements Serializable {
+public class MentionDetectionClassifier implements Serializable  {
 
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(MentionDetectionClassifier.class);
@@ -28,14 +27,14 @@ public class MentionDetectionClassifier implements Serializable {
   private static final long serialVersionUID = -4100580709477023158L;
 
   public RandomForest rf;
-
+  
   public MentionDetectionClassifier(RandomForest rf) {
     this.rf = rf;
   }
 
   public static Counter<String> extractFeatures(Mention p, Set<Mention> shares, Set<String> neStrings, Dictionaries dict, Properties props) {
     Counter<String> features = new ClassicCounter<>();
-
+    
     String span = p.lowercaseNormalizedSpanString();
     String ner = p.headWord.ner();
     int sIdx = p.startIndex;
@@ -45,8 +44,8 @@ public class MentionDetectionClassifier implements Serializable {
     CoreLabel nextWord = (eIdx == sent.size())? null : sent.get(eIdx);
     CoreLabel firstWord = p.originalSpan.get(0);
     CoreLabel lastWord = p.originalSpan.get(p.originalSpan.size()-1);
-
-
+    
+    
     features.incrementCount("B-NETYPE-"+ner);
     if(neStrings.contains(span)) {
       features.incrementCount("B-NE-STRING-EXIST");
@@ -56,16 +55,16 @@ public class MentionDetectionClassifier implements Serializable {
     }
     if(preWord!=null) features.incrementCount("B-PRECEDINGWORD-"+preWord.word());
     if(nextWord!=null) features.incrementCount("B-FOLLOWINGWORD-"+nextWord.word());
-
+    
     if(preWord!=null) features.incrementCount("B-PRECEDINGPOS-"+preWord.tag());
     if(nextWord!=null) features.incrementCount("B-FOLLOWINGPOS-"+nextWord.tag());
-
+    
     features.incrementCount("B-FIRSTWORD-"+firstWord.word());
     features.incrementCount("B-FIRSTPOS-"+firstWord.tag());
-
+    
     features.incrementCount("B-LASTWORD-"+lastWord.word());
     features.incrementCount("B-LASTWORD-"+lastWord.tag());
-
+    
     for(Mention s : shares) {
       if(s==p) continue;
       if(s.insideIn(p)) {
@@ -80,17 +79,17 @@ public class MentionDetectionClassifier implements Serializable {
         break;
       }
     }
-
+    
     return features;
   }
-
+  
   public static MentionDetectionClassifier loadMentionDetectionClassifier(String filename) throws ClassNotFoundException, IOException {
     log.info("loading MentionDetectionClassifier ...");
     MentionDetectionClassifier mdc = IOUtils.readObjectFromURLOrClasspathOrFileSystem(filename);
     log.info("done");
     return mdc;
   }
-
+  
   public double probabilityOf(Mention p, Set<Mention> shares, Set<String> neStrings, Dictionaries dict, Properties props) {
     try {
       boolean dummyLabel = false;
@@ -142,5 +141,5 @@ public class MentionDetectionClassifier implements Serializable {
       }
     }
   }
-
+  
 }

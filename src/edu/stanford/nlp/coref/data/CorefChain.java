@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
-
 import edu.stanford.nlp.coref.data.Dictionaries.Animacy;
 import edu.stanford.nlp.coref.data.Dictionaries.Gender;
 import edu.stanford.nlp.coref.data.Dictionaries.MentionType;

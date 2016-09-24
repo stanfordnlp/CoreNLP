@@ -1,6 +1,14 @@
 package edu.stanford.nlp.coref.data;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.coref.CorefRules;
@@ -83,7 +91,7 @@ public class DocumentPreprocessor  {
   }
 
   /** Extract gold coref cluster information. */
-  private static void extractGoldClusters(Document doc){
+  public static void extractGoldClusters(Document doc){
     doc.goldCorefClusters = Generics.newHashMap();
     for (List<Mention> mentions : doc.goldMentions) {
       for (Mention m : mentions) {
@@ -130,8 +138,12 @@ public class DocumentPreprocessor  {
   }
 
   private static List<Mention> mentionReorderingBySpan(List<Mention> mentionsInSent) {
-    TreeSet<Mention> ordering = new TreeSet<>((m1, m2) -> (m1.appearEarlierThan(m2)) ? -1 :
-            (m2.appearEarlierThan(m1)) ? 1 : 0);
+    TreeSet<Mention> ordering = new TreeSet<>(new Comparator<Mention>() {
+      @Override
+      public int compare(Mention m1, Mention m2) {
+        return (m1.appearEarlierThan(m2)) ? -1 : (m2.appearEarlierThan(m1)) ? 1 : 0;
+      }
+    });
     ordering.addAll(mentionsInSent);
     List<Mention> orderedMentions = Generics.newArrayList(ordering);
     return orderedMentions;
@@ -148,9 +160,8 @@ public class DocumentPreprocessor  {
     }
   }
 
-  /** Assign mention IDs, find twin mentions, fill mention positions, initialize coref clusters, etc.
-   *  @throws Exception
-   */
+  /** assign mention IDs, find twin mentions, fill mention positions, initialize coref clusters, etc
+   * @throws Exception */
   private static void initializeMentions(Document doc, Dictionaries dict, LogisticClassifier<String, String> singletonPredictor, HeadFinder headFinder) throws Exception {
     boolean hasGold = (doc.goldMentions != null);
     assignMentionIDs(doc);
@@ -177,7 +188,7 @@ public class DocumentPreprocessor  {
   }
 
   /** Mark twin mentions in gold and predicted mentions */
-  private static void findTwinMentions(Document doc, boolean strict){
+  protected static void findTwinMentions(Document doc, boolean strict){
     if(strict) findTwinMentionsStrict(doc);
     else findTwinMentionsRelaxed(doc);
   }
@@ -343,7 +354,7 @@ public class DocumentPreprocessor  {
   }
 
   private static void findSyntacticRelationsFromDependency(List<Mention> orderedMentions) {
-    if (orderedMentions.isEmpty()) return;
+    if(orderedMentions.size()==0) return;
     markListMemberRelation(orderedMentions);
     SemanticGraph dependency = orderedMentions.get(0).enhancedDependency;
 
@@ -389,7 +400,7 @@ public class DocumentPreprocessor  {
   private static void initializeClusters(Document doc) {
     for (List<Mention> predicted : doc.predictedMentions) {
       for (Mention p : predicted) {
-        doc.corefClusters.put(p.mentionID, new CorefCluster(p.mentionID, Generics.newHashSet(Collections.singletonList(p))));
+        doc.corefClusters.put(p.mentionID, new CorefCluster(p.mentionID, Generics.newHashSet(Arrays.asList(p))));
         p.corefClusterID = p.mentionID;
       }
     }
@@ -443,7 +454,7 @@ public class DocumentPreprocessor  {
   }
 
   /** Process discourse information */
-  private static void processDiscourse(Document doc, Dictionaries dict) {
+  protected static void processDiscourse(Document doc, Dictionaries dict) {
     Boolean useMarkedDiscourse =
         doc.annotation.get(CoreAnnotations.UseMarkedDiscourseAnnotation.class);
     if (useMarkedDiscourse == null || !useMarkedDiscourse) {
@@ -535,9 +546,9 @@ public class DocumentPreprocessor  {
         doc.speakers.put(utter, Integer.toString(speakerID));
       }
     }
-    for (Map.Entry<String, Integer> stringIntegerEntry : speakerConversion.entrySet()) {
-      doc.speakerInfoMap.put(Integer.toString(stringIntegerEntry.getValue()), doc.speakerInfoMap.get(stringIntegerEntry.getKey()));
-      doc.speakerInfoMap.remove(stringIntegerEntry.getKey());
+    for(String speaker : speakerConversion.keySet()) {
+      doc.speakerInfoMap.put( Integer.toString(speakerConversion.get(speaker)), doc.speakerInfoMap.get(speaker));
+      doc.speakerInfoMap.remove(speaker);
     }
 
     // fix SpeakerAnnotation
@@ -615,7 +626,7 @@ public class DocumentPreprocessor  {
       if(quoteStart) l.set(CoreAnnotations.UtteranceAnnotation.class, outsideQuoteUtterance);   // quote start got outside utterance idx
 
       boolean noSpeakerInfo = !l.containsKey(CoreAnnotations.SpeakerAnnotation.class)
-      || l.get(CoreAnnotations.SpeakerAnnotation.class).isEmpty()
+      || l.get(CoreAnnotations.SpeakerAnnotation.class).equals("")
       || l.get(CoreAnnotations.SpeakerAnnotation.class).startsWith("PER");
 
       if(noSpeakerInfo || insideQuotation){
@@ -898,7 +909,7 @@ public class DocumentPreprocessor  {
         }
         for(Pair<Integer, Integer> foundPair: foundPairs){
           if (foundPair.first() == m1.headIndex && foundPair.second() == m2.headIndex) {
-            if (flag.equals("APPOSITION")) {
+            if(flag.equals("APPOSITION")) {
               if ( ! foundPair.first().equals(foundPair.second()) || m2.insideIn(m1)) {
                 m2.addApposition(m1);
               }
