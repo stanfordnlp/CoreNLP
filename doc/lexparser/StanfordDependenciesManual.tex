@@ -1070,7 +1070,7 @@ GrammaticalStructureFactory gsf = tlp.grammaticalStructureFactory();}
 \texttt{String[] sent = { "This", "is", "an", "easy", "sentence", "." }; \\
 Tree parse = lp.apply(Sentence.toWordList(sent)); \\
 GrammaticalStructure gs = gsf.newGrammaticalStructure(parse); \\
-Collection$\langle$TypedDependency$\rangle$ tdl = gs.typedDependenciesEnhancedPlusPlus(); \\
+Collection$\langle$TypedDependency$\rangle$ tdl = gs.typedDependencies(); \\
 System.out.println(tdl); }
 \end{quote}
 
