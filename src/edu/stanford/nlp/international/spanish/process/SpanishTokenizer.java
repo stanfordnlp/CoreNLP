@@ -1,4 +1,4 @@
-package edu.stanford.nlp.international.spanish.process;
+package edu.stanford.nlp.international.spanish.process; 
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
@@ -122,18 +122,12 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
 
 
   /** Copies the CoreLabel cl with the new word part */
-  private static CoreLabel copyCoreLabel(CoreLabel cl, String part, int beginPosition, int endPosition) {
+  private static CoreLabel copyCoreLabel(CoreLabel cl, String part) {
     CoreLabel newLabel = new CoreLabel(cl);
     newLabel.setWord(part);
     newLabel.setValue(part);
-    newLabel.setBeginPosition(beginPosition);
-    newLabel.setEndPosition(endPosition);
     newLabel.set(OriginalTextAnnotation.class, part);
     return newLabel;
-  }
-
-  private static CoreLabel copyCoreLabel(CoreLabel cl, String part, int beginPosition) {
-    return copyCoreLabel(cl, part, beginPosition, beginPosition + part.length());
   }
 
   /**
@@ -149,7 +143,6 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     String word = cl.word();
     String first;
     String second;
-    int secondOffset = 0, secondLength = 0;
 
     String lowered = word.toLowerCase();
     switch (lowered) {
@@ -160,30 +153,22 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
         if (Character.isLowerCase(lastChar))
           second = "el";
         else second = "EL";
-        secondOffset = 1;
-        secondLength = lowered.length() - 1;
         break;
       case "conmigo":
       case "consigo":
         first = word.substring(0, 3);
         second = word.charAt(3) + "í";
-        secondOffset = 3;
-        secondLength = 4;
         break;
       case "contigo":
         first = word.substring(0, 3);
         second = word.substring(3, 5);
-        secondOffset = 3;
-        secondLength = 4;
         break;
       default:
         throw new IllegalArgumentException("Invalid contraction provided to processContraction");
     }
 
-    int secondStart = cl.beginPosition() + secondOffset;
-    int secondEnd = secondStart + secondLength;
-    compoundBuffer.add(copyCoreLabel(cl, second, secondStart, secondEnd));
-    return copyCoreLabel(cl, first, cl.beginPosition(), secondStart);
+    compoundBuffer.add(copyCoreLabel(cl, second));
+    return copyCoreLabel(cl, first);
   }
 
   /**
@@ -200,19 +185,10 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
     if (parts == null) {
       return cl;
     }
-
-    // Split the CoreLabel into separate labels, tracking changing begin + end
-    // positions.
-    int stemEnd = cl.beginPosition() + parts.first().length();
-    int lengthRemoved = 0;
     for (String pronoun : parts.second()) {
-      int beginOffset = stemEnd + lengthRemoved;
-      compoundBuffer.add(copyCoreLabel(cl, pronoun, beginOffset));
-      lengthRemoved += pronoun.length();
+      compoundBuffer.add(copyCoreLabel(cl, pronoun));
     }
-
-    CoreLabel stem = copyCoreLabel(cl, parts.first(), cl.beginPosition(), stemEnd);
-    return stem;
+    return copyCoreLabel(cl, parts.first());
   }
 
   private static final Pattern pDash = Pattern.compile("\\-");
@@ -223,19 +199,13 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    */
   private CoreLabel processCompound(CoreLabel cl) {
     cl.remove(ParentAnnotation.class);
-
     String[] parts = pSpace.split(pDash.matcher(cl.word()).replaceAll(" - "));
-    int lengthAccum = 0;
     for (String part : parts) {
       CoreLabel newLabel = new CoreLabel(cl);
       newLabel.setWord(part);
       newLabel.setValue(part);
-      newLabel.setBeginPosition(cl.beginPosition() + lengthAccum);
-      newLabel.setEndPosition(cl.beginPosition() + lengthAccum + part.length());
       newLabel.set(OriginalTextAnnotation.class, part);
       compoundBuffer.add(newLabel);
-
-      lengthAccum += part.length();
     }
     return compoundBuffer.remove(0);
   }

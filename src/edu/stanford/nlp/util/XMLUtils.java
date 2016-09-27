@@ -1,4 +1,5 @@
-package edu.stanford.nlp.util;
+package edu.stanford.nlp.util; 
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;
 import java.util.*;
@@ -22,8 +23,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.util.logging.Redwood;
-
 
 /**
  * Provides some utilities for dealing with XML files, both by properly
@@ -64,8 +63,8 @@ public class XMLUtils  {
    * @throws SAXException if tag doesn't exist in the file.
    * @return List of String text contents of tags.
    */
-  private static List<String> getTextContentFromTagsFromFileSAXException(
-          File f, String tag) throws SAXException {
+  public static List<String> getTextContentFromTagsFromFileSAXException(
+      File f, String tag) throws SAXException {
     List<String> sents = Generics.newArrayList();
     try {
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -125,8 +124,8 @@ public class XMLUtils  {
    * @throws SAXException if tag doesn't exist in the file.
    * @return List of String text contents of tags.
    */
-  private static List<Element> getTagElementsFromFileSAXException(
-          File f, String tag) throws SAXException {
+  public static List<Element> getTagElementsFromFileSAXException(
+      File f, String tag) throws SAXException {
     List<Element> sents = Generics.newArrayList();
     try {
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -140,7 +139,9 @@ public class XMLUtils  {
         Element element = (Element)nodeList.item(i);
         sents.add(element);
       }
-    } catch (IOException | ParserConfigurationException e) {
+    } catch (IOException e) {
+      log.info(e);
+    } catch (ParserConfigurationException e) {
       log.info(e);
     }
     return sents;
@@ -150,7 +151,7 @@ public class XMLUtils  {
    * Returns the elements in the given file with the given tag associated with
    * the text content of the two previous siblings and two next siblings.
    *
-   * @return List of {@code Triple<String, Element, String>} Targeted elements surrounded
+   * @return List of Triple<String, Element, String> Targeted elements surrounded
    * by the text content of the two previous siblings and two next siblings.
    */
   public static List<Triple<String, Element, String>> getTagElementTriplesFromFile(File f, String tag) {
@@ -168,11 +169,11 @@ public class XMLUtils  {
    * the text content of the two previous siblings and two next siblings.
    *
    * @throws SAXException if tag doesn't exist in the file.
-   * @return List of {@code Triple<String, Element, String>} Targeted elements surrounded
+   * @return List of Triple<String, Element, String> Targeted elements surrounded
    * by the text content of the two previous siblings and two next siblings.
    */
-  private static List<Triple<String, Element, String>> getTagElementTriplesFromFileSAXException(
-          File f, String tag) throws SAXException {
+  public static List<Triple<String, Element, String>> getTagElementTriplesFromFileSAXException(
+      File f, String tag) throws SAXException {
     List<Triple<String, Element, String>> sents = Generics.newArrayList();
     try {
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -201,10 +202,12 @@ public class XMLUtils  {
           }
         }
         Element element = (Element)nodeList.item(i);
-        Triple<String, Element, String> t = new Triple<>(prev, element, next);
+        Triple t = new Triple(prev, element, next);
         sents.add(t);
       }
-    } catch (IOException | ParserConfigurationException e) {
+    } catch (IOException e) {
+      System.err.println(e);
+    } catch (ParserConfigurationException e) {
       System.err.println(e);
     }
     return sents;
@@ -374,7 +377,7 @@ public class XMLUtils  {
   // "many matchers can share the same pattern"
   // on the Pattern javadoc.  Therefore, this should be
   // safe as a static final variable.
-  private static final Pattern xmlEscapingPattern = Pattern.compile("\\&.+?;");
+  static final Pattern xmlEscapingPattern = Pattern.compile("\\&.+?;");
 
   public static String unescapeStringForXML(String s) {
     StringBuilder result = new StringBuilder();

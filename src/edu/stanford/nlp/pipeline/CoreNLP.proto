@@ -434,18 +434,6 @@ message SentenceFragment {
   optional double score          = 4;
 }
 
-
-//
-// The index of a token in a document, including the sentence
-// index and the offset.
-//
-message TokenLocation {
- optional uint32 sentenceIndex = 1;
- optional uint32 tokenIndex    = 2;
-
-}
-
-
 //
 // An OpenIE relation triple.
 // Created by the openie annotator.
@@ -455,9 +443,9 @@ message RelationTriple {
   optional string          relation       = 2;   // The surface form of the relation (required)
   optional string          object         = 3;   // The surface form of the object
   optional double          confidence     = 4;   // The [optional] confidence of the extraction
-  repeated TokenLocation   subjectTokens  = 13; // The tokens comprising the subject of the triple
-  repeated TokenLocation   relationTokens = 14; // The tokens comprising the relation of the triple
-  repeated TokenLocation   objectTokens   = 15; // The tokens comprising the object of the triple
+  repeated uint32          subjectTokens  = 5;   // The tokens comprising the subject of the triple
+  repeated uint32          relationTokens = 6;   // The tokens comprising the relation of the triple
+  repeated uint32          objectTokens   = 7;   // The tokens comprising the object of the triple
   optional DependencyGraph tree           = 8;   // The dependency graph fragment for this triple
   optional bool            istmod         = 9;   // If true, this expresses an implicit tmod relation
   optional bool            prefixBe       = 10;  // If true, this relation string is missing a 'be' prefix

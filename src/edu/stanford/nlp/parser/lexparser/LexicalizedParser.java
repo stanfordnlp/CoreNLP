@@ -132,7 +132,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
   /**
    * Construct a new LexicalizedParser object from a previously
    * serialized grammar read from a System property
-   * {@code edu.stanford.nlp.SerializedLexicalizedParser}, or a
+   * <code>edu.stanford.nlp.SerializedLexicalizedParser</code>, or a
    * default classpath location
    * ({@code edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz}).
    */
@@ -143,7 +143,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
   /**
    * Construct a new LexicalizedParser object from a previously
    * serialized grammar read from a System property
-   * {@code edu.stanford.nlp.SerializedLexicalizedParser}, or a
+   * <code>edu.stanford.nlp.SerializedLexicalizedParser</code>, or a
    * default classpath location
    * ({@code edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz}).
    *
@@ -323,8 +323,8 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
   }
 
   /**
-   * Will launch multiple threads which calls {@code parse} on
-   * each of the {@code sentences} in order, returning the
+   * Will launch multiple threads which calls <code>parse</code> on
+   * each of the <code>sentences</code> in order, returning the
    * resulting parse trees in the same order.
    */
   public List<Tree> parseMultiple(final List<? extends List<? extends HasWord>> sentences, final int nthreads) {
@@ -977,7 +977,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
    * method, but you cannot pass in options that specify the treebank
    * or grammar to be loaded, the grammar to be written, trees or
    * files to be parsed or details of their encoding, nor the
-   * TreebankLangParserParams ({@code -tLPP}) to use. The
+   * TreebankLangParserParams (<code>-tLPP</code>) to use. The
    * TreebankLangParserParams should be set up on construction of a
    * LexicalizedParser, by constructing an Options that uses
    * the required TreebankLangParserParams, and passing that to a
@@ -1008,32 +1008,32 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
    * <ul>
    *   <li> <b>Train a parser (saved to <i>serializedGrammarFilename</i>)
    *      from a directory of trees (<i>trainFilesPath</i>, with an optional <i>fileRange</i>, e.g., 0-1000):</b>
-   *    {@code java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser [-v] -train trainFilesPath [fileRange] -saveToSerializedFile serializedGrammarFilename}
+   *    <code>java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser [-v] -train trainFilesPath [fileRange] -saveToSerializedFile serializedGrammarFilename</code>
    *   </li>
    *
    *   <li> <b>Train a parser (not saved) from a directory of trees, and test it (reporting scores) on a directory of trees</b>
-   *    {@code java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser [-v] -train trainFilesPath [fileRange] -testTreebank testFilePath [fileRange] }
+   *    <code> java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser [-v] -train trainFilesPath [fileRange] -testTreebank testFilePath [fileRange] </code>
    *   </li>
    *
    *   <li> <b>Parse one or more files, given a serialized grammar and a list of files</b>
-   *    {@code java -mx512m edu.stanford.nlp.parser.lexparser.LexicalizedParser [-v] serializedGrammarPath filename [filename]*}
+   *    <code>java -mx512m edu.stanford.nlp.parser.lexparser.LexicalizedParser [-v] serializedGrammarPath filename [filename]*</code>
    *   </li>
    *
    *   <li> <b>Test and report scores for a serialized grammar on trees in an output directory</b>
-   *    {@code java -mx512m edu.stanford.nlp.parser.lexparser.LexicalizedParser [-v] -loadFromSerializedFile serializedGrammarPath -testTreebank testFilePath [fileRange]}
+   *    <code>java -mx512m edu.stanford.nlp.parser.lexparser.LexicalizedParser [-v] -loadFromSerializedFile serializedGrammarPath -testTreebank testFilePath [fileRange]</code>
    *   </li>
    * </ul>
    *
    *<p>
-   * If the {@code serializedGrammarPath} ends in {@code .gz},
+   * If the <code>serializedGrammarPath</code> ends in <code>.gz</code>,
    * then the grammar is written and read as a compressed file (GZip).
-   * If the {@code serializedGrammarPath} is a URL, starting with
-   * {@code http://}, then the parser is read from the URL.
+   * If the <code>serializedGrammarPath</code> is a URL, starting with
+   * <code>http://</code>, then the parser is read from the URL.
    * A fileRange specifies a numeric value that must be included within a
    * filename for it to be used in training or testing (this works well with
    * most current treebanks).  It can be specified like a range of pages to be
-   * printed, for instance as {@code 200-2199} or
-   * {@code 1-300,500-725,9000} or just as {@code 1} (if all your
+   * printed, for instance as <code>200-2199</code> or
+   * <code>1-300,500-725,9000</code> or just as <code>1</code> (if all your
    * trees are in a single file, either omit this parameter or just give a dummy
    * argument such as {@code 0}).
    * If the filename to parse is "-" then the parser parses from stdin.
@@ -1043,18 +1043,18 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
    * <p>
    * The parser can write a grammar as either a serialized Java object file
    * or in a text format (or as both), specified with the following options:
-   * <blockquote>{@code
+   * <blockquote><code>
    * java edu.stanford.nlp.parser.lexparser.LexicalizedParser
    * [-v] -train
    * trainFilesPath [fileRange] [-saveToSerializedFile grammarPath]
    * [-saveToTextFile grammarPath]
-   * }</blockquote>
+   * </code></blockquote>
    *
    * <p>
    * In the same position as the verbose flag ({@code -v}), many other
    * options can be specified.  The most useful to an end user are:
    * <ul>
-   * <LI>{@code -tLPP class} Specify a different
+   * <LI><code>-tLPP class</code> Specify a different
    * TreebankLangParserParams, for when using a different language or
    * treebank (the default is English Penn Treebank). <i>This option MUST occur
    * before any other language-specific options that are used (or else they
@@ -1063,39 +1063,39 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
    * serialized grammar; it is necessary if the language pack specifies a
    * needed character encoding or you wish to specify language-specific
    * options on the command line.)</LI>
-   * <LI>{@code -encoding charset} Specify the character encoding of the
+   * <LI><code>-encoding charset</code> Specify the character encoding of the
    * input and output files.  This will override the value in the
-   * {@code TreebankLangParserParams}, provided this option appears
-   * <i>after</i> any {@code -tLPP} option.</LI>
-   * <LI>{@code -tokenized} Says that the input is already separated
+   * <code>TreebankLangParserParams</code>, provided this option appears
+   * <i>after</i> any <code>-tLPP</code> option.</LI>
+   * <LI><code>-tokenized</code> Says that the input is already separated
    * into whitespace-delimited tokens.  If this option is specified, any
    * tokenizer specified for the language is ignored, and a universal (Unicode)
    * tokenizer, which divides only on whitespace, is used.
    * Unless you also specify
-   * {@code -escaper}, the tokens <i>must</i> all be correctly
+   * <code>-escaper</code>, the tokens <i>must</i> all be correctly
    * tokenized tokens of the appropriate treebank for the parser to work
    * well (for instance, if using the Penn English Treebank, you must have
    * coded "(" as "-LRB-", "3/4" as "3\/4", etc.)</LI>
-   * <li>{@code -escaper class} Specify a class of type
+   * <li><code>-escaper class</code> Specify a class of type
    * {@link Function}&lt;List&lt;HasWord&gt;,List&lt;HasWord&gt;&gt; to do
    * customized escaping of tokenized text.  This class will be run over the
    * tokenized text and can fix the representation of tokens. For instance,
    * it could change "(" to "-LRB-" for the Penn English Treebank.  A
    * provided escaper that does such things for the Penn English Treebank is
-   * {@code edu.stanford.nlp.process.PTBEscapingProcessor}
-   * <li>{@code -tokenizerFactory class} Specifies a
+   * <code>edu.stanford.nlp.process.PTBEscapingProcessor</code>
+   * <li><code>-tokenizerFactory class</code> Specifies a
    * TokenizerFactory class to be used for tokenization</li>
-   * <li>{@code -tokenizerOptions options} Specifies options to a
+   * <li><code>-tokenizerOptions options</code> Specifies options to a
    * TokenizerFactory class to be used for tokenization.   A comma-separated
    * list. For PTBTokenizer, options of interest include
-   * {@code americanize=false} and {@code asciiQuotes} (for German).
+   * <code>americanize=false</code> and <code>asciiQuotes</code> (for German).
    * Note that any choice of tokenizer options that conflicts with the
    * tokenization used in the parser training data will likely degrade parser
    * performance. </li>
-   * <li>{@code -sentences token } Specifies a token that marks sentence
-   * boundaries.  A value of {@code newline} causes sentence breaking on
-   * newlines.  A value of {@code onePerElement} causes each element
-   * (using the XML {@code -parseInside} option) to be treated as a
+   * <li><code>-sentences token </code> Specifies a token that marks sentence
+   * boundaries.  A value of <code>newline</code> causes sentence breaking on
+   * newlines.  A value of <code>onePerElement</code> causes each element
+   * (using the XML <code>-parseInside</code> option) to be treated as a
    * sentence. All other tokens will be interpreted literally, and must be
    * exactly the same as tokens returned by the tokenizer.  For example,
    * you might specify "|||" and put that symbol sequence as a token between
@@ -1103,26 +1103,26 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
    * If no explicit sentence breaking option is chosen, sentence breaking
    * is done based on a set of language-particular sentence-ending patterns.
    * </li>
-   * <LI>{@code -parseInside element} Specifies that parsing should only
+   * <LI><code>-parseInside element</code> Specifies that parsing should only
    * be done for tokens inside the indicated XML-style
    * elements (done as simple pattern matching, rather than XML parsing).
-   * For example, if this is specified as {@code sentence}, then
-   * the text inside the {@code sentence} element
+   * For example, if this is specified as <code>sentence</code>, then
+   * the text inside the <code>sentence</code> element
    * would be parsed.
    * Using "-parseInside s" gives you support for the input format of
    * Charniak's parser. Sentences cannot span elements. Whether the
    * contents of the element are treated as one sentence or potentially
-   * multiple sentences is controlled by the {@code -sentences} flag.
+   * multiple sentences is controlled by the <code>-sentences</code> flag.
    * The default is potentially multiple sentences.
    * This option gives support for extracting and parsing
    * text from very simple SGML and XML documents, and is provided as a
    * user convenience for that purpose. If you want to really parse XML
    * documents before NLP parsing them, you should use an XML parser, and then
    * call to a LexicalizedParser on appropriate CDATA.
-   * <LI>{@code -tagSeparator char} Specifies to look for tags on words
+   * <LI><code>-tagSeparator char</code> Specifies to look for tags on words
    * following the word and separated from it by a special character
-   * {@code char}.  For instance, many tagged corpora have the
-   * representation "house/NN" and you would use {@code -tagSeparator /}.
+   * <code>char</code>.  For instance, many tagged corpora have the
+   * representation "house/NN" and you would use <code>-tagSeparator /</code>.
    * Notes: This option requires that the input be pretokenized.
    * The separator has to be only a single character, and there is no
    * escaping mechanism. However, splitting is done on the <i>last</i>
@@ -1133,42 +1133,42 @@ public class LexicalizedParser extends ParserGrammar implements Serializable  {
    * is not one that it regards as a possible tagging for the word.
    * The parser supports a format where only some of the words in a sentence
    * have a tag (if you are calling the parser programmatically, you indicate
-   * them by having them implement the {@code HasTag} interface).
+   * them by having them implement the <code>HasTag</code> interface).
    * You can do this at the command-line by only having tags after some words,
    * but you are limited by the fact that there is no way to escape the
    * tagSeparator character.</LI>
-   * <LI>{@code -maxLength leng} Specify the longest sentence that
+   * <LI><code>-maxLength leng</code> Specify the longest sentence that
    * will be parsed (and hence indirectly the amount of memory
    * needed for the parser). If this is not specified, the parser will
    * try to dynamically grow its parse chart when long sentence are
    * encountered, but may run out of memory trying to do so.</LI>
-   * <LI>{@code -outputFormat styles} Choose the style(s) of output
-   * sentences: {@code penn} for prettyprinting as in the Penn
-   * treebank files, or {@code oneline} for printing sentences one
-   * per line, {@code words}, {@code wordsAndTags},
-   * {@code dependencies}, {@code typedDependencies},
-   * or {@code typedDependenciesCollapsed}.
+   * <LI><code>-outputFormat styles</code> Choose the style(s) of output
+   * sentences: <code>penn</code> for prettyprinting as in the Penn
+   * treebank files, or <code>oneline</code> for printing sentences one
+   * per line, <code>words</code>, <code>wordsAndTags</code>,
+   * <code>dependencies</code>, <code>typedDependencies</code>,
+   * or <code>typedDependenciesCollapsed</code>.
    * Multiple options may be specified as a comma-separated
    * list.  See TreePrint class for further documentation.</LI>
-   * <LI>{@code -outputFormatOptions} Provide options that control the
-   * behavior of various {@code -outputFormat} choices, such as
-   * {@code lexicalize}, {@code stem}, {@code markHeadNodes},
-   * or {@code xml}.  {@link edu.stanford.nlp.trees.TreePrint}
+   * <LI><code>-outputFormatOptions</code> Provide options that control the
+   * behavior of various <code>-outputFormat</code> choices, such as
+   * <code>lexicalize</code>, <code>stem</code>, <code>markHeadNodes</code>,
+   * or <code>xml</code>.  {@link edu.stanford.nlp.trees.TreePrint}
    * Options are specified as a comma-separated list.</LI>
-   * <LI>{@code -writeOutputFiles} Write output files corresponding
-   * to the input files, with the same name but a {@code ".stp"}
+   * <LI><code>-writeOutputFiles</code> Write output files corresponding
+   * to the input files, with the same name but a <code>".stp"</code>
    * file extension.  The format of these files depends on the
-   * {@code outputFormat} option.  (If not specified, output is sent
+   * <code>outputFormat</code> option.  (If not specified, output is sent
    * to stdout.)</LI>
-   * <LI>{@code -outputFilesExtension} The extension that is appended to
+   * <LI><code>-outputFilesExtension</code> The extension that is appended to
    * the filename that is being parsed to produce an output file name (with the
-   * -writeOutputFiles option). The default is {@code stp}.  Don't
+   * -writeOutputFiles option). The default is <code>stp</code>.  Don't
    * include the period.
-   * <LI>{@code -outputFilesDirectory} The directory in which output
+   * <LI><code>-outputFilesDirectory</code> The directory in which output
    * files are written (when the -writeOutputFiles option is specified).
    * If not specified, output files are written in the same directory as the
    * input files.
-   * <LI>{@code -nthreads} Parsing files and testing on treebanks
+   * <LI><code>-nthreads</code> Parsing files and testing on treebanks
    * can use multiple threads.  This option tells the parser how many
    * threads to use.  A negative number indicates to use as many
    * threads as the machine has cores.

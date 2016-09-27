@@ -8,10 +8,14 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.coref.data.Dictionaries.MentionType;
+
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 
-
+/**
+ * Class for filtering out input features and producing feature conjunctions.
+ * @author Kevin Clark
+ */
 public class MetaFeatureExtractor {
 
   public enum PairConjunction {FIRST, LAST, BOTH}
@@ -68,7 +72,7 @@ public class MetaFeatureExtractor {
     disallowedPrefixes = builder.disallowedPrefixes;
     neTypeConjuntion = builder.useNEType;
 
-    str = StatisticalCorefUtils.fieldValues(builder);
+    str = StatisticalCorefTrainer.fieldValues(builder);
   }
 
   public static MetaFeatureExtractor anaphoricityMFE() {
@@ -103,7 +107,7 @@ public class MetaFeatureExtractor {
 
     if (!example.isNewLink()) {
       assert(!anaphoricityClassifier);
-      pairFeatures = compressor.uncompress(example.features);
+      pairFeatures = compressor.uncompress(example.pairwiseFeatures);
       features1 = compressor.uncompress(mentionFeatures.get(example.mentionId1));
     } else {
       features2.incrementCount("bias");

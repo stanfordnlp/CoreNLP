@@ -175,7 +175,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
 
   /** A logger for this class */
-  private static final Redwood.RedwoodChannels log = Redwood.channels(PTBTokenizer.class);
+  private static Redwood.RedwoodChannels log = Redwood.channels(PTBTokenizer.class);
 
   // the underlying lexer
   private final PTBLexer lexer;
@@ -334,7 +334,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
         sb.append(token);
       }
     } catch (IOException e) {
-      throw new RuntimeIOException(e);
+      e.printStackTrace();
     }
     return sb.toString();
   }
@@ -549,8 +549,6 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    */
   public static class PTBTokenizerFactory<T extends HasWord> implements TokenizerFactory<T> {
 
-    private static final long serialVersionUID = -8859638719818931606L;
-
     protected final LexedTokenFactory<T> factory;
     protected String options;
 
@@ -694,7 +692,9 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T>  {
    * This main method assumes that the input file is in utf-8 encoding,
    * unless an encoding is specified.
    * <p/>
-   * Usage: {@code java edu.stanford.nlp.process.PTBTokenizer [options] filename+ }
+   * Usage: <code>
+   * java edu.stanford.nlp.process.PTBTokenizer [options] filename+
+   * </code>
    * <p/>
    * Options:
    * <ul>

@@ -15,6 +15,16 @@
   <link rel="stylesheet" type="text/css" href="corenlp-brat.css"/>
   <script type="text/javascript" src="corenlp-brat.js"></script>
 
+  <!-- Google Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-28753732-2', 'auto');
+  ga('send', 'pageview');
+  </script>
+
   <meta charset="UTF-8">
 </head>
 
@@ -42,8 +52,8 @@
 
     <!-- Annotators select -->
     <div class="col-sm-10">
-      <select id="annotators" data-placeholder="CoreNLP annotators"
-              multiple class="chosen-select" title="Select CoreNLP annotators">
+      <select id="annotators" data-placeholder="CoreNLP annotators" 
+              multiple class="chosen-select">
         <option value="pos"            selected > parts-of-speech    </option>
         <option value="lemma"                   > lemmas             </option>
         <option value="ner"            selected > named entities     </option>
@@ -57,8 +67,10 @@
     </div>
 
     <!-- Submit button -->
-    <div class="col-sm-2" style="text-align: center;">
+    <div class="col-sm-2">
+      <center>
         <button id="submit" class="btn btn-block">Submit</button>
+      </center>
     </div>
     </form>
 
@@ -85,7 +97,6 @@
     <ul class="nav nav-tabs" role="tablist">
       <li class="active"><a href="#div_tokensregex" role="tab" data-toggle="tab">TokensRegex</a></li>
       <li               ><a href="#div_semgrex"     role="tab" data-toggle="tab">Semgrex</a></li>
-      <li               ><a href="#div_tregex"      role="tab" data-toggle="tab">Tregex</a></li>
     </ul>
 
     <!-- Tab panes -->
@@ -119,20 +130,7 @@
         </form>
       </div>
 
-      <!-- Tregex -->
-      <div class="tab-pane pattern_tab" id="div_tregex">
-        <form id="form_tregex" accept-charset="UTF-8">
-        <label for="tregex_search">Enter a <a href="http://nlp.stanford.edu/nlp/javadoc/javanlp/edu/stanford/nlp/trees/tregex/TregexPattern.html">Tregex</a>
-          expression to run against the above sentence:</label>
-        <div class="input-group">
-          <input id="tregex_search" type="text" class="form-control" placeholder='e.g., NP < NN=animal'/>
-        <span class="input-group-btn">
-          <input id="button_tregex" class="btn btn-default" type="submit" value="Match"/>
-        </span>
-        </div>
-        </form>
       </div>
-
     </div>
   </div>
 </div>

@@ -389,9 +389,7 @@
         <zipfileset prefix="WEB-INF/data"
                     file="/u/nlp/data/lexparser/arabicFactored.ser.gz"/>
         <zipfileset prefix="WEB-INF/data"
-                    file="/u/nlp/data/lexparser/frenchFactored.ser.gz"/>
-        <zipfileset prefix="WEB-INF/data"
-                    file="/u/nlp/data/lexparser/chineseFactored.ser.gz"/>
+                    file="/u/nlp/data/lexparser/xinhuaFactored.ser.gz"/>
         <zipfileset prefix="WEB-INF/data/chinesesegmenter"
                     file="/u/nlp/data/gale/segtool/stanford-seg/classifiers-2010/05202008-ctb6.processed-chris6.lex.gz"/>
         <zipfileset prefix="WEB-INF/data/chinesesegmenter"

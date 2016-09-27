@@ -7,7 +7,6 @@ import java.io.ObjectOutputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import edu.stanford.nlp.ie.regexp.ChineseNumberSequenceClassifier;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -40,34 +39,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   public static final String APPLY_GAZETTE_PROPERTY = "ner.regex";
   public static final boolean APPLY_GAZETTE_DEFAULT = false;
 
-  private final Language nerLanguage;
-  public static final Language NER_LANGUAGE_DEFAULT = Language.ENGLISH;
-  public static final String NER_LANGUAGE_PROPERTY = "ner.language";
-  public static final String NER_LANGUAGE_PROPERTY_BASE = "language";
-
   private final boolean useSUTime;
-
-  public enum Language {
-    ENGLISH("English"),
-    CHINESE("Chinese");
-
-    public String languageName;
-
-    Language(String name) {
-      this.languageName = name;
-    }
-
-    public static Language fromString(String name, Language defaultValue) {
-      if(name != null) {
-        for(Language l : Language.values()) {
-          if(name.equalsIgnoreCase(l.languageName)) {
-            return l;
-          }
-        }
-      }
-      return defaultValue;
-    }
-  }
 
   // todo [cdm 2015]: Could avoid constructing this if applyNumericClassifiers is false
   private final AbstractSequenceClassifier<CoreLabel> nsc;
@@ -82,7 +54,6 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   {
     super(props);
     applyNumericClassifiers = PropertiesUtils.getBool(props, APPLY_NUMERIC_CLASSIFIERS_PROPERTY, APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
-    nerLanguage = Language.fromString(PropertiesUtils.getString(props, NER_LANGUAGE_PROPERTY, null), NER_LANGUAGE_DEFAULT);
     useSUTime = PropertiesUtils.getBool(props, NumberSequenceClassifier.USE_SUTIME_PROPERTY, NumberSequenceClassifier.USE_SUTIME_DEFAULT);
     nsc = new NumberSequenceClassifier(new Properties(), useSUTime, props);
     if (PropertiesUtils.getBool(props, NERClassifierCombiner.APPLY_GAZETTE_PROPERTY, NERClassifierCombiner.APPLY_GAZETTE_DEFAULT) ) {
@@ -106,7 +77,6 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   {
     super(loadPaths);
     this.applyNumericClassifiers = applyNumericClassifiers;
-    this.nerLanguage = NER_LANGUAGE_DEFAULT;
     this.useSUTime = useSUTime;
     this.nsc = new NumberSequenceClassifier(useSUTime);
     if (augmentRegexNER) {
@@ -117,7 +87,6 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   }
 
   public NERClassifierCombiner(boolean applyNumericClassifiers,
-                               Language nerLanguage,
                                boolean useSUTime,
                                boolean augmentRegexNER,
                                Properties nscProps,
@@ -127,7 +96,6 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     // NOTE: nscProps may contains sutime props which will not be recognized by the SeqClassifierFlags
     super(nscProps, ClassifierCombiner.extractCombinationModeSafe(nscProps), loadPaths);
     this.applyNumericClassifiers = applyNumericClassifiers;
-    this.nerLanguage = nerLanguage;
     this.useSUTime = useSUTime;
     this.nsc = new NumberSequenceClassifier(new Properties(), useSUTime, nscProps);
     if (augmentRegexNER) {
@@ -153,7 +121,6 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
   {
     super(classifiers);
     this.applyNumericClassifiers = applyNumericClassifiers;
-    this.nerLanguage = NER_LANGUAGE_DEFAULT;
     this.useSUTime = useSUTime;
     this.nsc = new NumberSequenceClassifier(useSUTime);
     if (augmentRegexNER) {
@@ -180,14 +147,12 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
     } else {
       this.applyNumericClassifiers = diskApplyNumericClassifiers;
     }
-    this.nerLanguage = NER_LANGUAGE_DEFAULT;
     // build the nsc, note that initProps should be set by ClassifierCombiner
     this.nsc = new NumberSequenceClassifier(new Properties(), useSUTime, props);
     if (PropertiesUtils.getBool(props, NERClassifierCombiner.APPLY_GAZETTE_PROPERTY, NERClassifierCombiner.APPLY_GAZETTE_DEFAULT) ) {
       this.gazetteMapping = readRegexnerGazette(DefaultPaths.DEFAULT_NER_GAZETTE_MAPPING);
     } else {
       this.gazetteMapping = Collections.emptyMap();
-      log.fatal("Property ner.language not recognized: " + nerLanguage);
     }
   }
 
@@ -265,7 +230,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
         combinerProperties = properties;
       }
       //Properties combinerProperties = PropertiesUtils.extractSelectedProperties(properties, passDownProperties);
-      nerCombiner = new NERClassifierCombiner(applyNumericClassifiers, NERClassifierCombiner.NER_LANGUAGE_DEFAULT,
+      nerCombiner = new NERClassifierCombiner(applyNumericClassifiers,
               useSUTime, applyRegexner, combinerProperties, models);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
@@ -319,14 +284,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel>  {
       try {
         // normalizes numeric entities such as MONEY, TIME, DATE, or PERCENT
         // note: this uses and sets NamedEntityTagAnnotation!
-        if(nerLanguage == Language.CHINESE) {
-          // For chinese there is no support for SUTime by default
-          // We need to hand in document and sentence for Chinese to handle DocDate; however, since English normalization
-          // is handled by SUTime, and the information is passed in recognizeNumberSequences(), English only need output.
-          ChineseQuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(output, document, sentence);
-        } else {
-          QuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(output, false, useSUTime);
-        }
+        QuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(output, false, useSUTime);
       } catch (Exception e) {
         log.info("Ignored an exception in QuantifiableEntityNormalizer: (result is that entities were not normalized)");
         log.info("Tokens: " + StringUtils.joinWords(tokens, " "));

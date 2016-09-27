@@ -112,7 +112,9 @@ public class CorefUtils {
           for (Mention match : withStringMatch) {
             if (match.mentionNum < m.mentionNum
                 && match.mentionNum >= m.mentionNum - maxMentionDistanceWithStringMatch) {
-              candidateAntecedents.add(match.mentionID);
+              if (!candidateAntecedents.contains(match.mentionID)) {
+                candidateAntecedents.add(match.mentionID);
+              }
             }
           }
         }
