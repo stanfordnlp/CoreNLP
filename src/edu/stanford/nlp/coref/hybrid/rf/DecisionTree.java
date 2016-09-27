@@ -1,4 +1,4 @@
-package edu.stanford.nlp.coref.rf;
+package edu.stanford.nlp.coref.hybrid.rf;
 
 import java.io.Serializable;
 

@@ -10,7 +10,7 @@ import java.util.Set;
 
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.coref.data.Mention;
-import edu.stanford.nlp.coref.rf.RandomForest;
+import edu.stanford.nlp.coref.hybrid.rf.RandomForest;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.RVFDatum;

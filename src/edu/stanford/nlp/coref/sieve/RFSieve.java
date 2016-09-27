@@ -10,7 +10,6 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
 
-import edu.stanford.nlp.coref.CorefPrinter;
 import edu.stanford.nlp.coref.CorefProperties;
 import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.coref.data.CorefCluster;
@@ -25,7 +24,7 @@ import edu.stanford.nlp.coref.data.Document.DocType;
 import edu.stanford.nlp.coref.data.Mention;
 import edu.stanford.nlp.coref.md.RuleBasedCorefMentionFinder;
 import edu.stanford.nlp.coref.OldCorefPrinter;
-import edu.stanford.nlp.coref.rf.RandomForest;
+import edu.stanford.nlp.coref.hybrid.rf.RandomForest;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations.SpeakerAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
