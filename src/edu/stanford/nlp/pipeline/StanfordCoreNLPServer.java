@@ -943,7 +943,7 @@ public class StanfordCoreNLPServer implements Runnable {
                 //sentWriter.set("tree", tree.pennString());
                 TregexMatcher matcher = p.matcher(tree);
 
-                int i=0;
+                int i = 0;
                 while (matcher.find()) {
                   sentWriter.set(Integer.toString(i++), (Consumer<JSONOutputter.Writer>) (JSONOutputter.Writer matchWriter) -> {
                     matchWriter.set("match", matcher.getMatch().pennString());

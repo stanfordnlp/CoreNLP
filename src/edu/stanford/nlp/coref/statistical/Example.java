@@ -2,17 +2,14 @@ package edu.stanford.nlp.coref.statistical;
 
 import java.io.Serializable;
 
-import edu.stanford.nlp.coref.data.Mention;
 import edu.stanford.nlp.coref.data.Dictionaries.MentionType;
-/**
- * A representation of a mention-pair for training coreference models.
- * @author Kevin Clark
- */
+import edu.stanford.nlp.coref.data.Mention;
+
 public class Example implements Serializable {
   private static final long serialVersionUID = 1104263558466004590L;
   public final int docId;
   public final double label;
-  public final CompressedFeatureVector pairwiseFeatures;
+  public final CompressedFeatureVector features;
 
   public final int mentionId1;
   public final int mentionId2;
@@ -20,10 +17,10 @@ public class Example implements Serializable {
   public final MentionType mentionType2;
 
   public Example(int docId, Mention m1, Mention m2, double label,
-      CompressedFeatureVector pairwiseFeatures) {
+      CompressedFeatureVector features) {
     this.docId = docId;
     this.label = label;
-    this.pairwiseFeatures = pairwiseFeatures;
+    this.features = features;
 
     this.mentionId1 = m1.mentionID;
     this.mentionId2 = m2.mentionID;
@@ -34,7 +31,7 @@ public class Example implements Serializable {
   public Example(Example pair, boolean isPositive) {
     this.docId = pair.docId;
     this.label = isPositive ? 1 : 0;
-    this.pairwiseFeatures = null;
+    this.features = null;
 
     this.mentionId1 = -1;
     this.mentionId2 = pair.mentionId2;
@@ -43,6 +40,6 @@ public class Example implements Serializable {
   }
 
   public boolean isNewLink() {
-    return pairwiseFeatures == null;
+    return features == null;
   }
 }

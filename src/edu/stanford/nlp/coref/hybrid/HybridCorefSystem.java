@@ -3,6 +3,7 @@ package edu.stanford.nlp.coref.hybrid;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -10,31 +11,26 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
-
-import edu.stanford.nlp.coref.CorefAlgorithm;
-import edu.stanford.nlp.coref.CorefPrinter;
-import edu.stanford.nlp.coref.CorefProperties;
-import edu.stanford.nlp.coref.CorefScorer;
-import edu.stanford.nlp.coref.CorefUtils;
+import edu.stanford.nlp.coref.*;
 import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.coref.data.CorefCluster;
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.coref.data.Document;
-import edu.stanford.nlp.coref.data.DocumentMaker;
 import edu.stanford.nlp.coref.data.Mention;
-import edu.stanford.nlp.coref.hybrid.sieve.Sieve;
-import edu.stanford.nlp.coref.hybrid.sieve.Sieve.ClassifierType;
+import edu.stanford.nlp.coref.sieve.Sieve;
+import edu.stanford.nlp.coref.sieve.Sieve.ClassifierType;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.logging.RedwoodConfiguration;
 
-public class HybridCorefSystem implements CorefAlgorithm {
+public class HybridCorefSystem {
 
   /** A logger for this class */
   private static Redwood.RedwoodChannels log = Redwood.channels(HybridCorefSystem.class);
@@ -42,21 +38,7 @@ public class HybridCorefSystem implements CorefAlgorithm {
   public Properties props;
   public List<Sieve> sieves;
   public Dictionaries dictionaries;
-  public DocumentMaker docMaker = null;
-
-  public HybridCorefSystem(Properties props, Dictionaries dictionaries) throws Exception {
-    this.props = props;
-    this.dictionaries = dictionaries;
-    sieves = Sieve.loadSieves(props);
-
-    // set semantics loading
-    for(Sieve sieve : sieves) {
-      if(sieve.classifierType == ClassifierType.RULE) continue;
-      if(HybridCorefProperties.useWordEmbedding(props, sieve.sievename)) {
-        props.setProperty(HybridCorefProperties.LOAD_WORD_EMBEDDING_PROP, "true");
-      }
-    }
-  }
+  public CorefDocMaker docMaker = null;
 
   public HybridCorefSystem(Properties props) throws Exception {
     this.props = props;
@@ -65,38 +47,37 @@ public class HybridCorefSystem implements CorefAlgorithm {
     // set semantics loading
     for(Sieve sieve : sieves) {
       if(sieve.classifierType == ClassifierType.RULE) continue;
-      if(HybridCorefProperties.useWordEmbedding(props, sieve.sievename)) {
-        props.setProperty(HybridCorefProperties.LOAD_WORD_EMBEDDING_PROP, "true");
+      if(CorefProperties.useWordEmbedding(props, sieve.sievename)) {
+        props.setProperty(CorefProperties.LOAD_WORD_EMBEDDING_PROP, "true");
       }
     }
     dictionaries = new Dictionaries(props);
 
-    docMaker = new DocumentMaker(props, dictionaries);
+    docMaker = new CorefDocMaker(props, dictionaries);
   }
 
   public Dictionaries dictionaries() { return dictionaries; }
 
 
   public static void runCoref(String[] args) throws Exception {
-      runCoref(StringUtils.argsToProperties(args));
-  }
-
-  public static void runCoref(Properties props) throws Exception {
-   /*
-    * property, environment setting
-    */
     Redwood.hideChannelsEverywhere(
-            "debug-cluster", "debug-mention", "debug-preprocessor", "debug-docreader", "debug-mergethres",
-            "debug-featureselection", "debug-md"
-            );
-    int nThreads = HybridCorefProperties.getThreadCounts(props);
+        "debug-cluster", "debug-mention", "debug-preprocessor", "debug-docreader", "debug-mergethres",
+        "debug-featureselection", "debug-md"
+        );
+
+    /*
+       property, environment setting
+    */
+    Properties props = StringUtils.argsToProperties(args);
+    int nThreads = CorefProperties.getThreadCounts(props);
     String timeStamp = Calendar.getInstance().getTime().toString().replaceAll("\\s", "-").replaceAll(":", "-");
+    props.put(CorefProperties.PATH_INPUT_PROP, CorefProperties.getPathEvalData(props));
 
     Logger logger = Logger.getLogger(HybridCorefSystem.class.getName());
 
     // set log file path
-    if(props.containsKey(HybridCorefProperties.LOG_PROP)){
-      File logFile = new File(props.getProperty(HybridCorefProperties.LOG_PROP));
+    if(props.containsKey(CorefProperties.LOG_PROP)){
+      File logFile = new File(props.getProperty(CorefProperties.LOG_PROP));
       RedwoodConfiguration.current().handlers(
       RedwoodConfiguration.Handlers.file(logFile)).apply();
       Redwood.log("Starting coref log");
@@ -104,7 +85,7 @@ public class HybridCorefSystem implements CorefAlgorithm {
 
     log.info(props.toString());
 
-    if(HybridCorefProperties.checkMemory(props)) checkMemoryUsage();
+    if(CorefProperties.checkMemory(props)) checkMemoryUsage();
 
     HybridCorefSystem cs = new HybridCorefSystem(props);
 
@@ -118,8 +99,8 @@ public class HybridCorefSystem implements CorefAlgorithm {
     PrintWriter writerGold = null;
     PrintWriter writerBeforeCoref = null;
     PrintWriter writerAfterCoref = null;
-    if (HybridCorefProperties.doScore(props)) {
-      String pathOutput = CorefProperties.conllOutputPath(props);
+    if (CorefProperties.doScore(props)) {
+      String pathOutput = CorefProperties.getPathOutput(props);
       (new File(pathOutput)).mkdir();
       goldOutput = pathOutput + "output-" + timeStamp + ".gold.txt";
       beforeCorefOutput = pathOutput + "output-" + timeStamp + ".predicted.txt";
@@ -156,7 +137,7 @@ public class HybridCorefSystem implements CorefAlgorithm {
     });
 
     Date startTime = null;
-    if(HybridCorefProperties.checkTime(props)) {
+    if(CorefProperties.checkTime(props)) {
       startTime = new Date();
       System.err.printf("END-TO-END COREF Start time: %s\n", startTime);
     }
@@ -177,20 +158,20 @@ public class HybridCorefSystem implements CorefAlgorithm {
     IOUtils.closeIgnoringExceptions(writerBeforeCoref);
     IOUtils.closeIgnoringExceptions(writerAfterCoref);
 
-    if(HybridCorefProperties.checkTime(props)) {
+    if(CorefProperties.checkTime(props)) {
       System.err.printf("END-TO-END COREF Elapsed time: %.3f seconds\n", (((new Date()).getTime() - startTime.getTime()) / 1000F));
 //      System.err.printf("CORENLP PROCESS TIME TOTAL: %.3f seconds\n", cs.mentionExtractor.corenlpProcessTime);
     }
-    if(HybridCorefProperties.checkMemory(props)) checkMemoryUsage();
+    if(CorefProperties.checkMemory(props)) checkMemoryUsage();
 
     // scoring
-    if (HybridCorefProperties.doScore(props)) {
-      String summary = CorefScorer.getEvalSummary(CorefProperties.getScorerPath(props), goldOutput, beforeCorefOutput);
-      CorefScorer.printScoreSummary(summary, logger, false);
+    if (CorefProperties.doScore(props)) {
+      String summary = Scorer.getEvalSummary(CorefProperties.getPathScorer(props), goldOutput, beforeCorefOutput);
+      OldCorefPrinter.printScoreSummary(summary, logger, false);
 
-      summary = CorefScorer.getEvalSummary(CorefProperties.getScorerPath(props), goldOutput, afterCorefOutput);
-      CorefScorer.printScoreSummary(summary, logger, true);
-      CorefScorer.printFinalConllScore(summary);
+      summary = Scorer.getEvalSummary(CorefProperties.getPathScorer(props), goldOutput, afterCorefOutput);
+      OldCorefPrinter.printScoreSummary(summary, logger, true);
+      OldCorefPrinter.printFinalConllScore(summary);
     }
   }
 
@@ -215,15 +196,6 @@ public class HybridCorefSystem implements CorefAlgorithm {
     return docCnt;
   }
 
-  @Override
-  public void runCoref(Document document) {
-    try {
-      coref(document);
-    } catch (Exception e) {
-      throw new RuntimeException("Error running hybrid coref system", e);
-    }
-  }
-
   /**
    * main entry of coreference system.
    *
@@ -233,26 +205,28 @@ public class HybridCorefSystem implements CorefAlgorithm {
    * @throws Exception
    */
   public Map<Integer, CorefChain> coref(Document document, StringBuilder[] output) throws Exception {
-    if(HybridCorefProperties.printMDLog(props)) {
-      Redwood.log(HybridCorefPrinter.printMentionDetectionLog(document));
+
+    if(CorefProperties.printMDLog(props)) {
+      Redwood.log(OldCorefPrinter.printMentionDetectionLog(document));
     }
 
-    if(HybridCorefProperties.doScore(props)) {
+    if(CorefProperties.doScore(props)) {
       output[0] = (new StringBuilder()).append(CorefPrinter.printConllOutput(document, true));  // gold
       output[1] = (new StringBuilder()).append(CorefPrinter.printConllOutput(document, false)); // before coref
     }
     output[3] = new StringBuilder();  // log from sieves
 
     for(Sieve sieve : sieves){
-      CorefUtils.checkForInterrupt();
+      if (Thread.interrupted()) {  // Allow interrupting
+        throw new RuntimeInterruptedException();
+      }
       output[3].append(sieve.resolveMention(document, dictionaries, props));
     }
 
     // post processing
-    if(HybridCorefProperties.doPostProcessing(props)) postProcessing(document);
+    if(CorefProperties.doPostProcessing(props)) postProcessing(document);
 
-    if(HybridCorefProperties.doScore(props)) {
-
+    if(CorefProperties.doScore(props)) {
       output[2] = (new StringBuilder()).append(CorefPrinter.printConllOutput(document, false, true)); // after coref
     }
 
@@ -298,7 +272,7 @@ public class HybridCorefSystem implements CorefAlgorithm {
     for(CorefCluster c : document.corefClusters.values()){
       Set<Mention> removeMentions = Generics.newHashSet();
       for(Mention m : c.getCorefMentions()) {
-        if(HybridCorefProperties.REMOVE_APPOSITION_PREDICATENOMINATIVES
+        if(CorefProperties.REMOVE_APPOSITION_PREDICATENOMINATIVES
             && ((m.appositions!=null && m.appositions.size() > 0)
                 || (m.predicateNominatives!=null && m.predicateNominatives.size() > 0)
                 || (m.relativePronouns!=null && m.relativePronouns.size() > 0))){
@@ -309,7 +283,7 @@ public class HybridCorefSystem implements CorefAlgorithm {
       }
 
       c.corefMentions.removeAll(removeMentions);
-      if(HybridCorefProperties.REMOVE_SINGLETONS && c.getCorefMentions().size()==1) {
+      if(CorefProperties.REMOVE_SINGLETONS && c.getCorefMentions().size()==1) {
         removeClusterSet.add(c.clusterID);
       }
     }
@@ -327,7 +301,23 @@ public class HybridCorefSystem implements CorefAlgorithm {
     long memory = runtime.totalMemory() - runtime.freeMemory();
     log.info("USED MEMORY (bytes): " + memory);
   }
+  /** Remove singleton clusters */
+  public static List<List<Mention>> filterMentionsWithSingletonClusters(Document document, List<List<Mention>> mentions)
+  {
 
+    List<List<Mention>> res = new ArrayList<>(mentions.size());
+    for (List<Mention> ml:mentions) {
+      List<Mention> filtered = new ArrayList<>();
+      for (Mention m:ml) {
+        CorefCluster cluster = document.corefClusters.get(m.corefClusterID);
+        if (cluster != null && cluster.getCorefMentions().size() > 1) {
+          filtered.add(m);
+        }
+      }
+      res.add(filtered);
+    }
+    return res;
+  }
   public static void main(String[] args) throws Exception {
     Date startTime = new Date();
     System.err.printf("Start time: %s\n", startTime);

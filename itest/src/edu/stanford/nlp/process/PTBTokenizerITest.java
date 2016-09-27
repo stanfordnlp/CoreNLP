@@ -19,8 +19,8 @@ public class PTBTokenizerITest extends TestCase {
   private static void compareResults(BufferedReader testReader,
                              List<String> goldResults) {
     PTBTokenizer<CoreLabel> tokenizer =
-      new PTBTokenizer<CoreLabel>(testReader, new CoreLabelTokenFactory(), "");
-    List<String> testResults = new ArrayList<String>();
+            new PTBTokenizer<>(testReader, new CoreLabelTokenFactory(), "");
+    List<String> testResults = new ArrayList<>();
     while (tokenizer.hasNext()) {
       CoreLabel w = tokenizer.next();
       testResults.add(w.word());

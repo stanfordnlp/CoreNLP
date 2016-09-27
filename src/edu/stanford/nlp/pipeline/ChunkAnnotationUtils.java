@@ -843,24 +843,24 @@ public class ChunkAnnotationUtils  {
     for (Map.Entry<String, String> entry : attributes.entrySet()) {
       String key = entry.getKey();
       String value = entry.getValue();
-      AnnotationLookup.KeyLookup lookup = AnnotationLookup.getCoreKey(key);
+      Class coreKeyClass = AnnotationLookup.toCoreKey(key);
       if (key != null) {
         if (value != null)  {
           try {
-            Class valueClass = AnnotationLookup.getValueType(lookup.coreKey);
+            Class valueClass = AnnotationLookup.getValueType(coreKeyClass);
             if (valueClass == String.class) {
-              chunk.set(lookup.coreKey, value);
+              chunk.set(coreKeyClass, value);
             } else {
              Method valueOfMethod = valueClass.getMethod("valueOf", String.class);
               if (valueOfMethod != null) {
-                chunk.set(lookup.coreKey, valueOfMethod.invoke(valueClass, value));
+                chunk.set(coreKeyClass, valueOfMethod.invoke(valueClass, value));
               }
             }
           } catch (Exception ex) {
             throw new RuntimeException("Unable to annotate attribute " + key, ex);
           }
         } else {
-          chunk.set(lookup.coreKey, null);
+          chunk.set(coreKeyClass, null);
         }
       } else {
         throw new UnsupportedOperationException("Unknown null attribute.");

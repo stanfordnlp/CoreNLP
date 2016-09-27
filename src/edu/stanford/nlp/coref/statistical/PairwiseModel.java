@@ -4,15 +4,8 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.Map;
 
-import edu.stanford.nlp.coref.statistical.SimpleLinearClassifier.LearningRateSchedule;
-import edu.stanford.nlp.coref.statistical.SimpleLinearClassifier.Loss;
-
 import edu.stanford.nlp.stats.Counter;
 
-/**
- * Pairwise mention-classification model.
- * @author Kevin Clark
- */
 public class PairwiseModel {
   public final String name;
   private final int trainingExamples;
@@ -28,10 +21,11 @@ public class PairwiseModel {
     @SuppressWarnings("unused") // output in config file with reflection
     private final String source = StatisticalCorefTrainer.extractedFeaturesFile;
 
+    //private MetaFeatureExtractor metaAnaphor = null;
     private int trainingExamples = 100000000;
     private int epochs = 8;
-    private Loss loss = SimpleLinearClassifier.log();
-    private LearningRateSchedule learningRateSchedule =
+    private SimpleLinearClassifier.Loss loss = SimpleLinearClassifier.log();
+    private SimpleLinearClassifier.LearningRateSchedule learningRateSchedule =
         SimpleLinearClassifier.adaGrad(0.05, 30.0);
     private double regularizationStrength = 1e-7;
     private double singletonRatio = 0.3;
@@ -48,11 +42,11 @@ public class PairwiseModel {
       { this.epochs = epochs; return this; }
     public Builder singletonRatio(double singletonRatio)
       { this.singletonRatio = singletonRatio; return this; }
-    public Builder loss(Loss loss)
+    public Builder loss(SimpleLinearClassifier.Loss loss)
       { this.loss = loss; return this; }
     public Builder regularizationStrength(double regularizationStrength)
       { this.regularizationStrength = regularizationStrength; return this; }
-    public Builder learningRateSchedule(LearningRateSchedule learningRateSchedule)
+    public Builder learningRateSchedule(SimpleLinearClassifier.LearningRateSchedule learningRateSchedule)
       { this.learningRateSchedule = learningRateSchedule; return this; }
     public Builder modelPath(String modelFile)
       { this.modelFile = modelFile; return this; }
@@ -69,6 +63,7 @@ public class PairwiseModel {
   public PairwiseModel(Builder builder) {
     name = builder.name;
     meta = builder.meta;
+    //metaAnaphor = builder.metaAnaphor;
     trainingExamples = builder.trainingExamples;
     epochs = builder.epochs;
     singletonRatio = builder.singletonRatio;
@@ -76,7 +71,7 @@ public class PairwiseModel {
         builder.regularizationStrength, builder.modelFile == null ? null :
           ((builder.modelFile.endsWith(".ser") || builder.modelFile.endsWith(".gz"))  ? builder.modelFile :
           StatisticalCorefTrainer.pairwiseModelsPath + builder.modelFile + "/model.ser"));
-    str = StatisticalCorefTrainer.fieldValues(builder);
+    str = StatisticalCorefUtils.fieldValues(builder);
   }
 
   public String getDefaultOutputPath() {

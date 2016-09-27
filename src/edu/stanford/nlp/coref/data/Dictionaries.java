@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import edu.stanford.nlp.coref.hybrid.HybridCorefProperties;
+import edu.stanford.nlp.coref.CorefProperties;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.neural.VectorMap;
@@ -25,11 +25,6 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 
-/**
- * Stores various data used for coreference.
- * TODO: get rid of dependence on HybridCorefProperties
- * @author Heeyoung Lee
- */
 public class Dictionaries  {
 
   /** A logger for this class */
@@ -94,7 +89,7 @@ public class Dictionaries  {
   public Set<String> titleWords;
   public Set<String> removeWords;
   public Set<String> removeChars;
-
+  
   public final Set<String> personPronouns = Generics.newHashSet();
   public final Set<String> allPronouns = Generics.newHashSet();
 
@@ -163,7 +158,7 @@ public class Dictionaries  {
       neg_relations = WordLists.neg_relationsEn;
       modals = WordLists.modalsEn;
       break;
-
+      
       case "zh":
       reportVerb = WordLists.reportVerbZh;
       reportNoun = WordLists.reportNounZh;
@@ -211,12 +206,12 @@ public class Dictionaries  {
   }
 
   public int dimVector;
-
+  
   public VectorMap vectors = new VectorMap();
 
   public Map<String, String> strToEntity = Generics.newHashMap();
   public Counter<String> dictScore = new ClassicCounter<>();
-
+  
   private void setPronouns() {
     for(String s: animatePronouns){
       personPronouns.add(s);
@@ -380,7 +375,7 @@ public class Dictionaries  {
    * Load Bergsma and Lin (2006) gender and number list.
    * <br>
    * The list is converted from raw text and numbers to a serialized
-   * map, which saves quite a bit of time loading.
+   * map, which saves quite a bit of time loading.  
    * See edu.stanford.nlp.dcoref.util.ConvertGenderFile
    */
 /*
@@ -459,13 +454,13 @@ public class Dictionaries  {
       } else if (neutral * 0.5 > male + female && neutral > 2) {
         neutralWords.add(word);
       }
-
+      
       if (animate * 0.5 > inanimate && animate > 2) {
         animateWords.add(word);
       } else if (inanimate * 0.5 > animate && inanimate > 2) {
         inanimateWords.add(word);
       }
-
+      
       if (singular * 0.5 > plural && singular >2) {
         singularWords.add(word);
       } else if (plural * 0.5 > singular && plural > 2) {
@@ -538,17 +533,17 @@ public class Dictionaries  {
       IOUtils.closeIgnoringExceptions(reader);
     }
   }
-
+  
   public void loadSemantics(Properties props) throws ClassNotFoundException, IOException {
     log.info("LOADING SEMANTICS");
 
 //    wordnet = new WordNet();
-
+    
     // load word vector
-    if(HybridCorefProperties.loadWordEmbedding(props)) {
+    if(CorefProperties.loadWordEmbedding(props)) {
       log.info("LOAD: WordVectors");
-      String wordvectorFile = HybridCorefProperties.getPathSerializedWordVectors(props);
-      String word2vecFile = HybridCorefProperties.getPathWord2Vec(props);
+      String wordvectorFile = CorefProperties.getPathSerializedWordVectors(props);
+      String word2vecFile = CorefProperties.getPathWord2Vec(props);
       try {
         // Try to read the serialized vectors
         vectors = VectorMap.deserialize(wordvectorFile);
@@ -565,7 +560,7 @@ public class Dictionaries  {
         }
       }
       dimVector = vectors.entrySet().iterator().next().getValue().length;
-
+      
 //    if(Boolean.parseBoolean(props.getProperty("useValDictionary"))) {
 //      log.info("LOAD: ValDictionary");
 //      for(String line : IOUtils.readLines(valDict)) {
@@ -578,25 +573,25 @@ public class Dictionaries  {
   }
 
   public Dictionaries(Properties props) throws ClassNotFoundException, IOException {
-    this(props.getProperty(HybridCorefProperties.LANG_PROP, HybridCorefProperties.LANGUAGE_DEFAULT.toLanguageTag()),
-        props.getProperty(HybridCorefProperties.DEMONYM_PROP, DefaultPaths.DEFAULT_DCOREF_DEMONYM),
-        props.getProperty(HybridCorefProperties.ANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_ANIMATE),
-        props.getProperty(HybridCorefProperties.INANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_INANIMATE),
-        props.getProperty(HybridCorefProperties.MALE_PROP),
-        props.getProperty(HybridCorefProperties.NEUTRAL_PROP),
-        props.getProperty(HybridCorefProperties.FEMALE_PROP),
-        props.getProperty(HybridCorefProperties.PLURAL_PROP),
-        props.getProperty(HybridCorefProperties.SINGULAR_PROP),
-        props.getProperty(HybridCorefProperties.STATES_PROP, DefaultPaths.DEFAULT_DCOREF_STATES),
-        props.getProperty(HybridCorefProperties.GENDER_NUMBER_PROP, HybridCorefProperties.getGenderNumber(props)),
-        props.getProperty(HybridCorefProperties.COUNTRIES_PROP, DefaultPaths.DEFAULT_DCOREF_COUNTRIES),
-        props.getProperty(HybridCorefProperties.STATES_PROVINCES_PROP, DefaultPaths.DEFAULT_DCOREF_STATES_AND_PROVINCES),
-        HybridCorefProperties.getSieves(props).contains("CorefDictionaryMatch"),
-        PropertiesUtils.getStringArray(props, HybridCorefProperties.DICT_LIST_PROP,
+    this(props.getProperty(CorefProperties.LANG_PROP, CorefProperties.LANGUAGE_DEFAULT.toLanguageTag()),
+        props.getProperty(CorefProperties.DEMONYM_PROP, DefaultPaths.DEFAULT_DCOREF_DEMONYM),
+        props.getProperty(CorefProperties.ANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_ANIMATE),
+        props.getProperty(CorefProperties.INANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_INANIMATE),
+        props.getProperty(CorefProperties.MALE_PROP),
+        props.getProperty(CorefProperties.NEUTRAL_PROP),
+        props.getProperty(CorefProperties.FEMALE_PROP),
+        props.getProperty(CorefProperties.PLURAL_PROP),
+        props.getProperty(CorefProperties.SINGULAR_PROP),
+        props.getProperty(CorefProperties.STATES_PROP, DefaultPaths.DEFAULT_DCOREF_STATES),
+        props.getProperty(CorefProperties.GENDER_NUMBER_PROP, CorefProperties.getGenderNumber(props)),
+        props.getProperty(CorefProperties.COUNTRIES_PROP, DefaultPaths.DEFAULT_DCOREF_COUNTRIES),
+        props.getProperty(CorefProperties.STATES_PROVINCES_PROP, DefaultPaths.DEFAULT_DCOREF_STATES_AND_PROVINCES),
+        CorefProperties.getSieves(props).contains("CorefDictionaryMatch"),
+        PropertiesUtils.getStringArray(props, CorefProperties.DICT_LIST_PROP,
             new String[]{DefaultPaths.DEFAULT_DCOREF_DICT1, DefaultPaths.DEFAULT_DCOREF_DICT2,
                 DefaultPaths.DEFAULT_DCOREF_DICT3, DefaultPaths.DEFAULT_DCOREF_DICT4}),
-        props.getProperty(HybridCorefProperties.DICT_PMI_PROP, DefaultPaths.DEFAULT_DCOREF_DICT1),
-        props.getProperty(HybridCorefProperties.SIGNATURES_PROP, DefaultPaths.DEFAULT_DCOREF_NE_SIGNATURES));
+        props.getProperty(CorefProperties.DICT_PMI_PROP, DefaultPaths.DEFAULT_DCOREF_DICT1),
+        props.getProperty(CorefProperties.SIGNATURES_PROP, DefaultPaths.DEFAULT_DCOREF_NE_SIGNATURES));
     /*if(CorefProperties.useSemantics(props)) {
       loadSemantics(props);
     } else {
@@ -609,46 +604,46 @@ public class Dictionaries  {
 
   public static String signature(Properties props) {
     StringBuilder os = new StringBuilder();
-    os.append(HybridCorefProperties.DEMONYM_PROP + ":" +
-            props.getProperty(HybridCorefProperties.DEMONYM_PROP,
+    os.append(CorefProperties.DEMONYM_PROP + ":" +
+            props.getProperty(CorefProperties.DEMONYM_PROP,
                     DefaultPaths.DEFAULT_DCOREF_DEMONYM));
-    os.append(HybridCorefProperties.ANIMATE_PROP + ":" +
-            props.getProperty(HybridCorefProperties.ANIMATE_PROP,
+    os.append(CorefProperties.ANIMATE_PROP + ":" +
+            props.getProperty(CorefProperties.ANIMATE_PROP,
                     DefaultPaths.DEFAULT_DCOREF_ANIMATE));
-    os.append(HybridCorefProperties.INANIMATE_PROP + ":" +
-            props.getProperty(HybridCorefProperties.INANIMATE_PROP,
+    os.append(CorefProperties.INANIMATE_PROP + ":" +
+            props.getProperty(CorefProperties.INANIMATE_PROP,
                     DefaultPaths.DEFAULT_DCOREF_INANIMATE));
-    if(props.containsKey(HybridCorefProperties.MALE_PROP)) {
-      os.append(HybridCorefProperties.MALE_PROP + ":" +
-            props.getProperty(HybridCorefProperties.MALE_PROP));
+    if(props.containsKey(CorefProperties.MALE_PROP)) {
+      os.append(CorefProperties.MALE_PROP + ":" +
+            props.getProperty(CorefProperties.MALE_PROP));
     }
-    if(props.containsKey(HybridCorefProperties.NEUTRAL_PROP)) {
-      os.append(HybridCorefProperties.NEUTRAL_PROP + ":" +
-            props.getProperty(HybridCorefProperties.NEUTRAL_PROP));
+    if(props.containsKey(CorefProperties.NEUTRAL_PROP)) {
+      os.append(CorefProperties.NEUTRAL_PROP + ":" +
+            props.getProperty(CorefProperties.NEUTRAL_PROP));
     }
-    if(props.containsKey(HybridCorefProperties.FEMALE_PROP)) {
-      os.append(HybridCorefProperties.FEMALE_PROP + ":" +
-            props.getProperty(HybridCorefProperties.FEMALE_PROP));
+    if(props.containsKey(CorefProperties.FEMALE_PROP)) {
+      os.append(CorefProperties.FEMALE_PROP + ":" +
+            props.getProperty(CorefProperties.FEMALE_PROP));
     }
-    if(props.containsKey(HybridCorefProperties.PLURAL_PROP)) {
-      os.append(HybridCorefProperties.PLURAL_PROP + ":" +
-            props.getProperty(HybridCorefProperties.PLURAL_PROP));
+    if(props.containsKey(CorefProperties.PLURAL_PROP)) {
+      os.append(CorefProperties.PLURAL_PROP + ":" +
+            props.getProperty(CorefProperties.PLURAL_PROP));
     }
-    if(props.containsKey(HybridCorefProperties.SINGULAR_PROP)) {
-      os.append(HybridCorefProperties.SINGULAR_PROP + ":" +
-            props.getProperty(HybridCorefProperties.SINGULAR_PROP));
+    if(props.containsKey(CorefProperties.SINGULAR_PROP)) {
+      os.append(CorefProperties.SINGULAR_PROP + ":" +
+            props.getProperty(CorefProperties.SINGULAR_PROP));
     }
-    os.append(HybridCorefProperties.STATES_PROP + ":" +
-            props.getProperty(HybridCorefProperties.STATES_PROP,
+    os.append(CorefProperties.STATES_PROP + ":" +
+            props.getProperty(CorefProperties.STATES_PROP,
                     DefaultPaths.DEFAULT_DCOREF_STATES));
-    os.append(HybridCorefProperties.GENDER_NUMBER_PROP + ":" +
-            props.getProperty(HybridCorefProperties.GENDER_NUMBER_PROP,
+    os.append(CorefProperties.GENDER_NUMBER_PROP + ":" +
+            props.getProperty(CorefProperties.GENDER_NUMBER_PROP,
                     DefaultPaths.DEFAULT_DCOREF_GENDER_NUMBER));
-    os.append(HybridCorefProperties.COUNTRIES_PROP + ":" +
-            props.getProperty(HybridCorefProperties.COUNTRIES_PROP,
+    os.append(CorefProperties.COUNTRIES_PROP + ":" +
+            props.getProperty(CorefProperties.COUNTRIES_PROP,
                     DefaultPaths.DEFAULT_DCOREF_COUNTRIES));
-    os.append(HybridCorefProperties.STATES_PROVINCES_PROP + ":" +
-            props.getProperty(HybridCorefProperties.STATES_PROVINCES_PROP,
+    os.append(CorefProperties.STATES_PROVINCES_PROP + ":" +
+            props.getProperty(CorefProperties.STATES_PROVINCES_PROP,
                     DefaultPaths.DEFAULT_DCOREF_STATES_AND_PROVINCES));
     return os.toString();
   }

@@ -10,6 +10,7 @@
     baseline=-0.6ex, inner sep=-0.1cm, edge horizontal padding=3pt, edge unit distance=1.5ex}
 \usepackage{natbib}
 \bibpunct{(}{)}{,}{a}{}{;}
+\usepackage{color}
 
 \setlength{\textwidth}{16cm}
 \setlength{\oddsidemargin}{-0.04cm}
@@ -34,19 +35,21 @@
 % Revised for the Stanford Parser v.\ 3.3 in November 2013
 % Revised for the Stanford Parser v.\ 3.3 in December 2013
 %Revised for the Stanford Parser v.\ 3.5.1 in February 2015
-Revised for the Stanford Parser v.\ 3.5.2 in April 2015
+%Revised for the Stanford Parser v.\ 3.5.2 in April 2015
+Revised for the Stanford Parser v.\ 3.7.0 in September 2016
 }
 
 \begin{document}
 \maketitle
 
+\color{red}
 Please note that this manual describes the original Stanford 
-Dependencies representation. As of version 3.5.2 the default representation
+Dependencies representation. As of version 3.5.2, the default representation
 output by the Stanford Parser and Stanford CoreNLP is the new Universal Dependencies (UD)
-representation. Take a look at the Universal Dependencies documentation 
-at \textsf{http://universaldependencies.github.com/docs/} for a description of UD 
-relations.
-
+representation, and we no longer maintain the original Stanford Dependencies representation. For a description of the UD 
+representation, take a look at the Universal Dependencies documentation at \textsf{http:/www.universaldependencies.org} and
+the discussion of the \textit{enhanced} and \textit{enhanced++} UD representations by \citet{schuster2016enhanced}.
+\color{black}
 \section{Introduction}
 
 The Stanford typed dependencies representation was designed to provide
@@ -98,9 +101,8 @@ for English.  There is also a Stanford Dependency representation
 available for Chinese, but it is not further discussed here.  Starting
 in 2014, there has been work to extend Stanford Dependencies to be
 generally applicable cross-linguistically. Initial work appeared in
-\citet{marneffe14universal}, and the current proposal for Universal Dependencies (UD) can be found at
-\url{http://universaldependencies.github.io/docs/}. This work is not
-(yet) reflected in this manual or in our software.
+\citet{marneffe14universal}, and the current guidelines for Universal Dependencies (UD) can be found at
+\url{http://www.universaldependencies.org}.
 For SD, Section~\ref{def} of the manual defines the grammatical relations and the taxonomic hierarchy over
 them appears in section~\ref{hierarchy}.  This is then followed by a description of the several variant
 dependency representations available, aimed at different use cases
@@ -1068,7 +1070,7 @@ GrammaticalStructureFactory gsf = tlp.grammaticalStructureFactory();}
 \texttt{String[] sent = { "This", "is", "an", "easy", "sentence", "." }; \\
 Tree parse = lp.apply(Sentence.toWordList(sent)); \\
 GrammaticalStructure gs = gsf.newGrammaticalStructure(parse); \\
-Collection$\langle$TypedDependency$\rangle$ tdl = gs.typedDependenciesCCprocessed(); \\
+Collection$\langle$TypedDependency$\rangle$ tdl = gs.typedDependencies(); \\
 System.out.println(tdl); }
 \end{quote}
 
@@ -1250,7 +1252,7 @@ Dependencies \citep{marneffe14universal}. Further refinement with a
 team of collaborators has led to a new synthesis spanning
 tokenization, morphological features, parts of speech, and
 dependencies, known as Universal Dependencies: 
-\url{http://universaldependencies.github.io/docs/}.  Since version 3.5.2 
+\url{http://www.universaldependencies.org}.  Since version 3.5.2 
 the default representation output by our parser is the Universal Dependencies
 representation.
 
