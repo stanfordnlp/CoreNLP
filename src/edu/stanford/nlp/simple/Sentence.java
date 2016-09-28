@@ -896,8 +896,7 @@ public class Sentence {
     document.runOpenie(props);
     synchronized (impl) {
       List<CoreLabel> tokens = asCoreLabels();
-      Annotation doc = document.asAnnotation();
-      return impl.getOpenieTripleList().stream().map(x -> ProtobufAnnotationSerializer.fromProto(x, doc, this.sentenceIndex())).collect(Collectors.toList());
+      return impl.getOpenieTripleList().stream().map(x -> ProtobufAnnotationSerializer.fromProto(x, tokens, document.docid().orElse(null))).collect(Collectors.toList());
     }
   }
 
@@ -936,8 +935,7 @@ public class Sentence {
     document.runKBP(props);
     synchronized (impl) {
       List<CoreLabel> tokens = asCoreLabels();
-      Annotation doc = document.asAnnotation();
-      return impl.getKbpTripleList().stream().map(x -> ProtobufAnnotationSerializer.fromProto(x, doc, this.sentenceIndex())).collect(Collectors.toList());
+      return impl.getKbpTripleList().stream().map(x -> ProtobufAnnotationSerializer.fromProto(x, tokens, document.docid().orElse(null))).collect(Collectors.toList());
     }
   }
 
@@ -1013,13 +1011,19 @@ public class Sentence {
     for (Integer clusterID : allCorefs.keySet()) {
       CorefChain chain = allCorefs.get(clusterID);
       ArrayList<CorefChain.CorefMention> mentions = new ArrayList<>(chain.getMentionsInTextualOrder());
-      mentions.stream().filter(m -> m.sentNum != this.sentenceIndex() + 1).forEach(chain::deleteMention);
+      for (CorefChain.CorefMention m : mentions) {
+        if (m.sentNum != this.sentenceIndex() + 1) {
+          chain.deleteMention(m);
+        }
+      }
       if (chain.getMentionsInTextualOrder().isEmpty()) {
         toDeleteEntirely.add(clusterID);
       }
     }
     // Clean up dangling empty chains
-    toDeleteEntirely.forEach(allCorefs::remove);
+    for (Integer danglingChain : toDeleteEntirely) {
+      allCorefs.remove(danglingChain);
+    }
     // Return
     return allCorefs;
   }

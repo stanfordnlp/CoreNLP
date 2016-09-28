@@ -5,10 +5,10 @@ import java.util.Properties;
 import edu.stanford.nlp.coref.CorefProperties.CorefAlgorithmType;
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.coref.data.Document;
-//import edu.stanford.nlp.coref.hybrid.HybridCorefSystem;
+import edu.stanford.nlp.coref.hybrid.HybridCorefSystem;
 import edu.stanford.nlp.coref.neural.NeuralCorefAlgorithm;
-//import edu.stanford.nlp.coref.statistical.ClusteringCorefAlgorithm;
-//import edu.stanford.nlp.coref.statistical.StatisticalCorefAlgorithm;
+import edu.stanford.nlp.coref.statistical.ClusteringCorefAlgorithm;
+import edu.stanford.nlp.coref.statistical.StatisticalCorefAlgorithm;
 
 /**
  * A CorefAlgorithms makes coreference decisions on the provided {@link Document} after
@@ -16,10 +16,9 @@ import edu.stanford.nlp.coref.neural.NeuralCorefAlgorithm;
  * @author Kevin Clark
  */
 public interface CorefAlgorithm {
+    public void runCoref(Document document);
 
-  public void runCoref(Document document);
-
-    /*public static CorefAlgorithm fromProps(Properties props, Dictionaries dictionaries) {
+    public static CorefAlgorithm fromProps(Properties props, Dictionaries dictionaries) {
       CorefAlgorithmType algorithm = CorefProperties.algorithm(props);
       if (algorithm == CorefAlgorithmType.CLUSTERING) {
         return new ClusteringCorefAlgorithm(props, dictionaries);
@@ -34,10 +33,5 @@ public interface CorefAlgorithm {
           throw new RuntimeException("Error creating hybrid coref system", e);
         }
       }
-    }*/
-
-  public static CorefAlgorithm fromProps(Properties props, Dictionaries dictionaries) {
-    return new NeuralCorefAlgorithm(props, dictionaries);
-  }
-
+    }
 }

@@ -1,3 +1,4 @@
+
 package edu.stanford.nlp.coref.md;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ import edu.stanford.nlp.util.IntPair;
 public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
 
   public RuleBasedCorefMentionFinder(HeadFinder headFinder, Properties props) {
-    this(CorefProperties.allowReparsing(props), headFinder, CorefProperties.getLanguage(props));
+    this(true, headFinder, CorefProperties.getLanguage(props));
   }
 
   public RuleBasedCorefMentionFinder(boolean allowReparsing, HeadFinder headFinder, Locale lang) {
@@ -63,7 +64,7 @@ public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
     removeSpuriousMentions(doc, predictedMentions, dict, CorefProperties.removeNestedMentions(props), lang);
     return predictedMentions;
   }
-  
+
   /** Main method of mention detection.
    *  Extract all NP, PRP or NE, and filter out by manually written patterns.
    */
@@ -73,7 +74,7 @@ public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
     Set<String> neStrings = Generics.newHashSet();
     List<Set<IntPair>> mentionSpanSetList = Generics.newArrayList();
     List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
-    
+
     // extract premarked mentions, NP/PRP, named entity, enumerations
     for (CoreMap s : sentences) {
       List<Mention> mentions = new ArrayList<>();
@@ -85,22 +86,33 @@ public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
       extractNamedEntityMentions(s, mentions, mentionSpanSet, namedEntitySpanSet);
       extractNPorPRP(s, mentions, mentionSpanSet, namedEntitySpanSet);
       extractEnumerations(s, mentions, mentionSpanSet, namedEntitySpanSet);
-     
+
       addNamedEntityStrings(s, neStrings, namedEntitySpanSet);
       mentionSpanSetList.add(mentionSpanSet);
     }
-    
+
+    if (lang == Locale.CHINESE && CorefProperties.liberalChineseMD(props)) {
+      extractNamedEntityModifiers(sentences, mentionSpanSetList, predictedMentions, neStrings);
+    }
+
     // find head
     for (int i=0, sz = sentences.size(); i < sz; i++) {
       findHead(sentences.get(i), predictedMentions.get(i));
       setBarePlural(predictedMentions.get(i));
     }
-    
-    // mention selection based on document-wise info
-    removeSpuriousMentions(doc, predictedMentions, dict, CorefProperties.removeNestedMentions(props), lang);
 
-//    // assign mention IDs
-//    if(assignIds) assignMentionIDs(predictedMentions, maxID);
+    // mention selection based on document-wise info
+    if (lang == Locale.ENGLISH) {
+      removeSpuriousMentionsEn(doc, predictedMentions, dict);
+    } else if (lang == Locale.CHINESE) {
+      if (CorefProperties.liberalChineseMD(props)) {
+        removeSpuriousMentionsZhSimple(doc, predictedMentions, dict,
+            CorefProperties.removeNestedMentions(props));
+      } else {
+        removeSpuriousMentionsZh(doc, predictedMentions, dict,
+            CorefProperties.removeNestedMentions(props));
+      }
+    }
 
     return predictedMentions;
   }
@@ -129,7 +141,7 @@ public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
       List<Tree> mLeaves = t.getLeaves();
       int beginIdx = ((CoreLabel)mLeaves.get(0).label()).get(CoreAnnotations.IndexAnnotation.class)-1;
       int endIdx = ((CoreLabel)mLeaves.get(mLeaves.size()-1).label()).get(CoreAnnotations.IndexAnnotation.class);
-      if (",".equals(sent.get(endIdx-1).word())) { endIdx--; } // try not to have span that ends with ,
+      //if (",".equals(sent.get(endIdx-1).word())) { endIdx--; } // try not to have span that ends with ,
       IntPair mSpan = new IntPair(beginIdx, endIdx);
       if(!mentionSpanSet.contains(mSpan) && ( lang==Locale.CHINESE || !insideNE(mSpan, namedEntitySpanSet)) ) {
 //      if(!mentionSpanSet.contains(mSpan) && (!insideNE(mSpan, namedEntitySpanSet) || t.value().startsWith("PRP")) ) {
@@ -137,11 +149,11 @@ public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
         Mention m = new Mention(dummyMentionId, beginIdx, endIdx, sent, basicDependency, enhancedDependency, new ArrayList<>(sent.subList(beginIdx, endIdx)), t);
         mentions.add(m);
         mentionSpanSet.add(mSpan);
-        
+
 //        if(m.originalSpan.size() > 1) {
 //          boolean isNE = true;
 //          for(CoreLabel cl : m.originalSpan) {
-//            if(!cl.tag().startsWith("NNP")) isNE = false; 
+//            if(!cl.tag().startsWith("NNP")) isNE = false;
 //          }
 //          if(isNE) {
 //            namedEntitySpanSet.add(mSpan);
@@ -196,22 +208,39 @@ public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
     }
   }
 
-  /** Filter out all spurious mentions 
+  private static void removeSpuriousMentionsZhSimple(Annotation doc,
+      List<List<Mention>> predictedMentions, Dictionaries dict, boolean removeNested) {
+    for(int i=0 ; i < predictedMentions.size() ; i++) {
+      List<Mention> mentions = predictedMentions.get(i);
+      Set<Mention> remove = Generics.newHashSet();
+      for(Mention m : mentions){
+        if (m.originalSpan.size()==1 && m.headWord.tag().equals("CD")) {
+          remove.add(m);
+        }
+        if (m.spanToString().contains("ｑｕｏｔ")) {
+          remove.add(m);
+        }
+      }
+      mentions.removeAll(remove);
+    }
+  }
+
+  /** Filter out all spurious mentions
    */
   @Override
   public void removeSpuriousMentionsEn(Annotation doc, List<List<Mention>> predictedMentions, Dictionaries dict) {
-    
+
     Set<String> standAlones = new HashSet<>();
     List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
-    
+
     for(int i=0 ; i < predictedMentions.size() ; i++) {
       CoreMap s = sentences.get(i);
       List<Mention> mentions = predictedMentions.get(i);
-      
+
       Tree tree = s.get(TreeCoreAnnotations.TreeAnnotation.class);
       List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
       Set<Mention> remove = Generics.newHashSet();
-      
+
       for(Mention m : mentions){
         String headPOS = m.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class);
         String headNE = m.headWord.get(CoreAnnotations.NamedEntityTagAnnotation.class);
@@ -219,40 +248,40 @@ public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
         if(isPleonastic(m, tree)) {
           remove.add(m);
         }
-        
+
         // non word such as 'hmm'
         if(dict.nonWords.contains(m.headString)) remove.add(m);
-        
+
         // quantRule : not starts with 'any', 'all' etc
-        if (m.originalSpan.size() > 0) { 
+        if (m.originalSpan.size() > 0) {
           String firstWord = m.originalSpan.get(0).get(CoreAnnotations.TextAnnotation.class).toLowerCase(Locale.ENGLISH);
           if(firstWord.matches("none|no|nothing|not")) {
             remove.add(m);
           }
 //          if(dict.quantifiers.contains(firstWord)) remove.add(m);
         }
-        
+
         // partitiveRule
         if (partitiveRule(m, sent, dict)) {
           remove.add(m);
         }
-        
+
         // bareNPRule
         if (headPOS.equals("NN") && !dict.temporals.contains(m.headString)
             && (m.originalSpan.size()==1 || m.originalSpan.get(0).get(CoreAnnotations.PartOfSpeechAnnotation.class).equals("JJ"))) {
           remove.add(m);
         }
-        
+
         // remove generic rule
 //          if(m.generic==true) remove.add(m);
-        
+
         if (m.headString.equals("%")) {
           remove.add(m);
         }
         if (headNE.equals("PERCENT") || headNE.equals("MONEY")) {
           remove.add(m);
         }
-        
+
         // adjective form of nations
         // the [American] policy -> not mention
         // speak in [Japanese] -> mention
@@ -260,11 +289,11 @@ public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
         if (dict.isAdjectivalDemonym(m.spanToString())) {
           remove.add(m);
         }
-        
+
         // stop list (e.g., U.S., there)
         if (inStopList(m)) remove.add(m);
       }
-      
+
       // nested mention with shared headword (except apposition, enumeration): pick larger one
       for (Mention m1 : mentions){
         for (Mention m2 : mentions){

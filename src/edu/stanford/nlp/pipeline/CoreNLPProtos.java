@@ -41545,491 +41545,6 @@ public final class CoreNLPProtos {
     // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.SentenceFragment)
   }
 
-  public interface TokenLocationOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.TokenLocation)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>optional uint32 sentenceIndex = 1;</code>
-     */
-    boolean hasSentenceIndex();
-    /**
-     * <code>optional uint32 sentenceIndex = 1;</code>
-     */
-    int getSentenceIndex();
-
-    /**
-     * <code>optional uint32 tokenIndex = 2;</code>
-     */
-    boolean hasTokenIndex();
-    /**
-     * <code>optional uint32 tokenIndex = 2;</code>
-     */
-    int getTokenIndex();
-  }
-  /**
-   * Protobuf type {@code edu.stanford.nlp.pipeline.TokenLocation}
-   *
-   * <pre>
-   * The index of a token in a document, including the sentence
-   * index and the offset.
-   * </pre>
-   */
-  public static final class TokenLocation extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.TokenLocation)
-      TokenLocationOrBuilder {
-    // Use TokenLocation.newBuilder() to construct.
-    private TokenLocation(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
-      super(builder);
-      this.unknownFields = builder.getUnknownFields();
-    }
-    private TokenLocation(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
-    private static final TokenLocation defaultInstance;
-    public static TokenLocation getDefaultInstance() {
-      return defaultInstance;
-    }
-
-    public TokenLocation getDefaultInstanceForType() {
-      return defaultInstance;
-    }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private TokenLocation(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 8: {
-              bitField0_ |= 0x00000001;
-              sentenceIndex_ = input.readUInt32();
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              tokenIndex_ = input.readUInt32();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TokenLocation_descriptor;
-    }
-
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TokenLocation_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder.class);
-    }
-
-    public static com.google.protobuf.Parser<TokenLocation> PARSER =
-        new com.google.protobuf.AbstractParser<TokenLocation>() {
-      public TokenLocation parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new TokenLocation(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<TokenLocation> getParserForType() {
-      return PARSER;
-    }
-
-    private int bitField0_;
-    public static final int SENTENCEINDEX_FIELD_NUMBER = 1;
-    private int sentenceIndex_;
-    /**
-     * <code>optional uint32 sentenceIndex = 1;</code>
-     */
-    public boolean hasSentenceIndex() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    /**
-     * <code>optional uint32 sentenceIndex = 1;</code>
-     */
-    public int getSentenceIndex() {
-      return sentenceIndex_;
-    }
-
-    public static final int TOKENINDEX_FIELD_NUMBER = 2;
-    private int tokenIndex_;
-    /**
-     * <code>optional uint32 tokenIndex = 2;</code>
-     */
-    public boolean hasTokenIndex() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    /**
-     * <code>optional uint32 tokenIndex = 2;</code>
-     */
-    public int getTokenIndex() {
-      return tokenIndex_;
-    }
-
-    private void initFields() {
-      sentenceIndex_ = 0;
-      tokenIndex_ = 0;
-    }
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeUInt32(1, sentenceIndex_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeUInt32(2, tokenIndex_);
-      }
-      getUnknownFields().writeTo(output);
-    }
-
-    private int memoizedSerializedSize = -1;
-    public int getSerializedSize() {
-      int size = memoizedSerializedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(1, sentenceIndex_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(2, tokenIndex_);
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-
-    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input);
-    }
-    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
-    }
-    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
-    }
-    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
-    }
-    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input);
-    }
-    public static edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
-    }
-
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation prototype) {
-      return newBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() { return newBuilder(this); }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code edu.stanford.nlp.pipeline.TokenLocation}
-     *
-     * <pre>
-     * The index of a token in a document, including the sentence
-     * index and the offset.
-     * </pre>
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.TokenLocation)
-        edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TokenLocation_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TokenLocation_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.class, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder.class);
-      }
-
-      // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-        }
-      }
-      private static Builder create() {
-        return new Builder();
-      }
-
-      public Builder clear() {
-        super.clear();
-        sentenceIndex_ = 0;
-        bitField0_ = (bitField0_ & ~0x00000001);
-        tokenIndex_ = 0;
-        bitField0_ = (bitField0_ & ~0x00000002);
-        return this;
-      }
-
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_TokenLocation_descriptor;
-      }
-
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation getDefaultInstanceForType() {
-        return edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.getDefaultInstance();
-      }
-
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation build() {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation buildPartial() {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation result = new edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        result.sentenceIndex_ = sentenceIndex_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
-        result.tokenIndex_ = tokenIndex_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
-      }
-
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation) {
-          return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation other) {
-        if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.getDefaultInstance()) return this;
-        if (other.hasSentenceIndex()) {
-          setSentenceIndex(other.getSentenceIndex());
-        }
-        if (other.hasTokenIndex()) {
-          setTokenIndex(other.getTokenIndex());
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-      private int bitField0_;
-
-      private int sentenceIndex_ ;
-      /**
-       * <code>optional uint32 sentenceIndex = 1;</code>
-       */
-      public boolean hasSentenceIndex() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      /**
-       * <code>optional uint32 sentenceIndex = 1;</code>
-       */
-      public int getSentenceIndex() {
-        return sentenceIndex_;
-      }
-      /**
-       * <code>optional uint32 sentenceIndex = 1;</code>
-       */
-      public Builder setSentenceIndex(int value) {
-        bitField0_ |= 0x00000001;
-        sentenceIndex_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional uint32 sentenceIndex = 1;</code>
-       */
-      public Builder clearSentenceIndex() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        sentenceIndex_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private int tokenIndex_ ;
-      /**
-       * <code>optional uint32 tokenIndex = 2;</code>
-       */
-      public boolean hasTokenIndex() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <code>optional uint32 tokenIndex = 2;</code>
-       */
-      public int getTokenIndex() {
-        return tokenIndex_;
-      }
-      /**
-       * <code>optional uint32 tokenIndex = 2;</code>
-       */
-      public Builder setTokenIndex(int value) {
-        bitField0_ |= 0x00000002;
-        tokenIndex_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional uint32 tokenIndex = 2;</code>
-       */
-      public Builder clearTokenIndex() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        tokenIndex_ = 0;
-        onChanged();
-        return this;
-      }
-
-      // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.TokenLocation)
-    }
-
-    static {
-      defaultInstance = new TokenLocation(true);
-      defaultInstance.initFields();
-    }
-
-    // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.TokenLocation)
-  }
-
   public interface RelationTripleOrBuilder extends
       // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.RelationTriple)
       com.google.protobuf.MessageOrBuilder {
@@ -42130,24 +41645,15 @@ public final class CoreNLPProtos {
     double getConfidence();
 
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
+     * <code>repeated uint32 subjectTokens = 5;</code>
      *
      * <pre>
      * The tokens comprising the subject of the triple
      * </pre>
      */
-    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> 
-        getSubjectTokensList();
+    java.util.List<java.lang.Integer> getSubjectTokensList();
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
-     *
-     * <pre>
-     * The tokens comprising the subject of the triple
-     * </pre>
-     */
-    edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation getSubjectTokens(int index);
-    /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
+     * <code>repeated uint32 subjectTokens = 5;</code>
      *
      * <pre>
      * The tokens comprising the subject of the triple
@@ -42155,43 +41661,24 @@ public final class CoreNLPProtos {
      */
     int getSubjectTokensCount();
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
+     * <code>repeated uint32 subjectTokens = 5;</code>
      *
      * <pre>
      * The tokens comprising the subject of the triple
      * </pre>
      */
-    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder> 
-        getSubjectTokensOrBuilderList();
-    /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
-     *
-     * <pre>
-     * The tokens comprising the subject of the triple
-     * </pre>
-     */
-    edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder getSubjectTokensOrBuilder(
-        int index);
+    int getSubjectTokens(int index);
 
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
+     * <code>repeated uint32 relationTokens = 6;</code>
      *
      * <pre>
      * The tokens comprising the relation of the triple
      * </pre>
      */
-    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> 
-        getRelationTokensList();
+    java.util.List<java.lang.Integer> getRelationTokensList();
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
-     *
-     * <pre>
-     * The tokens comprising the relation of the triple
-     * </pre>
-     */
-    edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation getRelationTokens(int index);
-    /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
+     * <code>repeated uint32 relationTokens = 6;</code>
      *
      * <pre>
      * The tokens comprising the relation of the triple
@@ -42199,43 +41686,24 @@ public final class CoreNLPProtos {
      */
     int getRelationTokensCount();
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
+     * <code>repeated uint32 relationTokens = 6;</code>
      *
      * <pre>
      * The tokens comprising the relation of the triple
      * </pre>
      */
-    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder> 
-        getRelationTokensOrBuilderList();
-    /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
-     *
-     * <pre>
-     * The tokens comprising the relation of the triple
-     * </pre>
-     */
-    edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder getRelationTokensOrBuilder(
-        int index);
+    int getRelationTokens(int index);
 
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
+     * <code>repeated uint32 objectTokens = 7;</code>
      *
      * <pre>
      * The tokens comprising the object of the triple
      * </pre>
      */
-    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> 
-        getObjectTokensList();
+    java.util.List<java.lang.Integer> getObjectTokensList();
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
-     *
-     * <pre>
-     * The tokens comprising the object of the triple
-     * </pre>
-     */
-    edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation getObjectTokens(int index);
-    /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
+     * <code>repeated uint32 objectTokens = 7;</code>
      *
      * <pre>
      * The tokens comprising the object of the triple
@@ -42243,23 +41711,13 @@ public final class CoreNLPProtos {
      */
     int getObjectTokensCount();
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
+     * <code>repeated uint32 objectTokens = 7;</code>
      *
      * <pre>
      * The tokens comprising the object of the triple
      * </pre>
      */
-    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder> 
-        getObjectTokensOrBuilderList();
-    /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
-     *
-     * <pre>
-     * The tokens comprising the object of the triple
-     * </pre>
-     */
-    edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder getObjectTokensOrBuilder(
-        int index);
+    int getObjectTokens(int index);
 
     /**
      * <code>optional .edu.stanford.nlp.pipeline.DependencyGraph tree = 8;</code>
@@ -42434,6 +41892,69 @@ public final class CoreNLPProtos {
               confidence_ = input.readDouble();
               break;
             }
+            case 40: {
+              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+                subjectTokens_ = new java.util.ArrayList<java.lang.Integer>();
+                mutable_bitField0_ |= 0x00000010;
+              }
+              subjectTokens_.add(input.readUInt32());
+              break;
+            }
+            case 42: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010) && input.getBytesUntilLimit() > 0) {
+                subjectTokens_ = new java.util.ArrayList<java.lang.Integer>();
+                mutable_bitField0_ |= 0x00000010;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                subjectTokens_.add(input.readUInt32());
+              }
+              input.popLimit(limit);
+              break;
+            }
+            case 48: {
+              if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
+                relationTokens_ = new java.util.ArrayList<java.lang.Integer>();
+                mutable_bitField0_ |= 0x00000020;
+              }
+              relationTokens_.add(input.readUInt32());
+              break;
+            }
+            case 50: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000020) == 0x00000020) && input.getBytesUntilLimit() > 0) {
+                relationTokens_ = new java.util.ArrayList<java.lang.Integer>();
+                mutable_bitField0_ |= 0x00000020;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                relationTokens_.add(input.readUInt32());
+              }
+              input.popLimit(limit);
+              break;
+            }
+            case 56: {
+              if (!((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
+                objectTokens_ = new java.util.ArrayList<java.lang.Integer>();
+                mutable_bitField0_ |= 0x00000040;
+              }
+              objectTokens_.add(input.readUInt32());
+              break;
+            }
+            case 58: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000040) == 0x00000040) && input.getBytesUntilLimit() > 0) {
+                objectTokens_ = new java.util.ArrayList<java.lang.Integer>();
+                mutable_bitField0_ |= 0x00000040;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                objectTokens_.add(input.readUInt32());
+              }
+              input.popLimit(limit);
+              break;
+            }
             case 66: {
               edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder subBuilder = null;
               if (((bitField0_ & 0x00000010) == 0x00000010)) {
@@ -42465,30 +41986,6 @@ public final class CoreNLPProtos {
             case 96: {
               bitField0_ |= 0x00000100;
               suffixOf_ = input.readBool();
-              break;
-            }
-            case 106: {
-              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
-                subjectTokens_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation>();
-                mutable_bitField0_ |= 0x00000010;
-              }
-              subjectTokens_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.PARSER, extensionRegistry));
-              break;
-            }
-            case 114: {
-              if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
-                relationTokens_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation>();
-                mutable_bitField0_ |= 0x00000020;
-              }
-              relationTokens_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.PARSER, extensionRegistry));
-              break;
-            }
-            case 122: {
-              if (!((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
-                objectTokens_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation>();
-                mutable_bitField0_ |= 0x00000040;
-              }
-              objectTokens_.add(input.readMessage(edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.PARSER, extensionRegistry));
               break;
             }
           }
@@ -42725,31 +42222,21 @@ public final class CoreNLPProtos {
       return confidence_;
     }
 
-    public static final int SUBJECTTOKENS_FIELD_NUMBER = 13;
-    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> subjectTokens_;
+    public static final int SUBJECTTOKENS_FIELD_NUMBER = 5;
+    private java.util.List<java.lang.Integer> subjectTokens_;
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
+     * <code>repeated uint32 subjectTokens = 5;</code>
      *
      * <pre>
      * The tokens comprising the subject of the triple
      * </pre>
      */
-    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> getSubjectTokensList() {
+    public java.util.List<java.lang.Integer>
+        getSubjectTokensList() {
       return subjectTokens_;
     }
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
-     *
-     * <pre>
-     * The tokens comprising the subject of the triple
-     * </pre>
-     */
-    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder> 
-        getSubjectTokensOrBuilderList() {
-      return subjectTokens_;
-    }
-    /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
+     * <code>repeated uint32 subjectTokens = 5;</code>
      *
      * <pre>
      * The tokens comprising the subject of the triple
@@ -42759,52 +42246,31 @@ public final class CoreNLPProtos {
       return subjectTokens_.size();
     }
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
+     * <code>repeated uint32 subjectTokens = 5;</code>
      *
      * <pre>
      * The tokens comprising the subject of the triple
      * </pre>
      */
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation getSubjectTokens(int index) {
-      return subjectTokens_.get(index);
-    }
-    /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
-     *
-     * <pre>
-     * The tokens comprising the subject of the triple
-     * </pre>
-     */
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder getSubjectTokensOrBuilder(
-        int index) {
+    public int getSubjectTokens(int index) {
       return subjectTokens_.get(index);
     }
 
-    public static final int RELATIONTOKENS_FIELD_NUMBER = 14;
-    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> relationTokens_;
+    public static final int RELATIONTOKENS_FIELD_NUMBER = 6;
+    private java.util.List<java.lang.Integer> relationTokens_;
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
+     * <code>repeated uint32 relationTokens = 6;</code>
      *
      * <pre>
      * The tokens comprising the relation of the triple
      * </pre>
      */
-    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> getRelationTokensList() {
+    public java.util.List<java.lang.Integer>
+        getRelationTokensList() {
       return relationTokens_;
     }
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
-     *
-     * <pre>
-     * The tokens comprising the relation of the triple
-     * </pre>
-     */
-    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder> 
-        getRelationTokensOrBuilderList() {
-      return relationTokens_;
-    }
-    /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
+     * <code>repeated uint32 relationTokens = 6;</code>
      *
      * <pre>
      * The tokens comprising the relation of the triple
@@ -42814,52 +42280,31 @@ public final class CoreNLPProtos {
       return relationTokens_.size();
     }
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
+     * <code>repeated uint32 relationTokens = 6;</code>
      *
      * <pre>
      * The tokens comprising the relation of the triple
      * </pre>
      */
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation getRelationTokens(int index) {
-      return relationTokens_.get(index);
-    }
-    /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
-     *
-     * <pre>
-     * The tokens comprising the relation of the triple
-     * </pre>
-     */
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder getRelationTokensOrBuilder(
-        int index) {
+    public int getRelationTokens(int index) {
       return relationTokens_.get(index);
     }
 
-    public static final int OBJECTTOKENS_FIELD_NUMBER = 15;
-    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> objectTokens_;
+    public static final int OBJECTTOKENS_FIELD_NUMBER = 7;
+    private java.util.List<java.lang.Integer> objectTokens_;
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
+     * <code>repeated uint32 objectTokens = 7;</code>
      *
      * <pre>
      * The tokens comprising the object of the triple
      * </pre>
      */
-    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> getObjectTokensList() {
+    public java.util.List<java.lang.Integer>
+        getObjectTokensList() {
       return objectTokens_;
     }
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
-     *
-     * <pre>
-     * The tokens comprising the object of the triple
-     * </pre>
-     */
-    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder> 
-        getObjectTokensOrBuilderList() {
-      return objectTokens_;
-    }
-    /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
+     * <code>repeated uint32 objectTokens = 7;</code>
      *
      * <pre>
      * The tokens comprising the object of the triple
@@ -42869,24 +42314,13 @@ public final class CoreNLPProtos {
       return objectTokens_.size();
     }
     /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
+     * <code>repeated uint32 objectTokens = 7;</code>
      *
      * <pre>
      * The tokens comprising the object of the triple
      * </pre>
      */
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation getObjectTokens(int index) {
-      return objectTokens_.get(index);
-    }
-    /**
-     * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
-     *
-     * <pre>
-     * The tokens comprising the object of the triple
-     * </pre>
-     */
-    public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder getObjectTokensOrBuilder(
-        int index) {
+    public int getObjectTokens(int index) {
       return objectTokens_.get(index);
     }
 
@@ -43060,6 +42494,15 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeDouble(4, confidence_);
       }
+      for (int i = 0; i < subjectTokens_.size(); i++) {
+        output.writeUInt32(5, subjectTokens_.get(i));
+      }
+      for (int i = 0; i < relationTokens_.size(); i++) {
+        output.writeUInt32(6, relationTokens_.get(i));
+      }
+      for (int i = 0; i < objectTokens_.size(); i++) {
+        output.writeUInt32(7, objectTokens_.get(i));
+      }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         output.writeMessage(8, tree_);
       }
@@ -43074,15 +42517,6 @@ public final class CoreNLPProtos {
       }
       if (((bitField0_ & 0x00000100) == 0x00000100)) {
         output.writeBool(12, suffixOf_);
-      }
-      for (int i = 0; i < subjectTokens_.size(); i++) {
-        output.writeMessage(13, subjectTokens_.get(i));
-      }
-      for (int i = 0; i < relationTokens_.size(); i++) {
-        output.writeMessage(14, relationTokens_.get(i));
-      }
-      for (int i = 0; i < objectTokens_.size(); i++) {
-        output.writeMessage(15, objectTokens_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -43109,6 +42543,33 @@ public final class CoreNLPProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, confidence_);
       }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < subjectTokens_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeUInt32SizeNoTag(subjectTokens_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getSubjectTokensList().size();
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < relationTokens_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeUInt32SizeNoTag(relationTokens_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getRelationTokensList().size();
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < objectTokens_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeUInt32SizeNoTag(objectTokens_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getObjectTokensList().size();
+      }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(8, tree_);
@@ -43128,18 +42589,6 @@ public final class CoreNLPProtos {
       if (((bitField0_ & 0x00000100) == 0x00000100)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(12, suffixOf_);
-      }
-      for (int i = 0; i < subjectTokens_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(13, subjectTokens_.get(i));
-      }
-      for (int i = 0; i < relationTokens_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(14, relationTokens_.get(i));
-      }
-      for (int i = 0; i < objectTokens_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(15, objectTokens_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -43255,9 +42704,6 @@ public final class CoreNLPProtos {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          getSubjectTokensFieldBuilder();
-          getRelationTokensFieldBuilder();
-          getObjectTokensFieldBuilder();
           getTreeFieldBuilder();
         }
       }
@@ -43275,24 +42721,12 @@ public final class CoreNLPProtos {
         bitField0_ = (bitField0_ & ~0x00000004);
         confidence_ = 0D;
         bitField0_ = (bitField0_ & ~0x00000008);
-        if (subjectTokensBuilder_ == null) {
-          subjectTokens_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000010);
-        } else {
-          subjectTokensBuilder_.clear();
-        }
-        if (relationTokensBuilder_ == null) {
-          relationTokens_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000020);
-        } else {
-          relationTokensBuilder_.clear();
-        }
-        if (objectTokensBuilder_ == null) {
-          objectTokens_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000040);
-        } else {
-          objectTokensBuilder_.clear();
-        }
+        subjectTokens_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000010);
+        relationTokens_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000020);
+        objectTokens_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000040);
         if (treeBuilder_ == null) {
           tree_ = edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance();
         } else {
@@ -43351,33 +42785,21 @@ public final class CoreNLPProtos {
           to_bitField0_ |= 0x00000008;
         }
         result.confidence_ = confidence_;
-        if (subjectTokensBuilder_ == null) {
-          if (((bitField0_ & 0x00000010) == 0x00000010)) {
-            subjectTokens_ = java.util.Collections.unmodifiableList(subjectTokens_);
-            bitField0_ = (bitField0_ & ~0x00000010);
-          }
-          result.subjectTokens_ = subjectTokens_;
-        } else {
-          result.subjectTokens_ = subjectTokensBuilder_.build();
+        if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          subjectTokens_ = java.util.Collections.unmodifiableList(subjectTokens_);
+          bitField0_ = (bitField0_ & ~0x00000010);
         }
-        if (relationTokensBuilder_ == null) {
-          if (((bitField0_ & 0x00000020) == 0x00000020)) {
-            relationTokens_ = java.util.Collections.unmodifiableList(relationTokens_);
-            bitField0_ = (bitField0_ & ~0x00000020);
-          }
-          result.relationTokens_ = relationTokens_;
-        } else {
-          result.relationTokens_ = relationTokensBuilder_.build();
+        result.subjectTokens_ = subjectTokens_;
+        if (((bitField0_ & 0x00000020) == 0x00000020)) {
+          relationTokens_ = java.util.Collections.unmodifiableList(relationTokens_);
+          bitField0_ = (bitField0_ & ~0x00000020);
         }
-        if (objectTokensBuilder_ == null) {
-          if (((bitField0_ & 0x00000040) == 0x00000040)) {
-            objectTokens_ = java.util.Collections.unmodifiableList(objectTokens_);
-            bitField0_ = (bitField0_ & ~0x00000040);
-          }
-          result.objectTokens_ = objectTokens_;
-        } else {
-          result.objectTokens_ = objectTokensBuilder_.build();
+        result.relationTokens_ = relationTokens_;
+        if (((bitField0_ & 0x00000040) == 0x00000040)) {
+          objectTokens_ = java.util.Collections.unmodifiableList(objectTokens_);
+          bitField0_ = (bitField0_ & ~0x00000040);
         }
+        result.objectTokens_ = objectTokens_;
         if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
           to_bitField0_ |= 0x00000010;
         }
@@ -43436,83 +42858,35 @@ public final class CoreNLPProtos {
         if (other.hasConfidence()) {
           setConfidence(other.getConfidence());
         }
-        if (subjectTokensBuilder_ == null) {
-          if (!other.subjectTokens_.isEmpty()) {
-            if (subjectTokens_.isEmpty()) {
-              subjectTokens_ = other.subjectTokens_;
-              bitField0_ = (bitField0_ & ~0x00000010);
-            } else {
-              ensureSubjectTokensIsMutable();
-              subjectTokens_.addAll(other.subjectTokens_);
-            }
-            onChanged();
+        if (!other.subjectTokens_.isEmpty()) {
+          if (subjectTokens_.isEmpty()) {
+            subjectTokens_ = other.subjectTokens_;
+            bitField0_ = (bitField0_ & ~0x00000010);
+          } else {
+            ensureSubjectTokensIsMutable();
+            subjectTokens_.addAll(other.subjectTokens_);
           }
-        } else {
-          if (!other.subjectTokens_.isEmpty()) {
-            if (subjectTokensBuilder_.isEmpty()) {
-              subjectTokensBuilder_.dispose();
-              subjectTokensBuilder_ = null;
-              subjectTokens_ = other.subjectTokens_;
-              bitField0_ = (bitField0_ & ~0x00000010);
-              subjectTokensBuilder_ = 
-                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
-                   getSubjectTokensFieldBuilder() : null;
-            } else {
-              subjectTokensBuilder_.addAllMessages(other.subjectTokens_);
-            }
-          }
+          onChanged();
         }
-        if (relationTokensBuilder_ == null) {
-          if (!other.relationTokens_.isEmpty()) {
-            if (relationTokens_.isEmpty()) {
-              relationTokens_ = other.relationTokens_;
-              bitField0_ = (bitField0_ & ~0x00000020);
-            } else {
-              ensureRelationTokensIsMutable();
-              relationTokens_.addAll(other.relationTokens_);
-            }
-            onChanged();
+        if (!other.relationTokens_.isEmpty()) {
+          if (relationTokens_.isEmpty()) {
+            relationTokens_ = other.relationTokens_;
+            bitField0_ = (bitField0_ & ~0x00000020);
+          } else {
+            ensureRelationTokensIsMutable();
+            relationTokens_.addAll(other.relationTokens_);
           }
-        } else {
-          if (!other.relationTokens_.isEmpty()) {
-            if (relationTokensBuilder_.isEmpty()) {
-              relationTokensBuilder_.dispose();
-              relationTokensBuilder_ = null;
-              relationTokens_ = other.relationTokens_;
-              bitField0_ = (bitField0_ & ~0x00000020);
-              relationTokensBuilder_ = 
-                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
-                   getRelationTokensFieldBuilder() : null;
-            } else {
-              relationTokensBuilder_.addAllMessages(other.relationTokens_);
-            }
-          }
+          onChanged();
         }
-        if (objectTokensBuilder_ == null) {
-          if (!other.objectTokens_.isEmpty()) {
-            if (objectTokens_.isEmpty()) {
-              objectTokens_ = other.objectTokens_;
-              bitField0_ = (bitField0_ & ~0x00000040);
-            } else {
-              ensureObjectTokensIsMutable();
-              objectTokens_.addAll(other.objectTokens_);
-            }
-            onChanged();
+        if (!other.objectTokens_.isEmpty()) {
+          if (objectTokens_.isEmpty()) {
+            objectTokens_ = other.objectTokens_;
+            bitField0_ = (bitField0_ & ~0x00000040);
+          } else {
+            ensureObjectTokensIsMutable();
+            objectTokens_.addAll(other.objectTokens_);
           }
-        } else {
-          if (!other.objectTokens_.isEmpty()) {
-            if (objectTokensBuilder_.isEmpty()) {
-              objectTokensBuilder_.dispose();
-              objectTokensBuilder_ = null;
-              objectTokens_ = other.objectTokens_;
-              bitField0_ = (bitField0_ & ~0x00000040);
-              objectTokensBuilder_ = 
-                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
-                   getObjectTokensFieldBuilder() : null;
-            } else {
-              objectTokensBuilder_.addAllMessages(other.objectTokens_);
-            }
-          }
+          onChanged();
         }
         if (other.hasTree()) {
           mergeTree(other.getTree());
@@ -43910,940 +43284,286 @@ public final class CoreNLPProtos {
         return this;
       }
 
-      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> subjectTokens_ =
-        java.util.Collections.emptyList();
+      private java.util.List<java.lang.Integer> subjectTokens_ = java.util.Collections.emptyList();
       private void ensureSubjectTokensIsMutable() {
         if (!((bitField0_ & 0x00000010) == 0x00000010)) {
-          subjectTokens_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation>(subjectTokens_);
+          subjectTokens_ = new java.util.ArrayList<java.lang.Integer>(subjectTokens_);
           bitField0_ |= 0x00000010;
          }
       }
-
-      private com.google.protobuf.RepeatedFieldBuilder<
-          edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder> subjectTokensBuilder_;
-
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
+       * <code>repeated uint32 subjectTokens = 5;</code>
        *
        * <pre>
        * The tokens comprising the subject of the triple
        * </pre>
        */
-      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> getSubjectTokensList() {
-        if (subjectTokensBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(subjectTokens_);
-        } else {
-          return subjectTokensBuilder_.getMessageList();
-        }
+      public java.util.List<java.lang.Integer>
+          getSubjectTokensList() {
+        return java.util.Collections.unmodifiableList(subjectTokens_);
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
+       * <code>repeated uint32 subjectTokens = 5;</code>
        *
        * <pre>
        * The tokens comprising the subject of the triple
        * </pre>
        */
       public int getSubjectTokensCount() {
-        if (subjectTokensBuilder_ == null) {
-          return subjectTokens_.size();
-        } else {
-          return subjectTokensBuilder_.getCount();
-        }
+        return subjectTokens_.size();
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
+       * <code>repeated uint32 subjectTokens = 5;</code>
        *
        * <pre>
        * The tokens comprising the subject of the triple
        * </pre>
        */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation getSubjectTokens(int index) {
-        if (subjectTokensBuilder_ == null) {
-          return subjectTokens_.get(index);
-        } else {
-          return subjectTokensBuilder_.getMessage(index);
-        }
+      public int getSubjectTokens(int index) {
+        return subjectTokens_.get(index);
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
+       * <code>repeated uint32 subjectTokens = 5;</code>
        *
        * <pre>
        * The tokens comprising the subject of the triple
        * </pre>
        */
       public Builder setSubjectTokens(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation value) {
-        if (subjectTokensBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureSubjectTokensIsMutable();
-          subjectTokens_.set(index, value);
-          onChanged();
-        } else {
-          subjectTokensBuilder_.setMessage(index, value);
-        }
+          int index, int value) {
+        ensureSubjectTokensIsMutable();
+        subjectTokens_.set(index, value);
+        onChanged();
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
+       * <code>repeated uint32 subjectTokens = 5;</code>
        *
        * <pre>
        * The tokens comprising the subject of the triple
        * </pre>
        */
-      public Builder setSubjectTokens(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder builderForValue) {
-        if (subjectTokensBuilder_ == null) {
-          ensureSubjectTokensIsMutable();
-          subjectTokens_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          subjectTokensBuilder_.setMessage(index, builderForValue.build());
-        }
+      public Builder addSubjectTokens(int value) {
+        ensureSubjectTokensIsMutable();
+        subjectTokens_.add(value);
+        onChanged();
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
-       *
-       * <pre>
-       * The tokens comprising the subject of the triple
-       * </pre>
-       */
-      public Builder addSubjectTokens(edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation value) {
-        if (subjectTokensBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureSubjectTokensIsMutable();
-          subjectTokens_.add(value);
-          onChanged();
-        } else {
-          subjectTokensBuilder_.addMessage(value);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
-       *
-       * <pre>
-       * The tokens comprising the subject of the triple
-       * </pre>
-       */
-      public Builder addSubjectTokens(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation value) {
-        if (subjectTokensBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureSubjectTokensIsMutable();
-          subjectTokens_.add(index, value);
-          onChanged();
-        } else {
-          subjectTokensBuilder_.addMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
-       *
-       * <pre>
-       * The tokens comprising the subject of the triple
-       * </pre>
-       */
-      public Builder addSubjectTokens(
-          edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder builderForValue) {
-        if (subjectTokensBuilder_ == null) {
-          ensureSubjectTokensIsMutable();
-          subjectTokens_.add(builderForValue.build());
-          onChanged();
-        } else {
-          subjectTokensBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
-       *
-       * <pre>
-       * The tokens comprising the subject of the triple
-       * </pre>
-       */
-      public Builder addSubjectTokens(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder builderForValue) {
-        if (subjectTokensBuilder_ == null) {
-          ensureSubjectTokensIsMutable();
-          subjectTokens_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          subjectTokensBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
+       * <code>repeated uint32 subjectTokens = 5;</code>
        *
        * <pre>
        * The tokens comprising the subject of the triple
        * </pre>
        */
       public Builder addAllSubjectTokens(
-          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> values) {
-        if (subjectTokensBuilder_ == null) {
-          ensureSubjectTokensIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, subjectTokens_);
-          onChanged();
-        } else {
-          subjectTokensBuilder_.addAllMessages(values);
-        }
+          java.lang.Iterable<? extends java.lang.Integer> values) {
+        ensureSubjectTokensIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, subjectTokens_);
+        onChanged();
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
+       * <code>repeated uint32 subjectTokens = 5;</code>
        *
        * <pre>
        * The tokens comprising the subject of the triple
        * </pre>
        */
       public Builder clearSubjectTokens() {
-        if (subjectTokensBuilder_ == null) {
-          subjectTokens_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000010);
-          onChanged();
-        } else {
-          subjectTokensBuilder_.clear();
-        }
+        subjectTokens_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000010);
+        onChanged();
         return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
-       *
-       * <pre>
-       * The tokens comprising the subject of the triple
-       * </pre>
-       */
-      public Builder removeSubjectTokens(int index) {
-        if (subjectTokensBuilder_ == null) {
-          ensureSubjectTokensIsMutable();
-          subjectTokens_.remove(index);
-          onChanged();
-        } else {
-          subjectTokensBuilder_.remove(index);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
-       *
-       * <pre>
-       * The tokens comprising the subject of the triple
-       * </pre>
-       */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder getSubjectTokensBuilder(
-          int index) {
-        return getSubjectTokensFieldBuilder().getBuilder(index);
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
-       *
-       * <pre>
-       * The tokens comprising the subject of the triple
-       * </pre>
-       */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder getSubjectTokensOrBuilder(
-          int index) {
-        if (subjectTokensBuilder_ == null) {
-          return subjectTokens_.get(index);  } else {
-          return subjectTokensBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
-       *
-       * <pre>
-       * The tokens comprising the subject of the triple
-       * </pre>
-       */
-      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder> 
-           getSubjectTokensOrBuilderList() {
-        if (subjectTokensBuilder_ != null) {
-          return subjectTokensBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(subjectTokens_);
-        }
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
-       *
-       * <pre>
-       * The tokens comprising the subject of the triple
-       * </pre>
-       */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder addSubjectTokensBuilder() {
-        return getSubjectTokensFieldBuilder().addBuilder(
-            edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.getDefaultInstance());
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
-       *
-       * <pre>
-       * The tokens comprising the subject of the triple
-       * </pre>
-       */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder addSubjectTokensBuilder(
-          int index) {
-        return getSubjectTokensFieldBuilder().addBuilder(
-            index, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.getDefaultInstance());
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation subjectTokens = 13;</code>
-       *
-       * <pre>
-       * The tokens comprising the subject of the triple
-       * </pre>
-       */
-      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder> 
-           getSubjectTokensBuilderList() {
-        return getSubjectTokensFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilder<
-          edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder> 
-          getSubjectTokensFieldBuilder() {
-        if (subjectTokensBuilder_ == null) {
-          subjectTokensBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder>(
-                  subjectTokens_,
-                  ((bitField0_ & 0x00000010) == 0x00000010),
-                  getParentForChildren(),
-                  isClean());
-          subjectTokens_ = null;
-        }
-        return subjectTokensBuilder_;
       }
 
-      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> relationTokens_ =
-        java.util.Collections.emptyList();
+      private java.util.List<java.lang.Integer> relationTokens_ = java.util.Collections.emptyList();
       private void ensureRelationTokensIsMutable() {
         if (!((bitField0_ & 0x00000020) == 0x00000020)) {
-          relationTokens_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation>(relationTokens_);
+          relationTokens_ = new java.util.ArrayList<java.lang.Integer>(relationTokens_);
           bitField0_ |= 0x00000020;
          }
       }
-
-      private com.google.protobuf.RepeatedFieldBuilder<
-          edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder> relationTokensBuilder_;
-
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
+       * <code>repeated uint32 relationTokens = 6;</code>
        *
        * <pre>
        * The tokens comprising the relation of the triple
        * </pre>
        */
-      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> getRelationTokensList() {
-        if (relationTokensBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(relationTokens_);
-        } else {
-          return relationTokensBuilder_.getMessageList();
-        }
+      public java.util.List<java.lang.Integer>
+          getRelationTokensList() {
+        return java.util.Collections.unmodifiableList(relationTokens_);
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
+       * <code>repeated uint32 relationTokens = 6;</code>
        *
        * <pre>
        * The tokens comprising the relation of the triple
        * </pre>
        */
       public int getRelationTokensCount() {
-        if (relationTokensBuilder_ == null) {
-          return relationTokens_.size();
-        } else {
-          return relationTokensBuilder_.getCount();
-        }
+        return relationTokens_.size();
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
+       * <code>repeated uint32 relationTokens = 6;</code>
        *
        * <pre>
        * The tokens comprising the relation of the triple
        * </pre>
        */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation getRelationTokens(int index) {
-        if (relationTokensBuilder_ == null) {
-          return relationTokens_.get(index);
-        } else {
-          return relationTokensBuilder_.getMessage(index);
-        }
+      public int getRelationTokens(int index) {
+        return relationTokens_.get(index);
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
+       * <code>repeated uint32 relationTokens = 6;</code>
        *
        * <pre>
        * The tokens comprising the relation of the triple
        * </pre>
        */
       public Builder setRelationTokens(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation value) {
-        if (relationTokensBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureRelationTokensIsMutable();
-          relationTokens_.set(index, value);
-          onChanged();
-        } else {
-          relationTokensBuilder_.setMessage(index, value);
-        }
+          int index, int value) {
+        ensureRelationTokensIsMutable();
+        relationTokens_.set(index, value);
+        onChanged();
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
+       * <code>repeated uint32 relationTokens = 6;</code>
        *
        * <pre>
        * The tokens comprising the relation of the triple
        * </pre>
        */
-      public Builder setRelationTokens(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder builderForValue) {
-        if (relationTokensBuilder_ == null) {
-          ensureRelationTokensIsMutable();
-          relationTokens_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          relationTokensBuilder_.setMessage(index, builderForValue.build());
-        }
+      public Builder addRelationTokens(int value) {
+        ensureRelationTokensIsMutable();
+        relationTokens_.add(value);
+        onChanged();
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
-       *
-       * <pre>
-       * The tokens comprising the relation of the triple
-       * </pre>
-       */
-      public Builder addRelationTokens(edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation value) {
-        if (relationTokensBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureRelationTokensIsMutable();
-          relationTokens_.add(value);
-          onChanged();
-        } else {
-          relationTokensBuilder_.addMessage(value);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
-       *
-       * <pre>
-       * The tokens comprising the relation of the triple
-       * </pre>
-       */
-      public Builder addRelationTokens(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation value) {
-        if (relationTokensBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureRelationTokensIsMutable();
-          relationTokens_.add(index, value);
-          onChanged();
-        } else {
-          relationTokensBuilder_.addMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
-       *
-       * <pre>
-       * The tokens comprising the relation of the triple
-       * </pre>
-       */
-      public Builder addRelationTokens(
-          edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder builderForValue) {
-        if (relationTokensBuilder_ == null) {
-          ensureRelationTokensIsMutable();
-          relationTokens_.add(builderForValue.build());
-          onChanged();
-        } else {
-          relationTokensBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
-       *
-       * <pre>
-       * The tokens comprising the relation of the triple
-       * </pre>
-       */
-      public Builder addRelationTokens(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder builderForValue) {
-        if (relationTokensBuilder_ == null) {
-          ensureRelationTokensIsMutable();
-          relationTokens_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          relationTokensBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
+       * <code>repeated uint32 relationTokens = 6;</code>
        *
        * <pre>
        * The tokens comprising the relation of the triple
        * </pre>
        */
       public Builder addAllRelationTokens(
-          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> values) {
-        if (relationTokensBuilder_ == null) {
-          ensureRelationTokensIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, relationTokens_);
-          onChanged();
-        } else {
-          relationTokensBuilder_.addAllMessages(values);
-        }
+          java.lang.Iterable<? extends java.lang.Integer> values) {
+        ensureRelationTokensIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, relationTokens_);
+        onChanged();
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
+       * <code>repeated uint32 relationTokens = 6;</code>
        *
        * <pre>
        * The tokens comprising the relation of the triple
        * </pre>
        */
       public Builder clearRelationTokens() {
-        if (relationTokensBuilder_ == null) {
-          relationTokens_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000020);
-          onChanged();
-        } else {
-          relationTokensBuilder_.clear();
-        }
+        relationTokens_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000020);
+        onChanged();
         return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
-       *
-       * <pre>
-       * The tokens comprising the relation of the triple
-       * </pre>
-       */
-      public Builder removeRelationTokens(int index) {
-        if (relationTokensBuilder_ == null) {
-          ensureRelationTokensIsMutable();
-          relationTokens_.remove(index);
-          onChanged();
-        } else {
-          relationTokensBuilder_.remove(index);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
-       *
-       * <pre>
-       * The tokens comprising the relation of the triple
-       * </pre>
-       */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder getRelationTokensBuilder(
-          int index) {
-        return getRelationTokensFieldBuilder().getBuilder(index);
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
-       *
-       * <pre>
-       * The tokens comprising the relation of the triple
-       * </pre>
-       */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder getRelationTokensOrBuilder(
-          int index) {
-        if (relationTokensBuilder_ == null) {
-          return relationTokens_.get(index);  } else {
-          return relationTokensBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
-       *
-       * <pre>
-       * The tokens comprising the relation of the triple
-       * </pre>
-       */
-      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder> 
-           getRelationTokensOrBuilderList() {
-        if (relationTokensBuilder_ != null) {
-          return relationTokensBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(relationTokens_);
-        }
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
-       *
-       * <pre>
-       * The tokens comprising the relation of the triple
-       * </pre>
-       */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder addRelationTokensBuilder() {
-        return getRelationTokensFieldBuilder().addBuilder(
-            edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.getDefaultInstance());
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
-       *
-       * <pre>
-       * The tokens comprising the relation of the triple
-       * </pre>
-       */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder addRelationTokensBuilder(
-          int index) {
-        return getRelationTokensFieldBuilder().addBuilder(
-            index, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.getDefaultInstance());
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation relationTokens = 14;</code>
-       *
-       * <pre>
-       * The tokens comprising the relation of the triple
-       * </pre>
-       */
-      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder> 
-           getRelationTokensBuilderList() {
-        return getRelationTokensFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilder<
-          edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder> 
-          getRelationTokensFieldBuilder() {
-        if (relationTokensBuilder_ == null) {
-          relationTokensBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder>(
-                  relationTokens_,
-                  ((bitField0_ & 0x00000020) == 0x00000020),
-                  getParentForChildren(),
-                  isClean());
-          relationTokens_ = null;
-        }
-        return relationTokensBuilder_;
       }
 
-      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> objectTokens_ =
-        java.util.Collections.emptyList();
+      private java.util.List<java.lang.Integer> objectTokens_ = java.util.Collections.emptyList();
       private void ensureObjectTokensIsMutable() {
         if (!((bitField0_ & 0x00000040) == 0x00000040)) {
-          objectTokens_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation>(objectTokens_);
+          objectTokens_ = new java.util.ArrayList<java.lang.Integer>(objectTokens_);
           bitField0_ |= 0x00000040;
          }
       }
-
-      private com.google.protobuf.RepeatedFieldBuilder<
-          edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder> objectTokensBuilder_;
-
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
+       * <code>repeated uint32 objectTokens = 7;</code>
        *
        * <pre>
        * The tokens comprising the object of the triple
        * </pre>
        */
-      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> getObjectTokensList() {
-        if (objectTokensBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(objectTokens_);
-        } else {
-          return objectTokensBuilder_.getMessageList();
-        }
+      public java.util.List<java.lang.Integer>
+          getObjectTokensList() {
+        return java.util.Collections.unmodifiableList(objectTokens_);
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
+       * <code>repeated uint32 objectTokens = 7;</code>
        *
        * <pre>
        * The tokens comprising the object of the triple
        * </pre>
        */
       public int getObjectTokensCount() {
-        if (objectTokensBuilder_ == null) {
-          return objectTokens_.size();
-        } else {
-          return objectTokensBuilder_.getCount();
-        }
+        return objectTokens_.size();
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
+       * <code>repeated uint32 objectTokens = 7;</code>
        *
        * <pre>
        * The tokens comprising the object of the triple
        * </pre>
        */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation getObjectTokens(int index) {
-        if (objectTokensBuilder_ == null) {
-          return objectTokens_.get(index);
-        } else {
-          return objectTokensBuilder_.getMessage(index);
-        }
+      public int getObjectTokens(int index) {
+        return objectTokens_.get(index);
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
+       * <code>repeated uint32 objectTokens = 7;</code>
        *
        * <pre>
        * The tokens comprising the object of the triple
        * </pre>
        */
       public Builder setObjectTokens(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation value) {
-        if (objectTokensBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureObjectTokensIsMutable();
-          objectTokens_.set(index, value);
-          onChanged();
-        } else {
-          objectTokensBuilder_.setMessage(index, value);
-        }
+          int index, int value) {
+        ensureObjectTokensIsMutable();
+        objectTokens_.set(index, value);
+        onChanged();
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
+       * <code>repeated uint32 objectTokens = 7;</code>
        *
        * <pre>
        * The tokens comprising the object of the triple
        * </pre>
        */
-      public Builder setObjectTokens(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder builderForValue) {
-        if (objectTokensBuilder_ == null) {
-          ensureObjectTokensIsMutable();
-          objectTokens_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          objectTokensBuilder_.setMessage(index, builderForValue.build());
-        }
+      public Builder addObjectTokens(int value) {
+        ensureObjectTokensIsMutable();
+        objectTokens_.add(value);
+        onChanged();
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
-       *
-       * <pre>
-       * The tokens comprising the object of the triple
-       * </pre>
-       */
-      public Builder addObjectTokens(edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation value) {
-        if (objectTokensBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureObjectTokensIsMutable();
-          objectTokens_.add(value);
-          onChanged();
-        } else {
-          objectTokensBuilder_.addMessage(value);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
-       *
-       * <pre>
-       * The tokens comprising the object of the triple
-       * </pre>
-       */
-      public Builder addObjectTokens(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation value) {
-        if (objectTokensBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureObjectTokensIsMutable();
-          objectTokens_.add(index, value);
-          onChanged();
-        } else {
-          objectTokensBuilder_.addMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
-       *
-       * <pre>
-       * The tokens comprising the object of the triple
-       * </pre>
-       */
-      public Builder addObjectTokens(
-          edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder builderForValue) {
-        if (objectTokensBuilder_ == null) {
-          ensureObjectTokensIsMutable();
-          objectTokens_.add(builderForValue.build());
-          onChanged();
-        } else {
-          objectTokensBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
-       *
-       * <pre>
-       * The tokens comprising the object of the triple
-       * </pre>
-       */
-      public Builder addObjectTokens(
-          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder builderForValue) {
-        if (objectTokensBuilder_ == null) {
-          ensureObjectTokensIsMutable();
-          objectTokens_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          objectTokensBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
+       * <code>repeated uint32 objectTokens = 7;</code>
        *
        * <pre>
        * The tokens comprising the object of the triple
        * </pre>
        */
       public Builder addAllObjectTokens(
-          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation> values) {
-        if (objectTokensBuilder_ == null) {
-          ensureObjectTokensIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, objectTokens_);
-          onChanged();
-        } else {
-          objectTokensBuilder_.addAllMessages(values);
-        }
+          java.lang.Iterable<? extends java.lang.Integer> values) {
+        ensureObjectTokensIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, objectTokens_);
+        onChanged();
         return this;
       }
       /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
+       * <code>repeated uint32 objectTokens = 7;</code>
        *
        * <pre>
        * The tokens comprising the object of the triple
        * </pre>
        */
       public Builder clearObjectTokens() {
-        if (objectTokensBuilder_ == null) {
-          objectTokens_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000040);
-          onChanged();
-        } else {
-          objectTokensBuilder_.clear();
-        }
+        objectTokens_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000040);
+        onChanged();
         return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
-       *
-       * <pre>
-       * The tokens comprising the object of the triple
-       * </pre>
-       */
-      public Builder removeObjectTokens(int index) {
-        if (objectTokensBuilder_ == null) {
-          ensureObjectTokensIsMutable();
-          objectTokens_.remove(index);
-          onChanged();
-        } else {
-          objectTokensBuilder_.remove(index);
-        }
-        return this;
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
-       *
-       * <pre>
-       * The tokens comprising the object of the triple
-       * </pre>
-       */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder getObjectTokensBuilder(
-          int index) {
-        return getObjectTokensFieldBuilder().getBuilder(index);
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
-       *
-       * <pre>
-       * The tokens comprising the object of the triple
-       * </pre>
-       */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder getObjectTokensOrBuilder(
-          int index) {
-        if (objectTokensBuilder_ == null) {
-          return objectTokens_.get(index);  } else {
-          return objectTokensBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
-       *
-       * <pre>
-       * The tokens comprising the object of the triple
-       * </pre>
-       */
-      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder> 
-           getObjectTokensOrBuilderList() {
-        if (objectTokensBuilder_ != null) {
-          return objectTokensBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(objectTokens_);
-        }
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
-       *
-       * <pre>
-       * The tokens comprising the object of the triple
-       * </pre>
-       */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder addObjectTokensBuilder() {
-        return getObjectTokensFieldBuilder().addBuilder(
-            edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.getDefaultInstance());
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
-       *
-       * <pre>
-       * The tokens comprising the object of the triple
-       * </pre>
-       */
-      public edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder addObjectTokensBuilder(
-          int index) {
-        return getObjectTokensFieldBuilder().addBuilder(
-            index, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.getDefaultInstance());
-      }
-      /**
-       * <code>repeated .edu.stanford.nlp.pipeline.TokenLocation objectTokens = 15;</code>
-       *
-       * <pre>
-       * The tokens comprising the object of the triple
-       * </pre>
-       */
-      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder> 
-           getObjectTokensBuilderList() {
-        return getObjectTokensFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilder<
-          edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder> 
-          getObjectTokensFieldBuilder() {
-        if (objectTokensBuilder_ == null) {
-          objectTokensBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocation.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.TokenLocationOrBuilder>(
-                  objectTokens_,
-                  ((bitField0_ & 0x00000040) == 0x00000040),
-                  getParentForChildren(),
-                  isClean());
-          objectTokens_ = null;
-        }
-        return objectTokensBuilder_;
       }
 
       private edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph tree_ = edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.getDefaultInstance();
@@ -46663,11 +45383,6 @@ public final class CoreNLPProtos {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_edu_stanford_nlp_pipeline_SentenceFragment_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_edu_stanford_nlp_pipeline_TokenLocation_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_edu_stanford_nlp_pipeline_TokenLocation_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_edu_stanford_nlp_pipeline_RelationTriple_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -46865,32 +45580,27 @@ public final class CoreNLPProtos {
       "e.Timex\022\027\n\017wikipediaEntity\030\010 \001(\t\"Y\n\020Sent" +
       "enceFragment\022\022\n\ntokenIndex\030\001 \003(\r\022\014\n\004root" +
       "\030\002 \001(\r\022\024\n\014assumedTruth\030\003 \001(\010\022\r\n\005score\030\004 " +
-      "\001(\001\":\n\rTokenLocation\022\025\n\rsentenceIndex\030\001 " +
-      "\001(\r\022\022\n\ntokenIndex\030\002 \001(\r\"\232\003\n\016RelationTrip" +
-      "le\022\017\n\007subject\030\001 \001(\t\022\020\n\010relation\030\002 \001(\t\022\016\n" +
-      "\006object\030\003 \001(\t\022\022\n\nconfidence\030\004 \001(\001\022?\n\rsub" +
-      "jectTokens\030\r \003(\0132(.edu.stanford.nlp.pipe" +
-      "line.TokenLocation\022@\n\016relationTokens\030\016 \003",
-      "(\0132(.edu.stanford.nlp.pipeline.TokenLoca" +
-      "tion\022>\n\014objectTokens\030\017 \003(\0132(.edu.stanfor" +
-      "d.nlp.pipeline.TokenLocation\0228\n\004tree\030\010 \001" +
-      "(\0132*.edu.stanford.nlp.pipeline.Dependenc" +
-      "yGraph\022\016\n\006istmod\030\t \001(\010\022\020\n\010prefixBe\030\n \001(\010" +
-      "\022\020\n\010suffixBe\030\013 \001(\010\022\020\n\010suffixOf\030\014 \001(\010\"-\n\017" +
-      "MapStringString\022\013\n\003key\030\001 \003(\t\022\r\n\005value\030\002 " +
-      "\003(\t\"*\n\014MapIntString\022\013\n\003key\030\001 \003(\r\022\r\n\005valu" +
-      "e\030\002 \003(\t*\215\001\n\010Language\022\013\n\007Unknown\020\000\022\007\n\003Any" +
-      "\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020\003\022\013\n\007English\020\004",
-      "\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n\n\006Hebrew\020\007\022\013\n\007" +
-      "Spanish\020\010\022\024\n\020UniversalEnglish\020\t*h\n\tSenti" +
-      "ment\022\023\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATI" +
-      "VE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017" +
-      "STRONG_POSITIVE\020\004*\223\001\n\024NaturalLogicRelati" +
-      "on\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORWARD_ENTAILMEN" +
-      "T\020\001\022\026\n\022REVERSE_ENTAILMENT\020\002\022\014\n\010NEGATION\020" +
-      "\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPEN" +
-      "DENCE\020\006B*\n\031edu.stanford.nlp.pipelineB\rCo" +
-      "reNLPProtos"
+      "\001(\001\"\234\002\n\016RelationTriple\022\017\n\007subject\030\001 \001(\t\022" +
+      "\020\n\010relation\030\002 \001(\t\022\016\n\006object\030\003 \001(\t\022\022\n\ncon" +
+      "fidence\030\004 \001(\001\022\025\n\rsubjectTokens\030\005 \003(\r\022\026\n\016" +
+      "relationTokens\030\006 \003(\r\022\024\n\014objectTokens\030\007 \003" +
+      "(\r\0228\n\004tree\030\010 \001(\0132*.edu.stanford.nlp.pipe" +
+      "line.DependencyGraph\022\016\n\006istmod\030\t \001(\010\022\020\n\010",
+      "prefixBe\030\n \001(\010\022\020\n\010suffixBe\030\013 \001(\010\022\020\n\010suff" +
+      "ixOf\030\014 \001(\010\"-\n\017MapStringString\022\013\n\003key\030\001 \003" +
+      "(\t\022\r\n\005value\030\002 \003(\t\"*\n\014MapIntString\022\013\n\003key" +
+      "\030\001 \003(\r\022\r\n\005value\030\002 \003(\t*\215\001\n\010Language\022\013\n\007Un" +
+      "known\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020" +
+      "\003\022\013\n\007English\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n" +
+      "\n\006Hebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020UniversalEngl" +
+      "ish\020\t*h\n\tSentiment\022\023\n\017STRONG_NEGATIVE\020\000\022" +
+      "\021\n\rWEAK_NEGATIVE\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_" +
+      "POSITIVE\020\003\022\023\n\017STRONG_POSITIVE\020\004*\223\001\n\024Natu",
+      "ralLogicRelation\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FOR" +
+      "WARD_ENTAILMENT\020\001\022\026\n\022REVERSE_ENTAILMENT\020" +
+      "\002\022\014\n\010NEGATION\020\003\022\017\n\013ALTERNATION\020\004\022\t\n\005COVE" +
+      "R\020\005\022\020\n\014INDEPENDENCE\020\006B*\n\031edu.stanford.nl" +
+      "p.pipelineB\rCoreNLPProtos"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -47030,26 +45740,20 @@ public final class CoreNLPProtos {
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_SentenceFragment_descriptor,
         new java.lang.String[] { "TokenIndex", "Root", "AssumedTruth", "Score", });
-    internal_static_edu_stanford_nlp_pipeline_TokenLocation_descriptor =
-      getDescriptor().getMessageTypes().get(18);
-    internal_static_edu_stanford_nlp_pipeline_TokenLocation_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_edu_stanford_nlp_pipeline_TokenLocation_descriptor,
-        new java.lang.String[] { "SentenceIndex", "TokenIndex", });
     internal_static_edu_stanford_nlp_pipeline_RelationTriple_descriptor =
-      getDescriptor().getMessageTypes().get(19);
+      getDescriptor().getMessageTypes().get(18);
     internal_static_edu_stanford_nlp_pipeline_RelationTriple_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_RelationTriple_descriptor,
         new java.lang.String[] { "Subject", "Relation", "Object", "Confidence", "SubjectTokens", "RelationTokens", "ObjectTokens", "Tree", "Istmod", "PrefixBe", "SuffixBe", "SuffixOf", });
     internal_static_edu_stanford_nlp_pipeline_MapStringString_descriptor =
-      getDescriptor().getMessageTypes().get(20);
+      getDescriptor().getMessageTypes().get(19);
     internal_static_edu_stanford_nlp_pipeline_MapStringString_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_MapStringString_descriptor,
         new java.lang.String[] { "Key", "Value", });
     internal_static_edu_stanford_nlp_pipeline_MapIntString_descriptor =
-      getDescriptor().getMessageTypes().get(21);
+      getDescriptor().getMessageTypes().get(20);
     internal_static_edu_stanford_nlp_pipeline_MapIntString_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_MapIntString_descriptor,
