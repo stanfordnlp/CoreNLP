@@ -63,27 +63,27 @@ public class StatisticalCorefProperties {
 
   public static String classificationModelPath(Properties props) {
     return PropertiesUtils.getString(props, "coref.classificationModel",
-        "edu/stanford/nlp/models/scoref/classification_model.ser.gz");
+        "edu/stanford/nlp/models/coref/statistical/classification_model.ser.gz");
   }
 
   public static String rankingModelPath(Properties props) {
     return PropertiesUtils.getString(props, "coref.rankingModel",
-        "edu/stanford/nlp/models/scoref/ranking_model.ser.gz");
+        "edu/stanford/nlp/models/coref/statistical/ranking_model.ser.gz");
   }
 
   public static String anaphoricityModelPath(Properties props) {
     return PropertiesUtils.getString(props, "coref.anaphoricityModel",
-        "edu/stanford/nlp/models/scoref/anaphoricity_model.ser.gz");
+        "edu/stanford/nlp/models/coref/statistical/anaphoricity_model.ser.gz");
   }
 
   public static String clusteringModelPath(Properties props) {
     return PropertiesUtils.getString(props, "coref.clusteringModel",
-        "edu/stanford/nlp/models/scoref/clustering_model.ser");
+        "edu/stanford/nlp/models/coref/statistical/clustering_model.ser");
   }
 
   public static String wordCountsPath(Properties props) {
     return PropertiesUtils.getString(props, "coref.wordCounts",
-        "edu/stanford/nlp/models/scoref/word_counts.ser.gz");
+        "edu/stanford/nlp/models/coref/statistical/word_counts.ser.gz");
   }
 
   private static String defaultModelPath(Properties props, String modelName) {
