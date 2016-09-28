@@ -1,18 +1,11 @@
 package edu.stanford.nlp.coref.statistical;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.Properties;
 
-import edu.stanford.nlp.coref.CorefProperties;
-import edu.stanford.nlp.coref.CorefProperties.Dataset;
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.util.StringUtils;
 
-/**
- * Main class for training new statistical coreference systems.
- * @author Kevin Clark
- */
 public class StatisticalCorefTrainer {
   public static final String CLASSIFICATION_MODEL = "classification";
   public static final String RANKING_MODEL = "ranking";
@@ -61,20 +54,6 @@ public class StatisticalCorefTrainer {
     extractedFeaturesFile = extractedFeaturesPath + "compressed_features.ser";
   }
 
-  public static String fieldValues(Object o) {
-    String s = "";
-    Field[] fields = o.getClass().getDeclaredFields();
-    for (Field field : fields) {
-      try {
-        field.setAccessible(true);
-        s += field.getName() + " = " + field.get(o) + "\n";
-      } catch (Exception e) {
-        throw new RuntimeException("Error getting field value for " + field.getName(), e);
-      }
-    }
-    return s;
-  }
-
   private static void preprocess(Properties props, Dictionaries dictionaries, boolean isTrainSet)
       throws Exception {
     (isTrainSet ? new DatasetBuilder(StatisticalCorefProperties.minClassImbalance(props),
@@ -85,16 +64,17 @@ public class StatisticalCorefTrainer {
   }
 
   public static void doTraining(Properties props) throws Exception {
+    props = StatisticalCorefProperties.addHcorefProps(props);
     setTrainingPath(props);
     Dictionaries dictionaries = new Dictionaries(props);
 
     setDataPath("train");
     wordCountsFile = "train/word_counts.ser";
-    CorefProperties.setInput(props, Dataset.TRAIN);
+    StatisticalCorefProperties.setInput(props, StatisticalCorefProperties.Dataset.TRAIN);
     preprocess(props, dictionaries, true);
 
     setDataPath("dev");
-    CorefProperties.setInput(props, Dataset.DEV);
+    StatisticalCorefProperties.setInput(props, StatisticalCorefProperties.Dataset.DEV);
     preprocess(props, dictionaries, false);
 
     setDataPath("train");

@@ -7,15 +7,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import edu.stanford.nlp.coref.statistical.Clusterer.Cluster;
-
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Pair;
 
-/**
- * Utility classes for computing the B^3 and MUC coreference metrics
- * @author Kevin Clark
- */
 public class EvalUtils {
   public static double getCombinedF1(double mucWeight,
       List<List<Integer>> gold,

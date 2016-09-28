@@ -280,7 +280,7 @@ function ConstituencyParseProcessor() {
  */
 function render(data) {
   // Error checks
-  if (typeof data.sentences == 'undefined') { return; }
+  if (typeof data.sentences === 'undefined') { return; }
 
   /**
    * Register an entity type (a tag) for Brat
@@ -288,7 +288,7 @@ function render(data) {
   var entityTypesSet = {};
   var entityTypes = [];
   function addEntityType(name, type, coarseType) {
-    if (typeof coarseType == "undefined") {
+    if (typeof coarseType === "undefined") {
       coarseType = type;
     }
     // Don't add duplicates
@@ -323,7 +323,7 @@ function render(data) {
       borderColor: 'darken'
     });
   }
-  
+
   /**
    * Register a relation type (an arc) for Brat
    */
@@ -334,7 +334,7 @@ function render(data) {
     if (relationTypesSet[type]) return;
     relationTypesSet[type] = true;
     // Default arguments
-    if (typeof symmetricEdge == 'undefined') { symmetricEdge = false; }
+    if (typeof symmetricEdge === 'undefined') { symmetricEdge = false; }
     // Add the type
     relationTypes.push({
       type: type,
@@ -343,7 +343,7 @@ function render(data) {
       arrowHead: (symmetricEdge ? 'none' : undefined),
     });
   }
-  
+
   //
   // Construct text of annotation
   //
@@ -353,7 +353,7 @@ function render(data) {
     for (var i = 0; i < sentence.tokens.length; ++i) {
       var token = sentence.tokens[i];
       var word = token.word;
-      if (!(typeof tokensMap[word] == "undefined")) {
+      if (!(typeof tokensMap[word] === "undefined")) {
         word = tokensMap[word];
       }
       if (i > 0) { currentText.push(' '); }
@@ -366,7 +366,7 @@ function render(data) {
     currentText.push('\n');
   });
   currentText = currentText.join('');
-    
+
   //
   // Shared variables
   // These are what we'll render in BRAT
@@ -417,7 +417,7 @@ function render(data) {
     function posID(i) {
       return 'POS_' + sentI + '_' + i;
     }
-    if (tokens.length > 0 && typeof tokens[0].pos != 'undefined') {
+    if (tokens.length > 0 && typeof tokens[0].pos !== 'undefined') {
       for (var i = 0; i < tokens.length; i++) {
         var token = tokens[i];
         var pos = token.pos;
@@ -480,15 +480,15 @@ function render(data) {
       return relations;
     }
     // Actually add the dependencies
-    if (typeof deps != 'undefined') {
+    if (typeof deps !== 'undefined') {
       depsRelations = depsRelations.concat(processDeps('dep', deps));
     }
-    if (typeof deps2 != 'undefined') {
+    if (typeof deps2 !== 'undefined') {
       deps2Relations = deps2Relations.concat(processDeps('dep2', deps2));
     }
-  
+
     // Lemmas
-    if (tokens.length > 0 && typeof tokens[0].lemma != 'undefined') {
+    if (tokens.length > 0 && typeof tokens[0].lemma !== 'undefined') {
       for (var i = 0; i < tokens.length; i++) {
         var token = tokens[i];
         var lemma = token.lemma;
@@ -498,14 +498,14 @@ function render(data) {
         lemmaEntities.push(['LEMMA_' + sentI + '_' + i, lemma, [[begin, end]]]);
       }
     }
-  
+
     // NER tags
     // Assumption: contiguous occurrence of one non-O is a single entity
-    if (tokens.length > 0 && typeof tokens[0].ner != 'undefined') {
+    if (tokens.length > 0 && typeof tokens[0].ner !== 'undefined') {
       for (var i = 0; i < tokens.length; i++) {
         var ner = tokens[i].ner;
         var normalizedNER = tokens[i].normalizedNER;
-        if (typeof normalizedNER == "undefined") {
+        if (typeof normalizedNER === "undefined") {
           normalizedNER = ner;
         }
         if (ner == 'O') continue;
@@ -516,9 +516,9 @@ function render(data) {
         i = j;
       }
     }
-    
+
     // Sentiment
-    if (typeof sentence.sentiment != "undefined") {
+    if (typeof sentence.sentiment !== "undefined") {
       var sentiment = sentence.sentiment.toUpperCase().replace("VERY", "VERY ");
       addEntityType('SENTIMENT', sentiment);
       sentimentEntities.push(['SENTIMENT_' + sentI, sentiment,
@@ -530,7 +530,7 @@ function render(data) {
     if (tokens.length > 0) {
       for (var i = 0; i < tokens.length; i++) {
         var link = tokens[i].entitylink;
-        if (link == 'O' || typeof link == 'undefined') continue;
+        if (link == 'O' || typeof link === 'undefined') continue;
         var j = i;
         while (j < tokens.length - 1 && tokens[j+1].entitylink == link) j++;
         addEntityType('LINK', link);
@@ -549,8 +549,8 @@ function render(data) {
       if (openieEntitiesSet[[sentI, span, role]]) return;
       openieEntitiesSet[[sentI, span, role]] = true;
       // Add the entity
-      openieEntities.push([openieID(span), role, 
-        [[tokens[span[0]].characterOffsetBegin, 
+      openieEntities.push([openieID(span), role,
+        [[tokens[span[0]].characterOffsetBegin,
           tokens[span[1] - 1].characterOffsetEnd ]] ]);
     }
     function addRelation(gov, dep, role) {
@@ -559,12 +559,12 @@ function render(data) {
       openieRelationsSet[[sentI, gov, dep, role]] = true;
       // Add the relation
       openieRelations.push(['OPENIESUBJREL_' + sentI + '_' + gov[0] + '_' + gov[1] + '_' + dep[0] + '_' + dep[1],
-                           role, 
-                           [['governor',  openieID(gov)], 
+                           role,
+                           [['governor',  openieID(gov)],
                             ['dependent', openieID(dep)]  ] ]);
     }
     // Render OpenIE
-    if (typeof sentence.openie != 'undefined') {
+    if (typeof sentence.openie !== 'undefined') {
       // Register the entities + relations we'll need
       addEntityType('ENTITY',  'Entity');
       addEntityType('RELATION', 'Relation');
@@ -616,7 +616,7 @@ function render(data) {
                            [['governor',  kbpEntity(gov)],
                             ['dependent', kbpEntity(dep)]  ] ]);
     }
-    if (typeof sentence.kbp != 'undefined') {
+    if (typeof sentence.kbp !== 'undefined') {
       // Register the entities + relations we'll need
       addRelationType('subject');
       addRelationType('object');
@@ -626,9 +626,9 @@ function render(data) {
         var subjectLink = 'Entity';
         for (var k = subjectSpan[0]; k < subjectSpan[1]; ++k) {
           if (subjectLink == 'Entity' &&
-              typeof tokens[k] != 'undefined' &&
+              typeof tokens[k] !== 'undefined' &&
               tokens[k].entitylink != 'O' &&
-              typeof tokens[k].entitylink != 'undefined') {
+              typeof tokens[k].entitylink !== 'undefined') {
             subjectLink = tokens[k].entitylink
           }
         }
@@ -637,9 +637,9 @@ function render(data) {
         var objectLink = 'Entity';
         for (var k = objectSpan[0]; k < objectSpan[1]; ++k) {
           if (objectLink == 'Entity' &&
-              typeof tokens[k] != 'undefined' &&
+              typeof tokens[k] !== 'undefined' &&
               tokens[k].entitylink != 'O' &&
-              typeof tokens[k].entitylink != 'undefined') {
+              typeof tokens[k].entitylink !== 'undefined') {
             objectLink = tokens[k].entitylink
           }
         }
@@ -655,13 +655,13 @@ function render(data) {
     }  // End KBP block
 
   }  // End sentence loop
-    
+
   //
   // Coreference
-  // 
+  //
   var corefEntities = [];
   var corefRelations = [];
-  if (typeof data.corefs != 'undefined') {
+  if (typeof data.corefs !== 'undefined') {
     addRelationType('coref', true);
     addEntityType('COREF', 'Mention');
     var clusters = Object.keys(data.corefs);
@@ -672,21 +672,21 @@ function render(data) {
           var mention = chain[i];
           var id = 'COREF' + mention.id;
           var tokens = data.sentences[mention.sentNum - 1].tokens;
-          corefEntities.push([id, 'Mention', 
-            [[tokens[mention.startIndex - 1].characterOffsetBegin, 
+          corefEntities.push([id, 'Mention',
+            [[tokens[mention.startIndex - 1].characterOffsetBegin,
               tokens[mention.endIndex - 2].characterOffsetEnd      ]] ]);
           if (i > 0) {
             var lastId = 'COREF' + chain[i - 1].id;
             corefRelations.push(['COREF' + chain[i-1].id + '_' + chain[i].id,
-                                 'coref', 
-                                 [['governor', lastId], 
+                                 'coref',
+                                 [['governor', lastId],
                                   ['dependent', id]    ] ]);
           }
         }
       }
     });
   }  // End coreference block
-    
+
   //
   // Actually render the elements
   //
@@ -697,8 +697,8 @@ function render(data) {
    */
   function embed(container, entities, relations) {
     if ($('#' + container).length > 0) {
-      Util.embed(container, 
-                 {entity_types: entityTypes, relation_types: relationTypes}, 
+      Util.embed(container,
+                 {entity_types: entityTypes, relation_types: relationTypes},
                  {text: currentText, entities: entities, relations: relations}
                 );
     }
@@ -746,7 +746,7 @@ function renderTokensregex(data) {
     if (entityTypesSet[type]) return;
     entityTypesSet[type] = true;
     // Set the color
-    if (typeof color == 'undefined') {
+    if (typeof color === 'undefined') {
       color = '#ADF6A2';
     }
     // Register the type
@@ -805,7 +805,7 @@ function renderSemgrex(data) {
     if (entityTypesSet[type]) return;
     entityTypesSet[type] = true;
     // Set the color
-    if (typeof color == 'undefined') {
+    if (typeof color === 'undefined') {
       color = '#ADF6A2';
     }
     // Register the type
@@ -869,6 +869,13 @@ function renderSemgrex(data) {
         );
 }  // END renderSemgrex
 
+/**
+ * Render a Tregex response
+ */
+function renderTregex(data) {
+  $('#tregex').empty();
+  $('#tregex').append('<pre>' + JSON.stringify(data, null, 4) + '</pre>');
+}  // END renderTregex
 
 // ----------------------------------------------------------------------------
 // MAIN
@@ -876,7 +883,7 @@ function renderSemgrex(data) {
 
 /**
  * MAIN()
- * 
+ *
  * The entry point of the page
  */
 $(document).ready(function() {
@@ -928,7 +935,7 @@ $(document).ready(function() {
       contentType: "application/x-www-form-urlencoded;charset=UTF-8",
       success: function(data) {
         $('#submit').prop('disabled', false);
-        if (typeof data == undefined || data.sentences == undefined) {
+        if (typeof data === 'undefined' || data.sentences == undefined) {
           alert("Failed to reach server!");
         } else {
           // Process constituency parse
@@ -940,18 +947,18 @@ $(document).ready(function() {
           // Re-render divs
           function createAnnotationDiv(id, annotator, selector, label) {
             // (make sure we requested that element)
-            if (annotators().indexOf(annotator) < 0) { 
-              return; 
+            if (annotators().indexOf(annotator) < 0) {
+              return;
             }
             // (make sure the data contains that element)
             ok = false;
-            if (typeof data[selector] != 'undefined') {
+            if (typeof data[selector] !== 'undefined') {
               ok = true;
-            } else if (typeof data.sentences != 'undefined' && data.sentences.length > 0) {
-              if (typeof data.sentences[0][selector] != 'undefined') {
+            } else if (typeof data.sentences !== 'undefined' && data.sentences.length > 0) {
+              if (typeof data.sentences[0][selector] !== 'undefined') {
                 ok = true;
               } else if (typeof data.sentences[0].tokens != 'undefined' && data.sentences[0].tokens.length > 0) {
-                ok = (typeof data.sentences[0].tokens[0][selector] != 'undefined');
+                ok = (typeof data.sentences[0].tokens[0][selector] !== 'undefined');
               }
             }
             // (render the element)
@@ -1063,4 +1070,36 @@ $(document).ready(function() {
       }
     });
   });
+
+  $('#form_tregex').submit( function (e) {
+    // Don't actually submit the form
+    e.preventDefault();
+    // Get text
+    if ($('#tregex_search').val().trim() == '') {
+      $('#tregex_search').val('NP < NN=animal');
+    }
+    var pattern = $('#tregex_search').val();
+    // Remove existing annotation
+    $('#tregex').remove();
+    // Make ajax call
+    $.ajax({
+      type: 'POST',
+      url: serverAddress + '/tregex?pattern=' + encodeURIComponent(pattern.replace("&", "\\&").replace('+', '\\+')),
+      data: encodeURIComponent(currentQuery),
+      success: function(data) {
+        $('.tregex_error').remove();  // Clear error messages
+        $('<div id="tregex" class="pattern_brat"/>').appendTo($('#div_tregex'));
+        renderTregex(data);
+      },
+      error: function(data) {
+        var alertDiv = $('<div/>').addClass('alert').addClass('alert-danger').addClass('alert-dismissible').addClass('tregex_error').attr('role', 'alert')
+        var button = $('<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>');
+        var message = $('<span/>').text(data.responseText);
+        button.appendTo(alertDiv);
+        message.appendTo(alertDiv);
+        alertDiv.appendTo($('#div_tregex'));
+      }
+    });
+  });
+
 });

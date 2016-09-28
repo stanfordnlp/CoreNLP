@@ -37,7 +37,6 @@ import java.util.TreeMap;
 import edu.stanford.nlp.coref.data.Dictionaries.Animacy;
 import edu.stanford.nlp.coref.data.Dictionaries.Gender;
 import edu.stanford.nlp.coref.data.Dictionaries.Number;
-
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.Generics;
@@ -75,7 +74,6 @@ public class CorefCluster implements Serializable{
 
   public int getClusterID(){ return clusterID; }
   public Set<Mention> getCorefMentions() { return corefMentions; }
-  public int size() { return corefMentions.size(); }
   public Mention getFirstMention() { return firstMention; }
   public Mention getRepresentativeMention() { return representative; }
 

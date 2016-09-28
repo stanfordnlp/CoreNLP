@@ -63,8 +63,6 @@ public class WikidictAnnotator extends SentenceAnnotator {
         if (i % 1000000 == 0) {
           log.info("Loaded " + i + " entries from Wikidict [" + SystemUtils.getMemoryInUse() + "MB memory used; " + Redwood.formatTimeDifference(System.currentTimeMillis() - startTime) + " elapsed]");
         }
-        String surfaceForm = fields[0];
-        String link = fields[1].intern();  // intern, as most entities have multiple surface forms
         // Check that the read entry is above the score threshold
         if (threshold > 0.0) {
           double score = Double.parseDouble(fields[2]);
@@ -72,6 +70,8 @@ public class WikidictAnnotator extends SentenceAnnotator {
             continue;
           }
         }
+        String surfaceForm = fields[0];
+        String link = fields[1].intern();  // intern, as most entities have multiple surface forms
         // Add the entry
         dictionary.put(surfaceForm, link);
         i += 1;
@@ -160,7 +160,7 @@ public class WikidictAnnotator extends SentenceAnnotator {
   /** {@inheritDoc} */
   @Override
   protected long maxTime() {
-    return -1l;
+    return -1L;
   }
 
   /** {@inheritDoc} */

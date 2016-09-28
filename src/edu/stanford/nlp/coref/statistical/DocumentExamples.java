@@ -4,11 +4,6 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Represents all coreference examples for a particular document. Individual mention features are
- * stored separately from pairwise features to save memory.
- * @author Kevin Clark
- */
 public class DocumentExamples implements Serializable {
   private static final long serialVersionUID = -2474306699767791493L;
 

@@ -35,12 +35,7 @@ public class EnvLookup {
         }
       }
     }
-    AnnotationLookup.KeyLookup lookup = AnnotationLookup.getCoreKey(name);
-    if (lookup != null) {
-      return lookup.coreKey;
-    } else {
-      return null;
-    }
+    return AnnotationLookup.toCoreKey(name);
   }
 
   public static Class lookupAnnotationKeyWithClassname(Env env, String name) {
