@@ -237,6 +237,7 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
   public Set<Class<? extends CoreAnnotation>> requirementsSatisfied() {
     switch (COREF_MODE) {
       case STATISTICAL_MODE:
+      case NEURAL_MODE:
       case HYBRID_MODE:
         return Collections.singleton(CorefCoreAnnotations.CorefChainAnnotation.class);
       default:
