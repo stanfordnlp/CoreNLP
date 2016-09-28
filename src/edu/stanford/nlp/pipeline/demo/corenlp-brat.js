@@ -20,15 +20,9 @@ head.js(
   // brat modules
   bratLocation + '/client/src/dispatcher.js',
   bratLocation + '/client/src/url_monitor.js',
-  bratLocation + '/client/src/visualizer.js',
-
-  // parse viewer
-  './corenlp-parseviewer.js'
+  bratLocation + '/client/src/visualizer.js'
 );
 
-// Uses Dagre (https://github.com/cpettitt/dagre) for constinuency parse
-// visualization. It works better than the brat visualization.
-var useDagre = true;
 var currentQuery = 'The quick brown fox jumped over the lazy dog.';
 var currentSentences = '';
 var currentText = '';
@@ -103,21 +97,21 @@ function posColor(posTag) {
  */
 function nerColor(nerTag) {
   if (nerTag == 'PERSON') {
-    return '#FFCCAA';
+    return '#FFCCAA'
   } else if (nerTag == 'ORGANIZATION') {
-    return '#8FB2FF';
+    return '#8FB2FF'
   } else if (nerTag == 'MISC') {
-    return '#F1F447';
+    return '#F1F447'
   } else if (nerTag == 'LOCATION') {
-    return '#95DFFF';
+    return '#95DFFF'
   } else if (nerTag == 'DATE' || nerTag == 'TIME' || nerTag == 'SET') {
-    return '#9AFFE6';
+    return '#9AFFE6'
   } else if (nerTag == 'MONEY') {
-    return '#FFFFFF';
+    return '#FFFFFF'
   } else if (nerTag == 'PERCENT') {
-    return '#FFA22B';
+    return '#FFA22B'
   } else {
-    return '#E3E3E3';
+    return '#E3E3E3'
   }
 }
 
@@ -169,106 +163,6 @@ function date() {
   var m = date.getMinutes();
   var s = date.getSeconds();
   return "" + Y + "-" + f(M) + "-" + f(D) + "T" + f(h) + ':' + f(m) + ':' + f(s);
-}
-
-
-//-----------------------------------------------------------------------------
-// Constituency parser
-//-----------------------------------------------------------------------------
-function ConstituencyParseProcessor() {
-  var parenthesize = function (input, list) {
-    if (list === undefined) {
-      return parenthesize(input, []);
-    } else {
-      var token = input.shift();
-      if (token === undefined) {
-        return list.pop();
-      } else if (token === "(") {
-        list.push(parenthesize(input, []));
-        return parenthesize(input, list);
-      } else if (token === ")") {
-        return list;
-      } else {
-        return parenthesize(input, list.concat(token));
-      }
-    }
-  };
-
-  var toTree = function (list) {
-    if (list.length === 2 && typeof list[1] === 'string') {
-      return {label: list[0], text: list[1], isTerminal: true};
-    } else if (list.length >= 2) {
-      var label = list.shift();
-      var node = {label: label};
-      var rest = list.map(function (x) {
-        var t = toTree(x);
-        if (typeof t === 'object') {
-          t.parent = node;
-        }
-        return t;
-      });
-      node.children = rest;
-      return node;
-    } else {
-      return list;
-    }
-  };
-
-  var indexTree = function (tree, tokens, index) {
-    index = index || 0;
-    if (tree.isTerminal) {
-      tree.token = tokens[index];
-      tree.tokenIndex = index;
-      tree.tokenStart = index;
-      tree.tokenEnd = index + 1;
-      return index + 1;
-    } else if (tree.children) {
-      tree.tokenStart = index;
-      for (var i = 0; i < tree.children.length; i++) {
-        var child = tree.children[i];
-        index = indexTree(child, tokens, index);
-      }
-      tree.tokenEnd = index;
-    }
-    return index;
-  };
-
-  var tokenize = function (input) {
-    return input.split('"')
-      .map(function (x, i) {
-        if (i % 2 === 0) { // not in string
-          return x.replace(/\(/g, ' ( ')
-            .replace(/\)/g, ' ) ');
-        } else { // in string
-          return x.replace(/ /g, "!whitespace!");
-        }
-      })
-      .join('"')
-      .trim()
-      .split(/\s+/)
-      .map(function (x) {
-        return x.replace(/!whitespace!/g, " ");
-      });
-  };
-
-  var convertParseStringToTree = function (input, tokens) {
-    var p = parenthesize(tokenize(input));
-    if (Array.isArray(p)) {
-      var tree = toTree(p);
-      // Correlate tree with tokens
-      indexTree(tree, tokens);
-      return tree;
-    }
-  };
-
-  this.process = function(annotation) {
-    for (var i = 0; i < annotation.sentences.length; i++) {
-      var s = annotation.sentences[i];
-      if (s.parse) {
-        s.parseTree = convertParseStringToTree(s.parse, s.tokens);
-      }
-    }
-  }
 }
 
 // ----------------------------------------------------------------------------
@@ -395,8 +289,6 @@ function render(data) {
   var kbpRelations = [];
   var kbpRelationsSet = [];
 
-  var cparseEntities = [];
-  var cparseRelations = [];
 
   //
   // Loop over sentences.
@@ -408,7 +300,6 @@ function render(data) {
     var tokens = sentence.tokens;
     var deps = sentence['basicDependencies'];
     var deps2 = sentence['enhancedPlusPlusDependencies'];
-    var parseTree = sentence['parseTree'];
 
     // POS tags
     /**
@@ -426,40 +317,6 @@ function render(data) {
         addEntityType('POS', pos);
         posEntities.push([posID(i), pos, [[begin, end]]]);
       }
-    }
-
-    // Constituency parse
-    // Carries the same assumption as NER
-    if (parseTree && !useDagre) {
-      var parseEntities = [];
-      var parseRels = [];
-      function processParseTree(tree, index) {
-        tree.visitIndex = index;
-        index++;
-        if (tree.isTerminal) {
-          parseEntities[tree.visitIndex] = posEntities[tree.tokenIndex];
-          return index;
-        } else if (tree.children) {
-          addEntityType('PARSENODE', tree.label);
-          parseEntities[tree.visitIndex] =
-            ['PARSENODE_' + sentI + '_' + tree.visitIndex, tree.label,
-              [[tokens[tree.tokenStart].characterOffsetBegin, tokens[tree.tokenEnd-1].characterOffsetEnd]]];
-          var parentEnt = parseEntities[tree.visitIndex];
-          for (var i = 0; i < tree.children.length; i++) {
-            var child = tree.children[i];
-            index = processParseTree(child, index);
-            var childEnt = parseEntities[child.visitIndex];
-            addRelationType('pc');
-            parseRels.push(['PARSEEDGE_' + sentI + '_' + parseRels.length, 'pc', [['parent', parentEnt[0]], ['child', childEnt[0]]]]);
-          }
-        }
-        return index;
-      }
-      processParseTree(parseTree, 0);
-      console.log(parseEntities);
-      console.log(parseRels);
-      cparseEntities = cparseEntities.concat(cparseEntities, parseEntities);
-      cparseRelations = cparseRelations.concat(parseRels);
     }
 
     // Dependency parsing
@@ -710,23 +567,12 @@ function render(data) {
     embed('lemma', lemmaEntities);
     embed('ner', nerEntities);
     embed('entities', linkEntities);
-    if (!useDagre) {
-      embed('parse', cparseEntities, cparseRelations);
-    }
     embed('deps', posEntities, depsRelations);
     embed('deps2', posEntities, deps2Relations);
     embed('coref', corefEntities, corefRelations);
     embed('openie', openieEntities, openieRelations);
     embed('kbp',    kbpEntities, kbpRelations);
     embed('sentiment', sentimentEntities);
-
-    // Constituency parse
-    // Uses d3 and dagre-d3 (not brat)
-    if ($('#parse').length > 0 && useDagre) {
-      var parseViewer = new ParseViewer({ selector: '#parse' });
-      parseViewer.showAnnotation(data);
-      $('#parse').addClass('svg').css('display', 'block');
-    }
   });
 
 }  // End render function
@@ -826,7 +672,7 @@ function renderSemgrex(data) {
   }];
 
   var entities = [];
-  var relations = [];
+  var relations = []
 
   for (var sentI = 0; sentI < data.sentences.length; ++sentI) {
     var tokens = currentSentences[sentI].tokens;
@@ -929,7 +775,7 @@ $(document).ready(function() {
       type: 'POST',
       url: serverAddress + '?properties=' + encodeURIComponent(
         '{"annotators": "' + annotators() + '", "date": "' + date() + '"' +
-        ', "sutime.includeRange": "true", "coref.md.type": "dep", "coref.mode": "statistical"}'),
+        ', "coref.md.type": "dep", "coref.mode": "statistical"}'),
       data: encodeURIComponent(currentQuery), //jQuery does'nt automatically URI encode strings
       dataType: 'json',
       contentType: "application/x-www-form-urlencoded;charset=UTF-8",
@@ -938,10 +784,6 @@ $(document).ready(function() {
         if (typeof data === 'undefined' || data.sentences == undefined) {
           alert("Failed to reach server!");
         } else {
-          // Process constituency parse
-          var constituencyParseProcessor = new ConstituencyParseProcessor();
-          constituencyParseProcessor.process(data);
-          console.log(data);
           // Empty divs
           $('#annotations').empty();
           // Re-render divs
@@ -971,7 +813,6 @@ $(document).ready(function() {
           createAnnotationDiv('pos',      'pos',        'pos',                                 'Part-of-Speech'          );
           createAnnotationDiv('lemma',    'lemma',      'lemma',                               'Lemmas'                  );
           createAnnotationDiv('ner',      'ner',        'ner',                                 'Named Entity Recognition');
-          createAnnotationDiv('parse',    'parse',      'parseTree',                           'Constituency Parse'      );
           createAnnotationDiv('deps',     'depparse',   'basicDependencies',                   'Basic Dependencies'      );
           createAnnotationDiv('deps2',    'depparse',   'enhancedPlusPlusDependencies',        'Enhanced++ Dependencies' );
           createAnnotationDiv('openie',   'openie',     'openie',                              'Open IE'                 );

@@ -358,17 +358,12 @@ public class StanfordCoreNLPServer implements Runnable {
    */
   public static class FileHandler implements HttpHandler {
     private final String content;
-    private final String contentType;
     public FileHandler(String fileOrClasspath) throws IOException {
-      this(fileOrClasspath, "text/html");
-    }
-    public FileHandler(String fileOrClasspath, String contentType) throws IOException {
       this.content = IOUtils.slurpReader(IOUtils.readerFromString(fileOrClasspath));
-      this.contentType = contentType;
     }
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-      httpExchange.getResponseHeaders().set("Content-type", this.contentType);
+      httpExchange.getResponseHeaders().set("Content-type", "text/html");
       httpExchange.sendResponseHeaders(HTTP_OK, content.getBytes().length);
       httpExchange.getResponseBody().write(content.getBytes());
       httpExchange.close();
@@ -1078,9 +1073,8 @@ public class StanfordCoreNLPServer implements Runnable {
       withAuth(server.createContext("/tokensregex", new TokensRegexHandler(authenticator, callback)), basicAuth);
       withAuth(server.createContext("/semgrex", new SemgrexHandler(authenticator, callback)), basicAuth);
       withAuth(server.createContext("/tregex", new TregexHandler(authenticator, callback)), basicAuth);
-      withAuth(server.createContext("/corenlp-brat.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.js", "application/javascript")), basicAuth);
-      withAuth(server.createContext("/corenlp-brat.cs", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.css", "text/css")), basicAuth);
-      withAuth(server.createContext("/corenlp-parseviewer.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-parseviewer.js", "application/javascript")), basicAuth);
+      withAuth(server.createContext("/corenlp-brat.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.js")), basicAuth);
+      withAuth(server.createContext("/corenlp-brat.cs", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.css")), basicAuth);
       withAuth(server.createContext("/ping", new PingHandler()), basicAuth);
       withAuth(server.createContext("/shutdown", new ShutdownHandler()), basicAuth);
       server.setExecutor(serverExecutor);

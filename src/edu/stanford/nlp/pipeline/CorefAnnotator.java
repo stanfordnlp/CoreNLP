@@ -5,6 +5,7 @@ import java.util.*;
 
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
 import edu.stanford.nlp.coref.CorefProperties;
+import edu.stanford.nlp.coref.CorefSystem;
 import edu.stanford.nlp.coref.hybrid.HybridCorefSystem;
 import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.coref.data.CorefChain.CorefMention;
@@ -36,6 +37,7 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
 
   private static final boolean VERBOSE = false;
 
+  private final CorefSystem corefSystem;
   private final HybridCorefSystem hcorefSystem;
   private final StatisticalCorefSystem scorefSystem;
 
@@ -45,6 +47,7 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
   // String to determine whether to use hybrid or statistical mode
   private String COREF_MODE;
   private final String HYBRID_MODE = "hybrid";
+  private final String NEURAL_MODE = "neural";
   private final String STATISTICAL_MODE = "statistical";
 
   private final Properties props;
@@ -62,17 +65,24 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
   public CorefAnnotator(Properties props) {
     this.props = props;
     try {
-      COREF_MODE = props.getProperty("coref.mode", STATISTICAL_MODE);
+      COREF_MODE = props.getProperty("coref.algorithm", NEURAL_MODE);
       if (COREF_MODE.equals(HYBRID_MODE)) {
         hcorefSystem = new HybridCorefSystem(props);
         scorefSystem = null;
+        corefSystem = null;
       } else if (COREF_MODE.equals(STATISTICAL_MODE)) {
         // create corefSystem for statistical
         scorefSystem = StatisticalCorefSystem.fromProps(props);
         hcorefSystem = null;
+        corefSystem = null;
+      } else if (COREF_MODE.equals(NEURAL_MODE)) {
+        scorefSystem = null;
+        hcorefSystem = null;
+        corefSystem = new CorefSystem(props);
       } else {
         scorefSystem = null;
         hcorefSystem = null;
+        corefSystem = null;
       }
       OLD_FORMAT = Boolean.parseBoolean(props.getProperty("oldCorefFormat", "false"));
     } catch (Exception e) {
@@ -103,6 +113,8 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
         if(OLD_FORMAT) annotateOldFormat(result, corefDoc);
       } else if (COREF_MODE.equals(STATISTICAL_MODE)) {
         scorefSystem.annotate(annotation);
+      } else if (COREF_MODE.equals(NEURAL_MODE)) {
+        corefSystem.annotate(annotation);
       } else {
         log.error("invalid selection for coreference mode!");
         throw new RuntimeException() ;
