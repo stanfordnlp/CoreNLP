@@ -78,7 +78,7 @@ public class StatisticalCorefProperties {
 
   public static String clusteringModelPath(Properties props) {
     return PropertiesUtils.getString(props, "coref.clusteringModel",
-        "edu/stanford/nlp/models/coref/statistical/clustering_model.ser");
+        "edu/stanford/nlp/models/coref/statistical/clustering_model.ser.gz");
   }
 
   public static String wordCountsPath(Properties props) {
