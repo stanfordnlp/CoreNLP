@@ -65,7 +65,7 @@ public class CorefAnnotator extends TextAnnotationCreator implements Annotator  
   public CorefAnnotator(Properties props) {
     this.props = props;
     try {
-      COREF_MODE = props.getProperty("coref.algorithm", NEURAL_MODE);
+      COREF_MODE = props.getProperty("coref.algorithm", STATISTICAL_MODE);
       if (COREF_MODE.equals(HYBRID_MODE)) {
         hcorefSystem = new HybridCorefSystem(props);
         scorefSystem = null;
