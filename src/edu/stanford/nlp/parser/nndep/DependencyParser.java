@@ -594,6 +594,8 @@ public class DependencyParser  {
         }
       }
       input.close();
+      config.hiddenSize = hSize;
+      config.embeddingSize = eSize;
       classifier = new Classifier(config, E, W1, b1, W2, preComputed);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
