@@ -31,7 +31,7 @@ import edu.stanford.nlp.util.StringUtils;
  */
 public class DependencyParserITest extends TestCase {
 
-  private static final double EnglishSdLas = 89.46997859637266;
+  private static final double EnglishSdLas = 89.55236534222574; // was until Sept 2016: 89.46997859637266;
 
   /**
    * Test that the NN dependency parser performance doesn't change.
@@ -45,7 +45,7 @@ public class DependencyParserITest extends TestCase {
   }
 
   // Lower because we're evaluating on PTB + extraDevTest, not just PTB
-  private static final double EnglishUdLas = 88.72648417258083;
+  private static final double EnglishUdLas = 88.78652574464478; // was until Sept 2016: 88.72648417258083;
 
   /**
    * Test that the NN dependency parser performance doesn't change.
@@ -98,9 +98,9 @@ public class DependencyParserITest extends TestCase {
     Annotation document = new Annotation(text);
     pipeline.annotate(document);
 
-    SemanticGraph ccProcessed = document.get(CoreAnnotations.SentencesAnnotation.class).get(0)
-                                        .get(
-                                            SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
+    SemanticGraph ccProcessed =
+            document.get(CoreAnnotations.SentencesAnnotation.class).get(0)
+                                .get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
     Collection<TypedDependency> dependencies = ccProcessed.typedDependencies();
 
     GrammaticalRelation expected = UniversalEnglishGrammaticalRelations.getConj("and");
