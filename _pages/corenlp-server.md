@@ -19,16 +19,16 @@ If no value for `port` is provided, port 9000 will be used by default. You can t
 
     http://localhost:9000/
 
-You should see a website similar to [corenlp.run](http://corenlp.run/), with an input box for text and a list of annotators you can run. From this interface, you can test out each of the annotators by adding/removing them from this list. (Note: *The first use will be slow*  to respond while models are loaded – it might take 30 seconds or so, but after that the server should run quite quickly.) You can test out the API by sending a `POST` request to the server with the appropriate properties. An easy way to do this is with [wget](https://www.gnu.org/software/wget/). The following will annotate the sentence "*the quick brown fox jumped over the lazy dog*" with part of speech tags (and tokenizing on whitespace – recall, you can pass in any property recognized by CoreNLP):
+You should see a website similar to [corenlp.run](http://corenlp.run/), with an input box for text and a list of annotators you can run. From this interface, you can test out each of the annotators by adding/removing them from this list. (Note: *The first use will be slow*  to respond while models are loaded – it might take 30 seconds or so, but after that the server should run quite quickly.) You can test out the API by sending a `POST` request to the server with the appropriate properties. An easy way to do this is with [wget](https://www.gnu.org/software/wget/). The following will annotate the sentence "*the quick brown fox jumped over the lazy dog*" with part of speech tags:
 
 ```bash
-wget --post-data 'The quick brown fox jumped over the lazy dog.' 'localhost:9000/?properties={"tokenize.whitespace":"true","annotators":"tokenize,ssplit,pos","outputFormat":"json"}' -O -
+wget --post-data 'The quick brown fox jumped over the lazy dog.' 'localhost:9000/?properties={"annotators":"tokenize,ssplit,pos","outputFormat":"json"}' -O -
 ```
 
 Or if you only have or prefer [curl](https://curl.haxx.se/):
 
 ```bash
-curl --data 'The quick brown fox jumped over the lazy dog.' 'http://localhost:9000/?properties={{ "{%" }}22tokenize.whitespace%22%3A%22true%22%2C%22annotators%22%3A%22tokenize%2Cssplit%2Cpos%22%2C%22outputFormat%22%3A%22json%22}' -o -
+curl --data 'The quick brown fox jumped over the lazy dog.' 'http://localhost:9000/?properties={{ "{%" }}22annotators%22%3A%22tokenize%2Cssplit%2Cpos%22%2C%22outputFormat%22%3A%22json%22}' -o -
 ```
 
 The rest of this document: describes the API in more detail, describes a Java client to the API as a drop-in replacement for the `StanfordCoreNLP` annotator pipeline, and talks about administering the server.
