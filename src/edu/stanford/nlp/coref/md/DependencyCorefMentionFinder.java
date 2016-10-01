@@ -103,7 +103,7 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder  {
     SemanticGraph basic = s.get(BasicDependenciesAnnotation.class);
     
     List<IndexedWord> nounsOrPrp = basic.getAllNodesByPartOfSpeechPattern("N.*|PRP.*|DT");    // DT is for "this, these, etc"
-    Tree tree = s.get(TreeAnnotation.class);
+    //Tree tree = s.get(TreeAnnotation.class);
     
     for(IndexedWord w : nounsOrPrp) {
       SemanticGraphEdge edge = basic.getEdge(basic.getParent(w), w);

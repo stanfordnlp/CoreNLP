@@ -66,11 +66,11 @@ public class MentionAnnotator extends TextAnnotationCreator implements Annotator
       mentionAnnotatorRequirements.addAll(Arrays.asList(
           CoreAnnotations.TokensAnnotation.class,
           CoreAnnotations.SentencesAnnotation.class,
+          CoreAnnotations.SentenceIndexAnnotation.class,
           CoreAnnotations.PartOfSpeechAnnotation.class,
           CoreAnnotations.NamedEntityTagAnnotation.class,
           CoreAnnotations.IndexAnnotation.class,
           CoreAnnotations.TextAnnotation.class,
-          CoreAnnotations.ValueAnnotation.class,
           SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class,
           SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class
 
