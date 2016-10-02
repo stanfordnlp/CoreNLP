@@ -25,7 +25,7 @@
 //    Licensing: java-nlp-support@lists.stanford.edu
 //    http://www-nlp.stanford.edu/software/tagger.shtml
 
-package edu.stanford.nlp.tagger.maxent; 
+package edu.stanford.nlp.tagger.maxent;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import edu.stanford.nlp.maxent.Experiments;
@@ -104,12 +104,13 @@ public class TaggerExperiments extends Experiments  {
       vArray[i][0] = indX;
       vArray[i][1] = indY;
 
-      if (i > 0 && (i % 10000) == 0) {
-        System.err.printf("%d ", i);
-        if (i % 100000 == 0) { log.info(); }
-      }
+      // It's the 2010s now and it doesn't take so long to featurize....
+      // if (i > 0 && (i % 10000) == 0) {
+      //   System.err.printf("%d ", i);
+      //   if (i % 100000 == 0) { System.err.println(); }
+      // }
     }
-    log.info();
+    // log.info();
     log.info("Featurized " + c.getSize() + " data tokens [done].");
     c.release();
     ptilde();
