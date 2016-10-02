@@ -49,6 +49,7 @@ public class Distsim implements Serializable {
     }
 
     lexicon = Generics.newHashMap();
+    // todo [cdm 2016]: Note that this loads file with default file encoding rather than specifying it
     for (String word : ObjectBank.getLineIterator(new File(filename))) {
       String[] bits = word.split("\\s+");
       String w = bits[0];
