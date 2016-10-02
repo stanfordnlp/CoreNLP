@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Keeps track of a distributional similarity mapping, eg a map from
+ * Keeps track of a distributional similarity mapping, i.e., a map from
  * word to class.  Returns strings to save time, since that is how the
  * results are used in the tagger.
  */
@@ -24,7 +24,8 @@ public class Distsim implements Serializable {
 
   private final String unk;
 
-  private boolean mapdigits;
+  private boolean mapdigits; // = false
+  private boolean casedDistSim; // = false;
 
   private static final Pattern digits = Pattern.compile("[0-9]");
 
@@ -40,6 +41,8 @@ public class Distsim implements Serializable {
     for (int arg = 1; arg < pieces.length; ++arg) {
       if (pieces[arg].equalsIgnoreCase("mapdigits")) {
         mapdigits = true;
+      } else if (pieces[arg].equalsIgnoreCase("casedDistSim")) {
+        casedDistSim = true;
       } else {
         throw new IllegalArgumentException("Unknown argument " + pieces[arg]);
       }
@@ -48,7 +51,11 @@ public class Distsim implements Serializable {
     lexicon = Generics.newHashMap();
     for (String word : ObjectBank.getLineIterator(new File(filename))) {
       String[] bits = word.split("\\s+");
-      lexicon.put(bits[0].toLowerCase(), bits[1]);
+      String w = bits[0];
+      if ( ! casedDistSim) {
+        w = w.toLowerCase();
+      }
+      lexicon.put(w, bits[1]);
     }
 
     if (lexicon.containsKey("<unk>")) {
@@ -58,7 +65,7 @@ public class Distsim implements Serializable {
     }
   }
 
-  static public Distsim initLexicon(String path) {
+  public static Distsim initLexicon(String path) {
     synchronized (lexiconMap) {
       Distsim lex = lexiconMap.get(path);
       if (lex == null) {
@@ -96,4 +103,5 @@ public class Distsim implements Serializable {
 
 
   private static final long serialVersionUID = 2L;
+
 }
