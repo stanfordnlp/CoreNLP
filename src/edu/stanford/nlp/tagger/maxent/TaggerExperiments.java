@@ -26,11 +26,12 @@
 //    http://www-nlp.stanford.edu/software/tagger.shtml
 
 package edu.stanford.nlp.tagger.maxent;
-import edu.stanford.nlp.util.logging.Redwood;
 
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.maxent.Experiments;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,7 +51,7 @@ import java.util.Arrays;
 public class TaggerExperiments extends Experiments  {
 
   /** A logger for this class */
-  private static Redwood.RedwoodChannels log = Redwood.channels(TaggerExperiments.class);
+  private static final Redwood.RedwoodChannels log = Redwood.channels(TaggerExperiments.class);
 
   private static final boolean DEBUG = true;
   private static final String zeroSt = "0";
@@ -172,7 +173,7 @@ public class TaggerExperiments extends Experiments  {
         Pair<Integer, String> wT = new Pair<>(numF, fK.val);
         xValues = tFeature.getXValues(wT);
         if (xValues == null) {
-          log.info("  xValues is null: " + fK.toString()); //  + " " + i
+          log.info("  xValues is null: " + fK); //  + " " + i
           continue;
         }
         int numEvidence = 0;
@@ -235,7 +236,7 @@ public class TaggerExperiments extends Experiments  {
             current = current + numElements;
             feats.add(tF);
             if (VERBOSE) {
-              log.info("  added feature with key " + fK.toString() + " has support " + numElements);
+              log.info("  added feature with key " + fK + " has support " + numElements);
             }
           } else {
 
@@ -247,7 +248,7 @@ public class TaggerExperiments extends Experiments  {
                                                  maxentTagger.getTagIndex(fK.tag), this);
             feats.add(tF);
             if (VERBOSE) {
-              log.info("  added feature with key " + fK.toString() + " has support " + xValues.length);
+              log.info("  added feature with key " + fK + " has support " + xValues.length);
             }
           }
 
@@ -315,7 +316,7 @@ public class TaggerExperiments extends Experiments  {
       log.info("  Number of zero feature x,y pairs: " + numZeros);
       log.info("end getFeaturesNew.");
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new RuntimeIOException(e);
     }
   }
 
@@ -326,31 +327,33 @@ public class TaggerExperiments extends Experiments  {
     log.info("Hashing histories ...");
     for (int x = 0; x < xSize; x++) {
       History h = tHistories.getHistory(x);
-      if (x > 0 && x % 10000 == 0) {
-        System.err.printf("%d ",x);
-        if (x % 100000 == 0) { log.info(); }
-      }
+      // It's the 2010s now and it doesn't take so long to featurize....
+      // if (x > 0 && x % 10000 == 0) {
+      //   System.err.printf("%d ",x);
+      //   if (x % 100000 == 0) { log.info(); }
+      // }
       int fSize = (maxentTagger.isRare(ExtractorFrames.cWord.extract(h)) ? fAll : fGeneral);
       for (int i = 0; i < fSize; i++) {
         tFeature.addPrev(i, h);
       }
     } // for x
     // now for the populated ones
-    log.info();
+    // log.info();
     log.info("Hashed " + xSize + " histories.");
     log.info("Hashing populated histories ...");
     for (int x = 0; x < xSize; x++) {
       History h = tHistories.getHistory(x);
-      if (x > 0 && x % 10000 == 0) {
-        log.info(x + " ");
-        if (x % 100000 == 0) { log.info(); }
-      }
+      // It's the 2010s now and it doesn't take so long to featurize....
+      // if (x > 0 && x % 10000 == 0) {
+      //   log.info(x + " ");
+      //   if (x % 100000 == 0) { log.info(); }
+      // }
       int fSize = (maxentTagger.isRare(ExtractorFrames.cWord.extract(h)) ? fAll : fGeneral);
       for (int i = 0; i < fSize; i++) {
         tFeature.add(i, h, x); // write this to check whether to add
       }
     } // for x
-    log.info();
+    // log.info();
     log.info("Hashed populated histories.");
   }
 

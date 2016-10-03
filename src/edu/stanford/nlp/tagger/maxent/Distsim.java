@@ -3,6 +3,7 @@ package edu.stanford.nlp.tagger.maxent;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Timing;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.File;
 import java.io.Serializable;
@@ -16,7 +17,11 @@ import java.util.regex.Pattern;
  * results are used in the tagger.
  */
 public class Distsim implements Serializable {
-  // avoid loading the same lexicon twice but allow different lexicons
+
+  /** A logger for this class */
+  private static final Redwood.RedwoodChannels log = Redwood.channels(Distsim.class);
+
+  // Avoid loading the same lexicon twice but allow different lexicons
   // TODO: when loading a distsim, should we populate this map?
   private static final Map<String,Distsim> lexiconMap = Generics.newHashMap();
 
@@ -70,10 +75,10 @@ public class Distsim implements Serializable {
     synchronized (lexiconMap) {
       Distsim lex = lexiconMap.get(path);
       if (lex == null) {
-        Timing.startDoing("Loading distsim lexicon from " + path);
+        Timing timer = new Timing();
         lex = new Distsim(path);
         lexiconMap.put(path, lex);
-        Timing.endDoing();
+        timer.done(log, "Loading distsim lexicon from " + path);
       }
       return lex;
     }
