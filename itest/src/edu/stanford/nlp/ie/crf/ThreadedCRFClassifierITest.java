@@ -19,7 +19,7 @@ public class ThreadedCRFClassifierITest extends TestCase {
   private String german2 = 
     "/u/nlp/data/ner/goodClassifiers/german.dewac_175m_600.crf.ser.gz";
   */
-  private String germanTestFile = "/u/nlp/data/german/ner/2016/deu.io.utf8.testa"
+  private String germanTestFile = "/u/nlp/data/german/ner/2016/deu.io.utf8.testa";
 
   private String english1 = 
     "/u/nlp/data/ner/goodClassifiers/english.all.3class.nodistsim.crf.ser.gz";
