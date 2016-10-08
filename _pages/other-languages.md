@@ -15,6 +15,13 @@ Below are interfaces and packages for running Stanford CoreNLP from other langua
 * [Clojure wrapper for CoreNLP](https://github.com/ngrunwald/stanford-nlp-tools)
 by Nils Gruenwald. Incomplete. Currently only wraps tagger and TokensRegex.
 
+### Docker
+
+Okay, Docker isn't a language, but you know what we mean….
+
+* [corenlp-docker](https://hub.docker.com/r/motiz88/corenlp/) A Dockerfile for Stanford CoreNLP Server by motiz88.
+* [corenlp-docker](https://github.com/chilland/corenlp-docker) Another by chilland
+
 ### Java
 
 * [DKPro Core](https://dkpro.github.io/dkpro-core/) is a collection of NLP components, wrapped as **UIMA** components.
