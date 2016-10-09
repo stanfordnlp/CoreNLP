@@ -8,6 +8,8 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
+import edu.stanford.nlp.naturalli.OperatorSpec;
+import edu.stanford.nlp.naturalli.Polarity;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
@@ -36,13 +38,13 @@ public class Document {
   /**
    * The empty {@link java.util.Properties} object, for use with creating default annotators.
    */
-  static final Properties EMPTY_PROPS = new Properties() {{
-    setProperty("language", "english");
-    setProperty("annotators", "");
-    setProperty("tokenize.class", "PTBTokenizer");
-    setProperty("tokenize.language", "en");
-    setProperty("parse.binaryTrees", "true");
-  }};
+  static final Properties EMPTY_PROPS = PropertiesUtils.asProperties(
+      "language", "english",
+      "annotators", "",
+      "tokenize.class", "PTBTokenizer",
+      "tokenize.language", "en",
+      "parse.binaryTrees", "true");
+
 
   /**
    * The caseless {@link java.util.Properties} object.
@@ -50,18 +52,18 @@ public class Document {
    * @see Document#caseless()
    * @see Sentence#caseless()
    */
-  static final Properties CASELESS_PROPS = new Properties() {{
-    setProperty("language", "english");
-    setProperty("annotators", "");
-    setProperty("tokenize.class", "PTBTokenizer");
-    setProperty("tokenize.language", "en");
-    setProperty("parse.binaryTrees", "true");
-    setProperty("pos.model", "edu/stanford/nlp/models/pos-tagger/wsj-0-18-caseless-left3words-distsim.tagger");
-    setProperty("parse.model", "edu/stanford/nlp/models/lexparser/englishPCFG.caseless.ser.gz");
-    setProperty("ner.model", "edu/stanford/nlp/models/ner/english.muc.7class.caseless.distsim.crf.ser.gz," +
+  static final Properties CASELESS_PROPS = PropertiesUtils.asProperties(
+        "language", "english",
+        "annotators", "",
+        "tokenize.class", "PTBTokenizer",
+        "tokenize.language", "en",
+        "parse.binaryTrees", "true",
+        "pos.model", "edu/stanford/nlp/models/pos-tagger/wsj-0-18-caseless-left3words-distsim.tagger",
+        "parse.model", "edu/stanford/nlp/models/lexparser/englishPCFG.caseless.ser.gz",
+        "ner.model", "edu/stanford/nlp/models/ner/english.muc.7class.caseless.distsim.crf.ser.gz," +
                              "edu/stanford/nlp/models/ner/english.conll.4class.caseless.distsim.crf.ser.gz," +
                              "edu/stanford/nlp/models/ner/english.all.3class.caseless.distsim.crf.ser.gz");
-  }};
+
 
   /**
    * The backend to use for constructing {@link edu.stanford.nlp.pipeline.AnnotatorFactory}s.
@@ -382,7 +384,7 @@ public class Document {
   }
 
 
-  /**
+  /*
    * A static block that'll automatically fault in the CoreNLP server, if the appropriate environment
    * variables are set.
    * These are:
@@ -966,8 +968,8 @@ public class Document {
     // Update data
     synchronized (serializer) {
       for (int i = 0; i < sentences.size(); ++i) {
-        sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (pair) -> pair.first.setPolarity(ProtobufAnnotationSerializer.toProto(pair.second)), x -> x.get(NaturalLogicAnnotations.PolarityAnnotation.class));
-        sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (pair) -> pair.first.setOperator(ProtobufAnnotationSerializer.toProto(pair.second)), x -> x.get(NaturalLogicAnnotations.OperatorAnnotation.class));
+        sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (Pair<CoreNLPProtos.Token.Builder, Polarity> pair) -> pair.first().setPolarity(ProtobufAnnotationSerializer.toProto(pair.second())), x -> x.get(NaturalLogicAnnotations.PolarityAnnotation.class));
+        sentences.get(i).updateTokens(ann.get(CoreAnnotations.SentencesAnnotation.class).get(i).get(CoreAnnotations.TokensAnnotation.class), (Pair<CoreNLPProtos.Token.Builder, OperatorSpec> pair) -> pair.first().setOperator(ProtobufAnnotationSerializer.toProto(pair.second())), x -> x.get(NaturalLogicAnnotations.OperatorAnnotation.class));
       }
     }
     return this;
@@ -1108,7 +1110,7 @@ public class Document {
       StringBuilder mentionSpan = new StringBuilder();
       Sentence sentence = sentence(mentionProto.getSentenceIndex());
       for (int k = mentionProto.getBeginIndex(); k < mentionProto.getEndIndex(); ++k) {
-        mentionSpan.append(" ").append(sentence.word(k));
+        mentionSpan.append(' ').append(sentence.word(k));
       }
       // Set the coref cluster id for the token
       CorefChain.CorefMention mention = new CorefChain.CorefMention(
