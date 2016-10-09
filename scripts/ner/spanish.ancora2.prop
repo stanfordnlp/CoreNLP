@@ -1,6 +1,6 @@
 
-trainFileList = /u/nlp/data/spanish/ner/ancora.ner.train.tsv,/u/nlp/data/spanish/ner/ldc-DF.ner.train.tsv,/u/nlp/data/spanish/ner/ldc-NW.ner.train.tsv
-testFiles = /u/nlp/data/spanish/ner/ancora.ner.dev.tsv,/u/nlp/data/spanish/ner/ldc-DF.ner.dev.tsv,/u/nlp/data/spanish/ner/ldc-NW.ner.dev.tsv
+trainFile = /u/nlp/data/spanish/ner/ancora.ner.train.tsv
+testFile = /u/nlp/data/spanish/ner/ancora.ner.dev.tsv
 serializeTo = spanish.ancora2.crf.ser.gz
 
 useDistSim = false
