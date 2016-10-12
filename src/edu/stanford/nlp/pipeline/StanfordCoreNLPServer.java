@@ -105,7 +105,7 @@ public class StanfordCoreNLPServer implements Runnable {
   public StanfordCoreNLPServer() throws IOException {
     defaultProps = PropertiesUtils.asProperties(
         "annotators", defaultAnnotators,  // Run these annotators by default
-        "coref.md.type", "dep",  // Use dependency trees with coref by default
+        "mention.type", "dep",  // Use dependency trees with coref by default
         "coref.mode",  "statistical",  // Use the new coref
         "coref.language",  "en",  // We're English by default
         "inputFormat", "text",   // By default, treat the POST data like text
@@ -583,52 +583,34 @@ public class StanfordCoreNLPServer implements Runnable {
       } else if (urlParams.containsKey("props")) {
         urlProperties = StringUtils.decodeMap(URLDecoder.decode(urlParams.get("props"), "UTF-8"));
       }
-      System.out.println(urlProperties);
+
+      // check to see if a specific language was set, use language specific properties
+      if (urlProperties.containsKey("pipelineLanguage")) {
+        String languagePropertiesFile = LanguageInfo.getLanguagePropertiesFile(urlProperties.get("pipelineLanguage"));
+        Properties languageSpecificProperties = new Properties();
+        try {
+          languageSpecificProperties.load(StanfordCoreNLPServer.class.getResourceAsStream(languagePropertiesFile));
+          PropertiesUtils.overWriteProperties(props,languageSpecificProperties);
+        } catch (IOException e) {
+          err("Failure to load language specific properties.");
+        }
+      }
+
       // (tweak the default properties a bit)
-      if (!props.containsKey("coref.md.type")) {
+      if (!props.containsKey("mention.type")) {
         // Set coref head to use dependencies
-        props.setProperty("coref.md.type", "dep");
+        props.setProperty("mention.type", "dep");
         if (urlProperties.containsKey("annotators") && urlProperties.get("annotators") != null &&
             ArrayUtils.contains(urlProperties.get("annotators").split(","), "parse")) {
           // (case: the properties have a parse annotator --
           //        we don't have to use the dependency mention finder)
-          props.remove("coref.md.type");
+          props.remove("mention.type");
         }
       }
+
       // (add new properties on top of the default properties)
       urlProperties.entrySet()
           .forEach(entry -> props.setProperty(entry.getKey(), entry.getValue()));
-
-      // if a language is specified, load the properties for that language, don't overwrite other properties
-      if (props.containsKey("pipelineLanguage")) {
-        String pipelineLanguageFile = LanguageInfo.getLanguagePropertiesFile(props.getProperty("pipelineLanguage"));
-        if (pipelineLanguageFile == null) {
-          String clientResponse = "specified language is not supported: "+props.getProperty("pipelineLanguage")
-                  +" ; defaulting to English";
-          try {
-            respondError(clientResponse, httpExchange);
-          } catch (IOException e) {
-            err("failed to send client response: \""+clientResponse+"\"");
-          }
-        }
-        try {
-          Properties languageProps = new Properties();
-          languageProps.load(StanfordCoreNLPServer.class.getResourceAsStream(pipelineLanguageFile));
-          PropertiesUtils.noClobberWriteProperties(props, languageProps);
-        } catch (IOException e) {
-          // server side log missing resource for requested language
-          String errorMessage = "missing properties file: "
-                  +pipelineLanguageFile+" ; this file is required on server CLASSPATH to process language: "
-                  +props.getProperty("pipelineLanguage");
-          err(errorMessage);
-          // client side log missing resource for requested language
-          try {
-            respondError(errorMessage, httpExchange);
-          } catch (IOException ioe) {
-            err("failed to send client response: \""+errorMessage+"\"");
-          }
-        }
-      }
 
       // Get the annotators
       String annotators = props.getProperty("annotators");

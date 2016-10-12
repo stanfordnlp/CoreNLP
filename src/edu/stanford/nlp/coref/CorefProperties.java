@@ -29,11 +29,11 @@ public class CorefProperties {
   public static final String THREADS_PROP = "coref.threadCount";
   public static final String INPUT_TYPE_PROP = "coref.input.type";
   public static final String POSTPROCESSING_PROP = "coref.postprocessing";
-  public static final String MD_TYPE_PROP = "coref.md.type";
+  public static final String MD_TYPE_PROP = "mention.type";
   public static final String USE_SINGLETON_PREDICTOR_PROP = "coref.useSingletonPredictor";
   public static final String SEED_PROP = "coref.seed";
   public static final String CONLL_AUTO_PROP = "coref.conll.auto";
-  public static final String MD_TRAIN_PROP = "coref.md.isTraining";    // train MD classifier
+  public static final String MD_TRAIN_PROP = "mention.isTraining";    // train MD classifier
   public static final String USE_SEMANTICS_PROP = "coref.useSemantics";    // load semantics if true
   public static final String CURRENT_SIEVE_FOR_TRAIN_PROP = "coref.currentSieveForTrain";
   public static final String STORE_TRAINDATA_PROP = "coref.storeTrainData";
@@ -48,7 +48,7 @@ public class CorefProperties {
   public static final String LOG_PROP = "coref.logFile";
   public static final String TIMER_PROP = "coref.checkTime";
   public static final String MEMORY_PROP = "coref.checkMemory";
-  public static final String PRINT_MDLOG_PROP = "coref.print.md.log";
+  public static final String PRINT_MDLOG_PROP = "mention.print.log";
   public static final String CALCULATE_IMPORTANCE_PROP = "coref.calculateFeatureImportance";
   public static final String DO_ANALYSIS_PROP = "coref.analysis.doAnalysis";
   public static final String ANALYSIS_SKIP_MTYPE_PROP = "coref.analysis.skip.mType";
@@ -87,7 +87,7 @@ public class CorefProperties {
   // models
   public static final String PATH_SINGLETON_PREDICTOR_PROP = "coref.path.singletonPredictor";
   public static final String PATH_MODEL_PROP = "coref.SIEVENAME.model";
-  public static final String MENTION_DETECTION_MODEL_PROP = "coref.md.model";
+  public static final String MENTION_DETECTION_MODEL_PROP = "mention.model";
 
   // sieve option
   public static final String CLASSIFIER_TYPE_PROP = "coref.SIEVENAME.classifierType";
