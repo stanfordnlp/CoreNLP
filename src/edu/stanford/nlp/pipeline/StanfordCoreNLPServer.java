@@ -1063,7 +1063,7 @@ public class StanfordCoreNLPServer implements Runnable {
       withAuth(server.createContext("/corenlp-brat.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.js", "application/javascript")), basicAuth);
       withAuth(server.createContext("/corenlp-brat.cs", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-brat.css", "text/css")), basicAuth);
       withAuth(server.createContext("/corenlp-parseviewer.js", new FileHandler("edu/stanford/nlp/pipeline/demo/corenlp-parseviewer.js", "application/javascript")), basicAuth);
-      withAuth(server.createContext("/ping", new PingHandler()), basicAuth);
+      withAuth(server.createContext("/ping", new PingHandler()), Optional.empty());
       withAuth(server.createContext("/shutdown", new ShutdownHandler()), basicAuth);
       server.setExecutor(serverExecutor);
       server.start();
