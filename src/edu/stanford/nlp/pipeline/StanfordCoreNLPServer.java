@@ -1086,7 +1086,7 @@ public class StanfordCoreNLPServer implements Runnable {
     log("--- " + StanfordCoreNLPServer.class.getSimpleName() + "#main() called ---");
     String build = System.getenv("BUILD");
     if (build != null) {
-      log("    Build: " + build;
+      log("    Build: " + build);
     }
     Runtime.getRuntime().addShutdownHook(new Thread(() -> log("CoreNLP Server is shutting down.")));
 
