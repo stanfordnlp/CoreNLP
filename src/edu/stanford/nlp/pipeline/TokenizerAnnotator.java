@@ -169,7 +169,8 @@ public class TokenizerAnnotator implements Annotator  {
     }
     // check if segmenting must be done
     if (props.getProperty("tokenize.language") != null &&
-            LanguageInfo.isSegmenterLanguage(props.getProperty("tokenize.language"))) {
+            LanguageInfo.isSegmenterLanguage(
+            LanguageInfo.getLanguageFromString(props.getProperty("tokenize.language")))) {
       useSegmenter = true;
       if (LanguageInfo.getLanguageFromString(
               props.getProperty("tokenize.language")) == LanguageInfo.HumanLanguage.ARABIC)
@@ -271,7 +272,7 @@ public class TokenizerAnnotator implements Annotator  {
       log.info("Tokenizing ... ");
     }
 
-    // for Arabic and Chinese use a segmenter instead
+    // for Arabic and Chinese use the segmenter instead
     if (useSegmenter) {
       segmenterAnnotator.annotate(annotation);
       return;
