@@ -42,6 +42,8 @@ public class TokenizerAnnotator implements Annotator  {
    */
   public enum TokenizerType {
     Unspecified(null, null, "invertible,ptb3Escaping=true"),
+    Arabic     ("ar", null, ""),
+    Chinese    ("zh", null, ""),
     Spanish    ("es", "SpanishTokenizer", "invertible,ptb3Escaping=true,splitAll=true"),
     English    ("en", "PTBTokenizer", "invertible,ptb3Escaping=true"),
     German     ("de", null, "invertible,ptb3Escaping=true"),
@@ -222,6 +224,12 @@ public class TokenizerAnnotator implements Annotator  {
     }
 
     switch(type) {
+
+    case Arabic:
+    case Chinese:
+      factory = null;
+      break;
+
     case Spanish:
       factory = SpanishTokenizer.factory(new CoreLabelTokenFactory(), options);
       break;
