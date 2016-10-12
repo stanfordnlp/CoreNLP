@@ -128,6 +128,10 @@ public class TokenizerAnnotator implements Annotator  {
   private final boolean VERBOSE;
   private final TokenizerFactory<CoreLabel> factory;
 
+  /** new segmenter properties **/
+  private final boolean useSegmenter;
+  private final Annotator segmenterAnnotator;
+
   // CONSTRUCTORS
 
   /** Gives a non-verbose, English tokenizer. */
@@ -162,6 +166,26 @@ public class TokenizerAnnotator implements Annotator  {
   public TokenizerAnnotator(boolean verbose, Properties props, String options) {
     if (props == null) {
       props = new Properties();
+    }
+    // check if segmenting must be done
+    if (props.getProperty("tokenize.language") != null &&
+            LanguageInfo.isSegmenterLanguage(
+            LanguageInfo.getLanguageFromString(props.getProperty("tokenize.language")))) {
+      useSegmenter = true;
+      if (LanguageInfo.getLanguageFromString(
+              props.getProperty("tokenize.language")) == LanguageInfo.HumanLanguage.ARABIC)
+        segmenterAnnotator = new ArabicSegmenterAnnotator("segmenter", props);
+      else if (LanguageInfo.getLanguageFromString(
+              props.getProperty("tokenize.language")) == LanguageInfo.HumanLanguage.CHINESE)
+        segmenterAnnotator = new ChineseSegmenterAnnotator("segmenter", props);
+      else {
+        segmenterAnnotator = null;
+        throw new RuntimeException("No segmenter implemented for: "+
+                LanguageInfo.getLanguageFromString(props.getProperty("tokenize.language")));
+      }
+    } else {
+      useSegmenter = false;
+      segmenterAnnotator = null;
     }
     VERBOSE = PropertiesUtils.getBool(props, "tokenize.verbose", verbose);
     TokenizerType type = TokenizerType.getTokenizerType(props);
@@ -246,6 +270,12 @@ public class TokenizerAnnotator implements Annotator  {
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
       log.info("Tokenizing ... ");
+    }
+
+    // for Arabic and Chinese use the segmenter instead
+    if (useSegmenter) {
+      segmenterAnnotator.annotate(annotation);
+      return;
     }
 
     if (annotation.containsKey(CoreAnnotations.TextAnnotation.class)) {

@@ -9,6 +9,9 @@ import java.lang.reflect.Field;
 
 public class LanguageInfo {
 
+    /** languages supported **/
+    public enum HumanLanguage {ARABIC, CHINESE, ENGLISH, FRENCH, GERMAN, SPANISH};
+
     /** list of properties files for each language **/
     public static final String CHINESE_PROPERTIES = "StanfordCoreNLP-chinese.properties";
     public static final String ENGLISH_PROPERTIES = "StanfordCoreNLP.properties";
@@ -46,5 +49,31 @@ public class LanguageInfo {
             return SPANISH_PROPERTIES;
         else
             return null;
+    }
+
+    /** convert various input strings to language enum **/
+    public static HumanLanguage getLanguageFromString(String inputString) {
+        if (inputString.toLowerCase().equals("arabic") || inputString.toLowerCase().equals("ar"))
+            return HumanLanguage.ARABIC;
+        if (inputString.toLowerCase().equals("english") || inputString.toLowerCase().equals("en"))
+            return HumanLanguage.ENGLISH;
+        if (inputString.toLowerCase().equals("chinese") || inputString.toLowerCase().equals("zh"))
+            return HumanLanguage.CHINESE;
+        if (inputString.toLowerCase().equals("french") || inputString.toLowerCase().equals("fr"))
+            return HumanLanguage.FRENCH;
+        if (inputString.toLowerCase().equals("german") || inputString.toLowerCase().equals("de"))
+            return HumanLanguage.GERMAN;
+        if (inputString.toLowerCase().equals("spanish") || inputString.toLowerCase().equals("es"))
+            return HumanLanguage.SPANISH;
+        else
+            return null;
+    }
+
+    /** check if language is a segmenter language, return enum **/
+    public static boolean isSegmenterLanguage(HumanLanguage language) {
+        if (language == HumanLanguage.ARABIC || language == HumanLanguage.CHINESE)
+            return true;
+        else
+            return false;
     }
 }
