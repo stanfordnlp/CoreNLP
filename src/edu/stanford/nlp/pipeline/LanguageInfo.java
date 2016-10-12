@@ -1,23 +1,36 @@
 package edu.stanford.nlp.pipeline;
 
 import java.lang.reflect.Field;
+import java.util.*;
 
 /**
  * This contains mappings from strings to language properties files
  */
 
-
 public class LanguageInfo {
 
     /** languages supported **/
-    public enum HumanLanguage {ARABIC, CHINESE, ENGLISH, FRENCH, GERMAN, SPANISH};
+    public enum HumanLanguage {ARABIC, CHINESE, ENGLISH, FRENCH, GERMAN, SPANISH}
 
     /** list of properties files for each language **/
+    public static final String ARABIC_PROPERTIES = "StanfordCoreNLP-arabic.properties";
     public static final String CHINESE_PROPERTIES = "StanfordCoreNLP-chinese.properties";
     public static final String ENGLISH_PROPERTIES = "StanfordCoreNLP.properties";
     public static final String FRENCH_PROPERTIES = "StanfordCoreNLP-french.properties";
     public static final String GERMAN_PROPERTIES = "StanfordCoreNLP-german.properties";
     public static final String SPANISH_PROPERTIES = "StanfordCoreNLP-spanish.properties";
+
+    /** map enum to properties file **/
+    public static final HashMap<HumanLanguage,String> languageToPropertiesFile;
+    static {
+        languageToPropertiesFile = new HashMap<HumanLanguage,String>();
+        languageToPropertiesFile.put(HumanLanguage.ARABIC, ARABIC_PROPERTIES);
+        languageToPropertiesFile.put(HumanLanguage.CHINESE, CHINESE_PROPERTIES);
+        languageToPropertiesFile.put(HumanLanguage.ENGLISH, ENGLISH_PROPERTIES);
+        languageToPropertiesFile.put(HumanLanguage.FRENCH, FRENCH_PROPERTIES);
+        languageToPropertiesFile.put(HumanLanguage.GERMAN, GERMAN_PROPERTIES);
+        languageToPropertiesFile.put(HumanLanguage.SPANISH, SPANISH_PROPERTIES);
+    }
 
     private LanguageInfo() {
     }
@@ -35,20 +48,8 @@ public class LanguageInfo {
     }
 
     /** return the properties file name for a specific language **/
-    public static String getLanguagePropertiesFile(String languageName) {
-        String languageNameLower = languageName.toLowerCase();
-        if (languageNameLower.equals("english") || languageNameLower.equals("en"))
-            return ENGLISH_PROPERTIES;
-        if (languageNameLower.equals("chinese") || languageNameLower.equals("zh"))
-            return CHINESE_PROPERTIES;
-        else if (languageNameLower.equals("french") || languageNameLower.equals("fr"))
-            return FRENCH_PROPERTIES;
-        else if (languageNameLower.equals("german") || languageNameLower.equals("de"))
-            return GERMAN_PROPERTIES;
-        else if (languageNameLower.equals("spanish") || languageNameLower.equals("es"))
-            return SPANISH_PROPERTIES;
-        else
-            return null;
+    public static String getLanguagePropertiesFile(String inputString) {
+        return languageToPropertiesFile.get(getLanguageFromString(inputString));
     }
 
     /** convert various input strings to language enum **/
@@ -75,5 +76,9 @@ public class LanguageInfo {
             return true;
         else
             return false;
+    }
+
+    public static boolean isSegmenterLanguage(String inputString) {
+        return isSegmenterLanguage(getLanguageFromString(inputString));
     }
 }
