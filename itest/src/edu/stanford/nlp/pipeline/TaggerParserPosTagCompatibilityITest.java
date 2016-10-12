@@ -2,13 +2,12 @@ package edu.stanford.nlp.pipeline;
 
 import java.util.Set;
 
+import edu.stanford.nlp.parser.nndep.DependencyParser;
+import edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
-import edu.stanford.nlp.parser.nndep.DependencyParser;
-import edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
-import edu.stanford.nlp.util.Sets;
 
 /** This test checks whether our trained POS tagger and parser models are using the identical POS tag set
  *  for the various languages that we support. It's a good idea if they are.
@@ -25,34 +24,25 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
     Set<String> tagSet = lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction());
     for (String name : maxentTaggers) {
       MaxentTagger tagger = new MaxentTagger(name);
-      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch:\n" +
-                   "left - right: " + Sets.diff(tagSet, tagger.tagSet()) +
-                   "; right - left: " + Sets.diff(tagger.tagSet(), tagSet) + "\n",
-                   tagSet, tagger.tagSet());
+      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch", tagSet, tagger.tagSet());
     }
     for (String name : lexParsers) {
       LexicalizedParser lp2 = LexicalizedParser.loadModel(name);
-      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch:\n" +
-                   "left - right: " + Sets.diff(tagSet, lp2.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction())) + 
-                   "; right - left: " + Sets.diff(lp2.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()), tagSet) + "\n",
+      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch",
                    tagSet, lp2.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()));
     }
 
     for (String name : srParsers) {
       ShiftReduceParser srp = ShiftReduceParser.loadModel(name);
 
-      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch:\n" +
-                   "left - right: " + Sets.diff(tagSet, srp.tagSet()) +
-                   "; right - left: " + Sets.diff(srp.tagSet(), tagSet) + "\n",
+      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch",
                    tagSet, srp.tagSet());
     }
 
     for (String name : nnDepParsers) {
       DependencyParser dp = DependencyParser.loadFromModelFile(name);
 
-      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch:\n" +
-                   "left - right: " + Sets.diff(tagSet, dp.getPosSet()) +
-                   "; right - left: " + Sets.diff(dp.getPosSet(), tagSet) + "\n",
+      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch",
                    tagSet, dp.getPosSet());
     }
 
@@ -90,7 +80,7 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
   private static final String[] germanTaggers = {
     "edu/stanford/nlp/models/pos-tagger/german/german-fast.tagger",
     "edu/stanford/nlp/models/pos-tagger/german/german-fast-caseless.tagger",
-    // "edu/stanford/nlp/models/pos-tagger/german/german-dewac.tagger", // No longer supported; always worse than hgc
+    "edu/stanford/nlp/models/pos-tagger/german/german-dewac.tagger",
     "edu/stanford/nlp/models/pos-tagger/german/german-hgc.tagger"
   };
 
@@ -104,8 +94,6 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
   };
 
   private static final String[] germanNnParsers = {
-    // This one uses UD tag set not fine-grained tags!
-    // "edu/stanford/nlp/models/parser/nndep/UD_German.gz",
   };
 
   public void testGermanTagSet() {

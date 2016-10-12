@@ -105,10 +105,14 @@ University of Stuttgart and the Seminar für Sprachwissenschaft of the
 University of Tübingen. See: 
 http://www.ims.uni-stuttgart.de/projekte/CQPDemos/Bundestag/help-tagset.html
 This model uses features from the distributional similarity clusters
-built over the HGC (Huge German Corpus).
+built over the HGC.
 Performance:
 96.90% on the first half of the remaining 20% of the Negra corpus (dev set)
 (90.33% on unknown words)
+
+german-dewac.tagger
+This model uses features from the distributional similarity clusters
+built from the deWac web corpus.
 
 german-fast.tagger
 Lacks distributional similarity features, but is several times faster

@@ -4,33 +4,30 @@ import junit.framework.TestCase;
 
 import java.util.Properties;
 
-/**
+/** 
  * Test that the CRFClassifier works when multiple classifiers are run
  * in multiple threads.
  *
  *  @author John Bauer
  */
 public class ThreadedCRFClassifierITest extends TestCase {
-
   Properties props;
 
-  private static final String german1 =
-    "edu/stanford/nlp/models/ner/german.conll.hgc_175m_600.crf.ser.gz";
-  /** -- We're no longer supporting this one
-  private String german2 =
+  private String german1 = 
+    "/u/nlp/data/ner/goodClassifiers/german.hgc_175m_600.crf.ser.gz";
+  private String german2 = 
     "/u/nlp/data/ner/goodClassifiers/german.dewac_175m_600.crf.ser.gz";
-  */
-  private static final String germanTestFile = "/u/nlp/data/german/ner/2016/deu.utf8.testa";
+  private String germanTestFile = "/u/nlp/data/german/ner/deu.testa";
 
-  private static final String english1 =
+  private String english1 = 
     "/u/nlp/data/ner/goodClassifiers/english.all.3class.nodistsim.crf.ser.gz";
-  private static final String english2 =
-    "/u/nlp/data/ner/goodClassifiers/english.conll.4class.distsim.crf.ser.gz";
-  private static final String englishTestFile = "/u/nlp/data/ner/column_data/conll.4class.testa";
+  private String english2 = 
+    "/u/nlp/data/ner/goodClassifiers/english.all.3class.distsim.crf.ser.gz";
+  private String englishTestFile = "/u/nlp/data/ner/column_data/conll.testa";
 
-  private static final String germanEncoding = "utf-8";
-  private static final String englishEncoding = "utf-8";
-
+  private String germanEncoding = "iso-8859-1";
+  private String englishEncoding = "utf-8";
+  
   @Override
   public void setUp() {
     props = new Properties();
@@ -50,13 +47,12 @@ public class ThreadedCRFClassifierITest extends TestCase {
     TestThreadedCRFClassifier.runTest(props);
   }
 
-  public void testTwoEnglishCRFs() {
-    props.setProperty("crf1", english1);
-    props.setProperty("crf2", english2);
-    props.setProperty("testFile", englishTestFile);
-    props.setProperty("inputEncoding", englishEncoding);
+  public void testTwoGermanCRFs() {
+    props.setProperty("crf1", german1);
+    props.setProperty("crf2", german2);
+    props.setProperty("testFile", germanTestFile);
+    props.setProperty("inputEncoding", germanEncoding);
     TestThreadedCRFClassifier.runTest(props);
   }
-
 }
 

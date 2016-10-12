@@ -24,7 +24,7 @@ public class StatisticalCorefProperties {
       newProps.setProperty(CorefProperties.MD_TYPE_PROP, props.getProperty(CorefProperties.MD_TYPE_PROP, "rule"));
       newProps.setProperty("coref.useMarkedDiscourse", "true");
     } else {
-      String mdPath = PropertiesUtils.getString(newProps, "mention.model",
+      String mdPath = PropertiesUtils.getString(newProps, "coref.mentionDetectionModel",
           "edu/stanford/nlp/models/coref/md-model.ser");
       //String mdDir = mdPath.substring(0, mdPath.lastIndexOf('/') + 1);
       //String mdModelName = mdPath.substring(mdPath.lastIndexOf('/') + 1);
