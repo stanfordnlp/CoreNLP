@@ -173,10 +173,10 @@ public class TokenizerAnnotator implements Annotator  {
       useSegmenter = true;
       if (LanguageInfo.getLanguageFromString(
               props.getProperty("tokenize.language")) == LanguageInfo.HumanLanguage.ARABIC)
-        segmenterAnnotator = new ArabicSegmenterAnnotator("segmenter", props);
+        segmenterAnnotator = new ArabicSegmenterAnnotator("segment", props);
       else if (LanguageInfo.getLanguageFromString(
               props.getProperty("tokenize.language")) == LanguageInfo.HumanLanguage.CHINESE)
-        segmenterAnnotator = new ChineseSegmenterAnnotator("segmenter", props);
+        segmenterAnnotator = new ChineseSegmenterAnnotator("segment", props);
       else {
         segmenterAnnotator = null;
         throw new RuntimeException("No segmenter implemented for: "+
